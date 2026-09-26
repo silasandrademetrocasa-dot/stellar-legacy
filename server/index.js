@@ -80,7 +80,7 @@ async function ensureProfile(sb, user, callsign = '') {
   if (error) console.warn('profile upsert:', error.message);
 }
 
-app.get('/health', (req, res) => res.json({ ok: true, game: 'Stellar Legacy', version: '4.2.0' }));
+app.get('/health', (req, res) => res.json({ ok: true, game: 'Stellar Legacy', version: '5.0.0' }));
 
 
 app.get('/api/config', (req, res) => {
@@ -96,10 +96,10 @@ app.get('/api/config', (req, res) => {
 
 app.get('/api/meta', (req, res) => res.json({
   name: 'Stellar Legacy',
-  version: '4.2.0',
+  version: '5.0.0',
   authReady: Boolean(SUPABASE_URL && SUPABASE_KEY),
   diagnostics: configStatus(),
-  features: ['login', 'cloud_save', 'factions', 'safe_zone', 'shop', 'owned_ships', 'equipment_slots', 'inventory', 'drones', 'ammo', 'rockets', 'x1_x4_maps'],
+  features: ['login', 'cloud_save', 'factions', 'safe_zone', 'shop', 'owned_ships', 'equipment_slots', 'inventory', 'drones', 'ammo', 'rockets', 'x1_x4_maps', 'cargo_hold', 'ore_trading', 'npc_cargo_boxes', 'npc_respawn', 'minimap_navigation'],
 }));
 
 app.get('/api/diagnostics', asyncRoute(async (req, res) => {
@@ -241,6 +241,6 @@ app.use((err, req, res, next) => {
 
 const port = process.env.PORT || 3000;
 app.listen(port, () => {
-  console.log(`Stellar Legacy V4.2 on :${port}`);
+  console.log(`Stellar Legacy V5 on :${port}`);
   console.log('Supabase config:', configStatus());
 });

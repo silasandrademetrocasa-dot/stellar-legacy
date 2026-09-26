@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
   <meta name="theme-color" content="#030816">
-  <title>Stellar Legacy V4.2</title>
+  <title>Stellar Legacy V5</title>
   <link rel="stylesheet" href="/style.css">
 </head>
 <body>
@@ -12,7 +12,7 @@
   <canvas id="game"></canvas>
 
   <header id="topbar" class="hud-panel">
-    <div class="brand">STELLAR LEGACY <small>V4.2</small></div>
+    <div class="brand">STELLAR LEGACY <small>V5</small></div>
     <div class="top-meta">
       <span>Facção <b id="factionLabel">—</b></span>
       <span>Mapa <b id="mapLabel">—</b></span>
@@ -23,6 +23,7 @@
       <span class="pilot-chip">Piloto <b id="userLabel">—</b></span>
       <span id="syncLabel" class="sync-chip">LOCAL</span>
       <button id="shopBtn" class="small-btn gold">LOJA</button>
+      <button id="cargoBtn" class="small-btn">PORÃO</button>
       <button id="hangarBtn" class="small-btn">HANGAR</button>
       <button id="logoutBtn" class="small-btn danger-lite">SAIR</button>
     </div>
@@ -38,6 +39,7 @@
     <div>URI <span id="uridium">0</span></div>
     <div>XP <span id="xp">0</span></div>
     <div>DRONES <span id="droneCount">0</span>/8</div>
+    <div>PORÃO <span id="cargoUsed">0</span>/<span id="cargoMax">0</span></div>
     <div id="safeZoneLabel" class="safe-zone-status">FORA DA BASE</div>
   </section>
 
@@ -72,7 +74,7 @@
     </div>
   </section>
 
-  <div id="hint" class="hud-panel">Clique/toque no mapa para mover • alvo para selecionar • CTRL = laser • ESPAÇO = míssil • LOJA compra equipamentos • HANGAR equipa sua nave</div>
+  <div id="hint" class="hud-panel">Clique/toque no mapa para mover • alvo para selecionar • CTRL = laser • ESPAÇO = míssil • LOJA compra equipamentos • HANGAR equipa sua nave • C = PORÃO • clique no minimapa para navegar</div>
   <div id="toast"></div>
 
 
@@ -106,6 +108,24 @@
       <p>Essa escolha define sua companhia, sua base e a numeração dos mapas iniciais. Você começa com uma <b>Phoenix</b>, sem drones e com equipamento básico.</p>
       <div id="factionCards" class="faction-grid"></div>
       <div class="warning-text">A facção fica gravada neste save.</div>
+    </div>
+  </div>
+
+  <div id="cargoModal" class="modal hidden">
+    <div class="modal-card wide-card">
+      <div class="modal-header">
+        <div>
+          <div class="eyebrow">CARGA & COMÉRCIO</div>
+          <h2>Porão da Nave</h2>
+        </div>
+        <button id="closeCargo" class="small-btn">Fechar</button>
+      </div>
+      <div id="cargoSummary" class="section-box"></div>
+      <div class="cargo-toolbar">
+        <div class="muted">Colete minérios soltos e caixas de carga deixadas pelos NPCs. A venda só funciona na base X-1.</div>
+        <button id="sellAllCargo" class="small-btn gold">VENDER TUDO</button>
+      </div>
+      <div id="cargoGrid" class="cargo-grid"></div>
     </div>
   </div>
 
