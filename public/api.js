@@ -3,15 +3,23 @@ let session = null;
 let currentUser = null;
 
 async function jsonFetch(url, options = {}) {
-  const res = await fetch(url, {
-    ...options,
-    headers: {
-      'Content-Type': 'application/json',
-      ...(options.headers || {}),
-    },
-  });
+  let res;
+  try {
+    res = await fetch(url, {
+      ...options,
+      headers: {
+        'Content-Type': 'application/json',
+        ...(options.headers || {}),
+      },
+    });
+  } catch (err) {
+    throw new Error(`Servidor indisponível durante a requisição (${url}). Atualize a página e tente novamente.`);
+  }
   const body = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error(body.error || `Erro ${res.status}`);
+  if (!res.ok) {
+    const extra = body?.detail ? ` — ${body.detail}` : '';
+    throw new Error(`${body.error || `Erro ${res.status}`}${extra}`);
+  }
   return body;
 }
 
@@ -65,19 +73,25 @@ async function refreshSession() {
 
 async function authFetch(url, options = {}, retry = true) {
   if (!session?.access_token) throw new Error('Sessão ausente.');
-  const res = await fetch(url, {
-    ...options,
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${session.access_token}`,
-      ...(options.headers || {}),
-    },
-  });
-  if (res.status === 401 && retry && await refreshSession()) {
-    return authFetch(url, options, false);
+  let res;
+  try {
+    res = await fetch(url, {
+      ...options,
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${session.access_token}`,
+        ...(options.headers || {}),
+      },
+    });
+  } catch {
+    throw new Error('Servidor indisponível. O progresso continuará no backup local até a conexão voltar.');
   }
+  if (res.status === 401 && retry && await refreshSession()) return authFetch(url, options, false);
   const body = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error(body.error || `Erro ${res.status}`);
+  if (!res.ok) {
+    const extra = body?.detail ? ` — ${body.detail}` : '';
+    throw new Error(`${body.error || `Erro ${res.status}`}${extra}`);
+  }
   return body;
 }
 
@@ -99,13 +113,7 @@ export async function restoreSession() {
   }
 }
 
-export async function loadCloudSave() {
-  return authFetch('/api/save');
-}
-
+export async function loadCloudSave() { return authFetch('/api/save'); }
 export async function saveCloudSave(state) {
-  return authFetch('/api/save', {
-    method: 'PUT',
-    body: JSON.stringify({ state }),
-  });
+  return authFetch('/api/save', { method: 'PUT', body: JSON.stringify({ state }) });
 }

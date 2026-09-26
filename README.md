@@ -83,3 +83,11 @@ npm start
 - `public/api.js` — login, sessão e save online.
 - `server/index.js` — API de autenticação/save e servidor web.
 - `supabase/database.sql` — banco e políticas RLS.
+
+## V4.1 — correção de autenticação
+
+- Corrige falhas genéricas `fetch failed` no cadastro/login.
+- Normaliza `SUPABASE_URL`, inclusive quando foi colado por engano com `/rest/v1/`.
+- Aceita `SUPABASE_PUBLISHABLE_KEY` ou `SUPABASE_ANON_KEY`.
+- Adiciona `/api/diagnostics` para validar a conexão Render → Supabase sem expor a chave.
+- Rotas assíncronas agora tratam erros de rede e retornam mensagem útil em vez de derrubar a requisição.
