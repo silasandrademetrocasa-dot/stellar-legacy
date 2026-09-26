@@ -302,7 +302,7 @@ function fireLaserTick(){
   const fraction=allBase>0?firingBase/allBase:0;
 
   player.lastLaserShot=nowSec();
-  progress.ammo[ammo.id]=Math.max(0,stock-firingCount);
+  progress.ammo[ammo.id]=Math.max(0,stock-firingCount);refreshAmmoCounters();
   const damage=Math.round(player.laserDamage*fraction*ammo.mult*rand(.95,1.08));
   if(damage>0)dealDamageToEnemy(state.target,damage,ammo.color);
 
@@ -408,27 +408,56 @@ function drawMinimap(){
 }
 function draw(){ctx.clearRect(0,0,W,H);drawNebula();drawStars();if(!progress)return;drawBounds();drawBaseSafeZone();drawPortals();drawOres();drawLoot();state.enemies.forEach(e=>e.hp>0&&drawEnemy(e));drawPlayer();drawParticles();drawMinimap();}
 
+function ammoWarningClass(qty,perUse){
+  if(qty<=0)return 'empty';
+  const uses=perUse>0?Math.floor(qty/perUse):qty;
+  if(uses<=3)return 'critical';
+  if(uses<=10)return 'low';
+  return '';
+}
+function refreshAmmoCounters(){
+  if(!progress)return;
+  const laserUse=Math.max(1,equippedLaserCount());
+  ui.laserAmmoButtons.querySelectorAll('[data-ammo-id]').forEach(btn=>{
+    const id=btn.dataset.ammoId,a=LASER_AMMO[id],q=ammoQty(id),bursts=Math.floor(q/laserUse);
+    btn.classList.toggle('active',progress.selectedLaserAmmo===id);
+    btn.classList.remove('empty','low','critical');
+    const warn=ammoWarningClass(q,laserUse);if(warn)btn.classList.add(warn);
+    const small=btn.querySelector('small');
+    if(small)small.textContent=`x${a.mult} • ${fmt(q)} • -${laserUse}/raj. • ~${fmt(bursts)} raj.`;
+  });
+  ui.rocketAmmoButtons.querySelectorAll('[data-rocket-id]').forEach(btn=>{
+    const id=btn.dataset.rocketId,r=ROCKETS[id],q=rocketQty(id);
+    btn.classList.toggle('active',progress.selectedRocket===id);
+    btn.classList.remove('empty','low','critical');
+    const warn=ammoWarningClass(q,1);if(warn)btn.classList.add(warn);
+    const small=btn.querySelector('small');
+    if(small)small.textContent=`${fmt(r.damage)} DMG • ${fmt(q)} un. • -1/disparo`;
+  });
+}
 function buildAmmoButtons(){
   if(!progress)return;
-  const laserUse=Math.max(0,equippedLaserCount());
   ui.laserAmmoButtons.innerHTML='';
   Object.values(LASER_AMMO).forEach(a=>{
-    const q=ammoQty(a.id),b=document.createElement('button');
-    b.className=`ammo-btn ${progress.selectedLaserAmmo===a.id?'active':''} ${q<=0?'empty':''}`;
+    const b=document.createElement('button');
+    b.dataset.ammoId=a.id;
+    b.className='ammo-btn';
     b.style.borderColor=a.color;
-    b.innerHTML=`${a.name}<small>x${a.mult} • ${fmt(q)} • -${laserUse}/rajada</small>`;
-    b.onclick=()=>{progress.selectedLaserAmmo=a.id;buildAmmoButtons();saveGame();};
+    b.innerHTML=`${a.name}<small></small>`;
+    b.onclick=()=>{progress.selectedLaserAmmo=a.id;refreshAmmoCounters();saveGame();};
     ui.laserAmmoButtons.appendChild(b);
   });
   ui.rocketAmmoButtons.innerHTML='';
   Object.values(ROCKETS).forEach(r=>{
-    const q=rocketQty(r.id),b=document.createElement('button');
-    b.className=`ammo-btn ${progress.selectedRocket===r.id?'active':''} ${q<=0?'empty':''}`;
+    const b=document.createElement('button');
+    b.dataset.rocketId=r.id;
+    b.className='ammo-btn';
     b.style.borderColor=r.color;
-    b.innerHTML=`${r.name}<small>${fmt(r.damage)} • ${fmt(q)} • -1/disparo</small>`;
-    b.onclick=()=>{progress.selectedRocket=r.id;buildAmmoButtons();saveGame();};
+    b.innerHTML=`${r.name}<small></small>`;
+    b.onclick=()=>{progress.selectedRocket=r.id;refreshAmmoCounters();saveGame();};
     ui.rocketAmmoButtons.appendChild(b);
   });
+  refreshAmmoCounters();
 }
 
 function updateExtraControls(){
@@ -436,6 +465,7 @@ function updateExtraControls(){
   for(const [flag,item] of configs){const el=ui[flag],owned=hasExtra(item);el.disabled=!owned;if(!owned)progress.flags[flag]=false;el.checked=!!progress.flags[flag];el.closest('label')?.classList.toggle('locked',!owned);}
 }
 function updateUI(){
+  refreshAmmoCounters();
   const f=getFaction(),ship=SHIPS[progress.activeShipId],safe=isSafeZone();ui.factionLabel.textContent=f?.short||'—';ui.factionLabel.style.color=f?.color||'';ui.mapLabel.textContent=displayMapLabel(progress.mapId);ui.shipLabel.textContent=ship.name;ui.lvl.textContent=progress.profile.level;ui.hp.textContent=fmt(player.hp);ui.maxHp.textContent=fmt(player.maxHp);ui.shield.textContent=fmt(player.shield);ui.maxShield.textContent=fmt(player.maxShield);ui.speed.textContent=fmt(player.speed);if(ui.dmg)ui.dmg.textContent=fmt(player.laserDamage*currentLaserAmmo().mult);ui.credits.textContent=fmt(progress.profile.credits);ui.uridium.textContent=fmt(progress.profile.uridium);ui.xp.textContent=fmt(progress.profile.xp);if(ui.droneCount)ui.droneCount.textContent=progress.drones.length;ui.laserToggle.classList.toggle('active',player.laserFiring);ui.rocketCd.textContent=rocketReady()?'MÍSSIL PRONTO':`MÍSSIL ${(getRocketCooldown()-(nowSec()-player.lastRocketShot)).toFixed(1)}s`;
   ui.userLabel.textContent=progress.profile.callsign||getUser()?.callsign||'Pilot';ui.safeZoneLabel.textContent=safe?'ZONA SEGURA ATIVA':'FORA DA BASE';ui.safeZoneLabel.classList.toggle('active',safe);ui.cargoUsed.textContent=fmt(cargoUsed());ui.cargoMax.textContent=fmt(cargoCapacity());ui.cargoBtn.classList.toggle('gold',isAtTrader());
   if(state.target&&state.target.hp>0){ui.targetName.textContent=state.target.name;ui.targetStats.textContent=`HP ${fmt(state.target.hp)} • ESC ${fmt(state.target.shield)}`;ui.targetHpBar.style.width=`${state.target.hp/state.target.maxHp*100}%`;ui.targetShieldBar.style.width=`${state.target.maxShield?state.target.shield/state.target.maxShield*100:0}%`;}else{ui.targetName.textContent='Sem alvo';ui.targetStats.textContent='Toque em um NPC para selecionar';ui.targetHpBar.style.width='0%';ui.targetShieldBar.style.width='0%';}

@@ -82,20 +82,29 @@ export const RESOURCES = {
 };
 
 export const NPC_TYPES = {
-  streuner: { name: 'Streuner', hp: 800, shield: 400, credits: 400, uridium: 1, speed: 62, damage: 50, color: '#ff8e47', size: 15, resources: { Prometium: 10, Terbium: 10 } },
-  recruitStreuner: { name: 'Recruit Streuner', hp: 600, shield: 800, credits: 500, uridium: 2, speed: 68, damage: 56, color: '#ffa852', size: 14, resources: { Prometium: 12, Terbium: 12 } },
-  aiderStreuner: { name: 'Aider Streuner', hp: 1500, shield: 1000, credits: 700, uridium: 2, speed: 72, damage: 65, color: '#ffbb62', size: 16, resources: { Prometium: 15, Terbium: 15 } },
-  bossStreuner: { name: 'Boss Streuner', hp: 3200, shield: 1600, credits: 1600, uridium: 4, speed: 70, damage: 90, color: '#ff5e6e', size: 19, resources: { Prometium: 40, Terbium: 10, Endurium: 40 } },
-  lordakia: { name: 'Lordakia', hp: 2000, shield: 2000, credits: 800, uridium: 2, speed: 95, damage: 95, color: '#9f73ff', size: 18, resources: { Prometium: 20, Terbium: 20, Endurium: 20 } },
-  bossLordakia: { name: 'Boss Lordakia', hp: 8000, shield: 8000, credits: 3200, uridium: 8, speed: 90, damage: 150, color: '#c765ff', size: 20, resources: { Prometium: 80, Terbium: 80, Endurium: 80, Prometid: 10, Xenomit: 1 } },
-  saimon: { name: 'Saimon', hp: 6000, shield: 6000, credits: 1600, uridium: 4, speed: 82, damage: 140, color: '#55e2ff', size: 20, resources: { Prometium: 40, Terbium: 40, Endurium: 40, Prometid: 2, Duranium: 2 } },
-  bossSaimon: { name: 'Boss Saimon', hp: 24000, shield: 12000, credits: 6400, uridium: 16, speed: 78, damage: 230, color: '#24b0ff', size: 23, resources: { Prometium: 160, Terbium: 160, Endurium: 160, Prometid: 8, Duranium: 8, Promerium: 1, Xenomit: 2 } },
-  mordon: { name: 'Mordon', hp: 20000, shield: 10000, credits: 6400, uridium: 8, speed: 52, damage: 220, color: '#ffa34d', size: 25, resources: { Prometium: 80, Terbium: 80, Endurium: 80, Prometid: 8, Duranium: 8, Promerium: 1 } },
-  bossMordon: { name: 'Boss Mordon', hp: 80000, shield: 40000, credits: 25600, uridium: 32, speed: 48, damage: 360, color: '#ff6948', size: 28, resources: { Prometium: 320, Terbium: 320, Endurium: 320, Prometid: 32, Duranium: 32, Promerium: 8, Xenomit: 8 } },
-  devolarium: { name: 'Devolarium', hp: 100000, shield: 100000, credits: 51200, uridium: 16, speed: 38, damage: 420, color: '#7edcff', size: 32, resources: { Prometium: 100, Terbium: 100, Endurium: 100, Prometid: 16, Duranium: 16, Promerium: 2 } },
-  bossDevolarium: { name: 'Boss Devolarium', hp: 400000, shield: 400000, credits: 204800, uridium: 64, speed: 34, damage: 620, color: '#c8f0ff', size: 36, resources: { Prometium: 400, Terbium: 400, Endurium: 400, Prometid: 64, Duranium: 64, Promerium: 8, Xenomit: 8 } },
-  sibelon: { name: 'Sibelon', hp: 200000, shield: 200000, credits: 102400, uridium: 32, speed: 30, damage: 520, color: '#66ffcb', size: 36, resources: { Prometium: 200, Terbium: 200, Endurium: 200, Prometid: 32, Duranium: 32, Promerium: 4 } },
-  bossSibelon: { name: 'Boss Sibelon', hp: 800000, shield: 800000, credits: 409600, uridium: 128, speed: 28, damage: 840, color: '#19d59d', size: 42, resources: { Prometium: 800, Terbium: 800, Endurium: 800, Prometid: 128, Duranium: 128, Promerium: 16, Xenomit: 32 } },
+  // Dano normal rebalanceado para o HP moderno das naves do Stellar Legacy.
+  // A base segue a progressão do DarkOrbitWiki, com escala de combate maior.
+  streuner: { name: 'Streuner', hp: 800, shield: 400, credits: 400, uridium: 1, speed: 62, damage: 60, color: '#ff8e47', size: 15, resources: { Prometium: 10, Terbium: 10 } },
+  recruitStreuner: { name: 'Recruit Streuner', hp: 600, shield: 800, credits: 500, uridium: 2, speed: 68, damage: 120, color: '#ffa852', size: 14, resources: { Prometium: 12, Terbium: 12 } },
+  aiderStreuner: { name: 'Aider Streuner', hp: 1500, shield: 1000, credits: 700, uridium: 2, speed: 72, damage: 210, color: '#ffbb62', size: 16, resources: { Prometium: 15, Terbium: 15 } },
+
+  // Regra Stellar Legacy: BOSS = 2x HP, escudo, dano, créditos, uridium e carga do NPC normal.
+  bossStreuner: { name: 'Boss Streuner', hp: 1600, shield: 800, credits: 800, uridium: 2, speed: 62, damage: 120, color: '#ff5e6e', size: 19, resources: { Prometium: 20, Terbium: 20 } },
+
+  lordakia: { name: 'Lordakia', hp: 2000, shield: 2000, credits: 800, uridium: 2, speed: 95, damage: 240, color: '#9f73ff', size: 18, resources: { Prometium: 20, Terbium: 20, Endurium: 20 } },
+  bossLordakia: { name: 'Boss Lordakia', hp: 4000, shield: 4000, credits: 1600, uridium: 4, speed: 95, damage: 480, color: '#c765ff', size: 22, resources: { Prometium: 40, Terbium: 40, Endurium: 40, Xenomit: 1 } },
+
+  saimon: { name: 'Saimon', hp: 6000, shield: 6000, credits: 1600, uridium: 4, speed: 82, damage: 600, color: '#55e2ff', size: 20, resources: { Prometium: 40, Terbium: 40, Endurium: 40, Prometid: 2, Duranium: 2 } },
+  bossSaimon: { name: 'Boss Saimon', hp: 12000, shield: 12000, credits: 3200, uridium: 8, speed: 82, damage: 1200, color: '#24b0ff', size: 25, resources: { Prometium: 80, Terbium: 80, Endurium: 80, Prometid: 4, Duranium: 4, Xenomit: 2 } },
+
+  mordon: { name: 'Mordon', hp: 20000, shield: 10000, credits: 6400, uridium: 8, speed: 52, damage: 1170, color: '#ffa34d', size: 25, resources: { Prometium: 80, Terbium: 80, Endurium: 80, Prometid: 8, Duranium: 8, Promerium: 1 } },
+  bossMordon: { name: 'Boss Mordon', hp: 40000, shield: 20000, credits: 12800, uridium: 16, speed: 52, damage: 2340, color: '#ff6948', size: 31, resources: { Prometium: 160, Terbium: 160, Endurium: 160, Prometid: 16, Duranium: 16, Promerium: 2, Xenomit: 4 } },
+
+  devolarium: { name: 'Devolarium', hp: 100000, shield: 100000, credits: 51200, uridium: 16, speed: 38, damage: 3600, color: '#7edcff', size: 32, resources: { Prometium: 100, Terbium: 100, Endurium: 100, Prometid: 16, Duranium: 16, Promerium: 2 } },
+  bossDevolarium: { name: 'Boss Devolarium', hp: 200000, shield: 200000, credits: 102400, uridium: 32, speed: 38, damage: 7200, color: '#c8f0ff', size: 40, resources: { Prometium: 200, Terbium: 200, Endurium: 200, Prometid: 32, Duranium: 32, Promerium: 4, Xenomit: 8 } },
+
+  sibelon: { name: 'Sibelon', hp: 200000, shield: 200000, credits: 102400, uridium: 32, speed: 30, damage: 7950, color: '#66ffcb', size: 36, resources: { Prometium: 200, Terbium: 200, Endurium: 200, Prometid: 32, Duranium: 32, Promerium: 4 } },
+  bossSibelon: { name: 'Boss Sibelon', hp: 400000, shield: 400000, credits: 204800, uridium: 64, speed: 30, damage: 15900, color: '#19d59d', size: 45, resources: { Prometium: 400, Terbium: 400, Endurium: 400, Prometid: 64, Duranium: 64, Promerium: 8, Xenomit: 16 } },
 };
 
 export const MAPS = {
