@@ -1,1 +1,81 @@
-<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no"><meta name="theme-color" content="#030816"><title>Stellar Legacy</title><link rel="stylesheet" href="/style.css"></head><body><div id="app"><canvas id="game"></canvas><div id="top"><b>STELLAR LEGACY</b><span id="map">SOL-1</span><span>LV <i id="lvl">1</i></span></div><div id="stats"><div>HP <span id="hp">10.000</span></div><div>ESC <span id="shield">8.000</span></div><div>CR <span id="credits">0</span></div><div>XP <span id="xp">0</span></div></div><div id="target">Sem alvo</div><div id="controls"><button id="rocket">🚀</button><button id="laser">⚡ LASER</button></div><div id="hint">Toque no espaço para mover • toque no inimigo para selecionar</div></div><script type="module" src="/game.js"></script></body></html>
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
+  <meta name="theme-color" content="#030816">
+  <title>Stellar Legacy V2</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <div id="app">
+    <canvas id="game"></canvas>
+
+    <div id="topbar" class="hud-panel">
+      <div class="brand">STELLAR LEGACY <small>V2</small></div>
+      <div class="top-meta">
+        <span>Mapa: <b id="mapLabel">X-1</b></span>
+        <span>Nave: <b id="shipLabel">Leonov</b></span>
+        <span>Nível: <b id="lvl">1</b></span>
+      </div>
+      <button id="hangarBtn" class="small-btn">HANGAR</button>
+    </div>
+
+    <div id="leftStats" class="hud-panel stack">
+      <div>HP <span id="hp">0</span></div>
+      <div>ESC <span id="shield">0</span></div>
+      <div>CR <span id="credits">0</span></div>
+      <div>URI <span id="uridium">0</span></div>
+      <div>XP <span id="xp">0</span></div>
+      <div>DMG <span id="dmg">0</span></div>
+      <div>MIS <span id="rocketCd">0.0s</span></div>
+    </div>
+
+    <div id="targetPanel" class="hud-panel stack">
+      <div class="title">ALVO</div>
+      <div id="targetName">Sem alvo</div>
+      <div class="bar-wrap"><div id="targetHpBar" class="bar hp"></div></div>
+      <div class="bar-wrap"><div id="targetShieldBar" class="bar shield"></div></div>
+      <div id="targetStats">Toque em um NPC para selecionar</div>
+    </div>
+
+    <canvas id="minimap" width="180" height="180"></canvas>
+
+    <div id="weaponBar" class="hud-panel">
+      <div class="section">
+        <div class="section-title">LASER</div>
+        <div id="laserAmmoButtons" class="button-row"></div>
+      </div>
+      <div class="section">
+        <div class="section-title">MÍSSEIS</div>
+        <div id="rocketAmmoButtons" class="button-row"></div>
+      </div>
+      <div class="section actions">
+        <button id="laserToggle" class="action-btn">⚡ AUTO LASER</button>
+        <button id="rocketFire" class="action-btn">🚀 ATIRAR</button>
+      </div>
+      <div class="section extras">
+        <label><input type="checkbox" id="autoRocket"> Auto míssil</label>
+        <label><input type="checkbox" id="turboRocket"> Turbo míssil</label>
+      </div>
+    </div>
+
+    <div id="hint" class="hud-panel">Toque no espaço para mover • toque no NPC para selecionar • aproxime-se do portal para mudar de mapa</div>
+
+    <div id="toast"></div>
+
+    <div id="hangarModal" class="modal hidden">
+      <div class="modal-card">
+        <div class="modal-header">
+          <h2>Hangar / Seleção de Nave</h2>
+          <button id="closeHangar" class="small-btn">Fechar</button>
+        </div>
+        <div id="shipCards" class="ship-grid"></div>
+        <div class="modal-footer">Dados de naves e mapas baseados no DarkOrbitWiki para inspiração e balanceamento da V2.</div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="/game.js"></script>
+</body>
+</html>

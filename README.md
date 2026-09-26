@@ -1,24 +1,71 @@
-# Stellar Legacy
-Jogo web mobile-first inspirado em space MMOs clássicos. Código e identidade próprios.
+# Stellar Legacy V2
+
+Jogo web mobile-first inspirado em space MMOs clássicos, com identidade própria e progressão local.
+
+## Novidades da V2
+
+- 4 mapas iniciais inspirados no fluxo **X-1 até X-4**.
+- Hangar com seleção de naves clássicas de progressão inicial:
+  - Phoenix
+  - Liberator
+  - Piranha
+  - Leonov
+  - Nostromo
+  - Bigboy
+  - Goliath
+- NPCs baseados nas tabelas do DarkOrbitWiki:
+  - Streuner / Recruit Streuner / Aider Streuner / Boss Streuner
+  - Lordakia / Boss Lordakia
+  - Saimon / Boss Saimon
+  - Mordon / Boss Mordon
+  - Devolarium
+  - Sibelon / Boss Sibelon
+- Seletor de munição laser:
+  - LCB-10
+  - MCB-25
+  - MCB-50
+  - UCB-100
+- Seletor de mísseis:
+  - R-310
+  - PLT-2026
+  - PLT-2021
+  - PLT-3030
+- Regra aplicada: **míssil com cooldown padrão de 5 segundos**.
+- Extras/toggles de combate:
+  - **Auto míssil**
+  - **Turbo míssil** (reduz cooldown do míssil)
+- Minimap, loot, coleta de minério, portais, alvo selecionado, barras de HP/ESC do alvo e save local.
 
 ## Rodar localmente
+
+```bash
 npm install
 npm start
-Abra http://localhost:3000
+```
+
+Abra:
+
+```text
+http://localhost:3000
+```
 
 ## Render
-1. Suba este projeto para um repositório GitHub.
-2. No Render, New > Web Service e conecte o repositório.
-3. Build: `npm install` / Start: `npm start` (ou use render.yaml).
+
+- Build Command: `npm install`
+- Start Command: `npm start`
 
 ## Supabase
-1. Crie um projeto.
-2. Abra SQL Editor e execute `supabase/database.sql` inteiro.
-3. Depois configure SUPABASE_URL e SUPABASE_ANON_KEY no Render.
 
-## Controles
-Toque no mapa para mover. Toque em NPC para selecionar. LASER liga/desliga fogo contínuo. Foguete causa dano instantâneo. Encoste no loot amarelo para coletar.
+A V2 continua compatível com a estrutura do projeto para Render/Supabase, mas o protótipo atual mantém o loop principal jogável no frontend e salva progresso em `localStorage`.
 
-## Roadmap
-V1 atual: mapa, movimento touch, NPCs, alvo, laser, foguete, HP/escudo, loot, XP, level, créditos, portal visual e schema Supabase.
-Próximas: autenticação/sync, hangar, equipamentos/configurações, drones, missões, múltiplos mapas, facções, loja, refinamento, gates e bosses.
+## Arquivos principais
+
+- `public/index.html` → HUD e interface
+- `public/style.css` → visual / HUD
+- `public/game.js` → lógica do jogo V2
+- `server/index.js` → servidor Express
+- `supabase/database.sql` → estrutura inicial do banco
+
+## Observações
+
+Os dados de balanceamento usados como referência foram inspirados nas páginas públicas do DarkOrbitWiki enviadas pelo usuário. A implementação visual e a experiência desta versão são próprias.

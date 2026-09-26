@@ -1,1 +1,1 @@
-{"name":"stellar-legacy","version":"1.0.0","type":"module","scripts":{"start":"node server/index.js","dev":"node --watch server/index.js"},"dependencies":{"express":"^4.21.2","@supabase/supabase-js":"^2.49.1"},"engines":{"node":">=18"}}
+{"name":"stellar-legacy","version":"2.0.0","type":"module","scripts":{"start":"node server/index.js","dev":"node --watch server/index.js"},"dependencies":{"express":"^4.21.2","@supabase/supabase-js":"^2.49.1"},"engines":{"node":">=18"}}
