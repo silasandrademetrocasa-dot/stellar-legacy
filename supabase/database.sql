@@ -118,3 +118,28 @@ create policy "own ammunition" on public.ammunition for all using (auth.uid() = 
 create policy "own loadout" on public.ship_loadout for all using (auth.uid() = user_id) with check (auth.uid() = user_id);
 create policy "own drones" on public.player_drones for all using (auth.uid() = user_id) with check (auth.uid() = user_id);
 create policy "own inventory" on public.inventory for all using (auth.uid() = user_id) with check (auth.uid() = user_id);
+
+-- ============================================================
+-- V4: LOGIN + SAVE ONLINE
+-- Execute este bloco após atualizar a aplicação para a V4.
+-- ============================================================
+
+alter table public.profiles add column if not exists uridium bigint not null default 0;
+
+create table if not exists public.game_saves (
+  user_id uuid primary key references auth.users(id) on delete cascade,
+  state jsonb not null default '{}'::jsonb,
+  updated_at timestamptz not null default now()
+);
+
+alter table public.game_saves enable row level security;
+drop policy if exists "own game save" on public.game_saves;
+create policy "own game save"
+on public.game_saves
+for all
+using (auth.uid() = user_id)
+with check (auth.uid() = user_id);
+
+-- Índices úteis para evolução futura do ranking / perfis
+create index if not exists profiles_faction_idx on public.profiles(faction);
+create index if not exists profiles_level_idx on public.profiles(level desc);

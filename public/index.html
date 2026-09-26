@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
   <meta name="theme-color" content="#030816">
-  <title>Stellar Legacy V3</title>
+  <title>Stellar Legacy V4</title>
   <link rel="stylesheet" href="/style.css">
 </head>
 <body>
@@ -12,7 +12,7 @@
   <canvas id="game"></canvas>
 
   <header id="topbar" class="hud-panel">
-    <div class="brand">STELLAR LEGACY <small>V3</small></div>
+    <div class="brand">STELLAR LEGACY <small>V4</small></div>
     <div class="top-meta">
       <span>Facção <b id="factionLabel">—</b></span>
       <span>Mapa <b id="mapLabel">—</b></span>
@@ -20,8 +20,11 @@
       <span>LV <b id="lvl">1</b></span>
     </div>
     <div class="top-actions">
+      <span class="pilot-chip">Piloto <b id="userLabel">—</b></span>
+      <span id="syncLabel" class="sync-chip">LOCAL</span>
       <button id="shopBtn" class="small-btn gold">LOJA</button>
       <button id="hangarBtn" class="small-btn">HANGAR</button>
+      <button id="logoutBtn" class="small-btn danger-lite">SAIR</button>
     </div>
   </header>
 
@@ -35,6 +38,7 @@
     <div>URI <span id="uridium">0</span></div>
     <div>XP <span id="xp">0</span></div>
     <div>DRONES <span id="droneCount">0</span>/8</div>
+    <div id="safeZoneLabel" class="safe-zone-status">FORA DA BASE</div>
   </section>
 
   <section id="targetPanel" class="hud-panel stack">
@@ -71,6 +75,30 @@
   <div id="hint" class="hud-panel">Clique/toque no mapa para mover • alvo para selecionar • CTRL = laser • ESPAÇO = míssil • LOJA compra equipamentos • HANGAR equipa sua nave</div>
   <div id="toast"></div>
 
+
+  <div id="loginModal" class="modal fixed-modal">
+    <div class="modal-card login-card">
+      <div class="eyebrow">STELLAR NETWORK</div>
+      <h1>Entrar no universo</h1>
+      <p class="muted">Sua conta salva facção, nave, inventário, drones, munição e progresso online.</p>
+      <div class="auth-tabs">
+        <button id="loginTabBtn" class="tab-btn active">Entrar</button>
+        <button id="registerTabBtn" class="tab-btn">Criar conta</button>
+      </div>
+      <form id="loginForm" class="auth-form">
+        <label>E-mail<input id="loginEmail" type="email" autocomplete="email" required placeholder="piloto@email.com"></label>
+        <label>Senha<input id="loginPassword" type="password" autocomplete="current-password" required minlength="6" placeholder="••••••••"></label>
+        <button class="primary-btn" type="submit">ENTRAR</button>
+      </form>
+      <form id="registerForm" class="auth-form hidden">
+        <label>Callsign<input id="registerCallsign" type="text" required minlength="2" maxlength="24" placeholder="Seu nome no espaço"></label>
+        <label>E-mail<input id="registerEmail" type="email" autocomplete="email" required placeholder="piloto@email.com"></label>
+        <label>Senha<input id="registerPassword" type="password" autocomplete="new-password" required minlength="6" placeholder="mínimo 6 caracteres"></label>
+        <button class="primary-btn" type="submit">CRIAR CONTA</button>
+      </form>
+      <div id="authMessage" class="auth-message"></div>
+    </div>
+  </div>
   <div id="factionModal" class="modal hidden fixed-modal">
     <div class="modal-card onboarding-card">
       <div class="eyebrow">PRIMEIRO ACESSO</div>

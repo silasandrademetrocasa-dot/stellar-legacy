@@ -1,109 +1,70 @@
-# Stellar Legacy V3 — Facções, Loja, Hangar e Progressão
+# Stellar Legacy V4
 
-A V3 transforma o protótipo em um loop de progressão completo: escolha de facção, nave inicial, loja, inventário, equipamentos, drones, munição consumível e troca real de naves.
+V4 do protótipo web/mobile inspirado em space MMOs clássicos.
 
-## Primeiro acesso
+## O que mudou na V4
 
-O jogador escolhe uma das três facções:
+### Login + conta online
+- Criar conta com **Callsign + e-mail + senha**.
+- Login persistente.
+- Renovação de sessão.
+- Botão **SAIR**.
+- Save em nuvem usando Supabase (`game_saves`).
+- Backup local separado por usuário caso a conexão caia.
+- Indicador no HUD: `ONLINE`, `SALVANDO` ou `OFFLINE`.
 
-- **Terra Alliance** → mapas 1-1 até 1-4
-- **Mars Dominion** → mapas 2-1 até 2-4
-- **Jupiter Federation** → mapas 3-1 até 3-4
+### Facções
+No primeiro acesso de uma conta sem personagem, o jogador escolhe:
+- **Terra Alliance** → mapas `1-1` a `1-4`.
+- **Mars Dominion** → mapas `2-1` a `2-4`.
+- **Jupiter Federation** → mapas `3-1` a `3-4`.
 
-O save começa com:
+A conta começa com Phoenix, equipamento básico, zero drones e toda a economia/progressão da V3.
 
-- Phoenix
-- 0 drones
-- 1x LF-1 equipado
-- 1x SG3N-A01 equipado
-- 10.000 LCB-10
-- 100 R-310
-- 20.000 créditos
+### Base + Zona Segura
+Cada facção possui sua própria base no mapa inicial X-1.
+- Raio da base: 300 unidades.
+- NPCs nascem fora da zona.
+- NPCs não entram na zona.
+- Enquanto o jogador está dentro da base, NPCs não causam dano nem perseguem o jogador.
+- HP e escudo regeneram mais rápido dentro da base.
+- Ao morrer, o jogador retorna para a base X-1 da própria facção.
+- A Safe Zone aparece no mapa e no minimapa.
 
-## Sistema de naves
+### Sistemas mantidos da V3
+- Loja completa.
+- Naves obtidas e troca pelo Hangar.
+- Equipamentos retornam ao inventário quando a nave é trocada.
+- Lasers, geradores de velocidade, escudos e extras.
+- Flax / Iris e limite de 8 drones.
+- Munições e mísseis consumíveis.
+- Auto Laser CPU / Auto Rocket CPU / Rocket Turbo CPU / Repair Bot.
+- CTRL = laser.
+- Espaço = míssil.
+- B = Loja.
+- H = Hangar.
+- Mapas X-1 a X-4.
 
-Cada nave tem sua própria capacidade de:
+## Supabase — obrigatório para a V4
 
-- lasers
-- geradores (escudo ou velocidade)
-- extras
+Abra **SQL Editor** no projeto Supabase e execute novamente:
 
-Ao trocar de nave, **todos os equipamentos instalados na nave anterior voltam automaticamente para o inventário**. A nave nova entra vazia e você decide o que instalar nela.
+`supabase/database.sql`
 
-As naves compradas ficam permanentemente em `ownedShips` e podem ser trocadas no Hangar.
+O arquivo é idempotente e adiciona a tabela `game_saves` e a coluna `uridium` necessária no perfil.
 
-## Loja
-
-Categorias:
-
-- Naves
-- Lasers
-- Geradores
-- Drones
-- Extras
-- Munição laser
-- Mísseis
-
-A loja usa duas moedas:
-
-- Créditos
-- Uridium
-
-## Equipamentos
-
-### Lasers
-LF-1, MP-1, SL-01, LF-2, LF-3 e LF-4.
-
-O dano da nave é calculado pela soma dos lasers equipados na nave e nos drones.
-
-### Geradores
-Geradores de velocidade e escudo. O escudo total, absorção e velocidade são recalculados conforme a configuração.
-
-### Extras
-
-- Auto Laser CPU
-- Auto Rocket CPU
-- Rocket Turbo CPU
-- Repair Bot REP-2
-
-Os toggles de Auto Laser / Auto Míssil / Turbo Míssil só funcionam quando o respectivo CPU está realmente equipado em um slot de extra.
-
-## Drones
-
-Máximo de **8 drones**.
-
-- **Flax**: comum, 1 slot
-- **Iris**: elite, 2 slots
-
-Os drones aceitam lasers ou geradores e permanecem equipados mesmo quando o jogador troca de nave.
-
-## Combate
-
-- CTRL: liga/desliga laser
-- ESPAÇO: lança míssil
-- B: Loja
-- H: Hangar
-- 1–4: troca munição laser
-
-Munições e mísseis agora são consumíveis e precisam ser comprados.
-
-Cooldown padrão do míssil: **5 segundos**.
-Com Rocket Turbo CPU equipado e ativado: **2,5 segundos**.
-
-## Save
-
-A V3 usa `localStorage` para permitir jogar imediatamente mesmo sem login.
-O arquivo `supabase/database.sql` já contém a estrutura preparada para sincronização futura de:
-
-- perfil/facção
-- estado do jogador
-- naves obtidas
-- inventário
-- munição
-- loadout da nave
-- drones
+### Auth
+A tela de cadastro usa e-mail real + senha. Se **Confirm email** estiver ativado no Supabase, o jogador precisa confirmar o e-mail antes do primeiro login. Para testes privados, você pode desativar confirmação de e-mail no painel do Supabase Auth.
 
 ## Render
+O Web Service precisa ter:
+
+```text
+SUPABASE_URL=https://SEU-PROJETO.supabase.co
+SUPABASE_ANON_KEY=sb_publishable_...
+```
+
+Também é aceito o nome `SUPABASE_PUBLISHABLE_KEY`.
 
 Build Command:
 
@@ -116,3 +77,9 @@ Start Command:
 ```bash
 npm start
 ```
+
+## Arquivos principais
+- `public/game.js` — gameplay, loja, hangar, facções e Safe Zone.
+- `public/api.js` — login, sessão e save online.
+- `server/index.js` — API de autenticação/save e servidor web.
+- `supabase/database.sql` — banco e políticas RLS.

@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: stellar-legacy
+    name: darkorbit-legacy
     runtime: node
     plan: free
     buildCommand: npm install

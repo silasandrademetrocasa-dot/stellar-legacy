@@ -1,4 +1,5 @@
 import { FACTIONS, SHIPS, ITEMS, LASER_AMMO, ROCKETS, NPC_TYPES, MAPS } from './data.js';
+import { signUp, signIn, restoreSession, signOutLocal, getUser, loadCloudSave, saveCloudSave } from './api.js';
 
 const canvas = document.querySelector('#game');
 const ctx = canvas.getContext('2d');
@@ -23,9 +24,15 @@ const ui = {
   toast: $('#toast'), factionModal: $('#factionModal'), factionCards: $('#factionCards'),
   shopBtn: $('#shopBtn'), shopModal: $('#shopModal'), closeShop: $('#closeShop'), shopTabs: $('#shopTabs'), shopGrid: $('#shopGrid'), shopCredits: $('#shopCredits'), shopUridium: $('#shopUridium'),
   hangarBtn: $('#hangarBtn'), hangarModal: $('#hangarModal'), closeHangar: $('#closeHangar'), hangarTabs: $('#hangarTabs'), hangarContent: $('#hangarContent'), hangarShipName: $('#hangarShipName'),
+  loginModal: $('#loginModal'), loginTabBtn: $('#loginTabBtn'), registerTabBtn: $('#registerTabBtn'), loginForm: $('#loginForm'), registerForm: $('#registerForm'), loginEmail: $('#loginEmail'), loginPassword: $('#loginPassword'), registerCallsign: $('#registerCallsign'), registerEmail: $('#registerEmail'), registerPassword: $('#registerPassword'), authMessage: $('#authMessage'), userLabel: $('#userLabel'), syncLabel: $('#syncLabel'), logoutBtn: $('#logoutBtn'), safeZoneLabel: $('#safeZoneLabel'),
 };
 
-const SAVE_KEY = 'stellarLegacyV3Save';
+const SAVE_KEY_PREFIX = 'stellarLegacyV4Save';
+const SAFE_ZONE = { mapId: 'x1', x: 260, y: MAPS.x1.world.h / 2, radius: 300 };
+let cloudDirty = false;
+let cloudBusy = false;
+let authenticated = false;
+function saveKey(){return `${SAVE_KEY_PREFIX}:${getUser()?.id || 'guest'}`;}
 const TWO_PI = Math.PI * 2;
 const categories = {
   ships: 'Naves', lasers: 'Lasers', generators: 'Geradores', drones: 'Drones', extras: 'Extras', ammo: 'Munição', rockets: 'Mísseis'
@@ -45,7 +52,7 @@ function freshSave(factionId) {
   loadout.lasers[0] = 'lf1';
   loadout.generators[0] = 'sg3na01';
   return {
-    profile: { faction: factionId, level: 1, xp: 0, credits: 20000, uridium: 0 },
+    profile: { callsign: getUser()?.callsign || getUser()?.email?.split('@')[0] || 'Pilot', faction: factionId, level: 1, xp: 0, credits: 20000, uridium: 0 },
     activeShipId: 'phoenix',
     ownedShips: ['phoenix'],
     shipLoadout: loadout,
@@ -56,6 +63,7 @@ function freshSave(factionId) {
     selectedLaserAmmo: 'lcb10',
     selectedRocket: 'r310',
     mapId: 'x1',
+    x: SAFE_ZONE.x, y: SAFE_ZONE.y,
     hp: SHIPS.phoenix.hp,
     shield: 1000,
     flags: { autoLaser: false, autoRocket: false, turboRocket: false },
@@ -80,19 +88,29 @@ function nowSec(){return performance.now()/1000;}
 function fmt(v){return Math.max(0,Math.round(v)).toLocaleString('pt-BR');}
 function getFaction(){return progress?.profile?.faction ? FACTIONS[progress.profile.faction] : null;}
 function displayMapLabel(mapId){const f=getFaction(); return f ? `${f.prefix}-${MAPS[mapId].tier}` : `X-${MAPS[mapId].tier}`;}
+function isSafeZone(x=player.x,y=player.y){return !!progress&&progress.mapId===SAFE_ZONE.mapId&&Math.hypot(x-SAFE_ZONE.x,y-SAFE_ZONE.y)<=SAFE_ZONE.radius;}
+function safeZoneDistance(x,y){return Math.hypot(x-SAFE_ZONE.x,y-SAFE_ZONE.y);}
 function showToast(msg){ui.toast.textContent=msg;ui.toast.classList.add('show');clearTimeout(state.toastTimer);state.toastTimer=setTimeout(()=>ui.toast.classList.remove('show'),1900);}
-function saveGame(){if(progress)localStorage.setItem(SAVE_KEY,JSON.stringify(progress));}
-
-function loadGame(){
-  const raw=localStorage.getItem(SAVE_KEY);
+function setSync(text,cls=''){ui.syncLabel.textContent=text;ui.syncLabel.className=`sync-chip ${cls}`.trim();}
+function saveGame(){if(!progress)return;localStorage.setItem(saveKey(),JSON.stringify(progress));cloudDirty=true;}
+function loadLocalGame(){
+  const raw=localStorage.getItem(saveKey());
   if(!raw){progress=null;return;}
-  try{
-    progress=JSON.parse(raw);
-    if(!progress.profile?.faction || !SHIPS[progress.activeShipId]) throw new Error('save incompleto');
-    progress.ownedShips ||= ['phoenix']; progress.inventory ||= {}; progress.drones ||= []; progress.ammo ||= {}; progress.rockets ||= {}; progress.flags ||= {};
-    progress.shipLoadout ||= blankLoadout(progress.activeShipId);
-    normalizeLoadout();
-  }catch(e){console.warn(e);progress=null;}
+  try{progress=JSON.parse(raw);hydrateProgress();}catch(e){console.warn(e);progress=null;}
+}
+function hydrateProgress(){
+  if(!progress)return;
+  if(!progress.profile?.faction || !SHIPS[progress.activeShipId]) throw new Error('save incompleto');
+  progress.profile.callsign ||= getUser()?.callsign || getUser()?.email?.split('@')[0] || 'Pilot';
+  progress.ownedShips ||= ['phoenix'];progress.inventory ||= {};progress.drones ||= [];progress.ammo ||= {};progress.rockets ||= {};progress.flags ||= {};
+  progress.shipLoadout ||= blankLoadout(progress.activeShipId);normalizeLoadout();
+}
+async function flushCloudSave(force=false){
+  if(!authenticated||!progress||cloudBusy||(!cloudDirty&&!force))return;
+  cloudBusy=true;setSync('SALVANDO','busy');
+  try{await saveCloudSave(progress);cloudDirty=false;setSync('ONLINE','ok');}
+  catch(e){console.warn('cloud save',e);setSync('OFFLINE','err');}
+  finally{cloudBusy=false;}
 }
 
 function normalizeLoadout(){
@@ -137,7 +155,7 @@ function computeStats(keepRatio=true){
 }
 
 function initializeFaction(factionId){
-  progress=freshSave(factionId);state.currentMap=MAPS.x1;player.hp=SHIPS.phoenix.hp;player.shield=1000;computeStats(false);setMap('x1',false);ui.factionModal.classList.add('hidden');buildAmmoButtons();renderAll();saveGame();showToast(`Bem-vindo à ${FACTIONS[factionId].name}`);
+  progress=freshSave(factionId);state.currentMap=MAPS.x1;player.hp=SHIPS.phoenix.hp;player.shield=1000;computeStats(false);setMap('x1',false);ui.factionModal.classList.add('hidden');buildAmmoButtons();renderAll();saveGame();flushCloudSave(true);showToast(`Bem-vindo à ${FACTIONS[factionId].name}`);
 }
 
 function renderFactionChoice(){
@@ -159,12 +177,20 @@ function createOres(){
 }
 function spawnEnemies(){
   state.enemies=[];let n=0;
-  for(const group of state.currentMap.enemyGroups){const base=NPC_TYPES[group.type];for(let i=0;i<group.count;i++)state.enemies.push({id:`${group.type}_${n++}_${Math.random().toString(16).slice(2,6)}`,type:group.type,name:base.name,x:rand(160,state.currentMap.world.w-160),y:rand(160,state.currentMap.world.h-160),hp:base.hp,maxHp:base.hp,shield:base.shield,maxShield:base.shield,credits:base.credits,uridium:base.uridium,speed:base.speed,damage:base.damage,color:base.color,size:base.size,attackRange:Math.min(360,140+base.size*5),aggroRange:520,lastShot:0,angle:rand(0,TWO_PI),drift:rand(.4,1.4)});}
+  for(const group of state.currentMap.enemyGroups){
+    const base=NPC_TYPES[group.type];
+    for(let i=0;i<group.count;i++){
+      let x,y,tries=0;
+      do{x=rand(160,state.currentMap.world.w-160);y=rand(160,state.currentMap.world.h-160);tries++;}
+      while(progress.mapId==='x1'&&safeZoneDistance(x,y)<SAFE_ZONE.radius+180&&tries<80);
+      state.enemies.push({id:`${group.type}_${n++}_${Math.random().toString(16).slice(2,6)}`,type:group.type,name:base.name,x,y,hp:base.hp,maxHp:base.hp,shield:base.shield,maxShield:base.shield,credits:base.credits,uridium:base.uridium,speed:base.speed,damage:base.damage,color:base.color,size:base.size,attackRange:Math.min(360,140+base.size*5),aggroRange:520,lastShot:0,angle:rand(0,TWO_PI),drift:rand(.4,1.4)});
+    }
+  }
 }
 function setMap(mapId,preserve=false){
   progress.mapId=mapId;state.currentMap=MAPS[mapId];computeStats(true);
-  if(!preserve){player.x=mapId==='x1'?260:400;player.y=state.currentMap.world.h/2;player.tx=player.x;player.ty=player.y;}
-  state.camera.x=player.x;state.camera.y=player.y;state.target=null;state.loot=[];createOres();spawnEnemies();saveGame();showToast(`Entrando em ${displayMapLabel(mapId)}`);
+  if(!preserve){player.x=mapId==='x1'?SAFE_ZONE.x:400;player.y=mapId==='x1'?SAFE_ZONE.y:state.currentMap.world.h/2;player.tx=player.x;player.ty=player.y;}
+  state.camera.x=player.x;state.camera.y=player.y;state.target=null;state.loot=[];createOres();spawnEnemies();saveGame();showToast(mapId==='x1'?`Base ${getFaction()?.short||''} • Zona Segura`:`Entrando em ${displayMapLabel(mapId)}`);
 }
 
 function currentLaserAmmo(){return LASER_AMMO[progress.selectedLaserAmmo]||LASER_AMMO.lcb10;}
@@ -195,6 +221,7 @@ function fireRocket(manual=false){
   player.lastRocketShot=nowSec();progress.rockets[r.id]-=1;dealDamageToEnemy(state.target,Math.round(r.damage*player.rocketMult),r.color);saveGame();
 }
 function takePlayerDamage(dmg){
+  if(isSafeZone())return;
   const absorb=Math.max(0,Math.min(100,player.shieldAbsorption))/100;let shieldPart=dmg*absorb;let hullPart=dmg-shieldPart;
   if(player.shield>0){const got=Math.min(player.shield,shieldPart);player.shield-=got;shieldPart-=got;hullPart+=shieldPart;}
   else hullPart+=shieldPart;
@@ -205,23 +232,45 @@ function gainLoot(drop){progress.profile.credits+=drop.credits;progress.profile.
 function updatePlayer(dt){
   const dx=player.tx-player.x,dy=player.ty-player.y,d=Math.hypot(dx,dy);if(d>2){const step=Math.min(d,player.speed*dt);player.x+=dx/d*step;player.y+=dy/d*step;}
   player.x=Math.max(35,Math.min(state.currentMap.world.w-35,player.x));player.y=Math.max(35,Math.min(state.currentMap.world.h-35,player.y));state.camera.x+=(player.x-state.camera.x)*.08;state.camera.y+=(player.y-state.camera.y)*.08;
-  const inCombat=state.enemies.some(e=>e.hp>0&&enemyDistance(e)<430);if(!inCombat){player.shield=Math.min(player.maxShield,player.shield+player.maxShield*.045*dt);if(hasExtra('rep2'))player.hp=Math.min(player.maxHp,player.hp+player.maxHp*.025*dt);}
+  const safe=isSafeZone();const inCombat=!safe&&state.enemies.some(e=>e.hp>0&&enemyDistance(e)<430);if(!inCombat){const regen=safe?.12:.045;player.shield=Math.min(player.maxShield,player.shield+player.maxShield*regen*dt);if(safe||hasExtra('rep2'))player.hp=Math.min(player.maxHp,player.hp+player.maxHp*(safe?.08:.025)*dt);}
   if(player.laserFiring)fireLaserTick();
   if(progress.flags.autoRocket&&hasExtra('autoRocketCpu')&&player.laserFiring&&rocketReady())fireRocket(false);
   for(let i=state.loot.length-1;i>=0;i--){const l=state.loot[i];if(Math.hypot(l.x-player.x,l.y-player.y)<40){gainLoot(l);spawnParticle(l.x,l.y,`+${fmt(l.credits)} CR +${l.uridium} URI`,'#ffe57b');state.loot.splice(i,1);}}
   for(let i=state.ores.length-1;i>=0;i--){const o=state.ores[i];if(Math.hypot(o.x-player.x,o.y-player.y)<30){progress.profile.credits+=o.amount*25;spawnParticle(o.x,o.y,`+${o.amount} ${o.type}`,o.color);state.ores.splice(i,1);saveGame();}}
-  if(player.hp<=0){player.hp=player.maxHp;player.shield=Math.round(player.maxShield*.5);progress.profile.credits=Math.max(0,Math.round(progress.profile.credits*.95));player.x=180;player.y=state.currentMap.world.h/2;player.tx=player.x;player.ty=player.y;state.target=null;player.laserFiring=false;showToast('Nave destruída. Reparada na base.');saveGame();}
+  if(player.hp<=0){player.hp=player.maxHp;player.shield=Math.round(player.maxShield*.5);progress.profile.credits=Math.max(0,Math.round(progress.profile.credits*.95));progress.mapId='x1';state.currentMap=MAPS.x1;player.x=SAFE_ZONE.x;player.y=SAFE_ZONE.y;player.tx=player.x;player.ty=player.y;state.target=null;player.laserFiring=false;createOres();spawnEnemies();showToast('Nave destruída. Retorno automático à Zona Segura.');saveGame();}
   if(nowSec()-state.lastPortalAt>1.5)for(const p of state.currentMap.portals)if(Math.hypot(p.x-player.x,p.y-player.y)<58){state.lastPortalAt=nowSec();setMap(p.to,false);break;}
-  progress.hp=player.hp;progress.shield=player.shield;
+  progress.hp=player.hp;progress.shield=player.shield;progress.x=player.x;progress.y=player.y;
 }
 function updateEnemies(dt){
-  for(const e of state.enemies){if(e.hp<=0)continue;const dx=player.x-e.x,dy=player.y-e.y,d=Math.hypot(dx,dy);e.angle+=dt*e.drift;if(d<e.aggroRange&&d>e.attackRange*.8){e.x+=dx/d*e.speed*dt;e.y+=dy/d*e.speed*dt;}else if(d>e.aggroRange){e.x+=Math.cos(e.angle)*e.speed*.16*dt;e.y+=Math.sin(e.angle)*e.speed*.16*dt;}e.x=Math.max(25,Math.min(state.currentMap.world.w-25,e.x));e.y=Math.max(25,Math.min(state.currentMap.world.h-25,e.y));if(d<e.attackRange&&nowSec()-e.lastShot>(e.name.includes('Boss')?1.6:1.15)){e.lastShot=nowSec();takePlayerDamage(e.damage*rand(.92,1.12));spawnParticle(player.x,player.y-28,Math.round(e.damage),'#ff8080');}}
+  const playerSafe=isSafeZone();
+  for(const e of state.enemies){
+    if(e.hp<=0)continue;
+    const dx=player.x-e.x,dy=player.y-e.y,d=Math.hypot(dx,dy);e.angle+=dt*e.drift;
+    if(progress.mapId==='x1'&&safeZoneDistance(e.x,e.y)<SAFE_ZONE.radius+35){
+      const ox=e.x-SAFE_ZONE.x,oy=e.y-SAFE_ZONE.y,od=Math.hypot(ox,oy)||1;e.x=SAFE_ZONE.x+ox/od*(SAFE_ZONE.radius+38);e.y=SAFE_ZONE.y+oy/od*(SAFE_ZONE.radius+38);
+    }
+    if(!playerSafe&&d<e.aggroRange&&d>e.attackRange*.8){
+      const nx=e.x+dx/d*e.speed*dt,ny=e.y+dy/d*e.speed*dt;
+      if(!(progress.mapId==='x1'&&safeZoneDistance(nx,ny)<SAFE_ZONE.radius+25)){e.x=nx;e.y=ny;}
+    }else if(d>e.aggroRange||playerSafe){e.x+=Math.cos(e.angle)*e.speed*.16*dt;e.y+=Math.sin(e.angle)*e.speed*.16*dt;}
+    e.x=Math.max(25,Math.min(state.currentMap.world.w-25,e.x));e.y=Math.max(25,Math.min(state.currentMap.world.h-25,e.y));
+    if(!playerSafe&&d<e.attackRange&&nowSec()-e.lastShot>(e.name.includes('Boss')?1.6:1.15)){e.lastShot=nowSec();takePlayerDamage(e.damage*rand(.92,1.12));spawnParticle(player.x,player.y-28,Math.round(e.damage),'#ff8080');}
+  }
 }
 function updateParticles(dt){for(let i=state.particles.length-1;i>=0;i--){const p=state.particles[i];p.y-=p.vy*dt;p.life-=dt;if(p.life<=0)state.particles.splice(i,1);}}
 function update(dt){if(!progress)return;updatePlayer(dt);updateEnemies(dt);updateParticles(dt);updateUI();}
 
 function drawStars(){ctx.fillStyle='#fff';for(const s of state.stars){const sx=((s.x-state.camera.x*.15)%(W+80)+(W+80))%(W+80)-40,sy=((s.y-state.camera.y*.15)%(H+80)+(H+80))%(H+80)-40;ctx.globalAlpha=s.a;ctx.beginPath();ctx.arc(sx,sy,s.r,0,TWO_PI);ctx.fill();}ctx.globalAlpha=1;}
 function drawBounds(){const p=screenPos(0,0);ctx.strokeStyle='rgba(60,140,255,.16)';ctx.lineWidth=2;ctx.strokeRect(p.x,p.y,state.currentMap.world.w,state.currentMap.world.h);}
+function drawBaseSafeZone(){
+  if(progress.mapId!=='x1')return;
+  const p=screenPos(SAFE_ZONE.x,SAFE_ZONE.y),f=getFaction(),pulse=1+Math.sin(nowSec()*2.4)*.02;
+  ctx.save();ctx.translate(p.x,p.y);ctx.strokeStyle=f?.color||'#5ce8ff';ctx.fillStyle='rgba(40,220,170,.045)';ctx.lineWidth=3;ctx.beginPath();ctx.arc(0,0,SAFE_ZONE.radius*pulse,0,TWO_PI);ctx.fill();ctx.stroke();
+  ctx.strokeStyle='rgba(130,255,210,.28)';ctx.lineWidth=10;ctx.beginPath();ctx.arc(0,0,SAFE_ZONE.radius-10,0,TWO_PI);ctx.stroke();
+  ctx.rotate(nowSec()*.25);ctx.strokeStyle=f?.color||'#fff';ctx.lineWidth=4;for(let i=0;i<3;i++){ctx.rotate(TWO_PI/3);ctx.beginPath();ctx.moveTo(22,0);ctx.lineTo(72,0);ctx.stroke();}
+  ctx.rotate(-nowSec()*.25);ctx.fillStyle='#d9fbff';ctx.beginPath();ctx.arc(0,0,24,0,TWO_PI);ctx.fill();ctx.fillStyle=f?.color||'#5ce8ff';ctx.beginPath();ctx.arc(0,0,13,0,TWO_PI);ctx.fill();
+  ctx.fillStyle='#caffdf';ctx.font='bold 13px Arial';ctx.textAlign='center';ctx.fillText(`${f?.short||''} • ZONA SEGURA`,0,-SAFE_ZONE.radius-18);ctx.restore();
+}
 function drawPortals(){for(const portal of state.currentMap.portals){const p=screenPos(portal.x,portal.y);ctx.save();ctx.translate(p.x,p.y);ctx.strokeStyle=getFaction()?.color||'#38ddff';ctx.lineWidth=4;ctx.beginPath();ctx.ellipse(0,0,34,54,0,0,TWO_PI);ctx.stroke();ctx.strokeStyle='rgba(84,225,255,.30)';ctx.lineWidth=10;ctx.beginPath();ctx.ellipse(0,0,20+Math.sin(nowSec()*4)*2,38,0,0,TWO_PI);ctx.stroke();ctx.fillStyle='#d4f9ff';ctx.font='12px Arial';ctx.textAlign='center';ctx.fillText(displayMapLabel(portal.to),0,-68);ctx.restore();}}
 function drawOres(){for(const o of state.ores){const p=screenPos(o.x,o.y);ctx.fillStyle=o.color;ctx.beginPath();ctx.moveTo(p.x,p.y-12);ctx.lineTo(p.x+10,p.y);ctx.lineTo(p.x,p.y+12);ctx.lineTo(p.x-10,p.y);ctx.closePath();ctx.fill();}}
 function drawLoot(){for(const l of state.loot){const p=screenPos(l.x,l.y);ctx.fillStyle='#ffe77b';ctx.fillRect(p.x-7,p.y-7,14,14);ctx.strokeStyle='#fff6bc';ctx.strokeRect(p.x-7,p.y-7,14,14);}}
@@ -229,8 +278,8 @@ function drawEnemy(e){const p=screenPos(e.x,e.y);ctx.save();ctx.translate(p.x,p.
 function drawDrones(p){const f=getFaction();progress.drones.forEach((d,i)=>{const a=nowSec()*.8+i*TWO_PI/Math.max(1,progress.drones.length);const r=34+(i%2)*8;ctx.fillStyle=d.type==='iris'?'#d49cff':'#89d8ff';ctx.beginPath();ctx.arc(p.x+Math.cos(a)*r,p.y+Math.sin(a)*r,3.5,0,TWO_PI);ctx.fill();ctx.strokeStyle=f?.color||'#fff';ctx.stroke();});}
 function drawPlayer(){const p=screenPos(player.x,player.y),f=getFaction(),a=Math.atan2(player.ty-player.y,player.tx-player.x||0);ctx.save();ctx.translate(p.x,p.y);ctx.rotate(a||0);ctx.fillStyle=f?.color||'#76e0ff';ctx.beginPath();ctx.moveTo(22,0);ctx.lineTo(-14,-12);ctx.lineTo(-5,0);ctx.lineTo(-14,12);ctx.closePath();ctx.fill();ctx.fillStyle='#fff';ctx.fillRect(-18,-4,8,8);ctx.fillStyle='#6d4fff';ctx.fillRect(-12,-2,8,4);ctx.restore();drawDrones(p);if(player.laserFiring&&state.target&&state.target.hp>0&&enemyDistance(state.target)<=650){const t=screenPos(state.target.x,state.target.y);ctx.strokeStyle=currentLaserAmmo().color;ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(p.x,p.y);ctx.lineTo(t.x,t.y);ctx.stroke();}}
 function drawParticles(){ctx.font='12px Arial';ctx.textAlign='center';for(const p of state.particles){const q=screenPos(p.x,p.y);ctx.globalAlpha=Math.max(0,p.life);ctx.fillStyle=p.color;ctx.fillText(p.text,q.x,q.y);}ctx.globalAlpha=1;}
-function drawMinimap(){mm.clearRect(0,0,minimap.width,minimap.height);mm.fillStyle='#07111c';mm.fillRect(0,0,minimap.width,minimap.height);mm.strokeStyle='rgba(75,180,255,.5)';mm.strokeRect(1,1,minimap.width-2,minimap.height-2);const sx=minimap.width/state.currentMap.world.w,sy=minimap.height/state.currentMap.world.h;for(const p of state.currentMap.portals){mm.fillStyle=getFaction()?.color||'#2ce4ff';mm.beginPath();mm.arc(p.x*sx,p.y*sy,4,0,TWO_PI);mm.fill();}for(const e of state.enemies){if(e.hp<=0)continue;mm.fillStyle=state.target?.id===e.id?'#ff345e':e.color;mm.fillRect(e.x*sx-1,e.y*sy-1,3,3);}for(const o of state.ores){mm.fillStyle=o.color;mm.fillRect(o.x*sx-1,o.y*sy-1,2,2);}mm.fillStyle='#fff';mm.beginPath();mm.arc(player.x*sx,player.y*sy,4,0,TWO_PI);mm.fill();}
-function draw(){ctx.clearRect(0,0,W,H);drawStars();if(!progress)return;drawBounds();drawPortals();drawOres();drawLoot();state.enemies.forEach(e=>e.hp>0&&drawEnemy(e));drawPlayer();drawParticles();drawMinimap();}
+function drawMinimap(){mm.clearRect(0,0,minimap.width,minimap.height);mm.fillStyle='#07111c';mm.fillRect(0,0,minimap.width,minimap.height);mm.strokeStyle='rgba(75,180,255,.5)';mm.strokeRect(1,1,minimap.width-2,minimap.height-2);const sx=minimap.width/state.currentMap.world.w,sy=minimap.height/state.currentMap.world.h;if(progress.mapId==='x1'){mm.strokeStyle='rgba(100,255,190,.65)';mm.lineWidth=2;mm.beginPath();mm.arc(SAFE_ZONE.x*sx,SAFE_ZONE.y*sy,SAFE_ZONE.radius*Math.min(sx,sy),0,TWO_PI);mm.stroke();}for(const p of state.currentMap.portals){mm.fillStyle=getFaction()?.color||'#2ce4ff';mm.beginPath();mm.arc(p.x*sx,p.y*sy,4,0,TWO_PI);mm.fill();}for(const e of state.enemies){if(e.hp<=0)continue;mm.fillStyle=state.target?.id===e.id?'#ff345e':e.color;mm.fillRect(e.x*sx-1,e.y*sy-1,3,3);}for(const o of state.ores){mm.fillStyle=o.color;mm.fillRect(o.x*sx-1,o.y*sy-1,2,2);}mm.fillStyle='#fff';mm.beginPath();mm.arc(player.x*sx,player.y*sy,4,0,TWO_PI);mm.fill();}
+function draw(){ctx.clearRect(0,0,W,H);drawStars();if(!progress)return;drawBounds();drawBaseSafeZone();drawPortals();drawOres();drawLoot();state.enemies.forEach(e=>e.hp>0&&drawEnemy(e));drawPlayer();drawParticles();drawMinimap();}
 
 function buildAmmoButtons(){
   if(!progress)return;ui.laserAmmoButtons.innerHTML='';Object.values(LASER_AMMO).forEach(a=>{const q=ammoQty(a.id),b=document.createElement('button');b.className=`ammo-btn ${progress.selectedLaserAmmo===a.id?'active':''} ${q<=0?'empty':''}`;b.style.borderColor=a.color;b.innerHTML=`${a.name}<small>x${a.mult} • ${fmt(q)}</small>`;b.onclick=()=>{progress.selectedLaserAmmo=a.id;buildAmmoButtons();saveGame();};ui.laserAmmoButtons.appendChild(b);});
@@ -241,7 +290,8 @@ function updateExtraControls(){
   for(const [flag,item] of configs){const el=ui[flag],owned=hasExtra(item);el.disabled=!owned;if(!owned)progress.flags[flag]=false;el.checked=!!progress.flags[flag];el.closest('label')?.classList.toggle('locked',!owned);}
 }
 function updateUI(){
-  const f=getFaction(),ship=SHIPS[progress.activeShipId];ui.factionLabel.textContent=f?.short||'—';ui.factionLabel.style.color=f?.color||'';ui.mapLabel.textContent=displayMapLabel(progress.mapId);ui.shipLabel.textContent=ship.name;ui.lvl.textContent=progress.profile.level;ui.hp.textContent=fmt(player.hp);ui.maxHp.textContent=fmt(player.maxHp);ui.shield.textContent=fmt(player.shield);ui.maxShield.textContent=fmt(player.maxShield);ui.speed.textContent=fmt(player.speed);ui.dmg.textContent=fmt(player.laserDamage*currentLaserAmmo().mult);ui.credits.textContent=fmt(progress.profile.credits);ui.uridium.textContent=fmt(progress.profile.uridium);ui.xp.textContent=fmt(progress.profile.xp);ui.droneCount.textContent=progress.drones.length;ui.laserToggle.classList.toggle('active',player.laserFiring);ui.rocketCd.textContent=rocketReady()?'MÍSSIL PRONTO':`MÍSSIL ${(getRocketCooldown()-(nowSec()-player.lastRocketShot)).toFixed(1)}s`;
+  const f=getFaction(),ship=SHIPS[progress.activeShipId],safe=isSafeZone();ui.factionLabel.textContent=f?.short||'—';ui.factionLabel.style.color=f?.color||'';ui.mapLabel.textContent=displayMapLabel(progress.mapId);ui.shipLabel.textContent=ship.name;ui.lvl.textContent=progress.profile.level;ui.hp.textContent=fmt(player.hp);ui.maxHp.textContent=fmt(player.maxHp);ui.shield.textContent=fmt(player.shield);ui.maxShield.textContent=fmt(player.maxShield);ui.speed.textContent=fmt(player.speed);ui.dmg.textContent=fmt(player.laserDamage*currentLaserAmmo().mult);ui.credits.textContent=fmt(progress.profile.credits);ui.uridium.textContent=fmt(progress.profile.uridium);ui.xp.textContent=fmt(progress.profile.xp);ui.droneCount.textContent=progress.drones.length;ui.laserToggle.classList.toggle('active',player.laserFiring);ui.rocketCd.textContent=rocketReady()?'MÍSSIL PRONTO':`MÍSSIL ${(getRocketCooldown()-(nowSec()-player.lastRocketShot)).toFixed(1)}s`;
+  ui.userLabel.textContent=progress.profile.callsign||getUser()?.callsign||'Pilot';ui.safeZoneLabel.textContent=safe?'ZONA SEGURA ATIVA':'FORA DA BASE';ui.safeZoneLabel.classList.toggle('active',safe);
   if(state.target&&state.target.hp>0){ui.targetName.textContent=state.target.name;ui.targetStats.textContent=`HP ${fmt(state.target.hp)} • ESC ${fmt(state.target.shield)}`;ui.targetHpBar.style.width=`${state.target.hp/state.target.maxHp*100}%`;ui.targetShieldBar.style.width=`${state.target.maxShield?state.target.shield/state.target.maxShield*100:0}%`;}else{ui.targetName.textContent='Sem alvo';ui.targetStats.textContent='Toque em um NPC para selecionar';ui.targetHpBar.style.width='0%';ui.targetShieldBar.style.width='0%';}
   ui.shopCredits.textContent=fmt(progress.profile.credits);ui.shopUridium.textContent=fmt(progress.profile.uridium);ui.hangarShipName.textContent=ship.name;updateExtraControls();
 }
@@ -296,18 +346,45 @@ function openHangar(tab='ships'){state.hangarTab=tab;renderHangar();ui.hangarMod
 function renderAll(){buildAmmoButtons();renderShop();renderHangar();updateUI();}
 
 function worldPoint(ev){const r=canvas.getBoundingClientRect(),sx=ev.clientX-r.left,sy=ev.clientY-r.top;return{x:sx-W/2+state.camera.x,y:sy-H/2+state.camera.y};}
-function pointerAction(ev){if(!progress||!ui.shopModal.classList.contains('hidden')||!ui.hangarModal.classList.contains('hidden')||!ui.factionModal.classList.contains('hidden'))return;const p=worldPoint(ev);const found=state.enemies.find(e=>e.hp>0&&Math.hypot(e.x-p.x,e.y-p.y)<=e.size+12);if(found){state.target=found;showToast(`Alvo: ${found.name}`);if(progress.flags.autoLaser&&hasExtra('autoLaserCpu'))player.laserFiring=true;}else{player.tx=Math.max(40,Math.min(state.currentMap.world.w-40,p.x));player.ty=Math.max(40,Math.min(state.currentMap.world.h-40,p.y));}}
+function pointerAction(ev){if(!authenticated||!progress||!ui.loginModal.classList.contains('hidden')||!ui.shopModal.classList.contains('hidden')||!ui.hangarModal.classList.contains('hidden')||!ui.factionModal.classList.contains('hidden'))return;const p=worldPoint(ev);const found=state.enemies.find(e=>e.hp>0&&Math.hypot(e.x-p.x,e.y-p.y)<=e.size+12);if(found){state.target=found;showToast(`Alvo: ${found.name}`);if(progress.flags.autoLaser&&hasExtra('autoLaserCpu'))player.laserFiring=true;}else{player.tx=Math.max(40,Math.min(state.currentMap.world.w-40,p.x));player.ty=Math.max(40,Math.min(state.currentMap.world.h-40,p.y));}}
 canvas.addEventListener('pointerdown',pointerAction);
 ui.laserToggle.onclick=()=>{if(!state.target||state.target.hp<=0){showToast('Selecione um alvo');return;}player.laserFiring=!player.laserFiring;};ui.rocketFire.onclick=()=>fireRocket(true);
 ui.autoLaser.onchange=e=>{if(!hasExtra('autoLaserCpu')){e.target.checked=false;showToast('Equipe Auto Laser CPU no Hangar');return;}progress.flags.autoLaser=e.target.checked;saveGame();};
 ui.autoRocket.onchange=e=>{if(!hasExtra('autoRocketCpu')){e.target.checked=false;showToast('Equipe Auto Rocket CPU no Hangar');return;}progress.flags.autoRocket=e.target.checked;saveGame();};
 ui.turboRocket.onchange=e=>{if(!hasExtra('rocketTurboCpu')){e.target.checked=false;showToast('Equipe Rocket Turbo CPU no Hangar');return;}progress.flags.turboRocket=e.target.checked;saveGame();};
 ui.shopBtn.onclick=()=>openShop();ui.closeShop.onclick=()=>ui.shopModal.classList.add('hidden');ui.hangarBtn.onclick=()=>openHangar();ui.closeHangar.onclick=()=>ui.hangarModal.classList.add('hidden');ui.shopModal.onclick=e=>{if(e.target===ui.shopModal)ui.shopModal.classList.add('hidden');};ui.hangarModal.onclick=e=>{if(e.target===ui.hangarModal)ui.hangarModal.classList.add('hidden');};
-document.addEventListener('keydown',e=>{if(!progress||!ui.factionModal.classList.contains('hidden'))return;const tag=document.activeElement?.tagName;if(tag==='INPUT'||tag==='TEXTAREA')return;if(e.key==='Control'){e.preventDefault();if(state.target&&state.target.hp>0)player.laserFiring=!player.laserFiring;else showToast('Selecione um alvo');}if(e.code==='Space'){e.preventDefault();fireRocket(true);}if(e.key.toLowerCase()==='h')openHangar();if(e.key.toLowerCase()==='b')openShop();if(['1','2','3','4'].includes(e.key)){progress.selectedLaserAmmo=Object.keys(LASER_AMMO)[Number(e.key)-1];buildAmmoButtons();saveGame();}});
+document.addEventListener('keydown',e=>{if(!authenticated||!progress||!ui.loginModal.classList.contains('hidden')||!ui.factionModal.classList.contains('hidden'))return;const tag=document.activeElement?.tagName;if(tag==='INPUT'||tag==='TEXTAREA')return;if(e.key==='Control'){e.preventDefault();if(state.target&&state.target.hp>0)player.laserFiring=!player.laserFiring;else showToast('Selecione um alvo');}if(e.code==='Space'){e.preventDefault();fireRocket(true);}if(e.key.toLowerCase()==='h')openHangar();if(e.key.toLowerCase()==='b')openShop();if(['1','2','3','4'].includes(e.key)){progress.selectedLaserAmmo=Object.keys(LASER_AMMO)[Number(e.key)-1];buildAmmoButtons();saveGame();}});
 
-loadGame();
-if(!progress){renderFactionChoice();}else{
-  state.currentMap=MAPS[progress.mapId]||MAPS.x1;player.hp=progress.hp||1;player.shield=progress.shield||0;computeStats(true);player.hp=Math.min(player.maxHp,progress.hp??player.maxHp);player.shield=Math.min(player.maxShield,progress.shield??player.maxShield);setMap(progress.mapId||'x1',false);renderAll();
+function showAuthMode(mode){
+  const login=mode==='login';ui.loginForm.classList.toggle('hidden',!login);ui.registerForm.classList.toggle('hidden',login);ui.loginTabBtn.classList.toggle('active',login);ui.registerTabBtn.classList.toggle('active',!login);ui.authMessage.textContent='';
 }
-setInterval(()=>{if(progress)saveGame();},7000);
+ui.loginTabBtn.onclick=()=>showAuthMode('login');ui.registerTabBtn.onclick=()=>showAuthMode('register');
+ui.loginForm.onsubmit=async e=>{e.preventDefault();ui.authMessage.textContent='Entrando...';try{await signIn({email:ui.loginEmail.value,password:ui.loginPassword.value});await afterAuth();}catch(err){ui.authMessage.textContent=err.message;}};
+ui.registerForm.onsubmit=async e=>{e.preventDefault();ui.authMessage.textContent='Criando conta...';try{const result=await signUp({callsign:ui.registerCallsign.value,email:ui.registerEmail.value,password:ui.registerPassword.value});if(result.requires_confirmation){ui.authMessage.textContent='Conta criada. Confirme o e-mail no Supabase e depois entre.';showAuthMode('login');ui.loginEmail.value=ui.registerEmail.value;return;}await afterAuth();}catch(err){ui.authMessage.textContent=err.message;}};
+ui.logoutBtn.onclick=async()=>{await flushCloudSave(true);signOutLocal();authenticated=false;progress=null;state.target=null;player.laserFiring=false;ui.shopModal.classList.add('hidden');ui.hangarModal.classList.add('hidden');ui.factionModal.classList.add('hidden');ui.loginModal.classList.remove('hidden');ui.userLabel.textContent='—';setSync('LOCAL','');showAuthMode('login');};
+
+function startLoadedGame(){
+  const savedX=Number.isFinite(progress.x)?progress.x:null,savedY=Number.isFinite(progress.y)?progress.y:null;state.currentMap=MAPS[progress.mapId]||MAPS.x1;player.hp=progress.hp||1;player.shield=progress.shield||0;computeStats(true);player.hp=Math.min(player.maxHp,progress.hp??player.maxHp);player.shield=Math.min(player.maxShield,progress.shield??player.maxShield);
+  player.x=savedX??(progress.mapId==='x1'?SAFE_ZONE.x:400);player.y=savedY??state.currentMap.world.h/2;player.tx=player.x;player.ty=player.y;state.camera.x=player.x;state.camera.y=player.y;state.target=null;state.loot=[];createOres();spawnEnemies();renderAll();saveGame();
+}
+
+async function afterAuth(){
+  authenticated=true;ui.loginModal.classList.add('hidden');ui.userLabel.textContent=getUser()?.callsign||getUser()?.email?.split('@')[0]||'Pilot';setSync('SINCRONIZANDO','busy');
+  try{
+    const remote=await loadCloudSave();
+    if(remote.state){progress=remote.state;hydrateProgress();setSync('ONLINE','ok');}
+    else{loadLocalGame();setSync('ONLINE','ok');}
+  }catch(err){console.warn(err);loadLocalGame();setSync('OFFLINE','err');}
+  if(!progress){renderFactionChoice();return;}
+  startLoadedGame();
+}
+
+async function boot(){
+  ui.loginModal.classList.remove('hidden');showAuthMode('login');setSync('LOCAL','');
+  try{const restored=await restoreSession();if(restored)await afterAuth();}catch(err){console.warn(err);}
+}
+
+boot();
+setInterval(()=>{if(progress){saveGame();flushCloudSave();}},7000);
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden')flushCloudSave(true);});
 let last=performance.now();function loop(t){const dt=Math.min((t-last)/1000,.035);last=t;update(dt);draw();requestAnimationFrame(loop);}requestAnimationFrame(loop);
