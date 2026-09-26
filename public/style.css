@@ -125,3 +125,19 @@
 #minimapPanel.collapsed{padding:8px 10px;width:auto;}
 #minimapPanel.collapsed #minimap{display:none;}
 @media(max-width:680px){#minimapPanel{right:8px;bottom:230px;padding:7px}#minimap{width:136px;height:136px}}
+
+/* V7.2.1 mobile HUD fixes */
+:root{--hud-top-offset:64px;--weaponbar-height:170px;}
+#leftStats.ship-stats-float{top:var(--hud-top-offset)!important;z-index:7;}
+#minimapPanel{bottom:calc(var(--weaponbar-height) + 14px)!important;z-index:7;}
+.tappable-toolbar{cursor:pointer;user-select:none;-webkit-tap-highlight-color:transparent;touch-action:manipulation;}
+.stats-expand-btn{touch-action:manipulation;cursor:pointer;}
+#leftStats .stats-toolbar,#minimapPanel .minimap-toolbar{min-height:28px;}
+@media(max-width:680px){
+  #leftStats.ship-stats-float{top:var(--hud-top-offset)!important;left:8px;min-width:136px;max-width:156px;padding:8px 8px 9px;}
+  #leftStats .stats-toolbar,#minimapPanel .minimap-toolbar{min-height:34px;}
+  .stats-expand-btn{width:30px;height:30px;font-size:15px;}
+  .stats-toolbar-label{font-size:10px;}
+  #leftStats.collapsed{min-width:86px;}
+  #leftStats .safe-zone-status{font-size:10px;line-height:1.25;}
+}
