@@ -50,6 +50,7 @@ export const ITEMS = {
   autoRocketCpu: { id: 'autoRocketCpu', type: 'extra', name: 'Auto Rocket CPU', price: 15000, currency: 'credits', description: 'Dispara automaticamente o míssil selecionado durante o combate.' },
   rocketTurboCpu: { id: 'rocketTurboCpu', type: 'extra', name: 'Rocket Turbo CPU', price: 12000, currency: 'credits', description: 'Reduz o cooldown de mísseis pela metade.' },
   rep2: { id: 'rep2', type: 'extra', name: 'Repair Bot REP-2', price: 10000, currency: 'credits', description: 'Regenera HP fora de combate.' },
+  ammoAutoBuyCpu: { id: 'ammoAutoBuyCpu', type: 'extra', name: 'Auto Buy CPU', price: 18000, currency: 'credits', description: 'Compra automaticamente novo pacote da munição laser e do míssil selecionados quando o estoque estiver baixo.' },
 
   // DRONES
   flax: { id: 'flax', type: 'drone', name: 'Flax', slots: 1, price: 100000, currency: 'credits', description: 'Drone comum com 1 slot de equipamento.' },

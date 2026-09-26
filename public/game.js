@@ -45,13 +45,15 @@ const PET_GEARS = {
   guard: { id:'guard', name:'Modo Guardião', cost:5000, description:'Ataca automaticamente inimigos no alcance que estiverem causando dano à sua nave.' },
   box: { id:'box', name:'Coletor de BOX', cost:3500, description:'Busca cargo boxes próximas e vende automaticamente os recursos vendáveis. Xenomit é guardada.' },
   ore: { id:'ore', name:'Coletor de Pedras', cost:3000, description:'Busca e coleta automaticamente pedras/minérios soltos dentro do alcance do P.E.T.' },
+  repair: { id:'repair', name:'Regenerador de Vida', cost:7000, description:'Segue a nave e regenera HP automaticamente quando você estiver danificado.' },
+  kami: { id:'kami', name:'Kamikaze', cost:11000, description:'Investida explosiva contra alvos próximos, causando dano em área com recarga.' },
 };
 function freshPet(){
   return {
     level: 1, xp: 0,
     laserSlotsUnlocked: 1, shieldSlotsUnlocked: 1,
     lasers: [null], shields: [null],
-    gearsOwned: { guard:false, box:false, ore:false },
+    gearsOwned: { guard:false, box:false, ore:false, repair:false, kami:false },
     activeGear: 'off'
   };
 }
@@ -198,7 +200,8 @@ function hydrateProgress(){
   while(progress.pet.shields.length<progress.pet.shieldSlotsUnlocked)progress.pet.shields.push(null);
   progress.pet.lasers=progress.pet.lasers.slice(0,progress.pet.laserSlotsUnlocked);
   progress.pet.shields=progress.pet.shields.slice(0,progress.pet.shieldSlotsUnlocked);
-  progress.pet.gearsOwned ||= {guard:false,box:false,ore:false};
+  progress.pet.gearsOwned ||= {guard:false,box:false,ore:false,repair:false,kami:false};
+  for(const key of ['guard','box','ore','repair','kami']) if(progress.pet.gearsOwned[key]===undefined) progress.pet.gearsOwned[key]=false;
   progress.pet.activeGear ||= 'off';
   progress.shipLoadout ||= blankLoadout(progress.activeShipId);normalizeLoadout();
 }
@@ -232,6 +235,24 @@ function removeInventory(itemId,count=1){
   return true;
 }
 function hasExtra(itemId){return progress.shipLoadout.extras.includes(itemId);}
+function autoLaserEnabled(){return hasExtra('autoLaserCpu');}
+function autoRocketEnabled(){return hasExtra('autoRocketCpu');}
+function turboRocketEnabled(){return hasExtra('rocketTurboCpu');}
+function autoBuyEnabled(){return hasExtra('ammoAutoBuyCpu');}
+function canAutoBuy(def){return !!def && (def.currency==='credits'?progress.profile.credits>=def.price:progress.profile.uridium>=def.price);}
+function buyAmmoPack(id,silent=false){const a=LASER_AMMO[id];if(!a||!charge(a.price,a.currency))return false;progress.ammo[id]=(progress.ammo[id]||0)+a.pack;if(!silent)showToast(`+${fmt(a.pack)} ${a.name}`);saveGame();return true;}
+function buyRocketPack(id,silent=false){const r=ROCKETS[id];if(!r||!charge(r.price,r.currency))return false;progress.rockets[id]=(progress.rockets[id]||0)+r.pack;if(!silent)showToast(`+${fmt(r.pack)} ${r.name}`);saveGame();return true;}
+function maybeAutoBuyAmmo(){
+  if(!progress||!autoBuyEnabled()) return;
+  const now=nowSec();
+  if(now-state.lastAutoBuyAt<0.9) return;
+  let bought=[];
+  const laser=currentLaserAmmo(), rocket=currentRocket();
+  const laserNeed=Math.max(1,equippedLaserCount())*10;
+  if(ammoQty(laser.id)<laserNeed && canAutoBuy(laser) && buyAmmoPack(laser.id,true)) bought.push(`${laser.name} +${fmt(laser.pack)}`);
+  if(rocketQty(rocket.id)<10 && canAutoBuy(rocket) && buyRocketPack(rocket.id,true)) bought.push(`${rocket.name} +${fmt(rocket.pack)}`);
+  if(bought.length){state.lastAutoBuyAt=now;refreshAmmoCounters();renderShop();showToast(`Auto Buy: ${bought.join(' • ')}`);} 
+}
 function allEquippedIds(){return [...progress.shipLoadout.lasers,...progress.shipLoadout.generators,...progress.shipLoadout.extras,...progress.drones.flatMap(d=>d.slots)].filter(Boolean);}
 function equippedLaserIds(){return [...progress.shipLoadout.lasers,...progress.drones.flatMap(d=>d.slots)].filter(id=>ITEMS[id]?.type==='laser');}
 function equippedLaserCount(){return equippedLaserIds().length;}
@@ -313,9 +334,9 @@ function updatePet(dt){
   if(!progress?.pet)return;
   const pet=progress.pet, mode=pet.activeGear||'off', followAngle=nowSec()*.7;
   let targetX=player.x+Math.cos(followAngle)*58,targetY=player.y+Math.sin(followAngle)*58,task=null;
+  const now=nowSec();
 
   if(mode==='guard'&&pet.gearsOwned.guard){
-    const now=nowSec();
     task=state.enemies.filter(e=>e.hp>0&&e.lastAttackPlayerAt&&now-e.lastAttackPlayerAt<4.2&&Math.hypot(e.x-player.x,e.y-player.y)<=petRange())
       .sort((a,b)=>Math.hypot(a.x-player.x,a.y-player.y)-Math.hypot(b.x-player.x,b.y-player.y))[0]||null;
     if(task){targetX=task.x;targetY=task.y;petRuntime.taskType='guard';petRuntime.taskId=task.id;}
@@ -325,6 +346,14 @@ function updatePet(dt){
   }else if(mode==='ore'&&pet.gearsOwned.ore&&cargoFree()>0){
     task=petNearest(state.ores);
     if(task){targetX=task.x;targetY=task.y;petRuntime.taskType='ore';petRuntime.taskId=task.id;}
+  }else if(mode==='repair'&&pet.gearsOwned.repair){
+    petRuntime.taskType='repair';petRuntime.taskId=null;
+    targetX=player.x+38;targetY=player.y-42;
+    if(player.hp<player.maxHp)player.hp=Math.min(player.maxHp, player.hp + player.maxHp*(0.012+pet.level*0.0008)*dt);
+  }else if(mode==='kami'&&pet.gearsOwned.kami){
+    task=state.enemies.filter(e=>e.hp>0&&Math.hypot(e.x-player.x,e.y-player.y)<=Math.min(petRange(),340))
+      .sort((a,b)=>Math.hypot(a.x-player.x,a.y-player.y)-Math.hypot(b.x-player.x,b.y-player.y))[0]||null;
+    if(task){targetX=task.x;targetY=task.y;petRuntime.taskType='kami';petRuntime.taskId=task.id;}
   }else {petRuntime.taskType='follow';petRuntime.taskId=null;}
 
   const dx=targetX-petRuntime.x,dy=targetY-petRuntime.y,d=Math.hypot(dx,dy);
@@ -342,6 +371,12 @@ function updatePet(dt){
       progress.ammo[ammo.id]=Math.max(0,stock-firing);petRuntime.lastShot=nowSec();petRuntime.laserTargetId=task.id;petRuntime.laserUntil=nowSec()+.16;
       if(damage>0)dealDamageToEnemy(task,damage,ammo.color);refreshAmmoCounters();
     }
+  }
+  if(mode==='kami'&&task&&task.hp>0&&Math.hypot(task.x-petRuntime.x,task.y-petRuntime.y)<70&&now-(petRuntime.lastKami||0)>15){
+    petRuntime.lastKami=now;
+    const boomDmg=Math.round(3500 + pet.level*650 + petDamage()*2.5);
+    spawnParticle(petRuntime.x,petRuntime.y,'KAMIKAZE','#ff7d8f');
+    state.enemies.filter(e=>e.hp>0&&Math.hypot(e.x-petRuntime.x,e.y-petRuntime.y)<110).forEach(e=>dealDamageToEnemy(e,boomDmg,'#ff7d8f'));
   }
   if(mode==='box'&&task&&Math.hypot(task.x-petRuntime.x,task.y-petRuntime.y)<28){
     sellPetCargoBox(task);state.loot=state.loot.filter(x=>x.id!==task.id);petRuntime.taskId=null;
@@ -424,7 +459,7 @@ function currentLaserAmmo(){return LASER_AMMO[progress.selectedLaserAmmo]||LASER
 function currentRocket(){return ROCKETS[progress.selectedRocket]||ROCKETS.r310;}
 function ammoQty(id){return progress.ammo[id]||0;}
 function rocketQty(id){return progress.rockets[id]||0;}
-function getRocketCooldown(){return hasExtra('rocketTurboCpu')&&progress.flags.turboRocket?2.5:5;}
+function getRocketCooldown(){return turboRocketEnabled()?2.5:5;}
 function rocketReady(){return nowSec()-player.lastRocketShot>=getRocketCooldown();}
 function enemyDistance(e){return Math.hypot(e.x-player.x,e.y-player.y);}
 function nearbyPortal(){return resolvedPortals().find(p=>Math.hypot(p.x-player.x,p.y-player.y)<58)||null;}
@@ -450,7 +485,7 @@ function fireLaserTick(){
   const totalLasers=laserIds.length;
   if(totalLasers<=0){player.laserFiring=false;showToast('Equipe pelo menos um laser no Hangar');return;}
   const stock=ammoQty(ammo.id);
-  if(stock<=0){player.laserFiring=false;showToast(`${ammo.name} acabou`);return;}
+  if(stock<=0){if(autoBuyEnabled()&&buyAmmoPack(ammo.id,true)){refreshAmmoCounters();renderShop();showToast(`Auto Buy: ${ammo.name}`);}else{player.laserFiring=false;showToast(`${ammo.name} acabou`);return;}}
   if(nowSec()-player.lastLaserShot<.42)return;
 
   // Cada laser equipado consome 1 unidade de munição por rajada.
@@ -467,14 +502,18 @@ function fireLaserTick(){
   if(damage>0)dealDamageToEnemy(state.target,damage,ammo.color);
 
   if(progress.ammo[ammo.id]<=0){
-    player.laserFiring=false;
-    showToast(`${ammo.name} acabou`);
+    if(autoBuyEnabled()&&buyAmmoPack(ammo.id,true)){refreshAmmoCounters();renderShop();showToast(`Auto Buy: ${ammo.name}`);}
+    else { player.laserFiring=false; showToast(`${ammo.name} acabou`); }
   }
 }
 function fireRocket(manual=false){
   if(!state.target||state.target.hp<=0){if(manual)showToast('Selecione um alvo');return;}
   if(enemyDistance(state.target)>playerRocketRange()){if(manual)showToast('Alvo fora do alcance');return;}
-  const r=currentRocket();if(rocketQty(r.id)<=0){if(manual)showToast(`${r.name} acabou`);return;}
+  const r=currentRocket();
+  if(rocketQty(r.id)<=0){
+    if(autoBuyEnabled()&&buyRocketPack(r.id,true)){refreshAmmoCounters();renderShop();if(manual)showToast(`Auto Buy: ${r.name}`);}
+    else { if(manual)showToast(`${r.name} acabou`); return; }
+  }
   if(!rocketReady()){if(manual)showToast(`Míssil recarregando`);return;}
   player.lastRocketShot=nowSec();progress.rockets[r.id]=Math.max(0,(progress.rockets[r.id]||0)-1);dealDamageToEnemy(state.target,Math.round(r.damage*player.rocketMult),r.color);saveGame();
 }
@@ -491,8 +530,9 @@ function updatePlayer(dt){
   const dx=player.tx-player.x,dy=player.ty-player.y,d=Math.hypot(dx,dy);if(d>2){const step=Math.min(d,player.speed*dt);player.x+=dx/d*step;player.y+=dy/d*step;}
   player.x=Math.max(35,Math.min(state.currentMap.world.w-35,player.x));player.y=Math.max(35,Math.min(state.currentMap.world.h-35,player.y));state.camera.x+=(player.x-state.camera.x)*.08;state.camera.y+=(player.y-state.camera.y)*.08;
   const safe=isSafeZone();const inCombat=!safe&&state.enemies.some(e=>e.hp>0&&enemyDistance(e)<430);if(!inCombat){const regen=safe?.12:.045;player.shield=Math.min(player.maxShield,player.shield+player.maxShield*regen*dt);if(safe||hasExtra('rep2'))player.hp=Math.min(player.maxHp,player.hp+player.maxHp*(safe?.08:.025)*dt);}
+  maybeAutoBuyAmmo();
   if(player.laserFiring)fireLaserTick();
-  if(progress.flags.autoRocket&&hasExtra('autoRocketCpu')&&player.laserFiring&&rocketReady())fireRocket(false);
+  if(autoRocketEnabled()&&player.laserFiring&&rocketReady())fireRocket(false);
   for(let i=state.loot.length-1;i>=0;i--){const l=state.loot[i];if(Math.hypot(l.x-player.x,l.y-player.y)<40){const empty=collectCargoBox(l);if(empty)state.loot.splice(i,1);}}
   for(let i=state.ores.length-1;i>=0;i--){const o=state.ores[i];if(Math.hypot(o.x-player.x,o.y-player.y)<30){const got=addCargoResource(o.type,o.amount);if(got>0){spawnParticle(o.x,o.y,`+${got} ${o.type}`,o.color);state.ores.splice(i,1);state.oreRespawns.push({type:o.type,at:nowSec()+rand(5,12)});saveGame();}else showToast('Porão cheio');}}
   if(player.hp<=0){player.hp=player.maxHp;player.shield=Math.round(player.maxShield*.5);progress.profile.credits=Math.max(0,Math.round(progress.profile.credits*.95));progress.mapId='x1';state.currentMap=MAPS.x1;player.x=SAFE_ZONE.x;player.y=SAFE_ZONE.y;player.tx=player.x;player.ty=player.y;state.target=null;player.laserFiring=false;createOres();spawnEnemies();showToast('Nave destruída. Retorno automático à Zona Segura.');saveGame();}
@@ -639,10 +679,7 @@ function buildAmmoButtons(){
   refreshAmmoCounters();
 }
 
-function updateExtraControls(){
-  const configs=[['autoLaser','autoLaserCpu'],['autoRocket','autoRocketCpu'],['turboRocket','rocketTurboCpu']];
-  for(const [flag,item] of configs){const el=ui[flag],owned=hasExtra(item);el.disabled=!owned;if(!owned)progress.flags[flag]=false;el.checked=!!progress.flags[flag];el.closest('label')?.classList.toggle('locked',!owned);}
-}
+function updateExtraControls(){ return; }
 function updateUI(){
   refreshAmmoCounters();
   const f=getFaction(),ship=SHIPS[progress.activeShipId],safe=isSafeZone();ui.factionLabel.textContent=f?.short||'—';ui.factionLabel.style.color=f?.color||'';ui.mapLabel.textContent=displayMapLabel(progress.mapId);ui.shipLabel.textContent=ship.name;ui.lvl.textContent=progress.profile.level;ui.hp.textContent=fmt(player.hp);ui.maxHp.textContent=fmt(player.maxHp);ui.shield.textContent=fmt(player.shield);ui.maxShield.textContent=fmt(player.maxShield);ui.speed.textContent=fmt(player.speed);if(ui.dmg)ui.dmg.textContent=fmt(player.laserDamage*currentLaserAmmo().mult);ui.credits.textContent=fmt(progress.profile.credits);ui.uridium.textContent=fmt(progress.profile.uridium);ui.xp.textContent=fmt(progress.profile.xp);if(ui.droneCount)ui.droneCount.textContent=progress.drones.length;ui.laserToggle.classList.toggle('active',player.laserFiring);ui.rocketCd.textContent=rocketReady()?'MÍSSIL PRONTO':`MÍSSIL ${(getRocketCooldown()-(nowSec()-player.lastRocketShot)).toFixed(1)}s`;
@@ -660,8 +697,8 @@ function productIcon(type,subtype){return type==='ship'?'🛸':type==='laser'?'�
 function buyShip(shipId){const ship=SHIPS[shipId];if(progress.ownedShips.includes(shipId)){showToast('Nave já obtida');return;}if(!charge(ship.price,ship.currency)){showToast('Saldo insuficiente');return;}progress.ownedShips.push(shipId);saveGame();renderShop();showToast(`${ship.name} adicionada ao Hangar`);}
 function buyItem(itemId){const item=ITEMS[itemId];if(item.type==='drone'){buyDrone(itemId);return;}if(!charge(item.price,item.currency)){showToast('Saldo insuficiente');return;}addInventory(itemId);saveGame();renderShop();if(!ui.hangarModal.classList.contains('hidden'))renderHangar();showToast(`${item.name} comprado`);}
 function buyDrone(type){if(progress.drones.length>=8){showToast('Limite de 8 drones atingido');return;}const item=ITEMS[type];if(!charge(item.price,item.currency)){showToast('Saldo insuficiente');return;}progress.drones.push({id:`d_${Date.now()}_${Math.random().toString(16).slice(2,5)}`,type,slots:Array(item.slots).fill(null)});computeStats(true);saveGame();renderShop();showToast(`${item.name} adquirido (${progress.drones.length}/8)`);}
-function buyAmmo(id){const a=LASER_AMMO[id];if(!charge(a.price,a.currency)){showToast('Saldo insuficiente');return;}progress.ammo[id]=(progress.ammo[id]||0)+a.pack;saveGame();buildAmmoButtons();renderShop();showToast(`+${fmt(a.pack)} ${a.name}`);}
-function buyRockets(id){const r=ROCKETS[id];if(!charge(r.price,r.currency)){showToast('Saldo insuficiente');return;}progress.rockets[id]=(progress.rockets[id]||0)+r.pack;saveGame();buildAmmoButtons();renderShop();showToast(`+${fmt(r.pack)} ${r.name}`);}
+function buyAmmo(id){if(!buyAmmoPack(id,false)){showToast('Saldo insuficiente');return;}buildAmmoButtons();renderShop();}
+function buyRockets(id){if(!buyRocketPack(id,false)){showToast('Saldo insuficiente');return;}buildAmmoButtons();renderShop();}
 
 function renderTabs(container,map,active,onPick){container.innerHTML='';for(const [id,label] of Object.entries(map)){const b=document.createElement('button');b.className=`tab-btn ${active===id?'active':''}`;b.textContent=label;b.onclick=()=>onPick(id);container.appendChild(b);}}
 function makeProductCard({name,desc,price,currency,type,subtype,badge,owned,onBuy,disabled=false}){const card=document.createElement('div');card.className='product-card';card.innerHTML=`<div class="product-icon">${productIcon(type,subtype)}</div><div>${badge?`<span class="badge ${badge==='ELITE'?'elite':''}">${badge}</span>`:''}<h3>${name}</h3></div><div class="product-desc">${desc}</div><div class="price ${currency}">${owned?'OBTIDO':priceText(price,currency)}</div>`;const b=document.createElement('button');b.className='buy-btn';b.textContent=owned?'Obtido':'Comprar';b.disabled=owned||disabled;b.onclick=onBuy;card.appendChild(b);return card;}
@@ -716,7 +753,7 @@ function renderPet(){
   const pet=progress.pet,need=pet.level<PET_MAX_LEVEL?petLevelXp(pet.level):0,pct=pet.level>=PET_MAX_LEVEL?100:Math.min(100,pet.xp/need*100);
   ui.petContent.innerHTML='';
   const hero=document.createElement('div');hero.className='pet-hero';
-  hero.innerHTML=`<div class="pet-avatar"><div class="pet-core"></div></div><div class="pet-hero-copy"><div class="eyebrow">P.E.T. DE COMBATE</div><h2>Nível ${pet.level} / ${PET_MAX_LEVEL}</h2><div class="pet-xpbar"><span style="width:${pct}%"></span></div><div class="muted">${pet.level>=PET_MAX_LEVEL?'Nível máximo':`${fmt(pet.xp)} / ${fmt(need)} XP`} • Alcance ${fmt(petRange())} • Dano ${fmt(petDamage())} • Escudo ${fmt(petMaxShield())}</div></div>`;
+  hero.innerHTML=`<div class="pet-avatar"><div class="pet-core"></div></div><div class="pet-hero-copy"><div class="eyebrow">P.E.T. DE COMBATE</div><h2>Nível ${pet.level} / ${PET_MAX_LEVEL}</h2><div class="pet-xpbar"><span style="width:${pct}%"></span></div><div class="muted">${pet.level>=PET_MAX_LEVEL?'Nível máximo':`${fmt(pet.xp)} / ${fmt(need)} XP`} • Alcance ${fmt(petRange())} • Dano ${fmt(petDamage())} • Escudo ${fmt(petMaxShield())}</div><div class="muted">Módulos disponíveis: Guardião, BOX, Pedras, Regenerador e Kamikaze.</div></div>`;
   ui.petContent.appendChild(hero);
 
   const gears=document.createElement('div');gears.className='section-box';gears.innerHTML='<h3>Modos / Extras do P.E.T.</h3><div class="muted">Apenas um modo fica ativo por vez. Os módulos são permanentes depois de comprados.</div>';
@@ -753,14 +790,11 @@ function openHangar(tab='ships'){state.hangarTab=tab;renderHangar();ui.hangarMod
 function renderAll(){buildAmmoButtons();renderShop();renderHangar();renderCargo();renderMapModal();renderPet();updateUI();}
 
 function worldPoint(ev){const r=canvas.getBoundingClientRect(),sx=ev.clientX-r.left,sy=ev.clientY-r.top;return{x:sx-W/2+state.camera.x,y:sy-H/2+state.camera.y};}
-function pointerAction(ev){if(!authenticated||!progress||!ui.loginModal.classList.contains('hidden')||!ui.shopModal.classList.contains('hidden')||!ui.hangarModal.classList.contains('hidden')||!ui.cargoModal.classList.contains('hidden')||!ui.petModal.classList.contains('hidden')||!ui.factionModal.classList.contains('hidden'))return;const p=worldPoint(ev);const found=state.enemies.find(e=>e.hp>0&&Math.hypot(e.x-p.x,e.y-p.y)<=e.size+12);if(found){state.target=found;showToast(`Alvo: ${found.name}`);if(progress.flags.autoLaser&&hasExtra('autoLaserCpu'))player.laserFiring=true;return;}const clickedPortal=portalAtWorld(p.x,p.y);const readyPortal=nearbyPortal();if(clickedPortal&&readyPortal&&clickedPortal.to===readyPortal.to&&Math.hypot(clickedPortal.x-readyPortal.x,clickedPortal.y-readyPortal.y)<1){jumpThroughPortal(readyPortal);return;}player.tx=Math.max(40,Math.min(state.currentMap.world.w-40,p.x));player.ty=Math.max(40,Math.min(state.currentMap.world.h-40,p.y));}
+function pointerAction(ev){if(!authenticated||!progress||!ui.loginModal.classList.contains('hidden')||!ui.shopModal.classList.contains('hidden')||!ui.hangarModal.classList.contains('hidden')||!ui.cargoModal.classList.contains('hidden')||!ui.petModal.classList.contains('hidden')||!ui.factionModal.classList.contains('hidden'))return;const p=worldPoint(ev);const found=state.enemies.find(e=>e.hp>0&&Math.hypot(e.x-p.x,e.y-p.y)<=e.size+12);if(found){state.target=found;showToast(`Alvo: ${found.name}`);if(autoLaserEnabled())player.laserFiring=true;return;}const clickedPortal=portalAtWorld(p.x,p.y);const readyPortal=nearbyPortal();if(clickedPortal&&readyPortal&&clickedPortal.to===readyPortal.to&&Math.hypot(clickedPortal.x-readyPortal.x,clickedPortal.y-readyPortal.y)<1){jumpThroughPortal(readyPortal);return;}player.tx=Math.max(40,Math.min(state.currentMap.world.w-40,p.x));player.ty=Math.max(40,Math.min(state.currentMap.world.h-40,p.y));}
 canvas.addEventListener('pointerdown',pointerAction);
 ui.portalPrompt.onclick=()=>{const portal=nearbyPortal();if(portal)jumpThroughPortal(portal);};
 minimap.addEventListener('pointerdown',e=>{if(!authenticated||!progress)return;e.preventDefault();e.stopPropagation();const r=minimap.getBoundingClientRect();const mx=(e.clientX-r.left)/r.width*minimap.width,my=(e.clientY-r.top)/r.height*minimap.height;player.tx=Math.max(35,Math.min(state.currentMap.world.w-35,mx/minimap.width*state.currentMap.world.w));player.ty=Math.max(35,Math.min(state.currentMap.world.h-35,my/minimap.height*state.currentMap.world.h));showToast(`Rota definida no minimapa`);});
 ui.laserToggle.onclick=()=>{if(!state.target||state.target.hp<=0){showToast('Selecione um alvo');return;}player.laserFiring=!player.laserFiring;};ui.rocketFire.onclick=()=>fireRocket(true);
-ui.autoLaser.onchange=e=>{if(!hasExtra('autoLaserCpu')){e.target.checked=false;showToast('Equipe Auto Laser CPU no Hangar');return;}progress.flags.autoLaser=e.target.checked;saveGame();};
-ui.autoRocket.onchange=e=>{if(!hasExtra('autoRocketCpu')){e.target.checked=false;showToast('Equipe Auto Rocket CPU no Hangar');return;}progress.flags.autoRocket=e.target.checked;saveGame();};
-ui.turboRocket.onchange=e=>{if(!hasExtra('rocketTurboCpu')){e.target.checked=false;showToast('Equipe Rocket Turbo CPU no Hangar');return;}progress.flags.turboRocket=e.target.checked;saveGame();};
 ui.mapBtn.onclick=()=>openMapModal();ui.closeMap.onclick=()=>ui.mapModal.classList.add('hidden');ui.petBtn.onclick=()=>openPet();ui.closePet.onclick=()=>ui.petModal.classList.add('hidden');ui.shopBtn.onclick=()=>openShop();if(ui.weaponBarToggle)ui.weaponBarToggle.onclick=()=>toggleAmmoUi();ui.closeShop.onclick=()=>ui.shopModal.classList.add('hidden');ui.hangarBtn.onclick=()=>openHangar();ui.closeHangar.onclick=()=>ui.hangarModal.classList.add('hidden');ui.cargoBtn.onclick=()=>openCargo();ui.closeCargo.onclick=()=>ui.cargoModal.classList.add('hidden');ui.sellAllCargo.onclick=()=>sellAllCargo();ui.mapModal.onclick=e=>{if(e.target===ui.mapModal)ui.mapModal.classList.add('hidden');};ui.petModal.onclick=e=>{if(e.target===ui.petModal)ui.petModal.classList.add('hidden');};ui.shopModal.onclick=e=>{if(e.target===ui.shopModal)ui.shopModal.classList.add('hidden');};ui.hangarModal.onclick=e=>{if(e.target===ui.hangarModal)ui.hangarModal.classList.add('hidden');};ui.cargoModal.onclick=e=>{if(e.target===ui.cargoModal)ui.cargoModal.classList.add('hidden');};
 document.addEventListener('keydown',e=>{if(!authenticated||!progress||!ui.loginModal.classList.contains('hidden')||!ui.factionModal.classList.contains('hidden'))return;const tag=document.activeElement?.tagName;if(tag==='INPUT'||tag==='TEXTAREA')return;if(e.key==='Control'){e.preventDefault();if(state.target&&state.target.hp>0)player.laserFiring=!player.laserFiring;else showToast('Selecione um alvo');}if(e.code==='Space'){e.preventDefault();fireRocket(true);}if(['j','J'].includes(e.key)||e.key==='Enter'){const portal=nearbyPortal();if(portal){e.preventDefault();jumpThroughPortal(portal);}}if(e.key.toLowerCase()==='h')openHangar();if(e.key.toLowerCase()==='b')openShop();if(e.key.toLowerCase()==='c')openCargo();if(e.key.toLowerCase()==='m')openMapModal();if(e.key.toLowerCase()==='p')openPet();if(['1','2','3','4'].includes(e.key)){progress.selectedLaserAmmo=Object.keys(LASER_AMMO)[Number(e.key)-1];buildAmmoButtons();saveGame();}});
 

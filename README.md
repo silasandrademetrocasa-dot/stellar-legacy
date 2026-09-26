@@ -1,4 +1,4 @@
-# Stellar Legacy V6.5
+# Stellar Legacy V7
 
 Space MMO web mobile-first com login Supabase, progressão, economia, hangar, loja e mapas.
 
@@ -56,7 +56,7 @@ Variáveis:
 - Estoque baixo fica amarelo; estoque crítico fica vermelho/pulsante.
 
 
-## V6.5 — Sistema P.E.T.
+## V7 — Sistema P.E.T.
 
 - P.E.T. começa no nível 1 e evolui até o nível 15.
 - Nível do P.E.T. aumenta automaticamente com XP obtido em abates e coletas.
