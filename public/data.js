@@ -101,26 +101,51 @@ export const NPC_TYPES = {
 export const MAPS = {
   x1: {
     id: 'x1', tier: 1, world: { w: 2400, h: 1800 }, ores: ['Prometium', 'Endurium'],
+    palette: { nebula: '#123a52', accent: '#4fd7ff', deep: '#030916' },
     structures: ['Home Base', 'Mission Control', 'Trader', 'Hangar', 'Ship Repair', 'Company Hierarchy'],
     portals: [{ x: 2130, y: 900, to: 'x2' }],
     enemyGroups: [{ type: 'streuner', count: 9 }, { type: 'recruitStreuner', count: 5 }, { type: 'aiderStreuner', count: 4 }],
   },
   x2: {
     id: 'x2', tier: 2, world: { w: 2600, h: 1900 }, ores: ['Prometium', 'Endurium', 'Terbium'],
+    palette: { nebula: '#154d3e', accent: '#63e7bf', deep: '#030a12' },
     structures: ['Jump Gate X-1', 'Jump Gate X-3', 'Jump Gate X-4'],
     portals: [{ x: 220, y: 950, to: 'x1' }, { x: 2350, y: 360, to: 'x3' }, { x: 2350, y: 1540, to: 'x4' }],
     enemyGroups: [{ type: 'streuner', count: 6 }, { type: 'recruitStreuner', count: 4 }, { type: 'aiderStreuner', count: 4 }, { type: 'bossStreuner', count: 3 }, { type: 'lordakia', count: 7 }, { type: 'bossLordakia', count: 2 }],
   },
   x3: {
     id: 'x3', tier: 3, world: { w: 2900, h: 2100 }, ores: ['Endurium', 'Terbium'],
+    palette: { nebula: '#4b2b58', accent: '#c978ff', deep: '#080512' },
     structures: ['Jump Gate X-2', 'Jump Gate X-4', 'Clan Battle Station'],
     portals: [{ x: 280, y: 1050, to: 'x2' }, { x: 2620, y: 1050, to: 'x4' }],
     enemyGroups: [{ type: 'lordakia', count: 6 }, { type: 'saimon', count: 6 }, { type: 'bossSaimon', count: 2 }, { type: 'mordon', count: 4 }, { type: 'bossMordon', count: 2 }, { type: 'devolarium', count: 1 }, { type: 'bossDevolarium', count: 1 }],
   },
   x4: {
     id: 'x4', tier: 4, world: { w: 3200, h: 2300 }, ores: ['Endurium', 'Terbium'],
-    structures: ['Jump Gate X-2', 'Jump Gate X-3', 'Clan Battle Station'],
-    portals: [{ x: 300, y: 430, to: 'x2' }, { x: 300, y: 1900, to: 'x3' }],
+    palette: { nebula: '#173159', accent: '#66d9ff', deep: '#040a18' },
+    structures: ['Jump Gate X-2', 'Jump Gate X-3', 'Battle Gate'],
+    portals: [{ x: 300, y: 430, to: 'x2' }, { x: 300, y: 1900, to: 'x3' }, { x: 2920, y: 1150, to: 'battleHome' }],
     enemyGroups: [{ type: 'lordakia', count: 4 }, { type: 'saimon', count: 4 }, { type: 'bossSaimon', count: 3 }, { type: 'mordon', count: 4 }, { type: 'sibelon', count: 2 }, { type: 'bossSibelon', count: 1 }],
+  },
+  b41: {
+    id: 'b41', label: '4-1', tier: 41, battle: true, world: { w: 3400, h: 2400 }, ores: ['Terbium'],
+    palette: { nebula: '#29385d', accent: '#7ec8ff', deep: '#050814' },
+    structures: ['Battle Gate 4-2', 'Battle Gate 4-3', 'Earth Battle Gate'],
+    portals: [{ x: 420, y: 1200, to: 'x4HomeEarth' }, { x: 3000, y: 620, to: 'b42' }, { x: 3000, y: 1780, to: 'b43' }],
+    enemyGroups: [{ type: 'lordakia', count: 5 }, { type: 'saimon', count: 6 }, { type: 'mordon', count: 5 }, { type: 'bossMordon', count: 2 }, { type: 'devolarium', count: 2 }],
+  },
+  b42: {
+    id: 'b42', label: '4-2', tier: 42, battle: true, world: { w: 3500, h: 2450 }, ores: ['Endurium', 'Terbium'],
+    palette: { nebula: '#38442a', accent: '#8ee1a1', deep: '#050b12' },
+    structures: ['Battle Gate 4-1', 'Battle Gate 4-3', 'Mars Battle Gate'],
+    portals: [{ x: 420, y: 1225, to: 'x4HomeMars' }, { x: 3060, y: 700, to: 'b41' }, { x: 3060, y: 1750, to: 'b43' }],
+    enemyGroups: [{ type: 'saimon', count: 5 }, { type: 'mordon', count: 6 }, { type: 'bossMordon', count: 3 }, { type: 'devolarium', count: 3 }, { type: 'bossDevolarium', count: 1 }],
+  },
+  b43: {
+    id: 'b43', label: '4-3', tier: 43, battle: true, world: { w: 3600, h: 2500 }, ores: ['Endurium', 'Terbium'],
+    palette: { nebula: '#5d4421', accent: '#ffc65a', deep: '#0a0805' },
+    structures: ['Battle Gate 4-1', 'Battle Gate 4-2', 'Jupiter Battle Gate'],
+    portals: [{ x: 420, y: 1250, to: 'x4HomeJupiter' }, { x: 3160, y: 720, to: 'b41' }, { x: 3160, y: 1800, to: 'b42' }],
+    enemyGroups: [{ type: 'mordon', count: 5 }, { type: 'devolarium', count: 4 }, { type: 'bossDevolarium', count: 2 }, { type: 'sibelon', count: 3 }, { type: 'bossSibelon', count: 1 }],
   },
 };
