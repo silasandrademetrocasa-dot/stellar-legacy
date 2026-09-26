@@ -37,6 +37,7 @@ const ui = {
   rocketAmmoButtons: $('#rocketAmmoButtons'),
   laserToggle: $('#laserToggle'),
   rocketFire: $('#rocketFire'),
+  autoLaser: $('#autoLaser'),
   autoRocket: $('#autoRocket'),
   turboRocket: $('#turboRocket'),
   hint: $('#hint'),
@@ -185,6 +186,7 @@ const player = {
   laserAmmoId: 'lcb10',
   rocketId: 'r310',
   laserAuto: false,
+  autoLaser: false,
   autoRocket: false,
   turboRocket: false,
   lastLaserShot: 0,
@@ -244,6 +246,7 @@ function saveGame() {
     uridium: player.uridium,
     laserAmmoId: player.laserAmmoId,
     rocketId: player.rocketId,
+    autoLaser: player.autoLaser,
     autoRocket: player.autoRocket,
     turboRocket: player.turboRocket,
     hp: player.hp,
@@ -268,6 +271,7 @@ function loadGame() {
       uridium: data.uridium ?? player.uridium,
       laserAmmoId: data.laserAmmoId || player.laserAmmoId,
       rocketId: data.rocketId || player.rocketId,
+      autoLaser: !!data.autoLaser,
       autoRocket: !!data.autoRocket,
       turboRocket: !!data.turboRocket,
     });
@@ -872,6 +876,7 @@ function updateUI() {
   ui.rocketCd.textContent = rocketReady() ? 'PRONTO' : `${(getRocketCooldown() - (nowSec() - player.lastRocketShot)).toFixed(1)}s`;
 
   ui.laserToggle.classList.toggle('active', player.laserAuto);
+  ui.autoLaser.checked = player.autoLaser;
   ui.autoRocket.checked = player.autoRocket;
   ui.turboRocket.checked = player.turboRocket;
 
@@ -914,6 +919,7 @@ function pointerAction(ev) {
 
   if (selected) {
     state.target = selected;
+    if (player.autoLaser) player.laserAuto = true;
     showToast(`Alvo: ${selected.name}`);
   } else {
     player.tx = Math.max(40, Math.min(state.currentMap.world.w - 40, p.x));
@@ -931,6 +937,11 @@ ui.laserToggle.addEventListener('click', () => {
   saveGame();
 });
 ui.rocketFire.addEventListener('click', () => fireRocket(true));
+ui.autoLaser.addEventListener('change', (e) => {
+  player.autoLaser = e.target.checked;
+  if (player.autoLaser && state.target && state.target.hp > 0) player.laserAuto = true;
+  saveGame();
+});
 ui.autoRocket.addEventListener('change', (e) => {
   player.autoRocket = e.target.checked;
   saveGame();
@@ -953,21 +964,37 @@ document.addEventListener('keydown', (e) => {
     renderShipCards();
     ui.hangarModal.classList.toggle('hidden');
   }
-  if (e.key === ' ') {
+
+  if (e.key === 'Control' && !e.repeat) {
     e.preventDefault();
-    if (state.target && state.target.hp > 0) player.laserAuto = !player.laserAuto;
+    if (!state.target || state.target.hp <= 0) {
+      showToast('Selecione um alvo primeiro');
+    } else {
+      player.laserAuto = !player.laserAuto;
+      showToast(player.laserAuto ? 'Laser ativado (CTRL)' : 'Laser desativado (CTRL)');
+      saveGame();
+    }
   }
-  if (e.key.toLowerCase() === 'r') fireRocket(true);
-  if (e.key === '1') { player.laserAmmoId = LASER_AMMO[0].id; buildAmmoButtons(); }
-  if (e.key === '2') { player.laserAmmoId = LASER_AMMO[1].id; buildAmmoButtons(); }
-  if (e.key === '3') { player.laserAmmoId = LASER_AMMO[2].id; buildAmmoButtons(); }
-  if (e.key === '4') { player.laserAmmoId = LASER_AMMO[3].id; buildAmmoButtons(); }
+
+  if (e.code === 'Space' && !e.repeat) {
+    e.preventDefault();
+    fireRocket(true);
+  }
+
+  // Atalho alternativo para notebook/mobile com teclado externo.
+  if (e.key.toLowerCase() === 'r' && !e.repeat) fireRocket(true);
+
+  if (e.key === '1') { player.laserAmmoId = LASER_AMMO[0].id; buildAmmoButtons(); saveGame(); }
+  if (e.key === '2') { player.laserAmmoId = LASER_AMMO[1].id; buildAmmoButtons(); saveGame(); }
+  if (e.key === '3') { player.laserAmmoId = LASER_AMMO[2].id; buildAmmoButtons(); saveGame(); }
+  if (e.key === '4') { player.laserAmmoId = LASER_AMMO[3].id; buildAmmoButtons(); saveGame(); }
 });
 
 loadGame();
 buildAmmoButtons();
 renderShipCards();
 setMap(state.mapId, false);
+ui.autoLaser.checked = player.autoLaser;
 ui.autoRocket.checked = player.autoRocket;
 ui.turboRocket.checked = player.turboRocket;
 setInterval(saveGame, 7000);

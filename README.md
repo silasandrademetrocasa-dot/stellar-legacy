@@ -32,8 +32,10 @@ Jogo web mobile-first inspirado em space MMOs clássicos, com identidade própri
   - PLT-3030
 - Regra aplicada: **míssil com cooldown padrão de 5 segundos**.
 - Extras/toggles de combate:
+  - **Auto laser**: selecionar um alvo já ativa o laser automaticamente.
   - **Auto míssil**
   - **Turbo míssil** (reduz cooldown do míssil)
+- Atalhos clássicos: **CTRL = ligar/desligar laser** e **ESPAÇO = lançar míssil** (R continua como atalho alternativo).
 - Minimap, loot, coleta de minério, portais, alvo selecionado, barras de HP/ESC do alvo e save local.
 
 ## Rodar localmente
