@@ -1,4 +1,4 @@
-# Stellar Legacy V6.3.2
+# Stellar Legacy V6.4
 
 Space MMO web mobile-first com login Supabase, progressão, economia, hangar, loja e mapas.
 
@@ -54,3 +54,19 @@ Variáveis:
 - Mísseis atualizam em tempo real a cada disparo.
 - O seletor mostra estoque, consumo por rajada e estimativa de rajadas restantes.
 - Estoque baixo fica amarelo; estoque crítico fica vermelho/pulsante.
+
+
+## V6.4 — Sistema P.E.T.
+
+- P.E.T. começa no nível 1 e evolui até o nível 15.
+- Nível do P.E.T. aumenta automaticamente com XP obtido em abates e coletas.
+- Cada nível disponibiliza 1 novo slot potencial de arma e 1 de escudo.
+- Nível 1 já começa com 1 slot de arma e 1 slot de escudo liberados gratuitamente.
+- Slots dos níveis 2–15 precisam ser liberados com Uridium.
+- Lasers e escudos do P.E.T. usam o mesmo inventário de equipamentos do jogador.
+- Modo Guardião: ataca inimigos próximos que estejam causando dano à nave do jogador.
+- Coletor de BOX: busca cargo boxes, vende automaticamente recursos vendáveis e preserva Xenomit.
+- Coletor de Pedras: coleta minérios soltos automaticamente dentro do alcance.
+- O alcance do P.E.T. cresce a cada nível.
+- P.E.T. usa a munição laser atualmente selecionada quando está em Modo Guardião.
+- Atalho P abre o painel do P.E.T.

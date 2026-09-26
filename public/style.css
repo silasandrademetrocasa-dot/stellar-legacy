@@ -37,3 +37,21 @@
 .ammo-btn.critical{box-shadow:0 0 0 1px rgba(235,90,112,.22),0 0 14px rgba(235,90,112,.16)}
 .ammo-btn.critical.active{animation:ammoCriticalPulse 1.15s ease-in-out infinite}
 @keyframes ammoCriticalPulse{0%,100%{box-shadow:0 0 0 1px rgba(235,90,112,.24),0 0 10px rgba(235,90,112,.14)}50%{box-shadow:0 0 0 1px rgba(235,90,112,.5),0 0 20px rgba(235,90,112,.28)}}
+
+/* ===================== STELLAR LEGACY V6.4 - P.E.T. ===================== */
+.pet-top-btn{border-color:rgba(126,220,255,.55);color:#c9f7ff;background:linear-gradient(180deg,#0d3244,#081a28)}
+.pet-modal-card{width:min(1180px,98vw)}
+.pet-hero{display:grid;grid-template-columns:130px 1fr;gap:18px;align-items:center;padding:16px;margin-bottom:14px;border:1px solid rgba(95,208,255,.22);border-radius:16px;background:linear-gradient(135deg,rgba(10,31,47,.95),rgba(11,19,35,.95))}
+.pet-avatar{height:110px;border-radius:16px;display:flex;align-items:center;justify-content:center;background:radial-gradient(circle,rgba(96,224,255,.22),rgba(14,34,52,.1) 60%,transparent 70%)}
+.pet-core{width:48px;height:48px;clip-path:polygon(50% 0,100% 28%,82% 100%,18% 100%,0 28%);background:linear-gradient(145deg,#dffcff,#56dfff 35%,#283853 80%);box-shadow:0 0 26px rgba(89,222,255,.5)}
+.pet-hero-copy h2{margin:3px 0 10px}
+.pet-xpbar{height:12px;border-radius:999px;background:#081725;border:1px solid rgba(95,208,255,.2);overflow:hidden;margin-bottom:8px}
+.pet-xpbar span{display:block;height:100%;background:linear-gradient(90deg,#42d8ff,#8e72ff);box-shadow:0 0 12px rgba(66,216,255,.35)}
+.pet-gear-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(215px,1fr));gap:10px;margin-top:10px}
+.pet-gear{position:relative;text-align:left;min-height:112px;padding:12px;border-radius:14px;border:1px solid rgba(90,190,255,.2);background:#081827;color:#e8f9ff}
+.pet-gear b{display:block;color:#9fe9ff;margin-bottom:7px}.pet-gear small{display:block;opacity:.72;line-height:1.4;padding-right:6px}.pet-gear em{display:inline-block;margin-top:9px;font-style:normal;font-size:10px;font-weight:900;color:#ffd77b}
+.pet-gear.active{border-color:rgba(92,230,255,.82);box-shadow:0 0 0 1px rgba(92,230,255,.17),0 0 18px rgba(92,230,255,.12);background:linear-gradient(180deg,#0b3042,#091827)}
+.pet-slot-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;margin-top:10px}
+.pet-slot{min-height:112px;padding:11px;border:1px solid rgba(90,190,255,.22);border-radius:12px;background:#091624;display:flex;flex-direction:column;gap:6px}
+.pet-slot.filled{border-color:rgba(100,220,255,.42)}.pet-slot.locked{opacity:.78;border-style:dashed;background:#0b101a}.pet-slot .ghost-btn{margin-top:auto}
+@media(max-width:680px){.pet-hero{grid-template-columns:1fr;text-align:center}.pet-avatar{height:80px}.pet-gear-grid,.pet-slot-grid{grid-template-columns:1fr}}

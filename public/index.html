@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
   <meta name="theme-color" content="#030816">
-  <title>Stellar Legacy V6.3.3</title>
+  <title>Stellar Legacy V6.4</title>
   <link rel="stylesheet" href="/style.css">
 </head>
 <body>
@@ -25,6 +25,7 @@
       <span class="pilot-chip">Piloto <b id="userLabel">—</b></span>
       <span id="syncLabel" class="sync-chip">LOCAL</span>
       <button id="mapBtn" class="small-btn">MAPAS</button>
+      <button id="petBtn" class="small-btn pet-top-btn">P.E.T. LV1</button>
       <button id="shopBtn" class="small-btn gold">LOJA</button>
       <button id="cargoBtn" class="small-btn">PORÃO</button>
       <button id="hangarBtn" class="small-btn">HANGAR</button>
@@ -144,6 +145,19 @@
       </div>
       <div class="muted" style="margin-bottom:10px">Seu mapa atual recebe destaque. Os mapas da sua facção aparecem iluminados e as rotas seguem a lógica clássica.</div>
       <div id="mapNetwork" class="map-network"></div>
+    </div>
+  </div>
+
+  <div id="petModal" class="modal hidden">
+    <div class="modal-card wide-card pet-modal-card">
+      <div class="modal-header">
+        <div>
+          <div class="eyebrow">P.E.T. / ESCOLTA AUTÔNOMA</div>
+          <h2>Sistema P.E.T.</h2>
+        </div>
+        <button id="closePet" class="small-btn">Fechar</button>
+      </div>
+      <div id="petContent"></div>
     </div>
   </div>
 

@@ -241,6 +241,6 @@ app.use((err, req, res, next) => {
 
 const port = process.env.PORT || 3000;
 app.listen(port, () => {
-  console.log(`Stellar Legacy V6.3.3 on :${port}`);
+  console.log(`Stellar Legacy V6.4n :${port}`);
   console.log('Supabase config:', configStatus());
 });
