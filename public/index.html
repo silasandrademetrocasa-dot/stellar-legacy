@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
   <meta name="theme-color" content="#030816">
-  <title>Stellar Legacy V7</title>
+  <title>Stellar Legacy V7.1.1</title>
   <link rel="stylesheet" href="/style.css">
 </head>
 <body>
@@ -33,12 +33,20 @@
     </div>
   </header>
 
-  <section id="leftStats" class="hud-panel stack compact-stats">
-    <div>HP <span id="hp">0</span>/<span id="maxHp">0</span></div>
-    <div>ESC <span id="shield">0</span>/<span id="maxShield">0</span></div>
-    <div>VEL <span id="speed">0</span></div>
-    <div>PORÃO <span id="cargoUsed">0</span>/<span id="cargoMax">0</span></div>
-    <div id="safeZoneLabel" class="safe-zone-status">FORA DA BASE</div>
+  <section id="leftStats" class="hud-panel compact-stats ship-stats-float">
+    <div class="stats-toolbar">
+      <div class="stats-toolbar-left">
+        <button id="statsToggle" class="stats-expand-btn" title="Expandir / recolher painel da nave" aria-label="Expandir / recolher painel da nave">▾</button>
+        <div class="stats-toolbar-label">NAVE</div>
+      </div>
+    </div>
+    <div id="leftStatsContent" class="stack left-stats-content">
+      <div>HP <span id="hp">0</span>/<span id="maxHp">0</span></div>
+      <div>ESC <span id="shield">0</span>/<span id="maxShield">0</span></div>
+      <div>VEL <span id="speed">0</span></div>
+      <div>PORÃO <span id="cargoUsed">0</span>/<span id="cargoMax">0</span></div>
+      <div id="safeZoneLabel" class="safe-zone-status">FORA DA BASE</div>
+    </div>
   </section>
 
   <section id="targetPanel" class="hud-panel stack">

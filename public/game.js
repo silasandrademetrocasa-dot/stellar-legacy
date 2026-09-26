@@ -128,7 +128,7 @@ const petRuntime = {
 };
 const state = {
   currentMap: MAPS.x1, camera: { x: 380, y: 900 }, target: null, enemies: [], loot: [], ores: [], particles: [], enemyRespawns: [], oreRespawns: [], lastPortalAt: 0, radarRange: 920, jumping: false,
-  shopTab: 'ships', hangarTab: 'ships', toastTimer: null, ammoUiExpanded: true,
+  shopTab: 'ships', hangarTab: 'ships', toastTimer: null, ammoUiExpanded: true, statsUiExpanded: true,
   stars: Array.from({length:240},()=>({x:Math.random()*5200-2600,y:Math.random()*5200-2600,r:Math.random()*1.5+.3,a:Math.random()*.6+.2})),
 };
 
@@ -143,6 +143,10 @@ function rocketTooltipText(r,qty){return `${r.name} • dano ${fmt(r.damage)}\nE
 function applyAmmoUiState(){ if(!ui.weaponBar) return; ui.weaponBar.classList.toggle('collapsed', !state.ammoUiExpanded); if(ui.weaponBarToggle) ui.weaponBarToggle.textContent = state.ammoUiExpanded ? '▾' : '▸'; }
 function loadAmmoUiState(){ try{ const raw=localStorage.getItem('stellar_ammo_ui_expanded'); if(raw!==null) state.ammoUiExpanded = raw==='1'; }catch{} applyAmmoUiState(); }
 function toggleAmmoUi(){ state.ammoUiExpanded=!state.ammoUiExpanded; try{ localStorage.setItem('stellar_ammo_ui_expanded', state.ammoUiExpanded?'1':'0'); }catch{} applyAmmoUiState(); }
+
+function applyStatsUiState(){ if(!ui.leftStats) return; ui.leftStats.classList.toggle('collapsed', !state.statsUiExpanded); if(ui.statsToggle) ui.statsToggle.textContent = state.statsUiExpanded ? '▾' : '▸'; }
+function loadStatsUiState(){ try{ const raw=localStorage.getItem('stellar_stats_ui_expanded'); if(raw!==null) state.statsUiExpanded = raw==='1'; }catch{} applyStatsUiState(); }
+function toggleStatsUi(){ state.statsUiExpanded=!state.statsUiExpanded; try{ localStorage.setItem('stellar_stats_ui_expanded', state.statsUiExpanded?'1':'0'); }catch{} applyStatsUiState(); }
 function getFaction(){return progress?.profile?.faction ? FACTIONS[progress.profile.faction] : null;}
 function displayMapLabel(mapId){const map=MAPS[mapId];if(!map)return '—';if(map.battle)return map.label;const f=getFaction();return f?`${f.prefix}-${map.tier}`:`X-${map.tier}`;}
 function currentGraphMapLabel(){return progress?displayMapLabel(progress.mapId):null;}
@@ -795,7 +799,7 @@ canvas.addEventListener('pointerdown',pointerAction);
 ui.portalPrompt.onclick=()=>{const portal=nearbyPortal();if(portal)jumpThroughPortal(portal);};
 minimap.addEventListener('pointerdown',e=>{if(!authenticated||!progress)return;e.preventDefault();e.stopPropagation();const r=minimap.getBoundingClientRect();const mx=(e.clientX-r.left)/r.width*minimap.width,my=(e.clientY-r.top)/r.height*minimap.height;player.tx=Math.max(35,Math.min(state.currentMap.world.w-35,mx/minimap.width*state.currentMap.world.w));player.ty=Math.max(35,Math.min(state.currentMap.world.h-35,my/minimap.height*state.currentMap.world.h));showToast(`Rota definida no minimapa`);});
 ui.laserToggle.onclick=()=>{if(!state.target||state.target.hp<=0){showToast('Selecione um alvo');return;}player.laserFiring=!player.laserFiring;};ui.rocketFire.onclick=()=>fireRocket(true);
-ui.mapBtn.onclick=()=>openMapModal();ui.closeMap.onclick=()=>ui.mapModal.classList.add('hidden');ui.petBtn.onclick=()=>openPet();ui.closePet.onclick=()=>ui.petModal.classList.add('hidden');ui.shopBtn.onclick=()=>openShop();if(ui.weaponBarToggle)ui.weaponBarToggle.onclick=()=>toggleAmmoUi();ui.closeShop.onclick=()=>ui.shopModal.classList.add('hidden');ui.hangarBtn.onclick=()=>openHangar();ui.closeHangar.onclick=()=>ui.hangarModal.classList.add('hidden');ui.cargoBtn.onclick=()=>openCargo();ui.closeCargo.onclick=()=>ui.cargoModal.classList.add('hidden');ui.sellAllCargo.onclick=()=>sellAllCargo();ui.mapModal.onclick=e=>{if(e.target===ui.mapModal)ui.mapModal.classList.add('hidden');};ui.petModal.onclick=e=>{if(e.target===ui.petModal)ui.petModal.classList.add('hidden');};ui.shopModal.onclick=e=>{if(e.target===ui.shopModal)ui.shopModal.classList.add('hidden');};ui.hangarModal.onclick=e=>{if(e.target===ui.hangarModal)ui.hangarModal.classList.add('hidden');};ui.cargoModal.onclick=e=>{if(e.target===ui.cargoModal)ui.cargoModal.classList.add('hidden');};
+ui.mapBtn.onclick=()=>openMapModal();ui.closeMap.onclick=()=>ui.mapModal.classList.add('hidden');ui.petBtn.onclick=()=>openPet();ui.closePet.onclick=()=>ui.petModal.classList.add('hidden');ui.shopBtn.onclick=()=>openShop();if(ui.weaponBarToggle)ui.weaponBarToggle.onclick=()=>toggleAmmoUi();if(ui.statsToggle)ui.statsToggle.onclick=()=>toggleStatsUi();ui.closeShop.onclick=()=>ui.shopModal.classList.add('hidden');ui.hangarBtn.onclick=()=>openHangar();ui.closeHangar.onclick=()=>ui.hangarModal.classList.add('hidden');ui.cargoBtn.onclick=()=>openCargo();ui.closeCargo.onclick=()=>ui.cargoModal.classList.add('hidden');ui.sellAllCargo.onclick=()=>sellAllCargo();ui.mapModal.onclick=e=>{if(e.target===ui.mapModal)ui.mapModal.classList.add('hidden');};ui.petModal.onclick=e=>{if(e.target===ui.petModal)ui.petModal.classList.add('hidden');};ui.shopModal.onclick=e=>{if(e.target===ui.shopModal)ui.shopModal.classList.add('hidden');};ui.hangarModal.onclick=e=>{if(e.target===ui.hangarModal)ui.hangarModal.classList.add('hidden');};ui.cargoModal.onclick=e=>{if(e.target===ui.cargoModal)ui.cargoModal.classList.add('hidden');};
 document.addEventListener('keydown',e=>{if(!authenticated||!progress||!ui.loginModal.classList.contains('hidden')||!ui.factionModal.classList.contains('hidden'))return;const tag=document.activeElement?.tagName;if(tag==='INPUT'||tag==='TEXTAREA')return;if(e.key==='Control'){e.preventDefault();if(state.target&&state.target.hp>0)player.laserFiring=!player.laserFiring;else showToast('Selecione um alvo');}if(e.code==='Space'){e.preventDefault();fireRocket(true);}if(['j','J'].includes(e.key)||e.key==='Enter'){const portal=nearbyPortal();if(portal){e.preventDefault();jumpThroughPortal(portal);}}if(e.key.toLowerCase()==='h')openHangar();if(e.key.toLowerCase()==='b')openShop();if(e.key.toLowerCase()==='c')openCargo();if(e.key.toLowerCase()==='m')openMapModal();if(e.key.toLowerCase()==='p')openPet();if(['1','2','3','4'].includes(e.key)){progress.selectedLaserAmmo=Object.keys(LASER_AMMO)[Number(e.key)-1];buildAmmoButtons();saveGame();}});
 
 function showAuthMode(mode){
@@ -828,6 +832,7 @@ async function boot(){
 }
 
 loadAmmoUiState();
+loadStatsUiState();
 boot();
 setInterval(()=>{if(progress){saveGame();flushCloudSave();}},7000);
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden')flushCloudSave(true);});
