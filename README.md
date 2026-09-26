@@ -1,73 +1,118 @@
-# Stellar Legacy V2
+# Stellar Legacy V3 — Facções, Loja, Hangar e Progressão
 
-Jogo web mobile-first inspirado em space MMOs clássicos, com identidade própria e progressão local.
+A V3 transforma o protótipo em um loop de progressão completo: escolha de facção, nave inicial, loja, inventário, equipamentos, drones, munição consumível e troca real de naves.
 
-## Novidades da V2
+## Primeiro acesso
 
-- 4 mapas iniciais inspirados no fluxo **X-1 até X-4**.
-- Hangar com seleção de naves clássicas de progressão inicial:
-  - Phoenix
-  - Liberator
-  - Piranha
-  - Leonov
-  - Nostromo
-  - Bigboy
-  - Goliath
-- NPCs baseados nas tabelas do DarkOrbitWiki:
-  - Streuner / Recruit Streuner / Aider Streuner / Boss Streuner
-  - Lordakia / Boss Lordakia
-  - Saimon / Boss Saimon
-  - Mordon / Boss Mordon
-  - Devolarium
-  - Sibelon / Boss Sibelon
-- Seletor de munição laser:
-  - LCB-10
-  - MCB-25
-  - MCB-50
-  - UCB-100
-- Seletor de mísseis:
-  - R-310
-  - PLT-2026
-  - PLT-2021
-  - PLT-3030
-- Regra aplicada: **míssil com cooldown padrão de 5 segundos**.
-- Extras/toggles de combate:
-  - **Auto laser**: selecionar um alvo já ativa o laser automaticamente.
-  - **Auto míssil**
-  - **Turbo míssil** (reduz cooldown do míssil)
-- Atalhos clássicos: **CTRL = ligar/desligar laser** e **ESPAÇO = lançar míssil** (R continua como atalho alternativo).
-- Minimap, loot, coleta de minério, portais, alvo selecionado, barras de HP/ESC do alvo e save local.
+O jogador escolhe uma das três facções:
 
-## Rodar localmente
+- **Terra Alliance** → mapas 1-1 até 1-4
+- **Mars Dominion** → mapas 2-1 até 2-4
+- **Jupiter Federation** → mapas 3-1 até 3-4
 
-```bash
-npm install
-npm start
-```
+O save começa com:
 
-Abra:
+- Phoenix
+- 0 drones
+- 1x LF-1 equipado
+- 1x SG3N-A01 equipado
+- 10.000 LCB-10
+- 100 R-310
+- 20.000 créditos
 
-```text
-http://localhost:3000
-```
+## Sistema de naves
+
+Cada nave tem sua própria capacidade de:
+
+- lasers
+- geradores (escudo ou velocidade)
+- extras
+
+Ao trocar de nave, **todos os equipamentos instalados na nave anterior voltam automaticamente para o inventário**. A nave nova entra vazia e você decide o que instalar nela.
+
+As naves compradas ficam permanentemente em `ownedShips` e podem ser trocadas no Hangar.
+
+## Loja
+
+Categorias:
+
+- Naves
+- Lasers
+- Geradores
+- Drones
+- Extras
+- Munição laser
+- Mísseis
+
+A loja usa duas moedas:
+
+- Créditos
+- Uridium
+
+## Equipamentos
+
+### Lasers
+LF-1, MP-1, SL-01, LF-2, LF-3 e LF-4.
+
+O dano da nave é calculado pela soma dos lasers equipados na nave e nos drones.
+
+### Geradores
+Geradores de velocidade e escudo. O escudo total, absorção e velocidade são recalculados conforme a configuração.
+
+### Extras
+
+- Auto Laser CPU
+- Auto Rocket CPU
+- Rocket Turbo CPU
+- Repair Bot REP-2
+
+Os toggles de Auto Laser / Auto Míssil / Turbo Míssil só funcionam quando o respectivo CPU está realmente equipado em um slot de extra.
+
+## Drones
+
+Máximo de **8 drones**.
+
+- **Flax**: comum, 1 slot
+- **Iris**: elite, 2 slots
+
+Os drones aceitam lasers ou geradores e permanecem equipados mesmo quando o jogador troca de nave.
+
+## Combate
+
+- CTRL: liga/desliga laser
+- ESPAÇO: lança míssil
+- B: Loja
+- H: Hangar
+- 1–4: troca munição laser
+
+Munições e mísseis agora são consumíveis e precisam ser comprados.
+
+Cooldown padrão do míssil: **5 segundos**.
+Com Rocket Turbo CPU equipado e ativado: **2,5 segundos**.
+
+## Save
+
+A V3 usa `localStorage` para permitir jogar imediatamente mesmo sem login.
+O arquivo `supabase/database.sql` já contém a estrutura preparada para sincronização futura de:
+
+- perfil/facção
+- estado do jogador
+- naves obtidas
+- inventário
+- munição
+- loadout da nave
+- drones
 
 ## Render
 
-- Build Command: `npm install`
-- Start Command: `npm start`
+Build Command:
 
-## Supabase
+```bash
+npm install
+```
 
-A V2 continua compatível com a estrutura do projeto para Render/Supabase, mas o protótipo atual mantém o loop principal jogável no frontend e salva progresso em `localStorage`.
+Start Command:
 
-## Arquivos principais
-
-- `public/index.html` → HUD e interface
-- `public/style.css` → visual / HUD
-- `public/game.js` → lógica do jogo V2
-- `server/index.js` → servidor Express
-- `supabase/database.sql` → estrutura inicial do banco
-
-## Observações
-
-Os dados de balanceamento usados como referência foram inspirados nas páginas públicas do DarkOrbitWiki enviadas pelo usuário. A implementação visual e a experiência desta versão são próprias.
+```bash
+npm start
+```
