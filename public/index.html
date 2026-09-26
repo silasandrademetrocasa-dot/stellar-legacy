@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
   <meta name="theme-color" content="#030816">
-  <title>Stellar Legacy V6.4</title>
+  <title>Stellar Legacy V6.5</title>
   <link rel="stylesheet" href="/style.css">
 </head>
 <body>
@@ -51,24 +51,34 @@
 
   <canvas id="minimap" width="180" height="180"></canvas>
 
-  <section id="weaponBar" class="hud-panel">
-    <div class="section weapon-section">
-      <div class="section-title">MUNIÇÃO LASER</div>
-      <div id="laserAmmoButtons" class="button-row"></div>
+  <section id="weaponBar" class="hud-panel compact-ammo-ui">
+    <div class="weapon-toolbar">
+      <div class="weapon-toolbar-left">
+        <button id="weaponBarToggle" class="weapon-expand-btn" title="Expandir / recolher menu de munições" aria-label="Expandir / recolher menu de munições">▾</button>
+        <div class="weapon-toolbar-label">MUNIÇÕES</div>
+      </div>
+      <div class="section actions actions-inline">
+        <button id="laserToggle" class="action-btn">⚡ LASER <span class="keyhint">CTRL</span></button>
+        <button id="rocketFire" class="action-btn">🚀 MÍSSIL <span class="keyhint">ESPAÇO</span></button>
+      </div>
     </div>
-    <div class="section weapon-section">
-      <div class="section-title">MÍSSEIS</div>
-      <div id="rocketAmmoButtons" class="button-row"></div>
-    </div>
-    <div class="section actions">
-      <button id="laserToggle" class="action-btn">⚡ LASER <span class="keyhint">CTRL</span></button>
-      <button id="rocketFire" class="action-btn">🚀 MÍSSIL <span class="keyhint">ESPAÇO</span></button>
-    </div>
-    <div class="section extras compact">
-      <label title="Requer Auto Laser CPU"><input type="checkbox" id="autoLaser"> Auto laser</label>
-      <label title="Requer Auto Rocket CPU"><input type="checkbox" id="autoRocket"> Auto míssil</label>
-      <label title="Requer Rocket Turbo CPU"><input type="checkbox" id="turboRocket"> Turbo míssil</label>
-      <div id="rocketCd" class="cooldown-pill">MÍSSIL PRONTO</div>
+    <div id="weaponBarContent" class="weapon-bar-content">
+      <div class="ammo-clusters">
+        <div class="section weapon-section ammo-bubble-section">
+          <div class="section-title">LASER</div>
+          <div id="laserAmmoButtons" class="button-row ammo-bubbles"></div>
+        </div>
+        <div class="section weapon-section ammo-bubble-section">
+          <div class="section-title">MÍSSEIS</div>
+          <div id="rocketAmmoButtons" class="button-row ammo-bubbles"></div>
+        </div>
+      </div>
+      <div class="section extras compact extras-inline">
+        <label title="Requer Auto Laser CPU"><input type="checkbox" id="autoLaser"> Auto laser</label>
+        <label title="Requer Auto Rocket CPU"><input type="checkbox" id="autoRocket"> Auto míssil</label>
+        <label title="Requer Rocket Turbo CPU"><input type="checkbox" id="turboRocket"> Turbo míssil</label>
+        <div id="rocketCd" class="cooldown-pill">MÍSSIL PRONTO</div>
+      </div>
     </div>
   </section>
 

@@ -55,3 +55,44 @@
 .pet-slot{min-height:112px;padding:11px;border:1px solid rgba(90,190,255,.22);border-radius:12px;background:#091624;display:flex;flex-direction:column;gap:6px}
 .pet-slot.filled{border-color:rgba(100,220,255,.42)}.pet-slot.locked{opacity:.78;border-style:dashed;background:#0b101a}.pet-slot .ghost-btn{margin-top:auto}
 @media(max-width:680px){.pet-hero{grid-template-columns:1fr;text-align:center}.pet-avatar{height:80px}.pet-gear-grid,.pet-slot-grid{grid-template-columns:1fr}}
+
+/* ===================== STELLAR LEGACY V6.5 - AMMO UI ===================== */
+#weaponBar.compact-ammo-ui{padding:8px 10px 10px;gap:8px;display:flex;flex-direction:column}
+.weapon-toolbar{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.weapon-toolbar-left{display:flex;align-items:center;gap:10px}
+.weapon-toolbar-label{font-size:11px;letter-spacing:1.1px;color:#8ddfff;font-weight:800}
+.weapon-expand-btn{width:36px;height:36px;border-radius:999px;border:1px solid rgba(62,205,255,.45);background:linear-gradient(180deg,#0f2940,#07131f);color:#dffbff;font-size:18px;font-weight:900;display:grid;place-items:center;box-shadow:inset 0 0 15px rgba(0,110,170,.15)}
+.weapon-expand-btn:hover{border-color:#5de1ff;box-shadow:0 0 14px rgba(0,195,255,.18)}
+#weaponBar.collapsed #weaponBarContent{display:none}
+#weaponBar.collapsed .weapon-expand-btn{transform:rotate(-90deg)}
+.weapon-bar-content{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;flex-wrap:wrap}
+.ammo-clusters{display:flex;gap:16px;align-items:flex-start;flex-wrap:wrap;flex:1}
+.ammo-bubble-section{min-width:auto;flex:0 1 auto}
+.ammo-bubbles{gap:10px}
+.ammo-btn.circular{position:relative;width:72px;height:72px;min-width:72px;padding:6px 4px;border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;background:radial-gradient(circle at 35% 28%,rgba(34,81,120,.9),rgba(8,19,31,.96) 65%);box-shadow:inset 0 0 18px rgba(78,185,255,.08),0 0 0 1px rgba(10,22,30,.4)}
+.ammo-btn.circular .ammo-code{font-size:16px;line-height:1;font-weight:900;letter-spacing:.4px;color:#eefcff;text-transform:uppercase}
+.ammo-btn.circular .ammo-qty{margin-top:6px;font-size:11px;line-height:1;font-weight:700;color:#9fdfff;max-width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ammo-btn.circular:hover,.ammo-btn.circular.active{border-color:#75e8ff;box-shadow:0 0 18px rgba(0,195,255,.2), inset 0 0 18px rgba(84,206,255,.12)}
+.ammo-btn.circular.active{outline:none;transform:translateY(-1px)}
+.ammo-btn.circular.active::before{content:'';position:absolute;inset:-4px;border-radius:50%;border:2px solid rgba(109,236,255,.55);box-shadow:0 0 15px rgba(109,236,255,.12)}
+.ammo-btn.circular.empty{opacity:.28;filter:saturate(.6)}
+.ammo-btn.circular.low .ammo-qty{color:#ffd37e}
+.ammo-btn.circular.critical .ammo-qty{color:#ff95a1}
+.ammo-btn.circular[data-tip]:hover::after{content:attr(data-tip);position:absolute;bottom:calc(100% + 10px);left:50%;transform:translateX(-50%);min-width:130px;max-width:180px;padding:7px 9px;border-radius:10px;border:1px solid rgba(86,212,255,.24);background:rgba(6,15,24,.96);color:#dff8ff;font-size:11px;font-weight:600;line-height:1.35;white-space:normal;pointer-events:none;box-shadow:0 6px 25px rgba(0,0,0,.35);z-index:6}
+.ammo-btn.circular[data-tip]:hover::before{content:'';position:absolute;bottom:calc(100% + 3px);left:50%;transform:translateX(-50%) rotate(45deg);width:10px;height:10px;background:rgba(6,15,24,.96);border-right:1px solid rgba(86,212,255,.24);border-bottom:1px solid rgba(86,212,255,.24);z-index:6}
+.extras-inline{flex-direction:column;align-items:flex-start;justify-content:flex-start;min-width:180px;padding-top:2px}
+.actions-inline{display:flex;flex-direction:row;flex-wrap:wrap;align-items:center;gap:8px;min-width:auto}
+.actions-inline .action-btn{min-width:168px}
+.cooldown-pill{min-width:132px}
+@media(max-width:900px){
+  #weaponBar.compact-ammo-ui{width:calc(100% - 12px)}
+  .weapon-bar-content{flex-direction:column}
+  .ammo-clusters{width:100%}
+  .extras-inline{width:100%;flex-direction:row;flex-wrap:wrap;align-items:center}
+}
+@media(max-width:640px){
+  .ammo-btn.circular{width:62px;height:62px;min-width:62px}
+  .ammo-btn.circular .ammo-code{font-size:14px}
+  .ammo-btn.circular .ammo-qty{font-size:10px}
+  .actions-inline .action-btn{min-width:145px}
+}
