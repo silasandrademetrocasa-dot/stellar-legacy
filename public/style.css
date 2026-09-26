@@ -112,3 +112,16 @@
 #leftStats.collapsed{min-width:98px;padding-bottom:8px;}
 #leftStats.collapsed .left-stats-content{display:none;}
 @media(max-width:680px){#leftStats.ship-stats-float{top:52px;min-width:152px;padding:7px 9px}.left-stats-content{font-size:10px}#leftStats.collapsed{min-width:90px}}
+
+/* V7.2 HUD organization */
+#topbar.meta-collapsed .top-meta{display:none!important;}
+#topbar.meta-collapsed{padding:8px 10px;}
+#topbar.meta-collapsed .top-actions{margin-left:auto;}
+#topbar .small-btn.active-hud{box-shadow:0 0 14px rgba(0,195,255,.18);border-color:#52deff;}
+#minimapPanel{position:absolute;right:8px;bottom:168px;z-index:4;padding:8px;display:flex;flex-direction:column;gap:8px;}
+#minimap{position:static;display:block;border:1px solid rgba(35,165,255,.55);border-radius:10px;background:rgba(5,15,28,.85);box-shadow:0 0 18px rgba(0,180,255,.17);}
+.minimap-toolbar{display:flex;align-items:center;justify-content:space-between;}
+.minimap-toolbar-left{display:flex;align-items:center;gap:8px;}
+#minimapPanel.collapsed{padding:8px 10px;width:auto;}
+#minimapPanel.collapsed #minimap{display:none;}
+@media(max-width:680px){#minimapPanel{right:8px;bottom:230px;padding:7px}#minimap{width:136px;height:136px}}

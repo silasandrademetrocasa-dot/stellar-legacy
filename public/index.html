@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
   <meta name="theme-color" content="#030816">
-  <title>Stellar Legacy V7.1.1</title>
+  <title>Stellar Legacy V7.2</title>
   <link rel="stylesheet" href="/style.css">
 </head>
 <body>
@@ -29,6 +29,7 @@
       <button id="shopBtn" class="small-btn gold">LOJA</button>
       <button id="cargoBtn" class="small-btn">PORÃO</button>
       <button id="hangarBtn" class="small-btn">HANGAR</button>
+      <button id="hudToggle" class="small-btn">HUD</button>
       <button id="logoutBtn" class="small-btn danger-lite">SAIR</button>
     </div>
   </header>
@@ -57,7 +58,15 @@
     <div id="targetStats">Toque em um NPC para selecionar</div>
   </section>
 
-  <canvas id="minimap" width="180" height="180"></canvas>
+  <section id="minimapPanel" class="hud-panel minimap-panel">
+    <div class="minimap-toolbar">
+      <div class="minimap-toolbar-left">
+        <button id="minimapToggle" class="stats-expand-btn" title="Expandir / recolher minimapa" aria-label="Expandir / recolher minimapa">▾</button>
+        <div class="stats-toolbar-label">MAPA</div>
+      </div>
+    </div>
+    <canvas id="minimap" width="180" height="180"></canvas>
+  </section>
 
   <section id="weaponBar" class="hud-panel compact-ammo-ui">
     <div class="weapon-toolbar">
