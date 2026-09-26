@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
   <meta name="theme-color" content="#030816">
-  <title>Stellar Legacy V5.1</title>
+  <title>Stellar Legacy V5.2</title>
   <link rel="stylesheet" href="/style.css">
 </head>
 <body>
@@ -24,6 +24,7 @@
     <div class="top-actions">
       <span class="pilot-chip">Piloto <b id="userLabel">—</b></span>
       <span id="syncLabel" class="sync-chip">LOCAL</span>
+      <button id="mapBtn" class="small-btn">MAPAS</button>
       <button id="shopBtn" class="small-btn gold">LOJA</button>
       <button id="cargoBtn" class="small-btn">PORÃO</button>
       <button id="hangarBtn" class="small-btn">HANGAR</button>
@@ -121,6 +122,20 @@
         <button id="sellAllCargo" class="small-btn gold">VENDER TUDO</button>
       </div>
       <div id="cargoGrid" class="cargo-grid"></div>
+    </div>
+  </div>
+
+  <div id="mapModal" class="modal hidden">
+    <div class="modal-card wide-card map-card">
+      <div class="modal-header">
+        <div>
+          <div class="eyebrow">NAVEGAÇÃO GALÁCTICA</div>
+          <h2>Mapa de rotas</h2>
+        </div>
+        <button id="closeMap" class="small-btn">Fechar</button>
+      </div>
+      <div class="muted" style="margin-bottom:10px">Seu mapa atual recebe destaque. Os mapas da sua facção aparecem iluminados e as rotas seguem a lógica clássica.</div>
+      <div id="mapNetwork" class="map-network"></div>
     </div>
   </div>
 

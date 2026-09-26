@@ -1,4 +1,4 @@
-# Stellar Legacy V5.1
+# Stellar Legacy V5.2
 
 V5 foca no loop econômico do jogo: exploração → coleta → combate → caixas de carga → porão → retorno à base → venda → compra de equipamentos.
 
