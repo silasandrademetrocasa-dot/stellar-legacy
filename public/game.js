@@ -46,7 +46,19 @@ const MAP_GRAPH_NODES = [
   { id:'4-1', x:52, y:53 }, { id:'4-2', x:66, y:44 }, { id:'4-3', x:66, y:63 }
 ];
 const MAP_GRAPH_LINKS = [
-  ['1-1','1-2'],['1-2','1-3'],['1-2','1-4'],['1-3','2-3'],['1-4','3-4'],['1-4','4-1'],['2-3','2-2'],['2-2','2-1'],['2-2','2-4'],['2-4','3-3'],['3-3','3-2'],['3-2','3-1'],['4-1','4-2'],['4-1','4-3'],['4-2','2-4'],['4-3','3-3'],['4-2','2-3'],['4-3','3-4'],['4-2','4-3']
+  ['1-1','1-2'],
+  ['1-2','1-3'], ['1-2','1-4'],
+  ['1-3','1-4'], ['1-3','2-3'],
+  ['1-4','3-4'], ['1-4','4-1'],
+  ['2-1','2-2'],
+  ['2-2','2-3'], ['2-2','2-4'],
+  ['2-3','4-1'],
+  ['2-4','4-2'], ['2-4','3-3'],
+  ['3-1','3-2'],
+  ['3-2','3-3'], ['3-2','3-4'],
+  ['3-3','4-3'],
+  ['3-4','4-3'],
+  ['4-1','4-2'], ['4-1','4-3'], ['4-2','4-3']
 ];
 const PLAYABLE_GRAPH_LABELS = new Set(['1-1','1-2','1-3','1-4','2-1','2-2','2-3','2-4','3-1','3-2','3-3','3-4','4-1','4-2','4-3']);
 
@@ -90,7 +102,7 @@ const player = {
   laserFiring: false, lastLaserShot: 0, lastRocketShot: -999,
 };
 const state = {
-  currentMap: MAPS.x1, camera: { x: 380, y: 900 }, target: null, enemies: [], loot: [], ores: [], particles: [], enemyRespawns: [], oreRespawns: [], lastPortalAt: 0, radarRange: 850, jumping: false,
+  currentMap: MAPS.x1, camera: { x: 380, y: 900 }, target: null, enemies: [], loot: [], ores: [], particles: [], enemyRespawns: [], oreRespawns: [], lastPortalAt: 0, radarRange: 920, jumping: false,
   shopTab: 'ships', hangarTab: 'ships', toastTimer: null,
   stars: Array.from({length:240},()=>({x:Math.random()*5200-2600,y:Math.random()*5200-2600,r:Math.random()*1.5+.3,a:Math.random()*.6+.2})),
 };
@@ -129,6 +141,9 @@ function cargoCapacity(){const ship=SHIPS[progress?.activeShipId||'phoenix'];let
 function cargoUsed(){return Object.entries(progress?.cargo||{}).reduce((a,[id,b])=>id==='Xenomit'?a:a+(Number(b)||0),0);}
 function cargoFree(){return Math.max(0,cargoCapacity()-cargoUsed());}
 function addCargoResource(id,qty){if(!progress||qty<=0)return 0;const amount=Math.floor(qty);if(id==='Xenomit'){progress.cargo[id]=(progress.cargo[id]||0)+amount;return amount;}const take=Math.min(amount,cargoFree());if(take<=0)return 0;progress.cargo[id]=(progress.cargo[id]||0)+take;return take;}
+function playerLaserRange(){return state.currentMap?.battle ? 980 : 760;}
+function playerRocketRange(){return state.currentMap?.battle ? 860 : 680;}
+function mapRadarRange(){return state.currentMap?.battle ? 1380 : 920;}
 function isAtTrader(){return progress?.mapId==='x1'&&isSafeZone();}
 function showToast(msg){ui.toast.textContent=msg;ui.toast.classList.add('show');clearTimeout(state.toastTimer);state.toastTimer=setTimeout(()=>ui.toast.classList.remove('show'),1900);}
 function setSync(text,cls=''){ui.syncLabel.textContent=text;ui.syncLabel.className=`sync-chip ${cls}`.trim();}
@@ -176,6 +191,8 @@ function removeInventory(itemId,count=1){
 }
 function hasExtra(itemId){return progress.shipLoadout.extras.includes(itemId);}
 function allEquippedIds(){return [...progress.shipLoadout.lasers,...progress.shipLoadout.generators,...progress.shipLoadout.extras,...progress.drones.flatMap(d=>d.slots)].filter(Boolean);}
+function equippedLaserIds(){return [...progress.shipLoadout.lasers,...progress.drones.flatMap(d=>d.slots)].filter(id=>ITEMS[id]?.type==='laser');}
+function equippedLaserCount(){return equippedLaserIds().length;}
 
 function computeStats(keepRatio=true){
   if(!progress)return;
@@ -224,7 +241,7 @@ function spawnOre(type=null){
 function createOres(){state.ores=[];state.oreRespawns=[];for(let i=0;i<18;i++)spawnOre();}
 function makeEnemy(type){
   const base=NPC_TYPES[type],pos=randomMapPosition(160);
-  return {id:`${type}_${Math.random().toString(16).slice(2,9)}`,type,name:base.name,x:pos.x,y:pos.y,hp:base.hp,maxHp:base.hp,shield:base.shield,maxShield:base.shield,credits:base.credits,uridium:base.uridium,speed:base.speed,damage:base.damage,color:base.color,size:base.size,resources:{...(base.resources||{})},attackRange:Math.min(360,140+base.size*5),aggroRange:520,lastShot:0,angle:rand(0,TWO_PI),drift:rand(.4,1.4)};
+  const battle=state.currentMap?.battle;return {id:`${type}_${Math.random().toString(16).slice(2,9)}`,type,name:base.name,x:pos.x,y:pos.y,hp:base.hp,maxHp:base.hp,shield:base.shield,maxShield:base.shield,credits:base.credits,uridium:base.uridium,speed:base.speed,damage:base.damage,color:base.color,size:base.size,resources:{...(base.resources||{})},attackRange:Math.min(battle?460:390,(battle?190:150)+base.size*5.8),aggroRange:battle?760:560,lastShot:0,angle:rand(0,TWO_PI),drift:rand(.4,1.4)};
 }
 function spawnEnemies(){state.enemies=[];state.enemyRespawns=[];for(const group of state.currentMap.enemyGroups)for(let i=0;i<group.count;i++)state.enemies.push(makeEnemy(group.type));}
 function scheduleEnemyRespawn(type){state.enemyRespawns.push({type,at:nowSec()+rand(6,13)});}
@@ -267,18 +284,39 @@ function dealDamageToEnemy(enemy,damage,color){
   if(enemy.hp<=0){enemy.hp=0;enemy.deadAt=nowSec();rewardEnemyKill(enemy);if(state.target?.id===enemy.id){state.target=null;player.laserFiring=false;}}
 }
 function fireLaserTick(){
-  if(!state.target||state.target.hp<=0||enemyDistance(state.target)>650)return;
-  const ammo=currentLaserAmmo();if(ammoQty(ammo.id)<=0){player.laserFiring=false;showToast(`${ammo.name} acabou`);return;}
-  if(player.laserDamage<=0){player.laserFiring=false;showToast('Equipe pelo menos um laser no Hangar');return;}
+  if(!state.target||state.target.hp<=0||enemyDistance(state.target)>playerLaserRange())return;
+  const ammo=currentLaserAmmo();
+  const laserIds=equippedLaserIds();
+  const totalLasers=laserIds.length;
+  if(totalLasers<=0){player.laserFiring=false;showToast('Equipe pelo menos um laser no Hangar');return;}
+  const stock=ammoQty(ammo.id);
+  if(stock<=0){player.laserFiring=false;showToast(`${ammo.name} acabou`);return;}
   if(nowSec()-player.lastLaserShot<.42)return;
-  player.lastLaserShot=nowSec();progress.ammo[ammo.id]-=1;const damage=Math.round(player.laserDamage*ammo.mult*rand(.95,1.08));dealDamageToEnemy(state.target,damage,ammo.color);
+
+  // Cada laser equipado consome 1 unidade de munição por rajada.
+  // Se houver menos munição que lasers, somente parte da bateria dispara.
+  const firingCount=Math.min(totalLasers,stock);
+  const firingIds=laserIds.slice(0,firingCount);
+  const allBase=laserIds.reduce((sum,id)=>sum+(ITEMS[id]?.damage||0),0);
+  const firingBase=firingIds.reduce((sum,id)=>sum+(ITEMS[id]?.damage||0),0);
+  const fraction=allBase>0?firingBase/allBase:0;
+
+  player.lastLaserShot=nowSec();
+  progress.ammo[ammo.id]=Math.max(0,stock-firingCount);
+  const damage=Math.round(player.laserDamage*fraction*ammo.mult*rand(.95,1.08));
+  if(damage>0)dealDamageToEnemy(state.target,damage,ammo.color);
+
+  if(progress.ammo[ammo.id]<=0){
+    player.laserFiring=false;
+    showToast(`${ammo.name} acabou`);
+  }
 }
 function fireRocket(manual=false){
   if(!state.target||state.target.hp<=0){if(manual)showToast('Selecione um alvo');return;}
-  if(enemyDistance(state.target)>680){if(manual)showToast('Alvo fora do alcance');return;}
+  if(enemyDistance(state.target)>playerRocketRange()){if(manual)showToast('Alvo fora do alcance');return;}
   const r=currentRocket();if(rocketQty(r.id)<=0){if(manual)showToast(`${r.name} acabou`);return;}
   if(!rocketReady()){if(manual)showToast(`Míssil recarregando`);return;}
-  player.lastRocketShot=nowSec();progress.rockets[r.id]-=1;dealDamageToEnemy(state.target,Math.round(r.damage*player.rocketMult),r.color);saveGame();
+  player.lastRocketShot=nowSec();progress.rockets[r.id]=Math.max(0,(progress.rockets[r.id]||0)-1);dealDamageToEnemy(state.target,Math.round(r.damage*player.rocketMult),r.color);saveGame();
 }
 function takePlayerDamage(dmg){
   if(isSafeZone())return;
@@ -355,7 +393,7 @@ function drawShipModel(id,color){const s=1;ctx.shadowColor=color;ctx.shadowBlur=
   else if(id==='aegis'){ctx.moveTo(25,0);ctx.lineTo(8,-9);ctx.lineTo(-8,-8);ctx.lineTo(-18,-17);ctx.lineTo(-17,-5);ctx.lineTo(-25,0);ctx.lineTo(-17,5);ctx.lineTo(-18,17);ctx.lineTo(-8,8);ctx.lineTo(8,9);}
   else {ctx.moveTo(29,0);ctx.lineTo(9,-9);ctx.lineTo(-10,-15);ctx.lineTo(-18,-7);ctx.lineTo(-25,0);ctx.lineTo(-18,7);ctx.lineTo(-10,15);ctx.lineTo(9,9);}
 ctx.closePath();ctx.fill();ctx.stroke();ctx.shadowBlur=0;ctx.fillStyle='rgba(5,13,25,.88)';ctx.beginPath();ctx.ellipse(5,0,7,3.5,0,0,TWO_PI);ctx.fill();ctx.fillStyle='#f4ffff';ctx.beginPath();ctx.arc(7,0,1.6,0,TWO_PI);ctx.fill();ctx.fillStyle='#875bff';ctx.fillRect(-25,-2,8,4);}
-function drawPlayer(){const p=screenPos(player.x,player.y),f=getFaction(),a=Math.atan2(player.ty-player.y,player.tx-player.x||0),color=f?.color||'#76e0ff';ctx.save();ctx.translate(p.x,p.y);ctx.rotate(a||0);drawShipModel(progress.activeShipId,color);ctx.restore();drawDrones(p);ctx.fillStyle=color;ctx.font='bold 12px Arial';ctx.textAlign='center';ctx.shadowColor='rgba(0,0,0,.85)';ctx.shadowBlur=4;ctx.fillText(progress.profile.callsign||getUser()?.callsign||'Pilot',p.x,p.y+33);ctx.shadowBlur=0;if(player.laserFiring&&state.target&&state.target.hp>0&&enemyDistance(state.target)<=650){const t=screenPos(state.target.x,state.target.y);ctx.strokeStyle=currentLaserAmmo().color;ctx.shadowColor=currentLaserAmmo().color;ctx.shadowBlur=8;ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(p.x,p.y);ctx.lineTo(t.x,t.y);ctx.stroke();ctx.shadowBlur=0;}}
+function drawPlayer(){const p=screenPos(player.x,player.y),f=getFaction(),a=Math.atan2(player.ty-player.y,player.tx-player.x||0),color=f?.color||'#76e0ff';ctx.save();ctx.translate(p.x,p.y);ctx.rotate(a||0);drawShipModel(progress.activeShipId,color);ctx.restore();drawDrones(p);ctx.fillStyle=color;ctx.font='bold 12px Arial';ctx.textAlign='center';ctx.shadowColor='rgba(0,0,0,.85)';ctx.shadowBlur=4;ctx.fillText(progress.profile.callsign||getUser()?.callsign||'Pilot',p.x,p.y+33);ctx.shadowBlur=0;if(player.laserFiring&&state.target&&state.target.hp>0&&enemyDistance(state.target)<=playerLaserRange()){const t=screenPos(state.target.x,state.target.y);ctx.strokeStyle=currentLaserAmmo().color;ctx.shadowColor=currentLaserAmmo().color;ctx.shadowBlur=8;ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(p.x,p.y);ctx.lineTo(t.x,t.y);ctx.stroke();ctx.shadowBlur=0;}}
 function drawParticles(){ctx.font='12px Arial';ctx.textAlign='center';for(const p of state.particles){const q=screenPos(p.x,p.y);ctx.globalAlpha=Math.max(0,p.life);ctx.fillStyle=p.color;ctx.fillText(p.text,q.x,q.y);}ctx.globalAlpha=1;}
 function drawMinimap(){
   mm.clearRect(0,0,minimap.width,minimap.height);mm.fillStyle='#07111c';mm.fillRect(0,0,minimap.width,minimap.height);mm.strokeStyle='rgba(75,180,255,.5)';mm.strokeRect(1,1,minimap.width-2,minimap.height-2);
@@ -371,9 +409,28 @@ function drawMinimap(){
 function draw(){ctx.clearRect(0,0,W,H);drawNebula();drawStars();if(!progress)return;drawBounds();drawBaseSafeZone();drawPortals();drawOres();drawLoot();state.enemies.forEach(e=>e.hp>0&&drawEnemy(e));drawPlayer();drawParticles();drawMinimap();}
 
 function buildAmmoButtons(){
-  if(!progress)return;ui.laserAmmoButtons.innerHTML='';Object.values(LASER_AMMO).forEach(a=>{const q=ammoQty(a.id),b=document.createElement('button');b.className=`ammo-btn ${progress.selectedLaserAmmo===a.id?'active':''} ${q<=0?'empty':''}`;b.style.borderColor=a.color;b.innerHTML=`${a.name}<small>x${a.mult} • ${fmt(q)}</small>`;b.onclick=()=>{progress.selectedLaserAmmo=a.id;buildAmmoButtons();saveGame();};ui.laserAmmoButtons.appendChild(b);});
-  ui.rocketAmmoButtons.innerHTML='';Object.values(ROCKETS).forEach(r=>{const q=rocketQty(r.id),b=document.createElement('button');b.className=`ammo-btn ${progress.selectedRocket===r.id?'active':''} ${q<=0?'empty':''}`;b.style.borderColor=r.color;b.innerHTML=`${r.name}<small>${fmt(r.damage)} • ${fmt(q)}</small>`;b.onclick=()=>{progress.selectedRocket=r.id;buildAmmoButtons();saveGame();};ui.rocketAmmoButtons.appendChild(b);});
+  if(!progress)return;
+  const laserUse=Math.max(0,equippedLaserCount());
+  ui.laserAmmoButtons.innerHTML='';
+  Object.values(LASER_AMMO).forEach(a=>{
+    const q=ammoQty(a.id),b=document.createElement('button');
+    b.className=`ammo-btn ${progress.selectedLaserAmmo===a.id?'active':''} ${q<=0?'empty':''}`;
+    b.style.borderColor=a.color;
+    b.innerHTML=`${a.name}<small>x${a.mult} • ${fmt(q)} • -${laserUse}/rajada</small>`;
+    b.onclick=()=>{progress.selectedLaserAmmo=a.id;buildAmmoButtons();saveGame();};
+    ui.laserAmmoButtons.appendChild(b);
+  });
+  ui.rocketAmmoButtons.innerHTML='';
+  Object.values(ROCKETS).forEach(r=>{
+    const q=rocketQty(r.id),b=document.createElement('button');
+    b.className=`ammo-btn ${progress.selectedRocket===r.id?'active':''} ${q<=0?'empty':''}`;
+    b.style.borderColor=r.color;
+    b.innerHTML=`${r.name}<small>${fmt(r.damage)} • ${fmt(q)} • -1/disparo</small>`;
+    b.onclick=()=>{progress.selectedRocket=r.id;buildAmmoButtons();saveGame();};
+    ui.rocketAmmoButtons.appendChild(b);
+  });
 }
+
 function updateExtraControls(){
   const configs=[['autoLaser','autoLaserCpu'],['autoRocket','autoRocketCpu'],['turboRocket','rocketTurboCpu']];
   for(const [flag,item] of configs){const el=ui[flag],owned=hasExtra(item);el.disabled=!owned;if(!owned)progress.flags[flag]=false;el.checked=!!progress.flags[flag];el.closest('label')?.classList.toggle('locked',!owned);}
@@ -413,11 +470,11 @@ function renderShop(){
 
 function returnShipEquipmentToInventory(){for(const k of ['lasers','generators','extras'])for(const id of progress.shipLoadout[k])if(id)addInventory(id);}
 function switchShip(shipId){if(!progress.ownedShips.includes(shipId)){showToast('Compre essa nave na Loja');return;}if(shipId===progress.activeShipId)return;returnShipEquipmentToInventory();progress.activeShipId=shipId;progress.shipLoadout=blankLoadout(shipId);player.laserFiring=false;computeStats(false);saveGame();renderHangar();buildAmmoButtons();showToast(`${SHIPS[shipId].name} ativada. Equipamentos antigos voltaram ao inventário.`);}
-function equipShipItem(itemId){const item=ITEMS[itemId];const key=item.type==='laser'?'lasers':item.type==='generator'?'generators':item.type==='extra'?'extras':null;if(!key)return;if(!removeInventory(itemId)){showToast('Item não disponível');return;}const idx=progress.shipLoadout[key].findIndex(v=>!v);if(idx<0){addInventory(itemId);showToast('Sem slot livre na nave');return;}progress.shipLoadout[key][idx]=itemId;computeStats(true);saveGame();renderHangar();updateExtraControls();}
-function unequipShipSlot(key,index){const id=progress.shipLoadout[key][index];if(!id)return;progress.shipLoadout[key][index]=null;addInventory(id);if(key==='extras'){for(const flag of ['autoLaser','autoRocket','turboRocket'])progress.flags[flag]=false;}computeStats(true);saveGame();renderHangar();}
-function equipDroneItem(itemId){const item=ITEMS[itemId];if(!(item.type==='laser'||(item.type==='generator'&&item.subtype==='shield'))){showToast('Drones aceitam lasers ou geradores de escudo');return;}const drone=progress.drones.find(d=>d.slots.some(v=>!v));if(!drone){showToast('Nenhum slot livre nos drones');return;}if(!removeInventory(itemId))return;drone.slots[drone.slots.findIndex(v=>!v)]=itemId;computeStats(true);saveGame();renderHangar();}
-function unequipDroneSlot(droneId,index){const d=progress.drones.find(x=>x.id===droneId);if(!d||!d.slots[index])return;addInventory(d.slots[index]);d.slots[index]=null;computeStats(true);saveGame();renderHangar();}
-function sellDrone(droneId){const d=progress.drones.find(x=>x.id===droneId);if(!d)return;d.slots.filter(Boolean).forEach(addInventory);progress.drones=progress.drones.filter(x=>x.id!==droneId);computeStats(true);saveGame();renderHangar();showToast('Drone removido; equipamentos voltaram ao inventário');}
+function equipShipItem(itemId){const item=ITEMS[itemId];const key=item.type==='laser'?'lasers':item.type==='generator'?'generators':item.type==='extra'?'extras':null;if(!key)return;if(!removeInventory(itemId)){showToast('Item não disponível');return;}const idx=progress.shipLoadout[key].findIndex(v=>!v);if(idx<0){addInventory(itemId);showToast('Sem slot livre na nave');return;}progress.shipLoadout[key][idx]=itemId;computeStats(true);saveGame();renderHangar();buildAmmoButtons();updateExtraControls();}
+function unequipShipSlot(key,index){const id=progress.shipLoadout[key][index];if(!id)return;progress.shipLoadout[key][index]=null;addInventory(id);if(key==='extras'){for(const flag of ['autoLaser','autoRocket','turboRocket'])progress.flags[flag]=false;}computeStats(true);saveGame();renderHangar();buildAmmoButtons();}
+function equipDroneItem(itemId){const item=ITEMS[itemId];if(!(item.type==='laser'||(item.type==='generator'&&item.subtype==='shield'))){showToast('Drones aceitam lasers ou geradores de escudo');return;}const drone=progress.drones.find(d=>d.slots.some(v=>!v));if(!drone){showToast('Nenhum slot livre nos drones');return;}if(!removeInventory(itemId))return;drone.slots[drone.slots.findIndex(v=>!v)]=itemId;computeStats(true);saveGame();renderHangar();buildAmmoButtons();}
+function unequipDroneSlot(droneId,index){const d=progress.drones.find(x=>x.id===droneId);if(!d||!d.slots[index])return;addInventory(d.slots[index]);d.slots[index]=null;computeStats(true);saveGame();renderHangar();buildAmmoButtons();}
+function sellDrone(droneId){const d=progress.drones.find(x=>x.id===droneId);if(!d)return;d.slots.filter(Boolean).forEach(addInventory);progress.drones=progress.drones.filter(x=>x.id!==droneId);computeStats(true);saveGame();renderHangar();buildAmmoButtons();showToast('Drone removido; equipamentos voltaram ao inventário');}
 
 function slotCard(label,itemId,key,index,droneId=null){const el=document.createElement('div');el.className=`slot-card ${itemId?'':'empty'}`;const item=itemId?ITEMS[itemId]:null;el.innerHTML=`<div class="slot-label">${label}</div><div class="slot-item">${item?item.name:'VAZIO'}</div>${item?`<div class="muted" style="font-size:10px">${item.description}</div>`:''}`;if(item){const a=document.createElement('div');a.className='slot-actions';const b=document.createElement('button');b.className='ghost-btn';b.textContent='Remover';b.onclick=()=>droneId?unequipDroneSlot(droneId,index):unequipShipSlot(key,index);a.appendChild(b);el.appendChild(a);}return el;}
 function inventoryCard(itemId,count){const item=ITEMS[itemId];const el=document.createElement('div');el.className='inventory-card';el.innerHTML=`<b>${item.name}</b><div class="qty">Quantidade: ${count}</div><div class="muted" style="font-size:10px;margin-top:4px">${item.description}</div>`;const actions=document.createElement('div');actions.className='inventory-actions';const shipBtn=document.createElement('button');shipBtn.className='ghost-btn';shipBtn.textContent='Nave';shipBtn.onclick=()=>equipShipItem(itemId);actions.appendChild(shipBtn);if((item.type==='laser'||(item.type==='generator'&&item.subtype==='shield'))&&progress.drones.length){const d=document.createElement('button');d.className='ghost-btn';d.textContent='Drone';d.onclick=()=>equipDroneItem(itemId);actions.appendChild(d);}el.appendChild(actions);return el;}

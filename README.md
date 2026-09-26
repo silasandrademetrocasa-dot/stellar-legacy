@@ -1,8 +1,8 @@
-# Stellar Legacy V6
+# Stellar Legacy V6.2
 
 Space MMO web mobile-first com login Supabase, progressão, economia, hangar, loja e mapas.
 
-## Novidades V6
+## Novidades V6.2
 
 - Portal com botão flutuante holográfico `JUMP / SALTAR`.
 - Transição animada de salto entre mapas.
@@ -36,3 +36,9 @@ Start: `npm start`
 Variáveis:
 - `SUPABASE_URL`
 - `SUPABASE_PUBLISHABLE_KEY`
+
+## Consumo real de munição
+
+- Cada laser equipado na nave ou em drones consome 1 unidade da munição laser selecionada por rajada.
+- Se houver menos munição do que lasers, somente os lasers cobertos pelo estoque participam da última rajada.
+- Cada míssil disparado consome exatamente 1 unidade do tipo selecionado.

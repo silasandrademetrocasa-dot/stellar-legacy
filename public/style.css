@@ -23,7 +23,7 @@
 .map-legend span{display:flex;align-items:center;gap:8px}.dot{width:10px;height:10px;border-radius:50%}.dot.curr{background:#f07b8c}.dot.own{background:#5adfff}.dot.future{background:#6e7b92}
 @media(max-width:900px){.map-network{min-height:640px;overflow:auto}.map-node{width:94px;min-height:52px}.map-node .node-label{font-size:18px}}
 
-/* ===================== STELLAR LEGACY V6 ===================== */
+/* ===================== STELLAR LEGACY V6.2 ===================== */
 .portal-prompt{position:absolute;z-index:9;transform:translate(-50%,-100%);display:flex;align-items:center;gap:10px;padding:9px 14px;border-radius:14px;border:1px solid rgba(85,224,255,.78);background:linear-gradient(180deg,rgba(8,37,59,.97),rgba(4,18,32,.97));color:#ecfbff;font-weight:900;box-shadow:0 0 0 1px rgba(85,224,255,.1),0 0 28px rgba(60,214,255,.24),inset 0 0 22px rgba(50,180,255,.08);backdrop-filter:blur(6px);min-width:150px;text-align:left;animation:portalFloat 1.5s ease-in-out infinite}
 .portal-prompt small{display:block;font-size:10px;font-weight:700;color:#8ddff7;margin-top:2px;letter-spacing:.4px}.portal-icon{display:grid;place-items:center;width:28px;height:28px;border-radius:50%;background:radial-gradient(circle,#dfffff 0 18%,#4fdbff 20% 42%,rgba(44,129,255,.4) 44% 100%);box-shadow:0 0 16px rgba(80,220,255,.65);font-size:16px;color:#03121f}.portal-prompt:hover{border-color:#b8f5ff;box-shadow:0 0 34px rgba(70,225,255,.35)}
 @keyframes portalFloat{0%,100%{transform:translate(-50%,-100%) translateY(0)}50%{transform:translate(-50%,-100%) translateY(-5px)}}
