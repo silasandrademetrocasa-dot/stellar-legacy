@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
   <meta name="theme-color" content="#030816">
-  <title>Stellar Legacy V5</title>
+  <title>Stellar Legacy V5.1</title>
   <link rel="stylesheet" href="/style.css">
 </head>
 <body>
@@ -12,12 +12,14 @@
   <canvas id="game"></canvas>
 
   <header id="topbar" class="hud-panel">
-    <div class="brand">STELLAR LEGACY <small>V5</small></div>
-    <div class="top-meta">
+    <div class="top-meta left">
       <span>Facção <b id="factionLabel">—</b></span>
       <span>Mapa <b id="mapLabel">—</b></span>
       <span>Nave <b id="shipLabel">Phoenix</b></span>
       <span>LV <b id="lvl">1</b></span>
+      <span>XP <b id="xp">0</b></span>
+      <span>CR <b id="credits">0</b></span>
+      <span>URI <b id="uridium">0</b></span>
     </div>
     <div class="top-actions">
       <span class="pilot-chip">Piloto <b id="userLabel">—</b></span>
@@ -29,16 +31,10 @@
     </div>
   </header>
 
-  <section id="leftStats" class="hud-panel stack">
+  <section id="leftStats" class="hud-panel stack compact-stats">
     <div>HP <span id="hp">0</span>/<span id="maxHp">0</span></div>
     <div>ESC <span id="shield">0</span>/<span id="maxShield">0</span></div>
     <div>VEL <span id="speed">0</span></div>
-    <div>DMG <span id="dmg">0</span></div>
-    <hr>
-    <div>CR <span id="credits">0</span></div>
-    <div>URI <span id="uridium">0</span></div>
-    <div>XP <span id="xp">0</span></div>
-    <div>DRONES <span id="droneCount">0</span>/8</div>
     <div>PORÃO <span id="cargoUsed">0</span>/<span id="cargoMax">0</span></div>
     <div id="safeZoneLabel" class="safe-zone-status">FORA DA BASE</div>
   </section>
@@ -74,7 +70,6 @@
     </div>
   </section>
 
-  <div id="hint" class="hud-panel">Clique/toque no mapa para mover • alvo para selecionar • CTRL = laser • ESPAÇO = míssil • LOJA compra equipamentos • HANGAR equipa sua nave • C = PORÃO • clique no minimapa para navegar</div>
   <div id="toast"></div>
 
 
