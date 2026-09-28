@@ -1,3 +1,35 @@
+# Stellar Legacy V8 (base de arte + projeto)
+
+Versão base da V8 preparada para subir no Git, usando a estrutura funcional da V7.2.1 e adicionando uma nova direção de arte para a próxima fase do jogo.
+
+## O que entra nesta base
+
+- projeto web funcional herdado da V7.2.1
+- conceitos visuais da V8 em `public/v8-art`
+- galeria rápida em `public/v8-concepts.html`
+- direção para upgrade de HUD, mapas, hangar e loja
+
+## Conceitos V8
+
+Abra no navegador:
+
+- `/v8-concepts.html`
+
+## Artes adicionadas
+
+- `public/v8-art/battle-screen-v8.png`
+- `public/v8-art/map-screen-v8.png`
+- `public/v8-art/hangar-store-v8.png`
+
+## Próximos passos sugeridos
+
+1. aplicar a nova HUD no `public/index.html` / `public/style.css`
+2. integrar ilustrações de naves, NPCs e caixas como sprites reais
+3. criar versões mobile compactas baseadas nesses concepts
+4. refazer loja/hangar/mapas seguindo os mockups
+
+---
+
 # Stellar Legacy V7.2.1
 
 Space MMO web mobile-first com login Supabase, progressão, economia, hangar, loja e mapas.
