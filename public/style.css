@@ -275,3 +275,15 @@ body::before{content:"";position:fixed;inset:0;pointer-events:none;background:ra
 }
 .nav-discovery{font-size:10px;letter-spacing:.04em;color:#8eb8ce;display:flex!important;justify-content:space-between;gap:10px;border-top:1px solid rgba(84,199,255,.08);padding-top:3px}.nav-discovery span{color:#ffd66d;font-weight:800;text-shadow:0 0 8px rgba(255,202,77,.25)}
 @media(max-width:680px){.nav-discovery{font-size:9px;gap:6px}}
+
+
+/* ===== V9.1 layout hotfix ===== */
+:root{--hud-top-offset:92px;--weaponbar-height:156px;}
+#leftStats.ship-stats-float{width:184px!important;min-width:184px!important;max-width:184px!important;overflow:hidden;}
+#leftStats .left-stats-content,#leftStats .left-stats-content>div{width:100%;max-width:100%;white-space:normal!important;}
+#leftStats .ship-hud-portrait{width:100%;height:72px;min-height:72px;}
+#leftStats .ship-hud-portrait img{max-width:100%!important;max-height:100%!important;width:auto;height:auto;}
+#leftStats .nav-coord,#leftStats .nav-route,#leftStats .nav-discovery{align-items:center;}
+#minimapPanel{bottom:calc(var(--weaponbar-height) + 18px)!important;}
+@media(max-width:900px){#leftStats.ship-stats-float{top:84px!important;}}
+@media(max-width:680px){:root{--hud-top-offset:82px;--weaponbar-height:146px;}#leftStats.ship-stats-float{top:var(--hud-top-offset)!important;width:148px!important;min-width:148px!important;max-width:148px!important;padding:8px 8px 9px;}#leftStats .ship-hud-portrait{height:56px;min-height:56px;}#minimapPanel{bottom:calc(var(--weaponbar-height) + 14px)!important;}}

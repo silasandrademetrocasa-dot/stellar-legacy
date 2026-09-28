@@ -50,11 +50,11 @@ function drawMapBackground(){
   const nx=Math.max(0,Math.min(1,(state.camera?.x||0)/Math.max(1,world.w)));
   const ny=Math.max(0,Math.min(1,(state.camera?.y||0)/Math.max(1,world.h)));
   const viewAspect=W/Math.max(1,H),imgAspect=img.naturalWidth/img.naturalHeight;
-  let sw=img.naturalWidth*.72,sh=img.naturalHeight*.72;
+  let sw=img.naturalWidth*.92,sh=img.naturalHeight*.92;
   if(sw/sh<viewAspect) sh=sw/viewAspect; else sw=sh*viewAspect;
   sw=Math.min(sw,img.naturalWidth);sh=Math.min(sh,img.naturalHeight);
   const sx=(img.naturalWidth-sw)*nx,sy=(img.naturalHeight-sh)*ny;
-  ctx.save();ctx.globalAlpha=.86;
+  ctx.save();ctx.globalAlpha=.34;
   ctx.drawImage(img,sx,sy,sw,sh,0,0,W,H);
   const shade=ctx.createLinearGradient(0,0,0,H);
   shade.addColorStop(0,'rgba(1,7,16,.16)');shade.addColorStop(.52,'rgba(1,6,14,.05)');shade.addColorStop(1,'rgba(1,5,12,.38)');
