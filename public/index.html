@@ -4,14 +4,15 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
   <meta name="theme-color" content="#030816">
-  <title>Stellar Legacy V7.2.1</title>
+  <title>Stellar Legacy V8.1</title>
   <link rel="stylesheet" href="/style.css">
 </head>
 <body>
 <div id="app">
   <canvas id="game"></canvas>
 
-  <header id="topbar" class="hud-panel">
+  <header id="topbar" class="hud-panel v8-topbar">
+    <div class="brand-chip">STELLAR LEGACY <span>V8</span></div>
     <div class="top-meta left">
       <span>Facção <b id="factionLabel">—</b></span>
       <span>Mapa <b id="mapLabel">—</b></span>
@@ -112,6 +113,7 @@
       <div class="eyebrow">STELLAR NETWORK</div>
       <h1>Entrar no universo</h1>
       <p class="muted">Sua conta salva facção, nave, inventário, drones, munição e progresso online.</p>
+      <div class="auth-art-panel"><div class="auth-art-copy"><div class="eyebrow">DIREÇÃO DE ARTE V8</div><h3>Visual espacial premium</h3><p>Nova identidade visual sci-fi inspirada nas artes e interfaces da próxima geração do Stellar Legacy.</p></div><div class="auth-art-thumb auth-battle"></div></div>
       <div class="auth-tabs">
         <button id="loginTabBtn" class="tab-btn active">Entrar</button>
         <button id="registerTabBtn" class="tab-btn">Criar conta</button>
@@ -168,6 +170,15 @@
         <button id="closeMap" class="small-btn">Fechar</button>
       </div>
       <div class="muted" style="margin-bottom:10px">Seu mapa atual recebe destaque. Os mapas da sua facção aparecem iluminados e as rotas seguem a lógica clássica.</div>
+      <div class="modal-showcase map-showcase">
+        <div class="showcase-image map-concept"></div>
+        <div class="showcase-copy">
+          <div class="eyebrow">ROTA ESTELAR V8</div>
+          <h3>Navegação com visual tático</h3>
+          <p>Os mapas agora seguem uma direção mais premium, com rotas claras, destaque do setor atual e base visual baseada nos concepts da V8.</p>
+          <div class="showcase-tags"><span>rotas</span><span>setores</span><span>travel</span><span>battle maps</span></div>
+        </div>
+      </div>
       <div id="mapNetwork" class="map-network"></div>
     </div>
   </div>
@@ -180,6 +191,15 @@
           <h2>Sistema P.E.T.</h2>
         </div>
         <button id="closePet" class="small-btn">Fechar</button>
+      </div>
+      <div class="modal-showcase pet-showcase">
+        <div class="showcase-image battle-concept"></div>
+        <div class="showcase-copy">
+          <div class="eyebrow">AUTOMAÇÃO DE COMBATE</div>
+          <h3>P.E.T. com nova identidade V8</h3>
+          <p>Layout mais limpo para gerenciar engrenagens, slots, extras e automações do P.E.T.</p>
+          <div class="showcase-tags"><span>auto loot</span><span>kamikaze</span><span>regen</span><span>collector</span></div>
+        </div>
       </div>
       <div id="petContent"></div>
     </div>
@@ -195,6 +215,15 @@
         <div class="wallet">CR <b id="shopCredits">0</b> • URI <b id="shopUridium">0</b></div>
         <button id="closeShop" class="small-btn">Fechar</button>
       </div>
+      <div class="modal-showcase shop-showcase">
+        <div class="showcase-image hangar-concept"></div>
+        <div class="showcase-copy">
+          <div class="eyebrow">COMÉRCIO INTERESTELAR</div>
+          <h3>Loja orbital repaginada</h3>
+          <p>Naves, extras, munições, drones e upgrades apresentados com visual mais forte e futurista.</p>
+          <div class="showcase-tags"><span>naves</span><span>drones</span><span>munição</span><span>extras</span></div>
+        </div>
+      </div>
       <div id="shopTabs" class="tabs"></div>
       <div id="shopGrid" class="product-grid"></div>
     </div>
@@ -209,6 +238,15 @@
         </div>
         <div class="wallet">Nave ativa: <b id="hangarShipName">Phoenix</b></div>
         <button id="closeHangar" class="small-btn">Fechar</button>
+      </div>
+      <div class="modal-showcase hangar-showcase">
+        <div class="showcase-image hangar-concept"></div>
+        <div class="showcase-copy">
+          <div class="eyebrow">HANGAR TÁTICO</div>
+          <h3>Frota, equipamentos e drones</h3>
+          <p>Organize sua nave ativa, equipe lasers e geradores, e monte seu esquadrão com uma apresentação muito mais premium.</p>
+          <div class="showcase-tags"><span>fleet</span><span>equip</span><span>drone setup</span><span>switch ship</span></div>
+        </div>
       </div>
       <div id="hangarTabs" class="tabs"></div>
       <div id="hangarContent"></div>

@@ -1,4 +1,4 @@
-# Stellar Legacy V8 (base de arte + projeto)
+# Stellar Legacy V8.1 (integrado com novo visual)
 
 Versão base da V8 preparada para subir no Git, usando a estrutura funcional da V7.2.1 e adicionando uma nova direção de arte para a próxima fase do jogo.
 
