@@ -1,4 +1,4 @@
-# Stellar Legacy V9.5 — Reward Protocol
+# Stellar Legacy V9.6 — Mission Arsenal
 
 Grande atualização de conteúdo sobre a base V9 Expedition. Mantém os mapas expandidos e adiciona densidade maior de NPCs e um sistema persistente de missões com aceite manual.
 
@@ -129,3 +129,16 @@ Release: **9.0.0**
 - A missão mensal de matança geral calcula o bônus com base nos inimigos realmente abatidos, então NPCs mais fortes aumentam o prêmio.
 - O painel mostra o bônus acumulado em tempo real.
 - Recompensas fixas antigas deixaram de ser usadas no resgate.
+
+
+## V9.6 — Mission Arsenal
+- Diárias: exatamente 3 contratos por dia, sorteados deterministicamente.
+- 1 diária de NPC aleatório: 100 normal ou 50 BOSS.
+- 1 diária de pedra aleatória: 500 unidades.
+- 1 diária conjunta: 50 + 50 NPCs comuns diferentes + 10 BOSS.
+- Semanais: 10 contratos para cada NPC e cada pedra com metas 10/25/50/100/150/200/250/500/750/1000.
+- Mensais: mesma estrutura da semanal com metas 10x maiores.
+- Especiais: 1 contrato de 10 eliminações para cada NPC, contratos de pedra, 5 mistos de NPC, 5 BOSS solo, 5 BOSS mistos e 6 híbridos NPC + pedra.
+- Missões especiais pagam 100% da soma dos ganhos dos alvos; diárias/semanais/mensais continuam pagando 50%.
+- Parte das missões compostas é sequencial: uma tarefa precisa ser concluída para desbloquear a próxima.
+- Painel ganhou busca e filtro por NPC/BOSS/PEDRAS/MISTAS/NPC+PEDRA.

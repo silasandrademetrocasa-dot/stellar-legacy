@@ -381,3 +381,22 @@ body::before{content:"";position:fixed;inset:0;pointer-events:none;background:ra
 .mission-reward span{letter-spacing:.07em}
 .mission-card.active .mission-reward{border-color:rgba(255,211,98,.25);background:linear-gradient(180deg,rgba(66,47,12,.22),rgba(11,20,31,.62))}
 .mission-card.active .mission-reward b{color:#ffe28a;text-shadow:0 0 8px rgba(255,194,62,.18)}
+
+/* ===== V9.6 Mission Arsenal ===== */
+.mission-catalog-tools{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:0 0 12px}
+.mission-search,.mission-group-filter{border:1px solid rgba(92,196,255,.22);background:#061321;color:#dff8ff;border-radius:10px;padding:9px 11px;font-size:11px;outline:none}
+.mission-search{flex:1;min-width:220px}
+.mission-group-filter{min-width:145px}
+.mission-search:focus,.mission-group-filter:focus{border-color:var(--mission-accent);box-shadow:0 0 0 3px color-mix(in srgb,var(--mission-accent) 10%,transparent)}
+.mission-card.catalog-hidden{display:none!important}
+.mission-task-list{display:flex;flex-direction:column;gap:6px}
+.mission-task{padding:7px 8px;border-radius:8px;border:1px solid rgba(89,192,255,.10);background:rgba(4,13,24,.66)}
+.mission-task.done{border-color:rgba(91,255,169,.24);background:rgba(8,38,28,.45)}
+.mission-task.task-locked{opacity:.42;border-style:dashed}
+.mission-task-head{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:10px;color:#b8d7e7}
+.mission-task-head b{color:#f2fbff;white-space:nowrap}
+.mission-task-progress{height:5px;margin-top:5px;border-radius:999px;background:#07111e;border:1px solid rgba(255,255,255,.05);overflow:hidden}
+.mission-task-progress i{display:block;height:100%;border-radius:999px;background:linear-gradient(90deg,color-mix(in srgb,var(--mission-accent) 70%,#fff),var(--mission-accent))}
+.mission-sequence-badge{padding:6px 8px;border-radius:8px;border:1px solid rgba(255,191,84,.20);background:rgba(69,44,8,.24);color:#ffd985;font-size:9px;font-weight:900;letter-spacing:.04em}
+.mission-category .mission-grid{align-items:stretch}
+@media(max-width:680px){.mission-catalog-tools{align-items:stretch}.mission-search,.mission-group-filter{width:100%;min-width:0}}

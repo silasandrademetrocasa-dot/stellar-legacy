@@ -140,57 +140,205 @@ const MAP_GRAPH_LINKS = [
 const PLAYABLE_GRAPH_LABELS = new Set(['1-1','1-2','1-3','1-4','2-1','2-2','2-3','2-4','3-1','3-2','3-3','3-4','4-1','4-2','4-3']);
 
 
+
 const MISSION_CATEGORIES = {
   daily: { label: 'MISSÕES DIÁRIAS', accent: '#58d9ff', reset: 'daily' },
-  weekly: { label: 'MISSÃO SEMANAL', accent: '#8d7bff', reset: 'weekly' },
-  monthly: { label: 'MISSÃO MENSAL', accent: '#ffc65a', reset: 'monthly' },
-  special: { label: 'MISSÃO ESPECIAL • PROGRESSO', accent: '#ff668a', reset: 'special' },
+  weekly: { label: 'MISSÕES SEMANAIS', accent: '#8d7bff', reset: 'weekly' },
+  monthly: { label: 'MISSÕES MENSAIS', accent: '#ffc65a', reset: 'monthly' },
+  special: { label: 'MISSÕES ESPECIAIS', accent: '#ff668a', reset: 'special' },
 };
-const MISSION_LIBRARY = {
-  daily: [
-    {id:'daily_streuner',title:'Caçada: Streuner',desc:'Elimine apenas Streuners comuns.',objective:'killType',types:['streuner'],target:25,reward:{credits:18000,uridium:25,xp:1200}},
-    {id:'daily_lordakia',title:'Caçada: Lordakia',desc:'Elimine apenas Lordakias comuns.',objective:'killType',types:['lordakia'],target:20,reward:{credits:22000,uridium:30,xp:1500}},
-    {id:'daily_saimon',title:'Caçada: Saimon',desc:'Elimine apenas Saimons comuns.',objective:'killType',types:['saimon'],target:15,reward:{credits:30000,uridium:35,xp:1900}},
-    {id:'daily_mordon',title:'Caçada: Mordon',desc:'Elimine apenas Mordons comuns.',objective:'killType',types:['mordon'],target:10,reward:{credits:45000,uridium:45,xp:2400}},
-    {id:'daily_devolarium',title:'Caçada: Devolarium',desc:'Elimine apenas Devolariums comuns.',objective:'killType',types:['devolarium'],target:6,reward:{credits:70000,uridium:60,xp:3200}},
-    {id:'daily_sibelon',title:'Caçada: Sibelon',desc:'Elimine apenas Sibelons comuns.',objective:'killType',types:['sibelon'],target:4,reward:{credits:95000,uridium:80,xp:4200}},
-  ],
-  weekly: [
-    {id:'weekly_streuner',title:'Semana Streuner',desc:'Faça uma limpeza pesada de Streuners.',objective:'killType',types:['streuner'],target:180,reward:{credits:150000,uridium:200,xp:8500}},
-    {id:'weekly_lordakia',title:'Semana Lordakia',desc:'Elimine somente Lordakias.',objective:'killType',types:['lordakia'],target:140,reward:{credits:185000,uridium:250,xp:10000}},
-    {id:'weekly_saimon',title:'Semana Saimon',desc:'Elimine somente Saimons.',objective:'killType',types:['saimon'],target:110,reward:{credits:230000,uridium:310,xp:12500}},
-    {id:'weekly_mordon',title:'Semana Mordon',desc:'Elimine somente Mordons.',objective:'killType',types:['mordon'],target:80,reward:{credits:320000,uridium:420,xp:16000}},
-    {id:'weekly_devolarium',title:'Semana Devolarium',desc:'Elimine somente Devolariums.',objective:'killType',types:['devolarium'],target:45,reward:{credits:470000,uridium:620,xp:22000}},
-    {id:'weekly_sibelon',title:'Semana Sibelon',desc:'Elimine somente Sibelons.',objective:'killType',types:['sibelon'],target:30,reward:{credits:650000,uridium:850,xp:30000}},
-  ],
-  monthly: [
-    {id:'war_machine',title:'Máquina de Guerra',desc:'Elimine qualquer inimigo durante o mês.',objective:'killAny',target:1000,reward:{credits:950000,uridium:1500,xp:52000}},
-    {id:'boss_breaker',title:'Aniquilador de Bosses',desc:'Destrua qualquer NPC BOSS durante o mês.',objective:'killBoss',target:120,reward:{credits:1250000,uridium:2100,xp:70000}},
-    {id:'monthly_sibelon',title:'Domínio Sibelon',desc:'Elimine somente Sibelons durante o mês.',objective:'killType',types:['sibelon'],target:120,reward:{credits:1150000,uridium:1850,xp:62000}},
-  ],
-  special: [
-    {id:'progress_streuner',stage:1,title:'Progresso I • Streuner',desc:'Primeira etapa da linha de progresso. Elimine somente Streuners.',objective:'killType',types:['streuner'],target:100,reward:{credits:90000,uridium:120,xp:5000}},
-    {id:'progress_lordakia',stage:2,requires:'progress_streuner',title:'Progresso II • Lordakia',desc:'Segunda etapa. Elimine somente Lordakias.',objective:'killType',types:['lordakia'],target:90,reward:{credits:140000,uridium:190,xp:7500}},
-    {id:'progress_saimon',stage:3,requires:'progress_lordakia',title:'Progresso III • Saimon',desc:'Terceira etapa. Elimine somente Saimons.',objective:'killType',types:['saimon'],target:75,reward:{credits:220000,uridium:300,xp:11000}},
-    {id:'progress_mordon',stage:4,requires:'progress_saimon',title:'Progresso IV • Mordon',desc:'Quarta etapa. Elimine somente Mordons.',objective:'killType',types:['mordon'],target:60,reward:{credits:340000,uridium:460,xp:16000}},
-    {id:'progress_devolarium',stage:5,requires:'progress_mordon',title:'Progresso V • Devolarium',desc:'Quinta etapa. Elimine somente Devolariums.',objective:'killType',types:['devolarium'],target:40,reward:{credits:520000,uridium:700,xp:23000}},
-    {id:'progress_sibelon',stage:6,requires:'progress_devolarium',title:'Progresso VI • Sibelon',desc:'Sexta etapa. Elimine somente Sibelons.',objective:'killType',types:['sibelon'],target:30,reward:{credits:760000,uridium:980,xp:32000}},
-    {id:'progress_boss_devolarium',stage:7,requires:'progress_sibelon',title:'Progresso VII • Boss Devolarium',desc:'Sétima etapa. Elimine somente Boss Devolariums.',objective:'killType',types:['bossDevolarium'],target:20,reward:{credits:1050000,uridium:1450,xp:45000}},
-    {id:'progress_boss_sibelon',stage:8,requires:'progress_boss_devolarium',title:'Progresso VIII • Boss Sibelon',desc:'Etapa final desta campanha. Elimine somente Boss Sibelons.',objective:'killType',types:['bossSibelon'],target:12,reward:{credits:1750000,uridium:2400,xp:70000}},
-  ],
-};
+
+const WEEKLY_STEPS = [10,25,50,100,150,200,250,500,750,1000];
+const MONTHLY_STEPS = WEEKLY_STEPS.map(v=>v*10);
+const MISSION_NPCS = Object.keys(NPC_TYPES);
+const NORMAL_MISSION_NPCS = MISSION_NPCS.filter(id=>!id.startsWith('boss'));
+const BOSS_MISSION_NPCS = MISSION_NPCS.filter(id=>id.startsWith('boss'));
+const MISSION_ORES = ['Prometium','Endurium','Terbium'];
+
 function missionPeriodKey(category,now=new Date()){
-  const y=now.getUTCFullYear(),m=String(now.getUTCMonth()+1).padStart(2,'0'),d=String(now.getUTCDate()).padStart(2,'0');
+  const y=now.getFullYear(),m=String(now.getMonth()+1).padStart(2,'0'),d=String(now.getDate()).padStart(2,'0');
   if(category==='daily')return `${y}-${m}-${d}`;
   if(category==='monthly')return `${y}-${m}`;
   if(category==='weekly'){
-    const copy=new Date(Date.UTC(y,now.getUTCMonth(),now.getUTCDate()));
-    const day=copy.getUTCDay()||7;copy.setUTCDate(copy.getUTCDate()-day+1);
-    return `${copy.getUTCFullYear()}-${String(copy.getUTCMonth()+1).padStart(2,'0')}-${String(copy.getUTCDate()).padStart(2,'0')}`;
+    const copy=new Date(y,now.getMonth(),now.getDate());
+    const day=copy.getDay()||7;copy.setDate(copy.getDate()-day+1);
+    return `${copy.getFullYear()}-${String(copy.getMonth()+1).padStart(2,'0')}-${String(copy.getDate()).padStart(2,'0')}`;
   }
-  return 'special-progress-v2';
+  return 'special-v9.6';
 }
+function hashStringSeed(str){
+  let h=2166136261>>>0;
+  for(let i=0;i<str.length;i++){h^=str.charCodeAt(i);h=Math.imul(h,16777619);}
+  return h>>>0;
+}
+function seededRng(seed){
+  let x=seed>>>0;
+  return ()=>{x=(Math.imul(1664525,x)+1013904223)>>>0;return x/4294967296;};
+}
+function pickSeeded(list,rng,exclude=[]){
+  const pool=list.filter(x=>!exclude.includes(x));
+  return pool[Math.floor(rng()*pool.length)]||pool[0]||list[0];
+}
+function taskKill(npc,target,id=null){return {id:id||`kill_${npc}_${target}`,type:'kill',npc,target};}
+function taskOre(resource,target,id=null){return {id:id||`ore_${resource}_${target}`,type:'ore',resource,target};}
+function makeMission({id,title,desc,tasks,group='mix',sequence=false,rewardFactor=.5,tag=''}) {
+  return {id,title,desc,tasks,group,sequence,rewardFactor,tag};
+}
+function buildDailyMissions(){
+  const key=missionPeriodKey('daily'),rng=seededRng(hashStringSeed(`daily:${key}`));
+  const huntNpc=pickSeeded(MISSION_NPCS,rng);
+  const huntTarget=huntNpc.startsWith('boss')?50:100;
+  const ore=pickSeeded(MISSION_ORES,rng);
+  const n1=pickSeeded(NORMAL_MISSION_NPCS,rng);
+  const n2=pickSeeded(NORMAL_MISSION_NPCS,rng,[n1]);
+  const boss=pickSeeded(BOSS_MISSION_NPCS,rng);
+  return [
+    makeMission({
+      id:'daily_hunt',
+      title:`Caçada do Dia • ${NPC_TYPES[huntNpc].name}`,
+      desc:`Alvo diário sorteado para hoje. Elimine somente ${NPC_TYPES[huntNpc].name}.`,
+      tasks:[taskKill(huntNpc,huntTarget,'daily_hunt_target')],
+      group:huntNpc.startsWith('boss')?'boss':'npc',rewardFactor:.5,tag:'DIÁRIA'
+    }),
+    makeMission({
+      id:'daily_ore',
+      title:`Mineração do Dia • ${RESOURCES[ore].name}`,
+      desc:`Colete a pedra sorteada do dia. Somente ${RESOURCES[ore].name} conta.`,
+      tasks:[taskOre(ore,500,'daily_ore_target')],
+      group:'ore',rewardFactor:.5,tag:'DIÁRIA'
+    }),
+    makeMission({
+      id:'daily_combo',
+      title:'Operação Tripla do Dia',
+      desc:`Missão conjunta diária: dois NPCs comuns + um BOSS sorteado.`,
+      tasks:[
+        taskKill(n1,50,'daily_combo_a'),
+        taskKill(n2,50,'daily_combo_b'),
+        taskKill(boss,10,'daily_combo_boss'),
+      ],
+      group:'mix',rewardFactor:.5,tag:'DIÁRIA'
+    }),
+  ];
+}
+function buildTierMissions(category,steps){
+  const label=category==='weekly'?'Semanal':'Mensal';
+  const missions=[];
+  for(const npc of MISSION_NPCS){
+    const boss=npc.startsWith('boss');
+    steps.forEach((target,i)=>{
+      missions.push(makeMission({
+        id:`${category}_npc_${npc}_${target}`,
+        title:`${label} • ${NPC_TYPES[npc].name} • ${target}`,
+        desc:`Elimine exatamente ${target} ${NPC_TYPES[npc].name}.`,
+        tasks:[taskKill(npc,target)],
+        group:boss?'boss':'npc',rewardFactor:.5,
+        tag:`${label.toUpperCase()} • NÍVEL ${i+1}`
+      }));
+    });
+  }
+  for(const ore of MISSION_ORES){
+    steps.forEach((target,i)=>{
+      missions.push(makeMission({
+        id:`${category}_ore_${ore}_${target}`,
+        title:`${label} • ${RESOURCES[ore].name} • ${target}`,
+        desc:`Colete ${target} unidades de ${RESOURCES[ore].name}.`,
+        tasks:[taskOre(ore,target)],
+        group:'ore',rewardFactor:.5,
+        tag:`${label.toUpperCase()} • NÍVEL ${i+1}`
+      }));
+    });
+  }
+  return missions;
+}
+function buildSpecialMissions(){
+  const missions=[];
+  // 1 missão de cada NPC, sempre 10 eliminações, pagamento de 100% da soma dos alvos.
+  for(const npc of MISSION_NPCS){
+    missions.push(makeMission({
+      id:`special_npc_${npc}`,
+      title:`Contrato Especial • ${NPC_TYPES[npc].name}`,
+      desc:`Contrato direto: elimine 10 ${NPC_TYPES[npc].name}.`,
+      tasks:[taskKill(npc,10)],
+      group:npc.startsWith('boss')?'boss':'npc',rewardFactor:1,
+      tag:'CONTRATO 100%'
+    }));
+  }
+  // 1 missão de cada pedra.
+  for(const ore of MISSION_ORES){
+    missions.push(makeMission({
+      id:`special_ore_${ore}`,
+      title:`Contrato Mineral • ${RESOURCES[ore].name}`,
+      desc:`Colete 250 unidades de ${RESOURCES[ore].name}.`,
+      tasks:[taskOre(ore,250)],
+      group:'ore',rewardFactor:1,tag:'MINERAÇÃO 100%'
+    }));
+  }
+
+  const npcMixes=[
+    ['special_mix_npc_1','Trinca de Fronteira',false,[['streuner',10],['lordakia',10],['saimon',5]]],
+    ['special_mix_npc_2','Escalada de Patrulha',true,[['recruitStreuner',15],['aiderStreuner',10],['mordon',5]]],
+    ['special_mix_npc_3','Rota de Caça',false,[['lordakia',20],['saimon',10],['devolarium',3]]],
+    ['special_mix_npc_4','Linha de Ataque',true,[['streuner',25],['mordon',10],['sibelon',3]]],
+    ['special_mix_npc_5','Operação Veterana',false,[['aiderStreuner',20],['devolarium',5],['sibelon',2]]],
+  ];
+  npcMixes.forEach(([id,title,sequence,defs])=>missions.push(makeMission({
+    id,title,sequence,group:'mix',rewardFactor:1,tag:sequence?'SEQUENCIAL':'MULTIALVO',
+    desc:sequence?'Conclua cada alvo na ordem para liberar a próxima etapa.':'Todos os alvos podem ser concluídos em qualquer ordem.',
+    tasks:defs.map(([npc,target],i)=>taskKill(npc,target,`${id}_t${i+1}`))
+  })));
+
+  const bossSingles=[
+    ['bossLordakia',10],['bossSaimon',10],['bossMordon',10],['bossDevolarium',10],['bossSibelon',10]
+  ];
+  bossSingles.forEach(([npc,target],i)=>missions.push(makeMission({
+    id:`special_boss_contract_${i+1}`,title:`Caçada BOSS ${i+1} • ${NPC_TYPES[npc].name}`,
+    desc:`Contrato pesado contra ${NPC_TYPES[npc].name}.`,
+    tasks:[taskKill(npc,target)],group:'boss',rewardFactor:1,tag:'BOSS 100%'
+  })));
+
+  const bossMixes=[
+    ['special_boss_mix_1','Tríade BOSS I',false,[['bossStreuner',10],['bossLordakia',8],['bossSaimon',6]]],
+    ['special_boss_mix_2','Tríade BOSS II',true,[['bossLordakia',10],['bossSaimon',8],['bossMordon',5]]],
+    ['special_boss_mix_3','Tríade BOSS III',false,[['bossSaimon',10],['bossMordon',8],['bossDevolarium',4]]],
+    ['special_boss_mix_4','Tríade BOSS IV',true,[['bossMordon',8],['bossDevolarium',5],['bossSibelon',3]]],
+    ['special_boss_mix_5','Tríade BOSS V',false,[['bossStreuner',20],['bossDevolarium',4],['bossSibelon',2]]],
+  ];
+  bossMixes.forEach(([id,title,sequence,defs])=>missions.push(makeMission({
+    id,title,sequence,group:'boss',rewardFactor:1,tag:sequence?'BOSS SEQUENCIAL':'BOSS MISTO',
+    desc:sequence?'Derrube cada grupo BOSS na ordem marcada.':'Elimine os três grupos BOSS em qualquer ordem.',
+    tasks:defs.map(([npc,target],i)=>taskKill(npc,target,`${id}_t${i+1}`))
+  })));
+
+  const hybrids=[
+    ['special_hybrid_1','Ferro e Cristal I',false,[taskKill('streuner',20,'h1a'),taskOre('Prometium',100,'h1b')]],
+    ['special_hybrid_2','Ferro e Cristal II',true,[taskKill('lordakia',20,'h2a'),taskOre('Endurium',100,'h2b')]],
+    ['special_hybrid_3','Ferro e Cristal III',false,[taskKill('mordon',10,'h3a'),taskOre('Terbium',100,'h3b')]],
+    ['special_hybrid_4','Ferro e Cristal IV',true,[taskKill('saimon',15,'h4a'),taskOre('Prometium',150,'h4b'),taskOre('Endurium',150,'h4c')]],
+    ['special_hybrid_5','Ferro e Cristal V',false,[taskKill('devolarium',5,'h5a'),taskOre('Endurium',200,'h5b'),taskOre('Terbium',150,'h5c')]],
+    ['special_hybrid_6','Ferro e Cristal VI',true,[taskKill('sibelon',3,'h6a'),taskOre('Prometium',250,'h6b'),taskOre('Terbium',250,'h6c')]],
+  ];
+  hybrids.forEach(([id,title,sequence,tasks])=>missions.push(makeMission({
+    id,title,sequence,tasks,group:'hybrid',rewardFactor:1,
+    tag:sequence?'HÍBRIDA SEQUENCIAL':'HÍBRIDA',
+    desc:sequence?'Complete combate e mineração na ordem para liberar a próxima tarefa.':'Combate e mineração podem avançar ao mesmo tempo.'
+  })));
+  return missions;
+}
+
+let CACHED_WEEKLY_MISSIONS=null,CACHED_MONTHLY_MISSIONS=null,CACHED_SPECIAL_MISSIONS=null;
+function getMissionLibrary(category){
+  if(category==='daily')return buildDailyMissions();
+  if(category==='weekly')return CACHED_WEEKLY_MISSIONS ||= buildTierMissions('weekly',WEEKLY_STEPS);
+  if(category==='monthly')return CACHED_MONTHLY_MISSIONS ||= buildTierMissions('monthly',MONTHLY_STEPS);
+  if(category==='special')return CACHED_SPECIAL_MISSIONS ||= buildSpecialMissions();
+  return [];
+}
+function missionById(category,id){return getMissionLibrary(category).find(m=>m.id===id)||null;}
 function freshMissions(){return {active:{daily:null,weekly:null,monthly:null,special:null},completed:{}};}
+function missionInstanceKey(category,id){return `${category}:${missionPeriodKey(category)}:${id}`;}
+function missionCompleted(category,id){return !!progress?.missions?.completed?.[missionInstanceKey(category,id)];}
+function missionUnlocked(){return true;}
+
 function normalizeMissionState(){
   if(!progress)return;
   progress.missions ||= freshMissions();
@@ -199,26 +347,25 @@ function normalizeMissionState(){
   for(const category of Object.keys(MISSION_CATEGORIES)){
     if(progress.missions.active[category]===undefined)progress.missions.active[category]=null;
     const active=progress.missions.active[category];
-    if(active && (active.period!==missionPeriodKey(category) || !missionById(category,active.id)))progress.missions.active[category]=null;
-    else if(active){
+    if(active && (active.period!==missionPeriodKey(category) || !missionById(category,active.id))){
+      progress.missions.active[category]=null;
+      continue;
+    }
+    if(active){
+      const mission=missionById(category,active.id);
+      active.taskProgress ||= {};
+      // Migração de saves com missão antiga de uma tarefa.
+      if(mission?.tasks?.length===1 && active.progress && active.taskProgress[mission.tasks[0].id]===undefined){
+        active.taskProgress[mission.tasks[0].id]=Number(active.progress)||0;
+      }
       active.bonus ||= {credits:0,uridium:0,xp:0};
       active.bonus.credits=Number(active.bonus.credits)||0;
       active.bonus.uridium=Number(active.bonus.uridium)||0;
       active.bonus.xp=Number(active.bonus.xp)||0;
+      active.complete=mission ? mission.tasks.every(t=>(Number(active.taskProgress[t.id])||0)>=t.target) : false;
     }
   }
 }
-function missionById(category,id){return (MISSION_LIBRARY[category]||[]).find(m=>m.id===id)||null;}
-function missionCompleted(category,id){return !!progress?.missions?.completed?.[missionInstanceKey(category,id)];}
-function missionUnlocked(category,mission){
-  if(!mission?.requires)return true;
-  return missionCompleted(category,mission.requires);
-}
-function missionTargetName(m){
-  const id=m?.types?.[0];
-  return id && NPC_TYPES[id] ? NPC_TYPES[id].name : 'alvo específico';
-}
-
 function npcKillReward(enemy){
   if(!enemy)return {credits:0,uridium:0,xp:0};
   return {
@@ -227,16 +374,19 @@ function npcKillReward(enemy){
     xp: Math.max(0,Math.round((Number(enemy.credits)||0)/10+(Number(enemy.uridium)||0)*12)),
   };
 }
-function halfKillReward(enemy){
-  const r=npcKillReward(enemy);
-  return {credits:r.credits*.5,uridium:r.uridium*.5,xp:r.xp*.5};
-}
-function addMissionBonus(active,enemy){
+function missionFactor(mission){return Math.max(0,Number(mission?.rewardFactor ?? .5));}
+function addMissionReward(active,mission,kind,payload,units=1){
   active.bonus ||= {credits:0,uridium:0,xp:0};
-  const b=halfKillReward(enemy);
-  active.bonus.credits=(Number(active.bonus.credits)||0)+b.credits;
-  active.bonus.uridium=(Number(active.bonus.uridium)||0)+b.uridium;
-  active.bonus.xp=(Number(active.bonus.xp)||0)+b.xp;
+  const factor=missionFactor(mission);
+  if(kind==='kill'){
+    const r=npcKillReward(payload.enemy);
+    active.bonus.credits+=(r.credits*factor)*units;
+    active.bonus.uridium+=(r.uridium*factor)*units;
+    active.bonus.xp+=(r.xp*factor)*units;
+  }else if(kind==='ore'){
+    const ore=RESOURCES[payload.type];
+    active.bonus.credits+=((ore?.sell||0)*factor)*units;
+  }
 }
 function roundedMissionBonus(active){
   const b=active?.bonus||{};
@@ -246,34 +396,53 @@ function roundedMissionBonus(active){
     xp:Math.max(0,Math.round(Number(b.xp)||0)),
   };
 }
-function projectedMissionReward(m){
-  if(m?.objective!=='killType'||!m.types?.length)return null;
-  const npc=NPC_TYPES[m.types[0]];if(!npc)return null;
-  const one=halfKillReward(npc);
-  return {
-    credits:Math.round(one.credits*m.target),
-    uridium:Math.round(one.uridium*m.target),
-    xp:Math.round(one.xp*m.target),
-  };
-}
-function missionInstanceKey(category,id){return `${category}:${missionPeriodKey(category)}:${id}`;}
-function missionObjectiveText(m){
-  if(m.objective==='killAny')return `Eliminações: ${m.target}`;
-  if(m.objective==='killBoss')return `Bosses destruídos: ${m.target}`;
-  if(m.objective==='killBattle')return `Eliminações em 4-X: ${m.target}`;
-  if(m.objective==='collectOre')return `Minérios coletados: ${m.target}`;
-  if(m.objective==='explore')return `Descobertas: ${m.target}`;
-  if(m.objective==='killType')return `Elimine ${missionTargetName(m)}: ${m.target}`;
-  return `Objetivo: ${m.target}`;
-}
-function missionRewardText(m,active=null){
-  if(active){
-    const b=roundedMissionBonus(active);
-    return `${fmt(b.credits)} CR • ${fmt(b.uridium)} URI • ${fmt(b.xp)} XP`;
+function projectedMissionReward(mission){
+  const factor=missionFactor(mission),r={credits:0,uridium:0,xp:0};
+  for(const task of mission.tasks||[]){
+    if(task.type==='kill'){
+      const npc=NPC_TYPES[task.npc];if(!npc)continue;
+      const one=npcKillReward(npc);
+      r.credits+=one.credits*task.target*factor;
+      r.uridium+=one.uridium*task.target*factor;
+      r.xp+=one.xp*task.target*factor;
+    }else if(task.type==='ore'){
+      r.credits+=(RESOURCES[task.resource]?.sell||0)*task.target*factor;
+    }
   }
-  const projected=projectedMissionReward(m);
-  if(projected)return `${fmt(projected.credits)} CR • ${fmt(projected.uridium)} URI • ${fmt(projected.xp)} XP`;
-  return '50% dos ganhos reais acumulados dos alvos';
+  return {credits:Math.round(r.credits),uridium:Math.round(r.uridium),xp:Math.round(r.xp)};
+}
+function missionRewardText(mission,active=null){
+  const r=active?roundedMissionBonus(active):projectedMissionReward(mission);
+  return `${fmt(r.credits)} CR • ${fmt(r.uridium)} URI • ${fmt(r.xp)} XP`;
+}
+function taskLabel(task){
+  if(task.type==='kill')return `${NPC_TYPES[task.npc]?.name||task.npc}`;
+  if(task.type==='ore')return `${RESOURCES[task.resource]?.name||task.resource}`;
+  return 'Tarefa';
+}
+function taskCurrent(active,task){return Math.min(task.target,Math.max(0,Number(active?.taskProgress?.[task.id])||0));}
+function taskDone(active,task){return taskCurrent(active,task)>=task.target;}
+function taskUnlocked(mission,active,index){
+  if(!mission.sequence)return true;
+  for(let i=0;i<index;i++)if(!taskDone(active,mission.tasks[i]))return false;
+  return true;
+}
+function missionTasksHtml(mission,active,isActive){
+  return `<div class="mission-task-list">${mission.tasks.map((task,index)=>{
+    const current=isActive?taskCurrent(active,task):0,done=isActive&&taskDone(active,task),unlocked=!isActive||taskUnlocked(mission,active,index);
+    const pct=isActive?Math.max(0,Math.min(100,current/task.target*100)):0;
+    const icon=task.type==='kill'?'☠':'◆';
+    return `<div class="mission-task${done?' done':''}${!unlocked?' task-locked':''}">
+      <div class="mission-task-head"><span>${!unlocked?'🔒':icon} ${taskLabel(task)}</span><b>${isActive?`${fmt(current)} / `:''}${fmt(task.target)}</b></div>
+      ${isActive?`<div class="mission-task-progress"><i style="width:${pct}%"></i></div>`:''}
+    </div>`;
+  }).join('')}</div>`;
+}
+function missionProgressPercent(mission,active){
+  if(!active)return 0;
+  const total=(mission.tasks||[]).reduce((a,t)=>a+t.target,0)||1;
+  const current=(mission.tasks||[]).reduce((a,t)=>a+taskCurrent(active,t),0);
+  return Math.round(Math.max(0,Math.min(100,current/total*100)));
 }
 function updateMissionButton(){
   if(!ui.missionBtn||!progress)return;
@@ -286,14 +455,18 @@ function acceptMission(category,id){
   normalizeMissionState();
   if(progress.missions.active[category]){showToast('Você já tem uma missão ativa nessa categoria');return;}
   const mission=missionById(category,id);if(!mission)return;
-  if(!missionUnlocked(category,mission)){const req=missionById(category,mission.requires);showToast(`Conclua primeiro: ${req?.title||'etapa anterior'}`);return;}
-  const key=missionInstanceKey(category,id);if(progress.missions.completed[key]){showToast('Essa missão já foi concluída neste ciclo');return;}
-  progress.missions.active[category]={id,period:missionPeriodKey(category),progress:0,complete:false,acceptedAt:Date.now(),bonus:{credits:0,uridium:0,xp:0}};
+  const key=missionInstanceKey(category,id);
+  if(progress.missions.completed[key]){showToast('Essa missão já foi concluída neste ciclo');return;}
+  progress.missions.active[category]={
+    id,period:missionPeriodKey(category),complete:false,acceptedAt:Date.now(),
+    taskProgress:{},bonus:{credits:0,uridium:0,xp:0}
+  };
   saveGame();renderMissions();updateMissionButton();showToast(`${mission.title} aceita — progresso iniciado`);
 }
 function abandonMission(category){
   normalizeMissionState();const active=progress.missions.active[category];if(!active)return;
-  const mission=missionById(category,active.id);progress.missions.active[category]=null;saveGame();renderMissions();updateMissionButton();showToast(`${mission?.title||'Missão'} abandonada`);
+  const mission=missionById(category,active.id);progress.missions.active[category]=null;
+  saveGame();renderMissions();updateMissionButton();showToast(`${mission?.title||'Missão'} abandonada`);
 }
 function claimMission(category){
   normalizeMissionState();const active=progress.missions.active[category];if(!active||!active.complete)return;
@@ -302,48 +475,105 @@ function claimMission(category){
   progress.profile.credits+=bonus.credits;progress.profile.uridium+=bonus.uridium;progress.profile.xp+=bonus.xp;
   while(progress.profile.xp>=progress.profile.level*2000){progress.profile.xp-=progress.profile.level*2000;progress.profile.level++;}
   progress.missions.completed[missionInstanceKey(category,mission.id)]=Date.now();
-  progress.missions.active[category]=null;saveGame();renderMissions();updateMissionButton();updateUI();showToast(`Missão concluída: +${fmt(bonus.credits)} CR • +${fmt(bonus.uridium)} URI • +${fmt(bonus.xp)} XP`);
+  progress.missions.active[category]=null;saveGame();renderMissions();updateMissionButton();updateUI();
+  showToast(`Missão concluída: +${fmt(bonus.credits)} CR • +${fmt(bonus.uridium)} URI • +${fmt(bonus.xp)} XP`);
 }
 function missionEvent(type,payload={}){
-  if(!progress)return;normalizeMissionState();let changed=false;
+  if(!progress)return;
+  normalizeMissionState();
+  let changed=false;
   for(const category of Object.keys(MISSION_CATEGORIES)){
     const active=progress.missions.active[category];if(!active||active.complete)continue;
     const mission=missionById(category,active.id);if(!mission)continue;
-    let add=0;
-    if(type==='kill'){
-      const enemy=payload.enemy;
-      if(mission.objective==='killAny')add=1;
-      else if(mission.objective==='killBoss'&&enemy?.type?.startsWith('boss'))add=1;
-      else if(mission.objective==='killBattle'&&MAPS[payload.mapId]?.battle)add=1;
-      else if(mission.objective==='killType'&&mission.types?.includes(enemy?.type))add=1;
-    }else if(type==='collectOre'&&mission.objective==='collectOre')add=Math.max(0,Number(payload.amount)||0);
-    else if(type==='explore'&&mission.objective==='explore')add=1;
-    if(!add)continue;
-    if(type==='kill'&&payload.enemy)addMissionBonus(active,payload.enemy);
-    active.progress=Math.min(mission.target,(Number(active.progress)||0)+add);changed=true;
-    if(active.progress>=mission.target&&!active.complete){active.complete=true;showToast(`MISSÃO COMPLETA: ${mission.title} — resgate a recompensa`);}
+    let eventAmount=type==='collectOre'?Math.max(0,Number(payload.amount)||0):1;
+    if(eventAmount<=0)continue;
+    for(let i=0;i<mission.tasks.length;i++){
+      const task=mission.tasks[i];
+      if(!taskUnlocked(mission,active,i))continue;
+      const current=taskCurrent(active,task),remaining=Math.max(0,task.target-current);
+      if(!remaining)continue;
+      let matches=false;
+      if(type==='kill'&&task.type==='kill'&&payload.enemy?.type===task.npc)matches=true;
+      if(type==='collectOre'&&task.type==='ore'&&payload.type===task.resource)matches=true;
+      if(!matches)continue;
+      const add=Math.min(remaining,type==='kill'?1:eventAmount);
+      if(add<=0)continue;
+      active.taskProgress[task.id]=current+add;
+      addMissionReward(active,mission,task.type==='kill'?'kill':'ore',payload,add);
+      changed=true;
+      // Em sequência, um evento só avança a tarefa atualmente liberada.
+      if(mission.sequence)break;
+      if(type==='kill')break;
+    }
+    if(changed){
+      active.complete=mission.tasks.every(t=>taskDone(active,t));
+      if(active.complete)showToast(`MISSÃO COMPLETA: ${mission.title} — resgate a recompensa`);
+    }
   }
   if(changed){saveGame();updateMissionButton();if(ui.missionModal&&!ui.missionModal.classList.contains('hidden'))renderMissions();}
 }
+function missionGroupLabel(group){
+  return group==='npc'?'NPC':group==='boss'?'BOSS':group==='ore'?'PEDRAS':group==='hybrid'?'NPC + PEDRA':'MISTAS';
+}
+function renderMissionFilter(section,category,grid,missions){
+  if(missions.length<=12)return;
+  const tools=document.createElement('div');tools.className='mission-catalog-tools';
+  tools.innerHTML=`<input class="mission-search" type="search" placeholder="Buscar missão, NPC ou pedra..." aria-label="Buscar missão">
+  <select class="mission-group-filter" aria-label="Filtrar missões">
+    <option value="all">TODAS</option>
+    <option value="npc">NPC</option>
+    <option value="boss">BOSS</option>
+    <option value="ore">PEDRAS</option>
+    <option value="mix">MISTAS</option>
+    <option value="hybrid">NPC + PEDRA</option>
+  </select>`;
+  const apply=()=>{
+    const q=tools.querySelector('.mission-search').value.trim().toLowerCase();
+    const group=tools.querySelector('.mission-group-filter').value;
+    [...grid.children].forEach(card=>{
+      const okGroup=group==='all'||card.dataset.group===group;
+      const okText=!q||card.dataset.search.includes(q);
+      card.classList.toggle('catalog-hidden',!(okGroup&&okText));
+    });
+  };
+  tools.querySelector('.mission-search').addEventListener('input',apply);
+  tools.querySelector('.mission-group-filter').addEventListener('change',apply);
+  section.appendChild(tools);
+}
 function renderMissions(){
-  if(!ui.missionContent||!progress)return;normalizeMissionState();ui.missionContent.innerHTML='';
+  if(!ui.missionContent||!progress)return;
+  normalizeMissionState();ui.missionContent.innerHTML='';
   for(const [category,meta] of Object.entries(MISSION_CATEGORIES)){
+    const missions=getMissionLibrary(category);
     const section=document.createElement('section');section.className='mission-category';section.style.setProperty('--mission-accent',meta.accent);
     const active=progress.missions.active[category];
-    section.innerHTML=`<div class="mission-category-head"><div><div class="eyebrow">${meta.label}</div><h3>${active?'1 missão ativa':'Escolha sua missão'}</h3></div><span class="mission-slot-badge">${active?'ATIVA':'LIVRE'}</span></div>`;
+    section.innerHTML=`<div class="mission-category-head"><div><div class="eyebrow">${meta.label}</div><h3>${active?'1 missão ativa':`${missions.length} contratos disponíveis`}</h3></div><span class="mission-slot-badge">${active?'ATIVA':'LIVRE'}</span></div>`;
     const grid=document.createElement('div');grid.className='mission-grid';
-    for(const mission of MISSION_LIBRARY[category]){
-      const isActive=active?.id===mission.id,done=missionCompleted(category,mission.id),prereqUnlocked=missionUnlocked(category,mission),slotLocked=!!active&&!isActive,locked=slotLocked||(!prereqUnlocked&&!done);
-      const current=isActive?Math.min(mission.target,Number(active.progress)||0):0,pct=Math.max(0,Math.min(100,current/mission.target*100));
-      const reqMission=mission.requires?missionById(category,mission.requires):null;
+    renderMissionFilter(section,category,grid,missions);
+    for(const mission of missions){
+      const isActive=active?.id===mission.id,done=missionCompleted(category,mission.id),slotLocked=!!active&&!isActive,locked=slotLocked;
+      const pct=isActive?missionProgressPercent(mission,active):0;
       const card=document.createElement('article');card.className=`mission-card${isActive?' active':''}${done?' completed':''}${locked?' locked':''}`;
-      card.innerHTML=`<div class="mission-card-top"><div><span class="mission-type-chip">${mission.stage?`ETAPA ${mission.stage} • `:''}${meta.label.replace('MISSÕES ','').replace('MISSÃO ','')}</span><h4>${mission.title}</h4></div>${done?'<span class="mission-done">✓ CONCLUÍDA</span>':''}</div><p>${mission.desc}</p><div class="mission-objective">${missionObjectiveText(mission)}</div>${!prereqUnlocked&&!done?`<div class="mission-prereq">🔒 Requer: ${reqMission?.title||'etapa anterior'}</div>`:''}${isActive?`<div class="mission-progress-row"><span>${fmt(current)} / ${fmt(mission.target)}</span><b>${Math.round(pct)}%</b></div><div class="mission-progress"><i style="width:${pct}%"></i></div>`:''}<div class="mission-reward"><span>${isActive?'BÔNUS ACUMULADO • 50%':'RECOMPENSA • 50%'}</span><b>${missionRewardText(mission,isActive?active:null)}</b></div>`;
+      card.dataset.group=mission.group||'mix';
+      card.dataset.search=`${mission.title} ${mission.desc} ${(mission.tasks||[]).map(taskLabel).join(' ')}`.toLowerCase();
+      const factor=Math.round(missionFactor(mission)*100);
+      card.innerHTML=`<div class="mission-card-top"><div><span class="mission-type-chip">${mission.tag||missionGroupLabel(mission.group)}</span><h4>${mission.title}</h4></div>${done?'<span class="mission-done">✓ CONCLUÍDA</span>':''}</div>
+        <p>${mission.desc}</p>
+        ${mission.sequence?'<div class="mission-sequence-badge">SEQUENCIAL • complete uma etapa para liberar a próxima</div>':''}
+        ${missionTasksHtml(mission,active,isActive)}
+        ${isActive?`<div class="mission-progress-row"><span>PROGRESSO TOTAL</span><b>${pct}%</b></div><div class="mission-progress"><i style="width:${pct}%"></i></div>`:''}
+        <div class="mission-reward"><span>${isActive?`BÔNUS ACUMULADO • ${factor}%`:`RECOMPENSA ESTIMADA • ${factor}%`}</span><b>${missionRewardText(mission,isActive?active:null)}</b></div>`;
       const actions=document.createElement('div');actions.className='mission-actions';
       if(isActive){
-        const primary=document.createElement('button');primary.className=active.complete?'small-btn gold':'small-btn';primary.textContent=active.complete?'RESGATAR':'EM ANDAMENTO';primary.disabled=!active.complete;primary.onclick=()=>claimMission(category);actions.appendChild(primary);
+        const primary=document.createElement('button');primary.className=active.complete?'small-btn gold':'small-btn';
+        primary.textContent=active.complete?'RESGATAR':'EM ANDAMENTO';primary.disabled=!active.complete;primary.onclick=()=>claimMission(category);actions.appendChild(primary);
         const abandon=document.createElement('button');abandon.className='ghost-btn';abandon.textContent='ABANDONAR';abandon.onclick=()=>abandonMission(category);actions.appendChild(abandon);
-      }else if(done){const b=document.createElement('button');b.className='small-btn';b.disabled=true;b.textContent='CONCLUÍDA';actions.appendChild(b);}
-      else{const b=document.createElement('button');b.className='small-btn';b.disabled=locked;b.textContent=!prereqUnlocked?'BLOQUEADA':slotLocked?'OUTRA ATIVA':'ACEITAR';b.onclick=()=>acceptMission(category,mission.id);actions.appendChild(b);}
+      }else if(done){
+        const b=document.createElement('button');b.className='small-btn';b.disabled=true;b.textContent='CONCLUÍDA';actions.appendChild(b);
+      }else{
+        const b=document.createElement('button');b.className='small-btn';b.disabled=locked;b.textContent=slotLocked?'OUTRA ATIVA':'ACEITAR';
+        b.onclick=()=>acceptMission(category,mission.id);actions.appendChild(b);
+      }
       card.appendChild(actions);grid.appendChild(card);
     }
     section.appendChild(grid);ui.missionContent.appendChild(section);
@@ -351,6 +581,7 @@ function renderMissions(){
   updateMissionButton();
 }
 function openMissions(){normalizeMissionState();renderMissions();ui.missionModal.classList.remove('hidden');}
+
 
 function blankLoadout(shipId='phoenix') {
   const ship = SHIPS[shipId];
