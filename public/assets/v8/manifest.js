@@ -1,0 +1,105 @@
+export const V8_ASSETS = {
+  "branding": {
+    "logo": "/assets/v8/branding/logo-v8.png",
+    "earth": "/assets/v8/branding/earth.png",
+    "mars": "/assets/v8/branding/mars.png",
+    "jupiter": "/assets/v8/branding/jupiter.png"
+  },
+  "ships": {
+    "phoenix": "/assets/v8/ships/phoenix.png",
+    "liberator": "/assets/v8/ships/liberator.png",
+    "piranha": "/assets/v8/ships/piranha.png",
+    "leonov": "/assets/v8/ships/leonov.png",
+    "nostromo": "/assets/v8/ships/nostromo.png",
+    "bigboy": "/assets/v8/ships/bigboy.png",
+    "vengeance": "/assets/v8/ships/vengeance.png",
+    "goliath": "/assets/v8/ships/goliath.png",
+    "spearhead": "/assets/v8/ships/spearhead.png",
+    "aegis": "/assets/v8/ships/aegis.png",
+    "citadel": "/assets/v8/ships/citadel.png",
+    "solace": "/assets/v8/ships/solace.png",
+    "spectrum": "/assets/v8/ships/spectrum.png"
+  },
+  "npcs": {
+    "streuner": "/assets/v8/npcs/streuner.png",
+    "recruitStreuner": "/assets/v8/npcs/recruitStreuner.png",
+    "aiderStreuner": "/assets/v8/npcs/aiderStreuner.png",
+    "lordakia": "/assets/v8/npcs/lordakia.png",
+    "saimon": "/assets/v8/npcs/saimon.png",
+    "mordon": "/assets/v8/npcs/mordon.png",
+    "devolarium": "/assets/v8/npcs/devolarium.png",
+    "sibelon": "/assets/v8/npcs/sibelon.png",
+    "bossStreuner": "/assets/v8/npcs/bossStreuner.png",
+    "bossLordakia": "/assets/v8/npcs/bossLordakia.png",
+    "bossSaimon": "/assets/v8/npcs/bossSaimon.png",
+    "bossMordon": "/assets/v8/npcs/bossMordon.png",
+    "bossDevolarium": "/assets/v8/npcs/bossDevolarium.png",
+    "bossSibelon": "/assets/v8/npcs/bossSibelon.png"
+  },
+  "drones": {
+    "flax": "/assets/v8/drones/flax.png",
+    "iris": "/assets/v8/drones/iris.png",
+    "pet": "/assets/v8/drones/pet.png",
+    "petElite": "/assets/v8/drones/pet-elite.png"
+  },
+  "equipment": {
+    "lf1": "/assets/v8/equipment/lf1.png",
+    "mp1": "/assets/v8/equipment/mp1.png",
+    "sl01": "/assets/v8/equipment/sl01.png",
+    "lf2": "/assets/v8/equipment/lf2.png",
+    "lf3": "/assets/v8/equipment/lf3.png",
+    "lf4": "/assets/v8/equipment/lf4.png",
+    "sg3na01": "/assets/v8/equipment/sg3na01.png",
+    "sg3na02": "/assets/v8/equipment/sg3na02.png",
+    "sg3na03": "/assets/v8/equipment/sg3na03.png",
+    "sg3nb01": "/assets/v8/equipment/sg3nb01.png",
+    "sg3nb02": "/assets/v8/equipment/sg3nb02.png",
+    "sg3nb03": "/assets/v8/equipment/sg3nb03.png",
+    "g3n1010": "/assets/v8/equipment/g3n1010.png",
+    "g3n2010": "/assets/v8/equipment/g3n2010.png",
+    "g3n3210": "/assets/v8/equipment/g3n3210.png",
+    "g3n3310": "/assets/v8/equipment/g3n3310.png",
+    "g3n6900": "/assets/v8/equipment/g3n6900.png",
+    "g3n7900": "/assets/v8/equipment/g3n7900.png",
+    "autoLaserCpu": "/assets/v8/equipment/autoLaserCpu.png",
+    "autoRocketCpu": "/assets/v8/equipment/autoRocketCpu.png",
+    "rocketTurboCpu": "/assets/v8/equipment/rocketTurboCpu.png",
+    "rep2": "/assets/v8/equipment/rep2.png",
+    "ammoAutoBuyCpu": "/assets/v8/equipment/ammoAutoBuyCpu.png"
+  },
+  "ammo": {
+    "lcb10": "/assets/v8/ammo/lcb10.png",
+    "mcb25": "/assets/v8/ammo/mcb25.png",
+    "mcb50": "/assets/v8/ammo/mcb50.png",
+    "ucb100": "/assets/v8/ammo/ucb100.png",
+    "r310": "/assets/v8/ammo/r310.png",
+    "plt2026": "/assets/v8/ammo/plt2026.png",
+    "plt2021": "/assets/v8/ammo/plt2021.png",
+    "plt3030": "/assets/v8/ammo/plt3030.png"
+  },
+  "resources": {
+    "Prometium": "/assets/v8/resources/Prometium.png",
+    "Endurium": "/assets/v8/resources/Endurium.png",
+    "Terbium": "/assets/v8/resources/Terbium.png",
+    "Prometid": "/assets/v8/resources/Prometid.png",
+    "Duranium": "/assets/v8/resources/Duranium.png",
+    "Promerium": "/assets/v8/resources/Promerium.png",
+    "Xenomit": "/assets/v8/resources/Xenomit.png",
+    "credits": "/assets/v8/resources/credits.png"
+  },
+  "loot": {
+    "cargo": "/assets/v8/loot/cargo-box.png",
+    "mystery": "/assets/v8/loot/mystery-box.png",
+    "repair": "/assets/v8/loot/repair.png",
+    "energy": "/assets/v8/loot/energy.png"
+  },
+  "backgrounds": {
+    "x1": "/assets/v8/backgrounds/safe-zone.jpg",
+    "x2": "/assets/v8/backgrounds/asteroid-field.jpg",
+    "x3": "/assets/v8/backgrounds/purple-nebula.jpg",
+    "x4": "/assets/v8/backgrounds/fire-sector.jpg",
+    "b41": "/assets/v8/backgrounds/deep-battle.jpg",
+    "b42": "/assets/v8/backgrounds/alien-core.jpg",
+    "b43": "/assets/v8/backgrounds/fire-sector.jpg"
+  }
+};

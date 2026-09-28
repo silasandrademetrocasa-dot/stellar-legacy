@@ -1,258 +1,218 @@
-<!doctype html>
+<!DOCTYPE html>
+
 <html lang="pt-BR">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
-  <meta name="theme-color" content="#030816">
-  <title>Stellar Legacy V8.1</title>
-  <link rel="stylesheet" href="/style.css">
+<meta charset="utf-8"/>
+<meta content="width=device-width,initial-scale=1,user-scalable=no" name="viewport"/>
+<meta content="#030816" name="theme-color"/>
+<title>Stellar Legacy V9 — Expedition Update</title>
+<link href="/style.css" rel="stylesheet"/>
 </head>
 <body>
 <div id="app">
-  <canvas id="game"></canvas>
-
-  <header id="topbar" class="hud-panel v8-topbar">
-    <div class="brand-chip">STELLAR LEGACY <span>V8</span></div>
-    <div class="top-meta left">
-      <span>Facção <b id="factionLabel">—</b></span>
-      <span>Mapa <b id="mapLabel">—</b></span>
-      <span>Nave <b id="shipLabel">Phoenix</b></span>
-      <span>LV <b id="lvl">1</b></span>
-      <span>XP <b id="xp">0</b></span>
-      <span>CR <b id="credits">0</b></span>
-      <span>URI <b id="uridium">0</b></span>
-    </div>
-    <div class="top-actions">
-      <span class="pilot-chip">Piloto <b id="userLabel">—</b></span>
-      <span id="syncLabel" class="sync-chip">LOCAL</span>
-      <button id="mapBtn" class="small-btn">MAPAS</button>
-      <button id="petBtn" class="small-btn pet-top-btn">P.E.T. LV1</button>
-      <button id="shopBtn" class="small-btn gold">LOJA</button>
-      <button id="cargoBtn" class="small-btn">PORÃO</button>
-      <button id="hangarBtn" class="small-btn">HANGAR</button>
-      <button id="hudToggle" class="small-btn">HUD</button>
-      <button id="logoutBtn" class="small-btn danger-lite">SAIR</button>
-    </div>
-  </header>
-
-  <section id="leftStats" class="hud-panel compact-stats ship-stats-float">
-    <div id="statsHeader" class="stats-toolbar tappable-toolbar">
-      <div class="stats-toolbar-left">
-        <button id="statsToggle" class="stats-expand-btn" title="Expandir / recolher painel da nave" aria-label="Expandir / recolher painel da nave">▾</button>
-        <div class="stats-toolbar-label">NAVE</div>
-      </div>
-    </div>
-    <div id="leftStatsContent" class="stack left-stats-content">
-      <div>HP <span id="hp">0</span>/<span id="maxHp">0</span></div>
-      <div>ESC <span id="shield">0</span>/<span id="maxShield">0</span></div>
-      <div>VEL <span id="speed">0</span></div>
-      <div>PORÃO <span id="cargoUsed">0</span>/<span id="cargoMax">0</span></div>
-      <div id="safeZoneLabel" class="safe-zone-status">FORA DA BASE</div>
-    </div>
-  </section>
-
-  <section id="targetPanel" class="hud-panel stack">
-    <div class="title">ALVO</div>
-    <div id="targetName">Sem alvo</div>
-    <div class="bar-wrap"><div id="targetHpBar" class="bar hp"></div></div>
-    <div class="bar-wrap"><div id="targetShieldBar" class="bar shield"></div></div>
-    <div id="targetStats">Toque em um NPC para selecionar</div>
-  </section>
-
-  <section id="minimapPanel" class="hud-panel minimap-panel">
-    <div id="minimapHeader" class="minimap-toolbar tappable-toolbar">
-      <div class="minimap-toolbar-left">
-        <button id="minimapToggle" class="stats-expand-btn" title="Expandir / recolher minimapa" aria-label="Expandir / recolher minimapa">▾</button>
-        <div class="stats-toolbar-label">MAPA</div>
-      </div>
-    </div>
-    <canvas id="minimap" width="180" height="180"></canvas>
-  </section>
-
-  <section id="weaponBar" class="hud-panel compact-ammo-ui">
-    <div class="weapon-toolbar">
-      <div class="weapon-toolbar-left">
-        <button id="weaponBarToggle" class="weapon-expand-btn" title="Expandir / recolher menu de munições" aria-label="Expandir / recolher menu de munições">▾</button>
-        <div class="weapon-toolbar-label">MUNIÇÕES</div>
-      </div>
-      <div class="section actions actions-inline">
-        <button id="laserToggle" class="action-btn">⚡ LASER <span class="keyhint">CTRL</span></button>
-        <button id="rocketFire" class="action-btn">🚀 MÍSSIL <span class="keyhint">ESPAÇO</span></button>
-      </div>
-    </div>
-    <div id="weaponBarContent" class="weapon-bar-content">
-      <div class="ammo-clusters">
-        <div class="section weapon-section ammo-bubble-section">
-          <div class="section-title">LASER</div>
-          <div id="laserAmmoButtons" class="button-row ammo-bubbles"></div>
-        </div>
-        <div class="section weapon-section ammo-bubble-section">
-          <div class="section-title">MÍSSEIS</div>
-          <div id="rocketAmmoButtons" class="button-row ammo-bubbles"></div>
-        </div>
-      </div>
-      <div class="section extras compact extras-inline">
-        <div id="rocketCd" class="cooldown-pill">MÍSSIL PRONTO</div>
-      </div>
-    </div>
-  </section>
-
-  <div id="toast"></div>
-  <button id="portalPrompt" class="portal-prompt hidden" type="button"><span class="portal-icon">↯</span><span><b>JUMP / SALTAR</b><small id="portalPromptMap">—</small></span></button>
-  <div id="jumpTransition" class="jump-transition hidden">
-    <div class="warp-stars"></div>
-    <div class="warp-ring ring-a"></div>
-    <div class="warp-ring ring-b"></div>
-    <div class="warp-core"></div>
-    <div class="warp-copy"><div class="eyebrow">QUANTUM JUMP</div><h2 id="jumpTitle">SALTANDO</h2><div id="jumpSubtitle">Sincronizando coordenadas...</div></div>
-  </div>
-
-
-  <div id="loginModal" class="modal fixed-modal">
-    <div class="modal-card login-card">
-      <div class="eyebrow">STELLAR NETWORK</div>
-      <h1>Entrar no universo</h1>
-      <p class="muted">Sua conta salva facção, nave, inventário, drones, munição e progresso online.</p>
-      <div class="auth-art-panel"><div class="auth-art-copy"><div class="eyebrow">DIREÇÃO DE ARTE V8</div><h3>Visual espacial premium</h3><p>Nova identidade visual sci-fi inspirada nas artes e interfaces da próxima geração do Stellar Legacy.</p></div><div class="auth-art-thumb auth-battle"></div></div>
-      <div class="auth-tabs">
-        <button id="loginTabBtn" class="tab-btn active">Entrar</button>
-        <button id="registerTabBtn" class="tab-btn">Criar conta</button>
-      </div>
-      <form id="loginForm" class="auth-form">
-        <label>E-mail<input id="loginEmail" type="email" autocomplete="email" required placeholder="piloto@email.com"></label>
-        <label>Senha<input id="loginPassword" type="password" autocomplete="current-password" required minlength="6" placeholder="••••••••"></label>
-        <button class="primary-btn" type="submit">ENTRAR</button>
-      </form>
-      <form id="registerForm" class="auth-form hidden">
-        <label>Callsign<input id="registerCallsign" type="text" required minlength="2" maxlength="24" placeholder="Seu nome no espaço"></label>
-        <label>E-mail<input id="registerEmail" type="email" autocomplete="email" required placeholder="piloto@email.com"></label>
-        <label>Senha<input id="registerPassword" type="password" autocomplete="new-password" required minlength="6" placeholder="mínimo 6 caracteres"></label>
-        <button class="primary-btn" type="submit">CRIAR CONTA</button>
-      </form>
-      <div id="authMessage" class="auth-message"></div>
-    </div>
-  </div>
-  <div id="factionModal" class="modal hidden fixed-modal">
-    <div class="modal-card onboarding-card">
-      <div class="eyebrow">PRIMEIRO ACESSO</div>
-      <h1>Escolha sua facção</h1>
-      <p>Essa escolha define sua companhia, sua base e a numeração dos mapas iniciais. Você começa com uma <b>Phoenix</b>, sem drones e com equipamento básico.</p>
-      <div id="factionCards" class="faction-grid"></div>
-      <div class="warning-text">A facção fica gravada neste save.</div>
-    </div>
-  </div>
-
-  <div id="cargoModal" class="modal hidden">
-    <div class="modal-card wide-card">
-      <div class="modal-header">
-        <div>
-          <div class="eyebrow">CARGA & COMÉRCIO</div>
-          <h2>Porão da Nave</h2>
-        </div>
-        <button id="closeCargo" class="small-btn">Fechar</button>
-      </div>
-      <div id="cargoSummary" class="section-box"></div>
-      <div class="cargo-toolbar">
-        <div class="muted">Colete minérios soltos e caixas de carga deixadas pelos NPCs. A venda só funciona na base X-1.</div>
-        <button id="sellAllCargo" class="small-btn gold">VENDER TUDO</button>
-      </div>
-      <div id="cargoGrid" class="cargo-grid"></div>
-    </div>
-  </div>
-
-  <div id="mapModal" class="modal hidden">
-    <div class="modal-card wide-card map-card">
-      <div class="modal-header">
-        <div>
-          <div class="eyebrow">NAVEGAÇÃO GALÁCTICA</div>
-          <h2>Mapa de rotas</h2>
-        </div>
-        <button id="closeMap" class="small-btn">Fechar</button>
-      </div>
-      <div class="muted" style="margin-bottom:10px">Seu mapa atual recebe destaque. Os mapas da sua facção aparecem iluminados e as rotas seguem a lógica clássica.</div>
-      <div class="modal-showcase map-showcase">
-        <div class="showcase-image map-concept"></div>
-        <div class="showcase-copy">
-          <div class="eyebrow">ROTA ESTELAR V8</div>
-          <h3>Navegação com visual tático</h3>
-          <p>Os mapas agora seguem uma direção mais premium, com rotas claras, destaque do setor atual e base visual baseada nos concepts da V8.</p>
-          <div class="showcase-tags"><span>rotas</span><span>setores</span><span>travel</span><span>battle maps</span></div>
-        </div>
-      </div>
-      <div id="mapNetwork" class="map-network"></div>
-    </div>
-  </div>
-
-  <div id="petModal" class="modal hidden">
-    <div class="modal-card wide-card pet-modal-card">
-      <div class="modal-header">
-        <div>
-          <div class="eyebrow">P.E.T. / ESCOLTA AUTÔNOMA</div>
-          <h2>Sistema P.E.T.</h2>
-        </div>
-        <button id="closePet" class="small-btn">Fechar</button>
-      </div>
-      <div class="modal-showcase pet-showcase">
-        <div class="showcase-image battle-concept"></div>
-        <div class="showcase-copy">
-          <div class="eyebrow">AUTOMAÇÃO DE COMBATE</div>
-          <h3>P.E.T. com nova identidade V8</h3>
-          <p>Layout mais limpo para gerenciar engrenagens, slots, extras e automações do P.E.T.</p>
-          <div class="showcase-tags"><span>auto loot</span><span>kamikaze</span><span>regen</span><span>collector</span></div>
-        </div>
-      </div>
-      <div id="petContent"></div>
-    </div>
-  </div>
-
-  <div id="shopModal" class="modal hidden">
-    <div class="modal-card wide-card">
-      <div class="modal-header">
-        <div>
-          <div class="eyebrow">ECONOMIA & PROGRESSÃO</div>
-          <h2>Loja Orbital</h2>
-        </div>
-        <div class="wallet">CR <b id="shopCredits">0</b> • URI <b id="shopUridium">0</b></div>
-        <button id="closeShop" class="small-btn">Fechar</button>
-      </div>
-      <div class="modal-showcase shop-showcase">
-        <div class="showcase-image hangar-concept"></div>
-        <div class="showcase-copy">
-          <div class="eyebrow">COMÉRCIO INTERESTELAR</div>
-          <h3>Loja orbital repaginada</h3>
-          <p>Naves, extras, munições, drones e upgrades apresentados com visual mais forte e futurista.</p>
-          <div class="showcase-tags"><span>naves</span><span>drones</span><span>munição</span><span>extras</span></div>
-        </div>
-      </div>
-      <div id="shopTabs" class="tabs"></div>
-      <div id="shopGrid" class="product-grid"></div>
-    </div>
-  </div>
-
-  <div id="hangarModal" class="modal hidden">
-    <div class="modal-card wide-card">
-      <div class="modal-header">
-        <div>
-          <div class="eyebrow">GERENCIAMENTO</div>
-          <h2>Hangar</h2>
-        </div>
-        <div class="wallet">Nave ativa: <b id="hangarShipName">Phoenix</b></div>
-        <button id="closeHangar" class="small-btn">Fechar</button>
-      </div>
-      <div class="modal-showcase hangar-showcase">
-        <div class="showcase-image hangar-concept"></div>
-        <div class="showcase-copy">
-          <div class="eyebrow">HANGAR TÁTICO</div>
-          <h3>Frota, equipamentos e drones</h3>
-          <p>Organize sua nave ativa, equipe lasers e geradores, e monte seu esquadrão com uma apresentação muito mais premium.</p>
-          <div class="showcase-tags"><span>fleet</span><span>equip</span><span>drone setup</span><span>switch ship</span></div>
-        </div>
-      </div>
-      <div id="hangarTabs" class="tabs"></div>
-      <div id="hangarContent"></div>
-    </div>
-  </div>
+<canvas id="game"></canvas>
+<header class="hud-panel v8-topbar" id="topbar">
+<div class="brand-chip"><img alt="Stellar Legacy V8" class="brand-logo" src="/assets/v8/branding/logo-v8.png"/><span>EXPEDITION</span></div>
+<div class="top-meta left">
+<span><img alt="Facção" class="faction-mini-icon" id="factionIcon" src="/assets/v8/branding/earth.png"/>Facção <b id="factionLabel">—</b></span>
+<span>Mapa <b id="mapLabel">—</b></span>
+<span>Setor <b id="sectorName">—</b></span>
+<span>Nave <b id="shipLabel">Phoenix</b></span>
+<span>LV <b id="lvl">1</b></span>
+<span>XP <b id="xp">0</b></span>
+<span>CR <b id="credits">0</b></span>
+<span>URI <b id="uridium">0</b></span>
 </div>
-<script type="module" src="/game.js"></script>
+<div class="top-actions">
+<span class="pilot-chip">Piloto <b id="userLabel">—</b></span>
+<span class="sync-chip" id="syncLabel">LOCAL</span>
+<button class="small-btn" id="mapBtn">MAPAS</button>
+<button class="small-btn pet-top-btn" id="petBtn">P.E.T. LV1</button>
+<button class="small-btn gold" id="shopBtn">LOJA</button>
+<button class="small-btn" id="cargoBtn">PORÃO</button>
+<button class="small-btn" id="hangarBtn">HANGAR</button>
+<button class="small-btn" id="hudToggle">HUD</button>
+<button class="small-btn danger-lite" id="logoutBtn">SAIR</button>
+</div>
+</header>
+<section class="hud-panel compact-stats ship-stats-float" id="leftStats">
+<div class="stats-toolbar tappable-toolbar" id="statsHeader">
+<div class="stats-toolbar-left">
+<button aria-label="Expandir / recolher painel da nave" class="stats-expand-btn" id="statsToggle" title="Expandir / recolher painel da nave">▾</button>
+<div class="stats-toolbar-label">NAVE</div>
+</div>
+</div>
+<div class="stack left-stats-content" id="leftStatsContent"><div class="ship-hud-portrait"><img alt="Nave ativa" id="shipHudArt" src="/assets/v8/ships/phoenix.png"/></div>
+<div>HP <span id="hp">0</span>/<span id="maxHp">0</span></div>
+<div>ESC <span id="shield">0</span>/<span id="maxShield">0</span></div>
+<div>VEL <span id="speed">0</span></div>
+<div>PORÃO <span id="cargoUsed">0</span>/<span id="cargoMax">0</span></div>
+<div class="nav-coord">COORD <span id="coordLabel">0 / 0</span></div>
+<div class="nav-route">ROTA <span id="routeLabel">PARADO</span></div>
+<div class="nav-discovery">EXP <span id="discoveriesLabel">0/0</span></div>
+<div class="safe-zone-status" id="safeZoneLabel">FORA DA BASE</div>
+</div>
+</section>
+<section class="hud-panel stack" id="targetPanel">
+<div class="title">ALVO</div>
+<div id="targetName">Sem alvo</div>
+<div class="bar-wrap"><div class="bar hp" id="targetHpBar"></div></div>
+<div class="bar-wrap"><div class="bar shield" id="targetShieldBar"></div></div>
+<div id="targetStats">Toque em um NPC para selecionar</div>
+</section>
+<section class="hud-panel minimap-panel" id="minimapPanel">
+<div class="minimap-toolbar tappable-toolbar" id="minimapHeader">
+<div class="minimap-toolbar-left">
+<button aria-label="Expandir / recolher minimapa" class="stats-expand-btn" id="minimapToggle" title="Expandir / recolher minimapa">▾</button>
+<div class="stats-toolbar-label">MAPA</div>
+</div>
+</div>
+<canvas height="220" id="minimap" width="220"></canvas>
+</section>
+<section class="hud-panel compact-ammo-ui" id="weaponBar">
+<div class="weapon-toolbar">
+<div class="weapon-toolbar-left">
+<button aria-label="Expandir / recolher menu de munições" class="weapon-expand-btn" id="weaponBarToggle" title="Expandir / recolher menu de munições">▾</button>
+<div class="weapon-toolbar-label">MUNIÇÕES</div>
+</div>
+<div class="section actions actions-inline">
+<button class="action-btn" id="laserToggle">⚡ LASER <span class="keyhint">CTRL</span></button>
+<button class="action-btn" id="rocketFire">🚀 MÍSSIL <span class="keyhint">ESPAÇO</span></button>
+</div>
+</div>
+<div class="weapon-bar-content" id="weaponBarContent">
+<div class="ammo-clusters">
+<div class="section weapon-section ammo-bubble-section">
+<div class="section-title">LASER</div>
+<div class="button-row ammo-bubbles" id="laserAmmoButtons"></div>
+</div>
+<div class="section weapon-section ammo-bubble-section">
+<div class="section-title">MÍSSEIS</div>
+<div class="button-row ammo-bubbles" id="rocketAmmoButtons"></div>
+</div>
+</div>
+<div class="section extras compact extras-inline">
+<div class="cooldown-pill" id="rocketCd">MÍSSIL PRONTO</div>
+</div>
+</div>
+</section>
+<div id="toast"></div>
+<button class="portal-prompt hidden" id="portalPrompt" type="button"><span class="portal-icon">↯</span><span><b>JUMP / SALTAR</b><small id="portalPromptMap">—</small></span></button>
+<div class="jump-transition hidden" id="jumpTransition">
+<div class="warp-stars"></div>
+<div class="warp-ring ring-a"></div>
+<div class="warp-ring ring-b"></div>
+<div class="warp-core"></div>
+<div class="warp-copy"><div class="eyebrow">QUANTUM JUMP</div><h2 id="jumpTitle">SALTANDO</h2><div id="jumpSubtitle">Sincronizando coordenadas...</div></div>
+</div>
+<div class="modal fixed-modal" id="loginModal">
+<div class="modal-card login-card">
+<div class="eyebrow">STELLAR NETWORK • V9 EXPEDITION</div>
+<h1>Entrar no Stellar Legacy</h1>
+<p class="muted">Sua conta salva facção, nave, inventário, drones, munição e progresso online.</p>
+<div class="identity-panel"><img alt="Stellar Legacy V8" class="identity-logo" src="/assets/v8/branding/logo-v8.png"/><div class="identity-copy"><div class="eyebrow">IDENTIDADE STELLAR LEGACY</div><h3>Três facções. Uma guerra orbital.</h3><p>Naves, NPCs, equipamentos, recursos e mapas agora usam uma identidade visual própria integrada ao jogo.</p><div class="identity-factions"><div><img alt="Terra" src="/assets/v8/branding/earth.png"/><span>Terra</span></div><div><img alt="Marte" src="/assets/v8/branding/mars.png"/><span>Marte</span></div><div><img alt="Júpiter" src="/assets/v8/branding/jupiter.png"/><span>Júpiter</span></div></div></div></div>
+<div class="auth-tabs">
+<button class="tab-btn active" id="loginTabBtn">Entrar</button>
+<button class="tab-btn" id="registerTabBtn">Criar conta</button>
+</div>
+<form class="auth-form" id="loginForm">
+<label>E-mail<input autocomplete="email" id="loginEmail" placeholder="piloto@email.com" required="" type="email"/></label>
+<label>Senha<input autocomplete="current-password" id="loginPassword" minlength="6" placeholder="••••••••" required="" type="password"/></label>
+<button class="primary-btn" type="submit">ENTRAR</button>
+</form>
+<form class="auth-form hidden" id="registerForm">
+<label>Callsign<input id="registerCallsign" maxlength="24" minlength="2" placeholder="Seu nome no espaço" required="" type="text"/></label>
+<label>E-mail<input autocomplete="email" id="registerEmail" placeholder="piloto@email.com" required="" type="email"/></label>
+<label>Senha<input autocomplete="new-password" id="registerPassword" minlength="6" placeholder="mínimo 6 caracteres" required="" type="password"/></label>
+<button class="primary-btn" type="submit">CRIAR CONTA</button>
+</form>
+<div class="auth-message" id="authMessage"></div>
+</div>
+</div>
+<div class="modal hidden fixed-modal" id="factionModal">
+<div class="modal-card onboarding-card">
+<div class="eyebrow">PRIMEIRO ACESSO</div>
+<h1>Escolha sua facção</h1>
+<p>Essa escolha define sua companhia, sua base e a numeração dos mapas iniciais. Você começa com uma <b>Phoenix</b>, sem drones e com equipamento básico.</p>
+<div class="faction-grid" id="factionCards"></div>
+<div class="warning-text">A facção fica gravada neste save.</div>
+</div>
+</div>
+<div class="modal hidden" id="cargoModal">
+<div class="modal-card wide-card">
+<div class="modal-header">
+<div>
+<div class="eyebrow">CARGA &amp; COMÉRCIO</div>
+<h2>Porão da Nave</h2>
+</div>
+<button class="small-btn" id="closeCargo">Fechar</button>
+</div>
+<div class="section-box" id="cargoSummary"></div>
+<div class="cargo-toolbar">
+<div class="muted">Colete minérios soltos e caixas de carga deixadas pelos NPCs. A venda só funciona na base X-1.</div>
+<button class="small-btn gold" id="sellAllCargo">VENDER TUDO</button>
+</div>
+<div class="cargo-grid" id="cargoGrid"></div>
+</div>
+</div>
+<div class="modal hidden" id="mapModal">
+<div class="modal-card wide-card map-card">
+<div class="modal-header">
+<div>
+<div class="eyebrow">NAVEGAÇÃO GALÁCTICA</div>
+<h2>Mapa de rotas</h2>
+</div>
+<button class="small-btn" id="closeMap">Fechar</button>
+</div>
+<div class="muted" style="margin-bottom:10px">Seu mapa atual recebe destaque. Os mapas da sua facção aparecem iluminados e as rotas seguem a lógica clássica.</div>
+
+<div class="map-network" id="mapNetwork"></div>
+</div>
+</div>
+<div class="modal hidden" id="petModal">
+<div class="modal-card wide-card pet-modal-card">
+<div class="modal-header">
+<div>
+<div class="eyebrow">P.E.T. / ESCOLTA AUTÔNOMA</div>
+<h2>Sistema P.E.T.</h2>
+</div>
+<button class="small-btn" id="closePet">Fechar</button>
+</div>
+
+<div id="petContent"></div>
+</div>
+</div>
+<div class="modal hidden" id="shopModal">
+<div class="modal-card wide-card">
+<div class="modal-header">
+<div>
+<div class="eyebrow">ECONOMIA &amp; PROGRESSÃO</div>
+<h2>Loja Orbital</h2>
+</div>
+<div class="wallet">CR <b id="shopCredits">0</b> • URI <b id="shopUridium">0</b></div>
+<button class="small-btn" id="closeShop">Fechar</button>
+</div>
+
+<div class="tabs" id="shopTabs"></div>
+<div class="product-grid" id="shopGrid"></div>
+</div>
+</div>
+<div class="modal hidden" id="hangarModal">
+<div class="modal-card wide-card">
+<div class="modal-header">
+<div>
+<div class="eyebrow">GERENCIAMENTO</div>
+<h2>Hangar</h2>
+</div>
+<div class="wallet">Nave ativa: <b id="hangarShipName">Phoenix</b></div>
+<button class="small-btn" id="closeHangar">Fechar</button>
+</div>
+
+<div class="tabs" id="hangarTabs"></div>
+<div id="hangarContent"></div>
+</div>
+</div>
+</div>
+<script src="/game.js" type="module"></script>
 </body>
 </html>

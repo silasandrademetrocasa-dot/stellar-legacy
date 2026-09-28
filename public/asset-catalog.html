@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Stellar Legacy V8 — Asset Catalog</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#030816;color:#dff7ff;font-family:Arial,sans-serif}
+header{position:sticky;top:0;z-index:3;padding:16px 18px;background:rgba(3,8,18,.94);border-bottom:1px solid #1d6fa0;backdrop-filter:blur(10px)}
+h1{margin:0;font-size:22px}.muted{opacity:.66;font-size:12px}
+main{padding:18px}.section{margin-bottom:26px}h2{font-size:16px;color:#80dcff;text-transform:uppercase;letter-spacing:.08em}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px}
+.card{min-height:165px;padding:10px;border:1px solid rgba(79,197,255,.24);border-radius:14px;background:linear-gradient(180deg,#07162a,#050d19);display:flex;flex-direction:column;gap:8px}
+.card img{width:100%;height:116px;object-fit:contain;border-radius:10px;background:radial-gradient(circle,rgba(57,182,255,.11),transparent 70%)}
+.card b{font-size:11px;word-break:break-word}
+</style>
+</head>
+<body>
+<header><h1>STELLAR LEGACY V8 — catálogo de assets reais</h1><div class="muted">Cada arquivo abaixo existe individualmente no projeto e pode ser usado pelo gameplay, HUD, loja, hangar e mapas.</div></header>
+<main id="root"></main>
+<script type="module">
+import {V8_ASSETS} from './assets/v8/manifest.js';
+const root=document.querySelector('#root');
+for(const [group,data] of Object.entries(V8_ASSETS)){
+  const section=document.createElement('section');section.className='section';
+  section.innerHTML=`<h2>${group}</h2><div class="grid"></div>`;
+  const grid=section.querySelector('.grid');
+  for(const [name,path] of Object.entries(data)){
+    const c=document.createElement('div');c.className='card';
+    c.innerHTML=`<img src="${path}" loading="lazy" alt="${name}"><b>${name}</b><span class="muted">${path}</span>`;
+    grid.appendChild(c);
+  }
+  root.appendChild(section);
+}
+</script>
+</body></html>

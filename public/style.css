@@ -146,7 +146,7 @@
 /* ===== V8.1 integrated art direction ===== */
 body::before{content:"";position:fixed;inset:0;pointer-events:none;background:radial-gradient(circle at 50% 18%,rgba(0,165,255,.14),transparent 34%),linear-gradient(180deg,rgba(2,9,20,.35),rgba(2,7,15,.82));z-index:0;}
 #app{position:relative;isolation:isolate;}
-#app::before{content:"";position:absolute;inset:0;pointer-events:none;background-image:url('/v8-art/battle-screen-v8.png');background-size:cover;background-position:center top;opacity:.085;mix-blend-mode:screen;z-index:0;}
+#app::before{content:"";position:absolute;inset:0;pointer-events:none;background-image:linear-gradient(rgba(80,190,255,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(80,190,255,.04) 1px,transparent 1px);background-size:34px 34px;opacity:.18;z-index:0;}
 #game,.hud-panel,.modal,.portal-prompt,#toast{position:relative;z-index:1;}
 .v8-topbar{display:flex;gap:12px;align-items:center;flex-wrap:wrap;border-color:rgba(74,191,255,.55);background:linear-gradient(180deg,rgba(8,24,48,.92),rgba(5,13,28,.88));box-shadow:0 0 30px rgba(0,170,255,.12),inset 0 0 0 1px rgba(112,225,255,.06);}
 .brand-chip{display:flex;align-items:center;gap:8px;padding:10px 14px;border-radius:999px;border:1px solid rgba(91,209,255,.5);background:linear-gradient(180deg,rgba(9,31,55,.92),rgba(9,18,37,.95));font-weight:800;letter-spacing:.12em;font-size:12px;color:#e8fbff;box-shadow:0 0 18px rgba(0,179,255,.16);}
@@ -160,10 +160,10 @@ body::before{content:"";position:fixed;inset:0;pointer-events:none;background:ra
 .auth-art-copy h3,.showcase-copy h3{margin:4px 0 8px;font-size:22px;color:#fff;}
 .auth-art-copy p,.showcase-copy p{margin:0;color:#a7c6d8;line-height:1.45;}
 .auth-art-thumb,.showcase-image{border-radius:16px;border:1px solid rgba(79,196,255,.28);min-height:160px;background-size:cover;background-position:center;box-shadow:inset 0 0 0 1px rgba(255,255,255,.03),0 0 18px rgba(0,160,255,.08);}
-.auth-battle{background-image:linear-gradient(180deg,rgba(3,11,22,.18),rgba(3,10,20,.32)),url('/v8-art/battle-screen-v8.png');}
-.map-concept{background-image:linear-gradient(180deg,rgba(3,11,22,.12),rgba(3,10,20,.26)),url('/v8-art/map-screen-v8.png');}
-.hangar-concept{background-image:linear-gradient(180deg,rgba(3,11,22,.12),rgba(3,10,20,.24)),url('/v8-art/hangar-store-v8.png');}
-.battle-concept{background-image:linear-gradient(180deg,rgba(3,11,22,.12),rgba(3,10,20,.24)),url('/v8-art/battle-screen-v8.png');}
+.auth-battle{background:linear-gradient(180deg,rgba(3,11,22,.18),rgba(3,10,20,.32));}
+.map-concept{background:linear-gradient(180deg,rgba(3,11,22,.12),rgba(3,10,20,.26));}
+.hangar-concept{background:linear-gradient(180deg,rgba(3,11,22,.12),rgba(3,10,20,.24));}
+.battle-concept{background:linear-gradient(180deg,rgba(3,11,22,.12),rgba(3,10,20,.24));}
 .modal-card{background:linear-gradient(180deg,rgba(4,14,29,.97),rgba(2,8,18,.98));box-shadow:0 0 40px rgba(0,163,255,.14);}
 .modal-header{padding-bottom:12px;margin-bottom:14px;border-bottom:1px solid rgba(74,191,255,.18);}
 .modal-showcase{display:grid;grid-template-columns:minmax(240px, 34%) 1fr;gap:18px;align-items:center;padding:14px 16px;margin:4px 0 18px;border-radius:18px;border:1px solid rgba(74,191,255,.22);background:linear-gradient(180deg,rgba(8,24,43,.68),rgba(5,13,23,.92));overflow:hidden;}
@@ -172,7 +172,7 @@ body::before{content:"";position:fixed;inset:0;pointer-events:none;background:ra
 .showcase-tags{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px;}
 .showcase-tags span{padding:7px 10px;border-radius:999px;font-size:11px;letter-spacing:.06em;text-transform:uppercase;background:rgba(10,34,54,.9);border:1px solid rgba(71,183,255,.24);color:#89dfff;}
 .product-card,.ship-card,.drone-card,.section-box,.equipment-card{background:linear-gradient(180deg,rgba(7,21,41,.94),rgba(5,11,22,.96));border-color:rgba(67,187,255,.32);box-shadow:0 0 18px rgba(0,149,255,.06);}
-.ship-card .ship-visual{background-image:linear-gradient(180deg,rgba(6,19,35,.16),rgba(6,12,20,.3)),url('/v8-art/hangar-store-v8.png');background-size:cover;background-position:center;border-radius:14px;border:1px solid rgba(73,189,255,.22);min-height:110px;}
+.ship-card .ship-visual{position:relative;display:flex;align-items:center;justify-content:center;background:radial-gradient(circle at 50% 58%,rgba(43,181,255,.2),rgba(6,14,29,.92) 64%);border-radius:14px;border:1px solid rgba(73,189,255,.22);min-height:150px;overflow:hidden}
 .map-card{max-width:1180px;}
 .map-network{background:linear-gradient(180deg,rgba(5,12,24,.6),rgba(5,10,18,.88));border:1px solid rgba(68,186,255,.2);border-radius:18px;padding:18px;}
 .login-card{max-width:920px;}
@@ -180,3 +180,98 @@ body::before{content:"";position:fixed;inset:0;pointer-events:none;background:ra
 .wallet{padding:8px 12px;border-radius:999px;background:rgba(12,33,56,.8);border:1px solid rgba(74,191,255,.2);}
 @media(max-width:900px){.auth-art-panel,.modal-showcase{grid-template-columns:1fr;}.auth-art-thumb,.showcase-image{min-height:180px;}}
 @media(max-width:680px){.brand-chip{order:-1;width:100%;justify-content:center;padding:8px 10px;font-size:11px;}.login-card{max-width:94vw;}.auth-art-panel{padding:10px;gap:10px;}.auth-art-copy h3,.showcase-copy h3{font-size:18px;}.modal-showcase{padding:12px;gap:12px;border-radius:16px;}.modal-showcase .showcase-image{min-height:140px;} .showcase-tags span{font-size:10px;padding:6px 9px;}}
+
+
+/* ===== STELLAR LEGACY V8 — REAL ASSET IDENTITY ===== */
+:root{
+  --v8-cyan:#51d8ff;
+  --v8-blue:#1689ff;
+  --v8-gold:#ffc84a;
+  --v8-red:#ff5268;
+  --v8-panel:rgba(4,13,27,.90);
+}
+.brand-chip{min-width:190px;max-width:250px;padding:4px 10px;background:linear-gradient(180deg,rgba(5,20,38,.96),rgba(3,10,22,.96));border-radius:12px}
+.brand-logo{display:block;max-height:46px;max-width:170px;width:auto;object-fit:contain;filter:drop-shadow(0 0 10px rgba(74,202,255,.3))}
+.brand-chip>span{font-size:8px;letter-spacing:.18em;padding:4px 7px;height:auto;min-width:0}
+.faction-mini-icon{width:26px;height:26px;object-fit:contain;vertical-align:middle;margin-right:5px;filter:drop-shadow(0 0 5px rgba(87,210,255,.35))}
+.top-meta>span{display:inline-flex;align-items:center;gap:4px}
+.ship-hud-portrait{height:78px;margin:0 0 6px;display:flex;align-items:center;justify-content:center;border-radius:10px;background:radial-gradient(circle,rgba(50,177,255,.16),rgba(4,13,27,.02) 70%);overflow:hidden}
+.ship-hud-portrait img{max-width:94%;max-height:92%;object-fit:contain;filter:drop-shadow(0 0 10px rgba(75,203,255,.45))}
+.identity-panel{display:grid;grid-template-columns:minmax(170px,.8fr) minmax(260px,1.2fr);gap:18px;align-items:center;margin:12px 0 18px;padding:15px;border:1px solid rgba(70,193,255,.25);border-radius:18px;background:radial-gradient(circle at 18% 50%,rgba(34,147,255,.13),transparent 38%),linear-gradient(180deg,rgba(7,21,41,.88),rgba(3,10,23,.96))}
+.identity-logo{max-width:100%;max-height:190px;object-fit:contain;filter:drop-shadow(0 0 18px rgba(68,196,255,.28))}
+.identity-copy h3{font-size:22px;margin:3px 0 7px}.identity-copy p{margin:0;color:#a8cadc;line-height:1.45}
+.identity-factions{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+.identity-factions>div{display:flex;align-items:center;gap:6px;padding:6px 9px;border:1px solid rgba(92,201,255,.18);border-radius:10px;background:rgba(6,18,34,.72);font-size:11px;font-weight:800}
+.identity-factions img{width:40px;height:40px;object-fit:contain}
+.faction-card{background:linear-gradient(180deg,rgba(7,22,43,.94),rgba(3,10,22,.98));box-shadow:0 0 24px rgba(0,166,255,.07)}
+.faction-card .faction-orb{width:130px;height:130px;border-radius:18px;background-size:contain!important;background-repeat:no-repeat!important;background-position:center!important;box-shadow:none!important;border:0!important}
+.product-icon{height:110px;display:flex;align-items:center;justify-content:center;overflow:hidden;background:radial-gradient(circle at 50% 58%,rgba(64,193,255,.15),rgba(5,13,26,.96) 68%);border:1px solid rgba(67,187,255,.12)}
+.product-icon img{width:94%;height:94%;object-fit:contain;filter:drop-shadow(0 0 9px rgba(77,204,255,.28));transition:transform .18s ease}
+.product-card:hover .product-icon img{transform:scale(1.06)}
+.ship-visual img{max-width:94%;max-height:145px;object-fit:contain;filter:drop-shadow(0 0 13px rgba(75,202,255,.35))}
+.drone-art{width:92px;height:92px;object-fit:contain;display:block;margin:0 auto 8px;filter:drop-shadow(0 0 10px rgba(72,203,255,.3))}
+.pet-avatar{background:radial-gradient(circle,rgba(58,190,255,.18),rgba(5,13,28,.9) 68%);overflow:hidden}
+.pet-avatar img{width:100%;height:100%;object-fit:contain;filter:drop-shadow(0 0 10px rgba(63,206,255,.45))}
+.cargo-ore{background:none!important;width:56px!important;height:56px!important;display:flex;align-items:center;justify-content:center}
+.cargo-ore img{max-width:56px;max-height:56px;object-fit:contain;filter:drop-shadow(0 0 8px var(--ore))}
+.ammo-btn.circular{position:relative;overflow:hidden}
+.ammo-art{position:absolute;inset:3px;margin:auto;width:72%;height:72%;object-fit:contain;opacity:.32;filter:drop-shadow(0 0 5px currentColor);pointer-events:none}
+.ammo-btn.active .ammo-art{opacity:.48}
+.ammo-code,.ammo-qty{position:relative;z-index:2;text-shadow:0 2px 5px #000}
+.map-node .node-art{filter:saturate(1.08) contrast(1.04)}
+.map-network{background:radial-gradient(circle at 50% 45%,rgba(20,88,140,.18),transparent 45%),linear-gradient(180deg,rgba(2,8,18,.88),rgba(2,7,15,.96));}
+#weaponBar{border-top:1px solid rgba(87,209,255,.35);box-shadow:0 -10px 34px rgba(0,80,150,.12),0 0 22px rgba(0,169,255,.1)}
+#leftStats,#minimapPanel{box-shadow:0 0 24px rgba(0,162,255,.14),inset 0 0 22px rgba(21,95,165,.08)}
+@media(max-width:900px){
+  .identity-panel{grid-template-columns:1fr}
+  .identity-logo{max-height:135px;margin:auto}
+}
+@media(max-width:680px){
+  .brand-chip{width:auto!important;min-width:118px;max-width:145px;order:0!important;padding:3px 6px}
+  .brand-logo{max-height:32px;max-width:105px}
+  .brand-chip>span{display:none}
+  .ship-hud-portrait{height:58px}
+  .product-icon{height:95px}
+  .identity-panel{padding:10px;gap:8px}
+  .identity-logo{max-height:105px}
+  .identity-copy h3{font-size:17px}
+  .identity-factions img{width:30px;height:30px}
+}
+
+.slot-item-art{display:block;width:56px;height:56px;object-fit:contain;margin:2px auto 6px;filter:drop-shadow(0 0 7px rgba(73,199,255,.28))}
+.inventory-item-art{display:block;width:68px;height:68px;object-fit:contain;margin:0 auto 8px;filter:drop-shadow(0 0 8px rgba(73,199,255,.28))}
+.pet-gear-art{width:52px;height:52px;object-fit:contain;display:block;margin:0 auto 7px;filter:drop-shadow(0 0 8px rgba(84,211,255,.32))}
+
+/* ===== STELLAR LEGACY V9 — EXPEDITION UPDATE ===== */
+:root{
+  --v9-cyan:#63e3ff;
+  --v9-route:#7ee8ff;
+  --v9-gold:#ffd15c;
+}
+.brand-chip>span{background:linear-gradient(180deg,#3c2508,#171006)!important;color:#ffd976!important;border:1px solid rgba(255,205,82,.35);box-shadow:0 0 14px rgba(255,187,42,.13),inset 0 0 10px rgba(255,210,110,.1)!important}
+.nav-coord,.nav-route{font-size:10px;letter-spacing:.04em;color:#8eb8ce;display:flex!important;justify-content:space-between;gap:10px;border-top:1px solid rgba(84,199,255,.08);padding-top:3px}
+.nav-coord span,.nav-route span{color:#d8f7ff;font-weight:800}
+.nav-route.active span{color:var(--v9-route);text-shadow:0 0 8px rgba(100,228,255,.5)}
+#sectorName{color:#9cecff;max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#minimapPanel{border-color:rgba(89,205,255,.52)}
+#minimap{width:220px;height:220px;background:radial-gradient(circle at center,rgba(16,54,83,.7),rgba(2,8,16,.96));}
+#leftStats.ship-stats-float{min-width:184px}
+#leftStats .ship-hud-portrait{height:84px}
+#leftStats .safe-zone-status{margin-top:3px}
+.v8-topbar{background:linear-gradient(180deg,rgba(5,22,43,.96),rgba(3,11,24,.93));border-bottom-color:rgba(92,216,255,.65)}
+.v8-topbar::after{content:"";position:absolute;left:14px;right:14px;bottom:-1px;height:1px;background:linear-gradient(90deg,transparent,rgba(88,220,255,.8),transparent);pointer-events:none}
+.product-card,.ship-card,.drone-card,.slot-card,.inventory-card{transition:transform .16s ease,border-color .16s ease,box-shadow .16s ease}
+@media(hover:hover){.product-card:hover,.ship-card:hover,.drone-card:hover{transform:translateY(-2px);border-color:rgba(95,220,255,.55);box-shadow:0 8px 26px rgba(0,126,220,.12)}}
+.map-network{box-shadow:inset 0 0 50px rgba(8,73,125,.08)}
+#toast{background:linear-gradient(180deg,rgba(5,21,38,.96),rgba(3,11,22,.96));border-color:rgba(94,213,255,.28);box-shadow:0 0 24px rgba(0,155,255,.12)}
+@media(max-width:900px){#minimap{width:180px;height:180px}.top-meta span:nth-child(3){display:none}}
+@media(max-width:680px){
+  #minimap{width:142px;height:142px}
+  #leftStats.ship-stats-float{min-width:138px;max-width:158px}
+  #leftStats .ship-hud-portrait{height:60px}
+  .nav-coord,.nav-route{font-size:9px;gap:6px}
+  #sectorName{max-width:82px}
+  .top-meta span:nth-child(3){display:none}
+}
+.nav-discovery{font-size:10px;letter-spacing:.04em;color:#8eb8ce;display:flex!important;justify-content:space-between;gap:10px;border-top:1px solid rgba(84,199,255,.08);padding-top:3px}.nav-discovery span{color:#ffd66d;font-weight:800;text-shadow:0 0 8px rgba(255,202,77,.25)}
+@media(max-width:680px){.nav-discovery{font-size:9px;gap:6px}}

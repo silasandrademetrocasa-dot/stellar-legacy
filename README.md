@@ -1,104 +1,93 @@
-# Stellar Legacy V8.1 (integrado com novo visual)
+# Stellar Legacy V9 — Expedition Update
 
-Versão base da V8 preparada para subir no Git, usando a estrutura funcional da V7.2.1 e adicionando uma nova direção de arte para a próxima fase do jogo.
+Grande atualização baseada na V8.3 Identity Build, mantendo Node.js + Express + Supabase e evoluindo o jogo para mapas muito maiores, exploração real e combate mais vivo.
 
-## O que entra nesta base
+## Destaques da V9
 
-- projeto web funcional herdado da V7.2.1
-- conceitos visuais da V8 em `public/v8-art`
-- galeria rápida em `public/v8-concepts.html`
-- direção para upgrade de HUD, mapas, hangar e loja
+- todos os mapas foram ampliados de forma agressiva
+- mapas baixos agora vão de **6.000×4.500** até **7.800×5.600**
+- Battle Maps chegam a **11.200×8.000**
+- posições de portais foram refeitas para as novas dimensões
+- saves antigos são migrados proporcionalmente para o novo tamanho de mapa
+- quantidade de NPCs e minérios aumentada para preservar densidade sem lotar o celular
+- NPCs passam a surgir em torno de pontos de interesse, formando zonas de caça
+- landmarks de exploração foram adicionados: beacons, destroços, anomalias e pontos de varredura
+- grid de setor no canvas para dar escala e sensação de deslocamento
+- coordenadas da nave e distância até o destino agora aparecem na HUD
+- clique no minimapa traça uma rota visual até o destino
+- seta de navegação aparece na tela quando o waypoint está fora do campo de visão
+- minimapa maior e com grade, landmarks, portais, radar e rota
+- backgrounds usam recorte dinâmico baseado na posição da câmera, mudando conforme o jogador atravessa o mapa
+- radar ampliado para os mapas maiores
+- alcance de laser e míssil ajustado para a nova escala
+- seleção de NPC melhorada para sprites maiores
+- explosões, impactos, escudo e partículas novos
+- mísseis agora possuem efeito visual de trajetória
+- bosses recebem explosões maiores e aura visual mais forte
+- culling de objetos fora da tela para reduzir custo de renderização no celular
+- identidade visual, sprites, equipamentos, drones, P.E.T., recursos, loot e fundos da V8.3 continuam integrados
 
-## Conceitos V8
+## Dimensões dos mapas
 
-Abra no navegador:
+| Mapa interno | Tamanho V9 |
+| --- | --- |
+| X-1 | 6000 × 4500 |
+| X-2 | 6600 × 4800 |
+| X-3 | 7200 × 5200 |
+| X-4 | 7800 × 5600 |
+| 4-1 | 9800 × 7000 |
+| 4-2 | 10400 × 7400 |
+| 4-3 | 11200 × 8000 |
 
-- `/v8-concepts.html`
+A numeração exibida continua respeitando a facção: Terra 1-X, Marte 2-X e Júpiter 3-X.
 
-## Artes adicionadas
+## Identidade visual
 
-- `public/v8-art/battle-screen-v8.png`
-- `public/v8-art/map-screen-v8.png`
-- `public/v8-art/hangar-store-v8.png`
+Os assets continuam organizados em:
 
-## Próximos passos sugeridos
+```text
+public/assets/v8/
+  ammo/
+  backgrounds/
+  branding/
+  drones/
+  equipment/
+  loot/
+  npcs/
+  resources/
+  ships/
+  manifest.js
+```
 
-1. aplicar a nova HUD no `public/index.html` / `public/style.css`
-2. integrar ilustrações de naves, NPCs e caixas como sprites reais
-3. criar versões mobile compactas baseadas nesses concepts
-4. refazer loja/hangar/mapas seguindo os mockups
+O nome da pasta foi mantido para compatibilidade com a V8.3 e para evitar duplicar dezenas de imagens no deploy.
 
----
+O catálogo visual continua disponível em:
 
-# Stellar Legacy V7.2.1
+`/asset-catalog.html`
 
-Space MMO web mobile-first com login Supabase, progressão, economia, hangar, loja e mapas.
+## Stack
 
-## Novidades V6.2
+- Node.js 18+
+- Express
+- Supabase
+- HTML/CSS/JavaScript Canvas 2D
 
-- Portal com botão flutuante holográfico `JUMP / SALTAR`.
-- Transição animada de salto entre mapas.
-- Naves com silhuetas vetoriais diferentes por modelo.
-- NPCs com modelos vetoriais diferentes por família e bosses destacados.
-- Nomes coloridos: jogador pela facção, NPCs hostis em vermelho suave e portais neutros em ciano.
-- Minérios com cristais iluminados e cargo boxes sci-fi.
-- Modal MAPAS com artes próprias, destaque do mapa atual e rotas galácticas.
-- Viagem clicando em mapas liberados; níveis: X-1/X-2 lvl 1, X-3 lvl 2, X-4 lvl 3 e Battle Maps lvl 4.
-- Battle Maps 4-1, 4-2 e 4-3 jogáveis, conectados por portais.
-- Xenomit continua especial e não ocupa espaço no porão.
-- Munição e míssil selecionados destacados por borda vermelho suave.
-
-## Atalhos
-
-- CTRL: laser
-- ESPAÇO: míssil
-- J / ENTER: saltar quando estiver em cima do portal
-- M: mapas
-- B: loja
-- H: hangar
-- C: porão
-- 1-4: munição laser
+Não foi necessário adicionar PHP ou C#. O gargalo atual é gameplay/renderização no navegador, e a stack atual é mais simples para Render + Supabase e permite deploy direto pelo Git.
 
 ## Render
 
-Build: `npm install`
+Variáveis esperadas:
 
-Start: `npm start`
-
-Variáveis:
 - `SUPABASE_URL`
 - `SUPABASE_PUBLISHABLE_KEY`
 
-## Consumo real de munição
+## Validação
 
-- Cada laser equipado na nave ou em drones consome 1 unidade da munição laser selecionada por rajada.
-- Se houver menos munição do que lasers, somente os lasers cobertos pelo estoque participam da última rajada.
-- Cada míssil disparado consome exatamente 1 unidade do tipo selecionado.
+Antes de empacotar a release:
 
+- `public/game.js` → `node --check`
+- `public/data.js` → `node --check`
+- `public/assets/v8/manifest.js` → `node --check`
+- `server/index.js` → `node --check`
 
-## V6.3 — Combate e munição em tempo real
-
-- Dano dos NPCs normais foi rebalanceado para o HP atual das naves.
-- Os valores de progressão foram ancorados nos danos máximos clássicos e escalados para o combate do Stellar Legacy.
-- Bosses seguem a regra do projeto: **2x HP, 2x escudo, 2x dano, 2x créditos, 2x uridium e 2x recursos do NPC normal correspondente**.
-- Xenomit continua como recurso especial adicional em bosses selecionados.
-- Munição laser atualiza em tempo real a cada rajada.
-- Mísseis atualizam em tempo real a cada disparo.
-- O seletor mostra estoque, consumo por rajada e estimativa de rajadas restantes.
-- Estoque baixo fica amarelo; estoque crítico fica vermelho/pulsante.
-
-
-## V7.2.1 — Sistema P.E.T.
-
-- P.E.T. começa no nível 1 e evolui até o nível 15.
-- Nível do P.E.T. aumenta automaticamente com XP obtido em abates e coletas.
-- Cada nível disponibiliza 1 novo slot potencial de arma e 1 de escudo.
-- Nível 1 já começa com 1 slot de arma e 1 slot de escudo liberados gratuitamente.
-- Slots dos níveis 2–15 precisam ser liberados com Uridium.
-- Lasers e escudos do P.E.T. usam o mesmo inventário de equipamentos do jogador.
-- Modo Guardião: ataca inimigos próximos que estejam causando dano à nave do jogador.
-- Coletor de BOX: busca cargo boxes, vende automaticamente recursos vendáveis e preserva Xenomit.
-- Coletor de Pedras: coleta minérios soltos automaticamente dentro do alcance.
-- O alcance do P.E.T. cresce a cada nível.
-- P.E.T. usa a munição laser atualmente selecionada quando está em Modo Guardião.
-- Atalho P abre o painel do P.E.T.
+Release: **9.0.0**

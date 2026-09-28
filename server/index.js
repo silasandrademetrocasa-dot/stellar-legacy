@@ -80,7 +80,7 @@ async function ensureProfile(sb, user, callsign = '') {
   if (error) console.warn('profile upsert:', error.message);
 }
 
-app.get('/health', (req, res) => res.json({ ok: true, game: 'Stellar Legacy', version: '8.1.0' }));
+app.get('/health', (req, res) => res.json({ ok: true, game: 'Stellar Legacy', version: '9.0.0' }));
 
 
 app.get('/api/config', (req, res) => {
@@ -96,10 +96,10 @@ app.get('/api/config', (req, res) => {
 
 app.get('/api/meta', (req, res) => res.json({
   name: 'Stellar Legacy',
-  version: '8.1.0',
+  version: '9.0.0',
   authReady: Boolean(SUPABASE_URL && SUPABASE_KEY),
   diagnostics: configStatus(),
-  features: ['login', 'cloud_save', 'factions', 'safe_zone', 'shop', 'owned_ships', 'equipment_slots', 'inventory', 'drones', 'ammo', 'rockets', 'x1_x4_maps', 'cargo_hold', 'ore_trading', 'npc_cargo_boxes', 'npc_respawn', 'minimap_navigation', 'pet_modules', 'auto_buy_cpu', 'ship_extras_v7'],
+  features: ['login', 'cloud_save', 'factions', 'safe_zone', 'shop', 'owned_ships', 'equipment_slots', 'inventory', 'drones', 'ammo', 'rockets', 'expanded_expedition_maps', 'cargo_hold', 'ore_trading', 'npc_cargo_boxes', 'npc_respawn', 'minimap_navigation', 'waypoints', 'landmark_discovery', 'combat_fx', 'pet_modules', 'auto_buy_cpu', 'v8_asset_identity'],
 }));
 
 app.get('/api/diagnostics', asyncRoute(async (req, res) => {
