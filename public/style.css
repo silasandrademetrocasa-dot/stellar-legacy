@@ -335,3 +335,40 @@ body::before{content:"";position:fixed;inset:0;pointer-events:none;background:ra
 @media(max-width:1200px){#weaponBar{width:min(860px,calc(100vw - 300px))!important;}}
 @media(max-width:900px){#leftStats.ship-stats-float{top:70px!important;width:160px!important;min-width:160px!important;max-width:160px!important;}#weaponBar{width:calc(100vw - 16px)!important;left:8px!important;right:8px!important;transform:none!important;bottom:8px!important;}#minimapPanel{bottom:84px!important;}}
 @media(max-width:680px){#topbar{top:6px;left:6px;right:6px;padding:6px 8px;}#leftStats.ship-stats-float{top:66px!important;left:6px!important;width:146px!important;min-width:146px!important;max-width:146px!important;padding:7px 8px 8px!important;}#leftStats .ship-hud-portrait{height:52px;min-height:52px;}#weaponBar{left:6px!important;right:6px!important;transform:none!important;width:auto!important;bottom:6px!important;padding:5px 8px 7px!important;}#weaponBar.compact-ammo-ui{padding:5px 8px 7px!important;} .weapon-toolbar{gap:6px;} .ammo-clusters{gap:8px;} .ammo-bubbles{gap:6px;} .ammo-btn.circular{width:50px;height:50px;min-width:50px;} .ammo-btn.circular .ammo-code{font-size:12px;} .ammo-btn.circular .ammo-qty{font-size:9px;} .actions-inline .action-btn{min-width:108px;min-height:30px;padding:5px 8px;font-size:11px;} .cooldown-pill{min-width:104px;font-size:9px;padding:4px 6px;} #minimapPanel{right:6px!important;bottom:124px!important;} #minimap{width:124px!important;height:124px!important;} }
+
+/* ===== V9.3 Mission Protocol ===== */
+.mission-top-btn{position:relative;border-color:rgba(123,112,255,.48)!important;background:linear-gradient(180deg,rgba(36,28,79,.96),rgba(14,18,43,.96))!important;color:#e4e2ff!important}
+.mission-top-btn #missionActiveCount{display:inline-grid;place-items:center;min-width:20px;height:20px;margin-left:5px;padding:0 5px;border-radius:999px;background:rgba(255,255,255,.08);border:1px solid rgba(164,151,255,.26);font-size:10px;color:#c8c3ff}
+.mission-top-btn.mission-active{border-color:#8f7cff!important;box-shadow:0 0 16px rgba(119,94,255,.22),inset 0 0 14px rgba(145,124,255,.08)!important}
+.mission-top-btn.mission-active #missionActiveCount{background:#7864ff;color:white;border-color:#a99cff;box-shadow:0 0 10px rgba(118,100,255,.4)}
+.mission-modal-card{width:min(1320px,98vw)!important;background:radial-gradient(circle at 18% 10%,rgba(90,65,180,.13),transparent 30%),linear-gradient(180deg,rgba(5,14,30,.985),rgba(2,8,18,.99))!important}
+.mission-rule-banner{margin:2px 0 16px;padding:11px 13px;border:1px solid rgba(126,111,255,.26);border-radius:12px;background:linear-gradient(90deg,rgba(98,75,200,.13),rgba(8,19,35,.52));font-size:12px;color:#b9cce0;line-height:1.5}
+.mission-rule-banner b{color:#fff}
+.mission-content{display:flex;flex-direction:column;gap:18px}
+.mission-category{--mission-accent:#58d9ff;padding:14px;border:1px solid color-mix(in srgb,var(--mission-accent) 30%,transparent);border-radius:16px;background:linear-gradient(180deg,rgba(8,22,40,.84),rgba(4,11,22,.9));box-shadow:inset 0 0 28px color-mix(in srgb,var(--mission-accent) 4%,transparent)}
+.mission-category-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}
+.mission-category-head h3{margin:3px 0 0;font-size:17px}
+.mission-category-head .eyebrow{color:var(--mission-accent)}
+.mission-slot-badge{padding:6px 9px;border-radius:999px;border:1px solid color-mix(in srgb,var(--mission-accent) 40%,transparent);background:color-mix(in srgb,var(--mission-accent) 10%,transparent);color:var(--mission-accent);font-size:9px;font-weight:900;letter-spacing:.08em}
+.mission-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.mission-card{display:flex;flex-direction:column;min-width:0;gap:8px;padding:12px;border:1px solid rgba(87,190,255,.14);border-radius:13px;background:linear-gradient(180deg,rgba(8,21,38,.94),rgba(4,11,22,.97));transition:border-color .18s ease,opacity .18s ease,transform .18s ease}
+.mission-card.active{border-color:var(--mission-accent);box-shadow:0 0 18px color-mix(in srgb,var(--mission-accent) 12%,transparent),inset 0 0 16px color-mix(in srgb,var(--mission-accent) 5%,transparent)}
+.mission-card.locked{opacity:.55}
+.mission-card.completed{border-color:rgba(91,255,169,.28);background:linear-gradient(180deg,rgba(10,38,32,.66),rgba(4,18,17,.9))}
+.mission-card-top{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
+.mission-card h4{margin:4px 0 0;font-size:14px;color:#f0f9ff}
+.mission-card p{margin:0;color:#8faec2;font-size:11px;line-height:1.45;min-height:32px}
+.mission-type-chip{font-size:8px;font-weight:900;letter-spacing:.11em;color:var(--mission-accent)}
+.mission-done{font-size:8px;font-weight:900;color:#77f7b0;white-space:nowrap}
+.mission-objective{padding:7px 8px;border-radius:8px;border:1px solid rgba(88,195,255,.09);background:rgba(4,13,24,.66);font-size:10px;color:#bad4e4}
+.mission-progress-row{display:flex;justify-content:space-between;gap:8px;font-size:10px;color:#a8c8da}
+.mission-progress-row b{color:var(--mission-accent)}
+.mission-progress{height:7px;border-radius:999px;background:#07111e;border:1px solid rgba(255,255,255,.06);overflow:hidden}
+.mission-progress i{display:block;height:100%;border-radius:999px;background:linear-gradient(90deg,color-mix(in srgb,var(--mission-accent) 72%,#fff),var(--mission-accent));box-shadow:0 0 8px color-mix(in srgb,var(--mission-accent) 45%,transparent)}
+.mission-reward{display:flex;flex-direction:column;gap:3px;margin-top:auto;padding-top:7px;border-top:1px solid rgba(255,255,255,.06)}
+.mission-reward span{font-size:8px;letter-spacing:.1em;color:#728fa3;font-weight:900}
+.mission-reward b{font-size:10px;color:#ffe08a}
+.mission-actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:2px}
+.mission-actions .small-btn,.mission-actions .ghost-btn{flex:1;min-width:95px;min-height:32px;font-size:9px;padding:6px 8px}
+@media(max-width:980px){.mission-grid{grid-template-columns:1fr}.mission-card p{min-height:0}.mission-modal-card{width:min(760px,98vw)!important}.mission-category{padding:11px}}
+@media(max-width:680px){.mission-rule-banner{font-size:10px;padding:9px 10px}.mission-category-head h3{font-size:14px}.mission-card{padding:10px}.mission-content{gap:12px}.mission-slot-badge{font-size:8px}.mission-actions .small-btn,.mission-actions .ghost-btn{min-height:34px}}

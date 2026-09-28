@@ -1,4 +1,24 @@
-# Stellar Legacy V9 — Expedition Update
+# Stellar Legacy V9.3 — Mission Protocol
+
+Grande atualização de conteúdo sobre a base V9 Expedition. Mantém os mapas expandidos e adiciona densidade maior de NPCs e um sistema persistente de missões com aceite manual.
+
+## Destaques V9.3
+
+- Mais inimigos para preencher os mapas gigantes da V9.
+- X-1: ~48 NPCs; X-2: ~70; X-3: ~65; X-4: ~60; mapas 4-X: ~64–67 NPCs.
+- Novo botão **MISSÕES** na barra superior.
+- Categorias: **Diária, Semanal, Mensal e Especial**.
+- O objetivo só começa a contar depois de clicar em **ACEITAR**.
+- Apenas **1 missão ativa por categoria**; até 4 simultâneas no total (uma de cada categoria).
+- Missões aceitas e progresso ficam dentro do save local/cloud.
+- Missões diárias, semanais e mensais usam ciclos próprios; especiais são permanentes.
+- Progresso integrado a eliminações, bosses, mapas 4-X, coleta de minério e exploração.
+- Recompensas em Créditos, Uridium e XP.
+- Missões completas exigem **RESGATAR** para liberar a vaga da categoria.
+- Missão pode ser abandonada; o progresso daquela tentativa é perdido.
+- Correção interna dos seletores do painel recolhível da nave.
+
+---
 
 Grande atualização baseada na V8.3 Identity Build, mantendo Node.js + Express + Supabase e evoluindo o jogo para mapas muito maiores, exploração real e combate mais vivo.
 

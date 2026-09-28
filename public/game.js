@@ -74,12 +74,13 @@ function resize() {
 addEventListener('resize', resize); resize();
 
 const ui = {
-  topbar: $('#topbar'), topMeta: document.querySelector('#topbar .top-meta'), hudToggle: $('#hudToggle'), minimapPanel: $('#minimapPanel'), minimapToggle: $('#minimapToggle'), minimapHeader: $('#minimapHeader'), statsHeader: $('#statsHeader'), shipHudArt: $('#shipHudArt'), factionIcon: $('#factionIcon'), factionLabel: $('#factionLabel'), mapLabel: $('#mapLabel'), sectorName: $('#sectorName'), coordLabel: $('#coordLabel'), routeLabel: $('#routeLabel'), discoveriesLabel: $('#discoveriesLabel'), shipLabel: $('#shipLabel'), lvl: $('#lvl'),
+  topbar: $('#topbar'), topMeta: document.querySelector('#topbar .top-meta'), hudToggle: $('#hudToggle'), leftStats: $('#leftStats'), statsToggle: $('#statsToggle'), minimapPanel: $('#minimapPanel'), minimapToggle: $('#minimapToggle'), minimapHeader: $('#minimapHeader'), statsHeader: $('#statsHeader'), shipHudArt: $('#shipHudArt'), factionIcon: $('#factionIcon'), factionLabel: $('#factionLabel'), mapLabel: $('#mapLabel'), sectorName: $('#sectorName'), coordLabel: $('#coordLabel'), routeLabel: $('#routeLabel'), discoveriesLabel: $('#discoveriesLabel'), shipLabel: $('#shipLabel'), lvl: $('#lvl'),
   hp: $('#hp'), maxHp: $('#maxHp'), shield: $('#shield'), maxShield: $('#maxShield'), speed: $('#speed'), dmg: $('#dmg'), credits: $('#credits'), uridium: $('#uridium'), xp: $('#xp'), droneCount: $('#droneCount'),
   targetName: $('#targetName'), targetHpBar: $('#targetHpBar'), targetShieldBar: $('#targetShieldBar'), targetStats: $('#targetStats'),
   laserAmmoButtons: $('#laserAmmoButtons'), rocketAmmoButtons: $('#rocketAmmoButtons'), laserToggle: $('#laserToggle'), rocketFire: $('#rocketFire'), autoLaser: $('#autoLaser'), autoRocket: $('#autoRocket'), turboRocket: $('#turboRocket'), rocketCd: $('#rocketCd'), weaponBar: $('#weaponBar'), weaponBarContent: $('#weaponBarContent'), weaponBarToggle: $('#weaponBarToggle'),
   toast: $('#toast'), portalPrompt: $('#portalPrompt'), portalPromptMap: $('#portalPromptMap'), jumpTransition: $('#jumpTransition'), jumpTitle: $('#jumpTitle'), jumpSubtitle: $('#jumpSubtitle'), factionModal: $('#factionModal'), factionCards: $('#factionCards'),
   mapBtn: $('#mapBtn'), mapModal: $('#mapModal'), closeMap: $('#closeMap'), mapNetwork: $('#mapNetwork'),
+  missionBtn: $('#missionBtn'), missionActiveCount: $('#missionActiveCount'), missionModal: $('#missionModal'), closeMission: $('#closeMission'), missionContent: $('#missionContent'),
   petBtn: $('#petBtn'), petModal: $('#petModal'), closePet: $('#closePet'), petContent: $('#petContent'),
   shopBtn: $('#shopBtn'), shopModal: $('#shopModal'), closeShop: $('#closeShop'), shopTabs: $('#shopTabs'), shopGrid: $('#shopGrid'), shopCredits: $('#shopCredits'), shopUridium: $('#shopUridium'),
   hangarBtn: $('#hangarBtn'), hangarModal: $('#hangarModal'), closeHangar: $('#closeHangar'), hangarTabs: $('#hangarTabs'), hangarContent: $('#hangarContent'), hangarShipName: $('#hangarShipName'),
@@ -138,6 +139,143 @@ const MAP_GRAPH_LINKS = [
 ];
 const PLAYABLE_GRAPH_LABELS = new Set(['1-1','1-2','1-3','1-4','2-1','2-2','2-3','2-4','3-1','3-2','3-3','3-4','4-1','4-2','4-3']);
 
+
+const MISSION_CATEGORIES = {
+  daily: { label: 'MISSÕES DIÁRIAS', accent: '#58d9ff', reset: 'daily' },
+  weekly: { label: 'MISSÃO SEMANAL', accent: '#8d7bff', reset: 'weekly' },
+  monthly: { label: 'MISSÃO MENSAL', accent: '#ffc65a', reset: 'monthly' },
+  special: { label: 'MISSÃO ESPECIAL', accent: '#ff668a', reset: 'special' },
+};
+const MISSION_LIBRARY = {
+  daily: [
+    {id:'patrol',title:'Patrulha de Fronteira',desc:'Elimine qualquer ameaça hostil.',objective:'killAny',target:25,reward:{credits:18000,uridium:25,xp:1200}},
+    {id:'lowhunt',title:'Limpeza do Setor',desc:'Elimine Streuners e Lordakias.',objective:'killType',types:['streuner','recruitStreuner','aiderStreuner','bossStreuner','lordakia','bossLordakia'],target:18,reward:{credits:22000,uridium:30,xp:1500}},
+    {id:'miner',title:'Coleta de Campo',desc:'Colete minérios soltos no mapa.',objective:'collectOre',target:30,reward:{credits:16000,uridium:20,xp:1400}},
+  ],
+  weekly: [
+    {id:'extermination',title:'Operação Extermínio',desc:'Elimine inimigos em qualquer setor.',objective:'killAny',target:180,reward:{credits:160000,uridium:220,xp:9000}},
+    {id:'boss_hunter',title:'Caçador de Elite',desc:'Destrua NPCs BOSS.',objective:'killBoss',target:24,reward:{credits:210000,uridium:320,xp:12000}},
+    {id:'cartographer',title:'Cartógrafo Estelar',desc:'Descubra pontos de interesse inéditos.',objective:'explore',target:18,reward:{credits:175000,uridium:250,xp:10500}},
+  ],
+  monthly: [
+    {id:'war_machine',title:'Máquina de Guerra',desc:'Elimine uma força massiva de inimigos.',objective:'killAny',target:800,reward:{credits:850000,uridium:1400,xp:48000}},
+    {id:'boss_breaker',title:'Aniquilador de Bosses',desc:'Destrua NPCs BOSS em qualquer mapa.',objective:'killBoss',target:100,reward:{credits:1100000,uridium:1900,xp:65000}},
+    {id:'prospector',title:'Prospector Imperial',desc:'Colete minérios ao longo do mês.',objective:'collectOre',target:900,reward:{credits:780000,uridium:1200,xp:52000}},
+  ],
+  special: [
+    {id:'battle_veteran',title:'Veterano da Zona 4-X',desc:'Elimine inimigos nos mapas de batalha 4-1, 4-2 ou 4-3.',objective:'killBattle',target:100,reward:{credits:500000,uridium:1000,xp:30000}},
+    {id:'deep_explorer',title:'Horizonte Profundo',desc:'Descubra pontos de interesse pelo universo.',objective:'explore',target:35,reward:{credits:420000,uridium:800,xp:26000}},
+    {id:'heavy_hunter',title:'Caçada Pesada',desc:'Elimine Devolarium e Sibelon, incluindo versões BOSS.',objective:'killType',types:['devolarium','bossDevolarium','sibelon','bossSibelon'],target:35,reward:{credits:650000,uridium:1250,xp:36000}},
+  ],
+};
+function missionPeriodKey(category,now=new Date()){
+  const y=now.getUTCFullYear(),m=String(now.getUTCMonth()+1).padStart(2,'0'),d=String(now.getUTCDate()).padStart(2,'0');
+  if(category==='daily')return `${y}-${m}-${d}`;
+  if(category==='monthly')return `${y}-${m}`;
+  if(category==='weekly'){
+    const copy=new Date(Date.UTC(y,now.getUTCMonth(),now.getUTCDate()));
+    const day=copy.getUTCDay()||7;copy.setUTCDate(copy.getUTCDate()-day+1);
+    return `${copy.getUTCFullYear()}-${String(copy.getUTCMonth()+1).padStart(2,'0')}-${String(copy.getUTCDate()).padStart(2,'0')}`;
+  }
+  return 'special-v1';
+}
+function freshMissions(){return {active:{daily:null,weekly:null,monthly:null,special:null},completed:{}};}
+function normalizeMissionState(){
+  if(!progress)return;
+  progress.missions ||= freshMissions();
+  progress.missions.active ||= {daily:null,weekly:null,monthly:null,special:null};
+  progress.missions.completed ||= {};
+  for(const category of Object.keys(MISSION_CATEGORIES)){
+    if(progress.missions.active[category]===undefined)progress.missions.active[category]=null;
+    const active=progress.missions.active[category];
+    if(active && active.period!==missionPeriodKey(category))progress.missions.active[category]=null;
+  }
+}
+function missionById(category,id){return (MISSION_LIBRARY[category]||[]).find(m=>m.id===id)||null;}
+function missionInstanceKey(category,id){return `${category}:${missionPeriodKey(category)}:${id}`;}
+function missionObjectiveText(m){
+  if(m.objective==='killAny')return `Eliminações: ${m.target}`;
+  if(m.objective==='killBoss')return `Bosses destruídos: ${m.target}`;
+  if(m.objective==='killBattle')return `Eliminações em 4-X: ${m.target}`;
+  if(m.objective==='collectOre')return `Minérios coletados: ${m.target}`;
+  if(m.objective==='explore')return `Descobertas: ${m.target}`;
+  if(m.objective==='killType')return `Alvos específicos: ${m.target}`;
+  return `Objetivo: ${m.target}`;
+}
+function missionRewardText(m){return `${fmt(m.reward.credits)} CR • ${fmt(m.reward.uridium)} URI • ${fmt(m.reward.xp)} XP`;}
+function updateMissionButton(){
+  if(!ui.missionBtn||!progress)return;
+  normalizeMissionState();
+  const active=Object.values(progress.missions.active).filter(Boolean).length;
+  if(ui.missionActiveCount)ui.missionActiveCount.textContent=active;
+  ui.missionBtn.classList.toggle('mission-active',active>0);
+}
+function acceptMission(category,id){
+  normalizeMissionState();
+  if(progress.missions.active[category]){showToast('Você já tem uma missão ativa nessa categoria');return;}
+  const mission=missionById(category,id);if(!mission)return;
+  const key=missionInstanceKey(category,id);if(progress.missions.completed[key]){showToast('Essa missão já foi concluída neste ciclo');return;}
+  progress.missions.active[category]={id,period:missionPeriodKey(category),progress:0,complete:false,acceptedAt:Date.now()};
+  saveGame();renderMissions();updateMissionButton();showToast(`${mission.title} aceita — progresso iniciado`);
+}
+function abandonMission(category){
+  normalizeMissionState();const active=progress.missions.active[category];if(!active)return;
+  const mission=missionById(category,active.id);progress.missions.active[category]=null;saveGame();renderMissions();updateMissionButton();showToast(`${mission?.title||'Missão'} abandonada`);
+}
+function claimMission(category){
+  normalizeMissionState();const active=progress.missions.active[category];if(!active||!active.complete)return;
+  const mission=missionById(category,active.id);if(!mission)return;
+  progress.profile.credits+=mission.reward.credits;progress.profile.uridium+=mission.reward.uridium;progress.profile.xp+=mission.reward.xp;
+  while(progress.profile.xp>=progress.profile.level*2000){progress.profile.xp-=progress.profile.level*2000;progress.profile.level++;}
+  progress.missions.completed[missionInstanceKey(category,mission.id)]=Date.now();
+  progress.missions.active[category]=null;saveGame();renderMissions();updateMissionButton();updateUI();showToast(`Missão concluída: +${fmt(mission.reward.credits)} CR • +${fmt(mission.reward.uridium)} URI`);
+}
+function missionEvent(type,payload={}){
+  if(!progress)return;normalizeMissionState();let changed=false;
+  for(const category of Object.keys(MISSION_CATEGORIES)){
+    const active=progress.missions.active[category];if(!active||active.complete)continue;
+    const mission=missionById(category,active.id);if(!mission)continue;
+    let add=0;
+    if(type==='kill'){
+      const enemy=payload.enemy;
+      if(mission.objective==='killAny')add=1;
+      else if(mission.objective==='killBoss'&&enemy?.type?.startsWith('boss'))add=1;
+      else if(mission.objective==='killBattle'&&MAPS[payload.mapId]?.battle)add=1;
+      else if(mission.objective==='killType'&&mission.types?.includes(enemy?.type))add=1;
+    }else if(type==='collectOre'&&mission.objective==='collectOre')add=Math.max(0,Number(payload.amount)||0);
+    else if(type==='explore'&&mission.objective==='explore')add=1;
+    if(!add)continue;
+    active.progress=Math.min(mission.target,(Number(active.progress)||0)+add);changed=true;
+    if(active.progress>=mission.target&&!active.complete){active.complete=true;showToast(`MISSÃO COMPLETA: ${mission.title} — resgate a recompensa`);}
+  }
+  if(changed){saveGame();updateMissionButton();if(ui.missionModal&&!ui.missionModal.classList.contains('hidden'))renderMissions();}
+}
+function renderMissions(){
+  if(!ui.missionContent||!progress)return;normalizeMissionState();ui.missionContent.innerHTML='';
+  for(const [category,meta] of Object.entries(MISSION_CATEGORIES)){
+    const section=document.createElement('section');section.className='mission-category';section.style.setProperty('--mission-accent',meta.accent);
+    const active=progress.missions.active[category];
+    section.innerHTML=`<div class="mission-category-head"><div><div class="eyebrow">${meta.label}</div><h3>${active?'1 missão ativa':'Escolha sua missão'}</h3></div><span class="mission-slot-badge">${active?'ATIVA':'LIVRE'}</span></div>`;
+    const grid=document.createElement('div');grid.className='mission-grid';
+    for(const mission of MISSION_LIBRARY[category]){
+      const isActive=active?.id===mission.id,done=!!progress.missions.completed[missionInstanceKey(category,mission.id)],locked=!!active&&!isActive;
+      const current=isActive?Math.min(mission.target,Number(active.progress)||0):0,pct=Math.max(0,Math.min(100,current/mission.target*100));
+      const card=document.createElement('article');card.className=`mission-card${isActive?' active':''}${done?' completed':''}${locked?' locked':''}`;
+      card.innerHTML=`<div class="mission-card-top"><div><span class="mission-type-chip">${meta.label.replace('MISSÕES ','').replace('MISSÃO ','')}</span><h4>${mission.title}</h4></div>${done?'<span class="mission-done">✓ CONCLUÍDA</span>':''}</div><p>${mission.desc}</p><div class="mission-objective">${missionObjectiveText(mission)}</div>${isActive?`<div class="mission-progress-row"><span>${fmt(current)} / ${fmt(mission.target)}</span><b>${Math.round(pct)}%</b></div><div class="mission-progress"><i style="width:${pct}%"></i></div>`:''}<div class="mission-reward"><span>RECOMPENSA</span><b>${missionRewardText(mission)}</b></div>`;
+      const actions=document.createElement('div');actions.className='mission-actions';
+      if(isActive){
+        const primary=document.createElement('button');primary.className=active.complete?'small-btn gold':'small-btn';primary.textContent=active.complete?'RESGATAR':'EM ANDAMENTO';primary.disabled=!active.complete;primary.onclick=()=>claimMission(category);actions.appendChild(primary);
+        const abandon=document.createElement('button');abandon.className='ghost-btn';abandon.textContent='ABANDONAR';abandon.onclick=()=>abandonMission(category);actions.appendChild(abandon);
+      }else if(done){const b=document.createElement('button');b.className='small-btn';b.disabled=true;b.textContent='CONCLUÍDA';actions.appendChild(b);}
+      else{const b=document.createElement('button');b.className='small-btn';b.disabled=locked;b.textContent=locked?'OUTRA ATIVA':'ACEITAR';b.onclick=()=>acceptMission(category,mission.id);actions.appendChild(b);}
+      card.appendChild(actions);grid.appendChild(card);
+    }
+    section.appendChild(grid);ui.missionContent.appendChild(section);
+  }
+  updateMissionButton();
+}
+function openMissions(){normalizeMissionState();renderMissions();ui.missionModal.classList.remove('hidden');}
+
 function blankLoadout(shipId='phoenix') {
   const ship = SHIPS[shipId];
   return {
@@ -169,6 +307,7 @@ function freshSave(factionId) {
     flags: { autoLaser: false, autoRocket: false, turboRocket: false },
     cargo: {},
     discoveries: {},
+    missions: freshMissions(),
     pet: freshPet(),
     expeditionV9: 1,
   };
@@ -280,7 +419,7 @@ function hydrateProgress(){
   if(!progress)return;
   if(!progress.profile?.faction || !SHIPS[progress.activeShipId]) throw new Error('save incompleto');
   progress.profile.callsign ||= getUser()?.callsign || getUser()?.email?.split('@')[0] || 'Pilot';
-  progress.ownedShips ||= ['phoenix'];progress.inventory ||= {};progress.drones ||= [];progress.ammo ||= {};progress.rockets ||= {};progress.flags ||= {};progress.cargo ||= {};progress.discoveries ||= {};
+  progress.ownedShips ||= ['phoenix'];progress.inventory ||= {};progress.drones ||= [];progress.ammo ||= {};progress.rockets ||= {};progress.flags ||= {};progress.cargo ||= {};progress.discoveries ||= {};progress.missions ||= freshMissions();normalizeMissionState();
   progress.pet ||= freshPet();
   progress.pet.level=Math.max(1,Math.min(PET_MAX_LEVEL,Number(progress.pet.level)||1));
   progress.pet.xp=Math.max(0,Number(progress.pet.xp)||0);
@@ -480,7 +619,7 @@ function updatePet(dt){
   }
   if(mode==='ore'&&task&&Math.hypot(task.x-petRuntime.x,task.y-petRuntime.y)<24){
     const got=addCargoResource(task.type,task.amount);
-    if(got>0){spawnParticle(task.x,task.y,`P.E.T. +${got} ${task.type}`,task.color);addPetXp(3);state.ores=state.ores.filter(x=>x.id!==task.id);state.oreRespawns.push({type:task.type,at:nowSec()+rand(5,12)});saveGame();}
+    if(got>0){spawnParticle(task.x,task.y,`P.E.T. +${got} ${task.type}`,task.color);missionEvent('collectOre',{amount:got,type:task.type,mapId:progress.mapId});addPetXp(3);state.ores=state.ores.filter(x=>x.id!==task.id);state.oreRespawns.push({type:task.type,at:nowSec()+rand(5,12)});saveGame();}
     petRuntime.taskId=null;
   }
 }
@@ -546,7 +685,7 @@ function createLandmarks(){
 function routeDistance(){return Math.hypot(player.tx-player.x,player.ty-player.y);}
 function checkLandmarkDiscovery(){
   if(!progress?.discoveries)return;
-  for(const l of state.landmarks){const key=`${progress.mapId}:${l.id}`;if(progress.discoveries[key])continue;if(Math.hypot(player.x-l.x,player.y-l.y)>105)continue;progress.discoveries[key]=true;const tier=state.currentMap.battle?8:Math.max(1,state.currentMap.tier||1),cr=750+tier*450,xp=180+tier*90;progress.profile.credits+=cr;progress.profile.xp+=xp;while(progress.profile.xp>=progress.profile.level*2000){progress.profile.xp-=progress.profile.level*2000;progress.profile.level++;}spawnParticle(l.x,l.y-24,`DESCOBERTA +${fmt(cr)} CR`,'#74e7ff');spawnImpactFx(l.x,l.y,'#74e7ff',46,'shield');showToast(`Descoberta: ${l.name} • +${fmt(cr)} CR • +${fmt(xp)} XP`);saveGame();}
+  for(const l of state.landmarks){const key=`${progress.mapId}:${l.id}`;if(progress.discoveries[key])continue;if(Math.hypot(player.x-l.x,player.y-l.y)>105)continue;progress.discoveries[key]=true;const tier=state.currentMap.battle?8:Math.max(1,state.currentMap.tier||1),cr=750+tier*450,xp=180+tier*90;progress.profile.credits+=cr;progress.profile.xp+=xp;while(progress.profile.xp>=progress.profile.level*2000){progress.profile.xp-=progress.profile.level*2000;progress.profile.level++;}spawnParticle(l.x,l.y-24,`DESCOBERTA +${fmt(cr)} CR`,'#74e7ff');spawnImpactFx(l.x,l.y,'#74e7ff',46,'shield');missionEvent('explore',{landmark:l,mapId:progress.mapId});showToast(`Descoberta: ${l.name} • +${fmt(cr)} CR • +${fmt(xp)} XP`);saveGame();}
 }
 function visibleWorldBounds(margin=0){return {left:state.camera.x-W/2-margin,right:state.camera.x+W/2+margin,top:state.camera.y-H/2-margin,bottom:state.camera.y+H/2+margin};}
 function onScreenWorld(x,y,margin=180){const b=visibleWorldBounds(margin);return x>=b.left&&x<=b.right&&y>=b.top&&y<=b.bottom;}
@@ -569,7 +708,7 @@ function makeEnemy(type){
   if(progress?.mapId==='x1'&&safeZoneDistance(pos.x,pos.y)<SAFE_ZONE.radius+180)pos=randomMapPosition(180);
   const battle=state.currentMap?.battle;return {id:`${type}_${Math.random().toString(16).slice(2,9)}`,type,name:base.name,x:pos.x,y:pos.y,hp:base.hp,maxHp:base.hp,shield:base.shield,maxShield:base.shield,credits:base.credits,uridium:base.uridium,speed:base.speed,damage:base.damage,color:base.color,size:base.size,resources:{...(base.resources||{})},attackRange:Math.min(battle?500:420,(battle?210:170)+base.size*5.8),aggroRange:battle?920:720,lastShot:0,angle:rand(0,TWO_PI),drift:rand(.4,1.4)};
 }
-function spawnEnemies(){state.enemies=[];state.enemyRespawns=[];for(const group of state.currentMap.enemyGroups)for(let i=0;i<group.count;i++)state.enemies.push(makeEnemy(group.type));}
+function spawnEnemies(){state.enemies=[];state.enemyRespawns=[];const mult=Math.max(1,Number(state.currentMap.enemyMultiplier)||1);for(const group of state.currentMap.enemyGroups){const count=Math.max(1,Math.round(group.count*mult));for(let i=0;i<count;i++)state.enemies.push(makeEnemy(group.type));}}
 function scheduleEnemyRespawn(type){state.enemyRespawns.push({type,at:nowSec()+rand(6,13)});}
 function processRespawns(){
   const now=nowSec();state.enemies=state.enemies.filter(e=>e.hp>0||!e.deadAt||now-e.deadAt<1.2);
@@ -603,6 +742,7 @@ function rewardEnemyKill(enemy){
   addPetXp(Math.max(12,Math.round(enemy.credits/120+enemy.uridium*4)));
   while(progress.profile.xp>=progress.profile.level*2000){progress.profile.xp-=progress.profile.level*2000;progress.profile.level++;showToast(`Level ${progress.profile.level}!`);}
   state.loot.push({id:`box_${Math.random().toString(16).slice(2)}`,x:enemy.x,y:enemy.y,resources:{...(enemy.resources||{})},source:enemy.name});
+  missionEvent('kill',{enemy,mapId:progress.mapId});
   scheduleEnemyRespawn(enemy.type);saveGame();
 }
 function dealDamageToEnemy(enemy,damage,color){
@@ -667,7 +807,7 @@ function updatePlayer(dt){
   if(player.laserFiring)fireLaserTick();
   if(autoRocketEnabled()&&player.laserFiring&&rocketReady())fireRocket(false);
   for(let i=state.loot.length-1;i>=0;i--){const l=state.loot[i];if(Math.hypot(l.x-player.x,l.y-player.y)<40){const empty=collectCargoBox(l);if(empty)state.loot.splice(i,1);}}
-  for(let i=state.ores.length-1;i>=0;i--){const o=state.ores[i];if(Math.hypot(o.x-player.x,o.y-player.y)<30){const got=addCargoResource(o.type,o.amount);if(got>0){spawnParticle(o.x,o.y,`+${got} ${o.type}`,o.color);state.ores.splice(i,1);state.oreRespawns.push({type:o.type,at:nowSec()+rand(5,12)});saveGame();}else showToast('Porão cheio');}}
+  for(let i=state.ores.length-1;i>=0;i--){const o=state.ores[i];if(Math.hypot(o.x-player.x,o.y-player.y)<30){const got=addCargoResource(o.type,o.amount);if(got>0){spawnParticle(o.x,o.y,`+${got} ${o.type}`,o.color);missionEvent('collectOre',{amount:got,type:o.type,mapId:progress.mapId});state.ores.splice(i,1);state.oreRespawns.push({type:o.type,at:nowSec()+rand(5,12)});saveGame();}else showToast('Porão cheio');}}
   if(player.hp<=0){player.hp=player.maxHp;player.shield=Math.round(player.maxShield*.5);progress.profile.credits=Math.max(0,Math.round(progress.profile.credits*.95));progress.mapId='x1';state.currentMap=MAPS.x1;state.radarRange=mapRadarRange();player.x=SAFE_ZONE.x;player.y=SAFE_ZONE.y;player.tx=player.x;player.ty=player.y;state.camera.x=player.x;state.camera.y=player.y;state.target=null;player.laserFiring=false;state.fx=[];state.rocketFx=[];createLandmarks();createOres();spawnEnemies();showToast('Nave destruída. Retorno automático à Zona Segura.');saveGame();}
   progress.hp=player.hp;progress.shield=player.shield;progress.x=player.x;progress.y=player.y;
 }
@@ -1016,16 +1156,16 @@ function openCargo(){renderCargo();ui.cargoModal.classList.remove('hidden');}
 
 function openShop(tab='ships'){state.shopTab=tab;renderShop();ui.shopModal.classList.remove('hidden');}
 function openHangar(tab='ships'){state.hangarTab=tab;renderHangar();ui.hangarModal.classList.remove('hidden');}
-function renderAll(){buildAmmoButtons();renderShop();renderHangar();renderCargo();renderMapModal();renderPet();updateUI();}
+function renderAll(){buildAmmoButtons();renderShop();renderHangar();renderCargo();renderMapModal();renderPet();renderMissions();updateUI();}
 
 function worldPoint(ev){const r=canvas.getBoundingClientRect(),sx=ev.clientX-r.left,sy=ev.clientY-r.top;return{x:sx-W/2+state.camera.x,y:sy-H/2+state.camera.y};}
-function pointerAction(ev){if(!authenticated||!progress||!ui.loginModal.classList.contains('hidden')||!ui.shopModal.classList.contains('hidden')||!ui.hangarModal.classList.contains('hidden')||!ui.cargoModal.classList.contains('hidden')||!ui.petModal.classList.contains('hidden')||!ui.factionModal.classList.contains('hidden'))return;const p=worldPoint(ev);const found=state.enemies.find(e=>e.hp>0&&Math.hypot(e.x-p.x,e.y-p.y)<=e.size*1.8+18);if(found){state.target=found;showToast(`Alvo: ${found.name}`);if(autoLaserEnabled())player.laserFiring=true;return;}const clickedPortal=portalAtWorld(p.x,p.y);const readyPortal=nearbyPortal();if(clickedPortal&&readyPortal&&clickedPortal.to===readyPortal.to&&Math.hypot(clickedPortal.x-readyPortal.x,clickedPortal.y-readyPortal.y)<1){jumpThroughPortal(readyPortal);return;}player.tx=Math.max(40,Math.min(state.currentMap.world.w-40,p.x));player.ty=Math.max(40,Math.min(state.currentMap.world.h-40,p.y));}
+function pointerAction(ev){if(!authenticated||!progress||!ui.loginModal.classList.contains('hidden')||!ui.shopModal.classList.contains('hidden')||!ui.hangarModal.classList.contains('hidden')||!ui.cargoModal.classList.contains('hidden')||!ui.petModal.classList.contains('hidden')||!ui.missionModal.classList.contains('hidden')||!ui.factionModal.classList.contains('hidden'))return;const p=worldPoint(ev);const found=state.enemies.find(e=>e.hp>0&&Math.hypot(e.x-p.x,e.y-p.y)<=e.size*1.8+18);if(found){state.target=found;showToast(`Alvo: ${found.name}`);if(autoLaserEnabled())player.laserFiring=true;return;}const clickedPortal=portalAtWorld(p.x,p.y);const readyPortal=nearbyPortal();if(clickedPortal&&readyPortal&&clickedPortal.to===readyPortal.to&&Math.hypot(clickedPortal.x-readyPortal.x,clickedPortal.y-readyPortal.y)<1){jumpThroughPortal(readyPortal);return;}player.tx=Math.max(40,Math.min(state.currentMap.world.w-40,p.x));player.ty=Math.max(40,Math.min(state.currentMap.world.h-40,p.y));}
 canvas.addEventListener('pointerdown',pointerAction);
 ui.portalPrompt.onclick=()=>{const portal=nearbyPortal();if(portal)jumpThroughPortal(portal);};
 minimap.addEventListener('pointerdown',e=>{if(!authenticated||!progress)return;e.preventDefault();e.stopPropagation();const r=minimap.getBoundingClientRect();const mx=(e.clientX-r.left)/r.width*minimap.width,my=(e.clientY-r.top)/r.height*minimap.height;player.tx=Math.max(35,Math.min(state.currentMap.world.w-35,mx/minimap.width*state.currentMap.world.w));player.ty=Math.max(35,Math.min(state.currentMap.world.h-35,my/minimap.height*state.currentMap.world.h));showToast(`Rota definida no minimapa`);});
 ui.laserToggle.onclick=()=>{if(!state.target||state.target.hp<=0){showToast('Selecione um alvo');return;}player.laserFiring=!player.laserFiring;};ui.rocketFire.onclick=()=>fireRocket(true);
-ui.mapBtn.onclick=()=>openMapModal();ui.closeMap.onclick=()=>ui.mapModal.classList.add('hidden');ui.petBtn.onclick=()=>openPet();ui.closePet.onclick=()=>ui.petModal.classList.add('hidden');ui.shopBtn.onclick=()=>openShop();if(ui.weaponBarToggle)ui.weaponBarToggle.onclick=()=>toggleAmmoUi();if(ui.statsToggle){ui.statsToggle.onclick=e=>{e.stopPropagation();toggleStatsUi();};ui.statsToggle.ontouchstart=e=>e.stopPropagation();}if(ui.statsHeader)ui.statsHeader.onclick=()=>toggleStatsUi();if(ui.minimapToggle){ui.minimapToggle.onclick=e=>{e.stopPropagation();toggleMinimapUi();};ui.minimapToggle.ontouchstart=e=>e.stopPropagation();}if(ui.minimapHeader)ui.minimapHeader.onclick=()=>toggleMinimapUi();if(ui.hudToggle)ui.hudToggle.onclick=()=>toggleHudUi();ui.closeShop.onclick=()=>ui.shopModal.classList.add('hidden');ui.hangarBtn.onclick=()=>openHangar();ui.closeHangar.onclick=()=>ui.hangarModal.classList.add('hidden');ui.cargoBtn.onclick=()=>openCargo();ui.closeCargo.onclick=()=>ui.cargoModal.classList.add('hidden');ui.sellAllCargo.onclick=()=>sellAllCargo();ui.mapModal.onclick=e=>{if(e.target===ui.mapModal)ui.mapModal.classList.add('hidden');};ui.petModal.onclick=e=>{if(e.target===ui.petModal)ui.petModal.classList.add('hidden');};ui.shopModal.onclick=e=>{if(e.target===ui.shopModal)ui.shopModal.classList.add('hidden');};ui.hangarModal.onclick=e=>{if(e.target===ui.hangarModal)ui.hangarModal.classList.add('hidden');};ui.cargoModal.onclick=e=>{if(e.target===ui.cargoModal)ui.cargoModal.classList.add('hidden');};
-document.addEventListener('keydown',e=>{if(!authenticated||!progress||!ui.loginModal.classList.contains('hidden')||!ui.factionModal.classList.contains('hidden'))return;const tag=document.activeElement?.tagName;if(tag==='INPUT'||tag==='TEXTAREA')return;if(e.key==='Control'){e.preventDefault();if(state.target&&state.target.hp>0)player.laserFiring=!player.laserFiring;else showToast('Selecione um alvo');}if(e.code==='Space'){e.preventDefault();fireRocket(true);}if(['j','J'].includes(e.key)||e.key==='Enter'){const portal=nearbyPortal();if(portal){e.preventDefault();jumpThroughPortal(portal);}}if(e.key.toLowerCase()==='h')toggleHudUi();if(e.key.toLowerCase()==='b')openShop();if(e.key.toLowerCase()==='c')openCargo();if(e.key.toLowerCase()==='m')openMapModal();if(e.key.toLowerCase()==='p')openPet();if(['1','2','3','4'].includes(e.key)){progress.selectedLaserAmmo=Object.keys(LASER_AMMO)[Number(e.key)-1];buildAmmoButtons();saveGame();}});
+ui.mapBtn.onclick=()=>openMapModal();ui.closeMap.onclick=()=>ui.mapModal.classList.add('hidden');if(ui.missionBtn)ui.missionBtn.onclick=()=>openMissions();if(ui.closeMission)ui.closeMission.onclick=()=>ui.missionModal.classList.add('hidden');ui.petBtn.onclick=()=>openPet();ui.closePet.onclick=()=>ui.petModal.classList.add('hidden');ui.shopBtn.onclick=()=>openShop();if(ui.weaponBarToggle)ui.weaponBarToggle.onclick=()=>toggleAmmoUi();if(ui.statsToggle){ui.statsToggle.onclick=e=>{e.stopPropagation();toggleStatsUi();};ui.statsToggle.ontouchstart=e=>e.stopPropagation();}if(ui.statsHeader)ui.statsHeader.onclick=()=>toggleStatsUi();if(ui.minimapToggle){ui.minimapToggle.onclick=e=>{e.stopPropagation();toggleMinimapUi();};ui.minimapToggle.ontouchstart=e=>e.stopPropagation();}if(ui.minimapHeader)ui.minimapHeader.onclick=()=>toggleMinimapUi();if(ui.hudToggle)ui.hudToggle.onclick=()=>toggleHudUi();ui.closeShop.onclick=()=>ui.shopModal.classList.add('hidden');ui.hangarBtn.onclick=()=>openHangar();ui.closeHangar.onclick=()=>ui.hangarModal.classList.add('hidden');ui.cargoBtn.onclick=()=>openCargo();ui.closeCargo.onclick=()=>ui.cargoModal.classList.add('hidden');ui.sellAllCargo.onclick=()=>sellAllCargo();ui.mapModal.onclick=e=>{if(e.target===ui.mapModal)ui.mapModal.classList.add('hidden');};if(ui.missionModal)ui.missionModal.onclick=e=>{if(e.target===ui.missionModal)ui.missionModal.classList.add('hidden');};ui.petModal.onclick=e=>{if(e.target===ui.petModal)ui.petModal.classList.add('hidden');};ui.shopModal.onclick=e=>{if(e.target===ui.shopModal)ui.shopModal.classList.add('hidden');};ui.hangarModal.onclick=e=>{if(e.target===ui.hangarModal)ui.hangarModal.classList.add('hidden');};ui.cargoModal.onclick=e=>{if(e.target===ui.cargoModal)ui.cargoModal.classList.add('hidden');};
+document.addEventListener('keydown',e=>{if(!authenticated||!progress||!ui.loginModal.classList.contains('hidden')||!ui.factionModal.classList.contains('hidden'))return;const tag=document.activeElement?.tagName;if(tag==='INPUT'||tag==='TEXTAREA')return;if(e.key==='Control'){e.preventDefault();if(state.target&&state.target.hp>0)player.laserFiring=!player.laserFiring;else showToast('Selecione um alvo');}if(e.code==='Space'){e.preventDefault();fireRocket(true);}if(['j','J'].includes(e.key)||e.key==='Enter'){const portal=nearbyPortal();if(portal){e.preventDefault();jumpThroughPortal(portal);}}if(e.key.toLowerCase()==='h')toggleHudUi();if(e.key.toLowerCase()==='b')openShop();if(e.key.toLowerCase()==='c')openCargo();if(e.key.toLowerCase()==='m')openMapModal();if(e.key.toLowerCase()==='q')openMissions();if(e.key.toLowerCase()==='p')openPet();if(['1','2','3','4'].includes(e.key)){progress.selectedLaserAmmo=Object.keys(LASER_AMMO)[Number(e.key)-1];buildAmmoButtons();saveGame();}});
 
 function showAuthMode(mode){
   const login=mode==='login';ui.loginForm.classList.toggle('hidden',!login);ui.registerForm.classList.toggle('hidden',login);ui.loginTabBtn.classList.toggle('active',login);ui.registerTabBtn.classList.toggle('active',!login);ui.authMessage.textContent='';
