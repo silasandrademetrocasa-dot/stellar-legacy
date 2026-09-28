@@ -144,28 +144,39 @@ const MISSION_CATEGORIES = {
   daily: { label: 'MISSÕES DIÁRIAS', accent: '#58d9ff', reset: 'daily' },
   weekly: { label: 'MISSÃO SEMANAL', accent: '#8d7bff', reset: 'weekly' },
   monthly: { label: 'MISSÃO MENSAL', accent: '#ffc65a', reset: 'monthly' },
-  special: { label: 'MISSÃO ESPECIAL', accent: '#ff668a', reset: 'special' },
+  special: { label: 'MISSÃO ESPECIAL • PROGRESSO', accent: '#ff668a', reset: 'special' },
 };
 const MISSION_LIBRARY = {
   daily: [
-    {id:'patrol',title:'Patrulha de Fronteira',desc:'Elimine qualquer ameaça hostil.',objective:'killAny',target:25,reward:{credits:18000,uridium:25,xp:1200}},
-    {id:'lowhunt',title:'Limpeza do Setor',desc:'Elimine Streuners e Lordakias.',objective:'killType',types:['streuner','recruitStreuner','aiderStreuner','bossStreuner','lordakia','bossLordakia'],target:18,reward:{credits:22000,uridium:30,xp:1500}},
-    {id:'miner',title:'Coleta de Campo',desc:'Colete minérios soltos no mapa.',objective:'collectOre',target:30,reward:{credits:16000,uridium:20,xp:1400}},
+    {id:'daily_streuner',title:'Caçada: Streuner',desc:'Elimine apenas Streuners comuns.',objective:'killType',types:['streuner'],target:25,reward:{credits:18000,uridium:25,xp:1200}},
+    {id:'daily_lordakia',title:'Caçada: Lordakia',desc:'Elimine apenas Lordakias comuns.',objective:'killType',types:['lordakia'],target:20,reward:{credits:22000,uridium:30,xp:1500}},
+    {id:'daily_saimon',title:'Caçada: Saimon',desc:'Elimine apenas Saimons comuns.',objective:'killType',types:['saimon'],target:15,reward:{credits:30000,uridium:35,xp:1900}},
+    {id:'daily_mordon',title:'Caçada: Mordon',desc:'Elimine apenas Mordons comuns.',objective:'killType',types:['mordon'],target:10,reward:{credits:45000,uridium:45,xp:2400}},
+    {id:'daily_devolarium',title:'Caçada: Devolarium',desc:'Elimine apenas Devolariums comuns.',objective:'killType',types:['devolarium'],target:6,reward:{credits:70000,uridium:60,xp:3200}},
+    {id:'daily_sibelon',title:'Caçada: Sibelon',desc:'Elimine apenas Sibelons comuns.',objective:'killType',types:['sibelon'],target:4,reward:{credits:95000,uridium:80,xp:4200}},
   ],
   weekly: [
-    {id:'extermination',title:'Operação Extermínio',desc:'Elimine inimigos em qualquer setor.',objective:'killAny',target:180,reward:{credits:160000,uridium:220,xp:9000}},
-    {id:'boss_hunter',title:'Caçador de Elite',desc:'Destrua NPCs BOSS.',objective:'killBoss',target:24,reward:{credits:210000,uridium:320,xp:12000}},
-    {id:'cartographer',title:'Cartógrafo Estelar',desc:'Descubra pontos de interesse inéditos.',objective:'explore',target:18,reward:{credits:175000,uridium:250,xp:10500}},
+    {id:'weekly_streuner',title:'Semana Streuner',desc:'Faça uma limpeza pesada de Streuners.',objective:'killType',types:['streuner'],target:180,reward:{credits:150000,uridium:200,xp:8500}},
+    {id:'weekly_lordakia',title:'Semana Lordakia',desc:'Elimine somente Lordakias.',objective:'killType',types:['lordakia'],target:140,reward:{credits:185000,uridium:250,xp:10000}},
+    {id:'weekly_saimon',title:'Semana Saimon',desc:'Elimine somente Saimons.',objective:'killType',types:['saimon'],target:110,reward:{credits:230000,uridium:310,xp:12500}},
+    {id:'weekly_mordon',title:'Semana Mordon',desc:'Elimine somente Mordons.',objective:'killType',types:['mordon'],target:80,reward:{credits:320000,uridium:420,xp:16000}},
+    {id:'weekly_devolarium',title:'Semana Devolarium',desc:'Elimine somente Devolariums.',objective:'killType',types:['devolarium'],target:45,reward:{credits:470000,uridium:620,xp:22000}},
+    {id:'weekly_sibelon',title:'Semana Sibelon',desc:'Elimine somente Sibelons.',objective:'killType',types:['sibelon'],target:30,reward:{credits:650000,uridium:850,xp:30000}},
   ],
   monthly: [
-    {id:'war_machine',title:'Máquina de Guerra',desc:'Elimine uma força massiva de inimigos.',objective:'killAny',target:800,reward:{credits:850000,uridium:1400,xp:48000}},
-    {id:'boss_breaker',title:'Aniquilador de Bosses',desc:'Destrua NPCs BOSS em qualquer mapa.',objective:'killBoss',target:100,reward:{credits:1100000,uridium:1900,xp:65000}},
-    {id:'prospector',title:'Prospector Imperial',desc:'Colete minérios ao longo do mês.',objective:'collectOre',target:900,reward:{credits:780000,uridium:1200,xp:52000}},
+    {id:'war_machine',title:'Máquina de Guerra',desc:'Elimine qualquer inimigo durante o mês.',objective:'killAny',target:1000,reward:{credits:950000,uridium:1500,xp:52000}},
+    {id:'boss_breaker',title:'Aniquilador de Bosses',desc:'Destrua qualquer NPC BOSS durante o mês.',objective:'killBoss',target:120,reward:{credits:1250000,uridium:2100,xp:70000}},
+    {id:'monthly_sibelon',title:'Domínio Sibelon',desc:'Elimine somente Sibelons durante o mês.',objective:'killType',types:['sibelon'],target:120,reward:{credits:1150000,uridium:1850,xp:62000}},
   ],
   special: [
-    {id:'battle_veteran',title:'Veterano da Zona 4-X',desc:'Elimine inimigos nos mapas de batalha 4-1, 4-2 ou 4-3.',objective:'killBattle',target:100,reward:{credits:500000,uridium:1000,xp:30000}},
-    {id:'deep_explorer',title:'Horizonte Profundo',desc:'Descubra pontos de interesse pelo universo.',objective:'explore',target:35,reward:{credits:420000,uridium:800,xp:26000}},
-    {id:'heavy_hunter',title:'Caçada Pesada',desc:'Elimine Devolarium e Sibelon, incluindo versões BOSS.',objective:'killType',types:['devolarium','bossDevolarium','sibelon','bossSibelon'],target:35,reward:{credits:650000,uridium:1250,xp:36000}},
+    {id:'progress_streuner',stage:1,title:'Progresso I • Streuner',desc:'Primeira etapa da linha de progresso. Elimine somente Streuners.',objective:'killType',types:['streuner'],target:100,reward:{credits:90000,uridium:120,xp:5000}},
+    {id:'progress_lordakia',stage:2,requires:'progress_streuner',title:'Progresso II • Lordakia',desc:'Segunda etapa. Elimine somente Lordakias.',objective:'killType',types:['lordakia'],target:90,reward:{credits:140000,uridium:190,xp:7500}},
+    {id:'progress_saimon',stage:3,requires:'progress_lordakia',title:'Progresso III • Saimon',desc:'Terceira etapa. Elimine somente Saimons.',objective:'killType',types:['saimon'],target:75,reward:{credits:220000,uridium:300,xp:11000}},
+    {id:'progress_mordon',stage:4,requires:'progress_saimon',title:'Progresso IV • Mordon',desc:'Quarta etapa. Elimine somente Mordons.',objective:'killType',types:['mordon'],target:60,reward:{credits:340000,uridium:460,xp:16000}},
+    {id:'progress_devolarium',stage:5,requires:'progress_mordon',title:'Progresso V • Devolarium',desc:'Quinta etapa. Elimine somente Devolariums.',objective:'killType',types:['devolarium'],target:40,reward:{credits:520000,uridium:700,xp:23000}},
+    {id:'progress_sibelon',stage:6,requires:'progress_devolarium',title:'Progresso VI • Sibelon',desc:'Sexta etapa. Elimine somente Sibelons.',objective:'killType',types:['sibelon'],target:30,reward:{credits:760000,uridium:980,xp:32000}},
+    {id:'progress_boss_devolarium',stage:7,requires:'progress_sibelon',title:'Progresso VII • Boss Devolarium',desc:'Sétima etapa. Elimine somente Boss Devolariums.',objective:'killType',types:['bossDevolarium'],target:20,reward:{credits:1050000,uridium:1450,xp:45000}},
+    {id:'progress_boss_sibelon',stage:8,requires:'progress_boss_devolarium',title:'Progresso VIII • Boss Sibelon',desc:'Etapa final desta campanha. Elimine somente Boss Sibelons.',objective:'killType',types:['bossSibelon'],target:12,reward:{credits:1750000,uridium:2400,xp:70000}},
   ],
 };
 function missionPeriodKey(category,now=new Date()){
@@ -177,7 +188,7 @@ function missionPeriodKey(category,now=new Date()){
     const day=copy.getUTCDay()||7;copy.setUTCDate(copy.getUTCDate()-day+1);
     return `${copy.getUTCFullYear()}-${String(copy.getUTCMonth()+1).padStart(2,'0')}-${String(copy.getUTCDate()).padStart(2,'0')}`;
   }
-  return 'special-v1';
+  return 'special-progress-v2';
 }
 function freshMissions(){return {active:{daily:null,weekly:null,monthly:null,special:null},completed:{}};}
 function normalizeMissionState(){
@@ -188,10 +199,19 @@ function normalizeMissionState(){
   for(const category of Object.keys(MISSION_CATEGORIES)){
     if(progress.missions.active[category]===undefined)progress.missions.active[category]=null;
     const active=progress.missions.active[category];
-    if(active && active.period!==missionPeriodKey(category))progress.missions.active[category]=null;
+    if(active && (active.period!==missionPeriodKey(category) || !missionById(category,active.id)))progress.missions.active[category]=null;
   }
 }
 function missionById(category,id){return (MISSION_LIBRARY[category]||[]).find(m=>m.id===id)||null;}
+function missionCompleted(category,id){return !!progress?.missions?.completed?.[missionInstanceKey(category,id)];}
+function missionUnlocked(category,mission){
+  if(!mission?.requires)return true;
+  return missionCompleted(category,mission.requires);
+}
+function missionTargetName(m){
+  const id=m?.types?.[0];
+  return id && NPC_TYPES[id] ? NPC_TYPES[id].name : 'alvo específico';
+}
 function missionInstanceKey(category,id){return `${category}:${missionPeriodKey(category)}:${id}`;}
 function missionObjectiveText(m){
   if(m.objective==='killAny')return `Eliminações: ${m.target}`;
@@ -199,7 +219,7 @@ function missionObjectiveText(m){
   if(m.objective==='killBattle')return `Eliminações em 4-X: ${m.target}`;
   if(m.objective==='collectOre')return `Minérios coletados: ${m.target}`;
   if(m.objective==='explore')return `Descobertas: ${m.target}`;
-  if(m.objective==='killType')return `Alvos específicos: ${m.target}`;
+  if(m.objective==='killType')return `Elimine ${missionTargetName(m)}: ${m.target}`;
   return `Objetivo: ${m.target}`;
 }
 function missionRewardText(m){return `${fmt(m.reward.credits)} CR • ${fmt(m.reward.uridium)} URI • ${fmt(m.reward.xp)} XP`;}
@@ -214,6 +234,7 @@ function acceptMission(category,id){
   normalizeMissionState();
   if(progress.missions.active[category]){showToast('Você já tem uma missão ativa nessa categoria');return;}
   const mission=missionById(category,id);if(!mission)return;
+  if(!missionUnlocked(category,mission)){const req=missionById(category,mission.requires);showToast(`Conclua primeiro: ${req?.title||'etapa anterior'}`);return;}
   const key=missionInstanceKey(category,id);if(progress.missions.completed[key]){showToast('Essa missão já foi concluída neste ciclo');return;}
   progress.missions.active[category]={id,period:missionPeriodKey(category),progress:0,complete:false,acceptedAt:Date.now()};
   saveGame();renderMissions();updateMissionButton();showToast(`${mission.title} aceita — progresso iniciado`);
@@ -258,16 +279,17 @@ function renderMissions(){
     section.innerHTML=`<div class="mission-category-head"><div><div class="eyebrow">${meta.label}</div><h3>${active?'1 missão ativa':'Escolha sua missão'}</h3></div><span class="mission-slot-badge">${active?'ATIVA':'LIVRE'}</span></div>`;
     const grid=document.createElement('div');grid.className='mission-grid';
     for(const mission of MISSION_LIBRARY[category]){
-      const isActive=active?.id===mission.id,done=!!progress.missions.completed[missionInstanceKey(category,mission.id)],locked=!!active&&!isActive;
+      const isActive=active?.id===mission.id,done=missionCompleted(category,mission.id),prereqUnlocked=missionUnlocked(category,mission),slotLocked=!!active&&!isActive,locked=slotLocked||(!prereqUnlocked&&!done);
       const current=isActive?Math.min(mission.target,Number(active.progress)||0):0,pct=Math.max(0,Math.min(100,current/mission.target*100));
+      const reqMission=mission.requires?missionById(category,mission.requires):null;
       const card=document.createElement('article');card.className=`mission-card${isActive?' active':''}${done?' completed':''}${locked?' locked':''}`;
-      card.innerHTML=`<div class="mission-card-top"><div><span class="mission-type-chip">${meta.label.replace('MISSÕES ','').replace('MISSÃO ','')}</span><h4>${mission.title}</h4></div>${done?'<span class="mission-done">✓ CONCLUÍDA</span>':''}</div><p>${mission.desc}</p><div class="mission-objective">${missionObjectiveText(mission)}</div>${isActive?`<div class="mission-progress-row"><span>${fmt(current)} / ${fmt(mission.target)}</span><b>${Math.round(pct)}%</b></div><div class="mission-progress"><i style="width:${pct}%"></i></div>`:''}<div class="mission-reward"><span>RECOMPENSA</span><b>${missionRewardText(mission)}</b></div>`;
+      card.innerHTML=`<div class="mission-card-top"><div><span class="mission-type-chip">${mission.stage?`ETAPA ${mission.stage} • `:''}${meta.label.replace('MISSÕES ','').replace('MISSÃO ','')}</span><h4>${mission.title}</h4></div>${done?'<span class="mission-done">✓ CONCLUÍDA</span>':''}</div><p>${mission.desc}</p><div class="mission-objective">${missionObjectiveText(mission)}</div>${!prereqUnlocked&&!done?`<div class="mission-prereq">🔒 Requer: ${reqMission?.title||'etapa anterior'}</div>`:''}${isActive?`<div class="mission-progress-row"><span>${fmt(current)} / ${fmt(mission.target)}</span><b>${Math.round(pct)}%</b></div><div class="mission-progress"><i style="width:${pct}%"></i></div>`:''}<div class="mission-reward"><span>RECOMPENSA</span><b>${missionRewardText(mission)}</b></div>`;
       const actions=document.createElement('div');actions.className='mission-actions';
       if(isActive){
         const primary=document.createElement('button');primary.className=active.complete?'small-btn gold':'small-btn';primary.textContent=active.complete?'RESGATAR':'EM ANDAMENTO';primary.disabled=!active.complete;primary.onclick=()=>claimMission(category);actions.appendChild(primary);
         const abandon=document.createElement('button');abandon.className='ghost-btn';abandon.textContent='ABANDONAR';abandon.onclick=()=>abandonMission(category);actions.appendChild(abandon);
       }else if(done){const b=document.createElement('button');b.className='small-btn';b.disabled=true;b.textContent='CONCLUÍDA';actions.appendChild(b);}
-      else{const b=document.createElement('button');b.className='small-btn';b.disabled=locked;b.textContent=locked?'OUTRA ATIVA':'ACEITAR';b.onclick=()=>acceptMission(category,mission.id);actions.appendChild(b);}
+      else{const b=document.createElement('button');b.className='small-btn';b.disabled=locked;b.textContent=!prereqUnlocked?'BLOQUEADA':slotLocked?'OUTRA ATIVA':'ACEITAR';b.onclick=()=>acceptMission(category,mission.id);actions.appendChild(b);}
       card.appendChild(actions);grid.appendChild(card);
     }
     section.appendChild(grid);ui.missionContent.appendChild(section);

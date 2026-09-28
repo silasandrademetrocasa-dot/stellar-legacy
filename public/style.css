@@ -372,3 +372,7 @@ body::before{content:"";position:fixed;inset:0;pointer-events:none;background:ra
 .mission-actions .small-btn,.mission-actions .ghost-btn{flex:1;min-width:95px;min-height:32px;font-size:9px;padding:6px 8px}
 @media(max-width:980px){.mission-grid{grid-template-columns:1fr}.mission-card p{min-height:0}.mission-modal-card{width:min(760px,98vw)!important}.mission-category{padding:11px}}
 @media(max-width:680px){.mission-rule-banner{font-size:10px;padding:9px 10px}.mission-category-head h3{font-size:14px}.mission-card{padding:10px}.mission-content{gap:12px}.mission-slot-badge{font-size:8px}.mission-actions .small-btn,.mission-actions .ghost-btn{min-height:34px}}
+
+/* V9.4 Progress Protocol */
+.mission-prereq{padding:7px 8px;border-radius:8px;border:1px solid rgba(255,102,138,.16);background:rgba(56,12,25,.28);font-size:10px;color:#ff9eb3;font-weight:700}
+.mission-card.locked .mission-objective{opacity:.72}

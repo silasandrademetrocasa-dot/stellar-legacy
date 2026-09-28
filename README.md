@@ -1,4 +1,4 @@
-# Stellar Legacy V9.3 — Mission Protocol
+# Stellar Legacy V9.4 — Progress Protocol
 
 Grande atualização de conteúdo sobre a base V9 Expedition. Mantém os mapas expandidos e adiciona densidade maior de NPCs e um sistema persistente de missões com aceite manual.
 
@@ -111,3 +111,12 @@ Antes de empacotar a release:
 - `server/index.js` → `node --check`
 
 Release: **9.0.0**
+
+## V9.4 — Progress Protocol
+- Diárias: somente caçadas de NPC específico.
+- Semanais: somente caçadas de NPC específico.
+- Mensais: única categoria que permite eliminações gerais.
+- Especiais: nova campanha permanente de progresso em 8 etapas.
+- Cada etapa especial exige a conclusão da anterior.
+- Continua valendo a regra de 1 missão ativa por categoria.
+- O progresso só começa depois de ACEITAR.
