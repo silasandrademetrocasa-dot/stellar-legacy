@@ -200,6 +200,12 @@ function normalizeMissionState(){
     if(progress.missions.active[category]===undefined)progress.missions.active[category]=null;
     const active=progress.missions.active[category];
     if(active && (active.period!==missionPeriodKey(category) || !missionById(category,active.id)))progress.missions.active[category]=null;
+    else if(active){
+      active.bonus ||= {credits:0,uridium:0,xp:0};
+      active.bonus.credits=Number(active.bonus.credits)||0;
+      active.bonus.uridium=Number(active.bonus.uridium)||0;
+      active.bonus.xp=Number(active.bonus.xp)||0;
+    }
   }
 }
 function missionById(category,id){return (MISSION_LIBRARY[category]||[]).find(m=>m.id===id)||null;}
@@ -212,6 +218,44 @@ function missionTargetName(m){
   const id=m?.types?.[0];
   return id && NPC_TYPES[id] ? NPC_TYPES[id].name : 'alvo específico';
 }
+
+function npcKillReward(enemy){
+  if(!enemy)return {credits:0,uridium:0,xp:0};
+  return {
+    credits: Math.max(0,Number(enemy.credits)||0),
+    uridium: Math.max(0,Number(enemy.uridium)||0),
+    xp: Math.max(0,Math.round((Number(enemy.credits)||0)/10+(Number(enemy.uridium)||0)*12)),
+  };
+}
+function halfKillReward(enemy){
+  const r=npcKillReward(enemy);
+  return {credits:r.credits*.5,uridium:r.uridium*.5,xp:r.xp*.5};
+}
+function addMissionBonus(active,enemy){
+  active.bonus ||= {credits:0,uridium:0,xp:0};
+  const b=halfKillReward(enemy);
+  active.bonus.credits=(Number(active.bonus.credits)||0)+b.credits;
+  active.bonus.uridium=(Number(active.bonus.uridium)||0)+b.uridium;
+  active.bonus.xp=(Number(active.bonus.xp)||0)+b.xp;
+}
+function roundedMissionBonus(active){
+  const b=active?.bonus||{};
+  return {
+    credits:Math.max(0,Math.round(Number(b.credits)||0)),
+    uridium:Math.max(0,Math.round(Number(b.uridium)||0)),
+    xp:Math.max(0,Math.round(Number(b.xp)||0)),
+  };
+}
+function projectedMissionReward(m){
+  if(m?.objective!=='killType'||!m.types?.length)return null;
+  const npc=NPC_TYPES[m.types[0]];if(!npc)return null;
+  const one=halfKillReward(npc);
+  return {
+    credits:Math.round(one.credits*m.target),
+    uridium:Math.round(one.uridium*m.target),
+    xp:Math.round(one.xp*m.target),
+  };
+}
 function missionInstanceKey(category,id){return `${category}:${missionPeriodKey(category)}:${id}`;}
 function missionObjectiveText(m){
   if(m.objective==='killAny')return `Eliminações: ${m.target}`;
@@ -222,7 +266,15 @@ function missionObjectiveText(m){
   if(m.objective==='killType')return `Elimine ${missionTargetName(m)}: ${m.target}`;
   return `Objetivo: ${m.target}`;
 }
-function missionRewardText(m){return `${fmt(m.reward.credits)} CR • ${fmt(m.reward.uridium)} URI • ${fmt(m.reward.xp)} XP`;}
+function missionRewardText(m,active=null){
+  if(active){
+    const b=roundedMissionBonus(active);
+    return `${fmt(b.credits)} CR • ${fmt(b.uridium)} URI • ${fmt(b.xp)} XP`;
+  }
+  const projected=projectedMissionReward(m);
+  if(projected)return `${fmt(projected.credits)} CR • ${fmt(projected.uridium)} URI • ${fmt(projected.xp)} XP`;
+  return '50% dos ganhos reais acumulados dos alvos';
+}
 function updateMissionButton(){
   if(!ui.missionBtn||!progress)return;
   normalizeMissionState();
@@ -236,7 +288,7 @@ function acceptMission(category,id){
   const mission=missionById(category,id);if(!mission)return;
   if(!missionUnlocked(category,mission)){const req=missionById(category,mission.requires);showToast(`Conclua primeiro: ${req?.title||'etapa anterior'}`);return;}
   const key=missionInstanceKey(category,id);if(progress.missions.completed[key]){showToast('Essa missão já foi concluída neste ciclo');return;}
-  progress.missions.active[category]={id,period:missionPeriodKey(category),progress:0,complete:false,acceptedAt:Date.now()};
+  progress.missions.active[category]={id,period:missionPeriodKey(category),progress:0,complete:false,acceptedAt:Date.now(),bonus:{credits:0,uridium:0,xp:0}};
   saveGame();renderMissions();updateMissionButton();showToast(`${mission.title} aceita — progresso iniciado`);
 }
 function abandonMission(category){
@@ -246,10 +298,11 @@ function abandonMission(category){
 function claimMission(category){
   normalizeMissionState();const active=progress.missions.active[category];if(!active||!active.complete)return;
   const mission=missionById(category,active.id);if(!mission)return;
-  progress.profile.credits+=mission.reward.credits;progress.profile.uridium+=mission.reward.uridium;progress.profile.xp+=mission.reward.xp;
+  const bonus=roundedMissionBonus(active);
+  progress.profile.credits+=bonus.credits;progress.profile.uridium+=bonus.uridium;progress.profile.xp+=bonus.xp;
   while(progress.profile.xp>=progress.profile.level*2000){progress.profile.xp-=progress.profile.level*2000;progress.profile.level++;}
   progress.missions.completed[missionInstanceKey(category,mission.id)]=Date.now();
-  progress.missions.active[category]=null;saveGame();renderMissions();updateMissionButton();updateUI();showToast(`Missão concluída: +${fmt(mission.reward.credits)} CR • +${fmt(mission.reward.uridium)} URI`);
+  progress.missions.active[category]=null;saveGame();renderMissions();updateMissionButton();updateUI();showToast(`Missão concluída: +${fmt(bonus.credits)} CR • +${fmt(bonus.uridium)} URI • +${fmt(bonus.xp)} XP`);
 }
 function missionEvent(type,payload={}){
   if(!progress)return;normalizeMissionState();let changed=false;
@@ -266,6 +319,7 @@ function missionEvent(type,payload={}){
     }else if(type==='collectOre'&&mission.objective==='collectOre')add=Math.max(0,Number(payload.amount)||0);
     else if(type==='explore'&&mission.objective==='explore')add=1;
     if(!add)continue;
+    if(type==='kill'&&payload.enemy)addMissionBonus(active,payload.enemy);
     active.progress=Math.min(mission.target,(Number(active.progress)||0)+add);changed=true;
     if(active.progress>=mission.target&&!active.complete){active.complete=true;showToast(`MISSÃO COMPLETA: ${mission.title} — resgate a recompensa`);}
   }
@@ -283,7 +337,7 @@ function renderMissions(){
       const current=isActive?Math.min(mission.target,Number(active.progress)||0):0,pct=Math.max(0,Math.min(100,current/mission.target*100));
       const reqMission=mission.requires?missionById(category,mission.requires):null;
       const card=document.createElement('article');card.className=`mission-card${isActive?' active':''}${done?' completed':''}${locked?' locked':''}`;
-      card.innerHTML=`<div class="mission-card-top"><div><span class="mission-type-chip">${mission.stage?`ETAPA ${mission.stage} • `:''}${meta.label.replace('MISSÕES ','').replace('MISSÃO ','')}</span><h4>${mission.title}</h4></div>${done?'<span class="mission-done">✓ CONCLUÍDA</span>':''}</div><p>${mission.desc}</p><div class="mission-objective">${missionObjectiveText(mission)}</div>${!prereqUnlocked&&!done?`<div class="mission-prereq">🔒 Requer: ${reqMission?.title||'etapa anterior'}</div>`:''}${isActive?`<div class="mission-progress-row"><span>${fmt(current)} / ${fmt(mission.target)}</span><b>${Math.round(pct)}%</b></div><div class="mission-progress"><i style="width:${pct}%"></i></div>`:''}<div class="mission-reward"><span>RECOMPENSA</span><b>${missionRewardText(mission)}</b></div>`;
+      card.innerHTML=`<div class="mission-card-top"><div><span class="mission-type-chip">${mission.stage?`ETAPA ${mission.stage} • `:''}${meta.label.replace('MISSÕES ','').replace('MISSÃO ','')}</span><h4>${mission.title}</h4></div>${done?'<span class="mission-done">✓ CONCLUÍDA</span>':''}</div><p>${mission.desc}</p><div class="mission-objective">${missionObjectiveText(mission)}</div>${!prereqUnlocked&&!done?`<div class="mission-prereq">🔒 Requer: ${reqMission?.title||'etapa anterior'}</div>`:''}${isActive?`<div class="mission-progress-row"><span>${fmt(current)} / ${fmt(mission.target)}</span><b>${Math.round(pct)}%</b></div><div class="mission-progress"><i style="width:${pct}%"></i></div>`:''}<div class="mission-reward"><span>${isActive?'BÔNUS ACUMULADO • 50%':'RECOMPENSA • 50%'}</span><b>${missionRewardText(mission,isActive?active:null)}</b></div>`;
       const actions=document.createElement('div');actions.className='mission-actions';
       if(isActive){
         const primary=document.createElement('button');primary.className=active.complete?'small-btn gold':'small-btn';primary.textContent=active.complete?'RESGATAR':'EM ANDAMENTO';primary.disabled=!active.complete;primary.onclick=()=>claimMission(category);actions.appendChild(primary);

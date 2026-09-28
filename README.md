@@ -1,4 +1,4 @@
-# Stellar Legacy V9.4 — Progress Protocol
+# Stellar Legacy V9.5 — Reward Protocol
 
 Grande atualização de conteúdo sobre a base V9 Expedition. Mantém os mapas expandidos e adiciona densidade maior de NPCs e um sistema persistente de missões com aceite manual.
 
@@ -120,3 +120,12 @@ Release: **9.0.0**
 - Cada etapa especial exige a conclusão da anterior.
 - Continua valendo a regra de 1 missão ativa por categoria.
 - O progresso só começa depois de ACEITAR.
+
+
+## V9.5 — Reward Protocol
+- A recompensa de missão agora é dinâmica.
+- Cada eliminação válida adiciona ao prêmio da missão 50% dos Créditos, Uridium e XP que aquele NPC realmente concede.
+- Missões de NPC específico usam exatamente os NPCs pedidos.
+- A missão mensal de matança geral calcula o bônus com base nos inimigos realmente abatidos, então NPCs mais fortes aumentam o prêmio.
+- O painel mostra o bônus acumulado em tempo real.
+- Recompensas fixas antigas deixaram de ser usadas no resgate.
