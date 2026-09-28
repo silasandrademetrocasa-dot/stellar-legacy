@@ -287,3 +287,26 @@ body::before{content:"";position:fixed;inset:0;pointer-events:none;background:ra
 #minimapPanel{bottom:calc(var(--weaponbar-height) + 18px)!important;}
 @media(max-width:900px){#leftStats.ship-stats-float{top:84px!important;}}
 @media(max-width:680px){:root{--hud-top-offset:82px;--weaponbar-height:146px;}#leftStats.ship-stats-float{top:var(--hud-top-offset)!important;width:148px!important;min-width:148px!important;max-width:148px!important;padding:8px 8px 9px;}#leftStats .ship-hud-portrait{height:56px;min-height:56px;}#minimapPanel{bottom:calc(var(--weaponbar-height) + 14px)!important;}}
+
+
+/* ===== V9.1.1 HUD positioning fix ===== */
+:root{--hud-top-offset:106px;--weaponbar-height:92px;}
+#leftStats.ship-stats-float{top:var(--hud-top-offset)!important;}
+#weaponBar{bottom:8px!important;width:min(980px,calc(100% - 340px));padding:6px 10px 7px!important;border-radius:14px;}
+#weaponBar.compact-ammo-ui{padding:6px 10px 7px!important;gap:6px;}
+.weapon-toolbar{gap:8px;}
+.weapon-toolbar-label{font-size:10px;letter-spacing:1px;}
+.weapon-expand-btn{width:28px;height:28px;font-size:14px;}
+.weapon-bar-content{gap:10px;align-items:center;}
+.ammo-clusters{gap:10px;align-items:center;}
+.ammo-bubbles{gap:8px;}
+.ammo-btn.circular{width:58px;height:58px;min-width:58px;padding:4px 3px;}
+.ammo-btn.circular .ammo-code{font-size:14px;}
+.ammo-btn.circular .ammo-qty{margin-top:4px;font-size:10px;}
+.actions-inline{gap:6px;}
+.actions-inline .action-btn{min-width:132px;min-height:34px;padding:7px 10px;font-size:12px;border-radius:10px;}
+.cooldown-pill{min-width:120px;padding:5px 8px;font-size:10px;}
+#minimapPanel{bottom:88px!important;}
+@media(max-width:1200px){#weaponBar{width:min(860px,calc(100% - 300px));}}
+@media(max-width:900px){:root{--hud-top-offset:98px;--weaponbar-height:88px;}#weaponBar{width:calc(100% - 16px)!important;left:8px!important;transform:none!important;bottom:8px!important;}#minimapPanel{bottom:84px!important;}}
+@media(max-width:680px){:root{--hud-top-offset:92px;--weaponbar-height:132px;}#leftStats.ship-stats-float{top:var(--hud-top-offset)!important;}#weaponBar{width:calc(100% - 12px)!important;left:6px!important;right:6px!important;bottom:6px!important;padding:6px 8px 8px!important;}#weaponBar.compact-ammo-ui{padding:6px 8px 8px!important;} .weapon-bar-content{gap:8px;} .ammo-bubbles{gap:6px;} .ammo-btn.circular{width:54px;height:54px;min-width:54px;} .ammo-btn.circular .ammo-code{font-size:13px;} .ammo-btn.circular .ammo-qty{font-size:9px;} .actions-inline .action-btn{min-width:116px;min-height:32px;padding:6px 8px;font-size:11px;} #minimapPanel{bottom:132px!important;right:8px!important;} }
