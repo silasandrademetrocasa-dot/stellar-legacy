@@ -347,3 +347,9 @@ O Leilão Elite foi migrado para persistência online: lances ativos ficam regis
 - Semanais: 7X. Mensais: 5X. Especiais: 3X.
 - Itens e munições de bônus de missão tiveram chance/quantidades melhoradas.
 - Galaxy Gate herda automaticamente os novos valores-base dos NPCs e continua fechando 3X na conclusão.
+
+
+## V10.4.1 — Cargo Box Decay
+- Cargo boxes de aliens permanecem no mapa por no máximo 30 segundos.
+- Nos últimos 5 segundos piscam para avisar que vão desaparecer.
+- O P.E.T. Coletor de BOX respeita o mesmo cooldown.

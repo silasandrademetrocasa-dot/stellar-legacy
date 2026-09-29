@@ -1,6 +1,6 @@
-import { FACTIONS, SHIPS, ITEMS, LASER_AMMO, ROCKETS, NPC_TYPES, MAPS, RESOURCES } from './data.js?v=10.4.0';
-import { V8_ASSETS } from './assets/v8/manifest.js?v=10.4.0';
-import { signUp, signIn, restoreSession, signOutLocal, getUser, loadCloudSave, saveCloudSave, updateCallsign, updatePassword, loadRankings, loadAuctionBids, saveAuctionBidOnline, markAuctionBidStatusOnline } from './api.js?v=10.4.0';
+import { FACTIONS, SHIPS, ITEMS, LASER_AMMO, ROCKETS, NPC_TYPES, MAPS, RESOURCES } from './data.js?v=10.4.1';
+import { V8_ASSETS } from './assets/v8/manifest.js?v=10.4.1';
+import { signUp, signIn, restoreSession, signOutLocal, getUser, loadCloudSave, saveCloudSave, updateCallsign, updatePassword, loadRankings, loadAuctionBids, saveAuctionBidOnline, markAuctionBidStatusOnline } from './api.js?v=10.4.1';
 
 const canvas = document.querySelector('#game');
 const ctx = canvas.getContext('2d');
@@ -117,6 +117,7 @@ let cloudBusy = false;
 let authenticated = false;
 function saveKey(){return `${SAVE_KEY_PREFIX}:${getUser()?.id || 'guest'}`;}
 const TWO_PI = Math.PI * 2;
+const CARGO_BOX_LIFETIME_SEC = 30;
 const categories = {
   ships:'Naves', lasers:'Lasers', generators:'Geradores', drones:'Drones', pet:'P.E.T.', extras:'Extras', ammo:'Munição', rockets:'Mísseis'
 };
@@ -1310,7 +1311,7 @@ function updatePet(dt){
       .sort((a,b)=>Math.hypot(a.x-player.x,a.y-player.y)-Math.hypot(b.x-player.x,b.y-player.y))[0]||null;
     if(task){targetX=task.x;targetY=task.y;petRuntime.taskType='guard';petRuntime.taskId=task.id;}
   }else if(mode==='box'&&pet.gearsOwned.box){
-    task=petNearest(state.loot);
+    task=petNearest(state.loot.filter(l=>!Number.isFinite(l.expiresAt)||nowSec()<l.expiresAt));
     if(task){targetX=task.x;targetY=task.y;petRuntime.taskType='box';petRuntime.taskId=task.id;}
   }else if(mode==='ore'&&pet.gearsOwned.ore&&cargoFree()>0){
     task=petNearest(state.ores);
@@ -1349,7 +1350,8 @@ function updatePet(dt){
     state.enemies.filter(e=>e.hp>0&&Math.hypot(e.x-petRuntime.x,e.y-petRuntime.y)<boomRadius).forEach(e=>dealDamageToEnemy(e,boomDmg,'#ff7d8f'));
   }
   if(mode==='box'&&task&&Math.hypot(task.x-petRuntime.x,task.y-petRuntime.y)<28){
-    sellPetCargoBox(task);state.loot=state.loot.filter(x=>x.id!==task.id);petRuntime.taskId=null;
+    if(!Number.isFinite(task.expiresAt)||nowSec()<task.expiresAt)sellPetCargoBox(task);
+    state.loot=state.loot.filter(x=>x.id!==task.id);petRuntime.taskId=null;
   }
   if(mode==='ore'&&task&&Math.hypot(task.x-petRuntime.x,task.y-petRuntime.y)<24){
     const got=addCargoResource(task.type,task.amount);
@@ -1654,7 +1656,14 @@ function rewardEnemyKill(enemy){
   addPetXp(Math.max(12,Math.round(enemy.credits/120+enemy.uridium*4)));
   processPlayerLevelUps();
   const lootMult=1+pilotLootBonus(),boostedResources=Object.fromEntries(Object.entries(enemy.resources||{}).map(([id,q])=>[id,Math.max(1,Math.round(q*lootMult))]));
-  state.loot.push({id:`box_${Math.random().toString(16).slice(2)}`,x:enemy.x,y:enemy.y,resources:boostedResources,source:enemy.name});
+  state.loot.push({
+    id:`box_${Math.random().toString(16).slice(2)}`,
+    x:enemy.x,y:enemy.y,
+    resources:boostedResources,
+    source:enemy.name,
+    spawnedAt:nowSec(),
+    expiresAt:nowSec()+CARGO_BOX_LIFETIME_SEC
+  });
   missionEvent('kill',{enemy,mapId:progress.mapId});
   if(isGalaxyGateMap()&&enemy.gateEnemy){recordAlphaKillReward(enemy);syncAlphaGateSnapshot();}else scheduleEnemyRespawn(enemy.type);
   saveGame();
@@ -1774,7 +1783,15 @@ function updatePlayer(dt){
   checkLandmarkDiscovery();
   if(player.laserFiring)fireLaserTick();
   if(autoRocketEnabled()&&player.laserFiring&&rocketReady())fireRocket(false);
-  for(let i=state.loot.length-1;i>=0;i--){const l=state.loot[i];if(Math.hypot(l.x-player.x,l.y-player.y)<40){const empty=collectCargoBox(l);if(empty)state.loot.splice(i,1);}}
+  for(let i=state.loot.length-1;i>=0;i--){
+    const l=state.loot[i];
+    if(!Number.isFinite(l.expiresAt))l.expiresAt=nowSec()+CARGO_BOX_LIFETIME_SEC;
+    if(nowSec()>=l.expiresAt){state.loot.splice(i,1);continue;}
+    if(Math.hypot(l.x-player.x,l.y-player.y)<40){
+      const empty=collectCargoBox(l);
+      if(empty)state.loot.splice(i,1);
+    }
+  }
   for(let i=state.ores.length-1;i>=0;i--){const o=state.ores[i];if(Math.hypot(o.x-player.x,o.y-player.y)<30){const got=addCargoResource(o.type,o.amount);if(got>0){spawnParticle(o.x,o.y,`+${got} ${o.type}`,o.color);missionEvent('collectOre',{amount:got,type:o.type,mapId:progress.mapId});state.ores.splice(i,1);state.oreRespawns.push({type:o.type,at:nowSec()+rand(5,12)});saveGame();}else showToast('Porão cheio');}}
   if(player.hp<=0){
     if(isGalaxyGateMap())handleAlphaDeath();
@@ -1859,10 +1876,20 @@ function drawOres(){for(const o of state.ores){if(!onScreenWorld(o.x,o.y,100))co
   }
   ctx.save();ctx.translate(p.x,p.y);ctx.rotate(o.rot||0);ctx.shadowColor=o.color;ctx.shadowBlur=10;ctx.fillStyle=o.color;ctx.beginPath();ctx.arc(0,0,o.r,0,TWO_PI);ctx.fill();ctx.restore();
 }}
-function drawLoot(){for(const l of state.loot){if(!onScreenWorld(l.x,l.y,100))continue;
+function drawLoot(){for(const l of state.loot){
+  if(!Number.isFinite(l.expiresAt))l.expiresAt=nowSec()+CARGO_BOX_LIFETIME_SEC;
+  const remaining=l.expiresAt-nowSec();
+  if(remaining<=0||!onScreenWorld(l.x,l.y,100))continue;
   const p=screenPos(l.x,l.y),pulse=.92+Math.sin(nowSec()*4+l.x*.02)*.08,img=v8Image(V8_ASSETS.loot.cargo);
-  if(img&&img.naturalWidth){ctx.save();ctx.translate(p.x,p.y);ctx.rotate(Math.sin(nowSec()+l.x)*.06);ctx.shadowColor='#ffbd48';ctx.shadowBlur=12;const size=42*pulse,sc=size/Math.max(img.naturalWidth,img.naturalHeight);ctx.drawImage(img,-img.naturalWidth*sc/2,-img.naturalHeight*sc/2,img.naturalWidth*sc,img.naturalHeight*sc);ctx.restore();continue;}
-  ctx.fillStyle='#f5b84c';ctx.fillRect(p.x-10,p.y-10,20,20);
+  const dyingAlpha=remaining<=5?(.38+.62*Math.abs(Math.sin(nowSec()*7))):1;
+  if(img&&img.naturalWidth){
+    ctx.save();ctx.globalAlpha=dyingAlpha;ctx.translate(p.x,p.y);ctx.rotate(Math.sin(nowSec()+l.x)*.06);
+    ctx.shadowColor=remaining<=5?'#ff5a4c':'#ffbd48';ctx.shadowBlur=remaining<=5?18:12;
+    const size=42*pulse,sc=size/Math.max(img.naturalWidth,img.naturalHeight);
+    ctx.drawImage(img,-img.naturalWidth*sc/2,-img.naturalHeight*sc/2,img.naturalWidth*sc,img.naturalHeight*sc);
+    ctx.restore();continue;
+  }
+  ctx.save();ctx.globalAlpha=dyingAlpha;ctx.fillStyle='#f5b84c';ctx.fillRect(p.x-10,p.y-10,20,20);ctx.restore();
 }}
 function drawNpcModel(e){const boss=e.type.startsWith('boss');const type=e.type.toLowerCase();ctx.save();if(boss){ctx.strokeStyle='rgba(255,76,104,.55)';ctx.lineWidth=2;ctx.beginPath();ctx.arc(0,0,e.size+7+Math.sin(nowSec()*4)*2,0,TWO_PI);ctx.stroke();}ctx.shadowColor=e.color;ctx.shadowBlur=boss?20:10;const s=e.size;const fill=ctx.createLinearGradient(-s,-s,s,s);fill.addColorStop(0,'rgba(255,255,255,.92)');fill.addColorStop(.22,e.color);fill.addColorStop(1,'rgba(18,26,48,.96)');ctx.fillStyle=fill;ctx.strokeStyle='rgba(255,255,255,.42)';ctx.lineWidth=1.1;
   if(type.includes('streuner')){ctx.beginPath();ctx.moveTo(s,0);ctx.lineTo(-s*.05,-s*.5);ctx.lineTo(-s*.5,-s*.26);ctx.lineTo(-s*.15,0);ctx.lineTo(-s*.5,s*.26);ctx.lineTo(-s*.05,s*.5);ctx.closePath();ctx.fill();ctx.stroke();ctx.fillStyle='rgba(9,21,37,.86)';ctx.beginPath();ctx.arc(s*.16,0,s*.18,0,TWO_PI);ctx.fill();}
