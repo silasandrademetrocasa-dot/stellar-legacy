@@ -192,3 +192,10 @@ As ondas têm 10 segundos entre elas.
 - Depois que a última onda do Round já apareceu e todos os NPCs daquele Round forem eliminados, inicia uma contagem de 10 segundos.
 - Após esses 10 segundos, a primeira onda do próximo Round aparece.
 - As ondas seguintes desse novo Round continuam entrando de 10 em 10 segundos.
+
+
+## V9.8.2 — Gate UI Fix
+- Modal do Galaxy Gate agora abre acima do HUD/topbar, sem ficar escondido atrás da logo.
+- A janela do portal foi ancorada com espaçamento superior adequado e scroll próprio.
+- Header do modal do portal ficou sticky para facilitar leitura e navegação.
+- Ajustes mobile para o modal do portal não colidir com a interface.

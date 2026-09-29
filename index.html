@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width,initial-scale=1,user-scalable=no" name="viewport"/>
+<meta content="#030816" name="theme-color"/>
+<title>Stellar Legacy V9.8.2 — Gate UI Fix</title>
+<link href="/style.css" rel="stylesheet"/>
+</head>
+<body>
+<div id="app">
+<canvas id="game"></canvas>
+<header class="hud-panel v8-topbar" id="topbar">
+<div class="brand-chip"><img alt="Stellar Legacy V8" class="brand-logo" src="/assets/v8/branding/logo-v8.png"/><span>EXPEDITION</span></div>
+<div class="top-meta left">
+<span><img alt="Facção" class="faction-mini-icon" id="factionIcon" src="/assets/v8/branding/earth.png"/>Facção <b id="factionLabel">—</b></span>
+<span>Mapa <b id="mapLabel">—</b></span>
+<span>Setor <b id="sectorName">—</b></span>
+<span>Nave <b id="shipLabel">Phoenix</b></span>
+<span>LV <b id="lvl">1</b></span>
+<span>XP <b id="xp">0</b></span>
+<span>CR <b id="credits">0</b></span>
+<span>URI <b id="uridium">0</b></span>
+</div>
+<div class="top-actions">
+<span class="pilot-chip">Piloto <b id="userLabel">—</b></span>
+<span class="sync-chip" id="syncLabel">LOCAL</span>
+<button class="small-btn" id="mapBtn">MAPAS</button>
+<button class="small-btn mission-top-btn" id="missionBtn">MISSÕES <span id="missionActiveCount">0</span></button>
+<button class="small-btn gate-top-btn" id="gateBtn">GALAXY GATE <span id="gatePieceBadge">0/34</span></button>
+<button class="small-btn pet-top-btn" id="petBtn">P.E.T. LV1</button>
+<button class="small-btn gold" id="shopBtn">LOJA</button>
+<button class="small-btn" id="cargoBtn">PORÃO</button>
+<button class="small-btn" id="hangarBtn">HANGAR</button>
+<button class="small-btn" id="hudToggle">HUD</button>
+<button class="small-btn danger-lite" id="logoutBtn">SAIR</button>
+</div>
+</header>
+<section class="hud-panel compact-stats ship-stats-float" id="leftStats">
+<div class="stats-toolbar tappable-toolbar" id="statsHeader">
+<div class="stats-toolbar-left">
+<button aria-label="Expandir / recolher painel da nave" class="stats-expand-btn" id="statsToggle" title="Expandir / recolher painel da nave">▾</button>
+<div class="stats-toolbar-label">NAVE</div>
+</div>
+</div>
+<div class="stack left-stats-content" id="leftStatsContent"><div class="ship-hud-portrait"><img alt="Nave ativa" id="shipHudArt" src="/assets/v8/ships/phoenix.png"/></div>
+<div>HP <span id="hp">0</span>/<span id="maxHp">0</span></div>
+<div>ESC <span id="shield">0</span>/<span id="maxShield">0</span></div>
+<div>VEL <span id="speed">0</span></div>
+<div>PORÃO <span id="cargoUsed">0</span>/<span id="cargoMax">0</span></div>
+<div class="nav-coord">COORD <span id="coordLabel">0 / 0</span></div>
+<div class="nav-route">ROTA <span id="routeLabel">PARADO</span></div>
+<div class="nav-discovery">EXP <span id="discoveriesLabel">0/0</span></div>
+<div class="safe-zone-status" id="safeZoneLabel">FORA DA BASE</div>
+</div>
+</section>
+<section class="hud-panel stack" id="targetPanel">
+<div class="title">ALVO</div>
+<div id="targetName">Sem alvo</div>
+<div class="bar-wrap"><div class="bar hp" id="targetHpBar"></div></div>
+<div class="bar-wrap"><div class="bar shield" id="targetShieldBar"></div></div>
+<div id="targetStats">Toque em um NPC para selecionar</div>
+</section>
+<section class="hud-panel minimap-panel" id="minimapPanel">
+<div class="minimap-toolbar tappable-toolbar" id="minimapHeader">
+<div class="minimap-toolbar-left">
+<button aria-label="Expandir / recolher minimapa" class="stats-expand-btn" id="minimapToggle" title="Expandir / recolher minimapa">▾</button>
+<div class="stats-toolbar-label">MAPA</div>
+</div>
+</div>
+<canvas height="220" id="minimap" width="220"></canvas>
+</section>
+
+<section class="hud-panel gate-hud hidden" id="gateHud">
+  <div class="gate-hud-title">GALAXY GATE ALFA</div>
+  <div class="gate-hud-row"><span>ROUND</span><b id="gateHudRound">1 / 8</b></div>
+  <div class="gate-hud-row"><span>ONDA</span><b id="gateHudWave">1 / 4</b></div>
+  <div class="gate-hud-row"><span>NPC RESTANTES</span><b id="gateHudRemaining">0</b></div>
+  <div class="gate-hud-row"><span>PRÓXIMA ONDA</span><b id="gateHudNext">—</b></div>
+  <div class="gate-hud-lives" id="gateHudLives">♥ ♥ ♥</div>
+</section>
+
+<section class="hud-panel compact-ammo-ui" id="weaponBar">
+<div class="weapon-toolbar">
+<div class="weapon-toolbar-left">
+<button aria-label="Expandir / recolher menu de munições" class="weapon-expand-btn" id="weaponBarToggle" title="Expandir / recolher menu de munições">▾</button>
+<div class="weapon-toolbar-label">MUNIÇÕES</div>
+</div>
+<div class="section actions actions-inline">
+<button class="action-btn" id="laserToggle">⚡ LASER <span class="keyhint">CTRL</span></button>
+<button class="action-btn" id="rocketFire">🚀 MÍSSIL <span class="keyhint">ESPAÇO</span></button>
+</div>
+</div>
+<div class="weapon-bar-content" id="weaponBarContent">
+<div class="ammo-clusters">
+<div class="section weapon-section ammo-bubble-section">
+<div class="section-title">LASER</div>
+<div class="button-row ammo-bubbles" id="laserAmmoButtons"></div>
+</div>
+<div class="section weapon-section ammo-bubble-section">
+<div class="section-title">MÍSSEIS</div>
+<div class="button-row ammo-bubbles" id="rocketAmmoButtons"></div>
+</div>
+</div>
+<div class="section extras compact extras-inline">
+<div class="cooldown-pill" id="rocketCd">MÍSSIL PRONTO</div>
+</div>
+</div>
+</section>
+<div id="toast"></div>
+<div class="game-celebration hidden" id="gameCelebration" aria-live="polite">
+  <div class="celebration-burst"></div>
+  <div class="celebration-panel" id="celebrationPanel">
+    <div class="celebration-kicker" id="celebrationKicker">STELLAR LEGACY</div>
+    <div class="celebration-title" id="celebrationTitle">MISSÃO COMPLETA</div>
+    <div class="celebration-subtitle" id="celebrationSubtitle"></div>
+  </div>
+</div>
+
+<button class="portal-prompt hidden" id="portalPrompt" type="button"><span class="portal-icon">↯</span><span><b>JUMP / SALTAR</b><small id="portalPromptMap">—</small></span></button>
+<div class="jump-transition hidden" id="jumpTransition">
+<div class="warp-stars"></div>
+<div class="warp-ring ring-a"></div>
+<div class="warp-ring ring-b"></div>
+<div class="warp-core"></div>
+<div class="warp-copy"><div class="eyebrow">QUANTUM JUMP</div><h2 id="jumpTitle">SALTANDO</h2><div id="jumpSubtitle">Sincronizando coordenadas...</div></div>
+</div>
+<div class="modal fixed-modal" id="loginModal">
+<div class="modal-card login-card">
+<div class="eyebrow">STELLAR NETWORK • V9.8.2 GATE UI FIX</div>
+<h1>Entrar no Stellar Legacy</h1>
+<p class="muted">Sua conta salva facção, nave, inventário, drones, munição e progresso online.</p>
+<div class="identity-panel"><img alt="Stellar Legacy V8" class="identity-logo" src="/assets/v8/branding/logo-v8.png"/><div class="identity-copy"><div class="eyebrow">IDENTIDADE STELLAR LEGACY</div><h3>Três facções. Uma guerra orbital.</h3><p>Naves, NPCs, equipamentos, recursos e mapas agora usam uma identidade visual própria integrada ao jogo.</p><div class="identity-factions"><div><img alt="Terra" src="/assets/v8/branding/earth.png"/><span>Terra</span></div><div><img alt="Marte" src="/assets/v8/branding/mars.png"/><span>Marte</span></div><div><img alt="Júpiter" src="/assets/v8/branding/jupiter.png"/><span>Júpiter</span></div></div></div></div>
+<div class="auth-tabs">
+<button class="tab-btn active" id="loginTabBtn">Entrar</button>
+<button class="tab-btn" id="registerTabBtn">Criar conta</button>
+</div>
+<form class="auth-form" id="loginForm">
+<label>E-mail<input autocomplete="email" id="loginEmail" placeholder="piloto@email.com" required="" type="email"/></label>
+<label>Senha<input autocomplete="current-password" id="loginPassword" minlength="6" placeholder="••••••••" required="" type="password"/></label>
+<button class="primary-btn" type="submit">ENTRAR</button>
+</form>
+<form class="auth-form hidden" id="registerForm">
+<label>Callsign<input id="registerCallsign" maxlength="24" minlength="2" placeholder="Seu nome no espaço" required="" type="text"/></label>
+<label>E-mail<input autocomplete="email" id="registerEmail" placeholder="piloto@email.com" required="" type="email"/></label>
+<label>Senha<input autocomplete="new-password" id="registerPassword" minlength="6" placeholder="mínimo 6 caracteres" required="" type="password"/></label>
+<button class="primary-btn" type="submit">CRIAR CONTA</button>
+</form>
+<div class="auth-message" id="authMessage"></div>
+</div>
+</div>
+<div class="modal hidden fixed-modal" id="factionModal">
+<div class="modal-card onboarding-card">
+<div class="eyebrow">PRIMEIRO ACESSO</div>
+<h1>Escolha sua facção</h1>
+<p>Essa escolha define sua companhia, sua base e a numeração dos mapas iniciais. Você começa com uma <b>Phoenix</b>, sem drones e com equipamento básico.</p>
+<div class="faction-grid" id="factionCards"></div>
+<div class="warning-text">A facção fica gravada neste save.</div>
+</div>
+</div>
+
+<div class="modal hidden" id="missionModal">
+  <div class="modal-card wide-card mission-modal-card">
+    <div class="modal-header">
+      <div>
+        <div class="eyebrow">MISSION CONTROL • PROTOCOLO V9.8</div>
+        <h2>Painel de Missões</h2>
+      </div>
+      <button class="small-btn" id="closeMission">Fechar</button>
+    </div>
+    <div class="mission-rule-banner">
+      <b>REGRA:</b> uma missão ativa por categoria. Você pode manter simultaneamente <b>1 diária + 1 semanal + 1 mensal + 1 especial</b>. O progresso só começa depois de <b>ACEITAR</b>. Diárias mudam todo dia; semanais e mensais têm 10 níveis por NPC e pedra; especiais pagam <b>100%</b> do valor dos alvos.
+    </div>
+    <div id="missionContent" class="mission-content"></div>
+  </div>
+</div>
+
+<div class="modal hidden" id="gateModal">
+  <div class="modal-card wide-card gate-modal-card">
+    <div class="modal-header">
+      <div>
+        <div class="eyebrow">GALAXY GATES • ALFA</div>
+        <h2>Materializador do Portal</h2>
+      </div>
+      <button class="small-btn" id="closeGate">Fechar</button>
+    </div>
+
+    <div class="gate-layout">
+      <section class="gate-alpha-panel">
+        <div class="gate-portal-visual">
+          <div class="gate-ring ring-1"></div>
+          <div class="gate-ring ring-2"></div>
+          <div class="gate-ring ring-3"></div>
+          <div class="gate-core">ALFA</div>
+        </div>
+        <div class="gate-alpha-copy">
+          <div class="eyebrow">PORTAL ALFA</div>
+          <h3 id="gateAlphaStatusTitle">Em construção</h3>
+          <p id="gateAlphaStatusText">Encontre 34 peças no materializador para montar o portal.</p>
+          <div class="gate-stats-row">
+            <span>PEÇAS <b id="gatePiecesText">0 / 34</b></span>
+            <span>VIDAS <b id="gateLivesText">3</b></span>
+            <span>CONCLUÍDOS <b id="gateCompletedText">0</b></span>
+          </div>
+          <div class="gate-piece-grid" id="gatePieceGrid"></div>
+          <button class="primary-btn gate-jump-btn" id="gateJumpBtn">PORTAL INCOMPLETO</button>
+        </div>
+      </section>
+
+      <section class="gate-generator-panel">
+        <div class="gate-generator-head">
+          <div>
+            <div class="eyebrow">GERADOR GALÁCTICO</div>
+            <h3>Sortear energia</h3>
+          </div>
+          <div class="gate-generator-wallet">URI <b id="gateUriText">0</b></div>
+        </div>
+        <p class="muted">Cada sorteio custa <b>10 Uridium</b>. Pode vir peça ALFA, qualquer munição laser, qualquer míssil, Xenomit, Créditos, Bônus de Salto ou Bônus de Reparo.</p>
+        <div class="gate-spin-buttons" id="gateSpinButtons"></div>
+        <div class="gate-generator-inventory">
+          <div><span>BÔNUS DE SALTO</span><b id="gateJumpBonus">0</b></div>
+          <div><span>BÔNUS DE REPARO</span><b id="gateRepairBonus">0</b></div>
+          <button class="ghost-btn" id="useRepairBonus">REPARAR NAVE</button>
+        </div>
+        <div class="gate-result-box" id="gateResultBox">Faça um sorteio para ver os resultados.</div>
+      </section>
+    </div>
+
+    <section class="gate-rounds-section">
+      <div class="eyebrow">PROTOCOLO DE COMBATE • 8 ROUNDS • 3 VIDAS</div>
+      <div class="gate-rounds-grid" id="gateRoundsGrid"></div>
+      <div class="gate-reward-note">
+        <b>RECOMPENSA FINAL:</b> durante o portal você recebe os ganhos normais dos NPCs. Ao completar o ALFA, recebe um bônus adicional de <b>+200%</b> dos Créditos, Uridium e XP ganhos no portal, fechando <b>3X no total</b>.
+      </div>
+    </section>
+  </div>
+</div>
+
+<div class="modal hidden" id="cargoModal">
+<div class="modal-card wide-card">
+<div class="modal-header">
+<div>
+<div class="eyebrow">CARGA &amp; COMÉRCIO</div>
+<h2>Porão da Nave</h2>
+</div>
+<button class="small-btn" id="closeCargo">Fechar</button>
+</div>
+<div class="section-box" id="cargoSummary"></div>
+<div class="cargo-toolbar">
+<div class="muted">Colete minérios soltos e caixas de carga deixadas pelos NPCs. A venda só funciona na base X-1.</div>
+<button class="small-btn gold" id="sellAllCargo">VENDER TUDO</button>
+</div>
+<div class="cargo-grid" id="cargoGrid"></div>
+</div>
+</div>
+<div class="modal hidden" id="mapModal">
+<div class="modal-card wide-card map-card">
+<div class="modal-header">
+<div>
+<div class="eyebrow">NAVEGAÇÃO GALÁCTICA</div>
+<h2>Mapa de rotas</h2>
+</div>
+<button class="small-btn" id="closeMap">Fechar</button>
+</div>
+<div class="muted" style="margin-bottom:10px">Seu mapa atual recebe destaque. Os mapas da sua facção aparecem iluminados e as rotas seguem a lógica clássica.</div>
+
+<div class="map-network" id="mapNetwork"></div>
+</div>
+</div>
+<div class="modal hidden" id="petModal">
+<div class="modal-card wide-card pet-modal-card">
+<div class="modal-header">
+<div>
+<div class="eyebrow">P.E.T. / ESCOLTA AUTÔNOMA</div>
+<h2>Sistema P.E.T.</h2>
+</div>
+<button class="small-btn" id="closePet">Fechar</button>
+</div>
+
+<div id="petContent"></div>
+</div>
+</div>
+<div class="modal hidden" id="shopModal">
+<div class="modal-card wide-card">
+<div class="modal-header">
+<div>
+<div class="eyebrow">ECONOMIA &amp; PROGRESSÃO</div>
+<h2>Loja Orbital</h2>
+</div>
+<div class="wallet">CR <b id="shopCredits">0</b> • URI <b id="shopUridium">0</b></div>
+<button class="small-btn" id="closeShop">Fechar</button>
+</div>
+
+<div class="tabs" id="shopTabs"></div>
+<div class="product-grid" id="shopGrid"></div>
+</div>
+</div>
+<div class="modal hidden" id="hangarModal">
+<div class="modal-card wide-card">
+<div class="modal-header">
+<div>
+<div class="eyebrow">GERENCIAMENTO</div>
+<h2>Hangar</h2>
+</div>
+<div class="wallet">Nave ativa: <b id="hangarShipName">Phoenix</b></div>
+<button class="small-btn" id="closeHangar">Fechar</button>
+</div>
+
+<div class="tabs" id="hangarTabs"></div>
+<div id="hangarContent"></div>
+</div>
+</div>
+</div>
+<script src="/game.js" type="module"></script>
+</body>
+</html>
