@@ -475,3 +475,51 @@ body::before{content:"";position:fixed;inset:0;pointer-events:none;background:ra
 .pet-store-hero .primary-btn{margin-top:12px;max-width:360px}
 .product-card .price{word-break:break-word}
 canvas#game{cursor:crosshair}
+
+/* ===== V10.2 HUD COMMAND CENTER ===== */
+#topbar.compact-command-bar{
+  position:fixed!important;top:6px!important;left:8px!important;right:8px!important;
+  min-height:52px;padding:5px 8px!important;gap:8px!important;flex-wrap:nowrap!important;
+  background:linear-gradient(180deg,rgba(4,18,35,.97),rgba(2,10,22,.96));
+}
+.compact-command-bar .compact-brand{min-width:132px!important;max-width:154px!important;padding:2px 7px!important;flex:0 0 auto}
+.compact-command-bar .brand-logo{max-height:36px!important;max-width:105px!important}
+.compact-command-bar .compact-brand>span{font-size:8px!important;padding:3px 6px!important}
+.command-status{display:flex;align-items:center;gap:5px;min-width:0;flex:0 1 auto}
+.command-status .pilot-chip,.command-status .sync-chip,.status-chip{min-height:29px;display:inline-flex;align-items:center;gap:4px;padding:5px 8px;border-radius:999px;border:1px solid rgba(75,190,255,.18);background:rgba(4,17,31,.82);font-size:9px;white-space:nowrap;color:#9ec5d8}
+.command-status b{color:#effbff;font-size:10px}.credits-chip b{color:#ffe394}.uri-chip b{color:#9aeaff}
+.compact-command-bar .top-meta{display:none!important}
+.command-actions{display:flex!important;align-items:center;justify-content:flex-end;gap:5px!important;flex-wrap:nowrap!important;min-width:0;flex:1;overflow-x:auto;scrollbar-width:none;padding-bottom:1px}
+.command-actions::-webkit-scrollbar{display:none}.command-actions .small-btn{min-height:31px!important;padding:5px 10px!important;border-radius:9px!important;font-size:10px!important;white-space:nowrap}
+.command-actions .small-btn span{font-size:8px!important;margin-left:3px!important}
+.config-top-btn{border-color:rgba(119,213,255,.4)!important;background:linear-gradient(180deg,rgba(17,47,70,.95),rgba(6,23,39,.95))!important}
+
+#leftStats.ship-stats-float{top:var(--hud-top-offset)!important;left:8px!important;width:176px!important;min-width:176px!important;max-width:176px!important;padding:5px 8px 7px!important}
+#leftStats .stats-toolbar{min-height:25px!important}.compact-ship-metrics{display:flex!important;flex-direction:column;gap:1px!important;padding-top:2px}
+.compact-ship-metrics>div{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:3px 2px;border-bottom:1px solid rgba(91,191,255,.07);font-size:10px!important;line-height:1.35!important}
+.compact-ship-metrics>div:last-child{border-bottom:0}.compact-ship-metrics>div>span{color:#7ea9bc;font-weight:800}.compact-ship-metrics b{color:#effaff;font-size:10px;white-space:nowrap}
+#leftStats .ship-hud-portrait,.nav-coord,.nav-route,.nav-discovery,#leftStats .safe-zone-status{display:none!important}
+
+.pet-float-panel{position:fixed!important;top:var(--hud-top-offset)!important;left:192px!important;width:190px;padding:7px 9px!important;z-index:24!important;background:linear-gradient(180deg,rgba(7,31,40,.94),rgba(3,15,24,.95))!important;border-color:rgba(73,223,215,.42)!important}
+.pet-float-head{display:flex;justify-content:space-between;align-items:center;padding-bottom:5px;margin-bottom:5px;border-bottom:1px solid rgba(85,220,210,.14);font-size:10px;font-weight:1000;letter-spacing:.08em;color:#9affef}.pet-float-head b{color:#fff;font-size:9px}
+.pet-quick-label{display:block;font-size:8px;color:#6fa69f;font-weight:900;letter-spacing:.12em;margin-bottom:3px}.pet-quick-select{width:100%;height:28px;border-radius:7px;border:1px solid rgba(75,213,201,.28);background:#061b23;color:#e9fffb;padding:3px 7px;font-size:9px;font-weight:800;outline:none}.pet-float-status{margin-top:5px;font-size:8px;color:#80b9b1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hud-user-hidden{display:none!important}.hud-user-disabled{display:none!important}
+
+.base-trade-prompt{position:fixed!important;z-index:16;transform:translate(-50%,0);display:flex;align-items:center;gap:9px;padding:8px 12px;border-radius:13px;border:1px solid rgba(104,255,180,.68);background:linear-gradient(180deg,rgba(9,56,43,.97),rgba(4,28,24,.97));color:#ecfff5;font-weight:900;box-shadow:0 0 26px rgba(64,255,170,.18),inset 0 0 20px rgba(65,255,180,.05);min-width:190px;text-align:left;animation:portalFloat 1.7s ease-in-out infinite}
+.base-trade-prompt small{display:block;font-size:9px;font-weight:700;color:#8ee5bd;margin-top:2px}.base-trade-icon{display:grid;place-items:center;width:27px;height:27px;border-radius:50%;background:radial-gradient(circle,#effff6 0 16%,#69f0b1 20% 46%,#0c6c50 48% 100%);box-shadow:0 0 14px rgba(91,255,176,.5);color:#082d22;font-size:16px}
+
+.settings-modal-card{width:min(760px,96vw)!important}.settings-section{padding:13px;margin-bottom:10px;border-radius:14px;border:1px solid rgba(91,196,255,.15);background:rgba(5,16,29,.78)}.settings-title{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:10px}.settings-title>div{display:flex;flex-direction:column;gap:3px}.settings-title b{font-size:11px;color:#e9faff;letter-spacing:.06em}.settings-title small,.settings-account-row small{font-size:9px;color:#789cad}.settings-title>span{padding:4px 8px;border-radius:999px;border:1px solid rgba(86,215,255,.25);background:#071d30;color:#9eeaff;font-size:9px;font-weight:1000}
+.quality-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.quality-card{min-height:92px;padding:10px;border-radius:12px;border:1px solid rgba(87,188,255,.16);background:linear-gradient(180deg,#081827,#06111d);color:#cce8f3;text-align:left;display:flex;flex-direction:column;gap:5px}.quality-card b{font-size:12px;color:#fff}.quality-card span{font-size:9px;line-height:1.4;color:#7fa6b9}.quality-card.active{border-color:#59dfff;box-shadow:inset 0 0 22px rgba(64,205,255,.08),0 0 16px rgba(64,205,255,.08)}.quality-card.active b{color:#8deaff}
+.hud-settings-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}.hud-settings-grid label{display:flex;align-items:center;gap:7px;padding:9px;border-radius:9px;border:1px solid rgba(89,185,255,.1);background:#06131f;font-size:10px;color:#b7d1dd}.hud-settings-grid input{accent-color:#4ddcff}.settings-account-row{display:flex;align-items:center;justify-content:space-between;gap:16px}.settings-account-row>div{display:flex;flex-direction:column;gap:3px}
+
+.hangar-embedded-panel{min-height:260px}.pilot-hangar-panel .pilot-skill-tree{margin-top:12px}.pet-hangar-panel .pet-hero{margin-top:0}.hangar-modal-card{}.tabs#hangarTabs{position:sticky;top:0;z-index:3;padding:7px;background:rgba(3,12,24,.94);border-radius:11px;backdrop-filter:blur(5px)}
+.sell-item-btn{border-color:rgba(255,99,123,.28)!important;color:#ffc1ca!important}
+
+body[data-quality="medium"] .hud-panel,body[data-quality="medium"] .modal-card{backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px)}
+body[data-quality="low"]::before{opacity:.45}body[data-quality="low"] #app::before{display:none}body[data-quality="low"] .hud-panel,body[data-quality="low"] .modal-card{backdrop-filter:none!important;-webkit-backdrop-filter:none!important;box-shadow:none!important}body[data-quality="low"] .portal-prompt,body[data-quality="low"] .base-trade-prompt{animation:none!important;box-shadow:none!important}
+
+@media(max-width:1180px){.command-status .credits-chip,.command-status .uri-chip{display:none}.compact-command-bar .compact-brand{min-width:104px!important;max-width:120px!important}.command-actions .small-btn{padding:5px 8px!important}}
+@media(max-width:900px){#topbar.compact-command-bar{left:5px!important;right:5px!important;top:5px!important}.command-status .pilot-chip{display:none}.command-actions{justify-content:flex-start}.compact-command-bar .compact-brand{min-width:84px!important;max-width:96px!important}.compact-command-bar .brand-logo{max-width:78px!important;max-height:30px!important}#leftStats.ship-stats-float{width:160px!important;min-width:160px!important;max-width:160px!important}.pet-float-panel{left:174px!important;width:170px}}
+@media(max-width:680px){#topbar.compact-command-bar{min-height:45px;padding:4px 5px!important}.compact-command-bar .compact-brand{display:none}.command-status{flex:0 0 auto}.command-status .status-chip{display:none}.command-status .sync-chip{padding:4px 6px;font-size:8px}.command-actions .small-btn{min-height:29px!important;padding:4px 7px!important;font-size:9px!important}#leftStats.ship-stats-float{top:var(--hud-top-offset)!important;left:5px!important;width:145px!important;min-width:145px!important;max-width:145px!important}.pet-float-panel{top:var(--hud-top-offset)!important;left:155px!important;width:155px;padding:6px 7px!important}.quality-grid{grid-template-columns:1fr}.hud-settings-grid{grid-template-columns:repeat(2,1fr)}.settings-account-row{align-items:flex-start;flex-direction:column}.base-trade-prompt{min-width:170px;padding:7px 10px}}
+/* V10.2 overlay hardening */
+.modal{position:fixed!important;inset:0!important;z-index:50!important}.fixed-modal{z-index:90!important}.portal-prompt{position:fixed!important;z-index:18!important}.settings-modal-card{position:relative;z-index:2}

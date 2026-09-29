@@ -1,12 +1,27 @@
-import { FACTIONS, SHIPS, ITEMS, LASER_AMMO, ROCKETS, NPC_TYPES, MAPS, RESOURCES } from './data.js?v=10.1.0';
-import { V8_ASSETS } from './assets/v8/manifest.js?v=10.1.0';
-import { signUp, signIn, restoreSession, signOutLocal, getUser, loadCloudSave, saveCloudSave } from './api.js?v=10.1.0';
+import { FACTIONS, SHIPS, ITEMS, LASER_AMMO, ROCKETS, NPC_TYPES, MAPS, RESOURCES } from './data.js?v=10.2.0';
+import { V8_ASSETS } from './assets/v8/manifest.js?v=10.2.0';
+import { signUp, signIn, restoreSession, signOutLocal, getUser, loadCloudSave, saveCloudSave } from './api.js?v=10.2.0';
 
 const canvas = document.querySelector('#game');
 const ctx = canvas.getContext('2d');
 const minimap = document.querySelector('#minimap');
 const mm = minimap.getContext('2d');
 const $ = (s) => document.querySelector(s);
+
+const QUALITY_STORAGE_KEY='stellar_quality_mode';
+const QUALITY_PROFILES={
+  high:{label:'ALTA',dpr:2,fps:60,background:true,stars:1,grid:true,fx:true,particles:90,preload:'all'},
+  medium:{label:'MÉDIA',dpr:1.35,fps:45,background:true,stars:.55,grid:false,fx:true,particles:45,preload:'core'},
+  low:{label:'BAIXA',dpr:1,fps:30,background:false,stars:.2,grid:false,fx:false,particles:18,preload:'minimal'},
+};
+let qualityMode=(()=>{try{const v=localStorage.getItem(QUALITY_STORAGE_KEY);return QUALITY_PROFILES[v]?v:'high';}catch{return 'high';}})();
+function qualityProfile(){return QUALITY_PROFILES[qualityMode]||QUALITY_PROFILES.high;}
+function qualityShouldPreload(path){
+  const mode=qualityProfile().preload;
+  if(mode==='all')return true;
+  if(mode==='core')return /\/(branding|backgrounds|ammo)\//.test(path);
+  return /\/branding\//.test(path);
+}
 
 const V8_IMAGES = new Map();
 function flattenAssetPaths(value,out=[]){
@@ -16,16 +31,19 @@ function flattenAssetPaths(value,out=[]){
   else if(typeof value==='object')Object.values(value).forEach(v=>flattenAssetPaths(v,out));
   return out;
 }
-function preloadV8Assets(){
-  [...new Set(flattenAssetPaths(V8_ASSETS))].forEach(path=>{
-    const img=new Image();
-    img.decoding='async';
-    img.src=path;
-    img.onload=()=>V8_IMAGES.set(path,img);
-    img.onerror=()=>console.warn('V8 asset não carregado:',path);
-  });
+function requestV8Image(path){
+  if(!path)return null;
+  let img=V8_IMAGES.get(path);
+  if(img)return img;
+  img=new Image();img.decoding='async';img.loading='lazy';
+  V8_IMAGES.set(path,img);img.src=path;
+  img.onerror=()=>console.warn('V8 asset não carregado:',path);
+  return img;
 }
-function v8Image(path){return path ? V8_IMAGES.get(path) : null;}
+function preloadV8Assets(){
+  [...new Set(flattenAssetPaths(V8_ASSETS))].filter(qualityShouldPreload).forEach(requestV8Image);
+}
+function v8Image(path){return path ? requestV8Image(path) : null;}
 function drawSprite(path,x,y,maxSize,rotation=0,alpha=1){
   const img=v8Image(path);
   if(!img||!img.naturalWidth)return false;
@@ -38,6 +56,7 @@ function assetForProduct(id,type,subtype){
   if(type==='ship')return V8_ASSETS.ships[id];
   if(type==='drone')return V8_ASSETS.drones[id];
   if(type==='pet')return V8_ASSETS.drones.pet;
+  if(type==='petGear')return ({guard:V8_ASSETS.equipment.autoLaserCpu,box:V8_ASSETS.equipment.ammoAutoBuyCpu,ore:V8_ASSETS.equipment.rocketTurboCpu,repair:V8_ASSETS.equipment.rep2,kami:V8_ASSETS.equipment.autoRocketCpu})[id]||V8_ASSETS.drones.pet;
   if(type==='ammo'||type==='rocket')return V8_ASSETS.ammo[id];
   if(V8_ASSETS.equipment[id])return V8_ASSETS.equipment[id];
   return null;
@@ -67,19 +86,19 @@ function drawMapBackground(){
 
 let W = 0, H = 0, DPR = 1;
 function resize() {
-  DPR = Math.min(window.devicePixelRatio || 1, 2);
+  DPR = Math.min(window.devicePixelRatio || 1, qualityProfile().dpr);
   W = innerWidth; H = innerHeight;
-  canvas.width = W * DPR; canvas.height = H * DPR;
+  canvas.width = Math.max(1,Math.floor(W * DPR)); canvas.height = Math.max(1,Math.floor(H * DPR));
   ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
 }
 addEventListener('resize', resize); resize();
 
 const ui = {
-  topbar: $('#topbar'), topMeta: document.querySelector('#topbar .top-meta'), hudToggle: $('#hudToggle'), leftStats: $('#leftStats'), statsToggle: $('#statsToggle'), minimapPanel: $('#minimapPanel'), minimapToggle: $('#minimapToggle'), minimapHeader: $('#minimapHeader'), statsHeader: $('#statsHeader'), shipHudArt: $('#shipHudArt'), factionIcon: $('#factionIcon'), factionLabel: $('#factionLabel'), mapLabel: $('#mapLabel'), sectorName: $('#sectorName'), coordLabel: $('#coordLabel'), routeLabel: $('#routeLabel'), discoveriesLabel: $('#discoveriesLabel'), shipLabel: $('#shipLabel'), lvl: $('#lvl'),
+  topbar: $('#topbar'), topMeta: document.querySelector('#topbar .top-meta'), hudToggle: $('#hudToggle'), leftStats: $('#leftStats'), statsToggle: $('#statsToggle'), minimapPanel: $('#minimapPanel'), minimapToggle: $('#minimapToggle'), minimapHeader: $('#minimapHeader'), statsHeader: $('#statsHeader'), shipHudArt: $('#shipHudArt'), factionIcon: $('#factionIcon'), factionLabel: $('#factionLabel'), mapLabel: $('#mapLabel'), sectorName: $('#sectorName'), coordLabel: $('#coordLabel'), routeLabel: $('#routeLabel'), discoveriesLabel: $('#discoveriesLabel'), shipLabel: $('#shipLabel'), lvl: $('#lvl'), petFloatPanel: $('#petFloatPanel'), petFloatLevel: $('#petFloatLevel'), petGearQuickSelect: $('#petGearQuickSelect'), petFloatStatus: $('#petFloatStatus'),
   hp: $('#hp'), maxHp: $('#maxHp'), shield: $('#shield'), maxShield: $('#maxShield'), speed: $('#speed'), dmg: $('#dmg'), credits: $('#credits'), uridium: $('#uridium'), xp: $('#xp'), droneCount: $('#droneCount'),
   targetName: $('#targetName'), targetHpBar: $('#targetHpBar'), targetShieldBar: $('#targetShieldBar'), targetStats: $('#targetStats'),
   laserAmmoButtons: $('#laserAmmoButtons'), rocketAmmoButtons: $('#rocketAmmoButtons'), laserToggle: $('#laserToggle'), rocketFire: $('#rocketFire'), autoLaser: $('#autoLaser'), autoRocket: $('#autoRocket'), turboRocket: $('#turboRocket'), rocketCd: $('#rocketCd'), weaponBar: $('#weaponBar'), weaponBarContent: $('#weaponBarContent'), weaponBarToggle: $('#weaponBarToggle'),
-  toast: $('#toast'), gameCelebration: $('#gameCelebration'), celebrationPanel: $('#celebrationPanel'), celebrationKicker: $('#celebrationKicker'), celebrationTitle: $('#celebrationTitle'), celebrationSubtitle: $('#celebrationSubtitle'), portalPrompt: $('#portalPrompt'), portalPromptMap: $('#portalPromptMap'), jumpTransition: $('#jumpTransition'), jumpTitle: $('#jumpTitle'), jumpSubtitle: $('#jumpSubtitle'), factionModal: $('#factionModal'), factionCards: $('#factionCards'),
+  toast: $('#toast'), baseTradePrompt: $('#baseTradePrompt'), baseTradePromptInfo: $('#baseTradePromptInfo'), gameCelebration: $('#gameCelebration'), celebrationPanel: $('#celebrationPanel'), celebrationKicker: $('#celebrationKicker'), celebrationTitle: $('#celebrationTitle'), celebrationSubtitle: $('#celebrationSubtitle'), portalPrompt: $('#portalPrompt'), portalPromptMap: $('#portalPromptMap'), jumpTransition: $('#jumpTransition'), jumpTitle: $('#jumpTitle'), jumpSubtitle: $('#jumpSubtitle'), factionModal: $('#factionModal'), factionCards: $('#factionCards'),
   mapBtn: $('#mapBtn'), mapModal: $('#mapModal'), closeMap: $('#closeMap'), mapNetwork: $('#mapNetwork'),
   missionBtn: $('#missionBtn'), missionActiveCount: $('#missionActiveCount'), missionModal: $('#missionModal'), closeMission: $('#closeMission'), missionContent: $('#missionContent'),
   gateBtn: $('#gateBtn'), gatePieceBadge: $('#gatePieceBadge'), gateModal: $('#gateModal'), closeGate: $('#closeGate'), gatePiecesText: $('#gatePiecesText'), gateLivesText: $('#gateLivesText'), gateCompletedText: $('#gateCompletedText'), gatePieceGrid: $('#gatePieceGrid'), gateJumpBtn: $('#gateJumpBtn'), gateUriText: $('#gateUriText'), gateSpinButtons: $('#gateSpinButtons'), gateJumpBonus: $('#gateJumpBonus'), gateRepairBonus: $('#gateRepairBonus'), gateLogDisks: $('#gateLogDisks'), useRepairBonus: $('#useRepairBonus'), gateResultBox: $('#gateResultBox'), gateRoundsGrid: $('#gateRoundsGrid'), gateAlphaStatusTitle: $('#gateAlphaStatusTitle'), gateAlphaStatusText: $('#gateAlphaStatusText'), gateHud: $('#gateHud'), gateHudRound: $('#gateHudRound'), gateHudWave: $('#gateHudWave'), gateHudRemaining: $('#gateHudRemaining'), gateHudNext: $('#gateHudNext'), gateHudLives: $('#gateHudLives'),
@@ -88,7 +107,7 @@ const ui = {
   auctionBtn: $('#auctionBtn'), auctionTopClock: $('#auctionTopClock'), auctionModal: $('#auctionModal'), closeAuction: $('#closeAuction'), auctionClock: $('#auctionClock'), auctionCredits: $('#auctionCredits'), auctionEscrow: $('#auctionEscrow'), auctionGrid: $('#auctionGrid'), auctionHistory: $('#auctionHistory'),
   shopBtn: $('#shopBtn'), shopModal: $('#shopModal'), closeShop: $('#closeShop'), shopTabs: $('#shopTabs'), shopGrid: $('#shopGrid'), shopCredits: $('#shopCredits'), shopUridium: $('#shopUridium'),
   hangarBtn: $('#hangarBtn'), hangarModal: $('#hangarModal'), closeHangar: $('#closeHangar'), hangarTabs: $('#hangarTabs'), hangarContent: $('#hangarContent'), hangarShipName: $('#hangarShipName'),
-  loginModal: $('#loginModal'), loginTabBtn: $('#loginTabBtn'), registerTabBtn: $('#registerTabBtn'), loginForm: $('#loginForm'), registerForm: $('#registerForm'), loginEmail: $('#loginEmail'), loginPassword: $('#loginPassword'), registerCallsign: $('#registerCallsign'), registerEmail: $('#registerEmail'), registerPassword: $('#registerPassword'), authMessage: $('#authMessage'), userLabel: $('#userLabel'), syncLabel: $('#syncLabel'), logoutBtn: $('#logoutBtn'), safeZoneLabel: $('#safeZoneLabel'), cargoUsed: $('#cargoUsed'), cargoMax: $('#cargoMax'), cargoBtn: $('#cargoBtn'), cargoModal: $('#cargoModal'), closeCargo: $('#closeCargo'), cargoSummary: $('#cargoSummary'), cargoGrid: $('#cargoGrid'), sellAllCargo: $('#sellAllCargo'),
+  loginModal: $('#loginModal'), loginTabBtn: $('#loginTabBtn'), registerTabBtn: $('#registerTabBtn'), loginForm: $('#loginForm'), registerForm: $('#registerForm'), loginEmail: $('#loginEmail'), loginPassword: $('#loginPassword'), registerCallsign: $('#registerCallsign'), registerEmail: $('#registerEmail'), registerPassword: $('#registerPassword'), authMessage: $('#authMessage'), userLabel: $('#userLabel'), syncLabel: $('#syncLabel'), logoutBtn: $('#logoutBtn'), safeZoneLabel: $('#safeZoneLabel'), cargoUsed: $('#cargoUsed'), cargoMax: $('#cargoMax'), cargoBtn: $('#cargoBtn'), cargoModal: $('#cargoModal'), closeCargo: $('#closeCargo'), cargoSummary: $('#cargoSummary'), cargoGrid: $('#cargoGrid'), sellAllCargo: $('#sellAllCargo'), configBtn: $('#configBtn'), configModal: $('#configModal'), closeConfig: $('#closeConfig'), qualityButtons: $('#qualityButtons'), qualityCurrentBadge: $('#qualityCurrentBadge'), hudSettingsGrid: $('#hudSettingsGrid'),
 };
 
 const SAVE_KEY_PREFIX = 'stellarLegacyV5Save';
@@ -151,13 +170,13 @@ function auctionHourKey(d=new Date()){return `${d.getFullYear()}-${String(d.getM
 function auctionSecondsLeft(){const d=new Date(),next=new Date(d);next.setMinutes(60,0,0);return Math.max(0,Math.ceil((next-d)/1000));}
 function auctionSeed(str){let h=2166136261>>>0;for(let i=0;i<str.length;i++){h^=str.charCodeAt(i);h=Math.imul(h,16777619);}return h>>>0;}
 function auctionRand(seed){let x=seed>>>0;return()=>{x=(Math.imul(1664525,x)+1013904223)>>>0;return x/4294967296;};}
-function eliteAuctionCatalog(){const out=[];Object.values(SHIPS).filter(x=>x.currency==='uridium'&&!x.eventOnly&&x.shopAvailable!==false&&x.auctionEligible!==false).forEach(x=>out.push({ref:`ship:${x.id}`,kind:'ship',id:x.id,name:x.name,uri:x.price,qty:1}));Object.values(ITEMS).filter(x=>x.currency==='uridium'&&!x.eventOnly&&x.shopAvailable!==false&&x.auctionEligible!==false).forEach(x=>out.push({ref:`item:${x.id}`,kind:'item',id:x.id,name:x.name,uri:x.price,qty:1}));Object.values(LASER_AMMO).filter(x=>x.currency==='uridium').forEach(x=>out.push({ref:`ammo:${x.id}`,kind:'ammo',id:x.id,name:`${x.name} • pacote ${fmt(x.pack)}`,uri:x.price,qty:x.pack}));Object.values(ROCKETS).filter(x=>x.currency==='uridium').forEach(x=>out.push({ref:`rocket:${x.id}`,kind:'rocket',id:x.id,name:`${x.name} • pacote ${fmt(x.pack)}`,uri:x.price,qty:x.pack}));Object.values(PET_GEARS).filter(x=>x.currency==='uridium').forEach(x=>out.push({ref:`petGear:${x.id}`,kind:'petGear',id:x.id,name:`P.E.T. • ${x.name}`,uri:x.cost,qty:1}));return out;}
+function eliteAuctionCatalog(){const out=[];Object.values(SHIPS).filter(x=>x.currency==='uridium'&&!x.eventOnly&&x.shopAvailable!==false&&x.auctionEligible!==false).forEach(x=>out.push({ref:`ship:${x.id}`,kind:'ship',id:x.id,name:x.name,uri:x.price,qty:1}));Object.values(ITEMS).filter(x=>x.currency==='uridium'&&!x.eventOnly&&x.shopAvailable!==false&&x.auctionEligible!==false&&!(x.type==='extra'&&progress&&ownsExtraItem(x.id))).forEach(x=>out.push({ref:`item:${x.id}`,kind:'item',id:x.id,name:x.name,uri:x.price,qty:1}));Object.values(LASER_AMMO).filter(x=>x.currency==='uridium').forEach(x=>out.push({ref:`ammo:${x.id}`,kind:'ammo',id:x.id,name:`${x.name} • pacote ${fmt(x.pack)}`,uri:x.price,qty:x.pack}));Object.values(ROCKETS).filter(x=>x.currency==='uridium').forEach(x=>out.push({ref:`rocket:${x.id}`,kind:'rocket',id:x.id,name:`${x.name} • pacote ${fmt(x.pack)}`,uri:x.price,qty:x.pack}));Object.values(PET_GEARS).filter(x=>x.currency==='uridium'&&!progress?.pet?.gearsOwned?.[x.id]).forEach(x=>out.push({ref:`petGear:${x.id}`,kind:'petGear',id:x.id,name:`P.E.T. • ${x.name}`,uri:x.cost,qty:1}));return out;}
 function buildAuctionLots(key){const lots={};for(const entry of eliteAuctionCatalog()){const rnd=auctionRand(auctionSeed(`${key}:${entry.ref}`)),reserve=Math.max(100000,Math.round(entry.uri*70*(.75+rnd()*.5)/100000)*100000),finalBid=Math.max(reserve+100000,Math.round(reserve*(1.25+rnd()*1.75)/100000)*100000);lots[entry.ref]={...entry,reserve,finalNpcBid:finalBid,userBid:0,escrow:0};}return lots;}
 function auctionNpcBid(lot){const d=new Date(),fraction=(d.getMinutes()*60+d.getSeconds())/3600;return Math.max(100000,Math.round((lot.reserve+(lot.finalNpcBid-lot.reserve)*fraction)/100000)*100000);}
 function auctionEscrow(){return Object.values(progress?.auction?.lots||{}).reduce((sum,l)=>sum+(Number(l.escrow)||0),0);}
 function grantAuctionLot(lot){
   if(lot.kind==='ship'){if(progress.ownedShips.includes(lot.id))return false;progress.ownedShips.push(lot.id);return true;}
-  if(lot.kind==='item'){const item=ITEMS[lot.id];if(item?.type==='drone'){if(progress.drones.length>=8)return false;progress.drones.push({id:`d_auc_${Date.now()}_${Math.random().toString(16).slice(2,5)}`,type:lot.id,slots:Array(item.slots).fill(null)});return true;}addInventory(lot.id);return true;}
+  if(lot.kind==='item'){const item=ITEMS[lot.id];if(item?.type==='drone'){if(progress.drones.length>=8)return false;progress.drones.push({id:`d_auc_${Date.now()}_${Math.random().toString(16).slice(2,5)}`,type:lot.id,slots:Array(item.slots).fill(null)});return true;}if(item?.type==='extra'&&ownsExtraItem(lot.id))return false;addInventory(lot.id);return true;}
   if(lot.kind==='ammo'){progress.ammo[lot.id]=(progress.ammo[lot.id]||0)+(LASER_AMMO[lot.id]?.pack||lot.qty||0);return true;}
   if(lot.kind==='rocket'){progress.rockets[lot.id]=(progress.rockets[lot.id]||0)+(ROCKETS[lot.id]?.pack||lot.qty||0);return true;}if(lot.kind==='petGear'){if(progress.pet.gearsOwned[lot.id])return false;progress.pet.gearsOwned[lot.id]=true;return true;}return false;
 }
@@ -832,6 +851,40 @@ function syncHudButton(){
   ui.hudToggle.classList.toggle('active-hud', !allCollapsed);
 }
 
+const HUD_VISIBILITY_KEY='stellar_hud_visibility_v2';
+const HUD_VISIBILITY_DEFAULT={ship:true,pet:true,target:true,minimap:true,weapons:true,gate:true};
+let hudVisibility={...HUD_VISIBILITY_DEFAULT};
+function loadHudVisibility(){
+  try{const raw=JSON.parse(localStorage.getItem(HUD_VISIBILITY_KEY)||'null');if(raw&&typeof raw==='object')hudVisibility={...HUD_VISIBILITY_DEFAULT,...raw};}catch{}
+  applyHudVisibility();
+}
+function saveHudVisibility(){try{localStorage.setItem(HUD_VISIBILITY_KEY,JSON.stringify(hudVisibility));}catch{}}
+function applyHudVisibility(){
+  ui.leftStats?.classList.toggle('hud-user-hidden',!hudVisibility.ship);
+  ui.petFloatPanel?.classList.toggle('hud-user-disabled',!hudVisibility.pet);
+  ui.targetName?.closest('#targetPanel')?.classList.toggle('hud-user-hidden',!hudVisibility.target);
+  ui.minimapPanel?.classList.toggle('hud-user-hidden',!hudVisibility.minimap);
+  ui.weaponBar?.classList.toggle('hud-user-hidden',!hudVisibility.weapons);
+  ui.gateHud?.classList.toggle('hud-user-disabled',!hudVisibility.gate);
+}
+function setHudVisibility(key,value){if(!(key in HUD_VISIBILITY_DEFAULT))return;hudVisibility[key]=!!value;saveHudVisibility();applyHudVisibility();renderSettings();updatePetFloat();renderGateHud();layoutHudPanels();}
+function applyQualityMode(mode,persist=true){
+  if(!QUALITY_PROFILES[mode])mode='high';qualityMode=mode;
+  if(persist){try{localStorage.setItem(QUALITY_STORAGE_KEY,mode);}catch{}}
+  document.body.dataset.quality=mode;
+  for(const path of [...V8_IMAGES.keys()])if(!qualityShouldPreload(path))V8_IMAGES.delete(path);
+  preloadV8Assets();resize();renderSettings();
+  showToast(`Qualidade ${QUALITY_PROFILES[mode].label} ativada`);
+}
+function renderSettings(){
+  if(!ui.configModal)return;
+  document.body.dataset.quality=qualityMode;
+  if(ui.qualityCurrentBadge)ui.qualityCurrentBadge.textContent=qualityProfile().label;
+  ui.qualityButtons?.querySelectorAll('[data-quality]').forEach(b=>b.classList.toggle('active',b.dataset.quality===qualityMode));
+  ui.hudSettingsGrid?.querySelectorAll('[data-hud-key]').forEach(input=>input.checked=hudVisibility[input.dataset.hudKey]!==false);
+}
+function openSettings(){renderSettings();ui.configModal?.classList.remove('hidden');}
+
 function layoutHudPanels(){
   const topbarH = ui.topbar ? Math.ceil(ui.topbar.getBoundingClientRect().height) : 54;
   const weaponH = ui.weaponBar ? Math.ceil(ui.weaponBar.getBoundingClientRect().height) : 150;
@@ -1047,7 +1100,7 @@ function addPetXp(amount){
     leveled=true;
     showToast(`P.E.T. subiu para o nível ${progress.pet.level}!`);
   }
-  if(leveled){saveGame();if(ui.petModal&&!ui.petModal.classList.contains('hidden'))renderPet();}
+  if(leveled){saveGame();refreshPetViews();}
 }
 function unlockPetSlot(kind){
   const pet=progress.pet;if(!pet?.owned){showToast('Adquira o P.E.T. primeiro');return;}
@@ -1058,7 +1111,7 @@ function unlockPetSlot(kind){
   if(next>availableSlots){showToast(next>PET_SLOT_LEVEL_CAP?`P.E.T. atingiu o limite de ${PET_SLOT_LEVEL_CAP} slots`:`P.E.T. precisa estar no nível ${next}`);return;}
   const cost=petSlotCost(next);
   if(progress.profile.uridium<cost){showToast(`Faltam ${fmt(cost-progress.profile.uridium)} URI`);return;}
-  progress.profile.uridium-=cost;pet[key]=next;list.push(null);saveGame();renderPet();updateUI();showToast(`Slot ${next} de ${kind==='laser'?'laser':'escudo'} liberado`);
+  progress.profile.uridium-=cost;pet[key]=next;list.push(null);saveGame();refreshPetViews();updateUI();showToast(`Slot ${next} de ${kind==='laser'?'laser':'escudo'} liberado`);
 }
 function equipPetItem(itemId,kind){
   if(!progress?.pet?.owned){showToast('Adquira o P.E.T. primeiro');return;}
@@ -1068,12 +1121,12 @@ function equipPetItem(itemId,kind){
   const list=kind==='laser'?progress.pet.lasers:progress.pet.shields;
   const idx=list.findIndex(v=>!v);if(idx<0){showToast('Sem slot liberado vazio no P.E.T.');return;}
   if(!removeInventory(itemId)){showToast('Item não disponível');return;}
-  list[idx]=itemId;saveGame();renderPet();refreshAmmoCounters();
+  list[idx]=itemId;saveGame();refreshPetViews();refreshAmmoCounters();
 }
 function unequipPetSlot(kind,index){
   if(!progress?.pet?.owned)return;
   const list=kind==='laser'?progress.pet.lasers:progress.pet.shields;
-  const id=list[index];if(!id)return;list[index]=null;addInventory(id);saveGame();renderPet();refreshAmmoCounters();
+  const id=list[index];if(!id)return;list[index]=null;addInventory(id);saveGame();refreshPetViews();refreshAmmoCounters();
 }
 function buyPetUnit(){
   if(progress?.pet?.owned){showToast('P.E.T. já adquirido');return;}
@@ -1081,19 +1134,19 @@ function buyPetUnit(){
   progress.profile.uridium-=PET_BASE_PRICE;
   progress.pet=freshPet();progress.pet.owned=true;progress.pet.laserSlotsUnlocked=1;progress.pet.shieldSlotsUnlocked=1;progress.pet.lasers=[null];progress.pet.shields=[null];
   petRuntime.x=player.x+82;petRuntime.y=player.y+64;petRuntime.tx=petRuntime.x;petRuntime.ty=petRuntime.y;
-  saveGame();renderShop();renderPet();updateUI();showToast('P.E.T. adquirido! Agora equipe armas, escudos e módulos.');
+  saveGame();renderShop();refreshPetViews();updateUI();showToast('P.E.T. adquirido! Agora equipe armas, escudos e módulos.');
 }
 function buyPetGear(id){
   if(!progress?.pet?.owned){showToast('Adquira o P.E.T. primeiro');return;}
   const gear=PET_GEARS[id];if(!gear)return;
   if(progress.pet.gearsOwned[id]){showToast('Módulo já comprado');return;}
   if(progress.profile.uridium<gear.cost){showToast(`Faltam ${fmt(gear.cost-progress.profile.uridium)} URI`);return;}
-  progress.profile.uridium-=gear.cost;progress.pet.gearsOwned[id]=true;saveGame();renderPet();updateUI();showToast(`${gear.name} adquirido`);
+  progress.profile.uridium-=gear.cost;progress.pet.gearsOwned[id]=true;saveGame();renderShop();refreshPetViews();updateUI();showToast(`${gear.name} adquirido`);
 }
 function setPetGear(id){
   if(!progress?.pet?.owned){showToast('Adquira o P.E.T. primeiro');return;}
   if(id!=='off'&&!progress.pet.gearsOwned[id]){showToast('Compre esse módulo primeiro');return;}
-  progress.pet.activeGear=id;petRuntime.taskId=null;petRuntime.taskType='follow';saveGame();renderPet();
+  progress.pet.activeGear=id;petRuntime.taskId=null;petRuntime.taskType='follow';saveGame();refreshPetViews();
   showToast(id==='off'?'P.E.T. em modo companhia':PET_GEARS[id].name+' ativado');
 }
 function sellPetCargoBox(drop){
@@ -1213,7 +1266,7 @@ function renderFactionChoice(){
 }
 
 function screenPos(x,y){return{x:x-state.camera.x+W/2,y:y-state.camera.y+H/2};}
-function spawnParticle(x,y,text,color){state.particles.push({x,y,text,color,life:1,vy:rand(20,32)});}
+function spawnParticle(x,y,text,color){const cap=qualityProfile().particles;if(cap<=0)return;if(state.particles.length>=cap)state.particles.splice(0,state.particles.length-cap+1);state.particles.push({x,y,text,color,life:1,vy:rand(20,32)});}
 function spawnImpactFx(x,y,color='#7edcff',size=24,type='impact'){
   state.fx.push({x,y,color,size,type,life:1,maxLife:1,rot:rand(0,TWO_PI)});
 }
@@ -1650,7 +1703,7 @@ function drawNavigationOverlay(){
   else{const dx=target.x-W/2,dy=target.y-H/2,a=Math.atan2(dy,dx),rx=W/2-margin,ry=H/2-margin,t=Math.min(rx/Math.max(1,Math.abs(Math.cos(a))),ry/Math.max(1,Math.abs(Math.sin(a)))),x=W/2+Math.cos(a)*t,y=H/2+Math.sin(a)*t;ctx.translate(x,y);ctx.rotate(a);ctx.fillStyle='rgba(93,222,255,.9)';ctx.beginPath();ctx.moveTo(14,0);ctx.lineTo(-8,-8);ctx.lineTo(-4,0);ctx.lineTo(-8,8);ctx.closePath();ctx.fill();ctx.rotate(-a);ctx.fillStyle='#c8f5ff';ctx.fillText(`${fmt(d)}u`,0,-15);}
   ctx.restore();
 }
-function drawStars(){ctx.fillStyle='#fff';for(const s of state.stars){const sx=((s.x-state.camera.x*.15)%(W+80)+(W+80))%(W+80)-40,sy=((s.y-state.camera.y*.15)%(H+80)+(H+80))%(H+80)-40;ctx.globalAlpha=s.a;ctx.beginPath();ctx.arc(sx,sy,s.r,0,TWO_PI);ctx.fill();}ctx.globalAlpha=1;}
+function drawStars(){const fraction=qualityProfile().stars;if(fraction<=0)return;ctx.fillStyle='#fff';const step=fraction>=1?1:fraction>=.5?2:5;for(let i=0;i<state.stars.length;i+=step){const s=state.stars[i],sx=((s.x-state.camera.x*.15)%(W+80)+(W+80))%(W+80)-40,sy=((s.y-state.camera.y*.15)%(H+80)+(H+80))%(H+80)-40;ctx.globalAlpha=s.a;ctx.beginPath();ctx.arc(sx,sy,s.r,0,TWO_PI);ctx.fill();}ctx.globalAlpha=1;}
 function drawNebula(){const pal=state.currentMap.palette||{nebula:'#173159',accent:'#66d9ff',deep:'#030816'};const g=ctx.createRadialGradient(W*.62,H*.36,20,W*.62,H*.36,Math.max(W,H)*.72);g.addColorStop(0,`${pal.nebula}55`);g.addColorStop(.38,`${pal.nebula}22`);g.addColorStop(1,'rgba(0,0,0,0)');ctx.fillStyle=g;ctx.fillRect(0,0,W,H);const g2=ctx.createRadialGradient(W*.18,H*.78,10,W*.18,H*.78,Math.max(W,H)*.42);g2.addColorStop(0,`${pal.accent}1f`);g2.addColorStop(1,'rgba(0,0,0,0)');ctx.fillStyle=g2;ctx.fillRect(0,0,W,H);}
 function drawBounds(){const p=screenPos(0,0);ctx.strokeStyle='rgba(60,140,255,.13)';ctx.lineWidth=2;ctx.strokeRect(p.x,p.y,state.currentMap.world.w,state.currentMap.world.h);}
 function drawBaseSafeZone(){
@@ -1751,7 +1804,7 @@ function drawMinimap(){
   for(const o of state.ores){if(Math.hypot(o.x-player.x,o.y-player.y)>state.radarRange*.8)continue;mm.fillStyle=o.color;mm.beginPath();mm.arc(o.x*sx,o.y*sy,1.3,0,TWO_PI);mm.fill();}
   mm.fillStyle=getFaction()?.color||'#fff';mm.beginPath();mm.arc(px,py,4.5,0,TWO_PI);mm.fill();mm.strokeStyle='rgba(255,255,255,.7)';mm.stroke();
 }
-function draw(){ctx.clearRect(0,0,W,H);if(!progress){drawNebula();drawStars();return;}if(!drawMapBackground())drawNebula();drawStars();drawSectorGrid();drawBounds();drawLandmarks();drawBaseSafeZone();drawPortals();drawOres();drawLoot();state.enemies.forEach(e=>e.hp>0&&onScreenWorld(e.x,e.y,180)&&drawEnemy(e));drawRocketFx();drawPlayer();drawPet();drawFx();drawParticles();drawNavigationOverlay();drawMinimap();}
+function draw(){const q=qualityProfile();ctx.clearRect(0,0,W,H);if(!progress){drawNebula();drawStars();return;}if(!(q.background&&drawMapBackground()))drawNebula();drawStars();if(q.grid)drawSectorGrid();drawBounds();drawLandmarks();drawBaseSafeZone();drawPortals();drawOres();drawLoot();state.enemies.forEach(e=>e.hp>0&&onScreenWorld(e.x,e.y,180)&&drawEnemy(e));if(q.fx)drawRocketFx();drawPlayer();drawPet();if(q.fx)drawFx();drawParticles();drawNavigationOverlay();drawMinimap();}
 
 function ammoWarningClass(qty,perUse){
   if(qty<=0)return 'empty';
@@ -1813,12 +1866,42 @@ function buildAmmoButtons(){
 }
 
 function updateExtraControls(){ return; }
+function updatePetFloat(){
+  if(!ui.petFloatPanel)return;
+  const pet=progress?.pet;
+  const shouldShow=!!pet?.owned&&hudVisibility.pet!==false;
+  ui.petFloatPanel.classList.toggle('hidden',!shouldShow);
+  if(!shouldShow)return;
+  ui.petFloatPanel.classList.remove('hud-user-disabled');
+  if(ui.petFloatLevel)ui.petFloatLevel.textContent=`LV${pet.level}`;
+  if(ui.petFloatStatus){const gear=pet.activeGear==='off'?'COMPANHIA':(PET_GEARS[pet.activeGear]?.name||'COMPANHIA');ui.petFloatStatus.textContent=`${gear} • ESC ${fmt(petRuntime.shield||0)}/${fmt(petMaxShield())}`;}
+  if(ui.petGearQuickSelect){
+    const owned=['off',...Object.keys(PET_GEARS).filter(id=>pet.gearsOwned?.[id])];
+    const signature=owned.join('|');
+    if(ui.petGearQuickSelect.dataset.signature!==signature){
+      ui.petGearQuickSelect.innerHTML='';
+      for(const id of owned){const opt=document.createElement('option');opt.value=id;opt.textContent=id==='off'?'COMPANHIA':PET_GEARS[id].name;ui.petGearQuickSelect.appendChild(opt);}
+      ui.petGearQuickSelect.dataset.signature=signature;
+    }
+    ui.petGearQuickSelect.value=owned.includes(pet.activeGear)?pet.activeGear:'off';
+  }
+}
+function updateBaseTradePrompt(){
+  if(!ui.baseTradePrompt)return;
+  const active=!!progress&&isAtTrader()&&!isGalaxyGateMap()&&!state.jumping;
+  ui.baseTradePrompt.classList.toggle('hidden',!active);
+  if(!active)return;
+  const pos=screenPos(SAFE_ZONE.x,SAFE_ZONE.y);
+  ui.baseTradePrompt.style.left=`${Math.max(120,Math.min(W-120,pos.x))}px`;
+  ui.baseTradePrompt.style.top=`${Math.max(145,Math.min(H-110,pos.y+88))}px`;
+  if(ui.baseTradePromptInfo)ui.baseTradePromptInfo.textContent=`Porão ${fmt(cargoUsed())}/${fmt(cargoCapacity())} • ${fmt(cargoSaleValue())} CR`;
+}
 function updateUI(){
   refreshAmmoCounters();
   const f=getFaction(),ship=SHIPS[progress.activeShipId],safe=isSafeZone();ui.factionLabel.textContent=f?.short||'—';ui.factionLabel.style.color=f?.color||'';ui.mapLabel.textContent=displayMapLabel(progress.mapId);if(ui.sectorName)ui.sectorName.textContent=state.currentMap.name||'Setor';if(ui.coordLabel)ui.coordLabel.textContent=`${Math.round(player.x)} / ${Math.round(player.y)}`;if(ui.routeLabel){const rd=routeDistance();ui.routeLabel.textContent=rd>35?`${fmt(rd)}u`:'PARADO';ui.routeLabel.parentElement?.classList.toggle('active',rd>35);}if(ui.discoveriesLabel){const found=state.landmarks.filter(l=>progress.discoveries?.[`${progress.mapId}:${l.id}`]).length;ui.discoveriesLabel.textContent=`${found}/${state.landmarks.length}`;}ui.shipLabel.textContent=ship.name;ui.lvl.textContent=progress.profile.level;ui.hp.textContent=fmt(player.hp);ui.maxHp.textContent=fmt(player.maxHp);ui.shield.textContent=fmt(player.shield);ui.maxShield.textContent=fmt(player.maxShield);ui.speed.textContent=fmt(player.speed);if(ui.dmg)ui.dmg.textContent=fmt(player.laserDamage*currentLaserAmmo().mult);ui.credits.textContent=fmt(progress.profile.credits);ui.uridium.textContent=fmt(progress.profile.uridium);ui.xp.textContent=fmt(progress.profile.xp);ui.xp.title=progress.profile.level>=PLAYER_MAX_LEVEL?'Nível máximo':`Próximo nível: ${fmt(levelXpThreshold(progress.profile.level+1))} XP • ${Math.round(levelProgressPercent(progress.profile.xp,progress.profile.level))}%`;if(ui.droneCount)ui.droneCount.textContent=progress.drones.length;ui.laserToggle.classList.toggle('active',player.laserFiring);ui.rocketCd.textContent=rocketReady()?'MÍSSIL PRONTO':`MÍSSIL ${(getRocketCooldown()-(nowSec()-player.lastRocketShot)).toFixed(1)}s`;
   if(ui.shipHudArt)ui.shipHudArt.src=V8_ASSETS.ships[progress.activeShipId]||V8_ASSETS.ships.phoenix;
   if(ui.factionIcon)ui.factionIcon.src=factionAsset(progress.profile.faction);
-  ui.userLabel.textContent=progress.profile.callsign||getUser()?.callsign||'Pilot';if(ui.petBtn)ui.petBtn.textContent=progress.pet?.owned?`P.E.T. LV${progress.pet.level}`:'P.E.T. LOJA';ui.safeZoneLabel.textContent=safe?'ZONA SEGURA ATIVA':'FORA DA BASE';ui.safeZoneLabel.classList.toggle('active',safe);ui.cargoUsed.textContent=fmt(cargoUsed());ui.cargoMax.textContent=fmt(cargoCapacity());ui.cargoBtn.classList.toggle('gold',isAtTrader());
+  if(ui.userLabel)ui.userLabel.textContent=progress.profile.callsign||getUser()?.callsign||'Pilot';if(ui.petBtn)ui.petBtn.textContent=progress.pet?.owned?`P.E.T. LV${progress.pet.level}`:'P.E.T. LOJA';if(ui.safeZoneLabel){ui.safeZoneLabel.textContent=safe?'ZONA SEGURA ATIVA':'FORA DA BASE';ui.safeZoneLabel.classList.toggle('active',safe);}if(ui.cargoUsed)ui.cargoUsed.textContent=fmt(cargoUsed());if(ui.cargoMax)ui.cargoMax.textContent=fmt(cargoCapacity());if(ui.cargoBtn)ui.cargoBtn.classList.toggle('gold',isAtTrader());updatePetFloat();updateBaseTradePrompt();
   if(state.target&&state.target.hp>0){ui.targetName.textContent=state.target.name;ui.targetStats.textContent=`HP ${fmt(state.target.hp)} • ESC ${fmt(state.target.shield)}`;ui.targetHpBar.style.width=`${state.target.hp/state.target.maxHp*100}%`;ui.targetShieldBar.style.width=`${state.target.maxShield?state.target.shield/state.target.maxShield*100:0}%`;}else{ui.targetName.textContent='Sem alvo';ui.targetStats.textContent='Toque em um NPC para selecionar';ui.targetHpBar.style.width='0%';ui.targetShieldBar.style.width='0%';}
   ui.shopCredits.textContent=fmt(progress.profile.credits);ui.shopUridium.textContent=fmt(progress.profile.uridium);ui.hangarShipName.textContent=ship.name;updateExtraControls();
   const portal=nearbyPortal();if(portal&&!state.jumping&&ui.portalPrompt){const pos=screenPos(portal.x,portal.y);ui.portalPrompt.style.left=`${Math.max(85,Math.min(W-85,pos.x))}px`;ui.portalPrompt.style.top=`${Math.max(115,Math.min(H-90,pos.y-58))}px`;ui.portalPromptMap.textContent=`Destino ${displayMapLabel(portal.to)} • clique ou J`;ui.portalPrompt.classList.remove('hidden');}else ui.portalPrompt?.classList.add('hidden');
@@ -1829,8 +1912,20 @@ function charge(price,currency){if(!canAfford(price,currency))return false;if(cu
 function priceText(p,c){return `${fmt(p)} ${c==='credits'?'CR':'URI'}`;}
 function productIcon(type,subtype){return type==='ship'?'🛸':type==='laser'?'⚡':type==='generator'?(subtype==='speed'?'💨':'🛡️'):type==='drone'?'◆':type==='pet'?'🤖':type==='extra'?'🧩':type==='ammo'?'✦':'🚀';}
 
+function ownsExtraItem(itemId){
+  return (progress?.inventory?.[itemId]||0)>0||(progress?.shipLoadout?.extras||[]).includes(itemId);
+}
+function itemSellValue(item){return Math.max(1,Math.floor((Number(item?.price)||0)*.5));}
+function sellInventoryItem(itemId,qty=1){
+  const item=ITEMS[itemId],have=progress?.inventory?.[itemId]||0;qty=Math.max(1,Math.floor(qty));
+  if(!item||have<qty){showToast('Item não disponível para venda');return;}
+  const unit=itemSellValue(item),total=unit*qty;
+  progress.inventory[itemId]-=qty;if(progress.inventory[itemId]<=0)delete progress.inventory[itemId];
+  if(item.currency==='uridium')progress.profile.uridium+=total;else progress.profile.credits+=total;
+  saveGame();renderShop();renderHangar();updateUI();showToast(`${item.name} vendido por ${fmt(total)} ${item.currency==='uridium'?'URI':'CR'}`);
+}
 function buyShip(shipId){const ship=SHIPS[shipId];if(!ship)return;if(ship.eventOnly||ship.shopAvailable===false){showToast(`${ship.name}: nave reservada para Evento / Missão / Passe`);return;}if(progress.ownedShips.includes(shipId)){showToast('Nave já obtida');return;}if(!charge(ship.price,ship.currency)){showToast('Saldo insuficiente');return;}progress.ownedShips.push(shipId);saveGame();renderShop();showToast(`${ship.name} adicionada ao Hangar`);}
-function buyItem(itemId){const item=ITEMS[itemId];if(item.type==='drone'){buyDrone(itemId);return;}if(!charge(item.price,item.currency)){showToast('Saldo insuficiente');return;}addInventory(itemId);saveGame();renderShop();if(!ui.hangarModal.classList.contains('hidden'))renderHangar();showToast(`${item.name} comprado`);}
+function buyItem(itemId){const item=ITEMS[itemId];if(!item)return;if(item.type==='drone'){buyDrone(itemId);return;}if(item.type==='extra'&&ownsExtraItem(itemId)){showToast('Esse EXTRA já pertence à sua conta');return;}if(!charge(item.price,item.currency)){showToast('Saldo insuficiente');return;}addInventory(itemId);saveGame();renderShop();if(!ui.hangarModal.classList.contains('hidden'))renderHangar();showToast(`${item.name} comprado`);}
 function buyDrone(type){if(progress.drones.length>=8){showToast('Limite de 8 drones atingido');return;}const item=ITEMS[type];if(!charge(item.price,item.currency)){showToast('Saldo insuficiente');return;}progress.drones.push({id:`d_${Date.now()}_${Math.random().toString(16).slice(2,5)}`,type,slots:Array(item.slots).fill(null)});computeStats(true);saveGame();renderShop();showToast(`${item.name} adquirido (${progress.drones.length}/8)`);}
 function buyAmmo(id){if(!buyAmmoPack(id,false)){showToast('Saldo insuficiente');return;}buildAmmoButtons();renderShop();}
 function buyRockets(id){if(!buyRocketPack(id,false)){showToast('Saldo insuficiente');return;}buildAmmoButtons();renderShop();}
@@ -1847,9 +1942,20 @@ function renderShop(){
   if(state.shopTab==='ships')Object.values(SHIPS).forEach(s=>{const event=!!s.eventOnly||s.shopAvailable===false;ui.shopGrid.appendChild(makeProductCard({id:s.id,name:s.name,desc:`${s.role}<br>HP ${fmt(s.hp)} • ${s.lasers} lasers • ${s.generators} geradores • ${s.extras} extras • VEL ${s.speed}${s.ability?`<br><b>Habilidade:</b> ${s.ability}`:''}`,price:s.price,currency:s.currency,type:'ship',badge:event?'EVENTO':(s.currency==='uridium'?'ELITE':'COMUM'),owned:progress.ownedShips.includes(s.id),disabled:event&&!progress.ownedShips.includes(s.id),priceLabel:event?'EVENTO / MISSÃO / PASSE':null,buttonLabel:event?'BLOQUEADA':null,onBuy:()=>buyShip(s.id)}));});
   if(state.shopTab==='lasers')Object.values(ITEMS).filter(i=>i.type==='laser'&&i.shopAvailable!==false).forEach(i=>ui.shopGrid.appendChild(makeProductCard({id:i.id,name:i.name,desc:`Dano base: <b>${i.damage}</b>${i.alienDamage?` • Alien ${i.alienDamage}`:''}${i.alienBonus?` • +${Math.round(i.alienBonus*100)}% PvE`:''}<br>${i.description}`,price:i.price,currency:i.currency,type:i.type,badge:i.currency==='uridium'?'ELITE':'COMUM',onBuy:()=>buyItem(i.id)})));
   if(state.shopTab==='generators')Object.values(ITEMS).filter(i=>i.type==='generator').forEach(i=>{const event=!!i.eventOnly||i.shopAvailable===false;ui.shopGrid.appendChild(makeProductCard({id:i.id,name:i.name,desc:i.description,price:i.price,currency:i.currency,type:i.type,subtype:i.subtype,badge:event?'EVENTO':(i.currency==='uridium'?'ELITE':'COMUM'),disabled:event,priceLabel:event?'EVENTO / MISSÃO':null,buttonLabel:event?'BLOQUEADO':null,onBuy:()=>buyItem(i.id)}));});
-  if(state.shopTab==='pet')ui.shopGrid.appendChild(makeProductCard({id:'petBaseUnit',name:'P.E.T. — Unidade Base',desc:`Companheiro autônomo com progressão até o nível ${PET_MAX_LEVEL}. Armas, escudos e módulos são comprados separadamente.`,price:PET_BASE_PRICE,currency:'uridium',type:'pet',badge:'ELITE',owned:!!progress.pet?.owned,onBuy:()=>buyPetUnit()}));
+  if(state.shopTab==='pet'){
+    if(!progress.pet?.owned)ui.shopGrid.appendChild(makeProductCard({id:'petBaseUnit',name:'P.E.T. — Unidade Base',desc:`Companheiro autônomo com progressão até o nível ${PET_MAX_LEVEL}. Armas, escudos e módulos são comprados separadamente.`,price:PET_BASE_PRICE,currency:'uridium',type:'pet',badge:'ELITE',onBuy:()=>buyPetUnit()}));
+    else{
+      const missing=Object.values(PET_GEARS).filter(g=>!progress.pet.gearsOwned?.[g.id]);
+      if(!missing.length)ui.shopGrid.innerHTML='<div class="empty-state">Todos os módulos do P.E.T. já foram adquiridos. Eles ficam organizados em HANGAR → P.E.T.</div>';
+      else missing.forEach(g=>ui.shopGrid.appendChild(makeProductCard({id:g.id,name:`P.E.T. • ${g.name}`,desc:g.description,price:g.cost,currency:'uridium',type:'petGear',badge:'ELITE',onBuy:()=>buyPetGear(g.id)})));
+    }
+  }
   if(state.shopTab==='drones')Object.values(ITEMS).filter(i=>i.type==='drone').forEach(i=>ui.shopGrid.appendChild(makeProductCard({id:i.id,name:i.name,desc:`${i.description}<br>Você possui ${progress.drones.filter(d=>d.type===i.id).length}. Total: ${progress.drones.length}/8`,price:i.price,currency:i.currency,type:i.type,badge:i.id==='iris'?'ELITE':'COMUM',disabled:progress.drones.length>=8,onBuy:()=>buyDrone(i.id)})));
-  if(state.shopTab==='extras')Object.values(ITEMS).filter(i=>i.type==='extra').forEach(i=>ui.shopGrid.appendChild(makeProductCard({id:i.id,name:i.name,desc:i.description,price:i.price,currency:i.currency,type:i.type,badge:i.currency==='uridium'?'ELITE':'COMUM',onBuy:()=>buyItem(i.id)})));
+  if(state.shopTab==='extras'){
+    const available=Object.values(ITEMS).filter(i=>i.type==='extra'&&!ownsExtraItem(i.id));
+    if(!available.length)ui.shopGrid.innerHTML='<div class="empty-state">Você já possui todos os EXTRAS disponíveis. Itens únicos comprados somem da Loja para manter seu inventário organizado.</div>';
+    else available.forEach(i=>ui.shopGrid.appendChild(makeProductCard({id:i.id,name:i.name,desc:i.description,price:i.price,currency:i.currency,type:i.type,badge:i.currency==='uridium'?'ELITE':'COMUM',onBuy:()=>buyItem(i.id)})));
+  }
   if(state.shopTab==='ammo')Object.values(LASER_AMMO).forEach(a=>ui.shopGrid.appendChild(makeProductCard({id:a.id,name:a.name,desc:`Pacote com ${fmt(a.pack)} disparos • ${a.shieldDrain?'captura escudo x2':`dano x${a.mult}`}<br>Em estoque: ${fmt(ammoQty(a.id))}`,price:a.price,currency:a.currency,type:'ammo',badge:a.currency==='uridium'?'ELITE':'COMUM',onBuy:()=>buyAmmo(a.id)})));
   if(state.shopTab==='rockets')Object.values(ROCKETS).forEach(r=>ui.shopGrid.appendChild(makeProductCard({id:r.id,name:r.name,desc:`Pacote com ${fmt(r.pack)} mísseis • dano ${fmt(r.damage)}<br>Em estoque: ${fmt(rocketQty(r.id))}`,price:r.price,currency:r.currency,type:'rocket',badge:r.currency==='uridium'?'ELITE':'COMUM',onBuy:()=>buyRockets(r.id)})));
   updateUI();
@@ -1885,17 +1991,23 @@ function unequipShipSlot(key,index){
 }
 function equipDroneItem(itemId){const item=ITEMS[itemId];if(!(item.type==='laser'||(item.type==='generator'&&item.subtype==='shield'))){showToast('Drones aceitam lasers ou geradores de escudo');return;}const drone=progress.drones.find(d=>d.slots.some(v=>!v));if(!drone){showToast('Nenhum slot livre nos drones');return;}if(!removeInventory(itemId))return;drone.slots[drone.slots.findIndex(v=>!v)]=itemId;computeStats(true);saveGame();renderHangar();buildAmmoButtons();}
 function unequipDroneSlot(droneId,index){const d=progress.drones.find(x=>x.id===droneId);if(!d||!d.slots[index])return;addInventory(d.slots[index]);d.slots[index]=null;computeStats(true);saveGame();renderHangar();buildAmmoButtons();}
-function sellDrone(droneId){const d=progress.drones.find(x=>x.id===droneId);if(!d)return;d.slots.filter(Boolean).forEach(addInventory);progress.drones=progress.drones.filter(x=>x.id!==droneId);computeStats(true);saveGame();renderHangar();buildAmmoButtons();showToast('Drone removido; equipamentos voltaram ao inventário');}
+function sellDrone(droneId){const d=progress.drones.find(x=>x.id===droneId);if(!d)return;const model=ITEMS[d.type];d.slots.filter(Boolean).forEach(addInventory);progress.drones=progress.drones.filter(x=>x.id!==droneId);const refund=itemSellValue(model);if(model.currency==='uridium')progress.profile.uridium+=refund;else progress.profile.credits+=refund;computeStats(true);saveGame();renderHangar();renderShop();buildAmmoButtons();updateUI();showToast(`${model.name} vendido por ${fmt(refund)} ${model.currency==='uridium'?'URI':'CR'} • equipamentos retornaram ao inventário`);}
 
+function sellEquippedSlot(key,index,droneId=null){
+  const id=droneId?progress.drones.find(d=>d.id===droneId)?.slots?.[index]:progress.shipLoadout?.[key]?.[index];
+  if(!id)return;
+  if(droneId)unequipDroneSlot(droneId,index);else unequipShipSlot(key,index);
+  sellInventoryItem(id,1);
+}
 function slotCard(label,itemId,key,index,droneId=null){
   const el=document.createElement('div');el.className=`slot-card ${itemId?'':'empty'}`;const item=itemId?ITEMS[itemId]:null,art=item?V8_ASSETS.equipment[itemId]:null;
   el.innerHTML=`<div class="slot-label">${label}</div>${item&&art?`<img class="slot-item-art" src="${art}" alt="${item.name}">`:''}<div class="slot-item">${item?item.name:'VAZIO'}</div>${item?`<div class="muted" style="font-size:10px">${item.description}</div>`:''}`;
-  if(item){const a=document.createElement('div');a.className='slot-actions';const b=document.createElement('button');b.className='ghost-btn';b.textContent='Remover';b.onclick=()=>droneId?unequipDroneSlot(droneId,index):unequipShipSlot(key,index);a.appendChild(b);el.appendChild(a);}return el;
+  if(item){const a=document.createElement('div');a.className='slot-actions';const b=document.createElement('button');b.className='ghost-btn';b.textContent='Remover';b.onclick=()=>droneId?unequipDroneSlot(droneId,index):unequipShipSlot(key,index);a.appendChild(b);const sell=document.createElement('button');sell.className='danger-btn sell-item-btn';sell.textContent=`Vender 50%`;sell.title=`${fmt(itemSellValue(item))} ${item.currency==='uridium'?'URI':'CR'}`;sell.onclick=()=>sellEquippedSlot(key,index,droneId);a.appendChild(sell);el.appendChild(a);}return el;
 }
 function inventoryCard(itemId,count){
   const item=ITEMS[itemId],art=V8_ASSETS.equipment[itemId];const el=document.createElement('div');el.className='inventory-card';
   el.innerHTML=`${art?`<img class="inventory-item-art" src="${art}" alt="${item.name}">`:''}<b>${item.name}</b><div class="qty">Quantidade: ${count}</div><div class="muted" style="font-size:10px;margin-top:4px">${item.description}</div>`;
-  const actions=document.createElement('div');actions.className='inventory-actions';const shipBtn=document.createElement('button');shipBtn.className='ghost-btn';shipBtn.textContent='Nave';shipBtn.onclick=()=>equipShipItem(itemId);actions.appendChild(shipBtn);if((item.type==='laser'||(item.type==='generator'&&item.subtype==='shield'))&&progress.drones.length){const d=document.createElement('button');d.className='ghost-btn';d.textContent='Drone';d.onclick=()=>equipDroneItem(itemId);actions.appendChild(d);}el.appendChild(actions);return el;
+  const actions=document.createElement('div');actions.className='inventory-actions';const shipBtn=document.createElement('button');shipBtn.className='ghost-btn';shipBtn.textContent='Nave';shipBtn.onclick=()=>equipShipItem(itemId);actions.appendChild(shipBtn);if((item.type==='laser'||(item.type==='generator'&&item.subtype==='shield'))&&progress.drones.length){const d=document.createElement('button');d.className='ghost-btn';d.textContent='Drone';d.onclick=()=>equipDroneItem(itemId);actions.appendChild(d);}const sell=document.createElement('button');sell.className='danger-btn sell-item-btn';sell.textContent=`Vender 50% • ${fmt(itemSellValue(item))} ${item.currency==='uridium'?'URI':'CR'}`;sell.onclick=()=>sellInventoryItem(itemId,1);actions.appendChild(sell);el.appendChild(actions);return el;
 }
 
 function renderHangarShips(){
@@ -1913,14 +2025,32 @@ function renderHangarEquipment(){
   for(const [key,title] of [['lasers',`Lasers da ${ship.name} (${ship.lasers})`],['generators',`Geradores (${ship.generators})`],['extras',`Extras (${extraCap}${extraBonus?` = ${ship.extras} + ${extraBonus}`:''})`]]){const box=document.createElement('div');box.className='section-box';box.innerHTML=`<h3>${title}</h3>`;const grid=document.createElement('div');grid.className='slot-grid';progress.shipLoadout[key].forEach((id,i)=>grid.appendChild(slotCard(`${title.split(' ')[0]} ${i+1}`,id,key,i)));box.appendChild(grid);left.appendChild(box);}
   const inv=document.createElement('div');inv.className='section-box';inv.innerHTML='<h3>Inventário disponível</h3>';const grid=document.createElement('div');grid.className='inventory-grid';const entries=Object.entries(progress.inventory).filter(([id,q])=>q>0&&ITEMS[id]);if(!entries.length)grid.innerHTML='<div class="empty-state">Seu inventário de equipamentos está vazio. Compre itens na Loja.</div>';else entries.forEach(([id,q])=>grid.appendChild(inventoryCard(id,q)));inv.appendChild(grid);right.appendChild(inv);root.append(left,right);return root;
 }
-function renderHangarDrones(){const root=document.createElement('div');const info=document.createElement('div');info.className='section-box';info.innerHTML=`<h3>Esquadrão de drones — ${progress.drones.length}/8</h3><div class="muted" style="font-size:12px">Flax: 1 slot • Iris: 2 slots. Os drones permanecem equipados quando você troca de nave.</div>`;root.appendChild(info);const grid=document.createElement('div');grid.className='drone-grid';if(!progress.drones.length){grid.innerHTML='<div class="empty-state">Você ainda não possui drones. Vá à Loja → Drones.</div>';}progress.drones.forEach((d,idx)=>{const model=ITEMS[d.type],c=document.createElement('div');c.className='drone-card';c.innerHTML=`<img class="drone-art" src="${V8_ASSETS.drones[d.type]}" alt="${model.name}"><div><span class="badge ${d.type==='iris'?'elite':''}">${d.type==='iris'?'ELITE':'COMUM'}</span><h3>${model.name} #${idx+1}</h3></div><div class="drone-stats">${model.slots} slot${model.slots>1?'s':''} • aceita laser ou gerador de escudo</div>`;const sg=document.createElement('div');sg.className='slot-grid';d.slots.forEach((id,i)=>sg.appendChild(slotCard(`Slot ${i+1}`,id,null,i,d.id)));c.appendChild(sg);const rm=document.createElement('button');rm.className='danger-btn';rm.textContent='Remover drone';rm.onclick=()=>sellDrone(d.id);c.appendChild(rm);grid.appendChild(c);});root.appendChild(grid);return root;}
-function renderHangar(){if(!progress)return;renderTabs(ui.hangarTabs,{ships:'Naves',equipment:'Equipamentos',drones:'Drones'},state.hangarTab,id=>{state.hangarTab=id;renderHangar();});ui.hangarContent.innerHTML='';computeStats(true);ui.hangarContent.appendChild(state.hangarTab==='ships'?renderHangarShips():state.hangarTab==='equipment'?renderHangarEquipment():renderHangarDrones());updateUI();}
+function renderHangarDrones(){const root=document.createElement('div');const info=document.createElement('div');info.className='section-box';info.innerHTML=`<h3>Esquadrão de drones — ${progress.drones.length}/8</h3><div class="muted" style="font-size:12px">Flax: 1 slot • Iris: 2 slots. Os drones permanecem equipados quando você troca de nave.</div>`;root.appendChild(info);const grid=document.createElement('div');grid.className='drone-grid';if(!progress.drones.length){grid.innerHTML='<div class="empty-state">Você ainda não possui drones. Vá à Loja → Drones.</div>';}progress.drones.forEach((d,idx)=>{const model=ITEMS[d.type],c=document.createElement('div');c.className='drone-card';c.innerHTML=`<img class="drone-art" src="${V8_ASSETS.drones[d.type]}" alt="${model.name}"><div><span class="badge ${d.type==='iris'?'elite':''}">${d.type==='iris'?'ELITE':'COMUM'}</span><h3>${model.name} #${idx+1}</h3></div><div class="drone-stats">${model.slots} slot${model.slots>1?'s':''} • aceita laser ou gerador de escudo</div>`;const sg=document.createElement('div');sg.className='slot-grid';d.slots.forEach((id,i)=>sg.appendChild(slotCard(`Slot ${i+1}`,id,null,i,d.id)));c.appendChild(sg);const rm=document.createElement('button');rm.className='danger-btn';rm.textContent=`Vender drone • 50% (${fmt(itemSellValue(model))} ${model.currency==='uridium'?'URI':'CR'})`;rm.onclick=()=>sellDrone(d.id);c.appendChild(rm);grid.appendChild(c);});root.appendChild(grid);return root;}
+function renderHangarPet(){const root=document.createElement('div');root.className='hangar-embedded-panel pet-hangar-panel';renderPet(root);return root;}
+function renderHangarPilot(){
+  normalizePilotBio();const p=progress.pilotBio,spent=pilotSpentPoints(),avail=pilotAvailablePoints(),next=p.totalPoints+1;
+  const root=document.createElement('div');root.className='hangar-embedded-panel pilot-hangar-panel';
+  const summary=document.createElement('div');summary.className='pilot-wallet-grid';summary.innerHTML=`<div><span>LOG-DISKS</span><b>${fmt(p.logDisks)}</b></div><div><span>PP OBTIDOS</span><b>${p.totalPoints}/${PILOT_POINT_MAX}</b></div><div><span>PP DISPONÍVEIS</span><b>${avail}</b></div><div><span>PP INVESTIDOS</span><b>${spent}</b></div>`;root.appendChild(summary);
+  const research=document.createElement('section');research.className='pilot-research-panel';
+  const nextBox=document.createElement('div');if(p.totalPoints>=PILOT_POINT_MAX)nextBox.innerHTML='<div class="eyebrow">PESQUISA COMPLETA</div><h3>50 / 50 PP</h3><div class="muted">Limite máximo atingido.</div>';
+  else{const logs=pilotPointLogCost(next);nextBox.innerHTML=`<div class="eyebrow">PRÓXIMO PONTO</div><h3>PP #${next}</h3><div>${fmt(logs)} Log-Disks • ${fmt(logs*LOG_DISK_URI_PRICE)} URI equivalente</div>`;const b=document.createElement('button');b.className='primary-btn';b.textContent='CONVERTER EM 1 PP';b.disabled=p.logDisks<logs;b.onclick=()=>convertPilotPoint();nextBox.appendChild(b);}research.appendChild(nextBox);
+  const store=document.createElement('div');store.innerHTML='<div class="eyebrow">LOG-DISKS • 300 URI CADA</div>';const row=document.createElement('div');row.className='pilot-log-buttons';[1,10,100,500].forEach(q=>{const b=document.createElement('button');b.className='small-btn';b.innerHTML=`${q}x <small>${fmt(q*LOG_DISK_URI_PRICE)} URI</small>`;b.disabled=progress.profile.uridium<q*LOG_DISK_URI_PRICE;b.onclick=()=>buyLogDisks(q);row.appendChild(b);});store.appendChild(row);research.appendChild(store);
+  const reset=document.createElement('div');const resetCost=1000*Math.pow(2,p.resetCount);reset.innerHTML=`<div class="eyebrow">RECONFIGURAÇÃO</div><div>Reset #${p.resetCount+1}: ${fmt(resetCost)} URI</div>`;const rb=document.createElement('button');rb.className='ghost-btn';rb.textContent='RESETAR ÁRVORE';rb.disabled=spent<=0||progress.profile.uridium<resetCost;rb.onclick=()=>resetPilotTree();reset.appendChild(rb);research.appendChild(reset);root.appendChild(research);
+  const tree=document.createElement('div');tree.className='pilot-skill-tree';for(const [branch,meta] of Object.entries(PILOT_BRANCHES)){const col=document.createElement('section');col.className=`pilot-branch ${meta.className}`;col.innerHTML=`<div class="pilot-branch-title">${meta.label}</div>`;Object.values(PILOT_SKILLS).filter(skill=>skill.branch===branch).forEach(skill=>{const lv=pilotSkillLevel(skill.id),maxed=lv>=skill.max,req=pilotRequirementMet(skill),cost=maxed?0:pilotSkillCreditCost(skill,lv+1),card=document.createElement('article');card.className=`pilot-skill-node${maxed?' maxed':''}${!req?' locked':''}`;card.innerHTML=`<div class="pilot-skill-head"><b>${skill.name}</b><span>${lv}/${skill.max}</span></div><div class="pilot-skill-desc">${skill.desc}</div><div class="pilot-skill-bonus">ATUAL: <b>${pilotSkillBonusLabel(skill,lv)}</b>${!maxed?` • PRÓXIMO: <b>${pilotSkillBonusLabel(skill,lv+1)}</b>`:''}</div>${skill.requires?`<div class="pilot-skill-req">${req?'✓':'🔒'} Requer ${PILOT_SKILLS[skill.requires].name}</div>`:''}`;const b=document.createElement('button');b.className=maxed?'small-btn gold':'small-btn';b.disabled=maxed||!req||avail<=0||progress.profile.credits<cost;b.textContent=maxed?'MAX':`UP • 1 PP + ${fmt(cost)} CR`;b.onclick=()=>upgradePilotSkill(skill.id);card.appendChild(b);col.appendChild(card);});tree.appendChild(col);}root.appendChild(tree);return root;
+}
+function renderHangar(){
+  if(!progress)return;
+  const tabs={ships:'NAVES',equipment:'EQUIPAMENTOS',drones:'DRONES',pet:'P.E.T.',pilot:'PERFIL DE PILOTO'};
+  renderTabs(ui.hangarTabs,tabs,state.hangarTab,id=>{state.hangarTab=id;renderHangar();});ui.hangarContent.innerHTML='';computeStats(true);
+  const content=state.hangarTab==='ships'?renderHangarShips():state.hangarTab==='equipment'?renderHangarEquipment():state.hangarTab==='drones'?renderHangarDrones():state.hangarTab==='pet'?renderHangarPet():renderHangarPilot();
+  ui.hangarContent.appendChild(content);updateUI();
+}
 
 function petEquipCard(kind,index){
   const pet=progress.pet,list=kind==='laser'?pet.lasers:pet.shields,id=list[index],item=id?ITEMS[id]:null;
   const card=document.createElement('div');card.className=`pet-slot ${item?'filled':''}`;
   card.innerHTML=`<div class="slot-label">${kind==='laser'?'ARMA':'ESCUDO'} ${index+1}</div><div class="slot-item">${item?item.name:'VAZIO'}</div>${item?`<div class="muted">${item.description}</div>`:'<div class="muted">Slot liberado</div>'}`;
-  if(item){const b=document.createElement('button');b.className='ghost-btn';b.textContent='Remover';b.onclick=()=>unequipPetSlot(kind,index);card.appendChild(b);}
+  if(item){const actions=document.createElement('div');actions.className='slot-actions';const b=document.createElement('button');b.className='ghost-btn';b.textContent='Remover';b.onclick=()=>unequipPetSlot(kind,index);actions.appendChild(b);const sell=document.createElement('button');sell.className='danger-btn sell-item-btn';sell.textContent='Vender 50%';sell.title=`${fmt(itemSellValue(item))} ${item.currency==='uridium'?'URI':'CR'}`;sell.onclick=()=>{const id=list[index];unequipPetSlot(kind,index);sellInventoryItem(id,1);};actions.appendChild(sell);card.appendChild(actions);}
   return card;
 }
 function petLockedCard(kind,index){
@@ -1929,37 +2059,41 @@ function petLockedCard(kind,index){
   card.innerHTML=`<div class="slot-label">${kind==='laser'?'ARMA':'ESCUDO'} ${slot}</div><div class="slot-item">🔒 ${available?'LIBERÁVEL':'NÍVEL '+slot}</div><div class="muted">${available?`${fmt(cost)} URI para liberar`:`Alcance o nível ${slot} do P.E.T.`}</div>`;
   const b=document.createElement('button');b.className='ghost-btn';b.textContent=available?`Liberar • ${fmt(cost)} URI`:`Nível ${slot}`;b.disabled=!available;b.onclick=()=>unlockPetSlot(kind);card.appendChild(b);return card;
 }
-function renderPet(){
-  if(!progress?.pet||!ui.petContent)return;
-  const pet=progress.pet;ui.petContent.innerHTML='';
+function renderPet(root=ui.petContent){
+  if(!progress?.pet||!root)return;
+  const pet=progress.pet;root.innerHTML='';
   if(!pet.owned){
-    const hero=document.createElement('div');hero.className='pet-hero pet-store-hero';hero.innerHTML=`<div class="pet-avatar"><img src="${V8_ASSETS.drones.pet}" alt="P.E.T."></div><div class="pet-hero-copy"><div class="eyebrow">UNIDADE P.E.T.</div><h2>P.E.T. ainda não adquirido</h2><p class="muted">O P.E.T. não é mais gratuito. Adquira a unidade base para desbloquear progressão, armas, escudos, coleta, reparo e Kamikaze.</p><div class="price uridium">${fmt(PET_BASE_PRICE)} URI</div></div>`;const b=document.createElement('button');b.className='primary-btn';b.textContent=`COMPRAR P.E.T. • ${fmt(PET_BASE_PRICE)} URI`;b.disabled=progress.profile.uridium<PET_BASE_PRICE;b.onclick=()=>buyPetUnit();hero.querySelector('.pet-hero-copy').appendChild(b);ui.petContent.appendChild(hero);return;
+    const hero=document.createElement('div');hero.className='pet-hero pet-store-hero';hero.innerHTML=`<div class="pet-avatar"><img src="${V8_ASSETS.drones.pet}" alt="P.E.T."></div><div class="pet-hero-copy"><div class="eyebrow">UNIDADE P.E.T.</div><h2>P.E.T. ainda não adquirido</h2><p class="muted">O P.E.T. não é mais gratuito. Adquira a unidade base para desbloquear progressão, armas, escudos, coleta, reparo e Kamikaze.</p><div class="price uridium">${fmt(PET_BASE_PRICE)} URI</div></div>`;const b=document.createElement('button');b.className='primary-btn';b.textContent=`COMPRAR P.E.T. • ${fmt(PET_BASE_PRICE)} URI`;b.disabled=progress.profile.uridium<PET_BASE_PRICE;b.onclick=()=>buyPetUnit();hero.querySelector('.pet-hero-copy').appendChild(b);root.appendChild(hero);return;
   }
   const base=levelXpThreshold(pet.level),need=pet.level<PET_MAX_LEVEL?petLevelXp(pet.level):base,pct=pet.level>=PET_MAX_LEVEL?100:Math.min(100,(pet.xp-base)/Math.max(1,need-base)*100);
   const hero=document.createElement('div');hero.className='pet-hero';
   hero.innerHTML=`<div class="pet-avatar"><img src="${pet.level>=10?V8_ASSETS.drones.petElite:V8_ASSETS.drones.pet}" alt="P.E.T."></div><div class="pet-hero-copy"><div class="eyebrow">P.E.T. DE COMBATE</div><h2>Nível ${pet.level} / ${PET_MAX_LEVEL}</h2><div class="pet-xpbar"><span style="width:${pct}%"></span></div><div class="muted">${pet.level>=PET_MAX_LEVEL?'Nível máximo':`${fmt(pet.xp)} XP total • próximo ${fmt(need)}`} • Alcance ${fmt(petRange())} • Dano ${fmt(petDamage())} • Escudo ${fmt(petMaxShield())}</div><div class="muted">Módulos disponíveis: Guardião, BOX, Pedras, Regenerador e Kamikaze.</div></div>`;
-  ui.petContent.appendChild(hero);
+  root.appendChild(hero);
 
   const gears=document.createElement('div');gears.className='section-box';gears.innerHTML='<h3>Modos / Extras do P.E.T.</h3><div class="muted">Apenas um modo fica ativo por vez. Os módulos são permanentes depois de comprados.</div>';
   const gearGrid=document.createElement('div');gearGrid.className='pet-gear-grid';
   const off=document.createElement('button');off.className=`pet-gear ${pet.activeGear==='off'?'active':''}`;off.innerHTML='<b>COMPANHIA</b><small>Segue sua nave sem executar tarefa automática.</small>';off.onclick=()=>setPetGear('off');gearGrid.appendChild(off);
   Object.values(PET_GEARS).forEach(g=>{const owned=pet.gearsOwned[g.id],b=document.createElement('button');b.className=`pet-gear ${pet.activeGear===g.id?'active':''}`;const gearArt={guard:V8_ASSETS.equipment.autoLaserCpu,box:V8_ASSETS.equipment.ammoAutoBuyCpu,ore:V8_ASSETS.equipment.rocketTurboCpu,repair:V8_ASSETS.equipment.rep2,kami:V8_ASSETS.equipment.autoRocketCpu}[g.id];b.innerHTML=`${gearArt?`<img class="pet-gear-art" src="${gearArt}" alt="">`:''}<b>${g.name}</b><small>${g.description}</small><em>${owned?'COMPRADO':'ELITE • '+fmt(g.cost)+' URI'}</em>`;b.onclick=()=>owned?setPetGear(g.id):buyPetGear(g.id);gearGrid.appendChild(b);});
-  gears.appendChild(gearGrid);ui.petContent.appendChild(gears);
+  gears.appendChild(gearGrid);root.appendChild(gears);
 
   for(const kind of ['laser','shield']){
     const unlocked=kind==='laser'?pet.laserSlotsUnlocked:pet.shieldSlotsUnlocked;
     const box=document.createElement('div');box.className='section-box';box.innerHTML=`<h3>${kind==='laser'?'Armas':'Escudos'} — ${unlocked}/${Math.min(pet.level,PET_SLOT_LEVEL_CAP)} liberados</h3><div class="muted">O nível do P.E.T. define quantos espaços podem ser comprados. O slot 1 já vem liberado.</div>`;
     const grid=document.createElement('div');grid.className='pet-slot-grid';
     for(let i=0;i<Math.min(pet.level,PET_SLOT_LEVEL_CAP);i++)grid.appendChild(i<unlocked?petEquipCard(kind,i):petLockedCard(kind,i));
-    box.appendChild(grid);ui.petContent.appendChild(box);
+    box.appendChild(grid);root.appendChild(box);
   }
 
   const inv=document.createElement('div');inv.className='section-box';inv.innerHTML='<h3>Equipamentos disponíveis no inventário</h3>';
   const grid=document.createElement('div');grid.className='inventory-grid';
   const entries=Object.entries(progress.inventory).filter(([id,q])=>q>0&&ITEMS[id]&&(ITEMS[id].type==='laser'||(ITEMS[id].type==='generator'&&ITEMS[id].subtype==='shield')));
   if(!entries.length)grid.innerHTML='<div class="empty-state">Compre lasers ou geradores de escudo na Loja e eles aparecerão aqui.</div>';
-  else entries.forEach(([id,q])=>{const item=ITEMS[id],c=document.createElement('div');c.className='inventory-card';c.innerHTML=`${V8_ASSETS.equipment[id]?`<img class="inventory-item-art" src="${V8_ASSETS.equipment[id]}" alt="${item.name}">`:''}<b>${item.name}</b><div class="qty">Quantidade: ${q}</div><div class="muted">${item.description}</div>`;const b=document.createElement('button');b.className='ghost-btn';b.textContent=item.type==='laser'?'Equipar no P.E.T. (arma)':'Equipar no P.E.T. (escudo)';b.onclick=()=>equipPetItem(id,item.type==='laser'?'laser':'shield');c.appendChild(b);grid.appendChild(c);});
-  inv.appendChild(grid);ui.petContent.appendChild(inv);
+  else entries.forEach(([id,q])=>{const item=ITEMS[id],c=document.createElement('div');c.className='inventory-card';c.innerHTML=`${V8_ASSETS.equipment[id]?`<img class="inventory-item-art" src="${V8_ASSETS.equipment[id]}" alt="${item.name}">`:''}<b>${item.name}</b><div class="qty">Quantidade: ${q}</div><div class="muted">${item.description}</div>`;const actions=document.createElement('div');actions.className='inventory-actions';const b=document.createElement('button');b.className='ghost-btn';b.textContent=item.type==='laser'?'Equipar no P.E.T. (arma)':'Equipar no P.E.T. (escudo)';b.onclick=()=>equipPetItem(id,item.type==='laser'?'laser':'shield');actions.appendChild(b);const sell=document.createElement('button');sell.className='danger-btn sell-item-btn';sell.textContent=`Vender 50% • ${fmt(itemSellValue(item))} ${item.currency==='uridium'?'URI':'CR'}`;sell.onclick=()=>sellInventoryItem(id,1);actions.appendChild(sell);c.appendChild(actions);grid.appendChild(c);});
+  inv.appendChild(grid);root.appendChild(inv);
+}
+function refreshPetViews(){
+  renderPet();updatePetFloat();
+  if(ui.hangarModal&&!ui.hangarModal.classList.contains('hidden')&&state.hangarTab==='pet')renderHangar();
 }
 function openPet(){if(!progress?.pet?.owned){openShop('pet');showToast(`P.E.T. disponível na Loja por ${fmt(PET_BASE_PRICE)} URI`);return;}renderPet();ui.petModal.classList.remove('hidden');}
 
@@ -1967,7 +2101,7 @@ function cargoSaleValue(){let total=0;for(const [id,qty] of Object.entries(progr
 function sellCargoResource(id){if(!isAtTrader()){showToast('Venda disponível somente na base X-1');return;}const qty=progress.cargo[id]||0,price=RESOURCES[id]?.sell||0;if(qty<=0||price<=0)return;progress.profile.credits+=qty*price;delete progress.cargo[id];saveGame();renderCargo();updateUI();showToast(`${qty} ${id} vendidos por ${fmt(qty*price)} CR`);}
 function sellAllCargo(){if(!isAtTrader()){showToast('Volte à base X-1 para vender');return;}let total=0;for(const [id,qty] of Object.entries(progress.cargo||{})){const price=RESOURCES[id]?.sell||0;if(price>0){total+=qty*price;delete progress.cargo[id];}}progress.profile.credits+=total;saveGame();renderCargo();updateUI();showToast(total?`Porão vendido: +${fmt(total)} CR`:'Nada vendável no porão');}
 function renderCargo(){if(!progress)return;const atBase=isAtTrader();const xeno=progress.cargo?.Xenomit||0;const cargoBonus=cargoExtraBonus();ui.cargoSummary.innerHTML=`<b>${fmt(cargoUsed())}/${fmt(cargoCapacity())}</b> unidades ocupadas${cargoBonus?` • Expansão equipada: <b>+${fmt(cargoBonus)}</b>`:''} • Valor vendável: <b>${fmt(cargoSaleValue())} CR</b><br><span class="muted">${atBase?'Trader disponível: você está na base.':'Para vender recursos, retorne à Zona Segura do seu X-1.'} ${xeno?`• Xenomit: <b>${fmt(xeno)}</b> (não ocupa porão)`:''}</span>`;ui.cargoGrid.innerHTML='';const entries=Object.entries(progress.cargo||{}).filter(([,q])=>q>0);if(!entries.length){ui.cargoGrid.innerHTML='<div class="empty-state">Seu porão está vazio. Colete minérios no mapa ou caixas deixadas pelos NPCs.</div>';}for(const [id,qty] of entries){const r=RESOURCES[id]||{name:id,color:'#fff',sell:0};const special=id==='Xenomit';const c=document.createElement('div');c.className='cargo-card';c.innerHTML=`<div class="cargo-ore" style="--ore:${r.color}"><img src="${V8_ASSETS.resources[id]||V8_ASSETS.loot.cargo}" alt="${r.name}"></div><div><b>${r.name}</b><div class="muted">${fmt(qty)} un. • ${special?'especial • não ocupa porão':(r.sell?fmt(r.sell)+' CR/un.':'não vendável')}</div></div>`;const b=document.createElement('button');b.className='ghost-btn';b.textContent=r.sell?'Vender':'Guardar';b.disabled=!atBase||!r.sell;b.onclick=()=>sellCargoResource(id);c.appendChild(b);ui.cargoGrid.appendChild(c);}ui.sellAllCargo.disabled=!atBase||cargoSaleValue()<=0;}
-function openCargo(){renderCargo();ui.cargoModal.classList.remove('hidden');}
+function openCargo(){if(!isAtTrader()){showToast('Venda de recursos disponível somente na base X-1');return;}renderCargo();ui.cargoModal.classList.remove('hidden');}
 
 function openShop(tab='ships'){state.shopTab=tab;renderShop();ui.shopModal.classList.remove('hidden');}
 function openHangar(tab='ships'){state.hangarTab=tab;renderHangar();ui.hangarModal.classList.remove('hidden');}
@@ -2066,10 +2200,10 @@ function openGalaxyGate(){
 }
 
 
-function buyLogDisks(qty){normalizePilotBio();qty=Math.max(1,Math.floor(qty));const cost=qty*LOG_DISK_URI_PRICE;if(progress.profile.uridium<cost){showToast('Uridium insuficiente para Log-Disks');return;}progress.profile.uridium-=cost;progress.pilotBio.logDisks+=qty;saveGame();renderPilotProfile();updateUI();}
-function convertPilotPoint(){normalizePilotBio();const p=progress.pilotBio;if(p.totalPoints>=PILOT_POINT_MAX){showToast('Limite de 50 Pontos de Pesquisa atingido');return;}const no=p.totalPoints+1,cost=pilotPointLogCost(no);if(p.logDisks<cost){showToast(`Faltam ${fmt(cost-p.logDisks)} Log-Disks`);return;}p.logDisks-=cost;p.totalPoints++;saveGame();renderPilotProfile();showToast(`Ponto de Pesquisa #${p.totalPoints} obtido`);}
-function upgradePilotSkill(id){normalizePilotBio();const skill=PILOT_SKILLS[id],lv=pilotSkillLevel(id);if(!skill||lv>=skill.max)return;if(!pilotRequirementMet(skill)){showToast(`Complete ${PILOT_SKILLS[skill.requires].name} primeiro`);return;}if(pilotAvailablePoints()<1){showToast('Você não possui PP disponível');return;}const cost=pilotSkillCreditCost(skill,lv+1);if(progress.profile.credits<cost){showToast(`Faltam ${fmt(cost-progress.profile.credits)} CR`);return;}progress.profile.credits-=cost;progress.pilotBio.skills[id]=lv+1;computeStats(true);saveGame();renderPilotProfile();updateUI();showToast(`${skill.name} • nível ${lv+1}/${skill.max}`);}
-function resetPilotTree(){normalizePilotBio();const cost=1000*Math.pow(2,progress.pilotBio.resetCount);if(progress.profile.uridium<cost){showToast(`Reset requer ${fmt(cost)} URI`);return;}if(pilotSpentPoints()<=0){showToast('Nenhum ponto investido para resetar');return;}progress.profile.uridium-=cost;for(const id of Object.keys(PILOT_SKILLS))progress.pilotBio.skills[id]=0;progress.pilotBio.resetCount++;computeStats(true);saveGame();renderPilotProfile();updateUI();showToast('Árvore de Piloto resetada');}
+function buyLogDisks(qty){normalizePilotBio();qty=Math.max(1,Math.floor(qty));const cost=qty*LOG_DISK_URI_PRICE;if(progress.profile.uridium<cost){showToast('Uridium insuficiente para Log-Disks');return;}progress.profile.uridium-=cost;progress.pilotBio.logDisks+=qty;saveGame();refreshPilotViews();updateUI();}
+function convertPilotPoint(){normalizePilotBio();const p=progress.pilotBio;if(p.totalPoints>=PILOT_POINT_MAX){showToast('Limite de 50 Pontos de Pesquisa atingido');return;}const no=p.totalPoints+1,cost=pilotPointLogCost(no);if(p.logDisks<cost){showToast(`Faltam ${fmt(cost-p.logDisks)} Log-Disks`);return;}p.logDisks-=cost;p.totalPoints++;saveGame();refreshPilotViews();showToast(`Ponto de Pesquisa #${p.totalPoints} obtido`);}
+function upgradePilotSkill(id){normalizePilotBio();const skill=PILOT_SKILLS[id],lv=pilotSkillLevel(id);if(!skill||lv>=skill.max)return;if(!pilotRequirementMet(skill)){showToast(`Complete ${PILOT_SKILLS[skill.requires].name} primeiro`);return;}if(pilotAvailablePoints()<1){showToast('Você não possui PP disponível');return;}const cost=pilotSkillCreditCost(skill,lv+1);if(progress.profile.credits<cost){showToast(`Faltam ${fmt(cost-progress.profile.credits)} CR`);return;}progress.profile.credits-=cost;progress.pilotBio.skills[id]=lv+1;computeStats(true);saveGame();refreshPilotViews();updateUI();showToast(`${skill.name} • nível ${lv+1}/${skill.max}`);}
+function resetPilotTree(){normalizePilotBio();const cost=1000*Math.pow(2,progress.pilotBio.resetCount);if(progress.profile.uridium<cost){showToast(`Reset requer ${fmt(cost)} URI`);return;}if(pilotSpentPoints()<=0){showToast('Nenhum ponto investido para resetar');return;}progress.profile.uridium-=cost;for(const id of Object.keys(PILOT_SKILLS))progress.pilotBio.skills[id]=0;progress.pilotBio.resetCount++;computeStats(true);saveGame();refreshPilotViews();updateUI();showToast('Árvore de Piloto resetada');}
 function pilotSkillBonusLabel(skill,lv){if(lv<=0)return 'SEM BÔNUS';const value=skill.values[Math.min(lv,skill.values.length)-1];return `${fmt(value)}${skill.unit}`;}
 function renderPilotProfile(){
   if(!progress||!ui.pilotSkillTree)return;normalizePilotBio();const p=progress.pilotBio,spent=pilotSpentPoints(),avail=pilotAvailablePoints(),next=p.totalPoints+1;
@@ -2088,7 +2222,8 @@ function renderPilotProfile(){
     });ui.pilotSkillTree.appendChild(col);
   }
 }
-function openPilotProfile(){renderPilotProfile();ui.pilotModal.classList.remove('hidden');}
+function refreshPilotViews(){renderPilotProfile();if(ui.hangarModal&&!ui.hangarModal.classList.contains('hidden')&&state.hangarTab==='pilot')renderHangar();}
+function openPilotProfile(){openHangar('pilot');}
 
 function formatAuctionClock(sec){const m=Math.floor(sec/60),s=sec%60;return `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;}
 function auctionMinBid(lot){const npc=auctionNpcBid(lot);return Math.max(100000,npc+(npc<1000000?100000:Math.max(100000,Math.round(npc*.05/100000)*100000)));}
@@ -2117,7 +2252,7 @@ function updateAuctionSystem(){
 function renderAll(){buildAmmoButtons();renderShop();renderHangar();renderCargo();renderMapModal();renderPet();renderMissions();renderGalaxyGate();renderPilotProfile();ensureAuctionState();updateUI();}
 
 function worldPoint(ev){const r=canvas.getBoundingClientRect(),sx=ev.clientX-r.left,sy=ev.clientY-r.top;return{x:sx-W/2+state.camera.x,y:sy-H/2+state.camera.y};}
-function gameplayPointerAllowed(){return authenticated&&progress&&ui.loginModal.classList.contains('hidden')&&ui.shopModal.classList.contains('hidden')&&ui.hangarModal.classList.contains('hidden')&&ui.cargoModal.classList.contains('hidden')&&ui.petModal.classList.contains('hidden')&&ui.missionModal.classList.contains('hidden')&&ui.gateModal.classList.contains('hidden')&&ui.pilotModal.classList.contains('hidden')&&ui.auctionModal.classList.contains('hidden')&&ui.factionModal.classList.contains('hidden');}
+function gameplayPointerAllowed(){return authenticated&&progress&&ui.loginModal.classList.contains('hidden')&&ui.shopModal.classList.contains('hidden')&&ui.hangarModal.classList.contains('hidden')&&ui.cargoModal.classList.contains('hidden')&&ui.petModal.classList.contains('hidden')&&ui.missionModal.classList.contains('hidden')&&ui.gateModal.classList.contains('hidden')&&ui.pilotModal.classList.contains('hidden')&&ui.auctionModal.classList.contains('hidden')&&ui.configModal.classList.contains('hidden')&&ui.mapModal.classList.contains('hidden')&&ui.factionModal.classList.contains('hidden');}
 function setPointerDestination(ev){const p=worldPoint(ev);player.tx=Math.max(40,Math.min(state.currentMap.world.w-40,p.x));player.ty=Math.max(40,Math.min(state.currentMap.world.h-40,p.y));}
 function pointerAction(ev){
   if(!gameplayPointerAllowed()||ev.button!==0)return;
@@ -2139,7 +2274,7 @@ ui.portalPrompt.onclick=()=>{const portal=nearbyPortal();if(portal)jumpThroughPo
 minimap.addEventListener('pointerdown',e=>{if(!authenticated||!progress)return;e.preventDefault();e.stopPropagation();const r=minimap.getBoundingClientRect();const mx=(e.clientX-r.left)/r.width*minimap.width,my=(e.clientY-r.top)/r.height*minimap.height;player.tx=Math.max(35,Math.min(state.currentMap.world.w-35,mx/minimap.width*state.currentMap.world.w));player.ty=Math.max(35,Math.min(state.currentMap.world.h-35,my/minimap.height*state.currentMap.world.h));showToast(`Rota definida no minimapa`);});
 ui.laserToggle.onclick=()=>{if(!state.target||state.target.hp<=0){showToast('Selecione um alvo');return;}player.laserFiring=!player.laserFiring;};ui.rocketFire.onclick=()=>fireRocket(true);
 const dismissibleModals=()=>[
-  ui.auctionModal,ui.pilotModal,ui.gateModal,ui.missionModal,ui.shopModal,ui.hangarModal,ui.petModal,ui.cargoModal,ui.mapModal
+  ui.configModal,ui.auctionModal,ui.pilotModal,ui.gateModal,ui.missionModal,ui.shopModal,ui.hangarModal,ui.petModal,ui.cargoModal,ui.mapModal
 ].filter(Boolean);
 function closeTopOverlay(){
   const open=dismissibleModals().filter(modal=>!modal.classList.contains('hidden'));
@@ -2155,9 +2290,55 @@ function bindOverlayDismiss(){
   }
 }
 
-ui.mapBtn.onclick=()=>openMapModal();ui.closeMap.onclick=()=>ui.mapModal.classList.add('hidden');if(ui.missionBtn)ui.missionBtn.onclick=()=>openMissions();if(ui.closeMission)ui.closeMission.onclick=()=>ui.missionModal.classList.add('hidden');if(ui.gateBtn)ui.gateBtn.onclick=()=>openGalaxyGate();if(ui.pilotBtn)ui.pilotBtn.onclick=()=>openPilotProfile();if(ui.closePilot)ui.closePilot.onclick=()=>ui.pilotModal.classList.add('hidden');if(ui.pilotConvertPoint)ui.pilotConvertPoint.onclick=()=>convertPilotPoint();if(ui.pilotResetBtn)ui.pilotResetBtn.onclick=()=>resetPilotTree();if(ui.auctionBtn)ui.auctionBtn.onclick=()=>openAuction();if(ui.closeAuction)ui.closeAuction.onclick=()=>ui.auctionModal.classList.add('hidden');if(ui.closeGate)ui.closeGate.onclick=()=>ui.gateModal.classList.add('hidden');if(ui.gateJumpBtn)ui.gateJumpBtn.onclick=()=>enterAlphaGate();if(ui.useRepairBonus)ui.useRepairBonus.onclick=()=>useGalaxyRepairBonus();ui.petBtn.onclick=()=>openPet();ui.closePet.onclick=()=>ui.petModal.classList.add('hidden');ui.shopBtn.onclick=()=>openShop();if(ui.weaponBarToggle)ui.weaponBarToggle.onclick=()=>toggleAmmoUi();if(ui.statsToggle){ui.statsToggle.onclick=e=>{e.stopPropagation();toggleStatsUi();};ui.statsToggle.ontouchstart=e=>e.stopPropagation();}if(ui.statsHeader)ui.statsHeader.onclick=()=>toggleStatsUi();if(ui.minimapToggle){ui.minimapToggle.onclick=e=>{e.stopPropagation();toggleMinimapUi();};ui.minimapToggle.ontouchstart=e=>e.stopPropagation();}if(ui.minimapHeader)ui.minimapHeader.onclick=()=>toggleMinimapUi();if(ui.hudToggle)ui.hudToggle.onclick=()=>toggleHudUi();ui.closeShop.onclick=()=>ui.shopModal.classList.add('hidden');ui.hangarBtn.onclick=()=>openHangar();ui.closeHangar.onclick=()=>ui.hangarModal.classList.add('hidden');ui.cargoBtn.onclick=()=>openCargo();ui.closeCargo.onclick=()=>ui.cargoModal.classList.add('hidden');ui.sellAllCargo.onclick=()=>sellAllCargo();ui.mapModal.onclick=e=>{if(e.target===ui.mapModal)ui.mapModal.classList.add('hidden');};if(ui.missionModal)ui.missionModal.onclick=e=>{if(e.target===ui.missionModal)ui.missionModal.classList.add('hidden');};if(ui.gateModal)ui.gateModal.onclick=e=>{if(e.target===ui.gateModal)ui.gateModal.classList.add('hidden');};ui.petModal.onclick=e=>{if(e.target===ui.petModal)ui.petModal.classList.add('hidden');};ui.shopModal.onclick=e=>{if(e.target===ui.shopModal)ui.shopModal.classList.add('hidden');};ui.hangarModal.onclick=e=>{if(e.target===ui.hangarModal)ui.hangarModal.classList.add('hidden');};ui.cargoModal.onclick=e=>{if(e.target===ui.cargoModal)ui.cargoModal.classList.add('hidden');};
+if(ui.mapBtn)ui.mapBtn.onclick=()=>openMapModal();
+if(ui.closeMap)ui.closeMap.onclick=()=>ui.mapModal.classList.add('hidden');
+if(ui.missionBtn)ui.missionBtn.onclick=()=>openMissions();
+if(ui.closeMission)ui.closeMission.onclick=()=>ui.missionModal.classList.add('hidden');
+if(ui.gateBtn)ui.gateBtn.onclick=()=>openGalaxyGate();
+if(ui.pilotBtn)ui.pilotBtn.onclick=()=>openPilotProfile();
+if(ui.closePilot)ui.closePilot.onclick=()=>ui.pilotModal.classList.add('hidden');
+if(ui.pilotConvertPoint)ui.pilotConvertPoint.onclick=()=>convertPilotPoint();
+if(ui.pilotResetBtn)ui.pilotResetBtn.onclick=()=>resetPilotTree();
+if(ui.auctionBtn)ui.auctionBtn.onclick=()=>openAuction();
+if(ui.closeAuction)ui.closeAuction.onclick=()=>ui.auctionModal.classList.add('hidden');
+if(ui.closeGate)ui.closeGate.onclick=()=>ui.gateModal.classList.add('hidden');
+if(ui.gateJumpBtn)ui.gateJumpBtn.onclick=()=>enterAlphaGate();
+if(ui.useRepairBonus)ui.useRepairBonus.onclick=()=>useGalaxyRepairBonus();
+if(ui.petBtn)ui.petBtn.onclick=()=>openHangar('pet');
+if(ui.closePet)ui.closePet.onclick=()=>ui.petModal.classList.add('hidden');
+if(ui.shopBtn)ui.shopBtn.onclick=()=>openShop();
+if(ui.hangarBtn)ui.hangarBtn.onclick=()=>openHangar();
+if(ui.closeHangar)ui.closeHangar.onclick=()=>ui.hangarModal.classList.add('hidden');
+if(ui.configBtn)ui.configBtn.onclick=()=>openSettings();
+if(ui.closeConfig)ui.closeConfig.onclick=()=>ui.configModal.classList.add('hidden');
+if(ui.baseTradePrompt)ui.baseTradePrompt.onclick=()=>{if(isAtTrader())openCargo();};
+if(ui.petGearQuickSelect)ui.petGearQuickSelect.onchange=e=>setPetGear(e.target.value);
+if(ui.qualityButtons)ui.qualityButtons.addEventListener('click',e=>{const b=e.target.closest('[data-quality]');if(b)applyQualityMode(b.dataset.quality);});
+if(ui.hudSettingsGrid)ui.hudSettingsGrid.addEventListener('change',e=>{const input=e.target.closest('[data-hud-key]');if(input)setHudVisibility(input.dataset.hudKey,input.checked);});
+if(ui.weaponBarToggle)ui.weaponBarToggle.onclick=()=>toggleAmmoUi();
+if(ui.statsToggle){ui.statsToggle.onclick=e=>{e.stopPropagation();toggleStatsUi();};ui.statsToggle.ontouchstart=e=>e.stopPropagation();}
+if(ui.statsHeader)ui.statsHeader.onclick=()=>toggleStatsUi();
+if(ui.minimapToggle){ui.minimapToggle.onclick=e=>{e.stopPropagation();toggleMinimapUi();};ui.minimapToggle.ontouchstart=e=>e.stopPropagation();}
+if(ui.minimapHeader)ui.minimapHeader.onclick=()=>toggleMinimapUi();
+if(ui.hudToggle)ui.hudToggle.onclick=()=>toggleHudUi();
+if(ui.closeShop)ui.closeShop.onclick=()=>ui.shopModal.classList.add('hidden');
+if(ui.cargoBtn)ui.cargoBtn.onclick=()=>{if(isAtTrader())openCargo();else showToast('O Porão comercial só abre na base X-1');};
+if(ui.closeCargo)ui.closeCargo.onclick=()=>ui.cargoModal.classList.add('hidden');
+if(ui.sellAllCargo)ui.sellAllCargo.onclick=()=>sellAllCargo();
 bindOverlayDismiss();
-document.addEventListener('keydown',e=>{if(!authenticated||!progress||!ui.loginModal.classList.contains('hidden')||!ui.factionModal.classList.contains('hidden'))return;if(e.key==='Escape'){if(closeTopOverlay()){e.preventDefault();return;}}const tag=document.activeElement?.tagName;if(tag==='INPUT'||tag==='TEXTAREA')return;if(e.key==='Control'){e.preventDefault();if(state.target&&state.target.hp>0)player.laserFiring=!player.laserFiring;else showToast('Selecione um alvo');}if(e.code==='Space'){e.preventDefault();fireRocket(true);}if(['j','J'].includes(e.key)||e.key==='Enter'){const portal=nearbyPortal();if(portal){e.preventDefault();jumpThroughPortal(portal);}}if(e.key.toLowerCase()==='h')toggleHudUi();if(e.key.toLowerCase()==='b')openShop();if(e.key.toLowerCase()==='c')openCargo();if(e.key.toLowerCase()==='m')openMapModal();if(e.key.toLowerCase()==='q')openMissions();if(e.key.toLowerCase()==='g')openGalaxyGate();if(e.key.toLowerCase()==='p')openPet();if(e.key.toLowerCase()==='o')openPilotProfile();if(e.key.toLowerCase()==='l')openAuction();if(['1','2','3','4','5'].includes(e.key)){progress.selectedLaserAmmo=Object.keys(LASER_AMMO)[Number(e.key)-1];buildAmmoButtons();saveGame();}});
+document.addEventListener('keydown',e=>{
+  if(!authenticated||!progress||!ui.loginModal.classList.contains('hidden')||!ui.factionModal.classList.contains('hidden'))return;
+  if(e.key==='Escape'){if(closeTopOverlay()){e.preventDefault();return;}}
+  const tag=document.activeElement?.tagName;if(tag==='INPUT'||tag==='TEXTAREA'||tag==='SELECT')return;
+  if(e.key==='Control'){e.preventDefault();if(state.target&&state.target.hp>0)player.laserFiring=!player.laserFiring;else showToast('Selecione um alvo');}
+  if(e.code==='Space'){e.preventDefault();fireRocket(true);}
+  if(['j','J'].includes(e.key)||e.key==='Enter'){const portal=nearbyPortal();if(portal){e.preventDefault();jumpThroughPortal(portal);}}
+  const k=e.key.toLowerCase();
+  if(k==='h')toggleHudUi();if(k==='b')openShop();if(k==='c'){if(isAtTrader())openCargo();else showToast('Venda de recursos disponível somente na base X-1');}
+  if(k==='m')openMapModal();if(k==='q')openMissions();if(k==='g')openGalaxyGate();if(k==='p')openHangar('pet');if(k==='o')openHangar('pilot');if(k==='l')openAuction();
+  if(['1','2','3','4','5'].includes(e.key)){progress.selectedLaserAmmo=Object.keys(LASER_AMMO)[Number(e.key)-1];buildAmmoButtons();saveGame();}
+});
+
 
 function showAuthMode(mode){
   const login=mode==='login';ui.loginForm.classList.toggle('hidden',!login);ui.registerForm.classList.toggle('hidden',login);ui.loginTabBtn.classList.toggle('active',login);ui.registerTabBtn.classList.toggle('active',!login);ui.authMessage.textContent='';
@@ -2165,7 +2346,7 @@ function showAuthMode(mode){
 ui.loginTabBtn.onclick=()=>showAuthMode('login');ui.registerTabBtn.onclick=()=>showAuthMode('register');
 ui.loginForm.onsubmit=async e=>{e.preventDefault();ui.authMessage.textContent='Entrando...';try{await signIn({email:ui.loginEmail.value,password:ui.loginPassword.value});await afterAuth();}catch(err){ui.authMessage.textContent=err.message;}};
 ui.registerForm.onsubmit=async e=>{e.preventDefault();ui.authMessage.textContent='Criando conta...';try{const result=await signUp({callsign:ui.registerCallsign.value,email:ui.registerEmail.value,password:ui.registerPassword.value});if(result.requires_confirmation){ui.authMessage.textContent='Conta criada. Confirme o e-mail no Supabase e depois entre.';showAuthMode('login');ui.loginEmail.value=ui.registerEmail.value;return;}await afterAuth();}catch(err){ui.authMessage.textContent=err.message;}};
-ui.logoutBtn.onclick=async()=>{await flushCloudSave(true);signOutLocal();authenticated=false;progress=null;state.target=null;player.laserFiring=false;ui.mapModal.classList.add('hidden');ui.petModal.classList.add('hidden');ui.shopModal.classList.add('hidden');ui.hangarModal.classList.add('hidden');ui.cargoModal.classList.add('hidden');ui.pilotModal?.classList.add('hidden');ui.auctionModal?.classList.add('hidden');ui.gateModal?.classList.add('hidden');ui.factionModal.classList.add('hidden');ui.portalPrompt.classList.add('hidden');ui.loginModal.classList.remove('hidden');ui.userLabel.textContent='—';setSync('LOCAL','');showAuthMode('login');};
+ui.logoutBtn.onclick=async()=>{await flushCloudSave(true);signOutLocal();authenticated=false;progress=null;state.target=null;player.laserFiring=false;for(const modal of dismissibleModals())modal.classList.add('hidden');ui.factionModal.classList.add('hidden');ui.portalPrompt?.classList.add('hidden');ui.baseTradePrompt?.classList.add('hidden');ui.petFloatPanel?.classList.add('hidden');ui.loginModal.classList.remove('hidden');if(ui.userLabel)ui.userLabel.textContent='—';setSync('LOCAL','');showAuthMode('login');};
 
 function startLoadedGame(){
   state.lastPlayerDamageAt=nowSec();
@@ -2194,6 +2375,9 @@ async function boot(){
   try{const restored=await restoreSession();if(restored)await afterAuth();}catch(err){console.warn(err);}
 }
 
+document.body.dataset.quality=qualityMode;
+loadHudVisibility();
+renderSettings();
 preloadV8Assets();
 loadAmmoUiState();
 loadStatsUiState();
@@ -2206,4 +2390,4 @@ window.addEventListener('orientationchange', ()=>setTimeout(layoutHudPanels, 120
 boot();
 setInterval(()=>{if(progress){saveGame();flushCloudSave();}},7000);
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden')flushCloudSave(true);});
-let last=performance.now();function loop(t){const dt=Math.min((t-last)/1000,.035);last=t;update(dt);draw();requestAnimationFrame(loop);}requestAnimationFrame(loop);
+let last=performance.now();function loop(t){const minFrame=1000/qualityProfile().fps;if(t-last<minFrame){requestAnimationFrame(loop);return;}const dt=Math.min((t-last)/1000,.05);last=t;update(dt);draw();requestAnimationFrame(loop);}requestAnimationFrame(loop);

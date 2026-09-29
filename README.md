@@ -288,3 +288,46 @@ Todos os preços da Loja foram rebalanceados para progressão longa. Itens comun
 - Naves sem habilidade entram na progressão normal da Loja com preços robustos. Naves com habilidades especiais ficam marcadas como Evento/Missão/Passe, com Leonov como exceção vendável.
 - Missões podem conceder aleatoriamente lasers, escudos, munições e mísseis como bônus.
 - Materializador do Galaxy Gate agora custa 100 Uridium por giro.
+
+
+## V10.2 — HUD Command Center
+
+### Menu superior compacto
+- Nova sequência fixa: MAPA → GG → MISSÕES → LEILÃO → LOJA → HANGAR → CONF.
+- Perfil de Piloto e P.E.T. saíram do menu superior e foram centralizados no Hangar.
+- Porão saiu do menu superior; comércio aparece apenas na base X-1.
+- Status superior foi reduzido para Piloto, LV, Créditos, Uridium e conexão.
+
+### HUD da nave e P.E.T.
+- Painel da nave agora mostra somente HP, ESC, VEL e PORÃO.
+- Removidos retrato da nave, coordenadas, rota e exploração desse painel.
+- Novo painel flutuante do P.E.T. ao lado da nave, com seletor rápido de modo: Companhia, Guardião, BOX, Pedras, Reparação e Kamikaze conforme os módulos possuídos.
+
+### Central CONF
+- CONF substitui o antigo botão SAIR.
+- Qualidade ALTA: até 60 FPS, DPR 2, fundos e efeitos completos.
+- Qualidade MÉDIA: até 45 FPS, DPR 1.35, menos estrelas/efeitos pesados.
+- Qualidade BAIXA: até 30 FPS, DPR 1, fundo procedural, cache/preload reduzidos e menos efeitos para economizar memória, bateria e dados.
+- Configurações persistentes de visibilidade para Nave, P.E.T., Minimap, Munições e HUD do Galaxy Gate.
+- Logout agora fica dentro de CONF.
+
+### Hangar unificado
+- Novas abas: NAVES → EQUIPAMENTOS → DRONES → P.E.T. → PERFIL DE PILOTO.
+- O Perfil de Piloto completo agora pode ser administrado dentro do Hangar.
+- O P.E.T. também pode ser comprado, equipado e configurado dentro do Hangar.
+
+### Base / Porão
+- Ao entrar na base X-1 aparece o botão flutuante BASE / VENDER RECURSOS, no estilo do prompt de portal.
+- O Porão comercial só abre na base.
+
+### Organização de Loja
+- EXTRAS são únicos por conta: se o item já estiver no inventário ou equipado, ele desaparece da Loja.
+- P.E.T. base desaparece da Loja depois da compra.
+- Módulos P.E.T. comprados também desaparecem da Loja P.E.T.
+- Itens Elite únicos já possuídos são retirados do catálogo pessoal do Leilão.
+
+### Venda de equipamentos
+- Equipamentos no inventário podem ser vendidos diretamente por 50% do preço original de Loja.
+- Comuns devolvem Créditos; Elite devolvem Uridium.
+- A mesma opção aparece no inventário de equipamentos do P.E.T.
+- A venda em 50% também aparece nos slots equipados; drones vendidos devolvem os equipamentos instalados ao inventário e pagam 50% do próprio valor.
