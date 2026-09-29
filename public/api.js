@@ -216,8 +216,84 @@ export async function saveCloudSave(state) {
       xp: Number(profile.xp || 0),
       credits: Number(profile.credits || 0),
       uridium: Number(profile.uridium || 0),
+      aliens_killed: Number(profile.aliensKilled || 0),
+      gg_completed: Number(state.galaxyGate?.alpha?.completed || profile.ggCompleted || 0),
       updated_at,
     }),
   });
   return { ok: true, updated_at };
+}
+
+
+export async function updateCallsign(callsign) {
+  const preferred = String(callsign || '').trim().slice(0, 24);
+  if (preferred.length < 3) throw new Error('O nome precisa ter pelo menos 3 caracteres.');
+  const user = await authedSupabaseFetch('/auth/v1/user', {
+    method: 'PUT',
+    body: JSON.stringify({ data: { callsign: preferred } }),
+  });
+  currentUser = {
+    id: user.id,
+    email: user.email,
+    callsign: user.user_metadata?.callsign || preferred,
+  };
+  setSession(session, currentUser);
+  await authedSupabaseFetch('/rest/v1/profiles?on_conflict=id', {
+    method: 'POST',
+    headers: { Prefer: 'resolution=merge-duplicates,return=minimal' },
+    body: JSON.stringify({ id: currentUser.id, callsign: preferred, updated_at: new Date().toISOString() }),
+  });
+  return currentUser;
+}
+
+export async function updatePassword(password) {
+  const value = String(password || '');
+  if (value.length < 6) throw new Error('A nova senha precisa ter pelo menos 6 caracteres.');
+  await authedSupabaseFetch('/auth/v1/user', {
+    method: 'PUT',
+    body: JSON.stringify({ password: value }),
+  });
+  return { ok: true };
+}
+
+export async function loadRankings() {
+  const rows = await authedSupabaseFetch('/rest/v1/rpc/get_public_rankings', {
+    method: 'POST',
+    body: JSON.stringify({}),
+  });
+  return Array.isArray(rows) ? rows : [];
+}
+
+export async function loadAuctionBids() {
+  if (!currentUser?.id) throw new Error('Usuário não identificado.');
+  const rows = await authedSupabaseFetch(`/rest/v1/auction_bids?user_id=eq.${encodeURIComponent(currentUser.id)}&status=eq.active&select=*&order=updated_at.desc`);
+  return Array.isArray(rows) ? rows : [];
+}
+
+export async function saveAuctionBidOnline({ hourKey, lotRef, userBid, lot }) {
+  if (!currentUser?.id) throw new Error('Usuário não identificado.');
+  const rows = await authedSupabaseFetch('/rest/v1/auction_bids?on_conflict=user_id,hour_key,lot_ref', {
+    method: 'POST',
+    headers: { Prefer: 'resolution=merge-duplicates,return=representation' },
+    body: JSON.stringify({
+      user_id: currentUser.id,
+      hour_key: hourKey,
+      lot_ref: lotRef,
+      user_bid: Math.max(0, Math.round(Number(userBid) || 0)),
+      lot: lot || {},
+      status: 'active',
+      updated_at: new Date().toISOString(),
+    }),
+  });
+  return Array.isArray(rows) ? rows[0] || null : null;
+}
+
+export async function markAuctionBidStatusOnline({ hourKey, lotRef, status }) {
+  if (!currentUser?.id) throw new Error('Usuário não identificado.');
+  await authedSupabaseFetch(`/rest/v1/auction_bids?user_id=eq.${encodeURIComponent(currentUser.id)}&hour_key=eq.${encodeURIComponent(hourKey)}&lot_ref=eq.${encodeURIComponent(lotRef)}`, {
+    method: 'PATCH',
+    headers: { Prefer: 'return=minimal' },
+    body: JSON.stringify({ status, updated_at: new Date().toISOString() }),
+  });
+  return { ok: true };
 }

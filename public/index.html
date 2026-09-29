@@ -5,8 +5,8 @@
 <meta charset="utf-8"/>
 <meta content="width=device-width,initial-scale=1,user-scalable=no" name="viewport"/>
 <meta content="#030816" name="theme-color"/>
-<title>Stellar Legacy V10.2 — HUD Command Center</title>
-<link href="/style.css?v=10.2.0" rel="stylesheet"/>
+<title>Stellar Legacy V10.3 — Premium Online</title>
+<link href="/style.css?v=10.3.0" rel="stylesheet"/>
 </head>
 <body>
 <div id="app">
@@ -127,7 +127,7 @@
 </div>
 <div class="modal fixed-modal" id="loginModal">
 <div class="modal-card login-card">
-<div class="eyebrow">STELLAR NETWORK • V10.2 HUD COMMAND CENTER</div>
+<div class="eyebrow">STELLAR NETWORK • V10.3 PREMIUM ONLINE</div>
 <h1>Entrar no Stellar Legacy</h1>
 <p class="muted">Sua conta salva facção, nave, inventário, drones, munição e progresso online.</p>
 <div class="identity-panel"><img alt="Stellar Legacy V8" class="identity-logo" src="/assets/v8/branding/logo-v8.png"/><div class="identity-copy"><div class="eyebrow">IDENTIDADE STELLAR LEGACY</div><h3>Três facções. Uma guerra orbital.</h3><p>Naves, NPCs, equipamentos, recursos e mapas agora usam uma identidade visual própria integrada ao jogo.</p><div class="identity-factions"><div><img alt="Terra" src="/assets/v8/branding/earth.png"/><span>Terra</span></div><div><img alt="Marte" src="/assets/v8/branding/mars.png"/><span>Marte</span></div><div><img alt="Júpiter" src="/assets/v8/branding/jupiter.png"/><span>Júpiter</span></div></div></div></div>
@@ -255,33 +255,74 @@
 </div>
 
 <div class="modal hidden" id="configModal">
-  <div class="modal-card settings-modal-card">
+  <div class="modal-card settings-modal-card premium-settings-card">
     <div class="modal-header">
-      <div><div class="eyebrow">CENTRAL DE CONFIGURAÇÕES</div><h2>HUD & Qualidade</h2></div>
+      <div><div class="eyebrow">CENTRAL PREMIUM</div><h2>Configurações • Ranking • Conta</h2></div>
       <button class="small-btn" id="closeConfig">Fechar</button>
     </div>
-    <section class="settings-section">
-      <div class="settings-title"><div><b>QUALIDADE DO JOGO</b><small>Altere resolução, efeitos e uso de dados/memória.</small></div><span id="qualityCurrentBadge">ALTA</span></div>
-      <div class="quality-grid" id="qualityButtons">
-        <button class="quality-card" data-quality="high"><b>ALTA</b><span>60 FPS • resolução alta • fundos e efeitos completos</span></button>
-        <button class="quality-card" data-quality="medium"><b>MÉDIA</b><span>45 FPS • resolução equilibrada • efeitos reduzidos</span></button>
-        <button class="quality-card" data-quality="low"><b>BAIXA</b><span>30 FPS • resolução econômica • menos efeitos e downloads</span></button>
-      </div>
-    </section>
-    <section class="settings-section">
-      <div class="settings-title"><div><b>VISIBILIDADE DO HUD</b><small>Escolha o que fica visível durante o jogo.</small></div></div>
-      <div class="hud-settings-grid" id="hudSettingsGrid">
-        <label><input type="checkbox" data-hud-key="ship" checked/> Nave</label>
-        <label><input type="checkbox" data-hud-key="pet" checked/> P.E.T.</label>
-        <label><input type="checkbox" data-hud-key="minimap" checked/> Minimap</label>
-        <label><input type="checkbox" data-hud-key="weapons" checked/> Munições</label>
-        <label><input type="checkbox" data-hud-key="gate" checked/> Galaxy Gate</label>
-      </div>
-    </section>
-    <section class="settings-section settings-account-row">
-      <div><b>CONTA</b><small>Salve seu progresso antes de encerrar a sessão.</small></div>
-      <button class="small-btn danger-lite" id="logoutBtn">SAIR DA CONTA</button>
-    </section>
+    <div class="settings-tabs" id="settingsTabs">
+      <button class="tab-btn active" data-settings-tab="game">JOGO</button>
+      <button class="tab-btn" data-settings-tab="ranking">RANKING</button>
+      <button class="tab-btn" data-settings-tab="account">CONTA</button>
+    </div>
+
+    <div class="settings-panel" id="settingsGamePanel">
+      <section class="settings-section">
+        <div class="settings-title"><div><b>QUALIDADE DO JOGO</b><small>Altere resolução, efeitos e uso de dados/memória.</small></div><span id="qualityCurrentBadge">ALTA</span></div>
+        <div class="quality-grid" id="qualityButtons">
+          <button class="quality-card" data-quality="high"><b>ALTA</b><span>60 FPS • resolução alta • fundos e efeitos completos</span></button>
+          <button class="quality-card" data-quality="medium"><b>MÉDIA</b><span>45 FPS • resolução equilibrada • efeitos reduzidos</span></button>
+          <button class="quality-card" data-quality="low"><b>BAIXA</b><span>30 FPS • resolução econômica • menos efeitos e downloads</span></button>
+        </div>
+      </section>
+      <section class="settings-section">
+        <div class="settings-title"><div><b>VISIBILIDADE DO HUD</b><small>Escolha o que fica visível durante o jogo.</small></div></div>
+        <div class="hud-settings-grid" id="hudSettingsGrid">
+          <label><input type="checkbox" data-hud-key="ship" checked/> Nave</label>
+          <label><input type="checkbox" data-hud-key="pet" checked/> P.E.T.</label>
+          <label><input type="checkbox" data-hud-key="minimap" checked/> Minimap</label>
+          <label><input type="checkbox" data-hud-key="weapons" checked/> Munições</label>
+          <label><input type="checkbox" data-hud-key="gate" checked/> Galaxy Gate</label>
+        </div>
+      </section>
+    </div>
+
+    <div class="settings-panel hidden" id="settingsRankingPanel">
+      <section class="settings-section ranking-settings-section">
+        <div class="settings-title"><div><b>RANKING DE PILOTOS</b><small>Classificação online dos pilotos salvos no servidor.</small></div><button class="ghost-btn" id="rankingRefreshBtn">ATUALIZAR</button></div>
+        <div class="ranking-grid-settings">
+          <article class="ranking-board"><div class="ranking-board-title">NÍVEL</div><div id="rankingLevel"></div></article>
+          <article class="ranking-board"><div class="ranking-board-title">XP</div><div id="rankingXp"></div></article>
+          <article class="ranking-board"><div class="ranking-board-title">ALIENS MATADOS</div><div id="rankingAliens"></div></article>
+          <article class="ranking-board"><div class="ranking-board-title">GALAXY GATES</div><div id="rankingGg"></div></article>
+        </div>
+        <div class="muted ranking-updated" id="rankingUpdated">Abra esta aba para carregar o ranking.</div>
+      </section>
+    </div>
+
+    <div class="settings-panel hidden" id="settingsAccountPanel">
+      <section class="settings-section account-premium-grid">
+        <div class="account-card">
+          <div class="eyebrow">IDENTIDADE DO PILOTO</div>
+          <label>E-mail<input id="accountEmail" type="email" readonly/></label>
+          <label>Nome do jogador<input id="accountCallsign" type="text" minlength="3" maxlength="24"/></label>
+          <button class="primary-btn" id="accountSaveName">SALVAR NOME</button>
+          <small id="accountNameStatus" class="muted"></small>
+        </div>
+        <div class="account-card">
+          <div class="eyebrow">SEGURANÇA</div>
+          <label>Nova senha<input id="accountNewPassword" type="password" minlength="6" placeholder="mínimo 6 caracteres"/></label>
+          <label>Confirmar nova senha<input id="accountConfirmPassword" type="password" minlength="6" placeholder="repita a nova senha"/></label>
+          <button class="primary-btn" id="accountSavePassword">ALTERAR SENHA</button>
+          <small id="accountPasswordStatus" class="muted"></small>
+        </div>
+        <div class="account-card account-session-card">
+          <div class="eyebrow">SESSÃO</div>
+          <div id="accountSummary" class="account-summary"></div>
+          <button class="small-btn danger-lite" id="logoutBtn">SAIR DA CONTA</button>
+        </div>
+      </section>
+    </div>
   </div>
 </div>
 
@@ -360,6 +401,6 @@
 </div>
 </div>
 </div>
-<script src="/game.js?v=10.2.0" type="module"></script>
+<script src="/game.js?v=10.3.0" type="module"></script>
 </body>
 </html>

@@ -331,3 +331,8 @@ Todos os preços da Loja foram rebalanceados para progressão longa. Itens comun
 - Comuns devolvem Créditos; Elite devolvem Uridium.
 - A mesma opção aparece no inventário de equipamentos do P.E.T.
 - A venda em 50% também aparece nos slots equipados; drones vendidos devolvem os equipamentos instalados ao inventário e pagam 50% do próprio valor.
+
+## V10.3 — Premium Online
+A central CONF agora concentra configurações de jogo, ranking online e gerenciamento da conta. O ranking usa os perfis persistidos no Supabase e possui classificações independentes por nível, XP, aliens destruídos e Galaxy Gates concluídos.
+
+O Leilão Elite foi migrado para persistência online: lances ativos ficam registrados em `auction_bids`, sobrevivem a refresh/login e os Créditos em garantia deixam de ser subtraídos antecipadamente. O valor vencedor só é cobrado no fechamento do ciclo. Itens únicos já possuídos são filtrados automaticamente.

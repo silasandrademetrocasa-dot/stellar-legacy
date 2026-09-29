@@ -1,6 +1,6 @@
-import { FACTIONS, SHIPS, ITEMS, LASER_AMMO, ROCKETS, NPC_TYPES, MAPS, RESOURCES } from './data.js?v=10.2.0';
-import { V8_ASSETS } from './assets/v8/manifest.js?v=10.2.0';
-import { signUp, signIn, restoreSession, signOutLocal, getUser, loadCloudSave, saveCloudSave } from './api.js?v=10.2.0';
+import { FACTIONS, SHIPS, ITEMS, LASER_AMMO, ROCKETS, NPC_TYPES, MAPS, RESOURCES } from './data.js?v=10.3.0';
+import { V8_ASSETS } from './assets/v8/manifest.js?v=10.3.0';
+import { signUp, signIn, restoreSession, signOutLocal, getUser, loadCloudSave, saveCloudSave, updateCallsign, updatePassword, loadRankings, loadAuctionBids, saveAuctionBidOnline, markAuctionBidStatusOnline } from './api.js?v=10.3.0';
 
 const canvas = document.querySelector('#game');
 const ctx = canvas.getContext('2d');
@@ -107,7 +107,7 @@ const ui = {
   auctionBtn: $('#auctionBtn'), auctionTopClock: $('#auctionTopClock'), auctionModal: $('#auctionModal'), closeAuction: $('#closeAuction'), auctionClock: $('#auctionClock'), auctionCredits: $('#auctionCredits'), auctionEscrow: $('#auctionEscrow'), auctionGrid: $('#auctionGrid'), auctionHistory: $('#auctionHistory'),
   shopBtn: $('#shopBtn'), shopModal: $('#shopModal'), closeShop: $('#closeShop'), shopTabs: $('#shopTabs'), shopGrid: $('#shopGrid'), shopCredits: $('#shopCredits'), shopUridium: $('#shopUridium'),
   hangarBtn: $('#hangarBtn'), hangarModal: $('#hangarModal'), closeHangar: $('#closeHangar'), hangarTabs: $('#hangarTabs'), hangarContent: $('#hangarContent'), hangarShipName: $('#hangarShipName'),
-  loginModal: $('#loginModal'), loginTabBtn: $('#loginTabBtn'), registerTabBtn: $('#registerTabBtn'), loginForm: $('#loginForm'), registerForm: $('#registerForm'), loginEmail: $('#loginEmail'), loginPassword: $('#loginPassword'), registerCallsign: $('#registerCallsign'), registerEmail: $('#registerEmail'), registerPassword: $('#registerPassword'), authMessage: $('#authMessage'), userLabel: $('#userLabel'), syncLabel: $('#syncLabel'), logoutBtn: $('#logoutBtn'), safeZoneLabel: $('#safeZoneLabel'), cargoUsed: $('#cargoUsed'), cargoMax: $('#cargoMax'), cargoBtn: $('#cargoBtn'), cargoModal: $('#cargoModal'), closeCargo: $('#closeCargo'), cargoSummary: $('#cargoSummary'), cargoGrid: $('#cargoGrid'), sellAllCargo: $('#sellAllCargo'), configBtn: $('#configBtn'), configModal: $('#configModal'), closeConfig: $('#closeConfig'), qualityButtons: $('#qualityButtons'), qualityCurrentBadge: $('#qualityCurrentBadge'), hudSettingsGrid: $('#hudSettingsGrid'),
+  loginModal: $('#loginModal'), loginTabBtn: $('#loginTabBtn'), registerTabBtn: $('#registerTabBtn'), loginForm: $('#loginForm'), registerForm: $('#registerForm'), loginEmail: $('#loginEmail'), loginPassword: $('#loginPassword'), registerCallsign: $('#registerCallsign'), registerEmail: $('#registerEmail'), registerPassword: $('#registerPassword'), authMessage: $('#authMessage'), userLabel: $('#userLabel'), syncLabel: $('#syncLabel'), logoutBtn: $('#logoutBtn'), safeZoneLabel: $('#safeZoneLabel'), cargoUsed: $('#cargoUsed'), cargoMax: $('#cargoMax'), cargoBtn: $('#cargoBtn'), cargoModal: $('#cargoModal'), closeCargo: $('#closeCargo'), cargoSummary: $('#cargoSummary'), cargoGrid: $('#cargoGrid'), sellAllCargo: $('#sellAllCargo'), configBtn: $('#configBtn'), configModal: $('#configModal'), closeConfig: $('#closeConfig'), qualityButtons: $('#qualityButtons'), qualityCurrentBadge: $('#qualityCurrentBadge'), hudSettingsGrid: $('#hudSettingsGrid'), settingsTabs: $('#settingsTabs'), settingsGamePanel: $('#settingsGamePanel'), settingsRankingPanel: $('#settingsRankingPanel'), settingsAccountPanel: $('#settingsAccountPanel'), rankingRefreshBtn: $('#rankingRefreshBtn'), rankingLevel: $('#rankingLevel'), rankingXp: $('#rankingXp'), rankingAliens: $('#rankingAliens'), rankingGg: $('#rankingGg'), rankingUpdated: $('#rankingUpdated'), accountEmail: $('#accountEmail'), accountCallsign: $('#accountCallsign'), accountSaveName: $('#accountSaveName'), accountNameStatus: $('#accountNameStatus'), accountNewPassword: $('#accountNewPassword'), accountConfirmPassword: $('#accountConfirmPassword'), accountSavePassword: $('#accountSavePassword'), accountPasswordStatus: $('#accountPasswordStatus'), accountSummary: $('#accountSummary'),
 };
 
 const SAVE_KEY_PREFIX = 'stellarLegacyV5Save';
@@ -164,24 +164,75 @@ function pilotSkillCreditCost(skill,nextLevel){return Math.round(skill.creditBas
 function pilotRequirementMet(skill){return !skill.requires||pilotSkillLevel(skill.requires)>=PILOT_SKILLS[skill.requires].max;}
 function pilotRareChanceBonus(){return pilotCombined('luck1','luck2')/100;}function pilotLootBonus(){return pilotCombined('tractor1','tractor2')/100;}function pilotEvasion(){return Math.min(.35,pilotCombined('evasive1','evasive2')/100);}function pilotBattleLaserBonus(){return pilotCombined('bounty1','bounty2')/100;}function pilotKamikazeDamageBonus(){return pilotCombined('detonation1','detonation2')/100;}function pilotKamikazeRadiusBonus(){return pilotSkillValue('explosives')/100;}
 
-// ===================== V10 HOURLY AUCTION =====================
-function freshAuctionState(){return {hourKey:null,lots:{},history:[]};}
+// ===================== V10.3 ONLINE HOURLY AUCTION =====================
+function freshAuctionState(){return {hourKey:null,lots:{},history:[],onlineReady:false,legacyEscrowMigrated:false};}
 function auctionHourKey(d=new Date()){return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}-${String(d.getHours()).padStart(2,'0')}`;}
 function auctionSecondsLeft(){const d=new Date(),next=new Date(d);next.setMinutes(60,0,0);return Math.max(0,Math.ceil((next-d)/1000));}
 function auctionSeed(str){let h=2166136261>>>0;for(let i=0;i<str.length;i++){h^=str.charCodeAt(i);h=Math.imul(h,16777619);}return h>>>0;}
 function auctionRand(seed){let x=seed>>>0;return()=>{x=(Math.imul(1664525,x)+1013904223)>>>0;return x/4294967296;};}
-function eliteAuctionCatalog(){const out=[];Object.values(SHIPS).filter(x=>x.currency==='uridium'&&!x.eventOnly&&x.shopAvailable!==false&&x.auctionEligible!==false).forEach(x=>out.push({ref:`ship:${x.id}`,kind:'ship',id:x.id,name:x.name,uri:x.price,qty:1}));Object.values(ITEMS).filter(x=>x.currency==='uridium'&&!x.eventOnly&&x.shopAvailable!==false&&x.auctionEligible!==false&&!(x.type==='extra'&&progress&&ownsExtraItem(x.id))).forEach(x=>out.push({ref:`item:${x.id}`,kind:'item',id:x.id,name:x.name,uri:x.price,qty:1}));Object.values(LASER_AMMO).filter(x=>x.currency==='uridium').forEach(x=>out.push({ref:`ammo:${x.id}`,kind:'ammo',id:x.id,name:`${x.name} • pacote ${fmt(x.pack)}`,uri:x.price,qty:x.pack}));Object.values(ROCKETS).filter(x=>x.currency==='uridium').forEach(x=>out.push({ref:`rocket:${x.id}`,kind:'rocket',id:x.id,name:`${x.name} • pacote ${fmt(x.pack)}`,uri:x.price,qty:x.pack}));Object.values(PET_GEARS).filter(x=>x.currency==='uridium'&&!progress?.pet?.gearsOwned?.[x.id]).forEach(x=>out.push({ref:`petGear:${x.id}`,kind:'petGear',id:x.id,name:`P.E.T. • ${x.name}`,uri:x.cost,qty:1}));return out;}
+function eliteAuctionCatalog(){
+  const out=[];
+  Object.values(SHIPS).filter(x=>x.currency==='uridium'&&!x.eventOnly&&x.shopAvailable!==false&&x.auctionEligible!==false&&!progress?.ownedShips?.includes(x.id)).forEach(x=>out.push({ref:`ship:${x.id}`,kind:'ship',id:x.id,name:x.name,uri:x.price,qty:1,unique:true}));
+  Object.values(ITEMS).filter(x=>x.currency==='uridium'&&!x.eventOnly&&x.shopAvailable!==false&&x.auctionEligible!==false&&!(x.type==='extra'&&progress&&ownsExtraItem(x.id))).forEach(x=>out.push({ref:`item:${x.id}`,kind:'item',id:x.id,name:x.name,uri:x.price,qty:1,unique:x.type==='extra'}));
+  Object.values(LASER_AMMO).filter(x=>x.currency==='uridium').forEach(x=>out.push({ref:`ammo:${x.id}`,kind:'ammo',id:x.id,name:`${x.name} • pacote ${fmt(x.pack)}`,uri:x.price,qty:x.pack}));
+  Object.values(ROCKETS).filter(x=>x.currency==='uridium').forEach(x=>out.push({ref:`rocket:${x.id}`,kind:'rocket',id:x.id,name:`${x.name} • pacote ${fmt(x.pack)}`,uri:x.price,qty:x.pack}));
+  Object.values(PET_GEARS).filter(x=>x.currency==='uridium'&&!progress?.pet?.gearsOwned?.[x.id]).forEach(x=>out.push({ref:`petGear:${x.id}`,kind:'petGear',id:x.id,name:`P.E.T. • ${x.name}`,uri:x.cost,qty:1,unique:true}));
+  return out;
+}
 function buildAuctionLots(key){const lots={};for(const entry of eliteAuctionCatalog()){const rnd=auctionRand(auctionSeed(`${key}:${entry.ref}`)),reserve=Math.max(100000,Math.round(entry.uri*70*(.75+rnd()*.5)/100000)*100000),finalBid=Math.max(reserve+100000,Math.round(reserve*(1.25+rnd()*1.75)/100000)*100000);lots[entry.ref]={...entry,reserve,finalNpcBid:finalBid,userBid:0,escrow:0};}return lots;}
 function auctionNpcBid(lot){const d=new Date(),fraction=(d.getMinutes()*60+d.getSeconds())/3600;return Math.max(100000,Math.round((lot.reserve+(lot.finalNpcBid-lot.reserve)*fraction)/100000)*100000);}
-function auctionEscrow(){return Object.values(progress?.auction?.lots||{}).reduce((sum,l)=>sum+(Number(l.escrow)||0),0);}
+function auctionEscrow(){return Object.values(progress?.auction?.lots||{}).reduce((sum,l)=>sum+(auctionLotEligible(l)?(Number(l.userBid)||0):0),0);}
+function auctionSpendableCredits(excludeRef=null){const reserved=Object.values(progress?.auction?.lots||{}).reduce((sum,l)=>sum+(!auctionLotEligible(l)||l.ref===excludeRef?0:(Number(l.userBid)||0)),0);return Math.max(0,(progress?.profile?.credits||0)-reserved);}
 function grantAuctionLot(lot){
   if(lot.kind==='ship'){if(progress.ownedShips.includes(lot.id))return false;progress.ownedShips.push(lot.id);return true;}
   if(lot.kind==='item'){const item=ITEMS[lot.id];if(item?.type==='drone'){if(progress.drones.length>=8)return false;progress.drones.push({id:`d_auc_${Date.now()}_${Math.random().toString(16).slice(2,5)}`,type:lot.id,slots:Array(item.slots).fill(null)});return true;}if(item?.type==='extra'&&ownsExtraItem(lot.id))return false;addInventory(lot.id);return true;}
   if(lot.kind==='ammo'){progress.ammo[lot.id]=(progress.ammo[lot.id]||0)+(LASER_AMMO[lot.id]?.pack||lot.qty||0);return true;}
-  if(lot.kind==='rocket'){progress.rockets[lot.id]=(progress.rockets[lot.id]||0)+(ROCKETS[lot.id]?.pack||lot.qty||0);return true;}if(lot.kind==='petGear'){if(progress.pet.gearsOwned[lot.id])return false;progress.pet.gearsOwned[lot.id]=true;return true;}return false;
+  if(lot.kind==='rocket'){progress.rockets[lot.id]=(progress.rockets[lot.id]||0)+(ROCKETS[lot.id]?.pack||lot.qty||0);return true;}
+  if(lot.kind==='petGear'){if(progress.pet.gearsOwned[lot.id])return false;progress.pet.gearsOwned[lot.id]=true;return true;}
+  return false;
 }
-function settleAuction(){const a=progress.auction;if(!a?.lots)return;for(const lot of Object.values(a.lots)){if(!lot.userBid||!lot.escrow)continue;const won=lot.userBid>=lot.finalNpcBid;let granted=false;if(won)granted=grantAuctionLot(lot);if(!won||!granted)progress.profile.credits+=lot.escrow;a.history.unshift({at:Date.now(),name:lot.name,bid:lot.userBid,result:won&&granted?'VENCEU':won?'REEMBOLSADO':'PERDEU'});}a.history=a.history.slice(0,12);}
-function ensureAuctionState(){progress.auction ||= freshAuctionState();const key=auctionHourKey();if(progress.auction.hourKey!==key){if(progress.auction.hourKey)settleAuction();progress.auction.hourKey=key;progress.auction.lots=buildAuctionLots(key);saveGame();}}
+async function finalizeOnlineAuctionBid(row){
+  const lot=row.lot||{};if(!lot?.ref||row.status!=='active')return;
+  const won=Number(row.user_bid)>=Number(lot.finalNpcBid||Infinity);
+  let result='PERDEU',status='lost';
+  if(won){
+    if(progress.profile.credits>=Number(row.user_bid)&&grantAuctionLot(lot)){progress.profile.credits-=Number(row.user_bid);result='VENCEU';status='won';}
+    else{result='CANCELADO';status='cancelled';}
+  }
+  progress.auction.history.unshift({at:Date.now(),name:lot.name||row.lot_ref,bid:Number(row.user_bid)||0,result});
+  progress.auction.history=progress.auction.history.slice(0,12);
+  try{await markAuctionBidStatusOnline({hourKey:row.hour_key,lotRef:row.lot_ref,status});}catch(e){console.warn('auction settle online',e);}
+}
+async function syncAuctionBidsOnline(){
+  if(!authenticated||!progress)return;
+  try{
+    const rows=await loadAuctionBids(),current=auctionHourKey();
+    for(const row of rows){
+      if(row.hour_key!==current){await finalizeOnlineAuctionBid(row);continue;}
+      let lot=progress.auction?.lots?.[row.lot_ref];
+      if(!lot){
+        if(auctionLotEligible(row.lot)){lot={...row.lot,userBid:0,escrow:0};progress.auction.lots[row.lot_ref]=lot;}
+        else{await markAuctionBidStatusOnline({hourKey:row.hour_key,lotRef:row.lot_ref,status:'cancelled'});continue;}
+      }
+      lot.userBid=Math.max(Number(lot.userBid)||0,Number(row.user_bid)||0);lot.escrow=lot.userBid;
+    }
+    progress.auction.onlineReady=true;saveGame();await flushCloudSave(true);if(ui.auctionModal&&!ui.auctionModal.classList.contains('hidden'))renderAuction();
+  }catch(e){console.warn('auction sync online',e);showToast('Leilão online indisponível temporariamente');}
+}
+function settleAuction(){
+  const a=progress.auction;if(!a?.lots)return;
+  for(const lot of Object.values(a.lots)){
+    if(!lot.userBid)continue;
+    const won=lot.userBid>=lot.finalNpcBid;let granted=false,result='PERDEU',status='lost';
+    if(won&&progress.profile.credits>=lot.userBid)granted=grantAuctionLot(lot);
+    if(won&&granted){progress.profile.credits-=lot.userBid;result='VENCEU';status='won';}
+    else if(won){result='CANCELADO';status='cancelled';}
+    a.history.unshift({at:Date.now(),name:lot.name,bid:lot.userBid,result});
+    markAuctionBidStatusOnline({hourKey:a.hourKey,lotRef:lot.ref,status}).catch(e=>console.warn('auction status',e));
+  }
+  a.history=a.history.slice(0,12);
+}
+function ensureAuctionState(){progress.auction ||= freshAuctionState();const a=progress.auction;if(!a.legacyEscrowMigrated){const legacy=Object.values(a.lots||{}).reduce((sum,l)=>sum+(Number(l.escrow)||0),0);if(legacy>0)progress.profile.credits+=legacy;a.legacyEscrowMigrated=true;}const key=auctionHourKey();if(a.hourKey!==key){if(a.hourKey)settleAuction();a.hourKey=key;a.lots=buildAuctionLots(key);saveGame();}}
 
 const PLAYER_MAX_LEVEL=44;
 const PET_MAX_LEVEL=44;
@@ -763,7 +814,7 @@ function freshSave(factionId) {
   loadout.lasers[0] = 'lf1';
   loadout.generators[0] = 'sg3na01';
   return {
-    profile: { callsign:getUser()?.callsign || getUser()?.email?.split('@')[0] || 'Pilot', faction:factionId, level:1, xp:0, xpModelV101:true, credits:20000, uridium:0 },
+    profile: { callsign:getUser()?.callsign || getUser()?.email?.split('@')[0] || 'Pilot', faction:factionId, level:1, xp:0, xpModelV101:true, credits:20000, uridium:0, aliensKilled:0, ggCompleted:0 },
     activeShipId: 'phoenix',
     ownedShips: ['phoenix'],
     shipLoadout: loadout,
@@ -876,13 +927,56 @@ function applyQualityMode(mode,persist=true){
   preloadV8Assets();resize();renderSettings();
   showToast(`Qualidade ${QUALITY_PROFILES[mode].label} ativada`);
 }
+let settingsTab='game';
+let rankingsCache=[];
+let rankingsLoadedAt=0;
 function renderSettings(){
   if(!ui.configModal)return;
   document.body.dataset.quality=qualityMode;
   if(ui.qualityCurrentBadge)ui.qualityCurrentBadge.textContent=qualityProfile().label;
   ui.qualityButtons?.querySelectorAll('[data-quality]').forEach(b=>b.classList.toggle('active',b.dataset.quality===qualityMode));
   ui.hudSettingsGrid?.querySelectorAll('[data-hud-key]').forEach(input=>input.checked=hudVisibility[input.dataset.hudKey]!==false);
+  ui.settingsTabs?.querySelectorAll('[data-settings-tab]').forEach(b=>b.classList.toggle('active',b.dataset.settingsTab===settingsTab));
+  ui.settingsGamePanel?.classList.toggle('hidden',settingsTab!=='game');
+  ui.settingsRankingPanel?.classList.toggle('hidden',settingsTab!=='ranking');
+  ui.settingsAccountPanel?.classList.toggle('hidden',settingsTab!=='account');
+  if(settingsTab==='account')renderAccountSettings();
 }
+function rankingRows(metric){
+  const rows=[...rankingsCache];
+  if(metric==='level')rows.sort((a,b)=>(b.level-a.level)||(Number(b.xp)-Number(a.xp)));
+  else if(metric==='xp')rows.sort((a,b)=>Number(b.xp)-Number(a.xp));
+  else if(metric==='aliens')rows.sort((a,b)=>Number(b.aliens_killed)-Number(a.aliens_killed));
+  else rows.sort((a,b)=>Number(b.gg_completed)-Number(a.gg_completed));
+  return rows.slice(0,15);
+}
+function renderRankingBoard(el,metric){
+  if(!el)return;const me=getUser()?.id;
+  const rows=rankingRows(metric);if(!rows.length){el.innerHTML='<div class="muted ranking-empty">Nenhum piloto ranqueado ainda.</div>';return;}
+  el.innerHTML=rows.map((r,i)=>{const value=metric==='level'?`LV ${fmt(r.level)}`:metric==='xp'?`${fmt(r.xp)} XP`:metric==='aliens'?`${fmt(r.aliens_killed)} aliens`:`${fmt(r.gg_completed)} GG`;return `<div class="ranking-row${r.id===me?' me':''}"><span class="ranking-pos">#${i+1}</span><b>${r.callsign||'Pilot'}</b><em>${value}</em></div>`;}).join('');
+}
+function renderRankings(){renderRankingBoard(ui.rankingLevel,'level');renderRankingBoard(ui.rankingXp,'xp');renderRankingBoard(ui.rankingAliens,'aliens');renderRankingBoard(ui.rankingGg,'gg');if(ui.rankingUpdated)ui.rankingUpdated.textContent=rankingsLoadedAt?`Atualizado ${new Date(rankingsLoadedAt).toLocaleTimeString('pt-BR')}`:'Ranking ainda não carregado.';}
+async function refreshRankings(force=false){
+  if(!force&&rankingsCache.length&&Date.now()-rankingsLoadedAt<30000){renderRankings();return;}
+  if(ui.rankingUpdated)ui.rankingUpdated.textContent='Carregando ranking online...';
+  try{rankingsCache=await loadRankings();rankingsLoadedAt=Date.now();renderRankings();}
+  catch(err){if(ui.rankingUpdated)ui.rankingUpdated.textContent=`Falha ao carregar ranking: ${err.message}`;}
+}
+function renderAccountSettings(){
+  const user=getUser();if(ui.accountEmail)ui.accountEmail.value=user?.email||'';if(ui.accountCallsign)ui.accountCallsign.value=progress?.profile?.callsign||user?.callsign||'';
+  if(ui.accountSummary)ui.accountSummary.innerHTML=`<div><span>NÍVEL</span><b>${fmt(progress?.profile?.level||1)}</b></div><div><span>XP</span><b>${fmt(progress?.profile?.xp||0)}</b></div><div><span>ALIENS</span><b>${fmt(progress?.profile?.aliensKilled||0)}</b></div><div><span>GG</span><b>${fmt(progress?.galaxyGate?.alpha?.completed||0)}</b></div>`;
+}
+async function saveAccountName(){
+  const value=String(ui.accountCallsign?.value||'').trim();if(ui.accountNameStatus)ui.accountNameStatus.textContent='Salvando...';
+  try{const user=await updateCallsign(value);progress.profile.callsign=user.callsign;ui.userLabel.textContent=user.callsign;saveGame();await flushCloudSave(true);if(ui.accountNameStatus)ui.accountNameStatus.textContent='Nome atualizado online.';showToast('Nome de piloto atualizado');}
+  catch(err){if(ui.accountNameStatus)ui.accountNameStatus.textContent=err.message;}
+}
+async function saveAccountPassword(){
+  const a=ui.accountNewPassword?.value||'',b=ui.accountConfirmPassword?.value||'';if(a!==b){ui.accountPasswordStatus.textContent='As senhas não conferem.';return;}if(ui.accountPasswordStatus)ui.accountPasswordStatus.textContent='Atualizando...';
+  try{await updatePassword(a);ui.accountNewPassword.value='';ui.accountConfirmPassword.value='';ui.accountPasswordStatus.textContent='Senha alterada com sucesso.';showToast('Senha atualizada');}
+  catch(err){ui.accountPasswordStatus.textContent=err.message;}
+}
+function switchSettingsTab(tab){settingsTab=['game','ranking','account'].includes(tab)?tab:'game';renderSettings();if(settingsTab==='ranking')refreshRankings();}
 function openSettings(){renderSettings();ui.configModal?.classList.remove('hidden');}
 
 function layoutHudPanels(){
@@ -961,6 +1055,8 @@ function hydrateProgress(){
   progress.profile.callsign ||= getUser()?.callsign || getUser()?.email?.split('@')[0] || 'Pilot';
   progress.profile.level=Math.max(1,Math.min(PLAYER_MAX_LEVEL,Number(progress.profile.level)||1));
   progress.profile.xp=Math.max(0,Number(progress.profile.xp)||0);
+  progress.profile.aliensKilled=Math.max(0,Math.floor(Number(progress.profile.aliensKilled)||0));
+  progress.profile.ggCompleted=Math.max(0,Math.floor(Number(progress.profile.ggCompleted)||0));
   if(!progress.profile.xpModelV101){
     const oldCarry=progress.profile.xp;
     progress.profile.xp=levelXpThreshold(progress.profile.level)+oldCarry;
@@ -1427,7 +1523,7 @@ function completeAlphaGate(){
   progress.profile.credits+=bonus.credits;progress.profile.uridium+=bonus.uridium;progress.profile.xp+=bonus.xp;
   processPlayerLevelUps();
   const logReward=50;normalizePilotBio();progress.pilotBio.logDisks+=logReward;
-  a.completed++;a.lastCompletion={at:Date.now(),earned,bonus,logDisks:logReward,total:{credits:earned.credits*3,uridium:earned.uridium*3,xp:earned.xp*3}};
+  a.completed++;progress.profile.ggCompleted=a.completed;a.lastCompletion={at:Date.now(),earned,bonus,logDisks:logReward,total:{credits:earned.credits*3,uridium:earned.uridium*3,xp:earned.xp*3}};
   a.pieces=[];a.built=false;a.lives=3;a.run=null;
   showToast(`ALFA CONCLUÍDO! +${fmt(logReward)} Log-Disks • bônus 3X aplicado`);
   saveGame();renderGalaxyGate();
@@ -1517,7 +1613,7 @@ function jumpThroughPortal(portal){if(!portal||state.jumping||nowSec()-state.las
 function rewardEnemyKill(enemy){
   const creditMult=1+pilotSkillValue('greed')/100,uriMult=1+pilotCombined('cruelty1','cruelty2')/100,xpMult=1+pilotSkillValue('tactics')/100;
   const earnedCredits=Math.round(enemy.credits*creditMult),earnedUri=Math.round(enemy.uridium*uriMult),earnedXp=Math.round((Number(enemy.xp)||enemy.credits/10+enemy.uridium*12)*xpMult);
-  progress.profile.credits+=earnedCredits;progress.profile.uridium+=earnedUri;progress.profile.xp+=earnedXp;
+  progress.profile.credits+=earnedCredits;progress.profile.uridium+=earnedUri;progress.profile.xp+=earnedXp;progress.profile.aliensKilled=(progress.profile.aliensKilled||0)+1;
   addPetXp(Math.max(12,Math.round(enemy.credits/120+enemy.uridium*4)));
   processPlayerLevelUps();
   const lootMult=1+pilotLootBonus(),boostedResources=Object.fromEntries(Object.entries(enemy.resources||{}).map(([id,q])=>[id,Math.max(1,Math.round(q*lootMult))]));
@@ -2227,10 +2323,18 @@ function openPilotProfile(){openHangar('pilot');}
 
 function formatAuctionClock(sec){const m=Math.floor(sec/60),s=sec%60;return `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;}
 function auctionMinBid(lot){const npc=auctionNpcBid(lot);return Math.max(100000,npc+(npc<1000000?100000:Math.max(100000,Math.round(npc*.05/100000)*100000)));}
-function placeAuctionBid(ref,amount){ensureAuctionState();const lot=progress.auction.lots[ref];if(!lot)return;const min=auctionMinBid(lot);amount=Math.round(Number(amount)/100000)*100000;if(!Number.isFinite(amount)||amount<min){showToast(`Lance mínimo: ${fmt(min)} CR`);return;}const delta=amount-(lot.escrow||0);if(delta>progress.profile.credits){showToast('Créditos insuficientes para esse lance');return;}progress.profile.credits-=delta;lot.userBid=amount;lot.escrow=amount;saveGame();renderAuction();updateUI();showToast(`Lance registrado: ${fmt(amount)} CR`);}
+async function placeAuctionBid(ref,amount){ensureAuctionState();const lot=progress.auction.lots[ref];if(!lot)return;const min=auctionMinBid(lot);amount=Math.round(Number(amount)/100000)*100000;if(!Number.isFinite(amount)||amount<min){showToast(`Lance mínimo: ${fmt(min)} CR`);return;}if(amount>auctionSpendableCredits(ref)){showToast('Créditos insuficientes considerando os outros lances em garantia');return;}try{await saveAuctionBidOnline({hourKey:progress.auction.hourKey,lotRef:ref,userBid:amount,lot:{...lot,userBid:0,escrow:0}});lot.userBid=amount;lot.escrow=amount;saveGame();await flushCloudSave(true);renderAuction();updateUI();showToast(`Lance online registrado: ${fmt(amount)} CR`);}catch(err){showToast(`Falha ao registrar lance: ${err.message}`);}}
+function auctionLotEligible(lot){
+  if(!lot)return false;
+  if(lot.kind==='ship')return !progress?.ownedShips?.includes(lot.id);
+  if(lot.kind==='item'&&ITEMS[lot.id]?.type==='extra')return !ownsExtraItem(lot.id);
+  if(lot.kind==='petGear')return !progress?.pet?.gearsOwned?.[lot.id];
+  return true;
+}
 function renderAuction(){
-  if(!progress||!ui.auctionGrid)return;ensureAuctionState();const sec=auctionSecondsLeft(),clock=formatAuctionClock(sec);ui.auctionClock.textContent=clock;ui.auctionTopClock.textContent=clock;ui.auctionCredits.textContent=fmt(progress.profile.credits);ui.auctionEscrow.textContent=fmt(auctionEscrow());ui.auctionGrid.innerHTML='';
+  if(!progress||!ui.auctionGrid)return;ensureAuctionState();const sec=auctionSecondsLeft(),clock=formatAuctionClock(sec);ui.auctionClock.textContent=clock;ui.auctionTopClock.textContent=clock;ui.auctionCredits.textContent=fmt(auctionSpendableCredits());ui.auctionEscrow.textContent=fmt(auctionEscrow());ui.auctionGrid.innerHTML='';
   for(const lot of Object.values(progress.auction.lots)){
+    if(!auctionLotEligible(lot))continue;
     const npc=auctionNpcBid(lot),leader=lot.userBid>=npc&&lot.userBid>0?'VOCÊ':'SISTEMA',current=Math.max(npc,lot.userBid||0),min=auctionMinBid(lot),card=document.createElement('article');card.className=`auction-card ${leader==='VOCÊ'?'leading':''}`;card.dataset.auctionRef=lot.ref;const type=lot.kind==='ship'?'NAVE':lot.kind==='item'?'EQUIPAMENTO':lot.kind==='ammo'?'MUNIÇÃO':lot.kind==='rocket'?'MÍSSIL':'P.E.T.';
     let art=null;if(lot.kind==='ship')art=V8_ASSETS.ships[lot.id];else if(lot.kind==='item')art=assetForProduct(lot.id,ITEMS[lot.id]?.type,ITEMS[lot.id]?.subtype);else if(lot.kind==='ammo'||lot.kind==='rocket')art=V8_ASSETS.ammo[lot.id];else if(lot.kind==='petGear')art={guard:V8_ASSETS.equipment.autoLaserCpu,box:V8_ASSETS.equipment.ammoAutoBuyCpu,ore:V8_ASSETS.equipment.rocketTurboCpu,repair:V8_ASSETS.equipment.rep2,kami:V8_ASSETS.equipment.autoRocketCpu}[lot.id];
     card.innerHTML=`${art?`<img class="auction-art" src="${art}" alt="${lot.name}">`:''}<div class="auction-card-top"><span>${type}</span><b>${leader}</b></div><h3>${lot.name}</h3><div class="auction-bid-value">${fmt(current)} CR</div><div class="auction-meta">Lance mínimo ${fmt(min)} CR${lot.userBid?` • Seu lance ${fmt(lot.userBid)} CR`:''}</div>`;
@@ -2238,13 +2342,13 @@ function renderAuction(){
   }
   ui.auctionHistory.innerHTML=(progress.auction.history||[]).length?progress.auction.history.map(h=>`<div class="auction-history-row"><span>${h.result}</span><b>${h.name}</b><em>${fmt(h.bid)} CR</em></div>`).join(''):'<div class="muted">Nenhum ciclo encerrado ainda.</div>';
 }
-function openAuction(){renderAuction();ui.auctionModal.classList.remove('hidden');}
+function openAuction(){renderAuction();ui.auctionModal.classList.remove('hidden');syncAuctionBidsOnline();}
 let auctionUiTick=0;
 function updateAuctionSystem(){
   if(!progress)return;const now=Date.now();if(now-auctionUiTick<1000)return;auctionUiTick=now;ensureAuctionState();
   const clock=formatAuctionClock(auctionSecondsLeft());if(ui.auctionTopClock)ui.auctionTopClock.textContent=clock;if(ui.auctionClock)ui.auctionClock.textContent=clock;
   if(ui.auctionModal&&!ui.auctionModal.classList.contains('hidden')){
-    ui.auctionCredits.textContent=fmt(progress.profile.credits);ui.auctionEscrow.textContent=fmt(auctionEscrow());
+    ui.auctionCredits.textContent=fmt(auctionSpendableCredits());ui.auctionEscrow.textContent=fmt(auctionEscrow());
     ui.auctionGrid.querySelectorAll('[data-auction-ref]').forEach(card=>{const lot=progress.auction.lots[card.dataset.auctionRef];if(!lot)return;const npc=auctionNpcBid(lot),leader=lot.userBid>=npc&&lot.userBid>0?'VOCÊ':'SISTEMA',current=Math.max(npc,lot.userBid||0),min=auctionMinBid(lot);card.classList.toggle('leading',leader==='VOCÊ');const lead=card.querySelector('.auction-card-top b');if(lead)lead.textContent=leader;const value=card.querySelector('.auction-bid-value');if(value)value.textContent=`${fmt(current)} CR`;const meta=card.querySelector('.auction-meta');if(meta)meta.textContent=`Lance mínimo ${fmt(min)} CR${lot.userBid?` • Seu lance ${fmt(lot.userBid)} CR`:''}`;const input=card.querySelector('.auction-bid-input');if(input){input.min=String(min);if(document.activeElement!==input&&Number(input.value)<min)input.value=String(min);}});
   }
 }
@@ -2315,6 +2419,10 @@ if(ui.baseTradePrompt)ui.baseTradePrompt.onclick=()=>{if(isAtTrader())openCargo(
 if(ui.petGearQuickSelect)ui.petGearQuickSelect.onchange=e=>setPetGear(e.target.value);
 if(ui.qualityButtons)ui.qualityButtons.addEventListener('click',e=>{const b=e.target.closest('[data-quality]');if(b)applyQualityMode(b.dataset.quality);});
 if(ui.hudSettingsGrid)ui.hudSettingsGrid.addEventListener('change',e=>{const input=e.target.closest('[data-hud-key]');if(input)setHudVisibility(input.dataset.hudKey,input.checked);});
+if(ui.settingsTabs)ui.settingsTabs.addEventListener('click',e=>{const b=e.target.closest('[data-settings-tab]');if(b)switchSettingsTab(b.dataset.settingsTab);});
+if(ui.rankingRefreshBtn)ui.rankingRefreshBtn.onclick=()=>refreshRankings(true);
+if(ui.accountSaveName)ui.accountSaveName.onclick=()=>saveAccountName();
+if(ui.accountSavePassword)ui.accountSavePassword.onclick=()=>saveAccountPassword();
 if(ui.weaponBarToggle)ui.weaponBarToggle.onclick=()=>toggleAmmoUi();
 if(ui.statsToggle){ui.statsToggle.onclick=e=>{e.stopPropagation();toggleStatsUi();};ui.statsToggle.ontouchstart=e=>e.stopPropagation();}
 if(ui.statsHeader)ui.statsHeader.onclick=()=>toggleStatsUi();
@@ -2368,6 +2476,7 @@ async function afterAuth(){
   }catch(err){console.warn(err);loadLocalGame();setSync('OFFLINE','err');}
   if(!progress){renderFactionChoice();return;}
   startLoadedGame();
+  syncAuctionBidsOnline();
 }
 
 async function boot(){
