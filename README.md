@@ -199,3 +199,31 @@ As ondas têm 10 segundos entre elas.
 - A janela do portal foi ancorada com espaçamento superior adequado e scroll próprio.
 - Header do modal do portal ficou sticky para facilitar leitura e navegação.
 - Ajustes mobile para o modal do portal não colidir com a interface.
+
+
+## V9.8.3 — Alpha Combat Fix
+- Cache busting adicionado em CSS, game.js, data.js, api.js e manifest para impedir mistura de versões antigas no navegador.
+- Ao entrar no ALFA, a primeira onda inicia após uma contagem real de 10 segundos.
+- Estado antigo/travado do Gate é autocorrigido caso esteja sem temporizador.
+- Ondas seguintes continuam surgindo a cada 10 segundos mesmo com NPCs anteriores vivos.
+- Próximo Round só entra depois de todas as ondas atuais terem aparecido e todos os NPCs do Round terem morrido.
+- Depois de limpar o Round, são 10 segundos até iniciar o próximo.
+- NPCs do Galaxy Gate surgem próximos à borda do alcance do radar/minimapa do jogador.
+- NPCs do Galaxy Gate perseguem o jogador permanentemente, independentemente da distância.
+- Dentro do ALFA, o botão Galaxy Gate não abre mais o materializador gigante sobre a batalha; a HUD compacta continua ativa.
+
+
+## V9.9 — Extra Expansion
+
+### CPUs de expansão de slots
+- CPU Expansora Comum: equipada em um slot EXTRA e libera +3 novos slots EXTRAS.
+- CPU Expansora Elite: equipada em um slot EXTRA e libera +6 novos slots EXTRAS.
+- As duas versões não acumulam entre si.
+- Ao remover uma CPU expansora, equipamentos que ficarem acima da capacidade da nave retornam automaticamente ao inventário.
+
+### Robôs de reparação automática
+- Repair Bot Auto Comum: após 5 segundos sem receber dano, recupera 1% do HP máximo por segundo.
+- Repair Bot Auto Elite: após 5 segundos sem receber dano, recupera 2% do HP máximo por segundo.
+- Funcionam fora da base e independem da distância dos inimigos: o relógio reinicia somente quando a nave recebe dano.
+- Comum e Elite não acumulam entre si.
+- A base X-1 mantém sua regeneração própria mais rápida.

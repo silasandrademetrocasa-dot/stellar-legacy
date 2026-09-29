@@ -456,3 +456,7 @@ body::before{content:"";position:fixed;inset:0;pointer-events:none;background:ra
 .gate-hud{top:calc(var(--hud-top-offset) + 6px)!important;right:8px!important;left:auto!important;z-index:35!important}
 #gateModal{z-index:80!important}
 @media(max-width:680px){.gate-hud{top:calc(var(--hud-top-offset) + 4px)!important;right:6px!important;left:auto!important}}
+
+/* ===== V9.9 Extra Expansion ===== */
+.slot-card .slot-item{line-height:1.3}
+.inventory-card:has(.inventory-item-art[src*="rep2"]),.inventory-card:has(.inventory-item-art[src*="rocketTurboCpu"]){border-color:rgba(102,220,255,.26)}

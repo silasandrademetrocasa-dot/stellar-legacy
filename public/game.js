@@ -1,6 +1,6 @@
-import { FACTIONS, SHIPS, ITEMS, LASER_AMMO, ROCKETS, NPC_TYPES, MAPS, RESOURCES } from './data.js?v=9.8.3';
-import { V8_ASSETS } from './assets/v8/manifest.js?v=9.8.3';
-import { signUp, signIn, restoreSession, signOutLocal, getUser, loadCloudSave, saveCloudSave } from './api.js?v=9.8.3';
+import { FACTIONS, SHIPS, ITEMS, LASER_AMMO, ROCKETS, NPC_TYPES, MAPS, RESOURCES } from './data.js?v=9.9.0';
+import { V8_ASSETS } from './assets/v8/manifest.js?v=9.9.0';
+import { signUp, signIn, restoreSession, signOutLocal, getUser, loadCloudSave, saveCloudSave } from './api.js?v=9.9.0';
 
 const canvas = document.querySelector('#game');
 const ctx = canvas.getContext('2d');
@@ -651,6 +651,7 @@ const petRuntime = {
 };
 const state = {
   currentMap: MAPS.x1, camera: { x: 620, y: MAPS.x1.world.h/2 }, target: null, enemies: [], loot: [], ores: [], particles: [], fx: [], rocketFx: [], landmarks: [], enemyRespawns: [], oreRespawns: [], lastPortalAt: 0, radarRange: 1500, jumping: false,
+  lastPlayerDamageAt: nowSec(), repairFxAt: 0,
   shopTab: 'ships', hangarTab: 'ships', toastTimer: null, ammoUiExpanded: true, statsUiExpanded: true, minimapUiExpanded: true, topMetaExpanded: true,
   stars: Array.from({length:240},()=>({x:Math.random()*5200-2600,y:Math.random()*5200-2600,r:Math.random()*1.5+.3,a:Math.random()*.6+.2})),
 };
@@ -781,18 +782,47 @@ async function flushCloudSave(force=false){
   finally{cloudBusy=false;}
 }
 
+function extraSlotBonusFromLoadout(loadout=progress?.shipLoadout){
+  const extras=loadout?.extras||[];
+  let bonus=0;
+  for(const id of extras)bonus=Math.max(bonus,Number(ITEMS[id]?.slotBonus)||0);
+  return bonus;
+}
+function shipExtraCapacity(shipId=progress?.activeShipId,loadout=progress?.shipLoadout){
+  const ship=SHIPS[shipId];if(!ship)return 0;
+  return ship.extras+extraSlotBonusFromLoadout(loadout);
+}
+function activeRepairBot(){
+  const extras=progress?.shipLoadout?.extras||[];
+  let best=null;
+  for(const id of extras){
+    const item=ITEMS[id];
+    if(!item?.repairRate)continue;
+    if(!best||item.repairRate>best.repairRate)best=item;
+  }
+  return best;
+}
 function normalizeLoadout(){
-  if(!progress)return;
+  if(!progress)return 0;
   const ship=SHIPS[progress.activeShipId];
-  for(const type of ['lasers','generators','extras']){
+  let overflowCount=0;
+  for(const type of ['lasers','generators']){
     progress.shipLoadout[type] ||= [];
-    const cap=type==='lasers'?ship.lasers:type==='generators'?ship.generators:ship.extras;
+    const cap=type==='lasers'?ship.lasers:ship.generators;
     while(progress.shipLoadout[type].length<cap)progress.shipLoadout[type].push(null);
     if(progress.shipLoadout[type].length>cap){
       const overflow=progress.shipLoadout[type].splice(cap);
-      overflow.filter(Boolean).forEach(addInventory);
+      overflow.filter(Boolean).forEach(id=>{addInventory(id);overflowCount++;});
     }
   }
+  progress.shipLoadout.extras ||= [];
+  const extraCap=shipExtraCapacity(progress.activeShipId,progress.shipLoadout);
+  while(progress.shipLoadout.extras.length<extraCap)progress.shipLoadout.extras.push(null);
+  if(progress.shipLoadout.extras.length>extraCap){
+    const overflow=progress.shipLoadout.extras.splice(extraCap);
+    overflow.filter(Boolean).forEach(id=>{addInventory(id);overflowCount++;});
+  }
+  return overflowCount;
 }
 
 function addInventory(itemId,count=1){progress.inventory[itemId]=(progress.inventory[itemId]||0)+count;}
@@ -974,6 +1004,7 @@ function computeStats(keepRatio=true){
 }
 
 function initializeFaction(factionId){
+  state.lastPlayerDamageAt=nowSec();
   progress=freshSave(factionId);state.currentMap=MAPS.x1;player.hp=SHIPS.phoenix.hp;player.shield=1000;computeStats(false);setMap('x1',false);ui.factionModal.classList.add('hidden');buildAmmoButtons();renderAll();saveGame();flushCloudSave(true);showToast(`Bem-vindo à ${FACTIONS[factionId].name}`);
 }
 
@@ -1291,6 +1322,7 @@ function fireRocket(manual=false){
 }
 function takePlayerDamage(dmg){
   if(isSafeZone())return;
+  state.lastPlayerDamageAt=nowSec();
   const hadShield=player.shield>0,absorb=Math.max(0,Math.min(100,player.shieldAbsorption))/100;let shieldPart=dmg*absorb;let hullPart=dmg-shieldPart;
   if(player.shield>0){const got=Math.min(player.shield,shieldPart);player.shield-=got;shieldPart-=got;hullPart+=shieldPart;}
   else hullPart+=shieldPart;
@@ -1301,7 +1333,25 @@ function collectCargoBox(drop){const before=cargoFree();let total=0;for(const [i
 function updatePlayer(dt){
   const dx=player.tx-player.x,dy=player.ty-player.y,d=Math.hypot(dx,dy);if(d>2){const step=Math.min(d,player.speed*dt);player.x+=dx/d*step;player.y+=dy/d*step;}
   player.x=Math.max(35,Math.min(state.currentMap.world.w-35,player.x));player.y=Math.max(35,Math.min(state.currentMap.world.h-35,player.y));state.camera.x+=(player.x-state.camera.x)*.08;state.camera.y+=(player.y-state.camera.y)*.08;
-  const safe=isSafeZone();const inCombat=!safe&&state.enemies.some(e=>e.hp>0&&enemyDistance(e)<430);if(!inCombat){const regen=safe?.12:.045;player.shield=Math.min(player.maxShield,player.shield+player.maxShield*regen*dt);if(safe||hasExtra('rep2'))player.hp=Math.min(player.maxHp,player.hp+player.maxHp*(safe?.08:.025)*dt);}
+  const safe=isSafeZone();
+  const inCombat=!safe&&state.enemies.some(e=>e.hp>0&&enemyDistance(e)<430);
+  if(!inCombat){
+    const shieldRegen=safe?.12:.045;
+    player.shield=Math.min(player.maxShield,player.shield+player.maxShield*shieldRegen*dt);
+  }
+  if(safe){
+    player.hp=Math.min(player.maxHp,player.hp+player.maxHp*.08*dt);
+  }else{
+    const repairBot=activeRepairBot();
+    if(repairBot&&player.hp<player.maxHp&&nowSec()-state.lastPlayerDamageAt>=Number(repairBot.repairDelay||5)){
+      const before=player.hp;
+      player.hp=Math.min(player.maxHp,player.hp+player.maxHp*Number(repairBot.repairRate||0)*dt);
+      if(player.hp>before&&nowSec()-state.repairFxAt>.8){
+        state.repairFxAt=nowSec();
+        spawnParticle(player.x,player.y,`AUTO REPAIR +${Math.round((repairBot.repairRate||0)*100)}%/s`,'#73ffc0');
+      }
+    }
+  }
   maybeAutoBuyAmmo();
   checkLandmarkDiscovery();
   if(player.laserFiring)fireLaserTick();
@@ -1574,8 +1624,32 @@ function renderShop(){
 
 function returnShipEquipmentToInventory(){for(const k of ['lasers','generators','extras'])for(const id of progress.shipLoadout[k])if(id)addInventory(id);}
 function switchShip(shipId){if(!progress.ownedShips.includes(shipId)){showToast('Compre essa nave na Loja');return;}if(shipId===progress.activeShipId)return;returnShipEquipmentToInventory();progress.activeShipId=shipId;progress.shipLoadout=blankLoadout(shipId);player.laserFiring=false;computeStats(false);saveGame();renderHangar();buildAmmoButtons();showToast(`${SHIPS[shipId].name} ativada. Equipamentos antigos voltaram ao inventário.`);}
-function equipShipItem(itemId){const item=ITEMS[itemId];const key=item.type==='laser'?'lasers':item.type==='generator'?'generators':item.type==='extra'?'extras':null;if(!key)return;if(!removeInventory(itemId)){showToast('Item não disponível');return;}const idx=progress.shipLoadout[key].findIndex(v=>!v);if(idx<0){addInventory(itemId);showToast('Sem slot livre na nave');return;}progress.shipLoadout[key][idx]=itemId;computeStats(true);saveGame();renderHangar();buildAmmoButtons();updateExtraControls();}
-function unequipShipSlot(key,index){const id=progress.shipLoadout[key][index];if(!id)return;progress.shipLoadout[key][index]=null;addInventory(id);if(key==='extras'){for(const flag of ['autoLaser','autoRocket','turboRocket'])progress.flags[flag]=false;}computeStats(true);saveGame();renderHangar();buildAmmoButtons();}
+function equipShipItem(itemId){
+  const item=ITEMS[itemId];const key=item.type==='laser'?'lasers':item.type==='generator'?'generators':item.type==='extra'?'extras':null;if(!key)return;
+  if(key==='extras'&&item.exclusiveGroup){
+    const conflict=progress.shipLoadout.extras.find(id=>id&&id!==itemId&&ITEMS[id]?.exclusiveGroup===item.exclusiveGroup);
+    if(conflict){showToast(`Remova primeiro: ${ITEMS[conflict].name}`);return;}
+  }
+  if(!removeInventory(itemId)){showToast('Item não disponível');return;}
+  const idx=progress.shipLoadout[key].findIndex(v=>!v);
+  if(idx<0){addInventory(itemId);showToast('Sem slot livre na nave');return;}
+  progress.shipLoadout[key][idx]=itemId;
+  if(key==='extras')normalizeLoadout();
+  computeStats(true);saveGame();renderHangar();buildAmmoButtons();updateExtraControls();
+  if(item.slotBonus)showToast(`${item.name}: +${item.slotBonus} slots EXTRAS liberados`);
+}
+function unequipShipSlot(key,index){
+  const id=progress.shipLoadout[key][index];if(!id)return;
+  const wasExpansion=Number(ITEMS[id]?.slotBonus)||0;
+  progress.shipLoadout[key][index]=null;addInventory(id);
+  let overflow=0;
+  if(key==='extras'){
+    for(const flag of ['autoLaser','autoRocket','turboRocket'])progress.flags[flag]=false;
+    overflow=normalizeLoadout();
+  }
+  computeStats(true);saveGame();renderHangar();buildAmmoButtons();
+  if(wasExpansion&&overflow>0)showToast(`${overflow} equipamento${overflow>1?'s':''} excedente${overflow>1?'s':''} voltou${overflow>1?'aram':''} ao inventário`);
+}
 function equipDroneItem(itemId){const item=ITEMS[itemId];if(!(item.type==='laser'||(item.type==='generator'&&item.subtype==='shield'))){showToast('Drones aceitam lasers ou geradores de escudo');return;}const drone=progress.drones.find(d=>d.slots.some(v=>!v));if(!drone){showToast('Nenhum slot livre nos drones');return;}if(!removeInventory(itemId))return;drone.slots[drone.slots.findIndex(v=>!v)]=itemId;computeStats(true);saveGame();renderHangar();buildAmmoButtons();}
 function unequipDroneSlot(droneId,index){const d=progress.drones.find(x=>x.id===droneId);if(!d||!d.slots[index])return;addInventory(d.slots[index]);d.slots[index]=null;computeStats(true);saveGame();renderHangar();buildAmmoButtons();}
 function sellDrone(droneId){const d=progress.drones.find(x=>x.id===droneId);if(!d)return;d.slots.filter(Boolean).forEach(addInventory);progress.drones=progress.drones.filter(x=>x.id!==droneId);computeStats(true);saveGame();renderHangar();buildAmmoButtons();showToast('Drone removido; equipamentos voltaram ao inventário');}
@@ -1601,8 +1675,9 @@ function renderHangarShips(){
 }
 function renderHangarEquipment(){
   const ship=SHIPS[progress.activeShipId],root=document.createElement('div');root.className='hangar-layout';const left=document.createElement('div');left.className='hangar-column';const right=document.createElement('div');right.className='hangar-column';
-  const summary=document.createElement('div');summary.className='summary-grid';summary.innerHTML=`<div class="stat-card">Dano por tiro<strong>${fmt(player.laserDamage)}</strong></div><div class="stat-card">Escudo<strong>${fmt(player.maxShield)}</strong></div><div class="stat-card">Absorção<strong>${player.shieldAbsorption}%</strong></div><div class="stat-card">Velocidade<strong>${fmt(player.speed)}</strong></div>`;left.appendChild(summary);
-  for(const [key,title] of [['lasers',`Lasers da ${ship.name} (${ship.lasers})`],['generators',`Geradores (${ship.generators})`],['extras',`Extras (${ship.extras})`]]){const box=document.createElement('div');box.className='section-box';box.innerHTML=`<h3>${title}</h3>`;const grid=document.createElement('div');grid.className='slot-grid';progress.shipLoadout[key].forEach((id,i)=>grid.appendChild(slotCard(`${title.split(' ')[0]} ${i+1}`,id,key,i)));box.appendChild(grid);left.appendChild(box);}
+  const repairBot=activeRepairBot(),extraCap=shipExtraCapacity(),extraBonus=extraCap-ship.extras;
+  const summary=document.createElement('div');summary.className='summary-grid';summary.innerHTML=`<div class="stat-card">Dano por tiro<strong>${fmt(player.laserDamage)}</strong></div><div class="stat-card">Escudo<strong>${fmt(player.maxShield)}</strong></div><div class="stat-card">Absorção<strong>${player.shieldAbsorption}%</strong></div><div class="stat-card">Velocidade<strong>${fmt(player.speed)}</strong></div><div class="stat-card">Slots EXTRAS<strong>${extraCap}${extraBonus?` (+${extraBonus})`:''}</strong></div><div class="stat-card">Reparo Auto<strong>${repairBot?`${Math.round(repairBot.repairRate*100)}%/s`:'OFF'}</strong></div>`;left.appendChild(summary);
+  for(const [key,title] of [['lasers',`Lasers da ${ship.name} (${ship.lasers})`],['generators',`Geradores (${ship.generators})`],['extras',`Extras (${extraCap}${extraBonus?` = ${ship.extras} + ${extraBonus}`:''})`]]){const box=document.createElement('div');box.className='section-box';box.innerHTML=`<h3>${title}</h3>`;const grid=document.createElement('div');grid.className='slot-grid';progress.shipLoadout[key].forEach((id,i)=>grid.appendChild(slotCard(`${title.split(' ')[0]} ${i+1}`,id,key,i)));box.appendChild(grid);left.appendChild(box);}
   const inv=document.createElement('div');inv.className='section-box';inv.innerHTML='<h3>Inventário disponível</h3>';const grid=document.createElement('div');grid.className='inventory-grid';const entries=Object.entries(progress.inventory).filter(([id,q])=>q>0&&ITEMS[id]);if(!entries.length)grid.innerHTML='<div class="empty-state">Seu inventário de equipamentos está vazio. Compre itens na Loja.</div>';else entries.forEach(([id,q])=>grid.appendChild(inventoryCard(id,q)));inv.appendChild(grid);right.appendChild(inv);root.append(left,right);return root;
 }
 function renderHangarDrones(){const root=document.createElement('div');const info=document.createElement('div');info.className='section-box';info.innerHTML=`<h3>Esquadrão de drones — ${progress.drones.length}/8</h3><div class="muted" style="font-size:12px">Flax: 1 slot • Iris: 2 slots. Os drones permanecem equipados quando você troca de nave.</div>`;root.appendChild(info);const grid=document.createElement('div');grid.className='drone-grid';if(!progress.drones.length){grid.innerHTML='<div class="empty-state">Você ainda não possui drones. Vá à Loja → Drones.</div>';}progress.drones.forEach((d,idx)=>{const model=ITEMS[d.type],c=document.createElement('div');c.className='drone-card';c.innerHTML=`<img class="drone-art" src="${V8_ASSETS.drones[d.type]}" alt="${model.name}"><div><span class="badge ${d.type==='iris'?'elite':''}">${d.type==='iris'?'ELITE':'COMUM'}</span><h3>${model.name} #${idx+1}</h3></div><div class="drone-stats">${model.slots} slot${model.slots>1?'s':''} • aceita laser ou gerador de escudo</div>`;const sg=document.createElement('div');sg.className='slot-grid';d.slots.forEach((id,i)=>sg.appendChild(slotCard(`Slot ${i+1}`,id,null,i,d.id)));c.appendChild(sg);const rm=document.createElement('button');rm.className='danger-btn';rm.textContent='Remover drone';rm.onclick=()=>sellDrone(d.id);c.appendChild(rm);grid.appendChild(c);});root.appendChild(grid);return root;}
@@ -1785,6 +1860,7 @@ ui.registerForm.onsubmit=async e=>{e.preventDefault();ui.authMessage.textContent
 ui.logoutBtn.onclick=async()=>{await flushCloudSave(true);signOutLocal();authenticated=false;progress=null;state.target=null;player.laserFiring=false;ui.mapModal.classList.add('hidden');ui.petModal.classList.add('hidden');ui.shopModal.classList.add('hidden');ui.hangarModal.classList.add('hidden');ui.cargoModal.classList.add('hidden');ui.gateModal?.classList.add('hidden');ui.factionModal.classList.add('hidden');ui.portalPrompt.classList.add('hidden');ui.loginModal.classList.remove('hidden');ui.userLabel.textContent='—';setSync('LOCAL','');showAuthMode('login');};
 
 function startLoadedGame(){
+  state.lastPlayerDamageAt=nowSec();
   normalizeGalaxyGateState();
   if(progress.mapId==='ggAlpha'&&!progress.galaxyGate.alpha.run?.active)progress.mapId='x1';
   const savedX=Number.isFinite(progress.x)?progress.x:null,savedY=Number.isFinite(progress.y)?progress.y:null;state.currentMap=MAPS[progress.mapId]||MAPS.x1;state.radarRange=mapRadarRange();player.hp=progress.hp||1;player.shield=progress.shield||0;computeStats(true);player.hp=Math.min(player.maxHp,progress.hp??player.maxHp);player.shield=Math.min(player.maxShield,progress.shield??player.maxShield);

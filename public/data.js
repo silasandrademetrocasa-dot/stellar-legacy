@@ -49,7 +49,31 @@ export const ITEMS = {
   autoLaserCpu: { id: 'autoLaserCpu', type: 'extra', name: 'Auto Laser CPU', price: 12000, currency: 'credits', description: 'Ao selecionar um alvo, inicia o laser automaticamente.' },
   autoRocketCpu: { id: 'autoRocketCpu', type: 'extra', name: 'Auto Rocket CPU', price: 15000, currency: 'credits', description: 'Dispara automaticamente o míssil selecionado durante o combate.' },
   rocketTurboCpu: { id: 'rocketTurboCpu', type: 'extra', name: 'Rocket Turbo CPU', price: 12000, currency: 'credits', description: 'Reduz o cooldown de mísseis pela metade.' },
-  rep2: { id: 'rep2', type: 'extra', name: 'Repair Bot REP-2', price: 10000, currency: 'credits', description: 'Regenera HP fora de combate.' },
+
+  // EXPANSÃO DE SLOTS EXTRAS
+  extraSlotCpuCommon: {
+    id: 'extraSlotCpuCommon', type: 'extra', name: 'CPU Expansora de Extras • Comum',
+    price: 250000, currency: 'credits', slotBonus: 3, exclusiveGroup: 'extraSlotExpansion',
+    description: 'Enquanto equipada, libera +3 slots EXTRAS adicionais na nave ativa. Não acumula com a versão Elite.'
+  },
+  extraSlotCpuElite: {
+    id: 'extraSlotCpuElite', type: 'extra', name: 'CPU Expansora de Extras • Elite',
+    price: 12500, currency: 'uridium', slotBonus: 6, exclusiveGroup: 'extraSlotExpansion',
+    description: 'Enquanto equipada, libera +6 slots EXTRAS adicionais na nave ativa. Não acumula com a versão Comum.'
+  },
+
+  // ROBÔS DE REPARAÇÃO AUTOMÁTICA
+  rep2: {
+    id: 'rep2', type: 'extra', name: 'Repair Bot Auto • Comum',
+    price: 80000, currency: 'credits', repairRate: 0.01, repairDelay: 5, exclusiveGroup: 'repairBot',
+    description: 'Após 5s sem receber dano, repara automaticamente 1% do HP máximo por segundo, inclusive fora da base.'
+  },
+  repElite: {
+    id: 'repElite', type: 'extra', name: 'Repair Bot Auto • Elite',
+    price: 8000, currency: 'uridium', repairRate: 0.02, repairDelay: 5, exclusiveGroup: 'repairBot',
+    description: 'Após 5s sem receber dano, repara automaticamente 2% do HP máximo por segundo, inclusive fora da base.'
+  },
+
   ammoAutoBuyCpu: { id: 'ammoAutoBuyCpu', type: 'extra', name: 'Auto Buy CPU', price: 18000, currency: 'credits', description: 'Compra automaticamente novo pacote da munição laser e do míssil selecionados quando o estoque estiver baixo.' },
 
   // DRONES
