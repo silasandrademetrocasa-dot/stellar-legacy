@@ -100,6 +100,7 @@ export const V8_ASSETS = {
     "x4": "/assets/v8/backgrounds/fire-sector.jpg",
     "b41": "/assets/v8/backgrounds/deep-battle.jpg",
     "b42": "/assets/v8/backgrounds/alien-core.jpg",
-    "b43": "/assets/v8/backgrounds/fire-sector.jpg"
+    "b43": "/assets/v8/backgrounds/fire-sector.jpg",
+    "ggAlpha": "/assets/v8/backgrounds/alien-core.jpg"
   }
 };

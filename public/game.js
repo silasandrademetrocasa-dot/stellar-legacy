@@ -1,6 +1,6 @@
-import { FACTIONS, SHIPS, ITEMS, LASER_AMMO, ROCKETS, NPC_TYPES, MAPS, RESOURCES } from './data.js';
-import { V8_ASSETS } from './assets/v8/manifest.js';
-import { signUp, signIn, restoreSession, signOutLocal, getUser, loadCloudSave, saveCloudSave } from './api.js';
+import { FACTIONS, SHIPS, ITEMS, LASER_AMMO, ROCKETS, NPC_TYPES, MAPS, RESOURCES } from './data.js?v=9.8.3';
+import { V8_ASSETS } from './assets/v8/manifest.js?v=9.8.3';
+import { signUp, signIn, restoreSession, signOutLocal, getUser, loadCloudSave, saveCloudSave } from './api.js?v=9.8.3';
 
 const canvas = document.querySelector('#game');
 const ctx = canvas.getContext('2d');
@@ -1043,11 +1043,23 @@ function makeEnemy(type){
 function spawnEnemies(){state.enemies=[];state.enemyRespawns=[];const mult=Math.max(1,Number(state.currentMap.enemyMultiplier)||1);for(const group of state.currentMap.enemyGroups){const count=Math.max(1,Math.round(group.count*mult));for(let i=0;i<count;i++)state.enemies.push(makeEnemy(group.type));}}
 function scheduleEnemyRespawn(type){state.enemyRespawns.push({type,at:nowSec()+rand(6,13)});}
 function makeGateEnemy(type,index=0,total=1){
-  const e=makeEnemy(type),center={x:MAPS.ggAlpha.world.w/2,y:MAPS.ggAlpha.world.h/2};
-  const ring=1250+rand(-180,280),a=(index/Math.max(1,total))*TWO_PI+rand(-.18,.18);
-  e.x=Math.max(180,Math.min(MAPS.ggAlpha.world.w-180,center.x+Math.cos(a)*ring));
-  e.y=Math.max(180,Math.min(MAPS.ggAlpha.world.h-180,center.y+Math.sin(a)*ring*.72));
-  e.gateEnemy=true;e.aggroRange=1800;e.attackRange=Math.min(620,e.attackRange+80);
+  const e=makeEnemy(type);
+  const center={x:player.x||MAPS.ggAlpha.world.w/2,y:player.y||MAPS.ggAlpha.world.h/2};
+  const radar=Math.max(1200,state.radarRange||mapRadarRange());
+  const ring=radar*rand(.82,.96);
+  const baseAngle=(index/Math.max(1,total))*TWO_PI;
+  let a=baseAngle+rand(-.16,.16),x=center.x+Math.cos(a)*ring,y=center.y+Math.sin(a)*ring;
+  // Tenta preservar o nascimento no anel do radar sem grudar na borda do mapa.
+  for(let tries=0;tries<10&&(x<180||x>MAPS.ggAlpha.world.w-180||y<180||y>MAPS.ggAlpha.world.h-180);tries++){
+    a=baseAngle+rand(-.55,.55);
+    x=center.x+Math.cos(a)*ring;y=center.y+Math.sin(a)*ring;
+  }
+  e.x=Math.max(180,Math.min(MAPS.ggAlpha.world.w-180,x));
+  e.y=Math.max(180,Math.min(MAPS.ggAlpha.world.h-180,y));
+  e.gateEnemy=true;
+  e.forceChase=true;
+  e.aggroRange=Number.POSITIVE_INFINITY;
+  e.attackRange=Math.min(620,e.attackRange+80);
   return e;
 }
 function countAliveGateByType(){
@@ -1089,10 +1101,30 @@ function setupAlphaMap(resume=false){
   player.x=MAPS.ggAlpha.world.w/2;player.y=MAPS.ggAlpha.world.h/2;player.tx=player.x;player.ty=player.y;
   petRuntime.x=player.x+82;petRuntime.y=player.y+64;petRuntime.tx=petRuntime.x;petRuntime.ty=petRuntime.y;
   state.camera.x=player.x;state.camera.y=player.y;state.target=null;state.loot=[];state.ores=[];state.landmarks=[];state.fx=[];state.rocketFx=[];state.enemyRespawns=[];state.oreRespawns=[];
-  if(resume&&Object.keys(a.run.remaining||{}).length)restoreAlphaGateEnemies();else state.enemies=[];
-  if(a.run.waveIndex===0&&alphaRemainingCount()===0)spawnAlphaWave();
-  else if(a.run.waveIndex<(GALAXY_ALPHA_ROUNDS[a.run.round-1]?.waves.length||0)&&!a.run.nextWaveAt)a.run.nextWaveAt=Date.now()+GALAXY_ALPHA_WAVE_INTERVAL_MS;
-  saveGame();renderAll();renderGateHud();
+  if(resume&&Object.values(a.run.remaining||{}).some(v=>Number(v)>0))restoreAlphaGateEnemies();else state.enemies=[];
+
+  const def=GALAXY_ALPHA_ROUNDS[a.run.round-1];
+  const alive=alphaRemainingCount();
+  const now=Date.now();
+
+  // Entrada nova: o primeiro grupo nasce após 10 segundos.
+  if(a.run.waveIndex===0&&alive===0){
+    a.run.nextRoundAt=0;
+    a.run.nextWaveAt=now+GALAXY_ALPHA_WAVE_INTERVAL_MS;
+    showToast(`ALFA • Round ${a.run.round} começa em 10 segundos`);
+  }
+  // Save antigo / retorno após morte no meio de um round: garante que o relógio recomece.
+  else if(a.run.waveIndex<def.waves.length&&!a.run.nextWaveAt){
+    a.run.nextRoundAt=0;
+    a.run.nextWaveAt=now+GALAXY_ALPHA_WAVE_INTERVAL_MS;
+  }
+  // Todas as ondas já nasceram e não há mais NPC: prepara o próximo round.
+  else if(a.run.waveIndex>=def.waves.length&&alive===0&&a.run.round<GALAXY_ALPHA_ROUNDS.length&&!a.run.nextRoundAt){
+    a.run.nextWaveAt=0;
+    a.run.nextRoundAt=now+GALAXY_ALPHA_ROUND_INTERVAL_MS;
+  }
+
+  saveGame();renderAll();layoutHudPanels();renderGateHud();
 }
 function enterAlphaGate(){
   const a=alphaGate();
@@ -1143,12 +1175,36 @@ function updateAlphaGate(){
   if(!isGalaxyGateMap())return;
   const a=alphaGate(),run=a.run;if(!run?.active)return;
   const def=GALAXY_ALPHA_ROUNDS[run.round-1];if(!def)return;
-  const now=Date.now();
-  if(run.waveIndex<def.waves.length && run.nextWaveAt && now>=run.nextWaveAt){run.nextWaveAt=0;spawnAlphaWave();return;}
-  if(run.waveIndex>=def.waves.length && alphaRemainingCount()===0){
+  const now=Date.now(),alive=alphaRemainingCount();
+
+  // Autocorreção: nunca deixa um round congelado sem timer.
+  if(run.waveIndex<def.waves.length&&!run.nextWaveAt){
+    run.nextWaveAt=now+GALAXY_ALPHA_WAVE_INTERVAL_MS;
+  }
+
+  if(run.waveIndex<def.waves.length&&run.nextWaveAt&&now>=run.nextWaveAt){
+    run.nextWaveAt=0;
+    spawnAlphaWave();
+    return;
+  }
+
+  // O próximo round só é liberado depois que TODAS as ondas do atual já nasceram
+  // E todos os NPCs restantes foram eliminados.
+  if(run.waveIndex>=def.waves.length&&alive===0){
     if(run.round>=GALAXY_ALPHA_ROUNDS.length){completeAlphaGate();return;}
-    if(!run.nextRoundAt){run.nextRoundAt=now+GALAXY_ALPHA_ROUND_INTERVAL_MS;showToast(`Round ${run.round} concluído • próximo round em 10 segundos`);saveGame();}
-    else if(now>=run.nextRoundAt){run.round++;run.waveIndex=0;run.remaining={};run.nextRoundAt=0;run.nextWaveAt=0;spawnAlphaWave();}
+    if(!run.nextRoundAt){
+      run.nextRoundAt=now+GALAXY_ALPHA_ROUND_INTERVAL_MS;
+      showToast(`Round ${run.round} concluído • próximo round em 10 segundos`);
+      saveGame();
+    }else if(now>=run.nextRoundAt){
+      run.round++;
+      run.waveIndex=0;
+      run.remaining={};
+      run.nextRoundAt=0;
+      run.nextWaveAt=now+GALAXY_ALPHA_WAVE_INTERVAL_MS;
+      showToast(`ALFA • Round ${run.round} começa em 10 segundos`);
+      saveGame();
+    }
   }
   renderGateHud();
 }
@@ -1266,10 +1322,11 @@ function updateEnemies(dt){
     if(progress.mapId==='x1'&&safeZoneDistance(e.x,e.y)<SAFE_ZONE.radius+35){
       const ox=e.x-SAFE_ZONE.x,oy=e.y-SAFE_ZONE.y,od=Math.hypot(ox,oy)||1;e.x=SAFE_ZONE.x+ox/od*(SAFE_ZONE.radius+38);e.y=SAFE_ZONE.y+oy/od*(SAFE_ZONE.radius+38);
     }
-    if(!playerSafe&&d<e.aggroRange&&d>e.attackRange*.8){
-      const nx=e.x+dx/d*e.speed*dt,ny=e.y+dy/d*e.speed*dt;
+    const forceChase=!!e.gateEnemy||!!e.forceChase;
+    if(!playerSafe&&(forceChase||d<e.aggroRange)&&d>e.attackRange*.8){
+      const nd=Math.max(1,d),nx=e.x+dx/nd*e.speed*dt,ny=e.y+dy/nd*e.speed*dt;
       if(!(progress.mapId==='x1'&&safeZoneDistance(nx,ny)<SAFE_ZONE.radius+25)){e.x=nx;e.y=ny;}
-    }else if(d>e.aggroRange||playerSafe){e.x+=Math.cos(e.angle)*e.speed*.16*dt;e.y+=Math.sin(e.angle)*e.speed*.16*dt;}
+    }else if(!forceChase&&(d>e.aggroRange||playerSafe)){e.x+=Math.cos(e.angle)*e.speed*.16*dt;e.y+=Math.sin(e.angle)*e.speed*.16*dt;}
     e.x=Math.max(25,Math.min(state.currentMap.world.w-25,e.x));e.y=Math.max(25,Math.min(state.currentMap.world.h-25,e.y));
     if(!playerSafe&&d<e.attackRange&&nowSec()-e.lastShot>(e.name.includes('Boss')?1.6:1.15)){e.lastShot=nowSec();e.lastAttackPlayerAt=nowSec();takePlayerDamage(e.damage*rand(.92,1.12));spawnParticle(player.x,player.y-28,Math.round(e.damage),'#ff8080');}
   }
@@ -1663,7 +1720,7 @@ function renderGateHud(){
   const active=isGalaxyGateMap()&&alphaGate().run?.active;ui.gateHud.classList.toggle('hidden',!active);if(!active)return;
   const a=alphaGate(),run=a.run,def=GALAXY_ALPHA_ROUNDS[run.round-1],now=Date.now();
   ui.gateHudRound.textContent=`${run.round} / 8`;
-  ui.gateHudWave.textContent=`${Math.max(1,run.waveIndex)} / ${def.waves.length}`;
+  ui.gateHudWave.textContent=run.waveIndex===0?'AGUARDANDO':`${run.waveIndex} / ${def.waves.length}`;
   ui.gateHudRemaining.textContent=fmt(alphaRemainingCount());
   let next='—';
   if(run.nextWaveAt)next=`${Math.max(0,Math.ceil((run.nextWaveAt-now)/1000))}s`;
@@ -1698,7 +1755,15 @@ function renderGalaxyGate(){
   ui.useRepairBonus.disabled=g.repairBonus<=0||isGalaxyGateMap();
   renderGateRounds();renderGateHud();
 }
-function openGalaxyGate(){renderGalaxyGate();ui.gateModal.classList.remove('hidden');}
+function openGalaxyGate(){
+  if(isGalaxyGateMap()){
+    const a=alphaGate(),def=GALAXY_ALPHA_ROUNDS[a.run?.round-1];
+    renderGateHud();
+    showToast(`ALFA • Round ${a.run?.round||1} • ${alphaRemainingCount()} NPCs vivos${def?` • ${a.lives} vidas`:''}`);
+    return;
+  }
+  renderGalaxyGate();ui.gateModal.classList.remove('hidden');
+}
 
 function renderAll(){buildAmmoButtons();renderShop();renderHangar();renderCargo();renderMapModal();renderPet();renderMissions();renderGalaxyGate();updateUI();}
 

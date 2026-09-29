@@ -158,4 +158,12 @@ export const MAPS = {
     portals: [{ x: 850, y: 4000, to: 'x4HomeJupiter' }, { x: 10200, y: 2300, to: 'b41' }, { x: 10200, y: 5700, to: 'b42' }],
     enemyGroups: [{ type: 'mordon', count: 9 }, { type: 'devolarium', count: 8 }, { type: 'bossDevolarium', count: 4 }, { type: 'sibelon', count: 6 }, { type: 'bossSibelon', count: 3 }],
   },
+  ggAlpha: {
+    id: 'ggAlpha', label: 'ALFA', tier: 90, gate: true, battle: true, name: 'Galaxy Gate Alpha', risk: 'Portal',
+    world: { w: 7200, h: 5200 }, enemyMultiplier: 1, ores: [], oreCount: 0, landmarkCount: 0,
+    palette: { nebula: '#2f1d5e', accent: '#b278ff', deep: '#03030d' },
+    structures: ['Galaxy Gate Alpha'],
+    portals: [],
+    enemyGroups: [],
+  },
 };
