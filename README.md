@@ -1,4 +1,4 @@
-# Stellar Legacy V9.6 — Mission Arsenal
+# Stellar Legacy V9.8 — Dynamic Mission Flow
 
 Grande atualização de conteúdo sobre a base V9 Expedition. Mantém os mapas expandidos e adiciona densidade maior de NPCs e um sistema persistente de missões com aceite manual.
 
@@ -142,3 +142,53 @@ Release: **9.0.0**
 - Missões especiais pagam 100% da soma dos ganhos dos alvos; diárias/semanais/mensais continuam pagando 50%.
 - Parte das missões compostas é sequencial: uma tarefa precisa ser concluída para desbloquear a próxima.
 - Painel ganhou busca e filtro por NPC/BOSS/PEDRAS/MISTAS/NPC+PEDRA.
+
+
+## V9.7 — Galaxy Gate Alpha
+
+### Montagem
+- 34 peças únicas para montar o portal ALFA.
+- Cada sorteio do materializador custa 10 Uridium.
+- Botões: 1x, 5x, 10x, 50x e 100x.
+- Possíveis resultados: peça ALFA, LCB-10, MCB-25, MCB-50, UCB-100, R-310, PLT-2026, PLT-2021, PLT-3030, Xenomit, Créditos, Bônus de Salto e Bônus de Reparo.
+- Bônus de Reparo já pode ser consumido na base para reparar HP e escudo completamente.
+
+### Combate
+- 8 rounds.
+- 3 vidas por tentativa.
+- Morrer no ALFA devolve o piloto à base X-1 e mantém mortos os NPCs já eliminados.
+- O piloto precisa saltar novamente pelo painel Galaxy Gate para continuar.
+- Ao perder as 3 vidas, o ALFA é perdido e precisa ser remontado.
+
+### Ondas
+1. 4x 10 Streuners
+2. 4x 10 Lordakias
+3. 4x 10 Saimons
+4. 4x 10 Mordons
+5. 10 Boss Streuners → 10 Boss Lordakias → 10 Boss Saimons → 10 Boss Mordons
+6. 4x 5 Devolariums
+7. 2x 5 Boss Devolariums
+8. 10 Sibelons → 10 Sibelons → 10 Boss Sibelons → 5 Boss Sibelons
+
+As ondas têm 10 segundos entre elas.
+
+### Recompensa
+- As eliminações dão os ganhos normais durante o portal.
+- Ao completar o ALFA, o jogo concede +200% adicionais dos Créditos, Uridium e XP obtidos pelos NPCs do gate.
+- Total final de recompensa direta dos NPCs: 3X.
+
+
+## V9.8 — Dynamic Mission Flow
+- Semanais e mensais exibem somente o próximo degrau por NPC/pedra.
+- Missão concluída some da tela e a recompensa entra automaticamente.
+- Animações de MISSÃO COMPLETA e LEVEL UP.
+- Drones e P.E.T. mais afastados da nave.
+- P.E.T. usa a mesma munição laser selecionada pela nave, 1 munição por laser/rajada, com Auto Buy compatível.
+
+
+## V9.8.1 — Gate Timing Fix
+- Dentro de cada Round, as ondas continuam aparecendo automaticamente a cada 10 segundos, mesmo que ainda existam NPCs da onda anterior.
+- O próximo Round NUNCA começa enquanto houver qualquer NPC vivo do Round atual.
+- Depois que a última onda do Round já apareceu e todos os NPCs daquele Round forem eliminados, inicia uma contagem de 10 segundos.
+- Após esses 10 segundos, a primeira onda do próximo Round aparece.
+- As ondas seguintes desse novo Round continuam entrando de 10 em 10 segundos.
