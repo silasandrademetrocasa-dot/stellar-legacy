@@ -1,6 +1,6 @@
-import { FACTIONS, SHIPS, ITEMS, LASER_AMMO, ROCKETS, NPC_TYPES, MAPS, RESOURCES } from './data.js?v=10.0.0';
-import { V8_ASSETS } from './assets/v8/manifest.js?v=10.0.0';
-import { signUp, signIn, restoreSession, signOutLocal, getUser, loadCloudSave, saveCloudSave } from './api.js?v=10.0.0';
+import { FACTIONS, SHIPS, ITEMS, LASER_AMMO, ROCKETS, NPC_TYPES, MAPS, RESOURCES } from './data.js?v=10.1.0';
+import { V8_ASSETS } from './assets/v8/manifest.js?v=10.1.0';
+import { signUp, signIn, restoreSession, signOutLocal, getUser, loadCloudSave, saveCloudSave } from './api.js?v=10.1.0';
 
 const canvas = document.querySelector('#game');
 const ctx = canvas.getContext('2d');
@@ -37,6 +37,7 @@ function drawSprite(path,x,y,maxSize,rotation=0,alpha=1){
 function assetForProduct(id,type,subtype){
   if(type==='ship')return V8_ASSETS.ships[id];
   if(type==='drone')return V8_ASSETS.drones[id];
+  if(type==='pet')return V8_ASSETS.drones.pet;
   if(type==='ammo'||type==='rocket')return V8_ASSETS.ammo[id];
   if(V8_ASSETS.equipment[id])return V8_ASSETS.equipment[id];
   return null;
@@ -98,7 +99,7 @@ let authenticated = false;
 function saveKey(){return `${SAVE_KEY_PREFIX}:${getUser()?.id || 'guest'}`;}
 const TWO_PI = Math.PI * 2;
 const categories = {
-  ships: 'Naves', lasers: 'Lasers', generators: 'Geradores', drones: 'Drones', extras: 'Extras', ammo: 'Munição', rockets: 'Mísseis'
+  ships:'Naves', lasers:'Lasers', generators:'Geradores', drones:'Drones', pet:'P.E.T.', extras:'Extras', ammo:'Munição', rockets:'Mísseis'
 };
 
 // ===================== V10 PILOT BIO =====================
@@ -150,7 +151,7 @@ function auctionHourKey(d=new Date()){return `${d.getFullYear()}-${String(d.getM
 function auctionSecondsLeft(){const d=new Date(),next=new Date(d);next.setMinutes(60,0,0);return Math.max(0,Math.ceil((next-d)/1000));}
 function auctionSeed(str){let h=2166136261>>>0;for(let i=0;i<str.length;i++){h^=str.charCodeAt(i);h=Math.imul(h,16777619);}return h>>>0;}
 function auctionRand(seed){let x=seed>>>0;return()=>{x=(Math.imul(1664525,x)+1013904223)>>>0;return x/4294967296;};}
-function eliteAuctionCatalog(){const out=[];Object.values(SHIPS).filter(x=>x.currency==='uridium').forEach(x=>out.push({ref:`ship:${x.id}`,kind:'ship',id:x.id,name:x.name,uri:x.price,qty:1}));Object.values(ITEMS).filter(x=>x.currency==='uridium').forEach(x=>out.push({ref:`item:${x.id}`,kind:'item',id:x.id,name:x.name,uri:x.price,qty:1}));Object.values(LASER_AMMO).filter(x=>x.currency==='uridium').forEach(x=>out.push({ref:`ammo:${x.id}`,kind:'ammo',id:x.id,name:`${x.name} • pacote ${fmt(x.pack)}`,uri:x.price,qty:x.pack}));Object.values(ROCKETS).filter(x=>x.currency==='uridium').forEach(x=>out.push({ref:`rocket:${x.id}`,kind:'rocket',id:x.id,name:`${x.name} • pacote ${fmt(x.pack)}`,uri:x.price,qty:x.pack}));Object.values(PET_GEARS).filter(x=>x.currency==='uridium').forEach(x=>out.push({ref:`petGear:${x.id}`,kind:'petGear',id:x.id,name:`P.E.T. • ${x.name}`,uri:x.cost,qty:1}));return out;}
+function eliteAuctionCatalog(){const out=[];Object.values(SHIPS).filter(x=>x.currency==='uridium'&&!x.eventOnly&&x.shopAvailable!==false&&x.auctionEligible!==false).forEach(x=>out.push({ref:`ship:${x.id}`,kind:'ship',id:x.id,name:x.name,uri:x.price,qty:1}));Object.values(ITEMS).filter(x=>x.currency==='uridium'&&!x.eventOnly&&x.shopAvailable!==false&&x.auctionEligible!==false).forEach(x=>out.push({ref:`item:${x.id}`,kind:'item',id:x.id,name:x.name,uri:x.price,qty:1}));Object.values(LASER_AMMO).filter(x=>x.currency==='uridium').forEach(x=>out.push({ref:`ammo:${x.id}`,kind:'ammo',id:x.id,name:`${x.name} • pacote ${fmt(x.pack)}`,uri:x.price,qty:x.pack}));Object.values(ROCKETS).filter(x=>x.currency==='uridium').forEach(x=>out.push({ref:`rocket:${x.id}`,kind:'rocket',id:x.id,name:`${x.name} • pacote ${fmt(x.pack)}`,uri:x.price,qty:x.pack}));Object.values(PET_GEARS).filter(x=>x.currency==='uridium').forEach(x=>out.push({ref:`petGear:${x.id}`,kind:'petGear',id:x.id,name:`P.E.T. • ${x.name}`,uri:x.cost,qty:1}));return out;}
 function buildAuctionLots(key){const lots={};for(const entry of eliteAuctionCatalog()){const rnd=auctionRand(auctionSeed(`${key}:${entry.ref}`)),reserve=Math.max(100000,Math.round(entry.uri*70*(.75+rnd()*.5)/100000)*100000),finalBid=Math.max(reserve+100000,Math.round(reserve*(1.25+rnd()*1.75)/100000)*100000);lots[entry.ref]={...entry,reserve,finalNpcBid:finalBid,userBid:0,escrow:0};}return lots;}
 function auctionNpcBid(lot){const d=new Date(),fraction=(d.getMinutes()*60+d.getSeconds())/3600;return Math.max(100000,Math.round((lot.reserve+(lot.finalNpcBid-lot.reserve)*fraction)/100000)*100000);}
 function auctionEscrow(){return Object.values(progress?.auction?.lots||{}).reduce((sum,l)=>sum+(Number(l.escrow)||0),0);}
@@ -163,7 +164,24 @@ function grantAuctionLot(lot){
 function settleAuction(){const a=progress.auction;if(!a?.lots)return;for(const lot of Object.values(a.lots)){if(!lot.userBid||!lot.escrow)continue;const won=lot.userBid>=lot.finalNpcBid;let granted=false;if(won)granted=grantAuctionLot(lot);if(!won||!granted)progress.profile.credits+=lot.escrow;a.history.unshift({at:Date.now(),name:lot.name,bid:lot.userBid,result:won&&granted?'VENCEU':won?'REEMBOLSADO':'PERDEU'});}a.history=a.history.slice(0,12);}
 function ensureAuctionState(){progress.auction ||= freshAuctionState();const key=auctionHourKey();if(progress.auction.hourKey!==key){if(progress.auction.hourKey)settleAuction();progress.auction.hourKey=key;progress.auction.lots=buildAuctionLots(key);saveGame();}}
 
-const PET_MAX_LEVEL = 15;
+const PLAYER_MAX_LEVEL=44;
+const PET_MAX_LEVEL=44;
+const PET_SLOT_LEVEL_CAP=15;
+const PET_BASE_PRICE=1500000;
+function levelXpThreshold(level){
+  if(level<=1)return 0;
+  return Math.round(10000*Math.pow(2,level-2));
+}
+function levelProgressPercent(xp,level,maxLevel=PLAYER_MAX_LEVEL){
+  if(level>=maxLevel)return 100;
+  const base=levelXpThreshold(level),next=levelXpThreshold(level+1);
+  return Math.max(0,Math.min(100,(xp-base)/Math.max(1,next-base)*100));
+}
+function levelFromXp(xp,maxLevel=PLAYER_MAX_LEVEL){
+  let level=1;
+  while(level<maxLevel&&xp>=levelXpThreshold(level+1))level++;
+  return level;
+}
 const PET_GEARS = {
   guard: { id:'guard', name:'Modo Guardião', cost:150000, currency:'uridium', description:'Ataca automaticamente inimigos no alcance que estiverem causando dano à sua nave.' },
   box: { id:'box', name:'Coletor de BOX', cost:100000, currency:'uridium', description:'Busca cargo boxes próximas e vende automaticamente os recursos vendáveis. Xenomit é guardada.' },
@@ -173,11 +191,11 @@ const PET_GEARS = {
 };
 function freshPet(){
   return {
-    level: 1, xp: 0,
-    laserSlotsUnlocked: 1, shieldSlotsUnlocked: 1,
-    lasers: [null], shields: [null],
-    gearsOwned: { guard:false, box:false, ore:false, repair:false, kami:false },
-    activeGear: 'off'
+    owned:false, level:1, xp:0, xpModelV101:true,
+    laserSlotsUnlocked:0, shieldSlotsUnlocked:0,
+    lasers:[], shields:[],
+    gearsOwned:{guard:false,box:false,ore:false,repair:false,kami:false},
+    activeGear:'off'
   };
 }
 
@@ -434,9 +452,9 @@ function normalizeMissionState(){
 function npcKillReward(enemy){
   if(!enemy)return {credits:0,uridium:0,xp:0};
   return {
-    credits: Math.max(0,Number(enemy.credits)||0),
-    uridium: Math.max(0,Number(enemy.uridium)||0),
-    xp: Math.max(0,Math.round((Number(enemy.credits)||0)/10+(Number(enemy.uridium)||0)*12)),
+    credits:Math.max(0,Number(enemy.credits)||0),
+    uridium:Math.max(0,Number(enemy.uridium)||0),
+    xp:Math.max(0,Math.round(Number(enemy.xp) || ((Number(enemy.credits)||0)/10+(Number(enemy.uridium)||0)*12))),
   };
 }
 function missionFactor(mission){return Math.max(0,Number(mission?.rewardFactor ?? .5));}
@@ -533,7 +551,55 @@ function abandonMission(category){
   const mission=missionById(category,active.id);progress.missions.active[category]=null;
   saveGame();renderMissions();updateMissionButton();showToast(`${mission?.title||'Missão'} abandonada`);
 }
-function finishMissionAutomatically(category,mission,active){if(!mission||!active)return;const bonus=roundedMissionBonus(active);progress.profile.credits+=bonus.credits;progress.profile.uridium+=bonus.uridium;progress.profile.xp+=bonus.xp;progress.missions.completed[missionInstanceKey(category,mission.id)]=Date.now();progress.missions.active[category]=null;showMissionCompleteAnimation(mission,bonus);processPlayerLevelUps();showToast(`Recompensa coletada automaticamente • ${mission.title}`);saveGame();updateMissionButton();updateUI();if(ui.missionModal&&!ui.missionModal.classList.contains('hidden'))renderMissions();}
+const MISSION_ITEM_REWARD_POOLS={
+  commonGear:['lf1','mp1','lf2','sg3na02','sg3na03','fs01','fs02'],
+  eliteGear:['lf3','sg3nb02'],
+  jackpotGear:['lf4'],
+  ammo:[
+    {kind:'ammo',id:'mcb25',qty:2500,label:'2.500 MCB-25'},
+    {kind:'ammo',id:'mcb50',qty:1500,label:'1.500 MCB-50'},
+    {kind:'ammo',id:'ucb100',qty:750,label:'750 UCB-100'},
+    {kind:'ammo',id:'sab50',qty:1000,label:'1.000 SAB-50'},
+    {kind:'rocket',id:'plt2021',qty:50,label:'50 PLT-2021'},
+    {kind:'rocket',id:'plt3030',qty:30,label:'30 PLT-3030'},
+  ]
+};
+function missionItemChance(category){
+  return ({daily:.28,weekly:.46,monthly:.72,special:.82})[category]??.3;
+}
+function grantMissionSurprise(category){
+  if(Math.random()>missionItemChance(category))return null;
+  const r=Math.random();
+  if(r<.55){
+    const reward=randomChoice(MISSION_ITEM_REWARD_POOLS.ammo);
+    if(reward.kind==='ammo')progress.ammo[reward.id]=(progress.ammo[reward.id]||0)+reward.qty;
+    else progress.rockets[reward.id]=(progress.rockets[reward.id]||0)+reward.qty;
+    return reward.label;
+  }
+  let pool=MISSION_ITEM_REWARD_POOLS.commonGear;
+  if(category==='monthly'||category==='special'){
+    if(r>.96)pool=MISSION_ITEM_REWARD_POOLS.jackpotGear;
+    else if(r>.75)pool=MISSION_ITEM_REWARD_POOLS.eliteGear;
+  }else if(category==='weekly'&&r>.90)pool=MISSION_ITEM_REWARD_POOLS.eliteGear;
+  const id=randomChoice(pool),item=ITEMS[id];if(!item)return null;
+  addInventory(id);return item.name;
+}
+function missionRewardItemHint(category){
+  return `Chance bônus: ${Math.round(missionItemChance(category)*100)}% de munição/equipamento`;
+}
+function finishMissionAutomatically(category,mission,active){
+  if(!mission||!active)return;
+  const bonus=roundedMissionBonus(active);
+  progress.profile.credits+=bonus.credits;progress.profile.uridium+=bonus.uridium;progress.profile.xp+=bonus.xp;
+  const surprise=grantMissionSurprise(category);
+  if(surprise)bonus.itemText=`BÔNUS: ${surprise}`;
+  progress.missions.completed[missionInstanceKey(category,mission.id)]=Date.now();
+  progress.missions.active[category]=null;
+  showMissionCompleteAnimation(mission,bonus);processPlayerLevelUps();
+  showToast(`Recompensa automática • ${mission.title}${surprise?` • ${surprise}`:''}`);
+  saveGame();updateMissionButton();updateUI();
+  if(ui.missionModal&&!ui.missionModal.classList.contains('hidden'))renderMissions();
+}
 function claimMission(category){normalizeMissionState();const active=progress.missions.active[category];if(!active||!active.complete)return;finishMissionAutomatically(category,missionById(category,active.id),active);}
 function missionEvent(type,payload={}){if(!progress)return;normalizeMissionState();let anyChanged=false;const finished=[];for(const category of Object.keys(MISSION_CATEGORIES)){const active=progress.missions.active[category];if(!active||active.complete)continue;const mission=missionById(category,active.id);if(!mission)continue;let categoryChanged=false;let eventAmount=type==='collectOre'?Math.max(0,Number(payload.amount)||0):1;if(eventAmount<=0)continue;for(let i=0;i<mission.tasks.length;i++){const task=mission.tasks[i];if(!taskUnlocked(mission,active,i))continue;const current=taskCurrent(active,task),remaining=Math.max(0,task.target-current);if(!remaining)continue;let matches=false;if(type==='kill'&&task.type==='kill'&&payload.enemy?.type===task.npc)matches=true;if(type==='collectOre'&&task.type==='ore'&&payload.type===task.resource)matches=true;if(!matches)continue;const add=Math.min(remaining,type==='kill'?1:eventAmount);if(add<=0)continue;active.taskProgress[task.id]=current+add;addMissionReward(active,mission,task.type==='kill'?'kill':'ore',payload,add);categoryChanged=true;anyChanged=true;if(mission.sequence)break;if(type==='kill')break;}if(categoryChanged){active.complete=mission.tasks.every(x=>taskDone(active,x));if(active.complete)finished.push({category,mission,active});}}for(const item of finished)finishMissionAutomatically(item.category,item.mission,item.active);if(anyChanged&&!finished.length){saveGame();updateMissionButton();if(ui.missionModal&&!ui.missionModal.classList.contains('hidden'))renderMissions();}}
 function missionGroupLabel(group){
@@ -589,7 +655,7 @@ function renderMissions(){
         ${mission.sequence?'<div class="mission-sequence-badge">SEQUENCIAL • complete uma etapa para liberar a próxima</div>':''}
         ${missionTasksHtml(mission,active,isActive)}
         ${isActive?`<div class="mission-progress-row"><span>PROGRESSO TOTAL</span><b>${pct}%</b></div><div class="mission-progress"><i style="width:${pct}%"></i></div>`:''}
-        <div class="mission-reward"><span>${isActive?`BÔNUS ACUMULADO • ${factor}%`:`RECOMPENSA ESTIMADA • ${factor}%`}</span><b>${missionRewardText(mission,isActive?active:null)}</b></div>`;
+        <div class="mission-reward"><span>${isActive?`BÔNUS ACUMULADO • ${factor}%`:`RECOMPENSA ESTIMADA • ${factor}%`}</span><b>${missionRewardText(mission,isActive?active:null)}</b><small>${missionRewardItemHint(category)}</small></div>`;
       const actions=document.createElement('div');actions.className='mission-actions';
       if(isActive){
         const primary=document.createElement('button');primary.className='small-btn';primary.textContent='EM ANDAMENTO';primary.disabled=true;actions.appendChild(primary);
@@ -609,7 +675,7 @@ function openMissions(){normalizeMissionState();renderMissions();ui.missionModal
 
 
 const GALAXY_ALPHA_PIECES = 34;
-const GALAXY_ALPHA_SPIN_COST = 10;
+const GALAXY_ALPHA_SPIN_COST = 100;
 const GALAXY_ALPHA_WAVE_INTERVAL_MS = 10000;
 const GALAXY_ALPHA_ROUND_INTERVAL_MS = 10000;
 const GALAXY_ALPHA_ROUNDS = [
@@ -678,13 +744,13 @@ function freshSave(factionId) {
   loadout.lasers[0] = 'lf1';
   loadout.generators[0] = 'sg3na01';
   return {
-    profile: { callsign: getUser()?.callsign || getUser()?.email?.split('@')[0] || 'Pilot', faction: factionId, level: 1, xp: 0, credits: 20000, uridium: 0 },
+    profile: { callsign:getUser()?.callsign || getUser()?.email?.split('@')[0] || 'Pilot', faction:factionId, level:1, xp:0, xpModelV101:true, credits:20000, uridium:0 },
     activeShipId: 'phoenix',
     ownedShips: ['phoenix'],
     shipLoadout: loadout,
     inventory: {},
     drones: [],
-    ammo: { lcb10: 10000, mcb25: 0, mcb50: 0, ucb100: 0 },
+    ammo: { lcb10:10000, mcb25:0, mcb50:0, ucb100:0, sab50:0 },
     rockets: { r310: 100, plt2026: 0, plt2021: 0, plt3030: 0 },
     selectedLaserAmmo: 'lcb10',
     selectedRocket: 'r310',
@@ -707,8 +773,8 @@ function freshSave(factionId) {
 let progress = null;
 const player = {
   x: 620, y: MAPS.x1.world.h/2, tx: 620, ty: MAPS.x1.world.h/2,
-  hp: 1, maxHp: 1, shield: 0, maxShield: 0, speed: 320, laserDamage: 0, shieldAbsorption: 0,
-  laserFiring: false, lastLaserShot: 0, lastRocketShot: -999,
+  hp:1,maxHp:1,shield:0,maxShield:0,speed:320,laserDamage:0,shieldAbsorption:0,
+  angle:0,laserFiring:false,lastLaserShot:0,lastRocketShot:-999,
 };
 const petRuntime = {
   x: 410, y: 930, tx: 410, ty: 930,
@@ -717,7 +783,8 @@ const petRuntime = {
 };
 const state = {
   currentMap: MAPS.x1, camera: { x: 620, y: MAPS.x1.world.h/2 }, target: null, enemies: [], loot: [], ores: [], particles: [], fx: [], rocketFx: [], landmarks: [], enemyRespawns: [], oreRespawns: [], lastPortalAt: 0, radarRange: 1500, jumping: false,
-  lastPlayerDamageAt: nowSec(), repairFxAt: 0,
+  lastPlayerDamageAt:nowSec(), repairFxAt:0,
+  pointerNavActive:false, pointerNavId:null,
   shopTab: 'ships', hangarTab: 'ships', toastTimer: null, ammoUiExpanded: true, statsUiExpanded: true, minimapUiExpanded: true, topMetaExpanded: true,
   stars: Array.from({length:240},()=>({x:Math.random()*5200-2600,y:Math.random()*5200-2600,r:Math.random()*1.5+.3,a:Math.random()*.6+.2})),
 };
@@ -726,9 +793,9 @@ function clone(v){return JSON.parse(JSON.stringify(v));}
 function rand(a,b){return Math.random()*(b-a)+a;}
 function nowSec(){return performance.now()/1000;}
 function fmt(v){return Math.max(0,Math.round(v)).toLocaleString('pt-BR');}
-function shortLaserLabel(id){return ({lcb10:'x1',mcb25:'x2',mcb50:'x3',ucb100:'x4'})[id]||id.toUpperCase();}
+function shortLaserLabel(id){return ({lcb10:'x1',mcb25:'x2',mcb50:'x3',ucb100:'x4',sab50:'SAB'})[id]||id.toUpperCase();}
 function shortRocketLabel(id){return ({r310:'R310',plt2026:'PLT26',plt2021:'PLT21',plt3030:'PLT30'})[id]||id.replace(/[^a-z0-9]/gi,'').toUpperCase();}
-function ammoTooltipText(a,qty,laserUse,petUse,bursts){return `${a.name} • dano x${a.mult}\nEstoque: ${fmt(qty)}\nNave: -${laserUse}/rajada${petUse?` • P.E.T.: -${petUse}`:''}\nRajadas restantes: ~${fmt(bursts)}`;}
+function ammoTooltipText(a,qty,laserUse,petUse,bursts){const mode=a.shieldDrain?'CAPTURA ESCUDO x2':`dano x${a.mult}`;return `${a.name} • ${mode}\nEstoque: ${fmt(qty)}\nNave: -${laserUse}/rajada${petUse?` • P.E.T.: -${petUse}`:''}\nRajadas restantes: ~${fmt(bursts)}`;}
 function rocketTooltipText(r,qty){return `${r.name} • dano ${fmt(r.damage)}\nEstoque: ${fmt(qty)}\nConsumo: -1/disparo`; }
 function applyAmmoUiState(){ if(!ui.weaponBar) return; ui.weaponBar.classList.toggle('collapsed', !state.ammoUiExpanded); if(ui.weaponBarToggle) ui.weaponBarToggle.textContent = state.ammoUiExpanded ? '▾' : '▸'; }
 function loadAmmoUiState(){ try{ const raw=localStorage.getItem('stellar_ammo_ui_expanded'); if(raw!==null) state.ammoUiExpanded = raw==='1'; }catch{} applyAmmoUiState(); }
@@ -813,9 +880,20 @@ function showToast(msg){ui.toast.textContent=msg;ui.toast.classList.add('show');
 const celebrationQueue=[];let celebrationRunning=false;
 function queueCelebration(kind,title,subtitle=''){celebrationQueue.push({kind,title,subtitle});playNextCelebration();}
 function playNextCelebration(){if(celebrationRunning||!celebrationQueue.length||!ui.gameCelebration)return;celebrationRunning=true;const item=celebrationQueue.shift();ui.gameCelebration.classList.remove('hidden','mission','level');ui.gameCelebration.classList.add(item.kind==='level'?'level':'mission');ui.celebrationKicker.textContent=item.kind==='level'?'EVOLUÇÃO DE PILOTO':'PROTOCOLO DE MISSÃO';ui.celebrationTitle.textContent=item.title;ui.celebrationSubtitle.textContent=item.subtitle||'';void ui.gameCelebration.offsetWidth;ui.gameCelebration.classList.add('play');setTimeout(()=>{ui.gameCelebration.classList.remove('play');setTimeout(()=>{ui.gameCelebration.classList.add('hidden');celebrationRunning=false;playNextCelebration();},320);},1900);}
-function showMissionCompleteAnimation(mission,bonus){queueCelebration('mission','MISSÃO COMPLETA',`${mission.title} • +${fmt(bonus.credits)} CR • +${fmt(bonus.uridium)} URI • +${fmt(bonus.xp)} XP`);}
+function showMissionCompleteAnimation(mission,bonus){
+  const extra=bonus?.itemText?` • ${bonus.itemText}`:'';
+  queueCelebration('mission','MISSÃO COMPLETA',`${mission.title} • +${fmt(bonus.credits)} CR • +${fmt(bonus.uridium)} URI • +${fmt(bonus.xp)} XP${extra}`);
+}
 function showLevelUpAnimation(level){queueCelebration('level',`NÍVEL ${level}`,`Seu piloto alcançou o nível ${level}`);}
-function processPlayerLevelUps(){let gained=0;while(progress.profile.xp>=progress.profile.level*2000){progress.profile.xp-=progress.profile.level*2000;progress.profile.level++;gained++;showLevelUpAnimation(progress.profile.level);}return gained;}
+function processPlayerLevelUps(){
+  let gained=0;
+  while(progress.profile.level<PLAYER_MAX_LEVEL&&progress.profile.xp>=levelXpThreshold(progress.profile.level+1)){
+    progress.profile.level++;
+    gained++;
+    showLevelUpAnimation(progress.profile.level);
+  }
+  return gained;
+}
 
 function setSync(text,cls=''){ui.syncLabel.textContent=text;ui.syncLabel.className=`sync-chip ${cls}`.trim();}
 function saveGame(){if(!progress)return;if(isGalaxyGateMap())syncAlphaGateSnapshot();localStorage.setItem(saveKey(),JSON.stringify(progress));cloudDirty=true;}
@@ -828,17 +906,39 @@ function hydrateProgress(){
   if(!progress)return;
   if(!progress.profile?.faction || !SHIPS[progress.activeShipId]) throw new Error('save incompleto');
   progress.profile.callsign ||= getUser()?.callsign || getUser()?.email?.split('@')[0] || 'Pilot';
+  progress.profile.level=Math.max(1,Math.min(PLAYER_MAX_LEVEL,Number(progress.profile.level)||1));
+  progress.profile.xp=Math.max(0,Number(progress.profile.xp)||0);
+  if(!progress.profile.xpModelV101){
+    const oldCarry=progress.profile.xp;
+    progress.profile.xp=levelXpThreshold(progress.profile.level)+oldCarry;
+    progress.profile.xpModelV101=true;
+  }
+  progress.profile.level=levelFromXp(progress.profile.xp,PLAYER_MAX_LEVEL);
   progress.ownedShips ||= ['phoenix'];progress.inventory ||= {};progress.drones ||= [];progress.ammo ||= {};progress.rockets ||= {};progress.flags ||= {};progress.cargo ||= {};progress.discoveries ||= {};progress.missions ||= freshMissions();normalizeMissionState();progress.pilotBio ||= freshPilotBio();normalizePilotBio();progress.auction ||= freshAuctionState();ensureAuctionState();progress.galaxyGate ||= freshGalaxyGateState();normalizeGalaxyGateState();
+  for(const id of Object.keys(LASER_AMMO))if(progress.ammo[id]===undefined)progress.ammo[id]=0;
+  if(!LASER_AMMO[progress.selectedLaserAmmo])progress.selectedLaserAmmo='lcb10';
   progress.pet ||= freshPet();
+  const legacyPetOwned=progress.pet.owned===undefined&&(Number(progress.pet.level)>1||(progress.pet.lasers||[]).some(Boolean)||(progress.pet.shields||[]).some(Boolean)||Object.values(progress.pet.gearsOwned||{}).some(Boolean));
+  if(progress.pet.owned===undefined)progress.pet.owned=!!legacyPetOwned;
   progress.pet.level=Math.max(1,Math.min(PET_MAX_LEVEL,Number(progress.pet.level)||1));
   progress.pet.xp=Math.max(0,Number(progress.pet.xp)||0);
-  progress.pet.laserSlotsUnlocked=Math.max(1,Math.min(progress.pet.level,Number(progress.pet.laserSlotsUnlocked)||1));
-  progress.pet.shieldSlotsUnlocked=Math.max(1,Math.min(progress.pet.level,Number(progress.pet.shieldSlotsUnlocked)||1));
-  progress.pet.lasers ||= [null]; progress.pet.shields ||= [null];
-  while(progress.pet.lasers.length<progress.pet.laserSlotsUnlocked)progress.pet.lasers.push(null);
-  while(progress.pet.shields.length<progress.pet.shieldSlotsUnlocked)progress.pet.shields.push(null);
-  progress.pet.lasers=progress.pet.lasers.slice(0,progress.pet.laserSlotsUnlocked);
-  progress.pet.shields=progress.pet.shields.slice(0,progress.pet.shieldSlotsUnlocked);
+  if(progress.pet.owned&&!progress.pet.xpModelV101){
+    progress.pet.xp=levelXpThreshold(progress.pet.level)+progress.pet.xp;
+    progress.pet.xpModelV101=true;
+  }
+  if(!progress.pet.owned){
+    progress.pet.level=1;progress.pet.xp=0;progress.pet.laserSlotsUnlocked=0;progress.pet.shieldSlotsUnlocked=0;progress.pet.lasers=[];progress.pet.shields=[];progress.pet.activeGear='off';
+  }else{
+    progress.pet.level=levelFromXp(progress.pet.xp,PET_MAX_LEVEL);
+    const slotCap=Math.min(progress.pet.level,PET_SLOT_LEVEL_CAP);
+    progress.pet.laserSlotsUnlocked=Math.max(1,Math.min(slotCap,Number(progress.pet.laserSlotsUnlocked)||1));
+    progress.pet.shieldSlotsUnlocked=Math.max(1,Math.min(slotCap,Number(progress.pet.shieldSlotsUnlocked)||1));
+    progress.pet.lasers ||= [null]; progress.pet.shields ||= [null];
+    while(progress.pet.lasers.length<progress.pet.laserSlotsUnlocked)progress.pet.lasers.push(null);
+    while(progress.pet.shields.length<progress.pet.shieldSlotsUnlocked)progress.pet.shields.push(null);
+    progress.pet.lasers=progress.pet.lasers.slice(0,progress.pet.laserSlotsUnlocked);
+    progress.pet.shields=progress.pet.shields.slice(0,progress.pet.shieldSlotsUnlocked);
+  }
   progress.pet.gearsOwned ||= {guard:false,box:false,ore:false,repair:false,kami:false};
   for(const key of ['guard','box','ore','repair','kami']) if(progress.pet.gearsOwned[key]===undefined) progress.pet.gearsOwned[key]=false;
   progress.pet.activeGear ||= 'off';
@@ -931,39 +1031,37 @@ function allEquippedIds(){return [...progress.shipLoadout.lasers,...progress.shi
 function equippedLaserIds(){return [...progress.shipLoadout.lasers,...progress.drones.flatMap(d=>d.slots)].filter(id=>ITEMS[id]?.type==='laser');}
 function equippedLaserCount(){return equippedLaserIds().length;}
 
-function petLevelXp(level){return Math.round(900+level*650+level*level*80);}
-function petRange(){return 300+(progress?.pet?.level||1)*34;}
-function petSlotCost(slotNumber){return Math.round(5000*slotNumber+2500*slotNumber*slotNumber);}
-function petLaserIds(){return (progress?.pet?.lasers||[]).filter(id=>ITEMS[id]?.type==='laser');}
-function petShieldIds(){return (progress?.pet?.shields||[]).filter(id=>ITEMS[id]?.type==='generator'&&ITEMS[id]?.subtype==='shield');}
-function petDamage(){return petLaserIds().reduce((sum,id)=>sum+(ITEMS[id]?.damage||0),0);}
+function petLevelXp(level){return levelXpThreshold(level+1);}
+function petRange(){return 300+(progress?.pet?.owned?(progress.pet.level||1):1)*34;}
+function petSlotCost(slotNumber){return Math.round(25000*slotNumber+10000*slotNumber*slotNumber);}
+function petLaserIds(){return progress?.pet?.owned?(progress.pet.lasers||[]).filter(id=>ITEMS[id]?.type==='laser'):[];}
+function petShieldIds(){return progress?.pet?.owned?(progress.pet.shields||[]).filter(id=>ITEMS[id]?.type==='generator'&&ITEMS[id]?.subtype==='shield'):[];}
+function petDamage(){return petLaserIds().reduce((sum,id)=>{const it=ITEMS[id];const base=it?.alienDamage??it?.damage??0;return sum+base*(1+(Number(it?.alienBonus)||0));},0);}
 function petMaxShield(){return petShieldIds().reduce((sum,id)=>sum+(ITEMS[id]?.shield||0),0);}
 function addPetXp(amount){
-  if(!progress?.pet||amount<=0||progress.pet.level>=PET_MAX_LEVEL)return;
+  if(!progress?.pet?.owned||amount<=0||progress.pet.level>=PET_MAX_LEVEL)return;
   progress.pet.xp+=Math.round(amount);
   let leveled=false;
-  while(progress.pet.level<PET_MAX_LEVEL){
-    const need=petLevelXp(progress.pet.level);
-    if(progress.pet.xp<need)break;
-    progress.pet.xp-=need;
+  while(progress.pet.level<PET_MAX_LEVEL&&progress.pet.xp>=levelXpThreshold(progress.pet.level+1)){
     progress.pet.level++;
     leveled=true;
-    showToast(`P.E.T. subiu para o nível ${progress.pet.level}! Novo slot disponível para compra.`);
+    showToast(`P.E.T. subiu para o nível ${progress.pet.level}!`);
   }
-  if(progress.pet.level>=PET_MAX_LEVEL)progress.pet.xp=0;
   if(leveled){saveGame();if(ui.petModal&&!ui.petModal.classList.contains('hidden'))renderPet();}
 }
 function unlockPetSlot(kind){
-  const pet=progress.pet;
+  const pet=progress.pet;if(!pet?.owned){showToast('Adquira o P.E.T. primeiro');return;}
   const key=kind==='laser'?'laserSlotsUnlocked':'shieldSlotsUnlocked';
   const list=kind==='laser'?pet.lasers:pet.shields;
   const next=pet[key]+1;
-  if(next>pet.level){showToast(`P.E.T. precisa estar no nível ${next}`);return;}
+  const availableSlots=Math.min(pet.level,PET_SLOT_LEVEL_CAP);
+  if(next>availableSlots){showToast(next>PET_SLOT_LEVEL_CAP?`P.E.T. atingiu o limite de ${PET_SLOT_LEVEL_CAP} slots`:`P.E.T. precisa estar no nível ${next}`);return;}
   const cost=petSlotCost(next);
   if(progress.profile.uridium<cost){showToast(`Faltam ${fmt(cost-progress.profile.uridium)} URI`);return;}
   progress.profile.uridium-=cost;pet[key]=next;list.push(null);saveGame();renderPet();updateUI();showToast(`Slot ${next} de ${kind==='laser'?'laser':'escudo'} liberado`);
 }
 function equipPetItem(itemId,kind){
+  if(!progress?.pet?.owned){showToast('Adquira o P.E.T. primeiro');return;}
   const item=ITEMS[itemId];
   const valid=kind==='laser'?item?.type==='laser':item?.type==='generator'&&item?.subtype==='shield';
   if(!valid){showToast(kind==='laser'?'O P.E.T. aceita lasers nesse espaço':'O P.E.T. aceita geradores de escudo nesse espaço');return;}
@@ -973,16 +1071,27 @@ function equipPetItem(itemId,kind){
   list[idx]=itemId;saveGame();renderPet();refreshAmmoCounters();
 }
 function unequipPetSlot(kind,index){
+  if(!progress?.pet?.owned)return;
   const list=kind==='laser'?progress.pet.lasers:progress.pet.shields;
   const id=list[index];if(!id)return;list[index]=null;addInventory(id);saveGame();renderPet();refreshAmmoCounters();
 }
+function buyPetUnit(){
+  if(progress?.pet?.owned){showToast('P.E.T. já adquirido');return;}
+  if(progress.profile.uridium<PET_BASE_PRICE){showToast(`Faltam ${fmt(PET_BASE_PRICE-progress.profile.uridium)} URI para o P.E.T.`);return;}
+  progress.profile.uridium-=PET_BASE_PRICE;
+  progress.pet=freshPet();progress.pet.owned=true;progress.pet.laserSlotsUnlocked=1;progress.pet.shieldSlotsUnlocked=1;progress.pet.lasers=[null];progress.pet.shields=[null];
+  petRuntime.x=player.x+82;petRuntime.y=player.y+64;petRuntime.tx=petRuntime.x;petRuntime.ty=petRuntime.y;
+  saveGame();renderShop();renderPet();updateUI();showToast('P.E.T. adquirido! Agora equipe armas, escudos e módulos.');
+}
 function buyPetGear(id){
+  if(!progress?.pet?.owned){showToast('Adquira o P.E.T. primeiro');return;}
   const gear=PET_GEARS[id];if(!gear)return;
   if(progress.pet.gearsOwned[id]){showToast('Módulo já comprado');return;}
   if(progress.profile.uridium<gear.cost){showToast(`Faltam ${fmt(gear.cost-progress.profile.uridium)} URI`);return;}
   progress.profile.uridium-=gear.cost;progress.pet.gearsOwned[id]=true;saveGame();renderPet();updateUI();showToast(`${gear.name} adquirido`);
 }
 function setPetGear(id){
+  if(!progress?.pet?.owned){showToast('Adquira o P.E.T. primeiro');return;}
   if(id!=='off'&&!progress.pet.gearsOwned[id]){showToast('Compre esse módulo primeiro');return;}
   progress.pet.activeGear=id;petRuntime.taskId=null;petRuntime.taskType='follow';saveGame();renderPet();
   showToast(id==='off'?'P.E.T. em modo companhia':PET_GEARS[id].name+' ativado');
@@ -1005,7 +1114,7 @@ function petNearest(list,xKey='x',yKey='y'){
   return best;
 }
 function updatePet(dt){
-  if(!progress?.pet)return;
+  if(!progress?.pet?.owned)return;
   const pet=progress.pet, mode=pet.activeGear||'off', followAngle=nowSec()*.7;
   let targetX=player.x+Math.cos(followAngle)*92,targetY=player.y+Math.sin(followAngle)*92,task=null;
   const now=nowSec();
@@ -1041,9 +1150,9 @@ function updatePet(dt){
     if(pd<350&&lasers.length&&stock<=0&&autoBuyEnabled()&&buyAmmoPack(ammo.id,true)){stock=ammoQty(ammo.id);refreshAmmoCounters();renderShop();showToast(`Auto Buy P.E.T.: ${ammo.name}`);}
     if(pd<350&&lasers.length&&stock>0&&nowSec()-petRuntime.lastShot>.58){
       const firing=Math.min(lasers.length,stock);const ids=lasers.slice(0,firing);
-      const damage=Math.round(ids.reduce((s,id)=>s+(ITEMS[id]?.damage||0),0)*ammo.mult*rand(.95,1.08));
+      const rawBase=Math.round(laserPveBase(ids)*rand(.95,1.08));
       progress.ammo[ammo.id]=Math.max(0,stock-firing);petRuntime.lastShot=nowSec();petRuntime.laserTargetId=task.id;petRuntime.laserUntil=nowSec()+.16;
-      if(damage>0)dealDamageToEnemy(task,damage,ammo.color);refreshAmmoCounters();
+      if(rawBase>0)applyLaserAmmoHit(task,rawBase,ammo,ammo.color);refreshAmmoCounters();
     }
   }
   if(mode==='kami'&&task&&task.hp>0&&Math.hypot(task.x-petRuntime.x,task.y-petRuntime.y)<70&&now-(petRuntime.lastKami||0)>15){
@@ -1070,9 +1179,10 @@ function computeStats(keepRatio=true){
   const oldHpRatio=player.maxHp?player.hp/player.maxHp:1, oldShieldRatio=player.maxShield?player.shield/player.maxShield:1;
   const laserIds=[...progress.shipLoadout.lasers,...progress.drones.flatMap(d=>d.slots)].filter(id=>ITEMS[id]?.type==='laser');
   const genIds=[...progress.shipLoadout.generators,...progress.drones.flatMap(d=>d.slots)].filter(id=>ITEMS[id]?.type==='generator');
-  let hp=ship.hp, speed=ship.speed, shield=0, laserDamage=0, absorption=0, rocketMult=1;
-  for(const id of laserIds)laserDamage+=ITEMS[id].damage||0;
-  for(const id of genIds){const it=ITEMS[id];speed+=it.speed||0;shield+=it.shield||0;absorption=Math.max(absorption,it.absorption||0);}
+  let hp=ship.hp, speed=ship.speed, shield=0, laserDamage=0, absorption=0, rocketMult=1, shieldRegenBoost=0;
+  // Combate atual é PvE: respeita dano específico contra aliens e bônus PvE por laser.
+  for(const id of laserIds){const it=ITEMS[id];const base=it?.alienDamage??it?.damage??0;laserDamage+=base*(1+(Number(it?.alienBonus)||0));}
+  for(const id of genIds){const it=ITEMS[id];speed+=it.speed||0;shield+=it.shield||0;absorption=Math.max(absorption,it.absorption||0);shieldRegenBoost=Math.max(shieldRegenBoost,Number(it.shieldRegenBonus)||0);}
   if(ship.bonusLowMaps&&low){hp+=ship.bonusLowMaps.hp;speed+=ship.bonusLowMaps.speed;shield*=ship.bonusLowMaps.shieldMult;laserDamage*=ship.bonusLowMaps.laserMult;rocketMult=ship.bonusLowMaps.rocketMult;}
   hp+=pilotSkillValue('hull1')+pilotSkillValue('hull2');
   shield*=1+pilotSkillValue('shieldEngineering')/100;
@@ -1080,7 +1190,7 @@ function computeStats(keepRatio=true){
   if(state.currentMap?.battle||state.currentMap?.gate)laserDamage*=1+pilotBattleLaserBonus();
   absorption=Math.min(95,absorption+pilotSkillValue('shieldMechanics'));
   rocketMult*=1+pilotSkillValue('rocketFusion')/100;
-  player.maxHp=Math.round(hp);player.maxShield=Math.round(shield);player.speed=Math.round(speed);player.laserDamage=Math.round(laserDamage);player.shieldAbsorption=absorption;player.rocketMult=rocketMult;
+  player.maxHp=Math.round(hp);player.maxShield=Math.round(shield);player.speed=Math.round(speed);player.laserDamage=Math.round(laserDamage);player.shieldAbsorption=absorption;player.rocketMult=rocketMult;player.shieldRegenBoost=shieldRegenBoost;
   player.hp=keepRatio?Math.min(player.maxHp,Math.max(1,Math.round(player.maxHp*oldHpRatio))):player.maxHp;
   player.shield=keepRatio?Math.min(player.maxShield,Math.max(0,Math.round(player.maxShield*oldShieldRatio))):player.maxShield;
   progress.hp=player.hp;progress.shield=player.shield;
@@ -1152,7 +1262,7 @@ function makeEnemy(type){
   let pos=cluster?{x:cluster.x+rand(-520,520),y:cluster.y+rand(-420,420)}:randomMapPosition(160);
   pos.x=Math.max(160,Math.min(state.currentMap.world.w-160,pos.x));pos.y=Math.max(160,Math.min(state.currentMap.world.h-160,pos.y));
   if(progress?.mapId==='x1'&&safeZoneDistance(pos.x,pos.y)<SAFE_ZONE.radius+180)pos=randomMapPosition(180);
-  const battle=state.currentMap?.battle;return {id:`${type}_${Math.random().toString(16).slice(2,9)}`,type,name:base.name,x:pos.x,y:pos.y,hp:base.hp,maxHp:base.hp,shield:base.shield,maxShield:base.shield,credits:base.credits,uridium:base.uridium,speed:base.speed,damage:base.damage,color:base.color,size:base.size,resources:{...(base.resources||{})},attackRange:Math.min(battle?500:420,(battle?210:170)+base.size*5.8),aggroRange:battle?920:720,lastShot:0,angle:rand(0,TWO_PI),drift:rand(.4,1.4)};
+  const battle=state.currentMap?.battle;return {id:`${type}_${Math.random().toString(16).slice(2,9)}`,type,name:base.name,x:pos.x,y:pos.y,hp:base.hp,maxHp:base.hp,shield:base.shield,maxShield:base.shield,credits:base.credits,uridium:base.uridium,xp:base.xp,speed:base.speed,damage:base.damage,color:base.color,size:base.size,resources:{...(base.resources||{})},attackRange:Math.min(battle?500:420,(battle?210:170)+base.size*5.8),aggroRange:battle?920:720,lastShot:0,angle:rand(0,TWO_PI),drift:rand(.4,1.4)};
 }
 function spawnEnemies(){state.enemies=[];state.enemyRespawns=[];const mult=Math.max(1,Number(state.currentMap.enemyMultiplier)||1);for(const group of state.currentMap.enemyGroups){const count=Math.max(1,Math.round(group.count*mult));for(let i=0;i<count;i++)state.enemies.push(makeEnemy(group.type));}}
 function scheduleEnemyRespawn(type){state.enemyRespawns.push({type,at:nowSec()+rand(6,13)});}
@@ -1254,7 +1364,7 @@ function enterAlphaGate(){
 }
 function recordAlphaKillReward(enemy){
   const a=alphaGate();if(!a.run)return;
-  const xp=Math.round(enemy.credits/10+enemy.uridium*12);
+  const xp=Math.round(Number(enemy.xp)||enemy.credits/10+enemy.uridium*12);
   a.run.killRewards.credits=(a.run.killRewards.credits||0)+enemy.credits;
   a.run.killRewards.uridium=(a.run.killRewards.uridium||0)+enemy.uridium;
   a.run.killRewards.xp=(a.run.killRewards.xp||0)+xp;
@@ -1353,7 +1463,7 @@ function jumpThroughPortal(portal){if(!portal||state.jumping||nowSec()-state.las
 
 function rewardEnemyKill(enemy){
   const creditMult=1+pilotSkillValue('greed')/100,uriMult=1+pilotCombined('cruelty1','cruelty2')/100,xpMult=1+pilotSkillValue('tactics')/100;
-  const earnedCredits=Math.round(enemy.credits*creditMult),earnedUri=Math.round(enemy.uridium*uriMult),earnedXp=Math.round((enemy.credits/10+enemy.uridium*12)*xpMult);
+  const earnedCredits=Math.round(enemy.credits*creditMult),earnedUri=Math.round(enemy.uridium*uriMult),earnedXp=Math.round((Number(enemy.xp)||enemy.credits/10+enemy.uridium*12)*xpMult);
   progress.profile.credits+=earnedCredits;progress.profile.uridium+=earnedUri;progress.profile.xp+=earnedXp;
   addPetXp(Math.max(12,Math.round(enemy.credits/120+enemy.uridium*4)));
   processPlayerLevelUps();
@@ -1367,6 +1477,31 @@ function dealDamageToEnemy(enemy,damage,color){
   let remain=damage;const hadShield=enemy.shield>0;if(enemy.shield>0){const a=Math.min(enemy.shield,remain);enemy.shield-=a;remain-=a;}if(remain>0)enemy.hp-=remain;
   spawnParticle(enemy.x,enemy.y-enemy.size,fmt(damage),color);spawnImpactFx(enemy.x,enemy.y,hadShield?'#55d8ff':color,hadShield?30:22,hadShield?'shield':'impact');
   if(enemy.hp<=0){enemy.hp=0;enemy.deadAt=nowSec();spawnExplosionFx(enemy.x,enemy.y,enemy.color,enemy.type.startsWith('boss'));rewardEnemyKill(enemy);if(state.target?.id===enemy.id){state.target=null;player.laserFiring=false;}}
+}
+function laserPveBase(ids){
+  return ids.reduce((sum,id)=>{const it=ITEMS[id];const base=it?.alienDamage??it?.damage??0;return sum+base*(1+(Number(it?.alienBonus)||0));},0);
+}
+function applyLaserAmmoHit(enemy,baseDamage,ammo,color){
+  if(!enemy||enemy.hp<=0||baseDamage<=0)return 0;
+  if(ammo?.shieldDrain){
+    // SAB-50: não causa dano ao casco. Drena o escudo inimigo em x2 e transfere
+    // exatamente a energia capturada para o escudo da nave, limitada ao máximo.
+    const requested=Math.max(0,Math.round(baseDamage*(Number(ammo.mult)||2)));
+    const drained=Math.min(Math.max(0,enemy.shield||0),requested);
+    if(drained<=0){spawnParticle(enemy.x,enemy.y-enemy.size,'SEM ESCUDO','#79f1ff');return 0;}
+    enemy.shield=Math.max(0,enemy.shield-drained);
+    const before=player.shield;
+    player.shield=Math.min(player.maxShield,player.shield+drained);
+    const restored=Math.max(0,Math.round(player.shield-before));
+    spawnParticle(enemy.x,enemy.y-enemy.size,`SAB -${fmt(drained)} ESC`,'#79f1ff');
+    spawnImpactFx(enemy.x,enemy.y,'#79f1ff',34,'shield');
+    if(restored>0)spawnParticle(player.x,player.y-34,`+${fmt(restored)} ESC`,'#79f1ff');
+    progress.shield=player.shield;
+    return drained;
+  }
+  const damage=Math.max(0,Math.round(baseDamage*(Number(ammo?.mult)||1)));
+  if(damage>0)dealDamageToEnemy(enemy,damage,color||ammo?.color||'#7edcff');
+  return damage;
 }
 function fireLaserTick(){
   if(!state.target||state.target.hp<=0||enemyDistance(state.target)>playerLaserRange())return;
@@ -1382,15 +1517,15 @@ function fireLaserTick(){
   // Se houver menos munição que lasers, somente parte da bateria dispara.
   const firingCount=Math.min(totalLasers,stock);
   const firingIds=laserIds.slice(0,firingCount);
-  const allBase=laserIds.reduce((sum,id)=>sum+(ITEMS[id]?.damage||0),0);
-  const firingBase=firingIds.reduce((sum,id)=>sum+(ITEMS[id]?.damage||0),0);
+  const allBase=laserPveBase(laserIds);
+  const firingBase=laserPveBase(firingIds);
   const fraction=allBase>0?firingBase/allBase:0;
 
   player.lastLaserShot=nowSec();
   progress.ammo[ammo.id]=Math.max(0,stock-firingCount);refreshAmmoCounters();
-  const damage=Math.round(player.laserDamage*fraction*ammo.mult*rand(.95,1.08));
+  const rawBase=Math.round((player.laserDamage*fraction)*rand(.95,1.08));
   const laserHitChance=Math.min(1,.75+pilotSkillValue('electroOptics')/100);
-  if(Math.random()<=laserHitChance){if(damage>0)dealDamageToEnemy(state.target,damage,ammo.color);}else spawnParticle(state.target.x,state.target.y-state.target.size,'MISS','#7acfff');
+  if(Math.random()<=laserHitChance){if(rawBase>0)applyLaserAmmoHit(state.target,rawBase,ammo,ammo.color);}else spawnParticle(state.target.x,state.target.y-state.target.size,'MISS','#7acfff');
 
   if(progress.ammo[ammo.id]<=0){
     if(autoBuyEnabled()&&buyAmmoPack(ammo.id,true)){refreshAmmoCounters();renderShop();showToast(`Auto Buy: ${ammo.name}`);}
@@ -1421,13 +1556,18 @@ function takePlayerDamage(dmg){
 }
 function collectCargoBox(drop){const before=cargoFree();let total=0;for(const [id,qty] of Object.entries(drop.resources||{})){const got=addCargoResource(id,qty);if(got>0){drop.resources[id]-=got;if(drop.resources[id]<=0)delete drop.resources[id];total+=got;}}if(total>0){spawnParticle(drop.x,drop.y,`+${fmt(total)} recursos`,'#ffe57b');saveGame();}if(total===0&&before<=0)showToast('Porão cheio');return Object.keys(drop.resources||{}).length===0;}
 
+function angleDelta(from,to){return Math.atan2(Math.sin(to-from),Math.cos(to-from));}
 function updatePlayer(dt){
   const dx=player.tx-player.x,dy=player.ty-player.y,d=Math.hypot(dx,dy);if(d>2){const step=Math.min(d,player.speed*dt);player.x+=dx/d*step;player.y+=dy/d*step;}
+  let desiredAngle=player.angle||0;
+  if(state.target&&state.target.hp>0)desiredAngle=Math.atan2(state.target.y-player.y,state.target.x-player.x);
+  else if(d>3)desiredAngle=Math.atan2(dy,dx);
+  player.angle=(player.angle||0)+angleDelta(player.angle||0,desiredAngle)*Math.min(1,dt*9);
   player.x=Math.max(35,Math.min(state.currentMap.world.w-35,player.x));player.y=Math.max(35,Math.min(state.currentMap.world.h-35,player.y));state.camera.x+=(player.x-state.camera.x)*.08;state.camera.y+=(player.y-state.camera.y)*.08;
   const safe=isSafeZone();
   const inCombat=!safe&&state.enemies.some(e=>e.hp>0&&enemyDistance(e)<430);
   if(!inCombat){
-    const shieldRegen=safe?.12:.045;
+    const shieldRegen=(safe?.12:.045)*(1+(Number(player.shieldRegenBoost)||0));
     player.shield=Math.min(player.maxShield,player.shield+player.maxShield*shieldRegen*dt);
   }
   if(safe){
@@ -1566,7 +1706,7 @@ function drawDrones(p){const f=getFaction();progress.drones.forEach((d,i)=>{
   ctx.fillStyle=d.type==='iris'?'#bd7cff':'#71dfff';ctx.beginPath();ctx.arc(x,y,4,0,TWO_PI);ctx.fill();
 });}
 function drawPet(){
-  if(!progress?.pet)return;
+  if(!progress?.pet?.owned)return;
   const p=screenPos(petRuntime.x,petRuntime.y),mode=progress.pet.activeGear||'off',color=mode==='guard'?'#ff8c93':mode==='box'?'#ffd46b':mode==='ore'?'#7fffc4':'#7edcff';
   const path=progress.pet.level>=10?V8_ASSETS.drones.petElite:V8_ASSETS.drones.pet,img=v8Image(path);
   if(img&&img.naturalWidth){const size=34+(progress.pet.level/15)*10,sc=size/Math.max(img.naturalWidth,img.naturalHeight);ctx.save();ctx.translate(p.x,p.y);ctx.rotate(nowSec()*.6);ctx.shadowColor=color;ctx.shadowBlur=12;ctx.drawImage(img,-img.naturalWidth*sc/2,-img.naturalHeight*sc/2,img.naturalWidth*sc,img.naturalHeight*sc);ctx.restore();}
@@ -1586,7 +1726,7 @@ function drawShipModel(id,color){ctx.shadowColor=color;ctx.shadowBlur=18;ctx.str
   else {ctx.moveTo(29,0);ctx.lineTo(9,-9);ctx.lineTo(-10,-15);ctx.lineTo(-18,-7);ctx.lineTo(-25,0);ctx.lineTo(-18,7);ctx.lineTo(-10,15);ctx.lineTo(9,9);}
 ctx.closePath();ctx.fill();ctx.stroke();ctx.shadowBlur=0;ctx.fillStyle='rgba(5,13,25,.9)';ctx.beginPath();ctx.ellipse(6,0,7.5,3.8,0,0,TWO_PI);ctx.fill();ctx.fillStyle='#f4ffff';ctx.beginPath();ctx.arc(8,0,1.6,0,TWO_PI);ctx.fill();ctx.fillStyle='#b47bff';ctx.fillRect(-25,-2.2,8,4.4);ctx.fillStyle='rgba(255,255,255,.34)';ctx.fillRect(-2,-8,12,2.2);ctx.fillRect(-8,6,9,1.6);}
 function drawPlayer(){
-  const p=screenPos(player.x,player.y),f=getFaction(),a=Math.atan2(player.ty-player.y,player.tx-player.x||0),color=f?.color||'#76e0ff',path=V8_ASSETS.ships[progress.activeShipId],img=v8Image(path);
+  const p=screenPos(player.x,player.y),f=getFaction(),a=player.angle||0,color=f?.color||'#76e0ff',path=V8_ASSETS.ships[progress.activeShipId],img=v8Image(path);
   ctx.save();ctx.translate(p.x,p.y);
   if(img&&img.naturalWidth){
     const ship=SHIPS[progress.activeShipId],size=(ship.id==='citadel'?105:ship.id==='bigboy'?96:ship.id==='goliath'||ship.id==='aegis'?88:78),sc=size/Math.max(img.naturalWidth,img.naturalHeight);
@@ -1675,10 +1815,10 @@ function buildAmmoButtons(){
 function updateExtraControls(){ return; }
 function updateUI(){
   refreshAmmoCounters();
-  const f=getFaction(),ship=SHIPS[progress.activeShipId],safe=isSafeZone();ui.factionLabel.textContent=f?.short||'—';ui.factionLabel.style.color=f?.color||'';ui.mapLabel.textContent=displayMapLabel(progress.mapId);if(ui.sectorName)ui.sectorName.textContent=state.currentMap.name||'Setor';if(ui.coordLabel)ui.coordLabel.textContent=`${Math.round(player.x)} / ${Math.round(player.y)}`;if(ui.routeLabel){const rd=routeDistance();ui.routeLabel.textContent=rd>35?`${fmt(rd)}u`:'PARADO';ui.routeLabel.parentElement?.classList.toggle('active',rd>35);}if(ui.discoveriesLabel){const found=state.landmarks.filter(l=>progress.discoveries?.[`${progress.mapId}:${l.id}`]).length;ui.discoveriesLabel.textContent=`${found}/${state.landmarks.length}`;}ui.shipLabel.textContent=ship.name;ui.lvl.textContent=progress.profile.level;ui.hp.textContent=fmt(player.hp);ui.maxHp.textContent=fmt(player.maxHp);ui.shield.textContent=fmt(player.shield);ui.maxShield.textContent=fmt(player.maxShield);ui.speed.textContent=fmt(player.speed);if(ui.dmg)ui.dmg.textContent=fmt(player.laserDamage*currentLaserAmmo().mult);ui.credits.textContent=fmt(progress.profile.credits);ui.uridium.textContent=fmt(progress.profile.uridium);ui.xp.textContent=fmt(progress.profile.xp);if(ui.droneCount)ui.droneCount.textContent=progress.drones.length;ui.laserToggle.classList.toggle('active',player.laserFiring);ui.rocketCd.textContent=rocketReady()?'MÍSSIL PRONTO':`MÍSSIL ${(getRocketCooldown()-(nowSec()-player.lastRocketShot)).toFixed(1)}s`;
+  const f=getFaction(),ship=SHIPS[progress.activeShipId],safe=isSafeZone();ui.factionLabel.textContent=f?.short||'—';ui.factionLabel.style.color=f?.color||'';ui.mapLabel.textContent=displayMapLabel(progress.mapId);if(ui.sectorName)ui.sectorName.textContent=state.currentMap.name||'Setor';if(ui.coordLabel)ui.coordLabel.textContent=`${Math.round(player.x)} / ${Math.round(player.y)}`;if(ui.routeLabel){const rd=routeDistance();ui.routeLabel.textContent=rd>35?`${fmt(rd)}u`:'PARADO';ui.routeLabel.parentElement?.classList.toggle('active',rd>35);}if(ui.discoveriesLabel){const found=state.landmarks.filter(l=>progress.discoveries?.[`${progress.mapId}:${l.id}`]).length;ui.discoveriesLabel.textContent=`${found}/${state.landmarks.length}`;}ui.shipLabel.textContent=ship.name;ui.lvl.textContent=progress.profile.level;ui.hp.textContent=fmt(player.hp);ui.maxHp.textContent=fmt(player.maxHp);ui.shield.textContent=fmt(player.shield);ui.maxShield.textContent=fmt(player.maxShield);ui.speed.textContent=fmt(player.speed);if(ui.dmg)ui.dmg.textContent=fmt(player.laserDamage*currentLaserAmmo().mult);ui.credits.textContent=fmt(progress.profile.credits);ui.uridium.textContent=fmt(progress.profile.uridium);ui.xp.textContent=fmt(progress.profile.xp);ui.xp.title=progress.profile.level>=PLAYER_MAX_LEVEL?'Nível máximo':`Próximo nível: ${fmt(levelXpThreshold(progress.profile.level+1))} XP • ${Math.round(levelProgressPercent(progress.profile.xp,progress.profile.level))}%`;if(ui.droneCount)ui.droneCount.textContent=progress.drones.length;ui.laserToggle.classList.toggle('active',player.laserFiring);ui.rocketCd.textContent=rocketReady()?'MÍSSIL PRONTO':`MÍSSIL ${(getRocketCooldown()-(nowSec()-player.lastRocketShot)).toFixed(1)}s`;
   if(ui.shipHudArt)ui.shipHudArt.src=V8_ASSETS.ships[progress.activeShipId]||V8_ASSETS.ships.phoenix;
   if(ui.factionIcon)ui.factionIcon.src=factionAsset(progress.profile.faction);
-  ui.userLabel.textContent=progress.profile.callsign||getUser()?.callsign||'Pilot';if(ui.petBtn)ui.petBtn.textContent=`P.E.T. LV${progress.pet?.level||1}`;ui.safeZoneLabel.textContent=safe?'ZONA SEGURA ATIVA':'FORA DA BASE';ui.safeZoneLabel.classList.toggle('active',safe);ui.cargoUsed.textContent=fmt(cargoUsed());ui.cargoMax.textContent=fmt(cargoCapacity());ui.cargoBtn.classList.toggle('gold',isAtTrader());
+  ui.userLabel.textContent=progress.profile.callsign||getUser()?.callsign||'Pilot';if(ui.petBtn)ui.petBtn.textContent=progress.pet?.owned?`P.E.T. LV${progress.pet.level}`:'P.E.T. LOJA';ui.safeZoneLabel.textContent=safe?'ZONA SEGURA ATIVA':'FORA DA BASE';ui.safeZoneLabel.classList.toggle('active',safe);ui.cargoUsed.textContent=fmt(cargoUsed());ui.cargoMax.textContent=fmt(cargoCapacity());ui.cargoBtn.classList.toggle('gold',isAtTrader());
   if(state.target&&state.target.hp>0){ui.targetName.textContent=state.target.name;ui.targetStats.textContent=`HP ${fmt(state.target.hp)} • ESC ${fmt(state.target.shield)}`;ui.targetHpBar.style.width=`${state.target.hp/state.target.maxHp*100}%`;ui.targetShieldBar.style.width=`${state.target.maxShield?state.target.shield/state.target.maxShield*100:0}%`;}else{ui.targetName.textContent='Sem alvo';ui.targetStats.textContent='Toque em um NPC para selecionar';ui.targetHpBar.style.width='0%';ui.targetShieldBar.style.width='0%';}
   ui.shopCredits.textContent=fmt(progress.profile.credits);ui.shopUridium.textContent=fmt(progress.profile.uridium);ui.hangarShipName.textContent=ship.name;updateExtraControls();
   const portal=nearbyPortal();if(portal&&!state.jumping&&ui.portalPrompt){const pos=screenPos(portal.x,portal.y);ui.portalPrompt.style.left=`${Math.max(85,Math.min(W-85,pos.x))}px`;ui.portalPrompt.style.top=`${Math.max(115,Math.min(H-90,pos.y-58))}px`;ui.portalPromptMap.textContent=`Destino ${displayMapLabel(portal.to)} • clique ou J`;ui.portalPrompt.classList.remove('hidden');}else ui.portalPrompt?.classList.add('hidden');
@@ -1687,29 +1827,30 @@ function updateUI(){
 function canAfford(price,currency){return currency==='credits'?progress.profile.credits>=price:progress.profile.uridium>=price;}
 function charge(price,currency){if(!canAfford(price,currency))return false;if(currency==='credits')progress.profile.credits-=price;else progress.profile.uridium-=price;return true;}
 function priceText(p,c){return `${fmt(p)} ${c==='credits'?'CR':'URI'}`;}
-function productIcon(type,subtype){return type==='ship'?'🛸':type==='laser'?'⚡':type==='generator'?(subtype==='speed'?'💨':'🛡️'):type==='drone'?'◆':type==='extra'?'🧩':type==='ammo'?'✦':'🚀';}
+function productIcon(type,subtype){return type==='ship'?'🛸':type==='laser'?'⚡':type==='generator'?(subtype==='speed'?'💨':'🛡️'):type==='drone'?'◆':type==='pet'?'🤖':type==='extra'?'🧩':type==='ammo'?'✦':'🚀';}
 
-function buyShip(shipId){const ship=SHIPS[shipId];if(progress.ownedShips.includes(shipId)){showToast('Nave já obtida');return;}if(!charge(ship.price,ship.currency)){showToast('Saldo insuficiente');return;}progress.ownedShips.push(shipId);saveGame();renderShop();showToast(`${ship.name} adicionada ao Hangar`);}
+function buyShip(shipId){const ship=SHIPS[shipId];if(!ship)return;if(ship.eventOnly||ship.shopAvailable===false){showToast(`${ship.name}: nave reservada para Evento / Missão / Passe`);return;}if(progress.ownedShips.includes(shipId)){showToast('Nave já obtida');return;}if(!charge(ship.price,ship.currency)){showToast('Saldo insuficiente');return;}progress.ownedShips.push(shipId);saveGame();renderShop();showToast(`${ship.name} adicionada ao Hangar`);}
 function buyItem(itemId){const item=ITEMS[itemId];if(item.type==='drone'){buyDrone(itemId);return;}if(!charge(item.price,item.currency)){showToast('Saldo insuficiente');return;}addInventory(itemId);saveGame();renderShop();if(!ui.hangarModal.classList.contains('hidden'))renderHangar();showToast(`${item.name} comprado`);}
 function buyDrone(type){if(progress.drones.length>=8){showToast('Limite de 8 drones atingido');return;}const item=ITEMS[type];if(!charge(item.price,item.currency)){showToast('Saldo insuficiente');return;}progress.drones.push({id:`d_${Date.now()}_${Math.random().toString(16).slice(2,5)}`,type,slots:Array(item.slots).fill(null)});computeStats(true);saveGame();renderShop();showToast(`${item.name} adquirido (${progress.drones.length}/8)`);}
 function buyAmmo(id){if(!buyAmmoPack(id,false)){showToast('Saldo insuficiente');return;}buildAmmoButtons();renderShop();}
 function buyRockets(id){if(!buyRocketPack(id,false)){showToast('Saldo insuficiente');return;}buildAmmoButtons();renderShop();}
 
 function renderTabs(container,map,active,onPick){container.innerHTML='';for(const [id,label] of Object.entries(map)){const b=document.createElement('button');b.className=`tab-btn ${active===id?'active':''}`;b.textContent=label;b.onclick=()=>onPick(id);container.appendChild(b);}}
-function makeProductCard({id,name,desc,price,currency,type,subtype,badge,owned,onBuy,disabled=false}){
+function makeProductCard({id,name,desc,price,currency,type,subtype,badge,owned,onBuy,disabled=false,priceLabel=null,buttonLabel=null}){
   const card=document.createElement('div');card.className='product-card';
   const art=assetForProduct(id,type,subtype);
-  card.innerHTML=`<div class="product-icon">${art?`<img src="${art}" alt="${name}" loading="lazy">`:productIcon(type,subtype)}</div><div>${badge?`<span class="badge ${badge==='ELITE'?'elite':''}">${badge}</span>`:''}<h3>${name}</h3></div><div class="product-desc">${desc}</div><div class="price ${currency}">${owned?'OBTIDO':priceText(price,currency)}</div>`;
-  const b=document.createElement('button');b.className='buy-btn';b.textContent=owned?'Obtido':'Comprar';b.disabled=owned||disabled;b.onclick=onBuy;card.appendChild(b);return card;
+  card.innerHTML=`<div class="product-icon">${art?`<img src="${art}" alt="${name}" loading="lazy">`:productIcon(type,subtype)}</div><div>${badge?`<span class="badge ${badge==='ELITE'?'elite':''}">${badge}</span>`:''}<h3>${name}</h3></div><div class="product-desc">${desc}</div><div class="price ${currency}">${owned?'OBTIDO':(priceLabel||priceText(price,currency))}</div>`;
+  const b=document.createElement('button');b.className='buy-btn';b.textContent=owned?'Obtido':(buttonLabel||'Comprar');b.disabled=owned||disabled;b.onclick=onBuy;card.appendChild(b);return card;
 }
 function renderShop(){
   if(!progress)return;renderTabs(ui.shopTabs,categories,state.shopTab,id=>{state.shopTab=id;renderShop();});ui.shopGrid.innerHTML='';
-  if(state.shopTab==='ships')Object.values(SHIPS).forEach(s=>ui.shopGrid.appendChild(makeProductCard({id:s.id,name:s.name,desc:`${s.role}<br>HP ${fmt(s.hp)} • ${s.lasers} lasers • ${s.generators} geradores • ${s.extras} extras • VEL ${s.speed}`,price:s.price,currency:s.currency,type:'ship',badge:s.currency==='uridium'?'ELITE':'COMUM',owned:progress.ownedShips.includes(s.id),onBuy:()=>buyShip(s.id)})));
-  if(state.shopTab==='lasers')Object.values(ITEMS).filter(i=>i.type==='laser').forEach(i=>ui.shopGrid.appendChild(makeProductCard({id:i.id,name:i.name,desc:`Dano base: <b>${i.damage}</b><br>${i.description}`,price:i.price,currency:i.currency,type:i.type,badge:i.currency==='uridium'?'ELITE':'COMUM',onBuy:()=>buyItem(i.id)})));
-  if(state.shopTab==='generators')Object.values(ITEMS).filter(i=>i.type==='generator').forEach(i=>ui.shopGrid.appendChild(makeProductCard({id:i.id,name:i.name,desc:i.description,price:i.price,currency:i.currency,type:i.type,subtype:i.subtype,badge:i.currency==='uridium'?'ELITE':'COMUM',onBuy:()=>buyItem(i.id)})));
+  if(state.shopTab==='ships')Object.values(SHIPS).forEach(s=>{const event=!!s.eventOnly||s.shopAvailable===false;ui.shopGrid.appendChild(makeProductCard({id:s.id,name:s.name,desc:`${s.role}<br>HP ${fmt(s.hp)} • ${s.lasers} lasers • ${s.generators} geradores • ${s.extras} extras • VEL ${s.speed}${s.ability?`<br><b>Habilidade:</b> ${s.ability}`:''}`,price:s.price,currency:s.currency,type:'ship',badge:event?'EVENTO':(s.currency==='uridium'?'ELITE':'COMUM'),owned:progress.ownedShips.includes(s.id),disabled:event&&!progress.ownedShips.includes(s.id),priceLabel:event?'EVENTO / MISSÃO / PASSE':null,buttonLabel:event?'BLOQUEADA':null,onBuy:()=>buyShip(s.id)}));});
+  if(state.shopTab==='lasers')Object.values(ITEMS).filter(i=>i.type==='laser'&&i.shopAvailable!==false).forEach(i=>ui.shopGrid.appendChild(makeProductCard({id:i.id,name:i.name,desc:`Dano base: <b>${i.damage}</b>${i.alienDamage?` • Alien ${i.alienDamage}`:''}${i.alienBonus?` • +${Math.round(i.alienBonus*100)}% PvE`:''}<br>${i.description}`,price:i.price,currency:i.currency,type:i.type,badge:i.currency==='uridium'?'ELITE':'COMUM',onBuy:()=>buyItem(i.id)})));
+  if(state.shopTab==='generators')Object.values(ITEMS).filter(i=>i.type==='generator').forEach(i=>{const event=!!i.eventOnly||i.shopAvailable===false;ui.shopGrid.appendChild(makeProductCard({id:i.id,name:i.name,desc:i.description,price:i.price,currency:i.currency,type:i.type,subtype:i.subtype,badge:event?'EVENTO':(i.currency==='uridium'?'ELITE':'COMUM'),disabled:event,priceLabel:event?'EVENTO / MISSÃO':null,buttonLabel:event?'BLOQUEADO':null,onBuy:()=>buyItem(i.id)}));});
+  if(state.shopTab==='pet')ui.shopGrid.appendChild(makeProductCard({id:'petBaseUnit',name:'P.E.T. — Unidade Base',desc:`Companheiro autônomo com progressão até o nível ${PET_MAX_LEVEL}. Armas, escudos e módulos são comprados separadamente.`,price:PET_BASE_PRICE,currency:'uridium',type:'pet',badge:'ELITE',owned:!!progress.pet?.owned,onBuy:()=>buyPetUnit()}));
   if(state.shopTab==='drones')Object.values(ITEMS).filter(i=>i.type==='drone').forEach(i=>ui.shopGrid.appendChild(makeProductCard({id:i.id,name:i.name,desc:`${i.description}<br>Você possui ${progress.drones.filter(d=>d.type===i.id).length}. Total: ${progress.drones.length}/8`,price:i.price,currency:i.currency,type:i.type,badge:i.id==='iris'?'ELITE':'COMUM',disabled:progress.drones.length>=8,onBuy:()=>buyDrone(i.id)})));
   if(state.shopTab==='extras')Object.values(ITEMS).filter(i=>i.type==='extra').forEach(i=>ui.shopGrid.appendChild(makeProductCard({id:i.id,name:i.name,desc:i.description,price:i.price,currency:i.currency,type:i.type,badge:i.currency==='uridium'?'ELITE':'COMUM',onBuy:()=>buyItem(i.id)})));
-  if(state.shopTab==='ammo')Object.values(LASER_AMMO).forEach(a=>ui.shopGrid.appendChild(makeProductCard({id:a.id,name:a.name,desc:`Pacote com ${fmt(a.pack)} disparos • multiplicador x${a.mult}<br>Em estoque: ${fmt(ammoQty(a.id))}`,price:a.price,currency:a.currency,type:'ammo',badge:a.currency==='uridium'?'ELITE':'COMUM',onBuy:()=>buyAmmo(a.id)})));
+  if(state.shopTab==='ammo')Object.values(LASER_AMMO).forEach(a=>ui.shopGrid.appendChild(makeProductCard({id:a.id,name:a.name,desc:`Pacote com ${fmt(a.pack)} disparos • ${a.shieldDrain?'captura escudo x2':`dano x${a.mult}`}<br>Em estoque: ${fmt(ammoQty(a.id))}`,price:a.price,currency:a.currency,type:'ammo',badge:a.currency==='uridium'?'ELITE':'COMUM',onBuy:()=>buyAmmo(a.id)})));
   if(state.shopTab==='rockets')Object.values(ROCKETS).forEach(r=>ui.shopGrid.appendChild(makeProductCard({id:r.id,name:r.name,desc:`Pacote com ${fmt(r.pack)} mísseis • dano ${fmt(r.damage)}<br>Em estoque: ${fmt(rocketQty(r.id))}`,price:r.price,currency:r.currency,type:'rocket',badge:r.currency==='uridium'?'ELITE':'COMUM',onBuy:()=>buyRockets(r.id)})));
   updateUI();
 }
@@ -1762,7 +1903,7 @@ function renderHangarShips(){
   Object.values(SHIPS).forEach(s=>{
     const owned=progress.ownedShips.includes(s.id),active=s.id===progress.activeShipId,c=document.createElement('div');c.className='ship-card';
     c.innerHTML=`<div class="ship-visual"><img src="${V8_ASSETS.ships[s.id]||V8_ASSETS.ships.phoenix}" alt="${s.name}"></div><div><span class="badge">${owned?'OBTIDA':'BLOQUEADA'}</span><h3>${s.name}</h3></div><div class="ship-stats">HP ${fmt(s.hp)}<br>Lasers ${s.lasers} • Geradores ${s.generators} • Extras ${s.extras}<br>VEL ${s.speed} • Cargo ${fmt(s.cargo)}</div>`;
-    const b=document.createElement('button');b.className='equip-btn';b.textContent=active?'Nave ativa':owned?'Usar nave':'Comprar na Loja';b.disabled=active;b.onclick=()=>owned?switchShip(s.id):(ui.hangarModal.classList.add('hidden'),openShop('ships'));c.appendChild(b);wrap.appendChild(c);
+    const event=!!s.eventOnly||s.shopAvailable===false;const b=document.createElement('button');b.className='equip-btn';b.textContent=active?'Nave ativa':owned?'Usar nave':event?'EVENTO / MISSÃO / PASSE':'Comprar na Loja';b.disabled=active||(!owned&&event);b.onclick=()=>owned?switchShip(s.id):(ui.hangarModal.classList.add('hidden'),openShop('ships'));c.appendChild(b);wrap.appendChild(c);
   });return wrap;
 }
 function renderHangarEquipment(){
@@ -1790,10 +1931,13 @@ function petLockedCard(kind,index){
 }
 function renderPet(){
   if(!progress?.pet||!ui.petContent)return;
-  const pet=progress.pet,need=pet.level<PET_MAX_LEVEL?petLevelXp(pet.level):0,pct=pet.level>=PET_MAX_LEVEL?100:Math.min(100,pet.xp/need*100);
-  ui.petContent.innerHTML='';
+  const pet=progress.pet;ui.petContent.innerHTML='';
+  if(!pet.owned){
+    const hero=document.createElement('div');hero.className='pet-hero pet-store-hero';hero.innerHTML=`<div class="pet-avatar"><img src="${V8_ASSETS.drones.pet}" alt="P.E.T."></div><div class="pet-hero-copy"><div class="eyebrow">UNIDADE P.E.T.</div><h2>P.E.T. ainda não adquirido</h2><p class="muted">O P.E.T. não é mais gratuito. Adquira a unidade base para desbloquear progressão, armas, escudos, coleta, reparo e Kamikaze.</p><div class="price uridium">${fmt(PET_BASE_PRICE)} URI</div></div>`;const b=document.createElement('button');b.className='primary-btn';b.textContent=`COMPRAR P.E.T. • ${fmt(PET_BASE_PRICE)} URI`;b.disabled=progress.profile.uridium<PET_BASE_PRICE;b.onclick=()=>buyPetUnit();hero.querySelector('.pet-hero-copy').appendChild(b);ui.petContent.appendChild(hero);return;
+  }
+  const base=levelXpThreshold(pet.level),need=pet.level<PET_MAX_LEVEL?petLevelXp(pet.level):base,pct=pet.level>=PET_MAX_LEVEL?100:Math.min(100,(pet.xp-base)/Math.max(1,need-base)*100);
   const hero=document.createElement('div');hero.className='pet-hero';
-  hero.innerHTML=`<div class="pet-avatar"><img src="${pet.level>=10?V8_ASSETS.drones.petElite:V8_ASSETS.drones.pet}" alt="P.E.T."></div><div class="pet-hero-copy"><div class="eyebrow">P.E.T. DE COMBATE</div><h2>Nível ${pet.level} / ${PET_MAX_LEVEL}</h2><div class="pet-xpbar"><span style="width:${pct}%"></span></div><div class="muted">${pet.level>=PET_MAX_LEVEL?'Nível máximo':`${fmt(pet.xp)} / ${fmt(need)} XP`} • Alcance ${fmt(petRange())} • Dano ${fmt(petDamage())} • Escudo ${fmt(petMaxShield())}</div><div class="muted">Módulos disponíveis: Guardião, BOX, Pedras, Regenerador e Kamikaze.</div></div>`;
+  hero.innerHTML=`<div class="pet-avatar"><img src="${pet.level>=10?V8_ASSETS.drones.petElite:V8_ASSETS.drones.pet}" alt="P.E.T."></div><div class="pet-hero-copy"><div class="eyebrow">P.E.T. DE COMBATE</div><h2>Nível ${pet.level} / ${PET_MAX_LEVEL}</h2><div class="pet-xpbar"><span style="width:${pct}%"></span></div><div class="muted">${pet.level>=PET_MAX_LEVEL?'Nível máximo':`${fmt(pet.xp)} XP total • próximo ${fmt(need)}`} • Alcance ${fmt(petRange())} • Dano ${fmt(petDamage())} • Escudo ${fmt(petMaxShield())}</div><div class="muted">Módulos disponíveis: Guardião, BOX, Pedras, Regenerador e Kamikaze.</div></div>`;
   ui.petContent.appendChild(hero);
 
   const gears=document.createElement('div');gears.className='section-box';gears.innerHTML='<h3>Modos / Extras do P.E.T.</h3><div class="muted">Apenas um modo fica ativo por vez. Os módulos são permanentes depois de comprados.</div>';
@@ -1804,9 +1948,9 @@ function renderPet(){
 
   for(const kind of ['laser','shield']){
     const unlocked=kind==='laser'?pet.laserSlotsUnlocked:pet.shieldSlotsUnlocked;
-    const box=document.createElement('div');box.className='section-box';box.innerHTML=`<h3>${kind==='laser'?'Armas':'Escudos'} — ${unlocked}/${pet.level} liberados</h3><div class="muted">O nível do P.E.T. define quantos espaços podem ser comprados. O slot 1 já vem liberado.</div>`;
+    const box=document.createElement('div');box.className='section-box';box.innerHTML=`<h3>${kind==='laser'?'Armas':'Escudos'} — ${unlocked}/${Math.min(pet.level,PET_SLOT_LEVEL_CAP)} liberados</h3><div class="muted">O nível do P.E.T. define quantos espaços podem ser comprados. O slot 1 já vem liberado.</div>`;
     const grid=document.createElement('div');grid.className='pet-slot-grid';
-    for(let i=0;i<pet.level;i++)grid.appendChild(i<unlocked?petEquipCard(kind,i):petLockedCard(kind,i));
+    for(let i=0;i<Math.min(pet.level,PET_SLOT_LEVEL_CAP);i++)grid.appendChild(i<unlocked?petEquipCard(kind,i):petLockedCard(kind,i));
     box.appendChild(grid);ui.petContent.appendChild(box);
   }
 
@@ -1817,7 +1961,7 @@ function renderPet(){
   else entries.forEach(([id,q])=>{const item=ITEMS[id],c=document.createElement('div');c.className='inventory-card';c.innerHTML=`${V8_ASSETS.equipment[id]?`<img class="inventory-item-art" src="${V8_ASSETS.equipment[id]}" alt="${item.name}">`:''}<b>${item.name}</b><div class="qty">Quantidade: ${q}</div><div class="muted">${item.description}</div>`;const b=document.createElement('button');b.className='ghost-btn';b.textContent=item.type==='laser'?'Equipar no P.E.T. (arma)':'Equipar no P.E.T. (escudo)';b.onclick=()=>equipPetItem(id,item.type==='laser'?'laser':'shield');c.appendChild(b);grid.appendChild(c);});
   inv.appendChild(grid);ui.petContent.appendChild(inv);
 }
-function openPet(){renderPet();ui.petModal.classList.remove('hidden');}
+function openPet(){if(!progress?.pet?.owned){openShop('pet');showToast(`P.E.T. disponível na Loja por ${fmt(PET_BASE_PRICE)} URI`);return;}renderPet();ui.petModal.classList.remove('hidden');}
 
 function cargoSaleValue(){let total=0;for(const [id,qty] of Object.entries(progress.cargo||{}))total+=(RESOURCES[id]?.sell||0)*qty;return total;}
 function sellCargoResource(id){if(!isAtTrader()){showToast('Venda disponível somente na base X-1');return;}const qty=progress.cargo[id]||0,price=RESOURCES[id]?.sell||0;if(qty<=0||price<=0)return;progress.profile.credits+=qty*price;delete progress.cargo[id];saveGame();renderCargo();updateUI();showToast(`${qty} ${id} vendidos por ${fmt(qty*price)} CR`);}
@@ -1973,8 +2117,24 @@ function updateAuctionSystem(){
 function renderAll(){buildAmmoButtons();renderShop();renderHangar();renderCargo();renderMapModal();renderPet();renderMissions();renderGalaxyGate();renderPilotProfile();ensureAuctionState();updateUI();}
 
 function worldPoint(ev){const r=canvas.getBoundingClientRect(),sx=ev.clientX-r.left,sy=ev.clientY-r.top;return{x:sx-W/2+state.camera.x,y:sy-H/2+state.camera.y};}
-function pointerAction(ev){if(!authenticated||!progress||!ui.loginModal.classList.contains('hidden')||!ui.shopModal.classList.contains('hidden')||!ui.hangarModal.classList.contains('hidden')||!ui.cargoModal.classList.contains('hidden')||!ui.petModal.classList.contains('hidden')||!ui.missionModal.classList.contains('hidden')||!ui.gateModal.classList.contains('hidden')||!ui.pilotModal.classList.contains('hidden')||!ui.auctionModal.classList.contains('hidden')||!ui.factionModal.classList.contains('hidden'))return;const p=worldPoint(ev);const found=state.enemies.find(e=>e.hp>0&&Math.hypot(e.x-p.x,e.y-p.y)<=e.size*1.8+18);if(found){state.target=found;showToast(`Alvo: ${found.name}`);if(autoLaserEnabled())player.laserFiring=true;return;}const clickedPortal=portalAtWorld(p.x,p.y);const readyPortal=nearbyPortal();if(clickedPortal&&readyPortal&&clickedPortal.to===readyPortal.to&&Math.hypot(clickedPortal.x-readyPortal.x,clickedPortal.y-readyPortal.y)<1){jumpThroughPortal(readyPortal);return;}player.tx=Math.max(40,Math.min(state.currentMap.world.w-40,p.x));player.ty=Math.max(40,Math.min(state.currentMap.world.h-40,p.y));}
+function gameplayPointerAllowed(){return authenticated&&progress&&ui.loginModal.classList.contains('hidden')&&ui.shopModal.classList.contains('hidden')&&ui.hangarModal.classList.contains('hidden')&&ui.cargoModal.classList.contains('hidden')&&ui.petModal.classList.contains('hidden')&&ui.missionModal.classList.contains('hidden')&&ui.gateModal.classList.contains('hidden')&&ui.pilotModal.classList.contains('hidden')&&ui.auctionModal.classList.contains('hidden')&&ui.factionModal.classList.contains('hidden');}
+function setPointerDestination(ev){const p=worldPoint(ev);player.tx=Math.max(40,Math.min(state.currentMap.world.w-40,p.x));player.ty=Math.max(40,Math.min(state.currentMap.world.h-40,p.y));}
+function pointerAction(ev){
+  if(!gameplayPointerAllowed()||ev.button!==0)return;
+  const p=worldPoint(ev);const found=state.enemies.find(e=>e.hp>0&&Math.hypot(e.x-p.x,e.y-p.y)<=e.size*1.8+18);
+  if(found){state.target=found;state.pointerNavActive=false;showToast(`Alvo: ${found.name}`);if(autoLaserEnabled())player.laserFiring=true;return;}
+  const clickedPortal=portalAtWorld(p.x,p.y),readyPortal=nearbyPortal();
+  if(clickedPortal&&readyPortal&&clickedPortal.to===readyPortal.to&&Math.hypot(clickedPortal.x-readyPortal.x,clickedPortal.y-readyPortal.y)<1){state.pointerNavActive=false;jumpThroughPortal(readyPortal);return;}
+  setPointerDestination(ev);state.pointerNavActive=true;state.pointerNavId=ev.pointerId;
+  try{canvas.setPointerCapture(ev.pointerId);}catch(_e){}
+}
+function pointerNavigateMove(ev){if(!state.pointerNavActive||state.pointerNavId!==ev.pointerId||!gameplayPointerAllowed())return;setPointerDestination(ev);}
+function stopPointerNavigation(ev){if(state.pointerNavId!==null&&ev.pointerId!==undefined&&state.pointerNavId!==ev.pointerId)return;state.pointerNavActive=false;state.pointerNavId=null;try{if(ev.pointerId!==undefined)canvas.releasePointerCapture(ev.pointerId);}catch(_e){}}
 canvas.addEventListener('pointerdown',pointerAction);
+canvas.addEventListener('pointermove',pointerNavigateMove);
+canvas.addEventListener('pointerup',stopPointerNavigation);
+canvas.addEventListener('pointercancel',stopPointerNavigation);
+canvas.addEventListener('lostpointercapture',()=>{state.pointerNavActive=false;state.pointerNavId=null;});
 ui.portalPrompt.onclick=()=>{const portal=nearbyPortal();if(portal)jumpThroughPortal(portal);};
 minimap.addEventListener('pointerdown',e=>{if(!authenticated||!progress)return;e.preventDefault();e.stopPropagation();const r=minimap.getBoundingClientRect();const mx=(e.clientX-r.left)/r.width*minimap.width,my=(e.clientY-r.top)/r.height*minimap.height;player.tx=Math.max(35,Math.min(state.currentMap.world.w-35,mx/minimap.width*state.currentMap.world.w));player.ty=Math.max(35,Math.min(state.currentMap.world.h-35,my/minimap.height*state.currentMap.world.h));showToast(`Rota definida no minimapa`);});
 ui.laserToggle.onclick=()=>{if(!state.target||state.target.hp<=0){showToast('Selecione um alvo');return;}player.laserFiring=!player.laserFiring;};ui.rocketFire.onclick=()=>fireRocket(true);
@@ -1997,7 +2157,7 @@ function bindOverlayDismiss(){
 
 ui.mapBtn.onclick=()=>openMapModal();ui.closeMap.onclick=()=>ui.mapModal.classList.add('hidden');if(ui.missionBtn)ui.missionBtn.onclick=()=>openMissions();if(ui.closeMission)ui.closeMission.onclick=()=>ui.missionModal.classList.add('hidden');if(ui.gateBtn)ui.gateBtn.onclick=()=>openGalaxyGate();if(ui.pilotBtn)ui.pilotBtn.onclick=()=>openPilotProfile();if(ui.closePilot)ui.closePilot.onclick=()=>ui.pilotModal.classList.add('hidden');if(ui.pilotConvertPoint)ui.pilotConvertPoint.onclick=()=>convertPilotPoint();if(ui.pilotResetBtn)ui.pilotResetBtn.onclick=()=>resetPilotTree();if(ui.auctionBtn)ui.auctionBtn.onclick=()=>openAuction();if(ui.closeAuction)ui.closeAuction.onclick=()=>ui.auctionModal.classList.add('hidden');if(ui.closeGate)ui.closeGate.onclick=()=>ui.gateModal.classList.add('hidden');if(ui.gateJumpBtn)ui.gateJumpBtn.onclick=()=>enterAlphaGate();if(ui.useRepairBonus)ui.useRepairBonus.onclick=()=>useGalaxyRepairBonus();ui.petBtn.onclick=()=>openPet();ui.closePet.onclick=()=>ui.petModal.classList.add('hidden');ui.shopBtn.onclick=()=>openShop();if(ui.weaponBarToggle)ui.weaponBarToggle.onclick=()=>toggleAmmoUi();if(ui.statsToggle){ui.statsToggle.onclick=e=>{e.stopPropagation();toggleStatsUi();};ui.statsToggle.ontouchstart=e=>e.stopPropagation();}if(ui.statsHeader)ui.statsHeader.onclick=()=>toggleStatsUi();if(ui.minimapToggle){ui.minimapToggle.onclick=e=>{e.stopPropagation();toggleMinimapUi();};ui.minimapToggle.ontouchstart=e=>e.stopPropagation();}if(ui.minimapHeader)ui.minimapHeader.onclick=()=>toggleMinimapUi();if(ui.hudToggle)ui.hudToggle.onclick=()=>toggleHudUi();ui.closeShop.onclick=()=>ui.shopModal.classList.add('hidden');ui.hangarBtn.onclick=()=>openHangar();ui.closeHangar.onclick=()=>ui.hangarModal.classList.add('hidden');ui.cargoBtn.onclick=()=>openCargo();ui.closeCargo.onclick=()=>ui.cargoModal.classList.add('hidden');ui.sellAllCargo.onclick=()=>sellAllCargo();ui.mapModal.onclick=e=>{if(e.target===ui.mapModal)ui.mapModal.classList.add('hidden');};if(ui.missionModal)ui.missionModal.onclick=e=>{if(e.target===ui.missionModal)ui.missionModal.classList.add('hidden');};if(ui.gateModal)ui.gateModal.onclick=e=>{if(e.target===ui.gateModal)ui.gateModal.classList.add('hidden');};ui.petModal.onclick=e=>{if(e.target===ui.petModal)ui.petModal.classList.add('hidden');};ui.shopModal.onclick=e=>{if(e.target===ui.shopModal)ui.shopModal.classList.add('hidden');};ui.hangarModal.onclick=e=>{if(e.target===ui.hangarModal)ui.hangarModal.classList.add('hidden');};ui.cargoModal.onclick=e=>{if(e.target===ui.cargoModal)ui.cargoModal.classList.add('hidden');};
 bindOverlayDismiss();
-document.addEventListener('keydown',e=>{if(!authenticated||!progress||!ui.loginModal.classList.contains('hidden')||!ui.factionModal.classList.contains('hidden'))return;if(e.key==='Escape'){if(closeTopOverlay()){e.preventDefault();return;}}const tag=document.activeElement?.tagName;if(tag==='INPUT'||tag==='TEXTAREA')return;if(e.key==='Control'){e.preventDefault();if(state.target&&state.target.hp>0)player.laserFiring=!player.laserFiring;else showToast('Selecione um alvo');}if(e.code==='Space'){e.preventDefault();fireRocket(true);}if(['j','J'].includes(e.key)||e.key==='Enter'){const portal=nearbyPortal();if(portal){e.preventDefault();jumpThroughPortal(portal);}}if(e.key.toLowerCase()==='h')toggleHudUi();if(e.key.toLowerCase()==='b')openShop();if(e.key.toLowerCase()==='c')openCargo();if(e.key.toLowerCase()==='m')openMapModal();if(e.key.toLowerCase()==='q')openMissions();if(e.key.toLowerCase()==='g')openGalaxyGate();if(e.key.toLowerCase()==='p')openPet();if(e.key.toLowerCase()==='o')openPilotProfile();if(e.key.toLowerCase()==='l')openAuction();if(['1','2','3','4'].includes(e.key)){progress.selectedLaserAmmo=Object.keys(LASER_AMMO)[Number(e.key)-1];buildAmmoButtons();saveGame();}});
+document.addEventListener('keydown',e=>{if(!authenticated||!progress||!ui.loginModal.classList.contains('hidden')||!ui.factionModal.classList.contains('hidden'))return;if(e.key==='Escape'){if(closeTopOverlay()){e.preventDefault();return;}}const tag=document.activeElement?.tagName;if(tag==='INPUT'||tag==='TEXTAREA')return;if(e.key==='Control'){e.preventDefault();if(state.target&&state.target.hp>0)player.laserFiring=!player.laserFiring;else showToast('Selecione um alvo');}if(e.code==='Space'){e.preventDefault();fireRocket(true);}if(['j','J'].includes(e.key)||e.key==='Enter'){const portal=nearbyPortal();if(portal){e.preventDefault();jumpThroughPortal(portal);}}if(e.key.toLowerCase()==='h')toggleHudUi();if(e.key.toLowerCase()==='b')openShop();if(e.key.toLowerCase()==='c')openCargo();if(e.key.toLowerCase()==='m')openMapModal();if(e.key.toLowerCase()==='q')openMissions();if(e.key.toLowerCase()==='g')openGalaxyGate();if(e.key.toLowerCase()==='p')openPet();if(e.key.toLowerCase()==='o')openPilotProfile();if(e.key.toLowerCase()==='l')openAuction();if(['1','2','3','4','5'].includes(e.key)){progress.selectedLaserAmmo=Object.keys(LASER_AMMO)[Number(e.key)-1];buildAmmoButtons();saveGame();}});
 
 function showAuthMode(mode){
   const login=mode==='login';ui.loginForm.classList.toggle('hidden',!login);ui.registerForm.classList.toggle('hidden',login);ui.loginTabBtn.classList.toggle('active',login);ui.registerTabBtn.classList.toggle('active',!login);ui.authMessage.textContent='';
@@ -2013,7 +2173,7 @@ function startLoadedGame(){
   if(progress.mapId==='ggAlpha'&&!progress.galaxyGate.alpha.run?.active)progress.mapId='x1';
   const savedX=Number.isFinite(progress.x)?progress.x:null,savedY=Number.isFinite(progress.y)?progress.y:null;state.currentMap=MAPS[progress.mapId]||MAPS.x1;state.radarRange=mapRadarRange();player.hp=progress.hp||1;player.shield=progress.shield||0;computeStats(true);player.hp=Math.min(player.maxHp,progress.hp??player.maxHp);player.shield=Math.min(player.maxShield,progress.shield??player.maxShield);
   if(progress.mapId==='ggAlpha'){
-    player.x=savedX??MAPS.ggAlpha.world.w/2;player.y=savedY??MAPS.ggAlpha.world.h/2;player.tx=player.x;player.ty=player.y;petRuntime.x=player.x+82;petRuntime.y=player.y+64;petRuntime.tx=petRuntime.x;petRuntime.ty=petRuntime.y;state.camera.x=player.x;state.camera.y=player.y;state.target=null;state.loot=[];state.fx=[];state.rocketFx=[];state.ores=[];state.landmarks=[];state.enemyRespawns=[];state.oreRespawns=[];restoreAlphaGateEnemies();if(alphaGate().run.waveIndex===0&&alphaRemainingCount()===0)spawnAlphaWave();else if(alphaGate().run.waveIndex<(GALAXY_ALPHA_ROUNDS[alphaGate().run.round-1]?.waves.length||0)&&!alphaGate().run.nextWaveAt)alphaGate().run.nextWaveAt=Date.now()+GALAXY_ALPHA_WAVE_INTERVAL_MS;renderAll();saveGame();return;
+    player.x=savedX??MAPS.ggAlpha.world.w/2;player.y=savedY??MAPS.ggAlpha.world.h/2;player.tx=player.x;player.ty=player.y;petRuntime.x=player.x+82;petRuntime.y=player.y+64;petRuntime.tx=petRuntime.x;petRuntime.ty=petRuntime.y;state.camera.x=player.x;state.camera.y=player.y;state.target=null;state.loot=[];state.fx=[];state.rocketFx=[];state.ores=[];state.landmarks=[];state.enemyRespawns=[];state.oreRespawns=[];restoreAlphaGateEnemies();const a=alphaGate(),def=GALAXY_ALPHA_ROUNDS[a.run.round-1],alive=alphaRemainingCount(),now=Date.now();if(a.run.waveIndex<def.waves.length&&!a.run.nextWaveAt){a.run.nextWaveAt=now+GALAXY_ALPHA_WAVE_INTERVAL_MS;}else if(a.run.waveIndex>=def.waves.length&&alive===0&&a.run.round<GALAXY_ALPHA_ROUNDS.length&&!a.run.nextRoundAt){a.run.nextRoundAt=now+GALAXY_ALPHA_ROUND_INTERVAL_MS;}renderAll();saveGame();return;
   }
   player.x=savedX??(progress.mapId==='x1'?SAFE_ZONE.x:400);player.y=savedY??state.currentMap.world.h/2;player.tx=player.x;player.ty=player.y;petRuntime.x=player.x+82;petRuntime.y=player.y+64;petRuntime.tx=petRuntime.x;petRuntime.ty=petRuntime.y;state.camera.x=player.x;state.camera.y=player.y;state.target=null;state.loot=[];state.fx=[];state.rocketFx=[];createLandmarks();createOres();spawnEnemies();renderAll();saveGame();
 }

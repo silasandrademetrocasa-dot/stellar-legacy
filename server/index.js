@@ -80,7 +80,7 @@ async function ensureProfile(sb, user, callsign = '') {
   if (error) console.warn('profile upsert:', error.message);
 }
 
-app.get('/health', (req, res) => res.json({ ok: true, game: 'Stellar Legacy', version: '10.0.0' }));
+app.get('/health', (req, res) => res.json({ ok: true, game: 'Stellar Legacy', version: '10.1.0' }));
 
 
 app.get('/api/config', (req, res) => {
@@ -96,7 +96,7 @@ app.get('/api/config', (req, res) => {
 
 app.get('/api/meta', (req, res) => res.json({
   name: 'Stellar Legacy',
-  version: '10.0.0',
+  version: '10.1.0',
   authReady: Boolean(SUPABASE_URL && SUPABASE_KEY),
   diagnostics: configStatus(),
   features: ['login', 'cloud_save', 'factions', 'safe_zone', 'shop', 'owned_ships', 'equipment_slots', 'inventory', 'drones', 'ammo', 'rockets', 'expanded_expedition_maps', 'cargo_hold', 'ore_trading', 'npc_cargo_boxes', 'npc_respawn', 'minimap_navigation', 'waypoints', 'landmark_discovery', 'combat_fx', 'pet_modules', 'auto_buy_cpu', 'v8_asset_identity', 'mission_control_v93', 'mission_acceptance_tracking', 'expanded_enemy_density'],

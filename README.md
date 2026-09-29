@@ -272,3 +272,19 @@ Todos os preços da Loja foram rebalanceados para progressão longa. Itens comun
 - Lance fica em garantia: perdeu, recebe os Créditos de volta; venceu, recebe o item.
 - Concorrência automática aumenta durante a hora para manter o sistema competitivo.
 - Equipamentos Elite do P.E.T. também entram no catálogo do Leilão.
+
+
+## V10.1 — Combat Evolution
+- Nave gira suavemente e mantém o nariz apontado para o alvo selecionado, inclusive enquanto se move.
+- Navegação preserva clique simples e adiciona mouse segurado: enquanto o botão esquerdo fica pressionado, o destino acompanha o cursor.
+- Níveis do piloto e do P.E.T. usam a progressão cumulativa clássica baseada em 10.000 XP no nível 2 e duplicação dos requisitos seguintes, com teto atual no nível 44.
+- P.E.T. não é mais gratuito: unidade base custa 1.500.000 Uridium e começa sem ser possuída em contas novas.
+- P.E.T. usa a mesma progressão de XP do jogador; slots de equipamento continuam limitados aos 15 primeiros níveis para preservar o sistema de slots existente.
+- Catálogo futuro de aliens criado sem adicioná-los aos mapas atuais.
+- Lasers ativos da Loja: LF-1, MP-1, LF-2, LF-3 e LF-4; SL-01 fica apenas como legado de saves antigos.
+- MP-1 respeita dano PvE próprio; LF-3 aplica +15% contra aliens.
+- Munições laser: x1, x2, x3, x4 e SAB-50. SAB drena escudo inimigo em x2 e transfere a energia capturada para o escudo do jogador, sem causar dano ao casco.
+- Novos modelos de escudo preparados: FS-01/02/03/04, SG3N-B00 e linha SG3N atualizada.
+- Naves sem habilidade entram na progressão normal da Loja com preços robustos. Naves com habilidades especiais ficam marcadas como Evento/Missão/Passe, com Leonov como exceção vendável.
+- Missões podem conceder aleatoriamente lasers, escudos, munições e mísseis como bônus.
+- Materializador do Galaxy Gate agora custa 100 Uridium por giro.
