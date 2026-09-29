@@ -336,3 +336,14 @@ Todos os preços da Loja foram rebalanceados para progressão longa. Itens comun
 A central CONF agora concentra configurações de jogo, ranking online e gerenciamento da conta. O ranking usa os perfis persistidos no Supabase e possui classificações independentes por nível, XP, aliens destruídos e Galaxy Gates concluídos.
 
 O Leilão Elite foi migrado para persistência online: lances ativos ficam registrados em `auction_bids`, sobrevivem a refresh/login e os Créditos em garantia deixam de ser subtraídos antecipadamente. O valor vencedor só é cobrado no fechamento do ciclo. Itens únicos já possuídos são filtrados automaticamente.
+
+
+## V10.4 — Galactic Balance
+- Modo ALTO recebeu fundo mais vivo, resolução 2.35 DPR, mais partículas, preload total e sprites carregados em modo eager.
+- 30 naves novas agora possuem sprites individuais próprios gerados para o Stellar Legacy.
+- Novo painel flutuante MISSÕES ATIVAS com paginação por bolinhas e progresso em tempo real.
+- Economia de aliens atuais rebalanceada para o preço V10 dos equipamentos.
+- Missões Diárias: bônus 10X dos alvos; mineração diária inclui 3M CR + item/munição garantido.
+- Semanais: 7X. Mensais: 5X. Especiais: 3X.
+- Itens e munições de bônus de missão tiveram chance/quantidades melhoradas.
+- Galaxy Gate herda automaticamente os novos valores-base dos NPCs e continua fechando 3X na conclusão.

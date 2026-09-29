@@ -1,6 +1,6 @@
-import { FACTIONS, SHIPS, ITEMS, LASER_AMMO, ROCKETS, NPC_TYPES, MAPS, RESOURCES } from './data.js?v=10.3.0';
-import { V8_ASSETS } from './assets/v8/manifest.js?v=10.3.0';
-import { signUp, signIn, restoreSession, signOutLocal, getUser, loadCloudSave, saveCloudSave, updateCallsign, updatePassword, loadRankings, loadAuctionBids, saveAuctionBidOnline, markAuctionBidStatusOnline } from './api.js?v=10.3.0';
+import { FACTIONS, SHIPS, ITEMS, LASER_AMMO, ROCKETS, NPC_TYPES, MAPS, RESOURCES } from './data.js?v=10.4.0';
+import { V8_ASSETS } from './assets/v8/manifest.js?v=10.4.0';
+import { signUp, signIn, restoreSession, signOutLocal, getUser, loadCloudSave, saveCloudSave, updateCallsign, updatePassword, loadRankings, loadAuctionBids, saveAuctionBidOnline, markAuctionBidStatusOnline } from './api.js?v=10.4.0';
 
 const canvas = document.querySelector('#game');
 const ctx = canvas.getContext('2d');
@@ -10,9 +10,9 @@ const $ = (s) => document.querySelector(s);
 
 const QUALITY_STORAGE_KEY='stellar_quality_mode';
 const QUALITY_PROFILES={
-  high:{label:'ALTA',dpr:2,fps:60,background:true,stars:1,grid:true,fx:true,particles:90,preload:'all'},
-  medium:{label:'MÉDIA',dpr:1.35,fps:45,background:true,stars:.55,grid:false,fx:true,particles:45,preload:'core'},
-  low:{label:'BAIXA',dpr:1,fps:30,background:false,stars:.2,grid:false,fx:false,particles:18,preload:'minimal'},
+  high:{label:'ALTA',dpr:2.35,fps:60,background:true,backgroundAlpha:.72,stars:1,grid:false,fx:true,particles:120,preload:'all',saturation:1.16,contrast:1.07},
+  medium:{label:'MÉDIA',dpr:1.35,fps:45,background:true,backgroundAlpha:.48,stars:.58,grid:false,fx:true,particles:55,preload:'core',saturation:1.03,contrast:1.02},
+  low:{label:'BAIXA',dpr:1,fps:30,background:false,backgroundAlpha:0,stars:.2,grid:false,fx:false,particles:18,preload:'minimal',saturation:1,contrast:1},
 };
 let qualityMode=(()=>{try{const v=localStorage.getItem(QUALITY_STORAGE_KEY);return QUALITY_PROFILES[v]?v:'high';}catch{return 'high';}})();
 function qualityProfile(){return QUALITY_PROFILES[qualityMode]||QUALITY_PROFILES.high;}
@@ -35,7 +35,7 @@ function requestV8Image(path){
   if(!path)return null;
   let img=V8_IMAGES.get(path);
   if(img)return img;
-  img=new Image();img.decoding='async';img.loading='lazy';
+  img=new Image();img.decoding='async';img.loading='eager';try{img.fetchPriority=qualityMode==='high'?'high':'auto';}catch{}
   V8_IMAGES.set(path,img);img.src=path;
   img.onerror=()=>console.warn('V8 asset não carregado:',path);
   return img;
@@ -74,8 +74,8 @@ function drawMapBackground(){
   if(sw/sh<viewAspect) sh=sw/viewAspect; else sw=sh*viewAspect;
   sw=Math.min(sw,img.naturalWidth);sh=Math.min(sh,img.naturalHeight);
   const sx=(img.naturalWidth-sw)*nx,sy=(img.naturalHeight-sh)*ny;
-  ctx.save();ctx.globalAlpha=.34;
-  ctx.drawImage(img,sx,sy,sw,sh,0,0,W,H);
+  const q=qualityProfile();ctx.save();ctx.globalAlpha=q.backgroundAlpha??.5;ctx.filter=`saturate(${q.saturation||1}) contrast(${q.contrast||1})`;
+  ctx.drawImage(img,sx,sy,sw,sh,0,0,W,H);ctx.filter='none';
   const shade=ctx.createLinearGradient(0,0,0,H);
   shade.addColorStop(0,'rgba(1,7,16,.16)');shade.addColorStop(.52,'rgba(1,6,14,.05)');shade.addColorStop(1,'rgba(1,5,12,.38)');
   ctx.fillStyle=shade;ctx.fillRect(0,0,W,H);
@@ -100,7 +100,7 @@ const ui = {
   laserAmmoButtons: $('#laserAmmoButtons'), rocketAmmoButtons: $('#rocketAmmoButtons'), laserToggle: $('#laserToggle'), rocketFire: $('#rocketFire'), autoLaser: $('#autoLaser'), autoRocket: $('#autoRocket'), turboRocket: $('#turboRocket'), rocketCd: $('#rocketCd'), weaponBar: $('#weaponBar'), weaponBarContent: $('#weaponBarContent'), weaponBarToggle: $('#weaponBarToggle'),
   toast: $('#toast'), baseTradePrompt: $('#baseTradePrompt'), baseTradePromptInfo: $('#baseTradePromptInfo'), gameCelebration: $('#gameCelebration'), celebrationPanel: $('#celebrationPanel'), celebrationKicker: $('#celebrationKicker'), celebrationTitle: $('#celebrationTitle'), celebrationSubtitle: $('#celebrationSubtitle'), portalPrompt: $('#portalPrompt'), portalPromptMap: $('#portalPromptMap'), jumpTransition: $('#jumpTransition'), jumpTitle: $('#jumpTitle'), jumpSubtitle: $('#jumpSubtitle'), factionModal: $('#factionModal'), factionCards: $('#factionCards'),
   mapBtn: $('#mapBtn'), mapModal: $('#mapModal'), closeMap: $('#closeMap'), mapNetwork: $('#mapNetwork'),
-  missionBtn: $('#missionBtn'), missionActiveCount: $('#missionActiveCount'), missionModal: $('#missionModal'), closeMission: $('#closeMission'), missionContent: $('#missionContent'),
+  missionBtn: $('#missionBtn'), missionActiveCount: $('#missionActiveCount'), missionModal: $('#missionModal'), closeMission: $('#closeMission'), missionContent: $('#missionContent'), activeMissionPanel: $('#activeMissionPanel'), activeMissionCategory: $('#activeMissionCategory'), activeMissionTitle: $('#activeMissionTitle'), activeMissionTask: $('#activeMissionTask'), activeMissionProgressBar: $('#activeMissionProgressBar'), activeMissionProgressText: $('#activeMissionProgressText'), activeMissionRewardFactor: $('#activeMissionRewardFactor'), activeMissionDots: $('#activeMissionDots'), activeMissionOpen: $('#activeMissionOpen'),
   gateBtn: $('#gateBtn'), gatePieceBadge: $('#gatePieceBadge'), gateModal: $('#gateModal'), closeGate: $('#closeGate'), gatePiecesText: $('#gatePiecesText'), gateLivesText: $('#gateLivesText'), gateCompletedText: $('#gateCompletedText'), gatePieceGrid: $('#gatePieceGrid'), gateJumpBtn: $('#gateJumpBtn'), gateUriText: $('#gateUriText'), gateSpinButtons: $('#gateSpinButtons'), gateJumpBonus: $('#gateJumpBonus'), gateRepairBonus: $('#gateRepairBonus'), gateLogDisks: $('#gateLogDisks'), useRepairBonus: $('#useRepairBonus'), gateResultBox: $('#gateResultBox'), gateRoundsGrid: $('#gateRoundsGrid'), gateAlphaStatusTitle: $('#gateAlphaStatusTitle'), gateAlphaStatusText: $('#gateAlphaStatusText'), gateHud: $('#gateHud'), gateHudRound: $('#gateHudRound'), gateHudWave: $('#gateHudWave'), gateHudRemaining: $('#gateHudRemaining'), gateHudNext: $('#gateHudNext'), gateHudLives: $('#gateHudLives'),
   petBtn: $('#petBtn'), petModal: $('#petModal'), closePet: $('#closePet'), petContent: $('#petContent'),
   pilotBtn: $('#pilotBtn'), pilotPointBadge: $('#pilotPointBadge'), pilotModal: $('#pilotModal'), closePilot: $('#closePilot'), pilotLogDisks: $('#pilotLogDisks'), pilotPointsTotal: $('#pilotPointsTotal'), pilotPointsAvailable: $('#pilotPointsAvailable'), pilotPointsSpent: $('#pilotPointsSpent'), pilotNextPointTitle: $('#pilotNextPointTitle'), pilotNextPointCost: $('#pilotNextPointCost'), pilotConvertPoint: $('#pilotConvertPoint'), pilotLogBuyButtons: $('#pilotLogBuyButtons'), pilotResetCost: $('#pilotResetCost'), pilotResetBtn: $('#pilotResetBtn'), pilotSkillTree: $('#pilotSkillTree'),
@@ -334,8 +334,8 @@ function pickSeeded(list,rng,exclude=[]){
 }
 function taskKill(npc,target,id=null){return {id:id||`kill_${npc}_${target}`,type:'kill',npc,target};}
 function taskOre(resource,target,id=null){return {id:id||`ore_${resource}_${target}`,type:'ore',resource,target};}
-function makeMission({id,title,desc,tasks,group='mix',sequence=false,rewardFactor=.5,tag=''}) {
-  return {id,title,desc,tasks,group,sequence,rewardFactor,tag};
+function makeMission({id,title,desc,tasks,group='mix',sequence=false,rewardFactor=.5,tag='',flatReward=null}) {
+  return {id,title,desc,tasks,group,sequence,rewardFactor,tag,flatReward};
 }
 function buildDailyMissions(){
   const key=missionPeriodKey('daily'),rng=seededRng(hashStringSeed(`daily:${key}`));
@@ -351,14 +351,14 @@ function buildDailyMissions(){
       title:`Caçada do Dia • ${NPC_TYPES[huntNpc].name}`,
       desc:`Alvo diário sorteado para hoje. Elimine somente ${NPC_TYPES[huntNpc].name}.`,
       tasks:[taskKill(huntNpc,huntTarget,'daily_hunt_target')],
-      group:huntNpc.startsWith('boss')?'boss':'npc',rewardFactor:.5,tag:'DIÁRIA'
+      group:huntNpc.startsWith('boss')?'boss':'npc',rewardFactor:10,tag:'DIÁRIA • 10X'
     }),
     makeMission({
       id:'daily_ore',
       title:`Mineração do Dia • ${RESOURCES[ore].name}`,
       desc:`Colete a pedra sorteada do dia. Somente ${RESOURCES[ore].name} conta.`,
       tasks:[taskOre(ore,500,'daily_ore_target')],
-      group:'ore',rewardFactor:.5,tag:'DIÁRIA'
+      group:'ore',rewardFactor:10,tag:'DIÁRIA • RECOMPENSA GARANTIDA',flatReward:{credits:3000000,uridium:0,xp:15000}
     }),
     makeMission({
       id:'daily_combo',
@@ -369,7 +369,7 @@ function buildDailyMissions(){
         taskKill(n2,50,'daily_combo_b'),
         taskKill(boss,10,'daily_combo_boss'),
       ],
-      group:'mix',rewardFactor:.5,tag:'DIÁRIA'
+      group:'mix',rewardFactor:10,tag:'DIÁRIA • 10X'
     }),
   ];
 }
@@ -384,8 +384,8 @@ function buildTierMissions(category,steps){
         title:`${label} • ${NPC_TYPES[npc].name} • ${target}`,
         desc:`Elimine exatamente ${target} ${NPC_TYPES[npc].name}.`,
         tasks:[taskKill(npc,target)],
-        group:boss?'boss':'npc',rewardFactor:.5,
-        tag:`${label.toUpperCase()} • NÍVEL ${i+1}`
+        group:boss?'boss':'npc',rewardFactor:category==='weekly'?7:5,
+        tag:`${label.toUpperCase()} • NÍVEL ${i+1} • ${category==='weekly'?'7X':'5X'}`
       }));
     });
   }
@@ -396,8 +396,8 @@ function buildTierMissions(category,steps){
         title:`${label} • ${RESOURCES[ore].name} • ${target}`,
         desc:`Colete ${target} unidades de ${RESOURCES[ore].name}.`,
         tasks:[taskOre(ore,target)],
-        group:'ore',rewardFactor:.5,
-        tag:`${label.toUpperCase()} • NÍVEL ${i+1}`
+        group:'ore',rewardFactor:category==='weekly'?7:5,
+        tag:`${label.toUpperCase()} • NÍVEL ${i+1} • ${category==='weekly'?'7X':'5X'}`
       }));
     });
   }
@@ -412,8 +412,8 @@ function buildSpecialMissions(){
       title:`Contrato Especial • ${NPC_TYPES[npc].name}`,
       desc:`Contrato direto: elimine 10 ${NPC_TYPES[npc].name}.`,
       tasks:[taskKill(npc,10)],
-      group:npc.startsWith('boss')?'boss':'npc',rewardFactor:1,
-      tag:'CONTRATO 100%'
+      group:npc.startsWith('boss')?'boss':'npc',rewardFactor:3,
+      tag:'CONTRATO ESPECIAL • 3X'
     }));
   }
   // 1 missão de cada pedra.
@@ -423,7 +423,7 @@ function buildSpecialMissions(){
       title:`Contrato Mineral • ${RESOURCES[ore].name}`,
       desc:`Colete 250 unidades de ${RESOURCES[ore].name}.`,
       tasks:[taskOre(ore,250)],
-      group:'ore',rewardFactor:1,tag:'MINERAÇÃO 100%'
+      group:'ore',rewardFactor:3,tag:'MINERAÇÃO ESPECIAL • 3X'
     }));
   }
 
@@ -435,7 +435,7 @@ function buildSpecialMissions(){
     ['special_mix_npc_5','Operação Veterana',false,[['aiderStreuner',20],['devolarium',5],['sibelon',2]]],
   ];
   npcMixes.forEach(([id,title,sequence,defs])=>missions.push(makeMission({
-    id,title,sequence,group:'mix',rewardFactor:1,tag:sequence?'SEQUENCIAL':'MULTIALVO',
+    id,title,sequence,group:'mix',rewardFactor:3,tag:sequence?'SEQUENCIAL':'MULTIALVO',
     desc:sequence?'Conclua cada alvo na ordem para liberar a próxima etapa.':'Todos os alvos podem ser concluídos em qualquer ordem.',
     tasks:defs.map(([npc,target],i)=>taskKill(npc,target,`${id}_t${i+1}`))
   })));
@@ -446,7 +446,7 @@ function buildSpecialMissions(){
   bossSingles.forEach(([npc,target],i)=>missions.push(makeMission({
     id:`special_boss_contract_${i+1}`,title:`Caçada BOSS ${i+1} • ${NPC_TYPES[npc].name}`,
     desc:`Contrato pesado contra ${NPC_TYPES[npc].name}.`,
-    tasks:[taskKill(npc,target)],group:'boss',rewardFactor:1,tag:'BOSS 100%'
+    tasks:[taskKill(npc,target)],group:'boss',rewardFactor:3,tag:'BOSS ESPECIAL • 3X'
   })));
 
   const bossMixes=[
@@ -457,7 +457,7 @@ function buildSpecialMissions(){
     ['special_boss_mix_5','Tríade BOSS V',false,[['bossStreuner',20],['bossDevolarium',4],['bossSibelon',2]]],
   ];
   bossMixes.forEach(([id,title,sequence,defs])=>missions.push(makeMission({
-    id,title,sequence,group:'boss',rewardFactor:1,tag:sequence?'BOSS SEQUENCIAL':'BOSS MISTO',
+    id,title,sequence,group:'boss',rewardFactor:3,tag:sequence?'BOSS SEQUENCIAL':'BOSS MISTO',
     desc:sequence?'Derrube cada grupo BOSS na ordem marcada.':'Elimine os três grupos BOSS em qualquer ordem.',
     tasks:defs.map(([npc,target],i)=>taskKill(npc,target,`${id}_t${i+1}`))
   })));
@@ -471,7 +471,7 @@ function buildSpecialMissions(){
     ['special_hybrid_6','Ferro e Cristal VI',true,[taskKill('sibelon',3,'h6a'),taskOre('Prometium',250,'h6b'),taskOre('Terbium',250,'h6c')]],
   ];
   hybrids.forEach(([id,title,sequence,tasks])=>missions.push(makeMission({
-    id,title,sequence,tasks,group:'hybrid',rewardFactor:1,
+    id,title,sequence,tasks,group:'hybrid',rewardFactor:3,
     tag:sequence?'HÍBRIDA SEQUENCIAL':'HÍBRIDA',
     desc:sequence?'Complete combate e mineração na ordem para liberar a próxima tarefa.':'Combate e mineração podem avançar ao mesmo tempo.'
   })));
@@ -511,7 +511,7 @@ function normalizeMissionState(){
       if(mission?.tasks?.length===1 && active.progress && active.taskProgress[mission.tasks[0].id]===undefined){
         active.taskProgress[mission.tasks[0].id]=Number(active.progress)||0;
       }
-      active.bonus ||= {credits:0,uridium:0,xp:0};
+      active.bonus ||= {credits:0,uridium:0,xp:0};active.flatRewardApplied=!!active.flatRewardApplied;
       active.bonus.credits=Number(active.bonus.credits)||0;
       active.bonus.uridium=Number(active.bonus.uridium)||0;
       active.bonus.xp=Number(active.bonus.xp)||0;
@@ -562,10 +562,12 @@ function projectedMissionReward(mission){
       r.credits+=(RESOURCES[task.resource]?.sell||0)*task.target*factor;
     }
   }
+  if(mission.flatReward){r.credits+=Number(mission.flatReward.credits)||0;r.uridium+=Number(mission.flatReward.uridium)||0;r.xp+=Number(mission.flatReward.xp)||0;}
   return {credits:Math.round(r.credits),uridium:Math.round(r.uridium),xp:Math.round(r.xp)};
 }
 function missionRewardText(mission,active=null){
   const r=active?roundedMissionBonus(active):projectedMissionReward(mission);
+  if(active&&mission.flatReward&&!active.flatRewardApplied){r.credits+=Number(mission.flatReward.credits)||0;r.uridium+=Number(mission.flatReward.uridium)||0;r.xp+=Number(mission.flatReward.xp)||0;}
   return `${fmt(r.credits)} CR • ${fmt(r.uridium)} URI • ${fmt(r.xp)} XP`;
 }
 function taskLabel(task){
@@ -604,6 +606,38 @@ function updateMissionButton(){
   if(ui.missionActiveCount)ui.missionActiveCount.textContent=active;
   ui.missionBtn.classList.toggle('mission-active',active>0);
 }
+function activeMissionEntries(){
+  if(!progress)return [];
+  normalizeMissionState();
+  return Object.entries(progress.missions.active).filter(([,active])=>!!active).map(([category,active])=>({category,active,mission:missionById(category,active.id)})).filter(x=>x.mission);
+}
+function activeMissionTaskSummary(mission,active){
+  const pending=(mission.tasks||[]).find(t=>!taskDone(active,t))||(mission.tasks||[])[0];
+  if(!pending)return 'Objetivo concluído';
+  const current=taskCurrent(active,pending);
+  return `${taskLabel(pending)} • ${fmt(current)} / ${fmt(pending.target)}`;
+}
+function renderActiveMissionHud(force=false){
+  if(!ui.activeMissionPanel||!progress)return;
+  const entries=activeMissionEntries();
+  if(!entries.length){ui.activeMissionPanel.classList.add('hidden');state.missionHudPage=0;state.missionHudSignature='';return;}
+  ui.activeMissionPanel.classList.remove('hidden');
+  ui.activeMissionPanel.style.left=progress.pet?.owned?'394px':'192px';
+  state.missionHudPage=Math.max(0,Math.min(state.missionHudPage,entries.length-1));
+  const entry=entries[state.missionHudPage],pct=missionProgressPercent(entry.mission,entry.active);
+  const sig=entries.map(x=>`${x.category}:${x.active.id}:${missionProgressPercent(x.mission,x.active)}:${Object.entries(x.active.taskProgress||{}).map(([k,v])=>`${k}=${v}`).join(',')}`).join('|')+`|${state.missionHudPage}`;
+  if(!force&&sig===state.missionHudSignature)return;
+  state.missionHudSignature=sig;
+  ui.activeMissionCategory.textContent=MISSION_CATEGORIES[entry.category]?.label?.replace('MISSÕES ','')||entry.category.toUpperCase();
+  ui.activeMissionTitle.textContent=entry.mission.title;
+  ui.activeMissionTask.textContent=activeMissionTaskSummary(entry.mission,entry.active);
+  ui.activeMissionProgressBar.style.width=`${pct}%`;
+  ui.activeMissionProgressText.textContent=`${pct}%`;
+  ui.activeMissionRewardFactor.textContent=`RECOMPENSA ${missionFactor(entry.mission)}X`;
+  ui.activeMissionDots.innerHTML='';
+  entries.forEach((x,i)=>{const b=document.createElement('button');b.type='button';b.className=`active-mission-dot${i===state.missionHudPage?' active':''}`;b.title=MISSION_CATEGORIES[x.category]?.label||x.category;b.onclick=e=>{e.stopPropagation();state.missionHudPage=i;state.missionHudSignature='';renderActiveMissionHud(true);};ui.activeMissionDots.appendChild(b);});
+}
+
 function acceptMission(category,id){
   normalizeMissionState();
   if(progress.missions.active[category]){showToast('Você já tem uma missão ativa nessa categoria');return;}
@@ -612,33 +646,34 @@ function acceptMission(category,id){
   if(progress.missions.completed[key]){showToast('Essa missão já foi concluída neste ciclo');return;}
   progress.missions.active[category]={
     id,period:missionPeriodKey(category),complete:false,acceptedAt:Date.now(),
-    taskProgress:{},bonus:{credits:0,uridium:0,xp:0}
+    taskProgress:{},bonus:{credits:0,uridium:0,xp:0},flatRewardApplied:false
   };
-  saveGame();renderMissions();updateMissionButton();showToast(`${mission.title} aceita — progresso iniciado`);
+  saveGame();renderMissions();updateMissionButton();state.missionHudSignature='';renderActiveMissionHud(true);showToast(`${mission.title} aceita — progresso iniciado`);
 }
 function abandonMission(category){
   normalizeMissionState();const active=progress.missions.active[category];if(!active)return;
   const mission=missionById(category,active.id);progress.missions.active[category]=null;
-  saveGame();renderMissions();updateMissionButton();showToast(`${mission?.title||'Missão'} abandonada`);
+  saveGame();renderMissions();updateMissionButton();state.missionHudSignature='';renderActiveMissionHud(true);showToast(`${mission?.title||'Missão'} abandonada`);
 }
 const MISSION_ITEM_REWARD_POOLS={
   commonGear:['lf1','mp1','lf2','sg3na02','sg3na03','fs01','fs02'],
   eliteGear:['lf3','sg3nb02'],
   jackpotGear:['lf4'],
   ammo:[
-    {kind:'ammo',id:'mcb25',qty:2500,label:'2.500 MCB-25'},
-    {kind:'ammo',id:'mcb50',qty:1500,label:'1.500 MCB-50'},
-    {kind:'ammo',id:'ucb100',qty:750,label:'750 UCB-100'},
-    {kind:'ammo',id:'sab50',qty:1000,label:'1.000 SAB-50'},
-    {kind:'rocket',id:'plt2021',qty:50,label:'50 PLT-2021'},
-    {kind:'rocket',id:'plt3030',qty:30,label:'30 PLT-3030'},
+    {kind:'ammo',id:'mcb25',qty:10000,label:'10.000 MCB-25'},
+    {kind:'ammo',id:'mcb50',qty:5000,label:'5.000 MCB-50'},
+    {kind:'ammo',id:'ucb100',qty:2500,label:'2.500 UCB-100'},
+    {kind:'ammo',id:'sab50',qty:3000,label:'3.000 SAB-50'},
+    {kind:'rocket',id:'plt2021',qty:200,label:'200 PLT-2021'},
+    {kind:'rocket',id:'plt3030',qty:100,label:'100 PLT-3030'},
   ]
 };
-function missionItemChance(category){
-  return ({daily:.28,weekly:.46,monthly:.72,special:.82})[category]??.3;
+function missionItemChance(category,mission=null){
+  if(category==='daily'&&mission?.group==='ore')return 1;
+  return ({daily:.55,weekly:.60,monthly:.78,special:.88})[category]??.45;
 }
-function grantMissionSurprise(category){
-  if(Math.random()>missionItemChance(category))return null;
+function grantMissionSurprise(category,mission=null){
+  if(Math.random()>missionItemChance(category,mission))return null;
   const r=Math.random();
   if(r<.55){
     const reward=randomChoice(MISSION_ITEM_REWARD_POOLS.ammo);
@@ -654,20 +689,22 @@ function grantMissionSurprise(category){
   const id=randomChoice(pool),item=ITEMS[id];if(!item)return null;
   addInventory(id);return item.name;
 }
-function missionRewardItemHint(category){
-  return `Chance bônus: ${Math.round(missionItemChance(category)*100)}% de munição/equipamento`;
+function missionRewardItemHint(category,mission=null){
+  const chance=missionItemChance(category,mission);return chance>=1?'BÔNUS GARANTIDO: munição ou equipamento':`Chance bônus: ${Math.round(chance*100)}% de munição/equipamento`;
 }
 function finishMissionAutomatically(category,mission,active){
   if(!mission||!active)return;
+  const flat=mission.flatReward||null;
+  if(flat&&!active.flatRewardApplied){active.bonus.credits+=(Number(flat.credits)||0);active.bonus.uridium+=(Number(flat.uridium)||0);active.bonus.xp+=(Number(flat.xp)||0);active.flatRewardApplied=true;}
   const bonus=roundedMissionBonus(active);
   progress.profile.credits+=bonus.credits;progress.profile.uridium+=bonus.uridium;progress.profile.xp+=bonus.xp;
-  const surprise=grantMissionSurprise(category);
+  const surprise=grantMissionSurprise(category,mission);
   if(surprise)bonus.itemText=`BÔNUS: ${surprise}`;
   progress.missions.completed[missionInstanceKey(category,mission.id)]=Date.now();
   progress.missions.active[category]=null;
   showMissionCompleteAnimation(mission,bonus);processPlayerLevelUps();
   showToast(`Recompensa automática • ${mission.title}${surprise?` • ${surprise}`:''}`);
-  saveGame();updateMissionButton();updateUI();
+  saveGame();updateMissionButton();state.missionHudSignature='';renderActiveMissionHud(true);updateUI();
   if(ui.missionModal&&!ui.missionModal.classList.contains('hidden'))renderMissions();
 }
 function claimMission(category){normalizeMissionState();const active=progress.missions.active[category];if(!active||!active.complete)return;finishMissionAutomatically(category,missionById(category,active.id),active);}
@@ -719,13 +756,13 @@ function renderMissions(){
       const card=document.createElement('article');card.className=`mission-card${isActive?' active':''}${done?' completed':''}${locked?' locked':''}`;
       card.dataset.group=mission.group||'mix';
       card.dataset.search=`${mission.title} ${mission.desc} ${(mission.tasks||[]).map(taskLabel).join(' ')}`.toLowerCase();
-      const factor=Math.round(missionFactor(mission)*100);
+      const factor=missionFactor(mission);
       card.innerHTML=`<div class="mission-card-top"><div><span class="mission-type-chip">${mission.tag||missionGroupLabel(mission.group)}</span><h4>${mission.title}</h4></div></div>
         <p>${mission.desc}</p>
         ${mission.sequence?'<div class="mission-sequence-badge">SEQUENCIAL • complete uma etapa para liberar a próxima</div>':''}
         ${missionTasksHtml(mission,active,isActive)}
         ${isActive?`<div class="mission-progress-row"><span>PROGRESSO TOTAL</span><b>${pct}%</b></div><div class="mission-progress"><i style="width:${pct}%"></i></div>`:''}
-        <div class="mission-reward"><span>${isActive?`BÔNUS ACUMULADO • ${factor}%`:`RECOMPENSA ESTIMADA • ${factor}%`}</span><b>${missionRewardText(mission,isActive?active:null)}</b><small>${missionRewardItemHint(category)}</small></div>`;
+        <div class="mission-reward"><span>${isActive?`BÔNUS ACUMULADO • ${factor}X`:`RECOMPENSA ESTIMADA • ${factor}X`}</span><b>${missionRewardText(mission,isActive?active:null)}</b><small>${missionRewardItemHint(category,mission)}</small></div>`;
       const actions=document.createElement('div');actions.className='mission-actions';
       if(isActive){
         const primary=document.createElement('button');primary.className='small-btn';primary.textContent='EM ANDAMENTO';primary.disabled=true;actions.appendChild(primary);
@@ -854,7 +891,7 @@ const petRuntime = {
 const state = {
   currentMap: MAPS.x1, camera: { x: 620, y: MAPS.x1.world.h/2 }, target: null, enemies: [], loot: [], ores: [], particles: [], fx: [], rocketFx: [], landmarks: [], enemyRespawns: [], oreRespawns: [], lastPortalAt: 0, radarRange: 1500, jumping: false,
   lastPlayerDamageAt:nowSec(), repairFxAt:0,
-  pointerNavActive:false, pointerNavId:null,
+  pointerNavActive:false, pointerNavId:null, missionHudPage:0, missionHudSignature:'',
   shopTab: 'ships', hangarTab: 'ships', toastTimer: null, ammoUiExpanded: true, statsUiExpanded: true, minimapUiExpanded: true, topMetaExpanded: true,
   stars: Array.from({length:240},()=>({x:Math.random()*5200-2600,y:Math.random()*5200-2600,r:Math.random()*1.5+.3,a:Math.random()*.6+.2})),
 };
@@ -1842,7 +1879,12 @@ function drawEnemy(e){
   if(img&&img.naturalWidth){
     const face=Math.atan2(player.y-e.y,player.x-e.x)+Math.PI/2,size=e.size*(boss?3.35:3.05),sc=size/Math.max(img.naturalWidth,img.naturalHeight);
     ctx.rotate(face);ctx.shadowColor=boss?'#ff405a':e.color;ctx.shadowBlur=boss?20:10;ctx.drawImage(img,-img.naturalWidth*sc/2,-img.naturalHeight*sc/2,img.naturalWidth*sc,img.naturalHeight*sc);
-  }else drawNpcModel(e);
+  }else{
+    // Enquanto o PNG carrega, o modo ALTO usa uma silhueta angular discreta em vez de círculos/quadrados.
+    if(qualityMode==='high'){
+      const face=Math.atan2(player.y-e.y,player.x-e.x)+Math.PI/2,s=e.size*1.35;ctx.rotate(face);ctx.shadowColor=e.color;ctx.shadowBlur=16;ctx.fillStyle='rgba(8,18,30,.9)';ctx.strokeStyle=e.color;ctx.lineWidth=1.4;ctx.beginPath();ctx.moveTo(0,-s);ctx.lineTo(s*.72,s*.55);ctx.lineTo(0,s*.22);ctx.lineTo(-s*.72,s*.55);ctx.closePath();ctx.fill();ctx.stroke();ctx.shadowBlur=0;
+    }else drawNpcModel(e);
+  }
   ctx.restore();
   const hp=e.hp/e.maxHp,sh=e.maxShield?e.shield/e.maxShield:0,barW=Math.max(34,e.size*2.4),bx=p.x-barW/2;
   ctx.fillStyle='rgba(48,8,16,.86)';ctx.fillRect(bx,p.y-e.size-21,barW,5);ctx.fillStyle='#ff4f67';ctx.fillRect(bx,p.y-e.size-21,barW*hp,5);
@@ -1997,7 +2039,7 @@ function updateUI(){
   const f=getFaction(),ship=SHIPS[progress.activeShipId],safe=isSafeZone();ui.factionLabel.textContent=f?.short||'—';ui.factionLabel.style.color=f?.color||'';ui.mapLabel.textContent=displayMapLabel(progress.mapId);if(ui.sectorName)ui.sectorName.textContent=state.currentMap.name||'Setor';if(ui.coordLabel)ui.coordLabel.textContent=`${Math.round(player.x)} / ${Math.round(player.y)}`;if(ui.routeLabel){const rd=routeDistance();ui.routeLabel.textContent=rd>35?`${fmt(rd)}u`:'PARADO';ui.routeLabel.parentElement?.classList.toggle('active',rd>35);}if(ui.discoveriesLabel){const found=state.landmarks.filter(l=>progress.discoveries?.[`${progress.mapId}:${l.id}`]).length;ui.discoveriesLabel.textContent=`${found}/${state.landmarks.length}`;}ui.shipLabel.textContent=ship.name;ui.lvl.textContent=progress.profile.level;ui.hp.textContent=fmt(player.hp);ui.maxHp.textContent=fmt(player.maxHp);ui.shield.textContent=fmt(player.shield);ui.maxShield.textContent=fmt(player.maxShield);ui.speed.textContent=fmt(player.speed);if(ui.dmg)ui.dmg.textContent=fmt(player.laserDamage*currentLaserAmmo().mult);ui.credits.textContent=fmt(progress.profile.credits);ui.uridium.textContent=fmt(progress.profile.uridium);ui.xp.textContent=fmt(progress.profile.xp);ui.xp.title=progress.profile.level>=PLAYER_MAX_LEVEL?'Nível máximo':`Próximo nível: ${fmt(levelXpThreshold(progress.profile.level+1))} XP • ${Math.round(levelProgressPercent(progress.profile.xp,progress.profile.level))}%`;if(ui.droneCount)ui.droneCount.textContent=progress.drones.length;ui.laserToggle.classList.toggle('active',player.laserFiring);ui.rocketCd.textContent=rocketReady()?'MÍSSIL PRONTO':`MÍSSIL ${(getRocketCooldown()-(nowSec()-player.lastRocketShot)).toFixed(1)}s`;
   if(ui.shipHudArt)ui.shipHudArt.src=V8_ASSETS.ships[progress.activeShipId]||V8_ASSETS.ships.phoenix;
   if(ui.factionIcon)ui.factionIcon.src=factionAsset(progress.profile.faction);
-  if(ui.userLabel)ui.userLabel.textContent=progress.profile.callsign||getUser()?.callsign||'Pilot';if(ui.petBtn)ui.petBtn.textContent=progress.pet?.owned?`P.E.T. LV${progress.pet.level}`:'P.E.T. LOJA';if(ui.safeZoneLabel){ui.safeZoneLabel.textContent=safe?'ZONA SEGURA ATIVA':'FORA DA BASE';ui.safeZoneLabel.classList.toggle('active',safe);}if(ui.cargoUsed)ui.cargoUsed.textContent=fmt(cargoUsed());if(ui.cargoMax)ui.cargoMax.textContent=fmt(cargoCapacity());if(ui.cargoBtn)ui.cargoBtn.classList.toggle('gold',isAtTrader());updatePetFloat();updateBaseTradePrompt();
+  if(ui.userLabel)ui.userLabel.textContent=progress.profile.callsign||getUser()?.callsign||'Pilot';if(ui.petBtn)ui.petBtn.textContent=progress.pet?.owned?`P.E.T. LV${progress.pet.level}`:'P.E.T. LOJA';if(ui.safeZoneLabel){ui.safeZoneLabel.textContent=safe?'ZONA SEGURA ATIVA':'FORA DA BASE';ui.safeZoneLabel.classList.toggle('active',safe);}if(ui.cargoUsed)ui.cargoUsed.textContent=fmt(cargoUsed());if(ui.cargoMax)ui.cargoMax.textContent=fmt(cargoCapacity());if(ui.cargoBtn)ui.cargoBtn.classList.toggle('gold',isAtTrader());updatePetFloat();updateBaseTradePrompt();renderActiveMissionHud();
   if(state.target&&state.target.hp>0){ui.targetName.textContent=state.target.name;ui.targetStats.textContent=`HP ${fmt(state.target.hp)} • ESC ${fmt(state.target.shield)}`;ui.targetHpBar.style.width=`${state.target.hp/state.target.maxHp*100}%`;ui.targetShieldBar.style.width=`${state.target.maxShield?state.target.shield/state.target.maxShield*100:0}%`;}else{ui.targetName.textContent='Sem alvo';ui.targetStats.textContent='Toque em um NPC para selecionar';ui.targetHpBar.style.width='0%';ui.targetShieldBar.style.width='0%';}
   ui.shopCredits.textContent=fmt(progress.profile.credits);ui.shopUridium.textContent=fmt(progress.profile.uridium);ui.hangarShipName.textContent=ship.name;updateExtraControls();
   const portal=nearbyPortal();if(portal&&!state.jumping&&ui.portalPrompt){const pos=screenPos(portal.x,portal.y);ui.portalPrompt.style.left=`${Math.max(85,Math.min(W-85,pos.x))}px`;ui.portalPrompt.style.top=`${Math.max(115,Math.min(H-90,pos.y-58))}px`;ui.portalPromptMap.textContent=`Destino ${displayMapLabel(portal.to)} • clique ou J`;ui.portalPrompt.classList.remove('hidden');}else ui.portalPrompt?.classList.add('hidden');
@@ -2396,7 +2438,7 @@ function bindOverlayDismiss(){
 
 if(ui.mapBtn)ui.mapBtn.onclick=()=>openMapModal();
 if(ui.closeMap)ui.closeMap.onclick=()=>ui.mapModal.classList.add('hidden');
-if(ui.missionBtn)ui.missionBtn.onclick=()=>openMissions();
+if(ui.missionBtn)ui.missionBtn.onclick=()=>openMissions();if(ui.activeMissionOpen)ui.activeMissionOpen.onclick=()=>openMissions();
 if(ui.closeMission)ui.closeMission.onclick=()=>ui.missionModal.classList.add('hidden');
 if(ui.gateBtn)ui.gateBtn.onclick=()=>openGalaxyGate();
 if(ui.pilotBtn)ui.pilotBtn.onclick=()=>openPilotProfile();
