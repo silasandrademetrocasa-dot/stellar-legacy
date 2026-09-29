@@ -68,6 +68,8 @@ export const V8_ASSETS = {
     "extraSlotCpuElite": "/assets/v8/equipment/rocketTurboCpu.png",
     "rep2": "/assets/v8/equipment/rep2.png",
     "repElite": "/assets/v8/equipment/rep2.png",
+    "cargoCpuCommon": "/assets/v8/equipment/ammoAutoBuyCpu.png",
+    "cargoCpuElite": "/assets/v8/equipment/rocketTurboCpu.png",
     "ammoAutoBuyCpu": "/assets/v8/equipment/ammoAutoBuyCpu.png"
   },
   "ammo": {

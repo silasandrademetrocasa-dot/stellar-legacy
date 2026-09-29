@@ -227,3 +227,48 @@ As ondas têm 10 segundos entre elas.
 - Funcionam fora da base e independem da distância dos inimigos: o relógio reinicia somente quando a nave recebe dano.
 - Comum e Elite não acumulam entre si.
 - A base X-1 mantém sua regeneração própria mais rápida.
+
+
+## V9.10 — Cargo & UX
+
+### Fechamento rápido de janelas
+- ESC fecha a janela de jogo atualmente aberta.
+- Clique/toque no fundo escuro fora do card também fecha a janela.
+- Aplicado a: Mapas, Missões, Galaxy Gate, P.E.T., Loja, Hangar e Porão.
+- Login e seleção obrigatória de facção permanecem protegidos contra fechamento acidental.
+
+### Novos EXTRAS de Porão
+- Módulo de Porão • Comum: +2.500 de capacidade.
+  - Preço: 8.000.000 Créditos.
+- Módulo de Porão • Elite: +10.000 de capacidade.
+  - Preço: 120.000 Uridium.
+- Comum e Elite não acumulam entre si.
+- O bônus funciona somente enquanto o módulo estiver equipado.
+- O Hangar e o painel do Porão mostram a capacidade total e o bônus equipado.
+
+### Regra econômica
+- Itens Comuns usam Créditos.
+- Itens Elite usam Uridium.
+
+
+# V10 — Pilot Ascension
+
+## Economia Hardcore
+Todos os preços da Loja foram rebalanceados para progressão longa. Itens comuns usam Créditos; itens Elite usam Uridium. Naves, lasers, geradores, extras, drones, munições e mísseis ficaram substancialmente mais caros.
+
+## Perfil de Piloto
+- Máximo de 50 Pontos de Pesquisa.
+- Log-Disks custam 300 URI cada.
+- Primeiro PP: 30 Log-Disks; cada PP seguinte cresce 10% e é arredondado.
+- Log-Disks caem no Materializador e o ALFA completo concede 50.
+- Três trilhas: Defesa, Utilidade e Ataque.
+- 25 habilidades com pré-requisitos, níveis e custos em Créditos.
+- Reset começa em 1.000 URI e dobra a cada reset.
+
+## Leilão Elite
+- Todos os produtos Elite da Loja participam: naves, equipamentos, drones, munições e mísseis.
+- Lances em Créditos, a partir de 100.000 CR.
+- Ciclo encerra e reinicia de hora em hora.
+- Lance fica em garantia: perdeu, recebe os Créditos de volta; venceu, recebe o item.
+- Concorrência automática aumenta durante a hora para manter o sistema competitivo.
+- Equipamentos Elite do P.E.T. também entram no catálogo do Leilão.

@@ -6,93 +6,105 @@ export const FACTIONS = {
 
 export const SHIPS = {
   phoenix: { id: 'phoenix', name: 'Phoenix', lasers: 1, generators: 1, speed: 320, cargo: 100, hp: 104000, extras: 1, price: 0, currency: 'credits', role: 'Nave inicial' },
-  liberator: { id: 'liberator', name: 'Liberator', lasers: 4, generators: 6, speed: 300, cargo: 400, hp: 116000, extras: 2, price: 40000, currency: 'credits', role: 'Equilíbrio inicial' },
-  piranha: { id: 'piranha', name: 'Piranha', lasers: 6, generators: 8, speed: 360, cargo: 600, hp: 164000, extras: 2, price: 80000, currency: 'credits', role: 'Ataque rápido' },
-  leonov: { id: 'leonov', name: 'Leonov', lasers: 6, generators: 6, speed: 360, cargo: 500, hp: 164000, extras: 1, price: 15000, currency: 'uridium', role: 'Especialista em mapas baixos', bonusLowMaps: { hp: 96000, speed: 20, cargo: 500, laserMult: 1.5, rocketMult: 2, shieldMult: 2 } },
-  nostromo: { id: 'nostromo', name: 'Nostromo', lasers: 7, generators: 10, speed: 340, cargo: 700, hp: 220000, extras: 3, price: 180000, currency: 'credits', role: 'Farm e progressão' },
-  bigboy: { id: 'bigboy', name: 'Bigboy', lasers: 8, generators: 15, speed: 260, cargo: 800, hp: 360000, extras: 3, price: 350000, currency: 'credits', role: 'Tanque de entrada' },
-  vengeance: { id: 'vengeance', name: 'Vengeance', lasers: 10, generators: 10, speed: 380, cargo: 1000, hp: 280000, extras: 2, price: 30000, currency: 'uridium', role: 'Caçadora veloz' },
-  goliath: { id: 'goliath', name: 'Goliath', lasers: 15, generators: 15, speed: 300, cargo: 1500, hp: 356000, extras: 3, price: 80000, currency: 'uridium', role: 'Combate pesado' },
-  spearhead: { id: 'spearhead', name: 'Spearhead', lasers: 5, generators: 12, speed: 370, cargo: 500, hp: 200000, extras: 2, price: 45000, currency: 'uridium', role: 'Reconhecimento e mobilidade' },
-  aegis: { id: 'aegis', name: 'Aegis', lasers: 10, generators: 15, speed: 300, cargo: 2000, hp: 375000, extras: 3, price: 70000, currency: 'uridium', role: 'Suporte e resistência' },
-  citadel: { id: 'citadel', name: 'Citadel', lasers: 7, generators: 20, speed: 240, cargo: 4000, hp: 650000, extras: 5, price: 100000, currency: 'uridium', role: 'Tanque pesado' },
-  solace: { id: 'solace', name: 'Solace', lasers: 15, generators: 15, speed: 300, cargo: 1500, hp: 356000, extras: 3, price: 110000, currency: 'uridium', role: 'Combate e reparo' },
-  spectrum: { id: 'spectrum', name: 'Spectrum', lasers: 15, generators: 15, speed: 300, cargo: 1500, hp: 356000, extras: 3, price: 110000, currency: 'uridium', role: 'Defesa tática' },
+  liberator: { id: 'liberator', name: 'Liberator', lasers: 4, generators: 6, speed: 300, cargo: 400, hp: 116000, extras: 2, price: 2500000, currency: 'credits', role: 'Equilíbrio inicial' },
+  piranha: { id: 'piranha', name: 'Piranha', lasers: 6, generators: 8, speed: 360, cargo: 600, hp: 164000, extras: 2, price: 7500000, currency: 'credits', role: 'Ataque rápido' },
+  leonov: { id: 'leonov', name: 'Leonov', lasers: 6, generators: 6, speed: 360, cargo: 500, hp: 164000, extras: 1, price: 75000, currency: 'uridium', role: 'Especialista em mapas baixos', bonusLowMaps: { hp: 96000, speed: 20, cargo: 500, laserMult: 1.5, rocketMult: 2, shieldMult: 2 } },
+  nostromo: { id: 'nostromo', name: 'Nostromo', lasers: 7, generators: 10, speed: 340, cargo: 700, hp: 220000, extras: 3, price: 25000000, currency: 'credits', role: 'Farm e progressão' },
+  bigboy: { id: 'bigboy', name: 'Bigboy', lasers: 8, generators: 15, speed: 260, cargo: 800, hp: 360000, extras: 3, price: 60000000, currency: 'credits', role: 'Tanque de entrada' },
+  vengeance: { id: 'vengeance', name: 'Vengeance', lasers: 10, generators: 10, speed: 380, cargo: 1000, hp: 280000, extras: 2, price: 250000, currency: 'uridium', role: 'Caçadora veloz' },
+  goliath: { id: 'goliath', name: 'Goliath', lasers: 15, generators: 15, speed: 300, cargo: 1500, hp: 356000, extras: 3, price: 650000, currency: 'uridium', role: 'Combate pesado' },
+  spearhead: { id: 'spearhead', name: 'Spearhead', lasers: 5, generators: 12, speed: 370, cargo: 500, hp: 200000, extras: 2, price: 350000, currency: 'uridium', role: 'Reconhecimento e mobilidade' },
+  aegis: { id: 'aegis', name: 'Aegis', lasers: 10, generators: 15, speed: 300, cargo: 2000, hp: 375000, extras: 3, price: 500000, currency: 'uridium', role: 'Suporte e resistência' },
+  citadel: { id: 'citadel', name: 'Citadel', lasers: 7, generators: 20, speed: 240, cargo: 4000, hp: 650000, extras: 5, price: 900000, currency: 'uridium', role: 'Tanque pesado' },
+  solace: { id: 'solace', name: 'Solace', lasers: 15, generators: 15, speed: 300, cargo: 1500, hp: 356000, extras: 3, price: 1200000, currency: 'uridium', role: 'Combate e reparo' },
+  spectrum: { id: 'spectrum', name: 'Spectrum', lasers: 15, generators: 15, speed: 300, cargo: 1500, hp: 356000, extras: 3, price: 1200000, currency: 'uridium', role: 'Defesa tática' },
 };
 
 export const ITEMS = {
   // LASERS
-  lf1: { id: 'lf1', type: 'laser', name: 'LF-1', damage: 65, price: 10000, currency: 'credits', description: 'Laser básico.' },
-  mp1: { id: 'mp1', type: 'laser', name: 'MP-1', damage: 70, price: 40000, currency: 'credits', description: 'Laser intermediário.' },
-  sl01: { id: 'sl01', type: 'laser', name: 'SL-01', damage: 125, price: 2500000, currency: 'credits', description: 'Laser de pulso reforçado.' },
-  lf2: { id: 'lf2', type: 'laser', name: 'LF-2', damage: 140, price: 250000, currency: 'credits', description: 'Laser forte para progressão.' },
-  lf3: { id: 'lf3', type: 'laser', name: 'LF-3', damage: 175, price: 10000, currency: 'uridium', description: 'Laser elite clássico.' },
-  lf4: { id: 'lf4', type: 'laser', name: 'LF-4', damage: 200, price: 45000, currency: 'uridium', description: 'Laser de alto desempenho.' },
+  lf1: { id: 'lf1', type: 'laser', name: 'LF-1', damage: 65, price: 500000, currency: 'credits', description: 'Laser básico.' },
+  mp1: { id: 'mp1', type: 'laser', name: 'MP-1', damage: 70, price: 2000000, currency: 'credits', description: 'Laser intermediário.' },
+  sl01: { id: 'sl01', type: 'laser', name: 'SL-01', damage: 125, price: 20000000, currency: 'credits', description: 'Laser de pulso reforçado.' },
+  lf2: { id: 'lf2', type: 'laser', name: 'LF-2', damage: 140, price: 8000000, currency: 'credits', description: 'Laser forte para progressão.' },
+  lf3: { id: 'lf3', type: 'laser', name: 'LF-3', damage: 175, price: 60000, currency: 'uridium', description: 'Laser elite clássico.' },
+  lf4: { id: 'lf4', type: 'laser', name: 'LF-4', damage: 200, price: 250000, currency: 'uridium', description: 'Laser de alto desempenho.' },
 
   // SPEED GENERATORS
-  g3n1010: { id: 'g3n1010', type: 'generator', subtype: 'speed', name: 'G3N-1010', speed: 2, price: 2000, currency: 'credits', description: '+2 velocidade.' },
-  g3n2010: { id: 'g3n2010', type: 'generator', subtype: 'speed', name: 'G3N-2010', speed: 3, price: 4000, currency: 'credits', description: '+3 velocidade.' },
-  g3n3210: { id: 'g3n3210', type: 'generator', subtype: 'speed', name: 'G3N-3210', speed: 4, price: 8000, currency: 'credits', description: '+4 velocidade.' },
-  g3n3310: { id: 'g3n3310', type: 'generator', subtype: 'speed', name: 'G3N-3310', speed: 5, price: 16000, currency: 'credits', description: '+5 velocidade.' },
-  g3n6900: { id: 'g3n6900', type: 'generator', subtype: 'speed', name: 'G3N-6900', speed: 7, price: 1000, currency: 'uridium', description: '+7 velocidade.' },
-  g3n7900: { id: 'g3n7900', type: 'generator', subtype: 'speed', name: 'G3N-7900', speed: 10, price: 2000, currency: 'uridium', description: '+10 velocidade.' },
+  g3n1010: { id: 'g3n1010', type: 'generator', subtype: 'speed', name: 'G3N-1010', speed: 2, price: 250000, currency: 'credits', description: '+2 velocidade.' },
+  g3n2010: { id: 'g3n2010', type: 'generator', subtype: 'speed', name: 'G3N-2010', speed: 3, price: 1000000, currency: 'credits', description: '+3 velocidade.' },
+  g3n3210: { id: 'g3n3210', type: 'generator', subtype: 'speed', name: 'G3N-3210', speed: 4, price: 3000000, currency: 'credits', description: '+4 velocidade.' },
+  g3n3310: { id: 'g3n3310', type: 'generator', subtype: 'speed', name: 'G3N-3310', speed: 5, price: 10000000, currency: 'credits', description: '+5 velocidade.' },
+  g3n6900: { id: 'g3n6900', type: 'generator', subtype: 'speed', name: 'G3N-6900', speed: 7, price: 80000, currency: 'uridium', description: '+7 velocidade.' },
+  g3n7900: { id: 'g3n7900', type: 'generator', subtype: 'speed', name: 'G3N-7900', speed: 10, price: 250000, currency: 'uridium', description: '+10 velocidade.' },
 
   // SHIELD GENERATORS
-  sg3na01: { id: 'sg3na01', type: 'generator', subtype: 'shield', name: 'SG3N-A01', shield: 1000, absorption: 40, price: 8000, currency: 'credits', description: '1.000 escudo • 40% absorção.' },
-  sg3na02: { id: 'sg3na02', type: 'generator', subtype: 'shield', name: 'SG3N-A02', shield: 5000, absorption: 50, price: 16000, currency: 'credits', description: '5.000 escudo • 50% absorção.' },
-  sg3na03: { id: 'sg3na03', type: 'generator', subtype: 'shield', name: 'SG3N-A03', shield: 5000, absorption: 60, price: 256000, currency: 'credits', description: '5.000 escudo • 60% absorção.' },
-  sg3nb01: { id: 'sg3nb01', type: 'generator', subtype: 'shield', name: 'SG3N-B01', shield: 9500, absorption: 70, price: 256000, currency: 'credits', description: '9.500 escudo • 70% absorção.' },
-  sg3nb02: { id: 'sg3nb02', type: 'generator', subtype: 'shield', name: 'SG3N-B02', shield: 10000, absorption: 80, price: 10000, currency: 'uridium', description: '10.000 escudo • 80% absorção.' },
-  sg3nb03: { id: 'sg3nb03', type: 'generator', subtype: 'shield', name: 'SG3N-B03', shield: 11450, absorption: 80, price: 18000, currency: 'uridium', description: '11.450 escudo • 80% absorção.' },
+  sg3na01: { id: 'sg3na01', type: 'generator', subtype: 'shield', name: 'SG3N-A01', shield: 1000, absorption: 40, price: 500000, currency: 'credits', description: '1.000 escudo • 40% absorção.' },
+  sg3na02: { id: 'sg3na02', type: 'generator', subtype: 'shield', name: 'SG3N-A02', shield: 5000, absorption: 50, price: 2000000, currency: 'credits', description: '5.000 escudo • 50% absorção.' },
+  sg3na03: { id: 'sg3na03', type: 'generator', subtype: 'shield', name: 'SG3N-A03', shield: 5000, absorption: 60, price: 8000000, currency: 'credits', description: '5.000 escudo • 60% absorção.' },
+  sg3nb01: { id: 'sg3nb01', type: 'generator', subtype: 'shield', name: 'SG3N-B01', shield: 9500, absorption: 70, price: 25000000, currency: 'credits', description: '9.500 escudo • 70% absorção.' },
+  sg3nb02: { id: 'sg3nb02', type: 'generator', subtype: 'shield', name: 'SG3N-B02', shield: 10000, absorption: 80, price: 100000, currency: 'uridium', description: '10.000 escudo • 80% absorção.' },
+  sg3nb03: { id: 'sg3nb03', type: 'generator', subtype: 'shield', name: 'SG3N-B03', shield: 11450, absorption: 80, price: 300000, currency: 'uridium', description: '11.450 escudo • 80% absorção.' },
 
   // EXTRAS
-  autoLaserCpu: { id: 'autoLaserCpu', type: 'extra', name: 'Auto Laser CPU', price: 12000, currency: 'credits', description: 'Ao selecionar um alvo, inicia o laser automaticamente.' },
-  autoRocketCpu: { id: 'autoRocketCpu', type: 'extra', name: 'Auto Rocket CPU', price: 15000, currency: 'credits', description: 'Dispara automaticamente o míssil selecionado durante o combate.' },
-  rocketTurboCpu: { id: 'rocketTurboCpu', type: 'extra', name: 'Rocket Turbo CPU', price: 12000, currency: 'credits', description: 'Reduz o cooldown de mísseis pela metade.' },
+  autoLaserCpu: { id: 'autoLaserCpu', type: 'extra', name: 'Auto Laser CPU', price: 10000000, currency: 'credits', description: 'Ao selecionar um alvo, inicia o laser automaticamente.' },
+  autoRocketCpu: { id: 'autoRocketCpu', type: 'extra', name: 'Auto Rocket CPU', price: 12000000, currency: 'credits', description: 'Dispara automaticamente o míssil selecionado durante o combate.' },
+  rocketTurboCpu: { id: 'rocketTurboCpu', type: 'extra', name: 'Rocket Turbo CPU', price: 25000000, currency: 'credits', description: 'Reduz o cooldown de mísseis pela metade.' },
 
   // EXPANSÃO DE SLOTS EXTRAS
   extraSlotCpuCommon: {
     id: 'extraSlotCpuCommon', type: 'extra', name: 'CPU Expansora de Extras • Comum',
-    price: 250000, currency: 'credits', slotBonus: 3, exclusiveGroup: 'extraSlotExpansion',
+    price: 50000000, currency: 'credits', slotBonus: 3, exclusiveGroup: 'extraSlotExpansion',
     description: 'Enquanto equipada, libera +3 slots EXTRAS adicionais na nave ativa. Não acumula com a versão Elite.'
   },
   extraSlotCpuElite: {
     id: 'extraSlotCpuElite', type: 'extra', name: 'CPU Expansora de Extras • Elite',
-    price: 12500, currency: 'uridium', slotBonus: 6, exclusiveGroup: 'extraSlotExpansion',
+    price: 250000, currency: 'uridium', slotBonus: 6, exclusiveGroup: 'extraSlotExpansion',
     description: 'Enquanto equipada, libera +6 slots EXTRAS adicionais na nave ativa. Não acumula com a versão Comum.'
   },
 
   // ROBÔS DE REPARAÇÃO AUTOMÁTICA
   rep2: {
     id: 'rep2', type: 'extra', name: 'Repair Bot Auto • Comum',
-    price: 80000, currency: 'credits', repairRate: 0.01, repairDelay: 5, exclusiveGroup: 'repairBot',
+    price: 20000000, currency: 'credits', repairRate: 0.01, repairDelay: 5, exclusiveGroup: 'repairBot',
     description: 'Após 5s sem receber dano, repara automaticamente 1% do HP máximo por segundo, inclusive fora da base.'
   },
   repElite: {
     id: 'repElite', type: 'extra', name: 'Repair Bot Auto • Elite',
-    price: 8000, currency: 'uridium', repairRate: 0.02, repairDelay: 5, exclusiveGroup: 'repairBot',
+    price: 180000, currency: 'uridium', repairRate: 0.02, repairDelay: 5, exclusiveGroup: 'repairBot',
     description: 'Após 5s sem receber dano, repara automaticamente 2% do HP máximo por segundo, inclusive fora da base.'
   },
 
-  ammoAutoBuyCpu: { id: 'ammoAutoBuyCpu', type: 'extra', name: 'Auto Buy CPU', price: 18000, currency: 'credits', description: 'Compra automaticamente novo pacote da munição laser e do míssil selecionados quando o estoque estiver baixo.' },
+  // EXPANSÃO DE PORÃO
+  cargoCpuCommon: {
+    id: 'cargoCpuCommon', type: 'extra', name: 'Módulo de Porão • Comum',
+    price: 75000000, currency: 'credits', cargoBonus: 2500, exclusiveGroup: 'cargoExpansion',
+    description: 'Enquanto equipado, aumenta a capacidade do porão da nave ativa em +2.500 unidades. Não acumula com a versão Elite.'
+  },
+  cargoCpuElite: {
+    id: 'cargoCpuElite', type: 'extra', name: 'Módulo de Porão • Elite',
+    price: 500000, currency: 'uridium', cargoBonus: 10000, exclusiveGroup: 'cargoExpansion',
+    description: 'Enquanto equipado, aumenta a capacidade do porão da nave ativa em +10.000 unidades. Não acumula com a versão Comum.'
+  },
+
+  ammoAutoBuyCpu: { id: 'ammoAutoBuyCpu', type: 'extra', name: 'Auto Buy CPU', price: 30000000, currency: 'credits', description: 'Compra automaticamente novo pacote da munição laser e do míssil selecionados quando o estoque estiver baixo.' },
 
   // DRONES
-  flax: { id: 'flax', type: 'drone', name: 'Flax', slots: 1, price: 100000, currency: 'credits', description: 'Drone comum com 1 slot de equipamento.' },
-  iris: { id: 'iris', type: 'drone', name: 'Iris', slots: 2, price: 15000, currency: 'uridium', description: 'Drone elite com 2 slots de equipamento.' },
+  flax: { id: 'flax', type: 'drone', name: 'Flax', slots: 1, price: 20000000, currency: 'credits', description: 'Drone comum com 1 slot de equipamento.' },
+  iris: { id: 'iris', type: 'drone', name: 'Iris', slots: 2, price: 500000, currency: 'uridium', description: 'Drone elite com 2 slots de equipamento.' },
 };
 
 export const LASER_AMMO = {
-  lcb10: { id: 'lcb10', name: 'LCB-10', mult: 1, color: '#76d9ff', pack: 10000, price: 10000, currency: 'credits' },
-  mcb25: { id: 'mcb25', name: 'MCB-25', mult: 2, color: '#ffe36d', pack: 5000, price: 10000, currency: 'credits' },
-  mcb50: { id: 'mcb50', name: 'MCB-50', mult: 3, color: '#ff9d62', pack: 5000, price: 500, currency: 'uridium' },
-  ucb100: { id: 'ucb100', name: 'UCB-100', mult: 4, color: '#ff5d8b', pack: 5000, price: 2500, currency: 'uridium' },
+  lcb10: { id: 'lcb10', name: 'LCB-10', mult: 1, color: '#76d9ff', pack: 10000, price: 250000, currency: 'credits' },
+  mcb25: { id: 'mcb25', name: 'MCB-25', mult: 2, color: '#ffe36d', pack: 5000, price: 1000000, currency: 'credits' },
+  mcb50: { id: 'mcb50', name: 'MCB-50', mult: 3, color: '#ff9d62', pack: 5000, price: 15000, currency: 'uridium' },
+  ucb100: { id: 'ucb100', name: 'UCB-100', mult: 4, color: '#ff5d8b', pack: 5000, price: 80000, currency: 'uridium' },
 };
 
 export const ROCKETS = {
-  r310: { id: 'r310', name: 'R-310', damage: 1000, color: '#79d1ff', pack: 100, price: 10000, currency: 'credits' },
-  plt2026: { id: 'plt2026', name: 'PLT-2026', damage: 2000, color: '#98ff6c', pack: 100, price: 50000, currency: 'credits' },
-  plt2021: { id: 'plt2021', name: 'PLT-2021', damage: 4000, color: '#ffd15b', pack: 100, price: 500, currency: 'uridium' },
-  plt3030: { id: 'plt3030', name: 'PLT-3030', damage: 6000, color: '#ff7676', pack: 100, price: 700, currency: 'uridium' },
+  r310: { id: 'r310', name: 'R-310', damage: 1000, color: '#79d1ff', pack: 100, price: 500000, currency: 'credits' },
+  plt2026: { id: 'plt2026', name: 'PLT-2026', damage: 2000, color: '#98ff6c', pack: 100, price: 2000000, currency: 'credits' },
+  plt2021: { id: 'plt2021', name: 'PLT-2021', damage: 4000, color: '#ffd15b', pack: 100, price: 10000, currency: 'uridium' },
+  plt3030: { id: 'plt3030', name: 'PLT-3030', damage: 6000, color: '#ff7676', pack: 100, price: 30000, currency: 'uridium' },
 };
 
 
