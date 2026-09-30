@@ -1,6 +1,6 @@
-import { FACTIONS, SHIPS, ITEMS, LASER_AMMO, ROCKETS, NPC_TYPES, MAPS, RESOURCES } from './data.js?v=10.6.7';
-import { V8_ASSETS } from './assets/v8/manifest.js?v=10.6.7';
-import { signUp, signIn, restoreSession, signOutLocal, getUser, loadCloudSave, saveCloudSave, updateCallsign, updatePassword, loadRankings, loadAuctionBids, saveAuctionBidOnline, markAuctionBidStatusOnline, loadAuctionMarket, upsertPlayerPresenceOnline, loadMapPresenceOnline, removePlayerPresenceOnline, queuePvpAttackOnline, consumePvpDamageEventsOnline } from './api.js?v=10.6.7';
+import { FACTIONS, SHIPS, ITEMS, LASER_AMMO, ROCKETS, NPC_TYPES, MAPS, RESOURCES } from './data.js?v=10.6.8';
+import { V8_ASSETS } from './assets/v8/manifest.js?v=10.6.8';
+import { signUp, signIn, restoreSession, signOutLocal, getUser, loadCloudSave, saveCloudSave, updateCallsign, updatePassword, loadRankings, loadAuctionBids, saveAuctionBidOnline, markAuctionBidStatusOnline, loadAuctionMarket, upsertPlayerPresenceOnline, loadMapPresenceOnline, removePlayerPresenceOnline, queuePvpAttackOnline, consumePvpDamageEventsOnline } from './api.js?v=10.6.8';
 
 const canvas = document.querySelector('#game');
 const ctx = canvas.getContext('2d');
@@ -2562,7 +2562,26 @@ function makeProductCard({id,name,desc,price,currency,type,subtype,badge,owned,o
 }
 function renderShop(){
   if(!progress)return;renderTabs(ui.shopTabs,categories,state.shopTab,id=>{state.shopTab=id;renderShop();});ui.shopGrid.innerHTML='';
-  if(state.shopTab==='ships')Object.values(SHIPS).forEach(s=>{const event=!!s.eventOnly||s.shopAvailable===false;ui.shopGrid.appendChild(makeProductCard({id:s.id,name:s.name,desc:`${s.role}<br>HP ${fmt(s.hp)} • ${s.lasers} lasers • ${s.generators} geradores • ${s.extras} extras • VEL ${s.speed}${s.ability?`<br><b>Habilidade:</b> ${s.ability}`:''}`,price:s.price,currency:s.currency,type:'ship',badge:event?'EVENTO':(s.currency==='uridium'?'ELITE':'COMUM'),owned:progress.ownedShips.includes(s.id),disabled:event&&!progress.ownedShips.includes(s.id),priceLabel:event?'EVENTO / MISSÃO / PASSE':null,buttonLabel:event?'BLOQUEADA':null,onBuy:()=>buyShip(s.id)}));});
+  if(state.shopTab==='ships'){
+    const availableShips=Object.values(SHIPS).filter(s=>!progress.ownedShips.includes(s.id));
+    if(!availableShips.length){
+      ui.shopGrid.innerHTML='<div class="empty-state">Você já adquiriu todas as naves disponíveis deste catálogo.</div>';
+    }else{
+      availableShips.forEach(s=>{
+        const event=!!s.eventOnly||s.shopAvailable===false;
+        ui.shopGrid.appendChild(makeProductCard({
+          id:s.id,name:s.name,
+          desc:`${s.role}<br>HP ${fmt(s.hp)} • ${s.lasers} lasers • ${s.generators} geradores • ${s.extras} extras • VEL ${s.speed}${s.ability?`<br><b>Habilidade:</b> ${s.ability}`:''}`,
+          price:s.price,currency:s.currency,type:'ship',
+          badge:event?'EVENTO':(s.currency==='uridium'?'ELITE':'COMUM'),
+          disabled:event,
+          priceLabel:event?'EVENTO / MISSÃO / PASSE':null,
+          buttonLabel:event?'BLOQUEADA':null,
+          onBuy:()=>buyShip(s.id)
+        }));
+      });
+    }
+  }
   if(state.shopTab==='lasers')Object.values(ITEMS).filter(i=>i.type==='laser'&&i.shopAvailable!==false).forEach(i=>ui.shopGrid.appendChild(makeProductCard({id:i.id,name:i.name,desc:`Dano base: <b>${i.damage}</b>${i.alienDamage?` • Alien ${i.alienDamage}`:''}${i.alienBonus?` • +${Math.round(i.alienBonus*100)}% PvE`:''}<br>${i.description}`,price:i.price,currency:i.currency,type:i.type,badge:i.currency==='uridium'?'ELITE':'COMUM',onBuy:()=>buyItem(i.id)})));
   if(state.shopTab==='generators')Object.values(ITEMS).filter(i=>i.type==='generator').forEach(i=>{const event=!!i.eventOnly||i.shopAvailable===false;ui.shopGrid.appendChild(makeProductCard({id:i.id,name:i.name,desc:i.description,price:i.price,currency:i.currency,type:i.type,subtype:i.subtype,badge:event?'EVENTO':(i.currency==='uridium'?'ELITE':'COMUM'),disabled:event,priceLabel:event?'EVENTO / MISSÃO':null,buttonLabel:event?'BLOQUEADO':null,onBuy:()=>buyItem(i.id)}));});
   if(state.shopTab==='pet'){
@@ -2635,7 +2654,12 @@ function inventoryCard(itemId,count){
 
 function renderHangarShips(){
   const wrap=document.createElement('div');wrap.className='ship-grid';
-  Object.values(SHIPS).forEach(s=>{
+  const catalog=Object.values(SHIPS);
+  const orderedShips=[
+    ...catalog.filter(s=>progress.ownedShips.includes(s.id)),
+    ...catalog.filter(s=>!progress.ownedShips.includes(s.id)),
+  ];
+  orderedShips.forEach(s=>{
     const owned=progress.ownedShips.includes(s.id),active=s.id===progress.activeShipId,c=document.createElement('div');c.className='ship-card';
     c.innerHTML=`<div class="ship-visual"><img src="${V8_ASSETS.ships[s.id]||V8_ASSETS.ships.phoenix}" alt="${s.name}"></div><div><span class="badge">${owned?'OBTIDA':'BLOQUEADA'}</span><h3>${s.name}</h3></div><div class="ship-stats">HP ${fmt(s.hp)}<br>Lasers ${s.lasers} • Geradores ${s.generators} • Extras ${s.extras}<br>VEL ${s.speed} • Cargo ${fmt(s.cargo)}</div>`;
     const event=!!s.eventOnly||s.shopAvailable===false;const b=document.createElement('button');b.className='equip-btn';b.textContent=active?'Nave ativa':owned?'Usar nave':event?'EVENTO / MISSÃO / PASSE':'Comprar na Loja';b.disabled=active||(!owned&&event);b.onclick=()=>owned?switchShip(s.id):(ui.hangarModal.classList.add('hidden'),openShop('ships'));c.appendChild(b);wrap.appendChild(c);

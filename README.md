@@ -423,3 +423,8 @@ O Leilão Elite foi migrado para persistência online: lances ativos ficam regis
 - Removida definitivamente a barra visual de alvo.
 - Seleção de NPC/PvP passa apenas para ATIVIDADE.
 - Toast corrigido para voltar a ser uma notificação pequena e flutuante.
+
+
+## V10.6.8 — Ship Organizer
+- Loja esconde naves que a conta já possui.
+- Hangar organiza primeiro as naves adquiridas e depois o restante do catálogo na ordem normal.
