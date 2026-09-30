@@ -1,6 +1,6 @@
-import { FACTIONS, SHIPS, ITEMS, LASER_AMMO, ROCKETS, NPC_TYPES, MAPS, RESOURCES } from './data.js?v=10.6.3';
-import { V8_ASSETS } from './assets/v8/manifest.js?v=10.6.3';
-import { signUp, signIn, restoreSession, signOutLocal, getUser, loadCloudSave, saveCloudSave, updateCallsign, updatePassword, loadRankings, loadAuctionBids, saveAuctionBidOnline, markAuctionBidStatusOnline, loadAuctionMarket, upsertPlayerPresenceOnline, loadMapPresenceOnline, removePlayerPresenceOnline, queuePvpAttackOnline, consumePvpDamageEventsOnline } from './api.js?v=10.6.3';
+import { FACTIONS, SHIPS, ITEMS, LASER_AMMO, ROCKETS, NPC_TYPES, MAPS, RESOURCES } from './data.js?v=10.6.4';
+import { V8_ASSETS } from './assets/v8/manifest.js?v=10.6.4';
+import { signUp, signIn, restoreSession, signOutLocal, getUser, loadCloudSave, saveCloudSave, updateCallsign, updatePassword, loadRankings, loadAuctionBids, saveAuctionBidOnline, markAuctionBidStatusOnline, loadAuctionMarket, upsertPlayerPresenceOnline, loadMapPresenceOnline, removePlayerPresenceOnline, queuePvpAttackOnline, consumePvpDamageEventsOnline } from './api.js?v=10.6.4';
 
 const canvas = document.querySelector('#game');
 const ctx = canvas.getContext('2d');
@@ -96,7 +96,6 @@ addEventListener('resize', resize); resize();
 const ui = {
   topbar: $('#topbar'), topMeta: document.querySelector('#topbar .top-meta'), hudToggle: $('#hudToggle'), leftStats: $('#leftStats'), statsToggle: $('#statsToggle'), minimapPanel: $('#minimapPanel'), minimapToggle: $('#minimapToggle'), minimapHeader: $('#minimapHeader'), statsHeader: $('#statsHeader'), shipHudArt: $('#shipHudArt'), factionIcon: $('#factionIcon'), factionLabel: $('#factionLabel'), mapLabel: $('#mapLabel'), sectorName: $('#sectorName'), coordLabel: $('#coordLabel'), routeLabel: $('#routeLabel'), discoveriesLabel: $('#discoveriesLabel'), shipLabel: $('#shipLabel'), lvl: $('#lvl'), petFloatPanel: $('#petFloatPanel'), petFloatLevel: $('#petFloatLevel'), petGearQuickSelect: $('#petGearQuickSelect'), petFloatStatus: $('#petFloatStatus'),
   hp: $('#hp'), maxHp: $('#maxHp'), shield: $('#shield'), maxShield: $('#maxShield'), speed: $('#speed'), dmg: $('#dmg'), credits: $('#credits'), uridium: $('#uridium'), xp: $('#xp'), droneCount: $('#droneCount'),
-  targetName: $('#targetName'), targetHpBar: $('#targetHpBar'), targetShieldBar: $('#targetShieldBar'), targetStats: $('#targetStats'),
   laserAmmoButtons: $('#laserAmmoButtons'), rocketAmmoButtons: $('#rocketAmmoButtons'), laserToggle: $('#laserToggle'), rocketFire: $('#rocketFire'), autoLaser: $('#autoLaser'), autoRocket: $('#autoRocket'), turboRocket: $('#turboRocket'), rocketCd: $('#rocketCd'), weaponBar: $('#weaponBar'), weaponBarContent: $('#weaponBarContent'), weaponBarToggle: $('#weaponBarToggle'),
   toast: $('#toast'), baseTradePrompt: $('#baseTradePrompt'), baseTradePromptInfo: $('#baseTradePromptInfo'), gameCelebration: $('#gameCelebration'), celebrationPanel: $('#celebrationPanel'), celebrationKicker: $('#celebrationKicker'), celebrationTitle: $('#celebrationTitle'), celebrationSubtitle: $('#celebrationSubtitle'), portalPrompt: $('#portalPrompt'), portalPromptMap: $('#portalPromptMap'), jumpTransition: $('#jumpTransition'), jumpTitle: $('#jumpTitle'), jumpSubtitle: $('#jumpSubtitle'), factionModal: $('#factionModal'), factionCards: $('#factionCards'),
   mapBtn: $('#mapBtn'), mapModal: $('#mapModal'), closeMap: $('#closeMap'), mapNetwork: $('#mapNetwork'),
@@ -987,7 +986,7 @@ function syncHudButton(){
 }
 
 const HUD_VISIBILITY_KEY='stellar_hud_visibility_v2';
-const HUD_VISIBILITY_DEFAULT={ship:true,pet:true,missions:true,activity:true,target:true,minimap:true,weapons:true,gate:true};
+const HUD_VISIBILITY_DEFAULT={ship:true,pet:true,missions:true,activity:true,minimap:true,weapons:true,gate:true};
 let hudVisibility={...HUD_VISIBILITY_DEFAULT};
 function loadHudVisibility(){
   try{const raw=JSON.parse(localStorage.getItem(HUD_VISIBILITY_KEY)||'null');if(raw&&typeof raw==='object')hudVisibility={...HUD_VISIBILITY_DEFAULT,...raw};}catch{}
@@ -999,7 +998,6 @@ function applyHudVisibility(){
   ui.petFloatPanel?.classList.toggle('hud-user-disabled',!hudVisibility.pet);
   ui.activeMissionPanel?.classList.toggle('hud-user-disabled',!hudVisibility.missions);
   ui.activityPanel?.classList.toggle('hud-user-disabled',!hudVisibility.activity);
-  ui.targetName?.closest('#targetPanel')?.classList.toggle('hud-user-hidden',!hudVisibility.target);
   ui.minimapPanel?.classList.toggle('hud-user-hidden',!hudVisibility.minimap);
   ui.weaponBar?.classList.toggle('hud-user-hidden',!hudVisibility.weapons);
   ui.gateHud?.classList.toggle('hud-user-disabled',!hudVisibility.gate);
@@ -2396,7 +2394,6 @@ function updateUI(){
   if(ui.shipHudArt)ui.shipHudArt.src=V8_ASSETS.ships[progress.activeShipId]||V8_ASSETS.ships.phoenix;
   if(ui.factionIcon)ui.factionIcon.src=factionAsset(progress.profile.faction);
   if(ui.userLabel)ui.userLabel.textContent=progress.profile.callsign||getUser()?.callsign||'Pilot';if(ui.petBtn)ui.petBtn.textContent=progress.pet?.owned?`P.E.T. LV${progress.pet.level}`:'P.E.T. LOJA';if(ui.safeZoneLabel){ui.safeZoneLabel.textContent=safe?'ZONA SEGURA ATIVA':'FORA DA BASE';ui.safeZoneLabel.classList.toggle('active',safe);}if(ui.cargoUsed)ui.cargoUsed.textContent=fmt(cargoUsed());if(ui.cargoMax)ui.cargoMax.textContent=fmt(cargoCapacity());if(ui.cargoBtn)ui.cargoBtn.classList.toggle('gold',isAtTrader());updatePetFloat();updateBaseTradePrompt();renderActiveMissionHud();
-  if(state.target&&state.target.hp>0){ui.targetName.textContent=state.target.name;ui.targetStats.textContent=`HP ${fmt(state.target.hp)} • ESC ${fmt(state.target.shield)}`;ui.targetHpBar.style.width=`${state.target.hp/state.target.maxHp*100}%`;ui.targetShieldBar.style.width=`${state.target.maxShield?state.target.shield/state.target.maxShield*100:0}%`;}else{ui.targetName.textContent='Sem alvo';ui.targetStats.textContent='Selecione um NPC ou piloto inimigo';ui.targetHpBar.style.width='0%';ui.targetShieldBar.style.width='0%';}
   ui.shopCredits.textContent=fmt(progress.profile.credits);ui.shopUridium.textContent=fmt(progress.profile.uridium);ui.hangarShipName.textContent=ship.name;updateExtraControls();
   const portal=nearbyPortal();if(portal&&!state.jumping&&ui.portalPrompt){const pos=screenPos(portal.x,portal.y);ui.portalPrompt.style.left=`${Math.max(85,Math.min(W-85,pos.x))}px`;ui.portalPrompt.style.top=`${Math.max(115,Math.min(H-90,pos.y-58))}px`;ui.portalPromptMap.textContent=`Destino ${displayMapLabel(portal.to)} • clique ou J`;ui.portalPrompt.classList.remove('hidden');}else ui.portalPrompt?.classList.add('hidden');
 }

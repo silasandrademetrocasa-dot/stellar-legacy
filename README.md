@@ -396,3 +396,9 @@ O Leilão Elite foi migrado para persistência online: lances ativos ficam regis
 - Painel flutuante ATIVIDADE registra recompensas e ações recentes.
 - Missões Ativas e Atividade podem ser mostradas/ocultadas em CONF.
 - Status ONLINE/LOCAL foi removido visualmente do topo.
+
+
+## V10.6.4 — HUD Cleanup
+- Barra horizontal de ALVO removida.
+- Sistema de seleção e combate continua intacto.
+- Informações rápidas de seleção continuam aparecendo via ATIVIDADE/toast.
