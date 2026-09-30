@@ -297,3 +297,67 @@ export async function markAuctionBidStatusOnline({ hourKey, lotRef, status }) {
   });
   return { ok: true };
 }
+
+export async function loadAuctionMarket(hourKey) {
+  const rows = await authedSupabaseFetch('/rest/v1/rpc/get_auction_market', {
+    method: 'POST',
+    body: JSON.stringify({ p_hour_key: String(hourKey || '') }),
+  });
+  return Array.isArray(rows) ? rows : [];
+}
+
+export async function placeAuctionBidOnline({ hourKey, lotRef, userBid, lot }) {
+  const rows = await authedSupabaseFetch('/rest/v1/rpc/place_auction_bid_online', {
+    method: 'POST',
+    body: JSON.stringify({
+      p_hour_key: String(hourKey || ''),
+      p_lot_ref: String(lotRef || ''),
+      p_user_bid: Math.max(0, Math.round(Number(userBid) || 0)),
+      p_lot: lot || {},
+    }),
+  });
+  return Array.isArray(rows) ? rows[0] || null : null;
+}
+
+export async function upsertPlayerPresenceOnline(payload) {
+  if (!currentUser?.id) throw new Error('Usuário não identificado.');
+  await authedSupabaseFetch('/rest/v1/player_presence?on_conflict=user_id', {
+    method: 'POST',
+    headers: { Prefer: 'resolution=merge-duplicates,return=minimal' },
+    body: JSON.stringify({
+      user_id: currentUser.id,
+      callsign: String(payload.callsign || currentUser.callsign || 'Pilot').slice(0, 24),
+      map_id: String(payload.mapId || 'x1'),
+      x: Number(payload.x || 0),
+      y: Number(payload.y || 0),
+      angle: Number(payload.angle || 0),
+      ship_id: String(payload.shipId || 'phoenix'),
+      faction: payload.faction || null,
+      level: Math.max(1, Number(payload.level || 1)),
+      hp: Math.max(0, Math.round(Number(payload.hp || 0))),
+      max_hp: Math.max(0, Math.round(Number(payload.maxHp || 0))),
+      shield: Math.max(0, Math.round(Number(payload.shield || 0))),
+      max_shield: Math.max(0, Math.round(Number(payload.maxShield || 0))),
+      updated_at: new Date().toISOString(),
+    }),
+  });
+  return { ok: true };
+}
+
+export async function loadMapPresenceOnline(mapId) {
+  const cutoff = new Date(Date.now() - 9000).toISOString();
+  const rows = await authedSupabaseFetch(
+    `/rest/v1/player_presence?map_id=eq.${encodeURIComponent(String(mapId || 'x1'))}&updated_at=gte.${encodeURIComponent(cutoff)}&select=user_id,callsign,map_id,x,y,angle,ship_id,faction,level,hp,max_hp,shield,max_shield,updated_at&order=updated_at.desc`
+  );
+  return Array.isArray(rows) ? rows : [];
+}
+
+export async function removePlayerPresenceOnline() {
+  if (!currentUser?.id) return { ok: true };
+  await authedSupabaseFetch(`/rest/v1/player_presence?user_id=eq.${encodeURIComponent(currentUser.id)}`, {
+    method: 'DELETE',
+    headers: { Prefer: 'return=minimal' },
+  });
+  return { ok: true };
+}
+

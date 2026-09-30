@@ -1,6 +1,6 @@
-import { FACTIONS, SHIPS, ITEMS, LASER_AMMO, ROCKETS, NPC_TYPES, MAPS, RESOURCES } from './data.js?v=10.4.1';
-import { V8_ASSETS } from './assets/v8/manifest.js?v=10.4.1';
-import { signUp, signIn, restoreSession, signOutLocal, getUser, loadCloudSave, saveCloudSave, updateCallsign, updatePassword, loadRankings, loadAuctionBids, saveAuctionBidOnline, markAuctionBidStatusOnline } from './api.js?v=10.4.1';
+import { FACTIONS, SHIPS, ITEMS, LASER_AMMO, ROCKETS, NPC_TYPES, MAPS, RESOURCES } from './data.js?v=10.5.0';
+import { V8_ASSETS } from './assets/v8/manifest.js?v=10.5.0';
+import { signUp, signIn, restoreSession, signOutLocal, getUser, loadCloudSave, saveCloudSave, updateCallsign, updatePassword, loadRankings, loadAuctionBids, markAuctionBidStatusOnline, loadAuctionMarket, placeAuctionBidOnline, upsertPlayerPresenceOnline, loadMapPresenceOnline, removePlayerPresenceOnline } from './api.js?v=10.5.0';
 
 const canvas = document.querySelector('#game');
 const ctx = canvas.getContext('2d');
@@ -165,23 +165,20 @@ function pilotSkillCreditCost(skill,nextLevel){return Math.round(skill.creditBas
 function pilotRequirementMet(skill){return !skill.requires||pilotSkillLevel(skill.requires)>=PILOT_SKILLS[skill.requires].max;}
 function pilotRareChanceBonus(){return pilotCombined('luck1','luck2')/100;}function pilotLootBonus(){return pilotCombined('tractor1','tractor2')/100;}function pilotEvasion(){return Math.min(.35,pilotCombined('evasive1','evasive2')/100);}function pilotBattleLaserBonus(){return pilotCombined('bounty1','bounty2')/100;}function pilotKamikazeDamageBonus(){return pilotCombined('detonation1','detonation2')/100;}function pilotKamikazeRadiusBonus(){return pilotSkillValue('explosives')/100;}
 
-// ===================== V10.3 ONLINE HOURLY AUCTION =====================
-function freshAuctionState(){return {hourKey:null,lots:{},history:[],onlineReady:false,legacyEscrowMigrated:false};}
+// ===================== V10.5 REAL-PLAYER ONLINE AUCTION =====================
+function freshAuctionState(){return {hourKey:null,lots:{},history:[],onlineReady:false,legacyEscrowMigrated:false,marketVersion:2};}
 function auctionHourKey(d=new Date()){return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}-${String(d.getHours()).padStart(2,'0')}`;}
 function auctionSecondsLeft(){const d=new Date(),next=new Date(d);next.setMinutes(60,0,0);return Math.max(0,Math.ceil((next-d)/1000));}
-function auctionSeed(str){let h=2166136261>>>0;for(let i=0;i<str.length;i++){h^=str.charCodeAt(i);h=Math.imul(h,16777619);}return h>>>0;}
-function auctionRand(seed){let x=seed>>>0;return()=>{x=(Math.imul(1664525,x)+1013904223)>>>0;return x/4294967296;};}
 function eliteAuctionCatalog(){
   const out=[];
   Object.values(SHIPS).filter(x=>x.currency==='uridium'&&!x.eventOnly&&x.shopAvailable!==false&&x.auctionEligible!==false&&!progress?.ownedShips?.includes(x.id)).forEach(x=>out.push({ref:`ship:${x.id}`,kind:'ship',id:x.id,name:x.name,uri:x.price,qty:1,unique:true}));
   Object.values(ITEMS).filter(x=>x.currency==='uridium'&&!x.eventOnly&&x.shopAvailable!==false&&x.auctionEligible!==false&&!(x.type==='extra'&&progress&&ownsExtraItem(x.id))).forEach(x=>out.push({ref:`item:${x.id}`,kind:'item',id:x.id,name:x.name,uri:x.price,qty:1,unique:x.type==='extra'}));
-  Object.values(LASER_AMMO).filter(x=>x.currency==='uridium').forEach(x=>out.push({ref:`ammo:${x.id}`,kind:'ammo',id:x.id,name:`${x.name} • pacote ${fmt(x.pack)}`,uri:x.price,qty:x.pack}));
+  Object.values(LASER_AMMO).filter(x=>x.currency==='uridium'&&x.purchasable!==false).forEach(x=>out.push({ref:`ammo:${x.id}`,kind:'ammo',id:x.id,name:`${x.name} • pacote ${fmt(x.pack)}`,uri:x.price,qty:x.pack}));
   Object.values(ROCKETS).filter(x=>x.currency==='uridium').forEach(x=>out.push({ref:`rocket:${x.id}`,kind:'rocket',id:x.id,name:`${x.name} • pacote ${fmt(x.pack)}`,uri:x.price,qty:x.pack}));
   Object.values(PET_GEARS).filter(x=>x.currency==='uridium'&&!progress?.pet?.gearsOwned?.[x.id]).forEach(x=>out.push({ref:`petGear:${x.id}`,kind:'petGear',id:x.id,name:`P.E.T. • ${x.name}`,uri:x.cost,qty:1,unique:true}));
   return out;
 }
-function buildAuctionLots(key){const lots={};for(const entry of eliteAuctionCatalog()){const rnd=auctionRand(auctionSeed(`${key}:${entry.ref}`)),reserve=Math.max(100000,Math.round(entry.uri*70*(.75+rnd()*.5)/100000)*100000),finalBid=Math.max(reserve+100000,Math.round(reserve*(1.25+rnd()*1.75)/100000)*100000);lots[entry.ref]={...entry,reserve,finalNpcBid:finalBid,userBid:0,escrow:0};}return lots;}
-function auctionNpcBid(lot){const d=new Date(),fraction=(d.getMinutes()*60+d.getSeconds())/3600;return Math.max(100000,Math.round((lot.reserve+(lot.finalNpcBid-lot.reserve)*fraction)/100000)*100000);}
+function buildAuctionLots(key){const lots={};for(const entry of eliteAuctionCatalog())lots[entry.ref]={...entry,reserve:100000,userBid:0,escrow:0,marketBid:0,leaderUserId:null,leaderCallsign:null};return lots;}
 function auctionEscrow(){return Object.values(progress?.auction?.lots||{}).reduce((sum,l)=>sum+(auctionLotEligible(l)?(Number(l.userBid)||0):0),0);}
 function auctionSpendableCredits(excludeRef=null){const reserved=Object.values(progress?.auction?.lots||{}).reduce((sum,l)=>sum+(!auctionLotEligible(l)||l.ref===excludeRef?0:(Number(l.userBid)||0)),0);return Math.max(0,(progress?.profile?.credits||0)-reserved);}
 function grantAuctionLot(lot){
@@ -194,46 +191,57 @@ function grantAuctionLot(lot){
 }
 async function finalizeOnlineAuctionBid(row){
   const lot=row.lot||{};if(!lot?.ref||row.status!=='active')return;
-  const won=Number(row.user_bid)>=Number(lot.finalNpcBid||Infinity);
-  let result='PERDEU',status='lost';
-  if(won){
-    if(progress.profile.credits>=Number(row.user_bid)&&grantAuctionLot(lot)){progress.profile.credits-=Number(row.user_bid);result='VENCEU';status='won';}
-    else{result='CANCELADO';status='cancelled';}
-  }
-  progress.auction.history.unshift({at:Date.now(),name:lot.name||row.lot_ref,bid:Number(row.user_bid)||0,result});
-  progress.auction.history=progress.auction.history.slice(0,12);
-  try{await markAuctionBidStatusOnline({hourKey:row.hour_key,lotRef:row.lot_ref,status});}catch(e){console.warn('auction settle online',e);}
-}
-async function syncAuctionBidsOnline(){
-  if(!authenticated||!progress)return;
   try{
-    const rows=await loadAuctionBids(),current=auctionHourKey();
-    for(const row of rows){
-      if(row.hour_key!==current){await finalizeOnlineAuctionBid(row);continue;}
-      let lot=progress.auction?.lots?.[row.lot_ref];
-      if(!lot){
-        if(auctionLotEligible(row.lot)){lot={...row.lot,userBid:0,escrow:0};progress.auction.lots[row.lot_ref]=lot;}
-        else{await markAuctionBidStatusOnline({hourKey:row.hour_key,lotRef:row.lot_ref,status:'cancelled'});continue;}
-      }
-      lot.userBid=Math.max(Number(lot.userBid)||0,Number(row.user_bid)||0);lot.escrow=lot.userBid;
+    const market=await loadAuctionMarket(row.hour_key),winner=market.find(x=>x.lot_ref===row.lot_ref),mine=getUser()?.id;
+    const won=winner?.leader_user_id===mine&&Number(winner?.user_bid)===Number(row.user_bid);
+    let result='PERDEU',status='lost';
+    if(won){
+      if(progress.profile.credits>=Number(row.user_bid)&&grantAuctionLot(lot)){progress.profile.credits-=Number(row.user_bid);result='VENCEU';status='won';}
+      else{result='CANCELADO';status='cancelled';}
     }
-    progress.auction.onlineReady=true;saveGame();await flushCloudSave(true);if(ui.auctionModal&&!ui.auctionModal.classList.contains('hidden'))renderAuction();
-  }catch(e){console.warn('auction sync online',e);showToast('Leilão online indisponível temporariamente');}
+    progress.auction.history.unshift({at:Date.now(),name:lot.name||row.lot_ref,bid:Number(row.user_bid)||0,result});
+    progress.auction.history=progress.auction.history.slice(0,12);
+    await markAuctionBidStatusOnline({hourKey:row.hour_key,lotRef:row.lot_ref,status});
+    saveGame();await flushCloudSave(true);
+  }catch(e){console.warn('auction settle online',e);}
 }
-function settleAuction(){
-  const a=progress.auction;if(!a?.lots)return;
-  for(const lot of Object.values(a.lots)){
-    if(!lot.userBid)continue;
-    const won=lot.userBid>=lot.finalNpcBid;let granted=false,result='PERDEU',status='lost';
-    if(won&&progress.profile.credits>=lot.userBid)granted=grantAuctionLot(lot);
-    if(won&&granted){progress.profile.credits-=lot.userBid;result='VENCEU';status='won';}
-    else if(won){result='CANCELADO';status='cancelled';}
-    a.history.unshift({at:Date.now(),name:lot.name,bid:lot.userBid,result});
-    markAuctionBidStatusOnline({hourKey:a.hourKey,lotRef:lot.ref,status}).catch(e=>console.warn('auction status',e));
-  }
-  a.history=a.history.slice(0,12);
+let auctionSyncBusy=false,auctionLastMarketSync=0;
+async function syncAuctionBidsOnline(){
+  if(!authenticated||!progress||auctionSyncBusy)return;
+  auctionSyncBusy=true;
+  try{
+    ensureAuctionState();
+    const current=auctionHourKey();
+    const [ownRows,marketRows]=await Promise.all([loadAuctionBids(),loadAuctionMarket(current)]);
+    for(const row of ownRows)if(row.hour_key!==current)await finalizeOnlineAuctionBid(row);
+    const a=progress.auction;
+    const prevLeading=new Set(Object.values(a.lots||{}).filter(l=>l.userBid>0).map(l=>l.ref));
+    for(const lot of Object.values(a.lots||{})){lot.userBid=0;lot.escrow=0;lot.marketBid=0;lot.leaderUserId=null;lot.leaderCallsign=null;}
+    for(const row of ownRows){
+      if(row.hour_key!==current)continue;
+      let lot=a.lots[row.lot_ref];
+      if(!lot&&auctionLotEligible(row.lot)){lot={...row.lot,reserve:100000,userBid:0,escrow:0,marketBid:0,leaderUserId:null,leaderCallsign:null};a.lots[row.lot_ref]=lot;}
+      if(lot&&auctionLotEligible(lot)){lot.userBid=Number(row.user_bid)||0;lot.escrow=lot.userBid;}
+    }
+    for(const row of marketRows){
+      let lot=a.lots[row.lot_ref];
+      if(!lot&&auctionLotEligible(row.lot)){lot={...row.lot,reserve:100000,userBid:0,escrow:0,marketBid:0,leaderUserId:null,leaderCallsign:null};a.lots[row.lot_ref]=lot;}
+      if(!lot||!auctionLotEligible(lot))continue;
+      lot.marketBid=Number(row.user_bid)||0;lot.leaderUserId=row.leader_user_id||null;lot.leaderCallsign=row.leader_callsign||'Piloto';
+    }
+    const myId=getUser()?.id;
+    for(const ref of prevLeading){const lot=a.lots[ref];if(lot&&lot.leaderUserId&&lot.leaderUserId!==myId&&lot.userBid===0)showToast(`${lot.name}: seu lance foi superado por ${lot.leaderCallsign}`);}
+    a.onlineReady=true;auctionLastMarketSync=Date.now();saveGame();if(ui.auctionModal&&!ui.auctionModal.classList.contains('hidden'))renderAuction();
+  }catch(e){console.warn('auction sync online',e);if(ui.auctionModal&&!ui.auctionModal.classList.contains('hidden'))showToast('Leilão online indisponível temporariamente');}
+  finally{auctionSyncBusy=false;}
 }
-function ensureAuctionState(){progress.auction ||= freshAuctionState();const a=progress.auction;if(!a.legacyEscrowMigrated){const legacy=Object.values(a.lots||{}).reduce((sum,l)=>sum+(Number(l.escrow)||0),0);if(legacy>0)progress.profile.credits+=legacy;a.legacyEscrowMigrated=true;}const key=auctionHourKey();if(a.hourKey!==key){if(a.hourKey)settleAuction();a.hourKey=key;a.lots=buildAuctionLots(key);saveGame();}}
+function settleAuction(){syncAuctionBidsOnline();}
+function ensureAuctionState(){
+  progress.auction ||= freshAuctionState();const a=progress.auction;
+  if(!a.legacyEscrowMigrated){const legacy=Object.values(a.lots||{}).reduce((sum,l)=>sum+(Number(l.escrow)||0),0);if(legacy>0)progress.profile.credits+=legacy;a.legacyEscrowMigrated=true;}
+  const key=auctionHourKey();
+  if(a.marketVersion!==2||a.hourKey!==key){a.hourKey=key;a.lots=buildAuctionLots(key);a.marketVersion=2;a.onlineReady=false;saveGame();setTimeout(()=>syncAuctionBidsOnline(),0);}
+}
 
 const PLAYER_MAX_LEVEL=44;
 const PET_MAX_LEVEL=44;
@@ -970,7 +978,9 @@ let rankingsCache=[];
 let rankingsLoadedAt=0;
 function renderSettings(){
   if(!ui.configModal)return;
-  document.body.dataset.quality=qualityMode;
+  addEventListener('pagehide',()=>{clearOnlinePlayers();removePlayerPresenceOnline().catch(()=>{});});
+
+document.body.dataset.quality=qualityMode;
   if(ui.qualityCurrentBadge)ui.qualityCurrentBadge.textContent=qualityProfile().label;
   ui.qualityButtons?.querySelectorAll('[data-quality]').forEach(b=>b.classList.toggle('active',b.dataset.quality===qualityMode));
   ui.hudSettingsGrid?.querySelectorAll('[data-hud-key]').forEach(input=>input.checked=hudVisibility[input.dataset.hudKey]!==false);
@@ -1821,7 +1831,53 @@ function updateFx(dt){
   for(let i=state.fx.length-1;i>=0;i--){const f=state.fx[i];f.life-=dt;if(f.vx){f.x+=f.vx*dt;f.y+=f.vy*dt;f.vx*=.985;f.vy*=.985;}if(f.life<=0)state.fx.splice(i,1);}
   const now=nowSec();for(let i=state.rocketFx.length-1;i>=0;i--)if(now-state.rocketFx[i].born>state.rocketFx[i].duration+.12)state.rocketFx.splice(i,1);
 }
-function update(dt){if(!progress)return;processRespawns();updatePlayer(dt);updateEnemies(dt);updatePet(dt);updateParticles(dt);updateFx(dt);updateAlphaGate();updateAuctionSystem();updateUI();}
+// ===================== V10.5 ONLINE MAP PRESENCE =====================
+const onlineWorld={players:new Map(),busy:false,lastSyncAt:0,privateRemoved:false};
+function clearOnlinePlayers(){onlineWorld.players.clear();}
+function shortestAngleDelta(a,b){return Math.atan2(Math.sin(b-a),Math.cos(b-a));}
+async function syncOnlineWorld(){
+  if(!authenticated||!progress||onlineWorld.busy)return;
+  onlineWorld.busy=true;
+  try{
+    if(isGalaxyGateMap()){
+      clearOnlinePlayers();
+      if(!onlineWorld.privateRemoved){await removePlayerPresenceOnline().catch(()=>{});onlineWorld.privateRemoved=true;}
+      onlineWorld.lastSyncAt=Date.now();return;
+    }
+    onlineWorld.privateRemoved=false;
+    await upsertPlayerPresenceOnline({callsign:progress.profile.callsign,mapId:progress.mapId,x:player.x,y:player.y,angle:player.angle||0,shipId:progress.activeShipId,faction:progress.profile.faction,level:progress.profile.level,hp:player.hp,maxHp:player.maxHp,shield:player.shield,maxShield:player.maxShield});
+    const rows=await loadMapPresenceOnline(progress.mapId),me=getUser()?.id,seen=new Set();
+    for(const row of rows){
+      if(!row?.user_id||row.user_id===me)continue;seen.add(row.user_id);
+      let rp=onlineWorld.players.get(row.user_id);
+      if(!rp){rp={id:row.user_id,x:Number(row.x)||0,y:Number(row.y)||0,tx:Number(row.x)||0,ty:Number(row.y)||0,angle:Number(row.angle)||0,targetAngle:Number(row.angle)||0};onlineWorld.players.set(row.user_id,rp);}
+      rp.tx=Number(row.x)||0;rp.ty=Number(row.y)||0;rp.targetAngle=Number(row.angle)||0;rp.callsign=row.callsign||'Pilot';rp.shipId=row.ship_id||'phoenix';rp.faction=row.faction||null;rp.level=Number(row.level)||1;rp.hp=Number(row.hp)||0;rp.maxHp=Number(row.max_hp)||1;rp.shield=Number(row.shield)||0;rp.maxShield=Number(row.max_shield)||0;rp.updatedAt=row.updated_at;
+    }
+    for(const id of [...onlineWorld.players.keys()])if(!seen.has(id))onlineWorld.players.delete(id);
+    onlineWorld.lastSyncAt=Date.now();
+  }catch(e){console.warn('online presence sync',e);}
+  finally{onlineWorld.busy=false;}
+}
+function updateOnlineWorld(dt){
+  if(!authenticated||!progress)return;
+  if(Date.now()-onlineWorld.lastSyncAt>1800&&!onlineWorld.busy)syncOnlineWorld();
+  for(const rp of onlineWorld.players.values()){
+    const k=Math.min(1,dt*5.5);rp.x+=(rp.tx-rp.x)*k;rp.y+=(rp.ty-rp.y)*k;rp.angle+=shortestAngleDelta(rp.angle,rp.targetAngle)*Math.min(1,dt*6);
+  }
+}
+function onlineShipSize(shipId){const ship=SHIPS[shipId];if(!ship)return 72;if(ship.id==='citadel')return 96;if(ship.id==='bigboy')return 88;if(['goliath','aegis','solace','spectrum','sentinel','diminisher','venom'].includes(ship.id))return 82;return 72;}
+function drawOnlinePlayers(){
+  for(const rp of onlineWorld.players.values()){
+    if(!onScreenWorld(rp.x,rp.y,180))continue;const p=screenPos(rp.x,rp.y),f=FACTIONS[rp.faction],color=f?.color||'#69ffbd',path=V8_ASSETS.ships[rp.shipId],img=v8Image(path),size=onlineShipSize(rp.shipId);
+    ctx.save();ctx.translate(p.x,p.y);ctx.globalAlpha=.9;
+    if(img&&img.naturalWidth){const sc=size/Math.max(img.naturalWidth,img.naturalHeight);ctx.rotate((rp.angle||0)+Math.PI/2);ctx.shadowColor=color;ctx.shadowBlur=10;ctx.drawImage(img,-img.naturalWidth*sc/2,-img.naturalHeight*sc/2,img.naturalWidth*sc,img.naturalHeight*sc);}else{ctx.rotate(rp.angle||0);drawShipModel(rp.shipId,color);}ctx.restore();
+    const barW=58,bx=p.x-barW/2,hp=Math.max(0,Math.min(1,rp.hp/Math.max(1,rp.maxHp))),sh=Math.max(0,Math.min(1,rp.shield/Math.max(1,rp.maxShield)));
+    ctx.fillStyle='rgba(8,20,28,.78)';ctx.fillRect(bx,p.y-size*.42-17,barW,4);ctx.fillStyle='#55ff9d';ctx.fillRect(bx,p.y-size*.42-17,barW*hp,4);ctx.fillStyle='rgba(7,25,45,.82)';ctx.fillRect(bx,p.y-size*.42-11,barW,3);ctx.fillStyle='#4fcfff';ctx.fillRect(bx,p.y-size*.42-11,barW*sh,3);
+    ctx.font='bold 11px Arial';ctx.textAlign='center';ctx.fillStyle='#8fffd0';ctx.shadowColor='rgba(0,0,0,.9)';ctx.shadowBlur=4;ctx.fillText(`● ${rp.callsign} • LV ${rp.level}`,p.x,p.y+size*.45+18);ctx.shadowBlur=0;
+  }
+}
+
+function update(dt){if(!progress)return;processRespawns();updatePlayer(dt);updateEnemies(dt);updatePet(dt);updateOnlineWorld(dt);updateParticles(dt);updateFx(dt);updateAlphaGate();updateAuctionSystem();updateUI();}
 
 function drawSectorGrid(){
   const spacing=800,b=visibleWorldBounds(0),startX=Math.floor(b.left/spacing)*spacing,startY=Math.floor(b.top/spacing)*spacing;
@@ -1967,9 +2023,10 @@ function drawMinimap(){
   if(routeDistance()>35){mm.strokeStyle='rgba(115,225,255,.55)';mm.setLineDash([4,3]);mm.beginPath();mm.moveTo(px,py);mm.lineTo(tx,ty);mm.stroke();mm.setLineDash([]);mm.strokeStyle='#fff';mm.beginPath();mm.arc(tx,ty,4,0,TWO_PI);mm.stroke();}
   for(const e of state.enemies){if(e.hp<=0||Math.hypot(e.x-player.x,e.y-player.y)>state.radarRange)continue;mm.fillStyle=state.target?.id===e.id?'#ff345e':'#ff755d';mm.beginPath();mm.arc(e.x*sx,e.y*sy,e.type.startsWith('boss')?2.6:1.8,0,TWO_PI);mm.fill();}
   for(const o of state.ores){if(Math.hypot(o.x-player.x,o.y-player.y)>state.radarRange*.8)continue;mm.fillStyle=o.color;mm.beginPath();mm.arc(o.x*sx,o.y*sy,1.3,0,TWO_PI);mm.fill();}
+  for(const rp of onlineWorld.players.values()){if(Math.hypot(rp.x-player.x,rp.y-player.y)>state.radarRange)continue;mm.fillStyle='#59ffb0';mm.strokeStyle='rgba(255,255,255,.65)';mm.lineWidth=.7;mm.beginPath();mm.arc(rp.x*sx,rp.y*sy,2.4,0,TWO_PI);mm.fill();mm.stroke();}
   mm.fillStyle=getFaction()?.color||'#fff';mm.beginPath();mm.arc(px,py,4.5,0,TWO_PI);mm.fill();mm.strokeStyle='rgba(255,255,255,.7)';mm.stroke();
 }
-function draw(){const q=qualityProfile();ctx.clearRect(0,0,W,H);if(!progress){drawNebula();drawStars();return;}if(!(q.background&&drawMapBackground()))drawNebula();drawStars();if(q.grid)drawSectorGrid();drawBounds();drawLandmarks();drawBaseSafeZone();drawPortals();drawOres();drawLoot();state.enemies.forEach(e=>e.hp>0&&onScreenWorld(e.x,e.y,180)&&drawEnemy(e));if(q.fx)drawRocketFx();drawPlayer();drawPet();if(q.fx)drawFx();drawParticles();drawNavigationOverlay();drawMinimap();}
+function draw(){const q=qualityProfile();ctx.clearRect(0,0,W,H);if(!progress){drawNebula();drawStars();return;}if(!(q.background&&drawMapBackground()))drawNebula();drawStars();if(q.grid)drawSectorGrid();drawBounds();drawLandmarks();drawBaseSafeZone();drawPortals();drawOres();drawLoot();state.enemies.forEach(e=>e.hp>0&&onScreenWorld(e.x,e.y,180)&&drawEnemy(e));drawOnlinePlayers();if(q.fx)drawRocketFx();drawPlayer();drawPet();if(q.fx)drawFx();drawParticles();drawNavigationOverlay();drawMinimap();}
 
 function ammoWarningClass(qty,perUse){
   if(qty<=0)return 'empty';
@@ -2391,8 +2448,22 @@ function refreshPilotViews(){renderPilotProfile();if(ui.hangarModal&&!ui.hangarM
 function openPilotProfile(){openHangar('pilot');}
 
 function formatAuctionClock(sec){const m=Math.floor(sec/60),s=sec%60;return `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;}
-function auctionMinBid(lot){const npc=auctionNpcBid(lot);return Math.max(100000,npc+(npc<1000000?100000:Math.max(100000,Math.round(npc*.05/100000)*100000)));}
-async function placeAuctionBid(ref,amount){ensureAuctionState();const lot=progress.auction.lots[ref];if(!lot)return;const min=auctionMinBid(lot);amount=Math.round(Number(amount)/100000)*100000;if(!Number.isFinite(amount)||amount<min){showToast(`Lance mínimo: ${fmt(min)} CR`);return;}if(amount>auctionSpendableCredits(ref)){showToast('Créditos insuficientes considerando os outros lances em garantia');return;}try{await saveAuctionBidOnline({hourKey:progress.auction.hourKey,lotRef:ref,userBid:amount,lot:{...lot,userBid:0,escrow:0}});lot.userBid=amount;lot.escrow=amount;saveGame();await flushCloudSave(true);renderAuction();updateUI();showToast(`Lance online registrado: ${fmt(amount)} CR`);}catch(err){showToast(`Falha ao registrar lance: ${err.message}`);}}
+function auctionMinBid(lot){const current=Number(lot?.marketBid)||0;return current>0?Math.max(100000,current+100000):100000;}
+async function placeAuctionBid(ref,amount){
+  ensureAuctionState();const lot=progress.auction.lots[ref];if(!lot)return;
+  if(lot.leaderUserId===getUser()?.id){showToast('Você já está liderando esse lote — espere outro jogador cobrir');return;}
+  const min=auctionMinBid(lot);amount=Math.round(Number(amount)/100000)*100000;
+  if(!Number.isFinite(amount)||amount<min){showToast(`Lance mínimo: ${fmt(min)} CR`);return;}
+  if(amount>auctionSpendableCredits(ref)){showToast('Créditos insuficientes considerando os outros lances em garantia');return;}
+  try{
+    await flushCloudSave(true);
+    const row=await placeAuctionBidOnline({hourKey:progress.auction.hourKey,lotRef:ref,userBid:amount,lot:{...lot,userBid:0,escrow:0,marketBid:0,leaderUserId:null,leaderCallsign:null}});
+    if(!row)throw new Error('O servidor não confirmou o lance.');
+    lot.userBid=Number(row.user_bid)||amount;lot.escrow=lot.userBid;lot.marketBid=lot.userBid;lot.leaderUserId=row.leader_user_id;lot.leaderCallsign=row.leader_callsign||progress.profile.callsign;
+    saveGame();renderAuction();updateUI();showToast(`Você lidera ${lot.name} com ${fmt(lot.userBid)} CR`);
+    setTimeout(()=>syncAuctionBidsOnline(),450);
+  }catch(err){showToast(`Lance recusado: ${err.message}`);setTimeout(()=>syncAuctionBidsOnline(),250);}
+}
 function auctionLotEligible(lot){
   if(!lot)return false;
   if(lot.kind==='ship')return !progress?.ownedShips?.includes(lot.id);
@@ -2402,12 +2473,13 @@ function auctionLotEligible(lot){
 }
 function renderAuction(){
   if(!progress||!ui.auctionGrid)return;ensureAuctionState();const sec=auctionSecondsLeft(),clock=formatAuctionClock(sec);ui.auctionClock.textContent=clock;ui.auctionTopClock.textContent=clock;ui.auctionCredits.textContent=fmt(auctionSpendableCredits());ui.auctionEscrow.textContent=fmt(auctionEscrow());ui.auctionGrid.innerHTML='';
+  const myId=getUser()?.id;
   for(const lot of Object.values(progress.auction.lots)){
     if(!auctionLotEligible(lot))continue;
-    const npc=auctionNpcBid(lot),leader=lot.userBid>=npc&&lot.userBid>0?'VOCÊ':'SISTEMA',current=Math.max(npc,lot.userBid||0),min=auctionMinBid(lot),card=document.createElement('article');card.className=`auction-card ${leader==='VOCÊ'?'leading':''}`;card.dataset.auctionRef=lot.ref;const type=lot.kind==='ship'?'NAVE':lot.kind==='item'?'EQUIPAMENTO':lot.kind==='ammo'?'MUNIÇÃO':lot.kind==='rocket'?'MÍSSIL':'P.E.T.';
+    const current=Number(lot.marketBid)||0,isMine=lot.leaderUserId===myId&&current>0,leader=isMine?'VOCÊ':current>0?(lot.leaderCallsign||'JOGADOR'):'SEM LANCE',displayBid=current||100000,min=auctionMinBid(lot),card=document.createElement('article');card.className=`auction-card ${isMine?'leading':''}`;card.dataset.auctionRef=lot.ref;const type=lot.kind==='ship'?'NAVE':lot.kind==='item'?'EQUIPAMENTO':lot.kind==='ammo'?'MUNIÇÃO':lot.kind==='rocket'?'MÍSSIL':'P.E.T.';
     let art=null;if(lot.kind==='ship')art=V8_ASSETS.ships[lot.id];else if(lot.kind==='item')art=assetForProduct(lot.id,ITEMS[lot.id]?.type,ITEMS[lot.id]?.subtype);else if(lot.kind==='ammo'||lot.kind==='rocket')art=V8_ASSETS.ammo[lot.id];else if(lot.kind==='petGear')art={guard:V8_ASSETS.equipment.autoLaserCpu,box:V8_ASSETS.equipment.ammoAutoBuyCpu,ore:V8_ASSETS.equipment.rocketTurboCpu,repair:V8_ASSETS.equipment.rep2,kami:V8_ASSETS.equipment.autoRocketCpu}[lot.id];
-    card.innerHTML=`${art?`<img class="auction-art" src="${art}" alt="${lot.name}">`:''}<div class="auction-card-top"><span>${type}</span><b>${leader}</b></div><h3>${lot.name}</h3><div class="auction-bid-value">${fmt(current)} CR</div><div class="auction-meta">Lance mínimo ${fmt(min)} CR${lot.userBid?` • Seu lance ${fmt(lot.userBid)} CR`:''}</div>`;
-    const row=document.createElement('div');row.className='auction-bid-row';const input=document.createElement('input');input.className='auction-bid-input';input.type='number';input.min=String(min);input.step='100000';input.value=String(min);input.setAttribute('aria-label',`Lance para ${lot.name}`);const b=document.createElement('button');b.className='small-btn';b.textContent='DAR LANCE';b.onclick=()=>placeAuctionBid(lot.ref,input.value);row.append(input,b);card.appendChild(row);ui.auctionGrid.appendChild(card);
+    card.innerHTML=`${art?`<img class="auction-art" src="${art}" alt="${lot.name}">`:''}<div class="auction-card-top"><span>${type}</span><b>${leader}</b></div><h3>${lot.name}</h3><div class="auction-bid-value">${fmt(displayBid)} CR</div><div class="auction-meta">${current?`Lance atual de ${leader}`:'Lance inicial'} • Próximo mínimo ${fmt(min)} CR${lot.userBid?` • Seu lance ${fmt(lot.userBid)} CR`:''}</div>`;
+    const row=document.createElement('div');row.className='auction-bid-row';const input=document.createElement('input');input.className='auction-bid-input';input.type='number';input.min=String(min);input.step='100000';input.value=String(min);input.disabled=isMine;input.setAttribute('aria-label',`Lance para ${lot.name}`);const b=document.createElement('button');b.className='small-btn';b.textContent=isMine?'VOCÊ LIDERA':'DAR LANCE';b.disabled=isMine;b.onclick=()=>placeAuctionBid(lot.ref,input.value);row.append(input,b);card.appendChild(row);ui.auctionGrid.appendChild(card);
   }
   ui.auctionHistory.innerHTML=(progress.auction.history||[]).length?progress.auction.history.map(h=>`<div class="auction-history-row"><span>${h.result}</span><b>${h.name}</b><em>${fmt(h.bid)} CR</em></div>`).join(''):'<div class="muted">Nenhum ciclo encerrado ainda.</div>';
 }
@@ -2416,9 +2488,12 @@ let auctionUiTick=0;
 function updateAuctionSystem(){
   if(!progress)return;const now=Date.now();if(now-auctionUiTick<1000)return;auctionUiTick=now;ensureAuctionState();
   const clock=formatAuctionClock(auctionSecondsLeft());if(ui.auctionTopClock)ui.auctionTopClock.textContent=clock;if(ui.auctionClock)ui.auctionClock.textContent=clock;
-  if(ui.auctionModal&&!ui.auctionModal.classList.contains('hidden')){
+  const open=ui.auctionModal&&!ui.auctionModal.classList.contains('hidden');
+  if((open&&now-auctionLastMarketSync>2200)||(!open&&now-auctionLastMarketSync>9000))syncAuctionBidsOnline();
+  if(open){
     ui.auctionCredits.textContent=fmt(auctionSpendableCredits());ui.auctionEscrow.textContent=fmt(auctionEscrow());
-    ui.auctionGrid.querySelectorAll('[data-auction-ref]').forEach(card=>{const lot=progress.auction.lots[card.dataset.auctionRef];if(!lot)return;const npc=auctionNpcBid(lot),leader=lot.userBid>=npc&&lot.userBid>0?'VOCÊ':'SISTEMA',current=Math.max(npc,lot.userBid||0),min=auctionMinBid(lot);card.classList.toggle('leading',leader==='VOCÊ');const lead=card.querySelector('.auction-card-top b');if(lead)lead.textContent=leader;const value=card.querySelector('.auction-bid-value');if(value)value.textContent=`${fmt(current)} CR`;const meta=card.querySelector('.auction-meta');if(meta)meta.textContent=`Lance mínimo ${fmt(min)} CR${lot.userBid?` • Seu lance ${fmt(lot.userBid)} CR`:''}`;const input=card.querySelector('.auction-bid-input');if(input){input.min=String(min);if(document.activeElement!==input&&Number(input.value)<min)input.value=String(min);}});
+    const myId=getUser()?.id;
+    ui.auctionGrid.querySelectorAll('[data-auction-ref]').forEach(card=>{const lot=progress.auction.lots[card.dataset.auctionRef];if(!lot)return;const current=Number(lot.marketBid)||0,isMine=lot.leaderUserId===myId&&current>0,leader=isMine?'VOCÊ':current>0?(lot.leaderCallsign||'JOGADOR'):'SEM LANCE',min=auctionMinBid(lot);card.classList.toggle('leading',isMine);const lead=card.querySelector('.auction-card-top b');if(lead)lead.textContent=leader;const value=card.querySelector('.auction-bid-value');if(value)value.textContent=`${fmt(current||100000)} CR`;const meta=card.querySelector('.auction-meta');if(meta)meta.textContent=`${current?`Lance atual de ${leader}`:'Lance inicial'} • Próximo mínimo ${fmt(min)} CR${lot.userBid?` • Seu lance ${fmt(lot.userBid)} CR`:''}`;const input=card.querySelector('.auction-bid-input'),button=card.querySelector('.auction-bid-row button');if(input){input.min=String(min);input.disabled=isMine;if(document.activeElement!==input&&Number(input.value)<min)input.value=String(min);}if(button){button.disabled=isMine;button.textContent=isMine?'VOCÊ LIDERA':'DAR LANCE';}});
   }
 }
 
@@ -2523,7 +2598,7 @@ function showAuthMode(mode){
 ui.loginTabBtn.onclick=()=>showAuthMode('login');ui.registerTabBtn.onclick=()=>showAuthMode('register');
 ui.loginForm.onsubmit=async e=>{e.preventDefault();ui.authMessage.textContent='Entrando...';try{await signIn({email:ui.loginEmail.value,password:ui.loginPassword.value});await afterAuth();}catch(err){ui.authMessage.textContent=err.message;}};
 ui.registerForm.onsubmit=async e=>{e.preventDefault();ui.authMessage.textContent='Criando conta...';try{const result=await signUp({callsign:ui.registerCallsign.value,email:ui.registerEmail.value,password:ui.registerPassword.value});if(result.requires_confirmation){ui.authMessage.textContent='Conta criada. Confirme o e-mail no Supabase e depois entre.';showAuthMode('login');ui.loginEmail.value=ui.registerEmail.value;return;}await afterAuth();}catch(err){ui.authMessage.textContent=err.message;}};
-ui.logoutBtn.onclick=async()=>{await flushCloudSave(true);signOutLocal();authenticated=false;progress=null;state.target=null;player.laserFiring=false;for(const modal of dismissibleModals())modal.classList.add('hidden');ui.factionModal.classList.add('hidden');ui.portalPrompt?.classList.add('hidden');ui.baseTradePrompt?.classList.add('hidden');ui.petFloatPanel?.classList.add('hidden');ui.loginModal.classList.remove('hidden');if(ui.userLabel)ui.userLabel.textContent='—';setSync('LOCAL','');showAuthMode('login');};
+ui.logoutBtn.onclick=async()=>{await flushCloudSave(true);await removePlayerPresenceOnline().catch(()=>{});clearOnlinePlayers();signOutLocal();authenticated=false;progress=null;state.target=null;player.laserFiring=false;for(const modal of dismissibleModals())modal.classList.add('hidden');ui.factionModal.classList.add('hidden');ui.portalPrompt?.classList.add('hidden');ui.baseTradePrompt?.classList.add('hidden');ui.petFloatPanel?.classList.add('hidden');ui.loginModal.classList.remove('hidden');if(ui.userLabel)ui.userLabel.textContent='—';setSync('LOCAL','');showAuthMode('login');};
 
 function startLoadedGame(){
   state.lastPlayerDamageAt=nowSec();
@@ -2546,6 +2621,7 @@ async function afterAuth(){
   if(!progress){renderFactionChoice();return;}
   startLoadedGame();
   syncAuctionBidsOnline();
+  syncOnlineWorld();
 }
 
 async function boot(){

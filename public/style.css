@@ -565,3 +565,9 @@ body[data-quality="high"] .hud-panel{backdrop-filter:blur(7px);-webkit-backdrop-
 .active-mission-dots{display:flex;align-items:center;justify-content:center;gap:7px;margin-top:5px}.active-mission-dot{width:8px;height:8px;min-height:0;padding:0;border-radius:50%;border:1px solid rgba(119,196,255,.6);background:rgba(7,23,39,.9);box-shadow:none}.active-mission-dot.active{background:#62e7ff;border-color:#b7f5ff;box-shadow:0 0 9px rgba(86,225,255,.7);transform:scale(1.16)}
 @media(max-width:1100px){.active-mission-float{left:350px;width:285px}}
 @media(max-width:820px){.active-mission-float{display:none!important}}
+
+
+/* ===== V10.5 Online Universe ===== */
+.auction-card.leading{border-color:rgba(83,255,170,.66)!important;box-shadow:0 0 20px rgba(57,255,157,.12)!important}
+.auction-card.leading .auction-card-top b{color:#70ffb5!important}
+.auction-bid-row button:disabled{opacity:.82;border-color:rgba(83,255,170,.4);color:#86ffc0;background:rgba(8,49,35,.7)}
