@@ -402,3 +402,11 @@ O Leilão Elite foi migrado para persistência online: lances ativos ficam regis
 - Barra horizontal de ALVO removida.
 - Sistema de seleção e combate continua intacto.
 - Informações rápidas de seleção continuam aparecendo via ATIVIDADE/toast.
+
+
+## V10.6.5 — Smart Ammo
+- Laser troca automaticamente para uma munição mais fraca quando a ativa acaba.
+- Mísseis fazem a mesma troca automática por ordem de dano.
+- CPU Auto Buy atua somente sobre o laser e o míssil selecionados.
+- Se o Auto Buy não puder repor a munição ativa, o jogo usa automaticamente a próxima reserva mais fraca.
+- P.E.T. Guardião acompanha a mesma munição selecionada e a mesma lógica de fallback.

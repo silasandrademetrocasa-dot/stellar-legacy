@@ -1,6 +1,6 @@
-import { FACTIONS, SHIPS, ITEMS, LASER_AMMO, ROCKETS, NPC_TYPES, MAPS, RESOURCES } from './data.js?v=10.6.4';
-import { V8_ASSETS } from './assets/v8/manifest.js?v=10.6.4';
-import { signUp, signIn, restoreSession, signOutLocal, getUser, loadCloudSave, saveCloudSave, updateCallsign, updatePassword, loadRankings, loadAuctionBids, saveAuctionBidOnline, markAuctionBidStatusOnline, loadAuctionMarket, upsertPlayerPresenceOnline, loadMapPresenceOnline, removePlayerPresenceOnline, queuePvpAttackOnline, consumePvpDamageEventsOnline } from './api.js?v=10.6.4';
+import { FACTIONS, SHIPS, ITEMS, LASER_AMMO, ROCKETS, NPC_TYPES, MAPS, RESOURCES } from './data.js?v=10.6.5';
+import { V8_ASSETS } from './assets/v8/manifest.js?v=10.6.5';
+import { signUp, signIn, restoreSession, signOutLocal, getUser, loadCloudSave, saveCloudSave, updateCallsign, updatePassword, loadRankings, loadAuctionBids, saveAuctionBidOnline, markAuctionBidStatusOnline, loadAuctionMarket, upsertPlayerPresenceOnline, loadMapPresenceOnline, removePlayerPresenceOnline, queuePvpAttackOnline, consumePvpDamageEventsOnline } from './api.js?v=10.6.5';
 
 const canvas = document.querySelector('#game');
 const ctx = canvas.getContext('2d');
@@ -1347,19 +1347,104 @@ function autoLaserEnabled(){return hasExtra('autoLaserCpu');}
 function autoRocketEnabled(){return hasExtra('autoRocketCpu');}
 function turboRocketEnabled(){return hasExtra('rocketTurboCpu');}
 function autoBuyEnabled(){return hasExtra('ammoAutoBuyCpu');}
-function canAutoBuy(def){return !!def && (def.currency==='credits'?progress.profile.credits>=def.price:progress.profile.uridium>=def.price);}
-function buyAmmoPack(id,silent=false){const a=LASER_AMMO[id];if(!a||!charge(a.price,a.currency))return false;progress.ammo[id]=(progress.ammo[id]||0)+a.pack;if(!silent)showToast(`+${fmt(a.pack)} ${a.name}`);saveGame();return true;}
-function buyRocketPack(id,silent=false){const r=ROCKETS[id];if(!r||!charge(r.price,r.currency))return false;progress.rockets[id]=(progress.rockets[id]||0)+r.pack;if(!silent)showToast(`+${fmt(r.pack)} ${r.name}`);saveGame();return true;}
+function canAutoBuy(def){
+  if(!def||def.purchasable===false||def.sourceOnly===true)return false;
+  return def.currency==='credits'?progress.profile.credits>=def.price:progress.profile.uridium>=def.price;
+}
+function buyAmmoPack(id,silent=false){
+  const a=LASER_AMMO[id];
+  if(!a||a.purchasable===false||a.sourceOnly===true||!charge(a.price,a.currency))return false;
+  progress.ammo[id]=(progress.ammo[id]||0)+a.pack;
+  if(!silent)showToast(`+${fmt(a.pack)} ${a.name}`,'shop');
+  saveGame();return true;
+}
+function buyRocketPack(id,silent=false){
+  const r=ROCKETS[id];
+  if(!r||r.purchasable===false||r.sourceOnly===true||!charge(r.price,r.currency))return false;
+  progress.rockets[id]=(progress.rockets[id]||0)+r.pack;
+  if(!silent)showToast(`+${fmt(r.pack)} ${r.name}`,'shop');
+  saveGame();return true;
+}
+
+// Ordem de queda automática. SAB é especial: ao acabar, cai para x2 -> x1.
+const LASER_AMMO_FALLBACK={
+  ucb100:['mcb50','mcb25','lcb10'],
+  mcb50:['mcb25','lcb10'],
+  sab50:['mcb25','lcb10'],
+  mcb25:['lcb10'],
+  lcb10:[]
+};
+const ROCKET_FALLBACK={
+  plt3030:['plt2021','plt2026','r310'],
+  plt2021:['plt2026','r310'],
+  plt2026:['r310'],
+  r310:[]
+};
+
+function autoBuyActiveLaser(id,announce=true){
+  const def=LASER_AMMO[id];
+  if(!autoBuyEnabled()||!canAutoBuy(def)||!buyAmmoPack(id,true))return false;
+  state.lastAutoBuyAt=nowSec();
+  refreshAmmoCounters();renderShop();
+  if(announce)showToast(`AUTO BUY • ${shortLaserLabel(id)} +${fmt(def.pack)}`,'shop');
+  return true;
+}
+function autoBuyActiveRocket(id,announce=true){
+  const def=ROCKETS[id];
+  if(!autoBuyEnabled()||!canAutoBuy(def)||!buyRocketPack(id,true))return false;
+  state.lastAutoBuyAt=nowSec();
+  refreshAmmoCounters();renderShop();
+  if(announce)showToast(`AUTO BUY • ${shortRocketLabel(id)} +${fmt(def.pack)}`,'shop');
+  return true;
+}
+function switchToWeakerLaser(expiredId){
+  const next=(LASER_AMMO_FALLBACK[expiredId]||[]).find(id=>ammoQty(id)>0);
+  if(!next)return null;
+  progress.selectedLaserAmmo=next;
+  refreshAmmoCounters();saveGame();
+  showToast(`${shortLaserLabel(expiredId)} acabou → ${shortLaserLabel(next)}`,'system');
+  return LASER_AMMO[next];
+}
+function switchToWeakerRocket(expiredId){
+  const next=(ROCKET_FALLBACK[expiredId]||[]).find(id=>rocketQty(id)>0);
+  if(!next)return null;
+  progress.selectedRocket=next;
+  refreshAmmoCounters();saveGame();
+  showToast(`${shortRocketLabel(expiredId)} acabou → ${shortRocketLabel(next)}`,'system');
+  return ROCKETS[next];
+}
+function recoverActiveLaser(expiredId,announceBuy=true){
+  if(ammoQty(expiredId)>0)return LASER_AMMO[expiredId];
+  if(autoBuyActiveLaser(expiredId,announceBuy))return LASER_AMMO[expiredId];
+  return switchToWeakerLaser(expiredId);
+}
+function recoverActiveRocket(expiredId,announceBuy=true){
+  if(rocketQty(expiredId)>0)return ROCKETS[expiredId];
+  if(autoBuyActiveRocket(expiredId,announceBuy))return ROCKETS[expiredId];
+  return switchToWeakerRocket(expiredId);
+}
 function maybeAutoBuyAmmo(){
-  if(!progress||!autoBuyEnabled()) return;
+  if(!progress||!autoBuyEnabled())return;
   const now=nowSec();
-  if(now-state.lastAutoBuyAt<0.9) return;
-  let bought=[];
-  const laser=currentLaserAmmo(), rocket=currentRocket();
+  if(now-state.lastAutoBuyAt<0.9)return;
+
+  const laser=currentLaserAmmo(),rocket=currentRocket();
   const laserNeed=Math.max(1,equippedLaserCount()+petLaserIds().length)*10;
-  if(ammoQty(laser.id)<laserNeed && canAutoBuy(laser) && buyAmmoPack(laser.id,true)) bought.push(`${laser.name} +${fmt(laser.pack)}`);
-  if(rocketQty(rocket.id)<10 && canAutoBuy(rocket) && buyRocketPack(rocket.id,true)) bought.push(`${rocket.name} +${fmt(rocket.pack)}`);
-  if(bought.length){state.lastAutoBuyAt=now;refreshAmmoCounters();renderShop();showToast(`Auto Buy: ${bought.join(' • ')}`);} 
+  const bought=[];
+
+  // CPU compra SOMENTE o laser e o míssil atualmente selecionados.
+  if(ammoQty(laser.id)<laserNeed&&canAutoBuy(laser)&&buyAmmoPack(laser.id,true)){
+    bought.push(`${shortLaserLabel(laser.id)} +${fmt(laser.pack)}`);
+  }
+  if(rocketQty(rocket.id)<10&&canAutoBuy(rocket)&&buyRocketPack(rocket.id,true)){
+    bought.push(`${shortRocketLabel(rocket.id)} +${fmt(rocket.pack)}`);
+  }
+
+  if(bought.length){
+    state.lastAutoBuyAt=now;
+    refreshAmmoCounters();renderShop();
+    showToast(`AUTO BUY • ${bought.join(' • ')}`,'shop');
+  }
 }
 function allEquippedIds(){return [...progress.shipLoadout.lasers,...progress.shipLoadout.generators,...progress.shipLoadout.extras,...progress.drones.flatMap(d=>d.slots)].filter(Boolean);}
 function equippedLaserIds(){return [...progress.shipLoadout.lasers,...progress.drones.flatMap(d=>d.slots)].filter(id=>ITEMS[id]?.type==='laser');}
@@ -1480,13 +1565,22 @@ function updatePet(dt){
 
   if(mode==='guard'&&task&&task.hp>0){
     const pd=Math.hypot(task.x-petRuntime.x,task.y-petRuntime.y);
-    const lasers=petLaserIds(),ammo=currentLaserAmmo();let stock=ammoQty(ammo.id);
-    if(pd<350&&lasers.length&&stock<=0&&autoBuyEnabled()&&buyAmmoPack(ammo.id,true)){stock=ammoQty(ammo.id);refreshAmmoCounters();renderShop();showToast(`Auto Buy P.E.T.: ${ammo.name}`);}
-    if(pd<350&&lasers.length&&stock>0&&nowSec()-petRuntime.lastShot>.58){
-      const firing=Math.min(lasers.length,stock);const ids=lasers.slice(0,firing);
+    const lasers=petLaserIds();
+    let ammo=currentLaserAmmo(),stock=ammoQty(ammo.id);
+
+    if(pd<350&&lasers.length&&stock<=0){
+      ammo=recoverActiveLaser(ammo.id,true);
+      stock=ammo?ammoQty(ammo.id):0;
+    }
+
+    if(pd<350&&lasers.length&&ammo&&stock>0&&nowSec()-petRuntime.lastShot>.58){
+      const firing=Math.min(lasers.length,stock),ids=lasers.slice(0,firing);
       const rawBase=Math.round(laserPveBase(ids)*rand(.95,1.08));
-      progress.ammo[ammo.id]=Math.max(0,stock-firing);petRuntime.lastShot=nowSec();petRuntime.laserTargetId=task.id;petRuntime.laserUntil=nowSec()+.16;
-      if(rawBase>0)applyLaserAmmoHit(task,rawBase,ammo,ammo.color);refreshAmmoCounters();
+      progress.ammo[ammo.id]=Math.max(0,stock-firing);
+      petRuntime.lastShot=nowSec();petRuntime.laserTargetId=task.id;petRuntime.laserUntil=nowSec()+.16;
+      if(rawBase>0)applyLaserAmmoHit(task,rawBase,ammo,ammo.color);
+      refreshAmmoCounters();
+      if(progress.ammo[ammo.id]<=0)recoverActiveLaser(ammo.id,true);
     }
   }
   if(mode==='kami'&&task&&task.hp>0&&Math.hypot(task.x-petRuntime.x,task.y-petRuntime.y)<70&&now-(petRuntime.lastKami||0)>15){
@@ -1864,12 +1958,17 @@ function applyLaserAmmoHit(enemy,baseDamage,ammo,color){
 }
 function fireLaserTick(){
   if(!state.target||state.target.hp<=0||enemyDistance(state.target)>playerLaserRange())return;
-  const ammo=currentLaserAmmo();
-  const laserIds=equippedLaserIds();
-  const totalLasers=laserIds.length;
+
+  let ammo=currentLaserAmmo();
+  const laserIds=equippedLaserIds(),totalLasers=laserIds.length;
   if(totalLasers<=0){player.laserFiring=false;showToast('Equipe pelo menos um laser no Hangar');return;}
-  const stock=ammoQty(ammo.id);
-  if(stock<=0){if(autoBuyEnabled()&&buyAmmoPack(ammo.id,true)){refreshAmmoCounters();renderShop();showToast(`Auto Buy: ${ammo.name}`);}else{player.laserFiring=false;showToast(`${ammo.name} acabou`);return;}}
+
+  let stock=ammoQty(ammo.id);
+  if(stock<=0){
+    ammo=recoverActiveLaser(ammo.id,true);
+    if(!ammo){player.laserFiring=false;showToast('Sem munição laser disponível');return;}
+    stock=ammoQty(ammo.id);
+  }
   if(nowSec()-player.lastLaserShot<.42)return;
 
   const firingCount=Math.min(totalLasers,stock),firingIds=laserIds.slice(0,firingCount);
@@ -1877,56 +1976,89 @@ function fireLaserTick(){
   if(state.target.isPlayer){
     if(!pvpTargetAllowed(state.target)){player.laserFiring=false;showToast('Fogo amigo bloqueado');return;}
     if(state.pvpShotPending)return;
-    const base=pvpLaserBase(firingIds),raw=Math.round(base*(Number(ammo.mult)||1)*rand(.95,1.08));
+    const shotAmmo=ammo,base=pvpLaserBase(firingIds),raw=Math.round(base*(Number(shotAmmo.mult)||1)*rand(.95,1.08));
     player.lastLaserShot=nowSec();
-    queuePvpShot(state.target,ammo.shieldDrain?Math.round(base*(Number(ammo.mult)||2)):raw,!!ammo.shieldDrain,ammo.color).then(row=>{
+    queuePvpShot(state.target,shotAmmo.shieldDrain?Math.round(base*(Number(shotAmmo.mult)||2)):raw,!!shotAmmo.shieldDrain,shotAmmo.color).then(row=>{
       if(!row)return;
-      progress.ammo[ammo.id]=Math.max(0,(progress.ammo[ammo.id]||0)-firingCount);refreshAmmoCounters();saveGame();
-      if(progress.ammo[ammo.id]<=0){if(autoBuyEnabled()&&buyAmmoPack(ammo.id,true)){refreshAmmoCounters();renderShop();}else{player.laserFiring=false;showToast(`${ammo.name} acabou`);}}
+      progress.ammo[shotAmmo.id]=Math.max(0,(progress.ammo[shotAmmo.id]||0)-firingCount);
+      refreshAmmoCounters();saveGame();
+      if(progress.ammo[shotAmmo.id]<=0){
+        const replacement=recoverActiveLaser(shotAmmo.id,true);
+        if(!replacement){player.laserFiring=false;showToast(`${shortLaserLabel(shotAmmo.id)} acabou • sem munição reserva`);}
+      }
     });
     return;
   }
 
   const allBase=laserPveBase(laserIds),firingBase=laserPveBase(firingIds),fraction=allBase>0?firingBase/allBase:0;
   player.lastLaserShot=nowSec();
-  progress.ammo[ammo.id]=Math.max(0,stock-firingCount);refreshAmmoCounters();
+  progress.ammo[ammo.id]=Math.max(0,stock-firingCount);
+  refreshAmmoCounters();
+
   const rawBase=Math.round((player.laserDamage*fraction)*rand(.95,1.08));
   const laserHitChance=Math.min(1,.75+pilotSkillValue('electroOptics')/100);
-  if(Math.random()<=laserHitChance){if(rawBase>0)applyLaserAmmoHit(state.target,rawBase,ammo,ammo.color);}else spawnParticle(state.target.x,state.target.y-state.target.size,'MISS','#7acfff');
+  if(Math.random()<=laserHitChance){
+    if(rawBase>0)applyLaserAmmoHit(state.target,rawBase,ammo,ammo.color);
+  }else spawnParticle(state.target.x,state.target.y-state.target.size,'MISS','#7acfff');
+
   if(progress.ammo[ammo.id]<=0){
-    if(autoBuyEnabled()&&buyAmmoPack(ammo.id,true)){refreshAmmoCounters();renderShop();showToast(`Auto Buy: ${ammo.name}`);}
-    else {player.laserFiring=false;showToast(`${ammo.name} acabou`);}
+    const replacement=recoverActiveLaser(ammo.id,true);
+    if(!replacement){player.laserFiring=false;showToast(`${shortLaserLabel(ammo.id)} acabou • sem munição reserva`);}
   }
 }
 function fireRocket(manual=false){
   if(!state.target||state.target.hp<=0){if(manual)showToast('Selecione um alvo');return;}
   if(enemyDistance(state.target)>playerRocketRange()){if(manual)showToast('Alvo fora do alcance');return;}
-  const r=currentRocket();
+
+  let r=currentRocket();
   if(rocketQty(r.id)<=0){
-    if(autoBuyEnabled()&&buyRocketPack(r.id,true)){refreshAmmoCounters();renderShop();if(manual)showToast(`Auto Buy: ${r.name}`);}
-    else {if(manual)showToast(`${r.name} acabou`);return;}
+    r=recoverActiveRocket(r.id,true);
+    if(!r){if(manual)showToast('Sem mísseis disponíveis');return;}
   }
-  if(!rocketReady()){if(manual)showToast(`Míssil recarregando`);return;}
+  if(!rocketReady()){if(manual)showToast('Míssil recarregando');return;}
 
   if(state.target.isPlayer){
     if(!pvpTargetAllowed(state.target)){if(manual)showToast('Fogo amigo bloqueado');return;}
     if(state.pvpRocketPending)return;
+
+    const shotRocket=r;
     state.pvpRocketPending=true;player.lastRocketShot=nowSec();
-    queuePvpAttackOnline({targetUserId:state.target.id,damage:Math.round(r.damage*player.rocketMult),shieldDrain:false,mapId:progress.mapId,territoryFaction:onlineTerritoryKey()})
+    queuePvpAttackOnline({
+      targetUserId:state.target.id,
+      damage:Math.round(shotRocket.damage*player.rocketMult),
+      shieldDrain:false,
+      mapId:progress.mapId,
+      territoryFaction:onlineTerritoryKey()
+    })
       .then(row=>{
         if(!row?.accepted)return;
-        progress.rockets[r.id]=Math.max(0,(progress.rockets[r.id]||0)-1);
-        state.rocketFx.push({sx:player.x,sy:player.y,tx:state.target.x,ty:state.target.y,color:r.color,born:nowSec(),duration:Math.max(.18,Math.min(.48,enemyDistance(state.target)/1700)),size:5});
-        saveGame();refreshAmmoCounters();
+        progress.rockets[shotRocket.id]=Math.max(0,(progress.rockets[shotRocket.id]||0)-1);
+        state.rocketFx.push({
+          sx:player.x,sy:player.y,tx:state.target.x,ty:state.target.y,color:shotRocket.color,
+          born:nowSec(),duration:Math.max(.18,Math.min(.48,enemyDistance(state.target)/1700)),size:5
+        });
+        refreshAmmoCounters();saveGame();
+        if(progress.rockets[shotRocket.id]<=0)recoverActiveRocket(shotRocket.id,true);
       })
       .catch(e=>showToast(String(e?.message||e).replace(/^.*?:\s*/,'')))
       .finally(()=>{state.pvpRocketPending=false;});
     return;
   }
 
-  player.lastRocketShot=nowSec();progress.rockets[r.id]=Math.max(0,(progress.rockets[r.id]||0)-1);state.rocketFx.push({sx:player.x,sy:player.y,tx:state.target.x,ty:state.target.y,color:r.color,born:nowSec(),duration:Math.max(.18,Math.min(.48,enemyDistance(state.target)/1700)),size:5});
+  const shotRocket=r;
+  player.lastRocketShot=nowSec();
+  progress.rockets[shotRocket.id]=Math.max(0,(progress.rockets[shotRocket.id]||0)-1);
+  state.rocketFx.push({
+    sx:player.x,sy:player.y,tx:state.target.x,ty:state.target.y,color:shotRocket.color,
+    born:nowSec(),duration:Math.max(.18,Math.min(.48,enemyDistance(state.target)/1700)),size:5
+  });
+
   const rocketHitChance=Math.min(1,.90+pilotSkillValue('heatSeeking')/100);
-  if(Math.random()<=rocketHitChance)dealDamageToEnemy(state.target,Math.round(r.damage*player.rocketMult),r.color);else spawnParticle(state.target.x,state.target.y-state.target.size,'MÍSSIL ERROU','#ffb36d');saveGame();
+  if(Math.random()<=rocketHitChance)dealDamageToEnemy(state.target,Math.round(shotRocket.damage*player.rocketMult),shotRocket.color);
+  else spawnParticle(state.target.x,state.target.y-state.target.size,'MÍSSIL ERROU','#ffb36d');
+
+  refreshAmmoCounters();saveGame();
+  if(progress.rockets[shotRocket.id]<=0)recoverActiveRocket(shotRocket.id,true);
 }
 function takePlayerDamage(dmg,opts={}){
   if(isSafeZone()&&!opts.forcePvP)return;
