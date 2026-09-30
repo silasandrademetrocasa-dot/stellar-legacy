@@ -1,6 +1,6 @@
-import { FACTIONS, SHIPS, ITEMS, LASER_AMMO, ROCKETS, NPC_TYPES, MAPS, RESOURCES } from './data.js?v=10.6.5';
-import { V8_ASSETS } from './assets/v8/manifest.js?v=10.6.5';
-import { signUp, signIn, restoreSession, signOutLocal, getUser, loadCloudSave, saveCloudSave, updateCallsign, updatePassword, loadRankings, loadAuctionBids, saveAuctionBidOnline, markAuctionBidStatusOnline, loadAuctionMarket, upsertPlayerPresenceOnline, loadMapPresenceOnline, removePlayerPresenceOnline, queuePvpAttackOnline, consumePvpDamageEventsOnline } from './api.js?v=10.6.5';
+import { FACTIONS, SHIPS, ITEMS, LASER_AMMO, ROCKETS, NPC_TYPES, MAPS, RESOURCES } from './data.js?v=10.6.6';
+import { V8_ASSETS } from './assets/v8/manifest.js?v=10.6.6';
+import { signUp, signIn, restoreSession, signOutLocal, getUser, loadCloudSave, saveCloudSave, updateCallsign, updatePassword, loadRankings, loadAuctionBids, saveAuctionBidOnline, markAuctionBidStatusOnline, loadAuctionMarket, upsertPlayerPresenceOnline, loadMapPresenceOnline, removePlayerPresenceOnline, queuePvpAttackOnline, consumePvpDamageEventsOnline } from './api.js?v=10.6.6';
 
 const canvas = document.querySelector('#game');
 const ctx = canvas.getContext('2d');

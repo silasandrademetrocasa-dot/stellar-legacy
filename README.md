@@ -410,3 +410,10 @@ O Leilão Elite foi migrado para persistência online: lances ativos ficam regis
 - CPU Auto Buy atua somente sobre o laser e o míssil selecionados.
 - Se o Auto Buy não puder repor a munição ativa, o jogo usa automaticamente a próxima reserva mais fraca.
 - P.E.T. Guardião acompanha a mesma munição selecionada e a mesma lógica de fallback.
+
+
+## V10.6.6 — Slim Ammo HUD
+- Munições agora ficam em uma barra fina fixa no rodapé.
+- Interface ocupa uma única linha no desktop.
+- Botões de munição, LASER e MÍSSIL foram compactados.
+- Em telas menores, munições deslizam horizontalmente sem roubar altura do mapa.
