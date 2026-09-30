@@ -417,3 +417,9 @@ O Leilão Elite foi migrado para persistência online: lances ativos ficam regis
 - Interface ocupa uma única linha no desktop.
 - Botões de munição, LASER e MÍSSIL foram compactados.
 - Em telas menores, munições deslizam horizontalmente sem roubar altura do mapa.
+
+
+## V10.6.7 — Target Cleanup
+- Removida definitivamente a barra visual de alvo.
+- Seleção de NPC/PvP passa apenas para ATIVIDADE.
+- Toast corrigido para voltar a ser uma notificação pequena e flutuante.

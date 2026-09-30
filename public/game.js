@@ -1,6 +1,6 @@
-import { FACTIONS, SHIPS, ITEMS, LASER_AMMO, ROCKETS, NPC_TYPES, MAPS, RESOURCES } from './data.js?v=10.6.6';
-import { V8_ASSETS } from './assets/v8/manifest.js?v=10.6.6';
-import { signUp, signIn, restoreSession, signOutLocal, getUser, loadCloudSave, saveCloudSave, updateCallsign, updatePassword, loadRankings, loadAuctionBids, saveAuctionBidOnline, markAuctionBidStatusOnline, loadAuctionMarket, upsertPlayerPresenceOnline, loadMapPresenceOnline, removePlayerPresenceOnline, queuePvpAttackOnline, consumePvpDamageEventsOnline } from './api.js?v=10.6.6';
+import { FACTIONS, SHIPS, ITEMS, LASER_AMMO, ROCKETS, NPC_TYPES, MAPS, RESOURCES } from './data.js?v=10.6.7';
+import { V8_ASSETS } from './assets/v8/manifest.js?v=10.6.7';
+import { signUp, signIn, restoreSession, signOutLocal, getUser, loadCloudSave, saveCloudSave, updateCallsign, updatePassword, loadRankings, loadAuctionBids, saveAuctionBidOnline, markAuctionBidStatusOnline, loadAuctionMarket, upsertPlayerPresenceOnline, loadMapPresenceOnline, removePlayerPresenceOnline, queuePvpAttackOnline, consumePvpDamageEventsOnline } from './api.js?v=10.6.7';
 
 const canvas = document.querySelector('#game');
 const ctx = canvas.getContext('2d');
@@ -3089,10 +3089,10 @@ function pointerAction(ev){
   if(!gameplayPointerAllowed()||ev.button!==0)return;
   const p=worldPoint(ev);
   const found=state.enemies.find(e=>e.hp>0&&Math.hypot(e.x-p.x,e.y-p.y)<=e.size*1.8+18);
-  if(found){state.target=found;state.pointerNavActive=false;showToast(`Alvo: ${found.name}`);if(autoLaserEnabled())player.laserFiring=true;return;}
+  if(found){state.target=found;state.pointerNavActive=false;pushActivity(`Alvo selecionado • ${found.name}`,'combat');if(autoLaserEnabled())player.laserFiring=true;return;}
   const hostile=[...onlineWorld.players.values()].filter(rp=>onlinePlayerEnemy(rp)&&rp.hp>0).sort((a,b)=>Math.hypot(a.x-p.x,a.y-p.y)-Math.hypot(b.x-p.x,b.y-p.y))[0];
   if(hostile&&Math.hypot(hostile.x-p.x,hostile.y-p.y)<=Math.max(34,hostile.size*1.7)){
-    state.target=hostile;state.pointerNavActive=false;showToast(`PVP • Alvo: ${hostile.callsign}`);
+    state.target=hostile;state.pointerNavActive=false;pushActivity(`PVP • Alvo selecionado • ${hostile.callsign}`,'combat');
     if(autoLaserEnabled())player.laserFiring=true;return;
   }
   const clickedPortal=portalAtWorld(p.x,p.y),readyPortal=nearbyPortal();
