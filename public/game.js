@@ -1,6 +1,6 @@
-import { FACTIONS, SHIPS, ITEMS, LASER_AMMO, ROCKETS, NPC_TYPES, MAPS, RESOURCES } from './data.js?v=10.6.9';
-import { V8_ASSETS } from './assets/v8/manifest.js?v=10.6.9';
-import { signUp, signIn, restoreSession, signOutLocal, getUser, loadCloudSave, saveCloudSave, updateCallsign, updatePassword, loadRankings, loadAuctionBids, saveAuctionBidOnline, markAuctionBidStatusOnline, loadAuctionMarket, upsertPlayerPresenceOnline, loadMapPresenceOnline, removePlayerPresenceOnline, queuePvpAttackOnline, consumePvpDamageEventsOnline } from './api.js?v=10.6.9';
+import { FACTIONS, SHIPS, ITEMS, LASER_AMMO, ROCKETS, NPC_TYPES, MAPS, RESOURCES } from './data.js?v=10.7.0';
+import { V8_ASSETS } from './assets/v8/manifest.js?v=10.7.0';
+import { signUp, signIn, restoreSession, signOutLocal, getUser, loadCloudSave, saveCloudSave, updateCallsign, updatePassword, loadRankings, loadAuctionBids, saveAuctionBidOnline, markAuctionBidStatusOnline, loadAuctionMarket, upsertPlayerPresenceOnline, loadMapPresenceOnline, removePlayerPresenceOnline, queuePvpAttackOnline, consumePvpDamageEventsOnline } from './api.js?v=10.7.0';
 
 const canvas = document.querySelector('#game');
 const ctx = canvas.getContext('2d');
@@ -111,6 +111,17 @@ const ui = {
 
 const SAVE_KEY_PREFIX = 'stellarLegacyV5Save';
 const SAFE_ZONE = { mapId: 'x1', x: 620, y: MAPS.x1.world.h / 2, radius: 520 };
+
+function basePointForFaction(factionId){
+  const w=MAPS.x1.world.w,h=MAPS.x1.world.h;
+  if(factionId==='mars') return {x:w-620,y:Math.round(h*.28)};
+  if(factionId==='jupiter') return {x:w-620,y:Math.round(h*.72)};
+  return {x:620,y:Math.round(h*.50)};
+}
+function currentBasePoint(){
+  const owner=currentTerritoryFaction?.()||progress?.profile?.faction||'earth';
+  return basePointForFaction(owner);
+}
 let cloudDirty = false;
 let cloudBusy = false;
 let authenticated = false;
@@ -315,24 +326,37 @@ function freshPet(){
 }
 
 const MAP_GRAPH_NODES = [
-  { id:'1-1', x:8, y:54 }, { id:'1-2', x:23, y:54 }, { id:'1-3', x:37, y:38 }, { id:'1-4', x:37, y:67 },
-  { id:'2-1', x:82, y:10 }, { id:'2-2', x:67, y:18 }, { id:'2-3', x:53, y:28 }, { id:'2-4', x:88, y:28 },
-  { id:'3-1', x:82, y:92 }, { id:'3-2', x:67, y:80 }, { id:'3-3', x:82, y:55 }, { id:'3-4', x:53, y:73 },
-  { id:'4-1', x:52, y:53 }, { id:'4-2', x:66, y:44 }, { id:'4-3', x:66, y:63 }
+  // TERRA — esquerda / centro
+  { id:'1-1', x:8,  y:54 }, { id:'1-2', x:22, y:54 }, { id:'1-3', x:36, y:35 }, { id:'1-4', x:36, y:72 },
+  // MARTE — topo / direita
+  { id:'2-4', x:49, y:24 }, { id:'2-3', x:63, y:24 }, { id:'2-2', x:77, y:24 }, { id:'2-1', x:91, y:16 },
+  // JÚPITER — base / direita
+  { id:'3-4', x:52, y:78 }, { id:'3-3', x:67, y:78 }, { id:'3-2', x:81, y:78 }, { id:'3-1', x:92, y:87 },
+  // BATTLE MAPS — triângulo central
+  { id:'4-1', x:50, y:53 }, { id:'4-2', x:63, y:43 }, { id:'4-3', x:68, y:59 }
 ];
+
 const MAP_GRAPH_LINKS = [
+  // TERRA
   ['1-1','1-2'],
   ['1-2','1-3'], ['1-2','1-4'],
-  ['1-3','1-4'], ['1-3','2-3'],
+  ['1-3','1-4'], ['1-3','2-4'],
   ['1-4','3-4'], ['1-4','4-1'],
+
+  // MARTE — cadeia 2-1 > 2-2 > 2-3 > 2-4
   ['2-1','2-2'],
-  ['2-2','2-3'], ['2-2','2-4'],
-  ['2-3','4-1'],
-  ['2-4','4-2'], ['2-4','3-3'],
+  ['2-2','2-3'],
+  ['2-3','2-4'],
+  ['2-3','3-3'],
+  ['2-4','4-2'],
+
+  // JÚPITER — cadeia 3-1 > 3-2 > 3-3 > 3-4
   ['3-1','3-2'],
-  ['3-2','3-3'], ['3-2','3-4'],
+  ['3-2','3-3'],
+  ['3-3','3-4'],
   ['3-3','4-3'],
-  ['3-4','4-3'],
+
+  // BATTLE MAPS — triângulo
   ['4-1','4-2'], ['4-1','4-3'], ['4-2','4-3']
 ];
 const PLAYABLE_GRAPH_LABELS = new Set(['1-1','1-2','1-3','1-4','2-1','2-2','2-3','2-4','3-1','3-2','3-3','3-4','4-1','4-2','4-3']);
@@ -908,7 +932,7 @@ function freshSave(factionId) {
     selectedRocket: 'r310',
     mapId: 'x1',
     territoryFaction: factionId,
-    x: SAFE_ZONE.x, y: SAFE_ZONE.y,
+    x: basePointForFaction(factionId).x, y: basePointForFaction(factionId).y,
     hp: SHIPS.phoenix.hp,
     shield: 1000,
     flags: { autoLaser: false, autoRocket: false, turboRocket: false },
@@ -1139,12 +1163,19 @@ function renderMapModal(){
   ui.mapNetwork.querySelectorAll('.map-node.travel').forEach(el=>el.addEventListener('click',()=>{
     const label=el.dataset.mapLabel,access=canTravelGraphLabel(label);if(!access.ok)return;
     ui.mapModal.classList.add('hidden');
-    runMapTransition(access.mapId,null,access.foreign?'INVASÃO DE TERRITÓRIO':'NAVIGAÇÃO DIRETA',access.territoryFaction);
+    runMapTransition(access.mapId,null,access.foreign?'INVASÃO DE TERRITÓRIO':'NAVIGAÇÃO DIRETA',access.territoryFaction,currentGraphMapLabel());
   }));
 }
 function openMapModal(){if(isGalaxyGateMap()){showToast('Galaxy Gate ativo: complete o portal ou perca uma vida para retornar à base');return;}renderMapModal();ui.mapModal.classList.remove('hidden');}
-function isSafeZone(x=player.x,y=player.y){return !!progress&&progress.mapId===SAFE_ZONE.mapId&&isOwnTerritory()&&Math.hypot(x-SAFE_ZONE.x,y-SAFE_ZONE.y)<=SAFE_ZONE.radius;}
-function safeZoneDistance(x,y){return Math.hypot(x-SAFE_ZONE.x,y-SAFE_ZONE.y);}
+function isSafeZone(x=player.x,y=player.y){
+  if(!progress||progress.mapId!==SAFE_ZONE.mapId||!isOwnTerritory())return false;
+  const b=currentBasePoint();
+  return Math.hypot(x-b.x,y-b.y)<=SAFE_ZONE.radius;
+}
+function safeZoneDistance(x,y){
+  const b=currentBasePoint();
+  return Math.hypot(x-b.x,y-b.y);
+}
 function cargoExtraBonus(){
   return (progress?.shipLoadout?.extras||[]).reduce((sum,id)=>sum+(Number(ITEMS[id]?.cargoBonus)||0),0);
 }
@@ -1662,7 +1693,13 @@ function createLandmarks(){
   for(let i=0;i<count;i++){
     const col=(i%4)+1,row=Math.floor(i/4)+1,jx=(seededUnit(`${mapKey}:${i}:x`)-.5)*w*.09,jy=(seededUnit(`${mapKey}:${i}:y`)-.5)*h*.11;
     let x=w*(col/5)+jx,y=h*(row/(Math.ceil(count/4)+1))+jy;
-    if(mapKey==='x1'&&Math.hypot(x-SAFE_ZONE.x,y-SAFE_ZONE.y)<SAFE_ZONE.radius+700){x=Math.min(w-500,SAFE_ZONE.x+SAFE_ZONE.radius+900+i*170);}
+    if(mapKey==='x1'){
+      const b=currentBasePoint();
+      if(Math.hypot(x-b.x,y-b.y)<SAFE_ZONE.radius+700){
+        const dir=b.x<w/2?1:-1;
+        x=Math.max(500,Math.min(w-500,b.x+dir*(SAFE_ZONE.radius+900+i*170)));
+      }
+    }
     items.push({id:`lm_${i}`,x:Math.max(260,Math.min(w-260,x)),y:Math.max(260,Math.min(h-260,y)),name:names[i%names.length],type:i%3===0?'scan':i%3===1?'wreck':'beacon'});
   }
   state.landmarks=items;
@@ -1813,7 +1850,7 @@ function failAlphaGate(){
   const a=alphaGate();a.failed++;a.pieces=[];a.built=false;a.lives=3;a.run=null;
   showToast('GALAXY GATE ALFA PERDIDO — as 3 vidas acabaram e o portal precisa ser remontado');
   progress.mapId='x1';state.currentMap=MAPS.x1;state.radarRange=mapRadarRange();
-  player.x=SAFE_ZONE.x;player.y=SAFE_ZONE.y;player.tx=player.x;player.ty=player.y;state.camera.x=player.x;state.camera.y=player.y;
+  const homeBase=basePointForFaction(progress.profile.faction);player.x=homeBase.x;player.y=homeBase.y;player.tx=player.x;player.ty=player.y;state.camera.x=player.x;state.camera.y=player.y;
   state.target=null;player.laserFiring=false;createLandmarks();createOres();spawnEnemies();saveGame();renderAll();
 }
 function handleAlphaDeath(){
@@ -1821,7 +1858,7 @@ function handleAlphaDeath(){
   if(a.run){a.run.nextWaveAt=0;a.run.nextRoundAt=0;}
   player.hp=player.maxHp;player.shield=Math.round(player.maxShield*.5);state.target=null;player.laserFiring=false;state.fx=[];state.rocketFx=[];
   if(a.lives<=0){failAlphaGate();return;}
-  progress.mapId='x1';state.currentMap=MAPS.x1;state.radarRange=mapRadarRange();player.x=SAFE_ZONE.x;player.y=SAFE_ZONE.y;player.tx=player.x;player.ty=player.y;state.camera.x=player.x;state.camera.y=player.y;
+  progress.mapId='x1';state.currentMap=MAPS.x1;state.radarRange=mapRadarRange();const homeBase=basePointForFaction(progress.profile.faction);player.x=homeBase.x;player.y=homeBase.y;player.tx=player.x;player.ty=player.y;state.camera.x=player.x;state.camera.y=player.y;
   createLandmarks();createOres();spawnEnemies();saveGame();renderAll();renderGalaxyGate();
   showToast(`ALFA: você perdeu 1 vida • ${a.lives} vida${a.lives===1?'':'s'} restante${a.lives===1?'':'s'} • volte ao Galaxy Gate para continuar`);
 }
@@ -1869,30 +1906,111 @@ function processRespawns(){
   for(let i=state.oreRespawns.length-1;i>=0;i--)if(now>=state.oreRespawns[i].at){spawnOre(state.oreRespawns[i].type);state.oreRespawns.splice(i,1);}
 }
 function factionBattleMap(){const id=progress?.profile?.faction;return id==='earth'?'b41':id==='mars'?'b42':'b43';}
-function resolvePortalTarget(code){if(code==='battleHome')return factionBattleMap();if(code==='x4HomeEarth')return progress?.profile?.faction==='earth'?'x4':null;if(code==='x4HomeMars')return progress?.profile?.faction==='mars'?'x4':null;if(code==='x4HomeJupiter')return progress?.profile?.faction==='jupiter'?'x4':null;return MAPS[code]?code:null;}
-function resolvedPortals(map=state.currentMap){return (map?.portals||[]).map(p=>({...p,to:resolvePortalTarget(p.to)})).filter(p=>p.to);}
-function findReturnPortal(targetMapId,fromMapId){return resolvedPortals(MAPS[targetMapId]).find(p=>p.to===fromMapId)||null;}
-function setMap(mapId,preserve=false,fromMapId=null,targetTerritoryFaction=null){
+
+function graphNode(label){return MAP_GRAPH_NODES.find(n=>n.id===label)||null;}
+function graphNeighbors(label){
+  const out=[];
+  for(const [a,b] of MAP_GRAPH_LINKS){
+    if(a===label)out.push(b);
+    else if(b===label)out.push(a);
+  }
+  return out;
+}
+function portalEdgePoint(fromLabel,toLabel,map){
+  const a=graphNode(fromLabel),b=graphNode(toLabel);
+  const w=map.world.w,h=map.world.h,inset=175,cx=w/2,cy=h/2;
+  if(!a||!b)return {x:cx,y:cy};
+
+  // direção visual do grafo convertida para proporção real do mapa
+  const vx=((b.x-a.x)/100)*w;
+  const vy=((b.y-a.y)/100)*h;
+  const ax=Math.abs(vx),ay=Math.abs(vy);
+  const tx=ax>0?(cx-inset)/ax:Infinity;
+  const ty=ay>0?(cy-inset)/ay:Infinity;
+  const t=Math.max(0,Math.min(tx,ty));
+
+  return {
+    x:Math.round(Math.max(inset,Math.min(w-inset,cx+vx*t))),
+    y:Math.round(Math.max(inset,Math.min(h-inset,cy+vy*t)))
+  };
+}
+function portalsForGraphLabel(label){
+  const origin=graphDestination(label);
+  if(!origin)return [];
+  const map=MAPS[origin.mapId];
+  return graphNeighbors(label).map(targetLabel=>{
+    const dest=graphDestination(targetLabel),pos=portalEdgePoint(label,targetLabel,map);
+    return {
+      x:pos.x,y:pos.y,
+      to:dest.mapId,
+      targetLabel,
+      targetTerritoryFaction:dest.territoryFaction,
+      battle:!!dest.battle
+    };
+  });
+}
+function resolvedPortals(map=state.currentMap,label=null){
+  const mapLabel=label||(map===state.currentMap?currentGraphMapLabel():null);
+  if(mapLabel)return portalsForGraphLabel(mapLabel);
+  return [];
+}
+function findReturnPortal(targetLabel,fromLabel){
+  if(!targetLabel||!fromLabel)return null;
+  return portalsForGraphLabel(targetLabel).find(p=>p.targetLabel===fromLabel)||null;
+}
+function setMap(mapId,preserve=false,fromMapId=null,targetTerritoryFaction=null,fromGraphLabel=null){
   if(!MAPS[mapId])return;if(mapId==='ggAlpha'){setupAlphaMap(true);return;}
+
   const previousWasTerritory=['x1','x2','x3','x4'].includes(progress.mapId);
   progress.mapId=mapId;
   if(['x1','x2','x3','x4'].includes(mapId)){
     progress.territoryFaction=targetTerritoryFaction||(previousWasTerritory?progress.territoryFaction:null)||progress.profile.faction;
   }else progress.territoryFaction=null;
+
   state.currentMap=MAPS[mapId];state.radarRange=mapRadarRange();computeStats(true);
-  if(!preserve){const returnPortal=fromMapId?findReturnPortal(mapId,fromMapId):null;player.x=returnPortal?returnPortal.x:(mapId==='x1'?SAFE_ZONE.x:400);player.y=returnPortal?returnPortal.y:(mapId==='x1'?SAFE_ZONE.y:state.currentMap.world.h/2);player.tx=player.x;player.ty=player.y;}
-  petRuntime.x=player.x+82;petRuntime.y=player.y+64;petRuntime.tx=petRuntime.x;petRuntime.ty=petRuntime.y;state.camera.x=player.x;state.camera.y=player.y;state.target=null;state.loot=[];state.fx=[];state.rocketFx=[];clearOnlinePlayers();createLandmarks();createOres();spawnEnemies();saveGame();
+
+  if(!preserve){
+    const targetLabel=displayMapLabel(mapId,currentTerritoryFaction());
+    const returnPortal=fromGraphLabel?findReturnPortal(targetLabel,fromGraphLabel):null;
+    const base=currentBasePoint();
+
+    player.x=returnPortal?returnPortal.x:(mapId==='x1'?base.x:400);
+    player.y=returnPortal?returnPortal.y:(mapId==='x1'?base.y:state.currentMap.world.h/2);
+
+    // Nasce alguns pixels para dentro do mapa, evitando reativar instantaneamente o portal.
+    if(returnPortal){
+      const cx=state.currentMap.world.w/2,cy=state.currentMap.world.h/2;
+      const dx=cx-player.x,dy=cy-player.y,d=Math.hypot(dx,dy)||1;
+      player.x+=dx/d*95;player.y+=dy/d*95;
+    }
+    player.tx=player.x;player.ty=player.y;
+  }
+
+  petRuntime.x=player.x+82;petRuntime.y=player.y+64;petRuntime.tx=petRuntime.x;petRuntime.ty=petRuntime.y;
+  state.camera.x=player.x;state.camera.y=player.y;state.target=null;state.loot=[];state.fx=[];state.rocketFx=[];
+  clearOnlinePlayers();createLandmarks();createOres();spawnEnemies();saveGame();
+
   const owner=territoryOwner(),home=isOwnTerritory();
   showToast(mapId==='x1'?(home?`Base ${owner?.short||''} • Zona Segura`:`INVASÃO • Base ${owner?.short||''}`):`Entrando em ${displayMapLabel(mapId,currentTerritoryFaction())}`);
   renderMapModal();syncOnlineWorld();
 }
-function runMapTransition(targetMapId,fromMapId=null,mode='PORTAL QUÂNTICO',targetTerritoryFaction=null){
+function runMapTransition(targetMapId,fromMapId=null,mode='PORTAL QUÂNTICO',targetTerritoryFaction=null,fromGraphLabel=null){
   if(state.jumping||!MAPS[targetMapId])return;
   state.jumping=true;player.laserFiring=false;ui.portalPrompt?.classList.add('hidden');
-  ui.jumpTitle.textContent=`${displayMapLabel(progress.mapId,currentTerritoryFaction())} → ${displayMapLabel(targetMapId,targetTerritoryFaction)}`;
-  ui.jumpSubtitle.textContent=mode;ui.jumpTransition.classList.remove('hidden');requestAnimationFrame(()=>ui.jumpTransition.classList.add('active'));
-  setTimeout(()=>setMap(targetMapId,false,fromMapId,targetTerritoryFaction),430);
-  setTimeout(()=>{ui.jumpTransition.classList.remove('active');setTimeout(()=>ui.jumpTransition.classList.add('hidden'),240);state.jumping=false;},1050);
+
+  const sourceLabel=fromGraphLabel||currentGraphMapLabel();
+  const targetLabel=displayMapLabel(targetMapId,targetTerritoryFaction);
+  ui.jumpTitle.textContent=`${sourceLabel} → ${targetLabel}`;
+  ui.jumpSubtitle.textContent=mode;
+  ui.jumpTransition.classList.remove('hidden');
+  requestAnimationFrame(()=>ui.jumpTransition.classList.add('active'));
+
+  setTimeout(()=>setMap(targetMapId,false,fromMapId,targetTerritoryFaction,sourceLabel),430);
+  setTimeout(()=>{
+    ui.jumpTransition.classList.remove('active');
+    setTimeout(()=>ui.jumpTransition.classList.add('hidden'),240);
+    state.jumping=false;
+  },1050);
 }
 
 function currentLaserAmmo(){return LASER_AMMO[progress.selectedLaserAmmo]||LASER_AMMO.lcb10;}
@@ -1904,7 +2022,12 @@ function rocketReady(){return nowSec()-player.lastRocketShot>=getRocketCooldown(
 function enemyDistance(e){return Math.hypot(e.x-player.x,e.y-player.y);}
 function nearbyPortal(){return resolvedPortals().find(p=>Math.hypot(p.x-player.x,p.y-player.y)<58)||null;}
 function portalAtWorld(x,y){return resolvedPortals().find(p=>Math.hypot(p.x-x,p.y-y)<50)||null;}
-function jumpThroughPortal(portal){if(!portal||state.jumping||nowSec()-state.lastPortalAt<1.1)return;const fromMap=progress.mapId;state.lastPortalAt=nowSec();runMapTransition(portal.to,fromMap,'PORTAL QUÂNTICO');}
+function jumpThroughPortal(portal){
+  if(!portal||state.jumping||nowSec()-state.lastPortalAt<1.1)return;
+  const fromMap=progress.mapId,fromLabel=currentGraphMapLabel();
+  state.lastPortalAt=nowSec();
+  runMapTransition(portal.to,fromMap,'PORTAL QUÂNTICO',portal.targetTerritoryFaction,fromLabel);
+}
 
 function rewardEnemyKill(enemy){
   const creditMult=1+pilotSkillValue('greed')/100,uriMult=1+pilotCombined('cruelty1','cruelty2')/100,xpMult=1+pilotSkillValue('tactics')/100;
@@ -2139,7 +2262,7 @@ function updatePlayer(dt){
   for(let i=state.ores.length-1;i>=0;i--){const o=state.ores[i];if(Math.hypot(o.x-player.x,o.y-player.y)<30){const got=addCargoResource(o.type,o.amount);if(got>0){spawnParticle(o.x,o.y,`+${got} ${o.type}`,o.color);pushActivity(`Pedra • +${fmt(got)} ${o.type} • ${fmt((RESOURCES[o.type]?.sell||0)*got)} CR na base`,'ore');missionEvent('collectOre',{amount:got,type:o.type,mapId:progress.mapId});state.ores.splice(i,1);state.oreRespawns.push({type:o.type,at:nowSec()+rand(5,12)});saveGame();}else showToast('Porão cheio');}}
   if(player.hp<=0){
     if(isGalaxyGateMap())handleAlphaDeath();
-    else{player.hp=player.maxHp;player.shield=Math.round(player.maxShield*.5);progress.profile.credits=Math.max(0,Math.round(progress.profile.credits*.95));progress.mapId='x1';progress.territoryFaction=progress.profile.faction;state.currentMap=MAPS.x1;state.radarRange=mapRadarRange();player.x=SAFE_ZONE.x;player.y=SAFE_ZONE.y;player.tx=player.x;player.ty=player.y;state.camera.x=player.x;state.camera.y=player.y;state.target=null;player.laserFiring=false;state.fx=[];state.rocketFx=[];createLandmarks();createOres();spawnEnemies();showToast('Nave destruída. Retorno automático à Zona Segura.');saveGame();}
+    else{player.hp=player.maxHp;player.shield=Math.round(player.maxShield*.5);progress.profile.credits=Math.max(0,Math.round(progress.profile.credits*.95));progress.mapId='x1';progress.territoryFaction=progress.profile.faction;state.currentMap=MAPS.x1;state.radarRange=mapRadarRange();const homeBase=basePointForFaction(progress.profile.faction);player.x=homeBase.x;player.y=homeBase.y;player.tx=player.x;player.ty=player.y;state.camera.x=player.x;state.camera.y=player.y;state.target=null;player.laserFiring=false;state.fx=[];state.rocketFx=[];createLandmarks();createOres();spawnEnemies();showToast('Nave destruída. Retorno automático à Zona Segura.');saveGame();}
   }
   progress.hp=player.hp;progress.shield=player.shield;progress.x=player.x;progress.y=player.y;
 }
@@ -2149,7 +2272,8 @@ function updateEnemies(dt){
     if(e.hp<=0)continue;
     const dx=player.x-e.x,dy=player.y-e.y,d=Math.hypot(dx,dy);e.angle+=dt*e.drift;
     if(progress.mapId==='x1'&&safeZoneDistance(e.x,e.y)<SAFE_ZONE.radius+35){
-      const ox=e.x-SAFE_ZONE.x,oy=e.y-SAFE_ZONE.y,od=Math.hypot(ox,oy)||1;e.x=SAFE_ZONE.x+ox/od*(SAFE_ZONE.radius+38);e.y=SAFE_ZONE.y+oy/od*(SAFE_ZONE.radius+38);
+      const b=currentBasePoint(),ox=e.x-b.x,oy=e.y-b.y,od=Math.hypot(ox,oy)||1;
+      e.x=b.x+ox/od*(SAFE_ZONE.radius+38);e.y=b.y+oy/od*(SAFE_ZONE.radius+38);
     }
     const forceChase=!!e.gateEnemy||!!e.forceChase;
     if(!playerSafe&&(forceChase||d<e.aggroRange)&&d>e.attackRange*.8){
@@ -2322,14 +2446,14 @@ function drawNebula(){const pal=state.currentMap.palette||{nebula:'#173159',acce
 function drawBounds(){const p=screenPos(0,0);ctx.strokeStyle='rgba(60,140,255,.13)';ctx.lineWidth=2;ctx.strokeRect(p.x,p.y,state.currentMap.world.w,state.currentMap.world.h);}
 function drawBaseSafeZone(){
   if(progress.mapId!=='x1')return;
-  const p=screenPos(SAFE_ZONE.x,SAFE_ZONE.y),f=territoryOwner()||getFaction(),home=isOwnTerritory(),pulse=1+Math.sin(nowSec()*2.4)*.02;
+  const b=currentBasePoint(),p=screenPos(b.x,b.y),f=territoryOwner()||getFaction(),home=isOwnTerritory(),pulse=1+Math.sin(nowSec()*2.4)*.02;
   ctx.save();ctx.translate(p.x,p.y);ctx.strokeStyle=f?.color||'#5ce8ff';ctx.fillStyle=home?'rgba(40,220,170,.045)':'rgba(255,65,82,.035)';ctx.lineWidth=3;ctx.beginPath();ctx.arc(0,0,SAFE_ZONE.radius*pulse,0,TWO_PI);ctx.fill();ctx.stroke();
   ctx.strokeStyle='rgba(130,255,210,.22)';ctx.lineWidth=10;ctx.beginPath();ctx.arc(0,0,SAFE_ZONE.radius-10,0,TWO_PI);ctx.stroke();
   ctx.rotate(nowSec()*.25);ctx.strokeStyle=f?.color||'#fff';ctx.lineWidth=4;for(let i=0;i<3;i++){ctx.rotate(TWO_PI/3);ctx.beginPath();ctx.moveTo(22,0);ctx.lineTo(72,0);ctx.stroke();}
   ctx.rotate(-nowSec()*.25);const core=ctx.createRadialGradient(-6,-6,2,0,0,28);core.addColorStop(0,'#fff');core.addColorStop(.35,f?.color||'#5ce8ff');core.addColorStop(1,'#0a1c2b');ctx.fillStyle=core;ctx.beginPath();ctx.arc(0,0,24,0,TWO_PI);ctx.fill();
   ctx.fillStyle=home?'#caffdf':'#ff9aa8';ctx.font='bold 13px Arial';ctx.textAlign='center';ctx.fillText(`${f?.short||''} • ${home?'ZONA SEGURA':'BASE INIMIGA'}`,0,-SAFE_ZONE.radius-18);ctx.restore();
 }
-function drawPortals(){for(const portal of resolvedPortals()){const p=screenPos(portal.x,portal.y),t=nowSec();ctx.save();ctx.translate(p.x,p.y);ctx.shadowColor='#43d8ff';ctx.shadowBlur=18;ctx.strokeStyle='rgba(83,221,255,.88)';ctx.lineWidth=3;ctx.beginPath();ctx.ellipse(0,0,36,56,0,0,TWO_PI);ctx.stroke();ctx.shadowBlur=0;ctx.rotate(t*.7);ctx.strokeStyle='rgba(174,102,255,.62)';ctx.lineWidth=5;for(let i=0;i<4;i++){ctx.beginPath();ctx.arc(0,0,27,-.55+i*Math.PI/2,.55+i*Math.PI/2);ctx.stroke();}ctx.rotate(-t*1.4);ctx.strokeStyle='rgba(92,231,255,.42)';ctx.lineWidth=2;ctx.beginPath();ctx.arc(0,0,19,0,Math.PI*1.35);ctx.stroke();ctx.rotate(t*.7);const cg=ctx.createRadialGradient(0,0,2,0,0,24);cg.addColorStop(0,'rgba(240,255,255,.72)');cg.addColorStop(.35,'rgba(72,211,255,.32)');cg.addColorStop(1,'rgba(51,91,255,.02)');ctx.fillStyle=cg;ctx.beginPath();ctx.ellipse(0,0,22,38,0,0,TWO_PI);ctx.fill();ctx.fillStyle='#9aeaff';ctx.font='bold 11px Arial';ctx.textAlign='center';ctx.fillText(displayMapLabel(portal.to),0,-68);ctx.restore();}}
+function drawPortals(){for(const portal of resolvedPortals()){const p=screenPos(portal.x,portal.y),t=nowSec();ctx.save();ctx.translate(p.x,p.y);ctx.shadowColor='#43d8ff';ctx.shadowBlur=18;ctx.strokeStyle='rgba(83,221,255,.88)';ctx.lineWidth=3;ctx.beginPath();ctx.ellipse(0,0,36,56,0,0,TWO_PI);ctx.stroke();ctx.shadowBlur=0;ctx.rotate(t*.7);ctx.strokeStyle='rgba(174,102,255,.62)';ctx.lineWidth=5;for(let i=0;i<4;i++){ctx.beginPath();ctx.arc(0,0,27,-.55+i*Math.PI/2,.55+i*Math.PI/2);ctx.stroke();}ctx.rotate(-t*1.4);ctx.strokeStyle='rgba(92,231,255,.42)';ctx.lineWidth=2;ctx.beginPath();ctx.arc(0,0,19,0,Math.PI*1.35);ctx.stroke();ctx.rotate(t*.7);const cg=ctx.createRadialGradient(0,0,2,0,0,24);cg.addColorStop(0,'rgba(240,255,255,.72)');cg.addColorStop(.35,'rgba(72,211,255,.32)');cg.addColorStop(1,'rgba(51,91,255,.02)');ctx.fillStyle=cg;ctx.beginPath();ctx.ellipse(0,0,22,38,0,0,TWO_PI);ctx.fill();ctx.fillStyle='#9aeaff';ctx.font='bold 11px Arial';ctx.textAlign='center';ctx.fillText(portal.targetLabel||displayMapLabel(portal.to,portal.targetTerritoryFaction),0,-68);ctx.restore();}}
 function drawOres(){for(const o of state.ores){if(!onScreenWorld(o.x,o.y,100))continue;
   const p=screenPos(o.x,o.y),path=V8_ASSETS.resources[o.type];
   const img=v8Image(path);
@@ -2424,7 +2548,7 @@ function drawMinimap(){
   mm.clearRect(0,0,minimap.width,minimap.height);const bg=mm.createLinearGradient(0,0,0,minimap.height);bg.addColorStop(0,'#081522');bg.addColorStop(1,'#040b14');mm.fillStyle=bg;mm.fillRect(0,0,minimap.width,minimap.height);mm.strokeStyle='rgba(75,180,255,.5)';mm.strokeRect(1,1,minimap.width-2,minimap.height-2);
   const sx=minimap.width/state.currentMap.world.w,sy=minimap.height/state.currentMap.world.h;
   mm.strokeStyle='rgba(78,180,255,.08)';mm.lineWidth=.7;for(let x=0;x<=state.currentMap.world.w;x+=1000){mm.beginPath();mm.moveTo(x*sx,0);mm.lineTo(x*sx,minimap.height);mm.stroke();}for(let y=0;y<=state.currentMap.world.h;y+=1000){mm.beginPath();mm.moveTo(0,y*sy);mm.lineTo(minimap.width,y*sy);mm.stroke();}
-  if(progress.mapId==='x1'){mm.strokeStyle='rgba(100,255,190,.65)';mm.lineWidth=2;mm.beginPath();mm.arc(SAFE_ZONE.x*sx,SAFE_ZONE.y*sy,SAFE_ZONE.radius*Math.min(sx,sy),0,TWO_PI);mm.stroke();}
+  if(progress.mapId==='x1'){const b=currentBasePoint();mm.strokeStyle='rgba(100,255,190,.65)';mm.lineWidth=2;mm.beginPath();mm.arc(b.x*sx,b.y*sy,SAFE_ZONE.radius*Math.min(sx,sy),0,TWO_PI);mm.stroke();}
   for(const p of resolvedPortals()){mm.fillStyle='#56dbff';mm.beginPath();mm.arc(p.x*sx,p.y*sy,4,0,TWO_PI);mm.fill();}
   for(const l of state.landmarks){mm.fillStyle=l.type==='wreck'?'#ffc45a':l.type==='scan'?'#bd78ff':'#4fd7ff';mm.fillRect(l.x*sx-1,l.y*sy-1,2,2);}
   const px=player.x*sx,py=player.y*sy,tx=player.tx*sx,ty=player.ty*sy,rad=state.radarRange*Math.min(sx,sy);mm.strokeStyle='rgba(130,220,255,.22)';mm.lineWidth=1;mm.beginPath();mm.arc(px,py,rad,0,TWO_PI);mm.stroke();
@@ -2526,7 +2650,7 @@ function updateBaseTradePrompt(){
   const active=!!progress&&isAtTrader()&&!isGalaxyGateMap()&&!state.jumping;
   ui.baseTradePrompt.classList.toggle('hidden',!active);
   if(!active)return;
-  const pos=screenPos(SAFE_ZONE.x,SAFE_ZONE.y);
+  const b=currentBasePoint(),pos=screenPos(b.x,b.y);
   ui.baseTradePrompt.style.left=`${Math.max(120,Math.min(W-120,pos.x))}px`;
   ui.baseTradePrompt.style.top=`${Math.max(145,Math.min(H-110,pos.y+88))}px`;
   if(ui.baseTradePromptInfo)ui.baseTradePromptInfo.textContent=`Porão ${fmt(cargoUsed())}/${fmt(cargoCapacity())} • ${fmt(cargoSaleValue())} CR`;
@@ -3233,7 +3357,7 @@ function startLoadedGame(){
   if(progress.mapId==='ggAlpha'){
     player.x=savedX??MAPS.ggAlpha.world.w/2;player.y=savedY??MAPS.ggAlpha.world.h/2;player.tx=player.x;player.ty=player.y;petRuntime.x=player.x+82;petRuntime.y=player.y+64;petRuntime.tx=petRuntime.x;petRuntime.ty=petRuntime.y;state.camera.x=player.x;state.camera.y=player.y;state.target=null;state.loot=[];state.fx=[];state.rocketFx=[];state.ores=[];state.landmarks=[];state.enemyRespawns=[];state.oreRespawns=[];restoreAlphaGateEnemies();const a=alphaGate(),def=GALAXY_ALPHA_ROUNDS[a.run.round-1],alive=alphaRemainingCount(),now=Date.now();if(a.run.waveIndex<def.waves.length&&!a.run.nextWaveAt){a.run.nextWaveAt=now+GALAXY_ALPHA_WAVE_INTERVAL_MS;}else if(a.run.waveIndex>=def.waves.length&&alive===0&&a.run.round<GALAXY_ALPHA_ROUNDS.length&&!a.run.nextRoundAt){a.run.nextRoundAt=now+GALAXY_ALPHA_ROUND_INTERVAL_MS;}renderAll();saveGame();return;
   }
-  player.x=savedX??(progress.mapId==='x1'?SAFE_ZONE.x:400);player.y=savedY??state.currentMap.world.h/2;player.tx=player.x;player.ty=player.y;petRuntime.x=player.x+82;petRuntime.y=player.y+64;petRuntime.tx=petRuntime.x;petRuntime.ty=petRuntime.y;state.camera.x=player.x;state.camera.y=player.y;state.target=null;state.loot=[];state.fx=[];state.rocketFx=[];createLandmarks();createOres();spawnEnemies();renderAll();saveGame();
+  const spawnBase=currentBasePoint();player.x=savedX??(progress.mapId==='x1'?spawnBase.x:400);player.y=savedY??(progress.mapId==='x1'?spawnBase.y:state.currentMap.world.h/2);player.tx=player.x;player.ty=player.y;petRuntime.x=player.x+82;petRuntime.y=player.y+64;petRuntime.tx=petRuntime.x;petRuntime.ty=petRuntime.y;state.camera.x=player.x;state.camera.y=player.y;state.target=null;state.loot=[];state.fx=[];state.rocketFx=[];createLandmarks();createOres();spawnEnemies();renderAll();saveGame();
 }
 
 async function afterAuth(){

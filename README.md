@@ -435,3 +435,10 @@ O Leilão Elite foi migrado para persistência online: lances ativos ficam regis
 - Escudo padrão ou com Repair Bot Comum: 1% do máximo por segundo.
 - Repair Bot Elite também aumenta a regeneração do escudo para 2% por segundo.
 - Novo dano interrompe a regeneração e reinicia o cooldown.
+
+
+## V10.7 — Route Network
+- Rotas físicas e mapa visual passam a usar a mesma topologia.
+- Portais são posicionados automaticamente perto das bordas na direção estratégica do mapa conectado.
+- Bases 1-1/2-1/3-1 agora possuem posições próprias.
+- 3-2 não conecta mais ao 4-3; 3-3 conecta ao 4-3 e também ao 2-3.
