@@ -375,3 +375,9 @@ O Leilão Elite foi migrado para persistência online: lances ativos ficam regis
 - Minimap mostra somente NPCs e pilotos inimigos, usando marcadores diferentes.
 - Leilão voltou a ter preço automático crescente antes de lances, mas o sistema congela assim que um jogador entra no lote.
 - Nenhum lance real pode ser coberto pelo sistema.
+
+
+## V10.6.1 — Auction 100k Hotfix
+- O primeiro jogador pode dar exatamente o preço atual do sistema.
+- Portanto, quando o lote estiver em 100.000 CR, 100.000 CR é um lance válido.
+- Depois do primeiro jogador, somente outro jogador pode cobrir, com incremento mínimo de 100.000 CR.

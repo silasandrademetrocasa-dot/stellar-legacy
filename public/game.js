@@ -1,6 +1,6 @@
-import { FACTIONS, SHIPS, ITEMS, LASER_AMMO, ROCKETS, NPC_TYPES, MAPS, RESOURCES } from './data.js?v=10.6.0';
-import { V8_ASSETS } from './assets/v8/manifest.js?v=10.6.0';
-import { signUp, signIn, restoreSession, signOutLocal, getUser, loadCloudSave, saveCloudSave, updateCallsign, updatePassword, loadRankings, loadAuctionBids, markAuctionBidStatusOnline, loadAuctionMarket, placeAuctionBidOnline, upsertPlayerPresenceOnline, loadMapPresenceOnline, removePlayerPresenceOnline, queuePvpAttackOnline, consumePvpDamageEventsOnline } from './api.js?v=10.6.0';
+import { FACTIONS, SHIPS, ITEMS, LASER_AMMO, ROCKETS, NPC_TYPES, MAPS, RESOURCES } from './data.js?v=10.6.1';
+import { V8_ASSETS } from './assets/v8/manifest.js?v=10.6.1';
+import { signUp, signIn, restoreSession, signOutLocal, getUser, loadCloudSave, saveCloudSave, updateCallsign, updatePassword, loadRankings, loadAuctionBids, markAuctionBidStatusOnline, loadAuctionMarket, placeAuctionBidOnline, upsertPlayerPresenceOnline, loadMapPresenceOnline, removePlayerPresenceOnline, queuePvpAttackOnline, consumePvpDamageEventsOnline } from './api.js?v=10.6.1';
 
 const canvas = document.querySelector('#game');
 const ctx = canvas.getContext('2d');
@@ -2650,15 +2650,21 @@ function openPilotProfile(){openHangar('pilot');}
 function formatAuctionClock(sec){const m=Math.floor(sec/60),s=sec%60;return `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;}
 function auctionMinBid(lot){
   const playerBid=Number(lot?.marketBid)||0;
+  // Depois que existe um jogador liderando, somente outro jogador pode cobrir
+  // e precisa acrescentar no mínimo 100k.
   if(playerBid>0)return Math.max(100000,playerBid+100000);
-  const system=auctionSystemBid(lot),step=system<1000000?100000:Math.max(100000,Math.round(system*.05/100000)*100000);
-  return system+step;
+  // Antes do primeiro jogador, o preço do sistema é o próprio lance mínimo.
+  // Ex.: SISTEMA = 100k -> primeiro jogador pode dar exatamente 100k.
+  return Math.max(100000,auctionSystemBid(lot));
 }
 async function placeAuctionBid(ref,amount){
   ensureAuctionState();const lot=progress.auction.lots[ref];if(!lot)return;
   if(lot.leaderUserId===getUser()?.id){showToast('Você já está liderando esse lote — espere outro jogador cobrir');return;}
-  const min=auctionMinBid(lot);amount=Math.round(Number(amount)/100000)*100000;
-  if(!Number.isFinite(amount)||amount<min){showToast(`Lance mínimo: ${fmt(min)} CR`);return;}
+  const min=auctionMinBid(lot);
+  amount=Number(amount);
+  if(!Number.isFinite(amount)){showToast('Digite um lance válido');return;}
+  amount=Math.floor(amount/100000)*100000;
+  if(amount<min){showToast(`Lance mínimo: ${fmt(min)} CR`);return;}
   if(amount>auctionSpendableCredits(ref)){showToast('Créditos insuficientes considerando os outros lances em garantia');return;}
   try{
     await flushCloudSave(true);
