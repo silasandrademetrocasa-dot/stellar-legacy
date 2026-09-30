@@ -1,6 +1,6 @@
-import { FACTIONS, SHIPS, ITEMS, LASER_AMMO, ROCKETS, NPC_TYPES, MAPS, RESOURCES } from './data.js?v=10.6.8';
-import { V8_ASSETS } from './assets/v8/manifest.js?v=10.6.8';
-import { signUp, signIn, restoreSession, signOutLocal, getUser, loadCloudSave, saveCloudSave, updateCallsign, updatePassword, loadRankings, loadAuctionBids, saveAuctionBidOnline, markAuctionBidStatusOnline, loadAuctionMarket, upsertPlayerPresenceOnline, loadMapPresenceOnline, removePlayerPresenceOnline, queuePvpAttackOnline, consumePvpDamageEventsOnline } from './api.js?v=10.6.8';
+import { FACTIONS, SHIPS, ITEMS, LASER_AMMO, ROCKETS, NPC_TYPES, MAPS, RESOURCES } from './data.js?v=10.6.9';
+import { V8_ASSETS } from './assets/v8/manifest.js?v=10.6.9';
+import { signUp, signIn, restoreSession, signOutLocal, getUser, loadCloudSave, saveCloudSave, updateCallsign, updatePassword, loadRankings, loadAuctionBids, saveAuctionBidOnline, markAuctionBidStatusOnline, loadAuctionMarket, upsertPlayerPresenceOnline, loadMapPresenceOnline, removePlayerPresenceOnline, queuePvpAttackOnline, consumePvpDamageEventsOnline } from './api.js?v=10.6.9';
 
 const canvas = document.querySelector('#game');
 const ctx = canvas.getContext('2d');
@@ -936,7 +936,7 @@ const petRuntime = {
 };
 const state = {
   currentMap: MAPS.x1, camera: { x: 620, y: MAPS.x1.world.h/2 }, target: null, pvpShotPending:false, pvpRocketPending:false, enemies: [], loot: [], ores: [], particles: [], fx: [], rocketFx: [], landmarks: [], enemyRespawns: [], oreRespawns: [], lastPortalAt: 0, radarRange: 1500, jumping: false,
-  lastPlayerDamageAt:nowSec(), repairFxAt:0,
+  lastPlayerDamageAt:nowSec(), repairFxAt:0, shieldRepairFxAt:0,
   pointerNavActive:false, pointerNavId:null, missionHudPage:0, missionHudSignature:'',
   shopTab: 'ships', hangarTab: 'ships', toastTimer: null, ammoUiExpanded: true, statsUiExpanded: true, minimapUiExpanded: true, topMetaExpanded: true,
   stars: Array.from({length:240},()=>({x:Math.random()*5200-2600,y:Math.random()*5200-2600,r:Math.random()*1.5+.3,a:Math.random()*.6+.2})),
@@ -2093,23 +2093,34 @@ function updatePlayer(dt){
   player.angle=(player.angle||0)+angleDelta(player.angle||0,desiredAngle)*Math.min(1,dt*9);
   player.x=Math.max(35,Math.min(state.currentMap.world.w-35,player.x));player.y=Math.max(35,Math.min(state.currentMap.world.h-35,player.y));state.camera.x+=(player.x-state.camera.x)*.08;state.camera.y+=(player.y-state.camera.y)*.08;
   const safe=isSafeZone();
-  const inCombat=!safe&&state.enemies.some(e=>e.hp>0&&enemyDistance(e)<430);
-  if(!inCombat){
-    const shieldRegen=(safe?.12:.045)*(1+(Number(player.shieldRegenBoost)||0));
-    player.shield=Math.min(player.maxShield,player.shield+player.maxShield*shieldRegen*dt);
+  const repairBot=activeRepairBot();
+  const secondsWithoutDamage=nowSec()-state.lastPlayerDamageAt;
+  const repairDelay=5;
+
+  // V10.6.9 — Escudo segue a mesma lógica temporal do reparo de vida:
+  // só começa a regenerar após 5s completos sem receber dano.
+  // Sem Repair Bot ou com o Comum: 1% do ESC máximo/s.
+  // Com Repair Bot Elite: 2% do ESC máximo/s.
+  if(player.shield<player.maxShield&&secondsWithoutDamage>=repairDelay){
+    const shieldRepairRate=repairBot?.id==='repElite'?0.02:0.01;
+    const beforeShield=player.shield;
+    player.shield=Math.min(player.maxShield,player.shield+player.maxShield*shieldRepairRate*dt);
+    if(player.shield>beforeShield&&nowSec()-state.shieldRepairFxAt>1.15){
+      state.shieldRepairFxAt=nowSec();
+      spawnParticle(player.x,player.y,`ESCUDO +${Math.round(shieldRepairRate*100)}%/s`,'#62d9ff');
+    }
   }
+
   if(safe){
+    // Mantém a vantagem histórica da base apenas para HP.
     player.hp=Math.min(player.maxHp,player.hp+player.maxHp*.08*dt);
-  }else{
-    const repairBot=activeRepairBot();
-    if(repairBot&&player.hp<player.maxHp&&nowSec()-state.lastPlayerDamageAt>=Number(repairBot.repairDelay||5)){
-      const before=player.hp;
-      const repairRate=Number(repairBot.repairRate||0)*(1+pilotSkillValue('engineering')/100);
-      player.hp=Math.min(player.maxHp,player.hp+player.maxHp*repairRate*dt);
-      if(player.hp>before&&nowSec()-state.repairFxAt>.8){
-        state.repairFxAt=nowSec();
-        spawnParticle(player.x,player.y,`AUTO REPAIR +${Math.round((repairBot.repairRate||0)*100)}%/s`,'#73ffc0');
-      }
+  }else if(repairBot&&player.hp<player.maxHp&&secondsWithoutDamage>=Number(repairBot.repairDelay||5)){
+    const before=player.hp;
+    const repairRate=Number(repairBot.repairRate||0)*(1+pilotSkillValue('engineering')/100);
+    player.hp=Math.min(player.maxHp,player.hp+player.maxHp*repairRate*dt);
+    if(player.hp>before&&nowSec()-state.repairFxAt>.8){
+      state.repairFxAt=nowSec();
+      spawnParticle(player.x,player.y,`AUTO REPAIR +${Math.round((repairBot.repairRate||0)*100)}%/s`,'#73ffc0');
     }
   }
   maybeAutoBuyAmmo();

@@ -1,6 +1,6 @@
 {
   "name": "stellar-legacy",
-  "version": "10.6.8",
+  "version": "10.6.9",
   "type": "module",
   "scripts": {
     "start": "node server/index.js",

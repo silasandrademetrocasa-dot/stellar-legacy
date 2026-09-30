@@ -428,3 +428,10 @@ O Leilão Elite foi migrado para persistência online: lances ativos ficam regis
 ## V10.6.8 — Ship Organizer
 - Loja esconde naves que a conta já possui.
 - Hangar organiza primeiro as naves adquiridas e depois o restante do catálogo na ordem normal.
+
+
+## V10.6.9 — Shield Regeneration
+- Escudo espera 5 segundos após o último dano antes de regenerar.
+- Escudo padrão ou com Repair Bot Comum: 1% do máximo por segundo.
+- Repair Bot Elite também aumenta a regeneração do escudo para 2% por segundo.
+- Novo dano interrompe a regeneração e reinicia o cooldown.
