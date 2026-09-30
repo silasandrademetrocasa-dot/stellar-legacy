@@ -353,3 +353,16 @@ O Leilão Elite foi migrado para persistência online: lances ativos ficam regis
 - Cargo boxes de aliens permanecem no mapa por no máximo 30 segundos.
 - Nos últimos 5 segundos piscam para avisar que vão desaparecer.
 - O P.E.T. Coletor de BOX respeita o mesmo cooldown.
+
+
+## V10.5 — Online Universe
+- Pilotos autenticados passam a aparecer online no mesmo mapa com nave, nome, nível, HP e escudo.
+- Movimento remoto é suavizado por interpolação; posições são sincronizadas pelo Supabase a cada ~1,8s.
+- Galaxy Gates continuam privados/instanciados e não exibem outros jogadores.
+- Jogadores online também aparecem como pontos verdes no minimapa dentro do alcance do radar.
+- Leilão deixa de ter qualquer lance simulado do sistema.
+- Cada lote inicia em 100.000 Créditos e só sobe quando outro jogador real cobre.
+- Se você já lidera o lote, o botão fica bloqueado: não é possível cobrir o próprio lance.
+- O banco serializa os lances por lote para impedir corrida de dois jogadores ao mesmo tempo.
+- Quando outro piloto cobre você, sua garantia é liberada e o cliente sincroniza o novo líder.
+- Naves, EXTRAS e módulos únicos do P.E.T. já possuídos continuam ocultos do seu leilão.
