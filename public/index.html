@@ -5,8 +5,8 @@
 <meta charset="utf-8"/>
 <meta content="width=device-width,initial-scale=1,user-scalable=no" name="viewport"/>
 <meta content="#030816" name="theme-color"/>
-<title>Stellar Legacy V10.7 — Online Universe</title>
-<link href="/style.css?v=10.7.0" rel="stylesheet"/>
+<title>Stellar Legacy V10.8 — Online Universe</title>
+<link href="/style.css?v=10.8.0" rel="stylesheet"/>
 </head>
 <body>
 <div id="app">
@@ -138,9 +138,29 @@
 <div class="warp-core"></div>
 <div class="warp-copy"><div class="eyebrow">QUANTUM JUMP</div><h2 id="jumpTitle">SALTANDO</h2><div id="jumpSubtitle">Sincronizando coordenadas...</div></div>
 </div>
+
+<div class="modal hidden fixed-modal" id="repairModal">
+  <div class="modal-card repair-modal-card">
+    <div class="eyebrow">SERVIÇO DE RECUPERAÇÃO • BASE</div>
+    <h2>Nave destruída</h2>
+    <p id="repairModalText" class="muted">Sua nave precisa ser reparada antes de voltar ao combate.</p>
+    <div class="repair-status-grid">
+      <div><span>NAVE</span><b id="repairShipName">—</b></div>
+      <div><span>BÔNUS DE REPARO</span><b id="repairBonusCount">0</b></div>
+      <div><span>URIDIUM</span><b id="repairUriCount">0</b></div>
+    </div>
+    <div class="repair-actions">
+      <button class="primary-btn" id="repairUseBonus">USAR BÔNUS DE REPARO</button>
+      <button class="gold-btn" id="repairUseUri">PAGAR 500 URI</button>
+      <button class="ghost-btn" id="repairUsePhoenix">USAR PHOENIX GRÁTIS</button>
+    </div>
+    <p class="repair-footnote">A Phoenix possui reparo gratuito. Outras naves consomem 1 Bônus de Reparo ou 500 Uridium.</p>
+  </div>
+</div>
+
 <div class="modal fixed-modal" id="loginModal">
 <div class="modal-card login-card">
-<div class="eyebrow">STELLAR NETWORK • V10.7 ROUTE NETWORK</div>
+<div class="eyebrow">STELLAR NETWORK • V10.8 BASE & BONUS ECONOMY</div>
 <h1>Entrar no Stellar Legacy</h1>
 <p class="muted">Sua conta salva facção, nave, inventário, drones, munição e progresso online.</p>
 <div class="identity-panel"><img alt="Stellar Legacy V8" class="identity-logo" src="/assets/v8/branding/logo-v8.png"/><div class="identity-copy"><div class="eyebrow">IDENTIDADE STELLAR LEGACY</div><h3>Três facções. Uma guerra orbital.</h3><p>Naves, NPCs, equipamentos, recursos e mapas agora usam uma identidade visual própria integrada ao jogo.</p><div class="identity-factions"><div><img alt="Terra" src="/assets/v8/branding/earth.png"/><span>Terra</span></div><div><img alt="Marte" src="/assets/v8/branding/mars.png"/><span>Marte</span></div><div><img alt="Júpiter" src="/assets/v8/branding/jupiter.png"/><span>Júpiter</span></div></div></div></div>
@@ -416,6 +436,6 @@
 </div>
 </div>
 </div>
-<script src="/game.js?v=10.7.0" type="module"></script>
+<script src="/game.js?v=10.8.0" type="module"></script>
 </body>
 </html>

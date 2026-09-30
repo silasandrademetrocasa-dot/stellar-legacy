@@ -134,6 +134,9 @@ export const V8_ASSETS = {
     "repair": "/assets/v8/loot/repair.png",
     "energy": "/assets/v8/loot/energy.png"
   },
+  "bases": {
+    "orbitalStation": "/assets/v10/base/orbital-station.png"
+  },
   "backgrounds": {
     "x1": "/assets/v8/backgrounds/safe-zone.jpg",
     "x2": "/assets/v8/backgrounds/asteroid-field.jpg",

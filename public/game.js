@@ -1,6 +1,6 @@
-import { FACTIONS, SHIPS, ITEMS, LASER_AMMO, ROCKETS, NPC_TYPES, MAPS, RESOURCES } from './data.js?v=10.7.0';
-import { V8_ASSETS } from './assets/v8/manifest.js?v=10.7.0';
-import { signUp, signIn, restoreSession, signOutLocal, getUser, loadCloudSave, saveCloudSave, updateCallsign, updatePassword, loadRankings, loadAuctionBids, saveAuctionBidOnline, markAuctionBidStatusOnline, loadAuctionMarket, upsertPlayerPresenceOnline, loadMapPresenceOnline, removePlayerPresenceOnline, queuePvpAttackOnline, consumePvpDamageEventsOnline } from './api.js?v=10.7.0';
+import { FACTIONS, SHIPS, ITEMS, LASER_AMMO, ROCKETS, NPC_TYPES, MAPS, RESOURCES } from './data.js?v=10.8.0';
+import { V8_ASSETS } from './assets/v8/manifest.js?v=10.8.0';
+import { signUp, signIn, restoreSession, signOutLocal, getUser, loadCloudSave, saveCloudSave, updateCallsign, updatePassword, loadRankings, loadAuctionBids, saveAuctionBidOnline, markAuctionBidStatusOnline, loadAuctionMarket, upsertPlayerPresenceOnline, loadMapPresenceOnline, removePlayerPresenceOnline, queuePvpAttackOnline, consumePvpDamageEventsOnline } from './api.js?v=10.8.0';
 
 const canvas = document.querySelector('#game');
 const ctx = canvas.getContext('2d');
@@ -97,7 +97,7 @@ const ui = {
   topbar: $('#topbar'), topMeta: document.querySelector('#topbar .top-meta'), hudToggle: $('#hudToggle'), leftStats: $('#leftStats'), statsToggle: $('#statsToggle'), minimapPanel: $('#minimapPanel'), minimapToggle: $('#minimapToggle'), minimapHeader: $('#minimapHeader'), statsHeader: $('#statsHeader'), shipHudArt: $('#shipHudArt'), factionIcon: $('#factionIcon'), factionLabel: $('#factionLabel'), mapLabel: $('#mapLabel'), sectorName: $('#sectorName'), coordLabel: $('#coordLabel'), routeLabel: $('#routeLabel'), discoveriesLabel: $('#discoveriesLabel'), shipLabel: $('#shipLabel'), lvl: $('#lvl'), petFloatPanel: $('#petFloatPanel'), petFloatLevel: $('#petFloatLevel'), petGearQuickSelect: $('#petGearQuickSelect'), petFloatStatus: $('#petFloatStatus'),
   hp: $('#hp'), maxHp: $('#maxHp'), shield: $('#shield'), maxShield: $('#maxShield'), speed: $('#speed'), dmg: $('#dmg'), credits: $('#credits'), uridium: $('#uridium'), xp: $('#xp'), droneCount: $('#droneCount'),
   laserAmmoButtons: $('#laserAmmoButtons'), rocketAmmoButtons: $('#rocketAmmoButtons'), laserToggle: $('#laserToggle'), rocketFire: $('#rocketFire'), autoLaser: $('#autoLaser'), autoRocket: $('#autoRocket'), turboRocket: $('#turboRocket'), rocketCd: $('#rocketCd'), weaponBar: $('#weaponBar'), weaponBarContent: $('#weaponBarContent'), weaponBarToggle: $('#weaponBarToggle'),
-  toast: $('#toast'), baseTradePrompt: $('#baseTradePrompt'), baseTradePromptInfo: $('#baseTradePromptInfo'), gameCelebration: $('#gameCelebration'), celebrationPanel: $('#celebrationPanel'), celebrationKicker: $('#celebrationKicker'), celebrationTitle: $('#celebrationTitle'), celebrationSubtitle: $('#celebrationSubtitle'), portalPrompt: $('#portalPrompt'), portalPromptMap: $('#portalPromptMap'), jumpTransition: $('#jumpTransition'), jumpTitle: $('#jumpTitle'), jumpSubtitle: $('#jumpSubtitle'), factionModal: $('#factionModal'), factionCards: $('#factionCards'),
+  toast: $('#toast'), baseTradePrompt: $('#baseTradePrompt'), baseTradePromptInfo: $('#baseTradePromptInfo'), repairModal: $('#repairModal'), repairModalText: $('#repairModalText'), repairShipName: $('#repairShipName'), repairBonusCount: $('#repairBonusCount'), repairUriCount: $('#repairUriCount'), repairUseBonus: $('#repairUseBonus'), repairUseUri: $('#repairUseUri'), repairUsePhoenix: $('#repairUsePhoenix'), gameCelebration: $('#gameCelebration'), celebrationPanel: $('#celebrationPanel'), celebrationKicker: $('#celebrationKicker'), celebrationTitle: $('#celebrationTitle'), celebrationSubtitle: $('#celebrationSubtitle'), portalPrompt: $('#portalPrompt'), portalPromptMap: $('#portalPromptMap'), jumpTransition: $('#jumpTransition'), jumpTitle: $('#jumpTitle'), jumpSubtitle: $('#jumpSubtitle'), factionModal: $('#factionModal'), factionCards: $('#factionCards'),
   mapBtn: $('#mapBtn'), mapModal: $('#mapModal'), closeMap: $('#closeMap'), mapNetwork: $('#mapNetwork'),
   missionBtn: $('#missionBtn'), missionActiveCount: $('#missionActiveCount'), missionModal: $('#missionModal'), closeMission: $('#closeMission'), missionContent: $('#missionContent'), activeMissionPanel: $('#activeMissionPanel'), activeMissionCategory: $('#activeMissionCategory'), activeMissionTitle: $('#activeMissionTitle'), activeMissionTask: $('#activeMissionTask'), activeMissionProgressBar: $('#activeMissionProgressBar'), activeMissionProgressText: $('#activeMissionProgressText'), activeMissionRewardFactor: $('#activeMissionRewardFactor'), activeMissionDots: $('#activeMissionDots'), activeMissionOpen: $('#activeMissionOpen'), activityPanel: $('#activityPanel'), activityFeed: $('#activityFeed'), activityClearBtn: $('#activityClearBtn'),
   gateBtn: $('#gateBtn'), gatePieceBadge: $('#gatePieceBadge'), gateModal: $('#gateModal'), closeGate: $('#closeGate'), gatePiecesText: $('#gatePiecesText'), gateLivesText: $('#gateLivesText'), gateCompletedText: $('#gateCompletedText'), gatePieceGrid: $('#gatePieceGrid'), gateJumpBtn: $('#gateJumpBtn'), gateUriText: $('#gateUriText'), gateSpinButtons: $('#gateSpinButtons'), gateJumpBonus: $('#gateJumpBonus'), gateRepairBonus: $('#gateRepairBonus'), gateLogDisks: $('#gateLogDisks'), useRepairBonus: $('#useRepairBonus'), gateResultBox: $('#gateResultBox'), gateRoundsGrid: $('#gateRoundsGrid'), gateAlphaStatusTitle: $('#gateAlphaStatusTitle'), gateAlphaStatusText: $('#gateAlphaStatusText'), gateHud: $('#gateHud'), gateHudRound: $('#gateHudRound'), gateHudWave: $('#gateHudWave'), gateHudRemaining: $('#gateHudRemaining'), gateHudNext: $('#gateHudNext'), gateHudLives: $('#gateHudLives'),
@@ -850,6 +850,9 @@ function openMissions(){normalizeMissionState();renderMissions();ui.missionModal
 
 
 
+const STARTER_SHIP_ID = 'phoenix';
+const SHIP_REPAIR_URI_COST = 500;
+
 const GALAXY_ALPHA_PIECES = 34;
 const GALAXY_ALPHA_SPIN_COST = 100;
 const GALAXY_ALPHA_WAVE_INTERVAL_MS = 10000;
@@ -942,6 +945,7 @@ function freshSave(factionId) {
     pilotBio: freshPilotBio(),
     auction: freshAuctionState(),
     galaxyGate: freshGalaxyGateState(),
+    repairRequired: null,
     pet: freshPet(),
     expeditionV9: 1,
   };
@@ -1148,22 +1152,38 @@ function mapArtFor(label){
 }
 function renderMapModal(){
   if(!ui.mapNetwork||!progress)return;
+  normalizeGalaxyGateState();
+  const jumps=progress.galaxyGate.jumpBonus;
   const current=currentGraphMapLabel(),nodeMap=Object.fromEntries(MAP_GRAPH_NODES.map(n=>[n.id,n]));
   let html=`<svg class="map-svg" viewBox="0 0 100 100" preserveAspectRatio="none">`;
   for(const [a,b] of MAP_GRAPH_LINKS){const na=nodeMap[a],nb=nodeMap[b];html+=`<line class="map-link" x1="${na.x}" y1="${na.y}" x2="${nb.x}" y2="${nb.y}" />`;}
   html+='</svg>';
-  html+=`<div class="map-legend"><span><i class="dot curr"></i> mapa atual</span><span><i class="dot own"></i> território aliado</span><span><i class="dot hostile"></i> território inimigo / invasão</span></div>`;
+  html+=`<div class="map-legend"><span><i class="dot curr"></i> mapa atual</span><span><i class="dot own"></i> território aliado</span><span><i class="dot hostile"></i> território inimigo / invasão</span><span class="jump-wallet">↯ BÔNUS DE SALTO <b>${fmt(jumps)}</b></span></div>`;
   for(const node of MAP_GRAPH_NODES){
     const access=canTravelGraphLabel(node.id),active=node.id===current,battle=node.id.startsWith('4-'),foreign=!!access.foreign;
-    const classes=['map-node'];if(active)classes.push('current');if(!foreign&&!battle)classes.push('faction');if(foreign)classes.push('hostile');if(battle)classes.push('battle');if(access.ok&&!active)classes.push('travel');if(!access.ok)classes.push('locked');
-    const sub=active?'ATUAL':access.ok?(foreign?'INVASÃO':'LIBERADO'):access.reason;
+    const canJump=access.ok&&!active&&jumps>0;
+    const classes=['map-node'];
+    if(active)classes.push('current');if(!foreign&&!battle)classes.push('faction');if(foreign)classes.push('hostile');if(battle)classes.push('battle');
+    if(canJump)classes.push('travel');else if(access.ok&&!active)classes.push('no-jump');
+    if(!access.ok)classes.push('locked');
+    const sub=active?'ATUAL':!access.ok?access.reason:jumps>0?'1 BÔNUS DE SALTO':'USE OS PORTAIS';
     html+=`<div class="${classes.join(' ')}" data-map-label="${node.id}" style="left:${node.x}%;top:${node.y}%;--art:${mapArtFor(node.id)}"><div class="node-art"></div><div class="node-overlay"></div><div class="node-sub">${sub}</div>${!access.ok?'<div class="node-lock">🔒</div>':''}<div class="node-label">${node.id}</div></div>`;
   }
   ui.mapNetwork.innerHTML=html;
-  ui.mapNetwork.querySelectorAll('.map-node.travel').forEach(el=>el.addEventListener('click',()=>{
-    const label=el.dataset.mapLabel,access=canTravelGraphLabel(label);if(!access.ok)return;
+  ui.mapNetwork.querySelectorAll('.map-node[data-map-label]').forEach(el=>el.addEventListener('click',()=>{
+    const label=el.dataset.mapLabel;
+    if(label===current)return;
+    const access=canTravelGraphLabel(label);
+    if(!access.ok){showToast(access.reason);return;}
+    normalizeGalaxyGateState();
+    if(progress.galaxyGate.jumpBonus<=0){
+      showToast('Sem Bônus de Salto • viaje pelos portais físicos');
+      return;
+    }
+    progress.galaxyGate.jumpBonus--;
+    saveGame();renderGalaxyGate();
     ui.mapModal.classList.add('hidden');
-    runMapTransition(access.mapId,null,access.foreign?'INVASÃO DE TERRITÓRIO':'NAVIGAÇÃO DIRETA',access.territoryFaction,currentGraphMapLabel());
+    runMapTransition(access.mapId,null,'BÔNUS DE SALTO CONSUMIDO',access.territoryFaction,currentGraphMapLabel());
   }));
 }
 function openMapModal(){if(isGalaxyGateMap()){showToast('Galaxy Gate ativo: complete o portal ou perca uma vida para retornar à base');return;}renderMapModal();ui.mapModal.classList.remove('hidden');}
@@ -1280,6 +1300,7 @@ function hydrateProgress(){
   }
   progress.profile.level=levelFromXp(progress.profile.xp,PLAYER_MAX_LEVEL);
   progress.ownedShips ||= ['phoenix'];progress.inventory ||= {};progress.drones ||= [];progress.ammo ||= {};progress.rockets ||= {};progress.flags ||= {};progress.cargo ||= {};progress.discoveries ||= {};progress.missions ||= freshMissions();normalizeMissionState();progress.pilotBio ||= freshPilotBio();normalizePilotBio();progress.auction ||= freshAuctionState();ensureAuctionState();progress.galaxyGate ||= freshGalaxyGateState();normalizeGalaxyGateState();
+  if(progress.repairRequired&&(!progress.repairRequired.shipId||!SHIPS[progress.repairRequired.shipId]))progress.repairRequired=null;
   for(const id of Object.keys(LASER_AMMO))if(progress.ammo[id]===undefined)progress.ammo[id]=0;
   if(!LASER_AMMO[progress.selectedLaserAmmo])progress.selectedLaserAmmo='lcb10';
   progress.pet ||= freshPet();
@@ -1849,18 +1870,24 @@ function completeAlphaGate(){
 function failAlphaGate(){
   const a=alphaGate();a.failed++;a.pieces=[];a.built=false;a.lives=3;a.run=null;
   showToast('GALAXY GATE ALFA PERDIDO — as 3 vidas acabaram e o portal precisa ser remontado');
-  progress.mapId='x1';state.currentMap=MAPS.x1;state.radarRange=mapRadarRange();
-  const homeBase=basePointForFaction(progress.profile.faction);player.x=homeBase.x;player.y=homeBase.y;player.tx=player.x;player.ty=player.y;state.camera.x=player.x;state.camera.y=player.y;
-  state.target=null;player.laserFiring=false;createLandmarks();createOres();spawnEnemies();saveGame();renderAll();
+  movePlayerToHomeBase();
+  player.hp=1;player.shield=0;progress.hp=1;progress.shield=0;
+  saveGame();renderAll();
 }
 function handleAlphaDeath(){
   const a=alphaGate();syncAlphaGateSnapshot();a.lives=Math.max(0,a.lives-1);
   if(a.run){a.run.nextWaveAt=0;a.run.nextRoundAt=0;}
-  player.hp=player.maxHp;player.shield=Math.round(player.maxShield*.5);state.target=null;player.laserFiring=false;state.fx=[];state.rocketFx=[];
-  if(a.lives<=0){failAlphaGate();return;}
-  progress.mapId='x1';state.currentMap=MAPS.x1;state.radarRange=mapRadarRange();const homeBase=basePointForFaction(progress.profile.faction);player.x=homeBase.x;player.y=homeBase.y;player.tx=player.x;player.ty=player.y;state.camera.x=player.x;state.camera.y=player.y;
-  createLandmarks();createOres();spawnEnemies();saveGame();renderAll();renderGalaxyGate();
-  showToast(`ALFA: você perdeu 1 vida • ${a.lives} vida${a.lives===1?'':'s'} restante${a.lives===1?'':'s'} • volte ao Galaxy Gate para continuar`);
+  state.target=null;player.laserFiring=false;state.fx=[];state.rocketFx=[];
+  if(a.lives<=0){
+    failAlphaGate();
+    if(!progress.repairRequired)resolveDeathRepair({allowAuto:true});
+    return;
+  }
+  movePlayerToHomeBase();
+  const repaired=resolveDeathRepair({allowAuto:true});
+  saveGame();renderAll();renderGalaxyGate();
+  if(repaired)showToast(`ALFA: você perdeu 1 vida • ${a.lives} vida${a.lives===1?'':'s'} restante${a.lives===1?'':'s'} • nave reparada na base`);
+  else showToast(`ALFA: você perdeu 1 vida • repare a nave para retornar ao portal`);
 }
 function updateAlphaGate(){
   if(!isGalaxyGateMap())return;
@@ -2029,6 +2056,96 @@ function jumpThroughPortal(portal){
   runMapTransition(portal.to,fromMap,'PORTAL QUÂNTICO',portal.targetTerritoryFaction,fromLabel);
 }
 
+
+function isStarterShip(shipId=progress?.activeShipId){return shipId===STARTER_SHIP_ID;}
+function movePlayerToHomeBase(){
+  progress.mapId='x1';
+  progress.territoryFaction=progress.profile.faction;
+  state.currentMap=MAPS.x1;
+  state.radarRange=mapRadarRange();
+  const b=basePointForFaction(progress.profile.faction);
+  player.x=b.x;player.y=b.y;player.tx=b.x;player.ty=b.y;
+  state.camera.x=b.x;state.camera.y=b.y;
+  state.target=null;player.laserFiring=false;state.fx=[];state.rocketFx=[];
+  createLandmarks();createOres();spawnEnemies();
+}
+function finishShipRepair(method='repair'){
+  progress.repairRequired=null;
+  computeStats(false);
+  player.hp=player.maxHp;
+  player.shield=player.maxShield;
+  progress.hp=player.hp;
+  progress.shield=player.shield;
+  state.lastPlayerDamageAt=nowSec();
+  ui.repairModal?.classList.add('hidden');
+  saveGame();renderGalaxyGate();renderAll();updateUI();
+  const labels={bonus:'1 Bônus de Reparo consumido',uridium:`${fmt(SHIP_REPAIR_URI_COST)} URI consumidos`,free:'Phoenix reparada gratuitamente',phoenix:'Phoenix ativada • reparo gratuito'};
+  showToast(labels[method]||'Nave reparada','system');
+}
+function resolveDeathRepair({allowAuto=true}={}){
+  normalizeGalaxyGateState();
+  if(isStarterShip()){
+    finishShipRepair('free');
+    return true;
+  }
+  if(allowAuto&&progress.galaxyGate.repairBonus>0){
+    progress.galaxyGate.repairBonus--;
+    finishShipRepair('bonus');
+    return true;
+  }
+  if(allowAuto&&progress.profile.uridium>=SHIP_REPAIR_URI_COST){
+    progress.profile.uridium-=SHIP_REPAIR_URI_COST;
+    finishShipRepair('uridium');
+    return true;
+  }
+  progress.repairRequired={shipId:progress.activeShipId,cost:SHIP_REPAIR_URI_COST,at:Date.now()};
+  player.hp=1;player.shield=0;progress.hp=1;progress.shield=0;
+  saveGame();openRepairModal();
+  return false;
+}
+function openRepairModal(){
+  if(!progress?.repairRequired||!ui.repairModal)return;
+  normalizeGalaxyGateState();
+  const ship=SHIPS[progress.repairRequired.shipId]||SHIPS[progress.activeShipId];
+  ui.repairShipName.textContent=ship?.name||'Nave';
+  ui.repairBonusCount.textContent=fmt(progress.galaxyGate.repairBonus);
+  ui.repairUriCount.textContent=fmt(progress.profile.uridium);
+  ui.repairModalText.textContent=`${ship?.name||'Sua nave'} foi destruída. Repare para voltar ao combate.`;
+  ui.repairUseBonus.disabled=progress.galaxyGate.repairBonus<=0;
+  ui.repairUseUri.disabled=progress.profile.uridium<SHIP_REPAIR_URI_COST;
+  ui.repairUsePhoenix.disabled=!progress.ownedShips.includes(STARTER_SHIP_ID)||progress.activeShipId===STARTER_SHIP_ID;
+  ui.repairModal.classList.remove('hidden');
+}
+function repairDestroyedWithBonus(){
+  if(!progress?.repairRequired)return;
+  normalizeGalaxyGateState();
+  if(progress.galaxyGate.repairBonus<=0){showToast('Sem Bônus de Reparo');openRepairModal();return;}
+  progress.galaxyGate.repairBonus--;
+  finishShipRepair('bonus');
+}
+function repairDestroyedWithUri(){
+  if(!progress?.repairRequired)return;
+  if(progress.profile.uridium<SHIP_REPAIR_URI_COST){showToast(`Faltam ${fmt(SHIP_REPAIR_URI_COST-progress.profile.uridium)} URI`);openRepairModal();return;}
+  progress.profile.uridium-=SHIP_REPAIR_URI_COST;
+  finishShipRepair('uridium');
+}
+function recoverWithPhoenix(){
+  if(!progress?.repairRequired)return;
+  if(!progress.ownedShips.includes(STARTER_SHIP_ID)){showToast('Phoenix não disponível');return;}
+  returnShipEquipmentToInventory();
+  progress.activeShipId=STARTER_SHIP_ID;
+  progress.shipLoadout=blankLoadout(STARTER_SHIP_ID);
+  progress.repairRequired=null;
+  computeStats(false);
+  player.hp=player.maxHp;player.shield=player.maxShield;progress.hp=player.hp;progress.shield=player.shield;
+  ui.repairModal?.classList.add('hidden');
+  saveGame();renderAll();buildAmmoButtons();showToast('Phoenix ativada • reparo gratuito','system');
+}
+function handleNormalShipDeath(){
+  // A nova taxa de reparo substitui a antiga perda automática de 5% dos Créditos.
+  movePlayerToHomeBase();
+  resolveDeathRepair({allowAuto:true});
+}
 function rewardEnemyKill(enemy){
   const creditMult=1+pilotSkillValue('greed')/100,uriMult=1+pilotCombined('cruelty1','cruelty2')/100,xpMult=1+pilotSkillValue('tactics')/100;
   const earnedCredits=Math.round(enemy.credits*creditMult),earnedUri=Math.round(enemy.uridium*uriMult),earnedXp=Math.round((Number(enemy.xp)||enemy.credits/10+enemy.uridium*12)*xpMult);
@@ -2209,6 +2326,14 @@ function collectCargoBox(drop){
 
 function angleDelta(from,to){return Math.atan2(Math.sin(to-from),Math.cos(to-from));}
 function updatePlayer(dt){
+  if(progress?.repairRequired){
+    const b=basePointForFaction(progress.profile.faction);
+    player.x=b.x;player.y=b.y;player.tx=b.x;player.ty=b.y;player.laserFiring=false;
+    state.camera.x+=(b.x-state.camera.x)*.12;state.camera.y+=(b.y-state.camera.y)*.12;
+    progress.x=player.x;progress.y=player.y;progress.hp=player.hp;progress.shield=player.shield;
+    if(ui.repairModal?.classList.contains('hidden'))openRepairModal();
+    return;
+  }
   const dx=player.tx-player.x,dy=player.ty-player.y,d=Math.hypot(dx,dy);if(d>2){const step=Math.min(d,player.speed*dt);player.x+=dx/d*step;player.y+=dy/d*step;}
   let desiredAngle=player.angle||0;
   if(state.target&&state.target.hp>0)desiredAngle=Math.atan2(state.target.y-player.y,state.target.x-player.x);
@@ -2262,7 +2387,7 @@ function updatePlayer(dt){
   for(let i=state.ores.length-1;i>=0;i--){const o=state.ores[i];if(Math.hypot(o.x-player.x,o.y-player.y)<30){const got=addCargoResource(o.type,o.amount);if(got>0){spawnParticle(o.x,o.y,`+${got} ${o.type}`,o.color);pushActivity(`Pedra • +${fmt(got)} ${o.type} • ${fmt((RESOURCES[o.type]?.sell||0)*got)} CR na base`,'ore');missionEvent('collectOre',{amount:got,type:o.type,mapId:progress.mapId});state.ores.splice(i,1);state.oreRespawns.push({type:o.type,at:nowSec()+rand(5,12)});saveGame();}else showToast('Porão cheio');}}
   if(player.hp<=0){
     if(isGalaxyGateMap())handleAlphaDeath();
-    else{player.hp=player.maxHp;player.shield=Math.round(player.maxShield*.5);progress.profile.credits=Math.max(0,Math.round(progress.profile.credits*.95));progress.mapId='x1';progress.territoryFaction=progress.profile.faction;state.currentMap=MAPS.x1;state.radarRange=mapRadarRange();const homeBase=basePointForFaction(progress.profile.faction);player.x=homeBase.x;player.y=homeBase.y;player.tx=player.x;player.ty=player.y;state.camera.x=player.x;state.camera.y=player.y;state.target=null;player.laserFiring=false;state.fx=[];state.rocketFx=[];createLandmarks();createOres();spawnEnemies();showToast('Nave destruída. Retorno automático à Zona Segura.');saveGame();}
+    else handleNormalShipDeath();
   }
   progress.hp=player.hp;progress.shield=player.shield;progress.x=player.x;progress.y=player.y;
 }
@@ -2446,12 +2571,40 @@ function drawNebula(){const pal=state.currentMap.palette||{nebula:'#173159',acce
 function drawBounds(){const p=screenPos(0,0);ctx.strokeStyle='rgba(60,140,255,.13)';ctx.lineWidth=2;ctx.strokeRect(p.x,p.y,state.currentMap.world.w,state.currentMap.world.h);}
 function drawBaseSafeZone(){
   if(progress.mapId!=='x1')return;
-  const b=currentBasePoint(),p=screenPos(b.x,b.y),f=territoryOwner()||getFaction(),home=isOwnTerritory(),pulse=1+Math.sin(nowSec()*2.4)*.02;
-  ctx.save();ctx.translate(p.x,p.y);ctx.strokeStyle=f?.color||'#5ce8ff';ctx.fillStyle=home?'rgba(40,220,170,.045)':'rgba(255,65,82,.035)';ctx.lineWidth=3;ctx.beginPath();ctx.arc(0,0,SAFE_ZONE.radius*pulse,0,TWO_PI);ctx.fill();ctx.stroke();
-  ctx.strokeStyle='rgba(130,255,210,.22)';ctx.lineWidth=10;ctx.beginPath();ctx.arc(0,0,SAFE_ZONE.radius-10,0,TWO_PI);ctx.stroke();
-  ctx.rotate(nowSec()*.25);ctx.strokeStyle=f?.color||'#fff';ctx.lineWidth=4;for(let i=0;i<3;i++){ctx.rotate(TWO_PI/3);ctx.beginPath();ctx.moveTo(22,0);ctx.lineTo(72,0);ctx.stroke();}
-  ctx.rotate(-nowSec()*.25);const core=ctx.createRadialGradient(-6,-6,2,0,0,28);core.addColorStop(0,'#fff');core.addColorStop(.35,f?.color||'#5ce8ff');core.addColorStop(1,'#0a1c2b');ctx.fillStyle=core;ctx.beginPath();ctx.arc(0,0,24,0,TWO_PI);ctx.fill();
-  ctx.fillStyle=home?'#caffdf':'#ff9aa8';ctx.font='bold 13px Arial';ctx.textAlign='center';ctx.fillText(`${f?.short||''} • ${home?'ZONA SEGURA':'BASE INIMIGA'}`,0,-SAFE_ZONE.radius-18);ctx.restore();
+  const b=currentBasePoint(),p=screenPos(b.x,b.y),f=territoryOwner()||getFaction(),home=isOwnTerritory(),pulse=1+Math.sin(nowSec()*2.2)*.012;
+  ctx.save();ctx.translate(p.x,p.y);
+
+  // Campo de proteção.
+  ctx.strokeStyle=f?.color||'#5ce8ff';
+  ctx.fillStyle=home?'rgba(40,220,170,.035)':'rgba(255,65,82,.028)';
+  ctx.lineWidth=3;ctx.beginPath();ctx.arc(0,0,SAFE_ZONE.radius*pulse,0,TWO_PI);ctx.fill();ctx.stroke();
+  ctx.strokeStyle=home?'rgba(100,255,210,.18)':'rgba(255,85,110,.16)';
+  ctx.lineWidth=9;ctx.beginPath();ctx.arc(0,0,SAFE_ZONE.radius-10,0,TWO_PI);ctx.stroke();
+
+  // Nova estação orbital.
+  const station=v8Image(V8_ASSETS.bases?.orbitalStation);
+  if(station&&station.naturalWidth){
+    const targetW=520,targetH=targetW*(station.naturalHeight/station.naturalWidth);
+    ctx.save();
+    ctx.shadowColor=f?.color||'#51dfff';ctx.shadowBlur=34;
+    ctx.drawImage(station,-targetW/2,-targetH/2,targetW,targetH);
+    ctx.restore();
+
+    // Pulso da usina central com a cor da companhia.
+    const core=ctx.createRadialGradient(0,-8,4,0,-8,84);
+    core.addColorStop(0,'rgba(255,255,255,.30)');
+    core.addColorStop(.22,`${f?.color||'#55ddff'}66`);
+    core.addColorStop(1,'rgba(0,0,0,0)');
+    ctx.fillStyle=core;ctx.beginPath();ctx.arc(0,-8,84+Math.sin(nowSec()*3)*3,0,TWO_PI);ctx.fill();
+  }else{
+    const core=ctx.createRadialGradient(-6,-6,2,0,0,38);
+    core.addColorStop(0,'#fff');core.addColorStop(.35,f?.color||'#5ce8ff');core.addColorStop(1,'#0a1c2b');
+    ctx.fillStyle=core;ctx.beginPath();ctx.arc(0,0,34,0,TWO_PI);ctx.fill();
+  }
+
+  ctx.fillStyle=home?'#caffdf':'#ff9aa8';ctx.font='bold 13px Arial';ctx.textAlign='center';
+  ctx.fillText(`${f?.short||''} • ${home?'BASE ORBITAL / ZONA SEGURA':'BASE INIMIGA'}`,0,-SAFE_ZONE.radius-18);
+  ctx.restore();
 }
 function drawPortals(){for(const portal of resolvedPortals()){const p=screenPos(portal.x,portal.y),t=nowSec();ctx.save();ctx.translate(p.x,p.y);ctx.shadowColor='#43d8ff';ctx.shadowBlur=18;ctx.strokeStyle='rgba(83,221,255,.88)';ctx.lineWidth=3;ctx.beginPath();ctx.ellipse(0,0,36,56,0,0,TWO_PI);ctx.stroke();ctx.shadowBlur=0;ctx.rotate(t*.7);ctx.strokeStyle='rgba(174,102,255,.62)';ctx.lineWidth=5;for(let i=0;i<4;i++){ctx.beginPath();ctx.arc(0,0,27,-.55+i*Math.PI/2,.55+i*Math.PI/2);ctx.stroke();}ctx.rotate(-t*1.4);ctx.strokeStyle='rgba(92,231,255,.42)';ctx.lineWidth=2;ctx.beginPath();ctx.arc(0,0,19,0,Math.PI*1.35);ctx.stroke();ctx.rotate(t*.7);const cg=ctx.createRadialGradient(0,0,2,0,0,24);cg.addColorStop(0,'rgba(240,255,255,.72)');cg.addColorStop(.35,'rgba(72,211,255,.32)');cg.addColorStop(1,'rgba(51,91,255,.02)');ctx.fillStyle=cg;ctx.beginPath();ctx.ellipse(0,0,22,38,0,0,TWO_PI);ctx.fill();ctx.fillStyle='#9aeaff';ctx.font='bold 11px Arial';ctx.textAlign='center';ctx.fillText(portal.targetLabel||displayMapLabel(portal.to,portal.targetTerritoryFaction),0,-68);ctx.restore();}}
 function drawOres(){for(const o of state.ores){if(!onScreenWorld(o.x,o.y,100))continue;
@@ -2652,7 +2805,7 @@ function updateBaseTradePrompt(){
   if(!active)return;
   const b=currentBasePoint(),pos=screenPos(b.x,b.y);
   ui.baseTradePrompt.style.left=`${Math.max(120,Math.min(W-120,pos.x))}px`;
-  ui.baseTradePrompt.style.top=`${Math.max(145,Math.min(H-110,pos.y+88))}px`;
+  ui.baseTradePrompt.style.top=`${Math.max(145,Math.min(H-110,pos.y+205))}px`;
   if(ui.baseTradePromptInfo)ui.baseTradePromptInfo.textContent=`Porão ${fmt(cargoUsed())}/${fmt(cargoCapacity())} • ${fmt(cargoSaleValue())} CR`;
 }
 function updateUI(){
@@ -2739,7 +2892,15 @@ function renderShop(){
 }
 
 function returnShipEquipmentToInventory(){for(const k of ['lasers','generators','extras'])for(const id of progress.shipLoadout[k])if(id)addInventory(id);}
-function switchShip(shipId){if(!progress.ownedShips.includes(shipId)){showToast('Compre essa nave na Loja');return;}if(shipId===progress.activeShipId)return;returnShipEquipmentToInventory();progress.activeShipId=shipId;progress.shipLoadout=blankLoadout(shipId);player.laserFiring=false;computeStats(false);saveGame();renderHangar();buildAmmoButtons();showToast(`${SHIPS[shipId].name} ativada. Equipamentos antigos voltaram ao inventário.`);}
+function switchShip(shipId){
+  if(!progress.ownedShips.includes(shipId)){showToast('Compre essa nave na Loja');return;}
+  if(progress.repairRequired){
+    if(shipId===STARTER_SHIP_ID)return recoverWithPhoenix();
+    showToast('Sua nave está destruída • repare ou use a Phoenix gratuita');openRepairModal();return;
+  }
+  if(shipId===progress.activeShipId)return;
+  returnShipEquipmentToInventory();progress.activeShipId=shipId;progress.shipLoadout=blankLoadout(shipId);player.laserFiring=false;computeStats(false);saveGame();renderHangar();buildAmmoButtons();showToast(`${SHIPS[shipId].name} ativada. Equipamentos antigos voltaram ao inventário.`);
+}
 function equipShipItem(itemId){
   const item=ITEMS[itemId];const key=item.type==='laser'?'lasers':item.type==='generator'?'generators':item.type==='extra'?'extras':null;if(!key)return;
   if(key==='extras'&&item.exclusiveGroup){
@@ -3324,6 +3485,9 @@ if(ui.hudToggle)ui.hudToggle.onclick=()=>toggleHudUi();
 if(ui.closeShop)ui.closeShop.onclick=()=>ui.shopModal.classList.add('hidden');
 if(ui.cargoBtn)ui.cargoBtn.onclick=()=>{if(isAtTrader())openCargo();else showToast('O Porão comercial só abre na base X-1');};
 if(ui.activityClearBtn)ui.activityClearBtn.onclick=()=>clearActivityFeed();
+if(ui.repairUseBonus)ui.repairUseBonus.onclick=()=>repairDestroyedWithBonus();
+if(ui.repairUseUri)ui.repairUseUri.onclick=()=>repairDestroyedWithUri();
+if(ui.repairUsePhoenix)ui.repairUsePhoenix.onclick=()=>recoverWithPhoenix();
 if(ui.closeCargo)ui.closeCargo.onclick=()=>ui.cargoModal.classList.add('hidden');
 if(ui.sellAllCargo)ui.sellAllCargo.onclick=()=>sellAllCargo();
 bindOverlayDismiss();
@@ -3358,6 +3522,7 @@ function startLoadedGame(){
     player.x=savedX??MAPS.ggAlpha.world.w/2;player.y=savedY??MAPS.ggAlpha.world.h/2;player.tx=player.x;player.ty=player.y;petRuntime.x=player.x+82;petRuntime.y=player.y+64;petRuntime.tx=petRuntime.x;petRuntime.ty=petRuntime.y;state.camera.x=player.x;state.camera.y=player.y;state.target=null;state.loot=[];state.fx=[];state.rocketFx=[];state.ores=[];state.landmarks=[];state.enemyRespawns=[];state.oreRespawns=[];restoreAlphaGateEnemies();const a=alphaGate(),def=GALAXY_ALPHA_ROUNDS[a.run.round-1],alive=alphaRemainingCount(),now=Date.now();if(a.run.waveIndex<def.waves.length&&!a.run.nextWaveAt){a.run.nextWaveAt=now+GALAXY_ALPHA_WAVE_INTERVAL_MS;}else if(a.run.waveIndex>=def.waves.length&&alive===0&&a.run.round<GALAXY_ALPHA_ROUNDS.length&&!a.run.nextRoundAt){a.run.nextRoundAt=now+GALAXY_ALPHA_ROUND_INTERVAL_MS;}renderAll();saveGame();return;
   }
   const spawnBase=currentBasePoint();player.x=savedX??(progress.mapId==='x1'?spawnBase.x:400);player.y=savedY??(progress.mapId==='x1'?spawnBase.y:state.currentMap.world.h/2);player.tx=player.x;player.ty=player.y;petRuntime.x=player.x+82;petRuntime.y=player.y+64;petRuntime.tx=petRuntime.x;petRuntime.ty=petRuntime.y;state.camera.x=player.x;state.camera.y=player.y;state.target=null;state.loot=[];state.fx=[];state.rocketFx=[];createLandmarks();createOres();spawnEnemies();renderAll();saveGame();
+  if(progress.repairRequired){movePlayerToHomeBase();player.hp=1;player.shield=0;progress.hp=1;progress.shield=0;saveGame();openRepairModal();}
 }
 
 async function afterAuth(){

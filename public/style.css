@@ -1067,3 +1067,69 @@ body[data-quality="high"] .hud-panel{backdrop-filter:blur(7px);-webkit-backdrop-
 #targetPanel{
   display:none!important;
 }
+
+
+/* ===== V10.8 — Base & Bonus Economy ===== */
+.map-legend .jump-wallet{
+  margin-left:auto;
+  border:1px solid rgba(255,198,67,.28);
+  background:rgba(82,49,4,.36);
+  color:#ffd76b;
+  padding:5px 9px;
+  border-radius:999px;
+  font-size:9px;
+  letter-spacing:.06em;
+}
+.map-node.no-jump{
+  filter:saturate(.72) brightness(.78);
+  cursor:not-allowed!important;
+}
+.map-node.no-jump .node-sub{
+  color:#8196a2!important;
+}
+.repair-modal-card{
+  width:min(520px,calc(100vw - 28px));
+  border-color:rgba(88,207,255,.38)!important;
+  background:linear-gradient(180deg,rgba(5,24,40,.985),rgba(3,12,22,.99))!important;
+}
+.repair-status-grid{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:8px;
+  margin:16px 0;
+}
+.repair-status-grid>div{
+  padding:10px;
+  border:1px solid rgba(92,197,255,.15);
+  background:rgba(7,30,47,.52);
+  border-radius:10px;
+}
+.repair-status-grid span{
+  display:block;
+  font-size:8px;
+  letter-spacing:.08em;
+  color:#6d98ad;
+  margin-bottom:4px;
+}
+.repair-status-grid b{
+  display:block;
+  color:#d8f5ff;
+  font-size:13px;
+}
+.repair-actions{
+  display:grid;
+  gap:7px;
+}
+.repair-actions button{
+  width:100%;
+}
+.repair-footnote{
+  margin:12px 0 0;
+  font-size:9px;
+  color:#66899b;
+  line-height:1.4;
+}
+@media(max-width:560px){
+  .repair-status-grid{grid-template-columns:1fr}
+  .map-legend .jump-wallet{width:100%;margin-left:0}
+}

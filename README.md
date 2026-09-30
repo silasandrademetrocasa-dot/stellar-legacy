@@ -442,3 +442,11 @@ O Leilão Elite foi migrado para persistência online: lances ativos ficam regis
 - Portais são posicionados automaticamente perto das bordas na direção estratégica do mapa conectado.
 - Bases 1-1/2-1/3-1 agora possuem posições próprias.
 - 3-2 não conecta mais ao 4-3; 3-3 conecta ao 4-3 e também ao 2-3.
+
+
+## V10.8 — Base & Bonus Economy
+- Nova estação orbital integrada à base.
+- Bônus de Salto passa a ser obrigatório para teleporte direto pelo Mapa; portais físicos continuam grátis.
+- Phoenix tem reparo gratuito.
+- Outras naves consomem 1 Bônus de Reparo ou 500 URI após serem destruídas.
+- Sem recursos de reparo, a nave fica bloqueada na base até reparar ou trocar para Phoenix.
