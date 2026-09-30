@@ -5,8 +5,8 @@
 <meta charset="utf-8"/>
 <meta content="width=device-width,initial-scale=1,user-scalable=no" name="viewport"/>
 <meta content="#030816" name="theme-color"/>
-<title>Stellar Legacy V10.6.2 — Online Universe</title>
-<link href="/style.css?v=10.6.2" rel="stylesheet"/>
+<title>Stellar Legacy V10.6.3 — Online Universe</title>
+<link href="/style.css?v=10.6.3" rel="stylesheet"/>
 </head>
 <body>
 <div id="app">
@@ -18,7 +18,7 @@
   <span class="status-chip">LV <b id="lvl">1</b></span>
   <span class="status-chip credits-chip">CR <b id="credits">0</b></span>
   <span class="status-chip uri-chip">URI <b id="uridium">0</b></span>
-  <span class="sync-chip" id="syncLabel">LOCAL</span>
+  <span class="sync-chip hidden" id="syncLabel" aria-hidden="true">LOCAL</span>
 </div>
 <div class="top-meta hidden" aria-hidden="true">
   <span><b id="factionLabel">—</b></span><span><b id="mapLabel">—</b></span><span><b id="sectorName">—</b></span><span><b id="shipLabel">Phoenix</b></span><span><b id="xp">0</b></span>
@@ -63,6 +63,15 @@
   <div class="active-mission-progress"><i id="activeMissionProgressBar"></i></div>
   <div class="active-mission-meta"><b id="activeMissionProgressText">0%</b><span id="activeMissionRewardFactor">—</span></div>
   <div class="active-mission-dots" id="activeMissionDots"></div>
+</section>
+<section class="hud-panel activity-float-panel" id="activityPanel">
+  <div class="activity-float-head">
+    <span>ATIVIDADE</span>
+    <button id="activityClearBtn" type="button" title="Limpar histórico">×</button>
+  </div>
+  <div class="activity-feed" id="activityFeed">
+    <div class="activity-empty">As últimas ações e recompensas aparecem aqui.</div>
+  </div>
 </section>
 <section class="hud-panel stack" id="targetPanel">
 <div class="title">ALVO</div>
@@ -138,7 +147,7 @@
 </div>
 <div class="modal fixed-modal" id="loginModal">
 <div class="modal-card login-card">
-<div class="eyebrow">STELLAR NETWORK • V10.6.2 AUCTION REPAIR</div>
+<div class="eyebrow">STELLAR NETWORK • V10.6.3 HUD ACTIVITY</div>
 <h1>Entrar no Stellar Legacy</h1>
 <p class="muted">Sua conta salva facção, nave, inventário, drones, munição e progresso online.</p>
 <div class="identity-panel"><img alt="Stellar Legacy V8" class="identity-logo" src="/assets/v8/branding/logo-v8.png"/><div class="identity-copy"><div class="eyebrow">IDENTIDADE STELLAR LEGACY</div><h3>Três facções. Uma guerra orbital.</h3><p>Naves, NPCs, equipamentos, recursos e mapas agora usam uma identidade visual própria integrada ao jogo.</p><div class="identity-factions"><div><img alt="Terra" src="/assets/v8/branding/earth.png"/><span>Terra</span></div><div><img alt="Marte" src="/assets/v8/branding/mars.png"/><span>Marte</span></div><div><img alt="Júpiter" src="/assets/v8/branding/jupiter.png"/><span>Júpiter</span></div></div></div></div>
@@ -291,6 +300,8 @@
         <div class="hud-settings-grid" id="hudSettingsGrid">
           <label><input type="checkbox" data-hud-key="ship" checked/> Nave</label>
           <label><input type="checkbox" data-hud-key="pet" checked/> P.E.T.</label>
+          <label><input type="checkbox" data-hud-key="missions" checked/> Missões ativas</label>
+          <label><input type="checkbox" data-hud-key="activity" checked/> Atividade</label>
           <label><input type="checkbox" data-hud-key="minimap" checked/> Minimap</label>
           <label><input type="checkbox" data-hud-key="weapons" checked/> Munições</label>
           <label><input type="checkbox" data-hud-key="gate" checked/> Galaxy Gate</label>
@@ -412,6 +423,6 @@
 </div>
 </div>
 </div>
-<script src="/game.js?v=10.6.2" type="module"></script>
+<script src="/game.js?v=10.6.3" type="module"></script>
 </body>
 </html>

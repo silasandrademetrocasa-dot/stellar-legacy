@@ -637,3 +637,111 @@ body[data-quality="high"] .hud-panel{backdrop-filter:blur(7px);-webkit-backdrop-
   .auction-section{padding:8px}
   .auction-section-grid{grid-template-columns:1fr}
 }
+
+
+/* ===== V10.6.3 HUD Activity & Ore Economy ===== */
+.activity-float-panel{
+  position:fixed!important;
+  left:8px!important;
+  bottom:calc(var(--weaponbar-height, 150px) + 12px)!important;
+  width:320px;
+  max-width:calc(100vw - 16px);
+  min-height:96px;
+  max-height:154px;
+  padding:7px 9px!important;
+  z-index:24!important;
+  overflow:hidden;
+  background:linear-gradient(180deg,rgba(6,24,36,.95),rgba(3,13,23,.96))!important;
+  border-color:rgba(72,197,255,.36)!important;
+}
+.activity-float-head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:8px;
+  padding-bottom:5px;
+  margin-bottom:4px;
+  border-bottom:1px solid rgba(92,194,255,.12);
+}
+.activity-float-head>span{
+  font-size:9px;
+  font-weight:1000;
+  letter-spacing:.14em;
+  color:#87dfff;
+}
+.activity-float-head button{
+  width:22px;
+  height:22px;
+  padding:0;
+  border-radius:7px;
+  border:1px solid rgba(91,191,255,.22);
+  background:rgba(7,27,42,.68);
+  color:#82b8d1;
+  font-size:14px;
+  line-height:1;
+}
+.activity-feed{
+  display:flex;
+  flex-direction:column;
+  gap:3px;
+}
+.activity-row{
+  display:grid;
+  grid-template-columns:18px minmax(0,1fr) 34px;
+  gap:5px;
+  align-items:center;
+  min-height:19px;
+  padding:2px 4px;
+  border-radius:6px;
+  color:#8faebe;
+  font-size:9px;
+  line-height:1.15;
+}
+.activity-row.newest{
+  background:rgba(65,188,255,.07);
+  color:#ccefff;
+}
+.activity-row i{
+  display:grid;
+  place-items:center;
+  width:16px;
+  height:16px;
+  border-radius:5px;
+  background:rgba(58,176,235,.10);
+  color:#6fd8ff;
+  font-style:normal;
+  font-weight:1000;
+}
+.activity-row span{
+  overflow:hidden;
+  white-space:nowrap;
+  text-overflow:ellipsis;
+}
+.activity-row time{
+  text-align:right;
+  font-size:8px;
+  color:#50778b;
+}
+.activity-row.combat i{color:#ff8292;background:rgba(255,68,91,.09)}
+.activity-row.reward i,.activity-row.mission i{color:#ffd977;background:rgba(255,194,59,.09)}
+.activity-row.ore i{color:#c58cff;background:rgba(163,91,255,.10)}
+.activity-row.loot i{color:#79e8bc;background:rgba(67,227,169,.09)}
+.activity-empty{
+  padding:10px 5px;
+  color:#54798b;
+  font-size:9px;
+  text-align:center;
+}
+.command-status .sync-chip.hidden{display:none!important}
+
+@media(max-width:820px){
+  .activity-float-panel{
+    width:250px;
+    max-height:125px;
+    bottom:calc(var(--weaponbar-height, 145px) + 8px)!important;
+  }
+  .activity-row:nth-child(n+4){display:none}
+}
+@media(max-width:560px){
+  .activity-float-panel{display:none!important}
+}

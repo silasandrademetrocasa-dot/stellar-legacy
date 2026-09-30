@@ -388,3 +388,11 @@ O Leilão Elite foi migrado para persistência online: lances ativos ficam regis
 - Lance é gravado online e verificado novamente no mercado para resolver concorrência simultânea.
 - Garantia de lances já superados é liberada.
 - Leilão organizado em Naves, Munições & Mísseis, Equipamentos, Extras e P.E.T.
+
+
+## V10.6.3 — HUD Activity & Ore Economy
+- Minérios agora possuem valor de venda compatível com a economia atual.
+- Missões de mineração herdam os novos valores.
+- Painel flutuante ATIVIDADE registra recompensas e ações recentes.
+- Missões Ativas e Atividade podem ser mostradas/ocultadas em CONF.
+- Status ONLINE/LOCAL foi removido visualmente do topo.

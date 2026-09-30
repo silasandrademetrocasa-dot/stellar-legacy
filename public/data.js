@@ -150,12 +150,15 @@ export const ROCKETS = {
 
 
 export const RESOURCES = {
-  Prometium: { id: 'Prometium', name: 'Prometium', color: '#ff9f43', sell: 10 },
-  Endurium: { id: 'Endurium', name: 'Endurium', color: '#59d3ff', sell: 15 },
-  Terbium: { id: 'Terbium', name: 'Terbium', color: '#d76bff', sell: 25 },
-  Prometid: { id: 'Prometid', name: 'Prometid', color: '#ff6b6b', sell: 200 },
-  Duranium: { id: 'Duranium', name: 'Duranium', color: '#65f0bf', sell: 200 },
-  Promerium: { id: 'Promerium', name: 'Promerium', color: '#ffe66d', sell: 500 },
+  // V10.6.3 — mineração precisa competir com caça e missões.
+  // Valores unitários de venda na base X-1.
+  Prometium: { id: 'Prometium', name: 'Prometium', color: '#ff9f43', sell: 1000 },
+  Endurium: { id: 'Endurium', name: 'Endurium', color: '#59d3ff', sell: 1500 },
+  Terbium: { id: 'Terbium', name: 'Terbium', color: '#d76bff', sell: 2500 },
+  Prometid: { id: 'Prometid', name: 'Prometid', color: '#ff6b6b', sell: 10000 },
+  Duranium: { id: 'Duranium', name: 'Duranium', color: '#65f0bf', sell: 15000 },
+  Promerium: { id: 'Promerium', name: 'Promerium', color: '#ffe66d', sell: 35000 },
+  // Xenomit continua sendo recurso especial e não é vendido por Créditos.
   Xenomit: { id: 'Xenomit', name: 'Xenomit', color: '#ffffff', sell: 0 },
 };
 
