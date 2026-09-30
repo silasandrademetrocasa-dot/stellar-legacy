@@ -1,6 +1,6 @@
-import { FACTIONS, SHIPS, ITEMS, LASER_AMMO, ROCKETS, NPC_TYPES, MAPS, RESOURCES } from './data.js?v=10.6.1';
-import { V8_ASSETS } from './assets/v8/manifest.js?v=10.6.1';
-import { signUp, signIn, restoreSession, signOutLocal, getUser, loadCloudSave, saveCloudSave, updateCallsign, updatePassword, loadRankings, loadAuctionBids, markAuctionBidStatusOnline, loadAuctionMarket, placeAuctionBidOnline, upsertPlayerPresenceOnline, loadMapPresenceOnline, removePlayerPresenceOnline, queuePvpAttackOnline, consumePvpDamageEventsOnline } from './api.js?v=10.6.1';
+import { FACTIONS, SHIPS, ITEMS, LASER_AMMO, ROCKETS, NPC_TYPES, MAPS, RESOURCES } from './data.js?v=10.6.2';
+import { V8_ASSETS } from './assets/v8/manifest.js?v=10.6.2';
+import { signUp, signIn, restoreSession, signOutLocal, getUser, loadCloudSave, saveCloudSave, updateCallsign, updatePassword, loadRankings, loadAuctionBids, saveAuctionBidOnline, markAuctionBidStatusOnline, loadAuctionMarket, upsertPlayerPresenceOnline, loadMapPresenceOnline, removePlayerPresenceOnline, queuePvpAttackOnline, consumePvpDamageEventsOnline } from './api.js?v=10.6.2';
 
 const canvas = document.querySelector('#game');
 const ctx = canvas.getContext('2d');
@@ -254,7 +254,20 @@ async function syncAuctionBidsOnline(){
       lot.marketBid=Number(row.user_bid)||0;lot.leaderUserId=row.leader_user_id||null;lot.leaderCallsign=row.leader_callsign||'Piloto';
     }
     const myId=getUser()?.id;
-    for(const ref of prevLeading){const lot=a.lots[ref];if(lot&&lot.leaderUserId&&lot.leaderUserId!==myId&&lot.userBid===0)showToast(`${lot.name}: seu lance foi superado por ${lot.leaderCallsign}`);}
+    const staleOwn=[];
+    for(const lot of Object.values(a.lots||{})){
+      if(lot.userBid>0&&lot.leaderUserId&&lot.leaderUserId!==myId){
+        staleOwn.push(lot.ref);
+        lot.userBid=0;lot.escrow=0;
+      }
+    }
+    if(staleOwn.length){
+      Promise.allSettled(staleOwn.map(ref=>markAuctionBidStatusOnline({hourKey:current,lotRef:ref,status:'lost'})));
+    }
+    for(const ref of prevLeading){
+      const lot=a.lots[ref];
+      if(lot&&lot.leaderUserId&&lot.leaderUserId!==myId)showToast(`${lot.name}: seu lance foi superado por ${lot.leaderCallsign}`);
+    }
     a.onlineReady=true;auctionLastMarketSync=Date.now();saveGame();if(ui.auctionModal&&!ui.auctionModal.classList.contains('hidden'))renderAuction();
   }catch(e){console.warn('auction sync online',e);if(ui.auctionModal&&!ui.auctionModal.classList.contains('hidden'))showToast('Leilão online indisponível temporariamente');}
   finally{auctionSyncBusy=false;}
@@ -2658,23 +2671,93 @@ function auctionMinBid(lot){
   return Math.max(100000,auctionSystemBid(lot));
 }
 async function placeAuctionBid(ref,amount){
-  ensureAuctionState();const lot=progress.auction.lots[ref];if(!lot)return;
-  if(lot.leaderUserId===getUser()?.id){showToast('Você já está liderando esse lote — espere outro jogador cobrir');return;}
-  const min=auctionMinBid(lot);
+  ensureAuctionState();
+  const lot=progress.auction.lots[ref];
+  if(!lot)return;
+
+  const myId=getUser()?.id;
+  if(!myId){showToast('Sessão online não encontrada');return;}
+
+  // Busca o mercado real ANTES de aceitar o lance.
+  let market=[];
+  try{market=await loadAuctionMarket(progress.auction.hourKey);}
+  catch(e){showToast(`Leilão online indisponível: ${e.message}`);return;}
+
+  const live=market.find(x=>x.lot_ref===ref)||null;
+  if(live?.leader_user_id===myId){
+    showToast('Você já está liderando esse lote — espere outro jogador cobrir');
+    return;
+  }
+
+  // Se já existe jogador real, precisa cobrir +100k.
+  // Se ainda é o SISTEMA, basta cobrir o preço automático atual.
+  const systemFloor=auctionSystemBid(lot);
+  const liveMin=live?Math.max(100000,(Number(live.user_bid)||0)+100000):Math.max(100000,systemFloor);
+  const uiMin=auctionMinBid(lot);
+  const min=Math.max(liveMin,uiMin);
+
   amount=Number(amount);
   if(!Number.isFinite(amount)){showToast('Digite um lance válido');return;}
   amount=Math.floor(amount/100000)*100000;
-  if(amount<min){showToast(`Lance mínimo: ${fmt(min)} CR`);return;}
-  if(amount>auctionSpendableCredits(ref)){showToast('Créditos insuficientes considerando os outros lances em garantia');return;}
+
+  if(amount<min){
+    showToast(`Lance mínimo atualizado: ${fmt(min)} CR`);
+    renderAuction();
+    return;
+  }
+
+  if(amount>auctionSpendableCredits(ref)){
+    showToast('Créditos insuficientes considerando os outros lances em garantia');
+    return;
+  }
+
   try{
+    // Atualiza perfil/Créditos no banco antes da operação.
     await flushCloudSave(true);
-    const systemFloor=auctionSystemBid(lot);
-    const row=await placeAuctionBidOnline({hourKey:progress.auction.hourKey,lotRef:ref,userBid:amount,lot:{...lot,systemFloor,userBid:0,escrow:0,marketBid:0,leaderUserId:null,leaderCallsign:null}});
-    if(!row)throw new Error('O servidor não confirmou o lance.');
-    lot.userBid=Number(row.user_bid)||amount;lot.escrow=lot.userBid;lot.marketBid=lot.userBid;lot.leaderUserId=row.leader_user_id;lot.leaderCallsign=row.leader_callsign||progress.profile.callsign;
-    saveGame();renderAuction();updateUI();showToast(`Você lidera ${lot.name} com ${fmt(lot.userBid)} CR`);
-    setTimeout(()=>syncAuctionBidsOnline(),450);
-  }catch(err){showToast(`Lance recusado: ${err.message}`);setTimeout(()=>syncAuctionBidsOnline(),250);}
+
+    // Grava SOMENTE o lance do próprio jogador.
+    // Isso evita o bug do RPC antigo e respeita o RLS do Supabase.
+    const row=await saveAuctionBidOnline({
+      hourKey:progress.auction.hourKey,
+      lotRef:ref,
+      userBid:amount,
+      lot:{...lot,systemFloor,userBid:0,escrow:0,marketBid:0,leaderUserId:null,leaderCallsign:null}
+    });
+    if(!row)throw new Error('O banco não confirmou o lance.');
+
+    // Confirma quem realmente ficou na liderança (resolve disputa simultânea).
+    const after=await loadAuctionMarket(progress.auction.hourKey);
+    const winner=after.find(x=>x.lot_ref===ref)||null;
+
+    if(!winner||winner.leader_user_id!==myId||Number(winner.user_bid)!==amount){
+      await markAuctionBidStatusOnline({hourKey:progress.auction.hourKey,lotRef:ref,status:'lost'}).catch(()=>{});
+      lot.userBid=0;lot.escrow=0;
+      if(winner){
+        lot.marketBid=Number(winner.user_bid)||0;
+        lot.leaderUserId=winner.leader_user_id||null;
+        lot.leaderCallsign=winner.leader_callsign||'JOGADOR';
+        showToast(`Lance simultâneo perdido • ${lot.leaderCallsign} lidera com ${fmt(lot.marketBid)} CR`);
+      }else showToast('O lance não foi confirmado pelo mercado.');
+      saveGame();renderAuction();updateUI();
+      return;
+    }
+
+    lot.userBid=amount;
+    lot.escrow=amount;
+    lot.marketBid=amount;
+    lot.leaderUserId=myId;
+    lot.leaderCallsign=winner.leader_callsign||progress.profile.callsign;
+
+    saveGame();
+    renderAuction();
+    updateUI();
+    showToast(`Você lidera ${lot.name} com ${fmt(amount)} CR`);
+    setTimeout(()=>syncAuctionBidsOnline(),350);
+  }catch(err){
+    console.warn('auction bid',err);
+    showToast(`Lance recusado: ${err.message}`);
+    setTimeout(()=>syncAuctionBidsOnline(),250);
+  }
 }
 function auctionLotEligible(lot){
   if(!lot)return false;
@@ -2683,17 +2766,117 @@ function auctionLotEligible(lot){
   if(lot.kind==='petGear')return !progress?.pet?.gearsOwned?.[lot.id];
   return true;
 }
-function renderAuction(){
-  if(!progress||!ui.auctionGrid)return;ensureAuctionState();const sec=auctionSecondsLeft(),clock=formatAuctionClock(sec);ui.auctionClock.textContent=clock;ui.auctionTopClock.textContent=clock;ui.auctionCredits.textContent=fmt(auctionSpendableCredits());ui.auctionEscrow.textContent=fmt(auctionEscrow());ui.auctionGrid.innerHTML='';
-  const myId=getUser()?.id;
-  for(const lot of Object.values(progress.auction.lots)){
-    if(!auctionLotEligible(lot))continue;
-    const playerBid=Number(lot.marketBid)||0,current=auctionCurrentBid(lot),isMine=lot.leaderUserId===myId&&playerBid>0,leader=isMine?'VOCÊ':playerBid>0?(lot.leaderCallsign||'JOGADOR'):'SISTEMA',displayBid=current,min=auctionMinBid(lot),card=document.createElement('article');card.className=`auction-card ${isMine?'leading':''}`;card.dataset.auctionRef=lot.ref;const type=lot.kind==='ship'?'NAVE':lot.kind==='item'?'EQUIPAMENTO':lot.kind==='ammo'?'MUNIÇÃO':lot.kind==='rocket'?'MÍSSIL':'P.E.T.';
-    let art=null;if(lot.kind==='ship')art=V8_ASSETS.ships[lot.id];else if(lot.kind==='item')art=assetForProduct(lot.id,ITEMS[lot.id]?.type,ITEMS[lot.id]?.subtype);else if(lot.kind==='ammo'||lot.kind==='rocket')art=V8_ASSETS.ammo[lot.id];else if(lot.kind==='petGear')art={guard:V8_ASSETS.equipment.autoLaserCpu,box:V8_ASSETS.equipment.ammoAutoBuyCpu,ore:V8_ASSETS.equipment.rocketTurboCpu,repair:V8_ASSETS.equipment.rep2,kami:V8_ASSETS.equipment.autoRocketCpu}[lot.id];
-    card.innerHTML=`${art?`<img class="auction-art" src="${art}" alt="${lot.name}">`:''}<div class="auction-card-top"><span>${type}</span><b>${leader}</b></div><h3>${lot.name}</h3><div class="auction-bid-value">${fmt(displayBid)} CR</div><div class="auction-meta">${playerBid?`Lance atual de ${leader}`:'Preço automático do SISTEMA'} • Próximo mínimo ${fmt(min)} CR${lot.userBid?` • Seu lance ${fmt(lot.userBid)} CR`:''}</div>`;
-    const row=document.createElement('div');row.className='auction-bid-row';const input=document.createElement('input');input.className='auction-bid-input';input.type='number';input.min=String(min);input.step='100000';input.value=String(min);input.disabled=isMine;input.setAttribute('aria-label',`Lance para ${lot.name}`);const b=document.createElement('button');b.className='small-btn';b.textContent=isMine?'VOCÊ LIDERA':'DAR LANCE';b.disabled=isMine;b.onclick=()=>placeAuctionBid(lot.ref,input.value);row.append(input,b);card.appendChild(row);ui.auctionGrid.appendChild(card);
+const AUCTION_SECTIONS=[
+  {id:'ships',label:'NAVES',icon:'🛸'},
+  {id:'ammo',label:'MUNIÇÕES & MÍSSEIS',icon:'✦'},
+  {id:'equipment',label:'EQUIPAMENTOS',icon:'⚙'},
+  {id:'extras',label:'EXTRAS',icon:'🧩'},
+  {id:'pet',label:'P.E.T.',icon:'🤖'},
+];
+function auctionSectionId(lot){
+  if(lot.kind==='ship')return 'ships';
+  if(lot.kind==='ammo'||lot.kind==='rocket')return 'ammo';
+  if(lot.kind==='petGear')return 'pet';
+  if(lot.kind==='item'){
+    const type=ITEMS[lot.id]?.type;
+    if(type==='extra')return 'extras';
+    if(type==='pet')return 'pet';
+    return 'equipment';
   }
-  ui.auctionHistory.innerHTML=(progress.auction.history||[]).length?progress.auction.history.map(h=>`<div class="auction-history-row"><span>${h.result}</span><b>${h.name}</b><em>${fmt(h.bid)} CR</em></div>`).join(''):'<div class="muted">Nenhum ciclo encerrado ainda.</div>';
+  return 'equipment';
+}
+function auctionSectionLabelCount(sectionId,lots){
+  return lots.filter(l=>auctionSectionId(l)===sectionId).length;
+}
+
+function renderAuction(){
+  if(!progress||!ui.auctionGrid)return;
+  ensureAuctionState();
+
+  const sec=auctionSecondsLeft(),clock=formatAuctionClock(sec);
+  ui.auctionClock.textContent=clock;
+  ui.auctionTopClock.textContent=clock;
+  ui.auctionCredits.textContent=fmt(auctionSpendableCredits());
+  ui.auctionEscrow.textContent=fmt(auctionEscrow());
+  ui.auctionGrid.innerHTML='';
+
+  const myId=getUser()?.id;
+  const lots=Object.values(progress.auction.lots).filter(auctionLotEligible);
+
+  for(const section of AUCTION_SECTIONS){
+    const sectionLots=lots.filter(l=>auctionSectionId(l)===section.id);
+    if(!sectionLots.length)continue;
+
+    const block=document.createElement('section');
+    block.className='auction-section';
+    block.dataset.auctionSection=section.id;
+
+    const head=document.createElement('div');
+    head.className='auction-section-title';
+    head.innerHTML=`<div><span>${section.icon}</span><b>${section.label}</b></div><em>${sectionLots.length} ${sectionLots.length===1?'lote':'lotes'}</em>`;
+
+    const grid=document.createElement('div');
+    grid.className='auction-section-grid';
+
+    for(const lot of sectionLots){
+      const playerBid=Number(lot.marketBid)||0;
+      const current=auctionCurrentBid(lot);
+      const isMine=lot.leaderUserId===myId&&playerBid>0;
+      const leader=isMine?'VOCÊ':playerBid>0?(lot.leaderCallsign||'JOGADOR'):'SISTEMA';
+      const displayBid=current,min=auctionMinBid(lot);
+      const card=document.createElement('article');
+
+      card.className=`auction-card ${isMine?'leading':''}`;
+      card.dataset.auctionRef=lot.ref;
+
+      const type=lot.kind==='ship'?'NAVE':lot.kind==='item'?(ITEMS[lot.id]?.type==='extra'?'EXTRA':'EQUIPAMENTO'):lot.kind==='ammo'?'MUNIÇÃO':lot.kind==='rocket'?'MÍSSIL':'P.E.T.';
+
+      let art=null;
+      if(lot.kind==='ship')art=V8_ASSETS.ships[lot.id];
+      else if(lot.kind==='item')art=assetForProduct(lot.id,ITEMS[lot.id]?.type,ITEMS[lot.id]?.subtype);
+      else if(lot.kind==='ammo'||lot.kind==='rocket')art=V8_ASSETS.ammo[lot.id];
+      else if(lot.kind==='petGear')art={guard:V8_ASSETS.equipment.autoLaserCpu,box:V8_ASSETS.equipment.ammoAutoBuyCpu,ore:V8_ASSETS.equipment.rocketTurboCpu,repair:V8_ASSETS.equipment.rep2,kami:V8_ASSETS.equipment.autoRocketCpu}[lot.id];
+
+      card.innerHTML=`${art?`<img class="auction-art" src="${art}" alt="${lot.name}">`:''}
+        <div class="auction-card-top"><span>${type}</span><b>${leader}</b></div>
+        <h3>${lot.name}</h3>
+        <div class="auction-bid-value">${fmt(displayBid)} CR</div>
+        <div class="auction-meta">${playerBid?`Lance atual de ${leader}`:'Preço automático do SISTEMA'} • Próximo mínimo ${fmt(min)} CR${lot.userBid?` • Seu lance ${fmt(lot.userBid)} CR`:''}</div>`;
+
+      const row=document.createElement('div');
+      row.className='auction-bid-row';
+
+      const input=document.createElement('input');
+      input.className='auction-bid-input';
+      input.type='number';
+      input.min=String(min);
+      input.step='100000';
+      input.value=String(min);
+      input.disabled=isMine;
+      input.setAttribute('aria-label',`Lance para ${lot.name}`);
+
+      const b=document.createElement('button');
+      b.className='small-btn';
+      b.textContent=isMine?'VOCÊ LIDERA':'DAR LANCE';
+      b.disabled=isMine;
+      b.onclick=()=>placeAuctionBid(lot.ref,input.value);
+
+      row.append(input,b);
+      card.appendChild(row);
+      grid.appendChild(card);
+    }
+
+    block.append(head,grid);
+    ui.auctionGrid.appendChild(block);
+  }
+
+  if(!lots.length){
+    ui.auctionGrid.innerHTML='<div class="auction-empty">Nenhum item Elite disponível para sua conta neste ciclo.</div>';
+  }
+
+  ui.auctionHistory.innerHTML=(progress.auction.history||[]).length
+    ?progress.auction.history.map(h=>`<div class="auction-history-row"><span>${h.result}</span><b>${h.name}</b><em>${fmt(h.bid)} CR</em></div>`).join('')
+    :'<div class="muted">Nenhum ciclo encerrado ainda.</div>';
 }
 function openAuction(){renderAuction();ui.auctionModal.classList.remove('hidden');syncAuctionBidsOnline();}
 let auctionUiTick=0;

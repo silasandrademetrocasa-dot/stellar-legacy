@@ -381,3 +381,10 @@ O Leilão Elite foi migrado para persistência online: lances ativos ficam regis
 - O primeiro jogador pode dar exatamente o preço atual do sistema.
 - Portanto, quando o lote estiver em 100.000 CR, 100.000 CR é um lance válido.
 - Depois do primeiro jogador, somente outro jogador pode cobrir, com incremento mínimo de 100.000 CR.
+
+
+## V10.6.2 — Auction Repair & Sections
+- Corrigido definitivamente o fluxo de DAR LANCE, contornando o RPC antigo que retornava `lot_ref is ambiguous`.
+- Lance é gravado online e verificado novamente no mercado para resolver concorrência simultânea.
+- Garantia de lances já superados é liberada.
+- Leilão organizado em Naves, Munições & Mísseis, Equipamentos, Extras e P.E.T.
