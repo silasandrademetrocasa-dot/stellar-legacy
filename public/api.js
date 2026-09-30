@@ -328,6 +328,7 @@ export async function upsertPlayerPresenceOnline(payload) {
       user_id: currentUser.id,
       callsign: String(payload.callsign || currentUser.callsign || 'Pilot').slice(0, 24),
       map_id: String(payload.mapId || 'x1'),
+      territory_faction: String(payload.territoryFaction || 'battle'),
       x: Number(payload.x || 0),
       y: Number(payload.y || 0),
       angle: Number(payload.angle || 0),
@@ -344,11 +345,33 @@ export async function upsertPlayerPresenceOnline(payload) {
   return { ok: true };
 }
 
-export async function loadMapPresenceOnline(mapId) {
+export async function loadMapPresenceOnline(mapId, territoryFaction='battle') {
   const cutoff = new Date(Date.now() - 9000).toISOString();
   const rows = await authedSupabaseFetch(
-    `/rest/v1/player_presence?map_id=eq.${encodeURIComponent(String(mapId || 'x1'))}&updated_at=gte.${encodeURIComponent(cutoff)}&select=user_id,callsign,map_id,x,y,angle,ship_id,faction,level,hp,max_hp,shield,max_shield,updated_at&order=updated_at.desc`
+    `/rest/v1/player_presence?map_id=eq.${encodeURIComponent(String(mapId || 'x1'))}&territory_faction=eq.${encodeURIComponent(String(territoryFaction || 'battle'))}&updated_at=gte.${encodeURIComponent(cutoff)}&select=user_id,callsign,map_id,territory_faction,x,y,angle,ship_id,faction,level,hp,max_hp,shield,max_shield,updated_at&order=updated_at.desc`
   );
+  return Array.isArray(rows) ? rows : [];
+}
+
+export async function queuePvpAttackOnline({targetUserId,damage,shieldDrain=false,mapId,territoryFaction}) {
+  const rows = await authedSupabaseFetch('/rest/v1/rpc/queue_pvp_attack', {
+    method: 'POST',
+    body: JSON.stringify({
+      p_target_user_id: targetUserId,
+      p_damage: Math.max(0,Math.round(Number(damage)||0)),
+      p_shield_drain: !!shieldDrain,
+      p_map_id: String(mapId||'x1'),
+      p_territory_faction: String(territoryFaction||'battle'),
+    }),
+  });
+  return Array.isArray(rows) ? rows[0] || null : null;
+}
+
+export async function consumePvpDamageEventsOnline() {
+  const rows = await authedSupabaseFetch('/rest/v1/rpc/consume_pvp_damage_events', {
+    method: 'POST',
+    body: JSON.stringify({}),
+  });
   return Array.isArray(rows) ? rows : [];
 }
 

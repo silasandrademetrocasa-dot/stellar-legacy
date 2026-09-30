@@ -366,3 +366,12 @@ O Leilão Elite foi migrado para persistência online: lances ativos ficam regis
 - O banco serializa os lances por lote para impedir corrida de dois jogadores ao mesmo tempo.
 - Quando outro piloto cobre você, sua garantia é liberada e o cliente sincroniza o novo líder.
 - Naves, EXTRAS e módulos únicos do P.E.T. já possuídos continuam ocultos do seu leilão.
+
+
+## V10.6 — PvP Frontier
+- PvP real entre companhias.
+- Proteção assimétrica nas bases X-1: invasor não inicia combate; defensor pode abrir retaliação.
+- Territórios de facções agora são instâncias online separadas e podem ser invadidos pela navegação.
+- Minimap mostra somente NPCs e pilotos inimigos, usando marcadores diferentes.
+- Leilão voltou a ter preço automático crescente antes de lances, mas o sistema congela assim que um jogador entra no lote.
+- Nenhum lance real pode ser coberto pelo sistema.

@@ -571,3 +571,8 @@ body[data-quality="high"] .hud-panel{backdrop-filter:blur(7px);-webkit-backdrop-
 .auction-card.leading{border-color:rgba(83,255,170,.66)!important;box-shadow:0 0 20px rgba(57,255,157,.12)!important}
 .auction-card.leading .auction-card-top b{color:#70ffb5!important}
 .auction-bid-row button:disabled{opacity:.82;border-color:rgba(83,255,170,.4);color:#86ffc0;background:rgba(8,49,35,.7)}
+
+/* ===== V10.6 PvP Frontier ===== */
+.map-node.hostile{border-color:rgba(255,72,98,.66)!important;box-shadow:0 0 22px rgba(255,48,79,.17)!important}
+.map-node.hostile .node-sub{color:#ff8da0!important}
+.map-legend .dot.hostile{background:#ff4d69;box-shadow:0 0 8px rgba(255,77,105,.7)}

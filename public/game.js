@@ -1,6 +1,6 @@
-import { FACTIONS, SHIPS, ITEMS, LASER_AMMO, ROCKETS, NPC_TYPES, MAPS, RESOURCES } from './data.js?v=10.5.0';
-import { V8_ASSETS } from './assets/v8/manifest.js?v=10.5.0';
-import { signUp, signIn, restoreSession, signOutLocal, getUser, loadCloudSave, saveCloudSave, updateCallsign, updatePassword, loadRankings, loadAuctionBids, markAuctionBidStatusOnline, loadAuctionMarket, placeAuctionBidOnline, upsertPlayerPresenceOnline, loadMapPresenceOnline, removePlayerPresenceOnline } from './api.js?v=10.5.0';
+import { FACTIONS, SHIPS, ITEMS, LASER_AMMO, ROCKETS, NPC_TYPES, MAPS, RESOURCES } from './data.js?v=10.6.0';
+import { V8_ASSETS } from './assets/v8/manifest.js?v=10.6.0';
+import { signUp, signIn, restoreSession, signOutLocal, getUser, loadCloudSave, saveCloudSave, updateCallsign, updatePassword, loadRankings, loadAuctionBids, markAuctionBidStatusOnline, loadAuctionMarket, placeAuctionBidOnline, upsertPlayerPresenceOnline, loadMapPresenceOnline, removePlayerPresenceOnline, queuePvpAttackOnline, consumePvpDamageEventsOnline } from './api.js?v=10.6.0';
 
 const canvas = document.querySelector('#game');
 const ctx = canvas.getContext('2d');
@@ -166,9 +166,11 @@ function pilotRequirementMet(skill){return !skill.requires||pilotSkillLevel(skil
 function pilotRareChanceBonus(){return pilotCombined('luck1','luck2')/100;}function pilotLootBonus(){return pilotCombined('tractor1','tractor2')/100;}function pilotEvasion(){return Math.min(.35,pilotCombined('evasive1','evasive2')/100);}function pilotBattleLaserBonus(){return pilotCombined('bounty1','bounty2')/100;}function pilotKamikazeDamageBonus(){return pilotCombined('detonation1','detonation2')/100;}function pilotKamikazeRadiusBonus(){return pilotSkillValue('explosives')/100;}
 
 // ===================== V10.5 REAL-PLAYER ONLINE AUCTION =====================
-function freshAuctionState(){return {hourKey:null,lots:{},history:[],onlineReady:false,legacyEscrowMigrated:false,marketVersion:2};}
+function freshAuctionState(){return {hourKey:null,lots:{},history:[],onlineReady:false,legacyEscrowMigrated:false,marketVersion:3};}
 function auctionHourKey(d=new Date()){return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}-${String(d.getHours()).padStart(2,'0')}`;}
 function auctionSecondsLeft(){const d=new Date(),next=new Date(d);next.setMinutes(60,0,0);return Math.max(0,Math.ceil((next-d)/1000));}
+function auctionSeed(str){let h=2166136261>>>0;for(let i=0;i<str.length;i++){h^=str.charCodeAt(i);h=Math.imul(h,16777619);}return h>>>0;}
+function auctionRand(seed){let x=seed>>>0;return()=>{x=(Math.imul(1664525,x)+1013904223)>>>0;return x/4294967296;};}
 function eliteAuctionCatalog(){
   const out=[];
   Object.values(SHIPS).filter(x=>x.currency==='uridium'&&!x.eventOnly&&x.shopAvailable!==false&&x.auctionEligible!==false&&!progress?.ownedShips?.includes(x.id)).forEach(x=>out.push({ref:`ship:${x.id}`,kind:'ship',id:x.id,name:x.name,uri:x.price,qty:1,unique:true}));
@@ -178,7 +180,29 @@ function eliteAuctionCatalog(){
   Object.values(PET_GEARS).filter(x=>x.currency==='uridium'&&!progress?.pet?.gearsOwned?.[x.id]).forEach(x=>out.push({ref:`petGear:${x.id}`,kind:'petGear',id:x.id,name:`P.E.T. • ${x.name}`,uri:x.cost,qty:1,unique:true}));
   return out;
 }
-function buildAuctionLots(key){const lots={};for(const entry of eliteAuctionCatalog())lots[entry.ref]={...entry,reserve:100000,userBid:0,escrow:0,marketBid:0,leaderUserId:null,leaderCallsign:null};return lots;}
+function normalizeAuctionEconomy(lot,key=progress?.auction?.hourKey||auctionHourKey()){
+  if(!lot)return lot;
+  if(!Number.isFinite(Number(lot.reserve))||Number(lot.reserve)<100000||!Number.isFinite(Number(lot.finalSystemBid))){
+    const rnd=auctionRand(auctionSeed(`${key}:${lot.ref}`));
+    lot.reserve=Math.max(100000,Math.round((Number(lot.uri)||1000)*70*(.75+rnd()*.5)/100000)*100000);
+    lot.finalSystemBid=Math.max(lot.reserve+100000,Math.round(lot.reserve*(1.25+rnd()*1.75)/100000)*100000);
+  }
+  return lot;
+}
+function buildAuctionLots(key){
+  const lots={};
+  for(const entry of eliteAuctionCatalog()){
+    const lot=normalizeAuctionEconomy({...entry,userBid:0,escrow:0,marketBid:0,leaderUserId:null,leaderCallsign:null},key);
+    lots[entry.ref]=lot;
+  }
+  return lots;
+}
+function auctionSystemBid(lot){
+  normalizeAuctionEconomy(lot);
+  const d=new Date(),fraction=(d.getMinutes()*60+d.getSeconds())/3600;
+  return Math.max(100000,Math.round((lot.reserve+(lot.finalSystemBid-lot.reserve)*fraction)/100000)*100000);
+}
+function auctionCurrentBid(lot){return Number(lot?.marketBid)>0?Number(lot.marketBid):auctionSystemBid(lot);}
 function auctionEscrow(){return Object.values(progress?.auction?.lots||{}).reduce((sum,l)=>sum+(auctionLotEligible(l)?(Number(l.userBid)||0):0),0);}
 function auctionSpendableCredits(excludeRef=null){const reserved=Object.values(progress?.auction?.lots||{}).reduce((sum,l)=>sum+(!auctionLotEligible(l)||l.ref===excludeRef?0:(Number(l.userBid)||0)),0);return Math.max(0,(progress?.profile?.credits||0)-reserved);}
 function grantAuctionLot(lot){
@@ -220,12 +244,12 @@ async function syncAuctionBidsOnline(){
     for(const row of ownRows){
       if(row.hour_key!==current)continue;
       let lot=a.lots[row.lot_ref];
-      if(!lot&&auctionLotEligible(row.lot)){lot={...row.lot,reserve:100000,userBid:0,escrow:0,marketBid:0,leaderUserId:null,leaderCallsign:null};a.lots[row.lot_ref]=lot;}
+      if(!lot&&auctionLotEligible(row.lot)){lot=normalizeAuctionEconomy({...row.lot,userBid:0,escrow:0,marketBid:0,leaderUserId:null,leaderCallsign:null},a.hourKey);a.lots[row.lot_ref]=lot;}
       if(lot&&auctionLotEligible(lot)){lot.userBid=Number(row.user_bid)||0;lot.escrow=lot.userBid;}
     }
     for(const row of marketRows){
       let lot=a.lots[row.lot_ref];
-      if(!lot&&auctionLotEligible(row.lot)){lot={...row.lot,reserve:100000,userBid:0,escrow:0,marketBid:0,leaderUserId:null,leaderCallsign:null};a.lots[row.lot_ref]=lot;}
+      if(!lot&&auctionLotEligible(row.lot)){lot=normalizeAuctionEconomy({...row.lot,userBid:0,escrow:0,marketBid:0,leaderUserId:null,leaderCallsign:null},a.hourKey);a.lots[row.lot_ref]=lot;}
       if(!lot||!auctionLotEligible(lot))continue;
       lot.marketBid=Number(row.user_bid)||0;lot.leaderUserId=row.leader_user_id||null;lot.leaderCallsign=row.leader_callsign||'Piloto';
     }
@@ -240,7 +264,7 @@ function ensureAuctionState(){
   progress.auction ||= freshAuctionState();const a=progress.auction;
   if(!a.legacyEscrowMigrated){const legacy=Object.values(a.lots||{}).reduce((sum,l)=>sum+(Number(l.escrow)||0),0);if(legacy>0)progress.profile.credits+=legacy;a.legacyEscrowMigrated=true;}
   const key=auctionHourKey();
-  if(a.marketVersion!==2||a.hourKey!==key){a.hourKey=key;a.lots=buildAuctionLots(key);a.marketVersion=2;a.onlineReady=false;saveGame();setTimeout(()=>syncAuctionBidsOnline(),0);}
+  if(a.marketVersion!==3||a.hourKey!==key){a.hourKey=key;a.lots=buildAuctionLots(key);a.marketVersion=3;a.onlineReady=false;saveGame();setTimeout(()=>syncAuctionBidsOnline(),0);}
 }
 
 const PLAYER_MAX_LEVEL=44;
@@ -871,6 +895,7 @@ function freshSave(factionId) {
     selectedLaserAmmo: 'lcb10',
     selectedRocket: 'r310',
     mapId: 'x1',
+    territoryFaction: factionId,
     x: SAFE_ZONE.x, y: SAFE_ZONE.y,
     hp: SHIPS.phoenix.hp,
     shield: 1000,
@@ -898,7 +923,7 @@ const petRuntime = {
   taskType: 'follow', taskId: null
 };
 const state = {
-  currentMap: MAPS.x1, camera: { x: 620, y: MAPS.x1.world.h/2 }, target: null, enemies: [], loot: [], ores: [], particles: [], fx: [], rocketFx: [], landmarks: [], enemyRespawns: [], oreRespawns: [], lastPortalAt: 0, radarRange: 1500, jumping: false,
+  currentMap: MAPS.x1, camera: { x: 620, y: MAPS.x1.world.h/2 }, target: null, pvpShotPending:false, pvpRocketPending:false, enemies: [], loot: [], ores: [], particles: [], fx: [], rocketFx: [], landmarks: [], enemyRespawns: [], oreRespawns: [], lastPortalAt: 0, radarRange: 1500, jumping: false,
   lastPlayerDamageAt:nowSec(), repairFxAt:0,
   pointerNavActive:false, pointerNavId:null, missionHudPage:0, missionHudSignature:'',
   shopTab: 'ships', hangarTab: 'ships', toastTimer: null, ammoUiExpanded: true, statsUiExpanded: true, minimapUiExpanded: true, topMetaExpanded: true,
@@ -1034,11 +1059,46 @@ function layoutHudPanels(){
   document.documentElement.style.setProperty('--weaponbar-height', `${weaponH + 12}px`);
 }
 function getFaction(){return progress?.profile?.faction ? FACTIONS[progress.profile.faction] : null;}
-function displayMapLabel(mapId){const map=MAPS[mapId];if(!map)return '—';if(map.gate)return map.label||'GATE';if(map.battle)return map.label;const f=getFaction();return f?`${f.prefix}-${map.tier}`:`X-${map.tier}`;}
-function currentGraphMapLabel(){return progress?displayMapLabel(progress.mapId):null;}
-function internalMapFromGraphLabel(label){if(label==='4-1')return 'b41';if(label==='4-2')return 'b42';if(label==='4-3')return 'b43';const f=getFaction();if(!f||!label.startsWith(`${f.prefix}-`))return null;const tier=Number(label.split('-')[1]);return tier>=1&&tier<=4?`x${tier}`:null;}
+function factionFromPrefix(prefix){
+  return Object.values(FACTIONS).find(f=>String(f.prefix)===String(prefix))||null;
+}
+function currentTerritoryFaction(){
+  if(!progress)return null;
+  if(!['x1','x2','x3','x4'].includes(progress.mapId))return null;
+  return progress.territoryFaction||progress.profile.faction;
+}
+function territoryOwner(){
+  const id=currentTerritoryFaction();
+  return id?FACTIONS[id]||null:null;
+}
+function isOwnTerritory(){
+  return !!progress&&!!currentTerritoryFaction()&&currentTerritoryFaction()===progress.profile.faction;
+}
+function displayMapLabel(mapId,territoryFaction=null){
+  const map=MAPS[mapId];if(!map)return '—';
+  if(map.gate)return map.label||'GATE';
+  if(map.battle)return map.label;
+  const ownerId=territoryFaction||(mapId===progress?.mapId?currentTerritoryFaction():progress?.profile?.faction);
+  const f=ownerId?FACTIONS[ownerId]:getFaction();
+  return f?`${f.prefix}-${map.tier}`:`X-${map.tier}`;
+}
+function currentGraphMapLabel(){return progress?displayMapLabel(progress.mapId,currentTerritoryFaction()):null;}
+function graphDestination(label){
+  if(label==='4-1')return {mapId:'b41',territoryFaction:null,battle:true};
+  if(label==='4-2')return {mapId:'b42',territoryFaction:null,battle:true};
+  if(label==='4-3')return {mapId:'b43',territoryFaction:null,battle:true};
+  const [prefix,tierRaw]=String(label||'').split('-'),f=factionFromPrefix(prefix),tier=Number(tierRaw);
+  if(!f||tier<1||tier>4)return null;
+  return {mapId:`x${tier}`,territoryFaction:f.id,battle:false};
+}
+function internalMapFromGraphLabel(label){return graphDestination(label)?.mapId||null;}
 function graphLevelRequirement(label){if(label.startsWith('4-'))return 4;const tier=Number(label.split('-')[1]||99);return tier<=2?1:tier===3?2:tier===4?3:99;}
-function canTravelGraphLabel(label){const mapId=internalMapFromGraphLabel(label);if(!mapId)return {ok:false,reason:'Território de outra facção'};const req=graphLevelRequirement(label);if((progress?.profile?.level||1)<req)return {ok:false,reason:`Requer nível ${req}`};return {ok:true,mapId};}
+function canTravelGraphLabel(label){
+  const dest=graphDestination(label);if(!dest)return {ok:false,reason:'Rota inválida'};
+  const req=graphLevelRequirement(label);if((progress?.profile?.level||1)<req)return {ok:false,reason:`Requer nível ${req}`};
+  const foreign=!dest.battle&&dest.territoryFaction!==progress.profile.faction;
+  return {ok:true,mapId:dest.mapId,territoryFaction:dest.territoryFaction,battle:dest.battle,foreign};
+}
 function mapArtFor(label){
   const prefix=label.split('-')[0],tier=Number(label.split('-')[1]||1);
   let path=V8_ASSETS.backgrounds.x1;
@@ -1049,9 +1109,28 @@ function mapArtFor(label){
   else path=V8_ASSETS.backgrounds.x4;
   return `url('${path}') center/cover no-repeat`;
 }
-function renderMapModal(){if(!ui.mapNetwork||!progress)return;const current=currentGraphMapLabel();const nodeMap=Object.fromEntries(MAP_GRAPH_NODES.map(n=>[n.id,n]));let html=`<svg class="map-svg" viewBox="0 0 100 100" preserveAspectRatio="none">`;for(const [a,b] of MAP_GRAPH_LINKS){const na=nodeMap[a],nb=nodeMap[b];html+=`<line class="map-link" x1="${na.x}" y1="${na.y}" x2="${nb.x}" y2="${nb.y}" />`;}html+='</svg>';html+=`<div class="map-legend"><span><i class="dot curr"></i> mapa atual</span><span><i class="dot own"></i> liberado</span><span><i class="dot future"></i> bloqueado</span></div>`;for(const node of MAP_GRAPH_NODES){const access=canTravelGraphLabel(node.id),active=node.id===current,battle=node.id.startsWith('4-');const own=!!internalMapFromGraphLabel(node.id);const classes=['map-node'];if(active)classes.push('current');if(own)classes.push('faction');if(battle)classes.push('battle');if(access.ok&&!active)classes.push('travel');if(!access.ok)classes.push('locked');const sub=active?'ATUAL':access.ok?'LIBERADO':access.reason;html+=`<div class="${classes.join(' ')}" data-map-label="${node.id}" style="left:${node.x}%;top:${node.y}%;--art:${mapArtFor(node.id)}"><div class="node-art"></div><div class="node-overlay"></div><div class="node-sub">${sub}</div>${!access.ok?'<div class="node-lock">🔒</div>':''}<div class="node-label">${node.id}</div></div>`;}ui.mapNetwork.innerHTML=html;ui.mapNetwork.querySelectorAll('.map-node.travel').forEach(el=>el.addEventListener('click',()=>{const label=el.dataset.mapLabel,access=canTravelGraphLabel(label);if(!access.ok)return;ui.mapModal.classList.add('hidden');runMapTransition(access.mapId,null,'NAVIGAÇÃO DIRETA');}));}
+function renderMapModal(){
+  if(!ui.mapNetwork||!progress)return;
+  const current=currentGraphMapLabel(),nodeMap=Object.fromEntries(MAP_GRAPH_NODES.map(n=>[n.id,n]));
+  let html=`<svg class="map-svg" viewBox="0 0 100 100" preserveAspectRatio="none">`;
+  for(const [a,b] of MAP_GRAPH_LINKS){const na=nodeMap[a],nb=nodeMap[b];html+=`<line class="map-link" x1="${na.x}" y1="${na.y}" x2="${nb.x}" y2="${nb.y}" />`;}
+  html+='</svg>';
+  html+=`<div class="map-legend"><span><i class="dot curr"></i> mapa atual</span><span><i class="dot own"></i> território aliado</span><span><i class="dot hostile"></i> território inimigo / invasão</span></div>`;
+  for(const node of MAP_GRAPH_NODES){
+    const access=canTravelGraphLabel(node.id),active=node.id===current,battle=node.id.startsWith('4-'),foreign=!!access.foreign;
+    const classes=['map-node'];if(active)classes.push('current');if(!foreign&&!battle)classes.push('faction');if(foreign)classes.push('hostile');if(battle)classes.push('battle');if(access.ok&&!active)classes.push('travel');if(!access.ok)classes.push('locked');
+    const sub=active?'ATUAL':access.ok?(foreign?'INVASÃO':'LIBERADO'):access.reason;
+    html+=`<div class="${classes.join(' ')}" data-map-label="${node.id}" style="left:${node.x}%;top:${node.y}%;--art:${mapArtFor(node.id)}"><div class="node-art"></div><div class="node-overlay"></div><div class="node-sub">${sub}</div>${!access.ok?'<div class="node-lock">🔒</div>':''}<div class="node-label">${node.id}</div></div>`;
+  }
+  ui.mapNetwork.innerHTML=html;
+  ui.mapNetwork.querySelectorAll('.map-node.travel').forEach(el=>el.addEventListener('click',()=>{
+    const label=el.dataset.mapLabel,access=canTravelGraphLabel(label);if(!access.ok)return;
+    ui.mapModal.classList.add('hidden');
+    runMapTransition(access.mapId,null,access.foreign?'INVASÃO DE TERRITÓRIO':'NAVIGAÇÃO DIRETA',access.territoryFaction);
+  }));
+}
 function openMapModal(){if(isGalaxyGateMap()){showToast('Galaxy Gate ativo: complete o portal ou perca uma vida para retornar à base');return;}renderMapModal();ui.mapModal.classList.remove('hidden');}
-function isSafeZone(x=player.x,y=player.y){return !!progress&&progress.mapId===SAFE_ZONE.mapId&&Math.hypot(x-SAFE_ZONE.x,y-SAFE_ZONE.y)<=SAFE_ZONE.radius;}
+function isSafeZone(x=player.x,y=player.y){return !!progress&&progress.mapId===SAFE_ZONE.mapId&&isOwnTerritory()&&Math.hypot(x-SAFE_ZONE.x,y-SAFE_ZONE.y)<=SAFE_ZONE.radius;}
 function safeZoneDistance(x,y){return Math.hypot(x-SAFE_ZONE.x,y-SAFE_ZONE.y);}
 function cargoExtraBonus(){
   return (progress?.shipLoadout?.extras||[]).reduce((sum,id)=>sum+(Number(ITEMS[id]?.cargoBonus)||0),0);
@@ -1070,7 +1149,7 @@ function addCargoResource(id,qty){if(!progress||qty<=0)return 0;const amount=Mat
 function playerLaserRange(){return state.currentMap?.battle ? 1250 : 900;}
 function playerRocketRange(){return state.currentMap?.battle ? 1100 : 820;}
 function mapRadarRange(){return state.currentMap?.battle ? 2200 : 1650;}
-function isAtTrader(){return progress?.mapId==='x1'&&isSafeZone();}
+function isAtTrader(){return progress?.mapId==='x1'&&isOwnTerritory()&&isSafeZone();}
 function showToast(msg){ui.toast.textContent=msg;ui.toast.classList.add('show');clearTimeout(state.toastTimer);state.toastTimer=setTimeout(()=>ui.toast.classList.remove('show'),1900);}
 const celebrationQueue=[];let celebrationRunning=false;
 function queueCelebration(kind,title,subtitle=''){celebrationQueue.push({kind,title,subtitle});playNextCelebration();}
@@ -1105,6 +1184,8 @@ function hydrateProgress(){
   progress.profile.xp=Math.max(0,Number(progress.profile.xp)||0);
   progress.profile.aliensKilled=Math.max(0,Math.floor(Number(progress.profile.aliensKilled)||0));
   progress.profile.ggCompleted=Math.max(0,Math.floor(Number(progress.profile.ggCompleted)||0));
+  if(['x1','x2','x3','x4'].includes(progress.mapId))progress.territoryFaction=progress.territoryFaction||progress.profile.faction;
+  else progress.territoryFaction=null;
   if(!progress.profile.xpModelV101){
     const oldCarry=progress.profile.xp;
     progress.profile.xp=levelXpThreshold(progress.profile.level)+oldCarry;
@@ -1641,12 +1722,28 @@ function factionBattleMap(){const id=progress?.profile?.faction;return id==='ear
 function resolvePortalTarget(code){if(code==='battleHome')return factionBattleMap();if(code==='x4HomeEarth')return progress?.profile?.faction==='earth'?'x4':null;if(code==='x4HomeMars')return progress?.profile?.faction==='mars'?'x4':null;if(code==='x4HomeJupiter')return progress?.profile?.faction==='jupiter'?'x4':null;return MAPS[code]?code:null;}
 function resolvedPortals(map=state.currentMap){return (map?.portals||[]).map(p=>({...p,to:resolvePortalTarget(p.to)})).filter(p=>p.to);}
 function findReturnPortal(targetMapId,fromMapId){return resolvedPortals(MAPS[targetMapId]).find(p=>p.to===fromMapId)||null;}
-function setMap(mapId,preserve=false,fromMapId=null){
-  if(!MAPS[mapId])return;if(mapId==='ggAlpha'){setupAlphaMap(true);return;}progress.mapId=mapId;state.currentMap=MAPS[mapId];state.radarRange=mapRadarRange();computeStats(true);
+function setMap(mapId,preserve=false,fromMapId=null,targetTerritoryFaction=null){
+  if(!MAPS[mapId])return;if(mapId==='ggAlpha'){setupAlphaMap(true);return;}
+  const previousWasTerritory=['x1','x2','x3','x4'].includes(progress.mapId);
+  progress.mapId=mapId;
+  if(['x1','x2','x3','x4'].includes(mapId)){
+    progress.territoryFaction=targetTerritoryFaction||(previousWasTerritory?progress.territoryFaction:null)||progress.profile.faction;
+  }else progress.territoryFaction=null;
+  state.currentMap=MAPS[mapId];state.radarRange=mapRadarRange();computeStats(true);
   if(!preserve){const returnPortal=fromMapId?findReturnPortal(mapId,fromMapId):null;player.x=returnPortal?returnPortal.x:(mapId==='x1'?SAFE_ZONE.x:400);player.y=returnPortal?returnPortal.y:(mapId==='x1'?SAFE_ZONE.y:state.currentMap.world.h/2);player.tx=player.x;player.ty=player.y;}
-  petRuntime.x=player.x+82;petRuntime.y=player.y+64;petRuntime.tx=petRuntime.x;petRuntime.ty=petRuntime.y;state.camera.x=player.x;state.camera.y=player.y;state.target=null;state.loot=[];state.fx=[];state.rocketFx=[];createLandmarks();createOres();spawnEnemies();saveGame();showToast(mapId==='x1'?`Base ${getFaction()?.short||''} • Zona Segura`:`Entrando em ${displayMapLabel(mapId)}`);renderMapModal();
+  petRuntime.x=player.x+82;petRuntime.y=player.y+64;petRuntime.tx=petRuntime.x;petRuntime.ty=petRuntime.y;state.camera.x=player.x;state.camera.y=player.y;state.target=null;state.loot=[];state.fx=[];state.rocketFx=[];clearOnlinePlayers();createLandmarks();createOres();spawnEnemies();saveGame();
+  const owner=territoryOwner(),home=isOwnTerritory();
+  showToast(mapId==='x1'?(home?`Base ${owner?.short||''} • Zona Segura`:`INVASÃO • Base ${owner?.short||''}`):`Entrando em ${displayMapLabel(mapId,currentTerritoryFaction())}`);
+  renderMapModal();syncOnlineWorld();
 }
-function runMapTransition(targetMapId,fromMapId=null,mode='PORTAL QUÂNTICO'){if(state.jumping||!MAPS[targetMapId])return;state.jumping=true;player.laserFiring=false;ui.portalPrompt?.classList.add('hidden');ui.jumpTitle.textContent=`${displayMapLabel(progress.mapId)} → ${displayMapLabel(targetMapId)}`;ui.jumpSubtitle.textContent=mode;ui.jumpTransition.classList.remove('hidden');requestAnimationFrame(()=>ui.jumpTransition.classList.add('active'));setTimeout(()=>setMap(targetMapId,false,fromMapId),430);setTimeout(()=>{ui.jumpTransition.classList.remove('active');setTimeout(()=>ui.jumpTransition.classList.add('hidden'),240);state.jumping=false;},1050);}
+function runMapTransition(targetMapId,fromMapId=null,mode='PORTAL QUÂNTICO',targetTerritoryFaction=null){
+  if(state.jumping||!MAPS[targetMapId])return;
+  state.jumping=true;player.laserFiring=false;ui.portalPrompt?.classList.add('hidden');
+  ui.jumpTitle.textContent=`${displayMapLabel(progress.mapId,currentTerritoryFaction())} → ${displayMapLabel(targetMapId,targetTerritoryFaction)}`;
+  ui.jumpSubtitle.textContent=mode;ui.jumpTransition.classList.remove('hidden');requestAnimationFrame(()=>ui.jumpTransition.classList.add('active'));
+  setTimeout(()=>setMap(targetMapId,false,fromMapId,targetTerritoryFaction),430);
+  setTimeout(()=>{ui.jumpTransition.classList.remove('active');setTimeout(()=>ui.jumpTransition.classList.add('hidden'),240);state.jumping=false;},1050);
+}
 
 function currentLaserAmmo(){return LASER_AMMO[progress.selectedLaserAmmo]||LASER_AMMO.lcb10;}
 function currentRocket(){return ROCKETS[progress.selectedRocket]||ROCKETS.r310;}
@@ -1718,23 +1815,30 @@ function fireLaserTick(){
   if(stock<=0){if(autoBuyEnabled()&&buyAmmoPack(ammo.id,true)){refreshAmmoCounters();renderShop();showToast(`Auto Buy: ${ammo.name}`);}else{player.laserFiring=false;showToast(`${ammo.name} acabou`);return;}}
   if(nowSec()-player.lastLaserShot<.42)return;
 
-  // Cada laser equipado consome 1 unidade de munição por rajada.
-  // Se houver menos munição que lasers, somente parte da bateria dispara.
-  const firingCount=Math.min(totalLasers,stock);
-  const firingIds=laserIds.slice(0,firingCount);
-  const allBase=laserPveBase(laserIds);
-  const firingBase=laserPveBase(firingIds);
-  const fraction=allBase>0?firingBase/allBase:0;
+  const firingCount=Math.min(totalLasers,stock),firingIds=laserIds.slice(0,firingCount);
 
+  if(state.target.isPlayer){
+    if(!pvpTargetAllowed(state.target)){player.laserFiring=false;showToast('Fogo amigo bloqueado');return;}
+    if(state.pvpShotPending)return;
+    const base=pvpLaserBase(firingIds),raw=Math.round(base*(Number(ammo.mult)||1)*rand(.95,1.08));
+    player.lastLaserShot=nowSec();
+    queuePvpShot(state.target,ammo.shieldDrain?Math.round(base*(Number(ammo.mult)||2)):raw,!!ammo.shieldDrain,ammo.color).then(row=>{
+      if(!row)return;
+      progress.ammo[ammo.id]=Math.max(0,(progress.ammo[ammo.id]||0)-firingCount);refreshAmmoCounters();saveGame();
+      if(progress.ammo[ammo.id]<=0){if(autoBuyEnabled()&&buyAmmoPack(ammo.id,true)){refreshAmmoCounters();renderShop();}else{player.laserFiring=false;showToast(`${ammo.name} acabou`);}}
+    });
+    return;
+  }
+
+  const allBase=laserPveBase(laserIds),firingBase=laserPveBase(firingIds),fraction=allBase>0?firingBase/allBase:0;
   player.lastLaserShot=nowSec();
   progress.ammo[ammo.id]=Math.max(0,stock-firingCount);refreshAmmoCounters();
   const rawBase=Math.round((player.laserDamage*fraction)*rand(.95,1.08));
   const laserHitChance=Math.min(1,.75+pilotSkillValue('electroOptics')/100);
   if(Math.random()<=laserHitChance){if(rawBase>0)applyLaserAmmoHit(state.target,rawBase,ammo,ammo.color);}else spawnParticle(state.target.x,state.target.y-state.target.size,'MISS','#7acfff');
-
   if(progress.ammo[ammo.id]<=0){
     if(autoBuyEnabled()&&buyAmmoPack(ammo.id,true)){refreshAmmoCounters();renderShop();showToast(`Auto Buy: ${ammo.name}`);}
-    else { player.laserFiring=false; showToast(`${ammo.name} acabou`); }
+    else {player.laserFiring=false;showToast(`${ammo.name} acabou`);}
   }
 }
 function fireRocket(manual=false){
@@ -1743,15 +1847,32 @@ function fireRocket(manual=false){
   const r=currentRocket();
   if(rocketQty(r.id)<=0){
     if(autoBuyEnabled()&&buyRocketPack(r.id,true)){refreshAmmoCounters();renderShop();if(manual)showToast(`Auto Buy: ${r.name}`);}
-    else { if(manual)showToast(`${r.name} acabou`); return; }
+    else {if(manual)showToast(`${r.name} acabou`);return;}
   }
   if(!rocketReady()){if(manual)showToast(`Míssil recarregando`);return;}
+
+  if(state.target.isPlayer){
+    if(!pvpTargetAllowed(state.target)){if(manual)showToast('Fogo amigo bloqueado');return;}
+    if(state.pvpRocketPending)return;
+    state.pvpRocketPending=true;player.lastRocketShot=nowSec();
+    queuePvpAttackOnline({targetUserId:state.target.id,damage:Math.round(r.damage*player.rocketMult),shieldDrain:false,mapId:progress.mapId,territoryFaction:onlineTerritoryKey()})
+      .then(row=>{
+        if(!row?.accepted)return;
+        progress.rockets[r.id]=Math.max(0,(progress.rockets[r.id]||0)-1);
+        state.rocketFx.push({sx:player.x,sy:player.y,tx:state.target.x,ty:state.target.y,color:r.color,born:nowSec(),duration:Math.max(.18,Math.min(.48,enemyDistance(state.target)/1700)),size:5});
+        saveGame();refreshAmmoCounters();
+      })
+      .catch(e=>showToast(String(e?.message||e).replace(/^.*?:\s*/,'')))
+      .finally(()=>{state.pvpRocketPending=false;});
+    return;
+  }
+
   player.lastRocketShot=nowSec();progress.rockets[r.id]=Math.max(0,(progress.rockets[r.id]||0)-1);state.rocketFx.push({sx:player.x,sy:player.y,tx:state.target.x,ty:state.target.y,color:r.color,born:nowSec(),duration:Math.max(.18,Math.min(.48,enemyDistance(state.target)/1700)),size:5});
   const rocketHitChance=Math.min(1,.90+pilotSkillValue('heatSeeking')/100);
   if(Math.random()<=rocketHitChance)dealDamageToEnemy(state.target,Math.round(r.damage*player.rocketMult),r.color);else spawnParticle(state.target.x,state.target.y-state.target.size,'MÍSSIL ERROU','#ffb36d');saveGame();
 }
-function takePlayerDamage(dmg){
-  if(isSafeZone())return;
+function takePlayerDamage(dmg,opts={}){
+  if(isSafeZone()&&!opts.forcePvP)return;
   if(pilotEvasion()>0&&Math.random()<pilotEvasion()){spawnParticle(player.x,player.y-35,'EVASÃO','#66d9ff');return;}
   state.lastPlayerDamageAt=nowSec();
   const hadShield=player.shield>0,absorb=Math.max(0,Math.min(100,player.shieldAbsorption))/100;let shieldPart=dmg*absorb;let hullPart=dmg-shieldPart;
@@ -1805,7 +1926,7 @@ function updatePlayer(dt){
   for(let i=state.ores.length-1;i>=0;i--){const o=state.ores[i];if(Math.hypot(o.x-player.x,o.y-player.y)<30){const got=addCargoResource(o.type,o.amount);if(got>0){spawnParticle(o.x,o.y,`+${got} ${o.type}`,o.color);missionEvent('collectOre',{amount:got,type:o.type,mapId:progress.mapId});state.ores.splice(i,1);state.oreRespawns.push({type:o.type,at:nowSec()+rand(5,12)});saveGame();}else showToast('Porão cheio');}}
   if(player.hp<=0){
     if(isGalaxyGateMap())handleAlphaDeath();
-    else{player.hp=player.maxHp;player.shield=Math.round(player.maxShield*.5);progress.profile.credits=Math.max(0,Math.round(progress.profile.credits*.95));progress.mapId='x1';state.currentMap=MAPS.x1;state.radarRange=mapRadarRange();player.x=SAFE_ZONE.x;player.y=SAFE_ZONE.y;player.tx=player.x;player.ty=player.y;state.camera.x=player.x;state.camera.y=player.y;state.target=null;player.laserFiring=false;state.fx=[];state.rocketFx=[];createLandmarks();createOres();spawnEnemies();showToast('Nave destruída. Retorno automático à Zona Segura.');saveGame();}
+    else{player.hp=player.maxHp;player.shield=Math.round(player.maxShield*.5);progress.profile.credits=Math.max(0,Math.round(progress.profile.credits*.95));progress.mapId='x1';progress.territoryFaction=progress.profile.faction;state.currentMap=MAPS.x1;state.radarRange=mapRadarRange();player.x=SAFE_ZONE.x;player.y=SAFE_ZONE.y;player.tx=player.x;player.ty=player.y;state.camera.x=player.x;state.camera.y=player.y;state.target=null;player.laserFiring=false;state.fx=[];state.rocketFx=[];createLandmarks();createOres();spawnEnemies();showToast('Nave destruída. Retorno automático à Zona Segura.');saveGame();}
   }
   progress.hp=player.hp;progress.shield=player.shield;progress.x=player.x;progress.y=player.y;
 }
@@ -1833,8 +1954,12 @@ function updateFx(dt){
 }
 // ===================== V10.5 ONLINE MAP PRESENCE =====================
 const onlineWorld={players:new Map(),busy:false,lastSyncAt:0,privateRemoved:false};
-function clearOnlinePlayers(){onlineWorld.players.clear();}
+function clearOnlinePlayers(){if(state.target?.isPlayer){state.target=null;player.laserFiring=false;}onlineWorld.players.clear();}
 function shortestAngleDelta(a,b){return Math.atan2(Math.sin(b-a),Math.cos(b-a));}
+function onlineTerritoryKey(){
+  return ['x1','x2','x3','x4'].includes(progress?.mapId)?(currentTerritoryFaction()||progress.profile.faction):'battle';
+}
+function onlinePlayerEnemy(rp){return !!rp&&rp.faction&&rp.faction!==progress?.profile?.faction;}
 async function syncOnlineWorld(){
   if(!authenticated||!progress||onlineWorld.busy)return;
   onlineWorld.busy=true;
@@ -1845,35 +1970,105 @@ async function syncOnlineWorld(){
       onlineWorld.lastSyncAt=Date.now();return;
     }
     onlineWorld.privateRemoved=false;
-    await upsertPlayerPresenceOnline({callsign:progress.profile.callsign,mapId:progress.mapId,x:player.x,y:player.y,angle:player.angle||0,shipId:progress.activeShipId,faction:progress.profile.faction,level:progress.profile.level,hp:player.hp,maxHp:player.maxHp,shield:player.shield,maxShield:player.maxShield});
-    const rows=await loadMapPresenceOnline(progress.mapId),me=getUser()?.id,seen=new Set();
+    const territory=onlineTerritoryKey();
+    await upsertPlayerPresenceOnline({
+      callsign:progress.profile.callsign,mapId:progress.mapId,territoryFaction:territory,
+      x:player.x,y:player.y,angle:player.angle||0,shipId:progress.activeShipId,faction:progress.profile.faction,
+      level:progress.profile.level,hp:player.hp,maxHp:player.maxHp,shield:player.shield,maxShield:player.maxShield
+    });
+    const rows=await loadMapPresenceOnline(progress.mapId,territory),me=getUser()?.id,seen=new Set();
     for(const row of rows){
       if(!row?.user_id||row.user_id===me)continue;seen.add(row.user_id);
       let rp=onlineWorld.players.get(row.user_id);
-      if(!rp){rp={id:row.user_id,x:Number(row.x)||0,y:Number(row.y)||0,tx:Number(row.x)||0,ty:Number(row.y)||0,angle:Number(row.angle)||0,targetAngle:Number(row.angle)||0};onlineWorld.players.set(row.user_id,rp);}
-      rp.tx=Number(row.x)||0;rp.ty=Number(row.y)||0;rp.targetAngle=Number(row.angle)||0;rp.callsign=row.callsign||'Pilot';rp.shipId=row.ship_id||'phoenix';rp.faction=row.faction||null;rp.level=Number(row.level)||1;rp.hp=Number(row.hp)||0;rp.maxHp=Number(row.max_hp)||1;rp.shield=Number(row.shield)||0;rp.maxShield=Number(row.max_shield)||0;rp.updatedAt=row.updated_at;
+      if(!rp){rp={id:row.user_id,isPlayer:true,x:Number(row.x)||0,y:Number(row.y)||0,tx:Number(row.x)||0,ty:Number(row.y)||0,angle:Number(row.angle)||0,targetAngle:Number(row.angle)||0};onlineWorld.players.set(row.user_id,rp);}
+      rp.isPlayer=true;rp.tx=Number(row.x)||0;rp.ty=Number(row.y)||0;rp.targetAngle=Number(row.angle)||0;
+      rp.callsign=row.callsign||'Pilot';rp.name=rp.callsign;rp.shipId=row.ship_id||'phoenix';rp.faction=row.faction||null;rp.level=Number(row.level)||1;
+      rp.hp=Number(row.hp)||0;rp.maxHp=Number(row.max_hp)||1;rp.shield=Number(row.shield)||0;rp.maxShield=Number(row.max_shield)||0;
+      rp.territoryFaction=row.territory_faction||territory;rp.size=onlineShipSize(rp.shipId)*.48;rp.updatedAt=row.updated_at;
     }
-    for(const id of [...onlineWorld.players.keys()])if(!seen.has(id))onlineWorld.players.delete(id);
+    for(const id of [...onlineWorld.players.keys()]){
+      if(!seen.has(id)){
+        if(state.target?.isPlayer&&state.target.id===id){state.target=null;player.laserFiring=false;}
+        onlineWorld.players.delete(id);
+      }
+    }
     onlineWorld.lastSyncAt=Date.now();
   }catch(e){console.warn('online presence sync',e);}
   finally{onlineWorld.busy=false;}
 }
+let pvpInboxBusy=false,pvpInboxLastAt=0;
+async function syncPvpInbox(){
+  if(!authenticated||!progress||isGalaxyGateMap()||pvpInboxBusy||Date.now()-pvpInboxLastAt<450)return;
+  pvpInboxBusy=true;pvpInboxLastAt=Date.now();
+  try{
+    const events=await consumePvpDamageEventsOnline();
+    for(const ev of events){
+      const dmg=Math.max(0,Number(ev.damage)||0);
+      if(ev.shield_drain){
+        const drained=Math.min(player.shield,dmg);player.shield=Math.max(0,player.shield-drained);
+        state.lastPlayerDamageAt=nowSec();
+        spawnParticle(player.x,player.y-34,`SAB -${fmt(drained)} ESC`,'#79f1ff');
+        spawnImpactFx(player.x,player.y,'#79f1ff',38,'shield');
+      }else{
+        takePlayerDamage(dmg,{forcePvP:true});
+        spawnParticle(player.x,player.y-35,`${ev.attacker_callsign||'PILOTO'} -${fmt(dmg)}`,'#ff657d');
+      }
+    }
+    if(events.length){progress.hp=player.hp;progress.shield=player.shield;saveGame();}
+  }catch(e){console.warn('pvp inbox',e);}
+  finally{pvpInboxBusy=false;}
+}
+function pvpTargetAllowed(target){
+  if(!target?.isPlayer)return false;
+  if(target.faction===progress.profile.faction)return false;
+  return true;
+}
+function pvpLaserBase(ids){
+  let dmg=ids.reduce((sum,id)=>sum+(Number(ITEMS[id]?.damage)||0),0);
+  const ship=SHIPS[progress.activeShipId],low=['x1','x2','x3','x4'].includes(progress.mapId);
+  if(ship?.bonusLowMaps&&low)dmg*=Number(ship.bonusLowMaps.laserMult)||1;
+  if(state.currentMap?.battle)dmg*=1+pilotBattleLaserBonus();
+  return dmg;
+}
+async function queuePvpShot(target,damage,shieldDrain=false,color='#ff657d'){
+  if(!target?.isPlayer||state.pvpShotPending)return null;
+  state.pvpShotPending=true;
+  try{
+    const row=await queuePvpAttackOnline({
+      targetUserId:target.id,damage:Math.max(0,Math.round(damage)),shieldDrain,
+      mapId:progress.mapId,territoryFaction:onlineTerritoryKey()
+    });
+    if(!row?.accepted)throw new Error('Ataque não autorizado.');
+    const effective=Math.max(0,Number(row.effective_damage)||0);
+    if(shieldDrain&&effective>0){
+      const before=player.shield;player.shield=Math.min(player.maxShield,player.shield+effective);
+      const restored=Math.max(0,Math.round(player.shield-before));if(restored>0)spawnParticle(player.x,player.y-34,`+${fmt(restored)} ESC`,'#79f1ff');
+    }
+    if(effective>0)spawnImpactFx(target.x,target.y,shieldDrain?'#79f1ff':color,32,shieldDrain?'shield':'impact');
+    return row;
+  }catch(e){
+    player.laserFiring=false;
+    showToast(String(e?.message||e).replace(/^.*?:\s*/,''));
+    return null;
+  }finally{state.pvpShotPending=false;}
+}
 function updateOnlineWorld(dt){
   if(!authenticated||!progress)return;
-  if(Date.now()-onlineWorld.lastSyncAt>1800&&!onlineWorld.busy)syncOnlineWorld();
+  if(Date.now()-onlineWorld.lastSyncAt>1200&&!onlineWorld.busy)syncOnlineWorld();
+  syncPvpInbox();
   for(const rp of onlineWorld.players.values()){
-    const k=Math.min(1,dt*5.5);rp.x+=(rp.tx-rp.x)*k;rp.y+=(rp.ty-rp.y)*k;rp.angle+=shortestAngleDelta(rp.angle,rp.targetAngle)*Math.min(1,dt*6);
+    const k=Math.min(1,dt*6.5);rp.x+=(rp.tx-rp.x)*k;rp.y+=(rp.ty-rp.y)*k;rp.angle+=shortestAngleDelta(rp.angle,rp.targetAngle)*Math.min(1,dt*7);
   }
 }
 function onlineShipSize(shipId){const ship=SHIPS[shipId];if(!ship)return 72;if(ship.id==='citadel')return 96;if(ship.id==='bigboy')return 88;if(['goliath','aegis','solace','spectrum','sentinel','diminisher','venom'].includes(ship.id))return 82;return 72;}
 function drawOnlinePlayers(){
   for(const rp of onlineWorld.players.values()){
-    if(!onScreenWorld(rp.x,rp.y,180))continue;const p=screenPos(rp.x,rp.y),f=FACTIONS[rp.faction],color=f?.color||'#69ffbd',path=V8_ASSETS.ships[rp.shipId],img=v8Image(path),size=onlineShipSize(rp.shipId);
+    if(!onScreenWorld(rp.x,rp.y,180))continue;const p=screenPos(rp.x,rp.y),f=FACTIONS[rp.faction],enemy=onlinePlayerEnemy(rp),color=enemy?'#ff4d69':(f?.color||'#69ffbd'),path=V8_ASSETS.ships[rp.shipId],img=v8Image(path),size=onlineShipSize(rp.shipId);
     ctx.save();ctx.translate(p.x,p.y);ctx.globalAlpha=.9;
     if(img&&img.naturalWidth){const sc=size/Math.max(img.naturalWidth,img.naturalHeight);ctx.rotate((rp.angle||0)+Math.PI/2);ctx.shadowColor=color;ctx.shadowBlur=10;ctx.drawImage(img,-img.naturalWidth*sc/2,-img.naturalHeight*sc/2,img.naturalWidth*sc,img.naturalHeight*sc);}else{ctx.rotate(rp.angle||0);drawShipModel(rp.shipId,color);}ctx.restore();
     const barW=58,bx=p.x-barW/2,hp=Math.max(0,Math.min(1,rp.hp/Math.max(1,rp.maxHp))),sh=Math.max(0,Math.min(1,rp.shield/Math.max(1,rp.maxShield)));
     ctx.fillStyle='rgba(8,20,28,.78)';ctx.fillRect(bx,p.y-size*.42-17,barW,4);ctx.fillStyle='#55ff9d';ctx.fillRect(bx,p.y-size*.42-17,barW*hp,4);ctx.fillStyle='rgba(7,25,45,.82)';ctx.fillRect(bx,p.y-size*.42-11,barW,3);ctx.fillStyle='#4fcfff';ctx.fillRect(bx,p.y-size*.42-11,barW*sh,3);
-    ctx.font='bold 11px Arial';ctx.textAlign='center';ctx.fillStyle='#8fffd0';ctx.shadowColor='rgba(0,0,0,.9)';ctx.shadowBlur=4;ctx.fillText(`● ${rp.callsign} • LV ${rp.level}`,p.x,p.y+size*.45+18);ctx.shadowBlur=0;
+    ctx.font='bold 11px Arial';ctx.textAlign='center';ctx.fillStyle=enemy?'#ff8b9e':'#8fffd0';ctx.shadowColor='rgba(0,0,0,.9)';ctx.shadowBlur=4;ctx.fillText(`${enemy?'◆':'●'} ${rp.callsign} • LV ${rp.level}`,p.x,p.y+size*.45+18);ctx.shadowBlur=0;
   }
 }
 
@@ -1914,12 +2109,12 @@ function drawNebula(){const pal=state.currentMap.palette||{nebula:'#173159',acce
 function drawBounds(){const p=screenPos(0,0);ctx.strokeStyle='rgba(60,140,255,.13)';ctx.lineWidth=2;ctx.strokeRect(p.x,p.y,state.currentMap.world.w,state.currentMap.world.h);}
 function drawBaseSafeZone(){
   if(progress.mapId!=='x1')return;
-  const p=screenPos(SAFE_ZONE.x,SAFE_ZONE.y),f=getFaction(),pulse=1+Math.sin(nowSec()*2.4)*.02;
-  ctx.save();ctx.translate(p.x,p.y);ctx.strokeStyle=f?.color||'#5ce8ff';ctx.fillStyle='rgba(40,220,170,.045)';ctx.lineWidth=3;ctx.beginPath();ctx.arc(0,0,SAFE_ZONE.radius*pulse,0,TWO_PI);ctx.fill();ctx.stroke();
+  const p=screenPos(SAFE_ZONE.x,SAFE_ZONE.y),f=territoryOwner()||getFaction(),home=isOwnTerritory(),pulse=1+Math.sin(nowSec()*2.4)*.02;
+  ctx.save();ctx.translate(p.x,p.y);ctx.strokeStyle=f?.color||'#5ce8ff';ctx.fillStyle=home?'rgba(40,220,170,.045)':'rgba(255,65,82,.035)';ctx.lineWidth=3;ctx.beginPath();ctx.arc(0,0,SAFE_ZONE.radius*pulse,0,TWO_PI);ctx.fill();ctx.stroke();
   ctx.strokeStyle='rgba(130,255,210,.22)';ctx.lineWidth=10;ctx.beginPath();ctx.arc(0,0,SAFE_ZONE.radius-10,0,TWO_PI);ctx.stroke();
   ctx.rotate(nowSec()*.25);ctx.strokeStyle=f?.color||'#fff';ctx.lineWidth=4;for(let i=0;i<3;i++){ctx.rotate(TWO_PI/3);ctx.beginPath();ctx.moveTo(22,0);ctx.lineTo(72,0);ctx.stroke();}
   ctx.rotate(-nowSec()*.25);const core=ctx.createRadialGradient(-6,-6,2,0,0,28);core.addColorStop(0,'#fff');core.addColorStop(.35,f?.color||'#5ce8ff');core.addColorStop(1,'#0a1c2b');ctx.fillStyle=core;ctx.beginPath();ctx.arc(0,0,24,0,TWO_PI);ctx.fill();
-  ctx.fillStyle='#caffdf';ctx.font='bold 13px Arial';ctx.textAlign='center';ctx.fillText(`${f?.short||''} • ZONA SEGURA`,0,-SAFE_ZONE.radius-18);ctx.restore();
+  ctx.fillStyle=home?'#caffdf':'#ff9aa8';ctx.font='bold 13px Arial';ctx.textAlign='center';ctx.fillText(`${f?.short||''} • ${home?'ZONA SEGURA':'BASE INIMIGA'}`,0,-SAFE_ZONE.radius-18);ctx.restore();
 }
 function drawPortals(){for(const portal of resolvedPortals()){const p=screenPos(portal.x,portal.y),t=nowSec();ctx.save();ctx.translate(p.x,p.y);ctx.shadowColor='#43d8ff';ctx.shadowBlur=18;ctx.strokeStyle='rgba(83,221,255,.88)';ctx.lineWidth=3;ctx.beginPath();ctx.ellipse(0,0,36,56,0,0,TWO_PI);ctx.stroke();ctx.shadowBlur=0;ctx.rotate(t*.7);ctx.strokeStyle='rgba(174,102,255,.62)';ctx.lineWidth=5;for(let i=0;i<4;i++){ctx.beginPath();ctx.arc(0,0,27,-.55+i*Math.PI/2,.55+i*Math.PI/2);ctx.stroke();}ctx.rotate(-t*1.4);ctx.strokeStyle='rgba(92,231,255,.42)';ctx.lineWidth=2;ctx.beginPath();ctx.arc(0,0,19,0,Math.PI*1.35);ctx.stroke();ctx.rotate(t*.7);const cg=ctx.createRadialGradient(0,0,2,0,0,24);cg.addColorStop(0,'rgba(240,255,255,.72)');cg.addColorStop(.35,'rgba(72,211,255,.32)');cg.addColorStop(1,'rgba(51,91,255,.02)');ctx.fillStyle=cg;ctx.beginPath();ctx.ellipse(0,0,22,38,0,0,TWO_PI);ctx.fill();ctx.fillStyle='#9aeaff';ctx.font='bold 11px Arial';ctx.textAlign='center';ctx.fillText(displayMapLabel(portal.to),0,-68);ctx.restore();}}
 function drawOres(){for(const o of state.ores){if(!onScreenWorld(o.x,o.y,100))continue;
@@ -2022,8 +2217,13 @@ function drawMinimap(){
   const px=player.x*sx,py=player.y*sy,tx=player.tx*sx,ty=player.ty*sy,rad=state.radarRange*Math.min(sx,sy);mm.strokeStyle='rgba(130,220,255,.22)';mm.lineWidth=1;mm.beginPath();mm.arc(px,py,rad,0,TWO_PI);mm.stroke();
   if(routeDistance()>35){mm.strokeStyle='rgba(115,225,255,.55)';mm.setLineDash([4,3]);mm.beginPath();mm.moveTo(px,py);mm.lineTo(tx,ty);mm.stroke();mm.setLineDash([]);mm.strokeStyle='#fff';mm.beginPath();mm.arc(tx,ty,4,0,TWO_PI);mm.stroke();}
   for(const e of state.enemies){if(e.hp<=0||Math.hypot(e.x-player.x,e.y-player.y)>state.radarRange)continue;mm.fillStyle=state.target?.id===e.id?'#ff345e':'#ff755d';mm.beginPath();mm.arc(e.x*sx,e.y*sy,e.type.startsWith('boss')?2.6:1.8,0,TWO_PI);mm.fill();}
-  for(const o of state.ores){if(Math.hypot(o.x-player.x,o.y-player.y)>state.radarRange*.8)continue;mm.fillStyle=o.color;mm.beginPath();mm.arc(o.x*sx,o.y*sy,1.3,0,TWO_PI);mm.fill();}
-  for(const rp of onlineWorld.players.values()){if(Math.hypot(rp.x-player.x,rp.y-player.y)>state.radarRange)continue;mm.fillStyle='#59ffb0';mm.strokeStyle='rgba(255,255,255,.65)';mm.lineWidth=.7;mm.beginPath();mm.arc(rp.x*sx,rp.y*sy,2.4,0,TWO_PI);mm.fill();mm.stroke();}
+  // Minimap V10.6: sem pedras e sem cargo boxes. Somente NPCs + pilotos inimigos.
+  for(const rp of onlineWorld.players.values()){
+    if(!onlinePlayerEnemy(rp)||Math.hypot(rp.x-player.x,rp.y-player.y)>state.radarRange)continue;
+    const x=rp.x*sx,y=rp.y*sy,selected=state.target?.isPlayer&&state.target.id===rp.id,size=selected?5.8:4.6;
+    mm.save();mm.translate(x,y);mm.rotate(Math.PI/4);mm.fillStyle=selected?'#ff174f':'#ff4d69';mm.strokeStyle='#ffd4dc';mm.lineWidth=1;
+    mm.fillRect(-size/2,-size/2,size,size);mm.strokeRect(-size/2,-size/2,size,size);mm.restore();
+  }
   mm.fillStyle=getFaction()?.color||'#fff';mm.beginPath();mm.arc(px,py,4.5,0,TWO_PI);mm.fill();mm.strokeStyle='rgba(255,255,255,.7)';mm.stroke();
 }
 function draw(){const q=qualityProfile();ctx.clearRect(0,0,W,H);if(!progress){drawNebula();drawStars();return;}if(!(q.background&&drawMapBackground()))drawNebula();drawStars();if(q.grid)drawSectorGrid();drawBounds();drawLandmarks();drawBaseSafeZone();drawPortals();drawOres();drawLoot();state.enemies.forEach(e=>e.hp>0&&onScreenWorld(e.x,e.y,180)&&drawEnemy(e));drawOnlinePlayers();if(q.fx)drawRocketFx();drawPlayer();drawPet();if(q.fx)drawFx();drawParticles();drawNavigationOverlay();drawMinimap();}
@@ -2124,7 +2324,7 @@ function updateUI(){
   if(ui.shipHudArt)ui.shipHudArt.src=V8_ASSETS.ships[progress.activeShipId]||V8_ASSETS.ships.phoenix;
   if(ui.factionIcon)ui.factionIcon.src=factionAsset(progress.profile.faction);
   if(ui.userLabel)ui.userLabel.textContent=progress.profile.callsign||getUser()?.callsign||'Pilot';if(ui.petBtn)ui.petBtn.textContent=progress.pet?.owned?`P.E.T. LV${progress.pet.level}`:'P.E.T. LOJA';if(ui.safeZoneLabel){ui.safeZoneLabel.textContent=safe?'ZONA SEGURA ATIVA':'FORA DA BASE';ui.safeZoneLabel.classList.toggle('active',safe);}if(ui.cargoUsed)ui.cargoUsed.textContent=fmt(cargoUsed());if(ui.cargoMax)ui.cargoMax.textContent=fmt(cargoCapacity());if(ui.cargoBtn)ui.cargoBtn.classList.toggle('gold',isAtTrader());updatePetFloat();updateBaseTradePrompt();renderActiveMissionHud();
-  if(state.target&&state.target.hp>0){ui.targetName.textContent=state.target.name;ui.targetStats.textContent=`HP ${fmt(state.target.hp)} • ESC ${fmt(state.target.shield)}`;ui.targetHpBar.style.width=`${state.target.hp/state.target.maxHp*100}%`;ui.targetShieldBar.style.width=`${state.target.maxShield?state.target.shield/state.target.maxShield*100:0}%`;}else{ui.targetName.textContent='Sem alvo';ui.targetStats.textContent='Toque em um NPC para selecionar';ui.targetHpBar.style.width='0%';ui.targetShieldBar.style.width='0%';}
+  if(state.target&&state.target.hp>0){ui.targetName.textContent=state.target.name;ui.targetStats.textContent=`HP ${fmt(state.target.hp)} • ESC ${fmt(state.target.shield)}`;ui.targetHpBar.style.width=`${state.target.hp/state.target.maxHp*100}%`;ui.targetShieldBar.style.width=`${state.target.maxShield?state.target.shield/state.target.maxShield*100:0}%`;}else{ui.targetName.textContent='Sem alvo';ui.targetStats.textContent='Selecione um NPC ou piloto inimigo';ui.targetHpBar.style.width='0%';ui.targetShieldBar.style.width='0%';}
   ui.shopCredits.textContent=fmt(progress.profile.credits);ui.shopUridium.textContent=fmt(progress.profile.uridium);ui.hangarShipName.textContent=ship.name;updateExtraControls();
   const portal=nearbyPortal();if(portal&&!state.jumping&&ui.portalPrompt){const pos=screenPos(portal.x,portal.y);ui.portalPrompt.style.left=`${Math.max(85,Math.min(W-85,pos.x))}px`;ui.portalPrompt.style.top=`${Math.max(115,Math.min(H-90,pos.y-58))}px`;ui.portalPromptMap.textContent=`Destino ${displayMapLabel(portal.to)} • clique ou J`;ui.portalPrompt.classList.remove('hidden');}else ui.portalPrompt?.classList.add('hidden');
 }
@@ -2448,7 +2648,12 @@ function refreshPilotViews(){renderPilotProfile();if(ui.hangarModal&&!ui.hangarM
 function openPilotProfile(){openHangar('pilot');}
 
 function formatAuctionClock(sec){const m=Math.floor(sec/60),s=sec%60;return `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;}
-function auctionMinBid(lot){const current=Number(lot?.marketBid)||0;return current>0?Math.max(100000,current+100000):100000;}
+function auctionMinBid(lot){
+  const playerBid=Number(lot?.marketBid)||0;
+  if(playerBid>0)return Math.max(100000,playerBid+100000);
+  const system=auctionSystemBid(lot),step=system<1000000?100000:Math.max(100000,Math.round(system*.05/100000)*100000);
+  return system+step;
+}
 async function placeAuctionBid(ref,amount){
   ensureAuctionState();const lot=progress.auction.lots[ref];if(!lot)return;
   if(lot.leaderUserId===getUser()?.id){showToast('Você já está liderando esse lote — espere outro jogador cobrir');return;}
@@ -2457,7 +2662,8 @@ async function placeAuctionBid(ref,amount){
   if(amount>auctionSpendableCredits(ref)){showToast('Créditos insuficientes considerando os outros lances em garantia');return;}
   try{
     await flushCloudSave(true);
-    const row=await placeAuctionBidOnline({hourKey:progress.auction.hourKey,lotRef:ref,userBid:amount,lot:{...lot,userBid:0,escrow:0,marketBid:0,leaderUserId:null,leaderCallsign:null}});
+    const systemFloor=auctionSystemBid(lot);
+    const row=await placeAuctionBidOnline({hourKey:progress.auction.hourKey,lotRef:ref,userBid:amount,lot:{...lot,systemFloor,userBid:0,escrow:0,marketBid:0,leaderUserId:null,leaderCallsign:null}});
     if(!row)throw new Error('O servidor não confirmou o lance.');
     lot.userBid=Number(row.user_bid)||amount;lot.escrow=lot.userBid;lot.marketBid=lot.userBid;lot.leaderUserId=row.leader_user_id;lot.leaderCallsign=row.leader_callsign||progress.profile.callsign;
     saveGame();renderAuction();updateUI();showToast(`Você lidera ${lot.name} com ${fmt(lot.userBid)} CR`);
@@ -2476,9 +2682,9 @@ function renderAuction(){
   const myId=getUser()?.id;
   for(const lot of Object.values(progress.auction.lots)){
     if(!auctionLotEligible(lot))continue;
-    const current=Number(lot.marketBid)||0,isMine=lot.leaderUserId===myId&&current>0,leader=isMine?'VOCÊ':current>0?(lot.leaderCallsign||'JOGADOR'):'SEM LANCE',displayBid=current||100000,min=auctionMinBid(lot),card=document.createElement('article');card.className=`auction-card ${isMine?'leading':''}`;card.dataset.auctionRef=lot.ref;const type=lot.kind==='ship'?'NAVE':lot.kind==='item'?'EQUIPAMENTO':lot.kind==='ammo'?'MUNIÇÃO':lot.kind==='rocket'?'MÍSSIL':'P.E.T.';
+    const playerBid=Number(lot.marketBid)||0,current=auctionCurrentBid(lot),isMine=lot.leaderUserId===myId&&playerBid>0,leader=isMine?'VOCÊ':playerBid>0?(lot.leaderCallsign||'JOGADOR'):'SISTEMA',displayBid=current,min=auctionMinBid(lot),card=document.createElement('article');card.className=`auction-card ${isMine?'leading':''}`;card.dataset.auctionRef=lot.ref;const type=lot.kind==='ship'?'NAVE':lot.kind==='item'?'EQUIPAMENTO':lot.kind==='ammo'?'MUNIÇÃO':lot.kind==='rocket'?'MÍSSIL':'P.E.T.';
     let art=null;if(lot.kind==='ship')art=V8_ASSETS.ships[lot.id];else if(lot.kind==='item')art=assetForProduct(lot.id,ITEMS[lot.id]?.type,ITEMS[lot.id]?.subtype);else if(lot.kind==='ammo'||lot.kind==='rocket')art=V8_ASSETS.ammo[lot.id];else if(lot.kind==='petGear')art={guard:V8_ASSETS.equipment.autoLaserCpu,box:V8_ASSETS.equipment.ammoAutoBuyCpu,ore:V8_ASSETS.equipment.rocketTurboCpu,repair:V8_ASSETS.equipment.rep2,kami:V8_ASSETS.equipment.autoRocketCpu}[lot.id];
-    card.innerHTML=`${art?`<img class="auction-art" src="${art}" alt="${lot.name}">`:''}<div class="auction-card-top"><span>${type}</span><b>${leader}</b></div><h3>${lot.name}</h3><div class="auction-bid-value">${fmt(displayBid)} CR</div><div class="auction-meta">${current?`Lance atual de ${leader}`:'Lance inicial'} • Próximo mínimo ${fmt(min)} CR${lot.userBid?` • Seu lance ${fmt(lot.userBid)} CR`:''}</div>`;
+    card.innerHTML=`${art?`<img class="auction-art" src="${art}" alt="${lot.name}">`:''}<div class="auction-card-top"><span>${type}</span><b>${leader}</b></div><h3>${lot.name}</h3><div class="auction-bid-value">${fmt(displayBid)} CR</div><div class="auction-meta">${playerBid?`Lance atual de ${leader}`:'Preço automático do SISTEMA'} • Próximo mínimo ${fmt(min)} CR${lot.userBid?` • Seu lance ${fmt(lot.userBid)} CR`:''}</div>`;
     const row=document.createElement('div');row.className='auction-bid-row';const input=document.createElement('input');input.className='auction-bid-input';input.type='number';input.min=String(min);input.step='100000';input.value=String(min);input.disabled=isMine;input.setAttribute('aria-label',`Lance para ${lot.name}`);const b=document.createElement('button');b.className='small-btn';b.textContent=isMine?'VOCÊ LIDERA':'DAR LANCE';b.disabled=isMine;b.onclick=()=>placeAuctionBid(lot.ref,input.value);row.append(input,b);card.appendChild(row);ui.auctionGrid.appendChild(card);
   }
   ui.auctionHistory.innerHTML=(progress.auction.history||[]).length?progress.auction.history.map(h=>`<div class="auction-history-row"><span>${h.result}</span><b>${h.name}</b><em>${fmt(h.bid)} CR</em></div>`).join(''):'<div class="muted">Nenhum ciclo encerrado ainda.</div>';
@@ -2493,7 +2699,7 @@ function updateAuctionSystem(){
   if(open){
     ui.auctionCredits.textContent=fmt(auctionSpendableCredits());ui.auctionEscrow.textContent=fmt(auctionEscrow());
     const myId=getUser()?.id;
-    ui.auctionGrid.querySelectorAll('[data-auction-ref]').forEach(card=>{const lot=progress.auction.lots[card.dataset.auctionRef];if(!lot)return;const current=Number(lot.marketBid)||0,isMine=lot.leaderUserId===myId&&current>0,leader=isMine?'VOCÊ':current>0?(lot.leaderCallsign||'JOGADOR'):'SEM LANCE',min=auctionMinBid(lot);card.classList.toggle('leading',isMine);const lead=card.querySelector('.auction-card-top b');if(lead)lead.textContent=leader;const value=card.querySelector('.auction-bid-value');if(value)value.textContent=`${fmt(current||100000)} CR`;const meta=card.querySelector('.auction-meta');if(meta)meta.textContent=`${current?`Lance atual de ${leader}`:'Lance inicial'} • Próximo mínimo ${fmt(min)} CR${lot.userBid?` • Seu lance ${fmt(lot.userBid)} CR`:''}`;const input=card.querySelector('.auction-bid-input'),button=card.querySelector('.auction-bid-row button');if(input){input.min=String(min);input.disabled=isMine;if(document.activeElement!==input&&Number(input.value)<min)input.value=String(min);}if(button){button.disabled=isMine;button.textContent=isMine?'VOCÊ LIDERA':'DAR LANCE';}});
+    ui.auctionGrid.querySelectorAll('[data-auction-ref]').forEach(card=>{const lot=progress.auction.lots[card.dataset.auctionRef];if(!lot)return;const playerBid=Number(lot.marketBid)||0,current=auctionCurrentBid(lot),isMine=lot.leaderUserId===myId&&playerBid>0,leader=isMine?'VOCÊ':playerBid>0?(lot.leaderCallsign||'JOGADOR'):'SISTEMA',min=auctionMinBid(lot);card.classList.toggle('leading',isMine);const lead=card.querySelector('.auction-card-top b');if(lead)lead.textContent=leader;const value=card.querySelector('.auction-bid-value');if(value)value.textContent=`${fmt(current||100000)} CR`;const meta=card.querySelector('.auction-meta');if(meta)meta.textContent=`${playerBid?`Lance atual de ${leader}`:'Preço automático do SISTEMA'} • Próximo mínimo ${fmt(min)} CR${lot.userBid?` • Seu lance ${fmt(lot.userBid)} CR`:''}`;const input=card.querySelector('.auction-bid-input'),button=card.querySelector('.auction-bid-row button');if(input){input.min=String(min);input.disabled=isMine;if(document.activeElement!==input&&Number(input.value)<min)input.value=String(min);}if(button){button.disabled=isMine;button.textContent=isMine?'VOCÊ LIDERA':'DAR LANCE';}});
   }
 }
 
@@ -2504,8 +2710,14 @@ function gameplayPointerAllowed(){return authenticated&&progress&&ui.loginModal.
 function setPointerDestination(ev){const p=worldPoint(ev);player.tx=Math.max(40,Math.min(state.currentMap.world.w-40,p.x));player.ty=Math.max(40,Math.min(state.currentMap.world.h-40,p.y));}
 function pointerAction(ev){
   if(!gameplayPointerAllowed()||ev.button!==0)return;
-  const p=worldPoint(ev);const found=state.enemies.find(e=>e.hp>0&&Math.hypot(e.x-p.x,e.y-p.y)<=e.size*1.8+18);
+  const p=worldPoint(ev);
+  const found=state.enemies.find(e=>e.hp>0&&Math.hypot(e.x-p.x,e.y-p.y)<=e.size*1.8+18);
   if(found){state.target=found;state.pointerNavActive=false;showToast(`Alvo: ${found.name}`);if(autoLaserEnabled())player.laserFiring=true;return;}
+  const hostile=[...onlineWorld.players.values()].filter(rp=>onlinePlayerEnemy(rp)&&rp.hp>0).sort((a,b)=>Math.hypot(a.x-p.x,a.y-p.y)-Math.hypot(b.x-p.x,b.y-p.y))[0];
+  if(hostile&&Math.hypot(hostile.x-p.x,hostile.y-p.y)<=Math.max(34,hostile.size*1.7)){
+    state.target=hostile;state.pointerNavActive=false;showToast(`PVP • Alvo: ${hostile.callsign}`);
+    if(autoLaserEnabled())player.laserFiring=true;return;
+  }
   const clickedPortal=portalAtWorld(p.x,p.y),readyPortal=nearbyPortal();
   if(clickedPortal&&readyPortal&&clickedPortal.to===readyPortal.to&&Math.hypot(clickedPortal.x-readyPortal.x,clickedPortal.y-readyPortal.y)<1){state.pointerNavActive=false;jumpThroughPortal(readyPortal);return;}
   setPointerDestination(ev);state.pointerNavActive=true;state.pointerNavId=ev.pointerId;
@@ -2603,7 +2815,7 @@ ui.logoutBtn.onclick=async()=>{await flushCloudSave(true);await removePlayerPres
 function startLoadedGame(){
   state.lastPlayerDamageAt=nowSec();
   normalizeGalaxyGateState();
-  if(progress.mapId==='ggAlpha'&&!progress.galaxyGate.alpha.run?.active)progress.mapId='x1';
+  if(progress.mapId==='ggAlpha'&&!progress.galaxyGate.alpha.run?.active){progress.mapId='x1';progress.territoryFaction=progress.profile.faction;}
   const savedX=Number.isFinite(progress.x)?progress.x:null,savedY=Number.isFinite(progress.y)?progress.y:null;state.currentMap=MAPS[progress.mapId]||MAPS.x1;state.radarRange=mapRadarRange();player.hp=progress.hp||1;player.shield=progress.shield||0;computeStats(true);player.hp=Math.min(player.maxHp,progress.hp??player.maxHp);player.shield=Math.min(player.maxShield,progress.shield??player.maxShield);
   if(progress.mapId==='ggAlpha'){
     player.x=savedX??MAPS.ggAlpha.world.w/2;player.y=savedY??MAPS.ggAlpha.world.h/2;player.tx=player.x;player.ty=player.y;petRuntime.x=player.x+82;petRuntime.y=player.y+64;petRuntime.tx=petRuntime.x;petRuntime.ty=petRuntime.y;state.camera.x=player.x;state.camera.y=player.y;state.target=null;state.loot=[];state.fx=[];state.rocketFx=[];state.ores=[];state.landmarks=[];state.enemyRespawns=[];state.oreRespawns=[];restoreAlphaGateEnemies();const a=alphaGate(),def=GALAXY_ALPHA_ROUNDS[a.run.round-1],alive=alphaRemainingCount(),now=Date.now();if(a.run.waveIndex<def.waves.length&&!a.run.nextWaveAt){a.run.nextWaveAt=now+GALAXY_ALPHA_WAVE_INTERVAL_MS;}else if(a.run.waveIndex>=def.waves.length&&alive===0&&a.run.round<GALAXY_ALPHA_ROUNDS.length&&!a.run.nextRoundAt){a.run.nextRoundAt=now+GALAXY_ALPHA_ROUND_INTERVAL_MS;}renderAll();saveGame();return;
