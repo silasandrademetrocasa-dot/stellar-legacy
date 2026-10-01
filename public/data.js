@@ -105,13 +105,13 @@ export const ITEMS = {
   // ROBÔS DE REPARAÇÃO AUTOMÁTICA
   rep2: {
     id: 'rep2', type: 'extra', name: 'Repair Bot Auto • Comum',
-    price: 20000000, currency: 'credits', repairRate: 0.01, repairDelay: 5, exclusiveGroup: 'repairBot',
-    description: 'Após 5s sem receber dano, repara automaticamente 1% do HP máximo por segundo. O escudo também regenera a 1%/s.'
+    price: 20000000, currency: 'credits', repairRate: 0.01, repairTick: 5000, shieldRepairTick: 10000, repairDelay: 5, exclusiveGroup: 'repairBot',
+    description: 'Após 5s sem receber dano, repara +5.000 HP por segundo. O escudo regenera +10.000 por segundo.'
   },
   repElite: {
     id: 'repElite', type: 'extra', name: 'Repair Bot Auto • Elite',
-    price: 180000, currency: 'uridium', repairRate: 0.02, repairDelay: 5, exclusiveGroup: 'repairBot',
-    description: 'Após 5s sem receber dano, repara automaticamente 2% do HP máximo por segundo. Enquanto equipado, o escudo também sobe de 1%/s para 2%/s.'
+    price: 180000, currency: 'uridium', repairRate: 0.02, repairTick: 10000, shieldRepairTick: 15000, repairDelay: 5, exclusiveGroup: 'repairBot',
+    description: 'Após 5s sem receber dano, repara +10.000 HP por segundo. Enquanto equipado, o escudo regenera +15.000 por segundo.'
   },
 
   // EXPANSÃO DE PORÃO

@@ -450,3 +450,22 @@ O Leilão Elite foi migrado para persistência online: lances ativos ficam regis
 - Phoenix tem reparo gratuito.
 - Outras naves consomem 1 Bônus de Reparo ou 500 URI após serem destruídas.
 - Sem recursos de reparo, a nave fica bloqueada na base até reparar ou trocar para Phoenix.
+
+
+## V10.9 — Arena PvP
+- Arena PvP online com adversários reais registrados no Supabase.
+- Cada piloto possui 10 ataques por dia, com reset à meia-noite no horário de São Paulo.
+- Limite validado no servidor, sem reset por F5/localStorage.
+- Snapshot da nave: HP, escudo, dano laser, velocidade, nível, nave e facção.
+- Matchmaking prioriza pilotos de poder semelhante.
+- Histórico online, vitórias, derrotas e rating.
+- Rating inicial 1.000: vitória +25, derrota -10.
+- Defender atacado não consome uma das próprias 10 tentativas.
+- Botão ARENA no menu e atalho A.
+
+
+## V10.9.1 — Fixed Regeneration
+- Base / Repair Bot Comum: +5.000 HP por segundo.
+- Repair Bot Elite: +10.000 HP por segundo.
+- Escudo: +10.000 por segundo; com Repair Bot Elite, +15.000 por segundo.
+- Fora da Base, regeneração exige 5 segundos sem receber dano.

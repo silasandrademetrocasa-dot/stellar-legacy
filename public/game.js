@@ -1,6 +1,6 @@
-import { FACTIONS, SHIPS, ITEMS, LASER_AMMO, ROCKETS, NPC_TYPES, MAPS, RESOURCES } from './data.js?v=10.8.0';
-import { V8_ASSETS } from './assets/v8/manifest.js?v=10.8.0';
-import { signUp, signIn, restoreSession, signOutLocal, getUser, loadCloudSave, saveCloudSave, updateCallsign, updatePassword, loadRankings, loadAuctionBids, saveAuctionBidOnline, markAuctionBidStatusOnline, loadAuctionMarket, upsertPlayerPresenceOnline, loadMapPresenceOnline, removePlayerPresenceOnline, queuePvpAttackOnline, consumePvpDamageEventsOnline } from './api.js?v=10.8.0';
+import { FACTIONS, SHIPS, ITEMS, LASER_AMMO, ROCKETS, NPC_TYPES, MAPS, RESOURCES } from './data.js?v=10.9.1';
+import { V8_ASSETS } from './assets/v8/manifest.js?v=10.9.1';
+import { signUp, signIn, restoreSession, signOutLocal, getUser, loadCloudSave, saveCloudSave, updateCallsign, updatePassword, loadRankings, loadAuctionBids, saveAuctionBidOnline, markAuctionBidStatusOnline, loadAuctionMarket, upsertPlayerPresenceOnline, loadMapPresenceOnline, removePlayerPresenceOnline, queuePvpAttackOnline, consumePvpDamageEventsOnline, syncArenaProfileOnline, loadArenaState, loadArenaOpponents, loadArenaHistory, arenaAttackOnline } from './api.js?v=10.9.1';
 
 const canvas = document.querySelector('#game');
 const ctx = canvas.getContext('2d');
@@ -104,6 +104,7 @@ const ui = {
   petBtn: $('#petBtn'), petModal: $('#petModal'), closePet: $('#closePet'), petContent: $('#petContent'),
   pilotBtn: $('#pilotBtn'), pilotPointBadge: $('#pilotPointBadge'), pilotModal: $('#pilotModal'), closePilot: $('#closePilot'), pilotLogDisks: $('#pilotLogDisks'), pilotPointsTotal: $('#pilotPointsTotal'), pilotPointsAvailable: $('#pilotPointsAvailable'), pilotPointsSpent: $('#pilotPointsSpent'), pilotNextPointTitle: $('#pilotNextPointTitle'), pilotNextPointCost: $('#pilotNextPointCost'), pilotConvertPoint: $('#pilotConvertPoint'), pilotLogBuyButtons: $('#pilotLogBuyButtons'), pilotResetCost: $('#pilotResetCost'), pilotResetBtn: $('#pilotResetBtn'), pilotSkillTree: $('#pilotSkillTree'),
   auctionBtn: $('#auctionBtn'), auctionTopClock: $('#auctionTopClock'), auctionModal: $('#auctionModal'), closeAuction: $('#closeAuction'), auctionClock: $('#auctionClock'), auctionCredits: $('#auctionCredits'), auctionEscrow: $('#auctionEscrow'), auctionGrid: $('#auctionGrid'), auctionHistory: $('#auctionHistory'),
+  arenaBtn: $('#arenaBtn'), arenaTopCount: $('#arenaTopCount'), arenaModal: $('#arenaModal'), closeArena: $('#closeArena'), arenaRefresh: $('#arenaRefresh'), arenaAttacksLeft: $('#arenaAttacksLeft'), arenaRating: $('#arenaRating'), arenaWins: $('#arenaWins'), arenaLosses: $('#arenaLosses'), arenaPower: $('#arenaPower'), arenaOpponents: $('#arenaOpponents'), arenaHistory: $('#arenaHistory'), arenaResult: $('#arenaResult'),
   shopBtn: $('#shopBtn'), shopModal: $('#shopModal'), closeShop: $('#closeShop'), shopTabs: $('#shopTabs'), shopGrid: $('#shopGrid'), shopCredits: $('#shopCredits'), shopUridium: $('#shopUridium'),
   hangarBtn: $('#hangarBtn'), hangarModal: $('#hangarModal'), closeHangar: $('#closeHangar'), hangarTabs: $('#hangarTabs'), hangarContent: $('#hangarContent'), hangarShipName: $('#hangarShipName'),
   loginModal: $('#loginModal'), loginTabBtn: $('#loginTabBtn'), registerTabBtn: $('#registerTabBtn'), loginForm: $('#loginForm'), registerForm: $('#registerForm'), loginEmail: $('#loginEmail'), loginPassword: $('#loginPassword'), registerCallsign: $('#registerCallsign'), registerEmail: $('#registerEmail'), registerPassword: $('#registerPassword'), authMessage: $('#authMessage'), userLabel: $('#userLabel'), syncLabel: $('#syncLabel'), logoutBtn: $('#logoutBtn'), safeZoneLabel: $('#safeZoneLabel'), cargoUsed: $('#cargoUsed'), cargoMax: $('#cargoMax'), cargoBtn: $('#cargoBtn'), cargoModal: $('#cargoModal'), closeCargo: $('#closeCargo'), cargoSummary: $('#cargoSummary'), cargoGrid: $('#cargoGrid'), sellAllCargo: $('#sellAllCargo'), configBtn: $('#configBtn'), configModal: $('#configModal'), closeConfig: $('#closeConfig'), qualityButtons: $('#qualityButtons'), qualityCurrentBadge: $('#qualityCurrentBadge'), hudSettingsGrid: $('#hudSettingsGrid'), settingsTabs: $('#settingsTabs'), settingsGamePanel: $('#settingsGamePanel'), settingsRankingPanel: $('#settingsRankingPanel'), settingsAccountPanel: $('#settingsAccountPanel'), rankingRefreshBtn: $('#rankingRefreshBtn'), rankingLevel: $('#rankingLevel'), rankingXp: $('#rankingXp'), rankingAliens: $('#rankingAliens'), rankingGg: $('#rankingGg'), rankingUpdated: $('#rankingUpdated'), accountEmail: $('#accountEmail'), accountCallsign: $('#accountCallsign'), accountSaveName: $('#accountSaveName'), accountNameStatus: $('#accountNameStatus'), accountNewPassword: $('#accountNewPassword'), accountConfirmPassword: $('#accountConfirmPassword'), accountSavePassword: $('#accountSavePassword'), accountPasswordStatus: $('#accountPasswordStatus'), accountSummary: $('#accountSummary'),
@@ -2345,31 +2346,29 @@ function updatePlayer(dt){
   const secondsWithoutDamage=nowSec()-state.lastPlayerDamageAt;
   const repairDelay=5;
 
-  // V10.6.9 — Escudo segue a mesma lógica temporal do reparo de vida:
-  // só começa a regenerar após 5s completos sem receber dano.
-  // Sem Repair Bot ou com o Comum: 1% do ESC máximo/s.
-  // Com Repair Bot Elite: 2% do ESC máximo/s.
-  if(player.shield<player.maxShield&&secondsWithoutDamage>=repairDelay){
-    const shieldRepairRate=repairBot?.id==='repElite'?0.02:0.01;
+  // V10.9.1 — reparação em valores FIXOS por pulso de 1 segundo.
+  // HP: Base ou Repair Bot Comum = +5.000; Repair Bot Elite = +10.000.
+  // ESC: padrão = +10.000; com Repair Bot Elite = +15.000.
+  // Fora da base, o pulso só começa após 5s completos sem receber dano.
+  const regenReady=safe||secondsWithoutDamage>=repairDelay;
+  if(regenReady&&player.shield<player.maxShield&&nowSec()-state.shieldRepairFxAt>=1){
+    const shieldTick=repairBot?.id==='repElite'?15000:10000;
     const beforeShield=player.shield;
-    player.shield=Math.min(player.maxShield,player.shield+player.maxShield*shieldRepairRate*dt);
-    if(player.shield>beforeShield&&nowSec()-state.shieldRepairFxAt>1.15){
-      state.shieldRepairFxAt=nowSec();
-      spawnParticle(player.x,player.y,`ESCUDO +${Math.round(shieldRepairRate*100)}%/s`,'#62d9ff');
-    }
+    player.shield=Math.min(player.maxShield,player.shield+shieldTick);
+    state.shieldRepairFxAt=nowSec();
+    const gained=Math.max(0,Math.round(player.shield-beforeShield));
+    if(gained>0)spawnParticle(player.x,player.y,`ESCUDO +${fmt(gained)}`,'#62d9ff');
   }
 
-  if(safe){
-    // Mantém a vantagem histórica da base apenas para HP.
-    player.hp=Math.min(player.maxHp,player.hp+player.maxHp*.08*dt);
-  }else if(repairBot&&player.hp<player.maxHp&&secondsWithoutDamage>=Number(repairBot.repairDelay||5)){
-    const before=player.hp;
-    const repairRate=Number(repairBot.repairRate||0)*(1+pilotSkillValue('engineering')/100);
-    player.hp=Math.min(player.maxHp,player.hp+player.maxHp*repairRate*dt);
-    if(player.hp>before&&nowSec()-state.repairFxAt>.8){
-      state.repairFxAt=nowSec();
-      spawnParticle(player.x,player.y,`AUTO REPAIR +${Math.round((repairBot.repairRate||0)*100)}%/s`,'#73ffc0');
-    }
+  const hpCanRepair=safe||!!repairBot;
+  const hpDelayReady=safe||secondsWithoutDamage>=Number(repairBot?.repairDelay||5);
+  if(hpCanRepair&&hpDelayReady&&player.hp<player.maxHp&&nowSec()-state.repairFxAt>=1){
+    const hpTick=repairBot?.id==='repElite'?10000:5000;
+    const beforeHp=player.hp;
+    player.hp=Math.min(player.maxHp,player.hp+hpTick);
+    state.repairFxAt=nowSec();
+    const gained=Math.max(0,Math.round(player.hp-beforeHp));
+    if(gained>0)spawnParticle(player.x,player.y,`${safe?'BASE':'AUTO REPAIR'} +${fmt(gained)} HP`,'#73ffc0');
   }
   maybeAutoBuyAmmo();
   checkLandmarkDiscovery();
@@ -2964,7 +2963,7 @@ function renderHangarShips(){
 function renderHangarEquipment(){
   const ship=SHIPS[progress.activeShipId],root=document.createElement('div');root.className='hangar-layout';const left=document.createElement('div');left.className='hangar-column';const right=document.createElement('div');right.className='hangar-column';
   const repairBot=activeRepairBot(),extraCap=shipExtraCapacity(),extraBonus=extraCap-ship.extras;
-  const summary=document.createElement('div');summary.className='summary-grid';summary.innerHTML=`<div class="stat-card">Dano por tiro<strong>${fmt(player.laserDamage)}</strong></div><div class="stat-card">Escudo<strong>${fmt(player.maxShield)}</strong></div><div class="stat-card">Absorção<strong>${player.shieldAbsorption}%</strong></div><div class="stat-card">Velocidade<strong>${fmt(player.speed)}</strong></div><div class="stat-card">Slots EXTRAS<strong>${extraCap}${extraBonus?` (+${extraBonus})`:''}</strong></div><div class="stat-card">Reparo Auto<strong>${repairBot?`${Math.round(repairBot.repairRate*100)}%/s`:'OFF'}</strong></div><div class="stat-card">Porão<strong>${fmt(cargoCapacity())}${cargoExtraBonus()?` (+${fmt(cargoExtraBonus())})`:''}</strong></div>`;left.appendChild(summary);
+  const summary=document.createElement('div');summary.className='summary-grid';summary.innerHTML=`<div class="stat-card">Dano por tiro<strong>${fmt(player.laserDamage)}</strong></div><div class="stat-card">Escudo<strong>${fmt(player.maxShield)}</strong></div><div class="stat-card">Absorção<strong>${player.shieldAbsorption}%</strong></div><div class="stat-card">Velocidade<strong>${fmt(player.speed)}</strong></div><div class="stat-card">Slots EXTRAS<strong>${extraCap}${extraBonus?` (+${extraBonus})`:''}</strong></div><div class="stat-card">Reparo Auto<strong>${repairBot?`+${fmt(repairBot.id==='repElite'?10000:5000)} HP/s`:'OFF'}</strong></div><div class="stat-card">Porão<strong>${fmt(cargoCapacity())}${cargoExtraBonus()?` (+${fmt(cargoExtraBonus())})`:''}</strong></div>`;left.appendChild(summary);
   for(const [key,title] of [['lasers',`Lasers da ${ship.name} (${ship.lasers})`],['generators',`Geradores (${ship.generators})`],['extras',`Extras (${extraCap}${extraBonus?` = ${ship.extras} + ${extraBonus}`:''})`]]){const box=document.createElement('div');box.className='section-box';box.innerHTML=`<h3>${title}</h3>`;const grid=document.createElement('div');grid.className='slot-grid';progress.shipLoadout[key].forEach((id,i)=>grid.appendChild(slotCard(`${title.split(' ')[0]} ${i+1}`,id,key,i)));box.appendChild(grid);left.appendChild(box);}
   const inv=document.createElement('div');inv.className='section-box';inv.innerHTML='<h3>Inventário disponível</h3>';const grid=document.createElement('div');grid.className='inventory-grid';const entries=Object.entries(progress.inventory).filter(([id,q])=>q>0&&ITEMS[id]);if(!entries.length)grid.innerHTML='<div class="empty-state">Seu inventário de equipamentos está vazio. Compre itens na Loja.</div>';else entries.forEach(([id,q])=>grid.appendChild(inventoryCard(id,q)));inv.appendChild(grid);right.appendChild(inv);root.append(left,right);return root;
 }
@@ -3400,10 +3399,152 @@ function updateAuctionSystem(){
   }
 }
 
-function renderAll(){buildAmmoButtons();renderShop();renderHangar();renderCargo();renderMapModal();renderPet();renderMissions();renderGalaxyGate();renderPilotProfile();ensureAuctionState();updateUI();}
+
+/* ===================== V10.9 ARENA PVP ===================== */
+const ARENA_DAILY_LIMIT=10;
+const arenaRuntime={state:null,opponents:[],history:[],lastResult:null,busy:false,loadedAt:0,badgeAt:0,badgeBusy:false};
+
+function arenaSafeText(value){
+  return String(value??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+}
+function arenaFactionLabel(id){return FACTIONS[id]?.short||String(id||'—').toUpperCase();}
+function arenaStateLeft(){return Math.max(0,Math.min(ARENA_DAILY_LIMIT,Number(arenaRuntime.state?.attacks_left??ARENA_DAILY_LIMIT)));}
+
+async function syncArenaSnapshot(){
+  if(!authenticated||!progress)return null;
+  return syncArenaProfileOnline({
+    callsign:progress.profile.callsign,
+    faction:progress.profile.faction,
+    level:progress.profile.level,
+    shipId:progress.activeShipId,
+    hp:Math.max(1,Math.round(player.maxHp||player.hp||1)),
+    shield:Math.max(0,Math.round(player.maxShield||player.shield||0)),
+    laserDamage:Math.max(0,Math.round(player.laserDamage||0)),
+    speed:Math.max(0,Math.round(player.speed||0)),
+  });
+}
+function updateArenaBadge(){
+  if(!ui.arenaTopCount)return;
+  ui.arenaTopCount.textContent=`${arenaStateLeft()}/${ARENA_DAILY_LIMIT}`;
+  ui.arenaBtn?.classList.toggle('arena-empty',arenaStateLeft()<=0);
+}
+async function refreshArenaBadge(force=false){
+  if(!authenticated||!progress||arenaRuntime.badgeBusy)return;
+  if(!force&&Date.now()-arenaRuntime.badgeAt<45000)return;
+  arenaRuntime.badgeBusy=true;
+  try{
+    const s=await loadArenaState();
+    if(s)arenaRuntime.state=s;
+    arenaRuntime.badgeAt=Date.now();
+    updateArenaBadge();
+  }catch(e){console.warn('arena badge',e);}
+  finally{arenaRuntime.badgeBusy=false;}
+}
+function renderArenaResult(){
+  if(!ui.arenaResult)return;
+  const r=arenaRuntime.lastResult;
+  if(!r){ui.arenaResult.classList.add('hidden');ui.arenaResult.innerHTML='';return;}
+  const won=!!r.won;
+  ui.arenaResult.classList.remove('hidden','win','loss');
+  ui.arenaResult.classList.add(won?'win':'loss');
+  ui.arenaResult.innerHTML=`
+    <div class="arena-result-kicker">${won?'VITÓRIA NA ARENA':'DERROTA NA ARENA'}</div>
+    <strong>${arenaSafeText(r.opponent_callsign||'Piloto')}</strong>
+    <span>${fmt(r.rounds||0)} rounds • ${fmt(r.attacker_remaining||0)} resistência restante • Rating ${fmt(r.attacker_rating||1000)}</span>
+  `;
+}
+function renderArena(){
+  if(!ui.arenaModal||!progress)return;
+  const s=arenaRuntime.state||{attacks_left:ARENA_DAILY_LIMIT,wins:0,losses:0,rating:1000,power:0};
+  const left=arenaStateLeft();
+  ui.arenaAttacksLeft.textContent=`${left} / ${ARENA_DAILY_LIMIT}`;
+  ui.arenaRating.textContent=fmt(s.rating||1000);
+  ui.arenaWins.textContent=fmt(s.wins||0);
+  ui.arenaLosses.textContent=fmt(s.losses||0);
+  ui.arenaPower.textContent=fmt(s.power||0);
+  updateArenaBadge();
+  renderArenaResult();
+
+  if(!arenaRuntime.opponents.length){
+    ui.arenaOpponents.innerHTML='<div class="arena-empty-state">Nenhum adversário disponível ainda. Assim que outro piloto sincronizar a Arena, ele aparece aqui.</div>';
+  }else{
+    ui.arenaOpponents.innerHTML='';
+    for(const o of arenaRuntime.opponents){
+      const card=document.createElement('article');
+      card.className='arena-opponent-card';
+      const art=V8_ASSETS.ships[o.ship_id]||V8_ASSETS.ships.phoenix;
+      const ratio=(Number(o.power)||1)/Math.max(1,Number(s.power)||1);
+      const threat=ratio>1.25?'AMEAÇA ALTA':ratio<.75?'VANTAGEM':'EQUILIBRADO';
+      card.innerHTML=`
+        <div class="arena-opponent-art">${art?`<img src="${art}" alt="">`:''}</div>
+        <div class="arena-opponent-copy">
+          <div class="arena-opponent-top"><span>${arenaSafeText(arenaFactionLabel(o.faction))}</span><em>LV ${fmt(o.level||1)}</em></div>
+          <h3>${arenaSafeText(o.callsign||'Pilot')}</h3>
+          <p>${arenaSafeText(SHIPS[o.ship_id]?.name||o.ship_id||'Nave')} • PODER ${fmt(o.power||0)}</p>
+          <div class="arena-opponent-record"><span>Rating <b>${fmt(o.rating||1000)}</b></span><span>${fmt(o.wins||0)}V / ${fmt(o.losses||0)}D</span><span class="arena-threat">${threat}</span></div>
+        </div>
+        <button class="primary-btn arena-attack-btn" data-arena-target="${o.user_id}" ${left<=0||arenaRuntime.busy?'disabled':''}>${left<=0?'SEM ATAQUES':'ATACAR'}</button>
+      `;
+      ui.arenaOpponents.appendChild(card);
+    }
+    ui.arenaOpponents.querySelectorAll('[data-arena-target]').forEach(btn=>btn.onclick=()=>arenaFight(btn.dataset.arenaTarget));
+  }
+
+  ui.arenaHistory.innerHTML=arenaRuntime.history.length
+    ?arenaRuntime.history.map(h=>`<div class="arena-history-row ${h.won?'win':'loss'}"><span>${h.won?'VITÓRIA':'DERROTA'}</span><b>${arenaSafeText(h.opponent_callsign||'Pilot')}</b><em>${fmt(h.rounds||0)} rounds</em></div>`).join('')
+    :'<div class="muted">Nenhuma batalha registrada ainda.</div>';
+}
+async function refreshArena(force=false){
+  if(!authenticated||!progress||arenaRuntime.busy)return;
+  if(!force&&arenaRuntime.loadedAt&&Date.now()-arenaRuntime.loadedAt<12000){renderArena();return;}
+  arenaRuntime.busy=true;
+  if(ui.arenaOpponents)ui.arenaOpponents.classList.add('loading');
+  try{
+    await syncArenaSnapshot();
+    const [s,opponents,history]=await Promise.all([loadArenaState(),loadArenaOpponents(),loadArenaHistory()]);
+    arenaRuntime.state=s||arenaRuntime.state;
+    arenaRuntime.opponents=Array.isArray(opponents)?opponents:[];
+    arenaRuntime.history=Array.isArray(history)?history:[];
+    arenaRuntime.loadedAt=Date.now();
+    arenaRuntime.badgeAt=Date.now();
+  }catch(e){
+    console.warn('arena refresh',e);
+    showToast(String(e?.message||e).replace(/^.*?:\s*/,''));
+  }finally{
+    arenaRuntime.busy=false;
+    ui.arenaOpponents?.classList.remove('loading');
+    renderArena();
+  }
+}
+async function arenaFight(targetUserId){
+  if(arenaRuntime.busy||arenaStateLeft()<=0)return;
+  arenaRuntime.busy=true;
+  renderArena();
+  try{
+    const result=await arenaAttackOnline(targetUserId);
+    if(!result)throw new Error('A Arena não retornou o resultado da batalha.');
+    arenaRuntime.lastResult=result;
+    const won=!!result.won;
+    showToast(`ARENA • ${won?'VITÓRIA':'DERROTA'} contra ${result.opponent_callsign||'Piloto'}`);
+    pushActivity(`ARENA • ${won?'Vitória':'Derrota'} vs ${result.opponent_callsign||'Piloto'} • ${result.attacks_left}/10 ataques restantes`,'combat');
+  }catch(e){
+    showToast(String(e?.message||e).replace(/^.*?:\s*/,''));
+  }finally{
+    arenaRuntime.busy=false;
+    arenaRuntime.loadedAt=0;
+    await refreshArena(true);
+  }
+}
+function openArena(){
+  if(!progress)return;
+  ui.arenaModal?.classList.remove('hidden');
+  refreshArena(true);
+}
+
+function renderAll(){buildAmmoButtons();renderShop();renderHangar();renderCargo();renderMapModal();renderPet();renderMissions();renderGalaxyGate();renderPilotProfile();ensureAuctionState();updateUI();refreshArenaBadge();}
 
 function worldPoint(ev){const r=canvas.getBoundingClientRect(),sx=ev.clientX-r.left,sy=ev.clientY-r.top;return{x:sx-W/2+state.camera.x,y:sy-H/2+state.camera.y};}
-function gameplayPointerAllowed(){return authenticated&&progress&&ui.loginModal.classList.contains('hidden')&&ui.shopModal.classList.contains('hidden')&&ui.hangarModal.classList.contains('hidden')&&ui.cargoModal.classList.contains('hidden')&&ui.petModal.classList.contains('hidden')&&ui.missionModal.classList.contains('hidden')&&ui.gateModal.classList.contains('hidden')&&ui.pilotModal.classList.contains('hidden')&&ui.auctionModal.classList.contains('hidden')&&ui.configModal.classList.contains('hidden')&&ui.mapModal.classList.contains('hidden')&&ui.factionModal.classList.contains('hidden');}
+function gameplayPointerAllowed(){return authenticated&&progress&&ui.loginModal.classList.contains('hidden')&&ui.shopModal.classList.contains('hidden')&&ui.hangarModal.classList.contains('hidden')&&ui.cargoModal.classList.contains('hidden')&&ui.petModal.classList.contains('hidden')&&ui.missionModal.classList.contains('hidden')&&ui.gateModal.classList.contains('hidden')&&ui.pilotModal.classList.contains('hidden')&&ui.auctionModal.classList.contains('hidden')&&ui.arenaModal.classList.contains('hidden')&&ui.configModal.classList.contains('hidden')&&ui.mapModal.classList.contains('hidden')&&ui.factionModal.classList.contains('hidden');}
 function setPointerDestination(ev){const p=worldPoint(ev);player.tx=Math.max(40,Math.min(state.currentMap.world.w-40,p.x));player.ty=Math.max(40,Math.min(state.currentMap.world.h-40,p.y));}
 function pointerAction(ev){
   if(!gameplayPointerAllowed()||ev.button!==0)return;
@@ -3431,7 +3572,7 @@ ui.portalPrompt.onclick=()=>{const portal=nearbyPortal();if(portal)jumpThroughPo
 minimap.addEventListener('pointerdown',e=>{if(!authenticated||!progress)return;e.preventDefault();e.stopPropagation();const r=minimap.getBoundingClientRect();const mx=(e.clientX-r.left)/r.width*minimap.width,my=(e.clientY-r.top)/r.height*minimap.height;player.tx=Math.max(35,Math.min(state.currentMap.world.w-35,mx/minimap.width*state.currentMap.world.w));player.ty=Math.max(35,Math.min(state.currentMap.world.h-35,my/minimap.height*state.currentMap.world.h));showToast(`Rota definida no minimapa`);});
 ui.laserToggle.onclick=()=>{if(!state.target||state.target.hp<=0){showToast('Selecione um alvo');return;}player.laserFiring=!player.laserFiring;};ui.rocketFire.onclick=()=>fireRocket(true);
 const dismissibleModals=()=>[
-  ui.configModal,ui.auctionModal,ui.pilotModal,ui.gateModal,ui.missionModal,ui.shopModal,ui.hangarModal,ui.petModal,ui.cargoModal,ui.mapModal
+  ui.configModal,ui.arenaModal,ui.auctionModal,ui.pilotModal,ui.gateModal,ui.missionModal,ui.shopModal,ui.hangarModal,ui.petModal,ui.cargoModal,ui.mapModal
 ].filter(Boolean);
 function closeTopOverlay(){
   const open=dismissibleModals().filter(modal=>!modal.classList.contains('hidden'));
@@ -3458,6 +3599,9 @@ if(ui.pilotConvertPoint)ui.pilotConvertPoint.onclick=()=>convertPilotPoint();
 if(ui.pilotResetBtn)ui.pilotResetBtn.onclick=()=>resetPilotTree();
 if(ui.auctionBtn)ui.auctionBtn.onclick=()=>openAuction();
 if(ui.closeAuction)ui.closeAuction.onclick=()=>ui.auctionModal.classList.add('hidden');
+if(ui.arenaBtn)ui.arenaBtn.onclick=()=>openArena();
+if(ui.closeArena)ui.closeArena.onclick=()=>ui.arenaModal.classList.add('hidden');
+if(ui.arenaRefresh)ui.arenaRefresh.onclick=()=>refreshArena(true);
 if(ui.closeGate)ui.closeGate.onclick=()=>ui.gateModal.classList.add('hidden');
 if(ui.gateJumpBtn)ui.gateJumpBtn.onclick=()=>enterAlphaGate();
 if(ui.useRepairBonus)ui.useRepairBonus.onclick=()=>useGalaxyRepairBonus();
@@ -3500,7 +3644,7 @@ document.addEventListener('keydown',e=>{
   if(['j','J'].includes(e.key)||e.key==='Enter'){const portal=nearbyPortal();if(portal){e.preventDefault();jumpThroughPortal(portal);}}
   const k=e.key.toLowerCase();
   if(k==='h')toggleHudUi();if(k==='b')openShop();if(k==='c'){if(isAtTrader())openCargo();else showToast('Venda de recursos disponível somente na base X-1');}
-  if(k==='m')openMapModal();if(k==='q')openMissions();if(k==='g')openGalaxyGate();if(k==='p')openHangar('pet');if(k==='o')openHangar('pilot');if(k==='l')openAuction();
+  if(k==='m')openMapModal();if(k==='q')openMissions();if(k==='g')openGalaxyGate();if(k==='p')openHangar('pet');if(k==='o')openHangar('pilot');if(k==='l')openAuction();if(k==='a')openArena();
   if(['1','2','3','4','5'].includes(e.key)){progress.selectedLaserAmmo=Object.keys(LASER_AMMO)[Number(e.key)-1];buildAmmoButtons();saveGame();}
 });
 
