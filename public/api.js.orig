@@ -10,33 +10,6 @@ async function readJson(res) {
   });
 }
 
-async function serverFetch(path, options = {}, withAuth = false) {
-  const headers = {
-    'Content-Type': 'application/json',
-    ...(options.headers || {}),
-  };
-  if (withAuth) {
-    if (!session?.access_token) throw new Error('Sessão ausente.');
-    headers.Authorization = `Bearer ${session.access_token}`;
-  }
-
-  let res;
-  try {
-    res = await fetch(path, { ...options, headers, cache: 'no-store' });
-  } catch {
-    throw new Error('Não foi possível conectar ao servidor do jogo. Tente novamente.');
-  }
-
-  const body = await readJson(res);
-  if (!res.ok) {
-    const msg = body?.error || body?.message || `Erro ${res.status}`;
-    const err = new Error(String(msg));
-    err.status = res.status;
-    throw err;
-  }
-  return body;
-}
-
 async function getConfig() {
   if (!configPromise) {
     configPromise = fetch('/api/config', { cache: 'no-store' })
@@ -110,37 +83,48 @@ export function getSession() { return session; }
 export function getUser() { return currentUser; }
 
 export async function signUp({ callsign, email, password }) {
-  const body = await serverFetch('/api/auth/signup', {
+  const body = await supabaseFetch('/auth/v1/signup', {
     method: 'POST',
     body: JSON.stringify({
-      callsign: String(callsign).trim().slice(0, 24),
       email: String(email).trim().toLowerCase(),
       password,
+      data: { callsign: String(callsign).trim().slice(0, 24) },
     }),
   });
 
-  const nextSession = body.session || null;
+  const nextSession = sessionFromAuth(body);
   const user = body.user || null;
-  if (nextSession && user) setSession(nextSession, user);
+  if (nextSession && user) {
+    setSession(nextSession, {
+      id: user.id,
+      email: user.email,
+      callsign: user.user_metadata?.callsign || callsign,
+    });
+    await upsertProfile(user, callsign);
+  }
 
   return {
-    user,
+    user: user ? { id: user.id, email: user.email, callsign: user.user_metadata?.callsign || callsign } : null,
     session: nextSession,
-    requires_confirmation: Boolean(body.requires_confirmation),
+    requires_confirmation: !nextSession,
   };
 }
 
 export async function signIn({ email, password }) {
-  const body = await serverFetch('/api/auth/login', {
+  const body = await supabaseFetch('/auth/v1/token?grant_type=password', {
     method: 'POST',
-    body: JSON.stringify({
-      email: String(email).trim().toLowerCase(),
-      password,
-    }),
+    body: JSON.stringify({ email: String(email).trim().toLowerCase(), password }),
   });
-  if (!body?.session?.access_token || !body?.user) throw new Error('Login inválido.');
-  setSession(body.session, body.user);
-  return { user: body.user, session: body.session };
+  const nextSession = sessionFromAuth(body);
+  if (!nextSession || !body.user) throw new Error('Login inválido.');
+  const user = {
+    id: body.user.id,
+    email: body.user.email,
+    callsign: body.user.user_metadata?.callsign || body.user.email?.split('@')[0] || 'Pilot',
+  };
+  setSession(nextSession, user);
+  await upsertProfile(body.user);
+  return { user, session: nextSession };
 }
 
 export function signOutLocal() {
@@ -152,26 +136,22 @@ export function signOutLocal() {
 async function refreshSession() {
   if (!session?.refresh_token) return false;
   try {
-    const body = await serverFetch('/api/auth/refresh', {
+    const body = await supabaseFetch('/auth/v1/token?grant_type=refresh_token', {
       method: 'POST',
       body: JSON.stringify({ refresh_token: session.refresh_token }),
     });
-    if (!body?.session?.access_token || !body?.user) throw new Error('Sessão não renovada');
-    setSession(body.session, body.user);
+    const nextSession = sessionFromAuth(body);
+    if (!nextSession || !body.user) throw new Error('Sessão não renovada');
+    const user = {
+      id: body.user.id,
+      email: body.user.email,
+      callsign: body.user.user_metadata?.callsign || body.user.email?.split('@')[0] || 'Pilot',
+    };
+    setSession(nextSession, user);
     return true;
   } catch {
     signOutLocal();
     return false;
-  }
-}
-
-async function authedServerFetch(path, options = {}, retry = true) {
-  try {
-    return await serverFetch(path, options, true);
-  } catch (err) {
-    const authish = err?.status === 401 || /jwt|token|expired|unauthorized|sessão|401/i.test(String(err?.message || err));
-    if (retry && authish && await refreshSession()) return authedServerFetch(path, options, false);
-    throw err;
   }
 }
 
@@ -194,8 +174,12 @@ export async function restoreSession() {
     session = parsed.session || null;
     currentUser = parsed.user || null;
     if (!session?.access_token) throw new Error('Sessão inválida');
-    const body = await authedServerFetch('/api/auth/me');
-    currentUser = body.user;
+    const user = await authedSupabaseFetch('/auth/v1/user');
+    currentUser = {
+      id: user.id,
+      email: user.email,
+      callsign: user.user_metadata?.callsign || user.email?.split('@')[0] || 'Pilot',
+    };
     setSession(session, currentUser);
     return { session, user: currentUser };
   } catch {
@@ -206,16 +190,38 @@ export async function restoreSession() {
 
 export async function loadCloudSave() {
   if (!currentUser?.id) throw new Error('Usuário não identificado.');
-  const body = await authedServerFetch('/api/save');
-  return { state: body?.state || null, updated_at: body?.updated_at || null };
+  const rows = await authedSupabaseFetch(`/rest/v1/game_saves?user_id=eq.${encodeURIComponent(currentUser.id)}&select=state,updated_at&limit=1`);
+  const row = Array.isArray(rows) ? rows[0] : null;
+  return { state: row?.state || null, updated_at: row?.updated_at || null };
 }
 
 export async function saveCloudSave(state) {
   if (!currentUser?.id) throw new Error('Usuário não identificado.');
-  return authedServerFetch('/api/save', {
-    method: 'PUT',
-    body: JSON.stringify({ state }),
+  const updated_at = new Date().toISOString();
+  await authedSupabaseFetch('/rest/v1/game_saves?on_conflict=user_id', {
+    method: 'POST',
+    headers: { Prefer: 'resolution=merge-duplicates,return=minimal' },
+    body: JSON.stringify({ user_id: currentUser.id, state, updated_at }),
   });
+
+  const profile = state.profile || {};
+  await authedSupabaseFetch('/rest/v1/profiles?on_conflict=id', {
+    method: 'POST',
+    headers: { Prefer: 'resolution=merge-duplicates,return=minimal' },
+    body: JSON.stringify({
+      id: currentUser.id,
+      callsign: String(profile.callsign || currentUser.callsign || 'Pilot').slice(0, 24),
+      faction: profile.faction || null,
+      level: Number(profile.level || 1),
+      xp: Number(profile.xp || 0),
+      credits: Number(profile.credits || 0),
+      uridium: Number(profile.uridium || 0),
+      aliens_killed: Number(profile.aliensKilled || 0),
+      gg_completed: Number(state.galaxyGate?.alpha?.completed || profile.ggCompleted || 0),
+      updated_at,
+    }),
+  });
+  return { ok: true, updated_at };
 }
 
 
