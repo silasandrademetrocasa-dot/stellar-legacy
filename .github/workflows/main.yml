@@ -1,28 +1,74 @@
-name: ChatGPT Deploy Test
+name: ChatGPT Deploy Bridge
 
 on:
   workflow_dispatch:
+  schedule:
+    - cron: "*/5 * * * *"
 
 permissions:
   contents: write
 
 jobs:
-  test-write:
+  deploy:
     runs-on: ubuntu-latest
 
     steps:
       - name: Baixar repositório
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
-      - name: Testar escrita
+      - name: Buscar atualização do ChatGPT
+        env:
+          SUPABASE_URL: https://rxcekofbxzivuavtqjwp.supabase.co
+          SUPABASE_KEY: sb_publishable_eGTer0DC0Hzk3eWOC2Y78g_0Hib4_KK
         run: |
-          echo "ChatGPT Actions funcionando - $(date -u)" > .chatgpt-write-test
+          set -euo pipefail
+
+          JSON=$(curl -fsS \
+            "$SUPABASE_URL/rest/v1/chatgpt_deploy_files?select=version,content_b64&file_path=eq.__patch__.gz.b64&order=created_at.desc&limit=1" \
+            -H "apikey: $SUPABASE_KEY")
+
+          VERSION=$(echo "$JSON" | jq -r '.[0].version // empty')
+          PATCH_B64=$(echo "$JSON" | jq -r '.[0].content_b64 // empty')
+
+          if [ -z "$VERSION" ] || [ -z "$PATCH_B64" ]; then
+            echo "Nenhuma atualização disponível."
+            exit 0
+          fi
+
+          if [ -f .chatgpt-deployed-version ] && grep -qx "$VERSION" .chatgpt-deployed-version; then
+            echo "Versão $VERSION já instalada."
+            exit 0
+          fi
+
+          echo "$PATCH_B64" | base64 -d | gzip -d > /tmp/chatgpt.patch
+
+          echo "Aplicando versão $VERSION..."
+          patch -p1 --forward --batch < /tmp/chatgpt.patch
+
+          rm -f .chatgpt-write-test
+          echo "$VERSION" > .chatgpt-deployed-version
+
+      - name: Validar jogo
+        run: |
+          node --check public/game.js
+          node --check public/api.js
+          node --check public/data.js
+          node --check server/index.js
 
       - name: Commit e Push
         run: |
           git config user.name "ChatGPT Deploy"
           git config user.email "actions@users.noreply.github.com"
 
-          git add .chatgpt-write-test
-          git commit -m "test: libera deploy via ChatGPT Actions" || exit 0
+          git add -A
+
+          if git diff --cached --quiet; then
+            echo "Nada novo para publicar."
+            exit 0
+          fi
+
+          VERSION=$(cat .chatgpt-deployed-version)
+          git commit -m "deploy: Stellar Legacy V${VERSION}"
           git push
