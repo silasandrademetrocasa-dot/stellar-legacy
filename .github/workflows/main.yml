@@ -1,0 +1,28 @@
+name: ChatGPT Deploy Test
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  test-write:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Baixar repositório
+        uses: actions/checkout@v4
+
+      - name: Testar escrita
+        run: |
+          echo "ChatGPT Actions funcionando - $(date -u)" > .chatgpt-write-test
+
+      - name: Commit e Push
+        run: |
+          git config user.name "ChatGPT Deploy"
+          git config user.email "actions@users.noreply.github.com"
+
+          git add .chatgpt-write-test
+          git commit -m "test: libera deploy via ChatGPT Actions" || exit 0
+          git push
