@@ -1,6 +1,6 @@
-import { FACTIONS, SHIPS, ITEMS, LASER_AMMO, ROCKETS, NPC_TYPES, MAPS, RESOURCES } from './data.js?v=10.9.2';
-import { V8_ASSETS } from './assets/v8/manifest.js?v=10.9.2';
-import { signUp, signIn, restoreSession, signOutLocal, getUser, loadCloudSave, saveCloudSave, updateCallsign, updatePassword, loadRankings, loadAuctionBids, saveAuctionBidOnline, markAuctionBidStatusOnline, loadAuctionMarket, upsertPlayerPresenceOnline, loadMapPresenceOnline, removePlayerPresenceOnline, queuePvpAttackOnline, consumePvpDamageEventsOnline, syncArenaProfileOnline, loadArenaState, loadArenaOpponents, loadArenaHistory, arenaAttackOnline } from './api.js?v=10.9.2';
+import { FACTIONS, SHIPS, ITEMS, LASER_AMMO, ROCKETS, NPC_TYPES, MAPS, RESOURCES } from './data.js?v=10.10.0';
+import { V8_ASSETS } from './assets/v8/manifest.js?v=10.10.0';
+import { signUp, signIn, restoreSession, signOutLocal, getUser, loadCloudSave, saveCloudSave, updateCallsign, updatePassword, loadRankings, loadAuctionBids, saveAuctionBidOnline, markAuctionBidStatusOnline, loadAuctionMarket, upsertPlayerPresenceOnline, loadMapPresenceOnline, removePlayerPresenceOnline, queuePvpAttackOnline, consumePvpDamageEventsOnline, syncArenaProfileOnline, loadArenaState, loadArenaDailyRewardStatus, claimArenaDailyReward, loadArenaOpponents, loadArenaHistory, arenaAttackOnline } from './api.js?v=10.10.0';
 
 const canvas = document.querySelector('#game');
 const ctx = canvas.getContext('2d');
@@ -104,7 +104,7 @@ const ui = {
   petBtn: $('#petBtn'), petModal: $('#petModal'), closePet: $('#closePet'), petContent: $('#petContent'),
   pilotBtn: $('#pilotBtn'), pilotPointBadge: $('#pilotPointBadge'), pilotModal: $('#pilotModal'), closePilot: $('#closePilot'), pilotLogDisks: $('#pilotLogDisks'), pilotPointsTotal: $('#pilotPointsTotal'), pilotPointsAvailable: $('#pilotPointsAvailable'), pilotPointsSpent: $('#pilotPointsSpent'), pilotNextPointTitle: $('#pilotNextPointTitle'), pilotNextPointCost: $('#pilotNextPointCost'), pilotConvertPoint: $('#pilotConvertPoint'), pilotLogBuyButtons: $('#pilotLogBuyButtons'), pilotResetCost: $('#pilotResetCost'), pilotResetBtn: $('#pilotResetBtn'), pilotSkillTree: $('#pilotSkillTree'),
   auctionBtn: $('#auctionBtn'), auctionTopClock: $('#auctionTopClock'), auctionModal: $('#auctionModal'), closeAuction: $('#closeAuction'), auctionClock: $('#auctionClock'), auctionCredits: $('#auctionCredits'), auctionEscrow: $('#auctionEscrow'), auctionGrid: $('#auctionGrid'), auctionHistory: $('#auctionHistory'),
-  arenaBtn: $('#arenaBtn'), arenaTopCount: $('#arenaTopCount'), arenaModal: $('#arenaModal'), closeArena: $('#closeArena'), arenaRefresh: $('#arenaRefresh'), arenaAttacksLeft: $('#arenaAttacksLeft'), arenaRating: $('#arenaRating'), arenaWins: $('#arenaWins'), arenaLosses: $('#arenaLosses'), arenaPower: $('#arenaPower'), arenaOpponents: $('#arenaOpponents'), arenaHistory: $('#arenaHistory'), arenaResult: $('#arenaResult'),
+  arenaBtn: $('#arenaBtn'), arenaTopCount: $('#arenaTopCount'), arenaModal: $('#arenaModal'), closeArena: $('#closeArena'), arenaRefresh: $('#arenaRefresh'), arenaAttacksLeft: $('#arenaAttacksLeft'), arenaRating: $('#arenaRating'), arenaWins: $('#arenaWins'), arenaLosses: $('#arenaLosses'), arenaPower: $('#arenaPower'), arenaDailyReward: $('#arenaDailyReward'), arenaRewardLeague: $('#arenaRewardLeague'), arenaRewardRank: $('#arenaRewardRank'), arenaRewardBonus: $('#arenaRewardBonus'), arenaRewardProgress: $('#arenaRewardProgress'), arenaRewardItems: $('#arenaRewardItems'), arenaRewardClaim: $('#arenaRewardClaim'), arenaRewardFoot: $('#arenaRewardFoot'), arenaOpponents: $('#arenaOpponents'), arenaHistory: $('#arenaHistory'), arenaResult: $('#arenaResult'),
   shopBtn: $('#shopBtn'), shopModal: $('#shopModal'), closeShop: $('#closeShop'), shopTabs: $('#shopTabs'), shopGrid: $('#shopGrid'), shopCredits: $('#shopCredits'), shopUridium: $('#shopUridium'),
   hangarBtn: $('#hangarBtn'), hangarModal: $('#hangarModal'), closeHangar: $('#closeHangar'), hangarTabs: $('#hangarTabs'), hangarContent: $('#hangarContent'), hangarShipName: $('#hangarShipName'),
   loginModal: $('#loginModal'), loginTabBtn: $('#loginTabBtn'), registerTabBtn: $('#registerTabBtn'), loginForm: $('#loginForm'), registerForm: $('#registerForm'), loginEmail: $('#loginEmail'), loginPassword: $('#loginPassword'), registerCallsign: $('#registerCallsign'), registerEmail: $('#registerEmail'), registerPassword: $('#registerPassword'), authMessage: $('#authMessage'), userLabel: $('#userLabel'), syncLabel: $('#syncLabel'), logoutBtn: $('#logoutBtn'), safeZoneLabel: $('#safeZoneLabel'), cargoUsed: $('#cargoUsed'), cargoMax: $('#cargoMax'), cargoBtn: $('#cargoBtn'), cargoModal: $('#cargoModal'), closeCargo: $('#closeCargo'), cargoSummary: $('#cargoSummary'), cargoGrid: $('#cargoGrid'), sellAllCargo: $('#sellAllCargo'), configBtn: $('#configBtn'), configModal: $('#configModal'), closeConfig: $('#closeConfig'), qualityButtons: $('#qualityButtons'), qualityCurrentBadge: $('#qualityCurrentBadge'), hudSettingsGrid: $('#hudSettingsGrid'), settingsTabs: $('#settingsTabs'), settingsGamePanel: $('#settingsGamePanel'), settingsRankingPanel: $('#settingsRankingPanel'), settingsAccountPanel: $('#settingsAccountPanel'), rankingRefreshBtn: $('#rankingRefreshBtn'), rankingLevel: $('#rankingLevel'), rankingXp: $('#rankingXp'), rankingAliens: $('#rankingAliens'), rankingGg: $('#rankingGg'), rankingUpdated: $('#rankingUpdated'), accountEmail: $('#accountEmail'), accountCallsign: $('#accountCallsign'), accountSaveName: $('#accountSaveName'), accountNameStatus: $('#accountNameStatus'), accountNewPassword: $('#accountNewPassword'), accountConfirmPassword: $('#accountConfirmPassword'), accountSavePassword: $('#accountSavePassword'), accountPasswordStatus: $('#accountPasswordStatus'), accountSummary: $('#accountSummary'),
@@ -3402,7 +3402,7 @@ function updateAuctionSystem(){
 
 /* ===================== V10.9 ARENA PVP ===================== */
 const ARENA_DAILY_LIMIT=10;
-const arenaRuntime={state:null,opponents:[],history:[],lastResult:null,busy:false,loadedAt:0,badgeAt:0,badgeBusy:false};
+const arenaRuntime={state:null,reward:null,opponents:[],history:[],lastResult:null,busy:false,rewardBusy:false,loadedAt:0,badgeAt:0,badgeBusy:false};
 
 function arenaSafeText(value){
   return String(value??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
@@ -3440,6 +3440,74 @@ async function refreshArenaBadge(force=false){
   }catch(e){console.warn('arena badge',e);}
   finally{arenaRuntime.badgeBusy=false;}
 }
+function renderArenaReward(){
+  if(!ui.arenaDailyReward)return;
+  const r=arenaRuntime.reward;
+  if(!r){
+    ui.arenaRewardLeague.textContent='—';
+    ui.arenaRewardRank.textContent='—';
+    ui.arenaRewardBonus.textContent='—';
+    ui.arenaRewardProgress.textContent='Carregando progressão da liga...';
+    ui.arenaRewardItems.innerHTML='<div><span>CRÉDITOS</span><b>—</b></div><div><span>URIDIUM</span><b>—</b></div><div><span>XP</span><b>—</b></div><div><span>REPAROS</span><b>—</b></div>';
+    ui.arenaRewardClaim.disabled=true;
+    return;
+  }
+  const league=String(r.league||'BRONZE').toUpperCase();
+  ui.arenaDailyReward.dataset.league=league.toLowerCase();
+  ui.arenaRewardLeague.textContent=league;
+  ui.arenaRewardRank.textContent=`#${fmt(r.rank_position||1)}`;
+  ui.arenaRewardBonus.textContent=Number(r.total_bonus_percent||0)>0?`+${fmt(r.total_bonus_percent)}% BÔNUS`:'RECOMPENSA BASE';
+  ui.arenaRewardProgress.textContent=r.next_league
+    ?`Faltam ${fmt(r.points_to_next||0)} de Rating para ${String(r.next_league).toUpperCase()} • Nível ${fmt(r.player_level||1)} dá +${fmt(r.level_bonus_percent||0)}%`
+    :`Liga máxima alcançada • Nível ${fmt(r.player_level||1)} dá +${fmt(r.level_bonus_percent||0)}%`;
+  ui.arenaRewardItems.innerHTML=`
+    <div><span>CRÉDITOS</span><b>+${fmt(r.credits||0)}</b></div>
+    <div><span>URIDIUM</span><b>+${fmt(r.uridium||0)}</b></div>
+    <div><span>XP</span><b>+${fmt(r.xp||0)}</b></div>
+    <div><span>REPAROS</span><b>+${fmt(r.repair_bonus||0)}</b></div>
+  `;
+  const claimed=!!r.claimed_today;
+  ui.arenaRewardClaim.disabled=claimed||arenaRuntime.rewardBusy;
+  ui.arenaRewardClaim.textContent=arenaRuntime.rewardBusy?'RESGATANDO...':claimed?'RESGATADO HOJE':'RESGATAR RECOMPENSA';
+  const rankBonus=Number(r.rank_bonus_percent||0);
+  ui.arenaRewardFoot.textContent=claimed
+    ?'Recompensa de hoje entregue. Novo resgate à meia-noite no horário de São Paulo.'
+    :`Bônus de posição: ${rankBonus?`+${rankBonus}%`:'0%'} • Bônus de nível: +${fmt(r.level_bonus_percent||0)}% • 1 resgate por dia.`;
+}
+async function claimArenaRewardNow(){
+  if(!authenticated||!progress||arenaRuntime.rewardBusy||arenaRuntime.reward?.claimed_today)return;
+  arenaRuntime.rewardBusy=true;
+  renderArenaReward();
+  try{
+    const result=await claimArenaDailyReward();
+    if(!result)throw new Error('O servidor não retornou a recompensa diária.');
+    arenaRuntime.reward=result;
+    if(result.claim_applied){
+      const oldLevel=Number(progress.profile.level||1);
+      progress.profile.credits=Number(result.new_credits??progress.profile.credits);
+      progress.profile.uridium=Number(result.new_uridium??progress.profile.uridium);
+      progress.profile.xp=Number(result.new_xp??progress.profile.xp);
+      progress.profile.level=Number(result.level_after??levelFromXp(progress.profile.xp,PLAYER_MAX_LEVEL));
+      progress.galaxyGate ||= freshGalaxyGateState();
+      progress.galaxyGate.repairBonus=Number(result.new_repair_bonus??progress.galaxyGate.repairBonus??0);
+      localStorage.setItem(saveKey(),JSON.stringify(progress));
+      cloudDirty=false;
+      for(let lv=oldLevel+1;lv<=progress.profile.level;lv++)showLevelUpAnimation(lv);
+      renderAll();
+      showToast(`RECOMPENSA ${String(result.league||'ARENA').toUpperCase()} • +${fmt(result.credits||0)} CR • +${fmt(result.uridium||0)} URI`);
+      pushActivity(`ARENA • Recompensa diária ${String(result.league||'').toUpperCase()} resgatada • +${fmt(result.credits||0)} CR • +${fmt(result.uridium||0)} URI • +${fmt(result.xp||0)} XP`,'reward');
+    }else{
+      showToast('A recompensa diária de hoje já foi resgatada.');
+    }
+  }catch(e){
+    showToast(String(e?.message||e).replace(/^.*?:\s*/,''));
+  }finally{
+    arenaRuntime.rewardBusy=false;
+    renderArenaReward();
+    updateUI();
+  }
+}
+
 function renderArenaResult(){
   if(!ui.arenaResult)return;
   const r=arenaRuntime.lastResult;
@@ -3463,6 +3531,7 @@ function renderArena(){
   ui.arenaLosses.textContent=fmt(s.losses||0);
   ui.arenaPower.textContent=fmt(s.power||0);
   updateArenaBadge();
+  renderArenaReward();
   renderArenaResult();
 
   if(!arenaRuntime.opponents.length){
@@ -3501,8 +3570,9 @@ async function refreshArena(force=false){
   if(ui.arenaOpponents)ui.arenaOpponents.classList.add('loading');
   try{
     await syncArenaSnapshot();
-    const [s,opponents,history]=await Promise.all([loadArenaState(),loadArenaOpponents(),loadArenaHistory()]);
+    const [s,reward,opponents,history]=await Promise.all([loadArenaState(),loadArenaDailyRewardStatus(),loadArenaOpponents(),loadArenaHistory()]);
     arenaRuntime.state=s||arenaRuntime.state;
+    arenaRuntime.reward=reward||arenaRuntime.reward;
     arenaRuntime.opponents=Array.isArray(opponents)?opponents:[];
     arenaRuntime.history=Array.isArray(history)?history:[];
     arenaRuntime.loadedAt=Date.now();
@@ -3602,6 +3672,7 @@ if(ui.closeAuction)ui.closeAuction.onclick=()=>ui.auctionModal.classList.add('hi
 if(ui.arenaBtn)ui.arenaBtn.onclick=()=>openArena();
 if(ui.closeArena)ui.closeArena.onclick=()=>ui.arenaModal.classList.add('hidden');
 if(ui.arenaRefresh)ui.arenaRefresh.onclick=()=>refreshArena(true);
+if(ui.arenaRewardClaim)ui.arenaRewardClaim.onclick=()=>claimArenaRewardNow();
 if(ui.closeGate)ui.closeGate.onclick=()=>ui.gateModal.classList.add('hidden');
 if(ui.gateJumpBtn)ui.gateJumpBtn.onclick=()=>enterAlphaGate();
 if(ui.useRepairBonus)ui.useRepairBonus.onclick=()=>useGalaxyRepairBonus();

@@ -5,8 +5,8 @@
 <meta charset="utf-8"/>
 <meta content="width=device-width,initial-scale=1,user-scalable=no" name="viewport"/>
 <meta content="#030816" name="theme-color"/>
-<title>Stellar Legacy V10.9.2 — Auth Fix</title>
-<link href="/style.css?v=10.9.2" rel="stylesheet"/>
+<title>Stellar Legacy V10.10 — Recompensa Diária da Arena</title>
+<link href="/style.css?v=10.10.0" rel="stylesheet"/>
 </head>
 <body>
 <div id="app">
@@ -303,6 +303,23 @@
       <div><span>DERROTAS</span><b id="arenaLosses">0</b></div>
       <div><span>SEU PODER</span><b id="arenaPower">0</b></div>
     </div>
+    <section class="arena-daily-reward" id="arenaDailyReward">
+      <div class="arena-reward-head">
+        <div>
+          <div class="eyebrow">RECOMPENSA DIÁRIA • LIGA DA ARENA</div>
+          <div class="arena-reward-title"><b id="arenaRewardLeague">BRONZE</b><span id="arenaRewardRank">#1</span><em id="arenaRewardBonus">BASE</em></div>
+          <small id="arenaRewardProgress">Carregando progressão da liga...</small>
+        </div>
+        <button class="gold-btn" id="arenaRewardClaim">RESGATAR RECOMPENSA</button>
+      </div>
+      <div class="arena-reward-items" id="arenaRewardItems">
+        <div><span>CRÉDITOS</span><b>—</b></div>
+        <div><span>URIDIUM</span><b>—</b></div>
+        <div><span>XP</span><b>—</b></div>
+        <div><span>REPAROS</span><b>—</b></div>
+      </div>
+      <div class="arena-reward-foot" id="arenaRewardFoot">A recompensa aumenta com seu Rating, posição e nível do piloto.</div>
+    </section>
     <div class="arena-result hidden" id="arenaResult"></div>
     <section class="arena-section">
       <div class="arena-section-title"><div><b>ADVERSÁRIOS</b><small>Os pilotos mais próximos do seu poder aparecem primeiro.</small></div></div>
@@ -464,6 +481,6 @@
 </div>
 </div>
 </div>
-<script src="/game.js?v=10.9.2" type="module"></script>
+<script src="/game.js?v=10.10.0" type="module"></script>
 </body>
 </html>

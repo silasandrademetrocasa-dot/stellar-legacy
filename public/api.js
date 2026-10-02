@@ -395,6 +395,23 @@ export async function loadArenaState() {
   return Array.isArray(rows) ? rows[0] || null : null;
 }
 
+
+export async function loadArenaDailyRewardStatus() {
+  const body = await authedSupabaseFetch('/rest/v1/rpc/get_arena_daily_reward_status', {
+    method: 'POST',
+    body: JSON.stringify({}),
+  });
+  return Array.isArray(body) ? body[0] || null : body || null;
+}
+
+export async function claimArenaDailyReward() {
+  const body = await authedSupabaseFetch('/rest/v1/rpc/claim_arena_daily_reward', {
+    method: 'POST',
+    body: JSON.stringify({}),
+  });
+  return Array.isArray(body) ? body[0] || null : body || null;
+}
+
 export async function loadArenaOpponents() {
   const rows = await authedSupabaseFetch('/rest/v1/rpc/get_arena_opponents', {
     method: 'POST',

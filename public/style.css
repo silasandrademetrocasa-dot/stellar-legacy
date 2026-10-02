@@ -1189,3 +1189,25 @@ body[data-quality="high"] .hud-panel{backdrop-filter:blur(7px);-webkit-backdrop-
   .arena-opponent-art{width:58px}
   .arena-attack-btn{grid-column:1/-1;width:100%}
 }
+
+
+/* ===================== V10.10 DAILY ARENA REWARD ===================== */
+.arena-daily-reward{margin:0 0 12px;padding:13px;border:1px solid rgba(255,196,77,.26);border-radius:12px;background:linear-gradient(135deg,rgba(79,54,8,.34),rgba(8,23,42,.82));box-shadow:inset 0 0 28px rgba(255,199,69,.035)}
+.arena-reward-head{display:flex;justify-content:space-between;gap:12px;align-items:center}
+.arena-reward-title{display:flex;align-items:center;gap:8px;margin:4px 0}
+.arena-reward-title b{font-size:18px;color:#ffd36b;letter-spacing:.06em}
+.arena-reward-title span{font-size:11px;font-weight:900;color:#e9f8ff;padding:3px 7px;border-radius:999px;background:rgba(73,181,255,.12);border:1px solid rgba(73,181,255,.18)}
+.arena-reward-title em{font-style:normal;font-size:8px;font-weight:900;color:#76ffb4;padding:3px 6px;border-radius:999px;background:rgba(45,184,111,.1)}
+.arena-reward-head small{display:block;color:#85aabd;font-size:9px;line-height:1.45}
+.arena-reward-items{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px;margin-top:10px}
+.arena-reward-items>div{padding:9px;border-radius:9px;background:rgba(4,17,29,.58);border:1px solid rgba(255,215,111,.11)}
+.arena-reward-items span{display:block;font-size:7px;letter-spacing:.09em;color:#718fa0;margin-bottom:3px}
+.arena-reward-items b{display:block;color:#f4fbff;font-size:12px}
+.arena-reward-foot{margin-top:8px;color:#688c9f;font-size:8px;line-height:1.4}
+.arena-daily-reward[data-league="prata"] .arena-reward-title b{color:#d9e7f0}
+.arena-daily-reward[data-league="ouro"] .arena-reward-title b{color:#ffd36b}
+.arena-daily-reward[data-league="platina"] .arena-reward-title b{color:#79e7ff}
+.arena-daily-reward[data-league="diamante"] .arena-reward-title b{color:#9ed0ff;text-shadow:0 0 12px rgba(116,189,255,.32)}
+.arena-daily-reward[data-league="lenda"]{border-color:rgba(255,103,162,.34);background:linear-gradient(135deg,rgba(96,19,66,.34),rgba(14,17,48,.88))}
+.arena-daily-reward[data-league="lenda"] .arena-reward-title b{color:#ff9ed1;text-shadow:0 0 13px rgba(255,76,161,.3)}
+@media(max-width:700px){.arena-reward-head{align-items:stretch;flex-direction:column}.arena-reward-head button{width:100%}.arena-reward-items{grid-template-columns:repeat(2,minmax(0,1fr))}}
