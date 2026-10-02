@@ -1,4 +1,4 @@
-name: 🚀 Instalar versão do Stellar Legacy
+name: 🚀 1 Instalar versão do Stellar Legacy
 run-name: Instalar pacote do Stellar Legacy • ${{ github.actor }}
 
 on:
