@@ -1,6 +1,6 @@
 {
   "name": "stellar-legacy",
-  "version": "11.2.0",
+  "version": "11.3.0",
   "type": "module",
   "scripts": {
     "start": "node server/index.js",
@@ -13,5 +13,5 @@
   "engines": {
     "node": ">=18"
   },
-  "release": "clans-rank-nameplates-v12"
+  "release": "battle-pass-level-rewards-v13"
 }

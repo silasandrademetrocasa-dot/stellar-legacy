@@ -1,6 +1,6 @@
-import { FACTIONS, SHIPS, ITEMS, LASER_AMMO, ROCKETS, NPC_TYPES, MAPS, RESOURCES } from './data.js?v=11.2.0';
-import { GAME_ASSETS } from './assets/v8/manifest.js?v=11.2.0';
-import { signUp, signIn, restoreSession, signOutLocal, getUser, loadCloudSave, saveCloudSave, updateCallsign, updatePassword, loadRankings, loadAuctionBids, saveAuctionBidOnline, markAuctionBidStatusOnline, loadAuctionMarket, upsertPlayerPresenceOnline, loadMapPresenceOnline, removePlayerPresenceOnline, queuePvpAttackOnline, consumePvpDamageEventsOnline, syncArenaProfileOnline, loadArenaState, loadArenaDailyRewardStatus, claimArenaDailyReward, loadArenaOpponents, loadArenaHistory, arenaAttackOnline, listClansOnline, loadMyClanOnline, createClanOnline, joinClanOnline, leaveClanOnline, donateClanCreditsOnline, transferClanCreditsOnline, claimClanCreditGrantsOnline } from './api.js?v=11.2.0';
+import { FACTIONS, SHIPS, ITEMS, LASER_AMMO, ROCKETS, NPC_TYPES, MAPS, RESOURCES } from './data.js?v=11.3.0';
+import { GAME_ASSETS } from './assets/v8/manifest.js?v=11.3.0';
+import { signUp, signIn, restoreSession, signOutLocal, getUser, loadCloudSave, saveCloudSave, updateCallsign, updatePassword, loadRankings, loadAuctionBids, saveAuctionBidOnline, markAuctionBidStatusOnline, loadAuctionMarket, upsertPlayerPresenceOnline, loadMapPresenceOnline, removePlayerPresenceOnline, queuePvpAttackOnline, consumePvpDamageEventsOnline, syncArenaProfileOnline, loadArenaState, loadArenaDailyRewardStatus, claimArenaDailyReward, loadArenaOpponents, loadArenaHistory, arenaAttackOnline, listClansOnline, loadMyClanOnline, createClanOnline, joinClanOnline, leaveClanOnline, donateClanCreditsOnline, transferClanCreditsOnline, claimClanCreditGrantsOnline } from './api.js?v=11.3.0';
 
 const canvas = document.querySelector('#game');
 const ctx = canvas.getContext('2d');
@@ -99,7 +99,7 @@ const ui = {
   laserAmmoButtons: $('#laserAmmoButtons'), rocketAmmoButtons: $('#rocketAmmoButtons'), laserToggle: $('#laserToggle'), rocketFire: $('#rocketFire'), autoLaser: $('#autoLaser'), autoRocket: $('#autoRocket'), turboRocket: $('#turboRocket'), rocketCd: $('#rocketCd'), weaponBar: $('#weaponBar'), weaponBarContent: $('#weaponBarContent'), weaponBarToggle: $('#weaponBarToggle'),
   toast: $('#toast'), baseTradePrompt: $('#baseTradePrompt'), baseTradePromptInfo: $('#baseTradePromptInfo'), repairModal: $('#repairModal'), repairModalText: $('#repairModalText'), repairShipName: $('#repairShipName'), repairBonusCount: $('#repairBonusCount'), repairUriCount: $('#repairUriCount'), repairUseBonus: $('#repairUseBonus'), repairUseUri: $('#repairUseUri'), repairUsePhoenix: $('#repairUsePhoenix'), gameCelebration: $('#gameCelebration'), celebrationPanel: $('#celebrationPanel'), celebrationKicker: $('#celebrationKicker'), celebrationTitle: $('#celebrationTitle'), celebrationSubtitle: $('#celebrationSubtitle'), portalPrompt: $('#portalPrompt'), portalPromptMap: $('#portalPromptMap'), jumpTransition: $('#jumpTransition'), jumpTitle: $('#jumpTitle'), jumpSubtitle: $('#jumpSubtitle'), factionModal: $('#factionModal'), factionCards: $('#factionCards'),
   mapBtn: $('#mapBtn'), mapModal: $('#mapModal'), closeMap: $('#closeMap'), mapNetwork: $('#mapNetwork'),
-  missionBtn: $('#missionBtn'), missionActiveCount: $('#missionActiveCount'), missionModal: $('#missionModal'), closeMission: $('#closeMission'), missionContent: $('#missionContent'), activeMissionPanel: $('#activeMissionPanel'), activeMissionCategory: $('#activeMissionCategory'), activeMissionTitle: $('#activeMissionTitle'), activeMissionTask: $('#activeMissionTask'), activeMissionProgressBar: $('#activeMissionProgressBar'), activeMissionProgressText: $('#activeMissionProgressText'), activeMissionRewardFactor: $('#activeMissionRewardFactor'), activeMissionDots: $('#activeMissionDots'), activeMissionOpen: $('#activeMissionOpen'), activityPanel: $('#activityPanel'), activityFeed: $('#activityFeed'), activityClearBtn: $('#activityClearBtn'),
+  missionBtn: $('#missionBtn'), missionActiveCount: $('#missionActiveCount'), missionModal: $('#missionModal'), closeMission: $('#closeMission'), missionContent: $('#missionContent'), passBtn: $('#passBtn'), passTierBadge: $('#passTierBadge'), passModal: $('#passModal'), closePass: $('#closePass'), passContent: $('#passContent'), activeMissionPanel: $('#activeMissionPanel'), activeMissionCategory: $('#activeMissionCategory'), activeMissionTitle: $('#activeMissionTitle'), activeMissionTask: $('#activeMissionTask'), activeMissionProgressBar: $('#activeMissionProgressBar'), activeMissionProgressText: $('#activeMissionProgressText'), activeMissionRewardFactor: $('#activeMissionRewardFactor'), activeMissionDots: $('#activeMissionDots'), activeMissionOpen: $('#activeMissionOpen'), activityPanel: $('#activityPanel'), activityFeed: $('#activityFeed'), activityClearBtn: $('#activityClearBtn'),
   gateBtn: $('#gateBtn'), gatePieceBadge: $('#gatePieceBadge'), gateModal: $('#gateModal'), closeGate: $('#closeGate'), gatePiecesText: $('#gatePiecesText'), gateLivesText: $('#gateLivesText'), gateCompletedText: $('#gateCompletedText'), gatePieceGrid: $('#gatePieceGrid'), gateJumpBtn: $('#gateJumpBtn'), gateUriText: $('#gateUriText'), gateSpinButtons: $('#gateSpinButtons'), gateJumpBonus: $('#gateJumpBonus'), gateRepairBonus: $('#gateRepairBonus'), gateLogDisks: $('#gateLogDisks'), useRepairBonus: $('#useRepairBonus'), gateResultBox: $('#gateResultBox'), gateRoundsGrid: $('#gateRoundsGrid'), gateAlphaStatusTitle: $('#gateAlphaStatusTitle'), gateAlphaStatusText: $('#gateAlphaStatusText'), gateHud: $('#gateHud'), gateHudRound: $('#gateHudRound'), gateHudWave: $('#gateHudWave'), gateHudRemaining: $('#gateHudRemaining'), gateHudNext: $('#gateHudNext'), gateHudLives: $('#gateHudLives'),
   petBtn: $('#petBtn'), petModal: $('#petModal'), closePet: $('#closePet'), petContent: $('#petContent'),
   pilotBtn: $('#pilotBtn'), pilotPointBadge: $('#pilotPointBadge'), pilotModal: $('#pilotModal'), closePilot: $('#closePilot'), pilotLogDisks: $('#pilotLogDisks'), pilotPointsTotal: $('#pilotPointsTotal'), pilotPointsAvailable: $('#pilotPointsAvailable'), pilotPointsSpent: $('#pilotPointsSpent'), pilotNextPointTitle: $('#pilotNextPointTitle'), pilotNextPointCost: $('#pilotNextPointCost'), pilotConvertPoint: $('#pilotConvertPoint'), pilotLogBuyButtons: $('#pilotLogBuyButtons'), pilotResetCost: $('#pilotResetCost'), pilotResetBtn: $('#pilotResetBtn'), pilotSkillTree: $('#pilotSkillTree'),
@@ -850,6 +850,125 @@ function renderMissions(){
 }
 function openMissions(){normalizeMissionState();renderMissions();ui.missionModal.classList.remove('hidden');}
 
+// ===================== PROGRESSÃO V11.3 • NÍVEL + PASSE DE BATALHA =====================
+const BATTLE_PASS_TIER_COUNT=30;
+const BATTLE_PASS_POINTS_PER_TIER=500;
+const BATTLE_PASS_DAILY_POINTS=100;
+function progressionDateKey(now=new Date()){return `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;}
+function battlePassSeasonKey(now=new Date()){return `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;}
+function freshBattlePass(){return {season:battlePassSeasonKey(),points:0,claimedTiers:{},daily:{key:progressionDateKey(),progress:{},completed:{}}};}
+function freshLevelRewards(){return {claimed:{}};}
+function normalizeLevelRewards(){if(!progress)return;progress.levelRewards ||= freshLevelRewards();progress.levelRewards.claimed ||= {};}
+function normalizeBattlePass(){
+  if(!progress)return;
+  const season=battlePassSeasonKey(),day=progressionDateKey();
+  if(!progress.battlePass||progress.battlePass.season!==season)progress.battlePass=freshBattlePass();
+  progress.battlePass.points=Math.max(0,Math.min(BATTLE_PASS_TIER_COUNT*BATTLE_PASS_POINTS_PER_TIER,Math.floor(Number(progress.battlePass.points)||0)));
+  progress.battlePass.claimedTiers ||= {};
+  progress.battlePass.daily ||= {key:day,progress:{},completed:{}};
+  if(progress.battlePass.daily.key!==day)progress.battlePass.daily={key:day,progress:{},completed:{}};
+  progress.battlePass.daily.progress ||= {};progress.battlePass.daily.completed ||= {};
+}
+function battlePassDailyMissions(){
+  normalizeBattlePass();
+  const level=Math.max(1,Number(progress?.profile?.level)||1),seed=hashStringSeed(`bp:${progressionDateKey()}`),rng=seededRng(seed);
+  const nudge=()=>Math.floor(rng()*3);
+  return [
+    {id:'kills',kind:'kill',icon:'☠',title:'Caçada diária',desc:'Elimine aliens em qualquer mapa.',target:Math.min(100,10+level*2+nudge()*5),points:BATTLE_PASS_DAILY_POINTS},
+    {id:'damage',kind:'damage',icon:'⚡',title:'Poder de fogo',desc:'Cause dano real em aliens, incluindo escudo e casco.',target:Math.round((120000+level*65000+nudge()*50000)/1000)*1000,points:BATTLE_PASS_DAILY_POINTS},
+    {id:'attacks',kind:'attack',icon:'✦',title:'Pressão de combate',desc:'Acerte ataques em aliens. Laser, míssil e P.E.T. contam quando causam dano.',target:25+level*3+nudge()*10,points:BATTLE_PASS_DAILY_POINTS},
+    {id:'boxes',kind:'box',icon:'▣',title:'Recuperação de carga',desc:'Colete boxes deixadas pelos aliens destruídos.',target:5+Math.ceil(level/4)+nudge()*2,points:BATTLE_PASS_DAILY_POINTS},
+    {id:'dropResources',kind:'dropResource',icon:'◆',title:'Recursos de combate',desc:'Colete recursos que vieram das boxes dos aliens. Pedras soltas do mapa NÃO contam.',target:100+level*30+nudge()*50,points:BATTLE_PASS_DAILY_POINTS},
+  ];
+}
+function battlePassTier(){normalizeBattlePass();return Math.min(BATTLE_PASS_TIER_COUNT,Math.floor(progress.battlePass.points/BATTLE_PASS_POINTS_PER_TIER));}
+function battlePassTierProgress(){normalizeBattlePass();if(battlePassTier()>=BATTLE_PASS_TIER_COUNT)return 100;return Math.round((progress.battlePass.points%BATTLE_PASS_POINTS_PER_TIER)/BATTLE_PASS_POINTS_PER_TIER*100);}
+function updatePassBadge(){if(!ui.passTierBadge)return;ui.passTierBadge.textContent=`${battlePassTier()}/${BATTLE_PASS_TIER_COUNT}`;}
+function battlePassEvent(kind,amount=1){
+  if(!progress||amount<=0)return;normalizeBattlePass();
+  const daily=progress.battlePass.daily,missions=battlePassDailyMissions();let changed=false,completedNow=[];const tierBefore=battlePassTier();
+  for(const mission of missions){
+    if(mission.kind!==kind||daily.completed[mission.id])continue;
+    const current=Math.max(0,Number(daily.progress[mission.id])||0),next=Math.min(mission.target,current+Math.max(0,Number(amount)||0));
+    if(next===current)continue;daily.progress[mission.id]=next;changed=true;
+    if(next>=mission.target){
+      daily.completed[mission.id]=Date.now();
+      progress.battlePass.points=Math.min(BATTLE_PASS_TIER_COUNT*BATTLE_PASS_POINTS_PER_TIER,progress.battlePass.points+mission.points);
+      completedNow.push(mission);
+    }
+  }
+  if(completedNow.length){
+    for(const mission of completedNow){queueCelebration('mission','PASSE +100',`${mission.title} concluída • +${mission.points} pontos`);pushActivity(`PASSE • ${mission.title} • +${mission.points} pontos`,'reward');}
+    const tierAfter=battlePassTier();if(tierAfter>tierBefore)queueCelebration('level',`PASSE • TIER ${tierAfter}`,`Nova recompensa liberada no Passe de Batalha`);
+    saveGame();updatePassBadge();if(ui.passModal&&!ui.passModal.classList.contains('hidden'))renderProgression();
+  }else if(changed){cloudDirty=true;if(ui.passModal&&!ui.passModal.classList.contains('hidden'))renderProgression();}
+}
+function rewardBundle(){return {credits:0,uridium:0,ammo:{},rockets:{},items:[],repairBonus:0};}
+function addRewardQty(obj,id,qty){if(qty>0)obj[id]=(obj[id]||0)+Math.floor(qty);}
+function levelRewardDef(level){
+  const r=rewardBundle();r.credits=level*100000;r.uridium=level*75;addRewardQty(r.ammo,'lcb10',level*250);
+  if(level===5)addRewardQty(r.ammo,'mcb25',5000);
+  if(level===10){addRewardQty(r.ammo,'mcb50',2500);r.repairBonus+=1;}
+  if(level===15)r.items.push('lf2');
+  if(level===20){addRewardQty(r.ammo,'ucb100',2500);r.repairBonus+=1;}
+  if(level===25)r.items.push('lf3');
+  if(level===30){r.items.push('sg3nb02');addRewardQty(r.ammo,'mcb50',5000);r.repairBonus+=1;}
+  if(level===35){addRewardQty(r.ammo,'ucb100',5000);r.repairBonus+=2;}
+  if(level===40)r.items.push('lf4');
+  if(level===44){r.credits+=10000000;r.uridium+=10000;addRewardQty(r.ammo,'ucb100',10000);r.items.push('lf4');r.repairBonus+=3;}
+  return r;
+}
+function battlePassRewardDef(tier){
+  const r=rewardBundle();r.credits=250000+tier*175000;r.uridium=150+tier*35;addRewardQty(r.ammo,'lcb10',1500+tier*150);
+  if(tier%3===0)addRewardQty(r.ammo,'mcb25',1500+tier*50);
+  if(tier%5===0)addRewardQty(r.ammo,'mcb50',750+tier*25);
+  if(tier%10===0){addRewardQty(r.ammo,'ucb100',1000+tier*30);r.repairBonus+=1;}
+  if(tier===15)r.items.push('lf2');
+  if(tier===20)r.items.push('sg3nb02');
+  if(tier===25)r.items.push('lf3');
+  if(tier===30){r.items.push('lf4');addRewardQty(r.ammo,'ucb100',5000);r.repairBonus+=2;r.credits+=5000000;r.uridium+=5000;}
+  return r;
+}
+function progressionRewardText(r){
+  const parts=[];if(r.credits)parts.push(`${fmt(r.credits)} CR`);if(r.uridium)parts.push(`${fmt(r.uridium)} URI`);
+  for(const [id,qty] of Object.entries(r.ammo||{}))if(qty)parts.push(`${fmt(qty)} ${shortLaserLabel(id)}`);
+  for(const [id,qty] of Object.entries(r.rockets||{}))if(qty)parts.push(`${fmt(qty)} ${shortRocketLabel(id)}`);
+  for(const id of r.items||[])parts.push(ITEMS[id]?.name||id.toUpperCase());
+  if(r.repairBonus)parts.push(`${r.repairBonus} Bônus de Reparo`);return parts.join(' • ');
+}
+function grantProgressionBundle(r){
+  progress.profile.credits+=(Number(r.credits)||0);progress.profile.uridium+=(Number(r.uridium)||0);
+  progress.ammo ||= {};progress.rockets ||= {};
+  for(const [id,qty] of Object.entries(r.ammo||{}))progress.ammo[id]=(progress.ammo[id]||0)+Math.floor(qty);
+  for(const [id,qty] of Object.entries(r.rockets||{}))progress.rockets[id]=(progress.rockets[id]||0)+Math.floor(qty);
+  for(const id of r.items||[])addInventory(id);
+  normalizeGalaxyGateState();progress.galaxyGate.repairBonus+=(Number(r.repairBonus)||0);
+}
+function claimLevelReward(level){
+  normalizeLevelRewards();level=Math.floor(Number(level)||0);if(level<2||level>PLAYER_MAX_LEVEL)return;
+  if(progress.profile.level<level){showToast(`Requer nível ${level}`);return;}if(progress.levelRewards.claimed[level]){showToast('Recompensa já resgatada');return;}
+  const reward=levelRewardDef(level);grantProgressionBundle(reward);progress.levelRewards.claimed[level]=Date.now();saveGame();flushCloudSave(true).catch(()=>{});showToast(`LV ${level} • recompensa resgatada`,'reward');pushActivity(`NÍVEL ${level} • ${progressionRewardText(reward)}`,'reward');renderProgression();updateUI();
+}
+function claimAllLevelRewards(){normalizeLevelRewards();let count=0;for(let level=2;level<=Math.min(PLAYER_MAX_LEVEL,progress.profile.level);level++){if(progress.levelRewards.claimed[level])continue;grantProgressionBundle(levelRewardDef(level));progress.levelRewards.claimed[level]=Date.now();count++;}if(!count){showToast('Nenhuma recompensa de nível pendente');return;}saveGame();flushCloudSave(true).catch(()=>{});showToast(`${count} recompensa(s) de nível resgatada(s)`,'reward');renderProgression();updateUI();}
+function claimBattlePassTier(tier){
+  normalizeBattlePass();tier=Math.floor(Number(tier)||0);if(tier<1||tier>BATTLE_PASS_TIER_COUNT)return;if(battlePassTier()<tier){showToast('Tier ainda bloqueado');return;}if(progress.battlePass.claimedTiers[tier]){showToast('Recompensa já resgatada');return;}
+  const reward=battlePassRewardDef(tier);grantProgressionBundle(reward);progress.battlePass.claimedTiers[tier]=Date.now();saveGame();flushCloudSave(true).catch(()=>{});showToast(`PASSE • Tier ${tier} resgatado`,'reward');pushActivity(`PASSE T${tier} • ${progressionRewardText(reward)}`,'reward');renderProgression();updateUI();
+}
+function claimAllBattlePassRewards(){normalizeBattlePass();const unlocked=battlePassTier();let count=0;for(let tier=1;tier<=unlocked;tier++){if(progress.battlePass.claimedTiers[tier])continue;grantProgressionBundle(battlePassRewardDef(tier));progress.battlePass.claimedTiers[tier]=Date.now();count++;}if(!count){showToast('Nenhuma recompensa do passe pendente');return;}saveGame();flushCloudSave(true).catch(()=>{});showToast(`${count} recompensa(s) do passe resgatada(s)`,'reward');renderProgression();updateUI();}
+function renderProgression(){
+  if(!ui.passContent||!progress)return;normalizeBattlePass();normalizeLevelRewards();updatePassBadge();
+  const unlocked=battlePassTier(),points=progress.battlePass.points,daily=progress.battlePass.daily,missions=battlePassDailyMissions();
+  const dailyHtml=missions.map(m=>{const current=Math.min(m.target,Math.floor(Number(daily.progress[m.id])||0)),done=!!daily.completed[m.id],pct=Math.min(100,Math.round(current/m.target*100));return `<div class="pass-mission ${done?'done':''}"><span class="pass-mission-icon">${m.icon}</span><div class="pass-mission-main"><b>${m.title}</b><small>${m.desc}</small><div class="pass-mini-progress"><i style="width:${pct}%"></i></div><em>${fmt(current)} / ${fmt(m.target)}</em></div><strong>${done?'✓':`+${m.points}`}</strong></div>`;}).join('');
+  const tiers=Array.from({length:BATTLE_PASS_TIER_COUNT},(_,i)=>i+1).map(tier=>{const claimed=!!progress.battlePass.claimedTiers[tier],open=tier<=unlocked,reward=battlePassRewardDef(tier);return `<article class="pass-tier ${open?'unlocked':'locked'} ${claimed?'claimed':''}"><div class="pass-tier-num">TIER <b>${tier}</b></div><div class="pass-tier-reward">${progressionRewardText(reward)}</div><button class="small-btn ${open&&!claimed?'gold':''}" data-pass-claim="${tier}" ${!open||claimed?'disabled':''}>${claimed?'RESGATADO':open?'RESGATAR':'BLOQUEADO'}</button></article>`;}).join('');
+  const levels=Array.from({length:PLAYER_MAX_LEVEL-1},(_,i)=>i+2).map(level=>{const reached=level<=progress.profile.level,claimed=!!progress.levelRewards.claimed[level],reward=levelRewardDef(level);return `<article class="level-reward ${reached?'reached':'locked'} ${claimed?'claimed':''}"><div class="level-reward-head"><span>LV</span><b>${level}</b></div><div>${progressionRewardText(reward)}</div><button class="small-btn ${reached&&!claimed?'gold':''}" data-level-claim="${level}" ${!reached||claimed?'disabled':''}>${claimed?'RESGATADO':reached?'RESGATAR':'BLOQUEADO'}</button></article>`;}).join('');
+  const nextPoints=unlocked>=BATTLE_PASS_TIER_COUNT?0:BATTLE_PASS_POINTS_PER_TIER-(points%BATTLE_PASS_POINTS_PER_TIER);
+  ui.passContent.innerHTML=`<section class="pass-hero"><div><div class="eyebrow">TEMPORADA ${progress.battlePass.season}</div><h3>TIER ${unlocked} / ${BATTLE_PASS_TIER_COUNT}</h3><p>5 missões diárias • 100 pontos cada • completar o dia inteiro libera exatamente 1 tier.</p></div><div class="pass-points"><span>PONTOS</span><b>${fmt(points)}</b><small>${unlocked>=BATTLE_PASS_TIER_COUNT?'PASSE COMPLETO':`faltam ${fmt(nextPoints)} para o próximo tier`}</small></div></section><div class="pass-main-progress"><i style="width:${battlePassTierProgress()}%"></i></div><section class="pass-section"><div class="pass-section-head"><div><span>MISSÕES DIÁRIAS</span><b>${missions.filter(m=>daily.completed[m.id]).length}/5 concluídas hoje</b></div></div><div class="pass-missions">${dailyHtml}</div></section><section class="pass-section"><div class="pass-section-head"><div><span>RECOMPENSAS DO PASSE</span><b>30 tiers mensais</b></div><button class="ghost-btn" id="passClaimAll">RESGATAR LIBERADAS</button></div><div class="pass-tier-grid">${tiers}</div></section><section class="pass-section level-section"><div class="pass-section-head"><div><span>RECOMPENSAS DE NÍVEL</span><b>LV 2 → LV ${PLAYER_MAX_LEVEL}</b></div><button class="ghost-btn" id="levelClaimAll">RESGATAR DISPONÍVEIS</button></div><p class="muted">Recompensas antigas também ficam disponíveis uma única vez para pilotos que já estavam acima do nível 1 quando o sistema entrou.</p><div class="level-reward-grid">${levels}</div></section>`;
+  ui.passContent.querySelectorAll('[data-pass-claim]').forEach(b=>b.onclick=()=>claimBattlePassTier(b.dataset.passClaim));
+  ui.passContent.querySelectorAll('[data-level-claim]').forEach(b=>b.onclick=()=>claimLevelReward(b.dataset.levelClaim));
+  $('#passClaimAll')?.addEventListener('click',claimAllBattlePassRewards);$('#levelClaimAll')?.addEventListener('click',claimAllLevelRewards);
+}
+function openProgression(){if(!progress)return;normalizeBattlePass();normalizeLevelRewards();renderProgression();ui.passModal?.classList.remove('hidden');}
+
 
 
 const STARTER_SHIP_ID = 'phoenix';
@@ -944,6 +1063,8 @@ function freshSave(factionId) {
     cargo: {},
     discoveries: {},
     missions: freshMissions(),
+    battlePass: freshBattlePass(),
+    levelRewards: freshLevelRewards(),
     pilotBio: freshPilotBio(),
     auction: freshAuctionState(),
     galaxyGate: freshGalaxyGateState(),
@@ -1404,7 +1525,9 @@ function processPlayerLevelUps(){
     progress.profile.level++;
     gained++;
     showLevelUpAnimation(progress.profile.level);
+    queueCelebration('mission','RECOMPENSA LIBERADA',`Nível ${progress.profile.level} • abra PASSE para resgatar`);
   }
+  if(gained){normalizeLevelRewards();updatePassBadge();saveGame();}
   return gained;
 }
 
@@ -1431,7 +1554,7 @@ function hydrateProgress(){
     progress.profile.xpModelV101=true;
   }
   progress.profile.level=levelFromXp(progress.profile.xp,PLAYER_MAX_LEVEL);
-  progress.ownedShips ||= ['phoenix'];progress.inventory ||= {};progress.drones ||= [];progress.ammo ||= {};progress.rockets ||= {};progress.flags ||= {};progress.cargo ||= {};progress.discoveries ||= {};progress.missions ||= freshMissions();normalizeMissionState();progress.pilotBio ||= freshPilotBio();normalizePilotBio();progress.auction ||= freshAuctionState();ensureAuctionState();progress.galaxyGate ||= freshGalaxyGateState();normalizeGalaxyGateState();
+  progress.ownedShips ||= ['phoenix'];progress.inventory ||= {};progress.drones ||= [];progress.ammo ||= {};progress.rockets ||= {};progress.flags ||= {};progress.cargo ||= {};progress.discoveries ||= {};progress.missions ||= freshMissions();normalizeMissionState();normalizeBattlePass();normalizeLevelRewards();progress.pilotBio ||= freshPilotBio();normalizePilotBio();progress.auction ||= freshAuctionState();ensureAuctionState();progress.galaxyGate ||= freshGalaxyGateState();normalizeGalaxyGateState();
   if(progress.repairRequired&&(!progress.repairRequired.shipId||!SHIPS[progress.repairRequired.shipId]))progress.repairRequired=null;
   for(const id of Object.keys(LASER_AMMO))if(progress.ammo[id]===undefined)progress.ammo[id]=0;
   if(!LASER_AMMO[progress.selectedLaserAmmo])progress.selectedLaserAmmo='lcb10';
@@ -1708,6 +1831,7 @@ function sellPetCargoBox(drop){
     else {const got=addCargoResource(id,qty);total+=got;}
   }
   progress.profile.credits+=credits;
+  if(total>0){battlePassEvent('dropResource',total);battlePassEvent('box',1);}
   if(credits>0)spawnParticle(drop.x,drop.y,`P.E.T. +${fmt(credits)} CR`,'#ffd36c');
   addPetXp(Math.max(4,total*2));saveGame();
 }
@@ -2294,12 +2418,15 @@ function rewardEnemyKill(enemy){
     spawnedAt:nowSec(),
     expiresAt:nowSec()+CARGO_BOX_LIFETIME_SEC
   });
-  missionEvent('kill',{enemy,mapId:progress.mapId});
+  missionEvent('kill',{enemy,mapId:progress.mapId});battlePassEvent('kill',1);
   if(isGalaxyGateMap()&&enemy.gateEnemy){recordAlphaKillReward(enemy);syncAlphaGateSnapshot();}else scheduleEnemyRespawn(enemy.type);
   saveGame();
 }
 function dealDamageToEnemy(enemy,damage,color){
+  const before=Math.max(0,Number(enemy.shield)||0)+Math.max(0,Number(enemy.hp)||0);
   let remain=damage;const hadShield=enemy.shield>0;if(enemy.shield>0){const a=Math.min(enemy.shield,remain);enemy.shield-=a;remain-=a;}if(remain>0)enemy.hp-=remain;
+  const after=Math.max(0,Number(enemy.shield)||0)+Math.max(0,Number(enemy.hp)||0),actual=Math.max(0,Math.round(before-after));
+  if(actual>0){battlePassEvent('damage',actual);battlePassEvent('attack',1);}
   spawnParticle(enemy.x,enemy.y-enemy.size,fmt(damage),color);spawnImpactFx(enemy.x,enemy.y,hadShield?'#55d8ff':color,hadShield?30:22,hadShield?'shield':'impact');
   if(enemy.hp<=0){enemy.hp=0;enemy.deadAt=nowSec();spawnExplosionFx(enemy.x,enemy.y,enemy.color,enemy.type.startsWith('boss'));rewardEnemyKill(enemy);if(state.target?.id===enemy.id){state.target=null;player.laserFiring=false;}}
 }
@@ -2322,6 +2449,7 @@ function applyLaserAmmoHit(enemy,baseDamage,ammo,color){
     spawnImpactFx(enemy.x,enemy.y,'#79f1ff',34,'shield');
     if(restored>0)spawnParticle(player.x,player.y-34,`+${fmt(restored)} ESC`,'#79f1ff');
     progress.shield=player.shield;
+    if(drained>0){battlePassEvent('damage',drained);battlePassEvent('attack',1);}
     return drained;
   }
   const damage=Math.max(0,Math.round(baseDamage*(Number(ammo?.mult)||1)));
@@ -2448,6 +2576,8 @@ function collectCargoBox(drop){
     if(got>0){drop.resources[id]-=got;if(drop.resources[id]<=0)delete drop.resources[id];total+=got;picked.push(`${fmt(got)} ${id}`);}
   }
   if(total>0){
+    battlePassEvent('dropResource',total);
+    if(!drop.battlePassBoxCounted){drop.battlePassBoxCounted=true;battlePassEvent('box',1);}
     spawnParticle(drop.x,drop.y,`+${fmt(total)} recursos`,'#ffe57b');
     pushActivity(`BOX ${drop.source||''} • ${picked.join(' • ')}`,'loot');
     saveGame();
@@ -3939,10 +4069,10 @@ function openArena(){
   refreshArena(true);
 }
 
-function renderAll(){buildAmmoButtons();renderShop();renderHangar();renderCargo();renderMapModal();renderPet();renderMissions();renderGalaxyGate();renderPilotProfile();ensureAuctionState();updateUI();refreshArenaBadge();}
+function renderAll(){buildAmmoButtons();renderShop();renderHangar();renderCargo();renderMapModal();renderPet();renderMissions();renderGalaxyGate();renderPilotProfile();ensureAuctionState();updatePassBadge();updateUI();refreshArenaBadge();}
 
 function worldPoint(ev){const r=canvas.getBoundingClientRect(),sx=ev.clientX-r.left,sy=ev.clientY-r.top;return{x:sx-W/2+state.camera.x,y:sy-H/2+state.camera.y};}
-function gameplayPointerAllowed(){return authenticated&&progress&&ui.loginModal.classList.contains('hidden')&&ui.shopModal.classList.contains('hidden')&&ui.hangarModal.classList.contains('hidden')&&ui.cargoModal.classList.contains('hidden')&&ui.petModal.classList.contains('hidden')&&ui.missionModal.classList.contains('hidden')&&ui.gateModal.classList.contains('hidden')&&ui.pilotModal.classList.contains('hidden')&&ui.auctionModal.classList.contains('hidden')&&ui.arenaModal.classList.contains('hidden')&&ui.configModal.classList.contains('hidden')&&ui.mapModal.classList.contains('hidden')&&ui.factionModal.classList.contains('hidden');}
+function gameplayPointerAllowed(){return authenticated&&progress&&ui.loginModal.classList.contains('hidden')&&ui.shopModal.classList.contains('hidden')&&ui.hangarModal.classList.contains('hidden')&&ui.cargoModal.classList.contains('hidden')&&ui.petModal.classList.contains('hidden')&&ui.missionModal.classList.contains('hidden')&&ui.passModal.classList.contains('hidden')&&ui.gateModal.classList.contains('hidden')&&ui.pilotModal.classList.contains('hidden')&&ui.auctionModal.classList.contains('hidden')&&ui.arenaModal.classList.contains('hidden')&&ui.configModal.classList.contains('hidden')&&ui.mapModal.classList.contains('hidden')&&ui.factionModal.classList.contains('hidden');}
 function setPointerDestination(ev){const p=worldPoint(ev);player.tx=Math.max(40,Math.min(state.currentMap.world.w-40,p.x));player.ty=Math.max(40,Math.min(state.currentMap.world.h-40,p.y));}
 function pointerAction(ev){
   if(!gameplayPointerAllowed()||ev.button!==0)return;
@@ -3970,7 +4100,7 @@ ui.portalPrompt.onclick=()=>{const portal=nearbyPortal();if(portal)jumpThroughPo
 minimap.addEventListener('pointerdown',e=>{if(!authenticated||!progress)return;e.preventDefault();e.stopPropagation();const r=minimap.getBoundingClientRect();const mx=(e.clientX-r.left)/r.width*minimap.width,my=(e.clientY-r.top)/r.height*minimap.height;player.tx=Math.max(35,Math.min(state.currentMap.world.w-35,mx/minimap.width*state.currentMap.world.w));player.ty=Math.max(35,Math.min(state.currentMap.world.h-35,my/minimap.height*state.currentMap.world.h));showToast(`Rota definida no minimapa`);});
 ui.laserToggle.onclick=()=>{if(!state.target||state.target.hp<=0){showToast('Selecione um alvo');return;}player.laserFiring=!player.laserFiring;};ui.rocketFire.onclick=()=>fireRocket(true);
 const dismissibleModals=()=>[
-  ui.configModal,ui.clanModal,ui.arenaModal,ui.auctionModal,ui.pilotModal,ui.gateModal,ui.missionModal,ui.shopModal,ui.hangarModal,ui.petModal,ui.cargoModal,ui.mapModal
+  ui.configModal,ui.clanModal,ui.passModal,ui.arenaModal,ui.auctionModal,ui.pilotModal,ui.gateModal,ui.missionModal,ui.shopModal,ui.hangarModal,ui.petModal,ui.cargoModal,ui.mapModal
 ].filter(Boolean);
 function closeTopOverlay(){
   const open=dismissibleModals().filter(modal=>!modal.classList.contains('hidden'));
@@ -3990,6 +4120,8 @@ if(ui.mapBtn)ui.mapBtn.onclick=()=>openMapModal();
 if(ui.closeMap)ui.closeMap.onclick=()=>ui.mapModal.classList.add('hidden');
 if(ui.missionBtn)ui.missionBtn.onclick=()=>openMissions();if(ui.activeMissionOpen)ui.activeMissionOpen.onclick=()=>openMissions();
 if(ui.closeMission)ui.closeMission.onclick=()=>ui.missionModal.classList.add('hidden');
+if(ui.passBtn)ui.passBtn.onclick=()=>openProgression();
+if(ui.closePass)ui.closePass.onclick=()=>ui.passModal.classList.add('hidden');
 if(ui.gateBtn)ui.gateBtn.onclick=()=>openGalaxyGate();
 if(ui.pilotBtn)ui.pilotBtn.onclick=()=>openPilotProfile();
 if(ui.closePilot)ui.closePilot.onclick=()=>ui.pilotModal.classList.add('hidden');
@@ -4049,7 +4181,7 @@ document.addEventListener('keydown',e=>{
   if(['j','J'].includes(e.key)||e.key==='Enter'){const portal=nearbyPortal();if(portal){e.preventDefault();jumpThroughPortal(portal);}}
   const k=e.key.toLowerCase();
   if(k==='h')toggleHudUi();if(k==='b')openShop();if(k==='c'){if(isAtTrader())openCargo();else showToast('Venda de recursos disponível somente na base X-1');}
-  if(k==='m')openMapModal();if(k==='q')openMissions();if(k==='g')openGalaxyGate();if(k==='p')openHangar('pet');if(k==='o')openHangar('pilot');if(k==='l')openAuction();if(k==='a')openArena();if(k==='n')openClan();
+  if(k==='m')openMapModal();if(k==='q')openMissions();if(k==='x')openProgression();if(k==='g')openGalaxyGate();if(k==='p')openHangar('pet');if(k==='o')openHangar('pilot');if(k==='l')openAuction();if(k==='a')openArena();if(k==='n')openClan();
   if(['1','2','3','4','5'].includes(e.key)){progress.selectedLaserAmmo=Object.keys(LASER_AMMO)[Number(e.key)-1];buildAmmoButtons();saveGame();}
 });
 
@@ -4083,6 +4215,7 @@ async function afterAuth(){
   }catch(err){console.warn(err);loadLocalGame();setSync('OFFLINE','err');}
   if(!progress){renderFactionChoice();return;}
   startLoadedGame();
+  updatePassBadge();
   syncAuctionBidsOnline();
   syncOnlineWorld();
   syncClanCreditGrants(true);
