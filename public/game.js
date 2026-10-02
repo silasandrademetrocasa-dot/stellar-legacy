@@ -1,6 +1,6 @@
-import { FACTIONS, SHIPS, ITEMS, LASER_AMMO, ROCKETS, NPC_TYPES, MAPS, RESOURCES } from './data.js?v=11.0.0';
-import { GAME_ASSETS } from './assets/v8/manifest.js?v=11.0.0';
-import { signUp, signIn, restoreSession, signOutLocal, getUser, loadCloudSave, saveCloudSave, updateCallsign, updatePassword, loadRankings, loadAuctionBids, saveAuctionBidOnline, markAuctionBidStatusOnline, loadAuctionMarket, upsertPlayerPresenceOnline, loadMapPresenceOnline, removePlayerPresenceOnline, queuePvpAttackOnline, consumePvpDamageEventsOnline, syncArenaProfileOnline, loadArenaState, loadArenaDailyRewardStatus, claimArenaDailyReward, loadArenaOpponents, loadArenaHistory, arenaAttackOnline } from './api.js?v=11.0.0';
+import { FACTIONS, SHIPS, ITEMS, LASER_AMMO, ROCKETS, NPC_TYPES, MAPS, RESOURCES } from './data.js?v=11.1.1';
+import { GAME_ASSETS } from './assets/v8/manifest.js?v=11.1.1';
+import { signUp, signIn, restoreSession, signOutLocal, getUser, loadCloudSave, saveCloudSave, updateCallsign, updatePassword, loadRankings, loadAuctionBids, saveAuctionBidOnline, markAuctionBidStatusOnline, loadAuctionMarket, upsertPlayerPresenceOnline, loadMapPresenceOnline, removePlayerPresenceOnline, queuePvpAttackOnline, consumePvpDamageEventsOnline, syncArenaProfileOnline, loadArenaState, loadArenaDailyRewardStatus, claimArenaDailyReward, loadArenaOpponents, loadArenaHistory, arenaAttackOnline } from './api.js?v=11.1.1';
 
 const canvas = document.querySelector('#game');
 const ctx = canvas.getContext('2d');
@@ -107,7 +107,7 @@ const ui = {
   arenaBtn: $('#arenaBtn'), arenaTopCount: $('#arenaTopCount'), arenaModal: $('#arenaModal'), closeArena: $('#closeArena'), arenaRefresh: $('#arenaRefresh'), arenaAttacksLeft: $('#arenaAttacksLeft'), arenaRating: $('#arenaRating'), arenaWins: $('#arenaWins'), arenaLosses: $('#arenaLosses'), arenaPower: $('#arenaPower'), arenaDailyReward: $('#arenaDailyReward'), arenaRewardLeague: $('#arenaRewardLeague'), arenaRewardRank: $('#arenaRewardRank'), arenaRewardBonus: $('#arenaRewardBonus'), arenaRewardProgress: $('#arenaRewardProgress'), arenaRewardItems: $('#arenaRewardItems'), arenaRewardClaim: $('#arenaRewardClaim'), arenaRewardFoot: $('#arenaRewardFoot'), arenaOpponents: $('#arenaOpponents'), arenaHistory: $('#arenaHistory'), arenaResult: $('#arenaResult'), arenaBattleStage: $('#arenaBattleStage'), arenaBattleStatus: $('#arenaBattleStatus'), arenaBattleTimer: $('#arenaBattleTimer'), arenaBattleSkip: $('#arenaBattleSkip'), arenaBattleField: $('#arenaBattleField'), arenaFighterAttacker: $('#arenaFighterAttacker'), arenaFighterDefender: $('#arenaFighterDefender'), arenaAttackerName: $('#arenaAttackerName'), arenaDefenderName: $('#arenaDefenderName'), arenaAttackerShip: $('#arenaAttackerShip'), arenaDefenderShip: $('#arenaDefenderShip'), arenaAttackerShieldBar: $('#arenaAttackerShieldBar'), arenaDefenderShieldBar: $('#arenaDefenderShieldBar'), arenaAttackerHpBar: $('#arenaAttackerHpBar'), arenaDefenderHpBar: $('#arenaDefenderHpBar'), arenaAttackerShieldText: $('#arenaAttackerShieldText'), arenaDefenderShieldText: $('#arenaDefenderShieldText'), arenaAttackerHpText: $('#arenaAttackerHpText'), arenaDefenderHpText: $('#arenaDefenderHpText'), arenaBattleRound: $('#arenaBattleRound'), arenaProjectileLayer: $('#arenaProjectileLayer'), arenaBattleFeed: $('#arenaBattleFeed'), arenaBattleAnalysis: $('#arenaBattleAnalysis'),
   shopBtn: $('#shopBtn'), shopModal: $('#shopModal'), closeShop: $('#closeShop'), shopTabs: $('#shopTabs'), shopGrid: $('#shopGrid'), shopCredits: $('#shopCredits'), shopUridium: $('#shopUridium'),
   hangarBtn: $('#hangarBtn'), hangarModal: $('#hangarModal'), closeHangar: $('#closeHangar'), hangarTabs: $('#hangarTabs'), hangarContent: $('#hangarContent'), hangarShipName: $('#hangarShipName'),
-  loginModal: $('#loginModal'), loginTabBtn: $('#loginTabBtn'), registerTabBtn: $('#registerTabBtn'), loginForm: $('#loginForm'), registerForm: $('#registerForm'), loginEmail: $('#loginEmail'), loginPassword: $('#loginPassword'), registerCallsign: $('#registerCallsign'), registerEmail: $('#registerEmail'), registerPassword: $('#registerPassword'), authMessage: $('#authMessage'), userLabel: $('#userLabel'), syncLabel: $('#syncLabel'), logoutBtn: $('#logoutBtn'), safeZoneLabel: $('#safeZoneLabel'), cargoUsed: $('#cargoUsed'), cargoMax: $('#cargoMax'), cargoBtn: $('#cargoBtn'), cargoModal: $('#cargoModal'), closeCargo: $('#closeCargo'), cargoSummary: $('#cargoSummary'), cargoGrid: $('#cargoGrid'), sellAllCargo: $('#sellAllCargo'), configBtn: $('#configBtn'), configModal: $('#configModal'), closeConfig: $('#closeConfig'), qualityButtons: $('#qualityButtons'), qualityCurrentBadge: $('#qualityCurrentBadge'), hudSettingsGrid: $('#hudSettingsGrid'), settingsTabs: $('#settingsTabs'), settingsGamePanel: $('#settingsGamePanel'), settingsRankingPanel: $('#settingsRankingPanel'), settingsAccountPanel: $('#settingsAccountPanel'), rankingRefreshBtn: $('#rankingRefreshBtn'), rankingLevel: $('#rankingLevel'), rankingXp: $('#rankingXp'), rankingAliens: $('#rankingAliens'), rankingGg: $('#rankingGg'), rankingUpdated: $('#rankingUpdated'), accountEmail: $('#accountEmail'), accountCallsign: $('#accountCallsign'), accountSaveName: $('#accountSaveName'), accountNameStatus: $('#accountNameStatus'), accountNewPassword: $('#accountNewPassword'), accountConfirmPassword: $('#accountConfirmPassword'), accountSavePassword: $('#accountSavePassword'), accountPasswordStatus: $('#accountPasswordStatus'), accountSummary: $('#accountSummary'),
+  loginModal: $('#loginModal'), loginTabBtn: $('#loginTabBtn'), registerTabBtn: $('#registerTabBtn'), loginForm: $('#loginForm'), registerForm: $('#registerForm'), loginEmail: $('#loginEmail'), loginPassword: $('#loginPassword'), registerCallsign: $('#registerCallsign'), registerEmail: $('#registerEmail'), registerPassword: $('#registerPassword'), authMessage: $('#authMessage'), userLabel: $('#userLabel'), rankChip: $('#rankChip'), syncLabel: $('#syncLabel'), logoutBtn: $('#logoutBtn'), safeZoneLabel: $('#safeZoneLabel'), cargoUsed: $('#cargoUsed'), cargoMax: $('#cargoMax'), cargoBtn: $('#cargoBtn'), cargoModal: $('#cargoModal'), closeCargo: $('#closeCargo'), cargoSummary: $('#cargoSummary'), cargoGrid: $('#cargoGrid'), sellAllCargo: $('#sellAllCargo'), configBtn: $('#configBtn'), configModal: $('#configModal'), closeConfig: $('#closeConfig'), qualityButtons: $('#qualityButtons'), qualityCurrentBadge: $('#qualityCurrentBadge'), hudSettingsGrid: $('#hudSettingsGrid'), settingsTabs: $('#settingsTabs'), settingsGamePanel: $('#settingsGamePanel'), settingsRankingPanel: $('#settingsRankingPanel'), settingsAccountPanel: $('#settingsAccountPanel'), rankingRefreshBtn: $('#rankingRefreshBtn'), rankingMyPatent: $('#rankingMyPatent'), rankingPatentGuide: $('#rankingPatentGuide'), rankingPoints: $('#rankingPoints'), rankingArena: $('#rankingArena'), rankingAliens: $('#rankingAliens'), rankingGg: $('#rankingGg'), rankingUpdated: $('#rankingUpdated'), accountEmail: $('#accountEmail'), accountCallsign: $('#accountCallsign'), accountSaveName: $('#accountSaveName'), accountNameStatus: $('#accountNameStatus'), accountNewPassword: $('#accountNewPassword'), accountConfirmPassword: $('#accountConfirmPassword'), accountSavePassword: $('#accountSavePassword'), accountPasswordStatus: $('#accountPasswordStatus'), accountSummary: $('#accountSummary'),
 };
 
 const SAVE_KEY_PREFIX = 'stellarLegacyV5Save';
@@ -1043,6 +1043,36 @@ function applyQualityMode(mode,persist=true){
 let settingsTab='game';
 let rankingsCache=[];
 let rankingsLoadedAt=0;
+const PATENT_GUIDE=[
+  {code:'pilot_basic',title:'Piloto Básico',short:'PB',color:'#94a8bb',rule:'Base para todos os pilotos.'},
+  {code:'pilot',title:'Piloto',short:'P',color:'#a6bccc',rule:'Top 12,9% do ranking.'},
+  {code:'pilot_chief',title:'Piloto Chefe',short:'PC',color:'#b7c9d6',rule:'Top 10%.'},
+  {code:'sergeant_basic',title:'Sargento Básico',short:'SB',color:'#c0cdd8',rule:'Top 9%.'},
+  {code:'sergeant',title:'Sargento',short:'SG',color:'#cad3dc',rule:'Top 8%.'},
+  {code:'sergeant_chief',title:'Sargento Chefe',short:'SC',color:'#d6d9de',rule:'Top 7%.'},
+  {code:'lieutenant_basic',title:'Tenente Básico',short:'TB',color:'#d3d8e7',rule:'Top 6%.'},
+  {code:'lieutenant',title:'Tenente',short:'TEN',color:'#d9dfec',rule:'Top 5%.'},
+  {code:'lieutenant_chief',title:'Tenente Chefe',short:'TC',color:'#e1e6f0',rule:'Top 4,5%.'},
+  {code:'captain_basic',title:'Capitão Básico',short:'CB',color:'#d7dcc7',rule:'Top 4%.'},
+  {code:'captain',title:'Capitão',short:'CAP',color:'#e1e5cf',rule:'Top 3,5%.'},
+  {code:'captain_chief',title:'Capitão Chefe',short:'CC',color:'#ebeeda',rule:'Top 3%.'},
+  {code:'major_basic',title:'Major Básico',short:'MB',color:'#dfd6ad',rule:'Top 2,5%.'},
+  {code:'major',title:'Major',short:'MAJ',color:'#ebdfb7',rule:'Top 2%.'},
+  {code:'major_chief',title:'Major Chefe',short:'MC',color:'#f3e7c3',rule:'Top 1,5%.'},
+  {code:'colonel_basic',title:'Coronel Básico',short:'COB',color:'#e2caa4',rule:'Top 1%.'},
+  {code:'colonel',title:'Coronel',short:'COL',color:'#edc899',rule:'Top 20 absolutos.'},
+  {code:'colonel_chief',title:'Coronel Chefe',short:'CLC',color:'#f1b684',rule:'Top 5 absolutos.'},
+  {code:'general_basic',title:'General Básico',short:'GB',color:'#f0c56a',rule:'Top 4 absolutos.'},
+  {code:'general',title:'General',short:'GEN',color:'#ffd86d',rule:'#1 do ranking.'},
+  {code:'admin',title:'Administrador',short:'ADM',color:'#7de3ff',rule:'Patente especial de administração.'},
+  {code:'negative_honor',title:'Honra Negativa',short:'HN',color:'#ff7492',rule:'Aplicada em caso de punição / honra negativa.'},
+];
+const PATENT_BY_CODE=Object.fromEntries(PATENT_GUIDE.map(item=>[item.code,item]));
+function patentMeta(code){return PATENT_BY_CODE[code]||PATENT_BY_CODE.pilot_basic;}
+function patentBadgeMarkup(code,title){const meta=patentMeta(code);const label=title||meta.title;return `<span class="rank-badge" style="--rank-color:${meta.color}"><span class="rank-badge-icon">${meta.short}</span><span class="rank-badge-text">${label}</span></span>`;}
+function patentMiniMarkup(code){const meta=patentMeta(code);return `<span class="rank-mini" style="--rank-color:${meta.color}" title="${meta.title}">${meta.short}</span>`;}
+function myRankingRow(){const me=getUser()?.id;return rankingsCache.find(r=>r.id===me)||null;}
+function updateRankChip(){if(ui.rankChip)ui.rankChip.textContent=myRankingRow()?.rank_title||'Piloto Básico';}
 function renderSettings(){
   if(!ui.configModal)return;
   addEventListener('pagehide',()=>{clearOnlinePlayers();removePlayerPresenceOnline().catch(()=>{});});
@@ -1059,18 +1089,55 @@ document.body.dataset.quality=qualityMode;
 }
 function rankingRows(metric){
   const rows=[...rankingsCache];
-  if(metric==='level')rows.sort((a,b)=>(b.level-a.level)||(Number(b.xp)-Number(a.xp)));
-  else if(metric==='xp')rows.sort((a,b)=>Number(b.xp)-Number(a.xp));
+  if(metric==='points')rows.sort((a,b)=>(Number(b.rank_points)-Number(a.rank_points))||(Number(b.xp)-Number(a.xp))||((a.rank_position||999999)-(b.rank_position||999999)));
+  else if(metric==='arena')rows.sort((a,b)=>(Number(b.arena_wins)-Number(a.arena_wins))||(Number(b.arena_rating)-Number(a.arena_rating))||(Number(b.rank_points)-Number(a.rank_points)));
   else if(metric==='aliens')rows.sort((a,b)=>Number(b.aliens_killed)-Number(a.aliens_killed));
   else rows.sort((a,b)=>Number(b.gg_completed)-Number(a.gg_completed));
   return rows.slice(0,15);
 }
+function rankingMetricText(r,metric){
+  if(metric==='points')return `${fmt(r.rank_points||0)} pts`;
+  if(metric==='arena')return `${fmt(r.arena_wins||0)} vit • rating ${fmt(r.arena_rating||1000)}`;
+  if(metric==='aliens')return `${fmt(r.aliens_killed||0)} aliens`;
+  return `${fmt(r.gg_completed||0)} GG • ${fmt(r.missions_completed||0)} missões`;
+}
+function rankingSecondaryText(r,metric){
+  if(metric==='arena')return `${r.rank_title||'Patente'} • ${fmt(r.arena_losses||0)} derrotas`;
+  if(metric==='aliens')return `${r.rank_title||'Patente'} • LV ${fmt(r.level||1)} • ${fmt(r.xp||0)} XP`;
+  if(metric==='gg')return `${r.rank_title||'Patente'} • ${fmt(r.aliens_killed||0)} aliens`;
+  return `${r.rank_title||'Patente'} • LV ${fmt(r.level||1)} • ${fmt(r.missions_completed||0)} missões`;
+}
 function renderRankingBoard(el,metric){
   if(!el)return;const me=getUser()?.id;
   const rows=rankingRows(metric);if(!rows.length){el.innerHTML='<div class="muted ranking-empty">Nenhum piloto ranqueado ainda.</div>';return;}
-  el.innerHTML=rows.map((r,i)=>{const value=metric==='level'?`LV ${fmt(r.level)}`:metric==='xp'?`${fmt(r.xp)} XP`:metric==='aliens'?`${fmt(r.aliens_killed)} aliens`:`${fmt(r.gg_completed)} GG`;return `<div class="ranking-row${r.id===me?' me':''}"><span class="ranking-pos">#${i+1}</span><b>${r.callsign||'Pilot'}</b><em>${value}</em></div>`;}).join('');
+  el.innerHTML=rows.map((r,i)=>{const pos=metric==='points'?(r.rank_position||i+1):(i+1);return `<div class="ranking-row${r.id===me?' me':''}"><span class="ranking-pos">#${pos}</span><div class="ranking-main"><b>${r.callsign||'Pilot'}</b><small>${rankingSecondaryText(r,metric==='gg'?'gg':metric)}</small></div>${patentMiniMarkup(r.rank_code||'pilot_basic')}<em>${rankingMetricText(r,metric)}</em></div>`;}).join('');
 }
-function renderRankings(){renderRankingBoard(ui.rankingLevel,'level');renderRankingBoard(ui.rankingXp,'xp');renderRankingBoard(ui.rankingAliens,'aliens');renderRankingBoard(ui.rankingGg,'gg');if(ui.rankingUpdated)ui.rankingUpdated.textContent=rankingsLoadedAt?`Atualizado ${new Date(rankingsLoadedAt).toLocaleTimeString('pt-BR')}`:'Ranking ainda não carregado.';}
+function renderPatentGuide(){
+  if(!ui.rankingPatentGuide)return;
+  ui.rankingPatentGuide.innerHTML=PATENT_GUIDE.map(item=>`<div class="rank-guide-item">${patentMiniMarkup(item.code)}<div><b>${item.title}</b><small>${item.rule}</small></div></div>`).join('');
+}
+function renderMyPatent(){
+  if(!ui.rankingMyPatent)return;
+  const row=myRankingRow();
+  if(!row){
+    ui.rankingMyPatent.innerHTML=`<div class="ranking-my-head">${patentBadgeMarkup('pilot_basic','Piloto Básico')}<div class="ranking-my-name"><b>${progress?.profile?.callsign||getUser()?.callsign||'Pilot'}</b><small>Abra o ranking para sincronizar seus pontos online.</small></div></div><div class="rank-summary"><div><span>PONTOS</span><b>0</b></div><div><span>POSIÇÃO</span><b>—</b></div><div><span>NÍVEL</span><b>${fmt(progress?.profile?.level||1)}</b></div></div><div class="ranking-my-foot">A patente é atribuída de acordo com a posição do piloto no ranking de pontos.</div>`;
+    updateRankChip();
+    return;
+  }
+  ui.rankingMyPatent.innerHTML=`<div class="ranking-my-head">${patentBadgeMarkup(row.rank_code||'pilot_basic',row.rank_title||'Piloto Básico')}<div class="ranking-my-name"><b>${row.callsign||'Pilot'}</b><small>${row.is_admin?'Conta administrativa • patente fixa':''}${row.is_admin?'':'#'+fmt(row.rank_position||0)+' de '+fmt(row.total_players||0)+' pilotos ranqueados'}</small></div></div><div class="rank-summary"><div><span>PONTOS</span><b>${fmt(row.rank_points||0)}</b></div><div><span>POSIÇÃO</span><b>${row.is_admin?'ADM':'#'+fmt(row.rank_position||0)}</b></div><div><span>NÍVEL</span><b>${fmt(row.level||1)}</b></div><div><span>ARENA</span><b>${fmt(row.arena_wins||0)}W/${fmt(row.arena_losses||0)}L</b></div><div><span>ALIENS</span><b>${fmt(row.aliens_killed||0)}</b></div><div><span>GG</span><b>${fmt(row.gg_completed||0)}</b></div></div><div class="ranking-my-foot">${row.is_admin?'FELP22 usa a patente especial de Administrador e não entra na régua comum de patentes.':'A régua superior segue o padrão clássico: quanto maior sua pontuação, maior a sua patente.'}</div>`;
+  updateRankChip();
+}
+function renderRankings(){
+  renderPatentGuide();
+  renderMyPatent();
+  renderRankingBoard(ui.rankingPoints,'points');
+  renderRankingBoard(ui.rankingArena,'arena');
+  renderRankingBoard(ui.rankingAliens,'aliens');
+  renderRankingBoard(ui.rankingGg,'gg');
+  if(settingsTab==='account')renderAccountSettings();
+  updateRankChip();
+  if(ui.rankingUpdated)ui.rankingUpdated.textContent=rankingsLoadedAt?`Atualizado ${new Date(rankingsLoadedAt).toLocaleTimeString('pt-BR')}`:'Ranking ainda não carregado.';
+}
 async function refreshRankings(force=false){
   if(!force&&rankingsCache.length&&Date.now()-rankingsLoadedAt<30000){renderRankings();return;}
   if(ui.rankingUpdated)ui.rankingUpdated.textContent='Carregando ranking online...';
@@ -1078,12 +1145,14 @@ async function refreshRankings(force=false){
   catch(err){if(ui.rankingUpdated)ui.rankingUpdated.textContent=`Falha ao carregar ranking: ${err.message}`;}
 }
 function renderAccountSettings(){
-  const user=getUser();if(ui.accountEmail)ui.accountEmail.value=user?.email||'';if(ui.accountCallsign)ui.accountCallsign.value=progress?.profile?.callsign||user?.callsign||'';
-  if(ui.accountSummary)ui.accountSummary.innerHTML=`<div><span>NÍVEL</span><b>${fmt(progress?.profile?.level||1)}</b></div><div><span>XP</span><b>${fmt(progress?.profile?.xp||0)}</b></div><div><span>ALIENS</span><b>${fmt(progress?.profile?.aliensKilled||0)}</b></div><div><span>GG</span><b>${fmt(progress?.galaxyGate?.alpha?.completed||0)}</b></div>`;
+  const user=getUser();const row=myRankingRow();if(ui.accountEmail)ui.accountEmail.value=user?.email||'';if(ui.accountCallsign)ui.accountCallsign.value=progress?.profile?.callsign||user?.callsign||'';
+  const patent=row?.rank_title||'Piloto Básico',points=fmt(row?.rank_points||0),position=row?.is_admin?'ADM':(row?`#${fmt(row.rank_position||0)}`:'—');
+  if(ui.accountSummary)ui.accountSummary.innerHTML=`<div><span>PATENTE</span><b>${patent}</b></div><div><span>PONTOS</span><b>${points}</b></div><div><span>POSIÇÃO</span><b>${position}</b></div><div><span>NÍVEL</span><b>${fmt(progress?.profile?.level||1)}</b></div><div><span>ALIENS</span><b>${fmt(progress?.profile?.aliensKilled||0)}</b></div><div><span>GG</span><b>${fmt(progress?.galaxyGate?.alpha?.completed||0)}</b></div>`;
+  updateRankChip();
 }
 async function saveAccountName(){
   const value=String(ui.accountCallsign?.value||'').trim();if(ui.accountNameStatus)ui.accountNameStatus.textContent='Salvando...';
-  try{const user=await updateCallsign(value);progress.profile.callsign=user.callsign;ui.userLabel.textContent=user.callsign;saveGame();await flushCloudSave(true);if(ui.accountNameStatus)ui.accountNameStatus.textContent='Nome atualizado online.';showToast('Nome de piloto atualizado');}
+  try{const user=await updateCallsign(value);progress.profile.callsign=user.callsign;ui.userLabel.textContent=user.callsign;saveGame();await flushCloudSave(true);if(ui.accountNameStatus)ui.accountNameStatus.textContent='Nome atualizado online.';showToast('Nome de piloto atualizado');refreshRankings(true).catch(()=>{});}
   catch(err){if(ui.accountNameStatus)ui.accountNameStatus.textContent=err.message;}
 }
 async function saveAccountPassword(){
@@ -1091,8 +1160,8 @@ async function saveAccountPassword(){
   try{await updatePassword(a);ui.accountNewPassword.value='';ui.accountConfirmPassword.value='';ui.accountPasswordStatus.textContent='Senha alterada com sucesso.';showToast('Senha atualizada');}
   catch(err){ui.accountPasswordStatus.textContent=err.message;}
 }
-function switchSettingsTab(tab){settingsTab=['game','ranking','account'].includes(tab)?tab:'game';renderSettings();if(settingsTab==='ranking')refreshRankings();}
-function openSettings(){renderSettings();ui.configModal?.classList.remove('hidden');}
+function switchSettingsTab(tab){settingsTab=['game','ranking','account'].includes(tab)?tab:'game';renderSettings();if(settingsTab==='ranking')refreshRankings();if(settingsTab==='account'&&!rankingsCache.length)refreshRankings();}
+function openSettings(){renderSettings();if(!rankingsCache.length)refreshRankings().catch(()=>{});ui.configModal?.classList.remove('hidden');}
 
 function layoutHudPanels(){
   const topbarH = ui.topbar ? Math.ceil(ui.topbar.getBoundingClientRect().height) : 54;
@@ -2812,7 +2881,7 @@ function updateUI(){
   const f=getFaction(),ship=SHIPS[progress.activeShipId],safe=isSafeZone();ui.factionLabel.textContent=f?.short||'—';ui.factionLabel.style.color=f?.color||'';ui.mapLabel.textContent=displayMapLabel(progress.mapId);if(ui.sectorName)ui.sectorName.textContent=state.currentMap.name||'Setor';if(ui.coordLabel)ui.coordLabel.textContent=`${Math.round(player.x)} / ${Math.round(player.y)}`;if(ui.routeLabel){const rd=routeDistance();ui.routeLabel.textContent=rd>35?`${fmt(rd)}u`:'PARADO';ui.routeLabel.parentElement?.classList.toggle('active',rd>35);}if(ui.discoveriesLabel){const found=state.landmarks.filter(l=>progress.discoveries?.[`${progress.mapId}:${l.id}`]).length;ui.discoveriesLabel.textContent=`${found}/${state.landmarks.length}`;}ui.shipLabel.textContent=ship.name;ui.lvl.textContent=progress.profile.level;ui.hp.textContent=fmt(player.hp);ui.maxHp.textContent=fmt(player.maxHp);ui.shield.textContent=fmt(player.shield);ui.maxShield.textContent=fmt(player.maxShield);ui.speed.textContent=fmt(player.speed);if(ui.dmg)ui.dmg.textContent=fmt(player.laserDamage*currentLaserAmmo().mult);ui.credits.textContent=fmt(progress.profile.credits);ui.uridium.textContent=fmt(progress.profile.uridium);ui.xp.textContent=fmt(progress.profile.xp);ui.xp.title=progress.profile.level>=PLAYER_MAX_LEVEL?'Nível máximo':`Próximo nível: ${fmt(levelXpThreshold(progress.profile.level+1))} XP • ${Math.round(levelProgressPercent(progress.profile.xp,progress.profile.level))}%`;if(ui.droneCount)ui.droneCount.textContent=progress.drones.length;ui.laserToggle.classList.toggle('active',player.laserFiring);ui.rocketCd.textContent=rocketReady()?'MÍSSIL PRONTO':`MÍSSIL ${(getRocketCooldown()-(nowSec()-player.lastRocketShot)).toFixed(1)}s`;
   if(ui.shipHudArt)ui.shipHudArt.src=GAME_ASSETS.ships[progress.activeShipId]||GAME_ASSETS.ships.phoenix;
   if(ui.factionIcon)ui.factionIcon.src=factionAsset(progress.profile.faction);
-  if(ui.userLabel)ui.userLabel.textContent=progress.profile.callsign||getUser()?.callsign||'Pilot';if(ui.petBtn)ui.petBtn.textContent=progress.pet?.owned?`P.E.T. LV${progress.pet.level}`:'P.E.T. LOJA';if(ui.safeZoneLabel){ui.safeZoneLabel.textContent=safe?'ZONA SEGURA ATIVA':'FORA DA BASE';ui.safeZoneLabel.classList.toggle('active',safe);}if(ui.cargoUsed)ui.cargoUsed.textContent=fmt(cargoUsed());if(ui.cargoMax)ui.cargoMax.textContent=fmt(cargoCapacity());if(ui.cargoBtn)ui.cargoBtn.classList.toggle('gold',isAtTrader());updatePetFloat();updateBaseTradePrompt();renderActiveMissionHud();
+  if(ui.userLabel)ui.userLabel.textContent=progress.profile.callsign||getUser()?.callsign||'Pilot';updateRankChip();if(ui.petBtn)ui.petBtn.textContent=progress.pet?.owned?`P.E.T. LV${progress.pet.level}`:'P.E.T. LOJA';if(ui.safeZoneLabel){ui.safeZoneLabel.textContent=safe?'ZONA SEGURA ATIVA':'FORA DA BASE';ui.safeZoneLabel.classList.toggle('active',safe);}if(ui.cargoUsed)ui.cargoUsed.textContent=fmt(cargoUsed());if(ui.cargoMax)ui.cargoMax.textContent=fmt(cargoCapacity());if(ui.cargoBtn)ui.cargoBtn.classList.toggle('gold',isAtTrader());updatePetFloat();updateBaseTradePrompt();renderActiveMissionHud();
   ui.shopCredits.textContent=fmt(progress.profile.credits);ui.shopUridium.textContent=fmt(progress.profile.uridium);ui.hangarShipName.textContent=ship.name;updateExtraControls();
   const portal=nearbyPortal();if(portal&&!state.jumping&&ui.portalPrompt){const pos=screenPos(portal.x,portal.y);ui.portalPrompt.style.left=`${Math.max(85,Math.min(W-85,pos.x))}px`;ui.portalPrompt.style.top=`${Math.max(115,Math.min(H-90,pos.y-58))}px`;ui.portalPromptMap.textContent=`Destino ${displayMapLabel(portal.to)} • clique ou J`;ui.portalPrompt.classList.remove('hidden');}else ui.portalPrompt?.classList.add('hidden');
 }
@@ -3900,7 +3969,7 @@ function showAuthMode(mode){
 ui.loginTabBtn.onclick=()=>showAuthMode('login');ui.registerTabBtn.onclick=()=>showAuthMode('register');
 ui.loginForm.onsubmit=async e=>{e.preventDefault();ui.authMessage.textContent='Entrando...';try{await signIn({email:ui.loginEmail.value,password:ui.loginPassword.value});await afterAuth();}catch(err){ui.authMessage.textContent=err.message;}};
 ui.registerForm.onsubmit=async e=>{e.preventDefault();ui.authMessage.textContent='Criando conta...';try{const result=await signUp({callsign:ui.registerCallsign.value,email:ui.registerEmail.value,password:ui.registerPassword.value});if(result.requires_confirmation){ui.authMessage.textContent='Conta criada. Confirme o e-mail no Supabase e depois entre.';showAuthMode('login');ui.loginEmail.value=ui.registerEmail.value;return;}await afterAuth();}catch(err){ui.authMessage.textContent=err.message;}};
-ui.logoutBtn.onclick=async()=>{await flushCloudSave(true);await removePlayerPresenceOnline().catch(()=>{});clearOnlinePlayers();signOutLocal();authenticated=false;progress=null;state.target=null;player.laserFiring=false;for(const modal of dismissibleModals())modal.classList.add('hidden');ui.factionModal.classList.add('hidden');ui.portalPrompt?.classList.add('hidden');ui.baseTradePrompt?.classList.add('hidden');ui.petFloatPanel?.classList.add('hidden');ui.loginModal.classList.remove('hidden');if(ui.userLabel)ui.userLabel.textContent='—';setSync('LOCAL','');showAuthMode('login');};
+ui.logoutBtn.onclick=async()=>{await flushCloudSave(true);await removePlayerPresenceOnline().catch(()=>{});clearOnlinePlayers();signOutLocal();authenticated=false;progress=null;state.target=null;player.laserFiring=false;for(const modal of dismissibleModals())modal.classList.add('hidden');ui.factionModal.classList.add('hidden');ui.portalPrompt?.classList.add('hidden');ui.baseTradePrompt?.classList.add('hidden');ui.petFloatPanel?.classList.add('hidden');ui.loginModal.classList.remove('hidden');if(ui.userLabel)ui.userLabel.textContent='—';if(ui.rankChip)ui.rankChip.textContent='Piloto Básico';setSync('LOCAL','');showAuthMode('login');};
 
 function startLoadedGame(){
   state.lastPlayerDamageAt=nowSec();
@@ -3915,7 +3984,7 @@ function startLoadedGame(){
 }
 
 async function afterAuth(){
-  authenticated=true;ui.loginModal.classList.add('hidden');ui.userLabel.textContent=getUser()?.callsign||getUser()?.email?.split('@')[0]||'Pilot';loadActivityLog();setSync('SINCRONIZANDO','busy');
+  authenticated=true;ui.loginModal.classList.add('hidden');ui.userLabel.textContent=getUser()?.callsign||getUser()?.email?.split('@')[0]||'Pilot';loadActivityLog();refreshRankings(true).catch(()=>{});setSync('SINCRONIZANDO','busy');
   try{
     const remote=await loadCloudSave();
     if(remote.state){progress=remote.state;hydrateProgress();setSync('ONLINE','ok');}

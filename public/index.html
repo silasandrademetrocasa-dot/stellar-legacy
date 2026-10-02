@@ -5,16 +5,17 @@
 <meta charset="utf-8"/>
 <meta content="width=device-width,initial-scale=1,user-scalable=no" name="viewport"/>
 <meta content="#030816" name="theme-color"/>
-<title>Stellar Legacy V11 — Arena Cinemática</title>
-<link href="/style.css?v=11.0.0" rel="stylesheet"/>
+<title>Stellar Legacy V11.1.1 — Patentes & Ranking</title>
+<link href="/style.css?v=11.1.1" rel="stylesheet"/>
 </head>
 <body>
 <div id="app">
 <canvas id="game"></canvas>
 <header class="hud-panel v8-topbar compact-command-bar" id="topbar">
-<div class="brand-chip compact-brand"><img alt="Stellar Legacy" class="brand-logo" src="/assets/v8/branding/logo-v8.png"/><span>V10</span></div>
+<div class="brand-chip compact-brand"><img alt="Stellar Legacy" class="brand-logo" src="/assets/v8/branding/logo-v8.png"/><span>V11.1</span></div>
 <div class="command-status">
   <span class="pilot-chip">PILOTO <b id="userLabel">—</b></span>
+  <span class="pilot-chip patent-chip">PATENTE <b id="rankChip">Piloto Básico</b></span>
   <span class="status-chip">LV <b id="lvl">1</b></span>
   <span class="status-chip credits-chip">CR <b id="credits">0</b></span>
   <span class="status-chip uri-chip">URI <b id="uridium">0</b></span>
@@ -406,13 +407,24 @@
 
     <div class="settings-panel hidden" id="settingsRankingPanel">
       <section class="settings-section ranking-settings-section">
-        <div class="settings-title"><div><b>RANKING DE PILOTOS</b><small>Classificação online dos pilotos salvos no servidor.</small></div><button class="ghost-btn" id="rankingRefreshBtn">ATUALIZAR</button></div>
+        <div class="settings-title"><div><b>PATENTES & RANKING</b><small>Ranking por pontos inspirado no padrão clássico do DarkOrbit, com patente especial para administradores.</small></div><button class="ghost-btn" id="rankingRefreshBtn">ATUALIZAR</button></div>
+        <div class="ranking-hero-grid">
+          <article class="ranking-board ranking-hero-card">
+            <div class="ranking-board-title">MINHA PATENTE</div>
+            <div id="rankingMyPatent"></div>
+          </article>
+          <article class="ranking-board ranking-guide-card">
+            <div class="ranking-board-title">GUIA DE PATENTES</div>
+            <div id="rankingPatentGuide" class="rank-guide-list"></div>
+          </article>
+        </div>
         <div class="ranking-grid-settings">
-          <article class="ranking-board"><div class="ranking-board-title">NÍVEL</div><div id="rankingLevel"></div></article>
-          <article class="ranking-board"><div class="ranking-board-title">XP</div><div id="rankingXp"></div></article>
+          <article class="ranking-board"><div class="ranking-board-title">RANKING POR PONTOS</div><div id="rankingPoints"></div></article>
+          <article class="ranking-board"><div class="ranking-board-title">RANKING DE ARENA</div><div id="rankingArena"></div></article>
           <article class="ranking-board"><div class="ranking-board-title">ALIENS MATADOS</div><div id="rankingAliens"></div></article>
           <article class="ranking-board"><div class="ranking-board-title">GALAXY GATES</div><div id="rankingGg"></div></article>
         </div>
+        <div class="ranking-legend">Fórmula adaptada de pontos: <b>XP/100.000</b> + <b>Honra/100</b> + <b>vitórias PVP×3</b> + <b>nível×100</b> + <b>dias de conta×6</b> + <b>valor da nave</b> + <b>aliens/2</b> + <b>missões×100</b> − <b>abates aliados×100</b> − <b>mortes PVP×4</b> − <b>mortes por radiação×8</b> − <b>Phoenix destruídas×2</b>.</div>
         <div class="muted ranking-updated" id="rankingUpdated">Abra esta aba para carregar o ranking.</div>
       </section>
     </div>
@@ -518,6 +530,6 @@
 </div>
 </div>
 </div>
-<script src="/game.js?v=11.0.0" type="module"></script>
+<script src="/game.js?v=11.1.1" type="module"></script>
 </body>
 </html>
