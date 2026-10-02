@@ -1,0 +1,7 @@
+-- V10.9 Arena PvP
+-- Migração aplicada no Supabase stellar-legacy em 2026-10-01.
+-- Tabelas: arena_profiles, arena_stats, arena_daily, arena_battles.
+-- RPCs: sync_arena_profile, get_arena_state, get_arena_opponents,
+--       get_arena_history, arena_attack.
+-- Limite diário: 10 ataques.
+-- Reset diário: (now() at time zone 'America/Sao_Paulo')::date.
