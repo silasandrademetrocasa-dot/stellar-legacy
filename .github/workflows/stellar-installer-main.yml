@@ -1,5 +1,5 @@
 name: 🚀 Instalar versão do Stellar Legacy
-run-name: Instalar ZIP do Stellar Legacy • ${{ github.actor }}
+run-name: Instalar pacote do Stellar Legacy • ${{ github.actor }}
 
 on:
   workflow_dispatch:
@@ -14,7 +14,7 @@ concurrency:
 jobs:
   instalar:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 15
 
     steps:
       - name: Baixar a main
@@ -23,29 +23,49 @@ jobs:
           ref: main
           fetch-depth: 0
 
-      - name: Localizar o ZIP da nova versão
+      - name: Preparar pacote da nova versão
         shell: bash
         run: |
           set -euo pipefail
 
+          rm -f /tmp/stellar-upload.zip
+
+          mapfile -t B64S < <(find . -maxdepth 1 -type f -name 'stellar-legacy*.zip.b64' -printf '%T@ %p\n' | sort -nr | cut -d' ' -f2-)
           mapfile -t ZIPS < <(find . -maxdepth 1 -type f -name 'stellar-legacy*.zip' -printf '%T@ %p\n' | sort -nr | cut -d' ' -f2-)
 
-          if [ "${#ZIPS[@]}" -eq 0 ]; then
-            echo "❌ Nenhum ZIP encontrado na raiz do repositório."
-            echo "Envie um arquivo com nome parecido com: stellar-legacy-v11.0.0.zip"
-            exit 1
-          fi
-
-          if [ "${#ZIPS[@]}" -gt 1 ]; then
-            echo "❌ Encontrei mais de um ZIP do Stellar Legacy na raiz:"
+          if [ "${#B64S[@]}" -gt 0 ]; then
+            PAYLOAD_FILE="${B64S[0]#./}"
+            ZIP_FILE="/tmp/stellar-upload.zip"
+            echo "📦 Usando pacote Base64: $PAYLOAD_FILE"
+            tr -d '\r\n\t ' < "$PAYLOAD_FILE" | base64 -d > "$ZIP_FILE"
+          elif [ "${#ZIPS[@]}" -eq 1 ]; then
+            PAYLOAD_FILE="${ZIPS[0]#./}"
+            ZIP_FILE="$PAYLOAD_FILE"
+            echo "📦 Usando ZIP binário: $ZIP_FILE"
+          elif [ "${#ZIPS[@]}" -gt 1 ]; then
+            echo "❌ Há mais de um ZIP e nenhum pacote Base64 foi encontrado."
             printf ' - %s\n' "${ZIPS[@]}"
-            echo "Deixe somente o ZIP que deseja instalar e rode novamente."
+            exit 1
+          else
+            echo "❌ Nenhum pacote encontrado."
+            echo "Envie stellar-legacy-*.zip.b64 (recomendado) ou um único stellar-legacy-*.zip."
             exit 1
           fi
 
-          ZIP_FILE="${ZIPS[0]#./}"
+          echo "PAYLOAD_FILE=$PAYLOAD_FILE" >> "$GITHUB_ENV"
           echo "ZIP_FILE=$ZIP_FILE" >> "$GITHUB_ENV"
-          echo "✅ ZIP selecionado: $ZIP_FILE"
+
+          python3 - <<'PY'
+          import hashlib, os, zipfile
+          from pathlib import Path
+          p=Path(os.environ['ZIP_FILE'])
+          data=p.read_bytes()
+          print(f'✅ Arquivo reconstruído: {len(data)} bytes')
+          print(f'✅ SHA-256: {hashlib.sha256(data).hexdigest()}')
+          if not zipfile.is_zipfile(p):
+              raise SystemExit('❌ O pacote reconstruído ainda não é um ZIP válido.')
+          print('✅ Assinatura ZIP válida antes da extração.')
+          PY
 
       - name: Validar e extrair o pacote
         shell: bash
@@ -68,18 +88,14 @@ jobs:
               total = 0
               for info in z.infolist():
                   p = PurePosixPath(info.filename)
-
                   if p.is_absolute() or '..' in p.parts:
-                      raise SystemExit(f'ZIP inválido: caminho perigoso detectado: {info.filename}')
-
+                      raise SystemExit(f'ZIP inválido: caminho perigoso: {info.filename}')
                   mode = (info.external_attr >> 16) & 0o170000
                   if mode == stat.S_IFLNK:
                       raise SystemExit(f'ZIP inválido: link simbólico não permitido: {info.filename}')
-
                   total += info.file_size
                   if total > 2 * 1024 * 1024 * 1024:
                       raise SystemExit('ZIP inválido: conteúdo descompactado acima de 2 GB.')
-
               z.extractall(out)
 
           def valid_root(path: Path) -> bool:
@@ -99,10 +115,7 @@ jobs:
               if len(dirs) == 1 and not files and valid_root(dirs[0]):
                   source = dirs[0]
               else:
-                  raise SystemExit(
-                      'Estrutura do ZIP inválida. O pacote precisa conter package.json, public/ e server/ na raiz '
-                      'ou dentro de uma única pasta principal.'
-                  )
+                  raise SystemExit('Estrutura inválida: package.json, public/ e server/ não encontrados.')
 
           pkg = json.loads((source / 'package.json').read_text(encoding='utf-8'))
           version = str(pkg.get('version', '')).strip()
@@ -122,20 +135,17 @@ jobs:
         run: |
           set -euo pipefail
 
-          # O instalador do GitHub é infraestrutura e não pode ser apagado pelo ZIP.
-          # O restante do projeto é sincronizado com --delete, removendo arquivos antigos
-          # que não existam mais na nova versão.
-          rsync -a --delete \
+          # --checksum evita o bug anterior em que package.json podia ter
+          # mesmo tamanho/data e o rsync mantinha a versão velha.
+          rsync -a --checksum --delete \
             --exclude='.git/' \
             --exclude='.github/' \
             --exclude='stellar-legacy*.zip' \
+            --exclude='stellar-legacy*.zip.b64' \
             "$SOURCE_DIR/" ./
 
-          # O ZIP é descartável: depois da instalação ele sai do repositório.
-          rm -f "$ZIP_FILE"
+          rm -f ./stellar-legacy*.zip ./stellar-legacy*.zip.b64
 
-          # Remove resquício do antigo ChatGPT Deploy Bridge caso a versão nova
-          # já não use esse marcador.
           if [ ! -f "$SOURCE_DIR/.chatgpt-deployed-version" ]; then
             rm -f .chatgpt-deployed-version
           fi
@@ -165,20 +175,18 @@ jobs:
           node --check public/data.js
           node --check server/index.js
 
-          echo "✅ Validação concluída."
+          echo "✅ Validação concluída na V$PACKAGE_VERSION."
 
       - name: Mostrar o que será alterado
         shell: bash
         run: |
           echo "### Stellar Legacy V$STELLAR_VERSION" >> "$GITHUB_STEP_SUMMARY"
           echo "" >> "$GITHUB_STEP_SUMMARY"
-          echo "ZIP instalado: \`$ZIP_FILE\`" >> "$GITHUB_STEP_SUMMARY"
+          echo "Pacote instalado: \`$PAYLOAD_FILE\`" >> "$GITHUB_STEP_SUMMARY"
           echo "" >> "$GITHUB_STEP_SUMMARY"
-          echo "Arquivos alterados:" >> "$GITHUB_STEP_SUMMARY"
           echo '```text' >> "$GITHUB_STEP_SUMMARY"
           git status --short >> "$GITHUB_STEP_SUMMARY"
           echo '```' >> "$GITHUB_STEP_SUMMARY"
-
           git status --short
 
       - name: Commit e Push na main
@@ -196,7 +204,6 @@ jobs:
             exit 0
           fi
 
-          git commit -m "deploy: Stellar Legacy V${STELLAR_VERSION} via ZIP installer"
+          git commit -m "deploy: Stellar Legacy V${STELLAR_VERSION} via pacote seguro"
           git push origin HEAD:main
-
-          echo "✅ V$STELLAR_VERSION publicada na main. O Render pode iniciar o deploy automático agora."
+          echo "✅ V$STELLAR_VERSION publicada na main."
