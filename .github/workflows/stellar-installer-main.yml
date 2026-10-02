@@ -1,0 +1,202 @@
+name: 🚀 Instalar versão do Stellar Legacy
+run-name: Instalar ZIP do Stellar Legacy • ${{ github.actor }}
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: stellar-zip-installer
+  cancel-in-progress: false
+
+jobs:
+  instalar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Baixar a main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Localizar o ZIP da nova versão
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          mapfile -t ZIPS < <(find . -maxdepth 1 -type f -name 'stellar-legacy*.zip' -printf '%T@ %p\n' | sort -nr | cut -d' ' -f2-)
+
+          if [ "${#ZIPS[@]}" -eq 0 ]; then
+            echo "❌ Nenhum ZIP encontrado na raiz do repositório."
+            echo "Envie um arquivo com nome parecido com: stellar-legacy-v11.0.0.zip"
+            exit 1
+          fi
+
+          if [ "${#ZIPS[@]}" -gt 1 ]; then
+            echo "❌ Encontrei mais de um ZIP do Stellar Legacy na raiz:"
+            printf ' - %s\n' "${ZIPS[@]}"
+            echo "Deixe somente o ZIP que deseja instalar e rode novamente."
+            exit 1
+          fi
+
+          ZIP_FILE="${ZIPS[0]#./}"
+          echo "ZIP_FILE=$ZIP_FILE" >> "$GITHUB_ENV"
+          echo "✅ ZIP selecionado: $ZIP_FILE"
+
+      - name: Validar e extrair o pacote
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -rf /tmp/stellar-release
+          mkdir -p /tmp/stellar-release
+
+          python3 - <<'PY'
+          import json
+          import os
+          import stat
+          import zipfile
+          from pathlib import Path, PurePosixPath
+
+          zip_path = Path(os.environ['ZIP_FILE'])
+          out = Path('/tmp/stellar-release')
+
+          with zipfile.ZipFile(zip_path) as z:
+              total = 0
+              for info in z.infolist():
+                  p = PurePosixPath(info.filename)
+
+                  if p.is_absolute() or '..' in p.parts:
+                      raise SystemExit(f'ZIP inválido: caminho perigoso detectado: {info.filename}')
+
+                  mode = (info.external_attr >> 16) & 0o170000
+                  if mode == stat.S_IFLNK:
+                      raise SystemExit(f'ZIP inválido: link simbólico não permitido: {info.filename}')
+
+                  total += info.file_size
+                  if total > 2 * 1024 * 1024 * 1024:
+                      raise SystemExit('ZIP inválido: conteúdo descompactado acima de 2 GB.')
+
+              z.extractall(out)
+
+          def valid_root(path: Path) -> bool:
+              return (
+                  (path / 'package.json').is_file()
+                  and (path / 'public' / 'game.js').is_file()
+                  and (path / 'public' / 'api.js').is_file()
+                  and (path / 'public' / 'data.js').is_file()
+                  and (path / 'server' / 'index.js').is_file()
+              )
+
+          source = out
+          if not valid_root(source):
+              children = [p for p in out.iterdir() if p.name not in {'__MACOSX', '.DS_Store'}]
+              dirs = [p for p in children if p.is_dir()]
+              files = [p for p in children if p.is_file()]
+              if len(dirs) == 1 and not files and valid_root(dirs[0]):
+                  source = dirs[0]
+              else:
+                  raise SystemExit(
+                      'Estrutura do ZIP inválida. O pacote precisa conter package.json, public/ e server/ na raiz '
+                      'ou dentro de uma única pasta principal.'
+                  )
+
+          pkg = json.loads((source / 'package.json').read_text(encoding='utf-8'))
+          version = str(pkg.get('version', '')).strip()
+          if not version:
+              raise SystemExit('package.json sem versão.')
+
+          with open(os.environ['GITHUB_ENV'], 'a', encoding='utf-8') as env:
+              env.write(f'SOURCE_DIR={source}\n')
+              env.write(f'STELLAR_VERSION={version}\n')
+
+          print(f'✅ Estrutura validada: {source}')
+          print(f'✅ Versão detectada: {version}')
+          PY
+
+      - name: Instalar a nova versão
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          # O instalador do GitHub é infraestrutura e não pode ser apagado pelo ZIP.
+          # O restante do projeto é sincronizado com --delete, removendo arquivos antigos
+          # que não existam mais na nova versão.
+          rsync -a --delete \
+            --exclude='.git/' \
+            --exclude='.github/' \
+            --exclude='stellar-legacy*.zip' \
+            "$SOURCE_DIR/" ./
+
+          # O ZIP é descartável: depois da instalação ele sai do repositório.
+          rm -f "$ZIP_FILE"
+
+          # Remove resquício do antigo ChatGPT Deploy Bridge caso a versão nova
+          # já não use esse marcador.
+          if [ ! -f "$SOURCE_DIR/.chatgpt-deployed-version" ]; then
+            rm -f .chatgpt-deployed-version
+          fi
+
+          echo "✅ Stellar Legacy V$STELLAR_VERSION instalado na área de trabalho da Action."
+
+      - name: Validar o jogo antes do commit
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          test -f .github/workflows/main.yml
+          test -f package.json
+          test -f public/game.js
+          test -f public/api.js
+          test -f public/data.js
+          test -f server/index.js
+
+          PACKAGE_VERSION=$(node -p "require('./package.json').version")
+          if [ "$PACKAGE_VERSION" != "$STELLAR_VERSION" ]; then
+            echo "❌ Versão divergente: package.json=$PACKAGE_VERSION | detectada=$STELLAR_VERSION"
+            exit 1
+          fi
+
+          node --check public/game.js
+          node --check public/api.js
+          node --check public/data.js
+          node --check server/index.js
+
+          echo "✅ Validação concluída."
+
+      - name: Mostrar o que será alterado
+        shell: bash
+        run: |
+          echo "### Stellar Legacy V$STELLAR_VERSION" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "ZIP instalado: \`$ZIP_FILE\`" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "Arquivos alterados:" >> "$GITHUB_STEP_SUMMARY"
+          echo '```text' >> "$GITHUB_STEP_SUMMARY"
+          git status --short >> "$GITHUB_STEP_SUMMARY"
+          echo '```' >> "$GITHUB_STEP_SUMMARY"
+
+          git status --short
+
+      - name: Commit e Push na main
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          git config user.name "Stellar Legacy Installer"
+          git config user.email "actions@users.noreply.github.com"
+
+          git add -A
+
+          if git diff --cached --quiet; then
+            echo "Nada mudou além do que já estava instalado."
+            exit 0
+          fi
+
+          git commit -m "deploy: Stellar Legacy V${STELLAR_VERSION} via ZIP installer"
+          git push origin HEAD:main
+
+          echo "✅ V$STELLAR_VERSION publicada na main. O Render pode iniciar o deploy automático agora."
