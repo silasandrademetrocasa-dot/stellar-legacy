@@ -5,14 +5,14 @@
 <meta charset="utf-8"/>
 <meta content="width=device-width,initial-scale=1,user-scalable=no" name="viewport"/>
 <meta content="#030816" name="theme-color"/>
-<title>Stellar Legacy V11.1.1 — Patentes & Ranking</title>
-<link href="/style.css?v=11.1.1" rel="stylesheet"/>
+<title>Stellar Legacy V11.2 — Clãs & Patentes</title>
+<link href="/style.css?v=11.2.0" rel="stylesheet"/>
 </head>
 <body>
 <div id="app">
 <canvas id="game"></canvas>
 <header class="hud-panel v8-topbar compact-command-bar" id="topbar">
-<div class="brand-chip compact-brand"><img alt="Stellar Legacy" class="brand-logo" src="/assets/v8/branding/logo-v8.png"/><span>V11.1</span></div>
+<div class="brand-chip compact-brand"><img alt="Stellar Legacy" class="brand-logo" src="/assets/v8/branding/logo-v8.png"/><span>V11.2</span></div>
 <div class="command-status">
   <span class="pilot-chip">PILOTO <b id="userLabel">—</b></span>
   <span class="pilot-chip patent-chip">PATENTE <b id="rankChip">Piloto Básico</b></span>
@@ -29,6 +29,7 @@
 <button class="small-btn gate-top-btn" id="gateBtn">GG <span id="gatePieceBadge">0/34</span></button>
 <button class="small-btn mission-top-btn" id="missionBtn">MISSÕES <span id="missionActiveCount">0</span></button>
 <button class="small-btn arena-top-btn" id="arenaBtn">ARENA <span id="arenaTopCount">10/10</span></button>
+<button class="small-btn clan-top-btn" id="clanBtn">CLÃ <span id="clanTopTag">—</span></button>
 <button class="small-btn auction-top-btn" id="auctionBtn">LEILÃO <span id="auctionTopClock">60:00</span></button>
 <button class="small-btn gold" id="shopBtn">LOJA</button>
 <button class="small-btn" id="hangarBtn">HANGAR</button>
@@ -370,6 +371,17 @@
   </div>
 </div>
 
+<div class="modal hidden" id="clanModal">
+  <div class="modal-card wide-card clan-modal-card">
+    <div class="modal-header">
+      <div><div class="eyebrow">ALIANÇAS • COFRE COMPARTILHADO</div><h2>Clã / Aliança</h2></div>
+      <div class="arena-header-actions"><button class="ghost-btn" id="clanRefresh">ATUALIZAR</button><button class="small-btn" id="closeClan">Fechar</button></div>
+    </div>
+    <div class="clan-rule-banner"><b>COFRE:</b> qualquer membro pode doar Créditos sem limite diário. A aliança recebe <b>90%</b>; os outros <b>10%</b> são queimados como combustível. Somente o líder pode retirar do cofre e enviar Créditos para outro piloto.</div>
+    <div id="clanContent" class="clan-content"><div class="muted">Carregando dados da aliança...</div></div>
+  </div>
+</div>
+
 <div class="modal hidden" id="configModal">
   <div class="modal-card settings-modal-card premium-settings-card">
     <div class="modal-header">
@@ -530,6 +542,6 @@
 </div>
 </div>
 </div>
-<script src="/game.js?v=11.1.1" type="module"></script>
+<script src="/game.js?v=11.2.0" type="module"></script>
 </body>
 </html>

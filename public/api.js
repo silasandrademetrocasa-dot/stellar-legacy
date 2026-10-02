@@ -340,11 +340,63 @@ export async function upsertPlayerPresenceOnline(payload) {
 }
 
 export async function loadMapPresenceOnline(mapId, territoryFaction='battle') {
-  const cutoff = new Date(Date.now() - 9000).toISOString();
-  const rows = await authedSupabaseFetch(
-    `/rest/v1/player_presence?map_id=eq.${encodeURIComponent(String(mapId || 'x1'))}&territory_faction=eq.${encodeURIComponent(String(territoryFaction || 'battle'))}&updated_at=gte.${encodeURIComponent(cutoff)}&select=user_id,callsign,map_id,territory_faction,x,y,angle,ship_id,faction,level,hp,max_hp,shield,max_shield,updated_at&order=updated_at.desc`
-  );
+  const rows = await authedSupabaseFetch('/rest/v1/rpc/get_map_presence_v12', {
+    method: 'POST',
+    body: JSON.stringify({
+      p_map_id: String(mapId || 'x1'),
+      p_territory_faction: String(territoryFaction || 'battle'),
+    }),
+  });
   return Array.isArray(rows) ? rows : [];
+}
+
+export async function listClansOnline() {
+  const rows = await authedSupabaseFetch('/rest/v1/rpc/list_clans_v12', {
+    method: 'POST', body: JSON.stringify({}),
+  });
+  return Array.isArray(rows) ? rows : [];
+}
+
+export async function loadMyClanOnline() {
+  return authedSupabaseFetch('/rest/v1/rpc/get_my_clan_v12', {
+    method: 'POST', body: JSON.stringify({}),
+  });
+}
+
+export async function createClanOnline({name, tag}) {
+  return authedSupabaseFetch('/rest/v1/rpc/create_clan_v12', {
+    method: 'POST', body: JSON.stringify({p_name:String(name||''), p_tag:String(tag||'')}),
+  });
+}
+
+export async function joinClanOnline(clanId) {
+  return authedSupabaseFetch('/rest/v1/rpc/join_clan_v12', {
+    method: 'POST', body: JSON.stringify({p_clan_id:clanId}),
+  });
+}
+
+export async function leaveClanOnline() {
+  return authedSupabaseFetch('/rest/v1/rpc/leave_clan_v12', {
+    method: 'POST', body: JSON.stringify({}),
+  });
+}
+
+export async function donateClanCreditsOnline(amount) {
+  return authedSupabaseFetch('/rest/v1/rpc/donate_clan_credits_v12', {
+    method: 'POST', body: JSON.stringify({p_amount:Math.max(0,Math.trunc(Number(amount)||0))}),
+  });
+}
+
+export async function transferClanCreditsOnline({callsign, amount}) {
+  return authedSupabaseFetch('/rest/v1/rpc/transfer_clan_credits_v12', {
+    method: 'POST', body: JSON.stringify({p_target_callsign:String(callsign||''),p_amount:Math.max(0,Math.trunc(Number(amount)||0))}),
+  });
+}
+
+export async function claimClanCreditGrantsOnline() {
+  return authedSupabaseFetch('/rest/v1/rpc/claim_clan_credit_grants_v12', {
+    method: 'POST', body: JSON.stringify({}),
+  });
 }
 
 export async function queuePvpAttackOnline({targetUserId,damage,shieldDrain=false,mapId,territoryFaction}) {
