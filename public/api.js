@@ -369,6 +369,56 @@ export async function consumePvpDamageEventsOnline() {
   return Array.isArray(rows) ? rows : [];
 }
 
+
+export async function syncArenaProfileOnline(payload) {
+  const rows = await authedSupabaseFetch('/rest/v1/rpc/sync_arena_profile', {
+    method: 'POST',
+    body: JSON.stringify({
+      p_callsign: String(payload.callsign || currentUser?.callsign || 'Pilot'),
+      p_faction: payload.faction || null,
+      p_level: Math.max(1, Math.round(Number(payload.level) || 1)),
+      p_ship_id: String(payload.shipId || 'phoenix'),
+      p_hp: Math.max(1, Math.round(Number(payload.hp) || 1)),
+      p_shield: Math.max(0, Math.round(Number(payload.shield) || 0)),
+      p_laser_damage: Math.max(0, Math.round(Number(payload.laserDamage) || 0)),
+      p_speed: Math.max(0, Math.round(Number(payload.speed) || 0)),
+    }),
+  });
+  return Array.isArray(rows) ? rows[0] || null : null;
+}
+
+export async function loadArenaState() {
+  const rows = await authedSupabaseFetch('/rest/v1/rpc/get_arena_state', {
+    method: 'POST',
+    body: JSON.stringify({}),
+  });
+  return Array.isArray(rows) ? rows[0] || null : null;
+}
+
+export async function loadArenaOpponents() {
+  const rows = await authedSupabaseFetch('/rest/v1/rpc/get_arena_opponents', {
+    method: 'POST',
+    body: JSON.stringify({}),
+  });
+  return Array.isArray(rows) ? rows : [];
+}
+
+export async function loadArenaHistory() {
+  const rows = await authedSupabaseFetch('/rest/v1/rpc/get_arena_history', {
+    method: 'POST',
+    body: JSON.stringify({}),
+  });
+  return Array.isArray(rows) ? rows : [];
+}
+
+export async function arenaAttackOnline(targetUserId) {
+  const rows = await authedSupabaseFetch('/rest/v1/rpc/arena_attack', {
+    method: 'POST',
+    body: JSON.stringify({ p_target_user_id: targetUserId }),
+  });
+  return Array.isArray(rows) ? rows[0] || null : null;
+}
+
 export async function removePlayerPresenceOnline() {
   if (!currentUser?.id) return { ok: true };
   await authedSupabaseFetch(`/rest/v1/player_presence?user_id=eq.${encodeURIComponent(currentUser.id)}`, {

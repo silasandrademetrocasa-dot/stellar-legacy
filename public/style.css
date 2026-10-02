@@ -1133,3 +1133,59 @@ body[data-quality="high"] .hud-panel{backdrop-filter:blur(7px);-webkit-backdrop-
   .repair-status-grid{grid-template-columns:1fr}
   .map-legend .jump-wallet{width:100%;margin-left:0}
 }
+
+
+/* ===================== V10.9 ARENA PVP ===================== */
+.arena-top-btn{border-color:rgba(255,80,116,.55)!important;color:#ffdce5!important;background:linear-gradient(180deg,rgba(96,20,48,.78),rgba(32,8,24,.9))!important}
+.arena-top-btn span{color:#ff8ba5;font-size:10px;margin-left:4px}
+.arena-top-btn.arena-empty{opacity:.68;filter:saturate(.65)}
+.arena-modal-card{max-width:1180px}
+.arena-header-actions{display:flex;gap:8px;align-items:center}
+.arena-rule-banner{margin:4px 0 12px;padding:10px 12px;border:1px solid rgba(255,80,116,.25);border-radius:10px;background:linear-gradient(90deg,rgba(94,17,43,.26),rgba(9,28,49,.35));color:#9ec7d9;font-size:11px;line-height:1.5}
+.arena-rule-banner b{color:#ff9db2}
+.arena-summary{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px;margin-bottom:12px}
+.arena-summary>div{padding:10px;border-radius:10px;border:1px solid rgba(94,203,255,.16);background:rgba(5,19,33,.72)}
+.arena-summary span{display:block;color:#658ca1;font-size:8px;letter-spacing:.09em;margin-bottom:4px}
+.arena-summary b{font-size:15px;color:#dff7ff}
+.arena-result{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:12px 14px;border-radius:10px;margin-bottom:12px;border:1px solid rgba(102,237,255,.2)}
+.arena-result.win{background:rgba(27,103,73,.23);border-color:rgba(72,255,170,.36)}
+.arena-result.loss{background:rgba(117,28,49,.24);border-color:rgba(255,79,111,.36)}
+.arena-result-kicker{font-size:9px;font-weight:900;letter-spacing:.11em}
+.arena-result.win .arena-result-kicker{color:#69ffb0}
+.arena-result.loss .arena-result-kicker{color:#ff7e96}
+.arena-result strong{font-size:16px;color:#f2fbff}
+.arena-result span{font-size:10px;color:#8eb5c8}
+.arena-section{margin-top:10px}
+.arena-section-title{display:flex;justify-content:space-between;align-items:end;margin-bottom:8px}
+.arena-section-title b{font-size:11px;color:#dff7ff;letter-spacing:.06em}
+.arena-section-title small{display:block;color:#668da2;font-size:9px;margin-top:3px}
+.arena-opponents{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:9px;transition:.2s opacity}
+.arena-opponents.loading{opacity:.5;pointer-events:none}
+.arena-opponent-card{display:grid;grid-template-columns:70px 1fr auto;gap:10px;align-items:center;padding:10px;border:1px solid rgba(84,198,255,.16);border-radius:12px;background:linear-gradient(145deg,rgba(6,24,39,.9),rgba(12,12,30,.88));box-shadow:inset 0 0 20px rgba(57,172,255,.03)}
+.arena-opponent-art{width:70px;height:58px;display:flex;align-items:center;justify-content:center}
+.arena-opponent-art img{max-width:66px;max-height:54px;object-fit:contain;filter:drop-shadow(0 0 7px rgba(84,203,255,.25))}
+.arena-opponent-copy{min-width:0}
+.arena-opponent-top{display:flex;gap:8px;align-items:center}
+.arena-opponent-top span{font-size:8px;color:#ff8ca5;font-weight:800}
+.arena-opponent-top em{font-size:8px;color:#6f9eb5;font-style:normal}
+.arena-opponent-copy h3{margin:3px 0 2px;color:#effbff;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.arena-opponent-copy p{margin:0;color:#779fb3;font-size:9px}
+.arena-opponent-record{display:flex;gap:8px;flex-wrap:wrap;margin-top:5px;color:#718fa0;font-size:8px}
+.arena-opponent-record b{color:#d8f5ff}
+.arena-threat{color:#ffb36d}
+.arena-attack-btn{min-width:82px;padding:9px 10px!important}
+.arena-history-list{display:grid;gap:5px}
+.arena-history-row{display:grid;grid-template-columns:72px 1fr auto;gap:8px;align-items:center;padding:7px 9px;border-radius:8px;background:rgba(5,18,31,.65);font-size:9px}
+.arena-history-row span{font-weight:900}
+.arena-history-row.win span{color:#5dffad}
+.arena-history-row.loss span{color:#ff718b}
+.arena-history-row b{color:#cfeeff}
+.arena-history-row em{color:#638da2;font-style:normal}
+.arena-empty-state{grid-column:1/-1;padding:24px;text-align:center;border:1px dashed rgba(94,203,255,.2);border-radius:12px;color:#6f9fb5}
+@media(max-width:760px){
+  .arena-summary{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .arena-opponents{grid-template-columns:1fr}
+  .arena-opponent-card{grid-template-columns:58px 1fr}
+  .arena-opponent-art{width:58px}
+  .arena-attack-btn{grid-column:1/-1;width:100%}
+}
