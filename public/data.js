@@ -59,7 +59,7 @@ export const ITEMS = {
   // LASERS
   lf1: { id:'lf1', type:'laser', name:'LF-1', damage:65, price:1000000, currency:'credits', description:'Laser comum • dano 65.' },
   mp1: { id:'mp1', type:'laser', name:'MP-1', damage:70, alienDamage:60, price:5000000, currency:'credits', description:'Laser comum • 70 contra pilotos / 60 contra aliens.' },
-  sl01: { id:'sl01', type:'laser', name:'SL-01', damage:125, price:20000000, currency:'credits', shopAvailable:false, legacy:true, description:'Laser legado preservado em saves antigos; fora da Loja V10.1.' },
+  sl01: { id:'sl01', type:'laser', name:'SL-01', damage:125, price:20000000, currency:'credits', shopAvailable:false, legacy:true, description:'Laser legado preservado em saves antigos; fora da Loja atual.' },
   lf2: { id:'lf2', type:'laser', name:'LF-2', damage:140, price:25000000, currency:'credits', description:'Laser comum avançado • dano 140.' },
   lf3: { id:'lf3', type:'laser', name:'LF-3', damage:175, alienBonus:0.15, price:125000, currency:'uridium', description:'Laser Elite • dano 175 • +15% contra aliens.' },
   lf4: { id:'lf4', type:'laser', name:'LF-4', damage:200, price:500000, currency:'uridium', description:'Laser Elite de alto desempenho • dano 200.' },
@@ -150,7 +150,7 @@ export const ROCKETS = {
 
 
 export const RESOURCES = {
-  // V10.6.3 — mineração precisa competir com caça e missões.
+  // Mineração precisa competir com caça e missões.
   // Valores unitários de venda na base X-1.
   Prometium: { id: 'Prometium', name: 'Prometium', color: '#ff9f43', sell: 1000 },
   Endurium: { id: 'Endurium', name: 'Endurium', color: '#59d3ff', sell: 1500 },
@@ -162,7 +162,7 @@ export const RESOURCES = {
   Xenomit: { id: 'Xenomit', name: 'Xenomit', color: '#ffffff', sell: 0 },
 };
 
-// V10.4 ECONOMIA: recompensas base ampliadas para sustentar a progressão de preços da V10.
+// ECONOMIA: recompensas base ampliadas para sustentar a progressão de preços atual.
 // BOSS principais continuam com aproximadamente 2x a recompensa do alien normal correspondente.
 export const NPC_TYPES = {
   // Dano normal rebalanceado para o HP moderno das naves do Stellar Legacy.

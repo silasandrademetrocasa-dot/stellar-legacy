@@ -1,4 +1,4 @@
-export const V8_ASSETS = {
+export const GAME_ASSETS = {
   "branding": {
     "logo": "/assets/v8/branding/logo-v8.png",
     "earth": "/assets/v8/branding/earth.png",

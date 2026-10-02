@@ -5,8 +5,8 @@
 <meta charset="utf-8"/>
 <meta content="width=device-width,initial-scale=1,user-scalable=no" name="viewport"/>
 <meta content="#030816" name="theme-color"/>
-<title>Stellar Legacy V10.10 — Recompensa Diária da Arena</title>
-<link href="/style.css?v=10.10.0" rel="stylesheet"/>
+<title>Stellar Legacy V11 — Arena Cinemática</title>
+<link href="/style.css?v=11.0.0" rel="stylesheet"/>
 </head>
 <body>
 <div id="app">
@@ -161,10 +161,10 @@
 
 <div class="modal fixed-modal" id="loginModal">
 <div class="modal-card login-card">
-<div class="eyebrow">STELLAR NETWORK • V10.9 ARENA PVP</div>
+<div class="eyebrow">STELLAR NETWORK • V11 ARENA CINEMÁTICA</div>
 <h1>Entrar no Stellar Legacy</h1>
 <p class="muted">Sua conta salva facção, nave, inventário, drones, munição e progresso online.</p>
-<div class="identity-panel"><img alt="Stellar Legacy V8" class="identity-logo" src="/assets/v8/branding/logo-v8.png"/><div class="identity-copy"><div class="eyebrow">IDENTIDADE STELLAR LEGACY</div><h3>Três facções. Uma guerra orbital.</h3><p>Naves, NPCs, equipamentos, recursos e mapas agora usam uma identidade visual própria integrada ao jogo.</p><div class="identity-factions"><div><img alt="Terra" src="/assets/v8/branding/earth.png"/><span>Terra</span></div><div><img alt="Marte" src="/assets/v8/branding/mars.png"/><span>Marte</span></div><div><img alt="Júpiter" src="/assets/v8/branding/jupiter.png"/><span>Júpiter</span></div></div></div></div>
+<div class="identity-panel"><img alt="Stellar Legacy" class="identity-logo" src="/assets/v8/branding/logo-v8.png"/><div class="identity-copy"><div class="eyebrow">IDENTIDADE STELLAR LEGACY</div><h3>Três facções. Uma guerra orbital.</h3><p>Naves, NPCs, equipamentos, recursos e mapas agora usam uma identidade visual própria integrada ao jogo.</p><div class="identity-factions"><div><img alt="Terra" src="/assets/v8/branding/earth.png"/><span>Terra</span></div><div><img alt="Marte" src="/assets/v8/branding/mars.png"/><span>Marte</span></div><div><img alt="Júpiter" src="/assets/v8/branding/jupiter.png"/><span>Júpiter</span></div></div></div></div>
 <div class="auth-tabs">
 <button class="tab-btn active" id="loginTabBtn">Entrar</button>
 <button class="tab-btn" id="registerTabBtn">Criar conta</button>
@@ -292,10 +292,10 @@
 <div class="modal hidden" id="arenaModal">
   <div class="modal-card wide-card arena-modal-card">
     <div class="modal-header">
-      <div><div class="eyebrow">ARENA PVP • 10 BATALHAS POR DIA</div><h2>Duelo de Pilotos</h2></div>
+      <div><div class="eyebrow">ARENA PVP V11 • 10 BATALHAS POR DIA</div><h2>Duelo de Pilotos</h2></div>
       <div class="arena-header-actions"><button class="ghost-btn" id="arenaRefresh">ATUALIZAR</button><button class="small-btn" id="closeArena">Fechar</button></div>
     </div>
-    <div class="arena-rule-banner">Escolha outro piloto e ataque usando o poder atual da sua nave. O limite é de <b>10 ataques por dia</b>, renovados à meia-noite no horário de São Paulo. Defesa não consome ataque do defensor.</div>
+    <div class="arena-rule-banner">Escolha outro piloto e assista ao duelo acontecer <b>tiro por tiro</b>. A Arena V11 usa <b>LCB-10 (X1) + R-310</b> fixos e mostra escudo, HP, dano, duração e leitura tática. O limite continua em <b>10 ataques por dia</b>, renovados à meia-noite no horário de São Paulo.</div>
     <div class="arena-summary">
       <div><span>ATAQUES RESTANTES</span><b id="arenaAttacksLeft">10 / 10</b></div>
       <div><span>RATING</span><b id="arenaRating">1000</b></div>
@@ -321,6 +321,43 @@
       <div class="arena-reward-foot" id="arenaRewardFoot">A recompensa aumenta com seu Rating, posição e nível do piloto.</div>
     </section>
     <div class="arena-result hidden" id="arenaResult"></div>
+    <section class="arena-battle-stage hidden" id="arenaBattleStage">
+      <div class="arena-battle-head">
+        <div>
+          <div class="eyebrow">BATALHA AO VIVO • LOADOUT FIXO</div>
+          <h3 id="arenaBattleStatus">Preparando duelo...</h3>
+          <small>LCB-10 (X1) + R-310 • sem troca de munição durante a luta</small>
+        </div>
+        <div class="arena-battle-head-right"><span id="arenaBattleTimer">0.0s</span><button class="ghost-btn" id="arenaBattleSkip">PULAR ANIMAÇÃO</button></div>
+      </div>
+      <div class="arena-battle-field" id="arenaBattleField">
+        <article class="arena-fighter arena-fighter-left" id="arenaFighterAttacker">
+          <div class="arena-fighter-tag">VOCÊ</div>
+          <h3 id="arenaAttackerName">Piloto</h3>
+          <div class="arena-fighter-ship" id="arenaAttackerShip"></div>
+          <div class="arena-combat-bar shield"><span id="arenaAttackerShieldBar"></span></div>
+          <div class="arena-combat-value"><b>ESCUDO</b><em id="arenaAttackerShieldText">0 / 0</em></div>
+          <div class="arena-combat-bar hp"><span id="arenaAttackerHpBar"></span></div>
+          <div class="arena-combat-value"><b>HP</b><em id="arenaAttackerHpText">0 / 0</em></div>
+        </article>
+        <div class="arena-combat-lane" id="arenaCombatLane">
+          <div class="arena-versus">VS</div>
+          <div class="arena-round" id="arenaBattleRound">ROUND 1</div>
+          <div class="arena-projectile-layer" id="arenaProjectileLayer"></div>
+        </div>
+        <article class="arena-fighter arena-fighter-right" id="arenaFighterDefender">
+          <div class="arena-fighter-tag enemy">ADVERSÁRIO</div>
+          <h3 id="arenaDefenderName">Piloto</h3>
+          <div class="arena-fighter-ship" id="arenaDefenderShip"></div>
+          <div class="arena-combat-bar shield"><span id="arenaDefenderShieldBar"></span></div>
+          <div class="arena-combat-value"><b>ESCUDO</b><em id="arenaDefenderShieldText">0 / 0</em></div>
+          <div class="arena-combat-bar hp"><span id="arenaDefenderHpBar"></span></div>
+          <div class="arena-combat-value"><b>HP</b><em id="arenaDefenderHpText">0 / 0</em></div>
+        </article>
+      </div>
+      <div class="arena-battle-feed" id="arenaBattleFeed"></div>
+      <div class="arena-battle-analysis hidden" id="arenaBattleAnalysis"></div>
+    </section>
     <section class="arena-section">
       <div class="arena-section-title"><div><b>ADVERSÁRIOS</b><small>Os pilotos mais próximos do seu poder aparecem primeiro.</small></div></div>
       <div class="arena-opponents" id="arenaOpponents"><div class="muted">Carregando Arena...</div></div>
@@ -481,6 +518,6 @@
 </div>
 </div>
 </div>
-<script src="/game.js?v=10.10.0" type="module"></script>
+<script src="/game.js?v=11.0.0" type="module"></script>
 </body>
 </html>

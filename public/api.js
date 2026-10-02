@@ -429,7 +429,7 @@ export async function loadArenaHistory() {
 }
 
 export async function arenaAttackOnline(targetUserId) {
-  const rows = await authedSupabaseFetch('/rest/v1/rpc/arena_attack', {
+  const rows = await authedSupabaseFetch('/rest/v1/rpc/arena_attack_v11', {
     method: 'POST',
     body: JSON.stringify({ p_target_user_id: targetUserId }),
   });

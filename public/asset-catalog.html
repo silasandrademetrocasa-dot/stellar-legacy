@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Stellar Legacy V8 — Asset Catalog</title>
+<title>Stellar Legacy — Asset Catalog</title>
 <style>
 *{box-sizing:border-box}body{margin:0;background:#030816;color:#dff7ff;font-family:Arial,sans-serif}
 header{position:sticky;top:0;z-index:3;padding:16px 18px;background:rgba(3,8,18,.94);border-bottom:1px solid #1d6fa0;backdrop-filter:blur(10px)}
@@ -16,12 +16,12 @@ main{padding:18px}.section{margin-bottom:26px}h2{font-size:16px;color:#80dcff;te
 </style>
 </head>
 <body>
-<header><h1>STELLAR LEGACY V8 — catálogo de assets reais</h1><div class="muted">Cada arquivo abaixo existe individualmente no projeto e pode ser usado pelo gameplay, HUD, loja, hangar e mapas.</div></header>
+<header><h1>STELLAR LEGACY — catálogo de assets atuais</h1><div class="muted">Cada arquivo abaixo existe individualmente no projeto e pode ser usado pelo gameplay, HUD, loja, hangar e mapas.</div></header>
 <main id="root"></main>
 <script type="module">
-import {V8_ASSETS} from './assets/v8/manifest.js';
+import {GAME_ASSETS} from './assets/v8/manifest.js';
 const root=document.querySelector('#root');
-for(const [group,data] of Object.entries(V8_ASSETS)){
+for(const [group,data] of Object.entries(GAME_ASSETS)){
   const section=document.createElement('section');section.className='section';
   section.innerHTML=`<h2>${group}</h2><div class="grid"></div>`;
   const grid=section.querySelector('.grid');
