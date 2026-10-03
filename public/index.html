@@ -5,15 +5,14 @@
 <meta charset="utf-8"/>
 <meta content="width=device-width,initial-scale=1,user-scalable=no" name="viewport"/>
 <meta content="#030816" name="theme-color"/>
-<title>Stellar Legacy V13.2.0 — Event Domination</title>
-<link href="/style.css?v=13.2.0" rel="stylesheet"/>
+<title>Stellar Legacy V13.2.1 — Topbar Clean</title>
+<link href="/style.css?v=13.2.1" rel="stylesheet"/>
 </head>
 <body>
 <div id="app">
 <canvas id="game"></canvas>
-<header class="hud-panel v8-topbar compact-command-bar v132-command-center" id="topbar">
-<div class="brand-chip compact-brand"><img alt="Stellar Legacy" class="brand-logo" src="/assets/v8/branding/logo-v8.png"/><span>V13.2.0</span></div>
-<div class="command-status hidden-status-data" aria-hidden="true">
+<header class="hud-panel v8-topbar compact-command-bar" id="topbar">
+<div class="command-status">
   <span class="pilot-chip">PILOTO <b id="userLabel">—</b></span>
   <span class="pilot-chip patent-chip">PATENTE <b id="rankChip">Piloto Básico</b></span>
   <span class="status-chip">LV <b id="lvl">1</b></span>
@@ -24,55 +23,33 @@
 <div class="top-meta hidden" aria-hidden="true">
   <span><b id="factionLabel">—</b></span><span><b id="mapLabel">—</b></span><span><b id="sectorName">—</b></span><span><b id="shipLabel">Phoenix</b></span><span><b id="xp">0</b></span>
 </div>
-<section class="hud-panel v13-ability-bar" id="abilityBar">
-  <div class="ability-bar-head"><span>HABILIDADES V13</span><small>ATALHOS E / K</small></div>
-  <div class="ability-actions">
-    <button class="ability-btn ship-ability" id="shipAbilityBtn" type="button">
-      <span class="ability-icon" id="shipAbilityIcon">✦</span>
-      <span class="ability-copy"><b id="shipAbilityName">HABILIDADE DA NAVE</b><small id="shipAbilityStatus">PRONTA • E</small></span>
-      <i id="shipAbilityFill"></i>
-    </button>
-    <button class="ability-btn pet-kami-ability" id="petKamiAbilityBtn" type="button">
-      <span class="ability-icon">☄</span>
-      <span class="ability-copy"><b>KAMIKAZE P.E.T.</b><small id="petKamiAbilityStatus">BLOQUEADO • K</small></span>
-      <i id="petKamiAbilityFill"></i>
-    </button>
-  </div>
-</section>
-<nav class="top-actions command-actions grouped-command-actions" aria-label="Menu principal">
-  <div class="command-group profile-group">
-    <button class="command-main-btn profile-command" id="profileTopBtn" type="button"><span class="cmd-icon">◉</span><span><b>PERFIL DE JOGADOR</b><small>Piloto • Hangar • Clã</small></span></button>
-    <div class="command-flyout">
-      <button class="small-btn" id="pilotTopBtn">PILOTO / PERFIL</button>
-      <button class="small-btn" id="hangarBtn">HANGAR</button>
-      <button class="small-btn clan-top-btn" id="clanBtn">CLÃ <span id="clanTopTag">—</span></button>
-    </div>
-  </div>
-  <button class="command-main-btn maps-command" id="mapBtn" type="button"><span class="cmd-icon">◈</span><span><b>MAPAS</b><small>Rotas • 4-X Eventos</small></span></button>
-  <button class="command-main-btn auction-command" id="auctionBtn" type="button"><span class="cmd-icon">⚒</span><span><b>LEILÃO</b><small id="auctionTopClock">60:00</small></span></button>
-  <div class="command-group missions-group">
-    <button class="command-main-btn missions-command" id="missionsGroupBtn" type="button"><span class="cmd-icon">◎</span><span><b>MISSÕES <em id="missionActiveCount">0</em></b><small>Diária • Semanal • Mensal • Especial • Passe • Evento</small></span></button>
-    <div class="command-flyout">
-      <button class="small-btn mission-top-btn" id="missionBtn">MISSÕES</button>
-      <button class="small-btn pass-top-btn" id="passBtn">PASSE <span id="passTierBadge">0/30</span></button>
-    </div>
-  </div>
-  <div class="command-group battles-group">
-    <button class="command-main-btn battles-command" id="battlesGroupBtn" type="button"><span class="cmd-icon">⚔</span><span><b>BATALHAS <em id="warfrontTopStatus">READY</em></b><small>GG • Arena • Warfront • Dominação 4-X</small></span></button>
-    <div class="command-flyout command-flyout-wide">
-      <button class="small-btn gate-top-btn" id="gateBtn">GALAXY GATE <span id="gatePieceBadge">0/34</span></button>
-      <button class="small-btn arena-top-btn" id="arenaBtn">ARENA <span id="arenaTopCount">10/10</span></button>
-      <button class="small-btn warfront-top-btn" id="warfrontBtn">WARFRONT / DOMINAÇÃO</button>
-    </div>
-  </div>
-  <div class="command-group stores-group">
-    <button class="command-main-btn stores-command" id="storesGroupBtn" type="button"><span class="cmd-icon">▣</span><span><b>LOJAS</b><small>Loja Comum • Loja Premium</small></span></button>
-    <div class="command-flyout">
-      <button class="small-btn gold" id="shopBtn">LOJA COMUM</button>
-      <button class="small-btn premium-top-btn" id="premiumBtn">PREMIUM <span id="premiumTopStatus">LOJA</span></button>
-    </div>
-  </div>
-  <button class="command-main-btn config-command" id="configBtn" type="button"><span class="cmd-icon">⚙</span><span><b>CONFIGURAÇÕES</b><small>Jogo • Ranking • Conta</small></span></button>
+<nav class="top-actions command-actions" aria-label="Menu principal">
+<button class="small-btn" id="hangarBtn">NAVE</button>
+<button class="small-btn mission-top-btn" id="missionBtn">MISSÕES <span id="missionActiveCount">0</span></button>
+<button class="small-btn pet-top-btn" id="petBtn">P.E.T.</button>
+<button class="small-btn gate-top-btn" id="gateBtn">GG <span id="gatePieceBadge">ALFA 0/34</span></button>
+<button class="small-btn pilot-top-btn" id="pilotBtn">HABILIDADES <span id="pilotPointBadge">0 PP</span></button>
+<button class="small-btn" id="mapBtn">MAPA</button>
+<button class="small-btn pass-top-btn" id="passBtn">PASSE <span id="passTierBadge">0/30</span></button>
+<button class="small-btn arena-top-btn" id="arenaBtn">ARENA <span id="arenaTopCount">10/10</span></button>
+<button class="small-btn clan-top-btn" id="clanBtn">CLÃ <span id="clanTopTag">—</span></button>
+<button class="small-btn warfront-top-btn" id="warfrontBtn">WARFRONT <span id="warfrontTopStatus">READY</span></button>
+<button class="small-btn auction-top-btn" id="auctionBtn">LEILÃO <span id="auctionTopClock">60:00</span></button>
+<button class="small-btn gold" id="shopBtn">LOJA</button>
+<button class="small-btn premium-top-btn" id="premiumBtn">PREMIUM <span id="premiumTopStatus">LOJA</span></button>
+<div class="top-ability-cluster" id="abilityBar" aria-label="Habilidades rápidas">
+  <button class="ability-btn ship-ability" id="shipAbilityBtn" type="button" title="Habilidade da nave • tecla E">
+    <span class="ability-icon" id="shipAbilityIcon">✦</span>
+    <span class="ability-copy"><b id="shipAbilityName">HAB. NAVE</b><small id="shipAbilityStatus">PRONTA • E</small></span>
+    <i id="shipAbilityFill"></i>
+  </button>
+  <button class="ability-btn pet-kami-ability" id="petKamiAbilityBtn" type="button" title="Kamikaze P.E.T. • tecla K">
+    <span class="ability-icon">☄</span>
+    <span class="ability-copy"><b>KAMIKAZE</b><small id="petKamiAbilityStatus">BLOQUEADO • K</small></span>
+    <i id="petKamiAbilityFill"></i>
+  </button>
+</div>
+<button class="small-btn config-top-btn" id="configBtn">CONF</button>
 </nav>
 </header>
 <section class="hud-panel compact-stats ship-stats-float" id="leftStats">
@@ -133,7 +110,6 @@
   <div class="gate-hud-row"><span>PRÓXIMA ONDA</span><b id="gateHudNext">—</b></div>
   <div class="gate-hud-lives" id="gateHudLives">♥ ♥ ♥</div>
 </section>
-
 
 <section class="boss-phase-hud hidden" id="bossPhaseHud">
   <div class="boss-phase-top"><span id="bossPhaseName">BOSS</span><b id="bossPhaseLabel">FASE I</b></div>
@@ -262,7 +238,7 @@
     <div class="modal-header">
       <div>
         <div class="eyebrow">GALAXY GATES • V13 MULTIPROTOCOLO</div>
-        <h2>Materializador do Portal</h2><div class="gate-protocol-tabs" id="gateProtocolTabs"><button class="small-btn active" data-gate-protocol="alpha">ALFA</button><button class="small-btn" data-gate-protocol="beta">BETA</button><button class="small-btn" data-gate-protocol="gamma">GAMMA</button></div>
+        <h2>Materializador do Portal</h2><div class="gate-protocol-tabs" id="gateProtocolTabs"><button class="small-btn active" data-gate-protocol="alpha">ALFA</button><button class="small-btn" data-gate-protocol="beta" disabled title="Em breve">BETA 🔒</button><button class="small-btn" data-gate-protocol="gamma" disabled title="Em breve">GAMMA 🔒</button></div>
       </div>
       <button class="small-btn" id="closeGate">Fechar</button>
     </div>
@@ -433,7 +409,7 @@
   <div class="modal-card wide-card warfront-modal-card">
     <div class="modal-header">
       <div><div class="eyebrow">V13.1 • GUERRA TOTAL</div><h2>WARFRONT</h2></div>
-      <div class="arena-header-actions"><button class="ghost-btn" id="warfrontRefresh">ATUALIZAR</button><button class="small-btn" id="closeEvent Domination">Fechar</button></div>
+      <div class="arena-header-actions"><button class="ghost-btn" id="warfrontRefresh">ATUALIZAR</button><button class="small-btn" id="closeWarfront">Fechar</button></div>
     </div>
     <div class="warfront-rule-banner"><b>WORLD BOSS + GUERRA DE CLÃS + BLUEPRINTS:</b> cause dano no NEMESIS PRIME, dispute pontos com clãs rivais, encontre fragmentos raros e evolua a habilidade da sua classe de nave.</div>
     <div id="warfrontContent" class="warfront-content"><div class="muted">Sincronizando frente de guerra...</div></div>
@@ -641,6 +617,6 @@
   </div>
 </div>
 </div>
-<script src="/game.js?v=13.2.0" type="module"></script>
+<script src="/game.js?v=13.2.1" type="module"></script>
 </body>
 </html>

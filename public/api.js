@@ -557,21 +557,21 @@ export async function removePlayerPresenceOnline() {
 
 
 
-// ===================== V13.2 EVENT DOMINATION =====================
+// ===================== V13.1 WARFRONT =====================
 export async function loadWarfrontStateOnline() {
-  return authedSupabaseFetch('/rest/v1/rpc/get_warfront_state_v132', {
+  return authedSupabaseFetch('/rest/v1/rpc/get_warfront_state_v131', {
     method: 'POST', body: JSON.stringify({}),
   });
 }
 
 export async function hitWorldBossOnline(damage) {
-  return authedSupabaseFetch('/rest/v1/rpc/hit_world_boss_v132', {
+  return authedSupabaseFetch('/rest/v1/rpc/hit_world_boss_v131', {
     method: 'POST', body: JSON.stringify({p_damage:Math.max(1,Math.round(Number(damage)||0))}),
   });
 }
 
 export async function claimWorldBossRewardOnline() {
-  return authedSupabaseFetch('/rest/v1/rpc/claim_world_boss_reward_v132', {
+  return authedSupabaseFetch('/rest/v1/rpc/claim_world_boss_reward_v131', {
     method: 'POST', body: JSON.stringify({}),
   });
 }
@@ -587,10 +587,3 @@ export async function recordClanWarScoreOnline(points, reason='combat') {
     method: 'POST', body: JSON.stringify({p_points:Math.max(1,Math.round(Number(points)||0)),p_reason:String(reason||'combat').slice(0,40)}),
   });
 }
-export async function recordMapDominationScoreOnline(mapId, points, reason='combat') {
-  return authedSupabaseFetch('/rest/v1/rpc/record_map_domination_score_v132', {
-    method: 'POST',
-    body: JSON.stringify({p_map_id:String(mapId||''),p_points:Math.max(1,Math.round(Number(points)||0)),p_reason:String(reason||'combat').slice(0,40)}),
-  });
-}
-

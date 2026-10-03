@@ -1360,31 +1360,80 @@ body[data-quality="high"] .hud-panel{backdrop-filter:blur(7px);-webkit-backdrop-
 @media(max-width:820px){.warfront-grid{grid-template-columns:1fr}.blueprint-grid{grid-template-columns:1fr}.world-boss-stats{grid-template-columns:1fr 1fr}.mastery-card{grid-template-columns:1fr}.warfront-modal-card{width:96vw}}
 
 
-/* ===================== V13.2 EVENT DOMINATION • COMMAND CENTER LAYOUT ===================== */
-:root{--v132-topbar-h:132px;--v132-map-w:244px;--v132-gap:10px}
-#topbar.v132-command-center{position:fixed!important;top:6px!important;left:8px!important;right:8px!important;display:grid!important;grid-template-columns:154px minmax(380px,1fr);grid-template-rows:58px 58px;gap:6px 10px!important;align-items:stretch!important;min-height:0!important;padding:6px 8px!important;overflow:visible!important;background:linear-gradient(180deg,rgba(4,16,31,.98),rgba(2,10,22,.97))!important;border-color:rgba(82,205,255,.34)!important;z-index:80!important}
-.v132-command-center .compact-brand{grid-column:1;grid-row:1;display:flex!important;min-width:0!important;max-width:none!important;height:58px;justify-content:center}
-.v132-command-center .brand-logo{max-width:104px!important;max-height:42px!important}
-.v132-command-center .hidden-status-data,.v132-command-center .top-meta{display:none!important}
-.v132-command-center #abilityBar.v13-ability-bar{grid-column:2;grid-row:1;position:static!important;left:auto!important;bottom:auto!important;transform:none!important;width:100%!important;max-width:none!important;height:58px;padding:4px 7px!important;margin:0!important;box-shadow:none!important;border-color:rgba(90,214,255,.18)!important;background:linear-gradient(180deg,rgba(7,23,42,.9),rgba(4,13,26,.9))!important;z-index:auto!important}
-.v132-command-center #abilityBar .ability-bar-head{margin-bottom:3px;font-size:8px}.v132-command-center #abilityBar .ability-bar-head small{font-size:7px}.v132-command-center #abilityBar .ability-actions{gap:6px}.v132-command-center #abilityBar .ability-btn{min-height:35px;height:35px;padding:4px 8px;border-radius:8px}.v132-command-center #abilityBar .ability-btn .ability-icon{font-size:17px;width:20px}.v132-command-center #abilityBar .ability-copy b{font-size:9px}.v132-command-center #abilityBar .ability-copy small{font-size:7px;margin-top:0}
-.grouped-command-actions{grid-column:1/-1;grid-row:2;display:grid!important;grid-template-columns:1.25fr .72fr .72fr 1.45fr 1.15fr 1.08fr 1.05fr!important;gap:7px!important;overflow:visible!important;width:100%;padding:0!important;align-items:stretch!important}
-.command-main-btn{min-width:0;height:56px;display:flex;align-items:center;gap:8px;padding:7px 10px;border-radius:11px;border:1px solid rgba(87,198,255,.28);background:linear-gradient(180deg,rgba(11,31,52,.96),rgba(5,16,30,.98));color:#dff7ff;cursor:pointer;text-align:left;transition:.15s ease;box-shadow:inset 0 0 22px rgba(69,196,255,.025)}
-.command-main-btn:hover{transform:translateY(-1px);border-color:rgba(105,220,255,.56);box-shadow:0 0 18px rgba(68,203,255,.08)}
-.command-main-btn .cmd-icon{font-size:19px;line-height:1;min-width:24px;text-align:center;color:#79dcff}.command-main-btn>span:last-child{min-width:0;display:flex;flex-direction:column}.command-main-btn b{font-size:10px;line-height:1.05;color:#f3fbff;white-space:nowrap}.command-main-btn small{margin-top:4px;font-size:7px;line-height:1.1;color:#7fa8ba;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.command-main-btn em{font-style:normal;margin-left:4px;padding:1px 5px;border-radius:999px;background:rgba(103,214,255,.1);font-size:7px;color:#8fe6ff}
-.profile-command{border-color:rgba(255,211,91,.34);background:linear-gradient(180deg,rgba(69,48,10,.72),rgba(25,18,8,.94))}.profile-command .cmd-icon{color:#ffe17e}.missions-command{border-color:rgba(142,107,255,.38);background:linear-gradient(180deg,rgba(54,35,111,.7),rgba(21,15,48,.94))}.missions-command .cmd-icon{color:#ba9aff}.battles-command{border-color:rgba(255,78,105,.36);background:linear-gradient(180deg,rgba(83,20,36,.68),rgba(31,10,20,.94))}.battles-command .cmd-icon{color:#ff8396}.stores-command,.auction-command{border-color:rgba(255,198,74,.3);background:linear-gradient(180deg,rgba(69,45,8,.62),rgba(25,17,7,.94))}.stores-command .cmd-icon,.auction-command .cmd-icon{color:#ffd66e}
-.command-group{position:relative;min-width:0}.command-group>.command-main-btn{width:100%}.command-flyout{display:none;position:absolute;top:62px;left:0;z-index:120;min-width:190px;padding:7px;border-radius:11px;border:1px solid rgba(88,205,255,.24);background:rgba(4,14,27,.98);box-shadow:0 18px 48px rgba(0,0,0,.54);gap:6px}.command-group.open .command-flyout{display:grid}
-@media(hover:hover){.command-group:hover .command-flyout{display:grid}}.command-flyout-wide{min-width:260px;grid-template-columns:1fr 1fr}.command-flyout .small-btn{display:flex!important;align-items:center!important;justify-content:space-between!important;min-height:34px!important;width:100%;font-size:9px!important}
-#leftStats.ship-stats-float{top:calc(var(--v132-topbar-h) + 8px)!important;left:8px!important;z-index:30!important}
-.active-mission-float{top:calc(var(--v132-topbar-h) + 8px)!important;left:202px!important;width:330px!important;z-index:30!important}
-.activity-float-panel{top:calc(var(--v132-topbar-h) + 194px)!important;left:202px!important;max-height:150px!important}
-#minimapPanel{position:fixed!important;right:8px!important;bottom:8px!important;top:auto!important;width:var(--v132-map-w)!important;z-index:35!important;padding:7px!important}.minimap-panel #minimap,#minimapPanel canvas{width:228px!important;height:228px!important;max-width:100%!important}
-#weaponBar.compact-ammo-ui{position:fixed!important;left:8px!important;right:calc(var(--v132-map-w) + 18px)!important;bottom:8px!important;width:auto!important;max-width:none!important;transform:none!important;z-index:36!important;padding:5px 8px!important;gap:4px!important;min-height:66px!important;max-height:76px!important;overflow:hidden!important}
-#weaponBar .weapon-toolbar{min-height:24px!important;display:flex!important;align-items:center!important;justify-content:flex-start!important;gap:8px!important}#weaponBar .weapon-toolbar-label{display:none!important}#weaponBar .weapon-toolbar-left{width:auto!important}.weapon-bar-content{display:flex!important;align-items:center!important;justify-content:space-between!important;flex-wrap:nowrap!important;gap:7px!important;min-height:38px}.ammo-clusters{display:flex!important;align-items:center!important;gap:7px!important;flex:1;min-width:0}.weapon-section{display:flex!important;align-items:center!important;gap:5px!important}.weapon-section .section-title{display:none!important}.ammo-bubbles{display:flex!important;flex-wrap:nowrap!important;gap:5px!important}.ammo-btn.circular{width:42px!important;height:42px!important;min-width:42px!important}.ammo-btn.circular .ammo-code{font-size:10px!important}.ammo-btn.circular .ammo-qty{font-size:7px!important}.actions-inline .action-btn{min-height:27px!important;min-width:103px!important;padding:4px 7px!important;font-size:9px!important}.cooldown-pill{font-size:7px!important;min-width:88px!important;padding:4px 6px!important}
-.boss-phase-hud{top:calc(var(--v132-topbar-h) + 8px)!important}
-.event-flow-panel{border-color:rgba(127,101,255,.24);background:radial-gradient(circle at 85% 0,rgba(95,70,220,.1),transparent 38%),linear-gradient(180deg,rgba(11,19,39,.96),rgba(5,12,25,.98))}.event-flow-card,.event-flow-empty{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:11px;border-radius:10px;border:1px solid rgba(123,104,255,.2);background:rgba(66,43,150,.08)}.event-flow-card>div{display:flex;flex-direction:column;gap:3px}.event-flow-card span{font-size:8px;font-weight:1000;color:#b5a2ff;letter-spacing:.1em}.event-flow-card b{color:#fff;font-size:14px}.event-flow-card.upcoming{border-style:dashed;opacity:.88;background:rgba(28,44,66,.32)}.event-scheduled-chip{padding:5px 8px;border-radius:999px;border:1px solid rgba(112,194,235,.25);color:#8dcbe8!important;font-size:7px!important;font-weight:900;letter-spacing:.08em;white-space:nowrap}.event-flow-card small,.event-flow-empty small{color:#89a6b6;font-size:9px}.event-flow-empty{flex-direction:column;align-items:flex-start}.event-flow-empty b{color:#a6c8d9}
-.domination-panel{border-color:rgba(255,190,70,.2)}.domination-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}.domination-card{padding:10px;border-radius:11px;border:1px solid rgba(95,190,235,.12);background:rgba(5,17,29,.72)}.domination-card.event-live{border-color:rgba(255,205,85,.32);box-shadow:inset 0 0 25px rgba(255,178,45,.04)}.domination-card-head{display:flex;align-items:center;justify-content:space-between;gap:8px}.domination-card-head span{font-size:16px;font-weight:1000;color:#7edcff}.domination-card-head b{font-size:9px;color:#ffe092;text-align:right}.domination-card>small{display:block;margin:5px 0 7px;font-size:8px;color:#829fac}.domination-track{height:6px;border-radius:999px;background:#13212c;overflow:hidden}.domination-track i{display:block;height:100%;background:linear-gradient(90deg,#58ddff,#ffd359)}.domination-meta{display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-top:7px}.domination-meta span{padding:5px;border-radius:7px;background:rgba(255,255,255,.025);font-size:7px;color:#6f91a2}.domination-meta b{display:block;color:#eaf8ff;font-size:9px;margin-top:2px}.domination-owned{display:block;margin-top:7px;color:#7ff1bc;font-size:8px;letter-spacing:.03em}
-.map-node.battle .node-sub{color:#ffcf69!important}.map-node.battle{border-color:rgba(255,190,65,.44)!important}
-@media(max-width:1180px){:root{--v132-topbar-h:124px;--v132-map-w:205px}.grouped-command-actions{grid-template-columns:1.1fr .65fr .65fr 1.2fr 1fr 1fr .95fr!important;gap:5px!important}.command-main-btn{padding:6px 7px}.command-main-btn .cmd-icon{font-size:15px;min-width:18px}.command-main-btn b{font-size:8px}.command-main-btn small{font-size:6px}.active-mission-float{width:290px!important}.minimap-panel #minimap,#minimapPanel canvas{width:189px!important;height:189px!important}.ammo-btn.circular{width:38px!important;height:38px!important;min-width:38px!important}}
-@media(max-width:820px){:root{--v132-topbar-h:116px;--v132-map-w:164px}#topbar.v132-command-center{left:5px!important;right:5px!important;grid-template-columns:1fr;grid-template-rows:48px 52px;padding:5px!important}.v132-command-center .compact-brand{display:none!important}.v132-command-center #abilityBar.v13-ability-bar{grid-column:1;grid-row:1;height:48px}.grouped-command-actions{grid-column:1;grid-row:2;display:flex!important;overflow-x:auto!important;gap:5px!important}.command-main-btn{height:50px;min-width:132px}.command-main-btn small{display:none}.command-main-btn b{font-size:8px}.active-mission-float{display:none!important}#leftStats.ship-stats-float{top:calc(var(--v132-topbar-h) + 4px)!important}.domination-grid{grid-template-columns:1fr}.command-flyout{position:fixed;top:110px;left:8px;right:8px;min-width:0}.command-flyout-wide{grid-template-columns:1fr 1fr}#weaponBar.compact-ammo-ui{right:calc(var(--v132-map-w) + 14px)!important;max-height:68px!important}.minimap-panel #minimap,#minimapPanel canvas{width:148px!important;height:148px!important}.ammo-btn.circular{width:34px!important;height:34px!important;min-width:34px!important}.actions-inline .action-btn{min-width:86px!important;font-size:8px!important}.cooldown-pill{display:none!important}}
-@media(max-width:560px){:root{--v132-topbar-h:108px;--v132-map-w:126px}.v132-command-center #abilityBar .ability-copy b{font-size:8px}.v132-command-center #abilityBar .ability-copy small{font-size:6px}.command-main-btn{min-width:112px;padding:5px}.command-main-btn .cmd-icon{display:none}#leftStats.ship-stats-float{width:138px!important;min-width:138px!important;max-width:138px!important}#minimapPanel{width:var(--v132-map-w)!important;padding:5px!important}.minimap-panel #minimap,#minimapPanel canvas{width:114px!important;height:114px!important}#weaponBar.compact-ammo-ui{right:140px!important;left:5px!important;bottom:5px!important;max-height:62px!important}.ammo-clusters{overflow-x:auto}.ammo-btn.circular{width:32px!important;height:32px!important;min-width:32px!important}.weapon-toolbar{display:none!important}.weapon-bar-content{min-height:48px}.actions-inline{display:none!important}}
+/* ===================== V13.2.1 TOPBAR CLEAN ===================== */
+:root{--hud-top-offset:52px;}
+#topbar.compact-command-bar{
+  top:4px!important;left:6px!important;right:6px!important;
+  min-height:40px!important;height:40px!important;
+  padding:3px 6px!important;gap:5px!important;
+  overflow:hidden!important;
+}
+.compact-command-bar .compact-brand{display:none!important;}
+.command-status{gap:3px!important;flex:0 0 auto!important;}
+.command-status .pilot-chip,.command-status .sync-chip,.status-chip{
+  min-height:24px!important;height:24px!important;
+  padding:3px 6px!important;font-size:8px!important;
+}
+.command-status b{font-size:9px!important;}
+.command-actions{
+  min-height:32px!important;gap:4px!important;
+  flex-wrap:nowrap!important;overflow-x:auto!important;overflow-y:hidden!important;
+  justify-content:flex-start!important;scrollbar-width:none!important;
+}
+.command-actions::-webkit-scrollbar{display:none!important;}
+.command-actions .small-btn{
+  min-height:27px!important;height:27px!important;
+  padding:3px 7px!important;border-radius:7px!important;
+  font-size:8.5px!important;line-height:1!important;
+  flex:0 0 auto!important;
+}
+.command-actions .small-btn span{font-size:7px!important;margin-left:2px!important;}
+.pet-top-btn{border-color:rgba(73,223,215,.42)!important;color:#a9fff3!important;}
+.pilot-top-btn{border-color:rgba(126,118,255,.46)!important;}
+
+/* Habilidades deixam de ocupar um painel separado e entram na barra superior. */
+#abilityBar.top-ability-cluster{
+  position:static!important;inset:auto!important;transform:none!important;
+  width:auto!important;padding:0!important;margin:0!important;
+  display:flex!important;align-items:center!important;gap:4px!important;
+  border:0!important;background:transparent!important;box-shadow:none!important;
+  flex:0 0 auto!important;
+}
+#abilityBar .ability-btn{
+  width:auto!important;min-width:88px!important;height:27px!important;min-height:27px!important;
+  padding:2px 6px!important;border-radius:7px!important;gap:4px!important;
+  transform:none!important;
+}
+#abilityBar .ability-icon{font-size:13px!important;width:16px!important;}
+#abilityBar .ability-copy b{font-size:7.5px!important;max-width:72px!important;}
+#abilityBar .ability-copy small{font-size:6.5px!important;margin-top:0!important;white-space:nowrap!important;}
+#abilityBar .ability-btn>i{height:2px!important;}
+
+/* Mantém a lógica/atalhos, mas remove os textos LASER CTRL, MÍSSIL ESPAÇO e MÍSSIL PRONTO da interface. */
+#weaponBar .actions-inline,#weaponBar .extras-inline{display:none!important;}
+#weaponBar .weapon-toolbar{width:28px!important;min-width:28px!important;}
+#weaponBar .weapon-bar-content{justify-content:flex-start!important;}
+
+/* Galaxy Gates futuros continuam visíveis, porém bloqueados nesta versão. */
+#gateProtocolTabs [data-gate-protocol]:disabled{
+  opacity:.46!important;cursor:not-allowed!important;filter:saturate(.35)!important;
+  border-style:dashed!important;
+}
+
+@media(max-width:1100px){
+  .command-status .patent-chip,.command-status .credits-chip,.command-status .uri-chip{display:none!important;}
+  #abilityBar .ability-btn{min-width:72px!important;}
+  #abilityBar .ability-copy b{max-width:56px!important;}
+}
+@media(max-width:760px){
+  :root{--hud-top-offset:48px;}
+  #topbar.compact-command-bar{height:36px!important;min-height:36px!important;padding:3px 4px!important;}
+  .command-status{display:none!important;}
+  .command-actions{width:100%!important;display:flex!important;flex-wrap:nowrap!important;gap:3px!important;}
+  .command-actions .small-btn{height:25px!important;min-height:25px!important;padding:3px 6px!important;font-size:8px!important;}
+  #abilityBar .ability-btn{height:25px!important;min-height:25px!important;min-width:54px!important;padding:2px 4px!important;}
+  #abilityBar .ability-copy small{display:none!important;}
+  #abilityBar .ability-copy b{font-size:7px!important;max-width:48px!important;}
+  #abilityBar .ability-icon{font-size:12px!important;width:13px!important;}
+  .boss-phase-hud{top:48px!important;}
+}

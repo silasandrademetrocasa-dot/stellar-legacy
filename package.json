@@ -1,6 +1,6 @@
 {
   "name": "stellar-legacy",
-  "version": "13.2.0",
+  "version": "13.2.1",
   "type": "module",
   "scripts": {
     "start": "node server/index.js",
@@ -13,5 +13,5 @@
   "engines": {
     "node": ">=18"
   },
-  "release": "event-domination-v13-2"
+  "release": "topbar-clean-v13-2-1"
 }

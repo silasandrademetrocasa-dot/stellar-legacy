@@ -1,6 +1,6 @@
-import { FACTIONS, SHIPS, ITEMS, LASER_AMMO, ROCKETS, NPC_TYPES, MAPS, RESOURCES } from './data.js?v=13.2.0';
-import { GAME_ASSETS } from './assets/v8/manifest.js?v=13.2.0';
-import { signUp, signIn, restoreSession, signOutLocal, checkGameSession, endGameSession, getUser, loadCloudSave, saveCloudSave, updateCallsign, updatePassword, loadRankings, loadAuctionBids, saveAuctionBidOnline, markAuctionBidStatusOnline, loadAuctionMarket, upsertPlayerPresenceOnline, loadMapPresenceOnline, removePlayerPresenceOnline, queuePvpAttackOnline, consumePvpDamageEventsOnline, syncArenaProfileOnline, loadArenaState, loadArenaDailyRewardStatus, claimArenaDailyReward, loadArenaOpponents, loadArenaHistory, arenaAttackOnline, listClansOnline, loadMyClanOnline, createClanOnline, joinClanOnline, leaveClanOnline, transferClanCreditsOnline, claimClanCreditGrantsOnline, recordClanAlienKillOnline, getPremiumShopOnline, testPurchasePremiumOnline, loadWarfrontStateOnline, hitWorldBossOnline, claimWorldBossRewardOnline, declareClanWarOnline, recordClanWarScoreOnline, recordMapDominationScoreOnline } from './api.js?v=13.2.0';
+import { FACTIONS, SHIPS, ITEMS, LASER_AMMO, ROCKETS, NPC_TYPES, MAPS, RESOURCES } from './data.js?v=13.2.1';
+import { GAME_ASSETS } from './assets/v8/manifest.js?v=13.2.1';
+import { signUp, signIn, restoreSession, signOutLocal, checkGameSession, endGameSession, getUser, loadCloudSave, saveCloudSave, updateCallsign, updatePassword, loadRankings, loadAuctionBids, saveAuctionBidOnline, markAuctionBidStatusOnline, loadAuctionMarket, upsertPlayerPresenceOnline, loadMapPresenceOnline, removePlayerPresenceOnline, queuePvpAttackOnline, consumePvpDamageEventsOnline, syncArenaProfileOnline, loadArenaState, loadArenaDailyRewardStatus, claimArenaDailyReward, loadArenaOpponents, loadArenaHistory, arenaAttackOnline, listClansOnline, loadMyClanOnline, createClanOnline, joinClanOnline, leaveClanOnline, transferClanCreditsOnline, claimClanCreditGrantsOnline, recordClanAlienKillOnline, getPremiumShopOnline, testPurchasePremiumOnline, loadWarfrontStateOnline, hitWorldBossOnline, claimWorldBossRewardOnline, declareClanWarOnline, recordClanWarScoreOnline } from './api.js?v=13.2.1';
 
 const canvas = document.querySelector('#game');
 const ctx = canvas.getContext('2d');
@@ -94,7 +94,7 @@ function resize() {
 addEventListener('resize', resize); resize();
 
 const ui = {
-  topbar: $('#topbar'), profileTopBtn: $('#profileTopBtn'), pilotTopBtn: $('#pilotTopBtn'), missionsGroupBtn: $('#missionsGroupBtn'), battlesGroupBtn: $('#battlesGroupBtn'), storesGroupBtn: $('#storesGroupBtn'), topMeta: document.querySelector('#topbar .top-meta'), hudToggle: $('#hudToggle'), leftStats: $('#leftStats'), statsToggle: $('#statsToggle'), minimapPanel: $('#minimapPanel'), minimapToggle: $('#minimapToggle'), minimapHeader: $('#minimapHeader'), statsHeader: $('#statsHeader'), shipHudArt: $('#shipHudArt'), factionIcon: $('#factionIcon'), factionLabel: $('#factionLabel'), mapLabel: $('#mapLabel'), sectorName: $('#sectorName'), coordLabel: $('#coordLabel'), routeLabel: $('#routeLabel'), discoveriesLabel: $('#discoveriesLabel'), shipLabel: $('#shipLabel'), lvl: $('#lvl'), petFloatPanel: $('#petFloatPanel'), petFloatLevel: $('#petFloatLevel'), petGearQuickSelect: $('#petGearQuickSelect'), petFloatStatus: $('#petFloatStatus'),
+  topbar: $('#topbar'), topMeta: document.querySelector('#topbar .top-meta'), hudToggle: $('#hudToggle'), leftStats: $('#leftStats'), statsToggle: $('#statsToggle'), minimapPanel: $('#minimapPanel'), minimapToggle: $('#minimapToggle'), minimapHeader: $('#minimapHeader'), statsHeader: $('#statsHeader'), shipHudArt: $('#shipHudArt'), factionIcon: $('#factionIcon'), factionLabel: $('#factionLabel'), mapLabel: $('#mapLabel'), sectorName: $('#sectorName'), coordLabel: $('#coordLabel'), routeLabel: $('#routeLabel'), discoveriesLabel: $('#discoveriesLabel'), shipLabel: $('#shipLabel'), lvl: $('#lvl'), petFloatPanel: $('#petFloatPanel'), petFloatLevel: $('#petFloatLevel'), petGearQuickSelect: $('#petGearQuickSelect'), petFloatStatus: $('#petFloatStatus'),
   hp: $('#hp'), maxHp: $('#maxHp'), shield: $('#shield'), maxShield: $('#maxShield'), speed: $('#speed'), dmg: $('#dmg'), credits: $('#credits'), uridium: $('#uridium'), xp: $('#xp'), droneCount: $('#droneCount'),
   laserAmmoButtons: $('#laserAmmoButtons'), rocketAmmoButtons: $('#rocketAmmoButtons'), laserToggle: $('#laserToggle'), rocketFire: $('#rocketFire'), autoLaser: $('#autoLaser'), autoRocket: $('#autoRocket'), turboRocket: $('#turboRocket'), rocketCd: $('#rocketCd'), weaponBar: $('#weaponBar'), weaponBarContent: $('#weaponBarContent'), weaponBarToggle: $('#weaponBarToggle'),
   toast: $('#toast'), baseTradePrompt: $('#baseTradePrompt'), baseTradePromptInfo: $('#baseTradePromptInfo'), repairModal: $('#repairModal'), repairModalText: $('#repairModalText'), repairShipName: $('#repairShipName'), repairBonusCount: $('#repairBonusCount'), repairUriCount: $('#repairUriCount'), repairUseBonus: $('#repairUseBonus'), repairUseUri: $('#repairUseUri'), repairUsePhoenix: $('#repairUsePhoenix'), gameCelebration: $('#gameCelebration'), celebrationPanel: $('#celebrationPanel'), celebrationKicker: $('#celebrationKicker'), celebrationTitle: $('#celebrationTitle'), celebrationSubtitle: $('#celebrationSubtitle'), portalPrompt: $('#portalPrompt'), portalPromptMap: $('#portalPromptMap'), jumpTransition: $('#jumpTransition'), jumpTitle: $('#jumpTitle'), jumpSubtitle: $('#jumpSubtitle'), factionModal: $('#factionModal'), factionCards: $('#factionCards'),
@@ -931,7 +931,7 @@ function renderMissions(){
   }
   updateMissionButton();
 }
-function openMissions(){normalizeMissionState();renderMissions();ui.missionModal.classList.remove('hidden');}
+function openMissions(){closeNavigationModals(ui.missionModal);normalizeMissionState();renderMissions();ui.missionModal.classList.remove('hidden');}
 
 // ===================== PROGRESSÃO V12 • FREE + PREMIUM =====================
 const BATTLE_PASS_TIER_COUNT=30;
@@ -1078,7 +1078,7 @@ function renderProgression(){
   ui.passContent.querySelectorAll('[data-level-claim]').forEach(b=>b.onclick=()=>claimLevelReward(b.dataset.levelClaim));
   $('#passClaimAll')?.addEventListener('click',claimAllBattlePassRewards);$('#passPremiumClaimAll')?.addEventListener('click',claimAllPremiumBattlePassRewards);$('#levelClaimAll')?.addEventListener('click',claimAllLevelRewards);$('#passOpenPremium')?.addEventListener('click',openPremiumShop);
 }
-function openProgression(){if(!progress)return;normalizeBattlePass();normalizeLevelRewards();refreshPremiumState().finally(()=>{renderProgression();ui.passModal?.classList.remove('hidden');});}
+function openProgression(){if(!progress)return;closeNavigationModals(ui.passModal);normalizeBattlePass();normalizeLevelRewards();refreshPremiumState().finally(()=>{renderProgression();ui.passModal?.classList.remove('hidden');});}
 
 
 
@@ -1130,7 +1130,7 @@ function freshGalaxyGateState(){return {jumpBonus:0,repairBonus:0,lastResults:[]
 function gateKeyForMap(mapId=progress?.mapId){return Object.values(GALAXY_GATE_DEFS).find(d=>d.mapId===mapId)?.key||null;}
 function normalizeGalaxyGateState(){
   if(!progress)return; progress.galaxyGate ||= freshGalaxyGateState(); const g=progress.galaxyGate;
-  g.jumpBonus=Math.max(0,Number(g.jumpBonus)||0);g.repairBonus=Math.max(0,Number(g.repairBonus)||0);g.lastResults ||= [];g.selected=GALAXY_GATE_DEFS[g.selected]?g.selected:'alpha';
+  g.jumpBonus=Math.max(0,Number(g.jumpBonus)||0);g.repairBonus=Math.max(0,Number(g.repairBonus)||0);g.lastResults ||= [];g.selected='alpha';
   for(const [key,def] of Object.entries(GALAXY_GATE_DEFS)){
     g[key] ||= freshGateProtocol(); const a=g[key];
     a.pieces=Array.isArray(a.pieces)?[...new Set(a.pieces.map(Number).filter(n=>n>=1&&n<=def.pieces))]:[];
@@ -1140,7 +1140,7 @@ function normalizeGalaxyGateState(){
 }
 function currentGateKey(){normalizeGalaxyGateState();return gateKeyForMap()||progress.galaxyGate.selected||'alpha';}
 function galaxyGateDef(key=currentGateKey()){return GALAXY_GATE_DEFS[key]||GALAXY_GATE_DEFS.alpha;}
-function gateUnlocked(key){const def=GALAXY_GATE_DEFS[key];if(!def?.unlock)return true;return (progress?.galaxyGate?.[def.unlock]?.completed||0)>0;}
+function gateUnlocked(key){return key==='alpha';}
 function alphaGate(){normalizeGalaxyGateState();return progress.galaxyGate[currentGateKey()];}
 function isGalaxyGateMap(){return !!gateKeyForMap();}
 function alphaRoundDef(){const a=alphaGate(),def=galaxyGateDef();return def.rounds[a.run?.round-1]||def.rounds[0];}
@@ -1410,7 +1410,7 @@ async function saveAccountPassword(){
   catch(err){ui.accountPasswordStatus.textContent=err.message;}
 }
 function switchSettingsTab(tab){settingsTab=['game','ranking','account'].includes(tab)?tab:'game';renderSettings();if(settingsTab==='ranking')refreshRankings();if(settingsTab==='account'&&!rankingsCache.length)refreshRankings();}
-function openSettings(){renderSettings();if(!rankingsCache.length)refreshRankings().catch(()=>{});ui.configModal?.classList.remove('hidden');}
+function openSettings(){closeNavigationModals(ui.configModal);renderSettings();if(!rankingsCache.length)refreshRankings().catch(()=>{});ui.configModal?.classList.remove('hidden');}
 
 // ===================== CLÃS / ALIANÇAS V11.2 =====================
 function escHtml(value){return String(value??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));}
@@ -1480,62 +1480,36 @@ function renderClan(){
     <section class="clan-panel"><h3>MOVIMENTAÇÕES RECENTES</h3>${txHtml}</section>
     <div class="clan-panel"><button class="ghost-btn" id="clanLeaveBtn">${owner&&members.length===1?'ENCERRAR CLÃ':'SAIR DO CLÃ'}</button></div>`;
 }
-async function openClan(){ui.clanModal?.classList.remove('hidden');if(ui.clanContent)ui.clanContent.innerHTML='<div class="muted">Sincronizando aliança...</div>';await syncClanCreditGrants(true);await refreshClanState(true);}
+async function openClan(){closeNavigationModals(ui.clanModal);ui.clanModal?.classList.remove('hidden');if(ui.clanContent)ui.clanContent.innerHTML='<div class="muted">Sincronizando aliança...</div>';await syncClanCreditGrants(true);await refreshClanState(true);}
 async function createClanNow(){const name=$('#clanCreateName')?.value||'',tag=$('#clanCreateTag')?.value||'';try{await createClanOnline({name,tag});showToast(`Clã [${tag.toUpperCase()}] criado`);await refreshClanState(true);syncOnlineWorld();}catch(e){showToast(e.message);}}
 async function joinClanNow(id){try{await joinClanOnline(id);showToast('Você entrou na aliança');await refreshClanState(true);syncOnlineWorld();}catch(e){showToast(e.message);}}
 async function leaveClanNow(){try{await leaveClanOnline();showToast('Aliança atualizada');await refreshClanState(true);syncOnlineWorld();}catch(e){showToast(e.message);}}
 async function transferClanNow(){const callsign=$('#clanTransferCallsign')?.value||'',amount=Math.trunc(Number($('#clanTransferAmount')?.value)||0);if(!callsign||amount<=0){showToast('Informe callsign e valor');return;}try{const r=await transferClanCreditsOnline({callsign,amount});showToast(`${fmt(r.net_amount||0)} CR recebidos por ${r.target_callsign} • juros ${fmt(r.fee||0)} CR`);pushActivity(`CLÃ • Cofre -${fmt(r.gross_amount||0)} • ${r.target_callsign} +${fmt(r.net_amount||0)} • juros ${fmt(r.fee||0)}`,'reward');await refreshClanState(true);}catch(e){showToast(e.message);}}
 
-// ===================== V13.2 EVENT FLOW + CLAN MAP DOMINATION =====================
+// ===================== V13.1 WARFRONT =====================
 function worldBossState(){return warfrontRuntime.state?.world_boss||null;}
 function currentClanWar(){return warfrontRuntime.state?.war||null;}
-function eventFlowState(){return warfrontRuntime.state?.event_flow||{};}
-function activeMapEvents(){return Array.isArray(eventFlowState()?.active)?eventFlowState().active:[];}
-function upcomingMapEvents(){return Array.isArray(eventFlowState()?.upcoming)?eventFlowState().upcoming:[];}
-function activeWorldBossEvent(){return activeMapEvents().find(e=>String(e.event_key||'').includes('nemesis')||e.kind==='world_boss')||null;}
-function activeEventMapId(){return activeWorldBossEvent()?.map_id||null;}
-function dominationState(){return warfrontRuntime.state?.domination||{maps:[]};}
-function dominationMaps(){return Array.isArray(dominationState()?.maps)?dominationState().maps:[];}
-function dominationMapState(mapId=progress?.mapId){return dominationMaps().find(x=>x.map_id===mapId)||null;}
-function currentClanId(){return clanState()?.clan?.id||null;}
-function currentClanOwnsDominationMap(mapId=progress?.mapId){const d=dominationMapState(mapId);return !!d?.owner?.id&&d.owner.id===currentClanId();}
-function updateWarfrontBadge(){if(!ui.warfrontTopStatus)return;const wb=worldBossState(),war=currentClanWar(),ev=activeWorldBossEvent();if(war)ui.warfrontTopStatus.textContent='WAR';else if(ev&&wb&&Number(wb.hp)>0)ui.warfrontTopStatus.textContent=ev.map_label||'EVENTO';else if(wb&&Number(wb.hp)<=0)ui.warfrontTopStatus.textContent='LOOT';else ui.warfrontTopStatus.textContent='READY';}
+function updateWarfrontBadge(){if(!ui.warfrontTopStatus)return;const wb=worldBossState(),war=currentClanWar();if(war)ui.warfrontTopStatus.textContent='WAR';else if(wb&&Number(wb.hp)>0)ui.warfrontTopStatus.textContent='BOSS';else if(wb&&Number(wb.hp)<=0)ui.warfrontTopStatus.textContent='LOOT';else ui.warfrontTopStatus.textContent='READY';}
 function warfrontBossRatio(){const wb=worldBossState();return wb?Math.max(0,Math.min(1,Number(wb.hp||0)/Math.max(1,Number(wb.max_hp)||1))):0;}
 function warfrontClanName(id){const all=[...(warfrontRuntime.clans||[])];const c=all.find(x=>x.id===id);return c?`[${c.tag}] ${c.name}`:'Clã rival';}
 function blueprintCardHtml(bp){normalizeWarfrontProgress();const have=Number(progress.warfront.blueprints[bp.id]||0),cores=progress.warfront.skillCores,ready=have>=bp.need&&cores>=bp.cores;return `<div class="blueprint-card ${ready?'ready':''}"><div class="blueprint-icon">${bp.icon}</div><div><b>${bp.name}</b><small>${bp.desc}</small><div class="blueprint-progress"><i style="width:${Math.min(100,have/bp.need*100)}%"></i></div><span>FRAGMENTOS ${fmt(have)}/${fmt(bp.need)} • CORES ${fmt(cores)}/${fmt(bp.cores)}</span></div><button class="small-btn" data-blueprint-craft="${bp.id}" ${ready?'':'disabled'}>CONSTRUIR</button></div>`;}
 function abilityMasteryHtml(){normalizeWarfrontProgress();const cls=abilityClassId(),def=SHIP_ABILITIES[cls],lv=abilityMasteryLevel(),cost=lv>=5?0:[2,4,7,11][lv-1];return `<div class="mastery-card"><div class="mastery-title"><span>${def.icon}</span><div><b>${def.name} • MASTERY ${lv}/5</b><small>+${Math.round((abilityPowerMultiplier()-1)*100)}% potência • -${Math.round((1-abilityCooldownMultiplier())*100)}% recarga</small></div></div><div class="mastery-pips">${[1,2,3,4,5].map(n=>`<i class="${n<=lv?'on':''}"></i>`).join('')}</div>${lv<5?`<button class="primary-btn" data-mastery-upgrade>EVOLUIR • ${cost} CORE${cost>1?'S':''}</button>`:'<div class="mastery-max">MASTERY MÁXIMA</div>'}</div>`;}
-
-function eventFlowHtml(){
-  const active=activeMapEvents(),upcoming=upcomingMapEvents(),wb=worldBossState();
-  const activeHtml=active.map(ev=>{const boss=String(ev.event_key||'').includes('nemesis')||ev.kind==='world_boss',dead=boss&&wb&&Number(wb.hp)<=0;return `<div class="event-flow-card active"><div><span>EVENTO ATIVO • ${escHtml(ev.map_label||displayMapLabel(ev.map_id))}</span><b>${escHtml(ev.name||'Evento')}</b><small>${dead?'CONCLUÍDO • loot disponível':`encerra ${new Date(ev.ends_at).toLocaleString('pt-BR')}`}</small></div><button class="small-btn" data-event-jump="${escHtml(ev.map_id)}">${progress?.mapId===ev.map_id?'VOCÊ ESTÁ AQUI':'IR AO SETOR'}</button></div>`;}).join('');
-  const upcomingHtml=upcoming.slice(0,3).map(ev=>`<div class="event-flow-card upcoming"><div><span>PRÓXIMO • ${escHtml(ev.map_label||displayMapLabel(ev.map_id))}</span><b>${escHtml(ev.name||'Evento')}</b><small>inicia ${new Date(ev.starts_at).toLocaleString('pt-BR')}</small></div><span class="event-scheduled-chip">AGENDADO</span></div>`).join('');
-  if(!activeHtml&&!upcomingHtml)return '<div class="event-flow-empty"><b>4-X EM ESPERA</b><small>Sem evento ativo. Os setores 4-1, 4-2 e 4-3 permanecem sem NPCs comuns até o próximo evento.</small></div>';
-  return `${activeHtml}${upcomingHtml}`;
-}
-function dominationHtml(){
-  const maps=dominationMaps();if(!maps.length)return '<div class="muted">Dominação aguardando sincronização.</div>';
-  return `<div class="domination-grid">${maps.map(d=>{const owner=d.owner,active=d.active_event,my=Number(d.my_clan_score||0),leader=Number(d.leader?.score||0),ratio=leader?Math.min(100,my/leader*100):0;return `<div class="domination-card ${active?'event-live':''}"><div class="domination-card-head"><span>${escHtml(d.map_label||displayMapLabel(d.map_id))}</span><b>${owner?`[${escHtml(owner.tag)}] ${escHtml(owner.name)}`:'SEM DOMÍNIO'}</b></div><small>${active?`EVENTO • ${escHtml(active.name||'Ativo')}`:'AGUARDANDO EVENTO'}</small><div class="domination-track"><i style="width:${ratio}%"></i></div><div class="domination-meta"><span>SEU CLÃ <b>${fmt(my)}</b></span><span>LÍDER <b>${d.leader?`[${escHtml(d.leader.tag)}] ${fmt(leader)}`:'—'}</b></span></div>${owner&&owner.id===currentClanId()?'<strong class="domination-owned">DOMÍNIO DO SEU CLÃ • +10% LOOT DE EVENTO</strong>':''}</div>`;}).join('')}</div>`;
-}
-function renderWarfront(){if(!ui.warfrontContent)return;normalizeWarfrontProgress();const st=warfrontRuntime.state,wb=worldBossState(),war=currentClanWar(),myClan=clanState().clan,myRole=clanState().role;const bp=Object.values(WARFRONT_BLUEPRINTS).map(blueprintCardHtml).join('');let bossHtml='<div class="muted">World Boss online indisponível. Execute o SQL V13.2 no Supabase e atualize.</div>';if(wb){const hp=Math.max(0,Number(wb.hp)||0),max=Math.max(1,Number(wb.max_hp)||1),dead=hp<=0,claimed=!!wb.claimed;bossHtml=`<div class="world-boss-card ${dead?'dead':''}"><div class="world-boss-head"><div><span class="threat-chip">AMEAÇA GLOBAL</span><h3>${escHtml(wb.name||'NEMESIS PRIME')}</h3><small>${dead?'DERROTADO • recompensa disponível':`Encerra ${new Date(wb.ends_at).toLocaleString('pt-BR')}`}</small></div><b>${dead?'ELIMINADO':`${(hp/max*100).toFixed(2)}%`}</b></div><div class="world-boss-track"><i style="width:${Math.round(hp/max*100)}%"></i></div><div class="world-boss-stats"><span>HP <b>${fmt(hp)} / ${fmt(max)}</b></span><span>SEU DANO <b>${fmt(wb.my_damage||0)}</b></span><span>RANK <b>#${fmt(wb.my_rank||0)||'—'}</b></span></div><div class="warfront-actions">${dead?`<button class="primary-btn" data-worldboss-claim ${claimed?'disabled':''}>${claimed?'RECOMPENSA RESGATADA':'RESGATAR RECOMPENSA'}</button>`:`<button class="danger-btn" data-worldboss-engage>IR AO EVENTO / ENGAJAR</button>`}</div></div>`;}
+function renderWarfront(){if(!ui.warfrontContent)return;normalizeWarfrontProgress();const st=warfrontRuntime.state,wb=worldBossState(),war=currentClanWar(),myClan=clanState().clan,myRole=clanState().role;const bp=Object.values(WARFRONT_BLUEPRINTS).map(blueprintCardHtml).join('');let bossHtml='<div class="muted">World Boss online indisponível. Execute o SQL V13.1 no Supabase e atualize.</div>';if(wb){const hp=Math.max(0,Number(wb.hp)||0),max=Math.max(1,Number(wb.max_hp)||1),dead=hp<=0,claimed=!!wb.claimed;bossHtml=`<div class="world-boss-card ${dead?'dead':''}"><div class="world-boss-head"><div><span class="threat-chip">AMEAÇA GLOBAL</span><h3>${escHtml(wb.name||'NEMESIS PRIME')}</h3><small>${dead?'DERROTADO • recompensa disponível':`Encerra ${new Date(wb.ends_at).toLocaleString('pt-BR')}`}</small></div><b>${dead?'ELIMINADO':`${(hp/max*100).toFixed(2)}%`}</b></div><div class="world-boss-track"><i style="width:${Math.round(hp/max*100)}%"></i></div><div class="world-boss-stats"><span>HP <b>${fmt(hp)} / ${fmt(max)}</b></span><span>SEU DANO <b>${fmt(wb.my_damage||0)}</b></span><span>RANK <b>#${fmt(wb.my_rank||0)||'—'}</b></span></div><div class="warfront-actions">${dead?`<button class="primary-btn" data-worldboss-claim ${claimed?'disabled':''}>${claimed?'RECOMPENSA RESGATADA':'RESGATAR RECOMPENSA'}</button>`:`<button class="danger-btn" data-worldboss-engage>ENGAJAR EM MAPA BATTLE</button>`}</div></div>`;}
 let warHtml='';if(!myClan)warHtml='<div class="war-empty">Entre em um clã para participar das Guerras de Clãs.</div>';else if(war){const mine=war.my_side==='attacker'?Number(war.attacker_score||0):Number(war.defender_score||0),theirs=war.my_side==='attacker'?Number(war.defender_score||0):Number(war.attacker_score||0),opp=war.my_side==='attacker'?war.defender:war.attacker;warHtml=`<div class="clan-war-live"><div class="war-vs"><div><small>SEU CLÃ</small><b>[${escHtml(myClan.tag)}]</b><strong>${fmt(mine)}</strong></div><span>VS</span><div><small>RIVAL</small><b>[${escHtml(opp?.tag||'?')}]</b><strong>${fmt(theirs)}</strong></div></div><div class="war-score-track"><i style="width:${Math.min(100,(mine/Math.max(1,mine+theirs))*100)}%"></i></div><small>Termina ${new Date(war.ends_at).toLocaleString('pt-BR')} • BOSS +10 pts • PvP causa pontos por dano • World Boss também pontua.</small></div>`;}else if(myRole==='owner'){const opts=(warfrontRuntime.clans||[]).filter(c=>c.id!==myClan.id).map(c=>`<option value="${c.id}">[${escHtml(c.tag)}] ${escHtml(c.name)} • LV ${fmt(c.level||1)}</option>`).join('');warHtml=`<div class="war-declare"><b>DECLARAR GUERRA</b><small>Uma guerra dura 12 horas. Escolha um clã rival.</small><div class="clan-action-row"><select id="warTargetClan"><option value="">Escolha o rival...</option>${opts}</select><button class="danger-btn" data-war-declare>DECLARAR</button></div></div>`;}else warHtml='<div class="war-empty">Somente o líder pode declarar uma guerra.</div>';
-ui.warfrontContent.innerHTML=`<section class="warfront-panel event-flow-panel"><div class="section-kicker">FLUXO DE EVENTOS • 4-X EXCLUSIVO</div>${eventFlowHtml()}</section><section class="warfront-panel domination-panel"><div class="section-kicker">DOMINAÇÃO DE MAPA ENTRE CLÃS</div>${dominationHtml()}</section><div class="warfront-grid"><section class="warfront-panel worldboss-panel"><div class="section-kicker">WORLD BOSS</div>${bossHtml}</section><section class="warfront-panel"><div class="section-kicker">GUERRA DE CLÃS</div>${warHtml}</section></div><section class="warfront-panel"><div class="section-kicker">MASTERY DA HABILIDADE</div>${abilityMasteryHtml()}</section><section class="warfront-panel"><div class="section-kicker">BLUEPRINT FORGE • ${fmt(progress.warfront.skillCores)} CORES</div><div class="blueprint-grid">${bp}</div><small class="warfront-hint">BOSS comuns têm chance de dropar fragmentos. World Boss garante fragmentos + cores conforme sua contribuição.</small></section>`;updateWarfrontBadge();}
-async function refreshWarfrontState(force=false){if(!authenticated||warfrontRuntime.busy)return warfrontRuntime.state;if(!force&&warfrontRuntime.state&&Date.now()-warfrontRuntime.lastAt<5000){renderWarfront();return warfrontRuntime.state;}warfrontRuntime.busy=true;try{warfrontRuntime.clans=await listClansOnline().catch(()=>warfrontRuntime.clans||[]);warfrontRuntime.state=await loadWarfrontStateOnline();warfrontRuntime.lastAt=Date.now();updateWarfrontBadge();renderWarfront();syncActiveMapEventEncounters();return warfrontRuntime.state;}catch(e){console.warn('warfront',e);if(ui.warfrontContent&&!ui.warfrontModal?.classList.contains('hidden'))ui.warfrontContent.innerHTML=`<div class="warfront-error"><b>WARFRONT OFFLINE</b><span>${escHtml(e.message)}</span><small>Rode <b>sql/V13_2_EVENT_DOMINATION.sql</b> no Supabase.</small></div>`;}finally{warfrontRuntime.busy=false;}}
-async function openWarfront(){ui.warfrontModal?.classList.remove('hidden');if(ui.warfrontContent)ui.warfrontContent.innerHTML='<div class="muted">Sincronizando frente de guerra...</div>';await refreshClanState(true);await refreshWarfrontState(true);}
+ui.warfrontContent.innerHTML=`<div class="warfront-grid"><section class="warfront-panel worldboss-panel"><div class="section-kicker">WORLD BOSS</div>${bossHtml}</section><section class="warfront-panel"><div class="section-kicker">GUERRA DE CLÃS</div>${warHtml}</section></div><section class="warfront-panel"><div class="section-kicker">MASTERY DA HABILIDADE</div>${abilityMasteryHtml()}</section><section class="warfront-panel"><div class="section-kicker">BLUEPRINT FORGE • ${fmt(progress.warfront.skillCores)} CORES</div><div class="blueprint-grid">${bp}</div><small class="warfront-hint">BOSS comuns têm chance de dropar fragmentos. World Boss garante fragmentos + cores conforme sua contribuição.</small></section>`;updateWarfrontBadge();}
+async function refreshWarfrontState(force=false){if(!authenticated||warfrontRuntime.busy)return warfrontRuntime.state;if(!force&&warfrontRuntime.state&&Date.now()-warfrontRuntime.lastAt<5000){renderWarfront();return warfrontRuntime.state;}warfrontRuntime.busy=true;try{warfrontRuntime.clans=await listClansOnline().catch(()=>warfrontRuntime.clans||[]);warfrontRuntime.state=await loadWarfrontStateOnline();warfrontRuntime.lastAt=Date.now();updateWarfrontBadge();renderWarfront();syncWorldBossEnemyFromState();return warfrontRuntime.state;}catch(e){console.warn('warfront',e);if(ui.warfrontContent&&!ui.warfrontModal?.classList.contains('hidden'))ui.warfrontContent.innerHTML=`<div class="warfront-error"><b>WARFRONT OFFLINE</b><span>${escHtml(e.message)}</span><small>Rode <b>sql/V13_1_WARFRONT.sql</b> no Supabase.</small></div>`;}finally{warfrontRuntime.busy=false;}}
+async function openWarfront(){closeNavigationModals(ui.warfrontModal);ui.warfrontModal?.classList.remove('hidden');if(ui.warfrontContent)ui.warfrontContent.innerHTML='<div class="muted">Sincronizando frente de guerra...</div>';await refreshClanState(true);await refreshWarfrontState(true);}
 async function declareWarNow(){const target=$('#warTargetClan')?.value;if(!target){showToast('Escolha um clã rival');return;}try{await declareClanWarOnline(target);showToast('GUERRA DECLARADA!','reward');pushActivity('WARFRONT • Guerra de Clãs iniciada','reward');await refreshWarfrontState(true);}catch(e){showToast(e.message);}}
 function activeWorldBossEnemy(){return state.enemies.find(e=>e.worldBoss&&e.hp>0)||null;}
-function spawnWorldBossEncounter({auto=false}={}){const wb=worldBossState(),event=activeWorldBossEvent(),eventMap=activeEventMapId();if(!wb||Number(wb.hp)<=0){if(!auto)showToast('World Boss já foi derrotado');return;}if(!event||!eventMap){if(!auto)showToast('Nenhum evento World Boss ativo');return;}if(progress?.mapId!==eventMap){if(!auto)showToast(`NEMESIS PRIME está em ${event.map_label||displayMapLabel(eventMap)} • viaje até o setor do evento`);return;}let e=activeWorldBossEnemy();if(e){if(!auto){state.target=e;showToast('NEMESIS PRIME já está no setor');}return;}const base=makeEnemy('bossSibelon');base.id=`worldboss_${wb.id}`;base.worldBoss=true;base.eventNpc=true;base.dominationPoints=20;base.forceChase=true;base.name=wb.name||'NEMESIS PRIME';base.maxHp=Math.max(1,Number(wb.max_hp)||250000000);base.hp=Math.max(1,Number(wb.hp)||base.maxHp);base.maxShield=0;base.shield=0;base.damage=Math.max(base.damage*2.25,22000);base.speed=Math.max(base.speed,145);base.aggroRange=1800;base.attackRange=520;base.size=Math.max(base.size,78);base.x=Math.min(state.currentMap.world.w-350,Math.max(350,player.x+700));base.y=Math.min(state.currentMap.world.h-350,Math.max(350,player.y+250));state.enemies.push(base);if(!auto)state.target=base;showToast(`EVENTO ${event.map_label||displayMapLabel(eventMap)} • NEMESIS PRIME!`,'reward');pushActivity(`EVENTO • ${event.map_label||displayMapLabel(eventMap)} • NEMESIS PRIME detectado`,'combat');}
-function syncWorldBossEnemyFromState(){const wb=worldBossState(),eventMap=activeEventMapId();let e=activeWorldBossEnemy();if(!wb||!eventMap){if(e){state.enemies=state.enemies.filter(x=>x!==e);if(state.target?.id===e.id)state.target=null;}return;}if(progress?.mapId!==eventMap){if(e){state.enemies=state.enemies.filter(x=>x!==e);if(state.target?.id===e.id)state.target=null;}return;}if(Number(wb.hp)>0&&!e){spawnWorldBossEncounter({auto:true});e=activeWorldBossEnemy();}if(!e)return;if(Number(wb.hp)<=0){e.hp=0;spawnExplosionFx(e.x,e.y,'#ff416b',true);if(state.target?.id===e.id)state.target=null;return;}e.maxHp=Math.max(1,Number(wb.max_hp)||e.maxHp);e.hp=Math.max(1,Number(wb.hp)||e.hp);}
-function genericEventNpcGroups(ev){const groups=Array.isArray(ev?.config?.npc_groups)?ev.config.npc_groups:[];return groups.filter(g=>g&&NPC_TYPES[g.type]).map(g=>({type:g.type,count:Math.max(0,Math.min(40,Math.trunc(Number(g.count)||0))),name:String(g.name||'').slice(0,48),hpMultiplier:Math.max(.1,Math.min(50,Number(g.hp_multiplier)||1)),shieldMultiplier:Math.max(0,Math.min(50,Number(g.shield_multiplier??g.hp_multiplier)||1)),damageMultiplier:Math.max(.1,Math.min(20,Number(g.damage_multiplier)||1)),dominationPoints:Math.max(1,Math.min(25,Math.trunc(Number(g.domination_points)||3)))}));}
-function syncGenericMapEventEncounters(){if(!progress||!state.currentMap?.eventOnly)return;const events=activeMapEvents().filter(ev=>ev.map_id===progress.mapId&&ev.kind!=='world_boss');const activeIds=new Set(events.map(ev=>String(ev.id)));const removed=state.enemies.filter(e=>e.eventNpc&&!e.worldBoss&&!activeIds.has(String(e.eventInstanceId||'')));if(removed.includes(state.target))state.target=null;state.enemies=state.enemies.filter(e=>!e.eventNpc||e.worldBoss||activeIds.has(String(e.eventInstanceId||'')));for(const ev of events){for(const group of genericEventNpcGroups(ev)){const existing=state.enemies.filter(e=>e.eventNpc&&!e.worldBoss&&String(e.eventInstanceId)===String(ev.id)&&e.eventGroupType===group.type&&e.hp>0).length;for(let i=existing;i<group.count;i++){const mob=makeEnemy(group.type);mob.eventNpc=true;mob.eventInstanceId=ev.id;mob.eventGroupType=group.type;mob.dominationPoints=group.dominationPoints;if(group.name)mob.name=group.name;mob.maxHp=Math.max(1,Math.round(mob.maxHp*group.hpMultiplier));mob.hp=mob.maxHp;mob.maxShield=Math.max(0,Math.round(mob.maxShield*group.shieldMultiplier));mob.shield=mob.maxShield;mob.damage=Math.max(1,Math.round(mob.damage*group.damageMultiplier));mob.baseDamage=mob.damage;state.enemies.push(mob);}}}}
-function syncActiveMapEventEncounters(){syncWorldBossEnemyFromState();syncGenericMapEventEncounters();}
+function spawnWorldBossEncounter(){const wb=worldBossState();if(!wb||Number(wb.hp)<=0){showToast('World Boss já foi derrotado');return;}if(!state.currentMap?.battle){showToast('Entre em um mapa BATTLE (4-1 / 4-2 / 4-3) para enfrentar o World Boss');return;}let e=activeWorldBossEnemy();if(e){state.target=e;showToast('NEMESIS PRIME já está no setor');return;}const base=makeEnemy('bossSibelon');base.id=`worldboss_${wb.id}`;base.worldBoss=true;base.forceChase=true;base.name=wb.name||'NEMESIS PRIME';base.maxHp=Math.max(1,Number(wb.max_hp)||250000000);base.hp=Math.max(1,Number(wb.hp)||base.maxHp);base.maxShield=0;base.shield=0;base.damage=Math.max(base.damage*2.25,22000);base.speed=Math.max(base.speed,145);base.aggroRange=1800;base.attackRange=520;base.size=Math.max(base.size,78);base.x=Math.min(state.currentMap.world.w-350,Math.max(350,player.x+700));base.y=Math.min(state.currentMap.world.h-350,Math.max(350,player.y+250));state.enemies.push(base);state.target=base;showToast('NEMESIS PRIME ENTROU NO SETOR!','reward');pushActivity('WORLD BOSS • NEMESIS PRIME detectado','combat');}
+function syncWorldBossEnemyFromState(){const wb=worldBossState(),e=activeWorldBossEnemy();if(!wb||!e)return;if(Number(wb.hp)<=0){e.hp=0;spawnExplosionFx(e.x,e.y,'#ff416b',true);if(state.target?.id===e.id)state.target=null;return;}e.maxHp=Math.max(1,Number(wb.max_hp)||e.maxHp);e.hp=Math.max(1,Number(wb.hp)||e.hp);}
 async function flushWorldBossDamage(force=false){if(!authenticated||warfrontRuntime.busyDamage)return;const dmg=Math.floor(warfrontRuntime.pendingBossDamage||0);if(dmg<=0)return;if(!force&&Date.now()-warfrontRuntime.lastDamageFlush<900)return;warfrontRuntime.busyDamage=true;warfrontRuntime.pendingBossDamage=0;warfrontRuntime.lastDamageFlush=Date.now();try{const r=await hitWorldBossOnline(dmg);warfrontRuntime.state ||= {};warfrontRuntime.state.world_boss={...(warfrontRuntime.state.world_boss||{}),...r};updateWarfrontBadge();syncWorldBossEnemyFromState();if(r?.defeated){showToast('WORLD BOSS DERROTADO! RESGATE SEU LOOT!','reward');pushActivity('WORLD BOSS • NEMESIS PRIME eliminado!','reward');renderWarfront();}}catch(e){warfrontRuntime.pendingBossDamage+=dmg;console.warn('world boss damage',e);}finally{warfrontRuntime.busyDamage=false;}}
 async function claimWorldBossNow(){try{const r=await claimWorldBossRewardOnline();if(r?.already_claimed){showToast('Recompensa já resgatada');return;}normalizeWarfrontProgress();progress.profile.credits+=Number(r.credits)||0;progress.profile.uridium+=Number(r.uridium)||0;progress.warfront.skillCores+=Number(r.cores)||0;const bp=WARFRONT_BLUEPRINTS[r.blueprint_id]?r.blueprint_id:'lf4';progress.warfront.blueprints[bp]=(progress.warfront.blueprints[bp]||0)+(Number(r.fragments)||0);progress.warfront.worldBossClaims[String(r.boss_id||'boss')]=Date.now();saveGame();await flushCloudSave(true);showToast(`WORLD BOSS • +${fmt(r.credits||0)} CR • +${fmt(r.uridium||0)} URI • +${fmt(r.fragments||0)} FRAG`,'reward');pushActivity(`WORLD BOSS LOOT • ${fmt(r.fragments||0)} ${WARFRONT_BLUEPRINTS[bp].name} • +${fmt(r.cores||0)} cores`,'reward');await refreshWarfrontState(true);}catch(e){showToast(e.message);}}
 function rollRareBossLoot(enemy){if(!enemy||enemy.worldBoss||!String(enemy.type||'').startsWith('boss'))return;normalizeWarfrontProgress();const chance=enemy.gateEnemy?.22:.13;if(Math.random()>chance)return;const ids=Object.keys(WARFRONT_BLUEPRINTS),id=ids[Math.floor(Math.random()*ids.length)],frags=1+(Math.random()<.22?1:0),core=Math.random()<.18?1:0;progress.warfront.blueprints[id]+=frags;progress.warfront.skillCores+=core;progress.warfront.rareDrops++;showToast(`LOOT RARO • ${WARFRONT_BLUEPRINTS[id].name} +${frags}${core?' • +1 CORE':''}`,'reward');pushActivity(`BLUEPRINT • ${WARFRONT_BLUEPRINTS[id].name} +${frags}${core?' • SKILL CORE +1':''}`,'reward');}
 function craftBlueprint(id){normalizeWarfrontProgress();const bp=WARFRONT_BLUEPRINTS[id];if(!bp)return;const have=progress.warfront.blueprints[id]||0;if(have<bp.need||progress.warfront.skillCores<bp.cores){showToast('Fragmentos ou cores insuficientes');return;}progress.warfront.blueprints[id]-=bp.need;progress.warfront.skillCores-=bp.cores;progress.inventory[bp.itemId]=(progress.inventory[bp.itemId]||0)+bp.qty;progress.warfront.crafted[id]=(progress.warfront.crafted[id]||0)+1;saveGame();renderWarfront();renderHangar();showToast(`${bp.name} CONSTRUÍDO!`,'reward');pushActivity(`FORJA • ${bp.name} criado`,'reward');}
 function upgradeAbilityMastery(){normalizeWarfrontProgress();const cls=abilityClassId(),lv=abilityMasteryLevel();if(lv>=5){showToast('Mastery máxima');return;}const cost=[2,4,7,11][lv-1];if(progress.warfront.skillCores<cost){showToast(`Você precisa de ${cost} Skill Cores`);return;}progress.warfront.skillCores-=cost;progress.warfront.skillMastery[cls]=lv+1;saveGame();renderWarfront();updateAbilityHud();showToast(`${SHIP_ABILITIES[cls].name} • MASTERY ${lv+1}!`,'reward');pushActivity(`MASTERY • ${SHIP_ABILITIES[cls].name} subiu para ${lv+1}`,'reward');}
 async function scoreClanWar(points,reason){if(!authenticated||!currentClanTag())return;try{const r=await recordClanWarScoreOnline(points,reason);if(r?.scored){warfrontRuntime.state ||= {};warfrontRuntime.state.war=r.war||warfrontRuntime.state.war;updateWarfrontBadge();}}catch{}}
-async function scoreMapDomination(points,reason,mapId=progress?.mapId){if(!authenticated||!currentClanTag()||!MAPS[mapId]?.eventOnly)return;try{const r=await recordMapDominationScoreOnline(mapId,points,reason);if(r?.scored){if(r.domination)warfrontRuntime.state={...(warfrontRuntime.state||{}),domination:r.domination};renderWarfront();}}catch{}}
-function updateWarfrontRuntime(){if(!authenticated||!progress)return;if(warfrontRuntime.pendingBossDamage>0)flushWorldBossDamage();if(state.currentMap?.eventOnly&&Date.now()-(warfrontRuntime.lastEventSync||0)>5000){warfrontRuntime.lastEventSync=Date.now();refreshWarfrontState(true).catch(()=>{});}else if(activeWorldBossEnemy()&&Date.now()-warfrontRuntime.lastBossSync>5000){warfrontRuntime.lastBossSync=Date.now();refreshWarfrontState(true).catch(()=>{});}if(state.currentMap?.eventOnly)syncGenericMapEventEncounters();}
+function updateWarfrontRuntime(){if(!authenticated||!progress)return;if(warfrontRuntime.pendingBossDamage>0)flushWorldBossDamage();if(activeWorldBossEnemy()&&Date.now()-warfrontRuntime.lastBossSync>5000){warfrontRuntime.lastBossSync=Date.now();refreshWarfrontState(true).catch(()=>{});}}
 
 
 function layoutHudPanels(){
@@ -1611,7 +1585,7 @@ function renderMapModal(){
     if(active)classes.push('current');if(!foreign&&!battle)classes.push('faction');if(foreign)classes.push('hostile');if(battle)classes.push('battle');
     if(canJump)classes.push('travel');else if(access.ok&&!active)classes.push('no-jump');
     if(!access.ok)classes.push('locked');
-    const ev=activeMapEvents().find(e=>e.map_id===graphDestination(node.id)?.mapId);const sub=active?'ATUAL':!access.ok?access.reason:ev?`EVENTO • ${String(ev.name||'ATIVO').toUpperCase()}`:battle?'EVENTOS 4-X':jumps>0?'1 BÔNUS DE SALTO':'USE OS PORTAIS';
+    const sub=active?'ATUAL':!access.ok?access.reason:jumps>0?'1 BÔNUS DE SALTO':'USE OS PORTAIS';
     html+=`<div class="${classes.join(' ')}" data-map-label="${node.id}" style="left:${node.x}%;top:${node.y}%;--art:${mapArtFor(node.id)}"><div class="node-art"></div><div class="node-overlay"></div><div class="node-sub">${sub}</div>${!access.ok?'<div class="node-lock">🔒</div>':''}<div class="node-label">${node.id}</div></div>`;
   }
   ui.mapNetwork.innerHTML=html;
@@ -1631,7 +1605,7 @@ function renderMapModal(){
     runMapTransition(access.mapId,null,'BÔNUS DE SALTO CONSUMIDO',access.territoryFaction,currentGraphMapLabel());
   }));
 }
-function openMapModal(){if(isGalaxyGateMap()){showToast('Galaxy Gate ativo: complete o portal ou perca uma vida para retornar à base');return;}renderMapModal();ui.mapModal.classList.remove('hidden');}
+function openMapModal(){if(isGalaxyGateMap()){showToast('Galaxy Gate ativo: complete o portal ou perca uma vida para retornar à base');return;}closeNavigationModals(ui.mapModal);renderMapModal();ui.mapModal.classList.remove('hidden');}
 function isBaseSafeZone(x=player.x,y=player.y){
   if(!progress||progress.mapId!==SAFE_ZONE.mapId||!isOwnTerritory())return false;
   const b=currentBasePoint();
@@ -2387,8 +2361,8 @@ function makeEnemy(type){
   if(progress?.mapId==='x1'&&safeZoneDistance(pos.x,pos.y)<SAFE_ZONE.radius+180)pos=randomMapPosition(180);
   const battle=state.currentMap?.battle;return {id:`${type}_${Math.random().toString(16).slice(2,9)}`,type,name:base.name,x:pos.x,y:pos.y,hp:base.hp,maxHp:base.hp,shield:base.shield,maxShield:base.shield,credits:base.credits,uridium:base.uridium,xp:base.xp,speed:base.speed,baseSpeed:base.speed,damage:base.damage,baseDamage:base.damage,bossPhase:0,bossAttackScale:1,jammedUntil:0,color:base.color,size:base.size,resources:{...(base.resources||{})},attackRange:Math.min(battle?500:420,(battle?210:170)+base.size*5.8),aggroRange:battle?920:720,lastShot:0,angle:rand(0,TWO_PI),drift:rand(.4,1.4)};
 }
-function spawnEnemies(){state.enemies=[];state.enemyRespawns=[];if(state.currentMap?.eventOnly)return;const mult=Math.max(1,Number(state.currentMap.enemyMultiplier)||1);for(const group of state.currentMap.enemyGroups||[]){const count=Math.max(1,Math.round(group.count*mult));for(let i=0;i<count;i++)state.enemies.push(makeEnemy(group.type));}}
-function scheduleEnemyRespawn(type){if(state.currentMap?.eventOnly)return;state.enemyRespawns.push({type,at:nowSec()+rand(6,13)});}
+function spawnEnemies(){state.enemies=[];state.enemyRespawns=[];const mult=Math.max(1,Number(state.currentMap.enemyMultiplier)||1);for(const group of state.currentMap.enemyGroups){const count=Math.max(1,Math.round(group.count*mult));for(let i=0;i<count;i++)state.enemies.push(makeEnemy(group.type));}}
+function scheduleEnemyRespawn(type){state.enemyRespawns.push({type,at:nowSec()+rand(6,13)});}
 function makeGateEnemy(type,index=0,total=1){
   const e=makeEnemy(type);
   const gateWorld=state.currentMap?.world||MAPS[galaxyGateDef().mapId].world;const center={x:player.x||gateWorld.w/2,y:player.y||gateWorld.h/2};
@@ -2637,7 +2611,6 @@ function setMap(mapId,preserve=false,fromMapId=null,targetTerritoryFaction=null,
   const owner=territoryOwner(),home=isOwnTerritory();
   showToast(mapId==='x1'?(home?`Base ${owner?.short||''} • Zona Segura`:`INVASÃO • Base ${owner?.short||''}`):`Entrando em ${displayMapLabel(mapId,currentTerritoryFaction())}`);
   renderMapModal();syncOnlineWorld();
-  if(authenticated&&state.currentMap?.eventOnly)refreshWarfrontState(true).then(()=>syncActiveMapEventEncounters()).catch(()=>{});
 }
 function runMapTransition(targetMapId,fromMapId=null,mode='PORTAL QUÂNTICO',targetTerritoryFaction=null,fromGraphLabel=null){
   if(state.jumping||!MAPS[targetMapId])return;
@@ -2774,7 +2747,7 @@ function rewardEnemyKill(enemy){
   progress.profile.credits+=earnedCredits;progress.profile.uridium+=earnedUri;progress.profile.xp+=earnedXp;progress.profile.aliensKilled=(progress.profile.aliensKilled||0)+1;
   if(authenticated){const boss=/^boss/i.test(String(enemy.type||''));const clanType=String(enemy.type||'').replace(/^boss/i,'').toLowerCase();recordClanAlienKillOnline({npcType:clanType,isBoss:boss}).then(r=>{if(r?.status?.leveled_up){showToast(`CLÃ SUBIU PARA O LV ${r.status.new_level}!`,'reward');refreshClanState(true);}}).catch(()=>{});}
   pushActivity(`${enemy.name} • +${fmt(earnedCredits)} CR • +${fmt(earnedUri)} URI • +${fmt(earnedXp)} XP`,'combat');
-  if(String(enemy.type||'').startsWith('boss')){rollRareBossLoot(enemy);scoreClanWar(10,'boss_kill');}if(enemy.eventNpc)scoreMapDomination(enemy.dominationPoints||5,'event_npc');
+  if(String(enemy.type||'').startsWith('boss')){rollRareBossLoot(enemy);scoreClanWar(10,'boss_kill');}
   addPetXp(Math.max(12,Math.round(enemy.credits/120+enemy.uridium*4)));
   processPlayerLevelUps();
   const lootMult=1+pilotLootBonus(),boostedResources=Object.fromEntries(Object.entries(enemy.resources||{}).map(([id,q])=>[id,Math.max(1,Math.round(q*lootMult))]));
@@ -3147,7 +3120,7 @@ async function queuePvpShot(target,damage,shieldDrain=false,color='#ff657d'){
       const before=player.shield;player.shield=Math.min(player.maxShield,player.shield+effective);
       const restored=Math.max(0,Math.round(player.shield-before));if(restored>0)spawnParticle(player.x,player.y-34,`+${fmt(restored)} ESC`,'#79f1ff');
     }
-    if(effective>0){spawnImpactFx(target.x,target.y,shieldDrain?'#79f1ff':color,32,shieldDrain?'shield':'impact');if(target.clanTag&&target.clanTag!==currentClanTag()){const pts=Math.max(1,Math.min(6,Math.floor(effective/50000)));scoreClanWar(pts,'pvp_damage');scoreMapDomination(pts,'pvp_damage');}}
+    if(effective>0){spawnImpactFx(target.x,target.y,shieldDrain?'#79f1ff':color,32,shieldDrain?'shield':'impact');if(target.clanTag&&target.clanTag!==currentClanTag())scoreClanWar(Math.max(1,Math.min(6,Math.floor(effective/50000))),'pvp_damage');}
     return row;
   }catch(e){
     player.laserFiring=false;
@@ -3491,9 +3464,12 @@ function ownsExtraItem(itemId){
 }
 function itemSellValue(item){return Math.max(1,Math.floor((Number(item?.price)||0)*.5));}
 let pendingConfirmAction=null;
+let confirmReturnModal=null;
 function saleCurrencyLabel(currency){return currency==='uridium'?'URI':'CR';}
-function closeSaleConfirm(){pendingConfirmAction=null;ui.saleConfirmModal?.classList.add('hidden');}
+function closeSaleConfirm(){pendingConfirmAction=null;ui.saleConfirmModal?.classList.add('hidden');const back=confirmReturnModal;confirmReturnModal=null;if(back)back.classList.remove('hidden');}
 function openConfirmModal({eyebrow='CONFIRMAÇÃO',title='Confirmar ação?',itemName='Item',detail='Revise a ação antes de continuar.',value=0,currency='credits',valueLabel='VALOR',confirmLabel='CONFIRMAR',confirmClass='danger-btn',onConfirm}){
+  confirmReturnModal=dismissibleModals().find(modal=>modal!==ui.saleConfirmModal&&!modal.classList.contains('hidden'))||null;
+  if(confirmReturnModal)confirmReturnModal.classList.add('hidden');
   pendingConfirmAction=typeof onConfirm==='function'?onConfirm:null;
   if(ui.saleConfirmEyebrow)ui.saleConfirmEyebrow.textContent=eyebrow;
   if(ui.saleConfirmTitle)ui.saleConfirmTitle.textContent=title;
@@ -3510,7 +3486,7 @@ function openSaleConfirm({title='Confirmar venda?',itemName='Item',detail='Esta 
 function openSpendConfirm({title='Confirmar compra?',itemName='Item',detail='Seu saldo será consumido somente ao confirmar.',value=0,currency='credits',onConfirm,confirmLabel='CONFIRMAR COMPRA'}){
   openConfirmModal({eyebrow:'CONFIRMAÇÃO DE COMPRA',title,itemName,detail,value,currency,valueLabel:'VOCÊ GASTARÁ',confirmLabel,confirmClass:'primary-btn',onConfirm});
 }
-function confirmSaleNow(){const action=pendingConfirmAction;if(!action){closeSaleConfirm();return;}pendingConfirmAction=null;ui.saleConfirmModal?.classList.add('hidden');action();}
+function confirmSaleNow(){const action=pendingConfirmAction;if(!action){closeSaleConfirm();return;}const back=confirmReturnModal;pendingConfirmAction=null;confirmReturnModal=null;ui.saleConfirmModal?.classList.add('hidden');action();if(back)back.classList.remove('hidden');}
 function performSellInventoryItem(itemId,qty=1){
   const item=ITEMS[itemId],have=progress?.inventory?.[itemId]||0;qty=Math.max(1,Math.floor(qty));
   if(!item||have<qty){showToast('Item não disponível para venda');return;}
@@ -3752,7 +3728,7 @@ function cargoSaleValue(){let total=0;for(const [id,qty] of Object.entries(progr
 function sellCargoResource(id){if(!isAtTrader()){showToast('Venda disponível somente na base X-1');return;}const qty=progress.cargo[id]||0,price=RESOURCES[id]?.sell||0;if(qty<=0||price<=0)return;progress.profile.credits+=qty*price;delete progress.cargo[id];saveGame();renderCargo();updateUI();showToast(`${qty} ${id} vendidos por ${fmt(qty*price)} CR`);}
 function sellAllCargo(){if(!isAtTrader()){showToast('Volte à base X-1 para vender');return;}let total=0;for(const [id,qty] of Object.entries(progress.cargo||{})){const price=RESOURCES[id]?.sell||0;if(price>0){total+=qty*price;delete progress.cargo[id];}}progress.profile.credits+=total;saveGame();renderCargo();updateUI();showToast(total?`Porão vendido: +${fmt(total)} CR`:'Nada vendável no porão');}
 function renderCargo(){if(!progress)return;const atBase=isAtTrader();const xeno=progress.cargo?.Xenomit||0;const cargoBonus=cargoExtraBonus();ui.cargoSummary.innerHTML=`<b>${fmt(cargoUsed())}/${fmt(cargoCapacity())}</b> unidades ocupadas${cargoBonus?` • Expansão equipada: <b>+${fmt(cargoBonus)}</b>`:''} • Valor vendável: <b>${fmt(cargoSaleValue())} CR</b><br><span class="muted">${atBase?'Trader disponível: você está na base.':'Para vender recursos, retorne à Zona Segura do seu X-1.'} ${xeno?`• Xenomit: <b>${fmt(xeno)}</b> (não ocupa porão)`:''}</span>`;ui.cargoGrid.innerHTML='';const entries=Object.entries(progress.cargo||{}).filter(([,q])=>q>0);if(!entries.length){ui.cargoGrid.innerHTML='<div class="empty-state">Seu porão está vazio. Colete minérios no mapa ou caixas deixadas pelos NPCs.</div>';}for(const [id,qty] of entries){const r=RESOURCES[id]||{name:id,color:'#fff',sell:0};const special=id==='Xenomit';const c=document.createElement('div');c.className='cargo-card';c.innerHTML=`<div class="cargo-ore" style="--ore:${r.color}"><img src="${GAME_ASSETS.resources[id]||GAME_ASSETS.loot.cargo}" alt="${r.name}"></div><div><b>${r.name}</b><div class="muted">${fmt(qty)} un. • ${special?'especial • não ocupa porão':(r.sell?fmt(r.sell)+' CR/un.':'não vendável')}</div></div>`;const b=document.createElement('button');b.className='ghost-btn';b.textContent=r.sell?'Vender':'Guardar';b.disabled=!atBase||!r.sell;b.onclick=()=>sellCargoResource(id);c.appendChild(b);ui.cargoGrid.appendChild(c);}ui.sellAllCargo.disabled=!atBase||cargoSaleValue()<=0;}
-function openCargo(){if(!isAtTrader()){showToast('Venda de recursos disponível somente na base X-1');return;}renderCargo();ui.cargoModal.classList.remove('hidden');}
+function openCargo(){if(!isAtTrader()){showToast('Venda de recursos disponível somente na base X-1');return;}closeNavigationModals(ui.cargoModal);renderCargo();ui.cargoModal.classList.remove('hidden');}
 
 // ===================== V12 LOJA PREMIUM =====================
 function premiumProductIcon(product){
@@ -3788,10 +3764,10 @@ async function testPremiumPurchaseNow(productId){
     await refreshAndRenderPremium(true);
   }catch(e){showToast(String(e?.message||e));}
 }
-async function openPremiumShop(){ui.premiumModal?.classList.remove('hidden');if(ui.premiumProductGrid)ui.premiumProductGrid.innerHTML='<div class="muted">Sincronizando Loja Premium...</div>';await refreshPremiumState(true);renderPremiumShop();}
+async function openPremiumShop(){closeNavigationModals(ui.premiumModal);ui.premiumModal?.classList.remove('hidden');if(ui.premiumProductGrid)ui.premiumProductGrid.innerHTML='<div class="muted">Sincronizando Loja Premium...</div>';await refreshPremiumState(true);renderPremiumShop();}
 
-function openShop(tab='ships'){state.shopTab=tab;refreshPremiumState().finally(()=>{renderShop();ui.shopModal.classList.remove('hidden');});}
-function openHangar(tab='ships'){state.hangarTab=tab;renderHangar();ui.hangarModal.classList.remove('hidden');if(!canChangeEquipment())showToast('Hangar em modo consulta • alterações de equipamento só funcionam na base X-1');}
+function openShop(tab='ships'){closeNavigationModals(ui.shopModal);state.shopTab=tab;refreshPremiumState().finally(()=>{renderShop();ui.shopModal.classList.remove('hidden');});}
+function openHangar(tab='ships'){closeNavigationModals(ui.hangarModal);state.hangarTab=tab;renderHangar();ui.hangarModal.classList.remove('hidden');if(!canChangeEquipment())showToast('Hangar em modo consulta • alterações de equipamento só funcionam na base X-1');}
 
 function alphaPieceCount(){return alphaGate().pieces.length;}
 function addAlphaPiece(){
@@ -3847,7 +3823,7 @@ function renderGateHud(){
 function renderGalaxyGate(){
   if(!progress||!ui.gatePieceGrid)return;normalizeGalaxyGateState();const g=progress.galaxyGate,gd=galaxyGateDef(),a=alphaGate(),count=a.pieces.length,atBase=isAtTrader(),unlocked=gateUnlocked(gd.key);
   if(ui.gatePieceBadge)ui.gatePieceBadge.textContent=`${gd.label} ${count}/${gd.pieces}`;ui.gatePiecesText.textContent=`${count} / ${gd.pieces}`;ui.gateLivesText.textContent=a.lives;ui.gateCompletedText.textContent=a.completed;ui.gateUriText.textContent=fmt(progress.profile.uridium);ui.gateJumpBonus.textContent=fmt(g.jumpBonus);ui.gateRepairBonus.textContent=fmt(g.repairBonus);if(ui.gateLogDisks){normalizePilotBio();ui.gateLogDisks.textContent=fmt(progress.pilotBio.logDisks);}if(ui.gateCoreLabel)ui.gateCoreLabel.textContent=gd.label;if(ui.gateProtocolLabel)ui.gateProtocolLabel.textContent=`PORTAL ${gd.label}`;if(ui.gateCombatProtocol)ui.gateCombatProtocol.textContent=`PROTOCOLO ${gd.label} • ${gd.rounds.length} ROUNDS • 3 VIDAS • NPC ${Math.round(gd.enemyScale*100)}%`;if(ui.gateRewardNote)ui.gateRewardNote.innerHTML=`${gd.label} aplica dificuldade <b>${Math.round(gd.enemyScale*100)}%</b> e fecha <b>${gd.totalRewardMult}X</b> no total • ${gd.logReward} Log-Disks ao concluir.`;
-  if(ui.gateProtocolTabs)ui.gateProtocolTabs.querySelectorAll('[data-gate-protocol]').forEach(b=>{const key=b.dataset.gateProtocol;b.classList.toggle('active',key===gd.key);b.disabled=!gateUnlocked(key)&&key!==gd.key;b.title=!gateUnlocked(key)?`Conclua ${GALAXY_GATE_DEFS[GALAXY_GATE_DEFS[key].unlock]?.label||'o protocolo anterior'} para desbloquear`:'';});
+  if(ui.gateProtocolTabs)ui.gateProtocolTabs.querySelectorAll('[data-gate-protocol]').forEach(b=>{const key=b.dataset.gateProtocol;b.classList.toggle('active',key===gd.key);const locked=!gateUnlocked(key);b.disabled=locked;b.title=locked?`${GALAXY_GATE_DEFS[key].label} ainda não disponível na V13.2.1`:'';});
   ui.gatePieceGrid.innerHTML=Array.from({length:gd.pieces},(_,i)=>`<span class="gate-piece ${a.pieces.includes(i+1)?'found':''}" title="Peça ${i+1}">${i+1}</span>`).join('');ui.gateSpinButtons.innerHTML='';[1,5,10,50,100].forEach(n=>{const cost=n*alphaSpinUnitCost(),b=document.createElement('button');b.className='small-btn gate-spin-btn';b.innerHTML=`${n}x <small>${fmt(cost)} URI${premiumActive()?' • -10%':''}</small>`;b.disabled=!unlocked||progress.profile.uridium<cost;b.onclick=()=>spinAlpha(n);ui.gateSpinButtons.appendChild(b);});
   renderGateRounds();
   if(!unlocked){ui.gateAlphaStatusTitle.textContent=`${gd.label} BLOQUEADO`;ui.gateAlphaStatusText.textContent=`Conclua o Galaxy Gate ${GALAXY_GATE_DEFS[gd.unlock].label} ao menos 1 vez para liberar este protocolo.`;ui.gateJumpBtn.textContent='PROTOCOLO BLOQUEADO';ui.gateJumpBtn.disabled=true;}
@@ -3863,7 +3839,7 @@ function openGalaxyGate(){
     showToast(`${galaxyGateDef().label} • Round ${a.run?.round||1} • ${alphaRemainingCount()} NPCs vivos${def?` • ${a.lives} vidas`:''}`);
     return;
   }
-  renderGalaxyGate();ui.gateModal.classList.remove('hidden');
+  closeNavigationModals(ui.gateModal);renderGalaxyGate();ui.gateModal.classList.remove('hidden');
 }
 
 
@@ -4110,7 +4086,7 @@ function renderAuction(){
     ?progress.auction.history.map(h=>`<div class="auction-history-row"><span>${h.result}</span><b>${h.name}</b><em>${fmt(h.bid)} CR</em></div>`).join('')
     :'<div class="muted">Nenhum ciclo encerrado ainda.</div>';
 }
-function openAuction(){renderAuction();ui.auctionModal.classList.remove('hidden');syncAuctionBidsOnline();}
+function openAuction(){closeNavigationModals(ui.auctionModal);renderAuction();ui.auctionModal.classList.remove('hidden');syncAuctionBidsOnline();}
 let auctionUiTick=0;
 function updateAuctionSystem(){
   if(!progress)return;const now=Date.now();if(now-auctionUiTick<1000)return;auctionUiTick=now;ensureAuctionState();
@@ -4505,6 +4481,7 @@ async function arenaFight(targetUserId){
 }
 function openArena(){
   if(!progress)return;
+  closeNavigationModals(ui.arenaModal);
   ui.arenaModal?.classList.remove('hidden');
   refreshArena(true);
 }
@@ -4542,6 +4519,12 @@ ui.laserToggle.onclick=()=>{if(!state.target||state.target.hp<=0){showToast('Sel
 const dismissibleModals=()=>[
   ui.saleConfirmModal,ui.configModal,ui.premiumModal,ui.warfrontModal,ui.clanModal,ui.passModal,ui.arenaModal,ui.auctionModal,ui.pilotModal,ui.gateModal,ui.missionModal,ui.shopModal,ui.hangarModal,ui.petModal,ui.cargoModal,ui.mapModal
 ].filter(Boolean);
+function closeNavigationModals(except=null){
+  for(const modal of dismissibleModals()){
+    if(modal===except||modal===ui.saleConfirmModal)continue;
+    modal.classList.add('hidden');
+  }
+}
 function closeTopOverlay(){
   const open=dismissibleModals().filter(modal=>!modal.classList.contains('hidden'));
   if(!open.length)return false;
@@ -4558,14 +4541,6 @@ function bindOverlayDismiss(){
 
 if(ui.mapBtn)ui.mapBtn.onclick=()=>openMapModal();
 if(ui.closeMap)ui.closeMap.onclick=()=>ui.mapModal.classList.add('hidden');
-if(ui.profileTopBtn)ui.profileTopBtn.onclick=e=>{e.stopPropagation();toggleCommandFlyout(ui.profileTopBtn);};
-if(ui.pilotTopBtn)ui.pilotTopBtn.onclick=()=>openPilotProfile();
-function toggleCommandFlyout(btn){const group=btn?.closest('.command-group');if(!group)return;document.querySelectorAll('.command-group.open').forEach(x=>{if(x!==group)x.classList.remove('open');});group.classList.toggle('open');}
-if(ui.missionsGroupBtn)ui.missionsGroupBtn.onclick=e=>{e.stopPropagation();toggleCommandFlyout(ui.missionsGroupBtn);};
-if(ui.battlesGroupBtn)ui.battlesGroupBtn.onclick=e=>{e.stopPropagation();toggleCommandFlyout(ui.battlesGroupBtn);};
-if(ui.storesGroupBtn)ui.storesGroupBtn.onclick=e=>{e.stopPropagation();toggleCommandFlyout(ui.storesGroupBtn);};
-document.addEventListener('click',e=>{if(!e.target.closest('.command-group'))document.querySelectorAll('.command-group.open').forEach(x=>x.classList.remove('open'));});
-document.querySelectorAll('.command-flyout button').forEach(btn=>btn.addEventListener('click',()=>btn.closest('.command-group')?.classList.remove('open')));
 if(ui.missionBtn)ui.missionBtn.onclick=()=>openMissions();if(ui.activeMissionOpen)ui.activeMissionOpen.onclick=()=>openMissions();
 if(ui.closeMission)ui.closeMission.onclick=()=>ui.missionModal.classList.add('hidden');
 if(ui.passBtn)ui.passBtn.onclick=()=>openProgression();
@@ -4583,7 +4558,7 @@ if(ui.clanBtn)ui.clanBtn.onclick=()=>openClan();
 if(ui.warfrontBtn)ui.warfrontBtn.onclick=()=>openWarfront();
 if(ui.closeWarfront)ui.closeWarfront.onclick=()=>ui.warfrontModal.classList.add('hidden');
 if(ui.warfrontRefresh)ui.warfrontRefresh.onclick=()=>refreshWarfrontState(true);
-if(ui.warfrontContent)ui.warfrontContent.onclick=e=>{const eventJump=e.target.closest('[data-event-jump]');if(eventJump){const mapId=eventJump.dataset.eventJump;if(mapId&&MAPS[mapId]){ui.warfrontModal.classList.add('hidden');if(progress.mapId===mapId){showToast('Você já está no setor do evento');}else{runMapTransition(mapId,null,'EVENTO 4-X',null,currentGraphMapLabel());}}return;}const craft=e.target.closest('[data-blueprint-craft]');if(craft){craftBlueprint(craft.dataset.blueprintCraft);return;}if(e.target.closest('[data-mastery-upgrade]')){upgradeAbilityMastery();return;}if(e.target.closest('[data-worldboss-engage]')){const eventMap=activeEventMapId();ui.warfrontModal.classList.add('hidden');if(eventMap&&progress.mapId!==eventMap){runMapTransition(eventMap,null,'EVENTO 4-X',null,currentGraphMapLabel());}else{spawnWorldBossEncounter();}return;}if(e.target.closest('[data-worldboss-claim]')){claimWorldBossNow();return;}if(e.target.closest('[data-war-declare]')){declareWarNow();return;}};
+if(ui.warfrontContent)ui.warfrontContent.onclick=e=>{const craft=e.target.closest('[data-blueprint-craft]');if(craft){craftBlueprint(craft.dataset.blueprintCraft);return;}if(e.target.closest('[data-mastery-upgrade]')){upgradeAbilityMastery();return;}if(e.target.closest('[data-worldboss-engage]')){spawnWorldBossEncounter();ui.warfrontModal.classList.add('hidden');return;}if(e.target.closest('[data-worldboss-claim]')){claimWorldBossNow();return;}if(e.target.closest('[data-war-declare]')){declareWarNow();return;}};
 if(ui.closeClan)ui.closeClan.onclick=()=>ui.clanModal.classList.add('hidden');
 if(ui.clanRefresh)ui.clanRefresh.onclick=()=>refreshClanState(true);
 if(ui.clanContent)ui.clanContent.onclick=e=>{const join=e.target.closest('[data-clan-join]');if(join){joinClanNow(join.dataset.clanJoin);return;}if(e.target.closest('#clanCreateSubmit'))createClanNow();else if(e.target.closest('#clanTransferBtn'))transferClanNow();else if(e.target.closest('#clanLeaveBtn'))leaveClanNow();};
@@ -4593,7 +4568,7 @@ if(ui.arenaRewardClaim)ui.arenaRewardClaim.onclick=()=>claimArenaRewardNow();
 if(ui.arenaBattleSkip)ui.arenaBattleSkip.onclick=()=>{arenaRuntime.skipAnimation=true;ui.arenaBattleSkip.disabled=true;ui.arenaBattleSkip.textContent='ENCERRANDO...';};
 if(ui.closeGate)ui.closeGate.onclick=()=>ui.gateModal.classList.add('hidden');
 if(ui.gateJumpBtn)ui.gateJumpBtn.onclick=()=>enterAlphaGate();
-if(ui.gateProtocolTabs)ui.gateProtocolTabs.onclick=e=>{const b=e.target.closest('[data-gate-protocol]');if(!b||isGalaxyGateMap())return;const key=b.dataset.gateProtocol;if(!gateUnlocked(key)){showToast(`Conclua ${GALAXY_GATE_DEFS[GALAXY_GATE_DEFS[key].unlock].label} primeiro`);return;}progress.galaxyGate.selected=key;saveGame();renderGalaxyGate();};
+if(ui.gateProtocolTabs)ui.gateProtocolTabs.onclick=e=>{const b=e.target.closest('[data-gate-protocol]');if(!b||isGalaxyGateMap())return;const key=b.dataset.gateProtocol;if(!gateUnlocked(key)){showToast(`${GALAXY_GATE_DEFS[key].label} está bloqueado nesta versão • EM BREVE`);return;}progress.galaxyGate.selected=key;saveGame();renderGalaxyGate();};
 if(ui.useRepairBonus)ui.useRepairBonus.onclick=()=>useGalaxyRepairBonus();
 if(ui.petBtn)ui.petBtn.onclick=()=>openHangar('pet');
 if(ui.closePet)ui.closePet.onclick=()=>ui.petModal.classList.add('hidden');
