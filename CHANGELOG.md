@@ -63,3 +63,17 @@ Conta online, save cloud, facções, mapas, NPCs, Hangar, equipamentos, P.E.T., 
 - `saveGame()` agora sincroniza `player.x/y` antes de serializar.
 - Transições de mapa fazem flush cloud imediato.
 - Reload prefere save local mais recente quando o cloud ainda está alguns instantes atrasado.
+
+
+## V12.1.5 — HUD Mobile Clean
+- Removidos do topo, no mobile, os chips de versão/piloto/patente/nível/créditos/uridium para liberar espaço aos botões MAPA e GG.
+- Mantidos os botões principais do topo e o HUD limpo em celular.
+- Desktop continua exibindo as informações normalmente.
+
+
+## V12.1.6 — Confirmações de compra/gasto
+
+- O modal de confirmação agora também cobre compras e gastos de créditos/uridium.
+- Loja: comprar naves, equipamentos, munições, rockets, P.E.T. e módulos do P.E.T. exige confirmação.
+- Gastos manuais: slots do P.E.T., giros do Galaxy Gate, compra de Log-Disks, upgrade da Árvore de Piloto e reset também exigem confirmação.
+- Auto-buy permanece sem confirmação por ser automático e controlado por CPU.

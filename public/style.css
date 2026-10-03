@@ -1327,3 +1327,18 @@ body[data-quality="high"] .hud-panel{backdrop-filter:blur(7px);-webkit-backdrop-
 .sale-confirm-value span{font-size:8px;font-weight:1000;letter-spacing:.12em;color:#ad9a68}.sale-confirm-value b{font-size:20px;color:#ffe294}
 .sale-confirm-actions{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:14px}.sale-confirm-actions button{min-height:42px}.sale-confirm-actions .danger-btn{font-size:11px;border-color:rgba(255,88,117,.5);background:linear-gradient(180deg,#461522,#240b13);color:#ffd3da}
 @media(max-width:520px){.sale-confirm-actions{grid-template-columns:1fr}.sale-confirm-card{padding:16px}}
+
+
+/* V12.1.5 — HUD mobile clean */
+@media(max-width:900px){
+  .command-status{display:none!important;}
+  #topbar.compact-command-bar{justify-content:flex-start;gap:8px;}
+  .command-actions{flex:1 1 auto;justify-content:flex-start;gap:6px;}
+}
+@media(max-width:680px){
+  #topbar.compact-command-bar{min-height:40px!important;padding:4px 5px!important;}
+  .command-status{display:none!important;}
+  .compact-command-bar .compact-brand{display:none!important;}
+  .command-actions{width:100%;display:flex;flex-wrap:wrap;gap:5px;}
+  .command-actions .small-btn{min-height:28px!important;padding:4px 7px!important;font-size:9px!important;}
+}
