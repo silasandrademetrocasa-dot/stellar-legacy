@@ -1,6 +1,6 @@
-import { FACTIONS, SHIPS, ITEMS, LASER_AMMO, ROCKETS, NPC_TYPES, MAPS, RESOURCES } from './data.js?v=12.1.0';
-import { GAME_ASSETS } from './assets/v8/manifest.js?v=12.1.0';
-import { signUp, signIn, restoreSession, signOutLocal, getUser, loadCloudSave, saveCloudSave, updateCallsign, updatePassword, loadRankings, loadAuctionBids, saveAuctionBidOnline, markAuctionBidStatusOnline, loadAuctionMarket, upsertPlayerPresenceOnline, loadMapPresenceOnline, removePlayerPresenceOnline, queuePvpAttackOnline, consumePvpDamageEventsOnline, syncArenaProfileOnline, loadArenaState, loadArenaDailyRewardStatus, claimArenaDailyReward, loadArenaOpponents, loadArenaHistory, arenaAttackOnline, listClansOnline, loadMyClanOnline, createClanOnline, joinClanOnline, leaveClanOnline, transferClanCreditsOnline, claimClanCreditGrantsOnline, recordClanAlienKillOnline, getPremiumShopOnline, testPurchasePremiumOnline } from './api.js?v=12.1.0';
+import { FACTIONS, SHIPS, ITEMS, LASER_AMMO, ROCKETS, NPC_TYPES, MAPS, RESOURCES } from './data.js?v=12.1.1';
+import { GAME_ASSETS } from './assets/v8/manifest.js?v=12.1.1';
+import { signUp, signIn, restoreSession, signOutLocal, getUser, loadCloudSave, saveCloudSave, updateCallsign, updatePassword, loadRankings, loadAuctionBids, saveAuctionBidOnline, markAuctionBidStatusOnline, loadAuctionMarket, upsertPlayerPresenceOnline, loadMapPresenceOnline, removePlayerPresenceOnline, queuePvpAttackOnline, consumePvpDamageEventsOnline, syncArenaProfileOnline, loadArenaState, loadArenaDailyRewardStatus, claimArenaDailyReward, loadArenaOpponents, loadArenaHistory, arenaAttackOnline, listClansOnline, loadMyClanOnline, createClanOnline, joinClanOnline, leaveClanOnline, transferClanCreditsOnline, claimClanCreditGrantsOnline, recordClanAlienKillOnline, getPremiumShopOnline, testPurchasePremiumOnline } from './api.js?v=12.1.1';
 
 const canvas = document.querySelector('#game');
 const ctx = canvas.getContext('2d');
@@ -324,8 +324,8 @@ function levelFromXp(xp,maxLevel=PLAYER_MAX_LEVEL){
 }
 const PET_GEARS = {
   guard: { id:'guard', name:'Modo Guardião', cost:150000, currency:'uridium', description:'Combate assistido: prioriza seu alvo atual e, quando você está livre, caça o alien mais próximo dentro do radar.' },
-  box: { id:'box', name:'Coletor de BOX', cost:100000, currency:'uridium', description:'Busca cargo boxes em todo o raio do minimapa. Seu alvo em combate sempre tem prioridade máxima.' },
-  ore: { id:'ore', name:'Coletor de Pedras', cost:80000, currency:'uridium', description:'Busca pedras/minérios em todo o raio do minimapa. Seu alvo em combate sempre tem prioridade máxima.' },
+  box: { id:'box', name:'Coletor de BOX', cost:100000, currency:'uridium', description:'Busca a BOX mais próxima do próprio P.E.T. dentro do raio do minimapa e mantém o alvo até concluir a coleta. Seu alvo em combate sempre tem prioridade máxima.' },
+  ore: { id:'ore', name:'Coletor de Pedras', cost:80000, currency:'uridium', description:'Busca a pedra/minério mais próximo do próprio P.E.T. dentro do raio do minimapa e mantém o alvo até concluir a coleta. Seu alvo em combate sempre tem prioridade máxima.' },
   repair: { id:'repair', name:'Regenerador de Vida', cost:200000, currency:'uridium', description:'Segue a nave e regenera HP automaticamente quando você estiver danificado.' },
   kami: { id:'kami', name:'Kamikaze', cost:350000, currency:'uridium', description:'Investida explosiva contra alvos próximos, causando dano em área com recarga.' },
 };
@@ -1903,15 +1903,40 @@ function sellPetCargoBox(drop){
 }
 function petCollectionRange(){return Math.max(500,Number(state?.radarRange)||1500);}
 function petCombatSearchRange(){return Math.max(650,Number(state?.radarRange)||1500);}
-function petTetherRange(){return Math.max(900,petCollectionRange()*1.18);}
-function petNearest(list,xKey='x',yKey='y',range=petCollectionRange()){
+function petTetherRange(){return Math.max(900,petCollectionRange()*1.22);}
+function petWithinPlayerRadar(obj,range=petCollectionRange()){
+  return !!obj&&Number.isFinite(obj.x)&&Number.isFinite(obj.y)&&Math.hypot(obj.x-player.x,obj.y-player.y)<=range;
+}
+function petNearestToPlayer(list,range=petCombatSearchRange()){
   let best=null,bestD=Infinity;
-  for(const obj of list){const d=Math.hypot(obj[xKey]-player.x,obj[yKey]-player.y);if(d<=range&&d<bestD){best=obj;bestD=d;}}
+  for(const obj of list){if(!petWithinPlayerRadar(obj,range))continue;const d=Math.hypot(obj.x-player.x,obj.y-player.y);if(d<bestD){best=obj;bestD=d;}}
   return best;
+}
+function petNearestToPet(list,range=petCollectionRange()){
+  let best=null,bestD=Infinity;
+  for(const obj of list){if(!petWithinPlayerRadar(obj,range))continue;const d=Math.hypot(obj.x-petRuntime.x,obj.y-petRuntime.y);if(d<bestD){best=obj;bestD=d;}}
+  return best;
+}
+function petLockedCollectionTarget(list,type,validFn=()=>true){
+  if(petRuntime.taskType===type&&petRuntime.taskId){
+    const locked=list.find(obj=>obj.id===petRuntime.taskId);
+    if(locked&&validFn(locked)&&petWithinPlayerRadar(locked))return locked;
+  }
+  const next=petNearestToPet(list.filter(validFn));
+  petRuntime.taskId=next?.id||null;
+  return next;
 }
 function petNearestEnemy(){
   if(isSafeZone())return null;
-  return petNearest(state.enemies.filter(e=>e.hp>0),'x','y',petCombatSearchRange());
+  return petNearestToPlayer(state.enemies.filter(e=>e.hp>0),petCombatSearchRange());
+}
+function petStableEnemyTarget(type='autoCombat'){
+  if(isSafeZone())return null;
+  if(petRuntime.taskType===type&&petRuntime.taskId){
+    const locked=state.enemies.find(e=>e.id===petRuntime.taskId&&e.hp>0&&petWithinPlayerRadar(e,petCombatSearchRange()));
+    if(locked)return locked;
+  }
+  const next=petNearestEnemy();petRuntime.taskId=next?.id||null;return next;
 }
 function petPlayerCombatTarget(){
   const t=state.target;
@@ -1924,11 +1949,20 @@ function petPlayerCombatTarget(){
 }
 function petChooseRoamPoint(force=false){
   const now=nowSec();
-  if(!force&&petRuntime.roamX!=null&&petRuntime.roamY!=null&&now<petRuntime.nextRoamAt&&Math.hypot(petRuntime.roamX-petRuntime.x,petRuntime.roamY-petRuntime.y)>30)return;
-  const angle=rand(0,TWO_PI),radius=rand(150,Math.min(420,petCollectionRange()*.34));
+  // Mantém o mesmo waypoint por alguns segundos. Chegar ao ponto não dispara outra escolha imediata.
+  if(!force&&petRuntime.roamX!=null&&petRuntime.roamY!=null&&now<petRuntime.nextRoamAt)return;
+  const angle=rand(0,TWO_PI),radius=rand(90,Math.min(250,petCollectionRange()*.20));
   petRuntime.roamX=Math.max(45,Math.min(state.currentMap.world.w-45,player.x+Math.cos(angle)*radius));
   petRuntime.roamY=Math.max(45,Math.min(state.currentMap.world.h-45,player.y+Math.sin(angle)*radius));
-  petRuntime.nextRoamAt=now+rand(2.8,6.2);
+  petRuntime.nextRoamAt=now+rand(7,12);
+}
+function petMovementSpeed(taskType){
+  const base=Math.max(220,Number(player.speed)||320);
+  if(taskType==='roam')return Math.max(165,Math.min(250,base*.56));
+  if(taskType==='box'||taskType==='ore')return Math.max(230,Math.min(340,base*.74));
+  if(taskType==='escort')return Math.max(235,Math.min(360,base*.78));
+  if(taskType==='repair')return Math.max(215,Math.min(315,base*.68));
+  return Math.max(260,Math.min(390,base*.84));
 }
 function petMoveGoalNearCombatTarget(task){
   const a=Math.atan2(petRuntime.y-task.y,petRuntime.x-task.x)||0;
@@ -1973,21 +2007,21 @@ function updatePet(dt){
     task=combatTask;petRuntime.taskType='assist';petRuntime.taskId=task.id;
     const goal=petMoveGoalNearCombatTarget(task);targetX=goal.x;targetY=goal.y;
   }else if(mode==='box'&&pet.gearsOwned.box){
-    task=petNearest(state.loot.filter(l=>!Number.isFinite(l.expiresAt)||now<l.expiresAt));
+    task=petLockedCollectionTarget(state.loot,'box',l=>!Number.isFinite(l.expiresAt)||now<l.expiresAt);
     if(task){targetX=task.x;targetY=task.y;petRuntime.taskType='box';petRuntime.taskId=task.id;}
   }else if(mode==='ore'&&pet.gearsOwned.ore&&cargoFree()>0){
-    task=petNearest(state.ores);
+    task=petLockedCollectionTarget(state.ores,'ore');
     if(task){targetX=task.x;targetY=task.y;petRuntime.taskType='ore';petRuntime.taskId=task.id;}
   }else if(mode==='repair'&&pet.gearsOwned.repair&&player.hp<player.maxHp){
     petRuntime.taskType='repair';petRuntime.taskId=null;
     targetX=player.x+72;targetY=player.y-78;
     player.hp=Math.min(player.maxHp,player.hp+player.maxHp*(0.012+pet.level*0.0008)*dt*(premiumActive()?2:1));
   }else if(mode==='kami'&&pet.gearsOwned.kami){
-    task=petNearestEnemy();
+    task=petStableEnemyTarget('kami');
     if(task){targetX=task.x;targetY=task.y;petRuntime.taskType='kami';petRuntime.taskId=task.id;}
   }else{
     // Sem tarefa específica, o PET caça sozinho o alien mais próximo do piloto.
-    task=petNearestEnemy();
+    task=petStableEnemyTarget('autoCombat');
     if(task){
       combatTask=task;petRuntime.taskType='autoCombat';petRuntime.taskId=task.id;
       const goal=petMoveGoalNearCombatTarget(task);targetX=goal.x;targetY=goal.y;
@@ -2008,17 +2042,23 @@ function updatePet(dt){
 
   // Coletor sem alvo? Não fica grudado: patrulha. Se aparecer inimigo, combate automaticamente.
   if(!combatTask&&!task&&(mode==='box'||mode==='ore')){
-    combatTask=petNearestEnemy();
+    combatTask=petStableEnemyTarget('autoCombat');
     if(combatTask){task=combatTask;petRuntime.taskType='autoCombat';petRuntime.taskId=task.id;const goal=petMoveGoalNearCombatTarget(task);targetX=goal.x;targetY=goal.y;}
     else if(playerMoving){const back=(player.angle||0)+Math.PI;targetX=player.x+Math.cos(back)*155;targetY=player.y+Math.sin(back)*155;petRuntime.taskType='escort';}
     else{petChooseRoamPoint();targetX=petRuntime.roamX;targetY=petRuntime.roamY;petRuntime.taskType='roam';}
   }
 
   const dx=targetX-petRuntime.x,dy=targetY-petRuntime.y,d=Math.hypot(dx,dy);
-  const petSpeed=Math.max(500,player.speed*1.55);
-  if(d>4){const step=Math.min(d,petSpeed*dt);petRuntime.angle=Math.atan2(dy,dx);petRuntime.x+=dx/d*step;petRuntime.y+=dy/d*step;}
-  if(Math.hypot(petRuntime.x-player.x,petRuntime.y-player.y)>petTetherRange()){
-    petRuntime.x=player.x+rand(-120,120);petRuntime.y=player.y+rand(-120,120);petChooseRoamPoint(true);
+  let petSpeed=petMovementSpeed(petRuntime.taskType);
+  const distanceFromPlayer=Math.hypot(petRuntime.x-player.x,petRuntime.y-player.y);
+  // Se ficou muito para trás enquanto o piloto viaja, acelera só o suficiente para reencontrá-lo.
+  if(playerMoving&&distanceFromPlayer>petCollectionRange()*.72)petSpeed=Math.max(petSpeed,Math.min(430,player.speed*.94));
+  // Desacelera na aproximação para parar de "quicar" em volta do alvo.
+  const arrival=d<150?Math.max(.26,d/150):1;
+  if(d>5){const step=Math.min(d,petSpeed*arrival*dt);petRuntime.angle=Math.atan2(dy,dx);petRuntime.x+=dx/d*step;petRuntime.y+=dy/d*step;}
+  // Teleporte é apenas um failsafe extremo, não parte da movimentação normal.
+  if(distanceFromPlayer>petTetherRange()*1.25){
+    const back=(player.angle||0)+Math.PI;petRuntime.x=player.x+Math.cos(back)*130;petRuntime.y=player.y+Math.sin(back)*130;petRuntime.taskId=null;petChooseRoamPoint(true);
   }
 
   if(combatTask&&combatTask.hp>0)petFireAt(combatTask);
@@ -2032,12 +2072,12 @@ function updatePet(dt){
   }
   if(mode==='box'&&task&&!combatTask&&Math.hypot(task.x-petRuntime.x,task.y-petRuntime.y)<28){
     if(!Number.isFinite(task.expiresAt)||now<task.expiresAt)sellPetCargoBox(task);
-    state.loot=state.loot.filter(x=>x.id!==task.id);petRuntime.taskId=null;petChooseRoamPoint(true);
+    state.loot=state.loot.filter(x=>x.id!==task.id);petRuntime.taskId=null;
   }
   if(mode==='ore'&&task&&!combatTask&&Math.hypot(task.x-petRuntime.x,task.y-petRuntime.y)<24){
     const got=addCargoResource(task.type,task.amount);
     if(got>0){spawnParticle(task.x,task.y,`P.E.T. +${got} ${task.type}`,task.color);pushActivity(`P.E.T. coletou +${fmt(got)} ${task.type} • ${fmt((RESOURCES[task.type]?.sell||0)*got)} CR na base`,'ore');missionEvent('collectOre',{amount:got,type:task.type,mapId:progress.mapId});addPetXp(3);state.ores=state.ores.filter(x=>x.id!==task.id);state.oreRespawns.push({type:task.type,at:nowSec()+rand(5,12)});saveGame();}
-    petRuntime.taskId=null;petChooseRoamPoint(true);
+    petRuntime.taskId=null;
   }
 }
 
