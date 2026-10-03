@@ -1,6 +1,6 @@
-import { FACTIONS, SHIPS, ITEMS, LASER_AMMO, ROCKETS, NPC_TYPES, MAPS, RESOURCES } from './data.js?v=12.1.6';
-import { GAME_ASSETS } from './assets/v8/manifest.js?v=12.1.6';
-import { signUp, signIn, restoreSession, signOutLocal, checkGameSession, endGameSession, getUser, loadCloudSave, saveCloudSave, updateCallsign, updatePassword, loadRankings, loadAuctionBids, saveAuctionBidOnline, markAuctionBidStatusOnline, loadAuctionMarket, upsertPlayerPresenceOnline, loadMapPresenceOnline, removePlayerPresenceOnline, queuePvpAttackOnline, consumePvpDamageEventsOnline, syncArenaProfileOnline, loadArenaState, loadArenaDailyRewardStatus, claimArenaDailyReward, loadArenaOpponents, loadArenaHistory, arenaAttackOnline, listClansOnline, loadMyClanOnline, createClanOnline, joinClanOnline, leaveClanOnline, transferClanCreditsOnline, claimClanCreditGrantsOnline, recordClanAlienKillOnline, getPremiumShopOnline, testPurchasePremiumOnline } from './api.js?v=12.1.6';
+import { FACTIONS, SHIPS, ITEMS, LASER_AMMO, ROCKETS, NPC_TYPES, MAPS, RESOURCES } from './data.js?v=12.1.7';
+import { GAME_ASSETS } from './assets/v8/manifest.js?v=12.1.7';
+import { signUp, signIn, restoreSession, signOutLocal, checkGameSession, endGameSession, getUser, loadCloudSave, saveCloudSave, updateCallsign, updatePassword, loadRankings, loadAuctionBids, saveAuctionBidOnline, markAuctionBidStatusOnline, loadAuctionMarket, upsertPlayerPresenceOnline, loadMapPresenceOnline, removePlayerPresenceOnline, queuePvpAttackOnline, consumePvpDamageEventsOnline, syncArenaProfileOnline, loadArenaState, loadArenaDailyRewardStatus, claimArenaDailyReward, loadArenaOpponents, loadArenaHistory, arenaAttackOnline, listClansOnline, loadMyClanOnline, createClanOnline, joinClanOnline, leaveClanOnline, transferClanCreditsOnline, claimClanCreditGrantsOnline, recordClanAlienKillOnline, getPremiumShopOnline, testPurchasePremiumOnline } from './api.js?v=12.1.7';
 
 const canvas = document.querySelector('#game');
 const ctx = canvas.getContext('2d');
@@ -323,12 +323,13 @@ function levelFromXp(xp,maxLevel=PLAYER_MAX_LEVEL){
   while(level<maxLevel&&xp>=levelXpThreshold(level+1))level++;
   return level;
 }
+const PET_KAMIKAZE_COOLDOWN=15;
 const PET_GEARS = {
   guard: { id:'guard', name:'Modo Guardião', cost:150000, currency:'uridium', description:'Combate assistido: prioriza seu alvo atual e, quando você está livre, caça somente dentro do mesmo alcance de ataque laser da nave.' },
   box: { id:'box', name:'Coletor de BOX', cost:100000, currency:'uridium', description:'Busca a BOX mais próxima do próprio P.E.T. em até 50% do raio do minimapa e mantém o alvo até concluir a coleta. Seu alvo em combate sempre tem prioridade máxima.' },
   ore: { id:'ore', name:'Coletor de Pedras', cost:80000, currency:'uridium', description:'Busca a pedra/minério mais próximo do próprio P.E.T. em até 50% do raio do minimapa e mantém o alvo até concluir a coleta. Seu alvo em combate sempre tem prioridade máxima.' },
   repair: { id:'repair', name:'Regenerador de Vida', cost:200000, currency:'uridium', description:'Segue a nave e regenera HP automaticamente quando você estiver danificado.' },
-  kami: { id:'kami', name:'Kamikaze', cost:350000, currency:'uridium', description:'Investida explosiva contra alvos próximos, causando dano em área com recarga.' },
+  kami: { id:'kami', name:'Kamikaze', cost:350000, currency:'uridium', description:'Ativação única: o P.E.T. investe, explode uma vez e volta ao modo Companhia. Recarga de 15s antes de uma nova ativação.' },
 };
 function freshPet(){
   return {
@@ -336,7 +337,7 @@ function freshPet(){
     laserSlotsUnlocked:0, shieldSlotsUnlocked:0,
     lasers:[], shields:[],
     gearsOwned:{guard:false,box:false,ore:false,repair:false,kami:false},
-    activeGear:'off'
+    activeGear:'off', kamikazeReadyAt:0
   };
 }
 
@@ -1125,7 +1126,8 @@ const petRuntime = {
   x: 410, y: 930, tx: 410, ty: 930, angle: 0,
   lastShot: -999, laserTargetId: null, laserUntil: 0,
   taskType: 'follow', taskId: null,
-  roamX: null, roamY: null, nextRoamAt: 0, lastMode: 'off'
+  roamX: null, roamY: null, nextRoamAt: 0, lastMode: 'off',
+  lastKami: -999, kamiArmed: false, kamiActivationId: 0
 };
 const state = {
   currentMap: MAPS.x1, camera: { x: 620, y: MAPS.x1.world.h/2 }, target: null, pvpShotPending:false, pvpRocketPending:false, enemies: [], loot: [], ores: [], particles: [], fx: [], rocketFx: [], landmarks: [], enemyRespawns: [], oreRespawns: [], lastPortalAt: 0, radarRange: 1500, jumping: false,
@@ -1696,6 +1698,10 @@ function hydrateProgress(){
   progress.pet.gearsOwned ||= {guard:false,box:false,ore:false,repair:false,kami:false};
   for(const key of ['guard','box','ore','repair','kami']) if(progress.pet.gearsOwned[key]===undefined) progress.pet.gearsOwned[key]=false;
   progress.pet.activeGear ||= 'off';
+  progress.pet.kamikazeReadyAt=Math.max(0,Number(progress.pet.kamikazeReadyAt)||0);
+  // Kamikaze é uma habilidade de ativação única. Nunca restaura armado após reload/save antigo.
+  if(progress.pet.activeGear==='kami')progress.pet.activeGear='off';
+  petRuntime.kamiArmed=false;
   if(!progress.expeditionV9){
     const oldWorld={x1:{w:2400,h:1800},x2:{w:2600,h:1900},x3:{w:2900,h:2100},x4:{w:3200,h:2300},b41:{w:4600,h:3200},b42:{w:4800,h:3400},b43:{w:5000,h:3600}};
     const id=progress.mapId||'x1',old=oldWorld[id],now=MAPS[id]?.world;
@@ -1928,11 +1934,24 @@ function buyPetGear(id){
   const gearCost=premiumElitePrice(gear.cost,'uridium');if(progress.profile.uridium<gearCost){showToast(`Faltam ${fmt(gearCost-progress.profile.uridium)} URI`);return;}
   openSpendConfirm({title:'Comprar módulo do P.E.T.?',itemName:gear.name,detail:`Confirme a compra do módulo.${gearCost<gear.cost?' Bônus PREMIUM aplicado (-5%).':''}`,value:gearCost,currency:'uridium',onConfirm:()=>{if(progress.pet.gearsOwned[id]){showToast('Módulo já comprado');return;}if(progress.profile.uridium<gearCost){showToast(`Faltam ${fmt(gearCost-progress.profile.uridium)} URI`);return;}progress.profile.uridium-=gearCost;progress.pet.gearsOwned[id]=true;saveGame();renderShop();refreshPetViews();updateUI();showToast(`${gear.name} adquirido`);}});
 }
+function petKamikazeCooldownRemaining(){
+  return Math.max(0,(Number(progress?.pet?.kamikazeReadyAt)||0-Date.now())/1000);
+}
+function cancelPetKamikazeCharge(){
+  petRuntime.kamiArmed=false;
+  if(petRuntime.taskType==='kami'){petRuntime.taskType='follow';petRuntime.taskId=null;}
+}
 function setPetGear(id){
   if(!progress?.pet?.owned){showToast('Adquira o P.E.T. primeiro');return;}
   if(id!=='off'&&!progress.pet.gearsOwned[id]){showToast('Compre esse módulo primeiro');return;}
+  if(id==='kami'){
+    const remaining=petKamikazeCooldownRemaining();
+    if(remaining>0){showToast(`Kamikaze recarregando • ${remaining.toFixed(1)}s`);return;}
+    petRuntime.kamiArmed=true;
+    petRuntime.kamiActivationId=(petRuntime.kamiActivationId||0)+1;
+  }else cancelPetKamikazeCharge();
   progress.pet.activeGear=id;petRuntime.taskId=null;petRuntime.taskType='follow';saveGame();refreshPetViews();
-  showToast(id==='off'?'P.E.T. em modo companhia':PET_GEARS[id].name+' ativado');
+  showToast(id==='off'?'P.E.T. em modo companhia':id==='kami'?'Kamikaze armado • 1 explosão':PET_GEARS[id].name+' ativado');
 }
 function sellPetCargoBox(drop){
   let credits=0,total=0;
@@ -2063,7 +2082,7 @@ function updatePet(dt){
     petRuntime.taskType='repair';petRuntime.taskId=null;
     targetX=player.x+72;targetY=player.y-78;
     player.hp=Math.min(player.maxHp,player.hp+player.maxHp*(0.012+pet.level*0.0008)*dt*(premiumActive()?2:1));
-  }else if(mode==='kami'&&pet.gearsOwned.kami){
+  }else if(mode==='kami'&&pet.gearsOwned.kami&&petRuntime.kamiArmed){
     task=petStableEnemyTarget('kami');
     if(task){targetX=task.x;targetY=task.y;petRuntime.taskType='kami';petRuntime.taskId=task.id;}
   }else{
@@ -2110,12 +2129,22 @@ function updatePet(dt){
 
   if(combatTask&&combatTask.hp>0)petFireAt(combatTask);
 
-  if(mode==='kami'&&task&&!task.isPlayer&&task.hp>0&&Math.hypot(task.x-petRuntime.x,task.y-petRuntime.y)<70&&now-(petRuntime.lastKami||0)>15){
+  if(mode==='kami'&&petRuntime.kamiArmed&&task&&!task.isPlayer&&task.hp>0&&Math.hypot(task.x-petRuntime.x,task.y-petRuntime.y)<70&&petKamikazeCooldownRemaining()<=0){
+    // Consome a carga ANTES de aplicar dano para impedir reentrada no mesmo frame/tick.
+    petRuntime.kamiArmed=false;
     petRuntime.lastKami=now;
+    progress.pet.kamikazeReadyAt=Date.now()+PET_KAMIKAZE_COOLDOWN*1000;
+    const activationId=petRuntime.kamiActivationId;
     const boomDmg=Math.round((3500+pet.level*650+petDamage()*2.5)*(1+pilotKamikazeDamageBonus()));
     const boomRadius=110*(1+pilotKamikazeRadiusBonus());
+    const victims=state.enemies.filter(e=>e.hp>0&&Math.hypot(e.x-petRuntime.x,e.y-petRuntime.y)<boomRadius);
     spawnParticle(petRuntime.x,petRuntime.y,'KAMIKAZE','#ff7d8f');
-    state.enemies.filter(e=>e.hp>0&&Math.hypot(e.x-petRuntime.x,e.y-petRuntime.y)<boomRadius).forEach(e=>dealDamageToEnemy(e,boomDmg,'#ff7d8f'));
+    victims.forEach(e=>dealDamageToEnemy(e,boomDmg,'#ff7d8f'));
+    // Uma ativação = uma explosão. Depois volta automaticamente ao modo Companhia.
+    if(activationId===petRuntime.kamiActivationId){
+      progress.pet.activeGear='off';petRuntime.taskId=null;petRuntime.taskType='follow';
+      saveGame();refreshPetViews();showToast(`Kamikaze concluído • ${PET_KAMIKAZE_COOLDOWN}s de recarga`);
+    }
   }
   if(mode==='box'&&task&&!combatTask&&Math.hypot(task.x-petRuntime.x,task.y-petRuntime.y)<28){
     if(!Number.isFinite(task.expiresAt)||now<task.expiresAt)sellPetCargoBox(task);
@@ -2282,6 +2311,8 @@ function initAlphaRun(){
   a.lives=3;
 }
 function setupAlphaMap(resume=false){
+  if(progress?.pet?.activeGear==='kami')progress.pet.activeGear='off';
+  cancelPetKamikazeCharge();
   const a=alphaGate();if(!a.run?.active)initAlphaRun();
   progress.mapId='ggAlpha';state.currentMap=MAPS.ggAlpha;state.radarRange=mapRadarRange();computeStats(true);
   player.x=MAPS.ggAlpha.world.w/2;player.y=MAPS.ggAlpha.world.h/2;player.tx=player.x;player.ty=player.y;
@@ -2462,6 +2493,8 @@ function findReturnPortal(targetLabel,fromLabel){
 }
 function setMap(mapId,preserve=false,fromMapId=null,targetTerritoryFaction=null,fromGraphLabel=null){
   if(!MAPS[mapId])return;if(mapId==='ggAlpha'){setupAlphaMap(true);return;}
+  if(progress?.pet?.activeGear==='kami')progress.pet.activeGear='off';
+  cancelPetKamikazeCharge();
 
   const previousWasTerritory=['x1','x2','x3','x4'].includes(progress.mapId);
   progress.mapId=mapId;
@@ -3294,7 +3327,7 @@ function updatePetFloat(){
   if(!shouldShow)return;
   ui.petFloatPanel.classList.remove('hud-user-disabled');
   if(ui.petFloatLevel)ui.petFloatLevel.textContent=`LV${pet.level}`;
-  if(ui.petFloatStatus){const gear=pet.activeGear==='off'?'COMPANHIA':(PET_GEARS[pet.activeGear]?.name||'COMPANHIA');const behavior=({assist:'ASSISTINDO SEU ALVO',autoCombat:'CAÇANDO',box:'BUSCANDO BOX',ore:'BUSCANDO PEDRA',repair:'REPARANDO',kami:'KAMIKAZE',roam:'PATRULHANDO',escort:'ESCOLTANDO'})[petRuntime.taskType]||'LIVRE';const rangeLabel=pet.activeGear==='guard'?`ATAQUE ${fmt(petCombatSearchRange())}`:`COLETA ${fmt(petCollectionRange())}`;ui.petFloatStatus.textContent=`${behavior} • ${gear} • ${rangeLabel}`;}
+  if(ui.petFloatStatus){const gear=pet.activeGear==='off'?'COMPANHIA':(PET_GEARS[pet.activeGear]?.name||'COMPANHIA');const behavior=({assist:'ASSISTINDO SEU ALVO',autoCombat:'CAÇANDO',box:'BUSCANDO BOX',ore:'BUSCANDO PEDRA',repair:'REPARANDO',kami:petRuntime.kamiArmed?'KAMIKAZE ARMADO':'KAMIKAZE',roam:'PATRULHANDO',escort:'ESCOLTANDO'})[petRuntime.taskType]||'LIVRE';const rangeLabel=pet.activeGear==='guard'?`ATAQUE ${fmt(petCombatSearchRange())}`:`COLETA ${fmt(petCollectionRange())}`;ui.petFloatStatus.textContent=`${behavior} • ${gear} • ${rangeLabel}`;}
   if(ui.petGearQuickSelect){
     const owned=['off',...Object.keys(PET_GEARS).filter(id=>pet.gearsOwned?.[id])];
     const signature=owned.join('|');

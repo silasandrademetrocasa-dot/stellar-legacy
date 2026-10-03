@@ -1,3 +1,13 @@
+## V12.1.7 — P.E.T. Kamikaze One-Shot + Audit
+
+- Corrigido Kamikaze infinito/reentrante do P.E.T.
+- Cada seleção do módulo arma exatamente 1 detonação; a carga é consumida antes do dano para bloquear repetição no mesmo ciclo.
+- Depois da explosão o P.E.T. volta automaticamente para Companhia e respeita recarga global de 15s.
+- Qualquer troca de módulo cancela a carga de Kamikaze imediatamente; BOX/Pedras/Guardião/Reparo nunca herdam detonação pendente.
+- Reload e troca de mapa desarmam Kamikaze ativo de saves antigos.
+- Corrigido desalinhamento de versão/cache entre HTML, módulos JS, `package.json` e servidor.
+- Pente-fino estático: sintaxe JS, IDs HTML, imports/exports de API, assets locais e referências de versão verificados.
+
 ## V12.1.4 — Login Único / Segurança de Sessão
 
 - Uma conta só pode manter uma sessão oficial do jogo por vez.

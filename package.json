@@ -1,6 +1,6 @@
 {
   "name": "stellar-legacy",
-  "version": "12.1.4",
+  "version": "12.1.7",
   "type": "module",
   "scripts": {
     "start": "node server/index.js",
@@ -13,5 +13,5 @@
   "engines": {
     "node": ">=18"
   },
-  "release": "single-session-security-v12-1-4"
+  "release": "pet-kamikaze-one-shot-audit-v12-1-7"
 }

@@ -1,4 +1,4 @@
-# Stellar Legacy — V12.1.6
+# Stellar Legacy — V12.1.7
 
 Versão atual consolidada do Stellar Legacy. O pacote foi limpo para manter somente arquivos necessários ao jogo, documentação atual e um snapshot único do backend. O histórico completo das versões permanece no Git.
 
@@ -47,7 +47,7 @@ As migrations e changelogs históricos não fazem parte do ZIP atual porque perm
 - Alcance dos módulos de coleta BOX/Pedras reduzido para 50% do raio do minimapa.
 - Venda de equipamento e drones exige confirmação explícita antes de remover o item.
 
-## V12.1.5 — Login Único
+## V12.1.4 — Login Único
 
 A conta possui uma única sessão de jogo ativa. Cada login recebe um `game_session_id` próprio e o Supabase mantém apenas o mais recente por usuário. Um novo login substitui o anterior; a sessão antiga é detectada pelo cliente em até poucos segundos, perde acesso aos endpoints protegidos e volta para a tela de login. O save local da sessão revogada é removido para impedir conflito com o progresso do dispositivo mais novo.
 
@@ -57,3 +57,12 @@ A conta possui uma única sessão de jogo ativa. Cada login recebe um `game_sess
 - Compras da Loja agora pedem confirmação antes de gastar créditos ou uridium.
 - Ações manuais que consomem moedas, como P.E.T., módulos, Galaxy Gate, Log-Disks, upgrades da Árvore de Piloto e reset, também passam por confirmação.
 - Modal de confirmação foi generalizado para compra, gasto e venda, mantendo Cancelar/Confirmar antes de remover saldo.
+
+
+## V12.1.7 — Kamikaze One-Shot + pente-fino
+- Kamikaze virou ativação única: selecionar o módulo arma somente 1 explosão.
+- Após detonar, o P.E.T. volta automaticamente para Companhia e entra em recarga de 15s.
+- Trocar para BOX/Pedras/Guardião/Reparo cancela qualquer carga pendente; não existe explosão residual fora do modo Kamikaze.
+- Reload e troca de mapa também desarmam o Kamikaze para evitar efeitos fantasma.
+- Versões/cache de `index.html`, `game.js`, `data.js`, `api.js`, `package.json` e servidor foram alinhadas em V12.1.7.
+- Auditoria estática confirmou: JS válido, sem IDs HTML duplicados, imports da API completos e assets referenciados presentes.
