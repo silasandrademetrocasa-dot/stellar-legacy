@@ -80,7 +80,7 @@ async function ensureProfile(sb, user, callsign = '') {
   if (error) console.warn('profile upsert:', error.message);
 }
 
-app.get('/health', (req, res) => res.json({ ok: true, game: 'Stellar Legacy', version: '12.1.2' }));
+app.get('/health', (req, res) => res.json({ ok: true, game: 'Stellar Legacy', version: '12.1.3' }));
 
 
 app.get('/api/config', (req, res) => {
@@ -96,7 +96,7 @@ app.get('/api/config', (req, res) => {
 
 app.get('/api/meta', (req, res) => res.json({
   name: 'Stellar Legacy',
-  version: '12.1.2',
+  version: '12.1.3',
   authReady: Boolean(SUPABASE_URL && SUPABASE_KEY),
   diagnostics: configStatus(),
   features: ['login', 'cloud_save', 'factions', 'safe_zone', 'shop', 'owned_ships', 'equipment_slots', 'inventory', 'drones', 'ammo', 'rockets', 'expanded_expedition_maps', 'cargo_hold', 'ore_trading', 'npc_cargo_boxes', 'npc_respawn', 'minimap_navigation', 'waypoints', 'landmark_discovery', 'combat_fx', 'pet_modules', 'auto_buy_cpu', 'v8_asset_identity', 'mission_control_v93', 'mission_acceptance_tracking', 'expanded_enemy_density', 'online_player_presence', 'real_player_auction', 'rank_nameplates_v12', 'clans_v12', 'clan_vault_v12', 'premium_shop_v12', 'battle_pass_paid_v12', 'premium_subscription_v12', 'clan_daily_economy_v12', 'portal_neutral_zone_v12', 'base_only_equipment_v12'],
@@ -262,6 +262,6 @@ app.use((err, req, res, next) => {
 
 const port = process.env.PORT || 3000;
 app.listen(port, () => {
-  console.log(`Stellar Legacy V12.1.2 :${port}`);
+  console.log(`Stellar Legacy V12.1.3 :${port}`);
   console.log('Supabase config:', configStatus());
 });

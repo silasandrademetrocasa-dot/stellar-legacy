@@ -1,4 +1,4 @@
-# Stellar Legacy — V12.1.2
+# Stellar Legacy — V12.1.3
 
 Versão atual consolidada do Stellar Legacy. O pacote foi limpo para manter somente arquivos necessários ao jogo, documentação atual e um snapshot único do backend. O histórico completo das versões permanece no Git.
 
@@ -39,3 +39,10 @@ As migrations e changelogs históricos não fazem parte do ZIP atual porque perm
 - Ao recarregar, usa a posição salva do mapa atual em vez de reaproveitar coordenadas de outro mapa.
 - Se o save local deste navegador for mais novo que o cloud, ele é usado e enviado ao servidor, evitando rollback durante refresh/deploy.
 - Ao ocultar/fechar a página, força save da posição atual antes da sincronização.
+
+
+## V12.1.3 — P.E.T. Guardião + Venda Segura
+
+- Modo Guardião usa o mesmo alcance de ataque laser da nave (900u normal / 1250u em mapas de batalha).
+- Alcance dos módulos de coleta BOX/Pedras reduzido para 50% do raio do minimapa.
+- Venda de equipamento e drones exige confirmação explícita antes de remover o item.

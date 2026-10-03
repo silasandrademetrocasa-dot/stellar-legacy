@@ -1,3 +1,11 @@
+## V12.1.3 — P.E.T. Guardião + Venda Segura
+
+- Corrigido alcance do Modo Guardião: busca automática limitada ao mesmo alcance de laser da nave.
+- Coleta de BOX/Pedras reduzida para 50% do raio do minimapa.
+- O P.E.T. mantém o alvo de coleta mais próximo dele dentro desse raio reduzido.
+- Novo modal de confirmação de venda para inventário, equipamentos equipados, equipamentos do P.E.T. e drones.
+- Cancelar não altera inventário nem saldo.
+
 # Changelog — Stellar Legacy
 
 O projeto usa um único changelog consolidado. Os arquivos `CHANGELOG_Vx_y.md` antigos foram removidos do pacote; o histórico completo continua disponível no Git.
