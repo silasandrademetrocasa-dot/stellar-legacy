@@ -6,7 +6,7 @@
 - Temporadas de guerra com ranking e recompensas.
 
 ## V13.3 — Equipment Evolution
-- Refino de LF-4 / escudos / motores.
+- Refino de ARC-4 / escudos / motores.
 - Atributos aleatórios raros sem monetização pay-to-win direta.
 - Salvage de itens duplicados.
 

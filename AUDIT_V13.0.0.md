@@ -7,8 +7,8 @@
 - Todos os imports usados de `api.js` possuem export correspondente.
 - 130 caminhos declarados no manifest de assets conferidos; nenhum arquivo faltando.
 - Mapas `ggAlpha`, `ggBeta` e `ggGamma` presentes.
-- Estruturas de `GALAXY_BETA_ROUNDS` e `GALAXY_GAMMA_ROUNDS` presentes.
-- Framework `SHIP_ABILITIES`, `updateBossPhase` e `triggerPetKamikaze` presente no bundle.
+- Estruturas de `GALAXY_NEXUS_ROUNDS` e `GALAXY_ECLIPSE_ROUNDS` presentes.
+- Framework `SHIP_ABILITIES`, `updateBossPhase` e `triggerPetNova Burst` presente no bundle.
 - Versão principal alinhada em `index.html`, `game.js`, `server/index.js` e `package.json` como `13.0.0`.
 
 ## Compatibilidade

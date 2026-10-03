@@ -6,7 +6,7 @@
 - Node --check: game.js/api.js/data.js/server index aprovados
 - World Boss: dano client-side agrupado antes do RPC; HP global no Supabase
 - Guerra: janela de 12h, placar compartilhado, boss/PvP/world boss pontuam
-- Blueprints: LF-4, SG3N-B02, G3N-7900
+- Blueprints: ARC-4, VSH-5, THR-6
 - Mastery: 5 níveis por classe; potência + cooldown
 - Compatibilidade: hydrate cria progress.warfront em saves antigos
 

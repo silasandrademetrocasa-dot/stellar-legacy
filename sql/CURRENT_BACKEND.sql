@@ -36,12 +36,12 @@ create table if not exists public.premium_catalog_v12 (
 insert into public.premium_catalog_v12(id,name,category,price_brl,item_id,quantity,description,sort_order) values
  ('battle_pass_monthly','Passe de Batalha Mensal','battle_pass',19.90,null,1,'Libera a trilha Premium da temporada atual e todas as recompensas premium dos tiers alcançados.',10),
  ('premium_30d','PREMIUM • 30 dias','premium',29.90,null,1,'Reparo gratuito da nave, regeneração HP/ESC 2x, míssil 20% mais rápido, -5% em itens Elite e -10% no Materializador.',20),
- ('elite_lf3','LF-3','elite_item',4.90,'lf3',1,'Laser Elite • dano 175 • bônus PvE.',100),
- ('elite_lf4','LF-4','elite_item',9.90,'lf4',1,'Laser Elite de alto desempenho.',110),
- ('elite_sg3nb02','SG3N-B02','elite_item',7.90,'sg3nb02',1,'Gerador de escudo Elite • 10.000 ESC • 80% absorção.',120),
- ('elite_g3n6900','G3N-6900','elite_item',5.90,'g3n6900',1,'Motor Elite • +7 velocidade.',130),
- ('elite_g3n7900','G3N-7900','elite_item',9.90,'g3n7900',1,'Motor Elite • +10 velocidade.',140),
- ('elite_repair_bot','Repair Bot Auto • Elite','elite_item',9.90,'repElite',1,'Regenerador Elite para HP e escudo.',150),
+ ('elite_lf3','ARC-3','elite_item',4.90,'lf3',1,'Laser Elite • dano 175 • bônus PvE.',100),
+ ('elite_lf4','ARC-4','elite_item',9.90,'lf4',1,'Laser Elite de alto desempenho.',110),
+ ('elite_sg3nb02','VSH-5','elite_item',7.90,'sg3nb02',1,'Gerador de escudo Elite • 10.000 ESC • 80% absorção.',120),
+ ('elite_g3n6900','THR-5','elite_item',5.90,'g3n6900',1,'Motor Elite • +7 velocidade.',130),
+ ('elite_g3n7900','THR-6','elite_item',9.90,'g3n7900',1,'Motor Elite • +10 velocidade.',140),
+ ('elite_repair_bot','Nanobot de Reparo • Elite','elite_item',9.90,'repElite',1,'Regenerador Elite para HP e escudo.',150),
  ('elite_extra_slots','CPU Expansora de Extras • Elite','elite_item',9.90,'extraSlotCpuElite',1,'Libera +6 slots EXTRAS enquanto equipada.',160),
  ('elite_cargo','Módulo de Porão • Elite','elite_item',9.90,'cargoCpuElite',1,'Aumenta o porão em +10.000 enquanto equipado.',170)
 on conflict(id) do update set

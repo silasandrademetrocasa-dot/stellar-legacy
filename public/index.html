@@ -5,8 +5,8 @@
 <meta charset="utf-8"/>
 <meta content="width=device-width,initial-scale=1,user-scalable=no" name="viewport"/>
 <meta content="#030816" name="theme-color"/>
-<title>Stellar Legacy V13.2.1 — Topbar Clean</title>
-<link href="/style.css?v=13.2.1" rel="stylesheet"/>
+<title>Stellar Legacy V13.3.0 — Stellar Identity</title>
+<link href="/style.css?v=13.3.0" rel="stylesheet"/>
 </head>
 <body>
 <div id="app">
@@ -17,17 +17,17 @@
   <span class="pilot-chip patent-chip">PATENTE <b id="rankChip">Piloto Básico</b></span>
   <span class="status-chip">LV <b id="lvl">1</b></span>
   <span class="status-chip credits-chip">CR <b id="credits">0</b></span>
-  <span class="status-chip uri-chip">URI <b id="uridium">0</b></span>
+  <span class="status-chip uri-chip">STL <b id="uridium">0</b></span>
   <span class="sync-chip hidden" id="syncLabel" aria-hidden="true">LOCAL</span>
 </div>
 <div class="top-meta hidden" aria-hidden="true">
-  <span><b id="factionLabel">—</b></span><span><b id="mapLabel">—</b></span><span><b id="sectorName">—</b></span><span><b id="shipLabel">Phoenix</b></span><span><b id="xp">0</b></span>
+  <span><b id="factionLabel">—</b></span><span><b id="mapLabel">—</b></span><span><b id="sectorName">—</b></span><span><b id="shipLabel">Aurora</b></span><span><b id="xp">0</b></span>
 </div>
 <nav class="top-actions command-actions" aria-label="Menu principal">
 <button class="small-btn" id="hangarBtn">NAVE</button>
 <button class="small-btn mission-top-btn" id="missionBtn">MISSÕES <span id="missionActiveCount">0</span></button>
-<button class="small-btn pet-top-btn" id="petBtn">P.E.T.</button>
-<button class="small-btn gate-top-btn" id="gateBtn">GG <span id="gatePieceBadge">ALFA 0/34</span></button>
+<button class="small-btn pet-top-btn" id="petBtn">AUX-9</button>
+<button class="small-btn gate-top-btn" id="gateBtn">PORTAIS <span id="gatePieceBadge">AURORA 0/34</span></button>
 <button class="small-btn pilot-top-btn" id="pilotBtn">HABILIDADES <span id="pilotPointBadge">0 PP</span></button>
 <button class="small-btn" id="mapBtn">MAPA</button>
 <button class="small-btn pass-top-btn" id="passBtn">PASSE <span id="passTierBadge">0/30</span></button>
@@ -43,7 +43,7 @@
     <span class="ability-copy"><b id="shipAbilityName">HAB. NAVE</b><small id="shipAbilityStatus">PRONTA • E</small></span>
     <i id="shipAbilityFill"></i>
   </button>
-  <button class="ability-btn pet-kami-ability" id="petKamiAbilityBtn" type="button" title="Kamikaze P.E.T. • tecla K">
+  <button class="ability-btn pet-kami-ability" id="petKamiAbilityBtn" type="button" title="Nova Burst AUX-9 • tecla K">
     <span class="ability-icon">☄</span>
     <span class="ability-copy"><b>KAMIKAZE</b><small id="petKamiAbilityStatus">BLOQUEADO • K</small></span>
     <i id="petKamiAbilityFill"></i>
@@ -67,7 +67,7 @@
 </div>
 </section>
 <section class="hud-panel pet-float-panel hidden" id="petFloatPanel">
-  <div class="pet-float-head"><span>P.E.T.</span><b id="petFloatLevel">LV1</b></div>
+  <div class="pet-float-head"><span>AUX-9</span><b id="petFloatLevel">LV1</b></div>
   <label class="pet-quick-label" for="petGearQuickSelect">MODO</label>
   <select id="petGearQuickSelect" class="pet-quick-select"><option value="off">COMPANHIA</option></select>
   <div class="pet-float-status" id="petFloatStatus">Aguardando...</div>
@@ -103,7 +103,7 @@
 </section>
 
 <section class="hud-panel gate-hud hidden" id="gateHud">
-  <div class="gate-hud-title" id="gateHudTitle">GALAXY GATE ALFA</div>
+  <div class="gate-hud-title" id="gateHudTitle">PORTAL ASTRAL AURORA</div>
   <div class="gate-hud-row"><span>ROUND</span><b id="gateHudRound">1 / 8</b></div>
   <div class="gate-hud-row"><span>ONDA</span><b id="gateHudWave">1 / 4</b></div>
   <div class="gate-hud-row"><span>NPC RESTANTES</span><b id="gateHudRemaining">0</b></div>
@@ -172,14 +172,14 @@
     <div class="repair-status-grid">
       <div><span>NAVE</span><b id="repairShipName">—</b></div>
       <div><span>BÔNUS DE REPARO</span><b id="repairBonusCount">0</b></div>
-      <div><span>URIDIUM</span><b id="repairUriCount">0</b></div>
+      <div><span>STELLARIUM</span><b id="repairUriCount">0</b></div>
     </div>
     <div class="repair-actions">
       <button class="primary-btn" id="repairUseBonus">USAR BÔNUS DE REPARO</button>
-      <button class="gold-btn" id="repairUseUri">PAGAR 500 URI</button>
-      <button class="ghost-btn" id="repairUsePhoenix">USAR PHOENIX GRÁTIS</button>
+      <button class="gold-btn" id="repairUseUri">PAGAR 500 STL</button>
+      <button class="ghost-btn" id="repairUseAurora">USAR AURORA GRÁTIS</button>
     </div>
-    <p class="repair-footnote">A Phoenix possui reparo gratuito. Outras naves consomem 1 Bônus de Reparo ou 500 Uridium.</p>
+    <p class="repair-footnote">A Aurora possui reparo gratuito. Outras naves consomem 1 Bônus de Reparo ou 500 Stellarium.</p>
   </div>
 </div>
 
@@ -211,7 +211,7 @@
 <div class="modal-card onboarding-card">
 <div class="eyebrow">PRIMEIRO ACESSO</div>
 <h1>Escolha sua facção</h1>
-<p>Essa escolha define sua companhia, sua base e a numeração dos mapas iniciais. Você começa com uma <b>Phoenix</b>, sem drones e com equipamento básico.</p>
+<p>Essa escolha define sua companhia, sua base e a numeração dos mapas iniciais. Você começa com uma <b>Aurora</b>, sem drones e com equipamento básico.</p>
 <div class="faction-grid" id="factionCards"></div>
 <div class="warning-text">A facção fica gravada neste save.</div>
 </div>
@@ -237,8 +237,8 @@
   <div class="modal-card wide-card gate-modal-card">
     <div class="modal-header">
       <div>
-        <div class="eyebrow">GALAXY GATES • V13 MULTIPROTOCOLO</div>
-        <h2>Materializador do Portal</h2><div class="gate-protocol-tabs" id="gateProtocolTabs"><button class="small-btn active" data-gate-protocol="alpha">ALFA</button><button class="small-btn" data-gate-protocol="beta" disabled title="Em breve">BETA 🔒</button><button class="small-btn" data-gate-protocol="gamma" disabled title="Em breve">GAMMA 🔒</button></div>
+        <div class="eyebrow">PORTAIS ASTRAIS • V13 MULTIPROTOCOLO</div>
+        <h2>Materializador do Portal</h2><div class="gate-protocol-tabs" id="gateProtocolTabs"><button class="small-btn active" data-gate-protocol="alpha">AURORA</button><button class="small-btn" data-gate-protocol="beta" disabled title="Em breve">NEXUS 🔒</button><button class="small-btn" data-gate-protocol="gamma" disabled title="Em breve">ECLIPSE 🔒</button></div>
       </div>
       <button class="small-btn" id="closeGate">Fechar</button>
     </div>
@@ -249,10 +249,10 @@
           <div class="gate-ring ring-1"></div>
           <div class="gate-ring ring-2"></div>
           <div class="gate-ring ring-3"></div>
-          <div class="gate-core" id="gateCoreLabel">ALFA</div>
+          <div class="gate-core" id="gateCoreLabel">AURORA</div>
         </div>
         <div class="gate-alpha-copy">
-          <div class="eyebrow" id="gateProtocolLabel">PORTAL ALFA</div>
+          <div class="eyebrow" id="gateProtocolLabel">PORTAL AURORA</div>
           <h3 id="gateAlphaStatusTitle">Em construção</h3>
           <p id="gateAlphaStatusText">Encontre as peças do protocolo selecionado no materializador para montar o portal.</p>
           <div class="gate-stats-row">
@@ -271,14 +271,14 @@
             <div class="eyebrow">GERADOR GALÁCTICO</div>
             <h3>Sortear energia</h3>
           </div>
-          <div class="gate-generator-wallet">URI <b id="gateUriText">0</b></div>
+          <div class="gate-generator-wallet">STL <b id="gateUriText">0</b></div>
         </div>
-        <p class="muted" id="gateSpinCostNote">Cada sorteio custa <b>100 Uridium</b>. PREMIUM recebe <b>10% de desconto</b> no Materializador. Pode vir peça ALFA, <b>Log-Disks</b>, munição, míssil, Xenomit, Créditos, Bônus de Salto ou Bônus de Reparo.</p>
+        <p class="muted" id="gateSpinCostNote">Cada sorteio custa <b>100 Stellarium</b>. PREMIUM recebe <b>10% de desconto</b> no Materializador. Pode vir peça AURORA, <b>Núcleos Quânticos</b>, munição, míssil, Voidite, Créditos, Bônus de Salto ou Bônus de Reparo.</p>
         <div class="gate-spin-buttons" id="gateSpinButtons"></div>
         <div class="gate-generator-inventory">
           <div><span>BÔNUS DE SALTO</span><b id="gateJumpBonus">0</b></div>
           <div><span>BÔNUS DE REPARO</span><b id="gateRepairBonus">0</b></div>
-          <div><span>LOG-DISKS</span><b id="gateLogDisks">0</b></div>
+          <div><span>NÚCLEOS QUÂNTICOS</span><b id="gateLogDisks">0</b></div>
           <button class="ghost-btn" id="useRepairBonus">REPARAR NAVE</button>
         </div>
         <div class="gate-result-box" id="gateResultBox">Faça um sorteio para ver os resultados.</div>
@@ -289,7 +289,7 @@
       <div class="eyebrow" id="gateCombatProtocol">PROTOCOLO DE COMBATE • 8 ROUNDS • 3 VIDAS</div>
       <div class="gate-rounds-grid" id="gateRoundsGrid"></div>
       <div class="gate-reward-note">
-        <b>RECOMPENSA FINAL:</b> <span id="gateRewardNote">ALFA paga 3X no total; BETA e GAMMA aumentam dificuldade e multiplicador.</span>
+        <b>RECOMPENSA FINAL:</b> <span id="gateRewardNote">AURORA paga 3X no total; NEXUS e ECLIPSE aumentam dificuldade e multiplicador.</span>
       </div>
     </section>
   </div>
@@ -299,8 +299,8 @@
 <div class="modal hidden" id="pilotModal">
   <div class="modal-card wide-card pilot-modal-card">
     <div class="modal-header"><div><div class="eyebrow">PILOT BIO • 50 PONTOS MÁXIMOS</div><h2>Perfil de Piloto</h2></div><button class="small-btn" id="closePilot">Fechar</button></div>
-    <div class="pilot-wallet-grid"><div><span>LOG-DISKS</span><b id="pilotLogDisks">0</b></div><div><span>PP OBTIDOS</span><b id="pilotPointsTotal">0 / 50</b></div><div><span>PP DISPONÍVEIS</span><b id="pilotPointsAvailable">0</b></div><div><span>PP INVESTIDOS</span><b id="pilotPointsSpent">0</b></div></div>
-    <section class="pilot-research-panel"><div class="pilot-next-point"><div class="eyebrow">PRÓXIMO PONTO DE PESQUISA</div><h3 id="pilotNextPointTitle">PP #1</h3><div id="pilotNextPointCost">30 Log-Disks • equivalente 9.000 URI</div><button class="primary-btn" id="pilotConvertPoint">CONVERTER LOG-DISKS EM 1 PP</button></div><div class="pilot-log-store"><div class="eyebrow">ADQUIRIR LOG-DISKS • 300 URI CADA</div><div id="pilotLogBuyButtons" class="pilot-log-buttons"></div><div class="muted">Também podem cair no Materializador e são concedidos ao completar Galaxy Gates.</div></div><div class="pilot-reset-panel"><div class="eyebrow">RECONFIGURAÇÃO</div><div id="pilotResetCost">Reset: 1.000 URI</div><button class="ghost-btn" id="pilotResetBtn">RESETAR ÁRVORE</button></div></section>
+    <div class="pilot-wallet-grid"><div><span>NÚCLEOS QUÂNTICOS</span><b id="pilotLogDisks">0</b></div><div><span>PP OBTIDOS</span><b id="pilotPointsTotal">0 / 50</b></div><div><span>PP DISPONÍVEIS</span><b id="pilotPointsAvailable">0</b></div><div><span>PP INVESTIDOS</span><b id="pilotPointsSpent">0</b></div></div>
+    <section class="pilot-research-panel"><div class="pilot-next-point"><div class="eyebrow">PRÓXIMO PONTO DE PESQUISA</div><h3 id="pilotNextPointTitle">PP #1</h3><div id="pilotNextPointCost">30 Núcleos Quânticos • equivalente 9.000 STL</div><button class="primary-btn" id="pilotConvertPoint">CONVERTER NÚCLEOS QUÂNTICOS EM 1 PP</button></div><div class="pilot-log-store"><div class="eyebrow">ADQUIRIR NÚCLEOS QUÂNTICOS • 300 STL CADA</div><div id="pilotLogBuyButtons" class="pilot-log-buttons"></div><div class="muted">Também podem cair no Materializador e são concedidos ao completar Portais Astrais.</div></div><div class="pilot-reset-panel"><div class="eyebrow">RECONFIGURAÇÃO</div><div id="pilotResetCost">Reset: 1.000 STL</div><button class="ghost-btn" id="pilotResetBtn">RESETAR ÁRVORE</button></div></section>
     <div class="pilot-tree-legend"><span class="def">DEFESA</span><span class="util">UTILIDADE</span><span class="off">ATAQUE</span></div><div class="pilot-skill-tree" id="pilotSkillTree"></div>
   </div>
 </div>
@@ -319,7 +319,7 @@
       <div><div class="eyebrow">ARENA PVP V11 • 10 BATALHAS POR DIA</div><h2>Duelo de Pilotos</h2></div>
       <div class="arena-header-actions"><button class="ghost-btn" id="arenaRefresh">ATUALIZAR</button><button class="small-btn" id="closeArena">Fechar</button></div>
     </div>
-    <div class="arena-rule-banner">Escolha outro piloto e assista ao duelo acontecer <b>tiro por tiro</b>. A Arena V11 usa <b>LCB-10 (X1) + R-310</b> fixos e mostra escudo, HP, dano, duração e leitura tática. O limite continua em <b>10 ataques por dia</b>, renovados à meia-noite no horário de São Paulo.</div>
+    <div class="arena-rule-banner">Escolha outro piloto e assista ao duelo acontecer <b>tiro por tiro</b>. A Arena V11 usa <b>PLS-1 (X1) + CMT-1</b> fixos e mostra escudo, HP, dano, duração e leitura tática. O limite continua em <b>10 ataques por dia</b>, renovados à meia-noite no horário de São Paulo.</div>
     <div class="arena-summary">
       <div><span>ATAQUES RESTANTES</span><b id="arenaAttacksLeft">10 / 10</b></div>
       <div><span>RATING</span><b id="arenaRating">1000</b></div>
@@ -338,7 +338,7 @@
       </div>
       <div class="arena-reward-items" id="arenaRewardItems">
         <div><span>CRÉDITOS</span><b>—</b></div>
-        <div><span>URIDIUM</span><b>—</b></div>
+        <div><span>STELLARIUM</span><b>—</b></div>
         <div><span>XP</span><b>—</b></div>
         <div><span>REPAROS</span><b>—</b></div>
       </div>
@@ -350,7 +350,7 @@
         <div>
           <div class="eyebrow">BATALHA AO VIVO • LOADOUT FIXO</div>
           <h3 id="arenaBattleStatus">Preparando duelo...</h3>
-          <small>LCB-10 (X1) + R-310 • sem troca de munição durante a luta</small>
+          <small>PLS-1 (X1) + CMT-1 • sem troca de munição durante a luta</small>
         </div>
         <div class="arena-battle-head-right"><span id="arenaBattleTimer">0.0s</span><button class="ghost-btn" id="arenaBattleSkip">PULAR ANIMAÇÃO</button></div>
       </div>
@@ -441,19 +441,19 @@
         <div class="settings-title"><div><b>VISIBILIDADE DO HUD</b><small>Escolha o que fica visível durante o jogo.</small></div></div>
         <div class="hud-settings-grid" id="hudSettingsGrid">
           <label><input type="checkbox" data-hud-key="ship" checked/> Nave</label>
-          <label><input type="checkbox" data-hud-key="pet" checked/> P.E.T.</label>
+          <label><input type="checkbox" data-hud-key="pet" checked/> AUX-9</label>
           <label><input type="checkbox" data-hud-key="missions" checked/> Missões ativas</label>
           <label><input type="checkbox" data-hud-key="activity" checked/> Atividade</label>
           <label><input type="checkbox" data-hud-key="minimap" checked/> Minimap</label>
           <label><input type="checkbox" data-hud-key="weapons" checked/> Munições</label>
-          <label><input type="checkbox" data-hud-key="gate" checked/> Galaxy Gate</label>
+          <label><input type="checkbox" data-hud-key="gate" checked/> Portal Astral</label>
         </div>
       </section>
     </div>
 
     <div class="settings-panel hidden" id="settingsRankingPanel">
       <section class="settings-section ranking-settings-section">
-        <div class="settings-title"><div><b>PATENTES & RANKING</b><small>Ranking por pontos inspirado no padrão clássico do DarkOrbit, com patente especial para administradores.</small></div><button class="ghost-btn" id="rankingRefreshBtn">ATUALIZAR</button></div>
+        <div class="settings-title"><div><b>PATENTES & RANKING</b><small>Ranking por pontos inspirado no padrão clássico do Stellar Legacy, com patente especial para administradores.</small></div><button class="ghost-btn" id="rankingRefreshBtn">ATUALIZAR</button></div>
         <div class="ranking-hero-grid">
           <article class="ranking-board ranking-hero-card">
             <div class="ranking-board-title">MINHA PATENTE</div>
@@ -468,9 +468,9 @@
           <article class="ranking-board"><div class="ranking-board-title">RANKING POR PONTOS</div><div id="rankingPoints"></div></article>
           <article class="ranking-board"><div class="ranking-board-title">RANKING DE ARENA</div><div id="rankingArena"></div></article>
           <article class="ranking-board"><div class="ranking-board-title">ALIENS MATADOS</div><div id="rankingAliens"></div></article>
-          <article class="ranking-board"><div class="ranking-board-title">GALAXY GATES</div><div id="rankingGg"></div></article>
+          <article class="ranking-board"><div class="ranking-board-title">PORTAIS ASTRAIS</div><div id="rankingGg"></div></article>
         </div>
-        <div class="ranking-legend">Fórmula adaptada de pontos: <b>XP/100.000</b> + <b>Honra/100</b> + <b>vitórias PVP×3</b> + <b>nível×100</b> + <b>dias de conta×6</b> + <b>valor da nave</b> + <b>aliens/2</b> + <b>missões×100</b> − <b>abates aliados×100</b> − <b>mortes PVP×4</b> − <b>mortes por radiação×8</b> − <b>Phoenix destruídas×2</b>.</div>
+        <div class="ranking-legend">Fórmula adaptada de pontos: <b>XP/100.000</b> + <b>Honra/100</b> + <b>vitórias PVP×3</b> + <b>nível×100</b> + <b>dias de conta×6</b> + <b>valor da nave</b> + <b>aliens/2</b> + <b>missões×100</b> − <b>abates aliados×100</b> − <b>mortes PVP×4</b> − <b>mortes por radiação×8</b> − <b>Aurora destruídas×2</b>.</div>
         <div class="muted ranking-updated" id="rankingUpdated">Abra esta aba para carregar o ranking.</div>
       </section>
     </div>
@@ -549,8 +549,8 @@
 <div class="modal-card wide-card pet-modal-card">
 <div class="modal-header">
 <div>
-<div class="eyebrow">P.E.T. / ESCOLTA AUTÔNOMA</div>
-<h2>Sistema P.E.T.</h2>
+<div class="eyebrow">AUX-9 / ESCOLTA AUTÔNOMA</div>
+<h2>Sistema AUX-9</h2>
 </div>
 <button class="small-btn" id="closePet">Fechar</button>
 </div>
@@ -578,7 +578,7 @@
 <div class="eyebrow">ECONOMIA &amp; PROGRESSÃO</div>
 <h2>Loja Orbital</h2>
 </div>
-<div class="wallet">CR <b id="shopCredits">0</b> • URI <b id="shopUridium">0</b></div>
+<div class="wallet">CR <b id="shopCredits">0</b> • STL <b id="shopStellarium">0</b></div>
 <button class="small-btn" id="closeShop">Fechar</button>
 </div>
 
@@ -593,7 +593,7 @@
 <div class="eyebrow">GERENCIAMENTO</div>
 <h2>Hangar</h2>
 </div>
-<div class="wallet">Nave ativa: <b id="hangarShipName">Phoenix</b></div>
+<div class="wallet">Nave ativa: <b id="hangarShipName">Aurora</b></div>
 <button class="small-btn" id="closeHangar">Fechar</button>
 </div>
 
@@ -617,6 +617,6 @@
   </div>
 </div>
 </div>
-<script src="/game.js?v=13.2.1" type="module"></script>
+<script src="/game.js?v=13.3.0" type="module"></script>
 </body>
 </html>
