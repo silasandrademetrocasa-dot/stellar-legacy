@@ -107,3 +107,7 @@ Release atual: **11.0.0**
 
 ## V12 — Premium, Passe & Clã 2.0
 Consulte `CHANGELOG_V12.md` e `sql/V12_PREMIUM_CLAN_ECONOMY.sql`. A Loja Premium está em modo de teste: catálogo visível para todos e compras somente para administradores, sem cobrança real.
+
+
+## V12.1 — P.E.T. Autônomo
+O P.E.T. agora usa o radar do minimapa para coleta, patrulha livremente, acompanha a nave com comportamento independente e prioriza o mesmo alvo do jogador em combate. Veja `CHANGELOG_V12_1.md`.

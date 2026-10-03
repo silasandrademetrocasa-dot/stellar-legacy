@@ -1,6 +1,6 @@
-import { FACTIONS, SHIPS, ITEMS, LASER_AMMO, ROCKETS, NPC_TYPES, MAPS, RESOURCES } from './data.js?v=12.0.0';
-import { GAME_ASSETS } from './assets/v8/manifest.js?v=12.0.0';
-import { signUp, signIn, restoreSession, signOutLocal, getUser, loadCloudSave, saveCloudSave, updateCallsign, updatePassword, loadRankings, loadAuctionBids, saveAuctionBidOnline, markAuctionBidStatusOnline, loadAuctionMarket, upsertPlayerPresenceOnline, loadMapPresenceOnline, removePlayerPresenceOnline, queuePvpAttackOnline, consumePvpDamageEventsOnline, syncArenaProfileOnline, loadArenaState, loadArenaDailyRewardStatus, claimArenaDailyReward, loadArenaOpponents, loadArenaHistory, arenaAttackOnline, listClansOnline, loadMyClanOnline, createClanOnline, joinClanOnline, leaveClanOnline, transferClanCreditsOnline, claimClanCreditGrantsOnline, recordClanAlienKillOnline, getPremiumShopOnline, testPurchasePremiumOnline } from './api.js?v=12.0.0';
+import { FACTIONS, SHIPS, ITEMS, LASER_AMMO, ROCKETS, NPC_TYPES, MAPS, RESOURCES } from './data.js?v=12.1.0';
+import { GAME_ASSETS } from './assets/v8/manifest.js?v=12.1.0';
+import { signUp, signIn, restoreSession, signOutLocal, getUser, loadCloudSave, saveCloudSave, updateCallsign, updatePassword, loadRankings, loadAuctionBids, saveAuctionBidOnline, markAuctionBidStatusOnline, loadAuctionMarket, upsertPlayerPresenceOnline, loadMapPresenceOnline, removePlayerPresenceOnline, queuePvpAttackOnline, consumePvpDamageEventsOnline, syncArenaProfileOnline, loadArenaState, loadArenaDailyRewardStatus, claimArenaDailyReward, loadArenaOpponents, loadArenaHistory, arenaAttackOnline, listClansOnline, loadMyClanOnline, createClanOnline, joinClanOnline, leaveClanOnline, transferClanCreditsOnline, claimClanCreditGrantsOnline, recordClanAlienKillOnline, getPremiumShopOnline, testPurchasePremiumOnline } from './api.js?v=12.1.0';
 
 const canvas = document.querySelector('#game');
 const ctx = canvas.getContext('2d');
@@ -323,9 +323,9 @@ function levelFromXp(xp,maxLevel=PLAYER_MAX_LEVEL){
   return level;
 }
 const PET_GEARS = {
-  guard: { id:'guard', name:'Modo Guardião', cost:150000, currency:'uridium', description:'Ataca automaticamente inimigos no alcance que estiverem causando dano à sua nave.' },
-  box: { id:'box', name:'Coletor de BOX', cost:100000, currency:'uridium', description:'Busca cargo boxes próximas e vende automaticamente os recursos vendáveis. Xenomit é guardada.' },
-  ore: { id:'ore', name:'Coletor de Pedras', cost:80000, currency:'uridium', description:'Busca e coleta automaticamente pedras/minérios soltos dentro do alcance do P.E.T.' },
+  guard: { id:'guard', name:'Modo Guardião', cost:150000, currency:'uridium', description:'Combate assistido: prioriza seu alvo atual e, quando você está livre, caça o alien mais próximo dentro do radar.' },
+  box: { id:'box', name:'Coletor de BOX', cost:100000, currency:'uridium', description:'Busca cargo boxes em todo o raio do minimapa. Seu alvo em combate sempre tem prioridade máxima.' },
+  ore: { id:'ore', name:'Coletor de Pedras', cost:80000, currency:'uridium', description:'Busca pedras/minérios em todo o raio do minimapa. Seu alvo em combate sempre tem prioridade máxima.' },
   repair: { id:'repair', name:'Regenerador de Vida', cost:200000, currency:'uridium', description:'Segue a nave e regenera HP automaticamente quando você estiver danificado.' },
   kami: { id:'kami', name:'Kamikaze', cost:350000, currency:'uridium', description:'Investida explosiva contra alvos próximos, causando dano em área com recarga.' },
 };
@@ -1121,9 +1121,10 @@ const player = {
   angle:0,laserFiring:false,lastLaserShot:0,lastRocketShot:-999,
 };
 const petRuntime = {
-  x: 410, y: 930, tx: 410, ty: 930,
+  x: 410, y: 930, tx: 410, ty: 930, angle: 0,
   lastShot: -999, laserTargetId: null, laserUntil: 0,
-  taskType: 'follow', taskId: null
+  taskType: 'follow', taskId: null,
+  roamX: null, roamY: null, nextRoamAt: 0, lastMode: 'off'
 };
 const state = {
   currentMap: MAPS.x1, camera: { x: 620, y: MAPS.x1.world.h/2 }, target: null, pvpShotPending:false, pvpRocketPending:false, enemies: [], loot: [], ores: [], particles: [], fx: [], rocketFx: [], landmarks: [], enemyRespawns: [], oreRespawns: [], lastPortalAt: 0, radarRange: 1500, jumping: false,
@@ -1871,7 +1872,7 @@ function buyPetUnit(){
   const petCost=premiumElitePrice(PET_BASE_PRICE,'uridium');if(progress.profile.uridium<petCost){showToast(`Faltam ${fmt(petCost-progress.profile.uridium)} URI para o P.E.T.`);return;}
   progress.profile.uridium-=petCost;
   progress.pet=freshPet();progress.pet.owned=true;progress.pet.laserSlotsUnlocked=1;progress.pet.shieldSlotsUnlocked=1;progress.pet.lasers=[null];progress.pet.shields=[null];
-  petRuntime.x=player.x+82;petRuntime.y=player.y+64;petRuntime.tx=petRuntime.x;petRuntime.ty=petRuntime.y;
+  petRuntime.x=player.x+82;petRuntime.y=player.y+64;petRuntime.tx=petRuntime.x;petRuntime.ty=petRuntime.y;petRuntime.roamX=null;petRuntime.roamY=null;petRuntime.nextRoamAt=0;
   saveGame();renderShop();refreshPetViews();updateUI();showToast('P.E.T. adquirido! Agora equipe armas, escudos e módulos.');
 }
 function buyPetGear(id){
@@ -1900,77 +1901,143 @@ function sellPetCargoBox(drop){
   if(credits>0)spawnParticle(drop.x,drop.y,`P.E.T. +${fmt(credits)} CR`,'#ffd36c');
   addPetXp(Math.max(4,total*2));saveGame();
 }
-function petNearest(list,xKey='x',yKey='y'){
-  let best=null,bestD=Infinity;const range=petRange();
+function petCollectionRange(){return Math.max(500,Number(state?.radarRange)||1500);}
+function petCombatSearchRange(){return Math.max(650,Number(state?.radarRange)||1500);}
+function petTetherRange(){return Math.max(900,petCollectionRange()*1.18);}
+function petNearest(list,xKey='x',yKey='y',range=petCollectionRange()){
+  let best=null,bestD=Infinity;
   for(const obj of list){const d=Math.hypot(obj[xKey]-player.x,obj[yKey]-player.y);if(d<=range&&d<bestD){best=obj;bestD=d;}}
   return best;
 }
+function petNearestEnemy(){
+  if(isSafeZone())return null;
+  return petNearest(state.enemies.filter(e=>e.hp>0),'x','y',petCombatSearchRange());
+}
+function petPlayerCombatTarget(){
+  const t=state.target;
+  if(isSafeZone()||!player.laserFiring||!t||t.hp<=0)return null;
+  if(t.isPlayer){
+    if(!pvpTargetAllowed(t))return null;
+    return t;
+  }
+  return Math.hypot(t.x-player.x,t.y-player.y)<=petCombatSearchRange()?t:null;
+}
+function petChooseRoamPoint(force=false){
+  const now=nowSec();
+  if(!force&&petRuntime.roamX!=null&&petRuntime.roamY!=null&&now<petRuntime.nextRoamAt&&Math.hypot(petRuntime.roamX-petRuntime.x,petRuntime.roamY-petRuntime.y)>30)return;
+  const angle=rand(0,TWO_PI),radius=rand(150,Math.min(420,petCollectionRange()*.34));
+  petRuntime.roamX=Math.max(45,Math.min(state.currentMap.world.w-45,player.x+Math.cos(angle)*radius));
+  petRuntime.roamY=Math.max(45,Math.min(state.currentMap.world.h-45,player.y+Math.sin(angle)*radius));
+  petRuntime.nextRoamAt=now+rand(2.8,6.2);
+}
+function petMoveGoalNearCombatTarget(task){
+  const a=Math.atan2(petRuntime.y-task.y,petRuntime.x-task.x)||0;
+  const stand=110;
+  return {x:task.x+Math.cos(a)*stand,y:task.y+Math.sin(a)*stand};
+}
+function petFireAt(task){
+  if(!task||task.hp<=0)return;
+  const pd=Math.hypot(task.x-petRuntime.x,task.y-petRuntime.y),lasers=petLaserIds();
+  if(pd>420||!lasers.length||nowSec()-petRuntime.lastShot<=.58)return;
+  let ammo=currentLaserAmmo(),stock=ammoQty(ammo.id);
+  if(stock<=0){ammo=recoverActiveLaser(ammo.id,true);stock=ammo?ammoQty(ammo.id):0;}
+  if(!ammo||stock<=0)return;
+  const firing=Math.min(lasers.length,stock),ids=lasers.slice(0,firing);
+  petRuntime.lastShot=nowSec();petRuntime.laserTargetId=task.id;petRuntime.laserUntil=nowSec()+.16;
+  if(task.isPlayer){
+    if(state.pvpShotPending)return;
+    const shotAmmo=ammo,base=ids.reduce((sum,id)=>sum+(Number(ITEMS[id]?.damage)||0),0),raw=Math.round(base*(Number(shotAmmo.mult)||1)*rand(.95,1.08));
+    queuePvpShot(task,shotAmmo.shieldDrain?Math.round(base*(Number(shotAmmo.mult)||2)):raw,!!shotAmmo.shieldDrain,shotAmmo.color).then(row=>{
+      if(!row)return;
+      progress.ammo[shotAmmo.id]=Math.max(0,(progress.ammo[shotAmmo.id]||0)-firing);
+      refreshAmmoCounters();saveGame();
+      if(progress.ammo[shotAmmo.id]<=0)recoverActiveLaser(shotAmmo.id,true);
+    });
+    return;
+  }
+  const rawBase=Math.round(laserPveBase(ids)*rand(.95,1.08));
+  progress.ammo[ammo.id]=Math.max(0,stock-firing);
+  if(rawBase>0)applyLaserAmmoHit(task,rawBase,ammo,ammo.color);
+  refreshAmmoCounters();
+  if(progress.ammo[ammo.id]<=0)recoverActiveLaser(ammo.id,true);
+}
 function updatePet(dt){
   if(!progress?.pet?.owned)return;
-  const pet=progress.pet, mode=pet.activeGear||'off', followAngle=nowSec()*.7;
-  let targetX=player.x+Math.cos(followAngle)*92,targetY=player.y+Math.sin(followAngle)*92,task=null;
-  const now=nowSec();
+  const pet=progress.pet,mode=pet.activeGear||'off',now=nowSec();
+  const playerMoving=Math.hypot(player.tx-player.x,player.ty-player.y)>24;
+  let targetX=player.x,targetY=player.y,task=null,combatTask=null;
 
-  if(mode==='guard'&&pet.gearsOwned.guard){
-    task=state.enemies.filter(e=>e.hp>0&&e.lastAttackPlayerAt&&now-e.lastAttackPlayerAt<4.2&&Math.hypot(e.x-player.x,e.y-player.y)<=petRange())
-      .sort((a,b)=>Math.hypot(a.x-player.x,a.y-player.y)-Math.hypot(b.x-player.x,b.y-player.y))[0]||null;
-    if(task){targetX=task.x;targetY=task.y;petRuntime.taskType='guard';petRuntime.taskId=task.id;}
+  // PRIORIDADE MÁXIMA: se o piloto está atirando, o P.E.T. larga qualquer tarefa e ajuda no mesmo alvo.
+  combatTask=petPlayerCombatTarget();
+  if(combatTask){
+    task=combatTask;petRuntime.taskType='assist';petRuntime.taskId=task.id;
+    const goal=petMoveGoalNearCombatTarget(task);targetX=goal.x;targetY=goal.y;
   }else if(mode==='box'&&pet.gearsOwned.box){
-    task=petNearest(state.loot.filter(l=>!Number.isFinite(l.expiresAt)||nowSec()<l.expiresAt));
+    task=petNearest(state.loot.filter(l=>!Number.isFinite(l.expiresAt)||now<l.expiresAt));
     if(task){targetX=task.x;targetY=task.y;petRuntime.taskType='box';petRuntime.taskId=task.id;}
   }else if(mode==='ore'&&pet.gearsOwned.ore&&cargoFree()>0){
     task=petNearest(state.ores);
     if(task){targetX=task.x;targetY=task.y;petRuntime.taskType='ore';petRuntime.taskId=task.id;}
-  }else if(mode==='repair'&&pet.gearsOwned.repair){
+  }else if(mode==='repair'&&pet.gearsOwned.repair&&player.hp<player.maxHp){
     petRuntime.taskType='repair';petRuntime.taskId=null;
     targetX=player.x+72;targetY=player.y-78;
-    if(player.hp<player.maxHp)player.hp=Math.min(player.maxHp, player.hp + player.maxHp*(0.012+pet.level*0.0008)*dt);
+    player.hp=Math.min(player.maxHp,player.hp+player.maxHp*(0.012+pet.level*0.0008)*dt*(premiumActive()?2:1));
   }else if(mode==='kami'&&pet.gearsOwned.kami){
-    task=state.enemies.filter(e=>e.hp>0&&Math.hypot(e.x-player.x,e.y-player.y)<=Math.min(petRange(),340))
-      .sort((a,b)=>Math.hypot(a.x-player.x,a.y-player.y)-Math.hypot(b.x-player.x,b.y-player.y))[0]||null;
+    task=petNearestEnemy();
     if(task){targetX=task.x;targetY=task.y;petRuntime.taskType='kami';petRuntime.taskId=task.id;}
-  }else {petRuntime.taskType='follow';petRuntime.taskId=null;}
-
-  const dx=targetX-petRuntime.x,dy=targetY-petRuntime.y,d=Math.hypot(dx,dy);
-  const petSpeed=Math.max(420,player.speed*1.35);
-  if(d>4){const step=Math.min(d,petSpeed*dt);petRuntime.x+=dx/d*step;petRuntime.y+=dy/d*step;}
-  if(Math.hypot(petRuntime.x-player.x,petRuntime.y-player.y)>petRange()*1.45){petRuntime.x=player.x+78;petRuntime.y=player.y+64;}
-
-  if(mode==='guard'&&task&&task.hp>0){
-    const pd=Math.hypot(task.x-petRuntime.x,task.y-petRuntime.y);
-    const lasers=petLaserIds();
-    let ammo=currentLaserAmmo(),stock=ammoQty(ammo.id);
-
-    if(pd<350&&lasers.length&&stock<=0){
-      ammo=recoverActiveLaser(ammo.id,true);
-      stock=ammo?ammoQty(ammo.id):0;
-    }
-
-    if(pd<350&&lasers.length&&ammo&&stock>0&&nowSec()-petRuntime.lastShot>.58){
-      const firing=Math.min(lasers.length,stock),ids=lasers.slice(0,firing);
-      const rawBase=Math.round(laserPveBase(ids)*rand(.95,1.08));
-      progress.ammo[ammo.id]=Math.max(0,stock-firing);
-      petRuntime.lastShot=nowSec();petRuntime.laserTargetId=task.id;petRuntime.laserUntil=nowSec()+.16;
-      if(rawBase>0)applyLaserAmmoHit(task,rawBase,ammo,ammo.color);
-      refreshAmmoCounters();
-      if(progress.ammo[ammo.id]<=0)recoverActiveLaser(ammo.id,true);
+  }else{
+    // Sem tarefa específica, o PET caça sozinho o alien mais próximo do piloto.
+    task=petNearestEnemy();
+    if(task){
+      combatTask=task;petRuntime.taskType='autoCombat';petRuntime.taskId=task.id;
+      const goal=petMoveGoalNearCombatTarget(task);targetX=goal.x;targetY=goal.y;
+    }else if(playerMoving){
+      // Acompanhamento solto: fica atrás/lateral da nave, não colado como drone.
+      const back=(player.angle||0)+Math.PI,side=Math.sin(now*.85)*70;
+      targetX=player.x+Math.cos(back)*150+Math.cos(back+Math.PI/2)*side;
+      targetY=player.y+Math.sin(back)*150+Math.sin(back+Math.PI/2)*side;
+      petRuntime.taskType='escort';petRuntime.taskId=null;
+    }else{
+      // Nave parada: patrulha livre e aleatória ao redor do jogador.
+      petChooseRoamPoint(mode!==petRuntime.lastMode);
+      targetX=petRuntime.roamX;targetY=petRuntime.roamY;
+      petRuntime.taskType='roam';petRuntime.taskId=null;
     }
   }
-  if(mode==='kami'&&task&&task.hp>0&&Math.hypot(task.x-petRuntime.x,task.y-petRuntime.y)<70&&now-(petRuntime.lastKami||0)>15){
+  petRuntime.lastMode=mode;
+
+  // Coletor sem alvo? Não fica grudado: patrulha. Se aparecer inimigo, combate automaticamente.
+  if(!combatTask&&!task&&(mode==='box'||mode==='ore')){
+    combatTask=petNearestEnemy();
+    if(combatTask){task=combatTask;petRuntime.taskType='autoCombat';petRuntime.taskId=task.id;const goal=petMoveGoalNearCombatTarget(task);targetX=goal.x;targetY=goal.y;}
+    else if(playerMoving){const back=(player.angle||0)+Math.PI;targetX=player.x+Math.cos(back)*155;targetY=player.y+Math.sin(back)*155;petRuntime.taskType='escort';}
+    else{petChooseRoamPoint();targetX=petRuntime.roamX;targetY=petRuntime.roamY;petRuntime.taskType='roam';}
+  }
+
+  const dx=targetX-petRuntime.x,dy=targetY-petRuntime.y,d=Math.hypot(dx,dy);
+  const petSpeed=Math.max(500,player.speed*1.55);
+  if(d>4){const step=Math.min(d,petSpeed*dt);petRuntime.angle=Math.atan2(dy,dx);petRuntime.x+=dx/d*step;petRuntime.y+=dy/d*step;}
+  if(Math.hypot(petRuntime.x-player.x,petRuntime.y-player.y)>petTetherRange()){
+    petRuntime.x=player.x+rand(-120,120);petRuntime.y=player.y+rand(-120,120);petChooseRoamPoint(true);
+  }
+
+  if(combatTask&&combatTask.hp>0)petFireAt(combatTask);
+
+  if(mode==='kami'&&task&&!task.isPlayer&&task.hp>0&&Math.hypot(task.x-petRuntime.x,task.y-petRuntime.y)<70&&now-(petRuntime.lastKami||0)>15){
     petRuntime.lastKami=now;
-    const boomDmg=Math.round((3500 + pet.level*650 + petDamage()*2.5)*(1+pilotKamikazeDamageBonus()));
+    const boomDmg=Math.round((3500+pet.level*650+petDamage()*2.5)*(1+pilotKamikazeDamageBonus()));
     const boomRadius=110*(1+pilotKamikazeRadiusBonus());
     spawnParticle(petRuntime.x,petRuntime.y,'KAMIKAZE','#ff7d8f');
     state.enemies.filter(e=>e.hp>0&&Math.hypot(e.x-petRuntime.x,e.y-petRuntime.y)<boomRadius).forEach(e=>dealDamageToEnemy(e,boomDmg,'#ff7d8f'));
   }
-  if(mode==='box'&&task&&Math.hypot(task.x-petRuntime.x,task.y-petRuntime.y)<28){
-    if(!Number.isFinite(task.expiresAt)||nowSec()<task.expiresAt)sellPetCargoBox(task);
-    state.loot=state.loot.filter(x=>x.id!==task.id);petRuntime.taskId=null;
+  if(mode==='box'&&task&&!combatTask&&Math.hypot(task.x-petRuntime.x,task.y-petRuntime.y)<28){
+    if(!Number.isFinite(task.expiresAt)||now<task.expiresAt)sellPetCargoBox(task);
+    state.loot=state.loot.filter(x=>x.id!==task.id);petRuntime.taskId=null;petChooseRoamPoint(true);
   }
-  if(mode==='ore'&&task&&Math.hypot(task.x-petRuntime.x,task.y-petRuntime.y)<24){
+  if(mode==='ore'&&task&&!combatTask&&Math.hypot(task.x-petRuntime.x,task.y-petRuntime.y)<24){
     const got=addCargoResource(task.type,task.amount);
     if(got>0){spawnParticle(task.x,task.y,`P.E.T. +${got} ${task.type}`,task.color);pushActivity(`P.E.T. coletou +${fmt(got)} ${task.type} • ${fmt((RESOURCES[task.type]?.sell||0)*got)} CR na base`,'ore');missionEvent('collectOre',{amount:got,type:task.type,mapId:progress.mapId});addPetXp(3);state.ores=state.ores.filter(x=>x.id!==task.id);state.oreRespawns.push({type:task.type,at:nowSec()+rand(5,12)});saveGame();}
-    petRuntime.taskId=null;
+    petRuntime.taskId=null;petChooseRoamPoint(true);
   }
 }
 
@@ -2131,7 +2198,7 @@ function setupAlphaMap(resume=false){
   const a=alphaGate();if(!a.run?.active)initAlphaRun();
   progress.mapId='ggAlpha';state.currentMap=MAPS.ggAlpha;state.radarRange=mapRadarRange();computeStats(true);
   player.x=MAPS.ggAlpha.world.w/2;player.y=MAPS.ggAlpha.world.h/2;player.tx=player.x;player.ty=player.y;
-  petRuntime.x=player.x+82;petRuntime.y=player.y+64;petRuntime.tx=petRuntime.x;petRuntime.ty=petRuntime.y;
+  petRuntime.x=player.x+82;petRuntime.y=player.y+64;petRuntime.tx=petRuntime.x;petRuntime.ty=petRuntime.y;petRuntime.roamX=null;petRuntime.roamY=null;petRuntime.nextRoamAt=0;
   state.camera.x=player.x;state.camera.y=player.y;state.target=null;state.loot=[];state.ores=[];state.landmarks=[];state.fx=[];state.rocketFx=[];state.enemyRespawns=[];state.oreRespawns=[];
   if(resume&&Object.values(a.run.remaining||{}).some(v=>Number(v)>0))restoreAlphaGateEnemies();else state.enemies=[];
 
@@ -2334,7 +2401,7 @@ function setMap(mapId,preserve=false,fromMapId=null,targetTerritoryFaction=null,
     player.tx=player.x;player.ty=player.y;
   }
 
-  petRuntime.x=player.x+82;petRuntime.y=player.y+64;petRuntime.tx=petRuntime.x;petRuntime.ty=petRuntime.y;
+  petRuntime.x=player.x+82;petRuntime.y=player.y+64;petRuntime.tx=petRuntime.x;petRuntime.ty=petRuntime.y;petRuntime.roamX=null;petRuntime.roamY=null;petRuntime.nextRoamAt=0;
   state.camera.x=player.x;state.camera.y=player.y;state.target=null;state.loot=[];state.fx=[];state.rocketFx=[];
   clearOnlinePlayers();createLandmarks();createOres();spawnEnemies();saveGame();
 
@@ -3022,10 +3089,10 @@ function drawPet(){
   if(!progress?.pet?.owned)return;
   const p=screenPos(petRuntime.x,petRuntime.y),mode=progress.pet.activeGear||'off',color=mode==='guard'?'#ff8c93':mode==='box'?'#ffd46b':mode==='ore'?'#7fffc4':'#7edcff';
   const path=progress.pet.level>=10?GAME_ASSETS.drones.petElite:GAME_ASSETS.drones.pet,img=assetImage(path);
-  if(img&&img.naturalWidth){const size=34+(progress.pet.level/15)*10,sc=size/Math.max(img.naturalWidth,img.naturalHeight);ctx.save();ctx.translate(p.x,p.y);ctx.rotate(nowSec()*.6);ctx.shadowColor=color;ctx.shadowBlur=12;ctx.drawImage(img,-img.naturalWidth*sc/2,-img.naturalHeight*sc/2,img.naturalWidth*sc,img.naturalHeight*sc);ctx.restore();}
+  if(img&&img.naturalWidth){const size=34+(progress.pet.level/15)*10,sc=size/Math.max(img.naturalWidth,img.naturalHeight);ctx.save();ctx.translate(p.x,p.y);ctx.rotate((petRuntime.angle||0)+Math.PI/2);ctx.shadowColor=color;ctx.shadowBlur=12;ctx.drawImage(img,-img.naturalWidth*sc/2,-img.naturalHeight*sc/2,img.naturalWidth*sc,img.naturalHeight*sc);ctx.restore();}
   else{ctx.fillStyle=color;ctx.beginPath();ctx.arc(p.x,p.y,8,0,TWO_PI);ctx.fill();}
   ctx.fillStyle=color;ctx.font='bold 10px Arial';ctx.textAlign='center';ctx.fillText(`P.E.T. LV ${progress.pet.level}`,p.x,p.y+28);
-  if(petRuntime.laserTargetId&&nowSec()<petRuntime.laserUntil){const e=state.enemies.find(x=>x.id===petRuntime.laserTargetId&&x.hp>0);if(e){const t=screenPos(e.x,e.y);ctx.strokeStyle=currentLaserAmmo().color;ctx.shadowColor=currentLaserAmmo().color;ctx.shadowBlur=8;ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(p.x,p.y);ctx.lineTo(t.x,t.y);ctx.stroke();ctx.shadowBlur=0;}}
+  if(petRuntime.laserTargetId&&nowSec()<petRuntime.laserUntil){const e=state.enemies.find(x=>x.id===petRuntime.laserTargetId&&x.hp>0)||onlineWorld.players.get(petRuntime.laserTargetId);if(e&&e.hp>0){const t=screenPos(e.x,e.y);ctx.strokeStyle=currentLaserAmmo().color;ctx.shadowColor=currentLaserAmmo().color;ctx.shadowBlur=8;ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(p.x,p.y);ctx.lineTo(t.x,t.y);ctx.stroke();ctx.shadowBlur=0;}}
 }
 function drawShipModel(id,color){ctx.shadowColor=color;ctx.shadowBlur=18;ctx.strokeStyle='rgba(230,250,255,.65)';ctx.lineWidth=1.2;const fill=ctx.createLinearGradient(-26,-16,28,16);fill.addColorStop(0,'#ebfcff');fill.addColorStop(.2,color);fill.addColorStop(.72,'#25345d');fill.addColorStop(1,'#11182f');ctx.fillStyle=fill;ctx.beginPath();
   if(id==='phoenix'){ctx.moveTo(25,0);ctx.lineTo(-12,-12);ctx.lineTo(-4,0);ctx.lineTo(-12,12);}
@@ -3081,17 +3148,16 @@ function ammoWarningClass(qty,perUse){
 }
 function refreshAmmoCounters(){
   if(!progress)return;
-  const laserUse=Math.max(1,equippedLaserCount()+petLaserIds().length);
+  const shipLaserUse=Math.max(1,equippedLaserCount()),petUseCount=progress.pet?.owned?petLaserIds().length:0,totalLaserUse=Math.max(1,shipLaserUse+petUseCount);
   ui.laserAmmoButtons.querySelectorAll('[data-ammo-id]').forEach(btn=>{
-    const id=btn.dataset.ammoId,a=LASER_AMMO[id],q=ammoQty(id),bursts=Math.floor(q/laserUse);
+    const id=btn.dataset.ammoId,a=LASER_AMMO[id],q=ammoQty(id),bursts=Math.floor(q/totalLaserUse);
     btn.classList.toggle('active',progress.selectedLaserAmmo===id);
     btn.classList.remove('empty','low','critical');
-    const warn=ammoWarningClass(q,laserUse);if(warn)btn.classList.add(warn);
+    const warn=ammoWarningClass(q,totalLaserUse);if(warn)btn.classList.add(warn);
     const qty=btn.querySelector('.ammo-qty');
-    const petUse=(progress.pet?.activeGear==='guard'&&progress.pet?.gearsOwned?.guard)?petLaserIds().length:0;
     if(qty)qty.textContent=fmt(q);
-    btn.dataset.tip=ammoTooltipText(a,q,laserUse,petUse,bursts);
-    btn.title=ammoTooltipText(a,q,laserUse,petUse,bursts).replace(/\n/g,' | ');
+    btn.dataset.tip=ammoTooltipText(a,q,shipLaserUse,petUseCount,bursts);
+    btn.title=ammoTooltipText(a,q,shipLaserUse,petUseCount,bursts).replace(/\n/g,' | ');
   });
   ui.rocketAmmoButtons.querySelectorAll('[data-rocket-id]').forEach(btn=>{
     const id=btn.dataset.rocketId,r=ROCKETS[id],q=rocketQty(id);
@@ -3140,7 +3206,7 @@ function updatePetFloat(){
   if(!shouldShow)return;
   ui.petFloatPanel.classList.remove('hud-user-disabled');
   if(ui.petFloatLevel)ui.petFloatLevel.textContent=`LV${pet.level}`;
-  if(ui.petFloatStatus){const gear=pet.activeGear==='off'?'COMPANHIA':(PET_GEARS[pet.activeGear]?.name||'COMPANHIA');ui.petFloatStatus.textContent=`${gear} • ESC ${fmt(petRuntime.shield||0)}/${fmt(petMaxShield())}`;}
+  if(ui.petFloatStatus){const gear=pet.activeGear==='off'?'COMPANHIA':(PET_GEARS[pet.activeGear]?.name||'COMPANHIA');const behavior=({assist:'ASSISTINDO SEU ALVO',autoCombat:'CAÇANDO',box:'BUSCANDO BOX',ore:'BUSCANDO PEDRA',repair:'REPARANDO',kami:'KAMIKAZE',roam:'PATRULHANDO',escort:'ESCOLTANDO'})[petRuntime.taskType]||'LIVRE';ui.petFloatStatus.textContent=`${behavior} • ${gear} • RADAR ${fmt(petCollectionRange())}`;}
   if(ui.petGearQuickSelect){
     const owned=['off',...Object.keys(PET_GEARS).filter(id=>pet.gearsOwned?.[id])];
     const signature=owned.join('|');
@@ -3367,12 +3433,12 @@ function renderPet(root=ui.petContent){
   }
   const base=levelXpThreshold(pet.level),need=pet.level<PET_MAX_LEVEL?petLevelXp(pet.level):base,pct=pet.level>=PET_MAX_LEVEL?100:Math.min(100,(pet.xp-base)/Math.max(1,need-base)*100);
   const hero=document.createElement('div');hero.className='pet-hero';
-  hero.innerHTML=`<div class="pet-avatar"><img src="${pet.level>=10?GAME_ASSETS.drones.petElite:GAME_ASSETS.drones.pet}" alt="P.E.T."></div><div class="pet-hero-copy"><div class="eyebrow">P.E.T. DE COMBATE</div><h2>Nível ${pet.level} / ${PET_MAX_LEVEL}</h2><div class="pet-xpbar"><span style="width:${pct}%"></span></div><div class="muted">${pet.level>=PET_MAX_LEVEL?'Nível máximo':`${fmt(pet.xp)} XP total • próximo ${fmt(need)}`} • Alcance ${fmt(petRange())} • Dano ${fmt(petDamage())} • Escudo ${fmt(petMaxShield())}</div><div class="muted">Módulos disponíveis: Guardião, BOX, Pedras, Regenerador e Kamikaze.</div></div>`;
+  hero.innerHTML=`<div class="pet-avatar"><img src="${pet.level>=10?GAME_ASSETS.drones.petElite:GAME_ASSETS.drones.pet}" alt="P.E.T."></div><div class="pet-hero-copy"><div class="eyebrow">P.E.T. DE COMBATE</div><h2>Nível ${pet.level} / ${PET_MAX_LEVEL}</h2><div class="pet-xpbar"><span style="width:${pct}%"></span></div><div class="muted">${pet.level>=PET_MAX_LEVEL?'Nível máximo':`${fmt(pet.xp)} XP total • próximo ${fmt(need)}`} • Radar de busca ${fmt(petCollectionRange())} • Dano ${fmt(petDamage())} • Escudo ${fmt(petMaxShield())}</div><div class="muted">Módulos disponíveis: Guardião, BOX, Pedras, Regenerador e Kamikaze.</div></div>`;
   root.appendChild(hero);
 
   const gears=document.createElement('div');gears.className='section-box';gears.innerHTML='<h3>Modos / Extras do P.E.T.</h3><div class="muted">Apenas um modo fica ativo por vez. Os módulos são permanentes depois de comprados.</div>';
   const gearGrid=document.createElement('div');gearGrid.className='pet-gear-grid';
-  const off=document.createElement('button');off.className=`pet-gear ${pet.activeGear==='off'?'active':''}`;off.innerHTML='<b>COMPANHIA</b><small>Segue sua nave sem executar tarefa automática.</small>';off.onclick=()=>setPetGear('off');gearGrid.appendChild(off);
+  const off=document.createElement('button');off.className=`pet-gear ${pet.activeGear==='off'?'active':''}`;off.innerHTML='<b>COMPANHIA</b><small>Patrulha livre ao seu redor e combate automaticamente. Se você atacar um alvo, ele ajuda imediatamente.</small>';off.onclick=()=>setPetGear('off');gearGrid.appendChild(off);
   Object.values(PET_GEARS).forEach(g=>{const owned=pet.gearsOwned[g.id],b=document.createElement('button');b.className=`pet-gear ${pet.activeGear===g.id?'active':''}`;const gearArt={guard:GAME_ASSETS.equipment.autoLaserCpu,box:GAME_ASSETS.equipment.ammoAutoBuyCpu,ore:GAME_ASSETS.equipment.rocketTurboCpu,repair:GAME_ASSETS.equipment.rep2,kami:GAME_ASSETS.equipment.autoRocketCpu}[g.id];b.innerHTML=`${gearArt?`<img class="pet-gear-art" src="${gearArt}" alt="">`:''}<b>${g.name}</b><small>${g.description}</small><em>${owned?'COMPRADO':'ELITE • '+fmt(g.cost)+' URI'}</em>`;b.onclick=()=>owned?setPetGear(g.id):buyPetGear(g.id);gearGrid.appendChild(b);});
   gears.appendChild(gearGrid);root.appendChild(gears);
 
@@ -4311,9 +4377,9 @@ function startLoadedGame(){
   if(progress.mapId==='ggAlpha'&&!progress.galaxyGate.alpha.run?.active){progress.mapId='x1';progress.territoryFaction=progress.profile.faction;}
   const savedX=Number.isFinite(progress.x)?progress.x:null,savedY=Number.isFinite(progress.y)?progress.y:null;state.currentMap=MAPS[progress.mapId]||MAPS.x1;state.radarRange=mapRadarRange();player.hp=progress.hp||1;player.shield=progress.shield||0;computeStats(true);player.hp=Math.min(player.maxHp,progress.hp??player.maxHp);player.shield=Math.min(player.maxShield,progress.shield??player.maxShield);
   if(progress.mapId==='ggAlpha'){
-    player.x=savedX??MAPS.ggAlpha.world.w/2;player.y=savedY??MAPS.ggAlpha.world.h/2;player.tx=player.x;player.ty=player.y;petRuntime.x=player.x+82;petRuntime.y=player.y+64;petRuntime.tx=petRuntime.x;petRuntime.ty=petRuntime.y;state.camera.x=player.x;state.camera.y=player.y;state.target=null;state.loot=[];state.fx=[];state.rocketFx=[];state.ores=[];state.landmarks=[];state.enemyRespawns=[];state.oreRespawns=[];restoreAlphaGateEnemies();const a=alphaGate(),def=GALAXY_ALPHA_ROUNDS[a.run.round-1],alive=alphaRemainingCount(),now=Date.now();if(a.run.waveIndex<def.waves.length&&!a.run.nextWaveAt){a.run.nextWaveAt=now+GALAXY_ALPHA_WAVE_INTERVAL_MS;}else if(a.run.waveIndex>=def.waves.length&&alive===0&&a.run.round<GALAXY_ALPHA_ROUNDS.length&&!a.run.nextRoundAt){a.run.nextRoundAt=now+GALAXY_ALPHA_ROUND_INTERVAL_MS;}renderAll();saveGame();return;
+    player.x=savedX??MAPS.ggAlpha.world.w/2;player.y=savedY??MAPS.ggAlpha.world.h/2;player.tx=player.x;player.ty=player.y;petRuntime.x=player.x+82;petRuntime.y=player.y+64;petRuntime.tx=petRuntime.x;petRuntime.ty=petRuntime.y;petRuntime.roamX=null;petRuntime.roamY=null;petRuntime.nextRoamAt=0;state.camera.x=player.x;state.camera.y=player.y;state.target=null;state.loot=[];state.fx=[];state.rocketFx=[];state.ores=[];state.landmarks=[];state.enemyRespawns=[];state.oreRespawns=[];restoreAlphaGateEnemies();const a=alphaGate(),def=GALAXY_ALPHA_ROUNDS[a.run.round-1],alive=alphaRemainingCount(),now=Date.now();if(a.run.waveIndex<def.waves.length&&!a.run.nextWaveAt){a.run.nextWaveAt=now+GALAXY_ALPHA_WAVE_INTERVAL_MS;}else if(a.run.waveIndex>=def.waves.length&&alive===0&&a.run.round<GALAXY_ALPHA_ROUNDS.length&&!a.run.nextRoundAt){a.run.nextRoundAt=now+GALAXY_ALPHA_ROUND_INTERVAL_MS;}renderAll();saveGame();return;
   }
-  const spawnBase=currentBasePoint();player.x=savedX??(progress.mapId==='x1'?spawnBase.x:400);player.y=savedY??(progress.mapId==='x1'?spawnBase.y:state.currentMap.world.h/2);player.tx=player.x;player.ty=player.y;petRuntime.x=player.x+82;petRuntime.y=player.y+64;petRuntime.tx=petRuntime.x;petRuntime.ty=petRuntime.y;state.camera.x=player.x;state.camera.y=player.y;state.target=null;state.loot=[];state.fx=[];state.rocketFx=[];createLandmarks();createOres();spawnEnemies();renderAll();saveGame();
+  const spawnBase=currentBasePoint();player.x=savedX??(progress.mapId==='x1'?spawnBase.x:400);player.y=savedY??(progress.mapId==='x1'?spawnBase.y:state.currentMap.world.h/2);player.tx=player.x;player.ty=player.y;petRuntime.x=player.x+82;petRuntime.y=player.y+64;petRuntime.tx=petRuntime.x;petRuntime.ty=petRuntime.y;petRuntime.roamX=null;petRuntime.roamY=null;petRuntime.nextRoamAt=0;state.camera.x=player.x;state.camera.y=player.y;state.target=null;state.loot=[];state.fx=[];state.rocketFx=[];createLandmarks();createOres();spawnEnemies();renderAll();saveGame();
   if(progress.repairRequired){movePlayerToHomeBase();player.hp=1;player.shield=0;progress.hp=1;progress.shield=0;saveGame();if(premiumActive())resolveDeathRepair({allowAuto:true});else openRepairModal();}
 }
 

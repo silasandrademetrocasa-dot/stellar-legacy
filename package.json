@@ -1,6 +1,6 @@
 {
   "name": "stellar-legacy",
-  "version": "12.0.0",
+  "version": "12.1.0",
   "type": "module",
   "scripts": {
     "start": "node server/index.js",
@@ -13,5 +13,5 @@
   "engines": {
     "node": ">=18"
   },
-  "release": "premium-pass-clan-economy-v12"
+  "release": "pet-autonomy-radar-combat-v12-1"
 }
