@@ -145,6 +145,8 @@ export const GAME_ASSETS = {
     "b41": "/assets/v8/backgrounds/deep-battle.jpg",
     "b42": "/assets/v8/backgrounds/alien-core.jpg",
     "b43": "/assets/v8/backgrounds/fire-sector.jpg",
-    "ggAlpha": "/assets/v8/backgrounds/alien-core.jpg"
+    "ggAlpha": "/assets/v8/backgrounds/alien-core.jpg",
+    "ggBeta": "/assets/v8/backgrounds/purple-nebula.jpg",
+    "ggGamma": "/assets/v8/backgrounds/fire-sector.jpg"
   }
 };

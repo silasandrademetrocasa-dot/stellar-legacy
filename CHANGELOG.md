@@ -1,4 +1,20 @@
-## V12.1.7 — P.E.T. Kamikaze One-Shot + Audit
+# Changelog — Stellar Legacy
+
+## V13.0.0 — Combat Ascension
+
+- Novo framework de habilidades ativas de nave com classes Suporte, Tanque, Controle, Dano Contínuo e Assalto.
+- HUD de habilidade com cooldown visual; atalho `E`.
+- Kamikaze do P.E.T. movido para botão ativo dedicado; atalho `K`; continua respeitando uma explosão por ativação e cooldown de 15s.
+- BOSS agora possuem três fases dinâmicas com escalada de velocidade, dano e cadência em 66% e 33% de vida+escudo.
+- HUD de BOSS mostra fase e percentual restante.
+- Galaxy Gate expandido para ALFA/BETA/GAMMA com progressão de desbloqueio, peças, rounds, escalas de inimigos e multiplicadores de recompensa próprios.
+- BETA: 48 peças, 9 rounds, 130% de escala e recompensa total 4X.
+- GAMMA: 64 peças, 10 rounds, 165% de escala e recompensa total 5X.
+- Novos mapas privados `ggBeta` e `ggGamma`.
+- Cooldown da habilidade da nave persiste no save para impedir refresh exploit.
+- Compatibilidade automática com saves antigos; nenhuma migration de banco adicional necessária.
+
+## V13.0.0 — P.E.T. Kamikaze One-Shot + Audit
 
 - Corrigido Kamikaze infinito/reentrante do P.E.T.
 - Cada seleção do módulo arma exatamente 1 detonação; a carga é consumida antes do dano para bloquear repetição no mesmo ciclo.

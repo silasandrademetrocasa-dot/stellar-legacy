@@ -276,8 +276,18 @@ export const MAPS = {
     id: 'ggAlpha', label: 'ALFA', tier: 90, gate: true, battle: true, name: 'Galaxy Gate Alpha', risk: 'Portal',
     world: { w: 7200, h: 5200 }, enemyMultiplier: 1, ores: [], oreCount: 0, landmarkCount: 0,
     palette: { nebula: '#2f1d5e', accent: '#b278ff', deep: '#03030d' },
-    structures: ['Galaxy Gate Alpha'],
-    portals: [],
-    enemyGroups: [],
+    structures: ['Galaxy Gate Alpha'], portals: [], enemyGroups: [],
+  },
+  ggBeta: {
+    id: 'ggBeta', label: 'BETA', tier: 94, gate: true, battle: true, name: 'Galaxy Gate Beta', risk: 'Portal Elite',
+    world: { w: 7800, h: 5600 }, enemyMultiplier: 1, ores: [], oreCount: 0, landmarkCount: 0,
+    palette: { nebula: '#153f54', accent: '#55e6ff', deep: '#020c13' },
+    structures: ['Galaxy Gate Beta'], portals: [], enemyGroups: [],
+  },
+  ggGamma: {
+    id: 'ggGamma', label: 'GAMMA', tier: 99, gate: true, battle: true, name: 'Galaxy Gate Gamma', risk: 'Portal Extremo',
+    world: { w: 8400, h: 6200 }, enemyMultiplier: 1, ores: [], oreCount: 0, landmarkCount: 0,
+    palette: { nebula: '#5a1729', accent: '#ff4778', deep: '#100208' },
+    structures: ['Galaxy Gate Gamma'], portals: [], enemyGroups: [],
   },
 };

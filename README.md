@@ -1,23 +1,38 @@
-# Stellar Legacy — V12.1.7
+# Stellar Legacy — V13.0.0 • Combat Ascension
 
-Versão atual consolidada do Stellar Legacy. O pacote foi limpo para manter somente arquivos necessários ao jogo, documentação atual e um snapshot único do backend. O histórico completo das versões permanece no Git.
+A V13 transforma o combate em um sistema mais ativo e menos automático, preservando os saves antigos e sem exigir migration nova de banco. O save JSON passa a aceitar os novos campos de habilidade automaticamente.
 
-## Principais sistemas
+## O que entrou na V13
 
-- autenticação e save cloud via Supabase
-- mapas, portais, facções, NPCs e bosses
-- Hangar, armas, escudos, motores, drones e P.E.T.
-- missões, recompensa de nível e Passe de Batalha FREE/PREMIUM
-- Galaxy Gate, Arena PvP, ranking e patentes
-- clãs LV1–10 com economia diária
-- Loja Premium em modo de teste para ADM
-- equipamentos alteráveis somente na base e microzonas neutras em portais
+- **Habilidades ativas de nave** com HUD próprio e atalho `E`.
+  - **Suporte** — Nano Restore: recupera HP e escudo instantaneamente.
+  - **Tanque** — Fortress: reduz fortemente o dano recebido por alguns segundos.
+  - **Controle** — JAM Pulse: silencia NPCs próximos e aumenta a mobilidade temporariamente.
+  - **Dano contínuo** — Singularity: aplica pulsos sucessivos no alvo.
+  - **Assalto** — Overdrive: aumenta dano e velocidade por tempo limitado.
+- **Kamikaze do P.E.T. virou habilidade ativa** com botão dedicado e atalho `K`. Ele não aparece mais como modo permanente de coleta/combate.
+- **BOSS em três fases**: abaixo de 66% entram em Fúria e abaixo de 33% entram em Overdrive, ganhando velocidade, dano e cadência. A terceira fase também dispara um pulso de ameaça quando o jogador está próximo.
+- **HUD de BOSS** com barra de vida/escudo total e indicação da fase atual.
+- **Galaxy Gate ALFA / BETA / GAMMA** no mesmo Materializador.
+  - ALFA: 34 peças, 8 rounds, dificuldade 100%, recompensa total 3X.
+  - BETA: 48 peças, 9 rounds, dificuldade 130%, recompensa total 4X; libera após concluir ALFA.
+  - GAMMA: 64 peças, 10 rounds, dificuldade 165%, recompensa total 5X; libera após concluir BETA.
+- BETA e GAMMA têm mapas próprios, waves próprias e recompensas maiores de Log-Disks.
+- Cooldown da habilidade da nave é salvo para evitar reset por refresh.
 
-## P.E.T. V12.1.1
+## Atalhos de combate
 
-O P.E.T. usa o raio do minimapa como área operacional. Em modos de coleta ele escolhe o item válido mais próximo de sua posição atual, trava esse objetivo até concluir a tarefa e se move em velocidade reduzida com desaceleração na chegada. Quando o piloto ataca, o mesmo alvo vira prioridade máxima. Sem tarefa de coleta, o P.E.T. pode auxiliar em combate e patrulhar de forma mais calma.
+- `CTRL` — Laser
+- `ESPAÇO` — Míssil
+- `E` — Habilidade ativa da nave
+- `K` — Kamikaze do P.E.T.
+- `J` / `ENTER` — Portal próximo
 
-## Estrutura limpa
+## Compatibilidade
+
+Saves V12.x/V12.1.x continuam compatíveis. Os novos protocolos BETA/GAMMA e `combatAbilities` são criados automaticamente quando um save antigo é carregado. Nenhuma alteração no Supabase é necessária apenas para a V13, porque o estado novo fica dentro do save JSON já existente.
+
+## Estrutura do pacote
 
 ```text
 package.json
@@ -27,42 +42,10 @@ sql/CURRENT_BACKEND.sql
 render.yaml
 CHANGELOG.md
 README.md
+AUDIT_V13.0.0.md
+ROADMAP_AFTER_V13.md
 ```
 
-As migrations e changelogs históricos não fazem parte do ZIP atual porque permanecem recuperáveis pelo histórico do Git.
+## Próxima evolução recomendada
 
-
-## Hotfix V12.1.2 — Persistência de mapa e posição
-- Salva as coordenadas reais da nave antes de cada persistência local/cloud.
-- Guarda posição separada por mapa e facção territorial.
-- Troca de portal força sincronização cloud imediata.
-- Ao recarregar, usa a posição salva do mapa atual em vez de reaproveitar coordenadas de outro mapa.
-- Se o save local deste navegador for mais novo que o cloud, ele é usado e enviado ao servidor, evitando rollback durante refresh/deploy.
-- Ao ocultar/fechar a página, força save da posição atual antes da sincronização.
-
-
-## V12.1.3 — P.E.T. Guardião + Venda Segura
-
-- Modo Guardião usa o mesmo alcance de ataque laser da nave (900u normal / 1250u em mapas de batalha).
-- Alcance dos módulos de coleta BOX/Pedras reduzido para 50% do raio do minimapa.
-- Venda de equipamento e drones exige confirmação explícita antes de remover o item.
-
-## V12.1.4 — Login Único
-
-A conta possui uma única sessão de jogo ativa. Cada login recebe um `game_session_id` próprio e o Supabase mantém apenas o mais recente por usuário. Um novo login substitui o anterior; a sessão antiga é detectada pelo cliente em até poucos segundos, perde acesso aos endpoints protegidos e volta para a tela de login. O save local da sessão revogada é removido para impedir conflito com o progresso do dispositivo mais novo.
-
-
-
-## V12.1.6 — Confirmações de gasto
-- Compras da Loja agora pedem confirmação antes de gastar créditos ou uridium.
-- Ações manuais que consomem moedas, como P.E.T., módulos, Galaxy Gate, Log-Disks, upgrades da Árvore de Piloto e reset, também passam por confirmação.
-- Modal de confirmação foi generalizado para compra, gasto e venda, mantendo Cancelar/Confirmar antes de remover saldo.
-
-
-## V12.1.7 — Kamikaze One-Shot + pente-fino
-- Kamikaze virou ativação única: selecionar o módulo arma somente 1 explosão.
-- Após detonar, o P.E.T. volta automaticamente para Companhia e entra em recarga de 15s.
-- Trocar para BOX/Pedras/Guardião/Reparo cancela qualquer carga pendente; não existe explosão residual fora do modo Kamikaze.
-- Reload e troca de mapa também desarmam o Kamikaze para evitar efeitos fantasma.
-- Versões/cache de `index.html`, `game.js`, `data.js`, `api.js`, `package.json` e servidor foram alinhadas em V12.1.7.
-- Auditoria estática confirmou: JS válido, sem IDs HTML duplicados, imports da API completos e assets referenciados presentes.
+A base ideal para a V13.1/V14 é: **Guerra de Clãs**, **World Boss cooperativo**, habilidades com níveis/raridades, eventos semanais de mapa e temporadas com modificadores globais. Veja `ROADMAP_AFTER_V13.md`.
