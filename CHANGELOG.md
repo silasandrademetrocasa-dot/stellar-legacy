@@ -1,3 +1,15 @@
+## V12.1.4 — Login Único / Segurança de Sessão
+
+- Uma conta só pode manter uma sessão oficial do jogo por vez.
+- Novo login substitui a sessão anterior imediatamente no banco.
+- Cliente conectado verifica a sessão a cada 3 segundos e também ao voltar para a aba.
+- Sessão antiga é encerrada com aviso “Sua conta foi acessada em outro dispositivo”.
+- Endpoints de save/autenticação validam o identificador da sessão ativa no servidor.
+- Refresh token da sessão antiga não consegue reativar o jogo após substituição.
+- Ao ser expulso, o save local daquela sessão é descartado para não sobrescrever o progresso do dispositivo novo.
+- Logout normal limpa o registro da sessão ativa.
+- Sessões antigas anteriores à V12.1.4 exigem novo login uma única vez.
+
 ## V12.1.3 — P.E.T. Guardião + Venda Segura
 
 - Corrigido alcance do Modo Guardião: busca automática limitada ao mesmo alcance de laser da nave.

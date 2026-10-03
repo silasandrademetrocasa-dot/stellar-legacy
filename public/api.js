@@ -2,12 +2,25 @@ const SESSION_KEY = 'stellarLegacyV4Session';
 let session = null;
 let currentUser = null;
 let configPromise = null;
+let sessionReplacementNotified = false;
 
 async function readJson(res) {
   return res.json().catch(async () => {
     const text = await res.text().catch(() => '');
     return text ? { error: text } : {};
   });
+}
+
+function notifySessionReplaced(message = 'Sua conta foi acessada em outro dispositivo.') {
+  if (sessionReplacementNotified) return;
+  sessionReplacementNotified = true;
+  const userId = currentUser?.id || null;
+  signOutLocal();
+  try {
+    window.dispatchEvent(new CustomEvent('stellar-session-replaced', {
+      detail: { message, userId },
+    }));
+  } catch {}
 }
 
 async function serverFetch(path, options = {}, withAuth = false) {
@@ -18,6 +31,7 @@ async function serverFetch(path, options = {}, withAuth = false) {
   if (withAuth) {
     if (!session?.access_token) throw new Error('Sessão ausente.');
     headers.Authorization = `Bearer ${session.access_token}`;
+    if (session?.game_session_id) headers['X-Game-Session-Id'] = session.game_session_id;
   }
 
   let res;
@@ -32,6 +46,10 @@ async function serverFetch(path, options = {}, withAuth = false) {
     const msg = body?.error || body?.message || `Erro ${res.status}`;
     const err = new Error(String(msg));
     err.status = res.status;
+    err.code = body?.code || null;
+    if (withAuth && ['SESSION_REPLACED','SESSION_REQUIRED'].includes(err.code)) {
+      notifySessionReplaced(String(msg));
+    }
     throw err;
   }
   return body;
@@ -83,6 +101,7 @@ async function supabaseFetch(path, options = {}, withAuth = false) {
 function setSession(nextSession, user = null) {
   session = nextSession;
   currentUser = user;
+  if (session?.game_session_id) sessionReplacementNotified = false;
   localStorage.setItem(SESSION_KEY, JSON.stringify({ session, user: currentUser }));
 }
 
@@ -93,6 +112,7 @@ function sessionFromAuth(body) {
     access_token: body.access_token,
     refresh_token: body.refresh_token,
     expires_at: body.expires_at || (body.expires_in ? now + Number(body.expires_in) : null),
+    game_session_id: body.game_session_id || null,
   };
 }
 
@@ -154,7 +174,7 @@ async function refreshSession() {
   try {
     const body = await serverFetch('/api/auth/refresh', {
       method: 'POST',
-      body: JSON.stringify({ refresh_token: session.refresh_token }),
+      body: JSON.stringify({ refresh_token: session.refresh_token, game_session_id: session.game_session_id }),
     });
     if (!body?.session?.access_token || !body?.user) throw new Error('Sessão não renovada');
     setSession(body.session, body.user);
@@ -169,6 +189,7 @@ async function authedServerFetch(path, options = {}, retry = true) {
   try {
     return await serverFetch(path, options, true);
   } catch (err) {
+    if (['SESSION_REPLACED','SESSION_REQUIRED'].includes(err?.code)) throw err;
     const authish = err?.status === 401 || /jwt|token|expired|unauthorized|sessão|401/i.test(String(err?.message || err));
     if (retry && authish && await refreshSession()) return authedServerFetch(path, options, false);
     throw err;
@@ -193,7 +214,7 @@ export async function restoreSession() {
     const parsed = JSON.parse(raw);
     session = parsed.session || null;
     currentUser = parsed.user || null;
-    if (!session?.access_token) throw new Error('Sessão inválida');
+    if (!session?.access_token || !session?.game_session_id) throw new Error('Sessão antiga; faça login novamente.');
     const body = await authedServerFetch('/api/auth/me');
     currentUser = body.user;
     setSession(session, currentUser);
@@ -201,6 +222,24 @@ export async function restoreSession() {
   } catch {
     signOutLocal();
     return null;
+  }
+}
+
+export async function checkGameSession() {
+  if (!session?.access_token || !session?.game_session_id) return false;
+  const body = await authedServerFetch('/api/auth/session-status', {}, false);
+  return Boolean(body?.active);
+}
+
+export async function endGameSession() {
+  if (!session?.access_token || !session?.game_session_id) {
+    signOutLocal();
+    return;
+  }
+  try {
+    await authedServerFetch('/api/auth/logout', { method: 'POST', body: '{}' }, false);
+  } finally {
+    signOutLocal();
   }
 }
 

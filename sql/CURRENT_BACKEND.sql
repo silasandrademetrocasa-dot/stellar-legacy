@@ -343,3 +343,59 @@ begin
 end $$;
 select cron.schedule('stellar-v12-clan-interest','0 2 * * *','select public.process_all_clan_interest_v12();');
 select cron.schedule('stellar-v12-clan-collection','0 3 * * *','select public.process_all_clan_collection_v12();');
+
+
+-- ============================================================
+-- V12.1.4 — LOGIN ÚNICO / GAME SESSION LOCK
+-- ============================================================
+create table if not exists public.game_login_sessions_v1214 (
+  user_id uuid primary key references auth.users(id) on delete cascade,
+  session_id uuid not null,
+  device_label text,
+  issued_at timestamptz not null default now(),
+  last_seen timestamptz not null default now()
+);
+
+alter table public.game_login_sessions_v1214 enable row level security;
+revoke all on table public.game_login_sessions_v1214 from anon, authenticated;
+
+create or replace function public.register_game_session_v1214(p_session_id uuid,p_device_label text default null)
+returns jsonb language plpgsql security definer set search_path=public,auth,pg_temp as $$
+declare v_uid uuid:=auth.uid(); v_previous uuid;
+begin
+  if v_uid is null then raise exception 'Usuário não autenticado.'; end if;
+  if p_session_id is null then raise exception 'Identificador de sessão ausente.'; end if;
+  select session_id into v_previous from public.game_login_sessions_v1214 where user_id=v_uid;
+  insert into public.game_login_sessions_v1214(user_id,session_id,device_label,issued_at,last_seen)
+  values(v_uid,p_session_id,left(nullif(trim(coalesce(p_device_label,'')),''),160),now(),now())
+  on conflict(user_id) do update set session_id=excluded.session_id,device_label=excluded.device_label,issued_at=now(),last_seen=now();
+  return jsonb_build_object('ok',true,'session_id',p_session_id,'replaced_previous',v_previous is not null and v_previous<>p_session_id);
+end;$$;
+
+create or replace function public.validate_game_session_v1214(p_session_id uuid,p_touch boolean default true)
+returns jsonb language plpgsql security definer set search_path=public,auth,pg_temp as $$
+declare v_uid uuid:=auth.uid(); v_current uuid; v_issued timestamptz; v_last_seen timestamptz;
+begin
+  if v_uid is null then raise exception 'Usuário não autenticado.'; end if;
+  select session_id,issued_at,last_seen into v_current,v_issued,v_last_seen from public.game_login_sessions_v1214 where user_id=v_uid;
+  if v_current is null or p_session_id is null or v_current<>p_session_id then return jsonb_build_object('valid',false,'reason','replaced'); end if;
+  if p_touch then update public.game_login_sessions_v1214 set last_seen=now() where user_id=v_uid and session_id=p_session_id returning last_seen into v_last_seen; end if;
+  return jsonb_build_object('valid',true,'issued_at',v_issued,'last_seen',v_last_seen);
+end;$$;
+
+create or replace function public.clear_game_session_v1214(p_session_id uuid)
+returns jsonb language plpgsql security definer set search_path=public,auth,pg_temp as $$
+declare v_uid uuid:=auth.uid(); v_deleted integer:=0;
+begin
+  if v_uid is null then raise exception 'Usuário não autenticado.'; end if;
+  delete from public.game_login_sessions_v1214 where user_id=v_uid and session_id=p_session_id;
+  get diagnostics v_deleted=row_count;
+  return jsonb_build_object('ok',true,'cleared',v_deleted>0);
+end;$$;
+
+revoke all on function public.register_game_session_v1214(uuid,text) from public,anon;
+revoke all on function public.validate_game_session_v1214(uuid,boolean) from public,anon;
+revoke all on function public.clear_game_session_v1214(uuid) from public,anon;
+grant execute on function public.register_game_session_v1214(uuid,text) to authenticated,service_role;
+grant execute on function public.validate_game_session_v1214(uuid,boolean) to authenticated,service_role;
+grant execute on function public.clear_game_session_v1214(uuid) to authenticated,service_role;

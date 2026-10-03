@@ -1,4 +1,4 @@
-# Stellar Legacy — V12.1.3
+# Stellar Legacy — V12.1.4
 
 Versão atual consolidada do Stellar Legacy. O pacote foi limpo para manter somente arquivos necessários ao jogo, documentação atual e um snapshot único do backend. O histórico completo das versões permanece no Git.
 
@@ -46,3 +46,8 @@ As migrations e changelogs históricos não fazem parte do ZIP atual porque perm
 - Modo Guardião usa o mesmo alcance de ataque laser da nave (900u normal / 1250u em mapas de batalha).
 - Alcance dos módulos de coleta BOX/Pedras reduzido para 50% do raio do minimapa.
 - Venda de equipamento e drones exige confirmação explícita antes de remover o item.
+
+## V12.1.4 — Login Único
+
+A conta possui uma única sessão de jogo ativa. Cada login recebe um `game_session_id` próprio e o Supabase mantém apenas o mais recente por usuário. Um novo login substitui o anterior; a sessão antiga é detectada pelo cliente em até poucos segundos, perde acesso aos endpoints protegidos e volta para a tela de login. O save local da sessão revogada é removido para impedir conflito com o progresso do dispositivo mais novo.
+

@@ -1,6 +1,6 @@
-import { FACTIONS, SHIPS, ITEMS, LASER_AMMO, ROCKETS, NPC_TYPES, MAPS, RESOURCES } from './data.js?v=12.1.3';
-import { GAME_ASSETS } from './assets/v8/manifest.js?v=12.1.3';
-import { signUp, signIn, restoreSession, signOutLocal, getUser, loadCloudSave, saveCloudSave, updateCallsign, updatePassword, loadRankings, loadAuctionBids, saveAuctionBidOnline, markAuctionBidStatusOnline, loadAuctionMarket, upsertPlayerPresenceOnline, loadMapPresenceOnline, removePlayerPresenceOnline, queuePvpAttackOnline, consumePvpDamageEventsOnline, syncArenaProfileOnline, loadArenaState, loadArenaDailyRewardStatus, claimArenaDailyReward, loadArenaOpponents, loadArenaHistory, arenaAttackOnline, listClansOnline, loadMyClanOnline, createClanOnline, joinClanOnline, leaveClanOnline, transferClanCreditsOnline, claimClanCreditGrantsOnline, recordClanAlienKillOnline, getPremiumShopOnline, testPurchasePremiumOnline } from './api.js?v=12.1.3';
+import { FACTIONS, SHIPS, ITEMS, LASER_AMMO, ROCKETS, NPC_TYPES, MAPS, RESOURCES } from './data.js?v=12.1.4';
+import { GAME_ASSETS } from './assets/v8/manifest.js?v=12.1.4';
+import { signUp, signIn, restoreSession, signOutLocal, checkGameSession, endGameSession, getUser, loadCloudSave, saveCloudSave, updateCallsign, updatePassword, loadRankings, loadAuctionBids, saveAuctionBidOnline, markAuctionBidStatusOnline, loadAuctionMarket, upsertPlayerPresenceOnline, loadMapPresenceOnline, removePlayerPresenceOnline, queuePvpAttackOnline, consumePvpDamageEventsOnline, syncArenaProfileOnline, loadArenaState, loadArenaDailyRewardStatus, claimArenaDailyReward, loadArenaOpponents, loadArenaHistory, arenaAttackOnline, listClansOnline, loadMyClanOnline, createClanOnline, joinClanOnline, leaveClanOnline, transferClanCreditsOnline, claimClanCreditGrantsOnline, recordClanAlienKillOnline, getPremiumShopOnline, testPurchasePremiumOnline } from './api.js?v=12.1.4';
 
 const canvas = document.querySelector('#game');
 const ctx = canvas.getContext('2d');
@@ -4489,13 +4489,41 @@ document.addEventListener('keydown',e=>{
 });
 
 
+function forceLogoutBecauseSessionMoved(message='Sua conta foi acessada em outro dispositivo.',userId=null){
+  const staleUserId=userId||getUser()?.id||null;
+  authenticated=false;
+  cloudDirty=false;
+  player.laserFiring=false;
+  state.target=null;
+  clearOnlinePlayers();
+  try{if(staleUserId)localStorage.removeItem(`${SAVE_KEY_PREFIX}:${staleUserId}`);}catch{}
+  progress=null;
+  clanRuntime.state=null;clanRuntime.clans=[];clanRuntime.lastAt=0;
+  premiumRuntime.state=null;premiumRuntime.lastAt=0;
+  updateClanBadge();updatePremiumBadge();
+  for(const modal of dismissibleModals())modal.classList.add('hidden');
+  ui.factionModal.classList.add('hidden');
+  ui.portalPrompt?.classList.add('hidden');
+  ui.baseTradePrompt?.classList.add('hidden');
+  ui.petFloatPanel?.classList.add('hidden');
+  ui.loginModal.classList.remove('hidden');
+  if(ui.userLabel)ui.userLabel.textContent='—';
+  if(ui.rankChip)ui.rankChip.textContent='Piloto Básico';
+  setSync('SESSÃO ENCERRADA','err');
+  showAuthMode('login');
+  ui.authMessage.textContent=message+' O login mais recente permaneceu conectado.';
+}
+window.addEventListener('stellar-session-replaced',e=>{
+  forceLogoutBecauseSessionMoved(e?.detail?.message||'Sua conta foi acessada em outro dispositivo.',e?.detail?.userId||null);
+});
+
 function showAuthMode(mode){
   const login=mode==='login';ui.loginForm.classList.toggle('hidden',!login);ui.registerForm.classList.toggle('hidden',login);ui.loginTabBtn.classList.toggle('active',login);ui.registerTabBtn.classList.toggle('active',!login);ui.authMessage.textContent='';
 }
 ui.loginTabBtn.onclick=()=>showAuthMode('login');ui.registerTabBtn.onclick=()=>showAuthMode('register');
 ui.loginForm.onsubmit=async e=>{e.preventDefault();ui.authMessage.textContent='Entrando...';try{await signIn({email:ui.loginEmail.value,password:ui.loginPassword.value});await afterAuth();}catch(err){ui.authMessage.textContent=err.message;}};
 ui.registerForm.onsubmit=async e=>{e.preventDefault();ui.authMessage.textContent='Criando conta...';try{const result=await signUp({callsign:ui.registerCallsign.value,email:ui.registerEmail.value,password:ui.registerPassword.value});if(result.requires_confirmation){ui.authMessage.textContent='Conta criada. Confirme o e-mail no Supabase e depois entre.';showAuthMode('login');ui.loginEmail.value=ui.registerEmail.value;return;}await afterAuth();}catch(err){ui.authMessage.textContent=err.message;}};
-ui.logoutBtn.onclick=async()=>{await flushCloudSave(true);await removePlayerPresenceOnline().catch(()=>{});clearOnlinePlayers();signOutLocal();authenticated=false;progress=null;clanRuntime.state=null;clanRuntime.clans=[];clanRuntime.lastAt=0;premiumRuntime.state=null;premiumRuntime.lastAt=0;updateClanBadge();updatePremiumBadge();state.target=null;player.laserFiring=false;for(const modal of dismissibleModals())modal.classList.add('hidden');ui.factionModal.classList.add('hidden');ui.portalPrompt?.classList.add('hidden');ui.baseTradePrompt?.classList.add('hidden');ui.petFloatPanel?.classList.add('hidden');ui.loginModal.classList.remove('hidden');if(ui.userLabel)ui.userLabel.textContent='—';if(ui.rankChip)ui.rankChip.textContent='Piloto Básico';setSync('LOCAL','');showAuthMode('login');};
+ui.logoutBtn.onclick=async()=>{await flushCloudSave(true);await removePlayerPresenceOnline().catch(()=>{});clearOnlinePlayers();await endGameSession().catch(()=>signOutLocal());authenticated=false;progress=null;clanRuntime.state=null;clanRuntime.clans=[];clanRuntime.lastAt=0;premiumRuntime.state=null;premiumRuntime.lastAt=0;updateClanBadge();updatePremiumBadge();state.target=null;player.laserFiring=false;for(const modal of dismissibleModals())modal.classList.add('hidden');ui.factionModal.classList.add('hidden');ui.portalPrompt?.classList.add('hidden');ui.baseTradePrompt?.classList.add('hidden');ui.petFloatPanel?.classList.add('hidden');ui.loginModal.classList.remove('hidden');if(ui.userLabel)ui.userLabel.textContent='—';if(ui.rankChip)ui.rankChip.textContent='Piloto Básico';setSync('LOCAL','');showAuthMode('login');};
 
 function startLoadedGame(){
   state.lastPlayerDamageAt=nowSec();
@@ -4555,6 +4583,10 @@ layoutHudPanels();
 window.addEventListener('resize', layoutHudPanels);
 window.addEventListener('orientationchange', ()=>setTimeout(layoutHudPanels, 120));
 boot();
+setInterval(()=>{
+  if(!authenticated)return;
+  checkGameSession().catch(()=>{});
+},3000);
 setInterval(()=>{if(progress){saveGame();flushCloudSave();}},7000);
-document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'&&progress){saveGame();flushCloudSave(true);}});
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'&&progress){saveGame();flushCloudSave(true);}else if(document.visibilityState==='visible'&&authenticated){checkGameSession().catch(()=>{});}});
 let last=performance.now();function loop(t){const minFrame=1000/qualityProfile().fps;if(t-last<minFrame){requestAnimationFrame(loop);return;}const dt=Math.min((t-last)/1000,.05);last=t;update(dt);draw();requestAnimationFrame(loop);}requestAnimationFrame(loop);

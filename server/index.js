@@ -2,6 +2,7 @@ import express from 'express';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { createClient } from '@supabase/supabase-js';
+import { randomUUID } from 'crypto';
 
 const app = express();
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -53,6 +54,37 @@ function configStatus() {
   };
 }
 
+function gameSessionIdFromRequest(req) {
+  return String(req.headers['x-game-session-id'] || '').trim();
+}
+
+function deviceLabel(req) {
+  const ua = String(req.headers['user-agent'] || 'Dispositivo').replace(/\s+/g, ' ').trim();
+  return ua.slice(0, 160) || 'Dispositivo';
+}
+
+async function registerGameSession(sb, req) {
+  const sessionId = randomUUID();
+  const { data, error } = await sb.rpc('register_game_session_v1214', {
+    p_session_id: sessionId,
+    p_device_label: deviceLabel(req),
+  });
+  if (error) throw new Error(`Falha ao registrar sessão do jogo: ${error.message}`);
+  return { sessionId, replacedPrevious: Boolean(data?.replaced_previous) };
+}
+
+async function validateGameSession(sb, req, { touch = true } = {}) {
+  const sessionId = gameSessionIdFromRequest(req);
+  if (!sessionId) return { valid: false, missing: true, reason: 'missing' };
+  const { data, error } = await sb.rpc('validate_game_session_v1214', {
+    p_session_id: sessionId,
+    p_touch: Boolean(touch),
+  });
+  if (error) throw new Error(`Falha ao validar sessão do jogo: ${error.message}`);
+  return { ...(data || {}), sessionId };
+}
+
+
 async function requireUser(req, res, next) {
   try {
     const token = bearer(req);
@@ -64,6 +96,16 @@ async function requireUser(req, res, next) {
     req.accessToken = token;
     req.user = data.user;
     req.sb = supabaseForToken(token);
+    const gameSession = await validateGameSession(req.sb, req, { touch: true });
+    if (!gameSession.valid) {
+      return res.status(gameSession.missing ? 401 : 409).json({
+        error: gameSession.missing
+          ? 'Faça login novamente para ativar a proteção de sessão única.'
+          : 'Sua conta foi acessada em outro dispositivo.',
+        code: gameSession.missing ? 'SESSION_REQUIRED' : 'SESSION_REPLACED',
+      });
+    }
+    req.gameSessionId = gameSession.sessionId;
     next();
   } catch (err) {
     next(err);
@@ -80,7 +122,7 @@ async function ensureProfile(sb, user, callsign = '') {
   if (error) console.warn('profile upsert:', error.message);
 }
 
-app.get('/health', (req, res) => res.json({ ok: true, game: 'Stellar Legacy', version: '12.1.3' }));
+app.get('/health', (req, res) => res.json({ ok: true, game: 'Stellar Legacy', version: '12.1.4' }));
 
 
 app.get('/api/config', (req, res) => {
@@ -96,10 +138,10 @@ app.get('/api/config', (req, res) => {
 
 app.get('/api/meta', (req, res) => res.json({
   name: 'Stellar Legacy',
-  version: '12.1.3',
+  version: '12.1.4',
   authReady: Boolean(SUPABASE_URL && SUPABASE_KEY),
   diagnostics: configStatus(),
-  features: ['login', 'cloud_save', 'factions', 'safe_zone', 'shop', 'owned_ships', 'equipment_slots', 'inventory', 'drones', 'ammo', 'rockets', 'expanded_expedition_maps', 'cargo_hold', 'ore_trading', 'npc_cargo_boxes', 'npc_respawn', 'minimap_navigation', 'waypoints', 'landmark_discovery', 'combat_fx', 'pet_modules', 'auto_buy_cpu', 'v8_asset_identity', 'mission_control_v93', 'mission_acceptance_tracking', 'expanded_enemy_density', 'online_player_presence', 'real_player_auction', 'rank_nameplates_v12', 'clans_v12', 'clan_vault_v12', 'premium_shop_v12', 'battle_pass_paid_v12', 'premium_subscription_v12', 'clan_daily_economy_v12', 'portal_neutral_zone_v12', 'base_only_equipment_v12'],
+  features: ['login', 'cloud_save', 'factions', 'safe_zone', 'shop', 'owned_ships', 'equipment_slots', 'inventory', 'drones', 'ammo', 'rockets', 'expanded_expedition_maps', 'cargo_hold', 'ore_trading', 'npc_cargo_boxes', 'npc_respawn', 'minimap_navigation', 'waypoints', 'landmark_discovery', 'combat_fx', 'pet_modules', 'auto_buy_cpu', 'v8_asset_identity', 'mission_control_v93', 'mission_acceptance_tracking', 'expanded_enemy_density', 'online_player_presence', 'real_player_auction', 'rank_nameplates_v12', 'clans_v12', 'clan_vault_v12', 'premium_shop_v12', 'battle_pass_paid_v12', 'premium_subscription_v12', 'clan_daily_economy_v12', 'portal_neutral_zone_v12', 'base_only_equipment_v12', 'single_session_v1214'],
 }));
 
 app.get('/api/diagnostics', asyncRoute(async (req, res) => {
@@ -146,9 +188,11 @@ app.post('/api/auth/signup', asyncRoute(async (req, res) => {
   });
   if (error) return res.status(400).json({ error: error.message });
 
+  let gameSession = null;
   if (data.session && data.user) {
     const authed = supabaseForToken(data.session.access_token);
     await ensureProfile(authed, data.user, callsign);
+    gameSession = await registerGameSession(authed, req);
   }
 
   res.json({
@@ -157,6 +201,7 @@ app.post('/api/auth/signup', asyncRoute(async (req, res) => {
       access_token: data.session.access_token,
       refresh_token: data.session.refresh_token,
       expires_at: data.session.expires_at,
+      game_session_id: gameSession?.sessionId || null,
     } : null,
     requires_confirmation: !data.session,
   });
@@ -171,23 +216,53 @@ app.post('/api/auth/login', asyncRoute(async (req, res) => {
   if (error || !data.session) return res.status(401).json({ error: error?.message || 'Login inválido.' });
   const authed = supabaseForToken(data.session.access_token);
   await ensureProfile(authed, data.user);
+  const gameSession = await registerGameSession(authed, req);
   res.json({
     user: { id: data.user.id, email: data.user.email, callsign: data.user.user_metadata?.callsign || data.user.email?.split('@')[0] || 'Pilot' },
-    session: { access_token: data.session.access_token, refresh_token: data.session.refresh_token, expires_at: data.session.expires_at },
+    session: {
+      access_token: data.session.access_token,
+      refresh_token: data.session.refresh_token,
+      expires_at: data.session.expires_at,
+      game_session_id: gameSession.sessionId,
+    },
+    replaced_previous: gameSession.replacedPrevious,
   });
 }));
 
 app.post('/api/auth/refresh', asyncRoute(async (req, res) => {
-  const { refresh_token } = req.body || {};
+  const { refresh_token, game_session_id } = req.body || {};
   if (!refresh_token) return res.status(400).json({ error: 'Refresh token ausente.' });
+  if (!game_session_id) return res.status(401).json({ error: 'Faça login novamente para ativar a proteção de sessão única.', code: 'SESSION_REQUIRED' });
   const sb = supabaseBase();
   if (!sb) return res.status(503).json({ error: 'Supabase não configurado.', diagnostics: configStatus() });
   const { data, error } = await sb.auth.refreshSession({ refresh_token });
   if (error || !data.session) return res.status(401).json({ error: error?.message || 'Não foi possível renovar a sessão.' });
+  const authed = supabaseForToken(data.session.access_token);
+  const { data: sessionState, error: sessionError } = await authed.rpc('validate_game_session_v1214', {
+    p_session_id: String(game_session_id),
+    p_touch: true,
+  });
+  if (sessionError) return res.status(503).json({ error: `Falha ao validar sessão do jogo: ${sessionError.message}` });
+  if (!sessionState?.valid) return res.status(409).json({ error: 'Sua conta foi acessada em outro dispositivo.', code: 'SESSION_REPLACED' });
   res.json({
     user: { id: data.user.id, email: data.user.email, callsign: data.user.user_metadata?.callsign || data.user.email?.split('@')[0] || 'Pilot' },
-    session: { access_token: data.session.access_token, refresh_token: data.session.refresh_token, expires_at: data.session.expires_at },
+    session: {
+      access_token: data.session.access_token,
+      refresh_token: data.session.refresh_token,
+      expires_at: data.session.expires_at,
+      game_session_id: String(game_session_id),
+    },
   });
+}));
+
+app.get('/api/auth/session-status', requireUser, asyncRoute(async (req, res) => {
+  res.json({ ok: true, active: true, game_session_id: req.gameSessionId });
+}));
+
+app.post('/api/auth/logout', requireUser, asyncRoute(async (req, res) => {
+  const { data, error } = await req.sb.rpc('clear_game_session_v1214', { p_session_id: req.gameSessionId });
+  if (error) return res.status(400).json({ error: error.message });
+  res.json(data || { ok: true });
 }));
 
 app.get('/api/auth/me', requireUser, asyncRoute(async (req, res) => {
@@ -262,6 +337,6 @@ app.use((err, req, res, next) => {
 
 const port = process.env.PORT || 3000;
 app.listen(port, () => {
-  console.log(`Stellar Legacy V12.1.3 :${port}`);
+  console.log(`Stellar Legacy V12.1.4 :${port}`);
   console.log('Supabase config:', configStatus());
 });
