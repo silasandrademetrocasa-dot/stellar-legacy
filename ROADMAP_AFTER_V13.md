@@ -1,25 +1,16 @@
-# Roadmap depois da V13
+# Depois da V13.1
 
-## 1. Guerra de Clãs
-Temporada semanal com declaração de guerra, mapa dedicado, pontos por abate/objetivo, cofre de guerra e ranking próprio.
+## V13.2 — Territory Wars
+- Captura real de setores BATTLE por clãs.
+- Beacons de domínio e buffs de território.
+- Temporadas de guerra com ranking e recompensas.
 
-## 2. World Boss cooperativo
-Boss global com dezenas de milhões de HP, fases, mecânicas de área, ranking de contribuição e recompensa individual + de clã.
+## V13.3 — Equipment Evolution
+- Refino de LF-4 / escudos / motores.
+- Atributos aleatórios raros sem monetização pay-to-win direta.
+- Salvage de itens duplicados.
 
-## 3. Evolução de habilidades
-Árvore separada para habilidades ativas, redução de cooldown, potência, duração e variantes Elite.
-
-## 4. Eventos rotativos de mapa
-Invasão alien, tempestade de radiação, mineração dobrada, caça de BOSS e portais temporários.
-
-## 5. Galaxy Gate DELTA / EPSILON
-Portais especiais com mutadores: sem reparação, dano crescente, ondas com tempo e escolhas de recompensa.
-
-## 6. Loot raro de BOSS
-Chance baixa de blueprint, visual de nave, título, módulo especial e fragmentos de fabricação.
-
-## 7. Sistema de títulos e conquistas
-Metas permanentes ligadas a PVP, Gates, clã, mineração, missões e coleção de naves.
-
-## 8. Temporadas competitivas
-Reset parcial de Arena/Clã com cosméticos exclusivos, molduras de patente e histórico de campeões.
+## V14 — Online Universe
+- Instâncias persistentes de mapa e NPC no servidor.
+- Grupos/party e raids sincronizadas.
+- Mercado entre jogadores e economia regulada.

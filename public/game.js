@@ -1,6 +1,6 @@
-import { FACTIONS, SHIPS, ITEMS, LASER_AMMO, ROCKETS, NPC_TYPES, MAPS, RESOURCES } from './data.js?v=13.0.0';
-import { GAME_ASSETS } from './assets/v8/manifest.js?v=13.0.0';
-import { signUp, signIn, restoreSession, signOutLocal, checkGameSession, endGameSession, getUser, loadCloudSave, saveCloudSave, updateCallsign, updatePassword, loadRankings, loadAuctionBids, saveAuctionBidOnline, markAuctionBidStatusOnline, loadAuctionMarket, upsertPlayerPresenceOnline, loadMapPresenceOnline, removePlayerPresenceOnline, queuePvpAttackOnline, consumePvpDamageEventsOnline, syncArenaProfileOnline, loadArenaState, loadArenaDailyRewardStatus, claimArenaDailyReward, loadArenaOpponents, loadArenaHistory, arenaAttackOnline, listClansOnline, loadMyClanOnline, createClanOnline, joinClanOnline, leaveClanOnline, transferClanCreditsOnline, claimClanCreditGrantsOnline, recordClanAlienKillOnline, getPremiumShopOnline, testPurchasePremiumOnline } from './api.js?v=13.0.0';
+import { FACTIONS, SHIPS, ITEMS, LASER_AMMO, ROCKETS, NPC_TYPES, MAPS, RESOURCES } from './data.js?v=13.1.0';
+import { GAME_ASSETS } from './assets/v8/manifest.js?v=13.1.0';
+import { signUp, signIn, restoreSession, signOutLocal, checkGameSession, endGameSession, getUser, loadCloudSave, saveCloudSave, updateCallsign, updatePassword, loadRankings, loadAuctionBids, saveAuctionBidOnline, markAuctionBidStatusOnline, loadAuctionMarket, upsertPlayerPresenceOnline, loadMapPresenceOnline, removePlayerPresenceOnline, queuePvpAttackOnline, consumePvpDamageEventsOnline, syncArenaProfileOnline, loadArenaState, loadArenaDailyRewardStatus, claimArenaDailyReward, loadArenaOpponents, loadArenaHistory, arenaAttackOnline, listClansOnline, loadMyClanOnline, createClanOnline, joinClanOnline, leaveClanOnline, transferClanCreditsOnline, claimClanCreditGrantsOnline, recordClanAlienKillOnline, getPremiumShopOnline, testPurchasePremiumOnline, loadWarfrontStateOnline, hitWorldBossOnline, claimWorldBossRewardOnline, declareClanWarOnline, recordClanWarScoreOnline } from './api.js?v=13.1.0';
 
 const canvas = document.querySelector('#game');
 const ctx = canvas.getContext('2d');
@@ -108,6 +108,7 @@ const ui = {
   auctionBtn: $('#auctionBtn'), auctionTopClock: $('#auctionTopClock'), auctionModal: $('#auctionModal'), closeAuction: $('#closeAuction'), auctionClock: $('#auctionClock'), auctionCredits: $('#auctionCredits'), auctionEscrow: $('#auctionEscrow'), auctionGrid: $('#auctionGrid'), auctionHistory: $('#auctionHistory'),
   arenaBtn: $('#arenaBtn'), arenaTopCount: $('#arenaTopCount'), arenaModal: $('#arenaModal'), closeArena: $('#closeArena'), arenaRefresh: $('#arenaRefresh'), arenaAttacksLeft: $('#arenaAttacksLeft'), arenaRating: $('#arenaRating'), arenaWins: $('#arenaWins'), arenaLosses: $('#arenaLosses'), arenaPower: $('#arenaPower'), arenaDailyReward: $('#arenaDailyReward'), arenaRewardLeague: $('#arenaRewardLeague'), arenaRewardRank: $('#arenaRewardRank'), arenaRewardBonus: $('#arenaRewardBonus'), arenaRewardProgress: $('#arenaRewardProgress'), arenaRewardItems: $('#arenaRewardItems'), arenaRewardClaim: $('#arenaRewardClaim'), arenaRewardFoot: $('#arenaRewardFoot'), arenaOpponents: $('#arenaOpponents'), arenaHistory: $('#arenaHistory'), arenaResult: $('#arenaResult'), arenaBattleStage: $('#arenaBattleStage'), arenaBattleStatus: $('#arenaBattleStatus'), arenaBattleTimer: $('#arenaBattleTimer'), arenaBattleSkip: $('#arenaBattleSkip'), arenaBattleField: $('#arenaBattleField'), arenaFighterAttacker: $('#arenaFighterAttacker'), arenaFighterDefender: $('#arenaFighterDefender'), arenaAttackerName: $('#arenaAttackerName'), arenaDefenderName: $('#arenaDefenderName'), arenaAttackerShip: $('#arenaAttackerShip'), arenaDefenderShip: $('#arenaDefenderShip'), arenaAttackerShieldBar: $('#arenaAttackerShieldBar'), arenaDefenderShieldBar: $('#arenaDefenderShieldBar'), arenaAttackerHpBar: $('#arenaAttackerHpBar'), arenaDefenderHpBar: $('#arenaDefenderHpBar'), arenaAttackerShieldText: $('#arenaAttackerShieldText'), arenaDefenderShieldText: $('#arenaDefenderShieldText'), arenaAttackerHpText: $('#arenaAttackerHpText'), arenaDefenderHpText: $('#arenaDefenderHpText'), arenaBattleRound: $('#arenaBattleRound'), arenaProjectileLayer: $('#arenaProjectileLayer'), arenaBattleFeed: $('#arenaBattleFeed'), arenaBattleAnalysis: $('#arenaBattleAnalysis'),
   clanBtn: $('#clanBtn'), clanTopTag: $('#clanTopTag'), clanModal: $('#clanModal'), closeClan: $('#closeClan'), clanRefresh: $('#clanRefresh'), clanContent: $('#clanContent'),
+  warfrontBtn: $('#warfrontBtn'), warfrontTopStatus: $('#warfrontTopStatus'), warfrontModal: $('#warfrontModal'), closeWarfront: $('#closeWarfront'), warfrontRefresh: $('#warfrontRefresh'), warfrontContent: $('#warfrontContent'),
   premiumBtn: $('#premiumBtn'), premiumTopStatus: $('#premiumTopStatus'), premiumModal: $('#premiumModal'), closePremium: $('#closePremium'), premiumModeChip: $('#premiumModeChip'), premiumBenefits: $('#premiumBenefits'), premiumProductGrid: $('#premiumProductGrid'),
   saleConfirmModal: $('#saleConfirmModal'), saleConfirmEyebrow: $('#saleConfirmEyebrow'), saleConfirmTitle: $('#saleConfirmTitle'), saleConfirmItem: $('#saleConfirmItem'), saleConfirmCopy: $('#saleConfirmCopy'), saleConfirmValueLabel: $('#saleConfirmValueLabel'), saleConfirmValue: $('#saleConfirmValue'), saleConfirmCancel: $('#saleConfirmCancel'), saleConfirmAccept: $('#saleConfirmAccept'),
   shopBtn: $('#shopBtn'), shopModal: $('#shopModal'), closeShop: $('#closeShop'), shopTabs: $('#shopTabs'), shopGrid: $('#shopGrid'), shopCredits: $('#shopCredits'), shopUridium: $('#shopUridium'),
@@ -350,6 +351,18 @@ const SHIP_ABILITY_CLASSES={
   control:new Set(['spearhead','defcom','defcomRaven','mimesis','disruptor','hyperion','keres']),
   singularity:new Set(['venom','cyborg','solaris','diminisher','basilisk','hecate']),
 };
+const WARFRONT_BLUEPRINTS={
+  lf4:{id:'lf4',name:'LF-4 PROTOTYPE',icon:'⚡',need:12,cores:2,itemId:'lf4',qty:1,desc:'Constrói 1 LF-4 com tecnologia recuperada.'},
+  sg3nb02:{id:'sg3nb02',name:'MATRIZ B02',icon:'⬢',need:18,cores:3,itemId:'sg3nb02',qty:1,desc:'Constrói 1 SG3N-B02 Elite.'},
+  g3n7900:{id:'g3n7900',name:'PROPULSOR 7900',icon:'➤',need:15,cores:2,itemId:'g3n7900',qty:1,desc:'Constrói 1 G3N-7900 Elite.'},
+};
+function freshWarfrontProgress(){return {skillCores:0,rareDrops:0,blueprints:{lf4:0,sg3nb02:0,g3n7900:0},crafted:{},skillMastery:{support:1,tank:1,control:1,singularity:1,assault:1},worldBossClaims:{}};}
+function normalizeWarfrontProgress(){if(!progress)return;progress.warfront ||= freshWarfrontProgress();const w=progress.warfront;w.skillCores=Math.max(0,Math.floor(Number(w.skillCores)||0));w.rareDrops=Math.max(0,Math.floor(Number(w.rareDrops)||0));w.blueprints ||= {};w.crafted ||= {};w.skillMastery ||= {};w.worldBossClaims ||= {};for(const id of Object.keys(WARFRONT_BLUEPRINTS))w.blueprints[id]=Math.max(0,Math.floor(Number(w.blueprints[id])||0));for(const id of ['support','tank','control','singularity','assault'])w.skillMastery[id]=Math.max(1,Math.min(5,Math.floor(Number(w.skillMastery[id])||1)));}
+function abilityClassId(){const id=progress?.activeShipId;if(SHIP_ABILITY_CLASSES.support.has(id))return 'support';if(SHIP_ABILITY_CLASSES.tank.has(id))return 'tank';if(SHIP_ABILITY_CLASSES.control.has(id))return 'control';if(SHIP_ABILITY_CLASSES.singularity.has(id))return 'singularity';return 'assault';}
+function abilityMasteryLevel(){normalizeWarfrontProgress();return progress?.warfront?.skillMastery?.[abilityClassId()]||1;}
+function abilityPowerMultiplier(){return 1+(abilityMasteryLevel()-1)*.08;}
+function abilityCooldownMultiplier(){return Math.max(.82,1-(abilityMasteryLevel()-1)*.045);}
+function abilityEffectiveCooldown(def=shipAbilityDef()){return def.cooldown*abilityCooldownMultiplier();}
 const SHIP_ABILITIES={
   support:{id:'support',name:'NANO RESTORE',icon:'✚',cooldown:38,duration:0,desc:'Repara 30% do HP e 22% do escudo instantaneamente.'},
   tank:{id:'tank',name:'FORTRESS',icon:'⬢',cooldown:50,duration:9,desc:'Reduz em 48% o dano recebido por 9s.'},
@@ -359,12 +372,12 @@ const SHIP_ABILITIES={
 };
 const abilityRuntime={activeId:null,activeUntil:0,dotTargetId:null,dotTicks:0,dotNextAt:0};
 function normalizeCombatAbilities(){if(!progress)return;progress.combatAbilities ||= {shipReadyAt:0};progress.combatAbilities.shipReadyAt=Math.max(0,Number(progress.combatAbilities.shipReadyAt)||0);}
-function shipAbilityDef(){const id=progress?.activeShipId;if(SHIP_ABILITY_CLASSES.support.has(id))return SHIP_ABILITIES.support;if(SHIP_ABILITY_CLASSES.tank.has(id))return SHIP_ABILITIES.tank;if(SHIP_ABILITY_CLASSES.control.has(id))return SHIP_ABILITIES.control;if(SHIP_ABILITY_CLASSES.singularity.has(id))return SHIP_ABILITIES.singularity;return SHIP_ABILITIES.assault;}
+function shipAbilityDef(){return SHIP_ABILITIES[abilityClassId()]||SHIP_ABILITIES.assault;}
 function shipAbilityCooldownRemaining(){normalizeCombatAbilities();return Math.max(0,(progress.combatAbilities.shipReadyAt-Date.now())/1000);}
 function shipAbilityActive(id=null){return abilityRuntime.activeUntil>Date.now()&&(!id||abilityRuntime.activeId===id);}
-function shipAbilityDamageMultiplier(){return shipAbilityActive('assault')?1.35:1;}
-function shipAbilitySpeedMultiplier(){if(shipAbilityActive('assault'))return 1.20;if(shipAbilityActive('control'))return 1.24;return 1;}
-function shipAbilityIncomingMultiplier(){return shipAbilityActive('tank')?0.52:1;}
+function shipAbilityDamageMultiplier(){return shipAbilityActive('assault')?(1.35+(abilityMasteryLevel()-1)*.05):1;}
+function shipAbilitySpeedMultiplier(){if(shipAbilityActive('assault'))return 1.20+(abilityMasteryLevel()-1)*.025;if(shipAbilityActive('control'))return 1.24+(abilityMasteryLevel()-1)*.025;return 1;}
+function shipAbilityIncomingMultiplier(){return shipAbilityActive('tank')?Math.max(.34,.52-(abilityMasteryLevel()-1)*.045):1;}
 function triggerPetKamikaze(){
   if(!progress?.pet?.owned){showToast('Adquira o P.E.T. primeiro');return;}
   if(!progress.pet.gearsOwned?.kami){showToast('Compre o módulo Kamikaze no P.E.T.');return;}
@@ -378,22 +391,22 @@ function useShipAbility(){
   if(remaining>0){showToast(`${def.name} recarregando • ${remaining.toFixed(1)}s`);return;}
   const now=Date.now();normalizeCombatAbilities();
   if(def.id==='support'){
-    const hp=Math.round(player.maxHp*.30),shield=Math.round(player.maxShield*.22);const bh=player.hp,bs=player.shield;player.hp=Math.min(player.maxHp,player.hp+hp);player.shield=Math.min(player.maxShield,player.shield+shield);spawnParticle(player.x,player.y-34,`+${fmt(player.hp-bh)} HP • +${fmt(player.shield-bs)} ESC`,'#74ffc2');spawnImpactFx(player.x,player.y,'#74ffc2',70,'shield');
+    const power=abilityPowerMultiplier(),hp=Math.round(player.maxHp*.30*power),shield=Math.round(player.maxShield*.22*power);const bh=player.hp,bs=player.shield;player.hp=Math.min(player.maxHp,player.hp+hp);player.shield=Math.min(player.maxShield,player.shield+shield);spawnParticle(player.x,player.y-34,`+${fmt(player.hp-bh)} HP • +${fmt(player.shield-bs)} ESC`,'#74ffc2');spawnImpactFx(player.x,player.y,'#74ffc2',70,'shield');
   }else if(def.id==='control'){
-    const victims=state.enemies.filter(e=>e.hp>0&&Math.hypot(e.x-player.x,e.y-player.y)<=520);for(const e of victims)e.jammedUntil=nowSec()+5;abilityRuntime.activeId=def.id;abilityRuntime.activeUntil=now+def.duration*1000;spawnParticle(player.x,player.y-42,`JAM • ${victims.length} ALVOS`,'#7eeeff');spawnImpactFx(player.x,player.y,'#7eeeff',110,'shield');
+    const victims=state.enemies.filter(e=>e.hp>0&&Math.hypot(e.x-player.x,e.y-player.y)<=520);for(const e of victims)e.jammedUntil=nowSec()+5+(abilityMasteryLevel()-1)*.75;abilityRuntime.activeId=def.id;abilityRuntime.activeUntil=now+def.duration*1000;spawnParticle(player.x,player.y-42,`JAM • ${victims.length} ALVOS`,'#7eeeff');spawnImpactFx(player.x,player.y,'#7eeeff',110,'shield');
   }else if(def.id==='singularity'){
     if(!state.target||state.target.hp<=0||state.target.isPlayer){showToast('Selecione um NPC para usar Singularity');return;}abilityRuntime.dotTargetId=state.target.id;abilityRuntime.dotTicks=7;abilityRuntime.dotNextAt=nowSec();abilityRuntime.activeId=def.id;abilityRuntime.activeUntil=now+def.duration*1000;spawnParticle(state.target.x,state.target.y-state.target.size,'SINGULARITY','#ff5f9e');
   }else{
     abilityRuntime.activeId=def.id;abilityRuntime.activeUntil=now+def.duration*1000;spawnParticle(player.x,player.y-40,def.name,def.id==='tank'?'#ffe777':'#72dcff');spawnImpactFx(player.x,player.y,def.id==='tank'?'#ffe777':'#72dcff',100,'shield');
   }
-  progress.combatAbilities.shipReadyAt=now+def.cooldown*1000;saveGame();showToast(`${def.name} ATIVADA!`,'reward');
+  progress.combatAbilities.shipReadyAt=now+abilityEffectiveCooldown(def)*1000;saveGame();showToast(`${def.name} ATIVADA!`,'reward');
 }
 function updateCombatAbilities(){
   if(!progress)return; const now=nowSec();
-  if(abilityRuntime.dotTicks>0&&now>=abilityRuntime.dotNextAt){const e=state.enemies.find(x=>x.id===abilityRuntime.dotTargetId&&x.hp>0);if(!e){abilityRuntime.dotTicks=0;abilityRuntime.dotTargetId=null;}else{const dmg=Math.max(1800,Math.round(player.laserDamage*1.15));dealDamageToEnemy(e,dmg,'#ff5f9e');abilityRuntime.dotTicks--;abilityRuntime.dotNextAt=now+1;if(abilityRuntime.dotTicks<=0)abilityRuntime.dotTargetId=null;}}
+  if(abilityRuntime.dotTicks>0&&now>=abilityRuntime.dotNextAt){const e=state.enemies.find(x=>x.id===abilityRuntime.dotTargetId&&x.hp>0);if(!e){abilityRuntime.dotTicks=0;abilityRuntime.dotTargetId=null;}else{const dmg=Math.max(1800,Math.round(player.laserDamage*1.15*abilityPowerMultiplier()));dealDamageToEnemy(e,dmg,'#ff5f9e');abilityRuntime.dotTicks--;abilityRuntime.dotNextAt=now+1;if(abilityRuntime.dotTicks<=0)abilityRuntime.dotTargetId=null;}}
 }
 function updateAbilityHud(){
-  if(!progress||!ui.shipAbilityBtn)return;const def=shipAbilityDef(),rem=shipAbilityCooldownRemaining(),active=shipAbilityActive(def.id);ui.shipAbilityName.textContent=def.name;ui.shipAbilityIcon.textContent=def.icon;ui.shipAbilityBtn.title=def.desc;ui.shipAbilityBtn.disabled=rem>0&&!active;ui.shipAbilityBtn.classList.toggle('ready',rem<=0&&!active);ui.shipAbilityBtn.classList.toggle('active',active);ui.shipAbilityStatus.textContent=active?`ATIVA • ${Math.max(0,(abilityRuntime.activeUntil-Date.now())/1000).toFixed(1)}s`:rem>0?`RECARGA ${rem.toFixed(1)}s • E`:'PRONTA • E';const ratio=active?1:Math.max(0,Math.min(1,1-rem/def.cooldown));ui.shipAbilityFill.style.transform=`scaleX(${ratio})`;
+  if(!progress||!ui.shipAbilityBtn)return;const def=shipAbilityDef(),rem=shipAbilityCooldownRemaining(),active=shipAbilityActive(def.id);ui.shipAbilityName.textContent=def.name;ui.shipAbilityIcon.textContent=def.icon;ui.shipAbilityBtn.title=def.desc;ui.shipAbilityBtn.disabled=rem>0&&!active;ui.shipAbilityBtn.classList.toggle('ready',rem<=0&&!active);ui.shipAbilityBtn.classList.toggle('active',active);ui.shipAbilityStatus.textContent=active?`ATIVA • ${Math.max(0,(abilityRuntime.activeUntil-Date.now())/1000).toFixed(1)}s`:rem>0?`RECARGA ${rem.toFixed(1)}s • E`:`PRONTA • E • M${abilityMasteryLevel()}`;const ratio=active?1:Math.max(0,Math.min(1,1-rem/abilityEffectiveCooldown(def)));ui.shipAbilityFill.style.transform=`scaleX(${ratio})`;
   const pet=progress.pet,kRem=petKamikazeCooldownRemaining(),kamiReady=!!pet?.owned&&!!pet?.gearsOwned?.kami;ui.petKamiAbilityBtn.disabled=!kamiReady||kRem>0||petRuntime.kamiArmed;ui.petKamiAbilityBtn.classList.toggle('ready',kamiReady&&kRem<=0&&!petRuntime.kamiArmed);ui.petKamiAbilityBtn.classList.toggle('active',!!petRuntime.kamiArmed);ui.petKamiAbilityStatus.textContent=!kamiReady?'BLOQUEADO • K':petRuntime.kamiArmed?'EM ROTA • K':kRem>0?`RECARGA ${kRem.toFixed(1)}s • K`:'PRONTO • K';ui.petKamiAbilityFill.style.transform=`scaleX(${!kamiReady?0:kRem<=0?1:Math.max(0,1-kRem/PET_KAMIKAZE_COOLDOWN)})`;
 }
 
@@ -1176,6 +1189,7 @@ function freshSave(factionId) {
     repairRequired: null,
     pet: freshPet(),
     combatAbilities:{shipReadyAt:0},
+    warfront:freshWarfrontProgress(),
     expeditionV9: 1,
   };
 }
@@ -1302,6 +1316,7 @@ function patentMeta(code){return SPECIAL_RANK_META[code]||PATENT_BY_CODE[code]||
 function patentBadgeMarkup(code,title){const meta=patentMeta(code);const label=title||meta.title;return `<span class="rank-badge" style="--rank-color:${meta.color}"><span class="rank-badge-icon">${meta.short}</span><span class="rank-badge-text">${label}</span></span>`;}
 function patentMiniMarkup(code){const meta=patentMeta(code);return `<span class="rank-mini" style="--rank-color:${meta.color}" title="${meta.title}">${meta.short}</span>`;}
 const clanRuntime={state:null,clans:[],busy:false,lastAt:0,claimBusy:false,lastClaimAt:0};
+const warfrontRuntime={state:null,clans:[],busy:false,lastAt:0,pendingBossDamage:0,lastDamageFlush:0,lastBossSync:0};
 function myRankingRow(){const me=getUser()?.id;return rankingsCache.find(r=>r.id===me)||null;}
 function updateRankChip(){if(!ui.rankChip)return;ui.rankChip.textContent=clanRuntime.state?.is_admin?'ADMINISTRADOR':(myRankingRow()?.rank_title||'Piloto Básico');}
 function renderSettings(){
@@ -1470,6 +1485,32 @@ async function createClanNow(){const name=$('#clanCreateName')?.value||'',tag=$(
 async function joinClanNow(id){try{await joinClanOnline(id);showToast('Você entrou na aliança');await refreshClanState(true);syncOnlineWorld();}catch(e){showToast(e.message);}}
 async function leaveClanNow(){try{await leaveClanOnline();showToast('Aliança atualizada');await refreshClanState(true);syncOnlineWorld();}catch(e){showToast(e.message);}}
 async function transferClanNow(){const callsign=$('#clanTransferCallsign')?.value||'',amount=Math.trunc(Number($('#clanTransferAmount')?.value)||0);if(!callsign||amount<=0){showToast('Informe callsign e valor');return;}try{const r=await transferClanCreditsOnline({callsign,amount});showToast(`${fmt(r.net_amount||0)} CR recebidos por ${r.target_callsign} • juros ${fmt(r.fee||0)} CR`);pushActivity(`CLÃ • Cofre -${fmt(r.gross_amount||0)} • ${r.target_callsign} +${fmt(r.net_amount||0)} • juros ${fmt(r.fee||0)}`,'reward');await refreshClanState(true);}catch(e){showToast(e.message);}}
+
+// ===================== V13.1 WARFRONT =====================
+function worldBossState(){return warfrontRuntime.state?.world_boss||null;}
+function currentClanWar(){return warfrontRuntime.state?.war||null;}
+function updateWarfrontBadge(){if(!ui.warfrontTopStatus)return;const wb=worldBossState(),war=currentClanWar();if(war)ui.warfrontTopStatus.textContent='WAR';else if(wb&&Number(wb.hp)>0)ui.warfrontTopStatus.textContent='BOSS';else if(wb&&Number(wb.hp)<=0)ui.warfrontTopStatus.textContent='LOOT';else ui.warfrontTopStatus.textContent='READY';}
+function warfrontBossRatio(){const wb=worldBossState();return wb?Math.max(0,Math.min(1,Number(wb.hp||0)/Math.max(1,Number(wb.max_hp)||1))):0;}
+function warfrontClanName(id){const all=[...(warfrontRuntime.clans||[])];const c=all.find(x=>x.id===id);return c?`[${c.tag}] ${c.name}`:'Clã rival';}
+function blueprintCardHtml(bp){normalizeWarfrontProgress();const have=Number(progress.warfront.blueprints[bp.id]||0),cores=progress.warfront.skillCores,ready=have>=bp.need&&cores>=bp.cores;return `<div class="blueprint-card ${ready?'ready':''}"><div class="blueprint-icon">${bp.icon}</div><div><b>${bp.name}</b><small>${bp.desc}</small><div class="blueprint-progress"><i style="width:${Math.min(100,have/bp.need*100)}%"></i></div><span>FRAGMENTOS ${fmt(have)}/${fmt(bp.need)} • CORES ${fmt(cores)}/${fmt(bp.cores)}</span></div><button class="small-btn" data-blueprint-craft="${bp.id}" ${ready?'':'disabled'}>CONSTRUIR</button></div>`;}
+function abilityMasteryHtml(){normalizeWarfrontProgress();const cls=abilityClassId(),def=SHIP_ABILITIES[cls],lv=abilityMasteryLevel(),cost=lv>=5?0:[2,4,7,11][lv-1];return `<div class="mastery-card"><div class="mastery-title"><span>${def.icon}</span><div><b>${def.name} • MASTERY ${lv}/5</b><small>+${Math.round((abilityPowerMultiplier()-1)*100)}% potência • -${Math.round((1-abilityCooldownMultiplier())*100)}% recarga</small></div></div><div class="mastery-pips">${[1,2,3,4,5].map(n=>`<i class="${n<=lv?'on':''}"></i>`).join('')}</div>${lv<5?`<button class="primary-btn" data-mastery-upgrade>EVOLUIR • ${cost} CORE${cost>1?'S':''}</button>`:'<div class="mastery-max">MASTERY MÁXIMA</div>'}</div>`;}
+function renderWarfront(){if(!ui.warfrontContent)return;normalizeWarfrontProgress();const st=warfrontRuntime.state,wb=worldBossState(),war=currentClanWar(),myClan=clanState().clan,myRole=clanState().role;const bp=Object.values(WARFRONT_BLUEPRINTS).map(blueprintCardHtml).join('');let bossHtml='<div class="muted">World Boss online indisponível. Execute o SQL V13.1 no Supabase e atualize.</div>';if(wb){const hp=Math.max(0,Number(wb.hp)||0),max=Math.max(1,Number(wb.max_hp)||1),dead=hp<=0,claimed=!!wb.claimed;bossHtml=`<div class="world-boss-card ${dead?'dead':''}"><div class="world-boss-head"><div><span class="threat-chip">AMEAÇA GLOBAL</span><h3>${escHtml(wb.name||'NEMESIS PRIME')}</h3><small>${dead?'DERROTADO • recompensa disponível':`Encerra ${new Date(wb.ends_at).toLocaleString('pt-BR')}`}</small></div><b>${dead?'ELIMINADO':`${(hp/max*100).toFixed(2)}%`}</b></div><div class="world-boss-track"><i style="width:${Math.round(hp/max*100)}%"></i></div><div class="world-boss-stats"><span>HP <b>${fmt(hp)} / ${fmt(max)}</b></span><span>SEU DANO <b>${fmt(wb.my_damage||0)}</b></span><span>RANK <b>#${fmt(wb.my_rank||0)||'—'}</b></span></div><div class="warfront-actions">${dead?`<button class="primary-btn" data-worldboss-claim ${claimed?'disabled':''}>${claimed?'RECOMPENSA RESGATADA':'RESGATAR RECOMPENSA'}</button>`:`<button class="danger-btn" data-worldboss-engage>ENGAJAR EM MAPA BATTLE</button>`}</div></div>`;}
+let warHtml='';if(!myClan)warHtml='<div class="war-empty">Entre em um clã para participar das Guerras de Clãs.</div>';else if(war){const mine=war.my_side==='attacker'?Number(war.attacker_score||0):Number(war.defender_score||0),theirs=war.my_side==='attacker'?Number(war.defender_score||0):Number(war.attacker_score||0),opp=war.my_side==='attacker'?war.defender:war.attacker;warHtml=`<div class="clan-war-live"><div class="war-vs"><div><small>SEU CLÃ</small><b>[${escHtml(myClan.tag)}]</b><strong>${fmt(mine)}</strong></div><span>VS</span><div><small>RIVAL</small><b>[${escHtml(opp?.tag||'?')}]</b><strong>${fmt(theirs)}</strong></div></div><div class="war-score-track"><i style="width:${Math.min(100,(mine/Math.max(1,mine+theirs))*100)}%"></i></div><small>Termina ${new Date(war.ends_at).toLocaleString('pt-BR')} • BOSS +10 pts • PvP causa pontos por dano • World Boss também pontua.</small></div>`;}else if(myRole==='owner'){const opts=(warfrontRuntime.clans||[]).filter(c=>c.id!==myClan.id).map(c=>`<option value="${c.id}">[${escHtml(c.tag)}] ${escHtml(c.name)} • LV ${fmt(c.level||1)}</option>`).join('');warHtml=`<div class="war-declare"><b>DECLARAR GUERRA</b><small>Uma guerra dura 12 horas. Escolha um clã rival.</small><div class="clan-action-row"><select id="warTargetClan"><option value="">Escolha o rival...</option>${opts}</select><button class="danger-btn" data-war-declare>DECLARAR</button></div></div>`;}else warHtml='<div class="war-empty">Somente o líder pode declarar uma guerra.</div>';
+ui.warfrontContent.innerHTML=`<div class="warfront-grid"><section class="warfront-panel worldboss-panel"><div class="section-kicker">WORLD BOSS</div>${bossHtml}</section><section class="warfront-panel"><div class="section-kicker">GUERRA DE CLÃS</div>${warHtml}</section></div><section class="warfront-panel"><div class="section-kicker">MASTERY DA HABILIDADE</div>${abilityMasteryHtml()}</section><section class="warfront-panel"><div class="section-kicker">BLUEPRINT FORGE • ${fmt(progress.warfront.skillCores)} CORES</div><div class="blueprint-grid">${bp}</div><small class="warfront-hint">BOSS comuns têm chance de dropar fragmentos. World Boss garante fragmentos + cores conforme sua contribuição.</small></section>`;updateWarfrontBadge();}
+async function refreshWarfrontState(force=false){if(!authenticated||warfrontRuntime.busy)return warfrontRuntime.state;if(!force&&warfrontRuntime.state&&Date.now()-warfrontRuntime.lastAt<5000){renderWarfront();return warfrontRuntime.state;}warfrontRuntime.busy=true;try{warfrontRuntime.clans=await listClansOnline().catch(()=>warfrontRuntime.clans||[]);warfrontRuntime.state=await loadWarfrontStateOnline();warfrontRuntime.lastAt=Date.now();updateWarfrontBadge();renderWarfront();syncWorldBossEnemyFromState();return warfrontRuntime.state;}catch(e){console.warn('warfront',e);if(ui.warfrontContent&&!ui.warfrontModal?.classList.contains('hidden'))ui.warfrontContent.innerHTML=`<div class="warfront-error"><b>WARFRONT OFFLINE</b><span>${escHtml(e.message)}</span><small>Rode <b>sql/V13_1_WARFRONT.sql</b> no Supabase.</small></div>`;}finally{warfrontRuntime.busy=false;}}
+async function openWarfront(){ui.warfrontModal?.classList.remove('hidden');if(ui.warfrontContent)ui.warfrontContent.innerHTML='<div class="muted">Sincronizando frente de guerra...</div>';await refreshClanState(true);await refreshWarfrontState(true);}
+async function declareWarNow(){const target=$('#warTargetClan')?.value;if(!target){showToast('Escolha um clã rival');return;}try{await declareClanWarOnline(target);showToast('GUERRA DECLARADA!','reward');pushActivity('WARFRONT • Guerra de Clãs iniciada','reward');await refreshWarfrontState(true);}catch(e){showToast(e.message);}}
+function activeWorldBossEnemy(){return state.enemies.find(e=>e.worldBoss&&e.hp>0)||null;}
+function spawnWorldBossEncounter(){const wb=worldBossState();if(!wb||Number(wb.hp)<=0){showToast('World Boss já foi derrotado');return;}if(!state.currentMap?.battle){showToast('Entre em um mapa BATTLE (4-1 / 4-2 / 4-3) para enfrentar o World Boss');return;}let e=activeWorldBossEnemy();if(e){state.target=e;showToast('NEMESIS PRIME já está no setor');return;}const base=makeEnemy('bossSibelon');base.id=`worldboss_${wb.id}`;base.worldBoss=true;base.forceChase=true;base.name=wb.name||'NEMESIS PRIME';base.maxHp=Math.max(1,Number(wb.max_hp)||250000000);base.hp=Math.max(1,Number(wb.hp)||base.maxHp);base.maxShield=0;base.shield=0;base.damage=Math.max(base.damage*2.25,22000);base.speed=Math.max(base.speed,145);base.aggroRange=1800;base.attackRange=520;base.size=Math.max(base.size,78);base.x=Math.min(state.currentMap.world.w-350,Math.max(350,player.x+700));base.y=Math.min(state.currentMap.world.h-350,Math.max(350,player.y+250));state.enemies.push(base);state.target=base;showToast('NEMESIS PRIME ENTROU NO SETOR!','reward');pushActivity('WORLD BOSS • NEMESIS PRIME detectado','combat');}
+function syncWorldBossEnemyFromState(){const wb=worldBossState(),e=activeWorldBossEnemy();if(!wb||!e)return;if(Number(wb.hp)<=0){e.hp=0;spawnExplosionFx(e.x,e.y,'#ff416b',true);if(state.target?.id===e.id)state.target=null;return;}e.maxHp=Math.max(1,Number(wb.max_hp)||e.maxHp);e.hp=Math.max(1,Number(wb.hp)||e.hp);}
+async function flushWorldBossDamage(force=false){if(!authenticated||warfrontRuntime.busyDamage)return;const dmg=Math.floor(warfrontRuntime.pendingBossDamage||0);if(dmg<=0)return;if(!force&&Date.now()-warfrontRuntime.lastDamageFlush<900)return;warfrontRuntime.busyDamage=true;warfrontRuntime.pendingBossDamage=0;warfrontRuntime.lastDamageFlush=Date.now();try{const r=await hitWorldBossOnline(dmg);warfrontRuntime.state ||= {};warfrontRuntime.state.world_boss={...(warfrontRuntime.state.world_boss||{}),...r};updateWarfrontBadge();syncWorldBossEnemyFromState();if(r?.defeated){showToast('WORLD BOSS DERROTADO! RESGATE SEU LOOT!','reward');pushActivity('WORLD BOSS • NEMESIS PRIME eliminado!','reward');renderWarfront();}}catch(e){warfrontRuntime.pendingBossDamage+=dmg;console.warn('world boss damage',e);}finally{warfrontRuntime.busyDamage=false;}}
+async function claimWorldBossNow(){try{const r=await claimWorldBossRewardOnline();if(r?.already_claimed){showToast('Recompensa já resgatada');return;}normalizeWarfrontProgress();progress.profile.credits+=Number(r.credits)||0;progress.profile.uridium+=Number(r.uridium)||0;progress.warfront.skillCores+=Number(r.cores)||0;const bp=WARFRONT_BLUEPRINTS[r.blueprint_id]?r.blueprint_id:'lf4';progress.warfront.blueprints[bp]=(progress.warfront.blueprints[bp]||0)+(Number(r.fragments)||0);progress.warfront.worldBossClaims[String(r.boss_id||'boss')]=Date.now();saveGame();await flushCloudSave(true);showToast(`WORLD BOSS • +${fmt(r.credits||0)} CR • +${fmt(r.uridium||0)} URI • +${fmt(r.fragments||0)} FRAG`,'reward');pushActivity(`WORLD BOSS LOOT • ${fmt(r.fragments||0)} ${WARFRONT_BLUEPRINTS[bp].name} • +${fmt(r.cores||0)} cores`,'reward');await refreshWarfrontState(true);}catch(e){showToast(e.message);}}
+function rollRareBossLoot(enemy){if(!enemy||enemy.worldBoss||!String(enemy.type||'').startsWith('boss'))return;normalizeWarfrontProgress();const chance=enemy.gateEnemy?.22:.13;if(Math.random()>chance)return;const ids=Object.keys(WARFRONT_BLUEPRINTS),id=ids[Math.floor(Math.random()*ids.length)],frags=1+(Math.random()<.22?1:0),core=Math.random()<.18?1:0;progress.warfront.blueprints[id]+=frags;progress.warfront.skillCores+=core;progress.warfront.rareDrops++;showToast(`LOOT RARO • ${WARFRONT_BLUEPRINTS[id].name} +${frags}${core?' • +1 CORE':''}`,'reward');pushActivity(`BLUEPRINT • ${WARFRONT_BLUEPRINTS[id].name} +${frags}${core?' • SKILL CORE +1':''}`,'reward');}
+function craftBlueprint(id){normalizeWarfrontProgress();const bp=WARFRONT_BLUEPRINTS[id];if(!bp)return;const have=progress.warfront.blueprints[id]||0;if(have<bp.need||progress.warfront.skillCores<bp.cores){showToast('Fragmentos ou cores insuficientes');return;}progress.warfront.blueprints[id]-=bp.need;progress.warfront.skillCores-=bp.cores;progress.inventory[bp.itemId]=(progress.inventory[bp.itemId]||0)+bp.qty;progress.warfront.crafted[id]=(progress.warfront.crafted[id]||0)+1;saveGame();renderWarfront();renderHangar();showToast(`${bp.name} CONSTRUÍDO!`,'reward');pushActivity(`FORJA • ${bp.name} criado`,'reward');}
+function upgradeAbilityMastery(){normalizeWarfrontProgress();const cls=abilityClassId(),lv=abilityMasteryLevel();if(lv>=5){showToast('Mastery máxima');return;}const cost=[2,4,7,11][lv-1];if(progress.warfront.skillCores<cost){showToast(`Você precisa de ${cost} Skill Cores`);return;}progress.warfront.skillCores-=cost;progress.warfront.skillMastery[cls]=lv+1;saveGame();renderWarfront();updateAbilityHud();showToast(`${SHIP_ABILITIES[cls].name} • MASTERY ${lv+1}!`,'reward');pushActivity(`MASTERY • ${SHIP_ABILITIES[cls].name} subiu para ${lv+1}`,'reward');}
+async function scoreClanWar(points,reason){if(!authenticated||!currentClanTag())return;try{const r=await recordClanWarScoreOnline(points,reason);if(r?.scored){warfrontRuntime.state ||= {};warfrontRuntime.state.war=r.war||warfrontRuntime.state.war;updateWarfrontBadge();}}catch{}}
+function updateWarfrontRuntime(){if(!authenticated||!progress)return;if(warfrontRuntime.pendingBossDamage>0)flushWorldBossDamage();if(activeWorldBossEnemy()&&Date.now()-warfrontRuntime.lastBossSync>5000){warfrontRuntime.lastBossSync=Date.now();refreshWarfrontState(true).catch(()=>{});}}
+
 
 function layoutHudPanels(){
   const topbarH = ui.topbar ? Math.ceil(ui.topbar.getBoundingClientRect().height) : 54;
@@ -1718,6 +1759,7 @@ function hydrateProgress(){
   progress.profile.xp=Math.max(0,Number(progress.profile.xp)||0);
   progress.profile.aliensKilled=Math.max(0,Math.floor(Number(progress.profile.aliensKilled)||0));
   progress.profile.ggCompleted=Math.max(0,Math.floor(Number(progress.profile.ggCompleted)||0));
+  normalizeWarfrontProgress();
   if(['x1','x2','x3','x4'].includes(progress.mapId))progress.territoryFaction=progress.territoryFaction||progress.profile.faction;
   else progress.territoryFaction=null;
   progress.positionByMap ||= {};
@@ -2705,6 +2747,7 @@ function rewardEnemyKill(enemy){
   progress.profile.credits+=earnedCredits;progress.profile.uridium+=earnedUri;progress.profile.xp+=earnedXp;progress.profile.aliensKilled=(progress.profile.aliensKilled||0)+1;
   if(authenticated){const boss=/^boss/i.test(String(enemy.type||''));const clanType=String(enemy.type||'').replace(/^boss/i,'').toLowerCase();recordClanAlienKillOnline({npcType:clanType,isBoss:boss}).then(r=>{if(r?.status?.leveled_up){showToast(`CLÃ SUBIU PARA O LV ${r.status.new_level}!`,'reward');refreshClanState(true);}}).catch(()=>{});}
   pushActivity(`${enemy.name} • +${fmt(earnedCredits)} CR • +${fmt(earnedUri)} URI • +${fmt(earnedXp)} XP`,'combat');
+  if(String(enemy.type||'').startsWith('boss')){rollRareBossLoot(enemy);scoreClanWar(10,'boss_kill');}
   addPetXp(Math.max(12,Math.round(enemy.credits/120+enemy.uridium*4)));
   processPlayerLevelUps();
   const lootMult=1+pilotLootBonus(),boostedResources=Object.fromEntries(Object.entries(enemy.resources||{}).map(([id,q])=>[id,Math.max(1,Math.round(q*lootMult))]));
@@ -2726,6 +2769,7 @@ function dealDamageToEnemy(enemy,damage,color){
   const after=Math.max(0,Number(enemy.shield)||0)+Math.max(0,Number(enemy.hp)||0),actual=Math.max(0,Math.round(before-after));
   if(actual>0){battlePassEvent('damage',actual);battlePassEvent('attack',1);}
   spawnParticle(enemy.x,enemy.y-enemy.size,fmt(damage),color);spawnImpactFx(enemy.x,enemy.y,hadShield?'#55d8ff':color,hadShield?30:22,hadShield?'shield':'impact');
+  if(enemy.worldBoss){if(actual>0)warfrontRuntime.pendingBossDamage+=actual;if(enemy.hp<=0)enemy.hp=1;flushWorldBossDamage();return;}
   if(enemy.hp<=0){enemy.hp=0;enemy.deadAt=nowSec();spawnExplosionFx(enemy.x,enemy.y,enemy.color,enemy.type.startsWith('boss'));rewardEnemyKill(enemy);if(state.target?.id===enemy.id){state.target=null;player.laserFiring=false;}}
 }
 function laserPveBase(ids){
@@ -3076,7 +3120,7 @@ async function queuePvpShot(target,damage,shieldDrain=false,color='#ff657d'){
       const before=player.shield;player.shield=Math.min(player.maxShield,player.shield+effective);
       const restored=Math.max(0,Math.round(player.shield-before));if(restored>0)spawnParticle(player.x,player.y-34,`+${fmt(restored)} ESC`,'#79f1ff');
     }
-    if(effective>0)spawnImpactFx(target.x,target.y,shieldDrain?'#79f1ff':color,32,shieldDrain?'shield':'impact');
+    if(effective>0){spawnImpactFx(target.x,target.y,shieldDrain?'#79f1ff':color,32,shieldDrain?'shield':'impact');if(target.clanTag&&target.clanTag!==currentClanTag())scoreClanWar(Math.max(1,Math.min(6,Math.floor(effective/50000))),'pvp_damage');}
     return row;
   }catch(e){
     player.laserFiring=false;
@@ -3127,7 +3171,7 @@ function drawOnlinePlayers(){
   }
 }
 
-function update(dt){if(!progress)return;processRespawns();updateCombatAbilities();updatePlayer(dt);updateEnemies(dt);updatePet(dt);updateOnlineWorld(dt);updateParticles(dt);updateFx(dt);updateAlphaGate();updateAuctionSystem();updateUI();}
+function update(dt){if(!progress)return;processRespawns();updateCombatAbilities();updatePlayer(dt);updateEnemies(dt);updatePet(dt);updateOnlineWorld(dt);updateWarfrontRuntime();updateParticles(dt);updateFx(dt);updateAlphaGate();updateAuctionSystem();updateUI();}
 
 function drawSectorGrid(){
   const spacing=800,b=visibleWorldBounds(0),startX=Math.floor(b.left/spacing)*spacing,startY=Math.floor(b.top/spacing)*spacing;
@@ -4438,7 +4482,7 @@ function openArena(){
   refreshArena(true);
 }
 
-function renderAll(){buildAmmoButtons();renderShop();renderHangar();renderCargo();renderMapModal();renderPet();renderMissions();renderGalaxyGate();renderPilotProfile();ensureAuctionState();updatePassBadge();updateUI();refreshArenaBadge();}
+function renderAll(){buildAmmoButtons();renderShop();renderHangar();renderCargo();renderMapModal();renderPet();renderMissions();renderGalaxyGate();renderPilotProfile();ensureAuctionState();updatePassBadge();updateUI();updateWarfrontBadge();refreshArenaBadge();}
 
 function worldPoint(ev){const r=canvas.getBoundingClientRect(),sx=ev.clientX-r.left,sy=ev.clientY-r.top;return{x:sx-W/2+state.camera.x,y:sy-H/2+state.camera.y};}
 function gameplayPointerAllowed(){return authenticated&&progress&&ui.loginModal.classList.contains('hidden')&&ui.shopModal.classList.contains('hidden')&&ui.hangarModal.classList.contains('hidden')&&ui.cargoModal.classList.contains('hidden')&&ui.petModal.classList.contains('hidden')&&ui.missionModal.classList.contains('hidden')&&ui.passModal.classList.contains('hidden')&&ui.gateModal.classList.contains('hidden')&&ui.pilotModal.classList.contains('hidden')&&ui.auctionModal.classList.contains('hidden')&&ui.arenaModal.classList.contains('hidden')&&ui.configModal.classList.contains('hidden')&&ui.mapModal.classList.contains('hidden')&&ui.factionModal.classList.contains('hidden');}
@@ -4469,7 +4513,7 @@ ui.portalPrompt.onclick=()=>{const portal=nearbyPortal();if(portal)jumpThroughPo
 minimap.addEventListener('pointerdown',e=>{if(!authenticated||!progress)return;e.preventDefault();e.stopPropagation();const r=minimap.getBoundingClientRect();const mx=(e.clientX-r.left)/r.width*minimap.width,my=(e.clientY-r.top)/r.height*minimap.height;player.tx=Math.max(35,Math.min(state.currentMap.world.w-35,mx/minimap.width*state.currentMap.world.w));player.ty=Math.max(35,Math.min(state.currentMap.world.h-35,my/minimap.height*state.currentMap.world.h));showToast(`Rota definida no minimapa`);});
 ui.laserToggle.onclick=()=>{if(!state.target||state.target.hp<=0){showToast('Selecione um alvo');return;}player.laserFiring=!player.laserFiring;};ui.rocketFire.onclick=()=>fireRocket(true);
 const dismissibleModals=()=>[
-  ui.saleConfirmModal,ui.configModal,ui.premiumModal,ui.clanModal,ui.passModal,ui.arenaModal,ui.auctionModal,ui.pilotModal,ui.gateModal,ui.missionModal,ui.shopModal,ui.hangarModal,ui.petModal,ui.cargoModal,ui.mapModal
+  ui.saleConfirmModal,ui.configModal,ui.premiumModal,ui.warfrontModal,ui.clanModal,ui.passModal,ui.arenaModal,ui.auctionModal,ui.pilotModal,ui.gateModal,ui.missionModal,ui.shopModal,ui.hangarModal,ui.petModal,ui.cargoModal,ui.mapModal
 ].filter(Boolean);
 function closeTopOverlay(){
   const open=dismissibleModals().filter(modal=>!modal.classList.contains('hidden'));
@@ -4501,6 +4545,10 @@ if(ui.closeAuction)ui.closeAuction.onclick=()=>ui.auctionModal.classList.add('hi
 if(ui.arenaBtn)ui.arenaBtn.onclick=()=>openArena();
 if(ui.closeArena)ui.closeArena.onclick=()=>{arenaRuntime.skipAnimation=true;ui.arenaModal.classList.add('hidden');};
 if(ui.clanBtn)ui.clanBtn.onclick=()=>openClan();
+if(ui.warfrontBtn)ui.warfrontBtn.onclick=()=>openWarfront();
+if(ui.closeWarfront)ui.closeWarfront.onclick=()=>ui.warfrontModal.classList.add('hidden');
+if(ui.warfrontRefresh)ui.warfrontRefresh.onclick=()=>refreshWarfrontState(true);
+if(ui.warfrontContent)ui.warfrontContent.onclick=e=>{const craft=e.target.closest('[data-blueprint-craft]');if(craft){craftBlueprint(craft.dataset.blueprintCraft);return;}if(e.target.closest('[data-mastery-upgrade]')){upgradeAbilityMastery();return;}if(e.target.closest('[data-worldboss-engage]')){spawnWorldBossEncounter();ui.warfrontModal.classList.add('hidden');return;}if(e.target.closest('[data-worldboss-claim]')){claimWorldBossNow();return;}if(e.target.closest('[data-war-declare]')){declareWarNow();return;}};
 if(ui.closeClan)ui.closeClan.onclick=()=>ui.clanModal.classList.add('hidden');
 if(ui.clanRefresh)ui.clanRefresh.onclick=()=>refreshClanState(true);
 if(ui.clanContent)ui.clanContent.onclick=e=>{const join=e.target.closest('[data-clan-join]');if(join){joinClanNow(join.dataset.clanJoin);return;}if(e.target.closest('#clanCreateSubmit'))createClanNow();else if(e.target.closest('#clanTransferBtn'))transferClanNow();else if(e.target.closest('#clanLeaveBtn'))leaveClanNow();};
@@ -4557,7 +4605,7 @@ document.addEventListener('keydown',e=>{
   const k=e.key.toLowerCase();
   if(k==='e')useShipAbility();if(k==='k')triggerPetKamikaze();
   if(k==='h')toggleHudUi();if(k==='b')openShop();if(k==='c'){if(isAtTrader())openCargo();else showToast('Venda de recursos disponível somente na base X-1');}
-  if(k==='m')openMapModal();if(k==='y')openPremiumShop();if(k==='q')openMissions();if(k==='x')openProgression();if(k==='g')openGalaxyGate();if(k==='p')openHangar('pet');if(k==='o')openHangar('pilot');if(k==='l')openAuction();if(k==='a')openArena();if(k==='n')openClan();
+  if(k==='m')openMapModal();if(k==='w')openWarfront();if(k==='y')openPremiumShop();if(k==='q')openMissions();if(k==='x')openProgression();if(k==='g')openGalaxyGate();if(k==='p')openHangar('pet');if(k==='o')openHangar('pilot');if(k==='l')openAuction();if(k==='a')openArena();if(k==='n')openClan();
   if(['1','2','3','4','5'].includes(e.key)){progress.selectedLaserAmmo=Object.keys(LASER_AMMO)[Number(e.key)-1];buildAmmoButtons();saveGame();}
 });
 
@@ -4572,6 +4620,7 @@ function forceLogoutBecauseSessionMoved(message='Sua conta foi acessada em outro
   try{if(staleUserId)localStorage.removeItem(`${SAVE_KEY_PREFIX}:${staleUserId}`);}catch{}
   progress=null;
   clanRuntime.state=null;clanRuntime.clans=[];clanRuntime.lastAt=0;
+  warfrontRuntime.state=null;warfrontRuntime.clans=[];warfrontRuntime.lastAt=0;warfrontRuntime.pendingBossDamage=0;
   premiumRuntime.state=null;premiumRuntime.lastAt=0;
   updateClanBadge();updatePremiumBadge();
   for(const modal of dismissibleModals())modal.classList.add('hidden');
@@ -4596,7 +4645,7 @@ function showAuthMode(mode){
 ui.loginTabBtn.onclick=()=>showAuthMode('login');ui.registerTabBtn.onclick=()=>showAuthMode('register');
 ui.loginForm.onsubmit=async e=>{e.preventDefault();ui.authMessage.textContent='Entrando...';try{await signIn({email:ui.loginEmail.value,password:ui.loginPassword.value});await afterAuth();}catch(err){ui.authMessage.textContent=err.message;}};
 ui.registerForm.onsubmit=async e=>{e.preventDefault();ui.authMessage.textContent='Criando conta...';try{const result=await signUp({callsign:ui.registerCallsign.value,email:ui.registerEmail.value,password:ui.registerPassword.value});if(result.requires_confirmation){ui.authMessage.textContent='Conta criada. Confirme o e-mail no Supabase e depois entre.';showAuthMode('login');ui.loginEmail.value=ui.registerEmail.value;return;}await afterAuth();}catch(err){ui.authMessage.textContent=err.message;}};
-ui.logoutBtn.onclick=async()=>{await flushCloudSave(true);await removePlayerPresenceOnline().catch(()=>{});clearOnlinePlayers();await endGameSession().catch(()=>signOutLocal());authenticated=false;progress=null;clanRuntime.state=null;clanRuntime.clans=[];clanRuntime.lastAt=0;premiumRuntime.state=null;premiumRuntime.lastAt=0;updateClanBadge();updatePremiumBadge();state.target=null;player.laserFiring=false;for(const modal of dismissibleModals())modal.classList.add('hidden');ui.factionModal.classList.add('hidden');ui.portalPrompt?.classList.add('hidden');ui.baseTradePrompt?.classList.add('hidden');ui.petFloatPanel?.classList.add('hidden');ui.loginModal.classList.remove('hidden');if(ui.userLabel)ui.userLabel.textContent='—';if(ui.rankChip)ui.rankChip.textContent='Piloto Básico';setSync('LOCAL','');showAuthMode('login');};
+ui.logoutBtn.onclick=async()=>{await flushCloudSave(true);await removePlayerPresenceOnline().catch(()=>{});clearOnlinePlayers();await endGameSession().catch(()=>signOutLocal());authenticated=false;progress=null;clanRuntime.state=null;clanRuntime.clans=[];clanRuntime.lastAt=0;warfrontRuntime.state=null;warfrontRuntime.clans=[];warfrontRuntime.lastAt=0;warfrontRuntime.pendingBossDamage=0;premiumRuntime.state=null;premiumRuntime.lastAt=0;updateClanBadge();updatePremiumBadge();state.target=null;player.laserFiring=false;for(const modal of dismissibleModals())modal.classList.add('hidden');ui.factionModal.classList.add('hidden');ui.portalPrompt?.classList.add('hidden');ui.baseTradePrompt?.classList.add('hidden');ui.petFloatPanel?.classList.add('hidden');ui.loginModal.classList.remove('hidden');if(ui.userLabel)ui.userLabel.textContent='—';if(ui.rankChip)ui.rankChip.textContent='Piloto Básico';setSync('LOCAL','');showAuthMode('login');};
 
 function startLoadedGame(){
   state.lastPlayerDamageAt=nowSec();
@@ -4635,6 +4684,7 @@ async function afterAuth(){
   syncOnlineWorld();
   syncClanCreditGrants(true);
   refreshClanState(true);
+  refreshWarfrontState(true).catch(()=>{});
 }
 
 async function boot(){

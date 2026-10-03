@@ -5,14 +5,14 @@
 <meta charset="utf-8"/>
 <meta content="width=device-width,initial-scale=1,user-scalable=no" name="viewport"/>
 <meta content="#030816" name="theme-color"/>
-<title>Stellar Legacy V13.0.0 — Combat Ascension</title>
-<link href="/style.css?v=13.0.0" rel="stylesheet"/>
+<title>Stellar Legacy V13.1.0 — Warfront</title>
+<link href="/style.css?v=13.1.0" rel="stylesheet"/>
 </head>
 <body>
 <div id="app">
 <canvas id="game"></canvas>
 <header class="hud-panel v8-topbar compact-command-bar" id="topbar">
-<div class="brand-chip compact-brand"><img alt="Stellar Legacy" class="brand-logo" src="/assets/v8/branding/logo-v8.png"/><span>V13.0.0</span></div>
+<div class="brand-chip compact-brand"><img alt="Stellar Legacy" class="brand-logo" src="/assets/v8/branding/logo-v8.png"/><span>V13.1.0</span></div>
 <div class="command-status">
   <span class="pilot-chip">PILOTO <b id="userLabel">—</b></span>
   <span class="pilot-chip patent-chip">PATENTE <b id="rankChip">Piloto Básico</b></span>
@@ -31,6 +31,7 @@
 <button class="small-btn pass-top-btn" id="passBtn">PASSE <span id="passTierBadge">0/30</span></button>
 <button class="small-btn arena-top-btn" id="arenaBtn">ARENA <span id="arenaTopCount">10/10</span></button>
 <button class="small-btn clan-top-btn" id="clanBtn">CLÃ <span id="clanTopTag">—</span></button>
+<button class="small-btn warfront-top-btn" id="warfrontBtn">WARFRONT <span id="warfrontTopStatus">READY</span></button>
 <button class="small-btn auction-top-btn" id="auctionBtn">LEILÃO <span id="auctionTopClock">60:00</span></button>
 <button class="small-btn gold" id="shopBtn">LOJA</button>
 <button class="small-btn premium-top-btn" id="premiumBtn">PREMIUM <span id="premiumTopStatus">LOJA</span></button>
@@ -405,6 +406,18 @@
   </div>
 </div>
 
+
+<div class="modal hidden" id="warfrontModal">
+  <div class="modal-card wide-card warfront-modal-card">
+    <div class="modal-header">
+      <div><div class="eyebrow">V13.1 • GUERRA TOTAL</div><h2>WARFRONT</h2></div>
+      <div class="arena-header-actions"><button class="ghost-btn" id="warfrontRefresh">ATUALIZAR</button><button class="small-btn" id="closeWarfront">Fechar</button></div>
+    </div>
+    <div class="warfront-rule-banner"><b>WORLD BOSS + GUERRA DE CLÃS + BLUEPRINTS:</b> cause dano no NEMESIS PRIME, dispute pontos com clãs rivais, encontre fragmentos raros e evolua a habilidade da sua classe de nave.</div>
+    <div id="warfrontContent" class="warfront-content"><div class="muted">Sincronizando frente de guerra...</div></div>
+  </div>
+</div>
+
 <div class="modal hidden" id="configModal">
   <div class="modal-card settings-modal-card premium-settings-card">
     <div class="modal-header">
@@ -606,6 +619,6 @@
   </div>
 </div>
 </div>
-<script src="/game.js?v=13.0.0" type="module"></script>
+<script src="/game.js?v=13.1.0" type="module"></script>
 </body>
 </html>
