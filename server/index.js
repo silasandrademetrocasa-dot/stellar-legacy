@@ -80,7 +80,7 @@ async function ensureProfile(sb, user, callsign = '') {
   if (error) console.warn('profile upsert:', error.message);
 }
 
-app.get('/health', (req, res) => res.json({ ok: true, game: 'Stellar Legacy', version: '11.3.0' }));
+app.get('/health', (req, res) => res.json({ ok: true, game: 'Stellar Legacy', version: '12.0.0' }));
 
 
 app.get('/api/config', (req, res) => {
@@ -96,10 +96,10 @@ app.get('/api/config', (req, res) => {
 
 app.get('/api/meta', (req, res) => res.json({
   name: 'Stellar Legacy',
-  version: '11.3.0',
+  version: '12.0.0',
   authReady: Boolean(SUPABASE_URL && SUPABASE_KEY),
   diagnostics: configStatus(),
-  features: ['login', 'cloud_save', 'factions', 'safe_zone', 'shop', 'owned_ships', 'equipment_slots', 'inventory', 'drones', 'ammo', 'rockets', 'expanded_expedition_maps', 'cargo_hold', 'ore_trading', 'npc_cargo_boxes', 'npc_respawn', 'minimap_navigation', 'waypoints', 'landmark_discovery', 'combat_fx', 'pet_modules', 'auto_buy_cpu', 'v8_asset_identity', 'mission_control_v93', 'mission_acceptance_tracking', 'expanded_enemy_density', 'online_player_presence', 'real_player_auction', 'rank_nameplates_v12', 'clans_v12', 'clan_vault_v12'],
+  features: ['login', 'cloud_save', 'factions', 'safe_zone', 'shop', 'owned_ships', 'equipment_slots', 'inventory', 'drones', 'ammo', 'rockets', 'expanded_expedition_maps', 'cargo_hold', 'ore_trading', 'npc_cargo_boxes', 'npc_respawn', 'minimap_navigation', 'waypoints', 'landmark_discovery', 'combat_fx', 'pet_modules', 'auto_buy_cpu', 'v8_asset_identity', 'mission_control_v93', 'mission_acceptance_tracking', 'expanded_enemy_density', 'online_player_presence', 'real_player_auction', 'rank_nameplates_v12', 'clans_v12', 'clan_vault_v12', 'premium_shop_v12', 'battle_pass_paid_v12', 'premium_subscription_v12', 'clan_daily_economy_v12', 'portal_neutral_zone_v12', 'base_only_equipment_v12'],
 }));
 
 app.get('/api/diagnostics', asyncRoute(async (req, res) => {
@@ -202,8 +202,27 @@ app.get('/api/save', requireUser, asyncRoute(async (req, res) => {
 }));
 
 app.put('/api/save', requireUser, asyncRoute(async (req, res) => {
-  const state = req.body?.state;
+  let state = req.body?.state;
   if (!state || typeof state !== 'object') return res.status(400).json({ error: 'Save inválido.' });
+
+  // V12: a coleta diária do clã é autoridade do servidor. Se um navegador ficou
+  // aberto durante o reset, ele não pode sobrescrever a cobrança com um save antigo.
+  let statePatch = null;
+  const { data: serverSave } = await req.sb.from('game_saves').select('state').eq('user_id', req.user.id).maybeSingle();
+  const serverEconomy = serverSave?.state?.serverEconomy || {};
+  const clientEconomy = state?.serverEconomy || {};
+  const serverCollectionDate = String(serverEconomy.lastClanCollectionDate || '');
+  const clientCollectionDate = String(clientEconomy.lastClanCollectionDate || '');
+  if (serverCollectionDate && serverCollectionDate > clientCollectionDate) {
+    const authoritativeCredits = Number(serverSave?.state?.profile?.credits ?? state?.profile?.credits ?? 0);
+    state = {
+      ...state,
+      profile: { ...(state.profile || {}), credits: authoritativeCredits },
+      serverEconomy: { ...clientEconomy, ...serverEconomy },
+    };
+    statePatch = { credits: authoritativeCredits, serverEconomy: state.serverEconomy };
+  }
+
   const updated_at = new Date().toISOString();
   const { error } = await req.sb.from('game_saves').upsert({ user_id: req.user.id, state, updated_at }, { onConflict: 'user_id' });
   if (error) return res.status(400).json({ error: error.message });
@@ -222,7 +241,7 @@ app.put('/api/save', requireUser, asyncRoute(async (req, res) => {
     updated_at,
   }, { onConflict: 'id' });
 
-  res.json({ ok: true, updated_at });
+  res.json({ ok: true, updated_at, statePatch });
 }));
 
 app.get('*', (req, res) => res.sendFile(path.join(__dirname, '../public/index.html')));
@@ -243,6 +262,6 @@ app.use((err, req, res, next) => {
 
 const port = process.env.PORT || 3000;
 app.listen(port, () => {
-  console.log(`Stellar Legacy V11.3 :${port}`);
+  console.log(`Stellar Legacy V12 :${port}`);
   console.log('Supabase config:', configStatus());
 });

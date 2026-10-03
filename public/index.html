@@ -5,14 +5,14 @@
 <meta charset="utf-8"/>
 <meta content="width=device-width,initial-scale=1,user-scalable=no" name="viewport"/>
 <meta content="#030816" name="theme-color"/>
-<title>Stellar Legacy V11.3 — Passe & Recompensas</title>
-<link href="/style.css?v=11.3.0" rel="stylesheet"/>
+<title>Stellar Legacy V12 — Premium, Passe & Clãs 2.0</title>
+<link href="/style.css?v=12.0.0" rel="stylesheet"/>
 </head>
 <body>
 <div id="app">
 <canvas id="game"></canvas>
 <header class="hud-panel v8-topbar compact-command-bar" id="topbar">
-<div class="brand-chip compact-brand"><img alt="Stellar Legacy" class="brand-logo" src="/assets/v8/branding/logo-v8.png"/><span>V11.3</span></div>
+<div class="brand-chip compact-brand"><img alt="Stellar Legacy" class="brand-logo" src="/assets/v8/branding/logo-v8.png"/><span>V12</span></div>
 <div class="command-status">
   <span class="pilot-chip">PILOTO <b id="userLabel">—</b></span>
   <span class="pilot-chip patent-chip">PATENTE <b id="rankChip">Piloto Básico</b></span>
@@ -33,6 +33,7 @@
 <button class="small-btn clan-top-btn" id="clanBtn">CLÃ <span id="clanTopTag">—</span></button>
 <button class="small-btn auction-top-btn" id="auctionBtn">LEILÃO <span id="auctionTopClock">60:00</span></button>
 <button class="small-btn gold" id="shopBtn">LOJA</button>
+<button class="small-btn premium-top-btn" id="premiumBtn">PREMIUM <span id="premiumTopStatus">LOJA</span></button>
 <button class="small-btn" id="hangarBtn">HANGAR</button>
 <button class="small-btn config-top-btn" id="configBtn">CONF</button>
 </nav>
@@ -252,7 +253,7 @@
           </div>
           <div class="gate-generator-wallet">URI <b id="gateUriText">0</b></div>
         </div>
-        <p class="muted">Cada sorteio custa <b>100 Uridium</b>. Pode vir peça ALFA, <b>Log-Disks</b>, qualquer munição laser, qualquer míssil, Xenomit, Créditos, Bônus de Salto ou Bônus de Reparo.</p>
+        <p class="muted" id="gateSpinCostNote">Cada sorteio custa <b>100 Uridium</b>. PREMIUM recebe <b>10% de desconto</b> no Materializador. Pode vir peça ALFA, <b>Log-Disks</b>, munição, míssil, Xenomit, Créditos, Bônus de Salto ou Bônus de Reparo.</p>
         <div class="gate-spin-buttons" id="gateSpinButtons"></div>
         <div class="gate-generator-inventory">
           <div><span>BÔNUS DE SALTO</span><b id="gateJumpBonus">0</b></div>
@@ -378,7 +379,7 @@
       <div><div class="eyebrow">ALIANÇAS • COFRE COMPARTILHADO</div><h2>Clã / Aliança</h2></div>
       <div class="arena-header-actions"><button class="ghost-btn" id="clanRefresh">ATUALIZAR</button><button class="small-btn" id="closeClan">Fechar</button></div>
     </div>
-    <div class="clan-rule-banner"><b>COFRE:</b> qualquer membro pode doar Créditos sem limite diário. A aliança recebe <b>90%</b>; os outros <b>10%</b> são queimados como combustível. Somente o líder pode retirar do cofre e enviar Créditos para outro piloto.</div>
+    <div class="clan-rule-banner"><b>CLÃ V12:</b> não existem mais doações manuais. Às <b>23:00</b> o cofre rende conforme o nível do clã; no reset das <b>00:00</b>, o sistema coleta automaticamente <b>10% dos Créditos de cada membro</b>. O líder pode repassar Créditos do cofre, com <b>5% de juros queimados</b> em cada transferência.</div>
     <div id="clanContent" class="clan-content"><div class="muted">Carregando dados da aliança...</div></div>
   </div>
 </div>
@@ -525,6 +526,19 @@
 <div id="petContent"></div>
 </div>
 </div>
+
+<div class="modal hidden" id="premiumModal">
+  <div class="modal-card wide-card premium-store-modal">
+    <div class="modal-header">
+      <div><div class="eyebrow">STELLAR PREMIUM • V12</div><h2>Loja Premium</h2></div>
+      <div class="premium-header-actions"><span class="premium-mode-chip" id="premiumModeChip">MODO VISUALIZAÇÃO</span><button class="small-btn" id="closePremium">Fechar</button></div>
+    </div>
+    <div class="premium-rule-banner"><b>TESTE V12:</b> todos os pilotos podem visualizar preços e benefícios, mas somente a conta <b>Administrador</b> pode executar compras de teste neste momento. Nenhuma cobrança real é realizada.</div>
+    <div class="premium-benefits" id="premiumBenefits"></div>
+    <div class="premium-product-grid" id="premiumProductGrid"><div class="muted">Carregando catálogo Premium...</div></div>
+  </div>
+</div>
+
 <div class="modal hidden" id="shopModal">
 <div class="modal-card wide-card">
 <div class="modal-header">
@@ -556,6 +570,6 @@
 </div>
 </div>
 </div>
-<script src="/game.js?v=11.3.0" type="module"></script>
+<script src="/game.js?v=12.0.0" type="module"></script>
 </body>
 </html>

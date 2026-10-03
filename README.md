@@ -103,3 +103,7 @@ node --check server/index.js
 ```
 
 Release atual: **11.0.0**
+
+
+## V12 — Premium, Passe & Clã 2.0
+Consulte `CHANGELOG_V12.md` e `sql/V12_PREMIUM_CLAN_ECONOMY.sql`. A Loja Premium está em modo de teste: catálogo visível para todos e compras somente para administradores, sem cobrança real.

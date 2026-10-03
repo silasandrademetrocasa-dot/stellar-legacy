@@ -399,6 +399,25 @@ export async function claimClanCreditGrantsOnline() {
   });
 }
 
+
+export async function recordClanAlienKillOnline({npcType,isBoss=false}) {
+  return authedSupabaseFetch('/rest/v1/rpc/record_clan_alien_kill_v12', {
+    method: 'POST', body: JSON.stringify({p_npc_type:String(npcType||''),p_is_boss:!!isBoss}),
+  });
+}
+
+export async function getPremiumShopOnline() {
+  return authedSupabaseFetch('/rest/v1/rpc/get_premium_shop_v12', {
+    method: 'POST', body: JSON.stringify({}),
+  });
+}
+
+export async function testPurchasePremiumOnline(productId) {
+  return authedSupabaseFetch('/rest/v1/rpc/test_purchase_premium_v12', {
+    method: 'POST', body: JSON.stringify({p_product_id:String(productId||'')}),
+  });
+}
+
 export async function queuePvpAttackOnline({targetUserId,damage,shieldDrain=false,mapId,territoryFaction}) {
   const rows = await authedSupabaseFetch('/rest/v1/rpc/queue_pvp_attack', {
     method: 'POST',
