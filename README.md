@@ -1,4 +1,13 @@
-# Stellar Legacy V13.3.0 — STELLAR IDENTITY
+# Stellar Legacy V13.3.1 — PILOT LIVE REFRESH
+
+Hotfix sobre a V13.3.0 Stellar Identity.
+
+- Perfil de Piloto redesenha imediatamente após comprar Núcleos Quânticos.
+- PP, saldo de Núcleos, botões e custos atualizam na hora após converter PP.
+- Níveis de habilidade e desbloqueios seguintes atualizam imediatamente após evolução.
+- Reset da árvore também atualiza sem fechar/reabrir o Hangar.
+- Saves, IDs internos e compatibilidade da V13.3.0 preservados.
+
 
 Atualização de interface aplicada sobre a base V13.1.0 WARFRONT, preservando as mecânicas e o backend existentes.
 
