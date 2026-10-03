@@ -1,6 +1,6 @@
-import { FACTIONS, SHIPS, ITEMS, LASER_AMMO, ROCKETS, NPC_TYPES, MAPS, RESOURCES } from './data.js?v=12.1.1';
-import { GAME_ASSETS } from './assets/v8/manifest.js?v=12.1.1';
-import { signUp, signIn, restoreSession, signOutLocal, getUser, loadCloudSave, saveCloudSave, updateCallsign, updatePassword, loadRankings, loadAuctionBids, saveAuctionBidOnline, markAuctionBidStatusOnline, loadAuctionMarket, upsertPlayerPresenceOnline, loadMapPresenceOnline, removePlayerPresenceOnline, queuePvpAttackOnline, consumePvpDamageEventsOnline, syncArenaProfileOnline, loadArenaState, loadArenaDailyRewardStatus, claimArenaDailyReward, loadArenaOpponents, loadArenaHistory, arenaAttackOnline, listClansOnline, loadMyClanOnline, createClanOnline, joinClanOnline, leaveClanOnline, transferClanCreditsOnline, claimClanCreditGrantsOnline, recordClanAlienKillOnline, getPremiumShopOnline, testPurchasePremiumOnline } from './api.js?v=12.1.1';
+import { FACTIONS, SHIPS, ITEMS, LASER_AMMO, ROCKETS, NPC_TYPES, MAPS, RESOURCES } from './data.js?v=12.1.2';
+import { GAME_ASSETS } from './assets/v8/manifest.js?v=12.1.2';
+import { signUp, signIn, restoreSession, signOutLocal, getUser, loadCloudSave, saveCloudSave, updateCallsign, updatePassword, loadRankings, loadAuctionBids, saveAuctionBidOnline, markAuctionBidStatusOnline, loadAuctionMarket, upsertPlayerPresenceOnline, loadMapPresenceOnline, removePlayerPresenceOnline, queuePvpAttackOnline, consumePvpDamageEventsOnline, syncArenaProfileOnline, loadArenaState, loadArenaDailyRewardStatus, claimArenaDailyReward, loadArenaOpponents, loadArenaHistory, arenaAttackOnline, listClansOnline, loadMyClanOnline, createClanOnline, joinClanOnline, leaveClanOnline, transferClanCreditsOnline, claimClanCreditGrantsOnline, recordClanAlienKillOnline, getPremiumShopOnline, testPurchasePremiumOnline } from './api.js?v=12.1.2';
 
 const canvas = document.querySelector('#game');
 const ctx = canvas.getContext('2d');
@@ -1239,7 +1239,7 @@ function myRankingRow(){const me=getUser()?.id;return rankingsCache.find(r=>r.id
 function updateRankChip(){if(!ui.rankChip)return;ui.rankChip.textContent=clanRuntime.state?.is_admin?'ADMINISTRADOR':(myRankingRow()?.rank_title||'Piloto Básico');}
 function renderSettings(){
   if(!ui.configModal)return;
-  addEventListener('pagehide',()=>{clearOnlinePlayers();removePlayerPresenceOnline().catch(()=>{});});
+  addEventListener('pagehide',()=>{if(progress){saveGame();flushCloudSave(true);}clearOnlinePlayers();removePlayerPresenceOnline().catch(()=>{});});
 
 document.body.dataset.quality=qualityMode;
   if(ui.qualityCurrentBadge)ui.qualityCurrentBadge.textContent=qualityProfile().label;
@@ -1596,11 +1596,52 @@ function processPlayerLevelUps(){
 }
 
 function setSync(text,cls=''){ui.syncLabel.textContent=text;ui.syncLabel.className=`sync-chip ${cls}`.trim();}
-function saveGame(){if(!progress)return;if(isGalaxyGateMap())syncAlphaGateSnapshot();localStorage.setItem(saveKey(),JSON.stringify(progress));cloudDirty=true;}
-function loadLocalGame(){
+function locationStorageKey(mapId=progress?.mapId,territoryFaction=progress?.territoryFaction){
+  const id=String(mapId||'x1');
+  if(['x1','x2','x3','x4'].includes(id)){
+    const faction=territoryFaction||progress?.profile?.faction||'battle';
+    return `${id}:${faction}`;
+  }
+  return id;
+}
+function syncRuntimeLocationToProgress(){
+  if(!progress||!state?.currentMap)return;
+  const x=Number(player?.x),y=Number(player?.y);
+  if(!Number.isFinite(x)||!Number.isFinite(y))return;
+  progress.x=x;progress.y=y;
+  progress.savedMapId=progress.mapId;
+  progress.savedTerritoryFaction=progress.territoryFaction||null;
+  progress.positionByMap ||= {};
+  progress.positionByMap[locationStorageKey()]={
+    x,y,mapId:progress.mapId,territoryFaction:progress.territoryFaction||null,savedAt:Date.now()
+  };
+}
+function savedLocationForCurrentMap(){
+  if(!progress)return null;
+  const entry=progress.positionByMap?.[locationStorageKey()];
+  if(entry&&Number.isFinite(Number(entry.x))&&Number.isFinite(Number(entry.y)))return {x:Number(entry.x),y:Number(entry.y)};
+  const sameMap=String(progress.savedMapId||progress.mapId||'')===String(progress.mapId||'');
+  const sameTerritory=!['x1','x2','x3','x4'].includes(progress.mapId)||!progress.savedTerritoryFaction||progress.savedTerritoryFaction===progress.territoryFaction;
+  if(sameMap&&sameTerritory&&Number.isFinite(Number(progress.x))&&Number.isFinite(Number(progress.y)))return {x:Number(progress.x),y:Number(progress.y)};
+  return null;
+}
+function saveGame(){
+  if(!progress)return;
+  if(isGalaxyGateMap())syncAlphaGateSnapshot();
+  syncRuntimeLocationToProgress();
+  progress.clientSavedAt=Date.now();
+  localStorage.setItem(saveKey(),JSON.stringify(progress));
+  cloudDirty=true;
+}
+function readLocalGameState(){
   const raw=localStorage.getItem(saveKey());
-  if(!raw){progress=null;return;}
-  try{progress=JSON.parse(raw);hydrateProgress();}catch(e){console.warn(e);progress=null;}
+  if(!raw)return null;
+  try{return JSON.parse(raw);}catch(e){console.warn(e);return null;}
+}
+function loadLocalGame(){
+  const local=readLocalGameState();
+  if(!local){progress=null;return;}
+  try{progress=local;hydrateProgress();}catch(e){console.warn(e);progress=null;}
 }
 function hydrateProgress(){
   if(!progress)return;
@@ -1612,6 +1653,13 @@ function hydrateProgress(){
   progress.profile.ggCompleted=Math.max(0,Math.floor(Number(progress.profile.ggCompleted)||0));
   if(['x1','x2','x3','x4'].includes(progress.mapId))progress.territoryFaction=progress.territoryFaction||progress.profile.faction;
   else progress.territoryFaction=null;
+  progress.positionByMap ||= {};
+  if(!progress.savedMapId)progress.savedMapId=progress.mapId;
+  if(progress.savedTerritoryFaction===undefined)progress.savedTerritoryFaction=progress.territoryFaction||null;
+  const legacyLocationKey=locationStorageKey(progress.mapId,progress.territoryFaction);
+  if(!progress.positionByMap[legacyLocationKey]&&Number.isFinite(Number(progress.x))&&Number.isFinite(Number(progress.y))){
+    progress.positionByMap[legacyLocationKey]={x:Number(progress.x),y:Number(progress.y),mapId:progress.mapId,territoryFaction:progress.territoryFaction||null,savedAt:Number(progress.clientSavedAt)||0};
+  }
   if(!progress.profile.xpModelV101){
     const oldCarry=progress.profile.xp;
     progress.profile.xp=levelXpThreshold(progress.profile.level)+oldCarry;
@@ -2444,6 +2492,7 @@ function setMap(mapId,preserve=false,fromMapId=null,targetTerritoryFaction=null,
   petRuntime.x=player.x+82;petRuntime.y=player.y+64;petRuntime.tx=petRuntime.x;petRuntime.ty=petRuntime.y;petRuntime.roamX=null;petRuntime.roamY=null;petRuntime.nextRoamAt=0;
   state.camera.x=player.x;state.camera.y=player.y;state.target=null;state.loot=[];state.fx=[];state.rocketFx=[];
   clearOnlinePlayers();createLandmarks();createOres();spawnEnemies();saveGame();
+  if(authenticated)flushCloudSave(true).catch(()=>{});
 
   const owner=territoryOwner(),home=isOwnTerritory();
   showToast(mapId==='x1'?(home?`Base ${owner?.short||''} • Zona Segura`:`INVASÃO • Base ${owner?.short||''}`):`Entrando em ${displayMapLabel(mapId,currentTerritoryFaction())}`);
@@ -4415,7 +4464,7 @@ function startLoadedGame(){
   state.lastPlayerDamageAt=nowSec();
   normalizeGalaxyGateState();
   if(progress.mapId==='ggAlpha'&&!progress.galaxyGate.alpha.run?.active){progress.mapId='x1';progress.territoryFaction=progress.profile.faction;}
-  const savedX=Number.isFinite(progress.x)?progress.x:null,savedY=Number.isFinite(progress.y)?progress.y:null;state.currentMap=MAPS[progress.mapId]||MAPS.x1;state.radarRange=mapRadarRange();player.hp=progress.hp||1;player.shield=progress.shield||0;computeStats(true);player.hp=Math.min(player.maxHp,progress.hp??player.maxHp);player.shield=Math.min(player.maxShield,progress.shield??player.maxShield);
+  const savedLocation=savedLocationForCurrentMap(),savedX=savedLocation?.x??null,savedY=savedLocation?.y??null;state.currentMap=MAPS[progress.mapId]||MAPS.x1;state.radarRange=mapRadarRange();player.hp=progress.hp||1;player.shield=progress.shield||0;computeStats(true);player.hp=Math.min(player.maxHp,progress.hp??player.maxHp);player.shield=Math.min(player.maxShield,progress.shield??player.maxShield);
   if(progress.mapId==='ggAlpha'){
     player.x=savedX??MAPS.ggAlpha.world.w/2;player.y=savedY??MAPS.ggAlpha.world.h/2;player.tx=player.x;player.ty=player.y;petRuntime.x=player.x+82;petRuntime.y=player.y+64;petRuntime.tx=petRuntime.x;petRuntime.ty=petRuntime.y;petRuntime.roamX=null;petRuntime.roamY=null;petRuntime.nextRoamAt=0;state.camera.x=player.x;state.camera.y=player.y;state.target=null;state.loot=[];state.fx=[];state.rocketFx=[];state.ores=[];state.landmarks=[];state.enemyRespawns=[];state.oreRespawns=[];restoreAlphaGateEnemies();const a=alphaGate(),def=GALAXY_ALPHA_ROUNDS[a.run.round-1],alive=alphaRemainingCount(),now=Date.now();if(a.run.waveIndex<def.waves.length&&!a.run.nextWaveAt){a.run.nextWaveAt=now+GALAXY_ALPHA_WAVE_INTERVAL_MS;}else if(a.run.waveIndex>=def.waves.length&&alive===0&&a.run.round<GALAXY_ALPHA_ROUNDS.length&&!a.run.nextRoundAt){a.run.nextRoundAt=now+GALAXY_ALPHA_ROUND_INTERVAL_MS;}renderAll();saveGame();return;
   }
@@ -4426,9 +4475,19 @@ function startLoadedGame(){
 async function afterAuth(){
   authenticated=true;ui.loginModal.classList.add('hidden');ui.userLabel.textContent=getUser()?.callsign||getUser()?.email?.split('@')[0]||'Pilot';loadActivityLog();refreshClanState(true).then(()=>refreshRankings(true)).catch(()=>{});setSync('SINCRONIZANDO','busy');
   try{
+    const local=readLocalGameState();
     const remote=await loadCloudSave();
-    if(remote.state){progress=remote.state;hydrateProgress();setSync('ONLINE','ok');}
-    else{loadLocalGame();setSync('ONLINE','ok');}
+    const localStamp=Number(local?.clientSavedAt)||0;
+    const remoteStamp=Number(remote?.state?.clientSavedAt)||Date.parse(remote?.updated_at||'')||0;
+    const localStampSane=localStamp>0&&localStamp<=Date.now()+300000;
+    if(local&&localStampSane&&localStamp>remoteStamp+250){
+      progress=local;hydrateProgress();cloudDirty=true;setSync('LOCAL MAIS NOVO','busy');
+      setTimeout(()=>flushCloudSave(true),0);
+    }else if(remote.state){
+      progress=remote.state;hydrateProgress();setSync('ONLINE','ok');
+    }else{
+      loadLocalGame();setSync('ONLINE','ok');
+    }
   }catch(err){console.warn(err);loadLocalGame();setSync('OFFLINE','err');}
   if(!progress){renderFactionChoice();return;}
   await refreshPremiumState(true);
@@ -4460,5 +4519,5 @@ window.addEventListener('resize', layoutHudPanels);
 window.addEventListener('orientationchange', ()=>setTimeout(layoutHudPanels, 120));
 boot();
 setInterval(()=>{if(progress){saveGame();flushCloudSave();}},7000);
-document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden')flushCloudSave(true);});
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'&&progress){saveGame();flushCloudSave(true);}});
 let last=performance.now();function loop(t){const minFrame=1000/qualityProfile().fps;if(t-last<minFrame){requestAnimationFrame(loop);return;}const dt=Math.min((t-last)/1000,.05);last=t;update(dt);draw();requestAnimationFrame(loop);}requestAnimationFrame(loop);

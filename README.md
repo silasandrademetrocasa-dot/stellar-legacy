@@ -1,4 +1,4 @@
-# Stellar Legacy — V12.1.1
+# Stellar Legacy — V12.1.2
 
 Versão atual consolidada do Stellar Legacy. O pacote foi limpo para manter somente arquivos necessários ao jogo, documentação atual e um snapshot único do backend. O histórico completo das versões permanece no Git.
 
@@ -30,3 +30,12 @@ README.md
 ```
 
 As migrations e changelogs históricos não fazem parte do ZIP atual porque permanecem recuperáveis pelo histórico do Git.
+
+
+## Hotfix V12.1.2 — Persistência de mapa e posição
+- Salva as coordenadas reais da nave antes de cada persistência local/cloud.
+- Guarda posição separada por mapa e facção territorial.
+- Troca de portal força sincronização cloud imediata.
+- Ao recarregar, usa a posição salva do mapa atual em vez de reaproveitar coordenadas de outro mapa.
+- Se o save local deste navegador for mais novo que o cloud, ele é usado e enviado ao servidor, evitando rollback durante refresh/deploy.
+- Ao ocultar/fechar a página, força save da posição atual antes da sincronização.

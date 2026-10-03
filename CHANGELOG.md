@@ -35,3 +35,11 @@ Conta online, save cloud, facções, mapas, NPCs, Hangar, equipamentos, P.E.T., 
 - Alvos automáticos de combate também ficam estáveis enquanto forem válidos.
 - Changelogs por versão, SQL histórico, documentação obsoleta e página de catálogo de assets não usada foram removidos do release.
 - Backend de referência consolidado em `sql/CURRENT_BACKEND.sql`.
+
+
+## V12.1.2 — Location Persistence Hotfix
+- Corrigido bug que misturava `mapId` novo com `x/y` do mapa anterior durante salto por portal.
+- Novo `positionByMap` preserva coordenadas por mapa/facção.
+- `saveGame()` agora sincroniza `player.x/y` antes de serializar.
+- Transições de mapa fazem flush cloud imediato.
+- Reload prefere save local mais recente quando o cloud ainda está alguns instantes atrasado.
