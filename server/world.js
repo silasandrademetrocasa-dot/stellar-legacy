@@ -5,10 +5,41 @@ import { MAPS, NPC_TYPES, RESOURCES } from '../public/data.js';
 const PORTAL_NEUTRAL_RADIUS = 180;
 const LIVE_OPS_REFRESH_MS = 15000;
 
+function saoPauloClock(now=Date.now()){
+  const offsetMs=3*60*60*1000; // UTC-3
+  const spMs=now-offsetMs;
+  const d=new Date(spMs);
+  return {spMs,offsetMs,day:d.getUTCDay(),hour:d.getUTCHours(),minute:d.getUTCMinutes()};
+}
+function buildEventPayload(row,start,end,slot){
+  return {
+    id:String(row.event_key||''),
+    icon:String(row.icon||'✦'),
+    name:String(row.name||row.event_key||'EVENTO'),
+    desc:String(row.description||''),
+    target:Math.max(1,Number(row.target)||1),
+    reward:row.reward&&typeof row.reward==='object'?row.reward:{},
+    rules:row.rules&&typeof row.rules==='object'?row.rules:{},
+    priority:Number(row.priority)||100,
+    start,end,slot,
+    eventId:`v16:${String(row.event_key||'event')}:${start}`
+  };
+}
 function resolveLiveEvent(rows, now=Date.now()){
+  const enabled=(Array.isArray(rows)?rows:[]).filter(row=>row?.enabled);
+  if(!enabled.length)return null;
+  const pool=[...enabled].sort((a,b)=>(Number(a.priority)||100)-(Number(b.priority)||100)||String(a.event_key||'').localeCompare(String(b.event_key||'')));
+  if(pool.length>1){
+    const clock=saoPauloClock(now),weekend=clock.day===0||clock.day===6;
+    const slotMs=(weekend?1:4)*60*60*1000;
+    const slotStartSp=Math.floor(clock.spMs/slotMs)*slotMs;
+    const start=slotStartSp+clock.offsetMs,end=start+slotMs;
+    const slot=Math.floor(slotStartSp/slotMs);
+    const row=pool[((slot%pool.length)+pool.length)%pool.length];
+    return buildEventPayload(row,start,end,slot);
+  }
   const active=[];
-  for(const row of Array.isArray(rows)?rows:[]){
-    if(!row?.enabled)continue;
+  for(const row of pool){
     const base=Date.parse(row.starts_at||'');
     const duration=Math.max(1,Number(row.duration_minutes)||1)*60000;
     const repeat=Math.max(1,Number(row.repeat_minutes)||1)*60000;
@@ -16,18 +47,7 @@ function resolveLiveEvent(rows, now=Date.now()){
     const cycle=Math.max(0,Math.floor((now-base)/repeat));
     const start=base+cycle*repeat,end=start+duration;
     if(now<start||now>=end)continue;
-    active.push({
-      id:String(row.event_key||''),
-      icon:String(row.icon||'✦'),
-      name:String(row.name||row.event_key||'EVENTO'),
-      desc:String(row.description||''),
-      target:Math.max(1,Number(row.target)||1),
-      reward:row.reward&&typeof row.reward==='object'?row.reward:{},
-      rules:row.rules&&typeof row.rules==='object'?row.rules:{},
-      priority:Number(row.priority)||100,
-      start,end,slot:cycle,
-      eventId:`v16:${String(row.event_key||'event')}:${start}`
-    });
+    active.push(buildEventPayload(row,start,end,cycle));
   }
   active.sort((a,b)=>a.priority-b.priority||a.start-b.start||a.id.localeCompare(b.id));
   return active[0]||null;

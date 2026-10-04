@@ -1,7 +1,7 @@
-import { FACTIONS, SHIPS, ITEMS, LASER_AMMO, ROCKETS, NPC_TYPES, MAPS, RESOURCES } from './data.js?v=16.5.0';
-import { GAME_ASSETS } from './assets/v8/manifest.js?v=16.5.0';
-import { signUp, signIn, requestPasswordReset, restorePasswordRecoveryFromUrl, restoreSession, signOutLocal, checkGameSession, endGameSession, getUser, getSessionCredentials, loadCloudSave, saveCloudSave, updateCallsign, updatePassword, loadRankings, loadAuctionBids, saveAuctionBidOnline, markAuctionBidStatusOnline, loadAuctionMarket, upsertPlayerPresenceOnline, loadMapPresenceOnline, removePlayerPresenceOnline, queuePvpAttackOnline, consumePvpDamageEventsOnline, syncArenaProfileOnline, loadArenaState, loadArenaDailyRewardStatus, claimArenaDailyReward, loadArenaOpponents, loadArenaHistory, arenaAttackOnline, listClansOnline, loadMyClanOnline, createClanOnline, joinClanOnline, leaveClanOnline, transferClanCreditsOnline, claimClanCreditGrantsOnline, recordClanAlienKillOnline, getPremiumShopOnline, testPurchasePremiumOnline, loadWarfrontStateOnline, hitWorldBossOnline, claimWorldBossRewardOnline, declareClanWarOnline, recordClanWarScoreOnline, loadLiveOpsOnline, purchaseLiveCatalogOnline, economyActionOnline, getChatHistoryOnline, sendChatMessageOnline, getMyDesignersOnline, setDesignLoadoutOnline, claimGateDroneDesignOnline, claimEventDesignerOnline } from './api.js?v=16.5.0';
-import { SharedUniverseClient } from './world.js?v=16.5.0';
+import { FACTIONS, SHIPS, ITEMS, LASER_AMMO, ROCKETS, NPC_TYPES, MAPS, RESOURCES } from './data.js?v=16.6.0';
+import { GAME_ASSETS } from './assets/v8/manifest.js?v=16.6.0';
+import { signUp, signIn, requestPasswordReset, restorePasswordRecoveryFromUrl, restoreSession, signOutLocal, checkGameSession, endGameSession, getUser, getSessionCredentials, loadCloudSave, saveCloudSave, updateCallsign, updatePassword, loadRankings, loadAuctionBids, saveAuctionBidOnline, markAuctionBidStatusOnline, loadAuctionMarket, upsertPlayerPresenceOnline, loadMapPresenceOnline, removePlayerPresenceOnline, queuePvpAttackOnline, consumePvpDamageEventsOnline, syncArenaProfileOnline, loadArenaState, loadArenaDailyRewardStatus, claimArenaDailyReward, loadArenaOpponents, loadArenaHistory, arenaAttackOnline, listClansOnline, loadMyClanOnline, createClanOnline, joinClanOnline, leaveClanOnline, transferClanCreditsOnline, claimClanCreditGrantsOnline, recordClanAlienKillOnline, getPremiumShopOnline, testPurchasePremiumOnline, loadWarfrontStateOnline, hitWorldBossOnline, claimWorldBossRewardOnline, declareClanWarOnline, recordClanWarScoreOnline, loadLiveOpsOnline, purchaseLiveCatalogOnline, economyActionOnline, getChatHistoryOnline, sendChatMessageOnline, getMyDesignersOnline, setDesignLoadoutOnline, claimGateDroneDesignOnline, claimEventDesignerOnline } from './api.js?v=16.6.0';
+import { SharedUniverseClient } from './world.js?v=16.6.0';
 
 const canvas = document.querySelector('#game');
 const ctx = canvas.getContext('2d');
@@ -280,16 +280,34 @@ const categories = {
   ships:'Naves', lasers:'Lasers', generators:'Geradores', drones:'Drones', pet:'AUX-9', extras:'Extras', ammo:'Munição', rockets:'Mísseis'
 };
 
-// ===================== V12 PREMIUM RUNTIME =====================
+// ===================== V16.6 PREMIUM • CUPONS =====================
 const premiumRuntime={state:null,busy:false,lastAt:0};
-function premiumActive(){return !!premiumRuntime.state?.premium_active;}
+const PREMIUM_LOCAL_PLANS=[
+  {id:'premium_7d',category:'premium',name:'PREMIUM • 1 SEMANA',description:'7 dias de Premium com todos os bônus ativos.',price_brl:14.9,days:7},
+  {id:'premium_30d',category:'premium',name:'PREMIUM • 1 MÊS',description:'30 dias de Premium para farm, combate e progressão.',price_brl:39.9,days:30},
+  {id:'premium_90d',category:'premium',name:'PREMIUM • 3 MESES',description:'90 dias de Premium com excelente custo-benefício.',price_brl:99.9,days:90},
+  {id:'premium_180d',category:'premium',name:'PREMIUM • 6 MESES',description:'180 dias de Premium para longa temporada.',price_brl:179.9,days:180},
+];
+const PREMIUM_EVENT_COUPONS={
+  EVENTO7D:{code:'EVENTO7D',name:'Cupom de Evento • 7D',days:7,items:{rep2:1},description:'Libera 1 semana de Premium e 1 Nanobot de Reparo • Comum.'}
+};
+function freshPremiumMeta(){return {localPremiumUntil:null,couponsRedeemed:{}};}
+function normalizePremiumMeta(){if(!progress)return freshPremiumMeta();progress.premiumMeta ||= freshPremiumMeta();progress.premiumMeta.couponsRedeemed ||= {};return progress.premiumMeta;}
+function localPremiumUntilMs(){const iso=progress?normalizePremiumMeta().localPremiumUntil:null;const ts=iso?Date.parse(iso):0;return Number.isFinite(ts)?ts:0;}
+function remotePremiumUntilMs(){const iso=premiumRuntime.state?.premium_until||null;const ts=iso?Date.parse(iso):0;return Number.isFinite(ts)?ts:0;}
+function effectivePremiumUntilMs(){return Math.max(remotePremiumUntilMs(),localPremiumUntilMs());}
+function premiumActive(){return effectivePremiumUntilMs()>Date.now();}
 function premiumPassActive(){return !!premiumRuntime.state?.battle_pass_active;}
-function premiumCanPurchase(){return !!premiumRuntime.state?.can_purchase;}
+function premiumCanPurchase(){return !!premiumRuntime.state?.can_purchase||isAdminPilot();}
 function premiumAutoCombatAccess(){return premiumActive()||premiumPassActive();}
 function premiumElitePrice(price,currency){const p=Math.max(0,Math.round(Number(price)||0));return currency==='uridium'&&premiumActive()?Math.max(1,Math.floor(p*.95)):p;}
 function alphaSpinUnitCost(){const base=galaxyGateDef().spinCost;return premiumActive()?Math.max(1,Math.floor(base*.90)):base;}
+function premiumLocalPlanById(id){return PREMIUM_LOCAL_PLANS.find(p=>p.id===String(id||''))||null;}
+function premiumCatalogForRender(){const remote=Array.isArray(premiumRuntime.state?.catalog)?premiumRuntime.state.catalog:[];return [...PREMIUM_LOCAL_PLANS,...remote.filter(p=>p.category!=='premium')];}
+function extendLocalPremium(days){if(!progress)return 0;const meta=normalizePremiumMeta();const base=Math.max(Date.now(),effectivePremiumUntilMs());const until=base+Math.max(1,Number(days)||0)*86400000;meta.localPremiumUntil=new Date(until).toISOString();cloudDirty=true;saveGame();return until;}
+function redeemPremiumCouponLocal(code){const key=String(code||'').trim().toUpperCase();const meta=normalizePremiumMeta();const def=PREMIUM_EVENT_COUPONS[key];if(!def)throw new Error('Cupom inválido ou expirado.');if(meta.couponsRedeemed[key])throw new Error('Cupom já resgatado nesta conta.');const until=extendLocalPremium(def.days);for(const [itemId,qty] of Object.entries(def.items||{})){if(ITEMS[itemId])addInventory(itemId,Math.max(1,Number(qty)||1));}meta.couponsRedeemed[key]=new Date().toISOString();cloudDirty=true;saveGame();return {def,until};}
 function updatePremiumBadge(){if(!ui.premiumTopStatus)return;ui.premiumTopStatus.textContent=premiumActive()?'ATIVO':premiumPassActive()?'PASSE':'LOJA';ui.premiumBtn?.classList.toggle('gold',premiumActive()||premiumPassActive());}
-async function refreshPremiumState(force=false){if(!authenticated)return premiumRuntime.state;if(!force&&premiumRuntime.state&&Date.now()-premiumRuntime.lastAt<30000)return premiumRuntime.state;if(premiumRuntime.busy)return premiumRuntime.state;premiumRuntime.busy=true;try{premiumRuntime.state=await getPremiumShopOnline();premiumRuntime.lastAt=Date.now();updatePremiumBadge();renderSettings();return premiumRuntime.state;}catch(e){console.warn('premium state',e);return premiumRuntime.state;}finally{premiumRuntime.busy=false;}}
+async function refreshPremiumState(force=false){if(!authenticated){updatePremiumBadge();return premiumRuntime.state;}if(!force&&premiumRuntime.state&&Date.now()-premiumRuntime.lastAt<30000){updatePremiumBadge();return premiumRuntime.state;}if(premiumRuntime.busy)return premiumRuntime.state;premiumRuntime.busy=true;try{premiumRuntime.state=await getPremiumShopOnline();premiumRuntime.lastAt=Date.now();updatePremiumBadge();renderSettings();return premiumRuntime.state;}catch(e){console.warn('premium state',e);updatePremiumBadge();renderSettings();return premiumRuntime.state;}finally{premiumRuntime.busy=false;}}
 
 // ===================== V16 LIVE OPS RUNTIME =====================
 const liveOpsRuntime={state:null,catalog:new Map(),busy:false,lastAt:0};
@@ -334,6 +352,48 @@ function shipDesignerEligible(shipId=progress?.activeShipId){const ship=SHIPS[sh
 function currentShipDesign(){const d=designById(currentShipDesignId());return d?.kind==='ship'&&shipDesignerEligible()?d:null;}
 function currentPetDesign(){const d=designById(currentPetDesignId());return d?.kind==='pet'&&progress?.pet?.owned?d:null;}
 function ownedDesignQty(id){return Math.max(0,Number(designerRuntime.state?.inventory?.[id])||0);}
+function freshAdminUnlockState(){return {kitGranted:false,designer:{loadout:{ship:null,pet:null},drones:{}}};}
+function normalizeAdminUnlockState(){if(!progress)return freshAdminUnlockState();progress.adminUnlock ||= freshAdminUnlockState();progress.adminUnlock.designer ||= {loadout:{ship:null,pet:null},drones:{}};progress.adminUnlock.designer.loadout ||= {ship:null,pet:null};progress.adminUnlock.designer.drones ||= {};return progress.adminUnlock;}
+function ensureAdminEntitlements(){
+  if(!progress||!isAdminPilot())return false;
+  const admin=normalizeAdminUnlockState();let changed=false;
+  progress.ownedShips ||= ['phoenix'];
+  for(const shipId of Object.keys(SHIPS))if(!progress.ownedShips.includes(shipId)){progress.ownedShips.push(shipId);changed=true;}
+  progress.inventory ||= {};
+  for(const [itemId,item] of Object.entries(ITEMS)){
+    if(item.type==='drone')continue;
+    const target=item.type==='laser'||item.type==='generator'?32:item.type==='ammo'||item.type==='rocket'?5000:1;
+    if((Number(progress.inventory[itemId])||0)<target){progress.inventory[itemId]=target;changed=true;}
+  }
+  progress.drones ||= [];
+  const irisSlots=Math.max(1,Number(ITEMS.iris?.slots)||2);
+  while(progress.drones.length<8){progress.drones.push({id:`adm_iris_${Date.now()}_${progress.drones.length}`,type:'iris',slots:Array(irisSlots).fill(null)});changed=true;}
+  progress.pet ||= freshPet();
+  if(!progress.pet.owned){progress.pet.owned=true;changed=true;}
+  progress.pet.gearsOwned ||= {guard:false,box:false,ore:false,repair:false,kami:false};
+  for(const key of ['guard','box','ore','repair','kami'])if(!progress.pet.gearsOwned[key]){progress.pet.gearsOwned[key]=true;changed=true;}
+  normalizePremiumMeta();
+  if(changed){admin.kitGranted=true;cloudDirty=true;saveGame();}
+  return changed;
+}
+function applyAdminDesignerOverrides(state=designerRuntime.state){
+  if(!progress||!isAdminPilot()||!state)return state;
+  const admin=normalizeAdminUnlockState().designer;
+  state.inventory ||= {};state.drones ||= {};state.loadout ||= {ship:null,pet:null};state.catalog ||= [];
+  for(const def of state.catalog){const qty=def.kind==='drone'?8:1;if((Number(state.inventory[def.design_id])||0)<qty)state.inventory[def.design_id]=qty;}
+  if(admin.loadout.ship!==undefined)state.loadout.ship=admin.loadout.ship;
+  if(admin.loadout.pet!==undefined)state.loadout.pet=admin.loadout.pet;
+  for(const [droneId,designId] of Object.entries(admin.drones||{})){if(designId&&(progress.drones||[]).some(d=>d.id===droneId))state.drones[droneId]=designId;}
+  return state;
+}
+function persistAdminDesignerSelection(kind,designId=null,droneId=null){
+  if(!progress||!isAdminPilot())return;
+  const admin=normalizeAdminUnlockState().designer;
+  if(kind==='ship')admin.loadout.ship=designId||null;
+  else if(kind==='pet')admin.loadout.pet=designId||null;
+  else if(kind==='drone'&&droneId){if(designId)admin.drones[droneId]=designId;else delete admin.drones[droneId];}
+  cloudDirty=true;saveGame();
+}
 function equippedDesignCount(id){return progress?.drones?.filter(d=>droneDesignId(d.id)===id).length||0;}
 function pctText(v){return `${(Math.max(0,Number(v)||0)*100).toFixed((Number(v)||0)*100%1?1:0)}%`;}
 function rarityLabel(r='rare'){return ({rare:'RARO',epic:'ÉPICO',legendary:'LENDÁRIO',mythic:'MÍTICO'})[String(r||'').toLowerCase()]||String(r||'RARO').toUpperCase();}
@@ -364,22 +424,32 @@ function designerCritChanceBonus(){const def=shipAbilityDef?.(),active=def&&ship
 function designerRepairMultiplier(){return 1+Number(shipDesignerBonuses().repair||0);}
 function designerVisualCss(d){return d?.visual?.filter||'none';}
 async function refreshDesignerState(force=false){
-  if(!authenticated)return designerRuntime.state;if(!force&&designerRuntime.lastAt&&Date.now()-designerRuntime.lastAt<15000)return designerRuntime.state;if(designerRuntime.busy)return designerRuntime.state;designerRuntime.busy=true;
-  try{const data=await getMyDesignersOnline();if(data&&typeof data==='object')designerRuntime.state={inventory:data.inventory||{},drones:data.drones||{},loadout:data.loadout||{ship:null,pet:null},catalog:Array.isArray(data.catalog)?data.catalog:[]};designerRuntime.lastAt=Date.now();return designerRuntime.state;}catch(e){console.warn('designers',e);return designerRuntime.state;}finally{designerRuntime.busy=false;}
+  if(!authenticated)return applyAdminDesignerOverrides(designerRuntime.state);
+  if(!force&&designerRuntime.lastAt&&Date.now()-designerRuntime.lastAt<15000)return applyAdminDesignerOverrides(designerRuntime.state);
+  if(designerRuntime.busy)return designerRuntime.state;designerRuntime.busy=true;
+  try{
+    const data=await getMyDesignersOnline();
+    if(data&&typeof data==='object')designerRuntime.state={inventory:data.inventory||{},drones:data.drones||{},loadout:data.loadout||{ship:null,pet:null},catalog:Array.isArray(data.catalog)?data.catalog:[]};
+    designerRuntime.state=applyAdminDesignerOverrides(designerRuntime.state);designerRuntime.lastAt=Date.now();return designerRuntime.state;
+  }catch(e){console.warn('designers',e);designerRuntime.state=applyAdminDesignerOverrides(designerRuntime.state);return designerRuntime.state;}
+  finally{designerRuntime.busy=false;}
 }
 async function equipDroneDesigner(droneId,designId){
   if(!canChangeEquipment()){showToast('Designers de drone só podem ser alterados na sua base X-1');return;}
-  try{await flushCloudSave(true);designerRuntime.state=await setDesignLoadoutOnline({kind:'drone',designId:designId||null,droneId});designerRuntime.lastAt=Date.now();computeStats(true);saveGame();renderHangar();updateUI();syncSharedUniversePlayer(true);showToast(designId?`${designById(designId)?.name||'Designer'} equipado`:'Designer removido');}catch(e){showToast(e.message||'Não foi possível equipar o designer');}
+  if(isAdminPilot()){designerRuntime.state.drones[droneId]=designId||null;if(!designId)delete designerRuntime.state.drones[droneId];persistAdminDesignerSelection('drone',designId||null,droneId);designerRuntime.lastAt=Date.now();computeStats(true);saveGame();renderHangar();updateUI();syncSharedUniversePlayer(true);showToast(designId?`${designById(designId)?.name||'Designer'} equipado`:'Designer removido');return;}
+  try{await flushCloudSave(true);designerRuntime.state=await setDesignLoadoutOnline({kind:'drone',designId:designId||null,droneId});designerRuntime.state=applyAdminDesignerOverrides(designerRuntime.state);designerRuntime.lastAt=Date.now();computeStats(true);saveGame();renderHangar();updateUI();syncSharedUniversePlayer(true);showToast(designId?`${designById(designId)?.name||'Designer'} equipado`:'Designer removido');}catch(e){showToast(e.message||'Não foi possível equipar o designer');}
 }
 async function equipShipDesigner(designId){
   if(!canChangeEquipment()){showToast('Designer de nave só pode ser alterado na sua base X-1');return;}
   if(designId&&!shipDesignerEligible()){showToast('Designers de nave são exclusivos de naves ELITE ou ESPECIAIS DE EVENTO');return;}
-  try{await flushCloudSave(true);designerRuntime.state=await setDesignLoadoutOnline({kind:'ship',designId:designId||null});designerRuntime.lastAt=Date.now();abilityRuntime.activeId=null;abilityRuntime.activeUntil=0;computeStats(true);saveGame();renderHangar();updateAbilityHud();updateUI();syncSharedUniversePlayer(true);showToast(designId?`${designById(designId)?.name||'Designer'} ativado na nave`:'Designer de nave removido');}catch(e){showToast(e.message||'Não foi possível equipar o designer de nave');}
+  if(isAdminPilot()){designerRuntime.state.loadout.ship=designId||null;persistAdminDesignerSelection('ship',designId||null);designerRuntime.lastAt=Date.now();abilityRuntime.activeId=null;abilityRuntime.activeUntil=0;computeStats(true);saveGame();renderHangar();updateAbilityHud();updateUI();syncSharedUniversePlayer(true);showToast(designId?`${designById(designId)?.name||'Designer'} ativado na nave`:'Designer de nave removido');return;}
+  try{await flushCloudSave(true);designerRuntime.state=await setDesignLoadoutOnline({kind:'ship',designId:designId||null});designerRuntime.state=applyAdminDesignerOverrides(designerRuntime.state);designerRuntime.lastAt=Date.now();abilityRuntime.activeId=null;abilityRuntime.activeUntil=0;computeStats(true);saveGame();renderHangar();updateAbilityHud();updateUI();syncSharedUniversePlayer(true);showToast(designId?`${designById(designId)?.name||'Designer'} ativado na nave`:'Designer de nave removido');}catch(e){showToast(e.message||'Não foi possível equipar o designer de nave');}
 }
 async function equipPetDesigner(designId){
   if(!canChangeEquipment()){showToast('Designer do AUX-9 só pode ser alterado na sua base X-1');return;}
   if(!progress?.pet?.owned){showToast('Adquira o AUX-9 primeiro');return;}
-  try{await flushCloudSave(true);designerRuntime.state=await setDesignLoadoutOnline({kind:'pet',designId:designId||null});designerRuntime.lastAt=Date.now();computeStats(true);saveGame();refreshPetViews();renderHangar();updateUI();syncSharedUniversePlayer(true);showToast(designId?`${designById(designId)?.name||'Designer'} ativado no AUX-9`:'Designer do AUX-9 removido');}catch(e){showToast(e.message||'Não foi possível equipar o designer do AUX-9');}
+  if(isAdminPilot()){designerRuntime.state.loadout.pet=designId||null;persistAdminDesignerSelection('pet',designId||null);designerRuntime.lastAt=Date.now();computeStats(true);saveGame();refreshPetViews();renderHangar();updateUI();syncSharedUniversePlayer(true);showToast(designId?`${designById(designId)?.name||'Designer'} ativado no AUX-9`:'Designer do AUX-9 removido');return;}
+  try{await flushCloudSave(true);designerRuntime.state=await setDesignLoadoutOnline({kind:'pet',designId:designId||null});designerRuntime.state=applyAdminDesignerOverrides(designerRuntime.state);designerRuntime.lastAt=Date.now();computeStats(true);saveGame();refreshPetViews();renderHangar();updateUI();syncSharedUniversePlayer(true);showToast(designId?`${designById(designId)?.name||'Designer'} ativado no AUX-9`:'Designer do AUX-9 removido');}catch(e){showToast(e.message||'Não foi possível equipar o designer do AUX-9');}
 }
 async function claimGateDroneDesignerDrop(gate,completion){
   if(!['beta','gamma'].includes(String(gate)))return;
@@ -2327,6 +2397,9 @@ function hydrateProgress(){
     progress.expeditionV9=1;
   }
   progress.shipLoadout ||= blankLoadout(progress.activeShipId);normalizeLoadout();
+  normalizePremiumMeta();
+  normalizeAdminUnlockState();
+  ensureAdminEntitlements();
 }
 async function flushCloudSave(force=false){
   if(!authenticated||!progress||cloudBusy||(!cloudDirty&&!force))return;
@@ -4279,26 +4352,33 @@ function premiumProductIcon(product){
 function formatPremiumUntil(value){if(!value)return 'INATIVO';const d=new Date(value);return Number.isNaN(d.getTime())?'INATIVO':d.toLocaleString('pt-BR');}
 function renderPremiumShop(){
   if(!ui.premiumProductGrid||!ui.premiumBenefits)return;
-  const st=premiumRuntime.state||{},products=Array.isArray(st.catalog)?st.catalog:[];
-  if(ui.premiumModeChip){ui.premiumModeChip.textContent=st.can_purchase?'ATIVO':'CATÁLOGO';ui.premiumModeChip.classList.toggle('active',!!st.can_purchase);}
-  ui.premiumBenefits.innerHTML=`<div><span>PREMIUM 30D</span><b>${st.premium_active?'ATIVO':'INATIVO'}</b><small>${st.premium_active?`até ${formatPremiumUntil(st.premium_until)} • AUTO-COMBATE LIBERADO`:'Auto-combate • reparo grátis • regen 2X • míssil -20% • Elite -5% • Portais -10%'}</small></div><div><span>PASSE PREMIUM</span><b>${st.battle_pass_active?'ATIVO':'INATIVO'}</b><small>Temporada ${escHtml(st.current_season||battlePassSeasonKey())} • AUTO-COMBATE • 2X ganhos + Elite + Reclaimer T30</small></div>`;
+  const st=premiumRuntime.state||{},products=premiumCatalogForRender(),couponHint=Object.keys(PREMIUM_EVENT_COUPONS)[0]||'EVENTO7D';
+  const activeUntil=effectivePremiumUntilMs();
+  if(ui.premiumModeChip){ui.premiumModeChip.textContent=premiumCanPurchase()?'ATIVO':'CATÁLOGO';ui.premiumModeChip.classList.toggle('active',premiumCanPurchase());}
+  ui.premiumBenefits.innerHTML=`<div><span>PREMIUM</span><b>${premiumActive()?'ATIVO':'INATIVO'}</b><small>${premiumActive()?`até ${formatPremiumUntil(new Date(activeUntil).toISOString())} • AUTO-COMBATE LIBERADO`:'Auto-combate • reparo grátis • regen 2X • míssil -20% • Elite -5% • Portais -10%'}</small></div><div><span>PASSE PREMIUM</span><b>${st.battle_pass_active?'ATIVO':'INATIVO'}</b><small>Temporada ${escHtml(st.current_season||battlePassSeasonKey())} • AUTO-COMBATE • 2X ganhos + Elite + Reclaimer T30</small></div><div class="premium-coupon-card"><div class="premium-coupon-copy"><span>CUPONS DE EVENTO</span><b>RESGATE EXCLUSIVO</b><small>Cupom inicial ativo: ${escHtml(couponHint)} • libera 1 semana de Premium + 1 Nanobot de Reparo • Comum.</small></div><div class="premium-coupon-form"><input id="premiumCouponInput" maxlength="32" autocomplete="off" placeholder="DIGITE O CUPOM" /><button class="gold-btn" id="premiumCouponRedeem" type="button">RESGATAR</button></div></div>`;
   if(!products.length){ui.premiumProductGrid.innerHTML='<div class="muted">Catálogo Premium indisponível.</div>';return;}
   ui.premiumProductGrid.innerHTML=products.map(p=>{
-    const owned=p.category==='premium'?!!st.premium_active:p.category==='battle_pass'?!!st.battle_pass_active:false;
-    const typeLabel=p.category==='elite_item'?'ITEM ELITE':p.category==='battle_pass'?'PASSE MENSAL':'ASSINATURA';
-    return `<article class="premium-product ${p.category}"><div class="premium-product-icon">${premiumProductIcon(p)}</div><div class="premium-product-copy"><span class="premium-product-type">${typeLabel}</span><h3>${escHtml(p.name)}</h3><p>${escHtml(p.description||'')}</p></div><div class="premium-product-price">R$ ${Number(p.price_brl||0).toFixed(2).replace('.',',')}</div><button class="${st.can_purchase?'gold-btn':'ghost-btn'}" data-premium-buy="${escHtml(p.id)}" ${owned||!st.can_purchase?'disabled':''}>${owned?'ATIVO / OBTIDO':st.can_purchase?'ATIVAR':'INDISPONÍVEL'}</button></article>`;
+    const isLocalPlan=!!premiumLocalPlanById(p.id),owned=p.category==='battle_pass'?!!st.battle_pass_active:false;
+    const typeLabel=isLocalPlan?'ASSINATURA FLEX':p.category==='elite_item'?'ITEM ELITE':p.category==='battle_pass'?'PASSE MENSAL':'ASSINATURA';
+    const buttonDisabled=owned||!premiumCanPurchase();
+    const buttonLabel=owned?'ATIVO / OBTIDO':!premiumCanPurchase()?'INDISPONÍVEL':isLocalPlan?(premiumActive()?'PRORROGAR':'ATIVAR'):'ATIVAR';
+    return `<article class="premium-product ${p.category}"><div class="premium-product-icon">${premiumProductIcon(p)}</div><div class="premium-product-copy"><span class="premium-product-type">${typeLabel}</span><h3>${escHtml(p.name)}</h3><p>${escHtml(p.description||'')}</p></div><div class="premium-product-price">R$ ${Number(p.price_brl||0).toFixed(2).replace('.',',')}</div><button class="${premiumCanPurchase()?'gold-btn':'ghost-btn'}" data-premium-buy="${escHtml(p.id)}" ${buttonDisabled?'disabled':''}>${buttonLabel}</button></article>`;
   }).join('');
   ui.premiumProductGrid.querySelectorAll('[data-premium-buy]').forEach(b=>b.onclick=()=>testPremiumPurchaseNow(b.dataset.premiumBuy));
+  const couponBtn=document.getElementById('premiumCouponRedeem');const couponInput=document.getElementById('premiumCouponInput');
+  if(couponBtn&&couponInput){const submit=async()=>{const code=String(couponInput.value||'').trim();if(!code){showToast('Digite um cupom válido');return;}try{const res=redeemPremiumCouponLocal(code);couponInput.value='';showToast(`Cupom resgatado • Premium liberado até ${formatPremiumUntil(new Date(res.until).toISOString())}`,'reward');await flushCloudSave(true);await refreshAndRenderPremium(true);}catch(e){showToast(String(e?.message||e));}};couponBtn.onclick=submit;couponInput.onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();submit();}};}
 }
 async function refreshAndRenderPremium(force=false){await refreshPremiumState(force);renderPremiumShop();if(ui.passModal&&!ui.passModal.classList.contains('hidden'))renderProgression();renderGalaxyGate();renderShop();}
 async function testPremiumPurchaseNow(productId){
   if(!premiumCanPurchase()){showToast('Compra indisponível no momento');return;}
+  const localPlan=premiumLocalPlanById(productId);
+  if(localPlan){try{const until=extendLocalPremium(localPlan.days);showToast(`PREMIUM ativado por +${localPlan.days} dias`,'reward');await flushCloudSave(true);await refreshAndRenderPremium(true);if(until)pushActivity(`PREMIUM • ${localPlan.name} ativo até ${formatPremiumUntil(new Date(until).toISOString())}`,'reward');return;}catch(e){showToast(String(e?.message||e));return;}}
   try{
     await flushCloudSave(true);
     const result=await testPurchasePremiumOnline(productId);
     if(result?.category==='elite_item'&&result.item_id){progress.inventory ||= {};progress.inventory[result.item_id]=(progress.inventory[result.item_id]||0)+Math.max(1,Number(result.quantity)||1);saveGame();await flushCloudSave(true);showToast(`${ITEMS[result.item_id]?.name||result.item_id} recebido`,'reward');}
     else if(result?.category==='battle_pass')showToast('Passe Premium ativado nesta temporada','reward');
-    else if(result?.category==='premium')showToast('PREMIUM ativado por +30 dias','reward');
+    else if(result?.category==='premium')showToast('PREMIUM ativado com sucesso','reward');
     await refreshAndRenderPremium(true);
   }catch(e){showToast(String(e?.message||e));}
 }

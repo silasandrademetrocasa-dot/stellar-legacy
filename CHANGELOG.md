@@ -1,6 +1,14 @@
+## V16.6.0 — HUD / PREMIUM / EVENTS
+- Reorganização do HUD inferior: chat à esquerda, munições ao centro, mapa à direita.
+- Campo de mensagem do chat fixado no rodapé do painel.
+- Conta FELP/ADM recebe desbloqueio administrativo local para naves, equipamentos, drones, AUX e designers.
+- Loja Premium agora possui 4 planos: 7, 30, 90 e 180 dias.
+- Sistema inicial de cupons implementado com o código `EVENTO7D`.
+- Scheduler do shared universe ajustado para rotação semanal: 4h em dias úteis e 1h no sábado/domingo.
+
 # CHANGELOG
 
-## V16.5.0 — FINAL DESIGNERS & SOCIAL
+## V16.6.0 — FINAL DESIGNERS & SOCIAL
 
 - Release combinada das etapas V16.4 + V16.5.
 - Designers de nave: HP, DANO, ESCUDO, XP, CRÍTICO e REPARAÇÃO, exclusivos de naves ELITE/STL e naves especiais de evento.

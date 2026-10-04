@@ -1,4 +1,4 @@
-# Stellar Legacy V16.5.0 — FINAL DESIGNERS & SOCIAL
+# Stellar Legacy V16.6.0 — HUD / PREMIUM / EVENTS
 
 Esta release junta as duas últimas etapas da V16: **SHIP + AUX DESIGNERS** e **VISUAL & SOCIAL FINAL**. O sistema de designers fica conectado ao Supabase, com drops de evento, habilidade individual da nave, bônus de atributos e visual sincronizado no Shared Universe.
 

@@ -1754,3 +1754,22 @@ body[data-quality="high"] .hud-panel{backdrop-filter:blur(7px);-webkit-backdrop-
 @keyframes designerAbilityPulse{from{filter:brightness(1)}to{filter:brightness(1.16)}}
 
 @media(max-width:680px){.designer-loadout-control{grid-template-columns:1fr}.minimap-social-legend{gap:4px;font-size:5.5px}.minimap-social-legend span{letter-spacing:0}}
+
+
+/* ===================== V16.6 HUD / PREMIUM / CHAT TUNING ===================== */
+:root{--bottom-dock-height:268px;--chat-dock-width:332px;}
+.bottom-hud-dock{align-items:stretch!important;}
+#chatDock{display:flex;flex-direction:column;align-self:stretch;min-height:var(--bottom-dock-height);max-height:var(--bottom-dock-height);}
+#chatDock .chat-body{display:flex!important;flex-direction:column;flex:1 1 auto;min-height:0;gap:6px;}
+#chatDock .chat-feed{flex:1 1 auto;min-height:0;max-height:none!important;}
+#chatDock .chat-compose{margin-top:auto;}
+.bottom-hud-dock #weaponBar,.bottom-hud-dock #weaponBar.compact-ammo-ui{align-self:flex-end;min-height:136px;}
+.bottom-hud-dock #minimapPanel{align-self:flex-end;}
+.premium-coupon-card{display:grid;grid-template-columns:minmax(0,1fr) minmax(220px,320px);gap:12px;align-items:center;padding:12px 14px;border:1px solid rgba(220,188,82,.28);border-radius:16px;background:linear-gradient(180deg,rgba(44,28,8,.94),rgba(18,13,6,.92));box-shadow:inset 0 0 22px rgba(255,210,100,.05);}
+.premium-coupon-copy span{display:block;font-size:10px;letter-spacing:.14em;color:#ffd883;font-weight:900;}
+.premium-coupon-copy b{display:block;margin-top:4px;font-size:15px;color:#fff4cd;}
+.premium-coupon-copy small{display:block;margin-top:5px;line-height:1.45;color:#e8dcbb;}
+.premium-coupon-form{display:grid;grid-template-columns:1fr 110px;gap:8px;align-items:center;}
+.premium-coupon-form input{width:100%;height:42px;border-radius:12px;border:1px solid rgba(233,201,117,.26);background:rgba(3,11,19,.8);color:#f7fbff;padding:0 12px;outline:none;font-weight:800;letter-spacing:.05em;text-transform:uppercase;}
+.premium-coupon-form input:focus{border-color:#ffd76a;box-shadow:0 0 0 2px rgba(255,215,106,.08);}
+@media(max-width:980px){.premium-coupon-card{grid-template-columns:1fr;}.premium-coupon-form{grid-template-columns:1fr 120px;}}
