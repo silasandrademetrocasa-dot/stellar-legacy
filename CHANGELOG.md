@@ -1,3 +1,8 @@
+## V17.5.3 — POSITION PERSISTENCE HOTFIX
+- Posição da nave agora persiste corretamente ao atualizar/reabrir o jogo.
+- Checkpoint por mapa/território evita fallback indevido para a base.
+- Compras e mutações econômicas não sobrescrevem mais a prioridade temporal do snapshot de posição.
+
 ## V17.5.2 — ENTITY GRAPHICS LOCK + SCENE PERFORMANCE
 - Modo AUTO não remove/rebaixa sprites de NAVE, NPC, DRONES ou AUX-9.
 - Assets V17 de entidades ficam protegidos contra descarte do cache.
