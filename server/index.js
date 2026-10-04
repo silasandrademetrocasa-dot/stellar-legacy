@@ -655,7 +655,7 @@ const sharedUniverse = attachSharedUniverse(server, {
 });
 
 server.listen(port, () => {
-  console.log(`Stellar Legacy V16.5.0 :${port}`);
+  console.log(`Stellar Legacy V17.6.0 :${port}`);
   console.log('Supabase config:', configStatus());
   console.log('Shared Universe: ONLINE');
 });
