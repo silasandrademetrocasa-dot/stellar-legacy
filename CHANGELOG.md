@@ -1,3 +1,9 @@
+## V16.7.7 — AGGRO + PORTAL REWARDS + REALTIME MATERIALIZER
+- Perseguição normal limitada a 800u e ataque até 500u.
+- NPCs de evento deixam de perseguir o jogador através do mapa inteiro.
+- Pacotes finais dos Portais Astrais fortemente melhorados.
+- Materializador atualiza ganhos e peças imediatamente após os giros.
+
 ## V16.7.6 — PORTAL REFORGE
 - AURORA, NEXUS e ECLIPSE liberados desde o início.
 - Rounds e ondas refeitos para progressão estratégica e viável para jogador FREE com itens de Créditos.

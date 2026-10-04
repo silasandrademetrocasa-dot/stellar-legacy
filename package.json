@@ -1,6 +1,6 @@
 {
   "name": "stellar-legacy",
-  "version": "16.7.6",
+  "version": "16.7.7",
   "type": "module",
   "scripts": {
     "start": "node server/index.js",
@@ -14,5 +14,5 @@
   "engines": {
     "node": ">=18"
   },
-  "release": "portal-reforge-v16-7-6"
+  "release": "aggro-portal-rewards-realtime-v16-7-7"
 }
