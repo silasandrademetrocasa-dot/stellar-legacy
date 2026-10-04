@@ -2094,7 +2094,7 @@ body[data-quality="high"] .hud-panel{backdrop-filter:blur(7px);-webkit-backdrop-
 #gateProtocolTabs [data-gate-protocol]:disabled{opacity:1!important;cursor:pointer!important;}
 @media(max-width:680px){.gate-life-actions{grid-template-columns:1fr!important}.gate-round-card{min-height:0!important;}}
 
-/* ===================== V16.7.9 HANGAR EQUIPMENT COMMAND ===================== */
+/* ===================== V17.0.0 HANGAR EQUIPMENT COMMAND ===================== */
 .hangar-equipment-console,.hangar-drone-console{display:flex;flex-direction:column;gap:10px}
 .hangar-summary-strip{grid-template-columns:repeat(6,minmax(110px,1fr));margin-bottom:0}
 .hangar-summary-strip .stat-card{padding:9px 10px;min-height:66px}
