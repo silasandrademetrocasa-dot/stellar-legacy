@@ -1,6 +1,6 @@
 {
   "name": "stellar-legacy",
-  "version": "17.2.0",
+  "version": "17.3.0",
   "type": "module",
   "scripts": {
     "start": "node server/index.js",
@@ -14,5 +14,5 @@
   "engines": {
     "node": ">=18"
   },
-  "release": "sprite-polish-combat-visuals-v17-2-0"
+  "release": "fx-revamp-v17-3-0"
 }

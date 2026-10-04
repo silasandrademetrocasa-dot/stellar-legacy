@@ -1,3 +1,12 @@
+## V17.3.0 — FX REVAMP
+- Lasers agora possuem assinatura visual diferente por munição (PLS-1/2/3/4 e SIP-2).
+- PLS-4 recebeu plasma pulsante; SIP-2 recebeu efeito de drenagem energética.
+- Mísseis ganharam trilha, glow, núcleo e onda de aproximação.
+- Impactos de escudo, regeneração e reparação ganharam efeitos dedicados.
+- Explosões ganharam núcleo luminoso e shockwave em camadas.
+- Portais ganharam anéis de profundidade para reforçar sensação 3D.
+- Efeitos remotos usam a mesma linguagem visual para PvP/Shared Universe.
+
 ## V17.2.0 — SPRITE POLISH + COMBAT VISUALS
 - Inclui o polimento V17.1: sprites de nave recortados por componente principal, fragmentos vizinhos removidos e margem segura ampliada.
 - Quadros do Hangar/Loja ampliados e imagens centralizadas com escala segura.
