@@ -5,8 +5,8 @@
 <meta charset="utf-8"/>
 <meta content="width=device-width,initial-scale=1,user-scalable=no" name="viewport"/>
 <meta content="#030816" name="theme-color"/>
-<title>Stellar Legacy V13.3.1 — Pilot Live Refresh</title>
-<link href="/style.css?v=13.3.1" rel="stylesheet"/>
+<title>Stellar Legacy</title>
+<link href="/style.css?v=13.5.0" rel="stylesheet"/>
 </head>
 <body>
 <div id="app">
@@ -185,10 +185,10 @@
 
 <div class="modal fixed-modal" id="loginModal">
 <div class="modal-card login-card">
-<div class="eyebrow">STELLAR NETWORK • V11 ARENA CINEMÁTICA</div>
+<div class="eyebrow">STELLAR NETWORK</div>
 <h1>Entrar no Stellar Legacy</h1>
 <p class="muted">Sua conta salva facção, nave, inventário, drones, munição e progresso online.</p>
-<div class="identity-panel"><img alt="Stellar Legacy" class="identity-logo" src="/assets/v8/branding/logo-v8.png"/><div class="identity-copy"><div class="eyebrow">IDENTIDADE STELLAR LEGACY</div><h3>Três facções. Uma guerra orbital.</h3><p>Naves, NPCs, equipamentos, recursos e mapas agora usam uma identidade visual própria integrada ao jogo.</p><div class="identity-factions"><div><img alt="Terra" src="/assets/v8/branding/earth.png"/><span>Terra</span></div><div><img alt="Marte" src="/assets/v8/branding/mars.png"/><span>Marte</span></div><div><img alt="Júpiter" src="/assets/v8/branding/jupiter.png"/><span>Júpiter</span></div></div></div></div>
+<div class="identity-panel"><img alt="Stellar Legacy" class="identity-logo" src="/assets/v8/branding/logo-v8.png"/><div class="identity-copy"><div class="eyebrow">IDENTIDADE STELLAR LEGACY</div><h3>Três facções. Uma guerra orbital.</h3><p>Explore naves, NPCs, equipamentos, recursos e mapas do universo Stellar Legacy.</p><div class="identity-factions"><div><img alt="Terra" src="/assets/v8/branding/earth.png"/><span>Terra</span></div><div><img alt="Marte" src="/assets/v8/branding/mars.png"/><span>Marte</span></div><div><img alt="Júpiter" src="/assets/v8/branding/jupiter.png"/><span>Júpiter</span></div></div></div></div>
 <div class="auth-tabs">
 <button class="tab-btn active" id="loginTabBtn">Entrar</button>
 <button class="tab-btn" id="registerTabBtn">Criar conta</button>
@@ -221,7 +221,7 @@
   <div class="modal-card wide-card mission-modal-card">
     <div class="modal-header">
       <div>
-        <div class="eyebrow">MISSION CONTROL • PROTOCOLO V10</div>
+        <div class="eyebrow">MISSION CONTROL</div>
         <h2>Painel de Missões</h2>
       </div>
       <button class="small-btn" id="closeMission">Fechar</button>
@@ -237,8 +237,8 @@
   <div class="modal-card wide-card gate-modal-card">
     <div class="modal-header">
       <div>
-        <div class="eyebrow">PORTAIS ASTRAIS • V13 MULTIPROTOCOLO</div>
-        <h2>Materializador do Portal</h2><div class="gate-protocol-tabs" id="gateProtocolTabs"><button class="small-btn active" data-gate-protocol="alpha">AURORA</button><button class="small-btn" data-gate-protocol="beta" disabled title="Em breve">NEXUS 🔒</button><button class="small-btn" data-gate-protocol="gamma" disabled title="Em breve">ECLIPSE 🔒</button></div>
+        <div class="eyebrow">PORTAIS ASTRAIS</div>
+        <h2>Materializador do Portal</h2><div class="gate-protocol-tabs" id="gateProtocolTabs"><button class="small-btn active" data-gate-protocol="alpha">AURORA</button><button class="small-btn" data-gate-protocol="beta" disabled title="Bloqueado">NEXUS 🔒</button><button class="small-btn" data-gate-protocol="gamma" disabled title="Bloqueado">ECLIPSE 🔒</button></div>
       </div>
       <button class="small-btn" id="closeGate">Fechar</button>
     </div>
@@ -316,10 +316,10 @@
 <div class="modal hidden" id="arenaModal">
   <div class="modal-card wide-card arena-modal-card">
     <div class="modal-header">
-      <div><div class="eyebrow">ARENA PVP V11 • 10 BATALHAS POR DIA</div><h2>Duelo de Pilotos</h2></div>
+      <div><div class="eyebrow">ARENA PVP • 10 BATALHAS POR DIA</div><h2>Duelo de Pilotos</h2></div>
       <div class="arena-header-actions"><button class="ghost-btn" id="arenaRefresh">ATUALIZAR</button><button class="small-btn" id="closeArena">Fechar</button></div>
     </div>
-    <div class="arena-rule-banner">Escolha outro piloto e assista ao duelo acontecer <b>tiro por tiro</b>. A Arena V11 usa <b>PLS-1 (X1) + CMT-1</b> fixos e mostra escudo, HP, dano, duração e leitura tática. O limite continua em <b>10 ataques por dia</b>, renovados à meia-noite no horário de São Paulo.</div>
+    <div class="arena-rule-banner"><b>10 batalhas por dia.</b> Duelos usam PLS-1 + CMT-1 e o limite renova à meia-noite.</div>
     <div class="arena-summary">
       <div><span>ATAQUES RESTANTES</span><b id="arenaAttacksLeft">10 / 10</b></div>
       <div><span>RATING</span><b id="arenaRating">1000</b></div>
@@ -399,7 +399,6 @@
       <div><div class="eyebrow">ALIANÇAS • COFRE COMPARTILHADO</div><h2>Clã / Aliança</h2></div>
       <div class="arena-header-actions"><button class="ghost-btn" id="clanRefresh">ATUALIZAR</button><button class="small-btn" id="closeClan">Fechar</button></div>
     </div>
-    <div class="clan-rule-banner"><b>CLÃ V13:</b> não existem mais doações manuais. Às <b>23:00</b> o cofre rende conforme o nível do clã; no reset das <b>00:00</b>, o sistema coleta automaticamente <b>10% dos Créditos de cada membro</b>. O líder pode repassar Créditos do cofre, com <b>5% de juros queimados</b> em cada transferência.</div>
     <div id="clanContent" class="clan-content"><div class="muted">Carregando dados da aliança...</div></div>
   </div>
 </div>
@@ -408,11 +407,10 @@
 <div class="modal hidden" id="warfrontModal">
   <div class="modal-card wide-card warfront-modal-card">
     <div class="modal-header">
-      <div><div class="eyebrow">V13.1 • GUERRA TOTAL</div><h2>WARFRONT</h2></div>
+      <div><div class="eyebrow">GUERRA TOTAL</div><h2>WARFRONT</h2></div>
       <div class="arena-header-actions"><button class="ghost-btn" id="warfrontRefresh">ATUALIZAR</button><button class="small-btn" id="closeWarfront">Fechar</button></div>
     </div>
-    <div class="warfront-rule-banner"><b>WORLD BOSS + GUERRA DE CLÃS + BLUEPRINTS:</b> cause dano no NEMESIS PRIME, dispute pontos com clãs rivais, encontre fragmentos raros e evolua a habilidade da sua classe de nave.</div>
-    <div id="warfrontContent" class="warfront-content"><div class="muted">Sincronizando frente de guerra...</div></div>
+        <div id="warfrontContent" class="warfront-content"><div class="muted">Sincronizando frente de guerra...</div></div>
   </div>
 </div>
 
@@ -438,6 +436,13 @@
         </div>
       </section>
       <section class="settings-section">
+        <div class="settings-title"><div><b>ÁUDIO</b><small>Laser, mísseis, impactos, explosões, alertas e efeitos do jogo.</small></div><span id="audioVolumeValue">70%</span></div>
+        <div class="audio-settings-row">
+          <label class="audio-toggle"><input type="checkbox" id="audioEnabledToggle" checked/> Efeitos sonoros</label>
+          <label class="audio-volume">Volume <input type="range" id="audioVolumeRange" min="0" max="100" step="5" value="70"/></label>
+        </div>
+      </section>
+      <section class="settings-section">
         <div class="settings-title"><div><b>VISIBILIDADE DO HUD</b><small>Escolha o que fica visível durante o jogo.</small></div></div>
         <div class="hud-settings-grid" id="hudSettingsGrid">
           <label><input type="checkbox" data-hud-key="ship" checked/> Nave</label>
@@ -453,7 +458,7 @@
 
     <div class="settings-panel hidden" id="settingsRankingPanel">
       <section class="settings-section ranking-settings-section">
-        <div class="settings-title"><div><b>PATENTES & RANKING</b><small>Ranking por pontos inspirado no padrão clássico do Stellar Legacy, com patente especial para administradores.</small></div><button class="ghost-btn" id="rankingRefreshBtn">ATUALIZAR</button></div>
+        <div class="settings-title"><div><b>PATENTES & RANKING</b><small>Patentes, posição e desempenho dos pilotos.</small></div><button class="ghost-btn" id="rankingRefreshBtn">ATUALIZAR</button></div>
         <div class="ranking-hero-grid">
           <article class="ranking-board ranking-hero-card">
             <div class="ranking-board-title">MINHA PATENTE</div>
@@ -540,7 +545,7 @@
 </div>
 <button class="small-btn" id="closeMap">Fechar</button>
 </div>
-<div class="muted" style="margin-bottom:10px">Seu mapa atual recebe destaque. Os mapas da sua facção aparecem iluminados e as rotas seguem a lógica clássica.</div>
+<div class="muted" style="margin-bottom:10px">Seu setor atual e as rotas disponíveis aparecem destacados.</div>
 
 <div class="map-network" id="mapNetwork"></div>
 </div>
@@ -562,10 +567,9 @@
 <div class="modal hidden" id="premiumModal">
   <div class="modal-card wide-card premium-store-modal">
     <div class="modal-header">
-      <div><div class="eyebrow">STELLAR PREMIUM • V13</div><h2>Loja Premium</h2></div>
-      <div class="premium-header-actions"><span class="premium-mode-chip" id="premiumModeChip">MODO VISUALIZAÇÃO</span><button class="small-btn" id="closePremium">Fechar</button></div>
+      <div><div class="eyebrow">STELLAR PREMIUM</div><h2>Loja Premium</h2></div>
+      <div class="premium-header-actions"><span class="premium-mode-chip" id="premiumModeChip">CATÁLOGO</span><button class="small-btn" id="closePremium">Fechar</button></div>
     </div>
-    <div class="premium-rule-banner"><b>TESTE V13:</b> todos os pilotos podem visualizar preços e benefícios, mas somente a conta <b>Administrador</b> pode executar compras de teste neste momento. Nenhuma cobrança real é realizada.</div>
     <div class="premium-benefits" id="premiumBenefits"></div>
     <div class="premium-product-grid" id="premiumProductGrid"><div class="muted">Carregando catálogo Premium...</div></div>
   </div>
@@ -617,6 +621,6 @@
   </div>
 </div>
 </div>
-<script src="/game.js?v=13.3.1" type="module"></script>
+<script src="/game.js?v=13.5.0" type="module"></script>
 </body>
 </html>

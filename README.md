@@ -1,13 +1,4 @@
-# Stellar Legacy V13.3.1 — PILOT LIVE REFRESH
-
-Hotfix sobre a V13.3.0 Stellar Identity.
-
-- Perfil de Piloto redesenha imediatamente após comprar Núcleos Quânticos.
-- PP, saldo de Núcleos, botões e custos atualizam na hora após converter PP.
-- Níveis de habilidade e desbloqueios seguintes atualizam imediatamente após evolução.
-- Reset da árvore também atualiza sem fechar/reabrir o Hangar.
-- Saves, IDs internos e compatibilidade da V13.3.0 preservados.
-
+# Stellar Legacy V13.5.0 — Clean UI + AUX-9 + Combat Audio
 
 Atualização de interface aplicada sobre a base V13.1.0 WARFRONT, preservando as mecânicas e o backend existentes.
 
@@ -32,3 +23,9 @@ Atualização de interface aplicada sobre a base V13.1.0 WARFRONT, preservando a
 - `E`: habilidade da nave
 - `K`: Nova Burst do AUX-9
 - `W`: WARFRONT
+## V13.5.0
+
+- Interface limpa de textos de teste, versões e instruções internas.
+- AUX-9 com papéis exclusivos por módulo, sem misturar combate e coleta.
+- Áudio procedural de combate e animações com controle de volume.
+- Perfil de Piloto atualiza imediatamente após compras e upgrades.

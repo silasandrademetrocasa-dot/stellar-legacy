@@ -1,9 +1,11 @@
-# V13.3.1 — PILOT LIVE REFRESH
+# V13.5.0 — Clean UI + AUX-9 Exclusive Roles + Combat Audio
 
-- Corrige atualização atrasada do Perfil de Piloto durante confirmações.
-- `refreshPilotViews()` agora reconstrói a aba PILOTO mesmo quando o Hangar está temporariamente oculto pelo modal de confirmação.
-- Comprar Núcleos Quânticos, evoluir habilidades e resetar a árvore refletem imediatamente no painel ao confirmar.
-- Atualizado cache-busting para 13.3.1.
+- Perfil de Piloto atualiza imediatamente após compra de Núcleos, conversão de PP e evolução de habilidade.
+- Confirmações restauram o modal anterior antes do re-render, eliminando tela congelada/desatualizada.
+- AUX-9 agora obedece função exclusiva por módulo: Sentinela combate; Salvager caixas; Minerador minérios; Reclaimer reparo; Nova Burst ataque explosivo; Companhia apenas acompanha.
+- Removidos textos de teste, versão, instruções internas e recados de desenvolvimento da interface do jogador.
+- Adicionado sistema de áudio procedural para laser, AUX-9, mísseis, impactos, escudo, explosões, coleta, portais, habilidades e recompensas.
+- Adicionadas opções de áudio e volume em Configurações.
 
 # V13.3.0 — STELLAR IDENTITY
 - Rebranding completo da nomenclatura herdada.

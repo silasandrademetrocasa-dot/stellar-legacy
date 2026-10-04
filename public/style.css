@@ -1437,3 +1437,5 @@ body[data-quality="high"] .hud-panel{backdrop-filter:blur(7px);-webkit-backdrop-
   #abilityBar .ability-icon{font-size:12px!important;width:13px!important;}
   .boss-phase-hud{top:48px!important;}
 }
+
+.audio-settings-row{display:grid;grid-template-columns:minmax(180px,.7fr) 1.3fr;gap:8px}.audio-settings-row label{display:flex;align-items:center;gap:9px;padding:10px;border-radius:10px;border:1px solid rgba(89,185,255,.12);background:#06131f;color:#b7d1dd;font-size:10px}.audio-settings-row input[type=checkbox]{accent-color:#4ddcff}.audio-volume{justify-content:space-between}.audio-volume input[type=range]{width:min(290px,65%);accent-color:#4ddcff}@media(max-width:680px){.audio-settings-row{grid-template-columns:1fr}.audio-volume input[type=range]{width:68%}}
