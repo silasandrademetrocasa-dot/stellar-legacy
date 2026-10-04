@@ -1,3 +1,14 @@
+# V14.0.0 — EPIC COMBAT & GALAXY EVENTS
+
+- Novo Target Lock HUD para NPC, BOSS e PvP.
+- Críticos, damage feedback, alertas táticos e efeitos de habilidade aprimorados.
+- Boss HUD detalhado e minimapa com lock reforçado.
+- Auto-target e segundo toque para atacar configuráveis.
+- Event Director com Invasão, BOSS raro, mineração, comboio e Ruptura Warfront.
+- Mapas 4-1/4-2/4-3 passam a abrir por evento/World Boss.
+- World Boss Warfront integrado ao sistema de eventos coletivos.
+- Sem novo SQL obrigatório.
+
 # V13.7.0 — HUD DOCK SYSTEM
 
 - HUD superior reorganizado na sequência JOGADOR → NAVE → MISSÕES → AUX-9.

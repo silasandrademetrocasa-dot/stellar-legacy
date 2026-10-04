@@ -6,7 +6,7 @@
 <meta content="width=device-width,initial-scale=1,user-scalable=no" name="viewport"/>
 <meta content="#030816" name="theme-color"/>
 <title>Stellar Legacy</title>
-<link href="/style.css?v=13.7.0" rel="stylesheet"/>
+<link href="/style.css?v=14.0.0" rel="stylesheet"/>
 </head>
 <body>
 <div id="app">
@@ -37,6 +37,7 @@
       <button class="menu-item" id="arenaBtn" type="button">ARENA <span id="arenaTopCount">10/10</span></button>
       <button class="menu-item" id="warfrontBtn" type="button">WARFRONT <span id="warfrontTopStatus">READY</span></button>
       <button class="menu-item" id="gateBtn" type="button">PORTAIS <span id="gatePieceBadge">AURORA 0/34</span></button>
+      <button class="menu-item" id="galaxyEventBtn" type="button">EVENTOS <span id="galaxyEventTopStatus">AO VIVO</span></button>
     </div>
   </div>
 
@@ -120,6 +121,27 @@
   </div>
 </section>
 </div>
+
+<section class="target-lock-hud hidden" id="targetLockHud" aria-live="polite">
+  <div class="target-lock-head"><span>🎯 TARGET LOCK</span><b id="targetLockType">HOSTIL</b></div>
+  <div class="target-lock-name" id="targetLockName">SEM ALVO</div>
+  <div class="target-lock-meta"><span id="targetLockDistance">0u</span><span id="targetLockThreat">—</span></div>
+  <div class="target-lock-stat"><span>HP</span><div class="target-lock-track hp"><i id="targetLockHpFill"></i></div><b id="targetLockHpText">0 / 0</b></div>
+  <div class="target-lock-stat"><span>ESC</span><div class="target-lock-track shield"><i id="targetLockShieldFill"></i></div><b id="targetLockShieldText">0 / 0</b></div>
+</section>
+
+<section class="combat-state-hud hidden" id="combatStateHud" aria-live="polite">
+  <span class="combat-state-dot"></span><b id="combatStateText">EM COMBATE</b><small id="combatStateMeta">—</small>
+</section>
+
+<button class="galaxy-event-hud hidden" id="galaxyEventHud" type="button" aria-label="Abrir evento galáctico">
+  <span class="galaxy-event-icon" id="galaxyEventIcon">⚠</span>
+  <span class="galaxy-event-copy"><small>EVENTO GALÁCTICO</small><b id="galaxyEventName">ANOMALIA</b><em id="galaxyEventObjective">—</em></span>
+  <span class="galaxy-event-side"><b id="galaxyEventTimer">00:00</b><i><span id="galaxyEventProgress"></span></i></span>
+</button>
+
+<div class="combat-flash" id="combatFlash" aria-hidden="true"></div>
+
 <section class="hud-panel activity-float-panel" id="activityPanel">
   <div class="activity-float-head">
     <span>ATIVIDADE</span>
@@ -150,7 +172,9 @@
 
 <section class="boss-phase-hud hidden" id="bossPhaseHud">
   <div class="boss-phase-top"><span id="bossPhaseName">BOSS</span><b id="bossPhaseLabel">FASE I</b></div>
-  <div class="boss-phase-track"><i id="bossPhaseFill"></i></div>
+  <div class="boss-phase-values"><span>HP <b id="bossPhaseHpText">0 / 0</b></span><span>ESC <b id="bossPhaseShieldText">0 / 0</b></span><span id="bossPhaseDistance">0u</span></div>
+  <div class="boss-phase-track hp"><i id="bossPhaseHpFill"></i></div>
+  <div class="boss-phase-track shield"><i id="bossPhaseShieldFill"></i></div>
   <small id="bossPhaseStatus">ESTÁVEL</small>
 </section>
 
@@ -476,6 +500,16 @@
   </div>
 </div>
 
+<div class="modal hidden" id="galaxyEventModal">
+  <div class="modal-card wide-card galaxy-event-modal-card">
+    <div class="modal-header">
+      <div><div class="eyebrow">STELLAR EVENT DIRECTOR • V14</div><h2>Eventos Galácticos</h2></div>
+      <button class="small-btn" id="closeGalaxyEvent">Fechar</button>
+    </div>
+    <div id="galaxyEventContent" class="galaxy-event-content"></div>
+  </div>
+</div>
+
 <div class="modal hidden" id="configModal">
   <div class="modal-card settings-modal-card premium-settings-card">
     <div class="modal-header">
@@ -502,6 +536,14 @@
         <div class="audio-settings-row">
           <label class="audio-toggle"><input type="checkbox" id="audioEnabledToggle" checked/> Efeitos sonoros</label>
           <label class="audio-volume">Volume <input type="range" id="audioVolumeRange" min="0" max="100" step="5" value="70"/></label>
+        </div>
+      </section>
+      <section class="settings-section">
+        <div class="settings-title"><div><b>COMBATE INTELIGENTE</b><small>Automação leve e controles rápidos sem tirar o controle do piloto.</small></div></div>
+        <div class="combat-settings-grid">
+          <label><input type="checkbox" id="autoTargetToggle" checked/> Selecionar próximo NPC automaticamente</label>
+          <label><input type="checkbox" id="tapAttackToggle" checked/> Segundo toque no alvo inicia o laser</label>
+          <label><input type="checkbox" id="combatAlertsToggle" checked/> Alertas épicos de escudo, casco e PvP</label>
         </div>
       </section>
       <section class="settings-section">
@@ -684,6 +726,6 @@
   </div>
 </div>
 </div>
-<script src="/game.js?v=13.7.0" type="module"></script>
+<script src="/game.js?v=14.0.0" type="module"></script>
 </body>
 </html>

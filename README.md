@@ -1,4 +1,4 @@
-# Stellar Legacy V13.7.0 — HUD DOCK SYSTEM
+# Stellar Legacy V14.0.0 — HUD DOCK SYSTEM
 
 # Stellar Legacy V13.5.0 — Clean UI + AUX-9 + Combat Audio
 
@@ -25,7 +25,7 @@ Atualização de interface aplicada sobre a base V13.1.0 WARFRONT, preservando a
 - `E`: habilidade da nave
 - `K`: Nova Burst do AUX-9
 - `W`: WARFRONT
-## V13.7.0 — HUD DOCK SYSTEM
+## V14.0.0 — HUD DOCK SYSTEM
 
 - Sequência do HUD: JOGADOR → NAVE → MISSÕES → AUX-9.
 - Topbar pode ser escondida sem deixar vão; cards sobem automaticamente.
@@ -39,3 +39,7 @@ Atualização de interface aplicada sobre a base V13.1.0 WARFRONT, preservando a
 - AUX-9 com papéis exclusivos por módulo, sem misturar combate e coleta.
 - Áudio procedural de combate e animações com controle de volume.
 - Perfil de Piloto atualiza imediatamente após compras e upgrades.
+
+
+## V14.0.0
+Epic Combat & Galaxy Events: Target Lock, feedback de dano, eventos rotativos, comboio e Battle Maps por evento.
