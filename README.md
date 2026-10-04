@@ -1,3 +1,7 @@
+# Stellar Legacy V17.5.0 — NPC + Boss Visual Revamp
+
+Visual pass focado em NPCs e bosses, preservando gameplay e o Performance Pass da V17.4.
+
 # Stellar Legacy V17.4.0 — Performance + Mobile Pass
 
 A V17.4 reduz download e consumo de memória/GPU, adiciona qualidade AUTO adaptativa e melhora o uso em celulares sem alterar gameplay. Veja `PERFORMANCE_V17_4.md`.

@@ -1,3 +1,10 @@
+## V17.5.0 — NPC + BOSS VISUAL REVAMP
+- Sprites NPC/PRIME limpos e centralizados.
+- Auras por família, PRIME e EVENTO.
+- TARGET LOCK com retrato do alvo.
+- Pseudo-3D/banking visual em NPCs.
+- Nenhuma regra de gameplay alterada.
+
 ## V17.4.0 — PERFORMANCE + MOBILE PASS
 
 - Novo modo AUTO de qualidade com detecção de celular/desktop, memória, threads e economia de dados.

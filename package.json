@@ -1,6 +1,6 @@
 {
   "name": "stellar-legacy",
-  "version": "17.4.0",
+  "version": "17.5.0",
   "type": "module",
   "scripts": {
     "start": "node server/index.js",
@@ -14,5 +14,5 @@
   "engines": {
     "node": ">=18"
   },
-  "release": "performance-mobile-pass-v17-4-0"
+  "release": "npc-boss-visual-revamp-v17-5-0"
 }
