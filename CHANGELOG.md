@@ -1,15 +1,18 @@
-## V16.3.0 — DRONE DESIGNERS (ETAPA 4)
-
-- Três designers de drone controlados pelo Supabase: FURY CORE, AEGIS VEIL e TITAN HYBRID.
-- FURY CORE: +1,5% dano por drone; set 8/8 concede +8% escudo. Drop 10% no Portal NEXUS.
-- AEGIS VEIL: +2% escudo por drone; set 8/8 concede +8% HP. Drop 10% no Portal ECLIPSE.
-- TITAN HYBRID: +1,25% HP e +1,25% escudo por drone; set 8/8 concede +8% dano. Reservado para evento especial futuro.
-- Equipamento e quantidade de cópias são validados por RPC autenticada no Supabase.
-- Drops de Nexus/Eclipse são sorteados no banco e idempotentes por conclusão de portal.
-- Hangar mostra coleção, origem, bônus, progresso do set e designer individual de cada drone.
-- Drones equipados recebem identidade visual própria por glow/filtro/anel energético.
-
 # CHANGELOG
+
+## V16.5.0 — FINAL DESIGNERS & SOCIAL
+
+- Release combinada das etapas V16.4 + V16.5.
+- Designers de nave: HP, DANO, ESCUDO, XP, CRÍTICO e REPARAÇÃO, exclusivos de naves ELITE/STL e naves especiais de evento.
+- Habilidade inferior da tecla E agora representa a habilidade individual do designer de nave ativo; habilidade de classe continua como fallback sem designer.
+- Habilidades de designer: OVERDRIVE, SHIELD PULSE, HULL MEND, NANO RESTORE, QUANTUM FOCUS e PRECISION BURST.
+- Designers do AUX-9 exclusivos de evento: PREDATOR, BASTION, VITALIS AUX, SAVANT e OMEGA SYMBIOSIS.
+- Bônus AUX podem combinar DANO, HP, ESCUDO e XP; OMEGA é o item mítico híbrido.
+- Drops de evento são sorteados pelo Supabase, idempotentes por jogador/ciclo e controlados por `live_drop_rules_v16`.
+- Designer de nave/AUX é sincronizado pelo Shared Universe para os outros jogadores enxergarem o visual equipado.
+- Minimapa social: COMPANHIA em verde, ALIANÇA em dourado, HOSTIL em vermelho e alvo selecionado em amarelo.
+- Legenda social adicionada ao MAPA e acabamento visual por raridade nos painéis de designers.
+- Supabase V16.5 aplicado diretamente no projeto; nenhuma execução manual de SQL é necessária.
 
 ## V16.2.0 — CHAT DOCK
 - Chat persistente GLOBAL / ALIANÇA / PV via Supabase RPC.

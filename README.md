@@ -1,19 +1,18 @@
-# Stellar Legacy V16.3.0 — DRONE DESIGNERS (ETAPA 4)
+# Stellar Legacy V16.5.0 — FINAL DESIGNERS & SOCIAL
 
-A V16.3 adiciona designers raros aos drones, bônus por unidade, combos 8/8 e drops controlados pelo Supabase.
+Esta release junta as duas últimas etapas da V16: **SHIP + AUX DESIGNERS** e **VISUAL & SOCIAL FINAL**. O sistema de designers fica conectado ao Supabase, com drops de evento, habilidade individual da nave, bônus de atributos e visual sincronizado no Shared Universe.
 
+## Designers de nave
+Os designs REAPER, BULWARK, VITALIS, RECLAIMER, SCHOLAR e APEX cobrem DANO, ESCUDO, HP, REPARAÇÃO, XP e CRÍTICO. Eles só podem ser usados em naves ELITE (STL) ou ESPECIAIS DE EVENTO. A tecla **E** passa a usar a habilidade do designer ativo; sem designer, a habilidade de classe continua funcionando.
 
-Chat online persistente com canais GLOBAL, ALIANÇA e PV. O rodapé agora usa um dock fluido com CHAT à esquerda, MUNIÇÕES no centro e MAPA à direita; quando qualquer painel é recolhido ou ocultado, os demais ocupam o espaço automaticamente.
+## Designers AUX-9
+PREDATOR, BASTION, VITALIS AUX, SAVANT e OMEGA SYMBIOSIS são exclusivos de eventos. Os bônus podem afetar dano do AUX, HP/escudo como suporte e XP. O OMEGA é o drop mítico híbrido.
 
-A segunda etapa da V16 mantém o LIVE OPS da V16.0 e move transações econômicas críticas para o Render: AUTO BUY, Trader, vendas, slots do AUX-9, Núcleos Quânticos e Materializador. O navegador exibe a interface, mas preço/cobrança/recompensa são validados no servidor usando o catálogo do Supabase.
+## Social final
+O radar agora mostra aliados da mesma companhia e membros da mesma aliança além dos hostis. Designs de nave e AUX também são enviados pelo WebSocket, permitindo que outros jogadores enxerguem o visual raro equipado em tempo real.
 
-## Teste rápido da etapa
-1. Ative o CPU AUTO BUY e reduza munição até disparar compra automática.
-2. Venda um minério individual e depois use VENDER TUDO no X-1.
-3. Venda um equipamento e um drone.
-4. Libere um novo slot do AUX-9.
-5. Compre Núcleos Quânticos e converta 1 PP.
-6. Faça 1x e 5x no Materializador e valide que saldo/recompensas persistem após relogar.
+## Segurança operacional
+Agenda de eventos, preços, catálogo de designers e probabilidades de drop continuam no Supabase. O claim de designers de evento é validado por RPC autenticada, confere a janela oficial do evento e aceita apenas uma tentativa por jogador em cada ciclo.
 
 ---
 

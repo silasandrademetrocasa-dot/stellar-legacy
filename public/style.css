@@ -1718,3 +1718,39 @@ body[data-quality="high"] .hud-panel{backdrop-filter:blur(7px);-webkit-backdrop-
 .drone-designer-control{display:flex;align-items:center;gap:8px;padding:8px;border-radius:10px;background:rgba(5,18,31,.8);border:1px solid rgba(89,199,255,.15)}
 .drone-designer-control label{font-size:9px;font-weight:900;color:#90ddff;letter-spacing:.8px}.designer-select{min-width:0;flex:1;background:#061522;color:#e9faff;border:1px solid rgba(83,202,255,.30);border-radius:8px;padding:7px 8px;font-size:10px;font-weight:700}.designer-select:disabled{opacity:.5}
 @media(max-width:680px){.designer-summary-grid{grid-template-columns:1fr}.drone-designer-control{align-items:flex-start;flex-direction:column}.designer-select{width:100%}}
+
+/* ===================== V16.5 FINAL DESIGNERS & SOCIAL ===================== */
+.ship-designer-console,.aux-designer-console{
+  position:relative;overflow:hidden;
+  border-color:rgba(188,118,255,.28)!important;
+  background:linear-gradient(135deg,rgba(25,12,43,.88),rgba(5,24,39,.90) 52%,rgba(4,14,27,.92))!important;
+}
+.ship-designer-console:before,.aux-designer-console:before{
+  content:"";position:absolute;inset:-35% 48% auto -12%;height:150px;pointer-events:none;
+  background:radial-gradient(circle,rgba(190,111,255,.13),rgba(81,214,255,.035) 46%,transparent 70%);
+}
+.designer-loadout-control{position:relative;display:grid;grid-template-columns:auto minmax(210px,1fr);align-items:center;gap:10px;margin-top:10px;padding:9px 10px;border-radius:11px;background:rgba(4,14,25,.78);border:1px solid rgba(91,205,255,.17)}
+.designer-loadout-control label{font-size:9px;font-weight:1000;letter-spacing:.10em;color:#96e7ff;white-space:nowrap}
+.designer-summary-card.epic{border-color:rgba(143,101,255,.34)}
+.designer-summary-card.legendary{border-color:rgba(255,202,88,.48);box-shadow:inset 0 0 22px rgba(255,201,83,.055)}
+.designer-summary-card.mythic{animation:designerCardPulse 2.4s ease-in-out infinite}
+@keyframes designerCardPulse{0%,100%{box-shadow:inset 0 0 20px rgba(209,121,255,.06),0 0 0 rgba(209,121,255,0)}50%{box-shadow:inset 0 0 24px rgba(209,121,255,.11),0 0 16px rgba(209,121,255,.12)}}
+.designer-ship-art-wrap,.designer-pet-art-wrap{position:relative;isolation:isolate}
+.designer-ship-art-wrap img,.designer-pet-art-wrap img{position:relative;z-index:1;transition:filter .18s ease,transform .18s ease}
+.ship-card:hover .designer-ship-art-wrap img,.pet-hero:hover .designer-pet-art-wrap img{transform:scale(1.035)}
+.ship-card.has-designer,.pet-hero.has-designer{border-color:var(--designer-glow,rgba(89,214,255,.45))!important;box-shadow:0 0 22px color-mix(in srgb,var(--designer-glow,#62dcff) 24%,transparent),inset 0 0 25px rgba(255,255,255,.02)}
+.ship-card.has-designer.legendary,.pet-hero.has-designer.legendary{box-shadow:0 0 25px rgba(255,201,83,.14),inset 0 0 25px rgba(255,201,83,.035)}
+.ship-card.has-designer.mythic,.pet-hero.has-designer.mythic{box-shadow:0 0 30px rgba(201,112,255,.20),inset 0 0 26px rgba(111,255,224,.035)}
+.designer-ship-art-wrap:after,.designer-pet-art-wrap:after{content:"";position:absolute;z-index:0;inset:12% 18%;border-radius:50%;background:radial-gradient(circle,var(--designer-glow,rgba(83,214,255,.24)),transparent 70%);filter:blur(12px);opacity:.40;pointer-events:none}
+.designer-equipped-badge{z-index:3}
+
+.minimap-social-legend{display:flex;align-items:center;justify-content:center;gap:7px;padding:4px 5px 5px;font-size:6.5px;font-weight:1000;letter-spacing:.025em;white-space:nowrap;border-top:1px solid rgba(84,196,245,.10);background:rgba(2,10,18,.58)}
+.minimap-social-legend .company{color:#57e6a8}.minimap-social-legend .clan{color:#ffe16b}.minimap-social-legend .hostile{color:#ff6a7d}
+#minimapPanel.collapsed .minimap-social-legend{display:none!important}
+
+/* A habilidade inferior representa a habilidade individual da nave/design ativo. */
+#shipAbilityBtn.ready{box-shadow:0 0 18px rgba(94,222,255,.16),inset 0 0 18px rgba(94,222,255,.035)}
+#shipAbilityBtn.active{animation:designerAbilityPulse .82s ease-in-out infinite alternate}
+@keyframes designerAbilityPulse{from{filter:brightness(1)}to{filter:brightness(1.16)}}
+
+@media(max-width:680px){.designer-loadout-control{grid-template-columns:1fr}.minimap-social-legend{gap:4px;font-size:5.5px}.minimap-social-legend span{letter-spacing:0}}

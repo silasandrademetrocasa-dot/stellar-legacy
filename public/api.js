@@ -711,3 +711,15 @@ export async function claimGateDroneDesignOnline({gate, completion}={}) {
   });
   return Array.isArray(rows) ? rows[0] || null : rows || null;
 }
+
+
+export async function claimEventDesignerOnline({eventId, eventKey}={}) {
+  const rows = await authedSupabaseFetch('/rest/v1/rpc/claim_event_designer_v165', {
+    method: 'POST',
+    body: JSON.stringify({
+      p_event_id: String(eventId || '').slice(0,160),
+      p_event_key: String(eventKey || '').slice(0,64),
+    }),
+  });
+  return Array.isArray(rows) ? rows[0] || null : rows || null;
+}

@@ -1,7 +1,7 @@
-import { FACTIONS, SHIPS, ITEMS, LASER_AMMO, ROCKETS, NPC_TYPES, MAPS, RESOURCES } from './data.js?v=16.3.0';
-import { GAME_ASSETS } from './assets/v8/manifest.js?v=16.3.0';
-import { signUp, signIn, requestPasswordReset, restorePasswordRecoveryFromUrl, restoreSession, signOutLocal, checkGameSession, endGameSession, getUser, getSessionCredentials, loadCloudSave, saveCloudSave, updateCallsign, updatePassword, loadRankings, loadAuctionBids, saveAuctionBidOnline, markAuctionBidStatusOnline, loadAuctionMarket, upsertPlayerPresenceOnline, loadMapPresenceOnline, removePlayerPresenceOnline, queuePvpAttackOnline, consumePvpDamageEventsOnline, syncArenaProfileOnline, loadArenaState, loadArenaDailyRewardStatus, claimArenaDailyReward, loadArenaOpponents, loadArenaHistory, arenaAttackOnline, listClansOnline, loadMyClanOnline, createClanOnline, joinClanOnline, leaveClanOnline, transferClanCreditsOnline, claimClanCreditGrantsOnline, recordClanAlienKillOnline, getPremiumShopOnline, testPurchasePremiumOnline, loadWarfrontStateOnline, hitWorldBossOnline, claimWorldBossRewardOnline, declareClanWarOnline, recordClanWarScoreOnline, loadLiveOpsOnline, purchaseLiveCatalogOnline, economyActionOnline, getChatHistoryOnline, sendChatMessageOnline, getMyDesignersOnline, setDesignLoadoutOnline, claimGateDroneDesignOnline } from './api.js?v=16.3.0';
-import { SharedUniverseClient } from './world.js?v=16.3.0';
+import { FACTIONS, SHIPS, ITEMS, LASER_AMMO, ROCKETS, NPC_TYPES, MAPS, RESOURCES } from './data.js?v=16.5.0';
+import { GAME_ASSETS } from './assets/v8/manifest.js?v=16.5.0';
+import { signUp, signIn, requestPasswordReset, restorePasswordRecoveryFromUrl, restoreSession, signOutLocal, checkGameSession, endGameSession, getUser, getSessionCredentials, loadCloudSave, saveCloudSave, updateCallsign, updatePassword, loadRankings, loadAuctionBids, saveAuctionBidOnline, markAuctionBidStatusOnline, loadAuctionMarket, upsertPlayerPresenceOnline, loadMapPresenceOnline, removePlayerPresenceOnline, queuePvpAttackOnline, consumePvpDamageEventsOnline, syncArenaProfileOnline, loadArenaState, loadArenaDailyRewardStatus, claimArenaDailyReward, loadArenaOpponents, loadArenaHistory, arenaAttackOnline, listClansOnline, loadMyClanOnline, createClanOnline, joinClanOnline, leaveClanOnline, transferClanCreditsOnline, claimClanCreditGrantsOnline, recordClanAlienKillOnline, getPremiumShopOnline, testPurchasePremiumOnline, loadWarfrontStateOnline, hitWorldBossOnline, claimWorldBossRewardOnline, declareClanWarOnline, recordClanWarScoreOnline, loadLiveOpsOnline, purchaseLiveCatalogOnline, economyActionOnline, getChatHistoryOnline, sendChatMessageOnline, getMyDesignersOnline, setDesignLoadoutOnline, claimGateDroneDesignOnline, claimEventDesignerOnline } from './api.js?v=16.5.0';
+import { SharedUniverseClient } from './world.js?v=16.5.0';
 
 const canvas = document.querySelector('#game');
 const ctx = canvas.getContext('2d');
@@ -219,15 +219,15 @@ function normalizeSharedNpc(raw){
 }
 function joinSharedUniverse(){
   if(!sharedUniverseMap())return;sharedUniverseRuntime.ready=false;sharedUniverseRuntime.pendingOres.clear();state.enemyRespawns=[];state.oreRespawns=[];
-  sharedUniverse.join({mapId:progress.mapId,territoryFaction:currentTerritoryFaction()||'battle',faction:progress.profile.faction,callsign:progress.profile.callsign||getUser()?.callsign||'Pilot',shipId:progress.activeShipId,level:progress.profile.level||1,x:player.x,y:player.y,angle:player.angle||0,hp:player.hp,maxHp:player.maxHp,shield:player.shield,maxShield:player.maxShield});
+  sharedUniverse.join({mapId:progress.mapId,territoryFaction:currentTerritoryFaction()||'battle',faction:progress.profile.faction,callsign:progress.profile.callsign||getUser()?.callsign||'Pilot',shipId:progress.activeShipId,shipDesignId:currentShipDesign()?.design_id||null,level:progress.profile.level||1,x:player.x,y:player.y,angle:player.angle||0,hp:player.hp,maxHp:player.maxHp,shield:player.shield,maxShield:player.maxShield});
 }
 function syncSharedUniversePlayer(force=false){
   if(!sharedUniverseMap()||!sharedUniverse.isOnline())return;const now=Date.now(),ammo=currentLaserAmmo(),target=state.target&&state.target.hp>0?state.target:null,petOwned=!!progress.pet?.owned,petLaserActive=petOwned&&!!petRuntime.laserTargetId&&nowSec()<petRuntime.laserUntil;
-  const combatSignature=[player.laserFiring?1:0,ammo?.id||'',target?.id||'',target?.isPlayer?1:0,petOwned?1:0,petRuntime.laserTargetId||'',petLaserActive?1:0,progress.pet?.activeGear||'off'].join('|');
+  const combatSignature=[player.laserFiring?1:0,ammo?.id||'',target?.id||'',target?.isPlayer?1:0,petOwned?1:0,petRuntime.laserTargetId||'',petLaserActive?1:0,progress.pet?.activeGear||'off',currentShipDesignId()||'',currentPetDesignId()||''].join('|');
   if(!force&&now-sharedUniverseRuntime.lastPlayerSyncAt<75&&combatSignature===sharedUniverseRuntime.lastCombatSignature)return;sharedUniverseRuntime.lastPlayerSyncAt=now;sharedUniverseRuntime.lastCombatSignature=combatSignature;
-  sharedUniverse.updatePlayer({x:player.x,y:player.y,angle:player.angle||0,hp:player.hp,maxHp:player.maxHp,shield:player.shield,maxShield:player.maxShield,faction:progress.profile.faction,shipId:progress.activeShipId,level:progress.profile.level||1,
+  sharedUniverse.updatePlayer({x:player.x,y:player.y,angle:player.angle||0,hp:player.hp,maxHp:player.maxHp,shield:player.shield,maxShield:player.maxShield,faction:progress.profile.faction,shipId:progress.activeShipId,level:progress.profile.level||1,shipDesignId:currentShipDesign()?.design_id||null,
     laserFiring:!!player.laserFiring&&!!target,laserColor:ammo?.color||'#76d9ff',laserAmmoId:ammo?.id||'lcb10',laserAmmoName:ammo?.name||'PLS-1',targetId:target?.id||null,targetIsPlayer:!!target?.isPlayer,
-    pet:petOwned?{owned:true,level:progress.pet.level||1,x:petRuntime.x,y:petRuntime.y,angle:petRuntime.angle||0,activeGear:progress.pet.activeGear||'off',laserTargetId:petRuntime.laserTargetId||null,laserActive:petLaserActive,laserColor:ammo?.color||'#76d9ff'}:{owned:false}});
+    pet:petOwned?{owned:true,level:progress.pet.level||1,x:petRuntime.x,y:petRuntime.y,angle:petRuntime.angle||0,activeGear:progress.pet.activeGear||'off',laserTargetId:petRuntime.laserTargetId||null,laserActive:petLaserActive,laserColor:ammo?.color||'#76d9ff',designId:currentPetDesign()?.design_id||null}:{owned:false}});
 }
 function findSharedNpc(id){return state.enemies.find(e=>e.id===id&&e.sharedWorld)||null;}
 function applySharedNpcPatch(raw){const e=findSharedNpc(raw.id);if(!e)return;const now=Date.now(),nx=Number(raw.x),ny=Number(raw.y),dt=Math.max(.001,Math.min(1,(now-(e.netAt||now))/1000));if(Number.isFinite(nx)&&Number.isFinite(ny)){const px=Number.isFinite(e.netX)?e.netX:e.x,py=Number.isFinite(e.netY)?e.netY:e.y;e.vx=Math.max(-1400,Math.min(1400,(nx-px)/dt));e.vy=Math.max(-1400,Math.min(1400,(ny-py)/dt));e.netX=nx;e.netY=ny;e.tx=nx;e.ty=ny;e.netAt=now;}const rest={...raw};delete rest.x;delete rest.y;Object.assign(e,rest);}
@@ -322,15 +322,21 @@ async function applyAuthoritativePurchase(catalogKey,label='Item'){
 }
 
 
-// ===================== V16.3 DRONE DESIGNERS =====================
+// ===================== V16.5 DESIGNER SYSTEM • DRONE + SHIP + AUX =====================
 const designerRuntime={state:{inventory:{},drones:{},loadout:{ship:null,pet:null},catalog:[]},busy:false,lastAt:0};
 function designerCatalog(){return Array.isArray(designerRuntime.state?.catalog)?designerRuntime.state.catalog:[];}
 function designById(id){return designerCatalog().find(d=>d.design_id===id)||null;}
 function droneDesignId(droneId){return designerRuntime.state?.drones?.[String(droneId||'')]||null;}
 function droneDesignFor(droneId){return designById(droneDesignId(droneId));}
+function currentShipDesignId(){return designerRuntime.state?.loadout?.ship||null;}
+function currentPetDesignId(){return designerRuntime.state?.loadout?.pet||null;}
+function shipDesignerEligible(shipId=progress?.activeShipId){const ship=SHIPS[shipId];return !!ship&&(!!ship.eventOnly||ship.currency==='uridium');}
+function currentShipDesign(){const d=designById(currentShipDesignId());return d?.kind==='ship'&&shipDesignerEligible()?d:null;}
+function currentPetDesign(){const d=designById(currentPetDesignId());return d?.kind==='pet'&&progress?.pet?.owned?d:null;}
 function ownedDesignQty(id){return Math.max(0,Number(designerRuntime.state?.inventory?.[id])||0);}
 function equippedDesignCount(id){return progress?.drones?.filter(d=>droneDesignId(d.id)===id).length||0;}
 function pctText(v){return `${(Math.max(0,Number(v)||0)*100).toFixed((Number(v)||0)*100%1?1:0)}%`;}
+function rarityLabel(r='rare'){return ({rare:'RARO',epic:'ÉPICO',legendary:'LENDÁRIO',mythic:'MÍTICO'})[String(r||'').toLowerCase()]||String(r||'RARO').toUpperCase();}
 function designerBonusSummary(d){
   const b=d?.bonuses||{},parts=[];
   if(b.damage_per_drone)parts.push(`+${pctText(b.damage_per_drone)} DANO / drone`);
@@ -339,6 +345,9 @@ function designerBonusSummary(d){
   if(b.full_set_damage)parts.push(`SET 8/8: +${pctText(b.full_set_damage)} DANO`);
   if(b.full_set_shield)parts.push(`SET 8/8: +${pctText(b.full_set_shield)} ESCUDO`);
   if(b.full_set_hp)parts.push(`SET 8/8: +${pctText(b.full_set_hp)} HP`);
+  if(b.hp)parts.push(`+${pctText(b.hp)} HP`);if(b.shield)parts.push(`+${pctText(b.shield)} ESCUDO`);if(b.damage)parts.push(`+${pctText(b.damage)} DANO`);
+  if(b.xp)parts.push(`+${pctText(b.xp)} XP`);if(b.crit)parts.push(`+${pctText(b.crit)} CRÍTICO`);if(b.repair)parts.push(`+${pctText(b.repair)} REPARAÇÃO`);
+  if(d?.ability?.name)parts.push(`HAB: ${d.ability.name}`);
   return parts.join(' • ')||'Visual raro';
 }
 function droneDesignerMultipliers(){
@@ -347,17 +356,38 @@ function droneDesignerMultipliers(){
   for(const [id,count] of counts){const def=designById(id),b=def?.bonuses||{};hp+=Number(b.hp_per_drone||0)*count;shield+=Number(b.shield_per_drone||0)*count;damage+=Number(b.damage_per_drone||0)*count;if((progress?.drones?.length||0)===setSize&&count===setSize){hp+=Number(b.full_set_hp||0);shield+=Number(b.full_set_shield||0);damage+=Number(b.full_set_damage||0);}}
   return {hp,shield,damage,counts};
 }
+function shipDesignerBonuses(){return currentShipDesign()?.bonuses||{};}
+function petDesignerBonuses(){return currentPetDesign()?.bonuses||{};}
+function petDesignerDamageMultiplier(){return 1+Number(petDesignerBonuses().damage||0);}
+function designerXpMultiplier(){const ship=Number(shipDesignerBonuses().xp||0),pet=Number(petDesignerBonuses().xp||0),def=shipAbilityDef?.(),active=def&&shipAbilityActive?.(def.id)?Number(def.xp_active||0)*abilityPowerMultiplier():0;return 1+ship+pet+active;}
+function designerCritChanceBonus(){const def=shipAbilityDef?.(),active=def&&shipAbilityActive?.(def.id)?Number(def.crit_active||0)*abilityPowerMultiplier():0;return Number(shipDesignerBonuses().crit||0)+active;}
+function designerRepairMultiplier(){return 1+Number(shipDesignerBonuses().repair||0);}
+function designerVisualCss(d){return d?.visual?.filter||'none';}
 async function refreshDesignerState(force=false){
   if(!authenticated)return designerRuntime.state;if(!force&&designerRuntime.lastAt&&Date.now()-designerRuntime.lastAt<15000)return designerRuntime.state;if(designerRuntime.busy)return designerRuntime.state;designerRuntime.busy=true;
   try{const data=await getMyDesignersOnline();if(data&&typeof data==='object')designerRuntime.state={inventory:data.inventory||{},drones:data.drones||{},loadout:data.loadout||{ship:null,pet:null},catalog:Array.isArray(data.catalog)?data.catalog:[]};designerRuntime.lastAt=Date.now();return designerRuntime.state;}catch(e){console.warn('designers',e);return designerRuntime.state;}finally{designerRuntime.busy=false;}
 }
 async function equipDroneDesigner(droneId,designId){
   if(!canChangeEquipment()){showToast('Designers de drone só podem ser alterados na sua base X-1');return;}
-  try{await flushCloudSave(true);designerRuntime.state=await setDesignLoadoutOnline({kind:'drone',designId:designId||null,droneId});designerRuntime.lastAt=Date.now();computeStats(true);saveGame();renderHangar();updateUI();showToast(designId?`${designById(designId)?.name||'Designer'} equipado`:'Designer removido');}catch(e){showToast(e.message||'Não foi possível equipar o designer');}
+  try{await flushCloudSave(true);designerRuntime.state=await setDesignLoadoutOnline({kind:'drone',designId:designId||null,droneId});designerRuntime.lastAt=Date.now();computeStats(true);saveGame();renderHangar();updateUI();syncSharedUniversePlayer(true);showToast(designId?`${designById(designId)?.name||'Designer'} equipado`:'Designer removido');}catch(e){showToast(e.message||'Não foi possível equipar o designer');}
+}
+async function equipShipDesigner(designId){
+  if(!canChangeEquipment()){showToast('Designer de nave só pode ser alterado na sua base X-1');return;}
+  if(designId&&!shipDesignerEligible()){showToast('Designers de nave são exclusivos de naves ELITE ou ESPECIAIS DE EVENTO');return;}
+  try{await flushCloudSave(true);designerRuntime.state=await setDesignLoadoutOnline({kind:'ship',designId:designId||null});designerRuntime.lastAt=Date.now();abilityRuntime.activeId=null;abilityRuntime.activeUntil=0;computeStats(true);saveGame();renderHangar();updateAbilityHud();updateUI();syncSharedUniversePlayer(true);showToast(designId?`${designById(designId)?.name||'Designer'} ativado na nave`:'Designer de nave removido');}catch(e){showToast(e.message||'Não foi possível equipar o designer de nave');}
+}
+async function equipPetDesigner(designId){
+  if(!canChangeEquipment()){showToast('Designer do AUX-9 só pode ser alterado na sua base X-1');return;}
+  if(!progress?.pet?.owned){showToast('Adquira o AUX-9 primeiro');return;}
+  try{await flushCloudSave(true);designerRuntime.state=await setDesignLoadoutOnline({kind:'pet',designId:designId||null});designerRuntime.lastAt=Date.now();computeStats(true);saveGame();refreshPetViews();renderHangar();updateUI();syncSharedUniversePlayer(true);showToast(designId?`${designById(designId)?.name||'Designer'} ativado no AUX-9`:'Designer do AUX-9 removido');}catch(e){showToast(e.message||'Não foi possível equipar o designer do AUX-9');}
 }
 async function claimGateDroneDesignerDrop(gate,completion){
   if(!['beta','gamma'].includes(String(gate)))return;
   try{await flushCloudSave(true);const r=await claimGateDroneDesignOnline({gate,completion});if(!r?.eligible)return;if(r.design_id&&!r.already_claimed){await refreshDesignerState(true);const d=designById(r.design_id);playSfx('reward');showToast(`DROP RARO! ${d?.name||r.name||r.design_id} • Designer de Drone`,'reward');pushActivity(`DESIGNER RARO • ${d?.name||r.name||r.design_id} obtido no ${gate==='beta'?'NEXUS':'ECLIPSE'}`,'reward');renderHangar();}else if(r.design_id&&r.already_claimed){await refreshDesignerState(true);}}catch(e){console.warn('designer gate claim',e);}
+}
+async function claimEventDesignerDrop(ev){
+  if(!authenticated||!ev||ev.id==='none'||!ev.eventId)return;
+  try{await flushCloudSave(true);const r=await claimEventDesignerOnline({eventId:ev.eventId,eventKey:ev.id});if(!r?.eligible)return;if(r.design_id&&!r.already_claimed){await refreshDesignerState(true);const d=designById(r.design_id);playSfx('reward');triggerCombatFlash('gold');queueCelebration('mission','DROP DE EVENTO',`${d?.name||r.name||r.design_id} • ${d?.kind==='ship'?'DESIGNER DE NAVE':'DESIGNER AUX-9'}`);showToast(`DROP ${rarityLabel(d?.rarity)}! ${d?.name||r.name||r.design_id}`,'reward');pushActivity(`DESIGNER DE EVENTO • ${d?.name||r.name||r.design_id} • ${ev.name}`,'reward');renderHangar();refreshPetViews();}else if(r.design_id&&r.already_claimed){await refreshDesignerState(true);}}catch(e){console.warn('designer event claim',e);}
 }
 
 
@@ -595,20 +625,21 @@ function abilityPowerMultiplier(){return 1+(abilityMasteryLevel()-1)*.08;}
 function abilityCooldownMultiplier(){return Math.max(.82,1-(abilityMasteryLevel()-1)*.045);}
 function abilityEffectiveCooldown(def=shipAbilityDef()){return def.cooldown*abilityCooldownMultiplier();}
 const SHIP_ABILITIES={
-  support:{id:'support',name:'NANO RESTORE',icon:'✚',cooldown:38,duration:0,desc:'Repara 30% do HP e 22% do escudo instantaneamente.'},
-  tank:{id:'tank',name:'FORTRESS',icon:'⬢',cooldown:50,duration:9,desc:'Reduz em 48% o dano recebido por 9s.'},
-  control:{id:'control',name:'JAM PULSE',icon:'◉',cooldown:44,duration:6,desc:'Silencia NPCs próximos por 5s e acelera a nave por 6s.'},
+  support:{id:'support',name:'NANO RESTORE',icon:'✚',cooldown:38,duration:0,desc:'Repara 30% do HP e 22% do escudo instantaneamente.',heal_hp:.30,heal_shield:.22},
+  tank:{id:'tank',name:'FORTRESS',icon:'⬢',cooldown:50,duration:9,desc:'Reduz em 48% o dano recebido por 9s.',incoming_mult:.52},
+  control:{id:'control',name:'JAM PULSE',icon:'◉',cooldown:44,duration:6,desc:'Silencia NPCs próximos por 5s e acelera a nave por 6s.',speed_active:.24},
   singularity:{id:'singularity',name:'SINGULARITY',icon:'☢',cooldown:48,duration:7,desc:'Aplica 7 pulsos de dano contínuo no alvo.'},
-  assault:{id:'assault',name:'OVERDRIVE',icon:'⚡',cooldown:42,duration:10,desc:'+35% dano e +20% velocidade por 10s.'},
+  assault:{id:'assault',name:'OVERDRIVE',icon:'⚡',cooldown:42,duration:10,desc:'+35% dano e +20% velocidade por 10s.',damage_active:.35,speed_active:.20},
 };
 const abilityRuntime={activeId:null,activeUntil:0,dotTargetId:null,dotTicks:0,dotNextAt:0};
 function normalizeCombatAbilities(){if(!progress)return;progress.combatAbilities ||= {shipReadyAt:0};progress.combatAbilities.shipReadyAt=Math.max(0,Number(progress.combatAbilities.shipReadyAt)||0);}
-function shipAbilityDef(){return SHIP_ABILITIES[abilityClassId()]||SHIP_ABILITIES.assault;}
+function designerShipAbilityDef(){const d=currentShipDesign(),a=d?.ability;if(!a?.id)return null;const cooldown=Math.max(8,Number(a.cooldown)||45),duration=Math.max(0,Number(a.duration)||0);return {...a,id:String(a.id),name:String(a.name||d.name||'HABILIDADE'),icon:String(a.icon||'✦'),cooldown,duration,desc:`${d.name} • ${designerBonusSummary(d)}`,designerId:d.design_id};}
+function shipAbilityDef(){return designerShipAbilityDef()||SHIP_ABILITIES[abilityClassId()]||SHIP_ABILITIES.assault;}
 function shipAbilityCooldownRemaining(){normalizeCombatAbilities();return Math.max(0,(progress.combatAbilities.shipReadyAt-Date.now())/1000);}
 function shipAbilityActive(id=null){return abilityRuntime.activeUntil>Date.now()&&(!id||abilityRuntime.activeId===id);}
-function shipAbilityDamageMultiplier(){return shipAbilityActive('assault')?(1.35+(abilityMasteryLevel()-1)*.05):1;}
-function shipAbilitySpeedMultiplier(){if(shipAbilityActive('assault'))return 1.20+(abilityMasteryLevel()-1)*.025;if(shipAbilityActive('control'))return 1.24+(abilityMasteryLevel()-1)*.025;return 1;}
-function shipAbilityIncomingMultiplier(){return shipAbilityActive('tank')?Math.max(.34,.52-(abilityMasteryLevel()-1)*.045):1;}
+function shipAbilityDamageMultiplier(){const def=shipAbilityDef();if(shipAbilityActive(def.id)&&Number(def.damage_active)>0)return 1+Number(def.damage_active)*abilityPowerMultiplier();return 1;}
+function shipAbilitySpeedMultiplier(){const def=shipAbilityDef();if(shipAbilityActive(def.id)&&Number(def.speed_active)>0)return 1+Number(def.speed_active)*abilityPowerMultiplier();return 1;}
+function shipAbilityIncomingMultiplier(){const def=shipAbilityDef();if(shipAbilityActive(def.id)&&Number(def.incoming_mult)>0)return Math.max(.25,Number(def.incoming_mult)-(abilityMasteryLevel()-1)*.045);return 1;}
 function triggerPetKamikaze(){
   if(!progress?.pet?.owned){showToast('Adquira o AUX-9 primeiro');return;}
   if(!progress.pet.gearsOwned?.kami){showToast('Compre o módulo Nova Burst no AUX-9');return;}
@@ -618,19 +649,23 @@ function triggerPetKamikaze(){
   setPetGear('kami');triggerCombatFlash('red');setCombatAlert('NOVA BURST ARMADA','ability',1.8);
 }
 function useShipAbility(){
-  if(!progress||progress.repairRequired||state.jumping)return; const def=shipAbilityDef(),remaining=shipAbilityCooldownRemaining();
+  if(!progress||progress.repairRequired||state.jumping)return;const def=shipAbilityDef(),remaining=shipAbilityCooldownRemaining();
   if(remaining>0){showToast(`${def.name} recarregando • ${remaining.toFixed(1)}s`);return;}
-  const now=Date.now();normalizeCombatAbilities();
-  if(def.id==='support'){
-    const power=abilityPowerMultiplier(),hp=Math.round(player.maxHp*.30*power),shield=Math.round(player.maxShield*.22*power);const bh=player.hp,bs=player.shield;player.hp=Math.min(player.maxHp,player.hp+hp);player.shield=Math.min(player.maxShield,player.shield+shield);spawnParticle(player.x,player.y-34,`+${fmt(player.hp-bh)} HP • +${fmt(player.shield-bs)} ESC`,'#74ffc2');spawnImpactFx(player.x,player.y,'#74ffc2',70,'shield');
+  const now=Date.now(),power=abilityPowerMultiplier();normalizeCombatAbilities();
+  const healHp=Math.max(0,Number(def.heal_hp)||0),healShield=Math.max(0,Number(def.heal_shield)||0);
+  if(healHp>0||healShield>0){
+    const bh=player.hp,bs=player.shield;
+    if(healHp>0)player.hp=Math.min(player.maxHp,player.hp+Math.round(player.maxHp*healHp*power));
+    if(healShield>0)player.shield=Math.min(player.maxShield,player.shield+Math.round(player.maxShield*healShield*power));
+    const dh=Math.max(0,player.hp-bh),ds=Math.max(0,player.shield-bs);spawnParticle(player.x,player.y-34,`${dh?`+${fmt(dh)} HP`:''}${dh&&ds?' • ':''}${ds?`+${fmt(ds)} ESC`:''}`,'#74ffc2');spawnImpactFx(player.x,player.y,'#74ffc2',82,'shield');
   }else if(def.id==='control'){
     const victims=state.enemies.filter(e=>e.hp>0&&Math.hypot(e.x-player.x,e.y-player.y)<=520);for(const e of victims)e.jammedUntil=nowSec()+5+(abilityMasteryLevel()-1)*.75;abilityRuntime.activeId=def.id;abilityRuntime.activeUntil=now+def.duration*1000;spawnParticle(player.x,player.y-42,`JAM • ${victims.length} ALVOS`,'#7eeeff');spawnImpactFx(player.x,player.y,'#7eeeff',110,'shield');
   }else if(def.id==='singularity'){
     if(!state.target||state.target.hp<=0||state.target.isPlayer){showToast('Selecione um NPC para usar Singularity');return;}abilityRuntime.dotTargetId=state.target.id;abilityRuntime.dotTicks=7;abilityRuntime.dotNextAt=nowSec();abilityRuntime.activeId=def.id;abilityRuntime.activeUntil=now+def.duration*1000;spawnParticle(state.target.x,state.target.y-state.target.size,'SINGULARITY','#ff5f9e');
   }else{
-    abilityRuntime.activeId=def.id;abilityRuntime.activeUntil=now+def.duration*1000;spawnParticle(player.x,player.y-40,def.name,def.id==='tank'?'#ffe777':'#72dcff');spawnImpactFx(player.x,player.y,def.id==='tank'?'#ffe777':'#72dcff',100,'shield');
+    abilityRuntime.activeId=def.id;abilityRuntime.activeUntil=now+Math.max(.2,def.duration)*1000;const design=currentShipDesign(),fx=design?.visual?.glow||(def.id==='tank'?'#ffe777':'#72dcff');spawnParticle(player.x,player.y-40,def.name,fx);spawnImpactFx(player.x,player.y,fx,112,'shield');
   }
-  playSfx('ability');triggerCombatFlash(def.id==='tank'?'gold':def.id==='singularity'?'red':'cyan');setCombatAlert(`${def.name} ATIVADA`,'ability',1.8);progress.combatAbilities.shipReadyAt=now+abilityEffectiveCooldown(def)*1000;saveGame();showToast(`${def.name} ATIVADA!`,'reward');
+  playSfx('ability');triggerCombatFlash(def.id==='tank'?'gold':def.id==='singularity'?'red':'cyan');setCombatAlert(`${def.name} ATIVADA`,'ability',1.8);progress.combatAbilities.shipReadyAt=now+abilityEffectiveCooldown(def)*1000;saveGame();syncSharedUniversePlayer(true);showToast(`${def.name} ATIVADA!`,'reward');
 }
 function updateCombatAbilities(){
   if(!progress)return; const now=nowSec();
@@ -1081,7 +1116,7 @@ function finishMissionAutomatically(category,mission,active){
   const flat=mission.flatReward||null;
   if(flat&&!active.flatRewardApplied){active.bonus.credits+=(Number(flat.credits)||0);active.bonus.uridium+=(Number(flat.uridium)||0);active.bonus.xp+=(Number(flat.xp)||0);active.flatRewardApplied=true;}
   const bonus=roundedMissionBonus(active);
-  progress.profile.credits+=bonus.credits;progress.profile.uridium+=bonus.uridium;progress.profile.xp+=bonus.xp;
+  progress.profile.credits+=bonus.credits;progress.profile.uridium+=bonus.uridium;bonus.xp=Math.round(bonus.xp*designerXpMultiplier());progress.profile.xp+=bonus.xp;
   const surprise=grantMissionSurprise(category,mission);
   if(surprise)bonus.itemText=`BÔNUS: ${surprise}`;
   progress.missions.completed[missionInstanceKey(category,mission.id)]=Date.now();
@@ -1861,7 +1896,7 @@ function updateWarfrontBadge(){if(ui.warfrontTopStatus){const wb=worldBossState(
 function warfrontBossRatio(){const wb=worldBossState();return wb?Math.max(0,Math.min(1,Number(wb.hp||0)/Math.max(1,Number(wb.max_hp)||1))):0;}
 function warfrontClanName(id){const all=[...(warfrontRuntime.clans||[])];const c=all.find(x=>x.id===id);return c?`[${c.tag}] ${c.name}`:'Clã rival';}
 function blueprintCardHtml(bp){normalizeWarfrontProgress();const have=Number(progress.warfront.blueprints[bp.id]||0),cores=progress.warfront.skillCores,ready=have>=bp.need&&cores>=bp.cores;return `<div class="blueprint-card ${ready?'ready':''}"><div class="blueprint-icon">${bp.icon}</div><div><b>${bp.name}</b><small>${bp.desc}</small><div class="blueprint-progress"><i style="width:${Math.min(100,have/bp.need*100)}%"></i></div><span>FRAGMENTOS ${fmt(have)}/${fmt(bp.need)} • CORES ${fmt(cores)}/${fmt(bp.cores)}</span></div><button class="small-btn" data-blueprint-craft="${bp.id}" ${ready?'':'disabled'}>CONSTRUIR</button></div>`;}
-function abilityMasteryHtml(){normalizeWarfrontProgress();const cls=abilityClassId(),def=SHIP_ABILITIES[cls],lv=abilityMasteryLevel(),cost=lv>=5?0:[2,4,7,11][lv-1];return `<div class="mastery-card"><div class="mastery-title"><span>${def.icon}</span><div><b>${def.name} • MASTERY ${lv}/5</b><small>+${Math.round((abilityPowerMultiplier()-1)*100)}% potência • -${Math.round((1-abilityCooldownMultiplier())*100)}% recarga</small></div></div><div class="mastery-pips">${[1,2,3,4,5].map(n=>`<i class="${n<=lv?'on':''}"></i>`).join('')}</div>${lv<5?`<button class="primary-btn" data-mastery-upgrade>EVOLUIR • ${cost} CORE${cost>1?'S':''}</button>`:'<div class="mastery-max">MASTERY MÁXIMA</div>'}</div>`;}
+function abilityMasteryHtml(){normalizeWarfrontProgress();const cls=abilityClassId(),def=shipAbilityDef(),lv=abilityMasteryLevel(),cost=lv>=5?0:[2,4,7,11][lv-1];return `<div class="mastery-card"><div class="mastery-title"><span>${def.icon}</span><div><b>${def.name} • MASTERY ${lv}/5</b><small>+${Math.round((abilityPowerMultiplier()-1)*100)}% potência • -${Math.round((1-abilityCooldownMultiplier())*100)}% recarga</small></div></div><div class="mastery-pips">${[1,2,3,4,5].map(n=>`<i class="${n<=lv?'on':''}"></i>`).join('')}</div>${lv<5?`<button class="primary-btn" data-mastery-upgrade>EVOLUIR • ${cost} CORE${cost>1?'S':''}</button>`:'<div class="mastery-max">MASTERY MÁXIMA</div>'}</div>`;}
 function renderWarfront(){if(!ui.warfrontContent)return;normalizeWarfrontProgress();const st=warfrontRuntime.state,wb=worldBossState(),war=currentClanWar(),myClan=clanState().clan,myRole=clanState().role;const bp=Object.values(WARFRONT_BLUEPRINTS).map(blueprintCardHtml).join('');let bossHtml='<div class="muted">World Boss indisponível no momento.</div>';if(wb){const hp=Math.max(0,Number(wb.hp)||0),max=Math.max(1,Number(wb.max_hp)||1),dead=hp<=0,claimed=!!wb.claimed;bossHtml=`<div class="world-boss-card ${dead?'dead':''}"><div class="world-boss-head"><div><span class="threat-chip">AMEAÇA GLOBAL</span><h3>${escHtml(wb.name||'NEMESIS PRIME')}</h3><small>${dead?'DERROTADO • recompensa disponível':`Encerra ${new Date(wb.ends_at).toLocaleString('pt-BR')}`}</small></div><b>${dead?'ELIMINADO':`${(hp/max*100).toFixed(2)}%`}</b></div><div class="world-boss-track"><i style="width:${Math.round(hp/max*100)}%"></i></div><div class="world-boss-stats"><span>HP <b>${fmt(hp)} / ${fmt(max)}</b></span><span>SEU DANO <b>${fmt(wb.my_damage||0)}</b></span><span>RANK <b>#${fmt(wb.my_rank||0)||'—'}</b></span></div><div class="warfront-actions">${dead?`<button class="primary-btn" data-worldboss-claim ${claimed?'disabled':''}>${claimed?'RECOMPENSA RESGATADA':'RESGATAR RECOMPENSA'}</button>`:`<button class="danger-btn" data-worldboss-engage>ENGAJAR EM MAPA BATTLE</button>`}</div></div>`;}
 let warHtml='';if(!myClan)warHtml='<div class="war-empty">Entre em um clã para participar das Guerras de Clãs.</div>';else if(war){const mine=war.my_side==='attacker'?Number(war.attacker_score||0):Number(war.defender_score||0),theirs=war.my_side==='attacker'?Number(war.defender_score||0):Number(war.attacker_score||0),opp=war.my_side==='attacker'?war.defender:war.attacker;warHtml=`<div class="clan-war-live"><div class="war-vs"><div><small>SEU CLÃ</small><b>[${escHtml(myClan.tag)}]</b><strong>${fmt(mine)}</strong></div><span>VS</span><div><small>RIVAL</small><b>[${escHtml(opp?.tag||'?')}]</b><strong>${fmt(theirs)}</strong></div></div><div class="war-score-track"><i style="width:${Math.min(100,(mine/Math.max(1,mine+theirs))*100)}%"></i></div><small>Termina ${new Date(war.ends_at).toLocaleString('pt-BR')} • BOSS +10 pts • PvP causa pontos por dano • World Boss também pontua.</small></div>`;}else if(myRole==='owner'){const opts=(warfrontRuntime.clans||[]).filter(c=>c.id!==myClan.id).map(c=>`<option value="${c.id}">[${escHtml(c.tag)}] ${escHtml(c.name)} • LV ${fmt(c.level||1)}</option>`).join('');warHtml=`<div class="war-declare"><b>DECLARAR GUERRA</b><small>Uma guerra dura 12 horas. Escolha um clã rival.</small><div class="clan-action-row"><select id="warTargetClan"><option value="">Escolha o rival...</option>${opts}</select><button class="danger-btn" data-war-declare>DECLARAR</button></div></div>`;}else warHtml='<div class="war-empty">Somente o líder pode declarar uma guerra.</div>';
 ui.warfrontContent.innerHTML=`<div class="warfront-grid"><section class="warfront-panel worldboss-panel"><div class="section-kicker">WORLD BOSS</div>${bossHtml}</section><section class="warfront-panel"><div class="section-kicker">GUERRA DE CLÃS</div>${warHtml}</section></div><section class="warfront-panel"><div class="section-kicker">MASTERY DA HABILIDADE</div>${abilityMasteryHtml()}</section><section class="warfront-panel"><div class="section-kicker">BLUEPRINT FORGE • ${fmt(progress.warfront.skillCores)} CORES</div><div class="blueprint-grid">${bp}</div><small class="warfront-hint">BOSS comuns têm chance de dropar fragmentos. World Boss garante fragmentos + cores conforme sua contribuição.</small></section>`;updateWarfrontBadge();}
@@ -1875,7 +1910,7 @@ async function flushWorldBossDamage(force=false){if(!authenticated||warfrontRunt
 async function claimWorldBossNow(){try{const r=await claimWorldBossRewardOnline();if(r?.already_claimed){showToast('Recompensa já resgatada');return;}normalizeWarfrontProgress();progress.profile.credits+=Number(r.credits)||0;progress.profile.uridium+=Number(r.uridium)||0;progress.warfront.skillCores+=Number(r.cores)||0;const bp=WARFRONT_BLUEPRINTS[r.blueprint_id]?r.blueprint_id:'lf4';progress.warfront.blueprints[bp]=(progress.warfront.blueprints[bp]||0)+(Number(r.fragments)||0);progress.warfront.worldBossClaims[String(r.boss_id||'boss')]=Date.now();saveGame();await flushCloudSave(true);showToast(`WORLD BOSS • +${fmt(r.credits||0)} CR • +${fmt(r.uridium||0)} STL • +${fmt(r.fragments||0)} FRAG`,'reward');pushActivity(`WORLD BOSS LOOT • ${fmt(r.fragments||0)} ${WARFRONT_BLUEPRINTS[bp].name} • +${fmt(r.cores||0)} cores`,'reward');await refreshWarfrontState(true);}catch(e){showToast(e.message);}}
 function rollRareBossLoot(enemy){if(!enemy||enemy.worldBoss||!String(enemy.type||'').startsWith('boss'))return;normalizeWarfrontProgress();const chance=enemy.gateEnemy?.22:.13;if(Math.random()>chance)return;const ids=Object.keys(WARFRONT_BLUEPRINTS),id=ids[Math.floor(Math.random()*ids.length)],frags=1+(Math.random()<.22?1:0),core=Math.random()<.18?1:0;progress.warfront.blueprints[id]+=frags;progress.warfront.skillCores+=core;progress.warfront.rareDrops++;showToast(`LOOT RARO • ${WARFRONT_BLUEPRINTS[id].name} +${frags}${core?' • +1 CORE':''}`,'reward');pushActivity(`BLUEPRINT • ${WARFRONT_BLUEPRINTS[id].name} +${frags}${core?' • SKILL CORE +1':''}`,'reward');}
 function craftBlueprint(id){normalizeWarfrontProgress();const bp=WARFRONT_BLUEPRINTS[id];if(!bp)return;const have=progress.warfront.blueprints[id]||0;if(have<bp.need||progress.warfront.skillCores<bp.cores){showToast('Fragmentos ou cores insuficientes');return;}progress.warfront.blueprints[id]-=bp.need;progress.warfront.skillCores-=bp.cores;progress.inventory[bp.itemId]=(progress.inventory[bp.itemId]||0)+bp.qty;progress.warfront.crafted[id]=(progress.warfront.crafted[id]||0)+1;saveGame();renderWarfront();renderHangar();showToast(`${bp.name} CONSTRUÍDO!`,'reward');pushActivity(`FORJA • ${bp.name} criado`,'reward');}
-function upgradeAbilityMastery(){normalizeWarfrontProgress();const cls=abilityClassId(),lv=abilityMasteryLevel();if(lv>=5){showToast('Mastery máxima');return;}const cost=[2,4,7,11][lv-1];if(progress.warfront.skillCores<cost){showToast(`Você precisa de ${cost} Skill Cores`);return;}progress.warfront.skillCores-=cost;progress.warfront.skillMastery[cls]=lv+1;saveGame();renderWarfront();updateAbilityHud();showToast(`${SHIP_ABILITIES[cls].name} • MASTERY ${lv+1}!`,'reward');pushActivity(`MASTERY • ${SHIP_ABILITIES[cls].name} subiu para ${lv+1}`,'reward');}
+function upgradeAbilityMastery(){normalizeWarfrontProgress();const cls=abilityClassId(),lv=abilityMasteryLevel();if(lv>=5){showToast('Mastery máxima');return;}const cost=[2,4,7,11][lv-1];if(progress.warfront.skillCores<cost){showToast(`Você precisa de ${cost} Skill Cores`);return;}progress.warfront.skillCores-=cost;progress.warfront.skillMastery[cls]=lv+1;saveGame();renderWarfront();updateAbilityHud();const name=shipAbilityDef().name;showToast(`${name} • MASTERY ${lv+1}!`,'reward');pushActivity(`MASTERY • ${name} subiu para ${lv+1}`,'reward');}
 async function scoreClanWar(points,reason){if(!authenticated||!currentClanTag())return;try{const r=await recordClanWarScoreOnline(points,reason);if(r?.scored){warfrontRuntime.state ||= {};warfrontRuntime.state.war=r.war||warfrontRuntime.state.war;updateWarfrontBadge();}}catch{}}
 function updateWarfrontRuntime(){if(!authenticated||!progress)return;if(warfrontRuntime.pendingBossDamage>0)flushWorldBossDamage();if(activeWorldBossEnemy()&&Date.now()-warfrontRuntime.lastBossSync>5000){warfrontRuntime.lastBossSync=Date.now();refreshWarfrontState(true).catch(()=>{});}}
 
@@ -1910,12 +1945,12 @@ function galaxyEventObjectiveText(ev=currentGalaxyEvent(),rec=galaxyEventRecord(
   if(ev.id==='prime')return `${fmt(rec.value||0)} / 1 BOSS RARO`;
   return `${fmt(rec.value||0)} / ${fmt(ev.target)} INVASORES`;
 }
-function galaxyEventRewardScaled(ev){const mult=1+Math.min(1.5,Math.max(0,(progress?.profile?.level||1)-1)/36);return {credits:Math.round(ev.reward.credits*mult),uridium:Math.round(ev.reward.uridium*mult),xp:Math.round(ev.reward.xp*mult),cores:ev.reward.cores||0};}
+function galaxyEventRewardScaled(ev){const mult=1+Math.min(1.5,Math.max(0,(progress?.profile?.level||1)-1)/36);return {credits:Math.round(ev.reward.credits*mult),uridium:Math.round(ev.reward.uridium*mult),xp:Math.round(ev.reward.xp*mult*designerXpMultiplier()),cores:ev.reward.cores||0};}
 function triggerCombatFlash(kind='cyan'){
   if(!ui.combatFlash)return;ui.combatFlash.className=`combat-flash flash-${kind}`;void ui.combatFlash.offsetWidth;ui.combatFlash.classList.add('play');setTimeout(()=>ui.combatFlash?.classList.remove('play'),420);
 }
 function completeGalaxyEvent(ev=currentGalaxyEvent()){
-  const rec=galaxyEventRecord(ev);if(rec.rewarded)return;rec.value=ev.target;rec.complete=true;rec.rewarded=true;const r=galaxyEventRewardScaled(ev);progress.profile.credits+=r.credits;progress.profile.uridium+=r.uridium;progress.profile.xp+=r.xp;normalizeWarfrontProgress();progress.warfront.skillCores+=r.cores;processPlayerLevelUps();playSfx('event');triggerCombatFlash('gold');queueCelebration('mission',ev.name,`+${fmt(r.credits)} CR • +${fmt(r.uridium)} STL • +${fmt(r.xp)} XP${r.cores?` • +${r.cores} CORE`:''}`);pushActivity(`EVENTO • ${ev.name} concluído • +${fmt(r.credits)} CR • +${fmt(r.uridium)} STL`,'reward');saveGame();renderGalaxyEvent();
+  const rec=galaxyEventRecord(ev);if(rec.rewarded)return;rec.value=ev.target;rec.complete=true;rec.rewarded=true;const r=galaxyEventRewardScaled(ev);progress.profile.credits+=r.credits;progress.profile.uridium+=r.uridium;progress.profile.xp+=r.xp;normalizeWarfrontProgress();progress.warfront.skillCores+=r.cores;processPlayerLevelUps();playSfx('event');triggerCombatFlash('gold');queueCelebration('mission',ev.name,`+${fmt(r.credits)} CR • +${fmt(r.uridium)} STL • +${fmt(r.xp)} XP${r.cores?` • +${r.cores} CORE`:''}`);pushActivity(`EVENTO • ${ev.name} concluído • +${fmt(r.credits)} CR • +${fmt(r.uridium)} STL`,'reward');saveGame();renderGalaxyEvent();claimEventDesignerDrop(ev).catch(()=>{});
 }
 function addGalaxyEventProgress(amount=1,ev=currentGalaxyEvent()){
   const rec=galaxyEventRecord(ev);if(rec.complete)return;rec.value=Math.max(0,Math.min(ev.target,(Number(rec.value)||0)+Math.max(0,Number(amount)||0)));if(rec.value>=ev.target)completeGalaxyEvent(ev);else saveGame();
@@ -1960,7 +1995,7 @@ function forceGalaxyEvent(){refreshLiveOpsState(true).then(()=>showToast('LIVE O
 
 
 function spawnCombatText(x,y,text,color='#fff',opts={}){const cap=qualityProfile().particles;if(cap<=0)return;if(state.particles.length>=cap)state.particles.splice(0,state.particles.length-cap+1);state.particles.push({x,y,text,color,life:opts.critical?1.25:1,vy:opts.critical?42:30,vx:rand(-7,7),combat:true,critical:!!opts.critical,kind:opts.kind||'damage'});}
-function combatCritical(base,{chance=.065,mult=1.55}={}){const critical=Math.random()<chance;return {critical,damage:Math.round(base*(critical?mult:1))};}
+function combatCritical(base,{chance=.065,mult=1.55}={}){chance=Math.max(0,Math.min(.85,Number(chance||0)+designerCritChanceBonus()));const critical=Math.random()<chance;return {critical,damage:Math.round(base*(critical?mult:1))};}
 function setCombatAlert(text,kind='combat',seconds=1.8){if(!combatPrefs.alerts)return;state.combatAlertText=text;state.combatAlertKind=kind;state.combatAlertUntil=nowSec()+seconds;if(kind==='danger'||kind==='shield')playSfx('warning');}
 function nearestCombatTarget(excludeId=null){const candidates=state.enemies.filter(e=>e.hp>0&&e.id!==excludeId&&enemyDistance(e)<=state.radarRange);candidates.sort((a,b)=>enemyDistance(a)-enemyDistance(b));return candidates[0]||null;}
 function selectCombatTarget(target,{silent=false}={}){if(!target||target.hp<=0)return false;state.target=target;state.pointerNavActive=false;if(!silent){playSfx('target');pushActivity(`${target.isPlayer?'PVP':'Alvo selecionado'} • ${target.callsign||target.name}`,'combat');}updateTargetLockHud();return true;}
@@ -2428,8 +2463,8 @@ function petRange(){return 300+(progress?.pet?.owned?(progress.pet.level||1):1)*
 function petSlotCost(slotNumber){const v=livePetSlotPrices.get(Number(slotNumber));return Number.isFinite(Number(v))?Number(v):null;}
 function petLaserIds(){return progress?.pet?.owned?(progress.pet.lasers||[]).filter(id=>ITEMS[id]?.type==='laser'):[];}
 function petShieldIds(){return progress?.pet?.owned?(progress.pet.shields||[]).filter(id=>ITEMS[id]?.type==='generator'&&ITEMS[id]?.subtype==='shield'):[];}
-function petDamage(){return petLaserIds().reduce((sum,id)=>{const it=ITEMS[id];const base=it?.alienDamage??it?.damage??0;return sum+base*(1+(Number(it?.alienBonus)||0));},0);}
-function petMaxShield(){return petShieldIds().reduce((sum,id)=>sum+(ITEMS[id]?.shield||0),0);}
+function petDamage(){return petLaserIds().reduce((sum,id)=>{const it=ITEMS[id];const base=it?.alienDamage??it?.damage??0;return sum+base*(1+(Number(it?.alienBonus)||0));},0)*petDesignerDamageMultiplier();}
+function petMaxShield(){return petShieldIds().reduce((sum,id)=>sum+(ITEMS[id]?.shield||0),0)*(1+Number(petDesignerBonuses().shield||0));}
 function addPetXp(amount){
   if(!progress?.pet?.owned||amount<=0||progress.pet.level>=PET_MAX_LEVEL)return;
   progress.pet.xp+=Math.round(amount);
@@ -2593,7 +2628,7 @@ function petFireAt(task){
     });
     return;
   }
-  const rawBase=Math.round(laserPveBase(ids)*rand(.95,1.08));
+  const rawBase=Math.round(laserPveBase(ids)*petDesignerDamageMultiplier()*rand(.95,1.08));
   progress.ammo[ammo.id]=Math.max(0,stock-firing);
   if(rawBase>0)applyLaserAmmoHit(task,rawBase,ammo,ammo.color);
   refreshAmmoCounters();
@@ -2709,6 +2744,10 @@ function computeStats(keepRatio=true){
   if(state.currentMap?.battle||state.currentMap?.gate)laserDamage*=1+pilotBattleLaserBonus();
   absorption=Math.min(95,absorption+pilotSkillValue('shieldMechanics'));
   rocketMult*=1+pilotSkillValue('rocketFusion')/100;
+  const shipDesignBonus=shipDesignerBonuses(),petDesignBonus=petDesignerBonuses();
+  hp*=1+Number(shipDesignBonus.hp||0)+Number(petDesignBonus.hp||0);
+  shield*=1+Number(shipDesignBonus.shield||0)+Number(petDesignBonus.shield||0);
+  laserDamage*=1+Number(shipDesignBonus.damage||0);
   const designerMult=droneDesignerMultipliers();hp*=designerMult.hp;shield*=designerMult.shield;laserDamage*=designerMult.damage;
   player.maxHp=Math.round(hp);player.maxShield=Math.round(shield);player.speed=Math.round(speed);player.laserDamage=Math.round(laserDamage);player.shieldAbsorption=absorption;player.rocketMult=rocketMult;player.shieldRegenBoost=shieldRegenBoost;
   player.hp=keepRatio?Math.min(player.maxHp,Math.max(1,Math.round(player.maxHp*oldHpRatio))):player.maxHp;
@@ -2767,7 +2806,7 @@ function createLandmarks(){
 function routeDistance(){return Math.hypot(player.tx-player.x,player.ty-player.y);}
 function checkLandmarkDiscovery(){
   if(!progress?.discoveries)return;
-  for(const l of state.landmarks){const key=`${progress.mapId}:${l.id}`;if(progress.discoveries[key])continue;if(Math.hypot(player.x-l.x,player.y-l.y)>105)continue;progress.discoveries[key]=true;const tier=state.currentMap.battle?8:Math.max(1,state.currentMap.tier||1),cr=750+tier*450,xp=180+tier*90;progress.profile.credits+=cr;progress.profile.xp+=xp;processPlayerLevelUps();spawnParticle(l.x,l.y-24,`DESCOBERTA +${fmt(cr)} CR`,'#74e7ff');spawnImpactFx(l.x,l.y,'#74e7ff',46,'shield');missionEvent('explore',{landmark:l,mapId:progress.mapId});showToast(`Descoberta: ${l.name} • +${fmt(cr)} CR • +${fmt(xp)} XP`);saveGame();}
+  for(const l of state.landmarks){const key=`${progress.mapId}:${l.id}`;if(progress.discoveries[key])continue;if(Math.hypot(player.x-l.x,player.y-l.y)>105)continue;progress.discoveries[key]=true;const tier=state.currentMap.battle?8:Math.max(1,state.currentMap.tier||1),cr=750+tier*450,xp=Math.round((180+tier*90)*designerXpMultiplier());progress.profile.credits+=cr;progress.profile.xp+=xp;processPlayerLevelUps();spawnParticle(l.x,l.y-24,`DESCOBERTA +${fmt(cr)} CR`,'#74e7ff');spawnImpactFx(l.x,l.y,'#74e7ff',46,'shield');missionEvent('explore',{landmark:l,mapId:progress.mapId});showToast(`Descoberta: ${l.name} • +${fmt(cr)} CR • +${fmt(xp)} XP`);saveGame();}
 }
 function visibleWorldBounds(margin=0){return {left:state.camera.x-W/2-margin,right:state.camera.x+W/2+margin,top:state.camera.y-H/2-margin,bottom:state.camera.y+H/2+margin};}
 function onScreenWorld(x,y,margin=180){const b=visibleWorldBounds(margin);return x>=b.left&&x<=b.right&&y>=b.top&&y<=b.bottom;}
@@ -2900,7 +2939,7 @@ function recordAlphaKillReward(enemy){
   a.run.killRewards.xp=(a.run.killRewards.xp||0)+xp;
 }
 function completeAlphaGate(){
-  const a=alphaGate(),gd=galaxyGateDef(),earned=alphaRunReward(),extra=Math.max(0,gd.totalRewardMult-1),bonus={credits:earned.credits*extra,uridium:earned.uridium*extra,xp:earned.xp*extra};
+  const a=alphaGate(),gd=galaxyGateDef(),earned=alphaRunReward(),extra=Math.max(0,gd.totalRewardMult-1),bonus={credits:earned.credits*extra,uridium:earned.uridium*extra,xp:Math.round(earned.xp*extra*designerXpMultiplier())};
   progress.profile.credits+=bonus.credits;progress.profile.uridium+=bonus.uridium;progress.profile.xp+=bonus.xp;processPlayerLevelUps();normalizePilotBio();progress.pilotBio.logDisks+=gd.logReward;progress.profile.ggCompleted=(progress.profile.ggCompleted||0)+1;a.completed++;a.lastCompletion={at:Date.now(),reward:{...earned,bonus},totalMult:gd.totalRewardMult};a.pieces=[];a.built=false;a.lives=3;a.run=null;
   playSfx('reward');showToast(`${gd.label} CONCLUÍDO! +${fmt(gd.logReward)} Núcleos Quânticos • recompensa ${gd.totalRewardMult}X`,'reward');pushActivity(`PORTAL ASTRAL ${gd.label} • ${gd.totalRewardMult}X • +${fmt(gd.logReward)} Núcleos Quânticos`,'reward');saveGame();
   claimGateDroneDesignerDrop(gd.key,a.completed).catch(()=>{});
@@ -3176,7 +3215,7 @@ function handleNormalShipDeath(){
 }
 function rewardEnemyKill(enemy){
   const creditMult=1+pilotSkillValue('greed')/100,uriMult=1+pilotCombined('cruelty1','cruelty2')/100,xpMult=1+pilotSkillValue('tactics')/100;
-  const earnedCredits=Math.round(enemy.credits*creditMult),earnedUri=Math.round(enemy.uridium*uriMult),earnedXp=Math.round((Number(enemy.xp)||enemy.credits/10+enemy.uridium*12)*xpMult);
+  const earnedCredits=Math.round(enemy.credits*creditMult),earnedUri=Math.round(enemy.uridium*uriMult),earnedXp=Math.round((Number(enemy.xp)||enemy.credits/10+enemy.uridium*12)*xpMult*designerXpMultiplier());
   progress.profile.credits+=earnedCredits;progress.profile.uridium+=earnedUri;progress.profile.xp+=earnedXp;progress.profile.aliensKilled=(progress.profile.aliensKilled||0)+1;
   if(authenticated){const boss=/^boss/i.test(String(enemy.type||''));const clanType=String(enemy.type||'').replace(/^boss/i,'').toLowerCase();recordClanAlienKillOnline({npcType:clanType,isBoss:boss}).then(r=>{if(r?.status?.leveled_up){showToast(`CLÃ SUBIU PARA O LV ${r.status.new_level}!`,'reward');refreshClanState(true);}}).catch(()=>{});}
   pushActivity(`${enemy.name} • +${fmt(earnedCredits)} CR • +${fmt(earnedUri)} STL • +${fmt(earnedXp)} XP`,'combat');
@@ -3401,7 +3440,7 @@ function updatePlayer(dt){
   // Fora da base, o pulso só começa após 5s completos sem receber dano.
   const regenReady=baseSafe||secondsWithoutDamage>=repairDelay;
   if(regenReady&&player.shield<player.maxShield&&nowSec()-state.shieldRepairFxAt>=1){
-    const shieldTick=(repairBot?.id==='repElite'?15000:10000)*(premiumActive()?2:1);
+    const shieldTick=(repairBot?.id==='repElite'?15000:10000)*(premiumActive()?2:1)*designerRepairMultiplier();
     const beforeShield=player.shield;
     player.shield=Math.min(player.maxShield,player.shield+shieldTick);
     state.shieldRepairFxAt=nowSec();
@@ -3412,7 +3451,7 @@ function updatePlayer(dt){
   const hpCanRepair=baseSafe||!!repairBot;
   const hpDelayReady=baseSafe||secondsWithoutDamage>=Number(repairBot?.repairDelay||5);
   if(hpCanRepair&&hpDelayReady&&player.hp<player.maxHp&&nowSec()-state.repairFxAt>=1){
-    const hpTick=(repairBot?.id==='repElite'?10000:5000)*(premiumActive()?2:1);
+    const hpTick=(repairBot?.id==='repElite'?10000:5000)*(premiumActive()?2:1)*designerRepairMultiplier();
     const beforeHp=player.hp;
     player.hp=Math.min(player.maxHp,player.hp+hpTick);
     state.repairFxAt=nowSec();
@@ -3485,9 +3524,9 @@ function upsertRealtimePlayer(raw,spawn=false){
   let rp=onlineWorld.players.get(id);if(!rp){rp={id,isPlayer:true,x:nx,y:ny,tx:nx,ty:ny,netX:nx,netY:ny,angle:Number(raw.angle)||0,targetAngle:Number(raw.angle)||0,vx:0,vy:0};onlineWorld.players.set(id,rp);}
   const dt=Math.max(.001,Math.min(1,(now-(rp.realtimeUpdatedAt||now))/1000)),px=Number.isFinite(rp.netX)?rp.netX:rp.tx,py=Number.isFinite(rp.netY)?rp.netY:rp.ty;
   if(!spawn&&rp.realtimeUpdatedAt){rp.vx=Math.max(-1400,Math.min(1400,(nx-px)/dt));rp.vy=Math.max(-1400,Math.min(1400,(ny-py)/dt));}
-  rp.realtime=true;rp.realtimeUpdatedAt=now;rp.netX=nx;rp.netY=ny;rp.tx=nx;rp.ty=ny;rp.targetAngle=Number(raw.angle)||0;rp.callsign=raw.callsign||rp.callsign||'Pilot';rp.name=rp.callsign;rp.shipId=raw.shipId||rp.shipId||'phoenix';rp.faction=raw.faction||rp.faction||null;rp.level=Number(raw.level)||rp.level||1;rp.hp=Number(raw.hp??rp.hp)||0;rp.maxHp=Math.max(1,Number(raw.maxHp??rp.maxHp)||1);rp.shield=Math.max(0,Number(raw.shield??rp.shield)||0);rp.maxShield=Math.max(0,Number(raw.maxShield??rp.maxShield)||0);rp.size=onlineShipSize(rp.shipId)*.48;
+  rp.realtime=true;rp.realtimeUpdatedAt=now;rp.netX=nx;rp.netY=ny;rp.tx=nx;rp.ty=ny;rp.targetAngle=Number(raw.angle)||0;rp.callsign=raw.callsign||rp.callsign||'Pilot';rp.name=rp.callsign;rp.shipId=raw.shipId||rp.shipId||'phoenix';rp.shipDesignId=raw.shipDesignId||null;rp.faction=raw.faction||rp.faction||null;rp.level=Number(raw.level)||rp.level||1;rp.hp=Number(raw.hp??rp.hp)||0;rp.maxHp=Math.max(1,Number(raw.maxHp??rp.maxHp)||1);rp.shield=Math.max(0,Number(raw.shield??rp.shield)||0);rp.maxShield=Math.max(0,Number(raw.maxShield??rp.maxShield)||0);rp.size=onlineShipSize(rp.shipId)*.48;
   rp.laserFiring=!!raw.laserFiring;rp.laserColor=raw.laserColor||rp.laserColor||'#76d9ff';rp.laserAmmoId=raw.laserAmmoId||rp.laserAmmoId||'lcb10';rp.laserAmmoName=raw.laserAmmoName||rp.laserAmmoName||'PLS-1';rp.targetId=raw.targetId||null;rp.targetIsPlayer=!!raw.targetIsPlayer;
-  if(raw.pet?.owned){const q=raw.pet,old=rp.pet||{},qx=Number(q.x)||nx,qy=Number(q.y)||ny,pdt=Math.max(.001,Math.min(1,(now-(old.netAt||now))/1000));rp.pet={...old,owned:true,level:Number(q.level)||1,tx:qx,ty:qy,targetAngle:Number(q.angle)||0,activeGear:q.activeGear||'off',laserTargetId:q.laserTargetId||null,laserActive:!!q.laserActive,laserColor:q.laserColor||rp.laserColor,netAt:now};if(!old.owned||spawn){rp.pet.x=qx;rp.pet.y=qy;rp.pet.angle=Number(q.angle)||0;rp.pet.vx=0;rp.pet.vy=0;}else{rp.pet.vx=Math.max(-1400,Math.min(1400,(qx-(old.netX??old.tx??qx))/pdt));rp.pet.vy=Math.max(-1400,Math.min(1400,(qy-(old.netY??old.ty??qy))/pdt));}rp.pet.netX=qx;rp.pet.netY=qy;}else rp.pet={owned:false};
+  if(raw.pet?.owned){const q=raw.pet,old=rp.pet||{},qx=Number(q.x)||nx,qy=Number(q.y)||ny,pdt=Math.max(.001,Math.min(1,(now-(old.netAt||now))/1000));rp.pet={...old,owned:true,level:Number(q.level)||1,tx:qx,ty:qy,targetAngle:Number(q.angle)||0,activeGear:q.activeGear||'off',laserTargetId:q.laserTargetId||null,laserActive:!!q.laserActive,laserColor:q.laserColor||rp.laserColor,designId:q.designId||null,netAt:now};if(!old.owned||spawn){rp.pet.x=qx;rp.pet.y=qy;rp.pet.angle=Number(q.angle)||0;rp.pet.vx=0;rp.pet.vy=0;}else{rp.pet.vx=Math.max(-1400,Math.min(1400,(qx-(old.netX??old.tx??qx))/pdt));rp.pet.vy=Math.max(-1400,Math.min(1400,(qy-(old.netY??old.ty??qy))/pdt));}rp.pet.netX=qx;rp.pet.netY=qy;}else rp.pet={owned:false};
   return rp;
 }
 function remoteTargetEntity(id,isPlayer){if(!id)return null;if(isPlayer){if(String(id)===String(getUser()?.id||''))return {id,isPlayer:true,x:player.x,y:player.y,hp:player.hp};return onlineWorld.players.get(String(id))||null;}return state.enemies.find(e=>e.id===id&&e.hp>0)||null;}
@@ -3622,9 +3661,9 @@ function drawPilotNameplate({x,y,rankCode='pilot_basic',clanTag='',callsign='Pil
   ctx.font='9px Arial';ctx.fillStyle='rgba(205,235,247,.78)';ctx.textAlign='center';ctx.fillText(`${isAdmin?'ADMINISTRADOR':patentMeta(code).title} • LV ${level}`,x,y+13);ctx.restore();
 }
 function drawRemotePet(rp){
-  const q=rp?.pet;if(!q?.owned||!Number.isFinite(q.x)||!Number.isFinite(q.y)||!onScreenWorld(q.x,q.y,140))return;const p=screenPos(q.x,q.y),mode=q.activeGear||'off',color=mode==='guard'?'#ff8c93':mode==='box'?'#ffd46b':mode==='ore'?'#7fffc4':'#7edcff',path=(q.level||1)>=10?GAME_ASSETS.drones.petElite:GAME_ASSETS.drones.pet,img=assetImage(path);
-  if(img&&img.naturalWidth){const size=30+Math.min(15,Number(q.level)||1)/15*9,sc=size/Math.max(img.naturalWidth,img.naturalHeight);ctx.save();ctx.translate(p.x,p.y);ctx.rotate((q.angle||0)+Math.PI/2);ctx.globalAlpha=.88;ctx.shadowColor=color;ctx.shadowBlur=10;ctx.drawImage(img,-img.naturalWidth*sc/2,-img.naturalHeight*sc/2,img.naturalWidth*sc,img.naturalHeight*sc);ctx.restore();}else{ctx.fillStyle=color;ctx.beginPath();ctx.arc(p.x,p.y,7,0,TWO_PI);ctx.fill();}
-  ctx.fillStyle=color;ctx.font='bold 9px Arial';ctx.textAlign='center';ctx.fillText(`AUX-9 LV ${q.level||1}`,p.x,p.y+24);
+  const q=rp?.pet;if(!q?.owned||!Number.isFinite(q.x)||!Number.isFinite(q.y)||!onScreenWorld(q.x,q.y,140))return;const p=screenPos(q.x,q.y),mode=q.activeGear||'off',designer=designById(q.designId),visual=designer?.visual||{},color=visual.glow||(mode==='guard'?'#ff8c93':mode==='box'?'#ffd46b':mode==='ore'?'#7fffc4':'#7edcff'),path=(q.level||1)>=10?GAME_ASSETS.drones.petElite:GAME_ASSETS.drones.pet,img=assetImage(path);
+  if(img&&img.naturalWidth){const size=30+Math.min(15,Number(q.level)||1)/15*9,sc=size/Math.max(img.naturalWidth,img.naturalHeight);ctx.save();ctx.translate(p.x,p.y);ctx.rotate((q.angle||0)+Math.PI/2);ctx.globalAlpha=.9;ctx.shadowColor=color;ctx.shadowBlur=designer?16:10;if(designer)ctx.filter=designerVisualCss(designer);ctx.drawImage(img,-img.naturalWidth*sc/2,-img.naturalHeight*sc/2,img.naturalWidth*sc,img.naturalHeight*sc);ctx.filter='none';if(designer){ctx.rotate(-((q.angle||0)+Math.PI/2));ctx.strokeStyle=visual.accent||color;ctx.lineWidth=designer.rarity==='mythic'?2:1.2;ctx.globalAlpha=.78;ctx.beginPath();ctx.arc(0,0,size*.62,0,TWO_PI);ctx.stroke();}ctx.restore();}else{ctx.fillStyle=color;ctx.beginPath();ctx.arc(p.x,p.y,7,0,TWO_PI);ctx.fill();}
+  ctx.fillStyle=color;ctx.font='bold 9px Arial';ctx.textAlign='center';ctx.fillText(`AUX-9 LV ${q.level||1}${designer?' • '+designer.name:''}`,p.x,p.y+24);
   if(q.laserActive&&q.laserTargetId){const t=remoteTargetEntity(q.laserTargetId,false)||remoteTargetEntity(q.laserTargetId,true);if(t&&t.hp>0){const sp=screenPos(t.x,t.y),c=q.laserColor||rp.laserColor||'#76d9ff';ctx.save();ctx.strokeStyle=c;ctx.shadowColor=c;ctx.shadowBlur=8;ctx.globalAlpha=.9;ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(p.x,p.y);ctx.lineTo(sp.x,sp.y);ctx.stroke();ctx.restore();}}
 }
 function drawRemoteLaser(rp,p){
@@ -3632,15 +3671,16 @@ function drawRemoteLaser(rp,p){
 }
 function drawOnlinePlayers(){
   for(const rp of onlineWorld.players.values()){
-    if(!onScreenWorld(rp.x,rp.y,180))continue;const p=screenPos(rp.x,rp.y),f=FACTIONS[rp.faction],enemy=onlinePlayerEnemy(rp),color=enemy?'#ff4d69':(f?.color||'#69ffbd'),path=GAME_ASSETS.ships[rp.shipId],img=assetImage(path),size=onlineShipSize(rp.shipId);
-    ctx.save();ctx.translate(p.x,p.y);ctx.globalAlpha=.9;if(state.target?.isPlayer&&state.target.id===rp.id){const rr=size*.55+18;ctx.strokeStyle='#ffed6f';ctx.lineWidth=2;ctx.setLineDash([6,4]);ctx.beginPath();ctx.arc(0,0,rr,0,TWO_PI);ctx.stroke();ctx.setLineDash([]);}
-    if(img&&img.naturalWidth){const sc=size/Math.max(img.naturalWidth,img.naturalHeight);ctx.rotate((rp.angle||0)+Math.PI/2);ctx.shadowColor=color;ctx.shadowBlur=10;ctx.drawImage(img,-img.naturalWidth*sc/2,-img.naturalHeight*sc/2,img.naturalWidth*sc,img.naturalHeight*sc);}else{ctx.rotate(rp.angle||0);drawShipModel(rp.shipId,color);}ctx.restore();
+    if(!onScreenWorld(rp.x,rp.y,180))continue;const p=screenPos(rp.x,rp.y),f=FACTIONS[rp.faction],enemy=onlinePlayerEnemy(rp),sameClan=!!currentClanTag()&&!!rp.clanTag&&rp.clanTag===currentClanTag(),color=enemy?'#ff4d69':sameClan?'#ffe16b':(f?.color||'#69ffbd'),path=GAME_ASSETS.ships[rp.shipId],img=assetImage(path),size=onlineShipSize(rp.shipId),designer=designById(rp.shipDesignId),visual=designer?.visual||{};
+    ctx.save();ctx.translate(p.x,p.y);ctx.globalAlpha=.92;if(state.target?.isPlayer&&state.target.id===rp.id){const rr=size*.55+18;ctx.strokeStyle='#ffed6f';ctx.lineWidth=2;ctx.setLineDash([6,4]);ctx.beginPath();ctx.arc(0,0,rr,0,TWO_PI);ctx.stroke();ctx.setLineDash([]);}
+    if(img&&img.naturalWidth){const sc=size/Math.max(img.naturalWidth,img.naturalHeight);ctx.rotate((rp.angle||0)+Math.PI/2);ctx.shadowColor=visual.glow||color;ctx.shadowBlur=designer?18:10;if(designer)ctx.filter=designerVisualCss(designer);ctx.drawImage(img,-img.naturalWidth*sc/2,-img.naturalHeight*sc/2,img.naturalWidth*sc,img.naturalHeight*sc);ctx.filter='none';if(designer){ctx.rotate(-((rp.angle||0)+Math.PI/2));ctx.strokeStyle=visual.accent||visual.glow||color;ctx.globalAlpha=.72;ctx.lineWidth=designer.rarity==='legendary'||designer.rarity==='mythic'?2:1.2;ctx.beginPath();ctx.arc(0,0,size*.57,0,TWO_PI);ctx.stroke();}}else{ctx.rotate(rp.angle||0);drawShipModel(rp.shipId,color);}ctx.restore();
     drawRemoteLaser(rp,p);drawRemotePet(rp);
     const barW=58,bx=p.x-barW/2,hp=Math.max(0,Math.min(1,rp.hp/Math.max(1,rp.maxHp))),sh=Math.max(0,Math.min(1,rp.shield/Math.max(1,rp.maxShield)));
     ctx.fillStyle='rgba(8,20,28,.78)';ctx.fillRect(bx,p.y-size*.42-17,barW,4);ctx.fillStyle='#55ff9d';ctx.fillRect(bx,p.y-size*.42-17,barW*hp,4);ctx.fillStyle='rgba(7,25,45,.82)';ctx.fillRect(bx,p.y-size*.42-11,barW,3);ctx.fillStyle='#4fcfff';ctx.fillRect(bx,p.y-size*.42-11,barW*sh,3);
-    drawPilotNameplate({x:p.x,y:p.y+size*.45+17,rankCode:rp.rankCode,clanTag:rp.clanTag,callsign:rp.callsign,level:rp.level,color:enemy?'#ff8b9e':'#8fffd0',isAdmin:rp.isAdmin});
+    drawPilotNameplate({x:p.x,y:p.y+size*.45+17,rankCode:rp.rankCode,clanTag:rp.clanTag,callsign:rp.callsign,level:rp.level,color:enemy?'#ff8b9e':sameClan?'#ffe692':'#8fffd0',isAdmin:rp.isAdmin});
   }
 }
+
 
 function update(dt){if(!progress)return;processRespawns();updateCombatAbilities();updatePlayer(dt);updateSharedUniverseInterpolation(dt);updateEnemies(dt);updatePet(dt);updateOnlineWorld(dt);updateWarfrontRuntime();updateGalaxyEvent(dt);updateParticles(dt);updateFx(dt);updateAlphaGate();updateAuctionSystem();updateUI();}
 
@@ -3774,11 +3814,11 @@ function drawDrones(p){const f=getFaction();progress.drones.forEach((d,i)=>{
 });}
 function drawPet(){
   if(!progress?.pet?.owned)return;
-  const p=screenPos(petRuntime.x,petRuntime.y),mode=progress.pet.activeGear||'off',color=mode==='guard'?'#ff8c93':mode==='box'?'#ffd46b':mode==='ore'?'#7fffc4':'#7edcff';
+  const p=screenPos(petRuntime.x,petRuntime.y),mode=progress.pet.activeGear||'off',designer=currentPetDesign(),visual=designer?.visual||{},color=visual.glow||(mode==='guard'?'#ff8c93':mode==='box'?'#ffd46b':mode==='ore'?'#7fffc4':'#7edcff');
   const path=progress.pet.level>=10?GAME_ASSETS.drones.petElite:GAME_ASSETS.drones.pet,img=assetImage(path);
-  if(img&&img.naturalWidth){const size=34+(progress.pet.level/15)*10,sc=size/Math.max(img.naturalWidth,img.naturalHeight);ctx.save();ctx.translate(p.x,p.y);ctx.rotate((petRuntime.angle||0)+Math.PI/2);ctx.shadowColor=color;ctx.shadowBlur=12;ctx.drawImage(img,-img.naturalWidth*sc/2,-img.naturalHeight*sc/2,img.naturalWidth*sc,img.naturalHeight*sc);ctx.restore();}
+  if(img&&img.naturalWidth){const size=34+(progress.pet.level/15)*10,sc=size/Math.max(img.naturalWidth,img.naturalHeight);ctx.save();ctx.translate(p.x,p.y);ctx.rotate((petRuntime.angle||0)+Math.PI/2);ctx.shadowColor=color;ctx.shadowBlur=designer?18:12;if(designer)ctx.filter=designerVisualCss(designer);ctx.drawImage(img,-img.naturalWidth*sc/2,-img.naturalHeight*sc/2,img.naturalWidth*sc,img.naturalHeight*sc);ctx.filter='none';if(designer){ctx.rotate(-((petRuntime.angle||0)+Math.PI/2));ctx.strokeStyle=visual.accent||color;ctx.globalAlpha=.68+.2*Math.sin(nowSec()*3);ctx.lineWidth=designer.rarity==='mythic'?2.2:1.4;ctx.beginPath();ctx.arc(0,0,size*.62,0,TWO_PI);ctx.stroke();}ctx.restore();}
   else{ctx.fillStyle=color;ctx.beginPath();ctx.arc(p.x,p.y,8,0,TWO_PI);ctx.fill();}
-  ctx.fillStyle=color;ctx.font='bold 10px Arial';ctx.textAlign='center';ctx.fillText(`AUX-9 LV ${progress.pet.level}`,p.x,p.y+28);
+  ctx.fillStyle=color;ctx.font='bold 10px Arial';ctx.textAlign='center';ctx.fillText(`AUX-9 LV ${progress.pet.level}${designer?' • '+designer.name:''}`,p.x,p.y+28);
   if(petRuntime.laserTargetId&&nowSec()<petRuntime.laserUntil){const e=state.enemies.find(x=>x.id===petRuntime.laserTargetId&&x.hp>0)||onlineWorld.players.get(petRuntime.laserTargetId);if(e&&e.hp>0){const t=screenPos(e.x,e.y);ctx.strokeStyle=currentLaserAmmo().color;ctx.shadowColor=currentLaserAmmo().color;ctx.shadowBlur=8;ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(p.x,p.y);ctx.lineTo(t.x,t.y);ctx.stroke();ctx.shadowBlur=0;}}
 }
 function drawShipModel(id,color){ctx.shadowColor=color;ctx.shadowBlur=18;ctx.strokeStyle='rgba(230,250,255,.65)';ctx.lineWidth=1.2;const fill=ctx.createLinearGradient(-26,-16,28,16);fill.addColorStop(0,'#ebfcff');fill.addColorStop(.2,color);fill.addColorStop(.72,'#25345d');fill.addColorStop(1,'#11182f');ctx.fillStyle=fill;ctx.beginPath();
@@ -3793,14 +3833,14 @@ function drawShipModel(id,color){ctx.shadowColor=color;ctx.shadowBlur=18;ctx.str
   else {ctx.moveTo(29,0);ctx.lineTo(9,-9);ctx.lineTo(-10,-15);ctx.lineTo(-18,-7);ctx.lineTo(-25,0);ctx.lineTo(-18,7);ctx.lineTo(-10,15);ctx.lineTo(9,9);}
 ctx.closePath();ctx.fill();ctx.stroke();ctx.shadowBlur=0;ctx.fillStyle='rgba(5,13,25,.9)';ctx.beginPath();ctx.ellipse(6,0,7.5,3.8,0,0,TWO_PI);ctx.fill();ctx.fillStyle='#f4ffff';ctx.beginPath();ctx.arc(8,0,1.6,0,TWO_PI);ctx.fill();ctx.fillStyle='#b47bff';ctx.fillRect(-25,-2.2,8,4.4);ctx.fillStyle='rgba(255,255,255,.34)';ctx.fillRect(-2,-8,12,2.2);ctx.fillRect(-8,6,9,1.6);}
 function drawPlayer(){
-  const p=screenPos(player.x,player.y),f=getFaction(),a=player.angle||0,color=f?.color||'#76e0ff',path=GAME_ASSETS.ships[progress.activeShipId],img=assetImage(path);
+  const p=screenPos(player.x,player.y),f=getFaction(),a=player.angle||0,designer=currentShipDesign(),visual=designer?.visual||{},color=visual.glow||(f?.color||'#76e0ff'),path=GAME_ASSETS.ships[progress.activeShipId],img=assetImage(path);
   ctx.save();ctx.translate(p.x,p.y);
   if(img&&img.naturalWidth){
     const ship=SHIPS[progress.activeShipId],size=(ship.id==='citadel'?105:ship.id==='bigboy'?96:ship.id==='goliath'||ship.id==='aegis'?88:78),sc=size/Math.max(img.naturalWidth,img.naturalHeight);
-    ctx.rotate((a||0)+Math.PI/2);ctx.shadowColor=color;ctx.shadowBlur=14;ctx.drawImage(img,-img.naturalWidth*sc/2,-img.naturalHeight*sc/2,img.naturalWidth*sc,img.naturalHeight*sc);
+    ctx.rotate((a||0)+Math.PI/2);ctx.shadowColor=color;ctx.shadowBlur=designer?22:14;if(designer)ctx.filter=designerVisualCss(designer);ctx.drawImage(img,-img.naturalWidth*sc/2,-img.naturalHeight*sc/2,img.naturalWidth*sc,img.naturalHeight*sc);ctx.filter='none';if(designer){ctx.rotate(-((a||0)+Math.PI/2));ctx.strokeStyle=visual.accent||color;ctx.globalAlpha=.62+.18*Math.sin(nowSec()*3.2);ctx.lineWidth=designer.rarity==='legendary'||designer.rarity==='mythic'?2.4:1.5;ctx.beginPath();ctx.arc(0,0,size*.58,0,TWO_PI);ctx.stroke();}
   }else{ctx.rotate(a||0);drawShipModel(progress.activeShipId,color);}
   ctx.restore();drawDrones(p);
-  ctx.strokeStyle='rgba(119,228,255,.23)';ctx.lineWidth=1;ctx.beginPath();ctx.arc(p.x,p.y,25,0,TWO_PI);ctx.stroke();
+  ctx.strokeStyle=designer?(visual.accent||'rgba(119,228,255,.45)'):'rgba(119,228,255,.23)';ctx.lineWidth=designer?1.4:1;ctx.beginPath();ctx.arc(p.x,p.y,25,0,TWO_PI);ctx.stroke();
   drawPilotNameplate({x:p.x,y:p.y+39,rankCode:myRankingRow()?.rank_code||'pilot_basic',clanTag:currentClanTag(),callsign:progress.profile.callsign||getUser()?.callsign||'Pilot',level:progress.profile.level||1,color,isAdmin:!!clanRuntime.state?.is_admin});
   if(player.laserFiring&&state.target&&state.target.hp>0&&enemyDistance(state.target)<=playerLaserRange()){const t=screenPos(state.target.x,state.target.y);ctx.strokeStyle=currentLaserAmmo().color;ctx.shadowColor=currentLaserAmmo().color;ctx.shadowBlur=9;ctx.lineWidth=2.3;ctx.beginPath();ctx.moveTo(p.x,p.y);ctx.lineTo(t.x,t.y);ctx.stroke();ctx.shadowBlur=0;}
 }
@@ -3816,12 +3856,15 @@ function drawMinimap(){
   if(routeDistance()>35){mm.strokeStyle='rgba(115,225,255,.55)';mm.setLineDash([4,3]);mm.beginPath();mm.moveTo(px,py);mm.lineTo(tx,ty);mm.stroke();mm.setLineDash([]);mm.strokeStyle='#fff';mm.beginPath();mm.arc(tx,ty,4,0,TWO_PI);mm.stroke();}
   for(const e of state.enemies){if(e.hp<=0||Math.hypot(e.x-player.x,e.y-player.y)>state.radarRange)continue;const selected=state.target?.id===e.id;mm.fillStyle=selected?'#ffec67':e.eventNpc?'#ff9f43':'#ff755d';mm.beginPath();mm.arc(e.x*sx,e.y*sy,selected?3.8:(e.type.startsWith('boss')?2.8:1.8),0,TWO_PI);mm.fill();if(selected){mm.strokeStyle='#fff5a8';mm.lineWidth=1;mm.beginPath();mm.arc(e.x*sx,e.y*sy,6,0,TWO_PI);mm.stroke();}}
   const convoy=galaxyEventRuntime.convoy;if(convoy){mm.fillStyle='#5ef1ff';mm.fillRect(convoy.x*sx-3,convoy.y*sy-3,6,6);}
-  // Minimap: sem pedras e sem cargo boxes. Somente NPCs + pilotos inimigos.
+  // V16.5: radar social — hostis, companhia e aliança aparecem no mesmo mapa.
   for(const rp of onlineWorld.players.values()){
-    if(!onlinePlayerEnemy(rp)||Math.hypot(rp.x-player.x,rp.y-player.y)>state.radarRange)continue;
-    const x=rp.x*sx,y=rp.y*sy,selected=state.target?.isPlayer&&state.target.id===rp.id,size=selected?5.8:4.6;
-    mm.save();mm.translate(x,y);mm.rotate(Math.PI/4);mm.fillStyle=selected?'#ff174f':'#ff4d69';mm.strokeStyle='#ffd4dc';mm.lineWidth=1;
-    mm.fillRect(-size/2,-size/2,size,size);mm.strokeRect(-size/2,-size/2,size,size);mm.restore();
+    if(Math.hypot(rp.x-player.x,rp.y-player.y)>state.radarRange)continue;
+    const x=rp.x*sx,y=rp.y*sy,selected=state.target?.isPlayer&&state.target.id===rp.id,enemy=onlinePlayerEnemy(rp),sameClan=!!currentClanTag()&&!!rp.clanTag&&rp.clanTag===currentClanTag(),ally=!enemy;
+    const size=selected?6.2:sameClan?5.2:4.6,color=selected?'#ffea67':enemy?'#ff4d69':sameClan?'#ffe16b':'#57e6a8',stroke=selected?'#fff4a8':enemy?'#ffd4dc':sameClan?'#fff3b2':'#d7fff0';
+    mm.save();mm.translate(x,y);mm.rotate(enemy?Math.PI/4:0);mm.fillStyle=color;mm.strokeStyle=stroke;mm.lineWidth=1;
+    if(sameClan){mm.beginPath();mm.moveTo(0,-size);mm.lineTo(size,0);mm.lineTo(0,size);mm.lineTo(-size,0);mm.closePath();mm.fill();mm.stroke();}
+    else if(ally){mm.beginPath();mm.moveTo(0,-size);mm.lineTo(size*.85,size);mm.lineTo(-size*.85,size);mm.closePath();mm.fill();mm.stroke();}
+    else{mm.fillRect(-size/2,-size/2,size,size);mm.strokeRect(-size/2,-size/2,size,size);}mm.restore();
   }
   mm.fillStyle=getFaction()?.color||'#fff';mm.beginPath();mm.arc(px,py,4.5,0,TWO_PI);mm.fill();mm.strokeStyle='rgba(255,255,255,.7)';mm.stroke();
 }
@@ -3894,7 +3937,7 @@ function updatePetFloat(){
   if(!shouldShow)return;
   ui.petFloatPanel.classList.remove('hud-user-disabled');
   if(ui.petFloatLevel)ui.petFloatLevel.textContent=`LV${pet.level}`;
-  if(ui.petFloatStatus){const gear=pet.activeGear==='off'?'COMPANHIA':(PET_GEARS[pet.activeGear]?.name||'COMPANHIA');const behavior=({guard:'EM COMBATE',box:'BUSCANDO BOX',ore:'BUSCANDO PEDRA',repair:'REPARANDO',kami:petRuntime.kamiArmed?'NOVA BURST ARMADO':'NOVA BURST',roam:'PATRULHANDO',escort:'ESCOLTANDO'})[petRuntime.taskType]||'LIVRE';const rangeLabel=pet.activeGear==='guard'?`ATAQUE ${fmt(petCombatSearchRange())}`:(pet.activeGear==='box'||pet.activeGear==='ore')?`COLETA ${fmt(petCollectionRange())}`:pet.activeGear==='repair'?'SUPORTE':pet.activeGear==='kami'?'ASSALTO':'ESCOLTA';ui.petFloatStatus.textContent=`${behavior} • ${gear} • ${rangeLabel}`;}
+  if(ui.petFloatStatus){const gear=pet.activeGear==='off'?'COMPANHIA':(PET_GEARS[pet.activeGear]?.name||'COMPANHIA');const behavior=({guard:'EM COMBATE',box:'BUSCANDO BOX',ore:'BUSCANDO PEDRA',repair:'REPARANDO',kami:petRuntime.kamiArmed?'NOVA BURST ARMADO':'NOVA BURST',roam:'PATRULHANDO',escort:'ESCOLTANDO'})[petRuntime.taskType]||'LIVRE';const rangeLabel=pet.activeGear==='guard'?`ATAQUE ${fmt(petCombatSearchRange())}`:(pet.activeGear==='box'||pet.activeGear==='ore')?`COLETA ${fmt(petCollectionRange())}`:pet.activeGear==='repair'?'SUPORTE':pet.activeGear==='kami'?'ASSALTO':'ESCOLTA';const pd=currentPetDesign();ui.petFloatStatus.textContent=`${behavior} • ${gear} • ${rangeLabel}${pd?` • ${pd.name}`:''}`;}
   if(ui.petGearQuickSelect){
     const owned=['off',...Object.keys(PET_GEARS).filter(id=>id!=='kami'&&pet.gearsOwned?.[id])];
     const signature=owned.join('|');
@@ -3918,7 +3961,7 @@ function updateBaseTradePrompt(){
 }
 function updateUI(){
   refreshAmmoCounters();
-  const f=getFaction(),ship=SHIPS[progress.activeShipId],baseSafe=isBaseSafeZone(),portalSafe=isPortalNeutralZone(),safe=baseSafe||portalSafe;ui.factionLabel.textContent=f?.short||'—';ui.factionLabel.style.color=f?.color||'';ui.mapLabel.textContent=displayMapLabel(progress.mapId);if(ui.sectorName)ui.sectorName.textContent=state.currentMap.name||'Setor';if(ui.coordLabel)ui.coordLabel.textContent=`${Math.round(player.x)} / ${Math.round(player.y)}`;if(ui.routeLabel){const rd=routeDistance();ui.routeLabel.textContent=rd>35?`${fmt(rd)}u`:'PARADO';ui.routeLabel.parentElement?.classList.toggle('active',rd>35);}if(ui.discoveriesLabel){const found=state.landmarks.filter(l=>progress.discoveries?.[`${progress.mapId}:${l.id}`]).length;ui.discoveriesLabel.textContent=`${found}/${state.landmarks.length}`;}ui.shipLabel.textContent=ship.name;ui.lvl.textContent=progress.profile.level;ui.hp.textContent=fmt(player.hp);ui.maxHp.textContent=fmt(player.maxHp);ui.shield.textContent=fmt(player.shield);ui.maxShield.textContent=fmt(player.maxShield);ui.speed.textContent=fmt(player.speed*shipAbilitySpeedMultiplier());if(ui.dmg)ui.dmg.textContent=fmt(player.laserDamage*currentLaserAmmo().mult);ui.credits.textContent=fmt(progress.profile.credits);ui.uridium.textContent=fmt(progress.profile.uridium);ui.xp.textContent=fmt(progress.profile.xp);ui.xp.title=progress.profile.level>=PLAYER_MAX_LEVEL?'Nível máximo':`Próximo nível: ${fmt(levelXpThreshold(progress.profile.level+1))} XP • ${Math.round(levelProgressPercent(progress.profile.xp,progress.profile.level))}%`;if(ui.droneCount)ui.droneCount.textContent=progress.drones.length;ui.laserToggle.classList.toggle('active',player.laserFiring);ui.rocketCd.textContent=rocketReady()?'MÍSSIL PRONTO':`MÍSSIL ${(getRocketCooldown()-(nowSec()-player.lastRocketShot)).toFixed(1)}s`;
+  const f=getFaction(),ship=SHIPS[progress.activeShipId],baseSafe=isBaseSafeZone(),portalSafe=isPortalNeutralZone(),safe=baseSafe||portalSafe;ui.factionLabel.textContent=f?.short||'—';ui.factionLabel.style.color=f?.color||'';ui.mapLabel.textContent=displayMapLabel(progress.mapId);if(ui.sectorName)ui.sectorName.textContent=state.currentMap.name||'Setor';if(ui.coordLabel)ui.coordLabel.textContent=`${Math.round(player.x)} / ${Math.round(player.y)}`;if(ui.routeLabel){const rd=routeDistance();ui.routeLabel.textContent=rd>35?`${fmt(rd)}u`:'PARADO';ui.routeLabel.parentElement?.classList.toggle('active',rd>35);}if(ui.discoveriesLabel){const found=state.landmarks.filter(l=>progress.discoveries?.[`${progress.mapId}:${l.id}`]).length;ui.discoveriesLabel.textContent=`${found}/${state.landmarks.length}`;}const shipDesign=currentShipDesign();ui.shipLabel.textContent=shipDesign?`${ship.name} • ${shipDesign.name}`:ship.name;ui.lvl.textContent=progress.profile.level;ui.hp.textContent=fmt(player.hp);ui.maxHp.textContent=fmt(player.maxHp);ui.shield.textContent=fmt(player.shield);ui.maxShield.textContent=fmt(player.maxShield);ui.speed.textContent=fmt(player.speed*shipAbilitySpeedMultiplier());if(ui.dmg)ui.dmg.textContent=fmt(player.laserDamage*currentLaserAmmo().mult);ui.credits.textContent=fmt(progress.profile.credits);ui.uridium.textContent=fmt(progress.profile.uridium);ui.xp.textContent=fmt(progress.profile.xp);ui.xp.title=progress.profile.level>=PLAYER_MAX_LEVEL?'Nível máximo':`Próximo nível: ${fmt(levelXpThreshold(progress.profile.level+1))} XP • ${Math.round(levelProgressPercent(progress.profile.xp,progress.profile.level))}%`;if(ui.droneCount)ui.droneCount.textContent=progress.drones.length;ui.laserToggle.classList.toggle('active',player.laserFiring);ui.rocketCd.textContent=rocketReady()?'MÍSSIL PRONTO':`MÍSSIL ${(getRocketCooldown()-(nowSec()-player.lastRocketShot)).toFixed(1)}s`;
   if(ui.shipHudArt)ui.shipHudArt.src=GAME_ASSETS.ships[progress.activeShipId]||GAME_ASSETS.ships.phoenix;
   if(ui.factionIcon)ui.factionIcon.src=factionAsset(progress.profile.faction);
   if(ui.userLabel)ui.userLabel.textContent=progress.profile.callsign||getUser()?.callsign||'Pilot';updateRankChip();if(ui.petBtn)ui.petBtn.textContent=progress.pet?.owned?`AUX-9 LV${progress.pet.level}`:'AUX-9 LOJA';if(ui.safeZoneLabel){const portalCombat=portalSafe&&state.portalCombatUntil>nowSec();ui.safeZoneLabel.textContent=baseSafe?'BASE • ZONA SEGURA':portalCombat?'PORTAL • COMBATE ATIVO':portalSafe?'PORTAL • ZONA NEUTRA':'ZONA DE COMBATE';ui.safeZoneLabel.classList.toggle('active',safe&&!portalCombat);ui.safeZoneLabel.classList.toggle('danger-lite',portalCombat);}updatePremiumBadge();if(ui.cargoUsed)ui.cargoUsed.textContent=fmt(cargoUsed());if(ui.cargoMax)ui.cargoMax.textContent=fmt(cargoCapacity());if(ui.cargoBtn)ui.cargoBtn.classList.toggle('gold',isAtTrader());updatePetFloat();updateAbilityHud();updateBossHud();updateTargetLockHud();updateCombatStateHud();renderGalaxyEventHud();updateBaseTradePrompt();renderActiveMissionHud();
@@ -4101,17 +4144,22 @@ function inventoryCard(itemId,count){
 }
 
 function renderHangarShips(){
+  const root=document.createElement('div'),defs=designerCatalog().filter(d=>d.kind==='ship'),activeDesign=currentShipDesign(),eligible=shipDesignerEligible();
+  const designerBox=document.createElement('div');designerBox.className='section-box ship-designer-console';
+  const cards=defs.map(d=>`<div class="designer-summary-card ${d.rarity||'epic'}"><div class="designer-orb" style="--designer-glow:${d.visual?.glow||'#7edcff'};--designer-accent:${d.visual?.accent||'#fff'}"></div><div><b>${d.name}</b><small>${designerBonusSummary(d)}</small><span>${rarityLabel(d.rarity)} • EVENTO • Inventário ${ownedDesignQty(d.design_id)}</span></div></div>`).join('');
+  designerBox.innerHTML=`<h3>DESIGNERS DE NAVE • ELITE / EVENTO</h3><div class="muted" style="font-size:12px;margin-bottom:10px">O designer ativo altera visual, atributos e a habilidade da tecla E. Naves comuns de Créditos não aceitam designer.</div><div class="designer-summary-grid">${cards||'<div class="muted">Sincronizando catálogo...</div>'}</div>`;
+  const control=document.createElement('div');control.className='designer-loadout-control';const label=document.createElement('label');label.textContent=`NAVE ATIVA • ${SHIPS[progress.activeShipId]?.name||progress.activeShipId}`;const sel=document.createElement('select');sel.className='designer-select';
+  const none=document.createElement('option');none.value='';none.textContent=eligible?'SEM DESIGNER':'NAVE NÃO ELEGÍVEL';sel.appendChild(none);
+  defs.forEach(d=>{const opt=document.createElement('option');opt.value=d.design_id;opt.textContent=`${d.name} • ${rarityLabel(d.rarity)} • ${ownedDesignQty(d.design_id)}x`;opt.disabled=ownedDesignQty(d.design_id)<=0;sel.appendChild(opt);});sel.value=activeDesign?.design_id||'';sel.disabled=!eligible||!canChangeEquipment();sel.onchange=()=>equipShipDesigner(sel.value||null);control.append(label,sel);if(!eligible){const note=document.createElement('small');note.textContent='Ative uma nave ELITE (STL) ou ESPECIAL DE EVENTO para usar designers.';control.appendChild(note);}designerBox.appendChild(control);root.appendChild(designerBox);
+
   const wrap=document.createElement('div');wrap.className='ship-grid';
   const catalog=Object.values(SHIPS);
-  const orderedShips=[
-    ...catalog.filter(s=>progress.ownedShips.includes(s.id)),
-    ...catalog.filter(s=>!progress.ownedShips.includes(s.id)),
-  ];
+  const orderedShips=[...catalog.filter(s=>progress.ownedShips.includes(s.id)),...catalog.filter(s=>!progress.ownedShips.includes(s.id))];
   orderedShips.forEach(s=>{
-    const owned=progress.ownedShips.includes(s.id),active=s.id===progress.activeShipId,c=document.createElement('div');c.className='ship-card';
-    c.innerHTML=`<div class="ship-visual"><img src="${GAME_ASSETS.ships[s.id]||GAME_ASSETS.ships.phoenix}" alt="${s.name}"></div><div><span class="badge">${owned?'OBTIDA':'BLOQUEADA'}</span><h3>${s.name}</h3></div><div class="ship-stats">HP ${fmt(s.hp)}<br>Lasers ${s.lasers} • Geradores ${s.generators} • Extras ${s.extras}<br>VEL ${s.speed} • Cargo ${fmt(s.cargo)}</div>`;
-    const event=!!s.eventOnly||s.shopAvailable===false;const b=document.createElement('button');b.className='equip-btn';b.textContent=active?'Nave ativa':owned?'Usar nave':event?'EVENTO / MISSÃO / PASSE':'Comprar na Loja';b.disabled=active||(!owned&&event);b.onclick=()=>owned?switchShip(s.id):(ui.hangarModal.classList.add('hidden'),openShop('ships'));c.appendChild(b);wrap.appendChild(c);
-  });return wrap;
+    const owned=progress.ownedShips.includes(s.id),active=s.id===progress.activeShipId,event=!!s.eventOnly||s.shopAvailable===false,design=active?activeDesign:null,visual=design?.visual||{},c=document.createElement('div');c.className=`ship-card ${active?'active-ship':''} ${design?'has-designer '+(design.rarity||''):''}`;if(design)c.style.setProperty('--designer-glow',visual.glow||'#7edcff');
+    c.innerHTML=`<div class="ship-visual designer-ship-art-wrap"><img src="${GAME_ASSETS.ships[s.id]||GAME_ASSETS.ships.phoenix}" alt="${s.name}" ${design?`style="filter:${designerVisualCss(design)}"`:''}>${design?`<span class="designer-equipped-badge">${rarityLabel(design.rarity)} • ${design.name}</span>`:''}</div><div><span class="badge ${shipDesignerEligible(s.id)?'elite':''}">${owned?'OBTIDA':'BLOQUEADA'}${shipDesignerEligible(s.id)?' • ELITE':''}</span><h3>${s.name}</h3></div><div class="ship-stats">HP ${fmt(s.hp)}<br>Lasers ${s.lasers} • Geradores ${s.generators} • Extras ${s.extras}<br>VEL ${s.speed} • Cargo ${fmt(s.cargo)}${design?`<br><b>${designerBonusSummary(design)}</b>`:''}</div>`;
+    const b=document.createElement('button');b.className='equip-btn';b.textContent=active?'Nave ativa':owned?'Usar nave':event?'EVENTO / MISSÃO / PASSE':'Comprar na Loja';b.disabled=active||(!owned&&event);b.onclick=()=>owned?switchShip(s.id):(ui.hangarModal.classList.add('hidden'),openShop('ships'));c.appendChild(b);wrap.appendChild(c);
+  });root.appendChild(wrap);return root;
 }
 function renderHangarEquipment(){
   const ship=SHIPS[progress.activeShipId],root=document.createElement('div');root.className='hangar-layout';const left=document.createElement('div');left.className='hangar-column';const right=document.createElement('div');right.className='hangar-column';
@@ -4176,10 +4224,15 @@ function renderPet(root=ui.petContent){
   if(!pet.owned){
     const hero=document.createElement('div');hero.className='pet-hero pet-store-hero';hero.innerHTML=`<div class="pet-avatar"><img src="${GAME_ASSETS.drones.pet}" alt="AUX-9"></div><div class="pet-hero-copy"><div class="eyebrow">UNIDADE AUX-9</div><h2>AUX-9 ainda não adquirido</h2><p class="muted">Adquira a unidade base para desbloquear progressão, armas, escudos e módulos especializados.</p><div class="price uridium">${fmt(PET_BASE_PRICE)} STL</div></div>`;const b=document.createElement('button');b.className='primary-btn';b.textContent=`COMPRAR AUX-9 • ${fmt(PET_BASE_PRICE)} STL`;b.disabled=progress.profile.uridium<PET_BASE_PRICE;b.onclick=()=>buyPetUnit();hero.querySelector('.pet-hero-copy').appendChild(b);root.appendChild(hero);return;
   }
-  const base=levelXpThreshold(pet.level),need=pet.level<PET_MAX_LEVEL?petLevelXp(pet.level):base,pct=pet.level>=PET_MAX_LEVEL?100:Math.min(100,(pet.xp-base)/Math.max(1,need-base)*100);
-  const hero=document.createElement('div');hero.className='pet-hero';
-  hero.innerHTML=`<div class="pet-avatar"><img src="${pet.level>=10?GAME_ASSETS.drones.petElite:GAME_ASSETS.drones.pet}" alt="AUX-9"></div><div class="pet-hero-copy"><div class="eyebrow">UNIDADE AUX-9</div><h2>Nível ${pet.level} / ${PET_MAX_LEVEL}</h2><div class="pet-xpbar"><span style="width:${pct}%"></span></div><div class="muted">${pet.level>=PET_MAX_LEVEL?'Nível máximo':`${fmt(pet.xp)} XP total • próximo ${fmt(need)}`} • Coleta ${fmt(petCollectionRange())}u • Guardião ${fmt(petCombatSearchRange())}u • Dano ${fmt(petDamage())} • Escudo ${fmt(petMaxShield())}</div><div class="muted">Selecione um módulo para definir uma única função do AUX-9.</div></div>`;
+  const base=levelXpThreshold(pet.level),need=pet.level<PET_MAX_LEVEL?petLevelXp(pet.level):base,pct=pet.level>=PET_MAX_LEVEL?100:Math.min(100,(pet.xp-base)/Math.max(1,need-base)*100),petDesigner=currentPetDesign(),petVisual=petDesigner?.visual||{};
+  const hero=document.createElement('div');hero.className=`pet-hero ${petDesigner?'has-designer '+(petDesigner.rarity||''):''}`;if(petDesigner)hero.style.setProperty('--designer-glow',petVisual.glow||'#7edcff');
+  hero.innerHTML=`<div class="pet-avatar designer-pet-art-wrap"><img src="${pet.level>=10?GAME_ASSETS.drones.petElite:GAME_ASSETS.drones.pet}" alt="AUX-9" ${petDesigner?`style="filter:${designerVisualCss(petDesigner)}"`:''}>${petDesigner?`<span class="designer-equipped-badge">${rarityLabel(petDesigner.rarity)} • ${petDesigner.name}</span>`:''}</div><div class="pet-hero-copy"><div class="eyebrow">UNIDADE AUX-9</div><h2>Nível ${pet.level} / ${PET_MAX_LEVEL}</h2><div class="pet-xpbar"><span style="width:${pct}%"></span></div><div class="muted">${pet.level>=PET_MAX_LEVEL?'Nível máximo':`${fmt(pet.xp)} XP total • próximo ${fmt(need)}`} • Coleta ${fmt(petCollectionRange())}u • Guardião ${fmt(petCombatSearchRange())}u • Dano ${fmt(petDamage())} • Escudo ${fmt(petMaxShield())}</div><div class="muted">Selecione um módulo para definir uma única função do AUX-9.${petDesigner?` • <b>${designerBonusSummary(petDesigner)}</b>`:''}</div></div>`;
   root.appendChild(hero);
+
+  const petDefs=designerCatalog().filter(d=>d.kind==='pet'),designerPanel=document.createElement('div');designerPanel.className='section-box aux-designer-console';
+  const designerCards=petDefs.map(d=>`<div class="designer-summary-card ${d.rarity||'epic'}"><div class="designer-orb" style="--designer-glow:${d.visual?.glow||'#7edcff'};--designer-accent:${d.visual?.accent||'#fff'}"></div><div><b>${d.name}</b><small>${designerBonusSummary(d)}</small><span>${rarityLabel(d.rarity)} • EVENTO • Inventário ${ownedDesignQty(d.design_id)}</span></div></div>`).join('');
+  designerPanel.innerHTML=`<h3>DESIGNERS AUX-9 • EVENTOS</h3><div class="muted" style="font-size:12px;margin-bottom:10px">Itens raros de evento. Podem combinar DANO, HP, ESCUDO e XP.</div><div class="designer-summary-grid">${designerCards||'<div class="muted">Sincronizando catálogo...</div>'}</div>`;
+  const dControl=document.createElement('div');dControl.className='designer-loadout-control';const dLabel=document.createElement('label');dLabel.textContent='DESIGNER ATIVO';const dSel=document.createElement('select');dSel.className='designer-select';const dNone=document.createElement('option');dNone.value='';dNone.textContent='SEM DESIGNER';dSel.appendChild(dNone);petDefs.forEach(d=>{const o=document.createElement('option');o.value=d.design_id;o.textContent=`${d.name} • ${rarityLabel(d.rarity)} • ${ownedDesignQty(d.design_id)}x`;o.disabled=ownedDesignQty(d.design_id)<=0;dSel.appendChild(o);});dSel.value=petDesigner?.design_id||'';dSel.disabled=!canChangeEquipment();dSel.onchange=()=>equipPetDesigner(dSel.value||null);dControl.append(dLabel,dSel);designerPanel.appendChild(dControl);root.appendChild(designerPanel);
 
   const gears=document.createElement('div');gears.className='section-box';gears.innerHTML='<h3>Modos / Extras do AUX-9</h3><div class="muted">Apenas um modo fica ativo por vez. Os módulos são permanentes depois de comprados.</div>';
   const gearGrid=document.createElement('div');gearGrid.className='pet-gear-grid';

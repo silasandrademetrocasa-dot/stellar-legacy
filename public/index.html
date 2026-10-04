@@ -6,7 +6,7 @@
 <meta content="width=device-width,initial-scale=1,user-scalable=no" name="viewport"/>
 <meta content="#030816" name="theme-color"/>
 <title>Stellar Legacy</title>
-<link href="/style.css?v=16.3.0" rel="stylesheet"/>
+<link href="/style.css?v=16.5.0" rel="stylesheet"/>
 </head>
 <body>
 <div id="app">
@@ -226,9 +226,9 @@
 </div>
 </div>
 <div class="bottom-combat-abilities" id="abilityBar" aria-label="Habilidades de combate">
-  <button class="ability-btn ship-ability" id="shipAbilityBtn" type="button" title="Habilidade da nave • tecla E">
+  <button class="ability-btn ship-ability" id="shipAbilityBtn" type="button" title="Habilidade individual da nave / designer • tecla E">
     <span class="ability-icon" id="shipAbilityIcon">✦</span>
-    <span class="ability-copy"><b id="shipAbilityName">OVERDRIVE</b><small id="shipAbilityStatus">PRONTA • E</small></span>
+    <span class="ability-copy"><b id="shipAbilityName">HABILIDADE</b><small id="shipAbilityStatus">PRONTA • E</small></span>
     <i id="shipAbilityFill"></i>
   </button>
   <button class="ability-btn pet-kami-ability" id="petKamiAbilityBtn" type="button" title="Nova Burst AUX-9 • tecla K">
@@ -250,6 +250,9 @@
 </div>
 </div>
 <canvas height="220" id="minimap" width="220"></canvas>
+<div class="minimap-social-legend" aria-label="Legenda social do radar">
+  <span class="company">▲ COMPANHIA</span><span class="clan">◆ ALIANÇA</span><span class="hostile">◆ HOSTIL</span>
+</div>
 </section>
 </div>
 
@@ -763,6 +766,6 @@
   </div>
 </div>
 </div>
-<script src="/game.js?v=16.3.0" type="module"></script>
+<script src="/game.js?v=16.5.0" type="module"></script>
 </body>
 </html>
