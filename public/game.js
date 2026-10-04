@@ -1,7 +1,7 @@
-import { FACTIONS, SHIPS, ITEMS, LASER_AMMO, ROCKETS, NPC_TYPES, MAPS, RESOURCES } from './data.js?v=16.0.0';
-import { GAME_ASSETS } from './assets/v8/manifest.js?v=16.0.0';
-import { signUp, signIn, requestPasswordReset, restorePasswordRecoveryFromUrl, restoreSession, signOutLocal, checkGameSession, endGameSession, getUser, getSessionCredentials, loadCloudSave, saveCloudSave, updateCallsign, updatePassword, loadRankings, loadAuctionBids, saveAuctionBidOnline, markAuctionBidStatusOnline, loadAuctionMarket, upsertPlayerPresenceOnline, loadMapPresenceOnline, removePlayerPresenceOnline, queuePvpAttackOnline, consumePvpDamageEventsOnline, syncArenaProfileOnline, loadArenaState, loadArenaDailyRewardStatus, claimArenaDailyReward, loadArenaOpponents, loadArenaHistory, arenaAttackOnline, listClansOnline, loadMyClanOnline, createClanOnline, joinClanOnline, leaveClanOnline, transferClanCreditsOnline, claimClanCreditGrantsOnline, recordClanAlienKillOnline, getPremiumShopOnline, testPurchasePremiumOnline, loadWarfrontStateOnline, hitWorldBossOnline, claimWorldBossRewardOnline, declareClanWarOnline, recordClanWarScoreOnline, loadLiveOpsOnline, purchaseLiveCatalogOnline } from './api.js?v=16.0.0';
-import { SharedUniverseClient } from './world.js?v=16.0.0';
+import { FACTIONS, SHIPS, ITEMS, LASER_AMMO, ROCKETS, NPC_TYPES, MAPS, RESOURCES } from './data.js?v=16.1.0';
+import { GAME_ASSETS } from './assets/v8/manifest.js?v=16.1.0';
+import { signUp, signIn, requestPasswordReset, restorePasswordRecoveryFromUrl, restoreSession, signOutLocal, checkGameSession, endGameSession, getUser, getSessionCredentials, loadCloudSave, saveCloudSave, updateCallsign, updatePassword, loadRankings, loadAuctionBids, saveAuctionBidOnline, markAuctionBidStatusOnline, loadAuctionMarket, upsertPlayerPresenceOnline, loadMapPresenceOnline, removePlayerPresenceOnline, queuePvpAttackOnline, consumePvpDamageEventsOnline, syncArenaProfileOnline, loadArenaState, loadArenaDailyRewardStatus, claimArenaDailyReward, loadArenaOpponents, loadArenaHistory, arenaAttackOnline, listClansOnline, loadMyClanOnline, createClanOnline, joinClanOnline, leaveClanOnline, transferClanCreditsOnline, claimClanCreditGrantsOnline, recordClanAlienKillOnline, getPremiumShopOnline, testPurchasePremiumOnline, loadWarfrontStateOnline, hitWorldBossOnline, claimWorldBossRewardOnline, declareClanWarOnline, recordClanWarScoreOnline, loadLiveOpsOnline, purchaseLiveCatalogOnline, economyActionOnline } from './api.js?v=16.1.0';
+import { SharedUniverseClient } from './world.js?v=16.1.0';
 
 const canvas = document.querySelector('#game');
 const ctx = canvas.getContext('2d');
@@ -318,6 +318,27 @@ async function refreshLiveOpsState(force=false){
 }
 async function applyAuthoritativePurchase(catalogKey,label='Item'){
   try{await flushCloudSave(true);const result=await purchaseLiveCatalogOnline(catalogKey);if(!result?.state)throw new Error('Servidor não retornou o save atualizado.');progress=result.state;hydrateProgress();cloudDirty=false;try{localStorage.setItem(saveKey(),JSON.stringify(progress));}catch{}computeStats(true);buildAmmoButtons();renderShop();refreshPetViews();updateUI();showToast(`${label} adquirido • compra validada no servidor`,'shop');return true;}catch(e){showToast(e.message||'Compra recusada pelo servidor');return false;}
+}
+
+
+// ===================== V16.1 ECONOMY GUARD =====================
+const economyRuntime={queue:Promise.resolve(),autoPending:new Set()};
+function queueEconomy(fn){const run=economyRuntime.queue.then(fn,fn);economyRuntime.queue=run.catch(()=>{});return run;}
+async function waitCloudIdle(maxMs=1800){const start=Date.now();while(cloudBusy&&Date.now()-start<maxMs)await new Promise(r=>setTimeout(r,35));}
+async function syncBeforeEconomy(){await waitCloudIdle();await flushCloudSave(true);await waitCloudIdle();}
+function installEconomyState(state){if(!state||typeof state!=='object')throw new Error('Servidor não retornou o estado econômico atualizado.');progress=state;hydrateProgress();cloudDirty=false;try{localStorage.setItem(saveKey(),JSON.stringify(progress));}catch{}computeStats(true);buildAmmoButtons();refreshPetViews();renderShop();renderCargo();renderGalaxyGate();refreshPilotViews();updateUI();}
+async function runEconomyAction(action,payload={},options={}){
+  const {applyState=true,flush=true}=options;
+  return queueEconomy(async()=>{if(flush)await syncBeforeEconomy();const result=await economyActionOnline(action,payload);if(applyState&&result?.state)installEconomyState(result.state);return result;});
+}
+async function runAutoBuy(catalogKey,label){
+  const key=String(catalogKey||'');if(!key||economyRuntime.autoPending.has(key))return false;economyRuntime.autoPending.add(key);
+  try{
+    const result=await runEconomyAction('auto_buy',{catalog_key:key},{applyState:false,flush:true}),info=result?.info||{};
+    if(info.kind==='ammo'&&info.id){progress.ammo[info.id]=(Number(progress.ammo[info.id])||0)+Math.max(1,Number(info.qty)||1);}
+    else if(info.kind==='rocket'&&info.id){progress.rockets[info.id]=(Number(progress.rockets[info.id])||0)+Math.max(1,Number(info.qty)||1);}
+    const cur=info.currency==='uridium'?'uridium':'credits';progress.profile[cur]=Math.max(0,(Number(progress.profile[cur])||0)-Math.max(0,Number(info.price)||0));cloudDirty=true;saveGame();refreshAmmoCounters();renderShop();updateUI();showToast(`AUTO BUY • ${label}`,'shop');return true;
+  }catch(e){console.warn('auto buy server',e);return false;}finally{economyRuntime.autoPending.delete(key);}
 }
 
 // ===================== V10 PILOT BIO =====================
@@ -2224,25 +2245,12 @@ function autoLaserEnabled(){return hasExtra('autoLaserCpu');}
 function autoRocketEnabled(){return hasExtra('autoRocketCpu');}
 function turboRocketEnabled(){return hasExtra('rocketTurboCpu');}
 function autoBuyEnabled(){return hasExtra('ammoAutoBuyCpu');}
+function liveCatalogKeyForCombat(def){if(!def?.id)return null;if(LASER_AMMO[def.id])return `ammo:${def.id}`;if(ROCKETS[def.id])return `rocket:${def.id}`;return null;}
 function canAutoBuy(def){
   if(!def||def.purchasable===false||def.sourceOnly===true)return false;
-  return def.currency==='credits'?progress.profile.credits>=def.price:progress.profile.uridium>=def.price;
+  const q=liveQuote(liveCatalogKeyForCombat(def));if(!q)return false;
+  return q.currency==='credits'?progress.profile.credits>=q.price:progress.profile.uridium>=q.price;
 }
-function buyAmmoPack(id,silent=false){
-  const a=LASER_AMMO[id];
-  if(!a||a.purchasable===false||a.sourceOnly===true||!charge(a.price,a.currency))return false;
-  progress.ammo[id]=(progress.ammo[id]||0)+a.pack;
-  if(!silent)showToast(`+${fmt(a.pack)} ${a.name}`,'shop');
-  saveGame();return true;
-}
-function buyRocketPack(id,silent=false){
-  const r=ROCKETS[id];
-  if(!r||r.purchasable===false||r.sourceOnly===true||!charge(r.price,r.currency))return false;
-  progress.rockets[id]=(progress.rockets[id]||0)+r.pack;
-  if(!silent)showToast(`+${fmt(r.pack)} ${r.name}`,'shop');
-  saveGame();return true;
-}
-
 // Ordem de queda automática. SAB é especial: ao acabar, cai para x2 -> x1.
 const LASER_AMMO_FALLBACK={
   ucb100:['mcb50','mcb25','lcb10'],
@@ -2257,22 +2265,13 @@ const ROCKET_FALLBACK={
   plt2026:['r310'],
   r310:[]
 };
-
 function autoBuyActiveLaser(id,announce=true){
-  const def=LASER_AMMO[id];
-  if(!autoBuyEnabled()||!canAutoBuy(def)||!buyAmmoPack(id,true))return false;
-  state.lastAutoBuyAt=nowSec();
-  refreshAmmoCounters();renderShop();
-  if(announce)showToast(`AUTO BUY • ${shortLaserLabel(id)} +${fmt(def.pack)}`,'shop');
-  return true;
+  const def=LASER_AMMO[id],q=liveQuote(`ammo:${id}`);if(!autoBuyEnabled()||!q||!canAutoBuy(def))return false;
+  state.lastAutoBuyAt=nowSec();runAutoBuy(q.catalog_key,`${shortLaserLabel(id)} +${fmt(def.pack)}`).catch(()=>{});return false;
 }
 function autoBuyActiveRocket(id,announce=true){
-  const def=ROCKETS[id];
-  if(!autoBuyEnabled()||!canAutoBuy(def)||!buyRocketPack(id,true))return false;
-  state.lastAutoBuyAt=nowSec();
-  refreshAmmoCounters();renderShop();
-  if(announce)showToast(`AUTO BUY • ${shortRocketLabel(id)} +${fmt(def.pack)}`,'shop');
-  return true;
+  const def=ROCKETS[id],q=liveQuote(`rocket:${id}`);if(!autoBuyEnabled()||!q||!canAutoBuy(def))return false;
+  state.lastAutoBuyAt=nowSec();runAutoBuy(q.catalog_key,`${shortRocketLabel(id)} +${fmt(def.pack)}`).catch(()=>{});return false;
 }
 function switchToWeakerLaser(expiredId){
   const next=(LASER_AMMO_FALLBACK[expiredId]||[]).find(id=>ammoQty(id)>0);
@@ -2292,36 +2291,22 @@ function switchToWeakerRocket(expiredId){
 }
 function recoverActiveLaser(expiredId,announceBuy=true){
   if(ammoQty(expiredId)>0)return LASER_AMMO[expiredId];
-  if(autoBuyActiveLaser(expiredId,announceBuy))return LASER_AMMO[expiredId];
+  autoBuyActiveLaser(expiredId,announceBuy);
   return switchToWeakerLaser(expiredId);
 }
 function recoverActiveRocket(expiredId,announceBuy=true){
   if(rocketQty(expiredId)>0)return ROCKETS[expiredId];
-  if(autoBuyActiveRocket(expiredId,announceBuy))return ROCKETS[expiredId];
+  autoBuyActiveRocket(expiredId,announceBuy);
   return switchToWeakerRocket(expiredId);
 }
 function maybeAutoBuyAmmo(){
   if(!progress||!autoBuyEnabled())return;
-  const now=nowSec();
-  if(now-state.lastAutoBuyAt<0.9)return;
-
-  const laser=currentLaserAmmo(),rocket=currentRocket();
-  const laserNeed=Math.max(1,equippedLaserCount()+petLaserIds().length)*10;
-  const bought=[];
-
-  // CPU compra SOMENTE o laser e o míssil atualmente selecionados.
-  if(ammoQty(laser.id)<laserNeed&&canAutoBuy(laser)&&buyAmmoPack(laser.id,true)){
-    bought.push(`${shortLaserLabel(laser.id)} +${fmt(laser.pack)}`);
-  }
-  if(rocketQty(rocket.id)<10&&canAutoBuy(rocket)&&buyRocketPack(rocket.id,true)){
-    bought.push(`${shortRocketLabel(rocket.id)} +${fmt(rocket.pack)}`);
-  }
-
-  if(bought.length){
-    state.lastAutoBuyAt=now;
-    refreshAmmoCounters();renderShop();
-    showToast(`AUTO BUY • ${bought.join(' • ')}`,'shop');
-  }
+  const now=nowSec();if(now-state.lastAutoBuyAt<0.9)return;
+  const laser=currentLaserAmmo(),rocket=currentRocket(),laserNeed=Math.max(1,equippedLaserCount()+petLaserIds().length)*30;
+  let requested=false;
+  if(ammoQty(laser.id)<laserNeed&&canAutoBuy(laser)){const q=liveQuote(`ammo:${laser.id}`);if(q&&!economyRuntime.autoPending.has(q.catalog_key)){requested=true;runAutoBuy(q.catalog_key,`${shortLaserLabel(laser.id)} +${fmt(laser.pack)}`).catch(()=>{});}}
+  if(rocketQty(rocket.id)<30&&canAutoBuy(rocket)){const q=liveQuote(`rocket:${rocket.id}`);if(q&&!economyRuntime.autoPending.has(q.catalog_key)){requested=true;runAutoBuy(q.catalog_key,`${shortRocketLabel(rocket.id)} +${fmt(rocket.pack)}`).catch(()=>{});}}
+  if(requested)state.lastAutoBuyAt=now;
 }
 function allEquippedIds(){return [...progress.shipLoadout.lasers,...progress.shipLoadout.generators,...progress.shipLoadout.extras,...progress.drones.flatMap(d=>d.slots)].filter(Boolean);}
 function equippedLaserIds(){return [...progress.shipLoadout.lasers,...progress.drones.flatMap(d=>d.slots)].filter(id=>ITEMS[id]?.type==='laser');}
@@ -2329,7 +2314,7 @@ function equippedLaserCount(){return equippedLaserIds().length;}
 
 function petLevelXp(level){return levelXpThreshold(level+1);}
 function petRange(){return 300+(progress?.pet?.owned?(progress.pet.level||1):1)*34;}
-function petSlotCost(slotNumber){return livePetSlotPrices.get(Number(slotNumber))??Math.round(25000*slotNumber+10000*slotNumber*slotNumber);}
+function petSlotCost(slotNumber){const v=livePetSlotPrices.get(Number(slotNumber));return Number.isFinite(Number(v))?Number(v):null;}
 function petLaserIds(){return progress?.pet?.owned?(progress.pet.lasers||[]).filter(id=>ITEMS[id]?.type==='laser'):[];}
 function petShieldIds(){return progress?.pet?.owned?(progress.pet.shields||[]).filter(id=>ITEMS[id]?.type==='generator'&&ITEMS[id]?.subtype==='shield'):[];}
 function petDamage(){return petLaserIds().reduce((sum,id)=>{const it=ITEMS[id];const base=it?.alienDamage??it?.damage??0;return sum+base*(1+(Number(it?.alienBonus)||0));},0);}
@@ -2347,14 +2332,11 @@ function addPetXp(amount){
 }
 function unlockPetSlot(kind){
   const pet=progress.pet;if(!pet?.owned){showToast('Adquira o AUX-9 primeiro');return;}
-  const key=kind==='laser'?'laserSlotsUnlocked':'shieldSlotsUnlocked';
-  const list=kind==='laser'?pet.lasers:pet.shields;
-  const next=pet[key]+1;
-  const availableSlots=Math.min(pet.level,PET_SLOT_LEVEL_CAP);
+  const key=kind==='laser'?'laserSlotsUnlocked':'shieldSlotsUnlocked',next=(Number(pet[key])||1)+1,availableSlots=Math.min(pet.level,PET_SLOT_LEVEL_CAP);
   if(next>availableSlots){showToast(next>PET_SLOT_LEVEL_CAP?`AUX-9 atingiu o limite de ${PET_SLOT_LEVEL_CAP} slots`:`AUX-9 precisa estar no nível ${next}`);return;}
-  const cost=petSlotCost(next);
+  const cost=petSlotCost(next);if(cost==null){showToast('Preço do slot ainda não sincronizou com o Supabase');refreshLiveOpsState(true).then(()=>refreshPetViews());return;}
   if(progress.profile.uridium<cost){showToast(`Faltam ${fmt(cost-progress.profile.uridium)} STL`);return;}
-  openSpendConfirm({title:'Liberar slot do AUX-9?',itemName:`Slot ${next} de ${kind==='laser'?'laser':'escudo'}`,detail:'Confirme para gastar Stellarium e desbloquear este slot do AUX-9',value:cost,currency:'uridium',confirmLabel:'LIBERAR SLOT',onConfirm:()=>{if(progress.profile.uridium<cost){showToast(`Faltam ${fmt(cost-progress.profile.uridium)} STL`);return;}progress.profile.uridium-=cost;pet[key]=next;list.push(null);saveGame();refreshPetViews();updateUI();showToast(`Slot ${next} de ${kind==='laser'?'laser':'escudo'} liberado`);}});
+  openSpendConfirm({title:'Liberar slot do AUX-9?',itemName:`Slot ${next} de ${kind==='laser'?'laser':'escudo'}`,detail:'Preço e desbloqueio serão validados no servidor.',value:cost,currency:'uridium',confirmLabel:'LIBERAR SLOT',onConfirm:()=>runEconomyAction('unlock_pet_slot',{kind}).then(r=>showToast(`Slot ${r?.info?.slot||next} de ${kind==='laser'?'laser':'escudo'} liberado • servidor`)).catch(e=>showToast(e.message||'Desbloqueio recusado'))});
 }
 function equipPetItem(itemId,kind){
   if(!canChangeEquipment()){showToast('Configure equipamentos do AUX-9 somente dentro da sua base X-1');return;}
@@ -3839,7 +3821,7 @@ function productIcon(type,subtype){return type==='ship'?'🛸':type==='laser'?'�
 function ownsExtraItem(itemId){
   return (progress?.inventory?.[itemId]||0)>0||(progress?.shipLoadout?.extras||[]).includes(itemId);
 }
-function itemSellValue(item){return Math.max(1,Math.floor((Number(item?.price)||0)*.5));}
+function itemSellValue(item){if(!item)return 0;const key=item.type==='drone'?`drone:${item.id}`:`item:${item.id}`,row=liveCatalog(key);return row?Math.max(1,Math.floor((Number(row.price)||0)*.5)):0;}
 let pendingConfirmAction=null;
 let confirmReturnModal=null;
 function saleCurrencyLabel(currency){return currency==='uridium'?'STL':'CR';}
@@ -3864,13 +3846,10 @@ function openSpendConfirm({title='Confirmar compra?',itemName='Item',detail='Seu
   openConfirmModal({eyebrow:'CONFIRMAÇÃO DE COMPRA',title,itemName,detail,value,currency,valueLabel:'VOCÊ GASTARÁ',confirmLabel,confirmClass:'primary-btn',onConfirm});
 }
 function confirmSaleNow(){const action=pendingConfirmAction;if(!action){closeSaleConfirm();return;}const back=confirmReturnModal;pendingConfirmAction=null;confirmReturnModal=null;ui.saleConfirmModal?.classList.add('hidden');if(back)back.classList.remove('hidden');action();if(back===ui.hangarModal&&!back.classList.contains('hidden'))renderHangar();else if(back===ui.pilotModal&&!back.classList.contains('hidden'))renderPilotProfile();}
-function performSellInventoryItem(itemId,qty=1){
+async function performSellInventoryItem(itemId,qty=1){
   const item=ITEMS[itemId],have=progress?.inventory?.[itemId]||0;qty=Math.max(1,Math.floor(qty));
   if(!item||have<qty){showToast('Item não disponível para venda');return;}
-  const total=itemSellValue(item)*qty;
-  progress.inventory[itemId]-=qty;if(progress.inventory[itemId]<=0)delete progress.inventory[itemId];
-  if(item.currency==='uridium')progress.profile.uridium+=total;else progress.profile.credits+=total;
-  saveGame();renderShop();renderHangar();updateUI();showToast(`${item.name} vendido por ${fmt(total)} ${saleCurrencyLabel(item.currency)}`);
+  try{const r=await runEconomyAction('sell_inventory',{item_id:itemId,qty});showToast(`${item.name} vendido por ${fmt(r?.info?.total||0)} ${saleCurrencyLabel(r?.info?.currency)}`);}catch(e){showToast(e.message||'Venda recusada pelo servidor');}
 }
 function sellInventoryItem(itemId,qty=1){
   const item=ITEMS[itemId],have=progress?.inventory?.[itemId]||0;qty=Math.max(1,Math.floor(qty));
@@ -3976,11 +3955,9 @@ function unequipShipSlot(key,index){
 }
 function equipDroneItem(itemId){if(!canChangeEquipment()){showToast('Configure drones somente dentro da sua base X-1');return;}const item=ITEMS[itemId];if(!(item.type==='laser'||(item.type==='generator'&&item.subtype==='shield'))){showToast('Drones aceitam lasers ou geradores de escudo');return;}const drone=progress.drones.find(d=>d.slots.some(v=>!v));if(!drone){showToast('Nenhum slot livre nos drones');return;}if(!removeInventory(itemId))return;drone.slots[drone.slots.findIndex(v=>!v)]=itemId;computeStats(true);saveGame();renderHangar();buildAmmoButtons();}
 function unequipDroneSlot(droneId,index){if(!canChangeEquipment()){showToast('Configure drones somente dentro da sua base X-1');return;}const d=progress.drones.find(x=>x.id===droneId);if(!d||!d.slots[index])return;addInventory(d.slots[index]);d.slots[index]=null;computeStats(true);saveGame();renderHangar();buildAmmoButtons();}
-function performSellDrone(droneId){
-  const d=progress.drones.find(x=>x.id===droneId);if(!d)return;
-  const model=ITEMS[d.type];d.slots.filter(Boolean).forEach(addInventory);progress.drones=progress.drones.filter(x=>x.id!==droneId);
-  const refund=itemSellValue(model);if(model.currency==='uridium')progress.profile.uridium+=refund;else progress.profile.credits+=refund;
-  computeStats(true);saveGame();renderHangar();renderShop();buildAmmoButtons();updateUI();showToast(`${model.name} vendido por ${fmt(refund)} ${saleCurrencyLabel(model.currency)} • equipamentos retornaram ao inventário`);
+async function performSellDrone(droneId){
+  const d=progress.drones.find(x=>x.id===droneId);if(!d)return;const model=ITEMS[d.type];
+  try{const r=await runEconomyAction('sell_drone',{drone_id:droneId});showToast(`${model.name} vendido por ${fmt(r?.info?.refund||0)} ${saleCurrencyLabel(r?.info?.currency)} • equipamentos retornaram ao inventário`);}catch(e){showToast(e.message||'Venda do drone recusada pelo servidor');}
 }
 function sellDrone(droneId){
   if(!canChangeEquipment()){showToast('Venda/configuração de drones somente na sua base X-1');return;}
@@ -4060,9 +4037,9 @@ function petEquipCard(kind,index){
 }
 function petLockedCard(kind,index){
   const slot=index+1,cost=petSlotCost(slot),card=document.createElement('div');card.className='pet-slot locked';
-  const available=slot<=progress.pet.level;
-  card.innerHTML=`<div class="slot-label">${kind==='laser'?'ARMA':'ESCUDO'} ${slot}</div><div class="slot-item">🔒 ${available?'LIBERÁVEL':'NÍVEL '+slot}</div><div class="muted">${available?`${fmt(cost)} STL para liberar`:`Alcance o nível ${slot} do AUX-9`}</div>`;
-  const b=document.createElement('button');b.className='ghost-btn';b.textContent=available?`Liberar • ${fmt(cost)} STL`:`Nível ${slot}`;b.disabled=!available;b.onclick=()=>unlockPetSlot(kind);card.appendChild(b);return card;
+  const available=slot<=progress.pet.level,priced=cost!=null;
+  card.innerHTML=`<div class="slot-label">${kind==='laser'?'ARMA':'ESCUDO'} ${slot}</div><div class="slot-item">🔒 ${available?'LIBERÁVEL':'NÍVEL '+slot}</div><div class="muted">${available?(priced?`${fmt(cost)} STL para liberar`:'Sincronizando preço online...'):`Alcance o nível ${slot} do AUX-9`}</div>`;
+  const b=document.createElement('button');b.className='ghost-btn';b.textContent=available?(priced?`Liberar • ${fmt(cost)} STL`:'AGUARDE'):`Nível ${slot}`;b.disabled=!available||!priced;b.onclick=()=>unlockPetSlot(kind);card.appendChild(b);return card;
 }
 function renderPet(root=ui.petContent){
   if(!progress?.pet||!root)return;
@@ -4102,10 +4079,11 @@ function refreshPetViews(){
 }
 function openPet(){if(!progress?.pet?.owned){openShop('pet');showToast(`AUX-9 disponível na Loja por ${fmt(PET_BASE_PRICE)} STL`);return;}renderPet();ui.petModal.classList.remove('hidden');}
 
-function cargoSaleValue(){let total=0;for(const [id,qty] of Object.entries(progress.cargo||{}))total+=(RESOURCES[id]?.sell||0)*qty;return total;}
-function sellCargoResource(id){if(!isAtTrader()){showToast('Venda disponível somente na base X-1');return;}const qty=progress.cargo[id]||0,price=RESOURCES[id]?.sell||0;if(qty<=0||price<=0)return;progress.profile.credits+=qty*price;delete progress.cargo[id];saveGame();renderCargo();updateUI();showToast(`${qty} ${id} vendidos por ${fmt(qty*price)} CR`);}
-function sellAllCargo(){if(!isAtTrader()){showToast('Volte à base X-1 para vender');return;}let total=0;for(const [id,qty] of Object.entries(progress.cargo||{})){const price=RESOURCES[id]?.sell||0;if(price>0){total+=qty*price;delete progress.cargo[id];}}progress.profile.credits+=total;saveGame();renderCargo();updateUI();showToast(total?`Porão vendido: +${fmt(total)} CR`:'Nada vendável no porão');}
-function renderCargo(){if(!progress)return;const atBase=isAtTrader();const xeno=progress.cargo?.Xenomit||0;const cargoBonus=cargoExtraBonus();ui.cargoSummary.innerHTML=`<b>${fmt(cargoUsed())}/${fmt(cargoCapacity())}</b> unidades ocupadas${cargoBonus?` • Expansão equipada: <b>+${fmt(cargoBonus)}</b>`:''} • Valor vendável: <b>${fmt(cargoSaleValue())} CR</b><br><span class="muted">${atBase?'Trader disponível: você está na base.':'Para vender recursos, retorne à Zona Segura do seu X-1.'} ${xeno?`• Voidite: <b>${fmt(xeno)}</b> (não ocupa porão)`:''}</span>`;ui.cargoGrid.innerHTML='';const entries=Object.entries(progress.cargo||{}).filter(([,q])=>q>0);if(!entries.length){ui.cargoGrid.innerHTML='<div class="empty-state">Seu porão está vazio. Colete minérios no mapa ou caixas deixadas pelos NPCs.</div>';}for(const [id,qty] of entries){const r=RESOURCES[id]||{name:id,color:'#fff',sell:0};const special=id==='Xenomit';const c=document.createElement('div');c.className='cargo-card';c.innerHTML=`<div class="cargo-ore" style="--ore:${r.color}"><img src="${GAME_ASSETS.resources[id]||GAME_ASSETS.loot.cargo}" alt="${r.name}"></div><div><b>${r.name}</b><div class="muted">${fmt(qty)} un. • ${special?'especial • não ocupa porão':(r.sell?fmt(r.sell)+' CR/un.':'não vendável')}</div></div>`;const b=document.createElement('button');b.className='ghost-btn';b.textContent=r.sell?'Vender':'Guardar';b.disabled=!atBase||!r.sell;b.onclick=()=>sellCargoResource(id);c.appendChild(b);ui.cargoGrid.appendChild(c);}ui.sellAllCargo.disabled=!atBase||cargoSaleValue()<=0;}
+function liveResourcePrice(id){const row=liveCatalog(`resource:${id}`);return row&&row.enabled!==false&&String(row?.meta?.mode||'sell')==='sell'?Math.max(0,Number(row.price)||0):0;}
+function cargoSaleValue(){let total=0;for(const [id,qty] of Object.entries(progress.cargo||{}))total+=liveResourcePrice(id)*qty;return total;}
+async function sellCargoResource(id){if(!isAtTrader()){showToast('Venda disponível somente na base X-1');return;}const qty=progress.cargo[id]||0,price=liveResourcePrice(id);if(qty<=0||price<=0){showToast('Recurso sem preço ativo no Supabase');return;}try{const r=await runEconomyAction('sell_cargo',{resource_id:id});showToast(`${qty} ${id} vendidos por ${fmt(r?.info?.total||0)} CR • servidor`);}catch(e){showToast(e.message||'Venda recusada pelo servidor');}}
+async function sellAllCargo(){if(!isAtTrader()){showToast('Volte à base X-1 para vender');return;}try{const r=await runEconomyAction('sell_cargo',{resource_id:'all'});showToast(`Porão vendido: +${fmt(r?.info?.total||0)} CR • servidor`);}catch(e){showToast(e.message||'Venda recusada pelo servidor');}}
+function renderCargo(){if(!progress)return;const atBase=isAtTrader();const xeno=progress.cargo?.Xenomit||0;const cargoBonus=cargoExtraBonus();ui.cargoSummary.innerHTML=`<b>${fmt(cargoUsed())}/${fmt(cargoCapacity())}</b> unidades ocupadas${cargoBonus?` • Expansão equipada: <b>+${fmt(cargoBonus)}</b>`:''} • Valor vendável: <b>${fmt(cargoSaleValue())} CR</b><br><span class="muted">${atBase?'Trader disponível: você está na base.':'Para vender recursos, retorne à Zona Segura do seu X-1.'} ${xeno?`• Voidite: <b>${fmt(xeno)}</b> (não ocupa porão)`:''}</span>`;ui.cargoGrid.innerHTML='';const entries=Object.entries(progress.cargo||{}).filter(([,q])=>q>0);if(!entries.length){ui.cargoGrid.innerHTML='<div class="empty-state">Seu porão está vazio. Colete minérios no mapa ou caixas deixadas pelos NPCs.</div>';}for(const [id,qty] of entries){const r=RESOURCES[id]||{name:id,color:'#fff'},price=liveResourcePrice(id),special=id==='Xenomit';const c=document.createElement('div');c.className='cargo-card';c.innerHTML=`<div class="cargo-ore" style="--ore:${r.color}"><img src="${GAME_ASSETS.resources[id]||GAME_ASSETS.loot.cargo}" alt="${r.name}"></div><div><b>${r.name}</b><div class="muted">${fmt(qty)} un. • ${special?'especial • não ocupa porão':(price?fmt(price)+' CR/un.':'não vendável')}</div></div>`;const b=document.createElement('button');b.className='ghost-btn';b.textContent=price?'Vender':'Guardar';b.disabled=!atBase||!price;b.onclick=()=>sellCargoResource(id);c.appendChild(b);ui.cargoGrid.appendChild(c);}ui.sellAllCargo.disabled=!atBase||cargoSaleValue()<=0;}
 function openCargo(){if(!isAtTrader()){showToast('Venda de recursos disponível somente na base X-1');return;}closeNavigationModals(ui.cargoModal);renderCargo();ui.cargoModal.classList.remove('hidden');}
 
 // ===================== V12 LOJA PREMIUM =====================
@@ -4170,9 +4148,10 @@ function rollAlphaOnce(){
   g.repairBonus++;return {kind:'repair',label:'Bônus de Reparo +1'};
 }
 function spinAlpha(amount){
-  normalizeGalaxyGateState();const cost=amount*alphaSpinUnitCost();
+  normalizeGalaxyGateState();const key=currentGateKey(),q=liveQuote(`gate_spin:${key}`),unit=q?Math.max(1,Math.floor(q.basePrice*(premiumActive()?0.90:1))):null,cost=unit==null?null:amount*unit;
+  if(cost==null){showToast('Preço do Materializador ainda não sincronizou com o Supabase');refreshLiveOpsState(true).then(()=>renderGalaxyGate());return;}
   if(progress.profile.uridium<cost){showToast(`Faltam ${fmt(cost-progress.profile.uridium)} STL para ${amount} sorteio${amount>1?'s':''}`);return;}
-  openSpendConfirm({title:`Girar portal ${galaxyGateDef().label}?`,itemName:`${amount} sorteio${amount>1?'s':''} do Portal Astral`,detail:`Confirme para gastar Stellarium na montagem do portal ${galaxyGateDef().label}.`,value:cost,currency:'uridium',confirmLabel:'CONFIRMAR GIRO',onConfirm:()=>{if(progress.profile.uridium<cost){showToast(`Faltam ${fmt(cost-progress.profile.uridium)} STL para ${amount} sorteio${amount>1?'s':''}`);return;}progress.profile.uridium-=cost;const results=[];for(let i=0;i<amount;i++)results.push(rollAlphaOnce());progress.galaxyGate.lastResults=results.slice(-12);const summary={};results.forEach(r=>summary[r.label]=(summary[r.label]||0)+1);const pieces=results.filter(r=>r.kind==='piece').length;const lines=Object.entries(summary).slice(0,12).map(([label,count])=>`${count>1?`${count}× `:''}${label}`);ui.gateResultBox.innerHTML=`<b>${amount} sorteio${amount>1?'s':''} • ${fmt(cost)} STL</b>${pieces?`<div class="gate-piece-win">✦ ${pieces} peça${pieces>1?'s':''} ${galaxyGateDef().label} encontrada${pieces>1?'s':''}</div>`:''}<div>${lines.join(' • ')}</div>`;saveGame();refreshAmmoCounters();renderGalaxyGate();updateUI();}});
+  openSpendConfirm({title:`Girar portal ${galaxyGateDef().label}?`,itemName:`${amount} sorteio${amount>1?'s':''} do Portal Astral`,detail:'Preço, sorteio e recompensas serão processados pelo servidor.',value:cost,currency:'uridium',confirmLabel:'CONFIRMAR GIRO',onConfirm:()=>runEconomyAction('gate_spin',{protocol:key,amount}).then(r=>{const info=r?.info||{},results=Array.isArray(info.results)?info.results:[],summary={};results.forEach(x=>summary[x.label]=(summary[x.label]||0)+1);const pieces=results.filter(x=>x.kind==='piece').length,lines=Object.entries(summary).slice(0,12).map(([label,count])=>`${count>1?`${count}× `:''}${label}`);ui.gateResultBox.innerHTML=`<b>${info.amount||amount} sorteio${(info.amount||amount)>1?'s':''} • ${fmt(info.cost||cost)} STL • SERVIDOR</b>${pieces?`<div class="gate-piece-win">✦ ${pieces} peça${pieces>1?'s':''} encontrada${pieces>1?'s':''}</div>`:''}<div>${lines.join(' • ')}</div>`;}).catch(e=>showToast(e.message||'Materializador recusado pelo servidor'))});
 }
 function useGalaxyRepairBonus(){
   normalizeGalaxyGateState();
@@ -4221,8 +4200,8 @@ function openGalaxyGate(){
 }
 
 
-function buyLogDisks(qty){normalizePilotBio();qty=Math.max(1,Math.floor(qty));const cost=qty*LOG_DISK_URI_PRICE;if(progress.profile.uridium<cost){showToast('Stellarium insuficiente para Núcleos Quânticos');return;}openSpendConfirm({title:'Comprar Núcleos Quânticos?',itemName:`${qty} Núcleos Quânticos`,detail:'Confirme a compra dos Núcleos Quânticos com Stellarium.',value:cost,currency:'uridium',onConfirm:()=>{if(progress.profile.uridium<cost){showToast('Stellarium insuficiente para Núcleos Quânticos');return;}progress.profile.uridium-=cost;progress.pilotBio.logDisks+=qty;saveGame();refreshPilotViews();updateUI();},confirmLabel:'CONFIRMAR COMPRA'});}
-function convertPilotPoint(){normalizePilotBio();const p=progress.pilotBio;if(p.totalPoints>=PILOT_POINT_MAX){showToast('Limite de 50 Pontos de Pesquisa atingido');return;}const no=p.totalPoints+1,cost=pilotPointLogCost(no);if(p.logDisks<cost){showToast(`Faltam ${fmt(cost-p.logDisks)} Núcleos Quânticos`);return;}p.logDisks-=cost;p.totalPoints++;saveGame();refreshPilotViews();updateUI();showToast(`Ponto de Pesquisa #${p.totalPoints} obtido`);}
+function buyLogDisks(qty){normalizePilotBio();qty=Math.max(1,Math.min(500,Math.floor(qty)));const q=liveQuote('quantum_core:unit'),unit=q?.price??null,cost=unit==null?null:qty*unit;if(cost==null){showToast('Preço dos Núcleos ainda não sincronizou com o Supabase');refreshLiveOpsState(true).then(()=>refreshPilotViews());return;}if(progress.profile.uridium<cost){showToast('Stellarium insuficiente para Núcleos Quânticos');return;}openSpendConfirm({title:'Comprar Núcleos Quânticos?',itemName:`${qty} Núcleos Quânticos`,detail:'Compra validada pelo servidor usando o preço do Supabase.',value:cost,currency:'uridium',onConfirm:()=>runEconomyAction('buy_quantum_cores',{qty}).then(()=>showToast(`${qty} Núcleos Quânticos recebidos • servidor`)).catch(e=>showToast(e.message||'Compra recusada')),confirmLabel:'CONFIRMAR COMPRA'});}
+function convertPilotPoint(){normalizePilotBio();const p=progress.pilotBio;if(p.totalPoints>=PILOT_POINT_MAX){showToast('Limite de 50 Pontos de Pesquisa atingido');return;}const no=p.totalPoints+1,cost=pilotPointLogCost(no);if(p.logDisks<cost){showToast(`Faltam ${fmt(cost-p.logDisks)} Núcleos Quânticos`);return;}runEconomyAction('convert_pilot_point',{}).then(r=>showToast(`Ponto de Pesquisa #${r?.info?.point||no} obtido • servidor`)).catch(e=>showToast(e.message||'Conversão recusada pelo servidor'));}
 function upgradePilotSkill(id){normalizePilotBio();const skill=PILOT_SKILLS[id],lv=pilotSkillLevel(id);if(!skill||lv>=skill.max)return;if(!pilotRequirementMet(skill)){showToast(`Complete ${PILOT_SKILLS[skill.requires].name} primeiro`);return;}if(pilotAvailablePoints()<1){showToast('Você não possui PP disponível');return;}const cost=pilotSkillCreditCost(skill,lv+1);if(progress.profile.credits<cost){showToast(`Faltam ${fmt(cost-progress.profile.credits)} CR`);return;}openSpendConfirm({title:'Evoluir habilidade?',itemName:`${skill.name} • nível ${lv+1}/${skill.max}`,detail:'Confirme para gastar créditos e evoluir esta habilidade da Árvore de Piloto.',value:cost,currency:'credits',confirmLabel:'EVOLUIR HABILIDADE',onConfirm:()=>{if(progress.profile.credits<cost){showToast(`Faltam ${fmt(cost-progress.profile.credits)} CR`);return;}progress.profile.credits-=cost;progress.pilotBio.skills[id]=lv+1;computeStats(true);saveGame();refreshPilotViews();updateUI();showToast(`${skill.name} • nível ${lv+1}/${skill.max}`);}});}
 function resetPilotTree(){normalizePilotBio();const cost=1000*Math.pow(2,progress.pilotBio.resetCount);if(progress.profile.uridium<cost){showToast(`Reset requer ${fmt(cost)} STL`);return;}if(pilotSpentPoints()<=0){showToast('Nenhum ponto investido para resetar');return;}openSpendConfirm({title:'Resetar Árvore de Piloto?',itemName:`Reset #${progress.pilotBio.resetCount+1}`,detail:'Confirme para gastar Stellarium e resetar todos os pontos investidos.',value:cost,currency:'uridium',confirmLabel:'CONFIRMAR RESET',onConfirm:()=>{if(progress.profile.uridium<cost){showToast(`Reset requer ${fmt(cost)} STL`);return;}if(pilotSpentPoints()<=0){showToast('Nenhum ponto investido para resetar');return;}progress.profile.uridium-=cost;for(const id of Object.keys(PILOT_SKILLS))progress.pilotBio.skills[id]=0;progress.pilotBio.resetCount++;computeStats(true);saveGame();refreshPilotViews();updateUI();showToast('Árvore de Piloto resetada');}});}
 function pilotSkillBonusLabel(skill,lv){if(lv<=0)return 'SEM BÔNUS';const value=skill.values[Math.min(lv,skill.values.length)-1];return `${fmt(value)}${skill.unit}`;}

@@ -645,3 +645,11 @@ export async function purchaseLiveCatalogOnline(catalogKey) {
   }, false);
 }
 
+
+export async function economyActionOnline(action, payload = {}) {
+  return authedServerFetch('/api/economy/action', {
+    method: 'POST',
+    body: JSON.stringify({ action: String(action || ''), payload: payload && typeof payload === 'object' ? payload : {} }),
+  }, false);
+}
+

@@ -1,3 +1,14 @@
+# V16.1.0 — ETAPA 2 — ECONOMY GUARD
+
+- AUTO BUY de laser/míssil passou a comprar pelo Render com preço do Supabase.
+- Trader agora vende recursos pelo servidor usando `live_shop_prices_v16`.
+- Venda de equipamentos e drones passou a ser validada no servidor.
+- Slots do AUX-9 agora são liberados pelo servidor.
+- Compra/conversão de Núcleos Quânticos agora passa pelo servidor.
+- Materializador/Galaxy Gate agora cobra, sorteia e entrega recompensas no servidor.
+- Fila de mutações econômicas reduz double-spend e corrida entre ações simultâneas.
+- Nenhum SQL novo obrigatório nesta etapa.
+
 # V16.0.0 — ETAPA 1 — LIVE OPS CORE
 
 - Eventos online migrados para agenda do Supabase.

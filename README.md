@@ -1,3 +1,17 @@
+# Stellar Legacy V16.1.0 — ECONOMY GUARD (ETAPA 2)
+
+A segunda etapa da V16 mantém o LIVE OPS da V16.0 e move transações econômicas críticas para o Render: AUTO BUY, Trader, vendas, slots do AUX-9, Núcleos Quânticos e Materializador. O navegador exibe a interface, mas preço/cobrança/recompensa são validados no servidor usando o catálogo do Supabase.
+
+## Teste rápido da etapa
+1. Ative o CPU AUTO BUY e reduza munição até disparar compra automática.
+2. Venda um minério individual e depois use VENDER TUDO no X-1.
+3. Venda um equipamento e um drone.
+4. Libere um novo slot do AUX-9.
+5. Compre Núcleos Quânticos e converta 1 PP.
+6. Faça 1x e 5x no Materializador e valide que saldo/recompensas persistem após relogar.
+
+---
+
 # Stellar Legacy V16.0.0 — LIVE OPS CORE (ETAPA 1)
 
 Esta versão inicia a migração operacional para o Supabase em etapas. Eventos e preços deixam de ser definidos pelo cliente nos mapas online, e as compras principais passam por validação no servidor.

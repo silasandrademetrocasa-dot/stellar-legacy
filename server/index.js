@@ -107,6 +107,58 @@ async function withPurchaseLock(userId,fn){
   try{return await fn();}finally{release();if(livePurchaseLocks.get(userId)===current)livePurchaseLocks.delete(userId);}
 }
 
+
+const GATE_SERVER_DEFS={
+  alpha:{key:'alpha',label:'AURORA',pieces:34,unlock:null},
+  beta:{key:'beta',label:'NEXUS',pieces:48,unlock:'alpha'},
+  gamma:{key:'gamma',label:'ECLIPSE',pieces:64,unlock:'beta'},
+};
+const GATE_AMMO={lcb10:{name:'PLS-1',base:300},mcb25:{name:'PLS-2',base:200},mcb50:{name:'PLS-3',base:120},ucb100:{name:'PLS-4',base:70}};
+const GATE_ROCKETS={r310:{name:'R-310',base:15},plt2026:{name:'PLT-2026',base:10},plt2021:{name:'PLT-2021',base:7},plt3030:{name:'PLT-3030',base:5}};
+function randomChoiceServer(list){return list[Math.floor(Math.random()*list.length)];}
+function randomIntServer(min,max){return Math.floor(min+Math.random()*(max-min+1));}
+function ensureGalaxyGateServer(state){
+  state.galaxyGate ||= {jumpBonus:0,repairBonus:0,lastResults:[],selected:'alpha'};
+  const g=state.galaxyGate;g.jumpBonus=Math.max(0,Number(g.jumpBonus)||0);g.repairBonus=Math.max(0,Number(g.repairBonus)||0);g.lastResults=Array.isArray(g.lastResults)?g.lastResults:[];
+  for(const [key,def] of Object.entries(GATE_SERVER_DEFS)){
+    g[key] ||= {pieces:[],built:false,lives:3,completed:0,failed:0,run:null,lastCompletion:null};
+    const x=g[key];x.pieces=Array.isArray(x.pieces)?[...new Set(x.pieces.map(Number).filter(n=>n>=1&&n<=def.pieces))]:[];x.built=!!x.built||x.pieces.length>=def.pieces;x.completed=Math.max(0,Number(x.completed)||0);
+  }
+  return g;
+}
+function gateUnlockedServer(state,key){const def=GATE_SERVER_DEFS[key];if(!def)return false;if(!def.unlock)return true;const g=ensureGalaxyGateServer(state);return Number(g[def.unlock]?.completed||0)>0;}
+function pilotLuckServer(state){
+  const skills=state?.pilotBio?.skills||{};
+  const values={luck1:[2,4],luck2:[2,4,8]};
+  let total=0;for(const id of ['luck1','luck2']){const lv=Math.max(0,Math.floor(Number(skills[id])||0));if(lv)total+=Number(values[id][Math.min(lv,values[id].length)-1]||0);}return total/100;
+}
+function addGatePieceServer(state,key){
+  const g=ensureGalaxyGateServer(state),gate=g[key],def=GATE_SERVER_DEFS[key];const missing=Array.from({length:def.pieces},(_,i)=>i+1).filter(n=>!gate.pieces.includes(n));
+  if(!missing.length){gate.built=true;return null;}const piece=randomChoiceServer(missing);gate.pieces.push(piece);gate.pieces.sort((a,b)=>a-b);if(gate.pieces.length>=def.pieces)gate.built=true;return piece;
+}
+function rollGateOnceServer(state,key){
+  const g=ensureGalaxyGateServer(state),gate=g[key],def=GATE_SERVER_DEFS[key];state.profile ||= {};state.pilotBio ||= {};state.pilotBio.logDisks=Math.max(0,Number(state.pilotBio.logDisks)||0);state.ammo ||= {};state.rockets ||= {};state.cargo ||= {};
+  const luck=pilotLuckServer(state);let r=Math.random()*100;if(luck>0)r=Math.max(0,r-luck*18);if(gate.built&&r<12)r=12+Math.random()*88;
+  if(r<12){const piece=addGatePieceServer(state,key);return {kind:'piece',label:`Peça ${def.label} #${piece}`,piece};}
+  if(r<20){const qty=randomIntServer(1,5);state.pilotBio.logDisks+=qty;return {kind:'logdisk',label:`Núcleos Quânticos +${qty}`,qty};}
+  if(r<45){const id=randomChoiceServer(Object.keys(GATE_AMMO)),qty=GATE_AMMO[id].base*randomIntServer(1,4);state.ammo[id]=(Number(state.ammo[id])||0)+qty;return {kind:'ammo',id,qty,label:`${GATE_AMMO[id].name} +${qty}`};}
+  if(r<64){const id=randomChoiceServer(Object.keys(GATE_ROCKETS)),qty=GATE_ROCKETS[id].base*randomIntServer(1,4);state.rockets[id]=(Number(state.rockets[id])||0)+qty;return {kind:'rocket',id,qty,label:`${GATE_ROCKETS[id].name} +${qty}`};}
+  if(r<80){const qty=randomIntServer(1500,12000);state.profile.credits=Math.max(0,Number(state.profile.credits)||0)+qty;return {kind:'credits',qty,label:`Créditos +${qty}`};}
+  if(r<90){const qty=randomIntServer(4,18);state.cargo.Xenomit=(Number(state.cargo.Xenomit)||0)+qty;return {kind:'xenomit',qty,label:`Voidite +${qty}`};}
+  if(r<95){g.jumpBonus++;return {kind:'jump',label:'Bônus de Salto +1'};}
+  g.repairBonus++;return {kind:'repair',label:'Bônus de Reparo +1'};
+}
+async function readEconomySave(req){
+  const {data,error}=await req.sb.from('game_saves').select('state').eq('user_id',req.user.id).maybeSingle();if(error)throw new Error(error.message);if(!data?.state)throw Object.assign(new Error('Save online ainda não foi criado.'),{status:409});const state=structuredClone(data.state);if(String(state.accountOwnerId||req.user.id)!==req.user.id)throw Object.assign(new Error('SAVE BLOQUEADO: proprietário inválido.'),{status:409});state.profile ||= {};return state;
+}
+async function writeEconomySave(req,state){
+  state.accountOwnerId=req.user.id;state.accountOwnerEmail=req.user.email||null;state.clientSavedAt=Date.now();const updated_at=new Date().toISOString();const {error}=await req.sb.from('game_saves').upsert({user_id:req.user.id,state,updated_at},{onConflict:'user_id'});if(error)throw new Error(error.message);
+  const profile=state.profile||{},securedCallsign=await ensureProfile(req.sb,req.user);await req.sb.from('profiles').upsert({id:req.user.id,callsign:securedCallsign,faction:profile.faction||null,level:Number(profile.level||1),xp:Number(profile.xp||0),credits:Number(profile.credits||0),uridium:Number(profile.uridium||0),aliens_killed:Number(profile.aliensKilled||0),gg_completed:Number(state.galaxyGate?.alpha?.completed||profile.ggCompleted||0),updated_at},{onConflict:'id'});return updated_at;
+}
+function debitServer(state,amount,currency){const c=currency==='uridium'?'uridium':'credits',price=Math.max(0,Math.round(Number(amount)||0)),balance=Math.max(0,Number(state.profile?.[c])||0);if(balance<price)throw Object.assign(new Error(`Saldo insuficiente: faltam ${price-balance} ${c==='uridium'?'STL':'CR'}.`),{status:409});state.profile[c]=balance-price;return {currency:c,price,balance:state.profile[c]};}
+function creditServer(state,amount,currency){const c=currency==='uridium'?'uridium':'credits',value=Math.max(0,Math.round(Number(amount)||0));state.profile[c]=Math.max(0,Number(state.profile?.[c])||0)+value;return {currency:c,value,balance:state.profile[c]};}
+function catalogSellRow(snapshot,itemId){return (snapshot?.catalog||[]).find(r=>r?.enabled&&String(r.ref_id||'')===String(itemId||'')&&['laser','generator','extra'].includes(String(r.kind||'')))||null;}
+
 function gameSessionIdFromRequest(req) {
   return String(req.headers['x-game-session-id'] || '').trim();
 }
@@ -222,7 +274,7 @@ async function accountUser(sb, user, preferred = '') {
   return { id: user.id, email: user.email, callsign };
 }
 
-app.get('/health', (req, res) => res.json({ ok: true, game: 'Stellar Legacy', version: '16.0.0', universe: 'shared' }));
+app.get('/health', (req, res) => res.json({ ok: true, game: 'Stellar Legacy', version: '16.1.0', universe: 'shared' }));
 
 
 app.get('/api/config', (req, res) => {
@@ -238,10 +290,10 @@ app.get('/api/config', (req, res) => {
 
 app.get('/api/meta', (req, res) => res.json({
   name: 'Stellar Legacy',
-  version: '16.0.0',
+  version: '16.1.0',
   authReady: Boolean(SUPABASE_URL && SUPABASE_KEY),
   diagnostics: configStatus(),
-  features: ['login', 'cloud_save', 'factions', 'safe_zone', 'shop', 'owned_ships', 'equipment_slots', 'inventory', 'drones', 'ammo', 'rockets', 'expanded_expedition_maps', 'cargo_hold', 'ore_trading', 'npc_cargo_boxes', 'npc_respawn', 'minimap_navigation', 'waypoints', 'landmark_discovery', 'combat_fx', 'pet_modules', 'auto_buy_cpu', 'v8_asset_identity', 'mission_control_v93', 'mission_acceptance_tracking', 'expanded_enemy_density', 'online_player_presence', 'real_player_auction', 'rank_nameplates_v12', 'clans_v12', 'clan_vault_v12', 'premium_shop_v12', 'battle_pass_paid_v12', 'premium_subscription_v12', 'clan_daily_economy_v12', 'portal_neutral_zone_v12', 'base_only_equipment_v12', 'single_session_v1214', 'manual_login_v141', 'account_bound_save_v141', 'unique_callsign_v141', 'premium_auto_combat_v141', 'shared_universe_v15', 'authoritative_npcs_v15', 'shared_ores_v15', 'shared_events_v15', 'websocket_world_v15', 'npc_contribution_v15', 'realtime_player_socket_v151', 'remote_laser_fx_v151', 'remote_aux9_v151', 'low_latency_world_v151', 'live_ops_v16', 'server_authoritative_shop_v16', 'supabase_event_schedule_v16'],
+  features: ['login', 'cloud_save', 'factions', 'safe_zone', 'shop', 'owned_ships', 'equipment_slots', 'inventory', 'drones', 'ammo', 'rockets', 'expanded_expedition_maps', 'cargo_hold', 'ore_trading', 'npc_cargo_boxes', 'npc_respawn', 'minimap_navigation', 'waypoints', 'landmark_discovery', 'combat_fx', 'pet_modules', 'auto_buy_cpu', 'v8_asset_identity', 'mission_control_v93', 'mission_acceptance_tracking', 'expanded_enemy_density', 'online_player_presence', 'real_player_auction', 'rank_nameplates_v12', 'clans_v12', 'clan_vault_v12', 'premium_shop_v12', 'battle_pass_paid_v12', 'premium_subscription_v12', 'clan_daily_economy_v12', 'portal_neutral_zone_v12', 'base_only_equipment_v12', 'single_session_v1214', 'manual_login_v141', 'account_bound_save_v141', 'unique_callsign_v141', 'premium_auto_combat_v141', 'shared_universe_v15', 'authoritative_npcs_v15', 'shared_ores_v15', 'shared_events_v15', 'websocket_world_v15', 'npc_contribution_v15', 'realtime_player_socket_v151', 'remote_laser_fx_v151', 'remote_aux9_v151', 'low_latency_world_v151', 'live_ops_v16', 'server_authoritative_shop_v16', 'supabase_event_schedule_v16', 'economy_guard_v161', 'server_auto_buy_v161', 'server_trader_v161', 'server_pet_slots_v161', 'server_materializer_v161', 'server_quantum_cores_v161'],
 }));
 
 app.get('/api/diagnostics', asyncRoute(async (req, res) => {
@@ -438,6 +490,59 @@ app.post('/api/live/purchase', requireUser, asyncRoute(async (req,res)=>{
   res.json({ok:true,...result});
 }));
 
+
+
+app.post('/api/economy/action', requireUser, asyncRoute(async (req,res)=>{
+  const action=String(req.body?.action||'').trim();
+  const payload=(req.body?.payload&&typeof req.body.payload==='object')?req.body.payload:{};
+  if(!action)return res.status(400).json({error:'Ação econômica ausente.'});
+  const result=await withPurchaseLock(req.user.id,async()=>{
+    const snapshot=await loadLiveOpsSnapshot(true);
+    const state=await readEconomySave(req);
+    const {data:premiumState}=await req.sb.rpc('get_premium_shop_v12');
+    const premium=!!premiumState?.premium_active;
+    let info={action};
+
+    if(action==='auto_buy'){
+      const extras=Array.isArray(state?.shipLoadout?.extras)?state.shipLoadout.extras:[];if(!extras.includes('ammoAutoBuyCpu'))throw Object.assign(new Error('CPU AUTO BUY não está equipado no save online.'),{status:403});
+      const key=String(payload.catalog_key||'').slice(0,120),row=liveCatalogRow(snapshot,key);
+      if(!row||!['ammo','rocket'].includes(String(row.kind||'')))throw Object.assign(new Error('AUTO BUY indisponível para esse produto.'),{status:404});
+      const base=Math.max(0,Math.round(Number(row.price)||0)),price=premium&&premiumDiscountEligible(row)?Math.max(1,Math.floor(base*.95)):base,currency=String(row.currency||'credits')==='uridium'?'uridium':'credits';
+      const before=currency==='uridium'?Number(state.profile.uridium||0):Number(state.profile.credits||0);debitServer(state,price,currency);const grant=row?.meta?.grant||{},id=String(grant.id||row.ref_id||''),qty=Math.max(1,Math.floor(Number(grant.qty)||1));applyLiveGrant(state,row);
+      info={action,catalog_key:key,kind:String(row.kind),id,qty,price,currency,balance_before:before,balance_after:Number(state.profile[currency]||0)};
+    }
+    else if(action==='unlock_pet_slot'){
+      const kind=String(payload.kind)==='shield'?'shield':'laser',pet=ensurePetState(state);if(!pet.owned)throw Object.assign(new Error('Adquira o AUX-9 primeiro.'),{status:409});
+      const key=kind==='laser'?'laserSlotsUnlocked':'shieldSlotsUnlocked',listKey=kind==='laser'?'lasers':'shields',current=Math.max(1,Number(pet[key])||1),next=current+1,level=Math.max(1,Number(pet.level)||1);if(next>15)throw Object.assign(new Error('Limite de 15 slots atingido.'),{status:409});if(next>level)throw Object.assign(new Error(`AUX-9 precisa estar no nível ${next}.`),{status:409});
+      const row=liveCatalogRow(snapshot,`pet_slot:${next}`);if(!row)throw Object.assign(new Error('Preço do slot não está publicado no LIVE OPS.'),{status:404});const cost=Math.max(0,Math.round(Number(row.price)||0));debitServer(state,cost,'uridium');pet[key]=next;pet[listKey]=Array.isArray(pet[listKey])?pet[listKey]:[];while(pet[listKey].length<next)pet[listKey].push(null);info={action,kind,slot:next,cost,currency:'uridium'};
+    }
+    else if(action==='buy_quantum_cores'){
+      const qty=Math.max(1,Math.min(500,Math.floor(Number(payload.qty)||1))),row=liveCatalogRow(snapshot,'quantum_core:unit');if(!row)throw Object.assign(new Error('Núcleos Quânticos indisponíveis no LIVE OPS.'),{status:404});const unit=Math.max(0,Math.round(Number(row.price)||0)),cost=unit*qty;debitServer(state,cost,'uridium');state.pilotBio ||= {};state.pilotBio.logDisks=Math.max(0,Number(state.pilotBio.logDisks)||0)+qty;info={action,qty,unit_price:unit,cost,currency:'uridium'};
+    }
+    else if(action==='convert_pilot_point'){
+      state.pilotBio ||= {};const p=state.pilotBio;p.logDisks=Math.max(0,Math.floor(Number(p.logDisks)||0));p.totalPoints=Math.max(0,Math.floor(Number(p.totalPoints)||0));if(p.totalPoints>=50)throw Object.assign(new Error('Limite de 50 Pontos de Pesquisa atingido.'),{status:409});const next=p.totalPoints+1,cost=Math.max(30,Math.round(30*Math.pow(1.1,Math.max(0,next-1))));if(p.logDisks<cost)throw Object.assign(new Error(`Faltam ${cost-p.logDisks} Núcleos Quânticos.`),{status:409});p.logDisks-=cost;p.totalPoints=next;info={action,point:next,cost,remaining_cores:p.logDisks};
+    }
+    else if(action==='sell_cargo'){
+      const id=String(payload.resource_id||'all'),mapOk=String(state.mapId||'')==='x1'&&String(state.territoryFaction||state.profile?.faction||'')===String(state.profile?.faction||'');if(!mapOk)throw Object.assign(new Error('Trader disponível somente na sua base X-1.'),{status:409});state.cargo ||= {};let total=0;const sold={};const ids=id==='all'?Object.keys(state.cargo):[id];
+      for(const rid of ids){const qty=Math.max(0,Math.floor(Number(state.cargo[rid])||0));if(!qty||rid==='Xenomit')continue;const row=liveCatalogRow(snapshot,`resource:${rid}`);if(!row||String(row?.meta?.mode||'sell')!=='sell')continue;const unit=Math.max(0,Math.round(Number(row.price)||0));if(!unit)continue;total+=qty*unit;sold[rid]={qty,unit,total:qty*unit};delete state.cargo[rid];}
+      if(total<=0)throw Object.assign(new Error('Nada vendável no porão.'),{status:409});creditServer(state,total,'credits');info={action,sold,total,currency:'credits'};
+    }
+    else if(action==='sell_inventory'){
+      const itemId=String(payload.item_id||''),qty=Math.max(1,Math.min(999,Math.floor(Number(payload.qty)||1)));state.inventory ||= {};const have=Math.max(0,Math.floor(Number(state.inventory[itemId])||0));if(!itemId||have<qty)throw Object.assign(new Error('Item não disponível no inventário online.'),{status:409});const row=catalogSellRow(snapshot,itemId);if(!row)throw Object.assign(new Error('Esse item não possui preço online para venda.'),{status:404});const unit=Math.max(1,Math.floor((Number(row.price)||0)*.5)),total=unit*qty,currency=String(row.currency)==='uridium'?'uridium':'credits';state.inventory[itemId]=have-qty;if(state.inventory[itemId]<=0)delete state.inventory[itemId];creditServer(state,total,currency);info={action,item_id:itemId,qty,unit,total,currency};
+    }
+    else if(action==='sell_drone'){
+      const droneId=String(payload.drone_id||''),drones=Array.isArray(state.drones)?state.drones:[],idx=drones.findIndex(d=>String(d?.id||'')===droneId);if(idx<0)throw Object.assign(new Error('Drone não encontrado no save online.'),{status:404});const drone=drones[idx],row=liveCatalogRow(snapshot,`drone:${String(drone.type||'')}`);if(!row)throw Object.assign(new Error('Drone sem preço online para venda.'),{status:404});state.inventory ||= {};for(const itemId of (Array.isArray(drone.slots)?drone.slots:[]).filter(Boolean))state.inventory[itemId]=(Number(state.inventory[itemId])||0)+1;drones.splice(idx,1);state.drones=drones;const refund=Math.max(1,Math.floor((Number(row.price)||0)*.5)),currency=String(row.currency)==='uridium'?'uridium':'credits';creditServer(state,refund,currency);info={action,drone_id:droneId,drone_type:String(drone.type||''),refund,currency};
+    }
+    else if(action==='gate_spin'){
+      const key=String(payload.protocol||'alpha'),amount=Math.max(1,Math.min(100,Math.floor(Number(payload.amount)||1)));if(!GATE_SERVER_DEFS[key]||![1,5,10,50,100].includes(amount))throw Object.assign(new Error('Sorteio de portal inválido.'),{status:400});if(!gateUnlockedServer(state,key))throw Object.assign(new Error(`${GATE_SERVER_DEFS[key].label} ainda está bloqueado.`),{status:409});const row=liveCatalogRow(snapshot,`gate_spin:${key}`);if(!row)throw Object.assign(new Error('Materializador sem preço publicado no LIVE OPS.'),{status:404});const baseUnit=Math.max(0,Math.round(Number(row.price)||0)),unit=premium?Math.max(1,Math.floor(baseUnit*.90)):baseUnit,cost=unit*amount;debitServer(state,cost,'uridium');const results=[];for(let i=0;i<amount;i++)results.push(rollGateOnceServer(state,key));state.galaxyGate.lastResults=results.slice(-12);info={action,protocol:key,amount,base_unit_price:baseUnit,unit_price:unit,cost,currency:'uridium',results,premium_discount:unit<baseUnit};
+    }
+    else throw Object.assign(new Error('Ação econômica não reconhecida pelo servidor.'),{status:400});
+
+    const updated_at=await writeEconomySave(req,state);return {state,updated_at,info};
+  });
+  res.json({ok:true,...result});
+}));
+
 app.get('/api/save', requireUser, asyncRoute(async (req, res) => {
   const { data, error } = await req.sb.from('game_saves').select('state,updated_at').eq('user_id', req.user.id).maybeSingle();
   if (error) return res.status(400).json({ error: error.message });
@@ -498,7 +603,7 @@ app.put('/api/save', requireUser, asyncRoute(async (req, res) => {
   res.json({ ok: true, updated_at, statePatch });
 }));
 
-app.get('/api/world/status', (req, res) => res.json({ ok: true, version: '16.0.0', ...sharedUniverse.stats() }));
+app.get('/api/world/status', (req, res) => res.json({ ok: true, version: '16.1.0', ...sharedUniverse.stats() }));
 
 app.get('*', (req, res) => res.sendFile(path.join(__dirname, '../public/index.html')));
 
@@ -541,7 +646,7 @@ const sharedUniverse = attachSharedUniverse(server, {
 });
 
 server.listen(port, () => {
-  console.log(`Stellar Legacy V16.0.0 :${port}`);
+  console.log(`Stellar Legacy V16.1.0 :${port}`);
   console.log('Supabase config:', configStatus());
   console.log('Shared Universe: ONLINE');
 });
