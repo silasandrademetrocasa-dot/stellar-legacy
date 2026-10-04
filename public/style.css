@@ -2080,3 +2080,16 @@ body[data-quality="high"] .hud-panel{backdrop-filter:blur(7px);-webkit-backdrop-
 .pet-level-strip span{display:inline-flex;align-items:center;gap:5px;padding:5px 8px;border:1px solid rgba(87,207,255,.16);border-radius:999px;background:rgba(5,19,32,.72);font-size:9px;font-weight:900;color:#82b7ca;}
 .pet-level-strip b{color:#e8fbff;font-size:10px;}
 .pet-level-progression{border-color:rgba(77,223,215,.26)!important;background:linear-gradient(180deg,rgba(5,29,38,.82),rgba(4,16,27,.9))!important;}
+
+/* ===================== V16.7.6 PORTAL REFORGE ===================== */
+.gate-life-actions{grid-column:1/-1!important;display:grid!important;grid-template-columns:1fr 1fr!important;gap:7px!important;padding:0!important;background:transparent!important;border:0!important;}
+.gate-life-actions button{min-height:38px!important;font-size:10px!important;font-weight:900!important;}
+.gate-round-card{display:flex!important;flex-direction:column!important;min-height:132px!important;}
+.gate-round-card>div:not(.gate-round-num){display:flex!important;flex-direction:column!important;gap:2px!important;}
+.gate-round-card span{line-height:1.38!important;}
+.gate-round-reward{display:block;margin-top:auto;padding-top:7px;border-top:1px solid rgba(255,214,91,.12);font-size:8px;font-weight:900;color:#ffd96e;line-height:1.35;}
+.gate-reward-note{line-height:1.5!important;}
+.gate-reward-note small{display:block;margin-top:4px;color:#a9bdca;font-size:9px;}
+#gateProtocolTabs [data-gate-protocol]{opacity:1!important;filter:none!important;}
+#gateProtocolTabs [data-gate-protocol]:disabled{opacity:1!important;cursor:pointer!important;}
+@media(max-width:680px){.gate-life-actions{grid-template-columns:1fr!important}.gate-round-card{min-height:0!important;}}

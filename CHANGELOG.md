@@ -1,3 +1,11 @@
+## V16.7.6 — PORTAL REFORGE
+- AURORA, NEXUS e ECLIPSE liberados desde o início.
+- Rounds e ondas refeitos para progressão estratégica e viável para jogador FREE com itens de Créditos.
+- Sistema de vidas: 3 vidas base, até 5 com compra em Créditos ou Vida Astral Reserva.
+- Materializador troca o drop de reparo por Vida Astral Reserva.
+- Recompensa por Round + pacote final garantido com CR, STL, Núcleos, munição, míssil e Voidite.
+- Botão de reparar removido da tela do Portal.
+
 # V16.7.5 — AUCTION / AUTO-COMBATE / X-1 / AUX-9
 - Nova removido do leilão quando o piloto já possui 8 drones.
 - AUTO-COMBATE escolhe somente o NPC mais próximo dentro do alcance laser e visível na tela.

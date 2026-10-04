@@ -1,7 +1,7 @@
-import { FACTIONS, SHIPS, ITEMS, LASER_AMMO, ROCKETS, NPC_TYPES, MAPS, RESOURCES } from './data.js?v=16.7.5';
-import { GAME_ASSETS } from './assets/v8/manifest.js?v=16.7.5';
-import { signUp, signIn, requestPasswordReset, restorePasswordRecoveryFromUrl, restoreSession, signOutLocal, checkGameSession, endGameSession, getUser, getSessionCredentials, loadCloudSave, saveCloudSave, updateCallsign, updatePassword, loadRankings, loadAuctionBids, saveAuctionBidOnline, markAuctionBidStatusOnline, loadAuctionMarket, upsertPlayerPresenceOnline, loadMapPresenceOnline, removePlayerPresenceOnline, queuePvpAttackOnline, consumePvpDamageEventsOnline, syncArenaProfileOnline, loadArenaState, loadArenaDailyRewardStatus, claimArenaDailyReward, loadArenaOpponents, loadArenaHistory, arenaAttackOnline, listClansOnline, loadMyClanOnline, createClanOnline, joinClanOnline, leaveClanOnline, transferClanCreditsOnline, claimClanCreditGrantsOnline, recordClanAlienKillOnline, getPremiumShopOnline, testPurchasePremiumOnline, loadWarfrontStateOnline, hitWorldBossOnline, claimWorldBossRewardOnline, declareClanWarOnline, recordClanWarScoreOnline, loadLiveOpsOnline, purchaseLiveCatalogOnline, economyActionOnline, getChatHistoryOnline, sendChatMessageOnline, getMyDesignersOnline, setDesignLoadoutOnline, claimGateDroneDesignOnline, claimEventDesignerOnline } from './api.js?v=16.7.5';
-import { SharedUniverseClient } from './world.js?v=16.7.5';
+import { FACTIONS, SHIPS, ITEMS, LASER_AMMO, ROCKETS, NPC_TYPES, MAPS, RESOURCES } from './data.js?v=16.7.6';
+import { GAME_ASSETS } from './assets/v8/manifest.js?v=16.7.6';
+import { signUp, signIn, requestPasswordReset, restorePasswordRecoveryFromUrl, restoreSession, signOutLocal, checkGameSession, endGameSession, getUser, getSessionCredentials, loadCloudSave, saveCloudSave, updateCallsign, updatePassword, loadRankings, loadAuctionBids, saveAuctionBidOnline, markAuctionBidStatusOnline, loadAuctionMarket, upsertPlayerPresenceOnline, loadMapPresenceOnline, removePlayerPresenceOnline, queuePvpAttackOnline, consumePvpDamageEventsOnline, syncArenaProfileOnline, loadArenaState, loadArenaDailyRewardStatus, claimArenaDailyReward, loadArenaOpponents, loadArenaHistory, arenaAttackOnline, listClansOnline, loadMyClanOnline, createClanOnline, joinClanOnline, leaveClanOnline, transferClanCreditsOnline, claimClanCreditGrantsOnline, recordClanAlienKillOnline, getPremiumShopOnline, testPurchasePremiumOnline, loadWarfrontStateOnline, hitWorldBossOnline, claimWorldBossRewardOnline, declareClanWarOnline, recordClanWarScoreOnline, loadLiveOpsOnline, purchaseLiveCatalogOnline, economyActionOnline, getChatHistoryOnline, sendChatMessageOnline, getMyDesignersOnline, setDesignLoadoutOnline, claimGateDroneDesignOnline, claimEventDesignerOnline } from './api.js?v=16.7.6';
+import { SharedUniverseClient } from './world.js?v=16.7.6';
 
 const canvas = document.querySelector('#game');
 const ctx = canvas.getContext('2d');
@@ -169,7 +169,7 @@ const ui = {
   toast: $('#toast'), baseTradePrompt: $('#baseTradePrompt'), baseTradePromptInfo: $('#baseTradePromptInfo'), repairModal: $('#repairModal'), repairModalText: $('#repairModalText'), repairShipName: $('#repairShipName'), repairBonusCount: $('#repairBonusCount'), repairUriCount: $('#repairUriCount'), repairUseBonus: $('#repairUseBonus'), repairUseUri: $('#repairUseUri'), repairUseAurora: $('#repairUseAurora'), gameCelebration: $('#gameCelebration'), celebrationPanel: $('#celebrationPanel'), celebrationKicker: $('#celebrationKicker'), celebrationTitle: $('#celebrationTitle'), celebrationSubtitle: $('#celebrationSubtitle'), portalPrompt: $('#portalPrompt'), portalPromptMap: $('#portalPromptMap'), jumpTransition: $('#jumpTransition'), jumpTitle: $('#jumpTitle'), jumpSubtitle: $('#jumpSubtitle'), factionModal: $('#factionModal'), factionCards: $('#factionCards'),
   mapBtn: $('#mapBtn'), mapModal: $('#mapModal'), closeMap: $('#closeMap'), mapNetwork: $('#mapNetwork'),
   missionBtn: $('#missionBtn'), missionActiveCount: $('#missionActiveCount'), missionModal: $('#missionModal'), closeMission: $('#closeMission'), missionContent: $('#missionContent'), passBtn: $('#passBtn'), passTierBadge: $('#passTierBadge'), passModal: $('#passModal'), closePass: $('#closePass'), passContent: $('#passContent'), activeMissionPanel: $('#activeMissionPanel'), activeMissionCategory: $('#activeMissionCategory'), activeMissionTitle: $('#activeMissionTitle'), activeMissionTask: $('#activeMissionTask'), activeMissionProgressBar: $('#activeMissionProgressBar'), activeMissionProgressText: $('#activeMissionProgressText'), activeMissionRewardFactor: $('#activeMissionRewardFactor'), activeMissionDots: $('#activeMissionDots'), activeMissionToggle: $('#activeMissionToggle'), activeMissionBody: $('#activeMissionBody'), activeMissionOpen: $('#activeMissionOpen'), activityPanel: $('#activityPanel'), activityFeed: $('#activityFeed'), activityClearBtn: $('#activityClearBtn'),
-  gateBtn: $('#gateBtn'), gatePieceBadge: $('#gatePieceBadge'), gateModal: $('#gateModal'), closeGate: $('#closeGate'), gatePiecesText: $('#gatePiecesText'), gateLivesText: $('#gateLivesText'), gateCompletedText: $('#gateCompletedText'), gatePieceGrid: $('#gatePieceGrid'), gateJumpBtn: $('#gateJumpBtn'), gateUriText: $('#gateUriText'), gateSpinButtons: $('#gateSpinButtons'), gateJumpBonus: $('#gateJumpBonus'), gateRepairBonus: $('#gateRepairBonus'), gateLogDisks: $('#gateLogDisks'), useRepairBonus: $('#useRepairBonus'), gateResultBox: $('#gateResultBox'), gateRoundsGrid: $('#gateRoundsGrid'), gateAlphaStatusTitle: $('#gateAlphaStatusTitle'), gateAlphaStatusText: $('#gateAlphaStatusText'), gateHud: $('#gateHud'), gateHudRound: $('#gateHudRound'), gateHudWave: $('#gateHudWave'), gateHudRemaining: $('#gateHudRemaining'), gateHudNext: $('#gateHudNext'), gateHudLives: $('#gateHudLives'),
+  gateBtn: $('#gateBtn'), gatePieceBadge: $('#gatePieceBadge'), gateModal: $('#gateModal'), closeGate: $('#closeGate'), gatePiecesText: $('#gatePiecesText'), gateLivesText: $('#gateLivesText'), gateCompletedText: $('#gateCompletedText'), gatePieceGrid: $('#gatePieceGrid'), gateJumpBtn: $('#gateJumpBtn'), gateUriText: $('#gateUriText'), gateSpinButtons: $('#gateSpinButtons'), gateJumpBonus: $('#gateJumpBonus'), gateLifeBonus: $('#gateLifeBonus'), gateLogDisks: $('#gateLogDisks'), useLifeBonus: $('#useLifeBonus'), buyGateLife: $('#buyGateLife'), gateResultBox: $('#gateResultBox'), gateRoundsGrid: $('#gateRoundsGrid'), gateAlphaStatusTitle: $('#gateAlphaStatusTitle'), gateAlphaStatusText: $('#gateAlphaStatusText'), gateHud: $('#gateHud'), gateHudRound: $('#gateHudRound'), gateHudWave: $('#gateHudWave'), gateHudRemaining: $('#gateHudRemaining'), gateHudNext: $('#gateHudNext'), gateHudLives: $('#gateHudLives'),
   gateProtocolTabs: $('#gateProtocolTabs'), gateCoreLabel: $('#gateCoreLabel'), gateProtocolLabel: $('#gateProtocolLabel'), gateCombatProtocol: $('#gateCombatProtocol'), gateRewardNote: $('#gateRewardNote'), gateHudTitle: $('#gateHudTitle'),
   abilityBar: $('#abilityBar'), shipAbilityBtn: $('#shipAbilityBtn'), shipAbilityIcon: $('#shipAbilityIcon'), shipAbilityName: $('#shipAbilityName'), shipAbilityStatus: $('#shipAbilityStatus'), shipAbilityFill: $('#shipAbilityFill'), petKamiAbilityBtn: $('#petKamiAbilityBtn'), petKamiAbilityStatus: $('#petKamiAbilityStatus'), petKamiAbilityFill: $('#petKamiAbilityFill'), bossPhaseHud: $('#bossPhaseHud'), bossPhaseName: $('#bossPhaseName'), bossPhaseLabel: $('#bossPhaseLabel'), bossPhaseHpFill: $('#bossPhaseHpFill'), bossPhaseShieldFill: $('#bossPhaseShieldFill'), bossPhaseHpText: $('#bossPhaseHpText'), bossPhaseShieldText: $('#bossPhaseShieldText'), bossPhaseDistance: $('#bossPhaseDistance'), bossPhaseStatus: $('#bossPhaseStatus'), targetLockHud: $('#targetLockHud'), targetLockToggle: $('#targetLockToggle'), targetLockDetail: $('#targetLockDetail'), targetLockName: $('#targetLockName'), targetLockType: $('#targetLockType'), targetLockDistance: $('#targetLockDistance'), targetLockThreat: $('#targetLockThreat'), targetLockHpFill: $('#targetLockHpFill'), targetLockHpText: $('#targetLockHpText'), targetLockShieldFill: $('#targetLockShieldFill'), targetLockShieldText: $('#targetLockShieldText'), combatStateHud: $('#combatStateHud'), combatStateText: $('#combatStateText'), combatStateMeta: $('#combatStateMeta'), combatFlash: $('#combatFlash'), galaxyEventHud: $('#galaxyEventHud'), galaxyEventToggle: $('#galaxyEventToggle'), galaxyEventIcon: $('#galaxyEventIcon'), galaxyEventName: $('#galaxyEventName'), galaxyEventObjective: $('#galaxyEventObjective'), galaxyEventTimer: $('#galaxyEventTimer'), galaxyEventProgress: $('#galaxyEventProgress'),
   shipMenuBtn: $('#shipMenuBtn'), battleTopStatus: $('#battleTopStatus'), playerPanel: $('#playerPanel'), playerPanelToggle: $('#playerPanelToggle'), playerPanelContent: $('#playerPanelContent'), petBtn: $('#petBtn'), petModal: $('#petModal'), closePet: $('#closePet'), petContent: $('#petContent'),
@@ -301,7 +301,7 @@ function premiumPassActive(){return !!premiumRuntime.state?.battle_pass_active;}
 function premiumCanPurchase(){return !!premiumRuntime.state?.can_purchase||isAdminPilot();}
 function premiumAutoCombatAccess(){return premiumActive()||premiumPassActive();}
 function premiumElitePrice(price,currency){const p=Math.max(0,Math.round(Number(price)||0));return currency==='uridium'&&premiumActive()?Math.max(1,Math.floor(p*.95)):p;}
-function alphaSpinUnitCost(){const base=galaxyGateDef().spinCost;return premiumActive()?Math.max(1,Math.floor(base*.90)):base;}
+function alphaSpinUnitCost(){const gd=galaxyGateDef(),q=liveQuote(`gate_spin:${gd.key}`),base=Math.max(1,Math.round(Number(q?.basePrice??q?.price??gd.spinCost)||gd.spinCost));return premiumActive()?Math.max(1,Math.floor(base*.90)):base;}
 function premiumLocalPlanById(id){return PREMIUM_LOCAL_PLANS.find(p=>p.id===String(id||''))||null;}
 function premiumCatalogForRender(){const remote=Array.isArray(premiumRuntime.state?.catalog)?premiumRuntime.state.catalog:[];return [...PREMIUM_LOCAL_PLANS,...remote.filter(p=>p.category!=='premium')];}
 function extendLocalPremium(days){if(!progress)return 0;const meta=normalizePremiumMeta();const base=Math.max(Date.now(),effectivePremiumUntilMs());const until=base+Math.max(1,Number(days)||0)*86400000;meta.localPremiumUntil=new Date(until).toISOString();cloudDirty=true;saveGame();return until;}
@@ -1441,68 +1441,69 @@ function openProgression(){if(!progress)return;closeNavigationModals(ui.passModa
 const STARTER_SHIP_ID = 'phoenix';
 const SHIP_REPAIR_URI_COST = 500;
 
-const GALAXY_ALPHA_WAVE_INTERVAL_MS = 10000;
-const GALAXY_ALPHA_ROUND_INTERVAL_MS = 10000;
+const GALAXY_ALPHA_WAVE_INTERVAL_MS = 8000;
+const GALAXY_ALPHA_ROUND_INTERVAL_MS = 9000;
+const GALAXY_GATE_MAX_LIVES = 5;
+const GALAXY_GATE_BASE_LIVES = 3;
+
+// V16.7.6 • Portais refeitos para serem vencíveis também por jogador FREE bem equipado em Créditos.
+// A dificuldade vem de progressão, posicionamento e kite — não de dezenas de NPCs batendo ao mesmo tempo.
 const GALAXY_ALPHA_ROUNDS = [
-  {round:1,name:'Scavenger',waves:[{type:'streuner',count:10},{type:'streuner',count:10},{type:'streuner',count:10},{type:'streuner',count:10}]},
-  {round:2,name:'Vrax',waves:[{type:'lordakia',count:10},{type:'lordakia',count:10},{type:'lordakia',count:10},{type:'lordakia',count:10}]},
-  {round:3,name:'Zyron',waves:[{type:'saimon',count:10},{type:'saimon',count:10},{type:'saimon',count:10},{type:'saimon',count:10}]},
-  {round:4,name:'Kharon',waves:[{type:'mordon',count:10},{type:'mordon',count:10},{type:'mordon',count:10},{type:'mordon',count:10}]},
-  {round:5,name:'BOSS Quartet',waves:[{type:'bossStreuner',count:10},{type:'bossLordakia',count:10},{type:'bossSaimon',count:10},{type:'bossMordon',count:10}]},
-  {round:6,name:'Dreadnox',waves:[{type:'devolarium',count:5},{type:'devolarium',count:5},{type:'devolarium',count:5},{type:'devolarium',count:5}]},
-  {round:7,name:'Dreadnox Prime',waves:[{type:'bossDevolarium',count:5},{type:'bossDevolarium',count:5}]},
-  {round:8,name:'Colossar Finale',waves:[{type:'sibelon',count:10},{type:'sibelon',count:10},{type:'bossSibelon',count:10},{type:'bossSibelon',count:5}]},
+  {round:1,name:'Primeiro Contato',waves:[{type:'streuner',count:5},{type:'recruitStreuner',count:4},{type:'aiderStreuner',count:3}]},
+  {round:2,name:'Incursão Vrax',waves:[{type:'lordakia',count:4},{type:'lordakia',count:4},{type:'bossLordakia',count:1}]},
+  {round:3,name:'Enxame Zyron',waves:[{type:'saimon',count:4},{type:'saimon',count:3},{type:'bossSaimon',count:1}]},
+  {round:4,name:'Cerco Kharon',waves:[{type:'mordon',count:3},{type:'mordon',count:2},{type:'bossMordon',count:1}]},
+  {round:5,name:'Muralha Dreadnox',waves:[{type:'devolarium',count:2},{type:'mordon',count:2},{type:'bossDevolarium',count:1}]},
+  {round:6,name:'Guardião Aurora',waves:[{type:'sibelon',count:1},{type:'devolarium',count:2},{type:'sibelon',count:1}]},
 ];
 const GALAXY_NEXUS_ROUNDS = [
-  {round:1,name:'Vrax Assault',waves:[{type:'lordakia',count:12},{type:'lordakia',count:12},{type:'lordakia',count:12},{type:'bossLordakia',count:6}]},
-  {round:2,name:'Zyron Swarm',waves:[{type:'saimon',count:12},{type:'saimon',count:12},{type:'saimon',count:12},{type:'bossSaimon',count:6}]},
-  {round:3,name:'Kharon Breaker',waves:[{type:'mordon',count:12},{type:'mordon',count:12},{type:'bossMordon',count:6}]},
-  {round:4,name:'Dreadnox Wall',waves:[{type:'devolarium',count:7},{type:'devolarium',count:7},{type:'bossDevolarium',count:4}]},
-  {round:5,name:'Boss Convoy',waves:[{type:'bossStreuner',count:12},{type:'bossLordakia',count:10},{type:'bossSaimon',count:8},{type:'bossMordon',count:6}]},
-  {round:6,name:'Colossar Siege',waves:[{type:'sibelon',count:8},{type:'sibelon',count:8},{type:'sibelon',count:8}]},
-  {round:7,name:'Dreadnox Prime',waves:[{type:'bossDevolarium',count:4},{type:'bossDevolarium',count:4},{type:'bossDevolarium',count:4}]},
-  {round:8,name:'Colossar Prime',waves:[{type:'bossSibelon',count:5},{type:'bossSibelon',count:5},{type:'bossSibelon',count:5}]},
-  {round:9,name:'NEXUS Annihilation',waves:[{type:'bossMordon',count:6},{type:'bossDevolarium',count:5},{type:'bossSibelon',count:5}]},
+  {round:1,name:'Brecha Vrax',waves:[{type:'lordakia',count:4},{type:'saimon',count:3},{type:'bossSaimon',count:1}]},
+  {round:2,name:'Linha Zyron',waves:[{type:'saimon',count:3},{type:'mordon',count:2},{type:'bossMordon',count:1}]},
+  {round:3,name:'Fortaleza Kharon',waves:[{type:'mordon',count:3},{type:'mordon',count:2},{type:'bossMordon',count:1}]},
+  {round:4,name:'Pressão Dreadnox',waves:[{type:'devolarium',count:2},{type:'mordon',count:2},{type:'bossDevolarium',count:1}]},
+  {round:5,name:'Corredor Colossar',waves:[{type:'devolarium',count:2},{type:'bossDevolarium',count:1},{type:'sibelon',count:1}]},
+  {round:6,name:'Núcleo Colossar',waves:[{type:'sibelon',count:1},{type:'sibelon',count:1},{type:'bossSibelon',count:1}]},
+  {round:7,name:'Tríade Nexus',waves:[{type:'bossMordon',count:1},{type:'bossDevolarium',count:1},{type:'bossSibelon',count:1}]},
 ];
 const GALAXY_ECLIPSE_ROUNDS = [
-  {round:1,name:'Scavenger Prime Legion',waves:[{type:'bossStreuner',count:15},{type:'bossStreuner',count:15},{type:'bossLordakia',count:8}]},
-  {round:2,name:'Vrax Prime Legion',waves:[{type:'bossLordakia',count:12},{type:'bossLordakia',count:12},{type:'bossSaimon',count:6}]},
-  {round:3,name:'Zyron Prime Legion',waves:[{type:'bossSaimon',count:10},{type:'bossSaimon',count:10},{type:'bossMordon',count:5}]},
-  {round:4,name:'Kharon Prime Legion',waves:[{type:'bossMordon',count:8},{type:'bossMordon',count:8},{type:'bossMordon',count:8}]},
-  {round:5,name:'Dreadnox Crucible',waves:[{type:'devolarium',count:10},{type:'devolarium',count:10},{type:'bossDevolarium',count:5}]},
-  {round:6,name:'Dreadnox Prime Crucible',waves:[{type:'bossDevolarium',count:5},{type:'bossDevolarium',count:5},{type:'bossDevolarium',count:5}]},
-  {round:7,name:'Colossar Crucible',waves:[{type:'sibelon',count:10},{type:'sibelon',count:10},{type:'bossSibelon',count:5}]},
-  {round:8,name:'Colossar Prime Crucible',waves:[{type:'bossSibelon',count:6},{type:'bossSibelon',count:6},{type:'bossSibelon',count:6}]},
-  {round:9,name:'ECLIPSE Cataclysm',waves:[{type:'bossSaimon',count:8},{type:'bossMordon',count:8},{type:'bossDevolarium',count:6},{type:'bossSibelon',count:4}]},
-  {round:10,name:'OMEGA WAVE',waves:[{type:'bossMordon',count:10},{type:'bossDevolarium',count:8},{type:'bossSibelon',count:8}]},
+  {round:1,name:'Eclipse Zyron',waves:[{type:'saimon',count:3},{type:'bossSaimon',count:2},{type:'mordon',count:2}]},
+  {round:2,name:'Eclipse Kharon',waves:[{type:'mordon',count:2},{type:'bossMordon',count:1},{type:'mordon',count:2}]},
+  {round:3,name:'Eclipse Dreadnox',waves:[{type:'devolarium',count:2},{type:'bossDevolarium',count:1},{type:'devolarium',count:2}]},
+  {round:4,name:'Eclipse Colossar',waves:[{type:'sibelon',count:1},{type:'sibelon',count:1},{type:'bossSibelon',count:1}]},
+  {round:5,name:'Prime Ascension',waves:[{type:'bossMordon',count:2},{type:'bossDevolarium',count:1},{type:'sibelon',count:1}]},
+  {round:6,name:'Prime Convergence',waves:[{type:'bossDevolarium',count:1},{type:'bossSibelon',count:1},{type:'bossMordon',count:1}]},
+  {round:7,name:'Colapso Astral',waves:[{type:'sibelon',count:2},{type:'bossSibelon',count:1},{type:'bossDevolarium',count:1}]},
+  {round:8,name:'OMEGA ECLIPSE',waves:[{type:'bossMordon',count:1},{type:'bossDevolarium',count:1},{type:'bossSibelon',count:1}]},
 ];
 const GALAXY_GATE_DEFS={
-  alpha:{key:'alpha',label:'AURORA',mapId:'ggAlpha',pieces:34,spinCost:100,rounds:GALAXY_ALPHA_ROUNDS,enemyScale:1,rewardScale:1,totalRewardMult:3,logReward:10,unlock:null},
-  beta:{key:'beta',label:'NEXUS',mapId:'ggBeta',pieces:48,spinCost:125,rounds:GALAXY_NEXUS_ROUNDS,enemyScale:1.30,rewardScale:1.30,totalRewardMult:4,logReward:22,unlock:'alpha'},
-  gamma:{key:'gamma',label:'ECLIPSE',mapId:'ggGamma',pieces:64,spinCost:150,rounds:GALAXY_ECLIPSE_ROUNDS,enemyScale:1.65,rewardScale:1.65,totalRewardMult:5,logReward:40,unlock:'beta'},
+  alpha:{key:'alpha',label:'AURORA',mapId:'ggAlpha',pieces:34,spinCost:100,rounds:GALAXY_ALPHA_ROUNDS,enemyScale:.90,damageScale:.72,rewardScale:1.05,totalRewardMult:1.25,logReward:20,baseLives:3,maxLives:5,lifeCost:4000000,roundReward:{cores:2,credits:100000,ammoId:'mcb25',ammoQty:120},finalReward:{credits:500000,uridium:750,cores:20,ammoId:'mcb25',ammoQty:1500,rocketId:'plt2026',rocketQty:60,voidite:12},unlock:null},
+  beta:{key:'beta',label:'NEXUS',mapId:'ggBeta',pieces:48,spinCost:125,rounds:GALAXY_NEXUS_ROUNDS,enemyScale:1.00,damageScale:.85,rewardScale:1.25,totalRewardMult:1.50,logReward:45,baseLives:3,maxLives:5,lifeCost:8000000,roundReward:{cores:4,credits:220000,ammoId:'mcb50',ammoQty:140},finalReward:{credits:1500000,uridium:2000,cores:45,ammoId:'mcb50',ammoQty:2200,rocketId:'plt2021',rocketQty:90,voidite:28},unlock:null},
+  gamma:{key:'gamma',label:'ECLIPSE',mapId:'ggGamma',pieces:64,spinCost:150,rounds:GALAXY_ECLIPSE_ROUNDS,enemyScale:1.08,damageScale:.95,rewardScale:1.50,totalRewardMult:1.75,logReward:90,baseLives:3,maxLives:5,lifeCost:15000000,roundReward:{cores:6,credits:400000,ammoId:'ucb100',ammoQty:100},finalReward:{credits:3500000,uridium:4500,cores:90,ammoId:'ucb100',ammoQty:1800,rocketId:'plt3030',rocketQty:120,voidite:55},unlock:null},
 };
-function freshGateProtocol(){return {pieces:[],built:false,lives:3,completed:0,failed:0,run:null,lastCompletion:null};}
-function freshGalaxyGateState(){return {jumpBonus:0,repairBonus:0,lastResults:[],selected:'alpha',alpha:freshGateProtocol(),beta:freshGateProtocol(),gamma:freshGateProtocol()};}
+function freshGateProtocol(){return {pieces:[],built:false,lives:GALAXY_GATE_BASE_LIVES,completed:0,failed:0,run:null,lastCompletion:null};}
+function freshGalaxyGateState(){return {jumpBonus:0,lifeBonus:0,repairBonus:0,lastResults:[],selected:'alpha',alpha:freshGateProtocol(),beta:freshGateProtocol(),gamma:freshGateProtocol()};}
 function gateKeyForMap(mapId=progress?.mapId){return Object.values(GALAXY_GATE_DEFS).find(d=>d.mapId===mapId)?.key||null;}
 function normalizeGalaxyGateState(){
   if(!progress)return; progress.galaxyGate ||= freshGalaxyGateState(); const g=progress.galaxyGate;
-  g.jumpBonus=Math.max(0,Number(g.jumpBonus)||0);g.repairBonus=Math.max(0,Number(g.repairBonus)||0);g.lastResults ||= [];g.selected='alpha';
+  g.jumpBonus=Math.max(0,Number(g.jumpBonus)||0);g.lifeBonus=Math.max(0,Number(g.lifeBonus)||0);g.repairBonus=Math.max(0,Number(g.repairBonus)||0);g.lastResults ||= [];g.selected=GALAXY_GATE_DEFS[g.selected]?g.selected:'alpha';
   for(const [key,def] of Object.entries(GALAXY_GATE_DEFS)){
     g[key] ||= freshGateProtocol(); const a=g[key];
     a.pieces=Array.isArray(a.pieces)?[...new Set(a.pieces.map(Number).filter(n=>n>=1&&n<=def.pieces))]:[];
-    a.built=!!a.built||a.pieces.length>=def.pieces;a.lives=Math.max(0,Math.min(3,Number(a.lives)||3));a.completed=Math.max(0,Number(a.completed)||0);a.failed=Math.max(0,Number(a.failed)||0);
-    if(a.run){a.run.round=Math.max(1,Math.min(def.rounds.length,Number(a.run.round)||1));a.run.waveIndex=Math.max(0,Number(a.run.waveIndex)||0);a.run.remaining ||= {};a.run.killRewards ||= {credits:0,uridium:0,xp:0};a.run.nextWaveAt=Number(a.run.nextWaveAt)||0;a.run.nextRoundAt=Number(a.run.nextRoundAt)||0;a.run.active=a.run.active!==false;}
+    a.built=!!a.built||a.pieces.length>=def.pieces;a.lives=Math.max(0,Math.min(def.maxLives,Number(a.lives)||def.baseLives));a.completed=Math.max(0,Number(a.completed)||0);a.failed=Math.max(0,Number(a.failed)||0);
+    if(a.run){a.run.round=Math.max(1,Math.min(def.rounds.length,Number(a.run.round)||1));a.run.waveIndex=Math.max(0,Number(a.run.waveIndex)||0);a.run.remaining ||= {};a.run.killRewards ||= {credits:0,uridium:0,xp:0};a.run.roundRewardsClaimed=Array.isArray(a.run.roundRewardsClaimed)?a.run.roundRewardsClaimed.map(Number):[];a.run.nextWaveAt=Number(a.run.nextWaveAt)||0;a.run.nextRoundAt=Number(a.run.nextRoundAt)||0;a.run.active=a.run.active!==false;}
   }
 }
 function currentGateKey(){normalizeGalaxyGateState();return gateKeyForMap()||progress.galaxyGate.selected||'alpha';}
 function galaxyGateDef(key=currentGateKey()){return GALAXY_GATE_DEFS[key]||GALAXY_GATE_DEFS.alpha;}
-function gateUnlocked(key){return key==='alpha';}
+function gateUnlocked(key){return !!GALAXY_GATE_DEFS[key];}
 function alphaGate(){normalizeGalaxyGateState();return progress.galaxyGate[currentGateKey()];}
 function isGalaxyGateMap(){return !!gateKeyForMap();}
 function alphaRoundDef(){const a=alphaGate(),def=galaxyGateDef();return def.rounds[a.run?.round-1]||def.rounds[0];}
 function alphaWaveDef(){const a=alphaGate(),r=alphaRoundDef();return r.waves[Math.max(0,(a.run?.waveIndex||0)-1)]||r.waves[0];}
 function alphaRemainingCount(){return state.enemies.filter(e=>e.hp>0&&e.gateEnemy).length;}
 function alphaRunReward(){const a=alphaGate(),r=a.run?.killRewards||{};return {credits:Math.round(r.credits||0),uridium:Math.round(r.uridium||0),xp:Math.round(r.xp||0)};}
+function gateFinalRewardText(gd=galaxyGateDef()){const r=gd.finalReward||{};return `${fmt(r.credits||0)} CR • ${fmt(r.uridium||0)} STL • ${fmt(r.cores||0)} Núcleos • ${fmt(r.ammoQty||0)} ${LASER_AMMO[r.ammoId]?.name||''} • ${fmt(r.rocketQty||0)} ${ROCKETS[r.rocketId]?.name||''} • ${fmt(r.voidite||0)} Voidite`;}
+function gateRoundRewardText(gd=galaxyGateDef()){const r=gd.roundReward||{};return `+${fmt(r.cores||0)} Núcleos • +${fmt(r.credits||0)} CR${r.ammoQty?` • +${fmt(r.ammoQty)} ${LASER_AMMO[r.ammoId]?.name||''}`:''}`;}
 
 function blankLoadout(shipId='phoenix') {
   const ship = SHIPS[shipId];
@@ -2979,7 +2980,11 @@ function makeGateEnemy(type,index=0,total=1){
   e.forceChase=true;
   e.aggroRange=Number.POSITIVE_INFINITY;
   e.attackRange=Math.min(620,e.attackRange+80);
-  const gd=galaxyGateDef();if(gd.enemyScale!==1){e.hp=e.maxHp=Math.round(e.maxHp*gd.enemyScale);e.shield=e.maxShield=Math.round(e.maxShield*gd.enemyScale);e.damage=e.baseDamage=Math.round(e.damage*gd.enemyScale);e.credits=Math.round(e.credits*gd.rewardScale);e.uridium=Math.round(e.uridium*gd.rewardScale);e.xp=Math.round(e.xp*gd.rewardScale);}
+  const gd=galaxyGateDef();
+  e.hp=e.maxHp=Math.max(1,Math.round(e.maxHp*(gd.enemyScale||1)));
+  e.shield=e.maxShield=Math.max(0,Math.round(e.maxShield*(gd.enemyScale||1)));
+  e.damage=e.baseDamage=Math.max(1,Math.round(e.damage*(gd.damageScale??gd.enemyScale??1)));
+  e.credits=Math.round(e.credits*(gd.rewardScale||1));e.uridium=Math.round(e.uridium*(gd.rewardScale||1));e.xp=Math.round(e.xp*(gd.rewardScale||1));
   return e;
 }
 function countAliveGateByType(){
@@ -3011,9 +3016,9 @@ function spawnAlphaWave(){
   renderGateHud();renderGalaxyGate();
 }
 function initAlphaRun(){
-  const a=alphaGate();
-  a.run={active:true,round:1,waveIndex:0,remaining:{},nextWaveAt:0,nextRoundAt:0,killRewards:{credits:0,uridium:0,xp:0},startedAt:Date.now()};
-  a.lives=3;
+  const a=alphaGate(),gd=galaxyGateDef();
+  a.run={active:true,round:1,waveIndex:0,remaining:{},nextWaveAt:0,nextRoundAt:0,killRewards:{credits:0,uridium:0,xp:0},roundRewardsClaimed:[],startedAt:Date.now()};
+  a.lives=Math.max(gd.baseLives,Math.min(gd.maxLives,Number(a.lives)||gd.baseLives));
 }
 function setupAlphaMap(resume=false){
   sharedUniverse.close();sharedUniverseRuntime.ready=false;sharedUniverseRuntime.event=null;updateSharedUniverseChip();
@@ -3051,7 +3056,7 @@ function setupAlphaMap(resume=false){
 }
 function enterAlphaGate(){
   const a=alphaGate();
-  const gd=galaxyGateDef();if(!gateUnlocked(gd.key)){showToast(`${gd.label} bloqueado • conclua ${GALAXY_GATE_DEFS[gd.unlock].label} primeiro`);return;}if(!a.built&&!a.run){showToast(`Monte as ${gd.pieces} peças do ${gd.label} primeiro`);return;}
+  const gd=galaxyGateDef();if(!a.built&&!a.run){showToast(`Monte as ${gd.pieces} peças do ${gd.label} primeiro`);return;}
   if(!isAtTrader()){showToast(`O Portal Astral ${gd.label} só pode ser acessado pela base X-1`);return;}
   if(a.lives<=0){showToast(`O portal ${gd.label} foi perdido`);return;}
   if(!a.run)initAlphaRun();
@@ -3068,49 +3073,51 @@ function recordAlphaKillReward(enemy){
   a.run.killRewards.uridium=(a.run.killRewards.uridium||0)+enemy.uridium;
   a.run.killRewards.xp=(a.run.killRewards.xp||0)+xp;
 }
-function completeAlphaGate(){
-  const a=alphaGate(),gd=galaxyGateDef(),earned=alphaRunReward(),extra=Math.max(0,gd.totalRewardMult-1),bonus={credits:earned.credits*extra,uridium:earned.uridium*extra,xp:Math.round(earned.xp*extra*designerXpMultiplier())};
-  progress.profile.credits+=bonus.credits;progress.profile.uridium+=bonus.uridium;progress.profile.xp+=bonus.xp;processPlayerLevelUps();normalizePilotBio();progress.pilotBio.logDisks+=gd.logReward;progress.profile.ggCompleted=(progress.profile.ggCompleted||0)+1;a.completed++;a.lastCompletion={at:Date.now(),reward:{...earned,bonus},totalMult:gd.totalRewardMult};a.pieces=[];a.built=false;a.lives=3;a.run=null;
-  playSfx('reward');showToast(`${gd.label} CONCLUÍDO! +${fmt(gd.logReward)} Núcleos Quânticos • recompensa ${gd.totalRewardMult}X`,'reward');pushActivity(`PORTAL ASTRAL ${gd.label} • ${gd.totalRewardMult}X • +${fmt(gd.logReward)} Núcleos Quânticos`,'reward');saveGame();
-  claimGateDroneDesignerDrop(gd.key,a.completed).catch(()=>{});
-  setTimeout(()=>runMapTransition('x1',null,`${gd.label} CONCLUÍDO • RECOMPENSA ${gd.totalRewardMult}X`),1800);
+function grantGateRoundReward(roundNo){
+  const a=alphaGate(),gd=galaxyGateDef(),run=a.run;if(!run)return;
+  run.roundRewardsClaimed=Array.isArray(run.roundRewardsClaimed)?run.roundRewardsClaimed:[];
+  if(run.roundRewardsClaimed.includes(roundNo))return;
+  const r=gd.roundReward||{};normalizePilotBio();
+  if(r.credits)progress.profile.credits+=Math.round(r.credits);
+  if(r.cores)progress.pilotBio.logDisks+=Math.round(r.cores);
+  if(r.ammoId&&r.ammoQty){progress.ammo ||= {};progress.ammo[r.ammoId]=(progress.ammo[r.ammoId]||0)+Math.round(r.ammoQty);}
+  run.roundRewardsClaimed.push(roundNo);cloudDirty=true;
+  showToast(`${gd.label} • Round ${roundNo} concluído • ${gateRoundRewardText(gd)}`,'reward');
+  pushActivity(`PORTAL ${gd.label} • Round ${roundNo} • ${gateRoundRewardText(gd)}`,'reward');
 }
-function failAlphaGate(){const a=alphaGate(),gd=galaxyGateDef();a.failed++;a.pieces=[];a.built=false;a.lives=3;a.run=null;showToast(`PORTAL ASTRAL ${gd.label} PERDIDO — as 3 vidas acabaram e o portal precisa ser remontado`);saveGame();setTimeout(()=>runMapTransition('x1',null,`${gd.label} PERDIDO`),900);}
-function handleAlphaDeath(){const a=alphaGate(),gd=galaxyGateDef();syncAlphaGateSnapshot();a.lives=Math.max(0,a.lives-1);if(a.lives<=0){failAlphaGate();return;}a.run.active=true;progress.mapId='x1';progress.territoryFaction=progress.profile.faction;const b=basePointForFaction(progress.profile.faction);player.x=b.x;player.y=b.y;player.tx=b.x;player.ty=b.y;progress.x=b.x;progress.y=b.y;progress.hp=1;player.hp=1;player.shield=0;progress.shield=0;state.currentMap=MAPS.x1;state.radarRange=mapRadarRange();state.enemies=[];state.loot=[];state.ores=[];state.landmarks=[];state.target=null;state.repairRequired={shipId:progress.activeShipId,source:`Portal Astral ${gd.label}`};saveGame();openRepairModal();showToast(`${gd.label}: você perdeu 1 vida • ${a.lives} restante(s) • repare a nave para retornar`);}
+function grantGateFinalPackage(gd){
+  const r=gd.finalReward||{};normalizePilotBio();progress.ammo ||= {};progress.rockets ||= {};progress.cargo ||= {};
+  progress.profile.credits+=Math.round(r.credits||0);progress.profile.uridium+=Math.round(r.uridium||0);progress.pilotBio.logDisks+=Math.round(r.cores||0);
+  if(r.ammoId&&r.ammoQty)progress.ammo[r.ammoId]=(progress.ammo[r.ammoId]||0)+Math.round(r.ammoQty);
+  if(r.rocketId&&r.rocketQty)progress.rockets[r.rocketId]=(progress.rockets[r.rocketId]||0)+Math.round(r.rocketQty);
+  if(r.voidite)progress.cargo.Xenomit=(progress.cargo.Xenomit||0)+Math.round(r.voidite);
+}
+function completeAlphaGate(){
+  const a=alphaGate(),gd=galaxyGateDef(),earned=alphaRunReward();
+  grantGateRoundReward(a.run?.round||gd.rounds.length);
+  const extra=Math.max(0,gd.totalRewardMult-1),bonus={credits:Math.round(earned.credits*extra),uridium:Math.round(earned.uridium*extra),xp:Math.round(earned.xp*extra*designerXpMultiplier())};
+  progress.profile.credits+=bonus.credits;progress.profile.uridium+=bonus.uridium;progress.profile.xp+=bonus.xp;grantGateFinalPackage(gd);processPlayerLevelUps();
+  progress.profile.ggCompleted=(progress.profile.ggCompleted||0)+1;a.completed++;a.lastCompletion={at:Date.now(),reward:{...earned,bonus,package:{...(gd.finalReward||{})}},totalMult:gd.totalRewardMult};a.pieces=[];a.built=false;a.lives=gd.baseLives;a.run=null;
+  playSfx('reward');showToast(`${gd.label} CONCLUÍDO! • ${fmt(gd.finalReward?.cores||0)} Núcleos • pacote final entregue`,'reward');pushActivity(`PORTAL ASTRAL ${gd.label} • FINAL • ${gateFinalRewardText(gd)}`,'reward');saveGame();
+  claimGateDroneDesignerDrop(gd.key,a.completed).catch(()=>{});
+  setTimeout(()=>runMapTransition('x1',null,`${gd.label} CONCLUÍDO • PACOTE FINAL RECEBIDO`),1800);
+}
+function failAlphaGate(){const a=alphaGate(),gd=galaxyGateDef();a.failed++;a.pieces=[];a.built=false;a.lives=gd.baseLives;a.run=null;showToast(`PORTAL ASTRAL ${gd.label} PERDIDO — sem vidas restantes; o portal precisa ser remontado`);saveGame();setTimeout(()=>runMapTransition('x1',null,`${gd.label} PERDIDO`),900);}
+function handleAlphaDeath(){const a=alphaGate(),gd=galaxyGateDef();syncAlphaGateSnapshot();a.lives=Math.max(0,a.lives-1);if(a.lives<=0){failAlphaGate();return;}a.run.active=true;progress.mapId='x1';progress.territoryFaction=progress.profile.faction;const b=basePointForFaction(progress.profile.faction);player.x=b.x;player.y=b.y;player.tx=b.x;player.ty=b.y;progress.x=b.x;progress.y=b.y;progress.hp=1;player.hp=1;player.shield=0;progress.shield=0;state.currentMap=MAPS.x1;state.radarRange=mapRadarRange();state.enemies=[];state.loot=[];state.ores=[];state.landmarks=[];state.target=null;state.repairRequired={shipId:progress.activeShipId,source:`Portal Astral ${gd.label}`};saveGame();openRepairModal();showToast(`${gd.label}: -1 vida • ${a.lives} restante(s) • repare sua nave na base e retorne ao mesmo Round`);}
 function updateAlphaGate(){
   if(!isGalaxyGateMap())return;
   const a=alphaGate(),run=a.run;if(!run?.active)return;
   const gd=galaxyGateDef(),def=gd.rounds[run.round-1];if(!def)return;
   const now=Date.now(),alive=alphaRemainingCount();
 
-  // Autocorreção: nunca deixa um round congelado sem timer.
-  if(run.waveIndex<def.waves.length&&!run.nextWaveAt){
-    run.nextWaveAt=now+GALAXY_ALPHA_WAVE_INTERVAL_MS;
-  }
+  if(run.waveIndex<def.waves.length&&!run.nextWaveAt)run.nextWaveAt=now+GALAXY_ALPHA_WAVE_INTERVAL_MS;
+  if(run.waveIndex<def.waves.length&&run.nextWaveAt&&now>=run.nextWaveAt){run.nextWaveAt=0;spawnAlphaWave();return;}
 
-  if(run.waveIndex<def.waves.length&&run.nextWaveAt&&now>=run.nextWaveAt){
-    run.nextWaveAt=0;
-    spawnAlphaWave();
-    return;
-  }
-
-  // O próximo round só é liberado depois que TODAS as ondas do atual já nasceram
-  // E todos os NPCs restantes foram eliminados.
   if(run.waveIndex>=def.waves.length&&alive===0){
+    grantGateRoundReward(run.round);
     if(run.round>=gd.rounds.length){completeAlphaGate();return;}
-    if(!run.nextRoundAt){
-      run.nextRoundAt=now+GALAXY_ALPHA_ROUND_INTERVAL_MS;
-      showToast(`Round ${run.round} concluído • próximo round em 10 segundos`);
-      saveGame();
-    }else if(now>=run.nextRoundAt){
-      run.round++;
-      run.waveIndex=0;
-      run.remaining={};
-      run.nextRoundAt=0;
-      run.nextWaveAt=now+GALAXY_ALPHA_WAVE_INTERVAL_MS;
-      showToast(`${gd.label} • Round ${run.round} começa em 10 segundos`);
-      saveGame();
-    }
+    if(!run.nextRoundAt){run.nextRoundAt=now+GALAXY_ALPHA_ROUND_INTERVAL_MS;showToast(`Round ${run.round} concluído • próximo round em ${Math.round(GALAXY_ALPHA_ROUND_INTERVAL_MS/1000)}s`);saveGame();}
+    else if(now>=run.nextRoundAt){run.round++;run.waveIndex=0;run.remaining={};run.nextRoundAt=0;run.nextWaveAt=now+GALAXY_ALPHA_WAVE_INTERVAL_MS;showToast(`${gd.label} • Round ${run.round} começa em ${Math.round(GALAXY_ALPHA_WAVE_INTERVAL_MS/1000)}s`);saveGame();}
   }
   renderGateHud();
 }
@@ -4482,7 +4489,7 @@ function rollAlphaOnce(){
   if(r<80){const qty=Math.round(rand(1500,12000));progress.profile.credits+=qty;return {kind:'credits',label:`Créditos +${fmt(qty)}`};}
   if(r<90){const qty=Math.max(1,Math.round(rand(4,18)));progress.cargo.Xenomit=(progress.cargo.Xenomit||0)+qty;return {kind:'xenomit',label:`Voidite +${fmt(qty)}`};}
   if(r<95){g.jumpBonus++;return {kind:'jump',label:'Bônus de Salto +1'};}
-  g.repairBonus++;return {kind:'repair',label:'Bônus de Reparo +1'};
+  g.lifeBonus=(g.lifeBonus||0)+1;return {kind:'life',label:'Vida Astral Reserva +1'};
 }
 function spinAlpha(amount){
   normalizeGalaxyGateState();const key=currentGateKey(),q=liveQuote(`gate_spin:${key}`),unit=q?Math.max(1,Math.floor(q.basePrice*(premiumActive()?0.90:1))):null,cost=unit==null?null:amount*unit;
@@ -4490,15 +4497,24 @@ function spinAlpha(amount){
   if(progress.profile.uridium<cost){showToast(`Faltam ${fmt(cost-progress.profile.uridium)} STL para ${amount} sorteio${amount>1?'s':''}`);return;}
   openSpendConfirm({title:`Girar portal ${galaxyGateDef().label}?`,itemName:`${amount} sorteio${amount>1?'s':''} do Portal Astral`,detail:'Preço, sorteio e recompensas serão processados pelo servidor.',value:cost,currency:'uridium',confirmLabel:'CONFIRMAR GIRO',onConfirm:()=>runEconomyAction('gate_spin',{protocol:key,amount}).then(r=>{const info=r?.info||{},results=Array.isArray(info.results)?info.results:[],summary={};results.forEach(x=>summary[x.label]=(summary[x.label]||0)+1);const pieces=results.filter(x=>x.kind==='piece').length,lines=Object.entries(summary).slice(0,12).map(([label,count])=>`${count>1?`${count}× `:''}${label}`);ui.gateResultBox.innerHTML=`<b>${info.amount||amount} sorteio${(info.amount||amount)>1?'s':''} • ${fmt(info.cost||cost)} STL • SERVIDOR</b>${pieces?`<div class="gate-piece-win">✦ ${pieces} peça${pieces>1?'s':''} encontrada${pieces>1?'s':''}</div>`:''}<div>${lines.join(' • ')}</div>`;}).catch(e=>showToast(e.message||'Materializador recusado pelo servidor'))});
 }
-function useGalaxyRepairBonus(){
-  normalizeGalaxyGateState();
-  if(progress.galaxyGate.repairBonus<=0){showToast('Você não possui Bônus de Reparo');return;}
-  if(!isAtTrader()){showToast('Use o Bônus de Reparo na base X-1');return;}
-  progress.galaxyGate.repairBonus--;player.hp=player.maxHp;player.shield=player.maxShield;progress.hp=player.hp;progress.shield=player.shield;saveGame();renderGalaxyGate();updateUI();showToast('Nave totalmente reparada com 1 Bônus de Reparo');
+function useGalaxyLifeBonus(){
+  normalizeGalaxyGateState();const g=progress.galaxyGate,a=alphaGate(),gd=galaxyGateDef();
+  if((g.lifeBonus||0)<=0){showToast('Você não possui Vida Astral na reserva');return;}
+  if(a.lives>=gd.maxLives){showToast(`${gd.label} já está no máximo de ${gd.maxLives} vidas`);return;}
+  if(!isAtTrader()){showToast('Use a Vida Astral na sua base X-1');return;}
+  runEconomyAction('gate_life_bonus',{protocol:gd.key}).then(()=>showToast(`${gd.label} • +1 VIDA usando a reserva`,'reward')).catch(e=>showToast(e.message||'Não foi possível usar a vida reserva'));
 }
+function buyGalaxyLife(){
+  normalizeGalaxyGateState();const a=alphaGate(),gd=galaxyGateDef(),q=liveQuote(`gate_life:${gd.key}`),cost=q?.price??gd.lifeCost;
+  if(a.lives>=gd.maxLives){showToast(`${gd.label} já está no máximo de ${gd.maxLives} vidas`);return;}
+  if(!isAtTrader()){showToast('Vidas do Portal só podem ser compradas na base X-1');return;}
+  if(progress.profile.credits<cost){showToast(`Faltam ${fmt(cost-progress.profile.credits)} CR para comprar +1 vida`);return;}
+  openSpendConfirm({title:`Comprar +1 vida para ${gd.label}?`,itemName:`Vida Astral • ${gd.label}`,detail:`A vida fica vinculada ao ${gd.label}. Máximo ${gd.maxLives} vidas.`,value:cost,currency:'credits',confirmLabel:'COMPRAR VIDA',onConfirm:()=>runEconomyAction('gate_life',{protocol:gd.key}).then(()=>showToast(`${gd.label} • +1 VIDA comprada`,'reward')).catch(e=>showToast(e.message||'Compra de vida recusada'))});
+}
+
 function renderGateRounds(){
-  if(!ui.gateRoundsGrid)return;
-  ui.gateRoundsGrid.innerHTML=galaxyGateDef().rounds.map(r=>`<div class="gate-round-card"><div class="gate-round-num">ROUND ${r.round}</div><b>${r.name}</b><div>${r.waves.map((w,i)=>`<span>O${i+1}: ${w.count} ${NPC_TYPES[w.type].name}</span>`).join('')}</div></div>`).join('');
+  if(!ui.gateRoundsGrid)return;const gd=galaxyGateDef();
+  ui.gateRoundsGrid.innerHTML=gd.rounds.map(r=>`<div class="gate-round-card"><div class="gate-round-num">ROUND ${r.round}</div><b>${r.name}</b><div>${r.waves.map((w,i)=>`<span>ONDA ${i+1} • ${w.count}× ${NPC_TYPES[w.type].name}</span>`).join('')}</div><small class="gate-round-reward">${gateRoundRewardText(gd)}</small></div>`).join('');
 }
 function renderGateHud(){
   if(!ui.gateHud||!progress)return;
@@ -4512,20 +4528,30 @@ function renderGateHud(){
   else if(run.nextRoundAt)next=`ROUND ${run.round+1} • ${Math.max(0,Math.ceil((run.nextRoundAt-now)/1000))}s`;
   else if(run.waveIndex>=def.waves.length)next='LIMPE O MAPA';
   ui.gateHudNext.textContent=next;
-  ui.gateHudLives.textContent='♥ '.repeat(a.lives).trim()+' ♡ '.repeat(Math.max(0,3-a.lives)).trim();
+  ui.gateHudLives.textContent='♥ '.repeat(a.lives).trim()+' ♡ '.repeat(Math.max(0,galaxyGateDef().maxLives-a.lives)).trim();
 }
 function renderGalaxyGate(){
-  if(!progress||!ui.gatePieceGrid)return;normalizeGalaxyGateState();const g=progress.galaxyGate,gd=galaxyGateDef(),a=alphaGate(),count=a.pieces.length,atBase=isAtTrader(),unlocked=gateUnlocked(gd.key);
-  if(ui.gatePieceBadge)ui.gatePieceBadge.textContent=`${gd.label} ${count}/${gd.pieces}`;ui.gatePiecesText.textContent=`${count} / ${gd.pieces}`;ui.gateLivesText.textContent=a.lives;ui.gateCompletedText.textContent=a.completed;ui.gateUriText.textContent=fmt(progress.profile.uridium);ui.gateJumpBonus.textContent=fmt(g.jumpBonus);ui.gateRepairBonus.textContent=fmt(g.repairBonus);if(ui.gateLogDisks){normalizePilotBio();ui.gateLogDisks.textContent=fmt(progress.pilotBio.logDisks);}if(ui.gateCoreLabel)ui.gateCoreLabel.textContent=gd.label;if(ui.gateProtocolLabel)ui.gateProtocolLabel.textContent=`PORTAL ${gd.label}`;if(ui.gateCombatProtocol)ui.gateCombatProtocol.textContent=`PROTOCOLO ${gd.label} • ${gd.rounds.length} ROUNDS • 3 VIDAS • NPC ${Math.round(gd.enemyScale*100)}%`;if(ui.gateRewardNote)ui.gateRewardNote.innerHTML=`${gd.label} aplica dificuldade <b>${Math.round(gd.enemyScale*100)}%</b> e fecha <b>${gd.totalRewardMult}X</b> no total • ${gd.logReward} Núcleos Quânticos ao concluir.`;
-  if(ui.gateProtocolTabs)ui.gateProtocolTabs.querySelectorAll('[data-gate-protocol]').forEach(b=>{const key=b.dataset.gateProtocol;b.classList.toggle('active',key===gd.key);const locked=!gateUnlocked(key);b.disabled=locked;b.title=locked?`${GALAXY_GATE_DEFS[key].label} bloqueado`:'';});
-  ui.gatePieceGrid.innerHTML=Array.from({length:gd.pieces},(_,i)=>`<span class="gate-piece ${a.pieces.includes(i+1)?'found':''}" title="Peça ${i+1}">${i+1}</span>`).join('');ui.gateSpinButtons.innerHTML='';[1,5,10,50,100].forEach(n=>{const cost=n*alphaSpinUnitCost(),b=document.createElement('button');b.className='small-btn gate-spin-btn';b.innerHTML=`${n}x <small>${fmt(cost)} STL${premiumActive()?' • -10%':''}</small>`;b.disabled=!unlocked||progress.profile.uridium<cost;b.onclick=()=>spinAlpha(n);ui.gateSpinButtons.appendChild(b);});
+  if(!progress||!ui.gatePieceGrid)return;normalizeGalaxyGateState();
+  const g=progress.galaxyGate,gd=galaxyGateDef(),a=alphaGate(),count=a.pieces.length,atBase=isAtTrader(),unlocked=gateUnlocked(gd.key),lifeQuote=liveQuote(`gate_life:${gd.key}`),lifeCost=lifeQuote?.price??gd.lifeCost;
+  if(ui.gatePieceBadge)ui.gatePieceBadge.textContent=`${gd.label} ${count}/${gd.pieces}`;
+  ui.gatePiecesText.textContent=`${count} / ${gd.pieces}`;ui.gateLivesText.textContent=`${a.lives} / ${gd.maxLives}`;ui.gateCompletedText.textContent=a.completed;ui.gateUriText.textContent=fmt(progress.profile.uridium);ui.gateJumpBonus.textContent=fmt(g.jumpBonus);
+  if(ui.gateLifeBonus)ui.gateLifeBonus.textContent=fmt(g.lifeBonus||0);
+  if(ui.gateLogDisks){normalizePilotBio();ui.gateLogDisks.textContent=fmt(progress.pilotBio.logDisks);}
+  if(ui.gateCoreLabel)ui.gateCoreLabel.textContent=gd.label;if(ui.gateProtocolLabel)ui.gateProtocolLabel.textContent=`PORTAL ${gd.label}`;
+  if(ui.gateCombatProtocol)ui.gateCombatProtocol.textContent=`${gd.label} • ${gd.rounds.length} ROUNDS • ${gd.baseLives} VIDAS BASE / ${gd.maxLives} MÁX • DANO NPC ${Math.round(gd.damageScale*100)}%`;
+  if(ui.gateRewardNote)ui.gateRewardNote.innerHTML=`<b>PACOTE FINAL ${gd.label}:</b> ${gateFinalRewardText(gd)}<br><small>Cada Round limpo também paga ${gateRoundRewardText(gd)}. Bônus adicional sobre os abates: +${Math.round((gd.totalRewardMult-1)*100)}% no fechamento.</small>`;
+  if(ui.gateProtocolTabs)ui.gateProtocolTabs.querySelectorAll('[data-gate-protocol]').forEach(b=>{const key=b.dataset.gateProtocol;b.classList.toggle('active',key===gd.key);b.disabled=false;b.title=`${GALAXY_GATE_DEFS[key].label} • disponível`;});
+  ui.gatePieceGrid.innerHTML=Array.from({length:gd.pieces},(_,i)=>`<span class="gate-piece ${a.pieces.includes(i+1)?'found':''}" title="Peça ${i+1}">${i+1}</span>`).join('');
+  ui.gateSpinButtons.innerHTML='';[1,5,10,50,100].forEach(n=>{const cost=n*alphaSpinUnitCost(),b=document.createElement('button');b.className='small-btn gate-spin-btn';b.innerHTML=`${n}x <small>${fmt(cost)} STL${premiumActive()?' • -10%':''}</small>`;b.disabled=progress.profile.uridium<cost;b.onclick=()=>spinAlpha(n);ui.gateSpinButtons.appendChild(b);});
   renderGateRounds();
-  if(!unlocked){ui.gateAlphaStatusTitle.textContent=`${gd.label} BLOQUEADO`;ui.gateAlphaStatusText.textContent=`Conclua o Portal Astral ${GALAXY_GATE_DEFS[gd.unlock].label} ao menos 1 vez para liberar este protocolo.`;ui.gateJumpBtn.textContent='PROTOCOLO BLOQUEADO';ui.gateJumpBtn.disabled=true;}
-  else if(a.run?.active){ui.gateAlphaStatusTitle.textContent=`${gd.label} em andamento • Round ${a.run.round}`;ui.gateAlphaStatusText.textContent=`${a.lives} vidas restantes. NPCs eliminados permanecem eliminados ao retornar.`;ui.gateJumpBtn.textContent=isGalaxyGateMap()?`VOCÊ ESTÁ NO ${gd.label}`:atBase?`RETORNAR AO ${gd.label}`:'VOLTE À BASE X-1';ui.gateJumpBtn.disabled=isGalaxyGateMap()||!atBase||a.lives<=0;}
-  else if(a.built){ui.gateAlphaStatusTitle.textContent=`PORTAL ${gd.label} MONTADO`;ui.gateAlphaStatusText.textContent=`${gd.pieces}/${gd.pieces} peças • ${gd.rounds.length} rounds • 3 vidas • recompensa total ${gd.totalRewardMult}X.`;ui.gateJumpBtn.textContent=atBase?`SALTAR PARA O ${gd.label}`:'VOLTE À BASE X-1';ui.gateJumpBtn.disabled=!atBase;}
-  else{ui.gateAlphaStatusTitle.textContent='Em construção';ui.gateAlphaStatusText.textContent=`Faltam ${gd.pieces-count} peças para montar o portal ${gd.label}.`;ui.gateJumpBtn.textContent='PORTAL INCOMPLETO';ui.gateJumpBtn.disabled=true;}
-  ui.useRepairBonus.disabled=g.repairBonus<=0||isGalaxyGateMap();renderGateHud();
+  if(a.run?.active){ui.gateAlphaStatusTitle.textContent=`${gd.label} em andamento • Round ${a.run.round}`;ui.gateAlphaStatusText.textContent=`${a.lives}/${gd.maxLives} vidas. Você pode fugir, regenerar e retornar ao combate; NPCs eliminados continuam eliminados.`;ui.gateJumpBtn.textContent=isGalaxyGateMap()?`VOCÊ ESTÁ NO ${gd.label}`:atBase?`RETORNAR AO ${gd.label}`:'VOLTE À BASE X-1';ui.gateJumpBtn.disabled=isGalaxyGateMap()||!atBase||a.lives<=0;}
+  else if(a.built){ui.gateAlphaStatusTitle.textContent=`PORTAL ${gd.label} MONTADO`;ui.gateAlphaStatusText.textContent=`${gd.pieces}/${gd.pieces} peças • ${gd.rounds.length} rounds • ${a.lives}/${gd.maxLives} vidas • pensado para kite e progressão FREE.`;ui.gateJumpBtn.textContent=atBase?`SALTAR PARA O ${gd.label}`:'VOLTE À BASE X-1';ui.gateJumpBtn.disabled=!atBase;}
+  else{ui.gateAlphaStatusTitle.textContent=`${gd.label} • EM CONSTRUÇÃO`;ui.gateAlphaStatusText.textContent=`Todos os portais estão liberados. Faltam ${gd.pieces-count} peças para montar o ${gd.label}.`;ui.gateJumpBtn.textContent='PORTAL INCOMPLETO';ui.gateJumpBtn.disabled=true;}
+  if(ui.useLifeBonus){ui.useLifeBonus.textContent=`USAR VIDA RESERVA +1 (${fmt(g.lifeBonus||0)})`;ui.useLifeBonus.disabled=(g.lifeBonus||0)<=0||a.lives>=gd.maxLives||!atBase;}
+  if(ui.buyGateLife){ui.buyGateLife.textContent=`COMPRAR VIDA +1 • ${fmt(lifeCost)} CR`;ui.buyGateLife.disabled=a.lives>=gd.maxLives||!atBase||progress.profile.credits<lifeCost;}
+  renderGateHud();
 }
+
 function openGalaxyGate(){
   if(isGalaxyGateMap()){
     const a=alphaGate(),def=galaxyGateDef().rounds[a.run?.round-1];
@@ -5276,7 +5302,8 @@ if(ui.arenaBattleSkip)ui.arenaBattleSkip.onclick=()=>{arenaRuntime.skipAnimation
 if(ui.closeGate)ui.closeGate.onclick=()=>ui.gateModal.classList.add('hidden');
 if(ui.gateJumpBtn)ui.gateJumpBtn.onclick=()=>enterAlphaGate();
 if(ui.gateProtocolTabs)ui.gateProtocolTabs.onclick=e=>{const b=e.target.closest('[data-gate-protocol]');if(!b||isGalaxyGateMap())return;const key=b.dataset.gateProtocol;if(!gateUnlocked(key)){showToast(`${GALAXY_GATE_DEFS[key].label} está bloqueado`);return;}progress.galaxyGate.selected=key;saveGame();renderGalaxyGate();};
-if(ui.useRepairBonus)ui.useRepairBonus.onclick=()=>useGalaxyRepairBonus();
+if(ui.useLifeBonus)ui.useLifeBonus.onclick=()=>useGalaxyLifeBonus();
+if(ui.buyGateLife)ui.buyGateLife.onclick=()=>buyGalaxyLife();
 if(ui.petBtn)ui.petBtn.onclick=()=>openHangar('pet');
 if(ui.closePet)ui.closePet.onclick=()=>ui.petModal.classList.add('hidden');
 if(ui.shopBtn)ui.shopBtn.onclick=()=>openShop();

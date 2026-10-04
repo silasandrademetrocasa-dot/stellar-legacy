@@ -6,7 +6,7 @@
 <meta content="width=device-width,initial-scale=1,user-scalable=no" name="viewport"/>
 <meta content="#030816" name="theme-color"/>
 <title>Stellar Legacy</title>
-<link href="/style.css?v=16.7.5" rel="stylesheet"/>
+<link href="/style.css?v=16.7.6" rel="stylesheet"/>
 </head>
 <body>
 <div id="app">
@@ -363,7 +363,7 @@
     <div class="modal-header">
       <div>
         <div class="eyebrow">PORTAIS ASTRAIS</div>
-        <h2>Materializador do Portal</h2><div class="gate-protocol-tabs" id="gateProtocolTabs"><button class="small-btn active" data-gate-protocol="alpha">AURORA</button><button class="small-btn" data-gate-protocol="beta" disabled title="Bloqueado">NEXUS 🔒</button><button class="small-btn" data-gate-protocol="gamma" disabled title="Bloqueado">ECLIPSE 🔒</button></div>
+        <h2>Materializador do Portal</h2><div class="gate-protocol-tabs" id="gateProtocolTabs"><button class="small-btn active" data-gate-protocol="alpha">AURORA</button><button class="small-btn" data-gate-protocol="beta">NEXUS</button><button class="small-btn" data-gate-protocol="gamma">ECLIPSE</button></div>
       </div>
       <button class="small-btn" id="closeGate">Fechar</button>
     </div>
@@ -398,23 +398,26 @@
           </div>
           <div class="gate-generator-wallet">STL <b id="gateUriText">0</b></div>
         </div>
-        <p class="muted" id="gateSpinCostNote">Cada sorteio custa <b>100 Stellarium</b>. PREMIUM recebe <b>10% de desconto</b> no Materializador. Pode vir peça AURORA, <b>Núcleos Quânticos</b>, munição, míssil, Voidite, Créditos, Bônus de Salto ou Bônus de Reparo.</p>
+        <p class="muted" id="gateSpinCostNote">Cada sorteio custa <b>100 Stellarium</b>. PREMIUM recebe <b>10% de desconto</b> no Materializador. Pode vir peça do portal selecionado, <b>Núcleos Quânticos</b>, munição, míssil, Voidite, Créditos, Bônus de Salto ou <b>Vida Astral Reserva</b>.</p>
         <div class="gate-spin-buttons" id="gateSpinButtons"></div>
         <div class="gate-generator-inventory">
           <div><span>BÔNUS DE SALTO</span><b id="gateJumpBonus">0</b></div>
-          <div><span>BÔNUS DE REPARO</span><b id="gateRepairBonus">0</b></div>
+          <div><span>VIDAS RESERVA</span><b id="gateLifeBonus">0</b></div>
           <div><span>NÚCLEOS QUÂNTICOS</span><b id="gateLogDisks">0</b></div>
-          <button class="ghost-btn" id="useRepairBonus">REPARAR NAVE</button>
+          <div class="gate-life-actions">
+            <button class="ghost-btn" id="useLifeBonus">USAR VIDA RESERVA +1</button>
+            <button class="primary-btn" id="buyGateLife">COMPRAR VIDA +1</button>
+          </div>
         </div>
         <div class="gate-result-box" id="gateResultBox">Faça um sorteio para ver os resultados.</div>
       </section>
     </div>
 
     <section class="gate-rounds-section">
-      <div class="eyebrow" id="gateCombatProtocol">PROTOCOLO DE COMBATE • 8 ROUNDS • 3 VIDAS</div>
+      <div class="eyebrow" id="gateCombatProtocol">PROTOCOLO DE COMBATE • ROUNDS + ONDAS • 3 VIDAS BASE / 5 MÁX</div>
       <div class="gate-rounds-grid" id="gateRoundsGrid"></div>
       <div class="gate-reward-note">
-        <b>RECOMPENSA FINAL:</b> <span id="gateRewardNote">AURORA paga 3X no total; NEXUS e ECLIPSE aumentam dificuldade e multiplicador.</span>
+        <b>RECOMPENSA FINAL:</b> <span id="gateRewardNote">Cada portal possui recompensa por Round e um pacote final garantido com Núcleos Quânticos, CR, STL, munição, míssil e Voidite.</span>
       </div>
     </section>
   </div>
@@ -773,6 +776,6 @@
   </div>
 </div>
 </div>
-<script src="/game.js?v=16.7.5" type="module"></script>
+<script src="/game.js?v=16.7.6" type="module"></script>
 </body>
 </html>
