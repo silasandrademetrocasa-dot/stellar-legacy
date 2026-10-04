@@ -1,4 +1,4 @@
-# Stellar Legacy V16.6.1 — Catálogo de Eventos
+# Stellar Legacy V16.7.0 — Catálogo de Eventos
 
 ## Eventos-base já conhecidos do motor
 1. **INVASÃO RIFT** (`invasion`) — ondas de NPCs de evento em mapas normais.

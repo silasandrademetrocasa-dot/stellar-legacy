@@ -70,6 +70,22 @@ function roomKey(mapId,territoryFaction){
   return ['x1','x2','x3','x4'].includes(mapId) ? `${territoryFaction||'earth'}:${mapId}` : `battle:${mapId}`;
 }
 function sanitizeRoomMap(mapId){ return MAPS[mapId] && !MAPS[mapId].gate ? mapId : 'x1'; }
+const EVENT_VARIANTS={
+  invasion:{mode:'wave',progressLabel:'INVASORES',waveCount:8,minAlive:4,rewardMult:1.22},
+  battle:{mode:'battle_wave',progressLabel:'ABATES BATTLE',waveCount:6,minAlive:3,rewardMult:1.22},
+  prime:{mode:'boss',progressLabel:'BOSS RARO',bossName:'RIFT TYRANT',bossType:'bossSibelon',bossScale:4.2,bossRewardMult:2.4,bossSize:68,bossColor:'#ff4f9a'},
+  mining:{mode:'ore',progressLabel:'RECURSOS',orePool:['Prometium','Endurium','Terbium','Promerium'],oreCount:12,oreRespawnMin:5,oreAmount:[12,26]},
+  convoy:{mode:'convoy',progressLabel:'ESCOLTA',convoyHp:900000,convoySpeed:105,waveCount:3,waveRespawnMs:12000,rewardMult:1.22},
+  nexus_breach:{mode:'wave',progressLabel:'FENDAS NEXUS',waveCount:8,minAlive:4,pool:['saimon','mordon','devolarium'],namePrefix:'NEXUS',color:'#ff9666',scale:1.25,rewardMult:1.36},
+  eclipse_surge:{mode:'wave',progressLabel:'SURTO ECLIPSE',waveCount:7,minAlive:4,pool:['lordakia','saimon','mordon'],namePrefix:'ECLIPSE',color:'#b57cff',scale:1.2,speedMult:1.18,rewardMult:1.34},
+  relic_hunt:{mode:'ore',progressLabel:'RELÍQUIAS',orePool:['Promerium','Terbium','Endurium','Promerium'],oreCount:12,oreRespawnMin:5,oreAmount:[18,34]},
+  quantum_storm:{mode:'convoy',progressLabel:'ESTABILIZAÇÃO',convoyHp:1150000,convoySpeed:118,waveCount:4,waveRespawnMs:10000,pool:['saimon','mordon','devolarium'],namePrefix:'QUANTUM',color:'#62efff',scale:1.18,rewardMult:1.4},
+  shadow_fleet:{mode:'wave',progressLabel:'FROTA SHADOW',waveCount:6,minAlive:3,pool:['mordon','devolarium','sibelon'],namePrefix:'SHADOW',color:'#8eb6ff',scale:1.38,rewardMult:1.48},
+  aux_uprising:{mode:'wave',progressLabel:'AUX HOSTIS',waveCount:8,minAlive:4,pool:['recruitStreuner','aiderStreuner','lordakia'],namePrefix:'AUX',color:'#63eaff',scale:1.08,speedMult:1.35,rewardMult:1.30,size:20},
+  titan_assault:{mode:'boss',progressLabel:'TITÃ',bossName:'TITAN EXARCH',bossType:'bossSibelon',bossScale:5.2,bossRewardMult:2.8,bossSize:76,bossColor:'#ff7c52'},
+  ore_frenzy:{mode:'ore',progressLabel:'MINÉRIO',orePool:['Prometium','Endurium','Terbium','Promerium'],oreCount:16,oreRespawnMin:7,oreAmount:[24,42]}
+};
+function eventVariant(id){return EVENT_VARIANTS[String(id||'')]||EVENT_VARIANTS.invasion;}
 function safeJsonSend(ws,payload){
   if(ws?.readyState!==WebSocket.OPEN) return false;
   try{ ws.send(JSON.stringify(payload)); return true; }catch{ return false; }
@@ -152,14 +168,16 @@ class Room {
   }
 
   currentEventDef(){ return this.world.currentEvent(); }
+  eventProfile(ev=this.event){return eventVariant(ev?.id);}
+  eventMode(ev=this.event){return this.eventProfile(ev).mode;}
   eventEligible(ev){
     if(!ev)return false;
-    const rules=ev.rules||{};
+    const rules=ev.rules||{},mode=this.eventMode(ev);
     if(rules.battle_only)return !!this.map.battle;
     if(rules.normal_only&&this.map.battle)return false;
     if(Number(rules.min_tier||0)>Number(this.map.tier||0))return false;
-    if(ev.id==='battle')return !!this.map.battle;
-    if(ev.id==='prime')return !!this.map.battle||Number(this.map.tier||1)>=2;
+    if(mode==='battle_wave')return !!this.map.battle;
+    if(mode==='boss')return !!this.map.battle||Number(this.map.tier||1)>=2;
     return !this.map.battle;
   }
 
@@ -179,38 +197,41 @@ class Room {
     this.clearEventEntities();
     this.event={...ev,progress:0,complete:false};
     if(!this.eventEligible(ev))return;
-    if(ev.id==='invasion') this.spawnEventWave(8);
-    if(ev.id==='battle') this.spawnEventWave(6);
-    if(ev.id==='prime') this.spawnPrime();
-    if(ev.id==='mining') this.spawnEventOres(12);
-    if(ev.id==='convoy') this.startConvoy();
+    const profile=this.eventProfile(ev),mode=profile.mode;
+    if(mode==='wave'||mode==='battle_wave') this.spawnEventWave(profile.waveCount||6);
+    if(mode==='boss') this.spawnPrime();
+    if(mode==='ore') this.spawnEventOres(profile.oreCount||12);
+    if(mode==='convoy') this.startConvoy();
     this.broadcastEvent(true);
     if(this.clients.size)this.broadcast(this.snapshot());
   }
 
-  eventPool(){
+  eventPool(ev=this.event){
+    const profile=this.eventProfile(ev);
+    if(Array.isArray(profile.pool)&&profile.pool.length)return profile.pool;
     const tier=Number(this.map.tier||1);
     return tier>=4?['mordon','devolarium','sibelon']:tier>=3?['saimon','mordon','devolarium']:tier>=2?['lordakia','saimon','mordon']:['streuner','recruitStreuner','aiderStreuner'];
   }
   spawnEventWave(count=6){
-    const ev=this.event;if(!ev)return;const pool=this.eventPool();
+    const ev=this.event;if(!ev)return;const profile=this.eventProfile(ev),pool=this.eventPool(ev),rewardMult=profile.rewardMult||1.22;
     for(let i=0;i<count;i++){
-      const type=pool[Math.floor(Math.random()*pool.length)],e=this.makeNpc(type,{eventNpc:true,eventId:ev.eventId,forceChase:true,rewardMult:1.22});
+      const type=pool[Math.floor(Math.random()*pool.length)],baseName=(NPC_TYPES[type]?.name||String(type||'NPC')).toUpperCase();
+      const e=this.makeNpc(type,{eventNpc:true,eventId:ev.eventId,forceChase:true,rewardMult,scale:profile.scale||1,color:profile.color,size:profile.size,speedMult:profile.speedMult||1,name:profile.namePrefix?(profile.namePrefix+' '+baseName):undefined});
       if(e){this.npcs.set(e.id,e);this.broadcast({type:'npc_spawn',entity:this.publicNpc(e)});}
     }
   }
   spawnPrime(){
-    const ev=this.event;if(!ev)return;
-    const e=this.makeNpc('bossSibelon',{eventNpc:true,eventId:ev.eventId,forceChase:true,name:'RIFT TYRANT',scale:4.2,rewardMult:2.4,size:68,color:'#ff4f9a'});
+    const ev=this.event;if(!ev)return;const profile=this.eventProfile(ev);
+    const e=this.makeNpc(profile.bossType||'bossSibelon',{eventNpc:true,eventId:ev.eventId,forceChase:true,name:profile.bossName||'RIFT TYRANT',scale:profile.bossScale||4.2,rewardMult:profile.bossRewardMult||2.4,size:profile.bossSize||68,color:profile.bossColor||'#ff4f9a'});
     if(e){e.aggroRange=1800;e.attackRange=540;this.npcs.set(e.id,e);this.broadcast({type:'npc_spawn',entity:this.publicNpc(e)});}
   }
   spawnEventOres(count=12){
-    const ev=this.event;if(!ev)return;const pool=['Prometium','Endurium','Terbium','Promerium'];
-    for(let i=0;i<count;i++){const o=this.makeOre(pool[Math.floor(Math.random()*pool.length)],{eventOre:true,eventId:ev.eventId,amount:rand(12,26),r:rand(11,17)});this.ores.set(o.id,o);this.broadcast({type:'ore_spawn',ore:o});}
+    const ev=this.event;if(!ev)return;const profile=this.eventProfile(ev),pool=Array.isArray(profile.orePool)&&profile.orePool.length?profile.orePool:['Prometium','Endurium','Terbium','Promerium'],amountRange=Array.isArray(profile.oreAmount)?profile.oreAmount:[12,26];
+    for(let i=0;i<count;i++){const o=this.makeOre(pool[Math.floor(Math.random()*pool.length)],{eventOre:true,eventId:ev.eventId,amount:rand(amountRange[0],amountRange[1]),r:rand(11,17)});this.ores.set(o.id,o);this.broadcast({type:'ore_spawn',ore:o});}
   }
   startConvoy(){
-    const ev=this.event;if(!ev)return;const sx=420,sy=420,tx=this.map.world.w-420,ty=this.map.world.h-420;
-    this.convoy={eventId:ev.eventId,x:sx,y:sy,sx,sy,tx,ty,totalDistance:Math.max(1,Math.hypot(tx-sx,ty-sy)),hp:900000,maxHp:900000,speed:105,lastHitAt:0};this.convoyRetryAt=0;
+    const ev=this.event;if(!ev)return;const profile=this.eventProfile(ev),sx=420,sy=420,tx=this.map.world.w-420,ty=this.map.world.h-420;
+    this.convoy={eventId:ev.eventId,x:sx,y:sy,sx,sy,tx,ty,totalDistance:Math.max(1,Math.hypot(tx-sx,ty-sy)),hp:profile.convoyHp||900000,maxHp:profile.convoyHp||900000,speed:profile.convoySpeed||105,lastHitAt:0};this.convoyRetryAt=0;
     this.nextEventWaveAt=nowMs()+3000;
   }
 
@@ -295,13 +316,11 @@ class Room {
     const dead=this.publicNpc({...e,hp:0});
     this.broadcast({type:'npc_death',entity:dead,killerUserId,contributors});
     for(const c of this.clients){const row=contributors.find(x=>x.userId===c.player?.userId);if(row)safeJsonSend(c,{type:'kill_credit',entity:dead,share:row.share,finalBlow:c.player.userId===killerUserId});}
-    if(this.event?.id==='battle'&&!this.event.complete)this.addEventProgress(1);
-    else if(e.eventNpc&&this.event?.eventId===e.eventId){
-      if(this.event.id==='invasion')this.addEventProgress(1);
-      if(this.event.id==='prime')this.addEventProgress(1);
-    }
+    const mode=this.eventMode();
+    if(mode==='battle_wave'&&!this.event?.complete)this.addEventProgress(1);
+    else if(e.eventNpc&&this.event?.eventId===e.eventId&&(mode==='wave'||mode==='boss'))this.addEventProgress(1);
     if(e.eventNpc&&this.event?.eventId===e.eventId){
-      if((this.event.id==='invasion'||this.event.id==='battle')&&!this.event.complete)this.respawns.push({kind:'eventNpc',type:e.type,at:nowMs()+rand(7000,12000),eventId:e.eventId});
+      if((mode==='wave'||mode==='battle_wave')&&!this.event.complete)this.respawns.push({kind:'eventNpc',type:e.type,at:nowMs()+rand(7000,12000),eventId:e.eventId});
     }else this.respawns.push({kind:'npc',type:e.type,at:nowMs()+rand(6000,13000)});
   }
 
@@ -310,9 +329,10 @@ class Room {
     if(Math.hypot(p.x-o.x,p.y-o.y)>90)return safeJsonSend(ws,{type:'ore_collect_result',entityId:o.id,ok:false,reason:'range'});
     this.ores.delete(o.id);this.eventParticipants.add(p.userId);
     safeJsonSend(ws,{type:'ore_collected',ore:o});this.broadcast({type:'ore_remove',entityId:o.id,collectorUserId:p.userId},ws);
-    if(o.eventOre&&this.event?.eventId===o.eventId&&this.event.id==='mining')this.addEventProgress(o.amount);
+    const mode=this.eventMode();
+    if(o.eventOre&&this.event?.eventId===o.eventId&&mode==='ore')this.addEventProgress(o.amount);
     if(!o.eventOre)this.oreRespawns.push({type:o.type,at:nowMs()+rand(5000,12000)});
-    else if(this.event&&!this.event.complete&&this.event.id==='mining')this.oreRespawns.push({type:o.type,eventOre:true,eventId:o.eventId,amount:o.amount,at:nowMs()+rand(8000,14000)});
+    else if(this.event&&!this.event.complete&&mode==='ore')this.oreRespawns.push({type:o.type,eventOre:true,eventId:o.eventId,amount:o.amount,at:nowMs()+rand(8000,14000)});
   }
 
   addEventProgress(amount){
@@ -329,16 +349,24 @@ class Room {
       if(!protectedNow&&(retaliating||force||d<e.aggroRange)&&d>e.attackRange*.8){const nd=Math.max(1,d);e.x=clamp(e.x+dx/nd*e.speed*dt,25,this.map.world.w-25);e.y=clamp(e.y+dy/nd*e.speed*dt,25,this.map.world.h-25);}else if(!force&&((!retaliating&&d>e.aggroRange)||protectedNow)){e.x=clamp(e.x+Math.cos(e.angle)*e.speed*.16*dt,25,this.map.world.w-25);e.y=clamp(e.y+Math.sin(e.angle)*e.speed*.16*dt,25,this.map.world.h-25);}
       const attackDelay=((String(e.type).startsWith('boss')?1.6:1.15)*(e.bossAttackScale||1))*1000;if(!protectedNow&&d<e.attackRange&&now-(e.lastShot||0)>=attackDelay){e.lastShot=now;const victim=[...this.clients].find(c=>c.player?.userId===p.userId);safeJsonSend(victim,{type:'npc_attack',entityId:e.id,damage:Math.max(1,Math.round(e.damage*rand(.92,1.12))),x:e.x,y:e.y,retaliation:retaliating,aggroUserId:e.aggroUserId||null});}
     }
-    for(let i=this.respawns.length-1;i>=0;i--){const r=this.respawns[i];if(now<r.at)continue;this.respawns.splice(i,1);if(r.kind==='eventNpc'&&this.event?.eventId!==r.eventId)continue;const e=this.makeNpc(r.type,r.kind==='eventNpc'?{eventNpc:true,eventId:r.eventId,forceChase:true,rewardMult:1.22}:{});if(e){this.npcs.set(e.id,e);this.broadcast({type:'npc_spawn',entity:this.publicNpc(e)});}}
+    for(let i=this.respawns.length-1;i>=0;i--){const r=this.respawns[i];if(now<r.at)continue;this.respawns.splice(i,1);if(r.kind==='eventNpc'&&this.event?.eventId!==r.eventId)continue;const profile=r.kind==='eventNpc'?this.eventProfile():null,baseName=(NPC_TYPES[r.type]?.name||String(r.type||'NPC')).toUpperCase();const e=this.makeNpc(r.type,r.kind==='eventNpc'?{eventNpc:true,eventId:r.eventId,forceChase:true,rewardMult:profile?.rewardMult||1.22,scale:profile?.scale||1,color:profile?.color,size:profile?.size,speedMult:profile?.speedMult||1,name:profile?.namePrefix?(profile.namePrefix+' '+baseName):undefined}:{});if(e){this.npcs.set(e.id,e);this.broadcast({type:'npc_spawn',entity:this.publicNpc(e)});}}
     for(let i=this.oreRespawns.length-1;i>=0;i--){const r=this.oreRespawns[i];if(now<r.at)continue;this.oreRespawns.splice(i,1);if(r.eventOre&&this.event?.eventId!==r.eventId)continue;const o=this.makeOre(r.type,r.eventOre?{eventOre:true,eventId:r.eventId,amount:r.amount}:{});this.ores.set(o.id,o);this.broadcast({type:'ore_spawn',ore:o});}
-    if(this.event?.id==='invasion'&&!this.event.complete){const alive=[...this.npcs.values()].filter(e=>e.eventNpc&&e.eventId===this.event.eventId).length;if(alive<4)this.spawnEventWave(8-alive);}
-    if(this.event?.id==='battle'&&!this.event.complete){const alive=[...this.npcs.values()].filter(e=>e.eventNpc&&e.eventId===this.event.eventId).length;if(alive<3)this.spawnEventWave(6-alive);}
-    if(this.event?.id==='mining'&&!this.event.complete){const alive=[...this.ores.values()].filter(o=>o.eventOre&&o.eventId===this.event.eventId).length;if(alive<5)this.spawnEventOres(12-alive);}
-    if(this.event?.id==='convoy'&&!this.event.complete){
-      if(!this.convoy&&now>=this.convoyRetryAt)this.startConvoy();
-      if(this.convoy){const c=this.convoy;const close=[...this.players.values()].filter(p=>Math.hypot(p.x-c.x,p.y-c.y)<950);if(close.length){for(const p of close)this.eventParticipants.add(p.userId);const dx=c.tx-c.x,dy=c.ty-c.y,d=Math.hypot(dx,dy);if(d>10){const step=Math.min(d,c.speed*dt);c.x+=dx/Math.max(1,d)*step;c.y+=dy/Math.max(1,d)*step;this.event.progress=Math.max(this.event.progress,Math.round((1-d/c.totalDistance)*100));}if(d<=14)this.addEventProgress(100-this.event.progress);}
-        const nearby=[...this.npcs.values()].filter(e=>e.eventNpc&&e.hp>0&&Math.hypot(e.x-c.x,e.y-c.y)<270);if(nearby.length&&now-c.lastHitAt>800){c.lastHitAt=now;const dmg=nearby.reduce((sum,e)=>sum+Math.max(1000,e.damage*.12),0);c.hp=Math.max(0,c.hp-dmg);if(c.hp<=0){this.convoy=null;this.event.progress=0;this.convoyRetryAt=now+15000;this.broadcastEvent(true);}}
-        if(now>=this.nextEventWaveAt){this.nextEventWaveAt=now+12000;this.spawnEventWave(3);}
+    if(this.event&&!this.event.complete){
+      const profile=this.eventProfile(),mode=profile.mode;
+      if(mode==='wave'||mode==='battle_wave'){
+        const alive=[...this.npcs.values()].filter(e=>e.eventNpc&&e.eventId===this.event.eventId).length,minimum=profile.minAlive||3,targetWave=profile.waveCount||6;
+        if(alive<minimum)this.spawnEventWave(Math.max(1,targetWave-alive));
+      }
+      if(mode==='ore'){
+        const alive=[...this.ores.values()].filter(o=>o.eventOre&&o.eventId===this.event.eventId).length,minimum=profile.oreRespawnMin||5,targetCount=profile.oreCount||12;
+        if(alive<minimum)this.spawnEventOres(Math.max(1,targetCount-alive));
+      }
+      if(mode==='convoy'){
+        if(!this.convoy&&now>=this.convoyRetryAt)this.startConvoy();
+        if(this.convoy){const c=this.convoy;const close=[...this.players.values()].filter(p=>Math.hypot(p.x-c.x,p.y-c.y)<950);if(close.length){for(const p of close)this.eventParticipants.add(p.userId);const dx=c.tx-c.x,dy=c.ty-c.y,d=Math.hypot(dx,dy);if(d>10){const step=Math.min(d,c.speed*dt);c.x+=dx/Math.max(1,d)*step;c.y+=dy/Math.max(1,d)*step;this.event.progress=Math.max(this.event.progress,Math.round((1-d/c.totalDistance)*100));}if(d<=14)this.addEventProgress(100-this.event.progress);}
+          const nearby=[...this.npcs.values()].filter(e=>e.eventNpc&&e.hp>0&&Math.hypot(e.x-c.x,e.y-c.y)<270);if(nearby.length&&now-c.lastHitAt>800){c.lastHitAt=now;const dmg=nearby.reduce((sum,e)=>sum+Math.max(1000,e.damage*.12),0);c.hp=Math.max(0,c.hp-dmg);if(c.hp<=0){this.convoy=null;this.event.progress=0;this.convoyRetryAt=now+15000;this.broadcastEvent(true);}}
+          if(now>=this.nextEventWaveAt){this.nextEventWaveAt=now+(profile.waveRespawnMs||12000);this.spawnEventWave(profile.waveCount||3);}
+        }
       }
     }
     if(now-this.lastBroadcastAt>=100){this.lastBroadcastAt=now;this.broadcast({type:'npc_batch',entities:[...this.npcs.values()].map(e=>({id:e.id,x:e.x,y:e.y,hp:e.hp,shield:e.shield,angle:e.angle,bossPhase:e.bossPhase}))});}

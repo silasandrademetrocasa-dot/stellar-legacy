@@ -6,7 +6,7 @@
 <meta content="width=device-width,initial-scale=1,user-scalable=no" name="viewport"/>
 <meta content="#030816" name="theme-color"/>
 <title>Stellar Legacy</title>
-<link href="/style.css?v=16.6.1" rel="stylesheet"/>
+<link href="/style.css?v=16.7.0" rel="stylesheet"/>
 </head>
 <body>
 <div id="app">
@@ -121,8 +121,19 @@
     <div class="pet-float-status" id="petFloatStatus">Aguardando...</div>
   </div>
 </section>
+
+<section class="hud-panel activity-float-panel" id="activityPanel">
+  <div class="activity-float-head">
+    <span>ATIVIDADES</span>
+    <button id="activityClearBtn" type="button" title="Limpar histórico">×</button>
+  </div>
+  <div class="activity-feed" id="activityFeed">
+    <div class="activity-empty">As últimas ações e recompensas aparecem aqui.</div>
+  </div>
+</section>
 </div>
 
+<div class="right-hud-stack" id="rightHudStack">
 <section class="target-lock-hud hidden" id="targetLockHud" aria-live="polite">
   <div class="target-lock-head">
     <span>🎯 TARGET LOCK</span>
@@ -136,27 +147,18 @@
   </div>
 </section>
 
-<section class="combat-state-hud hidden" id="combatStateHud" aria-live="polite">
-  <span class="combat-state-dot"></span><b id="combatStateText">EM COMBATE</b><small id="combatStateMeta">—</small>
-</section>
-
 <button class="galaxy-event-hud hidden" id="galaxyEventHud" type="button" aria-label="Abrir evento galáctico">
   <span class="galaxy-event-icon" id="galaxyEventIcon">⚠</span>
   <span class="galaxy-event-copy"><small>EVENTO GALÁCTICO</small><b id="galaxyEventName">ANOMALIA</b><em id="galaxyEventObjective">—</em></span>
   <span class="galaxy-event-side"><span class="galaxy-event-side-top"><b id="galaxyEventTimer">00:00</b><span class="tactical-collapse-btn galaxy-event-toggle" id="galaxyEventToggle" role="button" tabindex="0" title="Minimizar / expandir evento" aria-label="Minimizar evento">▾</span></span><i><span id="galaxyEventProgress"></span></i></span>
 </button>
+</div>
+
+<section class="combat-state-hud hidden" id="combatStateHud" aria-live="polite">
+  <span class="combat-state-dot"></span><b id="combatStateText">EM COMBATE</b><small id="combatStateMeta">—</small>
+</section>
 
 <div class="combat-flash" id="combatFlash" aria-hidden="true"></div>
-
-<section class="hud-panel activity-float-panel" id="activityPanel">
-  <div class="activity-float-head">
-    <span>ATIVIDADE</span>
-    <button id="activityClearBtn" type="button" title="Limpar histórico">×</button>
-  </div>
-  <div class="activity-feed" id="activityFeed">
-    <div class="activity-empty">As últimas ações e recompensas aparecem aqui.</div>
-  </div>
-</section>
 
 <section class="hud-panel gate-hud hidden" id="gateHud">
   <div class="gate-hud-title" id="gateHudTitle">PORTAL ASTRAL AURORA</div>
@@ -766,6 +768,6 @@
   </div>
 </div>
 </div>
-<script src="/game.js?v=16.6.1" type="module"></script>
+<script src="/game.js?v=16.7.0" type="module"></script>
 </body>
 </html>

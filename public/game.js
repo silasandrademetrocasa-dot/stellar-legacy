@@ -1,7 +1,7 @@
-import { FACTIONS, SHIPS, ITEMS, LASER_AMMO, ROCKETS, NPC_TYPES, MAPS, RESOURCES } from './data.js?v=16.6.1';
-import { GAME_ASSETS } from './assets/v8/manifest.js?v=16.6.1';
-import { signUp, signIn, requestPasswordReset, restorePasswordRecoveryFromUrl, restoreSession, signOutLocal, checkGameSession, endGameSession, getUser, getSessionCredentials, loadCloudSave, saveCloudSave, updateCallsign, updatePassword, loadRankings, loadAuctionBids, saveAuctionBidOnline, markAuctionBidStatusOnline, loadAuctionMarket, upsertPlayerPresenceOnline, loadMapPresenceOnline, removePlayerPresenceOnline, queuePvpAttackOnline, consumePvpDamageEventsOnline, syncArenaProfileOnline, loadArenaState, loadArenaDailyRewardStatus, claimArenaDailyReward, loadArenaOpponents, loadArenaHistory, arenaAttackOnline, listClansOnline, loadMyClanOnline, createClanOnline, joinClanOnline, leaveClanOnline, transferClanCreditsOnline, claimClanCreditGrantsOnline, recordClanAlienKillOnline, getPremiumShopOnline, testPurchasePremiumOnline, loadWarfrontStateOnline, hitWorldBossOnline, claimWorldBossRewardOnline, declareClanWarOnline, recordClanWarScoreOnline, loadLiveOpsOnline, purchaseLiveCatalogOnline, economyActionOnline, getChatHistoryOnline, sendChatMessageOnline, getMyDesignersOnline, setDesignLoadoutOnline, claimGateDroneDesignOnline, claimEventDesignerOnline } from './api.js?v=16.6.1';
-import { SharedUniverseClient } from './world.js?v=16.6.1';
+import { FACTIONS, SHIPS, ITEMS, LASER_AMMO, ROCKETS, NPC_TYPES, MAPS, RESOURCES } from './data.js?v=16.7.0';
+import { GAME_ASSETS } from './assets/v8/manifest.js?v=16.7.0';
+import { signUp, signIn, requestPasswordReset, restorePasswordRecoveryFromUrl, restoreSession, signOutLocal, checkGameSession, endGameSession, getUser, getSessionCredentials, loadCloudSave, saveCloudSave, updateCallsign, updatePassword, loadRankings, loadAuctionBids, saveAuctionBidOnline, markAuctionBidStatusOnline, loadAuctionMarket, upsertPlayerPresenceOnline, loadMapPresenceOnline, removePlayerPresenceOnline, queuePvpAttackOnline, consumePvpDamageEventsOnline, syncArenaProfileOnline, loadArenaState, loadArenaDailyRewardStatus, claimArenaDailyReward, loadArenaOpponents, loadArenaHistory, arenaAttackOnline, listClansOnline, loadMyClanOnline, createClanOnline, joinClanOnline, leaveClanOnline, transferClanCreditsOnline, claimClanCreditGrantsOnline, recordClanAlienKillOnline, getPremiumShopOnline, testPurchasePremiumOnline, loadWarfrontStateOnline, hitWorldBossOnline, claimWorldBossRewardOnline, declareClanWarOnline, recordClanWarScoreOnline, loadLiveOpsOnline, purchaseLiveCatalogOnline, economyActionOnline, getChatHistoryOnline, sendChatMessageOnline, getMyDesignersOnline, setDesignLoadoutOnline, claimGateDroneDesignOnline, claimEventDesignerOnline } from './api.js?v=16.7.0';
+import { SharedUniverseClient } from './world.js?v=16.7.0';
 
 const canvas = document.querySelector('#game');
 const ctx = canvas.getContext('2d');
@@ -1989,6 +1989,22 @@ function updateWarfrontRuntime(){if(!authenticated||!progress)return;if(warfront
 const GALAXY_EVENT_DEFS=[];
 const galaxyEventRuntime={forcedIndex:null,activeId:null,mapKey:null,convoy:null,nextWaveAt:0,retryAt:0,lastEnsureAt:0};
 const NO_GALAXY_EVENT={id:'none',icon:'◇',name:'SEM EVENTO ATIVO',desc:'Aguardando a próxima janela configurada no Supabase.',target:1,reward:{credits:0,uridium:0,xp:0,cores:0},rules:{},start:Date.now(),end:Date.now()+60000,eventId:'v16:none'};
+const GALAXY_EVENT_VARIANTS={
+  invasion:{mode:'wave',progressLabel:'INVASORES',waveCount:8,minAlive:4,rewardMult:1.22},
+  battle:{mode:'battle_wave',progressLabel:'ABATES BATTLE',waveCount:6,minAlive:3,rewardMult:1.22},
+  prime:{mode:'boss',progressLabel:'BOSS RARO',bossName:'RIFT TYRANT',bossType:'bossSibelon',bossScale:2.2,bossRewardMult:2.4,bossSize:68,bossColor:'#ff4f9a'},
+  mining:{mode:'ore',progressLabel:'RECURSOS',orePool:['Prometium','Endurium','Terbium','Promerium'],oreCount:12,oreRespawnMin:5,oreAmount:[12,26]},
+  convoy:{mode:'convoy',progressLabel:'ESCOLTA',convoyHp:900000,convoySpeed:105,waveCount:3,waveRespawnMs:12000,rewardMult:1.22},
+  nexus_breach:{mode:'wave',progressLabel:'FENDAS NEXUS',waveCount:8,minAlive:4,pool:['saimon','mordon','devolarium'],namePrefix:'NEXUS',color:'#ff9666',scale:1.25,rewardMult:1.36},
+  eclipse_surge:{mode:'wave',progressLabel:'SURTO ECLIPSE',waveCount:7,minAlive:4,pool:['lordakia','saimon','mordon'],namePrefix:'ECLIPSE',color:'#b57cff',scale:1.2,speedMult:1.18,rewardMult:1.34},
+  relic_hunt:{mode:'ore',progressLabel:'RELÍQUIAS',orePool:['Promerium','Terbium','Endurium','Promerium'],oreCount:12,oreRespawnMin:5,oreAmount:[18,34]},
+  quantum_storm:{mode:'convoy',progressLabel:'ESTABILIZAÇÃO',convoyHp:1150000,convoySpeed:118,waveCount:4,waveRespawnMs:10000,pool:['saimon','mordon','devolarium'],namePrefix:'QUANTUM',color:'#62efff',scale:1.18,rewardMult:1.4},
+  shadow_fleet:{mode:'wave',progressLabel:'FROTA SHADOW',waveCount:6,minAlive:3,pool:['mordon','devolarium','sibelon'],namePrefix:'SHADOW',color:'#8eb6ff',scale:1.38,rewardMult:1.48},
+  aux_uprising:{mode:'wave',progressLabel:'AUX HOSTIS',waveCount:8,minAlive:4,pool:['recruitStreuner','aiderStreuner','lordakia'],namePrefix:'AUX',color:'#63eaff',scale:1.08,speedMult:1.35,rewardMult:1.30,size:20},
+  titan_assault:{mode:'boss',progressLabel:'TITÃ',bossName:'TITAN EXARCH',bossType:'bossSibelon',bossScale:3.4,bossRewardMult:2.8,bossSize:76,bossColor:'#ff7c52'},
+  ore_frenzy:{mode:'ore',progressLabel:'MINÉRIO',orePool:['Prometium','Endurium','Terbium','Promerium'],oreCount:16,oreRespawnMin:7,oreAmount:[24,42]}
+};
+function galaxyEventProfile(ev=currentGalaxyEvent()){return GALAXY_EVENT_VARIANTS[String(ev?.id||'')]||GALAXY_EVENT_VARIANTS.invasion;}
 function normalizeGalaxyEvents(){if(!progress)return;progress.galaxyEvents ||= {records:{},lastSeenEvent:null};progress.galaxyEvents.records ||= {};}
 function currentGalaxyEvent(){
   const shared=sharedWorldEvent();
@@ -2003,17 +2019,19 @@ function worldBossOpen(){const wb=worldBossState();return !!wb&&Number(wb.hp)>0;
 function galaxyBattleMapsOpen(){return currentGalaxyEvent().id==='battle'||worldBossOpen()||!!state.currentMap?.battle;}
 function galaxyEventEligible(ev=currentGalaxyEvent()){
   if(!progress||state.currentMap?.gate)return false;
-  if(ev.id==='battle')return !!state.currentMap?.battle;
-  if(ev.id==='prime')return !!state.currentMap?.battle||Number(state.currentMap?.tier||1)>=2;
+  const mode=galaxyEventProfile(ev).mode;
+  if(mode==='battle_wave')return !!state.currentMap?.battle;
+  if(mode==='boss')return !!state.currentMap?.battle||Number(state.currentMap?.tier||1)>=2;
   return !state.currentMap?.battle;
 }
 function galaxyEventObjectiveText(ev=currentGalaxyEvent(),rec=galaxyEventRecord(ev)){
   if(rec.complete)return 'OBJETIVO CONCLUÍDO • recompensa entregue';
-  if(ev.id==='convoy')return `ESCOLTA ${Math.min(100,Math.round(rec.value||0))}%`;
-  if(ev.id==='mining')return `${fmt(rec.value||0)} / ${fmt(ev.target)} RECURSOS`;
-  if(ev.id==='battle')return `${fmt(rec.value||0)} / ${fmt(ev.target)} ABATES BATTLE`;
-  if(ev.id==='prime')return `${fmt(rec.value||0)} / 1 BOSS RARO`;
-  return `${fmt(rec.value||0)} / ${fmt(ev.target)} INVASORES`;
+  const profile=galaxyEventProfile(ev),label=profile.progressLabel||'INVASORES',mode=profile.mode;
+  if(mode==='convoy')return label+' '+Math.min(100,Math.round(rec.value||0))+'%';
+  if(mode==='ore')return fmt(rec.value||0)+' / '+fmt(ev.target)+' '+label;
+  if(mode==='battle_wave')return fmt(rec.value||0)+' / '+fmt(ev.target)+' '+label;
+  if(mode==='boss')return fmt(rec.value||0)+' / 1 '+label;
+  return fmt(rec.value||0)+' / '+fmt(ev.target)+' '+label;
 }
 function galaxyEventRewardScaled(ev){const mult=1+Math.min(1.5,Math.max(0,(progress?.profile?.level||1)-1)/36);return {credits:Math.round(ev.reward.credits*mult),uridium:Math.round(ev.reward.uridium*mult),xp:Math.round(ev.reward.xp*mult*designerXpMultiplier()),cores:ev.reward.cores||0};}
 function triggerCombatFlash(kind='cyan'){
@@ -2027,33 +2045,32 @@ function addGalaxyEventProgress(amount=1,ev=currentGalaxyEvent()){
 }
 function clearGalaxyEventEntities(){if(state.target?.eventNpc){state.target=null;player.laserFiring=false;}state.enemies=state.enemies.filter(e=>!e.eventNpc);state.ores=state.ores.filter(o=>!o.eventOre);galaxyEventRuntime.convoy=null;galaxyEventRuntime.nextWaveAt=0;}
 function eventEnemy(type,ev,opts={}){const e=makeEnemy(type);e.eventNpc=true;e.eventId=ev.eventId;e.forceChase=opts.forceChase??true;e.name=opts.name||`RIFT • ${e.name}`;const scale=Number(opts.scale)||1;e.maxHp=e.hp=Math.round(e.maxHp*scale);e.maxShield=e.shield=Math.round(e.maxShield*scale);e.damage=e.baseDamage=Math.round(e.damage*Math.max(1,scale*.82));e.credits=Math.round(e.credits*(opts.rewardMult||1.35));e.uridium=Math.round(e.uridium*(opts.rewardMult||1.35));e.xp=Math.round(e.xp*(opts.rewardMult||1.35));e.color=opts.color||e.color;if(opts.size)e.size=opts.size;return e;}
-function spawnGalaxyEventWave(ev=currentGalaxyEvent(),count=6){const tier=Number(state.currentMap?.tier||1),pool=tier>=4?['mordon','devolarium','sibelon']:tier>=3?['saimon','mordon','devolarium']:tier>=2?['lordakia','saimon','mordon']:['streuner','recruitStreuner','aiderStreuner'];for(let i=0;i<count;i++){const type=pool[Math.floor(Math.random()*pool.length)],e=eventEnemy(type,ev,{forceChase:true,rewardMult:1.22});const a=Math.random()*TWO_PI,r=rand(420,820);e.x=Math.max(160,Math.min(state.currentMap.world.w-160,player.x+Math.cos(a)*r));e.y=Math.max(160,Math.min(state.currentMap.world.h-160,player.y+Math.sin(a)*r));state.enemies.push(e);}}
-function spawnGalaxyEventPrime(ev=currentGalaxyEvent()){if(state.enemies.some(e=>e.eventNpc&&e.eventId===ev.eventId&&e.hp>0))return;const level=progress?.profile?.level||1,scale=2.2+Math.min(4,level/11),e=eventEnemy('bossSibelon',ev,{name:'RIFT TYRANT',scale,rewardMult:2.4,size:68,color:'#ff4f9a'});e.forceChase=true;e.aggroRange=1800;e.attackRange=540;e.x=Math.max(280,Math.min(state.currentMap.world.w-280,player.x+650));e.y=Math.max(280,Math.min(state.currentMap.world.h-280,player.y+180));state.enemies.push(e);playSfx('warning');triggerCombatFlash('red');showToast('BOSS RARO • RIFT TYRANT detectado!','reward');}
-function spawnGalaxyEventOres(ev=currentGalaxyEvent(),count=12){for(let i=0;i<count;i++){const pos=randomMapPosition(120),type=['Prometium','Endurium','Terbium','Promerium'][Math.floor(Math.random()*4)],res=RESOURCES[type]||RESOURCES.Prometium;state.ores.push({id:`evtore_${ev.eventId}_${Math.random().toString(16).slice(2)}`,x:pos.x,y:pos.y,type,amount:Math.round(rand(12,26)),color:res.color,r:rand(11,17),rot:rand(0,TWO_PI),shape:Array.from({length:7},()=>rand(.72,1.18)),eventOre:true,eventId:ev.eventId});}}
+function spawnGalaxyEventWave(ev=currentGalaxyEvent(),count=6){const profile=galaxyEventProfile(ev),tier=Number(state.currentMap?.tier||1),pool=Array.isArray(profile.pool)&&profile.pool.length?profile.pool:(tier>=4?['mordon','devolarium','sibelon']:tier>=3?['saimon','mordon','devolarium']:tier>=2?['lordakia','saimon','mordon']:['streuner','recruitStreuner','aiderStreuner']);for(let i=0;i<count;i++){const type=pool[Math.floor(Math.random()*pool.length)],e=eventEnemy(type,ev,{forceChase:true,rewardMult:profile.rewardMult||1.22,scale:profile.scale||1,color:profile.color,size:profile.size});if(profile.namePrefix)e.name=profile.namePrefix+' • '+e.name; if(profile.speedMult){e.speed*=profile.speedMult;e.attackRange=Math.min(560,e.attackRange+(profile.speedMult-1)*90);}const a=Math.random()*TWO_PI,r=rand(420,820);e.x=Math.max(160,Math.min(state.currentMap.world.w-160,player.x+Math.cos(a)*r));e.y=Math.max(160,Math.min(state.currentMap.world.h-160,player.y+Math.sin(a)*r));state.enemies.push(e);}}
+function spawnGalaxyEventPrime(ev=currentGalaxyEvent()){if(state.enemies.some(e=>e.eventNpc&&e.eventId===ev.eventId&&e.hp>0))return;const profile=galaxyEventProfile(ev),level=progress?.profile?.level||1,scale=Math.max(profile.bossScale||2.2,(profile.bossScale||2.2)+Math.min(1.8,level/18)),e=eventEnemy(profile.bossType||'bossSibelon',ev,{name:profile.bossName||'RIFT TYRANT',scale,rewardMult:profile.bossRewardMult||2.4,size:profile.bossSize||68,color:profile.bossColor||'#ff4f9a'});e.forceChase=true;e.aggroRange=1800;e.attackRange=540;e.x=Math.max(280,Math.min(state.currentMap.world.w-280,player.x+650));e.y=Math.max(280,Math.min(state.currentMap.world.h-280,player.y+180));state.enemies.push(e);playSfx('warning');triggerCombatFlash('red');showToast((profile.progressLabel||'BOSS')+' • '+(profile.bossName||'RIFT TYRANT')+' detectado!','reward');}
+function spawnGalaxyEventOres(ev=currentGalaxyEvent(),count=12){const profile=galaxyEventProfile(ev),pool=Array.isArray(profile.orePool)&&profile.orePool.length?profile.orePool:['Prometium','Endurium','Terbium','Promerium'],amountRange=Array.isArray(profile.oreAmount)?profile.oreAmount:[12,26];for(let i=0;i<count;i++){const pos=randomMapPosition(120),type=pool[Math.floor(Math.random()*pool.length)],res=RESOURCES[type]||RESOURCES.Prometium;state.ores.push({id:'evtore_'+ev.eventId+'_'+Math.random().toString(16).slice(2),x:pos.x,y:pos.y,type,amount:Math.round(rand(amountRange[0],amountRange[1])),color:res.color,r:rand(11,17),rot:rand(0,TWO_PI),shape:Array.from({length:7},()=>rand(.72,1.18)),eventOre:true,eventId:ev.eventId});}}
 function startGalaxyConvoy(ev=currentGalaxyEvent()){
-  const a=Math.atan2(state.currentMap.world.h/2-player.y,state.currentMap.world.w/2-player.x),sx=Math.max(260,Math.min(state.currentMap.world.w-260,player.x+Math.cos(a)*260)),sy=Math.max(260,Math.min(state.currentMap.world.h-260,player.y+Math.sin(a)*260));
+  const profile=galaxyEventProfile(ev),a=Math.atan2(state.currentMap.world.h/2-player.y,state.currentMap.world.w/2-player.x),sx=Math.max(260,Math.min(state.currentMap.world.w-260,player.x+Math.cos(a)*260)),sy=Math.max(260,Math.min(state.currentMap.world.h-260,player.y+Math.sin(a)*260));
   const tx=sx<state.currentMap.world.w/2?state.currentMap.world.w-420:420,ty=sy<state.currentMap.world.h/2?state.currentMap.world.h-420:420;
-  galaxyEventRuntime.convoy={eventId:ev.eventId,x:sx,y:sy,sx,sy,tx,ty,totalDistance:Math.max(1,Math.hypot(tx-sx,ty-sy)),hp:900000,maxHp:900000,speed:105,lastHitAt:0};galaxyEventRuntime.nextWaveAt=nowSec()+3;showToast('COMBOIO QUÂNTICO • mantenha-se próximo e proteja a rota');
+  galaxyEventRuntime.convoy={eventId:ev.eventId,x:sx,y:sy,sx,sy,tx,ty,totalDistance:Math.max(1,Math.hypot(tx-sx,ty-sy)),hp:profile.convoyHp||900000,maxHp:profile.convoyHp||900000,speed:profile.convoySpeed||105,lastHitAt:0};galaxyEventRuntime.nextWaveAt=nowSec()+3;showToast((ev.name||'COMBOIO')+' • mantenha-se próximo e proteja a rota');
 }
 function ensureGalaxyEventWorld(force=false){
-  if(!progress)return;if(sharedUniverseMap())return;const ev=currentGalaxyEvent(),mapKey=`${ev.eventId}:${progress.mapId}:${currentTerritoryFaction()||''}`;if(force||galaxyEventRuntime.activeId!==ev.eventId||galaxyEventRuntime.mapKey!==mapKey){clearGalaxyEventEntities();galaxyEventRuntime.activeId=ev.eventId;galaxyEventRuntime.mapKey=mapKey;state.eventSpawnKey=mapKey;progress.galaxyEvents.lastSeenEvent=ev.eventId;playSfx('event');pushActivity(`EVENTO GALÁCTICO • ${ev.name}`,'reward');}
-  const rec=galaxyEventRecord(ev);if(rec.complete||!galaxyEventEligible(ev))return;
+  if(!progress)return;if(sharedUniverseMap())return;const ev=currentGalaxyEvent(),mapKey=ev.eventId+':'+progress.mapId+':'+(currentTerritoryFaction()||'');if(force||galaxyEventRuntime.activeId!==ev.eventId||galaxyEventRuntime.mapKey!==mapKey){clearGalaxyEventEntities();galaxyEventRuntime.activeId=ev.eventId;galaxyEventRuntime.mapKey=mapKey;state.eventSpawnKey=mapKey;progress.galaxyEvents.lastSeenEvent=ev.eventId;playSfx('event');pushActivity('EVENTO GALÁCTICO • '+ev.name,'reward');}
+  const rec=galaxyEventRecord(ev),profile=galaxyEventProfile(ev),mode=profile.mode;if(rec.complete||!galaxyEventEligible(ev))return;
   const alive=state.enemies.filter(e=>e.eventNpc&&e.eventId===ev.eventId&&e.hp>0).length;
-  if(ev.id==='invasion'&&alive<4)spawnGalaxyEventWave(ev,8);
-  else if(ev.id==='prime')spawnGalaxyEventPrime(ev);
-  else if(ev.id==='mining'&&state.ores.filter(o=>o.eventOre&&o.eventId===ev.eventId).length<5)spawnGalaxyEventOres(ev,12);
-  else if(ev.id==='convoy'&&!galaxyEventRuntime.convoy&&nowSec()>=galaxyEventRuntime.retryAt)startGalaxyConvoy(ev);
-  else if(ev.id==='battle'&&alive<3)spawnGalaxyEventWave(ev,6);
+  if((mode==='wave'||mode==='battle_wave')&&alive<(profile.minAlive||3))spawnGalaxyEventWave(ev,profile.waveCount||6);
+  else if(mode==='boss')spawnGalaxyEventPrime(ev);
+  else if(mode==='ore'&&state.ores.filter(o=>o.eventOre&&o.eventId===ev.eventId).length<(profile.oreRespawnMin||5))spawnGalaxyEventOres(ev,profile.oreCount||12);
+  else if(mode==='convoy'&&!galaxyEventRuntime.convoy&&nowSec()>=galaxyEventRuntime.retryAt)startGalaxyConvoy(ev);
 }
-function updateGalaxyConvoy(dt,ev,rec){const c=galaxyEventRuntime.convoy;if(!c||c.eventId!==ev.eventId)return;const distPlayer=Math.hypot(c.x-player.x,c.y-player.y),dx=c.tx-c.x,dy=c.ty-c.y,d=Math.hypot(dx,dy);if(distPlayer<950&&d>10){const step=Math.min(d,c.speed*dt);c.x+=dx/Math.max(1,d)*step;c.y+=dy/Math.max(1,d)*step;rec.value=Math.max(rec.value,Math.round((1-d/Math.max(1,c.totalDistance||d))*100));}
-  if(nowSec()>=galaxyEventRuntime.nextWaveAt){galaxyEventRuntime.nextWaveAt=nowSec()+12;spawnGalaxyEventWave(ev,3);}
-  const nearby=state.enemies.filter(e=>e.eventNpc&&e.hp>0&&Math.hypot(e.x-c.x,e.y-c.y)<270);if(nearby.length&&nowSec()-c.lastHitAt>.8){c.lastHitAt=nowSec();const dmg=nearby.reduce((s,e)=>s+Math.max(1000,e.damage*.12),0);c.hp=Math.max(0,c.hp-dmg);spawnCombatText(c.x,c.y-34,`COMBOIO -${fmt(dmg)}`,'#ff7089',{kind:'warning'});}
+function updateGalaxyConvoy(dt,ev,rec){const c=galaxyEventRuntime.convoy;if(!c||c.eventId!==ev.eventId)return;const profile=galaxyEventProfile(ev),distPlayer=Math.hypot(c.x-player.x,c.y-player.y),dx=c.tx-c.x,dy=c.ty-c.y,d=Math.hypot(dx,dy);if(distPlayer<950&&d>10){const step=Math.min(d,c.speed*dt);c.x+=dx/Math.max(1,d)*step;c.y+=dy/Math.max(1,d)*step;rec.value=Math.max(rec.value,Math.round((1-d/Math.max(1,c.totalDistance||d))*100));}
+  if(nowSec()>=galaxyEventRuntime.nextWaveAt){galaxyEventRuntime.nextWaveAt=nowSec()+(profile.waveRespawnMs||12);spawnGalaxyEventWave(ev,profile.waveCount||3);}
+  const nearby=state.enemies.filter(e=>e.eventNpc&&e.hp>0&&Math.hypot(e.x-c.x,e.y-c.y)<270);if(nearby.length&&nowSec()-c.lastHitAt>.8){c.lastHitAt=nowSec();const dmg=nearby.reduce((s,e)=>s+Math.max(1000,e.damage*.12),0);c.hp=Math.max(0,c.hp-dmg);spawnCombatText(c.x,c.y-34,'COMBOIO -'+fmt(dmg),'#ff7089',{kind:'warning'});}
   if(d<=14){rec.value=100;completeGalaxyEvent(ev);galaxyEventRuntime.convoy=null;}
   else if(c.hp<=0){playSfx('explosion');spawnExplosionFx(c.x,c.y,'#65dcff',true);showToast('COMBOIO DESTRUÍDO • novo cargueiro em 15s');galaxyEventRuntime.convoy=null;galaxyEventRuntime.retryAt=nowSec()+15;rec.value=0;}
 }
-function updateGalaxyEvent(dt){if(!progress)return;if(isGalaxyGateMap()){ui.galaxyEventHud?.classList.add('hidden');return;}if(sharedUniverseMap()){const ev=currentGalaxyEvent();if(ev.id==='none'){ui.galaxyEventHud?.classList.add('hidden');return;}const rec=galaxyEventRecord(ev);if(sharedWorldEvent()){rec.value=Math.max(0,Number(sharedWorldEvent().progress)||0);rec.complete=!!sharedWorldEvent().complete;galaxyEventRuntime.convoy=sharedWorldEvent().convoy?{...sharedWorldEvent().convoy}:null;}renderGalaxyEventHud(ev,rec);return;}ensureGalaxyEventWorld();const ev=currentGalaxyEvent(),rec=galaxyEventRecord(ev);if(ev.id==='convoy'&&!rec.complete&&galaxyEventEligible(ev))updateGalaxyConvoy(dt,ev,rec);renderGalaxyEventHud(ev,rec);}
-function galaxyEventKill(enemy){if(!enemy)return;if(sharedUniverseMap())return;const ev=currentGalaxyEvent(),rec=galaxyEventRecord(ev);if(rec.complete)return;if(ev.id==='battle'&&state.currentMap?.battle)addGalaxyEventProgress(1,ev);else if(enemy.eventNpc&&enemy.eventId===ev.eventId&&(ev.id==='invasion'||ev.id==='prime'))addGalaxyEventProgress(1,ev);}
-function galaxyEventOrePickup(ore,amount){if(sharedUniverseMap())return;const ev=currentGalaxyEvent(),rec=galaxyEventRecord(ev);if(rec.complete||ev.id!=='mining'||!ore?.eventOre||ore.eventId!==ev.eventId)return;addGalaxyEventProgress(amount,ev);}
+function updateGalaxyEvent(dt){if(!progress)return;if(isGalaxyGateMap()){ui.galaxyEventHud?.classList.add('hidden');return;}if(sharedUniverseMap()){const ev=currentGalaxyEvent();if(ev.id==='none'){ui.galaxyEventHud?.classList.add('hidden');return;}const rec=galaxyEventRecord(ev);if(sharedWorldEvent()){rec.value=Math.max(0,Number(sharedWorldEvent().progress)||0);rec.complete=!!sharedWorldEvent().complete;galaxyEventRuntime.convoy=sharedWorldEvent().convoy?{...sharedWorldEvent().convoy}:null;}renderGalaxyEventHud(ev,rec);return;}ensureGalaxyEventWorld();const ev=currentGalaxyEvent(),rec=galaxyEventRecord(ev);if(galaxyEventProfile(ev).mode==='convoy'&&!rec.complete&&galaxyEventEligible(ev))updateGalaxyConvoy(dt,ev,rec);renderGalaxyEventHud(ev,rec);}
+function galaxyEventKill(enemy){if(!enemy)return;if(sharedUniverseMap())return;const ev=currentGalaxyEvent(),rec=galaxyEventRecord(ev),mode=galaxyEventProfile(ev).mode;if(rec.complete)return;if(mode==='battle_wave'&&state.currentMap?.battle)addGalaxyEventProgress(1,ev);else if(enemy.eventNpc&&enemy.eventId===ev.eventId&&(mode==='wave'||mode==='boss'))addGalaxyEventProgress(1,ev);}
+function galaxyEventOrePickup(ore,amount){if(sharedUniverseMap())return;const ev=currentGalaxyEvent(),rec=galaxyEventRecord(ev),mode=galaxyEventProfile(ev).mode;if(rec.complete||mode!=='ore'||!ore?.eventOre||ore.eventId!==ev.eventId)return;addGalaxyEventProgress(amount,ev);}
 function renderGalaxyEventHud(ev=currentGalaxyEvent(),rec=galaxyEventRecord(ev)){
   if(!ui.galaxyEventHud)return;if(!ev||ev.id==='none'){ui.galaxyEventHud.classList.add('hidden');if(ui.galaxyEventTopStatus)ui.galaxyEventTopStatus.textContent='—';return;}ui.galaxyEventHud.classList.remove('hidden');ui.galaxyEventHud.classList.toggle('complete',!!rec.complete);if(ui.galaxyEventIcon)ui.galaxyEventIcon.textContent=ev.icon;if(ui.galaxyEventName)ui.galaxyEventName.textContent=ev.name;if(ui.galaxyEventObjective)ui.galaxyEventObjective.textContent=galaxyEventObjectiveText(ev,rec);if(ui.galaxyEventTimer)ui.galaxyEventTimer.textContent=galaxyEventTimeText(galaxyEventSecondsLeft(ev));if(ui.galaxyEventProgress)ui.galaxyEventProgress.style.width=`${Math.min(100,(Number(rec.value)||0)/Math.max(1,ev.target)*100)}%`;if(ui.galaxyEventTopStatus)ui.galaxyEventTopStatus.textContent=rec.complete?'OK':galaxyEventTimeText(galaxyEventSecondsLeft(ev));
 }
@@ -2087,10 +2104,12 @@ function layoutHudPanels(){
   const mapW=mapVisible?Math.ceil(ui.minimapPanel.getBoundingClientRect().width):0;
   root.style.setProperty('--map-dock-width',`${mapW}px`);
   const chatVisible=!!ui.chatDock&&getComputedStyle(ui.chatDock).display!=='none'&&!ui.chatDock.classList.contains('hidden')&&!ui.chatDock.classList.contains('hud-user-hidden');
-  const sideExpanded=window.innerWidth<=680?190:window.innerWidth<=820?232:window.innerWidth<=1100?280:332;
-  const sideCollapsed=window.innerWidth<=680?144:window.innerWidth<=820?156:172;
-  const chatW=chatVisible?(ui.chatDock.classList.contains('collapsed')?sideCollapsed:sideExpanded):0;
-  const minimapDockW=mapVisible?(ui.minimapPanel.classList.contains('collapsed')?sideCollapsed:sideExpanded):0;
+  const chatExpanded=332;
+  const chatCollapsed=162;
+  const minimapExpanded=window.innerWidth<=680?172:window.innerWidth<=820?188:window.innerWidth<=1100?210:window.innerWidth<=1280?228:252;
+  const minimapCollapsed=window.innerWidth<=680?136:window.innerWidth<=820?144:window.innerWidth<=1100?152:window.innerWidth<=1280?160:168;
+  const chatW=chatVisible?(ui.chatDock.classList.contains('collapsed')?chatCollapsed:chatExpanded):0;
+  const minimapDockW=mapVisible?(ui.minimapPanel.classList.contains('collapsed')?minimapCollapsed:minimapExpanded):0;
   root.style.setProperty('--chat-dock-width-current',`${chatW}px`);
   root.style.setProperty('--minimap-dock-width-current',`${minimapDockW}px`);
 

@@ -1,4 +1,4 @@
-# Stellar Legacy V16.6.1 — HUD DOCK POLISH + EVENT CATALOG
+# Stellar Legacy V16.7.0 — HUD DOCK POLISH + EVENT CATALOG
 
 Patch focado em acabamento do HUD inferior e preparação do calendário de eventos. O chat fica travado no rodapé esquerdo, o mapa no rodapé direito e a barra de munições permanece centralizada sem empurrar os docks laterais. NPCs de evento agora aparecem destacados no minimapa mesmo quando estão fora do alcance visual normal.
 

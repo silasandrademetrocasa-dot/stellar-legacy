@@ -1,4 +1,4 @@
-# AUDIT V16.6.1
+# AUDIT V16.7.0
 
 ## Objetivo
 Polimento do HUD inferior e preparação do catálogo de eventos sem ativar novos eventos automaticamente.

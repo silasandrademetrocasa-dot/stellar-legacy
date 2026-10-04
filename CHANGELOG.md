@@ -1,4 +1,4 @@
-## V16.6.1 — HUD DOCK POLISH + EVENT CATALOG
+## V16.7.0 — HUD DOCK POLISH + EVENT CATALOG
 - CHAT fixado no canto inferior esquerdo e MAPA no canto inferior direito com tamanhos equivalentes.
 - Campo de digitação do chat preso no rodapé do painel, sem subir quando outros docks são recolhidos.
 - Barra de munições mantida centralizada e mais fina, com estados recolhidos padronizados.
