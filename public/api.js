@@ -150,45 +150,54 @@ export async function signUp({ callsign, email, password }) {
   };
 }
 
-
 export async function requestPasswordReset(email) {
   const value = String(email || '').trim().toLowerCase();
   if (!value || !value.includes('@')) throw new Error('Informe um e-mail válido.');
-  return serverFetch('/api/auth/password-reset', {
-    method: 'POST',
-    body: JSON.stringify({ email: value }),
-  });
+  const redirectTo = `${window.location.origin}${window.location.pathname || '/'}?recovery=1`;
+  try {
+    await supabaseFetch(`/auth/v1/recover?redirect_to=${encodeURIComponent(redirectTo)}`, {
+      method: 'POST',
+      body: JSON.stringify({ email: value }),
+    });
+  } catch (err) {
+    await supabaseFetch('/auth/v1/recover', {
+      method: 'POST',
+      body: JSON.stringify({ email: value }),
+    });
+  }
+  return { ok: true };
 }
 
-export function getRecoveryAccessToken() {
+export async function restorePasswordRecoveryFromUrl() {
+  const hash = new URLSearchParams(String(window.location.hash || '').replace(/^#/, ''));
+  const query = new URLSearchParams(window.location.search || '');
+  const type = hash.get('type') || query.get('type');
+  const accessToken = hash.get('access_token');
+  if (type !== 'recovery' || !accessToken) return null;
+  const refreshToken = hash.get('refresh_token') || '';
+  const expiresIn = Number(hash.get('expires_in') || 3600);
+  session = {
+    access_token: accessToken,
+    refresh_token: refreshToken,
+    expires_at: Math.floor(Date.now() / 1000) + expiresIn,
+    game_session_id: null,
+  };
   try {
-    const params = new URLSearchParams(String(location.hash || '').replace(/^#/, ''));
-    if (params.get('type') !== 'recovery') return null;
-    return params.get('access_token') || null;
-  } catch {
-    return null;
+    const user = await supabaseFetch('/auth/v1/user', {}, true);
+    currentUser = {
+      id: user.id,
+      email: user.email,
+      callsign: user.user_metadata?.callsign || user.email?.split('@')[0] || 'Pilot',
+    };
+    setSession(session, currentUser);
+    history.replaceState({}, document.title, window.location.pathname || '/');
+    return { session, user: currentUser, recovery: true };
+  } catch (err) {
+    signOutLocal();
+    throw new Error('O link de recuperação expirou ou é inválido. Solicite outro e-mail.');
   }
 }
 
-export async function completePasswordRecovery(accessToken, password) {
-  const token = String(accessToken || '');
-  const value = String(password || '');
-  if (!token) throw new Error('Link de recuperação inválido ou expirado.');
-  if (value.length < 6) throw new Error('A nova senha precisa ter pelo menos 6 caracteres.');
-  const { url, key } = await getConfig();
-  const res = await fetch(`${url}/auth/v1/user`, {
-    method: 'PUT',
-    headers: {
-      apikey: key,
-      Authorization: `Bearer ${token}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ password: value }),
-  });
-  const body = await readJson(res);
-  if (!res.ok) throw new Error(body?.message || body?.error_description || body?.error || 'Não foi possível atualizar a senha.');
-  return { ok: true };
-}
 export async function signIn({ email, password }) {
   const body = await serverFetch('/api/auth/login', {
     method: 'POST',

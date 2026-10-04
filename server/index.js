@@ -122,7 +122,7 @@ async function ensureProfile(sb, user, callsign = '') {
   if (error) console.warn('profile upsert:', error.message);
 }
 
-app.get('/health', (req, res) => res.json({ ok: true, game: 'Stellar Legacy', version: '13.4.1' }));
+app.get('/health', (req, res) => res.json({ ok: true, game: 'Stellar Legacy', version: '13.6.0' }));
 
 
 app.get('/api/config', (req, res) => {
@@ -138,7 +138,7 @@ app.get('/api/config', (req, res) => {
 
 app.get('/api/meta', (req, res) => res.json({
   name: 'Stellar Legacy',
-  version: '13.4.1',
+  version: '13.6.0',
   authReady: Boolean(SUPABASE_URL && SUPABASE_KEY),
   diagnostics: configStatus(),
   features: ['login', 'cloud_save', 'factions', 'safe_zone', 'shop', 'owned_ships', 'equipment_slots', 'inventory', 'drones', 'ammo', 'rockets', 'expanded_expedition_maps', 'cargo_hold', 'ore_trading', 'npc_cargo_boxes', 'npc_respawn', 'minimap_navigation', 'waypoints', 'landmark_discovery', 'combat_fx', 'pet_modules', 'auto_buy_cpu', 'v8_asset_identity', 'mission_control_v93', 'mission_acceptance_tracking', 'expanded_enemy_density', 'online_player_presence', 'real_player_auction', 'rank_nameplates_v12', 'clans_v12', 'clan_vault_v12', 'premium_shop_v12', 'battle_pass_paid_v12', 'premium_subscription_v12', 'clan_daily_economy_v12', 'portal_neutral_zone_v12', 'base_only_equipment_v12', 'single_session_v1214'],
@@ -205,19 +205,6 @@ app.post('/api/auth/signup', asyncRoute(async (req, res) => {
     } : null,
     requires_confirmation: !data.session,
   });
-}));
-
-app.post('/api/auth/password-reset', asyncRoute(async (req, res) => {
-  const email = String(req.body?.email || '').trim().toLowerCase();
-  if (!email || !email.includes('@')) return res.status(400).json({ error: 'Informe um e-mail válido.' });
-  const sb = supabaseBase();
-  if (!sb) return res.status(503).json({ error: 'Supabase não configurado no Render.', diagnostics: configStatus() });
-  const forwardedProto = String(req.get('x-forwarded-proto') || '').split(',')[0].trim();
-  const proto = forwardedProto || req.protocol || 'https';
-  const origin = `${proto}://${req.get('host')}`;
-  const { error } = await sb.auth.resetPasswordForEmail(email, { redirectTo: `${origin}/` });
-  if (error) return res.status(400).json({ error: error.message });
-  res.json({ ok: true, message: 'Se o e-mail estiver cadastrado, você receberá um link para redefinir a senha.' });
 }));
 
 app.post('/api/auth/login', asyncRoute(async (req, res) => {
@@ -350,6 +337,6 @@ app.use((err, req, res, next) => {
 
 const port = process.env.PORT || 3000;
 app.listen(port, () => {
-  console.log(`Stellar Legacy V13.4.1 :${port}`);
+  console.log(`Stellar Legacy V13.6.0 :${port}`);
   console.log('Supabase config:', configStatus());
 });

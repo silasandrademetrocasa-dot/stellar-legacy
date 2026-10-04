@@ -1,17 +1,17 @@
-# Stellar Legacy V13.4.1 — STELLAR IDENTITY
+# Stellar Legacy V13.6.0
+
+# Stellar Legacy V13.5.0 — Clean UI + AUX-9 + Combat Audio
 
 Atualização de interface aplicada sobre a base V13.1.0 WARFRONT, preservando as mecânicas e o backend existentes.
 
 ## Principais mudanças
-- HUD JOGADOR em bloco próprio, independente de NAVE e AUX-9 e controlável em Configurações > HUD.
-- OVERDRIVE e KAMIKAZE movidos para a barra inferior junto das munições.
-- AUX-9 com módulos estritamente exclusivos por função: combate, BOX, mineração ou reparo.
-- Efeitos sonoros para laser, míssil, impactos, explosões, habilidades e Nova Burst.
-- Login compacto em desktop/mobile, com recuperação de senha e sem rolagem do modal.
-- Perfil de Piloto atualiza imediatamente após compra de Núcleos Quânticos, conversão de PP e evolução.
-- Stellar Auto Installer incluído em `.github/workflows/stellar-auto-installer.yml`.
-- Interface limpa de textos de teste/bastidor.
-- Compatível com os saves e o backend atuais.
+- Barra superior mais fina, sem a logo grande.
+- NAVE, MISSÕES, AUX-9, PORTAIS e HABILIDADES organizados no topo.
+- Habilidades rápidas da nave/AUX-9 integradas à barra superior.
+- Textos visuais LASER CTRL, MÍSSIL ESPAÇO e MÍSSIL PRONTO removidos da barra de munição; os atalhos continuam funcionando.
+- Navegação de menus em modo exclusivo: abrir um menu principal fecha o anterior.
+- Portal Astral AURORA disponível; NEXUS e ECLIPSE continuam visíveis, porém bloqueados como EM BREVE.
+- Compatível com os saves e o backend da V13.1.0.
 
 ## Instalação
 1. Suba os arquivos desta pasta no Git/Render.
@@ -25,3 +25,9 @@ Atualização de interface aplicada sobre a base V13.1.0 WARFRONT, preservando a
 - `E`: habilidade da nave
 - `K`: Nova Burst do AUX-9
 - `W`: WARFRONT
+## V13.5.0
+
+- Interface limpa de textos de teste, versões e instruções internas.
+- AUX-9 com papéis exclusivos por módulo, sem misturar combate e coleta.
+- Áudio procedural de combate e animações com controle de volume.
+- Perfil de Piloto atualiza imediatamente após compras e upgrades.

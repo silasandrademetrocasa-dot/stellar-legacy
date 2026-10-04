@@ -6,44 +6,70 @@
 <meta content="width=device-width,initial-scale=1,user-scalable=no" name="viewport"/>
 <meta content="#030816" name="theme-color"/>
 <title>Stellar Legacy</title>
-<link href="/style.css?v=13.4.1" rel="stylesheet"/>
+<link href="/style.css?v=13.6.0" rel="stylesheet"/>
 </head>
 <body>
 <div id="app">
 <canvas id="game"></canvas>
 <header class="hud-panel v8-topbar compact-command-bar" id="topbar">
-<div class="top-meta hidden" aria-hidden="true">
-  <span><b id="factionLabel">—</b></span><span><b id="mapLabel">—</b></span><span><b id="sectorName">—</b></span><span><b id="shipLabel">Aurora</b></span><span><b id="xp">0</b></span>
-</div>
 <nav class="top-actions command-actions" aria-label="Menu principal">
-<button class="small-btn" id="hangarBtn">NAVE</button>
-<button class="small-btn mission-top-btn" id="missionBtn">MISSÕES <span id="missionActiveCount">0</span></button>
-<button class="small-btn pet-top-btn" id="petBtn">AUX-9</button>
-<button class="small-btn gate-top-btn" id="gateBtn">PORTAIS <span id="gatePieceBadge">AURORA 0/34</span></button>
-<button class="small-btn pilot-top-btn" id="pilotBtn">HABILIDADES <span id="pilotPointBadge">0 PP</span></button>
-<button class="small-btn" id="mapBtn">MAPA</button>
-<button class="small-btn pass-top-btn" id="passBtn">PASSE <span id="passTierBadge">0/30</span></button>
-<button class="small-btn arena-top-btn" id="arenaBtn">ARENA <span id="arenaTopCount">10/10</span></button>
-<button class="small-btn clan-top-btn" id="clanBtn">CLÃ <span id="clanTopTag">—</span></button>
-<button class="small-btn warfront-top-btn" id="warfrontBtn">WARFRONT <span id="warfrontTopStatus">READY</span></button>
-<button class="small-btn auction-top-btn" id="auctionBtn">LEILÃO <span id="auctionTopClock">60:00</span></button>
-<button class="small-btn gold" id="shopBtn">LOJA</button>
-<button class="small-btn premium-top-btn" id="premiumBtn">PREMIUM <span id="premiumTopStatus">LOJA</span></button>
-<button class="small-btn config-top-btn" id="configBtn">CONF</button>
+  <div class="menu-group" data-menu-group="pilot">
+    <button class="small-btn menu-group-toggle" type="button" data-menu-toggle="pilot">PILOTO <span>▾</span></button>
+    <div class="menu-dropdown">
+      <button class="menu-item" id="hangarBtn" type="button">HANGAR</button>
+      <button class="menu-item" id="shipMenuBtn" type="button">NAVE</button>
+      <button class="menu-item" id="pilotBtn" type="button">HABILIDADES <span id="pilotPointBadge">0 PP</span></button>
+      <button class="menu-item" id="petBtn" type="button">AUX-9</button>
+    </div>
+  </div>
+
+  <div class="menu-group" data-menu-group="missions">
+    <button class="small-btn menu-group-toggle mission-top-btn" type="button" data-menu-toggle="missions">MISSÕES <span id="missionActiveCount">0</span> ▾</button>
+    <div class="menu-dropdown">
+      <button class="menu-item" id="missionBtn" type="button">MISSÕES</button>
+      <button class="menu-item" id="passBtn" type="button">PASSE <span id="passTierBadge">0/30</span></button>
+    </div>
+  </div>
+
+  <div class="menu-group" data-menu-group="battle">
+    <button class="small-btn menu-group-toggle arena-top-btn" type="button" data-menu-toggle="battle">BATALHA <span id="battleTopStatus">PRONTO</span> ▾</button>
+    <div class="menu-dropdown">
+      <button class="menu-item" id="arenaBtn" type="button">ARENA <span id="arenaTopCount">10/10</span></button>
+      <button class="menu-item" id="warfrontBtn" type="button">WARFRONT <span id="warfrontTopStatus">READY</span></button>
+      <button class="menu-item" id="gateBtn" type="button">PORTAIS <span id="gatePieceBadge">AURORA 0/34</span></button>
+    </div>
+  </div>
+
+  <button class="small-btn clan-top-btn" id="clanBtn" type="button">CLÃ <span id="clanTopTag">—</span></button>
+  <button class="small-btn" id="mapBtn" type="button">MAPA</button>
+  <button class="small-btn auction-top-btn" id="auctionBtn" type="button">LEILÃO <span id="auctionTopClock">60:00</span></button>
+
+  <div class="menu-group menu-group-right" data-menu-group="shops">
+    <button class="small-btn menu-group-toggle gold" type="button" data-menu-toggle="shops">LOJAS ▾</button>
+    <div class="menu-dropdown menu-dropdown-right">
+      <button class="menu-item gold" id="shopBtn" type="button">LOJA</button>
+      <button class="menu-item premium-top-btn" id="premiumBtn" type="button">LOJA PREMIUM <span id="premiumTopStatus">LOJA</span></button>
+    </div>
+  </div>
+
+  <button class="small-btn config-top-btn" id="configBtn" type="button">CONF</button>
 </nav>
 </header>
+
 <section class="hud-panel player-float-panel" id="playerPanel">
-  <div class="player-float-head tappable-toolbar" id="playerHeader">
-    <div class="player-float-title"><button aria-label="Expandir / recolher jogador" class="stats-expand-btn" id="playerToggle" title="Expandir / recolher jogador">▾</button><span>JOGADOR</span></div>
-    <span class="sync-chip" id="syncLabel">LOCAL</span>
+  <div class="player-float-head">
+    <div><span>PILOTO</span><b id="userLabel">—</b></div>
+    <button class="player-collapse-btn" id="playerPanelToggle" type="button" title="Expandir / recolher painel">▾</button>
   </div>
-  <div class="player-float-content" id="playerContent">
-    <div class="player-name-row"><b id="userLabel">—</b><span id="rankChip">Piloto Básico</span></div>
-    <div class="player-metrics">
-      <div><span>LV</span><b id="lvl">1</b></div>
-      <div><span>CR</span><b id="credits">0</b></div>
-      <div><span>STL</span><b id="uridium">0</b></div>
-    </div>
+  <div class="player-float-content" id="playerPanelContent">
+    <div><span>PATENTE</span><b id="rankChip">Piloto Básico</b></div>
+    <div><span>NÍVEL</span><b id="lvl">1</b></div>
+    <div><span>CR</span><b id="credits">0</b></div>
+    <div><span>STL</span><b id="uridium">0</b></div>
+    <div class="player-sync-row"><span>STATUS</span><b class="sync-chip" id="syncLabel">LOCAL</b></div>
+  </div>
+  <div class="top-meta hidden" aria-hidden="true">
+    <span><b id="factionLabel">—</b></span><span><b id="mapLabel">—</b></span><span><b id="sectorName">—</b></span><span><b id="shipLabel">Aurora</b></span><span><b id="xp">0</b></span>
   </div>
 </section>
 <section class="hud-panel compact-stats ship-stats-float" id="leftStats">
@@ -115,7 +141,7 @@
 <div class="weapon-toolbar">
 <div class="weapon-toolbar-left">
 <button aria-label="Expandir / recolher menu de munições" class="weapon-expand-btn" id="weaponBarToggle" title="Expandir / recolher menu de munições">▾</button>
-<div class="weapon-toolbar-label">COMBATE</div>
+<div class="weapon-toolbar-label">MUNIÇÕES</div>
 </div>
 <div class="section actions actions-inline">
 <button class="action-btn" id="laserToggle">⚡ LASER <span class="keyhint">CTRL</span></button>
@@ -133,12 +159,10 @@
 <div class="button-row ammo-bubbles" id="rocketAmmoButtons"></div>
 </div>
 </div>
-<div class="section bottom-ability-section">
-<div class="section-title">HABILIDADES</div>
-<div class="bottom-ability-cluster" id="abilityBar" aria-label="Habilidades de combate">
+<div class="bottom-combat-abilities" id="abilityBar" aria-label="Habilidades de combate">
   <button class="ability-btn ship-ability" id="shipAbilityBtn" type="button" title="Habilidade da nave • tecla E">
     <span class="ability-icon" id="shipAbilityIcon">✦</span>
-    <span class="ability-copy"><b id="shipAbilityName">HAB. NAVE</b><small id="shipAbilityStatus">PRONTA • E</small></span>
+    <span class="ability-copy"><b id="shipAbilityName">OVERDRIVE</b><small id="shipAbilityStatus">PRONTA • E</small></span>
     <i id="shipAbilityFill"></i>
   </button>
   <button class="ability-btn pet-kami-ability" id="petKamiAbilityBtn" type="button" title="Nova Burst AUX-9 • tecla K">
@@ -146,7 +170,6 @@
     <span class="ability-copy"><b>KAMIKAZE</b><small id="petKamiAbilityStatus">BLOQUEADO • K</small></span>
     <i id="petKamiAbilityFill"></i>
   </button>
-</div>
 </div>
 <div class="section extras compact extras-inline">
 <div class="cooldown-pill" id="rocketCd">MÍSSIL PRONTO</div>
@@ -193,13 +216,12 @@
 </div>
 
 <div class="modal fixed-modal" id="loginModal">
-  <div class="modal-card login-card login-shell">
+  <div class="modal-card login-card login-card-v136">
     <section class="login-brand-panel">
       <img alt="Stellar Legacy" class="login-brand-logo" src="/assets/v8/branding/logo-v8.png"/>
-      <div class="login-brand-copy">
-        <div class="eyebrow">STELLAR LEGACY</div>
-        <h2>Três facções.<br/>Uma guerra orbital.</h2>
-      </div>
+      <div class="eyebrow">STELLAR NETWORK</div>
+      <h1>Stellar Legacy</h1>
+      <p>Três facções. Uma guerra orbital.</p>
       <div class="login-factions">
         <div><img alt="Terra" src="/assets/v8/branding/earth.png"/><span>Terra</span></div>
         <div><img alt="Marte" src="/assets/v8/branding/mars.png"/><span>Marte</span></div>
@@ -207,29 +229,27 @@
       </div>
     </section>
     <section class="login-auth-panel">
-      <div class="eyebrow">STELLAR NETWORK</div>
-      <h1>Entrar no Stellar Legacy</h1>
-      <div class="auth-tabs" id="authTabs">
-        <button class="tab-btn active" id="loginTabBtn">Entrar</button>
-        <button class="tab-btn" id="registerTabBtn">Criar conta</button>
+      <div class="auth-tabs">
+        <button class="tab-btn active" id="loginTabBtn" type="button">Entrar</button>
+        <button class="tab-btn" id="registerTabBtn" type="button">Criar conta</button>
       </div>
       <form class="auth-form" id="loginForm">
-        <label>E-mail<input autocomplete="email" id="loginEmail" placeholder="piloto@email.com" required type="email"/></label>
-        <label>Senha<input autocomplete="current-password" id="loginPassword" minlength="6" placeholder="••••••••" required type="password"/></label>
+        <label>E-mail<input autocomplete="email" id="loginEmail" placeholder="piloto@email.com" required="" type="email"/></label>
+        <label>Senha<input autocomplete="current-password" id="loginPassword" minlength="6" placeholder="••••••••" required="" type="password"/></label>
+        <button class="primary-btn" type="submit">ENTRAR</button>
         <button class="auth-link-btn" id="forgotPasswordBtn" type="button">Esqueci minha senha</button>
-        <button class="primary-btn auth-main-btn" type="submit">ENTRAR</button>
       </form>
       <form class="auth-form hidden" id="registerForm">
-        <label>Callsign<input id="registerCallsign" maxlength="24" minlength="2" placeholder="Seu nome no espaço" required type="text"/></label>
-        <label>E-mail<input autocomplete="email" id="registerEmail" placeholder="piloto@email.com" required type="email"/></label>
-        <label>Senha<input autocomplete="new-password" id="registerPassword" minlength="6" placeholder="mínimo 6 caracteres" required type="password"/></label>
-        <button class="primary-btn auth-main-btn" type="submit">CRIAR CONTA</button>
+        <label>Callsign<input id="registerCallsign" maxlength="24" minlength="2" placeholder="Seu nome de piloto" required="" type="text"/></label>
+        <label>E-mail<input autocomplete="email" id="registerEmail" placeholder="piloto@email.com" required="" type="email"/></label>
+        <label>Senha<input autocomplete="new-password" id="registerPassword" minlength="6" placeholder="mínimo 6 caracteres" required="" type="password"/></label>
+        <button class="primary-btn" type="submit">CRIAR CONTA</button>
       </form>
       <form class="auth-form hidden" id="recoveryForm">
-        <div class="recovery-title">Defina sua nova senha</div>
-        <label>Nova senha<input autocomplete="new-password" id="recoveryPassword" minlength="6" placeholder="mínimo 6 caracteres" required type="password"/></label>
-        <label>Confirmar senha<input autocomplete="new-password" id="recoveryPasswordConfirm" minlength="6" placeholder="repita a nova senha" required type="password"/></label>
-        <button class="primary-btn auth-main-btn" type="submit">ATUALIZAR SENHA</button>
+        <div class="recovery-title">Nova senha</div>
+        <label>Nova senha<input autocomplete="new-password" id="recoveryPassword" minlength="6" placeholder="mínimo 6 caracteres" required="" type="password"/></label>
+        <label>Confirmar senha<input autocomplete="new-password" id="recoveryPasswordConfirm" minlength="6" placeholder="repita a senha" required="" type="password"/></label>
+        <button class="primary-btn" type="submit">ATUALIZAR SENHA</button>
       </form>
       <div class="auth-message" id="authMessage"></div>
     </section>
@@ -249,15 +269,12 @@
   <div class="modal-card wide-card mission-modal-card">
     <div class="modal-header">
       <div>
-        <div class="eyebrow">CENTRAL DE MISSÕES</div>
+        <div class="eyebrow">MISSION CONTROL</div>
         <h2>Painel de Missões</h2>
       </div>
       <button class="small-btn" id="closeMission">Fechar</button>
     </div>
-    <div class="mission-rule-banner">
-      <b>REGRA:</b> uma missão ativa por categoria. Você pode manter simultaneamente <b>1 diária + 1 semanal + 1 mensal + 1 especial</b>. O progresso só começa depois de <b>ACEITAR</b>. Diárias mudam todo dia; semanais e mensais têm 10 níveis por NPC e pedra; especiais pagam <b>100%</b> do valor dos alvos.
-    </div>
-    <div id="missionContent" class="mission-content"></div>
+<div id="missionContent" class="mission-content"></div>
   </div>
 </div>
 
@@ -266,7 +283,7 @@
     <div class="modal-header">
       <div>
         <div class="eyebrow">PORTAIS ASTRAIS</div>
-        <h2>Materializador do Portal</h2><div class="gate-protocol-tabs" id="gateProtocolTabs"><button class="small-btn active" data-gate-protocol="alpha">AURORA</button><button class="small-btn" data-gate-protocol="beta" disabled>NEXUS 🔒</button><button class="small-btn" data-gate-protocol="gamma" disabled>ECLIPSE 🔒</button></div>
+        <h2>Materializador do Portal</h2><div class="gate-protocol-tabs" id="gateProtocolTabs"><button class="small-btn active" data-gate-protocol="alpha">AURORA</button><button class="small-btn" data-gate-protocol="beta" disabled title="Bloqueado">NEXUS 🔒</button><button class="small-btn" data-gate-protocol="gamma" disabled title="Bloqueado">ECLIPSE 🔒</button></div>
       </div>
       <button class="small-btn" id="closeGate">Fechar</button>
     </div>
@@ -347,7 +364,7 @@
       <div><div class="eyebrow">ARENA PVP • 10 BATALHAS POR DIA</div><h2>Duelo de Pilotos</h2></div>
       <div class="arena-header-actions"><button class="ghost-btn" id="arenaRefresh">ATUALIZAR</button><button class="small-btn" id="closeArena">Fechar</button></div>
     </div>
-    <div class="arena-rule-banner">Escolha um piloto, entre em combate e acompanhe o duelo em tempo real. Limite diário: <b>10 batalhas</b>.</div>
+    <div class="arena-rule-banner"><b>10 batalhas por dia.</b> Duelos usam PLS-1 + CMT-1 e o limite renova à meia-noite.</div>
     <div class="arena-summary">
       <div><span>ATAQUES RESTANTES</span><b id="arenaAttacksLeft">10 / 10</b></div>
       <div><span>RATING</span><b id="arenaRating">1000</b></div>
@@ -427,7 +444,7 @@
       <div><div class="eyebrow">ALIANÇAS • COFRE COMPARTILHADO</div><h2>Clã / Aliança</h2></div>
       <div class="arena-header-actions"><button class="ghost-btn" id="clanRefresh">ATUALIZAR</button><button class="small-btn" id="closeClan">Fechar</button></div>
     </div>
-<div id="clanContent" class="clan-content"><div class="muted">Carregando dados da aliança...</div></div>
+    <div id="clanContent" class="clan-content"><div class="muted">Carregando dados da aliança...</div></div>
   </div>
 </div>
 
@@ -438,8 +455,7 @@
       <div><div class="eyebrow">GUERRA TOTAL</div><h2>WARFRONT</h2></div>
       <div class="arena-header-actions"><button class="ghost-btn" id="warfrontRefresh">ATUALIZAR</button><button class="small-btn" id="closeWarfront">Fechar</button></div>
     </div>
-    <div class="warfront-rule-banner"><b>WORLD BOSS + GUERRA DE CLÃS + BLUEPRINTS:</b> cause dano no NEMESIS PRIME, dispute pontos com clãs rivais, encontre fragmentos raros e evolua a habilidade da sua classe de nave.</div>
-    <div id="warfrontContent" class="warfront-content"><div class="muted">Sincronizando frente de guerra...</div></div>
+        <div id="warfrontContent" class="warfront-content"><div class="muted">Sincronizando frente de guerra...</div></div>
   </div>
 </div>
 
@@ -465,9 +481,16 @@
         </div>
       </section>
       <section class="settings-section">
+        <div class="settings-title"><div><b>ÁUDIO</b><small>Laser, mísseis, impactos, explosões, alertas e efeitos do jogo.</small></div><span id="audioVolumeValue">70%</span></div>
+        <div class="audio-settings-row">
+          <label class="audio-toggle"><input type="checkbox" id="audioEnabledToggle" checked/> Efeitos sonoros</label>
+          <label class="audio-volume">Volume <input type="range" id="audioVolumeRange" min="0" max="100" step="5" value="70"/></label>
+        </div>
+      </section>
+      <section class="settings-section">
         <div class="settings-title"><div><b>VISIBILIDADE DO HUD</b><small>Escolha o que fica visível durante o jogo.</small></div></div>
         <div class="hud-settings-grid" id="hudSettingsGrid">
-          <label><input type="checkbox" data-hud-key="player" checked/> Jogador</label>
+          <label><input type="checkbox" data-hud-key="player" checked/> Piloto</label>
           <label><input type="checkbox" data-hud-key="ship" checked/> Nave</label>
           <label><input type="checkbox" data-hud-key="pet" checked/> AUX-9</label>
           <label><input type="checkbox" data-hud-key="missions" checked/> Missões ativas</label>
@@ -477,15 +500,11 @@
           <label><input type="checkbox" data-hud-key="gate" checked/> Portal Astral</label>
         </div>
       </section>
-      <section class="settings-section">
-        <div class="settings-title"><div><b>ÁUDIO</b><small>Efeitos de armas, impactos, explosões e interface.</small></div></div>
-        <label class="audio-setting"><input type="checkbox" id="audioEnabledToggle" checked/> Som de batalha ativado</label>
-      </section>
     </div>
 
     <div class="settings-panel hidden" id="settingsRankingPanel">
       <section class="settings-section ranking-settings-section">
-        <div class="settings-title"><div><b>PATENTES & RANKING</b><small>Ranking por pontos inspirado no padrão clássico do Stellar Legacy, com patente especial para administradores.</small></div><button class="ghost-btn" id="rankingRefreshBtn">ATUALIZAR</button></div>
+        <div class="settings-title"><div><b>PATENTES & RANKING</b><small>Patentes, posição e desempenho dos pilotos.</small></div><button class="ghost-btn" id="rankingRefreshBtn">ATUALIZAR</button></div>
         <div class="ranking-hero-grid">
           <article class="ranking-board ranking-hero-card">
             <div class="ranking-board-title">MINHA PATENTE</div>
@@ -572,7 +591,7 @@
 </div>
 <button class="small-btn" id="closeMap">Fechar</button>
 </div>
-<div class="muted" style="margin-bottom:10px">Seu mapa atual recebe destaque. Os mapas da sua facção aparecem iluminados e as rotas seguem a lógica clássica.</div>
+<div class="muted" style="margin-bottom:10px">Seu setor atual e as rotas disponíveis aparecem destacados.</div>
 
 <div class="map-network" id="mapNetwork"></div>
 </div>
@@ -597,7 +616,7 @@
       <div><div class="eyebrow">STELLAR PREMIUM</div><h2>Loja Premium</h2></div>
       <div class="premium-header-actions"><span class="premium-mode-chip" id="premiumModeChip">CATÁLOGO</span><button class="small-btn" id="closePremium">Fechar</button></div>
     </div>
-<div class="premium-benefits" id="premiumBenefits"></div>
+    <div class="premium-benefits" id="premiumBenefits"></div>
     <div class="premium-product-grid" id="premiumProductGrid"><div class="muted">Carregando catálogo Premium...</div></div>
   </div>
 </div>
@@ -648,6 +667,6 @@
   </div>
 </div>
 </div>
-<script src="/game.js?v=13.4.1" type="module"></script>
+<script src="/game.js?v=13.6.0" type="module"></script>
 </body>
 </html>
