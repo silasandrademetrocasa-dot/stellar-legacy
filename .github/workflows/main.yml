@@ -1,74 +1,118 @@
-name: ChatGPT Deploy Bridge
+name: Stellar Auto Installer
+
+# STELLAR LEGACY AUTO INSTALLER
+# Para mudar a pasta de upload, altere "updates/*.zip" abaixo e as referências
+# "updates/" no script. O padrão recomendado é manter /updates.
 
 on:
+  push:
+    paths:
+      - 'updates/*.zip'
   workflow_dispatch:
-  schedule:
-    - cron: "*/5 * * * *"
 
 permissions:
   contents: write
 
-jobs:
-  deploy:
-    runs-on: ubuntu-latest
+concurrency:
+  group: stellar-auto-installer
+  cancel-in-progress: false
 
+jobs:
+  install:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
     steps:
       - name: Baixar repositório
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - name: Buscar atualização do ChatGPT
-        env:
-          SUPABASE_URL: https://rxcekofbxzivuavtqjwp.supabase.co
-          SUPABASE_KEY: sb_publishable_eGTer0DC0Hzk3eWOC2Y78g_0Hib4_KK
+      - name: Localizar ZIP mais recente
+        id: zip
+        shell: bash
         run: |
           set -euo pipefail
-
-          JSON=$(curl -fsS \
-            "$SUPABASE_URL/rest/v1/chatgpt_deploy_files?select=version,content_b64&file_path=eq.__patch__.gz.b64&order=created_at.desc&limit=1" \
-            -H "apikey: $SUPABASE_KEY")
-
-          VERSION=$(echo "$JSON" | jq -r '.[0].version // empty')
-          PATCH_B64=$(echo "$JSON" | jq -r '.[0].content_b64 // empty')
-
-          if [ -z "$VERSION" ] || [ -z "$PATCH_B64" ]; then
-            echo "Nenhuma atualização disponível."
+          shopt -s nullglob
+          files=(updates/*.zip)
+          if [ ${#files[@]} -eq 0 ]; then
+            echo "Nenhum ZIP encontrado em /updates."
+            echo "found=false" >> "$GITHUB_OUTPUT"
             exit 0
           fi
+          newest=$(ls -1t updates/*.zip | head -n 1)
+          echo "ZIP selecionado: $newest"
+          echo "found=true" >> "$GITHUB_OUTPUT"
+          echo "path=$newest" >> "$GITHUB_OUTPUT"
 
-          if [ -f .chatgpt-deployed-version ] && grep -qx "$VERSION" .chatgpt-deployed-version; then
-            echo "Versão $VERSION já instalada."
-            exit 0
+      - name: Validar e extrair atualização
+        if: steps.zip.outputs.found == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          ZIP="${{ steps.zip.outputs.path }}"
+          rm -rf .stellar-update
+          mkdir -p .stellar-update/raw .stellar-update/stage
+
+          # Bloqueia pacotes absurdamente grandes antes de extrair.
+          bytes=$(unzip -l "$ZIP" | awk 'END {print $1+0}')
+          max=$((350*1024*1024))
+          if [ "$bytes" -gt "$max" ]; then
+            echo "ZIP excede 350 MB descompactado. Abortando."
+            exit 1
           fi
 
-          echo "$PATCH_B64" | base64 -d | gzip -d > /tmp/chatgpt.patch
+          unzip -q "$ZIP" -d .stellar-update/raw
 
-          echo "Aplicando versão $VERSION..."
-          patch -p1 --forward --batch < /tmp/chatgpt.patch
+          # Aceita ZIP com os arquivos na raiz ou dentro de uma pasta principal.
+          src=.stellar-update/raw
+          entries=$(find "$src" -mindepth 1 -maxdepth 1 | wc -l | tr -d ' ')
+          dirs=$(find "$src" -mindepth 1 -maxdepth 1 -type d | wc -l | tr -d ' ')
+          if [ "$entries" = "1" ] && [ "$dirs" = "1" ]; then
+            src=$(find "$src" -mindepth 1 -maxdepth 1 -type d | head -n 1)
+          fi
 
-          rm -f .chatgpt-write-test
-          echo "$VERSION" > .chatgpt-deployed-version
+          if [ ! -f "$src/package.json" ]; then
+            echo "package.json não encontrado no pacote. Nenhum arquivo foi alterado."
+            exit 1
+          fi
 
-      - name: Validar jogo
+          node -e "const p=require(process.argv[1]); if(!p.name) process.exit(1); console.log('Pacote:',p.name,'versão',p.version||'sem versão')" "$src/package.json"
+          rsync -a "$src/" .stellar-update/stage/
+
+          if [ -f .stellar-update/stage/public/game.js ]; then
+            node --check .stellar-update/stage/public/game.js
+          fi
+          if [ -f .stellar-update/stage/server/index.js ]; then
+            node --check .stellar-update/stage/server/index.js
+          fi
+
+      - name: Instalar pacote no repositório
+        if: steps.zip.outputs.found == 'true'
+        shell: bash
         run: |
-          node --check public/game.js
-          node --check public/api.js
-          node --check public/data.js
-          node --check server/index.js
+          set -euo pipefail
+          rsync -a --delete \
+            --exclude='.git/' \
+            --exclude='.github/' \
+            --exclude='updates/' \
+            --exclude='.stellar-update/' \
+            .stellar-update/stage/ ./
 
-      - name: Commit e Push
+          rm -f updates/*.zip
+          rm -rf .stellar-update
+
+      - name: Commit automático
+        if: steps.zip.outputs.found == 'true'
+        shell: bash
         run: |
-          git config user.name "ChatGPT Deploy"
+          set -euo pipefail
+          git config user.name "Stellar Auto Installer"
           git config user.email "actions@users.noreply.github.com"
-
           git add -A
-
           if git diff --cached --quiet; then
-            echo "Nada novo para publicar."
+            echo "Nenhuma mudança para publicar."
             exit 0
           fi
-
-          VERSION=$(cat .chatgpt-deployed-version)
-          git commit -m "deploy: Stellar Legacy V${VERSION}"
+          VERSION=$(node -p "require('./package.json').version || 'update'" 2>/dev/null || echo update)
+          git commit -m "AUTO INSTALL: Stellar Legacy v${VERSION} [skip ci]"
           git push
