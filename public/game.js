@@ -1,7 +1,7 @@
-import { FACTIONS, SHIPS, ITEMS, LASER_AMMO, ROCKETS, NPC_TYPES, MAPS, RESOURCES } from './data.js?v=17.0.0';
-import { GAME_ASSETS } from './assets/v17/manifest.js?v=17.0.0';
-import { signUp, signIn, requestPasswordReset, restorePasswordRecoveryFromUrl, restoreSession, signOutLocal, checkGameSession, endGameSession, getUser, getSessionCredentials, loadCloudSave, saveCloudSave, updateCallsign, updatePassword, loadRankings, loadAuctionBids, saveAuctionBidOnline, markAuctionBidStatusOnline, loadAuctionMarket, upsertPlayerPresenceOnline, loadMapPresenceOnline, removePlayerPresenceOnline, queuePvpAttackOnline, consumePvpDamageEventsOnline, syncArenaProfileOnline, loadArenaState, loadArenaDailyRewardStatus, claimArenaDailyReward, loadArenaOpponents, loadArenaHistory, arenaAttackOnline, listClansOnline, loadMyClanOnline, createClanOnline, joinClanOnline, leaveClanOnline, transferClanCreditsOnline, claimClanCreditGrantsOnline, recordClanAlienKillOnline, getPremiumShopOnline, testPurchasePremiumOnline, loadWarfrontStateOnline, hitWorldBossOnline, claimWorldBossRewardOnline, declareClanWarOnline, recordClanWarScoreOnline, loadLiveOpsOnline, purchaseLiveCatalogOnline, economyActionOnline, getChatHistoryOnline, sendChatMessageOnline, getMyDesignersOnline, setDesignLoadoutOnline, claimGateDroneDesignOnline, claimEventDesignerOnline } from './api.js?v=17.0.0';
-import { SharedUniverseClient } from './world.js?v=17.0.0';
+import { FACTIONS, SHIPS, ITEMS, LASER_AMMO, ROCKETS, NPC_TYPES, MAPS, RESOURCES } from './data.js?v=17.2.0';
+import { GAME_ASSETS } from './assets/v17/manifest.js?v=17.2.0';
+import { signUp, signIn, requestPasswordReset, restorePasswordRecoveryFromUrl, restoreSession, signOutLocal, checkGameSession, endGameSession, getUser, getSessionCredentials, loadCloudSave, saveCloudSave, updateCallsign, updatePassword, loadRankings, loadAuctionBids, saveAuctionBidOnline, markAuctionBidStatusOnline, loadAuctionMarket, upsertPlayerPresenceOnline, loadMapPresenceOnline, removePlayerPresenceOnline, queuePvpAttackOnline, consumePvpDamageEventsOnline, syncArenaProfileOnline, loadArenaState, loadArenaDailyRewardStatus, claimArenaDailyReward, loadArenaOpponents, loadArenaHistory, arenaAttackOnline, listClansOnline, loadMyClanOnline, createClanOnline, joinClanOnline, leaveClanOnline, transferClanCreditsOnline, claimClanCreditGrantsOnline, recordClanAlienKillOnline, getPremiumShopOnline, testPurchasePremiumOnline, loadWarfrontStateOnline, hitWorldBossOnline, claimWorldBossRewardOnline, declareClanWarOnline, recordClanWarScoreOnline, loadLiveOpsOnline, purchaseLiveCatalogOnline, economyActionOnline, getChatHistoryOnline, sendChatMessageOnline, getMyDesignersOnline, setDesignLoadoutOnline, claimGateDroneDesignOnline, claimEventDesignerOnline } from './api.js?v=17.2.0';
+import { SharedUniverseClient } from './world.js?v=17.2.0';
 
 const canvas = document.querySelector('#game');
 const ctx = canvas.getContext('2d');
@@ -3846,15 +3846,16 @@ function drawRemoteLaser(rp,p){
 }
 function drawOnlinePlayers(){
   for(const rp of onlineWorld.players.values()){
-    if(!onScreenWorld(rp.x,rp.y,180))continue;const p=screenPos(rp.x,rp.y),f=FACTIONS[rp.faction],enemy=onlinePlayerEnemy(rp),sameClan=!!currentClanTag()&&!!rp.clanTag&&rp.clanTag===currentClanTag(),color=enemy?'#ff4d69':sameClan?'#ffe16b':(f?.color||'#69ffbd'),path=shipMapAsset(rp.shipId),img=assetImage(path),size=onlineShipSize(rp.shipId),designer=designById(rp.shipDesignId),visual=designer?.visual||{};
+    if(!onScreenWorld(rp.x,rp.y,180))continue;const p=screenPos(rp.x,rp.y),f=FACTIONS[rp.faction],enemy=onlinePlayerEnemy(rp),sameClan=!!currentClanTag()&&!!rp.clanTag&&rp.clanTag===currentClanTag(),color=enemy?'#ff4d69':sameClan?'#ffe16b':(f?.color||'#69ffbd'),path=shipMapAsset(rp.shipId),img=assetImage(path),size=onlineShipSize(rp.shipId),designer=designById(rp.shipDesignId),visual=designer?.visual||{},moving=Math.hypot((rp.tx??rp.x)-rp.x,(rp.ty??rp.y)-rp.y)>2,bank=combatBank(rp.angle||0,(rp.targetAngle??rp.angle??0),moving);
     ctx.save();ctx.translate(p.x,p.y);ctx.globalAlpha=.92;if(state.target?.isPlayer&&state.target.id===rp.id){const rr=size*.55+18;ctx.strokeStyle='#ffed6f';ctx.lineWidth=2;ctx.setLineDash([6,4]);ctx.beginPath();ctx.arc(0,0,rr,0,TWO_PI);ctx.stroke();ctx.setLineDash([]);}
-    if(img&&img.naturalWidth){const sc=size/Math.max(img.naturalWidth,img.naturalHeight);ctx.rotate((rp.angle||0)+Math.PI/2);ctx.shadowColor=visual.glow||color;ctx.shadowBlur=designer?18:10;if(designer)ctx.filter=designerVisualCss(designer);ctx.drawImage(img,-img.naturalWidth*sc/2,-img.naturalHeight*sc/2,img.naturalWidth*sc,img.naturalHeight*sc);ctx.filter='none';if(designer){ctx.rotate(-((rp.angle||0)+Math.PI/2));ctx.strokeStyle=visual.accent||visual.glow||color;ctx.globalAlpha=.72;ctx.lineWidth=designer.rarity==='legendary'||designer.rarity==='mythic'?2:1.2;ctx.beginPath();ctx.arc(0,0,size*.57,0,TWO_PI);ctx.stroke();}}else{ctx.rotate(rp.angle||0);drawShipModel(rp.shipId,color);}ctx.restore();
+    if(img&&img.naturalWidth){const sc=size/Math.max(img.naturalWidth,img.naturalHeight);ctx.save();ctx.rotate((rp.angle||0)+Math.PI/2);drawEngineWakeLocal(size,visual.glow||color,moving?1:0,Number(rp.level)||0);ctx.transform(1,0,bank*.4,1,0,0);ctx.scale(1+Math.abs(bank)*.07,1-Math.abs(bank)*.03);ctx.shadowColor=visual.glow||color;ctx.shadowBlur=designer?18:10;if(designer)ctx.filter=designerVisualCss(designer);ctx.drawImage(img,-img.naturalWidth*sc/2,-img.naturalHeight*sc/2,img.naturalWidth*sc,img.naturalHeight*sc);ctx.filter='none';ctx.restore();drawDesignerAuraLocal(size,designer,visual,Number(rp.level)||0);}else{ctx.rotate(rp.angle||0);drawShipModel(rp.shipId,color);}ctx.restore();
     drawRemoteLaser(rp,p);drawRemotePet(rp);
     const barW=58,bx=p.x-barW/2,hp=Math.max(0,Math.min(1,rp.hp/Math.max(1,rp.maxHp))),sh=Math.max(0,Math.min(1,rp.shield/Math.max(1,rp.maxShield)));
     ctx.fillStyle='rgba(8,20,28,.78)';ctx.fillRect(bx,p.y-size*.42-17,barW,4);ctx.fillStyle='#55ff9d';ctx.fillRect(bx,p.y-size*.42-17,barW*hp,4);ctx.fillStyle='rgba(7,25,45,.82)';ctx.fillRect(bx,p.y-size*.42-11,barW,3);ctx.fillStyle='#4fcfff';ctx.fillRect(bx,p.y-size*.42-11,barW*sh,3);
     drawPilotNameplate({x:p.x,y:p.y+size*.45+17,rankCode:rp.rankCode,clanTag:rp.clanTag,callsign:rp.callsign,level:rp.level,color:enemy?'#ff8b9e':sameClan?'#ffe692':'#8fffd0',isAdmin:rp.isAdmin});
   }
 }
+
 
 
 function update(dt){if(!progress)return;processRespawns();updateCombatAbilities();updatePlayer(dt);updateSharedUniverseInterpolation(dt);updateEnemies(dt);updatePet(dt);updateOnlineWorld(dt);updateWarfrontRuntime();updateGalaxyEvent(dt);updateParticles(dt);updateFx(dt);updateAlphaGate();updateAuctionSystem();updateUI();}
@@ -3968,8 +3969,8 @@ function drawEnemy(e){
   ctx.save();ctx.translate(p.x,p.y);
   if(state.target?.id===e.id){const rr=e.size+18+Math.sin(nowSec()*6)*2;ctx.strokeStyle=e.eventNpc?'rgba(255,190,72,.98)':'rgba(255,74,95,.98)';ctx.lineWidth=2;ctx.setLineDash([7,4]);ctx.beginPath();ctx.arc(0,0,rr,0,TWO_PI);ctx.stroke();ctx.setLineDash([]);ctx.rotate(-nowSec()*.55);for(let i=0;i<4;i++){ctx.rotate(Math.PI/2);ctx.beginPath();ctx.moveTo(rr+3,-8);ctx.lineTo(rr+3,8);ctx.lineTo(rr-5,8);ctx.stroke();}ctx.rotate(nowSec()*.55);}
   if(img&&img.naturalWidth){
-    const face=Math.atan2(player.y-e.y,player.x-e.x)+Math.PI/2,size=e.size*(boss?3.35:3.05),sc=size/Math.max(img.naturalWidth,img.naturalHeight);
-    ctx.rotate(face);ctx.shadowColor=boss?'#ff405a':e.color;ctx.shadowBlur=boss?20:10;ctx.drawImage(img,-img.naturalWidth*sc/2,-img.naturalHeight*sc/2,img.naturalWidth*sc,img.naturalHeight*sc);
+    const face=Math.atan2(player.y-e.y,player.x-e.x)+Math.PI/2,size=e.size*(boss?3.35:3.05),sc=size/Math.max(img.naturalWidth,img.naturalHeight),pulse=Math.sin(nowSec()*4+e.x*.002+e.y*.002);
+    ctx.rotate(face);if(!boss&&Math.hypot(player.x-e.x,player.y-e.y)<900)drawEngineWakeLocal(size,e.color,.55,e.x*.01);ctx.scale(1+pulse*.012,1-pulse*.012);ctx.shadowColor=boss?'#ff405a':e.color;ctx.shadowBlur=boss?22:11;ctx.drawImage(img,-img.naturalWidth*sc/2,-img.naturalHeight*sc/2,img.naturalWidth*sc,img.naturalHeight*sc);
   }else{
     // Enquanto o PNG carrega, o modo ALTO usa uma silhueta angular discreta em vez de círculos/quadrados.
     if(qualityMode==='high'){
@@ -4007,12 +4008,28 @@ function drawShipModel(id,color){ctx.shadowColor=color;ctx.shadowBlur=18;ctx.str
   else if(id==='aegis'){ctx.moveTo(25,0);ctx.lineTo(8,-9);ctx.lineTo(-8,-8);ctx.lineTo(-18,-17);ctx.lineTo(-17,-5);ctx.lineTo(-25,0);ctx.lineTo(-17,5);ctx.lineTo(-18,17);ctx.lineTo(-8,8);ctx.lineTo(8,9);}
   else {ctx.moveTo(29,0);ctx.lineTo(9,-9);ctx.lineTo(-10,-15);ctx.lineTo(-18,-7);ctx.lineTo(-25,0);ctx.lineTo(-18,7);ctx.lineTo(-10,15);ctx.lineTo(9,9);}
 ctx.closePath();ctx.fill();ctx.stroke();ctx.shadowBlur=0;ctx.fillStyle='rgba(5,13,25,.9)';ctx.beginPath();ctx.ellipse(6,0,7.5,3.8,0,0,TWO_PI);ctx.fill();ctx.fillStyle='#f4ffff';ctx.beginPath();ctx.arc(8,0,1.6,0,TWO_PI);ctx.fill();ctx.fillStyle='#b47bff';ctx.fillRect(-25,-2.2,8,4.4);ctx.fillStyle='rgba(255,255,255,.34)';ctx.fillRect(-2,-8,12,2.2);ctx.fillRect(-8,6,9,1.6);}
+function combatClamp(v,min,max){return Math.max(min,Math.min(max,v));}
+function combatBank(angle,targetAngle,moving){if(!moving)return 0;return combatClamp(angleDelta(angle||0,targetAngle||angle||0)*.42,-.22,.22);}
+function drawEngineWakeLocal(size,color,intensity=1,phase=0){
+  if(!qualityProfile().fx||intensity<=0)return;
+  const pulse=.84+.16*Math.sin(nowSec()*9+phase),len=size*(.28+.18*intensity)*pulse,spread=size*.16;
+  ctx.save();ctx.globalCompositeOperation='lighter';ctx.globalAlpha=.18+.24*intensity;
+  for(const ox of [-spread,spread]){const g=ctx.createRadialGradient(ox,size*.28,0,ox,size*.42,len);g.addColorStop(0,'rgba(255,255,255,.95)');g.addColorStop(.18,color);g.addColorStop(1,'rgba(0,0,0,0)');ctx.fillStyle=g;ctx.beginPath();ctx.ellipse(ox,size*.43,spread*.7,len,0,0,TWO_PI);ctx.fill();}
+  ctx.restore();
+}
+function drawDesignerAuraLocal(size,designer,visual,phase=0){
+  if(!designer||!qualityProfile().fx)return;const rare=designer.rarity==='mythic'||designer.rarity==='legendary',r=size*(rare?.64:.58),t=nowSec()*(rare?1.1:.72)+phase,c=visual.accent||visual.glow||'#7cecff';
+  ctx.save();ctx.rotate(t);ctx.strokeStyle=c;ctx.globalAlpha=rare?.58:.36;ctx.lineWidth=rare?2:1.2;ctx.setLineDash(rare?[10,8]:[7,10]);ctx.beginPath();ctx.arc(0,0,r,0,TWO_PI);ctx.stroke();ctx.setLineDash([]);
+  if(rare){ctx.fillStyle=c;for(let i=0;i<3;i++){const a=i*TWO_PI/3-t*.35;ctx.beginPath();ctx.arc(Math.cos(a)*r,Math.sin(a)*r,2.2,0,TWO_PI);ctx.fill();}}ctx.restore();
+}
 function drawPlayer(){
   const p=screenPos(player.x,player.y),f=getFaction(),a=player.angle||0,designer=currentShipDesign(),visual=designer?.visual||{},color=visual.glow||(f?.color||'#76e0ff'),path=shipMapAsset(progress.activeShipId),img=assetImage(path);
+  const moving=routeDistance()>4,desired=moving?Math.atan2(player.ty-player.y,player.tx-player.x):a,bank=combatBank(a,desired,moving),motion=moving?1:0;
   ctx.save();ctx.translate(p.x,p.y);
   if(img&&img.naturalWidth){
     const ship=SHIPS[progress.activeShipId],size=(ship.id==='citadel'?105:ship.id==='bigboy'?96:ship.id==='goliath'||ship.id==='aegis'?88:78),sc=size/Math.max(img.naturalWidth,img.naturalHeight);
-    ctx.rotate((a||0)+Math.PI/2);ctx.shadowColor=color;ctx.shadowBlur=designer?22:14;if(designer)ctx.filter=designerVisualCss(designer);ctx.drawImage(img,-img.naturalWidth*sc/2,-img.naturalHeight*sc/2,img.naturalWidth*sc,img.naturalHeight*sc);ctx.filter='none';if(designer){ctx.rotate(-((a||0)+Math.PI/2));ctx.strokeStyle=visual.accent||color;ctx.globalAlpha=.62+.18*Math.sin(nowSec()*3.2);ctx.lineWidth=designer.rarity==='legendary'||designer.rarity==='mythic'?2.4:1.5;ctx.beginPath();ctx.arc(0,0,size*.58,0,TWO_PI);ctx.stroke();}
+    ctx.save();ctx.rotate(a+Math.PI/2);drawEngineWakeLocal(size,color,motion,progress.profile.level||0);ctx.transform(1,0,bank*.42,1,0,0);ctx.scale(1+Math.abs(bank)*.08,1-Math.abs(bank)*.035);ctx.shadowColor=color;ctx.shadowBlur=designer?24:15;if(designer)ctx.filter=designerVisualCss(designer);ctx.drawImage(img,-img.naturalWidth*sc/2,-img.naturalHeight*sc/2,img.naturalWidth*sc,img.naturalHeight*sc);ctx.filter='none';ctx.restore();
+    drawDesignerAuraLocal(size,designer,visual,progress.profile.level||0);
   }else{ctx.rotate(a||0);drawShipModel(progress.activeShipId,color);}
   ctx.restore();drawDrones(p);
   ctx.strokeStyle=designer?(visual.accent||'rgba(119,228,255,.45)'):'rgba(119,228,255,.23)';ctx.lineWidth=designer?1.4:1;ctx.beginPath();ctx.arc(p.x,p.y,25,0,TWO_PI);ctx.stroke();

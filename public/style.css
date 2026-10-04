@@ -2146,3 +2146,16 @@ body[data-quality="high"] .hud-panel{backdrop-filter:blur(7px);-webkit-backdrop-
 @media(max-width:1180px){.hangar-summary-strip{grid-template-columns:repeat(3,minmax(110px,1fr))}.hangar-equipment-split{grid-template-columns:1fr}.hangar-pane-title{position:static}}
 @media(max-width:720px){.hangar-summary-strip{grid-template-columns:repeat(2,minmax(100px,1fr))}.hangar-filter-bar{position:static}.hangar-slot-grid,.hangar-inventory-grid{grid-template-columns:1fr 1fr}}
 @media(max-width:520px){.hangar-slot-grid,.hangar-inventory-grid{grid-template-columns:1fr}.hangar-section-head>span{align-items:flex-start;flex-direction:column;gap:2px}}
+
+
+/* ===================== V17.1 + V17.2 SPRITE POLISH / COMBAT VISUALS ===================== */
+.ship-grid{gap:16px!important;}
+.ship-card{padding:15px!important;gap:10px!important;}
+.ship-card .ship-visual{height:190px!important;min-height:190px!important;padding:14px!important;overflow:hidden!important;background:radial-gradient(circle at 50% 54%,rgba(63,194,255,.18),rgba(6,14,29,.96) 68%)!important;}
+.ship-card .ship-visual img{width:100%!important;height:100%!important;max-width:100%!important;max-height:100%!important;object-fit:contain!important;object-position:center center!important;filter:drop-shadow(0 0 15px rgba(75,202,255,.38));transform:scale(.98);}
+.ship-card:hover .ship-visual img{transform:scale(1.015);transition:transform .18s ease;}
+.product-icon{overflow:hidden!important;padding:8px!important;}
+.product-icon img{width:100%!important;height:100%!important;max-width:100%!important;max-height:100%!important;object-fit:contain!important;object-position:center!important;}
+.drone-mini-art,.pet-avatar{overflow:hidden!important;}
+.drone-mini-art img,.pet-avatar img{object-fit:contain!important;object-position:center!important;}
+@media(max-width:760px){.ship-card .ship-visual{height:168px!important;min-height:168px!important;padding:12px!important;}}
