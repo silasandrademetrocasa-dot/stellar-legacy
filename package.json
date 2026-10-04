@@ -1,6 +1,6 @@
 {
   "name": "stellar-legacy",
-  "version": "15.2.0",
+  "version": "16.0.0",
   "type": "module",
   "scripts": {
     "start": "node server/index.js",
@@ -14,5 +14,5 @@
   "engines": {
     "node": ">=18"
   },
-  "release": "tactical-hud-aggro-lock-v15-2-0"
+  "release": "live-ops-core-stage1-v16-0-0"
 }

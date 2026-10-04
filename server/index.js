@@ -56,6 +56,57 @@ function configStatus() {
   };
 }
 
+const LIVE_OPS_CACHE_MS = 12000;
+let liveOpsCache = null;
+let liveOpsCacheAt = 0;
+const livePurchaseLocks = new Map();
+
+async function loadLiveOpsSnapshot(force=false) {
+  const now=Date.now();
+  if(!force&&liveOpsCache&&now-liveOpsCacheAt<LIVE_OPS_CACHE_MS)return liveOpsCache;
+  const sb=supabaseBase();
+  if(!sb)throw new Error('Supabase indisponível para LIVE OPS.');
+  const {data,error}=await sb.rpc('get_live_ops_v16');
+  if(error)throw new Error(`Falha ao carregar LIVE OPS: ${error.message}`);
+  liveOpsCache=(data&&typeof data==='object')?data:{events:[],catalog:[],server_time:now};
+  liveOpsCacheAt=now;
+  return liveOpsCache;
+}
+
+function liveCatalogRow(snapshot,key){
+  return (snapshot?.catalog||[]).find(row=>row?.enabled&&String(row.catalog_key||'')===String(key||''))||null;
+}
+function premiumDiscountEligible(row){
+  return row?.currency==='uridium'&&['ship','laser','generator','drone','extra','pet','pet_gear'].includes(String(row?.kind||''));
+}
+function ensurePetState(state){
+  state.pet ||= {owned:false,level:1,xp:0,xpModelV101:true,laserSlotsUnlocked:0,shieldSlotsUnlocked:0,lasers:[],shields:[],gearsOwned:{guard:false,box:false,ore:false,repair:false,kami:false},activeGear:'off',kamikazeReadyAt:0};
+  state.pet.gearsOwned ||= {guard:false,box:false,ore:false,repair:false,kami:false};
+  state.pet.lasers ||= [];state.pet.shields ||= [];
+  return state.pet;
+}
+function applyLiveGrant(state,row){
+  const grant=row?.meta?.grant||{};
+  const kind=String(grant.kind||'');
+  const id=String(grant.id||row?.ref_id||'');
+  const qty=Math.max(1,Math.floor(Number(grant.qty)||1));
+  if(kind==='ship'){state.ownedShips ||= [];if(state.ownedShips.includes(id))throw Object.assign(new Error('Nave já obtida.'),{status:409});state.ownedShips.push(id);return;}
+  if(kind==='inventory'){state.inventory ||= {};const equippedExtra=(state.shipLoadout?.extras||[]).includes(id);if(row.kind==='extra'&&((state.inventory[id]||0)>0||equippedExtra))throw Object.assign(new Error('Esse EXTRA já pertence à sua conta.'),{status:409});state.inventory[id]=(Number(state.inventory[id])||0)+qty;return;}
+  if(kind==='drone'){state.drones ||= [];if(state.drones.length>=8)throw Object.assign(new Error('Limite de 8 drones atingido.'),{status:409});state.drones.push({id:`d_${Date.now()}_${randomUUID().slice(0,6)}`,type:id,slots:Array(Math.max(1,Number(grant.slots)||1)).fill(null)});return;}
+  if(kind==='ammo'){state.ammo ||= {};state.ammo[id]=(Number(state.ammo[id])||0)+qty;return;}
+  if(kind==='rocket'){state.rockets ||= {};state.rockets[id]=(Number(state.rockets[id])||0)+qty;return;}
+  if(kind==='pet_base'){const pet=ensurePetState(state);if(pet.owned)throw Object.assign(new Error('AUX-9 já adquirido.'),{status:409});pet.owned=true;pet.level=Math.max(1,Number(pet.level)||1);pet.laserSlotsUnlocked=Math.max(1,Number(pet.laserSlotsUnlocked)||1);pet.shieldSlotsUnlocked=Math.max(1,Number(pet.shieldSlotsUnlocked)||1);pet.lasers=pet.lasers.length?pet.lasers:[null];pet.shields=pet.shields.length?pet.shields:[null];return;}
+  if(kind==='pet_gear'){const pet=ensurePetState(state);if(!pet.owned)throw Object.assign(new Error('Adquira o AUX-9 primeiro.'),{status:409});if(pet.gearsOwned[id])throw Object.assign(new Error('Módulo já adquirido.'),{status:409});pet.gearsOwned[id]=true;return;}
+  throw Object.assign(new Error('Produto ainda não habilitado para compra autoritativa nesta etapa.'),{status:409});
+}
+
+async function withPurchaseLock(userId,fn){
+  const prev=livePurchaseLocks.get(userId)||Promise.resolve();
+  let release;const current=new Promise(r=>release=r);livePurchaseLocks.set(userId,current);
+  await prev.catch(()=>{});
+  try{return await fn();}finally{release();if(livePurchaseLocks.get(userId)===current)livePurchaseLocks.delete(userId);}
+}
+
 function gameSessionIdFromRequest(req) {
   return String(req.headers['x-game-session-id'] || '').trim();
 }
@@ -171,7 +222,7 @@ async function accountUser(sb, user, preferred = '') {
   return { id: user.id, email: user.email, callsign };
 }
 
-app.get('/health', (req, res) => res.json({ ok: true, game: 'Stellar Legacy', version: '15.2.0', universe: 'shared' }));
+app.get('/health', (req, res) => res.json({ ok: true, game: 'Stellar Legacy', version: '16.0.0', universe: 'shared' }));
 
 
 app.get('/api/config', (req, res) => {
@@ -187,10 +238,10 @@ app.get('/api/config', (req, res) => {
 
 app.get('/api/meta', (req, res) => res.json({
   name: 'Stellar Legacy',
-  version: '15.2.0',
+  version: '16.0.0',
   authReady: Boolean(SUPABASE_URL && SUPABASE_KEY),
   diagnostics: configStatus(),
-  features: ['login', 'cloud_save', 'factions', 'safe_zone', 'shop', 'owned_ships', 'equipment_slots', 'inventory', 'drones', 'ammo', 'rockets', 'expanded_expedition_maps', 'cargo_hold', 'ore_trading', 'npc_cargo_boxes', 'npc_respawn', 'minimap_navigation', 'waypoints', 'landmark_discovery', 'combat_fx', 'pet_modules', 'auto_buy_cpu', 'v8_asset_identity', 'mission_control_v93', 'mission_acceptance_tracking', 'expanded_enemy_density', 'online_player_presence', 'real_player_auction', 'rank_nameplates_v12', 'clans_v12', 'clan_vault_v12', 'premium_shop_v12', 'battle_pass_paid_v12', 'premium_subscription_v12', 'clan_daily_economy_v12', 'portal_neutral_zone_v12', 'base_only_equipment_v12', 'single_session_v1214', 'manual_login_v141', 'account_bound_save_v141', 'unique_callsign_v141', 'premium_auto_combat_v141', 'shared_universe_v15', 'authoritative_npcs_v15', 'shared_ores_v15', 'shared_events_v15', 'websocket_world_v15', 'npc_contribution_v15', 'realtime_player_socket_v151', 'remote_laser_fx_v151', 'remote_aux9_v151', 'low_latency_world_v151'],
+  features: ['login', 'cloud_save', 'factions', 'safe_zone', 'shop', 'owned_ships', 'equipment_slots', 'inventory', 'drones', 'ammo', 'rockets', 'expanded_expedition_maps', 'cargo_hold', 'ore_trading', 'npc_cargo_boxes', 'npc_respawn', 'minimap_navigation', 'waypoints', 'landmark_discovery', 'combat_fx', 'pet_modules', 'auto_buy_cpu', 'v8_asset_identity', 'mission_control_v93', 'mission_acceptance_tracking', 'expanded_enemy_density', 'online_player_presence', 'real_player_auction', 'rank_nameplates_v12', 'clans_v12', 'clan_vault_v12', 'premium_shop_v12', 'battle_pass_paid_v12', 'premium_subscription_v12', 'clan_daily_economy_v12', 'portal_neutral_zone_v12', 'base_only_equipment_v12', 'single_session_v1214', 'manual_login_v141', 'account_bound_save_v141', 'unique_callsign_v141', 'premium_auto_combat_v141', 'shared_universe_v15', 'authoritative_npcs_v15', 'shared_ores_v15', 'shared_events_v15', 'websocket_world_v15', 'npc_contribution_v15', 'realtime_player_socket_v151', 'remote_laser_fx_v151', 'remote_aux9_v151', 'low_latency_world_v151', 'live_ops_v16', 'server_authoritative_shop_v16', 'supabase_event_schedule_v16'],
 }));
 
 app.get('/api/diagnostics', asyncRoute(async (req, res) => {
@@ -347,6 +398,46 @@ app.put('/api/account/callsign', requireUser, asyncRoute(async (req, res) => {
   res.json({ user: { id: req.user.id, email: req.user.email, callsign: preferred } });
 }));
 
+app.get('/api/live-ops', requireUser, asyncRoute(async (req,res)=>{
+  const data=await loadLiveOpsSnapshot(Boolean(req.query?.refresh));
+  res.json(data);
+}));
+
+app.post('/api/live/purchase', requireUser, asyncRoute(async (req,res)=>{
+  const catalogKey=String(req.body?.catalog_key||'').trim().slice(0,120);
+  if(!catalogKey)return res.status(400).json({error:'Produto inválido.'});
+  const result=await withPurchaseLock(req.user.id,async()=>{
+    const snapshot=await loadLiveOpsSnapshot(true);
+    const row=liveCatalogRow(snapshot,catalogKey);
+    if(!row)throw Object.assign(new Error('Produto indisponível no catálogo online.'),{status:404});
+    const {data:saveRow,error:saveError}=await req.sb.from('game_saves').select('state').eq('user_id',req.user.id).maybeSingle();
+    if(saveError)throw new Error(saveError.message);
+    if(!saveRow?.state)throw Object.assign(new Error('Save online ainda não foi criado.'),{status:409});
+    const state=structuredClone(saveRow.state);
+    if(String(state.accountOwnerId||req.user.id)!==req.user.id)throw Object.assign(new Error('SAVE BLOQUEADO: proprietário inválido.'),{status:409});
+    state.profile ||= {};
+    const {data:premiumState}=await req.sb.rpc('get_premium_shop_v12');
+    const premium=!!premiumState?.premium_active;
+    const basePrice=Math.max(0,Math.round(Number(row.price)||0));
+    const price=premium&&premiumDiscountEligible(row)?Math.max(1,Math.floor(basePrice*.95)):basePrice;
+    const currency=String(row.currency||'credits')==='uridium'?'uridium':'credits';
+    const balance=Math.max(0,Number(state.profile[currency])||0);
+    if(balance<price)throw Object.assign(new Error(`Saldo insuficiente para ${catalogKey}.`),{status:409});
+    applyLiveGrant(state,row);
+    state.profile[currency]=balance-price;
+    state.clientSavedAt=Date.now();
+    state.accountOwnerId=req.user.id;state.accountOwnerEmail=req.user.email||null;
+    const updated_at=new Date().toISOString();
+    const {error:writeError}=await req.sb.from('game_saves').upsert({user_id:req.user.id,state,updated_at},{onConflict:'user_id'});
+    if(writeError)throw new Error(writeError.message);
+    const profile=state.profile||{};
+    const securedCallsign=await ensureProfile(req.sb,req.user);
+    await req.sb.from('profiles').upsert({id:req.user.id,callsign:securedCallsign,faction:profile.faction||null,level:Number(profile.level||1),xp:Number(profile.xp||0),credits:Number(profile.credits||0),uridium:Number(profile.uridium||0),aliens_killed:Number(profile.aliensKilled||0),gg_completed:Number(state.galaxyGate?.alpha?.completed||profile.ggCompleted||0),updated_at},{onConflict:'id'});
+    return {state,updated_at,purchase:{catalog_key:catalogKey,base_price:basePrice,price,currency,premium_discount:price<basePrice}};
+  });
+  res.json({ok:true,...result});
+}));
+
 app.get('/api/save', requireUser, asyncRoute(async (req, res) => {
   const { data, error } = await req.sb.from('game_saves').select('state,updated_at').eq('user_id', req.user.id).maybeSingle();
   if (error) return res.status(400).json({ error: error.message });
@@ -407,18 +498,21 @@ app.put('/api/save', requireUser, asyncRoute(async (req, res) => {
   res.json({ ok: true, updated_at, statePatch });
 }));
 
-app.get('/api/world/status', (req, res) => res.json({ ok: true, version: '15.2.0', ...sharedUniverse.stats() }));
+app.get('/api/world/status', (req, res) => res.json({ ok: true, version: '16.0.0', ...sharedUniverse.stats() }));
 
 app.get('*', (req, res) => res.sendFile(path.join(__dirname, '../public/index.html')));
 
 app.use((err, req, res, next) => {
   console.error(`[${new Date().toISOString()}] ${req.method} ${req.path}`, err);
   if (res.headersSent) return next(err);
+  const explicitStatus=Number(err?.status)||0;
   const isFetchError = /fetch failed|ENOTFOUND|ECONNREFUSED|ETIMEDOUT|UND_ERR/i.test(String(err?.message || err));
-  const message = isFetchError
-    ? 'Falha ao conectar ao Supabase. Confira SUPABASE_URL e a Publishable Key no Render.'
-    : 'Erro interno no servidor.';
-  res.status(502).json({
+  const message = explicitStatus
+    ? String(err?.message||'Operação recusada.')
+    : isFetchError
+      ? 'Falha ao conectar ao Supabase. Confira SUPABASE_URL e a Publishable Key no Render.'
+      : 'Erro interno no servidor.';
+  res.status(explicitStatus||502).json({
     error: message,
     detail: String(err?.message || err).slice(0, 240),
     diagnostics: configStatus(),
@@ -428,6 +522,7 @@ app.use((err, req, res, next) => {
 const port = process.env.PORT || 3000;
 const server = http.createServer(app);
 const sharedUniverse = attachSharedUniverse(server, {
+  loadLiveOps: async()=>loadLiveOpsSnapshot(false),
   authenticate: async (token, gameSessionId) => {
     if (!token || !gameSessionId) throw new Error('Sessão do universo ausente.');
     const base = supabaseBase();
@@ -446,7 +541,7 @@ const sharedUniverse = attachSharedUniverse(server, {
 });
 
 server.listen(port, () => {
-  console.log(`Stellar Legacy V15.2.0 :${port}`);
+  console.log(`Stellar Legacy V16.0.0 :${port}`);
   console.log('Supabase config:', configStatus());
   console.log('Shared Universe: ONLINE');
 });

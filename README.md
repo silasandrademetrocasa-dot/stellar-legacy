@@ -1,3 +1,7 @@
+# Stellar Legacy V16.0.0 — LIVE OPS CORE (ETAPA 1)
+
+Esta versão inicia a migração operacional para o Supabase em etapas. Eventos e preços deixam de ser definidos pelo cliente nos mapas online, e as compras principais passam por validação no servidor.
+
 # Stellar Legacy V15.2.0 — TACTICAL HUD + AGGRO LOCK
 
 ## V15.2 — TACTICAL HUD + AGGRO LOCK

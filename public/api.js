@@ -631,3 +631,17 @@ export async function recordClanWarScoreOnline(points, reason='combat') {
     method: 'POST', body: JSON.stringify({p_points:Math.max(1,Math.round(Number(points)||0)),p_reason:String(reason||'combat').slice(0,40)}),
   });
 }
+
+// ===================== V16 LIVE OPS =====================
+export async function loadLiveOpsOnline(force=false) {
+  const suffix=force?'?refresh=1':'';
+  return authedServerFetch(`/api/live-ops${suffix}`, {}, false);
+}
+
+export async function purchaseLiveCatalogOnline(catalogKey) {
+  return authedServerFetch('/api/live/purchase', {
+    method: 'POST',
+    body: JSON.stringify({ catalog_key: String(catalogKey || '') }),
+  }, false);
+}
+

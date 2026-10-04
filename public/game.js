@@ -1,7 +1,7 @@
-import { FACTIONS, SHIPS, ITEMS, LASER_AMMO, ROCKETS, NPC_TYPES, MAPS, RESOURCES } from './data.js?v=15.2.0';
-import { GAME_ASSETS } from './assets/v8/manifest.js?v=15.2.0';
-import { signUp, signIn, requestPasswordReset, restorePasswordRecoveryFromUrl, restoreSession, signOutLocal, checkGameSession, endGameSession, getUser, getSessionCredentials, loadCloudSave, saveCloudSave, updateCallsign, updatePassword, loadRankings, loadAuctionBids, saveAuctionBidOnline, markAuctionBidStatusOnline, loadAuctionMarket, upsertPlayerPresenceOnline, loadMapPresenceOnline, removePlayerPresenceOnline, queuePvpAttackOnline, consumePvpDamageEventsOnline, syncArenaProfileOnline, loadArenaState, loadArenaDailyRewardStatus, claimArenaDailyReward, loadArenaOpponents, loadArenaHistory, arenaAttackOnline, listClansOnline, loadMyClanOnline, createClanOnline, joinClanOnline, leaveClanOnline, transferClanCreditsOnline, claimClanCreditGrantsOnline, recordClanAlienKillOnline, getPremiumShopOnline, testPurchasePremiumOnline, loadWarfrontStateOnline, hitWorldBossOnline, claimWorldBossRewardOnline, declareClanWarOnline, recordClanWarScoreOnline } from './api.js?v=15.2.0';
-import { SharedUniverseClient } from './world.js?v=15.2.0';
+import { FACTIONS, SHIPS, ITEMS, LASER_AMMO, ROCKETS, NPC_TYPES, MAPS, RESOURCES } from './data.js?v=16.0.0';
+import { GAME_ASSETS } from './assets/v8/manifest.js?v=16.0.0';
+import { signUp, signIn, requestPasswordReset, restorePasswordRecoveryFromUrl, restoreSession, signOutLocal, checkGameSession, endGameSession, getUser, getSessionCredentials, loadCloudSave, saveCloudSave, updateCallsign, updatePassword, loadRankings, loadAuctionBids, saveAuctionBidOnline, markAuctionBidStatusOnline, loadAuctionMarket, upsertPlayerPresenceOnline, loadMapPresenceOnline, removePlayerPresenceOnline, queuePvpAttackOnline, consumePvpDamageEventsOnline, syncArenaProfileOnline, loadArenaState, loadArenaDailyRewardStatus, claimArenaDailyReward, loadArenaOpponents, loadArenaHistory, arenaAttackOnline, listClansOnline, loadMyClanOnline, createClanOnline, joinClanOnline, leaveClanOnline, transferClanCreditsOnline, claimClanCreditGrantsOnline, recordClanAlienKillOnline, getPremiumShopOnline, testPurchasePremiumOnline, loadWarfrontStateOnline, hitWorldBossOnline, claimWorldBossRewardOnline, declareClanWarOnline, recordClanWarScoreOnline, loadLiveOpsOnline, purchaseLiveCatalogOnline } from './api.js?v=16.0.0';
+import { SharedUniverseClient } from './world.js?v=16.0.0';
 
 const canvas = document.querySelector('#game');
 const ctx = canvas.getContext('2d');
@@ -290,9 +290,39 @@ function alphaSpinUnitCost(){const base=galaxyGateDef().spinCost;return premiumA
 function updatePremiumBadge(){if(!ui.premiumTopStatus)return;ui.premiumTopStatus.textContent=premiumActive()?'ATIVO':premiumPassActive()?'PASSE':'LOJA';ui.premiumBtn?.classList.toggle('gold',premiumActive()||premiumPassActive());}
 async function refreshPremiumState(force=false){if(!authenticated)return premiumRuntime.state;if(!force&&premiumRuntime.state&&Date.now()-premiumRuntime.lastAt<30000)return premiumRuntime.state;if(premiumRuntime.busy)return premiumRuntime.state;premiumRuntime.busy=true;try{premiumRuntime.state=await getPremiumShopOnline();premiumRuntime.lastAt=Date.now();updatePremiumBadge();renderSettings();return premiumRuntime.state;}catch(e){console.warn('premium state',e);return premiumRuntime.state;}finally{premiumRuntime.busy=false;}}
 
+// ===================== V16 LIVE OPS RUNTIME =====================
+const liveOpsRuntime={state:null,catalog:new Map(),busy:false,lastAt:0};
+const livePetSlotPrices=new Map();
+function liveCatalog(key){return liveOpsRuntime.catalog.get(String(key||''))||null;}
+function liveQuote(key){const row=liveCatalog(key);if(!row||row.enabled===false)return null;const base=Math.max(0,Math.round(Number(row.price)||0)),discount=String(row.currency)==='uridium'&&premiumActive()&&['ship','laser','generator','drone','extra','pet','pet_gear'].includes(String(row.kind||''));return {...row,basePrice:base,price:discount?Math.max(1,Math.floor(base*.95)):base,currency:String(row.currency)==='uridium'?'uridium':'credits'};}
+function applyLiveCatalog(rows){
+  liveOpsRuntime.catalog=new Map();livePetSlotPrices.clear();
+  for(const row of Array.isArray(rows)?rows:[]){
+    if(!row?.enabled)continue;liveOpsRuntime.catalog.set(String(row.catalog_key||''),row);const id=String(row.ref_id||''),price=Math.max(0,Number(row.price)||0),currency=String(row.currency||'credits');
+    if(row.kind==='ship'&&SHIPS[id]){SHIPS[id].price=price;SHIPS[id].currency=currency;}
+    else if(['laser','generator','extra'].includes(row.kind)&&ITEMS[id]){ITEMS[id].price=price;ITEMS[id].currency=currency;}
+    else if(row.kind==='drone'&&ITEMS[id]){ITEMS[id].price=price;ITEMS[id].currency=currency;}
+    else if(row.kind==='ammo'&&LASER_AMMO[id]){LASER_AMMO[id].price=price;LASER_AMMO[id].currency=currency;}
+    else if(row.kind==='rocket'&&ROCKETS[id]){ROCKETS[id].price=price;ROCKETS[id].currency=currency;}
+    else if(row.kind==='pet'){PET_BASE_PRICE=price;}
+    else if(row.kind==='pet_gear'&&PET_GEARS[id]){PET_GEARS[id].cost=price;PET_GEARS[id].currency=currency;}
+    else if(row.kind==='pet_slot')livePetSlotPrices.set(Number(id),price);
+    else if(row.kind==='gate_spin'&&GALAXY_GATE_DEFS[id])GALAXY_GATE_DEFS[id].spinCost=price;
+    else if(row.kind==='quantum_core')LOG_DISK_URI_PRICE=price;
+    else if(row.kind==='resource'&&RESOURCES[id])RESOURCES[id].sell=price;
+  }
+}
+async function refreshLiveOpsState(force=false){
+  if(!authenticated)return liveOpsRuntime.state;if(!force&&liveOpsRuntime.state&&Date.now()-liveOpsRuntime.lastAt<15000)return liveOpsRuntime.state;if(liveOpsRuntime.busy)return liveOpsRuntime.state;liveOpsRuntime.busy=true;
+  try{const data=await loadLiveOpsOnline(force);liveOpsRuntime.state=data||{events:[],catalog:[]};liveOpsRuntime.lastAt=Date.now();applyLiveCatalog(data?.catalog||[]);return liveOpsRuntime.state;}catch(e){console.warn('live ops',e);return liveOpsRuntime.state;}finally{liveOpsRuntime.busy=false;}
+}
+async function applyAuthoritativePurchase(catalogKey,label='Item'){
+  try{await flushCloudSave(true);const result=await purchaseLiveCatalogOnline(catalogKey);if(!result?.state)throw new Error('Servidor não retornou o save atualizado.');progress=result.state;hydrateProgress();cloudDirty=false;try{localStorage.setItem(saveKey(),JSON.stringify(progress));}catch{}computeStats(true);buildAmmoButtons();renderShop();refreshPetViews();updateUI();showToast(`${label} adquirido • compra validada no servidor`,'shop');return true;}catch(e){showToast(e.message||'Compra recusada pelo servidor');return false;}
+}
+
 // ===================== V10 PILOT BIO =====================
 const PILOT_POINT_MAX=50;
-const LOG_DISK_URI_PRICE=300;
+let LOG_DISK_URI_PRICE=300;
 const PILOT_BRANCHES={defense:{label:'DEFESA',className:'def'},utility:{label:'UTILIDADE',className:'util'},offense:{label:'ATAQUE',className:'off'}};
 const PILOT_SKILLS={
   hull1:{id:'hull1',branch:'defense',name:'Casco I',max:2,values:[5000,10000],unit:' HP',creditBase:2000000,desc:'Aumenta o HP máximo da nave.',requires:null},
@@ -451,7 +481,7 @@ function ensureAuctionState(){
 const PLAYER_MAX_LEVEL=44;
 const PET_MAX_LEVEL=44;
 const PET_SLOT_LEVEL_CAP=15;
-const PET_BASE_PRICE=1500000;
+let PET_BASE_PRICE=1500000;
 function levelXpThreshold(level){
   if(level<=1)return 0;
   return Math.round(10000*Math.pow(2,level-2));
@@ -1722,21 +1752,14 @@ function updateWarfrontRuntime(){if(!authenticated||!progress)return;if(warfront
 
 
 // ===================== V14.0 COMBAT TARGET + GALAXY EVENT DIRECTOR =====================
-const GALAXY_EVENT_SLOT_MS=15*60*1000;
-const GALAXY_EVENT_DEFS=[
-  {id:'invasion',icon:'⚠',name:'INVASÃO RIFT',desc:'Fendas hostis despejam esquadrões no setor.',target:18,reward:{credits:1200000,uridium:650,xp:45000,cores:0}},
-  {id:'prime',icon:'☠',name:'ANOMALIA PRIME',desc:'Um BOSS raro atravessou a fenda. Destrua-o.',target:1,reward:{credits:3500000,uridium:1500,xp:120000,cores:1}},
-  {id:'mining',icon:'◆',name:'SURTO DE MINERAÇÃO',desc:'Cristais energizados surgiram pelo setor.',target:180,reward:{credits:1000000,uridium:550,xp:35000,cores:0}},
-  {id:'convoy',icon:'➤',name:'COMBOIO QUÂNTICO',desc:'Escolte o cargueiro até o ponto de salto.',target:100,reward:{credits:2200000,uridium:900,xp:80000,cores:1}},
-  {id:'battle',icon:'✦',name:'RUPTURA WARFRONT',desc:'Mapas 4-1 / 4-2 / 4-3 abertos por tempo limitado.',target:24,reward:{credits:4200000,uridium:1800,xp:140000,cores:2}},
-];
+const GALAXY_EVENT_DEFS=[];
 const galaxyEventRuntime={forcedIndex:null,activeId:null,mapKey:null,convoy:null,nextWaveAt:0,retryAt:0,lastEnsureAt:0};
+const NO_GALAXY_EVENT={id:'none',icon:'◇',name:'SEM EVENTO ATIVO',desc:'Aguardando a próxima janela configurada no Supabase.',target:1,reward:{credits:0,uridium:0,xp:0,cores:0},rules:{},start:Date.now(),end:Date.now()+60000,eventId:'v16:none'};
 function normalizeGalaxyEvents(){if(!progress)return;progress.galaxyEvents ||= {records:{},lastSeenEvent:null};progress.galaxyEvents.records ||= {};}
 function currentGalaxyEvent(){
-  const shared=sharedWorldEvent();if(sharedUniverseMap()&&shared){const def=GALAXY_EVENT_DEFS.find(x=>x.id===shared.id)||GALAXY_EVENT_DEFS[0];return {...def,...shared,start:Number(shared.start)||Date.now(),end:Number(shared.end)||Date.now()+GALAXY_EVENT_SLOT_MS};}
-  const now=Date.now(),slot=Math.floor(now/GALAXY_EVENT_SLOT_MS),idx=galaxyEventRuntime.forcedIndex===null?Math.abs(slot)%GALAXY_EVENT_DEFS.length:galaxyEventRuntime.forcedIndex%GALAXY_EVENT_DEFS.length,def=GALAXY_EVENT_DEFS[idx];
-  const start=galaxyEventRuntime.forcedIndex===null?slot*GALAXY_EVENT_SLOT_MS:now-(now%1000),end=galaxyEventRuntime.forcedIndex===null?start+GALAXY_EVENT_SLOT_MS:start+GALAXY_EVENT_SLOT_MS;
-  return {...def,slot,start,end,eventId:`v14:${slot}:${def.id}${galaxyEventRuntime.forcedIndex===null?'':':admin'}`};
+  const shared=sharedWorldEvent();
+  if(sharedUniverseMap()&&shared)return {...shared,reward:shared.reward||{credits:0,uridium:0,xp:0,cores:0},start:Number(shared.start)||Date.now(),end:Number(shared.end)||Date.now()+60000};
+  return {...NO_GALAXY_EVENT,start:Date.now(),end:Date.now()+60000};
 }
 function galaxyEventRecord(ev=currentGalaxyEvent()){normalizeGalaxyEvents();progress.galaxyEvents.records[ev.eventId] ||= {value:0,complete:false,rewarded:false,startedAt:Date.now()};return progress.galaxyEvents.records[ev.eventId];}
 function galaxyEventSecondsLeft(ev=currentGalaxyEvent()){return Math.max(0,Math.ceil((ev.end-Date.now())/1000));}
@@ -1794,17 +1817,18 @@ function updateGalaxyConvoy(dt,ev,rec){const c=galaxyEventRuntime.convoy;if(!c||
   if(d<=14){rec.value=100;completeGalaxyEvent(ev);galaxyEventRuntime.convoy=null;}
   else if(c.hp<=0){playSfx('explosion');spawnExplosionFx(c.x,c.y,'#65dcff',true);showToast('COMBOIO DESTRUÍDO • novo cargueiro em 15s');galaxyEventRuntime.convoy=null;galaxyEventRuntime.retryAt=nowSec()+15;rec.value=0;}
 }
-function updateGalaxyEvent(dt){if(!progress)return;if(sharedUniverseMap()){const ev=currentGalaxyEvent(),rec=galaxyEventRecord(ev);if(sharedWorldEvent()){rec.value=Math.max(0,Number(sharedWorldEvent().progress)||0);rec.complete=!!sharedWorldEvent().complete;galaxyEventRuntime.convoy=sharedWorldEvent().convoy?{...sharedWorldEvent().convoy}:null;}renderGalaxyEventHud(ev,rec);return;}ensureGalaxyEventWorld();const ev=currentGalaxyEvent(),rec=galaxyEventRecord(ev);if(ev.id==='convoy'&&!rec.complete&&galaxyEventEligible(ev))updateGalaxyConvoy(dt,ev,rec);renderGalaxyEventHud(ev,rec);}
+function updateGalaxyEvent(dt){if(!progress)return;if(isGalaxyGateMap()){ui.galaxyEventHud?.classList.add('hidden');return;}if(sharedUniverseMap()){const ev=currentGalaxyEvent();if(ev.id==='none'){ui.galaxyEventHud?.classList.add('hidden');return;}const rec=galaxyEventRecord(ev);if(sharedWorldEvent()){rec.value=Math.max(0,Number(sharedWorldEvent().progress)||0);rec.complete=!!sharedWorldEvent().complete;galaxyEventRuntime.convoy=sharedWorldEvent().convoy?{...sharedWorldEvent().convoy}:null;}renderGalaxyEventHud(ev,rec);return;}ensureGalaxyEventWorld();const ev=currentGalaxyEvent(),rec=galaxyEventRecord(ev);if(ev.id==='convoy'&&!rec.complete&&galaxyEventEligible(ev))updateGalaxyConvoy(dt,ev,rec);renderGalaxyEventHud(ev,rec);}
 function galaxyEventKill(enemy){if(!enemy)return;if(sharedUniverseMap())return;const ev=currentGalaxyEvent(),rec=galaxyEventRecord(ev);if(rec.complete)return;if(ev.id==='battle'&&state.currentMap?.battle)addGalaxyEventProgress(1,ev);else if(enemy.eventNpc&&enemy.eventId===ev.eventId&&(ev.id==='invasion'||ev.id==='prime'))addGalaxyEventProgress(1,ev);}
 function galaxyEventOrePickup(ore,amount){if(sharedUniverseMap())return;const ev=currentGalaxyEvent(),rec=galaxyEventRecord(ev);if(rec.complete||ev.id!=='mining'||!ore?.eventOre||ore.eventId!==ev.eventId)return;addGalaxyEventProgress(amount,ev);}
 function renderGalaxyEventHud(ev=currentGalaxyEvent(),rec=galaxyEventRecord(ev)){
-  if(!ui.galaxyEventHud)return;ui.galaxyEventHud.classList.remove('hidden');ui.galaxyEventHud.classList.toggle('complete',!!rec.complete);if(ui.galaxyEventIcon)ui.galaxyEventIcon.textContent=ev.icon;if(ui.galaxyEventName)ui.galaxyEventName.textContent=ev.name;if(ui.galaxyEventObjective)ui.galaxyEventObjective.textContent=galaxyEventObjectiveText(ev,rec);if(ui.galaxyEventTimer)ui.galaxyEventTimer.textContent=galaxyEventTimeText(galaxyEventSecondsLeft(ev));if(ui.galaxyEventProgress)ui.galaxyEventProgress.style.width=`${Math.min(100,(Number(rec.value)||0)/Math.max(1,ev.target)*100)}%`;if(ui.galaxyEventTopStatus)ui.galaxyEventTopStatus.textContent=rec.complete?'OK':galaxyEventTimeText(galaxyEventSecondsLeft(ev));
+  if(!ui.galaxyEventHud)return;if(!ev||ev.id==='none'){ui.galaxyEventHud.classList.add('hidden');if(ui.galaxyEventTopStatus)ui.galaxyEventTopStatus.textContent='—';return;}ui.galaxyEventHud.classList.remove('hidden');ui.galaxyEventHud.classList.toggle('complete',!!rec.complete);if(ui.galaxyEventIcon)ui.galaxyEventIcon.textContent=ev.icon;if(ui.galaxyEventName)ui.galaxyEventName.textContent=ev.name;if(ui.galaxyEventObjective)ui.galaxyEventObjective.textContent=galaxyEventObjectiveText(ev,rec);if(ui.galaxyEventTimer)ui.galaxyEventTimer.textContent=galaxyEventTimeText(galaxyEventSecondsLeft(ev));if(ui.galaxyEventProgress)ui.galaxyEventProgress.style.width=`${Math.min(100,(Number(rec.value)||0)/Math.max(1,ev.target)*100)}%`;if(ui.galaxyEventTopStatus)ui.galaxyEventTopStatus.textContent=rec.complete?'OK':galaxyEventTimeText(galaxyEventSecondsLeft(ev));
 }
-function renderGalaxyEvent(){if(!ui.galaxyEventContent||!progress)return;const ev=currentGalaxyEvent(),rec=galaxyEventRecord(ev),reward=galaxyEventRewardScaled(ev),eligible=galaxyEventEligible(ev),wb=worldBossState(),worldBossHtml=wb?`<section class="galaxy-event-card world"><div><small>COLETIVO ONLINE • WARFRONT</small><b>${escHtml(wb.name||'NEMESIS PRIME')}</b><span>${Number(wb.hp)>0?`${fmt(wb.hp)} / ${fmt(wb.max_hp)} HP`:'DERROTADO • LOOT DISPONÍVEL'}</span></div><button class="ghost-btn" data-event-warfront>ABRIR WARFRONT</button></section>`:'';const admin=isAdminPilot()?`<section class="galaxy-event-admin"><small>CONTROLE ADMIN • TESTE DE EVENTOS</small><div>${GALAXY_EVENT_DEFS.map((d,i)=>`<button class="small-btn ${ev.id===d.id?'active':''}" data-force-event="${i}">${d.icon} ${d.name}</button>`).join('')}<button class="ghost-btn" data-force-event="auto">AUTO</button></div></section>`:'';
+function renderGalaxyEvent(){if(!ui.galaxyEventContent||!progress)return;const ev=currentGalaxyEvent(),rec=galaxyEventRecord(ev),reward=galaxyEventRewardScaled(ev),eligible=galaxyEventEligible(ev),wb=worldBossState(),worldBossHtml=wb?`<section class="galaxy-event-card world"><div><small>COLETIVO ONLINE • WARFRONT</small><b>${escHtml(wb.name||'NEMESIS PRIME')}</b><span>${Number(wb.hp)>0?`${fmt(wb.hp)} / ${fmt(wb.max_hp)} HP`:'DERROTADO • LOOT DISPONÍVEL'}</span></div><button class="ghost-btn" data-event-warfront>ABRIR WARFRONT</button></section>`:'';const admin=isAdminPilot()?`<section class="galaxy-event-admin"><small>LIVE OPS</small><div class="muted">Ativação, duração e rotação agora são controladas exclusivamente pelo Supabase.</div></section>`:'';
   ui.galaxyEventContent.innerHTML=`<section class="galaxy-event-hero ${rec.complete?'complete':''}"><div class="galaxy-event-hero-icon">${ev.icon}</div><div><div class="eyebrow">EVENTO ATUAL • ${galaxyEventTimeText(galaxyEventSecondsLeft(ev))}</div><h3>${ev.name}</h3><p>${ev.desc}</p><div class="galaxy-event-big-progress"><i style="width:${Math.min(100,(Number(rec.value)||0)/Math.max(1,ev.target)*100)}%"></i></div><b>${galaxyEventObjectiveText(ev,rec)}</b></div></section><div class="galaxy-event-grid"><section class="galaxy-event-card"><small>RECOMPENSA PESSOAL</small><b>${fmt(reward.credits)} CR</b><span>${fmt(reward.uridium)} STL • ${fmt(reward.xp)} XP${reward.cores?` • ${reward.cores} CORE`:''}</span></section><section class="galaxy-event-card"><small>SETOR</small><b>${eligible?displayMapLabel(progress.mapId):ev.id==='battle'?'4-1 / 4-2 / 4-3':'X-2 / X-3 / X-4'}</b><span>${eligible?'Você está no setor do evento.':'Abra o mapa e siga para um setor compatível.'}</span></section><section class="galaxy-event-card"><small>PILOTOS ONLINE NO SETOR</small><b>${onlineWorld.players.size+1}</b><span>${[...onlineWorld.players.values()].filter(onlinePlayerEnemy).length} hostil(is) detectado(s)</span></section></div><div class="galaxy-event-actions"><button class="primary-btn" data-event-map>ABRIR MAPA</button>${ev.id==='battle'||worldBossOpen()?'<button class="danger-btn" data-event-warfront>WARFRONT / WORLD BOSS</button>':''}</div>${worldBossHtml}${admin}`;
 }
 function openGalaxyEvent(){closeNavigationModals(ui.galaxyEventModal);renderGalaxyEvent();ui.galaxyEventModal?.classList.remove('hidden');}
-function forceGalaxyEvent(value){if(!isAdminPilot())return;if(sharedUniverseMap()){sharedUniverse.forceEvent(value==='auto'?'auto':Math.max(0,Math.min(GALAXY_EVENT_DEFS.length-1,Number(value)||0)));showToast(value==='auto'?'EVENTOS ONLINE • rotação automática':'EVENTO ONLINE FORÇADO PARA TODOS');return;}galaxyEventRuntime.forcedIndex=value==='auto'?null:Math.max(0,Math.min(GALAXY_EVENT_DEFS.length-1,Number(value)||0));galaxyEventRuntime.activeId=null;galaxyEventRuntime.mapKey=null;ensureGalaxyEventWorld(true);renderGalaxyEvent();renderMapModal();showToast(galaxyEventRuntime.forcedIndex===null?'EVENTOS • rotação automática':'EVENTO FORÇADO PARA TESTE');}
+function forceGalaxyEvent(){refreshLiveOpsState(true).then(()=>showToast('LIVE OPS atualizado do Supabase'));}
+
 
 function spawnCombatText(x,y,text,color='#fff',opts={}){const cap=qualityProfile().particles;if(cap<=0)return;if(state.particles.length>=cap)state.particles.splice(0,state.particles.length-cap+1);state.particles.push({x,y,text,color,life:opts.critical?1.25:1,vy:opts.critical?42:30,vx:rand(-7,7),combat:true,critical:!!opts.critical,kind:opts.kind||'damage'});}
 function combatCritical(base,{chance=.065,mult=1.55}={}){const critical=Math.random()<chance;return {critical,damage:Math.round(base*(critical?mult:1))};}
@@ -2305,7 +2329,7 @@ function equippedLaserCount(){return equippedLaserIds().length;}
 
 function petLevelXp(level){return levelXpThreshold(level+1);}
 function petRange(){return 300+(progress?.pet?.owned?(progress.pet.level||1):1)*34;}
-function petSlotCost(slotNumber){return Math.round(25000*slotNumber+10000*slotNumber*slotNumber);}
+function petSlotCost(slotNumber){return livePetSlotPrices.get(Number(slotNumber))??Math.round(25000*slotNumber+10000*slotNumber*slotNumber);}
 function petLaserIds(){return progress?.pet?.owned?(progress.pet.lasers||[]).filter(id=>ITEMS[id]?.type==='laser'):[];}
 function petShieldIds(){return progress?.pet?.owned?(progress.pet.shields||[]).filter(id=>ITEMS[id]?.type==='generator'&&ITEMS[id]?.subtype==='shield'):[];}
 function petDamage(){return petLaserIds().reduce((sum,id)=>{const it=ITEMS[id];const base=it?.alienDamage??it?.damage??0;return sum+base*(1+(Number(it?.alienBonus)||0));},0);}
@@ -2350,16 +2374,10 @@ function unequipPetSlot(kind,index){
   const id=list[index];if(!id)return;list[index]=null;addInventory(id);saveGame();refreshPetViews();refreshAmmoCounters();
 }
 function buyPetUnit(){
-  if(progress?.pet?.owned){showToast('AUX-9 já adquirido');return;}
-  const petCost=premiumElitePrice(PET_BASE_PRICE,'uridium');if(progress.profile.uridium<petCost){showToast(`Faltam ${fmt(petCost-progress.profile.uridium)} STL para o AUX-9`);return;}
-  openSpendConfirm({title:'Comprar AUX-9?',itemName:'AUX-9 — Unidade Base',detail:`Confirme a compra da unidade base do AUX-9.${petCost<PET_BASE_PRICE?' Bônus PREMIUM aplicado (-5%).':''}`,value:petCost,currency:'uridium',onConfirm:()=>{if(progress?.pet?.owned){showToast('AUX-9 já adquirido');return;}if(progress.profile.uridium<petCost){showToast(`Faltam ${fmt(petCost-progress.profile.uridium)} STL para o AUX-9`);return;}progress.profile.uridium-=petCost;progress.pet=freshPet();progress.pet.owned=true;progress.pet.laserSlotsUnlocked=1;progress.pet.shieldSlotsUnlocked=1;progress.pet.lasers=[null];progress.pet.shields=[null];petRuntime.x=player.x+82;petRuntime.y=player.y+64;petRuntime.tx=petRuntime.x;petRuntime.ty=petRuntime.y;petRuntime.roamX=null;petRuntime.roamY=null;petRuntime.nextRoamAt=0;saveGame();renderShop();refreshPetViews();updateUI();showToast('AUX-9 adquirido! Agora equipe armas, escudos e módulos.');}});
+  if(progress?.pet?.owned){showToast('AUX-9 já adquirido');return;}const q=liveQuote('pet:base');if(!q){showToast('AUX-9 indisponível no catálogo LIVE OPS');return;}if(!canAfford(q.price,q.currency)){showToast(`Faltam ${fmt(q.price-(progress.profile[q.currency]||0))} ${q.currency==='uridium'?'STL':'CR'}`);return;}openSpendConfirm({title:'Comprar AUX-9?',itemName:'AUX-9 — Unidade Base',detail:'Preço validado no Supabase e compra aplicada pelo servidor.',value:q.price,currency:q.currency,onConfirm:()=>applyAuthoritativePurchase(q.catalog_key,'AUX-9')});
 }
 function buyPetGear(id){
-  if(!progress?.pet?.owned){showToast('Adquira o AUX-9 primeiro');return;}
-  const gear=PET_GEARS[id];if(!gear)return;
-  if(progress.pet.gearsOwned[id]){showToast('Módulo já comprado');return;}
-  const gearCost=premiumElitePrice(gear.cost,'uridium');if(progress.profile.uridium<gearCost){showToast(`Faltam ${fmt(gearCost-progress.profile.uridium)} STL`);return;}
-  openSpendConfirm({title:'Comprar módulo do AUX-9?',itemName:gear.name,detail:`Confirme a compra do módulo.${gearCost<gear.cost?' Bônus PREMIUM aplicado (-5%).':''}`,value:gearCost,currency:'uridium',onConfirm:()=>{if(progress.pet.gearsOwned[id]){showToast('Módulo já comprado');return;}if(progress.profile.uridium<gearCost){showToast(`Faltam ${fmt(gearCost-progress.profile.uridium)} STL`);return;}progress.profile.uridium-=gearCost;progress.pet.gearsOwned[id]=true;saveGame();renderShop();refreshPetViews();updateUI();showToast(`${gear.name} adquirido`);}});
+  if(!progress?.pet?.owned){showToast('Adquira o AUX-9 primeiro');return;}const gear=PET_GEARS[id];if(!gear)return;if(progress.pet.gearsOwned[id]){showToast('Módulo já comprado');return;}const q=liveQuote(`pet_gear:${id}`);if(!q){showToast('Módulo indisponível no catálogo LIVE OPS');return;}if(!canAfford(q.price,q.currency)){showToast('Saldo insuficiente');return;}openSpendConfirm({title:'Comprar módulo do AUX-9?',itemName:gear.name,detail:'Preço validado no Supabase e compra aplicada pelo servidor.',value:q.price,currency:q.currency,onConfirm:()=>applyAuthoritativePurchase(q.catalog_key,gear.name)});
 }
 function petKamikazeCooldownRemaining(){
   return Math.max(0,(Number(progress?.pet?.kamikazeReadyAt)||0-Date.now())/1000);
@@ -3860,11 +3878,12 @@ function sellInventoryItem(itemId,qty=1){
   const total=itemSellValue(item)*qty;
   openSaleConfirm({title:'Vender equipamento?',itemName:`${item.name}${qty>1?` ×${qty}`:''}`,detail:'Confirme antes de remover o item do inventário. A venda é definitiva.',value:total,currency:item.currency,onConfirm:()=>performSellInventoryItem(itemId,qty)});
 }
-function buyShip(shipId){const ship=SHIPS[shipId];if(!ship)return;if(ship.eventOnly||ship.shopAvailable===false){showToast(`${ship.name}: nave reservada para Evento / Missão / Passe`);return;}if(progress.ownedShips.includes(shipId)){showToast('Nave já obtida');return;}const cost=premiumElitePrice(ship.price,ship.currency);if(!canAfford(cost,ship.currency)){showToast('Saldo insuficiente');return;}openSpendConfirm({title:'Comprar nave?',itemName:ship.name,detail:`Confirme a compra da nave para adicioná-la ao Hangar.${cost<ship.price?' Bônus PREMIUM aplicado (-5%).':''}`,value:cost,currency:ship.currency,onConfirm:()=>{if(progress.ownedShips.includes(shipId)){showToast('Nave já obtida');return;}if(!charge(cost,ship.currency)){showToast('Saldo insuficiente');return;}progress.ownedShips.push(shipId);saveGame();renderShop();showToast(`${ship.name} adicionada ao Hangar${cost<ship.price?' • PREMIUM -5%':''}`);}});}
-function buyItem(itemId){const item=ITEMS[itemId];if(!item)return;if(item.type==='drone'){buyDrone(itemId);return;}if(item.type==='extra'&&ownsExtraItem(itemId)){showToast('Esse EXTRA já pertence à sua conta');return;}const cost=premiumElitePrice(item.price,item.currency);if(!canAfford(cost,item.currency)){showToast('Saldo insuficiente');return;}openSpendConfirm({title:'Comprar item?',itemName:item.name,detail:`Confirme a compra do item.${cost<item.price?' Bônus PREMIUM aplicado (-5%).':''}`,value:cost,currency:item.currency,onConfirm:()=>{if(item.type==='extra'&&ownsExtraItem(itemId)){showToast('Esse EXTRA já pertence à sua conta');return;}if(!charge(cost,item.currency)){showToast('Saldo insuficiente');return;}addInventory(itemId);saveGame();renderShop();if(!ui.hangarModal.classList.contains('hidden'))renderHangar();showToast(`${item.name} comprado${cost<item.price?' • PREMIUM -5%':''}`);}});}
-function buyDrone(type){if(progress.drones.length>=8){showToast('Limite de 8 drones atingido');return;}const item=ITEMS[type],cost=premiumElitePrice(item.price,item.currency);if(!canAfford(cost,item.currency)){showToast('Saldo insuficiente');return;}openSpendConfirm({title:'Comprar drone?',itemName:item.name,detail:`Confirme a compra do drone.${cost<item.price?' Bônus PREMIUM aplicado (-5%).':''}`,value:cost,currency:item.currency,onConfirm:()=>{if(progress.drones.length>=8){showToast('Limite de 8 drones atingido');return;}if(!charge(cost,item.currency)){showToast('Saldo insuficiente');return;}progress.drones.push({id:`d_${Date.now()}_${Math.random().toString(16).slice(2,5)}`,type,slots:Array(item.slots).fill(null)});computeStats(true);saveGame();renderShop();showToast(`${item.name} adquirido (${progress.drones.length}/8)${cost<item.price?' • PREMIUM -5%':''}`);}});}
-function buyAmmo(id){const ammo=LASER_AMMO[id];if(!ammo||ammo.purchasable===false||ammo.sourceOnly===true)return;if(!canAfford(ammo.price,ammo.currency)){showToast('Saldo insuficiente');return;}openSpendConfirm({title:'Comprar munição?',itemName:`${ammo.name} • pacote ${fmt(ammo.pack)}`,detail:'Confirme a compra da munição selecionada.',value:ammo.price,currency:ammo.currency,onConfirm:()=>{if(!buyAmmoPack(id,false)){showToast('Saldo insuficiente');return;}buildAmmoButtons();renderShop();},confirmLabel:'CONFIRMAR COMPRA'});}
-function buyRockets(id){const rocket=ROCKETS[id];if(!rocket||rocket.purchasable===false||rocket.sourceOnly===true)return;if(!canAfford(rocket.price,rocket.currency)){showToast('Saldo insuficiente');return;}openSpendConfirm({title:'Comprar míssil?',itemName:`${rocket.name} • pacote ${fmt(rocket.pack)}`,detail:'Confirme a compra do pacote de mísseis.',value:rocket.price,currency:rocket.currency,onConfirm:()=>{if(!buyRocketPack(id,false)){showToast('Saldo insuficiente');return;}buildAmmoButtons();renderShop();},confirmLabel:'CONFIRMAR COMPRA'});}
+function buyShip(shipId){const ship=SHIPS[shipId];if(!ship)return;if(ship.eventOnly||ship.shopAvailable===false){showToast(`${ship.name}: nave reservada para Evento / Missão / Passe`);return;}if(progress.ownedShips.includes(shipId)){showToast('Nave já obtida');return;}const q=liveQuote(`ship:${shipId}`);if(!q){showToast('Produto indisponível no catálogo LIVE OPS');return;}if(!canAfford(q.price,q.currency)){showToast('Saldo insuficiente');return;}openSpendConfirm({title:'Comprar nave?',itemName:ship.name,detail:`Preço validado no Supabase.${q.price<q.basePrice?' PREMIUM -5% aplicado no servidor.':''}`,value:q.price,currency:q.currency,onConfirm:()=>applyAuthoritativePurchase(q.catalog_key,ship.name)});}
+function buyItem(itemId){const item=ITEMS[itemId];if(!item)return;if(item.type==='drone'){buyDrone(itemId);return;}if(item.type==='extra'&&ownsExtraItem(itemId)){showToast('Esse EXTRA já pertence à sua conta');return;}const q=liveQuote(`item:${itemId}`);if(!q){showToast('Produto indisponível no catálogo LIVE OPS');return;}if(!canAfford(q.price,q.currency)){showToast('Saldo insuficiente');return;}openSpendConfirm({title:'Comprar item?',itemName:item.name,detail:`Preço validado no Supabase.${q.price<q.basePrice?' PREMIUM -5% aplicado no servidor.':''}`,value:q.price,currency:q.currency,onConfirm:()=>applyAuthoritativePurchase(q.catalog_key,item.name)});}
+function buyDrone(type){if(progress.drones.length>=8){showToast('Limite de 8 drones atingido');return;}const item=ITEMS[type];if(!item)return;const q=liveQuote(`drone:${type}`);if(!q){showToast('Drone indisponível no catálogo LIVE OPS');return;}if(!canAfford(q.price,q.currency)){showToast('Saldo insuficiente');return;}openSpendConfirm({title:'Comprar drone?',itemName:item.name,detail:`Preço validado no Supabase.${q.price<q.basePrice?' PREMIUM -5% aplicado no servidor.':''}`,value:q.price,currency:q.currency,onConfirm:()=>applyAuthoritativePurchase(q.catalog_key,item.name)});}
+function buyAmmo(id){const ammo=LASER_AMMO[id];if(!ammo||ammo.purchasable===false||ammo.sourceOnly===true)return;const q=liveQuote(`ammo:${id}`);if(!q){showToast('Munição indisponível no catálogo LIVE OPS');return;}if(!canAfford(q.price,q.currency)){showToast('Saldo insuficiente');return;}openSpendConfirm({title:'Comprar munição?',itemName:`${ammo.name} • pacote ${fmt(ammo.pack)}`,detail:'Preço e quantidade validados pelo servidor.',value:q.price,currency:q.currency,onConfirm:()=>applyAuthoritativePurchase(q.catalog_key,ammo.name),confirmLabel:'CONFIRMAR COMPRA'});}
+function buyRockets(id){const rocket=ROCKETS[id];if(!rocket||rocket.purchasable===false||rocket.sourceOnly===true)return;const q=liveQuote(`rocket:${id}`);if(!q){showToast('Míssil indisponível no catálogo LIVE OPS');return;}if(!canAfford(q.price,q.currency)){showToast('Saldo insuficiente');return;}openSpendConfirm({title:'Comprar míssil?',itemName:`${rocket.name} • pacote ${fmt(rocket.pack)}`,detail:'Preço e quantidade validados pelo servidor.',value:q.price,currency:q.currency,onConfirm:()=>applyAuthoritativePurchase(q.catalog_key,rocket.name),confirmLabel:'CONFIRMAR COMPRA'});}
+
 
 function renderTabs(container,map,active,onPick){container.innerHTML='';for(const [id,label] of Object.entries(map)){const b=document.createElement('button');b.className=`tab-btn ${active===id?'active':''}`;b.textContent=label;b.onclick=()=>onPick(id);container.appendChild(b);}}
 function makeProductCard({id,name,desc,price,currency,type,subtype,badge,owned,onBuy,disabled=false,priceLabel=null,buttonLabel=null}){
@@ -4125,7 +4144,7 @@ async function testPremiumPurchaseNow(productId){
 }
 async function openPremiumShop(){closeNavigationModals(ui.premiumModal);ui.premiumModal?.classList.remove('hidden');if(ui.premiumProductGrid)ui.premiumProductGrid.innerHTML='<div class="muted">Sincronizando Loja Premium...</div>';await refreshPremiumState(true);renderPremiumShop();}
 
-function openShop(tab='ships'){closeNavigationModals(ui.shopModal);state.shopTab=tab;refreshPremiumState().finally(()=>{renderShop();ui.shopModal.classList.remove('hidden');});}
+function openShop(tab='ships'){closeNavigationModals(ui.shopModal);state.shopTab=tab;Promise.all([refreshPremiumState(),refreshLiveOpsState(true)]).finally(()=>{renderShop();ui.shopModal.classList.remove('hidden');});}
 function openHangar(tab='ships'){closeNavigationModals(ui.hangarModal);state.hangarTab=tab;renderHangar();ui.hangarModal.classList.remove('hidden');if(!canChangeEquipment())showToast('Hangar em modo consulta • alterações de equipamento só funcionam na base X-1');}
 
 function alphaPieceCount(){return alphaGate().pieces.length;}
@@ -5014,7 +5033,7 @@ function forceLogoutBecauseSessionMoved(message='Sua conta foi acessada em outro
   progress=null;
   clanRuntime.state=null;clanRuntime.clans=[];clanRuntime.lastAt=0;
   warfrontRuntime.state=null;warfrontRuntime.clans=[];warfrontRuntime.lastAt=0;warfrontRuntime.pendingBossDamage=0;
-  premiumRuntime.state=null;premiumRuntime.lastAt=0;
+  premiumRuntime.state=null;premiumRuntime.lastAt=0;liveOpsRuntime.state=null;liveOpsRuntime.catalog.clear();liveOpsRuntime.lastAt=0;
   updateClanBadge();updatePremiumBadge();
   for(const modal of dismissibleModals())modal.classList.add('hidden');
   ui.factionModal.classList.add('hidden');
@@ -5092,6 +5111,7 @@ async function afterAuth(){
   }
   if(!progress){renderFactionChoice();return;}
   await refreshPremiumState(true);
+  await refreshLiveOpsState(true);
   startLoadedGame();
   updatePassBadge();
   syncAuctionBidsOnline();

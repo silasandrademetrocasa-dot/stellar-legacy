@@ -1,3 +1,11 @@
+# V16.0.0 — ETAPA 1 — LIVE OPS CORE
+
+- Eventos online migrados para agenda do Supabase.
+- Catálogo/preços carregados de `live_shop_prices_v16`.
+- Compras da Loja principal validadas e aplicadas pelo Render.
+- Trader recebe preços online.
+- Nenhum evento local é criado quando o banco não possui janela ativa.
+
 # V15.2.0 — TACTICAL HUD + AGGRO LOCK
 
 - Target Lock e Evento Galáctico ganharam modo minimizado persistente.

@@ -2,15 +2,36 @@ import { randomUUID } from 'crypto';
 import { WebSocketServer, WebSocket } from 'ws';
 import { MAPS, NPC_TYPES, RESOURCES } from '../public/data.js';
 
-const EVENT_SLOT_MS = 15 * 60 * 1000;
 const PORTAL_NEUTRAL_RADIUS = 180;
-const EVENT_DEFS = [
-  {id:'invasion',icon:'⚠',name:'INVASÃO RIFT',desc:'Fendas hostis despejam esquadrões no setor.',target:18},
-  {id:'prime',icon:'☠',name:'ANOMALIA PRIME',desc:'Um BOSS raro atravessou a fenda. Destrua-o.',target:1},
-  {id:'mining',icon:'◆',name:'SURTO DE MINERAÇÃO',desc:'Cristais energizados surgiram pelo setor.',target:180},
-  {id:'convoy',icon:'➤',name:'COMBOIO QUÂNTICO',desc:'Escolte o cargueiro até o ponto de salto.',target:100},
-  {id:'battle',icon:'✦',name:'RUPTURA WARFRONT',desc:'Mapas 4-1 / 4-2 / 4-3 abertos por tempo limitado.',target:24},
-];
+const LIVE_OPS_REFRESH_MS = 15000;
+
+function resolveLiveEvent(rows, now=Date.now()){
+  const active=[];
+  for(const row of Array.isArray(rows)?rows:[]){
+    if(!row?.enabled)continue;
+    const base=Date.parse(row.starts_at||'');
+    const duration=Math.max(1,Number(row.duration_minutes)||1)*60000;
+    const repeat=Math.max(1,Number(row.repeat_minutes)||1)*60000;
+    if(!Number.isFinite(base)||now<base)continue;
+    const cycle=Math.max(0,Math.floor((now-base)/repeat));
+    const start=base+cycle*repeat,end=start+duration;
+    if(now<start||now>=end)continue;
+    active.push({
+      id:String(row.event_key||''),
+      icon:String(row.icon||'✦'),
+      name:String(row.name||row.event_key||'EVENTO'),
+      desc:String(row.description||''),
+      target:Math.max(1,Number(row.target)||1),
+      reward:row.reward&&typeof row.reward==='object'?row.reward:{},
+      rules:row.rules&&typeof row.rules==='object'?row.rules:{},
+      priority:Number(row.priority)||100,
+      start,end,slot:cycle,
+      eventId:`v16:${String(row.event_key||'event')}:${start}`
+    });
+  }
+  active.sort((a,b)=>a.priority-b.priority||a.start-b.start||a.id.localeCompare(b.id));
+  return active[0]||null;
+}
 
 function clamp(n,min,max){ return Math.max(min,Math.min(max,Number(n)||0)); }
 function rand(min,max){ return min + Math.random()*(max-min); }
@@ -112,6 +133,11 @@ class Room {
 
   currentEventDef(){ return this.world.currentEvent(); }
   eventEligible(ev){
+    if(!ev)return false;
+    const rules=ev.rules||{};
+    if(rules.battle_only)return !!this.map.battle;
+    if(rules.normal_only&&this.map.battle)return false;
+    if(Number(rules.min_tier||0)>Number(this.map.tier||0))return false;
     if(ev.id==='battle')return !!this.map.battle;
     if(ev.id==='prime')return !!this.map.battle||Number(this.map.tier||1)>=2;
     return !this.map.battle;
@@ -125,6 +151,10 @@ class Room {
 
   ensureEvent(force=false){
     const ev=this.currentEventDef();
+    if(!ev){
+      if(this.event||force){this.clearEventEntities();this.event=null;this.broadcastEvent(true);if(this.clients.size)this.broadcast(this.snapshot());}
+      return;
+    }
     if(!force&&this.event?.eventId===ev.eventId)return;
     this.clearEventEntities();
     this.event={...ev,progress:0,complete:false};
@@ -296,13 +326,34 @@ class Room {
   }
 }
 
-export function attachSharedUniverse(server,{authenticate}){
-  const wss=new WebSocketServer({server,path:'/ws',perMessageDeflate:false});const rooms=new Map();let forcedIndex=null;
+export function attachSharedUniverse(server,{authenticate,loadLiveOps}){
+  const wss=new WebSocketServer({server,path:'/ws',perMessageDeflate:false});const rooms=new Map();
   const world={
-    currentEvent(){const now=nowMs(),slot=Math.floor(now/EVENT_SLOT_MS),idx=forcedIndex==null?Math.abs(slot)%EVENT_DEFS.length:Math.max(0,Math.min(EVENT_DEFS.length-1,Number(forcedIndex)||0)),def=EVENT_DEFS[idx],start=forcedIndex==null?slot*EVENT_SLOT_MS:now-(now%1000),end=start+EVENT_SLOT_MS;return {...def,slot,start,end,eventId:`v15:${slot}:${def.id}${forcedIndex==null?'':':admin'}`};},
-    forceEvent(index){forcedIndex=index==null?null:index;for(const r of rooms.values())r.ensureEvent(true);},
+    liveOps:{events:[],catalog:[],server_time:0},
+    lastLiveOpsAt:0,
+    liveOpsBusy:false,
+    currentEvent(){return resolveLiveEvent(world.liveOps?.events||[],nowMs());},
+    async refreshLiveOps(force=false){
+      const now=nowMs();
+      if(!loadLiveOps)return world.liveOps;
+      if(!force&&world.lastLiveOpsAt&&now-world.lastLiveOpsAt<LIVE_OPS_REFRESH_MS)return world.liveOps;
+      if(world.liveOpsBusy)return world.liveOps;
+      world.liveOpsBusy=true;
+      try{
+        const data=await loadLiveOps();
+        if(data&&Array.isArray(data.events)){
+          const before=world.currentEvent()?.eventId||null;
+          world.liveOps=data;
+          world.lastLiveOpsAt=nowMs();
+          const after=world.currentEvent()?.eventId||null;
+          if(before!==after||force)for(const r of rooms.values())r.ensureEvent(true);
+        }
+      }catch(err){console.warn('LIVE OPS refresh failed:',err?.message||err);}
+      finally{world.liveOpsBusy=false;}
+      return world.liveOps;
+    },
     room(mapId,territoryFaction){const id=sanitizeRoomMap(mapId),key=roomKey(id,territoryFaction);if(!rooms.has(key))rooms.set(key,new Room(world,id,territoryFaction));return rooms.get(key);},
-    stats(){return {rooms:rooms.size,clients:[...rooms.values()].reduce((s,r)=>s+r.clients.size,0),npcs:[...rooms.values()].reduce((s,r)=>s+r.npcs.size,0),ores:[...rooms.values()].reduce((s,r)=>s+r.ores.size,0),event:world.currentEvent()};}
+    stats(){return {rooms:rooms.size,clients:[...rooms.values()].reduce((s,r)=>s+r.clients.size,0),npcs:[...rooms.values()].reduce((s,r)=>s+r.npcs.size,0),ores:[...rooms.values()].reduce((s,r)=>s+r.ores.size,0),event:world.currentEvent(),liveOpsUpdatedAt:world.lastLiveOpsAt};}
   };
 
   wss.on('connection',ws=>{
@@ -321,13 +372,18 @@ export function attachSharedUniverse(server,{authenticate}){
       if(msg.type==='player_state')return ws.room?.updatePlayer(ws,msg);
       if(msg.type==='npc_damage')return ws.room?.handleDamage(ws,msg);
       if(msg.type==='collect_ore')return ws.room?.handleOreCollect(ws,msg);
-      if(msg.type==='force_event'&&String(ws.identity.callsign||'').trim().toUpperCase()==='FELP22'){world.forceEvent(msg.index==='auto'?null:Number(msg.index));return;}
+      if(msg.type==='force_event'&&String(ws.identity.callsign||'').trim().toUpperCase()==='FELP22'){
+        await world.refreshLiveOps(true);
+        safeJsonSend(ws,{type:'live_ops_refresh',ok:true,event:world.currentEvent(),serverTime:nowMs()});
+        return;
+      }
     });
     ws.on('close',()=>{clearTimeout(ws.authTimer);ws.room?.removeClient(ws);});
     ws.on('error',()=>{});
   });
 
-  let last=nowMs();const timer=setInterval(()=>{const n=nowMs(),dt=Math.min(.12,(n-last)/1000);last=n;for(const [key,r] of rooms){r.tick(dt);if(r.clients.size===0&&n-(r.lastUsedAt||n)>30*60*1000)rooms.delete(key);else if(r.clients.size>0)r.lastUsedAt=n;}},50);
+  world.refreshLiveOps(true).catch(()=>{});
+  let last=nowMs();const timer=setInterval(()=>{const n=nowMs(),dt=Math.min(.12,(n-last)/1000);last=n;if(n-world.lastLiveOpsAt>=LIVE_OPS_REFRESH_MS)world.refreshLiveOps(false).catch(()=>{});for(const [key,r] of rooms){r.tick(dt);if(r.clients.size===0&&n-(r.lastUsedAt||n)>30*60*1000)rooms.delete(key);else if(r.clients.size>0)r.lastUsedAt=n;}},50);
   timer.unref?.();
   return world;
 }
