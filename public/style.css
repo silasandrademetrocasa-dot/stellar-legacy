@@ -1805,17 +1805,17 @@ body[data-quality="high"] .hud-panel{backdrop-filter:blur(7px);-webkit-backdrop-
 
 /* ===================== V16.7 HUD GRID REORGANIZATION ===================== */
 :root{
-  --hud-grid-width:252px;
-  --hud-grid-width-collapsed:168px;
-  --hud-right-stack-width:252px;
+  --hud-grid-width:236px;
+  --hud-grid-width-collapsed:156px;
+  --hud-right-stack-width:236px;
   --chat-dock-width-expanded:332px;
   --chat-dock-width-collapsed:162px;
   --minimap-dock-width-expanded:252px;
   --minimap-dock-width-collapsed:168px;
 }
 .top-hud-dock{
-  right:calc(var(--hud-right-stack-width) + 18px)!important;
-  gap:8px!important;
+  right:calc(var(--hud-right-stack-width) + 16px)!important;
+  gap:6px!important;
   align-items:flex-start!important;
 }
 #topHudDock #playerPanel,
@@ -1893,9 +1893,9 @@ body[data-quality="high"] .hud-panel{backdrop-filter:blur(7px);-webkit-backdrop-
 
 @media(max-width:1280px){
   :root{
-    --hud-grid-width:228px;
-    --hud-grid-width-collapsed:160px;
-    --hud-right-stack-width:228px;
+    --hud-grid-width:216px;
+    --hud-grid-width-collapsed:152px;
+    --hud-right-stack-width:216px;
     --minimap-dock-width-expanded:228px;
     --minimap-dock-width-collapsed:160px;
   }
@@ -1904,9 +1904,9 @@ body[data-quality="high"] .hud-panel{backdrop-filter:blur(7px);-webkit-backdrop-
 }
 @media(max-width:1100px){
   :root{
-    --hud-grid-width:210px;
-    --hud-grid-width-collapsed:152px;
-    --hud-right-stack-width:210px;
+    --hud-grid-width:198px;
+    --hud-grid-width-collapsed:148px;
+    --hud-right-stack-width:198px;
     --minimap-dock-width-expanded:210px;
     --minimap-dock-width-collapsed:152px;
   }
@@ -1942,8 +1942,8 @@ body[data-quality="high"] .hud-panel{backdrop-filter:blur(7px);-webkit-backdrop-
 }
 
 
-/* ===================== V16.7.1 TOP GRID EQUAL HEIGHT ===================== */
-:root{--hud-top-card-height:164px;}
+/* ===================== V16.7.2 TOP GRID COMPACT ===================== */
+:root{--hud-top-card-height:142px;}
 #topHudDock #playerPanel,
 #topHudDock #leftStats,
 #topHudDock #activeMissionPanel,
@@ -1954,18 +1954,29 @@ body[data-quality="high"] .hud-panel{backdrop-filter:blur(7px);-webkit-backdrop-
   max-height:var(--hud-top-card-height)!important;
   box-sizing:border-box!important;
   overflow:hidden!important;
+  padding:6px 8px 7px!important;
 }
 #topHudDock #playerPanel.collapsed,
 #topHudDock #leftStats.collapsed,
 #topHudDock #activeMissionPanel.collapsed,
 #topHudDock #petFloatPanel.collapsed{
-  height:44px!important;min-height:44px!important;max-height:44px!important;
+  height:40px!important;min-height:40px!important;max-height:40px!important;
 }
-#topHudDock #activityPanel .activity-feed{height:112px!important;min-height:0!important;max-height:112px!important;overflow-y:auto!important;}
-#topHudDock #activeMissionPanel .active-mission-body{max-height:118px!important;overflow:hidden!important;}
-#topHudDock #petFloatPanel .pet-float-body{max-height:118px!important;overflow:hidden!important;}
+#topHudDock #playerPanel .ship-stats-grid,
+#topHudDock #leftStats .ship-stats-grid{row-gap:3px!important;}
+#topHudDock #playerPanel .ship-stat,
+#topHudDock #leftStats .ship-stat{padding:0!important;}
+#topHudDock #playerPanel .panel-title,
+#topHudDock #leftStats .panel-title,
+#topHudDock #petFloatPanel .panel-title,
+#topHudDock #activityPanel .panel-title,
+#topHudDock #activeMissionPanel .active-mission-head{margin-bottom:4px!important;}
+#topHudDock #activityPanel .activity-feed{height:88px!important;min-height:0!important;max-height:88px!important;overflow-y:auto!important;}
+#topHudDock #activeMissionPanel .active-mission-body{max-height:94px!important;overflow:hidden!important;}
+#topHudDock #petFloatPanel .pet-float-body{max-height:94px!important;overflow:hidden!important;}
+#topHudDock #petFloatPanel .pet-float-status{min-height:24px!important;}
 .connection-settings-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;}
 .connection-settings-grid>div{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 14px;border:1px solid rgba(101,216,255,.16);border-radius:12px;background:rgba(4,20,33,.62);}
 .connection-settings-grid span{font-size:10px;font-weight:900;letter-spacing:.1em;color:#8fb7cb;}
 .connection-settings-grid .sync-chip{min-width:96px;text-align:center;}
-@media(max-width:700px){.connection-settings-grid{grid-template-columns:1fr;} :root{--hud-top-card-height:154px;}}
+@media(max-width:700px){.connection-settings-grid{grid-template-columns:1fr;} :root{--hud-top-card-height:136px;}}

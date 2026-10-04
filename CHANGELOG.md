@@ -1,3 +1,7 @@
+# V16.7.2 — TOP GRID COMPACT
+- Redução de altura e largura dos painéis superiores para liberar mais área útil da tela.
+- Grid do topo mantida padronizada com cards mais compactos.
+
 ## V16.7.1 — TOP GRID POLISH
 - Remove STATUS e UNIVERSO do card JOGADOR.
 - Move os indicadores de conexão para CONFIG > JOGO.

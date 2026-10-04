@@ -1,3 +1,7 @@
+# V16.7.2 — TOP GRID COMPACT
+- Redução de altura e largura dos painéis superiores para liberar mais área útil da tela.
+- Grid do topo mantida padronizada com cards mais compactos.
+
 # Stellar Legacy V16.7.0 — HUD DOCK POLISH + EVENT CATALOG
 
 Patch focado em acabamento do HUD inferior e preparação do calendário de eventos. O chat fica travado no rodapé esquerdo, o mapa no rodapé direito e a barra de munições permanece centralizada sem empurrar os docks laterais. NPCs de evento agora aparecem destacados no minimapa mesmo quando estão fora do alcance visual normal.
