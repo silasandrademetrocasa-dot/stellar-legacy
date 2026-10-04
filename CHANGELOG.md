@@ -1,3 +1,10 @@
+## V16.7.9 — HANGAR EQUIPMENT COMMAND
+- Hangar de equipamentos reformulado com filtros: LASERS, ESCUDOS, MOTORES e EXTRAS.
+- Painéis separados para EQUIPADOS e INVENTÁRIO.
+- Seções minimizáveis para reduzir rolagem vertical.
+- Mesma lógica de gerenciamento aplicada a NAVE, DRONES e AUX-9.
+- Remoção de equipamentos compacta automaticamente os slots: o vazio sempre vai para o último slot disponível.
+
 ## V16.7.8 — AUX EQUIPMENT + SHIELD SUPPORT
 - Corrigida a aba de equipamentos do AUX-9 no Hangar.
 - Escudos equipados no AUX-9 agora somam escudo à nave como suporte, igual aos drones.

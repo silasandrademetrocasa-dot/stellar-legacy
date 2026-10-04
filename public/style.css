@@ -2093,3 +2093,56 @@ body[data-quality="high"] .hud-panel{backdrop-filter:blur(7px);-webkit-backdrop-
 #gateProtocolTabs [data-gate-protocol]{opacity:1!important;filter:none!important;}
 #gateProtocolTabs [data-gate-protocol]:disabled{opacity:1!important;cursor:pointer!important;}
 @media(max-width:680px){.gate-life-actions{grid-template-columns:1fr!important}.gate-round-card{min-height:0!important;}}
+
+/* ===================== V16.7.9 HANGAR EQUIPMENT COMMAND ===================== */
+.hangar-equipment-console,.hangar-drone-console{display:flex;flex-direction:column;gap:10px}
+.hangar-summary-strip{grid-template-columns:repeat(6,minmax(110px,1fr));margin-bottom:0}
+.hangar-summary-strip .stat-card{padding:9px 10px;min-height:66px}
+.hangar-summary-strip .stat-card strong{font-size:15px}
+.hangar-filter-bar{display:flex;align-items:center;gap:6px;flex-wrap:wrap;padding:7px;border:1px solid rgba(86,201,255,.18);border-radius:12px;background:linear-gradient(180deg,rgba(7,24,39,.92),rgba(4,13,24,.95));position:sticky;top:50px;z-index:4;backdrop-filter:blur(8px)}
+.hangar-filter-label{font-size:8px;font-weight:1000;letter-spacing:.15em;color:#6faac2;padding:0 4px}
+.hangar-filter-btn{min-height:30px;padding:6px 11px;border-radius:9px;border:1px solid rgba(91,194,244,.2);background:#071725;color:#9dc8dc;font-size:9px;font-weight:1000;letter-spacing:.06em}
+.hangar-filter-btn.active{border-color:#55d9ff;color:#ecfbff;background:linear-gradient(180deg,#0b3850,#082336);box-shadow:0 0 12px rgba(62,210,255,.13)}
+.hangar-equipment-split{display:grid;grid-template-columns:minmax(0,1.45fr) minmax(320px,.75fr);gap:12px;align-items:start}
+.hangar-equipment-pane{min-width:0;display:flex;flex-direction:column;gap:8px}
+.hangar-pane-title{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:8px 10px;border-radius:11px;border:1px solid rgba(79,191,244,.18);background:linear-gradient(90deg,rgba(8,31,49,.95),rgba(5,15,27,.9));position:sticky;top:96px;z-index:3}
+.hangar-pane-title span{font-size:9px;letter-spacing:.12em;font-weight:1000;color:#78ddff}
+.hangar-pane-title b{font-size:10px;color:#eefaff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hangar-equip-section{padding:0!important;margin:0!important;overflow:hidden}
+.hangar-section-head{width:100%;min-height:38px;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:7px 10px;border:0;border-bottom:1px solid rgba(75,183,233,.09);background:linear-gradient(180deg,rgba(9,28,45,.9),rgba(6,18,31,.88));color:#dff7ff;text-align:left}
+.hangar-section-head>span{display:flex;align-items:baseline;gap:8px;min-width:0}
+.hangar-section-head b{font-size:10px;letter-spacing:.08em;color:#dff8ff}
+.hangar-section-head small{font-size:8px;color:#739cb1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hangar-section-head em{font-style:normal;color:#6edcff;font-size:15px}
+.hangar-section-body{padding:9px}
+.hangar-equip-section.collapsed .hangar-section-body{display:none}
+.hangar-equip-section.collapsed .hangar-section-head{border-bottom:0}
+.hangar-slot-grid{grid-template-columns:repeat(auto-fill,minmax(136px,1fr));gap:7px}
+.hangar-slot-grid .slot-card{min-height:74px;padding:8px;border-radius:11px}
+.hangar-slot-grid .slot-item-art{height:44px;max-width:82px;object-fit:contain;display:block;margin:0 auto 4px}
+.hangar-slot-grid .slot-label{font-size:8px;margin-bottom:3px}
+.hangar-slot-grid .slot-item{font-size:11px}
+.hangar-slot-grid .muted{font-size:8px!important;line-height:1.3}
+.hangar-slot-grid .slot-actions{margin-top:6px;gap:4px}
+.hangar-slot-grid .slot-actions button{min-height:26px;padding:4px 6px;font-size:8px}
+.hangar-inventory-grid{grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:7px}
+.hangar-inventory-card{padding:9px;min-height:148px;display:flex;flex-direction:column}
+.hangar-inventory-card .inventory-item-art{height:58px;max-width:105px;object-fit:contain;align-self:center;margin-bottom:4px}
+.hangar-inventory-card>b{font-size:11px}
+.hangar-inventory-card .qty{font-size:9px}
+.hangar-item-desc{font-size:8px!important;line-height:1.3;margin-top:3px;flex:1}
+.hangar-inventory-card .inventory-actions{gap:4px;margin-top:6px}
+.hangar-inventory-card .inventory-actions button{min-height:27px;padding:4px 7px;font-size:8px}
+.compact-empty{padding:18px!important;font-size:10px}
+.drone-equipment-body{display:flex;flex-direction:column;gap:8px}
+.drone-compact-head{display:flex;align-items:center;gap:8px}
+.drone-mini-art{width:54px;height:42px;display:grid;place-items:center;border:1px solid rgba(81,198,255,.13);border-radius:9px;background:#061524}
+.drone-mini-art img{max-width:48px;max-height:34px;object-fit:contain}
+.drone-compact-head b{display:block;font-size:11px}.drone-compact-head small{display:block;font-size:8px;color:#739daf;margin-top:2px}
+.drone-designer-control.compact{display:grid;grid-template-columns:72px 1fr;align-items:center;gap:8px}
+.drone-designer-control.compact label{font-size:8px}.drone-designer-control.compact select{height:30px;font-size:9px}
+.drone-sell-compact{align-self:flex-start}
+.pet-equipment-split{margin-top:0}
+@media(max-width:1180px){.hangar-summary-strip{grid-template-columns:repeat(3,minmax(110px,1fr))}.hangar-equipment-split{grid-template-columns:1fr}.hangar-pane-title{position:static}}
+@media(max-width:720px){.hangar-summary-strip{grid-template-columns:repeat(2,minmax(100px,1fr))}.hangar-filter-bar{position:static}.hangar-slot-grid,.hangar-inventory-grid{grid-template-columns:1fr 1fr}}
+@media(max-width:520px){.hangar-slot-grid,.hangar-inventory-grid{grid-template-columns:1fr}.hangar-section-head>span{align-items:flex-start;flex-direction:column;gap:2px}}

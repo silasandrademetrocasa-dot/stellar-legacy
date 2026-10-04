@@ -1,6 +1,6 @@
 {
   "name": "stellar-legacy",
-  "version": "16.7.8",
+  "version": "16.7.9",
   "type": "module",
   "scripts": {
     "start": "node server/index.js",
@@ -14,5 +14,5 @@
   "engines": {
     "node": ">=18"
   },
-  "release": "aux-equipment-shield-support-v16-7-8"
+  "release": "hangar-equipment-command-v16-7-9"
 }

@@ -1,7 +1,7 @@
-import { FACTIONS, SHIPS, ITEMS, LASER_AMMO, ROCKETS, NPC_TYPES, MAPS, RESOURCES } from './data.js?v=16.7.8';
-import { GAME_ASSETS } from './assets/v8/manifest.js?v=16.7.8';
-import { signUp, signIn, requestPasswordReset, restorePasswordRecoveryFromUrl, restoreSession, signOutLocal, checkGameSession, endGameSession, getUser, getSessionCredentials, loadCloudSave, saveCloudSave, updateCallsign, updatePassword, loadRankings, loadAuctionBids, saveAuctionBidOnline, markAuctionBidStatusOnline, loadAuctionMarket, upsertPlayerPresenceOnline, loadMapPresenceOnline, removePlayerPresenceOnline, queuePvpAttackOnline, consumePvpDamageEventsOnline, syncArenaProfileOnline, loadArenaState, loadArenaDailyRewardStatus, claimArenaDailyReward, loadArenaOpponents, loadArenaHistory, arenaAttackOnline, listClansOnline, loadMyClanOnline, createClanOnline, joinClanOnline, leaveClanOnline, transferClanCreditsOnline, claimClanCreditGrantsOnline, recordClanAlienKillOnline, getPremiumShopOnline, testPurchasePremiumOnline, loadWarfrontStateOnline, hitWorldBossOnline, claimWorldBossRewardOnline, declareClanWarOnline, recordClanWarScoreOnline, loadLiveOpsOnline, purchaseLiveCatalogOnline, economyActionOnline, getChatHistoryOnline, sendChatMessageOnline, getMyDesignersOnline, setDesignLoadoutOnline, claimGateDroneDesignOnline, claimEventDesignerOnline } from './api.js?v=16.7.8';
-import { SharedUniverseClient } from './world.js?v=16.7.8';
+import { FACTIONS, SHIPS, ITEMS, LASER_AMMO, ROCKETS, NPC_TYPES, MAPS, RESOURCES } from './data.js?v=16.7.9';
+import { GAME_ASSETS } from './assets/v8/manifest.js?v=16.7.9';
+import { signUp, signIn, requestPasswordReset, restorePasswordRecoveryFromUrl, restoreSession, signOutLocal, checkGameSession, endGameSession, getUser, getSessionCredentials, loadCloudSave, saveCloudSave, updateCallsign, updatePassword, loadRankings, loadAuctionBids, saveAuctionBidOnline, markAuctionBidStatusOnline, loadAuctionMarket, upsertPlayerPresenceOnline, loadMapPresenceOnline, removePlayerPresenceOnline, queuePvpAttackOnline, consumePvpDamageEventsOnline, syncArenaProfileOnline, loadArenaState, loadArenaDailyRewardStatus, claimArenaDailyReward, loadArenaOpponents, loadArenaHistory, arenaAttackOnline, listClansOnline, loadMyClanOnline, createClanOnline, joinClanOnline, leaveClanOnline, transferClanCreditsOnline, claimClanCreditGrantsOnline, recordClanAlienKillOnline, getPremiumShopOnline, testPurchasePremiumOnline, loadWarfrontStateOnline, hitWorldBossOnline, claimWorldBossRewardOnline, declareClanWarOnline, recordClanWarScoreOnline, loadLiveOpsOnline, purchaseLiveCatalogOnline, economyActionOnline, getChatHistoryOnline, sendChatMessageOnline, getMyDesignersOnline, setDesignLoadoutOnline, claimGateDroneDesignOnline, claimEventDesignerOnline } from './api.js?v=16.7.9';
+import { SharedUniverseClient } from './world.js?v=16.7.9';
 
 const canvas = document.querySelector('#game');
 const ctx = canvas.getContext('2d');
@@ -1446,7 +1446,7 @@ const GALAXY_ALPHA_ROUND_INTERVAL_MS = 9000;
 const GALAXY_GATE_MAX_LIVES = 5;
 const GALAXY_GATE_BASE_LIVES = 3;
 
-// V16.7.8 • Portais refeitos para serem vencíveis também por jogador FREE bem equipado em Créditos.
+// V16.7.9 • Portais refeitos para serem vencíveis também por jogador FREE bem equipado em Créditos.
 // A dificuldade vem de progressão, posicionamento e kite — não de dezenas de NPCs batendo ao mesmo tempo.
 const GALAXY_ALPHA_ROUNDS = [
   {round:1,name:'Primeiro Contato',waves:[{type:'streuner',count:5},{type:'recruitStreuner',count:4},{type:'aiderStreuner',count:3}]},
@@ -1571,7 +1571,7 @@ const state = {
   currentMap: MAPS.x1, camera: { x: 620, y: MAPS.x1.world.h/2 }, target: null, pvpShotPending:false, pvpRocketPending:false, enemies: [], loot: [], ores: [], particles: [], fx: [], rocketFx: [], landmarks: [], enemyRespawns: [], oreRespawns: [], lastPortalAt: 0, radarRange: 1500, jumping: false,
   lastPlayerDamageAt:nowSec(), repairFxAt:0, shieldRepairFxAt:0,
   pointerNavActive:false, pointerNavId:null, lastTargetTapId:null, lastTargetTapAt:0, combatAlertText:'', combatAlertKind:'', combatAlertUntil:0, lowHpWarned:false, eventSpawnKey:'', missionHudPage:0, missionHudSignature:'', portalCombatUntil:0,
-  shopTab: 'ships', hangarTab: 'ships', toastTimer: null, ammoUiExpanded: true, statsUiExpanded: true, playerUiExpanded: true, missionUiExpanded: true, petUiExpanded: true, minimapUiExpanded: true, chatUiExpanded: true, topMetaExpanded: true, topbarDockExpanded: true, targetLockUiExpanded:true, galaxyEventUiExpanded:true,
+  shopTab: 'ships', hangarTab: 'ships', hangarEquipFilter:'all', hangarDroneFilter:'all', hangarPetFilter:'all', toastTimer: null, ammoUiExpanded: true, statsUiExpanded: true, playerUiExpanded: true, missionUiExpanded: true, petUiExpanded: true, minimapUiExpanded: true, chatUiExpanded: true, topMetaExpanded: true, topbarDockExpanded: true, targetLockUiExpanded:true, galaxyEventUiExpanded:true,
   stars: Array.from({length:240},()=>({x:Math.random()*5200-2600,y:Math.random()*5200-2600,r:Math.random()*1.5+.3,a:Math.random()*.6+.2})),
 };
 
@@ -2448,7 +2448,7 @@ function hydrateProgress(){
     if(old&&now&&Number.isFinite(progress.x)&&Number.isFinite(progress.y)){progress.x=Math.max(35,Math.min(now.w-35,progress.x*(now.w/old.w)));progress.y=Math.max(35,Math.min(now.h-35,progress.y*(now.h/old.h)));}
     progress.expeditionV9=1;
   }
-  progress.shipLoadout ||= blankLoadout(progress.activeShipId);normalizeLoadout();
+  progress.shipLoadout ||= blankLoadout(progress.activeShipId);compactAllEquipmentSlots();normalizeLoadout();
   normalizePremiumMeta();
   normalizeAdminUnlockState();
   ensureAdminEntitlements();
@@ -2481,6 +2481,30 @@ function activeRepairBot(){
   }
   return best;
 }
+function compactEquipmentSlots(list){
+  const arr=Array.isArray(list)?list:[];
+  const filled=arr.filter(Boolean);
+  while(filled.length<arr.length)filled.push(null);
+  return filled;
+}
+function compactEquipmentSlotsInPlace(list){
+  if(!Array.isArray(list))return list;
+  const compact=compactEquipmentSlots(list);
+  list.splice(0,list.length,...compact);
+  return list;
+}
+function compactAllEquipmentSlots(){
+  if(!progress)return;
+  if(progress.shipLoadout){
+    for(const key of ['lasers','generators','extras'])if(Array.isArray(progress.shipLoadout[key]))compactEquipmentSlotsInPlace(progress.shipLoadout[key]);
+  }
+  for(const d of progress.drones||[])if(Array.isArray(d.slots))compactEquipmentSlotsInPlace(d.slots);
+  if(progress.pet){
+    if(Array.isArray(progress.pet.lasers))compactEquipmentSlotsInPlace(progress.pet.lasers);
+    if(Array.isArray(progress.pet.shields))compactEquipmentSlotsInPlace(progress.pet.shields);
+  }
+}
+
 function normalizeLoadout(){
   if(!progress)return 0;
   const ship=SHIPS[progress.activeShipId];
@@ -2501,6 +2525,7 @@ function normalizeLoadout(){
     const overflow=progress.shipLoadout.extras.splice(extraCap);
     overflow.filter(Boolean).forEach(id=>{addInventory(id);overflowCount++;});
   }
+  for(const key of ['lasers','generators','extras'])compactEquipmentSlotsInPlace(progress.shipLoadout[key]);
   return overflowCount;
 }
 
@@ -2631,7 +2656,7 @@ function unequipPetSlot(kind,index){
   if(!canChangeEquipment()){showToast('Configure equipamentos do AUX-9 somente dentro da sua base X-1');return;}
   if(!progress?.pet?.owned)return;
   const list=kind==='laser'?progress.pet.lasers:progress.pet.shields;
-  const id=list[index];if(!id)return;list[index]=null;addInventory(id);saveGame();refreshPetViews();refreshAmmoCounters();
+  const id=list[index];if(!id)return;list[index]=null;compactEquipmentSlotsInPlace(list);addInventory(id);saveGame();refreshPetViews();refreshAmmoCounters();
 }
 function buyPetUnit(){
   if(progress?.pet?.owned){showToast('AUX-9 já adquirido');return;}const q=liveQuote('pet:base');if(!q){showToast('AUX-9 indisponível no catálogo LIVE OPS');return;}if(!canAfford(q.price,q.currency)){showToast(`Faltam ${fmt(q.price-(progress.profile[q.currency]||0))} ${q.currency==='uridium'?'STL':'CR'}`);return;}openSpendConfirm({title:'Comprar AUX-9?',itemName:'AUX-9 — Unidade Base',detail:'Preço validado no Supabase e compra aplicada pelo servidor.',value:q.price,currency:q.currency,onConfirm:()=>applyAuthoritativePurchase(q.catalog_key,'AUX-9')});
@@ -2870,7 +2895,7 @@ function computeStats(keepRatio=true){
   // Combate atual é PvE: respeita dano específico contra aliens e bônus PvE por laser.
   for(const id of laserIds){const it=ITEMS[id];const base=it?.alienDamage??it?.damage??0;laserDamage+=base*(1+(Number(it?.alienBonus)||0));}
   for(const id of genIds){const it=ITEMS[id];speed+=it.speed||0;shield+=it.shield||0;absorption=Math.max(absorption,it.absorption||0);shieldRegenBoost=Math.max(shieldRegenBoost,Number(it.shieldRegenBonus)||0);}
-  // V16.7.8: escudos equipados no AUX-9 funcionam como suporte direto da nave, assim como escudos instalados em drones.
+  // V16.7.9: escudos equipados no AUX-9 funcionam como suporte direto da nave, assim como escudos instalados em drones.
   // O bônus de nível do AUX é aplicado à contribuição dele; absorção/regeneração também entram no cálculo da nave.
   shield+=petShieldSupport();
   for(const id of petShieldGenerators){const it=ITEMS[id];absorption=Math.max(absorption,it.absorption||0);shieldRegenBoost=Math.max(shieldRegenBoost,Number(it.shieldRegenBonus)||0);}
@@ -4262,7 +4287,7 @@ function unequipShipSlot(key,index){
   if(!canChangeEquipment()){showToast('Remova equipamentos somente dentro da sua base X-1');return;}
   const id=progress.shipLoadout[key][index];if(!id)return;
   const wasExpansion=Number(ITEMS[id]?.slotBonus)||0;
-  progress.shipLoadout[key][index]=null;addInventory(id);
+  progress.shipLoadout[key][index]=null;compactEquipmentSlotsInPlace(progress.shipLoadout[key]);addInventory(id);
   let overflow=0;
   if(key==='extras'){
     for(const flag of ['autoLaser','autoRocket','turboRocket'])progress.flags[flag]=false;
@@ -4272,7 +4297,7 @@ function unequipShipSlot(key,index){
   if(wasExpansion&&overflow>0)showToast(`${overflow} equipamento${overflow>1?'s':''} excedente${overflow>1?'s':''} voltou${overflow>1?'aram':''} ao inventário`);
 }
 function equipDroneItem(itemId){if(!canChangeEquipment()){showToast('Configure drones somente dentro da sua base X-1');return;}const item=ITEMS[itemId];if(!(item.type==='laser'||(item.type==='generator'&&item.subtype==='shield'))){showToast('Drones aceitam lasers ou geradores de escudo');return;}const drone=progress.drones.find(d=>d.slots.some(v=>!v));if(!drone){showToast('Nenhum slot livre nos drones');return;}if(!removeInventory(itemId))return;drone.slots[drone.slots.findIndex(v=>!v)]=itemId;computeStats(true);saveGame();renderHangar();buildAmmoButtons();}
-function unequipDroneSlot(droneId,index){if(!canChangeEquipment()){showToast('Configure drones somente dentro da sua base X-1');return;}const d=progress.drones.find(x=>x.id===droneId);if(!d||!d.slots[index])return;addInventory(d.slots[index]);d.slots[index]=null;computeStats(true);saveGame();renderHangar();buildAmmoButtons();}
+function unequipDroneSlot(droneId,index){if(!canChangeEquipment()){showToast('Configure drones somente dentro da sua base X-1');return;}const d=progress.drones.find(x=>x.id===droneId);if(!d||!d.slots[index])return;addInventory(d.slots[index]);d.slots[index]=null;compactEquipmentSlotsInPlace(d.slots);computeStats(true);saveGame();renderHangar();buildAmmoButtons();}
 async function performSellDrone(droneId){
   const d=progress.drones.find(x=>x.id===droneId);if(!d)return;const model=ITEMS[d.type];
   try{const r=await runEconomyAction('sell_drone',{drone_id:droneId});showToast(`${model.name} vendido por ${fmt(r?.info?.refund||0)} ${saleCurrencyLabel(r?.info?.currency)} • equipamentos retornaram ao inventário`);}catch(e){showToast(e.message||'Venda do drone recusada pelo servidor');}
@@ -4299,11 +4324,67 @@ function slotCard(label,itemId,key,index,droneId=null){
   el.innerHTML=`<div class="slot-label">${label}</div>${item&&art?`<img class="slot-item-art" src="${art}" alt="${item.name}">`:''}<div class="slot-item">${item?item.name:'VAZIO'}</div>${item?`<div class="muted" style="font-size:10px">${item.description}</div>`:''}`;
   if(item){const a=document.createElement('div');a.className='slot-actions';const b=document.createElement('button');b.className='ghost-btn';b.textContent='Remover';b.onclick=()=>droneId?unequipDroneSlot(droneId,index):unequipShipSlot(key,index);a.appendChild(b);const sell=document.createElement('button');sell.className='danger-btn sell-item-btn';sell.textContent=`Vender 50%`;sell.title=`${fmt(itemSellValue(item))} ${item.currency==='uridium'?'STL':'CR'}`;sell.onclick=()=>sellEquippedSlot(key,index,droneId);a.appendChild(sell);el.appendChild(a);}return el;
 }
-function inventoryCard(itemId,count){
-  const item=ITEMS[itemId],art=GAME_ASSETS.equipment[itemId];const el=document.createElement('div');el.className='inventory-card';
-  el.innerHTML=`${art?`<img class="inventory-item-art" src="${art}" alt="${item.name}">`:''}<b>${item.name}</b><div class="qty">Quantidade: ${count}</div><div class="muted" style="font-size:10px;margin-top:4px">${item.description}</div>`;
-  const actions=document.createElement('div');actions.className='inventory-actions';const shipBtn=document.createElement('button');shipBtn.className='ghost-btn';shipBtn.textContent='Nave';shipBtn.onclick=()=>equipShipItem(itemId);actions.appendChild(shipBtn);if((item.type==='laser'||(item.type==='generator'&&item.subtype==='shield'))&&progress.drones.length){const d=document.createElement('button');d.className='ghost-btn';d.textContent='Drone';d.onclick=()=>equipDroneItem(itemId);actions.appendChild(d);}const sell=document.createElement('button');sell.className='danger-btn sell-item-btn';sell.textContent=`Vender 50% • ${fmt(itemSellValue(item))} ${item.currency==='uridium'?'STL':'CR'}`;sell.onclick=()=>sellInventoryItem(itemId,1);actions.appendChild(sell);el.appendChild(actions);return el;
+function equipmentCategory(item){
+  if(!item)return 'other';
+  if(item.type==='laser')return 'lasers';
+  if(item.type==='generator'&&item.subtype==='shield')return 'shields';
+  if(item.type==='generator'&&item.subtype==='speed')return 'engines';
+  if(item.type==='extra')return 'extras';
+  return 'other';
 }
+const HANGAR_FILTER_LABELS={all:'TODOS',lasers:'LASERS',shields:'ESCUDOS',engines:'MOTORES',extras:'EXTRAS'};
+const hangarUiPrefs={loaded:false,collapsed:{}};
+function loadHangarEquipmentPrefs(){
+  if(hangarUiPrefs.loaded)return;hangarUiPrefs.loaded=true;
+  try{
+    const raw=JSON.parse(localStorage.getItem('stellar_hangar_equipment_ui_v1679')||'{}');
+    if(HANGAR_FILTER_LABELS[raw.equipmentFilter])state.hangarEquipFilter=raw.equipmentFilter;
+    if(['all','lasers','shields'].includes(raw.droneFilter))state.hangarDroneFilter=raw.droneFilter;
+    if(['all','lasers','shields'].includes(raw.petFilter))state.hangarPetFilter=raw.petFilter;
+    if(raw.collapsed&&typeof raw.collapsed==='object')hangarUiPrefs.collapsed={...raw.collapsed};
+  }catch{}
+}
+function saveHangarEquipmentPrefs(){
+  try{localStorage.setItem('stellar_hangar_equipment_ui_v1679',JSON.stringify({equipmentFilter:state.hangarEquipFilter,droneFilter:state.hangarDroneFilter,petFilter:state.hangarPetFilter,collapsed:hangarUiPrefs.collapsed}));}catch{}
+}
+function setHangarEquipmentFilter(scope,filter){
+  if(scope==='ship')state.hangarEquipFilter=filter;
+  else if(scope==='drone')state.hangarDroneFilter=filter;
+  else state.hangarPetFilter=filter;
+  saveHangarEquipmentPrefs();renderHangar();
+}
+function toggleHangarEquipSection(key){hangarUiPrefs.collapsed[key]=!hangarUiPrefs.collapsed[key];saveHangarEquipmentPrefs();renderHangar();}
+function hangarFilterBar(scope,filters,active){
+  const bar=document.createElement('div');bar.className='hangar-filter-bar';
+  const label=document.createElement('span');label.className='hangar-filter-label';label.textContent='FILTRO';bar.appendChild(label);
+  for(const filter of filters){const b=document.createElement('button');b.type='button';b.className=`hangar-filter-btn ${active===filter?'active':''}`;b.textContent=HANGAR_FILTER_LABELS[filter]||filter.toUpperCase();b.onclick=()=>setHangarEquipmentFilter(scope,filter);bar.appendChild(b);}
+  return bar;
+}
+function hangarSection(title,meta,key,body){
+  const box=document.createElement('section');box.className=`section-box hangar-equip-section ${hangarUiPrefs.collapsed[key]?'collapsed':''}`;
+  const head=document.createElement('button');head.type='button';head.className='hangar-section-head';head.innerHTML=`<span><b>${title}</b>${meta?`<small>${meta}</small>`:''}</span><em>${hangarUiPrefs.collapsed[key]?'▸':'▾'}</em>`;head.onclick=()=>toggleHangarEquipSection(key);box.appendChild(head);
+  const wrap=document.createElement('div');wrap.className='hangar-section-body';wrap.appendChild(body);box.appendChild(wrap);return box;
+}
+function inventoryMatchesFilter(item,filter){return filter==='all'||equipmentCategory(item)===filter;}
+function inventoryCard(itemId,count,context='ship'){
+  const item=ITEMS[itemId],art=GAME_ASSETS.equipment[itemId];const el=document.createElement('div');el.className=`inventory-card hangar-inventory-card cat-${equipmentCategory(item)}`;
+  el.innerHTML=`${art?`<img class="inventory-item-art" src="${art}" alt="${item.name}">`:''}<b>${item.name}</b><div class="qty">Quantidade: ${count}</div><div class="muted hangar-item-desc">${item.description}</div>`;
+  const actions=document.createElement('div');actions.className='inventory-actions';
+  const addButton=(label,fn,primary=false)=>{const b=document.createElement('button');b.className=primary?'equip-btn':'ghost-btn';b.textContent=label;b.onclick=fn;actions.appendChild(b);};
+  const cat=equipmentCategory(item);
+  if(['lasers','shields','engines','extras'].includes(cat))addButton('Nave',()=>equipShipItem(itemId),context==='ship');
+  if((cat==='lasers'||cat==='shields')&&progress.drones.length)addButton('Drone',()=>equipDroneItem(itemId),context==='drone');
+  if(progress.pet?.owned&&(cat==='lasers'||cat==='shields'))addButton('AUX-9',()=>equipPetItem(itemId,cat==='lasers'?'laser':'shield'),context==='pet');
+  const sell=document.createElement('button');sell.className='danger-btn sell-item-btn';sell.textContent=`Vender 50% • ${fmt(itemSellValue(item))} ${item.currency==='uridium'?'STL':'CR'}`;sell.onclick=()=>sellInventoryItem(itemId,1);actions.appendChild(sell);el.appendChild(actions);return el;
+}
+function filteredInventoryGrid(filter,context='ship',allowed=['lasers','shields','engines','extras']){
+  const grid=document.createElement('div');grid.className='inventory-grid hangar-inventory-grid';
+  const entries=Object.entries(progress.inventory).filter(([id,q])=>q>0&&ITEMS[id]&&allowed.includes(equipmentCategory(ITEMS[id]))&&inventoryMatchesFilter(ITEMS[id],filter));
+  if(!entries.length){grid.innerHTML='<div class="empty-state compact-empty">Nenhum equipamento desse tipo disponível no inventário.</div>';return grid;}
+  entries.sort((a,b)=>equipmentCategory(ITEMS[a[0]]).localeCompare(equipmentCategory(ITEMS[b[0]]))||ITEMS[a[0]].name.localeCompare(ITEMS[b[0]].name));
+  for(const [id,q] of entries)grid.appendChild(inventoryCard(id,q,context));return grid;
+}
+
 
 function renderHangarShips(){
   const root=document.createElement('div'),defs=designerCatalog().filter(d=>d.kind==='ship'),activeDesign=currentShipDesign(),eligible=shipDesignerEligible();
@@ -4323,28 +4404,57 @@ function renderHangarShips(){
     const b=document.createElement('button');b.className='equip-btn';b.textContent=active?'Nave ativa':owned?'Usar nave':event?'EVENTO / MISSÃO / PASSE':'Comprar na Loja';b.disabled=active||(!owned&&event);b.onclick=()=>owned?switchShip(s.id):(ui.hangarModal.classList.add('hidden'),openShop('ships'));c.appendChild(b);wrap.appendChild(c);
   });root.appendChild(wrap);return root;
 }
-function renderHangarEquipment(){
-  const ship=SHIPS[progress.activeShipId],root=document.createElement('div');root.className='hangar-layout';const left=document.createElement('div');left.className='hangar-column';const right=document.createElement('div');right.className='hangar-column';
-  const repairBot=activeRepairBot(),extraCap=shipExtraCapacity(),extraBonus=extraCap-ship.extras;
-  const summary=document.createElement('div');summary.className='summary-grid';summary.innerHTML=`<div class="stat-card">Dano por tiro<strong>${fmt(player.laserDamage)}</strong></div><div class="stat-card">Escudo<strong>${fmt(player.maxShield)}</strong></div><div class="stat-card">Absorção<strong>${player.shieldAbsorption}%</strong></div><div class="stat-card">Velocidade<strong>${fmt(player.speed)}</strong></div><div class="stat-card">Slots EXTRAS<strong>${extraCap}${extraBonus?` (+${extraBonus})`:''}</strong></div><div class="stat-card">Reparo Auto<strong>${repairBot?`+${fmt(repairBot.id==='repElite'?10000:5000)} HP/s`:'OFF'}</strong></div><div class="stat-card">Porão<strong>${fmt(cargoCapacity())}${cargoExtraBonus()?` (+${fmt(cargoExtraBonus())})`:''}</strong></div>`;left.appendChild(summary);
-  for(const [key,title] of [['lasers',`Lasers da ${ship.name} (${ship.lasers})`],['generators',`Geradores (${ship.generators})`],['extras',`Extras (${extraCap}${extraBonus?` = ${ship.extras} + ${extraBonus}`:''})`]]){const box=document.createElement('div');box.className='section-box';box.innerHTML=`<h3>${title}</h3>`;const grid=document.createElement('div');grid.className='slot-grid';progress.shipLoadout[key].forEach((id,i)=>grid.appendChild(slotCard(`${title.split(' ')[0]} ${i+1}`,id,key,i)));box.appendChild(grid);left.appendChild(box);}
-  const inv=document.createElement('div');inv.className='section-box';inv.innerHTML='<h3>Inventário disponível</h3>';const grid=document.createElement('div');grid.className='inventory-grid';const entries=Object.entries(progress.inventory).filter(([id,q])=>q>0&&ITEMS[id]);if(!entries.length)grid.innerHTML='<div class="empty-state">Seu inventário de equipamentos está vazio. Compre itens na Loja.</div>';else entries.forEach(([id,q])=>grid.appendChild(inventoryCard(id,q)));inv.appendChild(grid);right.appendChild(inv);root.append(left,right);return root;
+function shipEquipmentSectionData(filter,ship,extraCap){
+  if(filter==='lasers')return {title:'LASERS',meta:`${progress.shipLoadout.lasers.filter(Boolean).length}/${ship.lasers} equipados`,key:'lasers',list:progress.shipLoadout.lasers,slotPrefix:'Laser'};
+  if(filter==='extras')return {title:'EXTRAS',meta:`${progress.shipLoadout.extras.filter(Boolean).length}/${extraCap} equipados`,key:'extras',list:progress.shipLoadout.extras,slotPrefix:'Extra'};
+  const gen=progress.shipLoadout.generators;
+  const subtype=filter==='shields'?'shield':'speed',name=filter==='shields'?'ESCUDOS':'MOTORES',prefix=filter==='shields'?'Escudo':'Motor';
+  const matching=gen.map((id,i)=>({id,i})).filter(x=>x.id&&ITEMS[x.id]?.subtype===subtype),empty=gen.map((id,i)=>({id,i})).filter(x=>!x.id);
+  return {title:name,meta:`${matching.length} equipados • ${empty.length} slots de gerador livres`,key:'generators',filtered:true,matching,empty,slotPrefix:prefix};
 }
+function buildShipEquipmentSection(filter,ship,extraCap){
+  const def=shipEquipmentSectionData(filter,ship,extraCap),grid=document.createElement('div');grid.className='slot-grid hangar-slot-grid';
+  if(def.filtered){
+    for(const x of def.matching)grid.appendChild(slotCard(`${def.slotPrefix} ${x.i+1}`,x.id,'generators',x.i));
+    for(const x of def.empty)grid.appendChild(slotCard(`Gerador ${x.i+1}`,null,'generators',x.i));
+  }else def.list.forEach((id,i)=>grid.appendChild(slotCard(`${def.slotPrefix} ${i+1}`,id,def.key,i)));
+  return hangarSection(def.title,def.meta,`ship:${filter}`,grid);
+}
+function renderHangarEquipment(){
+  loadHangarEquipmentPrefs();
+  const ship=SHIPS[progress.activeShipId],root=document.createElement('div');root.className='hangar-equipment-console';
+  const repairBot=activeRepairBot(),extraCap=shipExtraCapacity(),extraBonus=extraCap-ship.extras;
+  const summary=document.createElement('div');summary.className='summary-grid hangar-summary-strip';summary.innerHTML=`<div class="stat-card">Dano<strong>${fmt(player.laserDamage)}</strong></div><div class="stat-card">Escudo<strong>${fmt(player.maxShield)}</strong></div><div class="stat-card">Absorção<strong>${player.shieldAbsorption}%</strong></div><div class="stat-card">VEL<strong>${fmt(player.speed)}</strong></div><div class="stat-card">Extras<strong>${extraCap}${extraBonus?` (+${extraBonus})`:''}</strong></div><div class="stat-card">Reparo<strong>${repairBot?`+${fmt(repairBot.id==='repElite'?10000:5000)}/s`:'OFF'}</strong></div>`;root.appendChild(summary);
+  root.appendChild(hangarFilterBar('ship',['all','lasers','shields','engines','extras'],state.hangarEquipFilter));
+  const layout=document.createElement('div');layout.className='hangar-equipment-split';
+  const equipped=document.createElement('div');equipped.className='hangar-equipment-pane equipped-pane';equipped.innerHTML=`<div class="hangar-pane-title"><span>NAVE • EQUIPADOS</span><b>${ship.name}</b></div>`;
+  const filters=state.hangarEquipFilter==='all'?['lasers','shields','engines','extras']:[state.hangarEquipFilter];
+  for(const filter of filters)equipped.appendChild(buildShipEquipmentSection(filter,ship,extraCap));
+  const inventory=document.createElement('div');inventory.className='hangar-equipment-pane inventory-pane';inventory.innerHTML='<div class="hangar-pane-title"><span>INVENTÁRIO • DISPONÍVEIS</span><b>Equipar / vender</b></div>';
+  inventory.appendChild(hangarSection('EQUIPAMENTOS',HANGAR_FILTER_LABELS[state.hangarEquipFilter],`ship:inventory:${state.hangarEquipFilter}`,filteredInventoryGrid(state.hangarEquipFilter,'ship')));
+  layout.append(equipped,inventory);root.appendChild(layout);return root;
+}
+
 function renderHangarDrones(){
-  const root=document.createElement('div'),defs=designerCatalog().filter(d=>d.kind==='drone');
+  loadHangarEquipmentPrefs();
+  const root=document.createElement('div'),defs=designerCatalog().filter(d=>d.kind==='drone');root.className='hangar-drone-console';
   const summary=document.createElement('div');summary.className='section-box drone-designer-summary';
   const cards=defs.map(d=>{const owned=ownedDesignQty(d.design_id),equipped=equippedDesignCount(d.design_id),source=d.eligibility?.source||'EVENTO';const chance=d.design_id==='drone_fury'?'10%':d.design_id==='drone_aegis'?'10%':'EVENTO FUTURO';return `<div class="designer-summary-card ${d.rarity||'rare'}"><div class="designer-orb" style="--designer-glow:${d.visual?.glow||'#7edcff'};--designer-accent:${d.visual?.accent||'#fff'}"></div><div><b>${d.name}</b><small>${designerBonusSummary(d)}</small><span>${source} • ${chance} • Inventário ${owned} • Equipado ${equipped}/8</span></div></div>`;}).join('');
-  summary.innerHTML=`<h3>DESIGNERS DE DRONE • SETS 8/8</h3><div class="muted" style="font-size:12px;margin-bottom:10px">Cada drop entrega 1 cópia. Para ativar o bônus de conjunto, os 8 drones precisam usar o mesmo designer.</div><div class="designer-summary-grid">${cards||'<div class="muted">Sincronizando catálogo de designers...</div>'}</div>`;root.appendChild(summary);
-
-  const info=document.createElement('div');info.className='section-box';info.innerHTML=`<h3>Esquadrão de drones — ${progress.drones.length}/8</h3><div class="muted" style="font-size:12px">Halo: 1 slot • Nova: 2 slots. Designer altera visual e atributos sem consumir slot de equipamento.</div>`;root.appendChild(info);
-  const grid=document.createElement('div');grid.className='drone-grid designer-drone-grid';
-  if(!progress.drones.length){grid.innerHTML='<div class="empty-state">Você ainda não possui drones. Vá à Loja → Drones.</div>';}
-  progress.drones.forEach((d,idx)=>{const model=ITEMS[d.type],design=droneDesignFor(d.id),visual=design?.visual||{},c=document.createElement('div');c.className=`drone-card ${design?'has-designer':''} ${design?.rarity||''}`;if(design)c.style.setProperty('--designer-glow',visual.glow||'#7edcff');
-    c.innerHTML=`<div class="drone-designer-art-wrap"><img class="drone-art" src="${GAME_ASSETS.drones[d.type]}" alt="${model.name}" ${design?`style="filter:${visual.filter||'none'};"`:''}>${design?`<span class="designer-equipped-badge">${design.rarity==='mythic'?'MÍTICO':'RARO'} • ${design.name}</span>`:''}</div><div><span class="badge ${d.type==='iris'?'elite':''}">${d.type==='iris'?'ELITE':'COMUM'}</span><h3>${model.name} #${idx+1}</h3></div><div class="drone-stats">${model.slots} slot${model.slots>1?'s':''} • aceita laser ou gerador de escudo${design?`<br><b>${designerBonusSummary(design)}</b>`:''}</div>`;
-    const designerBox=document.createElement('div');designerBox.className='drone-designer-control';const label=document.createElement('label');label.textContent='DESIGNER';const sel=document.createElement('select');sel.className='designer-select';
-    const none=document.createElement('option');none.value='';none.textContent='SEM DESIGNER';sel.appendChild(none);
-    defs.forEach(def=>{const opt=document.createElement('option'),owned=ownedDesignQty(def.design_id),used=equippedDesignCount(def.design_id),current=design?.design_id===def.design_id;opt.value=def.design_id;opt.textContent=`${def.name} • ${owned}x${current?' • EQUIPADO':used>=owned?' • SEM CÓPIA LIVRE':''}`;opt.disabled=!current&&used>=owned;sel.appendChild(opt);});sel.value=design?.design_id||'';sel.disabled=!canChangeEquipment();sel.onchange=()=>equipDroneDesigner(d.id,sel.value||null);designerBox.append(label,sel);c.appendChild(designerBox);
-    const sg=document.createElement('div');sg.className='slot-grid';d.slots.forEach((id,i)=>sg.appendChild(slotCard(`Slot ${i+1}`,id,null,i,d.id)));c.appendChild(sg);const rm=document.createElement('button');rm.className='danger-btn';rm.textContent=`Vender drone • 50% (${fmt(itemSellValue(model))} ${model.currency==='uridium'?'STL':'CR'})`;rm.onclick=()=>sellDrone(d.id);c.appendChild(rm);grid.appendChild(c);});root.appendChild(grid);return root;
+  summary.innerHTML=`<h3>DESIGNERS DE DRONE • SETS 8/8</h3><div class="designer-summary-grid">${cards||'<div class="muted">Sincronizando catálogo...</div>'}</div>`;root.appendChild(summary);
+  root.appendChild(hangarFilterBar('drone',['all','lasers','shields'],state.hangarDroneFilter));
+  const layout=document.createElement('div');layout.className='hangar-equipment-split';
+  const equippedPane=document.createElement('div');equippedPane.className='hangar-equipment-pane equipped-pane';equippedPane.innerHTML=`<div class="hangar-pane-title"><span>DRONES • EQUIPADOS</span><b>${progress.drones.length}/8</b></div>`;
+  if(!progress.drones.length)equippedPane.innerHTML+='<div class="empty-state">Você ainda não possui drones.</div>';
+  progress.drones.forEach((d,idx)=>{
+    const model=ITEMS[d.type],design=droneDesignFor(d.id),visual=design?.visual||{},body=document.createElement('div');body.className='drone-equipment-body';
+    const top=document.createElement('div');top.className='drone-compact-head';top.innerHTML=`<div class="drone-mini-art"><img src="${GAME_ASSETS.drones[d.type]}" alt="${model.name}" ${design?`style="filter:${visual.filter||'none'}"`:''}></div><div><b>${model.name} #${idx+1}</b><small>${model.slots} slot${model.slots>1?'s':''}${design?` • ${design.name}`:''}</small></div>`;body.appendChild(top);
+    const designerBox=document.createElement('div');designerBox.className='drone-designer-control compact';const label=document.createElement('label');label.textContent='DESIGNER';const sel=document.createElement('select');sel.className='designer-select';const none=document.createElement('option');none.value='';none.textContent='SEM DESIGNER';sel.appendChild(none);defs.forEach(def=>{const opt=document.createElement('option'),owned=ownedDesignQty(def.design_id),used=equippedDesignCount(def.design_id),current=design?.design_id===def.design_id;opt.value=def.design_id;opt.textContent=`${def.name} • ${owned}x`;opt.disabled=!current&&used>=owned;sel.appendChild(opt);});sel.value=design?.design_id||'';sel.disabled=!canChangeEquipment();sel.onchange=()=>equipDroneDesigner(d.id,sel.value||null);designerBox.append(label,sel);body.appendChild(designerBox);
+    const sg=document.createElement('div');sg.className='slot-grid hangar-slot-grid';d.slots.forEach((id,i)=>{const item=id?ITEMS[id]:null,cat=equipmentCategory(item);if(state.hangarDroneFilter==='all'||!id||cat===state.hangarDroneFilter)sg.appendChild(slotCard(`Slot ${i+1}`,id,null,i,d.id));});body.appendChild(sg);
+    const rm=document.createElement('button');rm.className='danger-btn drone-sell-compact';rm.textContent=`Vender drone • 50%`;rm.onclick=()=>sellDrone(d.id);body.appendChild(rm);
+    equippedPane.appendChild(hangarSection(`${model.name} #${idx+1}`,`${d.slots.filter(Boolean).length}/${d.slots.length} slots`,`drone:${d.id}`,body));
+  });
+  const inv=document.createElement('div');inv.className='hangar-equipment-pane inventory-pane';inv.innerHTML='<div class="hangar-pane-title"><span>INVENTÁRIO • DRONES</span><b>Lasers / Escudos</b></div>';inv.appendChild(hangarSection('EQUIPAMENTOS',HANGAR_FILTER_LABELS[state.hangarDroneFilter],`drone:inventory:${state.hangarDroneFilter}`,filteredInventoryGrid(state.hangarDroneFilter,'drone',['lasers','shields'])));
+  layout.append(equippedPane,inv);root.appendChild(layout);return root;
 }
 
 function renderHangarPet(){const root=document.createElement('div');root.className='hangar-embedded-panel pet-hangar-panel';renderPet(root);return root;}
@@ -4360,7 +4470,7 @@ function renderHangarPilot(){
   const tree=document.createElement('div');tree.className='pilot-skill-tree';for(const [branch,meta] of Object.entries(PILOT_BRANCHES)){const col=document.createElement('section');col.className=`pilot-branch ${meta.className}`;col.innerHTML=`<div class="pilot-branch-title">${meta.label}</div>`;Object.values(PILOT_SKILLS).filter(skill=>skill.branch===branch).forEach(skill=>{const lv=pilotSkillLevel(skill.id),maxed=lv>=skill.max,req=pilotRequirementMet(skill),cost=maxed?0:pilotSkillCreditCost(skill,lv+1),card=document.createElement('article');card.className=`pilot-skill-node${maxed?' maxed':''}${!req?' locked':''}`;card.innerHTML=`<div class="pilot-skill-head"><b>${skill.name}</b><span>${lv}/${skill.max}</span></div><div class="pilot-skill-desc">${skill.desc}</div><div class="pilot-skill-bonus">ATUAL: <b>${pilotSkillBonusLabel(skill,lv)}</b>${!maxed?` • PRÓXIMO: <b>${pilotSkillBonusLabel(skill,lv+1)}</b>`:''}</div>${skill.requires?`<div class="pilot-skill-req">${req?'✓':'🔒'} Requer ${PILOT_SKILLS[skill.requires].name}</div>`:''}`;const b=document.createElement('button');b.className=maxed?'small-btn gold':'small-btn';b.disabled=maxed||!req||avail<=0||progress.profile.credits<cost;b.textContent=maxed?'MAX':`UP • 1 PP + ${fmt(cost)} CR`;b.onclick=()=>upgradePilotSkill(skill.id);card.appendChild(b);col.appendChild(card);});tree.appendChild(col);}root.appendChild(tree);return root;
 }
 function renderHangar(){
-  if(!progress)return;
+  if(!progress)return;loadHangarEquipmentPrefs();
   const tabs={ships:'NAVES',equipment:'EQUIPAMENTOS',drones:'DRONES',pet:'AUX-9',pilot:'PERFIL DE PILOTO'};
   renderTabs(ui.hangarTabs,tabs,state.hangarTab,id=>{state.hangarTab=id;renderHangar();});ui.hangarContent.innerHTML='';computeStats(true);
   const content=state.hangarTab==='ships'?renderHangarShips():state.hangarTab==='equipment'?renderHangarEquipment():state.hangarTab==='drones'?renderHangarDrones():state.hangarTab==='pet'?renderHangarPet():renderHangarPilot();
@@ -4404,21 +4514,19 @@ function renderPet(root=ui.petContent){
   Object.values(PET_GEARS).forEach(g=>{const owned=pet.gearsOwned[g.id],b=document.createElement('button');b.className=`pet-gear ${pet.activeGear===g.id?'active':''}`;const gearArt={guard:GAME_ASSETS.equipment.autoLaserCpu,box:GAME_ASSETS.equipment.ammoAutoBuyCpu,ore:GAME_ASSETS.equipment.rocketTurboCpu,repair:GAME_ASSETS.equipment.rep2,kami:GAME_ASSETS.equipment.autoRocketCpu}[g.id];b.innerHTML=`${gearArt?`<img class="pet-gear-art" src="${gearArt}" alt="">`:''}<b>${g.name}</b><small>${g.description}</small><em>${owned?'COMPRADO':'ELITE • '+fmt(g.cost)+' STL'}</em>`;b.onclick=()=>owned?(g.id==='kami'?triggerPetKamikaze():setPetGear(g.id)):buyPetGear(g.id);gearGrid.appendChild(b);});
   gears.appendChild(gearGrid);root.appendChild(gears);
 
-  const progression=document.createElement('div');progression.className='section-box pet-level-progression';progression.innerHTML=`<h3>PROGRESSÃO AUX-9 • NÍVEL ${pet.level}</h3><div class="pet-level-strip"><span>LASER <b>${petDef.laser}</b></span><span>ESCUDO <b>${petDef.shield}</b></span><span>MÓDULOS <b>${petDef.gear}</b></span><span>PROTOCOLOS <b>${petDef.protocol}</b></span><span>TIER <b>${petBonus.tier}</b></span></div><div class="muted">Sem combustível. Cada nível amplia capacidade e alterna bônus de dano/escudo; níveis 4, 8 e 20 liberam tiers superiores.</div>`;root.appendChild(progression);
-  for(const kind of ['laser','shield']){
-    const unlocked=kind==='laser'?pet.laserSlotsUnlocked:pet.shieldSlotsUnlocked,capacity=petSlotCapacity(kind,pet.level);
-    const box=document.createElement('div');box.className='section-box';box.innerHTML=`<h3>${kind==='laser'?'Armas':'Escudos de Suporte'} — ${unlocked}/${capacity} liberados</h3><div class="muted">${kind==='shield'?`Os geradores equipados aqui somam escudo diretamente à NAVE, como os drones. Suporte atual: +${fmt(petShieldSupport())} ESC.`:'Seu nível libera a capacidade máxima; os espaços adicionais são comprados separadamente.'}</div>`;
-    const grid=document.createElement('div');grid.className='pet-slot-grid';
+  const progression=document.createElement('div');progression.className='section-box pet-level-progression';progression.innerHTML=`<h3>PROGRESSÃO AUX-9 • NÍVEL ${pet.level}</h3><div class="pet-level-strip"><span>LASER <b>${petDef.laser}</b></span><span>ESCUDO <b>${petDef.shield}</b></span><span>MÓDULOS <b>${petDef.gear}</b></span><span>PROTOCOLOS <b>${petDef.protocol}</b></span><span>TIER <b>${petBonus.tier}</b></span></div><div class="muted">Sem combustível. O nível define a capacidade máxima de equipamento.</div>`;root.appendChild(progression);
+  loadHangarEquipmentPrefs();root.appendChild(hangarFilterBar('pet',['all','lasers','shields'],state.hangarPetFilter));
+  const equipmentLayout=document.createElement('div');equipmentLayout.className='hangar-equipment-split pet-equipment-split';
+  const equippedPane=document.createElement('div');equippedPane.className='hangar-equipment-pane equipped-pane';equippedPane.innerHTML=`<div class="hangar-pane-title"><span>AUX-9 • EQUIPADO</span><b>Suporte ESC +${fmt(petShieldSupport())}</b></div>`;
+  const kinds=state.hangarPetFilter==='all'?['laser','shield']:[state.hangarPetFilter==='lasers'?'laser':'shield'];
+  for(const kind of kinds){
+    const unlocked=kind==='laser'?pet.laserSlotsUnlocked:pet.shieldSlotsUnlocked,capacity=petSlotCapacity(kind,pet.level),grid=document.createElement('div');grid.className='pet-slot-grid hangar-slot-grid';
     for(let i=0;i<capacity;i++)grid.appendChild(i<unlocked?petEquipCard(kind,i):petLockedCard(kind,i));
-    box.appendChild(grid);root.appendChild(box);
+    const title=kind==='laser'?'LASERS':'ESCUDOS DE SUPORTE',meta=kind==='shield'?`${unlocked}/${capacity} liberados • +${fmt(petShieldSupport())} ESC na nave`:`${unlocked}/${capacity} liberados`;
+    equippedPane.appendChild(hangarSection(title,meta,`pet:${kind}`,grid));
   }
-
-  const inv=document.createElement('div');inv.className='section-box';inv.innerHTML='<h3>Equipamentos disponíveis no inventário</h3>';
-  const grid=document.createElement('div');grid.className='inventory-grid';
-  const entries=Object.entries(progress.inventory).filter(([id,q])=>q>0&&ITEMS[id]&&(ITEMS[id].type==='laser'||(ITEMS[id].type==='generator'&&ITEMS[id].subtype==='shield')));
-  if(!entries.length)grid.innerHTML='<div class="empty-state">Compre lasers ou geradores de escudo na Loja e eles aparecerão aqui.</div>';
-  else entries.forEach(([id,q])=>{const item=ITEMS[id],c=document.createElement('div');c.className='inventory-card';c.innerHTML=`${GAME_ASSETS.equipment[id]?`<img class="inventory-item-art" src="${GAME_ASSETS.equipment[id]}" alt="${item.name}">`:''}<b>${item.name}</b><div class="qty">Quantidade: ${q}</div><div class="muted">${item.description}</div>`;const actions=document.createElement('div');actions.className='inventory-actions';const b=document.createElement('button');b.className='ghost-btn';b.textContent=item.type==='laser'?'Equipar no AUX-9 (arma)':'Equipar no AUX-9 (escudo)';b.onclick=()=>equipPetItem(id,item.type==='laser'?'laser':'shield');actions.appendChild(b);const sell=document.createElement('button');sell.className='danger-btn sell-item-btn';sell.textContent=`Vender 50% • ${fmt(itemSellValue(item))} ${item.currency==='uridium'?'STL':'CR'}`;sell.onclick=()=>sellInventoryItem(id,1);actions.appendChild(sell);c.appendChild(actions);grid.appendChild(c);});
-  inv.appendChild(grid);root.appendChild(inv);
+  const inv=document.createElement('div');inv.className='hangar-equipment-pane inventory-pane';inv.innerHTML='<div class="hangar-pane-title"><span>INVENTÁRIO • AUX-9</span><b>Lasers / Escudos</b></div>';inv.appendChild(hangarSection('EQUIPAMENTOS',HANGAR_FILTER_LABELS[state.hangarPetFilter],`pet:inventory:${state.hangarPetFilter}`,filteredInventoryGrid(state.hangarPetFilter,'pet',['lasers','shields'])));
+  equipmentLayout.append(equippedPane,inv);root.appendChild(equipmentLayout);
 }
 function refreshPetViews(){
   renderPet();updatePetFloat();
