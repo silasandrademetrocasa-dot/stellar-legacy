@@ -1,3 +1,15 @@
+# V14.1.0 — ACCOUNT GUARD + PREMIUM AUTO-COMBAT
+
+- Login automático removido: cada entrada/reload exige login explícito.
+- Tokens não ficam mais persistidos em localStorage; sessão fica somente na aba durante o uso.
+- Save ganhou vínculo por `accountOwnerId`; cliente e servidor bloqueiam mistura entre contas.
+- Callsign deixou de ser aceito do save: a identidade pública vem do perfil autenticado do servidor.
+- Login não sobrescreve mais callsign do perfil com metadata antigo.
+- Renome de callsign passa por endpoint autenticado e valida duplicidade.
+- SQL V14.1 adiciona unicidade case-insensitive para callsigns e RPC segura de disponibilidade.
+- AUTO-COMBATE (selecionar próximo NPC e continuar laser) agora é benefício exclusivo de PREMIUM 30D ou PASSE MENSAL.
+- Segundo toque para atacar continua disponível a todos por ser comando manual.
+
 # V14.0.0 — EPIC COMBAT & GALAXY EVENTS
 
 - Novo Target Lock HUD para NPC, BOSS e PvP.

@@ -6,7 +6,7 @@
 <meta content="width=device-width,initial-scale=1,user-scalable=no" name="viewport"/>
 <meta content="#030816" name="theme-color"/>
 <title>Stellar Legacy</title>
-<link href="/style.css?v=14.0.0" rel="stylesheet"/>
+<link href="/style.css?v=14.1.0" rel="stylesheet"/>
 </head>
 <body>
 <div id="app">
@@ -541,7 +541,7 @@
       <section class="settings-section">
         <div class="settings-title"><div><b>COMBATE INTELIGENTE</b><small>Automação leve e controles rápidos sem tirar o controle do piloto.</small></div></div>
         <div class="combat-settings-grid">
-          <label><input type="checkbox" id="autoTargetToggle" checked/> Selecionar próximo NPC automaticamente</label>
+          <label class="premium-auto-combat-setting" id="premiumAutoCombatSetting"><input type="checkbox" id="autoTargetToggle" checked/> <span>Ataque automático • próximo NPC</span><em id="autoCombatAccessTag">PREMIUM / PASSE MENSAL</em></label>
           <label><input type="checkbox" id="tapAttackToggle" checked/> Segundo toque no alvo inicia o laser</label>
           <label><input type="checkbox" id="combatAlertsToggle" checked/> Alertas épicos de escudo, casco e PvP</label>
         </div>
@@ -726,6 +726,6 @@
   </div>
 </div>
 </div>
-<script src="/game.js?v=14.0.0" type="module"></script>
+<script src="/game.js?v=14.1.0" type="module"></script>
 </body>
 </html>

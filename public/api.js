@@ -102,7 +102,9 @@ function setSession(nextSession, user = null) {
   session = nextSession;
   currentUser = user;
   if (session?.game_session_id) sessionReplacementNotified = false;
-  localStorage.setItem(SESSION_KEY, JSON.stringify({ session, user: currentUser }));
+  // V14.1: tokens ficam somente na sessão da aba. Nunca persistimos login entre entradas no site.
+  try { sessionStorage.setItem(SESSION_KEY, JSON.stringify({ session, user: currentUser })); } catch {}
+  try { localStorage.removeItem(SESSION_KEY); } catch {}
 }
 
 function sessionFromAuth(body) {
@@ -214,7 +216,8 @@ export async function signIn({ email, password }) {
 export function signOutLocal() {
   session = null;
   currentUser = null;
-  localStorage.removeItem(SESSION_KEY);
+  try { sessionStorage.removeItem(SESSION_KEY); } catch {}
+  try { localStorage.removeItem(SESSION_KEY); } catch {}
 }
 
 async function refreshSession() {
@@ -256,7 +259,7 @@ async function authedSupabaseFetch(path, options = {}, retry = true) {
 }
 
 export async function restoreSession() {
-  const raw = localStorage.getItem(SESSION_KEY);
+  const raw = sessionStorage.getItem(SESSION_KEY);
   if (!raw) return null;
   try {
     const parsed = JSON.parse(raw);
@@ -307,23 +310,15 @@ export async function saveCloudSave(state) {
 
 
 export async function updateCallsign(callsign) {
-  const preferred = String(callsign || '').trim().slice(0, 24);
+  const preferred = String(callsign || '').trim().replace(/\s+/g, ' ').slice(0, 24);
   if (preferred.length < 3) throw new Error('O nome precisa ter pelo menos 3 caracteres.');
-  const user = await authedSupabaseFetch('/auth/v1/user', {
+  const body = await authedServerFetch('/api/account/callsign', {
     method: 'PUT',
-    body: JSON.stringify({ data: { callsign: preferred } }),
+    body: JSON.stringify({ callsign: preferred }),
   });
-  currentUser = {
-    id: user.id,
-    email: user.email,
-    callsign: user.user_metadata?.callsign || preferred,
-  };
+  if (!body?.user) throw new Error('Não foi possível confirmar o novo nome.');
+  currentUser = body.user;
   setSession(session, currentUser);
-  await authedSupabaseFetch('/rest/v1/profiles?on_conflict=id', {
-    method: 'POST',
-    headers: { Prefer: 'resolution=merge-duplicates,return=minimal' },
-    body: JSON.stringify({ id: currentUser.id, callsign: preferred, updated_at: new Date().toISOString() }),
-  });
   return currentUser;
 }
 

@@ -1,4 +1,4 @@
-# Stellar Legacy V14.0.0 — HUD DOCK SYSTEM
+# Stellar Legacy V14.1.0 — HUD DOCK SYSTEM
 
 # Stellar Legacy V13.5.0 — Clean UI + AUX-9 + Combat Audio
 
@@ -25,7 +25,7 @@ Atualização de interface aplicada sobre a base V13.1.0 WARFRONT, preservando a
 - `E`: habilidade da nave
 - `K`: Nova Burst do AUX-9
 - `W`: WARFRONT
-## V14.0.0 — HUD DOCK SYSTEM
+## V14.1.0 — HUD DOCK SYSTEM
 
 - Sequência do HUD: JOGADOR → NAVE → MISSÕES → AUX-9.
 - Topbar pode ser escondida sem deixar vão; cards sobem automaticamente.
@@ -41,5 +41,9 @@ Atualização de interface aplicada sobre a base V13.1.0 WARFRONT, preservando a
 - Perfil de Piloto atualiza imediatamente após compras e upgrades.
 
 
-## V14.0.0
+## V14.1.0
 Epic Combat & Galaxy Events: Target Lock, feedback de dano, eventos rotativos, comboio e Battle Maps por evento.
+
+
+## V14.1 ACCOUNT GUARD
+Antes de liberar novos cadastros/renomes, execute `sql/V14_1_ACCOUNT_GUARD.sql` uma vez no Supabase. O jogo passa a exigir login manual, vincula saves à conta autenticada e bloqueia callsigns duplicados. AUTO-COMBATE é exclusivo para PREMIUM 30D ou PASSE MENSAL.

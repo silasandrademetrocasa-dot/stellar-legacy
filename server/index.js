@@ -112,17 +112,64 @@ async function requireUser(req, res, next) {
   }
 }
 
+function normalizeCallsign(value = '') {
+  return String(value || '').trim().replace(/\s+/g, ' ').slice(0, 24);
+}
+
+function fallbackCallsign(user) {
+  const suffix = String(user?.id || randomUUID()).replace(/-/g, '').slice(0, 6).toUpperCase();
+  return `Pilot-${suffix}`.slice(0, 24);
+}
+
+async function callsignAvailable(sb, callsign, excludeUserId = null) {
+  const preferred = normalizeCallsign(callsign);
+  if (!preferred) return false;
+  // V14.1 RPC é SECURITY DEFINER e enxerga todos os perfis sem expor dados privados.
+  const { data, error } = await sb.rpc('callsign_available_v141', {
+    p_callsign: preferred,
+    p_exclude_user: excludeUserId || null,
+  });
+  if (!error) return Boolean(data);
+  // Compatibilidade durante a janela entre deploy e execução da migration.
+  const fallback = await sb.from('profiles').select('id').ilike('callsign', preferred).limit(2);
+  if (!fallback.error) return !(fallback.data || []).some(row => !excludeUserId || row.id !== excludeUserId);
+  return null;
+}
+
 async function ensureProfile(sb, user, callsign = '') {
-  const preferred = (callsign || user.user_metadata?.callsign || user.email?.split('@')[0] || 'Pilot').slice(0, 24);
-  const { error } = await sb.from('profiles').upsert({
+  const { data: existing, error: readError } = await sb.from('profiles').select('id,callsign').eq('id', user.id).maybeSingle();
+  if (readError) throw new Error(`Falha ao carregar perfil: ${readError.message}`);
+  if (existing?.callsign) return normalizeCallsign(existing.callsign);
+
+  let preferred = normalizeCallsign(callsign || user.user_metadata?.callsign || user.email?.split('@')[0] || 'Pilot');
+  if (preferred.length < 3) preferred = fallbackCallsign(user);
+  const available = await callsignAvailable(sb, preferred, user.id);
+  if (available === false) preferred = fallbackCallsign(user);
+
+  const { data: created, error } = await sb.from('profiles').insert({
     id: user.id,
     callsign: preferred,
     updated_at: new Date().toISOString(),
-  }, { onConflict: 'id' });
-  if (error) console.warn('profile upsert:', error.message);
+  }).select('callsign').single();
+  if (error) {
+    // Em caso de corrida na reserva de nome, cria identidade técnica única para não bloquear o login.
+    if (String(error.code) === '23505' || /callsign|duplicate|unique/i.test(String(error.message || ''))) {
+      preferred = fallbackCallsign(user);
+      const retry = await sb.from('profiles').insert({ id: user.id, callsign: preferred, updated_at: new Date().toISOString() }).select('callsign').single();
+      if (retry.error) throw new Error(`Falha ao criar perfil seguro: ${retry.error.message}`);
+      return normalizeCallsign(retry.data?.callsign || preferred);
+    }
+    throw new Error(`Falha ao criar perfil: ${error.message}`);
+  }
+  return normalizeCallsign(created?.callsign || preferred);
 }
 
-app.get('/health', (req, res) => res.json({ ok: true, game: 'Stellar Legacy', version: '13.6.0' }));
+async function accountUser(sb, user, preferred = '') {
+  const callsign = await ensureProfile(sb, user, preferred);
+  return { id: user.id, email: user.email, callsign };
+}
+
+app.get('/health', (req, res) => res.json({ ok: true, game: 'Stellar Legacy', version: '14.1.0' }));
 
 
 app.get('/api/config', (req, res) => {
@@ -138,10 +185,10 @@ app.get('/api/config', (req, res) => {
 
 app.get('/api/meta', (req, res) => res.json({
   name: 'Stellar Legacy',
-  version: '13.6.0',
+  version: '14.1.0',
   authReady: Boolean(SUPABASE_URL && SUPABASE_KEY),
   diagnostics: configStatus(),
-  features: ['login', 'cloud_save', 'factions', 'safe_zone', 'shop', 'owned_ships', 'equipment_slots', 'inventory', 'drones', 'ammo', 'rockets', 'expanded_expedition_maps', 'cargo_hold', 'ore_trading', 'npc_cargo_boxes', 'npc_respawn', 'minimap_navigation', 'waypoints', 'landmark_discovery', 'combat_fx', 'pet_modules', 'auto_buy_cpu', 'v8_asset_identity', 'mission_control_v93', 'mission_acceptance_tracking', 'expanded_enemy_density', 'online_player_presence', 'real_player_auction', 'rank_nameplates_v12', 'clans_v12', 'clan_vault_v12', 'premium_shop_v12', 'battle_pass_paid_v12', 'premium_subscription_v12', 'clan_daily_economy_v12', 'portal_neutral_zone_v12', 'base_only_equipment_v12', 'single_session_v1214'],
+  features: ['login', 'cloud_save', 'factions', 'safe_zone', 'shop', 'owned_ships', 'equipment_slots', 'inventory', 'drones', 'ammo', 'rockets', 'expanded_expedition_maps', 'cargo_hold', 'ore_trading', 'npc_cargo_boxes', 'npc_respawn', 'minimap_navigation', 'waypoints', 'landmark_discovery', 'combat_fx', 'pet_modules', 'auto_buy_cpu', 'v8_asset_identity', 'mission_control_v93', 'mission_acceptance_tracking', 'expanded_enemy_density', 'online_player_presence', 'real_player_auction', 'rank_nameplates_v12', 'clans_v12', 'clan_vault_v12', 'premium_shop_v12', 'battle_pass_paid_v12', 'premium_subscription_v12', 'clan_daily_economy_v12', 'portal_neutral_zone_v12', 'base_only_equipment_v12', 'single_session_v1214', 'manual_login_v141', 'account_bound_save_v141', 'unique_callsign_v141', 'premium_auto_combat_v141'],
 }));
 
 app.get('/api/diagnostics', asyncRoute(async (req, res) => {
@@ -176,27 +223,31 @@ app.get('/api/diagnostics', asyncRoute(async (req, res) => {
 app.post('/api/auth/signup', asyncRoute(async (req, res) => {
   const { email, password, callsign } = req.body || {};
   if (!email || !password || !callsign) return res.status(400).json({ error: 'Informe callsign, e-mail e senha.' });
-  if (String(callsign).trim().length < 3) return res.status(400).json({ error: 'O callsign precisa ter pelo menos 3 caracteres.' });
+  const preferredCallsign = normalizeCallsign(callsign);
+  if (preferredCallsign.length < 3) return res.status(400).json({ error: 'O callsign precisa ter pelo menos 3 caracteres.' });
   if (password.length < 6) return res.status(400).json({ error: 'A senha precisa ter pelo menos 6 caracteres.' });
   const sb = supabaseBase();
   if (!sb) return res.status(503).json({ error: 'Supabase não configurado no Render.', diagnostics: configStatus() });
+  const available = await callsignAvailable(sb, preferredCallsign);
+  if (available === false) return res.status(409).json({ error: 'Esse nome de piloto já está em uso. Escolha outro.', code: 'CALLSIGN_TAKEN' });
 
   const { data, error } = await sb.auth.signUp({
     email: String(email).trim().toLowerCase(),
     password,
-    options: { data: { callsign: String(callsign).trim().slice(0, 24) } },
+    options: { data: { callsign: preferredCallsign } },
   });
   if (error) return res.status(400).json({ error: error.message });
 
   let gameSession = null;
   if (data.session && data.user) {
     const authed = supabaseForToken(data.session.access_token);
-    await ensureProfile(authed, data.user, callsign);
+    const securedCallsign = await ensureProfile(authed, data.user, preferredCallsign);
+    data.user.user_metadata = { ...(data.user.user_metadata || {}), callsign: securedCallsign };
     gameSession = await registerGameSession(authed, req);
   }
 
   res.json({
-    user: data.user ? { id: data.user.id, email: data.user.email, callsign: data.user.user_metadata?.callsign || callsign } : null,
+    user: data.user ? { id: data.user.id, email: data.user.email, callsign: data.user.user_metadata?.callsign || preferredCallsign } : null,
     session: data.session ? {
       access_token: data.session.access_token,
       refresh_token: data.session.refresh_token,
@@ -215,10 +266,10 @@ app.post('/api/auth/login', asyncRoute(async (req, res) => {
   const { data, error } = await sb.auth.signInWithPassword({ email: String(email).trim().toLowerCase(), password });
   if (error || !data.session) return res.status(401).json({ error: error?.message || 'Login inválido.' });
   const authed = supabaseForToken(data.session.access_token);
-  await ensureProfile(authed, data.user);
+  const securedUser = await accountUser(authed, data.user);
   const gameSession = await registerGameSession(authed, req);
   res.json({
-    user: { id: data.user.id, email: data.user.email, callsign: data.user.user_metadata?.callsign || data.user.email?.split('@')[0] || 'Pilot' },
+    user: securedUser,
     session: {
       access_token: data.session.access_token,
       refresh_token: data.session.refresh_token,
@@ -244,8 +295,9 @@ app.post('/api/auth/refresh', asyncRoute(async (req, res) => {
   });
   if (sessionError) return res.status(503).json({ error: `Falha ao validar sessão do jogo: ${sessionError.message}` });
   if (!sessionState?.valid) return res.status(409).json({ error: 'Sua conta foi acessada em outro dispositivo.', code: 'SESSION_REPLACED' });
+  const securedUser = await accountUser(authed, data.user);
   res.json({
-    user: { id: data.user.id, email: data.user.email, callsign: data.user.user_metadata?.callsign || data.user.email?.split('@')[0] || 'Pilot' },
+    user: securedUser,
     session: {
       access_token: data.session.access_token,
       refresh_token: data.session.refresh_token,
@@ -266,8 +318,31 @@ app.post('/api/auth/logout', requireUser, asyncRoute(async (req, res) => {
 }));
 
 app.get('/api/auth/me', requireUser, asyncRoute(async (req, res) => {
-  await ensureProfile(req.sb, req.user);
-  res.json({ user: { id: req.user.id, email: req.user.email, callsign: req.user.user_metadata?.callsign || req.user.email?.split('@')[0] || 'Pilot' } });
+  const user = await accountUser(req.sb, req.user);
+  res.json({ user });
+}));
+
+app.put('/api/account/callsign', requireUser, asyncRoute(async (req, res) => {
+  const preferred = normalizeCallsign(req.body?.callsign);
+  if (preferred.length < 3) return res.status(400).json({ error: 'O nome precisa ter pelo menos 3 caracteres.' });
+  const available = await callsignAvailable(req.sb, preferred, req.user.id);
+  if (available === false) return res.status(409).json({ error: 'Esse nome de piloto já está em uso. Escolha outro.', code: 'CALLSIGN_TAKEN' });
+
+  const { error: profileError } = await req.sb.from('profiles').update({
+    callsign: preferred,
+    updated_at: new Date().toISOString(),
+  }).eq('id', req.user.id);
+  if (profileError) {
+    if (String(profileError.code) === '23505' || /callsign|duplicate|unique/i.test(String(profileError.message || ''))) {
+      return res.status(409).json({ error: 'Esse nome de piloto já está em uso. Escolha outro.', code: 'CALLSIGN_TAKEN' });
+    }
+    return res.status(400).json({ error: profileError.message });
+  }
+
+  // Mantém o metadata sincronizado, mas o perfil é a fonte de verdade da identidade pública.
+  const { error: authError } = await req.sb.auth.updateUser({ data: { callsign: preferred } });
+  if (authError) console.warn('callsign auth metadata:', authError.message);
+  res.json({ user: { id: req.user.id, email: req.user.email, callsign: preferred } });
 }));
 
 app.get('/api/save', requireUser, asyncRoute(async (req, res) => {
@@ -279,6 +354,17 @@ app.get('/api/save', requireUser, asyncRoute(async (req, res) => {
 app.put('/api/save', requireUser, asyncRoute(async (req, res) => {
   let state = req.body?.state;
   if (!state || typeof state !== 'object') return res.status(400).json({ error: 'Save inválido.' });
+  const claimedOwner = String(state.accountOwnerId || '');
+  if (claimedOwner && claimedOwner !== req.user.id) {
+    return res.status(409).json({ error: 'SAVE BLOQUEADO: os dados pertencem a outra conta.', code: 'SAVE_OWNER_MISMATCH' });
+  }
+  const securedCallsign = await ensureProfile(req.sb, req.user);
+  state = {
+    ...state,
+    accountOwnerId: req.user.id,
+    accountOwnerEmail: req.user.email || null,
+    profile: { ...(state.profile || {}), callsign: securedCallsign },
+  };
 
   // V12: a coleta diária do clã é autoridade do servidor. Se um navegador ficou
   // aberto durante o reset, ele não pode sobrescrever a cobrança com um save antigo.
@@ -305,7 +391,7 @@ app.put('/api/save', requireUser, asyncRoute(async (req, res) => {
   const profile = state.profile || {};
   await req.sb.from('profiles').upsert({
     id: req.user.id,
-    callsign: String(profile.callsign || req.user.user_metadata?.callsign || 'Pilot').slice(0, 24),
+    callsign: securedCallsign,
     faction: profile.faction || null,
     level: Number(profile.level || 1),
     xp: Number(profile.xp || 0),
@@ -337,6 +423,6 @@ app.use((err, req, res, next) => {
 
 const port = process.env.PORT || 3000;
 app.listen(port, () => {
-  console.log(`Stellar Legacy V13.6.0 :${port}`);
+  console.log(`Stellar Legacy V14.1.0 :${port}`);
   console.log('Supabase config:', configStatus());
 });

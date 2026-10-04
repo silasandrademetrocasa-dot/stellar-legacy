@@ -1,6 +1,6 @@
-import { FACTIONS, SHIPS, ITEMS, LASER_AMMO, ROCKETS, NPC_TYPES, MAPS, RESOURCES } from './data.js?v=14.0.0';
-import { GAME_ASSETS } from './assets/v8/manifest.js?v=14.0.0';
-import { signUp, signIn, requestPasswordReset, restorePasswordRecoveryFromUrl, restoreSession, signOutLocal, checkGameSession, endGameSession, getUser, loadCloudSave, saveCloudSave, updateCallsign, updatePassword, loadRankings, loadAuctionBids, saveAuctionBidOnline, markAuctionBidStatusOnline, loadAuctionMarket, upsertPlayerPresenceOnline, loadMapPresenceOnline, removePlayerPresenceOnline, queuePvpAttackOnline, consumePvpDamageEventsOnline, syncArenaProfileOnline, loadArenaState, loadArenaDailyRewardStatus, claimArenaDailyReward, loadArenaOpponents, loadArenaHistory, arenaAttackOnline, listClansOnline, loadMyClanOnline, createClanOnline, joinClanOnline, leaveClanOnline, transferClanCreditsOnline, claimClanCreditGrantsOnline, recordClanAlienKillOnline, getPremiumShopOnline, testPurchasePremiumOnline, loadWarfrontStateOnline, hitWorldBossOnline, claimWorldBossRewardOnline, declareClanWarOnline, recordClanWarScoreOnline } from './api.js?v=14.0.0';
+import { FACTIONS, SHIPS, ITEMS, LASER_AMMO, ROCKETS, NPC_TYPES, MAPS, RESOURCES } from './data.js?v=14.1.0';
+import { GAME_ASSETS } from './assets/v8/manifest.js?v=14.1.0';
+import { signUp, signIn, requestPasswordReset, restorePasswordRecoveryFromUrl, restoreSession, signOutLocal, checkGameSession, endGameSession, getUser, loadCloudSave, saveCloudSave, updateCallsign, updatePassword, loadRankings, loadAuctionBids, saveAuctionBidOnline, markAuctionBidStatusOnline, loadAuctionMarket, upsertPlayerPresenceOnline, loadMapPresenceOnline, removePlayerPresenceOnline, queuePvpAttackOnline, consumePvpDamageEventsOnline, syncArenaProfileOnline, loadArenaState, loadArenaDailyRewardStatus, claimArenaDailyReward, loadArenaOpponents, loadArenaHistory, arenaAttackOnline, listClansOnline, loadMyClanOnline, createClanOnline, joinClanOnline, leaveClanOnline, transferClanCreditsOnline, claimClanCreditGrantsOnline, recordClanAlienKillOnline, getPremiumShopOnline, testPurchasePremiumOnline, loadWarfrontStateOnline, hitWorldBossOnline, claimWorldBossRewardOnline, declareClanWarOnline, recordClanWarScoreOnline } from './api.js?v=14.1.0';
 
 const canvas = document.querySelector('#game');
 const ctx = canvas.getContext('2d');
@@ -176,7 +176,7 @@ const ui = {
   auctionBtn: $('#auctionBtn'), auctionTopClock: $('#auctionTopClock'), auctionModal: $('#auctionModal'), closeAuction: $('#closeAuction'), auctionClock: $('#auctionClock'), auctionCredits: $('#auctionCredits'), auctionEscrow: $('#auctionEscrow'), auctionGrid: $('#auctionGrid'), auctionHistory: $('#auctionHistory'),
   arenaBtn: $('#arenaBtn'), arenaTopCount: $('#arenaTopCount'), arenaModal: $('#arenaModal'), closeArena: $('#closeArena'), arenaRefresh: $('#arenaRefresh'), arenaAttacksLeft: $('#arenaAttacksLeft'), arenaRating: $('#arenaRating'), arenaWins: $('#arenaWins'), arenaLosses: $('#arenaLosses'), arenaPower: $('#arenaPower'), arenaDailyReward: $('#arenaDailyReward'), arenaRewardLeague: $('#arenaRewardLeague'), arenaRewardRank: $('#arenaRewardRank'), arenaRewardBonus: $('#arenaRewardBonus'), arenaRewardProgress: $('#arenaRewardProgress'), arenaRewardItems: $('#arenaRewardItems'), arenaRewardClaim: $('#arenaRewardClaim'), arenaRewardFoot: $('#arenaRewardFoot'), arenaOpponents: $('#arenaOpponents'), arenaHistory: $('#arenaHistory'), arenaResult: $('#arenaResult'), arenaBattleStage: $('#arenaBattleStage'), arenaBattleStatus: $('#arenaBattleStatus'), arenaBattleTimer: $('#arenaBattleTimer'), arenaBattleSkip: $('#arenaBattleSkip'), arenaBattleField: $('#arenaBattleField'), arenaFighterAttacker: $('#arenaFighterAttacker'), arenaFighterDefender: $('#arenaFighterDefender'), arenaAttackerName: $('#arenaAttackerName'), arenaDefenderName: $('#arenaDefenderName'), arenaAttackerShip: $('#arenaAttackerShip'), arenaDefenderShip: $('#arenaDefenderShip'), arenaAttackerShieldBar: $('#arenaAttackerShieldBar'), arenaDefenderShieldBar: $('#arenaDefenderShieldBar'), arenaAttackerHpBar: $('#arenaAttackerHpBar'), arenaDefenderHpBar: $('#arenaDefenderHpBar'), arenaAttackerShieldText: $('#arenaAttackerShieldText'), arenaDefenderShieldText: $('#arenaDefenderShieldText'), arenaAttackerHpText: $('#arenaAttackerHpText'), arenaDefenderHpText: $('#arenaDefenderHpText'), arenaBattleRound: $('#arenaBattleRound'), arenaProjectileLayer: $('#arenaProjectileLayer'), arenaBattleFeed: $('#arenaBattleFeed'), arenaBattleAnalysis: $('#arenaBattleAnalysis'),
   clanBtn: $('#clanBtn'), clanTopTag: $('#clanTopTag'), clanModal: $('#clanModal'), closeClan: $('#closeClan'), clanRefresh: $('#clanRefresh'), clanContent: $('#clanContent'),
-  warfrontBtn: $('#warfrontBtn'), warfrontTopStatus: $('#warfrontTopStatus'), warfrontModal: $('#warfrontModal'), closeWarfront: $('#closeWarfront'), warfrontRefresh: $('#warfrontRefresh'), warfrontContent: $('#warfrontContent'), galaxyEventBtn: $('#galaxyEventBtn'), galaxyEventTopStatus: $('#galaxyEventTopStatus'), galaxyEventModal: $('#galaxyEventModal'), closeGalaxyEvent: $('#closeGalaxyEvent'), galaxyEventContent: $('#galaxyEventContent'), autoTargetToggle: $('#autoTargetToggle'), tapAttackToggle: $('#tapAttackToggle'), combatAlertsToggle: $('#combatAlertsToggle'),
+  warfrontBtn: $('#warfrontBtn'), warfrontTopStatus: $('#warfrontTopStatus'), warfrontModal: $('#warfrontModal'), closeWarfront: $('#closeWarfront'), warfrontRefresh: $('#warfrontRefresh'), warfrontContent: $('#warfrontContent'), galaxyEventBtn: $('#galaxyEventBtn'), galaxyEventTopStatus: $('#galaxyEventTopStatus'), galaxyEventModal: $('#galaxyEventModal'), closeGalaxyEvent: $('#closeGalaxyEvent'), galaxyEventContent: $('#galaxyEventContent'), autoTargetToggle: $('#autoTargetToggle'), tapAttackToggle: $('#tapAttackToggle'), combatAlertsToggle: $('#combatAlertsToggle'), premiumAutoCombatSetting: $('#premiumAutoCombatSetting'), autoCombatAccessTag: $('#autoCombatAccessTag'),
   premiumBtn: $('#premiumBtn'), premiumTopStatus: $('#premiumTopStatus'), premiumModal: $('#premiumModal'), closePremium: $('#closePremium'), premiumModeChip: $('#premiumModeChip'), premiumBenefits: $('#premiumBenefits'), premiumProductGrid: $('#premiumProductGrid'),
   saleConfirmModal: $('#saleConfirmModal'), saleConfirmEyebrow: $('#saleConfirmEyebrow'), saleConfirmTitle: $('#saleConfirmTitle'), saleConfirmItem: $('#saleConfirmItem'), saleConfirmCopy: $('#saleConfirmCopy'), saleConfirmValueLabel: $('#saleConfirmValueLabel'), saleConfirmValue: $('#saleConfirmValue'), saleConfirmCancel: $('#saleConfirmCancel'), saleConfirmAccept: $('#saleConfirmAccept'),
   shopBtn: $('#shopBtn'), shopModal: $('#shopModal'), closeShop: $('#closeShop'), shopTabs: $('#shopTabs'), shopGrid: $('#shopGrid'), shopCredits: $('#shopCredits'), shopStellarium: $('#shopStellarium'),
@@ -213,10 +213,11 @@ const premiumRuntime={state:null,busy:false,lastAt:0};
 function premiumActive(){return !!premiumRuntime.state?.premium_active;}
 function premiumPassActive(){return !!premiumRuntime.state?.battle_pass_active;}
 function premiumCanPurchase(){return !!premiumRuntime.state?.can_purchase;}
+function premiumAutoCombatAccess(){return premiumActive()||premiumPassActive();}
 function premiumElitePrice(price,currency){const p=Math.max(0,Math.round(Number(price)||0));return currency==='uridium'&&premiumActive()?Math.max(1,Math.floor(p*.95)):p;}
 function alphaSpinUnitCost(){const base=galaxyGateDef().spinCost;return premiumActive()?Math.max(1,Math.floor(base*.90)):base;}
 function updatePremiumBadge(){if(!ui.premiumTopStatus)return;ui.premiumTopStatus.textContent=premiumActive()?'ATIVO':premiumPassActive()?'PASSE':'LOJA';ui.premiumBtn?.classList.toggle('gold',premiumActive()||premiumPassActive());}
-async function refreshPremiumState(force=false){if(!authenticated)return premiumRuntime.state;if(!force&&premiumRuntime.state&&Date.now()-premiumRuntime.lastAt<30000)return premiumRuntime.state;if(premiumRuntime.busy)return premiumRuntime.state;premiumRuntime.busy=true;try{premiumRuntime.state=await getPremiumShopOnline();premiumRuntime.lastAt=Date.now();updatePremiumBadge();return premiumRuntime.state;}catch(e){console.warn('premium state',e);return premiumRuntime.state;}finally{premiumRuntime.busy=false;}}
+async function refreshPremiumState(force=false){if(!authenticated)return premiumRuntime.state;if(!force&&premiumRuntime.state&&Date.now()-premiumRuntime.lastAt<30000)return premiumRuntime.state;if(premiumRuntime.busy)return premiumRuntime.state;premiumRuntime.busy=true;try{premiumRuntime.state=await getPremiumShopOnline();premiumRuntime.lastAt=Date.now();updatePremiumBadge();renderSettings();return premiumRuntime.state;}catch(e){console.warn('premium state',e);return premiumRuntime.state;}finally{premiumRuntime.busy=false;}}
 
 // ===================== V10 PILOT BIO =====================
 const PILOT_POINT_MAX=50;
@@ -1229,6 +1230,8 @@ function freshSave(factionId) {
   loadout.lasers[0] = 'lf1';
   loadout.generators[0] = 'sg3na01';
   return {
+    accountOwnerId:getUser()?.id||null,
+    accountOwnerEmail:getUser()?.email||null,
     profile: { callsign:getUser()?.callsign || getUser()?.email?.split('@')[0] || 'Pilot', faction:factionId, level:1, xp:0, xpModelV101:true, credits:20000, uridium:0, aliensKilled:0, ggCompleted:0 },
     activeShipId: 'phoenix',
     ownedShips: ['phoenix'],
@@ -1436,7 +1439,10 @@ document.body.dataset.quality=qualityMode;
   if(ui.audioEnabledToggle)ui.audioEnabledToggle.checked=audioEnabled;
   if(ui.audioVolumeRange)ui.audioVolumeRange.value=String(Math.round(audioVolume*100));
   if(ui.audioVolumeValue)ui.audioVolumeValue.textContent=`${Math.round(audioVolume*100)}%`;
-  if(ui.autoTargetToggle)ui.autoTargetToggle.checked=combatPrefs.autoTarget!==false;
+  const autoCombatUnlocked=premiumAutoCombatAccess();
+  if(ui.autoTargetToggle){ui.autoTargetToggle.checked=autoCombatUnlocked&&combatPrefs.autoTarget!==false;ui.autoTargetToggle.disabled=!autoCombatUnlocked;}
+  if(ui.premiumAutoCombatSetting){ui.premiumAutoCombatSetting.classList.toggle('locked',!autoCombatUnlocked);ui.premiumAutoCombatSetting.classList.toggle('unlocked',autoCombatUnlocked);}
+  if(ui.autoCombatAccessTag)ui.autoCombatAccessTag.textContent=autoCombatUnlocked?(premiumActive()?'PREMIUM ATIVO':'PASSE ATIVO'):'PREMIUM / PASSE MENSAL';
   if(ui.tapAttackToggle)ui.tapAttackToggle.checked=combatPrefs.tapAttack!==false;
   if(ui.combatAlertsToggle)ui.combatAlertsToggle.checked=combatPrefs.alerts!==false;
   ui.hudSettingsGrid?.querySelectorAll('[data-hud-key]').forEach(input=>input.checked=hudVisibility[input.dataset.hudKey]!==false);
@@ -1720,7 +1726,7 @@ function combatCritical(base,{chance=.065,mult=1.55}={}){const critical=Math.ran
 function setCombatAlert(text,kind='combat',seconds=1.8){if(!combatPrefs.alerts)return;state.combatAlertText=text;state.combatAlertKind=kind;state.combatAlertUntil=nowSec()+seconds;if(kind==='danger'||kind==='shield')playSfx('warning');}
 function nearestCombatTarget(excludeId=null){const candidates=state.enemies.filter(e=>e.hp>0&&e.id!==excludeId&&enemyDistance(e)<=state.radarRange);candidates.sort((a,b)=>enemyDistance(a)-enemyDistance(b));return candidates[0]||null;}
 function selectCombatTarget(target,{silent=false}={}){if(!target||target.hp<=0)return false;state.target=target;state.pointerNavActive=false;if(!silent){playSfx('target');pushActivity(`${target.isPlayer?'PVP':'Alvo selecionado'} • ${target.callsign||target.name}`,'combat');}updateTargetLockHud();return true;}
-function autoAcquireNextTarget(excludeId=null){if(!combatPrefs.autoTarget||!progress||state.jumping)return null;const next=nearestCombatTarget(excludeId);if(next){selectCombatTarget(next,{silent:true});if(autoLaserEnabled())player.laserFiring=true;return next;}return null;}
+function autoAcquireNextTarget(excludeId=null){if(!combatPrefs.autoTarget||!premiumAutoCombatAccess()||!progress||state.jumping)return null;const next=nearestCombatTarget(excludeId);if(next){selectCombatTarget(next,{silent:true});player.laserFiring=true;setCombatAlert('AUTO-COMBATE • NOVO ALVO','ability',1.0);return next;}return null;}
 function updateTargetLockHud(){const t=state.target&&state.target.hp>0?state.target:null;if(!ui.targetLockHud)return;ui.targetLockHud.classList.toggle('hidden',!t);if(!t)return;const name=t.callsign||t.name||'ALVO',hp=Math.max(0,Number(t.hp)||0),maxHp=Math.max(1,Number(t.maxHp)||1),shield=Math.max(0,Number(t.shield)||0),maxShield=Math.max(1,Number(t.maxShield)||1),d=Math.round(enemyDistance(t));ui.targetLockName.textContent=name.toUpperCase();ui.targetLockType.textContent=t.isPlayer?'PVP':t.worldBoss?'WORLD BOSS':t.eventNpc?'EVENTO':String(t.type||'NPC').startsWith('boss')?'BOSS':'NPC';ui.targetLockDistance.textContent=`${fmt(d)}u`;ui.targetLockThreat.textContent=t.isPlayer?'PILOTO HOSTIL':t.worldBoss?'AMEAÇA GLOBAL':t.eventNpc?'ANOMALIA RIFT':d<=playerLaserRange()?'ALCANCE LASER':'FORA DO LASER';ui.targetLockHpFill.style.width=`${Math.max(0,Math.min(100,hp/maxHp*100))}%`;ui.targetLockHpText.textContent=`${fmt(hp)} / ${fmt(maxHp)}`;ui.targetLockShieldFill.style.width=`${Math.max(0,Math.min(100,shield/maxShield*100))}%`;ui.targetLockShieldText.textContent=`${fmt(shield)} / ${fmt(maxShield)}`;ui.targetLockHud.classList.toggle('boss',!t.isPlayer&&String(t.type||'').startsWith('boss'));ui.targetLockHud.classList.toggle('pvp',!!t.isPlayer);}
 function updateCombatStateHud(){if(!ui.combatStateHud||!progress)return;const now=nowSec(),hpRatio=player.hp/Math.max(1,player.maxHp),hostiles=[...onlineWorld.players.values()].filter(rp=>onlinePlayerEnemy(rp)&&Math.hypot(rp.x-player.x,rp.y-player.y)<=state.radarRange).length,combat=player.laserFiring||now-state.lastPlayerDamageAt<5||state.enemies.some(e=>e.hp>0&&now-(e.lastAttackPlayerAt||-99)<4);let text='',meta='',kind='';if(state.combatAlertUntil>now){text=state.combatAlertText;kind=state.combatAlertKind;meta=hostiles?`PVP ${hostiles} • ALERTA`:'ALERTA TÁTICO';}else if(hpRatio<=.25){text='CASCO CRÍTICO';meta=`HP ${Math.round(hpRatio*100)}%`;kind='danger';}else if(combat){text='EM COMBATE';meta=hostiles?`PVP ${hostiles} • ${state.target?fmt(enemyDistance(state.target))+'u':'SEM LOCK'}`:(state.target?`${state.target.name||'ALVO'} • ${fmt(enemyDistance(state.target))}u`:'HOSTIL DETECTADO');kind='combat';}else if(hostiles){text='PVP NO RADAR';meta=`${hostiles} piloto(s) hostil(is)`;kind='pvp';}ui.combatStateHud.classList.toggle('hidden',!text);if(!text)return;ui.combatStateHud.dataset.kind=kind;ui.combatStateText.textContent=text;ui.combatStateMeta.textContent=meta;}
 function drawGalaxyEventWorld(){const c=galaxyEventRuntime.convoy;if(!c||!onScreenWorld(c.x,c.y,180))return;const p=screenPos(c.x,c.y),a=Math.atan2(c.ty-c.y,c.tx-c.x);ctx.save();ctx.translate(p.x,p.y);ctx.rotate(a);ctx.shadowColor='#63eaff';ctx.shadowBlur=18;ctx.fillStyle='rgba(12,49,74,.96)';ctx.strokeStyle='#8cf3ff';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(32,0);ctx.lineTo(5,-16);ctx.lineTo(-28,-11);ctx.lineTo(-20,0);ctx.lineTo(-28,11);ctx.lineTo(5,16);ctx.closePath();ctx.fill();ctx.stroke();ctx.restore();const w=92,ratio=Math.max(0,c.hp/c.maxHp);ctx.fillStyle='rgba(4,18,27,.9)';ctx.fillRect(p.x-w/2,p.y-35,w,6);ctx.fillStyle=ratio>.35?'#56f0c5':'#ff5f7c';ctx.fillRect(p.x-w/2,p.y-35,w*ratio,6);ctx.fillStyle='#c8f7ff';ctx.font='bold 10px Arial';ctx.textAlign='center';ctx.fillText('COMBOIO QUÂNTICO',p.x,p.y+30);}
@@ -1978,8 +1984,13 @@ function loadLocalGame(){
 }
 function hydrateProgress(){
   if(!progress)return;
+  const account=getUser();
   if(!progress.profile?.faction || !SHIPS[progress.activeShipId]) throw new Error('save incompleto');
-  progress.profile.callsign ||= getUser()?.callsign || getUser()?.email?.split('@')[0] || 'Pilot';
+  if(progress.accountOwnerId&&account?.id&&String(progress.accountOwnerId)!==String(account.id))throw new Error('SAVE_OWNER_MISMATCH');
+  progress.accountOwnerId=account?.id||progress.accountOwnerId||null;
+  progress.accountOwnerEmail=account?.email||progress.accountOwnerEmail||null;
+  // A identidade da conta é soberana; um save nunca pode renomear outro usuário.
+  progress.profile.callsign=account?.callsign || account?.email?.split('@')[0] || progress.profile.callsign || 'Pilot';
   progress.profile.level=Math.max(1,Math.min(PLAYER_MAX_LEVEL,Number(progress.profile.level)||1));
   progress.profile.xp=Math.max(0,Number(progress.profile.xp)||0);
   progress.profile.aliensKilled=Math.max(0,Math.floor(Number(progress.profile.aliensKilled)||0));
@@ -2045,7 +2056,7 @@ async function flushCloudSave(force=false){
   if(!authenticated||!progress||cloudBusy||(!cloudDirty&&!force))return;
   cloudBusy=true;setSync('SALVANDO','busy');
   try{const result=await saveCloudSave(progress);if(result?.statePatch){const patch=result.statePatch;if(Number.isFinite(Number(patch.credits)))progress.profile.credits=Number(patch.credits);if(patch.serverEconomy)progress.serverEconomy={...(progress.serverEconomy||{}),...patch.serverEconomy};localStorage.setItem(saveKey(),JSON.stringify(progress));updateUI();if(patch.serverEconomy?.lastClanCollectionDate)showToast('CLÃ • coleta diária de 10% sincronizada','system');}cloudDirty=false;setSync('ONLINE','ok');}
-  catch(e){console.warn('cloud save',e);setSync('OFFLINE','err');}
+  catch(e){console.warn('cloud save',e);if(e?.code==='SAVE_OWNER_MISMATCH'){setSync('BLOQUEADO','err');forceLogoutBecauseSessionMoved('Proteção de conta: um save de outro usuário foi bloqueado.',getUser()?.id||null);return;}setSync('OFFLINE','err');}
   finally{cloudBusy=false;}
 }
 
@@ -3973,7 +3984,7 @@ function renderPremiumShop(){
   if(!ui.premiumProductGrid||!ui.premiumBenefits)return;
   const st=premiumRuntime.state||{},products=Array.isArray(st.catalog)?st.catalog:[];
   if(ui.premiumModeChip){ui.premiumModeChip.textContent=st.can_purchase?'ATIVO':'CATÁLOGO';ui.premiumModeChip.classList.toggle('active',!!st.can_purchase);}
-  ui.premiumBenefits.innerHTML=`<div><span>PREMIUM 30D</span><b>${st.premium_active?'ATIVO':'INATIVO'}</b><small>${st.premium_active?`até ${formatPremiumUntil(st.premium_until)}`:'Reparo grátis • regen 2X • míssil -20% • Elite -5% • Portais -10%'}</small></div><div><span>PASSE PREMIUM</span><b>${st.battle_pass_active?'ATIVO':'INATIVO'}</b><small>Temporada ${escHtml(st.current_season||battlePassSeasonKey())} • 2X ganhos + Elite + Reclaimer T30</small></div>`;
+  ui.premiumBenefits.innerHTML=`<div><span>PREMIUM 30D</span><b>${st.premium_active?'ATIVO':'INATIVO'}</b><small>${st.premium_active?`até ${formatPremiumUntil(st.premium_until)} • AUTO-COMBATE LIBERADO`:'Auto-combate • reparo grátis • regen 2X • míssil -20% • Elite -5% • Portais -10%'}</small></div><div><span>PASSE PREMIUM</span><b>${st.battle_pass_active?'ATIVO':'INATIVO'}</b><small>Temporada ${escHtml(st.current_season||battlePassSeasonKey())} • AUTO-COMBATE • 2X ganhos + Elite + Reclaimer T30</small></div>`;
   if(!products.length){ui.premiumProductGrid.innerHTML='<div class="muted">Catálogo Premium indisponível.</div>';return;}
   ui.premiumProductGrid.innerHTML=products.map(p=>{
     const owned=p.category==='premium'?!!st.premium_active:p.category==='battle_pass'?!!st.battle_pass_active:false;
@@ -4830,7 +4841,7 @@ if(ui.hudSettingsGrid)ui.hudSettingsGrid.addEventListener('change',e=>{const inp
 if(ui.settingsTabs)ui.settingsTabs.addEventListener('click',e=>{const b=e.target.closest('[data-settings-tab]');if(b)switchSettingsTab(b.dataset.settingsTab);});
 if(ui.audioEnabledToggle)ui.audioEnabledToggle.onchange=()=>setAudioEnabled(ui.audioEnabledToggle.checked);
 if(ui.audioVolumeRange)ui.audioVolumeRange.oninput=()=>setAudioVolume(Number(ui.audioVolumeRange.value)/100);
-if(ui.autoTargetToggle)ui.autoTargetToggle.onchange=()=>{combatPrefs.autoTarget=ui.autoTargetToggle.checked;saveCombatPrefs();};
+if(ui.autoTargetToggle)ui.autoTargetToggle.onchange=()=>{if(!premiumAutoCombatAccess()){ui.autoTargetToggle.checked=false;showToast('AUTO-COMBATE é exclusivo do PREMIUM ou PASSE MENSAL');openPremiumShop();return;}combatPrefs.autoTarget=ui.autoTargetToggle.checked;saveCombatPrefs();};
 if(ui.tapAttackToggle)ui.tapAttackToggle.onchange=()=>{combatPrefs.tapAttack=ui.tapAttackToggle.checked;saveCombatPrefs();};
 if(ui.combatAlertsToggle)ui.combatAlertsToggle.onchange=()=>{combatPrefs.alerts=ui.combatAlertsToggle.checked;saveCombatPrefs();};
 addEventListener('pagehide',()=>{if(progress){saveGame();flushCloudSave(true);}clearOnlinePlayers();removePlayerPresenceOnline().catch(()=>{});});
@@ -4912,7 +4923,7 @@ ui.loginForm.onsubmit=async e=>{e.preventDefault();ui.authMessage.textContent='E
 ui.registerForm.onsubmit=async e=>{e.preventDefault();ui.authMessage.textContent='Criando conta...';try{const result=await signUp({callsign:ui.registerCallsign.value,email:ui.registerEmail.value,password:ui.registerPassword.value});if(result.requires_confirmation){showAuthMode('login');ui.loginEmail.value=ui.registerEmail.value;ui.authMessage.textContent='Conta criada. Confirme o e-mail e depois entre.';return;}await afterAuth();}catch(err){ui.authMessage.textContent=err.message;}};
 if(ui.forgotPasswordBtn)ui.forgotPasswordBtn.onclick=async()=>{const email=String(ui.loginEmail?.value||'').trim();ui.authMessage.textContent='Enviando recuperação...';try{await requestPasswordReset(email);ui.authMessage.textContent='E-mail de recuperação enviado. Abra o link recebido para criar uma nova senha.';}catch(err){ui.authMessage.textContent=err.message;}};
 if(ui.recoveryForm)ui.recoveryForm.onsubmit=async e=>{e.preventDefault();const a=ui.recoveryPassword?.value||'',b=ui.recoveryPasswordConfirm?.value||'';if(a!==b){ui.authMessage.textContent='As senhas não conferem.';return;}ui.authMessage.textContent='Atualizando senha...';try{await updatePassword(a);signOutLocal();showAuthMode('login');ui.loginPassword.value='';ui.authMessage.textContent='Senha atualizada. Entre com a nova senha.';}catch(err){ui.authMessage.textContent=err.message;}};
-ui.logoutBtn.onclick=async()=>{await flushCloudSave(true);await removePlayerPresenceOnline().catch(()=>{});clearOnlinePlayers();await endGameSession().catch(()=>signOutLocal());authenticated=false;progress=null;clanRuntime.state=null;clanRuntime.clans=[];clanRuntime.lastAt=0;warfrontRuntime.state=null;warfrontRuntime.clans=[];warfrontRuntime.lastAt=0;warfrontRuntime.pendingBossDamage=0;premiumRuntime.state=null;premiumRuntime.lastAt=0;updateClanBadge();updatePremiumBadge();state.target=null;player.laserFiring=false;for(const modal of dismissibleModals())modal.classList.add('hidden');ui.factionModal.classList.add('hidden');ui.portalPrompt?.classList.add('hidden');ui.baseTradePrompt?.classList.add('hidden');ui.petFloatPanel?.classList.add('hidden');ui.loginModal.classList.remove('hidden');if(ui.userLabel)ui.userLabel.textContent='—';if(ui.rankChip)ui.rankChip.textContent='Piloto Básico';setSync('LOCAL','');showAuthMode('login');};
+ui.logoutBtn.onclick=async()=>{await flushCloudSave(true);await removePlayerPresenceOnline().catch(()=>{});clearOnlinePlayers();await endGameSession().catch(()=>signOutLocal());authenticated=false;progress=null;clanRuntime.state=null;clanRuntime.clans=[];clanRuntime.lastAt=0;warfrontRuntime.state=null;warfrontRuntime.clans=[];warfrontRuntime.lastAt=0;warfrontRuntime.pendingBossDamage=0;premiumRuntime.state=null;premiumRuntime.lastAt=0;updateClanBadge();updatePremiumBadge();state.target=null;player.laserFiring=false;for(const modal of dismissibleModals())modal.classList.add('hidden');ui.factionModal.classList.add('hidden');ui.portalPrompt?.classList.add('hidden');ui.baseTradePrompt?.classList.add('hidden');ui.petFloatPanel?.classList.add('hidden');ui.loginModal.classList.remove('hidden');if(ui.userLabel)ui.userLabel.textContent='—';if(ui.rankChip)ui.rankChip.textContent='Piloto Básico';if(ui.loginPassword)ui.loginPassword.value='';setSync('LOCAL','');showAuthMode('login');};
 
 function startLoadedGame(){
   state.lastPlayerDamageAt=nowSec();
@@ -4929,8 +4940,17 @@ function startLoadedGame(){
 async function afterAuth(){
   authenticated=true;ui.loginModal.classList.add('hidden');ui.userLabel.textContent=getUser()?.callsign||getUser()?.email?.split('@')[0]||'Pilot';loadActivityLog();refreshClanState(true).then(()=>refreshRankings(true)).catch(()=>{});setSync('SINCRONIZANDO','busy');
   try{
-    const local=readLocalGameState();
+    const accountId=String(getUser()?.id||'');
+    let local=readLocalGameState();
+    if(local?.accountOwnerId&&String(local.accountOwnerId)!==accountId){
+      console.warn('Local save quarantined: owner mismatch');
+      try{localStorage.removeItem(saveKey());}catch{}
+      local=null;
+    }
     const remote=await loadCloudSave();
+    if(remote?.state?.accountOwnerId&&String(remote.state.accountOwnerId)!==accountId){
+      throw Object.assign(new Error('Proteção de conta: o save online está vinculado a outro usuário.'),{code:'SAVE_OWNER_MISMATCH'});
+    }
     const localStamp=Number(local?.clientSavedAt)||0;
     const remoteStamp=Number(remote?.state?.clientSavedAt)||Date.parse(remote?.updated_at||'')||0;
     const localStampSane=localStamp>0&&localStamp<=Date.now()+300000;
@@ -4939,10 +4959,16 @@ async function afterAuth(){
       setTimeout(()=>flushCloudSave(true),0);
     }else if(remote.state){
       progress=remote.state;hydrateProgress();setSync('ONLINE','ok');
+    }else if(local){
+      progress=local;hydrateProgress();setSync('LOCAL','busy');cloudDirty=true;setTimeout(()=>flushCloudSave(true),0);
     }else{
-      loadLocalGame();setSync('ONLINE','ok');
+      progress=null;setSync('ONLINE','ok');
     }
-  }catch(err){console.warn(err);loadLocalGame();setSync('OFFLINE','err');}
+  }catch(err){
+    console.warn(err);
+    if(err?.code==='SAVE_OWNER_MISMATCH'){authenticated=false;progress=null;signOutLocal();ui.loginModal.classList.remove('hidden');showAuthMode('login');ui.authMessage.textContent=err.message;setSync('BLOQUEADO','err');return;}
+    loadLocalGame();setSync('OFFLINE','err');
+  }
   if(!progress){renderFactionChoice();return;}
   await refreshPremiumState(true);
   startLoadedGame();
@@ -4956,7 +4982,14 @@ async function afterAuth(){
 
 async function boot(){
   ui.loginModal.classList.remove('hidden');showAuthMode('login');setSync('LOCAL','');
-  try{const recovery=await restorePasswordRecoveryFromUrl();if(recovery){showAuthMode('recovery');ui.authMessage.textContent='Defina sua nova senha para concluir a recuperação.';return;}const restored=await restoreSession();if(restored)await afterAuth();}catch(err){console.warn(err);ui.authMessage.textContent=err.message||'Não foi possível restaurar a sessão.';}
+  try{
+    const recovery=await restorePasswordRecoveryFromUrl();
+    if(recovery){showAuthMode('recovery');ui.authMessage.textContent='Defina sua nova senha para concluir a recuperação.';return;}
+    // V14.1 SECURITY: nunca entra sozinho. Toda nova entrada/reload exige login explícito.
+    signOutLocal();
+    if(ui.loginPassword)ui.loginPassword.value='';
+    ui.authMessage.textContent='Por segurança, faça login para acessar sua conta.';
+  }catch(err){console.warn(err);signOutLocal();ui.authMessage.textContent=err.message||'Faça login novamente.';}
 }
 
 document.body.dataset.quality=qualityMode;

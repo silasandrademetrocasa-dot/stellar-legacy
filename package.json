@@ -1,6 +1,6 @@
 {
   "name": "stellar-legacy",
-  "version": "14.0.0",
+  "version": "14.1.0",
   "type": "module",
   "scripts": {
     "start": "node server/index.js",
@@ -13,5 +13,5 @@
   "engines": {
     "node": ">=18"
   },
-  "release": "epic-combat-galaxy-events-v14-0-0"
+  "release": "account-guard-premium-auto-combat-v14-1-0"
 }
