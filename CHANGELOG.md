@@ -1,3 +1,10 @@
+## V16.6.1 — HUD DOCK POLISH + EVENT CATALOG
+- CHAT fixado no canto inferior esquerdo e MAPA no canto inferior direito com tamanhos equivalentes.
+- Campo de digitação do chat preso no rodapé do painel, sem subir quando outros docks são recolhidos.
+- Barra de munições mantida centralizada e mais fina, com estados recolhidos padronizados.
+- NPCs de evento agora permanecem destacados no minimapa mesmo fora do alcance visual/radar do jogador.
+- Novo catálogo de eventos criado em modo inativo (dormant), pronto para ativação manual por semana/mês no Supabase.
+
 ## V16.6.0 — HUD / PREMIUM / EVENTS
 - Reorganização do HUD inferior: chat à esquerda, munições ao centro, mapa à direita.
 - Campo de mensagem do chat fixado no rodapé do painel.

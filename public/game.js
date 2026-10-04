@@ -1,7 +1,7 @@
-import { FACTIONS, SHIPS, ITEMS, LASER_AMMO, ROCKETS, NPC_TYPES, MAPS, RESOURCES } from './data.js?v=16.6.0';
-import { GAME_ASSETS } from './assets/v8/manifest.js?v=16.6.0';
-import { signUp, signIn, requestPasswordReset, restorePasswordRecoveryFromUrl, restoreSession, signOutLocal, checkGameSession, endGameSession, getUser, getSessionCredentials, loadCloudSave, saveCloudSave, updateCallsign, updatePassword, loadRankings, loadAuctionBids, saveAuctionBidOnline, markAuctionBidStatusOnline, loadAuctionMarket, upsertPlayerPresenceOnline, loadMapPresenceOnline, removePlayerPresenceOnline, queuePvpAttackOnline, consumePvpDamageEventsOnline, syncArenaProfileOnline, loadArenaState, loadArenaDailyRewardStatus, claimArenaDailyReward, loadArenaOpponents, loadArenaHistory, arenaAttackOnline, listClansOnline, loadMyClanOnline, createClanOnline, joinClanOnline, leaveClanOnline, transferClanCreditsOnline, claimClanCreditGrantsOnline, recordClanAlienKillOnline, getPremiumShopOnline, testPurchasePremiumOnline, loadWarfrontStateOnline, hitWorldBossOnline, claimWorldBossRewardOnline, declareClanWarOnline, recordClanWarScoreOnline, loadLiveOpsOnline, purchaseLiveCatalogOnline, economyActionOnline, getChatHistoryOnline, sendChatMessageOnline, getMyDesignersOnline, setDesignLoadoutOnline, claimGateDroneDesignOnline, claimEventDesignerOnline } from './api.js?v=16.6.0';
-import { SharedUniverseClient } from './world.js?v=16.6.0';
+import { FACTIONS, SHIPS, ITEMS, LASER_AMMO, ROCKETS, NPC_TYPES, MAPS, RESOURCES } from './data.js?v=16.6.1';
+import { GAME_ASSETS } from './assets/v8/manifest.js?v=16.6.1';
+import { signUp, signIn, requestPasswordReset, restorePasswordRecoveryFromUrl, restoreSession, signOutLocal, checkGameSession, endGameSession, getUser, getSessionCredentials, loadCloudSave, saveCloudSave, updateCallsign, updatePassword, loadRankings, loadAuctionBids, saveAuctionBidOnline, markAuctionBidStatusOnline, loadAuctionMarket, upsertPlayerPresenceOnline, loadMapPresenceOnline, removePlayerPresenceOnline, queuePvpAttackOnline, consumePvpDamageEventsOnline, syncArenaProfileOnline, loadArenaState, loadArenaDailyRewardStatus, claimArenaDailyReward, loadArenaOpponents, loadArenaHistory, arenaAttackOnline, listClansOnline, loadMyClanOnline, createClanOnline, joinClanOnline, leaveClanOnline, transferClanCreditsOnline, claimClanCreditGrantsOnline, recordClanAlienKillOnline, getPremiumShopOnline, testPurchasePremiumOnline, loadWarfrontStateOnline, hitWorldBossOnline, claimWorldBossRewardOnline, declareClanWarOnline, recordClanWarScoreOnline, loadLiveOpsOnline, purchaseLiveCatalogOnline, economyActionOnline, getChatHistoryOnline, sendChatMessageOnline, getMyDesignersOnline, setDesignLoadoutOnline, claimGateDroneDesignOnline, claimEventDesignerOnline } from './api.js?v=16.6.1';
+import { SharedUniverseClient } from './world.js?v=16.6.1';
 
 const canvas = document.querySelector('#game');
 const ctx = canvas.getContext('2d');
@@ -2083,9 +2083,16 @@ function layoutHudPanels(){
   root.style.setProperty('--hud-top-offset',`${topbarVisible?topbarH+8:6}px`);
   root.style.setProperty('--top-dock-offset',`${topDockOffset}px`);
 
-  const mapVisible=!!ui.minimapPanel&&getComputedStyle(ui.minimapPanel).display!=='none';
+  const mapVisible=!!ui.minimapPanel&&getComputedStyle(ui.minimapPanel).display!=='none'&&!ui.minimapPanel.classList.contains('hidden')&&!ui.minimapPanel.classList.contains('hud-user-hidden');
   const mapW=mapVisible?Math.ceil(ui.minimapPanel.getBoundingClientRect().width):0;
   root.style.setProperty('--map-dock-width',`${mapW}px`);
+  const chatVisible=!!ui.chatDock&&getComputedStyle(ui.chatDock).display!=='none'&&!ui.chatDock.classList.contains('hidden')&&!ui.chatDock.classList.contains('hud-user-hidden');
+  const sideExpanded=window.innerWidth<=680?190:window.innerWidth<=820?232:window.innerWidth<=1100?280:332;
+  const sideCollapsed=window.innerWidth<=680?144:window.innerWidth<=820?156:172;
+  const chatW=chatVisible?(ui.chatDock.classList.contains('collapsed')?sideCollapsed:sideExpanded):0;
+  const minimapDockW=mapVisible?(ui.minimapPanel.classList.contains('collapsed')?sideCollapsed:sideExpanded):0;
+  root.style.setProperty('--chat-dock-width-current',`${chatW}px`);
+  root.style.setProperty('--minimap-dock-width-current',`${minimapDockW}px`);
 
   const weaponVisible=!!ui.weaponBar&&getComputedStyle(ui.weaponBar).display!=='none';
   const weaponH=weaponVisible?Math.ceil(ui.weaponBar.getBoundingClientRect().height):0;
@@ -3927,7 +3934,23 @@ function drawMinimap(){
   for(const l of state.landmarks){mm.fillStyle=l.type==='wreck'?'#ffc45a':l.type==='scan'?'#bd78ff':'#4fd7ff';mm.fillRect(l.x*sx-1,l.y*sy-1,2,2);}
   const px=player.x*sx,py=player.y*sy,tx=player.tx*sx,ty=player.ty*sy,rad=state.radarRange*Math.min(sx,sy);mm.strokeStyle='rgba(130,220,255,.22)';mm.lineWidth=1;mm.beginPath();mm.arc(px,py,rad,0,TWO_PI);mm.stroke();
   if(routeDistance()>35){mm.strokeStyle='rgba(115,225,255,.55)';mm.setLineDash([4,3]);mm.beginPath();mm.moveTo(px,py);mm.lineTo(tx,ty);mm.stroke();mm.setLineDash([]);mm.strokeStyle='#fff';mm.beginPath();mm.arc(tx,ty,4,0,TWO_PI);mm.stroke();}
-  for(const e of state.enemies){if(e.hp<=0||Math.hypot(e.x-player.x,e.y-player.y)>state.radarRange)continue;const selected=state.target?.id===e.id;mm.fillStyle=selected?'#ffec67':e.eventNpc?'#ff9f43':'#ff755d';mm.beginPath();mm.arc(e.x*sx,e.y*sy,selected?3.8:(e.type.startsWith('boss')?2.8:1.8),0,TWO_PI);mm.fill();if(selected){mm.strokeStyle='#fff5a8';mm.lineWidth=1;mm.beginPath();mm.arc(e.x*sx,e.y*sy,6,0,TWO_PI);mm.stroke();}}
+  for(const e of state.enemies){
+    if(e.hp<=0)continue;
+    const dist=Math.hypot(e.x-player.x,e.y-player.y),eventPinned=!!e.eventNpc;
+    if(dist>state.radarRange&&!eventPinned)continue;
+    const selected=state.target?.id===e.id,x=e.x*sx,y=e.y*sy;
+    if(eventPinned){
+      const pulse=5.2+Math.sin(nowSec()*4+x*.01+y*.01)*1.1;
+      mm.fillStyle=selected?'#ffec67':'#ffb347';
+      mm.beginPath();mm.arc(x,y,selected?4.2:(String(e.type||'').startsWith('boss')?3.4:2.6),0,TWO_PI);mm.fill();
+      mm.strokeStyle=selected?'rgba(255,245,168,.95)':'rgba(255,177,71,.85)';
+      mm.lineWidth=selected?1.4:1.1;mm.beginPath();mm.arc(x,y,pulse,0,TWO_PI);mm.stroke();
+      continue;
+    }
+    mm.fillStyle=selected?'#ffec67':'#ff755d';
+    mm.beginPath();mm.arc(x,y,selected?3.8:(String(e.type||'').startsWith('boss')?2.8:1.8),0,TWO_PI);mm.fill();
+    if(selected){mm.strokeStyle='#fff5a8';mm.lineWidth=1;mm.beginPath();mm.arc(x,y,6,0,TWO_PI);mm.stroke();}
+  }
   const convoy=galaxyEventRuntime.convoy;if(convoy){mm.fillStyle='#5ef1ff';mm.fillRect(convoy.x*sx-3,convoy.y*sy-3,6,6);}
   // V16.5: radar social — hostis, companhia e aliança aparecem no mesmo mapa.
   for(const rp of onlineWorld.players.values()){

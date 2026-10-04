@@ -1,3 +1,12 @@
+# Stellar Legacy V16.6.1 — HUD DOCK POLISH + EVENT CATALOG
+
+Patch focado em acabamento do HUD inferior e preparação do calendário de eventos. O chat fica travado no rodapé esquerdo, o mapa no rodapé direito e a barra de munições permanece centralizada sem empurrar os docks laterais. NPCs de evento agora aparecem destacados no minimapa mesmo quando estão fora do alcance visual normal.
+
+## Catálogo de eventos (sem ativação automática nova)
+- Eventos atuais continuam como estão no Supabase.
+- O arquivo `sql/V16_6_EVENT_CATALOG_DORMANT.sql` adiciona o catálogo expandido em modo `enabled = false`, para você escolher depois por mês/semana.
+- A lista humana de eventos está em `EVENT_CATALOG_V16_6.md`.
+
 # Stellar Legacy V16.6.0 — HUD / PREMIUM / EVENTS
 
 Esta release junta as duas últimas etapas da V16: **SHIP + AUX DESIGNERS** e **VISUAL & SOCIAL FINAL**. O sistema de designers fica conectado ao Supabase, com drops de evento, habilidade individual da nave, bônus de atributos e visual sincronizado no Shared Universe.

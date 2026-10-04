@@ -1,6 +1,6 @@
 {
   "name": "stellar-legacy",
-  "version": "16.6.0",
+  "version": "16.6.1",
   "type": "module",
   "scripts": {
     "start": "node server/index.js",
@@ -14,5 +14,5 @@
   "engines": {
     "node": ">=18"
   },
-  "release": "final-hud-premium-events-v16-6-0"
+  "release": "hud-dock-events-v16-6-1"
 }
