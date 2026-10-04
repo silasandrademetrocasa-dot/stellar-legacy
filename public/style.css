@@ -1980,3 +1980,68 @@ body[data-quality="high"] .hud-panel{backdrop-filter:blur(7px);-webkit-backdrop-
 .connection-settings-grid span{font-size:10px;font-weight:900;letter-spacing:.1em;color:#8fb7cb;}
 .connection-settings-grid .sync-chip{min-width:96px;text-align:center;}
 @media(max-width:700px){.connection-settings-grid{grid-template-columns:1fr;} :root{--hud-top-card-height:136px;}}
+
+
+/* ===================== V16.7.3 MODO DE BATALHA ===================== */
+:root{
+  --hud-grid-width:208px;
+  --hud-grid-width-collapsed:148px;
+  --hud-right-stack-width:208px;
+  --hud-top-card-height:124px;
+}
+.top-hud-dock{right:calc(var(--hud-right-stack-width) + 14px)!important;gap:5px!important;}
+#topHudDock #playerPanel,
+#topHudDock #leftStats,
+#topHudDock #activeMissionPanel,
+#topHudDock #petFloatPanel,
+#topHudDock #activityPanel{
+  width:var(--hud-grid-width)!important;
+  min-width:var(--hud-grid-width)!important;
+  max-width:var(--hud-grid-width)!important;
+  height:var(--hud-top-card-height)!important;
+  min-height:var(--hud-top-card-height)!important;
+  max-height:var(--hud-top-card-height)!important;
+  padding:5px 7px 6px!important;
+  border-radius:14px!important;
+}
+#topHudDock #playerPanel.collapsed,
+#topHudDock #leftStats.collapsed,
+#topHudDock #activeMissionPanel.collapsed,
+#topHudDock #petFloatPanel.collapsed{
+  width:var(--hud-grid-width-collapsed)!important;
+  min-width:var(--hud-grid-width-collapsed)!important;
+  max-width:var(--hud-grid-width-collapsed)!important;
+  height:36px!important;
+  min-height:36px!important;
+  max-height:36px!important;
+}
+#topHudDock #playerPanel .player-float-head,
+#topHudDock #leftStats .stats-toolbar,
+#topHudDock #petFloatPanel .pet-float-head,
+#topHudDock #activityPanel .activity-float-head,
+#topHudDock #activeMissionPanel .active-mission-head{margin-bottom:3px!important;}
+#topHudDock #playerPanel .player-float-content>div,
+#topHudDock #leftStats .left-stats-content>div{padding:1px 0!important;font-size:7px!important;}
+#topHudDock #playerPanel .player-float-content b,
+#topHudDock #leftStats .left-stats-content b{font-size:8px!important;}
+#topHudDock #playerPanel .player-float-head span,
+#topHudDock #leftStats .stats-toolbar-label,
+#topHudDock #activeMissionPanel .active-mission-head span,
+#topHudDock #petFloatPanel .pet-float-head span,
+#topHudDock #activityPanel .activity-float-head span{font-size:9px!important;letter-spacing:.08em!important;}
+#topHudDock #activeMissionPanel .active-mission-title{margin-top:2px!important;font-size:9px!important;}
+#topHudDock #activeMissionPanel .active-mission-task{display:none!important;}
+#topHudDock #activeMissionPanel .active-mission-progress{margin-top:4px!important;}
+#topHudDock #activeMissionPanel .active-mission-meta{margin-top:3px!important;}
+#topHudDock #activeMissionPanel #activeMissionRewardFactor{display:none!important;}
+#topHudDock #activeMissionPanel .active-mission-body{max-height:76px!important;}
+#topHudDock #petFloatPanel .pet-float-body{max-height:78px!important;}
+#topHudDock #petFloatPanel .pet-quick-label{display:none!important;}
+#topHudDock #petFloatPanel .pet-quick-select{height:24px!important;font-size:8px!important;padding:2px 6px!important;}
+#topHudDock #petFloatPanel .pet-float-status{display:none!important;}
+#topHudDock #activityPanel .activity-feed{height:74px!important;max-height:74px!important;}
+#topHudDock #activityPanel .activity-row:nth-child(n+4){display:none!important;}
+#topHudDock #activityPanel .activity-empty{font-size:8px!important;opacity:.8;}
+@media(max-width:1280px){:root{--hud-grid-width:196px;--hud-grid-width-collapsed:144px;--hud-right-stack-width:196px;--hud-top-card-height:118px;}}
+@media(max-width:1100px){:root{--hud-grid-width:182px;--hud-grid-width-collapsed:136px;--hud-right-stack-width:182px;--hud-top-card-height:112px;}}
+@media(max-width:820px){:root{--hud-grid-width:170px;--hud-grid-width-collapsed:132px;--hud-right-stack-width:170px;--hud-top-card-height:108px;}}

@@ -1,3 +1,8 @@
+# V16.7.3 — MODO DE BATALHA
+- HUD slim, clean e bem compacto.
+- Menos informação visível no topo para liberar mais área de combate.
+- Missões, AUX e Atividades com visual reduzido e leitura rápida.
+
 # V16.7.2 — TOP GRID COMPACT
 - Redução de altura e largura dos painéis superiores para liberar mais área útil da tela.
 - Grid do topo mantida padronizada com cards mais compactos.
