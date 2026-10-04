@@ -1,12 +1,3 @@
-# V13.5.0 — Clean UI + AUX-9 Exclusive Roles + Combat Audio
-
-- Perfil de Piloto atualiza imediatamente após compra de Núcleos, conversão de PP e evolução de habilidade.
-- Confirmações restauram o modal anterior antes do re-render, eliminando tela congelada/desatualizada.
-- AUX-9 agora obedece função exclusiva por módulo: Sentinela combate; Salvager caixas; Minerador minérios; Reclaimer reparo; Nova Burst ataque explosivo; Companhia apenas acompanha.
-- Removidos textos de teste, versão, instruções internas e recados de desenvolvimento da interface do jogador.
-- Adicionado sistema de áudio procedural para laser, AUX-9, mísseis, impactos, escudo, explosões, coleta, portais, habilidades e recompensas.
-- Adicionadas opções de áudio e volume em Configurações.
-
 # V13.3.0 — STELLAR IDENTITY
 - Rebranding completo da nomenclatura herdada.
 - Naves, NPCs, armas, escudos, motores, munições, mísseis, drones e recursos com identidade Stellar Legacy.
@@ -34,3 +25,12 @@
 - Base: V13.1.0 WARFRONT.
 - Sem alteração de schema/SQL neste patch.
 - Saves e backend V13.1 permanecem compatíveis.
+
+## V13.4.0
+- HUD JOGADOR separado e configurável.
+- Login compacto + recuperação de senha.
+- AUX-9: módulos com comportamento exclusivo.
+- Efeitos sonoros de combate.
+- Perfil de Piloto atualiza sem fechar/reabrir após compras/upgrades.
+- Stellar Auto Installer para ZIPs em /updates.
+- Limpeza de textos internos/testes na interface.

@@ -150,6 +150,45 @@ export async function signUp({ callsign, email, password }) {
   };
 }
 
+
+export async function requestPasswordReset(email) {
+  const value = String(email || '').trim().toLowerCase();
+  if (!value || !value.includes('@')) throw new Error('Informe um e-mail válido.');
+  return serverFetch('/api/auth/password-reset', {
+    method: 'POST',
+    body: JSON.stringify({ email: value }),
+  });
+}
+
+export function getRecoveryAccessToken() {
+  try {
+    const params = new URLSearchParams(String(location.hash || '').replace(/^#/, ''));
+    if (params.get('type') !== 'recovery') return null;
+    return params.get('access_token') || null;
+  } catch {
+    return null;
+  }
+}
+
+export async function completePasswordRecovery(accessToken, password) {
+  const token = String(accessToken || '');
+  const value = String(password || '');
+  if (!token) throw new Error('Link de recuperação inválido ou expirado.');
+  if (value.length < 6) throw new Error('A nova senha precisa ter pelo menos 6 caracteres.');
+  const { url, key } = await getConfig();
+  const res = await fetch(`${url}/auth/v1/user`, {
+    method: 'PUT',
+    headers: {
+      apikey: key,
+      Authorization: `Bearer ${token}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ password: value }),
+  });
+  const body = await readJson(res);
+  if (!res.ok) throw new Error(body?.message || body?.error_description || body?.error || 'Não foi possível atualizar a senha.');
+  return { ok: true };
+}
 export async function signIn({ email, password }) {
   const body = await serverFetch('/api/auth/login', {
     method: 'POST',

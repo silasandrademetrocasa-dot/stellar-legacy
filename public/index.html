@@ -6,20 +6,12 @@
 <meta content="width=device-width,initial-scale=1,user-scalable=no" name="viewport"/>
 <meta content="#030816" name="theme-color"/>
 <title>Stellar Legacy</title>
-<link href="/style.css?v=13.5.0" rel="stylesheet"/>
+<link href="/style.css?v=13.4.0" rel="stylesheet"/>
 </head>
 <body>
 <div id="app">
 <canvas id="game"></canvas>
 <header class="hud-panel v8-topbar compact-command-bar" id="topbar">
-<div class="command-status">
-  <span class="pilot-chip">PILOTO <b id="userLabel">—</b></span>
-  <span class="pilot-chip patent-chip">PATENTE <b id="rankChip">Piloto Básico</b></span>
-  <span class="status-chip">LV <b id="lvl">1</b></span>
-  <span class="status-chip credits-chip">CR <b id="credits">0</b></span>
-  <span class="status-chip uri-chip">STL <b id="uridium">0</b></span>
-  <span class="sync-chip hidden" id="syncLabel" aria-hidden="true">LOCAL</span>
-</div>
 <div class="top-meta hidden" aria-hidden="true">
   <span><b id="factionLabel">—</b></span><span><b id="mapLabel">—</b></span><span><b id="sectorName">—</b></span><span><b id="shipLabel">Aurora</b></span><span><b id="xp">0</b></span>
 </div>
@@ -52,6 +44,20 @@
 <button class="small-btn config-top-btn" id="configBtn">CONF</button>
 </nav>
 </header>
+<section class="hud-panel player-float-panel" id="playerPanel">
+  <div class="player-float-head tappable-toolbar" id="playerHeader">
+    <div class="player-float-title"><button aria-label="Expandir / recolher jogador" class="stats-expand-btn" id="playerToggle" title="Expandir / recolher jogador">▾</button><span>JOGADOR</span></div>
+    <span class="sync-chip" id="syncLabel">LOCAL</span>
+  </div>
+  <div class="player-float-content" id="playerContent">
+    <div class="player-name-row"><b id="userLabel">—</b><span id="rankChip">Piloto Básico</span></div>
+    <div class="player-metrics">
+      <div><span>LV</span><b id="lvl">1</b></div>
+      <div><span>CR</span><b id="credits">0</b></div>
+      <div><span>STL</span><b id="uridium">0</b></div>
+    </div>
+  </div>
+</section>
 <section class="hud-panel compact-stats ship-stats-float" id="leftStats">
 <div class="stats-toolbar tappable-toolbar" id="statsHeader">
 <div class="stats-toolbar-left">
@@ -184,28 +190,47 @@
 </div>
 
 <div class="modal fixed-modal" id="loginModal">
-<div class="modal-card login-card">
-<div class="eyebrow">STELLAR NETWORK</div>
-<h1>Entrar no Stellar Legacy</h1>
-<p class="muted">Sua conta salva facção, nave, inventário, drones, munição e progresso online.</p>
-<div class="identity-panel"><img alt="Stellar Legacy" class="identity-logo" src="/assets/v8/branding/logo-v8.png"/><div class="identity-copy"><div class="eyebrow">IDENTIDADE STELLAR LEGACY</div><h3>Três facções. Uma guerra orbital.</h3><p>Explore naves, NPCs, equipamentos, recursos e mapas do universo Stellar Legacy.</p><div class="identity-factions"><div><img alt="Terra" src="/assets/v8/branding/earth.png"/><span>Terra</span></div><div><img alt="Marte" src="/assets/v8/branding/mars.png"/><span>Marte</span></div><div><img alt="Júpiter" src="/assets/v8/branding/jupiter.png"/><span>Júpiter</span></div></div></div></div>
-<div class="auth-tabs">
-<button class="tab-btn active" id="loginTabBtn">Entrar</button>
-<button class="tab-btn" id="registerTabBtn">Criar conta</button>
-</div>
-<form class="auth-form" id="loginForm">
-<label>E-mail<input autocomplete="email" id="loginEmail" placeholder="piloto@email.com" required="" type="email"/></label>
-<label>Senha<input autocomplete="current-password" id="loginPassword" minlength="6" placeholder="••••••••" required="" type="password"/></label>
-<button class="primary-btn" type="submit">ENTRAR</button>
-</form>
-<form class="auth-form hidden" id="registerForm">
-<label>Callsign<input id="registerCallsign" maxlength="24" minlength="2" placeholder="Seu nome no espaço" required="" type="text"/></label>
-<label>E-mail<input autocomplete="email" id="registerEmail" placeholder="piloto@email.com" required="" type="email"/></label>
-<label>Senha<input autocomplete="new-password" id="registerPassword" minlength="6" placeholder="mínimo 6 caracteres" required="" type="password"/></label>
-<button class="primary-btn" type="submit">CRIAR CONTA</button>
-</form>
-<div class="auth-message" id="authMessage"></div>
-</div>
+  <div class="modal-card login-card login-shell">
+    <section class="login-brand-panel">
+      <img alt="Stellar Legacy" class="login-brand-logo" src="/assets/v8/branding/logo-v8.png"/>
+      <div class="login-brand-copy">
+        <div class="eyebrow">STELLAR LEGACY</div>
+        <h2>Três facções.<br/>Uma guerra orbital.</h2>
+      </div>
+      <div class="login-factions">
+        <div><img alt="Terra" src="/assets/v8/branding/earth.png"/><span>Terra</span></div>
+        <div><img alt="Marte" src="/assets/v8/branding/mars.png"/><span>Marte</span></div>
+        <div><img alt="Júpiter" src="/assets/v8/branding/jupiter.png"/><span>Júpiter</span></div>
+      </div>
+    </section>
+    <section class="login-auth-panel">
+      <div class="eyebrow">STELLAR NETWORK</div>
+      <h1>Entrar no Stellar Legacy</h1>
+      <div class="auth-tabs" id="authTabs">
+        <button class="tab-btn active" id="loginTabBtn">Entrar</button>
+        <button class="tab-btn" id="registerTabBtn">Criar conta</button>
+      </div>
+      <form class="auth-form" id="loginForm">
+        <label>E-mail<input autocomplete="email" id="loginEmail" placeholder="piloto@email.com" required type="email"/></label>
+        <label>Senha<input autocomplete="current-password" id="loginPassword" minlength="6" placeholder="••••••••" required type="password"/></label>
+        <button class="auth-link-btn" id="forgotPasswordBtn" type="button">Esqueci minha senha</button>
+        <button class="primary-btn auth-main-btn" type="submit">ENTRAR</button>
+      </form>
+      <form class="auth-form hidden" id="registerForm">
+        <label>Callsign<input id="registerCallsign" maxlength="24" minlength="2" placeholder="Seu nome no espaço" required type="text"/></label>
+        <label>E-mail<input autocomplete="email" id="registerEmail" placeholder="piloto@email.com" required type="email"/></label>
+        <label>Senha<input autocomplete="new-password" id="registerPassword" minlength="6" placeholder="mínimo 6 caracteres" required type="password"/></label>
+        <button class="primary-btn auth-main-btn" type="submit">CRIAR CONTA</button>
+      </form>
+      <form class="auth-form hidden" id="recoveryForm">
+        <div class="recovery-title">Defina sua nova senha</div>
+        <label>Nova senha<input autocomplete="new-password" id="recoveryPassword" minlength="6" placeholder="mínimo 6 caracteres" required type="password"/></label>
+        <label>Confirmar senha<input autocomplete="new-password" id="recoveryPasswordConfirm" minlength="6" placeholder="repita a nova senha" required type="password"/></label>
+        <button class="primary-btn auth-main-btn" type="submit">ATUALIZAR SENHA</button>
+      </form>
+      <div class="auth-message" id="authMessage"></div>
+    </section>
+  </div>
 </div>
 <div class="modal hidden fixed-modal" id="factionModal">
 <div class="modal-card onboarding-card">
@@ -221,7 +246,7 @@
   <div class="modal-card wide-card mission-modal-card">
     <div class="modal-header">
       <div>
-        <div class="eyebrow">MISSION CONTROL</div>
+        <div class="eyebrow">CENTRAL DE MISSÕES</div>
         <h2>Painel de Missões</h2>
       </div>
       <button class="small-btn" id="closeMission">Fechar</button>
@@ -238,7 +263,7 @@
     <div class="modal-header">
       <div>
         <div class="eyebrow">PORTAIS ASTRAIS</div>
-        <h2>Materializador do Portal</h2><div class="gate-protocol-tabs" id="gateProtocolTabs"><button class="small-btn active" data-gate-protocol="alpha">AURORA</button><button class="small-btn" data-gate-protocol="beta" disabled title="Bloqueado">NEXUS 🔒</button><button class="small-btn" data-gate-protocol="gamma" disabled title="Bloqueado">ECLIPSE 🔒</button></div>
+        <h2>Materializador do Portal</h2><div class="gate-protocol-tabs" id="gateProtocolTabs"><button class="small-btn active" data-gate-protocol="alpha">AURORA</button><button class="small-btn" data-gate-protocol="beta" disabled>NEXUS 🔒</button><button class="small-btn" data-gate-protocol="gamma" disabled>ECLIPSE 🔒</button></div>
       </div>
       <button class="small-btn" id="closeGate">Fechar</button>
     </div>
@@ -319,7 +344,7 @@
       <div><div class="eyebrow">ARENA PVP • 10 BATALHAS POR DIA</div><h2>Duelo de Pilotos</h2></div>
       <div class="arena-header-actions"><button class="ghost-btn" id="arenaRefresh">ATUALIZAR</button><button class="small-btn" id="closeArena">Fechar</button></div>
     </div>
-    <div class="arena-rule-banner"><b>10 batalhas por dia.</b> Duelos usam PLS-1 + CMT-1 e o limite renova à meia-noite.</div>
+    <div class="arena-rule-banner">Escolha um piloto, entre em combate e acompanhe o duelo em tempo real. Limite diário: <b>10 batalhas</b>.</div>
     <div class="arena-summary">
       <div><span>ATAQUES RESTANTES</span><b id="arenaAttacksLeft">10 / 10</b></div>
       <div><span>RATING</span><b id="arenaRating">1000</b></div>
@@ -399,7 +424,7 @@
       <div><div class="eyebrow">ALIANÇAS • COFRE COMPARTILHADO</div><h2>Clã / Aliança</h2></div>
       <div class="arena-header-actions"><button class="ghost-btn" id="clanRefresh">ATUALIZAR</button><button class="small-btn" id="closeClan">Fechar</button></div>
     </div>
-    <div id="clanContent" class="clan-content"><div class="muted">Carregando dados da aliança...</div></div>
+<div id="clanContent" class="clan-content"><div class="muted">Carregando dados da aliança...</div></div>
   </div>
 </div>
 
@@ -410,7 +435,8 @@
       <div><div class="eyebrow">GUERRA TOTAL</div><h2>WARFRONT</h2></div>
       <div class="arena-header-actions"><button class="ghost-btn" id="warfrontRefresh">ATUALIZAR</button><button class="small-btn" id="closeWarfront">Fechar</button></div>
     </div>
-        <div id="warfrontContent" class="warfront-content"><div class="muted">Sincronizando frente de guerra...</div></div>
+    <div class="warfront-rule-banner"><b>WORLD BOSS + GUERRA DE CLÃS + BLUEPRINTS:</b> cause dano no NEMESIS PRIME, dispute pontos com clãs rivais, encontre fragmentos raros e evolua a habilidade da sua classe de nave.</div>
+    <div id="warfrontContent" class="warfront-content"><div class="muted">Sincronizando frente de guerra...</div></div>
   </div>
 </div>
 
@@ -436,15 +462,9 @@
         </div>
       </section>
       <section class="settings-section">
-        <div class="settings-title"><div><b>ÁUDIO</b><small>Laser, mísseis, impactos, explosões, alertas e efeitos do jogo.</small></div><span id="audioVolumeValue">70%</span></div>
-        <div class="audio-settings-row">
-          <label class="audio-toggle"><input type="checkbox" id="audioEnabledToggle" checked/> Efeitos sonoros</label>
-          <label class="audio-volume">Volume <input type="range" id="audioVolumeRange" min="0" max="100" step="5" value="70"/></label>
-        </div>
-      </section>
-      <section class="settings-section">
         <div class="settings-title"><div><b>VISIBILIDADE DO HUD</b><small>Escolha o que fica visível durante o jogo.</small></div></div>
         <div class="hud-settings-grid" id="hudSettingsGrid">
+          <label><input type="checkbox" data-hud-key="player" checked/> Jogador</label>
           <label><input type="checkbox" data-hud-key="ship" checked/> Nave</label>
           <label><input type="checkbox" data-hud-key="pet" checked/> AUX-9</label>
           <label><input type="checkbox" data-hud-key="missions" checked/> Missões ativas</label>
@@ -454,11 +474,15 @@
           <label><input type="checkbox" data-hud-key="gate" checked/> Portal Astral</label>
         </div>
       </section>
+      <section class="settings-section">
+        <div class="settings-title"><div><b>ÁUDIO</b><small>Efeitos de armas, impactos, explosões e interface.</small></div></div>
+        <label class="audio-setting"><input type="checkbox" id="audioEnabledToggle" checked/> Som de batalha ativado</label>
+      </section>
     </div>
 
     <div class="settings-panel hidden" id="settingsRankingPanel">
       <section class="settings-section ranking-settings-section">
-        <div class="settings-title"><div><b>PATENTES & RANKING</b><small>Patentes, posição e desempenho dos pilotos.</small></div><button class="ghost-btn" id="rankingRefreshBtn">ATUALIZAR</button></div>
+        <div class="settings-title"><div><b>PATENTES & RANKING</b><small>Ranking por pontos inspirado no padrão clássico do Stellar Legacy, com patente especial para administradores.</small></div><button class="ghost-btn" id="rankingRefreshBtn">ATUALIZAR</button></div>
         <div class="ranking-hero-grid">
           <article class="ranking-board ranking-hero-card">
             <div class="ranking-board-title">MINHA PATENTE</div>
@@ -545,7 +569,7 @@
 </div>
 <button class="small-btn" id="closeMap">Fechar</button>
 </div>
-<div class="muted" style="margin-bottom:10px">Seu setor atual e as rotas disponíveis aparecem destacados.</div>
+<div class="muted" style="margin-bottom:10px">Seu mapa atual recebe destaque. Os mapas da sua facção aparecem iluminados e as rotas seguem a lógica clássica.</div>
 
 <div class="map-network" id="mapNetwork"></div>
 </div>
@@ -570,7 +594,7 @@
       <div><div class="eyebrow">STELLAR PREMIUM</div><h2>Loja Premium</h2></div>
       <div class="premium-header-actions"><span class="premium-mode-chip" id="premiumModeChip">CATÁLOGO</span><button class="small-btn" id="closePremium">Fechar</button></div>
     </div>
-    <div class="premium-benefits" id="premiumBenefits"></div>
+<div class="premium-benefits" id="premiumBenefits"></div>
     <div class="premium-product-grid" id="premiumProductGrid"><div class="muted">Carregando catálogo Premium...</div></div>
   </div>
 </div>
@@ -621,6 +645,6 @@
   </div>
 </div>
 </div>
-<script src="/game.js?v=13.5.0" type="module"></script>
+<script src="/game.js?v=13.4.0" type="module"></script>
 </body>
 </html>
