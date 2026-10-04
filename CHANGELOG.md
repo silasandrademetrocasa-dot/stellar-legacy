@@ -1,3 +1,11 @@
+## V17.6.0 — MAPS + PORTALS + ENVIRONMENT REVAMP
+- Novos fundos V17 otimizados para X-1, X-2, X-3, X-4, 4-1, 4-2, 4-3, AURORA, NEXUS e ECLIPSE.
+- Iluminação ambiente própria por setor, adaptada ao modo de qualidade.
+- Portais com cores por rota/destino e efeitos reduzidos automaticamente em dispositivos mais fracos.
+- Base X-1 refinada e safe-zone visual menos invasiva.
+- Recursos e caixas mantêm sprites originais, com iluminação mais leve.
+- Naves, NPCs, AUX e drones não foram alterados.
+
 ## V17.5.3 — POSITION PERSISTENCE HOTFIX
 - Posição da nave agora persiste corretamente ao atualizar/reabrir o jogo.
 - Checkpoint por mapa/território evita fallback indevido para a base.

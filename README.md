@@ -1,3 +1,7 @@
+# Stellar Legacy V17.6.0 — Maps + Portals + Environment Revamp
+
+Atualização visual de cenário, iluminação, base e portais, preservando todos os sprites V17 de entidades.
+
 # Stellar Legacy V17.5.1 — Event Cleanup Hotfix
 
 Visual pass focado em NPCs e bosses, preservando gameplay e o Performance Pass da V17.4.

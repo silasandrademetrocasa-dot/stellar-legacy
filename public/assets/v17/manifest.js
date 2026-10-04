@@ -1,9 +1,9 @@
 export const GAME_ASSETS = {
   branding: {
-    logo: '/assets/v8/branding/logo-v8.webp',
-    earth: '/assets/v8/branding/earth.webp',
-    mars: '/assets/v8/branding/mars.webp',
-    jupiter: '/assets/v8/branding/jupiter.webp'
+    logo: '/assets/v8/branding/logo-v8.png',
+    earth: '/assets/v8/branding/earth.png',
+    mars: '/assets/v8/branding/mars.png',
+    jupiter: '/assets/v8/branding/jupiter.png'
   },
   ships: {
     phoenix: '/assets/v17/ships/aurora.webp',
@@ -159,45 +159,45 @@ export const GAME_ASSETS = {
     ammoAutoBuyCpu: '/assets/v17/equipment/auto-restock.webp'
   },
   ammo: {
-    lcb10: '/assets/v8/ammo/pls1.webp',
-    mcb25: '/assets/v8/ammo/pls2.webp',
-    mcb50: '/assets/v8/ammo/pls3.webp',
-    ucb100: '/assets/v8/ammo/pls4.webp',
-    sab50: '/assets/v8/ammo/pls3.webp',
-    r310: '/assets/v8/ammo/cmt1.webp',
-    plt2026: '/assets/v8/ammo/cmt2.webp',
-    plt2021: '/assets/v8/ammo/cmt3.webp',
-    plt3030: '/assets/v8/ammo/cmt4.webp'
+    lcb10: '/assets/v8/ammo/pls1.png',
+    mcb25: '/assets/v8/ammo/pls2.png',
+    mcb50: '/assets/v8/ammo/pls3.png',
+    ucb100: '/assets/v8/ammo/pls4.png',
+    sab50: '/assets/v8/ammo/pls3.png',
+    r310: '/assets/v8/ammo/cmt1.png',
+    plt2026: '/assets/v8/ammo/cmt2.png',
+    plt2021: '/assets/v8/ammo/cmt3.png',
+    plt3030: '/assets/v8/ammo/cmt4.png'
   },
   resources: {
-    Prometium: '/assets/v8/resources/ferron.webp',
-    Endurium: '/assets/v8/resources/cryon.webp',
-    Terbium: '/assets/v8/resources/virel.webp',
-    Prometid: '/assets/v8/resources/ferrite.webp',
-    Duranium: '/assets/v8/resources/duracite.webp',
-    Promerium: '/assets/v8/resources/solarium.webp',
-    Xenomit: '/assets/v8/resources/voidite.webp',
-    credits: '/assets/v8/resources/credits.webp'
+    Prometium: '/assets/v8/resources/ferron.png',
+    Endurium: '/assets/v8/resources/cryon.png',
+    Terbium: '/assets/v8/resources/virel.png',
+    Prometid: '/assets/v8/resources/ferrite.png',
+    Duranium: '/assets/v8/resources/duracite.png',
+    Promerium: '/assets/v8/resources/solarium.png',
+    Xenomit: '/assets/v8/resources/voidite.png',
+    credits: '/assets/v8/resources/credits.png'
   },
   loot: {
-    cargo: '/assets/v8/loot/cargo-box.webp',
-    mystery: '/assets/v8/loot/mystery-box.webp',
-    repair: '/assets/v8/loot/repair.webp',
-    energy: '/assets/v8/loot/energy.webp'
+    cargo: '/assets/v8/loot/cargo-box.png',
+    mystery: '/assets/v8/loot/mystery-box.png',
+    repair: '/assets/v8/loot/repair.png',
+    energy: '/assets/v8/loot/energy.png'
   },
   bases: {
-    orbitalStation: '/assets/v10/base/orbital-station.webp'
+    orbitalStation: '/assets/v17/environment/orbital-station.webp'
   },
   backgrounds: {
-    x1: '/assets/v8/backgrounds/safe-zone.jpg',
-    x2: '/assets/v8/backgrounds/asteroid-field.jpg',
-    x3: '/assets/v8/backgrounds/purple-nebula.jpg',
-    x4: '/assets/v8/backgrounds/fire-sector.jpg',
-    b41: '/assets/v8/backgrounds/deep-battle.jpg',
-    b42: '/assets/v8/backgrounds/alien-core.jpg',
-    b43: '/assets/v8/backgrounds/fire-sector.jpg',
-    ggAlpha: '/assets/v8/backgrounds/alien-core.jpg',
-    ggBeta: '/assets/v8/backgrounds/purple-nebula.jpg',
-    ggGamma: '/assets/v8/backgrounds/fire-sector.jpg'
+    x1: '/assets/v17/environment/x1.webp',
+    x2: '/assets/v17/environment/x2.webp',
+    x3: '/assets/v17/environment/x3.webp',
+    x4: '/assets/v17/environment/x4.webp',
+    b41: '/assets/v17/environment/b41.webp',
+    b42: '/assets/v17/environment/b42.webp',
+    b43: '/assets/v17/environment/b43.webp',
+    ggAlpha: '/assets/v17/environment/ggAlpha.webp',
+    ggBeta: '/assets/v17/environment/ggBeta.webp',
+    ggGamma: '/assets/v17/environment/ggGamma.webp'
   }
 };
