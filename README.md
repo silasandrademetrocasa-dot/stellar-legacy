@@ -1,4 +1,6 @@
-# Stellar Legacy V16.1.0 — ECONOMY GUARD (ETAPA 2)
+# Stellar Legacy V16.2.0 — CHAT DOCK (ETAPA 3)
+
+Chat online persistente com canais GLOBAL, ALIANÇA e PV. O rodapé agora usa um dock fluido com CHAT à esquerda, MUNIÇÕES no centro e MAPA à direita; quando qualquer painel é recolhido ou ocultado, os demais ocupam o espaço automaticamente.
 
 A segunda etapa da V16 mantém o LIVE OPS da V16.0 e move transações econômicas críticas para o Render: AUTO BUY, Trader, vendas, slots do AUX-9, Núcleos Quânticos e Materializador. O navegador exibe a interface, mas preço/cobrança/recompensa são validados no servidor usando o catálogo do Supabase.
 

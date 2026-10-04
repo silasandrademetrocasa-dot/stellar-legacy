@@ -653,3 +653,29 @@ export async function economyActionOnline(action, payload = {}) {
   }, false);
 }
 
+
+
+// ===================== V16.2 CHAT DOCK =====================
+export async function getChatHistoryOnline({channel='global', recipientCallsign='', limit=60}={}) {
+  const rows = await authedSupabaseFetch('/rest/v1/rpc/get_chat_history_v16', {
+    method: 'POST',
+    body: JSON.stringify({
+      p_channel: String(channel || 'global'),
+      p_recipient_callsign: recipientCallsign ? String(recipientCallsign).trim().slice(0,24) : null,
+      p_limit: Math.max(1, Math.min(100, Math.round(Number(limit)||60))),
+    }),
+  });
+  return Array.isArray(rows) ? rows : rows ? [rows] : [];
+}
+
+export async function sendChatMessageOnline({channel='global', body='', recipientCallsign=''}={}) {
+  const rows = await authedSupabaseFetch('/rest/v1/rpc/send_chat_message_v16', {
+    method: 'POST',
+    body: JSON.stringify({
+      p_channel: String(channel || 'global'),
+      p_body: String(body || '').trim().slice(0,240),
+      p_recipient_callsign: recipientCallsign ? String(recipientCallsign).trim().slice(0,24) : null,
+    }),
+  });
+  return Array.isArray(rows) ? rows[0] || null : rows || null;
+}

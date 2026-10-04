@@ -1,3 +1,13 @@
+# CHANGELOG
+
+## V16.2.0 — CHAT DOCK
+- Chat persistente GLOBAL / ALIANÇA / PV via Supabase RPC.
+- Dock inferior fluido CHAT | MUNIÇÕES | MAPA, com reflow automático ao esconder ou recolher painéis.
+- Chat minimizável, estado persistido e opção de visibilidade no HUD.
+- PV por callsign único e histórico privado restrito aos dois participantes.
+- Limite de 240 caracteres e rate-limit server-side já aplicado no banco.
+- Polling leve de chat sem interferir no Shared Universe/WebSocket de combate.
+
 # V16.1.0 — ETAPA 2 — ECONOMY GUARD
 
 - AUTO BUY de laser/míssil passou a comprar pelo Render com preço do Supabase.

@@ -1,7 +1,7 @@
-import { FACTIONS, SHIPS, ITEMS, LASER_AMMO, ROCKETS, NPC_TYPES, MAPS, RESOURCES } from './data.js?v=16.1.0';
-import { GAME_ASSETS } from './assets/v8/manifest.js?v=16.1.0';
-import { signUp, signIn, requestPasswordReset, restorePasswordRecoveryFromUrl, restoreSession, signOutLocal, checkGameSession, endGameSession, getUser, getSessionCredentials, loadCloudSave, saveCloudSave, updateCallsign, updatePassword, loadRankings, loadAuctionBids, saveAuctionBidOnline, markAuctionBidStatusOnline, loadAuctionMarket, upsertPlayerPresenceOnline, loadMapPresenceOnline, removePlayerPresenceOnline, queuePvpAttackOnline, consumePvpDamageEventsOnline, syncArenaProfileOnline, loadArenaState, loadArenaDailyRewardStatus, claimArenaDailyReward, loadArenaOpponents, loadArenaHistory, arenaAttackOnline, listClansOnline, loadMyClanOnline, createClanOnline, joinClanOnline, leaveClanOnline, transferClanCreditsOnline, claimClanCreditGrantsOnline, recordClanAlienKillOnline, getPremiumShopOnline, testPurchasePremiumOnline, loadWarfrontStateOnline, hitWorldBossOnline, claimWorldBossRewardOnline, declareClanWarOnline, recordClanWarScoreOnline, loadLiveOpsOnline, purchaseLiveCatalogOnline, economyActionOnline } from './api.js?v=16.1.0';
-import { SharedUniverseClient } from './world.js?v=16.1.0';
+import { FACTIONS, SHIPS, ITEMS, LASER_AMMO, ROCKETS, NPC_TYPES, MAPS, RESOURCES } from './data.js?v=16.2.0';
+import { GAME_ASSETS } from './assets/v8/manifest.js?v=16.2.0';
+import { signUp, signIn, requestPasswordReset, restorePasswordRecoveryFromUrl, restoreSession, signOutLocal, checkGameSession, endGameSession, getUser, getSessionCredentials, loadCloudSave, saveCloudSave, updateCallsign, updatePassword, loadRankings, loadAuctionBids, saveAuctionBidOnline, markAuctionBidStatusOnline, loadAuctionMarket, upsertPlayerPresenceOnline, loadMapPresenceOnline, removePlayerPresenceOnline, queuePvpAttackOnline, consumePvpDamageEventsOnline, syncArenaProfileOnline, loadArenaState, loadArenaDailyRewardStatus, claimArenaDailyReward, loadArenaOpponents, loadArenaHistory, arenaAttackOnline, listClansOnline, loadMyClanOnline, createClanOnline, joinClanOnline, leaveClanOnline, transferClanCreditsOnline, claimClanCreditGrantsOnline, recordClanAlienKillOnline, getPremiumShopOnline, testPurchasePremiumOnline, loadWarfrontStateOnline, hitWorldBossOnline, claimWorldBossRewardOnline, declareClanWarOnline, recordClanWarScoreOnline, loadLiveOpsOnline, purchaseLiveCatalogOnline, economyActionOnline, getChatHistoryOnline, sendChatMessageOnline } from './api.js?v=16.2.0';
+import { SharedUniverseClient } from './world.js?v=16.2.0';
 
 const canvas = document.querySelector('#game');
 const ctx = canvas.getContext('2d');
@@ -182,6 +182,7 @@ const ui = {
   saleConfirmModal: $('#saleConfirmModal'), saleConfirmEyebrow: $('#saleConfirmEyebrow'), saleConfirmTitle: $('#saleConfirmTitle'), saleConfirmItem: $('#saleConfirmItem'), saleConfirmCopy: $('#saleConfirmCopy'), saleConfirmValueLabel: $('#saleConfirmValueLabel'), saleConfirmValue: $('#saleConfirmValue'), saleConfirmCancel: $('#saleConfirmCancel'), saleConfirmAccept: $('#saleConfirmAccept'),
   shopBtn: $('#shopBtn'), shopModal: $('#shopModal'), closeShop: $('#closeShop'), shopTabs: $('#shopTabs'), shopGrid: $('#shopGrid'), shopCredits: $('#shopCredits'), shopStellarium: $('#shopStellarium'),
   hangarBtn: $('#hangarBtn'), hangarModal: $('#hangarModal'), closeHangar: $('#closeHangar'), hangarTabs: $('#hangarTabs'), hangarContent: $('#hangarContent'), hangarShipName: $('#hangarShipName'),
+  bottomHudDock: $('#bottomHudDock'), chatDock: $('#chatDock'), chatToggle: $('#chatToggle'), chatBody: $('#chatBody'), chatTabs: $('#chatTabs'), chatStatus: $('#chatStatus'), chatChannelChip: $('#chatChannelChip'), chatPrivateRow: $('#chatPrivateRow'), chatPrivateCallsign: $('#chatPrivateCallsign'), chatPrivateOpen: $('#chatPrivateOpen'), chatFeed: $('#chatFeed'), chatForm: $('#chatForm'), chatInput: $('#chatInput'), chatSend: $('#chatSend'),
   loginModal: $('#loginModal'), loginTabBtn: $('#loginTabBtn'), registerTabBtn: $('#registerTabBtn'), loginForm: $('#loginForm'), registerForm: $('#registerForm'), recoveryForm: $('#recoveryForm'), forgotPasswordBtn: $('#forgotPasswordBtn'), recoveryPassword: $('#recoveryPassword'), recoveryPasswordConfirm: $('#recoveryPasswordConfirm'), loginEmail: $('#loginEmail'), loginPassword: $('#loginPassword'), registerCallsign: $('#registerCallsign'), registerEmail: $('#registerEmail'), registerPassword: $('#registerPassword'), authMessage: $('#authMessage'), userLabel: $('#userLabel'), rankChip: $('#rankChip'), syncLabel: $('#syncLabel'), worldSyncLabel: $('#worldSyncLabel'), logoutBtn: $('#logoutBtn'), safeZoneLabel: $('#safeZoneLabel'), cargoUsed: $('#cargoUsed'), cargoMax: $('#cargoMax'), cargoBtn: $('#cargoBtn'), cargoModal: $('#cargoModal'), closeCargo: $('#closeCargo'), cargoSummary: $('#cargoSummary'), cargoGrid: $('#cargoGrid'), sellAllCargo: $('#sellAllCargo'), configBtn: $('#configBtn'), configModal: $('#configModal'), closeConfig: $('#closeConfig'), qualityButtons: $('#qualityButtons'), qualityCurrentBadge: $('#qualityCurrentBadge'), audioEnabledToggle: $('#audioEnabledToggle'), audioVolumeRange: $('#audioVolumeRange'), audioVolumeValue: $('#audioVolumeValue'), hudSettingsGrid: $('#hudSettingsGrid'), settingsTabs: $('#settingsTabs'), settingsGamePanel: $('#settingsGamePanel'), settingsRankingPanel: $('#settingsRankingPanel'), settingsAccountPanel: $('#settingsAccountPanel'), rankingRefreshBtn: $('#rankingRefreshBtn'), rankingMyPatent: $('#rankingMyPatent'), rankingPatentGuide: $('#rankingPatentGuide'), rankingPoints: $('#rankingPoints'), rankingArena: $('#rankingArena'), rankingAliens: $('#rankingAliens'), rankingGg: $('#rankingGg'), rankingUpdated: $('#rankingUpdated'), accountEmail: $('#accountEmail'), accountCallsign: $('#accountCallsign'), accountSaveName: $('#accountSaveName'), accountNameStatus: $('#accountNameStatus'), accountNewPassword: $('#accountNewPassword'), accountConfirmPassword: $('#accountConfirmPassword'), accountSavePassword: $('#accountSavePassword'), accountPasswordStatus: $('#accountPasswordStatus'), accountSummary: $('#accountSummary'),
 };
 
@@ -1404,7 +1405,7 @@ const state = {
   currentMap: MAPS.x1, camera: { x: 620, y: MAPS.x1.world.h/2 }, target: null, pvpShotPending:false, pvpRocketPending:false, enemies: [], loot: [], ores: [], particles: [], fx: [], rocketFx: [], landmarks: [], enemyRespawns: [], oreRespawns: [], lastPortalAt: 0, radarRange: 1500, jumping: false,
   lastPlayerDamageAt:nowSec(), repairFxAt:0, shieldRepairFxAt:0,
   pointerNavActive:false, pointerNavId:null, lastTargetTapId:null, lastTargetTapAt:0, combatAlertText:'', combatAlertKind:'', combatAlertUntil:0, lowHpWarned:false, eventSpawnKey:'', missionHudPage:0, missionHudSignature:'', portalCombatUntil:0,
-  shopTab: 'ships', hangarTab: 'ships', toastTimer: null, ammoUiExpanded: true, statsUiExpanded: true, playerUiExpanded: true, missionUiExpanded: true, petUiExpanded: true, minimapUiExpanded: true, topMetaExpanded: true, topbarDockExpanded: true, targetLockUiExpanded:true, galaxyEventUiExpanded:true,
+  shopTab: 'ships', hangarTab: 'ships', toastTimer: null, ammoUiExpanded: true, statsUiExpanded: true, playerUiExpanded: true, missionUiExpanded: true, petUiExpanded: true, minimapUiExpanded: true, chatUiExpanded: true, topMetaExpanded: true, topbarDockExpanded: true, targetLockUiExpanded:true, galaxyEventUiExpanded:true,
   stars: Array.from({length:240},()=>({x:Math.random()*5200-2600,y:Math.random()*5200-2600,r:Math.random()*1.5+.3,a:Math.random()*.6+.2})),
 };
 
@@ -1460,6 +1461,72 @@ function applyGalaxyEventUiState(){
 function loadGalaxyEventUiState(){try{const raw=localStorage.getItem('stellar_galaxy_event_ui_expanded');if(raw!==null)state.galaxyEventUiExpanded=raw==='1';}catch{}applyGalaxyEventUiState();}
 function toggleGalaxyEventUi(){state.galaxyEventUiExpanded=!state.galaxyEventUiExpanded;try{localStorage.setItem('stellar_galaxy_event_ui_expanded',state.galaxyEventUiExpanded?'1':'0');}catch{}applyGalaxyEventUiState();}
 
+
+// ===================== V16.2 CHAT DOCK • GLOBAL / ALIANÇA / PV =====================
+const CHAT_POLL_MS=1100;
+const CHAT_STATE_KEY='stellar_chat_v162';
+const chatRuntime={channel:'global',pvTarget:'',busy:false,lastPollAt:0,lastSignature:'',messages:[]};
+function loadChatPrefs(){
+  try{const raw=JSON.parse(localStorage.getItem(CHAT_STATE_KEY)||'null');if(raw&&typeof raw==='object'){if(['global','clan','private'].includes(raw.channel))chatRuntime.channel=raw.channel;if(typeof raw.pvTarget==='string')chatRuntime.pvTarget=raw.pvTarget.slice(0,24);if(raw.expanded!==undefined)state.chatUiExpanded=!!raw.expanded;}}catch{}
+  if(ui.chatPrivateCallsign)ui.chatPrivateCallsign.value=chatRuntime.pvTarget;
+  applyChatUiState();renderChatTabs();renderChatMessages();
+}
+function saveChatPrefs(){try{localStorage.setItem(CHAT_STATE_KEY,JSON.stringify({channel:chatRuntime.channel,pvTarget:chatRuntime.pvTarget,expanded:state.chatUiExpanded}));}catch{}}
+function applyChatUiState(){
+  if(!ui.chatDock)return;ui.chatDock.classList.toggle('collapsed',!state.chatUiExpanded);
+  if(ui.chatToggle){ui.chatToggle.textContent=state.chatUiExpanded?'▾':'▸';ui.chatToggle.setAttribute('aria-label',state.chatUiExpanded?'Minimizar chat':'Expandir chat');}
+  requestAnimationFrame(layoutHudPanels);
+}
+function toggleChatUi(){state.chatUiExpanded=!state.chatUiExpanded;saveChatPrefs();applyChatUiState();syncHudButton();}
+function chatChannelLabel(){return chatRuntime.channel==='clan'?'ALIANÇA':chatRuntime.channel==='private'?'PV':'GLOBAL';}
+function renderChatTabs(){
+  ui.chatTabs?.querySelectorAll('[data-chat-channel]').forEach(b=>b.classList.toggle('active',b.dataset.chatChannel===chatRuntime.channel));
+  ui.chatPrivateRow?.classList.toggle('hidden',chatRuntime.channel!=='private');
+  if(ui.chatChannelChip)ui.chatChannelChip.textContent=chatRuntime.channel==='private'?(chatRuntime.pvTarget?`PV • ${chatRuntime.pvTarget.toUpperCase()}`:'PV'):chatChannelLabel();
+  if(ui.chatStatus)ui.chatStatus.textContent=authenticated?'ONLINE':'OFFLINE';
+  if(ui.chatInput)ui.chatInput.placeholder=chatRuntime.channel==='private'&&!chatRuntime.pvTarget?'Informe o callsign acima...':'Digite uma mensagem...';
+}
+function chatMessageSignature(rows){return rows.map(r=>`${r.id}:${r.created_at}`).join('|');}
+function renderChatMessages(){
+  if(!ui.chatFeed)return;const rows=Array.isArray(chatRuntime.messages)?[...chatRuntime.messages].reverse():[];
+  if(chatRuntime.channel==='private'&&!chatRuntime.pvTarget){ui.chatFeed.innerHTML='<div class="chat-empty">Digite o callsign do piloto para abrir uma conversa privada.</div>';return;}
+  if(!rows.length){ui.chatFeed.innerHTML=`<div class="chat-empty">${chatRuntime.channel==='clan'?'Nenhuma mensagem da aliança ainda.':chatRuntime.channel==='private'?'Nenhuma mensagem nesta conversa.':'Nenhuma mensagem global ainda.'}</div>`;return;}
+  const me=String(getUser()?.id||'');
+  ui.chatFeed.innerHTML=rows.map(m=>{
+    const own=String(m.sender_user_id||'')===me,when=new Date(m.created_at||Date.now()),hh=String(when.getHours()).padStart(2,'0'),mm=String(when.getMinutes()).padStart(2,'0');
+    const target=m.channel==='private'&&!own?'<span class="chat-private-mark">PV</span>':'';
+    return `<div class="chat-line ${own?'own':''}"><div class="chat-line-meta">${target}<b>${escHtml(m.sender_callsign||'Pilot')}</b><span>${hh}:${mm}</span></div><div class="chat-line-body">${escHtml(m.body||'')}</div></div>`;
+  }).join('');
+  ui.chatFeed.scrollTop=ui.chatFeed.scrollHeight;
+}
+async function refreshChatHistory(force=false){
+  if(!authenticated||!ui.chatDock||hudVisibility.chat===false||chatRuntime.busy)return;
+  const now=Date.now();if(!force&&now-chatRuntime.lastPollAt<CHAT_POLL_MS)return;
+  if(chatRuntime.channel==='private'&&!chatRuntime.pvTarget){chatRuntime.messages=[];renderChatMessages();return;}
+  chatRuntime.busy=true;chatRuntime.lastPollAt=now;
+  try{
+    const rows=await getChatHistoryOnline({channel:chatRuntime.channel,recipientCallsign:chatRuntime.pvTarget,limit:60});
+    const sig=chatMessageSignature(rows);if(force||sig!==chatRuntime.lastSignature){chatRuntime.messages=rows;chatRuntime.lastSignature=sig;renderChatMessages();}
+    if(ui.chatStatus)ui.chatStatus.textContent='ONLINE';
+  }catch(err){if(ui.chatStatus)ui.chatStatus.textContent='ERRO';if(force)showToast(err.message||'Falha ao atualizar chat');}
+  finally{chatRuntime.busy=false;}
+}
+function switchChatChannel(channel){
+  if(!['global','clan','private'].includes(channel))return;chatRuntime.channel=channel;chatRuntime.lastSignature='';chatRuntime.messages=[];saveChatPrefs();renderChatTabs();renderChatMessages();refreshChatHistory(true);
+  if(channel==='private'&&!chatRuntime.pvTarget)setTimeout(()=>ui.chatPrivateCallsign?.focus(),0);
+}
+function openPrivateChatTarget(){
+  const value=String(ui.chatPrivateCallsign?.value||'').trim().replace(/\s+/g,' ').slice(0,24);chatRuntime.pvTarget=value;chatRuntime.lastSignature='';chatRuntime.messages=[];saveChatPrefs();renderChatTabs();renderChatMessages();if(value)refreshChatHistory(true);
+}
+async function sendChatNow(){
+  if(!authenticated||chatRuntime.busy)return;const body=String(ui.chatInput?.value||'').trim();if(!body)return;
+  if(chatRuntime.channel==='private'&&!chatRuntime.pvTarget){showToast('Informe o callsign do piloto para enviar PV');ui.chatPrivateCallsign?.focus();return;}
+  chatRuntime.busy=true;if(ui.chatSend)ui.chatSend.disabled=true;
+  try{await sendChatMessageOnline({channel:chatRuntime.channel,body,recipientCallsign:chatRuntime.pvTarget});if(ui.chatInput)ui.chatInput.value='';chatRuntime.lastSignature='';}
+  catch(err){showToast(err.message||'Não foi possível enviar a mensagem');}
+  finally{chatRuntime.busy=false;if(ui.chatSend)ui.chatSend.disabled=false;refreshChatHistory(true);}
+}
+
 function applyTopbarDockState(){
   if(!ui.topbar)return;
   ui.topbar.classList.toggle('dock-hidden',!state.topbarDockExpanded);
@@ -1481,29 +1548,30 @@ function applyTopMetaUiState(){ if(!ui.topbar) return; ui.topbar.classList.toggl
 function loadTopMetaUiState(){ try{ const raw=localStorage.getItem('stellar_top_meta_expanded'); if(raw!==null) state.topMetaExpanded = raw==='1'; }catch{} applyTopMetaUiState(); }
 function toggleTopMetaUi(){ state.topMetaExpanded=!state.topMetaExpanded; try{ localStorage.setItem('stellar_top_meta_expanded', state.topMetaExpanded?'1':'0'); }catch{} applyTopMetaUiState(); syncHudButton(); }
 function setHudState(expanded){
-  state.ammoUiExpanded = expanded; state.statsUiExpanded = expanded; state.playerUiExpanded = expanded; state.minimapUiExpanded = expanded; state.topMetaExpanded = expanded;
+  state.ammoUiExpanded = expanded; state.statsUiExpanded = expanded; state.playerUiExpanded = expanded; state.minimapUiExpanded = expanded; state.chatUiExpanded = expanded; state.topMetaExpanded = expanded;
   try{
     localStorage.setItem('stellar_ammo_ui_expanded', expanded?'1':'0');
     localStorage.setItem('stellar_stats_ui_expanded', expanded?'1':'0');
     localStorage.setItem('stellar_player_ui_expanded', expanded?'1':'0');
     localStorage.setItem('stellar_minimap_ui_expanded', expanded?'1':'0');
+    localStorage.setItem(CHAT_STATE_KEY,JSON.stringify({channel:chatRuntime.channel,pvTarget:chatRuntime.pvTarget,expanded}));
     localStorage.setItem('stellar_top_meta_expanded', expanded?'1':'0');
   }catch{}
-  applyAmmoUiState(); applyStatsUiState(); applyPlayerUiState(); applyMinimapUiState(); applyTopMetaUiState(); syncHudButton();
+  applyAmmoUiState(); applyStatsUiState(); applyPlayerUiState(); applyMinimapUiState(); applyChatUiState(); applyTopMetaUiState(); syncHudButton();
 }
 function toggleHudUi(){
-  const anyExpanded = state.ammoUiExpanded || state.statsUiExpanded || state.playerUiExpanded || state.minimapUiExpanded || state.topMetaExpanded;
+  const anyExpanded = state.ammoUiExpanded || state.statsUiExpanded || state.playerUiExpanded || state.minimapUiExpanded || state.chatUiExpanded || state.topMetaExpanded;
   setHudState(!anyExpanded ? true : false);
 }
 function syncHudButton(){
   if(!ui.hudToggle) return;
-  const allCollapsed = !state.ammoUiExpanded && !state.statsUiExpanded && !state.playerUiExpanded && !state.minimapUiExpanded && !state.topMetaExpanded;
+  const allCollapsed = !state.ammoUiExpanded && !state.statsUiExpanded && !state.playerUiExpanded && !state.minimapUiExpanded && !state.chatUiExpanded && !state.topMetaExpanded;
   ui.hudToggle.textContent = allCollapsed ? 'HUD +' : 'HUD';
   ui.hudToggle.classList.toggle('active-hud', !allCollapsed);
 }
 
 const HUD_VISIBILITY_KEY='stellar_hud_visibility_v2';
-const HUD_VISIBILITY_DEFAULT={player:true,ship:true,pet:true,missions:true,activity:true,minimap:true,weapons:true,gate:true};
+const HUD_VISIBILITY_DEFAULT={player:true,ship:true,pet:true,missions:true,activity:true,chat:true,minimap:true,weapons:true,gate:true};
 let hudVisibility={...HUD_VISIBILITY_DEFAULT};
 function loadHudVisibility(){
   try{const raw=JSON.parse(localStorage.getItem(HUD_VISIBILITY_KEY)||'null');if(raw&&typeof raw==='object')hudVisibility={...HUD_VISIBILITY_DEFAULT,...raw};}catch{}
@@ -1516,6 +1584,7 @@ function applyHudVisibility(){
   ui.petFloatPanel?.classList.toggle('hud-user-disabled',!hudVisibility.pet);
   ui.activeMissionPanel?.classList.toggle('hud-user-disabled',!hudVisibility.missions);
   ui.activityPanel?.classList.toggle('hud-user-disabled',!hudVisibility.activity);
+  ui.chatDock?.classList.toggle('hud-user-hidden',!hudVisibility.chat);
   ui.minimapPanel?.classList.toggle('hud-user-hidden',!hudVisibility.minimap);
   ui.weaponBar?.classList.toggle('hud-user-hidden',!hudVisibility.weapons);
   ui.gateHud?.classList.toggle('hud-user-disabled',!hudVisibility.gate);
@@ -1877,6 +1946,9 @@ function layoutHudPanels(){
   const weaponVisible=!!ui.weaponBar&&getComputedStyle(ui.weaponBar).display!=='none';
   const weaponH=weaponVisible?Math.ceil(ui.weaponBar.getBoundingClientRect().height):0;
   root.style.setProperty('--weaponbar-height',`${weaponH+12}px`);
+  const bottomItems=[ui.chatDock,ui.weaponBar,ui.minimapPanel].filter(el=>el&&getComputedStyle(el).display!=='none');
+  const bottomH=bottomItems.length?Math.max(...bottomItems.map(el=>Math.ceil(el.getBoundingClientRect().height))):0;
+  root.style.setProperty('--bottom-dock-height',`${bottomH+12}px`);
 }
 function getFaction(){return progress?.profile?.faction ? FACTIONS[progress.profile.faction] : null;}
 function factionFromPrefix(prefix){
@@ -4954,6 +5026,11 @@ if(ui.closeConfig)ui.closeConfig.onclick=()=>ui.configModal.classList.add('hidde
 if(ui.baseTradePrompt)ui.baseTradePrompt.onclick=()=>{if(isAtTrader())openCargo();};
 if(ui.petGearQuickSelect)ui.petGearQuickSelect.onchange=e=>setPetGear(e.target.value);
 if(ui.shipAbilityBtn)ui.shipAbilityBtn.onclick=()=>useShipAbility();if(ui.petKamiAbilityBtn)ui.petKamiAbilityBtn.onclick=()=>triggerPetKamikaze();
+if(ui.chatToggle)ui.chatToggle.onclick=e=>{e.stopPropagation();toggleChatUi();};
+if(ui.chatTabs)ui.chatTabs.onclick=e=>{const b=e.target.closest('[data-chat-channel]');if(b)switchChatChannel(b.dataset.chatChannel);};
+if(ui.chatPrivateOpen)ui.chatPrivateOpen.onclick=()=>openPrivateChatTarget();
+if(ui.chatPrivateCallsign)ui.chatPrivateCallsign.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();openPrivateChatTarget();ui.chatInput?.focus();}});
+if(ui.chatForm)ui.chatForm.onsubmit=e=>{e.preventDefault();sendChatNow();};
 if(ui.qualityButtons)ui.qualityButtons.addEventListener('click',e=>{const b=e.target.closest('[data-quality]');if(b)applyQualityMode(b.dataset.quality);});
 if(ui.hudSettingsGrid)ui.hudSettingsGrid.addEventListener('change',e=>{const input=e.target.closest('[data-hud-key]');if(input)setHudVisibility(input.dataset.hudKey,input.checked);});
 if(ui.settingsTabs)ui.settingsTabs.addEventListener('click',e=>{const b=e.target.closest('[data-settings-tab]');if(b)switchSettingsTab(b.dataset.settingsTab);});
@@ -5013,7 +5090,7 @@ function forceLogoutBecauseSessionMoved(message='Sua conta foi acessada em outro
   clanRuntime.state=null;clanRuntime.clans=[];clanRuntime.lastAt=0;
   warfrontRuntime.state=null;warfrontRuntime.clans=[];warfrontRuntime.lastAt=0;warfrontRuntime.pendingBossDamage=0;
   premiumRuntime.state=null;premiumRuntime.lastAt=0;liveOpsRuntime.state=null;liveOpsRuntime.catalog.clear();liveOpsRuntime.lastAt=0;
-  updateClanBadge();updatePremiumBadge();
+  updateClanBadge();updatePremiumBadge();chatRuntime.messages=[];chatRuntime.lastSignature='';renderChatTabs();renderChatMessages();
   for(const modal of dismissibleModals())modal.classList.add('hidden');
   ui.factionModal.classList.add('hidden');
   ui.portalPrompt?.classList.add('hidden');
@@ -5042,7 +5119,7 @@ ui.loginForm.onsubmit=async e=>{e.preventDefault();ui.authMessage.textContent='E
 ui.registerForm.onsubmit=async e=>{e.preventDefault();ui.authMessage.textContent='Criando conta...';try{const result=await signUp({callsign:ui.registerCallsign.value,email:ui.registerEmail.value,password:ui.registerPassword.value});if(result.requires_confirmation){showAuthMode('login');ui.loginEmail.value=ui.registerEmail.value;ui.authMessage.textContent='Conta criada. Confirme o e-mail e depois entre.';return;}await afterAuth();}catch(err){ui.authMessage.textContent=err.message;}};
 if(ui.forgotPasswordBtn)ui.forgotPasswordBtn.onclick=async()=>{const email=String(ui.loginEmail?.value||'').trim();ui.authMessage.textContent='Enviando recuperação...';try{await requestPasswordReset(email);ui.authMessage.textContent='E-mail de recuperação enviado. Abra o link recebido para criar uma nova senha.';}catch(err){ui.authMessage.textContent=err.message;}};
 if(ui.recoveryForm)ui.recoveryForm.onsubmit=async e=>{e.preventDefault();const a=ui.recoveryPassword?.value||'',b=ui.recoveryPasswordConfirm?.value||'';if(a!==b){ui.authMessage.textContent='As senhas não conferem.';return;}ui.authMessage.textContent='Atualizando senha...';try{await updatePassword(a);signOutLocal();showAuthMode('login');ui.loginPassword.value='';ui.authMessage.textContent='Senha atualizada. Entre com a nova senha.';}catch(err){ui.authMessage.textContent=err.message;}};
-ui.logoutBtn.onclick=async()=>{sharedUniverse.close();sharedUniverseRuntime.ready=false;sharedUniverseRuntime.event=null;await flushCloudSave(true);await removePlayerPresenceOnline().catch(()=>{});clearOnlinePlayers();await endGameSession().catch(()=>signOutLocal());authenticated=false;progress=null;clanRuntime.state=null;clanRuntime.clans=[];clanRuntime.lastAt=0;warfrontRuntime.state=null;warfrontRuntime.clans=[];warfrontRuntime.lastAt=0;warfrontRuntime.pendingBossDamage=0;premiumRuntime.state=null;premiumRuntime.lastAt=0;updateClanBadge();updatePremiumBadge();state.target=null;player.laserFiring=false;for(const modal of dismissibleModals())modal.classList.add('hidden');ui.factionModal.classList.add('hidden');ui.portalPrompt?.classList.add('hidden');ui.baseTradePrompt?.classList.add('hidden');ui.petFloatPanel?.classList.add('hidden');ui.loginModal.classList.remove('hidden');if(ui.userLabel)ui.userLabel.textContent='—';if(ui.rankChip)ui.rankChip.textContent='Piloto Básico';if(ui.loginPassword)ui.loginPassword.value='';setSync('LOCAL','');showAuthMode('login');};
+ui.logoutBtn.onclick=async()=>{sharedUniverse.close();sharedUniverseRuntime.ready=false;sharedUniverseRuntime.event=null;await flushCloudSave(true);await removePlayerPresenceOnline().catch(()=>{});clearOnlinePlayers();await endGameSession().catch(()=>signOutLocal());authenticated=false;progress=null;clanRuntime.state=null;clanRuntime.clans=[];clanRuntime.lastAt=0;warfrontRuntime.state=null;warfrontRuntime.clans=[];warfrontRuntime.lastAt=0;warfrontRuntime.pendingBossDamage=0;premiumRuntime.state=null;premiumRuntime.lastAt=0;updateClanBadge();updatePremiumBadge();chatRuntime.messages=[];chatRuntime.lastSignature='';renderChatTabs();renderChatMessages();state.target=null;player.laserFiring=false;for(const modal of dismissibleModals())modal.classList.add('hidden');ui.factionModal.classList.add('hidden');ui.portalPrompt?.classList.add('hidden');ui.baseTradePrompt?.classList.add('hidden');ui.petFloatPanel?.classList.add('hidden');ui.loginModal.classList.remove('hidden');if(ui.userLabel)ui.userLabel.textContent='—';if(ui.rankChip)ui.rankChip.textContent='Piloto Básico';if(ui.loginPassword)ui.loginPassword.value='';setSync('LOCAL','');showAuthMode('login');};
 
 function startLoadedGame(){
   state.lastPlayerDamageAt=nowSec();
@@ -5092,6 +5169,7 @@ async function afterAuth(){
   await refreshPremiumState(true);
   await refreshLiveOpsState(true);
   startLoadedGame();
+  renderChatTabs();refreshChatHistory(true);
   updatePassBadge();
   syncAuctionBidsOnline();
   syncOnlineWorld();
@@ -5115,6 +5193,7 @@ async function boot(){
 document.body.dataset.quality=qualityMode;
 loadActivityLog();
 loadHudVisibility();
+loadChatPrefs();
 renderSettings();
 preloadAssets();
 loadAmmoUiState();
@@ -5136,6 +5215,7 @@ setInterval(()=>{
   if(!authenticated)return;
   checkGameSession().catch(()=>{});
 },3000);
+setInterval(()=>{if(authenticated)refreshChatHistory(false);},CHAT_POLL_MS);
 setInterval(()=>{if(progress){saveGame();flushCloudSave();}},7000);
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'&&progress){saveGame();flushCloudSave(true);}else if(document.visibilityState==='visible'&&authenticated){checkGameSession().catch(()=>{});}});
 let last=performance.now();function loop(t){const minFrame=1000/qualityProfile().fps;if(t-last<minFrame){requestAnimationFrame(loop);return;}const dt=Math.min((t-last)/1000,.05);last=t;update(dt);draw();requestAnimationFrame(loop);}requestAnimationFrame(loop);

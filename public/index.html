@@ -6,7 +6,7 @@
 <meta content="width=device-width,initial-scale=1,user-scalable=no" name="viewport"/>
 <meta content="#030816" name="theme-color"/>
 <title>Stellar Legacy</title>
-<link href="/style.css?v=16.1.0" rel="stylesheet"/>
+<link href="/style.css?v=16.2.0" rel="stylesheet"/>
 </head>
 <body>
 <div id="app">
@@ -157,15 +157,6 @@
     <div class="activity-empty">As últimas ações e recompensas aparecem aqui.</div>
   </div>
 </section>
-<section class="hud-panel minimap-panel" id="minimapPanel">
-<div class="minimap-toolbar tappable-toolbar" id="minimapHeader">
-<div class="minimap-toolbar-left">
-<button aria-label="Expandir / recolher minimapa" class="stats-expand-btn" id="minimapToggle" title="Expandir / recolher minimapa">▾</button>
-<div class="stats-toolbar-label">MAPA</div>
-</div>
-</div>
-<canvas height="220" id="minimap" width="220"></canvas>
-</section>
 
 <section class="hud-panel gate-hud hidden" id="gateHud">
   <div class="gate-hud-title" id="gateHudTitle">PORTAL ASTRAL AURORA</div>
@@ -184,6 +175,34 @@
   <small id="bossPhaseStatus">ESTÁVEL</small>
 </section>
 
+<div class="bottom-hud-dock" id="bottomHudDock">
+<section class="hud-panel chat-dock" id="chatDock" aria-label="Chat dos pilotos">
+  <div class="chat-toolbar">
+    <div class="chat-toolbar-left">
+      <button class="chat-collapse-btn" id="chatToggle" type="button" title="Minimizar / expandir chat" aria-label="Minimizar chat">▾</button>
+      <div class="chat-toolbar-title"><b>CHAT</b><small id="chatStatus">ONLINE</small></div>
+    </div>
+    <span class="chat-channel-chip" id="chatChannelChip">GLOBAL</span>
+  </div>
+  <div class="chat-body" id="chatBody">
+    <div class="chat-tabs" id="chatTabs">
+      <button class="chat-tab active" type="button" data-chat-channel="global">GLOBAL</button>
+      <button class="chat-tab" type="button" data-chat-channel="clan">ALIANÇA</button>
+      <button class="chat-tab" type="button" data-chat-channel="private">PV</button>
+    </div>
+    <div class="chat-private-row hidden" id="chatPrivateRow">
+      <input id="chatPrivateCallsign" maxlength="24" autocomplete="off" placeholder="CALLSIGN DO PILOTO" />
+      <button id="chatPrivateOpen" type="button">ABRIR</button>
+    </div>
+    <div class="chat-feed" id="chatFeed" aria-live="polite">
+      <div class="chat-empty">Conectando ao chat...</div>
+    </div>
+    <form class="chat-compose" id="chatForm">
+      <input id="chatInput" maxlength="240" autocomplete="off" placeholder="Digite uma mensagem..." />
+      <button id="chatSend" type="submit">ENVIAR</button>
+    </form>
+  </div>
+</section>
 <section class="hud-panel compact-ammo-ui" id="weaponBar">
 <div class="weapon-toolbar">
 <div class="weapon-toolbar-left">
@@ -223,6 +242,17 @@
 </div>
 </div>
 </section>
+<section class="hud-panel minimap-panel" id="minimapPanel">
+<div class="minimap-toolbar tappable-toolbar" id="minimapHeader">
+<div class="minimap-toolbar-left">
+<button aria-label="Expandir / recolher minimapa" class="stats-expand-btn" id="minimapToggle" title="Expandir / recolher minimapa">▾</button>
+<div class="stats-toolbar-label">MAPA</div>
+</div>
+</div>
+<canvas height="220" id="minimap" width="220"></canvas>
+</section>
+</div>
+
 <div id="toast"></div>
 <div class="game-celebration hidden" id="gameCelebration" aria-live="polite">
   <div class="celebration-burst"></div>
@@ -560,6 +590,7 @@
           <label><input type="checkbox" data-hud-key="pet" checked/> AUX-9</label>
           <label><input type="checkbox" data-hud-key="missions" checked/> Missões ativas</label>
           <label><input type="checkbox" data-hud-key="activity" checked/> Atividade</label>
+          <label><input type="checkbox" data-hud-key="chat" checked/> Chat</label>
           <label><input type="checkbox" data-hud-key="minimap" checked/> Minimap</label>
           <label><input type="checkbox" data-hud-key="weapons" checked/> Munições</label>
           <label><input type="checkbox" data-hud-key="gate" checked/> Portal Astral</label>
@@ -732,6 +763,6 @@
   </div>
 </div>
 </div>
-<script src="/game.js?v=16.1.0" type="module"></script>
+<script src="/game.js?v=16.2.0" type="module"></script>
 </body>
 </html>
