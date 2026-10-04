@@ -1,7 +1,7 @@
-import { FACTIONS, SHIPS, ITEMS, LASER_AMMO, ROCKETS, NPC_TYPES, MAPS, RESOURCES } from './data.js?v=16.2.0';
-import { GAME_ASSETS } from './assets/v8/manifest.js?v=16.2.0';
-import { signUp, signIn, requestPasswordReset, restorePasswordRecoveryFromUrl, restoreSession, signOutLocal, checkGameSession, endGameSession, getUser, getSessionCredentials, loadCloudSave, saveCloudSave, updateCallsign, updatePassword, loadRankings, loadAuctionBids, saveAuctionBidOnline, markAuctionBidStatusOnline, loadAuctionMarket, upsertPlayerPresenceOnline, loadMapPresenceOnline, removePlayerPresenceOnline, queuePvpAttackOnline, consumePvpDamageEventsOnline, syncArenaProfileOnline, loadArenaState, loadArenaDailyRewardStatus, claimArenaDailyReward, loadArenaOpponents, loadArenaHistory, arenaAttackOnline, listClansOnline, loadMyClanOnline, createClanOnline, joinClanOnline, leaveClanOnline, transferClanCreditsOnline, claimClanCreditGrantsOnline, recordClanAlienKillOnline, getPremiumShopOnline, testPurchasePremiumOnline, loadWarfrontStateOnline, hitWorldBossOnline, claimWorldBossRewardOnline, declareClanWarOnline, recordClanWarScoreOnline, loadLiveOpsOnline, purchaseLiveCatalogOnline, economyActionOnline, getChatHistoryOnline, sendChatMessageOnline } from './api.js?v=16.2.0';
-import { SharedUniverseClient } from './world.js?v=16.2.0';
+import { FACTIONS, SHIPS, ITEMS, LASER_AMMO, ROCKETS, NPC_TYPES, MAPS, RESOURCES } from './data.js?v=16.3.0';
+import { GAME_ASSETS } from './assets/v8/manifest.js?v=16.3.0';
+import { signUp, signIn, requestPasswordReset, restorePasswordRecoveryFromUrl, restoreSession, signOutLocal, checkGameSession, endGameSession, getUser, getSessionCredentials, loadCloudSave, saveCloudSave, updateCallsign, updatePassword, loadRankings, loadAuctionBids, saveAuctionBidOnline, markAuctionBidStatusOnline, loadAuctionMarket, upsertPlayerPresenceOnline, loadMapPresenceOnline, removePlayerPresenceOnline, queuePvpAttackOnline, consumePvpDamageEventsOnline, syncArenaProfileOnline, loadArenaState, loadArenaDailyRewardStatus, claimArenaDailyReward, loadArenaOpponents, loadArenaHistory, arenaAttackOnline, listClansOnline, loadMyClanOnline, createClanOnline, joinClanOnline, leaveClanOnline, transferClanCreditsOnline, claimClanCreditGrantsOnline, recordClanAlienKillOnline, getPremiumShopOnline, testPurchasePremiumOnline, loadWarfrontStateOnline, hitWorldBossOnline, claimWorldBossRewardOnline, declareClanWarOnline, recordClanWarScoreOnline, loadLiveOpsOnline, purchaseLiveCatalogOnline, economyActionOnline, getChatHistoryOnline, sendChatMessageOnline, getMyDesignersOnline, setDesignLoadoutOnline, claimGateDroneDesignOnline } from './api.js?v=16.3.0';
+import { SharedUniverseClient } from './world.js?v=16.3.0';
 
 const canvas = document.querySelector('#game');
 const ctx = canvas.getContext('2d');
@@ -319,6 +319,45 @@ async function refreshLiveOpsState(force=false){
 }
 async function applyAuthoritativePurchase(catalogKey,label='Item'){
   try{await flushCloudSave(true);const result=await purchaseLiveCatalogOnline(catalogKey);if(!result?.state)throw new Error('Servidor não retornou o save atualizado.');progress=result.state;hydrateProgress();cloudDirty=false;try{localStorage.setItem(saveKey(),JSON.stringify(progress));}catch{}computeStats(true);buildAmmoButtons();renderShop();refreshPetViews();updateUI();showToast(`${label} adquirido • compra validada no servidor`,'shop');return true;}catch(e){showToast(e.message||'Compra recusada pelo servidor');return false;}
+}
+
+
+// ===================== V16.3 DRONE DESIGNERS =====================
+const designerRuntime={state:{inventory:{},drones:{},loadout:{ship:null,pet:null},catalog:[]},busy:false,lastAt:0};
+function designerCatalog(){return Array.isArray(designerRuntime.state?.catalog)?designerRuntime.state.catalog:[];}
+function designById(id){return designerCatalog().find(d=>d.design_id===id)||null;}
+function droneDesignId(droneId){return designerRuntime.state?.drones?.[String(droneId||'')]||null;}
+function droneDesignFor(droneId){return designById(droneDesignId(droneId));}
+function ownedDesignQty(id){return Math.max(0,Number(designerRuntime.state?.inventory?.[id])||0);}
+function equippedDesignCount(id){return progress?.drones?.filter(d=>droneDesignId(d.id)===id).length||0;}
+function pctText(v){return `${(Math.max(0,Number(v)||0)*100).toFixed((Number(v)||0)*100%1?1:0)}%`;}
+function designerBonusSummary(d){
+  const b=d?.bonuses||{},parts=[];
+  if(b.damage_per_drone)parts.push(`+${pctText(b.damage_per_drone)} DANO / drone`);
+  if(b.shield_per_drone)parts.push(`+${pctText(b.shield_per_drone)} ESCUDO / drone`);
+  if(b.hp_per_drone)parts.push(`+${pctText(b.hp_per_drone)} HP / drone`);
+  if(b.full_set_damage)parts.push(`SET 8/8: +${pctText(b.full_set_damage)} DANO`);
+  if(b.full_set_shield)parts.push(`SET 8/8: +${pctText(b.full_set_shield)} ESCUDO`);
+  if(b.full_set_hp)parts.push(`SET 8/8: +${pctText(b.full_set_hp)} HP`);
+  return parts.join(' • ')||'Visual raro';
+}
+function droneDesignerMultipliers(){
+  const counts=new Map();for(const d of progress?.drones||[]){const id=droneDesignId(d.id);if(id)counts.set(id,(counts.get(id)||0)+1);}
+  let hp=1,shield=1,damage=1;const setSize=8;
+  for(const [id,count] of counts){const def=designById(id),b=def?.bonuses||{};hp+=Number(b.hp_per_drone||0)*count;shield+=Number(b.shield_per_drone||0)*count;damage+=Number(b.damage_per_drone||0)*count;if((progress?.drones?.length||0)===setSize&&count===setSize){hp+=Number(b.full_set_hp||0);shield+=Number(b.full_set_shield||0);damage+=Number(b.full_set_damage||0);}}
+  return {hp,shield,damage,counts};
+}
+async function refreshDesignerState(force=false){
+  if(!authenticated)return designerRuntime.state;if(!force&&designerRuntime.lastAt&&Date.now()-designerRuntime.lastAt<15000)return designerRuntime.state;if(designerRuntime.busy)return designerRuntime.state;designerRuntime.busy=true;
+  try{const data=await getMyDesignersOnline();if(data&&typeof data==='object')designerRuntime.state={inventory:data.inventory||{},drones:data.drones||{},loadout:data.loadout||{ship:null,pet:null},catalog:Array.isArray(data.catalog)?data.catalog:[]};designerRuntime.lastAt=Date.now();return designerRuntime.state;}catch(e){console.warn('designers',e);return designerRuntime.state;}finally{designerRuntime.busy=false;}
+}
+async function equipDroneDesigner(droneId,designId){
+  if(!canChangeEquipment()){showToast('Designers de drone só podem ser alterados na sua base X-1');return;}
+  try{await flushCloudSave(true);designerRuntime.state=await setDesignLoadoutOnline({kind:'drone',designId:designId||null,droneId});designerRuntime.lastAt=Date.now();computeStats(true);saveGame();renderHangar();updateUI();showToast(designId?`${designById(designId)?.name||'Designer'} equipado`:'Designer removido');}catch(e){showToast(e.message||'Não foi possível equipar o designer');}
+}
+async function claimGateDroneDesignerDrop(gate,completion){
+  if(!['beta','gamma'].includes(String(gate)))return;
+  try{await flushCloudSave(true);const r=await claimGateDroneDesignOnline({gate,completion});if(!r?.eligible)return;if(r.design_id&&!r.already_claimed){await refreshDesignerState(true);const d=designById(r.design_id);playSfx('reward');showToast(`DROP RARO! ${d?.name||r.name||r.design_id} • Designer de Drone`,'reward');pushActivity(`DESIGNER RARO • ${d?.name||r.name||r.design_id} obtido no ${gate==='beta'?'NEXUS':'ECLIPSE'}`,'reward');renderHangar();}else if(r.design_id&&r.already_claimed){await refreshDesignerState(true);}}catch(e){console.warn('designer gate claim',e);}
 }
 
 
@@ -2670,6 +2709,7 @@ function computeStats(keepRatio=true){
   if(state.currentMap?.battle||state.currentMap?.gate)laserDamage*=1+pilotBattleLaserBonus();
   absorption=Math.min(95,absorption+pilotSkillValue('shieldMechanics'));
   rocketMult*=1+pilotSkillValue('rocketFusion')/100;
+  const designerMult=droneDesignerMultipliers();hp*=designerMult.hp;shield*=designerMult.shield;laserDamage*=designerMult.damage;
   player.maxHp=Math.round(hp);player.maxShield=Math.round(shield);player.speed=Math.round(speed);player.laserDamage=Math.round(laserDamage);player.shieldAbsorption=absorption;player.rocketMult=rocketMult;player.shieldRegenBoost=shieldRegenBoost;
   player.hp=keepRatio?Math.min(player.maxHp,Math.max(1,Math.round(player.maxHp*oldHpRatio))):player.maxHp;
   player.shield=keepRatio?Math.min(player.maxShield,Math.max(0,Math.round(player.maxShield*oldShieldRatio))):player.maxShield;
@@ -2863,6 +2903,7 @@ function completeAlphaGate(){
   const a=alphaGate(),gd=galaxyGateDef(),earned=alphaRunReward(),extra=Math.max(0,gd.totalRewardMult-1),bonus={credits:earned.credits*extra,uridium:earned.uridium*extra,xp:earned.xp*extra};
   progress.profile.credits+=bonus.credits;progress.profile.uridium+=bonus.uridium;progress.profile.xp+=bonus.xp;processPlayerLevelUps();normalizePilotBio();progress.pilotBio.logDisks+=gd.logReward;progress.profile.ggCompleted=(progress.profile.ggCompleted||0)+1;a.completed++;a.lastCompletion={at:Date.now(),reward:{...earned,bonus},totalMult:gd.totalRewardMult};a.pieces=[];a.built=false;a.lives=3;a.run=null;
   playSfx('reward');showToast(`${gd.label} CONCLUÍDO! +${fmt(gd.logReward)} Núcleos Quânticos • recompensa ${gd.totalRewardMult}X`,'reward');pushActivity(`PORTAL ASTRAL ${gd.label} • ${gd.totalRewardMult}X • +${fmt(gd.logReward)} Núcleos Quânticos`,'reward');saveGame();
+  claimGateDroneDesignerDrop(gd.key,a.completed).catch(()=>{});
   setTimeout(()=>runMapTransition('x1',null,`${gd.label} CONCLUÍDO • RECOMPENSA ${gd.totalRewardMult}X`),1800);
 }
 function failAlphaGate(){const a=alphaGate(),gd=galaxyGateDef();a.failed++;a.pieces=[];a.built=false;a.lives=3;a.run=null;showToast(`PORTAL ASTRAL ${gd.label} PERDIDO — as 3 vidas acabaram e o portal precisa ser remontado`);saveGame();setTimeout(()=>runMapTransition('x1',null,`${gd.label} PERDIDO`),900);}
@@ -3727,9 +3768,9 @@ function drawEnemy(e){
   ctx.fillStyle=boss?'#ffcf71':'#ff958d';ctx.font=`bold ${boss?12:11}px Arial`;ctx.textAlign='center';ctx.fillText(e.name,p.x,p.y+e.size+22);
 }
 function drawDrones(p){const f=getFaction();progress.drones.forEach((d,i)=>{
-  const a=nowSec()*.8+i*TWO_PI/Math.max(1,progress.drones.length),r=66+(i%2)*18,x=p.x+Math.cos(a)*r,y=p.y+Math.sin(a)*r,img=assetImage(GAME_ASSETS.drones[d.type]);
-  if(img&&img.naturalWidth){const size=d.type==='iris'?26:23,sc=size/Math.max(img.naturalWidth,img.naturalHeight);ctx.save();ctx.translate(x,y);ctx.rotate(a+Math.PI);ctx.shadowColor=d.type==='iris'?'#c77cff':'#71dfff';ctx.shadowBlur=8;ctx.drawImage(img,-img.naturalWidth*sc/2,-img.naturalHeight*sc/2,img.naturalWidth*sc,img.naturalHeight*sc);ctx.restore();return;}
-  ctx.fillStyle=d.type==='iris'?'#bd7cff':'#71dfff';ctx.beginPath();ctx.arc(x,y,4,0,TWO_PI);ctx.fill();
+  const a=nowSec()*.8+i*TWO_PI/Math.max(1,progress.drones.length),r=66+(i%2)*18,x=p.x+Math.cos(a)*r,y=p.y+Math.sin(a)*r,img=assetImage(GAME_ASSETS.drones[d.type]),designer=droneDesignFor(d.id),visual=designer?.visual||{},glow=visual.glow||(d.type==='iris'?'#c77cff':'#71dfff');
+  if(img&&img.naturalWidth){const size=d.type==='iris'?26:23,sc=size/Math.max(img.naturalWidth,img.naturalHeight);ctx.save();ctx.translate(x,y);ctx.rotate(a+Math.PI);ctx.shadowColor=glow;ctx.shadowBlur=designer?.rarity==='mythic'?18:designer?13:8;if(designer&&'filter' in ctx)ctx.filter=visual.filter||'none';ctx.drawImage(img,-img.naturalWidth*sc/2,-img.naturalHeight*sc/2,img.naturalWidth*sc,img.naturalHeight*sc);ctx.filter='none';if(designer){ctx.rotate(-(a+Math.PI));ctx.strokeStyle=visual.accent||glow;ctx.globalAlpha=.65+.2*Math.sin(nowSec()*3+i);ctx.lineWidth=designer.rarity==='mythic'?2:1.2;ctx.beginPath();ctx.arc(0,0,size*.62,0,TWO_PI);ctx.stroke();}ctx.restore();return;}
+  ctx.fillStyle=glow;ctx.beginPath();ctx.arc(x,y,designer?5:4,0,TWO_PI);ctx.fill();
 });}
 function drawPet(){
   if(!progress?.pet?.owned)return;
@@ -4079,7 +4120,23 @@ function renderHangarEquipment(){
   for(const [key,title] of [['lasers',`Lasers da ${ship.name} (${ship.lasers})`],['generators',`Geradores (${ship.generators})`],['extras',`Extras (${extraCap}${extraBonus?` = ${ship.extras} + ${extraBonus}`:''})`]]){const box=document.createElement('div');box.className='section-box';box.innerHTML=`<h3>${title}</h3>`;const grid=document.createElement('div');grid.className='slot-grid';progress.shipLoadout[key].forEach((id,i)=>grid.appendChild(slotCard(`${title.split(' ')[0]} ${i+1}`,id,key,i)));box.appendChild(grid);left.appendChild(box);}
   const inv=document.createElement('div');inv.className='section-box';inv.innerHTML='<h3>Inventário disponível</h3>';const grid=document.createElement('div');grid.className='inventory-grid';const entries=Object.entries(progress.inventory).filter(([id,q])=>q>0&&ITEMS[id]);if(!entries.length)grid.innerHTML='<div class="empty-state">Seu inventário de equipamentos está vazio. Compre itens na Loja.</div>';else entries.forEach(([id,q])=>grid.appendChild(inventoryCard(id,q)));inv.appendChild(grid);right.appendChild(inv);root.append(left,right);return root;
 }
-function renderHangarDrones(){const root=document.createElement('div');const info=document.createElement('div');info.className='section-box';info.innerHTML=`<h3>Esquadrão de drones — ${progress.drones.length}/8</h3><div class="muted" style="font-size:12px">Halo: 1 slot • Nova: 2 slots. Os drones permanecem equipados quando você troca de nave.</div>`;root.appendChild(info);const grid=document.createElement('div');grid.className='drone-grid';if(!progress.drones.length){grid.innerHTML='<div class="empty-state">Você ainda não possui drones. Vá à Loja → Drones.</div>';}progress.drones.forEach((d,idx)=>{const model=ITEMS[d.type],c=document.createElement('div');c.className='drone-card';c.innerHTML=`<img class="drone-art" src="${GAME_ASSETS.drones[d.type]}" alt="${model.name}"><div><span class="badge ${d.type==='iris'?'elite':''}">${d.type==='iris'?'ELITE':'COMUM'}</span><h3>${model.name} #${idx+1}</h3></div><div class="drone-stats">${model.slots} slot${model.slots>1?'s':''} • aceita laser ou gerador de escudo</div>`;const sg=document.createElement('div');sg.className='slot-grid';d.slots.forEach((id,i)=>sg.appendChild(slotCard(`Slot ${i+1}`,id,null,i,d.id)));c.appendChild(sg);const rm=document.createElement('button');rm.className='danger-btn';rm.textContent=`Vender drone • 50% (${fmt(itemSellValue(model))} ${model.currency==='uridium'?'STL':'CR'})`;rm.onclick=()=>sellDrone(d.id);c.appendChild(rm);grid.appendChild(c);});root.appendChild(grid);return root;}
+function renderHangarDrones(){
+  const root=document.createElement('div'),defs=designerCatalog().filter(d=>d.kind==='drone');
+  const summary=document.createElement('div');summary.className='section-box drone-designer-summary';
+  const cards=defs.map(d=>{const owned=ownedDesignQty(d.design_id),equipped=equippedDesignCount(d.design_id),source=d.eligibility?.source||'EVENTO';const chance=d.design_id==='drone_fury'?'10%':d.design_id==='drone_aegis'?'10%':'EVENTO FUTURO';return `<div class="designer-summary-card ${d.rarity||'rare'}"><div class="designer-orb" style="--designer-glow:${d.visual?.glow||'#7edcff'};--designer-accent:${d.visual?.accent||'#fff'}"></div><div><b>${d.name}</b><small>${designerBonusSummary(d)}</small><span>${source} • ${chance} • Inventário ${owned} • Equipado ${equipped}/8</span></div></div>`;}).join('');
+  summary.innerHTML=`<h3>DESIGNERS DE DRONE • SETS 8/8</h3><div class="muted" style="font-size:12px;margin-bottom:10px">Cada drop entrega 1 cópia. Para ativar o bônus de conjunto, os 8 drones precisam usar o mesmo designer.</div><div class="designer-summary-grid">${cards||'<div class="muted">Sincronizando catálogo de designers...</div>'}</div>`;root.appendChild(summary);
+
+  const info=document.createElement('div');info.className='section-box';info.innerHTML=`<h3>Esquadrão de drones — ${progress.drones.length}/8</h3><div class="muted" style="font-size:12px">Halo: 1 slot • Nova: 2 slots. Designer altera visual e atributos sem consumir slot de equipamento.</div>`;root.appendChild(info);
+  const grid=document.createElement('div');grid.className='drone-grid designer-drone-grid';
+  if(!progress.drones.length){grid.innerHTML='<div class="empty-state">Você ainda não possui drones. Vá à Loja → Drones.</div>';}
+  progress.drones.forEach((d,idx)=>{const model=ITEMS[d.type],design=droneDesignFor(d.id),visual=design?.visual||{},c=document.createElement('div');c.className=`drone-card ${design?'has-designer':''} ${design?.rarity||''}`;if(design)c.style.setProperty('--designer-glow',visual.glow||'#7edcff');
+    c.innerHTML=`<div class="drone-designer-art-wrap"><img class="drone-art" src="${GAME_ASSETS.drones[d.type]}" alt="${model.name}" ${design?`style="filter:${visual.filter||'none'};"`:''}>${design?`<span class="designer-equipped-badge">${design.rarity==='mythic'?'MÍTICO':'RARO'} • ${design.name}</span>`:''}</div><div><span class="badge ${d.type==='iris'?'elite':''}">${d.type==='iris'?'ELITE':'COMUM'}</span><h3>${model.name} #${idx+1}</h3></div><div class="drone-stats">${model.slots} slot${model.slots>1?'s':''} • aceita laser ou gerador de escudo${design?`<br><b>${designerBonusSummary(design)}</b>`:''}</div>`;
+    const designerBox=document.createElement('div');designerBox.className='drone-designer-control';const label=document.createElement('label');label.textContent='DESIGNER';const sel=document.createElement('select');sel.className='designer-select';
+    const none=document.createElement('option');none.value='';none.textContent='SEM DESIGNER';sel.appendChild(none);
+    defs.forEach(def=>{const opt=document.createElement('option'),owned=ownedDesignQty(def.design_id),used=equippedDesignCount(def.design_id),current=design?.design_id===def.design_id;opt.value=def.design_id;opt.textContent=`${def.name} • ${owned}x${current?' • EQUIPADO':used>=owned?' • SEM CÓPIA LIVRE':''}`;opt.disabled=!current&&used>=owned;sel.appendChild(opt);});sel.value=design?.design_id||'';sel.disabled=!canChangeEquipment();sel.onchange=()=>equipDroneDesigner(d.id,sel.value||null);designerBox.append(label,sel);c.appendChild(designerBox);
+    const sg=document.createElement('div');sg.className='slot-grid';d.slots.forEach((id,i)=>sg.appendChild(slotCard(`Slot ${i+1}`,id,null,i,d.id)));c.appendChild(sg);const rm=document.createElement('button');rm.className='danger-btn';rm.textContent=`Vender drone • 50% (${fmt(itemSellValue(model))} ${model.currency==='uridium'?'STL':'CR'})`;rm.onclick=()=>sellDrone(d.id);c.appendChild(rm);grid.appendChild(c);});root.appendChild(grid);return root;
+}
+
 function renderHangarPet(){const root=document.createElement('div');root.className='hangar-embedded-panel pet-hangar-panel';renderPet(root);return root;}
 function renderHangarPilot(){
   normalizePilotBio();const p=progress.pilotBio,spent=pilotSpentPoints(),avail=pilotAvailablePoints(),next=p.totalPoints+1;
@@ -4195,7 +4252,7 @@ async function testPremiumPurchaseNow(productId){
 async function openPremiumShop(){closeNavigationModals(ui.premiumModal);ui.premiumModal?.classList.remove('hidden');if(ui.premiumProductGrid)ui.premiumProductGrid.innerHTML='<div class="muted">Sincronizando Loja Premium...</div>';await refreshPremiumState(true);renderPremiumShop();}
 
 function openShop(tab='ships'){closeNavigationModals(ui.shopModal);state.shopTab=tab;Promise.all([refreshPremiumState(),refreshLiveOpsState(true)]).finally(()=>{renderShop();ui.shopModal.classList.remove('hidden');});}
-function openHangar(tab='ships'){closeNavigationModals(ui.hangarModal);state.hangarTab=tab;renderHangar();ui.hangarModal.classList.remove('hidden');if(!canChangeEquipment())showToast('Hangar em modo consulta • alterações de equipamento só funcionam na base X-1');}
+function openHangar(tab='ships'){closeNavigationModals(ui.hangarModal);state.hangarTab=tab;renderHangar();ui.hangarModal.classList.remove('hidden');refreshDesignerState(true).then(()=>{computeStats(true);renderHangar();updateUI();}).catch(()=>{});if(!canChangeEquipment())showToast('Hangar em modo consulta • alterações de equipamento só funcionam na base X-1');}
 
 function alphaPieceCount(){return alphaGate().pieces.length;}
 function addAlphaPiece(){
@@ -5168,6 +5225,7 @@ async function afterAuth(){
   if(!progress){renderFactionChoice();return;}
   await refreshPremiumState(true);
   await refreshLiveOpsState(true);
+  await refreshDesignerState(true);
   startLoadedGame();
   renderChatTabs();refreshChatHistory(true);
   updatePassBadge();

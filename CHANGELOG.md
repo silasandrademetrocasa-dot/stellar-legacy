@@ -1,3 +1,14 @@
+## V16.3.0 — DRONE DESIGNERS (ETAPA 4)
+
+- Três designers de drone controlados pelo Supabase: FURY CORE, AEGIS VEIL e TITAN HYBRID.
+- FURY CORE: +1,5% dano por drone; set 8/8 concede +8% escudo. Drop 10% no Portal NEXUS.
+- AEGIS VEIL: +2% escudo por drone; set 8/8 concede +8% HP. Drop 10% no Portal ECLIPSE.
+- TITAN HYBRID: +1,25% HP e +1,25% escudo por drone; set 8/8 concede +8% dano. Reservado para evento especial futuro.
+- Equipamento e quantidade de cópias são validados por RPC autenticada no Supabase.
+- Drops de Nexus/Eclipse são sorteados no banco e idempotentes por conclusão de portal.
+- Hangar mostra coleção, origem, bônus, progresso do set e designer individual de cada drone.
+- Drones equipados recebem identidade visual própria por glow/filtro/anel energético.
+
 # CHANGELOG
 
 ## V16.2.0 — CHAT DOCK

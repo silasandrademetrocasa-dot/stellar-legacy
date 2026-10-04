@@ -1,4 +1,7 @@
-# Stellar Legacy V16.2.0 — CHAT DOCK (ETAPA 3)
+# Stellar Legacy V16.3.0 — DRONE DESIGNERS (ETAPA 4)
+
+A V16.3 adiciona designers raros aos drones, bônus por unidade, combos 8/8 e drops controlados pelo Supabase.
+
 
 Chat online persistente com canais GLOBAL, ALIANÇA e PV. O rodapé agora usa um dock fluido com CHAT à esquerda, MUNIÇÕES no centro e MAPA à direita; quando qualquer painel é recolhido ou ocultado, os demais ocupam o espaço automaticamente.
 

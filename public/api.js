@@ -679,3 +679,35 @@ export async function sendChatMessageOnline({channel='global', body='', recipien
   });
   return Array.isArray(rows) ? rows[0] || null : rows || null;
 }
+
+
+// ===================== V16.3 DRONE DESIGNERS =====================
+export async function getMyDesignersOnline() {
+  const rows = await authedSupabaseFetch('/rest/v1/rpc/get_my_designers_v16', {
+    method: 'POST', body: JSON.stringify({}),
+  });
+  return Array.isArray(rows) ? rows[0] || null : rows || null;
+}
+
+export async function setDesignLoadoutOnline({kind, designId=null, droneId=null}={}) {
+  const rows = await authedSupabaseFetch('/rest/v1/rpc/set_design_loadout_v16', {
+    method: 'POST',
+    body: JSON.stringify({
+      p_kind: String(kind || ''),
+      p_design_id: designId ? String(designId) : null,
+      p_drone_id: droneId ? String(droneId) : null,
+    }),
+  });
+  return Array.isArray(rows) ? rows[0] || null : rows || null;
+}
+
+export async function claimGateDroneDesignOnline({gate, completion}={}) {
+  const rows = await authedSupabaseFetch('/rest/v1/rpc/claim_gate_drone_design_v163', {
+    method: 'POST',
+    body: JSON.stringify({
+      p_gate: String(gate || ''),
+      p_completion: Math.max(1, Math.round(Number(completion)||0)),
+    }),
+  });
+  return Array.isArray(rows) ? rows[0] || null : rows || null;
+}
