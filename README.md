@@ -1,4 +1,12 @@
-# Stellar Legacy V15.1.0 — REALTIME COMBAT PRESENCE
+# Stellar Legacy V15.2.0 — TACTICAL HUD + AGGRO LOCK
+
+## V15.2 — TACTICAL HUD + AGGRO LOCK
+
+- Target Lock e Evento Galáctico recolhíveis.
+- Aggro PVE autoritativo: o primeiro jogador que acerta o NPC vira o alvo prioritário.
+- Portal neutro protege apenas enquanto o jogador não inicia combate contra o NPC.
+- Base continua totalmente segura.
+
 
 A V15 transforma os mapas principais em um universo realmente compartilhado. Jogadores na mesma sala veem os mesmos NPCs, os mesmos minérios, os mesmos eventos e o mesmo estado de combate PVE. O Render mantém o World Server em tempo real por WebSocket e o Supabase continua como camada persistente de conta e progresso.
 
@@ -18,7 +26,7 @@ A V15 transforma os mapas principais em um universo realmente compartilhado. Jog
 1. Suba o ZIP completo pelo instalador atual.
 2. O Render executará `npm install` e instalará também a dependência `ws`.
 3. Não há SQL novo obrigatório na V15.
-4. Após o deploy, `/health` deve informar V15.1.0 e `/api/world/status` mostra salas, clientes, NPCs e minérios ativos.
+4. Após o deploy, `/health` deve informar V15.2.0 e `/api/world/status` mostra salas, clientes, NPCs e minérios ativos.
 
 ## Teste recomendado com duas contas
 Abra duas janelas, entre no mesmo mapa/território e valide: selecionar o mesmo NPC, observar HP caindo nas duas telas, matar em conjunto, coletar a mesma pedra e confirmar que ela desaparece nas duas janelas. Em seguida valide um Evento Galáctico e o status UNIVERSO/ping no painel JOGADOR.

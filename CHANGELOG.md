@@ -1,3 +1,12 @@
+# V15.2.0 — TACTICAL HUD + AGGRO LOCK
+
+- Target Lock e Evento Galáctico ganharam modo minimizado persistente.
+- NPCs do Shared Universe agora travam o primeiro atacante como alvo de aggro.
+- Portal mantém neutralidade para quem não iniciou combate; ao atacar um NPC dentro da zona neutra, o NPC pode perseguir e causar dano normalmente.
+- A base X-1 continua protegida.
+- Feedback do HUD indica quando o portal está em COMBATE ATIVO.
+- Sem SQL novo.
+
 # V15.1.0 — REALTIME COMBAT PRESENCE
 
 - Movimento dos jogadores no mesmo mapa migrou para atualização WebSocket de baixa latência, mantendo Supabase como fallback/metadata.

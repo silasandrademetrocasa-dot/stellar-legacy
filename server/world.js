@@ -3,6 +3,7 @@ import { WebSocketServer, WebSocket } from 'ws';
 import { MAPS, NPC_TYPES, RESOURCES } from '../public/data.js';
 
 const EVENT_SLOT_MS = 15 * 60 * 1000;
+const PORTAL_NEUTRAL_RADIUS = 180;
 const EVENT_DEFS = [
   {id:'invasion',icon:'⚠',name:'INVASÃO RIFT',desc:'Fendas hostis despejam esquadrões no setor.',target:18},
   {id:'prime',icon:'☠',name:'ANOMALIA PRIME',desc:'Um BOSS raro atravessou a fenda. Destrua-o.',target:1},
@@ -81,7 +82,7 @@ class Room {
       bossPhase:0,bossAttackScale:1,jammedUntil:0,color:opts.color||base.color,size:opts.size||base.size,
       resources:{...(base.resources||{})},attackRange:Math.min(battle?500:420,(battle?210:170)+base.size*5.8),aggroRange:battle?920:720,
       lastShot:0,angle:rand(0,Math.PI*2),drift:rand(.4,1.4),eventNpc:!!opts.eventNpc,eventId:opts.eventId||null,
-      forceChase:!!opts.forceChase,damageContrib:new Map(),lastDamageAt:0,spawnedAt:nowMs()
+      forceChase:!!opts.forceChase,damageContrib:new Map(),lastDamageAt:0,aggroUserId:null,aggroStartedAt:0,spawnedAt:nowMs()
     };
     if(opts.x!=null)e.x=opts.x;if(opts.y!=null)e.y=opts.y;
     return e;
@@ -195,8 +196,24 @@ class Room {
   playerSafe(p){
     if(this.mapId!=='x1'||this.territoryFaction!==p.faction)return false;const b=basePointForFaction(this.territoryFaction);return Math.hypot(p.x-b.x,p.y-b.y)<=520;
   }
+  playerPortalNeutral(p){
+    return (this.map.portals||[]).some(portal=>Math.hypot(p.x-Number(portal.x||0),p.y-Number(portal.y||0))<=PORTAL_NEUTRAL_RADIUS);
+  }
+  playerProtectedFromNpc(p,e=null){
+    if(this.playerSafe(p))return true;
+    if(this.playerPortalNeutral(p)&&String(e?.aggroUserId||'')!==String(p.userId||''))return true;
+    return false;
+  }
+  playerFresh(p){return !!p&&p.hp>0&&nowMs()-(p.updatedAt||0)<=8000;}
+  lockedAggroPlayer(e){
+    if(e.aggroUserId){const locked=this.players.get(e.aggroUserId);if(this.playerFresh(locked))return locked;
+      const next=[...e.damageContrib.keys()].map(id=>this.players.get(id)).find(p=>this.playerFresh(p));
+      if(next){e.aggroUserId=next.userId;e.aggroStartedAt=nowMs();return next;}e.aggroUserId=null;e.aggroStartedAt=0;
+    }
+    return null;
+  }
   nearestPlayer(e){
-    let best=null,dist=Infinity;for(const p of this.players.values()){if(nowMs()-(p.updatedAt||0)>8000)continue;const d=Math.hypot(p.x-e.x,p.y-e.y);if(d<dist){dist=d;best=p;}}return best?{player:best,dist}:null;
+    let best=null,dist=Infinity;for(const p of this.players.values()){if(!this.playerFresh(p)||this.playerProtectedFromNpc(p,e))continue;const d=Math.hypot(p.x-e.x,p.y-e.y);if(d<dist){dist=d;best=p;}}return best?{player:best,dist}:null;
   }
 
   applyBossPhase(e){
@@ -214,7 +231,7 @@ class Room {
     }else{
       let remain=Math.round(amount);if(e.shield>0){const got=Math.min(e.shield,remain);e.shield-=got;remain-=got;actual+=got;}if(remain>0){const got=Math.min(e.hp,remain);e.hp-=got;actual+=got;}
     }
-    if(actual>0){e.damageContrib.set(p.userId,(e.damageContrib.get(p.userId)||0)+actual);e.lastDamageAt=now;this.eventParticipants.add(p.userId);this.applyBossPhase(e);}
+    if(actual>0){if(!e.aggroUserId){e.aggroUserId=p.userId;e.aggroStartedAt=now;this.broadcast({type:'npc_aggro',entityId:e.id,userId:p.userId});}e.damageContrib.set(p.userId,(e.damageContrib.get(p.userId)||0)+actual);e.lastDamageAt=now;this.eventParticipants.add(p.userId);this.applyBossPhase(e);}
     safeJsonSend(ws,{type:'damage_result',hitId:msg.hitId||null,entityId:e.id,actual,mode,critical:!!msg.critical,beforeShield,beforeHp,hp:e.hp,shield:e.shield});
     this.broadcast({type:'npc_patch',entity:{id:e.id,hp:e.hp,shield:e.shield,x:e.x,y:e.y,bossPhase:e.bossPhase}});
     if(e.hp<=0)this.killNpc(e,p.userId);
@@ -255,12 +272,12 @@ class Room {
   tick(dt){
     this.ensureEvent(false);const now=nowMs();
     for(const e of this.npcs.values()){
-      const near=this.nearestPlayer(e);e.angle+=(Number(e.drift)||0)*dt;if(!near)continue;const p=near.player,d=near.dist,dx=p.x-e.x,dy=p.y-e.y,force=!!e.forceChase;
+      const locked=this.lockedAggroPlayer(e);const near=locked?{player:locked,dist:Math.hypot(locked.x-e.x,locked.y-e.y)}:this.nearestPlayer(e);e.angle+=(Number(e.drift)||0)*dt;if(!near)continue;const p=near.player,d=near.dist,dx=p.x-e.x,dy=p.y-e.y,force=!!e.forceChase,retaliating=String(e.aggroUserId||'')===String(p.userId||''),protectedNow=this.playerProtectedFromNpc(p,e);
       if(this.mapId==='x1'){
         const b=basePointForFaction(this.territoryFaction),bd=Math.hypot(e.x-b.x,e.y-b.y);if(bd<555){const ox=e.x-b.x,oy=e.y-b.y,od=Math.hypot(ox,oy)||1;e.x=b.x+ox/od*558;e.y=b.y+oy/od*558;}
       }
-      if(!this.playerSafe(p)&&(force||d<e.aggroRange)&&d>e.attackRange*.8){const nd=Math.max(1,d);e.x=clamp(e.x+dx/nd*e.speed*dt,25,this.map.world.w-25);e.y=clamp(e.y+dy/nd*e.speed*dt,25,this.map.world.h-25);}else if(!force&&(d>e.aggroRange||this.playerSafe(p))){e.x=clamp(e.x+Math.cos(e.angle)*e.speed*.16*dt,25,this.map.world.w-25);e.y=clamp(e.y+Math.sin(e.angle)*e.speed*.16*dt,25,this.map.world.h-25);}
-      const attackDelay=((String(e.type).startsWith('boss')?1.6:1.15)*(e.bossAttackScale||1))*1000;if(!this.playerSafe(p)&&d<e.attackRange&&now-(e.lastShot||0)>=attackDelay){e.lastShot=now;const victim=[...this.clients].find(c=>c.player?.userId===p.userId);safeJsonSend(victim,{type:'npc_attack',entityId:e.id,damage:Math.max(1,Math.round(e.damage*rand(.92,1.12))),x:e.x,y:e.y});}
+      if(!protectedNow&&(retaliating||force||d<e.aggroRange)&&d>e.attackRange*.8){const nd=Math.max(1,d);e.x=clamp(e.x+dx/nd*e.speed*dt,25,this.map.world.w-25);e.y=clamp(e.y+dy/nd*e.speed*dt,25,this.map.world.h-25);}else if(!force&&((!retaliating&&d>e.aggroRange)||protectedNow)){e.x=clamp(e.x+Math.cos(e.angle)*e.speed*.16*dt,25,this.map.world.w-25);e.y=clamp(e.y+Math.sin(e.angle)*e.speed*.16*dt,25,this.map.world.h-25);}
+      const attackDelay=((String(e.type).startsWith('boss')?1.6:1.15)*(e.bossAttackScale||1))*1000;if(!protectedNow&&d<e.attackRange&&now-(e.lastShot||0)>=attackDelay){e.lastShot=now;const victim=[...this.clients].find(c=>c.player?.userId===p.userId);safeJsonSend(victim,{type:'npc_attack',entityId:e.id,damage:Math.max(1,Math.round(e.damage*rand(.92,1.12))),x:e.x,y:e.y,retaliation:retaliating,aggroUserId:e.aggroUserId||null});}
     }
     for(let i=this.respawns.length-1;i>=0;i--){const r=this.respawns[i];if(now<r.at)continue;this.respawns.splice(i,1);if(r.kind==='eventNpc'&&this.event?.eventId!==r.eventId)continue;const e=this.makeNpc(r.type,r.kind==='eventNpc'?{eventNpc:true,eventId:r.eventId,forceChase:true,rewardMult:1.22}:{});if(e){this.npcs.set(e.id,e);this.broadcast({type:'npc_spawn',entity:this.publicNpc(e)});}}
     for(let i=this.oreRespawns.length-1;i>=0;i--){const r=this.oreRespawns[i];if(now<r.at)continue;this.oreRespawns.splice(i,1);if(r.eventOre&&this.event?.eventId!==r.eventId)continue;const o=this.makeOre(r.type,r.eventOre?{eventOre:true,eventId:r.eventId,amount:r.amount}:{});this.ores.set(o.id,o);this.broadcast({type:'ore_spawn',ore:o});}

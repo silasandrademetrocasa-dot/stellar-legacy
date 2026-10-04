@@ -6,7 +6,7 @@
 <meta content="width=device-width,initial-scale=1,user-scalable=no" name="viewport"/>
 <meta content="#030816" name="theme-color"/>
 <title>Stellar Legacy</title>
-<link href="/style.css?v=15.1.0" rel="stylesheet"/>
+<link href="/style.css?v=15.2.0" rel="stylesheet"/>
 </head>
 <body>
 <div id="app">
@@ -124,11 +124,16 @@
 </div>
 
 <section class="target-lock-hud hidden" id="targetLockHud" aria-live="polite">
-  <div class="target-lock-head"><span>🎯 TARGET LOCK</span><b id="targetLockType">HOSTIL</b></div>
+  <div class="target-lock-head">
+    <span>🎯 TARGET LOCK</span>
+    <span class="target-lock-head-actions"><b id="targetLockType">HOSTIL</b><button class="tactical-collapse-btn" id="targetLockToggle" type="button" title="Minimizar / expandir Target Lock" aria-label="Minimizar Target Lock">▾</button></span>
+  </div>
   <div class="target-lock-name" id="targetLockName">SEM ALVO</div>
-  <div class="target-lock-meta"><span id="targetLockDistance">0u</span><span id="targetLockThreat">—</span></div>
-  <div class="target-lock-stat"><span>HP</span><div class="target-lock-track hp"><i id="targetLockHpFill"></i></div><b id="targetLockHpText">0 / 0</b></div>
-  <div class="target-lock-stat"><span>ESC</span><div class="target-lock-track shield"><i id="targetLockShieldFill"></i></div><b id="targetLockShieldText">0 / 0</b></div>
+  <div class="target-lock-detail" id="targetLockDetail">
+    <div class="target-lock-meta"><span id="targetLockDistance">0u</span><span id="targetLockThreat">—</span></div>
+    <div class="target-lock-stat"><span>HP</span><div class="target-lock-track hp"><i id="targetLockHpFill"></i></div><b id="targetLockHpText">0 / 0</b></div>
+    <div class="target-lock-stat"><span>ESC</span><div class="target-lock-track shield"><i id="targetLockShieldFill"></i></div><b id="targetLockShieldText">0 / 0</b></div>
+  </div>
 </section>
 
 <section class="combat-state-hud hidden" id="combatStateHud" aria-live="polite">
@@ -138,7 +143,7 @@
 <button class="galaxy-event-hud hidden" id="galaxyEventHud" type="button" aria-label="Abrir evento galáctico">
   <span class="galaxy-event-icon" id="galaxyEventIcon">⚠</span>
   <span class="galaxy-event-copy"><small>EVENTO GALÁCTICO</small><b id="galaxyEventName">ANOMALIA</b><em id="galaxyEventObjective">—</em></span>
-  <span class="galaxy-event-side"><b id="galaxyEventTimer">00:00</b><i><span id="galaxyEventProgress"></span></i></span>
+  <span class="galaxy-event-side"><span class="galaxy-event-side-top"><b id="galaxyEventTimer">00:00</b><span class="tactical-collapse-btn galaxy-event-toggle" id="galaxyEventToggle" role="button" tabindex="0" title="Minimizar / expandir evento" aria-label="Minimizar evento">▾</span></span><i><span id="galaxyEventProgress"></span></i></span>
 </button>
 
 <div class="combat-flash" id="combatFlash" aria-hidden="true"></div>
@@ -727,6 +732,6 @@
   </div>
 </div>
 </div>
-<script src="/game.js?v=15.1.0" type="module"></script>
+<script src="/game.js?v=15.2.0" type="module"></script>
 </body>
 </html>
