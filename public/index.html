@@ -6,7 +6,7 @@
 <meta content="width=device-width,initial-scale=1,user-scalable=no" name="viewport"/>
 <meta content="#030816" name="theme-color"/>
 <title>Stellar Legacy</title>
-<link href="/style.css?v=13.4.0" rel="stylesheet"/>
+<link href="/style.css?v=13.4.1" rel="stylesheet"/>
 </head>
 <body>
 <div id="app">
@@ -29,18 +29,6 @@
 <button class="small-btn auction-top-btn" id="auctionBtn">LEILÃO <span id="auctionTopClock">60:00</span></button>
 <button class="small-btn gold" id="shopBtn">LOJA</button>
 <button class="small-btn premium-top-btn" id="premiumBtn">PREMIUM <span id="premiumTopStatus">LOJA</span></button>
-<div class="top-ability-cluster" id="abilityBar" aria-label="Habilidades rápidas">
-  <button class="ability-btn ship-ability" id="shipAbilityBtn" type="button" title="Habilidade da nave • tecla E">
-    <span class="ability-icon" id="shipAbilityIcon">✦</span>
-    <span class="ability-copy"><b id="shipAbilityName">HAB. NAVE</b><small id="shipAbilityStatus">PRONTA • E</small></span>
-    <i id="shipAbilityFill"></i>
-  </button>
-  <button class="ability-btn pet-kami-ability" id="petKamiAbilityBtn" type="button" title="Nova Burst AUX-9 • tecla K">
-    <span class="ability-icon">☄</span>
-    <span class="ability-copy"><b>KAMIKAZE</b><small id="petKamiAbilityStatus">BLOQUEADO • K</small></span>
-    <i id="petKamiAbilityFill"></i>
-  </button>
-</div>
 <button class="small-btn config-top-btn" id="configBtn">CONF</button>
 </nav>
 </header>
@@ -127,7 +115,7 @@
 <div class="weapon-toolbar">
 <div class="weapon-toolbar-left">
 <button aria-label="Expandir / recolher menu de munições" class="weapon-expand-btn" id="weaponBarToggle" title="Expandir / recolher menu de munições">▾</button>
-<div class="weapon-toolbar-label">MUNIÇÕES</div>
+<div class="weapon-toolbar-label">COMBATE</div>
 </div>
 <div class="section actions actions-inline">
 <button class="action-btn" id="laserToggle">⚡ LASER <span class="keyhint">CTRL</span></button>
@@ -143,6 +131,21 @@
 <div class="section weapon-section ammo-bubble-section">
 <div class="section-title">MÍSSEIS</div>
 <div class="button-row ammo-bubbles" id="rocketAmmoButtons"></div>
+</div>
+</div>
+<div class="section bottom-ability-section">
+<div class="section-title">HABILIDADES</div>
+<div class="bottom-ability-cluster" id="abilityBar" aria-label="Habilidades de combate">
+  <button class="ability-btn ship-ability" id="shipAbilityBtn" type="button" title="Habilidade da nave • tecla E">
+    <span class="ability-icon" id="shipAbilityIcon">✦</span>
+    <span class="ability-copy"><b id="shipAbilityName">HAB. NAVE</b><small id="shipAbilityStatus">PRONTA • E</small></span>
+    <i id="shipAbilityFill"></i>
+  </button>
+  <button class="ability-btn pet-kami-ability" id="petKamiAbilityBtn" type="button" title="Nova Burst AUX-9 • tecla K">
+    <span class="ability-icon">☄</span>
+    <span class="ability-copy"><b>KAMIKAZE</b><small id="petKamiAbilityStatus">BLOQUEADO • K</small></span>
+    <i id="petKamiAbilityFill"></i>
+  </button>
 </div>
 </div>
 <div class="section extras compact extras-inline">
@@ -645,6 +648,6 @@
   </div>
 </div>
 </div>
-<script src="/game.js?v=13.4.0" type="module"></script>
+<script src="/game.js?v=13.4.1" type="module"></script>
 </body>
 </html>

@@ -26,7 +26,7 @@
 - Sem alteração de schema/SQL neste patch.
 - Saves e backend V13.1 permanecem compatíveis.
 
-## V13.4.0
+## V13.4.1
 - HUD JOGADOR separado e configurável.
 - Login compacto + recuperação de senha.
 - AUX-9: módulos com comportamento exclusivo.

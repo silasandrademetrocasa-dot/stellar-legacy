@@ -1,6 +1,6 @@
-import { FACTIONS, SHIPS, ITEMS, LASER_AMMO, ROCKETS, NPC_TYPES, MAPS, RESOURCES } from './data.js?v=13.4.0';
-import { GAME_ASSETS } from './assets/v8/manifest.js?v=13.4.0';
-import { signUp, signIn, requestPasswordReset, getRecoveryAccessToken, completePasswordRecovery, restoreSession, signOutLocal, checkGameSession, endGameSession, getUser, loadCloudSave, saveCloudSave, updateCallsign, updatePassword, loadRankings, loadAuctionBids, saveAuctionBidOnline, markAuctionBidStatusOnline, loadAuctionMarket, upsertPlayerPresenceOnline, loadMapPresenceOnline, removePlayerPresenceOnline, queuePvpAttackOnline, consumePvpDamageEventsOnline, syncArenaProfileOnline, loadArenaState, loadArenaDailyRewardStatus, claimArenaDailyReward, loadArenaOpponents, loadArenaHistory, arenaAttackOnline, listClansOnline, loadMyClanOnline, createClanOnline, joinClanOnline, leaveClanOnline, transferClanCreditsOnline, claimClanCreditGrantsOnline, recordClanAlienKillOnline, getPremiumShopOnline, testPurchasePremiumOnline, loadWarfrontStateOnline, hitWorldBossOnline, claimWorldBossRewardOnline, declareClanWarOnline, recordClanWarScoreOnline } from './api.js?v=13.4.0';
+import { FACTIONS, SHIPS, ITEMS, LASER_AMMO, ROCKETS, NPC_TYPES, MAPS, RESOURCES } from './data.js?v=13.4.1';
+import { GAME_ASSETS } from './assets/v8/manifest.js?v=13.4.1';
+import { signUp, signIn, requestPasswordReset, getRecoveryAccessToken, completePasswordRecovery, restoreSession, signOutLocal, checkGameSession, endGameSession, getUser, loadCloudSave, saveCloudSave, updateCallsign, updatePassword, loadRankings, loadAuctionBids, saveAuctionBidOnline, markAuctionBidStatusOnline, loadAuctionMarket, upsertPlayerPresenceOnline, loadMapPresenceOnline, removePlayerPresenceOnline, queuePvpAttackOnline, consumePvpDamageEventsOnline, syncArenaProfileOnline, loadArenaState, loadArenaDailyRewardStatus, claimArenaDailyReward, loadArenaOpponents, loadArenaHistory, arenaAttackOnline, listClansOnline, loadMyClanOnline, createClanOnline, joinClanOnline, leaveClanOnline, transferClanCreditsOnline, claimClanCreditGrantsOnline, recordClanAlienKillOnline, getPremiumShopOnline, testPurchasePremiumOnline, loadWarfrontStateOnline, hitWorldBossOnline, claimWorldBossRewardOnline, declareClanWarOnline, recordClanWarScoreOnline } from './api.js?v=13.4.1';
 
 const canvas = document.querySelector('#game');
 const ctx = canvas.getContext('2d');
@@ -33,13 +33,13 @@ function setAudioEnabled(value){audioEnabled=!!value;try{localStorage.setItem(AU
 function playSfx(type,level=1){
   if(!audioEnabled)return;
   const ctx=ensureAudio();if(!ctx)return;
-  const now=ctx.currentTime, throttle={laser:.09,rocket:.12,impact:.06,damage:.12,explode:.16,pickup:.08,ui:.05}[type]||.05;
+  const now=ctx.currentTime, throttle={laser:.09,rocket:.12,impact:.06,damage:.12,explode:.16,pickup:.08,ui:.05,ability:.18,kami:.18}[type]||.05;
   if(now-(sfxLast[type]||0)<throttle)return;sfxLast[type]=now;
   const out=ctx.createGain();out.gain.setValueAtTime(.0001,now);out.connect(ctx.destination);
   const gain=Math.max(.015,Math.min(.18,.08*Number(level||1)));
   out.gain.exponentialRampToValueAtTime(gain,now+.008);
   const osc=ctx.createOscillator();const g=ctx.createGain();osc.connect(g);g.connect(out);
-  const cfg={laser:[760,170,'sawtooth',.11],rocket:[150,58,'square',.24],impact:[240,90,'triangle',.09],damage:[120,52,'sawtooth',.16],explode:[95,32,'square',.34],pickup:[560,980,'sine',.13],ui:[420,520,'sine',.07]}[type]||[300,180,'sine',.08];
+  const cfg={laser:[760,170,'sawtooth',.11],rocket:[150,58,'square',.24],impact:[240,90,'triangle',.09],damage:[120,52,'sawtooth',.16],explode:[95,32,'square',.34],pickup:[560,980,'sine',.13],ui:[420,520,'sine',.07],ability:[310,920,'sawtooth',.22],kami:[190,52,'square',.28]}[type]||[300,180,'sine',.08];
   osc.type=cfg[2];osc.frequency.setValueAtTime(cfg[0],now);osc.frequency.exponentialRampToValueAtTime(Math.max(20,cfg[1]),now+cfg[3]);
   g.gain.setValueAtTime(.8,now);g.gain.exponentialRampToValueAtTime(.0001,now+cfg[3]);
   osc.start(now);osc.stop(now+cfg[3]+.02);out.gain.exponentialRampToValueAtTime(.0001,now+cfg[3]+.025);
@@ -360,10 +360,10 @@ function levelFromXp(xp,maxLevel=PLAYER_MAX_LEVEL){
 }
 const PET_KAMIKAZE_COOLDOWN=15;
 const PET_GEARS = {
-  guard: { id:'guard', name:'Modo Sentinela', cost:150000, currency:'uridium', description:'Combate assistido: prioriza seu alvo atual e, quando você está livre, caça somente dentro do mesmo alcance de ataque laser da nave.' },
-  box: { id:'box', name:'Módulo Salvager', cost:100000, currency:'uridium', description:'Busca a caixa de saque mais próxima do próprio AUX-9 em até 50% do raio do minimapa e mantém o alvo até concluir a coleta. Seu alvo em combate sempre tem prioridade máxima.' },
-  ore: { id:'ore', name:'Módulo Minerador', cost:80000, currency:'uridium', description:'Busca a pedra/minério mais próximo do próprio AUX-9 em até 50% do raio do minimapa e mantém o alvo até concluir a coleta. Seu alvo em combate sempre tem prioridade máxima.' },
-  repair: { id:'repair', name:'Módulo Reclaimer', cost:200000, currency:'uridium', description:'Segue a nave e regenera HP automaticamente quando você estiver danificado.' },
+  guard: { id:'guard', name:'Modo Sentinela', cost:150000, currency:'uridium', description:'Módulo exclusivo de combate. Ataca NPCs e somente NPCs; não coleta caixas, não minera e não repara.' },
+  box: { id:'box', name:'Módulo Salvager', cost:100000, currency:'uridium', description:'Módulo exclusivo de coleta de caixas. Busca e recolhe apenas BOX; não ataca, não minera e não repara.' },
+  ore: { id:'ore', name:'Módulo Minerador', cost:80000, currency:'uridium', description:'Módulo exclusivo de mineração. Busca e recolhe apenas pedras/minérios; não ataca, não coleta BOX e não repara.' },
+  repair: { id:'repair', name:'Módulo Reclaimer', cost:200000, currency:'uridium', description:'Módulo exclusivo de reparo. Segue a nave e regenera HP; não ataca e não coleta recursos.' },
   kami: { id:'kami', name:'Nova Burst', cost:350000, currency:'uridium', description:'Ativação única: o AUX-9 investe, explode uma vez e volta ao modo Companhia. Recarga de 15s antes de uma nova ativação.' },
 };
 function freshPet(){
@@ -416,7 +416,7 @@ function triggerPetKamikaze(){
   if(petKamikazeCooldownRemaining()>0){showToast(`Nova Burst recarregando • ${petKamikazeCooldownRemaining().toFixed(1)}s`);return;}
   if(!state.target||state.target.hp<=0||state.target.isPlayer){const nearest=petNearestToPlayer(state.enemies.filter(e=>e.hp>0),petCombatSearchRange());if(nearest)state.target=nearest;}
   if(!state.target||state.target.hp<=0||state.target.isPlayer){showToast('Selecione um NPC para lançar o Nova Burst');return;}
-  setPetGear('kami');
+  setPetGear('kami');playSfx('kami',1.05);
 }
 function useShipAbility(){
   if(!progress||progress.repairRequired||state.jumping)return; const def=shipAbilityDef(),remaining=shipAbilityCooldownRemaining();
@@ -431,7 +431,7 @@ function useShipAbility(){
   }else{
     abilityRuntime.activeId=def.id;abilityRuntime.activeUntil=now+def.duration*1000;spawnParticle(player.x,player.y-40,def.name,def.id==='tank'?'#ffe777':'#72dcff');spawnImpactFx(player.x,player.y,def.id==='tank'?'#ffe777':'#72dcff',100,'shield');
   }
-  progress.combatAbilities.shipReadyAt=now+abilityEffectiveCooldown(def)*1000;saveGame();showToast(`${def.name} ATIVADA!`,'reward');
+  progress.combatAbilities.shipReadyAt=now+abilityEffectiveCooldown(def)*1000;playSfx('ability',1.05);saveGame();showToast(`${def.name} ATIVADA!`,'reward');
 }
 function updateCombatAbilities(){
   if(!progress)return; const now=nowSec();
@@ -1552,15 +1552,31 @@ function updateWarfrontRuntime(){if(!authenticated||!progress)return;if(warfront
 
 function layoutHudPanels(){
   const topbarH=ui.topbar?Math.ceil(ui.topbar.getBoundingClientRect().height):42;
-  const weaponH=ui.weaponBar?Math.ceil(ui.weaponBar.getBoundingClientRect().height):150;
-  document.documentElement.style.setProperty('--hud-top-offset',`${topbarH+8}px`);
+  const weaponH=ui.weaponBar?Math.ceil(ui.weaponBar.getBoundingClientRect().height):82;
+  const startTop=topbarH+8;
+  document.documentElement.style.setProperty('--hud-top-offset',`${startTop}px`);
   document.documentElement.style.setProperty('--weaponbar-height',`${weaponH+12}px`);
-  let left=8;
-  const place=(el,visible=true,gap=8)=>{if(!el||!visible)return;el.style.left=`${left}px`;const w=Math.ceil(el.getBoundingClientRect().width||0);left+=w+gap;};
-  place(ui.leftStats,hudVisibility.ship!==false);
+
+  let left=8, top=startTop, rowH=0;
+  const maxRight=Math.max(320,innerWidth-12);
+  const place=(el,visible=true,gap=8)=>{
+    if(!el)return;
+    if(!visible||el.classList.contains('hud-user-hidden')||el.classList.contains('hud-user-disabled')||el.classList.contains('hidden'))return;
+    el.style.setProperty('left',`${left}px`,'important');el.style.setProperty('top',`${top}px`,'important');
+    let r=el.getBoundingClientRect(),w=Math.ceil(r.width||160),h=Math.ceil(r.height||70);
+    if(left>8&&left+w>maxRight){
+      left=8;top+=rowH+8;rowH=0;
+      el.style.setProperty('left',`${left}px`,'important');el.style.setProperty('top',`${top}px`,'important');
+      r=el.getBoundingClientRect();w=Math.ceil(r.width||160);h=Math.ceil(r.height||70);
+    }
+    left+=w+gap;rowH=Math.max(rowH,h);
+  };
+
+  // Ordem visual fixa para nunca misturar dados do jogador com o AUX-9.
   place(ui.playerPanel,hudVisibility.player!==false);
+  place(ui.leftStats,hudVisibility.ship!==false);
   place(ui.petFloatPanel,hudVisibility.pet!==false&&!!progress?.pet?.owned);
-  if(ui.activeMissionPanel&&hudVisibility.missions!==false&&innerWidth>820)ui.activeMissionPanel.style.left=`${left}px`;
+  place(ui.activeMissionPanel,hudVisibility.missions!==false&&!!progress);
 }
 function getFaction(){return progress?.profile?.faction ? FACTIONS[progress.profile.faction] : null;}
 function factionFromPrefix(prefix){
@@ -3717,7 +3733,7 @@ function renderPet(root=ui.petContent){
   inv.appendChild(grid);root.appendChild(inv);
 }
 function refreshPetViews(){
-  renderPet();updatePetFloat();
+  renderPet();updatePetFloat();layoutHudPanels();
   if(ui.hangarModal&&!ui.hangarModal.classList.contains('hidden')&&state.hangarTab==='pet')renderHangar();
 }
 function openPet(){if(!progress?.pet?.owned){openShop('pet');showToast(`AUX-9 disponível na Loja por ${fmt(PET_BASE_PRICE)} STL`);return;}renderPet();ui.petModal.classList.remove('hidden');}
@@ -4484,7 +4500,7 @@ function openArena(){
   refreshArena(true);
 }
 
-function renderAll(){buildAmmoButtons();renderShop();renderHangar();renderCargo();renderMapModal();renderPet();renderMissions();renderGalaxyGate();renderPilotProfile();ensureAuctionState();updatePassBadge();updateUI();updateWarfrontBadge();refreshArenaBadge();}
+function renderAll(){buildAmmoButtons();renderShop();renderHangar();renderCargo();renderMapModal();renderPet();renderMissions();renderGalaxyGate();renderPilotProfile();ensureAuctionState();updatePassBadge();updateUI();updateWarfrontBadge();refreshArenaBadge();layoutHudPanels();}
 
 function worldPoint(ev){const r=canvas.getBoundingClientRect(),sx=ev.clientX-r.left,sy=ev.clientY-r.top;return{x:sx-W/2+state.camera.x,y:sy-H/2+state.camera.y};}
 function gameplayPointerAllowed(){return authenticated&&progress&&ui.loginModal.classList.contains('hidden')&&ui.shopModal.classList.contains('hidden')&&ui.hangarModal.classList.contains('hidden')&&ui.cargoModal.classList.contains('hidden')&&ui.petModal.classList.contains('hidden')&&ui.missionModal.classList.contains('hidden')&&ui.passModal.classList.contains('hidden')&&ui.gateModal.classList.contains('hidden')&&ui.pilotModal.classList.contains('hidden')&&ui.auctionModal.classList.contains('hidden')&&ui.arenaModal.classList.contains('hidden')&&ui.configModal.classList.contains('hidden')&&ui.mapModal.classList.contains('hidden')&&ui.factionModal.classList.contains('hidden');}

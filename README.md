@@ -1,15 +1,17 @@
-# Stellar Legacy V13.4.0 — STELLAR IDENTITY
+# Stellar Legacy V13.4.1 — STELLAR IDENTITY
 
 Atualização de interface aplicada sobre a base V13.1.0 WARFRONT, preservando as mecânicas e o backend existentes.
 
 ## Principais mudanças
-- Barra superior mais fina, sem a logo grande.
-- NAVE, MISSÕES, AUX-9, PORTAIS e HABILIDADES organizados no topo.
-- Habilidades rápidas da nave/AUX-9 integradas à barra superior.
-- Textos visuais LASER CTRL, MÍSSIL ESPAÇO e MÍSSIL PRONTO removidos da barra de munição; os atalhos continuam funcionando.
-- Navegação de menus em modo exclusivo: abrir um menu principal fecha o anterior.
-- Portal Astral AURORA disponível; NEXUS e ECLIPSE continuam visíveis, porém bloqueados como EM BREVE.
-- Compatível com os saves e o backend da V13.1.0.
+- HUD JOGADOR em bloco próprio, independente de NAVE e AUX-9 e controlável em Configurações > HUD.
+- OVERDRIVE e KAMIKAZE movidos para a barra inferior junto das munições.
+- AUX-9 com módulos estritamente exclusivos por função: combate, BOX, mineração ou reparo.
+- Efeitos sonoros para laser, míssil, impactos, explosões, habilidades e Nova Burst.
+- Login compacto em desktop/mobile, com recuperação de senha e sem rolagem do modal.
+- Perfil de Piloto atualiza imediatamente após compra de Núcleos Quânticos, conversão de PP e evolução.
+- Stellar Auto Installer incluído em `.github/workflows/stellar-auto-installer.yml`.
+- Interface limpa de textos de teste/bastidor.
+- Compatível com os saves e o backend atuais.
 
 ## Instalação
 1. Suba os arquivos desta pasta no Git/Render.
