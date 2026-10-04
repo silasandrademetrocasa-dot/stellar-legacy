@@ -1,7 +1,7 @@
-import { FACTIONS, SHIPS, ITEMS, LASER_AMMO, ROCKETS, NPC_TYPES, MAPS, RESOURCES } from './data.js?v=17.5.0';
-import { GAME_ASSETS } from './assets/v17/manifest.js?v=17.5.0';
-import { signUp, signIn, requestPasswordReset, restorePasswordRecoveryFromUrl, restoreSession, signOutLocal, checkGameSession, endGameSession, getUser, getSessionCredentials, loadCloudSave, saveCloudSave, updateCallsign, updatePassword, loadRankings, loadAuctionBids, saveAuctionBidOnline, markAuctionBidStatusOnline, loadAuctionMarket, upsertPlayerPresenceOnline, loadMapPresenceOnline, removePlayerPresenceOnline, queuePvpAttackOnline, consumePvpDamageEventsOnline, syncArenaProfileOnline, loadArenaState, loadArenaDailyRewardStatus, claimArenaDailyReward, loadArenaOpponents, loadArenaHistory, arenaAttackOnline, listClansOnline, loadMyClanOnline, createClanOnline, joinClanOnline, leaveClanOnline, transferClanCreditsOnline, claimClanCreditGrantsOnline, recordClanAlienKillOnline, getPremiumShopOnline, testPurchasePremiumOnline, loadWarfrontStateOnline, hitWorldBossOnline, claimWorldBossRewardOnline, declareClanWarOnline, recordClanWarScoreOnline, loadLiveOpsOnline, purchaseLiveCatalogOnline, economyActionOnline, getChatHistoryOnline, sendChatMessageOnline, getMyDesignersOnline, setDesignLoadoutOnline, claimGateDroneDesignOnline, claimEventDesignerOnline } from './api.js?v=17.5.0';
-import { SharedUniverseClient } from './world.js?v=17.5.0';
+import { FACTIONS, SHIPS, ITEMS, LASER_AMMO, ROCKETS, NPC_TYPES, MAPS, RESOURCES } from './data.js?v=17.5.1';
+import { GAME_ASSETS } from './assets/v17/manifest.js?v=17.5.1';
+import { signUp, signIn, requestPasswordReset, restorePasswordRecoveryFromUrl, restoreSession, signOutLocal, checkGameSession, endGameSession, getUser, getSessionCredentials, loadCloudSave, saveCloudSave, updateCallsign, updatePassword, loadRankings, loadAuctionBids, saveAuctionBidOnline, markAuctionBidStatusOnline, loadAuctionMarket, upsertPlayerPresenceOnline, loadMapPresenceOnline, removePlayerPresenceOnline, queuePvpAttackOnline, consumePvpDamageEventsOnline, syncArenaProfileOnline, loadArenaState, loadArenaDailyRewardStatus, claimArenaDailyReward, loadArenaOpponents, loadArenaHistory, arenaAttackOnline, listClansOnline, loadMyClanOnline, createClanOnline, joinClanOnline, leaveClanOnline, transferClanCreditsOnline, claimClanCreditGrantsOnline, recordClanAlienKillOnline, getPremiumShopOnline, testPurchasePremiumOnline, loadWarfrontStateOnline, hitWorldBossOnline, claimWorldBossRewardOnline, declareClanWarOnline, recordClanWarScoreOnline, loadLiveOpsOnline, purchaseLiveCatalogOnline, economyActionOnline, getChatHistoryOnline, sendChatMessageOnline, getMyDesignersOnline, setDesignLoadoutOnline, claimGateDroneDesignOnline, claimEventDesignerOnline } from './api.js?v=17.5.1';
+import { SharedUniverseClient } from './world.js?v=17.5.1';
 
 const canvas = document.querySelector('#game');
 const ctx = canvas.getContext('2d');
@@ -273,6 +273,15 @@ function syncSharedUniversePlayer(force=false){
     pet:petOwned?{owned:true,level:progress.pet.level||1,x:petRuntime.x,y:petRuntime.y,angle:petRuntime.angle||0,activeGear:progress.pet.activeGear||'off',laserTargetId:petRuntime.laserTargetId||null,laserActive:petLaserActive,laserColor:ammo?.color||'#76d9ff',designId:currentPetDesign()?.design_id||null}:{owned:false}});
 }
 function findSharedNpc(id){return state.enemies.find(e=>e.id===id&&e.sharedWorld)||null;}
+function purgeSharedEventEntities(activeEventId=null){
+  const targetWasEvent=!!state.target?.eventNpc;
+  state.enemies=state.enemies.filter(e=>!e.eventNpc||(activeEventId&&e.eventId===activeEventId));
+  state.ores=state.ores.filter(o=>!o.eventOre||(activeEventId&&o.eventId===activeEventId));
+  state.enemyRespawns=state.enemyRespawns.filter(r=>!r.eventId);
+  state.oreRespawns=state.oreRespawns.filter(r=>!r.eventId&&!r.eventOre);
+  if(targetWasEvent&&!state.enemies.some(e=>e.id===state.target?.id)){state.target=null;player.laserFiring=false;}
+  galaxyEventRuntime.convoy=null;
+}
 function applySharedNpcPatch(raw){const e=findSharedNpc(raw.id);if(!e)return;const now=Date.now(),nx=Number(raw.x),ny=Number(raw.y),dt=Math.max(.001,Math.min(1,(now-(e.netAt||now))/1000));if(Number.isFinite(nx)&&Number.isFinite(ny)){const px=Number.isFinite(e.netX)?e.netX:e.x,py=Number.isFinite(e.netY)?e.netY:e.y;e.vx=Math.max(-1400,Math.min(1400,(nx-px)/dt));e.vy=Math.max(-1400,Math.min(1400,(ny-py)/dt));e.netX=nx;e.netY=ny;e.tx=nx;e.ty=ny;e.netAt=now;}const rest={...raw};delete rest.x;delete rest.y;Object.assign(e,rest);}
 function sharedKillReward(entity,share,finalBlow){
   if(!progress)return;const pct=Math.max(.08,Math.min(1,Number(share)||0)),factor=finalBlow?Math.max(.35,pct):Math.max(.18,pct);
@@ -304,8 +313,20 @@ function handleSharedUniverseMessage(msg){
   }
   if(msg.type==='npc_aggro'){const e=findSharedNpc(msg.entityId);if(e)e.aggroUserId=msg.userId||null;if(String(msg.userId||'')===String(getUser()?.id||'')){state.portalCombatUntil=Math.max(state.portalCombatUntil,nowSec()+6);setCombatAlert('NPC FIXOU ALVO EM VOCÊ','combat',1.4);}return;}
   if(msg.type==='npc_attack'){const e=findSharedNpc(msg.entityId);if(e)e.lastAttackPlayerAt=nowSec();const retaliation=!!msg.retaliation;if(retaliation&&isPortalNeutralZone())state.portalCombatUntil=Math.max(state.portalCombatUntil,nowSec()+6);takePlayerDamage(Math.max(0,Number(msg.damage)||0),{forceNpcRetaliation:retaliation});return;}
+  if(msg.type==='event_cleanup'){
+    const npcIds=new Set(msg.npcIds||[]),oreIds=new Set(msg.oreIds||[]);
+    if(npcIds.size)state.enemies=state.enemies.filter(e=>!npcIds.has(e.id));else purgeSharedEventEntities(null);
+    if(oreIds.size)state.ores=state.ores.filter(o=>!oreIds.has(o.id));
+    if(state.target?.eventNpc&&(!state.enemies.some(e=>e.id===state.target.id))){state.target=null;player.laserFiring=false;}
+    galaxyEventRuntime.convoy=null;return;
+  }
   if(msg.type==='event_update'){
-    sharedUniverseRuntime.event=msg.event||null;galaxyEventRuntime.convoy=msg.event?.convoy?{...msg.event.convoy}:null;const ev=currentGalaxyEvent(),rec=galaxyEventRecord(ev);if(msg.event){rec.value=Math.max(0,Number(msg.event.progress)||0);rec.complete=!!msg.event.complete;}return;
+    const previousEventId=sharedUniverseRuntime.event?.eventId||null,nextEventId=msg.event?.eventId||null;
+    sharedUniverseRuntime.event=msg.event||null;
+    if(previousEventId!==nextEventId||!nextEventId||msg.event?.complete)purgeSharedEventEntities(nextEventId&&!msg.event?.complete?nextEventId:null);
+    galaxyEventRuntime.convoy=msg.event?.convoy?{...msg.event.convoy}:null;
+    if(msg.event){const ev=currentGalaxyEvent(),rec=galaxyEventRecord(ev);rec.value=Math.max(0,Number(msg.event.progress)||0);rec.complete=!!msg.event.complete;}
+    return;
   }
   if(msg.type==='event_credit'){
     sharedUniverseRuntime.event=msg.event||sharedUniverseRuntime.event;const ev=currentGalaxyEvent(),rec=galaxyEventRecord(ev);if(!rec.rewarded)completeGalaxyEvent(ev);return;
@@ -2124,7 +2145,7 @@ function completeGalaxyEvent(ev=currentGalaxyEvent()){
 function addGalaxyEventProgress(amount=1,ev=currentGalaxyEvent()){
   const rec=galaxyEventRecord(ev);if(rec.complete)return;rec.value=Math.max(0,Math.min(ev.target,(Number(rec.value)||0)+Math.max(0,Number(amount)||0)));if(rec.value>=ev.target)completeGalaxyEvent(ev);else saveGame();
 }
-function clearGalaxyEventEntities(){if(state.target?.eventNpc){state.target=null;player.laserFiring=false;}state.enemies=state.enemies.filter(e=>!e.eventNpc);state.ores=state.ores.filter(o=>!o.eventOre);galaxyEventRuntime.convoy=null;galaxyEventRuntime.nextWaveAt=0;}
+function clearGalaxyEventEntities(){if(state.target?.eventNpc){state.target=null;player.laserFiring=false;}state.enemies=state.enemies.filter(e=>!e.eventNpc);state.ores=state.ores.filter(o=>!o.eventOre);state.enemyRespawns=state.enemyRespawns.filter(r=>!r.eventId);state.oreRespawns=state.oreRespawns.filter(r=>!r.eventId&&!r.eventOre);galaxyEventRuntime.convoy=null;galaxyEventRuntime.nextWaveAt=0;galaxyEventRuntime.retryAt=0;}
 function eventEnemy(type,ev,opts={}){const e=makeEnemy(type);e.eventNpc=true;e.eventId=ev.eventId;e.forceChase=opts.forceChase??true;e.name=opts.name||`RIFT • ${e.name}`;const scale=Number(opts.scale)||1;e.maxHp=e.hp=Math.round(e.maxHp*scale);e.maxShield=e.shield=Math.round(e.maxShield*scale);e.damage=e.baseDamage=Math.round(e.damage*Math.max(1,scale*.82));e.credits=Math.round(e.credits*(opts.rewardMult||1.35));e.uridium=Math.round(e.uridium*(opts.rewardMult||1.35));e.xp=Math.round(e.xp*(opts.rewardMult||1.35));e.color=opts.color||e.color;if(opts.size)e.size=opts.size;return e;}
 function spawnGalaxyEventWave(ev=currentGalaxyEvent(),count=6){const profile=galaxyEventProfile(ev),tier=Number(state.currentMap?.tier||1),pool=Array.isArray(profile.pool)&&profile.pool.length?profile.pool:(tier>=4?['mordon','devolarium','sibelon']:tier>=3?['saimon','mordon','devolarium']:tier>=2?['lordakia','saimon','mordon']:['streuner','recruitStreuner','aiderStreuner']);for(let i=0;i<count;i++){const type=pool[Math.floor(Math.random()*pool.length)],e=eventEnemy(type,ev,{forceChase:true,rewardMult:profile.rewardMult||1.22,scale:profile.scale||1,color:profile.color,size:profile.size});if(profile.namePrefix)e.name=profile.namePrefix+' • '+e.name; if(profile.speedMult){e.speed*=profile.speedMult;e.attackRange=Math.min(500,e.attackRange+(profile.speedMult-1)*90);}const a=Math.random()*TWO_PI,r=rand(420,820);e.x=Math.max(160,Math.min(state.currentMap.world.w-160,player.x+Math.cos(a)*r));e.y=Math.max(160,Math.min(state.currentMap.world.h-160,player.y+Math.sin(a)*r));state.enemies.push(e);}}
 function spawnGalaxyEventPrime(ev=currentGalaxyEvent()){if(state.enemies.some(e=>e.eventNpc&&e.eventId===ev.eventId&&e.hp>0))return;const profile=galaxyEventProfile(ev),level=progress?.profile?.level||1,scale=Math.max(profile.bossScale||2.2,(profile.bossScale||2.2)+Math.min(1.8,level/18)),e=eventEnemy(profile.bossType||'bossSibelon',ev,{name:profile.bossName||'RIFT TYRANT',scale,rewardMult:profile.bossRewardMult||2.4,size:profile.bossSize||68,color:profile.bossColor||'#ff4f9a'});e.forceChase=true;e.aggroRange=800;e.attackRange=500;e.x=Math.max(280,Math.min(state.currentMap.world.w-280,player.x+650));e.y=Math.max(280,Math.min(state.currentMap.world.h-280,player.y+180));state.enemies.push(e);playSfx('warning');triggerCombatFlash('red');showToast((profile.progressLabel||'BOSS')+' • '+(profile.bossName||'RIFT TYRANT')+' detectado!','reward');}

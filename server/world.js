@@ -181,20 +181,27 @@ class Room {
     return !this.map.battle;
   }
 
-  clearEventEntities(){
-    for(const [id,e] of this.npcs) if(e.eventNpc) this.npcs.delete(id);
-    for(const [id,o] of this.ores) if(o.eventOre) this.ores.delete(id);
-    this.convoy=null;this.convoyRetryAt=0;this.nextEventWaveAt=0;this.eventParticipants.clear();
+  clearEventEntities(reason='event_cleanup',clearParticipants=true){
+    const npcIds=[],oreIds=[];
+    for(const [id,e] of this.npcs) if(e.eventNpc){npcIds.push(id);this.npcs.delete(id);}
+    for(const [id,o] of this.ores) if(o.eventOre){oreIds.push(id);this.ores.delete(id);}
+    // Never allow delayed event respawns from a finished/rotated event to come back later.
+    this.respawns=this.respawns.filter(r=>r.kind!=='eventNpc');
+    this.oreRespawns=this.oreRespawns.filter(r=>!r.eventOre);
+    this.convoy=null;this.convoyRetryAt=0;this.nextEventWaveAt=0;
+    if(clearParticipants)this.eventParticipants.clear();
+    if(npcIds.length||oreIds.length)this.broadcast({type:'event_cleanup',reason,npcIds,oreIds,eventId:this.event?.eventId||null,serverTime:nowMs()});
+    return {npcIds,oreIds};
   }
 
   ensureEvent(force=false){
     const ev=this.currentEventDef();
     if(!ev){
-      if(this.event||force){this.clearEventEntities();this.event=null;this.broadcastEvent(true);if(this.clients.size)this.broadcast(this.snapshot());}
+      if(this.event||force){this.clearEventEntities('event_end');this.event=null;this.broadcastEvent(true);if(this.clients.size)this.broadcast(this.snapshot());}
       return;
     }
     if(!force&&this.event?.eventId===ev.eventId)return;
-    this.clearEventEntities();
+    this.clearEventEntities(this.event?'event_rotate':'event_start');
     this.event={...ev,progress:0,complete:false};
     if(!this.eventEligible(ev))return;
     const profile=this.eventProfile(ev),mode=profile.mode;
@@ -214,6 +221,9 @@ class Room {
   }
   spawnEventWave(count=6){
     const ev=this.event;if(!ev)return;const profile=this.eventProfile(ev),pool=this.eventPool(ev),rewardMult=profile.rewardMult||1.22;
+    const alive=[...this.npcs.values()].filter(e=>e.eventNpc&&e.eventId===ev.eventId&&e.hp>0).length;
+    const maxAlive=Math.max(1,Number(profile.maxAlive)||Math.max(Number(profile.waveCount)||6,(Number(profile.minAlive)||3)*2));
+    count=Math.max(0,Math.min(Math.max(0,Number(count)||0),maxAlive-alive));
     for(let i=0;i<count;i++){
       const type=pool[Math.floor(Math.random()*pool.length)],baseName=(NPC_TYPES[type]?.name||String(type||'NPC')).toUpperCase();
       const e=this.makeNpc(type,{eventNpc:true,eventId:ev.eventId,forceChase:true,rewardMult,scale:profile.scale||1,color:profile.color,size:profile.size,speedMult:profile.speedMult||1,name:profile.namePrefix?(profile.namePrefix+' '+baseName):undefined});
@@ -320,9 +330,7 @@ class Room {
     const mode=this.eventMode();
     if(mode==='battle_wave'&&!this.event?.complete)this.addEventProgress(1);
     else if(e.eventNpc&&this.event?.eventId===e.eventId&&(mode==='wave'||mode==='boss'))this.addEventProgress(1);
-    if(e.eventNpc&&this.event?.eventId===e.eventId){
-      if((mode==='wave'||mode==='battle_wave')&&!this.event.complete)this.respawns.push({kind:'eventNpc',type:e.type,at:nowMs()+rand(7000,12000),eventId:e.eventId});
-    }else this.respawns.push({kind:'npc',type:e.type,at:nowMs()+rand(6000,13000)});
+    if(!e.eventNpc)this.respawns.push({kind:'npc',type:e.type,at:nowMs()+rand(6000,13000)});
   }
 
   handleOreCollect(ws,msg){
@@ -333,15 +341,26 @@ class Room {
     const mode=this.eventMode();
     if(o.eventOre&&this.event?.eventId===o.eventId&&mode==='ore')this.addEventProgress(o.amount);
     if(!o.eventOre)this.oreRespawns.push({type:o.type,at:nowMs()+rand(5000,12000)});
-    else if(this.event&&!this.event.complete&&mode==='ore')this.oreRespawns.push({type:o.type,eventOre:true,eventId:o.eventId,amount:o.amount,at:nowMs()+rand(8000,14000)});
   }
 
   addEventProgress(amount){
-    if(!this.event||this.event.complete)return;this.event.progress=Math.min(this.event.target,Math.max(0,this.event.progress+Math.max(0,Number(amount)||0)));if(this.event.progress>=this.event.target){this.event.complete=true;this.broadcastEvent(true);for(const c of this.clients){if(this.eventParticipants.has(c.player?.userId))safeJsonSend(c,{type:'event_credit',event:this.eventPayload()});}}else this.broadcastEvent(true);
+    if(!this.event||this.event.complete)return;
+    this.event.progress=Math.min(this.event.target,Math.max(0,this.event.progress+Math.max(0,Number(amount)||0)));
+    if(this.event.progress>=this.event.target){
+      this.event.complete=true;this.broadcastEvent(true);
+      for(const c of this.clients){if(this.eventParticipants.has(c.player?.userId))safeJsonSend(c,{type:'event_credit',event:this.eventPayload()});}
+      this.clearEventEntities('event_complete',false);
+      if(this.clients.size)this.broadcast(this.snapshot());
+    }else this.broadcastEvent(true);
   }
 
   tick(dt){
     this.ensureEvent(false);const now=nowMs();
+    const activeEventId=this.event?.eventId||null;
+    let staleNpc=false,staleOre=false;
+    for(const [id,e] of this.npcs)if(e.eventNpc&&(!activeEventId||e.eventId!==activeEventId)){this.npcs.delete(id);staleNpc=true;}
+    for(const [id,o] of this.ores)if(o.eventOre&&(!activeEventId||o.eventId!==activeEventId)){this.ores.delete(id);staleOre=true;}
+    if(staleNpc||staleOre){this.respawns=this.respawns.filter(r=>r.kind!=='eventNpc');this.oreRespawns=this.oreRespawns.filter(r=>!r.eventOre);if(this.clients.size)this.broadcast(this.snapshot());}
     for(const e of this.npcs.values()){
       const locked=this.lockedAggroPlayer(e);const near=locked?{player:locked,dist:Math.hypot(locked.x-e.x,locked.y-e.y)}:this.nearestPlayer(e);e.angle+=(Number(e.drift)||0)*dt;if(!near){e.x=clamp(e.x+Math.cos(e.angle)*e.speed*.12*dt,25,this.map.world.w-25);e.y=clamp(e.y+Math.sin(e.angle)*e.speed*.12*dt,25,this.map.world.h-25);continue;}const p=near.player,d=near.dist,dx=p.x-e.x,dy=p.y-e.y,force=!!e.forceChase,retaliating=String(e.aggroUserId||'')===String(p.userId||''),protectedNow=this.playerProtectedFromNpc(p,e),neutralX1=this.mapId==='x1'&&!retaliating;
       if(this.mapId==='x1'){

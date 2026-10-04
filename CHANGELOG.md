@@ -1,3 +1,8 @@
+## V17.5.1 — EVENT CLEANUP HOTFIX
+- Limpeza automática de NPCs/ores ao fim ou rotação de eventos.
+- Prevenção de acúmulo de ondas e respawns atrasados.
+- Sincronização imediata no Shared Universe.
+
 ## V17.5.0 — NPC + BOSS VISUAL REVAMP
 - Sprites NPC/PRIME limpos e centralizados.
 - Auras por família, PRIME e EVENTO.

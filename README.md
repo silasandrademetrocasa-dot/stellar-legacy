@@ -1,4 +1,4 @@
-# Stellar Legacy V17.5.0 — NPC + Boss Visual Revamp
+# Stellar Legacy V17.5.1 — Event Cleanup Hotfix
 
 Visual pass focado em NPCs e bosses, preservando gameplay e o Performance Pass da V17.4.
 
