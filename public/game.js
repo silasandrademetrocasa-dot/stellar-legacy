@@ -1,7 +1,7 @@
-import { FACTIONS, SHIPS, ITEMS, LASER_AMMO, ROCKETS, NPC_TYPES, MAPS, RESOURCES } from './data.js?v=15.0.0';
-import { GAME_ASSETS } from './assets/v8/manifest.js?v=15.0.0';
-import { signUp, signIn, requestPasswordReset, restorePasswordRecoveryFromUrl, restoreSession, signOutLocal, checkGameSession, endGameSession, getUser, getSessionCredentials, loadCloudSave, saveCloudSave, updateCallsign, updatePassword, loadRankings, loadAuctionBids, saveAuctionBidOnline, markAuctionBidStatusOnline, loadAuctionMarket, upsertPlayerPresenceOnline, loadMapPresenceOnline, removePlayerPresenceOnline, queuePvpAttackOnline, consumePvpDamageEventsOnline, syncArenaProfileOnline, loadArenaState, loadArenaDailyRewardStatus, claimArenaDailyReward, loadArenaOpponents, loadArenaHistory, arenaAttackOnline, listClansOnline, loadMyClanOnline, createClanOnline, joinClanOnline, leaveClanOnline, transferClanCreditsOnline, claimClanCreditGrantsOnline, recordClanAlienKillOnline, getPremiumShopOnline, testPurchasePremiumOnline, loadWarfrontStateOnline, hitWorldBossOnline, claimWorldBossRewardOnline, declareClanWarOnline, recordClanWarScoreOnline } from './api.js?v=15.0.0';
-import { SharedUniverseClient } from './world.js?v=15.0.0';
+import { FACTIONS, SHIPS, ITEMS, LASER_AMMO, ROCKETS, NPC_TYPES, MAPS, RESOURCES } from './data.js?v=15.1.0';
+import { GAME_ASSETS } from './assets/v8/manifest.js?v=15.1.0';
+import { signUp, signIn, requestPasswordReset, restorePasswordRecoveryFromUrl, restoreSession, signOutLocal, checkGameSession, endGameSession, getUser, getSessionCredentials, loadCloudSave, saveCloudSave, updateCallsign, updatePassword, loadRankings, loadAuctionBids, saveAuctionBidOnline, markAuctionBidStatusOnline, loadAuctionMarket, upsertPlayerPresenceOnline, loadMapPresenceOnline, removePlayerPresenceOnline, queuePvpAttackOnline, consumePvpDamageEventsOnline, syncArenaProfileOnline, loadArenaState, loadArenaDailyRewardStatus, claimArenaDailyReward, loadArenaOpponents, loadArenaHistory, arenaAttackOnline, listClansOnline, loadMyClanOnline, createClanOnline, joinClanOnline, leaveClanOnline, transferClanCreditsOnline, claimClanCreditGrantsOnline, recordClanAlienKillOnline, getPremiumShopOnline, testPurchasePremiumOnline, loadWarfrontStateOnline, hitWorldBossOnline, claimWorldBossRewardOnline, declareClanWarOnline, recordClanWarScoreOnline } from './api.js?v=15.1.0';
+import { SharedUniverseClient } from './world.js?v=15.1.0';
 
 const canvas = document.querySelector('#game');
 const ctx = canvas.getContext('2d');
@@ -203,8 +203,8 @@ let cloudDirty = false;
 let cloudBusy = false;
 let authenticated = false;
 
-// ===================== V15.0 SHARED UNIVERSE =====================
-const sharedUniverseRuntime={ready:false,status:'offline',latency:0,event:null,roomKey:null,lastPlayerSyncAt:0,pendingOres:new Set(),lastSnapshotToastAt:0};
+// ===================== V15.1 SHARED UNIVERSE • REALTIME COMBAT PRESENCE =====================
+const sharedUniverseRuntime={ready:false,status:'offline',latency:0,event:null,roomKey:null,lastPlayerSyncAt:0,lastCombatSignature:'',pendingOres:new Set(),lastSnapshotToastAt:0};
 function sharedUniverseMap(){return !!authenticated&&!!progress&&!isGalaxyGateMap();}
 function sharedUniverseOnline(){return sharedUniverseMap()&&sharedUniverseRuntime.ready&&sharedUniverse.isOnline();}
 function updateSharedUniverseChip(){
@@ -214,18 +214,22 @@ function updateSharedUniverseChip(){
 }
 function sharedWorldEvent(){return sharedUniverseRuntime.event||null;}
 function normalizeSharedNpc(raw){
-  const base=NPC_TYPES[raw.type]||{};return {...raw,sharedWorld:true,name:raw.name||base.name||raw.type,color:raw.color||base.color||'#ff755d',size:Number(raw.size||base.size||18),resources:{...(raw.resources||base.resources||{})},lastShot:0,lastAttackPlayerAt:0,jammedUntil:Number(raw.jammedUntil)||0,bossAttackScale:Number(raw.bossAttackScale)||1};
+  const base=NPC_TYPES[raw.type]||{},x=Number(raw.x)||0,y=Number(raw.y)||0;return {...raw,x,y,tx:x,ty:y,netX:x,netY:y,netAt:Date.now(),vx:0,vy:0,sharedWorld:true,name:raw.name||base.name||raw.type,color:raw.color||base.color||'#ff755d',size:Number(raw.size||base.size||18),resources:{...(raw.resources||base.resources||{})},lastShot:0,lastAttackPlayerAt:0,jammedUntil:Number(raw.jammedUntil)||0,bossAttackScale:Number(raw.bossAttackScale)||1};
 }
 function joinSharedUniverse(){
   if(!sharedUniverseMap())return;sharedUniverseRuntime.ready=false;sharedUniverseRuntime.pendingOres.clear();state.enemyRespawns=[];state.oreRespawns=[];
   sharedUniverse.join({mapId:progress.mapId,territoryFaction:currentTerritoryFaction()||'battle',faction:progress.profile.faction,callsign:progress.profile.callsign||getUser()?.callsign||'Pilot',shipId:progress.activeShipId,level:progress.profile.level||1,x:player.x,y:player.y,angle:player.angle||0,hp:player.hp,maxHp:player.maxHp,shield:player.shield,maxShield:player.maxShield});
 }
 function syncSharedUniversePlayer(force=false){
-  if(!sharedUniverseMap()||!sharedUniverse.isOnline())return;const now=Date.now();if(!force&&now-sharedUniverseRuntime.lastPlayerSyncAt<180)return;sharedUniverseRuntime.lastPlayerSyncAt=now;
-  sharedUniverse.updatePlayer({x:player.x,y:player.y,angle:player.angle||0,hp:player.hp,maxHp:player.maxHp,shield:player.shield,maxShield:player.maxShield,faction:progress.profile.faction,shipId:progress.activeShipId,level:progress.profile.level||1});
+  if(!sharedUniverseMap()||!sharedUniverse.isOnline())return;const now=Date.now(),ammo=currentLaserAmmo(),target=state.target&&state.target.hp>0?state.target:null,petOwned=!!progress.pet?.owned,petLaserActive=petOwned&&!!petRuntime.laserTargetId&&nowSec()<petRuntime.laserUntil;
+  const combatSignature=[player.laserFiring?1:0,ammo?.id||'',target?.id||'',target?.isPlayer?1:0,petOwned?1:0,petRuntime.laserTargetId||'',petLaserActive?1:0,progress.pet?.activeGear||'off'].join('|');
+  if(!force&&now-sharedUniverseRuntime.lastPlayerSyncAt<75&&combatSignature===sharedUniverseRuntime.lastCombatSignature)return;sharedUniverseRuntime.lastPlayerSyncAt=now;sharedUniverseRuntime.lastCombatSignature=combatSignature;
+  sharedUniverse.updatePlayer({x:player.x,y:player.y,angle:player.angle||0,hp:player.hp,maxHp:player.maxHp,shield:player.shield,maxShield:player.maxShield,faction:progress.profile.faction,shipId:progress.activeShipId,level:progress.profile.level||1,
+    laserFiring:!!player.laserFiring&&!!target,laserColor:ammo?.color||'#76d9ff',laserAmmoId:ammo?.id||'lcb10',laserAmmoName:ammo?.name||'PLS-1',targetId:target?.id||null,targetIsPlayer:!!target?.isPlayer,
+    pet:petOwned?{owned:true,level:progress.pet.level||1,x:petRuntime.x,y:petRuntime.y,angle:petRuntime.angle||0,activeGear:progress.pet.activeGear||'off',laserTargetId:petRuntime.laserTargetId||null,laserActive:petLaserActive,laserColor:ammo?.color||'#76d9ff'}:{owned:false}});
 }
 function findSharedNpc(id){return state.enemies.find(e=>e.id===id&&e.sharedWorld)||null;}
-function applySharedNpcPatch(raw){const e=findSharedNpc(raw.id);if(!e)return;Object.assign(e,raw);}
+function applySharedNpcPatch(raw){const e=findSharedNpc(raw.id);if(!e)return;const now=Date.now(),nx=Number(raw.x),ny=Number(raw.y),dt=Math.max(.001,Math.min(1,(now-(e.netAt||now))/1000));if(Number.isFinite(nx)&&Number.isFinite(ny)){const px=Number.isFinite(e.netX)?e.netX:e.x,py=Number.isFinite(e.netY)?e.netY:e.y;e.vx=Math.max(-1400,Math.min(1400,(nx-px)/dt));e.vy=Math.max(-1400,Math.min(1400,(ny-py)/dt));e.netX=nx;e.netY=ny;e.tx=nx;e.ty=ny;e.netAt=now;}const rest={...raw};delete rest.x;delete rest.y;Object.assign(e,rest);}
 function sharedKillReward(entity,share,finalBlow){
   if(!progress)return;const pct=Math.max(.08,Math.min(1,Number(share)||0)),factor=finalBlow?Math.max(.35,pct):Math.max(.18,pct);
   const clone=normalizeSharedNpc({...entity,credits:Math.max(1,Math.round((entity.credits||0)*factor)),uridium:Math.max(0,Math.round((entity.uridium||0)*factor)),xp:Math.max(1,Math.round((entity.xp||0)*factor)),resources:Object.fromEntries(Object.entries(entity.resources||{}).map(([k,v])=>[k,Math.max(1,Math.round(v*factor))])),sharedReward:true,sharedRewardShare:pct,sharedFinalBlow:!!finalBlow});
@@ -234,8 +238,10 @@ function sharedKillReward(entity,share,finalBlow){
 function handleSharedUniverseMessage(msg){
   if(!msg||!progress)return;
   if(msg.type==='world_snapshot'){
-    const targetId=state.target&&!state.target.isPlayer?state.target.id:null;state.enemies=(msg.npcs||[]).map(normalizeSharedNpc);state.ores=(msg.ores||[]).map(o=>({...o,sharedWorld:true}));state.enemyRespawns=[];state.oreRespawns=[];sharedUniverseRuntime.event=msg.event||null;sharedUniverseRuntime.roomKey=msg.roomKey||null;sharedUniverseRuntime.ready=true;galaxyEventRuntime.convoy=msg.event?.convoy?{...msg.event.convoy}:null;if(targetId){const e=findSharedNpc(targetId);state.target=e||null;if(!e)player.laserFiring=false;}const now=Date.now();if(now-sharedUniverseRuntime.lastSnapshotToastAt>3000){sharedUniverseRuntime.lastSnapshotToastAt=now;showToast(`UNIVERSO SINCRONIZADO • ${state.enemies.length} NPCs • ${state.ores.length} recursos`,'system');}updateSharedUniverseChip();return;
+    const targetId=state.target&&!state.target.isPlayer?state.target.id:null;state.enemies=(msg.npcs||[]).map(normalizeSharedNpc);state.ores=(msg.ores||[]).map(o=>({...o,sharedWorld:true}));state.enemyRespawns=[];state.oreRespawns=[];for(const rp of msg.players||[])upsertRealtimePlayer(rp,true);sharedUniverseRuntime.event=msg.event||null;sharedUniverseRuntime.roomKey=msg.roomKey||null;sharedUniverseRuntime.ready=true;galaxyEventRuntime.convoy=msg.event?.convoy?{...msg.event.convoy}:null;if(targetId){const e=findSharedNpc(targetId);state.target=e||null;if(!e)player.laserFiring=false;}const now=Date.now();if(now-sharedUniverseRuntime.lastSnapshotToastAt>3000){sharedUniverseRuntime.lastSnapshotToastAt=now;showToast(`UNIVERSO SINCRONIZADO • ${state.enemies.length} NPCs • ${state.ores.length} recursos`,'system');}updateSharedUniverseChip();return;
   }
+  if(msg.type==='world_player_spawn'||msg.type==='world_player_patch'){upsertRealtimePlayer(msg.entity||{},msg.type==='world_player_spawn');return;}
+  if(msg.type==='world_player_leave'){const id=String(msg.userId||'');if(state.target?.isPlayer&&state.target.id===id){state.target=null;player.laserFiring=false;}onlineWorld.players.delete(id);return;}
   if(msg.type==='npc_batch'){for(const e of msg.entities||[])applySharedNpcPatch(e);return;}
   if(msg.type==='npc_patch'){applySharedNpcPatch(msg.entity||{});return;}
   if(msg.type==='npc_spawn'){const e=normalizeSharedNpc(msg.entity||{});if(e.id&&!findSharedNpc(e.id))state.enemies.push(e);return;}
@@ -3333,15 +3339,29 @@ function updateEnemies(dt){
     if(!playerSafe&&nowSec()>=(e.jammedUntil||0)&&d<e.attackRange&&nowSec()-e.lastShot>((e.name.includes('Boss')?1.6:1.15)*(e.bossAttackScale||1))){e.lastShot=nowSec();e.lastAttackPlayerAt=nowSec();takePlayerDamage(e.damage*rand(.92,1.12));spawnParticle(player.x,player.y-28,Math.round(e.damage),'#ff8080');}
   }
 }
+function updateSharedUniverseInterpolation(dt){
+  if(!sharedUniverseMap())return;const now=Date.now();for(const e of state.enemies){if(!e.sharedWorld||e.hp<=0)continue;const live=now-(e.netAt||0)<1800,lead=live?.045:0,goalX=(e.tx??e.x)+(e.vx||0)*lead,goalY=(e.ty??e.y)+(e.vy||0)*lead,k=Math.min(1,dt*13);e.x+=(goalX-e.x)*k;e.y+=(goalY-e.y)*k;}
+}
 function updateParticles(dt){for(let i=state.particles.length-1;i>=0;i--){const p=state.particles[i];p.y-=p.vy*dt;if(p.vx)p.x+=p.vx*dt;p.life-=dt;if(p.life<=0)state.particles.splice(i,1);}}
 function updateFx(dt){
   for(let i=state.fx.length-1;i>=0;i--){const f=state.fx[i];f.life-=dt;if(f.vx){f.x+=f.vx*dt;f.y+=f.vy*dt;f.vx*=.985;f.vy*=.985;}if(f.life<=0)state.fx.splice(i,1);}
   const now=nowSec();for(let i=state.rocketFx.length-1;i>=0;i--)if(now-state.rocketFx[i].born>state.rocketFx[i].duration+.12)state.rocketFx.splice(i,1);
 }
 // ===================== ONLINE MAP PRESENCE =====================
-const onlineWorld={players:new Map(),busy:false,lastSyncAt:0,privateRemoved:false};
+const onlineWorld={players:new Map(),busy:false,lastSyncAt:0,lastPresenceSyncAt:0,privateRemoved:false};
 function clearOnlinePlayers(){if(state.target?.isPlayer){state.target=null;player.laserFiring=false;}onlineWorld.players.clear();}
 function shortestAngleDelta(a,b){return Math.atan2(Math.sin(b-a),Math.cos(b-a));}
+function upsertRealtimePlayer(raw,spawn=false){
+  const id=String(raw?.userId||raw?.id||'');if(!id||id===String(getUser()?.id||''))return null;const now=Date.now(),nx=Number(raw.x)||0,ny=Number(raw.y)||0;
+  let rp=onlineWorld.players.get(id);if(!rp){rp={id,isPlayer:true,x:nx,y:ny,tx:nx,ty:ny,netX:nx,netY:ny,angle:Number(raw.angle)||0,targetAngle:Number(raw.angle)||0,vx:0,vy:0};onlineWorld.players.set(id,rp);}
+  const dt=Math.max(.001,Math.min(1,(now-(rp.realtimeUpdatedAt||now))/1000)),px=Number.isFinite(rp.netX)?rp.netX:rp.tx,py=Number.isFinite(rp.netY)?rp.netY:rp.ty;
+  if(!spawn&&rp.realtimeUpdatedAt){rp.vx=Math.max(-1400,Math.min(1400,(nx-px)/dt));rp.vy=Math.max(-1400,Math.min(1400,(ny-py)/dt));}
+  rp.realtime=true;rp.realtimeUpdatedAt=now;rp.netX=nx;rp.netY=ny;rp.tx=nx;rp.ty=ny;rp.targetAngle=Number(raw.angle)||0;rp.callsign=raw.callsign||rp.callsign||'Pilot';rp.name=rp.callsign;rp.shipId=raw.shipId||rp.shipId||'phoenix';rp.faction=raw.faction||rp.faction||null;rp.level=Number(raw.level)||rp.level||1;rp.hp=Number(raw.hp??rp.hp)||0;rp.maxHp=Math.max(1,Number(raw.maxHp??rp.maxHp)||1);rp.shield=Math.max(0,Number(raw.shield??rp.shield)||0);rp.maxShield=Math.max(0,Number(raw.maxShield??rp.maxShield)||0);rp.size=onlineShipSize(rp.shipId)*.48;
+  rp.laserFiring=!!raw.laserFiring;rp.laserColor=raw.laserColor||rp.laserColor||'#76d9ff';rp.laserAmmoId=raw.laserAmmoId||rp.laserAmmoId||'lcb10';rp.laserAmmoName=raw.laserAmmoName||rp.laserAmmoName||'PLS-1';rp.targetId=raw.targetId||null;rp.targetIsPlayer=!!raw.targetIsPlayer;
+  if(raw.pet?.owned){const q=raw.pet,old=rp.pet||{},qx=Number(q.x)||nx,qy=Number(q.y)||ny,pdt=Math.max(.001,Math.min(1,(now-(old.netAt||now))/1000));rp.pet={...old,owned:true,level:Number(q.level)||1,tx:qx,ty:qy,targetAngle:Number(q.angle)||0,activeGear:q.activeGear||'off',laserTargetId:q.laserTargetId||null,laserActive:!!q.laserActive,laserColor:q.laserColor||rp.laserColor,netAt:now};if(!old.owned||spawn){rp.pet.x=qx;rp.pet.y=qy;rp.pet.angle=Number(q.angle)||0;rp.pet.vx=0;rp.pet.vy=0;}else{rp.pet.vx=Math.max(-1400,Math.min(1400,(qx-(old.netX??old.tx??qx))/pdt));rp.pet.vy=Math.max(-1400,Math.min(1400,(qy-(old.netY??old.ty??qy))/pdt));}rp.pet.netX=qx;rp.pet.netY=qy;}else rp.pet={owned:false};
+  return rp;
+}
+function remoteTargetEntity(id,isPlayer){if(!id)return null;if(isPlayer){if(String(id)===String(getUser()?.id||''))return {id,isPlayer:true,x:player.x,y:player.y,hp:player.hp};return onlineWorld.players.get(String(id))||null;}return state.enemies.find(e=>e.id===id&&e.hp>0)||null;}
 function onlineTerritoryKey(){
   return ['x1','x2','x3','x4'].includes(progress?.mapId)?(currentTerritoryFaction()||progress.profile.faction):'battle';
 }
@@ -3367,14 +3387,14 @@ async function syncOnlineWorld(){
       if(!row?.user_id||row.user_id===me)continue;seen.add(row.user_id);
       let rp=onlineWorld.players.get(row.user_id);
       if(!rp){rp={id:row.user_id,isPlayer:true,x:Number(row.x)||0,y:Number(row.y)||0,tx:Number(row.x)||0,ty:Number(row.y)||0,angle:Number(row.angle)||0,targetAngle:Number(row.angle)||0};onlineWorld.players.set(row.user_id,rp);}
-      rp.isPlayer=true;rp.tx=Number(row.x)||0;rp.ty=Number(row.y)||0;rp.targetAngle=Number(row.angle)||0;
-      rp.callsign=row.callsign||'Pilot';rp.name=rp.callsign;rp.shipId=row.ship_id||'phoenix';rp.faction=row.faction||null;rp.level=Number(row.level)||1;
-      rp.hp=Number(row.hp)||0;rp.maxHp=Number(row.max_hp)||1;rp.shield=Number(row.shield)||0;rp.maxShield=Number(row.max_shield)||0;
+      rp.isPlayer=true;const live=rp.realtime&&Date.now()-(rp.realtimeUpdatedAt||0)<2500;if(!live){rp.tx=Number(row.x)||0;rp.ty=Number(row.y)||0;rp.targetAngle=Number(row.angle)||0;rp.hp=Number(row.hp)||0;rp.maxHp=Number(row.max_hp)||1;rp.shield=Number(row.shield)||0;rp.maxShield=Number(row.max_shield)||0;}
+      rp.callsign=row.callsign||rp.callsign||'Pilot';rp.name=rp.callsign;rp.shipId=row.ship_id||rp.shipId||'phoenix';rp.faction=row.faction||rp.faction||null;rp.level=Number(row.level)||rp.level||1;
       rp.rankCode=row.rank_code||'pilot_basic';rp.rankTitle=row.rank_title||'Piloto Básico';rp.clanTag=row.clan_tag||'';rp.isAdmin=!!row.is_admin;
       rp.territoryFaction=row.territory_faction||territory;rp.size=onlineShipSize(rp.shipId)*.48;rp.updatedAt=row.updated_at;
     }
     for(const id of [...onlineWorld.players.keys()]){
       if(!seen.has(id)){
+        const rp=onlineWorld.players.get(id);if(rp?.realtime&&Date.now()-(rp.realtimeUpdatedAt||0)<5000)continue;
         if(state.target?.isPlayer&&state.target.id===id){state.target=null;player.laserFiring=false;}
         onlineWorld.players.delete(id);
       }
@@ -3440,11 +3460,12 @@ async function queuePvpShot(target,damage,shieldDrain=false,color='#ff657d'){
   }finally{state.pvpShotPending=false;}
 }
 function updateOnlineWorld(dt){
-  if(!authenticated||!progress)return;
-  if(Date.now()-onlineWorld.lastSyncAt>1200&&!onlineWorld.busy)syncOnlineWorld();
+  if(!authenticated||!progress)return;const now=Date.now(),presenceInterval=sharedUniverseOnline()?4500:1200;
+  if(now-onlineWorld.lastSyncAt>presenceInterval&&!onlineWorld.busy)syncOnlineWorld();
   syncPvpInbox();syncClanCreditGrants();
   for(const rp of onlineWorld.players.values()){
-    const k=Math.min(1,dt*6.5);rp.x+=(rp.tx-rp.x)*k;rp.y+=(rp.ty-rp.y)*k;rp.angle+=shortestAngleDelta(rp.angle,rp.targetAngle)*Math.min(1,dt*7);
+    const live=rp.realtime&&now-(rp.realtimeUpdatedAt||0)<2500,lead=live ? 0.055 : 0,goalX=(rp.tx||0)+(live?(rp.vx||0)*lead:0),goalY=(rp.ty||0)+(live?(rp.vy||0)*lead:0),k=Math.min(1,dt*(live?14:6.5));rp.x+=(goalX-rp.x)*k;rp.y+=(goalY-rp.y)*k;rp.angle+=shortestAngleDelta(rp.angle,rp.targetAngle||0)*Math.min(1,dt*(live?15:7));
+    const q=rp.pet;if(q?.owned){const pk=Math.min(1,dt*14),pgx=(q.tx||q.x||rp.x)+(q.vx||0)*.045,pgy=(q.ty||q.y||rp.y)+(q.vy||0)*.045;q.x+=(pgx-q.x)*pk;q.y+=(pgy-q.y)*pk;q.angle=(q.angle||0)+shortestAngleDelta(q.angle||0,q.targetAngle||0)*Math.min(1,dt*15);}
   }
 }
 function onlineShipSize(shipId){const ship=SHIPS[shipId];if(!ship)return 72;if(ship.id==='citadel')return 96;if(ship.id==='bigboy')return 88;if(['goliath','aegis','solace','spectrum','sentinel','diminisher','venom'].includes(ship.id))return 82;return 72;}
@@ -3471,18 +3492,28 @@ function drawPilotNameplate({x,y,rankCode='pilot_basic',clanTag='',callsign='Pil
   ctx.font=`bold ${fontSize}px Arial`;ctx.textAlign='left';ctx.textBaseline='middle';ctx.fillStyle=color;ctx.shadowColor='rgba(0,0,0,.95)';ctx.shadowBlur=4;ctx.fillText(label,start+badgeW+gap,y);ctx.shadowBlur=0;
   ctx.font='9px Arial';ctx.fillStyle='rgba(205,235,247,.78)';ctx.textAlign='center';ctx.fillText(`${isAdmin?'ADMINISTRADOR':patentMeta(code).title} • LV ${level}`,x,y+13);ctx.restore();
 }
+function drawRemotePet(rp){
+  const q=rp?.pet;if(!q?.owned||!Number.isFinite(q.x)||!Number.isFinite(q.y)||!onScreenWorld(q.x,q.y,140))return;const p=screenPos(q.x,q.y),mode=q.activeGear||'off',color=mode==='guard'?'#ff8c93':mode==='box'?'#ffd46b':mode==='ore'?'#7fffc4':'#7edcff',path=(q.level||1)>=10?GAME_ASSETS.drones.petElite:GAME_ASSETS.drones.pet,img=assetImage(path);
+  if(img&&img.naturalWidth){const size=30+Math.min(15,Number(q.level)||1)/15*9,sc=size/Math.max(img.naturalWidth,img.naturalHeight);ctx.save();ctx.translate(p.x,p.y);ctx.rotate((q.angle||0)+Math.PI/2);ctx.globalAlpha=.88;ctx.shadowColor=color;ctx.shadowBlur=10;ctx.drawImage(img,-img.naturalWidth*sc/2,-img.naturalHeight*sc/2,img.naturalWidth*sc,img.naturalHeight*sc);ctx.restore();}else{ctx.fillStyle=color;ctx.beginPath();ctx.arc(p.x,p.y,7,0,TWO_PI);ctx.fill();}
+  ctx.fillStyle=color;ctx.font='bold 9px Arial';ctx.textAlign='center';ctx.fillText(`AUX-9 LV ${q.level||1}`,p.x,p.y+24);
+  if(q.laserActive&&q.laserTargetId){const t=remoteTargetEntity(q.laserTargetId,false)||remoteTargetEntity(q.laserTargetId,true);if(t&&t.hp>0){const sp=screenPos(t.x,t.y),c=q.laserColor||rp.laserColor||'#76d9ff';ctx.save();ctx.strokeStyle=c;ctx.shadowColor=c;ctx.shadowBlur=8;ctx.globalAlpha=.9;ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(p.x,p.y);ctx.lineTo(sp.x,sp.y);ctx.stroke();ctx.restore();}}
+}
+function drawRemoteLaser(rp,p){
+  if(!rp?.laserFiring||!rp.targetId)return;const t=remoteTargetEntity(rp.targetId,rp.targetIsPlayer);if(!t||t.hp<=0)return;const sp=screenPos(t.x,t.y),c=rp.laserColor||'#76d9ff';ctx.save();ctx.strokeStyle=c;ctx.shadowColor=c;ctx.shadowBlur=10;ctx.globalAlpha=.92;ctx.lineWidth=2.25;ctx.beginPath();ctx.moveTo(p.x,p.y);ctx.lineTo(sp.x,sp.y);ctx.stroke();ctx.shadowBlur=0;const mx=(p.x+sp.x)/2,my=(p.y+sp.y)/2;ctx.font='900 8px Arial';ctx.textAlign='center';ctx.fillStyle=c;ctx.strokeStyle='rgba(0,0,0,.8)';ctx.lineWidth=3;const label=rp.laserAmmoName||'';if(label&&Math.hypot(sp.x-p.x,sp.y-p.y)>80){ctx.strokeText(label,mx,my-5);ctx.fillText(label,mx,my-5);}ctx.restore();
+}
 function drawOnlinePlayers(){
   for(const rp of onlineWorld.players.values()){
     if(!onScreenWorld(rp.x,rp.y,180))continue;const p=screenPos(rp.x,rp.y),f=FACTIONS[rp.faction],enemy=onlinePlayerEnemy(rp),color=enemy?'#ff4d69':(f?.color||'#69ffbd'),path=GAME_ASSETS.ships[rp.shipId],img=assetImage(path),size=onlineShipSize(rp.shipId);
     ctx.save();ctx.translate(p.x,p.y);ctx.globalAlpha=.9;if(state.target?.isPlayer&&state.target.id===rp.id){const rr=size*.55+18;ctx.strokeStyle='#ffed6f';ctx.lineWidth=2;ctx.setLineDash([6,4]);ctx.beginPath();ctx.arc(0,0,rr,0,TWO_PI);ctx.stroke();ctx.setLineDash([]);}
     if(img&&img.naturalWidth){const sc=size/Math.max(img.naturalWidth,img.naturalHeight);ctx.rotate((rp.angle||0)+Math.PI/2);ctx.shadowColor=color;ctx.shadowBlur=10;ctx.drawImage(img,-img.naturalWidth*sc/2,-img.naturalHeight*sc/2,img.naturalWidth*sc,img.naturalHeight*sc);}else{ctx.rotate(rp.angle||0);drawShipModel(rp.shipId,color);}ctx.restore();
+    drawRemoteLaser(rp,p);drawRemotePet(rp);
     const barW=58,bx=p.x-barW/2,hp=Math.max(0,Math.min(1,rp.hp/Math.max(1,rp.maxHp))),sh=Math.max(0,Math.min(1,rp.shield/Math.max(1,rp.maxShield)));
     ctx.fillStyle='rgba(8,20,28,.78)';ctx.fillRect(bx,p.y-size*.42-17,barW,4);ctx.fillStyle='#55ff9d';ctx.fillRect(bx,p.y-size*.42-17,barW*hp,4);ctx.fillStyle='rgba(7,25,45,.82)';ctx.fillRect(bx,p.y-size*.42-11,barW,3);ctx.fillStyle='#4fcfff';ctx.fillRect(bx,p.y-size*.42-11,barW*sh,3);
     drawPilotNameplate({x:p.x,y:p.y+size*.45+17,rankCode:rp.rankCode,clanTag:rp.clanTag,callsign:rp.callsign,level:rp.level,color:enemy?'#ff8b9e':'#8fffd0',isAdmin:rp.isAdmin});
   }
 }
 
-function update(dt){if(!progress)return;processRespawns();updateCombatAbilities();updatePlayer(dt);updateEnemies(dt);updatePet(dt);updateOnlineWorld(dt);updateWarfrontRuntime();updateGalaxyEvent(dt);updateParticles(dt);updateFx(dt);updateAlphaGate();updateAuctionSystem();updateUI();}
+function update(dt){if(!progress)return;processRespawns();updateCombatAbilities();updatePlayer(dt);updateSharedUniverseInterpolation(dt);updateEnemies(dt);updatePet(dt);updateOnlineWorld(dt);updateWarfrontRuntime();updateGalaxyEvent(dt);updateParticles(dt);updateFx(dt);updateAlphaGate();updateAuctionSystem();updateUI();}
 
 function drawSectorGrid(){
   const spacing=800,b=visibleWorldBounds(0),startX=Math.floor(b.left/spacing)*spacing,startY=Math.floor(b.top/spacing)*spacing;

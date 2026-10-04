@@ -1,7 +1,7 @@
 export class SharedUniverseClient {
   constructor({getCredentials,onMessage,onStatus}){
     this.getCredentials=getCredentials;this.onMessage=onMessage||(()=>{});this.onStatus=onStatus||(()=>{});
-    this.ws=null;this.authed=false;this.manual=false;this.pendingJoin=null;this.reconnectTimer=null;this.pingTimer=null;this.latency=0;this.lastPing=0;
+    this.ws=null;this.authed=false;this.manual=false;this.pendingJoin=null;this.reconnectTimer=null;this.pingTimer=null;this.latency=0;this.lastPing=0;this.lastRxAt=0;
   }
   status(state,extra={}){this.onStatus({state,latency:this.latency,...extra});}
   url(){const proto=location.protocol==='https:'?'wss:':'ws:';return `${proto}//${location.host}/ws`;}
@@ -9,8 +9,8 @@ export class SharedUniverseClient {
     if(this.ws&&[WebSocket.OPEN,WebSocket.CONNECTING].includes(this.ws.readyState))return;this.manual=false;this.status('connecting');
     const ws=new WebSocket(this.url());this.ws=ws;
     ws.onopen=()=>{const c=this.getCredentials?.()||{};ws.send(JSON.stringify({type:'auth',accessToken:c.accessToken||'',gameSessionId:c.gameSessionId||''}));};
-    ws.onmessage=e=>{let msg;try{msg=JSON.parse(e.data);}catch{return;}if(msg.type==='auth_ok'){this.authed=true;this.status('online');if(this.pendingJoin)this.join(this.pendingJoin,true);clearInterval(this.pingTimer);this.pingTimer=setInterval(()=>this.ping(),5000);this.ping();return;}if(msg.type==='auth_error'){this.status('auth_error');return;}if(msg.type==='pong'){this.latency=Math.max(0,Date.now()-Number(msg.ts||Date.now()));this.status('online');return;}this.onMessage(msg);};
-    ws.onclose=()=>{this.authed=false;clearInterval(this.pingTimer);this.pingTimer=null;if(this.manual){this.status('offline');return;}this.status('reconnecting');clearTimeout(this.reconnectTimer);this.reconnectTimer=setTimeout(()=>this.connect(),1500);};
+    ws.onmessage=e=>{this.lastRxAt=Date.now();let msg;try{msg=JSON.parse(e.data);}catch{return;}if(msg.type==='auth_ok'){this.authed=true;this.status('online');if(this.pendingJoin)this.join(this.pendingJoin,true);clearInterval(this.pingTimer);this.pingTimer=setInterval(()=>this.ping(),3000);this.ping();return;}if(msg.type==='auth_error'){this.status('auth_error');return;}if(msg.type==='pong'){this.latency=Math.max(0,Date.now()-Number(msg.ts||Date.now()));this.status('online');return;}this.onMessage(msg);};
+    ws.onclose=()=>{this.authed=false;clearInterval(this.pingTimer);this.pingTimer=null;if(this.manual){this.status('offline');return;}this.status('reconnecting');clearTimeout(this.reconnectTimer);this.reconnectTimer=setTimeout(()=>this.connect(),700);};
     ws.onerror=()=>this.status('reconnecting');
   }
   send(payload){if(!this.authed||this.ws?.readyState!==WebSocket.OPEN)return false;try{this.ws.send(JSON.stringify(payload));return true;}catch{return false;}}

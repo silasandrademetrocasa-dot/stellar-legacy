@@ -1,3 +1,15 @@
+# V15.1.0 — REALTIME COMBAT PRESENCE
+
+- Movimento dos jogadores no mesmo mapa migrou para atualização WebSocket de baixa latência, mantendo Supabase como fallback/metadata.
+- Frequência do estado do jogador aumentada e mudanças de combate são enviadas imediatamente.
+- Lasers de outros jogadores agora aparecem no mapa com a cor real da munição PLS/SIP em uso e etiqueta discreta da munição.
+- AUX-9 dos outros jogadores agora é visível, com posição, direção, nível, modo e feixe de laser sincronizados.
+- Movimento remoto recebeu interpolação + pequena predição para reduzir sensação de atraso sem teleporte.
+- NPCs compartilhados agora usam tick de 20 Hz, broadcast de 10 Hz e interpolação no cliente.
+- WebSocket desabilita compressão de pacotes pequenos, ativa TCP no-delay quando disponível e reconecta mais rápido.
+- Polling de presença do Supabase fica mais lento quando o Shared Universe está saudável, evitando sobrescrever posições realtime com dados antigos.
+- Sem migration SQL nova.
+
 # V15.0.0 — SHARED UNIVERSE
 
 - Novo World Server autoritativo via WebSocket no Render.

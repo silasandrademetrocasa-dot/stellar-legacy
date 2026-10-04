@@ -1,6 +1,6 @@
 {
   "name": "stellar-legacy",
-  "version": "15.0.0",
+  "version": "15.1.0",
   "type": "module",
   "scripts": {
     "start": "node server/index.js",
@@ -14,5 +14,5 @@
   "engines": {
     "node": ">=18"
   },
-  "release": "shared-universe-v15-0-0"
+  "release": "realtime-combat-presence-v15-1-0"
 }

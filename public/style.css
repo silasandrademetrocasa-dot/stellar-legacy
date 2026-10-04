@@ -1633,3 +1633,5 @@ body[data-quality="high"] .hud-panel{backdrop-filter:blur(7px);-webkit-backdrop-
 
 /* V15 Shared Universe status */
 .world-chip.ok{color:#79ffd1!important;border-color:rgba(66,238,177,.45)!important;background:rgba(18,95,70,.22)!important}.world-chip.busy{color:#ffe783!important;border-color:rgba(255,210,76,.38)!important}.world-chip.err{color:#ff8f9d!important;border-color:rgba(255,89,110,.42)!important}
+
+/* V15.1 Realtime Combat Presence: remote laser/AUX rendered on canvas; no extra DOM layout required. */

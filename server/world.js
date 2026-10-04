@@ -14,6 +14,10 @@ const EVENT_DEFS = [
 function clamp(n,min,max){ return Math.max(min,Math.min(max,Number(n)||0)); }
 function rand(min,max){ return min + Math.random()*(max-min); }
 function nowMs(){ return Date.now(); }
+function safeColor(value,fallback='#76d9ff'){
+  const v=String(value||'').trim();return /^#[0-9a-fA-F]{6}$/.test(v)?v:fallback;
+}
+function shortText(value,max=48){return String(value||'').replace(/[\r\n\t]/g,' ').trim().slice(0,max);}
 function basePointForFaction(factionId){
   const w=MAPS.x1.world.w,h=MAPS.x1.world.h;
   if(factionId==='mars') return {x:w-620,y:Math.round(h*.28)};
@@ -160,21 +164,33 @@ class Room {
   }
 
   eventPayload(){return this.event?{...this.event,convoy:this.convoy?{...this.convoy}:null}:null;}
-  snapshot(){return {type:'world_snapshot',roomKey:this.key,mapId:this.mapId,territoryFaction:this.territoryFaction,npcs:[...this.npcs.values()].map(e=>this.publicNpc(e)),ores:[...this.ores.values()],event:this.eventPayload(),serverTime:nowMs()};}
+  publicPlayer(p){
+    if(!p)return null;
+    return {userId:p.userId,callsign:p.callsign,faction:p.faction,shipId:p.shipId,level:p.level,x:p.x,y:p.y,angle:p.angle,hp:p.hp,maxHp:p.maxHp,shield:p.shield,maxShield:p.maxShield,updatedAt:p.updatedAt,
+      laserFiring:!!p.laserFiring,laserColor:p.laserColor||'#76d9ff',laserAmmoId:p.laserAmmoId||'lcb10',laserAmmoName:p.laserAmmoName||'PLS-1',targetId:p.targetId||null,targetIsPlayer:!!p.targetIsPlayer,
+      pet:p.pet?{...p.pet}:null};
+  }
+  snapshot(viewerUserId=null){return {type:'world_snapshot',roomKey:this.key,mapId:this.mapId,territoryFaction:this.territoryFaction,npcs:[...this.npcs.values()].map(e=>this.publicNpc(e)),ores:[...this.ores.values()],players:[...this.players.values()].filter(p=>p.userId!==viewerUserId).map(p=>this.publicPlayer(p)),event:this.eventPayload(),serverTime:nowMs()};}
   broadcast(payload,exclude=null){for(const c of this.clients)if(c!==exclude)safeJsonSend(c,payload);}
-  broadcastEvent(force=false){const now=nowMs();if(!force&&now-this.lastEventBroadcastAt<1000)return;this.lastEventBroadcastAt=now;this.broadcast({type:'event_update',event:this.eventPayload(),serverTime:now});}
+  broadcastEvent(force=false){const now=nowMs();if(!force&&now-this.lastEventBroadcastAt<500)return;this.lastEventBroadcastAt=now;this.broadcast({type:'event_update',event:this.eventPayload(),serverTime:now});}
 
   addClient(ws,player){
     this.clients.add(ws);this.players.set(player.userId,player);ws.room=this;ws.player=player;
-    safeJsonSend(ws,this.snapshot());
-    this.broadcast({type:'world_player_join',userId:player.userId,callsign:player.callsign},ws);
+    safeJsonSend(ws,this.snapshot(player.userId));
+    this.broadcast({type:'world_player_spawn',entity:this.publicPlayer(player)},ws);
   }
   removeClient(ws){
     if(!this.clients.has(ws))return;this.clients.delete(ws);if(ws.player)this.players.delete(ws.player.userId);if(ws.player)this.broadcast({type:'world_player_leave',userId:ws.player.userId});ws.room=null;ws.player=null;
   }
   updatePlayer(ws,msg){
     const p=ws.player;if(!p)return;
-    p.x=clamp(msg.x,0,this.map.world.w);p.y=clamp(msg.y,0,this.map.world.h);p.angle=Number(msg.angle)||0;p.hp=Math.max(0,Number(msg.hp)||0);p.shield=Math.max(0,Number(msg.shield)||0);p.maxHp=Math.max(1,Number(msg.maxHp)||1);p.maxShield=Math.max(0,Number(msg.maxShield)||0);p.faction=String(msg.faction||p.faction||'earth');p.shipId=String(msg.shipId||p.shipId||'phoenix');p.level=Math.max(1,Number(msg.level)||1);p.updatedAt=nowMs();
+    const now=nowMs();if(now-(ws.lastPlayerStateAt||0)<35)return;ws.lastPlayerStateAt=now;
+    p.x=clamp(msg.x,0,this.map.world.w);p.y=clamp(msg.y,0,this.map.world.h);p.angle=Number(msg.angle)||0;p.hp=Math.max(0,Number(msg.hp)||0);p.shield=Math.max(0,Number(msg.shield)||0);p.maxHp=Math.max(1,Number(msg.maxHp)||1);p.maxShield=Math.max(0,Number(msg.maxShield)||0);p.faction=String(msg.faction||p.faction||'earth');p.shipId=shortText(msg.shipId||p.shipId||'phoenix',40);p.level=Math.max(1,Number(msg.level)||1);
+    p.laserFiring=!!msg.laserFiring;p.laserColor=safeColor(msg.laserColor,p.laserColor||'#76d9ff');p.laserAmmoId=shortText(msg.laserAmmoId||p.laserAmmoId||'lcb10',24);p.laserAmmoName=shortText(msg.laserAmmoName||p.laserAmmoName||'PLS-1',20);p.targetId=msg.targetId?shortText(msg.targetId,96):null;p.targetIsPlayer=!!msg.targetIsPlayer;
+    const pet=msg.pet&&typeof msg.pet==='object'?msg.pet:null;
+    if(pet?.owned){p.pet={owned:true,level:Math.max(1,Math.min(15,Number(pet.level)||1)),x:clamp(pet.x,0,this.map.world.w),y:clamp(pet.y,0,this.map.world.h),angle:Number(pet.angle)||0,activeGear:shortText(pet.activeGear||'off',24),laserTargetId:pet.laserTargetId?shortText(pet.laserTargetId,96):null,laserActive:!!pet.laserActive,laserColor:safeColor(pet.laserColor,p.laserColor)};}else p.pet={owned:false};
+    p.updatedAt=now;
+    this.broadcast({type:'world_player_patch',entity:this.publicPlayer(p)},ws);
   }
   playerSafe(p){
     if(this.mapId!=='x1'||this.territoryFaction!==p.faction)return false;const b=basePointForFaction(this.territoryFaction);return Math.hypot(p.x-b.x,p.y-b.y)<=520;
@@ -258,13 +274,13 @@ class Room {
         if(now>=this.nextEventWaveAt){this.nextEventWaveAt=now+12000;this.spawnEventWave(3);}
       }
     }
-    if(now-this.lastBroadcastAt>=250){this.lastBroadcastAt=now;this.broadcast({type:'npc_batch',entities:[...this.npcs.values()].map(e=>({id:e.id,x:e.x,y:e.y,hp:e.hp,shield:e.shield,angle:e.angle,bossPhase:e.bossPhase}))});}
+    if(now-this.lastBroadcastAt>=100){this.lastBroadcastAt=now;this.broadcast({type:'npc_batch',entities:[...this.npcs.values()].map(e=>({id:e.id,x:e.x,y:e.y,hp:e.hp,shield:e.shield,angle:e.angle,bossPhase:e.bossPhase}))});}
     this.broadcastEvent(false);
   }
 }
 
 export function attachSharedUniverse(server,{authenticate}){
-  const wss=new WebSocketServer({server,path:'/ws'});const rooms=new Map();let forcedIndex=null;
+  const wss=new WebSocketServer({server,path:'/ws',perMessageDeflate:false});const rooms=new Map();let forcedIndex=null;
   const world={
     currentEvent(){const now=nowMs(),slot=Math.floor(now/EVENT_SLOT_MS),idx=forcedIndex==null?Math.abs(slot)%EVENT_DEFS.length:Math.max(0,Math.min(EVENT_DEFS.length-1,Number(forcedIndex)||0)),def=EVENT_DEFS[idx],start=forcedIndex==null?slot*EVENT_SLOT_MS:now-(now%1000),end=start+EVENT_SLOT_MS;return {...def,slot,start,end,eventId:`v15:${slot}:${def.id}${forcedIndex==null?'':':admin'}`};},
     forceEvent(index){forcedIndex=index==null?null:index;for(const r of rooms.values())r.ensureEvent(true);},
@@ -273,6 +289,7 @@ export function attachSharedUniverse(server,{authenticate}){
   };
 
   wss.on('connection',ws=>{
+    try{ws._socket?.setNoDelay?.(true);}catch{}
     ws.isAuthed=false;ws.authTimer=setTimeout(()=>{try{ws.close(4401,'auth timeout');}catch{}},8000);
     ws.on('message',async raw=>{
       let msg;try{msg=JSON.parse(String(raw));}catch{return;}
@@ -282,7 +299,7 @@ export function attachSharedUniverse(server,{authenticate}){
         try{const identity=await authenticate(String(msg.accessToken||''),String(msg.gameSessionId||''));if(!identity?.user?.id)throw new Error('auth');ws.isAuthed=true;ws.identity=identity;clearTimeout(ws.authTimer);safeJsonSend(ws,{type:'auth_ok',user:{id:identity.user.id,callsign:identity.callsign},serverTime:nowMs()});}catch{safeJsonSend(ws,{type:'auth_error'});try{ws.close(4401,'auth failed');}catch{}}return;
       }
       if(msg.type==='join_map'){
-        ws.room?.removeClient(ws);const r=world.room(msg.mapId,msg.territoryFaction);const p={userId:ws.identity.user.id,callsign:ws.identity.callsign||msg.callsign||'Pilot',faction:String(msg.faction||'earth'),shipId:String(msg.shipId||'phoenix'),level:Number(msg.level)||1,x:Number(msg.x)||400,y:Number(msg.y)||400,hp:Number(msg.hp)||1,maxHp:Number(msg.maxHp)||1,shield:Number(msg.shield)||0,maxShield:Number(msg.maxShield)||0,angle:Number(msg.angle)||0,updatedAt:nowMs()};r.addClient(ws,p);return;
+        ws.room?.removeClient(ws);const r=world.room(msg.mapId,msg.territoryFaction);const p={userId:ws.identity.user.id,callsign:ws.identity.callsign||msg.callsign||'Pilot',faction:String(msg.faction||'earth'),shipId:String(msg.shipId||'phoenix'),level:Number(msg.level)||1,x:Number(msg.x)||400,y:Number(msg.y)||400,hp:Number(msg.hp)||1,maxHp:Number(msg.maxHp)||1,shield:Number(msg.shield)||0,maxShield:Number(msg.maxShield)||0,angle:Number(msg.angle)||0,laserFiring:false,laserColor:'#76d9ff',laserAmmoId:'lcb10',laserAmmoName:'PLS-1',targetId:null,targetIsPlayer:false,pet:{owned:false},updatedAt:nowMs()};r.addClient(ws,p);return;
       }
       if(msg.type==='player_state')return ws.room?.updatePlayer(ws,msg);
       if(msg.type==='npc_damage')return ws.room?.handleDamage(ws,msg);
@@ -293,7 +310,7 @@ export function attachSharedUniverse(server,{authenticate}){
     ws.on('error',()=>{});
   });
 
-  let last=nowMs();const timer=setInterval(()=>{const n=nowMs(),dt=Math.min(.2,(n-last)/1000);last=n;for(const [key,r] of rooms){r.tick(dt);if(r.clients.size===0&&n-(r.lastUsedAt||n)>30*60*1000)rooms.delete(key);else if(r.clients.size>0)r.lastUsedAt=n;}},100);
+  let last=nowMs();const timer=setInterval(()=>{const n=nowMs(),dt=Math.min(.12,(n-last)/1000);last=n;for(const [key,r] of rooms){r.tick(dt);if(r.clients.size===0&&n-(r.lastUsedAt||n)>30*60*1000)rooms.delete(key);else if(r.clients.size>0)r.lastUsedAt=n;}},50);
   timer.unref?.();
   return world;
 }
