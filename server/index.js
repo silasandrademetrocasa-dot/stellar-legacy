@@ -1,8 +1,10 @@
 import express from 'express';
+import http from 'http';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { createClient } from '@supabase/supabase-js';
 import { randomUUID } from 'crypto';
+import { attachSharedUniverse } from './world.js';
 
 const app = express();
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -169,7 +171,7 @@ async function accountUser(sb, user, preferred = '') {
   return { id: user.id, email: user.email, callsign };
 }
 
-app.get('/health', (req, res) => res.json({ ok: true, game: 'Stellar Legacy', version: '14.1.0' }));
+app.get('/health', (req, res) => res.json({ ok: true, game: 'Stellar Legacy', version: '15.0.0', universe: 'shared' }));
 
 
 app.get('/api/config', (req, res) => {
@@ -185,10 +187,10 @@ app.get('/api/config', (req, res) => {
 
 app.get('/api/meta', (req, res) => res.json({
   name: 'Stellar Legacy',
-  version: '14.1.0',
+  version: '15.0.0',
   authReady: Boolean(SUPABASE_URL && SUPABASE_KEY),
   diagnostics: configStatus(),
-  features: ['login', 'cloud_save', 'factions', 'safe_zone', 'shop', 'owned_ships', 'equipment_slots', 'inventory', 'drones', 'ammo', 'rockets', 'expanded_expedition_maps', 'cargo_hold', 'ore_trading', 'npc_cargo_boxes', 'npc_respawn', 'minimap_navigation', 'waypoints', 'landmark_discovery', 'combat_fx', 'pet_modules', 'auto_buy_cpu', 'v8_asset_identity', 'mission_control_v93', 'mission_acceptance_tracking', 'expanded_enemy_density', 'online_player_presence', 'real_player_auction', 'rank_nameplates_v12', 'clans_v12', 'clan_vault_v12', 'premium_shop_v12', 'battle_pass_paid_v12', 'premium_subscription_v12', 'clan_daily_economy_v12', 'portal_neutral_zone_v12', 'base_only_equipment_v12', 'single_session_v1214', 'manual_login_v141', 'account_bound_save_v141', 'unique_callsign_v141', 'premium_auto_combat_v141'],
+  features: ['login', 'cloud_save', 'factions', 'safe_zone', 'shop', 'owned_ships', 'equipment_slots', 'inventory', 'drones', 'ammo', 'rockets', 'expanded_expedition_maps', 'cargo_hold', 'ore_trading', 'npc_cargo_boxes', 'npc_respawn', 'minimap_navigation', 'waypoints', 'landmark_discovery', 'combat_fx', 'pet_modules', 'auto_buy_cpu', 'v8_asset_identity', 'mission_control_v93', 'mission_acceptance_tracking', 'expanded_enemy_density', 'online_player_presence', 'real_player_auction', 'rank_nameplates_v12', 'clans_v12', 'clan_vault_v12', 'premium_shop_v12', 'battle_pass_paid_v12', 'premium_subscription_v12', 'clan_daily_economy_v12', 'portal_neutral_zone_v12', 'base_only_equipment_v12', 'single_session_v1214', 'manual_login_v141', 'account_bound_save_v141', 'unique_callsign_v141', 'premium_auto_combat_v141', 'shared_universe_v15', 'authoritative_npcs_v15', 'shared_ores_v15', 'shared_events_v15', 'websocket_world_v15', 'npc_contribution_v15'],
 }));
 
 app.get('/api/diagnostics', asyncRoute(async (req, res) => {
@@ -405,6 +407,8 @@ app.put('/api/save', requireUser, asyncRoute(async (req, res) => {
   res.json({ ok: true, updated_at, statePatch });
 }));
 
+app.get('/api/world/status', (req, res) => res.json({ ok: true, version: '15.0.0', ...sharedUniverse.stats() }));
+
 app.get('*', (req, res) => res.sendFile(path.join(__dirname, '../public/index.html')));
 
 app.use((err, req, res, next) => {
@@ -422,7 +426,27 @@ app.use((err, req, res, next) => {
 });
 
 const port = process.env.PORT || 3000;
-app.listen(port, () => {
-  console.log(`Stellar Legacy V14.1.0 :${port}`);
+const server = http.createServer(app);
+const sharedUniverse = attachSharedUniverse(server, {
+  authenticate: async (token, gameSessionId) => {
+    if (!token || !gameSessionId) throw new Error('Sessão do universo ausente.');
+    const base = supabaseBase();
+    if (!base) throw new Error('Supabase indisponível.');
+    const { data, error } = await base.auth.getUser(token);
+    if (error || !data?.user) throw new Error('Sessão inválida.');
+    const sb = supabaseForToken(token);
+    const { data: sessionState, error: sessionError } = await sb.rpc('validate_game_session_v1214', {
+      p_session_id: gameSessionId,
+      p_touch: true,
+    });
+    if (sessionError || !sessionState?.valid) throw new Error('Sessão do jogo substituída.');
+    const callsign = await ensureProfile(sb, data.user);
+    return { user: data.user, callsign };
+  },
+});
+
+server.listen(port, () => {
+  console.log(`Stellar Legacy V15.0.0 :${port}`);
   console.log('Supabase config:', configStatus());
+  console.log('Shared Universe: ONLINE');
 });

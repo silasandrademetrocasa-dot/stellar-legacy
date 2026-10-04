@@ -1630,3 +1630,6 @@ body[data-quality="high"] .hud-panel{backdrop-filter:blur(7px);-webkit-backdrop-
 .premium-auto-combat-setting.locked span{color:#8299a7}
 .premium-auto-combat-setting.unlocked{border-color:rgba(255,211,82,.28)!important;box-shadow:inset 0 0 18px rgba(255,200,45,.04)}
 .premium-auto-combat-setting.unlocked em{color:#87f1c8;border-color:rgba(88,236,182,.30);background:rgba(30,133,94,.12)}
+
+/* V15 Shared Universe status */
+.world-chip.ok{color:#79ffd1!important;border-color:rgba(66,238,177,.45)!important;background:rgba(18,95,70,.22)!important}.world-chip.busy{color:#ffe783!important;border-color:rgba(255,210,76,.38)!important}.world-chip.err{color:#ff8f9d!important;border-color:rgba(255,89,110,.42)!important}

@@ -1,3 +1,30 @@
+# Stellar Legacy V15.0.0 — SHARED UNIVERSE
+
+A V15 transforma os mapas principais em um universo realmente compartilhado. Jogadores na mesma sala veem os mesmos NPCs, os mesmos minérios, os mesmos eventos e o mesmo estado de combate PVE. O Render mantém o World Server em tempo real por WebSocket e o Supabase continua como camada persistente de conta e progresso.
+
+## V15.0 — pontos principais
+- World Server autoritativo em `server/world.js`.
+- Cliente realtime em `public/world.js`.
+- Salas por território/mapa: Terra/Marte/Júpiter X-1..X-4 e salas BATTLE 4-1..4-3.
+- NPCs compartilhados com movimento, HP, escudo, morte, respawn e ataque coordenados.
+- Recursos compartilhados com coleta exclusiva e respawn global.
+- Eventos Galácticos sincronizados por relógio do servidor.
+- Contribuição de dano por jogador e assistência proporcional.
+- Base pronta para Party/Grupo de Batalha sem reconstruir o motor PVE.
+- Galaxy Gate/AURORA continua privado por jogador.
+- Se o realtime cair, o cliente congela o mundo em vez de inventar uma cópia local.
+
+## Deploy
+1. Suba o ZIP completo pelo instalador atual.
+2. O Render executará `npm install` e instalará também a dependência `ws`.
+3. Não há SQL novo obrigatório na V15.
+4. Após o deploy, `/health` deve informar V15.0.0 e `/api/world/status` mostra salas, clientes, NPCs e minérios ativos.
+
+## Teste recomendado com duas contas
+Abra duas janelas, entre no mesmo mapa/território e valide: selecionar o mesmo NPC, observar HP caindo nas duas telas, matar em conjunto, coletar a mesma pedra e confirmar que ela desaparece nas duas janelas. Em seguida valide um Evento Galáctico e o status UNIVERSO/ping no painel JOGADOR.
+
+---
+
 # Stellar Legacy V14.1.0 — HUD DOCK SYSTEM
 
 # Stellar Legacy V13.5.0 — Clean UI + AUX-9 + Combat Audio

@@ -1,6 +1,6 @@
 {
   "name": "stellar-legacy",
-  "version": "14.1.0",
+  "version": "15.0.0",
   "type": "module",
   "scripts": {
     "start": "node server/index.js",
@@ -8,10 +8,11 @@
   },
   "dependencies": {
     "express": "^4.21.2",
-    "@supabase/supabase-js": "^2.57.4"
+    "@supabase/supabase-js": "^2.57.4",
+    "ws": "^8.18.0"
   },
   "engines": {
     "node": ">=18"
   },
-  "release": "account-guard-premium-auto-combat-v14-1-0"
+  "release": "shared-universe-v15-0-0"
 }

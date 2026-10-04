@@ -1,6 +1,7 @@
-import { FACTIONS, SHIPS, ITEMS, LASER_AMMO, ROCKETS, NPC_TYPES, MAPS, RESOURCES } from './data.js?v=14.1.0';
-import { GAME_ASSETS } from './assets/v8/manifest.js?v=14.1.0';
-import { signUp, signIn, requestPasswordReset, restorePasswordRecoveryFromUrl, restoreSession, signOutLocal, checkGameSession, endGameSession, getUser, loadCloudSave, saveCloudSave, updateCallsign, updatePassword, loadRankings, loadAuctionBids, saveAuctionBidOnline, markAuctionBidStatusOnline, loadAuctionMarket, upsertPlayerPresenceOnline, loadMapPresenceOnline, removePlayerPresenceOnline, queuePvpAttackOnline, consumePvpDamageEventsOnline, syncArenaProfileOnline, loadArenaState, loadArenaDailyRewardStatus, claimArenaDailyReward, loadArenaOpponents, loadArenaHistory, arenaAttackOnline, listClansOnline, loadMyClanOnline, createClanOnline, joinClanOnline, leaveClanOnline, transferClanCreditsOnline, claimClanCreditGrantsOnline, recordClanAlienKillOnline, getPremiumShopOnline, testPurchasePremiumOnline, loadWarfrontStateOnline, hitWorldBossOnline, claimWorldBossRewardOnline, declareClanWarOnline, recordClanWarScoreOnline } from './api.js?v=14.1.0';
+import { FACTIONS, SHIPS, ITEMS, LASER_AMMO, ROCKETS, NPC_TYPES, MAPS, RESOURCES } from './data.js?v=15.0.0';
+import { GAME_ASSETS } from './assets/v8/manifest.js?v=15.0.0';
+import { signUp, signIn, requestPasswordReset, restorePasswordRecoveryFromUrl, restoreSession, signOutLocal, checkGameSession, endGameSession, getUser, getSessionCredentials, loadCloudSave, saveCloudSave, updateCallsign, updatePassword, loadRankings, loadAuctionBids, saveAuctionBidOnline, markAuctionBidStatusOnline, loadAuctionMarket, upsertPlayerPresenceOnline, loadMapPresenceOnline, removePlayerPresenceOnline, queuePvpAttackOnline, consumePvpDamageEventsOnline, syncArenaProfileOnline, loadArenaState, loadArenaDailyRewardStatus, claimArenaDailyReward, loadArenaOpponents, loadArenaHistory, arenaAttackOnline, listClansOnline, loadMyClanOnline, createClanOnline, joinClanOnline, leaveClanOnline, transferClanCreditsOnline, claimClanCreditGrantsOnline, recordClanAlienKillOnline, getPremiumShopOnline, testPurchasePremiumOnline, loadWarfrontStateOnline, hitWorldBossOnline, claimWorldBossRewardOnline, declareClanWarOnline, recordClanWarScoreOnline } from './api.js?v=15.0.0';
+import { SharedUniverseClient } from './world.js?v=15.0.0';
 
 const canvas = document.querySelector('#game');
 const ctx = canvas.getContext('2d');
@@ -181,7 +182,7 @@ const ui = {
   saleConfirmModal: $('#saleConfirmModal'), saleConfirmEyebrow: $('#saleConfirmEyebrow'), saleConfirmTitle: $('#saleConfirmTitle'), saleConfirmItem: $('#saleConfirmItem'), saleConfirmCopy: $('#saleConfirmCopy'), saleConfirmValueLabel: $('#saleConfirmValueLabel'), saleConfirmValue: $('#saleConfirmValue'), saleConfirmCancel: $('#saleConfirmCancel'), saleConfirmAccept: $('#saleConfirmAccept'),
   shopBtn: $('#shopBtn'), shopModal: $('#shopModal'), closeShop: $('#closeShop'), shopTabs: $('#shopTabs'), shopGrid: $('#shopGrid'), shopCredits: $('#shopCredits'), shopStellarium: $('#shopStellarium'),
   hangarBtn: $('#hangarBtn'), hangarModal: $('#hangarModal'), closeHangar: $('#closeHangar'), hangarTabs: $('#hangarTabs'), hangarContent: $('#hangarContent'), hangarShipName: $('#hangarShipName'),
-  loginModal: $('#loginModal'), loginTabBtn: $('#loginTabBtn'), registerTabBtn: $('#registerTabBtn'), loginForm: $('#loginForm'), registerForm: $('#registerForm'), recoveryForm: $('#recoveryForm'), forgotPasswordBtn: $('#forgotPasswordBtn'), recoveryPassword: $('#recoveryPassword'), recoveryPasswordConfirm: $('#recoveryPasswordConfirm'), loginEmail: $('#loginEmail'), loginPassword: $('#loginPassword'), registerCallsign: $('#registerCallsign'), registerEmail: $('#registerEmail'), registerPassword: $('#registerPassword'), authMessage: $('#authMessage'), userLabel: $('#userLabel'), rankChip: $('#rankChip'), syncLabel: $('#syncLabel'), logoutBtn: $('#logoutBtn'), safeZoneLabel: $('#safeZoneLabel'), cargoUsed: $('#cargoUsed'), cargoMax: $('#cargoMax'), cargoBtn: $('#cargoBtn'), cargoModal: $('#cargoModal'), closeCargo: $('#closeCargo'), cargoSummary: $('#cargoSummary'), cargoGrid: $('#cargoGrid'), sellAllCargo: $('#sellAllCargo'), configBtn: $('#configBtn'), configModal: $('#configModal'), closeConfig: $('#closeConfig'), qualityButtons: $('#qualityButtons'), qualityCurrentBadge: $('#qualityCurrentBadge'), audioEnabledToggle: $('#audioEnabledToggle'), audioVolumeRange: $('#audioVolumeRange'), audioVolumeValue: $('#audioVolumeValue'), hudSettingsGrid: $('#hudSettingsGrid'), settingsTabs: $('#settingsTabs'), settingsGamePanel: $('#settingsGamePanel'), settingsRankingPanel: $('#settingsRankingPanel'), settingsAccountPanel: $('#settingsAccountPanel'), rankingRefreshBtn: $('#rankingRefreshBtn'), rankingMyPatent: $('#rankingMyPatent'), rankingPatentGuide: $('#rankingPatentGuide'), rankingPoints: $('#rankingPoints'), rankingArena: $('#rankingArena'), rankingAliens: $('#rankingAliens'), rankingGg: $('#rankingGg'), rankingUpdated: $('#rankingUpdated'), accountEmail: $('#accountEmail'), accountCallsign: $('#accountCallsign'), accountSaveName: $('#accountSaveName'), accountNameStatus: $('#accountNameStatus'), accountNewPassword: $('#accountNewPassword'), accountConfirmPassword: $('#accountConfirmPassword'), accountSavePassword: $('#accountSavePassword'), accountPasswordStatus: $('#accountPasswordStatus'), accountSummary: $('#accountSummary'),
+  loginModal: $('#loginModal'), loginTabBtn: $('#loginTabBtn'), registerTabBtn: $('#registerTabBtn'), loginForm: $('#loginForm'), registerForm: $('#registerForm'), recoveryForm: $('#recoveryForm'), forgotPasswordBtn: $('#forgotPasswordBtn'), recoveryPassword: $('#recoveryPassword'), recoveryPasswordConfirm: $('#recoveryPasswordConfirm'), loginEmail: $('#loginEmail'), loginPassword: $('#loginPassword'), registerCallsign: $('#registerCallsign'), registerEmail: $('#registerEmail'), registerPassword: $('#registerPassword'), authMessage: $('#authMessage'), userLabel: $('#userLabel'), rankChip: $('#rankChip'), syncLabel: $('#syncLabel'), worldSyncLabel: $('#worldSyncLabel'), logoutBtn: $('#logoutBtn'), safeZoneLabel: $('#safeZoneLabel'), cargoUsed: $('#cargoUsed'), cargoMax: $('#cargoMax'), cargoBtn: $('#cargoBtn'), cargoModal: $('#cargoModal'), closeCargo: $('#closeCargo'), cargoSummary: $('#cargoSummary'), cargoGrid: $('#cargoGrid'), sellAllCargo: $('#sellAllCargo'), configBtn: $('#configBtn'), configModal: $('#configModal'), closeConfig: $('#closeConfig'), qualityButtons: $('#qualityButtons'), qualityCurrentBadge: $('#qualityCurrentBadge'), audioEnabledToggle: $('#audioEnabledToggle'), audioVolumeRange: $('#audioVolumeRange'), audioVolumeValue: $('#audioVolumeValue'), hudSettingsGrid: $('#hudSettingsGrid'), settingsTabs: $('#settingsTabs'), settingsGamePanel: $('#settingsGamePanel'), settingsRankingPanel: $('#settingsRankingPanel'), settingsAccountPanel: $('#settingsAccountPanel'), rankingRefreshBtn: $('#rankingRefreshBtn'), rankingMyPatent: $('#rankingMyPatent'), rankingPatentGuide: $('#rankingPatentGuide'), rankingPoints: $('#rankingPoints'), rankingArena: $('#rankingArena'), rankingAliens: $('#rankingAliens'), rankingGg: $('#rankingGg'), rankingUpdated: $('#rankingUpdated'), accountEmail: $('#accountEmail'), accountCallsign: $('#accountCallsign'), accountSaveName: $('#accountSaveName'), accountNameStatus: $('#accountNameStatus'), accountNewPassword: $('#accountNewPassword'), accountConfirmPassword: $('#accountConfirmPassword'), accountSavePassword: $('#accountSavePassword'), accountPasswordStatus: $('#accountPasswordStatus'), accountSummary: $('#accountSummary'),
 };
 
 const SAVE_KEY_PREFIX = 'stellarLegacyV5Save';
@@ -201,6 +202,69 @@ function currentBasePoint(){
 let cloudDirty = false;
 let cloudBusy = false;
 let authenticated = false;
+
+// ===================== V15.0 SHARED UNIVERSE =====================
+const sharedUniverseRuntime={ready:false,status:'offline',latency:0,event:null,roomKey:null,lastPlayerSyncAt:0,pendingOres:new Set(),lastSnapshotToastAt:0};
+function sharedUniverseMap(){return !!authenticated&&!!progress&&!isGalaxyGateMap();}
+function sharedUniverseOnline(){return sharedUniverseMap()&&sharedUniverseRuntime.ready&&sharedUniverse.isOnline();}
+function updateSharedUniverseChip(){
+  if(!ui.worldSyncLabel)return;const st=sharedUniverseRuntime.status,lat=Math.round(sharedUniverseRuntime.latency||0);
+  ui.worldSyncLabel.textContent=st==='online'?(lat?`ONLINE ${lat}ms`:'ONLINE'):st==='connecting'?'CONECTANDO':st==='reconnecting'?'RECONECTANDO':st==='auth_error'?'SESSÃO':'OFFLINE';
+  ui.worldSyncLabel.className=`sync-chip world-chip ${st==='online'?'ok':st==='reconnecting'||st==='connecting'?'busy':st==='offline'?'':'err'}`.trim();
+}
+function sharedWorldEvent(){return sharedUniverseRuntime.event||null;}
+function normalizeSharedNpc(raw){
+  const base=NPC_TYPES[raw.type]||{};return {...raw,sharedWorld:true,name:raw.name||base.name||raw.type,color:raw.color||base.color||'#ff755d',size:Number(raw.size||base.size||18),resources:{...(raw.resources||base.resources||{})},lastShot:0,lastAttackPlayerAt:0,jammedUntil:Number(raw.jammedUntil)||0,bossAttackScale:Number(raw.bossAttackScale)||1};
+}
+function joinSharedUniverse(){
+  if(!sharedUniverseMap())return;sharedUniverseRuntime.ready=false;sharedUniverseRuntime.pendingOres.clear();state.enemyRespawns=[];state.oreRespawns=[];
+  sharedUniverse.join({mapId:progress.mapId,territoryFaction:currentTerritoryFaction()||'battle',faction:progress.profile.faction,callsign:progress.profile.callsign||getUser()?.callsign||'Pilot',shipId:progress.activeShipId,level:progress.profile.level||1,x:player.x,y:player.y,angle:player.angle||0,hp:player.hp,maxHp:player.maxHp,shield:player.shield,maxShield:player.maxShield});
+}
+function syncSharedUniversePlayer(force=false){
+  if(!sharedUniverseMap()||!sharedUniverse.isOnline())return;const now=Date.now();if(!force&&now-sharedUniverseRuntime.lastPlayerSyncAt<180)return;sharedUniverseRuntime.lastPlayerSyncAt=now;
+  sharedUniverse.updatePlayer({x:player.x,y:player.y,angle:player.angle||0,hp:player.hp,maxHp:player.maxHp,shield:player.shield,maxShield:player.maxShield,faction:progress.profile.faction,shipId:progress.activeShipId,level:progress.profile.level||1});
+}
+function findSharedNpc(id){return state.enemies.find(e=>e.id===id&&e.sharedWorld)||null;}
+function applySharedNpcPatch(raw){const e=findSharedNpc(raw.id);if(!e)return;Object.assign(e,raw);}
+function sharedKillReward(entity,share,finalBlow){
+  if(!progress)return;const pct=Math.max(.08,Math.min(1,Number(share)||0)),factor=finalBlow?Math.max(.35,pct):Math.max(.18,pct);
+  const clone=normalizeSharedNpc({...entity,credits:Math.max(1,Math.round((entity.credits||0)*factor)),uridium:Math.max(0,Math.round((entity.uridium||0)*factor)),xp:Math.max(1,Math.round((entity.xp||0)*factor)),resources:Object.fromEntries(Object.entries(entity.resources||{}).map(([k,v])=>[k,Math.max(1,Math.round(v*factor))])),sharedReward:true,sharedRewardShare:pct,sharedFinalBlow:!!finalBlow});
+  rewardEnemyKill(clone);pushActivity(`ASSISTÊNCIA ONLINE • ${clone.name} • ${(pct*100).toFixed(0)}% do dano`,'combat');
+}
+function handleSharedUniverseMessage(msg){
+  if(!msg||!progress)return;
+  if(msg.type==='world_snapshot'){
+    const targetId=state.target&&!state.target.isPlayer?state.target.id:null;state.enemies=(msg.npcs||[]).map(normalizeSharedNpc);state.ores=(msg.ores||[]).map(o=>({...o,sharedWorld:true}));state.enemyRespawns=[];state.oreRespawns=[];sharedUniverseRuntime.event=msg.event||null;sharedUniverseRuntime.roomKey=msg.roomKey||null;sharedUniverseRuntime.ready=true;galaxyEventRuntime.convoy=msg.event?.convoy?{...msg.event.convoy}:null;if(targetId){const e=findSharedNpc(targetId);state.target=e||null;if(!e)player.laserFiring=false;}const now=Date.now();if(now-sharedUniverseRuntime.lastSnapshotToastAt>3000){sharedUniverseRuntime.lastSnapshotToastAt=now;showToast(`UNIVERSO SINCRONIZADO • ${state.enemies.length} NPCs • ${state.ores.length} recursos`,'system');}updateSharedUniverseChip();return;
+  }
+  if(msg.type==='npc_batch'){for(const e of msg.entities||[])applySharedNpcPatch(e);return;}
+  if(msg.type==='npc_patch'){applySharedNpcPatch(msg.entity||{});return;}
+  if(msg.type==='npc_spawn'){const e=normalizeSharedNpc(msg.entity||{});if(e.id&&!findSharedNpc(e.id))state.enemies.push(e);return;}
+  if(msg.type==='npc_death'){
+    const e=findSharedNpc(msg.entity?.id)||normalizeSharedNpc(msg.entity||{});if(e?.id){playSfx('explosion');spawnExplosionFx(e.x,e.y,e.color,String(e.type||'').startsWith('boss'));triggerCombatFlash(String(e.type||'').startsWith('boss')?'red':'cyan');state.enemies=state.enemies.filter(x=>x.id!==e.id);if(state.target?.id===e.id){state.target=null;player.laserFiring=false;autoAcquireNextTarget(e.id);}}return;
+  }
+  if(msg.type==='kill_credit'){sharedKillReward(msg.entity||{},msg.share,msg.finalBlow);return;}
+  if(msg.type==='damage_result'){
+    const e=findSharedNpc(msg.entityId);if(e){e.hp=Number(msg.hp??e.hp);e.shield=Number(msg.shield??e.shield);if(msg.actual>0){const shieldHit=Number(msg.beforeShield||0)>Number(msg.shield||0);spawnCombatText(e.x,e.y-e.size,msg.critical?`CRÍTICO ${fmt(msg.actual)}`:`-${fmt(msg.actual)}`,msg.critical?'#ffe96f':(shieldHit?'#62dcff':'#ff8b8b'),{critical:!!msg.critical,kind:shieldHit?'shield':'damage'});spawnImpactFx(e.x,e.y,shieldHit?'#55d8ff':'#ff6b77',shieldHit?30:22,shieldHit?'shield':'impact');battlePassEvent('damage',msg.actual);battlePassEvent('attack',1);}if(msg.mode==='shield_drain'&&msg.actual>0){const before=player.shield;player.shield=Math.min(player.maxShield,player.shield+Number(msg.actual||0));const gain=Math.max(0,Math.round(player.shield-before));if(gain)spawnParticle(player.x,player.y-34,`ESCUDO +${fmt(gain)}`,'#79f1ff');}}return;
+  }
+  if(msg.type==='ore_remove'){sharedUniverseRuntime.pendingOres.delete(msg.entityId);state.ores=state.ores.filter(o=>o.id!==msg.entityId);return;}
+  if(msg.type==='ore_spawn'){const o={...(msg.ore||{}),sharedWorld:true};if(o.id&&!state.ores.some(x=>x.id===o.id))state.ores.push(o);return;}
+  if(msg.type==='ore_collect_result'){sharedUniverseRuntime.pendingOres.delete(msg.entityId);return;}
+  if(msg.type==='ore_collected'){
+    const o=msg.ore;if(!o)return;sharedUniverseRuntime.pendingOres.delete(o.id);state.ores=state.ores.filter(x=>x.id!==o.id);const got=addCargoResource(o.type,o.amount);if(got>0){playSfx('pickup');spawnParticle(o.x,o.y,`+${fmt(got)} ${o.type}`,o.color);pushActivity(`RECURSO ONLINE • +${fmt(got)} ${o.type}`,'ore');missionEvent('collectOre',{amount:got,type:o.type,mapId:progress.mapId});saveGame();}return;
+  }
+  if(msg.type==='npc_attack'){const e=findSharedNpc(msg.entityId);if(e)e.lastAttackPlayerAt=nowSec();takePlayerDamage(Math.max(0,Number(msg.damage)||0));return;}
+  if(msg.type==='event_update'){
+    sharedUniverseRuntime.event=msg.event||null;galaxyEventRuntime.convoy=msg.event?.convoy?{...msg.event.convoy}:null;const ev=currentGalaxyEvent(),rec=galaxyEventRecord(ev);if(msg.event){rec.value=Math.max(0,Number(msg.event.progress)||0);rec.complete=!!msg.event.complete;}return;
+  }
+  if(msg.type==='event_credit'){
+    sharedUniverseRuntime.event=msg.event||sharedUniverseRuntime.event;const ev=currentGalaxyEvent(),rec=galaxyEventRecord(ev);if(!rec.rewarded)completeGalaxyEvent(ev);return;
+  }
+}
+const sharedUniverse=new SharedUniverseClient({
+  getCredentials:()=>getSessionCredentials(),
+  onMessage:handleSharedUniverseMessage,
+  onStatus:st=>{sharedUniverseRuntime.status=st.state;sharedUniverseRuntime.latency=st.latency||0;if(st.state!=='online')sharedUniverseRuntime.ready=false;updateSharedUniverseChip();}
+});
 function saveKey(){return `${SAVE_KEY_PREFIX}:${getUser()?.id || 'guest'}`;}
 const TWO_PI = Math.PI * 2;
 const CARGO_BOX_LIFETIME_SEC = 30;
@@ -1622,11 +1686,11 @@ function abilityMasteryHtml(){normalizeWarfrontProgress();const cls=abilityClass
 function renderWarfront(){if(!ui.warfrontContent)return;normalizeWarfrontProgress();const st=warfrontRuntime.state,wb=worldBossState(),war=currentClanWar(),myClan=clanState().clan,myRole=clanState().role;const bp=Object.values(WARFRONT_BLUEPRINTS).map(blueprintCardHtml).join('');let bossHtml='<div class="muted">World Boss indisponível no momento.</div>';if(wb){const hp=Math.max(0,Number(wb.hp)||0),max=Math.max(1,Number(wb.max_hp)||1),dead=hp<=0,claimed=!!wb.claimed;bossHtml=`<div class="world-boss-card ${dead?'dead':''}"><div class="world-boss-head"><div><span class="threat-chip">AMEAÇA GLOBAL</span><h3>${escHtml(wb.name||'NEMESIS PRIME')}</h3><small>${dead?'DERROTADO • recompensa disponível':`Encerra ${new Date(wb.ends_at).toLocaleString('pt-BR')}`}</small></div><b>${dead?'ELIMINADO':`${(hp/max*100).toFixed(2)}%`}</b></div><div class="world-boss-track"><i style="width:${Math.round(hp/max*100)}%"></i></div><div class="world-boss-stats"><span>HP <b>${fmt(hp)} / ${fmt(max)}</b></span><span>SEU DANO <b>${fmt(wb.my_damage||0)}</b></span><span>RANK <b>#${fmt(wb.my_rank||0)||'—'}</b></span></div><div class="warfront-actions">${dead?`<button class="primary-btn" data-worldboss-claim ${claimed?'disabled':''}>${claimed?'RECOMPENSA RESGATADA':'RESGATAR RECOMPENSA'}</button>`:`<button class="danger-btn" data-worldboss-engage>ENGAJAR EM MAPA BATTLE</button>`}</div></div>`;}
 let warHtml='';if(!myClan)warHtml='<div class="war-empty">Entre em um clã para participar das Guerras de Clãs.</div>';else if(war){const mine=war.my_side==='attacker'?Number(war.attacker_score||0):Number(war.defender_score||0),theirs=war.my_side==='attacker'?Number(war.defender_score||0):Number(war.attacker_score||0),opp=war.my_side==='attacker'?war.defender:war.attacker;warHtml=`<div class="clan-war-live"><div class="war-vs"><div><small>SEU CLÃ</small><b>[${escHtml(myClan.tag)}]</b><strong>${fmt(mine)}</strong></div><span>VS</span><div><small>RIVAL</small><b>[${escHtml(opp?.tag||'?')}]</b><strong>${fmt(theirs)}</strong></div></div><div class="war-score-track"><i style="width:${Math.min(100,(mine/Math.max(1,mine+theirs))*100)}%"></i></div><small>Termina ${new Date(war.ends_at).toLocaleString('pt-BR')} • BOSS +10 pts • PvP causa pontos por dano • World Boss também pontua.</small></div>`;}else if(myRole==='owner'){const opts=(warfrontRuntime.clans||[]).filter(c=>c.id!==myClan.id).map(c=>`<option value="${c.id}">[${escHtml(c.tag)}] ${escHtml(c.name)} • LV ${fmt(c.level||1)}</option>`).join('');warHtml=`<div class="war-declare"><b>DECLARAR GUERRA</b><small>Uma guerra dura 12 horas. Escolha um clã rival.</small><div class="clan-action-row"><select id="warTargetClan"><option value="">Escolha o rival...</option>${opts}</select><button class="danger-btn" data-war-declare>DECLARAR</button></div></div>`;}else warHtml='<div class="war-empty">Somente o líder pode declarar uma guerra.</div>';
 ui.warfrontContent.innerHTML=`<div class="warfront-grid"><section class="warfront-panel worldboss-panel"><div class="section-kicker">WORLD BOSS</div>${bossHtml}</section><section class="warfront-panel"><div class="section-kicker">GUERRA DE CLÃS</div>${warHtml}</section></div><section class="warfront-panel"><div class="section-kicker">MASTERY DA HABILIDADE</div>${abilityMasteryHtml()}</section><section class="warfront-panel"><div class="section-kicker">BLUEPRINT FORGE • ${fmt(progress.warfront.skillCores)} CORES</div><div class="blueprint-grid">${bp}</div><small class="warfront-hint">BOSS comuns têm chance de dropar fragmentos. World Boss garante fragmentos + cores conforme sua contribuição.</small></section>`;updateWarfrontBadge();}
-async function refreshWarfrontState(force=false){if(!authenticated||warfrontRuntime.busy)return warfrontRuntime.state;if(!force&&warfrontRuntime.state&&Date.now()-warfrontRuntime.lastAt<5000){renderWarfront();return warfrontRuntime.state;}warfrontRuntime.busy=true;try{warfrontRuntime.clans=await listClansOnline().catch(()=>warfrontRuntime.clans||[]);warfrontRuntime.state=await loadWarfrontStateOnline();warfrontRuntime.lastAt=Date.now();updateWarfrontBadge();renderWarfront();syncWorldBossEnemyFromState();return warfrontRuntime.state;}catch(e){console.warn('warfront',e);if(ui.warfrontContent&&!ui.warfrontModal?.classList.contains('hidden'))ui.warfrontContent.innerHTML=`<div class="warfront-error"><b>WARFRONT INDISPONÍVEL</b><span>${escHtml(e.message)}</span><small>Verifique sua conexão e tente novamente.</small></div>`;}finally{warfrontRuntime.busy=false;}}
+async function refreshWarfrontState(force=false){if(!authenticated||warfrontRuntime.busy)return warfrontRuntime.state;if(!force&&warfrontRuntime.state&&Date.now()-warfrontRuntime.lastAt<5000){renderWarfront();return warfrontRuntime.state;}warfrontRuntime.busy=true;try{warfrontRuntime.clans=await listClansOnline().catch(()=>warfrontRuntime.clans||[]);warfrontRuntime.state=await loadWarfrontStateOnline();warfrontRuntime.lastAt=Date.now();updateWarfrontBadge();renderWarfront();syncWorldBossEnemyFromState();if(sharedUniverseMap()&&state.currentMap?.battle&&worldBossOpen()&&!activeWorldBossEnemy())spawnWorldBossEncounter(true);return warfrontRuntime.state;}catch(e){console.warn('warfront',e);if(ui.warfrontContent&&!ui.warfrontModal?.classList.contains('hidden'))ui.warfrontContent.innerHTML=`<div class="warfront-error"><b>WARFRONT INDISPONÍVEL</b><span>${escHtml(e.message)}</span><small>Verifique sua conexão e tente novamente.</small></div>`;}finally{warfrontRuntime.busy=false;}}
 async function openWarfront(){closeNavigationModals(ui.warfrontModal);ui.warfrontModal?.classList.remove('hidden');if(ui.warfrontContent)ui.warfrontContent.innerHTML='<div class="muted">Sincronizando frente de guerra...</div>';await refreshClanState(true);await refreshWarfrontState(true);}
 async function declareWarNow(){const target=$('#warTargetClan')?.value;if(!target){showToast('Escolha um clã rival');return;}try{await declareClanWarOnline(target);showToast('GUERRA DECLARADA!','reward');pushActivity('WARFRONT • Guerra de Clãs iniciada','reward');await refreshWarfrontState(true);}catch(e){showToast(e.message);}}
 function activeWorldBossEnemy(){return state.enemies.find(e=>e.worldBoss&&e.hp>0)||null;}
-function spawnWorldBossEncounter(){const wb=worldBossState();if(!wb||Number(wb.hp)<=0){showToast('World Boss já foi derrotado');return;}if(!state.currentMap?.battle){showToast('Entre em um mapa BATTLE (4-1 / 4-2 / 4-3) para enfrentar o World Boss');return;}let e=activeWorldBossEnemy();if(e){state.target=e;showToast('NEMESIS PRIME já está no setor');return;}const base=makeEnemy('bossSibelon');base.id=`worldboss_${wb.id}`;base.worldBoss=true;base.forceChase=true;base.name=wb.name||'NEMESIS PRIME';base.maxHp=Math.max(1,Number(wb.max_hp)||250000000);base.hp=Math.max(1,Number(wb.hp)||base.maxHp);base.maxShield=0;base.shield=0;base.damage=Math.max(base.damage*2.25,22000);base.speed=Math.max(base.speed,145);base.aggroRange=1800;base.attackRange=520;base.size=Math.max(base.size,78);base.x=Math.min(state.currentMap.world.w-350,Math.max(350,player.x+700));base.y=Math.min(state.currentMap.world.h-350,Math.max(350,player.y+250));state.enemies.push(base);selectCombatTarget(base,{silent:true});playSfx('warning');showToast('NEMESIS PRIME ENTROU NO SETOR!','reward');pushActivity('WORLD BOSS • NEMESIS PRIME detectado','combat');}
+function spawnWorldBossEncounter(auto=false){const wb=worldBossState();if(!wb||Number(wb.hp)<=0){if(!auto)showToast('World Boss já foi derrotado');return;}if(!state.currentMap?.battle){if(!auto)showToast('Entre em um mapa BATTLE (4-1 / 4-2 / 4-3) para enfrentar o World Boss');return;}let e=activeWorldBossEnemy();if(e){if(!auto){state.target=e;showToast('NEMESIS PRIME já está no setor');}return;}const base=makeEnemy('bossSibelon');base.id=`worldboss_${wb.id}`;base.worldBoss=true;base.forceChase=!sharedUniverseMap();base.name=wb.name||'NEMESIS PRIME';base.maxHp=Math.max(1,Number(wb.max_hp)||250000000);base.hp=Math.max(1,Number(wb.hp)||base.maxHp);base.maxShield=0;base.shield=0;base.damage=Math.max(base.damage*2.25,22000);base.speed=sharedUniverseMap()?0:Math.max(base.speed,145);base.aggroRange=1800;base.attackRange=520;base.size=Math.max(base.size,78);if(sharedUniverseMap()){base.x=Math.round(state.currentMap.world.w*.62);base.y=Math.round(state.currentMap.world.h*.46);base.sharedStaticBoss=true;}else{base.x=Math.min(state.currentMap.world.w-350,Math.max(350,player.x+700));base.y=Math.min(state.currentMap.world.h-350,Math.max(350,player.y+250));}state.enemies.push(base);if(!auto)selectCombatTarget(base,{silent:true});playSfx('warning');if(!auto)showToast('NEMESIS PRIME ENTROU NO SETOR!','reward');pushActivity('WORLD BOSS • NEMESIS PRIME detectado','combat');}
 function syncWorldBossEnemyFromState(){const wb=worldBossState(),e=activeWorldBossEnemy();if(!wb||!e)return;if(Number(wb.hp)<=0){e.hp=0;spawnExplosionFx(e.x,e.y,'#ff416b',true);if(state.target?.id===e.id)state.target=null;return;}e.maxHp=Math.max(1,Number(wb.max_hp)||e.maxHp);e.hp=Math.max(1,Number(wb.hp)||e.hp);}
 async function flushWorldBossDamage(force=false){if(!authenticated||warfrontRuntime.busyDamage)return;const dmg=Math.floor(warfrontRuntime.pendingBossDamage||0);if(dmg<=0)return;if(!force&&Date.now()-warfrontRuntime.lastDamageFlush<900)return;warfrontRuntime.busyDamage=true;warfrontRuntime.pendingBossDamage=0;warfrontRuntime.lastDamageFlush=Date.now();try{const r=await hitWorldBossOnline(dmg);warfrontRuntime.state ||= {};warfrontRuntime.state.world_boss={...(warfrontRuntime.state.world_boss||{}),...r};updateWarfrontBadge();syncWorldBossEnemyFromState();if(r?.defeated){showToast('WORLD BOSS DERROTADO! RESGATE SEU LOOT!','reward');pushActivity('WORLD BOSS • NEMESIS PRIME eliminado!','reward');renderWarfront();}}catch(e){warfrontRuntime.pendingBossDamage+=dmg;console.warn('world boss damage',e);}finally{warfrontRuntime.busyDamage=false;}}
 async function claimWorldBossNow(){try{const r=await claimWorldBossRewardOnline();if(r?.already_claimed){showToast('Recompensa já resgatada');return;}normalizeWarfrontProgress();progress.profile.credits+=Number(r.credits)||0;progress.profile.uridium+=Number(r.uridium)||0;progress.warfront.skillCores+=Number(r.cores)||0;const bp=WARFRONT_BLUEPRINTS[r.blueprint_id]?r.blueprint_id:'lf4';progress.warfront.blueprints[bp]=(progress.warfront.blueprints[bp]||0)+(Number(r.fragments)||0);progress.warfront.worldBossClaims[String(r.boss_id||'boss')]=Date.now();saveGame();await flushCloudSave(true);showToast(`WORLD BOSS • +${fmt(r.credits||0)} CR • +${fmt(r.uridium||0)} STL • +${fmt(r.fragments||0)} FRAG`,'reward');pushActivity(`WORLD BOSS LOOT • ${fmt(r.fragments||0)} ${WARFRONT_BLUEPRINTS[bp].name} • +${fmt(r.cores||0)} cores`,'reward');await refreshWarfrontState(true);}catch(e){showToast(e.message);}}
@@ -1649,6 +1713,7 @@ const GALAXY_EVENT_DEFS=[
 const galaxyEventRuntime={forcedIndex:null,activeId:null,mapKey:null,convoy:null,nextWaveAt:0,retryAt:0,lastEnsureAt:0};
 function normalizeGalaxyEvents(){if(!progress)return;progress.galaxyEvents ||= {records:{},lastSeenEvent:null};progress.galaxyEvents.records ||= {};}
 function currentGalaxyEvent(){
+  const shared=sharedWorldEvent();if(sharedUniverseMap()&&shared){const def=GALAXY_EVENT_DEFS.find(x=>x.id===shared.id)||GALAXY_EVENT_DEFS[0];return {...def,...shared,start:Number(shared.start)||Date.now(),end:Number(shared.end)||Date.now()+GALAXY_EVENT_SLOT_MS};}
   const now=Date.now(),slot=Math.floor(now/GALAXY_EVENT_SLOT_MS),idx=galaxyEventRuntime.forcedIndex===null?Math.abs(slot)%GALAXY_EVENT_DEFS.length:galaxyEventRuntime.forcedIndex%GALAXY_EVENT_DEFS.length,def=GALAXY_EVENT_DEFS[idx];
   const start=galaxyEventRuntime.forcedIndex===null?slot*GALAXY_EVENT_SLOT_MS:now-(now%1000),end=galaxyEventRuntime.forcedIndex===null?start+GALAXY_EVENT_SLOT_MS:start+GALAXY_EVENT_SLOT_MS;
   return {...def,slot,start,end,eventId:`v14:${slot}:${def.id}${galaxyEventRuntime.forcedIndex===null?'':':admin'}`};
@@ -1694,7 +1759,7 @@ function startGalaxyConvoy(ev=currentGalaxyEvent()){
   galaxyEventRuntime.convoy={eventId:ev.eventId,x:sx,y:sy,sx,sy,tx,ty,totalDistance:Math.max(1,Math.hypot(tx-sx,ty-sy)),hp:900000,maxHp:900000,speed:105,lastHitAt:0};galaxyEventRuntime.nextWaveAt=nowSec()+3;showToast('COMBOIO QUÂNTICO • mantenha-se próximo e proteja a rota');
 }
 function ensureGalaxyEventWorld(force=false){
-  if(!progress)return;const ev=currentGalaxyEvent(),mapKey=`${ev.eventId}:${progress.mapId}:${currentTerritoryFaction()||''}`;if(force||galaxyEventRuntime.activeId!==ev.eventId||galaxyEventRuntime.mapKey!==mapKey){clearGalaxyEventEntities();galaxyEventRuntime.activeId=ev.eventId;galaxyEventRuntime.mapKey=mapKey;state.eventSpawnKey=mapKey;progress.galaxyEvents.lastSeenEvent=ev.eventId;playSfx('event');pushActivity(`EVENTO GALÁCTICO • ${ev.name}`,'reward');}
+  if(!progress)return;if(sharedUniverseMap())return;const ev=currentGalaxyEvent(),mapKey=`${ev.eventId}:${progress.mapId}:${currentTerritoryFaction()||''}`;if(force||galaxyEventRuntime.activeId!==ev.eventId||galaxyEventRuntime.mapKey!==mapKey){clearGalaxyEventEntities();galaxyEventRuntime.activeId=ev.eventId;galaxyEventRuntime.mapKey=mapKey;state.eventSpawnKey=mapKey;progress.galaxyEvents.lastSeenEvent=ev.eventId;playSfx('event');pushActivity(`EVENTO GALÁCTICO • ${ev.name}`,'reward');}
   const rec=galaxyEventRecord(ev);if(rec.complete||!galaxyEventEligible(ev))return;
   const alive=state.enemies.filter(e=>e.eventNpc&&e.eventId===ev.eventId&&e.hp>0).length;
   if(ev.id==='invasion'&&alive<4)spawnGalaxyEventWave(ev,8);
@@ -1709,9 +1774,9 @@ function updateGalaxyConvoy(dt,ev,rec){const c=galaxyEventRuntime.convoy;if(!c||
   if(d<=14){rec.value=100;completeGalaxyEvent(ev);galaxyEventRuntime.convoy=null;}
   else if(c.hp<=0){playSfx('explosion');spawnExplosionFx(c.x,c.y,'#65dcff',true);showToast('COMBOIO DESTRUÍDO • novo cargueiro em 15s');galaxyEventRuntime.convoy=null;galaxyEventRuntime.retryAt=nowSec()+15;rec.value=0;}
 }
-function updateGalaxyEvent(dt){if(!progress)return;ensureGalaxyEventWorld();const ev=currentGalaxyEvent(),rec=galaxyEventRecord(ev);if(ev.id==='convoy'&&!rec.complete&&galaxyEventEligible(ev))updateGalaxyConvoy(dt,ev,rec);renderGalaxyEventHud(ev,rec);}
-function galaxyEventKill(enemy){if(!enemy)return;const ev=currentGalaxyEvent(),rec=galaxyEventRecord(ev);if(rec.complete)return;if(ev.id==='battle'&&state.currentMap?.battle)addGalaxyEventProgress(1,ev);else if(enemy.eventNpc&&enemy.eventId===ev.eventId&&(ev.id==='invasion'||ev.id==='prime'))addGalaxyEventProgress(1,ev);}
-function galaxyEventOrePickup(ore,amount){const ev=currentGalaxyEvent(),rec=galaxyEventRecord(ev);if(rec.complete||ev.id!=='mining'||!ore?.eventOre||ore.eventId!==ev.eventId)return;addGalaxyEventProgress(amount,ev);}
+function updateGalaxyEvent(dt){if(!progress)return;if(sharedUniverseMap()){const ev=currentGalaxyEvent(),rec=galaxyEventRecord(ev);if(sharedWorldEvent()){rec.value=Math.max(0,Number(sharedWorldEvent().progress)||0);rec.complete=!!sharedWorldEvent().complete;galaxyEventRuntime.convoy=sharedWorldEvent().convoy?{...sharedWorldEvent().convoy}:null;}renderGalaxyEventHud(ev,rec);return;}ensureGalaxyEventWorld();const ev=currentGalaxyEvent(),rec=galaxyEventRecord(ev);if(ev.id==='convoy'&&!rec.complete&&galaxyEventEligible(ev))updateGalaxyConvoy(dt,ev,rec);renderGalaxyEventHud(ev,rec);}
+function galaxyEventKill(enemy){if(!enemy)return;if(sharedUniverseMap())return;const ev=currentGalaxyEvent(),rec=galaxyEventRecord(ev);if(rec.complete)return;if(ev.id==='battle'&&state.currentMap?.battle)addGalaxyEventProgress(1,ev);else if(enemy.eventNpc&&enemy.eventId===ev.eventId&&(ev.id==='invasion'||ev.id==='prime'))addGalaxyEventProgress(1,ev);}
+function galaxyEventOrePickup(ore,amount){if(sharedUniverseMap())return;const ev=currentGalaxyEvent(),rec=galaxyEventRecord(ev);if(rec.complete||ev.id!=='mining'||!ore?.eventOre||ore.eventId!==ev.eventId)return;addGalaxyEventProgress(amount,ev);}
 function renderGalaxyEventHud(ev=currentGalaxyEvent(),rec=galaxyEventRecord(ev)){
   if(!ui.galaxyEventHud)return;ui.galaxyEventHud.classList.remove('hidden');ui.galaxyEventHud.classList.toggle('complete',!!rec.complete);if(ui.galaxyEventIcon)ui.galaxyEventIcon.textContent=ev.icon;if(ui.galaxyEventName)ui.galaxyEventName.textContent=ev.name;if(ui.galaxyEventObjective)ui.galaxyEventObjective.textContent=galaxyEventObjectiveText(ev,rec);if(ui.galaxyEventTimer)ui.galaxyEventTimer.textContent=galaxyEventTimeText(galaxyEventSecondsLeft(ev));if(ui.galaxyEventProgress)ui.galaxyEventProgress.style.width=`${Math.min(100,(Number(rec.value)||0)/Math.max(1,ev.target)*100)}%`;if(ui.galaxyEventTopStatus)ui.galaxyEventTopStatus.textContent=rec.complete?'OK':galaxyEventTimeText(galaxyEventSecondsLeft(ev));
 }
@@ -1719,7 +1784,7 @@ function renderGalaxyEvent(){if(!ui.galaxyEventContent||!progress)return;const e
   ui.galaxyEventContent.innerHTML=`<section class="galaxy-event-hero ${rec.complete?'complete':''}"><div class="galaxy-event-hero-icon">${ev.icon}</div><div><div class="eyebrow">EVENTO ATUAL • ${galaxyEventTimeText(galaxyEventSecondsLeft(ev))}</div><h3>${ev.name}</h3><p>${ev.desc}</p><div class="galaxy-event-big-progress"><i style="width:${Math.min(100,(Number(rec.value)||0)/Math.max(1,ev.target)*100)}%"></i></div><b>${galaxyEventObjectiveText(ev,rec)}</b></div></section><div class="galaxy-event-grid"><section class="galaxy-event-card"><small>RECOMPENSA PESSOAL</small><b>${fmt(reward.credits)} CR</b><span>${fmt(reward.uridium)} STL • ${fmt(reward.xp)} XP${reward.cores?` • ${reward.cores} CORE`:''}</span></section><section class="galaxy-event-card"><small>SETOR</small><b>${eligible?displayMapLabel(progress.mapId):ev.id==='battle'?'4-1 / 4-2 / 4-3':'X-2 / X-3 / X-4'}</b><span>${eligible?'Você está no setor do evento.':'Abra o mapa e siga para um setor compatível.'}</span></section><section class="galaxy-event-card"><small>PILOTOS ONLINE NO SETOR</small><b>${onlineWorld.players.size+1}</b><span>${[...onlineWorld.players.values()].filter(onlinePlayerEnemy).length} hostil(is) detectado(s)</span></section></div><div class="galaxy-event-actions"><button class="primary-btn" data-event-map>ABRIR MAPA</button>${ev.id==='battle'||worldBossOpen()?'<button class="danger-btn" data-event-warfront>WARFRONT / WORLD BOSS</button>':''}</div>${worldBossHtml}${admin}`;
 }
 function openGalaxyEvent(){closeNavigationModals(ui.galaxyEventModal);renderGalaxyEvent();ui.galaxyEventModal?.classList.remove('hidden');}
-function forceGalaxyEvent(value){if(!isAdminPilot())return;galaxyEventRuntime.forcedIndex=value==='auto'?null:Math.max(0,Math.min(GALAXY_EVENT_DEFS.length-1,Number(value)||0));galaxyEventRuntime.activeId=null;galaxyEventRuntime.mapKey=null;ensureGalaxyEventWorld(true);renderGalaxyEvent();renderMapModal();showToast(galaxyEventRuntime.forcedIndex===null?'EVENTOS • rotação automática':'EVENTO FORÇADO PARA TESTE');}
+function forceGalaxyEvent(value){if(!isAdminPilot())return;if(sharedUniverseMap()){sharedUniverse.forceEvent(value==='auto'?'auto':Math.max(0,Math.min(GALAXY_EVENT_DEFS.length-1,Number(value)||0)));showToast(value==='auto'?'EVENTOS ONLINE • rotação automática':'EVENTO ONLINE FORÇADO PARA TODOS');return;}galaxyEventRuntime.forcedIndex=value==='auto'?null:Math.max(0,Math.min(GALAXY_EVENT_DEFS.length-1,Number(value)||0));galaxyEventRuntime.activeId=null;galaxyEventRuntime.mapKey=null;ensureGalaxyEventWorld(true);renderGalaxyEvent();renderMapModal();showToast(galaxyEventRuntime.forcedIndex===null?'EVENTOS • rotação automática':'EVENTO FORÇADO PARA TESTE');}
 
 function spawnCombatText(x,y,text,color='#fff',opts={}){const cap=qualityProfile().particles;if(cap<=0)return;if(state.particles.length>=cap)state.particles.splice(0,state.particles.length-cap+1);state.particles.push({x,y,text,color,life:opts.critical?1.25:1,vy:opts.critical?42:30,vx:rand(-7,7),combat:true,critical:!!opts.critical,kind:opts.kind||'damage'});}
 function combatCritical(base,{chance=.065,mult=1.55}={}){const critical=Math.random()<chance;return {critical,damage:Math.round(base*(critical?mult:1))};}
@@ -2488,6 +2553,7 @@ function updatePet(dt){
     state.loot=state.loot.filter(x=>x.id!==task.id);petRuntime.taskId=null;
   }
   if(mode==='ore'&&task&&Math.hypot(task.x-petRuntime.x,task.y-petRuntime.y)<24){
+    if(task.sharedWorld&&sharedUniverseMap()){if(sharedUniverseOnline()&&!sharedUniverseRuntime.pendingOres.has(task.id)){sharedUniverseRuntime.pendingOres.add(task.id);sharedUniverse.collectOre(task.id);}petRuntime.taskId=null;return;}
     const got=addCargoResource(task.type,task.amount);
     if(got>0){playSfx('pickup');spawnParticle(task.x,task.y,`AUX-9 +${got} ${task.type}`,task.color);pushActivity(`AUX-9 coletou +${fmt(got)} ${task.type} • ${fmt((RESOURCES[task.type]?.sell||0)*got)} CR na base`,'ore');missionEvent('collectOre',{amount:got,type:task.type,mapId:progress.mapId});addPetXp(3);state.ores=state.ores.filter(x=>x.id!==task.id);state.oreRespawns.push({type:task.type,at:nowSec()+rand(5,12)});saveGame();}
     petRuntime.taskId=null;
@@ -2649,6 +2715,7 @@ function initAlphaRun(){
   a.lives=3;
 }
 function setupAlphaMap(resume=false){
+  sharedUniverse.close();sharedUniverseRuntime.ready=false;sharedUniverseRuntime.event=null;updateSharedUniverseChip();
   if(progress?.pet?.activeGear==='kami')progress.pet.activeGear='off';
   cancelPetKamikazeCharge();
   const a=alphaGate();if(!a.run?.active)initAlphaRun();
@@ -2747,6 +2814,7 @@ function updateAlphaGate(){
 }
 
 function processRespawns(){
+  if(sharedUniverseMap())return;
   const now=nowSec();state.enemies=state.enemies.filter(e=>e.hp>0||!e.deadAt||now-e.deadAt<1.2);
   for(let i=state.enemyRespawns.length-1;i>=0;i--)if(now>=state.enemyRespawns[i].at){state.enemies.push(makeEnemy(state.enemyRespawns[i].type));state.enemyRespawns.splice(i,1);}
   for(let i=state.oreRespawns.length-1;i>=0;i--)if(now>=state.oreRespawns[i].at){spawnOre(state.oreRespawns[i].type);state.oreRespawns.splice(i,1);}
@@ -2836,7 +2904,7 @@ function setMap(mapId,preserve=false,fromMapId=null,targetTerritoryFaction=null,
 
   petRuntime.x=player.x+82;petRuntime.y=player.y+64;petRuntime.tx=petRuntime.x;petRuntime.ty=petRuntime.y;petRuntime.roamX=null;petRuntime.roamY=null;petRuntime.nextRoamAt=0;
   state.camera.x=player.x;state.camera.y=player.y;state.target=null;state.loot=[];state.fx=[];state.rocketFx=[];
-  clearOnlinePlayers();createLandmarks();createOres();spawnEnemies();galaxyEventRuntime.mapKey=null;ensureGalaxyEventWorld(true);saveGame();
+  clearOnlinePlayers();createLandmarks();state.ores=[];state.enemies=[];state.enemyRespawns=[];state.oreRespawns=[];galaxyEventRuntime.mapKey=null;sharedUniverseRuntime.event=null;joinSharedUniverse();saveGame();
   if(authenticated)flushCloudSave(true).catch(()=>{});
 
   const owner=territoryOwner(),home=isOwnTerritory();
@@ -2890,7 +2958,7 @@ function movePlayerToHomeBase(){
   player.x=b.x;player.y=b.y;player.tx=b.x;player.ty=b.y;
   state.camera.x=b.x;state.camera.y=b.y;
   state.target=null;player.laserFiring=false;state.fx=[];state.rocketFx=[];
-  createLandmarks();createOres();spawnEnemies();
+  createLandmarks();state.ores=[];state.enemies=[];state.enemyRespawns=[];state.oreRespawns=[];sharedUniverseRuntime.event=null;joinSharedUniverse();
 }
 function finishShipRepair(method='repair'){
   progress.repairRequired=null;
@@ -2979,7 +3047,7 @@ function rewardEnemyKill(enemy){
   progress.profile.credits+=earnedCredits;progress.profile.uridium+=earnedUri;progress.profile.xp+=earnedXp;progress.profile.aliensKilled=(progress.profile.aliensKilled||0)+1;
   if(authenticated){const boss=/^boss/i.test(String(enemy.type||''));const clanType=String(enemy.type||'').replace(/^boss/i,'').toLowerCase();recordClanAlienKillOnline({npcType:clanType,isBoss:boss}).then(r=>{if(r?.status?.leveled_up){showToast(`CLÃ SUBIU PARA O LV ${r.status.new_level}!`,'reward');refreshClanState(true);}}).catch(()=>{});}
   pushActivity(`${enemy.name} • +${fmt(earnedCredits)} CR • +${fmt(earnedUri)} STL • +${fmt(earnedXp)} XP`,'combat');
-  if(String(enemy.type||'').startsWith('boss')){rollRareBossLoot(enemy);scoreClanWar(10,'boss_kill');}
+  if(String(enemy.type||'').startsWith('boss')){if(!enemy.sharedReward||enemy.sharedFinalBlow||Number(enemy.sharedRewardShare||0)>=.25)rollRareBossLoot(enemy);scoreClanWar(enemy.sharedReward?Math.max(1,Math.round(10*Number(enemy.sharedRewardShare||0))):10,'boss_kill');}
   addPetXp(Math.max(12,Math.round(enemy.credits/120+enemy.uridium*4)));
   processPlayerLevelUps();
   const lootMult=1+pilotLootBonus(),boostedResources=Object.fromEntries(Object.entries(enemy.resources||{}).map(([id,q])=>[id,Math.max(1,Math.round(q*lootMult))]));
@@ -2992,10 +3060,11 @@ function rewardEnemyKill(enemy){
     expiresAt:nowSec()+CARGO_BOX_LIFETIME_SEC
   });
   missionEvent('kill',{enemy,mapId:progress.mapId});battlePassEvent('kill',1);
-  if(isGalaxyGateMap()&&enemy.gateEnemy){recordAlphaKillReward(enemy);syncAlphaGateSnapshot();}else if(!enemy.eventNpc)scheduleEnemyRespawn(enemy.type);
+  if(isGalaxyGateMap()&&enemy.gateEnemy){recordAlphaKillReward(enemy);syncAlphaGateSnapshot();}else if(!sharedUniverseMap()&&!enemy.eventNpc)scheduleEnemyRespawn(enemy.type);
   saveGame();
 }
 function dealDamageToEnemy(enemy,damage,color,opts={}){
+  if(enemy?.sharedWorld&&sharedUniverseMap()){let requested=Math.max(0,Math.round(damage));let critical=false;if(opts.canCrit){const roll=combatCritical(requested,{chance:opts.critChance??.065,mult:opts.critMult??1.55});requested=roll.damage;critical=roll.critical;}if(!sharedUniverseOnline()){setCombatAlert('UNIVERSO RECONECTANDO','danger',1.5);return 0;}const hitId=`hit_${Date.now()}_${Math.random().toString(16).slice(2)}`;sharedUniverse.damageNpc({entityId:enemy.id,damage:requested,mode:'damage',hitId,critical});if(critical){playSfx('critical');triggerCombatFlash('gold');}return requested;}
   let requested=Math.max(0,Math.round(damage));let critical=false;if(opts.canCrit){const roll=combatCritical(requested,{chance:opts.critChance??.065,mult:opts.critMult??1.55});requested=roll.damage;critical=roll.critical;}
   const before=Math.max(0,Number(enemy.shield)||0)+Math.max(0,Number(enemy.hp)||0);
   let remain=requested;const hadShield=enemy.shield>0;if(enemy.shield>0){const a=Math.min(enemy.shield,remain);enemy.shield-=a;remain-=a;}if(remain>0)enemy.hp-=remain;
@@ -3016,6 +3085,7 @@ function applyLaserAmmoHit(enemy,baseDamage,ammo,color){
     // SIP-2: não causa dano ao casco. Drena o escudo inimigo em x2 e transfere
     // exatamente a energia capturada para o escudo da nave, limitada ao máximo.
     const requested=Math.max(0,Math.round(baseDamage*(Number(ammo.mult)||2)));
+    if(enemy.sharedWorld&&sharedUniverseMap()){if(!sharedUniverseOnline()){setCombatAlert('UNIVERSO RECONECTANDO','danger',1.5);return 0;}if((enemy.shield||0)<=0){spawnParticle(enemy.x,enemy.y-enemy.size,'SEM ESCUDO','#79f1ff');return 0;}sharedUniverse.damageNpc({entityId:enemy.id,damage:requested,mode:'shield_drain',hitId:`sab_${Date.now()}_${Math.random().toString(16).slice(2)}`});return requested;}
     const drained=Math.min(Math.max(0,enemy.shield||0),requested);
     if(drained<=0){spawnParticle(enemy.x,enemy.y-enemy.size,'SEM ESCUDO','#79f1ff');return 0;}
     enemy.shield=Math.max(0,enemy.shield-drained);playSfx('shield');
@@ -3175,7 +3245,7 @@ function updatePlayer(dt){
     const b=basePointForFaction(progress.profile.faction);
     player.x=b.x;player.y=b.y;player.tx=b.x;player.ty=b.y;player.laserFiring=false;
     state.camera.x+=(b.x-state.camera.x)*.12;state.camera.y+=(b.y-state.camera.y)*.12;
-    progress.x=player.x;progress.y=player.y;progress.hp=player.hp;progress.shield=player.shield;
+    progress.x=player.x;progress.y=player.y;progress.hp=player.hp;progress.shield=player.shield;syncSharedUniversePlayer();
     if(ui.repairModal?.classList.contains('hidden'))openRepairModal();
     return;
   }
@@ -3227,12 +3297,12 @@ function updatePlayer(dt){
       if(empty)state.loot.splice(i,1);
     }
   }
-  for(let i=state.ores.length-1;i>=0;i--){const o=state.ores[i];if(Math.hypot(o.x-player.x,o.y-player.y)<30){const got=addCargoResource(o.type,o.amount);if(got>0){playSfx('pickup');spawnParticle(o.x,o.y,`+${got} ${o.type}`,o.color);pushActivity(`Pedra • +${fmt(got)} ${o.type} • ${fmt((RESOURCES[o.type]?.sell||0)*got)} CR na base`,'ore');missionEvent('collectOre',{amount:got,type:o.type,mapId:progress.mapId});galaxyEventOrePickup(o,got);state.ores.splice(i,1);state.oreRespawns.push({type:o.type,at:nowSec()+rand(5,12)});saveGame();}else showToast('Porão cheio');}}
+  for(let i=state.ores.length-1;i>=0;i--){const o=state.ores[i];if(Math.hypot(o.x-player.x,o.y-player.y)<30){if(o.sharedWorld&&sharedUniverseMap()){if(cargoFree()<=0){showToast('Porão cheio');continue;}if(sharedUniverseOnline()&&!sharedUniverseRuntime.pendingOres.has(o.id)){sharedUniverseRuntime.pendingOres.add(o.id);sharedUniverse.collectOre(o.id);}continue;}const got=addCargoResource(o.type,o.amount);if(got>0){playSfx('pickup');spawnParticle(o.x,o.y,`+${got} ${o.type}`,o.color);pushActivity(`Pedra • +${fmt(got)} ${o.type} • ${fmt((RESOURCES[o.type]?.sell||0)*got)} CR na base`,'ore');missionEvent('collectOre',{amount:got,type:o.type,mapId:progress.mapId});galaxyEventOrePickup(o,got);state.ores.splice(i,1);state.oreRespawns.push({type:o.type,at:nowSec()+rand(5,12)});saveGame();}else showToast('Porão cheio');}}
   if(player.hp<=0){
     if(isGalaxyGateMap())handleAlphaDeath();
     else handleNormalShipDeath();
   }
-  progress.hp=player.hp;progress.shield=player.shield;progress.x=player.x;progress.y=player.y;
+  progress.hp=player.hp;progress.shield=player.shield;progress.x=player.x;progress.y=player.y;syncSharedUniversePlayer();
 }
 function updateBossPhase(e){
   if(!e?.type?.startsWith('boss')||e.hp<=0)return;const total=Math.max(1,e.maxHp+e.maxShield),remain=Math.max(0,e.hp)+Math.max(0,e.shield),ratio=remain/total;let next=e.bossPhase||0;if(ratio<=.33)next=2;else if(ratio<=.66)next=Math.max(next,1);if(next===(e.bossPhase||0))return;e.bossPhase=next;
@@ -3245,9 +3315,10 @@ function updateBossHud(){
 }
 
 function updateEnemies(dt){
+  const sharedMode=sharedUniverseMap();
   const playerSafe=isSafeZone();
   for(const e of state.enemies){
-    if(e.hp<=0)continue;updateBossPhase(e);
+    if(e.hp<=0||sharedMode&&e.sharedWorld)continue;updateBossPhase(e);
     const dx=player.x-e.x,dy=player.y-e.y,d=Math.hypot(dx,dy);e.angle+=dt*e.drift;
     if(progress.mapId==='x1'&&safeZoneDistance(e.x,e.y)<SAFE_ZONE.radius+35){
       const b=currentBasePoint(),ox=e.x-b.x,oy=e.y-b.y,od=Math.hypot(ox,oy)||1;
@@ -4883,6 +4954,7 @@ document.addEventListener('keydown',e=>{
 
 
 function forceLogoutBecauseSessionMoved(message='Sua conta foi acessada em outro dispositivo.',userId=null){
+  sharedUniverse.close();sharedUniverseRuntime.ready=false;sharedUniverseRuntime.event=null;
   const staleUserId=userId||getUser()?.id||null;
   authenticated=false;
   cloudDirty=false;
@@ -4923,7 +4995,7 @@ ui.loginForm.onsubmit=async e=>{e.preventDefault();ui.authMessage.textContent='E
 ui.registerForm.onsubmit=async e=>{e.preventDefault();ui.authMessage.textContent='Criando conta...';try{const result=await signUp({callsign:ui.registerCallsign.value,email:ui.registerEmail.value,password:ui.registerPassword.value});if(result.requires_confirmation){showAuthMode('login');ui.loginEmail.value=ui.registerEmail.value;ui.authMessage.textContent='Conta criada. Confirme o e-mail e depois entre.';return;}await afterAuth();}catch(err){ui.authMessage.textContent=err.message;}};
 if(ui.forgotPasswordBtn)ui.forgotPasswordBtn.onclick=async()=>{const email=String(ui.loginEmail?.value||'').trim();ui.authMessage.textContent='Enviando recuperação...';try{await requestPasswordReset(email);ui.authMessage.textContent='E-mail de recuperação enviado. Abra o link recebido para criar uma nova senha.';}catch(err){ui.authMessage.textContent=err.message;}};
 if(ui.recoveryForm)ui.recoveryForm.onsubmit=async e=>{e.preventDefault();const a=ui.recoveryPassword?.value||'',b=ui.recoveryPasswordConfirm?.value||'';if(a!==b){ui.authMessage.textContent='As senhas não conferem.';return;}ui.authMessage.textContent='Atualizando senha...';try{await updatePassword(a);signOutLocal();showAuthMode('login');ui.loginPassword.value='';ui.authMessage.textContent='Senha atualizada. Entre com a nova senha.';}catch(err){ui.authMessage.textContent=err.message;}};
-ui.logoutBtn.onclick=async()=>{await flushCloudSave(true);await removePlayerPresenceOnline().catch(()=>{});clearOnlinePlayers();await endGameSession().catch(()=>signOutLocal());authenticated=false;progress=null;clanRuntime.state=null;clanRuntime.clans=[];clanRuntime.lastAt=0;warfrontRuntime.state=null;warfrontRuntime.clans=[];warfrontRuntime.lastAt=0;warfrontRuntime.pendingBossDamage=0;premiumRuntime.state=null;premiumRuntime.lastAt=0;updateClanBadge();updatePremiumBadge();state.target=null;player.laserFiring=false;for(const modal of dismissibleModals())modal.classList.add('hidden');ui.factionModal.classList.add('hidden');ui.portalPrompt?.classList.add('hidden');ui.baseTradePrompt?.classList.add('hidden');ui.petFloatPanel?.classList.add('hidden');ui.loginModal.classList.remove('hidden');if(ui.userLabel)ui.userLabel.textContent='—';if(ui.rankChip)ui.rankChip.textContent='Piloto Básico';if(ui.loginPassword)ui.loginPassword.value='';setSync('LOCAL','');showAuthMode('login');};
+ui.logoutBtn.onclick=async()=>{sharedUniverse.close();sharedUniverseRuntime.ready=false;sharedUniverseRuntime.event=null;await flushCloudSave(true);await removePlayerPresenceOnline().catch(()=>{});clearOnlinePlayers();await endGameSession().catch(()=>signOutLocal());authenticated=false;progress=null;clanRuntime.state=null;clanRuntime.clans=[];clanRuntime.lastAt=0;warfrontRuntime.state=null;warfrontRuntime.clans=[];warfrontRuntime.lastAt=0;warfrontRuntime.pendingBossDamage=0;premiumRuntime.state=null;premiumRuntime.lastAt=0;updateClanBadge();updatePremiumBadge();state.target=null;player.laserFiring=false;for(const modal of dismissibleModals())modal.classList.add('hidden');ui.factionModal.classList.add('hidden');ui.portalPrompt?.classList.add('hidden');ui.baseTradePrompt?.classList.add('hidden');ui.petFloatPanel?.classList.add('hidden');ui.loginModal.classList.remove('hidden');if(ui.userLabel)ui.userLabel.textContent='—';if(ui.rankChip)ui.rankChip.textContent='Piloto Básico';if(ui.loginPassword)ui.loginPassword.value='';setSync('LOCAL','');showAuthMode('login');};
 
 function startLoadedGame(){
   state.lastPlayerDamageAt=nowSec();
@@ -4933,7 +5005,7 @@ function startLoadedGame(){
   if(isGalaxyGateMap()){
     const gd=galaxyGateDef();player.x=savedX??MAPS[gd.mapId].world.w/2;player.y=savedY??MAPS[gd.mapId].world.h/2;player.tx=player.x;player.ty=player.y;petRuntime.x=player.x+82;petRuntime.y=player.y+64;petRuntime.tx=petRuntime.x;petRuntime.ty=petRuntime.y;petRuntime.roamX=null;petRuntime.roamY=null;petRuntime.nextRoamAt=0;state.camera.x=player.x;state.camera.y=player.y;state.target=null;state.loot=[];state.fx=[];state.rocketFx=[];state.ores=[];state.landmarks=[];state.enemyRespawns=[];state.oreRespawns=[];restoreAlphaGateEnemies();const a=alphaGate(),def=galaxyGateDef().rounds[a.run.round-1],alive=alphaRemainingCount(),now=Date.now();if(a.run.waveIndex<def.waves.length&&!a.run.nextWaveAt){a.run.nextWaveAt=now+GALAXY_ALPHA_WAVE_INTERVAL_MS;}else if(a.run.waveIndex>=def.waves.length&&alive===0&&a.run.round<galaxyGateDef().rounds.length&&!a.run.nextRoundAt){a.run.nextRoundAt=now+GALAXY_ALPHA_ROUND_INTERVAL_MS;}renderAll();saveGame();return;
   }
-  const spawnBase=currentBasePoint();player.x=savedX??(progress.mapId==='x1'?spawnBase.x:400);player.y=savedY??(progress.mapId==='x1'?spawnBase.y:state.currentMap.world.h/2);player.tx=player.x;player.ty=player.y;petRuntime.x=player.x+82;petRuntime.y=player.y+64;petRuntime.tx=petRuntime.x;petRuntime.ty=petRuntime.y;petRuntime.roamX=null;petRuntime.roamY=null;petRuntime.nextRoamAt=0;state.camera.x=player.x;state.camera.y=player.y;state.target=null;state.loot=[];state.fx=[];state.rocketFx=[];createLandmarks();createOres();spawnEnemies();galaxyEventRuntime.mapKey=null;ensureGalaxyEventWorld(true);renderAll();saveGame();
+  const spawnBase=currentBasePoint();player.x=savedX??(progress.mapId==='x1'?spawnBase.x:400);player.y=savedY??(progress.mapId==='x1'?spawnBase.y:state.currentMap.world.h/2);player.tx=player.x;player.ty=player.y;petRuntime.x=player.x+82;petRuntime.y=player.y+64;petRuntime.tx=petRuntime.x;petRuntime.ty=petRuntime.y;petRuntime.roamX=null;petRuntime.roamY=null;petRuntime.nextRoamAt=0;state.camera.x=player.x;state.camera.y=player.y;state.target=null;state.loot=[];state.fx=[];state.rocketFx=[];createLandmarks();state.ores=[];state.enemies=[];state.enemyRespawns=[];state.oreRespawns=[];galaxyEventRuntime.mapKey=null;sharedUniverseRuntime.event=null;joinSharedUniverse();renderAll();saveGame();
   if(progress.repairRequired){movePlayerToHomeBase();player.hp=1;player.shield=0;progress.hp=1;progress.shield=0;saveGame();if(premiumActive())resolveDeathRepair({allowAuto:true});else openRepairModal();}
 }
 

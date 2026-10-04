@@ -1,3 +1,18 @@
+# V15.0.0 — SHARED UNIVERSE
+
+- Novo World Server autoritativo via WebSocket no Render.
+- NPCs, HP, escudo, movimento, morte e respawn compartilhados para todos no mesmo mapa.
+- Minérios/pedras compartilhados: uma coleta remove a entidade para todos e o respawn é global.
+- Eventos Galácticos passam a usar relógio e entidades do servidor, incluindo Invasão, Prime, Mineração, Comboio e Warfront.
+- Dano PVE passa pelo servidor e registra contribuição por jogador.
+- Assistências recebem crédito proporcional, deixando a fundação pronta para Grupos de Batalha.
+- Ataques de NPC passam a ser coordenados pelo servidor.
+- Reconexão segura: sem fallback para spawns locais durante queda de WebSocket.
+- HUD ganhou estado do UNIVERSO + latência.
+- Portais Astrais continuam instâncias privadas.
+- V14.1 Account Guard e benefícios PREMIUM preservados.
+- Sem novo SQL obrigatório.
+
 # V14.1.0 — ACCOUNT GUARD + PREMIUM AUTO-COMBAT
 
 - Login automático removido: cada entrada/reload exige login explícito.

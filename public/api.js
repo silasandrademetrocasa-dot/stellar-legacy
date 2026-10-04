@@ -129,6 +129,7 @@ async function upsertProfile(user, callsign = '') {
 }
 
 export function getSession() { return session; }
+export function getSessionCredentials() { return { accessToken: session?.access_token || '', gameSessionId: session?.game_session_id || '' }; }
 export function getUser() { return currentUser; }
 
 export async function signUp({ callsign, email, password }) {
