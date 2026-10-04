@@ -1,6 +1,6 @@
 {
   "name": "stellar-legacy",
-  "version": "17.5.1",
+  "version": "17.5.2",
   "type": "module",
   "scripts": {
     "start": "node server/index.js",
@@ -14,5 +14,5 @@
   "engines": {
     "node": ">=18"
   },
-  "release": "event-cleanup-hotfix-v17-5-1"
+  "release": "entity-graphics-lock-scene-performance-v17-5-2"
 }

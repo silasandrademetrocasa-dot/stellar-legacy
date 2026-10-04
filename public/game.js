@@ -1,7 +1,7 @@
-import { FACTIONS, SHIPS, ITEMS, LASER_AMMO, ROCKETS, NPC_TYPES, MAPS, RESOURCES } from './data.js?v=17.5.1';
-import { GAME_ASSETS } from './assets/v17/manifest.js?v=17.5.1';
-import { signUp, signIn, requestPasswordReset, restorePasswordRecoveryFromUrl, restoreSession, signOutLocal, checkGameSession, endGameSession, getUser, getSessionCredentials, loadCloudSave, saveCloudSave, updateCallsign, updatePassword, loadRankings, loadAuctionBids, saveAuctionBidOnline, markAuctionBidStatusOnline, loadAuctionMarket, upsertPlayerPresenceOnline, loadMapPresenceOnline, removePlayerPresenceOnline, queuePvpAttackOnline, consumePvpDamageEventsOnline, syncArenaProfileOnline, loadArenaState, loadArenaDailyRewardStatus, claimArenaDailyReward, loadArenaOpponents, loadArenaHistory, arenaAttackOnline, listClansOnline, loadMyClanOnline, createClanOnline, joinClanOnline, leaveClanOnline, transferClanCreditsOnline, claimClanCreditGrantsOnline, recordClanAlienKillOnline, getPremiumShopOnline, testPurchasePremiumOnline, loadWarfrontStateOnline, hitWorldBossOnline, claimWorldBossRewardOnline, declareClanWarOnline, recordClanWarScoreOnline, loadLiveOpsOnline, purchaseLiveCatalogOnline, economyActionOnline, getChatHistoryOnline, sendChatMessageOnline, getMyDesignersOnline, setDesignLoadoutOnline, claimGateDroneDesignOnline, claimEventDesignerOnline } from './api.js?v=17.5.1';
-import { SharedUniverseClient } from './world.js?v=17.5.1';
+import { FACTIONS, SHIPS, ITEMS, LASER_AMMO, ROCKETS, NPC_TYPES, MAPS, RESOURCES } from './data.js?v=17.5.2';
+import { GAME_ASSETS } from './assets/v17/manifest.js?v=17.5.2';
+import { signUp, signIn, requestPasswordReset, restorePasswordRecoveryFromUrl, restoreSession, signOutLocal, checkGameSession, endGameSession, getUser, getSessionCredentials, loadCloudSave, saveCloudSave, updateCallsign, updatePassword, loadRankings, loadAuctionBids, saveAuctionBidOnline, markAuctionBidStatusOnline, loadAuctionMarket, upsertPlayerPresenceOnline, loadMapPresenceOnline, removePlayerPresenceOnline, queuePvpAttackOnline, consumePvpDamageEventsOnline, syncArenaProfileOnline, loadArenaState, loadArenaDailyRewardStatus, claimArenaDailyReward, loadArenaOpponents, loadArenaHistory, arenaAttackOnline, listClansOnline, loadMyClanOnline, createClanOnline, joinClanOnline, leaveClanOnline, transferClanCreditsOnline, claimClanCreditGrantsOnline, recordClanAlienKillOnline, getPremiumShopOnline, testPurchasePremiumOnline, loadWarfrontStateOnline, hitWorldBossOnline, claimWorldBossRewardOnline, declareClanWarOnline, recordClanWarScoreOnline, loadLiveOpsOnline, purchaseLiveCatalogOnline, economyActionOnline, getChatHistoryOnline, sendChatMessageOnline, getMyDesignersOnline, setDesignLoadoutOnline, claimGateDroneDesignOnline, claimEventDesignerOnline } from './api.js?v=17.5.2';
+import { SharedUniverseClient } from './world.js?v=17.5.2';
 
 const canvas = document.querySelector('#game');
 const ctx = canvas.getContext('2d');
@@ -21,9 +21,11 @@ const DEVICE_CAPS=(()=>{
   return {mobile,memory,cores,saveData,reducedMotion};
 })();
 const QUALITY_PROFILES={
-  high:{label:'ALTA',dpr:2,fps:60,background:true,backgroundAlpha:.70,stars:1,grid:false,fx:true,particles:105,preload:'smart',saturation:1.14,contrast:1.06,assetCap:54},
-  medium:{label:'MÉDIA',dpr:1.30,fps:45,background:true,backgroundAlpha:.46,stars:.52,grid:false,fx:true,particles:48,preload:'core',saturation:1.03,contrast:1.02,assetCap:34},
-  low:{label:'BAIXA',dpr:.95,fps:30,background:false,backgroundAlpha:0,stars:.16,grid:false,fx:false,particles:14,preload:'minimal',saturation:1,contrast:1,assetCap:22},
+  // V17.5.2: qualidade dinâmica atua no CENÁRIO / ILUMINAÇÃO / densidade de efeitos,
+  // mas nunca rebaixa ou descarta os sprites V17 de NAVE, NPC, DRONES ou AUX-9.
+  high:{label:'ALTA',dpr:2,fps:60,background:true,backgroundAlpha:.70,stars:1,grid:false,fx:true,particles:105,preload:'smart',saturation:1.14,contrast:1.06,sceneLight:1,assetCap:54},
+  medium:{label:'MÉDIA',dpr:1.30,fps:45,background:true,backgroundAlpha:.46,stars:.52,grid:false,fx:true,particles:48,preload:'core',saturation:1.03,contrast:1.02,sceneLight:.62,assetCap:34},
+  low:{label:'BAIXA',dpr:.95,fps:30,background:false,backgroundAlpha:0,stars:.16,grid:false,fx:true,particles:20,preload:'minimal',saturation:1,contrast:1,sceneLight:.32,assetCap:22},
 };
 function initialAutoQuality(){
   if(DEVICE_CAPS.saveData)return 'low';
@@ -122,21 +124,25 @@ function flattenAssetPaths(value,out=[]){
   else if(typeof value==='object')Object.values(value).forEach(v=>flattenAssetPaths(v,out));
   return out;
 }
-function coreAssetPath(path){return /\/(branding|backgrounds|ammo)\//.test(path);}
+function entityAssetPath(path){return /\/assets\/v17\/(ships|ships-map|drones|drones-map|npcs)\//.test(String(path||''));}
+function coreAssetPath(path){return entityAssetPath(path)||/\/(branding|backgrounds|ammo)\//.test(String(path||''));}
 function requestAssetImage(path){
   if(!path)return null;
   let img=ASSET_IMAGES.get(path);
   if(img){ASSET_TOUCH.set(path,performance.now());return img;}
-  img=new Image();img.decoding='async';img.loading=coreAssetPath(path)?'eager':'lazy';
-  try{img.fetchPriority=coreAssetPath(path)?'high':'low';}catch{}
+  const entity=entityAssetPath(path),priority=entity||coreAssetPath(path);
+  img=new Image();img.decoding='async';img.loading=priority?'eager':'lazy';
+  try{img.fetchPriority=priority?'high':'low';}catch{}
   ASSET_IMAGES.set(path,img);ASSET_TOUCH.set(path,performance.now());img.src=path;
   img.onerror=()=>console.warn('Asset não carregado:',path);
   return img;
 }
 function trimAssetCache(){
-  const cap=qualityProfile().assetCap||32;if(ASSET_IMAGES.size<=cap)return;
-  const entries=[...ASSET_IMAGES.keys()].filter(path=>!coreAssetPath(path)).sort((a,b)=>(ASSET_TOUCH.get(a)||0)-(ASSET_TOUCH.get(b)||0));
-  while(ASSET_IMAGES.size>cap&&entries.length){const path=entries.shift();ASSET_IMAGES.delete(path);ASSET_TOUCH.delete(path);}
+  const cap=qualityProfile().assetCap||32;
+  // Sprites de entidades são protegidos: AUTO nunca desmonta nave/NPC/AUX/drone da memória.
+  const evictable=[...ASSET_IMAGES.keys()].filter(path=>!coreAssetPath(path)).sort((a,b)=>(ASSET_TOUCH.get(a)||0)-(ASSET_TOUCH.get(b)||0));
+  let nonCoreCount=evictable.length;
+  while(nonCoreCount>cap&&evictable.length){const path=evictable.shift();ASSET_IMAGES.delete(path);ASSET_TOUCH.delete(path);nonCoreCount--;}
 }
 function preloadAssets(){
   [...new Set(flattenAssetPaths(GAME_ASSETS))].filter(qualityShouldPreload).forEach(requestAssetImage);
@@ -148,7 +154,11 @@ function preloadActiveGameplayAssets(){
   requestAssetImage(shipMapAsset(progress.activeShipId));
   requestAssetImage(shipCardAsset(progress.activeShipId));
   requestAssetImage(droneMapAsset(progress?.pet?.level>=10?'petElite':'pet'));
-  for(const d of progress.drones||[])requestAssetImage(droneMapAsset(d.type));
+  requestAssetImage(droneCardAsset(progress?.pet?.level>=10?'petElite':'pet'));
+  for(const d of progress.drones||[]){requestAssetImage(droneMapAsset(d.type));requestAssetImage(droneCardAsset(d.type));}
+  // Pré-carrega os NPCs presentes e as naves online para impedir fallback após mudança do modo AUTO.
+  for(const e of state.enemies||[])if(e?.hp>0)requestAssetImage(GAME_ASSETS.npcs?.[e.type]);
+  for(const rp of onlineWorld?.players?.values?.()||[])requestAssetImage(shipMapAsset(rp.shipId));
   setTimeout(trimAssetCache,1200);
 }
 function assetImage(path){return path ? requestAssetImage(path) : null;}
@@ -186,10 +196,10 @@ function drawMapBackground(){
   if(sw/sh<viewAspect) sh=sw/viewAspect; else sw=sh*viewAspect;
   sw=Math.min(sw,img.naturalWidth);sh=Math.min(sh,img.naturalHeight);
   const sx=(img.naturalWidth-sw)*nx,sy=(img.naturalHeight-sh)*ny;
-  const q=qualityProfile();ctx.save();ctx.globalAlpha=q.backgroundAlpha??.5;ctx.filter=`saturate(${q.saturation||1}) contrast(${q.contrast||1})`;
+  const q=qualityProfile(),sceneLight=q.sceneLight??1;ctx.save();ctx.globalAlpha=q.backgroundAlpha??.5;ctx.filter=`saturate(${q.saturation||1}) contrast(${q.contrast||1}) brightness(${.82+.18*sceneLight})`;
   ctx.drawImage(img,sx,sy,sw,sh,0,0,W,H);ctx.filter='none';
   const shade=ctx.createLinearGradient(0,0,0,H);
-  shade.addColorStop(0,'rgba(1,7,16,.16)');shade.addColorStop(.52,'rgba(1,6,14,.05)');shade.addColorStop(1,'rgba(1,5,12,.38)');
+  shade.addColorStop(0,`rgba(1,7,16,${.10+.06*sceneLight})`);shade.addColorStop(.52,`rgba(1,6,14,${.03+.02*sceneLight})`);shade.addColorStop(1,`rgba(1,5,12,${.22+.16*sceneLight})`);
   ctx.fillStyle=shade;ctx.fillRect(0,0,W,H);
   const vignette=ctx.createRadialGradient(W/2,H/2,Math.min(W,H)*.25,W/2,H/2,Math.max(W,H)*.72);
   vignette.addColorStop(0,'rgba(0,0,0,0)');vignette.addColorStop(1,'rgba(0,0,0,.25)');ctx.fillStyle=vignette;ctx.fillRect(0,0,W,H);
@@ -1834,7 +1844,8 @@ function applyQualityMode(mode,persist=true){
   if(persist){try{localStorage.setItem(QUALITY_STORAGE_KEY,mode);}catch{}}
   document.body.dataset.quality=resolvedQualityMode();
   document.body.dataset.device=DEVICE_CAPS.mobile?'mobile':'desktop';
-  for(const path of [...ASSET_IMAGES.keys()])if(!qualityShouldPreload(path)&&!coreAssetPath(path)){ASSET_IMAGES.delete(path);ASSET_TOUCH.delete(path);}
+  // Trocar qualidade limpa apenas cenário/UI não essencial. Sprites de entidades ficam intactos.
+  for(const path of [...ASSET_IMAGES.keys()])if(!entityAssetPath(path)&&!qualityShouldPreload(path)&&!coreAssetPath(path)){ASSET_IMAGES.delete(path);ASSET_TOUCH.delete(path);}
   preloadAssets();if(progress)preloadActiveGameplayAssets();resize();renderSettings();
   showToast(mode==='auto'?`Modo AUTO • ${qualityProfile().label}`:`Qualidade ${qualityProfile().label} ativada`);
 }
@@ -4063,7 +4074,7 @@ function drawBaseSafeZone(){
   if(station&&station.naturalWidth){
     const targetW=520,targetH=targetW*(station.naturalHeight/station.naturalWidth);
     ctx.save();
-    ctx.shadowColor=f?.color||'#51dfff';ctx.shadowBlur=34;
+    ctx.shadowColor=f?.color||'#51dfff';ctx.shadowBlur=34*(qualityProfile().sceneLight??1);
     ctx.drawImage(station,-targetW/2,-targetH/2,targetW,targetH);
     ctx.restore();
 
@@ -4083,7 +4094,7 @@ function drawBaseSafeZone(){
   ctx.fillText(`${f?.short||''} • ${home?'BASE ORBITAL / ZONA SEGURA':'BASE INIMIGA'}`,0,-SAFE_ZONE.radius-18);
   ctx.restore();
 }
-function drawPortals(){for(const portal of resolvedPortals()){const p=screenPos(portal.x,portal.y),t=nowSec();ctx.save();ctx.translate(p.x,p.y);ctx.save();ctx.setLineDash([8,10]);ctx.strokeStyle='rgba(98,255,210,.18)';ctx.lineWidth=1.5;ctx.beginPath();ctx.arc(0,0,PORTAL_NEUTRAL_RADIUS,0,TWO_PI);ctx.stroke();ctx.setLineDash([]);ctx.fillStyle='rgba(98,255,210,.035)';ctx.beginPath();ctx.arc(0,0,PORTAL_NEUTRAL_RADIUS,0,TWO_PI);ctx.fill();ctx.restore();ctx.shadowColor='#43d8ff';ctx.shadowBlur=18;ctx.strokeStyle='rgba(83,221,255,.88)';ctx.lineWidth=3;ctx.beginPath();ctx.ellipse(0,0,36,56,0,0,TWO_PI);ctx.stroke();ctx.shadowBlur=0;ctx.rotate(t*.7);ctx.strokeStyle='rgba(174,102,255,.62)';ctx.lineWidth=5;for(let i=0;i<4;i++){ctx.beginPath();ctx.arc(0,0,27,-.55+i*Math.PI/2,.55+i*Math.PI/2);ctx.stroke();}ctx.rotate(-t*1.4);ctx.strokeStyle='rgba(92,231,255,.42)';ctx.lineWidth=2;ctx.beginPath();ctx.arc(0,0,19,0,Math.PI*1.35);ctx.stroke();ctx.rotate(t*.7);const cg=ctx.createRadialGradient(0,0,2,0,0,24);cg.addColorStop(0,'rgba(240,255,255,.72)');cg.addColorStop(.35,'rgba(72,211,255,.32)');cg.addColorStop(1,'rgba(51,91,255,.02)');ctx.fillStyle=cg;ctx.beginPath();ctx.ellipse(0,0,22,38,0,0,TWO_PI);ctx.fill();ctx.save();ctx.globalCompositeOperation='lighter';ctx.strokeStyle='rgba(210,245,255,.42)';ctx.lineWidth=1;for(let i=0;i<3;i++){const z=((t*.55+i/3)%1),rx=8+z*28,ry=14+z*44;ctx.globalAlpha=(1-z)*.46;ctx.beginPath();ctx.ellipse(0,0,rx,ry,0,0,TWO_PI);ctx.stroke();}ctx.restore();ctx.fillStyle='#9aeaff';ctx.font='bold 11px Arial';ctx.textAlign='center';ctx.fillText(portal.targetLabel||displayMapLabel(portal.to,portal.targetTerritoryFaction),0,-68);ctx.restore();}}
+function drawPortals(){for(const portal of resolvedPortals()){const p=screenPos(portal.x,portal.y),t=nowSec();ctx.save();ctx.translate(p.x,p.y);ctx.save();ctx.setLineDash([8,10]);ctx.strokeStyle='rgba(98,255,210,.18)';ctx.lineWidth=1.5;ctx.beginPath();ctx.arc(0,0,PORTAL_NEUTRAL_RADIUS,0,TWO_PI);ctx.stroke();ctx.setLineDash([]);ctx.fillStyle='rgba(98,255,210,.035)';ctx.beginPath();ctx.arc(0,0,PORTAL_NEUTRAL_RADIUS,0,TWO_PI);ctx.fill();ctx.restore();ctx.shadowColor='#43d8ff';ctx.shadowBlur=18*(qualityProfile().sceneLight??1);ctx.strokeStyle='rgba(83,221,255,.88)';ctx.lineWidth=3;ctx.beginPath();ctx.ellipse(0,0,36,56,0,0,TWO_PI);ctx.stroke();ctx.shadowBlur=0;ctx.rotate(t*.7);ctx.strokeStyle='rgba(174,102,255,.62)';ctx.lineWidth=5;for(let i=0;i<4;i++){ctx.beginPath();ctx.arc(0,0,27,-.55+i*Math.PI/2,.55+i*Math.PI/2);ctx.stroke();}ctx.rotate(-t*1.4);ctx.strokeStyle='rgba(92,231,255,.42)';ctx.lineWidth=2;ctx.beginPath();ctx.arc(0,0,19,0,Math.PI*1.35);ctx.stroke();ctx.rotate(t*.7);const cg=ctx.createRadialGradient(0,0,2,0,0,24);cg.addColorStop(0,'rgba(240,255,255,.72)');cg.addColorStop(.35,'rgba(72,211,255,.32)');cg.addColorStop(1,'rgba(51,91,255,.02)');ctx.fillStyle=cg;ctx.beginPath();ctx.ellipse(0,0,22,38,0,0,TWO_PI);ctx.fill();ctx.save();ctx.globalCompositeOperation='lighter';ctx.strokeStyle='rgba(210,245,255,.42)';ctx.lineWidth=1;for(let i=0;i<3;i++){const z=((t*.55+i/3)%1),rx=8+z*28,ry=14+z*44;ctx.globalAlpha=(1-z)*.46;ctx.beginPath();ctx.ellipse(0,0,rx,ry,0,0,TWO_PI);ctx.stroke();}ctx.restore();ctx.fillStyle='#9aeaff';ctx.font='bold 11px Arial';ctx.textAlign='center';ctx.fillText(portal.targetLabel||displayMapLabel(portal.to,portal.targetTerritoryFaction),0,-68);ctx.restore();}}
 function drawOres(){for(const o of state.ores){if(!onScreenWorld(o.x,o.y,100))continue;
   const p=screenPos(o.x,o.y),path=GAME_ASSETS.resources[o.type];
   const img=assetImage(path);
@@ -4126,7 +4137,7 @@ function drawEnemy(e){
     drawNpcAuraLocal(e,boss,size);ctx.rotate(face);if(Math.hypot(player.x-e.x,player.y-e.y)<900)drawEngineWakeLocal(size,fx.trail,boss?.78:.5,e.x*.01);ctx.scale(1+bank,1-Math.abs(bank)*.35);ctx.scale(1+pulse*.012,1-pulse*.012);ctx.shadowColor=fx.glow;ctx.shadowBlur=boss?28:13;if(boss&&'filter' in ctx&&Number(e.bossPhase||0)>=2)ctx.filter='saturate(1.25) brightness(1.12)';ctx.drawImage(img,-img.naturalWidth*sc/2,-img.naturalHeight*sc/2,img.naturalWidth*sc,img.naturalHeight*sc);ctx.filter='none';
   }else{
     // Enquanto o PNG carrega, o modo ALTO usa uma silhueta angular discreta em vez de círculos/quadrados.
-    if(qualityMode==='high'){
+    if(resolvedQualityMode()==='high'){
       const face=Math.atan2(player.y-e.y,player.x-e.x)+Math.PI/2,s=e.size*1.35;ctx.rotate(face);ctx.shadowColor=e.color;ctx.shadowBlur=16;ctx.fillStyle='rgba(8,18,30,.9)';ctx.strokeStyle=e.color;ctx.lineWidth=1.4;ctx.beginPath();ctx.moveTo(0,-s);ctx.lineTo(s*.72,s*.55);ctx.lineTo(0,s*.22);ctx.lineTo(-s*.72,s*.55);ctx.closePath();ctx.fill();ctx.stroke();ctx.shadowBlur=0;
     }else drawNpcModel(e);
   }

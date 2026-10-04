@@ -1,3 +1,10 @@
+## V17.5.2 — ENTITY GRAPHICS LOCK + SCENE PERFORMANCE
+- Modo AUTO não remove/rebaixa sprites de NAVE, NPC, DRONES ou AUX-9.
+- Assets V17 de entidades ficam protegidos contra descarte do cache.
+- Mudança de qualidade atua principalmente no cenário, iluminação, fundo e densidade ambiental.
+- Pré-carga ativa reforçada para NPCs presentes e jogadores online.
+- Corrigido fallback visual que podia permanecer após AUTO baixar/subir a qualidade.
+
 ## V17.5.1 — EVENT CLEANUP HOTFIX
 - Limpeza automática de NPCs/ores ao fim ou rotação de eventos.
 - Prevenção de acúmulo de ondas e respawns atrasados.
