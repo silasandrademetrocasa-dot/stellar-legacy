@@ -1,7 +1,7 @@
-import { FACTIONS, SHIPS, ITEMS, LASER_AMMO, ROCKETS, NPC_TYPES, MAPS, RESOURCES } from './data.js?v=16.7.7';
-import { GAME_ASSETS } from './assets/v8/manifest.js?v=16.7.7';
-import { signUp, signIn, requestPasswordReset, restorePasswordRecoveryFromUrl, restoreSession, signOutLocal, checkGameSession, endGameSession, getUser, getSessionCredentials, loadCloudSave, saveCloudSave, updateCallsign, updatePassword, loadRankings, loadAuctionBids, saveAuctionBidOnline, markAuctionBidStatusOnline, loadAuctionMarket, upsertPlayerPresenceOnline, loadMapPresenceOnline, removePlayerPresenceOnline, queuePvpAttackOnline, consumePvpDamageEventsOnline, syncArenaProfileOnline, loadArenaState, loadArenaDailyRewardStatus, claimArenaDailyReward, loadArenaOpponents, loadArenaHistory, arenaAttackOnline, listClansOnline, loadMyClanOnline, createClanOnline, joinClanOnline, leaveClanOnline, transferClanCreditsOnline, claimClanCreditGrantsOnline, recordClanAlienKillOnline, getPremiumShopOnline, testPurchasePremiumOnline, loadWarfrontStateOnline, hitWorldBossOnline, claimWorldBossRewardOnline, declareClanWarOnline, recordClanWarScoreOnline, loadLiveOpsOnline, purchaseLiveCatalogOnline, economyActionOnline, getChatHistoryOnline, sendChatMessageOnline, getMyDesignersOnline, setDesignLoadoutOnline, claimGateDroneDesignOnline, claimEventDesignerOnline } from './api.js?v=16.7.7';
-import { SharedUniverseClient } from './world.js?v=16.7.7';
+import { FACTIONS, SHIPS, ITEMS, LASER_AMMO, ROCKETS, NPC_TYPES, MAPS, RESOURCES } from './data.js?v=16.7.8';
+import { GAME_ASSETS } from './assets/v8/manifest.js?v=16.7.8';
+import { signUp, signIn, requestPasswordReset, restorePasswordRecoveryFromUrl, restoreSession, signOutLocal, checkGameSession, endGameSession, getUser, getSessionCredentials, loadCloudSave, saveCloudSave, updateCallsign, updatePassword, loadRankings, loadAuctionBids, saveAuctionBidOnline, markAuctionBidStatusOnline, loadAuctionMarket, upsertPlayerPresenceOnline, loadMapPresenceOnline, removePlayerPresenceOnline, queuePvpAttackOnline, consumePvpDamageEventsOnline, syncArenaProfileOnline, loadArenaState, loadArenaDailyRewardStatus, claimArenaDailyReward, loadArenaOpponents, loadArenaHistory, arenaAttackOnline, listClansOnline, loadMyClanOnline, createClanOnline, joinClanOnline, leaveClanOnline, transferClanCreditsOnline, claimClanCreditGrantsOnline, recordClanAlienKillOnline, getPremiumShopOnline, testPurchasePremiumOnline, loadWarfrontStateOnline, hitWorldBossOnline, claimWorldBossRewardOnline, declareClanWarOnline, recordClanWarScoreOnline, loadLiveOpsOnline, purchaseLiveCatalogOnline, economyActionOnline, getChatHistoryOnline, sendChatMessageOnline, getMyDesignersOnline, setDesignLoadoutOnline, claimGateDroneDesignOnline, claimEventDesignerOnline } from './api.js?v=16.7.8';
+import { SharedUniverseClient } from './world.js?v=16.7.8';
 
 const canvas = document.querySelector('#game');
 const ctx = canvas.getContext('2d');
@@ -1446,7 +1446,7 @@ const GALAXY_ALPHA_ROUND_INTERVAL_MS = 9000;
 const GALAXY_GATE_MAX_LIVES = 5;
 const GALAXY_GATE_BASE_LIVES = 3;
 
-// V16.7.7 • Portais refeitos para serem vencíveis também por jogador FREE bem equipado em Créditos.
+// V16.7.8 • Portais refeitos para serem vencíveis também por jogador FREE bem equipado em Créditos.
 // A dificuldade vem de progressão, posicionamento e kite — não de dezenas de NPCs batendo ao mesmo tempo.
 const GALAXY_ALPHA_ROUNDS = [
   {round:1,name:'Primeiro Contato',waves:[{type:'streuner',count:5},{type:'recruitStreuner',count:4},{type:'aiderStreuner',count:3}]},
@@ -2594,7 +2594,8 @@ function petSlotCost(slotNumber){const v=livePetSlotPrices.get(Number(slotNumber
 function petLaserIds(){return progress?.pet?.owned?(progress.pet.lasers||[]).filter(id=>ITEMS[id]?.type==='laser'):[];}
 function petShieldIds(){return progress?.pet?.owned?(progress.pet.shields||[]).filter(id=>ITEMS[id]?.type==='generator'&&ITEMS[id]?.subtype==='shield'):[];}
 function petDamage(){const levelBonus=petLevelBonuses().damage/100;return petLaserIds().reduce((sum,id)=>{const it=ITEMS[id];const base=it?.alienDamage??it?.damage??0;return sum+base*(1+(Number(it?.alienBonus)||0));},0)*petDesignerDamageMultiplier()*(1+levelBonus);}
-function petMaxShield(){const levelBonus=petLevelBonuses().shield/100;return petShieldIds().reduce((sum,id)=>sum+(ITEMS[id]?.shield||0),0)*(1+Number(petDesignerBonuses().shield||0))*(1+levelBonus);}
+function petShieldSupport(){const levelBonus=petLevelBonuses().shield/100;return petShieldIds().reduce((sum,id)=>sum+(ITEMS[id]?.shield||0),0)*(1+levelBonus);}
+function petMaxShield(){return petShieldSupport()*(1+Number(petDesignerBonuses().shield||0));}
 function addPetXp(amount){
   if(!progress?.pet?.owned||amount<=0||progress.pet.level>=PET_MAX_LEVEL)return;
   progress.pet.xp+=Math.round(amount);
@@ -2864,10 +2865,15 @@ function computeStats(keepRatio=true){
   const oldHpRatio=player.maxHp?player.hp/player.maxHp:1, oldShieldRatio=player.maxShield?player.shield/player.maxShield:1;
   const laserIds=[...progress.shipLoadout.lasers,...progress.drones.flatMap(d=>d.slots)].filter(id=>ITEMS[id]?.type==='laser');
   const genIds=[...progress.shipLoadout.generators,...progress.drones.flatMap(d=>d.slots)].filter(id=>ITEMS[id]?.type==='generator');
+  const petShieldGenerators=petShieldIds();
   let hp=ship.hp, speed=ship.speed, shield=0, laserDamage=0, absorption=0, rocketMult=1, shieldRegenBoost=0;
   // Combate atual é PvE: respeita dano específico contra aliens e bônus PvE por laser.
   for(const id of laserIds){const it=ITEMS[id];const base=it?.alienDamage??it?.damage??0;laserDamage+=base*(1+(Number(it?.alienBonus)||0));}
   for(const id of genIds){const it=ITEMS[id];speed+=it.speed||0;shield+=it.shield||0;absorption=Math.max(absorption,it.absorption||0);shieldRegenBoost=Math.max(shieldRegenBoost,Number(it.shieldRegenBonus)||0);}
+  // V16.7.8: escudos equipados no AUX-9 funcionam como suporte direto da nave, assim como escudos instalados em drones.
+  // O bônus de nível do AUX é aplicado à contribuição dele; absorção/regeneração também entram no cálculo da nave.
+  shield+=petShieldSupport();
+  for(const id of petShieldGenerators){const it=ITEMS[id];absorption=Math.max(absorption,it.absorption||0);shieldRegenBoost=Math.max(shieldRegenBoost,Number(it.shieldRegenBonus)||0);}
   if(ship.bonusLowMaps&&low){hp+=ship.bonusLowMaps.hp;speed+=ship.bonusLowMaps.speed;shield*=ship.bonusLowMaps.shieldMult;laserDamage*=ship.bonusLowMaps.laserMult;rocketMult=ship.bonusLowMaps.rocketMult;}
   hp+=pilotSkillValue('hull1')+pilotSkillValue('hull2');
   shield*=1+pilotSkillValue('shieldEngineering')/100;
@@ -4364,13 +4370,14 @@ function renderHangar(){
 function petEquipCard(kind,index){
   const pet=progress.pet,list=kind==='laser'?pet.lasers:pet.shields,id=list[index],item=id?ITEMS[id]:null;
   const card=document.createElement('div');card.className=`pet-slot ${item?'filled':''}`;
-  card.innerHTML=`<div class="slot-label">${kind==='laser'?'ARMA':'ESCUDO'} ${index+1}</div><div class="slot-item">${item?item.name:'VAZIO'}</div>${item?`<div class="muted">${item.description}</div>`:'<div class="muted">Slot liberado</div>'}`;
+  card.innerHTML=`<div class="slot-label">${kind==='laser'?'ARMA':'ESCUDO'} ${index+1}</div><div class="slot-item">${item?item.name:'VAZIO'}</div>${item?`<div class="muted">${item.description}${kind==='shield'?` • SUPORTE NAVE +${fmt(item.shield||0)} ESC`:''}</div>`:'<div class="muted">Slot liberado</div>'}`;
   if(item){const actions=document.createElement('div');actions.className='slot-actions';const b=document.createElement('button');b.className='ghost-btn';b.textContent='Remover';b.onclick=()=>unequipPetSlot(kind,index);actions.appendChild(b);const sell=document.createElement('button');sell.className='danger-btn sell-item-btn';sell.textContent='Vender 50%';sell.title=`${fmt(itemSellValue(item))} ${item.currency==='uridium'?'STL':'CR'}`;sell.onclick=()=>sellPetEquippedSlot(kind,index);actions.appendChild(sell);card.appendChild(actions);}
   return card;
 }
 function petSlotRequiredLevel(kind,slot){for(let lv=1;lv<=PET_MAX_LEVEL;lv++)if(petSlotCapacity(kind,lv)>=slot)return lv;return PET_MAX_LEVEL;}
 function petLockedCard(kind,index){
-  const slot=index+1,cost=petSlotCost(slot),card=document.createElement('div');card.className='pet-slot locked',requiredLevel=petSlotRequiredLevel(kind,slot);
+  const slot=index+1,cost=petSlotCost(slot),card=document.createElement('div'),requiredLevel=petSlotRequiredLevel(kind,slot);
+  card.className='pet-slot locked';
   const available=progress.pet.level>=requiredLevel,priced=cost!=null;
   card.innerHTML=`<div class="slot-label">${kind==='laser'?'ARMA':'ESCUDO'} ${slot}</div><div class="slot-item">🔒 ${available?'LIBERÁVEL':'NÍVEL '+requiredLevel}</div><div class="muted">${available?(priced?`${fmt(cost)} STL para liberar`:'Sincronizando preço online...'):`Alcance o nível ${requiredLevel} do AUX-9`}</div>`;
   const b=document.createElement('button');b.className='ghost-btn';b.textContent=available?(priced?`Liberar • ${fmt(cost)} STL`:'AGUARDE'):`Nível ${requiredLevel}`;b.disabled=!available||!priced;b.onclick=()=>unlockPetSlot(kind);card.appendChild(b);return card;
@@ -4383,7 +4390,7 @@ function renderPet(root=ui.petContent){
   }
   const base=petLevelThreshold(pet.level),need=pet.level<PET_MAX_LEVEL?petLevelXp(pet.level):base,pct=pet.level>=PET_MAX_LEVEL?100:Math.min(100,(pet.xp-base)/Math.max(1,need-base)*100),petDesigner=currentPetDesign(),petVisual=petDesigner?.visual||{},petDef=petLevelDef(pet.level),petBonus=petLevelBonuses(pet.level);
   const hero=document.createElement('div');hero.className=`pet-hero ${petDesigner?'has-designer '+(petDesigner.rarity||''):''}`;if(petDesigner)hero.style.setProperty('--designer-glow',petVisual.glow||'#7edcff');
-  hero.innerHTML=`<div class="pet-avatar designer-pet-art-wrap"><img src="${pet.level>=10?GAME_ASSETS.drones.petElite:GAME_ASSETS.drones.pet}" alt="AUX-9" ${petDesigner?`style="filter:${designerVisualCss(petDesigner)}"`:''}>${petDesigner?`<span class="designer-equipped-badge">${rarityLabel(petDesigner.rarity)} • ${petDesigner.name}</span>`:''}</div><div class="pet-hero-copy"><div class="eyebrow">UNIDADE AUX-9</div><h2>Nível ${pet.level} / ${PET_MAX_LEVEL}</h2><div class="pet-xpbar"><span style="width:${pct}%"></span></div><div class="muted">${pet.level>=PET_MAX_LEVEL?'Nível máximo':`${fmt(pet.xp)} XP total • próximo ${fmt(need)}`} • Dano ${fmt(petDamage())} • Escudo ${fmt(petMaxShield())}</div><div class="pet-level-strip"><span>LASER <b>${petDef.laser}</b></span><span>ESCUDO <b>${petDef.shield}</b></span><span>MÓDULOS <b>${petDef.gear}</b></span><span>PROTOCOLOS <b>${petDef.protocol}</b></span></div><div class="muted">Bônus de nível: <b>${petBonus.damage?`DANO +${petBonus.damage}%`:''}${petBonus.damage&&petBonus.shield?' • ':''}${petBonus.shield?`ESCUDO +${petBonus.shield}%`:''}${!petBonus.damage&&!petBonus.shield?'progressão de equipamento':''}</b> • Tier ${petBonus.tier}${petDesigner?` • ${designerBonusSummary(petDesigner)}`:''}</div></div>`;
+  hero.innerHTML=`<div class="pet-avatar designer-pet-art-wrap"><img src="${pet.level>=10?GAME_ASSETS.drones.petElite:GAME_ASSETS.drones.pet}" alt="AUX-9" ${petDesigner?`style="filter:${designerVisualCss(petDesigner)}"`:''}>${petDesigner?`<span class="designer-equipped-badge">${rarityLabel(petDesigner.rarity)} • ${petDesigner.name}</span>`:''}</div><div class="pet-hero-copy"><div class="eyebrow">UNIDADE AUX-9</div><h2>Nível ${pet.level} / ${PET_MAX_LEVEL}</h2><div class="pet-xpbar"><span style="width:${pct}%"></span></div><div class="muted">${pet.level>=PET_MAX_LEVEL?'Nível máximo':`${fmt(pet.xp)} XP total • próximo ${fmt(need)}`} • Dano ${fmt(petDamage())} • Suporte ESC +${fmt(petShieldSupport())}</div><div class="pet-level-strip"><span>LASER <b>${petDef.laser}</b></span><span>ESCUDO <b>${petDef.shield}</b></span><span>MÓDULOS <b>${petDef.gear}</b></span><span>PROTOCOLOS <b>${petDef.protocol}</b></span></div><div class="muted">Bônus de nível: <b>${petBonus.damage?`DANO +${petBonus.damage}%`:''}${petBonus.damage&&petBonus.shield?' • ':''}${petBonus.shield?`ESCUDO +${petBonus.shield}%`:''}${!petBonus.damage&&!petBonus.shield?'progressão de equipamento':''}</b> • Tier ${petBonus.tier}${petDesigner?` • ${designerBonusSummary(petDesigner)}`:''}</div></div>`;
   root.appendChild(hero);
 
   const petDefs=designerCatalog().filter(d=>d.kind==='pet'),designerPanel=document.createElement('div');designerPanel.className='section-box aux-designer-console';
@@ -4400,7 +4407,7 @@ function renderPet(root=ui.petContent){
   const progression=document.createElement('div');progression.className='section-box pet-level-progression';progression.innerHTML=`<h3>PROGRESSÃO AUX-9 • NÍVEL ${pet.level}</h3><div class="pet-level-strip"><span>LASER <b>${petDef.laser}</b></span><span>ESCUDO <b>${petDef.shield}</b></span><span>MÓDULOS <b>${petDef.gear}</b></span><span>PROTOCOLOS <b>${petDef.protocol}</b></span><span>TIER <b>${petBonus.tier}</b></span></div><div class="muted">Sem combustível. Cada nível amplia capacidade e alterna bônus de dano/escudo; níveis 4, 8 e 20 liberam tiers superiores.</div>`;root.appendChild(progression);
   for(const kind of ['laser','shield']){
     const unlocked=kind==='laser'?pet.laserSlotsUnlocked:pet.shieldSlotsUnlocked,capacity=petSlotCapacity(kind,pet.level);
-    const box=document.createElement('div');box.className='section-box';box.innerHTML=`<h3>${kind==='laser'?'Armas':'Escudos'} — ${unlocked}/${capacity} liberados</h3><div class="muted">Seu nível libera a capacidade máxima; os espaços adicionais são comprados separadamente.</div>`;
+    const box=document.createElement('div');box.className='section-box';box.innerHTML=`<h3>${kind==='laser'?'Armas':'Escudos de Suporte'} — ${unlocked}/${capacity} liberados</h3><div class="muted">${kind==='shield'?`Os geradores equipados aqui somam escudo diretamente à NAVE, como os drones. Suporte atual: +${fmt(petShieldSupport())} ESC.`:'Seu nível libera a capacidade máxima; os espaços adicionais são comprados separadamente.'}</div>`;
     const grid=document.createElement('div');grid.className='pet-slot-grid';
     for(let i=0;i<capacity;i++)grid.appendChild(i<unlocked?petEquipCard(kind,i):petLockedCard(kind,i));
     box.appendChild(grid);root.appendChild(box);

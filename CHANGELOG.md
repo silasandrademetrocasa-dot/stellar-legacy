@@ -1,3 +1,8 @@
+## V16.7.8 — AUX EQUIPMENT + SHIELD SUPPORT
+- Corrigida a aba de equipamentos do AUX-9 no Hangar.
+- Escudos equipados no AUX-9 agora somam escudo à nave como suporte, igual aos drones.
+- Absorção e regeneração dos geradores do AUX entram nas estatísticas da nave.
+
 ## V16.7.7 — AGGRO + PORTAL REWARDS + REALTIME MATERIALIZER
 - Perseguição normal limitada a 800u e ataque até 500u.
 - NPCs de evento deixam de perseguir o jogador através do mapa inteiro.
