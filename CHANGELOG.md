@@ -1,3 +1,9 @@
+# V16.7.4 — X-1 NEUTRAL + PREMIUM POLISH
+- Em mapas X-1 os NPCs ficam passivos até serem atacados pelo jogador.
+- Ao receber dano, o NPC entra em retaliação e pode perseguir/atacar normalmente.
+- Loja Premium compactada e reorganizada; cupom abaixo dos status Premium/Passe.
+- Cards Premium menores e uniformes.
+
 # V16.7.3 — MODO DE BATALHA
 - HUD slim, clean e bem compacto.
 - Menos informação visível no topo para liberar mais área de combate.

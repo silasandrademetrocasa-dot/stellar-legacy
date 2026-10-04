@@ -1,7 +1,7 @@
-import { FACTIONS, SHIPS, ITEMS, LASER_AMMO, ROCKETS, NPC_TYPES, MAPS, RESOURCES } from './data.js?v=16.7.1';
-import { GAME_ASSETS } from './assets/v8/manifest.js?v=16.7.1';
-import { signUp, signIn, requestPasswordReset, restorePasswordRecoveryFromUrl, restoreSession, signOutLocal, checkGameSession, endGameSession, getUser, getSessionCredentials, loadCloudSave, saveCloudSave, updateCallsign, updatePassword, loadRankings, loadAuctionBids, saveAuctionBidOnline, markAuctionBidStatusOnline, loadAuctionMarket, upsertPlayerPresenceOnline, loadMapPresenceOnline, removePlayerPresenceOnline, queuePvpAttackOnline, consumePvpDamageEventsOnline, syncArenaProfileOnline, loadArenaState, loadArenaDailyRewardStatus, claimArenaDailyReward, loadArenaOpponents, loadArenaHistory, arenaAttackOnline, listClansOnline, loadMyClanOnline, createClanOnline, joinClanOnline, leaveClanOnline, transferClanCreditsOnline, claimClanCreditGrantsOnline, recordClanAlienKillOnline, getPremiumShopOnline, testPurchasePremiumOnline, loadWarfrontStateOnline, hitWorldBossOnline, claimWorldBossRewardOnline, declareClanWarOnline, recordClanWarScoreOnline, loadLiveOpsOnline, purchaseLiveCatalogOnline, economyActionOnline, getChatHistoryOnline, sendChatMessageOnline, getMyDesignersOnline, setDesignLoadoutOnline, claimGateDroneDesignOnline, claimEventDesignerOnline } from './api.js?v=16.7.1';
-import { SharedUniverseClient } from './world.js?v=16.7.1';
+import { FACTIONS, SHIPS, ITEMS, LASER_AMMO, ROCKETS, NPC_TYPES, MAPS, RESOURCES } from './data.js?v=16.7.4';
+import { GAME_ASSETS } from './assets/v8/manifest.js?v=16.7.4';
+import { signUp, signIn, requestPasswordReset, restorePasswordRecoveryFromUrl, restoreSession, signOutLocal, checkGameSession, endGameSession, getUser, getSessionCredentials, loadCloudSave, saveCloudSave, updateCallsign, updatePassword, loadRankings, loadAuctionBids, saveAuctionBidOnline, markAuctionBidStatusOnline, loadAuctionMarket, upsertPlayerPresenceOnline, loadMapPresenceOnline, removePlayerPresenceOnline, queuePvpAttackOnline, consumePvpDamageEventsOnline, syncArenaProfileOnline, loadArenaState, loadArenaDailyRewardStatus, claimArenaDailyReward, loadArenaOpponents, loadArenaHistory, arenaAttackOnline, listClansOnline, loadMyClanOnline, createClanOnline, joinClanOnline, leaveClanOnline, transferClanCreditsOnline, claimClanCreditGrantsOnline, recordClanAlienKillOnline, getPremiumShopOnline, testPurchasePremiumOnline, loadWarfrontStateOnline, hitWorldBossOnline, claimWorldBossRewardOnline, declareClanWarOnline, recordClanWarScoreOnline, loadLiveOpsOnline, purchaseLiveCatalogOnline, economyActionOnline, getChatHistoryOnline, sendChatMessageOnline, getMyDesignersOnline, setDesignLoadoutOnline, claimGateDroneDesignOnline, claimEventDesignerOnline } from './api.js?v=16.7.4';
+import { SharedUniverseClient } from './world.js?v=16.7.4';
 
 const canvas = document.querySelector('#game');
 const ctx = canvas.getContext('2d');
@@ -3340,7 +3340,7 @@ function dealDamageToEnemy(enemy,damage,color,opts={}){
   const before=Math.max(0,Number(enemy.shield)||0)+Math.max(0,Number(enemy.hp)||0);
   let remain=requested;const hadShield=enemy.shield>0;if(enemy.shield>0){const a=Math.min(enemy.shield,remain);enemy.shield-=a;remain-=a;}if(remain>0)enemy.hp-=remain;
   const after=Math.max(0,Number(enemy.shield)||0)+Math.max(0,Number(enemy.hp)||0),actual=Math.max(0,Math.round(before-after));
-  if(actual>0){battlePassEvent('damage',actual);battlePassEvent('attack',1);playSfx(critical?'critical':(hadShield?'shield':'impact'));}
+  if(actual>0){enemy.playerProvoked=true;enemy.lastProvokedAt=nowSec();battlePassEvent('damage',actual);battlePassEvent('attack',1);playSfx(critical?'critical':(hadShield?'shield':'impact'));}
   spawnCombatText(enemy.x,enemy.y-enemy.size,critical?`CRÍTICO ${fmt(actual)}`:`-${fmt(actual)}`,critical?'#ffe96f':(hadShield?'#62dcff':color),{critical,kind:hadShield?'shield':'damage'});spawnImpactFx(enemy.x,enemy.y,hadShield?'#55d8ff':color,critical?38:(hadShield?30:22),hadShield?'shield':'impact');
   if(critical)triggerCombatFlash('gold');
   if(enemy.worldBoss){if(actual>0)warfrontRuntime.pendingBossDamage+=actual;if(enemy.hp<=0)enemy.hp=1;flushWorldBossDamage();return actual;}
@@ -3359,7 +3359,7 @@ function applyLaserAmmoHit(enemy,baseDamage,ammo,color){
     if(enemy.sharedWorld&&sharedUniverseMap()){if(!sharedUniverseOnline()){setCombatAlert('UNIVERSO RECONECTANDO','danger',1.5);return 0;}if((enemy.shield||0)<=0){spawnParticle(enemy.x,enemy.y-enemy.size,'SEM ESCUDO','#79f1ff');return 0;}if(isPortalNeutralZone())state.portalCombatUntil=Math.max(state.portalCombatUntil,nowSec()+6);sharedUniverse.damageNpc({entityId:enemy.id,damage:requested,mode:'shield_drain',hitId:`sab_${Date.now()}_${Math.random().toString(16).slice(2)}`});return requested;}
     const drained=Math.min(Math.max(0,enemy.shield||0),requested);
     if(drained<=0){spawnParticle(enemy.x,enemy.y-enemy.size,'SEM ESCUDO','#79f1ff');return 0;}
-    enemy.shield=Math.max(0,enemy.shield-drained);playSfx('shield');
+    enemy.shield=Math.max(0,enemy.shield-drained);enemy.playerProvoked=true;enemy.lastProvokedAt=nowSec();playSfx('shield');
     const before=player.shield;
     player.shield=Math.min(player.maxShield,player.shield+drained);
     const restored=Math.max(0,Math.round(player.shield-before));
@@ -3589,7 +3589,7 @@ function updateBossHud(){
 
 function updateEnemies(dt){
   const sharedMode=sharedUniverseMap();
-  const playerSafe=isSafeZone();
+  const baseSafe=isSafeZone();
   for(const e of state.enemies){
     if(e.hp<=0||sharedMode&&e.sharedWorld)continue;updateBossPhase(e);
     const dx=player.x-e.x,dy=player.y-e.y,d=Math.hypot(dx,dy);e.angle+=dt*e.drift;
@@ -3597,13 +3597,13 @@ function updateEnemies(dt){
       const b=currentBasePoint(),ox=e.x-b.x,oy=e.y-b.y,od=Math.hypot(ox,oy)||1;
       e.x=b.x+ox/od*(SAFE_ZONE.radius+38);e.y=b.y+oy/od*(SAFE_ZONE.radius+38);
     }
-    const forceChase=!!e.gateEnemy||!!e.forceChase;
-    if(!playerSafe&&(forceChase||d<e.aggroRange)&&d>e.attackRange*.8){
+    const forceChase=!!e.gateEnemy||!!e.forceChase,retaliating=!!e.playerProvoked,neutralX1=progress.mapId==='x1'&&!retaliating,protectedNow=baseSafe&&!retaliating;
+    if(!protectedNow&&!neutralX1&&(retaliating||forceChase||d<e.aggroRange)&&d>e.attackRange*.8){
       const nd=Math.max(1,d),nx=e.x+dx/nd*e.speed*dt,ny=e.y+dy/nd*e.speed*dt;
-      if(!(progress.mapId==='x1'&&safeZoneDistance(nx,ny)<SAFE_ZONE.radius+25)){e.x=nx;e.y=ny;}
-    }else if(!forceChase&&(d>e.aggroRange||playerSafe)){e.x+=Math.cos(e.angle)*e.speed*.16*dt;e.y+=Math.sin(e.angle)*e.speed*.16*dt;}
+      if(!(progress.mapId==='x1'&&safeZoneDistance(nx,ny)<SAFE_ZONE.radius+25&&!retaliating)){e.x=nx;e.y=ny;}
+    }else if(neutralX1||(!forceChase&&(d>e.aggroRange||protectedNow))){e.x+=Math.cos(e.angle)*e.speed*.16*dt;e.y+=Math.sin(e.angle)*e.speed*.16*dt;}
     e.x=Math.max(25,Math.min(state.currentMap.world.w-25,e.x));e.y=Math.max(25,Math.min(state.currentMap.world.h-25,e.y));
-    if(!playerSafe&&nowSec()>=(e.jammedUntil||0)&&d<e.attackRange&&nowSec()-e.lastShot>((e.name.includes('Boss')?1.6:1.15)*(e.bossAttackScale||1))){e.lastShot=nowSec();e.lastAttackPlayerAt=nowSec();takePlayerDamage(e.damage*rand(.92,1.12));spawnParticle(player.x,player.y-28,Math.round(e.damage),'#ff8080');}
+    if(!protectedNow&&!neutralX1&&nowSec()>=(e.jammedUntil||0)&&d<e.attackRange&&nowSec()-e.lastShot>((e.name.includes('Boss')?1.6:1.15)*(e.bossAttackScale||1))){e.lastShot=nowSec();e.lastAttackPlayerAt=nowSec();takePlayerDamage(e.damage*rand(.92,1.12));spawnParticle(player.x,player.y-28,Math.round(e.damage),'#ff8080');}
   }
 }
 function updateSharedUniverseInterpolation(dt){
@@ -4397,7 +4397,7 @@ function renderPremiumShop(){
   const st=premiumRuntime.state||{},products=premiumCatalogForRender(),couponHint=Object.keys(PREMIUM_EVENT_COUPONS)[0]||'EVENTO7D';
   const activeUntil=effectivePremiumUntilMs();
   if(ui.premiumModeChip){ui.premiumModeChip.textContent=premiumCanPurchase()?'ATIVO':'CATÁLOGO';ui.premiumModeChip.classList.toggle('active',premiumCanPurchase());}
-  ui.premiumBenefits.innerHTML=`<div><span>PREMIUM</span><b>${premiumActive()?'ATIVO':'INATIVO'}</b><small>${premiumActive()?`até ${formatPremiumUntil(new Date(activeUntil).toISOString())} • AUTO-COMBATE LIBERADO`:'Auto-combate • reparo grátis • regen 2X • míssil -20% • Elite -5% • Portais -10%'}</small></div><div><span>PASSE PREMIUM</span><b>${st.battle_pass_active?'ATIVO':'INATIVO'}</b><small>Temporada ${escHtml(st.current_season||battlePassSeasonKey())} • AUTO-COMBATE • 2X ganhos + Elite + Reclaimer T30</small></div><div class="premium-coupon-card"><div class="premium-coupon-copy"><span>CUPONS DE EVENTO</span><b>RESGATE EXCLUSIVO</b><small>Cupom inicial ativo: ${escHtml(couponHint)} • libera 1 semana de Premium + 1 Nanobot de Reparo • Comum.</small></div><div class="premium-coupon-form"><input id="premiumCouponInput" maxlength="32" autocomplete="off" placeholder="DIGITE O CUPOM" /><button class="gold-btn" id="premiumCouponRedeem" type="button">RESGATAR</button></div></div>`;
+  ui.premiumBenefits.innerHTML=`<div class="premium-status-card"><span>PREMIUM</span><b>${premiumActive()?'ATIVO':'INATIVO'}</b><small>${premiumActive()?`até ${formatPremiumUntil(new Date(activeUntil).toISOString())} • AUTO-COMBATE LIBERADO`:'Auto-combate • reparo grátis • regen 2X • míssil -20% • Elite -5% • Portais -10%'}</small></div><div class="premium-status-card"><span>PASSE PREMIUM</span><b>${st.battle_pass_active?'ATIVO':'INATIVO'}</b><small>Temporada ${escHtml(st.current_season||battlePassSeasonKey())} • AUTO-COMBATE • 2X ganhos + Elite + Reclaimer T30</small></div><div class="premium-coupon-card"><div class="premium-coupon-copy"><span>CUPOM DE EVENTO</span><b>RESGATE</b><small>${escHtml(couponHint)} • 7 dias Premium + 1 Nanobot de Reparo • Comum.</small></div><div class="premium-coupon-form"><input id="premiumCouponInput" maxlength="32" autocomplete="off" placeholder="DIGITE O CUPOM" /><button class="gold-btn" id="premiumCouponRedeem" type="button">RESGATAR</button></div></div>`;
   if(!products.length){ui.premiumProductGrid.innerHTML='<div class="muted">Catálogo Premium indisponível.</div>';return;}
   ui.premiumProductGrid.innerHTML=products.map(p=>{
     const isLocalPlan=!!premiumLocalPlanById(p.id),owned=p.category==='battle_pass'?!!st.battle_pass_active:false;
