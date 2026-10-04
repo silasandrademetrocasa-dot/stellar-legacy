@@ -2073,3 +2073,10 @@ body[data-quality="high"] .hud-panel{backdrop-filter:blur(7px);-webkit-backdrop-
 .premium-product button{min-height:32px!important;padding:6px 8px!important;font-size:9px!important;}
 @media(max-width:900px){.premium-product-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important;}.premium-coupon-card{grid-template-columns:1fr!important;}}
 @media(max-width:560px){.premium-benefits,.premium-product-grid{grid-template-columns:1fr!important;}.premium-store-modal{width:96vw!important;padding:12px!important;}}
+
+
+/* ===================== V16.7.5 AUX LEVEL PROGRESSION ===================== */
+.pet-level-strip{display:flex;flex-wrap:wrap;gap:7px;margin:8px 0;}
+.pet-level-strip span{display:inline-flex;align-items:center;gap:5px;padding:5px 8px;border:1px solid rgba(87,207,255,.16);border-radius:999px;background:rgba(5,19,32,.72);font-size:9px;font-weight:900;color:#82b7ca;}
+.pet-level-strip b{color:#e8fbff;font-size:10px;}
+.pet-level-progression{border-color:rgba(77,223,215,.26)!important;background:linear-gradient(180deg,rgba(5,29,38,.82),rgba(4,16,27,.9))!important;}

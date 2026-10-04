@@ -1,3 +1,10 @@
+# V16.7.5 — AUCTION / AUTO-COMBATE / X-1 / AUX-9
+- Nova removido do leilão quando o piloto já possui 8 drones.
+- AUTO-COMBATE escolhe somente o NPC mais próximo dentro do alcance laser e visível na tela.
+- NPCs do X-1 perseguem de forma passiva, mas só atacam depois de receber dano.
+- AUX-9 acompanha a velocidade real da nave e ganha aceleração curta para recuperar distância.
+- Progressão AUX-9 adaptada para 20 níveis com capacidade de slots e bônus por nível, sem combustível.
+
 # V16.7.4 — X-1 NEUTRAL + PREMIUM POLISH
 - Em mapas X-1 os NPCs ficam passivos até serem atacados pelo jogador.
 - Ao receber dano, o NPC entra em retaliação e pode perseguir/atacar normalmente.

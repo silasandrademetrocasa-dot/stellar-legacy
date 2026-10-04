@@ -79,8 +79,11 @@ function liveCatalogRow(snapshot,key){
 function premiumDiscountEligible(row){
   return row?.currency==='uridium'&&['ship','laser','generator','drone','extra','pet','pet_gear'].includes(String(row?.kind||''));
 }
+const PET_LASER_CAP_BY_LEVEL=[0,2,2,3,3,4,4,5,5,6,6,7,7,8,9,10,10,11,11,12,12];
+const PET_SHIELD_CAP_BY_LEVEL=[0,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22];
+function petSlotCapacityServer(kind,level){const lv=Math.max(1,Math.min(20,Number(level)||1));return kind==='shield'?PET_SHIELD_CAP_BY_LEVEL[lv]:PET_LASER_CAP_BY_LEVEL[lv];}
 function ensurePetState(state){
-  state.pet ||= {owned:false,level:1,xp:0,xpModelV101:true,laserSlotsUnlocked:0,shieldSlotsUnlocked:0,lasers:[],shields:[],gearsOwned:{guard:false,box:false,ore:false,repair:false,kami:false},activeGear:'off',kamikazeReadyAt:0};
+  state.pet ||= {owned:false,level:1,xp:0,xpModelV175:true,laserSlotsUnlocked:0,shieldSlotsUnlocked:0,lasers:[],shields:[],gearsOwned:{guard:false,box:false,ore:false,repair:false,kami:false},activeGear:'off',kamikazeReadyAt:0};
   state.pet.gearsOwned ||= {guard:false,box:false,ore:false,repair:false,kami:false};
   state.pet.lasers ||= [];state.pet.shields ||= [];
   return state.pet;
@@ -95,7 +98,7 @@ function applyLiveGrant(state,row){
   if(kind==='drone'){state.drones ||= [];if(state.drones.length>=8)throw Object.assign(new Error('Limite de 8 drones atingido.'),{status:409});state.drones.push({id:`d_${Date.now()}_${randomUUID().slice(0,6)}`,type:id,slots:Array(Math.max(1,Number(grant.slots)||1)).fill(null)});return;}
   if(kind==='ammo'){state.ammo ||= {};state.ammo[id]=(Number(state.ammo[id])||0)+qty;return;}
   if(kind==='rocket'){state.rockets ||= {};state.rockets[id]=(Number(state.rockets[id])||0)+qty;return;}
-  if(kind==='pet_base'){const pet=ensurePetState(state);if(pet.owned)throw Object.assign(new Error('AUX-9 já adquirido.'),{status:409});pet.owned=true;pet.level=Math.max(1,Number(pet.level)||1);pet.laserSlotsUnlocked=Math.max(1,Number(pet.laserSlotsUnlocked)||1);pet.shieldSlotsUnlocked=Math.max(1,Number(pet.shieldSlotsUnlocked)||1);pet.lasers=pet.lasers.length?pet.lasers:[null];pet.shields=pet.shields.length?pet.shields:[null];return;}
+  if(kind==='pet_base'){const pet=ensurePetState(state);if(pet.owned)throw Object.assign(new Error('AUX-9 já adquirido.'),{status:409});pet.owned=true;pet.level=Math.max(1,Number(pet.level)||1);pet.laserSlotsUnlocked=Math.max(1,Number(pet.laserSlotsUnlocked)||1);pet.shieldSlotsUnlocked=Math.max(2,Number(pet.shieldSlotsUnlocked)||2);pet.lasers=pet.lasers.length?pet.lasers:[null];pet.shields=pet.shields.length?pet.shields:[null,null];return;}
   if(kind==='pet_gear'){const pet=ensurePetState(state);if(!pet.owned)throw Object.assign(new Error('Adquira o AUX-9 primeiro.'),{status:409});if(pet.gearsOwned[id])throw Object.assign(new Error('Módulo já adquirido.'),{status:409});pet.gearsOwned[id]=true;return;}
   throw Object.assign(new Error('Produto ainda não habilitado para compra autoritativa nesta etapa.'),{status:409});
 }
@@ -274,7 +277,7 @@ async function accountUser(sb, user, preferred = '') {
   return { id: user.id, email: user.email, callsign };
 }
 
-app.get('/health', (req, res) => res.json({ ok: true, game: 'Stellar Legacy', version: '16.7.4', universe: 'shared' }));
+app.get('/health', (req, res) => res.json({ ok: true, game: 'Stellar Legacy', version: '16.7.5', universe: 'shared' }));
 
 
 app.get('/api/config', (req, res) => {
@@ -290,7 +293,7 @@ app.get('/api/config', (req, res) => {
 
 app.get('/api/meta', (req, res) => res.json({
   name: 'Stellar Legacy',
-  version: '16.7.4',
+  version: '16.7.5',
   authReady: Boolean(SUPABASE_URL && SUPABASE_KEY),
   diagnostics: configStatus(),
   features: ['login', 'cloud_save', 'factions', 'safe_zone', 'shop', 'owned_ships', 'equipment_slots', 'inventory', 'drones', 'ammo', 'rockets', 'expanded_expedition_maps', 'cargo_hold', 'ore_trading', 'npc_cargo_boxes', 'npc_respawn', 'minimap_navigation', 'waypoints', 'landmark_discovery', 'combat_fx', 'pet_modules', 'auto_buy_cpu', 'v8_asset_identity', 'mission_control_v93', 'mission_acceptance_tracking', 'expanded_enemy_density', 'online_player_presence', 'real_player_auction', 'rank_nameplates_v12', 'clans_v12', 'clan_vault_v12', 'premium_shop_v12', 'battle_pass_paid_v12', 'premium_subscription_v12', 'clan_daily_economy_v12', 'portal_neutral_zone_v12', 'base_only_equipment_v12', 'single_session_v1214', 'manual_login_v141', 'account_bound_save_v141', 'unique_callsign_v141', 'premium_auto_combat_v141', 'shared_universe_v15', 'authoritative_npcs_v15', 'shared_ores_v15', 'shared_events_v15', 'websocket_world_v15', 'npc_contribution_v15', 'realtime_player_socket_v151', 'remote_laser_fx_v151', 'remote_aux9_v151', 'low_latency_world_v151', 'live_ops_v16', 'server_authoritative_shop_v16', 'supabase_event_schedule_v16', 'economy_guard_v161', 'server_auto_buy_v161', 'server_trader_v161', 'server_pet_slots_v161', 'server_materializer_v161', 'server_quantum_cores_v161', 'chat_dock_v162', 'drone_designers_v163', 'designer_sets_v163', 'nexus_eclipse_designer_drops_v163', 'global_chat_v162', 'clan_chat_v162', 'private_chat_v162', 'bottom_hud_reflow_v162', 'ship_designers_v165', 'aux_designers_v165', 'designer_ship_abilities_v165', 'event_designer_drops_v165', 'social_minimap_v165', 'realtime_designer_visuals_v165'],
@@ -513,7 +516,7 @@ app.post('/api/economy/action', requireUser, asyncRoute(async (req,res)=>{
     }
     else if(action==='unlock_pet_slot'){
       const kind=String(payload.kind)==='shield'?'shield':'laser',pet=ensurePetState(state);if(!pet.owned)throw Object.assign(new Error('Adquira o AUX-9 primeiro.'),{status:409});
-      const key=kind==='laser'?'laserSlotsUnlocked':'shieldSlotsUnlocked',listKey=kind==='laser'?'lasers':'shields',current=Math.max(1,Number(pet[key])||1),next=current+1,level=Math.max(1,Number(pet.level)||1);if(next>15)throw Object.assign(new Error('Limite de 15 slots atingido.'),{status:409});if(next>level)throw Object.assign(new Error(`AUX-9 precisa estar no nível ${next}.`),{status:409});
+      const key=kind==='laser'?'laserSlotsUnlocked':'shieldSlotsUnlocked',listKey=kind==='laser'?'lasers':'shields',current=Math.max(kind==='shield'?2:1,Number(pet[key])||(kind==='shield'?2:1)),next=current+1,level=Math.max(1,Math.min(20,Number(pet.level)||1)),capacity=petSlotCapacityServer(kind,level);if(next>capacity)throw Object.assign(new Error(`Nível ${level}: limite atual de ${capacity} slots de ${kind==='laser'?'laser':'escudo'}.`),{status:409});
       const row=liveCatalogRow(snapshot,`pet_slot:${next}`);if(!row)throw Object.assign(new Error('Preço do slot não está publicado no LIVE OPS.'),{status:404});const cost=Math.max(0,Math.round(Number(row.price)||0));debitServer(state,cost,'uridium');pet[key]=next;pet[listKey]=Array.isArray(pet[listKey])?pet[listKey]:[];while(pet[listKey].length<next)pet[listKey].push(null);info={action,kind,slot:next,cost,currency:'uridium'};
     }
     else if(action==='buy_quantum_cores'){
@@ -603,7 +606,7 @@ app.put('/api/save', requireUser, asyncRoute(async (req, res) => {
   res.json({ ok: true, updated_at, statePatch });
 }));
 
-app.get('/api/world/status', (req, res) => res.json({ ok: true, version: '16.7.4', ...sharedUniverse.stats() }));
+app.get('/api/world/status', (req, res) => res.json({ ok: true, version: '16.7.5', ...sharedUniverse.stats() }));
 
 app.get('*', (req, res) => res.sendFile(path.join(__dirname, '../public/index.html')));
 

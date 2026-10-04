@@ -1,6 +1,6 @@
 {
   "name": "stellar-legacy",
-  "version": "16.7.4",
+  "version": "16.7.5",
   "type": "module",
   "scripts": {
     "start": "node server/index.js",
@@ -14,5 +14,5 @@
   "engines": {
     "node": ">=18"
   },
-  "release": "x1-neutral-premium-polish-v16-7-4"
+  "release": "auction-auto-combat-x1-chase-aux-progression-v16-7-5"
 }
