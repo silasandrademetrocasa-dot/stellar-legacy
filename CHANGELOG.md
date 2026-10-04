@@ -1,3 +1,14 @@
+## V17.4.0 — PERFORMANCE + MOBILE PASS
+
+- Novo modo AUTO de qualidade com detecção de celular/desktop, memória, threads e economia de dados.
+- Perfil AUTO ajusta resolução, FPS, partículas e efeitos durante a sessão conforme desempenho real.
+- Assets V17 convertidos de PNG para WebP com transparência, reduzindo drasticamente o peso do pacote e o download inicial.
+- Preload inteligente: carrega somente assets essenciais no boot e faz lazy-load de naves, drones e equipamentos quando necessário.
+- Cache de imagens agora possui limite e descarte LRU para reduzir consumo de memória em sessões longas.
+- Renderização fica suspensa quando a aba está em segundo plano.
+- Mobile Pass remove blur/sombras pesadas, compacta modais e melhora toque sem mexer na lógica de combate.
+- Respeita a preferência do sistema por redução de movimento.
+
 ## V17.3.0 — FX REVAMP
 - Lasers agora possuem assinatura visual diferente por munição (PLS-1/2/3/4 e SIP-2).
 - PLS-4 recebeu plasma pulsante; SIP-2 recebeu efeito de drenagem energética.

@@ -6,7 +6,7 @@
 <meta content="width=device-width,initial-scale=1,user-scalable=no" name="viewport"/>
 <meta content="#030816" name="theme-color"/>
 <title>Stellar Legacy</title>
-<link href="/style.css?v=17.3.0" rel="stylesheet"/>
+<link href="/style.css?v=17.4.0" rel="stylesheet"/>
 </head>
 <body>
 <div id="app">
@@ -575,10 +575,12 @@
       <section class="settings-section">
         <div class="settings-title"><div><b>QUALIDADE DO JOGO</b><small>Altere resolução, efeitos e uso de dados/memória.</small></div><span id="qualityCurrentBadge">ALTA</span></div>
         <div class="quality-grid" id="qualityButtons">
-          <button class="quality-card" data-quality="high"><b>ALTA</b><span>60 FPS • resolução nativa • sprites HD • fundo vivo • efeitos completos</span></button>
+          <button class="quality-card" data-quality="auto"><b>AUTO</b><span>Detecta celular/PC e ajusta FPS, resolução, efeitos e memória automaticamente.</span></button>
+          <button class="quality-card" data-quality="high"><b>ALTA</b><span>60 FPS • sprites HD • fundo vivo • efeitos completos</span></button>
           <button class="quality-card" data-quality="medium"><b>MÉDIA</b><span>45 FPS • resolução equilibrada • efeitos reduzidos</span></button>
           <button class="quality-card" data-quality="low"><b>BAIXA</b><span>30 FPS • resolução econômica • menos efeitos e downloads</span></button>
         </div>
+        <div class="performance-hint" id="performanceHint">Analisando dispositivo...</div>
       </section>
       <section class="settings-section">
         <div class="settings-title"><div><b>ÁUDIO</b><small>Laser, mísseis, impactos, explosões, alertas e efeitos do jogo.</small></div><span id="audioVolumeValue">70%</span></div>
@@ -776,6 +778,6 @@
   </div>
 </div>
 </div>
-<script src="/game.js?v=17.3.0" type="module"></script>
+<script src="/game.js?v=17.4.0" type="module"></script>
 </body>
 </html>

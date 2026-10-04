@@ -1,3 +1,7 @@
+# Stellar Legacy V17.4.0 — Performance + Mobile Pass
+
+A V17.4 reduz download e consumo de memória/GPU, adiciona qualidade AUTO adaptativa e melhora o uso em celulares sem alterar gameplay. Veja `PERFORMANCE_V17_4.md`.
+
 ## V16.7.8 — AUX EQUIPMENT + SHIELD SUPPORT
 - Corrigida a aba de equipamentos do AUX-9 no Hangar.
 - Escudos equipados no AUX-9 agora somam escudo à nave como suporte, igual aos drones.

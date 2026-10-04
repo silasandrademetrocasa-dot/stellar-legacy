@@ -1,7 +1,7 @@
-import { FACTIONS, SHIPS, ITEMS, LASER_AMMO, ROCKETS, NPC_TYPES, MAPS, RESOURCES } from './data.js?v=17.3.0';
-import { GAME_ASSETS } from './assets/v17/manifest.js?v=17.3.0';
-import { signUp, signIn, requestPasswordReset, restorePasswordRecoveryFromUrl, restoreSession, signOutLocal, checkGameSession, endGameSession, getUser, getSessionCredentials, loadCloudSave, saveCloudSave, updateCallsign, updatePassword, loadRankings, loadAuctionBids, saveAuctionBidOnline, markAuctionBidStatusOnline, loadAuctionMarket, upsertPlayerPresenceOnline, loadMapPresenceOnline, removePlayerPresenceOnline, queuePvpAttackOnline, consumePvpDamageEventsOnline, syncArenaProfileOnline, loadArenaState, loadArenaDailyRewardStatus, claimArenaDailyReward, loadArenaOpponents, loadArenaHistory, arenaAttackOnline, listClansOnline, loadMyClanOnline, createClanOnline, joinClanOnline, leaveClanOnline, transferClanCreditsOnline, claimClanCreditGrantsOnline, recordClanAlienKillOnline, getPremiumShopOnline, testPurchasePremiumOnline, loadWarfrontStateOnline, hitWorldBossOnline, claimWorldBossRewardOnline, declareClanWarOnline, recordClanWarScoreOnline, loadLiveOpsOnline, purchaseLiveCatalogOnline, economyActionOnline, getChatHistoryOnline, sendChatMessageOnline, getMyDesignersOnline, setDesignLoadoutOnline, claimGateDroneDesignOnline, claimEventDesignerOnline } from './api.js?v=17.3.0';
-import { SharedUniverseClient } from './world.js?v=17.3.0';
+import { FACTIONS, SHIPS, ITEMS, LASER_AMMO, ROCKETS, NPC_TYPES, MAPS, RESOURCES } from './data.js?v=17.4.0';
+import { GAME_ASSETS } from './assets/v17/manifest.js?v=17.4.0';
+import { signUp, signIn, requestPasswordReset, restorePasswordRecoveryFromUrl, restoreSession, signOutLocal, checkGameSession, endGameSession, getUser, getSessionCredentials, loadCloudSave, saveCloudSave, updateCallsign, updatePassword, loadRankings, loadAuctionBids, saveAuctionBidOnline, markAuctionBidStatusOnline, loadAuctionMarket, upsertPlayerPresenceOnline, loadMapPresenceOnline, removePlayerPresenceOnline, queuePvpAttackOnline, consumePvpDamageEventsOnline, syncArenaProfileOnline, loadArenaState, loadArenaDailyRewardStatus, claimArenaDailyReward, loadArenaOpponents, loadArenaHistory, arenaAttackOnline, listClansOnline, loadMyClanOnline, createClanOnline, joinClanOnline, leaveClanOnline, transferClanCreditsOnline, claimClanCreditGrantsOnline, recordClanAlienKillOnline, getPremiumShopOnline, testPurchasePremiumOnline, loadWarfrontStateOnline, hitWorldBossOnline, claimWorldBossRewardOnline, declareClanWarOnline, recordClanWarScoreOnline, loadLiveOpsOnline, purchaseLiveCatalogOnline, economyActionOnline, getChatHistoryOnline, sendChatMessageOnline, getMyDesignersOnline, setDesignLoadoutOnline, claimGateDroneDesignOnline, claimEventDesignerOnline } from './api.js?v=17.4.0';
+import { SharedUniverseClient } from './world.js?v=17.4.0';
 
 const canvas = document.querySelector('#game');
 const ctx = canvas.getContext('2d');
@@ -10,13 +10,34 @@ const mm = minimap.getContext('2d');
 const $ = (s) => document.querySelector(s);
 
 const QUALITY_STORAGE_KEY='stellar_quality_mode';
+const DEVICE_CAPS=(()=>{
+  const ua=String(navigator.userAgent||'');
+  const coarse=matchMedia?.('(pointer: coarse)')?.matches||false;
+  const mobile=/Android|iPhone|iPad|iPod|Mobile/i.test(ua)||coarse||innerWidth<=820;
+  const memory=Number(navigator.deviceMemory)||0;
+  const cores=Number(navigator.hardwareConcurrency)||0;
+  const saveData=!!navigator.connection?.saveData;
+  const reducedMotion=matchMedia?.('(prefers-reduced-motion: reduce)')?.matches||false;
+  return {mobile,memory,cores,saveData,reducedMotion};
+})();
 const QUALITY_PROFILES={
-  high:{label:'ALTA',dpr:2.35,fps:60,background:true,backgroundAlpha:.72,stars:1,grid:false,fx:true,particles:120,preload:'all',saturation:1.16,contrast:1.07},
-  medium:{label:'MÉDIA',dpr:1.35,fps:45,background:true,backgroundAlpha:.48,stars:.58,grid:false,fx:true,particles:55,preload:'core',saturation:1.03,contrast:1.02},
-  low:{label:'BAIXA',dpr:1,fps:30,background:false,backgroundAlpha:0,stars:.2,grid:false,fx:false,particles:18,preload:'minimal',saturation:1,contrast:1},
+  high:{label:'ALTA',dpr:2,fps:60,background:true,backgroundAlpha:.70,stars:1,grid:false,fx:true,particles:105,preload:'smart',saturation:1.14,contrast:1.06,assetCap:54},
+  medium:{label:'MÉDIA',dpr:1.30,fps:45,background:true,backgroundAlpha:.46,stars:.52,grid:false,fx:true,particles:48,preload:'core',saturation:1.03,contrast:1.02,assetCap:34},
+  low:{label:'BAIXA',dpr:.95,fps:30,background:false,backgroundAlpha:0,stars:.16,grid:false,fx:false,particles:14,preload:'minimal',saturation:1,contrast:1,assetCap:22},
 };
-let qualityMode=(()=>{try{const v=localStorage.getItem(QUALITY_STORAGE_KEY);return QUALITY_PROFILES[v]?v:'high';}catch{return 'high';}})();
-function qualityProfile(){return QUALITY_PROFILES[qualityMode]||QUALITY_PROFILES.high;}
+function initialAutoQuality(){
+  if(DEVICE_CAPS.saveData)return 'low';
+  if(DEVICE_CAPS.mobile&&(innerWidth<=620||(DEVICE_CAPS.memory&&DEVICE_CAPS.memory<=4)||(DEVICE_CAPS.cores&&DEVICE_CAPS.cores<=4)))return 'low';
+  if(DEVICE_CAPS.mobile)return 'medium';
+  if((DEVICE_CAPS.memory&&DEVICE_CAPS.memory<=4)||(DEVICE_CAPS.cores&&DEVICE_CAPS.cores<=4))return 'medium';
+  return 'high';
+}
+const AUTO_QUALITY_CEILING=initialAutoQuality();
+let autoQualityResolved=AUTO_QUALITY_CEILING;
+let qualityMode=(()=>{try{const v=localStorage.getItem(QUALITY_STORAGE_KEY);return v==='auto'||QUALITY_PROFILES[v]?v:'auto';}catch{return 'auto';}})();
+function resolvedQualityMode(){return qualityMode==='auto'?autoQualityResolved:qualityMode;}
+function qualityProfile(){return QUALITY_PROFILES[resolvedQualityMode()]||QUALITY_PROFILES.high;}
+function qualityBadgeLabel(){return qualityMode==='auto'?`AUTO • ${qualityProfile().label}`:qualityProfile().label;}
 
 const AUDIO_STORAGE_KEY='stellar_audio_settings_v1';
 let audioEnabled=true;
@@ -87,12 +108,13 @@ addEventListener('pointerdown',unlockGameAudio,{passive:true});
 addEventListener('keydown',unlockGameAudio);
 function qualityShouldPreload(path){
   const mode=qualityProfile().preload;
-  if(mode==='all')return true;
+  if(mode==='smart')return /\/(branding|backgrounds|ammo|resources|loot)\//.test(path);
   if(mode==='core')return /\/(branding|backgrounds|ammo)\//.test(path);
   return /\/branding\//.test(path);
 }
 
 const ASSET_IMAGES = new Map();
+const ASSET_TOUCH = new Map();
 function flattenAssetPaths(value,out=[]){
   if(!value)return out;
   if(typeof value==='string')out.push(value);
@@ -100,17 +122,34 @@ function flattenAssetPaths(value,out=[]){
   else if(typeof value==='object')Object.values(value).forEach(v=>flattenAssetPaths(v,out));
   return out;
 }
+function coreAssetPath(path){return /\/(branding|backgrounds|ammo)\//.test(path);}
 function requestAssetImage(path){
   if(!path)return null;
   let img=ASSET_IMAGES.get(path);
-  if(img)return img;
-  img=new Image();img.decoding='async';img.loading='eager';try{img.fetchPriority=qualityMode==='high'?'high':'auto';}catch{}
-  ASSET_IMAGES.set(path,img);img.src=path;
+  if(img){ASSET_TOUCH.set(path,performance.now());return img;}
+  img=new Image();img.decoding='async';img.loading=coreAssetPath(path)?'eager':'lazy';
+  try{img.fetchPriority=coreAssetPath(path)?'high':'low';}catch{}
+  ASSET_IMAGES.set(path,img);ASSET_TOUCH.set(path,performance.now());img.src=path;
   img.onerror=()=>console.warn('Asset não carregado:',path);
   return img;
 }
+function trimAssetCache(){
+  const cap=qualityProfile().assetCap||32;if(ASSET_IMAGES.size<=cap)return;
+  const entries=[...ASSET_IMAGES.keys()].filter(path=>!coreAssetPath(path)).sort((a,b)=>(ASSET_TOUCH.get(a)||0)-(ASSET_TOUCH.get(b)||0));
+  while(ASSET_IMAGES.size>cap&&entries.length){const path=entries.shift();ASSET_IMAGES.delete(path);ASSET_TOUCH.delete(path);}
+}
 function preloadAssets(){
   [...new Set(flattenAssetPaths(GAME_ASSETS))].filter(qualityShouldPreload).forEach(requestAssetImage);
+  setTimeout(trimAssetCache,1500);
+}
+function preloadActiveGameplayAssets(){
+  if(!progress)return;
+  requestAssetImage(currentMapBackground());
+  requestAssetImage(shipMapAsset(progress.activeShipId));
+  requestAssetImage(shipCardAsset(progress.activeShipId));
+  requestAssetImage(droneMapAsset(progress?.pet?.level>=10?'petElite':'pet'));
+  for(const d of progress.drones||[])requestAssetImage(droneMapAsset(d.type));
+  setTimeout(trimAssetCache,1200);
 }
 function assetImage(path){return path ? requestAssetImage(path) : null;}
 function drawSprite(path,x,y,maxSize,rotation=0,alpha=1){
@@ -187,7 +226,7 @@ const ui = {
   shopBtn: $('#shopBtn'), shopModal: $('#shopModal'), closeShop: $('#closeShop'), shopTabs: $('#shopTabs'), shopGrid: $('#shopGrid'), shopCredits: $('#shopCredits'), shopStellarium: $('#shopStellarium'),
   hangarBtn: $('#hangarBtn'), hangarModal: $('#hangarModal'), closeHangar: $('#closeHangar'), hangarTabs: $('#hangarTabs'), hangarContent: $('#hangarContent'), hangarShipName: $('#hangarShipName'),
   bottomHudDock: $('#bottomHudDock'), chatDock: $('#chatDock'), chatToggle: $('#chatToggle'), chatBody: $('#chatBody'), chatTabs: $('#chatTabs'), chatStatus: $('#chatStatus'), chatChannelChip: $('#chatChannelChip'), chatPrivateRow: $('#chatPrivateRow'), chatPrivateCallsign: $('#chatPrivateCallsign'), chatPrivateOpen: $('#chatPrivateOpen'), chatFeed: $('#chatFeed'), chatForm: $('#chatForm'), chatInput: $('#chatInput'), chatSend: $('#chatSend'),
-  loginModal: $('#loginModal'), loginTabBtn: $('#loginTabBtn'), registerTabBtn: $('#registerTabBtn'), loginForm: $('#loginForm'), registerForm: $('#registerForm'), recoveryForm: $('#recoveryForm'), forgotPasswordBtn: $('#forgotPasswordBtn'), recoveryPassword: $('#recoveryPassword'), recoveryPasswordConfirm: $('#recoveryPasswordConfirm'), loginEmail: $('#loginEmail'), loginPassword: $('#loginPassword'), registerCallsign: $('#registerCallsign'), registerEmail: $('#registerEmail'), registerPassword: $('#registerPassword'), authMessage: $('#authMessage'), userLabel: $('#userLabel'), rankChip: $('#rankChip'), syncLabel: $('#syncLabel'), worldSyncLabel: $('#worldSyncLabel'), logoutBtn: $('#logoutBtn'), safeZoneLabel: $('#safeZoneLabel'), cargoUsed: $('#cargoUsed'), cargoMax: $('#cargoMax'), cargoBtn: $('#cargoBtn'), cargoModal: $('#cargoModal'), closeCargo: $('#closeCargo'), cargoSummary: $('#cargoSummary'), cargoGrid: $('#cargoGrid'), sellAllCargo: $('#sellAllCargo'), configBtn: $('#configBtn'), configModal: $('#configModal'), closeConfig: $('#closeConfig'), qualityButtons: $('#qualityButtons'), qualityCurrentBadge: $('#qualityCurrentBadge'), audioEnabledToggle: $('#audioEnabledToggle'), audioVolumeRange: $('#audioVolumeRange'), audioVolumeValue: $('#audioVolumeValue'), hudSettingsGrid: $('#hudSettingsGrid'), settingsTabs: $('#settingsTabs'), settingsGamePanel: $('#settingsGamePanel'), settingsRankingPanel: $('#settingsRankingPanel'), settingsAccountPanel: $('#settingsAccountPanel'), rankingRefreshBtn: $('#rankingRefreshBtn'), rankingMyPatent: $('#rankingMyPatent'), rankingPatentGuide: $('#rankingPatentGuide'), rankingPoints: $('#rankingPoints'), rankingArena: $('#rankingArena'), rankingAliens: $('#rankingAliens'), rankingGg: $('#rankingGg'), rankingUpdated: $('#rankingUpdated'), accountEmail: $('#accountEmail'), accountCallsign: $('#accountCallsign'), accountSaveName: $('#accountSaveName'), accountNameStatus: $('#accountNameStatus'), accountNewPassword: $('#accountNewPassword'), accountConfirmPassword: $('#accountConfirmPassword'), accountSavePassword: $('#accountSavePassword'), accountPasswordStatus: $('#accountPasswordStatus'), accountSummary: $('#accountSummary'),
+  loginModal: $('#loginModal'), loginTabBtn: $('#loginTabBtn'), registerTabBtn: $('#registerTabBtn'), loginForm: $('#loginForm'), registerForm: $('#registerForm'), recoveryForm: $('#recoveryForm'), forgotPasswordBtn: $('#forgotPasswordBtn'), recoveryPassword: $('#recoveryPassword'), recoveryPasswordConfirm: $('#recoveryPasswordConfirm'), loginEmail: $('#loginEmail'), loginPassword: $('#loginPassword'), registerCallsign: $('#registerCallsign'), registerEmail: $('#registerEmail'), registerPassword: $('#registerPassword'), authMessage: $('#authMessage'), userLabel: $('#userLabel'), rankChip: $('#rankChip'), syncLabel: $('#syncLabel'), worldSyncLabel: $('#worldSyncLabel'), logoutBtn: $('#logoutBtn'), safeZoneLabel: $('#safeZoneLabel'), cargoUsed: $('#cargoUsed'), cargoMax: $('#cargoMax'), cargoBtn: $('#cargoBtn'), cargoModal: $('#cargoModal'), closeCargo: $('#closeCargo'), cargoSummary: $('#cargoSummary'), cargoGrid: $('#cargoGrid'), sellAllCargo: $('#sellAllCargo'), configBtn: $('#configBtn'), configModal: $('#configModal'), closeConfig: $('#closeConfig'), qualityButtons: $('#qualityButtons'), qualityCurrentBadge: $('#qualityCurrentBadge'), performanceHint: $('#performanceHint'), audioEnabledToggle: $('#audioEnabledToggle'), audioVolumeRange: $('#audioVolumeRange'), audioVolumeValue: $('#audioVolumeValue'), hudSettingsGrid: $('#hudSettingsGrid'), settingsTabs: $('#settingsTabs'), settingsGamePanel: $('#settingsGamePanel'), settingsRankingPanel: $('#settingsRankingPanel'), settingsAccountPanel: $('#settingsAccountPanel'), rankingRefreshBtn: $('#rankingRefreshBtn'), rankingMyPatent: $('#rankingMyPatent'), rankingPatentGuide: $('#rankingPatentGuide'), rankingPoints: $('#rankingPoints'), rankingArena: $('#rankingArena'), rankingAliens: $('#rankingAliens'), rankingGg: $('#rankingGg'), rankingUpdated: $('#rankingUpdated'), accountEmail: $('#accountEmail'), accountCallsign: $('#accountCallsign'), accountSaveName: $('#accountSaveName'), accountNameStatus: $('#accountNameStatus'), accountNewPassword: $('#accountNewPassword'), accountConfirmPassword: $('#accountConfirmPassword'), accountSavePassword: $('#accountSavePassword'), accountPasswordStatus: $('#accountPasswordStatus'), accountSummary: $('#accountSummary'),
 };
 
 const SAVE_KEY_PREFIX = 'stellarLegacyV5Save';
@@ -1761,13 +1800,22 @@ function applyHudVisibility(){
   requestAnimationFrame(layoutHudPanels);
 }
 function setHudVisibility(key,value){if(!(key in HUD_VISIBILITY_DEFAULT))return;hudVisibility[key]=!!value;saveHudVisibility();applyHudVisibility();renderSettings();updatePetFloat();renderGateHud();layoutHudPanels();}
+function applyAutoQualityResolution(next,announce=false){
+  if(!QUALITY_PROFILES[next]||autoQualityResolved===next)return;
+  autoQualityResolved=next;
+  document.body.dataset.quality=resolvedQualityMode();
+  trimAssetCache();resize();renderSettings();
+  if(announce)showToast(`AUTO ajustou para ${qualityProfile().label}`);
+}
 function applyQualityMode(mode,persist=true){
-  if(!QUALITY_PROFILES[mode])mode='high';qualityMode=mode;
+  if(mode!=='auto'&&!QUALITY_PROFILES[mode])mode='auto';qualityMode=mode;
+  if(mode==='auto')autoQualityResolved=initialAutoQuality();
   if(persist){try{localStorage.setItem(QUALITY_STORAGE_KEY,mode);}catch{}}
-  document.body.dataset.quality=mode;
-  for(const path of [...ASSET_IMAGES.keys()])if(!qualityShouldPreload(path))ASSET_IMAGES.delete(path);
-  preloadAssets();resize();renderSettings();
-  showToast(`Qualidade ${QUALITY_PROFILES[mode].label} ativada`);
+  document.body.dataset.quality=resolvedQualityMode();
+  document.body.dataset.device=DEVICE_CAPS.mobile?'mobile':'desktop';
+  for(const path of [...ASSET_IMAGES.keys()])if(!qualityShouldPreload(path)&&!coreAssetPath(path)){ASSET_IMAGES.delete(path);ASSET_TOUCH.delete(path);}
+  preloadAssets();if(progress)preloadActiveGameplayAssets();resize();renderSettings();
+  showToast(mode==='auto'?`Modo AUTO • ${qualityProfile().label}`:`Qualidade ${qualityProfile().label} ativada`);
 }
 let settingsTab='game';
 let rankingsCache=[];
@@ -1807,9 +1855,16 @@ function myRankingRow(){const me=getUser()?.id;return rankingsCache.find(r=>r.id
 function updateRankChip(){if(!ui.rankChip)return;ui.rankChip.textContent=clanRuntime.state?.is_admin?'ADMINISTRADOR':(myRankingRow()?.rank_title||'Piloto Básico');}
 function renderSettings(){
   if(!ui.configModal)return;
-document.body.dataset.quality=qualityMode;
-  if(ui.qualityCurrentBadge)ui.qualityCurrentBadge.textContent=qualityProfile().label;
+document.body.dataset.quality=resolvedQualityMode();
+  if(ui.qualityCurrentBadge)ui.qualityCurrentBadge.textContent=qualityBadgeLabel();
   ui.qualityButtons?.querySelectorAll('[data-quality]').forEach(b=>b.classList.toggle('active',b.dataset.quality===qualityMode));
+  if(ui.performanceHint){
+    const bits=[DEVICE_CAPS.mobile?'MOBILE':'DESKTOP'];
+    if(DEVICE_CAPS.memory)bits.push(`${DEVICE_CAPS.memory} GB RAM`);
+    if(DEVICE_CAPS.cores)bits.push(`${DEVICE_CAPS.cores} THREADS`);
+    if(DEVICE_CAPS.saveData)bits.push('ECONOMIA DE DADOS');
+    ui.performanceHint.textContent=`${bits.join(' • ')} • perfil efetivo ${qualityProfile().label}`;
+  }
   if(ui.audioEnabledToggle)ui.audioEnabledToggle.checked=audioEnabled;
   if(ui.audioVolumeRange)ui.audioVolumeRange.value=String(Math.round(audioVolume*100));
   if(ui.audioVolumeValue)ui.audioVolumeValue.textContent=`${Math.round(audioVolume*100)}%`;
@@ -5609,9 +5664,9 @@ function startLoadedGame(){
   const loadedGateKey=gateKeyForMap(progress.mapId);if(loadedGateKey&&!progress.galaxyGate[loadedGateKey]?.run?.active){progress.mapId='x1';progress.territoryFaction=progress.profile.faction;}else if(loadedGateKey)progress.galaxyGate.selected=loadedGateKey;
   const savedLocation=savedLocationForCurrentMap(),savedX=savedLocation?.x??null,savedY=savedLocation?.y??null;state.currentMap=MAPS[progress.mapId]||MAPS.x1;state.radarRange=mapRadarRange();player.hp=progress.hp||1;player.shield=progress.shield||0;computeStats(true);player.hp=Math.min(player.maxHp,progress.hp??player.maxHp);player.shield=Math.min(player.maxShield,progress.shield??player.maxShield);
   if(isGalaxyGateMap()){
-    const gd=galaxyGateDef();player.x=savedX??MAPS[gd.mapId].world.w/2;player.y=savedY??MAPS[gd.mapId].world.h/2;player.tx=player.x;player.ty=player.y;petRuntime.x=player.x+82;petRuntime.y=player.y+64;petRuntime.tx=petRuntime.x;petRuntime.ty=petRuntime.y;petRuntime.roamX=null;petRuntime.roamY=null;petRuntime.nextRoamAt=0;state.camera.x=player.x;state.camera.y=player.y;state.target=null;state.loot=[];state.fx=[];state.rocketFx=[];state.ores=[];state.landmarks=[];state.enemyRespawns=[];state.oreRespawns=[];restoreAlphaGateEnemies();const a=alphaGate(),def=galaxyGateDef().rounds[a.run.round-1],alive=alphaRemainingCount(),now=Date.now();if(a.run.waveIndex<def.waves.length&&!a.run.nextWaveAt){a.run.nextWaveAt=now+GALAXY_ALPHA_WAVE_INTERVAL_MS;}else if(a.run.waveIndex>=def.waves.length&&alive===0&&a.run.round<galaxyGateDef().rounds.length&&!a.run.nextRoundAt){a.run.nextRoundAt=now+GALAXY_ALPHA_ROUND_INTERVAL_MS;}renderAll();saveGame();return;
+    const gd=galaxyGateDef();player.x=savedX??MAPS[gd.mapId].world.w/2;player.y=savedY??MAPS[gd.mapId].world.h/2;player.tx=player.x;player.ty=player.y;petRuntime.x=player.x+82;petRuntime.y=player.y+64;petRuntime.tx=petRuntime.x;petRuntime.ty=petRuntime.y;petRuntime.roamX=null;petRuntime.roamY=null;petRuntime.nextRoamAt=0;state.camera.x=player.x;state.camera.y=player.y;state.target=null;state.loot=[];state.fx=[];state.rocketFx=[];state.ores=[];state.landmarks=[];state.enemyRespawns=[];state.oreRespawns=[];restoreAlphaGateEnemies();const a=alphaGate(),def=galaxyGateDef().rounds[a.run.round-1],alive=alphaRemainingCount(),now=Date.now();if(a.run.waveIndex<def.waves.length&&!a.run.nextWaveAt){a.run.nextWaveAt=now+GALAXY_ALPHA_WAVE_INTERVAL_MS;}else if(a.run.waveIndex>=def.waves.length&&alive===0&&a.run.round<galaxyGateDef().rounds.length&&!a.run.nextRoundAt){a.run.nextRoundAt=now+GALAXY_ALPHA_ROUND_INTERVAL_MS;}renderAll();preloadActiveGameplayAssets();saveGame();return;
   }
-  const spawnBase=currentBasePoint();player.x=savedX??(progress.mapId==='x1'?spawnBase.x:400);player.y=savedY??(progress.mapId==='x1'?spawnBase.y:state.currentMap.world.h/2);player.tx=player.x;player.ty=player.y;petRuntime.x=player.x+82;petRuntime.y=player.y+64;petRuntime.tx=petRuntime.x;petRuntime.ty=petRuntime.y;petRuntime.roamX=null;petRuntime.roamY=null;petRuntime.nextRoamAt=0;state.camera.x=player.x;state.camera.y=player.y;state.target=null;state.loot=[];state.fx=[];state.rocketFx=[];createLandmarks();state.ores=[];state.enemies=[];state.enemyRespawns=[];state.oreRespawns=[];galaxyEventRuntime.mapKey=null;sharedUniverseRuntime.event=null;joinSharedUniverse();renderAll();saveGame();
+  const spawnBase=currentBasePoint();player.x=savedX??(progress.mapId==='x1'?spawnBase.x:400);player.y=savedY??(progress.mapId==='x1'?spawnBase.y:state.currentMap.world.h/2);player.tx=player.x;player.ty=player.y;petRuntime.x=player.x+82;petRuntime.y=player.y+64;petRuntime.tx=petRuntime.x;petRuntime.ty=petRuntime.y;petRuntime.roamX=null;petRuntime.roamY=null;petRuntime.nextRoamAt=0;state.camera.x=player.x;state.camera.y=player.y;state.target=null;state.loot=[];state.fx=[];state.rocketFx=[];createLandmarks();state.ores=[];state.enemies=[];state.enemyRespawns=[];state.oreRespawns=[];galaxyEventRuntime.mapKey=null;sharedUniverseRuntime.event=null;joinSharedUniverse();renderAll();preloadActiveGameplayAssets();saveGame();
   if(progress.repairRequired){movePlayerToHomeBase();player.hp=1;player.shield=0;progress.hp=1;progress.shield=0;saveGame();if(premiumActive())resolveDeathRepair({allowAuto:true});else openRepairModal();}
 }
 
@@ -5673,7 +5728,9 @@ async function boot(){
   }catch(err){console.warn(err);signOutLocal();ui.authMessage.textContent=err.message||'Faça login novamente.';}
 }
 
-document.body.dataset.quality=qualityMode;
+document.body.dataset.quality=resolvedQualityMode();
+document.body.dataset.device=DEVICE_CAPS.mobile?'mobile':'desktop';
+document.body.dataset.reducedMotion=DEVICE_CAPS.reducedMotion?'1':'0';
 loadActivityLog();
 loadHudVisibility();
 loadChatPrefs();
@@ -5700,5 +5757,22 @@ setInterval(()=>{
 },3000);
 setInterval(()=>{if(authenticated)refreshChatHistory(false);},CHAT_POLL_MS);
 setInterval(()=>{if(progress){saveGame();flushCloudSave();}},7000);
-document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'&&progress){saveGame();flushCloudSave(true);}else if(document.visibilityState==='visible'&&authenticated){checkGameSession().catch(()=>{});}});
-let last=performance.now();function loop(t){const minFrame=1000/qualityProfile().fps;if(t-last<minFrame){requestAnimationFrame(loop);return;}const dt=Math.min((t-last)/1000,.05);last=t;update(dt);draw();requestAnimationFrame(loop);}requestAnimationFrame(loop);
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'&&progress){saveGame();flushCloudSave(true);}else if(document.visibilityState==='visible'&&authenticated){checkGameSession().catch(()=>{});preloadActiveGameplayAssets();}});
+const AUTO_QUALITY_ORDER=['low','medium','high'];
+let perfWindowStart=performance.now(),perfFrames=0,perfGoodWindows=0,perfLastChange=0;
+function monitorAutoPerformance(t){
+  if(qualityMode!=='auto'){perfWindowStart=t;perfFrames=0;perfGoodWindows=0;return;}
+  perfFrames++;
+  const elapsed=t-perfWindowStart;if(elapsed<5000)return;
+  const fps=perfFrames*1000/Math.max(1,elapsed),current=resolvedQualityMode(),idx=AUTO_QUALITY_ORDER.indexOf(current),ceiling=AUTO_QUALITY_ORDER.indexOf(AUTO_QUALITY_CEILING),target=qualityProfile().fps;
+  if(t-perfLastChange>9000&&fps<target*.76&&idx>0){perfLastChange=t;perfGoodWindows=0;applyAutoQualityResolution(AUTO_QUALITY_ORDER[idx-1],true);}
+  else if(fps>target*.94){perfGoodWindows++;if(perfGoodWindows>=2&&t-perfLastChange>12000&&idx<ceiling){perfLastChange=t;perfGoodWindows=0;applyAutoQualityResolution(AUTO_QUALITY_ORDER[idx+1],true);}}
+  else perfGoodWindows=0;
+  perfWindowStart=t;perfFrames=0;
+}
+let last=performance.now();function loop(t){
+  if(document.visibilityState==='hidden'){last=t;requestAnimationFrame(loop);return;}
+  const minFrame=1000/qualityProfile().fps;if(t-last<minFrame){requestAnimationFrame(loop);return;}
+  const dt=Math.min((t-last)/1000,.05);last=t;update(dt);draw();monitorAutoPerformance(t);requestAnimationFrame(loop);
+}requestAnimationFrame(loop);
+setInterval(()=>{if(document.visibilityState==='visible')trimAssetCache();},30000);
