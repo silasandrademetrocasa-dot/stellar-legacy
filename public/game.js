@@ -156,12 +156,12 @@ function resize() {
 addEventListener('resize', resize); resize();
 
 const ui = {
-  topbar: $('#topbar'), topMeta: document.querySelector('#playerPanel .top-meta'), hudToggle: $('#hudToggle'), leftStats: $('#leftStats'), statsToggle: $('#statsToggle'), minimapPanel: $('#minimapPanel'), minimapToggle: $('#minimapToggle'), minimapHeader: $('#minimapHeader'), statsHeader: $('#statsHeader'), shipHudArt: $('#shipHudArt'), factionIcon: $('#factionIcon'), factionLabel: $('#factionLabel'), mapLabel: $('#mapLabel'), sectorName: $('#sectorName'), coordLabel: $('#coordLabel'), routeLabel: $('#routeLabel'), discoveriesLabel: $('#discoveriesLabel'), shipLabel: $('#shipLabel'), lvl: $('#lvl'), petFloatPanel: $('#petFloatPanel'), petFloatLevel: $('#petFloatLevel'), petGearQuickSelect: $('#petGearQuickSelect'), petFloatStatus: $('#petFloatStatus'),
+  topbar: $('#topbar'), topHudDock: $('#topHudDock'), topbarDockToggle: $('#topbarDockToggle'), topMeta: document.querySelector('#playerPanel .top-meta'), hudToggle: $('#hudToggle'), leftStats: $('#leftStats'), statsToggle: $('#statsToggle'), minimapPanel: $('#minimapPanel'), minimapToggle: $('#minimapToggle'), minimapHeader: $('#minimapHeader'), statsHeader: $('#statsHeader'), shipHudArt: $('#shipHudArt'), factionIcon: $('#factionIcon'), factionLabel: $('#factionLabel'), mapLabel: $('#mapLabel'), sectorName: $('#sectorName'), coordLabel: $('#coordLabel'), routeLabel: $('#routeLabel'), discoveriesLabel: $('#discoveriesLabel'), shipLabel: $('#shipLabel'), lvl: $('#lvl'), petFloatPanel: $('#petFloatPanel'), petFloatLevel: $('#petFloatLevel'), petFloatToggle: $('#petFloatToggle'), petFloatBody: $('#petFloatBody'), petGearQuickSelect: $('#petGearQuickSelect'), petFloatStatus: $('#petFloatStatus'),
   hp: $('#hp'), maxHp: $('#maxHp'), shield: $('#shield'), maxShield: $('#maxShield'), speed: $('#speed'), dmg: $('#dmg'), credits: $('#credits'), uridium: $('#uridium'), xp: $('#xp'), droneCount: $('#droneCount'),
   laserAmmoButtons: $('#laserAmmoButtons'), rocketAmmoButtons: $('#rocketAmmoButtons'), laserToggle: $('#laserToggle'), rocketFire: $('#rocketFire'), autoLaser: $('#autoLaser'), autoRocket: $('#autoRocket'), turboRocket: $('#turboRocket'), rocketCd: $('#rocketCd'), weaponBar: $('#weaponBar'), weaponBarContent: $('#weaponBarContent'), weaponBarToggle: $('#weaponBarToggle'),
   toast: $('#toast'), baseTradePrompt: $('#baseTradePrompt'), baseTradePromptInfo: $('#baseTradePromptInfo'), repairModal: $('#repairModal'), repairModalText: $('#repairModalText'), repairShipName: $('#repairShipName'), repairBonusCount: $('#repairBonusCount'), repairUriCount: $('#repairUriCount'), repairUseBonus: $('#repairUseBonus'), repairUseUri: $('#repairUseUri'), repairUseAurora: $('#repairUseAurora'), gameCelebration: $('#gameCelebration'), celebrationPanel: $('#celebrationPanel'), celebrationKicker: $('#celebrationKicker'), celebrationTitle: $('#celebrationTitle'), celebrationSubtitle: $('#celebrationSubtitle'), portalPrompt: $('#portalPrompt'), portalPromptMap: $('#portalPromptMap'), jumpTransition: $('#jumpTransition'), jumpTitle: $('#jumpTitle'), jumpSubtitle: $('#jumpSubtitle'), factionModal: $('#factionModal'), factionCards: $('#factionCards'),
   mapBtn: $('#mapBtn'), mapModal: $('#mapModal'), closeMap: $('#closeMap'), mapNetwork: $('#mapNetwork'),
-  missionBtn: $('#missionBtn'), missionActiveCount: $('#missionActiveCount'), missionModal: $('#missionModal'), closeMission: $('#closeMission'), missionContent: $('#missionContent'), passBtn: $('#passBtn'), passTierBadge: $('#passTierBadge'), passModal: $('#passModal'), closePass: $('#closePass'), passContent: $('#passContent'), activeMissionPanel: $('#activeMissionPanel'), activeMissionCategory: $('#activeMissionCategory'), activeMissionTitle: $('#activeMissionTitle'), activeMissionTask: $('#activeMissionTask'), activeMissionProgressBar: $('#activeMissionProgressBar'), activeMissionProgressText: $('#activeMissionProgressText'), activeMissionRewardFactor: $('#activeMissionRewardFactor'), activeMissionDots: $('#activeMissionDots'), activeMissionOpen: $('#activeMissionOpen'), activityPanel: $('#activityPanel'), activityFeed: $('#activityFeed'), activityClearBtn: $('#activityClearBtn'),
+  missionBtn: $('#missionBtn'), missionActiveCount: $('#missionActiveCount'), missionModal: $('#missionModal'), closeMission: $('#closeMission'), missionContent: $('#missionContent'), passBtn: $('#passBtn'), passTierBadge: $('#passTierBadge'), passModal: $('#passModal'), closePass: $('#closePass'), passContent: $('#passContent'), activeMissionPanel: $('#activeMissionPanel'), activeMissionCategory: $('#activeMissionCategory'), activeMissionTitle: $('#activeMissionTitle'), activeMissionTask: $('#activeMissionTask'), activeMissionProgressBar: $('#activeMissionProgressBar'), activeMissionProgressText: $('#activeMissionProgressText'), activeMissionRewardFactor: $('#activeMissionRewardFactor'), activeMissionDots: $('#activeMissionDots'), activeMissionToggle: $('#activeMissionToggle'), activeMissionBody: $('#activeMissionBody'), activeMissionOpen: $('#activeMissionOpen'), activityPanel: $('#activityPanel'), activityFeed: $('#activityFeed'), activityClearBtn: $('#activityClearBtn'),
   gateBtn: $('#gateBtn'), gatePieceBadge: $('#gatePieceBadge'), gateModal: $('#gateModal'), closeGate: $('#closeGate'), gatePiecesText: $('#gatePiecesText'), gateLivesText: $('#gateLivesText'), gateCompletedText: $('#gateCompletedText'), gatePieceGrid: $('#gatePieceGrid'), gateJumpBtn: $('#gateJumpBtn'), gateUriText: $('#gateUriText'), gateSpinButtons: $('#gateSpinButtons'), gateJumpBonus: $('#gateJumpBonus'), gateRepairBonus: $('#gateRepairBonus'), gateLogDisks: $('#gateLogDisks'), useRepairBonus: $('#useRepairBonus'), gateResultBox: $('#gateResultBox'), gateRoundsGrid: $('#gateRoundsGrid'), gateAlphaStatusTitle: $('#gateAlphaStatusTitle'), gateAlphaStatusText: $('#gateAlphaStatusText'), gateHud: $('#gateHud'), gateHudRound: $('#gateHudRound'), gateHudWave: $('#gateHudWave'), gateHudRemaining: $('#gateHudRemaining'), gateHudNext: $('#gateHudNext'), gateHudLives: $('#gateHudLives'),
   gateProtocolTabs: $('#gateProtocolTabs'), gateCoreLabel: $('#gateCoreLabel'), gateProtocolLabel: $('#gateProtocolLabel'), gateCombatProtocol: $('#gateCombatProtocol'), gateRewardNote: $('#gateRewardNote'), gateHudTitle: $('#gateHudTitle'),
   abilityBar: $('#abilityBar'), shipAbilityBtn: $('#shipAbilityBtn'), shipAbilityIcon: $('#shipAbilityIcon'), shipAbilityName: $('#shipAbilityName'), shipAbilityStatus: $('#shipAbilityStatus'), shipAbilityFill: $('#shipAbilityFill'), petKamiAbilityBtn: $('#petKamiAbilityBtn'), petKamiAbilityStatus: $('#petKamiAbilityStatus'), petKamiAbilityFill: $('#petKamiAbilityFill'), bossPhaseHud: $('#bossPhaseHud'), bossPhaseName: $('#bossPhaseName'), bossPhaseLabel: $('#bossPhaseLabel'), bossPhaseFill: $('#bossPhaseFill'), bossPhaseStatus: $('#bossPhaseStatus'),
@@ -838,7 +838,6 @@ function renderActiveMissionHud(force=false){
   const entries=activeMissionEntries();
   if(!entries.length){ui.activeMissionPanel.classList.add('hidden');state.missionHudPage=0;state.missionHudSignature='';return;}
   ui.activeMissionPanel.classList.remove('hidden');
-  ui.activeMissionPanel.style.left=progress.pet?.owned?'394px':'192px';
   state.missionHudPage=Math.max(0,Math.min(state.missionHudPage,entries.length-1));
   const entry=entries[state.missionHudPage],pct=missionProgressPercent(entry.mission,entry.active);
   const sig=entries.map(x=>`${x.category}:${x.active.id}:${missionProgressPercent(x.mission,x.active)}:${Object.entries(x.active.taskProgress||{}).map(([k,v])=>`${k}=${v}`).join(',')}`).join('|')+`|${state.missionHudPage}`;
@@ -1273,7 +1272,7 @@ const state = {
   currentMap: MAPS.x1, camera: { x: 620, y: MAPS.x1.world.h/2 }, target: null, pvpShotPending:false, pvpRocketPending:false, enemies: [], loot: [], ores: [], particles: [], fx: [], rocketFx: [], landmarks: [], enemyRespawns: [], oreRespawns: [], lastPortalAt: 0, radarRange: 1500, jumping: false,
   lastPlayerDamageAt:nowSec(), repairFxAt:0, shieldRepairFxAt:0,
   pointerNavActive:false, pointerNavId:null, missionHudPage:0, missionHudSignature:'',
-  shopTab: 'ships', hangarTab: 'ships', toastTimer: null, ammoUiExpanded: true, statsUiExpanded: true, playerUiExpanded: true, minimapUiExpanded: true, topMetaExpanded: true,
+  shopTab: 'ships', hangarTab: 'ships', toastTimer: null, ammoUiExpanded: true, statsUiExpanded: true, playerUiExpanded: true, missionUiExpanded: true, petUiExpanded: true, minimapUiExpanded: true, topMetaExpanded: true, topbarDockExpanded: true,
   stars: Array.from({length:240},()=>({x:Math.random()*5200-2600,y:Math.random()*5200-2600,r:Math.random()*1.5+.3,a:Math.random()*.6+.2})),
 };
 
@@ -1285,19 +1284,52 @@ function shortLaserLabel(id){return ({lcb10:'x1',mcb25:'x2',mcb50:'x3',ucb100:'x
 function shortRocketLabel(id){return ({r310:'R310',plt2026:'PLT26',plt2021:'PLT21',plt3030:'PLT30'})[id]||id.replace(/[^a-z0-9]/gi,'').toUpperCase();}
 function ammoTooltipText(a,qty,laserUse,petUse,bursts){const mode=a.shieldDrain?'CAPTURA ESCUDO x2':`dano x${a.mult}`;return `${a.name} • ${mode}\nEstoque: ${fmt(qty)}\nNave: -${laserUse}/rajada${petUse?` • AUX-9: -${petUse}`:''}\nRajadas restantes: ~${fmt(bursts)}`;}
 function rocketTooltipText(r,qty){return `${r.name} • dano ${fmt(r.damage)}\nEstoque: ${fmt(qty)}\nConsumo: -1/disparo`; }
-function applyAmmoUiState(){ if(!ui.weaponBar) return; ui.weaponBar.classList.toggle('collapsed', !state.ammoUiExpanded); if(ui.weaponBarToggle) ui.weaponBarToggle.textContent = state.ammoUiExpanded ? '▾' : '▸'; }
+function applyAmmoUiState(){ if(!ui.weaponBar) return; ui.weaponBar.classList.toggle('collapsed', !state.ammoUiExpanded); if(ui.weaponBarToggle) ui.weaponBarToggle.textContent = state.ammoUiExpanded ? '▾' : '▸'; requestAnimationFrame(layoutHudPanels); }
 function loadAmmoUiState(){ try{ const raw=localStorage.getItem('stellar_ammo_ui_expanded'); if(raw!==null) state.ammoUiExpanded = raw==='1'; }catch{} applyAmmoUiState(); }
 function toggleAmmoUi(){ state.ammoUiExpanded=!state.ammoUiExpanded; try{ localStorage.setItem('stellar_ammo_ui_expanded', state.ammoUiExpanded?'1':'0'); }catch{} applyAmmoUiState(); syncHudButton(); }
 
-function applyStatsUiState(){ if(!ui.leftStats) return; ui.leftStats.classList.toggle('collapsed', !state.statsUiExpanded); if(ui.statsToggle) ui.statsToggle.textContent = state.statsUiExpanded ? '▾' : '▸'; }
+function applyStatsUiState(){ if(!ui.leftStats) return; ui.leftStats.classList.toggle('collapsed', !state.statsUiExpanded); if(ui.statsToggle) ui.statsToggle.textContent = state.statsUiExpanded ? '▾' : '▸'; requestAnimationFrame(layoutHudPanels); }
 function loadStatsUiState(){ try{ const raw=localStorage.getItem('stellar_stats_ui_expanded'); if(raw!==null) state.statsUiExpanded = raw==='1'; }catch{} applyStatsUiState(); }
 function toggleStatsUi(){ state.statsUiExpanded=!state.statsUiExpanded; try{ localStorage.setItem('stellar_stats_ui_expanded', state.statsUiExpanded?'1':'0'); }catch{} applyStatsUiState(); syncHudButton(); }
 
-function applyPlayerUiState(){ if(!ui.playerPanel) return; ui.playerPanel.classList.toggle('collapsed', !state.playerUiExpanded); if(ui.playerPanelToggle) ui.playerPanelToggle.textContent = state.playerUiExpanded ? '▾' : '▸'; }
+function applyPlayerUiState(){ if(!ui.playerPanel) return; ui.playerPanel.classList.toggle('collapsed', !state.playerUiExpanded); if(ui.playerPanelToggle) ui.playerPanelToggle.textContent = state.playerUiExpanded ? '▾' : '▸'; requestAnimationFrame(layoutHudPanels); }
 function loadPlayerUiState(){ try{ const raw=localStorage.getItem('stellar_player_ui_expanded'); if(raw!==null) state.playerUiExpanded = raw==='1'; }catch{} applyPlayerUiState(); }
 function togglePlayerUi(){ state.playerUiExpanded=!state.playerUiExpanded; try{ localStorage.setItem('stellar_player_ui_expanded', state.playerUiExpanded?'1':'0'); }catch{} applyPlayerUiState(); }
 
-function applyMinimapUiState(){ if(!ui.minimapPanel) return; ui.minimapPanel.classList.toggle('collapsed', !state.minimapUiExpanded); if(ui.minimapToggle) ui.minimapToggle.textContent = state.minimapUiExpanded ? '▾' : '▸'; }
+
+function applyMissionUiState(){
+  if(!ui.activeMissionPanel)return;
+  ui.activeMissionPanel.classList.toggle('collapsed',!state.missionUiExpanded);
+  if(ui.activeMissionToggle)ui.activeMissionToggle.textContent=state.missionUiExpanded?'▾':'▸';
+  requestAnimationFrame(layoutHudPanels);
+}
+function loadMissionUiState(){try{const raw=localStorage.getItem('stellar_mission_ui_expanded');if(raw!==null)state.missionUiExpanded=raw==='1';}catch{}applyMissionUiState();}
+function toggleMissionUi(){state.missionUiExpanded=!state.missionUiExpanded;try{localStorage.setItem('stellar_mission_ui_expanded',state.missionUiExpanded?'1':'0');}catch{}applyMissionUiState();}
+
+function applyPetUiState(){
+  if(!ui.petFloatPanel)return;
+  ui.petFloatPanel.classList.toggle('collapsed',!state.petUiExpanded);
+  if(ui.petFloatToggle)ui.petFloatToggle.textContent=state.petUiExpanded?'▾':'▸';
+  requestAnimationFrame(layoutHudPanels);
+}
+function loadPetUiState(){try{const raw=localStorage.getItem('stellar_pet_ui_expanded');if(raw!==null)state.petUiExpanded=raw==='1';}catch{}applyPetUiState();}
+function togglePetUi(){state.petUiExpanded=!state.petUiExpanded;try{localStorage.setItem('stellar_pet_ui_expanded',state.petUiExpanded?'1':'0');}catch{}applyPetUiState();}
+
+function applyTopbarDockState(){
+  if(!ui.topbar)return;
+  ui.topbar.classList.toggle('dock-hidden',!state.topbarDockExpanded);
+  if(ui.topbarDockToggle){
+    ui.topbarDockToggle.textContent=state.topbarDockExpanded?'▲':'▼';
+    ui.topbarDockToggle.setAttribute('aria-label',state.topbarDockExpanded?'Esconder barra superior':'Mostrar barra superior');
+    ui.topbarDockToggle.title=state.topbarDockExpanded?'Esconder menu superior':'Mostrar menu superior';
+  }
+  if(!state.topbarDockExpanded)document.querySelectorAll('.menu-group.open').forEach(x=>x.classList.remove('open'));
+  requestAnimationFrame(layoutHudPanels);
+}
+function loadTopbarDockState(){try{const raw=localStorage.getItem('stellar_topbar_dock_expanded');if(raw!==null)state.topbarDockExpanded=raw==='1';}catch{}applyTopbarDockState();}
+function toggleTopbarDock(){state.topbarDockExpanded=!state.topbarDockExpanded;try{localStorage.setItem('stellar_topbar_dock_expanded',state.topbarDockExpanded?'1':'0');}catch{}applyTopbarDockState();}
+
+function applyMinimapUiState(){ if(!ui.minimapPanel) return; ui.minimapPanel.classList.toggle('collapsed', !state.minimapUiExpanded); if(ui.minimapToggle) ui.minimapToggle.textContent = state.minimapUiExpanded ? '▾' : '▸'; requestAnimationFrame(layoutHudPanels); }
 function loadMinimapUiState(){ try{ const raw=localStorage.getItem('stellar_minimap_ui_expanded'); if(raw!==null) state.minimapUiExpanded = raw==='1'; }catch{} applyMinimapUiState(); }
 function toggleMinimapUi(){ state.minimapUiExpanded=!state.minimapUiExpanded; try{ localStorage.setItem('stellar_minimap_ui_expanded', state.minimapUiExpanded?'1':'0'); }catch{} applyMinimapUiState(); syncHudButton(); }
 function applyTopMetaUiState(){ if(!ui.topbar) return; ui.topbar.classList.toggle('meta-collapsed', !state.topMetaExpanded); }
@@ -1342,6 +1374,7 @@ function applyHudVisibility(){
   ui.minimapPanel?.classList.toggle('hud-user-hidden',!hudVisibility.minimap);
   ui.weaponBar?.classList.toggle('hud-user-hidden',!hudVisibility.weapons);
   ui.gateHud?.classList.toggle('hud-user-disabled',!hudVisibility.gate);
+  requestAnimationFrame(layoutHudPanels);
 }
 function setHudVisibility(key,value){if(!(key in HUD_VISIBILITY_DEFAULT))return;hudVisibility[key]=!!value;saveHudVisibility();applyHudVisibility();renderSettings();updatePetFloat();renderGateHud();layoutHudPanels();}
 function applyQualityMode(mode,persist=true){
@@ -1589,10 +1622,20 @@ function updateWarfrontRuntime(){if(!authenticated||!progress)return;if(warfront
 
 
 function layoutHudPanels(){
-  const topbarH = ui.topbar ? Math.ceil(ui.topbar.getBoundingClientRect().height) : 54;
-  const weaponH = ui.weaponBar ? Math.ceil(ui.weaponBar.getBoundingClientRect().height) : 150;
-  document.documentElement.style.setProperty('--hud-top-offset', `${topbarH + 8}px`);
-  document.documentElement.style.setProperty('--weaponbar-height', `${weaponH + 12}px`);
+  const root=document.documentElement;
+  const topbarVisible=!!ui.topbar&&state.topbarDockExpanded&&getComputedStyle(ui.topbar).display!=='none';
+  const topbarH=topbarVisible?Math.ceil(ui.topbar.getBoundingClientRect().height):0;
+  const topDockOffset=topbarVisible?topbarH+14:6;
+  root.style.setProperty('--hud-top-offset',`${topbarVisible?topbarH+8:6}px`);
+  root.style.setProperty('--top-dock-offset',`${topDockOffset}px`);
+
+  const mapVisible=!!ui.minimapPanel&&getComputedStyle(ui.minimapPanel).display!=='none';
+  const mapW=mapVisible?Math.ceil(ui.minimapPanel.getBoundingClientRect().width):0;
+  root.style.setProperty('--map-dock-width',`${mapW}px`);
+
+  const weaponVisible=!!ui.weaponBar&&getComputedStyle(ui.weaponBar).display!=='none';
+  const weaponH=weaponVisible?Math.ceil(ui.weaponBar.getBoundingClientRect().height):0;
+  root.style.setProperty('--weaponbar-height',`${weaponH+12}px`);
 }
 function getFaction(){return progress?.profile?.faction ? FACTIONS[progress.profile.faction] : null;}
 function factionFromPrefix(prefix){
@@ -4676,6 +4719,9 @@ if(ui.rankingRefreshBtn)ui.rankingRefreshBtn.onclick=()=>refreshRankings(true);
 if(ui.accountSaveName)ui.accountSaveName.onclick=()=>saveAccountName();
 if(ui.accountSavePassword)ui.accountSavePassword.onclick=()=>saveAccountPassword();
 if(ui.weaponBarToggle)ui.weaponBarToggle.onclick=()=>toggleAmmoUi();
+if(ui.topbarDockToggle)ui.topbarDockToggle.onclick=()=>toggleTopbarDock();
+if(ui.activeMissionToggle)ui.activeMissionToggle.onclick=e=>{e.stopPropagation();toggleMissionUi();};
+if(ui.petFloatToggle)ui.petFloatToggle.onclick=e=>{e.stopPropagation();togglePetUi();};
 if(ui.playerPanelToggle)ui.playerPanelToggle.onclick=e=>{e.stopPropagation();togglePlayerUi();};
 if(ui.statsToggle){ui.statsToggle.onclick=e=>{e.stopPropagation();toggleStatsUi();};ui.statsToggle.ontouchstart=e=>e.stopPropagation();}
 if(ui.statsHeader)ui.statsHeader.onclick=()=>toggleStatsUi();
@@ -4801,8 +4847,12 @@ renderSettings();
 preloadAssets();
 loadAmmoUiState();
 loadStatsUiState();
+loadPlayerUiState();
+loadMissionUiState();
+loadPetUiState();
 loadMinimapUiState();
 loadTopMetaUiState();
+loadTopbarDockState();
 syncHudButton();
 layoutHudPanels();
 window.addEventListener('resize', layoutHudPanels);

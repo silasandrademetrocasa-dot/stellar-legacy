@@ -6,7 +6,7 @@
 <meta content="width=device-width,initial-scale=1,user-scalable=no" name="viewport"/>
 <meta content="#030816" name="theme-color"/>
 <title>Stellar Legacy</title>
-<link href="/style.css?v=13.6.0" rel="stylesheet"/>
+<link href="/style.css?v=13.7.0" rel="stylesheet"/>
 </head>
 <body>
 <div id="app">
@@ -56,10 +56,13 @@
 </nav>
 </header>
 
+<button class="topbar-dock-toggle" id="topbarDockToggle" type="button" aria-label="Esconder barra superior" title="Esconder / mostrar menu superior">▲</button>
+
+<div class="top-hud-dock" id="topHudDock" aria-label="HUD principal">
 <section class="hud-panel player-float-panel" id="playerPanel">
   <div class="player-float-head">
-    <div><span>PILOTO</span><b id="userLabel">—</b></div>
-    <button class="player-collapse-btn" id="playerPanelToggle" type="button" title="Expandir / recolher painel">▾</button>
+    <div><span>JOGADOR</span><b id="userLabel">—</b></div>
+    <button class="player-collapse-btn" id="playerPanelToggle" type="button" title="Expandir / recolher jogador">▾</button>
   </div>
   <div class="player-float-content" id="playerPanelContent">
     <div><span>PATENTE</span><b id="rankChip">Piloto Básico</b></div>
@@ -72,37 +75,51 @@
     <span><b id="factionLabel">—</b></span><span><b id="mapLabel">—</b></span><span><b id="sectorName">—</b></span><span><b id="shipLabel">Aurora</b></span><span><b id="xp">0</b></span>
   </div>
 </section>
+
 <section class="hud-panel compact-stats ship-stats-float" id="leftStats">
-<div class="stats-toolbar tappable-toolbar" id="statsHeader">
-<div class="stats-toolbar-left">
-<button aria-label="Expandir / recolher painel da nave" class="stats-expand-btn" id="statsToggle" title="Expandir / recolher painel da nave">▾</button>
-<div class="stats-toolbar-label">NAVE</div>
-</div>
-</div>
-<div class="stack left-stats-content compact-ship-metrics" id="leftStatsContent">
-<div><span>HP</span><b><span id="hp">0</span>/<span id="maxHp">0</span></b></div>
-<div><span>ESC</span><b><span id="shield">0</span>/<span id="maxShield">0</span></b></div>
-<div><span>VEL</span><b id="speed">0</b></div>
-<div><span>PORÃO</span><b><span id="cargoUsed">0</span>/<span id="cargoMax">0</span></b></div>
-</div>
+  <div class="stats-toolbar tappable-toolbar" id="statsHeader">
+    <div class="stats-toolbar-left">
+      <button aria-label="Expandir / recolher painel da nave" class="stats-expand-btn" id="statsToggle" title="Expandir / recolher painel da nave">▾</button>
+      <div class="stats-toolbar-label">NAVE</div>
+    </div>
+  </div>
+  <div class="stack left-stats-content compact-ship-metrics" id="leftStatsContent">
+    <div><span>HP</span><b><span id="hp">0</span>/<span id="maxHp">0</span></b></div>
+    <div><span>ESC</span><b><span id="shield">0</span>/<span id="maxShield">0</span></b></div>
+    <div><span>VEL</span><b id="speed">0</b></div>
+    <div><span>PORÃO</span><b><span id="cargoUsed">0</span>/<span id="cargoMax">0</span></b></div>
+  </div>
 </section>
-<section class="hud-panel pet-float-panel hidden" id="petFloatPanel">
-  <div class="pet-float-head"><span>AUX-9</span><b id="petFloatLevel">LV1</b></div>
-  <label class="pet-quick-label" for="petGearQuickSelect">MODO</label>
-  <select id="petGearQuickSelect" class="pet-quick-select"><option value="off">COMPANHIA</option></select>
-  <div class="pet-float-status" id="petFloatStatus">Aguardando...</div>
-</section>
+
 <section class="hud-panel active-mission-float hidden" id="activeMissionPanel">
   <div class="active-mission-head">
     <div><span>MISSÕES ATIVAS</span><small id="activeMissionCategory">—</small></div>
-    <button id="activeMissionOpen" type="button" title="Abrir painel completo">›</button>
+    <div class="active-mission-controls">
+      <button id="activeMissionToggle" type="button" title="Expandir / recolher missões">▾</button>
+      <button id="activeMissionOpen" type="button" title="Abrir painel completo">›</button>
+    </div>
   </div>
-  <div class="active-mission-title" id="activeMissionTitle">Nenhuma missão ativa</div>
-  <div class="active-mission-task" id="activeMissionTask">Aceite uma missão para acompanhar aqui.</div>
-  <div class="active-mission-progress"><i id="activeMissionProgressBar"></i></div>
-  <div class="active-mission-meta"><b id="activeMissionProgressText">0%</b><span id="activeMissionRewardFactor">—</span></div>
-  <div class="active-mission-dots" id="activeMissionDots"></div>
+  <div class="active-mission-body" id="activeMissionBody">
+    <div class="active-mission-title" id="activeMissionTitle">Nenhuma missão ativa</div>
+    <div class="active-mission-task" id="activeMissionTask">Aceite uma missão para acompanhar aqui.</div>
+    <div class="active-mission-progress"><i id="activeMissionProgressBar"></i></div>
+    <div class="active-mission-meta"><b id="activeMissionProgressText">0%</b><span id="activeMissionRewardFactor">—</span></div>
+    <div class="active-mission-dots" id="activeMissionDots"></div>
+  </div>
 </section>
+
+<section class="hud-panel pet-float-panel hidden" id="petFloatPanel">
+  <div class="pet-float-head">
+    <span>AUX-9</span>
+    <div class="pet-float-head-actions"><b id="petFloatLevel">LV1</b><button class="pet-collapse-btn" id="petFloatToggle" type="button" title="Expandir / recolher AUX-9">▾</button></div>
+  </div>
+  <div class="pet-float-body" id="petFloatBody">
+    <label class="pet-quick-label" for="petGearQuickSelect">MODO</label>
+    <select id="petGearQuickSelect" class="pet-quick-select"><option value="off">COMPANHIA</option></select>
+    <div class="pet-float-status" id="petFloatStatus">Aguardando...</div>
+  </div>
+</section>
+</div>
 <section class="hud-panel activity-float-panel" id="activityPanel">
   <div class="activity-float-head">
     <span>ATIVIDADE</span>
@@ -667,6 +684,6 @@
   </div>
 </div>
 </div>
-<script src="/game.js?v=13.6.0" type="module"></script>
+<script src="/game.js?v=13.7.0" type="module"></script>
 </body>
 </html>

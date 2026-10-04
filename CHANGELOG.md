@@ -1,3 +1,15 @@
+# V13.7.0 — HUD DOCK SYSTEM
+
+- HUD superior reorganizado na sequência JOGADOR → NAVE → MISSÕES → AUX-9.
+- Painéis superiores agora vivem em um dock flexível: recolher ou esconder um bloco não deixa espaços fantasmas.
+- Barra de comandos superior ganhou controle independente para esconder/mostrar; ao esconder, o HUD principal sobe e gruda no topo.
+- MISSÕES ATIVAS e AUX-9 ganharam recolhimento próprio e persistente.
+- Barra inferior virou dock real: MUNIÇÕES no canto inferior esquerdo e MAPA no canto inferior direito, lado a lado e sem sobreposição.
+- Ao recolher MUNIÇÕES, permanecem visíveis apenas OVERDRIVE e KAMIKAZE, além do botão de reabrir.
+- Layout agora recalcula offsets usando as dimensões reais dos docks, inclusive após recolher painéis, mudar visibilidade e redimensionar a tela.
+- Corrigido carregamento do estado recolhido do painel JOGADOR, que existia mas não era restaurado no boot.
+- Sem alteração de schema/SQL e sem mudança nas mecânicas de combate, missões, clã ou economia.
+
 # V13.6.0 — Command Groups + Pilot HUD + Clan Tabs
 
 - Barra superior reorganizada em grupos: PILOTO, MISSÕES, BATALHA e LOJAS.
