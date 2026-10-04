@@ -6,7 +6,7 @@
 <meta content="width=device-width,initial-scale=1,user-scalable=no" name="viewport"/>
 <meta content="#030816" name="theme-color"/>
 <title>Stellar Legacy</title>
-<link href="/style.css?v=16.7.0" rel="stylesheet"/>
+<link href="/style.css?v=16.7.1" rel="stylesheet"/>
 </head>
 <body>
 <div id="app">
@@ -70,8 +70,6 @@
     <div><span>NÍVEL</span><b id="lvl">1</b></div>
     <div><span>CR</span><b id="credits">0</b></div>
     <div><span>STL</span><b id="uridium">0</b></div>
-    <div class="player-sync-row"><span>STATUS</span><b class="sync-chip" id="syncLabel">LOCAL</b></div>
-    <div class="player-sync-row"><span>UNIVERSO</span><b class="sync-chip world-chip" id="worldSyncLabel">OFFLINE</b></div>
   </div>
   <div class="top-meta hidden" aria-hidden="true">
     <span><b id="factionLabel">—</b></span><span><b id="mapLabel">—</b></span><span><b id="sectorName">—</b></span><span><b id="shipLabel">Aurora</b></span><span><b id="xp">0</b></span>
@@ -564,6 +562,13 @@
     </div>
 
     <div class="settings-panel" id="settingsGamePanel">
+      <section class="settings-section connection-settings-section">
+        <div class="settings-title"><div><b>CONEXÃO ONLINE</b><small>Status da conta e do Shared Universe ficam concentrados aqui.</small></div></div>
+        <div class="connection-settings-grid">
+          <div><span>CONTA / SAVE</span><b class="sync-chip" id="syncLabel">LOCAL</b></div>
+          <div><span>UNIVERSO</span><b class="sync-chip world-chip" id="worldSyncLabel">OFFLINE</b></div>
+        </div>
+      </section>
       <section class="settings-section">
         <div class="settings-title"><div><b>QUALIDADE DO JOGO</b><small>Altere resolução, efeitos e uso de dados/memória.</small></div><span id="qualityCurrentBadge">ALTA</span></div>
         <div class="quality-grid" id="qualityButtons">
@@ -768,6 +773,6 @@
   </div>
 </div>
 </div>
-<script src="/game.js?v=16.7.0" type="module"></script>
+<script src="/game.js?v=16.7.1" type="module"></script>
 </body>
 </html>

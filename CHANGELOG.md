@@ -1,3 +1,8 @@
+## V16.7.1 — TOP GRID POLISH
+- Remove STATUS e UNIVERSO do card JOGADOR.
+- Move os indicadores de conexão para CONFIG > JOGO.
+- Padroniza a altura de PILOTO, NAVE, MISSÕES, AUX-9 e ATIVIDADES.
+
 ## V16.7.0 — HUD DOCK POLISH + EVENT CATALOG
 - CHAT fixado no canto inferior esquerdo e MAPA no canto inferior direito com tamanhos equivalentes.
 - Campo de digitação do chat preso no rodapé do painel, sem subir quando outros docks são recolhidos.

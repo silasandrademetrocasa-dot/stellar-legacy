@@ -1,6 +1,6 @@
 {
   "name": "stellar-legacy",
-  "version": "16.7.0",
+  "version": "16.7.1",
   "type": "module",
   "scripts": {
     "start": "node server/index.js",
@@ -14,5 +14,5 @@
   "engines": {
     "node": ">=18"
   },
-  "release": "hud-grid-events-v16-7-0"
+  "release": "hud-grid-equal-height-v16-7-1"
 }
