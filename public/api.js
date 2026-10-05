@@ -800,6 +800,14 @@ export async function inviteBattleGroupOnline(callsign){
   const rows=await authedSupabaseFetch('/rest/v1/rpc/invite_battle_group_v179',{method:'POST',body:JSON.stringify({p_callsign:String(callsign||'').trim().slice(0,24)})});
   return Array.isArray(rows)?rows[0]||null:rows||null;
 }
+export async function searchBattleGroupPlayersOnline(query){
+  const rows=await authedSupabaseFetch('/rest/v1/rpc/search_battle_group_players_v1793',{method:'POST',body:JSON.stringify({p_query:String(query||'').trim().slice(0,24)})});
+  return Array.isArray(rows)?rows[0]||null:rows||null;
+}
+export async function inviteBattleGroupUserOnline(userId){
+  const rows=await authedSupabaseFetch('/rest/v1/rpc/invite_battle_group_user_v1793',{method:'POST',body:JSON.stringify({p_target_user_id:String(userId||'')})});
+  return Array.isArray(rows)?rows[0]||null:rows||null;
+}
 export async function respondBattleGroupInviteOnline(inviteId,accept){
   const rows=await authedSupabaseFetch('/rest/v1/rpc/respond_battle_group_invite_v179',{method:'POST',body:JSON.stringify({p_invite_id:String(inviteId||''),p_accept:!!accept})});
   return Array.isArray(rows)?rows[0]||null:rows||null;
