@@ -1,3 +1,15 @@
+## V18.0.0 — Warfront Sector Control • Stage 1
+
+- Battle Maps 4-1, 4-2 e 4-3 agora possuem três pontos de controle sincronizados no Shared Universe.
+- Captura territorial é autoritativa no servidor e usa a posição real dos pilotos conectados.
+- Um piloto captura um ponto neutro em aproximadamente 18 segundos; até três pilotos da mesma facção aceleram a captura.
+- Presença de facções rivais no mesmo ponto congela o progresso como CONTESTADO.
+- Pontos inimigos precisam ser neutralizados antes de uma nova facção assumir o controle.
+- Cenário e minimapa exibem zonas, dono, contestação e progresso de captura.
+- WARFRONT ganhou painel ao vivo com placar Terra / Marte / Júpiter e navegação rápida até cada ponto.
+- Esta etapa não concede CR/STL/XP: primeiro validamos a mecânica territorial antes de conectar economia e temporada.
+- Bootstrap, posição persistente e regras de Grupo/NPC da V17.9.5 foram preservados.
+
 ## V17.9.5 — Battle Group Reward Stability
 - Atividade de combate de NPC passa a sobreviver a troca de mapa/conexão por 120s no servidor.
 - Grupo atual do primeiro atacante é revalidado na morte do NPC.

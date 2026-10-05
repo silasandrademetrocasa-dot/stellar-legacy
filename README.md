@@ -1,4 +1,4 @@
-# Stellar Legacy 17.9.5 — NPC Ownership + Battle Groups
+# Stellar Legacy 18.0.0 — Multiplayer Expansion
 
 Propriedade autoritativa de NPCs no Shared Universe, grupos multi-facção e divisão de recompensa apenas entre membros ativos no mesmo setor. A box continua exclusiva do primeiro atacante.
 

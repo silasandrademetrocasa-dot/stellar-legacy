@@ -5,6 +5,21 @@ import { MAPS, NPC_TYPES, RESOURCES } from '../public/data.js';
 const PORTAL_NEUTRAL_RADIUS = 180;
 const LIVE_OPS_REFRESH_MS = 15000;
 
+// ===================== V18.0 WARFRONT • SECTOR CONTROL =====================
+const WARFRONT_CAPTURE_RADIUS=360;
+const WARFRONT_CAPTURE_RATE=5.6; // ~18s solo para um ponto neutro.
+const WARFRONT_DECAY_RATE=2.2;
+const WARFRONT_FACTIONS=['earth','mars','jupiter'];
+const WARFRONT_NODE_LAYOUT={
+  b41:[['A','ALPHA',.26,.32],['B','BETA',.54,.52],['C','GAMMA',.79,.67]],
+  b42:[['A','ALPHA',.23,.68],['B','BETA',.52,.38],['C','GAMMA',.78,.65]],
+  b43:[['A','ALPHA',.22,.34],['B','BETA',.52,.66],['C','GAMMA',.80,.38]],
+};
+function warfrontNodesForMap(mapId,map){
+  const layout=WARFRONT_NODE_LAYOUT[mapId]||[];
+  return layout.map(([id,label,nx,ny])=>({id,label,x:Math.round(map.world.w*nx),y:Math.round(map.world.h*ny),radius:WARFRONT_CAPTURE_RADIUS,owner:null,challenger:null,progress:0,contested:false,nearby:{earth:0,mars:0,jupiter:0},capturedAt:0}));
+}
+
 function saoPauloClock(now=Date.now()){
   const offsetMs=3*60*60*1000; // UTC-3
   const spMs=now-offsetMs;
@@ -111,6 +126,8 @@ class Room {
     this.nextEventWaveAt=0;
     this.lastBroadcastAt=0;
     this.lastEventBroadcastAt=0;
+    this.lastWarfrontBroadcastAt=0;
+    this.warfrontControl=this.map.battle?{mapId:this.mapId,nodes:warfrontNodesForMap(this.mapId,this.map),startedAt:nowMs()}:null;
     this.generateBaseWorld();
     this.ensureEvent(true);
   }
@@ -246,6 +263,43 @@ class Room {
     this.nextEventWaveAt=nowMs()+3000;
   }
 
+  warfrontPayload(){
+    if(!this.warfrontControl)return null;
+    const scores={earth:0,mars:0,jupiter:0};
+    for(const n of this.warfrontControl.nodes)if(scores[n.owner]!==undefined)scores[n.owner]++;
+    const ranked=WARFRONT_FACTIONS.map(id=>({id,score:scores[id]})).sort((a,b)=>b.score-a.score);
+    const dominant=ranked[0].score>ranked[1].score?ranked[0].id:null;
+    return {mapId:this.mapId,nodes:this.warfrontControl.nodes.map(n=>({id:n.id,label:n.label,x:n.x,y:n.y,radius:n.radius,owner:n.owner,challenger:n.challenger,progress:Math.round(n.progress*10)/10,contested:!!n.contested,nearby:{...n.nearby},capturedAt:n.capturedAt||0})),scores,dominantFaction:dominant,serverTime:nowMs()};
+  }
+  updateWarfrontControl(dt,now){
+    if(!this.warfrontControl)return;
+    for(const node of this.warfrontControl.nodes){
+      const counts={earth:0,mars:0,jupiter:0};
+      for(const p of this.players.values()){
+        if(!this.playerFresh(p)||p.hp<=0||Math.hypot(p.x-node.x,p.y-node.y)>node.radius)continue;
+        if(counts[p.faction]!==undefined)counts[p.faction]++;
+      }
+      node.nearby=counts;
+      const active=WARFRONT_FACTIONS.filter(id=>counts[id]>0);
+      node.contested=active.length>1;
+      if(node.contested)continue;
+      if(active.length===1){
+        const faction=active[0],weight=Math.max(1,Math.min(3,counts[faction]));
+        if(node.owner===faction){node.challenger=null;node.progress=0;continue;}
+        if(node.challenger!==faction){node.challenger=faction;node.progress=0;}
+        node.progress=Math.min(100,node.progress+WARFRONT_CAPTURE_RATE*weight*dt);
+        if(node.progress>=100){
+          if(node.owner){node.owner=null;node.progress=0;node.challenger=faction;}
+          else{node.owner=faction;node.challenger=null;node.progress=0;node.capturedAt=now;}
+        }
+      }else if(node.challenger&&node.progress>0){
+        node.progress=Math.max(0,node.progress-WARFRONT_DECAY_RATE*dt);
+        if(node.progress<=0)node.challenger=null;
+      }
+    }
+    if(this.clients.size&&now-this.lastWarfrontBroadcastAt>=500){this.lastWarfrontBroadcastAt=now;this.broadcast({type:'warfront_control',warfront:this.warfrontPayload(),serverTime:now});}
+  }
+
   eventPayload(){return this.event?{...this.event,convoy:this.convoy?{...this.convoy}:null}:null;}
   publicPlayer(p){
     if(!p)return null;
@@ -253,7 +307,7 @@ class Room {
       laserFiring:!!p.laserFiring,laserColor:p.laserColor||'#76d9ff',laserAmmoId:p.laserAmmoId||'lcb10',laserAmmoName:p.laserAmmoName||'PLS-1',targetId:p.targetId||null,targetIsPlayer:!!p.targetIsPlayer,
       pet:p.pet?{...p.pet}:null};
   }
-  snapshot(viewerUserId=null){return {type:'world_snapshot',roomKey:this.key,mapId:this.mapId,territoryFaction:this.territoryFaction,npcs:[...this.npcs.values()].map(e=>this.publicNpc(e)),ores:[...this.ores.values()],players:[...this.players.values()].filter(p=>p.userId!==viewerUserId).map(p=>this.publicPlayer(p)),event:this.eventPayload(),serverTime:nowMs()};}
+  snapshot(viewerUserId=null){return {type:'world_snapshot',roomKey:this.key,mapId:this.mapId,territoryFaction:this.territoryFaction,npcs:[...this.npcs.values()].map(e=>this.publicNpc(e)),ores:[...this.ores.values()],players:[...this.players.values()].filter(p=>p.userId!==viewerUserId).map(p=>this.publicPlayer(p)),event:this.eventPayload(),warfront:this.warfrontPayload(),serverTime:nowMs()};}
   broadcast(payload,exclude=null){for(const c of this.clients)if(c!==exclude)safeJsonSend(c,payload);}
   broadcastEvent(force=false){const now=nowMs();if(!force&&now-this.lastEventBroadcastAt<500)return;this.lastEventBroadcastAt=now;this.broadcast({type:'event_update',event:this.eventPayload(),serverTime:now});}
 
@@ -418,6 +472,7 @@ class Room {
 
   tick(dt){
     this.ensureEvent(false);const now=nowMs();
+    this.updateWarfrontControl(dt,now);
     const activeEventId=this.event?.eventId||null;
     let staleNpc=false,staleOre=false;
     for(const [id,e] of this.npcs)if(e.eventNpc&&(!activeEventId||e.eventId!==activeEventId)){this.npcs.delete(id);staleNpc=true;}
