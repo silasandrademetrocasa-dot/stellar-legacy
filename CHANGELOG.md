@@ -1,4 +1,4 @@
-## 17.7.1 — Player Telemetry + Titles
+## 17.7.2 — Player Telemetry + Titles
 - Reset total de conta continua exclusivo do painel ADM; o reset administrativo também limpa a telemetria para iniciar testes de progressão do zero.
 - Telemetria registra tempo jogado, sessões, níveis alcançados, kills, boxes, mineração, missões, mortes, saltos e geração/gasto de CR/STL/XP.
 - Fontes econômicas separadas em NPC, missões, recursos, passe/nível, eventos, portais, exploração e outros.
@@ -129,3 +129,10 @@ Versão anterior mantida no histórico do projeto base.
 - Estado de categorias recolhidas é salvo localmente para persistir entre aberturas.
 - Cargo box de NPC migrou para o pipeline atual de assets e recebe preload prioritário.
 - Cargo box não usa mais fallback de quadrado amarelo; fallback temporário agora mantém formato de crate.
+
+
+## 17.7.2 — Position Persistence + XP HUD
+- NÍVEL no HUD agora mostra nível + XP total e tooltip com XP restante para o próximo nível.
+- Novo checkpoint global de localização por conta (mapa, território, X/Y e timestamp).
+- No login/reload, a localização local mais recente é reconciliada depois do save econômico, sem substituir saldo/inventário.
+- Checkpoints por mapa continuam mantidos para retorno entre setores.

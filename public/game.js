@@ -1,7 +1,7 @@
-import { FACTIONS, SHIPS, ITEMS, LASER_AMMO, ROCKETS, NPC_TYPES, MAPS, RESOURCES } from './data.js?v=17.7.1';
-import { GAME_ASSETS } from './assets/v17/manifest.js?v=17.7.1';
-import { signUp, signIn, requestPasswordReset, restorePasswordRecoveryFromUrl, restoreSession, signOutLocal, checkGameSession, endGameSession, getUser, getSessionCredentials, loadCloudSave, saveCloudSave, updateCallsign, updatePassword, loadRankings, loadAuctionBids, saveAuctionBidOnline, markAuctionBidStatusOnline, loadAuctionMarket, upsertPlayerPresenceOnline, loadMapPresenceOnline, removePlayerPresenceOnline, queuePvpAttackOnline, consumePvpDamageEventsOnline, syncArenaProfileOnline, loadArenaState, loadArenaDailyRewardStatus, claimArenaDailyReward, loadArenaOpponents, loadArenaHistory, arenaAttackOnline, listClansOnline, loadMyClanOnline, createClanOnline, joinClanOnline, leaveClanOnline, transferClanCreditsOnline, claimClanCreditGrantsOnline, recordClanAlienKillOnline, getPremiumShopOnline, testPurchasePremiumOnline, loadWarfrontStateOnline, hitWorldBossOnline, claimWorldBossRewardOnline, declareClanWarOnline, recordClanWarScoreOnline, loadLiveOpsOnline, purchaseLiveCatalogOnline, economyActionOnline, getChatHistoryOnline, sendChatMessageOnline, getMyDesignersOnline, setDesignLoadoutOnline, claimGateDroneDesignOnline, claimEventDesignerOnline, getAdminStatus, adminSearchAccounts, adminRecentActions, adminBanAccount, adminUnbanAccount, adminResetAccount, adminDeleteAccount, pushTelemetryBatch, adminTelemetryOverview, adminPlayerTelemetry } from './api.js?v=17.7.1';
-import { SharedUniverseClient } from './world.js?v=17.7.1';
+import { FACTIONS, SHIPS, ITEMS, LASER_AMMO, ROCKETS, NPC_TYPES, MAPS, RESOURCES } from './data.js?v=17.7.2';
+import { GAME_ASSETS } from './assets/v17/manifest.js?v=17.7.2';
+import { signUp, signIn, requestPasswordReset, restorePasswordRecoveryFromUrl, restoreSession, signOutLocal, checkGameSession, endGameSession, getUser, getSessionCredentials, loadCloudSave, saveCloudSave, updateCallsign, updatePassword, loadRankings, loadAuctionBids, saveAuctionBidOnline, markAuctionBidStatusOnline, loadAuctionMarket, upsertPlayerPresenceOnline, loadMapPresenceOnline, removePlayerPresenceOnline, queuePvpAttackOnline, consumePvpDamageEventsOnline, syncArenaProfileOnline, loadArenaState, loadArenaDailyRewardStatus, claimArenaDailyReward, loadArenaOpponents, loadArenaHistory, arenaAttackOnline, listClansOnline, loadMyClanOnline, createClanOnline, joinClanOnline, leaveClanOnline, transferClanCreditsOnline, claimClanCreditGrantsOnline, recordClanAlienKillOnline, getPremiumShopOnline, testPurchasePremiumOnline, loadWarfrontStateOnline, hitWorldBossOnline, claimWorldBossRewardOnline, declareClanWarOnline, recordClanWarScoreOnline, loadLiveOpsOnline, purchaseLiveCatalogOnline, economyActionOnline, getChatHistoryOnline, sendChatMessageOnline, getMyDesignersOnline, setDesignLoadoutOnline, claimGateDroneDesignOnline, claimEventDesignerOnline, getAdminStatus, adminSearchAccounts, adminRecentActions, adminBanAccount, adminUnbanAccount, adminResetAccount, adminDeleteAccount, pushTelemetryBatch, adminTelemetryOverview, adminPlayerTelemetry } from './api.js?v=17.7.2';
+import { SharedUniverseClient } from './world.js?v=17.7.2';
 
 const canvas = document.querySelector('#game');
 const ctx = canvas.getContext('2d');
@@ -117,7 +117,7 @@ function qualityShouldPreload(path){
   return /\/branding\//.test(value)||/\/assets\/v17\/loot\/cargo-box\.webp/.test(value);
 }
 
-const ASSET_REVISION='17.7.1';
+const ASSET_REVISION='17.7.2';
 function versionedAssetUrl(path){
   const value=String(path||'');if(!value)return value;
   return value.includes('?')?`${value}&asset=${ASSET_REVISION}`:`${value}?asset=${ASSET_REVISION}`;
@@ -608,7 +608,7 @@ async function claimEventDesignerDrop(ev){
 const economyRuntime={queue:Promise.resolve(),autoPending:new Set()};
 
 
-// ===================== V17.7.1 PROGRESSION TELEMETRY =====================
+// ===================== V17.7.2 PROGRESSION TELEMETRY =====================
 const TELEMETRY_SOURCE_KEYS=['npc','mission','resource','pass','event','gate','discovery','other'];
 function freshTelemetryPending(){return {counters:{sessions:0,play_seconds:0,kills:0,boxes:0,ore_nodes:0,ore_units:0,missions_completed:0,deaths:0,map_jumps:0,level_ups:0},spent:{cr:0,stl:0},sources:Object.fromEntries(TELEMETRY_SOURCE_KEYS.map(k=>[k,{cr:0,stl:0,xp:0}])),level_events:[]};}
 const telemetryRuntime={pending:freshTelemetryPending(),activeRemainder:0,lastFlushAt:0,flushing:false,sessionOpen:false};
@@ -693,7 +693,7 @@ function togglePilotBranch(branch){loadPilotUiPrefs();pilotUiPrefs.collapsed[bra
 function pilotRareChanceBonus(){return pilotCombined('luck1','luck2')/100;}function pilotLootBonus(){return pilotCombined('tractor1','tractor2')/100;}function pilotEvasion(){return Math.min(.35,pilotCombined('evasive1','evasive2')/100);}function pilotBattleLaserBonus(){return pilotCombined('bounty1','bounty2')/100;}function pilotKamikazeDamageBonus(){return pilotCombined('detonation1','detonation2')/100;}function pilotKamikazeRadiusBonus(){return pilotSkillValue('explosives')/100;}
 
 
-// ===================== V17.7.1 PILOT TITLES =====================
+// ===================== V17.7.2 PILOT TITLES =====================
 const PILOT_TITLES=[
   {id:'pioneer',label:'Pioneiro Estelar',desc:'Título inicial de todo piloto.',check:()=>true,req:'Disponível desde o início.'},
   {id:'cadet',label:'Cadete Estelar',desc:'Primeiros sistemas dominados.',check:()=>Number(progress?.profile?.level||1)>=5,req:'Alcance o nível 5.'},
@@ -2668,6 +2668,48 @@ function positionCheckpointKey(mapId=progress?.mapId,territoryFaction=progress?.
   const userId=getUser()?.id||progress?.accountOwnerId||'guest';
   return `${SAVE_KEY_PREFIX}:position:${userId}:${locationStorageKey(mapId,territoryFaction)}`;
 }
+function latestPositionCheckpointKey(){
+  const userId=getUser()?.id||progress?.accountOwnerId||'guest';
+  return `${SAVE_KEY_PREFIX}:positionLatest:${userId}`;
+}
+function readLatestPositionCheckpoint(){
+  try{
+    const raw=localStorage.getItem(latestPositionCheckpointKey());
+    if(!raw)return null;
+    const entry=JSON.parse(raw),mapId=String(entry?.mapId||'');
+    if(!entry||!MAPS[mapId])return null;
+    const x=Number(entry.x),y=Number(entry.y),savedAt=Number(entry.savedAt)||0;
+    if(!Number.isFinite(x)||!Number.isFinite(y)||!savedAt)return null;
+    // Ignora relógio impossível / checkpoint absurdamente antigo.
+    if(savedAt>Date.now()+300000||savedAt<Date.now()-1000*60*60*24*30)return null;
+    const territoryFaction=['x1','x2','x3','x4'].includes(mapId)
+      ? (entry.territoryFaction||progress?.profile?.faction||null)
+      : null;
+    return {mapId,territoryFaction,x,y,savedAt};
+  }catch{return null;}
+}
+function restoreLatestRuntimeLocationCheckpoint(){
+  if(!progress)return false;
+  const latest=readLatestPositionCheckpoint();
+  if(!latest)return false;
+  const map=MAPS[latest.mapId];if(!map)return false;
+  const key=locationStorageKey(latest.mapId,latest.territoryFaction);
+  const savedEntry=progress.positionByMap?.[key];
+  const savedAt=Math.max(Number(savedEntry?.savedAt)||0,
+    String(progress.savedMapId||'')===latest.mapId ? Number(progress.locationSavedAt||progress.clientSavedAt)||0 : 0);
+  // O checkpoint local de movimento só substitui localização, nunca economia/inventário.
+  if(latest.savedAt+25<savedAt)return false;
+  progress.mapId=latest.mapId;
+  progress.territoryFaction=latest.territoryFaction;
+  progress.x=Math.max(35,Math.min(map.world.w-35,latest.x));
+  progress.y=Math.max(35,Math.min(map.world.h-35,latest.y));
+  progress.savedMapId=latest.mapId;
+  progress.savedTerritoryFaction=latest.territoryFaction;
+  progress.locationSavedAt=latest.savedAt;
+  progress.positionByMap ||= {};
+  progress.positionByMap[key]={x:progress.x,y:progress.y,mapId:latest.mapId,territoryFaction:latest.territoryFaction,savedAt:latest.savedAt};
+  return true;
+}
 function readPositionCheckpoint(mapId=progress?.mapId,territoryFaction=progress?.territoryFaction){
   try{
     const raw=localStorage.getItem(positionCheckpointKey(mapId,territoryFaction));
@@ -2688,12 +2730,16 @@ function syncRuntimeLocationToProgress(forceCheckpoint=true){
   progress.x=x;progress.y=y;
   progress.savedMapId=progress.mapId;
   progress.savedTerritoryFaction=progress.territoryFaction||null;
+  progress.locationSavedAt=now;
   progress.positionByMap ||= {};
   progress.positionByMap[mapKey]=saved;
   const moved=positionCheckpointRuntime.lastX===null||Math.hypot(x-positionCheckpointRuntime.lastX,y-positionCheckpointRuntime.lastY)>=4;
   const due=now-positionCheckpointRuntime.lastAt>=750||positionCheckpointRuntime.lastKey!==mapKey;
   if(forceCheckpoint||(moved&&due)){
-    try{localStorage.setItem(positionCheckpointKey(),JSON.stringify(saved));}catch{}
+    try{
+      localStorage.setItem(positionCheckpointKey(),JSON.stringify(saved));
+      localStorage.setItem(latestPositionCheckpointKey(),JSON.stringify(saved));
+    }catch{}
     positionCheckpointRuntime.lastAt=now;positionCheckpointRuntime.lastX=x;positionCheckpointRuntime.lastY=y;positionCheckpointRuntime.lastKey=mapKey;
   }
 }
@@ -2749,6 +2795,7 @@ function hydrateProgress(){
   progress.positionByMap ||= {};
   if(!progress.savedMapId)progress.savedMapId=progress.mapId;
   if(progress.savedTerritoryFaction===undefined)progress.savedTerritoryFaction=progress.territoryFaction||null;
+  progress.locationSavedAt=Math.max(0,Number(progress.locationSavedAt)||Number(progress.clientSavedAt)||0);
   const legacyLocationKey=locationStorageKey(progress.mapId,progress.territoryFaction);
   if(!progress.positionByMap[legacyLocationKey]&&Number.isFinite(Number(progress.x))&&Number.isFinite(Number(progress.y))){
     progress.positionByMap[legacyLocationKey]={x:Number(progress.x),y:Number(progress.y),mapId:progress.mapId,territoryFaction:progress.territoryFaction||null,savedAt:Number(progress.clientSavedAt)||0};
@@ -4569,7 +4616,7 @@ function updateBaseTradePrompt(){
 }
 function updateUI(){
   refreshAmmoCounters();
-  const f=getFaction(),ship=SHIPS[progress.activeShipId],baseSafe=isBaseSafeZone(),portalSafe=isPortalNeutralZone(),safe=baseSafe||portalSafe;ui.factionLabel.textContent=f?.short||'—';ui.factionLabel.style.color=f?.color||'';ui.mapLabel.textContent=displayMapLabel(progress.mapId);if(ui.sectorName)ui.sectorName.textContent=state.currentMap.name||'Setor';if(ui.coordLabel)ui.coordLabel.textContent=`${Math.round(player.x)} / ${Math.round(player.y)}`;if(ui.routeLabel){const rd=routeDistance();ui.routeLabel.textContent=rd>35?`${fmt(rd)}u`:'PARADO';ui.routeLabel.parentElement?.classList.toggle('active',rd>35);}if(ui.discoveriesLabel){const found=state.landmarks.filter(l=>progress.discoveries?.[`${progress.mapId}:${l.id}`]).length;ui.discoveriesLabel.textContent=`${found}/${state.landmarks.length}`;}const shipDesign=currentShipDesign();ui.shipLabel.textContent=shipDesign?`${ship.name} • ${shipDesign.name}`:ship.name;ui.lvl.textContent=progress.profile.level;ui.hp.textContent=fmt(player.hp);ui.maxHp.textContent=fmt(player.maxHp);ui.shield.textContent=fmt(player.shield);ui.maxShield.textContent=fmt(player.maxShield);ui.speed.textContent=fmt(player.speed*shipAbilitySpeedMultiplier());if(ui.dmg)ui.dmg.textContent=fmt(player.laserDamage*currentLaserAmmo().mult);ui.credits.textContent=fmt(progress.profile.credits);ui.uridium.textContent=fmt(progress.profile.uridium);ui.xp.textContent=fmt(progress.profile.xp);ui.xp.title=progress.profile.level>=PLAYER_MAX_LEVEL?'Nível máximo':`Próximo nível: ${fmt(levelXpThreshold(progress.profile.level+1))} XP • ${Math.round(levelProgressPercent(progress.profile.xp,progress.profile.level))}%`;if(ui.droneCount)ui.droneCount.textContent=progress.drones.length;ui.laserToggle.classList.toggle('active',player.laserFiring);ui.rocketCd.textContent=rocketReady()?'MÍSSIL PRONTO':`MÍSSIL ${(getRocketCooldown()-(nowSec()-player.lastRocketShot)).toFixed(1)}s`;
+  const f=getFaction(),ship=SHIPS[progress.activeShipId],baseSafe=isBaseSafeZone(),portalSafe=isPortalNeutralZone(),safe=baseSafe||portalSafe;ui.factionLabel.textContent=f?.short||'—';ui.factionLabel.style.color=f?.color||'';ui.mapLabel.textContent=displayMapLabel(progress.mapId);if(ui.sectorName)ui.sectorName.textContent=state.currentMap.name||'Setor';if(ui.coordLabel)ui.coordLabel.textContent=`${Math.round(player.x)} / ${Math.round(player.y)}`;if(ui.routeLabel){const rd=routeDistance();ui.routeLabel.textContent=rd>35?`${fmt(rd)}u`:'PARADO';ui.routeLabel.parentElement?.classList.toggle('active',rd>35);}if(ui.discoveriesLabel){const found=state.landmarks.filter(l=>progress.discoveries?.[`${progress.mapId}:${l.id}`]).length;ui.discoveriesLabel.textContent=`${found}/${state.landmarks.length}`;}const shipDesign=currentShipDesign();ui.shipLabel.textContent=shipDesign?`${ship.name} • ${shipDesign.name}`:ship.name;if(ui.lvl){const lv=Number(progress.profile.level)||1,xp=Math.max(0,Number(progress.profile.xp)||0);ui.lvl.textContent=`${lv} • ${fmt(xp)} XP`;const maxed=lv>=PLAYER_MAX_LEVEL,next=maxed?levelXpThreshold(PLAYER_MAX_LEVEL):levelXpThreshold(lv+1),missing=maxed?0:Math.max(0,next-xp);const tip=maxed?`Nível máximo • ${fmt(xp)} XP total`:`${fmt(xp)} XP total • faltam ${fmt(missing)} XP para o nível ${lv+1} • ${Math.round(levelProgressPercent(xp,lv))}% do nível atual`;ui.lvl.title=tip;ui.lvl.parentElement.title=tip;}ui.hp.textContent=fmt(player.hp);ui.maxHp.textContent=fmt(player.maxHp);ui.shield.textContent=fmt(player.shield);ui.maxShield.textContent=fmt(player.maxShield);ui.speed.textContent=fmt(player.speed*shipAbilitySpeedMultiplier());if(ui.dmg)ui.dmg.textContent=fmt(player.laserDamage*currentLaserAmmo().mult);ui.credits.textContent=fmt(progress.profile.credits);ui.uridium.textContent=fmt(progress.profile.uridium);ui.xp.textContent=fmt(progress.profile.xp);ui.xp.title=progress.profile.level>=PLAYER_MAX_LEVEL?'Nível máximo':`Próximo nível: ${fmt(levelXpThreshold(progress.profile.level+1))} XP • ${Math.round(levelProgressPercent(progress.profile.xp,progress.profile.level))}%`;if(ui.droneCount)ui.droneCount.textContent=progress.drones.length;ui.laserToggle.classList.toggle('active',player.laserFiring);ui.rocketCd.textContent=rocketReady()?'MÍSSIL PRONTO':`MÍSSIL ${(getRocketCooldown()-(nowSec()-player.lastRocketShot)).toFixed(1)}s`;
   if(ui.shipHudArt)ui.shipHudArt.src=shipCardAsset(progress.activeShipId)||shipCardAsset('phoenix');
   if(ui.factionIcon)ui.factionIcon.src=factionAsset(progress.profile.faction);
   if(ui.userLabel)ui.userLabel.textContent=progress.profile.callsign||getUser()?.callsign||'Pilot';updateRankChip();if(ui.petBtn)ui.petBtn.textContent=progress.pet?.owned?`AUX-9 LV${progress.pet.level}`:'AUX-9 LOJA';if(ui.safeZoneLabel){const portalCombat=portalSafe&&state.portalCombatUntil>nowSec();ui.safeZoneLabel.textContent=baseSafe?'BASE • ZONA SEGURA':portalCombat?'PORTAL • COMBATE ATIVO':portalSafe?'PORTAL • ZONA NEUTRA':'ZONA DE COMBATE';ui.safeZoneLabel.classList.toggle('active',safe&&!portalCombat);ui.safeZoneLabel.classList.toggle('danger-lite',portalCombat);}updatePremiumBadge();if(ui.cargoUsed)ui.cargoUsed.textContent=fmt(cargoUsed());if(ui.cargoMax)ui.cargoMax.textContent=fmt(cargoCapacity());if(ui.cargoBtn)ui.cargoBtn.classList.toggle('gold',isAtTrader());updatePetFloat();updateAbilityHud();updateBossHud();updateTargetLockHud();updateCombatStateHud();renderGalaxyEventHud();updateBaseTradePrompt();updateProgressionAccessLocks();renderActiveMissionHud();
@@ -6062,6 +6109,9 @@ async function afterAuth(){
     loadLocalGame();setSync('OFFLINE','err');
   }
   if(!progress){renderFactionChoice();return;}
+  // Localização tem checkpoint próprio e mais frequente que o save econômico.
+  // Reaplica o último mapa/X/Y deste navegador sem substituir saldo, inventário ou progresso online.
+  restoreLatestRuntimeLocationCheckpoint();
   await refreshPremiumState(true);
   await refreshLiveOpsState(true);
   await refreshDesignerState(true);
