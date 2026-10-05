@@ -1,7 +1,7 @@
-import { FACTIONS, SHIPS, ITEMS, LASER_AMMO, ROCKETS, NPC_TYPES, MAPS, RESOURCES } from './data.js?v=17.6.5';
-import { GAME_ASSETS } from './assets/v17/manifest.js?v=17.6.5';
-import { signUp, signIn, requestPasswordReset, restorePasswordRecoveryFromUrl, restoreSession, signOutLocal, checkGameSession, endGameSession, getUser, getSessionCredentials, loadCloudSave, saveCloudSave, updateCallsign, updatePassword, loadRankings, loadAuctionBids, saveAuctionBidOnline, markAuctionBidStatusOnline, loadAuctionMarket, upsertPlayerPresenceOnline, loadMapPresenceOnline, removePlayerPresenceOnline, queuePvpAttackOnline, consumePvpDamageEventsOnline, syncArenaProfileOnline, loadArenaState, loadArenaDailyRewardStatus, claimArenaDailyReward, loadArenaOpponents, loadArenaHistory, arenaAttackOnline, listClansOnline, loadMyClanOnline, createClanOnline, joinClanOnline, leaveClanOnline, transferClanCreditsOnline, claimClanCreditGrantsOnline, recordClanAlienKillOnline, getPremiumShopOnline, testPurchasePremiumOnline, loadWarfrontStateOnline, hitWorldBossOnline, claimWorldBossRewardOnline, declareClanWarOnline, recordClanWarScoreOnline, loadLiveOpsOnline, purchaseLiveCatalogOnline, economyActionOnline, getChatHistoryOnline, sendChatMessageOnline, getMyDesignersOnline, setDesignLoadoutOnline, claimGateDroneDesignOnline, claimEventDesignerOnline, getAdminStatus, adminSearchAccounts, adminRecentActions, adminBanAccount, adminUnbanAccount, adminResetAccount, adminDeleteAccount } from './api.js?v=17.6.5';
-import { SharedUniverseClient } from './world.js?v=17.6.5';
+import { FACTIONS, SHIPS, ITEMS, LASER_AMMO, ROCKETS, NPC_TYPES, MAPS, RESOURCES } from './data.js?v=17.6.6';
+import { GAME_ASSETS } from './assets/v17/manifest.js?v=17.6.6';
+import { signUp, signIn, requestPasswordReset, restorePasswordRecoveryFromUrl, restoreSession, signOutLocal, checkGameSession, endGameSession, getUser, getSessionCredentials, loadCloudSave, saveCloudSave, updateCallsign, updatePassword, loadRankings, loadAuctionBids, saveAuctionBidOnline, markAuctionBidStatusOnline, loadAuctionMarket, upsertPlayerPresenceOnline, loadMapPresenceOnline, removePlayerPresenceOnline, queuePvpAttackOnline, consumePvpDamageEventsOnline, syncArenaProfileOnline, loadArenaState, loadArenaDailyRewardStatus, claimArenaDailyReward, loadArenaOpponents, loadArenaHistory, arenaAttackOnline, listClansOnline, loadMyClanOnline, createClanOnline, joinClanOnline, leaveClanOnline, transferClanCreditsOnline, claimClanCreditGrantsOnline, recordClanAlienKillOnline, getPremiumShopOnline, testPurchasePremiumOnline, loadWarfrontStateOnline, hitWorldBossOnline, claimWorldBossRewardOnline, declareClanWarOnline, recordClanWarScoreOnline, loadLiveOpsOnline, purchaseLiveCatalogOnline, economyActionOnline, getChatHistoryOnline, sendChatMessageOnline, getMyDesignersOnline, setDesignLoadoutOnline, claimGateDroneDesignOnline, claimEventDesignerOnline, getAdminStatus, adminSearchAccounts, adminRecentActions, adminBanAccount, adminUnbanAccount, adminResetAccount, adminDeleteAccount } from './api.js?v=17.6.6';
+import { SharedUniverseClient } from './world.js?v=17.6.6';
 
 const canvas = document.querySelector('#game');
 const ctx = canvas.getContext('2d');
@@ -117,7 +117,7 @@ function qualityShouldPreload(path){
   return /\/branding\//.test(value)||/\/assets\/v17\/loot\/cargo-box\.webp/.test(value);
 }
 
-const ASSET_REVISION='17.6.5';
+const ASSET_REVISION='17.6.6';
 function versionedAssetUrl(path){
   const value=String(path||'');if(!value)return value;
   return value.includes('?')?`${value}&asset=${ASSET_REVISION}`:`${value}?asset=${ASSET_REVISION}`;
@@ -1410,7 +1410,8 @@ function renderMissions(){
     const section=document.createElement('section');section.className=`mission-category${collapsed?' collapsed':''}`;section.style.setProperty('--mission-accent',meta.accent);
     const active=progress.missions.active[category];
     const head=document.createElement('button');head.type='button';head.className='mission-category-head';head.setAttribute('aria-expanded',String(!collapsed));
-    head.innerHTML=`<div><div class="eyebrow">${meta.label}</div><h3>${active?'1 missão ativa':`${missions.length} contratos disponíveis agora`}</h3></div><span class="mission-head-actions"><span class="mission-slot-badge">${active?'ATIVA':'LIVRE'}</span><em class="mission-collapse-icon">${collapsed?'▸':'▾'}</em></span>`;
+    const summary=active?'1 missão ativa • ATIVA':`${missions.length} contratos disponíveis agora • LIVRE`;
+    head.innerHTML=`<span><b>${meta.label}</b><small>${summary}</small></span><em>${collapsed?'▸':'▾'}</em>`;
     head.onclick=()=>toggleMissionCategory(category);section.appendChild(head);
     const body=document.createElement('div');body.className='mission-category-body';
     const grid=document.createElement('div');grid.className='mission-grid';
