@@ -6,7 +6,7 @@
 <meta content="width=device-width,initial-scale=1,user-scalable=no" name="viewport"/>
 <meta content="#030816" name="theme-color"/>
 <title>Stellar Legacy</title>
-<link href="/style.css?v=17.8.3" rel="stylesheet"/>
+<link href="/style.css?v=17.9.0" rel="stylesheet"/>
 </head>
 <body>
 <div id="app">
@@ -38,6 +38,7 @@
       <button class="menu-item" id="warfrontBtn" type="button">WARFRONT <span id="warfrontTopStatus">READY</span></button>
       <button class="menu-item" id="gateBtn" type="button">PORTAIS <span id="gatePieceBadge">AURORA 0/34</span></button>
       <button class="menu-item" id="galaxyEventBtn" type="button">EVENTOS <span id="galaxyEventTopStatus">AO VIVO</span></button>
+      <button class="menu-item" id="battleGroupBtn" type="button">GRUPO <span id="battleGroupTopStatus">0/5</span></button>
     </div>
   </div>
 
@@ -752,6 +753,15 @@
 <div class="base-services-section"><div class="settings-title"><div><b>SERVIÇOS DA BASE</b><small>Sinks voluntários de Créditos com bônus temporários. Custos escalam por faixa de nível.</small></div></div><div class="base-service-grid" id="baseServiceGrid"></div></div>
 </div>
 </div>
+<div class="modal hidden" id="battleGroupModal">
+  <div class="modal-card wide-card battle-group-modal-card">
+    <div class="modal-header">
+      <div><div class="eyebrow">SOCIAL • COORDENAÇÃO</div><h2>Grupo de Batalha</h2><p class="muted">Até 5 pilotos da mesma facção • rally compartilhado • identificação tática no mapa.</p></div>
+      <div class="battle-group-header-actions"><button class="ghost-btn" id="battleGroupRefresh" type="button">ATUALIZAR</button><button class="small-btn" id="closeBattleGroup" type="button">FECHAR</button></div>
+    </div>
+    <div id="battleGroupContent" class="battle-group-content"><div class="empty-state">Carregando grupo...</div></div>
+  </div>
+</div>
 <div class="modal hidden" id="mapModal">
 <div class="modal-card wide-card map-card">
 <div class="modal-header">
@@ -837,6 +847,6 @@
   </div>
 </div>
 </div>
-<script src="/game.js?v=17.8.3" type="module"></script>
+<script src="/game.js?v=17.9.0" type="module"></script>
 </body>
 </html>

@@ -785,3 +785,34 @@ export async function adminTelemetryOverview(){
 export async function adminPlayerTelemetry(userId){
   return authedServerFetch(`/api/admin/telemetry/${encodeURIComponent(String(userId||''))}`);
 }
+
+
+// ===================== V17.9.0 BATTLE GROUPS =====================
+export async function getBattleGroupOnline(){
+  const rows=await authedSupabaseFetch('/rest/v1/rpc/get_my_battle_group_v179',{method:'POST',body:'{}'});
+  return Array.isArray(rows)?rows[0]||null:rows||null;
+}
+export async function createBattleGroupOnline(){
+  const rows=await authedSupabaseFetch('/rest/v1/rpc/create_battle_group_v179',{method:'POST',body:'{}'});
+  return Array.isArray(rows)?rows[0]||null:rows||null;
+}
+export async function inviteBattleGroupOnline(callsign){
+  const rows=await authedSupabaseFetch('/rest/v1/rpc/invite_battle_group_v179',{method:'POST',body:JSON.stringify({p_callsign:String(callsign||'').trim().slice(0,24)})});
+  return Array.isArray(rows)?rows[0]||null:rows||null;
+}
+export async function respondBattleGroupInviteOnline(inviteId,accept){
+  const rows=await authedSupabaseFetch('/rest/v1/rpc/respond_battle_group_invite_v179',{method:'POST',body:JSON.stringify({p_invite_id:String(inviteId||''),p_accept:!!accept})});
+  return Array.isArray(rows)?rows[0]||null:rows||null;
+}
+export async function leaveBattleGroupOnline(){
+  const rows=await authedSupabaseFetch('/rest/v1/rpc/leave_battle_group_v179',{method:'POST',body:'{}'});
+  return Array.isArray(rows)?rows[0]||null:rows||null;
+}
+export async function kickBattleGroupMemberOnline(userId){
+  const rows=await authedSupabaseFetch('/rest/v1/rpc/kick_battle_group_member_v179',{method:'POST',body:JSON.stringify({p_target_user_id:String(userId||'')})});
+  return Array.isArray(rows)?rows[0]||null:rows||null;
+}
+export async function setBattleGroupRallyOnline({mapId,territoryFaction,x,y}={}){
+  const rows=await authedSupabaseFetch('/rest/v1/rpc/set_battle_group_rally_v179',{method:'POST',body:JSON.stringify({p_map_id:String(mapId||''),p_territory_faction:territoryFaction?String(territoryFaction):null,p_x:Number(x)||0,p_y:Number(y)||0})});
+  return Array.isArray(rows)?rows[0]||null:rows||null;
+}

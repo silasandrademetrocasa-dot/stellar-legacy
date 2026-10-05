@@ -1,0 +1,2 @@
+-- Applied to Supabase: battle_groups_v179, battle_group_members_v179, battle_group_invites_v179 and secured RPCs.
+-- Source of truth is the deployed migration v17_9_0_battle_groups.
