@@ -55,7 +55,7 @@ Seraph, Venatrix, Ravager, Praetor, Bulwark, Nexus Prime, Phantom, Wraith, Nulli
 - Portais Astrais — sistema de portais
 - AURORA / NEXUS / ECLIPSE — protocolos de portal
 - Núcleos Quânticos — pesquisa do piloto
-## Identidade do piloto — V17.7.7
+## Identidade do piloto — V17.7.8
 - A patente visual continua representada pelo emblema ao lado do callsign.
 - O texto secundário da nave passa a ser o **título equipado**; patente por extenso e nível não são mostrados no mapa.
 - Títulos iniciais: Pioneiro Estelar, Cadete Estelar, Veterano do Vazio, Ás Estelar, Caçador de Aliens, Exterminador Estelar, Prospector Cósmico, Agente de Missões, Navegador Quântico, Rompe-Portais e Mestre dos Portais.
