@@ -1,4 +1,4 @@
-# Stellar Legacy V17.7.3 — Player Telemetry + Titles
+# Stellar Legacy V17.7.4 — Player Telemetry + Titles
 
 Atualização de observabilidade da progressão. O jogo registra métricas agregadas de evolução/economia para o painel ADM e adiciona um perfil de títulos exibidos sob o callsign. O reset completo de conta permanece uma ferramenta administrativa; jogadores comuns não recebem controle para apagar o próprio progresso.
 

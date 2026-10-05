@@ -440,6 +440,32 @@ export async function loadOwnPresenceCheckpointOnline() {
   return Array.isArray(rows) ? rows[0] || null : null;
 }
 
+
+// V17.7.4 • posição autoritativa separada do save econômico.
+export async function savePlayerLocationCheckpointOnline(payload, { keepalive = false } = {}) {
+  if (!currentUser?.id) return null;
+  return authedSupabaseFetch('/rest/v1/rpc/save_player_location_v1774', {
+    method: 'POST',
+    keepalive: Boolean(keepalive),
+    body: JSON.stringify({
+      p_map_id: String(payload?.mapId || 'x1'),
+      p_territory_faction: payload?.territoryFaction == null ? null : String(payload.territoryFaction),
+      p_x: Number(payload?.x || 0),
+      p_y: Number(payload?.y || 0),
+      p_angle: Number(payload?.angle || 0),
+      p_client_saved_at: Math.max(0, Math.trunc(Number(payload?.savedAt || Date.now()))),
+    }),
+  });
+}
+
+export async function loadPlayerLocationCheckpointOnline() {
+  if (!currentUser?.id) return null;
+  return authedSupabaseFetch('/rest/v1/rpc/get_my_player_location_v1774', {
+    method: 'POST',
+    body: '{}',
+  });
+}
+
 export async function listClansOnline() {
   const rows = await authedSupabaseFetch('/rest/v1/rpc/list_clans_v12', {
     method: 'POST', body: JSON.stringify({}),
