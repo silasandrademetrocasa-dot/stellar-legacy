@@ -48,5 +48,13 @@ O banco não envia seletores, HTML ou JavaScript. O cliente contém uma whitelis
 - O servidor continua autoritativo para dano e recompensa.
 
 
-## Hotfix — V18.1.2 Topbar Router
+## Hotfix — V18.1.3 Topbar Router
 A navegação superior passa por um roteador local baseado em `module_key`. Reordenação e labels continuam Data Driven, mas a execução das ações permanece em whitelist no cliente.
+
+
+## V18.1.3 — Server Runtime Topbar Cache
+- Topbar agora usa snapshot SQL materializado pelo Render em JSON temporário.
+- Browser não consulta mais diretamente o RPC da topbar.
+- Ordem das abas usa CSS `order`; nenhum nó é reanexado no DOM.
+- Handlers originais dos botões permanecem intactos.
+- Configuração continua vindo do Supabase e pode mudar sem alterar o código do cliente.

@@ -1,4 +1,4 @@
-# Stellar Legacy 18.1.2 — Topbar Router Hotfix
+# Stellar Legacy 18.1.3 — Topbar Router Hotfix
 
 Hotfix da V18.1 Data Driven: a barra superior agora usa um roteador único de ações por `module_key`, mantendo cliques funcionais mesmo depois de nome/ordem/visibilidade serem reorganizados pelo Supabase.
 
@@ -197,3 +197,11 @@ A V17.6.3 usa a tabela existente `public.game_admins` como fonte de autorizaçã
 - trigger no Supabase espelha presence para o checkpoint dedicado;
 - estado econômico não substitui mais a localização atual;
 - SQL legado/temporário removido do banco e do ZIP.
+
+
+## V18.1.3 — Server Runtime Topbar Cache
+- Topbar agora usa snapshot SQL materializado pelo Render em JSON temporário.
+- Browser não consulta mais diretamente o RPC da topbar.
+- Ordem das abas usa CSS `order`; nenhum nó é reanexado no DOM.
+- Handlers originais dos botões permanecem intactos.
+- Configuração continua vindo do Supabase e pode mudar sem alterar o código do cliente.

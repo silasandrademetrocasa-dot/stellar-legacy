@@ -828,8 +828,9 @@ export async function setBattleGroupRallyOnline({mapId,territoryFaction,x,y}={})
 
 // ===================== V18.1.0 DATA DRIVEN CORE =====================
 export async function loadRuntimeConfigOnline(){
-  const rows=await authedSupabaseFetch('/rest/v1/rpc/get_game_runtime_config_v1810',{method:'POST',body:'{}'});
-  return Array.isArray(rows)?rows[0]||null:rows||null;
+  // V18.1.3: o navegador não consulta mais a configuração da topbar diretamente no Supabase.
+  // O Render mantém um snapshot JSON temporário validado e entrega por uma rota autenticada.
+  return serverFetch('/api/runtime/topbar',{},true);
 }
 
 

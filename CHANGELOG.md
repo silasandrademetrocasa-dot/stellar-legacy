@@ -1,4 +1,4 @@
-## V18.1.2 — Topbar Router Hotfix
+## V18.1.3 — Topbar Router Hotfix
 
 - Corrige botões da topbar que podiam parar de responder após aplicação/reordenação Data Driven.
 - Adiciona roteador único por `module_key` para PILOTO, MISSÕES, BATALHA, CLÃ, MAPA, LEILÃO, LOJAS, ADM e CONF.
@@ -296,3 +296,11 @@ Versão anterior mantida no histórico do projeto base.
 - Rally compartilhado visível no minimapa.
 - Membros do grupo recebem identificação tática azul/ciano no mapa e minimapa.
 - Sem bônus de CR/STL/XP para preservar o balanceamento econômico.
+
+
+## V18.1.3 — Server Runtime Topbar Cache
+- Topbar agora usa snapshot SQL materializado pelo Render em JSON temporário.
+- Browser não consulta mais diretamente o RPC da topbar.
+- Ordem das abas usa CSS `order`; nenhum nó é reanexado no DOM.
+- Handlers originais dos botões permanecem intactos.
+- Configuração continua vindo do Supabase e pode mudar sem alterar o código do cliente.

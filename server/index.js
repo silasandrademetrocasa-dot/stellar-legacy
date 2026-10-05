@@ -1,6 +1,8 @@
 import express from 'express';
 import http from 'http';
 import path from 'path';
+import fs from 'fs/promises';
+import os from 'os';
 import { fileURLToPath } from 'url';
 import { createClient } from '@supabase/supabase-js';
 import { randomUUID } from 'crypto';
@@ -62,6 +64,86 @@ let liveOpsCacheAt = 0;
 const NPC_CONFIG_CACHE_MS = 12000;
 let npcRuntimeCache = null;
 let npcRuntimeCacheAt = 0;
+
+// V18.1.3 — SERVER RUNTIME TOPBAR CACHE
+// O Render busca a configuração no Supabase e materializa um snapshot temporário.
+// O navegador nunca reorganiza nós por reparenting; apenas lê este snapshot validado.
+const TOPBAR_RUNTIME_CACHE_MS = 15000;
+const TOPBAR_RUNTIME_DIR = path.join(os.tmpdir(), 'stellar-legacy-runtime');
+const TOPBAR_RUNTIME_FILE = path.join(TOPBAR_RUNTIME_DIR, 'topbar.runtime.json');
+const TOPBAR_ALLOWED_MODULES = new Set([
+  'pilot_menu','hangar','ship','pilot_research','pet',
+  'missions_menu','missions','pass',
+  'battle_menu','arena','warfront','gates','events','battle_group',
+  'clan','map','auction','shops_menu','shop','premium','admin','config'
+]);
+const TOPBAR_ALLOWED_FLAGS = new Set([
+  'missions','battle_pass','arena','warfront','battle_groups','clans','auction',
+  'premium_shop','crafting','economy_services','live_events'
+]);
+let topbarRuntimeCache = null;
+let topbarRuntimeCacheAt = 0;
+
+function sanitizeTopbarRuntime(raw){
+  const modules=Array.isArray(raw?.modules)?raw.modules.filter(x=>x&&TOPBAR_ALLOWED_MODULES.has(String(x.module_key||''))).map(x=>({
+    module_key:String(x.module_key),
+    parent_key:x.parent_key==null?null:String(x.parent_key),
+    label:String(x.label||'').slice(0,40),
+    sort_order:Math.max(0,Math.min(999,Number(x.sort_order)||100)),
+    min_level:Math.max(1,Math.min(100,Number(x.min_level)||1)),
+    enabled:x.enabled!==false,
+    hide_until_level:!!x.hide_until_level,
+    admin_only:!!x.admin_only,
+    config:x.config&&typeof x.config==='object'?x.config:{}
+  })):[];
+  const flags=Array.isArray(raw?.flags)?raw.flags.filter(x=>x&&TOPBAR_ALLOWED_FLAGS.has(String(x.flag_key||''))).map(x=>({
+    flag_key:String(x.flag_key),enabled:x.enabled!==false,description:String(x.description||'').slice(0,180),
+    config:x.config&&typeof x.config==='object'?x.config:{}
+  })):[];
+  return {
+    version:Math.max(0,Number(raw?.version)||0),updated_at:raw?.updated_at||null,
+    modules,flags,generated_at:new Date().toISOString(),source:'render-temp-json'
+  };
+}
+
+async function writeTopbarRuntimeFile(payload){
+  await fs.mkdir(TOPBAR_RUNTIME_DIR,{recursive:true});
+  const tmp=`${TOPBAR_RUNTIME_FILE}.${process.pid}.tmp`;
+  await fs.writeFile(tmp,JSON.stringify(payload),{encoding:'utf8'});
+  await fs.rename(tmp,TOPBAR_RUNTIME_FILE);
+}
+
+async function readTopbarRuntimeFile(){
+  try{
+    const text=await fs.readFile(TOPBAR_RUNTIME_FILE,'utf8');
+    const parsed=JSON.parse(text);
+    return parsed&&Array.isArray(parsed.modules)?parsed:null;
+  }catch{return null;}
+}
+
+async function refreshTopbarRuntimeSnapshot(force=false){
+  const now=Date.now();
+  if(!force&&topbarRuntimeCache&&now-topbarRuntimeCacheAt<TOPBAR_RUNTIME_CACHE_MS)return topbarRuntimeCache;
+  const sb=supabaseBase();
+  if(!sb)throw new Error('Supabase indisponível para configuração da topbar.');
+  const {data,error}=await sb.rpc('get_game_runtime_public_v1813');
+  if(error)throw new Error(`Falha ao carregar topbar runtime: ${error.message}`);
+  const payload=sanitizeTopbarRuntime(data||{});
+  if(!payload.modules.length)throw new Error('Snapshot da topbar veio vazio.');
+  await writeTopbarRuntimeFile(payload);
+  topbarRuntimeCache=payload;
+  topbarRuntimeCacheAt=now;
+  return payload;
+}
+
+async function loadTopbarRuntimeSnapshot(force=false){
+  try{return await refreshTopbarRuntimeSnapshot(force);}catch(err){
+    const disk=await readTopbarRuntimeFile();
+    if(disk){topbarRuntimeCache=disk;topbarRuntimeCacheAt=Date.now();return disk;}
+    throw err;
+  }
+}
+
 const livePurchaseLocks = new Map();
 
 async function loadLiveOpsSnapshot(force=false) {
@@ -316,7 +398,7 @@ async function accountUser(sb, user, preferred = '') {
   return { id: user.id, email: user.email, callsign };
 }
 
-app.get('/health', (req, res) => res.json({ ok: true, game: 'Stellar Legacy', version: '18.1.2', universe: 'shared' }));
+app.get('/health', (req, res) => res.json({ ok: true, game: 'Stellar Legacy', version: '18.1.3', universe: 'shared' }));
 
 
 app.get('/api/config', (req, res) => {
@@ -332,10 +414,22 @@ app.get('/api/config', (req, res) => {
 
 app.get('/api/meta', (req, res) => res.json({
   name: 'Stellar Legacy',
-  version: '18.1.2',
+  version: '18.1.3',
   authReady: Boolean(SUPABASE_URL && SUPABASE_KEY),
   diagnostics: configStatus(),
-  features: ['login', 'cloud_save', 'factions', 'safe_zone', 'shop', 'owned_ships', 'equipment_slots', 'inventory', 'drones', 'ammo', 'rockets', 'expanded_expedition_maps', 'cargo_hold', 'ore_trading', 'npc_cargo_boxes', 'npc_respawn', 'minimap_navigation', 'waypoints', 'landmark_discovery', 'combat_fx', 'pet_modules', 'auto_buy_cpu', 'v8_asset_identity', 'mission_control_v93', 'mission_acceptance_tracking', 'expanded_enemy_density', 'online_player_presence', 'real_player_auction', 'rank_nameplates_v12', 'clans_v12', 'clan_vault_v12', 'premium_shop_v12', 'battle_pass_paid_v12', 'premium_subscription_v12', 'clan_daily_economy_v12', 'portal_neutral_zone_v12', 'base_only_equipment_v12', 'single_session_v1214', 'manual_login_v141', 'account_bound_save_v141', 'unique_callsign_v141', 'premium_auto_combat_v141', 'shared_universe_v15', 'authoritative_npcs_v15', 'shared_ores_v15', 'shared_events_v15', 'websocket_world_v15', 'npc_contribution_v15', 'realtime_player_socket_v151', 'remote_laser_fx_v151', 'remote_aux9_v151', 'low_latency_world_v151', 'live_ops_v16', 'server_authoritative_shop_v16', 'supabase_event_schedule_v16', 'economy_guard_v161', 'server_auto_buy_v161', 'server_trader_v161', 'server_pet_slots_v161', 'server_materializer_v161', 'server_quantum_cores_v161', 'economy_fast_path_v1767', 'chat_dock_v162', 'drone_designers_v163', 'designer_sets_v163', 'nexus_eclipse_designer_drops_v163', 'global_chat_v162', 'clan_chat_v162', 'private_chat_v162', 'bottom_hud_reflow_v162', 'ship_designers_v165', 'aux_designers_v165', 'designer_ship_abilities_v165', 'event_designer_drops_v165', 'social_minimap_v165', 'realtime_designer_visuals_v165', 'data_driven_core_v1810', 'data_driven_npcs_v1811'],
+  features: ['login', 'cloud_save', 'factions', 'safe_zone', 'shop', 'owned_ships', 'equipment_slots', 'inventory', 'drones', 'ammo', 'rockets', 'expanded_expedition_maps', 'cargo_hold', 'ore_trading', 'npc_cargo_boxes', 'npc_respawn', 'minimap_navigation', 'waypoints', 'landmark_discovery', 'combat_fx', 'pet_modules', 'auto_buy_cpu', 'v8_asset_identity', 'mission_control_v93', 'mission_acceptance_tracking', 'expanded_enemy_density', 'online_player_presence', 'real_player_auction', 'rank_nameplates_v12', 'clans_v12', 'clan_vault_v12', 'premium_shop_v12', 'battle_pass_paid_v12', 'premium_subscription_v12', 'clan_daily_economy_v12', 'portal_neutral_zone_v12', 'base_only_equipment_v12', 'single_session_v1214', 'manual_login_v141', 'account_bound_save_v141', 'unique_callsign_v141', 'premium_auto_combat_v141', 'shared_universe_v15', 'authoritative_npcs_v15', 'shared_ores_v15', 'shared_events_v15', 'websocket_world_v15', 'npc_contribution_v15', 'realtime_player_socket_v151', 'remote_laser_fx_v151', 'remote_aux9_v151', 'low_latency_world_v151', 'live_ops_v16', 'server_authoritative_shop_v16', 'supabase_event_schedule_v16', 'economy_guard_v161', 'server_auto_buy_v161', 'server_trader_v161', 'server_pet_slots_v161', 'server_materializer_v161', 'server_quantum_cores_v161', 'economy_fast_path_v1767', 'chat_dock_v162', 'drone_designers_v163', 'designer_sets_v163', 'nexus_eclipse_designer_drops_v163', 'global_chat_v162', 'clan_chat_v162', 'private_chat_v162', 'bottom_hud_reflow_v162', 'ship_designers_v165', 'aux_designers_v165', 'designer_ship_abilities_v165', 'event_designer_drops_v165', 'social_minimap_v165', 'realtime_designer_visuals_v165', 'data_driven_core_v1810', 'data_driven_npcs_v1811', 'server_runtime_topbar_cache_v1813'],
+}));
+
+
+app.get('/api/runtime/topbar', requireUser, asyncRoute(async (req,res)=>{
+  const snapshot=await loadTopbarRuntimeSnapshot(Boolean(req.query?.refresh));
+  let isAdmin=false;
+  try{
+    const {data}=await req.sb.rpc('admin_status_v1763');
+    isAdmin=!!data?.is_admin;
+  }catch{}
+  res.set('Cache-Control','no-store');
+  res.json({...snapshot,is_admin:isAdmin});
 }));
 
 app.get('/api/diagnostics', asyncRoute(async (req, res) => {
@@ -732,7 +826,7 @@ app.post('/api/player/location', requireUser, asyncRoute(async (req,res)=>{
   return res.json(data||{ok:true});
 }));
 
-app.get('/api/world/status', (req, res) => res.json({ ok: true, version: '18.1.2', ...sharedUniverse.stats() }));
+app.get('/api/world/status', (req, res) => res.json({ ok: true, version: '18.1.3', ...sharedUniverse.stats() }));
 
 app.get('*', (req, res) => res.sendFile(path.join(__dirname, '../public/index.html')));
 
@@ -783,8 +877,15 @@ const sharedUniverse = attachSharedUniverse(server, {
   },
 });
 
+
+const topbarRefreshTimer=setInterval(()=>{
+  refreshTopbarRuntimeSnapshot(true).catch(err=>console.warn('[topbar-runtime] refresh:',err.message));
+},TOPBAR_RUNTIME_CACHE_MS);
+topbarRefreshTimer.unref?.();
+refreshTopbarRuntimeSnapshot(true).then(cfg=>console.log(`[topbar-runtime] v${cfg.version} cacheado em ${TOPBAR_RUNTIME_FILE}`)).catch(err=>console.warn('[topbar-runtime] bootstrap:',err.message));
+
 server.listen(port, () => {
-  console.log(`Stellar Legacy V18.1.2 :${port}`);
+  console.log(`Stellar Legacy V18.1.3 :${port}`);
   console.log('Supabase config:', configStatus());
   console.log('Shared Universe: ONLINE');
 });

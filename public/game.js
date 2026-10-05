@@ -1,7 +1,7 @@
-import { FACTIONS, SHIPS, ITEMS, LASER_AMMO, ROCKETS, NPC_TYPES, MAPS, RESOURCES } from './data.js?v=18.1.2';
-import { GAME_ASSETS } from './assets/v17/manifest.js?v=18.1.2';
-import { signUp, signIn, requestPasswordReset, restorePasswordRecoveryFromUrl, restoreSession, signOutLocal, checkGameSession, endGameSession, getUser, getSessionCredentials, loadCloudSave, saveCloudSave, updateCallsign, updatePassword, loadRankings, loadAuctionBids, saveAuctionBidOnline, markAuctionBidStatusOnline, loadAuctionMarket, upsertPlayerPresenceOnline, loadMapPresenceOnline, savePlayerLocationCheckpointOnline, loadPlayerLocationCheckpointOnline, removePlayerPresenceOnline, queuePvpAttackOnline, consumePvpDamageEventsOnline, syncArenaProfileOnline, loadArenaState, loadArenaDailyRewardStatus, claimArenaDailyReward, loadArenaOpponents, loadArenaHistory, arenaAttackOnline, listClansOnline, loadMyClanOnline, createClanOnline, joinClanOnline, leaveClanOnline, transferClanCreditsOnline, claimClanCreditGrantsOnline, recordClanAlienKillOnline, getPremiumShopOnline, testPurchasePremiumOnline, loadWarfrontStateOnline, hitWorldBossOnline, claimWorldBossRewardOnline, declareClanWarOnline, recordClanWarScoreOnline, loadLiveOpsOnline, purchaseLiveCatalogOnline, economyActionOnline, getChatHistoryOnline, sendChatMessageOnline, getMyDesignersOnline, setDesignLoadoutOnline, claimGateDroneDesignOnline, claimEventDesignerOnline, getAdminStatus, adminSearchAccounts, adminRecentActions, adminBanAccount, adminUnbanAccount, adminResetAccount, adminDeleteAccount, pushTelemetryBatch, adminTelemetryOverview, adminPlayerTelemetry, getBattleGroupOnline, createBattleGroupOnline, inviteBattleGroupOnline, searchBattleGroupPlayersOnline, inviteBattleGroupUserOnline, respondBattleGroupInviteOnline, leaveBattleGroupOnline, kickBattleGroupMemberOnline, setBattleGroupRallyOnline, loadRuntimeConfigOnline, loadNpcRuntimeConfigOnline } from './api.js?v=18.1.2';
-import { SharedUniverseClient } from './world.js?v=18.1.2';
+import { FACTIONS, SHIPS, ITEMS, LASER_AMMO, ROCKETS, NPC_TYPES, MAPS, RESOURCES } from './data.js?v=18.1.3';
+import { GAME_ASSETS } from './assets/v17/manifest.js?v=18.1.3';
+import { signUp, signIn, requestPasswordReset, restorePasswordRecoveryFromUrl, restoreSession, signOutLocal, checkGameSession, endGameSession, getUser, getSessionCredentials, loadCloudSave, saveCloudSave, updateCallsign, updatePassword, loadRankings, loadAuctionBids, saveAuctionBidOnline, markAuctionBidStatusOnline, loadAuctionMarket, upsertPlayerPresenceOnline, loadMapPresenceOnline, savePlayerLocationCheckpointOnline, loadPlayerLocationCheckpointOnline, removePlayerPresenceOnline, queuePvpAttackOnline, consumePvpDamageEventsOnline, syncArenaProfileOnline, loadArenaState, loadArenaDailyRewardStatus, claimArenaDailyReward, loadArenaOpponents, loadArenaHistory, arenaAttackOnline, listClansOnline, loadMyClanOnline, createClanOnline, joinClanOnline, leaveClanOnline, transferClanCreditsOnline, claimClanCreditGrantsOnline, recordClanAlienKillOnline, getPremiumShopOnline, testPurchasePremiumOnline, loadWarfrontStateOnline, hitWorldBossOnline, claimWorldBossRewardOnline, declareClanWarOnline, recordClanWarScoreOnline, loadLiveOpsOnline, purchaseLiveCatalogOnline, economyActionOnline, getChatHistoryOnline, sendChatMessageOnline, getMyDesignersOnline, setDesignLoadoutOnline, claimGateDroneDesignOnline, claimEventDesignerOnline, getAdminStatus, adminSearchAccounts, adminRecentActions, adminBanAccount, adminUnbanAccount, adminResetAccount, adminDeleteAccount, pushTelemetryBatch, adminTelemetryOverview, adminPlayerTelemetry, getBattleGroupOnline, createBattleGroupOnline, inviteBattleGroupOnline, searchBattleGroupPlayersOnline, inviteBattleGroupUserOnline, respondBattleGroupInviteOnline, leaveBattleGroupOnline, kickBattleGroupMemberOnline, setBattleGroupRallyOnline, loadRuntimeConfigOnline, loadNpcRuntimeConfigOnline } from './api.js?v=18.1.3';
+import { SharedUniverseClient } from './world.js?v=18.1.3';
 
 const canvas = document.querySelector('#game');
 const ctx = canvas.getContext('2d');
@@ -117,7 +117,7 @@ function qualityShouldPreload(path){
   return /\/branding\//.test(value)||/\/assets\/v17\/loot\/cargo-box\.webp/.test(value);
 }
 
-const ASSET_REVISION='18.1.2';
+const ASSET_REVISION='18.1.3';
 function versionedAssetUrl(path){
   const value=String(path||'');if(!value)return value;
   return value.includes('?')?`${value}&asset=${ASSET_REVISION}`:`${value}?asset=${ASSET_REVISION}`;
@@ -1027,10 +1027,13 @@ function runtimeModuleUnlocked(key){return (Number(progress?.profile?.level)||1)
 function runtimeSetButtonLabel(btn,label){if(!btn||!label)return;const node=[...btn.childNodes].find(n=>n.nodeType===Node.TEXT_NODE&&String(n.textContent||'').trim());if(node)node.textContent=`${label} `;else btn.insertBefore(document.createTextNode(`${label} `),btn.firstChild);}
 function runtimeModuleElement(key){const sel=RUNTIME_MODULE_SELECTORS[key];return sel?document.querySelector(sel):null;}
 function applyRuntimeMenuConfig(){
-  const level=Math.max(1,Number(progress?.profile?.level)||1),nav=document.querySelector('#topbar .command-actions');
+  const level=Math.max(1,Number(progress?.profile?.level)||1);
+  // V18.1.3: NUNCA reanexa os nós da topbar. A ordem vem do SQL, mas é aplicada
+  // somente via CSS order. Assim os elementos originais e seus listeners permanecem intactos.
   for(const [key,selector] of Object.entries(RUNTIME_MODULE_SELECTORS)){
     const row=runtimeModule(key),el=document.querySelector(selector);if(!el)continue;
     el.dataset.runtimeModule=key;
+    el.style.order=String(Number(row?.sort_order)||100);
     const enabled=runtimeModuleEnabled(key),unlocked=level>=runtimeModuleMinLevel(key,1),hidden=!enabled||(row?.admin_only&&!runtimeConfigRuntime.isAdmin)||(!unlocked&&row?.hide_until_level===true);
     el.classList.toggle('runtime-module-hidden',hidden);
     el.classList.toggle('runtime-module-locked',!hidden&&!unlocked);
@@ -1039,15 +1042,6 @@ function applyRuntimeMenuConfig(){
     runtimeSetButtonLabel(target,row?.label||RUNTIME_FALLBACK_MODULES.find(x=>x.module_key===key)?.label||key.toUpperCase());
     if(target&&!hidden&&!unlocked)target.title=`Libera no nível ${runtimeModuleMinLevel(key,1)}`;
     else if(target&&target.title?.startsWith('Libera no nível'))target.title='';
-  }
-  if(nav){
-    const top=[...runtimeConfigRuntime.modules.values()].filter(x=>!x.parent_key).sort((a,b)=>(Number(a.sort_order)||100)-(Number(b.sort_order)||100));
-    for(const row of top){const el=runtimeModuleElement(row.module_key);if(el&&el.parentElement===nav)nav.appendChild(el);}
-  }
-  for(const parent of [...runtimeConfigRuntime.modules.values()].filter(x=>!x.parent_key)){
-    const pel=runtimeModuleElement(parent.module_key),drop=pel?.querySelector?.(':scope > .menu-dropdown');if(!drop)continue;
-    const kids=[...runtimeConfigRuntime.modules.values()].filter(x=>x.parent_key===parent.module_key).sort((a,b)=>(Number(a.sort_order)||100)-(Number(b.sort_order)||100));
-    for(const row of kids){const el=runtimeModuleElement(row.module_key);if(el&&el.parentElement===drop)drop.appendChild(el);}
   }
 }
 function normalizeRuntimeConfig(raw,source='online'){
@@ -1071,57 +1065,26 @@ async function refreshRuntimeConfig(force=false){
 }
 function runtimeGuardMessage(key){const row=runtimeModule(key);if(!runtimeModuleEnabled(key))return `${row?.label||'Recurso'} está temporariamente desativado.`;const req=runtimeModuleMinLevel(key,1);if(!runtimeModuleUnlocked(key))return `${row?.label||'Recurso'} libera no nível ${req}.`;return '';}
 
-// V18.1.2: roteador único da topbar. A UI pode ser reordenada pelo banco sem perder os cliques.
-// Toda ação continua em whitelist local; o Supabase só escolhe posição/nome/nível/visibilidade.
-const RUNTIME_MENU_ACTIONS={
-  hangar:()=>openHangar('equipment'),
-  ship:()=>openHangar('ships'),
-  pilot_research:()=>openPilotProfile(),
-  pet:()=>openHangar('pet'),
-  missions:()=>openMissions(),
-  pass:()=>openProgression(),
-  arena:()=>openArena(),
-  warfront:()=>openWarfront(),
-  gates:()=>openGalaxyGate(),
-  events:()=>openGalaxyEvent(),
-  battle_group:()=>openBattleGroup(),
-  clan:()=>openClan(),
-  map:()=>openMapModal(),
-  auction:()=>openAuction(),
-  shop:()=>openShop(),
-  premium:()=>openPremiumShop(),
-  admin:()=>openAdminPanel(),
-  config:()=>openSettings()
-};
-const RUNTIME_MENU_GROUPS=new Set(['pilot_menu','missions_menu','battle_menu','shops_menu']);
-function installRuntimeMenuRouter(){
+// V18.1.3: a configuração da topbar chega por um snapshot temporário criado pelo Render.
+// Os handlers originais continuam sendo a única rota de clique. Este guard só bloqueia
+// módulos desativados/bloqueados; para módulos normais ele NÃO intercepta o evento.
+function installRuntimeMenuGuard(){
   const nav=document.querySelector('#topbar .command-actions');
-  if(!nav||nav.dataset.runtimeRouter==='1')return;
-  nav.dataset.runtimeRouter='1';
+  if(!nav||nav.dataset.runtimeGuard==='1')return;
+  nav.dataset.runtimeGuard='1';
   nav.addEventListener('click',e=>{
     const el=e.target.closest('[data-runtime-module]');
     if(!el||!nav.contains(el))return;
     const key=String(el.dataset.runtimeModule||'');
     if(!key)return;
     const msg=runtimeGuardMessage(key);
+    if(!msg)return;
     e.preventDefault();
     e.stopImmediatePropagation();
-    if(msg){showToast(msg);return;}
-    if(RUNTIME_MENU_GROUPS.has(key)){
-      const group=el.matches('.menu-group')?el:el.closest('.menu-group');
-      if(!group)return;
-      const opening=!group.classList.contains('open');
-      closeCommandMenus(group);
-      group.classList.toggle('open',opening);
-      return;
-    }
-    const action=RUNTIME_MENU_ACTIONS[key];
-    if(typeof action!=='function'){console.warn('[runtime-menu] ação não registrada',key);return;}
-    closeCommandMenus();
-    try{action();}catch(err){console.error('[runtime-menu] falha ao abrir',key,err);showToast('Não foi possível abrir este painel.');}
+    showToast(msg);
   },true);
 }
-installRuntimeMenuRouter();
+installRuntimeMenuGuard();
 setInterval(()=>{if(authenticated)refreshRuntimeConfig(false);},45000);
 
 // ===================== V18.1.1 NPC + RECOMPENSAS DATA DRIVEN =====================

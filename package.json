@@ -1,6 +1,6 @@
 {
   "name": "stellar-legacy",
-  "version": "18.1.2",
+  "version": "18.1.3",
   "type": "module",
   "scripts": {
     "start": "node server/index.js",
@@ -14,5 +14,5 @@
   "engines": {
     "node": ">=18"
   },
-  "release": "data-driven-topbar-router-hotfix-v18-1-2"
+  "release": "server-runtime-topbar-cache-v18-1-3"
 }
