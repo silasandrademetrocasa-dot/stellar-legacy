@@ -434,29 +434,29 @@ export async function loadMapPresenceOnline(mapId, territoryFaction='battle') {
   return Array.isArray(rows) ? rows : [];
 }
 
-// V17.7.5 • posição autoritativa separada do save econômico.
+// V17.7.6 • posição autoritativa separada do save econômico.
+// Bootstrap-critical: passa pelo próprio servidor do jogo. Isso evita que uma RPC direta
+// navegador -> Supabase segure a inicialização do mapa/NPCs quando a rota externa estiver lenta.
 export async function savePlayerLocationCheckpointOnline(payload, { keepalive = false } = {}) {
   if (!currentUser?.id) return null;
-  return authedSupabaseFetch('/rest/v1/rpc/save_player_location_v1774', {
+  return authedServerFetch('/api/player/location', {
     method: 'POST',
     keepalive: Boolean(keepalive),
     body: JSON.stringify({
-      p_map_id: String(payload?.mapId || 'x1'),
-      p_territory_faction: payload?.territoryFaction == null ? null : String(payload.territoryFaction),
-      p_x: Number(payload?.x || 0),
-      p_y: Number(payload?.y || 0),
-      p_angle: Number(payload?.angle || 0),
-      p_client_saved_at: Math.max(0, Math.trunc(Number(payload?.savedAt || Date.now()))),
+      mapId: String(payload?.mapId || 'x1'),
+      territoryFaction: payload?.territoryFaction == null ? null : String(payload.territoryFaction),
+      x: Number(payload?.x || 0),
+      y: Number(payload?.y || 0),
+      angle: Number(payload?.angle || 0),
+      savedAt: Math.max(0, Math.trunc(Number(payload?.savedAt || Date.now()))),
     }),
-  });
+  }, false);
 }
 
 export async function loadPlayerLocationCheckpointOnline() {
   if (!currentUser?.id) return null;
-  return authedSupabaseFetch('/rest/v1/rpc/get_my_player_location_v1774', {
-    method: 'POST',
-    body: '{}',
-  });
+  const body = await authedServerFetch('/api/player/location', {}, false);
+  return body?.location ?? body ?? null;
 }
 
 export async function listClansOnline() {

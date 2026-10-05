@@ -1,7 +1,7 @@
-import { FACTIONS, SHIPS, ITEMS, LASER_AMMO, ROCKETS, NPC_TYPES, MAPS, RESOURCES } from './data.js?v=17.7.5';
-import { GAME_ASSETS } from './assets/v17/manifest.js?v=17.7.5';
-import { signUp, signIn, requestPasswordReset, restorePasswordRecoveryFromUrl, restoreSession, signOutLocal, checkGameSession, endGameSession, getUser, getSessionCredentials, loadCloudSave, saveCloudSave, updateCallsign, updatePassword, loadRankings, loadAuctionBids, saveAuctionBidOnline, markAuctionBidStatusOnline, loadAuctionMarket, upsertPlayerPresenceOnline, loadMapPresenceOnline, savePlayerLocationCheckpointOnline, loadPlayerLocationCheckpointOnline, removePlayerPresenceOnline, queuePvpAttackOnline, consumePvpDamageEventsOnline, syncArenaProfileOnline, loadArenaState, loadArenaDailyRewardStatus, claimArenaDailyReward, loadArenaOpponents, loadArenaHistory, arenaAttackOnline, listClansOnline, loadMyClanOnline, createClanOnline, joinClanOnline, leaveClanOnline, transferClanCreditsOnline, claimClanCreditGrantsOnline, recordClanAlienKillOnline, getPremiumShopOnline, testPurchasePremiumOnline, loadWarfrontStateOnline, hitWorldBossOnline, claimWorldBossRewardOnline, declareClanWarOnline, recordClanWarScoreOnline, loadLiveOpsOnline, purchaseLiveCatalogOnline, economyActionOnline, getChatHistoryOnline, sendChatMessageOnline, getMyDesignersOnline, setDesignLoadoutOnline, claimGateDroneDesignOnline, claimEventDesignerOnline, getAdminStatus, adminSearchAccounts, adminRecentActions, adminBanAccount, adminUnbanAccount, adminResetAccount, adminDeleteAccount, pushTelemetryBatch, adminTelemetryOverview, adminPlayerTelemetry } from './api.js?v=17.7.5';
-import { SharedUniverseClient } from './world.js?v=17.7.5';
+import { FACTIONS, SHIPS, ITEMS, LASER_AMMO, ROCKETS, NPC_TYPES, MAPS, RESOURCES } from './data.js?v=17.7.6';
+import { GAME_ASSETS } from './assets/v17/manifest.js?v=17.7.6';
+import { signUp, signIn, requestPasswordReset, restorePasswordRecoveryFromUrl, restoreSession, signOutLocal, checkGameSession, endGameSession, getUser, getSessionCredentials, loadCloudSave, saveCloudSave, updateCallsign, updatePassword, loadRankings, loadAuctionBids, saveAuctionBidOnline, markAuctionBidStatusOnline, loadAuctionMarket, upsertPlayerPresenceOnline, loadMapPresenceOnline, savePlayerLocationCheckpointOnline, loadPlayerLocationCheckpointOnline, removePlayerPresenceOnline, queuePvpAttackOnline, consumePvpDamageEventsOnline, syncArenaProfileOnline, loadArenaState, loadArenaDailyRewardStatus, claimArenaDailyReward, loadArenaOpponents, loadArenaHistory, arenaAttackOnline, listClansOnline, loadMyClanOnline, createClanOnline, joinClanOnline, leaveClanOnline, transferClanCreditsOnline, claimClanCreditGrantsOnline, recordClanAlienKillOnline, getPremiumShopOnline, testPurchasePremiumOnline, loadWarfrontStateOnline, hitWorldBossOnline, claimWorldBossRewardOnline, declareClanWarOnline, recordClanWarScoreOnline, loadLiveOpsOnline, purchaseLiveCatalogOnline, economyActionOnline, getChatHistoryOnline, sendChatMessageOnline, getMyDesignersOnline, setDesignLoadoutOnline, claimGateDroneDesignOnline, claimEventDesignerOnline, getAdminStatus, adminSearchAccounts, adminRecentActions, adminBanAccount, adminUnbanAccount, adminResetAccount, adminDeleteAccount, pushTelemetryBatch, adminTelemetryOverview, adminPlayerTelemetry } from './api.js?v=17.7.6';
+import { SharedUniverseClient } from './world.js?v=17.7.6';
 
 const canvas = document.querySelector('#game');
 const ctx = canvas.getContext('2d');
@@ -117,7 +117,7 @@ function qualityShouldPreload(path){
   return /\/branding\//.test(value)||/\/assets\/v17\/loot\/cargo-box\.webp/.test(value);
 }
 
-const ASSET_REVISION='17.7.5';
+const ASSET_REVISION='17.7.6';
 function versionedAssetUrl(path){
   const value=String(path||'');if(!value)return value;
   return value.includes('?')?`${value}&asset=${ASSET_REVISION}`:`${value}?asset=${ASSET_REVISION}`;
@@ -325,6 +325,10 @@ function currentBasePoint(){
 let cloudDirty = false;
 let cloudBusy = false;
 let authenticated = false;
+// Login bootstrap must never expose a half-initialized world (HP 1/1, empty NPC map, etc.).
+const gameBootstrapRuntime={loading:false,ready:false,generation:0,lastError:null};
+function bootstrapDelay(ms){return new Promise(resolve=>setTimeout(resolve,ms));}
+
 
 // ===================== V15.1 SHARED UNIVERSE • REALTIME COMBAT PRESENCE =====================
 const sharedUniverseRuntime={ready:false,status:'offline',latency:0,event:null,roomKey:null,lastPlayerSyncAt:0,lastCombatSignature:'',pendingOres:new Set(),lastSnapshotToastAt:0};
@@ -608,7 +612,7 @@ async function claimEventDesignerDrop(ev){
 const economyRuntime={queue:Promise.resolve(),autoPending:new Set()};
 
 
-// ===================== V17.7.5 PROGRESSION TELEMETRY =====================
+// ===================== V17.7.6 PROGRESSION TELEMETRY =====================
 const TELEMETRY_SOURCE_KEYS=['npc','mission','resource','pass','event','gate','discovery','other'];
 function freshTelemetryPending(){return {counters:{sessions:0,play_seconds:0,kills:0,boxes:0,ore_nodes:0,ore_units:0,missions_completed:0,deaths:0,map_jumps:0,level_ups:0},spent:{cr:0,stl:0},sources:Object.fromEntries(TELEMETRY_SOURCE_KEYS.map(k=>[k,{cr:0,stl:0,xp:0}])),level_events:[]};}
 const telemetryRuntime={pending:freshTelemetryPending(),activeRemainder:0,lastFlushAt:0,flushing:false,sessionOpen:false};
@@ -693,7 +697,7 @@ function togglePilotBranch(branch){loadPilotUiPrefs();pilotUiPrefs.collapsed[bra
 function pilotRareChanceBonus(){return pilotCombined('luck1','luck2')/100;}function pilotLootBonus(){return pilotCombined('tractor1','tractor2')/100;}function pilotEvasion(){return Math.min(.35,pilotCombined('evasive1','evasive2')/100);}function pilotBattleLaserBonus(){return pilotCombined('bounty1','bounty2')/100;}function pilotKamikazeDamageBonus(){return pilotCombined('detonation1','detonation2')/100;}function pilotKamikazeRadiusBonus(){return pilotSkillValue('explosives')/100;}
 
 
-// ===================== V17.7.5 PILOT TITLES =====================
+// ===================== V17.7.6 PILOT TITLES =====================
 const PILOT_TITLES=[
   {id:'pioneer',label:'Pioneiro Estelar',desc:'Título inicial de todo piloto.',check:()=>true,req:'Disponível desde o início.'},
   {id:'cadet',label:'Cadete Estelar',desc:'Primeiros sistemas dominados.',check:()=>Number(progress?.profile?.level||1)>=5,req:'Alcance o nível 5.'},
@@ -2741,6 +2745,36 @@ function applyPresenceCheckpoint(row){
   console.info('[position] restored from server presence',mapId,Math.round(progress.x),Math.round(progress.y));
   return true;
 }
+function applyDedicatedCheckpointToProgress(row,{requireNewer=true}={}){
+  if(!progress||!row)return false;
+  const mapId=String(row.map_id||row.mapId||'');
+  const map=MAPS[mapId];if(!map)return false;
+  const x=Number(row.x),y=Number(row.y);
+  const savedAt=Math.max(0,Number(row.client_saved_at||row.savedAt)||Date.parse(row.updated_at||'')||0);
+  if(!Number.isFinite(x)||!Number.isFinite(y)||!savedAt)return false;
+  const currentStamp=Math.max(0,Number(progress.locationSavedAt)||0);
+  if(requireNewer&&savedAt<=currentStamp+25)return false;
+  const territory=['x1','x2','x3','x4'].includes(mapId)?(row.territory_faction||row.territoryFaction||progress.profile?.faction||null):null;
+  progress.mapId=mapId;progress.territoryFaction=territory;
+  progress.x=Math.max(35,Math.min(map.world.w-35,x));progress.y=Math.max(35,Math.min(map.world.h-35,y));
+  progress.savedMapId=mapId;progress.savedTerritoryFaction=territory;progress.locationSavedAt=savedAt;
+  progress.positionByMap ||= {};
+  const key=locationStorageKey(mapId,territory);
+  progress.positionByMap[key]={x:progress.x,y:progress.y,mapId,territoryFaction:territory,savedAt};
+  const normalized={x:progress.x,y:progress.y,mapId,territoryFaction:territory,savedAt};
+  try{localStorage.setItem(positionCheckpointKey(mapId,territory),JSON.stringify(normalized));localStorage.setItem(latestPositionCheckpointKey(),JSON.stringify(normalized));}catch{}
+  return true;
+}
+function reapplyDedicatedCheckpointToLiveWorld(row){
+  if(!progress||!row||movementPositionRuntime.hasMovedSinceLoad)return false;
+  if(!applyDedicatedCheckpointToProgress(row,{requireNewer:true}))return false;
+  // A localização chegou depois do primeiro frame. Reinicializa somente o mundo visual,
+  // sem substituir economia/inventário e sem esperar outros serviços.
+  try{sharedUniverse.close();sharedUniverseRuntime.ready=false;sharedUniverseRuntime.event=null;clearOnlinePlayers();}catch{}
+  try{startLoadedGame();console.info('[bootstrap] late location applied',progress.mapId,Math.round(progress.x),Math.round(progress.y));return true;}
+  catch(e){console.warn('[bootstrap] late location apply failed',e);return false;}
+}
+
 async function restoreBestRuntimePosition(){
   if(!progress)return false;
   const local=readLatestPositionCheckpoint();
@@ -4378,7 +4412,7 @@ function drawOnlinePlayers(){
 
 
 
-function update(dt){if(!progress)return;telemetryTick(dt);processRespawns();updateCombatAbilities();updatePlayer(dt);updateSharedUniverseInterpolation(dt);updateEnemies(dt);updatePet(dt);updateOnlineWorld(dt);updateWarfrontRuntime();updateGalaxyEvent(dt);updateParticles(dt);updateFx(dt);updateAlphaGate();updateAuctionSystem();updateUI();}
+function update(dt){if(!progress||gameBootstrapRuntime.loading)return;telemetryTick(dt);processRespawns();updateCombatAbilities();updatePlayer(dt);updateSharedUniverseInterpolation(dt);updateEnemies(dt);updatePet(dt);updateOnlineWorld(dt);updateWarfrontRuntime();updateGalaxyEvent(dt);updateParticles(dt);updateFx(dt);updateAlphaGate();updateAuctionSystem();updateUI();}
 
 function drawSectorGrid(){
   const spacing=800,b=visibleWorldBounds(0),startX=Math.floor(b.left/spacing)*spacing,startY=Math.floor(b.top/spacing)*spacing;
@@ -4637,7 +4671,7 @@ function drawMinimap(){
   }
   mm.fillStyle=getFaction()?.color||'#fff';mm.beginPath();mm.arc(px,py,4.5,0,TWO_PI);mm.fill();mm.strokeStyle='rgba(255,255,255,.7)';mm.stroke();
 }
-function draw(){const q=qualityProfile();ctx.clearRect(0,0,W,H);if(!progress){drawNebula();drawStars();return;}if(!(q.background&&drawMapBackground()))drawNebula();drawStars();drawEnvironmentLighting();if(q.grid)drawSectorGrid();drawBounds();drawLandmarks();drawBaseSafeZone();drawPortals();drawOres();drawLoot();drawGalaxyEventWorld();state.enemies.forEach(e=>e.hp>0&&onScreenWorld(e.x,e.y,180)&&drawEnemy(e));drawOnlinePlayers();if(q.fx)drawRocketFx();drawPlayer();drawPet();if(q.fx)drawFx();drawParticles();drawNavigationOverlay();drawMinimap();}
+function draw(){const q=qualityProfile();ctx.clearRect(0,0,W,H);if(!progress||gameBootstrapRuntime.loading){drawNebula();drawStars();return;}if(!(q.background&&drawMapBackground()))drawNebula();drawStars();drawEnvironmentLighting();if(q.grid)drawSectorGrid();drawBounds();drawLandmarks();drawBaseSafeZone();drawPortals();drawOres();drawLoot();drawGalaxyEventWorld();state.enemies.forEach(e=>e.hp>0&&onScreenWorld(e.x,e.y,180)&&drawEnemy(e));drawOnlinePlayers();if(q.fx)drawRocketFx();drawPlayer();drawPet();if(q.fx)drawFx();drawParticles();drawNavigationOverlay();drawMinimap();}
 
 function ammoWarningClass(qty,perUse){
   if(qty<=0)return 'empty';
@@ -6183,18 +6217,34 @@ function startLoadedGame(){
   state.lastPlayerDamageAt=nowSec();
   normalizeGalaxyGateState();normalizeCombatAbilities();
   const loadedGateKey=gateKeyForMap(progress.mapId);if(loadedGateKey&&!progress.galaxyGate[loadedGateKey]?.run?.active){progress.mapId='x1';progress.territoryFaction=progress.profile.faction;}else if(loadedGateKey)progress.galaxyGate.selected=loadedGateKey;
-  const savedLocation=savedLocationForCurrentMap(),savedX=savedLocation?.x??null,savedY=savedLocation?.y??null;state.currentMap=MAPS[progress.mapId]||MAPS.x1;state.radarRange=mapRadarRange();player.hp=progress.hp||1;player.shield=progress.shield||0;computeStats(true);player.hp=Math.min(player.maxHp,progress.hp??player.maxHp);player.shield=Math.min(player.maxShield,progress.shield??player.maxShield);
+  const savedLocation=savedLocationForCurrentMap(),savedX=savedLocation?.x??null,savedY=savedLocation?.y??null;
+  state.currentMap=MAPS[progress.mapId]||MAPS.x1;state.radarRange=mapRadarRange();
+  player.hp=Number(progress.hp)||1;player.shield=Math.max(0,Number(progress.shield)||0);
+  // Stats are bootstrap-critical. One subsystem must never prevent map/NPC/user initialization.
+  try{computeStats(true);}catch(e){
+    console.error('[bootstrap] computeStats failed; using safe ship fallback',e);
+    const ship=SHIPS[progress.activeShipId]||SHIPS.phoenix;
+    player.maxHp=Math.max(1,Number(ship?.hp)||1);player.maxShield=Math.max(0,Number(progress.shield)||0);player.speed=Math.max(1,Number(ship?.speed)||320);
+    player.hp=Math.max(1,Math.min(player.maxHp,Number(progress.hp)||player.maxHp));player.shield=Math.max(0,Math.min(player.maxShield,Number(progress.shield)||0));
+    progress.hp=player.hp;progress.shield=player.shield;
+  }
+  player.hp=Math.min(player.maxHp,Number(progress.hp??player.maxHp));player.shield=Math.min(player.maxShield,Number(progress.shield??player.maxShield));
   positionCheckpointRuntime.lastAt=0;positionCheckpointRuntime.lastX=null;positionCheckpointRuntime.lastY=null;positionCheckpointRuntime.lastKey=null;
   authoritativeLocationRuntime.lastAt=0;authoritativeLocationRuntime.lastX=null;authoritativeLocationRuntime.lastY=null;authoritativeLocationRuntime.lastKey=null;authoritativeLocationRuntime.lastSavedAt=0;authoritativeLocationRuntime.pending=false;
   movementPositionRuntime.wasMoving=false;movementPositionRuntime.lastCommitAt=0;movementPositionRuntime.lastX=null;movementPositionRuntime.lastY=null;movementPositionRuntime.loadedFromCheckpoint=!!savedLocation;movementPositionRuntime.hasMovedSinceLoad=false;movementPositionRuntime.spawnX=savedX;movementPositionRuntime.spawnY=savedY;
   if(isGalaxyGateMap()){
     const gd=galaxyGateDef();player.x=savedX??MAPS[gd.mapId].world.w/2;player.y=savedY??MAPS[gd.mapId].world.h/2;player.tx=player.x;player.ty=player.y;petRuntime.x=player.x+82;petRuntime.y=player.y+64;petRuntime.tx=petRuntime.x;petRuntime.ty=petRuntime.y;petRuntime.roamX=null;petRuntime.roamY=null;petRuntime.nextRoamAt=0;state.camera.x=player.x;state.camera.y=player.y;state.target=null;state.loot=[];state.fx=[];state.rocketFx=[];state.ores=[];state.landmarks=[];state.enemyRespawns=[];state.oreRespawns=[];restoreAlphaGateEnemies();const a=alphaGate(),def=galaxyGateDef().rounds[a.run.round-1],alive=alphaRemainingCount(),now=Date.now();if(a.run.waveIndex<def.waves.length&&!a.run.nextWaveAt){a.run.nextWaveAt=now+GALAXY_ALPHA_WAVE_INTERVAL_MS;}else if(a.run.waveIndex>=def.waves.length&&alive===0&&a.run.round<galaxyGateDef().rounds.length&&!a.run.nextRoundAt){a.run.nextRoundAt=now+GALAXY_ALPHA_ROUND_INTERVAL_MS;}renderAll();preloadActiveGameplayAssets();return;
   }
-  const spawnBase=currentBasePoint();player.x=savedX??(progress.mapId==='x1'?spawnBase.x:400);player.y=savedY??(progress.mapId==='x1'?spawnBase.y:state.currentMap.world.h/2);player.tx=player.x;player.ty=player.y;petRuntime.x=player.x+82;petRuntime.y=player.y+64;petRuntime.tx=petRuntime.x;petRuntime.ty=petRuntime.y;petRuntime.roamX=null;petRuntime.roamY=null;petRuntime.nextRoamAt=0;state.camera.x=player.x;state.camera.y=player.y;state.target=null;state.loot=[];state.fx=[];state.rocketFx=[];createLandmarks();state.ores=[];state.enemies=[];state.enemyRespawns=[];state.oreRespawns=[];galaxyEventRuntime.mapKey=null;sharedUniverseRuntime.event=null;joinSharedUniverse();renderAll();preloadActiveGameplayAssets();
+  const spawnBase=currentBasePoint();player.x=savedX??(progress.mapId==='x1'?spawnBase.x:400);player.y=savedY??(progress.mapId==='x1'?spawnBase.y:state.currentMap.world.h/2);player.tx=player.x;player.ty=player.y;petRuntime.x=player.x+82;petRuntime.y=player.y+64;petRuntime.tx=petRuntime.x;petRuntime.ty=petRuntime.y;petRuntime.roamX=null;petRuntime.roamY=null;petRuntime.nextRoamAt=0;state.camera.x=player.x;state.camera.y=player.y;state.target=null;state.loot=[];state.fx=[];state.rocketFx=[];createLandmarks();state.ores=[];state.enemies=[];state.enemyRespawns=[];state.oreRespawns=[];galaxyEventRuntime.mapKey=null;sharedUniverseRuntime.event=null;
+  try{joinSharedUniverse();}catch(e){console.error('[bootstrap] shared universe join failed',e);}
+  try{renderAll();}catch(e){console.error('[bootstrap] initial render failed',e);try{updateUI();}catch{}}
+  preloadActiveGameplayAssets();
   if(progress.repairRequired){movePlayerToHomeBase();player.hp=1;player.shield=0;progress.hp=1;progress.shield=0;saveGame();if(premiumActive())resolveDeathRepair({allowAuto:true});else openRepairModal();}
 }
 
 async function afterAuth(){
+  const generation=++gameBootstrapRuntime.generation;
+  gameBootstrapRuntime.loading=true;gameBootstrapRuntime.ready=false;gameBootstrapRuntime.lastError=null;
   authenticated=true;ui.loginModal.classList.add('hidden');ui.userLabel.textContent=getUser()?.callsign||getUser()?.email?.split('@')[0]||'Pilot';loadActivityLog();refreshAdminStatus(true);refreshClanState(true).then(()=>refreshRankings(true)).catch(()=>{});setSync('SINCRONIZANDO','busy');
   try{
     const accountId=String(getUser()?.id||'');
@@ -6222,26 +6272,51 @@ async function afterAuth(){
       progress=null;setSync('ONLINE','ok');
     }
   }catch(err){
-    console.warn(err);
-    if(err?.code==='SAVE_OWNER_MISMATCH'){authenticated=false;progress=null;signOutLocal();ui.loginModal.classList.remove('hidden');showAuthMode('login');ui.authMessage.textContent=err.message;setSync('BLOQUEADO','err');return;}
+    console.warn(err);gameBootstrapRuntime.lastError=err;
+    if(err?.code==='SAVE_OWNER_MISMATCH'){authenticated=false;progress=null;signOutLocal();ui.loginModal.classList.remove('hidden');showAuthMode('login');ui.authMessage.textContent=err.message;setSync('BLOQUEADO','err');gameBootstrapRuntime.loading=false;return;}
     loadLocalGame();setSync('OFFLINE','err');
   }
-  if(!progress){renderFactionChoice();return;}
-  // Posição é restaurada separadamente da economia. Primeiro tenta o checkpoint local
-  // e depois usa a última presença real gravada no servidor como fallback autoritativo.
-  const positionRestored=await restoreBestRuntimePosition();
-  console.info('[position] auth restore',positionRestored?'restored':'no checkpoint',progress.mapId,Math.round(Number(progress.x)||0),Math.round(Number(progress.y)||0));
-  await refreshPremiumState(true);
-  await refreshLiveOpsState(true);
-  await refreshDesignerState(true);
-  startLoadedGame();
-  renderChatTabs();refreshChatHistory(true);
-  updatePassBadge();
-  syncAuctionBidsOnline();
-  syncOnlineWorld();
-  syncClanCreditGrants(true);
-  refreshClanState(true);
-  refreshWarfrontState(true).catch(()=>{});
+  if(generation!==gameBootstrapRuntime.generation)return;
+  if(!progress){gameBootstrapRuntime.loading=false;renderFactionChoice();return;}
+
+  // 1) Posição local é síncrona e nunca bloqueia o mundo.
+  try{restoreLatestRuntimeLocationCheckpoint();}catch(e){console.warn('[bootstrap] local position',e);}
+
+  // 2) Damos uma janela CURTA para o checkpoint dedicado. Nunca mais deixamos RPC externa
+  // segurar stats, NPCs, usuários ou o WebSocket indefinidamente.
+  let locationPromise=null,locationSettled=false;
+  try{
+    locationPromise=loadPlayerLocationCheckpointOnline().then(row=>{locationSettled=true;return row;}).catch(e=>{locationSettled=true;console.warn('[bootstrap] server location',e);return null;});
+    const first=await Promise.race([locationPromise,bootstrapDelay(650).then(()=>null)]);
+    if(first)applyDedicatedCheckpointToProgress(first,{requireNewer:true});
+  }catch(e){console.warn('[bootstrap] position race',e);}
+
+  // 3) O MUNDO SOBE AGORA. Premium/LIVE OPS/Designers são secundários e nunca bloqueiam gameplay.
+  try{
+    startLoadedGame();
+    gameBootstrapRuntime.ready=true;
+    setSync('ONLINE','ok');
+  }catch(e){
+    gameBootstrapRuntime.lastError=e;console.error('[bootstrap] startLoadedGame fatal',e);
+    // Última barreira: mantém a nave e tenta o universo mesmo se um render auxiliar falhar.
+    try{state.currentMap=MAPS[progress.mapId]||MAPS.x1;const ship=SHIPS[progress.activeShipId]||SHIPS.phoenix;player.maxHp=Math.max(1,Number(ship.hp)||1);player.maxShield=Math.max(0,Number(progress.shield)||0);player.hp=Math.max(1,Math.min(player.maxHp,Number(progress.hp)||player.maxHp));player.shield=Math.max(0,Math.min(player.maxShield,Number(progress.shield)||0));player.x=Number(progress.x)||currentBasePoint().x;player.y=Number(progress.y)||state.currentMap.world.h/2;player.tx=player.x;player.ty=player.y;state.camera.x=player.x;state.camera.y=player.y;joinSharedUniverse();syncOnlineWorld();updateUI();gameBootstrapRuntime.ready=true;}catch(inner){console.error('[bootstrap] emergency fallback failed',inner);}
+  }finally{gameBootstrapRuntime.loading=false;}
+
+  renderChatTabs();refreshChatHistory(true);updatePassBadge();syncAuctionBidsOnline();syncOnlineWorld();syncClanCreditGrants(true);refreshClanState(true);refreshWarfrontState(true).catch(()=>{});
+
+  // Se a posição do servidor chegou depois dos 650ms e o jogador ainda não moveu a nave,
+  // ela pode corrigir o ponto inicial sem tocar em economia/inventário.
+  if(locationPromise&&!locationSettled){locationPromise.then(row=>{if(row&&generation===gameBootstrapRuntime.generation&&!movementPositionRuntime.hasMovedSinceLoad)reapplyDedicatedCheckpointToLiveWorld(row);}).catch(()=>{});}
+
+  // Serviços não críticos em background. Designers podem alterar stats, então recalculamos ao terminar.
+  Promise.allSettled([refreshPremiumState(true),refreshLiveOpsState(true),refreshDesignerState(true)]).then(()=>{
+    if(generation!==gameBootstrapRuntime.generation||!authenticated||!progress)return;
+    try{computeStats(true);buildAmmoButtons();refreshPetViews();renderShop();updateUI();syncSharedUniversePlayer(true);syncOnlineWorld();}catch(e){console.warn('[bootstrap] background refresh',e);}
+  });
+
+  // Watchdogs curtos: se WS/presença ainda não tiverem snapshot, tenta novamente sem bloquear o usuário.
+  setTimeout(()=>{if(generation===gameBootstrapRuntime.generation&&authenticated&&progress&&sharedUniverseMap()&&!sharedUniverseRuntime.ready){try{joinSharedUniverse();}catch{}syncOnlineWorld();}},2500);
+  setTimeout(()=>{if(generation===gameBootstrapRuntime.generation&&authenticated&&progress&&sharedUniverseMap()&&!sharedUniverseRuntime.ready){try{sharedUniverse.close();joinSharedUniverse();}catch{}syncOnlineWorld();}},6500);
 }
 
 async function boot(){

@@ -1,6 +1,6 @@
 {
   "name": "stellar-legacy",
-  "version": "17.6.3",
+  "version": "17.7.6",
   "type": "module",
   "scripts": {
     "start": "node server/index.js",
@@ -14,5 +14,5 @@
   "engines": {
     "node": ">=18"
   },
-  "release": "admin-control-panel-v17-6-3"
+  "release": "bootstrap-world-recovery-v17-7-6"
 }
