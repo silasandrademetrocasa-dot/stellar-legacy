@@ -1,3 +1,13 @@
+## V18.1.5 — Data Driven Systems
+
+- Missões: níveis, multiplicadores, metas diárias, steps semanais/mensais, pools de minério e chance de bônus via Supabase.
+- Missões customizadas podem ser criadas/removidas por RPC administrativo sem alterar o Git.
+- Economia 2.0: serviços da base agora vêm do Systems Runtime (custos, duração, escala por nível e efeitos).
+- Crafting: receitas, ingredientes, custo, moeda, nível mínimo e produto final agora vêm do Systems Runtime.
+- Render materializa `systems.runtime.json` com cache/fallback, no mesmo padrão estável da topbar/world runtime.
+- Servidor valida crafting e serviços usando o mesmo snapshot do cliente, evitando divergência de preço/regra.
+- Nenhuma alteração em posição, Warfront, Grupo de Batalha ou ownership de NPCs.
+
 ## V18.1.4 — Data Driven World
 
 - Novo World Runtime: mapas, setores, portais e recursos configuráveis pelo Supabase.

@@ -844,3 +844,9 @@ export async function loadNpcRuntimeConfigOnline(){
 export async function loadWorldRuntimeConfigOnline(){
   return serverFetch('/api/runtime/world',{},true);
 }
+
+
+// ===================== V18.1.5 SYSTEMS RUNTIME CONFIG =====================
+export async function loadSystemsRuntimeConfigOnline(){
+  return serverFetch('/api/runtime/systems',{},true);
+}

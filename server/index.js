@@ -90,6 +90,58 @@ const WORLD_RUNTIME_FILE = path.join(TOPBAR_RUNTIME_DIR, 'world.runtime.json');
 let worldRuntimeCache = null;
 let worldRuntimeCacheAt = 0;
 
+
+// V18.1.5 — MISSÕES + ECONOMIA + CRAFTING RUNTIME CACHE
+const SYSTEMS_RUNTIME_CACHE_MS = 15000;
+const SYSTEMS_RUNTIME_FILE = path.join(TOPBAR_RUNTIME_DIR, 'systems.runtime.json');
+let systemsRuntimeCache = null;
+let systemsRuntimeCacheAt = 0;
+const SYSTEM_MISSION_CATEGORIES = new Set(['daily','weekly','monthly','special']);
+const SYSTEM_SERVICE_IDS = new Set(['weapon','shield','cargo','thruster']);
+const SYSTEM_EFFECT_KEYS = new Set(['laser_damage_pct','shield_pct','cargo_flat','speed_flat']);
+const SYSTEM_GRANT_KINDS = new Set(['resource','ammo','rocket','repair']);
+function safeJsonNumberObject(obj,maxKeys=32,maxValue=1000000000){
+  const out={};if(!obj||typeof obj!=='object'||Array.isArray(obj))return out;
+  for(const [k,v] of Object.entries(obj).slice(0,maxKeys)){const id=safeWorldId(k),n=Math.max(0,Math.min(maxValue,Math.floor(Number(v)||0)));if(id&&n>0)out[id]=n;}return out;
+}
+function sanitizeMissionTask(task){
+  if(!task||typeof task!=='object')return null;const type=String(task.type||'');const id=String(task.id||'').slice(0,80);const target=Math.max(1,Math.min(1000000,Math.floor(Number(task.target)||1)));
+  if(type==='kill'){const npc=safeWorldId(task.npc);return npc?{id:id||`kill_${npc}_${target}`,type,npc,target}:null;}
+  if(type==='ore'){const resource=safeWorldId(task.resource);return resource?{id:id||`ore_${resource}_${target}`,type,resource,target}:null;}
+  return null;
+}
+function sanitizeSystemsRuntime(raw){
+  const mission_categories=Array.isArray(raw?.mission_categories)?raw.mission_categories.map(x=>({
+    category:String(x?.category||''),label:String(x?.label||'').slice(0,48),accent:String(x?.accent||'#58d9ff').slice(0,24),reset_kind:String(x?.reset_kind||'').slice(0,16),
+    min_level:Math.round(clampNum(x?.min_level,1,100,1)),reward_factor:clampNum(x?.reward_factor,0,10,1),item_chance:clampNum(x?.item_chance,0,1,0),enabled:x?.enabled!==false,
+    config:x?.config&&typeof x.config==='object'&&!Array.isArray(x.config)?x.config:{}
+  })).filter(x=>SYSTEM_MISSION_CATEGORIES.has(x.category)):[];
+  const custom_missions=Array.isArray(raw?.custom_missions)?raw.custom_missions.map(x=>({
+    mission_id:String(x?.mission_id||'').slice(0,80),category:String(x?.category||''),title:String(x?.title||'').slice(0,100),description:String(x?.description||'').slice(0,260),
+    tasks:Array.isArray(x?.tasks)?x.tasks.map(sanitizeMissionTask).filter(Boolean).slice(0,8):[],group_key:String(x?.group_key||'mix').slice(0,24),sequence:!!x?.sequence,
+    reward_factor:x?.reward_factor==null?null:clampNum(x.reward_factor,0,10,1),tag:x?.tag==null?null:String(x.tag).slice(0,64),
+    flat_reward:x?.flat_reward&&typeof x.flat_reward==='object'&&!Array.isArray(x.flat_reward)?x.flat_reward:null,enabled:x?.enabled!==false,sort_order:Math.round(clampNum(x?.sort_order,0,9999,100))
+  })).filter(x=>x.mission_id&&SYSTEM_MISSION_CATEGORIES.has(x.category)&&x.tasks.length):[];
+  const economy_services=Array.isArray(raw?.economy_services)?raw.economy_services.map(x=>{
+    const effect={};if(x?.effect&&typeof x.effect==='object'&&!Array.isArray(x.effect)){for(const [k,v] of Object.entries(x.effect)){if(SYSTEM_EFFECT_KEYS.has(k))effect[k]=clampNum(v,-100000,100000,0);}}
+    return {service_id:String(x?.service_id||''),name:String(x?.name||'').slice(0,80),description:String(x?.description||'').slice(0,180),base_cost:Math.max(0,Math.round(Number(x?.base_cost)||0)),duration_ms:Math.round(clampNum(x?.duration_ms,60000,86400000,3600000)),level_band_size:Math.round(clampNum(x?.level_band_size,1,100,5)),level_cost_scale:clampNum(x?.level_cost_scale,0,10,.35),max_stack_ms:Math.round(clampNum(x?.max_stack_ms,60000,604800000,21600000)),effect,enabled:x?.enabled!==false,sort_order:Math.round(clampNum(x?.sort_order,0,9999,100))};
+  }).filter(x=>SYSTEM_SERVICE_IDS.has(x.service_id)):[];
+  const crafting_recipes=Array.isArray(raw?.crafting_recipes)?raw.crafting_recipes.map(x=>{
+    const g=x?.grant_payload&&typeof x.grant_payload==='object'?x.grant_payload:{};const kind=String(g.kind||'');const grant=SYSTEM_GRANT_KINDS.has(kind)?{kind,id:g.id?safeWorldId(g.id):undefined,qty:Math.max(1,Math.min(10000000,Math.floor(Number(g.qty)||1)))}:{};
+    return {recipe_id:String(x?.recipe_id||'').slice(0,64),name:String(x?.name||'').slice(0,80),description:String(x?.description||'').slice(0,180),cost:Math.max(0,Math.round(Number(x?.cost)||0)),currency:String(x?.currency)==='uridium'?'uridium':'credits',ingredients:safeJsonNumberObject(x?.ingredients),grant_payload:grant,output_label:String(x?.output_label||'').slice(0,80),min_level:Math.round(clampNum(x?.min_level,1,100,1)),enabled:x?.enabled!==false,sort_order:Math.round(clampNum(x?.sort_order,0,9999,100))};
+  }).filter(x=>x.recipe_id&&x.name&&x.grant_payload.kind):[];
+  return {version:Math.max(0,Number(raw?.version)||0),updated_at:raw?.updated_at||null,mission_categories,custom_missions,economy_services,crafting_recipes,generated_at:new Date().toISOString(),source:'render-temp-json'};
+}
+async function writeSystemsRuntimeFile(payload){await fs.mkdir(TOPBAR_RUNTIME_DIR,{recursive:true});const tmp=`${SYSTEMS_RUNTIME_FILE}.${process.pid}.tmp`;await fs.writeFile(tmp,JSON.stringify(payload),{encoding:'utf8'});await fs.rename(tmp,SYSTEMS_RUNTIME_FILE);}
+async function readSystemsRuntimeFile(){try{const text=await fs.readFile(SYSTEMS_RUNTIME_FILE,'utf8');const parsed=JSON.parse(text);return parsed&&Array.isArray(parsed.economy_services)?parsed:null;}catch{return null;}}
+async function refreshSystemsRuntimeSnapshot(force=false){
+  const now=Date.now();if(!force&&systemsRuntimeCache&&now-systemsRuntimeCacheAt<SYSTEMS_RUNTIME_CACHE_MS)return systemsRuntimeCache;
+  const sb=supabaseBase();if(!sb)throw new Error('Supabase indisponível para configuração de sistemas.');const {data,error}=await sb.rpc('get_systems_runtime_config_v1815');if(error)throw new Error(`Falha ao carregar systems runtime: ${error.message}`);
+  const payload=sanitizeSystemsRuntime(data||{});if(!payload.mission_categories.length||!payload.economy_services.length||!payload.crafting_recipes.length)throw new Error('Snapshot de sistemas veio incompleto.');
+  await writeSystemsRuntimeFile(payload);systemsRuntimeCache=payload;systemsRuntimeCacheAt=now;return payload;
+}
+async function loadSystemsRuntimeSnapshot(force=false){try{return await refreshSystemsRuntimeSnapshot(force);}catch(err){const disk=await readSystemsRuntimeFile();if(disk){systemsRuntimeCache=disk;systemsRuntimeCacheAt=Date.now();return disk;}throw err;}}
+
 function clampNum(value,min,max,fallback){
   const n=Number(value);return Number.isFinite(n)?Math.max(min,Math.min(max,n)):fallback;
 }
@@ -460,7 +512,7 @@ async function accountUser(sb, user, preferred = '') {
   return { id: user.id, email: user.email, callsign };
 }
 
-app.get('/health', (req, res) => res.json({ ok: true, game: 'Stellar Legacy', version: '18.1.4', universe: 'shared' }));
+app.get('/health', (req, res) => res.json({ ok: true, game: 'Stellar Legacy', version: '18.1.5', universe: 'shared' }));
 
 
 app.get('/api/config', (req, res) => {
@@ -476,10 +528,10 @@ app.get('/api/config', (req, res) => {
 
 app.get('/api/meta', (req, res) => res.json({
   name: 'Stellar Legacy',
-  version: '18.1.4',
+  version: '18.1.5',
   authReady: Boolean(SUPABASE_URL && SUPABASE_KEY),
   diagnostics: configStatus(),
-  features: ['login', 'cloud_save', 'factions', 'safe_zone', 'shop', 'owned_ships', 'equipment_slots', 'inventory', 'drones', 'ammo', 'rockets', 'expanded_expedition_maps', 'cargo_hold', 'ore_trading', 'npc_cargo_boxes', 'npc_respawn', 'minimap_navigation', 'waypoints', 'landmark_discovery', 'combat_fx', 'pet_modules', 'auto_buy_cpu', 'v8_asset_identity', 'mission_control_v93', 'mission_acceptance_tracking', 'expanded_enemy_density', 'online_player_presence', 'real_player_auction', 'rank_nameplates_v12', 'clans_v12', 'clan_vault_v12', 'premium_shop_v12', 'battle_pass_paid_v12', 'premium_subscription_v12', 'clan_daily_economy_v12', 'portal_neutral_zone_v12', 'base_only_equipment_v12', 'single_session_v1214', 'manual_login_v141', 'account_bound_save_v141', 'unique_callsign_v141', 'premium_auto_combat_v141', 'shared_universe_v15', 'authoritative_npcs_v15', 'shared_ores_v15', 'shared_events_v15', 'websocket_world_v15', 'npc_contribution_v15', 'realtime_player_socket_v151', 'remote_laser_fx_v151', 'remote_aux9_v151', 'low_latency_world_v151', 'live_ops_v16', 'server_authoritative_shop_v16', 'supabase_event_schedule_v16', 'economy_guard_v161', 'server_auto_buy_v161', 'server_trader_v161', 'server_pet_slots_v161', 'server_materializer_v161', 'server_quantum_cores_v161', 'economy_fast_path_v1767', 'chat_dock_v162', 'drone_designers_v163', 'designer_sets_v163', 'nexus_eclipse_designer_drops_v163', 'global_chat_v162', 'clan_chat_v162', 'private_chat_v162', 'bottom_hud_reflow_v162', 'ship_designers_v165', 'aux_designers_v165', 'designer_ship_abilities_v165', 'event_designer_drops_v165', 'social_minimap_v165', 'realtime_designer_visuals_v165', 'data_driven_core_v1810', 'data_driven_npcs_v1811', 'server_runtime_topbar_cache_v1813', 'data_driven_world_v1814'],
+  features: ['login', 'cloud_save', 'factions', 'safe_zone', 'shop', 'owned_ships', 'equipment_slots', 'inventory', 'drones', 'ammo', 'rockets', 'expanded_expedition_maps', 'cargo_hold', 'ore_trading', 'npc_cargo_boxes', 'npc_respawn', 'minimap_navigation', 'waypoints', 'landmark_discovery', 'combat_fx', 'pet_modules', 'auto_buy_cpu', 'v8_asset_identity', 'mission_control_v93', 'mission_acceptance_tracking', 'expanded_enemy_density', 'online_player_presence', 'real_player_auction', 'rank_nameplates_v12', 'clans_v12', 'clan_vault_v12', 'premium_shop_v12', 'battle_pass_paid_v12', 'premium_subscription_v12', 'clan_daily_economy_v12', 'portal_neutral_zone_v12', 'base_only_equipment_v12', 'single_session_v1214', 'manual_login_v141', 'account_bound_save_v141', 'unique_callsign_v141', 'premium_auto_combat_v141', 'shared_universe_v15', 'authoritative_npcs_v15', 'shared_ores_v15', 'shared_events_v15', 'websocket_world_v15', 'npc_contribution_v15', 'realtime_player_socket_v151', 'remote_laser_fx_v151', 'remote_aux9_v151', 'low_latency_world_v151', 'live_ops_v16', 'server_authoritative_shop_v16', 'supabase_event_schedule_v16', 'economy_guard_v161', 'server_auto_buy_v161', 'server_trader_v161', 'server_pet_slots_v161', 'server_materializer_v161', 'server_quantum_cores_v161', 'economy_fast_path_v1767', 'chat_dock_v162', 'drone_designers_v163', 'designer_sets_v163', 'nexus_eclipse_designer_drops_v163', 'global_chat_v162', 'clan_chat_v162', 'private_chat_v162', 'bottom_hud_reflow_v162', 'ship_designers_v165', 'aux_designers_v165', 'designer_ship_abilities_v165', 'event_designer_drops_v165', 'social_minimap_v165', 'realtime_designer_visuals_v165', 'data_driven_core_v1810', 'data_driven_npcs_v1811', 'server_runtime_topbar_cache_v1813', 'data_driven_world_v1814', 'data_driven_systems_v1815'],
 }));
 
 
@@ -496,6 +548,13 @@ app.get('/api/runtime/topbar', requireUser, asyncRoute(async (req,res)=>{
 
 app.get('/api/runtime/world', requireUser, asyncRoute(async (req,res)=>{
   const snapshot=await loadWorldRuntimeSnapshot(Boolean(req.query?.refresh));
+  res.set('Cache-Control','no-store');
+  res.json(snapshot);
+}));
+
+
+app.get('/api/runtime/systems', requireUser, asyncRoute(async (req,res)=>{
+  const snapshot=await loadSystemsRuntimeSnapshot(Boolean(req.query?.refresh));
   res.set('Cache-Control','no-store');
   res.json(snapshot);
 }));
@@ -703,19 +762,32 @@ app.post('/api/live/purchase', requireUser, asyncRoute(async (req,res)=>{
 
 
 const BASE_SERVICES_V1783={
-  weapon:{baseCost:1500000,duration:3600000},shield:{baseCost:1000000,duration:3600000},cargo:{baseCost:750000,duration:3600000},thruster:{baseCost:1000000,duration:3600000}
+  weapon:{name:'Calibração de Armamento',description:'+3% dano laser por 60 minutos.',base_cost:1500000,duration_ms:3600000,level_band_size:5,level_cost_scale:.35,max_stack_ms:21600000,effect:{laser_damage_pct:3},enabled:true},
+  shield:{name:'Harmonização de Escudo',description:'+5% escudo máximo por 60 minutos.',base_cost:1000000,duration_ms:3600000,level_band_size:5,level_cost_scale:.35,max_stack_ms:21600000,effect:{shield_pct:5},enabled:true},
+  cargo:{name:'Otimização de Porão',description:'+750 capacidade de carga por 60 minutos.',base_cost:750000,duration_ms:3600000,level_band_size:5,level_cost_scale:.35,max_stack_ms:21600000,effect:{cargo_flat:750},enabled:true},
+  thruster:{name:'Ajuste de Propulsão',description:'+5 velocidade por 60 minutos.',base_cost:1000000,duration_ms:3600000,level_band_size:5,level_cost_scale:.35,max_stack_ms:21600000,effect:{speed_flat:5},enabled:true}
 };
-function activateBaseServiceServer(state,id){const def=BASE_SERVICES_V1783[id];if(!def)throw Object.assign(new Error('Serviço inexistente.'),{status:404});const mapOk=String(state.mapId||'')==='x1'&&String(state.territoryFaction||state.profile?.faction||'')===String(state.profile?.faction||'');if(!mapOk)throw Object.assign(new Error('Serviço disponível somente na sua base X-1.'),{status:409});const lv=Math.max(1,Number(state.profile?.level)||1),band=Math.floor((lv-1)/5),cost=Math.round(def.baseCost*(1+band*.35));debitServer(state,cost,'credits');state.economyBoosts ||= {};const now=Date.now(),current=Math.max(now,Number(state.economyBoosts[id])||0),cap=now+6*3600000;state.economyBoosts[id]=Math.min(cap,current+def.duration);return {cost,expires_at:state.economyBoosts[id]};}
-
 const CRAFT_RECIPES_V1782={
-  prometid_batch:{cost:200000,ingredients:{Prometium:220,Endurium:120,Terbium:80},grant:{kind:'resource',id:'Prometid',qty:30},label:'30 Ferrite'},
-  duranium_batch:{cost:400000,ingredients:{Endurium:140,Terbium:140,Prometid:20},grant:{kind:'resource',id:'Duranium',qty:20},label:'20 Duracite'},
-  promerium_batch:{cost:1500000,ingredients:{Prometid:35,Duranium:35,Xenomit:3},grant:{kind:'resource',id:'Promerium',qty:5},label:'5 Solarium'},
-  ammo_pls2:{cost:750000,ingredients:{Prometid:25,Duranium:25,Promerium:1},grant:{kind:'ammo',id:'mcb25',qty:1500},label:'1.500 PLS-2'},
-  rocket_pack:{cost:500000,ingredients:{Duranium:20,Promerium:1},grant:{kind:'rocket',id:'plt2026',qty:100},label:'100 R-2026'},
-  repair_bonus:{cost:1000000,ingredients:{Prometium:40,Endurium:40,Duranium:20},grant:{kind:'repair',qty:1},label:'1 Bônus de Reparo'}
+  prometid_batch:{name:'Ferrite Refinada',description:'Comprime minérios básicos em Ferrite.',cost:200000,currency:'credits',ingredients:{Prometium:220,Endurium:120,Terbium:80},grant_payload:{kind:'resource',id:'Prometid',qty:30},output_label:'30 Ferrite',min_level:1,enabled:true},
+  duranium_batch:{name:'Duracite Refinada',description:'Liga estrutural de média densidade.',cost:400000,currency:'credits',ingredients:{Endurium:140,Terbium:140,Prometid:20},grant_payload:{kind:'resource',id:'Duranium',qty:20},output_label:'20 Duracite',min_level:1,enabled:true},
+  promerium_batch:{name:'Solarium Refinado',description:'Material raro para receitas avançadas.',cost:1500000,currency:'credits',ingredients:{Prometid:35,Duranium:35,Xenomit:3},grant_payload:{kind:'resource',id:'Promerium',qty:5},output_label:'5 Solarium',min_level:1,enabled:true},
+  ammo_pls2:{name:'Lote PLS-2',description:'Produção de munição usando ligas refinadas.',cost:750000,currency:'credits',ingredients:{Prometid:25,Duranium:25,Promerium:1},grant_payload:{kind:'ammo',id:'mcb25',qty:1500},output_label:'1.500 PLS-2',min_level:1,enabled:true},
+  rocket_pack:{name:'Lote R-2026',description:'Mísseis intermediários produzidos na base.',cost:500000,currency:'credits',ingredients:{Duranium:20,Promerium:1},grant_payload:{kind:'rocket',id:'plt2026',qty:100},output_label:'100 R-2026',min_level:1,enabled:true},
+  repair_bonus:{name:'Carga de Nanorreparo',description:'Converte recursos em 1 Bônus de Reparo.',cost:1000000,currency:'credits',ingredients:{Prometium:40,Endurium:40,Duranium:20},grant_payload:{kind:'repair',qty:1},output_label:'1 Bônus de Reparo',min_level:1,enabled:true}
 };
-function applyCraftRecipeServer(state,recipeId){const recipe=CRAFT_RECIPES_V1782[recipeId];if(!recipe)throw Object.assign(new Error('Receita inexistente.'),{status:404});const mapOk=String(state.mapId||'')==='x1'&&String(state.territoryFaction||state.profile?.faction||'')===String(state.profile?.faction||'');if(!mapOk)throw Object.assign(new Error('Refinaria disponível somente na sua base X-1.'),{status:409});state.cargo ||= {};for(const [id,qty] of Object.entries(recipe.ingredients)){const have=Math.max(0,Math.floor(Number(state.cargo[id])||0));if(have<qty)throw Object.assign(new Error(`Recursos insuficientes: ${id}.`),{status:409});}debitServer(state,recipe.cost,'credits');for(const [id,qty] of Object.entries(recipe.ingredients)){state.cargo[id]=Math.max(0,Math.floor(Number(state.cargo[id])||0)-qty);if(state.cargo[id]<=0)delete state.cargo[id];}const g=recipe.grant;if(g.kind==='resource')state.cargo[g.id]=(Number(state.cargo[g.id])||0)+g.qty;else if(g.kind==='ammo'){state.ammo ||= {};state.ammo[g.id]=(Number(state.ammo[g.id])||0)+g.qty;}else if(g.kind==='rocket'){state.rockets ||= {};state.rockets[g.id]=(Number(state.rockets[g.id])||0)+g.qty;}else if(g.kind==='repair'){state.galaxyGate ||= {};state.galaxyGate.repairBonus=Math.max(0,Number(state.galaxyGate.repairBonus)||0)+g.qty;}return recipe;}
+function runtimeServiceDef(runtime,id){const rows=Array.isArray(runtime?.economy_services)?runtime.economy_services:null;if(rows){const hit=rows.find(x=>x.service_id===id);return hit?(hit.enabled===false?null:hit):null;}return BASE_SERVICES_V1783[id]||null;}
+function runtimeCraftDef(runtime,id){const rows=Array.isArray(runtime?.crafting_recipes)?runtime.crafting_recipes:null;if(rows){const hit=rows.find(x=>x.recipe_id===id);return hit?(hit.enabled===false?null:hit):null;}return CRAFT_RECIPES_V1782[id]||null;}
+function activateBaseServiceServer(state,id,runtime){
+  const def=runtimeServiceDef(runtime,id);if(!def)throw Object.assign(new Error('Serviço inexistente ou desativado.'),{status:404});const mapOk=String(state.mapId||'')==='x1'&&String(state.territoryFaction||state.profile?.faction||'')===String(state.profile?.faction||'');if(!mapOk)throw Object.assign(new Error('Serviço disponível somente na sua base X-1.'),{status:409});
+  const lv=Math.max(1,Number(state.profile?.level)||1),bandSize=Math.max(1,Number(def.level_band_size)||5),band=Math.floor((lv-1)/bandSize),scale=Math.max(0,Number(def.level_cost_scale)||0),base=Math.max(0,Number(def.base_cost??def.baseCost)||0),cost=Math.round(base*(1+band*scale));debitServer(state,cost,'credits');
+  state.economyBoosts ||= {};const now=Date.now(),current=Math.max(now,Number(state.economyBoosts[id])||0),duration=Math.max(60000,Number(def.duration_ms??def.duration)||3600000),cap=now+Math.max(duration,Number(def.max_stack_ms)||21600000);state.economyBoosts[id]=Math.min(cap,current+duration);return {cost,expires_at:state.economyBoosts[id],duration_ms:duration};
+}
+function applyCraftRecipeServer(state,recipeId,runtime){
+  const recipe=runtimeCraftDef(runtime,recipeId);if(!recipe)throw Object.assign(new Error('Receita inexistente ou desativada.'),{status:404});const mapOk=String(state.mapId||'')==='x1'&&String(state.territoryFaction||state.profile?.faction||'')===String(state.profile?.faction||'');if(!mapOk)throw Object.assign(new Error('Refinaria disponível somente na sua base X-1.'),{status:409});
+  const level=Math.max(1,Number(state.profile?.level)||1),minLevel=Math.max(1,Number(recipe.min_level)||1);if(level<minLevel)throw Object.assign(new Error(`Receita libera no nível ${minLevel}.`),{status:409});state.cargo ||= {};for(const [id,qty] of Object.entries(recipe.ingredients||{})){const have=Math.max(0,Math.floor(Number(state.cargo[id])||0));if(have<qty)throw Object.assign(new Error(`Recursos insuficientes: ${id}.`),{status:409});}
+  const currency=String(recipe.currency)==='uridium'?'uridium':'credits',cost=Math.max(0,Number(recipe.cost)||0);debitServer(state,cost,currency);for(const [id,qty] of Object.entries(recipe.ingredients||{})){state.cargo[id]=Math.max(0,Math.floor(Number(state.cargo[id])||0)-qty);if(state.cargo[id]<=0)delete state.cargo[id];}
+  const g=recipe.grant_payload||recipe.grant||{};if(g.kind==='resource')state.cargo[g.id]=(Number(state.cargo[g.id])||0)+g.qty;else if(g.kind==='ammo'){state.ammo ||= {};state.ammo[g.id]=(Number(state.ammo[g.id])||0)+g.qty;}else if(g.kind==='rocket'){state.rockets ||= {};state.rockets[g.id]=(Number(state.rockets[g.id])||0)+g.qty;}else if(g.kind==='repair'){state.galaxyGate ||= {};state.galaxyGate.repairBonus=Math.max(0,Number(state.galaxyGate.repairBonus)||0)+g.qty;}return {...recipe,currency,cost,output_label:recipe.output_label||recipe.label};
+}
 
 app.post('/api/economy/action', requireUser, asyncRoute(async (req,res)=>{
   const routeStarted=Date.now();
@@ -725,10 +797,12 @@ app.post('/api/economy/action', requireUser, asyncRoute(async (req,res)=>{
   const result=await withPurchaseLock(req.user.id,async()=>{
     const catalogActions=new Set(['auto_buy','unlock_pet_slot','buy_quantum_cores','sell_cargo','sell_inventory','sell_drone','gate_life','gate_spin']);
     const premiumActions=new Set(['auto_buy','gate_spin']);
-    const [snapshot,state,premiumResult]=await Promise.all([
+    const systemsActions=new Set(['base_service','craft_recipe']);
+    const [snapshot,state,premiumResult,systemsSnapshot]=await Promise.all([
       catalogActions.has(action)?loadLiveOpsSnapshot(false):Promise.resolve(null),
       readEconomySave(req),
-      premiumActions.has(action)?req.sb.rpc('get_premium_shop_v12'):Promise.resolve({data:null,error:null})
+      premiumActions.has(action)?req.sb.rpc('get_premium_shop_v12'):Promise.resolve({data:null,error:null}),
+      systemsActions.has(action)?loadSystemsRuntimeSnapshot(false).catch(()=>null):Promise.resolve(null)
     ]);
     if(premiumResult?.error)throw new Error(premiumResult.error.message);
     const premium=!!premiumResult?.data?.premium_active;
@@ -754,10 +828,10 @@ app.post('/api/economy/action', requireUser, asyncRoute(async (req,res)=>{
       state.pilotBio ||= {};const p=state.pilotBio;p.logDisks=Math.max(0,Math.floor(Number(p.logDisks)||0));p.totalPoints=Math.max(0,Math.floor(Number(p.totalPoints)||0));if(p.totalPoints>=50)throw Object.assign(new Error('Limite de 50 Pontos de Pesquisa atingido.'),{status:409});const next=p.totalPoints+1,cost=Math.max(30,Math.round(30*Math.pow(1.1,Math.max(0,next-1))));if(p.logDisks<cost)throw Object.assign(new Error(`Faltam ${cost-p.logDisks} Núcleos Quânticos.`),{status:409});p.logDisks-=cost;p.totalPoints=next;info={action,point:next,cost,remaining_cores:p.logDisks};
     }
     else if(action==='base_service'){
-      const serviceId=String(payload.service_id||'').slice(0,40),svc=activateBaseServiceServer(state,serviceId);info={action,service_id:serviceId,cost:svc.cost,currency:'credits',expires_at:svc.expires_at};
+      const serviceId=String(payload.service_id||'').slice(0,40),svc=activateBaseServiceServer(state,serviceId,systemsSnapshot);info={action,service_id:serviceId,cost:svc.cost,currency:'credits',expires_at:svc.expires_at,duration_ms:svc.duration_ms};
     }
     else if(action==='craft_recipe'){
-      const recipeId=String(payload.recipe_id||'').slice(0,64),recipe=applyCraftRecipeServer(state,recipeId);info={action,recipe_id:recipeId,cost:recipe.cost,currency:'credits',ingredients:recipe.ingredients,output:recipe.label};
+      const recipeId=String(payload.recipe_id||'').slice(0,64),recipe=applyCraftRecipeServer(state,recipeId,systemsSnapshot);info={action,recipe_id:recipeId,cost:recipe.cost,currency:recipe.currency,ingredients:recipe.ingredients,output:recipe.output_label};
     }
     else if(action==='sell_cargo'){
       const id=String(payload.resource_id||'all'),mapOk=String(state.mapId||'')==='x1'&&String(state.territoryFaction||state.profile?.faction||'')===String(state.profile?.faction||'');if(!mapOk)throw Object.assign(new Error('Trader disponível somente na sua base X-1.'),{status:409});state.cargo ||= {};let total=0;const sold={};const ids=id==='all'?Object.keys(state.cargo):[id];
@@ -895,7 +969,7 @@ app.post('/api/player/location', requireUser, asyncRoute(async (req,res)=>{
   return res.json(data||{ok:true});
 }));
 
-app.get('/api/world/status', (req, res) => res.json({ ok: true, version: '18.1.4', ...sharedUniverse.stats() }));
+app.get('/api/world/status', (req, res) => res.json({ ok: true, version: '18.1.5', ...sharedUniverse.stats() }));
 
 app.get('*', (req, res) => res.sendFile(path.join(__dirname, '../public/index.html')));
 
@@ -922,6 +996,7 @@ const sharedUniverse = attachSharedUniverse(server, {
   loadLiveOps: async()=>loadLiveOpsSnapshot(false),
   loadNpcConfig: async()=>loadNpcRuntimeSnapshot(false),
   loadWorldConfig: async()=>loadWorldRuntimeSnapshot(false),
+  loadSystemsConfig: async()=>loadSystemsRuntimeSnapshot(false),
   loadBattleGroup: async (token) => {
     const sb=supabaseForToken(token);if(!sb)return null;
     const {data,error}=await sb.rpc('get_my_battle_group_v179');
@@ -961,7 +1036,7 @@ worldRefreshTimer.unref?.();
 refreshWorldRuntimeSnapshot(true).then(cfg=>console.log(`[world-runtime] v${cfg.version} cacheado em ${WORLD_RUNTIME_FILE}`)).catch(err=>console.warn('[world-runtime] bootstrap:',err.message));
 
 server.listen(port, () => {
-  console.log(`Stellar Legacy V18.1.4 :${port}`);
+  console.log(`Stellar Legacy V18.1.5 :${port}`);
   console.log('Supabase config:', configStatus());
   console.log('Shared Universe: ONLINE');
 });

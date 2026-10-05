@@ -1,0 +1,14 @@
+-- Stellar Legacy V18.1.5 — Systems Runtime
+-- Migration de produção já aplicada no Supabase.
+-- Objetos principais:
+--   public.game_mission_category_v1815
+--   public.game_mission_custom_v1815
+--   public.game_economy_service_v1815
+--   public.game_crafting_recipe_v1815
+--   public.get_systems_runtime_config_v1815()
+--   public.admin_update_mission_category_v1815(...)
+--   public.admin_upsert_custom_mission_v1815(...)
+--   public.admin_delete_custom_mission_v1815(...)
+--   public.admin_update_economy_service_v1815(...)
+--   public.admin_update_crafting_recipe_v1815(...)
+-- O runtime é materializado pelo Render em systems.runtime.json.

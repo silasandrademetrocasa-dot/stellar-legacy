@@ -1,7 +1,7 @@
-import { FACTIONS, SHIPS, ITEMS, LASER_AMMO, ROCKETS, NPC_TYPES, MAPS, RESOURCES } from './data.js?v=18.1.4';
-import { GAME_ASSETS } from './assets/v17/manifest.js?v=18.1.4';
-import { signUp, signIn, requestPasswordReset, restorePasswordRecoveryFromUrl, restoreSession, signOutLocal, checkGameSession, endGameSession, getUser, getSessionCredentials, loadCloudSave, saveCloudSave, updateCallsign, updatePassword, loadRankings, loadAuctionBids, saveAuctionBidOnline, markAuctionBidStatusOnline, loadAuctionMarket, upsertPlayerPresenceOnline, loadMapPresenceOnline, savePlayerLocationCheckpointOnline, loadPlayerLocationCheckpointOnline, removePlayerPresenceOnline, queuePvpAttackOnline, consumePvpDamageEventsOnline, syncArenaProfileOnline, loadArenaState, loadArenaDailyRewardStatus, claimArenaDailyReward, loadArenaOpponents, loadArenaHistory, arenaAttackOnline, listClansOnline, loadMyClanOnline, createClanOnline, joinClanOnline, leaveClanOnline, transferClanCreditsOnline, claimClanCreditGrantsOnline, recordClanAlienKillOnline, getPremiumShopOnline, testPurchasePremiumOnline, loadWarfrontStateOnline, hitWorldBossOnline, claimWorldBossRewardOnline, declareClanWarOnline, recordClanWarScoreOnline, loadLiveOpsOnline, purchaseLiveCatalogOnline, economyActionOnline, getChatHistoryOnline, sendChatMessageOnline, getMyDesignersOnline, setDesignLoadoutOnline, claimGateDroneDesignOnline, claimEventDesignerOnline, getAdminStatus, adminSearchAccounts, adminRecentActions, adminBanAccount, adminUnbanAccount, adminResetAccount, adminDeleteAccount, pushTelemetryBatch, adminTelemetryOverview, adminPlayerTelemetry, getBattleGroupOnline, createBattleGroupOnline, inviteBattleGroupOnline, searchBattleGroupPlayersOnline, inviteBattleGroupUserOnline, respondBattleGroupInviteOnline, leaveBattleGroupOnline, kickBattleGroupMemberOnline, setBattleGroupRallyOnline, loadRuntimeConfigOnline, loadNpcRuntimeConfigOnline, loadWorldRuntimeConfigOnline } from './api.js?v=18.1.4';
-import { SharedUniverseClient } from './world.js?v=18.1.4';
+import { FACTIONS, SHIPS, ITEMS, LASER_AMMO, ROCKETS, NPC_TYPES, MAPS, RESOURCES } from './data.js?v=18.1.5';
+import { GAME_ASSETS } from './assets/v17/manifest.js?v=18.1.5';
+import { signUp, signIn, requestPasswordReset, restorePasswordRecoveryFromUrl, restoreSession, signOutLocal, checkGameSession, endGameSession, getUser, getSessionCredentials, loadCloudSave, saveCloudSave, updateCallsign, updatePassword, loadRankings, loadAuctionBids, saveAuctionBidOnline, markAuctionBidStatusOnline, loadAuctionMarket, upsertPlayerPresenceOnline, loadMapPresenceOnline, savePlayerLocationCheckpointOnline, loadPlayerLocationCheckpointOnline, removePlayerPresenceOnline, queuePvpAttackOnline, consumePvpDamageEventsOnline, syncArenaProfileOnline, loadArenaState, loadArenaDailyRewardStatus, claimArenaDailyReward, loadArenaOpponents, loadArenaHistory, arenaAttackOnline, listClansOnline, loadMyClanOnline, createClanOnline, joinClanOnline, leaveClanOnline, transferClanCreditsOnline, claimClanCreditGrantsOnline, recordClanAlienKillOnline, getPremiumShopOnline, testPurchasePremiumOnline, loadWarfrontStateOnline, hitWorldBossOnline, claimWorldBossRewardOnline, declareClanWarOnline, recordClanWarScoreOnline, loadLiveOpsOnline, purchaseLiveCatalogOnline, economyActionOnline, getChatHistoryOnline, sendChatMessageOnline, getMyDesignersOnline, setDesignLoadoutOnline, claimGateDroneDesignOnline, claimEventDesignerOnline, getAdminStatus, adminSearchAccounts, adminRecentActions, adminBanAccount, adminUnbanAccount, adminResetAccount, adminDeleteAccount, pushTelemetryBatch, adminTelemetryOverview, adminPlayerTelemetry, getBattleGroupOnline, createBattleGroupOnline, inviteBattleGroupOnline, searchBattleGroupPlayersOnline, inviteBattleGroupUserOnline, respondBattleGroupInviteOnline, leaveBattleGroupOnline, kickBattleGroupMemberOnline, setBattleGroupRallyOnline, loadRuntimeConfigOnline, loadNpcRuntimeConfigOnline, loadWorldRuntimeConfigOnline, loadSystemsRuntimeConfigOnline } from './api.js?v=18.1.5';
+import { SharedUniverseClient } from './world.js?v=18.1.5';
 
 const canvas = document.querySelector('#game');
 const ctx = canvas.getContext('2d');
@@ -117,7 +117,7 @@ function qualityShouldPreload(path){
   return /\/branding\//.test(value)||/\/assets\/v17\/loot\/cargo-box\.webp/.test(value);
 }
 
-const ASSET_REVISION='18.1.4';
+const ASSET_REVISION='18.1.5';
 function versionedAssetUrl(path){
   const value=String(path||'');if(!value)return value;
   return value.includes('?')?`${value}&asset=${ASSET_REVISION}`:`${value}?asset=${ASSET_REVISION}`;
@@ -1110,11 +1110,11 @@ async function refreshNpcRuntimeConfig(force=false){
 setInterval(()=>{if(authenticated)refreshNpcRuntimeConfig(false);},45000);
 
 const PROGRESSION_UNLOCKS={missions:5,pilot:6,clan:8};
-const MISSION_CATEGORY_LEVELS={daily:5,weekly:7,monthly:10,special:12};
+let MISSION_CATEGORY_LEVELS={daily:5,weekly:7,monthly:10,special:12};
 function featureRequiredLevel(key){const map={missions:'missions',pilot:'pilot_research',clan:'clan'};const moduleKey=map[key];return moduleKey?runtimeModuleMinLevel(moduleKey,PROGRESSION_UNLOCKS[key]||1):Number(PROGRESSION_UNLOCKS[key]||1);}
 function featureUnlocked(key){return (Number(progress?.profile?.level)||1)>=featureRequiredLevel(key);}
 function showFeatureLock(key,label){const req=featureRequiredLevel(key);showToast(`${label} libera no nível ${req}`);}
-function missionCategoryRequiredLevel(category){return Number(MISSION_CATEGORY_LEVELS[category]||5);}
+function missionCategoryRequiredLevel(category){return Number(systemsMissionCategory(category)?.minLevel||MISSION_CATEGORY_LEVELS[category]||5);}
 function missionCategoryUnlocked(category){return (Number(progress?.profile?.level)||1)>=missionCategoryRequiredLevel(category);}
 function progressionUnlocksAtLevel(level){
   const out=[];
@@ -1297,19 +1297,19 @@ async function refreshWorldRuntimeConfig(force=false){
 setInterval(()=>{if(authenticated)refreshWorldRuntimeConfig(false);},45000);
 
 
-const MISSION_CATEGORIES = {
+let MISSION_CATEGORIES = {
   daily: { label: 'MISSÕES DIÁRIAS', accent: '#58d9ff', reset: 'daily' },
   weekly: { label: 'MISSÕES SEMANAIS', accent: '#8d7bff', reset: 'weekly' },
   monthly: { label: 'MISSÕES MENSAIS', accent: '#ffc65a', reset: 'monthly' },
   special: { label: 'MISSÕES ESPECIAIS', accent: '#ff668a', reset: 'special' },
 };
 
-const WEEKLY_STEPS = [10,25,50,100,150,200,250,500,750,1000];
-const MONTHLY_STEPS = WEEKLY_STEPS.map(v=>v*10);
+let WEEKLY_STEPS = [10,25,50,100,150,200,250,500,750,1000];
+let MONTHLY_STEPS = WEEKLY_STEPS.map(v=>v*10);
 const MISSION_NPCS = Object.keys(NPC_TYPES);
 const NORMAL_MISSION_NPCS = MISSION_NPCS.filter(id=>!id.startsWith('boss'));
 const BOSS_MISSION_NPCS = MISSION_NPCS.filter(id=>id.startsWith('boss'));
-const MISSION_ORES = ['Prometium','Endurium','Terbium'];
+let MISSION_ORES = ['Prometium','Endurium','Terbium'];
 
 function missionPeriodKey(category,now=new Date()){
   const y=now.getFullYear(),m=String(now.getMonth()+1).padStart(2,'0'),d=String(now.getDate()).padStart(2,'0');
@@ -1341,10 +1341,10 @@ function makeMission({id,title,desc,tasks,group='mix',sequence=false,rewardFacto
   return {id,title,desc,tasks,group,sequence,rewardFactor,tag,flatReward};
 }
 function buildDailyMissions(){
-  const key=missionPeriodKey('daily'),rng=seededRng(hashStringSeed(`daily:${key}`));
+  const key=missionPeriodKey('daily'),rng=seededRng(hashStringSeed(`daily:${key}`)),rule=systemsMissionCategory('daily'),cfg=rule?.config||{},factor=Number(rule?.rewardFactor??.5);
   const huntNpc=pickSeeded(MISSION_NPCS,rng);
-  const huntTarget=huntNpc.startsWith('boss')?50:100;
-  const ore=pickSeeded(MISSION_ORES,rng);
+  const huntTarget=huntNpc.startsWith('boss')?Math.max(1,Number(cfg.hunt_boss_target)||50):Math.max(1,Number(cfg.hunt_normal_target)||100);
+  const orePool=missionOrePool('daily'),ore=pickSeeded(orePool,rng);
   const n1=pickSeeded(NORMAL_MISSION_NPCS,rng);
   const n2=pickSeeded(NORMAL_MISSION_NPCS,rng,[n1]);
   const boss=pickSeeded(BOSS_MISSION_NPCS,rng);
@@ -1354,30 +1354,30 @@ function buildDailyMissions(){
       title:`Caçada do Dia • ${NPC_TYPES[huntNpc].name}`,
       desc:`Alvo diário sorteado para hoje. Elimine somente ${NPC_TYPES[huntNpc].name}.`,
       tasks:[taskKill(huntNpc,huntTarget,'daily_hunt_target')],
-      group:huntNpc.startsWith('boss')?'boss':'npc',rewardFactor:.5,tag:'DIÁRIA • BÔNUS 50%'
+      group:huntNpc.startsWith('boss')?'boss':'npc',rewardFactor:factor,tag:`DIÁRIA • BÔNUS ${Math.round(factor*100)}%`
     }),
     makeMission({
       id:'daily_ore',
       title:`Mineração do Dia • ${RESOURCES[ore].name}`,
       desc:`Colete a pedra sorteada do dia. Somente ${RESOURCES[ore].name} conta.`,
-      tasks:[taskOre(ore,500,'daily_ore_target')],
-      group:'ore',rewardFactor:.5,tag:'DIÁRIA • BÔNUS 50%',flatReward:{credits:750000,uridium:750,xp:2500}
+      tasks:[taskOre(ore,Math.max(1,Number(cfg.ore_target)||500),'daily_ore_target')],
+      group:'ore',rewardFactor:factor,tag:`DIÁRIA • BÔNUS ${Math.round(factor*100)}%`,flatReward:cfg.ore_flat_reward&&typeof cfg.ore_flat_reward==='object'?{...cfg.ore_flat_reward}:{credits:750000,uridium:750,xp:2500}
     }),
     makeMission({
       id:'daily_combo',
       title:'Operação Tripla do Dia',
       desc:`Missão conjunta diária: dois NPCs comuns + um BOSS sorteado.`,
       tasks:[
-        taskKill(n1,50,'daily_combo_a'),
-        taskKill(n2,50,'daily_combo_b'),
-        taskKill(boss,10,'daily_combo_boss'),
+        taskKill(n1,Math.max(1,Number(cfg.combo_normal_target)||50),'daily_combo_a'),
+        taskKill(n2,Math.max(1,Number(cfg.combo_normal_target)||50),'daily_combo_b'),
+        taskKill(boss,Math.max(1,Number(cfg.combo_boss_target)||10),'daily_combo_boss'),
       ],
-      group:'mix',rewardFactor:.5,tag:'DIÁRIA • BÔNUS 50%'
+      group:'mix',rewardFactor:factor,tag:`DIÁRIA • BÔNUS ${Math.round(factor*100)}%`
     }),
   ];
 }
 function buildTierMissions(category,steps){
-  const label=category==='weekly'?'Semanal':'Mensal';
+  const label=category==='weekly'?'Semanal':'Mensal',factor=Number(systemsMissionCategory(category)?.rewardFactor??(category==='weekly'?.8:1)),orePool=missionOrePool(category);
   const missions=[];
   for(const npc of MISSION_NPCS){
     const boss=npc.startsWith('boss');
@@ -1387,46 +1387,46 @@ function buildTierMissions(category,steps){
         title:`${label} • ${NPC_TYPES[npc].name} • ${target}`,
         desc:`Elimine exatamente ${target} ${NPC_TYPES[npc].name}.`,
         tasks:[taskKill(npc,target)],
-        group:boss?'boss':'npc',rewardFactor:category==='weekly'?.8:1,
-        tag:`${label.toUpperCase()} • NÍVEL ${i+1} • ${category==='weekly'?'BÔNUS 80%':'BÔNUS 100%'}`
+        group:boss?'boss':'npc',rewardFactor:factor,
+        tag:`${label.toUpperCase()} • NÍVEL ${i+1} • BÔNUS ${Math.round(factor*100)}%`
       }));
     });
   }
-  for(const ore of MISSION_ORES){
+  for(const ore of orePool){
     steps.forEach((target,i)=>{
       missions.push(makeMission({
         id:`${category}_ore_${ore}_${target}`,
         title:`${label} • ${RESOURCES[ore].name} • ${target}`,
         desc:`Colete ${target} unidades de ${RESOURCES[ore].name}.`,
         tasks:[taskOre(ore,target)],
-        group:'ore',rewardFactor:category==='weekly'?.8:1,
-        tag:`${label.toUpperCase()} • NÍVEL ${i+1} • ${category==='weekly'?'BÔNUS 80%':'BÔNUS 100%'}`
+        group:'ore',rewardFactor:factor,
+        tag:`${label.toUpperCase()} • NÍVEL ${i+1} • BÔNUS ${Math.round(factor*100)}%`
       }));
     });
   }
   return missions;
 }
 function buildSpecialMissions(){
-  const missions=[];
+  const missions=[],rule=systemsMissionCategory('special'),cfg=rule?.config||{},factor=Number(rule?.rewardFactor??1.25),orePool=missionOrePool('special');
   // 1 missão de cada NPC, sempre 10 eliminações, com bônus controlado sobre a recompensa normal.
   for(const npc of MISSION_NPCS){
     missions.push(makeMission({
       id:`special_npc_${npc}`,
       title:`Contrato Especial • ${NPC_TYPES[npc].name}`,
-      desc:`Contrato direto: elimine 10 ${NPC_TYPES[npc].name}.`,
-      tasks:[taskKill(npc,10)],
-      group:npc.startsWith('boss')?'boss':'npc',rewardFactor:1.25,
-      tag:'CONTRATO ESPECIAL • BÔNUS 125%'
+      desc:`Contrato direto: elimine ${Math.max(1,Number(cfg.npc_target)||10)} ${NPC_TYPES[npc].name}.`,
+      tasks:[taskKill(npc,Math.max(1,Number(cfg.npc_target)||10))],
+      group:npc.startsWith('boss')?'boss':'npc',rewardFactor:factor,
+      tag:`CONTRATO ESPECIAL • BÔNUS ${Math.round(factor*100)}%`
     }));
   }
   // 1 missão de cada pedra.
-  for(const ore of MISSION_ORES){
+  for(const ore of orePool){
     missions.push(makeMission({
       id:`special_ore_${ore}`,
       title:`Contrato Mineral • ${RESOURCES[ore].name}`,
-      desc:`Colete 250 unidades de ${RESOURCES[ore].name}.`,
-      tasks:[taskOre(ore,250)],
-      group:'ore',rewardFactor:1.25,tag:'MINERAÇÃO ESPECIAL • BÔNUS 125%'
+      desc:`Colete ${Math.max(1,Number(cfg.ore_target)||250)} unidades de ${RESOURCES[ore].name}.`,
+      tasks:[taskOre(ore,Math.max(1,Number(cfg.ore_target)||250))],
+      group:'ore',rewardFactor:factor,tag:`MINERAÇÃO ESPECIAL • BÔNUS ${Math.round(factor*100)}%`
     }));
   }
 
@@ -1438,7 +1438,7 @@ function buildSpecialMissions(){
     ['special_mix_npc_5','Operação Veterana',false,[['aiderStreuner',20],['devolarium',5],['sibelon',2]]],
   ];
   npcMixes.forEach(([id,title,sequence,defs])=>missions.push(makeMission({
-    id,title,sequence,group:'mix',rewardFactor:1.25,tag:sequence?'SEQUENCIAL':'MULTIALVO',
+    id,title,sequence,group:'mix',rewardFactor:factor,tag:sequence?'SEQUENCIAL':'MULTIALVO',
     desc:sequence?'Conclua cada alvo na ordem para liberar a próxima etapa.':'Todos os alvos podem ser concluídos em qualquer ordem.',
     tasks:defs.map(([npc,target],i)=>taskKill(npc,target,`${id}_t${i+1}`))
   })));
@@ -1449,7 +1449,7 @@ function buildSpecialMissions(){
   bossSingles.forEach(([npc,target],i)=>missions.push(makeMission({
     id:`special_boss_contract_${i+1}`,title:`Caçada BOSS ${i+1} • ${NPC_TYPES[npc].name}`,
     desc:`Contrato pesado contra ${NPC_TYPES[npc].name}.`,
-    tasks:[taskKill(npc,target)],group:'boss',rewardFactor:1.25,tag:'BOSS ESPECIAL • BÔNUS 125%'
+    tasks:[taskKill(npc,target)],group:'boss',rewardFactor:factor,tag:`BOSS ESPECIAL • BÔNUS ${Math.round(factor*100)}%`
   })));
 
   const bossMixes=[
@@ -1460,7 +1460,7 @@ function buildSpecialMissions(){
     ['special_boss_mix_5','Tríade BOSS V',false,[['bossStreuner',20],['bossDevolarium',4],['bossSibelon',2]]],
   ];
   bossMixes.forEach(([id,title,sequence,defs])=>missions.push(makeMission({
-    id,title,sequence,group:'boss',rewardFactor:1.25,tag:sequence?'BOSS SEQUENCIAL':'BOSS MISTO',
+    id,title,sequence,group:'boss',rewardFactor:factor,tag:sequence?'BOSS SEQUENCIAL':'BOSS MISTO',
     desc:sequence?'Derrube cada grupo BOSS na ordem marcada.':'Elimine os três grupos BOSS em qualquer ordem.',
     tasks:defs.map(([npc,target],i)=>taskKill(npc,target,`${id}_t${i+1}`))
   })));
@@ -1474,18 +1474,19 @@ function buildSpecialMissions(){
     ['special_hybrid_6','Ferro e Cristal VI',true,[taskKill('sibelon',3,'h6a'),taskOre('Prometium',250,'h6b'),taskOre('Terbium',250,'h6c')]],
   ];
   hybrids.forEach(([id,title,sequence,tasks])=>missions.push(makeMission({
-    id,title,sequence,tasks,group:'hybrid',rewardFactor:1.25,
+    id,title,sequence,tasks,group:'hybrid',rewardFactor:factor,
     tag:sequence?'HÍBRIDA SEQUENCIAL':'HÍBRIDA',
     desc:sequence?'Complete combate e mineração na ordem para liberar a próxima tarefa.':'Combate e mineração podem avançar ao mesmo tempo.'
   })));
+  for(const cm of systemsCustomMissions('special')){if(missions.some(m=>m.id===cm.id))continue;missions.push(cm);}
   return missions;
 }
 
 let CACHED_WEEKLY_MISSIONS=null,CACHED_MONTHLY_MISSIONS=null,CACHED_SPECIAL_MISSIONS=null;
 function getMissionLibrary(category){
   if(category==='daily')return buildDailyMissions();
-  if(category==='weekly')return CACHED_WEEKLY_MISSIONS ||= buildTierMissions('weekly',WEEKLY_STEPS);
-  if(category==='monthly')return CACHED_MONTHLY_MISSIONS ||= buildTierMissions('monthly',MONTHLY_STEPS);
+  if(category==='weekly')return CACHED_WEEKLY_MISSIONS ||= buildTierMissions('weekly',missionSteps('weekly',WEEKLY_STEPS));
+  if(category==='monthly')return CACHED_MONTHLY_MISSIONS ||= buildTierMissions('monthly',missionSteps('monthly',MONTHLY_STEPS));
   if(category==='special')return CACHED_SPECIAL_MISSIONS ||= buildSpecialMissions();
   return [];
 }
@@ -1691,8 +1692,8 @@ const MISSION_ITEM_REWARD_POOLS={
   ]
 };
 function missionItemChance(category,mission=null){
-  if(category==='daily'&&mission?.group==='ore')return 1;
-  return ({daily:.55,weekly:.60,monthly:.78,special:.88})[category]??.45;
+  const rule=systemsMissionCategory(category),cfg=rule?.config||{};if(category==='daily'&&mission?.group==='ore')return Number.isFinite(Number(cfg.ore_item_chance))?Math.max(0,Math.min(1,Number(cfg.ore_item_chance))):1;
+  return Number.isFinite(Number(rule?.itemChance))?Math.max(0,Math.min(1,Number(rule.itemChance))):(({daily:.55,weekly:.60,monthly:.78,special:.88})[category]??.45);
 }
 function grantMissionSurprise(category,mission=null){
   if(Math.random()>missionItemChance(category,mission))return null;
@@ -1730,7 +1731,7 @@ function finishMissionAutomatically(category,mission,active){
   if(ui.missionModal&&!ui.missionModal.classList.contains('hidden'))renderMissions();
 }
 function claimMission(category){normalizeMissionState();const active=progress.missions.active[category];if(!active||!active.complete)return;finishMissionAutomatically(category,missionById(category,active.id),active);}
-function missionEvent(type,payload={}){if(!progress||!featureUnlocked('missions'))return;normalizeMissionState();let anyChanged=false;const finished=[];for(const category of Object.keys(MISSION_CATEGORIES)){const active=progress.missions.active[category];if(!active||active.complete)continue;const mission=missionById(category,active.id);if(!mission)continue;let categoryChanged=false;let eventAmount=type==='collectOre'?Math.max(0,Number(payload.amount)||0):1;if(eventAmount<=0)continue;for(let i=0;i<mission.tasks.length;i++){const task=mission.tasks[i];if(!taskUnlocked(mission,active,i))continue;const current=taskCurrent(active,task),remaining=Math.max(0,task.target-current);if(!remaining)continue;let matches=false;if(type==='kill'&&task.type==='kill'&&payload.enemy?.type===task.npc)matches=true;if(type==='collectOre'&&task.type==='ore'&&payload.type===task.resource)matches=true;if(!matches)continue;const add=Math.min(remaining,type==='kill'?1:eventAmount);if(add<=0)continue;active.taskProgress[task.id]=current+add;addMissionReward(active,mission,task.type==='kill'?'kill':'ore',payload,add);categoryChanged=true;anyChanged=true;if(mission.sequence)break;if(type==='kill')break;}if(categoryChanged){active.complete=mission.tasks.every(x=>taskDone(active,x));if(active.complete)finished.push({category,mission,active});}}for(const item of finished)finishMissionAutomatically(item.category,item.mission,item.active);if(anyChanged&&!finished.length){saveGame();updateMissionButton();if(ui.missionModal&&!ui.missionModal.classList.contains('hidden'))renderMissions();}}
+function missionEvent(type,payload={}){if(!progress||!featureUnlocked('missions'))return;normalizeMissionState();let anyChanged=false;const finished=[];for(const category of Object.keys(MISSION_CATEGORIES)){if(MISSION_CATEGORIES[category]?.enabled===false)continue;const active=progress.missions.active[category];if(!active||active.complete)continue;const mission=missionById(category,active.id);if(!mission)continue;let categoryChanged=false;let eventAmount=type==='collectOre'?Math.max(0,Number(payload.amount)||0):1;if(eventAmount<=0)continue;for(let i=0;i<mission.tasks.length;i++){const task=mission.tasks[i];if(!taskUnlocked(mission,active,i))continue;const current=taskCurrent(active,task),remaining=Math.max(0,task.target-current);if(!remaining)continue;let matches=false;if(type==='kill'&&task.type==='kill'&&payload.enemy?.type===task.npc)matches=true;if(type==='collectOre'&&task.type==='ore'&&payload.type===task.resource)matches=true;if(!matches)continue;const add=Math.min(remaining,type==='kill'?1:eventAmount);if(add<=0)continue;active.taskProgress[task.id]=current+add;addMissionReward(active,mission,task.type==='kill'?'kill':'ore',payload,add);categoryChanged=true;anyChanged=true;if(mission.sequence)break;if(type==='kill')break;}if(categoryChanged){active.complete=mission.tasks.every(x=>taskDone(active,x));if(active.complete)finished.push({category,mission,active});}}for(const item of finished)finishMissionAutomatically(item.category,item.mission,item.active);if(anyChanged&&!finished.length){saveGame();updateMissionButton();if(ui.missionModal&&!ui.missionModal.classList.contains('hidden'))renderMissions();}}
 const MISSION_UI_PREFS_KEY='stellar_mission_ui_v1765';
 const missionUiPrefs={loaded:false,collapsed:{}};
 function loadMissionUiPrefs(){
@@ -1775,6 +1776,7 @@ function renderMissions(){
   loadMissionUiPrefs();normalizeMissionState();normalizePilotJourney();ui.missionContent.innerHTML='';
   ui.missionContent.appendChild(journeyPanel());
   for(const [category,meta] of Object.entries(MISSION_CATEGORIES)){
+    if(meta?.enabled===false)continue;
     const allMissions=getMissionLibrary(category);const missions=visibleMissionCatalog(category,allMissions);
     const categoryLocked=!missionCategoryUnlocked(category),collapsed=categoryLocked||!!missionUiPrefs.collapsed[category];
     const section=document.createElement('section');section.className=`mission-category${collapsed?' collapsed':''}${categoryLocked?' level-locked-section':''}`;section.style.setProperty('--mission-accent',meta.accent);
@@ -2902,7 +2904,7 @@ function cargoCapacity(){
   const ship=SHIPS[progress?.activeShipId||'phoenix'];
   let cap=ship.cargo||0;
   if(ship.bonusLowMaps&&progress&&['x1','x2','x3','x4'].includes(progress.mapId))cap+=ship.bonusLowMaps.cargo||0;
-  cap+=cargoExtraBonus();if(economyBoostActive('cargo'))cap+=750;
+  cap+=cargoExtraBonus();if(economyBoostActive('cargo'))cap+=economyServiceEffect('cargo','cargo_flat',750);
   cap*=1+pilotSkillValue('logistics')/100;
   return Math.round(cap);
 }
@@ -3787,7 +3789,7 @@ function computeStats(keepRatio=true){
   shield*=1+Number(shipDesignBonus.shield||0)+Number(petDesignBonus.shield||0);
   laserDamage*=1+Number(shipDesignBonus.damage||0);
   const designerMult=droneDesignerMultipliers();hp*=designerMult.hp;shield*=designerMult.shield;laserDamage*=designerMult.damage;
-  if(economyBoostActive('weapon'))laserDamage*=1.03;if(economyBoostActive('shield'))shield*=1.05;if(economyBoostActive('thruster'))speed+=5;
+  if(economyBoostActive('weapon'))laserDamage*=1+economyServiceEffect('weapon','laser_damage_pct',3)/100;if(economyBoostActive('shield'))shield*=1+economyServiceEffect('shield','shield_pct',5)/100;if(economyBoostActive('thruster'))speed+=economyServiceEffect('thruster','speed_flat',5);
   player.maxHp=Math.round(hp);player.maxShield=Math.round(shield);player.speed=Math.round(speed);player.laserDamage=Math.round(laserDamage);player.shieldAbsorption=absorption;player.rocketMult=rocketMult;player.shieldRegenBoost=shieldRegenBoost;
   player.hp=keepRatio?Math.min(player.maxHp,Math.max(1,Math.round(player.maxHp*oldHpRatio))):player.maxHp;
   player.shield=keepRatio?Math.min(player.maxShield,Math.max(0,Math.round(player.maxShield*oldShieldRatio))):player.maxShield;
@@ -5530,20 +5532,21 @@ function openPet(){if(!progress?.pet?.owned){openShop('pet');showToast(`AUX-9 di
 
 
 
-const BASE_SERVICES_V1783={
-  weapon:{name:'Calibração de Armamento',desc:'+3% dano laser por 60 minutos.',baseCost:1500000,duration:3600000},
-  shield:{name:'Harmonização de Escudo',desc:'+5% escudo máximo por 60 minutos.',baseCost:1000000,duration:3600000},
-  cargo:{name:'Otimização de Porão',desc:'+750 capacidade de carga por 60 minutos.',baseCost:750000,duration:3600000},
-  thruster:{name:'Ajuste de Propulsão',desc:'+5 velocidade por 60 minutos.',baseCost:1000000,duration:3600000}
+let BASE_SERVICES_V1783={
+  weapon:{name:'Calibração de Armamento',desc:'+3% dano laser por 60 minutos.',baseCost:1500000,duration:3600000,levelBandSize:5,levelCostScale:.35,maxStackMs:21600000,effect:{laser_damage_pct:3},enabled:true},
+  shield:{name:'Harmonização de Escudo',desc:'+5% escudo máximo por 60 minutos.',baseCost:1000000,duration:3600000,levelBandSize:5,levelCostScale:.35,maxStackMs:21600000,effect:{shield_pct:5},enabled:true},
+  cargo:{name:'Otimização de Porão',desc:'+750 capacidade de carga por 60 minutos.',baseCost:750000,duration:3600000,levelBandSize:5,levelCostScale:.35,maxStackMs:21600000,effect:{cargo_flat:750},enabled:true},
+  thruster:{name:'Ajuste de Propulsão',desc:'+5 velocidade por 60 minutos.',baseCost:1000000,duration:3600000,levelBandSize:5,levelCostScale:.35,maxStackMs:21600000,effect:{speed_flat:5},enabled:true}
 };
 function normalizeEconomyBoosts(){if(!progress)return {};progress.economyBoosts ||= {};for(const k of Object.keys(BASE_SERVICES_V1783)){const v=Number(progress.economyBoosts[k])||0;if(v<Date.now()-86400000)delete progress.economyBoosts[k];else progress.economyBoosts[k]=v;}return progress.economyBoosts;}
-function economyBoostActive(id){normalizeEconomyBoosts();return Number(progress?.economyBoosts?.[id]||0)>Date.now();}
+function economyBoostActive(id){normalizeEconomyBoosts();const def=BASE_SERVICES_V1783?.[id];if(!def||def.enabled===false)return false;return Number(progress?.economyBoosts?.[id]||0)>Date.now();}
 function economyBoostRemaining(id){const ms=Math.max(0,Number(progress?.economyBoosts?.[id]||0)-Date.now());const m=Math.ceil(ms/60000);return m>60?`${Math.floor(m/60)}h ${m%60}min`:`${m}min`;}
-function baseServiceCost(def){const lv=Math.max(1,Number(progress?.profile?.level)||1),band=Math.floor((lv-1)/5);return Math.round(def.baseCost*(1+band*.35));}
-async function buyBaseService(id){const def=BASE_SERVICES_V1783[id];if(!def)return;if(!isAtTrader()){showToast('Serviço disponível somente na sua base X-1');return;}try{const r=await runEconomyAction('base_service',{service_id:id});computeStats(true);renderCargo();updateUI();showToast(`${def.name} • ativo por 60 min • ${fmt(r?.info?.cost||0)} CR`,'shop');}catch(e){showToast(e.message||'Serviço recusado pelo servidor');}}
-function renderBaseServices(){if(!ui.baseServiceGrid||!progress)return;normalizeEconomyBoosts();ui.baseServiceGrid.innerHTML=Object.entries(BASE_SERVICES_V1783).map(([id,d])=>{const active=economyBoostActive(id),cost=baseServiceCost(d),afford=progress.profile.credits>=cost;return `<article class="base-service-card${active?' active':''}"><div><span>${active?'ATIVO':'SERVIÇO'}</span><b>${escHtml(d.name)}</b><p>${escHtml(d.desc)}</p></div><div class="base-service-foot"><small>${active?`restam ${economyBoostRemaining(id)}`:`${fmt(cost)} CR`}</small><button class="small-btn ${afford?'gold':''}" data-base-service="${id}" ${afford?'':'disabled'}>${active?'ESTENDER +1H':'ATIVAR'}</button></div></article>`;}).join('');ui.baseServiceGrid.querySelectorAll('[data-base-service]').forEach(b=>b.onclick=()=>buyBaseService(b.dataset.baseService));}
+function baseServiceCost(def){const lv=Math.max(1,Number(progress?.profile?.level)||1),bandSize=Math.max(1,Number(def?.levelBandSize)||5),band=Math.floor((lv-1)/bandSize),scale=Math.max(0,Number(def?.levelCostScale)||0);return Math.round((Number(def?.baseCost)||0)*(1+band*scale));}
+function economyServiceEffect(id,key,fallback=0){const n=Number(BASE_SERVICES_V1783?.[id]?.effect?.[key]);return Number.isFinite(n)?n:fallback;}
+async function buyBaseService(id){const def=BASE_SERVICES_V1783[id];if(!def)return;if(!isAtTrader()){showToast('Serviço disponível somente na sua base X-1');return;}try{const r=await runEconomyAction('base_service',{service_id:id});computeStats(true);renderCargo();updateUI();showToast(`${def.name} • ativo por ${Math.max(1,Math.round((Number(r?.info?.duration_ms)||def.duration||3600000)/60000))} min • ${fmt(r?.info?.cost||0)} CR`,'shop');}catch(e){showToast(e.message||'Serviço recusado pelo servidor');}}
+function renderBaseServices(){if(!ui.baseServiceGrid||!progress)return;normalizeEconomyBoosts();ui.baseServiceGrid.innerHTML=Object.entries(BASE_SERVICES_V1783).filter(([,d])=>d?.enabled!==false).map(([id,d])=>{const active=economyBoostActive(id),cost=baseServiceCost(d),afford=progress.profile.credits>=cost;return `<article class="base-service-card${active?' active':''}"><div><span>${active?'ATIVO':'SERVIÇO'}</span><b>${escHtml(d.name)}</b><p>${escHtml(d.desc)}</p></div><div class="base-service-foot"><small>${active?`restam ${economyBoostRemaining(id)}`:`${fmt(cost)} CR`}</small><button class="small-btn ${afford?'gold':''}" data-base-service="${id}" ${afford?'':'disabled'}>${active?'ESTENDER +1H':'ATIVAR'}</button></div></article>`;}).join('');ui.baseServiceGrid.querySelectorAll('[data-base-service]').forEach(b=>b.onclick=()=>buyBaseService(b.dataset.baseService));}
 
-const CRAFT_RECIPES_V1782={
+let CRAFT_RECIPES_V1782={
   prometid_batch:{name:'Ferrite Refinada',desc:'Comprime minérios básicos em Ferrite.',cost:200000,ingredients:{Prometium:220,Endurium:120,Terbium:80},output:'30 Ferrite'},
   duranium_batch:{name:'Duracite Refinada',desc:'Liga estrutural de média densidade.',cost:400000,ingredients:{Endurium:140,Terbium:140,Prometid:20},output:'20 Duracite'},
   promerium_batch:{name:'Solarium Refinado',desc:'Material raro para receitas avançadas.',cost:1500000,ingredients:{Prometid:35,Duranium:35,Xenomit:3},output:'5 Solarium'},
@@ -5552,9 +5555,37 @@ const CRAFT_RECIPES_V1782={
   repair_bonus:{name:'Carga de Nanorreparo',desc:'Converte recursos em 1 Bônus de Reparo.',cost:1000000,ingredients:{Prometium:40,Endurium:40,Duranium:20},output:'1 Bônus de Reparo'}
 };
 function craftIngredientText(recipe){return Object.entries(recipe.ingredients).map(([id,qty])=>`${fmt(qty)} ${RESOURCES[id]?.name||id}`).join(' • ');}
-function canCraftRecipe(recipe){if(!progress||!recipe)return false;if((progress.profile.credits||0)<recipe.cost)return false;return Object.entries(recipe.ingredients).every(([id,qty])=>(Number(progress.cargo?.[id])||0)>=qty);}
+function canCraftRecipe(recipe){if(!progress||!recipe||recipe.enabled===false)return false;if((Number(progress.profile?.level)||1)<Math.max(1,Number(recipe.minLevel)||1))return false;const currency=recipe.currency==='uridium'?'uridium':'credits';if((Number(progress.profile?.[currency])||0)<recipe.cost)return false;return Object.entries(recipe.ingredients||{}).every(([id,qty])=>(Number(progress.cargo?.[id])||0)>=qty);}
 async function craftRecipe(recipeId){const recipe=CRAFT_RECIPES_V1782[recipeId];if(!recipe)return;if(!isAtTrader()){showToast('Crafting disponível somente na sua base X-1');return;}try{const r=await runEconomyAction('craft_recipe',{recipe_id:recipeId});showToast(`CRAFT • ${recipe.name} • ${r?.info?.output||recipe.output}`,'reward');renderCargo();}catch(e){showToast(e.message||'Crafting recusado pelo servidor');}}
-function renderRefinery(){if(!ui.refineryGrid||!progress)return;ui.refineryGrid.innerHTML=Object.entries(CRAFT_RECIPES_V1782).map(([id,r])=>`<article class="refinery-card${canCraftRecipe(r)?' ready':''}"><div class="refinery-card-head"><div><span>RECEITA</span><b>${escHtml(r.name)}</b></div><em>${fmt(r.cost)} CR</em></div><p>${escHtml(r.desc)}</p><div class="refinery-ingredients">${escHtml(craftIngredientText(r))}</div><div class="refinery-output">→ ${escHtml(r.output)}</div><button class="small-btn ${canCraftRecipe(r)?'gold':''}" data-craft-recipe="${id}" ${canCraftRecipe(r)?'':'disabled'}>FABRICAR</button></article>`).join('');ui.refineryGrid.querySelectorAll('[data-craft-recipe]').forEach(b=>b.onclick=()=>craftRecipe(b.dataset.craftRecipe));}
+function renderRefinery(){if(!ui.refineryGrid||!progress)return;ui.refineryGrid.innerHTML=Object.entries(CRAFT_RECIPES_V1782).filter(([,r])=>r?.enabled!==false).map(([id,r])=>`<article class="refinery-card${canCraftRecipe(r)?' ready':''}"><div class="refinery-card-head"><div><span>RECEITA</span><b>${escHtml(r.name)}</b></div><em>${fmt(r.cost)} ${r.currency==='uridium'?'STL':'CR'}</em></div><p>${escHtml(r.desc)}</p><div class="refinery-ingredients">${escHtml(craftIngredientText(r))}</div><div class="refinery-output">→ ${escHtml(r.output)}</div><button class="small-btn ${canCraftRecipe(r)?'gold':''}" data-craft-recipe="${id}" ${canCraftRecipe(r)?'':'disabled'}>FABRICAR</button></article>`).join('');ui.refineryGrid.querySelectorAll('[data-craft-recipe]').forEach(b=>b.onclick=()=>craftRecipe(b.dataset.craftRecipe));}
+
+
+// ===================== V18.1.5 MISSÕES + ECONOMIA + CRAFTING DATA DRIVEN =====================
+const SYSTEMS_RUNTIME_CACHE_KEY='stellar_systems_runtime_v1815';
+const systemsRuntimeConfig={version:0,updatedAt:null,lastFetchAt:0,source:'fallback',missionCategories:new Map(),customMissions:[],services:new Map(),recipes:new Map()};
+function systemsMissionCategory(category){return systemsRuntimeConfig.missionCategories.get(String(category||''))||null;}
+function missionSteps(category,fallback=[]){const a=systemsMissionCategory(category)?.config?.steps;return Array.isArray(a)&&a.length?a.map(v=>Math.max(1,Math.floor(Number(v)||1))).slice(0,30):fallback;}
+function missionOrePool(category){const a=systemsMissionCategory(category)?.config?.ore_pool;const pool=Array.isArray(a)?a.map(String).filter(id=>RESOURCES[id]&&RESOURCES[id].enabled!==false):[];return pool.length?pool:MISSION_ORES.filter(id=>RESOURCES[id]&&RESOURCES[id].enabled!==false);}
+function systemsCustomMissions(category){return systemsRuntimeConfig.customMissions.filter(m=>m.category===category&&m.enabled!==false).map(m=>makeMission({id:m.id,title:m.title,desc:m.desc,tasks:m.tasks.map(t=>({...t})),group:m.group,sequence:m.sequence,rewardFactor:m.rewardFactor,tag:m.tag,flatReward:m.flatReward}));}
+function normalizeSystemsRuntimeConfig(raw,source='online'){
+  if(!raw||typeof raw!=='object'||!Array.isArray(raw.mission_categories)||!raw.mission_categories.length)return false;
+  const cats=new Map();for(const row of raw.mission_categories){const category=String(row?.category||'');if(!category)continue;const item={category,label:String(row.label||MISSION_CATEGORIES[category]?.label||category.toUpperCase()),accent:String(row.accent||MISSION_CATEGORIES[category]?.accent||'#58d9ff'),reset:String(row.reset_kind||category),minLevel:Math.max(1,Number(row.min_level)||1),rewardFactor:Math.max(0,Number(row.reward_factor)||0),itemChance:Math.max(0,Math.min(1,Number(row.item_chance)||0)),enabled:row.enabled!==false,config:row.config&&typeof row.config==='object'?{...row.config}:{}};cats.set(category,item);MISSION_CATEGORY_LEVELS[category]=item.minLevel;MISSION_CATEGORIES[category]={label:item.label,accent:item.accent,reset:item.reset,enabled:item.enabled};}
+  systemsRuntimeConfig.missionCategories=cats;
+  systemsRuntimeConfig.customMissions=(raw.custom_missions||[]).filter(x=>x?.enabled!==false&&Array.isArray(x.tasks)).map(x=>({id:String(x.mission_id||''),category:String(x.category||''),title:String(x.title||''),desc:String(x.description||''),tasks:x.tasks.map(t=>({...t,target:Math.max(1,Number(t.target)||1)})),group:String(x.group_key||'mix'),sequence:!!x.sequence,rewardFactor:x.reward_factor==null?Number(cats.get(String(x.category||''))?.rewardFactor||1):Math.max(0,Number(x.reward_factor)||0),tag:String(x.tag||''),flatReward:x.flat_reward&&typeof x.flat_reward==='object'?{...x.flat_reward}:null,enabled:true})).filter(x=>x.id&&x.category&&x.tasks.length);
+  const services={};for(const row of raw.economy_services||[]){if(row?.enabled===false)continue;const id=String(row.service_id||'');if(!id)continue;services[id]={name:String(row.name||id),desc:String(row.description||''),baseCost:Math.max(0,Number(row.base_cost)||0),duration:Math.max(60000,Number(row.duration_ms)||3600000),levelBandSize:Math.max(1,Number(row.level_band_size)||5),levelCostScale:Math.max(0,Number(row.level_cost_scale)||0),maxStackMs:Math.max(60000,Number(row.max_stack_ms)||21600000),effect:row.effect&&typeof row.effect==='object'?{...row.effect}:{},enabled:true,sortOrder:Number(row.sort_order)||100};}
+  if(Object.keys(services).length)BASE_SERVICES_V1783=services;
+  const recipes={};for(const row of raw.crafting_recipes||[]){if(row?.enabled===false)continue;const id=String(row.recipe_id||'');if(!id)continue;recipes[id]={name:String(row.name||id),desc:String(row.description||''),cost:Math.max(0,Number(row.cost)||0),currency:String(row.currency)==='uridium'?'uridium':'credits',ingredients:row.ingredients&&typeof row.ingredients==='object'?{...row.ingredients}:{},grant:row.grant_payload&&typeof row.grant_payload==='object'?{...row.grant_payload}:{},output:String(row.output_label||''),minLevel:Math.max(1,Number(row.min_level)||1),enabled:true,sortOrder:Number(row.sort_order)||100};}
+  if(Object.keys(recipes).length)CRAFT_RECIPES_V1782=recipes;
+  CACHED_WEEKLY_MISSIONS=null;CACHED_MONTHLY_MISSIONS=null;CACHED_SPECIAL_MISSIONS=null;
+  systemsRuntimeConfig.version=Math.max(0,Number(raw.version)||0);systemsRuntimeConfig.updatedAt=raw.updated_at||null;systemsRuntimeConfig.source=source;return true;
+}
+function loadSystemsRuntimeConfigCache(){try{const raw=JSON.parse(localStorage.getItem(SYSTEMS_RUNTIME_CACHE_KEY)||'null');return !!(raw&&normalizeSystemsRuntimeConfig(raw,'cache'));}catch{return false;}}
+function saveSystemsRuntimeConfigCache(raw){try{localStorage.setItem(SYSTEMS_RUNTIME_CACHE_KEY,JSON.stringify(raw));}catch{}}
+async function refreshSystemsRuntimeConfig(force=false){
+  if(!authenticated||!getUser()?.id)return null;const now=Date.now();if(!force&&now-systemsRuntimeConfig.lastFetchAt<30000)return null;systemsRuntimeConfig.lastFetchAt=now;
+  try{const raw=await loadSystemsRuntimeConfigOnline();if(!raw)return null;const changed=Number(raw.version)!==Number(systemsRuntimeConfig.version)||systemsRuntimeConfig.source!=='online';if(changed){normalizeSystemsRuntimeConfig(raw,'online');saveSystemsRuntimeConfigCache(raw);if(progress){try{normalizeMissionState();computeStats(true);renderCargo();renderMissions();updateUI();}catch{}}console.info(`[systems-config] v${systemsRuntimeConfig.version} aplicado no cliente`);}return raw;}catch(err){console.warn('[systems-config] usando cache/fallback',err);if(systemsRuntimeConfig.source==='fallback')loadSystemsRuntimeConfigCache();return null;}
+}
+setInterval(()=>{if(authenticated)refreshSystemsRuntimeConfig(false);},45000);
 
 function liveResourcePrice(id){const runtime=RESOURCES[id];if(worldRuntimeConfig.version>0)return runtime&&runtime.enabled!==false?Math.max(0,Number(runtime.sell)||0):0;const row=liveCatalog(`resource:${id}`);return row&&row.enabled!==false&&String(row?.meta?.mode||'sell')==='sell'?Math.max(0,Number(row.price)||0):Math.max(0,Number(runtime?.sell)||0);}
 function cargoSaleValue(){let total=0;for(const [id,qty] of Object.entries(progress.cargo||{}))total+=liveResourcePrice(id)*qty;return total;}
@@ -6703,7 +6734,7 @@ async function afterAuth(){
     try{state.currentMap=MAPS[progress.mapId]||MAPS.x1;const ship=SHIPS[progress.activeShipId]||SHIPS.phoenix;player.maxHp=Math.max(1,Number(ship.hp)||1);player.maxShield=Math.max(0,Number(progress.shield)||0);player.hp=Math.max(1,Math.min(player.maxHp,Number(progress.hp)||player.maxHp));player.shield=Math.max(0,Math.min(player.maxShield,Number(progress.shield)||0));player.x=Number(progress.x)||currentBasePoint().x;player.y=Number(progress.y)||state.currentMap.world.h/2;player.tx=player.x;player.ty=player.y;state.camera.x=player.x;state.camera.y=player.y;joinSharedUniverse();syncOnlineWorld();updateUI();gameBootstrapRuntime.ready=true;}catch(inner){console.error('[bootstrap] emergency fallback failed',inner);}
   }finally{gameBootstrapRuntime.loading=false;}
 
-  renderChatTabs();refreshChatHistory(true);updatePassBadge();syncAuctionBidsOnline();syncOnlineWorld();syncClanCreditGrants(true);refreshClanState(true);refreshWarfrontState(true).catch(()=>{});refreshRuntimeConfig(true).catch(()=>{});refreshNpcRuntimeConfig(true).catch(()=>{});refreshWorldRuntimeConfig(true).catch(()=>{});
+  renderChatTabs();refreshChatHistory(true);updatePassBadge();syncAuctionBidsOnline();syncOnlineWorld();syncClanCreditGrants(true);refreshClanState(true);refreshWarfrontState(true).catch(()=>{});refreshRuntimeConfig(true).catch(()=>{});refreshNpcRuntimeConfig(true).catch(()=>{});refreshWorldRuntimeConfig(true).catch(()=>{});refreshSystemsRuntimeConfig(true).catch(()=>{});
 
   // Se a posição do servidor chegou depois dos 650ms e o jogador ainda não moveu a nave,
   // ela pode corrigir o ponto inicial sem tocar em economia/inventário.

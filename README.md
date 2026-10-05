@@ -215,3 +215,17 @@ A V17.6.3 usa a tabela existente `public.game_admins` como fonte de autorizaçã
 - Grafo de setores (`1-1` ... `4-3`) e níveis mínimos podem ser alterados sem novo deploy.
 - Código/engine e gráficos continuam no Git; o banco apenas configura conteúdo conhecido.
 
+## V18.1.5 — Missions + Economy + Crafting Runtime
+
+O Runtime de sistemas usa `Supabase -> Render -> systems.runtime.json -> cliente/servidor`.
+
+Agora são configuráveis sem redeploy:
+- níveis e multiplicadores das categorias de missão;
+- metas/steps e pools de minério dos geradores de missão;
+- chance de bônus das missões;
+- missões customizadas via banco;
+- custos, duração, escala e efeito dos serviços econômicos da base;
+- receitas de crafting, ingredientes, custo/moeda, nível mínimo e saída.
+
+O código mantém fallback local para continuidade do jogo se o runtime remoto estiver temporariamente indisponível.
+
