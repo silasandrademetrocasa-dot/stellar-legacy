@@ -1,4 +1,4 @@
-## V18.0.1 — Warfront Global Announcements
+## V18.0.2 — Warfront Global Announcements
 
 - Avisos globais em tempo real quando um piloto conquista A/B/C nos mapas 4-1, 4-2 e 4-3.
 - Domínio total 3/3 gera anúncio global especial informando qual facção controla o mapa.
