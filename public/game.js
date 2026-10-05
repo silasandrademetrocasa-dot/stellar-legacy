@@ -1,7 +1,7 @@
-import { FACTIONS, SHIPS, ITEMS, LASER_AMMO, ROCKETS, NPC_TYPES, MAPS, RESOURCES } from './data.js?v=17.8.0';
-import { GAME_ASSETS } from './assets/v17/manifest.js?v=17.8.0';
-import { signUp, signIn, requestPasswordReset, restorePasswordRecoveryFromUrl, restoreSession, signOutLocal, checkGameSession, endGameSession, getUser, getSessionCredentials, loadCloudSave, saveCloudSave, updateCallsign, updatePassword, loadRankings, loadAuctionBids, saveAuctionBidOnline, markAuctionBidStatusOnline, loadAuctionMarket, upsertPlayerPresenceOnline, loadMapPresenceOnline, savePlayerLocationCheckpointOnline, loadPlayerLocationCheckpointOnline, removePlayerPresenceOnline, queuePvpAttackOnline, consumePvpDamageEventsOnline, syncArenaProfileOnline, loadArenaState, loadArenaDailyRewardStatus, claimArenaDailyReward, loadArenaOpponents, loadArenaHistory, arenaAttackOnline, listClansOnline, loadMyClanOnline, createClanOnline, joinClanOnline, leaveClanOnline, transferClanCreditsOnline, claimClanCreditGrantsOnline, recordClanAlienKillOnline, getPremiumShopOnline, testPurchasePremiumOnline, loadWarfrontStateOnline, hitWorldBossOnline, claimWorldBossRewardOnline, declareClanWarOnline, recordClanWarScoreOnline, loadLiveOpsOnline, purchaseLiveCatalogOnline, economyActionOnline, getChatHistoryOnline, sendChatMessageOnline, getMyDesignersOnline, setDesignLoadoutOnline, claimGateDroneDesignOnline, claimEventDesignerOnline, getAdminStatus, adminSearchAccounts, adminRecentActions, adminBanAccount, adminUnbanAccount, adminResetAccount, adminDeleteAccount, pushTelemetryBatch, adminTelemetryOverview, adminPlayerTelemetry } from './api.js?v=17.8.0';
-import { SharedUniverseClient } from './world.js?v=17.8.0';
+import { FACTIONS, SHIPS, ITEMS, LASER_AMMO, ROCKETS, NPC_TYPES, MAPS, RESOURCES } from './data.js?v=17.8.1';
+import { GAME_ASSETS } from './assets/v17/manifest.js?v=17.8.1';
+import { signUp, signIn, requestPasswordReset, restorePasswordRecoveryFromUrl, restoreSession, signOutLocal, checkGameSession, endGameSession, getUser, getSessionCredentials, loadCloudSave, saveCloudSave, updateCallsign, updatePassword, loadRankings, loadAuctionBids, saveAuctionBidOnline, markAuctionBidStatusOnline, loadAuctionMarket, upsertPlayerPresenceOnline, loadMapPresenceOnline, savePlayerLocationCheckpointOnline, loadPlayerLocationCheckpointOnline, removePlayerPresenceOnline, queuePvpAttackOnline, consumePvpDamageEventsOnline, syncArenaProfileOnline, loadArenaState, loadArenaDailyRewardStatus, claimArenaDailyReward, loadArenaOpponents, loadArenaHistory, arenaAttackOnline, listClansOnline, loadMyClanOnline, createClanOnline, joinClanOnline, leaveClanOnline, transferClanCreditsOnline, claimClanCreditGrantsOnline, recordClanAlienKillOnline, getPremiumShopOnline, testPurchasePremiumOnline, loadWarfrontStateOnline, hitWorldBossOnline, claimWorldBossRewardOnline, declareClanWarOnline, recordClanWarScoreOnline, loadLiveOpsOnline, purchaseLiveCatalogOnline, economyActionOnline, getChatHistoryOnline, sendChatMessageOnline, getMyDesignersOnline, setDesignLoadoutOnline, claimGateDroneDesignOnline, claimEventDesignerOnline, getAdminStatus, adminSearchAccounts, adminRecentActions, adminBanAccount, adminUnbanAccount, adminResetAccount, adminDeleteAccount, pushTelemetryBatch, adminTelemetryOverview, adminPlayerTelemetry } from './api.js?v=17.8.1';
+import { SharedUniverseClient } from './world.js?v=17.8.1';
 
 const canvas = document.querySelector('#game');
 const ctx = canvas.getContext('2d');
@@ -117,7 +117,7 @@ function qualityShouldPreload(path){
   return /\/branding\//.test(value)||/\/assets\/v17\/loot\/cargo-box\.webp/.test(value);
 }
 
-const ASSET_REVISION='17.8.0';
+const ASSET_REVISION='17.8.1';
 function versionedAssetUrl(path){
   const value=String(path||'');if(!value)return value;
   return value.includes('?')?`${value}&asset=${ASSET_REVISION}`:`${value}?asset=${ASSET_REVISION}`;
@@ -612,7 +612,7 @@ async function claimEventDesignerDrop(ev){
 const economyRuntime={queue:Promise.resolve(),autoPending:new Set()};
 
 
-// ===================== V17.8.0 PROGRESSION TELEMETRY =====================
+// ===================== V17.8.1 PROGRESSION TELEMETRY =====================
 const TELEMETRY_SOURCE_KEYS=['npc','mission','resource','pass','event','gate','discovery','other'];
 function freshTelemetryPending(){return {counters:{sessions:0,play_seconds:0,kills:0,boxes:0,ore_nodes:0,ore_units:0,missions_completed:0,deaths:0,map_jumps:0,level_ups:0},spent:{cr:0,stl:0},sources:Object.fromEntries(TELEMETRY_SOURCE_KEYS.map(k=>[k,{cr:0,stl:0,xp:0}])),level_events:[]};}
 const telemetryRuntime={pending:freshTelemetryPending(),activeRemainder:0,lastFlushAt:0,flushing:false,sessionOpen:false};
@@ -697,7 +697,30 @@ function togglePilotBranch(branch){loadPilotUiPrefs();pilotUiPrefs.collapsed[bra
 function pilotRareChanceBonus(){return pilotCombined('luck1','luck2')/100;}function pilotLootBonus(){return pilotCombined('tractor1','tractor2')/100;}function pilotEvasion(){return Math.min(.35,pilotCombined('evasive1','evasive2')/100);}function pilotBattleLaserBonus(){return pilotCombined('bounty1','bounty2')/100;}function pilotKamikazeDamageBonus(){return pilotCombined('detonation1','detonation2')/100;}function pilotKamikazeRadiusBonus(){return pilotSkillValue('explosives')/100;}
 
 
-// ===================== V17.8.0 PILOT TITLES =====================
+
+// ===================== V17.8.1 — CONQUISTAS =====================
+const ACHIEVEMENT_DEFS=[
+  {id:'first_blood',group:'COMBATE',label:'Primeiro Abate',desc:'Destrua seu primeiro NPC.',target:1,metric:()=>Number(progress?.profile?.aliensKilled||0),icon:'☠'},
+  {id:'hunter_100',group:'COMBATE',label:'Caçador de Setor',desc:'Destrua 100 NPCs.',target:100,metric:()=>Number(progress?.profile?.aliensKilled||0),icon:'⌖'},
+  {id:'hunter_1000',group:'COMBATE',label:'Extermínio Estelar',desc:'Destrua 1.000 NPCs.',target:1000,metric:()=>Number(progress?.profile?.aliensKilled||0),icon:'✹'},
+  {id:'salvage_100',group:'COLETA',label:'Recuperador',desc:'Colete 100 boxes de carga.',target:100,metric:()=>Number(progress?.titles?.stats?.boxes||0),icon:'▣'},
+  {id:'ore_5000',group:'COLETA',label:'Minerador Cósmico',desc:'Colete 5.000 unidades de recursos.',target:5000,metric:()=>Number(progress?.titles?.stats?.oreUnits||0),icon:'◆'},
+  {id:'mission_10',group:'MISSÕES',label:'Contratado',desc:'Conclua 10 missões.',target:10,metric:()=>Number(progress?.titles?.stats?.missions||0),icon:'✓'},
+  {id:'mission_50',group:'MISSÕES',label:'Operador de Elite',desc:'Conclua 50 missões.',target:50,metric:()=>Number(progress?.titles?.stats?.missions||0),icon:'★'},
+  {id:'jump_25',group:'EXPLORAÇÃO',label:'Cartógrafo',desc:'Realize 25 saltos entre setores.',target:25,metric:()=>Number(progress?.titles?.stats?.mapJumps||0),icon:'◎'},
+  {id:'gate_1',group:'PORTAIS',label:'Além do Horizonte',desc:'Conclua um Portal Astral.',target:1,metric:()=>Number(progress?.profile?.ggCompleted||0),icon:'◉'},
+  {id:'level_10',group:'PROGRESSÃO',label:'Piloto Veterano',desc:'Alcance o nível 10.',target:10,metric:()=>Number(progress?.profile?.level||1),icon:'▲'},
+  {id:'level_25',group:'PROGRESSÃO',label:'Comandante Estelar',desc:'Alcance o nível 25.',target:25,metric:()=>Number(progress?.profile?.level||1),icon:'✦'}
+];
+function freshAchievements(){return {unlocked:{},seen:{}};}
+function normalizeAchievements(){if(!progress)return freshAchievements();progress.achievements ||= freshAchievements();progress.achievements.unlocked ||= {};progress.achievements.seen ||= {};return progress.achievements;}
+function achievementProgress(def){const current=Math.max(0,Number(def.metric?.()||0));return {current,target:def.target,pct:Math.max(0,Math.min(100,current/Math.max(1,def.target)*100))};}
+function achievementUnlocked(id){normalizeAchievements();return !!progress.achievements.unlocked[id];}
+function syncAchievements(announce=true){if(!progress)return [];normalizeAchievements();const fresh=[];for(const def of ACHIEVEMENT_DEFS){const pg=achievementProgress(def);if(pg.current>=pg.target&&!progress.achievements.unlocked[def.id]){progress.achievements.unlocked[def.id]=Date.now();fresh.push(def);}}if(announce)for(const def of fresh){queueCelebration('mission','CONQUISTA DESBLOQUEADA',`${def.label} • identidade liberada`);pushActivity(`CONQUISTA • ${def.label}`,'reward');}return fresh;}
+function achievementUnlockedCount(){syncAchievements(false);return ACHIEVEMENT_DEFS.filter(x=>achievementUnlocked(x.id)).length;}
+function buildAchievementsPanel(){syncAchievements(false);const section=document.createElement('section');section.className='pilot-achievement-profile';const count=achievementUnlockedCount();section.innerHTML=`<div class="pilot-achievement-head"><div><div class="eyebrow">CONQUISTAS</div><h3>REGISTRO DO PILOTO</h3><small>${count}/${ACHIEVEMENT_DEFS.length} conquistas concluídas • foco em identidade, não inflação.</small></div><span>${Math.round(count/ACHIEVEMENT_DEFS.length*100)}%</span></div>`;const grid=document.createElement('div');grid.className='pilot-achievement-grid';for(const def of ACHIEVEMENT_DEFS){const pg=achievementProgress(def),open=achievementUnlocked(def.id),card=document.createElement('article');card.className=`pilot-achievement-card${open?' unlocked':''}`;card.innerHTML=`<div class="pilot-achievement-icon">${def.icon}</div><div class="pilot-achievement-main"><span>${escHtml(def.group)}</span><b>${escHtml(def.label)}</b><p>${escHtml(def.desc)}</p><div class="pilot-achievement-track"><i style="width:${pg.pct}%"></i></div><small>${fmt(Math.min(pg.current,pg.target))} / ${fmt(pg.target)}</small></div><em>${open?'✓':'○'}</em>`;grid.appendChild(card);}section.appendChild(grid);return section;}
+
+// ===================== V17.8.1 PILOT TITLES =====================
 const PILOT_TITLES=[
   {id:'pioneer',group:'PROGRESSÃO',label:'Pioneiro Estelar',desc:'Título inicial de todo piloto.',target:1,metric:()=>1,format:(n)=>`${fmt(n)}/1`,req:'Disponível desde o início.'},
   {id:'cadet',group:'PROGRESSÃO',label:'Cadete Estelar',desc:'Primeiros sistemas dominados.',target:5,metric:()=>Number(progress?.profile?.level||1),format:(n)=>`Nível ${fmt(n)}/5`,req:'Alcance o nível 5.'},
@@ -711,6 +734,10 @@ const PILOT_TITLES=[
   {id:'gatebreaker',group:'PORTAIS',label:'Rompe-Portais',desc:'Concluiu seu primeiro Portal Astral.',target:1,metric:()=>Number(progress?.profile?.ggCompleted||0),format:(n)=>`${fmt(n)}/1 Portal`,req:'Conclua 1 Portal Astral.'},
   {id:'gatemaster',group:'PORTAIS',label:'Mestre dos Portais',desc:'Especialista em ciclos de Portal Astral.',target:10,metric:()=>Number(progress?.profile?.ggCompleted||0),format:(n)=>`${fmt(n)}/10 Portais`,req:'Conclua 10 Portais Astrais.'},
   {id:'initiated',group:'JORNADA',label:'Iniciado Estelar',desc:'Concluiu o treinamento inicial do Stellar Legacy.',target:1,metric:()=>progress?.journey?.completed?1:0,format:(n)=>n?'Jornada concluída':'Jornada em andamento',req:'Conclua a Jornada do Piloto.'},
+  {id:'salvager',group:'CONQUISTA',label:'Recuperador Estelar',desc:'Identidade concedida a pilotos especializados em carga.',target:1,metric:()=>achievementUnlocked('salvage_100')?1:0,format:(n)=>n?'Conquista concluída':'0/1',req:'Conquista: Recuperador.'},
+  {id:'cartographer',group:'CONQUISTA',label:'Cartógrafo do Vazio',desc:'Reconhecido por explorar rotas entre setores.',target:1,metric:()=>achievementUnlocked('jump_25')?1:0,format:(n)=>n?'Conquista concluída':'0/1',req:'Conquista: Cartógrafo.'},
+  {id:'operator',group:'CONQUISTA',label:'Operador de Elite',desc:'Título de quem domina contratos e objetivos.',target:1,metric:()=>achievementUnlocked('mission_50')?1:0,format:(n)=>n?'Conquista concluída':'0/1',req:'Conquista: Operador de Elite.'},
+  {id:'commander',group:'CONQUISTA',label:'Comandante Estelar',desc:'Marca de progressão avançada.',target:1,metric:()=>achievementUnlocked('level_25')?1:0,format:(n)=>n?'Conquista concluída':'0/1',req:'Conquista: Comandante Estelar.'},
   {id:'admin',group:'ESPECIAL',label:'Administrador',desc:'Título reservado à administração do universo.',target:1,metric:()=>isAdminPilot()?1:0,format:(n)=>n?'Autorizado':'Restrito',req:'Título administrativo.'}
 ];
 function freshPilotTitles(){return {selected:'pioneer',stats:{missions:0,oreUnits:0,boxes:0,deaths:0,mapJumps:0}};}
@@ -719,7 +746,7 @@ function pilotTitleDef(id){return PILOT_TITLES.find(x=>x.id===id)||PILOT_TITLES[
 function pilotTitleProgress(idOrDef){const def=typeof idOrDef==='string'?pilotTitleDef(idOrDef):idOrDef;let current=0;try{current=Math.max(0,Number(def?.metric?.())||0);}catch{}const target=Math.max(1,Number(def?.target)||1);return {current,target,pct:Math.max(0,Math.min(100,current/target*100)),text:def?.format?def.format(Math.min(current,target)): `${fmt(Math.min(current,target))}/${fmt(target)}`};}
 function pilotTitleUnlocked(idOrDef){const def=typeof idOrDef==='string'?pilotTitleDef(idOrDef):idOrDef;return pilotTitleProgress(def).current>=pilotTitleProgress(def).target;}
 function activePilotTitle(){normalizePilotTitles();const def=pilotTitleDef(progress?.titles?.selected||'pioneer');return pilotTitleUnlocked(def)?def:PILOT_TITLES[0];}
-function titleStatAdd(key,amount=1){if(!progress)return;normalizePilotTitles();progress.titles.stats[key]=Math.max(0,(Number(progress.titles.stats[key])||0)+Math.max(0,Number(amount)||0));}
+function titleStatAdd(key,amount=1){if(!progress)return;normalizePilotTitles();progress.titles.stats[key]=Math.max(0,(Number(progress.titles.stats[key])||0)+Math.max(0,Number(amount)||0));syncAchievements(true);}
 function selectPilotTitle(id){normalizePilotTitles();const def=pilotTitleDef(id);if(!pilotTitleUnlocked(def)){showToast(`Título bloqueado • ${def.req}`);return;}progress.titles.selected=def.id;saveGame();syncSharedUniversePlayer(true);syncOnlineWorld();telemetryMarkTitle();renderHangar();showToast(`Título equipado: ${def.label}`,'system');}
 
 // ===================== REAL-PLAYER ONLINE AUCTION =====================
@@ -1564,7 +1591,7 @@ function renderMissions(){
 function openMissions(){if(!featureUnlocked('missions')){showFeatureLock('missions','Missões');return;}closeNavigationModals(ui.missionModal);normalizeMissionState();renderMissions();ui.missionModal.classList.remove('hidden');}
 
 
-// ===================== V17.8.0 — JORNADA DO PILOTO =====================
+// ===================== V17.8.1 — JORNADA DO PILOTO =====================
 const PILOT_JOURNEY_STEPS=[
   {id:'first_kills',label:'Batismo de Fogo',desc:'Destrua 3 NPCs para dominar seleção, laser e míssil.',event:'kill',target:3,reward:'2.000 PLS-1',grant:()=>{progress.ammo.lcb10=(progress.ammo.lcb10||0)+2000;}},
   {id:'first_boxes',label:'Recupere a Carga',desc:'Colete 2 boxes deixadas por NPCs destruídos.',event:'box',target:2,reward:'50 R-310',grant:()=>{progress.rockets.r310=(progress.rockets.r310||0)+50;}},
@@ -1852,6 +1879,7 @@ function freshSave(factionId) {
     pilotBio: freshPilotBio(),
     titles: freshPilotTitles(),
     journey: freshPilotJourney(),
+    achievements: freshAchievements(),
     auction: freshAuctionState(),
     galaxyGate: freshGalaxyGateState(),
     repairRequired: null,
@@ -2676,7 +2704,7 @@ function processPlayerLevelUps(){
   let gained=0;
   while(progress.profile.level<PLAYER_MAX_LEVEL&&progress.profile.xp>=levelXpThreshold(progress.profile.level+1)){
     progress.profile.level++;
-    gained++;telemetryLevelReached(progress.profile.level);journeyEvent('level',progress.profile.level);
+    gained++;telemetryLevelReached(progress.profile.level);journeyEvent('level',progress.profile.level);syncAchievements(true);
     showLevelUpAnimation(progress.profile.level);
     queueCelebration('mission','RECOMPENSA LIBERADA',`Nível ${progress.profile.level} • abra PASSE para resgatar`);
     const unlocked=progressionUnlocksAtLevel(progress.profile.level);if(unlocked.length)queueCelebration('mission','NOVO ACESSO',unlocked.join(' • '));
@@ -2978,7 +3006,7 @@ function hydrateProgress(){
   }
   migratePlayerXpCurveV1770();
   progress.profile.level=levelFromXp(progress.profile.xp,PLAYER_MAX_LEVEL);
-  progress.ownedShips ||= ['phoenix'];progress.inventory ||= {};progress.drones ||= [];progress.ammo ||= {};progress.rockets ||= {};progress.flags ||= {};progress.cargo ||= {};progress.discoveries ||= {};progress.missions ||= freshMissions();normalizeMissionState();normalizeBattlePass();normalizeLevelRewards();progress.pilotBio ||= freshPilotBio();normalizePilotBio();progress.titles ||= freshPilotTitles();normalizePilotTitles();progress.journey ||= freshPilotJourney();normalizePilotJourney();progress.auction ||= freshAuctionState();ensureAuctionState();progress.galaxyGate ||= freshGalaxyGateState();normalizeGalaxyGateState();normalizeCombatAbilities();normalizeGalaxyEvents();
+  progress.ownedShips ||= ['phoenix'];progress.inventory ||= {};progress.drones ||= [];progress.ammo ||= {};progress.rockets ||= {};progress.flags ||= {};progress.cargo ||= {};progress.discoveries ||= {};progress.missions ||= freshMissions();normalizeMissionState();normalizeBattlePass();normalizeLevelRewards();progress.pilotBio ||= freshPilotBio();normalizePilotBio();progress.titles ||= freshPilotTitles();normalizePilotTitles();progress.journey ||= freshPilotJourney();normalizePilotJourney();progress.achievements ||= freshAchievements();normalizeAchievements();syncAchievements(false);progress.auction ||= freshAuctionState();ensureAuctionState();progress.galaxyGate ||= freshGalaxyGateState();normalizeGalaxyGateState();normalizeCombatAbilities();normalizeGalaxyEvents();
   if(progress.repairRequired&&(!progress.repairRequired.shipId||!SHIPS[progress.repairRequired.shipId]))progress.repairRequired=null;
   for(const id of Object.keys(LASER_AMMO))if(progress.ammo[id]===undefined)progress.ammo[id]=0;
   if(!LASER_AMMO[progress.selectedLaserAmmo])progress.selectedLaserAmmo='lcb10';
@@ -3701,7 +3729,7 @@ function completeAlphaGate(){
   grantGateRoundReward(a.run?.round||gd.rounds.length);
   const extra=Math.max(0,gd.totalRewardMult-1),bonus={credits:Math.round(earned.credits*extra),uridium:Math.round(earned.uridium*extra),xp:Math.round(earned.xp*extra*designerXpMultiplier())};
   progress.profile.credits+=bonus.credits;progress.profile.uridium+=bonus.uridium;progress.profile.xp+=bonus.xp;telemetryEconomy('gate',{cr:bonus.credits,stl:bonus.uridium,xp:bonus.xp});grantGateFinalPackage(gd);processPlayerLevelUps();
-  progress.profile.ggCompleted=(progress.profile.ggCompleted||0)+1;a.completed++;a.lastCompletion={at:Date.now(),reward:{...earned,bonus,package:{...(gd.finalReward||{})}},totalMult:gd.totalRewardMult};a.pieces=[];a.built=false;a.lives=gd.baseLives;a.run=null;
+  progress.profile.ggCompleted=(progress.profile.ggCompleted||0)+1;syncAchievements(true);a.completed++;a.lastCompletion={at:Date.now(),reward:{...earned,bonus,package:{...(gd.finalReward||{})}},totalMult:gd.totalRewardMult};a.pieces=[];a.built=false;a.lives=gd.baseLives;a.run=null;
   playSfx('reward');showToast(`${gd.label} CONCLUÍDO! • ${fmt(gd.finalReward?.cores||0)} Núcleos • pacote final entregue`,'reward');pushActivity(`PORTAL ASTRAL ${gd.label} • FINAL • ${gateFinalRewardText(gd)}`,'reward');saveGame();
   claimGateDroneDesignerDrop(gd.key,a.completed).catch(()=>{});
   setTimeout(()=>runMapTransition('x1',null,`${gd.label} CONCLUÍDO • PACOTE FINAL RECEBIDO`),1800);
@@ -3963,7 +3991,7 @@ function handleNormalShipDeath(){
 function rewardEnemyKill(enemy){
   const creditMult=1+pilotSkillValue('greed')/100,uriMult=1+pilotCombined('cruelty1','cruelty2')/100,xpMult=1+pilotSkillValue('tactics')/100;
   const earnedCredits=Math.round(enemy.credits*creditMult),earnedUri=Math.round(enemy.uridium*uriMult),earnedXp=Math.round((Number(enemy.xp)||enemy.credits/10+enemy.uridium*12)*xpMult*designerXpMultiplier());
-  progress.profile.credits+=earnedCredits;progress.profile.uridium+=earnedUri;progress.profile.xp+=earnedXp;progress.profile.aliensKilled=(progress.profile.aliensKilled||0)+1;telemetryEconomy('npc',{cr:earnedCredits,stl:earnedUri,xp:earnedXp});telemetryCounter('kills',1);journeyEvent('kill',1);
+  progress.profile.credits+=earnedCredits;progress.profile.uridium+=earnedUri;progress.profile.xp+=earnedXp;progress.profile.aliensKilled=(progress.profile.aliensKilled||0)+1;telemetryEconomy('npc',{cr:earnedCredits,stl:earnedUri,xp:earnedXp});telemetryCounter('kills',1);journeyEvent('kill',1);syncAchievements(true);
   if(authenticated){const boss=/^boss/i.test(String(enemy.type||''));const clanType=String(enemy.type||'').replace(/^boss/i,'').toLowerCase();recordClanAlienKillOnline({npcType:clanType,isBoss:boss}).then(r=>{if(r?.status?.leveled_up){showToast(`CLÃ SUBIU PARA O LV ${r.status.new_level}!`,'reward');refreshClanState(true);}}).catch(()=>{});}
   pushActivity(`${enemy.name} • +${fmt(earnedCredits)} CR • +${fmt(earnedUri)} STL • +${fmt(earnedXp)} XP`,'combat');
   if(String(enemy.type||'').startsWith('boss')){if(!enemy.sharedReward||enemy.sharedFinalBlow||Number(enemy.sharedRewardShare||0)>=.25)rollRareBossLoot(enemy);scoreClanWar(enemy.sharedReward?Math.max(1,Math.round(10*Number(enemy.sharedRewardShare||0))):10,'boss_kill');}
@@ -5128,6 +5156,7 @@ function renderHangarTitles(){
   normalizePilotTitles();
   const root=document.createElement('div');root.className='hangar-embedded-panel titles-hangar-panel';
   root.appendChild(buildPilotTitlesPanel());
+  root.appendChild(buildAchievementsPanel());
   const hint=document.createElement('div');hint.className='pilot-title-help';hint.innerHTML='<b>IDENTIDADE DO PILOTO</b><span>A patente continua representada pelo emblema. No mapa, abaixo do callsign, aparece somente o título equipado — o nível não é exibido para outros pilotos.</span>';
   root.appendChild(hint);
   return root;
