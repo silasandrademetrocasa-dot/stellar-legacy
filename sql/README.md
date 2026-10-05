@@ -6,3 +6,6 @@ O jogo em produção usa o projeto Supabase já migrado; este arquivo serve como
 
 ## V16.3.0
 `V16_3_DRONE_DESIGNERS.sql` adiciona/fecha o fluxo de designers de drone, sets 8/8 e claims idempotentes de Nexus/Eclipse.
+## V17.7.1
+`V17_7_1_TELEMETRY_TITLES.sql` documenta a camada de telemetria, marcos de nível, título sincronizado no presence e RPCs administrativas de análise. A migration correspondente já foi aplicada no Supabase de produção.
+

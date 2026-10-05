@@ -2249,3 +2249,50 @@ body[data-quality="low"] .hud-panel,body[data-quality="low"] .modal-card{backdro
 /* ================= V17.7 PROGRESSION REBALANCE ================= */
 .level-locked{opacity:.48!important;filter:saturate(.5)!important;cursor:not-allowed!important}.level-locked::after{content:' 🔒';font-size:.8em}.level-locked-section{opacity:.72}.level-locked-section .mission-category-head{cursor:not-allowed}.level-locked-section .mission-category-body{display:none!important}
 @media(max-width:680px){.pass-head-copy{align-items:flex-start;flex-direction:column;gap:2px}.pass-section-head{align-items:stretch;flex-direction:column}.pass-claim-stack{width:100%;min-width:0}.pass-section-title-button{width:100%}}
+
+/* ===================== V17.7.1 TITLES + TELEMETRY ===================== */
+.pilot-title-profile{margin-bottom:14px;padding:14px;border:1px solid rgba(96,211,255,.20);border-radius:16px;background:linear-gradient(180deg,rgba(7,25,42,.94),rgba(5,14,27,.96));box-shadow:inset 0 0 28px rgba(92,213,255,.035)}
+.pilot-title-profile-head{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:12px}
+.pilot-title-profile-head h3{margin:3px 0 2px;font-size:18px;color:#eefbff}
+.pilot-title-profile-head small{display:block;color:#82a9bc;font-size:9px;line-height:1.45}
+.pilot-title-current{padding:6px 9px;border:1px solid rgba(255,215,94,.28);border-radius:999px;background:rgba(255,198,53,.08);color:#ffe187;font-size:8px;font-weight:1000;letter-spacing:.10em;white-space:nowrap}
+.pilot-title-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px}
+.pilot-title-card{display:flex;flex-direction:column;gap:6px;min-height:142px;padding:11px;border:1px solid rgba(91,191,238,.14);border-radius:12px;background:rgba(4,15,27,.72)}
+.pilot-title-card.unlocked{border-color:rgba(91,220,255,.23)}
+.pilot-title-card.selected{border-color:rgba(255,216,91,.46);box-shadow:inset 0 0 18px rgba(255,207,65,.055),0 0 16px rgba(255,207,65,.05)}
+.pilot-title-card.locked{opacity:.48}
+.pilot-title-card-top{display:flex;align-items:flex-start;justify-content:space-between;gap:8px}
+.pilot-title-card-top b{font-size:11px;color:#edfaff}
+.pilot-title-card-top span{font-size:7px;font-weight:1000;letter-spacing:.08em;color:#69e2ff}
+.pilot-title-card.locked .pilot-title-card-top span{color:#758797}
+.pilot-title-card p{margin:0;color:#8fb0c1;font-size:9px;line-height:1.45;flex:1}
+.pilot-title-card small{color:#7898a8;font-size:8px;line-height:1.35}
+.pilot-title-card .small-btn{min-height:29px;margin-top:auto;font-size:8px}
+
+.admin-telemetry-section{padding:14px;border:1px solid rgba(82,198,247,.18);border-radius:16px;background:linear-gradient(180deg,rgba(6,22,38,.85),rgba(3,12,23,.9));margin-bottom:16px}
+.admin-telemetry-summary{display:grid;grid-template-columns:repeat(6,minmax(105px,1fr));gap:8px;margin:10px 0 14px}
+.admin-telemetry-summary>div{min-height:66px;padding:9px 10px;border:1px solid rgba(83,190,240,.13);border-radius:10px;background:rgba(5,17,29,.78);display:flex;flex-direction:column;justify-content:center;gap:3px}
+.admin-telemetry-summary span,.admin-telemetry-kicker{font-size:7.5px;font-weight:1000;letter-spacing:.11em;color:#79b7cf}
+.admin-telemetry-summary b{font-size:14px;color:#ecfbff}.admin-telemetry-summary b.negative{color:#ff879b}.admin-telemetry-summary small{font-size:7px;color:#708b9a}
+.admin-telemetry-split{display:grid;grid-template-columns:1.25fr .75fr;gap:12px;margin-bottom:14px}
+.admin-telemetry-kicker{margin:0 0 7px 2px}
+.admin-telemetry-sources,.admin-telemetry-milestones{display:flex;flex-direction:column;gap:6px}
+.admin-source-row{display:grid;grid-template-columns:minmax(130px,1fr) repeat(3,minmax(70px,.45fr));gap:8px;align-items:center;padding:8px 9px;border:1px solid rgba(80,177,220,.11);border-radius:9px;background:rgba(4,14,25,.66)}
+.admin-source-row>div{display:flex;flex-direction:column;gap:2px}.admin-source-row>div b{font-size:9px;color:#e6f8ff}.admin-source-row>div small{font-size:7px;color:#718d9d}.admin-source-row>span{font-size:7px;color:#7899aa}.admin-source-row>span b{display:block;margin-top:1px;color:#d6f5ff;font-size:9px}
+.admin-milestone-row{display:grid;grid-template-columns:55px 75px 1fr;gap:8px;align-items:center;padding:8px 9px;border:1px solid rgba(116,103,255,.13);border-radius:9px;background:rgba(11,12,35,.52)}
+.admin-milestone-row>b{color:#9e91ff;font-size:10px}.admin-milestone-row>span{font-size:10px;color:#e7f7ff}.admin-milestone-row>small{font-size:7.5px;color:#8094a5;line-height:1.35}
+.admin-telemetry-players{display:flex;flex-direction:column;gap:7px;margin-top:7px;max-height:360px;overflow:auto;padding-right:3px}
+.admin-telemetry-player{padding:10px;border:1px solid rgba(82,192,237,.12);border-radius:11px;background:rgba(4,15,27,.72)}
+.admin-telemetry-player-head{display:flex;align-items:center;justify-content:space-between;gap:10px}.admin-telemetry-player-head>div{display:flex;flex-direction:column;gap:2px}.admin-telemetry-player-head b{font-size:11px;color:#edfaff}.admin-telemetry-player-head small{font-size:8px;color:#7fa4b6}
+.admin-telemetry-player-stats{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:6px;margin-top:8px}.admin-telemetry-player-stats span{padding:6px 7px;border-radius:7px;background:rgba(7,25,41,.8);font-size:7px;color:#6e93a7}.admin-telemetry-player-stats b{display:block;margin-top:2px;font-size:8.5px;color:#dff7ff;overflow:hidden;text-overflow:ellipsis}
+.admin-telemetry-detail{margin:8px 0;padding:11px;border:1px solid rgba(255,215,89,.22);border-radius:11px;background:linear-gradient(180deg,rgba(35,28,8,.35),rgba(5,15,26,.78))}.admin-detail-head{display:flex;align-items:center;justify-content:space-between;gap:10px}.admin-detail-head>div{display:flex;flex-direction:column;gap:2px}.admin-detail-head b{font-size:10px;color:#ffe495}.admin-detail-head small{font-size:8px;color:#8ca6b3}.admin-detail-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:6px;margin:9px 0}.admin-detail-grid span{padding:6px;border-radius:7px;background:rgba(5,18,30,.76);font-size:7px;color:#7192a4}.admin-detail-grid b{display:block;margin-top:2px;font-size:9px;color:#e8f8ff}.admin-detail-milestones{display:flex;gap:6px;flex-wrap:wrap}.admin-detail-milestones span{padding:6px 8px;border:1px solid rgba(113,99,255,.14);border-radius:8px;background:rgba(14,14,40,.45);font-size:7.5px;color:#8499aa}.admin-detail-milestones b{color:#a89cff;margin-right:5px}
+@media(max-width:1100px){.admin-telemetry-summary{grid-template-columns:repeat(3,1fr)}.admin-telemetry-split{grid-template-columns:1fr}.admin-telemetry-player-stats,.admin-detail-grid{grid-template-columns:repeat(3,1fr)}.pilot-title-grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:680px){.admin-telemetry-summary{grid-template-columns:repeat(2,1fr)}.admin-source-row{grid-template-columns:1fr 1fr}.admin-milestone-row{grid-template-columns:48px 70px 1fr}.admin-telemetry-player-stats,.admin-detail-grid{grid-template-columns:repeat(2,1fr)}.pilot-title-profile-head{align-items:flex-start;flex-direction:column}.pilot-title-grid{grid-template-columns:1fr}}
+
+/* V17.7.1 — standalone Titles profile */
+.titles-hangar-panel{display:flex;flex-direction:column;gap:12px}
+.titles-hangar-panel .pilot-title-profile{margin-bottom:0}
+.pilot-title-help{display:flex;align-items:flex-start;gap:12px;padding:12px 14px;border:1px solid rgba(86,203,255,.14);border-radius:12px;background:rgba(5,18,32,.68)}
+.pilot-title-help b{flex:0 0 auto;color:#7bdfff;font-size:9px;letter-spacing:.1em}
+.pilot-title-help span{color:#91b2c4;font-size:10px;line-height:1.5}
+@media(max-width:680px){.pilot-title-help{flex-direction:column;gap:5px}}

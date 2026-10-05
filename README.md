@@ -1,3 +1,9 @@
+# Stellar Legacy V17.7.1 — Player Telemetry + Titles
+
+Atualização de observabilidade da progressão. O jogo registra métricas agregadas de evolução/economia para o painel ADM e adiciona um perfil de títulos exibidos sob o callsign. O reset completo de conta permanece uma ferramenta administrativa; jogadores comuns não recebem controle para apagar o próprio progresso.
+
+A telemetria é enviada em lotes idempotentes e protegida por RPC autenticada. O ADM acompanha tempo médio até níveis-chave, CR/STL/XP por hora, fontes de recompensa, gastos, kills, missões, mineração, mortes e saltos.
+
 # Stellar Legacy V17.6.1 — Environment Asset Loading Hotfix
 
 Hotfix do revamp de cenário: força atualização dos assets no navegador/CDN, mantém fundos visíveis no modo LOW e integra base, recursos e portais ao preload ativo sem alterar naves/NPCs/AUX/drones.

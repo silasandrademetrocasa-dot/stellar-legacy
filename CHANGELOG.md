@@ -1,3 +1,12 @@
+## 17.7.1 — Player Telemetry + Titles
+- Reset total de conta continua exclusivo do painel ADM; o reset administrativo também limpa a telemetria para iniciar testes de progressão do zero.
+- Telemetria registra tempo jogado, sessões, níveis alcançados, kills, boxes, mineração, missões, mortes, saltos e geração/gasto de CR/STL/XP.
+- Fontes econômicas separadas em NPC, missões, recursos, passe/nível, eventos, portais, exploração e outros.
+- Painel ADM ganhou visão de economia global, CR/h, STL/h, XP/h, tempo médio até níveis-chave e detalhe individual por jogador.
+- Sistema de títulos com perfil próprio no Hangar e títulos liberados por nível/conquistas.
+- Abaixo do callsign no mapa aparece apenas o título equipado; patente permanece representada pelo emblema e o nível deixa de ser exposto visualmente.
+- Título sincronizado no Presence/Shared Universe para outros jogadores.
+
 
 ## 17.7.0 — Progression & Economy Rebalance
 - Nova curva de XP com migração que preserva nível/progresso relativo de contas existentes.

@@ -6,7 +6,7 @@
 <meta content="width=device-width,initial-scale=1,user-scalable=no" name="viewport"/>
 <meta content="#030816" name="theme-color"/>
 <title>Stellar Legacy</title>
-<link href="/style.css?v=17.7.0" rel="stylesheet"/>
+<link href="/style.css?v=17.7.1" rel="stylesheet"/>
 </head>
 <body>
 <div id="app">
@@ -565,6 +565,17 @@
       <div><span>ONLINE</span><b id="adminOnlineAccounts">0</b></div>
       <div><span>BANIDAS</span><b id="adminBannedAccounts">0</b></div>
     </div>
+    <section class="admin-telemetry-section">
+      <div class="settings-title"><div><b>EVOLUÇÃO & ECONOMIA</b><small>Telemetria acumulada dos jogadores: ritmo de evolução, fontes de renda e gasto.</small></div></div>
+      <div class="admin-telemetry-summary" id="adminTelemetrySummary"><div class="empty-state">Aguardando telemetria...</div></div>
+      <div class="admin-telemetry-split">
+        <div><div class="admin-telemetry-kicker">FONTES DE RECOMPENSA</div><div class="admin-telemetry-sources" id="adminTelemetrySources"></div></div>
+        <div><div class="admin-telemetry-kicker">TEMPO MÉDIO POR NÍVEL</div><div class="admin-telemetry-milestones" id="adminTelemetryMilestones"></div></div>
+      </div>
+      <div class="admin-telemetry-kicker">JOGADORES MONITORADOS</div>
+      <div class="admin-telemetry-detail hidden" id="adminTelemetryDetail"></div>
+      <div class="admin-telemetry-players" id="adminTelemetryPlayers"><div class="empty-state">Nenhum jogador registrado ainda.</div></div>
+    </section>
     <section class="admin-control-box">
       <div class="admin-search-row">
         <input id="adminSearchInput" type="search" maxlength="120" placeholder="Buscar por callsign, e-mail ou ID..." autocomplete="off"/>
@@ -587,7 +598,7 @@
       <div class="admin-message muted" id="adminMessage">Apenas contas cadastradas como administradoras no banco podem executar ações.</div>
     </section>
     <section>
-      <div class="settings-title"><div><b>JOGADORES</b><small>RESET mantém login/callsign e preserva Premium. DELETAR remove a conta de autenticação.</small></div><button class="ghost-btn" id="adminRefreshBtn" type="button">ATUALIZAR</button></div>
+      <div class="settings-title"><div><b>JOGADORES</b><small>RESET é exclusivo do ADM, mantém login/callsign, preserva Premium e zera também a telemetria. DELETAR remove a conta de autenticação.</small></div><button class="ghost-btn" id="adminRefreshBtn" type="button">ATUALIZAR</button></div>
       <div class="admin-user-list" id="adminUserList"><div class="empty-state">Buscando contas...</div></div>
     </section>
     <section class="admin-log-section">
@@ -823,6 +834,6 @@
   </div>
 </div>
 </div>
-<script src="/game.js?v=17.7.0" type="module"></script>
+<script src="/game.js?v=17.7.1" type="module"></script>
 </body>
 </html>

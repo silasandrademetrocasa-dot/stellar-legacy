@@ -411,6 +411,7 @@ export async function upsertPlayerPresenceOnline(payload) {
       angle: Number(payload.angle || 0),
       ship_id: String(payload.shipId || 'phoenix'),
       faction: payload.faction || null,
+      pilot_title: String(payload.pilotTitle || 'Piloto Estelar').slice(0, 64),
       level: Math.max(1, Number(payload.level || 1)),
       hp: Math.max(0, Math.round(Number(payload.hp || 0))),
       max_hp: Math.max(0, Math.round(Number(payload.maxHp || 0))),
@@ -746,4 +747,16 @@ export async function adminResetAccount(userId){
 }
 export async function adminDeleteAccount(userId){
   return authedServerFetch(`/api/admin/users/${encodeURIComponent(userId)}`,{method:'DELETE'});
+}
+
+
+// ===================== V17.7.1 TELEMETRY =====================
+export async function pushTelemetryBatch(batch={}){
+  return authedServerFetch('/api/telemetry',{method:'POST',body:JSON.stringify(batch||{})});
+}
+export async function adminTelemetryOverview(){
+  return authedServerFetch('/api/admin/telemetry');
+}
+export async function adminPlayerTelemetry(userId){
+  return authedServerFetch(`/api/admin/telemetry/${encodeURIComponent(String(userId||''))}`);
 }
