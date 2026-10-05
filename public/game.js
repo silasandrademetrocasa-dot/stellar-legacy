@@ -1,7 +1,7 @@
-import { FACTIONS, SHIPS, ITEMS, LASER_AMMO, ROCKETS, NPC_TYPES, MAPS, RESOURCES } from './data.js?v=17.6.0';
-import { GAME_ASSETS } from './assets/v17/manifest.js?v=17.6.0';
-import { signUp, signIn, requestPasswordReset, restorePasswordRecoveryFromUrl, restoreSession, signOutLocal, checkGameSession, endGameSession, getUser, getSessionCredentials, loadCloudSave, saveCloudSave, updateCallsign, updatePassword, loadRankings, loadAuctionBids, saveAuctionBidOnline, markAuctionBidStatusOnline, loadAuctionMarket, upsertPlayerPresenceOnline, loadMapPresenceOnline, removePlayerPresenceOnline, queuePvpAttackOnline, consumePvpDamageEventsOnline, syncArenaProfileOnline, loadArenaState, loadArenaDailyRewardStatus, claimArenaDailyReward, loadArenaOpponents, loadArenaHistory, arenaAttackOnline, listClansOnline, loadMyClanOnline, createClanOnline, joinClanOnline, leaveClanOnline, transferClanCreditsOnline, claimClanCreditGrantsOnline, recordClanAlienKillOnline, getPremiumShopOnline, testPurchasePremiumOnline, loadWarfrontStateOnline, hitWorldBossOnline, claimWorldBossRewardOnline, declareClanWarOnline, recordClanWarScoreOnline, loadLiveOpsOnline, purchaseLiveCatalogOnline, economyActionOnline, getChatHistoryOnline, sendChatMessageOnline, getMyDesignersOnline, setDesignLoadoutOnline, claimGateDroneDesignOnline, claimEventDesignerOnline } from './api.js?v=17.6.0';
-import { SharedUniverseClient } from './world.js?v=17.6.0';
+import { FACTIONS, SHIPS, ITEMS, LASER_AMMO, ROCKETS, NPC_TYPES, MAPS, RESOURCES } from './data.js?v=17.6.1';
+import { GAME_ASSETS } from './assets/v17/manifest.js?v=17.6.1';
+import { signUp, signIn, requestPasswordReset, restorePasswordRecoveryFromUrl, restoreSession, signOutLocal, checkGameSession, endGameSession, getUser, getSessionCredentials, loadCloudSave, saveCloudSave, updateCallsign, updatePassword, loadRankings, loadAuctionBids, saveAuctionBidOnline, markAuctionBidStatusOnline, loadAuctionMarket, upsertPlayerPresenceOnline, loadMapPresenceOnline, removePlayerPresenceOnline, queuePvpAttackOnline, consumePvpDamageEventsOnline, syncArenaProfileOnline, loadArenaState, loadArenaDailyRewardStatus, claimArenaDailyReward, loadArenaOpponents, loadArenaHistory, arenaAttackOnline, listClansOnline, loadMyClanOnline, createClanOnline, joinClanOnline, leaveClanOnline, transferClanCreditsOnline, claimClanCreditGrantsOnline, recordClanAlienKillOnline, getPremiumShopOnline, testPurchasePremiumOnline, loadWarfrontStateOnline, hitWorldBossOnline, claimWorldBossRewardOnline, declareClanWarOnline, recordClanWarScoreOnline, loadLiveOpsOnline, purchaseLiveCatalogOnline, economyActionOnline, getChatHistoryOnline, sendChatMessageOnline, getMyDesignersOnline, setDesignLoadoutOnline, claimGateDroneDesignOnline, claimEventDesignerOnline } from './api.js?v=17.6.1';
+import { SharedUniverseClient } from './world.js?v=17.6.1';
 
 const canvas = document.querySelector('#game');
 const ctx = canvas.getContext('2d');
@@ -25,7 +25,7 @@ const QUALITY_PROFILES={
   // mas nunca rebaixa ou descarta os sprites V17 de NAVE, NPC, DRONES ou AUX-9.
   high:{label:'ALTA',dpr:2,fps:60,background:true,backgroundAlpha:.70,stars:1,grid:false,fx:true,particles:105,preload:'smart',saturation:1.14,contrast:1.06,sceneLight:1,assetCap:54},
   medium:{label:'MÉDIA',dpr:1.30,fps:45,background:true,backgroundAlpha:.46,stars:.52,grid:false,fx:true,particles:48,preload:'core',saturation:1.03,contrast:1.02,sceneLight:.62,assetCap:34},
-  low:{label:'BAIXA',dpr:.95,fps:30,background:false,backgroundAlpha:0,stars:.16,grid:false,fx:true,particles:20,preload:'minimal',saturation:1,contrast:1,sceneLight:.32,assetCap:22},
+  low:{label:'BAIXA',dpr:.90,fps:30,background:true,backgroundAlpha:.26,stars:.12,grid:false,fx:true,particles:12,preload:'minimal',saturation:.96,contrast:1,sceneLight:.24,assetCap:24},
 };
 function initialAutoQuality(){
   if(DEVICE_CAPS.saveData)return 'low';
@@ -110,11 +110,18 @@ addEventListener('pointerdown',unlockGameAudio,{passive:true});
 addEventListener('keydown',unlockGameAudio);
 function qualityShouldPreload(path){
   const mode=qualityProfile().preload;
-  if(mode==='smart')return /\/(branding|backgrounds|ammo|resources|loot)\//.test(path);
-  if(mode==='core')return /\/(branding|backgrounds|ammo)\//.test(path);
-  return /\/branding\//.test(path);
+  const value=String(path||'');
+  // Não pré-carrega todos os fundos grandes de uma vez; o mapa ativo entra em preloadActiveGameplayAssets().
+  if(mode==='smart')return /\/(branding|ammo|loot)\//.test(value)||/\/assets\/v17\/environment\/(?:orbital-station\.webp|resources\/|portals\/)/.test(value);
+  if(mode==='core')return /\/(branding|ammo)\//.test(value)||/\/assets\/v17\/environment\/(?:orbital-station\.webp|portals\/)/.test(value);
+  return /\/branding\//.test(value);
 }
 
+const ASSET_REVISION='17.6.1';
+function versionedAssetUrl(path){
+  const value=String(path||'');if(!value)return value;
+  return value.includes('?')?`${value}&asset=${ASSET_REVISION}`:`${value}?asset=${ASSET_REVISION}`;
+}
 const ASSET_IMAGES = new Map();
 const ASSET_TOUCH = new Map();
 function flattenAssetPaths(value,out=[]){
@@ -125,7 +132,7 @@ function flattenAssetPaths(value,out=[]){
   return out;
 }
 function entityAssetPath(path){return /\/assets\/v17\/(ships|ships-map|drones|drones-map|npcs)\//.test(String(path||''));}
-function coreAssetPath(path){return entityAssetPath(path)||/\/(branding|backgrounds|ammo)\//.test(String(path||''));}
+function coreAssetPath(path){const value=String(path||'');return entityAssetPath(value)||/\/(branding|ammo)\//.test(value)||/\/assets\/v17\/environment\//.test(value);}
 function requestAssetImage(path){
   if(!path)return null;
   let img=ASSET_IMAGES.get(path);
@@ -133,8 +140,9 @@ function requestAssetImage(path){
   const entity=entityAssetPath(path),priority=entity||coreAssetPath(path);
   img=new Image();img.decoding='async';img.loading=priority?'eager':'lazy';
   try{img.fetchPriority=priority?'high':'low';}catch{}
-  ASSET_IMAGES.set(path,img);ASSET_TOUCH.set(path,performance.now());img.src=path;
-  img.onerror=()=>console.warn('Asset não carregado:',path);
+  ASSET_IMAGES.set(path,img);ASSET_TOUCH.set(path,performance.now());img.src=versionedAssetUrl(path);
+  img.onload=()=>ASSET_TOUCH.set(path,performance.now());
+  img.onerror=()=>console.warn('Asset não carregado:',path,'→',img.src);
   return img;
 }
 function trimAssetCache(){
@@ -151,6 +159,11 @@ function preloadAssets(){
 function preloadActiveGameplayAssets(){
   if(!progress)return;
   requestAssetImage(currentMapBackground());
+  if(progress.mapId==='x1')requestAssetImage(GAME_ASSETS.bases?.orbitalStation);
+  Object.values(GAME_ASSETS.portals||{}).forEach(requestAssetImage);
+  const activeOreTypes=[...new Set((state.ores||[]).map(o=>o?.type).filter(Boolean))];
+  activeOreTypes.forEach(type=>requestAssetImage(GAME_ASSETS.resources?.[type]));
+  requestAssetImage(GAME_ASSETS.loot?.cargo);
   requestAssetImage(shipMapAsset(progress.activeShipId));
   requestAssetImage(shipCardAsset(progress.activeShipId));
   requestAssetImage(droneMapAsset(progress?.pet?.level>=10?'petElite':'pet'));
@@ -227,6 +240,12 @@ function portalVisualPalette(portal){
   if(to.includes('x3'))return {main:'#b879ff',ring:'#765bff',core:'#f1dcff'};
   if(to.includes('x2'))return {main:'#53edcf',ring:'#50a8ff',core:'#e5fffa'};
   return {main:'#59dcff',ring:'#63ffc2',core:'#efffff'};
+}
+function portalAsset(portal){
+  const to=String(portal?.to||'').toLowerCase();
+  if(to.includes('battle')||to.startsWith('b4'))return GAME_ASSETS.portals?.warzone||GAME_ASSETS.portals?.standard;
+  if(to.includes('x3')||to.includes('gamma'))return GAME_ASSETS.portals?.shadow||GAME_ASSETS.portals?.standard;
+  return GAME_ASSETS.portals?.standard;
 }
 function drawMapBackground(){
   const img=assetImage(currentMapBackground());
@@ -4146,6 +4165,8 @@ function drawPortals(){
     const p=screenPos(portal.x,portal.y),c=portalVisualPalette(portal);ctx.save();ctx.translate(p.x,p.y);
     ctx.save();ctx.setLineDash([8,11]);ctx.strokeStyle=hexToRgba(c.main,.14);ctx.lineWidth=1.2;ctx.beginPath();ctx.arc(0,0,PORTAL_NEUTRAL_RADIUS,0,TWO_PI);ctx.stroke();ctx.setLineDash([]);ctx.restore();
     if(light>.4){ctx.globalCompositeOperation='lighter';const halo=ctx.createRadialGradient(0,0,0,0,0,74);halo.addColorStop(0,hexToRgba(c.main,.14*light));halo.addColorStop(.45,hexToRgba(c.ring,.07*light));halo.addColorStop(1,'rgba(0,0,0,0)');ctx.fillStyle=halo;ctx.beginPath();ctx.arc(0,0,74,0,TWO_PI);ctx.fill();ctx.globalCompositeOperation='source-over';}
+    const portalImg=assetImage(portalAsset(portal));
+    if(portalImg&&portalImg.naturalWidth){const targetH=138,targetW=targetH*(portalImg.naturalWidth/portalImg.naturalHeight);ctx.save();ctx.globalAlpha=.90;ctx.shadowColor=c.main;ctx.shadowBlur=light>.55?18:5;ctx.drawImage(portalImg,-targetW/2,-targetH/2,targetW,targetH);ctx.restore();}
     ctx.shadowColor=c.main;ctx.shadowBlur=light>.55?14:0;ctx.strokeStyle=hexToRgba(c.main,.92);ctx.lineWidth=3;ctx.beginPath();ctx.ellipse(0,0,34,54,0,0,TWO_PI);ctx.stroke();ctx.shadowBlur=0;
     ctx.save();ctx.rotate(t*.52);ctx.strokeStyle=hexToRgba(c.ring,.72);ctx.lineWidth=4;for(let i=0;i<4;i++){ctx.beginPath();ctx.arc(0,0,26,-.52+i*Math.PI/2,.52+i*Math.PI/2);ctx.stroke();}ctx.restore();
     ctx.save();ctx.rotate(-t*.78);ctx.strokeStyle=hexToRgba(c.main,.38);ctx.lineWidth=1.4;ctx.beginPath();ctx.ellipse(0,0,19,34,0,0,TWO_PI);ctx.stroke();ctx.restore();

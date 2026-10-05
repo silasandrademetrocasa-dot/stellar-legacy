@@ -1,6 +1,6 @@
-# Stellar Legacy V17.6.0 — Maps + Portals + Environment Revamp
+# Stellar Legacy V17.6.1 — Environment Asset Loading Hotfix
 
-Atualização visual de cenário, iluminação, base e portais, preservando todos os sprites V17 de entidades.
+Hotfix do revamp de cenário: força atualização dos assets no navegador/CDN, mantém fundos visíveis no modo LOW e integra base, recursos e portais ao preload ativo sem alterar naves/NPCs/AUX/drones.
 
 # Stellar Legacy V17.5.1 — Event Cleanup Hotfix
 

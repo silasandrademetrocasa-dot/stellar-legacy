@@ -1,3 +1,12 @@
+## V17.6.1 — ENVIRONMENT ASSET LOADING HOTFIX
+- Cache-busting aplicado também aos arquivos de imagem, evitando fundo/base/recurso antigo ou 404 preso no navegador/CDN após deploy.
+- Modo BAIXA mantém o fundo do mapa visível com alpha e efeitos reduzidos em vez de desligar o cenário por completo.
+- Pré-carga ativa agora inclui fundo atual, base orbital, portal, recursos presentes no mapa e caixa de loot.
+- Assets de cenário V17 ficam protegidos do descarte prematuro do cache durante a partida.
+- Recursos/minérios migrados para o pipeline V17 em WebP otimizado.
+- Portais agora usam sprite visual próprio do cenário, mantendo os anéis/efeitos leves do Canvas por cima.
+- Naves, NPCs, AUX-9 e drones permanecem intocados.
+
 ## V17.6.0 — MAPS + PORTALS + ENVIRONMENT REVAMP
 - Novos fundos V17 otimizados para X-1, X-2, X-3, X-4, 4-1, 4-2, 4-3, AURORA, NEXUS e ECLIPSE.
 - Iluminação ambiente própria por setor, adaptada ao modo de qualidade.

@@ -170,14 +170,14 @@ export const GAME_ASSETS = {
     plt3030: '/assets/v8/ammo/cmt4.png'
   },
   resources: {
-    Prometium: '/assets/v8/resources/ferron.png',
-    Endurium: '/assets/v8/resources/cryon.png',
-    Terbium: '/assets/v8/resources/virel.png',
-    Prometid: '/assets/v8/resources/ferrite.png',
-    Duranium: '/assets/v8/resources/duracite.png',
-    Promerium: '/assets/v8/resources/solarium.png',
-    Xenomit: '/assets/v8/resources/voidite.png',
-    credits: '/assets/v8/resources/credits.png'
+    Prometium: '/assets/v17/environment/resources/ferron.webp',
+    Endurium: '/assets/v17/environment/resources/cryon.webp',
+    Terbium: '/assets/v17/environment/resources/virel.webp',
+    Prometid: '/assets/v17/environment/resources/ferrite.webp',
+    Duranium: '/assets/v17/environment/resources/duracite.webp',
+    Promerium: '/assets/v17/environment/resources/solarium.webp',
+    Xenomit: '/assets/v17/environment/resources/voidite.webp',
+    credits: '/assets/v17/environment/resources/credits.webp'
   },
   loot: {
     cargo: '/assets/v8/loot/cargo-box.png',
@@ -187,6 +187,11 @@ export const GAME_ASSETS = {
   },
   bases: {
     orbitalStation: '/assets/v17/environment/orbital-station.webp'
+  },
+  portals: {
+    standard: '/assets/v17/environment/portals/portal-standard.webp',
+    warzone: '/assets/v17/environment/portals/portal-warzone.webp',
+    shadow: '/assets/v17/environment/portals/portal-shadow.webp'
   },
   backgrounds: {
     x1: '/assets/v17/environment/x1.webp',
