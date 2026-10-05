@@ -25,3 +25,5 @@ Feature Flags + UI Modules + cache/versionamento/fallback.
 ## Planned Stage 3
 - PvP objectives, escorts and faction operations.
 - Seasonal Warfront ladder and endgame rewards.
+
+- ✅ V18.1.4 — Mapas + Portais + Recursos Data Driven / World Runtime cache.

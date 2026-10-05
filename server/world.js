@@ -1,6 +1,6 @@
 import { randomUUID } from 'crypto';
 import { WebSocketServer, WebSocket } from 'ws';
-import { MAPS, NPC_TYPES, RESOURCES } from '../public/data.js';
+import { FACTIONS, MAPS, NPC_TYPES, RESOURCES } from '../public/data.js';
 
 const PORTAL_NEUTRAL_RADIUS = 180;
 const LIVE_OPS_REFRESH_MS = 15000;
@@ -116,7 +116,7 @@ class Room {
     this.mapId=sanitizeRoomMap(mapId);
     this.territoryFaction=territoryFaction||'battle';
     this.key=roomKey(this.mapId,this.territoryFaction);
-    this.map=MAPS[this.mapId];
+    this.map=this.world.mapDefinition(this.mapId)||MAPS.x1;
     this.clients=new Set();
     this.players=new Map();
     this.npcs=new Map();
@@ -175,9 +175,14 @@ class Room {
   }
 
   makeOre(type=null,opts={}){
-    const names=this.map.ores||[];
-    const oreType=type||names[Math.floor(Math.random()*Math.max(1,names.length))]||'Prometium';
-    const p=this.randomPosition(120),res=RESOURCES[oreType]||RESOURCES.Prometium;
+    const pool=this.world.resourcePool(this.mapId);
+    let oreType=type;
+    if(!oreType){
+      const total=pool.reduce((sum,row)=>sum+Math.max(.01,Number(row.weight)||1),0);let roll=Math.random()*Math.max(.01,total);
+      for(const row of pool){roll-=Math.max(.01,Number(row.weight)||1);if(roll<=0){oreType=row.resource_key;break;}}
+      oreType ||= pool[0]?.resource_key || (this.map.ores||[])[0] || 'Prometium';
+    }
+    const p=this.randomPosition(120),res=this.world.resourceDefinition(oreType)||RESOURCES[oreType]||RESOURCES.Prometium;
     return {id:opts.id||`${opts.eventOre?'evtore':'ore'}_${randomUUID().slice(0,10)}`,x:p.x,y:p.y,type:oreType,amount:Math.max(1,Math.round(opts.amount||1)),color:res.color,r:opts.r||rand(7,13),rot:rand(0,Math.PI*2),shape:Array.from({length:7},()=>rand(.72,1.18)),eventOre:!!opts.eventOre,eventId:opts.eventId||null};
   }
 
@@ -220,6 +225,22 @@ class Room {
       const target=Math.max(0,Math.round(Number(group.count)||0)),current=this.nonEventNpcCount(group.type);
       for(let i=current;i<target;i++){const e=this.makeNpc(group.type);if(e){this.npcs.set(e.id,e);this.broadcast({type:'npc_spawn',entity:this.publicNpc(e)});}}
     }
+  }
+
+  applyWorldRuntimeConfig(){
+    this.map=this.world.mapDefinition(this.mapId)||MAPS.x1;
+    const w=this.map.world?.w||6000,h=this.map.world?.h||4500;
+    for(const p of this.players.values()){p.x=clamp(p.x,25,w-25);p.y=clamp(p.y,25,h-25);}
+    for(const e of this.npcs.values()){e.x=clamp(e.x,25,w-25);e.y=clamp(e.y,25,h-25);}
+    for(const o of this.ores.values()){o.x=clamp(o.x,25,w-25);o.y=clamp(o.y,25,h-25);const res=this.world.resourceDefinition(o.type);if(res)o.color=res.color;}
+    const target=Math.max(0,Math.round(Number(this.map.oreCount)||0));
+    const normal=[...this.ores.values()].filter(o=>!o.eventOre);
+    if(normal.length>target){for(const o of normal.slice(target)){this.ores.delete(o.id);this.broadcast({type:'ore_remove',entityId:o.id,reason:'runtime_count'});}}
+    else for(let i=normal.length;i<target;i++){const o=this.makeOre();this.ores.set(o.id,o);this.broadcast({type:'ore_spawn',ore:o});}
+    this.oreRespawns=this.oreRespawns.filter(r=>r.eventOre);
+    if(this.map.battle&&!this.warfrontControl)this.warfrontControl={mapId:this.mapId,nodes:warfrontNodesForMap(this.mapId,this.map),startedAt:nowMs()};
+    if(!this.map.battle)this.warfrontControl=null;
+    if(this.clients.size)this.broadcast(this.snapshot());
   }
 
   currentEventDef(){ return this.world.currentEvent(); }
@@ -426,7 +447,7 @@ class Room {
     if(this.mapId!=='x1'||this.territoryFaction!==p.faction)return false;const b=basePointForFaction(this.territoryFaction);return Math.hypot(p.x-b.x,p.y-b.y)<=520;
   }
   playerPortalNeutral(p){
-    return (this.map.portals||[]).some(portal=>Math.hypot(p.x-Number(portal.x||0),p.y-Number(portal.y||0))<=PORTAL_NEUTRAL_RADIUS);
+    return this.world.portalsForRoom(this.mapId,this.territoryFaction).some(portal=>Math.hypot(p.x-Number(portal.x||0),p.y-Number(portal.y||0))<=PORTAL_NEUTRAL_RADIUS);
   }
   playerProtectedFromNpc(p,e=null){
     const retaliating=String(e?.aggroUserId||'')===String(p?.userId||'');
@@ -549,7 +570,7 @@ class Room {
     safeJsonSend(ws,{type:'ore_collected',ore:o});this.broadcast({type:'ore_remove',entityId:o.id,collectorUserId:p.userId},ws);
     const mode=this.eventMode();
     if(o.eventOre&&this.event?.eventId===o.eventId&&mode==='ore')this.addEventProgress(o.amount);
-    if(!o.eventOre)this.oreRespawns.push({type:o.type,at:nowMs()+rand(5000,12000)});
+    if(!o.eventOre){const min=Math.max(1000,Number(this.map.oreRespawnMinMs)||5000),max=Math.max(min,Number(this.map.oreRespawnMaxMs)||12000);this.oreRespawns.push({type:o.type,at:nowMs()+rand(min,max)});}
   }
 
   addEventProgress(amount){
@@ -608,7 +629,7 @@ class Room {
   }
 }
 
-export function attachSharedUniverse(server,{authenticate,loadLiveOps,loadBattleGroup,loadNpcConfig}){
+export function attachSharedUniverse(server,{authenticate,loadLiveOps,loadBattleGroup,loadNpcConfig,loadWorldConfig}){
   const wss=new WebSocketServer({server,path:'/ws',perMessageDeflate:false});const rooms=new Map();
   const world={
     liveOps:{events:[],catalog:[],server_time:0},
@@ -617,6 +638,15 @@ export function attachSharedUniverse(server,{authenticate,loadLiveOps,loadBattle
     npcRuntime:{version:0,updatedAt:null,npcs:new Map(),spawns:new Map(),source:'fallback'},
     lastNpcConfigAt:0,
     npcConfigBusy:false,
+    worldRuntime:{version:0,updatedAt:null,maps:new Map(),resources:new Map(),mapResources:new Map(),sectors:new Map(),portals:[],source:'fallback'},
+    lastWorldConfigAt:0,
+    worldConfigBusy:false,
+    mapDefinition(mapId){return this.worldRuntime?.maps?.get?.(String(mapId||''))||MAPS[String(mapId||'')]||null;},
+    resourceDefinition(key){return this.worldRuntime?.resources?.get?.(String(key||''))||RESOURCES[String(key||'')]||null;},
+    resourcePool(mapId){const rows=this.worldRuntime?.mapResources?.get?.(String(mapId||''));if(Array.isArray(rows)&&rows.length)return rows.filter(r=>r.enabled!==false&&this.resourceDefinition(r.resource_key)?.enabled!==false);return (MAPS[String(mapId||'')]?.ores||[]).map(resource_key=>({resource_key,weight:1,enabled:true}));},
+    sectorForRoom(mapId,territoryFaction){const rows=[...this.worldRuntime.sectors.values()].filter(x=>x.enabled!==false&&String(x.map_id)===String(mapId));if(!rows.length)return null;if(MAPS[mapId]?.battle||this.mapDefinition(mapId)?.battle)return rows[0]||null;return rows.find(x=>String(x.territory_faction||'')===String(territoryFaction||''))||rows[0]||null;},
+    portalEdgePoint(fromSector,toSector,map){const a=this.worldRuntime.sectors.get(String(fromSector||'')),b=this.worldRuntime.sectors.get(String(toSector||''));const w=map?.world?.w||6000,h=map?.world?.h||4500,inset=175,cx=w/2,cy=h/2;if(!a||!b)return{x:cx,y:cy};const vx=((Number(b.graph_x)-Number(a.graph_x))/100)*w,vy=((Number(b.graph_y)-Number(a.graph_y))/100)*h,ax=Math.abs(vx),ay=Math.abs(vy),tx=ax>0?(cx-inset)/ax:Infinity,ty=ay>0?(cy-inset)/ay:Infinity,t=Math.max(0,Math.min(tx,ty));return{x:Math.round(Math.max(inset,Math.min(w-inset,cx+vx*t))),y:Math.round(Math.max(inset,Math.min(h-inset,cy+vy*t)))};},
+    portalsForRoom(mapId,territoryFaction){const origin=this.sectorForRoom(mapId,territoryFaction);if(!origin)return MAPS[mapId]?.portals||[];const map=this.mapDefinition(mapId)||MAPS.x1,out=[];for(const link of this.worldRuntime.portals){if(link.enabled===false)continue;let target=null;if(link.from_sector===origin.sector_label)target=link.to_sector;else if(link.bidirectional!==false&&link.to_sector===origin.sector_label)target=link.from_sector;if(!target)continue;const dest=this.worldRuntime.sectors.get(target);if(!dest||dest.enabled===false)continue;const pos=this.portalEdgePoint(origin.sector_label,target,map);out.push({...pos,to:dest.map_id,targetLabel:target,targetTerritoryFaction:dest.territory_faction||null,battle:!!this.mapDefinition(dest.map_id)?.battle});}return out;},
     loadBattleGroup:loadBattleGroup||null,
     npcActivity:new Map(),
     announcementCooldowns:new Map(),
@@ -647,6 +677,24 @@ export function attachSharedUniverse(server,{authenticate,loadLiveOps,loadBattle
       }catch(err){this.lastNpcConfigAt=nowMs();console.warn('NPC runtime refresh failed; mantendo fallback/cache atual:',err?.message||err);}
       finally{this.npcConfigBusy=false;}
       return this.npcRuntime;
+    },
+    async refreshWorldConfig(force=false){
+      const now=nowMs();if(!loadWorldConfig)return this.worldRuntime;if(!force&&this.lastWorldConfigAt&&now-this.lastWorldConfigAt<15000)return this.worldRuntime;if(this.worldConfigBusy)return this.worldRuntime;this.worldConfigBusy=true;
+      try{
+        const raw=await loadWorldConfig();
+        if(raw&&Array.isArray(raw.maps)&&Array.isArray(raw.resources)&&Array.isArray(raw.sectors)&&Array.isArray(raw.portals)){
+          const nextVersion=Math.max(0,Number(raw.version)||0),changed=nextVersion!==Number(this.worldRuntime.version);
+          const resources=new Map();for(const row of raw.resources){if(!row?.resource_key)continue;const key=String(row.resource_key),obj={id:key,name:shortText(row.name||key,48),color:safeColor(row.color,'#ffffff'),sell:Math.max(0,Number(row.sell_price)||0),enabled:row.enabled!==false};resources.set(key,obj);RESOURCES[key]={...(RESOURCES[key]||{}),...obj};}
+          const maps=new Map();for(const row of raw.maps){if(!row?.map_id)continue;const key=String(row.map_id),fallback=MAPS[key]||{};const map={...fallback,id:key,label:row.label??fallback.label,tier:Number(row.tier)||fallback.tier||1,name:shortText(row.name||fallback.name||key,64),risk:shortText(row.risk||fallback.risk||'Normal',32),world:{w:Math.max(1000,Number(row.world_w)||fallback.world?.w||6000),h:Math.max(1000,Number(row.world_h)||fallback.world?.h||4500)},enemyMultiplier:Math.max(.1,Number(row.enemy_multiplier)||fallback.enemyMultiplier||1),oreCount:Math.max(0,Math.round(Number(row.ore_count)||0)),oreRespawnMinMs:Math.max(1000,Number(row.ore_respawn_min_ms)||5000),oreRespawnMaxMs:Math.max(1000,Number(row.ore_respawn_max_ms)||12000),landmarkCount:Math.max(0,Math.round(Number(row.landmark_count)||0)),minLevel:Math.max(1,Number(row.min_level)||1),battle:!!row.battle,gate:!!row.gate,enabled:row.enabled!==false,palette:row.palette&&typeof row.palette==='object'?row.palette:(fallback.palette||{}),structures:Array.isArray(row.structures)?row.structures:(fallback.structures||[])};maps.set(key,map);MAPS[key]=map;}
+          const mapResources=new Map();for(const row of raw.map_resources||[]){const mapId=String(row?.map_id||''),resource_key=String(row?.resource_key||'');if(!mapId||!resource_key)continue;if(!mapResources.has(mapId))mapResources.set(mapId,[]);mapResources.get(mapId).push({resource_key,weight:Math.max(.01,Number(row.weight)||1),enabled:row.enabled!==false});}
+          for(const [mapId,map] of maps){const pool=mapResources.get(mapId)||[];map.ores=pool.filter(x=>x.enabled!==false).map(x=>x.resource_key);map.oreWeights=Object.fromEntries(pool.map(x=>[x.resource_key,x.weight]));}
+          const sectors=new Map();for(const row of raw.sectors||[]){if(!row?.sector_label||!maps.has(String(row.map_id)))continue;sectors.set(String(row.sector_label),{...row,sector_label:String(row.sector_label),map_id:String(row.map_id),territory_faction:row.territory_faction?String(row.territory_faction):null,graph_x:Number(row.graph_x)||0,graph_y:Number(row.graph_y)||0,min_level:Math.max(1,Number(row.min_level)||1),enabled:row.enabled!==false});}
+          const portals=(raw.portals||[]).filter(x=>x?.from_sector&&x?.to_sector).map(x=>({...x,from_sector:String(x.from_sector),to_sector:String(x.to_sector),bidirectional:x.bidirectional!==false,enabled:x.enabled!==false,sort_order:Number(x.sort_order)||100}));
+          this.worldRuntime={version:nextVersion,updatedAt:raw.updated_at||null,maps,resources,mapResources,sectors,portals,source:'render-cache'};this.lastWorldConfigAt=nowMs();
+          if(changed){for(const r of rooms.values())r.applyWorldRuntimeConfig();console.info(`[world-config] v${nextVersion} aplicado • ${maps.size} mapas • ${portals.length} portais`);}
+        }
+      }catch(err){this.lastWorldConfigAt=nowMs();console.warn('World runtime refresh failed; mantendo fallback/cache atual:',err?.message||err);}
+      finally{this.worldConfigBusy=false;}return this.worldRuntime;
     },
     broadcastGlobalAnnouncement(payload={}){
       const now=nowMs(),key=String(payload.key||payload.kind||'global');
@@ -681,8 +729,8 @@ export function attachSharedUniverse(server,{authenticate,loadLiveOps,loadBattle
       finally{world.liveOpsBusy=false;}
       return world.liveOps;
     },
-    room(mapId,territoryFaction){const id=sanitizeRoomMap(mapId),key=roomKey(id,territoryFaction);if(!rooms.has(key))rooms.set(key,new Room(world,id,territoryFaction));return rooms.get(key);},
-    stats(){return {rooms:rooms.size,clients:[...rooms.values()].reduce((s,r)=>s+r.clients.size,0),npcs:[...rooms.values()].reduce((s,r)=>s+r.npcs.size,0),ores:[...rooms.values()].reduce((s,r)=>s+r.ores.size,0),event:world.currentEvent(),liveOpsUpdatedAt:world.lastLiveOpsAt,npcConfigVersion:Number(world.npcRuntime?.version)||0,npcConfigUpdatedAt:world.npcRuntime?.updatedAt||null};}
+    room(mapId,territoryFaction){const requested=String(mapId||'x1'),def=this.mapDefinition(requested),id=def&&def.enabled!==false&&!def.gate?requested:sanitizeRoomMap(requested),key=roomKey(id,territoryFaction);if(!rooms.has(key))rooms.set(key,new Room(world,id,territoryFaction));return rooms.get(key);},
+    stats(){return {rooms:rooms.size,clients:[...rooms.values()].reduce((s,r)=>s+r.clients.size,0),npcs:[...rooms.values()].reduce((s,r)=>s+r.npcs.size,0),ores:[...rooms.values()].reduce((s,r)=>s+r.ores.size,0),event:world.currentEvent(),liveOpsUpdatedAt:world.lastLiveOpsAt,npcConfigVersion:Number(world.npcRuntime?.version)||0,npcConfigUpdatedAt:world.npcRuntime?.updatedAt||null,worldConfigVersion:Number(world.worldRuntime?.version)||0,worldConfigUpdatedAt:world.worldRuntime?.updatedAt||null};}
   };
 
   wss.on('connection',ws=>{
@@ -711,9 +759,10 @@ export function attachSharedUniverse(server,{authenticate,loadLiveOps,loadBattle
     ws.on('error',()=>{});
   });
 
+  world.refreshWorldConfig(true).catch(()=>{});
   world.refreshNpcConfig(true).catch(()=>{});
   world.refreshLiveOps(true).catch(()=>{});
-  let last=nowMs(),lastActivityCleanup=0;const timer=setInterval(()=>{const n=nowMs(),dt=Math.min(.12,(n-last)/1000);last=n;if(n-world.lastLiveOpsAt>=LIVE_OPS_REFRESH_MS)world.refreshLiveOps(false).catch(()=>{});if(n-world.lastNpcConfigAt>=12000)world.refreshNpcConfig(false).catch(()=>{});for(const [key,r] of rooms){r.tick(dt);if(r.clients.size===0&&n-(r.lastUsedAt||n)>30*60*1000)rooms.delete(key);else if(r.clients.size>0)r.lastUsedAt=n;}if(n-lastActivityCleanup>60000){lastActivityCleanup=n;for(const [uid,at] of world.npcActivity)if(n-Number(at)>10*60*1000)world.npcActivity.delete(uid);}},50);
+  let last=nowMs(),lastActivityCleanup=0;const timer=setInterval(()=>{const n=nowMs(),dt=Math.min(.12,(n-last)/1000);last=n;if(n-world.lastLiveOpsAt>=LIVE_OPS_REFRESH_MS)world.refreshLiveOps(false).catch(()=>{});if(n-world.lastNpcConfigAt>=12000)world.refreshNpcConfig(false).catch(()=>{});if(n-world.lastWorldConfigAt>=15000)world.refreshWorldConfig(false).catch(()=>{});for(const [key,r] of rooms){r.tick(dt);if(r.clients.size===0&&n-(r.lastUsedAt||n)>30*60*1000)rooms.delete(key);else if(r.clients.size>0)r.lastUsedAt=n;}if(n-lastActivityCleanup>60000){lastActivityCleanup=n;for(const [uid,at] of world.npcActivity)if(n-Number(at)>10*60*1000)world.npcActivity.delete(uid);}},50);
   timer.unref?.();
   return world;
 }

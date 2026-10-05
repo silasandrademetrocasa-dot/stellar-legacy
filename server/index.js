@@ -84,6 +84,68 @@ const TOPBAR_ALLOWED_FLAGS = new Set([
 let topbarRuntimeCache = null;
 let topbarRuntimeCacheAt = 0;
 
+// V18.1.4 — WORLD RUNTIME CACHE
+const WORLD_RUNTIME_CACHE_MS = 15000;
+const WORLD_RUNTIME_FILE = path.join(TOPBAR_RUNTIME_DIR, 'world.runtime.json');
+let worldRuntimeCache = null;
+let worldRuntimeCacheAt = 0;
+
+function clampNum(value,min,max,fallback){
+  const n=Number(value);return Number.isFinite(n)?Math.max(min,Math.min(max,n)):fallback;
+}
+function safeWorldId(value){return /^[A-Za-z0-9_-]{1,32}$/.test(String(value||''))?String(value):'';}
+function safeSector(value){return /^[A-Za-z0-9_-]{1,24}$/.test(String(value||''))?String(value):'';}
+function sanitizeWorldRuntime(raw){
+  const resources=Array.isArray(raw?.resources)?raw.resources.map(x=>({
+    resource_key:safeWorldId(x?.resource_key),name:String(x?.name||'').slice(0,48),color:String(x?.color||'#ffffff').slice(0,24),
+    sell_price:Math.max(0,Math.round(Number(x?.sell_price)||0)),enabled:x?.enabled!==false
+  })).filter(x=>x.resource_key):[];
+  const maps=Array.isArray(raw?.maps)?raw.maps.map(x=>({
+    map_id:safeWorldId(x?.map_id),label:x?.label==null?null:String(x.label).slice(0,24),tier:Math.round(Number(x?.tier)||1),
+    name:String(x?.name||'Setor').slice(0,64),risk:String(x?.risk||'Normal').slice(0,32),
+    world_w:Math.round(clampNum(x?.world_w,1000,50000,6000)),world_h:Math.round(clampNum(x?.world_h,1000,50000,4500)),
+    enemy_multiplier:clampNum(x?.enemy_multiplier,.1,10,1),ore_count:Math.round(clampNum(x?.ore_count,0,1000,0)),
+    ore_respawn_min_ms:Math.round(clampNum(x?.ore_respawn_min_ms,1000,600000,5000)),ore_respawn_max_ms:Math.round(clampNum(x?.ore_respawn_max_ms,1000,600000,12000)),
+    landmark_count:Math.round(clampNum(x?.landmark_count,0,100,0)),min_level:Math.round(clampNum(x?.min_level,1,100,1)),
+    battle:!!x?.battle,gate:!!x?.gate,enabled:x?.enabled!==false,
+    palette:x?.palette&&typeof x.palette==='object'?x.palette:{},structures:Array.isArray(x?.structures)?x.structures.slice(0,30).map(v=>String(v).slice(0,64)):[]
+  })).filter(x=>x.map_id):[];
+  const map_resources=Array.isArray(raw?.map_resources)?raw.map_resources.map(x=>({
+    map_id:safeWorldId(x?.map_id),resource_key:safeWorldId(x?.resource_key),weight:clampNum(x?.weight,.01,1000,1),enabled:x?.enabled!==false
+  })).filter(x=>x.map_id&&x.resource_key):[];
+  const sectors=Array.isArray(raw?.sectors)?raw.sectors.map(x=>({
+    sector_label:safeSector(x?.sector_label),map_id:safeWorldId(x?.map_id),territory_faction:x?.territory_faction==null?null:safeWorldId(x.territory_faction),
+    graph_x:clampNum(x?.graph_x,0,100,50),graph_y:clampNum(x?.graph_y,0,100,50),min_level:Math.round(clampNum(x?.min_level,1,100,1)),enabled:x?.enabled!==false
+  })).filter(x=>x.sector_label&&x.map_id):[];
+  const portals=Array.isArray(raw?.portals)?raw.portals.map(x=>({
+    portal_key:safeWorldId(x?.portal_key),from_sector:safeSector(x?.from_sector),to_sector:safeSector(x?.to_sector),
+    bidirectional:x?.bidirectional!==false,enabled:x?.enabled!==false,sort_order:Math.round(clampNum(x?.sort_order,0,9999,100))
+  })).filter(x=>x.portal_key&&x.from_sector&&x.to_sector):[];
+  return {version:Math.max(0,Number(raw?.version)||0),updated_at:raw?.updated_at||null,resources,maps,map_resources,sectors,portals,generated_at:new Date().toISOString(),source:'render-temp-json'};
+}
+async function writeWorldRuntimeFile(payload){
+  await fs.mkdir(TOPBAR_RUNTIME_DIR,{recursive:true});
+  const tmp=`${WORLD_RUNTIME_FILE}.${process.pid}.tmp`;
+  await fs.writeFile(tmp,JSON.stringify(payload),{encoding:'utf8'});
+  await fs.rename(tmp,WORLD_RUNTIME_FILE);
+}
+async function readWorldRuntimeFile(){
+  try{const text=await fs.readFile(WORLD_RUNTIME_FILE,'utf8');const parsed=JSON.parse(text);return parsed&&Array.isArray(parsed.maps)?parsed:null;}catch{return null;}
+}
+async function refreshWorldRuntimeSnapshot(force=false){
+  const now=Date.now();
+  if(!force&&worldRuntimeCache&&now-worldRuntimeCacheAt<WORLD_RUNTIME_CACHE_MS)return worldRuntimeCache;
+  const sb=supabaseBase();if(!sb)throw new Error('Supabase indisponível para configuração do mundo.');
+  const {data,error}=await sb.rpc('get_world_runtime_config_v1814');
+  if(error)throw new Error(`Falha ao carregar world runtime: ${error.message}`);
+  const payload=sanitizeWorldRuntime(data||{});
+  if(!payload.maps.length||!payload.sectors.length)throw new Error('Snapshot do mundo veio vazio.');
+  await writeWorldRuntimeFile(payload);worldRuntimeCache=payload;worldRuntimeCacheAt=now;return payload;
+}
+async function loadWorldRuntimeSnapshot(force=false){
+  try{return await refreshWorldRuntimeSnapshot(force);}catch(err){const disk=await readWorldRuntimeFile();if(disk){worldRuntimeCache=disk;worldRuntimeCacheAt=Date.now();return disk;}throw err;}
+}
+
 function sanitizeTopbarRuntime(raw){
   const modules=Array.isArray(raw?.modules)?raw.modules.filter(x=>x&&TOPBAR_ALLOWED_MODULES.has(String(x.module_key||''))).map(x=>({
     module_key:String(x.module_key),
@@ -398,7 +460,7 @@ async function accountUser(sb, user, preferred = '') {
   return { id: user.id, email: user.email, callsign };
 }
 
-app.get('/health', (req, res) => res.json({ ok: true, game: 'Stellar Legacy', version: '18.1.3', universe: 'shared' }));
+app.get('/health', (req, res) => res.json({ ok: true, game: 'Stellar Legacy', version: '18.1.4', universe: 'shared' }));
 
 
 app.get('/api/config', (req, res) => {
@@ -414,10 +476,10 @@ app.get('/api/config', (req, res) => {
 
 app.get('/api/meta', (req, res) => res.json({
   name: 'Stellar Legacy',
-  version: '18.1.3',
+  version: '18.1.4',
   authReady: Boolean(SUPABASE_URL && SUPABASE_KEY),
   diagnostics: configStatus(),
-  features: ['login', 'cloud_save', 'factions', 'safe_zone', 'shop', 'owned_ships', 'equipment_slots', 'inventory', 'drones', 'ammo', 'rockets', 'expanded_expedition_maps', 'cargo_hold', 'ore_trading', 'npc_cargo_boxes', 'npc_respawn', 'minimap_navigation', 'waypoints', 'landmark_discovery', 'combat_fx', 'pet_modules', 'auto_buy_cpu', 'v8_asset_identity', 'mission_control_v93', 'mission_acceptance_tracking', 'expanded_enemy_density', 'online_player_presence', 'real_player_auction', 'rank_nameplates_v12', 'clans_v12', 'clan_vault_v12', 'premium_shop_v12', 'battle_pass_paid_v12', 'premium_subscription_v12', 'clan_daily_economy_v12', 'portal_neutral_zone_v12', 'base_only_equipment_v12', 'single_session_v1214', 'manual_login_v141', 'account_bound_save_v141', 'unique_callsign_v141', 'premium_auto_combat_v141', 'shared_universe_v15', 'authoritative_npcs_v15', 'shared_ores_v15', 'shared_events_v15', 'websocket_world_v15', 'npc_contribution_v15', 'realtime_player_socket_v151', 'remote_laser_fx_v151', 'remote_aux9_v151', 'low_latency_world_v151', 'live_ops_v16', 'server_authoritative_shop_v16', 'supabase_event_schedule_v16', 'economy_guard_v161', 'server_auto_buy_v161', 'server_trader_v161', 'server_pet_slots_v161', 'server_materializer_v161', 'server_quantum_cores_v161', 'economy_fast_path_v1767', 'chat_dock_v162', 'drone_designers_v163', 'designer_sets_v163', 'nexus_eclipse_designer_drops_v163', 'global_chat_v162', 'clan_chat_v162', 'private_chat_v162', 'bottom_hud_reflow_v162', 'ship_designers_v165', 'aux_designers_v165', 'designer_ship_abilities_v165', 'event_designer_drops_v165', 'social_minimap_v165', 'realtime_designer_visuals_v165', 'data_driven_core_v1810', 'data_driven_npcs_v1811', 'server_runtime_topbar_cache_v1813'],
+  features: ['login', 'cloud_save', 'factions', 'safe_zone', 'shop', 'owned_ships', 'equipment_slots', 'inventory', 'drones', 'ammo', 'rockets', 'expanded_expedition_maps', 'cargo_hold', 'ore_trading', 'npc_cargo_boxes', 'npc_respawn', 'minimap_navigation', 'waypoints', 'landmark_discovery', 'combat_fx', 'pet_modules', 'auto_buy_cpu', 'v8_asset_identity', 'mission_control_v93', 'mission_acceptance_tracking', 'expanded_enemy_density', 'online_player_presence', 'real_player_auction', 'rank_nameplates_v12', 'clans_v12', 'clan_vault_v12', 'premium_shop_v12', 'battle_pass_paid_v12', 'premium_subscription_v12', 'clan_daily_economy_v12', 'portal_neutral_zone_v12', 'base_only_equipment_v12', 'single_session_v1214', 'manual_login_v141', 'account_bound_save_v141', 'unique_callsign_v141', 'premium_auto_combat_v141', 'shared_universe_v15', 'authoritative_npcs_v15', 'shared_ores_v15', 'shared_events_v15', 'websocket_world_v15', 'npc_contribution_v15', 'realtime_player_socket_v151', 'remote_laser_fx_v151', 'remote_aux9_v151', 'low_latency_world_v151', 'live_ops_v16', 'server_authoritative_shop_v16', 'supabase_event_schedule_v16', 'economy_guard_v161', 'server_auto_buy_v161', 'server_trader_v161', 'server_pet_slots_v161', 'server_materializer_v161', 'server_quantum_cores_v161', 'economy_fast_path_v1767', 'chat_dock_v162', 'drone_designers_v163', 'designer_sets_v163', 'nexus_eclipse_designer_drops_v163', 'global_chat_v162', 'clan_chat_v162', 'private_chat_v162', 'bottom_hud_reflow_v162', 'ship_designers_v165', 'aux_designers_v165', 'designer_ship_abilities_v165', 'event_designer_drops_v165', 'social_minimap_v165', 'realtime_designer_visuals_v165', 'data_driven_core_v1810', 'data_driven_npcs_v1811', 'server_runtime_topbar_cache_v1813', 'data_driven_world_v1814'],
 }));
 
 
@@ -430,6 +492,12 @@ app.get('/api/runtime/topbar', requireUser, asyncRoute(async (req,res)=>{
   }catch{}
   res.set('Cache-Control','no-store');
   res.json({...snapshot,is_admin:isAdmin});
+}));
+
+app.get('/api/runtime/world', requireUser, asyncRoute(async (req,res)=>{
+  const snapshot=await loadWorldRuntimeSnapshot(Boolean(req.query?.refresh));
+  res.set('Cache-Control','no-store');
+  res.json(snapshot);
 }));
 
 app.get('/api/diagnostics', asyncRoute(async (req, res) => {
@@ -693,8 +761,9 @@ app.post('/api/economy/action', requireUser, asyncRoute(async (req,res)=>{
     }
     else if(action==='sell_cargo'){
       const id=String(payload.resource_id||'all'),mapOk=String(state.mapId||'')==='x1'&&String(state.territoryFaction||state.profile?.faction||'')===String(state.profile?.faction||'');if(!mapOk)throw Object.assign(new Error('Trader disponível somente na sua base X-1.'),{status:409});state.cargo ||= {};let total=0;const sold={};const ids=id==='all'?Object.keys(state.cargo):[id];
-      for(const rid of ids){const qty=Math.max(0,Math.floor(Number(state.cargo[rid])||0));if(!qty||rid==='Xenomit')continue;const row=liveCatalogRow(snapshot,`resource:${rid}`);if(!row||String(row?.meta?.mode||'sell')!=='sell')continue;const unit=Math.max(0,Math.round(Number(row.price)||0));if(!unit)continue;total+=qty*unit;sold[rid]={qty,unit,total:qty*unit};delete state.cargo[rid];}
-      if(total<=0)throw Object.assign(new Error('Nada vendável no porão.'),{status:409});creditServer(state,total,'credits');info={action,sold,total,currency:'credits'};
+      const worldCfg=await loadWorldRuntimeSnapshot(false).catch(()=>null);const resourceRows=new Map((worldCfg?.resources||[]).map(r=>[String(r.resource_key||''),r]));
+      for(const rid of ids){const qty=Math.max(0,Math.floor(Number(state.cargo[rid])||0));if(!qty||rid==='Xenomit')continue;const runtimeRow=resourceRows.get(rid);let unit=runtimeRow&&runtimeRow.enabled!==false?Math.max(0,Math.round(Number(runtimeRow.sell_price)||0)):0;if(!worldCfg){const row=liveCatalogRow(snapshot,`resource:${rid}`);if(row&&String(row?.meta?.mode||'sell')==='sell')unit=Math.max(0,Math.round(Number(row.price)||0));}if(!unit)continue;total+=qty*unit;sold[rid]={qty,unit,total:qty*unit};delete state.cargo[rid];}
+      if(total<=0)throw Object.assign(new Error('Nada vendável no porão.'),{status:409});creditServer(state,total,'credits');info={action,sold,total,currency:'credits',price_source:worldCfg?'world_runtime':'live_ops_fallback'};
     }
     else if(action==='sell_inventory'){
       const itemId=String(payload.item_id||''),qty=Math.max(1,Math.min(999,Math.floor(Number(payload.qty)||1)));state.inventory ||= {};const have=Math.max(0,Math.floor(Number(state.inventory[itemId])||0));if(!itemId||have<qty)throw Object.assign(new Error('Item não disponível no inventário online.'),{status:409});const row=catalogSellRow(snapshot,itemId);if(!row)throw Object.assign(new Error('Esse item não possui preço online para venda.'),{status:404});const unit=Math.max(1,Math.floor((Number(row.price)||0)*.5)),total=unit*qty,currency=String(row.currency)==='uridium'?'uridium':'credits';state.inventory[itemId]=have-qty;if(state.inventory[itemId]<=0)delete state.inventory[itemId];creditServer(state,total,currency);info={action,item_id:itemId,qty,unit,total,currency};
@@ -826,7 +895,7 @@ app.post('/api/player/location', requireUser, asyncRoute(async (req,res)=>{
   return res.json(data||{ok:true});
 }));
 
-app.get('/api/world/status', (req, res) => res.json({ ok: true, version: '18.1.3', ...sharedUniverse.stats() }));
+app.get('/api/world/status', (req, res) => res.json({ ok: true, version: '18.1.4', ...sharedUniverse.stats() }));
 
 app.get('*', (req, res) => res.sendFile(path.join(__dirname, '../public/index.html')));
 
@@ -852,6 +921,7 @@ const server = http.createServer(app);
 const sharedUniverse = attachSharedUniverse(server, {
   loadLiveOps: async()=>loadLiveOpsSnapshot(false),
   loadNpcConfig: async()=>loadNpcRuntimeSnapshot(false),
+  loadWorldConfig: async()=>loadWorldRuntimeSnapshot(false),
   loadBattleGroup: async (token) => {
     const sb=supabaseForToken(token);if(!sb)return null;
     const {data,error}=await sb.rpc('get_my_battle_group_v179');
@@ -884,8 +954,14 @@ const topbarRefreshTimer=setInterval(()=>{
 topbarRefreshTimer.unref?.();
 refreshTopbarRuntimeSnapshot(true).then(cfg=>console.log(`[topbar-runtime] v${cfg.version} cacheado em ${TOPBAR_RUNTIME_FILE}`)).catch(err=>console.warn('[topbar-runtime] bootstrap:',err.message));
 
+const worldRefreshTimer=setInterval(()=>{
+  refreshWorldRuntimeSnapshot(true).catch(err=>console.warn('[world-runtime] refresh:',err.message));
+},WORLD_RUNTIME_CACHE_MS);
+worldRefreshTimer.unref?.();
+refreshWorldRuntimeSnapshot(true).then(cfg=>console.log(`[world-runtime] v${cfg.version} cacheado em ${WORLD_RUNTIME_FILE}`)).catch(err=>console.warn('[world-runtime] bootstrap:',err.message));
+
 server.listen(port, () => {
-  console.log(`Stellar Legacy V18.1.3 :${port}`);
+  console.log(`Stellar Legacy V18.1.4 :${port}`);
   console.log('Supabase config:', configStatus());
   console.log('Shared Universe: ONLINE');
 });

@@ -58,3 +58,18 @@ A navegação superior passa por um roteador local baseado em `module_key`. Reor
 - Ordem das abas usa CSS `order`; nenhum nó é reanexado no DOM.
 - Handlers originais dos botões permanecem intactos.
 - Configuração continua vindo do Supabase e pode mudar sem alterar o código do cliente.
+
+
+## V18.1.4 — World Runtime
+
+Fluxo: `Supabase -> Render -> world.runtime.json -> cliente/Shared Universe`.
+
+Tabelas principais:
+- `game_resource_config_v1814`
+- `game_map_config_v1814`
+- `game_map_resource_pool_v1814`
+- `game_sector_nodes_v1814`
+- `game_portal_links_v1814`
+
+O Git continua responsável pelo motor e pelos assets. O banco controla conteúdo, quantidade, rotas e balanceamento sem executar JavaScript arbitrário.
+

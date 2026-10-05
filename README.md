@@ -1,4 +1,4 @@
-# Stellar Legacy 18.1.3 — Topbar Router Hotfix
+# Stellar Legacy 18.1.4 — Data Driven World
 
 Hotfix da V18.1 Data Driven: a barra superior agora usa um roteador único de ações por `module_key`, mantendo cliques funcionais mesmo depois de nome/ordem/visibilidade serem reorganizados pelo Supabase.
 
@@ -205,3 +205,13 @@ A V17.6.3 usa a tabela existente `public.game_admins` como fonte de autorizaçã
 - Ordem das abas usa CSS `order`; nenhum nó é reanexado no DOM.
 - Handlers originais dos botões permanecem intactos.
 - Configuração continua vindo do Supabase e pode mudar sem alterar o código do cliente.
+
+## V18.1.4 — Mapas + Portais + Recursos Data Driven
+
+- Mapas, setores, rotas de portal e recursos passam a ser configurados no Supabase.
+- O Render materializa `world.runtime.json` em cache temporário e o navegador consome via `/api/runtime/world`.
+- Shared Universe usa o mesmo snapshot para quantidade/respawn de minérios e zonas de portal.
+- Preço de venda de recursos passa a usar o World Runtime, com fallback seguro.
+- Grafo de setores (`1-1` ... `4-3`) e níveis mínimos podem ser alterados sem novo deploy.
+- Código/engine e gráficos continuam no Git; o banco apenas configura conteúdo conhecido.
+

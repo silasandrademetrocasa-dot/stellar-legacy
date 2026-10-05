@@ -1,3 +1,12 @@
+## V18.1.4 — Data Driven World
+
+- Novo World Runtime: mapas, setores, portais e recursos configuráveis pelo Supabase.
+- Cache temporário `world.runtime.json` no Render com fallback em disco.
+- Shared Universe atualiza recursos e mapas sem reiniciar o servidor.
+- Preços de recursos e pools de minério passam a obedecer o World Runtime.
+- Rotas e nível mínimo dos setores deixam de depender exclusivamente do código local.
+- Topbar V18.1.3 preservada sem alterações.
+
 ## V18.1.3 — Topbar Router Hotfix
 
 - Corrige botões da topbar que podiam parar de responder após aplicação/reordenação Data Driven.
