@@ -1,3 +1,12 @@
+## V18.1.0 — Data Driven Core • Stage 1
+
+- Feature Flags globais no Supabase.
+- Topbar e itens dos dropdowns agora recebem nome, ordem, nível mínimo e ativo/inativo do banco.
+- Configuração usa whitelist de módulos; banco nunca injeta HTML/JavaScript.
+- Cache local por conta + fallback local: indisponibilidade do Supabase não impede o jogo de abrir.
+- Polling leve por versão: alterações no banco chegam sem redeploy (até ~45s, ou no próximo login/F5).
+- RPCs administrativas preparadas para a futura Central de Configuração ADM.
+
 
 ## V18.0.3 — Patent Ranking Fix
 - Remove a carência de 1 dia para disputar patentes.

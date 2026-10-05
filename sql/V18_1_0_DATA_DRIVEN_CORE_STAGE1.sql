@@ -1,0 +1,4 @@
+-- Applied to Supabase as migration v18_1_0_data_driven_core_stage1.
+-- Source-of-truth schema: game_runtime_meta_v1810, game_ui_modules_v1810, game_feature_flags_v1810.
+-- Runtime RPC: get_game_runtime_config_v1810().
+-- Admin RPCs: admin_update_ui_module_v1810(), admin_update_feature_flag_v1810().

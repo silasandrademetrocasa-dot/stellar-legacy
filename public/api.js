@@ -824,3 +824,10 @@ export async function setBattleGroupRallyOnline({mapId,territoryFaction,x,y}={})
   const rows=await authedSupabaseFetch('/rest/v1/rpc/set_battle_group_rally_v179',{method:'POST',body:JSON.stringify({p_map_id:String(mapId||''),p_territory_faction:territoryFaction?String(territoryFaction):null,p_x:Number(x)||0,p_y:Number(y)||0})});
   return Array.isArray(rows)?rows[0]||null:rows||null;
 }
+
+
+// ===================== V18.1.0 DATA DRIVEN CORE =====================
+export async function loadRuntimeConfigOnline(){
+  const rows=await authedSupabaseFetch('/rest/v1/rpc/get_game_runtime_config_v1810',{method:'POST',body:'{}'});
+  return Array.isArray(rows)?rows[0]||null:rows||null;
+}

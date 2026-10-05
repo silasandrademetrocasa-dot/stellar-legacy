@@ -1,7 +1,7 @@
-import { FACTIONS, SHIPS, ITEMS, LASER_AMMO, ROCKETS, NPC_TYPES, MAPS, RESOURCES } from './data.js?v=18.0.3';
-import { GAME_ASSETS } from './assets/v17/manifest.js?v=18.0.3';
-import { signUp, signIn, requestPasswordReset, restorePasswordRecoveryFromUrl, restoreSession, signOutLocal, checkGameSession, endGameSession, getUser, getSessionCredentials, loadCloudSave, saveCloudSave, updateCallsign, updatePassword, loadRankings, loadAuctionBids, saveAuctionBidOnline, markAuctionBidStatusOnline, loadAuctionMarket, upsertPlayerPresenceOnline, loadMapPresenceOnline, savePlayerLocationCheckpointOnline, loadPlayerLocationCheckpointOnline, removePlayerPresenceOnline, queuePvpAttackOnline, consumePvpDamageEventsOnline, syncArenaProfileOnline, loadArenaState, loadArenaDailyRewardStatus, claimArenaDailyReward, loadArenaOpponents, loadArenaHistory, arenaAttackOnline, listClansOnline, loadMyClanOnline, createClanOnline, joinClanOnline, leaveClanOnline, transferClanCreditsOnline, claimClanCreditGrantsOnline, recordClanAlienKillOnline, getPremiumShopOnline, testPurchasePremiumOnline, loadWarfrontStateOnline, hitWorldBossOnline, claimWorldBossRewardOnline, declareClanWarOnline, recordClanWarScoreOnline, loadLiveOpsOnline, purchaseLiveCatalogOnline, economyActionOnline, getChatHistoryOnline, sendChatMessageOnline, getMyDesignersOnline, setDesignLoadoutOnline, claimGateDroneDesignOnline, claimEventDesignerOnline, getAdminStatus, adminSearchAccounts, adminRecentActions, adminBanAccount, adminUnbanAccount, adminResetAccount, adminDeleteAccount, pushTelemetryBatch, adminTelemetryOverview, adminPlayerTelemetry, getBattleGroupOnline, createBattleGroupOnline, inviteBattleGroupOnline, searchBattleGroupPlayersOnline, inviteBattleGroupUserOnline, respondBattleGroupInviteOnline, leaveBattleGroupOnline, kickBattleGroupMemberOnline, setBattleGroupRallyOnline } from './api.js?v=18.0.3';
-import { SharedUniverseClient } from './world.js?v=18.0.3';
+import { FACTIONS, SHIPS, ITEMS, LASER_AMMO, ROCKETS, NPC_TYPES, MAPS, RESOURCES } from './data.js?v=18.1.0';
+import { GAME_ASSETS } from './assets/v17/manifest.js?v=18.1.0';
+import { signUp, signIn, requestPasswordReset, restorePasswordRecoveryFromUrl, restoreSession, signOutLocal, checkGameSession, endGameSession, getUser, getSessionCredentials, loadCloudSave, saveCloudSave, updateCallsign, updatePassword, loadRankings, loadAuctionBids, saveAuctionBidOnline, markAuctionBidStatusOnline, loadAuctionMarket, upsertPlayerPresenceOnline, loadMapPresenceOnline, savePlayerLocationCheckpointOnline, loadPlayerLocationCheckpointOnline, removePlayerPresenceOnline, queuePvpAttackOnline, consumePvpDamageEventsOnline, syncArenaProfileOnline, loadArenaState, loadArenaDailyRewardStatus, claimArenaDailyReward, loadArenaOpponents, loadArenaHistory, arenaAttackOnline, listClansOnline, loadMyClanOnline, createClanOnline, joinClanOnline, leaveClanOnline, transferClanCreditsOnline, claimClanCreditGrantsOnline, recordClanAlienKillOnline, getPremiumShopOnline, testPurchasePremiumOnline, loadWarfrontStateOnline, hitWorldBossOnline, claimWorldBossRewardOnline, declareClanWarOnline, recordClanWarScoreOnline, loadLiveOpsOnline, purchaseLiveCatalogOnline, economyActionOnline, getChatHistoryOnline, sendChatMessageOnline, getMyDesignersOnline, setDesignLoadoutOnline, claimGateDroneDesignOnline, claimEventDesignerOnline, getAdminStatus, adminSearchAccounts, adminRecentActions, adminBanAccount, adminUnbanAccount, adminResetAccount, adminDeleteAccount, pushTelemetryBatch, adminTelemetryOverview, adminPlayerTelemetry, getBattleGroupOnline, createBattleGroupOnline, inviteBattleGroupOnline, searchBattleGroupPlayersOnline, inviteBattleGroupUserOnline, respondBattleGroupInviteOnline, leaveBattleGroupOnline, kickBattleGroupMemberOnline, setBattleGroupRallyOnline, loadRuntimeConfigOnline } from './api.js?v=18.1.0';
+import { SharedUniverseClient } from './world.js?v=18.1.0';
 
 const canvas = document.querySelector('#game');
 const ctx = canvas.getContext('2d');
@@ -117,7 +117,7 @@ function qualityShouldPreload(path){
   return /\/branding\//.test(value)||/\/assets\/v17\/loot\/cargo-box\.webp/.test(value);
 }
 
-const ASSET_REVISION='18.0.3';
+const ASSET_REVISION='18.1.0';
 function versionedAssetUrl(path){
   const value=String(path||'');if(!value)return value;
   return value.includes('?')?`${value}&asset=${ASSET_REVISION}`:`${value}?asset=${ASSET_REVISION}`;
@@ -997,9 +997,85 @@ function migratePlayerXpCurveV1770(){
   }else progress.profile.xp=Math.max(levelXpThreshold(PLAYER_MAX_LEVEL),xp);
   progress.profile.xpModelV1770=true;
 }
+
+// ===================== V18.1.0 DATA DRIVEN CORE =====================
+// O banco configura o motor; nunca executa HTML/JS arbitrário vindo do SQL.
+const RUNTIME_CONFIG_CACHE_PREFIX='stellar_runtime_config_v1810';
+const RUNTIME_MODULE_SELECTORS={
+  pilot_menu:'[data-menu-group="pilot"]',hangar:'#hangarBtn',ship:'#shipMenuBtn',pilot_research:'#pilotBtn',pet:'#petBtn',
+  missions_menu:'[data-menu-group="missions"]',missions:'#missionBtn',pass:'#passBtn',
+  battle_menu:'[data-menu-group="battle"]',arena:'#arenaBtn',warfront:'#warfrontBtn',gates:'#gateBtn',events:'#galaxyEventBtn',battle_group:'#battleGroupBtn',
+  clan:'#clanBtn',map:'#mapBtn',auction:'#auctionBtn',shops_menu:'[data-menu-group="shops"]',shop:'#shopBtn',premium:'#premiumBtn',admin:'#adminBtn',config:'#configBtn'
+};
+const RUNTIME_MODULE_FLAGS={missions_menu:'missions',missions:'missions',pass:'battle_pass',arena:'arena',warfront:'warfront',events:'live_events',battle_group:'battle_groups',clan:'clans',auction:'auction',premium:'premium_shop'};
+const RUNTIME_FALLBACK_MODULES=[
+  ['pilot_menu',null,'PILOTO',10,1,true,false,false],['hangar','pilot_menu','HANGAR',10,1,true,false,false],['ship','pilot_menu','NAVE',20,1,true,false,false],['pilot_research','pilot_menu','HABILIDADES',30,6,true,false,false],['pet','pilot_menu','AUX-9',40,1,true,false,false],
+  ['missions_menu',null,'MISSÕES',20,5,true,true,false],['missions','missions_menu','MISSÕES',10,5,true,false,false],['pass','missions_menu','PASSE',20,5,true,false,false],
+  ['battle_menu',null,'BATALHA',30,1,true,false,false],['arena','battle_menu','ARENA',10,1,true,false,false],['warfront','battle_menu','WARFRONT',20,15,true,false,false],['gates','battle_menu','PORTAIS',30,1,true,false,false],['events','battle_menu','EVENTOS',40,1,true,false,false],['battle_group','battle_menu','GRUPO',50,1,true,false,false],
+  ['clan',null,'CLÃ',40,8,true,true,false],['map',null,'MAPA',50,1,true,false,false],['auction',null,'LEILÃO',60,1,true,false,false],
+  ['shops_menu',null,'LOJAS',70,1,true,false,false],['shop','shops_menu','LOJA',10,1,true,false,false],['premium','shops_menu','LOJA PREMIUM',20,1,true,false,false],['admin',null,'ADM',80,1,true,false,true],['config',null,'CONF',90,1,true,false,false]
+].map(([module_key,parent_key,label,sort_order,min_level,enabled,hide_until_level,admin_only])=>({module_key,parent_key,label,sort_order,min_level,enabled,hide_until_level,admin_only,config:{}}));
+const RUNTIME_FALLBACK_FLAGS={missions:true,battle_pass:true,arena:true,warfront:true,battle_groups:true,clans:true,auction:true,premium_shop:true,crafting:true,economy_services:true,live_events:true};
+const runtimeConfigRuntime={version:0,updatedAt:null,modules:new Map(RUNTIME_FALLBACK_MODULES.map(x=>[x.module_key,x])),flags:new Map(Object.entries(RUNTIME_FALLBACK_FLAGS).map(([flag_key,enabled])=>[flag_key,{flag_key,enabled,config:{}}])),lastFetchAt:0,source:'fallback'};
+function runtimeConfigCacheKey(){return `${RUNTIME_CONFIG_CACHE_PREFIX}:${String(getUser()?.id||'guest')}`;}
+function runtimeModule(key){return runtimeConfigRuntime.modules.get(String(key||''))||null;}
+function runtimeFeatureEnabled(key,fallback=true){const row=runtimeConfigRuntime.flags.get(String(key||''));return row?row.enabled!==false:!!fallback;}
+function runtimeModuleEnabled(key){const row=runtimeModule(key);if(!row||row.enabled===false)return false;const flag=RUNTIME_MODULE_FLAGS[key];return flag?runtimeFeatureEnabled(flag,true):true;}
+function runtimeModuleMinLevel(key,fallback=1){const row=runtimeModule(key);return Math.max(1,Number(row?.min_level)||Number(fallback)||1);}
+function runtimeModuleUnlocked(key){return (Number(progress?.profile?.level)||1)>=runtimeModuleMinLevel(key,1);}
+function runtimeSetButtonLabel(btn,label){if(!btn||!label)return;const node=[...btn.childNodes].find(n=>n.nodeType===Node.TEXT_NODE&&String(n.textContent||'').trim());if(node)node.textContent=`${label} `;else btn.insertBefore(document.createTextNode(`${label} `),btn.firstChild);}
+function runtimeModuleElement(key){const sel=RUNTIME_MODULE_SELECTORS[key];return sel?document.querySelector(sel):null;}
+function applyRuntimeMenuConfig(){
+  const level=Math.max(1,Number(progress?.profile?.level)||1),nav=document.querySelector('#topbar .command-actions');
+  for(const [key,selector] of Object.entries(RUNTIME_MODULE_SELECTORS)){
+    const row=runtimeModule(key),el=document.querySelector(selector);if(!el)continue;
+    el.dataset.runtimeModule=key;
+    const enabled=runtimeModuleEnabled(key),unlocked=level>=runtimeModuleMinLevel(key,1),hidden=!enabled||(row?.admin_only&&!runtimeConfigRuntime.isAdmin)||(!unlocked&&row?.hide_until_level===true);
+    el.classList.toggle('runtime-module-hidden',hidden);
+    el.classList.toggle('runtime-module-locked',!hidden&&!unlocked);
+    el.setAttribute('aria-disabled',String(!enabled||!unlocked));
+    const target=el.matches('.menu-group')?el.querySelector(':scope > .menu-group-toggle'):el;
+    runtimeSetButtonLabel(target,row?.label||RUNTIME_FALLBACK_MODULES.find(x=>x.module_key===key)?.label||key.toUpperCase());
+    if(target&&!hidden&&!unlocked)target.title=`Libera no nível ${runtimeModuleMinLevel(key,1)}`;
+    else if(target&&target.title?.startsWith('Libera no nível'))target.title='';
+  }
+  if(nav){
+    const top=[...runtimeConfigRuntime.modules.values()].filter(x=>!x.parent_key).sort((a,b)=>(Number(a.sort_order)||100)-(Number(b.sort_order)||100));
+    for(const row of top){const el=runtimeModuleElement(row.module_key);if(el&&el.parentElement===nav)nav.appendChild(el);}
+  }
+  for(const parent of [...runtimeConfigRuntime.modules.values()].filter(x=>!x.parent_key)){
+    const pel=runtimeModuleElement(parent.module_key),drop=pel?.querySelector?.(':scope > .menu-dropdown');if(!drop)continue;
+    const kids=[...runtimeConfigRuntime.modules.values()].filter(x=>x.parent_key===parent.module_key).sort((a,b)=>(Number(a.sort_order)||100)-(Number(b.sort_order)||100));
+    for(const row of kids){const el=runtimeModuleElement(row.module_key);if(el&&el.parentElement===drop)drop.appendChild(el);}
+  }
+}
+function normalizeRuntimeConfig(raw,source='online'){
+  if(!raw||typeof raw!=='object')return false;
+  const modules=Array.isArray(raw.modules)?raw.modules.filter(x=>x&&RUNTIME_MODULE_SELECTORS[x.module_key]):[];
+  const flags=Array.isArray(raw.flags)?raw.flags.filter(x=>x?.flag_key):[];
+  if(!modules.length)return false;
+  runtimeConfigRuntime.version=Math.max(0,Number(raw.version)||0);runtimeConfigRuntime.updatedAt=raw.updated_at||null;runtimeConfigRuntime.isAdmin=!!raw.is_admin;
+  runtimeConfigRuntime.modules=new Map(modules.map(x=>[String(x.module_key),{...x,module_key:String(x.module_key),sort_order:Number(x.sort_order)||100,min_level:Math.max(1,Number(x.min_level)||1),enabled:x.enabled!==false,hide_until_level:!!x.hide_until_level,admin_only:!!x.admin_only}]));
+  for(const fallback of RUNTIME_FALLBACK_MODULES)if(!runtimeConfigRuntime.modules.has(fallback.module_key))runtimeConfigRuntime.modules.set(fallback.module_key,fallback);
+  runtimeConfigRuntime.flags=new Map(flags.map(x=>[String(x.flag_key),{...x,enabled:x.enabled!==false}]));
+  for(const [flag_key,enabled] of Object.entries(RUNTIME_FALLBACK_FLAGS))if(!runtimeConfigRuntime.flags.has(flag_key))runtimeConfigRuntime.flags.set(flag_key,{flag_key,enabled,config:{}});
+  runtimeConfigRuntime.source=source;applyRuntimeMenuConfig();return true;
+}
+function loadRuntimeConfigCache(){try{const raw=JSON.parse(localStorage.getItem(runtimeConfigCacheKey())||'null');if(raw&&normalizeRuntimeConfig(raw,'cache'))return true;}catch{}return false;}
+function saveRuntimeConfigCache(raw){try{localStorage.setItem(runtimeConfigCacheKey(),JSON.stringify(raw));}catch{}}
+async function refreshRuntimeConfig(force=false){
+  if(!authenticated||!getUser()?.id)return null;
+  const now=Date.now();if(!force&&now-runtimeConfigRuntime.lastFetchAt<30000)return null;runtimeConfigRuntime.lastFetchAt=now;
+  try{const raw=await loadRuntimeConfigOnline();if(!raw)return null;const changed=Number(raw.version)!==Number(runtimeConfigRuntime.version)||runtimeConfigRuntime.source!=='online';if(changed){normalizeRuntimeConfig(raw,'online');saveRuntimeConfigCache(raw);console.info(`[runtime-config] v${runtimeConfigRuntime.version} aplicado`);}return raw;}catch(err){console.warn('[runtime-config] usando cache/fallback',err);if(runtimeConfigRuntime.source==='fallback')loadRuntimeConfigCache();applyRuntimeMenuConfig();return null;}
+}
+function runtimeGuardMessage(key){const row=runtimeModule(key);if(!runtimeModuleEnabled(key))return `${row?.label||'Recurso'} está temporariamente desativado.`;const req=runtimeModuleMinLevel(key,1);if(!runtimeModuleUnlocked(key))return `${row?.label||'Recurso'} libera no nível ${req}.`;return '';}
+function installRuntimeMenuGuard(){const nav=document.querySelector('#topbar .command-actions');if(!nav||nav.dataset.runtimeGuard==='1')return;nav.dataset.runtimeGuard='1';nav.addEventListener('click',e=>{const el=e.target.closest('[data-runtime-module]');if(!el)return;const key=el.dataset.runtimeModule,msg=runtimeGuardMessage(key);if(!msg)return;e.preventDefault();e.stopImmediatePropagation();showToast(msg);},true);}
+installRuntimeMenuGuard();
+setInterval(()=>{if(authenticated)refreshRuntimeConfig(false);},45000);
+
 const PROGRESSION_UNLOCKS={missions:5,pilot:6,clan:8};
 const MISSION_CATEGORY_LEVELS={daily:5,weekly:7,monthly:10,special:12};
-function featureRequiredLevel(key){return Number(PROGRESSION_UNLOCKS[key]||1);}
+function featureRequiredLevel(key){const map={missions:'missions',pilot:'pilot_research',clan:'clan'};const moduleKey=map[key];return moduleKey?runtimeModuleMinLevel(moduleKey,PROGRESSION_UNLOCKS[key]||1):Number(PROGRESSION_UNLOCKS[key]||1);}
 function featureUnlocked(key){return (Number(progress?.profile?.level)||1)>=featureRequiredLevel(key);}
 function showFeatureLock(key,label){const req=featureRequiredLevel(key);showToast(`${label} libera no nível ${req}`);}
 function missionCategoryRequiredLevel(category){return Number(MISSION_CATEGORY_LEVELS[category]||5);}
@@ -1017,7 +1093,7 @@ function progressionUnlocksAtLevel(level){
   return out;
 }
 function updateProgressionAccessLocks(){
-  if(!progress)return;
+  if(!progress)return;applyRuntimeMenuConfig();
   const lock=(el,key,label)=>{if(!el)return;const req=featureRequiredLevel(key),locked=!featureUnlocked(key);el.classList.toggle('level-locked',locked);el.setAttribute('aria-disabled',String(locked));el.title=locked?`${label} • libera no nível ${req}`:'';};
   lock(ui.missionBtn,'missions','Missões');lock(ui.pilotBtn,'pilot','Perfil de Piloto');lock(ui.clanBtn,'clan','Clã');
 }
@@ -6465,7 +6541,7 @@ ui.loginForm.onsubmit=async e=>{e.preventDefault();ui.authMessage.textContent='E
 ui.registerForm.onsubmit=async e=>{e.preventDefault();ui.authMessage.textContent='Criando conta...';try{const result=await signUp({callsign:ui.registerCallsign.value,email:ui.registerEmail.value,password:ui.registerPassword.value});if(result.requires_confirmation){showAuthMode('login');ui.loginEmail.value=ui.registerEmail.value;ui.authMessage.textContent='Conta criada. Confirme o e-mail e depois entre.';return;}await afterAuth();}catch(err){ui.authMessage.textContent=err.message;}};
 if(ui.forgotPasswordBtn)ui.forgotPasswordBtn.onclick=async()=>{const email=String(ui.loginEmail?.value||'').trim();ui.authMessage.textContent='Enviando recuperação...';try{await requestPasswordReset(email);ui.authMessage.textContent='E-mail de recuperação enviado. Abra o link recebido para criar uma nova senha.';}catch(err){ui.authMessage.textContent=err.message;}};
 if(ui.recoveryForm)ui.recoveryForm.onsubmit=async e=>{e.preventDefault();const a=ui.recoveryPassword?.value||'',b=ui.recoveryPasswordConfirm?.value||'';if(a!==b){ui.authMessage.textContent='As senhas não conferem.';return;}ui.authMessage.textContent='Atualizando senha...';try{await updatePassword(a);signOutLocal();showAuthMode('login');ui.loginPassword.value='';ui.authMessage.textContent='Senha atualizada. Entre com a nova senha.';}catch(err){ui.authMessage.textContent=err.message;}};
-ui.logoutBtn.onclick=async()=>{await flushTelemetry(true).catch(()=>{});telemetryRuntime.sessionOpen=false;sharedUniverse.close();sharedUniverseRuntime.ready=false;sharedUniverseRuntime.event=null;if(movementPositionRuntime.loadedFromCheckpoint||movementPositionRuntime.hasMovedSinceLoad)commitRuntimePosition('logout');await flushCloudSave(true);await removePlayerPresenceOnline().catch(()=>{});clearOnlinePlayers();await endGameSession().catch(()=>signOutLocal());authenticated=false;progress=null;clanRuntime.state=null;clanRuntime.clans=[];clanRuntime.lastAt=0;warfrontRuntime.state=null;warfrontRuntime.clans=[];warfrontRuntime.lastAt=0;warfrontRuntime.pendingBossDamage=0;premiumRuntime.state=null;premiumRuntime.lastAt=0;updateClanBadge();updatePremiumBadge();chatRuntime.messages=[];chatRuntime.lastSignature='';renderChatTabs();renderChatMessages();state.target=null;player.laserFiring=false;for(const modal of dismissibleModals())modal.classList.add('hidden');ui.factionModal.classList.add('hidden');ui.portalPrompt?.classList.add('hidden');ui.baseTradePrompt?.classList.add('hidden');ui.petFloatPanel?.classList.add('hidden');ui.loginModal.classList.remove('hidden');if(ui.userLabel)ui.userLabel.textContent='—';if(ui.rankChip)ui.rankChip.textContent='Piloto Básico';if(ui.loginPassword)ui.loginPassword.value='';setSync('LOCAL','');showAuthMode('login');};
+ui.logoutBtn.onclick=async()=>{await flushTelemetry(true).catch(()=>{});telemetryRuntime.sessionOpen=false;sharedUniverse.close();sharedUniverseRuntime.ready=false;sharedUniverseRuntime.event=null;if(movementPositionRuntime.loadedFromCheckpoint||movementPositionRuntime.hasMovedSinceLoad)commitRuntimePosition('logout');await flushCloudSave(true);await removePlayerPresenceOnline().catch(()=>{});clearOnlinePlayers();await endGameSession().catch(()=>signOutLocal());authenticated=false;progress=null;runtimeConfigRuntime.version=0;runtimeConfigRuntime.isAdmin=false;runtimeConfigRuntime.source='fallback';runtimeConfigRuntime.modules=new Map(RUNTIME_FALLBACK_MODULES.map(x=>[x.module_key,x]));runtimeConfigRuntime.flags=new Map(Object.entries(RUNTIME_FALLBACK_FLAGS).map(([flag_key,enabled])=>[flag_key,{flag_key,enabled,config:{}}]));applyRuntimeMenuConfig();clanRuntime.state=null;clanRuntime.clans=[];clanRuntime.lastAt=0;warfrontRuntime.state=null;warfrontRuntime.clans=[];warfrontRuntime.lastAt=0;warfrontRuntime.pendingBossDamage=0;premiumRuntime.state=null;premiumRuntime.lastAt=0;updateClanBadge();updatePremiumBadge();chatRuntime.messages=[];chatRuntime.lastSignature='';renderChatTabs();renderChatMessages();state.target=null;player.laserFiring=false;for(const modal of dismissibleModals())modal.classList.add('hidden');ui.factionModal.classList.add('hidden');ui.portalPrompt?.classList.add('hidden');ui.baseTradePrompt?.classList.add('hidden');ui.petFloatPanel?.classList.add('hidden');ui.loginModal.classList.remove('hidden');if(ui.userLabel)ui.userLabel.textContent='—';if(ui.rankChip)ui.rankChip.textContent='Piloto Básico';if(ui.loginPassword)ui.loginPassword.value='';setSync('LOCAL','');showAuthMode('login');};
 
 function startLoadedGame(){
   if(!telemetryRuntime.sessionOpen)telemetryStartSession();
@@ -6534,6 +6610,9 @@ async function afterAuth(){
   if(generation!==gameBootstrapRuntime.generation)return;
   if(!progress){gameBootstrapRuntime.loading=false;renderFactionChoice();return;}
 
+  // V18.1.0: aplica cache de configuração imediatamente; atualização online nunca bloqueia o mundo.
+  try{loadRuntimeConfigCache();applyRuntimeMenuConfig();}catch(e){console.warn('[runtime-config] cache',e);}
+
   // 1) Posição local é síncrona e nunca bloqueia o mundo.
   try{restoreLatestRuntimeLocationCheckpoint();}catch(e){console.warn('[bootstrap] local position',e);}
 
@@ -6557,7 +6636,7 @@ async function afterAuth(){
     try{state.currentMap=MAPS[progress.mapId]||MAPS.x1;const ship=SHIPS[progress.activeShipId]||SHIPS.phoenix;player.maxHp=Math.max(1,Number(ship.hp)||1);player.maxShield=Math.max(0,Number(progress.shield)||0);player.hp=Math.max(1,Math.min(player.maxHp,Number(progress.hp)||player.maxHp));player.shield=Math.max(0,Math.min(player.maxShield,Number(progress.shield)||0));player.x=Number(progress.x)||currentBasePoint().x;player.y=Number(progress.y)||state.currentMap.world.h/2;player.tx=player.x;player.ty=player.y;state.camera.x=player.x;state.camera.y=player.y;joinSharedUniverse();syncOnlineWorld();updateUI();gameBootstrapRuntime.ready=true;}catch(inner){console.error('[bootstrap] emergency fallback failed',inner);}
   }finally{gameBootstrapRuntime.loading=false;}
 
-  renderChatTabs();refreshChatHistory(true);updatePassBadge();syncAuctionBidsOnline();syncOnlineWorld();syncClanCreditGrants(true);refreshClanState(true);refreshWarfrontState(true).catch(()=>{});
+  renderChatTabs();refreshChatHistory(true);updatePassBadge();syncAuctionBidsOnline();syncOnlineWorld();syncClanCreditGrants(true);refreshClanState(true);refreshWarfrontState(true).catch(()=>{});refreshRuntimeConfig(true).catch(()=>{});
 
   // Se a posição do servidor chegou depois dos 650ms e o jogador ainda não moveu a nave,
   // ela pode corrigir o ponto inicial sem tocar em economia/inventário.

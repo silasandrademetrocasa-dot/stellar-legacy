@@ -2507,3 +2507,9 @@ body[data-quality="low"] .hud-panel,body[data-quality="low"] .modal-card{backdro
 .war-declare-btn{min-width:178px;height:42px;padding:0 16px!important;display:flex!important;align-items:center;justify-content:center;gap:8px;border-color:rgba(255,91,119,.55)!important;background:linear-gradient(180deg,rgba(117,25,47,.94),rgba(70,13,31,.96))!important;box-shadow:inset 0 0 16px rgba(255,83,117,.08),0 0 0 rgba(255,70,104,0);font-size:10px!important;font-weight:1000!important;letter-spacing:.04em;transition:transform .16s ease,box-shadow .16s ease,filter .16s ease!important}.war-declare-btn:not(:disabled):hover{transform:translateY(-1px);filter:brightness(1.12);box-shadow:0 0 20px rgba(255,62,101,.16),inset 0 0 18px rgba(255,91,121,.12)}.war-declare-btn:disabled{opacity:.38!important;filter:saturate(.45);cursor:not-allowed!important;box-shadow:none!important}.war-declare-icon{font-size:14px}
 .war-declare-note{display:flex;align-items:flex-start;gap:8px;margin-top:10px;padding:8px 10px;border:1px solid rgba(255,178,80,.13);border-radius:9px;background:rgba(82,50,10,.12);color:#8fa5af}.war-declare-note>span{color:#ffc15b;font-size:11px}.war-declare-note p{margin:0;font-size:8px;line-height:1.45}.war-declare-note b{color:#ffd487}
 @media(max-width:680px){.clan-war-declare-card{padding:12px}.war-declare-head{gap:8px}.war-declare-controls{grid-template-columns:1fr}.war-declare-btn{width:100%;min-width:0}.war-declare-duration{min-width:42px;height:30px;font-size:10px}.war-declare-head b{font-size:15px}}
+
+
+/* ===================== V18.1.0 DATA DRIVEN CORE ===================== */
+.runtime-module-hidden{display:none!important}
+.runtime-module-locked{opacity:.48;filter:saturate(.55)}
+.runtime-module-locked>.menu-group-toggle,.runtime-module-locked.menu-item,.runtime-module-locked.small-btn{cursor:not-allowed}
