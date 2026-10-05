@@ -301,7 +301,7 @@ async function accountUser(sb, user, preferred = '') {
   return { id: user.id, email: user.email, callsign };
 }
 
-app.get('/health', (req, res) => res.json({ ok: true, game: 'Stellar Legacy', version: '17.8.2', universe: 'shared' }));
+app.get('/health', (req, res) => res.json({ ok: true, game: 'Stellar Legacy', version: '17.8.3', universe: 'shared' }));
 
 
 app.get('/api/config', (req, res) => {
@@ -317,7 +317,7 @@ app.get('/api/config', (req, res) => {
 
 app.get('/api/meta', (req, res) => res.json({
   name: 'Stellar Legacy',
-  version: '17.8.2',
+  version: '17.8.3',
   authReady: Boolean(SUPABASE_URL && SUPABASE_KEY),
   diagnostics: configStatus(),
   features: ['login', 'cloud_save', 'factions', 'safe_zone', 'shop', 'owned_ships', 'equipment_slots', 'inventory', 'drones', 'ammo', 'rockets', 'expanded_expedition_maps', 'cargo_hold', 'ore_trading', 'npc_cargo_boxes', 'npc_respawn', 'minimap_navigation', 'waypoints', 'landmark_discovery', 'combat_fx', 'pet_modules', 'auto_buy_cpu', 'v8_asset_identity', 'mission_control_v93', 'mission_acceptance_tracking', 'expanded_enemy_density', 'online_player_presence', 'real_player_auction', 'rank_nameplates_v12', 'clans_v12', 'clan_vault_v12', 'premium_shop_v12', 'battle_pass_paid_v12', 'premium_subscription_v12', 'clan_daily_economy_v12', 'portal_neutral_zone_v12', 'base_only_equipment_v12', 'single_session_v1214', 'manual_login_v141', 'account_bound_save_v141', 'unique_callsign_v141', 'premium_auto_combat_v141', 'shared_universe_v15', 'authoritative_npcs_v15', 'shared_ores_v15', 'shared_events_v15', 'websocket_world_v15', 'npc_contribution_v15', 'realtime_player_socket_v151', 'remote_laser_fx_v151', 'remote_aux9_v151', 'low_latency_world_v151', 'live_ops_v16', 'server_authoritative_shop_v16', 'supabase_event_schedule_v16', 'economy_guard_v161', 'server_auto_buy_v161', 'server_trader_v161', 'server_pet_slots_v161', 'server_materializer_v161', 'server_quantum_cores_v161', 'economy_fast_path_v1767', 'chat_dock_v162', 'drone_designers_v163', 'designer_sets_v163', 'nexus_eclipse_designer_drops_v163', 'global_chat_v162', 'clan_chat_v162', 'private_chat_v162', 'bottom_hud_reflow_v162', 'ship_designers_v165', 'aux_designers_v165', 'designer_ship_abilities_v165', 'event_designer_drops_v165', 'social_minimap_v165', 'realtime_designer_visuals_v165'],
@@ -524,6 +524,12 @@ app.post('/api/live/purchase', requireUser, asyncRoute(async (req,res)=>{
 
 
 
+
+const BASE_SERVICES_V1783={
+  weapon:{baseCost:1500000,duration:3600000},shield:{baseCost:1000000,duration:3600000},cargo:{baseCost:750000,duration:3600000},thruster:{baseCost:1000000,duration:3600000}
+};
+function activateBaseServiceServer(state,id){const def=BASE_SERVICES_V1783[id];if(!def)throw Object.assign(new Error('Serviço inexistente.'),{status:404});const mapOk=String(state.mapId||'')==='x1'&&String(state.territoryFaction||state.profile?.faction||'')===String(state.profile?.faction||'');if(!mapOk)throw Object.assign(new Error('Serviço disponível somente na sua base X-1.'),{status:409});const lv=Math.max(1,Number(state.profile?.level)||1),band=Math.floor((lv-1)/5),cost=Math.round(def.baseCost*(1+band*.35));debitServer(state,cost,'credits');state.economyBoosts ||= {};const now=Date.now(),current=Math.max(now,Number(state.economyBoosts[id])||0),cap=now+6*3600000;state.economyBoosts[id]=Math.min(cap,current+def.duration);return {cost,expires_at:state.economyBoosts[id]};}
+
 const CRAFT_RECIPES_V1782={
   prometid_batch:{cost:200000,ingredients:{Prometium:220,Endurium:120,Terbium:80},grant:{kind:'resource',id:'Prometid',qty:30},label:'30 Ferrite'},
   duranium_batch:{cost:400000,ingredients:{Endurium:140,Terbium:140,Prometid:20},grant:{kind:'resource',id:'Duranium',qty:20},label:'20 Duracite'},
@@ -569,6 +575,9 @@ app.post('/api/economy/action', requireUser, asyncRoute(async (req,res)=>{
     }
     else if(action==='convert_pilot_point'){
       state.pilotBio ||= {};const p=state.pilotBio;p.logDisks=Math.max(0,Math.floor(Number(p.logDisks)||0));p.totalPoints=Math.max(0,Math.floor(Number(p.totalPoints)||0));if(p.totalPoints>=50)throw Object.assign(new Error('Limite de 50 Pontos de Pesquisa atingido.'),{status:409});const next=p.totalPoints+1,cost=Math.max(30,Math.round(30*Math.pow(1.1,Math.max(0,next-1))));if(p.logDisks<cost)throw Object.assign(new Error(`Faltam ${cost-p.logDisks} Núcleos Quânticos.`),{status:409});p.logDisks-=cost;p.totalPoints=next;info={action,point:next,cost,remaining_cores:p.logDisks};
+    }
+    else if(action==='base_service'){
+      const serviceId=String(payload.service_id||'').slice(0,40),svc=activateBaseServiceServer(state,serviceId);info={action,service_id:serviceId,cost:svc.cost,currency:'credits',expires_at:svc.expires_at};
     }
     else if(action==='craft_recipe'){
       const recipeId=String(payload.recipe_id||'').slice(0,64),recipe=applyCraftRecipeServer(state,recipeId);info={action,recipe_id:recipeId,cost:recipe.cost,currency:'credits',ingredients:recipe.ingredients,output:recipe.label};
@@ -688,7 +697,7 @@ app.put('/api/save', requireUser, asyncRoute(async (req, res) => {
 }));
 
 
-// ===================== V17.8.2 BOOTSTRAP-SAFE PLAYER LOCATION =====================
+// ===================== V17.8.3 BOOTSTRAP-SAFE PLAYER LOCATION =====================
 // A posição é crítica para o login, então o navegador fala apenas com o Render e o
 // servidor faz a RPC autenticada no Supabase. Falha nessa rota nunca deve bloquear o mundo.
 app.get('/api/player/location', requireUser, asyncRoute(async (req,res)=>{
@@ -708,7 +717,7 @@ app.post('/api/player/location', requireUser, asyncRoute(async (req,res)=>{
   return res.json(data||{ok:true});
 }));
 
-app.get('/api/world/status', (req, res) => res.json({ ok: true, version: '17.8.2', ...sharedUniverse.stats() }));
+app.get('/api/world/status', (req, res) => res.json({ ok: true, version: '17.8.3', ...sharedUniverse.stats() }));
 
 app.get('*', (req, res) => res.sendFile(path.join(__dirname, '../public/index.html')));
 
@@ -753,7 +762,7 @@ const sharedUniverse = attachSharedUniverse(server, {
 });
 
 server.listen(port, () => {
-  console.log(`Stellar Legacy V17.8.2 :${port}`);
+  console.log(`Stellar Legacy V17.8.3 :${port}`);
   console.log('Supabase config:', configStatus());
   console.log('Shared Universe: ONLINE');
 });
