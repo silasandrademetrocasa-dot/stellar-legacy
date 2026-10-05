@@ -46,3 +46,7 @@ O banco não envia seletores, HTML ou JavaScript. O cliente contém uma whitelis
 - `get_npc_runtime_config_v1811()`: snapshot versionado consumido pelo servidor/cliente.
 - Alterações no banco não executam código arbitrário: apenas alimentam campos validados do motor.
 - O servidor continua autoritativo para dano e recompensa.
+
+
+## Hotfix — V18.1.2 Topbar Router
+A navegação superior passa por um roteador local baseado em `module_key`. Reordenação e labels continuam Data Driven, mas a execução das ações permanece em whitelist no cliente.

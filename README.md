@@ -1,4 +1,8 @@
-# Stellar Legacy 18.1.1 — Data Driven NPCs
+# Stellar Legacy 18.1.2 — Topbar Router Hotfix
+
+Hotfix da V18.1 Data Driven: a barra superior agora usa um roteador único de ações por `module_key`, mantendo cliques funcionais mesmo depois de nome/ordem/visibilidade serem reorganizados pelo Supabase.
+
+Preserva integralmente NPC Runtime V18.1.1, Warfront, posição, grupos e economia.
 
 Propriedade autoritativa de NPCs no Shared Universe, grupos multi-facção e divisão de recompensa apenas entre membros ativos no mesmo setor. A box continua exclusiva do primeiro atacante.
 
@@ -193,4 +197,3 @@ A V17.6.3 usa a tabela existente `public.game_admins` como fonte de autorizaçã
 - trigger no Supabase espelha presence para o checkpoint dedicado;
 - estado econômico não substitui mais a localização atual;
 - SQL legado/temporário removido do banco e do ZIP.
-

@@ -1,7 +1,7 @@
-import { FACTIONS, SHIPS, ITEMS, LASER_AMMO, ROCKETS, NPC_TYPES, MAPS, RESOURCES } from './data.js?v=18.1.1';
-import { GAME_ASSETS } from './assets/v17/manifest.js?v=18.1.1';
-import { signUp, signIn, requestPasswordReset, restorePasswordRecoveryFromUrl, restoreSession, signOutLocal, checkGameSession, endGameSession, getUser, getSessionCredentials, loadCloudSave, saveCloudSave, updateCallsign, updatePassword, loadRankings, loadAuctionBids, saveAuctionBidOnline, markAuctionBidStatusOnline, loadAuctionMarket, upsertPlayerPresenceOnline, loadMapPresenceOnline, savePlayerLocationCheckpointOnline, loadPlayerLocationCheckpointOnline, removePlayerPresenceOnline, queuePvpAttackOnline, consumePvpDamageEventsOnline, syncArenaProfileOnline, loadArenaState, loadArenaDailyRewardStatus, claimArenaDailyReward, loadArenaOpponents, loadArenaHistory, arenaAttackOnline, listClansOnline, loadMyClanOnline, createClanOnline, joinClanOnline, leaveClanOnline, transferClanCreditsOnline, claimClanCreditGrantsOnline, recordClanAlienKillOnline, getPremiumShopOnline, testPurchasePremiumOnline, loadWarfrontStateOnline, hitWorldBossOnline, claimWorldBossRewardOnline, declareClanWarOnline, recordClanWarScoreOnline, loadLiveOpsOnline, purchaseLiveCatalogOnline, economyActionOnline, getChatHistoryOnline, sendChatMessageOnline, getMyDesignersOnline, setDesignLoadoutOnline, claimGateDroneDesignOnline, claimEventDesignerOnline, getAdminStatus, adminSearchAccounts, adminRecentActions, adminBanAccount, adminUnbanAccount, adminResetAccount, adminDeleteAccount, pushTelemetryBatch, adminTelemetryOverview, adminPlayerTelemetry, getBattleGroupOnline, createBattleGroupOnline, inviteBattleGroupOnline, searchBattleGroupPlayersOnline, inviteBattleGroupUserOnline, respondBattleGroupInviteOnline, leaveBattleGroupOnline, kickBattleGroupMemberOnline, setBattleGroupRallyOnline, loadRuntimeConfigOnline, loadNpcRuntimeConfigOnline } from './api.js?v=18.1.1';
-import { SharedUniverseClient } from './world.js?v=18.1.1';
+import { FACTIONS, SHIPS, ITEMS, LASER_AMMO, ROCKETS, NPC_TYPES, MAPS, RESOURCES } from './data.js?v=18.1.2';
+import { GAME_ASSETS } from './assets/v17/manifest.js?v=18.1.2';
+import { signUp, signIn, requestPasswordReset, restorePasswordRecoveryFromUrl, restoreSession, signOutLocal, checkGameSession, endGameSession, getUser, getSessionCredentials, loadCloudSave, saveCloudSave, updateCallsign, updatePassword, loadRankings, loadAuctionBids, saveAuctionBidOnline, markAuctionBidStatusOnline, loadAuctionMarket, upsertPlayerPresenceOnline, loadMapPresenceOnline, savePlayerLocationCheckpointOnline, loadPlayerLocationCheckpointOnline, removePlayerPresenceOnline, queuePvpAttackOnline, consumePvpDamageEventsOnline, syncArenaProfileOnline, loadArenaState, loadArenaDailyRewardStatus, claimArenaDailyReward, loadArenaOpponents, loadArenaHistory, arenaAttackOnline, listClansOnline, loadMyClanOnline, createClanOnline, joinClanOnline, leaveClanOnline, transferClanCreditsOnline, claimClanCreditGrantsOnline, recordClanAlienKillOnline, getPremiumShopOnline, testPurchasePremiumOnline, loadWarfrontStateOnline, hitWorldBossOnline, claimWorldBossRewardOnline, declareClanWarOnline, recordClanWarScoreOnline, loadLiveOpsOnline, purchaseLiveCatalogOnline, economyActionOnline, getChatHistoryOnline, sendChatMessageOnline, getMyDesignersOnline, setDesignLoadoutOnline, claimGateDroneDesignOnline, claimEventDesignerOnline, getAdminStatus, adminSearchAccounts, adminRecentActions, adminBanAccount, adminUnbanAccount, adminResetAccount, adminDeleteAccount, pushTelemetryBatch, adminTelemetryOverview, adminPlayerTelemetry, getBattleGroupOnline, createBattleGroupOnline, inviteBattleGroupOnline, searchBattleGroupPlayersOnline, inviteBattleGroupUserOnline, respondBattleGroupInviteOnline, leaveBattleGroupOnline, kickBattleGroupMemberOnline, setBattleGroupRallyOnline, loadRuntimeConfigOnline, loadNpcRuntimeConfigOnline } from './api.js?v=18.1.2';
+import { SharedUniverseClient } from './world.js?v=18.1.2';
 
 const canvas = document.querySelector('#game');
 const ctx = canvas.getContext('2d');
@@ -117,7 +117,7 @@ function qualityShouldPreload(path){
   return /\/branding\//.test(value)||/\/assets\/v17\/loot\/cargo-box\.webp/.test(value);
 }
 
-const ASSET_REVISION='18.1.1';
+const ASSET_REVISION='18.1.2';
 function versionedAssetUrl(path){
   const value=String(path||'');if(!value)return value;
   return value.includes('?')?`${value}&asset=${ASSET_REVISION}`:`${value}?asset=${ASSET_REVISION}`;
@@ -1070,8 +1070,58 @@ async function refreshRuntimeConfig(force=false){
   try{const raw=await loadRuntimeConfigOnline();if(!raw)return null;const changed=Number(raw.version)!==Number(runtimeConfigRuntime.version)||runtimeConfigRuntime.source!=='online';if(changed){normalizeRuntimeConfig(raw,'online');saveRuntimeConfigCache(raw);console.info(`[runtime-config] v${runtimeConfigRuntime.version} aplicado`);}return raw;}catch(err){console.warn('[runtime-config] usando cache/fallback',err);if(runtimeConfigRuntime.source==='fallback')loadRuntimeConfigCache();applyRuntimeMenuConfig();return null;}
 }
 function runtimeGuardMessage(key){const row=runtimeModule(key);if(!runtimeModuleEnabled(key))return `${row?.label||'Recurso'} está temporariamente desativado.`;const req=runtimeModuleMinLevel(key,1);if(!runtimeModuleUnlocked(key))return `${row?.label||'Recurso'} libera no nível ${req}.`;return '';}
-function installRuntimeMenuGuard(){const nav=document.querySelector('#topbar .command-actions');if(!nav||nav.dataset.runtimeGuard==='1')return;nav.dataset.runtimeGuard='1';nav.addEventListener('click',e=>{const el=e.target.closest('[data-runtime-module]');if(!el)return;const key=el.dataset.runtimeModule,msg=runtimeGuardMessage(key);if(!msg)return;e.preventDefault();e.stopImmediatePropagation();showToast(msg);},true);}
-installRuntimeMenuGuard();
+
+// V18.1.2: roteador único da topbar. A UI pode ser reordenada pelo banco sem perder os cliques.
+// Toda ação continua em whitelist local; o Supabase só escolhe posição/nome/nível/visibilidade.
+const RUNTIME_MENU_ACTIONS={
+  hangar:()=>openHangar('equipment'),
+  ship:()=>openHangar('ships'),
+  pilot_research:()=>openPilotProfile(),
+  pet:()=>openHangar('pet'),
+  missions:()=>openMissions(),
+  pass:()=>openProgression(),
+  arena:()=>openArena(),
+  warfront:()=>openWarfront(),
+  gates:()=>openGalaxyGate(),
+  events:()=>openGalaxyEvent(),
+  battle_group:()=>openBattleGroup(),
+  clan:()=>openClan(),
+  map:()=>openMapModal(),
+  auction:()=>openAuction(),
+  shop:()=>openShop(),
+  premium:()=>openPremiumShop(),
+  admin:()=>openAdminPanel(),
+  config:()=>openSettings()
+};
+const RUNTIME_MENU_GROUPS=new Set(['pilot_menu','missions_menu','battle_menu','shops_menu']);
+function installRuntimeMenuRouter(){
+  const nav=document.querySelector('#topbar .command-actions');
+  if(!nav||nav.dataset.runtimeRouter==='1')return;
+  nav.dataset.runtimeRouter='1';
+  nav.addEventListener('click',e=>{
+    const el=e.target.closest('[data-runtime-module]');
+    if(!el||!nav.contains(el))return;
+    const key=String(el.dataset.runtimeModule||'');
+    if(!key)return;
+    const msg=runtimeGuardMessage(key);
+    e.preventDefault();
+    e.stopImmediatePropagation();
+    if(msg){showToast(msg);return;}
+    if(RUNTIME_MENU_GROUPS.has(key)){
+      const group=el.matches('.menu-group')?el:el.closest('.menu-group');
+      if(!group)return;
+      const opening=!group.classList.contains('open');
+      closeCommandMenus(group);
+      group.classList.toggle('open',opening);
+      return;
+    }
+    const action=RUNTIME_MENU_ACTIONS[key];
+    if(typeof action!=='function'){console.warn('[runtime-menu] ação não registrada',key);return;}
+    closeCommandMenus();
+    try{action();}catch(err){console.error('[runtime-menu] falha ao abrir',key,err);showToast('Não foi possível abrir este painel.');}
+  },true);
+}
+installRuntimeMenuRouter();
 setInterval(()=>{if(authenticated)refreshRuntimeConfig(false);},45000);
 
 // ===================== V18.1.1 NPC + RECOMPENSAS DATA DRIVEN =====================

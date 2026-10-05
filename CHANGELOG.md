@@ -1,3 +1,11 @@
+## V18.1.2 — Topbar Router Hotfix
+
+- Corrige botões da topbar que podiam parar de responder após aplicação/reordenação Data Driven.
+- Adiciona roteador único por `module_key` para PILOTO, MISSÕES, BATALHA, CLÃ, MAPA, LEILÃO, LOJAS, ADM e CONF.
+- Dropdowns continuam reordenáveis pelo Supabase sem depender de listeners antigos presos à posição original do DOM.
+- Mantém whitelist local: nenhuma ação JavaScript é recebida do banco.
+- Não altera NPCs, posição, Warfront, economia ou recompensas.
+
 ## V18.1.1 — NPCs + Recompensas Data Driven
 - HP, escudo, dano, velocidade, CR, STL, XP, recursos e respawn dos NPCs agora vêm do Supabase.
 - Quantidade de cada NPC por mapa agora é configuração explícita no banco.
