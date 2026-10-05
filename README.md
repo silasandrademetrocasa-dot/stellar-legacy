@@ -1,4 +1,7 @@
-# Stellar Legacy 17.9.1 — ADM Analytics + Pilot Titles
+# Stellar Legacy 17.9.2 — NPC Ownership + Battle Groups
+
+Propriedade autoritativa de NPCs no Shared Universe, grupos multi-facção e divisão de recompensa apenas entre membros ativos no mesmo setor. A box continua exclusiva do primeiro atacante.
+
 
 Atualização de observabilidade da progressão. O jogo registra métricas agregadas de evolução/economia para o painel ADM e adiciona um perfil de títulos exibidos sob o callsign. O reset completo de conta permanece uma ferramenta administrativa; jogadores comuns não recebem controle para apagar o próprio progresso.
 

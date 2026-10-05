@@ -1,3 +1,15 @@
+## V17.9.2 — NPC Ownership + Cross-Faction Battle Groups
+
+- Grupo de Batalha aceita pilotos de qualquer facção.
+- Membros do mesmo grupo são tratados como aliados para leitura tática/PVP.
+- Primeiro ataque efetivo marca o NPC para aquele piloto/grupo.
+- NPC marcado aparece com arco colorido para o dono/grupo e branco para terceiros.
+- Fora do grupo, terceiros podem ajudar no dano, mas não recebem CR/STL/XP nem box.
+- No mesmo setor/instância, CR/STL/XP são divididos igualmente apenas entre membros do grupo ativos.
+- Membro ativo = causou dano em algum NPC nos últimos 120 segundos e está vivo no setor.
+- Box de carga e drop raro pertencem somente ao primeiro piloto que marcou o NPC.
+- Regras de propriedade e divisão são validadas no servidor do Shared Universe.
+
 ## V17.9.1 — ADM Analytics + Pilot Titles
 
 - Dashboard ADM com CR/h, STL/h, XP/h, sinks de moeda e atividade em 24h.

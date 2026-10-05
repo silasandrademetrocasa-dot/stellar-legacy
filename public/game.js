@@ -1,7 +1,7 @@
-import { FACTIONS, SHIPS, ITEMS, LASER_AMMO, ROCKETS, NPC_TYPES, MAPS, RESOURCES } from './data.js?v=17.9.1';
-import { GAME_ASSETS } from './assets/v17/manifest.js?v=17.9.1';
-import { signUp, signIn, requestPasswordReset, restorePasswordRecoveryFromUrl, restoreSession, signOutLocal, checkGameSession, endGameSession, getUser, getSessionCredentials, loadCloudSave, saveCloudSave, updateCallsign, updatePassword, loadRankings, loadAuctionBids, saveAuctionBidOnline, markAuctionBidStatusOnline, loadAuctionMarket, upsertPlayerPresenceOnline, loadMapPresenceOnline, savePlayerLocationCheckpointOnline, loadPlayerLocationCheckpointOnline, removePlayerPresenceOnline, queuePvpAttackOnline, consumePvpDamageEventsOnline, syncArenaProfileOnline, loadArenaState, loadArenaDailyRewardStatus, claimArenaDailyReward, loadArenaOpponents, loadArenaHistory, arenaAttackOnline, listClansOnline, loadMyClanOnline, createClanOnline, joinClanOnline, leaveClanOnline, transferClanCreditsOnline, claimClanCreditGrantsOnline, recordClanAlienKillOnline, getPremiumShopOnline, testPurchasePremiumOnline, loadWarfrontStateOnline, hitWorldBossOnline, claimWorldBossRewardOnline, declareClanWarOnline, recordClanWarScoreOnline, loadLiveOpsOnline, purchaseLiveCatalogOnline, economyActionOnline, getChatHistoryOnline, sendChatMessageOnline, getMyDesignersOnline, setDesignLoadoutOnline, claimGateDroneDesignOnline, claimEventDesignerOnline, getAdminStatus, adminSearchAccounts, adminRecentActions, adminBanAccount, adminUnbanAccount, adminResetAccount, adminDeleteAccount, pushTelemetryBatch, adminTelemetryOverview, adminPlayerTelemetry, getBattleGroupOnline, createBattleGroupOnline, inviteBattleGroupOnline, respondBattleGroupInviteOnline, leaveBattleGroupOnline, kickBattleGroupMemberOnline, setBattleGroupRallyOnline } from './api.js?v=17.9.1';
-import { SharedUniverseClient } from './world.js?v=17.9.1';
+import { FACTIONS, SHIPS, ITEMS, LASER_AMMO, ROCKETS, NPC_TYPES, MAPS, RESOURCES } from './data.js?v=17.9.2';
+import { GAME_ASSETS } from './assets/v17/manifest.js?v=17.9.2';
+import { signUp, signIn, requestPasswordReset, restorePasswordRecoveryFromUrl, restoreSession, signOutLocal, checkGameSession, endGameSession, getUser, getSessionCredentials, loadCloudSave, saveCloudSave, updateCallsign, updatePassword, loadRankings, loadAuctionBids, saveAuctionBidOnline, markAuctionBidStatusOnline, loadAuctionMarket, upsertPlayerPresenceOnline, loadMapPresenceOnline, savePlayerLocationCheckpointOnline, loadPlayerLocationCheckpointOnline, removePlayerPresenceOnline, queuePvpAttackOnline, consumePvpDamageEventsOnline, syncArenaProfileOnline, loadArenaState, loadArenaDailyRewardStatus, claimArenaDailyReward, loadArenaOpponents, loadArenaHistory, arenaAttackOnline, listClansOnline, loadMyClanOnline, createClanOnline, joinClanOnline, leaveClanOnline, transferClanCreditsOnline, claimClanCreditGrantsOnline, recordClanAlienKillOnline, getPremiumShopOnline, testPurchasePremiumOnline, loadWarfrontStateOnline, hitWorldBossOnline, claimWorldBossRewardOnline, declareClanWarOnline, recordClanWarScoreOnline, loadLiveOpsOnline, purchaseLiveCatalogOnline, economyActionOnline, getChatHistoryOnline, sendChatMessageOnline, getMyDesignersOnline, setDesignLoadoutOnline, claimGateDroneDesignOnline, claimEventDesignerOnline, getAdminStatus, adminSearchAccounts, adminRecentActions, adminBanAccount, adminUnbanAccount, adminResetAccount, adminDeleteAccount, pushTelemetryBatch, adminTelemetryOverview, adminPlayerTelemetry, getBattleGroupOnline, createBattleGroupOnline, inviteBattleGroupOnline, respondBattleGroupInviteOnline, leaveBattleGroupOnline, kickBattleGroupMemberOnline, setBattleGroupRallyOnline } from './api.js?v=17.9.2';
+import { SharedUniverseClient } from './world.js?v=17.9.2';
 
 const canvas = document.querySelector('#game');
 const ctx = canvas.getContext('2d');
@@ -117,7 +117,7 @@ function qualityShouldPreload(path){
   return /\/branding\//.test(value)||/\/assets\/v17\/loot\/cargo-box\.webp/.test(value);
 }
 
-const ASSET_REVISION='17.9.1';
+const ASSET_REVISION='17.9.2';
 function versionedAssetUrl(path){
   const value=String(path||'');if(!value)return value;
   return value.includes('?')?`${value}&asset=${ASSET_REVISION}`:`${value}?asset=${ASSET_REVISION}`;
@@ -366,10 +366,17 @@ function purgeSharedEventEntities(activeEventId=null){
   galaxyEventRuntime.convoy=null;
 }
 function applySharedNpcPatch(raw){const e=findSharedNpc(raw.id);if(!e)return;const now=Date.now(),nx=Number(raw.x),ny=Number(raw.y),dt=Math.max(.001,Math.min(1,(now-(e.netAt||now))/1000));if(Number.isFinite(nx)&&Number.isFinite(ny)){const px=Number.isFinite(e.netX)?e.netX:e.x,py=Number.isFinite(e.netY)?e.netY:e.y;e.vx=Math.max(-1400,Math.min(1400,(nx-px)/dt));e.vy=Math.max(-1400,Math.min(1400,(ny-py)/dt));e.netX=nx;e.netY=ny;e.tx=nx;e.ty=ny;e.netAt=now;}const rest={...raw};delete rest.x;delete rest.y;Object.assign(e,rest);}
-function sharedKillReward(entity,share,finalBlow){
-  if(!progress)return;const pct=Math.max(.08,Math.min(1,Number(share)||0)),factor=finalBlow?Math.max(.35,pct):Math.max(.18,pct);
-  const clone=normalizeSharedNpc({...entity,credits:Math.max(1,Math.round((entity.credits||0)*factor)),uridium:Math.max(0,Math.round((entity.uridium||0)*factor)),xp:Math.max(1,Math.round((entity.xp||0)*factor)),resources:Object.fromEntries(Object.entries(entity.resources||{}).map(([k,v])=>[k,Math.max(1,Math.round(v*factor))])),sharedReward:true,sharedRewardShare:pct,sharedFinalBlow:!!finalBlow});
-  rewardEnemyKill(clone);pushActivity(`ASSISTÊNCIA ONLINE • ${clone.name} • ${(pct*100).toFixed(0)}% do dano`,'combat');
+function sharedKillReward(entity,factor=1,opts={}){
+  if(!progress)return;const share=Math.max(0,Math.min(1,Number(factor)||0));
+  const clone=normalizeSharedNpc({...entity,credits:Math.max(0,Math.round((entity.credits||0)*share)),uridium:Math.max(0,Math.round((entity.uridium||0)*share)),xp:Math.max(0,Math.round((entity.xp||0)*share)),resources:{...(entity.resources||{})},sharedReward:true,sharedRewardShare:share,sharedFinalBlow:false,sharedDropBox:!!opts.dropBox,sharedGroupReward:!!opts.groupShared,sharedOwner:!!opts.owner});
+  rewardEnemyKill(clone);
+  const suffix=opts.groupShared?`GRUPO ${Math.max(1,Number(opts.eligibleCount)||1)} PILOTO(S)`:(opts.owner?'MARCAÇÃO EXCLUSIVA':'ABATE');
+  pushActivity(`${suffix} • ${clone.name} • +${fmt(clone.credits)} CR • +${fmt(clone.uridium)} STL • +${fmt(clone.xp)} XP`,'combat');
+}
+function sharedNpcClaimState(e){
+  const owner=String(e?.ownerUserId||''),me=String(getUser()?.id||'');if(!owner)return {claimed:false,friendly:false,owner:false};
+  const myGroup=String(battleGroupState()?.group?.id||''),ownerGroup=String(e?.ownerGroupId||'');
+  return {claimed:true,owner:owner===me,friendly:owner===me||!!(myGroup&&ownerGroup&&myGroup===ownerGroup)};
 }
 function handleSharedUniverseMessage(msg){
   if(!msg||!progress)return;
@@ -380,13 +387,15 @@ function handleSharedUniverseMessage(msg){
   if(msg.type==='world_player_leave'){const id=String(msg.userId||'');if(state.target?.isPlayer&&state.target.id===id){state.target=null;player.laserFiring=false;}onlineWorld.players.delete(id);return;}
   if(msg.type==='npc_batch'){for(const e of msg.entities||[])applySharedNpcPatch(e);return;}
   if(msg.type==='npc_patch'){applySharedNpcPatch(msg.entity||{});return;}
+  if(msg.type==='npc_claim'){const e=findSharedNpc(msg.entityId);if(e){e.ownerUserId=msg.ownerUserId||null;e.ownerGroupId=msg.ownerGroupId||null;e.claimedAt=Number(msg.claimedAt)||Date.now();}return;}
   if(msg.type==='npc_spawn'){const e=normalizeSharedNpc(msg.entity||{});if(e.id&&!findSharedNpc(e.id))state.enemies.push(e);return;}
   if(msg.type==='npc_death'){
     const e=findSharedNpc(msg.entity?.id)||normalizeSharedNpc(msg.entity||{});if(e?.id){playSfx('explosion');spawnExplosionFx(e.x,e.y,e.color,String(e.type||'').startsWith('boss'));triggerCombatFlash(String(e.type||'').startsWith('boss')?'red':'cyan');state.enemies=state.enemies.filter(x=>x.id!==e.id);if(state.target?.id===e.id){state.target=null;player.laserFiring=false;autoAcquireNextTarget(e.id);}}return;
   }
-  if(msg.type==='kill_credit'){sharedKillReward(msg.entity||{},msg.share,msg.finalBlow);return;}
+  if(msg.type==='kill_credit'){const me=String(getUser()?.id||'');sharedKillReward(msg.entity||{},msg.factor,{groupShared:!!msg.groupShared,eligibleCount:msg.eligibleCount,dropBox:!!msg.dropBox,owner:String(msg.ownerUserId||'')===me});return;}
+  if(msg.type==='npc_loot_credit'){const e=normalizeSharedNpc(msg.entity||{});spawnNpcLootBox(e);pushActivity(`BOX EXCLUSIVA • ${e.name} • primeira marcação`,'reward');return;}
   if(msg.type==='damage_result'){
-    const e=findSharedNpc(msg.entityId);if(e){e.hp=Number(msg.hp??e.hp);e.shield=Number(msg.shield??e.shield);if(msg.actual>0){const shieldHit=Number(msg.beforeShield||0)>Number(msg.shield||0);spawnCombatText(e.x,e.y-e.size,msg.critical?`CRÍTICO ${fmt(msg.actual)}`:`-${fmt(msg.actual)}`,msg.critical?'#ffe96f':(shieldHit?'#62dcff':'#ff8b8b'),{critical:!!msg.critical,kind:shieldHit?'shield':'damage'});spawnImpactFx(e.x,e.y,shieldHit?'#55d8ff':'#ff6b77',shieldHit?30:22,shieldHit?'shield':'impact');battlePassEvent('damage',msg.actual);battlePassEvent('attack',1);}if(msg.mode==='shield_drain'&&msg.actual>0){const before=player.shield;player.shield=Math.min(player.maxShield,player.shield+Number(msg.actual||0));const gain=Math.max(0,Math.round(player.shield-before));if(gain)spawnParticle(player.x,player.y-34,`ESCUDO +${fmt(gain)}`,'#79f1ff');}}return;
+    const e=findSharedNpc(msg.entityId);if(e){e.hp=Number(msg.hp??e.hp);e.shield=Number(msg.shield??e.shield);if(msg.ownerUserId!==undefined)e.ownerUserId=msg.ownerUserId||null;if(msg.ownerGroupId!==undefined)e.ownerGroupId=msg.ownerGroupId||null;if(msg.actual>0){const shieldHit=Number(msg.beforeShield||0)>Number(msg.shield||0);spawnCombatText(e.x,e.y-e.size,msg.critical?`CRÍTICO ${fmt(msg.actual)}`:`-${fmt(msg.actual)}`,msg.critical?'#ffe96f':(shieldHit?'#62dcff':'#ff8b8b'),{critical:!!msg.critical,kind:shieldHit?'shield':'damage'});spawnImpactFx(e.x,e.y,shieldHit?'#55d8ff':'#ff6b77',shieldHit?30:22,shieldHit?'shield':'impact');battlePassEvent('damage',msg.actual);battlePassEvent('attack',1);}if(msg.mode==='shield_drain'&&msg.actual>0){const before=player.shield;player.shield=Math.min(player.maxShield,player.shield+Number(msg.actual||0));const gain=Math.max(0,Math.round(player.shield-before));if(gain)spawnParticle(player.x,player.y-34,`ESCUDO +${fmt(gain)}`,'#79f1ff');}}return;
   }
   if(msg.type==='ore_remove'){sharedUniverseRuntime.pendingOres.delete(msg.entityId);state.ores=state.ores.filter(o=>o.id!==msg.entityId);return;}
   if(msg.type==='ore_spawn'){const o={...(msg.ore||{}),sharedWorld:true};if(o.id&&!state.ores.some(x=>x.id===o.id))state.ores.push(o);return;}
@@ -612,7 +621,7 @@ async function claimEventDesignerDrop(ev){
 const economyRuntime={queue:Promise.resolve(),autoPending:new Set()};
 
 
-// ===================== V17.9.1 PROGRESSION TELEMETRY =====================
+// ===================== V17.9.2 PROGRESSION TELEMETRY =====================
 const TELEMETRY_SOURCE_KEYS=['npc','mission','resource','pass','event','gate','discovery','other'];
 function freshTelemetryPending(){return {counters:{sessions:0,play_seconds:0,kills:0,boxes:0,ore_nodes:0,ore_units:0,missions_completed:0,deaths:0,map_jumps:0,level_ups:0},spent:{cr:0,stl:0},sources:Object.fromEntries(TELEMETRY_SOURCE_KEYS.map(k=>[k,{cr:0,stl:0,xp:0}])),level_events:[]};}
 const telemetryRuntime={pending:freshTelemetryPending(),activeRemainder:0,lastFlushAt:0,flushing:false,sessionOpen:false};
@@ -698,7 +707,7 @@ function pilotRareChanceBonus(){return pilotCombined('luck1','luck2')/100;}funct
 
 
 
-// ===================== V17.9.1 — CONQUISTAS =====================
+// ===================== V17.9.2 — CONQUISTAS =====================
 const ACHIEVEMENT_DEFS=[
   {id:'first_blood',group:'COMBATE',label:'Primeiro Abate',desc:'Destrua seu primeiro NPC.',target:1,metric:()=>Number(progress?.profile?.aliensKilled||0),icon:'☠'},
   {id:'hunter_100',group:'COMBATE',label:'Caçador de Setor',desc:'Destrua 100 NPCs.',target:100,metric:()=>Number(progress?.profile?.aliensKilled||0),icon:'⌖'},
@@ -720,7 +729,7 @@ function syncAchievements(announce=true){if(!progress)return [];normalizeAchieve
 function achievementUnlockedCount(){syncAchievements(false);return ACHIEVEMENT_DEFS.filter(x=>achievementUnlocked(x.id)).length;}
 function buildAchievementsPanel(){syncAchievements(false);const section=document.createElement('section');section.className='pilot-achievement-profile';const count=achievementUnlockedCount();section.innerHTML=`<div class="pilot-achievement-head"><div><div class="eyebrow">CONQUISTAS</div><h3>REGISTRO DO PILOTO</h3><small>${count}/${ACHIEVEMENT_DEFS.length} conquistas concluídas • foco em identidade, não inflação.</small></div><span>${Math.round(count/ACHIEVEMENT_DEFS.length*100)}%</span></div>`;const grid=document.createElement('div');grid.className='pilot-achievement-grid';for(const def of ACHIEVEMENT_DEFS){const pg=achievementProgress(def),open=achievementUnlocked(def.id),card=document.createElement('article');card.className=`pilot-achievement-card${open?' unlocked':''}`;card.innerHTML=`<div class="pilot-achievement-icon">${def.icon}</div><div class="pilot-achievement-main"><span>${escHtml(def.group)}</span><b>${escHtml(def.label)}</b><p>${escHtml(def.desc)}</p><div class="pilot-achievement-track"><i style="width:${pg.pct}%"></i></div><small>${fmt(Math.min(pg.current,pg.target))} / ${fmt(pg.target)}</small></div><em>${open?'✓':'○'}</em>`;grid.appendChild(card);}section.appendChild(grid);return section;}
 
-// ===================== V17.9.1 PILOT TITLES =====================
+// ===================== V17.9.2 PILOT TITLES =====================
 const PILOT_TITLES=[
   {id:'pioneer',group:'PROGRESSÃO',label:'Pioneiro Estelar',desc:'Título inicial de todo piloto.',target:1,metric:()=>1,format:(n)=>`${fmt(n)}/1`,req:'Disponível desde o início.'},
   {id:'cadet',group:'PROGRESSÃO',label:'Cadete Estelar',desc:'Primeiros sistemas dominados.',target:5,metric:()=>Number(progress?.profile?.level||1),format:(n)=>`Nível ${fmt(n)}/5`,req:'Alcance o nível 5.'},
@@ -1591,7 +1600,7 @@ function renderMissions(){
 function openMissions(){if(!featureUnlocked('missions')){showFeatureLock('missions','Missões');return;}closeNavigationModals(ui.missionModal);normalizeMissionState();renderMissions();ui.missionModal.classList.remove('hidden');}
 
 
-// ===================== V17.9.1 — JORNADA DO PILOTO =====================
+// ===================== V17.9.2 — JORNADA DO PILOTO =====================
 const PILOT_JOURNEY_STEPS=[
   {id:'first_kills',label:'Batismo de Fogo',desc:'Destrua 3 NPCs para dominar seleção, laser e míssil.',event:'kill',target:3,reward:'2.000 PLS-1',grant:()=>{progress.ammo.lcb10=(progress.ammo.lcb10||0)+2000;}},
   {id:'first_boxes',label:'Recupere a Carga',desc:'Colete 2 boxes deixadas por NPCs destruídos.',event:'box',target:2,reward:'50 R-310',grant:()=>{progress.rockets.r310=(progress.rockets.r310||0)+50;}},
@@ -2148,7 +2157,7 @@ function patentMeta(code){return SPECIAL_RANK_META[code]||PATENT_BY_CODE[code]||
 function patentBadgeMarkup(code,title){const meta=patentMeta(code);const label=title||meta.title;return `<span class="rank-badge" style="--rank-color:${meta.color}"><span class="rank-badge-icon">${meta.short}</span><span class="rank-badge-text">${label}</span></span>`;}
 function patentMiniMarkup(code){const meta=patentMeta(code);return `<span class="rank-mini" style="--rank-color:${meta.color}" title="${meta.title}">${meta.short}</span>`;}
 
-// ===================== V17.9.1 — GRUPO DE BATALHA =====================
+// ===================== V17.9.2 — GRUPO DE BATALHA =====================
 const battleGroupRuntime={state:null,busy:false,lastAt:0};
 function battleGroupState(){return battleGroupRuntime.state||{group:null,members:[],invites:[],my_user_id:String(getUser()?.id||'')};}
 function battleGroupMemberIds(){return new Set((battleGroupState().members||[]).map(x=>String(x.user_id||'')));}
@@ -2156,8 +2165,8 @@ function isBattleGroupMember(userId){return battleGroupMemberIds().has(String(us
 function battleGroupMyRole(){const me=String(getUser()?.id||'');return (battleGroupState().members||[]).find(x=>String(x.user_id)===me)?.role||null;}
 function battleGroupRally(){const g=battleGroupState().group;if(!g||!g.rally_map_id||!Number.isFinite(Number(g.rally_x))||!Number.isFinite(Number(g.rally_y)))return null;return {mapId:g.rally_map_id,territoryFaction:g.rally_territory_faction||null,x:Number(g.rally_x),y:Number(g.rally_y),at:g.rally_at};}
 function updateBattleGroupBadge(){if(!ui.battleGroupTopStatus)return;const st=battleGroupState(),count=st.group?(st.members||[]).length:0,invites=(st.invites||[]).length;ui.battleGroupTopStatus.textContent=st.group?`${count}/5`:invites?`${invites} convite${invites>1?'s':''}`:'0/5';ui.battleGroupBtn?.classList.toggle('gold',!!st.group);}
-async function refreshBattleGroup(force=false){if(!authenticated||battleGroupRuntime.busy)return battleGroupRuntime.state;if(!force&&battleGroupRuntime.state&&Date.now()-battleGroupRuntime.lastAt<12000){updateBattleGroupBadge();return battleGroupRuntime.state;}battleGroupRuntime.busy=true;try{battleGroupRuntime.state=await getBattleGroupOnline();battleGroupRuntime.lastAt=Date.now();updateBattleGroupBadge();if(ui.battleGroupModal&&!ui.battleGroupModal.classList.contains('hidden'))renderBattleGroup();return battleGroupRuntime.state;}catch(e){console.warn('battle group',e);return battleGroupRuntime.state;}finally{battleGroupRuntime.busy=false;}}
-function renderBattleGroup(){if(!ui.battleGroupContent)return;const st=battleGroupState(),group=st.group,members=st.members||[],invites=st.invites||[],me=String(st.my_user_id||getUser()?.id||''),role=battleGroupMyRole(),leader=role==='leader';let html='';if(invites.length){html+=`<section class="battle-group-invites"><div class="section-kicker">CONVITES RECEBIDOS</div>${invites.map(i=>`<div class="battle-group-invite"><div><b>${escHtml(i.inviter_callsign||'Piloto')}</b><small>expira ${adminDate(i.expires_at)}</small></div><div><button class="small-btn gold" data-group-accept="${escHtml(i.id)}">ACEITAR</button><button class="ghost-btn" data-group-decline="${escHtml(i.id)}">RECUSAR</button></div></div>`).join('')}</section>`;}if(!group){html+=`<section class="battle-group-empty"><div class="battle-group-empty-icon">◇</div><h3>SEM GRUPO ATIVO</h3><p>Crie um grupo para coordenar até 5 pilotos da mesma facção. O grupo não concede bônus de CR/STL/XP: ele serve para estratégia e organização.</p><button class="primary-btn" data-group-create>CRIAR GRUPO DE BATALHA</button></section>`;}else{const rally=battleGroupRally();html+=`<section class="battle-group-summary"><div><div class="eyebrow">GRUPO ATIVO</div><h3>${members.length}/5 PILOTOS</h3><small>${leader?'Você é o líder tático.':'Líder: '+escHtml(members.find(x=>x.role==='leader')?.callsign||'Piloto')}</small></div><div class="battle-group-summary-actions">${leader?'<button class="small-btn gold" data-group-rally>MARCAR RALLY AQUI</button>':''}<button class="danger-btn" data-group-leave>SAIR</button></div></section>`;if(rally)html+=`<div class="battle-group-rally"><b>RALLY</b><span>${escHtml(displayMapLabel(rally.mapId))} • ${Math.round(rally.x)} / ${Math.round(rally.y)}${rally.mapId===progress?.mapId?' • NO SEU MAPA':''}</span></div>`;html+=`<div class="battle-group-members">${members.map(m=>{const online=m.presence_updated_at&&Date.now()-Date.parse(m.presence_updated_at)<15000;const isMe=String(m.user_id)===me;return `<article class="battle-group-member${online?' online':''}"><div class="battle-group-member-main"><i></i><div><b>${escHtml(m.callsign||'Pilot')} ${m.role==='leader'?'<em>LÍDER</em>':''}${isMe?'<em>VOCÊ</em>':''}</b><small>${m.clan_tag?`[${escHtml(m.clan_tag)}] • `:''}${online?`${escHtml(displayMapLabel(m.map_id||''))} • ONLINE`:'OFFLINE'}</small></div></div>${leader&&!isMe?`<button class="ghost-btn" data-group-kick="${escHtml(m.user_id)}">REMOVER</button>`:''}</article>`;}).join('')}</div>`;if(leader&&members.length<5)html+=`<div class="battle-group-invite-form"><input id="battleGroupCallsign" maxlength="24" placeholder="CALLSIGN DO PILOTO" autocomplete="off"><button class="small-btn gold" data-group-invite>CONVIDAR</button></div>`;}ui.battleGroupContent.innerHTML=html;}
+async function refreshBattleGroup(force=false){if(!authenticated||battleGroupRuntime.busy)return battleGroupRuntime.state;if(!force&&battleGroupRuntime.state&&Date.now()-battleGroupRuntime.lastAt<5000){updateBattleGroupBadge();return battleGroupRuntime.state;}battleGroupRuntime.busy=true;try{battleGroupRuntime.state=await getBattleGroupOnline();battleGroupRuntime.lastAt=Date.now();updateBattleGroupBadge();if(ui.battleGroupModal&&!ui.battleGroupModal.classList.contains('hidden'))renderBattleGroup();return battleGroupRuntime.state;}catch(e){console.warn('battle group',e);return battleGroupRuntime.state;}finally{battleGroupRuntime.busy=false;}}
+function renderBattleGroup(){if(!ui.battleGroupContent)return;const st=battleGroupState(),group=st.group,members=st.members||[],invites=st.invites||[],me=String(st.my_user_id||getUser()?.id||''),role=battleGroupMyRole(),leader=role==='leader';let html='';if(invites.length){html+=`<section class="battle-group-invites"><div class="section-kicker">CONVITES RECEBIDOS</div>${invites.map(i=>`<div class="battle-group-invite"><div><b>${escHtml(i.inviter_callsign||'Piloto')}</b><small>expira ${adminDate(i.expires_at)}</small></div><div><button class="small-btn gold" data-group-accept="${escHtml(i.id)}">ACEITAR</button><button class="ghost-btn" data-group-decline="${escHtml(i.id)}">RECUSAR</button></div></div>`).join('')}</section>`;}if(!group){html+=`<section class="battle-group-empty"><div class="battle-group-empty-icon">◇</div><h3>SEM GRUPO ATIVO</h3><p>Crie um grupo para coordenar até 5 pilotos de qualquer facção. NPCs marcados pelo grupo dividem CR/STL/XP apenas entre membros ativos no mesmo setor; a box continua exclusiva do primeiro atacante.</p><button class="primary-btn" data-group-create>CRIAR GRUPO DE BATALHA</button></section>`;}else{const rally=battleGroupRally();html+=`<section class="battle-group-summary"><div><div class="eyebrow">GRUPO ATIVO</div><h3>${members.length}/5 PILOTOS</h3><small>${leader?'Você é o líder tático.':'Líder: '+escHtml(members.find(x=>x.role==='leader')?.callsign||'Piloto')}</small></div><div class="battle-group-summary-actions">${leader?'<button class="small-btn gold" data-group-rally>MARCAR RALLY AQUI</button>':''}<button class="danger-btn" data-group-leave>SAIR</button></div></section>`;if(rally)html+=`<div class="battle-group-rally"><b>RALLY</b><span>${escHtml(displayMapLabel(rally.mapId))} • ${Math.round(rally.x)} / ${Math.round(rally.y)}${rally.mapId===progress?.mapId?' • NO SEU MAPA':''}</span></div>`;html+=`<div class="battle-group-members">${members.map(m=>{const online=m.presence_updated_at&&Date.now()-Date.parse(m.presence_updated_at)<15000;const isMe=String(m.user_id)===me;return `<article class="battle-group-member${online?' online':''}"><div class="battle-group-member-main"><i></i><div><b>${escHtml(m.callsign||'Pilot')} ${m.role==='leader'?'<em>LÍDER</em>':''}${isMe?'<em>VOCÊ</em>':''}</b><small>${m.clan_tag?`[${escHtml(m.clan_tag)}] • `:''}${escHtml(FACTIONS[m.faction]?.name||String(m.faction||'SEM FACÇÃO').toUpperCase())} • ${online?`${escHtml(displayMapLabel(m.map_id||'',m.territory_faction||null))} • ONLINE`:'OFFLINE'}</small></div></div>${leader&&!isMe?`<button class="ghost-btn" data-group-kick="${escHtml(m.user_id)}">REMOVER</button>`:''}</article>`;}).join('')}</div>`;if(leader&&members.length<5)html+=`<div class="battle-group-invite-form"><input id="battleGroupCallsign" maxlength="24" placeholder="CALLSIGN DO PILOTO" autocomplete="off"><button class="small-btn gold" data-group-invite>CONVIDAR</button></div>`;}ui.battleGroupContent.innerHTML=html;}
 async function openBattleGroup(){closeNavigationModals(ui.battleGroupModal);ui.battleGroupModal?.classList.remove('hidden');await refreshBattleGroup(true);renderBattleGroup();}
 async function battleGroupAction(action,arg=null){if(battleGroupRuntime.busy)return;battleGroupRuntime.busy=true;try{let result=null;if(action==='create')result=await createBattleGroupOnline();else if(action==='invite'){const input=document.getElementById('battleGroupCallsign'),callsign=String(input?.value||'').trim();if(!callsign)throw new Error('Digite o callsign do piloto.');await inviteBattleGroupOnline(callsign);showToast(`Convite enviado para ${callsign}`,'system');}else if(action==='accept')result=await respondBattleGroupInviteOnline(arg,true);else if(action==='decline')result=await respondBattleGroupInviteOnline(arg,false);else if(action==='leave'){if(!confirm('Sair do Grupo de Batalha?'))return;result=await leaveBattleGroupOnline();}else if(action==='kick'){if(!confirm('Remover este piloto do grupo?'))return;result=await kickBattleGroupMemberOnline(arg);}else if(action==='rally')result=await setBattleGroupRallyOnline({mapId:progress.mapId,territoryFaction:onlineTerritoryKey(),x:player.x,y:player.y});if(result?.group!==undefined)battleGroupRuntime.state=result;else battleGroupRuntime.state=await getBattleGroupOnline();battleGroupRuntime.lastAt=Date.now();updateBattleGroupBadge();renderBattleGroup();}catch(e){showToast(String(e?.message||e));}finally{battleGroupRuntime.busy=false;}}
 
@@ -2540,7 +2549,7 @@ function layoutHudPanels(){
   root.style.setProperty('--weaponbar-height',`${weaponH+12}px`);
   const bottomItems=[ui.chatDock,ui.weaponBar,ui.minimapPanel].filter(el=>el&&getComputedStyle(el).display!=='none');
   const legacyBottomH=bottomItems.length?Math.max(...bottomItems.map(el=>Math.ceil(el.getBoundingClientRect().height))):0;
-  // V17.9.1: no mobile o HUD inferior vira dois andares (chat/mapa + munições).
+  // V17.9.2: no mobile o HUD inferior vira dois andares (chat/mapa + munições).
   // Usar apenas o maior filho fazia os painéis flutuantes invadirem a barra de munição.
   const dockRect=ui.bottomHudDock&&getComputedStyle(ui.bottomHudDock).display!=='none'?ui.bottomHudDock.getBoundingClientRect():null;
   const bottomH=window.innerWidth<=760&&dockRect?Math.ceil(dockRect.height):legacyBottomH;
@@ -4009,24 +4018,21 @@ function handleNormalShipDeath(){
   movePlayerToHomeBase();
   resolveDeathRepair({allowAuto:true});
 }
+function spawnNpcLootBox(enemy){
+  if(!enemy)return;
+  const lootMult=1+pilotLootBonus(),boostedResources=Object.fromEntries(Object.entries(enemy.resources||{}).map(([id,q])=>[id,Math.max(1,Math.round(q*lootMult))]));
+  state.loot.push({id:`box_${Math.random().toString(16).slice(2)}`,x:enemy.x,y:enemy.y,resources:boostedResources,source:enemy.name,spawnedAt:nowSec(),expiresAt:nowSec()+CARGO_BOX_LIFETIME_SEC});
+}
 function rewardEnemyKill(enemy){
   const creditMult=1+pilotSkillValue('greed')/100,uriMult=1+pilotCombined('cruelty1','cruelty2')/100,xpMult=1+pilotSkillValue('tactics')/100;
   const earnedCredits=Math.round(enemy.credits*creditMult),earnedUri=Math.round(enemy.uridium*uriMult),earnedXp=Math.round((Number(enemy.xp)||enemy.credits/10+enemy.uridium*12)*xpMult*designerXpMultiplier());
   progress.profile.credits+=earnedCredits;progress.profile.uridium+=earnedUri;progress.profile.xp+=earnedXp;progress.profile.aliensKilled=(progress.profile.aliensKilled||0)+1;telemetryEconomy('npc',{cr:earnedCredits,stl:earnedUri,xp:earnedXp});telemetryCounter('kills',1);journeyEvent('kill',1);syncAchievements(true);
   if(authenticated){const boss=/^boss/i.test(String(enemy.type||''));const clanType=String(enemy.type||'').replace(/^boss/i,'').toLowerCase();recordClanAlienKillOnline({npcType:clanType,isBoss:boss}).then(r=>{if(r?.status?.leveled_up){showToast(`CLÃ SUBIU PARA O LV ${r.status.new_level}!`,'reward');refreshClanState(true);}}).catch(()=>{});}
   pushActivity(`${enemy.name} • +${fmt(earnedCredits)} CR • +${fmt(earnedUri)} STL • +${fmt(earnedXp)} XP`,'combat');
-  if(String(enemy.type||'').startsWith('boss')){if(!enemy.sharedReward||enemy.sharedFinalBlow||Number(enemy.sharedRewardShare||0)>=.25)rollRareBossLoot(enemy);scoreClanWar(enemy.sharedReward?Math.max(1,Math.round(10*Number(enemy.sharedRewardShare||0))):10,'boss_kill');}
+  if(String(enemy.type||'').startsWith('boss')){if(!enemy.sharedReward||enemy.sharedOwner)rollRareBossLoot(enemy);scoreClanWar(enemy.sharedReward?Math.max(1,Math.round(10*Number(enemy.sharedRewardShare||0))):10,'boss_kill');}
   addPetXp(Math.max(12,Math.round(enemy.credits/120+enemy.uridium*4)));
   processPlayerLevelUps();
-  const lootMult=1+pilotLootBonus(),boostedResources=Object.fromEntries(Object.entries(enemy.resources||{}).map(([id,q])=>[id,Math.max(1,Math.round(q*lootMult))]));
-  state.loot.push({
-    id:`box_${Math.random().toString(16).slice(2)}`,
-    x:enemy.x,y:enemy.y,
-    resources:boostedResources,
-    source:enemy.name,
-    spawnedAt:nowSec(),
-    expiresAt:nowSec()+CARGO_BOX_LIFETIME_SEC
-  });
+  if(enemy.sharedDropBox!==false)spawnNpcLootBox(enemy);
   missionEvent('kill',{enemy,mapId:progress.mapId});battlePassEvent('kill',1);
   if(isGalaxyGateMap()&&enemy.gateEnemy){recordAlphaKillReward(enemy);syncAlphaGateSnapshot();}else if(!sharedUniverseMap()&&!enemy.eventNpc)scheduleEnemyRespawn(enemy.type);
   saveGame();
@@ -4338,7 +4344,7 @@ function remoteTargetEntity(id,isPlayer){if(!id)return null;if(isPlayer){if(Stri
 function onlineTerritoryKey(){
   return ['x1','x2','x3','x4'].includes(progress?.mapId)?(currentTerritoryFaction()||progress.profile.faction):'battle';
 }
-function onlinePlayerEnemy(rp){return !!rp&&rp.faction&&rp.faction!==progress?.profile?.faction;}
+function onlinePlayerEnemy(rp){return !!rp&&!isBattleGroupMember(rp.id)&&rp.faction&&rp.faction!==progress?.profile?.faction;}
 async function syncOnlineWorld(){
   if(!authenticated||!progress||onlineWorld.busy)return;
   onlineWorld.busy=true;
@@ -4435,7 +4441,7 @@ async function queuePvpShot(target,damage,shieldDrain=false,color='#ff657d'){
 function updateOnlineWorld(dt){
   if(!authenticated||!progress)return;const now=Date.now(),presenceInterval=sharedUniverseOnline()?4500:1200;
   if(now-onlineWorld.lastSyncAt>presenceInterval&&!onlineWorld.busy)syncOnlineWorld();
-  syncPvpInbox();syncClanCreditGrants();if(Date.now()-battleGroupRuntime.lastAt>15000)refreshBattleGroup(false);
+  syncPvpInbox();syncClanCreditGrants();if(Date.now()-battleGroupRuntime.lastAt>6000)refreshBattleGroup(false);
   for(const rp of onlineWorld.players.values()){
     const live=rp.realtime&&now-(rp.realtimeUpdatedAt||0)<2500,lead=live ? 0.055 : 0,goalX=(rp.tx||0)+(live?(rp.vx||0)*lead:0),goalY=(rp.ty||0)+(live?(rp.vy||0)*lead:0),k=Math.min(1,dt*(live?14:6.5));rp.x+=(goalX-rp.x)*k;rp.y+=(goalY-rp.y)*k;rp.angle+=shortestAngleDelta(rp.angle,rp.targetAngle||0)*Math.min(1,dt*(live?15:7));
     const q=rp.pet;if(q?.owned){const pk=Math.min(1,dt*14),pgx=(q.tx||q.x||rp.x)+(q.vx||0)*.045,pgy=(q.ty||q.y||rp.y)+(q.vy||0)*.045;q.x+=(pgx-q.x)*pk;q.y+=(pgy-q.y)*pk;q.angle=(q.angle||0)+shortestAngleDelta(q.angle||0,q.targetAngle||0)*Math.min(1,dt*15);}
@@ -4638,7 +4644,9 @@ ctx.shadowBlur=0;ctx.restore();}
 function drawEnemy(e){
   const p=screenPos(e.x,e.y),boss=e.type.startsWith('boss'),img=assetImage(GAME_ASSETS.npcs[e.type]);
   ctx.save();ctx.translate(p.x,p.y);
-  if(state.target?.id===e.id){const rr=e.size+18+Math.sin(nowSec()*6)*2;ctx.strokeStyle=e.eventNpc?'rgba(255,190,72,.98)':'rgba(255,74,95,.98)';ctx.lineWidth=2;ctx.setLineDash([7,4]);ctx.beginPath();ctx.arc(0,0,rr,0,TWO_PI);ctx.stroke();ctx.setLineDash([]);ctx.rotate(-nowSec()*.55);for(let i=0;i<4;i++){ctx.rotate(Math.PI/2);ctx.beginPath();ctx.moveTo(rr+3,-8);ctx.lineTo(rr+3,8);ctx.lineTo(rr-5,8);ctx.stroke();}ctx.rotate(nowSec()*.55);}
+  const claim=sharedNpcClaimState(e),claimColor=claim.claimed?(claim.friendly?(e.eventNpc?'rgba(255,190,72,.96)':(e.color||'rgba(255,74,95,.96)')):'rgba(245,250,255,.94)'):null;
+  if(claim.claimed){const cr=e.size+12+Math.sin(nowSec()*3.4)*1.2;ctx.strokeStyle=claimColor;ctx.globalAlpha=.72;ctx.lineWidth=1.4;ctx.setLineDash([5,5]);ctx.beginPath();ctx.arc(0,0,cr,0,TWO_PI);ctx.stroke();ctx.setLineDash([]);ctx.globalAlpha=1;}
+  if(state.target?.id===e.id){const rr=e.size+18+Math.sin(nowSec()*6)*2;ctx.strokeStyle=claimColor||(e.eventNpc?'rgba(255,190,72,.98)':'rgba(255,74,95,.98)');ctx.lineWidth=2;ctx.setLineDash([7,4]);ctx.beginPath();ctx.arc(0,0,rr,0,TWO_PI);ctx.stroke();ctx.setLineDash([]);ctx.rotate(-nowSec()*.55);for(let i=0;i<4;i++){ctx.rotate(Math.PI/2);ctx.beginPath();ctx.moveTo(rr+3,-8);ctx.lineTo(rr+3,8);ctx.lineTo(rr-5,8);ctx.stroke();}ctx.rotate(nowSec()*.55);}
   if(img&&img.naturalWidth){
     const face=Math.atan2(player.y-e.y,player.x-e.x)+Math.PI/2,size=e.size*(boss?3.45:3.08),sc=size/Math.max(img.naturalWidth,img.naturalHeight),pulse=Math.sin(nowSec()*4+e.x*.002+e.y*.002),bank=Math.sin((e.angle||0)*1.7+nowSec()*.7)*(boss?.035:.055),fx=npcFxProfile(e.type);
     drawNpcAuraLocal(e,boss,size);ctx.rotate(face);if(Math.hypot(player.x-e.x,player.y-e.y)<900)drawEngineWakeLocal(size,fx.trail,boss?.78:.5,e.x*.01);ctx.scale(1+bank,1-Math.abs(bank)*.35);ctx.scale(1+pulse*.012,1-pulse*.012);ctx.shadowColor=fx.glow;ctx.shadowBlur=boss?28:13;if(boss&&'filter' in ctx&&Number(e.bossPhase||0)>=2)ctx.filter='saturate(1.25) brightness(1.12)';ctx.drawImage(img,-img.naturalWidth*sc/2,-img.naturalHeight*sc/2,img.naturalWidth*sc,img.naturalHeight*sc);ctx.filter='none';

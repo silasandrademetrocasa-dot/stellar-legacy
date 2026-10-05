@@ -1,6 +1,6 @@
 {
   "name": "stellar-legacy",
-  "version": "17.7.6",
+  "version": "17.9.2",
   "type": "module",
   "scripts": {
     "start": "node server/index.js",
@@ -14,5 +14,5 @@
   "engines": {
     "node": ">=18"
   },
-  "release": "bootstrap-world-recovery-v17-7-6"
+  "release": "npc-ownership-cross-faction-groups-v17-9-2"
 }
