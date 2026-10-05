@@ -1,6 +1,6 @@
 import { FACTIONS, SHIPS, ITEMS, LASER_AMMO, ROCKETS, NPC_TYPES, MAPS, RESOURCES } from './data.js?v=17.9.3';
 import { GAME_ASSETS } from './assets/v17/manifest.js?v=17.9.3';
-import { signUp, signIn, requestPasswordReset, restorePasswordRecoveryFromUrl, restoreSession, signOutLocal, checkGameSession, endGameSession, getUser, getSessionCredentials, loadCloudSave, saveCloudSave, updateCallsign, updatePassword, loadRankings, loadAuctionBids, saveAuctionBidOnline, markAuctionBidStatusOnline, loadAuctionMarket, upsertPlayerPresenceOnline, loadMapPresenceOnline, savePlayerLocationCheckpointOnline, loadPlayerLocationCheckpointOnline, removePlayerPresenceOnline, queuePvpAttackOnline, consumePvpDamageEventsOnline, syncArenaProfileOnline, loadArenaState, loadArenaDailyRewardStatus, claimArenaDailyReward, loadArenaOpponents, loadArenaHistory, arenaAttackOnline, listClansOnline, loadMyClanOnline, createClanOnline, joinClanOnline, leaveClanOnline, transferClanCreditsOnline, claimClanCreditGrantsOnline, recordClanAlienKillOnline, getPremiumShopOnline, testPurchasePremiumOnline, loadWarfrontStateOnline, hitWorldBossOnline, claimWorldBossRewardOnline, declareClanWarOnline, recordClanWarScoreOnline, loadLiveOpsOnline, purchaseLiveCatalogOnline, economyActionOnline, getChatHistoryOnline, sendChatMessageOnline, getMyDesignersOnline, setDesignLoadoutOnline, claimGateDroneDesignOnline, claimEventDesignerOnline, getAdminStatus, adminSearchAccounts, adminRecentActions, adminBanAccount, adminUnbanAccount, adminResetAccount, adminDeleteAccount, pushTelemetryBatch, adminTelemetryOverview, adminPlayerTelemetry, getBattleGroupOnline, createBattleGroupOnline, inviteBattleGroupOnline, searchBattleGroupPlayersOnline, inviteBattleGroupUserOnline, respondBattleGroupInviteOnline, leaveBattleGroupOnline, kickBattleGroupMemberOnline, setBattleGroupRallyOnline } from './api.js?v=17.9.3';
+import { signUp, signIn, requestPasswordReset, restorePasswordRecoveryFromUrl, restoreSession, signOutLocal, checkGameSession, endGameSession, getUser, getSessionCredentials, loadCloudSave, saveCloudSave, updateCallsign, updatePassword, loadRankings, loadAuctionBids, saveAuctionBidOnline, markAuctionBidStatusOnline, loadAuctionMarket, upsertPlayerPresenceOnline, loadMapPresenceOnline, savePlayerLocationCheckpointOnline, loadPlayerLocationCheckpointOnline, removePlayerPresenceOnline, queuePvpAttackOnline, consumePvpDamageEventsOnline, syncArenaProfileOnline, loadArenaState, loadArenaDailyRewardStatus, claimArenaDailyReward, loadArenaOpponents, loadArenaHistory, arenaAttackOnline, listClansOnline, loadMyClanOnline, createClanOnline, joinClanOnline, leaveClanOnline, transferClanCreditsOnline, claimClanCreditGrantsOnline, recordClanAlienKillOnline, getPremiumShopOnline, testPurchasePremiumOnline, loadWarfrontStateOnline, hitWorldBossOnline, claimWorldBossRewardOnline, declareClanWarOnline, recordClanWarScoreOnline, loadLiveOpsOnline, purchaseLiveCatalogOnline, economyActionOnline, getChatHistoryOnline, sendChatMessageOnline, getMyDesignersOnline, setDesignLoadoutOnline, claimGateDroneDesignOnline, claimEventDesignerOnline, getAdminStatus, adminSearchAccounts, adminRecentActions, adminBanAccount, adminUnbanAccount, adminResetAccount, adminDeleteAccount, pushTelemetryBatch, adminTelemetryOverview, adminPlayerTelemetry, getBattleGroupOnline, createBattleGroupOnline, inviteBattleGroupOnline, searchBattleGroupPlayersOnline, inviteBattleGroupUserOnline, respondBattleGroupInviteOnline, leaveBattleGroupOnline, kickBattleGroupMemberOnline, setBattleGroupRallyOnline } from './api.js?v=17.9.4';
 import { SharedUniverseClient } from './world.js?v=17.9.3';
 
 const canvas = document.querySelector('#game');
@@ -117,7 +117,7 @@ function qualityShouldPreload(path){
   return /\/branding\//.test(value)||/\/assets\/v17\/loot\/cargo-box\.webp/.test(value);
 }
 
-const ASSET_REVISION='17.9.3';
+const ASSET_REVISION='17.9.4';
 function versionedAssetUrl(path){
   const value=String(path||'');if(!value)return value;
   return value.includes('?')?`${value}&asset=${ASSET_REVISION}`:`${value}?asset=${ASSET_REVISION}`;
@@ -2910,16 +2910,26 @@ async function restoreBestRuntimePosition(){
   return true;
 }
 
-function syncRuntimeLocationToProgress(forceCheckpoint=true){
+function syncRuntimeLocationToProgress(forceCheckpoint=false){
   if(!progress||!state?.currentMap)return;
   const x=Number(player?.x),y=Number(player?.y);
   if(!Number.isFinite(x)||!Number.isFinite(y))return;
-  const now=Date.now(),mapKey=locationStorageKey(),saved={x,y,mapId:progress.mapId,territoryFaction:progress.territoryFaction||null,savedAt:now};
+  const now=Date.now(),mapKey=locationStorageKey();
+  progress.positionByMap ||= {};
+  const previous=progress.positionByMap[mapKey];
+  const previousX=Number(previous?.x),previousY=Number(previous?.y);
+  const mapChanged=String(progress.savedMapId||'')!==String(progress.mapId||'')||String(progress.savedTerritoryFaction||'')!==String(progress.territoryFaction||'');
+  const actualMove=!Number.isFinite(previousX)||!Number.isFinite(previousY)||Math.hypot(x-previousX,y-previousY)>=2;
+
+  // Economia/save geral pode atualizar progress.x/y, mas NÃO promove o timestamp de posição.
+  // Só movimento real, troca de mapa ou checkpoint explícito pode tornar uma localização "mais nova".
   progress.x=x;progress.y=y;
+  if(!(forceCheckpoint||mapChanged||actualMove))return;
+
+  const saved={x,y,mapId:progress.mapId,territoryFaction:progress.territoryFaction||null,savedAt:now};
   progress.savedMapId=progress.mapId;
   progress.savedTerritoryFaction=progress.territoryFaction||null;
   progress.locationSavedAt=now;
-  progress.positionByMap ||= {};
   progress.positionByMap[mapKey]=saved;
   const moved=positionCheckpointRuntime.lastX===null||Math.hypot(x-positionCheckpointRuntime.lastX,y-positionCheckpointRuntime.lastY)>=4;
   const due=now-positionCheckpointRuntime.lastAt>=750||positionCheckpointRuntime.lastKey!==mapKey;
@@ -2998,7 +3008,7 @@ function savedLocationForCurrentMap(){
   if(checkpoint)candidates.push({x:checkpoint.x,y:checkpoint.y,savedAt:checkpoint.savedAt,source:'checkpoint'});
   const sameMap=String(progress.savedMapId||progress.mapId||'')===String(progress.mapId||'');
   const sameTerritory=!['x1','x2','x3','x4'].includes(progress.mapId)||!progress.savedTerritoryFaction||progress.savedTerritoryFaction===progress.territoryFaction;
-  if(sameMap&&sameTerritory&&Number.isFinite(Number(progress.x))&&Number.isFinite(Number(progress.y)))candidates.push({x:Number(progress.x),y:Number(progress.y),savedAt:Number(progress.clientSavedAt)||0,source:'legacy'});
+  if(sameMap&&sameTerritory&&Number.isFinite(Number(progress.x))&&Number.isFinite(Number(progress.y)))candidates.push({x:Number(progress.x),y:Number(progress.y),savedAt:Number(progress.locationSavedAt)||Number(progress.clientSavedAt)||0,source:'legacy'});
   if(!candidates.length)return null;
   candidates.sort((a,b)=>(b.savedAt||0)-(a.savedAt||0));
   const best=candidates[0];

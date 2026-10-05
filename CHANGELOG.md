@@ -1,8 +1,8 @@
-## 17.9.3 — Global Battle Group Search
+## 17.9.4 — Global Battle Group Search
 - Grupo de Batalha agora busca pilotos globalmente por callsign, sem depender de mapa, facção ou presença online.
 - Convites passam a usar o UUID real da conta, evitando falhas por formatação do callsign.
 
-## V17.9.3 — NPC Ownership + Cross-Faction Battle Groups
+## V17.9.4 — NPC Ownership + Cross-Faction Battle Groups
 
 - Grupo de Batalha aceita pilotos de qualquer facção.
 - Membros do mesmo grupo são tratados como aliados para leitura tática/PVP.
