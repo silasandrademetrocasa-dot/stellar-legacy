@@ -1,4 +1,14 @@
-## 17.7.4 — Player Telemetry + Titles
+## 17.7.5 — Position Root Fix + SQL Cleanup
+- Persistência de posição simplificada: `player_location_v1774` + checkpoint local são as únicas fontes de spawn; `player_presence` deixa de decidir diretamente onde o jogador nasce.
+- `player_presence` agora espelha automaticamente a posição real para `player_location_v1774` via trigger no Supabase.
+- Posição final é confirmada ao terminar um deslocamento e periodicamente durante movimento.
+- Spawn/fallback de base não é promovido para checkpoint definitivo sem checkpoint válido ou movimento real do jogador.
+- Respostas da economia preservam mapa/X/Y atuais em vez de substituir localização com snapshot econômico antigo.
+- Presença online volta a ser efêmera e é removida no logout/pagehide.
+- SQL: removidas 9 tabelas legadas/temporárias que não participavam mais do runtime.
+- Pasta `sql/` do release foi reduzida às referências atuais.
+
+## 17.7.1 — Player Telemetry + Titles
 - Reset total de conta continua exclusivo do painel ADM; o reset administrativo também limpa a telemetria para iniciar testes de progressão do zero.
 - Telemetria registra tempo jogado, sessões, níveis alcançados, kills, boxes, mineração, missões, mortes, saltos e geração/gasto de CR/STL/XP.
 - Fontes econômicas separadas em NPC, missões, recursos, passe/nível, eventos, portais, exploração e outros.
@@ -16,7 +26,7 @@
 - Passe e recompensas de nível entregam mais STL.
 - Seções do Passe minimizáveis e trilhas FREE/PREMIUM empilhadas verticalmente.
 
-## 17.7.0 — Pilot Accordion + Economy Fast Path
+## 17.6.7 — Pilot Accordion + Economy Fast Path
 - Cupom Premium: botão RESGATAR padronizado com os botões dourados do jogo.
 - Perfil de Piloto: DEFESA, UTILIDADE e ATAQUE viraram accordions persistentes no padrão do Hangar.
 - Regra de dependência: pesquisas de 2/3 níveis exigem máximo; pesquisas de 5 níveis liberam a seguinte no nível 3.
@@ -131,14 +141,14 @@ Versão anterior mantida no histórico do projeto base.
 - Cargo box não usa mais fallback de quadrado amarelo; fallback temporário agora mantém formato de crate.
 
 
-## 17.7.4 — Position Persistence + XP HUD
+## 17.7.2 — Position Persistence + XP HUD
 - NÍVEL no HUD agora mostra nível + XP total e tooltip com XP restante para o próximo nível.
 - Novo checkpoint global de localização por conta (mapa, território, X/Y e timestamp).
 - No login/reload, a localização local mais recente é reconciliada depois do save econômico, sem substituir saldo/inventário.
 - Checkpoints por mapa continuam mantidos para retorno entre setores.
 
 
-## 17.7.4 — Position persistence hard fix
+## 17.7.3 — Position persistence hard fix
 - A última posição deixa de depender somente do save econômico/localStorage.
 - `player_presence` passa a servir também como checkpoint persistente de mapa/X/Y.
 - Reload/login restaura o checkpoint local e usa a última presença do servidor como fallback.

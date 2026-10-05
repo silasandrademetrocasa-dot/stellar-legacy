@@ -1,11 +1,12 @@
 # SQL atual do Stellar Legacy
 
-`CURRENT_BACKEND.sql` é a referência consolidada do backend atual. As migrations antigas continuam preservadas no histórico do Git e não precisam viajar em cada ZIP de release.
+O banco de produção já está migrado. O ZIP mantém somente referências técnicas atuais; migrations antigas ficam no histórico do Git e não viajam mais em releases.
 
-O jogo em produção usa o projeto Supabase já migrado; este arquivo serve como snapshot técnico de referência.
+- `CURRENT_BACKEND.sql`: snapshot consolidado do backend principal.
+- `V17_7_1_TELEMETRY_TITLES.sql`: telemetria, milestones e títulos.
+- `V17_7_5_POSITION_SQL_CLEANUP.sql`: persistência robusta de posição + limpeza das tabelas legadas.
 
-## V16.3.0
-`V16_3_DRONE_DESIGNERS.sql` adiciona/fecha o fluxo de designers de drone, sets 8/8 e claims idempotentes de Nexus/Eclipse.
-## V17.7.1
-`V17_7_1_TELEMETRY_TITLES.sql` documenta a camada de telemetria, marcos de nível, título sincronizado no presence e RPCs administrativas de análise. A migration correspondente já foi aplicada no Supabase de produção.
+### Limpeza 17.7.5
+Foram removidas tabelas antigas vazias que não participavam mais do runtime: `ammunition`, `inventory`, `inventory_items`, `owned_ships`, `player_drones`, `player_state`, `ship_loadout` e as tabelas temporárias `chatgpt_deploy_*`.
 
+A posição persistente continua em `player_location_v1774`, e agora `player_presence` espelha automaticamente o último movimento real para ela.

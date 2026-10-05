@@ -434,14 +434,7 @@ export async function loadMapPresenceOnline(mapId, territoryFaction='battle') {
   return Array.isArray(rows) ? rows : [];
 }
 
-export async function loadOwnPresenceCheckpointOnline() {
-  if (!currentUser?.id) return null;
-  const rows = await authedSupabaseFetch(`/rest/v1/player_presence?user_id=eq.${encodeURIComponent(currentUser.id)}&select=map_id,territory_faction,x,y,angle,updated_at&limit=1`);
-  return Array.isArray(rows) ? rows[0] || null : null;
-}
-
-
-// V17.7.4 • posição autoritativa separada do save econômico.
+// V17.7.5 • posição autoritativa separada do save econômico.
 export async function savePlayerLocationCheckpointOnline(payload, { keepalive = false } = {}) {
   if (!currentUser?.id) return null;
   return authedSupabaseFetch('/rest/v1/rpc/save_player_location_v1774', {
