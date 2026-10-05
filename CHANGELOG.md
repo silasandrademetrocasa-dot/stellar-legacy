@@ -1,4 +1,4 @@
-## V17.8.1 — ADM Analytics + Pilot Titles
+## V17.8.2 — ADM Analytics + Pilot Titles
 
 - Dashboard ADM com CR/h, STL/h, XP/h, sinks de moeda e atividade em 24h.
 - Marcos de nível agora mostram mediana, média e P90 de tempo.
@@ -8,7 +8,7 @@
 - Mantém as correções críticas de bootstrap/world da V17.7.6.
 
 
-## V17.8.1 — Bootstrap Recovery + World Restore
+## V17.8.2 — Bootstrap Recovery + World Restore
 - Corrige regressão onde o HUD aparecia com HP 1/1, mapa sem NPCs e sem usuários antes do bootstrap terminar.
 - Save + stats + mapa + Shared Universe sobem antes de Premium/LIVE OPS/Designers.
 - Serviços secundários agora sincronizam em background e não bloqueiam gameplay.
@@ -16,7 +16,7 @@
 - Se o checkpoint dedicado chegar atrasado, ele só é aplicado enquanto o jogador ainda não moveu a nave.
 - Watchdog de Shared Universe/presença tenta reconectar sem travar o cliente.
 - Nenhuma nova remoção SQL nesta versão; a correção é exclusivamente de bootstrap/runtime.
-## 17.8.1 — Position Root Fix + SQL Cleanup
+## 17.8.2 — Position Root Fix + SQL Cleanup
 - Persistência de posição simplificada: `player_location_v1774` + checkpoint local são as únicas fontes de spawn; `player_presence` deixa de decidir diretamente onde o jogador nasce.
 - `player_presence` agora espelha automaticamente a posição real para `player_location_v1774` via trigger no Supabase.
 - Posição final é confirmada ao terminar um deslocamento e periodicamente durante movimento.
@@ -183,19 +183,25 @@ Versão anterior mantida no histórico do projeto base.
 - reset ADM também limpa o checkpoint dedicado.
 
 
-## V17.8.1 — Server Health
+## V17.8.2 — Server Health
 - Botão SAÚDE DO SERVIDOR no ADM.
 - Score automático 0–100 para CR, STL e dispersão de XP/h.
 - Leitura de ritmo LV5/LV10 quando houver amostra.
 
 
-## V17.8.1 — Jornada do Piloto
+## V17.8.2 — Jornada do Piloto
 - Tutorial orgânico em 6 etapas, sem tela obrigatória.
 - Tracker no HUD mesmo antes do nível 5.
 - Recompensas pequenas e funcionais; título Iniciado Estelar ao concluir.
 
 
-## V17.8.1 — Achievements + Titles
+## V17.8.2 — Achievements + Titles
 - 11 conquistas persistentes com barra de progresso.
 - Novos títulos vinculados a conquistas.
 - Recompensas de identidade em vez de inflação de moeda.
+
+
+## V17.8.2 — Refinaria & Crafting
+- 6 receitas server-authoritative na base X-1.
+- Refino de recursos, munição, mísseis e Bônus de Reparo.
+- Custos em CR criam novo sink econômico sem apagar valor da mineração.
