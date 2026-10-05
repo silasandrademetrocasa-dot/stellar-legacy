@@ -434,7 +434,7 @@ export async function loadMapPresenceOnline(mapId, territoryFaction='battle') {
   return Array.isArray(rows) ? rows : [];
 }
 
-// V17.7.6 • posição autoritativa separada do save econômico.
+// V17.7.7 • posição autoritativa separada do save econômico.
 // Bootstrap-critical: passa pelo próprio servidor do jogo. Isso evita que uma RPC direta
 // navegador -> Supabase segure a inicialização do mapa/NPCs quando a rota externa estiver lenta.
 export async function savePlayerLocationCheckpointOnline(payload, { keepalive = false } = {}) {

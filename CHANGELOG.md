@@ -1,5 +1,14 @@
+## V17.7.7 — ADM Analytics + Pilot Titles
 
-## V17.7.6 — Bootstrap Recovery + World Restore
+- Dashboard ADM com CR/h, STL/h, XP/h, sinks de moeda e atividade em 24h.
+- Marcos de nível agora mostram mediana, média e P90 de tempo.
+- Jogadores recebem leitura de ritmo NORMAL / RÁPIDO / LENTO conforme telemetria.
+- Detalhe individual mostra economia por origem, gastos e marcos de progressão.
+- Perfil de Títulos ganhou progresso visual e requisitos quantitativos.
+- Mantém as correções críticas de bootstrap/world da V17.7.6.
+
+
+## V17.7.7 — Bootstrap Recovery + World Restore
 - Corrige regressão onde o HUD aparecia com HP 1/1, mapa sem NPCs e sem usuários antes do bootstrap terminar.
 - Save + stats + mapa + Shared Universe sobem antes de Premium/LIVE OPS/Designers.
 - Serviços secundários agora sincronizam em background e não bloqueiam gameplay.
@@ -7,7 +16,7 @@
 - Se o checkpoint dedicado chegar atrasado, ele só é aplicado enquanto o jogador ainda não moveu a nave.
 - Watchdog de Shared Universe/presença tenta reconectar sem travar o cliente.
 - Nenhuma nova remoção SQL nesta versão; a correção é exclusivamente de bootstrap/runtime.
-## 17.7.6 — Position Root Fix + SQL Cleanup
+## 17.7.7 — Position Root Fix + SQL Cleanup
 - Persistência de posição simplificada: `player_location_v1774` + checkpoint local são as únicas fontes de spawn; `player_presence` deixa de decidir diretamente onde o jogador nasce.
 - `player_presence` agora espelha automaticamente a posição real para `player_location_v1774` via trigger no Supabase.
 - Posição final é confirmada ao terminar um deslocamento e periodicamente durante movimento.
