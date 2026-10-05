@@ -434,6 +434,12 @@ export async function loadMapPresenceOnline(mapId, territoryFaction='battle') {
   return Array.isArray(rows) ? rows : [];
 }
 
+export async function loadOwnPresenceCheckpointOnline() {
+  if (!currentUser?.id) return null;
+  const rows = await authedSupabaseFetch(`/rest/v1/player_presence?user_id=eq.${encodeURIComponent(currentUser.id)}&select=map_id,territory_faction,x,y,angle,updated_at&limit=1`);
+  return Array.isArray(rows) ? rows[0] || null : null;
+}
+
 export async function listClansOnline() {
   const rows = await authedSupabaseFetch('/rest/v1/rpc/list_clans_v12', {
     method: 'POST', body: JSON.stringify({}),
