@@ -97,4 +97,7 @@ O código mantém fallback local para continuidade do jogo se o runtime remoto e
 
 
 ## V18.1.6B — Editor de Interface
-O ADM agora edita apenas `game_ui_modules_v1810`, via backend autenticado. Cada SAVE força a regeneração de `topbar.runtime.json` no Render. O editor não escreve HTML/JS e só aceita `module_key` presente na whitelist do servidor.
+O ADM edita `game_ui_modules_v1810` via backend autenticado. Cada SAVE força a regeneração de `topbar.runtime.json` no Render. O editor não escreve HTML/JS e só aceita `module_key` presente na whitelist do servidor.
+
+## V18.1.6C — Editor de NPCs
+O ADM passa a editar `game_npc_config_v1811` e os vínculos existentes em `game_map_npc_spawns_v1811`. Cada SAVE força `npcs.runtime.json`. A etapa mantém Mundo e Sistemas somente leitura. O RPC de NPC foi endurecido para preservar campos opcionais enviados como `NULL`.

@@ -231,5 +231,5 @@ O código mantém fallback local para continuidade do jogo se o runtime remoto e
 
 
 
-### V18.1.6B
-Editor de Interface isolado no ADM, com atualização imediata do snapshot da topbar.
+### V18.1.6C
+Editor de NPCs isolado no ADM. Permite editar atributos/recompensas/respawn e a população dos vínculos de mapa já existentes. Cada alteração atualiza `npcs.runtime.json` imediatamente pelo Render, sem redeploy.

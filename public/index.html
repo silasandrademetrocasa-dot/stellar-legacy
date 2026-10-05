@@ -6,7 +6,7 @@
 <meta content="width=device-width,initial-scale=1,user-scalable=no" name="viewport"/>
 <meta content="#030816" name="theme-color"/>
 <title>Stellar Legacy</title>
-<link href="/style.css?v=18.1.6B" rel="stylesheet"/>
+<link href="/style.css?v=18.1.6C" rel="stylesheet"/>
 </head>
 <body>
 <div id="app">
@@ -568,12 +568,13 @@
     </div>
     <section class="admin-runtime-monitor-section">
       <div class="settings-title admin-runtime-monitor-head">
-        <div><b>CONFIGURAÇÃO AO VIVO</b><small>Etapa 2/5 • Runtime estável + editor isolado da Interface.</small></div>
+        <div><b>CONFIGURAÇÃO AO VIVO</b><small>Etapa 3/5 • Runtime + Interface + editor isolado de NPCs.</small></div>
         <button class="small-btn gold" id="adminRuntimeMonitorRefresh" type="button">ATUALIZAR RUNTIME</button>
       </div>
       <div class="admin-runtime-tabs" id="adminRuntimeTabs">
         <button class="active" type="button" data-admin-runtime-tab="runtime">RUNTIME</button>
         <button type="button" data-admin-runtime-tab="interface">INTERFACE</button>
+        <button type="button" data-admin-runtime-tab="npcs">NPCs</button>
       </div>
       <div id="adminRuntimeMonitorPanel">
         <div class="admin-runtime-monitor-grid" id="adminRuntimeMonitorGrid"><div class="empty-state">Aguardando status dos runtimes...</div></div>
@@ -586,6 +587,14 @@
         </div>
         <div class="admin-runtime-interface-grid" id="adminRuntimeInterfaceGrid"><div class="empty-state">Carregue a configuração da interface.</div></div>
         <div class="admin-runtime-interface-message muted" id="adminRuntimeInterfaceMessage">Nenhuma alteração pendente.</div>
+      </div>
+      <div class="admin-runtime-npc-panel hidden" id="adminRuntimeNpcPanel">
+        <div class="admin-runtime-interface-toolbar">
+          <div><b>EDITOR DE NPCs</b><small>Etapa isolada: atributos de combate, recompensas, respawn e população atual por mapa.</small></div>
+          <button class="small-btn" id="adminRuntimeNpcReload" type="button">RECARREGAR</button>
+        </div>
+        <div class="admin-runtime-npc-grid" id="adminRuntimeNpcGrid"><div class="empty-state">Carregue a configuração dos NPCs.</div></div>
+        <div class="admin-runtime-interface-message muted" id="adminRuntimeNpcMessage">Nenhuma alteração pendente.</div>
       </div>
     </section>
     <section class="admin-telemetry-section">
@@ -869,6 +878,6 @@
   </div>
 </div>
 </div>
-<script src="/game.js?v=18.1.6B" type="module"></script>
+<script src="/game.js?v=18.1.6C" type="module"></script>
 </body>
 </html>

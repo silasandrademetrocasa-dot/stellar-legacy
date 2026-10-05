@@ -1,10 +1,19 @@
+## V18.1.6C — Admin NPC Editor • Stage 3
+- Nova aba **NPCs** dentro de Configuração ao Vivo no ADM.
+- Edição isolada de nome, HP, escudo, dano, velocidade, CR, STL, XP, respawn e ativo/inativo.
+- População por mapa editável somente para vínculos NPC/mapa já existentes nesta etapa.
+- Cada SAVE passa pelo backend autenticado, grava no Supabase e força a regeneração de `npcs.runtime.json` no Render.
+- Corrigida a segurança do RPC `admin_update_npc_v1811`: parâmetros numéricos `NULL` agora preservam o valor existente em vez de cair em limites de `GREATEST/LEAST`.
+- Nenhuma edição de Mundo, Missões, Economia ou Crafting nesta etapa.
+
 ## V18.1.6B — Admin Interface Editor • Stage 2
-- Nova aba **INTERFACE** dentro de Configuração ao Vivo no ADM.
-- Edição isolada de nome, ordem, nível mínimo, ativo/inativo e ocultação até o nível.
-- Escrita protegida pelo RPC administrativo `admin_update_ui_module_v1810`.
-- Render materializa imediatamente `topbar.runtime.json` após cada SAVE.
-- Módulo ADM protegido contra auto-bloqueio acidental.
-- Nenhuma edição de NPC, Mundo ou Sistemas nesta etapa.
+- Aba **INTERFACE** no ADM para nome, ordem, nível mínimo, ativo/inativo e ocultação até o nível.
+- Módulo ADM protegido contra auto-bloqueio.
+- Cada SAVE regenera `topbar.runtime.json` sem redeploy.
+
+## V18.1.6A — Runtime Monitor • Stage 1
+- Monitor somente leitura para TOPBAR / NPCs / WORLD / SYSTEMS.
+- Atualização manual dos snapshots temporários sem editar balanceamento.
 
 ## V18.1.5 — Data Driven Systems
 

@@ -832,18 +832,26 @@ export async function loadRuntimeConfigOnline(refresh=false){
   return serverFetch(`/api/runtime/topbar${refresh?'?refresh=1':''}`,{},true);
 }
 
-// ===================== V18.1.6B ADMIN INTERFACE EDITOR =====================
+// ===================== V18.1.6C ADMIN INTERFACE EDITOR =====================
 export async function adminUpdateRuntimeModuleOnline(moduleKey,payload={}){
   return serverFetch(`/api/admin/runtime/interface/${encodeURIComponent(String(moduleKey||''))}`,{method:'POST',body:JSON.stringify(payload||{})},true);
 }
 
 
 // ===================== V18.1.1 NPC RUNTIME CONFIG =====================
-export async function loadNpcRuntimeConfigOnline(){
-  return serverFetch('/api/runtime/npcs',{},true);
+export async function loadNpcRuntimeConfigOnline(refresh=false){
+  return serverFetch(`/api/runtime/npcs${refresh?'?refresh=1':''}`,{},true);
 }
 
-// ===================== V18.1.6B ADMIN RUNTIME MONITOR =====================
+// ===================== V18.1.6C ADMIN NPC EDITOR =====================
+export async function adminUpdateNpcRuntimeOnline(npcKey,payload={}){
+  return serverFetch(`/api/admin/runtime/npcs/${encodeURIComponent(String(npcKey||''))}`,{method:'POST',body:JSON.stringify(payload||{})},true);
+}
+export async function adminUpdateNpcSpawnRuntimeOnline(npcKey,mapId,payload={}){
+  return serverFetch(`/api/admin/runtime/npcs/${encodeURIComponent(String(npcKey||''))}/spawns/${encodeURIComponent(String(mapId||''))}`,{method:'POST',body:JSON.stringify(payload||{})},true);
+}
+
+// ===================== V18.1.6C ADMIN RUNTIME MONITOR =====================
 export async function loadAdminRuntimeMonitorOnline(refresh=false){
   return serverFetch(`/api/admin/runtime-monitor${refresh?'?refresh=1':''}`,{},true);
 }

@@ -42,3 +42,9 @@ Agora são configuráveis sem redeploy:
 
 O código mantém fallback local para continuidade do jogo se o runtime remoto estiver temporariamente indisponível.
 
+
+## Central ADM — progresso
+- ✅ V18.1.6A Runtime Monitor
+- ✅ V18.1.6B Editor de Interface
+- ✅ V18.1.6C Editor de NPCs
+- ⏳ Próximo: Editor de Mundo (18.1.6D)
