@@ -1,3 +1,10 @@
+# 17.6.4 — HUD Dock Slot Lock
+
+- Minimap fixed permanently in the bottom-right HUD slot.
+- Hiding Chat no longer causes minimap reflow/overlap.
+- When Chat is hidden, Weapons/Ammo expands into the freed left area.
+- Explicit dock slot assignments prevent CSS Grid auto-placement from moving HUD panels.
+
 # V17.6.3 — Admin Control Panel
 
 - Nova aba ADM visível apenas para contas presentes em `game_admins`.
