@@ -1,3 +1,13 @@
+## V18.0.1 — Warfront Global Announcements
+
+- Avisos globais em tempo real quando um piloto conquista A/B/C nos mapas 4-1, 4-2 e 4-3.
+- Domínio total 3/3 gera anúncio global especial informando qual facção controla o mapa.
+- Quebra de domínio total também gera alerta global.
+- O piloto que conclui a captura aparece no anúncio; capturas em equipe podem informar quantos pilotos estavam na zona.
+- Fila visual evita que captura do terceiro ponto e domínio total se sobreponham.
+- Anti-spam no servidor por evento/facção.
+- Sem alterações na economia/recompensas da Etapa 1.
+
 ## V18.0.0 — Warfront Sector Control • Stage 1
 
 - Battle Maps 4-1, 4-2 e 4-3 agora possuem três pontos de controle sincronizados no Shared Universe.

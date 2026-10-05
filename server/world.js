@@ -15,6 +15,10 @@ const WARFRONT_NODE_LAYOUT={
   b42:[['A','ALPHA',.23,.68],['B','BETA',.52,.38],['C','GAMMA',.78,.65]],
   b43:[['A','ALPHA',.22,.34],['B','BETA',.52,.66],['C','GAMMA',.80,.38]],
 };
+const WARFRONT_MAP_LABELS={b41:'4-1',b42:'4-2',b43:'4-3'};
+const WARFRONT_FACTION_LABELS={earth:'TERRA',mars:'MARTE',jupiter:'JÚPITER'};
+function warfrontMapLabel(mapId){return WARFRONT_MAP_LABELS[mapId]||String(mapId||'MAPA').toUpperCase();}
+function warfrontFactionLabel(factionId){return WARFRONT_FACTION_LABELS[factionId]||String(factionId||'NEUTRO').toUpperCase();}
 function warfrontNodesForMap(mapId,map){
   const layout=WARFRONT_NODE_LAYOUT[mapId]||[];
   return layout.map(([id,label,nx,ny])=>({id,label,x:Math.round(map.world.w*nx),y:Math.round(map.world.h*ny),radius:WARFRONT_CAPTURE_RADIUS,owner:null,challenger:null,progress:0,contested:false,nearby:{earth:0,mars:0,jupiter:0},capturedAt:0}));
@@ -127,6 +131,7 @@ class Room {
     this.lastBroadcastAt=0;
     this.lastEventBroadcastAt=0;
     this.lastWarfrontBroadcastAt=0;
+    this.warfrontFullController=null;
     this.warfrontControl=this.map.battle?{mapId:this.mapId,nodes:warfrontNodesForMap(this.mapId,this.map),startedAt:nowMs()}:null;
     this.generateBaseWorld();
     this.ensureEvent(true);
@@ -273,12 +278,17 @@ class Room {
   }
   updateWarfrontControl(dt,now){
     if(!this.warfrontControl)return;
+    const previousFull=this.warfrontFullController||null;
+    let lastChange=null;
     for(const node of this.warfrontControl.nodes){
       const counts={earth:0,mars:0,jupiter:0};
+      const candidates={earth:[],mars:[],jupiter:[]};
       for(const p of this.players.values()){
-        if(!this.playerFresh(p)||p.hp<=0||Math.hypot(p.x-node.x,p.y-node.y)>node.radius)continue;
-        if(counts[p.faction]!==undefined)counts[p.faction]++;
+        const distance=Math.hypot(p.x-node.x,p.y-node.y);
+        if(!this.playerFresh(p)||p.hp<=0||distance>node.radius)continue;
+        if(counts[p.faction]!==undefined){counts[p.faction]++;candidates[p.faction].push({player:p,distance});}
       }
+      for(const list of Object.values(candidates))list.sort((a,b)=>a.distance-b.distance);
       node.nearby=counts;
       const active=WARFRONT_FACTIONS.filter(id=>counts[id]>0);
       node.contested=active.length>1;
@@ -289,14 +299,65 @@ class Room {
         if(node.challenger!==faction){node.challenger=faction;node.progress=0;}
         node.progress=Math.min(100,node.progress+WARFRONT_CAPTURE_RATE*weight*dt);
         if(node.progress>=100){
-          if(node.owner){node.owner=null;node.progress=0;node.challenger=faction;}
-          else{node.owner=faction;node.challenger=null;node.progress=0;node.capturedAt=now;}
+          const actor=candidates[faction][0]?.player||null;
+          if(node.owner){
+            const formerOwner=node.owner;
+            node.owner=null;node.progress=0;node.challenger=faction;
+            lastChange={type:'neutralized',node,faction,formerOwner,actor,allies:counts[faction]};
+          }else{
+            node.owner=faction;node.challenger=null;node.progress=0;node.capturedAt=now;
+            lastChange={type:'captured',node,faction,formerOwner:null,actor,allies:counts[faction]};
+            this.world.broadcastGlobalAnnouncement({
+              kind:'warfront_point',
+              key:`warfront_point:${this.mapId}:${node.id}:${faction}`,
+              mapId:this.mapId,
+              nodeId:node.id,
+              nodeLabel:node.label,
+              faction,
+              actorUserId:actor?.userId||null,
+              actorCallsign:shortText(actor?.callsign||'PILOTO',32),
+              title:`⚔ WARFRONT • ${shortText(actor?.callsign||'PILOTO',32)} CONQUISTOU ${node.id} • ${warfrontMapLabel(this.mapId)}`,
+              subtitle:`${node.label} agora pertence à ${warfrontFactionLabel(faction)}${counts[faction]>1?` • ${counts[faction]} pilotos na captura`:''}`
+            });
+          }
         }
       }else if(node.challenger&&node.progress>0){
         node.progress=Math.max(0,node.progress-WARFRONT_DECAY_RATE*dt);
         if(node.progress<=0)node.challenger=null;
       }
     }
+    const scores={earth:0,mars:0,jupiter:0};
+    for(const n of this.warfrontControl.nodes)if(scores[n.owner]!==undefined)scores[n.owner]++;
+    const currentFull=WARFRONT_FACTIONS.find(id=>scores[id]===this.warfrontControl.nodes.length)||null;
+    if(previousFull&&currentFull!==previousFull){
+      const breaker=lastChange?.faction&&lastChange.faction!==previousFull?lastChange.faction:null;
+      const actor=lastChange?.actor||null;
+      this.world.broadcastGlobalAnnouncement({
+        kind:'warfront_break',
+        key:`warfront_break:${this.mapId}:${previousFull}:${breaker||'unknown'}`,
+        mapId:this.mapId,
+        faction:breaker,
+        formerFaction:previousFull,
+        actorUserId:actor?.userId||null,
+        actorCallsign:shortText(actor?.callsign||'',32),
+        title:`⚠ DOMÍNIO ROMPIDO • ${warfrontMapLabel(this.mapId)}`,
+        subtitle:breaker?`${warfrontFactionLabel(breaker)} quebrou o controle total da ${warfrontFactionLabel(previousFull)}${actor?.callsign?` • ${shortText(actor.callsign,32)}`:''}`:`O domínio da ${warfrontFactionLabel(previousFull)} foi quebrado`
+      });
+    }
+    if(currentFull&&currentFull!==previousFull){
+      const actor=lastChange?.actor||null;
+      this.world.broadcastGlobalAnnouncement({
+        kind:'warfront_domination',
+        key:`warfront_domination:${this.mapId}:${currentFull}`,
+        mapId:this.mapId,
+        faction:currentFull,
+        actorUserId:actor?.userId||null,
+        actorCallsign:shortText(actor?.callsign||'',32),
+        title:`🚨 DOMÍNIO TOTAL • ${warfrontMapLabel(this.mapId)} CONTROLADO PELA ${warfrontFactionLabel(currentFull)}`,
+        subtitle:`3/3 relés conquistados${actor?.callsign?` • último ponto por ${shortText(actor.callsign,32)}`:''}`
+      });
+    }
+    this.warfrontFullController=currentFull;
     if(this.clients.size&&now-this.lastWarfrontBroadcastAt>=500){this.lastWarfrontBroadcastAt=now;this.broadcast({type:'warfront_control',warfront:this.warfrontPayload(),serverTime:now});}
   }
 
@@ -523,6 +584,17 @@ export function attachSharedUniverse(server,{authenticate,loadLiveOps,loadBattle
     liveOpsBusy:false,
     loadBattleGroup:loadBattleGroup||null,
     npcActivity:new Map(),
+    announcementCooldowns:new Map(),
+    broadcastGlobalAnnouncement(payload={}){
+      const now=nowMs(),key=String(payload.key||payload.kind||'global');
+      const last=Number(this.announcementCooldowns.get(key)||0);
+      if(now-last<5000)return false;
+      this.announcementCooldowns.set(key,now);
+      if(this.announcementCooldowns.size>120){for(const [k,t] of this.announcementCooldowns)if(now-t>120000)this.announcementCooldowns.delete(k);}
+      const message={type:'global_announcement',scope:'global',category:'warfront',...payload,serverTime:now};
+      for(const r of rooms.values())for(const c of r.clients)safeJsonSend(c,message);
+      return true;
+    },
     markNpcActivity(userId,at=nowMs()){const uid=String(userId||'');if(uid)this.npcActivity.set(uid,Number(at)||nowMs());},
     lastNpcActivity(userId){return Number(this.npcActivity.get(String(userId||''))||0);},
     findClient(userId){const uid=String(userId||'');for(const r of rooms.values())for(const c of r.clients)if(String(c.player?.userId||'')===uid)return c;return null;},

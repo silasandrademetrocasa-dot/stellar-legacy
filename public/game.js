@@ -1,7 +1,7 @@
-import { FACTIONS, SHIPS, ITEMS, LASER_AMMO, ROCKETS, NPC_TYPES, MAPS, RESOURCES } from './data.js?v=18.0.0';
-import { GAME_ASSETS } from './assets/v17/manifest.js?v=18.0.0';
-import { signUp, signIn, requestPasswordReset, restorePasswordRecoveryFromUrl, restoreSession, signOutLocal, checkGameSession, endGameSession, getUser, getSessionCredentials, loadCloudSave, saveCloudSave, updateCallsign, updatePassword, loadRankings, loadAuctionBids, saveAuctionBidOnline, markAuctionBidStatusOnline, loadAuctionMarket, upsertPlayerPresenceOnline, loadMapPresenceOnline, savePlayerLocationCheckpointOnline, loadPlayerLocationCheckpointOnline, removePlayerPresenceOnline, queuePvpAttackOnline, consumePvpDamageEventsOnline, syncArenaProfileOnline, loadArenaState, loadArenaDailyRewardStatus, claimArenaDailyReward, loadArenaOpponents, loadArenaHistory, arenaAttackOnline, listClansOnline, loadMyClanOnline, createClanOnline, joinClanOnline, leaveClanOnline, transferClanCreditsOnline, claimClanCreditGrantsOnline, recordClanAlienKillOnline, getPremiumShopOnline, testPurchasePremiumOnline, loadWarfrontStateOnline, hitWorldBossOnline, claimWorldBossRewardOnline, declareClanWarOnline, recordClanWarScoreOnline, loadLiveOpsOnline, purchaseLiveCatalogOnline, economyActionOnline, getChatHistoryOnline, sendChatMessageOnline, getMyDesignersOnline, setDesignLoadoutOnline, claimGateDroneDesignOnline, claimEventDesignerOnline, getAdminStatus, adminSearchAccounts, adminRecentActions, adminBanAccount, adminUnbanAccount, adminResetAccount, adminDeleteAccount, pushTelemetryBatch, adminTelemetryOverview, adminPlayerTelemetry, getBattleGroupOnline, createBattleGroupOnline, inviteBattleGroupOnline, searchBattleGroupPlayersOnline, inviteBattleGroupUserOnline, respondBattleGroupInviteOnline, leaveBattleGroupOnline, kickBattleGroupMemberOnline, setBattleGroupRallyOnline } from './api.js?v=18.0.0';
-import { SharedUniverseClient } from './world.js?v=18.0.0';
+import { FACTIONS, SHIPS, ITEMS, LASER_AMMO, ROCKETS, NPC_TYPES, MAPS, RESOURCES } from './data.js?v=18.0.1';
+import { GAME_ASSETS } from './assets/v17/manifest.js?v=18.0.1';
+import { signUp, signIn, requestPasswordReset, restorePasswordRecoveryFromUrl, restoreSession, signOutLocal, checkGameSession, endGameSession, getUser, getSessionCredentials, loadCloudSave, saveCloudSave, updateCallsign, updatePassword, loadRankings, loadAuctionBids, saveAuctionBidOnline, markAuctionBidStatusOnline, loadAuctionMarket, upsertPlayerPresenceOnline, loadMapPresenceOnline, savePlayerLocationCheckpointOnline, loadPlayerLocationCheckpointOnline, removePlayerPresenceOnline, queuePvpAttackOnline, consumePvpDamageEventsOnline, syncArenaProfileOnline, loadArenaState, loadArenaDailyRewardStatus, claimArenaDailyReward, loadArenaOpponents, loadArenaHistory, arenaAttackOnline, listClansOnline, loadMyClanOnline, createClanOnline, joinClanOnline, leaveClanOnline, transferClanCreditsOnline, claimClanCreditGrantsOnline, recordClanAlienKillOnline, getPremiumShopOnline, testPurchasePremiumOnline, loadWarfrontStateOnline, hitWorldBossOnline, claimWorldBossRewardOnline, declareClanWarOnline, recordClanWarScoreOnline, loadLiveOpsOnline, purchaseLiveCatalogOnline, economyActionOnline, getChatHistoryOnline, sendChatMessageOnline, getMyDesignersOnline, setDesignLoadoutOnline, claimGateDroneDesignOnline, claimEventDesignerOnline, getAdminStatus, adminSearchAccounts, adminRecentActions, adminBanAccount, adminUnbanAccount, adminResetAccount, adminDeleteAccount, pushTelemetryBatch, adminTelemetryOverview, adminPlayerTelemetry, getBattleGroupOnline, createBattleGroupOnline, inviteBattleGroupOnline, searchBattleGroupPlayersOnline, inviteBattleGroupUserOnline, respondBattleGroupInviteOnline, leaveBattleGroupOnline, kickBattleGroupMemberOnline, setBattleGroupRallyOnline } from './api.js?v=18.0.1';
+import { SharedUniverseClient } from './world.js?v=18.0.1';
 
 const canvas = document.querySelector('#game');
 const ctx = canvas.getContext('2d');
@@ -117,7 +117,7 @@ function qualityShouldPreload(path){
   return /\/branding\//.test(value)||/\/assets\/v17\/loot\/cargo-box\.webp/.test(value);
 }
 
-const ASSET_REVISION='18.0.0';
+const ASSET_REVISION='18.0.1';
 function versionedAssetUrl(path){
   const value=String(path||'');if(!value)return value;
   return value.includes('?')?`${value}&asset=${ASSET_REVISION}`:`${value}?asset=${ASSET_REVISION}`;
@@ -425,6 +425,34 @@ function sharedNpcClaimState(e){
   const myGroup=String(battleGroupState()?.group?.id||''),ownerGroup=String(e?.ownerGroupId||'');
   return {claimed:true,owner:owner===me,friendly:owner===me||!!(myGroup&&ownerGroup&&myGroup===ownerGroup)};
 }
+const warfrontAnnouncementQueue=[];
+let warfrontAnnouncementRunning=false;
+function warfrontAnnouncementElement(){
+  let el=document.getElementById('warfrontGlobalAnnouncement');
+  if(el)return el;
+  el=document.createElement('div');el.id='warfrontGlobalAnnouncement';el.className='warfront-global-announcement';
+  el.innerHTML='<div class="warfront-global-kicker">TRANSMISSÃO GLOBAL</div><strong></strong><span></span>';
+  document.body.appendChild(el);return el;
+}
+function playNextWarfrontAnnouncement(){
+  if(warfrontAnnouncementRunning||!warfrontAnnouncementQueue.length)return;
+  warfrontAnnouncementRunning=true;
+  const msg=warfrontAnnouncementQueue.shift(),el=warfrontAnnouncementElement();
+  el.className=`warfront-global-announcement ${escHtml(msg.kind||'warfront_point')}`;
+  el.querySelector('strong').textContent=String(msg.title||'WARFRONT');
+  el.querySelector('span').textContent=String(msg.subtitle||'');
+  requestAnimationFrame(()=>el.classList.add('show'));
+  try{playSfx(msg.kind==='warfront_domination'?'reward':'warning');}catch{}
+  pushActivity(`${msg.title||'WARFRONT'}${msg.subtitle?` • ${msg.subtitle}`:''}`,'combat');
+  setTimeout(()=>{el.classList.remove('show');setTimeout(()=>{warfrontAnnouncementRunning=false;playNextWarfrontAnnouncement();},320);},4200);
+}
+function queueWarfrontGlobalAnnouncement(msg){
+  if(!msg)return;
+  warfrontAnnouncementQueue.push(msg);
+  if(warfrontAnnouncementQueue.length>6)warfrontAnnouncementQueue.splice(0,warfrontAnnouncementQueue.length-6);
+  playNextWarfrontAnnouncement();
+}
+
 function handleSharedUniverseMessage(msg){
   if(!msg||!progress)return;
   if(msg.type==='world_snapshot'){
@@ -433,6 +461,7 @@ function handleSharedUniverseMessage(msg){
   if(msg.type==='world_player_spawn'||msg.type==='world_player_patch'){upsertRealtimePlayer(msg.entity||{},msg.type==='world_player_spawn');return;}
   if(msg.type==='world_player_leave'){const id=String(msg.userId||'');if(state.target?.isPlayer&&state.target.id===id){state.target=null;player.laserFiring=false;}onlineWorld.players.delete(id);return;}
   if(msg.type==='warfront_control'){sharedUniverseRuntime.warfront=msg.warfront||null;updateWarfrontBadge();if(ui.warfrontModal&&!ui.warfrontModal.classList.contains('hidden'))renderWarfront();return;}
+  if(msg.type==='global_announcement'){queueWarfrontGlobalAnnouncement(msg);return;}
   if(msg.type==='npc_batch'){for(const e of msg.entities||[])applySharedNpcPatch(e);return;}
   if(msg.type==='npc_patch'){applySharedNpcPatch(msg.entity||{});return;}
   if(msg.type==='npc_claim'){const e=findSharedNpc(msg.entityId);if(e){e.ownerUserId=msg.ownerUserId||null;e.ownerGroupId=msg.ownerGroupId||null;e.claimedAt=Number(msg.claimedAt)||Date.now();}return;}
