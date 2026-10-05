@@ -1,7 +1,7 @@
-import { FACTIONS, SHIPS, ITEMS, LASER_AMMO, ROCKETS, NPC_TYPES, MAPS, RESOURCES } from './data.js?v=17.7.8';
-import { GAME_ASSETS } from './assets/v17/manifest.js?v=17.7.8';
-import { signUp, signIn, requestPasswordReset, restorePasswordRecoveryFromUrl, restoreSession, signOutLocal, checkGameSession, endGameSession, getUser, getSessionCredentials, loadCloudSave, saveCloudSave, updateCallsign, updatePassword, loadRankings, loadAuctionBids, saveAuctionBidOnline, markAuctionBidStatusOnline, loadAuctionMarket, upsertPlayerPresenceOnline, loadMapPresenceOnline, savePlayerLocationCheckpointOnline, loadPlayerLocationCheckpointOnline, removePlayerPresenceOnline, queuePvpAttackOnline, consumePvpDamageEventsOnline, syncArenaProfileOnline, loadArenaState, loadArenaDailyRewardStatus, claimArenaDailyReward, loadArenaOpponents, loadArenaHistory, arenaAttackOnline, listClansOnline, loadMyClanOnline, createClanOnline, joinClanOnline, leaveClanOnline, transferClanCreditsOnline, claimClanCreditGrantsOnline, recordClanAlienKillOnline, getPremiumShopOnline, testPurchasePremiumOnline, loadWarfrontStateOnline, hitWorldBossOnline, claimWorldBossRewardOnline, declareClanWarOnline, recordClanWarScoreOnline, loadLiveOpsOnline, purchaseLiveCatalogOnline, economyActionOnline, getChatHistoryOnline, sendChatMessageOnline, getMyDesignersOnline, setDesignLoadoutOnline, claimGateDroneDesignOnline, claimEventDesignerOnline, getAdminStatus, adminSearchAccounts, adminRecentActions, adminBanAccount, adminUnbanAccount, adminResetAccount, adminDeleteAccount, pushTelemetryBatch, adminTelemetryOverview, adminPlayerTelemetry } from './api.js?v=17.7.8';
-import { SharedUniverseClient } from './world.js?v=17.7.8';
+import { FACTIONS, SHIPS, ITEMS, LASER_AMMO, ROCKETS, NPC_TYPES, MAPS, RESOURCES } from './data.js?v=17.8.0';
+import { GAME_ASSETS } from './assets/v17/manifest.js?v=17.8.0';
+import { signUp, signIn, requestPasswordReset, restorePasswordRecoveryFromUrl, restoreSession, signOutLocal, checkGameSession, endGameSession, getUser, getSessionCredentials, loadCloudSave, saveCloudSave, updateCallsign, updatePassword, loadRankings, loadAuctionBids, saveAuctionBidOnline, markAuctionBidStatusOnline, loadAuctionMarket, upsertPlayerPresenceOnline, loadMapPresenceOnline, savePlayerLocationCheckpointOnline, loadPlayerLocationCheckpointOnline, removePlayerPresenceOnline, queuePvpAttackOnline, consumePvpDamageEventsOnline, syncArenaProfileOnline, loadArenaState, loadArenaDailyRewardStatus, claimArenaDailyReward, loadArenaOpponents, loadArenaHistory, arenaAttackOnline, listClansOnline, loadMyClanOnline, createClanOnline, joinClanOnline, leaveClanOnline, transferClanCreditsOnline, claimClanCreditGrantsOnline, recordClanAlienKillOnline, getPremiumShopOnline, testPurchasePremiumOnline, loadWarfrontStateOnline, hitWorldBossOnline, claimWorldBossRewardOnline, declareClanWarOnline, recordClanWarScoreOnline, loadLiveOpsOnline, purchaseLiveCatalogOnline, economyActionOnline, getChatHistoryOnline, sendChatMessageOnline, getMyDesignersOnline, setDesignLoadoutOnline, claimGateDroneDesignOnline, claimEventDesignerOnline, getAdminStatus, adminSearchAccounts, adminRecentActions, adminBanAccount, adminUnbanAccount, adminResetAccount, adminDeleteAccount, pushTelemetryBatch, adminTelemetryOverview, adminPlayerTelemetry } from './api.js?v=17.8.0';
+import { SharedUniverseClient } from './world.js?v=17.8.0';
 
 const canvas = document.querySelector('#game');
 const ctx = canvas.getContext('2d');
@@ -117,7 +117,7 @@ function qualityShouldPreload(path){
   return /\/branding\//.test(value)||/\/assets\/v17\/loot\/cargo-box\.webp/.test(value);
 }
 
-const ASSET_REVISION='17.7.8';
+const ASSET_REVISION='17.8.0';
 function versionedAssetUrl(path){
   const value=String(path||'');if(!value)return value;
   return value.includes('?')?`${value}&asset=${ASSET_REVISION}`:`${value}?asset=${ASSET_REVISION}`;
@@ -392,7 +392,7 @@ function handleSharedUniverseMessage(msg){
   if(msg.type==='ore_spawn'){const o={...(msg.ore||{}),sharedWorld:true};if(o.id&&!state.ores.some(x=>x.id===o.id))state.ores.push(o);return;}
   if(msg.type==='ore_collect_result'){sharedUniverseRuntime.pendingOres.delete(msg.entityId);return;}
   if(msg.type==='ore_collected'){
-    const o=msg.ore;if(!o)return;sharedUniverseRuntime.pendingOres.delete(o.id);state.ores=state.ores.filter(x=>x.id!==o.id);const got=addCargoResource(o.type,o.amount);if(got>0){playSfx('pickup');spawnParticle(o.x,o.y,`+${fmt(got)} ${o.type}`,o.color);pushActivity(`RECURSO ONLINE • +${fmt(got)} ${o.type}`,'ore');telemetryCounter('ore_nodes',1);telemetryCounter('ore_units',got);titleStatAdd('oreUnits',got);missionEvent('collectOre',{amount:got,type:o.type,mapId:progress.mapId});saveGame();}return;
+    const o=msg.ore;if(!o)return;sharedUniverseRuntime.pendingOres.delete(o.id);state.ores=state.ores.filter(x=>x.id!==o.id);const got=addCargoResource(o.type,o.amount);if(got>0){playSfx('pickup');spawnParticle(o.x,o.y,`+${fmt(got)} ${o.type}`,o.color);pushActivity(`RECURSO ONLINE • +${fmt(got)} ${o.type}`,'ore');telemetryCounter('ore_nodes',1);telemetryCounter('ore_units',got);titleStatAdd('oreUnits',got);journeyEvent('ore',got);missionEvent('collectOre',{amount:got,type:o.type,mapId:progress.mapId});saveGame();}return;
   }
   if(msg.type==='npc_aggro'){const e=findSharedNpc(msg.entityId);if(e)e.aggroUserId=msg.userId||null;if(String(msg.userId||'')===String(getUser()?.id||'')){state.portalCombatUntil=Math.max(state.portalCombatUntil,nowSec()+6);setCombatAlert('NPC FIXOU ALVO EM VOCÊ','combat',1.4);}return;}
   if(msg.type==='npc_attack'){const e=findSharedNpc(msg.entityId);if(e)e.lastAttackPlayerAt=nowSec();const retaliation=!!msg.retaliation;if(retaliation&&isPortalNeutralZone())state.portalCombatUntil=Math.max(state.portalCombatUntil,nowSec()+6);takePlayerDamage(Math.max(0,Number(msg.damage)||0),{forceNpcRetaliation:retaliation});return;}
@@ -612,7 +612,7 @@ async function claimEventDesignerDrop(ev){
 const economyRuntime={queue:Promise.resolve(),autoPending:new Set()};
 
 
-// ===================== V17.7.8 PROGRESSION TELEMETRY =====================
+// ===================== V17.8.0 PROGRESSION TELEMETRY =====================
 const TELEMETRY_SOURCE_KEYS=['npc','mission','resource','pass','event','gate','discovery','other'];
 function freshTelemetryPending(){return {counters:{sessions:0,play_seconds:0,kills:0,boxes:0,ore_nodes:0,ore_units:0,missions_completed:0,deaths:0,map_jumps:0,level_ups:0},spent:{cr:0,stl:0},sources:Object.fromEntries(TELEMETRY_SOURCE_KEYS.map(k=>[k,{cr:0,stl:0,xp:0}])),level_events:[]};}
 const telemetryRuntime={pending:freshTelemetryPending(),activeRemainder:0,lastFlushAt:0,flushing:false,sessionOpen:false};
@@ -697,7 +697,7 @@ function togglePilotBranch(branch){loadPilotUiPrefs();pilotUiPrefs.collapsed[bra
 function pilotRareChanceBonus(){return pilotCombined('luck1','luck2')/100;}function pilotLootBonus(){return pilotCombined('tractor1','tractor2')/100;}function pilotEvasion(){return Math.min(.35,pilotCombined('evasive1','evasive2')/100);}function pilotBattleLaserBonus(){return pilotCombined('bounty1','bounty2')/100;}function pilotKamikazeDamageBonus(){return pilotCombined('detonation1','detonation2')/100;}function pilotKamikazeRadiusBonus(){return pilotSkillValue('explosives')/100;}
 
 
-// ===================== V17.7.8 PILOT TITLES =====================
+// ===================== V17.8.0 PILOT TITLES =====================
 const PILOT_TITLES=[
   {id:'pioneer',group:'PROGRESSÃO',label:'Pioneiro Estelar',desc:'Título inicial de todo piloto.',target:1,metric:()=>1,format:(n)=>`${fmt(n)}/1`,req:'Disponível desde o início.'},
   {id:'cadet',group:'PROGRESSÃO',label:'Cadete Estelar',desc:'Primeiros sistemas dominados.',target:5,metric:()=>Number(progress?.profile?.level||1),format:(n)=>`Nível ${fmt(n)}/5`,req:'Alcance o nível 5.'},
@@ -710,6 +710,7 @@ const PILOT_TITLES=[
   {id:'navigator',group:'EXPLORAÇÃO',label:'Navegador Quântico',desc:'Acumulou experiência viajando entre setores.',target:50,metric:()=>Number(progress?.titles?.stats?.mapJumps||0),format:(n)=>`${fmt(n)}/50 saltos`,req:'Realize 50 saltos de mapa.'},
   {id:'gatebreaker',group:'PORTAIS',label:'Rompe-Portais',desc:'Concluiu seu primeiro Portal Astral.',target:1,metric:()=>Number(progress?.profile?.ggCompleted||0),format:(n)=>`${fmt(n)}/1 Portal`,req:'Conclua 1 Portal Astral.'},
   {id:'gatemaster',group:'PORTAIS',label:'Mestre dos Portais',desc:'Especialista em ciclos de Portal Astral.',target:10,metric:()=>Number(progress?.profile?.ggCompleted||0),format:(n)=>`${fmt(n)}/10 Portais`,req:'Conclua 10 Portais Astrais.'},
+  {id:'initiated',group:'JORNADA',label:'Iniciado Estelar',desc:'Concluiu o treinamento inicial do Stellar Legacy.',target:1,metric:()=>progress?.journey?.completed?1:0,format:(n)=>n?'Jornada concluída':'Jornada em andamento',req:'Conclua a Jornada do Piloto.'},
   {id:'admin',group:'ESPECIAL',label:'Administrador',desc:'Título reservado à administração do universo.',target:1,metric:()=>isAdminPilot()?1:0,format:(n)=>n?'Autorizado':'Restrito',req:'Título administrativo.'}
 ];
 function freshPilotTitles(){return {selected:'pioneer',stats:{missions:0,oreUnits:0,boxes:0,deaths:0,mapJumps:0}};}
@@ -1384,6 +1385,8 @@ function activeMissionTaskSummary(mission,active){
 }
 function renderActiveMissionHud(force=false){
   if(!ui.activeMissionPanel||!progress)return;
+  normalizePilotJourney();const journey=currentJourneyStep();
+  if(journey){const pct=Math.round(journeyStepPct(journey)),sig=`journey:${progress.journey.step}:${journeyStepValue(journey)}:${pct}`;ui.activeMissionPanel.classList.remove('hidden');if(!force&&sig===state.missionHudSignature)return;state.missionHudSignature=sig;ui.activeMissionCategory.textContent='JORNADA';ui.activeMissionTitle.textContent=journey.label;ui.activeMissionTask.textContent=`${journey.desc} • ${fmt(Math.min(journeyStepValue(journey),journey.target))}/${fmt(journey.target)}`;ui.activeMissionProgressBar.style.width=`${pct}%`;ui.activeMissionProgressText.textContent=`${pct}%`;ui.activeMissionRewardFactor.textContent=journey.reward;ui.activeMissionDots.innerHTML='';return;}
   if(!featureUnlocked('missions')){ui.activeMissionPanel.classList.add('hidden');return;}
   const entries=activeMissionEntries();
   if(!entries.length){ui.activeMissionPanel.classList.add('hidden');state.missionHudPage=0;state.missionHudSignature='';return;}
@@ -1517,7 +1520,8 @@ function renderMissionFilter(section,category,grid,missions){
 }
 function renderMissions(){
   if(!ui.missionContent||!progress)return;
-  loadMissionUiPrefs();normalizeMissionState();ui.missionContent.innerHTML='';
+  loadMissionUiPrefs();normalizeMissionState();normalizePilotJourney();ui.missionContent.innerHTML='';
+  ui.missionContent.appendChild(journeyPanel());
   for(const [category,meta] of Object.entries(MISSION_CATEGORIES)){
     const allMissions=getMissionLibrary(category);const missions=visibleMissionCatalog(category,allMissions);
     const categoryLocked=!missionCategoryUnlocked(category),collapsed=categoryLocked||!!missionUiPrefs.collapsed[category];
@@ -1558,6 +1562,27 @@ function renderMissions(){
   updateMissionButton();
 }
 function openMissions(){if(!featureUnlocked('missions')){showFeatureLock('missions','Missões');return;}closeNavigationModals(ui.missionModal);normalizeMissionState();renderMissions();ui.missionModal.classList.remove('hidden');}
+
+
+// ===================== V17.8.0 — JORNADA DO PILOTO =====================
+const PILOT_JOURNEY_STEPS=[
+  {id:'first_kills',label:'Batismo de Fogo',desc:'Destrua 3 NPCs para dominar seleção, laser e míssil.',event:'kill',target:3,reward:'2.000 PLS-1',grant:()=>{progress.ammo.lcb10=(progress.ammo.lcb10||0)+2000;}},
+  {id:'first_boxes',label:'Recupere a Carga',desc:'Colete 2 boxes deixadas por NPCs destruídos.',event:'box',target:2,reward:'50 R-310',grant:()=>{progress.rockets.r310=(progress.rockets.r310||0)+50;}},
+  {id:'first_ore',label:'Mineração Inicial',desc:'Colete 100 unidades de recursos no setor.',event:'ore',target:100,reward:'500 PLS-2',grant:()=>{progress.ammo.mcb25=(progress.ammo.mcb25||0)+500;}},
+  {id:'first_sale',label:'Primeira Venda',desc:'Retorne à base e venda recursos pelo menos uma vez.',event:'sell',target:1,reward:'100 STL',grant:()=>{progress.profile.uridium=(progress.profile.uridium||0)+100;telemetryEconomy('other',{stl:100});}},
+  {id:'first_jump',label:'Rota Estelar',desc:'Use um portal e viaje para outro setor.',event:'jump',target:1,reward:'1 Bônus de Reparo',grant:()=>{normalizeGalaxyGateState();progress.galaxyGate.repairBonus=(progress.galaxyGate.repairBonus||0)+1;}},
+  {id:'reach_level_5',label:'Piloto Operacional',desc:'Alcance o nível 5 e libere o Controle de Missões.',event:'level',target:5,reward:'Título • Iniciado Estelar',value:()=>Number(progress?.profile?.level||1),grant:()=>{progress.journey.titleUnlocked=true;}}
+];
+function freshPilotJourney(){return {step:0,progress:0,claimed:{},completed:false,completedAt:null,titleUnlocked:false};}
+function normalizePilotJourney(){if(!progress)return freshPilotJourney();progress.journey ||= freshPilotJourney();const j=progress.journey;j.step=Math.max(0,Math.min(PILOT_JOURNEY_STEPS.length,Math.floor(Number(j.step)||0)));j.progress=Math.max(0,Number(j.progress)||0);j.claimed ||= {};j.completed=!!j.completed||j.step>=PILOT_JOURNEY_STEPS.length;j.titleUnlocked=!!j.titleUnlocked;if(j.completed&&!j.completedAt)j.completedAt=Date.now();return j;}
+function currentJourneyStep(){const j=normalizePilotJourney();return j.completed?null:PILOT_JOURNEY_STEPS[j.step]||null;}
+function journeyStepValue(step=currentJourneyStep()){if(!step)return 0;if(typeof step.value==='function')return Math.max(0,Number(step.value())||0);return Math.max(0,Number(progress?.journey?.progress)||0);}
+function journeyStepPct(step=currentJourneyStep()){if(!step)return 100;return Math.max(0,Math.min(100,journeyStepValue(step)/Math.max(1,step.target)*100));}
+function grantJourneyReward(step){if(!step||progress.journey.claimed[step.id])return;progress.journey.claimed[step.id]=Date.now();try{step.grant?.();}catch(e){console.warn('journey grant',step.id,e);}pushActivity(`JORNADA • ${step.label} • ${step.reward}`,'reward');}
+function advanceJourney(){const j=normalizePilotJourney();let guard=0;while(!j.completed&&guard++<PILOT_JOURNEY_STEPS.length){const step=PILOT_JOURNEY_STEPS[j.step];const value=journeyStepValue(step);if(value<step.target)break;grantJourneyReward(step);j.step++;j.progress=0;if(j.step>=PILOT_JOURNEY_STEPS.length){j.completed=true;j.completedAt=Date.now();queueCelebration('mission','JORNADA CONCLUÍDA','Treinamento inicial finalizado • novos sistemas liberam conforme seu nível');showToast('Jornada do Piloto concluída','reward');break;}const next=PILOT_JOURNEY_STEPS[j.step];queueCelebration('mission','JORNADA AVANÇOU',`${next.label} • ${next.desc}`);}saveGame();state.missionHudSignature='';renderActiveMissionHud(true);if(ui.missionModal&&!ui.missionModal.classList.contains('hidden'))renderMissions();}
+function journeyEvent(type,amount=1){if(!progress)return;const j=normalizePilotJourney(),step=currentJourneyStep();if(!step||step.event!==type)return;if(typeof step.value==='function'){advanceJourney();return;}j.progress=Math.max(0,(Number(j.progress)||0)+Math.max(0,Number(amount)||0));advanceJourney();}
+function journeyPanel(){const j=normalizePilotJourney(),section=document.createElement('section');section.className='pilot-journey-panel';const current=currentJourneyStep();section.innerHTML=`<div class="pilot-journey-head"><div><div class="eyebrow">JORNADA DO PILOTO</div><h3>${j.completed?'TREINAMENTO CONCLUÍDO':escHtml(current?.label||'Jornada')}</h3><small>${j.completed?'Você já domina os fundamentos do Stellar Legacy.':'Tutorial orgânico • siga os objetivos enquanto joga normalmente.'}</small></div><span>${j.completed?'100%':`${j.step+1}/${PILOT_JOURNEY_STEPS.length}`}</span></div>`;const grid=document.createElement('div');grid.className='pilot-journey-grid';PILOT_JOURNEY_STEPS.forEach((s,i)=>{const done=i<j.step||j.completed,active=i===j.step&&!j.completed,locked=i>j.step&&!j.completed,val=done?s.target:active?journeyStepValue(s):0,pct=done?100:active?journeyStepPct(s):0;const card=document.createElement('article');card.className=`pilot-journey-step${done?' done':''}${active?' active':''}${locked?' locked':''}`;card.innerHTML=`<div class="pilot-journey-step-top"><b>${i+1}. ${escHtml(s.label)}</b><span>${done?'✓':active?'ATUAL':'🔒'}</span></div><p>${escHtml(s.desc)}</p><div class="pilot-journey-progress"><i style="width:${pct}%"></i></div><small>${active?`${fmt(Math.min(val,s.target))} / ${fmt(s.target)} • `:''}${escHtml(s.reward)}</small>`;grid.appendChild(card);});section.appendChild(grid);return section;}
+function openJourneyPanel(){closeNavigationModals(ui.missionModal);normalizeMissionState();renderMissions();ui.missionModal.classList.remove('hidden');}
 
 // ===================== PROGRESSÃO V12 • FREE + PREMIUM =====================
 const BATTLE_PASS_TIER_COUNT=30;
@@ -1826,6 +1851,7 @@ function freshSave(factionId) {
     levelRewards: freshLevelRewards(),
     pilotBio: freshPilotBio(),
     titles: freshPilotTitles(),
+    journey: freshPilotJourney(),
     auction: freshAuctionState(),
     galaxyGate: freshGalaxyGateState(),
     repairRequired: null,
@@ -2650,7 +2676,7 @@ function processPlayerLevelUps(){
   let gained=0;
   while(progress.profile.level<PLAYER_MAX_LEVEL&&progress.profile.xp>=levelXpThreshold(progress.profile.level+1)){
     progress.profile.level++;
-    gained++;telemetryLevelReached(progress.profile.level);
+    gained++;telemetryLevelReached(progress.profile.level);journeyEvent('level',progress.profile.level);
     showLevelUpAnimation(progress.profile.level);
     queueCelebration('mission','RECOMPENSA LIBERADA',`Nível ${progress.profile.level} • abra PASSE para resgatar`);
     const unlocked=progressionUnlocksAtLevel(progress.profile.level);if(unlocked.length)queueCelebration('mission','NOVO ACESSO',unlocked.join(' • '));
@@ -2952,7 +2978,7 @@ function hydrateProgress(){
   }
   migratePlayerXpCurveV1770();
   progress.profile.level=levelFromXp(progress.profile.xp,PLAYER_MAX_LEVEL);
-  progress.ownedShips ||= ['phoenix'];progress.inventory ||= {};progress.drones ||= [];progress.ammo ||= {};progress.rockets ||= {};progress.flags ||= {};progress.cargo ||= {};progress.discoveries ||= {};progress.missions ||= freshMissions();normalizeMissionState();normalizeBattlePass();normalizeLevelRewards();progress.pilotBio ||= freshPilotBio();normalizePilotBio();progress.titles ||= freshPilotTitles();normalizePilotTitles();progress.auction ||= freshAuctionState();ensureAuctionState();progress.galaxyGate ||= freshGalaxyGateState();normalizeGalaxyGateState();normalizeCombatAbilities();normalizeGalaxyEvents();
+  progress.ownedShips ||= ['phoenix'];progress.inventory ||= {};progress.drones ||= [];progress.ammo ||= {};progress.rockets ||= {};progress.flags ||= {};progress.cargo ||= {};progress.discoveries ||= {};progress.missions ||= freshMissions();normalizeMissionState();normalizeBattlePass();normalizeLevelRewards();progress.pilotBio ||= freshPilotBio();normalizePilotBio();progress.titles ||= freshPilotTitles();normalizePilotTitles();progress.journey ||= freshPilotJourney();normalizePilotJourney();progress.auction ||= freshAuctionState();ensureAuctionState();progress.galaxyGate ||= freshGalaxyGateState();normalizeGalaxyGateState();normalizeCombatAbilities();normalizeGalaxyEvents();
   if(progress.repairRequired&&(!progress.repairRequired.shipId||!SHIPS[progress.repairRequired.shipId]))progress.repairRequired=null;
   for(const id of Object.keys(LASER_AMMO))if(progress.ammo[id]===undefined)progress.ammo[id]=0;
   if(!LASER_AMMO[progress.selectedLaserAmmo])progress.selectedLaserAmmo='lcb10';
@@ -3239,7 +3265,7 @@ function sellPetCargoBox(drop){
     else {const got=addCargoResource(id,qty);total+=got;}
   }
   progress.profile.credits+=credits;if(credits>0)telemetryEconomy('resource',{cr:credits});
-  if(total>0){playSfx('pickup');battlePassEvent('dropResource',total);battlePassEvent('box',1);telemetryCounter('boxes',1);telemetryCounter('ore_units',total);titleStatAdd('boxes',1);titleStatAdd('oreUnits',total);}
+  if(total>0){playSfx('pickup');battlePassEvent('dropResource',total);battlePassEvent('box',1);telemetryCounter('boxes',1);telemetryCounter('ore_units',total);titleStatAdd('boxes',1);journeyEvent('box',1);titleStatAdd('oreUnits',total);}
   if(credits>0)spawnParticle(drop.x,drop.y,`AUX-9 +${fmt(credits)} CR`,'#ffd36c');
   addPetXp(Math.max(4,total*2));saveGame();
 }
@@ -3803,7 +3829,7 @@ function setMap(mapId,preserve=false,fromMapId=null,targetTerritoryFaction=null,
 }
 function runMapTransition(targetMapId,fromMapId=null,mode='PORTAL QUÂNTICO',targetTerritoryFaction=null,fromGraphLabel=null){
   if(state.jumping||!MAPS[targetMapId])return;
-  telemetryCounter('map_jumps',1);titleStatAdd('mapJumps',1);
+  telemetryCounter('map_jumps',1);titleStatAdd('mapJumps',1);journeyEvent('jump',1);
   state.jumping=true;player.laserFiring=false;playSfx('portal');ui.portalPrompt?.classList.add('hidden');
 
   const sourceLabel=fromGraphLabel||currentGraphMapLabel();
@@ -3937,7 +3963,7 @@ function handleNormalShipDeath(){
 function rewardEnemyKill(enemy){
   const creditMult=1+pilotSkillValue('greed')/100,uriMult=1+pilotCombined('cruelty1','cruelty2')/100,xpMult=1+pilotSkillValue('tactics')/100;
   const earnedCredits=Math.round(enemy.credits*creditMult),earnedUri=Math.round(enemy.uridium*uriMult),earnedXp=Math.round((Number(enemy.xp)||enemy.credits/10+enemy.uridium*12)*xpMult*designerXpMultiplier());
-  progress.profile.credits+=earnedCredits;progress.profile.uridium+=earnedUri;progress.profile.xp+=earnedXp;progress.profile.aliensKilled=(progress.profile.aliensKilled||0)+1;telemetryEconomy('npc',{cr:earnedCredits,stl:earnedUri,xp:earnedXp});telemetryCounter('kills',1);
+  progress.profile.credits+=earnedCredits;progress.profile.uridium+=earnedUri;progress.profile.xp+=earnedXp;progress.profile.aliensKilled=(progress.profile.aliensKilled||0)+1;telemetryEconomy('npc',{cr:earnedCredits,stl:earnedUri,xp:earnedXp});telemetryCounter('kills',1);journeyEvent('kill',1);
   if(authenticated){const boss=/^boss/i.test(String(enemy.type||''));const clanType=String(enemy.type||'').replace(/^boss/i,'').toLowerCase();recordClanAlienKillOnline({npcType:clanType,isBoss:boss}).then(r=>{if(r?.status?.leveled_up){showToast(`CLÃ SUBIU PARA O LV ${r.status.new_level}!`,'reward');refreshClanState(true);}}).catch(()=>{});}
   pushActivity(`${enemy.name} • +${fmt(earnedCredits)} CR • +${fmt(earnedUri)} STL • +${fmt(earnedXp)} XP`,'combat');
   if(String(enemy.type||'').startsWith('boss')){if(!enemy.sharedReward||enemy.sharedFinalBlow||Number(enemy.sharedRewardShare||0)>=.25)rollRareBossLoot(enemy);scoreClanWar(enemy.sharedReward?Math.max(1,Math.round(10*Number(enemy.sharedRewardShare||0))):10,'boss_kill');}
@@ -4125,7 +4151,7 @@ function collectCargoBox(drop){
   if(total>0){
     playSfx('pickup');
     battlePassEvent('dropResource',total);
-    if(!drop.battlePassBoxCounted){drop.battlePassBoxCounted=true;battlePassEvent('box',1);telemetryCounter('boxes',1);titleStatAdd('boxes',1);}telemetryCounter('ore_units',total);titleStatAdd('oreUnits',total);
+    if(!drop.battlePassBoxCounted){drop.battlePassBoxCounted=true;battlePassEvent('box',1);telemetryCounter('boxes',1);titleStatAdd('boxes',1);journeyEvent('box',1);}telemetryCounter('ore_units',total);titleStatAdd('oreUnits',total);
     spawnParticle(drop.x,drop.y,`+${fmt(total)} recursos`,'#ffe57b');
     pushActivity(`BOX ${drop.source||''} • ${picked.join(' • ')}`,'loot');
     saveGame();
@@ -4198,7 +4224,7 @@ function updatePlayer(dt){
       if(empty)state.loot.splice(i,1);
     }
   }
-  for(let i=state.ores.length-1;i>=0;i--){const o=state.ores[i];if(Math.hypot(o.x-player.x,o.y-player.y)<30){if(o.sharedWorld&&sharedUniverseMap()){if(cargoFree()<=0){showToast('Porão cheio');continue;}if(sharedUniverseOnline()&&!sharedUniverseRuntime.pendingOres.has(o.id)){sharedUniverseRuntime.pendingOres.add(o.id);sharedUniverse.collectOre(o.id);}continue;}const got=addCargoResource(o.type,o.amount);if(got>0){playSfx('pickup');spawnParticle(o.x,o.y,`+${got} ${o.type}`,o.color);pushActivity(`Pedra • +${fmt(got)} ${o.type} • ${fmt((RESOURCES[o.type]?.sell||0)*got)} CR na base`,'ore');telemetryCounter('ore_nodes',1);telemetryCounter('ore_units',got);titleStatAdd('oreUnits',got);missionEvent('collectOre',{amount:got,type:o.type,mapId:progress.mapId});galaxyEventOrePickup(o,got);state.ores.splice(i,1);state.oreRespawns.push({type:o.type,at:nowSec()+rand(5,12)});saveGame();}else showToast('Porão cheio');}}
+  for(let i=state.ores.length-1;i>=0;i--){const o=state.ores[i];if(Math.hypot(o.x-player.x,o.y-player.y)<30){if(o.sharedWorld&&sharedUniverseMap()){if(cargoFree()<=0){showToast('Porão cheio');continue;}if(sharedUniverseOnline()&&!sharedUniverseRuntime.pendingOres.has(o.id)){sharedUniverseRuntime.pendingOres.add(o.id);sharedUniverse.collectOre(o.id);}continue;}const got=addCargoResource(o.type,o.amount);if(got>0){playSfx('pickup');spawnParticle(o.x,o.y,`+${got} ${o.type}`,o.color);pushActivity(`Pedra • +${fmt(got)} ${o.type} • ${fmt((RESOURCES[o.type]?.sell||0)*got)} CR na base`,'ore');telemetryCounter('ore_nodes',1);telemetryCounter('ore_units',got);titleStatAdd('oreUnits',got);journeyEvent('ore',got);missionEvent('collectOre',{amount:got,type:o.type,mapId:progress.mapId});galaxyEventOrePickup(o,got);state.ores.splice(i,1);state.oreRespawns.push({type:o.type,at:nowSec()+rand(5,12)});saveGame();}else showToast('Porão cheio');}}
   if(player.hp<=0){
     if(isGalaxyGateMap())handleAlphaDeath();
     else handleNormalShipDeath();
@@ -5185,8 +5211,8 @@ function openPet(){if(!progress?.pet?.owned){openShop('pet');showToast(`AUX-9 di
 
 function liveResourcePrice(id){const row=liveCatalog(`resource:${id}`);return row&&row.enabled!==false&&String(row?.meta?.mode||'sell')==='sell'?Math.max(0,Number(row.price)||0):0;}
 function cargoSaleValue(){let total=0;for(const [id,qty] of Object.entries(progress.cargo||{}))total+=liveResourcePrice(id)*qty;return total;}
-async function sellCargoResource(id){if(!isAtTrader()){showToast('Venda disponível somente na base X-1');return;}const qty=progress.cargo[id]||0,price=liveResourcePrice(id);if(qty<=0||price<=0){showToast('Recurso sem preço ativo no Supabase');return;}try{const r=await runEconomyAction('sell_cargo',{resource_id:id});showToast(`${qty} ${id} vendidos por ${fmt(r?.info?.total||0)} CR • servidor`);}catch(e){showToast(e.message||'Venda recusada pelo servidor');}}
-async function sellAllCargo(){if(!isAtTrader()){showToast('Volte à base X-1 para vender');return;}try{const r=await runEconomyAction('sell_cargo',{resource_id:'all'});showToast(`Porão vendido: +${fmt(r?.info?.total||0)} CR • servidor`);}catch(e){showToast(e.message||'Venda recusada pelo servidor');}}
+async function sellCargoResource(id){if(!isAtTrader()){showToast('Venda disponível somente na base X-1');return;}const qty=progress.cargo[id]||0,price=liveResourcePrice(id);if(qty<=0||price<=0){showToast('Recurso sem preço ativo no Supabase');return;}try{const r=await runEconomyAction('sell_cargo',{resource_id:id});journeyEvent('sell',1);showToast(`${qty} ${id} vendidos por ${fmt(r?.info?.total||0)} CR • servidor`);}catch(e){showToast(e.message||'Venda recusada pelo servidor');}}
+async function sellAllCargo(){if(!isAtTrader()){showToast('Volte à base X-1 para vender');return;}try{const r=await runEconomyAction('sell_cargo',{resource_id:'all'});journeyEvent('sell',1);showToast(`Porão vendido: +${fmt(r?.info?.total||0)} CR • servidor`);}catch(e){showToast(e.message||'Venda recusada pelo servidor');}}
 function renderCargo(){if(!progress)return;const atBase=isAtTrader();const xeno=progress.cargo?.Xenomit||0;const cargoBonus=cargoExtraBonus();ui.cargoSummary.innerHTML=`<b>${fmt(cargoUsed())}/${fmt(cargoCapacity())}</b> unidades ocupadas${cargoBonus?` • Expansão equipada: <b>+${fmt(cargoBonus)}</b>`:''} • Valor vendável: <b>${fmt(cargoSaleValue())} CR</b><br><span class="muted">${atBase?'Trader disponível: você está na base.':'Para vender recursos, retorne à Zona Segura do seu X-1.'} ${xeno?`• Voidite: <b>${fmt(xeno)}</b> (não ocupa porão)`:''}</span>`;ui.cargoGrid.innerHTML='';const entries=Object.entries(progress.cargo||{}).filter(([,q])=>q>0);if(!entries.length){ui.cargoGrid.innerHTML='<div class="empty-state">Seu porão está vazio. Colete minérios no mapa ou caixas deixadas pelos NPCs.</div>';}for(const [id,qty] of entries){const r=RESOURCES[id]||{name:id,color:'#fff'},price=liveResourcePrice(id),special=id==='Xenomit';const c=document.createElement('div');c.className='cargo-card';c.innerHTML=`<div class="cargo-ore" style="--ore:${r.color}"><img src="${GAME_ASSETS.resources[id]||GAME_ASSETS.loot.cargo}" alt="${r.name}"></div><div><b>${r.name}</b><div class="muted">${fmt(qty)} un. • ${special?'especial • não ocupa porão':(price?fmt(price)+' CR/un.':'não vendável')}</div></div>`;const b=document.createElement('button');b.className='ghost-btn';b.textContent=price?'Vender':'Guardar';b.disabled=!atBase||!price;b.onclick=()=>sellCargoResource(id);c.appendChild(b);ui.cargoGrid.appendChild(c);}ui.sellAllCargo.disabled=!atBase||cargoSaleValue()<=0;}
 function openCargo(){if(!isAtTrader()){showToast('Venda de recursos disponível somente na base X-1');return;}closeNavigationModals(ui.cargoModal);renderCargo();ui.cargoModal.classList.remove('hidden');}
 
@@ -6077,7 +6103,7 @@ document.querySelectorAll('.menu-dropdown .menu-item').forEach(btn=>btn.addEvent
 
 if(ui.mapBtn)ui.mapBtn.onclick=()=>openMapModal();
 if(ui.closeMap)ui.closeMap.onclick=()=>ui.mapModal.classList.add('hidden');
-if(ui.missionBtn)ui.missionBtn.onclick=()=>openMissions();if(ui.activeMissionOpen)ui.activeMissionOpen.onclick=()=>openMissions();
+if(ui.missionBtn)ui.missionBtn.onclick=()=>openMissions();if(ui.activeMissionOpen)ui.activeMissionOpen.onclick=()=>currentJourneyStep()?openJourneyPanel():openMissions();
 if(ui.closeMission)ui.closeMission.onclick=()=>ui.missionModal.classList.add('hidden');
 if(ui.passBtn)ui.passBtn.onclick=()=>openProgression();
 if(ui.closePass)ui.closePass.onclick=()=>ui.passModal.classList.add('hidden');
