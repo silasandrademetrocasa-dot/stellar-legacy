@@ -162,32 +162,32 @@ export const RESOURCES = {
   Xenomit: { id: 'Xenomit', name: 'Voidite', color: '#ffffff', sell: 0 },
 };
 
-// ECONOMIA: recompensas base ampliadas para sustentar a progressão de preços atual.
+// ECONOMIA REBALANCEADA: Créditos preservados, Stellarium reforçado e XP reduzido para progressão mais longa.
 // BOSS principais continuam com aproximadamente 2x a recompensa do alien normal correspondente.
 export const NPC_TYPES = {
   // Dano normal rebalanceado para o HP moderno das naves do Stellar Legacy.
   // A base segue a progressão do Stellar Codex, com escala de combate maior.
-  streuner: { name: 'Scavenger', hp: 800, shield: 400, credits: 7500, uridium: 6, xp: 500, speed: 62, damage: 60, color: '#ff8e47', size: 15, resources: { Prometium: 10, Terbium: 10 } },
-  recruitStreuner: { name: 'Scavenger Scout', hp: 600, shield: 800, credits: 9000, uridium: 8, xp: 650, speed: 68, damage: 120, color: '#ffa852', size: 14, resources: { Prometium: 12, Terbium: 12 } },
-  aiderStreuner: { name: 'Scavenger Support', hp: 1500, shield: 1000, credits: 12000, uridium: 10, xp: 850, speed: 72, damage: 210, color: '#ffbb62', size: 16, resources: { Prometium: 15, Terbium: 15 } },
+  streuner: { name: 'Scavenger', hp: 800, shield: 400, credits: 7500, uridium: 15, xp: 200, speed: 62, damage: 60, color: '#ff8e47', size: 15, resources: { Prometium: 10, Terbium: 10 } },
+  recruitStreuner: { name: 'Scavenger Scout', hp: 600, shield: 800, credits: 9000, uridium: 20, xp: 260, speed: 68, damage: 120, color: '#ffa852', size: 14, resources: { Prometium: 12, Terbium: 12 } },
+  aiderStreuner: { name: 'Scavenger Support', hp: 1500, shield: 1000, credits: 12000, uridium: 25, xp: 340, speed: 72, damage: 210, color: '#ffbb62', size: 16, resources: { Prometium: 15, Terbium: 15 } },
 
   // Regra Stellar Legacy: BOSS = 2x HP, escudo, dano, créditos, uridium e carga do NPC normal.
-  bossStreuner: { name: 'Scavenger Prime', hp: 1600, shield: 800, credits: 15000, uridium: 12, xp: 1000, speed: 62, damage: 120, color: '#ff5e6e', size: 19, resources: { Prometium: 20, Terbium: 20 } },
+  bossStreuner: { name: 'Scavenger Prime', hp: 1600, shield: 800, credits: 15000, uridium: 30, xp: 400, speed: 62, damage: 120, color: '#ff5e6e', size: 19, resources: { Prometium: 20, Terbium: 20 } },
 
-  lordakia: { name: 'Vrax', hp: 2000, shield: 2000, credits: 18000, uridium: 12, xp: 1200, speed: 95, damage: 240, color: '#9f73ff', size: 18, resources: { Prometium: 20, Terbium: 20, Endurium: 20 } },
-  bossLordakia: { name: 'Vrax Prime', hp: 4000, shield: 4000, credits: 36000, uridium: 24, xp: 2400, speed: 95, damage: 480, color: '#c765ff', size: 22, resources: { Prometium: 40, Terbium: 40, Endurium: 40, Xenomit: 1 } },
+  lordakia: { name: 'Vrax', hp: 2000, shield: 2000, credits: 18000, uridium: 30, xp: 480, speed: 95, damage: 240, color: '#9f73ff', size: 18, resources: { Prometium: 20, Terbium: 20, Endurium: 20 } },
+  bossLordakia: { name: 'Vrax Prime', hp: 4000, shield: 4000, credits: 36000, uridium: 60, xp: 960, speed: 95, damage: 480, color: '#c765ff', size: 22, resources: { Prometium: 40, Terbium: 40, Endurium: 40, Xenomit: 1 } },
 
-  saimon: { name: 'Zyron', hp: 6000, shield: 6000, credits: 35000, uridium: 18, xp: 2400, speed: 82, damage: 600, color: '#55e2ff', size: 20, resources: { Prometium: 40, Terbium: 40, Endurium: 40, Prometid: 2, Duranium: 2 } },
-  bossSaimon: { name: 'Zyron Prime', hp: 12000, shield: 12000, credits: 70000, uridium: 36, xp: 4800, speed: 82, damage: 1200, color: '#24b0ff', size: 25, resources: { Prometium: 80, Terbium: 80, Endurium: 80, Prometid: 4, Duranium: 4, Xenomit: 2 } },
+  saimon: { name: 'Zyron', hp: 6000, shield: 6000, credits: 35000, uridium: 45, xp: 960, speed: 82, damage: 600, color: '#55e2ff', size: 20, resources: { Prometium: 40, Terbium: 40, Endurium: 40, Prometid: 2, Duranium: 2 } },
+  bossSaimon: { name: 'Zyron Prime', hp: 12000, shield: 12000, credits: 70000, uridium: 90, xp: 1920, speed: 82, damage: 1200, color: '#24b0ff', size: 25, resources: { Prometium: 80, Terbium: 80, Endurium: 80, Prometid: 4, Duranium: 4, Xenomit: 2 } },
 
-  mordon: { name: 'Kharon', hp: 20000, shield: 10000, credits: 90000, uridium: 40, xp: 6000, speed: 52, damage: 1170, color: '#ffa34d', size: 25, resources: { Prometium: 80, Terbium: 80, Endurium: 80, Prometid: 8, Duranium: 8, Promerium: 1 } },
-  bossMordon: { name: 'Kharon Prime', hp: 40000, shield: 20000, credits: 180000, uridium: 80, xp: 12000, speed: 52, damage: 2340, color: '#ff6948', size: 31, resources: { Prometium: 160, Terbium: 160, Endurium: 160, Prometid: 16, Duranium: 16, Promerium: 2, Xenomit: 4 } },
+  mordon: { name: 'Kharon', hp: 20000, shield: 10000, credits: 90000, uridium: 100, xp: 2400, speed: 52, damage: 1170, color: '#ffa34d', size: 25, resources: { Prometium: 80, Terbium: 80, Endurium: 80, Prometid: 8, Duranium: 8, Promerium: 1 } },
+  bossMordon: { name: 'Kharon Prime', hp: 40000, shield: 20000, credits: 180000, uridium: 200, xp: 4800, speed: 52, damage: 2340, color: '#ff6948', size: 31, resources: { Prometium: 160, Terbium: 160, Endurium: 160, Prometid: 16, Duranium: 16, Promerium: 2, Xenomit: 4 } },
 
-  devolarium: { name: 'Dreadnox', hp: 100000, shield: 100000, credits: 300000, uridium: 100, xp: 18000, speed: 38, damage: 3600, color: '#7edcff', size: 32, resources: { Prometium: 100, Terbium: 100, Endurium: 100, Prometid: 16, Duranium: 16, Promerium: 2 } },
-  bossDevolarium: { name: 'Dreadnox Prime', hp: 200000, shield: 200000, credits: 600000, uridium: 200, xp: 36000, speed: 38, damage: 7200, color: '#c8f0ff', size: 40, resources: { Prometium: 200, Terbium: 200, Endurium: 200, Prometid: 32, Duranium: 32, Promerium: 4, Xenomit: 8 } },
+  devolarium: { name: 'Dreadnox', hp: 100000, shield: 100000, credits: 300000, uridium: 250, xp: 7200, speed: 38, damage: 3600, color: '#7edcff', size: 32, resources: { Prometium: 100, Terbium: 100, Endurium: 100, Prometid: 16, Duranium: 16, Promerium: 2 } },
+  bossDevolarium: { name: 'Dreadnox Prime', hp: 200000, shield: 200000, credits: 600000, uridium: 500, xp: 14400, speed: 38, damage: 7200, color: '#c8f0ff', size: 40, resources: { Prometium: 200, Terbium: 200, Endurium: 200, Prometid: 32, Duranium: 32, Promerium: 4, Xenomit: 8 } },
 
-  sibelon: { name: 'Colossar', hp: 200000, shield: 200000, credits: 650000, uridium: 160, xp: 30000, speed: 30, damage: 7950, color: '#66ffcb', size: 36, resources: { Prometium: 200, Terbium: 200, Endurium: 200, Prometid: 32, Duranium: 32, Promerium: 4 } },
-  bossSibelon: { name: 'Colossar Prime', hp: 400000, shield: 400000, credits: 1300000, uridium: 320, xp: 60000, speed: 30, damage: 15900, color: '#19d59d', size: 45, resources: { Prometium: 400, Terbium: 400, Endurium: 400, Prometid: 64, Duranium: 64, Promerium: 8, Xenomit: 16 } },
+  sibelon: { name: 'Colossar', hp: 200000, shield: 200000, credits: 650000, uridium: 400, xp: 12000, speed: 30, damage: 7950, color: '#66ffcb', size: 36, resources: { Prometium: 200, Terbium: 200, Endurium: 200, Prometid: 32, Duranium: 32, Promerium: 4 } },
+  bossSibelon: { name: 'Colossar Prime', hp: 400000, shield: 400000, credits: 1300000, uridium: 800, xp: 24000, speed: 30, damage: 15900, color: '#19d59d', size: 45, resources: { Prometium: 400, Terbium: 400, Endurium: 400, Prometid: 64, Duranium: 64, Promerium: 8, Xenomit: 16 } },
 };
 
 

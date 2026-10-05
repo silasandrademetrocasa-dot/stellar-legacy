@@ -1,7 +1,7 @@
-import { FACTIONS, SHIPS, ITEMS, LASER_AMMO, ROCKETS, NPC_TYPES, MAPS, RESOURCES } from './data.js?v=17.6.7';
-import { GAME_ASSETS } from './assets/v17/manifest.js?v=17.6.7';
-import { signUp, signIn, requestPasswordReset, restorePasswordRecoveryFromUrl, restoreSession, signOutLocal, checkGameSession, endGameSession, getUser, getSessionCredentials, loadCloudSave, saveCloudSave, updateCallsign, updatePassword, loadRankings, loadAuctionBids, saveAuctionBidOnline, markAuctionBidStatusOnline, loadAuctionMarket, upsertPlayerPresenceOnline, loadMapPresenceOnline, removePlayerPresenceOnline, queuePvpAttackOnline, consumePvpDamageEventsOnline, syncArenaProfileOnline, loadArenaState, loadArenaDailyRewardStatus, claimArenaDailyReward, loadArenaOpponents, loadArenaHistory, arenaAttackOnline, listClansOnline, loadMyClanOnline, createClanOnline, joinClanOnline, leaveClanOnline, transferClanCreditsOnline, claimClanCreditGrantsOnline, recordClanAlienKillOnline, getPremiumShopOnline, testPurchasePremiumOnline, loadWarfrontStateOnline, hitWorldBossOnline, claimWorldBossRewardOnline, declareClanWarOnline, recordClanWarScoreOnline, loadLiveOpsOnline, purchaseLiveCatalogOnline, economyActionOnline, getChatHistoryOnline, sendChatMessageOnline, getMyDesignersOnline, setDesignLoadoutOnline, claimGateDroneDesignOnline, claimEventDesignerOnline, getAdminStatus, adminSearchAccounts, adminRecentActions, adminBanAccount, adminUnbanAccount, adminResetAccount, adminDeleteAccount } from './api.js?v=17.6.7';
-import { SharedUniverseClient } from './world.js?v=17.6.7';
+import { FACTIONS, SHIPS, ITEMS, LASER_AMMO, ROCKETS, NPC_TYPES, MAPS, RESOURCES } from './data.js?v=17.7.0';
+import { GAME_ASSETS } from './assets/v17/manifest.js?v=17.7.0';
+import { signUp, signIn, requestPasswordReset, restorePasswordRecoveryFromUrl, restoreSession, signOutLocal, checkGameSession, endGameSession, getUser, getSessionCredentials, loadCloudSave, saveCloudSave, updateCallsign, updatePassword, loadRankings, loadAuctionBids, saveAuctionBidOnline, markAuctionBidStatusOnline, loadAuctionMarket, upsertPlayerPresenceOnline, loadMapPresenceOnline, removePlayerPresenceOnline, queuePvpAttackOnline, consumePvpDamageEventsOnline, syncArenaProfileOnline, loadArenaState, loadArenaDailyRewardStatus, claimArenaDailyReward, loadArenaOpponents, loadArenaHistory, arenaAttackOnline, listClansOnline, loadMyClanOnline, createClanOnline, joinClanOnline, leaveClanOnline, transferClanCreditsOnline, claimClanCreditGrantsOnline, recordClanAlienKillOnline, getPremiumShopOnline, testPurchasePremiumOnline, loadWarfrontStateOnline, hitWorldBossOnline, claimWorldBossRewardOnline, declareClanWarOnline, recordClanWarScoreOnline, loadLiveOpsOnline, purchaseLiveCatalogOnline, economyActionOnline, getChatHistoryOnline, sendChatMessageOnline, getMyDesignersOnline, setDesignLoadoutOnline, claimGateDroneDesignOnline, claimEventDesignerOnline, getAdminStatus, adminSearchAccounts, adminRecentActions, adminBanAccount, adminUnbanAccount, adminResetAccount, adminDeleteAccount } from './api.js?v=17.7.0';
+import { SharedUniverseClient } from './world.js?v=17.7.0';
 
 const canvas = document.querySelector('#game');
 const ctx = canvas.getContext('2d');
@@ -117,7 +117,7 @@ function qualityShouldPreload(path){
   return /\/branding\//.test(value)||/\/assets\/v17\/loot\/cargo-box\.webp/.test(value);
 }
 
-const ASSET_REVISION='17.6.7';
+const ASSET_REVISION='17.7.0';
 function versionedAssetUrl(path){
   const value=String(path||'');if(!value)return value;
   return value.includes('?')?`${value}&asset=${ASSET_REVISION}`:`${value}?asset=${ASSET_REVISION}`;
@@ -814,9 +814,51 @@ const PET_LEVEL_TABLE={
   20:{xp:150000000,laser:12,shield:22,gear:6,protocol:12,bonus:'EQUIPAMENTO N4',tier:4},
 };
 let PET_BASE_PRICE=1500000;
-function levelXpThreshold(level){
+function legacyLevelXpThresholdV1767(level){
   if(level<=1)return 0;
   return Math.round(10000*Math.pow(2,level-2));
+}
+function levelXpThreshold(level){
+  if(level<=1)return 0;
+  const n=Math.max(1,level-1);
+  return Math.round(15000*Math.pow(n,2.3)*Math.pow(1.20,Math.max(0,level-2)));
+}
+function migratePlayerXpCurveV1770(){
+  if(!progress?.profile||progress.profile.xpModelV1770)return;
+  let level=Math.max(1,Math.min(PLAYER_MAX_LEVEL,Math.floor(Number(progress.profile.level)||1)));
+  const xp=Math.max(0,Number(progress.profile.xp)||0);
+  // Mantém exatamente o nível e aproximadamente o percentual de progresso do modelo anterior.
+  if(level<PLAYER_MAX_LEVEL){
+    const oldBase=legacyLevelXpThresholdV1767(level),oldNext=legacyLevelXpThresholdV1767(level+1);
+    const ratio=Math.max(0,Math.min(.999999,(xp-oldBase)/Math.max(1,oldNext-oldBase)));
+    const nextBase=levelXpThreshold(level),nextTarget=levelXpThreshold(level+1);
+    progress.profile.xp=Math.round(nextBase+(nextTarget-nextBase)*ratio);
+  }else progress.profile.xp=Math.max(levelXpThreshold(PLAYER_MAX_LEVEL),xp);
+  progress.profile.xpModelV1770=true;
+}
+const PROGRESSION_UNLOCKS={missions:5,pilot:6,clan:8};
+const MISSION_CATEGORY_LEVELS={daily:5,weekly:7,monthly:10,special:12};
+function featureRequiredLevel(key){return Number(PROGRESSION_UNLOCKS[key]||1);}
+function featureUnlocked(key){return (Number(progress?.profile?.level)||1)>=featureRequiredLevel(key);}
+function showFeatureLock(key,label){const req=featureRequiredLevel(key);showToast(`${label} libera no nível ${req}`);}
+function missionCategoryRequiredLevel(category){return Number(MISSION_CATEGORY_LEVELS[category]||5);}
+function missionCategoryUnlocked(category){return (Number(progress?.profile?.level)||1)>=missionCategoryRequiredLevel(category);}
+function progressionUnlocksAtLevel(level){
+  const out=[];
+  if(level===3)out.push('MAPA X-2');
+  if(level===5)out.push('MISSÕES DIÁRIAS');
+  if(level===6)out.push('PERFIL DE PILOTO');
+  if(level===7)out.push('MAPA X-3','MISSÕES SEMANAIS');
+  if(level===8)out.push('CLÃ');
+  if(level===10)out.push('MAPA X-4','MISSÕES MENSAIS');
+  if(level===12)out.push('MISSÕES ESPECIAIS');
+  if(level===15)out.push('BATTLE MAPS');
+  return out;
+}
+function updateProgressionAccessLocks(){
+  if(!progress)return;
+  const lock=(el,key,label)=>{if(!el)return;const req=featureRequiredLevel(key),locked=!featureUnlocked(key);el.classList.toggle('level-locked',locked);el.setAttribute('aria-disabled',String(locked));el.title=locked?`${label} • libera no nível ${req}`:'';};
+  lock(ui.missionBtn,'missions','Missões');lock(ui.pilotBtn,'pilot','Perfil de Piloto');lock(ui.clanBtn,'clan','Clã');
 }
 function levelProgressPercent(xp,level,maxLevel=PLAYER_MAX_LEVEL){
   if(level>=maxLevel)return 100;
@@ -1012,14 +1054,14 @@ function buildDailyMissions(){
       title:`Caçada do Dia • ${NPC_TYPES[huntNpc].name}`,
       desc:`Alvo diário sorteado para hoje. Elimine somente ${NPC_TYPES[huntNpc].name}.`,
       tasks:[taskKill(huntNpc,huntTarget,'daily_hunt_target')],
-      group:huntNpc.startsWith('boss')?'boss':'npc',rewardFactor:10,tag:'DIÁRIA • 10X'
+      group:huntNpc.startsWith('boss')?'boss':'npc',rewardFactor:.5,tag:'DIÁRIA • BÔNUS 50%'
     }),
     makeMission({
       id:'daily_ore',
       title:`Mineração do Dia • ${RESOURCES[ore].name}`,
       desc:`Colete a pedra sorteada do dia. Somente ${RESOURCES[ore].name} conta.`,
       tasks:[taskOre(ore,500,'daily_ore_target')],
-      group:'ore',rewardFactor:10,tag:'DIÁRIA • RECOMPENSA GARANTIDA',flatReward:{credits:3000000,uridium:0,xp:15000}
+      group:'ore',rewardFactor:.5,tag:'DIÁRIA • BÔNUS 50%',flatReward:{credits:750000,uridium:750,xp:2500}
     }),
     makeMission({
       id:'daily_combo',
@@ -1030,7 +1072,7 @@ function buildDailyMissions(){
         taskKill(n2,50,'daily_combo_b'),
         taskKill(boss,10,'daily_combo_boss'),
       ],
-      group:'mix',rewardFactor:10,tag:'DIÁRIA • 10X'
+      group:'mix',rewardFactor:.5,tag:'DIÁRIA • BÔNUS 50%'
     }),
   ];
 }
@@ -1045,8 +1087,8 @@ function buildTierMissions(category,steps){
         title:`${label} • ${NPC_TYPES[npc].name} • ${target}`,
         desc:`Elimine exatamente ${target} ${NPC_TYPES[npc].name}.`,
         tasks:[taskKill(npc,target)],
-        group:boss?'boss':'npc',rewardFactor:category==='weekly'?7:5,
-        tag:`${label.toUpperCase()} • NÍVEL ${i+1} • ${category==='weekly'?'7X':'5X'}`
+        group:boss?'boss':'npc',rewardFactor:category==='weekly'?.8:1,
+        tag:`${label.toUpperCase()} • NÍVEL ${i+1} • ${category==='weekly'?'BÔNUS 80%':'BÔNUS 100%'}`
       }));
     });
   }
@@ -1057,8 +1099,8 @@ function buildTierMissions(category,steps){
         title:`${label} • ${RESOURCES[ore].name} • ${target}`,
         desc:`Colete ${target} unidades de ${RESOURCES[ore].name}.`,
         tasks:[taskOre(ore,target)],
-        group:'ore',rewardFactor:category==='weekly'?7:5,
-        tag:`${label.toUpperCase()} • NÍVEL ${i+1} • ${category==='weekly'?'7X':'5X'}`
+        group:'ore',rewardFactor:category==='weekly'?.8:1,
+        tag:`${label.toUpperCase()} • NÍVEL ${i+1} • ${category==='weekly'?'BÔNUS 80%':'BÔNUS 100%'}`
       }));
     });
   }
@@ -1066,15 +1108,15 @@ function buildTierMissions(category,steps){
 }
 function buildSpecialMissions(){
   const missions=[];
-  // 1 missão de cada NPC, sempre 10 eliminações, pagamento de 100% da soma dos alvos.
+  // 1 missão de cada NPC, sempre 10 eliminações, com bônus controlado sobre a recompensa normal.
   for(const npc of MISSION_NPCS){
     missions.push(makeMission({
       id:`special_npc_${npc}`,
       title:`Contrato Especial • ${NPC_TYPES[npc].name}`,
       desc:`Contrato direto: elimine 10 ${NPC_TYPES[npc].name}.`,
       tasks:[taskKill(npc,10)],
-      group:npc.startsWith('boss')?'boss':'npc',rewardFactor:3,
-      tag:'CONTRATO ESPECIAL • 3X'
+      group:npc.startsWith('boss')?'boss':'npc',rewardFactor:1.25,
+      tag:'CONTRATO ESPECIAL • BÔNUS 125%'
     }));
   }
   // 1 missão de cada pedra.
@@ -1084,7 +1126,7 @@ function buildSpecialMissions(){
       title:`Contrato Mineral • ${RESOURCES[ore].name}`,
       desc:`Colete 250 unidades de ${RESOURCES[ore].name}.`,
       tasks:[taskOre(ore,250)],
-      group:'ore',rewardFactor:3,tag:'MINERAÇÃO ESPECIAL • 3X'
+      group:'ore',rewardFactor:1.25,tag:'MINERAÇÃO ESPECIAL • BÔNUS 125%'
     }));
   }
 
@@ -1096,7 +1138,7 @@ function buildSpecialMissions(){
     ['special_mix_npc_5','Operação Veterana',false,[['aiderStreuner',20],['devolarium',5],['sibelon',2]]],
   ];
   npcMixes.forEach(([id,title,sequence,defs])=>missions.push(makeMission({
-    id,title,sequence,group:'mix',rewardFactor:3,tag:sequence?'SEQUENCIAL':'MULTIALVO',
+    id,title,sequence,group:'mix',rewardFactor:1.25,tag:sequence?'SEQUENCIAL':'MULTIALVO',
     desc:sequence?'Conclua cada alvo na ordem para liberar a próxima etapa.':'Todos os alvos podem ser concluídos em qualquer ordem.',
     tasks:defs.map(([npc,target],i)=>taskKill(npc,target,`${id}_t${i+1}`))
   })));
@@ -1107,7 +1149,7 @@ function buildSpecialMissions(){
   bossSingles.forEach(([npc,target],i)=>missions.push(makeMission({
     id:`special_boss_contract_${i+1}`,title:`Caçada BOSS ${i+1} • ${NPC_TYPES[npc].name}`,
     desc:`Contrato pesado contra ${NPC_TYPES[npc].name}.`,
-    tasks:[taskKill(npc,target)],group:'boss',rewardFactor:3,tag:'BOSS ESPECIAL • 3X'
+    tasks:[taskKill(npc,target)],group:'boss',rewardFactor:1.25,tag:'BOSS ESPECIAL • BÔNUS 125%'
   })));
 
   const bossMixes=[
@@ -1118,7 +1160,7 @@ function buildSpecialMissions(){
     ['special_boss_mix_5','Tríade BOSS V',false,[['bossStreuner',20],['bossDevolarium',4],['bossSibelon',2]]],
   ];
   bossMixes.forEach(([id,title,sequence,defs])=>missions.push(makeMission({
-    id,title,sequence,group:'boss',rewardFactor:3,tag:sequence?'BOSS SEQUENCIAL':'BOSS MISTO',
+    id,title,sequence,group:'boss',rewardFactor:1.25,tag:sequence?'BOSS SEQUENCIAL':'BOSS MISTO',
     desc:sequence?'Derrube cada grupo BOSS na ordem marcada.':'Elimine os três grupos BOSS em qualquer ordem.',
     tasks:defs.map(([npc,target],i)=>taskKill(npc,target,`${id}_t${i+1}`))
   })));
@@ -1132,7 +1174,7 @@ function buildSpecialMissions(){
     ['special_hybrid_6','Ferro e Cristal VI',true,[taskKill('sibelon',3,'h6a'),taskOre('Prometium',250,'h6b'),taskOre('Terbium',250,'h6c')]],
   ];
   hybrids.forEach(([id,title,sequence,tasks])=>missions.push(makeMission({
-    id,title,sequence,tasks,group:'hybrid',rewardFactor:3,
+    id,title,sequence,tasks,group:'hybrid',rewardFactor:1.25,
     tag:sequence?'HÍBRIDA SEQUENCIAL':'HÍBRIDA',
     desc:sequence?'Complete combate e mineração na ordem para liberar a próxima tarefa.':'Combate e mineração podem avançar ao mesmo tempo.'
   })));
@@ -1148,7 +1190,7 @@ function getMissionLibrary(category){
   return [];
 }
 function missionById(category,id){return getMissionLibrary(category).find(m=>m.id===id)||null;}
-function freshMissions(){return {active:{daily:null,weekly:null,monthly:null,special:null},completed:{}};}
+function freshMissions(){return {balanceVersion:'17.7',active:{daily:null,weekly:null,monthly:null,special:null},completed:{}};}
 function missionInstanceKey(category,id){return `${category}:${missionPeriodKey(category)}:${id}`;}
 function missionCompleted(category,id){return !!progress?.missions?.completed?.[missionInstanceKey(category,id)];}
 function missionUnlocked(){return true;}
@@ -1178,6 +1220,20 @@ function normalizeMissionState(){
       active.bonus.xp=Number(active.bonus.xp)||0;
       active.complete=mission ? mission.tasks.every(t=>(Number(active.taskProgress[t.id])||0)>=t.target) : false;
     }
+  }
+  if(progress.missions.balanceVersion!=='17.7'){
+    for(const category of Object.keys(MISSION_CATEGORIES)){
+      const active=progress.missions.active[category];if(!active)continue;
+      const mission=missionById(category,active.id);if(!mission)continue;
+      const next={credits:0,uridium:0,xp:0},factor=missionFactor(mission);
+      for(const task of mission.tasks||[]){
+        const units=Math.max(0,Math.min(task.target,Number(active.taskProgress?.[task.id])||0));if(!units)continue;
+        if(task.type==='kill'){const r=npcKillReward(NPC_TYPES[task.npc]);next.credits+=r.credits*factor*units;next.uridium+=r.uridium*factor*units;next.xp+=r.xp*factor*units;}
+        else if(task.type==='ore')next.credits+=(RESOURCES[task.resource]?.sell||0)*factor*units;
+      }
+      active.bonus={credits:Math.round(next.credits),uridium:Math.round(next.uridium),xp:Math.round(next.xp)};active.flatRewardApplied=false;
+    }
+    progress.missions.balanceVersion='17.7';
   }
 }
 function npcKillReward(enemy){
@@ -1263,9 +1319,10 @@ function missionProgressPercent(mission,active){
 function updateMissionButton(){
   if(!ui.missionBtn||!progress)return;
   normalizeMissionState();
-  const active=Object.values(progress.missions.active).filter(Boolean).length;
-  if(ui.missionActiveCount)ui.missionActiveCount.textContent=active;
-  ui.missionBtn.classList.toggle('mission-active',active>0);
+  const unlocked=featureUnlocked('missions'),active=Object.values(progress.missions.active).filter(Boolean).length;
+  if(ui.missionActiveCount)ui.missionActiveCount.textContent=unlocked?active:`LV${featureRequiredLevel('missions')}`;
+  ui.missionBtn.classList.toggle('mission-active',unlocked&&active>0);
+  ui.missionBtn.classList.toggle('level-locked',!unlocked);
 }
 function activeMissionEntries(){
   if(!progress)return [];
@@ -1280,6 +1337,7 @@ function activeMissionTaskSummary(mission,active){
 }
 function renderActiveMissionHud(force=false){
   if(!ui.activeMissionPanel||!progress)return;
+  if(!featureUnlocked('missions')){ui.activeMissionPanel.classList.add('hidden');return;}
   const entries=activeMissionEntries();
   if(!entries.length){ui.activeMissionPanel.classList.add('hidden');state.missionHudPage=0;state.missionHudSignature='';return;}
   ui.activeMissionPanel.classList.remove('hidden');
@@ -1299,6 +1357,8 @@ function renderActiveMissionHud(force=false){
 }
 
 function acceptMission(category,id){
+  if(!featureUnlocked('missions')){showFeatureLock('missions','Missões');return;}
+  if(!missionCategoryUnlocked(category)){showToast(`${MISSION_CATEGORIES[category]?.label||'Categoria'} libera no nível ${missionCategoryRequiredLevel(category)}`);return;}
   normalizeMissionState();
   if(progress.missions.active[category]){showToast('Você já tem uma missão ativa nessa categoria');return;}
   const mission=missionById(category,id);if(!mission)return;
@@ -1368,7 +1428,7 @@ function finishMissionAutomatically(category,mission,active){
   if(ui.missionModal&&!ui.missionModal.classList.contains('hidden'))renderMissions();
 }
 function claimMission(category){normalizeMissionState();const active=progress.missions.active[category];if(!active||!active.complete)return;finishMissionAutomatically(category,missionById(category,active.id),active);}
-function missionEvent(type,payload={}){if(!progress)return;normalizeMissionState();let anyChanged=false;const finished=[];for(const category of Object.keys(MISSION_CATEGORIES)){const active=progress.missions.active[category];if(!active||active.complete)continue;const mission=missionById(category,active.id);if(!mission)continue;let categoryChanged=false;let eventAmount=type==='collectOre'?Math.max(0,Number(payload.amount)||0):1;if(eventAmount<=0)continue;for(let i=0;i<mission.tasks.length;i++){const task=mission.tasks[i];if(!taskUnlocked(mission,active,i))continue;const current=taskCurrent(active,task),remaining=Math.max(0,task.target-current);if(!remaining)continue;let matches=false;if(type==='kill'&&task.type==='kill'&&payload.enemy?.type===task.npc)matches=true;if(type==='collectOre'&&task.type==='ore'&&payload.type===task.resource)matches=true;if(!matches)continue;const add=Math.min(remaining,type==='kill'?1:eventAmount);if(add<=0)continue;active.taskProgress[task.id]=current+add;addMissionReward(active,mission,task.type==='kill'?'kill':'ore',payload,add);categoryChanged=true;anyChanged=true;if(mission.sequence)break;if(type==='kill')break;}if(categoryChanged){active.complete=mission.tasks.every(x=>taskDone(active,x));if(active.complete)finished.push({category,mission,active});}}for(const item of finished)finishMissionAutomatically(item.category,item.mission,item.active);if(anyChanged&&!finished.length){saveGame();updateMissionButton();if(ui.missionModal&&!ui.missionModal.classList.contains('hidden'))renderMissions();}}
+function missionEvent(type,payload={}){if(!progress||!featureUnlocked('missions'))return;normalizeMissionState();let anyChanged=false;const finished=[];for(const category of Object.keys(MISSION_CATEGORIES)){const active=progress.missions.active[category];if(!active||active.complete)continue;const mission=missionById(category,active.id);if(!mission)continue;let categoryChanged=false;let eventAmount=type==='collectOre'?Math.max(0,Number(payload.amount)||0):1;if(eventAmount<=0)continue;for(let i=0;i<mission.tasks.length;i++){const task=mission.tasks[i];if(!taskUnlocked(mission,active,i))continue;const current=taskCurrent(active,task),remaining=Math.max(0,task.target-current);if(!remaining)continue;let matches=false;if(type==='kill'&&task.type==='kill'&&payload.enemy?.type===task.npc)matches=true;if(type==='collectOre'&&task.type==='ore'&&payload.type===task.resource)matches=true;if(!matches)continue;const add=Math.min(remaining,type==='kill'?1:eventAmount);if(add<=0)continue;active.taskProgress[task.id]=current+add;addMissionReward(active,mission,task.type==='kill'?'kill':'ore',payload,add);categoryChanged=true;anyChanged=true;if(mission.sequence)break;if(type==='kill')break;}if(categoryChanged){active.complete=mission.tasks.every(x=>taskDone(active,x));if(active.complete)finished.push({category,mission,active});}}for(const item of finished)finishMissionAutomatically(item.category,item.mission,item.active);if(anyChanged&&!finished.length){saveGame();updateMissionButton();if(ui.missionModal&&!ui.missionModal.classList.contains('hidden'))renderMissions();}}
 const MISSION_UI_PREFS_KEY='stellar_mission_ui_v1765';
 const missionUiPrefs={loaded:false,collapsed:{}};
 function loadMissionUiPrefs(){
@@ -1413,13 +1473,13 @@ function renderMissions(){
   loadMissionUiPrefs();normalizeMissionState();ui.missionContent.innerHTML='';
   for(const [category,meta] of Object.entries(MISSION_CATEGORIES)){
     const allMissions=getMissionLibrary(category);const missions=visibleMissionCatalog(category,allMissions);
-    const collapsed=!!missionUiPrefs.collapsed[category];
-    const section=document.createElement('section');section.className=`mission-category${collapsed?' collapsed':''}`;section.style.setProperty('--mission-accent',meta.accent);
+    const categoryLocked=!missionCategoryUnlocked(category),collapsed=categoryLocked||!!missionUiPrefs.collapsed[category];
+    const section=document.createElement('section');section.className=`mission-category${collapsed?' collapsed':''}${categoryLocked?' level-locked-section':''}`;section.style.setProperty('--mission-accent',meta.accent);
     const active=progress.missions.active[category];
     const head=document.createElement('button');head.type='button';head.className='mission-category-head';head.setAttribute('aria-expanded',String(!collapsed));
-    const summary=active?'1 missão ativa • ATIVA':`${missions.length} contratos disponíveis agora • LIVRE`;
-    head.innerHTML=`<span><b>${meta.label}</b><small>${summary}</small></span><em>${collapsed?'▸':'▾'}</em>`;
-    head.onclick=()=>toggleMissionCategory(category);section.appendChild(head);
+    const summary=categoryLocked?`LIBERA NO NÍVEL ${missionCategoryRequiredLevel(category)}`:(active?'1 missão ativa • ATIVA':`${missions.length} contratos disponíveis agora • LIVRE`);
+    head.innerHTML=`<span><b>${meta.label}</b><small>${summary}</small></span><em>${categoryLocked?'🔒':collapsed?'▸':'▾'}</em>`;
+    head.onclick=()=>categoryLocked?showToast(`${meta.label} libera no nível ${missionCategoryRequiredLevel(category)}`):toggleMissionCategory(category);section.appendChild(head);
     const body=document.createElement('div');body.className='mission-category-body';
     const grid=document.createElement('div');grid.className='mission-grid';
     renderMissionFilter(body,category,grid,missions);
@@ -1450,7 +1510,7 @@ function renderMissions(){
   }
   updateMissionButton();
 }
-function openMissions(){closeNavigationModals(ui.missionModal);normalizeMissionState();renderMissions();ui.missionModal.classList.remove('hidden');}
+function openMissions(){if(!featureUnlocked('missions')){showFeatureLock('missions','Missões');return;}closeNavigationModals(ui.missionModal);normalizeMissionState();renderMissions();ui.missionModal.classList.remove('hidden');}
 
 // ===================== PROGRESSÃO V12 • FREE + PREMIUM =====================
 const BATTLE_PASS_TIER_COUNT=30;
@@ -1505,7 +1565,7 @@ function battlePassEvent(kind,amount=1){
 function rewardBundle(){return {credits:0,uridium:0,ammo:{},rockets:{},items:[],ships:[],repairBonus:0};}
 function addRewardQty(obj,id,qty){if(qty>0)obj[id]=(obj[id]||0)+Math.floor(qty);}
 function levelRewardDef(level){
-  const r=rewardBundle();r.credits=level*100000;r.uridium=level*75;addRewardQty(r.ammo,'lcb10',level*250);
+  const r=rewardBundle();r.credits=level*100000;r.uridium=level*150;addRewardQty(r.ammo,'lcb10',level*250);
   if(level===5)addRewardQty(r.ammo,'mcb25',5000);
   if(level===10){addRewardQty(r.ammo,'mcb50',2500);r.repairBonus+=1;}
   if(level===15)r.items.push('lf2');
@@ -1518,7 +1578,7 @@ function levelRewardDef(level){
   return r;
 }
 function battlePassRewardDef(tier){
-  const r=rewardBundle();r.credits=250000+tier*175000;r.uridium=150+tier*35;addRewardQty(r.ammo,'lcb10',1500+tier*150);
+  const r=rewardBundle();r.credits=250000+tier*175000;r.uridium=350+tier*75;addRewardQty(r.ammo,'lcb10',1500+tier*150);
   if(tier%3===0)addRewardQty(r.ammo,'mcb25',1500+tier*50);
   if(tier%5===0)addRewardQty(r.ammo,'mcb50',750+tier*25);
   if(tier%10===0){addRewardQty(r.ammo,'ucb100',1000+tier*30);r.repairBonus+=1;}
@@ -1581,6 +1641,13 @@ function claimPremiumBattlePassTier(tier){
 }
 function claimAllBattlePassRewards(){normalizeBattlePass();const unlocked=battlePassTier();let count=0;for(let tier=1;tier<=unlocked;tier++){if(progress.battlePass.claimedTiers[tier])continue;grantProgressionBundle(battlePassRewardDef(tier));progress.battlePass.claimedTiers[tier]=Date.now();count++;}if(!count){showToast('Nenhuma recompensa Free pendente');return;}saveGame();flushCloudSave(true).catch(()=>{});showToast(`${count} recompensa(s) Free resgatada(s)`,'reward');renderProgression();updateUI();}
 function claimAllPremiumBattlePassRewards(){normalizeBattlePass();if(!premiumPassActive()){showToast('Passe Premium ainda não adquirido');openPremiumShop();return;}const unlocked=battlePassTier();let count=0;for(let tier=1;tier<=unlocked;tier++){if(progress.battlePass.premiumClaimedTiers[tier])continue;grantProgressionBundle(premiumBattlePassRewardDef(tier));progress.battlePass.premiumClaimedTiers[tier]=Date.now();count++;}if(!count){showToast('Nenhuma recompensa Premium pendente');return;}saveGame();flushCloudSave(true).catch(()=>{});showToast(`${count} recompensa(s) Premium resgatada(s)`,'reward');renderProgression();updateUI();}
+const PASS_UI_PREFS_KEY='stellar_pass_ui_v1770';
+let passUiPrefs={loaded:false,collapsed:{missions:false,rewards:false,levels:false}};
+function loadPassUiPrefs(){if(passUiPrefs.loaded)return passUiPrefs;passUiPrefs.loaded=true;try{const raw=JSON.parse(localStorage.getItem(PASS_UI_PREFS_KEY)||'{}');for(const k of Object.keys(passUiPrefs.collapsed))passUiPrefs.collapsed[k]=!!raw?.collapsed?.[k];}catch{}return passUiPrefs;}
+function savePassUiPrefs(){try{localStorage.setItem(PASS_UI_PREFS_KEY,JSON.stringify({collapsed:passUiPrefs.collapsed}));}catch{}}
+function togglePassSection(key){loadPassUiPrefs();passUiPrefs.collapsed[key]=!passUiPrefs.collapsed[key];savePassUiPrefs();renderProgression();}
+function passSectionClass(key,extra=''){loadPassUiPrefs();return `pass-section ${extra}${passUiPrefs.collapsed[key]?' collapsed':''}`.trim();}
+function passSectionIcon(key){loadPassUiPrefs();return passUiPrefs.collapsed[key]?'▸':'▾';}
 function renderProgression(){
   if(!ui.passContent||!progress)return;normalizeBattlePass();normalizeLevelRewards();updatePassBadge();
   const unlocked=battlePassTier(),points=progress.battlePass.points,daily=progress.battlePass.daily,missions=battlePassDailyMissions(),paid=premiumPassActive();
@@ -1591,7 +1658,12 @@ function renderProgression(){
   }).join('');
   const levels=Array.from({length:PLAYER_MAX_LEVEL-1},(_,i)=>i+2).map(level=>{const reached=level<=progress.profile.level,claimed=!!progress.levelRewards.claimed[level],reward=levelRewardDef(level);return `<article class="level-reward ${reached?'reached':'locked'} ${claimed?'claimed':''}"><div class="level-reward-head"><span>LV</span><b>${level}</b></div><div>${progressionRewardText(reward)}</div><button class="small-btn ${reached&&!claimed?'gold':''}" data-level-claim="${level}" ${!reached||claimed?'disabled':''}>${claimed?'RESGATADO':reached?'RESGATAR':'BLOQUEADO'}</button></article>`;}).join('');
   const nextPoints=unlocked>=BATTLE_PASS_TIER_COUNT?0:BATTLE_PASS_POINTS_PER_TIER-(points%BATTLE_PASS_POINTS_PER_TIER);
-  ui.passContent.innerHTML=`<section class="pass-hero"><div><div class="eyebrow">TEMPORADA ${progress.battlePass.season}</div><h3>TIER ${unlocked} / ${BATTLE_PASS_TIER_COUNT}</h3><p>5 missões diárias • 100 pontos cada • Free + trilha Premium com ganhos 2X e itens Elite.</p></div><div class="pass-points"><span>PONTOS</span><b>${fmt(points)}</b><small>${unlocked>=BATTLE_PASS_TIER_COUNT?'PASSE COMPLETO':`faltam ${fmt(nextPoints)} para o próximo tier`}</small></div></section><div class="pass-main-progress"><i style="width:${battlePassTierProgress()}%"></i></div>${paid?'<div class="pass-premium-active">✦ PASSE PREMIUM ATIVO NESTA TEMPORADA</div>':'<div class="pass-premium-cta">A trilha Premium entrega 2X os ganhos, equipamentos Elite nos marcos e <b>Reclaimer</b> no Tier 30. <button class="gold-btn" id="passOpenPremium">VER PASSE PREMIUM</button></div>'}<section class="pass-section"><div class="pass-section-head"><div><span>MISSÕES DIÁRIAS</span><b>${missions.filter(m=>daily.completed[m.id]).length}/5 concluídas hoje</b></div></div><div class="pass-missions">${dailyHtml}</div></section><section class="pass-section"><div class="pass-section-head"><div><span>RECOMPENSAS DO PASSE</span><b>FREE + PREMIUM • 30 tiers</b></div><div><button class="ghost-btn" id="passClaimAll">RESGATAR FREE</button> <button class="ghost-btn" id="passPremiumClaimAll" ${paid?'':'disabled'}>RESGATAR PREMIUM</button></div></div><div class="pass-tier-grid">${tiers}</div></section><section class="pass-section level-section"><div class="pass-section-head"><div><span>RECOMPENSAS DE NÍVEL</span><b>LV 2 → LV ${PLAYER_MAX_LEVEL}</b></div><button class="ghost-btn" id="levelClaimAll">RESGATAR DISPONÍVEIS</button></div><p class="muted">Cada recompensa de nível pode ser resgatada uma única vez.</p><div class="level-reward-grid">${levels}</div></section>`;
+  loadPassUiPrefs();
+  ui.passContent.innerHTML=`<section class="pass-hero"><div><div class="eyebrow">TEMPORADA ${progress.battlePass.season}</div><h3>TIER ${unlocked} / ${BATTLE_PASS_TIER_COUNT}</h3><p>5 missões diárias • 100 pontos cada • Free + trilha Premium com ganhos 2X e itens Elite.</p></div><div class="pass-points"><span>PONTOS</span><b>${fmt(points)}</b><small>${unlocked>=BATTLE_PASS_TIER_COUNT?'PASSE COMPLETO':`faltam ${fmt(nextPoints)} para o próximo tier`}</small></div></section><div class="pass-main-progress"><i style="width:${battlePassTierProgress()}%"></i></div>${paid?'<div class="pass-premium-active">✦ PASSE PREMIUM ATIVO NESTA TEMPORADA</div>':'<div class="pass-premium-cta">A trilha Premium entrega 2X os ganhos, equipamentos Elite nos marcos e <b>Reclaimer</b> no Tier 30. <button class="gold-btn" id="passOpenPremium">VER PASSE PREMIUM</button></div>'}
+  <section class="${passSectionClass('missions')}"><button class="pass-section-head pass-section-toggle" type="button" data-pass-toggle="missions"><span class="pass-head-copy"><b>MISSÕES DIÁRIAS</b><small>${missions.filter(m=>daily.completed[m.id]).length}/5 concluídas hoje</small></span><em>${passSectionIcon('missions')}</em></button><div class="pass-section-body"><div class="pass-missions">${dailyHtml}</div></div></section>
+  <section class="${passSectionClass('rewards')}"><div class="pass-section-head"><button class="pass-section-title-button" type="button" data-pass-toggle="rewards"><span class="pass-head-copy"><b>RECOMPENSAS DO PASSE</b><small>FREE + PREMIUM • 30 tiers</small></span><em>${passSectionIcon('rewards')}</em></button><div class="pass-claim-stack"><button class="ghost-btn" id="passClaimAll">RESGATAR FREE</button><button class="ghost-btn" id="passPremiumClaimAll" ${paid?'':'disabled'}>RESGATAR PREMIUM</button></div></div><div class="pass-section-body"><div class="pass-tier-grid">${tiers}</div></div></section>
+  <section class="${passSectionClass('levels','level-section')}"><div class="pass-section-head"><button class="pass-section-title-button" type="button" data-pass-toggle="levels"><span class="pass-head-copy"><b>RECOMPENSAS DE NÍVEL</b><small>LV 2 → LV ${PLAYER_MAX_LEVEL}</small></span><em>${passSectionIcon('levels')}</em></button><button class="ghost-btn" id="levelClaimAll">RESGATAR DISPONÍVEIS</button></div><div class="pass-section-body"><p class="muted">Cada recompensa de nível pode ser resgatada uma única vez.</p><div class="level-reward-grid">${levels}</div></div></section>`;
+  ui.passContent.querySelectorAll('[data-pass-toggle]').forEach(b=>b.onclick=e=>{e.stopPropagation();togglePassSection(b.dataset.passToggle);});
   ui.passContent.querySelectorAll('[data-pass-claim]').forEach(b=>b.onclick=()=>claimBattlePassTier(b.dataset.passClaim));
   ui.passContent.querySelectorAll('[data-pass-premium-claim]').forEach(b=>b.onclick=()=>claimPremiumBattlePassTier(b.dataset.passPremiumClaim));
   ui.passContent.querySelectorAll('[data-level-claim]').forEach(b=>b.onclick=()=>claimLevelReward(b.dataset.levelClaim));
@@ -1684,7 +1756,7 @@ function freshSave(factionId) {
   return {
     accountOwnerId:getUser()?.id||null,
     accountOwnerEmail:getUser()?.email||null,
-    profile: { callsign:getUser()?.callsign || getUser()?.email?.split('@')[0] || 'Pilot', faction:factionId, level:1, xp:0, xpModelV101:true, credits:20000, uridium:0, aliensKilled:0, ggCompleted:0 },
+    profile: { callsign:getUser()?.callsign || getUser()?.email?.split('@')[0] || 'Pilot', faction:factionId, level:1, xp:0, xpModelV101:true, xpModelV1770:true, credits:20000, uridium:0, aliensKilled:0, ggCompleted:0 },
     activeShipId: 'phoenix',
     ownedShips: ['phoenix'],
     shipLoadout: loadout,
@@ -2157,7 +2229,7 @@ function renderClan(){
   }
   ui.clanContent.innerHTML=header+body;
 }
-async function openClan(){clanViewTab='overview';closeNavigationModals(ui.clanModal);ui.clanModal?.classList.remove('hidden');if(ui.clanContent)ui.clanContent.innerHTML='<div class="muted">Sincronizando aliança...</div>';await syncClanCreditGrants(true);await refreshClanState(true);}
+async function openClan(){if(!featureUnlocked('clan')){showFeatureLock('clan','Clã');return;}clanViewTab='overview';closeNavigationModals(ui.clanModal);ui.clanModal?.classList.remove('hidden');if(ui.clanContent)ui.clanContent.innerHTML='<div class="muted">Sincronizando aliança...</div>';await syncClanCreditGrants(true);await refreshClanState(true);}
 async function createClanNow(){const name=$('#clanCreateName')?.value||'',tag=$('#clanCreateTag')?.value||'';try{await createClanOnline({name,tag});showToast(`Clã [${tag.toUpperCase()}] criado`);await refreshClanState(true);syncOnlineWorld();}catch(e){showToast(e.message);}}
 async function joinClanNow(id){try{await joinClanOnline(id);showToast('Você entrou na aliança');await refreshClanState(true);syncOnlineWorld();}catch(e){showToast(e.message);}}
 async function leaveClanNow(){try{await leaveClanOnline();showToast('Aliança atualizada');await refreshClanState(true);syncOnlineWorld();}catch(e){showToast(e.message);}}
@@ -2238,7 +2310,7 @@ function galaxyEventObjectiveText(ev=currentGalaxyEvent(),rec=galaxyEventRecord(
   if(mode==='boss')return fmt(rec.value||0)+' / 1 '+label;
   return fmt(rec.value||0)+' / '+fmt(ev.target)+' '+label;
 }
-function galaxyEventRewardScaled(ev){const mult=1+Math.min(1.5,Math.max(0,(progress?.profile?.level||1)-1)/36);return {credits:Math.round(ev.reward.credits*mult),uridium:Math.round(ev.reward.uridium*mult),xp:Math.round(ev.reward.xp*mult*designerXpMultiplier()),cores:ev.reward.cores||0};}
+function galaxyEventRewardScaled(ev){const mult=1+Math.min(1.5,Math.max(0,(progress?.profile?.level||1)-1)/36);return {credits:Math.round(ev.reward.credits*mult),uridium:Math.round(ev.reward.uridium*mult),xp:Math.round(ev.reward.xp*mult*designerXpMultiplier()*.55),cores:ev.reward.cores||0};}
 function triggerCombatFlash(kind='cyan'){
   if(!ui.combatFlash)return;ui.combatFlash.className=`combat-flash flash-${kind}`;void ui.combatFlash.offsetWidth;ui.combatFlash.classList.add('play');setTimeout(()=>ui.combatFlash?.classList.remove('play'),420);
 }
@@ -2386,7 +2458,7 @@ function graphDestination(label){
   return {mapId:`x${tier}`,territoryFaction:f.id,battle:false};
 }
 function internalMapFromGraphLabel(label){return graphDestination(label)?.mapId||null;}
-function graphLevelRequirement(label){if(label.startsWith('4-'))return 4;const tier=Number(label.split('-')[1]||99);return tier<=2?1:tier===3?2:tier===4?3:99;}
+function graphLevelRequirement(label){if(label.startsWith('4-'))return 15;const tier=Number(label.split('-')[1]||99);return tier===1?1:tier===2?3:tier===3?7:tier===4?10:99;}
 function canTravelGraphLabel(label){
   const dest=graphDestination(label);if(!dest)return {ok:false,reason:'Rota inválida'};
   if(String(label).startsWith('4-')&&!galaxyBattleMapsOpen()&&!state.currentMap?.battle)return {ok:false,reason:'BATTLE MAP FECHADO • aguarde Evento Galáctico ou World Boss'};
@@ -2533,6 +2605,7 @@ function processPlayerLevelUps(){
     gained++;
     showLevelUpAnimation(progress.profile.level);
     queueCelebration('mission','RECOMPENSA LIBERADA',`Nível ${progress.profile.level} • abra PASSE para resgatar`);
+    const unlocked=progressionUnlocksAtLevel(progress.profile.level);if(unlocked.length)queueCelebration('mission','NOVO ACESSO',unlocked.join(' • '));
   }
   if(gained){normalizeLevelRewards();updatePassBadge();saveGame();}
   return gained;
@@ -2639,9 +2712,10 @@ function hydrateProgress(){
   }
   if(!progress.profile.xpModelV101){
     const oldCarry=progress.profile.xp;
-    progress.profile.xp=levelXpThreshold(progress.profile.level)+oldCarry;
+    progress.profile.xp=legacyLevelXpThresholdV1767(progress.profile.level)+oldCarry;
     progress.profile.xpModelV101=true;
   }
+  migratePlayerXpCurveV1770();
   progress.profile.level=levelFromXp(progress.profile.xp,PLAYER_MAX_LEVEL);
   progress.ownedShips ||= ['phoenix'];progress.inventory ||= {};progress.drones ||= [];progress.ammo ||= {};progress.rockets ||= {};progress.flags ||= {};progress.cargo ||= {};progress.discoveries ||= {};progress.missions ||= freshMissions();normalizeMissionState();normalizeBattlePass();normalizeLevelRewards();progress.pilotBio ||= freshPilotBio();normalizePilotBio();progress.auction ||= freshAuctionState();ensureAuctionState();progress.galaxyGate ||= freshGalaxyGateState();normalizeGalaxyGateState();normalizeCombatAbilities();normalizeGalaxyEvents();
   if(progress.repairRequired&&(!progress.repairRequired.shipId||!SHIPS[progress.repairRequired.shipId]))progress.repairRequired=null;
@@ -3521,7 +3595,8 @@ function nearbyPortal(){return resolvedPortals().find(p=>Math.hypot(p.x-player.x
 function portalAtWorld(x,y){return resolvedPortals().find(p=>Math.hypot(p.x-x,p.y-y)<50)||null;}
 function jumpThroughPortal(portal){
   if(!portal||state.jumping||nowSec()-state.lastPortalAt<1.1)return;
-  if(MAPS[portal.to]?.battle&&!state.currentMap?.battle&&!galaxyBattleMapsOpen()){showToast('MAPAS BATTLE FECHADOS • aguarde Evento Galáctico ou World Boss');playSfx('warning');return;}
+  const access=canTravelGraphLabel(portal.targetLabel||displayMapLabel(portal.to,portal.targetTerritoryFaction));
+  if(!access.ok){showToast(access.reason);playSfx('warning');return;}
   const fromMap=progress.mapId,fromLabel=currentGraphMapLabel();
   state.lastPortalAt=nowSec();
   runMapTransition(portal.to,fromMap,'PORTAL QUÂNTICO',portal.targetTerritoryFaction,fromLabel);
@@ -4452,9 +4527,9 @@ function updateUI(){
   const f=getFaction(),ship=SHIPS[progress.activeShipId],baseSafe=isBaseSafeZone(),portalSafe=isPortalNeutralZone(),safe=baseSafe||portalSafe;ui.factionLabel.textContent=f?.short||'—';ui.factionLabel.style.color=f?.color||'';ui.mapLabel.textContent=displayMapLabel(progress.mapId);if(ui.sectorName)ui.sectorName.textContent=state.currentMap.name||'Setor';if(ui.coordLabel)ui.coordLabel.textContent=`${Math.round(player.x)} / ${Math.round(player.y)}`;if(ui.routeLabel){const rd=routeDistance();ui.routeLabel.textContent=rd>35?`${fmt(rd)}u`:'PARADO';ui.routeLabel.parentElement?.classList.toggle('active',rd>35);}if(ui.discoveriesLabel){const found=state.landmarks.filter(l=>progress.discoveries?.[`${progress.mapId}:${l.id}`]).length;ui.discoveriesLabel.textContent=`${found}/${state.landmarks.length}`;}const shipDesign=currentShipDesign();ui.shipLabel.textContent=shipDesign?`${ship.name} • ${shipDesign.name}`:ship.name;ui.lvl.textContent=progress.profile.level;ui.hp.textContent=fmt(player.hp);ui.maxHp.textContent=fmt(player.maxHp);ui.shield.textContent=fmt(player.shield);ui.maxShield.textContent=fmt(player.maxShield);ui.speed.textContent=fmt(player.speed*shipAbilitySpeedMultiplier());if(ui.dmg)ui.dmg.textContent=fmt(player.laserDamage*currentLaserAmmo().mult);ui.credits.textContent=fmt(progress.profile.credits);ui.uridium.textContent=fmt(progress.profile.uridium);ui.xp.textContent=fmt(progress.profile.xp);ui.xp.title=progress.profile.level>=PLAYER_MAX_LEVEL?'Nível máximo':`Próximo nível: ${fmt(levelXpThreshold(progress.profile.level+1))} XP • ${Math.round(levelProgressPercent(progress.profile.xp,progress.profile.level))}%`;if(ui.droneCount)ui.droneCount.textContent=progress.drones.length;ui.laserToggle.classList.toggle('active',player.laserFiring);ui.rocketCd.textContent=rocketReady()?'MÍSSIL PRONTO':`MÍSSIL ${(getRocketCooldown()-(nowSec()-player.lastRocketShot)).toFixed(1)}s`;
   if(ui.shipHudArt)ui.shipHudArt.src=shipCardAsset(progress.activeShipId)||shipCardAsset('phoenix');
   if(ui.factionIcon)ui.factionIcon.src=factionAsset(progress.profile.faction);
-  if(ui.userLabel)ui.userLabel.textContent=progress.profile.callsign||getUser()?.callsign||'Pilot';updateRankChip();if(ui.petBtn)ui.petBtn.textContent=progress.pet?.owned?`AUX-9 LV${progress.pet.level}`:'AUX-9 LOJA';if(ui.safeZoneLabel){const portalCombat=portalSafe&&state.portalCombatUntil>nowSec();ui.safeZoneLabel.textContent=baseSafe?'BASE • ZONA SEGURA':portalCombat?'PORTAL • COMBATE ATIVO':portalSafe?'PORTAL • ZONA NEUTRA':'ZONA DE COMBATE';ui.safeZoneLabel.classList.toggle('active',safe&&!portalCombat);ui.safeZoneLabel.classList.toggle('danger-lite',portalCombat);}updatePremiumBadge();if(ui.cargoUsed)ui.cargoUsed.textContent=fmt(cargoUsed());if(ui.cargoMax)ui.cargoMax.textContent=fmt(cargoCapacity());if(ui.cargoBtn)ui.cargoBtn.classList.toggle('gold',isAtTrader());updatePetFloat();updateAbilityHud();updateBossHud();updateTargetLockHud();updateCombatStateHud();renderGalaxyEventHud();updateBaseTradePrompt();renderActiveMissionHud();
+  if(ui.userLabel)ui.userLabel.textContent=progress.profile.callsign||getUser()?.callsign||'Pilot';updateRankChip();if(ui.petBtn)ui.petBtn.textContent=progress.pet?.owned?`AUX-9 LV${progress.pet.level}`:'AUX-9 LOJA';if(ui.safeZoneLabel){const portalCombat=portalSafe&&state.portalCombatUntil>nowSec();ui.safeZoneLabel.textContent=baseSafe?'BASE • ZONA SEGURA':portalCombat?'PORTAL • COMBATE ATIVO':portalSafe?'PORTAL • ZONA NEUTRA':'ZONA DE COMBATE';ui.safeZoneLabel.classList.toggle('active',safe&&!portalCombat);ui.safeZoneLabel.classList.toggle('danger-lite',portalCombat);}updatePremiumBadge();if(ui.cargoUsed)ui.cargoUsed.textContent=fmt(cargoUsed());if(ui.cargoMax)ui.cargoMax.textContent=fmt(cargoCapacity());if(ui.cargoBtn)ui.cargoBtn.classList.toggle('gold',isAtTrader());updatePetFloat();updateAbilityHud();updateBossHud();updateTargetLockHud();updateCombatStateHud();renderGalaxyEventHud();updateBaseTradePrompt();updateProgressionAccessLocks();renderActiveMissionHud();
   ui.shopCredits.textContent=fmt(progress.profile.credits);ui.shopStellarium.textContent=fmt(progress.profile.uridium);ui.hangarShipName.textContent=ship.name;updateExtraControls();
-  const portal=nearbyPortal();if(portal&&!state.jumping&&ui.portalPrompt){const pos=screenPos(portal.x,portal.y);ui.portalPrompt.style.left=`${Math.max(85,Math.min(W-85,pos.x))}px`;ui.portalPrompt.style.top=`${Math.max(115,Math.min(H-90,pos.y-58))}px`;ui.portalPromptMap.textContent=`Destino ${displayMapLabel(portal.to)} • clique ou J`;ui.portalPrompt.classList.remove('hidden');}else ui.portalPrompt?.classList.add('hidden');
+  const portal=nearbyPortal();if(portal&&!state.jumping&&ui.portalPrompt){const pos=screenPos(portal.x,portal.y);ui.portalPrompt.style.left=`${Math.max(85,Math.min(W-85,pos.x))}px`;ui.portalPrompt.style.top=`${Math.max(115,Math.min(H-90,pos.y-58))}px`;{const pa=canTravelGraphLabel(portal.targetLabel||displayMapLabel(portal.to,portal.targetTerritoryFaction));ui.portalPromptMap.textContent=pa.ok?`Destino ${portal.targetLabel||displayMapLabel(portal.to)} • clique ou J`:`🔒 ${pa.reason}`;}ui.portalPrompt.classList.remove('hidden');}else ui.portalPrompt?.classList.add('hidden');
 }
 
 function canAfford(price,currency){return currency==='credits'?progress.profile.credits>=price:progress.profile.uridium>=price;}
@@ -4788,7 +4863,7 @@ function renderHangarPilot(){
 function renderHangar(){
   if(!progress)return;loadHangarEquipmentPrefs();
   const tabs={ships:'NAVES',equipment:'EQUIPAMENTOS',drones:'DRONES',pet:'AUX-9',pilot:'PERFIL DE PILOTO'};
-  renderTabs(ui.hangarTabs,tabs,state.hangarTab,id=>{state.hangarTab=id;renderHangar();});ui.hangarContent.innerHTML='';computeStats(true);
+  renderTabs(ui.hangarTabs,tabs,state.hangarTab,id=>{if(id==='pilot'&&!featureUnlocked('pilot')){showFeatureLock('pilot','Perfil de Piloto');return;}state.hangarTab=id;renderHangar();});const pilotTab=[...ui.hangarTabs.querySelectorAll('.tab-btn')][Object.keys(tabs).indexOf('pilot')];if(pilotTab&&!featureUnlocked('pilot')){pilotTab.classList.add('level-locked');pilotTab.title=`Libera no nível ${featureRequiredLevel('pilot')}`;}ui.hangarContent.innerHTML='';computeStats(true);
   const content=state.hangarTab==='ships'?renderHangarShips():state.hangarTab==='equipment'?renderHangarEquipment():state.hangarTab==='drones'?renderHangarDrones():state.hangarTab==='pet'?renderHangarPet():renderHangarPilot();
   ui.hangarContent.appendChild(content);updateUI();
 }
@@ -4901,7 +4976,7 @@ async function testPremiumPurchaseNow(productId){
 async function openPremiumShop(){closeNavigationModals(ui.premiumModal);ui.premiumModal?.classList.remove('hidden');if(ui.premiumProductGrid)ui.premiumProductGrid.innerHTML='<div class="muted">Sincronizando Loja Premium...</div>';await refreshPremiumState(true);renderPremiumShop();}
 
 function openShop(tab='ships'){closeNavigationModals(ui.shopModal);state.shopTab=tab;Promise.all([refreshPremiumState(),refreshLiveOpsState(true)]).finally(()=>{renderShop();ui.shopModal.classList.remove('hidden');});}
-function openHangar(tab='ships'){closeNavigationModals(ui.hangarModal);state.hangarTab=tab;renderHangar();ui.hangarModal.classList.remove('hidden');refreshDesignerState(true).then(()=>{computeStats(true);renderHangar();updateUI();}).catch(()=>{});if(!canChangeEquipment())showToast('Hangar em modo consulta • alterações de equipamento só funcionam na base X-1');}
+function openHangar(tab='ships'){if(tab==='pilot'&&!featureUnlocked('pilot')){showFeatureLock('pilot','Perfil de Piloto');return;}closeNavigationModals(ui.hangarModal);state.hangarTab=tab;renderHangar();ui.hangarModal.classList.remove('hidden');refreshDesignerState(true).then(()=>{computeStats(true);renderHangar();updateUI();}).catch(()=>{});if(!canChangeEquipment())showToast('Hangar em modo consulta • alterações de equipamento só funcionam na base X-1');}
 
 function alphaPieceCount(){return alphaGate().pieces.length;}
 function addAlphaPiece(){
@@ -5013,7 +5088,7 @@ function renderPilotProfile(){
   for(const [branch,meta] of Object.entries(PILOT_BRANCHES))ui.pilotSkillTree.appendChild(buildPilotBranch(branch,meta,avail));
 }
 function refreshPilotViews(){renderPilotProfile();if(ui.hangarModal&&!ui.hangarModal.classList.contains('hidden')&&state.hangarTab==='pilot')renderHangar();requestAnimationFrame(()=>{renderPilotProfile();if(ui.hangarModal&&!ui.hangarModal.classList.contains('hidden')&&state.hangarTab==='pilot')renderHangar();});}
-function openPilotProfile(){openHangar('pilot');}
+function openPilotProfile(){if(!featureUnlocked('pilot')){showFeatureLock('pilot','Perfil de Piloto');return;}openHangar('pilot');}
 
 function formatAuctionClock(sec){const m=Math.floor(sec/60),s=sec%60;return `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;}
 function auctionMinBid(lot){

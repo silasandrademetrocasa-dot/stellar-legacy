@@ -1,5 +1,13 @@
 
-## 17.6.7 — Pilot Accordion + Economy Fast Path
+## 17.7.0 — Progression & Economy Rebalance
+- Nova curva de XP com migração que preserva nível/progresso relativo de contas existentes.
+- NPCs: XP reduzido, Stellarium reforçado, Créditos preservados.
+- Missões deixam de multiplicar recompensas em 10X/7X/5X/3X e viram bônus controlados.
+- Desbloqueios: X-2 LV3, Missões LV5, Piloto LV6, X-3/Semanais LV7, Clã LV8, X-4/Mensais LV10, Especiais LV12, Battle Maps LV15.
+- Passe e recompensas de nível entregam mais STL.
+- Seções do Passe minimizáveis e trilhas FREE/PREMIUM empilhadas verticalmente.
+
+## 17.7.0 — Pilot Accordion + Economy Fast Path
 - Cupom Premium: botão RESGATAR padronizado com os botões dourados do jogo.
 - Perfil de Piloto: DEFESA, UTILIDADE e ATAQUE viraram accordions persistentes no padrão do Hangar.
 - Regra de dependência: pesquisas de 2/3 níveis exigem máximo; pesquisas de 5 níveis liberam a seguinte no nível 3.
