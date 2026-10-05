@@ -6,7 +6,7 @@
 <meta content="width=device-width,initial-scale=1,user-scalable=no" name="viewport"/>
 <meta content="#030816" name="theme-color"/>
 <title>Stellar Legacy</title>
-<link href="/style.css?v=18.1.5" rel="stylesheet"/>
+<link href="/style.css?v=18.1.6A" rel="stylesheet"/>
 </head>
 <body>
 <div id="app">
@@ -566,6 +566,14 @@
       <div><span>ONLINE</span><b id="adminOnlineAccounts">0</b></div>
       <div><span>BANIDAS</span><b id="adminBannedAccounts">0</b></div>
     </div>
+    <section class="admin-runtime-monitor-section">
+      <div class="settings-title admin-runtime-monitor-head">
+        <div><b>CONFIGURAÇÃO AO VIVO • RUNTIME</b><small>Monitor somente leitura dos snapshots usados pelo Render. Nenhuma configuração é editada nesta etapa.</small></div>
+        <button class="small-btn gold" id="adminRuntimeMonitorRefresh" type="button">ATUALIZAR RUNTIME</button>
+      </div>
+      <div class="admin-runtime-monitor-grid" id="adminRuntimeMonitorGrid"><div class="empty-state">Aguardando status dos runtimes...</div></div>
+      <div class="admin-runtime-monitor-foot" id="adminRuntimeMonitorFoot">Etapa 1/5 • monitoramento somente leitura.</div>
+    </section>
     <section class="admin-telemetry-section">
       <div class="settings-title"><div><b>EVOLUÇÃO & ECONOMIA</b><small>Telemetria acumulada dos jogadores: ritmo de evolução, fontes de renda e gasto.</small></div><button class="small-btn gold" id="adminHealthToggle" type="button">SAÚDE DO SERVIDOR</button></div>
       <div class="admin-telemetry-summary" id="adminTelemetrySummary"><div class="empty-state">Aguardando telemetria...</div></div>
@@ -847,6 +855,6 @@
   </div>
 </div>
 </div>
-<script src="/game.js?v=18.1.5" type="module"></script>
+<script src="/game.js?v=18.1.6A" type="module"></script>
 </body>
 </html>

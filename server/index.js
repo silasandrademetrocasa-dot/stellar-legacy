@@ -61,7 +61,7 @@ function configStatus() {
 const LIVE_OPS_CACHE_MS = 12000;
 let liveOpsCache = null;
 let liveOpsCacheAt = 0;
-const NPC_CONFIG_CACHE_MS = 12000;
+const NPC_CONFIG_CACHE_MS = 15000;
 let npcRuntimeCache = null;
 let npcRuntimeCacheAt = 0;
 
@@ -71,6 +71,7 @@ let npcRuntimeCacheAt = 0;
 const TOPBAR_RUNTIME_CACHE_MS = 15000;
 const TOPBAR_RUNTIME_DIR = path.join(os.tmpdir(), 'stellar-legacy-runtime');
 const TOPBAR_RUNTIME_FILE = path.join(TOPBAR_RUNTIME_DIR, 'topbar.runtime.json');
+const NPC_RUNTIME_FILE = path.join(TOPBAR_RUNTIME_DIR, 'npcs.runtime.json');
 const TOPBAR_ALLOWED_MODULES = new Set([
   'pilot_menu','hangar','ship','pilot_research','pet',
   'missions_menu','missions','pass',
@@ -272,17 +273,20 @@ async function loadLiveOpsSnapshot(force=false) {
   return liveOpsCache;
 }
 
-async function loadNpcRuntimeSnapshot(force=false) {
+async function writeNpcRuntimeFile(payload){await fs.mkdir(TOPBAR_RUNTIME_DIR,{recursive:true});const tmp=`${NPC_RUNTIME_FILE}.${process.pid}.tmp`;await fs.writeFile(tmp,JSON.stringify(payload),{encoding:'utf8'});await fs.rename(tmp,NPC_RUNTIME_FILE);}
+async function readNpcRuntimeFile(){try{const text=await fs.readFile(NPC_RUNTIME_FILE,'utf8');const parsed=JSON.parse(text);return parsed&&Array.isArray(parsed.npcs)&&Array.isArray(parsed.spawns)?parsed:null;}catch{return null;}}
+async function refreshNpcRuntimeSnapshot(force=false){
   const now=Date.now();
   if(!force&&npcRuntimeCache&&now-npcRuntimeCacheAt<NPC_CONFIG_CACHE_MS)return npcRuntimeCache;
   const sb=supabaseBase();
   if(!sb)throw new Error('Supabase indisponível para configuração de NPCs.');
   const {data,error}=await sb.rpc('get_npc_runtime_config_v1811');
   if(error)throw new Error(`Falha ao carregar configuração de NPCs: ${error.message}`);
-  npcRuntimeCache=(data&&typeof data==='object')?data:{version:0,npcs:[],spawns:[]};
-  npcRuntimeCacheAt=now;
-  return npcRuntimeCache;
+  const payload=(data&&typeof data==='object')?data:{version:0,npcs:[],spawns:[]};
+  if(!Array.isArray(payload.npcs)||!payload.npcs.length)throw new Error('Snapshot de NPCs veio incompleto.');
+  await writeNpcRuntimeFile(payload);npcRuntimeCache=payload;npcRuntimeCacheAt=now;return payload;
 }
+async function loadNpcRuntimeSnapshot(force=false){try{return await refreshNpcRuntimeSnapshot(force);}catch(err){const disk=await readNpcRuntimeFile();if(disk){npcRuntimeCache=disk;npcRuntimeCacheAt=Date.now();return disk;}throw err;}}
 
 function liveCatalogRow(snapshot,key){
   return (snapshot?.catalog||[]).find(row=>row?.enabled&&String(row.catalog_key||'')===String(key||''))||null;
@@ -512,7 +516,7 @@ async function accountUser(sb, user, preferred = '') {
   return { id: user.id, email: user.email, callsign };
 }
 
-app.get('/health', (req, res) => res.json({ ok: true, game: 'Stellar Legacy', version: '18.1.5', universe: 'shared' }));
+app.get('/health', (req, res) => res.json({ ok: true, game: 'Stellar Legacy', version: '18.1.6A', universe: 'shared' }));
 
 
 app.get('/api/config', (req, res) => {
@@ -528,10 +532,10 @@ app.get('/api/config', (req, res) => {
 
 app.get('/api/meta', (req, res) => res.json({
   name: 'Stellar Legacy',
-  version: '18.1.5',
+  version: '18.1.6A',
   authReady: Boolean(SUPABASE_URL && SUPABASE_KEY),
   diagnostics: configStatus(),
-  features: ['login', 'cloud_save', 'factions', 'safe_zone', 'shop', 'owned_ships', 'equipment_slots', 'inventory', 'drones', 'ammo', 'rockets', 'expanded_expedition_maps', 'cargo_hold', 'ore_trading', 'npc_cargo_boxes', 'npc_respawn', 'minimap_navigation', 'waypoints', 'landmark_discovery', 'combat_fx', 'pet_modules', 'auto_buy_cpu', 'v8_asset_identity', 'mission_control_v93', 'mission_acceptance_tracking', 'expanded_enemy_density', 'online_player_presence', 'real_player_auction', 'rank_nameplates_v12', 'clans_v12', 'clan_vault_v12', 'premium_shop_v12', 'battle_pass_paid_v12', 'premium_subscription_v12', 'clan_daily_economy_v12', 'portal_neutral_zone_v12', 'base_only_equipment_v12', 'single_session_v1214', 'manual_login_v141', 'account_bound_save_v141', 'unique_callsign_v141', 'premium_auto_combat_v141', 'shared_universe_v15', 'authoritative_npcs_v15', 'shared_ores_v15', 'shared_events_v15', 'websocket_world_v15', 'npc_contribution_v15', 'realtime_player_socket_v151', 'remote_laser_fx_v151', 'remote_aux9_v151', 'low_latency_world_v151', 'live_ops_v16', 'server_authoritative_shop_v16', 'supabase_event_schedule_v16', 'economy_guard_v161', 'server_auto_buy_v161', 'server_trader_v161', 'server_pet_slots_v161', 'server_materializer_v161', 'server_quantum_cores_v161', 'economy_fast_path_v1767', 'chat_dock_v162', 'drone_designers_v163', 'designer_sets_v163', 'nexus_eclipse_designer_drops_v163', 'global_chat_v162', 'clan_chat_v162', 'private_chat_v162', 'bottom_hud_reflow_v162', 'ship_designers_v165', 'aux_designers_v165', 'designer_ship_abilities_v165', 'event_designer_drops_v165', 'social_minimap_v165', 'realtime_designer_visuals_v165', 'data_driven_core_v1810', 'data_driven_npcs_v1811', 'server_runtime_topbar_cache_v1813', 'data_driven_world_v1814', 'data_driven_systems_v1815'],
+  features: ['login', 'cloud_save', 'factions', 'safe_zone', 'shop', 'owned_ships', 'equipment_slots', 'inventory', 'drones', 'ammo', 'rockets', 'expanded_expedition_maps', 'cargo_hold', 'ore_trading', 'npc_cargo_boxes', 'npc_respawn', 'minimap_navigation', 'waypoints', 'landmark_discovery', 'combat_fx', 'pet_modules', 'auto_buy_cpu', 'v8_asset_identity', 'mission_control_v93', 'mission_acceptance_tracking', 'expanded_enemy_density', 'online_player_presence', 'real_player_auction', 'rank_nameplates_v12', 'clans_v12', 'clan_vault_v12', 'premium_shop_v12', 'battle_pass_paid_v12', 'premium_subscription_v12', 'clan_daily_economy_v12', 'portal_neutral_zone_v12', 'base_only_equipment_v12', 'single_session_v1214', 'manual_login_v141', 'account_bound_save_v141', 'unique_callsign_v141', 'premium_auto_combat_v141', 'shared_universe_v15', 'authoritative_npcs_v15', 'shared_ores_v15', 'shared_events_v15', 'websocket_world_v15', 'npc_contribution_v15', 'realtime_player_socket_v151', 'remote_laser_fx_v151', 'remote_aux9_v151', 'low_latency_world_v151', 'live_ops_v16', 'server_authoritative_shop_v16', 'supabase_event_schedule_v16', 'economy_guard_v161', 'server_auto_buy_v161', 'server_trader_v161', 'server_pet_slots_v161', 'server_materializer_v161', 'server_quantum_cores_v161', 'economy_fast_path_v1767', 'chat_dock_v162', 'drone_designers_v163', 'designer_sets_v163', 'nexus_eclipse_designer_drops_v163', 'global_chat_v162', 'clan_chat_v162', 'private_chat_v162', 'bottom_hud_reflow_v162', 'ship_designers_v165', 'aux_designers_v165', 'designer_ship_abilities_v165', 'event_designer_drops_v165', 'social_minimap_v165', 'realtime_designer_visuals_v165', 'data_driven_core_v1810', 'data_driven_npcs_v1811', 'server_runtime_topbar_cache_v1813', 'data_driven_world_v1814', 'data_driven_systems_v1815', 'admin_runtime_monitor_v1816a'],
 }));
 
 
@@ -544,6 +548,35 @@ app.get('/api/runtime/topbar', requireUser, asyncRoute(async (req,res)=>{
   }catch{}
   res.set('Cache-Control','no-store');
   res.json({...snapshot,is_admin:isAdmin});
+}));
+
+app.get('/api/runtime/npcs', requireUser, asyncRoute(async (req,res)=>{
+  const snapshot=await loadNpcRuntimeSnapshot(Boolean(req.query?.refresh));
+  res.set('Cache-Control','no-store');
+  res.json(snapshot);
+}));
+
+async function runtimeFileStatus(file){
+  try{const st=await fs.stat(file);return {exists:true,file:path.basename(file),bytes:st.size,updated_at:st.mtime.toISOString()};}
+  catch{return {exists:false,file:path.basename(file),bytes:0,updated_at:null};}
+}
+app.get('/api/admin/runtime-monitor', requireUser, asyncRoute(async(req,res)=>{
+  const {data:adm,error:admErr}=await req.sb.rpc('admin_status_v1763');
+  if(admErr||!adm?.is_admin)return res.status(403).json({error:'Acesso administrativo negado.'});
+  const force=String(req.query?.refresh||'')==='1';
+  const jobs=[
+    ['topbar',()=>loadTopbarRuntimeSnapshot(force),TOPBAR_RUNTIME_FILE],
+    ['npcs',()=>loadNpcRuntimeSnapshot(force),NPC_RUNTIME_FILE],
+    ['world',()=>loadWorldRuntimeSnapshot(force),WORLD_RUNTIME_FILE],
+    ['systems',()=>loadSystemsRuntimeSnapshot(force),SYSTEMS_RUNTIME_FILE],
+  ];
+  const out={};
+  for(const [key,loader,file] of jobs){
+    try{const cfg=await loader();const f=await runtimeFileStatus(file);out[key]={ok:true,version:Number(cfg?.version)||0,source:String(cfg?.source||'render-temp-json'),config_updated_at:cfg?.updated_at||null,...f};}
+    catch(err){const f=await runtimeFileStatus(file);out[key]={ok:false,version:0,source:'unavailable',config_updated_at:null,error:err?.message||'Falha no runtime',...f};}
+  }
+  res.set('Cache-Control','no-store');
+  res.json({ok:true,generated_at:new Date().toISOString(),runtimes:out});
 }));
 
 app.get('/api/runtime/world', requireUser, asyncRoute(async (req,res)=>{
@@ -969,7 +1002,7 @@ app.post('/api/player/location', requireUser, asyncRoute(async (req,res)=>{
   return res.json(data||{ok:true});
 }));
 
-app.get('/api/world/status', (req, res) => res.json({ ok: true, version: '18.1.5', ...sharedUniverse.stats() }));
+app.get('/api/world/status', (req, res) => res.json({ ok: true, version: '18.1.6A', ...sharedUniverse.stats() }));
 
 app.get('*', (req, res) => res.sendFile(path.join(__dirname, '../public/index.html')));
 
@@ -1035,8 +1068,12 @@ const worldRefreshTimer=setInterval(()=>{
 worldRefreshTimer.unref?.();
 refreshWorldRuntimeSnapshot(true).then(cfg=>console.log(`[world-runtime] v${cfg.version} cacheado em ${WORLD_RUNTIME_FILE}`)).catch(err=>console.warn('[world-runtime] bootstrap:',err.message));
 
+const npcRefreshTimer=setInterval(()=>{refreshNpcRuntimeSnapshot(true).catch(err=>console.warn('[npc-runtime] refresh:',err.message));},NPC_CONFIG_CACHE_MS);
+npcRefreshTimer.unref?.();
+refreshNpcRuntimeSnapshot(true).then(cfg=>console.log(`[npc-runtime] v${cfg.version} cacheado em ${NPC_RUNTIME_FILE}`)).catch(err=>console.warn('[npc-runtime] bootstrap:',err.message));
+
 server.listen(port, () => {
-  console.log(`Stellar Legacy V18.1.5 :${port}`);
+  console.log(`Stellar Legacy V18.1.6A :${port}`);
   console.log('Supabase config:', configStatus());
   console.log('Shared Universe: ONLINE');
 });

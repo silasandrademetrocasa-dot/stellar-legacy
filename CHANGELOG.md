@@ -323,3 +323,10 @@ Versão anterior mantida no histórico do projeto base.
 - Ordem das abas usa CSS `order`; nenhum nó é reanexado no DOM.
 - Handlers originais dos botões permanecem intactos.
 - Configuração continua vindo do Supabase e pode mudar sem alterar o código do cliente.
+
+
+## 18.1.6A — Runtime Monitor
+- ADM ganhou monitor somente leitura para TOPBAR, NPCs, WORLD e SYSTEMS.
+- Render materializa também `npcs.runtime.json`, mantendo os quatro runtimes no mesmo padrão de snapshot temporário.
+- Botão `ATUALIZAR RUNTIME` força apenas a renovação dos snapshots; não edita configuração.
+- Nenhum editor de balanceamento foi exposto nesta etapa.

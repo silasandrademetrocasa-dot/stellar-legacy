@@ -2513,3 +2513,16 @@ body[data-quality="low"] .hud-panel,body[data-quality="low"] .modal-card{backdro
 .runtime-module-hidden{display:none!important}
 .runtime-module-locked{opacity:.48;filter:saturate(.55)}
 .runtime-module-locked>.menu-group-toggle,.runtime-module-locked.menu-item,.runtime-module-locked.small-btn{cursor:not-allowed}
+
+
+/* ===================== V18.1.6A • ADMIN RUNTIME MONITOR ===================== */
+.admin-runtime-monitor-section{margin:12px 0;padding:12px;border:1px solid rgba(83,213,255,.15);border-radius:14px;background:linear-gradient(180deg,rgba(5,20,34,.92),rgba(3,12,22,.94))}
+.admin-runtime-monitor-head{margin-bottom:10px}.admin-runtime-monitor-head small{max-width:720px}
+.admin-runtime-monitor-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.admin-runtime-monitor-card{min-width:0;padding:11px;border:1px solid rgba(255,255,255,.08);border-radius:11px;background:rgba(2,11,20,.76)}
+.admin-runtime-monitor-card.ok{border-color:rgba(81,225,184,.2);box-shadow:inset 0 0 18px rgba(81,225,184,.025)}.admin-runtime-monitor-card.err{border-color:rgba(255,92,116,.28)}
+.admin-runtime-monitor-card-head{display:flex;align-items:center;justify-content:space-between;gap:8px}.admin-runtime-monitor-card-head span{font-size:8px;font-weight:1000;letter-spacing:.12em;color:#91b5c6}.admin-runtime-monitor-card-head b{font-size:7px;color:#5ee8bc}.admin-runtime-monitor-card.err .admin-runtime-monitor-card-head b{color:#ff7890}
+.admin-runtime-monitor-card>strong{display:block;margin:8px 0 4px;color:#f2fbff;font-size:20px}.admin-runtime-monitor-card>small{display:block;color:#6f91a1;font-size:7.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.admin-runtime-monitor-meta{display:grid;gap:4px;margin-top:9px}.admin-runtime-monitor-meta span{display:flex;justify-content:space-between;gap:8px;color:#668898;font-size:7px}.admin-runtime-monitor-meta b{color:#bdd7e2;font-size:7px}.admin-runtime-monitor-card em{display:block;margin-top:7px;color:#ff91a4;font-size:7px;font-style:normal;line-height:1.35}
+.admin-runtime-monitor-foot{margin-top:8px;color:#658595;font-size:7.5px;text-align:right}
+@media(max-width:900px){.admin-runtime-monitor-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:560px){.admin-runtime-monitor-grid{grid-template-columns:1fr}.admin-runtime-monitor-head{align-items:flex-start;gap:8px}.admin-runtime-monitor-head>button{width:100%}}

@@ -87,3 +87,10 @@ Agora são configuráveis sem redeploy:
 
 O código mantém fallback local para continuidade do jogo se o runtime remoto estiver temporariamente indisponível.
 
+
+
+## V18.1.6A — Runtime Monitor
+- Etapa somente leitura no ADM.
+- Exibe status e versão de `topbar.runtime.json`, `npcs.runtime.json`, `world.runtime.json` e `systems.runtime.json`.
+- `ATUALIZAR RUNTIME` apenas força a renovação dos snapshots no Render; não altera tabelas nem balanceamento.
+- Nenhum editor foi liberado nesta etapa.

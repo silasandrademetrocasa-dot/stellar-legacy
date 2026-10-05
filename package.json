@@ -1,6 +1,6 @@
 {
   "name": "stellar-legacy",
-  "version": "18.1.5",
+  "version": "18.1.6",
   "type": "module",
   "scripts": {
     "start": "node server/index.js",
@@ -14,5 +14,5 @@
   "engines": {
     "node": ">=18"
   },
-  "release": "data-driven-systems-v18-1-5"
+  "release": "runtime-monitor-v18-1-6a"
 }

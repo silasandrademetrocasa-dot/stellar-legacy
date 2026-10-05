@@ -836,9 +836,14 @@ export async function loadRuntimeConfigOnline(){
 
 // ===================== V18.1.1 NPC RUNTIME CONFIG =====================
 export async function loadNpcRuntimeConfigOnline(){
-  const rows=await authedSupabaseFetch('/rest/v1/rpc/get_npc_runtime_config_v1811',{method:'POST',body:'{}'});
-  return Array.isArray(rows)?rows[0]||null:rows||null;
+  return serverFetch('/api/runtime/npcs',{},true);
 }
+
+// ===================== V18.1.6A ADMIN RUNTIME MONITOR =====================
+export async function loadAdminRuntimeMonitorOnline(refresh=false){
+  return serverFetch(`/api/admin/runtime-monitor${refresh?'?refresh=1':''}`,{},true);
+}
+
 
 // ===================== V18.1.4 WORLD RUNTIME CONFIG =====================
 export async function loadWorldRuntimeConfigOnline(){
