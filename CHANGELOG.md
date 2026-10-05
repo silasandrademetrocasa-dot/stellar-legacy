@@ -1,3 +1,11 @@
+
+## 17.6.7 — Pilot Accordion + Economy Fast Path
+- Cupom Premium: botão RESGATAR padronizado com os botões dourados do jogo.
+- Perfil de Piloto: DEFESA, UTILIDADE e ATAQUE viraram accordions persistentes no padrão do Hangar.
+- Regra de dependência: pesquisas de 2/3 níveis exigem máximo; pesquisas de 5 níveis liberam a seguinte no nível 3.
+- Economia: remove save forçado quando não há alterações pendentes; LIVE OPS usa cache; consultas independentes rodam em paralelo; Premium é consultado apenas quando a ação precisa dele; gravação de save/perfil é paralela.
+- /api/economy/action passa a retornar server_ms para diagnóstico de latência.
+
 # 17.6.4 — HUD Dock Slot Lock
 
 - Minimap fixed permanently in the bottom-right HUD slot.

@@ -2222,3 +2222,25 @@ body[data-quality="low"] .hud-panel,body[data-quality="low"] .modal-card{backdro
 .mission-category.collapsed .mission-category-body{display:none!important}
 .mission-category.collapsed .mission-slot-badge{opacity:.82}
 @media(max-width:680px){.mission-collapse-icon{width:25px;height:25px;border-radius:8px}.mission-head-actions{gap:5px}}
+
+/* V17.6.7 • padrão único para botões dourados */
+.gold-btn{border:1px solid rgba(255,200,84,.58);background:linear-gradient(180deg,rgba(84,57,15,.96),rgba(50,34,10,.96));color:#ffe8af;border-radius:10px;padding:8px 12px;min-height:36px;font-weight:900;letter-spacing:.02em;box-shadow:0 0 16px rgba(255,190,70,.08),inset 0 0 14px rgba(255,225,150,.04);cursor:pointer}
+.gold-btn:hover:not(:disabled){border-color:#ffd76a;box-shadow:0 0 18px rgba(255,194,73,.18),inset 0 0 16px rgba(255,225,150,.06)}
+.gold-btn:disabled{opacity:.38;cursor:not-allowed}
+
+/* V17.6.7 • Perfil de Piloto em accordion, padrão Hangar */
+.pilot-skill-tree{display:flex!important;flex-direction:column!important;gap:10px!important}
+.pilot-branch{padding:0!important;border-radius:15px!important;overflow:hidden!important;border:1px solid color-mix(in srgb,var(--pilot) 28%,rgba(255,255,255,.06))!important;background:rgba(4,11,23,.82)!important}
+.pilot-branch-head{width:100%;min-height:44px;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:8px 12px;border:0;border-bottom:1px solid color-mix(in srgb,var(--pilot) 24%,transparent);background:linear-gradient(180deg,rgba(9,28,45,.90),rgba(6,18,31,.88));color:#dff7ff;text-align:left}
+.pilot-branch-head>span{display:flex;align-items:baseline;gap:9px;min-width:0;flex-wrap:wrap}
+.pilot-branch-head b{font-size:11px;letter-spacing:.10em;color:var(--pilot)}
+.pilot-branch-head small{font-size:8px;color:#769caf;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pilot-branch-head em{font-style:normal;color:var(--pilot);font-size:15px}
+.pilot-branch-head:hover{filter:brightness(1.05)}
+.pilot-branch-body{padding:10px;display:grid;grid-template-columns:repeat(auto-fit,minmax(255px,1fr));gap:8px}
+.pilot-branch.collapsed .pilot-branch-body{display:none}
+.pilot-branch.collapsed .pilot-branch-head{border-bottom:0}
+.pilot-skill-node{margin:0!important;height:100%}
+.pilot-skill-node:after{display:none!important}
+.pilot-skill-req{min-height:14px}
+@media(max-width:680px){.pilot-branch-head>span{align-items:flex-start;flex-direction:column;gap:2px}.pilot-branch-head small{white-space:normal}.pilot-branch-body{grid-template-columns:1fr}}

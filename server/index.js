@@ -155,8 +155,12 @@ async function readEconomySave(req){
   const {data,error}=await req.sb.from('game_saves').select('state').eq('user_id',req.user.id).maybeSingle();if(error)throw new Error(error.message);if(!data?.state)throw Object.assign(new Error('Save online ainda não foi criado.'),{status:409});const state=structuredClone(data.state);if(String(state.accountOwnerId||req.user.id)!==req.user.id)throw Object.assign(new Error('SAVE BLOQUEADO: proprietário inválido.'),{status:409});state.profile ||= {};return state;
 }
 async function writeEconomySave(req,state){
-  state.accountOwnerId=req.user.id;state.accountOwnerEmail=req.user.email||null;const updated_at=new Date().toISOString();const {error}=await req.sb.from('game_saves').upsert({user_id:req.user.id,state,updated_at},{onConflict:'user_id'});if(error)throw new Error(error.message);
-  const profile=state.profile||{},securedCallsign=await ensureProfile(req.sb,req.user);await req.sb.from('profiles').upsert({id:req.user.id,callsign:securedCallsign,faction:profile.faction||null,level:Number(profile.level||1),xp:Number(profile.xp||0),credits:Number(profile.credits||0),uridium:Number(profile.uridium||0),aliens_killed:Number(profile.aliensKilled||0),gg_completed:Number(state.galaxyGate?.alpha?.completed||profile.ggCompleted||0),updated_at},{onConflict:'id'});return updated_at;
+  state.accountOwnerId=req.user.id;state.accountOwnerEmail=req.user.email||null;const updated_at=new Date().toISOString();
+  const profile=state.profile||{};let securedCallsign=normalizeCallsign(profile.callsign||'');if(!securedCallsign)securedCallsign=await ensureProfile(req.sb,req.user);
+  state.profile={...profile,callsign:securedCallsign};
+  const savePromise=req.sb.from('game_saves').upsert({user_id:req.user.id,state,updated_at},{onConflict:'user_id'});
+  const profilePromise=req.sb.from('profiles').upsert({id:req.user.id,callsign:securedCallsign,faction:profile.faction||null,level:Number(profile.level||1),xp:Number(profile.xp||0),credits:Number(profile.credits||0),uridium:Number(profile.uridium||0),aliens_killed:Number(profile.aliensKilled||0),gg_completed:Number(state.galaxyGate?.alpha?.completed||profile.ggCompleted||0),updated_at},{onConflict:'id'});
+  const [{error:saveError},{error:profileError}]=await Promise.all([savePromise,profilePromise]);if(saveError)throw new Error(saveError.message);if(profileError)throw new Error(profileError.message);return updated_at;
 }
 function debitServer(state,amount,currency){const c=currency==='uridium'?'uridium':'credits',price=Math.max(0,Math.round(Number(amount)||0)),balance=Math.max(0,Number(state.profile?.[c])||0);if(balance<price)throw Object.assign(new Error(`Saldo insuficiente: faltam ${price-balance} ${c==='uridium'?'STL':'CR'}.`),{status:409});state.profile[c]=balance-price;return {currency:c,price,balance:state.profile[c]};}
 function creditServer(state,amount,currency){const c=currency==='uridium'?'uridium':'credits',value=Math.max(0,Math.round(Number(amount)||0));state.profile[c]=Math.max(0,Number(state.profile?.[c])||0)+value;return {currency:c,value,balance:state.profile[c]};}
@@ -297,7 +301,7 @@ async function accountUser(sb, user, preferred = '') {
   return { id: user.id, email: user.email, callsign };
 }
 
-app.get('/health', (req, res) => res.json({ ok: true, game: 'Stellar Legacy', version: '17.6.6', universe: 'shared' }));
+app.get('/health', (req, res) => res.json({ ok: true, game: 'Stellar Legacy', version: '17.6.7', universe: 'shared' }));
 
 
 app.get('/api/config', (req, res) => {
@@ -313,10 +317,10 @@ app.get('/api/config', (req, res) => {
 
 app.get('/api/meta', (req, res) => res.json({
   name: 'Stellar Legacy',
-  version: '17.6.6',
+  version: '17.6.7',
   authReady: Boolean(SUPABASE_URL && SUPABASE_KEY),
   diagnostics: configStatus(),
-  features: ['login', 'cloud_save', 'factions', 'safe_zone', 'shop', 'owned_ships', 'equipment_slots', 'inventory', 'drones', 'ammo', 'rockets', 'expanded_expedition_maps', 'cargo_hold', 'ore_trading', 'npc_cargo_boxes', 'npc_respawn', 'minimap_navigation', 'waypoints', 'landmark_discovery', 'combat_fx', 'pet_modules', 'auto_buy_cpu', 'v8_asset_identity', 'mission_control_v93', 'mission_acceptance_tracking', 'expanded_enemy_density', 'online_player_presence', 'real_player_auction', 'rank_nameplates_v12', 'clans_v12', 'clan_vault_v12', 'premium_shop_v12', 'battle_pass_paid_v12', 'premium_subscription_v12', 'clan_daily_economy_v12', 'portal_neutral_zone_v12', 'base_only_equipment_v12', 'single_session_v1214', 'manual_login_v141', 'account_bound_save_v141', 'unique_callsign_v141', 'premium_auto_combat_v141', 'shared_universe_v15', 'authoritative_npcs_v15', 'shared_ores_v15', 'shared_events_v15', 'websocket_world_v15', 'npc_contribution_v15', 'realtime_player_socket_v151', 'remote_laser_fx_v151', 'remote_aux9_v151', 'low_latency_world_v151', 'live_ops_v16', 'server_authoritative_shop_v16', 'supabase_event_schedule_v16', 'economy_guard_v161', 'server_auto_buy_v161', 'server_trader_v161', 'server_pet_slots_v161', 'server_materializer_v161', 'server_quantum_cores_v161', 'chat_dock_v162', 'drone_designers_v163', 'designer_sets_v163', 'nexus_eclipse_designer_drops_v163', 'global_chat_v162', 'clan_chat_v162', 'private_chat_v162', 'bottom_hud_reflow_v162', 'ship_designers_v165', 'aux_designers_v165', 'designer_ship_abilities_v165', 'event_designer_drops_v165', 'social_minimap_v165', 'realtime_designer_visuals_v165'],
+  features: ['login', 'cloud_save', 'factions', 'safe_zone', 'shop', 'owned_ships', 'equipment_slots', 'inventory', 'drones', 'ammo', 'rockets', 'expanded_expedition_maps', 'cargo_hold', 'ore_trading', 'npc_cargo_boxes', 'npc_respawn', 'minimap_navigation', 'waypoints', 'landmark_discovery', 'combat_fx', 'pet_modules', 'auto_buy_cpu', 'v8_asset_identity', 'mission_control_v93', 'mission_acceptance_tracking', 'expanded_enemy_density', 'online_player_presence', 'real_player_auction', 'rank_nameplates_v12', 'clans_v12', 'clan_vault_v12', 'premium_shop_v12', 'battle_pass_paid_v12', 'premium_subscription_v12', 'clan_daily_economy_v12', 'portal_neutral_zone_v12', 'base_only_equipment_v12', 'single_session_v1214', 'manual_login_v141', 'account_bound_save_v141', 'unique_callsign_v141', 'premium_auto_combat_v141', 'shared_universe_v15', 'authoritative_npcs_v15', 'shared_ores_v15', 'shared_events_v15', 'websocket_world_v15', 'npc_contribution_v15', 'realtime_player_socket_v151', 'remote_laser_fx_v151', 'remote_aux9_v151', 'low_latency_world_v151', 'live_ops_v16', 'server_authoritative_shop_v16', 'supabase_event_schedule_v16', 'economy_guard_v161', 'server_auto_buy_v161', 'server_trader_v161', 'server_pet_slots_v161', 'server_materializer_v161', 'server_quantum_cores_v161', 'economy_fast_path_v1767', 'chat_dock_v162', 'drone_designers_v163', 'designer_sets_v163', 'nexus_eclipse_designer_drops_v163', 'global_chat_v162', 'clan_chat_v162', 'private_chat_v162', 'bottom_hud_reflow_v162', 'ship_designers_v165', 'aux_designers_v165', 'designer_ship_abilities_v165', 'event_designer_drops_v165', 'social_minimap_v165', 'realtime_designer_visuals_v165'],
 }));
 
 app.get('/api/diagnostics', asyncRoute(async (req, res) => {
@@ -520,14 +524,20 @@ app.post('/api/live/purchase', requireUser, asyncRoute(async (req,res)=>{
 
 
 app.post('/api/economy/action', requireUser, asyncRoute(async (req,res)=>{
+  const routeStarted=Date.now();
   const action=String(req.body?.action||'').trim();
   const payload=(req.body?.payload&&typeof req.body.payload==='object')?req.body.payload:{};
   if(!action)return res.status(400).json({error:'Ação econômica ausente.'});
   const result=await withPurchaseLock(req.user.id,async()=>{
-    const snapshot=await loadLiveOpsSnapshot(true);
-    const state=await readEconomySave(req);
-    const {data:premiumState}=await req.sb.rpc('get_premium_shop_v12');
-    const premium=!!premiumState?.premium_active;
+    const catalogActions=new Set(['auto_buy','unlock_pet_slot','buy_quantum_cores','sell_cargo','sell_inventory','sell_drone','gate_life','gate_spin']);
+    const premiumActions=new Set(['auto_buy','gate_spin']);
+    const [snapshot,state,premiumResult]=await Promise.all([
+      catalogActions.has(action)?loadLiveOpsSnapshot(false):Promise.resolve(null),
+      readEconomySave(req),
+      premiumActions.has(action)?req.sb.rpc('get_premium_shop_v12'):Promise.resolve({data:null,error:null})
+    ]);
+    if(premiumResult?.error)throw new Error(premiumResult.error.message);
+    const premium=!!premiumResult?.data?.premium_active;
     let info={action};
 
     if(action==='auto_buy'){
@@ -573,7 +583,7 @@ app.post('/api/economy/action', requireUser, asyncRoute(async (req,res)=>{
 
     const updated_at=await writeEconomySave(req,state);return {state,updated_at,info};
   });
-  res.json({ok:true,...result});
+  res.json({ok:true,...result,server_ms:Date.now()-routeStarted});
 }));
 
 // ===================== ADMIN CONTROL PANEL =====================
@@ -653,7 +663,7 @@ app.put('/api/save', requireUser, asyncRoute(async (req, res) => {
   res.json({ ok: true, updated_at, statePatch });
 }));
 
-app.get('/api/world/status', (req, res) => res.json({ ok: true, version: '17.6.6', ...sharedUniverse.stats() }));
+app.get('/api/world/status', (req, res) => res.json({ ok: true, version: '17.6.7', ...sharedUniverse.stats() }));
 
 app.get('*', (req, res) => res.sendFile(path.join(__dirname, '../public/index.html')));
 
@@ -698,7 +708,7 @@ const sharedUniverse = attachSharedUniverse(server, {
 });
 
 server.listen(port, () => {
-  console.log(`Stellar Legacy V17.6.6 :${port}`);
+  console.log(`Stellar Legacy V17.6.7 :${port}`);
   console.log('Supabase config:', configStatus());
   console.log('Shared Universe: ONLINE');
 });
