@@ -98,3 +98,9 @@
 ## V16.7.9 — HANGAR EQUIPMENT COMMAND
 
 Versão anterior mantida no histórico do projeto base.
+
+## Mission + Loot Polish
+- Painel de missões agora permite recolher/expandir cada categoria individualmente.
+- Estado de categorias recolhidas é salvo localmente para persistir entre aberturas.
+- Cargo box de NPC migrou para o pipeline atual de assets e recebe preload prioritário.
+- Cargo box não usa mais fallback de quadrado amarelo; fallback temporário agora mantém formato de crate.

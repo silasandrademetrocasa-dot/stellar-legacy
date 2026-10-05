@@ -180,7 +180,7 @@ export const GAME_ASSETS = {
     credits: '/assets/v17/environment/resources/credits.webp'
   },
   loot: {
-    cargo: '/assets/v8/loot/cargo-box.png',
+    cargo: '/assets/v17/loot/cargo-box.webp',
     mystery: '/assets/v8/loot/mystery-box.png',
     repair: '/assets/v8/loot/repair.png',
     energy: '/assets/v8/loot/energy.png'

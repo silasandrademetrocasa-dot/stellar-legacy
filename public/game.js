@@ -1,7 +1,7 @@
-import { FACTIONS, SHIPS, ITEMS, LASER_AMMO, ROCKETS, NPC_TYPES, MAPS, RESOURCES } from './data.js?v=17.6.4';
-import { GAME_ASSETS } from './assets/v17/manifest.js?v=17.6.4';
-import { signUp, signIn, requestPasswordReset, restorePasswordRecoveryFromUrl, restoreSession, signOutLocal, checkGameSession, endGameSession, getUser, getSessionCredentials, loadCloudSave, saveCloudSave, updateCallsign, updatePassword, loadRankings, loadAuctionBids, saveAuctionBidOnline, markAuctionBidStatusOnline, loadAuctionMarket, upsertPlayerPresenceOnline, loadMapPresenceOnline, removePlayerPresenceOnline, queuePvpAttackOnline, consumePvpDamageEventsOnline, syncArenaProfileOnline, loadArenaState, loadArenaDailyRewardStatus, claimArenaDailyReward, loadArenaOpponents, loadArenaHistory, arenaAttackOnline, listClansOnline, loadMyClanOnline, createClanOnline, joinClanOnline, leaveClanOnline, transferClanCreditsOnline, claimClanCreditGrantsOnline, recordClanAlienKillOnline, getPremiumShopOnline, testPurchasePremiumOnline, loadWarfrontStateOnline, hitWorldBossOnline, claimWorldBossRewardOnline, declareClanWarOnline, recordClanWarScoreOnline, loadLiveOpsOnline, purchaseLiveCatalogOnline, economyActionOnline, getChatHistoryOnline, sendChatMessageOnline, getMyDesignersOnline, setDesignLoadoutOnline, claimGateDroneDesignOnline, claimEventDesignerOnline, getAdminStatus, adminSearchAccounts, adminRecentActions, adminBanAccount, adminUnbanAccount, adminResetAccount, adminDeleteAccount } from './api.js?v=17.6.4';
-import { SharedUniverseClient } from './world.js?v=17.6.4';
+import { FACTIONS, SHIPS, ITEMS, LASER_AMMO, ROCKETS, NPC_TYPES, MAPS, RESOURCES } from './data.js?v=17.6.5';
+import { GAME_ASSETS } from './assets/v17/manifest.js?v=17.6.5';
+import { signUp, signIn, requestPasswordReset, restorePasswordRecoveryFromUrl, restoreSession, signOutLocal, checkGameSession, endGameSession, getUser, getSessionCredentials, loadCloudSave, saveCloudSave, updateCallsign, updatePassword, loadRankings, loadAuctionBids, saveAuctionBidOnline, markAuctionBidStatusOnline, loadAuctionMarket, upsertPlayerPresenceOnline, loadMapPresenceOnline, removePlayerPresenceOnline, queuePvpAttackOnline, consumePvpDamageEventsOnline, syncArenaProfileOnline, loadArenaState, loadArenaDailyRewardStatus, claimArenaDailyReward, loadArenaOpponents, loadArenaHistory, arenaAttackOnline, listClansOnline, loadMyClanOnline, createClanOnline, joinClanOnline, leaveClanOnline, transferClanCreditsOnline, claimClanCreditGrantsOnline, recordClanAlienKillOnline, getPremiumShopOnline, testPurchasePremiumOnline, loadWarfrontStateOnline, hitWorldBossOnline, claimWorldBossRewardOnline, declareClanWarOnline, recordClanWarScoreOnline, loadLiveOpsOnline, purchaseLiveCatalogOnline, economyActionOnline, getChatHistoryOnline, sendChatMessageOnline, getMyDesignersOnline, setDesignLoadoutOnline, claimGateDroneDesignOnline, claimEventDesignerOnline, getAdminStatus, adminSearchAccounts, adminRecentActions, adminBanAccount, adminUnbanAccount, adminResetAccount, adminDeleteAccount } from './api.js?v=17.6.5';
+import { SharedUniverseClient } from './world.js?v=17.6.5';
 
 const canvas = document.querySelector('#game');
 const ctx = canvas.getContext('2d');
@@ -113,11 +113,11 @@ function qualityShouldPreload(path){
   const value=String(path||'');
   // Não pré-carrega todos os fundos grandes de uma vez; o mapa ativo entra em preloadActiveGameplayAssets().
   if(mode==='smart')return /\/(branding|ammo|loot)\//.test(value)||/\/assets\/v17\/environment\/(?:orbital-station\.webp|resources\/|portals\/)/.test(value);
-  if(mode==='core')return /\/(branding|ammo)\//.test(value)||/\/assets\/v17\/environment\/(?:orbital-station\.webp|portals\/)/.test(value);
-  return /\/branding\//.test(value);
+  if(mode==='core')return /\/(branding|ammo|loot)\//.test(value)||/\/assets\/v17\/environment\/(?:orbital-station\.webp|portals\/)/.test(value);
+  return /\/branding\//.test(value)||/\/assets\/v17\/loot\/cargo-box\.webp/.test(value);
 }
 
-const ASSET_REVISION='17.6.4';
+const ASSET_REVISION='17.6.5';
 function versionedAssetUrl(path){
   const value=String(path||'');if(!value)return value;
   return value.includes('?')?`${value}&asset=${ASSET_REVISION}`:`${value}?asset=${ASSET_REVISION}`;
@@ -132,7 +132,7 @@ function flattenAssetPaths(value,out=[]){
   return out;
 }
 function entityAssetPath(path){return /\/assets\/v17\/(ships|ships-map|drones|drones-map|npcs)\//.test(String(path||''));}
-function coreAssetPath(path){const value=String(path||'');return entityAssetPath(value)||/\/(branding|ammo)\//.test(value)||/\/assets\/v17\/environment\//.test(value);}
+function coreAssetPath(path){const value=String(path||'');return entityAssetPath(value)||/\/(branding|ammo)\//.test(value)||/\/assets\/v17\/(environment|loot)\//.test(value);}
 function requestAssetImage(path){
   if(!path)return null;
   let img=ASSET_IMAGES.get(path);
@@ -153,6 +153,7 @@ function trimAssetCache(){
   while(nonCoreCount>cap&&evictable.length){const path=evictable.shift();ASSET_IMAGES.delete(path);ASSET_TOUCH.delete(path);nonCoreCount--;}
 }
 function preloadAssets(){
+  requestAssetImage(GAME_ASSETS.loot?.cargo);
   [...new Set(flattenAssetPaths(GAME_ASSETS))].filter(qualityShouldPreload).forEach(requestAssetImage);
   setTimeout(trimAssetCache,1500);
 }
@@ -1361,6 +1362,14 @@ function finishMissionAutomatically(category,mission,active){
 }
 function claimMission(category){normalizeMissionState();const active=progress.missions.active[category];if(!active||!active.complete)return;finishMissionAutomatically(category,missionById(category,active.id),active);}
 function missionEvent(type,payload={}){if(!progress)return;normalizeMissionState();let anyChanged=false;const finished=[];for(const category of Object.keys(MISSION_CATEGORIES)){const active=progress.missions.active[category];if(!active||active.complete)continue;const mission=missionById(category,active.id);if(!mission)continue;let categoryChanged=false;let eventAmount=type==='collectOre'?Math.max(0,Number(payload.amount)||0):1;if(eventAmount<=0)continue;for(let i=0;i<mission.tasks.length;i++){const task=mission.tasks[i];if(!taskUnlocked(mission,active,i))continue;const current=taskCurrent(active,task),remaining=Math.max(0,task.target-current);if(!remaining)continue;let matches=false;if(type==='kill'&&task.type==='kill'&&payload.enemy?.type===task.npc)matches=true;if(type==='collectOre'&&task.type==='ore'&&payload.type===task.resource)matches=true;if(!matches)continue;const add=Math.min(remaining,type==='kill'?1:eventAmount);if(add<=0)continue;active.taskProgress[task.id]=current+add;addMissionReward(active,mission,task.type==='kill'?'kill':'ore',payload,add);categoryChanged=true;anyChanged=true;if(mission.sequence)break;if(type==='kill')break;}if(categoryChanged){active.complete=mission.tasks.every(x=>taskDone(active,x));if(active.complete)finished.push({category,mission,active});}}for(const item of finished)finishMissionAutomatically(item.category,item.mission,item.active);if(anyChanged&&!finished.length){saveGame();updateMissionButton();if(ui.missionModal&&!ui.missionModal.classList.contains('hidden'))renderMissions();}}
+const MISSION_UI_PREFS_KEY='stellar_mission_ui_v1765';
+const missionUiPrefs={loaded:false,collapsed:{}};
+function loadMissionUiPrefs(){
+  if(missionUiPrefs.loaded)return;missionUiPrefs.loaded=true;
+  try{const raw=JSON.parse(localStorage.getItem(MISSION_UI_PREFS_KEY)||'{}');if(raw.collapsed&&typeof raw.collapsed==='object')missionUiPrefs.collapsed={...raw.collapsed};}catch{}
+}
+function saveMissionUiPrefs(){try{localStorage.setItem(MISSION_UI_PREFS_KEY,JSON.stringify({collapsed:missionUiPrefs.collapsed}));}catch{}}
+function toggleMissionCategory(category){loadMissionUiPrefs();missionUiPrefs.collapsed[category]=!missionUiPrefs.collapsed[category];saveMissionUiPrefs();renderMissions();}
 function missionGroupLabel(group){
   return group==='npc'?'NPC':group==='boss'?'BOSS':group==='ore'?'PEDRAS':group==='hybrid'?'NPC + PEDRA':'MISTAS';
 }
@@ -1394,14 +1403,18 @@ function renderMissionFilter(section,category,grid,missions){
 }
 function renderMissions(){
   if(!ui.missionContent||!progress)return;
-  normalizeMissionState();ui.missionContent.innerHTML='';
+  loadMissionUiPrefs();normalizeMissionState();ui.missionContent.innerHTML='';
   for(const [category,meta] of Object.entries(MISSION_CATEGORIES)){
     const allMissions=getMissionLibrary(category);const missions=visibleMissionCatalog(category,allMissions);
-    const section=document.createElement('section');section.className='mission-category';section.style.setProperty('--mission-accent',meta.accent);
+    const collapsed=!!missionUiPrefs.collapsed[category];
+    const section=document.createElement('section');section.className=`mission-category${collapsed?' collapsed':''}`;section.style.setProperty('--mission-accent',meta.accent);
     const active=progress.missions.active[category];
-    section.innerHTML=`<div class="mission-category-head"><div><div class="eyebrow">${meta.label}</div><h3>${active?'1 missão ativa':`${missions.length} contratos disponíveis agora`}</h3></div><span class="mission-slot-badge">${active?'ATIVA':'LIVRE'}</span></div>`;
+    const head=document.createElement('button');head.type='button';head.className='mission-category-head';head.setAttribute('aria-expanded',String(!collapsed));
+    head.innerHTML=`<div><div class="eyebrow">${meta.label}</div><h3>${active?'1 missão ativa':`${missions.length} contratos disponíveis agora`}</h3></div><span class="mission-head-actions"><span class="mission-slot-badge">${active?'ATIVA':'LIVRE'}</span><em class="mission-collapse-icon">${collapsed?'▸':'▾'}</em></span>`;
+    head.onclick=()=>toggleMissionCategory(category);section.appendChild(head);
+    const body=document.createElement('div');body.className='mission-category-body';
     const grid=document.createElement('div');grid.className='mission-grid';
-    renderMissionFilter(section,category,grid,missions);
+    renderMissionFilter(body,category,grid,missions);
     for(const mission of missions){
       const isActive=active?.id===mission.id,done=missionCompleted(category,mission.id),slotLocked=!!active&&!isActive,locked=slotLocked;if(done)continue;
       const pct=isActive?missionProgressPercent(mission,active):0;
@@ -1425,7 +1438,7 @@ function renderMissions(){
       }
       card.appendChild(actions);grid.appendChild(card);
     }
-    section.appendChild(grid);ui.missionContent.appendChild(section);
+    body.appendChild(grid);section.appendChild(body);ui.missionContent.appendChild(section);
   }
   updateMissionButton();
 }
@@ -4210,7 +4223,10 @@ function drawLoot(){for(const l of state.loot){
     ctx.drawImage(img,-img.naturalWidth*sc/2,-img.naturalHeight*sc/2,img.naturalWidth*sc,img.naturalHeight*sc);
     ctx.restore();continue;
   }
-  ctx.save();ctx.globalAlpha=dyingAlpha;ctx.fillStyle='#f5b84c';ctx.fillRect(p.x-10,p.y-10,20,20);ctx.restore();
+  // Fallback temporário de carregamento: mantém formato de cargo crate, nunca um quadrado chapado.
+  ctx.save();ctx.globalAlpha=dyingAlpha;ctx.translate(p.x,p.y);ctx.shadowColor='#ffbd48';ctx.shadowBlur=8;
+  ctx.fillStyle='rgba(16,28,40,.94)';ctx.strokeStyle='#ffbd48';ctx.lineWidth=1.5;ctx.beginPath();ctx.roundRect(-14,-11,28,22,4);ctx.fill();ctx.stroke();
+  ctx.strokeStyle='rgba(99,214,255,.88)';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(-9,-5);ctx.lineTo(9,-5);ctx.moveTo(-9,5);ctx.lineTo(9,5);ctx.stroke();ctx.restore();
 }}
 function drawNpcModel(e){const boss=e.type.startsWith('boss');const type=e.type.toLowerCase();ctx.save();if(boss){ctx.strokeStyle='rgba(255,76,104,.55)';ctx.lineWidth=2;ctx.beginPath();ctx.arc(0,0,e.size+7+Math.sin(nowSec()*4)*2,0,TWO_PI);ctx.stroke();}ctx.shadowColor=e.color;ctx.shadowBlur=boss?20:10;const s=e.size;const fill=ctx.createLinearGradient(-s,-s,s,s);fill.addColorStop(0,'rgba(255,255,255,.92)');fill.addColorStop(.22,e.color);fill.addColorStop(1,'rgba(18,26,48,.96)');ctx.fillStyle=fill;ctx.strokeStyle='rgba(255,255,255,.42)';ctx.lineWidth=1.1;
   if(type.includes('streuner')){ctx.beginPath();ctx.moveTo(s,0);ctx.lineTo(-s*.05,-s*.5);ctx.lineTo(-s*.5,-s*.26);ctx.lineTo(-s*.15,0);ctx.lineTo(-s*.5,s*.26);ctx.lineTo(-s*.05,s*.5);ctx.closePath();ctx.fill();ctx.stroke();ctx.fillStyle='rgba(9,21,37,.86)';ctx.beginPath();ctx.arc(s*.16,0,s*.18,0,TWO_PI);ctx.fill();}
