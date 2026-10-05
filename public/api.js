@@ -11,14 +11,14 @@ async function readJson(res) {
   });
 }
 
-function notifySessionReplaced(message = 'Sua conta foi acessada em outro dispositivo.') {
+function notifySessionReplaced(message = 'Sua conta foi acessada em outro dispositivo.', code = 'SESSION_REPLACED') {
   if (sessionReplacementNotified) return;
   sessionReplacementNotified = true;
   const userId = currentUser?.id || null;
   signOutLocal();
   try {
     window.dispatchEvent(new CustomEvent('stellar-session-replaced', {
-      detail: { message, userId },
+      detail: { message, userId, code },
     }));
   } catch {}
 }
@@ -47,8 +47,8 @@ async function serverFetch(path, options = {}, withAuth = false) {
     const err = new Error(String(msg));
     err.status = res.status;
     err.code = body?.code || null;
-    if (withAuth && ['SESSION_REPLACED','SESSION_REQUIRED'].includes(err.code)) {
-      notifySessionReplaced(String(msg));
+    if (withAuth && ['SESSION_REPLACED','SESSION_REQUIRED','ACCOUNT_BANNED'].includes(err.code)) {
+      notifySessionReplaced(String(msg), err.code);
     }
     throw err;
   }
@@ -722,4 +722,28 @@ export async function claimEventDesignerOnline({eventId, eventKey}={}) {
     }),
   });
   return Array.isArray(rows) ? rows[0] || null : rows || null;
+}
+
+
+// ===================== ADMIN CONTROL PANEL =====================
+export async function getAdminStatus(){
+  return authedServerFetch('/api/admin/status');
+}
+export async function adminSearchAccounts(query=''){
+  return authedServerFetch(`/api/admin/users?q=${encodeURIComponent(String(query||''))}`);
+}
+export async function adminRecentActions(){
+  return authedServerFetch('/api/admin/actions');
+}
+export async function adminBanAccount(userId,{minutes=0,reason=''}={}){
+  return authedServerFetch(`/api/admin/users/${encodeURIComponent(userId)}/ban`,{method:'POST',body:JSON.stringify({minutes,reason})});
+}
+export async function adminUnbanAccount(userId){
+  return authedServerFetch(`/api/admin/users/${encodeURIComponent(userId)}/unban`,{method:'POST',body:'{}'});
+}
+export async function adminResetAccount(userId){
+  return authedServerFetch(`/api/admin/users/${encodeURIComponent(userId)}/reset`,{method:'POST',body:'{}'});
+}
+export async function adminDeleteAccount(userId){
+  return authedServerFetch(`/api/admin/users/${encodeURIComponent(userId)}`,{method:'DELETE'});
 }

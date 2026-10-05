@@ -6,7 +6,7 @@
 <meta content="width=device-width,initial-scale=1,user-scalable=no" name="viewport"/>
 <meta content="#030816" name="theme-color"/>
 <title>Stellar Legacy</title>
-<link href="/style.css?v=17.6.2" rel="stylesheet"/>
+<link href="/style.css?v=17.6.3" rel="stylesheet"/>
 </head>
 <body>
 <div id="app">
@@ -53,6 +53,7 @@
     </div>
   </div>
 
+  <button class="small-btn admin-top-btn hidden" id="adminBtn" type="button">ADM</button>
   <button class="small-btn config-top-btn" id="configBtn" type="button">CONF</button>
 </nav>
 </header>
@@ -552,6 +553,50 @@
   </div>
 </div>
 
+
+<div class="modal hidden" id="adminModal">
+  <div class="modal-card admin-modal-card">
+    <div class="modal-header admin-modal-header">
+      <div><div class="eyebrow">CENTRAL ADMINISTRATIVA</div><h2>CONTROLE DE CONTAS</h2><p class="muted">Banimento, reset de progresso e exclusão definitiva protegidos pelo backend.</p></div>
+      <button class="ghost-btn" id="closeAdmin" type="button">FECHAR</button>
+    </div>
+    <div class="admin-kpis">
+      <div><span>CONTAS</span><b id="adminTotalAccounts">0</b></div>
+      <div><span>ONLINE</span><b id="adminOnlineAccounts">0</b></div>
+      <div><span>BANIDAS</span><b id="adminBannedAccounts">0</b></div>
+    </div>
+    <section class="admin-control-box">
+      <div class="admin-search-row">
+        <input id="adminSearchInput" type="search" maxlength="120" placeholder="Buscar por callsign, e-mail ou ID..." autocomplete="off"/>
+        <button class="primary-btn" id="adminSearchBtn" type="button">BUSCAR</button>
+      </div>
+      <div class="admin-ban-options">
+        <label>DURAÇÃO DO BAN
+          <select id="adminBanDuration">
+            <option value="60">1 HORA</option>
+            <option value="1440">24 HORAS</option>
+            <option value="10080">7 DIAS</option>
+            <option value="43200">30 DIAS</option>
+            <option value="0" selected>PERMANENTE</option>
+          </select>
+        </label>
+        <label>MOTIVO
+          <input id="adminBanReason" maxlength="240" placeholder="Ex.: uso de exploit, fraude, abuso..."/>
+        </label>
+      </div>
+      <div class="admin-message muted" id="adminMessage">Apenas contas cadastradas como administradoras no banco podem executar ações.</div>
+    </section>
+    <section>
+      <div class="settings-title"><div><b>JOGADORES</b><small>RESET mantém login/callsign e preserva Premium. DELETAR remove a conta de autenticação.</small></div><button class="ghost-btn" id="adminRefreshBtn" type="button">ATUALIZAR</button></div>
+      <div class="admin-user-list" id="adminUserList"><div class="empty-state">Buscando contas...</div></div>
+    </section>
+    <section class="admin-log-section">
+      <div class="settings-title"><div><b>LOG ADMINISTRATIVO</b><small>Últimas ações executadas pelo painel.</small></div></div>
+      <div class="admin-action-log" id="adminActionLog"><div class="empty-state">Nenhuma ação registrada.</div></div>
+    </section>
+  </div>
+</div>
+
 <div class="modal hidden" id="configModal">
   <div class="modal-card settings-modal-card premium-settings-card">
     <div class="modal-header">
@@ -778,6 +823,6 @@
   </div>
 </div>
 </div>
-<script src="/game.js?v=17.6.2" type="module"></script>
+<script src="/game.js?v=17.6.3" type="module"></script>
 </body>
 </html>

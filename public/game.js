@@ -1,7 +1,7 @@
-import { FACTIONS, SHIPS, ITEMS, LASER_AMMO, ROCKETS, NPC_TYPES, MAPS, RESOURCES } from './data.js?v=17.6.2';
-import { GAME_ASSETS } from './assets/v17/manifest.js?v=17.6.2';
-import { signUp, signIn, requestPasswordReset, restorePasswordRecoveryFromUrl, restoreSession, signOutLocal, checkGameSession, endGameSession, getUser, getSessionCredentials, loadCloudSave, saveCloudSave, updateCallsign, updatePassword, loadRankings, loadAuctionBids, saveAuctionBidOnline, markAuctionBidStatusOnline, loadAuctionMarket, upsertPlayerPresenceOnline, loadMapPresenceOnline, removePlayerPresenceOnline, queuePvpAttackOnline, consumePvpDamageEventsOnline, syncArenaProfileOnline, loadArenaState, loadArenaDailyRewardStatus, claimArenaDailyReward, loadArenaOpponents, loadArenaHistory, arenaAttackOnline, listClansOnline, loadMyClanOnline, createClanOnline, joinClanOnline, leaveClanOnline, transferClanCreditsOnline, claimClanCreditGrantsOnline, recordClanAlienKillOnline, getPremiumShopOnline, testPurchasePremiumOnline, loadWarfrontStateOnline, hitWorldBossOnline, claimWorldBossRewardOnline, declareClanWarOnline, recordClanWarScoreOnline, loadLiveOpsOnline, purchaseLiveCatalogOnline, economyActionOnline, getChatHistoryOnline, sendChatMessageOnline, getMyDesignersOnline, setDesignLoadoutOnline, claimGateDroneDesignOnline, claimEventDesignerOnline } from './api.js?v=17.6.2';
-import { SharedUniverseClient } from './world.js?v=17.6.2';
+import { FACTIONS, SHIPS, ITEMS, LASER_AMMO, ROCKETS, NPC_TYPES, MAPS, RESOURCES } from './data.js?v=17.6.3';
+import { GAME_ASSETS } from './assets/v17/manifest.js?v=17.6.3';
+import { signUp, signIn, requestPasswordReset, restorePasswordRecoveryFromUrl, restoreSession, signOutLocal, checkGameSession, endGameSession, getUser, getSessionCredentials, loadCloudSave, saveCloudSave, updateCallsign, updatePassword, loadRankings, loadAuctionBids, saveAuctionBidOnline, markAuctionBidStatusOnline, loadAuctionMarket, upsertPlayerPresenceOnline, loadMapPresenceOnline, removePlayerPresenceOnline, queuePvpAttackOnline, consumePvpDamageEventsOnline, syncArenaProfileOnline, loadArenaState, loadArenaDailyRewardStatus, claimArenaDailyReward, loadArenaOpponents, loadArenaHistory, arenaAttackOnline, listClansOnline, loadMyClanOnline, createClanOnline, joinClanOnline, leaveClanOnline, transferClanCreditsOnline, claimClanCreditGrantsOnline, recordClanAlienKillOnline, getPremiumShopOnline, testPurchasePremiumOnline, loadWarfrontStateOnline, hitWorldBossOnline, claimWorldBossRewardOnline, declareClanWarOnline, recordClanWarScoreOnline, loadLiveOpsOnline, purchaseLiveCatalogOnline, economyActionOnline, getChatHistoryOnline, sendChatMessageOnline, getMyDesignersOnline, setDesignLoadoutOnline, claimGateDroneDesignOnline, claimEventDesignerOnline, getAdminStatus, adminSearchAccounts, adminRecentActions, adminBanAccount, adminUnbanAccount, adminResetAccount, adminDeleteAccount } from './api.js?v=17.6.3';
+import { SharedUniverseClient } from './world.js?v=17.6.3';
 
 const canvas = document.querySelector('#game');
 const ctx = canvas.getContext('2d');
@@ -117,7 +117,7 @@ function qualityShouldPreload(path){
   return /\/branding\//.test(value);
 }
 
-const ASSET_REVISION='17.6.2';
+const ASSET_REVISION='17.6.3';
 function versionedAssetUrl(path){
   const value=String(path||'');if(!value)return value;
   return value.includes('?')?`${value}&asset=${ASSET_REVISION}`:`${value}?asset=${ASSET_REVISION}`;
@@ -304,7 +304,7 @@ const ui = {
   shopBtn: $('#shopBtn'), shopModal: $('#shopModal'), closeShop: $('#closeShop'), shopTabs: $('#shopTabs'), shopGrid: $('#shopGrid'), shopCredits: $('#shopCredits'), shopStellarium: $('#shopStellarium'),
   hangarBtn: $('#hangarBtn'), hangarModal: $('#hangarModal'), closeHangar: $('#closeHangar'), hangarTabs: $('#hangarTabs'), hangarContent: $('#hangarContent'), hangarShipName: $('#hangarShipName'),
   bottomHudDock: $('#bottomHudDock'), chatDock: $('#chatDock'), chatToggle: $('#chatToggle'), chatBody: $('#chatBody'), chatTabs: $('#chatTabs'), chatStatus: $('#chatStatus'), chatChannelChip: $('#chatChannelChip'), chatPrivateRow: $('#chatPrivateRow'), chatPrivateCallsign: $('#chatPrivateCallsign'), chatPrivateOpen: $('#chatPrivateOpen'), chatFeed: $('#chatFeed'), chatForm: $('#chatForm'), chatInput: $('#chatInput'), chatSend: $('#chatSend'),
-  loginModal: $('#loginModal'), loginTabBtn: $('#loginTabBtn'), registerTabBtn: $('#registerTabBtn'), loginForm: $('#loginForm'), registerForm: $('#registerForm'), recoveryForm: $('#recoveryForm'), forgotPasswordBtn: $('#forgotPasswordBtn'), recoveryPassword: $('#recoveryPassword'), recoveryPasswordConfirm: $('#recoveryPasswordConfirm'), loginEmail: $('#loginEmail'), loginPassword: $('#loginPassword'), registerCallsign: $('#registerCallsign'), registerEmail: $('#registerEmail'), registerPassword: $('#registerPassword'), authMessage: $('#authMessage'), userLabel: $('#userLabel'), rankChip: $('#rankChip'), syncLabel: $('#syncLabel'), worldSyncLabel: $('#worldSyncLabel'), logoutBtn: $('#logoutBtn'), safeZoneLabel: $('#safeZoneLabel'), cargoUsed: $('#cargoUsed'), cargoMax: $('#cargoMax'), cargoBtn: $('#cargoBtn'), cargoModal: $('#cargoModal'), closeCargo: $('#closeCargo'), cargoSummary: $('#cargoSummary'), cargoGrid: $('#cargoGrid'), sellAllCargo: $('#sellAllCargo'), configBtn: $('#configBtn'), configModal: $('#configModal'), closeConfig: $('#closeConfig'), qualityButtons: $('#qualityButtons'), qualityCurrentBadge: $('#qualityCurrentBadge'), performanceHint: $('#performanceHint'), audioEnabledToggle: $('#audioEnabledToggle'), audioVolumeRange: $('#audioVolumeRange'), audioVolumeValue: $('#audioVolumeValue'), hudSettingsGrid: $('#hudSettingsGrid'), settingsTabs: $('#settingsTabs'), settingsGamePanel: $('#settingsGamePanel'), settingsRankingPanel: $('#settingsRankingPanel'), settingsAccountPanel: $('#settingsAccountPanel'), rankingRefreshBtn: $('#rankingRefreshBtn'), rankingMyPatent: $('#rankingMyPatent'), rankingPatentGuide: $('#rankingPatentGuide'), rankingPoints: $('#rankingPoints'), rankingArena: $('#rankingArena'), rankingAliens: $('#rankingAliens'), rankingGg: $('#rankingGg'), rankingUpdated: $('#rankingUpdated'), accountEmail: $('#accountEmail'), accountCallsign: $('#accountCallsign'), accountSaveName: $('#accountSaveName'), accountNameStatus: $('#accountNameStatus'), accountNewPassword: $('#accountNewPassword'), accountConfirmPassword: $('#accountConfirmPassword'), accountSavePassword: $('#accountSavePassword'), accountPasswordStatus: $('#accountPasswordStatus'), accountSummary: $('#accountSummary'),
+  loginModal: $('#loginModal'), loginTabBtn: $('#loginTabBtn'), registerTabBtn: $('#registerTabBtn'), loginForm: $('#loginForm'), registerForm: $('#registerForm'), recoveryForm: $('#recoveryForm'), forgotPasswordBtn: $('#forgotPasswordBtn'), recoveryPassword: $('#recoveryPassword'), recoveryPasswordConfirm: $('#recoveryPasswordConfirm'), loginEmail: $('#loginEmail'), loginPassword: $('#loginPassword'), registerCallsign: $('#registerCallsign'), registerEmail: $('#registerEmail'), registerPassword: $('#registerPassword'), authMessage: $('#authMessage'), userLabel: $('#userLabel'), rankChip: $('#rankChip'), syncLabel: $('#syncLabel'), worldSyncLabel: $('#worldSyncLabel'), logoutBtn: $('#logoutBtn'), safeZoneLabel: $('#safeZoneLabel'), cargoUsed: $('#cargoUsed'), cargoMax: $('#cargoMax'), cargoBtn: $('#cargoBtn'), cargoModal: $('#cargoModal'), closeCargo: $('#closeCargo'), cargoSummary: $('#cargoSummary'), cargoGrid: $('#cargoGrid'), sellAllCargo: $('#sellAllCargo'), adminBtn: $('#adminBtn'), adminModal: $('#adminModal'), closeAdmin: $('#closeAdmin'), adminSearchInput: $('#adminSearchInput'), adminSearchBtn: $('#adminSearchBtn'), adminRefreshBtn: $('#adminRefreshBtn'), adminUserList: $('#adminUserList'), adminActionLog: $('#adminActionLog'), adminMessage: $('#adminMessage'), adminBanDuration: $('#adminBanDuration'), adminBanReason: $('#adminBanReason'), adminTotalAccounts: $('#adminTotalAccounts'), adminOnlineAccounts: $('#adminOnlineAccounts'), adminBannedAccounts: $('#adminBannedAccounts'), configBtn: $('#configBtn'), configModal: $('#configModal'), closeConfig: $('#closeConfig'), qualityButtons: $('#qualityButtons'), qualityCurrentBadge: $('#qualityCurrentBadge'), performanceHint: $('#performanceHint'), audioEnabledToggle: $('#audioEnabledToggle'), audioVolumeRange: $('#audioVolumeRange'), audioVolumeValue: $('#audioVolumeValue'), hudSettingsGrid: $('#hudSettingsGrid'), settingsTabs: $('#settingsTabs'), settingsGamePanel: $('#settingsGamePanel'), settingsRankingPanel: $('#settingsRankingPanel'), settingsAccountPanel: $('#settingsAccountPanel'), rankingRefreshBtn: $('#rankingRefreshBtn'), rankingMyPatent: $('#rankingMyPatent'), rankingPatentGuide: $('#rankingPatentGuide'), rankingPoints: $('#rankingPoints'), rankingArena: $('#rankingArena'), rankingAliens: $('#rankingAliens'), rankingGg: $('#rankingGg'), rankingUpdated: $('#rankingUpdated'), accountEmail: $('#accountEmail'), accountCallsign: $('#accountCallsign'), accountSaveName: $('#accountSaveName'), accountNameStatus: $('#accountNameStatus'), accountNewPassword: $('#accountNewPassword'), accountConfirmPassword: $('#accountConfirmPassword'), accountSavePassword: $('#accountSavePassword'), accountPasswordStatus: $('#accountPasswordStatus'), accountSummary: $('#accountSummary'),
 };
 
 const SAVE_KEY_PREFIX = 'stellarLegacyV5Save';
@@ -5600,6 +5600,26 @@ function openArena(){
   refreshArena(true);
 }
 
+const adminRuntime={enabled:false,status:null,users:[],actions:[],busy:false};
+function adminDate(value){if(!value)return '—';try{return new Date(value).toLocaleString('pt-BR',{dateStyle:'short',timeStyle:'short'});}catch{return String(value);}}
+function adminSetMessage(text,kind=''){if(!ui.adminMessage)return;ui.adminMessage.textContent=text||'';ui.adminMessage.className=`admin-message ${kind}`.trim();}
+function renderAdminStatus(){const st=adminRuntime.status||{};if(ui.adminTotalAccounts)ui.adminTotalAccounts.textContent=fmt(st.total_accounts||0);if(ui.adminOnlineAccounts)ui.adminOnlineAccounts.textContent=fmt(st.online_accounts||0);if(ui.adminBannedAccounts)ui.adminBannedAccounts.textContent=fmt(st.banned_accounts||0);}
+function renderAdminUsers(){
+  if(!ui.adminUserList)return;const users=adminRuntime.users||[];
+  if(!users.length){ui.adminUserList.innerHTML='<div class="empty-state">Nenhuma conta encontrada.</div>';return;}
+  ui.adminUserList.innerHTML=users.map(u=>{const protectedAdmin=!!u.is_admin,banned=!!u.is_banned,online=u.presence_updated_at&&Date.now()-Date.parse(u.presence_updated_at)<120000;return `<article class="admin-user-card ${banned?'banned':''} ${protectedAdmin?'protected':''}" data-admin-user="${escHtml(u.user_id)}"><div class="admin-user-main"><div><div class="admin-user-name">${escHtml(u.callsign||'Pilot')} ${protectedAdmin?'<span class="admin-role-badge">ADM</span>':''}${banned?'<span class="admin-ban-badge">BANIDO</span>':''}</div><small>${escHtml(u.email||'sem e-mail')} • ${escHtml(u.user_id)}</small></div><span class="admin-online-dot ${online?'on':''}">${online?'ONLINE':'OFFLINE'}</span></div><div class="admin-user-stats"><span>LV <b>${fmt(u.level||1)}</b></span><span>XP <b>${fmt(u.xp||0)}</b></span><span>CR <b>${fmt(u.credits||0)}</b></span><span>STL <b>${fmt(u.uridium||0)}</b></span><span>SAVE <b>${u.has_save?'SIM':'NÃO'}</b></span></div>${banned?`<div class="admin-ban-info">${u.banned_until?`Até ${adminDate(u.banned_until)}`:'Permanente'}${u.banned_reason?` • ${escHtml(u.banned_reason)}`:''}</div>`:''}<div class="admin-user-actions">${banned?`<button class="ghost-btn" data-admin-action="unban" ${protectedAdmin?'disabled':''}>REMOVER BAN</button>`:`<button class="danger-btn" data-admin-action="ban" ${protectedAdmin?'disabled':''}>BANIR</button>`}<button class="ghost-btn admin-reset-btn" data-admin-action="reset" ${protectedAdmin?'disabled':''}>ZERAR CONTA</button><button class="danger-btn admin-delete-btn" data-admin-action="delete" ${protectedAdmin?'disabled':''}>DELETAR</button></div></article>`;}).join('');
+}
+function renderAdminActions(){if(!ui.adminActionLog)return;const rows=adminRuntime.actions||[];if(!rows.length){ui.adminActionLog.innerHTML='<div class="empty-state">Nenhuma ação registrada.</div>';return;}ui.adminActionLog.innerHTML=rows.map(a=>`<div class="admin-log-row"><b>${escHtml(String(a.action||'').toUpperCase())}</b><span>${escHtml(a.target_callsign||a.target_email||a.target_user_id||'Conta')}</span><small>${adminDate(a.created_at)}</small></div>`).join('');}
+async function refreshAdminStatus(silent=true){
+  try{const st=await getAdminStatus();adminRuntime.status=st;adminRuntime.enabled=!!st?.is_admin;ui.adminBtn?.classList.toggle('hidden',!adminRuntime.enabled);renderAdminStatus();return adminRuntime.enabled;}catch(err){adminRuntime.enabled=false;ui.adminBtn?.classList.add('hidden');if(!silent)showToast(err.message);return false;}
+}
+async function refreshAdminPanel(query=null){if(adminRuntime.busy)return;adminRuntime.busy=true;adminSetMessage('Atualizando painel...','busy');try{const q=query===null?String(ui.adminSearchInput?.value||''):String(query||'');const [status,users,actions]=await Promise.all([getAdminStatus(),adminSearchAccounts(q),adminRecentActions()]);adminRuntime.status=status;adminRuntime.enabled=!!status?.is_admin;if(!adminRuntime.enabled)throw new Error('Acesso administrativo negado.');adminRuntime.users=users?.users||[];adminRuntime.actions=actions?.actions||[];renderAdminStatus();renderAdminUsers();renderAdminActions();adminSetMessage(`${adminRuntime.users.length} conta(s) exibida(s).`,'ok');}catch(err){adminSetMessage(err.message,'err');}finally{adminRuntime.busy=false;}}
+async function openAdminPanel(){if(!await refreshAdminStatus(false)){showToast('Acesso administrativo negado');return;}closeNavigationModals(ui.adminModal);ui.adminModal?.classList.remove('hidden');await refreshAdminPanel();}
+async function runAdminAction(action,user){if(!user||adminRuntime.busy)return;const name=user.callsign||user.email||'esta conta';let changed=false;try{adminRuntime.busy=true;if(action==='ban'){const minutes=Math.max(0,Number(ui.adminBanDuration?.value)||0),reason=String(ui.adminBanReason?.value||'').trim();if(!confirm(`Banir ${name}${minutes?` por ${minutes} minuto(s)`:' permanentemente'}?`))return;await adminBanAccount(user.user_id,{minutes,reason});changed=true;adminSetMessage(`${name} foi banido.`,'ok');}
+else if(action==='unban'){if(!confirm(`Remover o ban de ${name}?`))return;await adminUnbanAccount(user.user_id);changed=true;adminSetMessage(`Ban removido de ${name}.`,'ok');}
+else if(action==='reset'){if(!confirm(`ZERAR TODO O PROGRESSO de ${name}?\n\nLogin e callsign serão mantidos. Premium é preservado. O jogador será desconectado.`))return;await adminResetAccount(user.user_id);changed=true;adminSetMessage(`${name} foi zerado e desconectado.`,'ok');}
+else if(action==='delete'){const typed=prompt(`EXCLUSÃO DEFINITIVA.\nDigite exatamente o callsign abaixo para confirmar:\n\n${name}`,'');if(String(typed||'').trim()!==String(name).trim())throw new Error('Exclusão cancelada: callsign não confere.');if(!confirm(`ÚLTIMA CONFIRMAÇÃO: deletar ${name}? A pessoa terá que criar uma conta nova.`))return;await adminDeleteAccount(user.user_id);changed=true;adminSetMessage(`${name} foi deletado definitivamente.`,'ok');}}catch(err){adminSetMessage(err.message,'err');showToast(err.message);}finally{adminRuntime.busy=false;}if(changed)await refreshAdminPanel();}
+
 function renderAll(){buildAmmoButtons();renderShop();renderHangar();renderCargo();renderMapModal();renderPet();renderMissions();renderGalaxyGate();renderPilotProfile();ensureAuctionState();updatePassBadge();renderGalaxyEvent();updateUI();updateWarfrontBadge();refreshArenaBadge();}
 
 function worldPoint(ev){const r=canvas.getBoundingClientRect(),sx=ev.clientX-r.left,sy=ev.clientY-r.top;return{x:sx-W/2+state.camera.x,y:sy-H/2+state.camera.y};}
@@ -5631,7 +5651,7 @@ ui.portalPrompt.onclick=()=>{const portal=nearbyPortal();if(portal)jumpThroughPo
 minimap.addEventListener('pointerdown',e=>{if(!authenticated||!progress)return;e.preventDefault();e.stopPropagation();const r=minimap.getBoundingClientRect();const mx=(e.clientX-r.left)/r.width*minimap.width,my=(e.clientY-r.top)/r.height*minimap.height;player.tx=Math.max(35,Math.min(state.currentMap.world.w-35,mx/minimap.width*state.currentMap.world.w));player.ty=Math.max(35,Math.min(state.currentMap.world.h-35,my/minimap.height*state.currentMap.world.h));showToast(`Rota definida no minimapa`);});
 ui.laserToggle.onclick=()=>{if(!state.target||state.target.hp<=0){showToast('Selecione um alvo');return;}player.laserFiring=!player.laserFiring;};ui.rocketFire.onclick=()=>fireRocket(true);
 const dismissibleModals=()=>[
-  ui.saleConfirmModal,ui.configModal,ui.galaxyEventModal,ui.premiumModal,ui.warfrontModal,ui.clanModal,ui.passModal,ui.arenaModal,ui.auctionModal,ui.pilotModal,ui.gateModal,ui.missionModal,ui.shopModal,ui.hangarModal,ui.petModal,ui.cargoModal,ui.mapModal
+  ui.saleConfirmModal,ui.adminModal,ui.configModal,ui.galaxyEventModal,ui.premiumModal,ui.warfrontModal,ui.clanModal,ui.passModal,ui.arenaModal,ui.auctionModal,ui.pilotModal,ui.gateModal,ui.missionModal,ui.shopModal,ui.hangarModal,ui.petModal,ui.cargoModal,ui.mapModal
 ].filter(Boolean);
 function closeNavigationModals(except=null){
   for(const modal of dismissibleModals()){
@@ -5706,6 +5726,12 @@ if(ui.saleConfirmAccept)ui.saleConfirmAccept.onclick=()=>confirmSaleNow();
 if(ui.hangarBtn)ui.hangarBtn.onclick=()=>openHangar('equipment');
 if(ui.shipMenuBtn)ui.shipMenuBtn.onclick=()=>openHangar('ships');
 if(ui.closeHangar)ui.closeHangar.onclick=()=>ui.hangarModal.classList.add('hidden');
+if(ui.adminBtn)ui.adminBtn.onclick=()=>openAdminPanel();
+if(ui.closeAdmin)ui.closeAdmin.onclick=()=>ui.adminModal.classList.add('hidden');
+if(ui.adminSearchBtn)ui.adminSearchBtn.onclick=()=>refreshAdminPanel();
+if(ui.adminRefreshBtn)ui.adminRefreshBtn.onclick=()=>refreshAdminPanel();
+if(ui.adminSearchInput)ui.adminSearchInput.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();refreshAdminPanel();}});
+if(ui.adminUserList)ui.adminUserList.onclick=e=>{const btn=e.target.closest('[data-admin-action]'),card=e.target.closest('[data-admin-user]');if(!btn||!card)return;const user=adminRuntime.users.find(u=>String(u.user_id)===String(card.dataset.adminUser));if(user)runAdminAction(btn.dataset.adminAction,user);};
 if(ui.configBtn)ui.configBtn.onclick=()=>openSettings();
 if(ui.closeConfig)ui.closeConfig.onclick=()=>ui.configModal.classList.add('hidden');
 if(ui.baseTradePrompt)ui.baseTradePrompt.onclick=()=>{if(isAtTrader())openCargo();};
@@ -5762,7 +5788,7 @@ document.addEventListener('keydown',e=>{
 });
 
 
-function forceLogoutBecauseSessionMoved(message='Sua conta foi acessada em outro dispositivo.',userId=null){
+function forceLogoutBecauseSessionMoved(message='Sua conta foi acessada em outro dispositivo.',userId=null,reason='session'){
   sharedUniverse.close();sharedUniverseRuntime.ready=false;sharedUniverseRuntime.event=null;
   const staleUserId=userId||getUser()?.id||null;
   authenticated=false;
@@ -5786,10 +5812,10 @@ function forceLogoutBecauseSessionMoved(message='Sua conta foi acessada em outro
   if(ui.rankChip)ui.rankChip.textContent='Piloto Básico';
   setSync('SESSÃO ENCERRADA','err');
   showAuthMode('login');
-  ui.authMessage.textContent=message+' O login mais recente permaneceu conectado.';
+  ui.authMessage.textContent=reason==='ban'?message:message+' O login mais recente permaneceu conectado.';
 }
 window.addEventListener('stellar-session-replaced',e=>{
-  forceLogoutBecauseSessionMoved(e?.detail?.message||'Sua conta foi acessada em outro dispositivo.',e?.detail?.userId||null);
+  forceLogoutBecauseSessionMoved(e?.detail?.message||'Sua conta foi acessada em outro dispositivo.',e?.detail?.userId||null,e?.detail?.code==='ACCOUNT_BANNED'?'ban':'session');
 });
 
 function showAuthMode(mode){
@@ -5820,7 +5846,7 @@ function startLoadedGame(){
 }
 
 async function afterAuth(){
-  authenticated=true;ui.loginModal.classList.add('hidden');ui.userLabel.textContent=getUser()?.callsign||getUser()?.email?.split('@')[0]||'Pilot';loadActivityLog();refreshClanState(true).then(()=>refreshRankings(true)).catch(()=>{});setSync('SINCRONIZANDO','busy');
+  authenticated=true;ui.loginModal.classList.add('hidden');ui.userLabel.textContent=getUser()?.callsign||getUser()?.email?.split('@')[0]||'Pilot';loadActivityLog();refreshAdminStatus(true);refreshClanState(true).then(()=>refreshRankings(true)).catch(()=>{});setSync('SINCRONIZANDO','busy');
   try{
     const accountId=String(getUser()?.id||'');
     let local=readLocalGameState();

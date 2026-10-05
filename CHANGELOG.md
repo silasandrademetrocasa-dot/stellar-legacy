@@ -1,3 +1,16 @@
+# V17.6.3 — Admin Control Panel
+
+- Nova aba ADM visível apenas para contas presentes em `game_admins`.
+- Busca de contas por callsign, e-mail ou UUID.
+- Ban temporário ou permanente com motivo e desconexão da sessão ativa.
+- Remoção de ban.
+- Reset completo de progresso preservando login, callsign e Premium.
+- Exclusão definitiva da conta, obrigando novo cadastro.
+- Proteção contra ban/reset/delete de contas administrativas pelo painel.
+- Log auditável das ações administrativas.
+- Ban aplicado também no login, refresh, APIs autenticadas e Shared Universe.
+- Migration: `sql/V17_6_3_ADMIN_CONTROL_PANEL.sql`.
+
 ## V17.6.1 — ENVIRONMENT ASSET LOADING HOTFIX
 - Cache-busting aplicado também aos arquivos de imagem, evitando fundo/base/recurso antigo ou 404 preso no navegador/CDN após deploy.
 - Modo BAIXA mantém o fundo do mapa visível com alpha e efeitos reduzidos em vez de desligar o cenário por completo.

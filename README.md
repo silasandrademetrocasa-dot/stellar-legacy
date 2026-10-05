@@ -174,3 +174,6 @@ Antes de liberar novos cadastros/renomes, execute `sql/V14_1_ACCOUNT_GUARD.sql` 
 - Laser remoto: cor + munição usada.
 - AUX-9 remoto: posição, modo, nível e disparo visíveis.
 - Supabase continua como persistência e fallback, não como transporte primário de movimento.
+
+## Painel ADM
+A V17.6.3 usa a tabela existente `public.game_admins` como fonte de autorização. A migration `sql/V17_6_3_ADMIN_CONTROL_PANEL.sql` cria moderação, log e RPCs seguras. No projeto principal do Supabase esta migration já foi aplicada; o arquivo permanece no ZIP para reproduzir o ambiente em outro banco.
