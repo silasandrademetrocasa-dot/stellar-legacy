@@ -243,3 +243,9 @@ Editor de Mundo no painel ADM: mapas, recursos, setores, portais e pools de min�
 ### V18.1.6E
 
 `ADM > CONFIGURAÇÃO AO VIVO > SISTEMAS` adiciona editores de Missões, Economia e Crafting. As alterações passam pelo backend autenticado, atualizam o Supabase e renovam `systems.runtime.json` sem deploy.
+## V18.1.6 FINAL — Central ADM Data Driven
+
+A Central ADM consolidada possui cinco áreas em `ADM > CONFIGURAÇÃO AO VIVO`: **RUNTIME, INTERFACE, NPCs, MUNDO e SISTEMAS**. As alterações passam por backend autenticado e RPCs administrativas, regeneram os snapshots temporários do Render e são consumidas pelo jogo sem redeploy.
+
+Snapshots ativos: `topbar.runtime.json`, `npcs.runtime.json`, `world.runtime.json` e `systems.runtime.json`. O Git continua responsável pela engine, segurança e assets; o Supabase configura apenas conteúdo conhecido e validado pelo motor.
+

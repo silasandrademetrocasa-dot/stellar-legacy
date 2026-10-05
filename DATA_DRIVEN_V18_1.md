@@ -111,3 +111,8 @@ O ADM ganhou a aba **MUNDO**, com quatro visões: Mapas, Recursos, Setores e Por
 ## V18.1.6E — Editor de Sistemas
 
 A quinta etapa da Central ADM expõe somente o `systems.runtime.json` para edição controlada. O administrador pode ajustar categorias/geradores de missão, serviços econômicos e receitas de crafting. O backend valida IDs, limites numéricos e objetos JSON, chama apenas RPCs conhecidas e regenera o snapshot temporário do Render.
+
+## V18.1.6 FINAL — Central ADM consolidada
+
+As cinco etapas A–E foram consolidadas. O painel administrativo agora controla Interface, NPCs, Mundo, Missões, Economia e Crafting sobre os quatro snapshots temporários do Render. A versão FINAL não acrescenta novas regras: ela congela a arquitetura testada por etapas e mantém as proteções de parâmetros opcionais `NULL`.
+

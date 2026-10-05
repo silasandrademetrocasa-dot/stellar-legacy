@@ -1,3 +1,14 @@
+## V18.1.6 FINAL — Central ADM Data Driven
+
+- Consolida as etapas A → E da Central ADM em um único build estável.
+- RUNTIME: monitora TOPBAR / NPCs / WORLD / SYSTEMS e força renovação dos snapshots temporários.
+- INTERFACE: nome, ordem, nível mínimo, ativo/inativo e ocultação por nível.
+- NPCs: atributos, recompensas, respawn e população por mapa.
+- MUNDO: mapas, recursos, setores, portais e pools de minério.
+- SISTEMAS: missões, economia e crafting.
+- Mantém o fluxo seguro `Supabase -> Render -> JSON temporário -> jogo`, sem execução de HTML/JS vindo do banco.
+- Nenhuma mecânica nova foi adicionada nesta consolidação; o objetivo é congelar a fundação Data Driven validada nas etapas anteriores.
+
 ## V18.1.6E — Admin Systems Editor • Stage 5
 
 - Nova aba **SISTEMAS** em `ADM > CONFIGURAÇÃO AO VIVO`.

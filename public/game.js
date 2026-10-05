@@ -1,7 +1,7 @@
-import { FACTIONS, SHIPS, ITEMS, LASER_AMMO, ROCKETS, NPC_TYPES, MAPS, RESOURCES } from './data.js?v=18.1.6E';
-import { GAME_ASSETS } from './assets/v17/manifest.js?v=18.1.6E';
-import { signUp, signIn, requestPasswordReset, restorePasswordRecoveryFromUrl, restoreSession, signOutLocal, checkGameSession, endGameSession, getUser, getSessionCredentials, loadCloudSave, saveCloudSave, updateCallsign, updatePassword, loadRankings, loadAuctionBids, saveAuctionBidOnline, markAuctionBidStatusOnline, loadAuctionMarket, upsertPlayerPresenceOnline, loadMapPresenceOnline, savePlayerLocationCheckpointOnline, loadPlayerLocationCheckpointOnline, removePlayerPresenceOnline, queuePvpAttackOnline, consumePvpDamageEventsOnline, syncArenaProfileOnline, loadArenaState, loadArenaDailyRewardStatus, claimArenaDailyReward, loadArenaOpponents, loadArenaHistory, arenaAttackOnline, listClansOnline, loadMyClanOnline, createClanOnline, joinClanOnline, leaveClanOnline, transferClanCreditsOnline, claimClanCreditGrantsOnline, recordClanAlienKillOnline, getPremiumShopOnline, testPurchasePremiumOnline, loadWarfrontStateOnline, hitWorldBossOnline, claimWorldBossRewardOnline, declareClanWarOnline, recordClanWarScoreOnline, loadLiveOpsOnline, purchaseLiveCatalogOnline, economyActionOnline, getChatHistoryOnline, sendChatMessageOnline, getMyDesignersOnline, setDesignLoadoutOnline, claimGateDroneDesignOnline, claimEventDesignerOnline, getAdminStatus, adminSearchAccounts, adminRecentActions, adminBanAccount, adminUnbanAccount, adminResetAccount, adminDeleteAccount, pushTelemetryBatch, adminTelemetryOverview, adminPlayerTelemetry, getBattleGroupOnline, createBattleGroupOnline, inviteBattleGroupOnline, searchBattleGroupPlayersOnline, inviteBattleGroupUserOnline, respondBattleGroupInviteOnline, leaveBattleGroupOnline, kickBattleGroupMemberOnline, setBattleGroupRallyOnline, loadRuntimeConfigOnline, loadNpcRuntimeConfigOnline, loadWorldRuntimeConfigOnline, loadSystemsRuntimeConfigOnline, loadAdminRuntimeMonitorOnline, adminUpdateRuntimeModuleOnline, adminUpdateNpcRuntimeOnline, adminUpdateNpcSpawnRuntimeOnline, adminUpdateWorldMapOnline, adminUpdateWorldResourceOnline, adminUpdateWorldSectorOnline, adminUpdateWorldPortalOnline, adminUpdateWorldResourcePoolOnline, adminUpdateMissionCategoryOnline, adminUpdateEconomyServiceOnline, adminUpdateCraftingRecipeOnline } from './api.js?v=18.1.6E';
-import { SharedUniverseClient } from './world.js?v=18.1.6E';
+import { FACTIONS, SHIPS, ITEMS, LASER_AMMO, ROCKETS, NPC_TYPES, MAPS, RESOURCES } from './data.js?v=18.1.6-final';
+import { GAME_ASSETS } from './assets/v17/manifest.js?v=18.1.6-final';
+import { signUp, signIn, requestPasswordReset, restorePasswordRecoveryFromUrl, restoreSession, signOutLocal, checkGameSession, endGameSession, getUser, getSessionCredentials, loadCloudSave, saveCloudSave, updateCallsign, updatePassword, loadRankings, loadAuctionBids, saveAuctionBidOnline, markAuctionBidStatusOnline, loadAuctionMarket, upsertPlayerPresenceOnline, loadMapPresenceOnline, savePlayerLocationCheckpointOnline, loadPlayerLocationCheckpointOnline, removePlayerPresenceOnline, queuePvpAttackOnline, consumePvpDamageEventsOnline, syncArenaProfileOnline, loadArenaState, loadArenaDailyRewardStatus, claimArenaDailyReward, loadArenaOpponents, loadArenaHistory, arenaAttackOnline, listClansOnline, loadMyClanOnline, createClanOnline, joinClanOnline, leaveClanOnline, transferClanCreditsOnline, claimClanCreditGrantsOnline, recordClanAlienKillOnline, getPremiumShopOnline, testPurchasePremiumOnline, loadWarfrontStateOnline, hitWorldBossOnline, claimWorldBossRewardOnline, declareClanWarOnline, recordClanWarScoreOnline, loadLiveOpsOnline, purchaseLiveCatalogOnline, economyActionOnline, getChatHistoryOnline, sendChatMessageOnline, getMyDesignersOnline, setDesignLoadoutOnline, claimGateDroneDesignOnline, claimEventDesignerOnline, getAdminStatus, adminSearchAccounts, adminRecentActions, adminBanAccount, adminUnbanAccount, adminResetAccount, adminDeleteAccount, pushTelemetryBatch, adminTelemetryOverview, adminPlayerTelemetry, getBattleGroupOnline, createBattleGroupOnline, inviteBattleGroupOnline, searchBattleGroupPlayersOnline, inviteBattleGroupUserOnline, respondBattleGroupInviteOnline, leaveBattleGroupOnline, kickBattleGroupMemberOnline, setBattleGroupRallyOnline, loadRuntimeConfigOnline, loadNpcRuntimeConfigOnline, loadWorldRuntimeConfigOnline, loadSystemsRuntimeConfigOnline, loadAdminRuntimeMonitorOnline, adminUpdateRuntimeModuleOnline, adminUpdateNpcRuntimeOnline, adminUpdateNpcSpawnRuntimeOnline, adminUpdateWorldMapOnline, adminUpdateWorldResourceOnline, adminUpdateWorldSectorOnline, adminUpdateWorldPortalOnline, adminUpdateWorldResourcePoolOnline, adminUpdateMissionCategoryOnline, adminUpdateEconomyServiceOnline, adminUpdateCraftingRecipeOnline } from './api.js?v=18.1.6-final';
+import { SharedUniverseClient } from './world.js?v=18.1.6-final';
 
 const canvas = document.querySelector('#game');
 const ctx = canvas.getContext('2d');
@@ -117,7 +117,7 @@ function qualityShouldPreload(path){
   return /\/branding\//.test(value)||/\/assets\/v17\/loot\/cargo-box\.webp/.test(value);
 }
 
-const ASSET_REVISION='18.1.6E';
+const ASSET_REVISION='18.1.6-final';
 function versionedAssetUrl(path){
   const value=String(path||'');if(!value)return value;
   return value.includes('?')?`${value}&asset=${ASSET_REVISION}`:`${value}?asset=${ASSET_REVISION}`;
@@ -6459,7 +6459,7 @@ async function saveAdminNpcSpawn(key,row,button){
 }
 
 
-// ===================== V18.1.6E • ADMIN WORLD EDITOR =====================
+// ===================== V18.1.6-final • ADMIN WORLD EDITOR =====================
 const adminWorldEditor={busy:false,snapshot:null,activeView:'maps'};
 function adminWorldMessage(text,kind='muted'){if(!ui.adminRuntimeWorldMessage)return;ui.adminRuntimeWorldMessage.textContent=text||'';ui.adminRuntimeWorldMessage.className=`admin-runtime-interface-message ${kind}`.trim();}
 function adminWorldSetView(view='maps'){
@@ -6511,7 +6511,7 @@ async function saveAdminWorldPortal(key,card,button){
 async function saveAdminWorldPool(mapId,row,button){
   if(adminWorldEditor.busy||!mapId||!row)return;const resourceKey=String(row.dataset.worldPoolResource||''),weight=Math.max(.01,Math.min(1000,Number(row.querySelector('[data-world-pool-weight]')?.value)||1)),enabled=!!row.querySelector('[data-world-pool-enabled]')?.checked;adminWorldEditor.busy=true;if(button)button.disabled=true;adminWorldMessage(`Salvando pool ${adminWorldResourceLabel(resourceKey)}...`);try{await adminWorldApplyResult(await adminUpdateWorldResourcePoolOnline(mapId,resourceKey,{weight,enabled}),`${adminWorldResourceLabel(resourceKey)} em ${adminWorldMapLabel(mapId)} salvo`);showToast('Pool de minério atualizado');}catch(e){adminWorldMessage(e.message||'Falha ao salvar pool.','err');}finally{adminWorldEditor.busy=false;if(button)button.disabled=false;}}
 
-// ===================== V18.1.6E • ADMIN SYSTEMS EDITOR =====================
+// ===================== V18.1.6-final • ADMIN SYSTEMS EDITOR =====================
 const adminSystemsEditor={busy:false,snapshot:null,activeView:'missions'};
 function adminSystemsMessage(text,kind='muted'){if(!ui.adminRuntimeSystemsMessage)return;ui.adminRuntimeSystemsMessage.textContent=text||'';ui.adminRuntimeSystemsMessage.className=`admin-runtime-interface-message ${kind}`.trim();}
 function adminSystemsSetView(view='missions'){
