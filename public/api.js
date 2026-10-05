@@ -832,7 +832,7 @@ export async function loadRuntimeConfigOnline(refresh=false){
   return serverFetch(`/api/runtime/topbar${refresh?'?refresh=1':''}`,{},true);
 }
 
-// ===================== V18.1.6C ADMIN INTERFACE EDITOR =====================
+// ===================== V18.1.6B ADMIN INTERFACE EDITOR =====================
 export async function adminUpdateRuntimeModuleOnline(moduleKey,payload={}){
   return serverFetch(`/api/admin/runtime/interface/${encodeURIComponent(String(moduleKey||''))}`,{method:'POST',body:JSON.stringify(payload||{})},true);
 }
@@ -851,15 +851,32 @@ export async function adminUpdateNpcSpawnRuntimeOnline(npcKey,mapId,payload={}){
   return serverFetch(`/api/admin/runtime/npcs/${encodeURIComponent(String(npcKey||''))}/spawns/${encodeURIComponent(String(mapId||''))}`,{method:'POST',body:JSON.stringify(payload||{})},true);
 }
 
-// ===================== V18.1.6C ADMIN RUNTIME MONITOR =====================
+// ===================== V18.1.6A ADMIN RUNTIME MONITOR =====================
 export async function loadAdminRuntimeMonitorOnline(refresh=false){
   return serverFetch(`/api/admin/runtime-monitor${refresh?'?refresh=1':''}`,{},true);
 }
 
 
 // ===================== V18.1.4 WORLD RUNTIME CONFIG =====================
-export async function loadWorldRuntimeConfigOnline(){
-  return serverFetch('/api/runtime/world',{},true);
+export async function loadWorldRuntimeConfigOnline(refresh=false){
+  return serverFetch(`/api/runtime/world${refresh?'?refresh=1':''}`,{},true);
+}
+
+// ===================== V18.1.6D ADMIN WORLD EDITOR =====================
+export async function adminUpdateWorldMapOnline(mapId,payload={}){
+  return serverFetch(`/api/admin/runtime/world/maps/${encodeURIComponent(String(mapId||''))}`,{method:'POST',body:JSON.stringify(payload||{})},true);
+}
+export async function adminUpdateWorldResourceOnline(resourceKey,payload={}){
+  return serverFetch(`/api/admin/runtime/world/resources/${encodeURIComponent(String(resourceKey||''))}`,{method:'POST',body:JSON.stringify(payload||{})},true);
+}
+export async function adminUpdateWorldSectorOnline(sectorLabel,payload={}){
+  return serverFetch(`/api/admin/runtime/world/sectors/${encodeURIComponent(String(sectorLabel||''))}`,{method:'POST',body:JSON.stringify(payload||{})},true);
+}
+export async function adminUpdateWorldPortalOnline(portalKey,payload={}){
+  return serverFetch(`/api/admin/runtime/world/portals/${encodeURIComponent(String(portalKey||''))}`,{method:'POST',body:JSON.stringify(payload||{})},true);
+}
+export async function adminUpdateWorldResourcePoolOnline(mapId,resourceKey,payload={}){
+  return serverFetch(`/api/admin/runtime/world/maps/${encodeURIComponent(String(mapId||''))}/resources/${encodeURIComponent(String(resourceKey||''))}`,{method:'POST',body:JSON.stringify(payload||{})},true);
 }
 
 

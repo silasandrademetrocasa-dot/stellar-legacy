@@ -101,3 +101,8 @@ O ADM edita `game_ui_modules_v1810` via backend autenticado. Cada SAVE força a 
 
 ## V18.1.6C — Editor de NPCs
 O ADM passa a editar `game_npc_config_v1811` e os vínculos existentes em `game_map_npc_spawns_v1811`. Cada SAVE força `npcs.runtime.json`. A etapa mantém Mundo e Sistemas somente leitura. O RPC de NPC foi endurecido para preservar campos opcionais enviados como `NULL`.
+
+
+## V18.1.6D — Editor de Mundo
+
+O ADM ganhou a aba **MUNDO**, com quatro visões: Mapas, Recursos, Setores e Portais. O editor também permite ajustar o peso/ativação dos recursos já vinculados a cada mapa. As alterações são persistidas pelas RPCs administrativas e o Render regenera imediatamente `world.runtime.json`.

@@ -516,7 +516,7 @@ async function accountUser(sb, user, preferred = '') {
   return { id: user.id, email: user.email, callsign };
 }
 
-app.get('/health', (req, res) => res.json({ ok: true, game: 'Stellar Legacy', version: '18.1.6C', universe: 'shared' }));
+app.get('/health', (req, res) => res.json({ ok: true, game: 'Stellar Legacy', version: '18.1.6D', universe: 'shared' }));
 
 
 app.get('/api/config', (req, res) => {
@@ -532,10 +532,10 @@ app.get('/api/config', (req, res) => {
 
 app.get('/api/meta', (req, res) => res.json({
   name: 'Stellar Legacy',
-  version: '18.1.6C',
+  version: '18.1.6D',
   authReady: Boolean(SUPABASE_URL && SUPABASE_KEY),
   diagnostics: configStatus(),
-  features: ['login', 'cloud_save', 'factions', 'safe_zone', 'shop', 'owned_ships', 'equipment_slots', 'inventory', 'drones', 'ammo', 'rockets', 'expanded_expedition_maps', 'cargo_hold', 'ore_trading', 'npc_cargo_boxes', 'npc_respawn', 'minimap_navigation', 'waypoints', 'landmark_discovery', 'combat_fx', 'pet_modules', 'auto_buy_cpu', 'v8_asset_identity', 'mission_control_v93', 'mission_acceptance_tracking', 'expanded_enemy_density', 'online_player_presence', 'real_player_auction', 'rank_nameplates_v12', 'clans_v12', 'clan_vault_v12', 'premium_shop_v12', 'battle_pass_paid_v12', 'premium_subscription_v12', 'clan_daily_economy_v12', 'portal_neutral_zone_v12', 'base_only_equipment_v12', 'single_session_v1214', 'manual_login_v141', 'account_bound_save_v141', 'unique_callsign_v141', 'premium_auto_combat_v141', 'shared_universe_v15', 'authoritative_npcs_v15', 'shared_ores_v15', 'shared_events_v15', 'websocket_world_v15', 'npc_contribution_v15', 'realtime_player_socket_v151', 'remote_laser_fx_v151', 'remote_aux9_v151', 'low_latency_world_v151', 'live_ops_v16', 'server_authoritative_shop_v16', 'supabase_event_schedule_v16', 'economy_guard_v161', 'server_auto_buy_v161', 'server_trader_v161', 'server_pet_slots_v161', 'server_materializer_v161', 'server_quantum_cores_v161', 'economy_fast_path_v1767', 'chat_dock_v162', 'drone_designers_v163', 'designer_sets_v163', 'nexus_eclipse_designer_drops_v163', 'global_chat_v162', 'clan_chat_v162', 'private_chat_v162', 'bottom_hud_reflow_v162', 'ship_designers_v165', 'aux_designers_v165', 'designer_ship_abilities_v165', 'event_designer_drops_v165', 'social_minimap_v165', 'realtime_designer_visuals_v165', 'data_driven_core_v1810', 'data_driven_npcs_v1811', 'server_runtime_topbar_cache_v1813', 'data_driven_world_v1814', 'data_driven_systems_v1815', 'admin_runtime_monitor_v1816a', 'admin_interface_editor_v1816b', 'admin_npc_editor_v1816c'],
+  features: ['login', 'cloud_save', 'factions', 'safe_zone', 'shop', 'owned_ships', 'equipment_slots', 'inventory', 'drones', 'ammo', 'rockets', 'expanded_expedition_maps', 'cargo_hold', 'ore_trading', 'npc_cargo_boxes', 'npc_respawn', 'minimap_navigation', 'waypoints', 'landmark_discovery', 'combat_fx', 'pet_modules', 'auto_buy_cpu', 'v8_asset_identity', 'mission_control_v93', 'mission_acceptance_tracking', 'expanded_enemy_density', 'online_player_presence', 'real_player_auction', 'rank_nameplates_v12', 'clans_v12', 'clan_vault_v12', 'premium_shop_v12', 'battle_pass_paid_v12', 'premium_subscription_v12', 'clan_daily_economy_v12', 'portal_neutral_zone_v12', 'base_only_equipment_v12', 'single_session_v1214', 'manual_login_v141', 'account_bound_save_v141', 'unique_callsign_v141', 'premium_auto_combat_v141', 'shared_universe_v15', 'authoritative_npcs_v15', 'shared_ores_v15', 'shared_events_v15', 'websocket_world_v15', 'npc_contribution_v15', 'realtime_player_socket_v151', 'remote_laser_fx_v151', 'remote_aux9_v151', 'low_latency_world_v151', 'live_ops_v16', 'server_authoritative_shop_v16', 'supabase_event_schedule_v16', 'economy_guard_v161', 'server_auto_buy_v161', 'server_trader_v161', 'server_pet_slots_v161', 'server_materializer_v161', 'server_quantum_cores_v161', 'economy_fast_path_v1767', 'chat_dock_v162', 'drone_designers_v163', 'designer_sets_v163', 'nexus_eclipse_designer_drops_v163', 'global_chat_v162', 'clan_chat_v162', 'private_chat_v162', 'bottom_hud_reflow_v162', 'ship_designers_v165', 'aux_designers_v165', 'designer_ship_abilities_v165', 'event_designer_drops_v165', 'social_minimap_v165', 'realtime_designer_visuals_v165', 'data_driven_core_v1810', 'data_driven_npcs_v1811', 'server_runtime_topbar_cache_v1813', 'data_driven_world_v1814', 'data_driven_systems_v1815', 'admin_runtime_monitor_v1816a', 'admin_interface_editor_v1816b', 'admin_npc_editor_v1816c', 'admin_world_editor_v1816d'],
 }));
 
 
@@ -579,7 +579,7 @@ app.get('/api/admin/runtime-monitor', requireUser, asyncRoute(async(req,res)=>{
   res.json({ok:true,generated_at:new Date().toISOString(),runtimes:out});
 }));
 
-// V18.1.6C — editor isolado da Interface. Somente módulos já conhecidos pelo motor.
+// V18.1.6B — editor isolado da Interface. Somente módulos já conhecidos pelo motor.
 app.post('/api/admin/runtime/interface/:moduleKey', requireUser, asyncRoute(async(req,res)=>{
   const key=String(req.params?.moduleKey||'').trim();
   if(!TOPBAR_ALLOWED_MODULES.has(key))return res.status(400).json({error:'Módulo de interface inválido.'});
@@ -644,6 +644,38 @@ app.post('/api/admin/runtime/npcs/:npcKey/spawns/:mapId', requireUser, asyncRout
   if(error){const msg=String(error.message||'Falha ao salvar população.');const denied=/administrativ|permiss|negado/i.test(msg);return res.status(denied?403:400).json({error:msg});}
   const runtime=await refreshNpcRuntimeSnapshot(true);
   res.set('Cache-Control','no-store');res.json({ok:true,npc_key:key,map_id:mapId,runtime,saved:data||null});
+}));
+
+
+// V18.1.6D — editor isolado do Mundo. Não toca em Missões/Economia/Crafting.
+app.post('/api/admin/runtime/world/maps/:mapId', requireUser, asyncRoute(async(req,res)=>{
+  const mapId=safeWorldId(req.params?.mapId);const current=await loadWorldRuntimeSnapshot(false);const row=current?.maps?.find(x=>String(x.map_id)===mapId);if(!mapId||!row)return res.status(400).json({error:'Mapa inválido.'});
+  const body=req.body&&typeof req.body==='object'?req.body:{};const name=String(body.name||'').trim().slice(0,64),risk=String(body.risk||'').trim().slice(0,32);if(!name||!risk)return res.status(400).json({error:'Nome e risco do mapa são obrigatórios.'});
+  const respawnMin=Math.round(clampNum(body.ore_respawn_min_ms,1000,600000,row.ore_respawn_min_ms||5000)),respawnMax=Math.round(clampNum(body.ore_respawn_max_ms,1000,600000,row.ore_respawn_max_ms||12000));if(respawnMax<respawnMin)return res.status(400).json({error:'Respawn máximo deve ser maior ou igual ao mínimo.'});
+  const {data,error}=await req.sb.rpc('admin_update_map_v1814',{p_map_id:mapId,p_name:name,p_risk:risk,p_world_w:Math.round(clampNum(body.world_w,1000,50000,row.world_w||6000)),p_world_h:Math.round(clampNum(body.world_h,1000,50000,row.world_h||4500)),p_enemy_multiplier:null,p_ore_count:Math.round(clampNum(body.ore_count,0,1000,row.ore_count||0)),p_ore_respawn_min_ms:respawnMin,p_ore_respawn_max_ms:respawnMax,p_landmark_count:null,p_min_level:Math.round(clampNum(body.min_level,1,100,row.min_level||1)),p_enabled:body.enabled!==false,p_palette:null,p_structures:null});
+  if(error){const msg=String(error.message||'Falha ao salvar mapa.');return res.status(/administrativ|permiss|negado/i.test(msg)?403:400).json({error:msg});}
+  const runtime=await refreshWorldRuntimeSnapshot(true);res.set('Cache-Control','no-store');res.json({ok:true,map_id:mapId,runtime,saved:data||null});
+}));
+app.post('/api/admin/runtime/world/resources/:resourceKey', requireUser, asyncRoute(async(req,res)=>{
+  const key=safeWorldId(req.params?.resourceKey);const current=await loadWorldRuntimeSnapshot(false);const row=current?.resources?.find(x=>String(x.resource_key)===key);if(!key||!row)return res.status(400).json({error:'Recurso inválido.'});
+  const body=req.body&&typeof req.body==='object'?req.body:{};const name=String(body.name||'').trim().slice(0,48),color=String(body.color||'').trim();if(!name)return res.status(400).json({error:'Informe o nome do recurso.'});if(!/^#[0-9a-f]{6}$/i.test(color))return res.status(400).json({error:'Cor inválida. Use #RRGGBB.'});
+  const {data,error}=await req.sb.rpc('admin_update_resource_v1814',{p_resource_key:key,p_name:name,p_color:color,p_sell_price:Math.max(0,Math.round(Number(body.sell_price)||0)),p_enabled:body.enabled!==false});if(error){const msg=String(error.message||'Falha ao salvar recurso.');return res.status(/administrativ|permiss|negado/i.test(msg)?403:400).json({error:msg});}
+  const runtime=await refreshWorldRuntimeSnapshot(true);res.set('Cache-Control','no-store');res.json({ok:true,resource_key:key,runtime,saved:data||null});
+}));
+app.post('/api/admin/runtime/world/sectors/:sectorLabel', requireUser, asyncRoute(async(req,res)=>{
+  const key=safeSector(req.params?.sectorLabel);const current=await loadWorldRuntimeSnapshot(false);const row=current?.sectors?.find(x=>String(x.sector_label)===key);if(!key||!row)return res.status(400).json({error:'Setor inválido.'});const body=req.body&&typeof req.body==='object'?req.body:{};
+  const {data,error}=await req.sb.rpc('admin_update_sector_v1814',{p_sector_label:key,p_graph_x:clampNum(body.graph_x,0,100,row.graph_x||0),p_graph_y:clampNum(body.graph_y,0,100,row.graph_y||0),p_min_level:Math.round(clampNum(body.min_level,1,100,row.min_level||1)),p_enabled:body.enabled!==false});if(error){const msg=String(error.message||'Falha ao salvar setor.');return res.status(/administrativ|permiss|negado/i.test(msg)?403:400).json({error:msg});}
+  const runtime=await refreshWorldRuntimeSnapshot(true);res.set('Cache-Control','no-store');res.json({ok:true,sector_label:key,runtime,saved:data||null});
+}));
+app.post('/api/admin/runtime/world/portals/:portalKey', requireUser, asyncRoute(async(req,res)=>{
+  const key=safeWorldId(req.params?.portalKey);const current=await loadWorldRuntimeSnapshot(false);const row=current?.portals?.find(x=>String(x.portal_key)===key);if(!key||!row)return res.status(400).json({error:'Portal inválido.'});const body=req.body&&typeof req.body==='object'?req.body:{};
+  const {data,error}=await req.sb.rpc('admin_update_portal_link_v1814',{p_portal_key:key,p_enabled:body.enabled!==false,p_bidirectional:body.bidirectional!==false,p_sort_order:Math.round(clampNum(body.sort_order,0,9999,row.sort_order||100))});if(error){const msg=String(error.message||'Falha ao salvar portal.');return res.status(/administrativ|permiss|negado/i.test(msg)?403:400).json({error:msg});}
+  const runtime=await refreshWorldRuntimeSnapshot(true);res.set('Cache-Control','no-store');res.json({ok:true,portal_key:key,runtime,saved:data||null});
+}));
+app.post('/api/admin/runtime/world/maps/:mapId/resources/:resourceKey', requireUser, asyncRoute(async(req,res)=>{
+  const mapId=safeWorldId(req.params?.mapId),resourceKey=safeWorldId(req.params?.resourceKey);const current=await loadWorldRuntimeSnapshot(false);if(!current?.map_resources?.some(x=>String(x.map_id)===mapId&&String(x.resource_key)===resourceKey))return res.status(400).json({error:'Vínculo mapa/recurso inválido nesta etapa.'});const body=req.body&&typeof req.body==='object'?req.body:{};
+  const {data,error}=await req.sb.rpc('admin_update_map_resource_pool_v1816',{p_map_id:mapId,p_resource_key:resourceKey,p_weight:clampNum(body.weight,.01,1000,1),p_enabled:body.enabled!==false});if(error){const msg=String(error.message||'Falha ao salvar pool de minério.');return res.status(/administrativ|permiss|negado/i.test(msg)?403:400).json({error:msg});}
+  const runtime=await refreshWorldRuntimeSnapshot(true);res.set('Cache-Control','no-store');res.json({ok:true,map_id:mapId,resource_key:resourceKey,runtime,saved:data||null});
 }));
 
 app.get('/api/runtime/world', requireUser, asyncRoute(async (req,res)=>{
@@ -1069,7 +1101,7 @@ app.post('/api/player/location', requireUser, asyncRoute(async (req,res)=>{
   return res.json(data||{ok:true});
 }));
 
-app.get('/api/world/status', (req, res) => res.json({ ok: true, version: '18.1.6C', ...sharedUniverse.stats() }));
+app.get('/api/world/status', (req, res) => res.json({ ok: true, version: '18.1.6D', ...sharedUniverse.stats() }));
 
 app.get('*', (req, res) => res.sendFile(path.join(__dirname, '../public/index.html')));
 
@@ -1140,7 +1172,7 @@ npcRefreshTimer.unref?.();
 refreshNpcRuntimeSnapshot(true).then(cfg=>console.log(`[npc-runtime] v${cfg.version} cacheado em ${NPC_RUNTIME_FILE}`)).catch(err=>console.warn('[npc-runtime] bootstrap:',err.message));
 
 server.listen(port, () => {
-  console.log(`Stellar Legacy V18.1.6C :${port}`);
+  console.log(`Stellar Legacy V18.1.6D :${port}`);
   console.log('Supabase config:', configStatus());
   console.log('Shared Universe: ONLINE');
 });

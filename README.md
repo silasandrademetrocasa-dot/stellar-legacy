@@ -233,3 +233,8 @@ O código mantém fallback local para continuidade do jogo se o runtime remoto e
 
 ### V18.1.6C
 Editor de NPCs isolado no ADM. Permite editar atributos/recompensas/respawn e a população dos vínculos de mapa já existentes. Cada alteração atualiza `npcs.runtime.json` imediatamente pelo Render, sem redeploy.
+
+
+### V18.1.6D
+
+Editor de Mundo no painel ADM: mapas, recursos, setores, portais e pools de minério com atualização do `world.runtime.json` sem redeploy.

@@ -1,3 +1,11 @@
+## V18.1.6D — Admin World Editor • Stage 4
+
+- Nova aba **MUNDO** em `ADM > CONFIGURAÇÃO AO VIVO`.
+- Editor isolado de mapas, recursos, setores, portais e pool de minério por mapa.
+- Cada gravação passa pelo backend autenticado, RPC administrativa e materialização imediata de `world.runtime.json`.
+- Correção preventiva das RPCs de Mundo: parâmetros opcionais `NULL` agora preservam o valor atual em vez de cair em limites de `GREATEST/LEAST`.
+- Sem alterações em Missões, Economia ou Crafting nesta etapa.
+
 ## V18.1.6C — Admin NPC Editor • Stage 3
 - Nova aba **NPCs** dentro de Configuração ao Vivo no ADM.
 - Edição isolada de nome, HP, escudo, dano, velocidade, CR, STL, XP, respawn e ativo/inativo.
