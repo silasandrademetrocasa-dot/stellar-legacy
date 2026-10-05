@@ -6,7 +6,7 @@
 <meta content="width=device-width,initial-scale=1,user-scalable=no" name="viewport"/>
 <meta content="#030816" name="theme-color"/>
 <title>Stellar Legacy</title>
-<link href="/style.css?v=18.1.6D" rel="stylesheet"/>
+<link href="/style.css?v=18.1.6E" rel="stylesheet"/>
 </head>
 <body>
 <div id="app">
@@ -568,7 +568,7 @@
     </div>
     <section class="admin-runtime-monitor-section">
       <div class="settings-title admin-runtime-monitor-head">
-        <div><b>CONFIGURAÇÃO AO VIVO</b><small>Etapa 4/5 • Runtime + Interface + NPCs + editor isolado de Mundo.</small></div>
+        <div><b>CONFIGURAÇÃO AO VIVO</b><small>Etapa 5/5 • Runtime + Interface + NPCs + Mundo + editor isolado de Sistemas.</small></div>
         <button class="small-btn gold" id="adminRuntimeMonitorRefresh" type="button">ATUALIZAR RUNTIME</button>
       </div>
       <div class="admin-runtime-tabs" id="adminRuntimeTabs">
@@ -576,6 +576,7 @@
         <button type="button" data-admin-runtime-tab="interface">INTERFACE</button>
         <button type="button" data-admin-runtime-tab="npcs">NPCs</button>
         <button type="button" data-admin-runtime-tab="world">MUNDO</button>
+        <button type="button" data-admin-runtime-tab="systems">SISTEMAS</button>
       </div>
       <div id="adminRuntimeMonitorPanel">
         <div class="admin-runtime-monitor-grid" id="adminRuntimeMonitorGrid"><div class="empty-state">Aguardando status dos runtimes...</div></div>
@@ -610,6 +611,19 @@
         </div>
         <div class="admin-runtime-world-grid" id="adminRuntimeWorldGrid"><div class="empty-state">Carregue a configuração do Mundo.</div></div>
         <div class="admin-runtime-interface-message muted" id="adminRuntimeWorldMessage">Nenhuma alteração pendente.</div>
+      </div>
+      <div class="admin-runtime-systems-panel hidden" id="adminRuntimeSystemsPanel">
+        <div class="admin-runtime-interface-toolbar">
+          <div><b>EDITOR DE SISTEMAS</b><small>Etapa isolada: geradores de Missões, serviços da Economia e receitas de Crafting. Sem alterar Interface, NPCs ou Mundo.</small></div>
+          <button class="small-btn" id="adminRuntimeSystemsReload" type="button">RECARREGAR</button>
+        </div>
+        <div class="admin-systems-subtabs" id="adminRuntimeSystemsTabs">
+          <button class="active" type="button" data-admin-systems-view="missions">MISSÕES</button>
+          <button type="button" data-admin-systems-view="economy">ECONOMIA</button>
+          <button type="button" data-admin-systems-view="crafting">CRAFTING</button>
+        </div>
+        <div class="admin-runtime-systems-grid" id="adminRuntimeSystemsGrid"><div class="empty-state">Carregue a configuração dos Sistemas.</div></div>
+        <div class="admin-runtime-interface-message muted" id="adminRuntimeSystemsMessage">Nenhuma alteração pendente.</div>
       </div>
     </section>
     <section class="admin-telemetry-section">
@@ -893,6 +907,6 @@
   </div>
 </div>
 </div>
-<script src="/game.js?v=18.1.6D" type="module"></script>
+<script src="/game.js?v=18.1.6E" type="module"></script>
 </body>
 </html>

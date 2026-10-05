@@ -516,7 +516,7 @@ async function accountUser(sb, user, preferred = '') {
   return { id: user.id, email: user.email, callsign };
 }
 
-app.get('/health', (req, res) => res.json({ ok: true, game: 'Stellar Legacy', version: '18.1.6D', universe: 'shared' }));
+app.get('/health', (req, res) => res.json({ ok: true, game: 'Stellar Legacy', version: '18.1.6E', universe: 'shared' }));
 
 
 app.get('/api/config', (req, res) => {
@@ -532,10 +532,10 @@ app.get('/api/config', (req, res) => {
 
 app.get('/api/meta', (req, res) => res.json({
   name: 'Stellar Legacy',
-  version: '18.1.6D',
+  version: '18.1.6E',
   authReady: Boolean(SUPABASE_URL && SUPABASE_KEY),
   diagnostics: configStatus(),
-  features: ['login', 'cloud_save', 'factions', 'safe_zone', 'shop', 'owned_ships', 'equipment_slots', 'inventory', 'drones', 'ammo', 'rockets', 'expanded_expedition_maps', 'cargo_hold', 'ore_trading', 'npc_cargo_boxes', 'npc_respawn', 'minimap_navigation', 'waypoints', 'landmark_discovery', 'combat_fx', 'pet_modules', 'auto_buy_cpu', 'v8_asset_identity', 'mission_control_v93', 'mission_acceptance_tracking', 'expanded_enemy_density', 'online_player_presence', 'real_player_auction', 'rank_nameplates_v12', 'clans_v12', 'clan_vault_v12', 'premium_shop_v12', 'battle_pass_paid_v12', 'premium_subscription_v12', 'clan_daily_economy_v12', 'portal_neutral_zone_v12', 'base_only_equipment_v12', 'single_session_v1214', 'manual_login_v141', 'account_bound_save_v141', 'unique_callsign_v141', 'premium_auto_combat_v141', 'shared_universe_v15', 'authoritative_npcs_v15', 'shared_ores_v15', 'shared_events_v15', 'websocket_world_v15', 'npc_contribution_v15', 'realtime_player_socket_v151', 'remote_laser_fx_v151', 'remote_aux9_v151', 'low_latency_world_v151', 'live_ops_v16', 'server_authoritative_shop_v16', 'supabase_event_schedule_v16', 'economy_guard_v161', 'server_auto_buy_v161', 'server_trader_v161', 'server_pet_slots_v161', 'server_materializer_v161', 'server_quantum_cores_v161', 'economy_fast_path_v1767', 'chat_dock_v162', 'drone_designers_v163', 'designer_sets_v163', 'nexus_eclipse_designer_drops_v163', 'global_chat_v162', 'clan_chat_v162', 'private_chat_v162', 'bottom_hud_reflow_v162', 'ship_designers_v165', 'aux_designers_v165', 'designer_ship_abilities_v165', 'event_designer_drops_v165', 'social_minimap_v165', 'realtime_designer_visuals_v165', 'data_driven_core_v1810', 'data_driven_npcs_v1811', 'server_runtime_topbar_cache_v1813', 'data_driven_world_v1814', 'data_driven_systems_v1815', 'admin_runtime_monitor_v1816a', 'admin_interface_editor_v1816b', 'admin_npc_editor_v1816c', 'admin_world_editor_v1816d'],
+  features: ['login', 'cloud_save', 'factions', 'safe_zone', 'shop', 'owned_ships', 'equipment_slots', 'inventory', 'drones', 'ammo', 'rockets', 'expanded_expedition_maps', 'cargo_hold', 'ore_trading', 'npc_cargo_boxes', 'npc_respawn', 'minimap_navigation', 'waypoints', 'landmark_discovery', 'combat_fx', 'pet_modules', 'auto_buy_cpu', 'v8_asset_identity', 'mission_control_v93', 'mission_acceptance_tracking', 'expanded_enemy_density', 'online_player_presence', 'real_player_auction', 'rank_nameplates_v12', 'clans_v12', 'clan_vault_v12', 'premium_shop_v12', 'battle_pass_paid_v12', 'premium_subscription_v12', 'clan_daily_economy_v12', 'portal_neutral_zone_v12', 'base_only_equipment_v12', 'single_session_v1214', 'manual_login_v141', 'account_bound_save_v141', 'unique_callsign_v141', 'premium_auto_combat_v141', 'shared_universe_v15', 'authoritative_npcs_v15', 'shared_ores_v15', 'shared_events_v15', 'websocket_world_v15', 'npc_contribution_v15', 'realtime_player_socket_v151', 'remote_laser_fx_v151', 'remote_aux9_v151', 'low_latency_world_v151', 'live_ops_v16', 'server_authoritative_shop_v16', 'supabase_event_schedule_v16', 'economy_guard_v161', 'server_auto_buy_v161', 'server_trader_v161', 'server_pet_slots_v161', 'server_materializer_v161', 'server_quantum_cores_v161', 'economy_fast_path_v1767', 'chat_dock_v162', 'drone_designers_v163', 'designer_sets_v163', 'nexus_eclipse_designer_drops_v163', 'global_chat_v162', 'clan_chat_v162', 'private_chat_v162', 'bottom_hud_reflow_v162', 'ship_designers_v165', 'aux_designers_v165', 'designer_ship_abilities_v165', 'event_designer_drops_v165', 'social_minimap_v165', 'realtime_designer_visuals_v165', 'data_driven_core_v1810', 'data_driven_npcs_v1811', 'server_runtime_topbar_cache_v1813', 'data_driven_world_v1814', 'data_driven_systems_v1815', 'admin_runtime_monitor_v1816a', 'admin_interface_editor_v1816b', 'admin_npc_editor_v1816c', 'admin_world_editor_v1816d', 'admin_systems_editor_v1816e'],
 }));
 
 
@@ -647,7 +647,7 @@ app.post('/api/admin/runtime/npcs/:npcKey/spawns/:mapId', requireUser, asyncRout
 }));
 
 
-// V18.1.6D — editor isolado do Mundo. Não toca em Missões/Economia/Crafting.
+// V18.1.6E — editor isolado do Mundo. Não toca em Missões/Economia/Crafting.
 app.post('/api/admin/runtime/world/maps/:mapId', requireUser, asyncRoute(async(req,res)=>{
   const mapId=safeWorldId(req.params?.mapId);const current=await loadWorldRuntimeSnapshot(false);const row=current?.maps?.find(x=>String(x.map_id)===mapId);if(!mapId||!row)return res.status(400).json({error:'Mapa inválido.'});
   const body=req.body&&typeof req.body==='object'?req.body:{};const name=String(body.name||'').trim().slice(0,64),risk=String(body.risk||'').trim().slice(0,32);if(!name||!risk)return res.status(400).json({error:'Nome e risco do mapa são obrigatórios.'});
@@ -684,6 +684,28 @@ app.get('/api/runtime/world', requireUser, asyncRoute(async (req,res)=>{
   res.json(snapshot);
 }));
 
+
+// V18.1.6E — editor isolado de Sistemas. Não toca em Interface/NPCs/Mundo.
+app.post('/api/admin/runtime/systems/missions/:category', requireUser, asyncRoute(async(req,res)=>{
+  const key=safeWorldId(req.params?.category);const current=await loadSystemsRuntimeSnapshot(false);const row=current?.mission_categories?.find(x=>String(x.category)===key);if(!key||!row)return res.status(400).json({error:'Categoria de missão inválida.'});
+  const body=req.body&&typeof req.body==='object'?req.body:{};const config=body.config&&typeof body.config==='object'&&!Array.isArray(body.config)?body.config:null;if(!config)return res.status(400).json({error:'Configuração da missão precisa ser um objeto JSON.'});if(JSON.stringify(config).length>12000)return res.status(400).json({error:'Configuração da missão muito grande.'});
+  const {data,error}=await req.sb.rpc('admin_update_mission_category_v1815',{p_category:key,p_min_level:Math.round(clampNum(body.min_level,1,100,row.min_level||1)),p_reward_factor:clampNum(body.reward_factor,0,10,row.reward_factor||0),p_item_chance:clampNum(body.item_chance,0,1,row.item_chance||0),p_enabled:body.enabled!==false,p_config:config});if(error){const msg=String(error.message||'Falha ao salvar missão.');return res.status(/administrativ|permiss|negado/i.test(msg)?403:400).json({error:msg});}
+  const runtime=await refreshSystemsRuntimeSnapshot(true);res.set('Cache-Control','no-store');res.json({ok:true,category:key,runtime,saved:data||null});
+}));
+app.post('/api/admin/runtime/systems/economy/:serviceId', requireUser, asyncRoute(async(req,res)=>{
+  const key=safeWorldId(req.params?.serviceId);const current=await loadSystemsRuntimeSnapshot(false);const row=current?.economy_services?.find(x=>String(x.service_id)===key);if(!key||!row)return res.status(400).json({error:'Serviço econômico inválido.'});
+  const body=req.body&&typeof req.body==='object'?req.body:{};const effect=body.effect&&typeof body.effect==='object'&&!Array.isArray(body.effect)?body.effect:null;if(!effect)return res.status(400).json({error:'Efeito precisa ser um objeto JSON.'});if(JSON.stringify(effect).length>6000)return res.status(400).json({error:'Efeito muito grande.'});
+  const duration=Math.round(clampNum(body.duration_ms,60000,86400000,row.duration_ms||3600000)),maxStack=Math.round(clampNum(body.max_stack_ms,60000,604800000,row.max_stack_ms||21600000));
+  const {data,error}=await req.sb.rpc('admin_update_economy_service_v1815',{p_service_id:key,p_base_cost:Math.round(clampNum(body.base_cost,0,1000000000000,row.base_cost||0)),p_duration_ms:duration,p_level_cost_scale:clampNum(body.level_cost_scale,0,10,row.level_cost_scale||0),p_max_stack_ms:maxStack,p_effect:effect,p_enabled:body.enabled!==false});if(error){const msg=String(error.message||'Falha ao salvar serviço econômico.');return res.status(/administrativ|permiss|negado/i.test(msg)?403:400).json({error:msg});}
+  const runtime=await refreshSystemsRuntimeSnapshot(true);res.set('Cache-Control','no-store');res.json({ok:true,service_id:key,runtime,saved:data||null});
+}));
+app.post('/api/admin/runtime/systems/crafting/:recipeId', requireUser, asyncRoute(async(req,res)=>{
+  const key=safeWorldId(req.params?.recipeId);const current=await loadSystemsRuntimeSnapshot(false);const row=current?.crafting_recipes?.find(x=>String(x.recipe_id)===key);if(!key||!row)return res.status(400).json({error:'Receita inválida.'});
+  const body=req.body&&typeof req.body==='object'?req.body:{},ingredients=body.ingredients&&typeof body.ingredients==='object'&&!Array.isArray(body.ingredients)?body.ingredients:null,grantPayload=body.grant_payload&&typeof body.grant_payload==='object'&&!Array.isArray(body.grant_payload)?body.grant_payload:null;if(!ingredients||!grantPayload)return res.status(400).json({error:'Ingredientes e recompensa precisam ser objetos JSON.'});if(JSON.stringify(ingredients).length>8000||JSON.stringify(grantPayload).length>8000)return res.status(400).json({error:'JSON da receita muito grande.'});
+  const currency=String(body.currency||row.currency||'credits')==='uridium'?'uridium':'credits',output=String(body.output_label||'').trim().slice(0,72);if(!output)return res.status(400).json({error:'Informe a saída da receita.'});
+  const {data,error}=await req.sb.rpc('admin_update_crafting_recipe_v1815',{p_recipe_id:key,p_cost:Math.round(clampNum(body.cost,0,1000000000000,row.cost||0)),p_currency:currency,p_ingredients:ingredients,p_grant_payload:grantPayload,p_output_label:output,p_min_level:Math.round(clampNum(body.min_level,1,100,row.min_level||1)),p_enabled:body.enabled!==false});if(error){const msg=String(error.message||'Falha ao salvar receita.');return res.status(/administrativ|permiss|negado/i.test(msg)?403:400).json({error:msg});}
+  const runtime=await refreshSystemsRuntimeSnapshot(true);res.set('Cache-Control','no-store');res.json({ok:true,recipe_id:key,runtime,saved:data||null});
+}));
 
 app.get('/api/runtime/systems', requireUser, asyncRoute(async (req,res)=>{
   const snapshot=await loadSystemsRuntimeSnapshot(Boolean(req.query?.refresh));
@@ -1101,7 +1123,7 @@ app.post('/api/player/location', requireUser, asyncRoute(async (req,res)=>{
   return res.json(data||{ok:true});
 }));
 
-app.get('/api/world/status', (req, res) => res.json({ ok: true, version: '18.1.6D', ...sharedUniverse.stats() }));
+app.get('/api/world/status', (req, res) => res.json({ ok: true, version: '18.1.6E', ...sharedUniverse.stats() }));
 
 app.get('*', (req, res) => res.sendFile(path.join(__dirname, '../public/index.html')));
 
@@ -1172,7 +1194,7 @@ npcRefreshTimer.unref?.();
 refreshNpcRuntimeSnapshot(true).then(cfg=>console.log(`[npc-runtime] v${cfg.version} cacheado em ${NPC_RUNTIME_FILE}`)).catch(err=>console.warn('[npc-runtime] bootstrap:',err.message));
 
 server.listen(port, () => {
-  console.log(`Stellar Legacy V18.1.6D :${port}`);
+  console.log(`Stellar Legacy V18.1.6E :${port}`);
   console.log('Supabase config:', configStatus());
   console.log('Shared Universe: ONLINE');
 });

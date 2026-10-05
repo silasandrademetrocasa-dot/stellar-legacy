@@ -49,3 +49,5 @@ O código mantém fallback local para continuidade do jogo se o runtime remoto e
 - ✅ V18.1.6C Editor de NPCs
 - ✅ V18.1.6D Editor de Mundo
 - ⏳ Próximo: Editor de Sistemas (18.1.6E)
+
+- ✅ V18.1.6E Editor de Sistemas

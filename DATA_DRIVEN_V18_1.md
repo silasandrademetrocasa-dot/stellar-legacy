@@ -106,3 +106,8 @@ O ADM passa a editar `game_npc_config_v1811` e os vínculos existentes em `game_
 ## V18.1.6D — Editor de Mundo
 
 O ADM ganhou a aba **MUNDO**, com quatro visões: Mapas, Recursos, Setores e Portais. O editor também permite ajustar o peso/ativação dos recursos já vinculados a cada mapa. As alterações são persistidas pelas RPCs administrativas e o Render regenera imediatamente `world.runtime.json`.
+
+
+## V18.1.6E — Editor de Sistemas
+
+A quinta etapa da Central ADM expõe somente o `systems.runtime.json` para edição controlada. O administrador pode ajustar categorias/geradores de missão, serviços econômicos e receitas de crafting. O backend valida IDs, limites numéricos e objetos JSON, chama apenas RPCs conhecidas e regenera o snapshot temporário do Render.

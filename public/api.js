@@ -881,6 +881,17 @@ export async function adminUpdateWorldResourcePoolOnline(mapId,resourceKey,paylo
 
 
 // ===================== V18.1.5 SYSTEMS RUNTIME CONFIG =====================
-export async function loadSystemsRuntimeConfigOnline(){
-  return serverFetch('/api/runtime/systems',{},true);
+export async function loadSystemsRuntimeConfigOnline(refresh=false){
+  return serverFetch(`/api/runtime/systems${refresh?'?refresh=1':''}`,{},true);
+}
+
+// ===================== V18.1.6E ADMIN SYSTEMS EDITOR =====================
+export async function adminUpdateMissionCategoryOnline(category,payload={}){
+  return serverFetch(`/api/admin/runtime/systems/missions/${encodeURIComponent(String(category||''))}`,{method:'POST',body:JSON.stringify(payload||{})},true);
+}
+export async function adminUpdateEconomyServiceOnline(serviceId,payload={}){
+  return serverFetch(`/api/admin/runtime/systems/economy/${encodeURIComponent(String(serviceId||''))}`,{method:'POST',body:JSON.stringify(payload||{})},true);
+}
+export async function adminUpdateCraftingRecipeOnline(recipeId,payload={}){
+  return serverFetch(`/api/admin/runtime/systems/crafting/${encodeURIComponent(String(recipeId||''))}`,{method:'POST',body:JSON.stringify(payload||{})},true);
 }

@@ -1,3 +1,12 @@
+## V18.1.6E — Admin Systems Editor • Stage 5
+
+- Nova aba **SISTEMAS** em `ADM > CONFIGURAÇÃO AO VIVO`.
+- Editor isolado para geradores de Missões, serviços da Economia e receitas de Crafting.
+- JSON de configuração é validado no cliente e novamente no backend antes de chegar ao Supabase.
+- Cada salvamento força regeneração de `systems.runtime.json`, sem deploy.
+- RPCs de Sistemas corrigidas para preservar campos opcionais quando recebem `NULL`.
+- Interface, NPCs e Mundo permanecem fora do escopo desta etapa.
+
 ## V18.1.6D — Admin World Editor • Stage 4
 
 - Nova aba **MUNDO** em `ADM > CONFIGURAÇÃO AO VIVO`.

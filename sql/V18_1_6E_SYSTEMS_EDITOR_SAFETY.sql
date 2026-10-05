@@ -1,0 +1,3 @@
+-- Stellar Legacy V18.1.6E — segurança dos campos opcionais do Editor de Sistemas.
+-- Aplicada no Supabase: admin_update_mission_category_v1815, admin_update_economy_service_v1815
+-- e admin_update_crafting_recipe_v1815 agora preservam campos NULL via CASE.

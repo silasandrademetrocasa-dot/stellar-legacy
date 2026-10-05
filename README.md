@@ -238,3 +238,8 @@ Editor de NPCs isolado no ADM. Permite editar atributos/recompensas/respawn e a 
 ### V18.1.6D
 
 Editor de Mundo no painel ADM: mapas, recursos, setores, portais e pools de minério com atualização do `world.runtime.json` sem redeploy.
+
+
+### V18.1.6E
+
+`ADM > CONFIGURAÇÃO AO VIVO > SISTEMAS` adiciona editores de Missões, Economia e Crafting. As alterações passam pelo backend autenticado, atualizam o Supabase e renovam `systems.runtime.json` sem deploy.
