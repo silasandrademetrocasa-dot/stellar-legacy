@@ -516,7 +516,7 @@ async function accountUser(sb, user, preferred = '') {
   return { id: user.id, email: user.email, callsign };
 }
 
-app.get('/health', (req, res) => res.json({ ok: true, game: 'Stellar Legacy', version: '18.1.6A', universe: 'shared' }));
+app.get('/health', (req, res) => res.json({ ok: true, game: 'Stellar Legacy', version: '18.1.6B', universe: 'shared' }));
 
 
 app.get('/api/config', (req, res) => {
@@ -532,10 +532,10 @@ app.get('/api/config', (req, res) => {
 
 app.get('/api/meta', (req, res) => res.json({
   name: 'Stellar Legacy',
-  version: '18.1.6A',
+  version: '18.1.6B',
   authReady: Boolean(SUPABASE_URL && SUPABASE_KEY),
   diagnostics: configStatus(),
-  features: ['login', 'cloud_save', 'factions', 'safe_zone', 'shop', 'owned_ships', 'equipment_slots', 'inventory', 'drones', 'ammo', 'rockets', 'expanded_expedition_maps', 'cargo_hold', 'ore_trading', 'npc_cargo_boxes', 'npc_respawn', 'minimap_navigation', 'waypoints', 'landmark_discovery', 'combat_fx', 'pet_modules', 'auto_buy_cpu', 'v8_asset_identity', 'mission_control_v93', 'mission_acceptance_tracking', 'expanded_enemy_density', 'online_player_presence', 'real_player_auction', 'rank_nameplates_v12', 'clans_v12', 'clan_vault_v12', 'premium_shop_v12', 'battle_pass_paid_v12', 'premium_subscription_v12', 'clan_daily_economy_v12', 'portal_neutral_zone_v12', 'base_only_equipment_v12', 'single_session_v1214', 'manual_login_v141', 'account_bound_save_v141', 'unique_callsign_v141', 'premium_auto_combat_v141', 'shared_universe_v15', 'authoritative_npcs_v15', 'shared_ores_v15', 'shared_events_v15', 'websocket_world_v15', 'npc_contribution_v15', 'realtime_player_socket_v151', 'remote_laser_fx_v151', 'remote_aux9_v151', 'low_latency_world_v151', 'live_ops_v16', 'server_authoritative_shop_v16', 'supabase_event_schedule_v16', 'economy_guard_v161', 'server_auto_buy_v161', 'server_trader_v161', 'server_pet_slots_v161', 'server_materializer_v161', 'server_quantum_cores_v161', 'economy_fast_path_v1767', 'chat_dock_v162', 'drone_designers_v163', 'designer_sets_v163', 'nexus_eclipse_designer_drops_v163', 'global_chat_v162', 'clan_chat_v162', 'private_chat_v162', 'bottom_hud_reflow_v162', 'ship_designers_v165', 'aux_designers_v165', 'designer_ship_abilities_v165', 'event_designer_drops_v165', 'social_minimap_v165', 'realtime_designer_visuals_v165', 'data_driven_core_v1810', 'data_driven_npcs_v1811', 'server_runtime_topbar_cache_v1813', 'data_driven_world_v1814', 'data_driven_systems_v1815', 'admin_runtime_monitor_v1816a'],
+  features: ['login', 'cloud_save', 'factions', 'safe_zone', 'shop', 'owned_ships', 'equipment_slots', 'inventory', 'drones', 'ammo', 'rockets', 'expanded_expedition_maps', 'cargo_hold', 'ore_trading', 'npc_cargo_boxes', 'npc_respawn', 'minimap_navigation', 'waypoints', 'landmark_discovery', 'combat_fx', 'pet_modules', 'auto_buy_cpu', 'v8_asset_identity', 'mission_control_v93', 'mission_acceptance_tracking', 'expanded_enemy_density', 'online_player_presence', 'real_player_auction', 'rank_nameplates_v12', 'clans_v12', 'clan_vault_v12', 'premium_shop_v12', 'battle_pass_paid_v12', 'premium_subscription_v12', 'clan_daily_economy_v12', 'portal_neutral_zone_v12', 'base_only_equipment_v12', 'single_session_v1214', 'manual_login_v141', 'account_bound_save_v141', 'unique_callsign_v141', 'premium_auto_combat_v141', 'shared_universe_v15', 'authoritative_npcs_v15', 'shared_ores_v15', 'shared_events_v15', 'websocket_world_v15', 'npc_contribution_v15', 'realtime_player_socket_v151', 'remote_laser_fx_v151', 'remote_aux9_v151', 'low_latency_world_v151', 'live_ops_v16', 'server_authoritative_shop_v16', 'supabase_event_schedule_v16', 'economy_guard_v161', 'server_auto_buy_v161', 'server_trader_v161', 'server_pet_slots_v161', 'server_materializer_v161', 'server_quantum_cores_v161', 'economy_fast_path_v1767', 'chat_dock_v162', 'drone_designers_v163', 'designer_sets_v163', 'nexus_eclipse_designer_drops_v163', 'global_chat_v162', 'clan_chat_v162', 'private_chat_v162', 'bottom_hud_reflow_v162', 'ship_designers_v165', 'aux_designers_v165', 'designer_ship_abilities_v165', 'event_designer_drops_v165', 'social_minimap_v165', 'realtime_designer_visuals_v165', 'data_driven_core_v1810', 'data_driven_npcs_v1811', 'server_runtime_topbar_cache_v1813', 'data_driven_world_v1814', 'data_driven_systems_v1815', 'admin_runtime_monitor_v1816a', 'admin_interface_editor_v1816b'],
 }));
 
 
@@ -577,6 +577,30 @@ app.get('/api/admin/runtime-monitor', requireUser, asyncRoute(async(req,res)=>{
   }
   res.set('Cache-Control','no-store');
   res.json({ok:true,generated_at:new Date().toISOString(),runtimes:out});
+}));
+
+// V18.1.6B — editor isolado da Interface. Somente módulos já conhecidos pelo motor.
+app.post('/api/admin/runtime/interface/:moduleKey', requireUser, asyncRoute(async(req,res)=>{
+  const key=String(req.params?.moduleKey||'').trim();
+  if(!TOPBAR_ALLOWED_MODULES.has(key))return res.status(400).json({error:'Módulo de interface inválido.'});
+  const body=req.body&&typeof req.body==='object'?req.body:{};
+  const label=String(body.label||'').trim().slice(0,40);
+  if(!label)return res.status(400).json({error:'Informe um nome para a aba.'});
+  const sortOrder=Math.max(0,Math.min(999,Math.trunc(Number(body.sort_order)||0)));
+  let minLevel=Math.max(1,Math.min(100,Math.trunc(Number(body.min_level)||1)));
+  let enabled=body.enabled!==false;
+  let hideUntilLevel=!!body.hide_until_level;
+  // Proteção: o ADM nunca pode se auto-ocultar pelo editor.
+  if(key==='admin'){minLevel=1;enabled=true;hideUntilLevel=false;}
+  const {data,error}=await req.sb.rpc('admin_update_ui_module_v1810',{
+    p_module_key:key,p_label:label,p_sort_order:sortOrder,p_min_level:minLevel,
+    p_enabled:enabled,p_hide_until_level:hideUntilLevel,p_config:null
+  });
+  if(error){const msg=String(error.message||'Falha ao salvar módulo.');const denied=/administrativ|permiss|negado/i.test(msg);return res.status(denied?403:400).json({error:msg});}
+  // Materializa imediatamente o novo JSON no Render.
+  const runtime=await refreshTopbarRuntimeSnapshot(true);
+  res.set('Cache-Control','no-store');
+  res.json({ok:true,module_key:key,runtime:{...runtime,is_admin:true},saved:data||null});
 }));
 
 app.get('/api/runtime/world', requireUser, asyncRoute(async (req,res)=>{
@@ -1002,7 +1026,7 @@ app.post('/api/player/location', requireUser, asyncRoute(async (req,res)=>{
   return res.json(data||{ok:true});
 }));
 
-app.get('/api/world/status', (req, res) => res.json({ ok: true, version: '18.1.6A', ...sharedUniverse.stats() }));
+app.get('/api/world/status', (req, res) => res.json({ ok: true, version: '18.1.6B', ...sharedUniverse.stats() }));
 
 app.get('*', (req, res) => res.sendFile(path.join(__dirname, '../public/index.html')));
 
@@ -1073,7 +1097,7 @@ npcRefreshTimer.unref?.();
 refreshNpcRuntimeSnapshot(true).then(cfg=>console.log(`[npc-runtime] v${cfg.version} cacheado em ${NPC_RUNTIME_FILE}`)).catch(err=>console.warn('[npc-runtime] bootstrap:',err.message));
 
 server.listen(port, () => {
-  console.log(`Stellar Legacy V18.1.6A :${port}`);
+  console.log(`Stellar Legacy V18.1.6B :${port}`);
   console.log('Supabase config:', configStatus());
   console.log('Shared Universe: ONLINE');
 });

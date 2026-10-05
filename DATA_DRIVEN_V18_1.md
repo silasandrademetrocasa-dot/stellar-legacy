@@ -94,3 +94,7 @@ O código mantém fallback local para continuidade do jogo se o runtime remoto e
 - Exibe status e versão de `topbar.runtime.json`, `npcs.runtime.json`, `world.runtime.json` e `systems.runtime.json`.
 - `ATUALIZAR RUNTIME` apenas força a renovação dos snapshots no Render; não altera tabelas nem balanceamento.
 - Nenhum editor foi liberado nesta etapa.
+
+
+## V18.1.6B — Editor de Interface
+O ADM agora edita apenas `game_ui_modules_v1810`, via backend autenticado. Cada SAVE força a regeneração de `topbar.runtime.json` no Render. O editor não escreve HTML/JS e só aceita `module_key` presente na whitelist do servidor.

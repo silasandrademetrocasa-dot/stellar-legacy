@@ -14,5 +14,5 @@
   "engines": {
     "node": ">=18"
   },
-  "release": "runtime-monitor-v18-1-6a"
+  "release": "interface-editor-v18-1-6b"
 }

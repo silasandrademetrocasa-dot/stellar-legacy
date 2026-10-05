@@ -229,3 +229,7 @@ Agora são configuráveis sem redeploy:
 
 O código mantém fallback local para continuidade do jogo se o runtime remoto estiver temporariamente indisponível.
 
+
+
+### V18.1.6B
+Editor de Interface isolado no ADM, com atualização imediata do snapshot da topbar.

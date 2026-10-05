@@ -1,3 +1,11 @@
+## V18.1.6B — Admin Interface Editor • Stage 2
+- Nova aba **INTERFACE** dentro de Configuração ao Vivo no ADM.
+- Edição isolada de nome, ordem, nível mínimo, ativo/inativo e ocultação até o nível.
+- Escrita protegida pelo RPC administrativo `admin_update_ui_module_v1810`.
+- Render materializa imediatamente `topbar.runtime.json` após cada SAVE.
+- Módulo ADM protegido contra auto-bloqueio acidental.
+- Nenhuma edição de NPC, Mundo ou Sistemas nesta etapa.
+
 ## V18.1.5 — Data Driven Systems
 
 - Missões: níveis, multiplicadores, metas diárias, steps semanais/mensais, pools de minério e chance de bônus via Supabase.
