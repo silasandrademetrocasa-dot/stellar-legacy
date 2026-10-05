@@ -1,7 +1,7 @@
-import { FACTIONS, SHIPS, ITEMS, LASER_AMMO, ROCKETS, NPC_TYPES, MAPS, RESOURCES } from './data.js?v=18.1.0';
-import { GAME_ASSETS } from './assets/v17/manifest.js?v=18.1.0';
-import { signUp, signIn, requestPasswordReset, restorePasswordRecoveryFromUrl, restoreSession, signOutLocal, checkGameSession, endGameSession, getUser, getSessionCredentials, loadCloudSave, saveCloudSave, updateCallsign, updatePassword, loadRankings, loadAuctionBids, saveAuctionBidOnline, markAuctionBidStatusOnline, loadAuctionMarket, upsertPlayerPresenceOnline, loadMapPresenceOnline, savePlayerLocationCheckpointOnline, loadPlayerLocationCheckpointOnline, removePlayerPresenceOnline, queuePvpAttackOnline, consumePvpDamageEventsOnline, syncArenaProfileOnline, loadArenaState, loadArenaDailyRewardStatus, claimArenaDailyReward, loadArenaOpponents, loadArenaHistory, arenaAttackOnline, listClansOnline, loadMyClanOnline, createClanOnline, joinClanOnline, leaveClanOnline, transferClanCreditsOnline, claimClanCreditGrantsOnline, recordClanAlienKillOnline, getPremiumShopOnline, testPurchasePremiumOnline, loadWarfrontStateOnline, hitWorldBossOnline, claimWorldBossRewardOnline, declareClanWarOnline, recordClanWarScoreOnline, loadLiveOpsOnline, purchaseLiveCatalogOnline, economyActionOnline, getChatHistoryOnline, sendChatMessageOnline, getMyDesignersOnline, setDesignLoadoutOnline, claimGateDroneDesignOnline, claimEventDesignerOnline, getAdminStatus, adminSearchAccounts, adminRecentActions, adminBanAccount, adminUnbanAccount, adminResetAccount, adminDeleteAccount, pushTelemetryBatch, adminTelemetryOverview, adminPlayerTelemetry, getBattleGroupOnline, createBattleGroupOnline, inviteBattleGroupOnline, searchBattleGroupPlayersOnline, inviteBattleGroupUserOnline, respondBattleGroupInviteOnline, leaveBattleGroupOnline, kickBattleGroupMemberOnline, setBattleGroupRallyOnline, loadRuntimeConfigOnline } from './api.js?v=18.1.0';
-import { SharedUniverseClient } from './world.js?v=18.1.0';
+import { FACTIONS, SHIPS, ITEMS, LASER_AMMO, ROCKETS, NPC_TYPES, MAPS, RESOURCES } from './data.js?v=18.1.1';
+import { GAME_ASSETS } from './assets/v17/manifest.js?v=18.1.1';
+import { signUp, signIn, requestPasswordReset, restorePasswordRecoveryFromUrl, restoreSession, signOutLocal, checkGameSession, endGameSession, getUser, getSessionCredentials, loadCloudSave, saveCloudSave, updateCallsign, updatePassword, loadRankings, loadAuctionBids, saveAuctionBidOnline, markAuctionBidStatusOnline, loadAuctionMarket, upsertPlayerPresenceOnline, loadMapPresenceOnline, savePlayerLocationCheckpointOnline, loadPlayerLocationCheckpointOnline, removePlayerPresenceOnline, queuePvpAttackOnline, consumePvpDamageEventsOnline, syncArenaProfileOnline, loadArenaState, loadArenaDailyRewardStatus, claimArenaDailyReward, loadArenaOpponents, loadArenaHistory, arenaAttackOnline, listClansOnline, loadMyClanOnline, createClanOnline, joinClanOnline, leaveClanOnline, transferClanCreditsOnline, claimClanCreditGrantsOnline, recordClanAlienKillOnline, getPremiumShopOnline, testPurchasePremiumOnline, loadWarfrontStateOnline, hitWorldBossOnline, claimWorldBossRewardOnline, declareClanWarOnline, recordClanWarScoreOnline, loadLiveOpsOnline, purchaseLiveCatalogOnline, economyActionOnline, getChatHistoryOnline, sendChatMessageOnline, getMyDesignersOnline, setDesignLoadoutOnline, claimGateDroneDesignOnline, claimEventDesignerOnline, getAdminStatus, adminSearchAccounts, adminRecentActions, adminBanAccount, adminUnbanAccount, adminResetAccount, adminDeleteAccount, pushTelemetryBatch, adminTelemetryOverview, adminPlayerTelemetry, getBattleGroupOnline, createBattleGroupOnline, inviteBattleGroupOnline, searchBattleGroupPlayersOnline, inviteBattleGroupUserOnline, respondBattleGroupInviteOnline, leaveBattleGroupOnline, kickBattleGroupMemberOnline, setBattleGroupRallyOnline, loadRuntimeConfigOnline, loadNpcRuntimeConfigOnline } from './api.js?v=18.1.1';
+import { SharedUniverseClient } from './world.js?v=18.1.1';
 
 const canvas = document.querySelector('#game');
 const ctx = canvas.getContext('2d');
@@ -117,7 +117,7 @@ function qualityShouldPreload(path){
   return /\/branding\//.test(value)||/\/assets\/v17\/loot\/cargo-box\.webp/.test(value);
 }
 
-const ASSET_REVISION='18.1.0';
+const ASSET_REVISION='18.1.1';
 function versionedAssetUrl(path){
   const value=String(path||'');if(!value)return value;
   return value.includes('?')?`${value}&asset=${ASSET_REVISION}`:`${value}?asset=${ASSET_REVISION}`;
@@ -466,6 +466,7 @@ function handleSharedUniverseMessage(msg){
   if(msg.type==='npc_patch'){applySharedNpcPatch(msg.entity||{});return;}
   if(msg.type==='npc_claim'){const e=findSharedNpc(msg.entityId);if(e){e.ownerUserId=msg.ownerUserId||null;e.ownerGroupId=msg.ownerGroupId||null;e.claimedAt=Number(msg.claimedAt)||Date.now();}return;}
   if(msg.type==='npc_spawn'){const e=normalizeSharedNpc(msg.entity||{});if(e.id&&!findSharedNpc(e.id))state.enemies.push(e);return;}
+  if(msg.type==='npc_remove'){const id=String(msg.entityId||'');state.enemies=state.enemies.filter(e=>String(e.id)!==id);if(state.target&&!state.target.isPlayer&&String(state.target.id)===id){state.target=null;player.laserFiring=false;}return;}
   if(msg.type==='npc_death'){
     const e=findSharedNpc(msg.entity?.id)||normalizeSharedNpc(msg.entity||{});if(e?.id){playSfx('explosion');spawnExplosionFx(e.x,e.y,e.color,String(e.type||'').startsWith('boss'));triggerCombatFlash(String(e.type||'').startsWith('boss')?'red':'cyan');state.enemies=state.enemies.filter(x=>x.id!==e.id);if(state.target?.id===e.id){state.target=null;player.laserFiring=false;autoAcquireNextTarget(e.id);}}return;
   }
@@ -1072,6 +1073,28 @@ function runtimeGuardMessage(key){const row=runtimeModule(key);if(!runtimeModule
 function installRuntimeMenuGuard(){const nav=document.querySelector('#topbar .command-actions');if(!nav||nav.dataset.runtimeGuard==='1')return;nav.dataset.runtimeGuard='1';nav.addEventListener('click',e=>{const el=e.target.closest('[data-runtime-module]');if(!el)return;const key=el.dataset.runtimeModule,msg=runtimeGuardMessage(key);if(!msg)return;e.preventDefault();e.stopImmediatePropagation();showToast(msg);},true);}
 installRuntimeMenuGuard();
 setInterval(()=>{if(authenticated)refreshRuntimeConfig(false);},45000);
+
+// ===================== V18.1.1 NPC + RECOMPENSAS DATA DRIVEN =====================
+const NPC_RUNTIME_CACHE_PREFIX='stellar_npc_runtime_v1811';
+const NPC_FALLBACK_SNAPSHOT=Object.fromEntries(Object.entries(NPC_TYPES).map(([key,row])=>[key,{...row,resources:{...(row.resources||{})}}]));
+const npcRuntimeConfig={version:0,updatedAt:null,lastFetchAt:0,source:'fallback'};
+function npcRuntimeCacheKey(){return `${NPC_RUNTIME_CACHE_PREFIX}:${String(getUser()?.id||'guest')}`;}
+function normalizeNpcRuntimeConfig(raw,source='online'){
+  if(!raw||typeof raw!=='object'||!Array.isArray(raw.npcs)||!raw.npcs.length)return false;
+  for(const row of raw.npcs){
+    const key=String(row?.npc_key||'').trim();if(!key)continue;
+    const fallback=NPC_FALLBACK_SNAPSHOT[key]||{};
+    NPC_TYPES[key]={...fallback,...NPC_TYPES[key],name:String(row.name||fallback.name||key),hp:Math.max(1,Number(row.hp)||1),shield:Math.max(0,Number(row.shield)||0),credits:Math.max(0,Number(row.credits)||0),uridium:Math.max(0,Number(row.stl)||0),xp:Math.max(0,Number(row.xp)||0),speed:Math.max(1,Number(row.speed)||1),damage:Math.max(0,Number(row.damage)||0),color:String(row.color||fallback.color||'#ff755d'),size:Math.max(4,Number(row.size)||18),resources:row.resources&&typeof row.resources==='object'?{...row.resources}:{...(fallback.resources||{})},respawnMinMs:Math.max(1000,Number(row.respawn_min_ms)||6000),respawnMaxMs:Math.max(1000,Number(row.respawn_max_ms)||13000),enabled:row.enabled!==false};
+  }
+  npcRuntimeConfig.version=Math.max(0,Number(raw.version)||0);npcRuntimeConfig.updatedAt=raw.updated_at||null;npcRuntimeConfig.source=source;return true;
+}
+function loadNpcRuntimeConfigCache(){try{const raw=JSON.parse(localStorage.getItem(npcRuntimeCacheKey())||'null');return !!(raw&&normalizeNpcRuntimeConfig(raw,'cache'));}catch{return false;}}
+function saveNpcRuntimeConfigCache(raw){try{localStorage.setItem(npcRuntimeCacheKey(),JSON.stringify(raw));}catch{}}
+async function refreshNpcRuntimeConfig(force=false){
+  if(!authenticated||!getUser()?.id)return null;const now=Date.now();if(!force&&now-npcRuntimeConfig.lastFetchAt<30000)return null;npcRuntimeConfig.lastFetchAt=now;
+  try{const raw=await loadNpcRuntimeConfigOnline();if(!raw)return null;const changed=Number(raw.version)!==Number(npcRuntimeConfig.version)||npcRuntimeConfig.source!=='online';if(changed){normalizeNpcRuntimeConfig(raw,'online');saveNpcRuntimeConfigCache(raw);console.info(`[npc-config] v${npcRuntimeConfig.version} aplicado no cliente`);try{renderAll();}catch{}}return raw;}catch(err){console.warn('[npc-config] usando cache/fallback',err);if(npcRuntimeConfig.source==='fallback')loadNpcRuntimeConfigCache();return null;}
+}
+setInterval(()=>{if(authenticated)refreshNpcRuntimeConfig(false);},45000);
 
 const PROGRESSION_UNLOCKS={missions:5,pilot:6,clan:8};
 const MISSION_CATEGORY_LEVELS={daily:5,weekly:7,monthly:10,special:12};
@@ -6541,7 +6564,7 @@ ui.loginForm.onsubmit=async e=>{e.preventDefault();ui.authMessage.textContent='E
 ui.registerForm.onsubmit=async e=>{e.preventDefault();ui.authMessage.textContent='Criando conta...';try{const result=await signUp({callsign:ui.registerCallsign.value,email:ui.registerEmail.value,password:ui.registerPassword.value});if(result.requires_confirmation){showAuthMode('login');ui.loginEmail.value=ui.registerEmail.value;ui.authMessage.textContent='Conta criada. Confirme o e-mail e depois entre.';return;}await afterAuth();}catch(err){ui.authMessage.textContent=err.message;}};
 if(ui.forgotPasswordBtn)ui.forgotPasswordBtn.onclick=async()=>{const email=String(ui.loginEmail?.value||'').trim();ui.authMessage.textContent='Enviando recuperação...';try{await requestPasswordReset(email);ui.authMessage.textContent='E-mail de recuperação enviado. Abra o link recebido para criar uma nova senha.';}catch(err){ui.authMessage.textContent=err.message;}};
 if(ui.recoveryForm)ui.recoveryForm.onsubmit=async e=>{e.preventDefault();const a=ui.recoveryPassword?.value||'',b=ui.recoveryPasswordConfirm?.value||'';if(a!==b){ui.authMessage.textContent='As senhas não conferem.';return;}ui.authMessage.textContent='Atualizando senha...';try{await updatePassword(a);signOutLocal();showAuthMode('login');ui.loginPassword.value='';ui.authMessage.textContent='Senha atualizada. Entre com a nova senha.';}catch(err){ui.authMessage.textContent=err.message;}};
-ui.logoutBtn.onclick=async()=>{await flushTelemetry(true).catch(()=>{});telemetryRuntime.sessionOpen=false;sharedUniverse.close();sharedUniverseRuntime.ready=false;sharedUniverseRuntime.event=null;if(movementPositionRuntime.loadedFromCheckpoint||movementPositionRuntime.hasMovedSinceLoad)commitRuntimePosition('logout');await flushCloudSave(true);await removePlayerPresenceOnline().catch(()=>{});clearOnlinePlayers();await endGameSession().catch(()=>signOutLocal());authenticated=false;progress=null;runtimeConfigRuntime.version=0;runtimeConfigRuntime.isAdmin=false;runtimeConfigRuntime.source='fallback';runtimeConfigRuntime.modules=new Map(RUNTIME_FALLBACK_MODULES.map(x=>[x.module_key,x]));runtimeConfigRuntime.flags=new Map(Object.entries(RUNTIME_FALLBACK_FLAGS).map(([flag_key,enabled])=>[flag_key,{flag_key,enabled,config:{}}]));applyRuntimeMenuConfig();clanRuntime.state=null;clanRuntime.clans=[];clanRuntime.lastAt=0;warfrontRuntime.state=null;warfrontRuntime.clans=[];warfrontRuntime.lastAt=0;warfrontRuntime.pendingBossDamage=0;premiumRuntime.state=null;premiumRuntime.lastAt=0;updateClanBadge();updatePremiumBadge();chatRuntime.messages=[];chatRuntime.lastSignature='';renderChatTabs();renderChatMessages();state.target=null;player.laserFiring=false;for(const modal of dismissibleModals())modal.classList.add('hidden');ui.factionModal.classList.add('hidden');ui.portalPrompt?.classList.add('hidden');ui.baseTradePrompt?.classList.add('hidden');ui.petFloatPanel?.classList.add('hidden');ui.loginModal.classList.remove('hidden');if(ui.userLabel)ui.userLabel.textContent='—';if(ui.rankChip)ui.rankChip.textContent='Piloto Básico';if(ui.loginPassword)ui.loginPassword.value='';setSync('LOCAL','');showAuthMode('login');};
+ui.logoutBtn.onclick=async()=>{await flushTelemetry(true).catch(()=>{});telemetryRuntime.sessionOpen=false;sharedUniverse.close();sharedUniverseRuntime.ready=false;sharedUniverseRuntime.event=null;if(movementPositionRuntime.loadedFromCheckpoint||movementPositionRuntime.hasMovedSinceLoad)commitRuntimePosition('logout');await flushCloudSave(true);await removePlayerPresenceOnline().catch(()=>{});clearOnlinePlayers();await endGameSession().catch(()=>signOutLocal());authenticated=false;progress=null;npcRuntimeConfig.version=0;npcRuntimeConfig.updatedAt=null;npcRuntimeConfig.source='fallback';runtimeConfigRuntime.version=0;runtimeConfigRuntime.isAdmin=false;runtimeConfigRuntime.source='fallback';runtimeConfigRuntime.modules=new Map(RUNTIME_FALLBACK_MODULES.map(x=>[x.module_key,x]));runtimeConfigRuntime.flags=new Map(Object.entries(RUNTIME_FALLBACK_FLAGS).map(([flag_key,enabled])=>[flag_key,{flag_key,enabled,config:{}}]));applyRuntimeMenuConfig();clanRuntime.state=null;clanRuntime.clans=[];clanRuntime.lastAt=0;warfrontRuntime.state=null;warfrontRuntime.clans=[];warfrontRuntime.lastAt=0;warfrontRuntime.pendingBossDamage=0;premiumRuntime.state=null;premiumRuntime.lastAt=0;updateClanBadge();updatePremiumBadge();chatRuntime.messages=[];chatRuntime.lastSignature='';renderChatTabs();renderChatMessages();state.target=null;player.laserFiring=false;for(const modal of dismissibleModals())modal.classList.add('hidden');ui.factionModal.classList.add('hidden');ui.portalPrompt?.classList.add('hidden');ui.baseTradePrompt?.classList.add('hidden');ui.petFloatPanel?.classList.add('hidden');ui.loginModal.classList.remove('hidden');if(ui.userLabel)ui.userLabel.textContent='—';if(ui.rankChip)ui.rankChip.textContent='Piloto Básico';if(ui.loginPassword)ui.loginPassword.value='';setSync('LOCAL','');showAuthMode('login');};
 
 function startLoadedGame(){
   if(!telemetryRuntime.sessionOpen)telemetryStartSession();
@@ -6612,6 +6635,7 @@ async function afterAuth(){
 
   // V18.1.0: aplica cache de configuração imediatamente; atualização online nunca bloqueia o mundo.
   try{loadRuntimeConfigCache();applyRuntimeMenuConfig();}catch(e){console.warn('[runtime-config] cache',e);}
+  try{loadNpcRuntimeConfigCache();}catch(e){console.warn('[npc-config] cache',e);}
 
   // 1) Posição local é síncrona e nunca bloqueia o mundo.
   try{restoreLatestRuntimeLocationCheckpoint();}catch(e){console.warn('[bootstrap] local position',e);}
@@ -6636,7 +6660,7 @@ async function afterAuth(){
     try{state.currentMap=MAPS[progress.mapId]||MAPS.x1;const ship=SHIPS[progress.activeShipId]||SHIPS.phoenix;player.maxHp=Math.max(1,Number(ship.hp)||1);player.maxShield=Math.max(0,Number(progress.shield)||0);player.hp=Math.max(1,Math.min(player.maxHp,Number(progress.hp)||player.maxHp));player.shield=Math.max(0,Math.min(player.maxShield,Number(progress.shield)||0));player.x=Number(progress.x)||currentBasePoint().x;player.y=Number(progress.y)||state.currentMap.world.h/2;player.tx=player.x;player.ty=player.y;state.camera.x=player.x;state.camera.y=player.y;joinSharedUniverse();syncOnlineWorld();updateUI();gameBootstrapRuntime.ready=true;}catch(inner){console.error('[bootstrap] emergency fallback failed',inner);}
   }finally{gameBootstrapRuntime.loading=false;}
 
-  renderChatTabs();refreshChatHistory(true);updatePassBadge();syncAuctionBidsOnline();syncOnlineWorld();syncClanCreditGrants(true);refreshClanState(true);refreshWarfrontState(true).catch(()=>{});refreshRuntimeConfig(true).catch(()=>{});
+  renderChatTabs();refreshChatHistory(true);updatePassBadge();syncAuctionBidsOnline();syncOnlineWorld();syncClanCreditGrants(true);refreshClanState(true);refreshWarfrontState(true).catch(()=>{});refreshRuntimeConfig(true).catch(()=>{});refreshNpcRuntimeConfig(true).catch(()=>{});
 
   // Se a posição do servidor chegou depois dos 650ms e o jogador ainda não moveu a nave,
   // ela pode corrigir o ponto inicial sem tocar em economia/inventário.

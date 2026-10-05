@@ -148,7 +148,7 @@ class Room {
   }
 
   makeNpc(type,opts={}){
-    const base=NPC_TYPES[type]; if(!base) return null;
+    const base=this.world.npcDefinition(type); if(!base||base.enabled===false) return null;
     const p=this.randomPosition(180), battle=!!this.map.battle;
     const e={
       id:opts.id||`${opts.eventNpc?'evt':'npc'}_${type}_${randomUUID().slice(0,8)}`,
@@ -162,14 +162,15 @@ class Room {
       resources:{...(base.resources||{})},attackRange:Math.min(500,(battle?250:230)+base.size*5.8),aggroRange:800,
       lastShot:0,angle:rand(0,Math.PI*2),drift:rand(.4,1.4),eventNpc:!!opts.eventNpc,eventId:opts.eventId||null,
       forceChase:!!opts.forceChase,damageContrib:new Map(),lastDamageAt:0,aggroUserId:null,aggroStartedAt:0,spawnedAt:nowMs(),
-      ownerUserId:null,ownerGroupId:null,claimedAt:0,ownerGroupMemberIds:new Set(),ownerGroupPromise:null
+      ownerUserId:null,ownerGroupId:null,claimedAt:0,ownerGroupMemberIds:new Set(),ownerGroupPromise:null,
+      _configScale:Number(opts.scale||1),_configRewardMult:Number(opts.rewardMult||1),_configSpeedMult:Number(opts.speedMult||1),_configColorOverride:opts.color||null,_configSizeOverride:opts.size||null
     };
     if(opts.x!=null)e.x=opts.x;if(opts.y!=null)e.y=opts.y;
     return e;
   }
 
   publicNpc(e){
-    const {damageContrib,ownerGroupMemberIds,ownerGroupPromise,...rest}=e;
+    const {damageContrib,ownerGroupMemberIds,ownerGroupPromise,_configScale,_configRewardMult,_configSpeedMult,_configColorOverride,_configSizeOverride,...rest}=e;
     return rest;
   }
 
@@ -181,13 +182,44 @@ class Room {
   }
 
   generateBaseWorld(){
-    const mult=Math.max(1,Number(this.map.enemyMultiplier)||1);
-    for(const group of this.map.enemyGroups||[]){
-      const count=Math.max(1,Math.round(group.count*mult));
+    for(const group of this.world.npcSpawnGroups(this.mapId)){
+      const count=Math.max(0,Math.round(Number(group.count)||0));
       for(let i=0;i<count;i++){const e=this.makeNpc(group.type);if(e)this.npcs.set(e.id,e);}
     }
     const oreCount=this.map.oreCount||(this.map.battle?72:48);
     for(let i=0;i<oreCount;i++){const o=this.makeOre();this.ores.set(o.id,o);}
+  }
+
+  desiredNpcCount(type){
+    const row=this.world.npcSpawnGroups(this.mapId).find(g=>String(g.type)===String(type));
+    return Math.max(0,Math.round(Number(row?.count)||0));
+  }
+
+  nonEventNpcCount(type){
+    let n=0;for(const e of this.npcs.values())if(!e.eventNpc&&String(e.type)===String(type)&&e.hp>0)n++;return n;
+  }
+
+  applyNpcRuntimeConfig(){
+    // Atualiza NPCs vivos preservando a porcentagem atual de HP/escudo.
+    for(const [id,e] of this.npcs){
+      const base=this.world.npcDefinition(e.type);
+      if(!base||base.enabled===false){if(!e.eventNpc&&!e.ownerUserId){this.npcs.delete(id);this.broadcast({type:'npc_remove',entityId:id,reason:'runtime_disabled'});}continue;}
+      const scale=Math.max(.01,Number(e._configScale)||1),rewardMult=Math.max(0,Number(e._configRewardMult)||1),speedMult=Math.max(.01,Number(e._configSpeedMult)||1);
+      const hpRatio=e.maxHp>0?e.hp/e.maxHp:1,shieldRatio=e.maxShield>0?e.shield/e.maxShield:1;
+      e.maxHp=Math.max(1,Math.round(Number(base.hp)*scale));e.hp=Math.max(0,Math.min(e.maxHp,Math.round(e.maxHp*hpRatio)));
+      e.maxShield=Math.max(0,Math.round(Number(base.shield||0)*scale));e.shield=Math.max(0,Math.min(e.maxShield,Math.round(e.maxShield*shieldRatio)));
+      e.credits=Math.max(0,Math.round(Number(base.credits||0)*rewardMult));e.uridium=Math.max(0,Math.round(Number(base.uridium||0)*rewardMult));e.xp=Math.max(0,Math.round(Number(base.xp||0)*rewardMult));
+      e.baseSpeed=Math.max(10,Math.round(Number(base.speed||10)*speedMult));e.baseDamage=Math.round(Number(base.damage||0)*Math.max(1,scale*.82));{const phase=Math.max(0,Math.min(2,Number(e.bossPhase)||0));e.speed=Math.round(e.baseSpeed*(phase===1?1.16:phase===2?1.36:1));e.damage=Math.round(e.baseDamage*(phase===1?1.20:phase===2?1.48:1));}
+      e.name=e._configColorOverride?e.name:base.name;e.color=e._configColorOverride||base.color;e.size=e._configSizeOverride||base.size;e.resources={...(base.resources||{})};
+      this.broadcast({type:'npc_patch',entity:{id:e.id,name:e.name,hp:e.hp,maxHp:e.maxHp,shield:e.shield,maxShield:e.maxShield,credits:e.credits,uridium:e.uridium,xp:e.xp,speed:e.speed,damage:e.damage,color:e.color,size:e.size,resources:e.resources}});
+    }
+    // Contagem menor passa a valer naturalmente nas próximas mortes; contagem maior entra agora.
+    // Limpamos apenas respawns normais pendentes para não ressuscitar uma configuração antiga.
+    this.respawns=this.respawns.filter(r=>r.kind!=='npc');
+    for(const group of this.world.npcSpawnGroups(this.mapId)){
+      const target=Math.max(0,Math.round(Number(group.count)||0)),current=this.nonEventNpcCount(group.type);
+      for(let i=current;i<target;i++){const e=this.makeNpc(group.type);if(e){this.npcs.set(e.id,e);this.broadcast({type:'npc_spawn',entity:this.publicNpc(e)});}}
+    }
   }
 
   currentEventDef(){ return this.world.currentEvent(); }
@@ -248,7 +280,7 @@ class Room {
     const maxAlive=Math.max(1,Number(profile.maxAlive)||Math.max(Number(profile.waveCount)||6,(Number(profile.minAlive)||3)*2));
     count=Math.max(0,Math.min(Math.max(0,Number(count)||0),maxAlive-alive));
     for(let i=0;i<count;i++){
-      const type=pool[Math.floor(Math.random()*pool.length)],baseName=(NPC_TYPES[type]?.name||String(type||'NPC')).toUpperCase();
+      const type=pool[Math.floor(Math.random()*pool.length)],baseName=(this.world.npcDefinition(type)?.name||String(type||'NPC')).toUpperCase();
       const e=this.makeNpc(type,{eventNpc:true,eventId:ev.eventId,forceChase:true,rewardMult,scale:profile.scale||1,color:profile.color,size:profile.size,speedMult:profile.speedMult||1,name:profile.namePrefix?(profile.namePrefix+' '+baseName):undefined});
       if(e){this.npcs.set(e.id,e);this.broadcast({type:'npc_spawn',entity:this.publicNpc(e)});}
     }
@@ -507,7 +539,7 @@ class Room {
     const mode=this.eventMode();
     if(mode==='battle_wave'&&!this.event?.complete)this.addEventProgress(1);
     else if(e.eventNpc&&this.event?.eventId===e.eventId&&(mode==='wave'||mode==='boss'))this.addEventProgress(1);
-    if(!e.eventNpc)this.respawns.push({kind:'npc',type:e.type,at:nowMs()+rand(6000,13000)});
+    if(!e.eventNpc){const delay=this.world.npcRespawnDelay(e.type);if(this.desiredNpcCount(e.type)>0)this.respawns.push({kind:'npc',type:e.type,at:nowMs()+delay});}
   }
 
   handleOreCollect(ws,msg){
@@ -551,7 +583,7 @@ class Room {
       }else if(!protectedNow&&!neutralX1&&d<=e.aggroRange&&d>e.attackRange*.8){const nd=Math.max(1,d);e.x=clamp(e.x+dx/nd*e.speed*dt,25,this.map.world.w-25);e.y=clamp(e.y+dy/nd*e.speed*dt,25,this.map.world.h-25);}else if(d>e.aggroRange||protectedNow){e.x=clamp(e.x+Math.cos(e.angle)*e.speed*.16*dt,25,this.map.world.w-25);e.y=clamp(e.y+Math.sin(e.angle)*e.speed*.16*dt,25,this.map.world.h-25);}
       const attackDelay=((String(e.type).startsWith('boss')?1.6:1.15)*(e.bossAttackScale||1))*1000;if(!protectedNow&&!neutralX1&&d<e.attackRange&&now-(e.lastShot||0)>=attackDelay){e.lastShot=now;const victim=[...this.clients].find(c=>c.player?.userId===p.userId);safeJsonSend(victim,{type:'npc_attack',entityId:e.id,damage:Math.max(1,Math.round(e.damage*rand(.92,1.12))),x:e.x,y:e.y,retaliation:retaliating,aggroUserId:e.aggroUserId||null});}
     }
-    for(let i=this.respawns.length-1;i>=0;i--){const r=this.respawns[i];if(now<r.at)continue;this.respawns.splice(i,1);if(r.kind==='eventNpc'&&this.event?.eventId!==r.eventId)continue;const profile=r.kind==='eventNpc'?this.eventProfile():null,baseName=(NPC_TYPES[r.type]?.name||String(r.type||'NPC')).toUpperCase();const e=this.makeNpc(r.type,r.kind==='eventNpc'?{eventNpc:true,eventId:r.eventId,forceChase:true,rewardMult:profile?.rewardMult||1.22,scale:profile?.scale||1,color:profile?.color,size:profile?.size,speedMult:profile?.speedMult||1,name:profile?.namePrefix?(profile.namePrefix+' '+baseName):undefined}:{});if(e){this.npcs.set(e.id,e);this.broadcast({type:'npc_spawn',entity:this.publicNpc(e)});}}
+    for(let i=this.respawns.length-1;i>=0;i--){const r=this.respawns[i];if(now<r.at)continue;this.respawns.splice(i,1);if(r.kind==='eventNpc'&&this.event?.eventId!==r.eventId)continue;if(r.kind==='npc'&&this.nonEventNpcCount(r.type)>=this.desiredNpcCount(r.type))continue;const profile=r.kind==='eventNpc'?this.eventProfile():null,baseName=(this.world.npcDefinition(r.type)?.name||String(r.type||'NPC')).toUpperCase();const e=this.makeNpc(r.type,r.kind==='eventNpc'?{eventNpc:true,eventId:r.eventId,forceChase:true,rewardMult:profile?.rewardMult||1.22,scale:profile?.scale||1,color:profile?.color,size:profile?.size,speedMult:profile?.speedMult||1,name:profile?.namePrefix?(profile.namePrefix+' '+baseName):undefined}:{});if(e){this.npcs.set(e.id,e);this.broadcast({type:'npc_spawn',entity:this.publicNpc(e)});}}
     for(let i=this.oreRespawns.length-1;i>=0;i--){const r=this.oreRespawns[i];if(now<r.at)continue;this.oreRespawns.splice(i,1);if(r.eventOre&&this.event?.eventId!==r.eventId)continue;const o=this.makeOre(r.type,r.eventOre?{eventOre:true,eventId:r.eventId,amount:r.amount}:{});this.ores.set(o.id,o);this.broadcast({type:'ore_spawn',ore:o});}
     if(this.event&&!this.event.complete){
       const profile=this.eventProfile(),mode=profile.mode;
@@ -576,15 +608,46 @@ class Room {
   }
 }
 
-export function attachSharedUniverse(server,{authenticate,loadLiveOps,loadBattleGroup}){
+export function attachSharedUniverse(server,{authenticate,loadLiveOps,loadBattleGroup,loadNpcConfig}){
   const wss=new WebSocketServer({server,path:'/ws',perMessageDeflate:false});const rooms=new Map();
   const world={
     liveOps:{events:[],catalog:[],server_time:0},
     lastLiveOpsAt:0,
     liveOpsBusy:false,
+    npcRuntime:{version:0,updatedAt:null,npcs:new Map(),spawns:new Map(),source:'fallback'},
+    lastNpcConfigAt:0,
+    npcConfigBusy:false,
     loadBattleGroup:loadBattleGroup||null,
     npcActivity:new Map(),
     announcementCooldowns:new Map(),
+    npcDefinition(type){
+      const key=String(type||''),live=this.npcRuntime?.npcs?.get?.(key),fallback=NPC_TYPES[key]||null;
+      return live||fallback;
+    },
+    npcSpawnGroups(mapId){
+      const key=String(mapId||''),rows=this.npcRuntime?.spawns?.get?.(key);
+      if(this.npcRuntime?.version>0&&Array.isArray(rows))return rows.filter(r=>r.enabled!==false&&Number(r.count)>0&&this.npcDefinition(r.type)?.enabled!==false).map(r=>({type:r.type,count:Math.max(0,Math.round(Number(r.count)||0))}));
+      const map=MAPS[key]||MAPS.x1,mult=Math.max(1,Number(map.enemyMultiplier)||1);
+      return (map.enemyGroups||[]).map(g=>({type:g.type,count:Math.max(1,Math.round((Number(g.count)||0)*mult))}));
+    },
+    npcRespawnDelay(type){
+      const n=this.npcDefinition(type)||{},min=Math.max(1000,Number(n.respawn_min_ms)||6000),max=Math.max(min,Number(n.respawn_max_ms)||13000);return rand(min,max);
+    },
+    async refreshNpcConfig(force=false){
+      const now=nowMs();if(!loadNpcConfig)return this.npcRuntime;if(!force&&this.lastNpcConfigAt&&now-this.lastNpcConfigAt<12000)return this.npcRuntime;if(this.npcConfigBusy)return this.npcRuntime;this.npcConfigBusy=true;
+      try{
+        const raw=await loadNpcConfig();
+        if(raw&&Array.isArray(raw.npcs)&&Array.isArray(raw.spawns)){
+          const nextVersion=Math.max(0,Number(raw.version)||0),changed=nextVersion!==Number(this.npcRuntime.version);
+          const npcs=new Map();for(const row of raw.npcs){if(!row?.npc_key)continue;npcs.set(String(row.npc_key),{...row,name:shortText(row.name||row.npc_key,64),hp:Math.max(1,Number(row.hp)||1),shield:Math.max(0,Number(row.shield)||0),credits:Math.max(0,Number(row.credits)||0),uridium:Math.max(0,Number(row.stl)||0),xp:Math.max(0,Number(row.xp)||0),speed:Math.max(1,Number(row.speed)||1),damage:Math.max(0,Number(row.damage)||0),color:safeColor(row.color,'#ff755d'),size:Math.max(4,Number(row.size)||18),resources:row.resources&&typeof row.resources==='object'?row.resources:{},respawn_min_ms:Math.max(1000,Number(row.respawn_min_ms)||6000),respawn_max_ms:Math.max(1000,Number(row.respawn_max_ms)||13000),enabled:row.enabled!==false});}
+          const spawns=new Map();for(const row of raw.spawns){const mapId=String(row?.map_id||''),type=String(row?.npc_key||'');if(!MAPS[mapId]||!type)continue;if(!spawns.has(mapId))spawns.set(mapId,[]);spawns.get(mapId).push({type,count:Math.max(0,Math.round(Number(row.spawn_count)||0)),enabled:row.enabled!==false});}
+          this.npcRuntime={version:nextVersion,updatedAt:raw.updated_at||null,npcs,spawns,source:'supabase'};this.lastNpcConfigAt=nowMs();
+          if(changed){for(const r of rooms.values())r.applyNpcRuntimeConfig();console.info(`[npc-config] v${nextVersion} aplicado • ${npcs.size} NPCs`);}
+        }
+      }catch(err){this.lastNpcConfigAt=nowMs();console.warn('NPC runtime refresh failed; mantendo fallback/cache atual:',err?.message||err);}
+      finally{this.npcConfigBusy=false;}
+      return this.npcRuntime;
+    },
     broadcastGlobalAnnouncement(payload={}){
       const now=nowMs(),key=String(payload.key||payload.kind||'global');
       const last=Number(this.announcementCooldowns.get(key)||0);
@@ -619,7 +682,7 @@ export function attachSharedUniverse(server,{authenticate,loadLiveOps,loadBattle
       return world.liveOps;
     },
     room(mapId,territoryFaction){const id=sanitizeRoomMap(mapId),key=roomKey(id,territoryFaction);if(!rooms.has(key))rooms.set(key,new Room(world,id,territoryFaction));return rooms.get(key);},
-    stats(){return {rooms:rooms.size,clients:[...rooms.values()].reduce((s,r)=>s+r.clients.size,0),npcs:[...rooms.values()].reduce((s,r)=>s+r.npcs.size,0),ores:[...rooms.values()].reduce((s,r)=>s+r.ores.size,0),event:world.currentEvent(),liveOpsUpdatedAt:world.lastLiveOpsAt};}
+    stats(){return {rooms:rooms.size,clients:[...rooms.values()].reduce((s,r)=>s+r.clients.size,0),npcs:[...rooms.values()].reduce((s,r)=>s+r.npcs.size,0),ores:[...rooms.values()].reduce((s,r)=>s+r.ores.size,0),event:world.currentEvent(),liveOpsUpdatedAt:world.lastLiveOpsAt,npcConfigVersion:Number(world.npcRuntime?.version)||0,npcConfigUpdatedAt:world.npcRuntime?.updatedAt||null};}
   };
 
   wss.on('connection',ws=>{
@@ -648,8 +711,9 @@ export function attachSharedUniverse(server,{authenticate,loadLiveOps,loadBattle
     ws.on('error',()=>{});
   });
 
+  world.refreshNpcConfig(true).catch(()=>{});
   world.refreshLiveOps(true).catch(()=>{});
-  let last=nowMs(),lastActivityCleanup=0;const timer=setInterval(()=>{const n=nowMs(),dt=Math.min(.12,(n-last)/1000);last=n;if(n-world.lastLiveOpsAt>=LIVE_OPS_REFRESH_MS)world.refreshLiveOps(false).catch(()=>{});for(const [key,r] of rooms){r.tick(dt);if(r.clients.size===0&&n-(r.lastUsedAt||n)>30*60*1000)rooms.delete(key);else if(r.clients.size>0)r.lastUsedAt=n;}if(n-lastActivityCleanup>60000){lastActivityCleanup=n;for(const [uid,at] of world.npcActivity)if(n-Number(at)>10*60*1000)world.npcActivity.delete(uid);}},50);
+  let last=nowMs(),lastActivityCleanup=0;const timer=setInterval(()=>{const n=nowMs(),dt=Math.min(.12,(n-last)/1000);last=n;if(n-world.lastLiveOpsAt>=LIVE_OPS_REFRESH_MS)world.refreshLiveOps(false).catch(()=>{});if(n-world.lastNpcConfigAt>=12000)world.refreshNpcConfig(false).catch(()=>{});for(const [key,r] of rooms){r.tick(dt);if(r.clients.size===0&&n-(r.lastUsedAt||n)>30*60*1000)rooms.delete(key);else if(r.clients.size>0)r.lastUsedAt=n;}if(n-lastActivityCleanup>60000){lastActivityCleanup=n;for(const [uid,at] of world.npcActivity)if(n-Number(at)>10*60*1000)world.npcActivity.delete(uid);}},50);
   timer.unref?.();
   return world;
 }

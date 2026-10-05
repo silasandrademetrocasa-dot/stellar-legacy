@@ -1,4 +1,4 @@
-# Stellar Legacy 18.1.0 — Multiplayer Expansion
+# Stellar Legacy 18.1.1 — Data Driven NPCs
 
 Propriedade autoritativa de NPCs no Shared Universe, grupos multi-facção e divisão de recompensa apenas entre membros ativos no mesmo setor. A box continua exclusiva do primeiro atacante.
 

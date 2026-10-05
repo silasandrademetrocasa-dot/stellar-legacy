@@ -831,3 +831,10 @@ export async function loadRuntimeConfigOnline(){
   const rows=await authedSupabaseFetch('/rest/v1/rpc/get_game_runtime_config_v1810',{method:'POST',body:'{}'});
   return Array.isArray(rows)?rows[0]||null:rows||null;
 }
+
+
+// ===================== V18.1.1 NPC RUNTIME CONFIG =====================
+export async function loadNpcRuntimeConfigOnline(){
+  const rows=await authedSupabaseFetch('/rest/v1/rpc/get_npc_runtime_config_v1811',{method:'POST',body:'{}'});
+  return Array.isArray(rows)?rows[0]||null:rows||null;
+}

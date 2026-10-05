@@ -1,3 +1,11 @@
+## V18.1.1 — NPCs + Recompensas Data Driven
+- HP, escudo, dano, velocidade, CR, STL, XP, recursos e respawn dos NPCs agora vêm do Supabase.
+- Quantidade de cada NPC por mapa agora é configuração explícita no banco.
+- Servidor mantém fallback local se o banco/configuração estiver indisponível.
+- Configuração é cacheada e atualizada em runtime; salas existentes recebem novos valores sem redeploy.
+- Reduções de população entram naturalmente nas próximas mortes; aumentos aparecem imediatamente.
+- Cliente sincroniza catálogo para nomes e cálculos de missões, mantendo recompensa final autoritativa no servidor.
+
 ## V18.1.0 — Data Driven Core • Stage 1
 
 - Feature Flags globais no Supabase.

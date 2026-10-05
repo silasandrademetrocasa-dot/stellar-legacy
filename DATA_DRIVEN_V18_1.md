@@ -38,3 +38,11 @@ O banco não envia seletores, HTML ou JavaScript. O cliente contém uma whitelis
 2. Stage 3: mapas + portais + recursos.
 3. Stage 4: missões + economia + crafting.
 4. Stage 5: Central ADM visual para edição sem SQL manual.
+
+
+## Stage 2 — V18.1.1 NPC Runtime
+- `game_npc_config_v1811`: stats, economia, recursos, respawn e status dos NPCs.
+- `game_map_npc_spawns_v1811`: população exata por mapa.
+- `get_npc_runtime_config_v1811()`: snapshot versionado consumido pelo servidor/cliente.
+- Alterações no banco não executam código arbitrário: apenas alimentam campos validados do motor.
+- O servidor continua autoritativo para dano e recompensa.
