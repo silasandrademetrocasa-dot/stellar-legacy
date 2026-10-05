@@ -1,7 +1,7 @@
-import { FACTIONS, SHIPS, ITEMS, LASER_AMMO, ROCKETS, NPC_TYPES, MAPS, RESOURCES } from './data.js?v=17.9.3';
-import { GAME_ASSETS } from './assets/v17/manifest.js?v=17.9.3';
-import { signUp, signIn, requestPasswordReset, restorePasswordRecoveryFromUrl, restoreSession, signOutLocal, checkGameSession, endGameSession, getUser, getSessionCredentials, loadCloudSave, saveCloudSave, updateCallsign, updatePassword, loadRankings, loadAuctionBids, saveAuctionBidOnline, markAuctionBidStatusOnline, loadAuctionMarket, upsertPlayerPresenceOnline, loadMapPresenceOnline, savePlayerLocationCheckpointOnline, loadPlayerLocationCheckpointOnline, removePlayerPresenceOnline, queuePvpAttackOnline, consumePvpDamageEventsOnline, syncArenaProfileOnline, loadArenaState, loadArenaDailyRewardStatus, claimArenaDailyReward, loadArenaOpponents, loadArenaHistory, arenaAttackOnline, listClansOnline, loadMyClanOnline, createClanOnline, joinClanOnline, leaveClanOnline, transferClanCreditsOnline, claimClanCreditGrantsOnline, recordClanAlienKillOnline, getPremiumShopOnline, testPurchasePremiumOnline, loadWarfrontStateOnline, hitWorldBossOnline, claimWorldBossRewardOnline, declareClanWarOnline, recordClanWarScoreOnline, loadLiveOpsOnline, purchaseLiveCatalogOnline, economyActionOnline, getChatHistoryOnline, sendChatMessageOnline, getMyDesignersOnline, setDesignLoadoutOnline, claimGateDroneDesignOnline, claimEventDesignerOnline, getAdminStatus, adminSearchAccounts, adminRecentActions, adminBanAccount, adminUnbanAccount, adminResetAccount, adminDeleteAccount, pushTelemetryBatch, adminTelemetryOverview, adminPlayerTelemetry, getBattleGroupOnline, createBattleGroupOnline, inviteBattleGroupOnline, searchBattleGroupPlayersOnline, inviteBattleGroupUserOnline, respondBattleGroupInviteOnline, leaveBattleGroupOnline, kickBattleGroupMemberOnline, setBattleGroupRallyOnline } from './api.js?v=17.9.4';
-import { SharedUniverseClient } from './world.js?v=17.9.3';
+import { FACTIONS, SHIPS, ITEMS, LASER_AMMO, ROCKETS, NPC_TYPES, MAPS, RESOURCES } from './data.js?v=17.9.5';
+import { GAME_ASSETS } from './assets/v17/manifest.js?v=17.9.5';
+import { signUp, signIn, requestPasswordReset, restorePasswordRecoveryFromUrl, restoreSession, signOutLocal, checkGameSession, endGameSession, getUser, getSessionCredentials, loadCloudSave, saveCloudSave, updateCallsign, updatePassword, loadRankings, loadAuctionBids, saveAuctionBidOnline, markAuctionBidStatusOnline, loadAuctionMarket, upsertPlayerPresenceOnline, loadMapPresenceOnline, savePlayerLocationCheckpointOnline, loadPlayerLocationCheckpointOnline, removePlayerPresenceOnline, queuePvpAttackOnline, consumePvpDamageEventsOnline, syncArenaProfileOnline, loadArenaState, loadArenaDailyRewardStatus, claimArenaDailyReward, loadArenaOpponents, loadArenaHistory, arenaAttackOnline, listClansOnline, loadMyClanOnline, createClanOnline, joinClanOnline, leaveClanOnline, transferClanCreditsOnline, claimClanCreditGrantsOnline, recordClanAlienKillOnline, getPremiumShopOnline, testPurchasePremiumOnline, loadWarfrontStateOnline, hitWorldBossOnline, claimWorldBossRewardOnline, declareClanWarOnline, recordClanWarScoreOnline, loadLiveOpsOnline, purchaseLiveCatalogOnline, economyActionOnline, getChatHistoryOnline, sendChatMessageOnline, getMyDesignersOnline, setDesignLoadoutOnline, claimGateDroneDesignOnline, claimEventDesignerOnline, getAdminStatus, adminSearchAccounts, adminRecentActions, adminBanAccount, adminUnbanAccount, adminResetAccount, adminDeleteAccount, pushTelemetryBatch, adminTelemetryOverview, adminPlayerTelemetry, getBattleGroupOnline, createBattleGroupOnline, inviteBattleGroupOnline, searchBattleGroupPlayersOnline, inviteBattleGroupUserOnline, respondBattleGroupInviteOnline, leaveBattleGroupOnline, kickBattleGroupMemberOnline, setBattleGroupRallyOnline } from './api.js?v=17.9.5';
+import { SharedUniverseClient } from './world.js?v=17.9.5';
 
 const canvas = document.querySelector('#game');
 const ctx = canvas.getContext('2d');
@@ -117,7 +117,7 @@ function qualityShouldPreload(path){
   return /\/branding\//.test(value)||/\/assets\/v17\/loot\/cargo-box\.webp/.test(value);
 }
 
-const ASSET_REVISION='17.9.4';
+const ASSET_REVISION='17.9.5';
 function versionedAssetUrl(path){
   const value=String(path||'');if(!value)return value;
   return value.includes('?')?`${value}&asset=${ASSET_REVISION}`:`${value}?asset=${ASSET_REVISION}`;
@@ -367,11 +367,50 @@ function purgeSharedEventEntities(activeEventId=null){
 }
 function applySharedNpcPatch(raw){const e=findSharedNpc(raw.id);if(!e)return;const now=Date.now(),nx=Number(raw.x),ny=Number(raw.y),dt=Math.max(.001,Math.min(1,(now-(e.netAt||now))/1000));if(Number.isFinite(nx)&&Number.isFinite(ny)){const px=Number.isFinite(e.netX)?e.netX:e.x,py=Number.isFinite(e.netY)?e.netY:e.y;e.vx=Math.max(-1400,Math.min(1400,(nx-px)/dt));e.vy=Math.max(-1400,Math.min(1400,(ny-py)/dt));e.netX=nx;e.netY=ny;e.tx=nx;e.ty=ny;e.netAt=now;}const rest={...raw};delete rest.x;delete rest.y;Object.assign(e,rest);}
 function sharedKillReward(entity,factor=1,opts={}){
-  if(!progress)return;const share=Math.max(0,Math.min(1,Number(factor)||0));
-  const clone=normalizeSharedNpc({...entity,credits:Math.max(0,Math.round((entity.credits||0)*share)),uridium:Math.max(0,Math.round((entity.uridium||0)*share)),xp:Math.max(0,Math.round((entity.xp||0)*share)),resources:{...(entity.resources||{})},sharedReward:true,sharedRewardShare:share,sharedFinalBlow:false,sharedDropBox:!!opts.dropBox,sharedGroupReward:!!opts.groupShared,sharedOwner:!!opts.owner});
-  rewardEnemyKill(clone);
+  if(!progress)return;
+  const share=Math.max(0,Math.min(1,Number(factor)||0));
+  const clone=normalizeSharedNpc({...entity,
+    credits:Math.max(0,Math.round((entity.credits||0)*share)),
+    uridium:Math.max(0,Math.round((entity.uridium||0)*share)),
+    xp:Math.max(0,Math.round((entity.xp||0)*share)),
+    resources:{...(entity.resources||{})},sharedReward:true,sharedRewardShare:share,
+    sharedFinalBlow:false,sharedDropBox:!!opts.dropBox,sharedGroupReward:!!opts.groupShared,sharedOwner:!!opts.owner
+  });
+
+  // V17.9.5: membros elegíveis recebem somente a parcela econômica do NPC.
+  // Kill/missão/conquista/passe/clã pertencem ao primeiro atacante, evitando farm passivo de objetivos.
+  const creditMult=1+pilotSkillValue('greed')/100,
+        uriMult=1+pilotCombined('cruelty1','cruelty2')/100,
+        xpMult=1+pilotSkillValue('tactics')/100;
+  const earnedCredits=Math.round(clone.credits*creditMult),
+        earnedUri=Math.round(clone.uridium*uriMult),
+        earnedXp=Math.round((Number(clone.xp)||clone.credits/10+clone.uridium*12)*xpMult*designerXpMultiplier());
+  progress.profile.credits+=earnedCredits;
+  progress.profile.uridium+=earnedUri;
+  progress.profile.xp+=earnedXp;
+  telemetryEconomy('npc',{cr:earnedCredits,stl:earnedUri,xp:earnedXp});
+
+  if(opts.owner){
+    progress.profile.aliensKilled=(progress.profile.aliensKilled||0)+1;
+    telemetryCounter('kills',1);journeyEvent('kill',1);syncAchievements(true);
+    if(authenticated){
+      const boss=/^boss/i.test(String(clone.type||'')),clanType=String(clone.type||'').replace(/^boss/i,'').toLowerCase();
+      recordClanAlienKillOnline({npcType:clanType,isBoss:boss}).then(r=>{if(r?.status?.leveled_up){showToast(`CLÃ SUBIU PARA O LV ${r.status.new_level}!`,'reward');refreshClanState(true);}}).catch(()=>{});
+    }
+    if(String(clone.type||'').startsWith('boss')){
+      rollRareBossLoot(clone);
+      scoreClanWar(Math.max(1,Math.round(10*share)),'boss_kill');
+    }
+    addPetXp(Math.max(12,Math.round(clone.credits/120+clone.uridium*4)));
+    missionEvent('kill',{enemy:clone,mapId:progress.mapId});
+    battlePassEvent('kill',1);
+  }
+  processPlayerLevelUps();
+  if(opts.dropBox)spawnNpcLootBox(clone);
+  saveGame();
+
   const suffix=opts.groupShared?`GRUPO ${Math.max(1,Number(opts.eligibleCount)||1)} PILOTO(S)`:(opts.owner?'MARCAÇÃO EXCLUSIVA':'ABATE');
-  pushActivity(`${suffix} • ${clone.name} • +${fmt(clone.credits)} CR • +${fmt(clone.uridium)} STL • +${fmt(clone.xp)} XP`,'combat');
+  pushActivity(`${suffix} • ${clone.name} • +${fmt(earnedCredits)} CR • +${fmt(earnedUri)} STL • +${fmt(earnedXp)} XP`,'combat');
 }
 function sharedNpcClaimState(e){
   const owner=String(e?.ownerUserId||''),me=String(getUser()?.id||'');if(!owner)return {claimed:false,friendly:false,owner:false};

@@ -1,8 +1,16 @@
-## 17.9.4 — Global Battle Group Search
+## V17.9.5 — Battle Group Reward Stability
+- Atividade de combate de NPC passa a sobreviver a troca de mapa/conexão por 120s no servidor.
+- Grupo atual do primeiro atacante é revalidado na morte do NPC.
+- Apenas membros vivos, na mesma instância e ativos nos últimos 120s entram na divisão.
+- CR/STL/XP são divididos sem multiplicação.
+- Missão/conquista/passe/clã/kill credit pertencem somente ao primeiro atacante elegível.
+- Box continua exclusiva do primeiro atacante, mesmo se ele ficar inativo antes da morte.
+
+## 17.9.3 — Global Battle Group Search
 - Grupo de Batalha agora busca pilotos globalmente por callsign, sem depender de mapa, facção ou presença online.
 - Convites passam a usar o UUID real da conta, evitando falhas por formatação do callsign.
 
-## V17.9.4 — NPC Ownership + Cross-Faction Battle Groups
+## V17.9.2 — NPC Ownership + Cross-Faction Battle Groups
 
 - Grupo de Batalha aceita pilotos de qualquer facção.
 - Membros do mesmo grupo são tratados como aliados para leitura tática/PVP.

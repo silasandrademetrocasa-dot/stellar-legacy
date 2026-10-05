@@ -335,7 +335,7 @@ class Room {
     }else{
       let remain=Math.round(amount);if(e.shield>0){const got=Math.min(e.shield,remain);e.shield-=got;remain-=got;actual+=got;}if(remain>0){const got=Math.min(e.hp,remain);e.hp-=got;actual+=got;}
     }
-    if(actual>0){this.claimNpc(e,ws,p,now);p.lastNpcAttackAt=now;ws.lastNpcAttackAt=now;if(!e.aggroUserId){e.aggroUserId=p.userId;e.aggroStartedAt=now;this.broadcast({type:'npc_aggro',entityId:e.id,userId:p.userId});}e.damageContrib.set(p.userId,(e.damageContrib.get(p.userId)||0)+actual);e.lastDamageAt=now;this.eventParticipants.add(p.userId);this.applyBossPhase(e);}
+    if(actual>0){this.claimNpc(e,ws,p,now);p.lastNpcAttackAt=now;ws.lastNpcAttackAt=now;this.world.markNpcActivity(p.userId,now);if(!e.aggroUserId){e.aggroUserId=p.userId;e.aggroStartedAt=now;this.broadcast({type:'npc_aggro',entityId:e.id,userId:p.userId});}e.damageContrib.set(p.userId,(e.damageContrib.get(p.userId)||0)+actual);e.lastDamageAt=now;this.eventParticipants.add(p.userId);this.applyBossPhase(e);}
     safeJsonSend(ws,{type:'damage_result',hitId:msg.hitId||null,entityId:e.id,actual,mode,critical:!!msg.critical,beforeShield,beforeHp,hp:e.hp,shield:e.shield,ownerUserId:e.ownerUserId,ownerGroupId:e.ownerGroupId});
     this.broadcast({type:'npc_patch',entity:{id:e.id,hp:e.hp,shield:e.shield,x:e.x,y:e.y,bossPhase:e.bossPhase,ownerUserId:e.ownerUserId,ownerGroupId:e.ownerGroupId,claimedAt:e.claimedAt}});
     if(e.hp<=0)await this.killNpc(e,p.userId);
@@ -351,22 +351,43 @@ class Room {
     this.broadcast({type:'npc_death',entity:dead,killerUserId,contributors,ownerUserId:e.ownerUserId,ownerGroupId:e.ownerGroupId});
 
     const ownerId=String(e.ownerUserId||'');
+    const ownerClient=this.world.findClient(ownerId);
+    const ownerRoomClient=[...this.clients].find(c=>String(c.player?.userId||'')===ownerId)||null;
+
+    // V17.9.5: resolve o grupo ATUAL do primeiro atacante na hora da morte.
+    // Assim membros que entraram/saíram durante uma luta longa não ficam presos a um snapshot antigo.
+    let rewardGroupId=e.ownerGroupId||null;
+    let rewardMemberIds=e.ownerGroupMemberIds instanceof Set?new Set(e.ownerGroupMemberIds):new Set([ownerId]);
+    if(ownerClient){
+      try{
+        const liveGroup=await this.groupStateForWs(ownerClient,true);
+        rewardGroupId=liveGroup?.group?.id?String(liveGroup.group.id):null;
+        rewardMemberIds=new Set(rewardGroupId?(liveGroup.members||[]).map(m=>String(m.user_id||'')).filter(Boolean):[ownerId]);
+        rewardMemberIds.add(ownerId);
+      }catch{}
+    }
+    e.ownerGroupId=rewardGroupId;
+
+    // this.clients = mesma instância real do mapa/território. Nenhuma recompensa atravessa salas.
     let candidateClients=[];
-    if(e.ownerGroupId){
-      const locked=e.ownerGroupMemberIds instanceof Set?e.ownerGroupMemberIds:new Set([ownerId]);
-      candidateClients=[...this.clients].filter(c=>c.player&&locked.has(String(c.player.userId||'')));
+    if(rewardGroupId){
+      candidateClients=[...this.clients].filter(c=>c.player&&rewardMemberIds.has(String(c.player.userId||'')));
     }else{
       candidateClients=[...this.clients].filter(c=>String(c.player?.userId||'')===ownerId);
     }
     const cutoff=nowMs()-120000;
-    const eligible=candidateClients.filter(c=>Number(c.player?.hp||0)>0&&Number(c.lastNpcAttackAt||c.player?.lastNpcAttackAt||0)>=cutoff);
+    const eligible=candidateClients.filter(c=>{
+      const uid=String(c.player?.userId||'');
+      return Number(c.player?.hp||0)>0&&this.world.lastNpcActivity(uid)>=cutoff;
+    });
     const factor=eligible.length?1/eligible.length:0;
     for(const c of eligible){
       const isOwner=String(c.player?.userId||'')===ownerId;
-      safeJsonSend(c,{type:'kill_credit',entity:dead,factor,groupShared:!!e.ownerGroupId,eligibleCount:eligible.length,ownerUserId:ownerId,ownerGroupId:e.ownerGroupId||null,dropBox:isOwner});
+      safeJsonSend(c,{type:'kill_credit',entity:dead,factor,groupShared:!!rewardGroupId,eligibleCount:eligible.length,ownerUserId:ownerId,ownerGroupId:rewardGroupId||null,dropBox:isOwner});
     }
-    const ownerClient=[...this.clients].find(c=>String(c.player?.userId||'')===ownerId);
-    if(ownerClient&&!eligible.includes(ownerClient))safeJsonSend(ownerClient,{type:'npc_loot_credit',entity:dead,ownerUserId:ownerId});
+
+    // A BOX nunca é compartilhada. Mesmo se o dono ficou inativo (>120s), ela continua sendo dele.
+    if(ownerRoomClient&&!eligible.includes(ownerRoomClient))safeJsonSend(ownerRoomClient,{type:'npc_loot_credit',entity:dead,ownerUserId:ownerId});
 
     const mode=this.eventMode();
     if(mode==='battle_wave'&&!this.event?.complete)this.addEventProgress(1);
@@ -446,6 +467,10 @@ export function attachSharedUniverse(server,{authenticate,loadLiveOps,loadBattle
     lastLiveOpsAt:0,
     liveOpsBusy:false,
     loadBattleGroup:loadBattleGroup||null,
+    npcActivity:new Map(),
+    markNpcActivity(userId,at=nowMs()){const uid=String(userId||'');if(uid)this.npcActivity.set(uid,Number(at)||nowMs());},
+    lastNpcActivity(userId){return Number(this.npcActivity.get(String(userId||''))||0);},
+    findClient(userId){const uid=String(userId||'');for(const r of rooms.values())for(const c of r.clients)if(String(c.player?.userId||'')===uid)return c;return null;},
     currentEvent(){return resolveLiveEvent(world.liveOps?.events||[],nowMs());},
     async refreshLiveOps(force=false){
       const now=nowMs();
@@ -497,7 +522,7 @@ export function attachSharedUniverse(server,{authenticate,loadLiveOps,loadBattle
   });
 
   world.refreshLiveOps(true).catch(()=>{});
-  let last=nowMs();const timer=setInterval(()=>{const n=nowMs(),dt=Math.min(.12,(n-last)/1000);last=n;if(n-world.lastLiveOpsAt>=LIVE_OPS_REFRESH_MS)world.refreshLiveOps(false).catch(()=>{});for(const [key,r] of rooms){r.tick(dt);if(r.clients.size===0&&n-(r.lastUsedAt||n)>30*60*1000)rooms.delete(key);else if(r.clients.size>0)r.lastUsedAt=n;}},50);
+  let last=nowMs(),lastActivityCleanup=0;const timer=setInterval(()=>{const n=nowMs(),dt=Math.min(.12,(n-last)/1000);last=n;if(n-world.lastLiveOpsAt>=LIVE_OPS_REFRESH_MS)world.refreshLiveOps(false).catch(()=>{});for(const [key,r] of rooms){r.tick(dt);if(r.clients.size===0&&n-(r.lastUsedAt||n)>30*60*1000)rooms.delete(key);else if(r.clients.size>0)r.lastUsedAt=n;}if(n-lastActivityCleanup>60000){lastActivityCleanup=n;for(const [uid,at] of world.npcActivity)if(n-Number(at)>10*60*1000)world.npcActivity.delete(uid);}},50);
   timer.unref?.();
   return world;
 }
