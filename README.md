@@ -1,4 +1,4 @@
-# Stellar Legacy 17.9.0 — ADM Analytics + Pilot Titles
+# Stellar Legacy 17.9.1 — ADM Analytics + Pilot Titles
 
 Atualização de observabilidade da progressão. O jogo registra métricas agregadas de evolução/economia para o painel ADM e adiciona um perfil de títulos exibidos sob o callsign. O reset completo de conta permanece uma ferramenta administrativa; jogadores comuns não recebem controle para apagar o próprio progresso.
 
@@ -184,7 +184,7 @@ Antes de liberar novos cadastros/renomes, execute `sql/V14_1_ACCOUNT_GUARD.sql` 
 ## Painel ADM
 A V17.6.3 usa a tabela existente `public.game_admins` como fonte de autorização. A migration `sql/V17_6_3_ADMIN_CONTROL_PANEL.sql` cria moderação, log e RPCs seguras. No projeto principal do Supabase esta migration já foi aplicada; o arquivo permanece no ZIP para reproduzir o ambiente em outro banco.
 
-## 17.9.0 — Position Root Fix
+## 17.9.1 — Position Root Fix
 - spawn usa checkpoint dedicado/local, não presence efêmera;
 - movimento confirma posição no fim do trajeto e durante deslocamentos longos;
 - trigger no Supabase espelha presence para o checkpoint dedicado;

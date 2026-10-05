@@ -1,7 +1,7 @@
-import { FACTIONS, SHIPS, ITEMS, LASER_AMMO, ROCKETS, NPC_TYPES, MAPS, RESOURCES } from './data.js?v=17.9.0';
-import { GAME_ASSETS } from './assets/v17/manifest.js?v=17.9.0';
-import { signUp, signIn, requestPasswordReset, restorePasswordRecoveryFromUrl, restoreSession, signOutLocal, checkGameSession, endGameSession, getUser, getSessionCredentials, loadCloudSave, saveCloudSave, updateCallsign, updatePassword, loadRankings, loadAuctionBids, saveAuctionBidOnline, markAuctionBidStatusOnline, loadAuctionMarket, upsertPlayerPresenceOnline, loadMapPresenceOnline, savePlayerLocationCheckpointOnline, loadPlayerLocationCheckpointOnline, removePlayerPresenceOnline, queuePvpAttackOnline, consumePvpDamageEventsOnline, syncArenaProfileOnline, loadArenaState, loadArenaDailyRewardStatus, claimArenaDailyReward, loadArenaOpponents, loadArenaHistory, arenaAttackOnline, listClansOnline, loadMyClanOnline, createClanOnline, joinClanOnline, leaveClanOnline, transferClanCreditsOnline, claimClanCreditGrantsOnline, recordClanAlienKillOnline, getPremiumShopOnline, testPurchasePremiumOnline, loadWarfrontStateOnline, hitWorldBossOnline, claimWorldBossRewardOnline, declareClanWarOnline, recordClanWarScoreOnline, loadLiveOpsOnline, purchaseLiveCatalogOnline, economyActionOnline, getChatHistoryOnline, sendChatMessageOnline, getMyDesignersOnline, setDesignLoadoutOnline, claimGateDroneDesignOnline, claimEventDesignerOnline, getAdminStatus, adminSearchAccounts, adminRecentActions, adminBanAccount, adminUnbanAccount, adminResetAccount, adminDeleteAccount, pushTelemetryBatch, adminTelemetryOverview, adminPlayerTelemetry, getBattleGroupOnline, createBattleGroupOnline, inviteBattleGroupOnline, respondBattleGroupInviteOnline, leaveBattleGroupOnline, kickBattleGroupMemberOnline, setBattleGroupRallyOnline } from './api.js?v=17.9.0';
-import { SharedUniverseClient } from './world.js?v=17.9.0';
+import { FACTIONS, SHIPS, ITEMS, LASER_AMMO, ROCKETS, NPC_TYPES, MAPS, RESOURCES } from './data.js?v=17.9.1';
+import { GAME_ASSETS } from './assets/v17/manifest.js?v=17.9.1';
+import { signUp, signIn, requestPasswordReset, restorePasswordRecoveryFromUrl, restoreSession, signOutLocal, checkGameSession, endGameSession, getUser, getSessionCredentials, loadCloudSave, saveCloudSave, updateCallsign, updatePassword, loadRankings, loadAuctionBids, saveAuctionBidOnline, markAuctionBidStatusOnline, loadAuctionMarket, upsertPlayerPresenceOnline, loadMapPresenceOnline, savePlayerLocationCheckpointOnline, loadPlayerLocationCheckpointOnline, removePlayerPresenceOnline, queuePvpAttackOnline, consumePvpDamageEventsOnline, syncArenaProfileOnline, loadArenaState, loadArenaDailyRewardStatus, claimArenaDailyReward, loadArenaOpponents, loadArenaHistory, arenaAttackOnline, listClansOnline, loadMyClanOnline, createClanOnline, joinClanOnline, leaveClanOnline, transferClanCreditsOnline, claimClanCreditGrantsOnline, recordClanAlienKillOnline, getPremiumShopOnline, testPurchasePremiumOnline, loadWarfrontStateOnline, hitWorldBossOnline, claimWorldBossRewardOnline, declareClanWarOnline, recordClanWarScoreOnline, loadLiveOpsOnline, purchaseLiveCatalogOnline, economyActionOnline, getChatHistoryOnline, sendChatMessageOnline, getMyDesignersOnline, setDesignLoadoutOnline, claimGateDroneDesignOnline, claimEventDesignerOnline, getAdminStatus, adminSearchAccounts, adminRecentActions, adminBanAccount, adminUnbanAccount, adminResetAccount, adminDeleteAccount, pushTelemetryBatch, adminTelemetryOverview, adminPlayerTelemetry, getBattleGroupOnline, createBattleGroupOnline, inviteBattleGroupOnline, respondBattleGroupInviteOnline, leaveBattleGroupOnline, kickBattleGroupMemberOnline, setBattleGroupRallyOnline } from './api.js?v=17.9.1';
+import { SharedUniverseClient } from './world.js?v=17.9.1';
 
 const canvas = document.querySelector('#game');
 const ctx = canvas.getContext('2d');
@@ -117,7 +117,7 @@ function qualityShouldPreload(path){
   return /\/branding\//.test(value)||/\/assets\/v17\/loot\/cargo-box\.webp/.test(value);
 }
 
-const ASSET_REVISION='17.9.0';
+const ASSET_REVISION='17.9.1';
 function versionedAssetUrl(path){
   const value=String(path||'');if(!value)return value;
   return value.includes('?')?`${value}&asset=${ASSET_REVISION}`:`${value}?asset=${ASSET_REVISION}`;
@@ -612,7 +612,7 @@ async function claimEventDesignerDrop(ev){
 const economyRuntime={queue:Promise.resolve(),autoPending:new Set()};
 
 
-// ===================== V17.9.0 PROGRESSION TELEMETRY =====================
+// ===================== V17.9.1 PROGRESSION TELEMETRY =====================
 const TELEMETRY_SOURCE_KEYS=['npc','mission','resource','pass','event','gate','discovery','other'];
 function freshTelemetryPending(){return {counters:{sessions:0,play_seconds:0,kills:0,boxes:0,ore_nodes:0,ore_units:0,missions_completed:0,deaths:0,map_jumps:0,level_ups:0},spent:{cr:0,stl:0},sources:Object.fromEntries(TELEMETRY_SOURCE_KEYS.map(k=>[k,{cr:0,stl:0,xp:0}])),level_events:[]};}
 const telemetryRuntime={pending:freshTelemetryPending(),activeRemainder:0,lastFlushAt:0,flushing:false,sessionOpen:false};
@@ -698,7 +698,7 @@ function pilotRareChanceBonus(){return pilotCombined('luck1','luck2')/100;}funct
 
 
 
-// ===================== V17.9.0 — CONQUISTAS =====================
+// ===================== V17.9.1 — CONQUISTAS =====================
 const ACHIEVEMENT_DEFS=[
   {id:'first_blood',group:'COMBATE',label:'Primeiro Abate',desc:'Destrua seu primeiro NPC.',target:1,metric:()=>Number(progress?.profile?.aliensKilled||0),icon:'☠'},
   {id:'hunter_100',group:'COMBATE',label:'Caçador de Setor',desc:'Destrua 100 NPCs.',target:100,metric:()=>Number(progress?.profile?.aliensKilled||0),icon:'⌖'},
@@ -720,7 +720,7 @@ function syncAchievements(announce=true){if(!progress)return [];normalizeAchieve
 function achievementUnlockedCount(){syncAchievements(false);return ACHIEVEMENT_DEFS.filter(x=>achievementUnlocked(x.id)).length;}
 function buildAchievementsPanel(){syncAchievements(false);const section=document.createElement('section');section.className='pilot-achievement-profile';const count=achievementUnlockedCount();section.innerHTML=`<div class="pilot-achievement-head"><div><div class="eyebrow">CONQUISTAS</div><h3>REGISTRO DO PILOTO</h3><small>${count}/${ACHIEVEMENT_DEFS.length} conquistas concluídas • foco em identidade, não inflação.</small></div><span>${Math.round(count/ACHIEVEMENT_DEFS.length*100)}%</span></div>`;const grid=document.createElement('div');grid.className='pilot-achievement-grid';for(const def of ACHIEVEMENT_DEFS){const pg=achievementProgress(def),open=achievementUnlocked(def.id),card=document.createElement('article');card.className=`pilot-achievement-card${open?' unlocked':''}`;card.innerHTML=`<div class="pilot-achievement-icon">${def.icon}</div><div class="pilot-achievement-main"><span>${escHtml(def.group)}</span><b>${escHtml(def.label)}</b><p>${escHtml(def.desc)}</p><div class="pilot-achievement-track"><i style="width:${pg.pct}%"></i></div><small>${fmt(Math.min(pg.current,pg.target))} / ${fmt(pg.target)}</small></div><em>${open?'✓':'○'}</em>`;grid.appendChild(card);}section.appendChild(grid);return section;}
 
-// ===================== V17.9.0 PILOT TITLES =====================
+// ===================== V17.9.1 PILOT TITLES =====================
 const PILOT_TITLES=[
   {id:'pioneer',group:'PROGRESSÃO',label:'Pioneiro Estelar',desc:'Título inicial de todo piloto.',target:1,metric:()=>1,format:(n)=>`${fmt(n)}/1`,req:'Disponível desde o início.'},
   {id:'cadet',group:'PROGRESSÃO',label:'Cadete Estelar',desc:'Primeiros sistemas dominados.',target:5,metric:()=>Number(progress?.profile?.level||1),format:(n)=>`Nível ${fmt(n)}/5`,req:'Alcance o nível 5.'},
@@ -1591,7 +1591,7 @@ function renderMissions(){
 function openMissions(){if(!featureUnlocked('missions')){showFeatureLock('missions','Missões');return;}closeNavigationModals(ui.missionModal);normalizeMissionState();renderMissions();ui.missionModal.classList.remove('hidden');}
 
 
-// ===================== V17.9.0 — JORNADA DO PILOTO =====================
+// ===================== V17.9.1 — JORNADA DO PILOTO =====================
 const PILOT_JOURNEY_STEPS=[
   {id:'first_kills',label:'Batismo de Fogo',desc:'Destrua 3 NPCs para dominar seleção, laser e míssil.',event:'kill',target:3,reward:'2.000 PLS-1',grant:()=>{progress.ammo.lcb10=(progress.ammo.lcb10||0)+2000;}},
   {id:'first_boxes',label:'Recupere a Carga',desc:'Colete 2 boxes deixadas por NPCs destruídos.',event:'box',target:2,reward:'50 R-310',grant:()=>{progress.rockets.r310=(progress.rockets.r310||0)+50;}},
@@ -2148,7 +2148,7 @@ function patentMeta(code){return SPECIAL_RANK_META[code]||PATENT_BY_CODE[code]||
 function patentBadgeMarkup(code,title){const meta=patentMeta(code);const label=title||meta.title;return `<span class="rank-badge" style="--rank-color:${meta.color}"><span class="rank-badge-icon">${meta.short}</span><span class="rank-badge-text">${label}</span></span>`;}
 function patentMiniMarkup(code){const meta=patentMeta(code);return `<span class="rank-mini" style="--rank-color:${meta.color}" title="${meta.title}">${meta.short}</span>`;}
 
-// ===================== V17.9.0 — GRUPO DE BATALHA =====================
+// ===================== V17.9.1 — GRUPO DE BATALHA =====================
 const battleGroupRuntime={state:null,busy:false,lastAt:0};
 function battleGroupState(){return battleGroupRuntime.state||{group:null,members:[],invites:[],my_user_id:String(getUser()?.id||'')};}
 function battleGroupMemberIds(){return new Set((battleGroupState().members||[]).map(x=>String(x.user_id||'')));}
@@ -2539,7 +2539,11 @@ function layoutHudPanels(){
   const weaponH=weaponVisible?Math.ceil(ui.weaponBar.getBoundingClientRect().height):0;
   root.style.setProperty('--weaponbar-height',`${weaponH+12}px`);
   const bottomItems=[ui.chatDock,ui.weaponBar,ui.minimapPanel].filter(el=>el&&getComputedStyle(el).display!=='none');
-  const bottomH=bottomItems.length?Math.max(...bottomItems.map(el=>Math.ceil(el.getBoundingClientRect().height))):0;
+  const legacyBottomH=bottomItems.length?Math.max(...bottomItems.map(el=>Math.ceil(el.getBoundingClientRect().height))):0;
+  // V17.9.1: no mobile o HUD inferior vira dois andares (chat/mapa + munições).
+  // Usar apenas o maior filho fazia os painéis flutuantes invadirem a barra de munição.
+  const dockRect=ui.bottomHudDock&&getComputedStyle(ui.bottomHudDock).display!=='none'?ui.bottomHudDock.getBoundingClientRect():null;
+  const bottomH=window.innerWidth<=760&&dockRect?Math.ceil(dockRect.height):legacyBottomH;
   root.style.setProperty('--bottom-dock-height',`${bottomH+12}px`);
 }
 function getFaction(){return progress?.profile?.faction ? FACTIONS[progress.profile.faction] : null;}

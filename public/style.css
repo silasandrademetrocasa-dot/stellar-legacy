@@ -2327,3 +2327,146 @@ body[data-quality="low"] .hud-panel,body[data-quality="low"] .modal-card{backdro
 
 /* V17.9.0 — Grupo de Batalha */
 .battle-group-modal-card{max-width:980px}.battle-group-header-actions{display:flex;gap:7px}.battle-group-content{display:flex;flex-direction:column;gap:10px}.battle-group-invites{display:flex;flex-direction:column;gap:7px;padding:11px;border:1px solid rgba(255,207,77,.18);border-radius:12px;background:rgba(39,29,7,.22)}.battle-group-invite{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:8px;border-radius:9px;background:rgba(7,19,30,.72)}.battle-group-invite>div:first-child{display:flex;flex-direction:column;gap:2px}.battle-group-invite b{color:#fff}.battle-group-invite small{font-size:8px;color:#829ead}.battle-group-invite>div:last-child{display:flex;gap:6px}.battle-group-empty{text-align:center;padding:28px 18px;border:1px dashed rgba(91,207,246,.22);border-radius:14px;background:rgba(4,16,29,.56)}.battle-group-empty-icon{font-size:42px;color:#61e5ff}.battle-group-empty h3{margin:7px 0;color:#eafaff}.battle-group-empty p{max-width:600px;margin:0 auto 14px;color:#86a8b8;font-size:9px;line-height:1.55}.battle-group-summary{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px;border:1px solid rgba(85,220,255,.25);border-radius:13px;background:linear-gradient(180deg,rgba(7,33,47,.85),rgba(4,17,29,.92))}.battle-group-summary h3{margin:3px 0;color:#eaffff}.battle-group-summary small{color:#86adbd;font-size:8px}.battle-group-summary-actions{display:flex;gap:7px}.battle-group-rally{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:8px 10px;border:1px solid rgba(95,229,255,.18);border-radius:9px;background:rgba(5,25,36,.72)}.battle-group-rally b{font-size:8px;color:#5ee8ff;letter-spacing:.12em}.battle-group-rally span{font-size:8px;color:#a5c8d5}.battle-group-members{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.battle-group-member{display:flex;align-items:center;justify-content:space-between;gap:9px;padding:10px;border:1px solid rgba(87,184,222,.12);border-radius:11px;background:rgba(4,15,27,.72)}.battle-group-member.online{border-color:rgba(90,230,255,.25)}.battle-group-member-main{display:flex;align-items:center;gap:9px;min-width:0}.battle-group-member-main>i{width:10px;height:10px;border-radius:50%;background:#485b66;box-shadow:0 0 0 3px rgba(68,86,98,.12)}.battle-group-member.online .battle-group-member-main>i{background:#58ebff;box-shadow:0 0 10px rgba(88,235,255,.65)}.battle-group-member-main>div{min-width:0}.battle-group-member b{display:block;color:#eafaff;font-size:10px}.battle-group-member b em{font-style:normal;margin-left:5px;padding:2px 4px;border-radius:4px;background:rgba(83,221,255,.11);color:#6de8ff;font-size:6px}.battle-group-member small{display:block;margin-top:3px;color:#7f9eac;font-size:7.5px}.battle-group-invite-form{display:grid;grid-template-columns:1fr auto;gap:8px;padding:10px;border:1px solid rgba(88,199,241,.12);border-radius:10px;background:rgba(5,17,30,.7)}.battle-group-invite-form input{min-width:0}.menu-item#battleGroupBtn.gold{color:#78efff}@media(max-width:720px){.battle-group-members{grid-template-columns:1fr}.battle-group-summary{align-items:flex-start;flex-direction:column}.battle-group-summary-actions{width:100%}.battle-group-summary-actions button{flex:1}.battle-group-invite{align-items:flex-start;flex-direction:column}.battle-group-invite>div:last-child{width:100%}.battle-group-invite>div:last-child button{flex:1}}
+
+
+/* ===================== V17.9.1 MOBILE HUD DOCK FIX =====================
+   Mobile: CHAT + MAPA ficam na linha superior e MUNICOES ocupam 100% do rodape.
+   Isso evita que os docks laterais esmaguem/encubram os botoes de municao. */
+@media(max-width:760px){
+  .bottom-hud-dock{
+    left:6px!important;
+    right:6px!important;
+    bottom:max(6px,env(safe-area-inset-bottom))!important;
+    display:grid!important;
+    grid-template-columns:minmax(0,1fr) minmax(0,1fr)!important;
+    grid-template-rows:auto auto!important;
+    align-items:end!important;
+    gap:5px 6px!important;
+    overflow:visible!important;
+    pointer-events:none!important;
+  }
+  .bottom-hud-dock>.hud-panel{pointer-events:auto!important;}
+
+  /* Linha 1: docks flutuantes, colados na barra mas sem cobrir os slots. */
+  .bottom-hud-dock #chatDock{
+    grid-column:1!important;
+    grid-row:1!important;
+    justify-self:start!important;
+    align-self:end!important;
+    width:min(46vw,184px)!important;
+    min-width:0!important;
+    max-width:184px!important;
+    z-index:27!important;
+  }
+  .bottom-hud-dock #minimapPanel{
+    grid-column:2!important;
+    grid-row:1!important;
+    justify-self:end!important;
+    align-self:end!important;
+    width:min(46vw,172px)!important;
+    min-width:0!important;
+    max-width:172px!important;
+    z-index:27!important;
+  }
+
+  /* Linha 2: a barra de municoes sempre ganha toda a largura util. */
+  .bottom-hud-dock #weaponBar,
+  .bottom-hud-dock #weaponBar.compact-ammo-ui,
+  .bottom-hud-dock.chat-disabled #weaponBar,
+  .bottom-hud-dock.minimap-disabled #weaponBar,
+  .bottom-hud-dock.chat-disabled.minimap-disabled #weaponBar{
+    grid-column:1 / -1!important;
+    grid-row:2!important;
+    justify-self:stretch!important;
+    align-self:end!important;
+    left:auto!important;
+    right:auto!important;
+    bottom:auto!important;
+    width:100%!important;
+    min-width:0!important;
+    max-width:none!important;
+    min-height:54px!important;
+    z-index:26!important;
+  }
+  .bottom-hud-dock #weaponBar.collapsed,
+  .bottom-hud-dock #weaponBar.compact-ammo-ui.collapsed{
+    width:100%!important;
+    max-width:none!important;
+    min-height:46px!important;
+    max-height:46px!important;
+  }
+
+  #weaponBar .weapon-bar-content{
+    width:100%!important;
+    min-width:0!important;
+    grid-template-columns:minmax(0,1fr) auto!important;
+    gap:6px!important;
+  }
+  #weaponBar .ammo-clusters{
+    min-width:0!important;
+    overflow-x:auto!important;
+    overflow-y:hidden!important;
+    overscroll-behavior-x:contain;
+    touch-action:pan-x;
+    scrollbar-width:none;
+    padding:2px 1px 3px!important;
+  }
+  #weaponBar .ammo-clusters::-webkit-scrollbar{display:none!important;}
+  #weaponBar .ammo-bubbles{gap:5px!important;}
+  #weaponBar .ammo-btn.circular{
+    width:46px!important;
+    height:46px!important;
+    min-width:46px!important;
+    min-height:46px!important;
+    flex:0 0 46px!important;
+    touch-action:manipulation;
+  }
+  #weaponBar .bottom-combat-abilities{
+    width:auto!important;
+    flex:0 0 auto!important;
+    border-top:0!important;
+    border-left:1px solid rgba(98,195,255,.12)!important;
+    padding:0 0 0 6px!important;
+    gap:5px!important;
+    flex-wrap:nowrap!important;
+  }
+  #weaponBar .bottom-combat-abilities .ability-btn{
+    min-width:104px!important;
+    width:104px!important;
+    min-height:38px!important;
+    height:38px!important;
+    touch-action:manipulation;
+  }
+  #weaponBar.collapsed .bottom-combat-abilities{
+    margin-left:auto!important;
+  }
+
+  /* Quando recolhidos, chat/mapa viram dois botoes compactos simetricos. */
+  #chatDock.collapsed,
+  #minimapPanel.collapsed{
+    width:min(46vw,172px)!important;
+    min-width:0!important;
+    max-width:172px!important;
+    min-height:42px!important;
+    max-height:42px!important;
+    padding:5px 8px!important;
+  }
+  #chatDock.collapsed .chat-toolbar,
+  #minimapPanel.collapsed .minimap-toolbar{min-height:30px!important;}
+
+  /* Os paineis acima do rodape agora respeitam a altura total dos dois andares. */
+  .activity-float-panel,
+  .target-lock-hud{bottom:calc(var(--bottom-dock-height) + 8px)!important;}
+}
+
+@media(max-width:430px){
+  .bottom-hud-dock{gap:4px!important;}
+  .bottom-hud-dock #chatDock,
+  .bottom-hud-dock #minimapPanel,
+  #chatDock.collapsed,
+  #minimapPanel.collapsed{width:calc(50vw - 10px)!important;max-width:none!important;}
+  #weaponBar .ammo-btn.circular{width:44px!important;height:44px!important;min-width:44px!important;min-height:44px!important;flex-basis:44px!important;}
+  #weaponBar .bottom-combat-abilities .ability-btn{min-width:96px!important;width:96px!important;}
+  #weaponBar .bottom-combat-abilities .ability-copy b{font-size:7px!important;}
+  #weaponBar .bottom-combat-abilities .ability-copy small{font-size:6px!important;}
+}
