@@ -1,7 +1,7 @@
-import { FACTIONS, SHIPS, ITEMS, LASER_AMMO, ROCKETS, NPC_TYPES, MAPS, RESOURCES } from './data.js?v=17.6.1';
-import { GAME_ASSETS } from './assets/v17/manifest.js?v=17.6.1';
-import { signUp, signIn, requestPasswordReset, restorePasswordRecoveryFromUrl, restoreSession, signOutLocal, checkGameSession, endGameSession, getUser, getSessionCredentials, loadCloudSave, saveCloudSave, updateCallsign, updatePassword, loadRankings, loadAuctionBids, saveAuctionBidOnline, markAuctionBidStatusOnline, loadAuctionMarket, upsertPlayerPresenceOnline, loadMapPresenceOnline, removePlayerPresenceOnline, queuePvpAttackOnline, consumePvpDamageEventsOnline, syncArenaProfileOnline, loadArenaState, loadArenaDailyRewardStatus, claimArenaDailyReward, loadArenaOpponents, loadArenaHistory, arenaAttackOnline, listClansOnline, loadMyClanOnline, createClanOnline, joinClanOnline, leaveClanOnline, transferClanCreditsOnline, claimClanCreditGrantsOnline, recordClanAlienKillOnline, getPremiumShopOnline, testPurchasePremiumOnline, loadWarfrontStateOnline, hitWorldBossOnline, claimWorldBossRewardOnline, declareClanWarOnline, recordClanWarScoreOnline, loadLiveOpsOnline, purchaseLiveCatalogOnline, economyActionOnline, getChatHistoryOnline, sendChatMessageOnline, getMyDesignersOnline, setDesignLoadoutOnline, claimGateDroneDesignOnline, claimEventDesignerOnline } from './api.js?v=17.6.1';
-import { SharedUniverseClient } from './world.js?v=17.6.1';
+import { FACTIONS, SHIPS, ITEMS, LASER_AMMO, ROCKETS, NPC_TYPES, MAPS, RESOURCES } from './data.js?v=17.6.2';
+import { GAME_ASSETS } from './assets/v17/manifest.js?v=17.6.2';
+import { signUp, signIn, requestPasswordReset, restorePasswordRecoveryFromUrl, restoreSession, signOutLocal, checkGameSession, endGameSession, getUser, getSessionCredentials, loadCloudSave, saveCloudSave, updateCallsign, updatePassword, loadRankings, loadAuctionBids, saveAuctionBidOnline, markAuctionBidStatusOnline, loadAuctionMarket, upsertPlayerPresenceOnline, loadMapPresenceOnline, removePlayerPresenceOnline, queuePvpAttackOnline, consumePvpDamageEventsOnline, syncArenaProfileOnline, loadArenaState, loadArenaDailyRewardStatus, claimArenaDailyReward, loadArenaOpponents, loadArenaHistory, arenaAttackOnline, listClansOnline, loadMyClanOnline, createClanOnline, joinClanOnline, leaveClanOnline, transferClanCreditsOnline, claimClanCreditGrantsOnline, recordClanAlienKillOnline, getPremiumShopOnline, testPurchasePremiumOnline, loadWarfrontStateOnline, hitWorldBossOnline, claimWorldBossRewardOnline, declareClanWarOnline, recordClanWarScoreOnline, loadLiveOpsOnline, purchaseLiveCatalogOnline, economyActionOnline, getChatHistoryOnline, sendChatMessageOnline, getMyDesignersOnline, setDesignLoadoutOnline, claimGateDroneDesignOnline, claimEventDesignerOnline } from './api.js?v=17.6.2';
+import { SharedUniverseClient } from './world.js?v=17.6.2';
 
 const canvas = document.querySelector('#game');
 const ctx = canvas.getContext('2d');
@@ -23,9 +23,9 @@ const DEVICE_CAPS=(()=>{
 const QUALITY_PROFILES={
   // V17.5.2: qualidade dinâmica atua no CENÁRIO / ILUMINAÇÃO / densidade de efeitos,
   // mas nunca rebaixa ou descarta os sprites V17 de NAVE, NPC, DRONES ou AUX-9.
-  high:{label:'ALTA',dpr:2,fps:60,background:true,backgroundAlpha:.70,stars:1,grid:false,fx:true,particles:105,preload:'smart',saturation:1.14,contrast:1.06,sceneLight:1,assetCap:54},
-  medium:{label:'MÉDIA',dpr:1.30,fps:45,background:true,backgroundAlpha:.46,stars:.52,grid:false,fx:true,particles:48,preload:'core',saturation:1.03,contrast:1.02,sceneLight:.62,assetCap:34},
-  low:{label:'BAIXA',dpr:.90,fps:30,background:true,backgroundAlpha:.26,stars:.12,grid:false,fx:true,particles:12,preload:'minimal',saturation:.96,contrast:1,sceneLight:.24,assetCap:24},
+  high:{label:'ALTA',dpr:2,fps:60,background:true,backgroundAlpha:.78,stars:1,grid:false,fx:true,particles:105,preload:'smart',saturation:1.16,contrast:1.08,sceneLight:1,assetCap:54},
+  medium:{label:'MÉDIA',dpr:1.30,fps:45,background:true,backgroundAlpha:.56,stars:.52,grid:false,fx:true,particles:48,preload:'core',saturation:1.05,contrast:1.03,sceneLight:.68,assetCap:34},
+  low:{label:'BAIXA',dpr:.90,fps:30,background:true,backgroundAlpha:.34,stars:.12,grid:false,fx:true,particles:12,preload:'minimal',saturation:.98,contrast:1.01,sceneLight:.30,assetCap:24},
 };
 function initialAutoQuality(){
   if(DEVICE_CAPS.saveData)return 'low';
@@ -117,7 +117,7 @@ function qualityShouldPreload(path){
   return /\/branding\//.test(value);
 }
 
-const ASSET_REVISION='17.6.1';
+const ASSET_REVISION='17.6.2';
 function versionedAssetUrl(path){
   const value=String(path||'');if(!value)return value;
   return value.includes('?')?`${value}&asset=${ASSET_REVISION}`:`${value}?asset=${ASSET_REVISION}`;
@@ -197,7 +197,10 @@ function assetForProduct(id,type,subtype){
   return null;
 }
 function factionAsset(id){return GAME_ASSETS.branding[id]||GAME_ASSETS.branding.earth;}
-function currentMapBackground(){return progress ? (GAME_ASSETS.backgrounds[progress.mapId]||GAME_ASSETS.backgrounds.b42) : null;}
+function currentMapBackground(){
+  if(!progress)return null;
+  return GAME_ASSETS.backgrounds[progress.mapId]||GAME_ASSETS.backgrounds.b42;
+}
 function hexToRgba(hex,alpha=1){const h=String(hex||'#ffffff').replace('#','');const v=h.length===3?h.split('').map(c=>c+c).join(''):h;const n=parseInt(v,16)||0xffffff;return `rgba(${(n>>16)&255},${(n>>8)&255},${n&255},${alpha})`;}
 const ENVIRONMENT_PROFILES={
   x1:{accent:'#58dfff',secondary:'#64ffc8',edge:'#06182a',dust:'#9cecff',motion:.28,label:'ORBITAL SAFE-ZONE'},
@@ -253,15 +256,21 @@ function drawMapBackground(){
   const world=state.currentMap?.world||{w:6000,h:4500};
   const nx=Math.max(0,Math.min(1,(state.camera?.x||0)/Math.max(1,world.w)));
   const ny=Math.max(0,Math.min(1,(state.camera?.y||0)/Math.max(1,world.h)));
-  const viewAspect=W/Math.max(1,H),imgAspect=img.naturalWidth/img.naturalHeight;
-  let sw=img.naturalWidth*.92,sh=img.naturalHeight*.92;
+  const viewAspect=W/Math.max(1,H);
+  let sw=img.naturalWidth*.975,sh=img.naturalHeight*.975;
   if(sw/sh<viewAspect) sh=sw/viewAspect; else sw=sh*viewAspect;
   sw=Math.min(sw,img.naturalWidth);sh=Math.min(sh,img.naturalHeight);
   const sx=(img.naturalWidth-sw)*nx,sy=(img.naturalHeight-sh)*ny;
-  const q=qualityProfile(),sceneLight=q.sceneLight??1,env=environmentProfile();ctx.save();ctx.globalAlpha=q.backgroundAlpha??.5;ctx.filter=`saturate(${q.saturation||1}) contrast(${q.contrast||1}) brightness(${.84+.16*sceneLight})`;
-  ctx.drawImage(img,sx,sy,sw,sh,0,0,W,H);ctx.filter='none';
-  const shade=ctx.createLinearGradient(0,0,0,H);shade.addColorStop(0,'rgba(1,7,16,.08)');shade.addColorStop(.52,'rgba(1,6,14,.025)');shade.addColorStop(1,'rgba(1,5,12,.24)');ctx.fillStyle=shade;ctx.fillRect(0,0,W,H);
-  const vignette=ctx.createRadialGradient(W/2,H/2,Math.min(W,H)*.26,W/2,H/2,Math.max(W,H)*.76);vignette.addColorStop(0,'rgba(0,0,0,0)');vignette.addColorStop(1,hexToRgba(env.edge,.34));ctx.fillStyle=vignette;ctx.fillRect(0,0,W,H);
+  const q=qualityProfile(),sceneLight=q.sceneLight??1,env=environmentProfile();
+  ctx.save();
+  ctx.globalAlpha=q.backgroundAlpha??.5;
+  ctx.imageSmoothingEnabled=true;
+  ctx.imageSmoothingQuality='high';
+  ctx.filter=`saturate(${q.saturation||1}) contrast(${q.contrast||1}) brightness(${.90+.10*sceneLight})`;
+  ctx.drawImage(img,sx,sy,sw,sh,0,0,W,H);
+  ctx.filter='none';
+  const shade=ctx.createLinearGradient(0,0,0,H);shade.addColorStop(0,'rgba(1,7,16,.05)');shade.addColorStop(.52,'rgba(1,6,14,.018)');shade.addColorStop(1,'rgba(1,5,12,.18)');ctx.fillStyle=shade;ctx.fillRect(0,0,W,H);
+  const vignette=ctx.createRadialGradient(W/2,H/2,Math.min(W,H)*.28,W/2,H/2,Math.max(W,H)*.78);vignette.addColorStop(0,'rgba(0,0,0,0)');vignette.addColorStop(1,hexToRgba(env.edge,.24));ctx.fillStyle=vignette;ctx.fillRect(0,0,W,H);
   ctx.restore();return true;
 }
 
