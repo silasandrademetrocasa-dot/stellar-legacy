@@ -249,3 +249,7 @@ A Central ADM consolidada possui cinco áreas em `ADM > CONFIGURAÇÃO AO VIVO`:
 
 Snapshots ativos: `topbar.runtime.json`, `npcs.runtime.json`, `world.runtime.json` e `systems.runtime.json`. O Git continua responsável pela engine, segurança e assets; o Supabase configura apenas conteúdo conhecido e validado pelo motor.
 
+
+
+### V18.1.7A
+Calendário Live Ops editável no ADM: dias da semana, horário, duração, repetição e ativação de eventos, com resolução autoritativa no Shared Universe.

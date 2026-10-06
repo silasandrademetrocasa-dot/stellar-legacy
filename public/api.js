@@ -664,6 +664,12 @@ export async function loadLiveOpsOnline(force=false) {
   return authedServerFetch(`/api/live-ops${suffix}`, {}, false);
 }
 
+export async function adminUpdateLiveEventScheduleOnline(eventKey,payload={}) {
+  return authedServerFetch(`/api/admin/runtime/events/${encodeURIComponent(String(eventKey||''))}`, {
+    method:'POST', body:JSON.stringify(payload&&typeof payload==='object'?payload:{})
+  }, false);
+}
+
 export async function purchaseLiveCatalogOnline(catalogKey) {
   return authedServerFetch('/api/live/purchase', {
     method: 'POST',

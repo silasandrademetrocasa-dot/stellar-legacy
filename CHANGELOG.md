@@ -1,3 +1,12 @@
+# V18.1.7A — EVENT SCHEDULER • STAGE 1
+
+- Corrige o resolver de eventos: vários eventos deixam de ignorar horários do Supabase.
+- Adiciona modos INTERVALO, SEMANAL e ÚNICO.
+- Agenda semanal suporta DOM–SÁB, horário oficial America/Sao_Paulo e duração editável.
+- Central ADM ganha aba EVENTOS para ativar/desativar e editar calendário sem Git.
+- Mantém os eventos atuais no modo INTERVALO por padrão, preservando a rotação existente.
+- QA administrativo executado em transação com rollback.
+
 ## V18.1.6 FINAL — Central ADM Data Driven
 
 - Consolida as etapas A → E da Central ADM em um único build estável.

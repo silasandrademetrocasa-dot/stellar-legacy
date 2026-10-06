@@ -1,6 +1,6 @@
 {
   "name": "stellar-legacy",
-  "version": "18.1.6",
+  "version": "18.1.7",
   "type": "module",
   "scripts": {
     "start": "node server/index.js",
@@ -14,5 +14,5 @@
   "engines": {
     "node": ">=18"
   },
-  "release": "central-adm-v18-1-6-final"
+  "release": "event-scheduler-v18-1-7a"
 }

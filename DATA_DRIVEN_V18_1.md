@@ -116,3 +116,7 @@ A quinta etapa da Central ADM expõe somente o `systems.runtime.json` para ediç
 
 As cinco etapas A–E foram consolidadas. O painel administrativo agora controla Interface, NPCs, Mundo, Missões, Economia e Crafting sobre os quatro snapshots temporários do Render. A versão FINAL não acrescenta novas regras: ela congela a arquitetura testada por etapas e mantém as proteções de parâmetros opcionais `NULL`.
 
+
+
+## V18.1.7A — Eventos
+O servidor agora respeita `schedule_mode`: `interval`, `weekly` ou `once`. A agenda semanal usa `weekdays`, `start_local_time`, `duration_minutes` e `America/Sao_Paulo`. Edição disponível no ADM → CONFIGURAÇÃO AO VIVO → EVENTOS.

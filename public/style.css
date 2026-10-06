@@ -2584,3 +2584,17 @@ body[data-quality="low"] .hud-panel,body[data-quality="low"] .modal-card{backdro
 .admin-system-save{justify-self:end;min-width:128px}
 @media(max-width:1050px){.admin-runtime-systems-grid,.admin-runtime-systems-grid.view-economy{grid-template-columns:1fr}.admin-system-fields.economy,.admin-system-fields.crafting{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:620px){.admin-system-fields.mission,.admin-system-fields.economy,.admin-system-fields.crafting,.admin-system-json-grid{grid-template-columns:1fr}.admin-system-save{width:100%}.admin-system-card-head{align-items:flex-start}}
+
+/* ===================== V18.1.7A • EVENT SCHEDULER ===================== */
+.admin-runtime-events-panel{display:grid;gap:10px}
+.admin-runtime-events-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;max-height:590px;overflow:auto;padding-right:2px}
+.admin-event-card{display:grid;gap:9px;padding:11px;border:1px solid rgba(255,185,75,.16);border-radius:12px;background:linear-gradient(180deg,rgba(29,17,5,.92),rgba(10,9,12,.9));box-shadow:inset 0 0 20px rgba(255,167,52,.025)}
+.admin-event-head{display:flex;align-items:center;justify-content:space-between;gap:9px;padding-bottom:7px;border-bottom:1px solid rgba(255,185,75,.09)}
+.admin-event-head>div{display:grid;gap:2px;min-width:0}.admin-event-head b{color:#fff2d3;font-size:9.5px;letter-spacing:.055em}.admin-event-head small{color:#9f815c;font-size:6.8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.admin-event-fields{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px}.admin-event-fields label{display:grid;gap:4px;color:#a98b66;font-size:6.5px;font-weight:1000;letter-spacing:.07em}.admin-event-fields input,.admin-event-fields select{width:100%;min-width:0;height:31px;border:1px solid rgba(255,185,75,.16);border-radius:7px;background:#151007;color:#fff4db;padding:0 7px;font-size:8px;outline:none}.admin-event-fields input:focus,.admin-event-fields select:focus{border-color:#ffbd58;box-shadow:0 0 0 2px rgba(255,189,88,.07)}
+.admin-event-weekdays{display:grid;gap:5px;padding:8px;border:1px solid rgba(255,185,75,.1);border-radius:8px;background:rgba(17,11,5,.55)}.admin-event-weekdays>span{color:#9e805d;font-size:6.3px;font-weight:1000;letter-spacing:.08em}.admin-event-weekdays>div{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px}.admin-event-weekdays label{display:flex;align-items:center;justify-content:center;gap:3px;min-height:27px;border:1px solid rgba(255,185,75,.1);border-radius:6px;color:#c9ad86;font-size:6.3px;font-weight:1000;background:rgba(20,13,6,.58)}.admin-event-weekdays input{accent-color:#ffbd58}
+.admin-event-summary{display:flex;flex-wrap:wrap;gap:6px}.admin-event-summary span{padding:4px 6px;border:1px solid rgba(255,185,75,.09);border-radius:6px;color:#856c4f;font-size:6px}.admin-event-summary b{color:#dbc49f}.admin-event-save{justify-self:end;min-width:140px}
+@media(max-width:1050px){.admin-runtime-events-grid{grid-template-columns:1fr}}
+@media(max-width:620px){.admin-event-fields{grid-template-columns:1fr 1fr}.admin-event-weekdays>div{grid-template-columns:repeat(4,minmax(0,1fr))}.admin-event-save{width:100%}}
+@media(max-width:440px){.admin-event-fields{grid-template-columns:1fr}.admin-event-weekdays>div{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:760px){.admin-runtime-tabs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr))}.admin-runtime-tabs button{min-width:0}}

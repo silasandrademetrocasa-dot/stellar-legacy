@@ -50,3 +50,9 @@ O código mantém fallback local para continuidade do jogo se o runtime remoto e
 - ✅ V18.1.6D Editor de Mundo
 - ✅ V18.1.6E Editor de Sistemas
 - ✅ V18.1.6 FINAL Central ADM consolidada
+
+
+## V18.1.7 — LIVE COMMERCE & SEASONS
+- [x] Stage A: Calendário de Eventos Data Driven (dia/hora/duração).
+- [ ] Stage B: Passe de Temporada Data Driven.
+- [ ] Stage C: Lojas Comum + Premium Data Driven.

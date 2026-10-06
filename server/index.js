@@ -516,7 +516,7 @@ async function accountUser(sb, user, preferred = '') {
   return { id: user.id, email: user.email, callsign };
 }
 
-app.get('/health', (req, res) => res.json({ ok: true, game: 'Stellar Legacy', version: '18.1.6-final', universe: 'shared' }));
+app.get('/health', (req, res) => res.json({ ok: true, game: 'Stellar Legacy', version: '18.1.7a', universe: 'shared' }));
 
 
 app.get('/api/config', (req, res) => {
@@ -532,10 +532,10 @@ app.get('/api/config', (req, res) => {
 
 app.get('/api/meta', (req, res) => res.json({
   name: 'Stellar Legacy',
-  version: '18.1.6-final',
+  version: '18.1.7a',
   authReady: Boolean(SUPABASE_URL && SUPABASE_KEY),
   diagnostics: configStatus(),
-  features: ['login', 'cloud_save', 'factions', 'safe_zone', 'shop', 'owned_ships', 'equipment_slots', 'inventory', 'drones', 'ammo', 'rockets', 'expanded_expedition_maps', 'cargo_hold', 'ore_trading', 'npc_cargo_boxes', 'npc_respawn', 'minimap_navigation', 'waypoints', 'landmark_discovery', 'combat_fx', 'pet_modules', 'auto_buy_cpu', 'v8_asset_identity', 'mission_control_v93', 'mission_acceptance_tracking', 'expanded_enemy_density', 'online_player_presence', 'real_player_auction', 'rank_nameplates_v12', 'clans_v12', 'clan_vault_v12', 'premium_shop_v12', 'battle_pass_paid_v12', 'premium_subscription_v12', 'clan_daily_economy_v12', 'portal_neutral_zone_v12', 'base_only_equipment_v12', 'single_session_v1214', 'manual_login_v141', 'account_bound_save_v141', 'unique_callsign_v141', 'premium_auto_combat_v141', 'shared_universe_v15', 'authoritative_npcs_v15', 'shared_ores_v15', 'shared_events_v15', 'websocket_world_v15', 'npc_contribution_v15', 'realtime_player_socket_v151', 'remote_laser_fx_v151', 'remote_aux9_v151', 'low_latency_world_v151', 'live_ops_v16', 'server_authoritative_shop_v16', 'supabase_event_schedule_v16', 'economy_guard_v161', 'server_auto_buy_v161', 'server_trader_v161', 'server_pet_slots_v161', 'server_materializer_v161', 'server_quantum_cores_v161', 'economy_fast_path_v1767', 'chat_dock_v162', 'drone_designers_v163', 'designer_sets_v163', 'nexus_eclipse_designer_drops_v163', 'global_chat_v162', 'clan_chat_v162', 'private_chat_v162', 'bottom_hud_reflow_v162', 'ship_designers_v165', 'aux_designers_v165', 'designer_ship_abilities_v165', 'event_designer_drops_v165', 'social_minimap_v165', 'realtime_designer_visuals_v165', 'data_driven_core_v1810', 'data_driven_npcs_v1811', 'server_runtime_topbar_cache_v1813', 'data_driven_world_v1814', 'data_driven_systems_v1815', 'admin_runtime_monitor_v1816a', 'admin_interface_editor_v1816b', 'admin_npc_editor_v1816c', 'admin_world_editor_v1816d', 'admin_systems_editor_v1816e'],
+  features: ['login', 'cloud_save', 'factions', 'safe_zone', 'shop', 'owned_ships', 'equipment_slots', 'inventory', 'drones', 'ammo', 'rockets', 'expanded_expedition_maps', 'cargo_hold', 'ore_trading', 'npc_cargo_boxes', 'npc_respawn', 'minimap_navigation', 'waypoints', 'landmark_discovery', 'combat_fx', 'pet_modules', 'auto_buy_cpu', 'v8_asset_identity', 'mission_control_v93', 'mission_acceptance_tracking', 'expanded_enemy_density', 'online_player_presence', 'real_player_auction', 'rank_nameplates_v12', 'clans_v12', 'clan_vault_v12', 'premium_shop_v12', 'battle_pass_paid_v12', 'premium_subscription_v12', 'clan_daily_economy_v12', 'portal_neutral_zone_v12', 'base_only_equipment_v12', 'single_session_v1214', 'manual_login_v141', 'account_bound_save_v141', 'unique_callsign_v141', 'premium_auto_combat_v141', 'shared_universe_v15', 'authoritative_npcs_v15', 'shared_ores_v15', 'shared_events_v15', 'websocket_world_v15', 'npc_contribution_v15', 'realtime_player_socket_v151', 'remote_laser_fx_v151', 'remote_aux9_v151', 'low_latency_world_v151', 'live_ops_v16', 'server_authoritative_shop_v16', 'supabase_event_schedule_v16', 'economy_guard_v161', 'server_auto_buy_v161', 'server_trader_v161', 'server_pet_slots_v161', 'server_materializer_v161', 'server_quantum_cores_v161', 'economy_fast_path_v1767', 'chat_dock_v162', 'drone_designers_v163', 'designer_sets_v163', 'nexus_eclipse_designer_drops_v163', 'global_chat_v162', 'clan_chat_v162', 'private_chat_v162', 'bottom_hud_reflow_v162', 'ship_designers_v165', 'aux_designers_v165', 'designer_ship_abilities_v165', 'event_designer_drops_v165', 'social_minimap_v165', 'realtime_designer_visuals_v165', 'data_driven_core_v1810', 'data_driven_npcs_v1811', 'server_runtime_topbar_cache_v1813', 'data_driven_world_v1814', 'data_driven_systems_v1815', 'admin_runtime_monitor_v1816a', 'admin_interface_editor_v1816b', 'admin_npc_editor_v1816c', 'admin_world_editor_v1816d', 'admin_systems_editor_v1816e', 'event_scheduler_v1817a'],
 }));
 
 
@@ -647,7 +647,7 @@ app.post('/api/admin/runtime/npcs/:npcKey/spawns/:mapId', requireUser, asyncRout
 }));
 
 
-// V18.1.6-final — editor isolado do Mundo. Não toca em Missões/Economia/Crafting.
+// V18.1.7a — editor isolado do Mundo. Não toca em Missões/Economia/Crafting.
 app.post('/api/admin/runtime/world/maps/:mapId', requireUser, asyncRoute(async(req,res)=>{
   const mapId=safeWorldId(req.params?.mapId);const current=await loadWorldRuntimeSnapshot(false);const row=current?.maps?.find(x=>String(x.map_id)===mapId);if(!mapId||!row)return res.status(400).json({error:'Mapa inválido.'});
   const body=req.body&&typeof req.body==='object'?req.body:{};const name=String(body.name||'').trim().slice(0,64),risk=String(body.risk||'').trim().slice(0,32);if(!name||!risk)return res.status(400).json({error:'Nome e risco do mapa são obrigatórios.'});
@@ -685,7 +685,7 @@ app.get('/api/runtime/world', requireUser, asyncRoute(async (req,res)=>{
 }));
 
 
-// V18.1.6-final — editor isolado de Sistemas. Não toca em Interface/NPCs/Mundo.
+// V18.1.7a — editor isolado de Sistemas. Não toca em Interface/NPCs/Mundo.
 app.post('/api/admin/runtime/systems/missions/:category', requireUser, asyncRoute(async(req,res)=>{
   const key=safeWorldId(req.params?.category);const current=await loadSystemsRuntimeSnapshot(false);const row=current?.mission_categories?.find(x=>String(x.category)===key);if(!key||!row)return res.status(400).json({error:'Categoria de missão inválida.'});
   const body=req.body&&typeof req.body==='object'?req.body:{};const config=body.config&&typeof body.config==='object'&&!Array.isArray(body.config)?body.config:null;if(!config)return res.status(400).json({error:'Configuração da missão precisa ser um objeto JSON.'});if(JSON.stringify(config).length>12000)return res.status(400).json({error:'Configuração da missão muito grande.'});
@@ -874,6 +874,30 @@ app.put('/api/account/callsign', requireUser, asyncRoute(async (req, res) => {
 app.get('/api/live-ops', requireUser, asyncRoute(async (req,res)=>{
   const data=await loadLiveOpsSnapshot(Boolean(req.query?.refresh));
   res.json(data);
+}));
+
+
+// V18.1.7A — calendário de eventos administrável. Não altera Passe/Lojas nesta etapa.
+app.post('/api/admin/runtime/events/:eventKey', requireUser, asyncRoute(async(req,res)=>{
+  const key=safeWorldId(req.params?.eventKey),current=await loadLiveOpsSnapshot(false),row=current?.events?.find(x=>String(x.event_key)===key);
+  if(!key||!row)return res.status(400).json({error:'Evento inválido.'});
+  const body=req.body&&typeof req.body==='object'?req.body:{},mode=['interval','weekly','once'].includes(String(body.schedule_mode))?String(body.schedule_mode):String(row.schedule_mode||'interval');
+  const weekdays=[...new Set((Array.isArray(body.weekdays)?body.weekdays:[]).map(Number).filter(n=>Number.isInteger(n)&&n>=0&&n<=6))].sort((a,b)=>a-b);
+  const localTime=String(body.start_local_time||'').trim();
+  if(mode==='weekly'&&(!weekdays.length||!/^([01]\d|2[0-3]):[0-5]\d(?::[0-5]\d)?$/.test(localTime)))return res.status(400).json({error:'Agenda semanal precisa de pelo menos um dia e horário HH:MM.'});
+  const parseIso=(value)=>{if(value==null||value==='')return null;const d=new Date(value);return Number.isNaN(d.getTime())?null:d.toISOString();};
+  const startsAt=parseIso(body.starts_at)||row.starts_at||null,endsAt=parseIso(body.ends_at),clearEnds=body.ends_at===''||body.clear_ends_at===true;
+  if((mode==='interval'||mode==='once')&&!startsAt)return res.status(400).json({error:'Informe a data/hora inicial do evento.'});
+  const {data,error}=await req.sb.rpc('admin_update_live_event_schedule_v1817a',{
+    p_event_key:key,p_enabled:body.enabled!==false,p_schedule_mode:mode,p_starts_at:startsAt,
+    p_duration_minutes:Math.round(clampNum(body.duration_minutes,1,10080,row.duration_minutes||15)),
+    p_repeat_minutes:Math.round(clampNum(body.repeat_minutes,1,10080,row.repeat_minutes||75)),
+    p_weekdays:mode==='weekly'?weekdays:(Array.isArray(row.weekdays)?row.weekdays:[]),
+    p_start_local_time:mode==='weekly'?localTime:(row.start_local_time||null),p_ends_at:endsAt,p_clear_ends_at:clearEnds
+  });
+  if(error){const msg=String(error.message||'Falha ao salvar agenda do evento.');return res.status(/administrativ|permiss|negado/i.test(msg)?403:400).json({error:msg});}
+  const runtime=await loadLiveOpsSnapshot(true);try{await sharedUniverse.refreshLiveOps(true);}catch{}
+  res.set('Cache-Control','no-store');res.json({ok:true,event_key:key,runtime,saved:data||null});
 }));
 
 app.post('/api/live/purchase', requireUser, asyncRoute(async (req,res)=>{
@@ -1123,7 +1147,7 @@ app.post('/api/player/location', requireUser, asyncRoute(async (req,res)=>{
   return res.json(data||{ok:true});
 }));
 
-app.get('/api/world/status', (req, res) => res.json({ ok: true, version: '18.1.6-final', ...sharedUniverse.stats() }));
+app.get('/api/world/status', (req, res) => res.json({ ok: true, version: '18.1.7a', ...sharedUniverse.stats() }));
 
 app.get('*', (req, res) => res.sendFile(path.join(__dirname, '../public/index.html')));
 
@@ -1194,7 +1218,7 @@ npcRefreshTimer.unref?.();
 refreshNpcRuntimeSnapshot(true).then(cfg=>console.log(`[npc-runtime] v${cfg.version} cacheado em ${NPC_RUNTIME_FILE}`)).catch(err=>console.warn('[npc-runtime] bootstrap:',err.message));
 
 server.listen(port, () => {
-  console.log(`Stellar Legacy V18.1.6-final :${port}`);
+  console.log(`Stellar Legacy V18.1.7a :${port}`);
   console.log('Supabase config:', configStatus());
   console.log('Shared Universe: ONLINE');
 });
