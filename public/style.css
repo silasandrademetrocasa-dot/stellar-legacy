@@ -2598,3 +2598,12 @@ body[data-quality="low"] .hud-panel,body[data-quality="low"] .modal-card{backdro
 @media(max-width:620px){.admin-event-fields{grid-template-columns:1fr 1fr}.admin-event-weekdays>div{grid-template-columns:repeat(4,minmax(0,1fr))}.admin-event-save{width:100%}}
 @media(max-width:440px){.admin-event-fields{grid-template-columns:1fr}.admin-event-weekdays>div{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:760px){.admin-runtime-tabs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr))}.admin-runtime-tabs button{min-width:0}}
+
+/* V18.1.7B • Battle Pass Data Driven */
+.admin-runtime-pass-panel{display:grid;gap:10px}
+.admin-pass-season{display:grid;gap:8px}.admin-pass-season-card,.admin-pass-tier-card{border:1px solid rgba(255,198,90,.18);background:linear-gradient(180deg,rgba(39,27,9,.72),rgba(9,12,19,.88));border-radius:10px;padding:10px;box-shadow:inset 0 0 18px rgba(255,190,70,.025)}
+.admin-pass-season-head,.admin-pass-tier-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:9px}.admin-pass-season-head b,.admin-pass-tier-head b{color:#ffd878;letter-spacing:.05em}.admin-pass-season-head small{display:block;color:#8399a6;margin-top:3px;font-size:9px}
+.admin-pass-season-fields{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px}.admin-pass-season-fields label,.admin-pass-tier-rewards label{display:grid;gap:4px;color:#78909c;font-size:8px;font-weight:900;letter-spacing:.08em}.admin-pass-season-fields input,.admin-pass-season-card textarea,.admin-pass-tier-card textarea{width:100%;border:1px solid rgba(106,214,255,.14);background:rgba(2,8,14,.82);color:#d9f5ff;border-radius:7px;padding:8px;outline:none}.admin-pass-season-card textarea{min-height:58px;resize:vertical;margin-bottom:8px}
+.admin-runtime-pass-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;max-height:610px;overflow:auto;padding-right:2px}.admin-pass-tier-head label{font-size:8px;color:#8ca3ae}.admin-pass-tier-rewards{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:8px}.admin-pass-tier-rewards textarea{min-height:170px;resize:vertical;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:9px;line-height:1.35}
+@media(max-width:1050px){.admin-pass-season-fields{grid-template-columns:repeat(2,minmax(0,1fr))}.admin-runtime-pass-grid{grid-template-columns:1fr}}
+@media(max-width:650px){.admin-pass-season-fields,.admin-pass-tier-rewards{grid-template-columns:1fr}.admin-pass-tier-rewards textarea{min-height:130px}}

@@ -901,3 +901,15 @@ export async function adminUpdateEconomyServiceOnline(serviceId,payload={}){
 export async function adminUpdateCraftingRecipeOnline(recipeId,payload={}){
   return serverFetch(`/api/admin/runtime/systems/crafting/${encodeURIComponent(String(recipeId||''))}`,{method:'POST',body:JSON.stringify(payload||{})},true);
 }
+
+
+// ===================== V18.1.7B BATTLE PASS RUNTIME =====================
+export async function loadBattlePassRuntimeConfigOnline(refresh=false){
+  return serverFetch(`/api/runtime/pass${refresh?'?refresh=1':''}`,{},true);
+}
+export async function adminUpdateBattlePassSeasonOnline(seasonKey,payload={}){
+  return serverFetch(`/api/admin/runtime/pass/seasons/${encodeURIComponent(String(seasonKey||''))}`,{method:'POST',body:JSON.stringify(payload||{})},true);
+}
+export async function adminUpdateBattlePassTierOnline(seasonKey,tierNo,payload={}){
+  return serverFetch(`/api/admin/runtime/pass/seasons/${encodeURIComponent(String(seasonKey||''))}/tiers/${encodeURIComponent(String(tierNo||''))}`,{method:'POST',body:JSON.stringify(payload||{})},true);
+}

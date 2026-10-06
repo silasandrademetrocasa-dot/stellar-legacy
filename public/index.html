@@ -6,7 +6,7 @@
 <meta content="width=device-width,initial-scale=1,user-scalable=no" name="viewport"/>
 <meta content="#030816" name="theme-color"/>
 <title>Stellar Legacy</title>
-<link href="/style.css?v=18.1.7a" rel="stylesheet"/>
+<link href="/style.css?v=18.1.7b" rel="stylesheet"/>
 </head>
 <body>
 <div id="app">
@@ -568,7 +568,7 @@
     </div>
     <section class="admin-runtime-monitor-section">
       <div class="settings-title admin-runtime-monitor-head">
-        <div><b>CONFIGURAÇÃO AO VIVO</b><small>Central ADM Data Driven • Eventos agora com calendário real por dia/horário.</small></div>
+        <div><b>CONFIGURAÇÃO AO VIVO</b><small>Central ADM Data Driven • Eventos + Passe de Temporada controlados pelo runtime.</small></div>
         <button class="small-btn gold" id="adminRuntimeMonitorRefresh" type="button">ATUALIZAR RUNTIME</button>
       </div>
       <div class="admin-runtime-tabs" id="adminRuntimeTabs">
@@ -578,6 +578,7 @@
         <button type="button" data-admin-runtime-tab="world">MUNDO</button>
         <button type="button" data-admin-runtime-tab="systems">SISTEMAS</button>
         <button type="button" data-admin-runtime-tab="events">EVENTOS</button>
+        <button type="button" data-admin-runtime-tab="pass">PASSE</button>
       </div>
       <div id="adminRuntimeMonitorPanel">
         <div class="admin-runtime-monitor-grid" id="adminRuntimeMonitorGrid"><div class="empty-state">Aguardando status dos runtimes...</div></div>
@@ -633,6 +634,15 @@
         </div>
         <div class="admin-runtime-events-grid" id="adminRuntimeEventsGrid"><div class="empty-state">Carregue o calendário de eventos.</div></div>
         <div class="admin-runtime-interface-message muted" id="adminRuntimeEventsMessage">Nenhuma alteração pendente.</div>
+      </div>
+      <div class="admin-runtime-pass-panel hidden" id="adminRuntimePassPanel">
+        <div class="admin-runtime-interface-toolbar">
+          <div><b>PASSE DE TEMPORADA</b><small>V18.1.7B • Datas, tiers, pontos, preço e recompensas Free/Premium controlados pelo Supabase.</small></div>
+          <button class="small-btn" id="adminRuntimePassReload" type="button">RECARREGAR</button>
+        </div>
+        <div class="admin-pass-season" id="adminRuntimePassSeason"><div class="empty-state">Carregue a temporada do Passe.</div></div>
+        <div class="admin-runtime-pass-grid" id="adminRuntimePassGrid"><div class="empty-state">Carregue os tiers do Passe.</div></div>
+        <div class="admin-runtime-interface-message muted" id="adminRuntimePassMessage">Nenhuma alteração pendente.</div>
       </div>
     </section>
     <section class="admin-telemetry-section">
@@ -916,6 +926,6 @@
   </div>
 </div>
 </div>
-<script src="/game.js?v=18.1.7a" type="module"></script>
+<script src="/game.js?v=18.1.7b" type="module"></script>
 </body>
 </html>

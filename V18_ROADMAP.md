@@ -56,3 +56,12 @@ O código mantém fallback local para continuidade do jogo se o runtime remoto e
 - [x] Stage A: Calendário de Eventos Data Driven (dia/hora/duração).
 - [ ] Stage B: Passe de Temporada Data Driven.
 - [ ] Stage C: Lojas Comum + Premium Data Driven.
+
+
+### Concluído — V18.1.7B
+- Passe de Temporada Data Driven
+- preço Premium sincronizado com temporada
+- recompensas Free/Premium por tier no Supabase
+- editor ADM do Passe
+
+Próxima etapa prevista: V18.1.7C — Lojas Comum + Premium Data Driven.

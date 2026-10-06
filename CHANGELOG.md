@@ -1,3 +1,12 @@
+# V18.1.7B — PASSE DE TEMPORADA DATA DRIVEN • STAGE 2
+
+- Temporada, início/fim, quantidade de tiers, pontos por tier, pontos por missão diária e preço Premium agora vêm do Supabase.
+- 30 tiers atuais foram migrados preservando exatamente as recompensas Free/Premium existentes.
+- Render materializa `pass.runtime.json` e o cliente usa fallback local se o runtime ficar indisponível.
+- Central ADM ganhou a aba PASSE com editor da temporada e JSON de recompensa por tier.
+- Loja Premium usa o preço e a chave da temporada ativa; compra do Passe não depende mais do mês `YYYY-MM` hardcoded.
+- Temporada fora da janela pausa progressão e resgates.
+
 # V18.1.7A — EVENT SCHEDULER • STAGE 1
 
 - Corrige o resolver de eventos: vários eventos deixam de ignorar horários do Supabase.

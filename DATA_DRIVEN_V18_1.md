@@ -120,3 +120,10 @@ As cinco etapas A–E foram consolidadas. O painel administrativo agora controla
 
 ## V18.1.7A — Eventos
 O servidor agora respeita `schedule_mode`: `interval`, `weekly` ou `once`. A agenda semanal usa `weekdays`, `start_local_time`, `duration_minutes` e `America/Sao_Paulo`. Edição disponível no ADM → CONFIGURAÇÃO AO VIVO → EVENTOS.
+
+
+## V18.1.7B — Passe de Temporada
+
+Runtime: `pass.runtime.json`. Fonte: `game_battle_pass_seasons_v1817b` + `game_battle_pass_tiers_v1817b`.
+
+Controla temporada ativa, datas, tiers, pontos, preço Premium e recompensas Free/Premium. A Loja Premium resolve o Passe pela temporada ativa, evitando preço ou entitlement divergente do calendário.

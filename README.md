@@ -253,3 +253,7 @@ Snapshots ativos: `topbar.runtime.json`, `npcs.runtime.json`, `world.runtime.jso
 
 ### V18.1.7A
 Calendário Live Ops editável no ADM: dias da semana, horário, duração, repetição e ativação de eventos, com resolução autoritativa no Shared Universe.
+
+
+### V18.1.7B
+Passe de Temporada Data Driven: calendário, preço, progressão e recompensas por tier editáveis pela Central ADM, usando snapshot temporário do Render.
