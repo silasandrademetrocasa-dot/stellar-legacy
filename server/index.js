@@ -1,4 +1,5 @@
 import express from 'express';
+import compression from 'compression';
 import http from 'http';
 import path from 'path';
 import fs from 'fs/promises';
@@ -22,8 +23,30 @@ function normalizeSupabaseUrl(value = '') {
 const SUPABASE_URL = normalizeSupabaseUrl(process.env.SUPABASE_URL || '');
 const SUPABASE_KEY = String(process.env.SUPABASE_PUBLISHABLE_KEY || process.env.SUPABASE_ANON_KEY || '').trim();
 
+const PUBLIC_DIR = path.join(__dirname, '../public');
+const ASSET_CACHE_MS = 24 * 60 * 60 * 1000;
+
+// V18.1.8 • HTTP BANDWIDTH OPTIMIZATION
+// JS/CSS/JSON textuais são comprimidos; imagens já compactadas (PNG/WebP) passam sem custo extra.
+app.use(compression({ threshold: 1024 }));
 app.use(express.json({ limit: '1mb' }));
-app.use(express.static(path.join(__dirname, '../public')));
+
+// Assets recebem cache longo. As URLs dos assets já carregam ?asset=<versão>, portanto um novo
+// release invalida o cache sem obrigar o jogador a baixar os mesmos arquivos a cada F5.
+app.use('/assets', express.static(path.join(PUBLIC_DIR, 'assets'), {
+  maxAge: ASSET_CACHE_MS,
+  etag: true,
+  lastModified: true,
+  setHeaders(res){res.setHeader('Cache-Control','public, max-age=86400, stale-while-revalidate=604800');}
+}));
+app.use(express.static(PUBLIC_DIR, {
+  etag: true,
+  lastModified: true,
+  setHeaders(res, filePath) {
+    if (/\.html?$/i.test(filePath)) res.setHeader('Cache-Control', 'no-cache');
+    else if (/\.(?:js|css)$/i.test(filePath)) res.setHeader('Cache-Control', 'public, max-age=0, must-revalidate');
+  }
+}));
 
 function asyncRoute(fn) {
   return (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next);
@@ -103,6 +126,14 @@ const PASS_RUNTIME_CACHE_MS = 15000;
 const PASS_RUNTIME_FILE = path.join(TOPBAR_RUNTIME_DIR, 'pass.runtime.json');
 let passRuntimeCache = null;
 let passRuntimeCacheAt = 0;
+
+// V18.1.7C — LOJAS COMUM + PREMIUM RUNTIME CACHE
+const SHOPS_RUNTIME_CACHE_MS = 15000;
+const SHOPS_RUNTIME_FILE = path.join(TOPBAR_RUNTIME_DIR, 'shops.runtime.json');
+let shopsRuntimeCache = null;
+let shopsRuntimeCacheAt = 0;
+const COMMON_SHOP_KINDS = new Set(['ship','laser','generator','drone','pet','pet_gear','extra','ammo','rocket']);
+const COMMON_SHOP_TABS = new Set(['ships','lasers','generators','drones','pet','extras','ammo','rockets']);
 const SYSTEM_MISSION_CATEGORIES = new Set(['daily','weekly','monthly','special']);
 const SYSTEM_SERVICE_IDS = new Set(['weapon','shield','cargo','thruster']);
 const SYSTEM_EFFECT_KEYS = new Set(['laser_damage_pct','shield_pct','cargo_flat','speed_flat']);
@@ -191,6 +222,37 @@ async function refreshPassRuntimeSnapshot(force=false){
   const payload=sanitizePassRuntime(data||{});if(!payload.seasons.length)throw new Error('Snapshot do Passe veio sem temporadas.');await writePassRuntimeFile(payload);passRuntimeCache=payload;passRuntimeCacheAt=now;return payload;
 }
 async function loadPassRuntimeSnapshot(force=false){try{return await refreshPassRuntimeSnapshot(force);}catch(err){const disk=await readPassRuntimeFile();if(disk){passRuntimeCache=disk;passRuntimeCacheAt=Date.now();return disk;}throw err;}}
+
+function sanitizeCommonShopMeta(raw){
+  const src=raw&&typeof raw==='object'&&!Array.isArray(raw)?raw:{};const g=src.grant&&typeof src.grant==='object'&&!Array.isArray(src.grant)?src.grant:{};
+  const grant={};if(g.kind)grant.kind=String(g.kind).slice(0,32);if(g.id)grant.id=String(g.id).slice(0,64);if(g.protocol)grant.protocol=String(g.protocol).slice(0,32);
+  if(g.qty!=null)grant.qty=Math.max(1,Math.min(10000000,Math.floor(Number(g.qty)||1)));if(g.slots!=null)grant.slots=Math.max(1,Math.min(32,Math.floor(Number(g.slots)||1)));
+  return {grant};
+}
+function sanitizeShopsRuntime(raw){
+  const common=Array.isArray(raw?.common)?raw.common.map(x=>({
+    catalog_key:String(x?.catalog_key||'').slice(0,120),kind:String(x?.kind||'').slice(0,24),ref_id:String(x?.ref_id||'').slice(0,64),
+    display_name:x?.display_name==null?null:String(x.display_name).slice(0,100),description:x?.description==null?null:String(x.description).slice(0,300),
+    price:Math.max(0,Math.min(1000000000000,Math.round(Number(x?.price)||0))),currency:String(x?.currency)==='uridium'?'uridium':'credits',
+    enabled:x?.enabled!==false,shop_tab:COMMON_SHOP_TABS.has(String(x?.shop_tab||''))?String(x.shop_tab):null,shop_visible:x?.shop_visible!==false,
+    min_level:Math.round(clampNum(x?.min_level,1,100,1)),sort_order:Math.round(clampNum(x?.sort_order,0,9999,100)),meta:sanitizeCommonShopMeta(x?.meta),updated_at:x?.updated_at||null
+  })).filter(x=>x.catalog_key&&COMMON_SHOP_KINDS.has(x.kind)):[];
+  const premium=Array.isArray(raw?.premium)?raw.premium.map(x=>({
+    id:String(x?.id||'').slice(0,80),name:String(x?.name||'').slice(0,100),category:String(x?.category||'').slice(0,32),
+    price_brl:clampNum(x?.price_brl,0,99999,0),item_id:x?.item_id==null?null:String(x.item_id).slice(0,64),quantity:Math.max(1,Math.min(10000000,Math.floor(Number(x?.quantity)||1))),
+    description:String(x?.description||'').slice(0,300),active:x?.active!==false,sort_order:Math.round(clampNum(x?.sort_order,0,9999,100)),min_level:Math.round(clampNum(x?.min_level,1,100,1)),
+    meta:{days:Math.max(1,Math.min(3650,Math.floor(Number(x?.meta?.days)||30)))}
+  })).filter(x=>x.id):[];
+  return {version:Math.max(0,Number(raw?.version)||0),updated_at:raw?.updated_at||null,common,premium,generated_at:new Date().toISOString(),source:'render-temp-json'};
+}
+async function writeShopsRuntimeFile(payload){await fs.mkdir(TOPBAR_RUNTIME_DIR,{recursive:true});const tmp=`${SHOPS_RUNTIME_FILE}.${process.pid}.tmp`;await fs.writeFile(tmp,JSON.stringify(payload),{encoding:'utf8'});await fs.rename(tmp,SHOPS_RUNTIME_FILE);}
+async function readShopsRuntimeFile(){try{const text=await fs.readFile(SHOPS_RUNTIME_FILE,'utf8');const parsed=JSON.parse(text);return parsed&&Array.isArray(parsed.common)&&Array.isArray(parsed.premium)?parsed:null;}catch{return null;}}
+async function refreshShopsRuntimeSnapshot(force=false){
+  const now=Date.now();if(!force&&shopsRuntimeCache&&now-shopsRuntimeCacheAt<SHOPS_RUNTIME_CACHE_MS)return shopsRuntimeCache;
+  const sb=supabaseBase();if(!sb)throw new Error('Supabase indisponível para configuração das lojas.');const {data,error}=await sb.rpc('get_shops_runtime_config_v1817c');if(error)throw new Error(`Falha ao carregar shops runtime: ${error.message}`);
+  const payload=sanitizeShopsRuntime(data||{});if(!payload.common.length||!payload.premium.length)throw new Error('Snapshot das lojas veio incompleto.');await writeShopsRuntimeFile(payload);shopsRuntimeCache=payload;shopsRuntimeCacheAt=now;return payload;
+}
+async function loadShopsRuntimeSnapshot(force=false){try{return await refreshShopsRuntimeSnapshot(force);}catch(err){const disk=await readShopsRuntimeFile();if(disk){shopsRuntimeCache=disk;shopsRuntimeCacheAt=Date.now();return disk;}throw err;}}
 
 function clampNum(value,min,max,fallback){
   const n=Number(value);return Number.isFinite(n)?Math.max(min,Math.min(max,n)):fallback;
@@ -565,7 +627,7 @@ async function accountUser(sb, user, preferred = '') {
   return { id: user.id, email: user.email, callsign };
 }
 
-app.get('/health', (req, res) => res.json({ ok: true, game: 'Stellar Legacy', version: '18.1.7b', universe: 'shared' }));
+app.get('/health', (req, res) => res.json({ ok: true, game: 'Stellar Legacy', version: '18.1.8', universe: 'shared' }));
 
 
 app.get('/api/config', (req, res) => {
@@ -581,10 +643,10 @@ app.get('/api/config', (req, res) => {
 
 app.get('/api/meta', (req, res) => res.json({
   name: 'Stellar Legacy',
-  version: '18.1.7b',
+  version: '18.1.8',
   authReady: Boolean(SUPABASE_URL && SUPABASE_KEY),
   diagnostics: configStatus(),
-  features: ['login', 'cloud_save', 'factions', 'safe_zone', 'shop', 'owned_ships', 'equipment_slots', 'inventory', 'drones', 'ammo', 'rockets', 'expanded_expedition_maps', 'cargo_hold', 'ore_trading', 'npc_cargo_boxes', 'npc_respawn', 'minimap_navigation', 'waypoints', 'landmark_discovery', 'combat_fx', 'pet_modules', 'auto_buy_cpu', 'v8_asset_identity', 'mission_control_v93', 'mission_acceptance_tracking', 'expanded_enemy_density', 'online_player_presence', 'real_player_auction', 'rank_nameplates_v12', 'clans_v12', 'clan_vault_v12', 'premium_shop_v12', 'battle_pass_paid_v12', 'premium_subscription_v12', 'clan_daily_economy_v12', 'portal_neutral_zone_v12', 'base_only_equipment_v12', 'single_session_v1214', 'manual_login_v141', 'account_bound_save_v141', 'unique_callsign_v141', 'premium_auto_combat_v141', 'shared_universe_v15', 'authoritative_npcs_v15', 'shared_ores_v15', 'shared_events_v15', 'websocket_world_v15', 'npc_contribution_v15', 'realtime_player_socket_v151', 'remote_laser_fx_v151', 'remote_aux9_v151', 'low_latency_world_v151', 'live_ops_v16', 'server_authoritative_shop_v16', 'supabase_event_schedule_v16', 'economy_guard_v161', 'server_auto_buy_v161', 'server_trader_v161', 'server_pet_slots_v161', 'server_materializer_v161', 'server_quantum_cores_v161', 'economy_fast_path_v1767', 'chat_dock_v162', 'drone_designers_v163', 'designer_sets_v163', 'nexus_eclipse_designer_drops_v163', 'global_chat_v162', 'clan_chat_v162', 'private_chat_v162', 'bottom_hud_reflow_v162', 'ship_designers_v165', 'aux_designers_v165', 'designer_ship_abilities_v165', 'event_designer_drops_v165', 'social_minimap_v165', 'realtime_designer_visuals_v165', 'data_driven_core_v1810', 'data_driven_npcs_v1811', 'server_runtime_topbar_cache_v1813', 'data_driven_world_v1814', 'data_driven_systems_v1815', 'admin_runtime_monitor_v1816a', 'admin_interface_editor_v1816b', 'admin_npc_editor_v1816c', 'admin_world_editor_v1816d', 'admin_systems_editor_v1816e', 'event_scheduler_v1817a', 'battle_pass_data_driven_v1817b'],
+  features: ['login', 'cloud_save', 'factions', 'safe_zone', 'shop', 'owned_ships', 'equipment_slots', 'inventory', 'drones', 'ammo', 'rockets', 'expanded_expedition_maps', 'cargo_hold', 'ore_trading', 'npc_cargo_boxes', 'npc_respawn', 'minimap_navigation', 'waypoints', 'landmark_discovery', 'combat_fx', 'pet_modules', 'auto_buy_cpu', 'v8_asset_identity', 'mission_control_v93', 'mission_acceptance_tracking', 'expanded_enemy_density', 'online_player_presence', 'real_player_auction', 'rank_nameplates_v12', 'clans_v12', 'clan_vault_v12', 'premium_shop_v12', 'battle_pass_paid_v12', 'premium_subscription_v12', 'clan_daily_economy_v12', 'portal_neutral_zone_v12', 'base_only_equipment_v12', 'single_session_v1214', 'manual_login_v141', 'account_bound_save_v141', 'unique_callsign_v141', 'premium_auto_combat_v141', 'shared_universe_v15', 'authoritative_npcs_v15', 'shared_ores_v15', 'shared_events_v15', 'websocket_world_v15', 'npc_contribution_v15', 'realtime_player_socket_v151', 'remote_laser_fx_v151', 'remote_aux9_v151', 'low_latency_world_v151', 'live_ops_v16', 'server_authoritative_shop_v16', 'supabase_event_schedule_v16', 'economy_guard_v161', 'server_auto_buy_v161', 'server_trader_v161', 'server_pet_slots_v161', 'server_materializer_v161', 'server_quantum_cores_v161', 'economy_fast_path_v1767', 'chat_dock_v162', 'drone_designers_v163', 'designer_sets_v163', 'nexus_eclipse_designer_drops_v163', 'global_chat_v162', 'clan_chat_v162', 'private_chat_v162', 'bottom_hud_reflow_v162', 'ship_designers_v165', 'aux_designers_v165', 'designer_ship_abilities_v165', 'event_designer_drops_v165', 'social_minimap_v165', 'realtime_designer_visuals_v165', 'data_driven_core_v1810', 'data_driven_npcs_v1811', 'server_runtime_topbar_cache_v1813', 'data_driven_world_v1814', 'data_driven_systems_v1815', 'admin_runtime_monitor_v1816a', 'admin_interface_editor_v1816b', 'admin_npc_editor_v1816c', 'admin_world_editor_v1816d', 'admin_systems_editor_v1816e', 'event_scheduler_v1817a', 'battle_pass_data_driven_v1817b', 'shops_data_driven_v1817c'],
 }));
 
 
@@ -619,6 +681,7 @@ app.get('/api/admin/runtime-monitor', requireUser, asyncRoute(async(req,res)=>{
     ['world',()=>loadWorldRuntimeSnapshot(force),WORLD_RUNTIME_FILE],
     ['systems',()=>loadSystemsRuntimeSnapshot(force),SYSTEMS_RUNTIME_FILE],
     ['pass',()=>loadPassRuntimeSnapshot(force),PASS_RUNTIME_FILE],
+    ['shops',()=>loadShopsRuntimeSnapshot(force),SHOPS_RUNTIME_FILE],
   ];
   const out={};
   for(const [key,loader,file] of jobs){
@@ -697,7 +760,7 @@ app.post('/api/admin/runtime/npcs/:npcKey/spawns/:mapId', requireUser, asyncRout
 }));
 
 
-// V18.1.7a — editor isolado do Mundo. Não toca em Missões/Economia/Crafting.
+// V18.1.6D — editor isolado do Mundo. Não toca em Missões/Economia/Crafting.
 app.post('/api/admin/runtime/world/maps/:mapId', requireUser, asyncRoute(async(req,res)=>{
   const mapId=safeWorldId(req.params?.mapId);const current=await loadWorldRuntimeSnapshot(false);const row=current?.maps?.find(x=>String(x.map_id)===mapId);if(!mapId||!row)return res.status(400).json({error:'Mapa inválido.'});
   const body=req.body&&typeof req.body==='object'?req.body:{};const name=String(body.name||'').trim().slice(0,64),risk=String(body.risk||'').trim().slice(0,32);if(!name||!risk)return res.status(400).json({error:'Nome e risco do mapa são obrigatórios.'});
@@ -735,7 +798,7 @@ app.get('/api/runtime/world', requireUser, asyncRoute(async (req,res)=>{
 }));
 
 
-// V18.1.7a — editor isolado de Sistemas. Não toca em Interface/NPCs/Mundo.
+// V18.1.6E — editor isolado de Sistemas. Não toca em Interface/NPCs/Mundo.
 app.post('/api/admin/runtime/systems/missions/:category', requireUser, asyncRoute(async(req,res)=>{
   const key=safeWorldId(req.params?.category);const current=await loadSystemsRuntimeSnapshot(false);const row=current?.mission_categories?.find(x=>String(x.category)===key);if(!key||!row)return res.status(400).json({error:'Categoria de missão inválida.'});
   const body=req.body&&typeof req.body==='object'?req.body:{};const config=body.config&&typeof body.config==='object'&&!Array.isArray(body.config)?body.config:null;if(!config)return res.status(400).json({error:'Configuração da missão precisa ser um objeto JSON.'});if(JSON.stringify(config).length>12000)return res.status(400).json({error:'Configuração da missão muito grande.'});
@@ -778,6 +841,36 @@ app.post('/api/admin/runtime/pass/seasons/:seasonKey/tiers/:tierNo', requireUser
   const body=req.body&&typeof req.body==='object'?req.body:{};if(!body.free_reward||typeof body.free_reward!=='object'||Array.isArray(body.free_reward))return res.status(400).json({error:'Recompensa Free precisa ser um objeto JSON.'});if(!body.premium_reward||typeof body.premium_reward!=='object'||Array.isArray(body.premium_reward))return res.status(400).json({error:'Recompensa Premium precisa ser um objeto JSON.'});
   const {data,error}=await req.sb.rpc('admin_update_battle_pass_tier_v1817b',{p_season_key:key,p_tier_no:tierNo,p_free_reward:sanitizePassReward(body.free_reward),p_premium_reward:sanitizePassReward(body.premium_reward),p_enabled:body.enabled!==false});if(error){const msg=String(error.message||'Falha ao salvar tier.');return res.status(/administrativ|permiss|negado/i.test(msg)?403:400).json({error:msg});}
   const runtime=await refreshPassRuntimeSnapshot(true);res.set('Cache-Control','no-store');res.json({ok:true,season_key:key,tier_no:tierNo,runtime,saved:data||null});
+}));
+
+// V18.1.7C — Lojas Comum + Premium Data Driven
+app.get('/api/runtime/shops', requireUser, asyncRoute(async(req,res)=>{
+  const snapshot=await loadShopsRuntimeSnapshot(Boolean(req.query?.refresh));
+  res.set('Cache-Control','no-store');res.json(snapshot);
+}));
+app.post('/api/admin/runtime/shops/common/:catalogKey', requireUser, asyncRoute(async(req,res)=>{
+  const key=String(req.params?.catalogKey||'').trim().slice(0,120),current=await loadShopsRuntimeSnapshot(false),row=current?.common?.find(x=>String(x.catalog_key)===key);if(!key||!row)return res.status(400).json({error:'Produto da Loja Comum inválido.'});
+  const body=req.body&&typeof req.body==='object'?req.body:{},currency=String(body.currency||row.currency||'credits')==='uridium'?'uridium':'credits',tab=COMMON_SHOP_TABS.has(String(body.shop_tab||''))?String(body.shop_tab):String(row.shop_tab||'');if(!COMMON_SHOP_TABS.has(tab))return res.status(400).json({error:'Aba da Loja inválida.'});
+  const {data,error}=await req.sb.rpc('admin_update_common_shop_item_v1817c',{
+    p_catalog_key:key,p_display_name:String(body.display_name??row.display_name??'').trim().slice(0,100),p_description:String(body.description??row.description??'').trim().slice(0,300),
+    p_price:Math.round(clampNum(body.price,0,1000000000000,row.price||0)),p_currency:currency,p_quantity:Math.round(clampNum(body.quantity,1,10000000,row?.meta?.grant?.qty||1)),
+    p_min_level:Math.round(clampNum(body.min_level,1,100,row.min_level||1)),p_sort_order:Math.round(clampNum(body.sort_order,0,9999,row.sort_order||100)),p_shop_tab:tab,
+    p_shop_visible:body.shop_visible!==false,p_enabled:body.enabled!==false
+  });
+  if(error){const msg=String(error.message||'Falha ao salvar produto da Loja Comum.');return res.status(/administrativ|permiss|negado/i.test(msg)?403:400).json({error:msg});}
+  const runtime=await refreshShopsRuntimeSnapshot(true);await loadLiveOpsSnapshot(true).catch(()=>null);res.set('Cache-Control','no-store');res.json({ok:true,catalog_key:key,runtime,saved:data||null});
+}));
+app.post('/api/admin/runtime/shops/premium/:productId', requireUser, asyncRoute(async(req,res)=>{
+  const key=String(req.params?.productId||'').trim().slice(0,80),current=await loadShopsRuntimeSnapshot(false),row=current?.premium?.find(x=>String(x.id)===key);if(!key||!row)return res.status(400).json({error:'Produto Premium inválido.'});
+  const body=req.body&&typeof req.body==='object'?req.body:{};
+  const {data,error}=await req.sb.rpc('admin_update_premium_shop_item_v1817c',{
+    p_product_id:key,p_name:String(body.name??row.name??'').trim().slice(0,100),p_description:String(body.description??row.description??'').trim().slice(0,300),
+    p_price_brl:row.category==='battle_pass'?null:clampNum(body.price_brl,0,99999,row.price_brl||0),p_quantity:Math.round(clampNum(body.quantity,1,10000000,row.quantity||1)),
+    p_min_level:Math.round(clampNum(body.min_level,1,100,row.min_level||1)),p_sort_order:Math.round(clampNum(body.sort_order,0,9999,row.sort_order||100)),p_active:body.active!==false,
+    p_days:row.category==='premium'?Math.round(clampNum(body.days,1,3650,row?.meta?.days||30)):null
+  });
+  if(error){const msg=String(error.message||'Falha ao salvar produto Premium.');return res.status(/administrativ|permiss|negado/i.test(msg)?403:400).json({error:msg});}
+  const runtime=await refreshShopsRuntimeSnapshot(true);res.set('Cache-Control','no-store');res.json({ok:true,product_id:key,runtime,saved:data||null});
 }));
 
 app.get('/api/diagnostics', asyncRoute(async (req, res) => {
@@ -973,10 +1066,13 @@ app.post('/api/live/purchase', requireUser, asyncRoute(async (req,res)=>{
   const result=await withPurchaseLock(req.user.id,async()=>{
     const snapshot=await loadLiveOpsSnapshot(true);
     const row=liveCatalogRow(snapshot,catalogKey);
-    if(!row)throw Object.assign(new Error('Produto indisponível no catálogo online.'),{status:404});
+    if(!row||row.shop_visible===false)throw Object.assign(new Error('Produto indisponível na Loja.'),{status:404});
     const {data:saveRow,error:saveError}=await req.sb.from('game_saves').select('state').eq('user_id',req.user.id).maybeSingle();
     if(saveError)throw new Error(saveError.message);
     if(!saveRow?.state)throw Object.assign(new Error('Save online ainda não foi criado.'),{status:409});
+    const playerLevel=Math.max(1,Math.floor(Number(saveRow.state?.profile?.level)||1));
+    const minLevel=Math.max(1,Math.floor(Number(row.min_level)||1));
+    if(playerLevel<minLevel)throw Object.assign(new Error(`Requer nível ${minLevel}.`),{status:409});
     const state=structuredClone(saveRow.state);
     if(String(state.accountOwnerId||req.user.id)!==req.user.id)throw Object.assign(new Error('SAVE BLOQUEADO: proprietário inválido.'),{status:409});
     state.profile ||= {};
@@ -1214,7 +1310,7 @@ app.post('/api/player/location', requireUser, asyncRoute(async (req,res)=>{
   return res.json(data||{ok:true});
 }));
 
-app.get('/api/world/status', (req, res) => res.json({ ok: true, version: '18.1.7b', ...sharedUniverse.stats() }));
+app.get('/api/world/status', (req, res) => res.json({ ok: true, version: '18.1.8', ...sharedUniverse.stats() }));
 
 app.get('*', (req, res) => res.sendFile(path.join(__dirname, '../public/index.html')));
 
@@ -1284,8 +1380,12 @@ const npcRefreshTimer=setInterval(()=>{refreshNpcRuntimeSnapshot(true).catch(err
 npcRefreshTimer.unref?.();
 refreshNpcRuntimeSnapshot(true).then(cfg=>console.log(`[npc-runtime] v${cfg.version} cacheado em ${NPC_RUNTIME_FILE}`)).catch(err=>console.warn('[npc-runtime] bootstrap:',err.message));
 
+const shopsRefreshTimer=setInterval(()=>{refreshShopsRuntimeSnapshot(true).catch(err=>console.warn('[shops-runtime] refresh:',err.message));},SHOPS_RUNTIME_CACHE_MS);
+shopsRefreshTimer.unref?.();
+refreshShopsRuntimeSnapshot(true).then(cfg=>console.log(`[shops-runtime] v${cfg.version} cacheado em ${SHOPS_RUNTIME_FILE}`)).catch(err=>console.warn('[shops-runtime] bootstrap:',err.message));
+
 server.listen(port, () => {
-  console.log(`Stellar Legacy V18.1.7b :${port}`);
+  console.log(`Stellar Legacy V18.1.8 :${port}`);
   console.log('Supabase config:', configStatus());
   console.log('Shared Universe: ONLINE');
 });

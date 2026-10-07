@@ -64,4 +64,8 @@ O código mantém fallback local para continuidade do jogo se o runtime remoto e
 - recompensas Free/Premium por tier no Supabase
 - editor ADM do Passe
 
-Próxima etapa prevista: V18.1.7C — Lojas Comum + Premium Data Driven.
+Concluído — V18.1.7C: Lojas Comum + Premium Data Driven.
+
+Próxima etapa: validar o ciclo completo de Live Commerce/Seasons e escolher a próxima feature de gameplay.
+
+Concluído — V18.1.8: Network Optimization / redução agressiva de bandwidth no Shared Universe.

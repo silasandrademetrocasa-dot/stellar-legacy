@@ -6,7 +6,7 @@
 <meta content="width=device-width,initial-scale=1,user-scalable=no" name="viewport"/>
 <meta content="#030816" name="theme-color"/>
 <title>Stellar Legacy</title>
-<link href="/style.css?v=18.1.7b" rel="stylesheet"/>
+<link href="/style.css?v=18.1.8" rel="stylesheet"/>
 </head>
 <body>
 <div id="app">
@@ -568,7 +568,7 @@
     </div>
     <section class="admin-runtime-monitor-section">
       <div class="settings-title admin-runtime-monitor-head">
-        <div><b>CONFIGURAÇÃO AO VIVO</b><small>Central ADM Data Driven • Eventos + Passe de Temporada controlados pelo runtime.</small></div>
+        <div><b>CONFIGURAÇÃO AO VIVO</b><small>Central ADM Data Driven • Eventos, Passe e Lojas controlados pelo runtime.</small></div>
         <button class="small-btn gold" id="adminRuntimeMonitorRefresh" type="button">ATUALIZAR RUNTIME</button>
       </div>
       <div class="admin-runtime-tabs" id="adminRuntimeTabs">
@@ -579,6 +579,7 @@
         <button type="button" data-admin-runtime-tab="systems">SISTEMAS</button>
         <button type="button" data-admin-runtime-tab="events">EVENTOS</button>
         <button type="button" data-admin-runtime-tab="pass">PASSE</button>
+        <button type="button" data-admin-runtime-tab="shops">LOJAS</button>
       </div>
       <div id="adminRuntimeMonitorPanel">
         <div class="admin-runtime-monitor-grid" id="adminRuntimeMonitorGrid"><div class="empty-state">Aguardando status dos runtimes...</div></div>
@@ -643,6 +644,18 @@
         <div class="admin-pass-season" id="adminRuntimePassSeason"><div class="empty-state">Carregue a temporada do Passe.</div></div>
         <div class="admin-runtime-pass-grid" id="adminRuntimePassGrid"><div class="empty-state">Carregue os tiers do Passe.</div></div>
         <div class="admin-runtime-interface-message muted" id="adminRuntimePassMessage">Nenhuma alteração pendente.</div>
+      </div>
+      <div class="admin-runtime-shops-panel hidden" id="adminRuntimeShopsPanel">
+        <div class="admin-runtime-interface-toolbar">
+          <div><b>EDITOR DE LOJAS</b><small>V18.1.7C • Preços, itens, quantidade, nível, ordem e disponibilidade das lojas Comum e Premium.</small></div>
+          <button class="small-btn" id="adminRuntimeShopsReload" type="button">RECARREGAR</button>
+        </div>
+        <div class="admin-shops-subtabs" id="adminRuntimeShopsTabs">
+          <button class="active" type="button" data-admin-shops-view="common">LOJA COMUM</button>
+          <button type="button" data-admin-shops-view="premium">PREMIUM</button>
+        </div>
+        <div class="admin-runtime-shops-grid" id="adminRuntimeShopsGrid"><div class="empty-state">Carregue a configuração das lojas.</div></div>
+        <div class="admin-runtime-interface-message muted" id="adminRuntimeShopsMessage">Nenhuma alteração pendente.</div>
       </div>
     </section>
     <section class="admin-telemetry-section">
@@ -926,6 +939,6 @@
   </div>
 </div>
 </div>
-<script src="/game.js?v=18.1.7b" type="module"></script>
+<script src="/game.js?v=18.1.8" type="module"></script>
 </body>
 </html>

@@ -5,6 +5,16 @@ import { FACTIONS, MAPS, NPC_TYPES, RESOURCES } from '../public/data.js';
 const PORTAL_NEUTRAL_RADIUS = 180;
 const LIVE_OPS_REFRESH_MS = 15000;
 
+// V18.1.8 • NETWORK OPTIMIZATION
+// A simulação segue em 20 Hz. Somente a frequência/quantidade de dados enviados pela rede é reduzida.
+const NPC_BATCH_INTERVAL_MS = 250;       // 4 Hz para NPCs próximos; interpolação mantém fluidez visual.
+const NPC_FAR_REFRESH_MS = 2500;         // NPCs distantes recebem correção lenta para minimapa/consistência.
+const NPC_NEAR_RADIUS = 2200;
+const NPC_NEAR_RADIUS_SQ = NPC_NEAR_RADIUS * NPC_NEAR_RADIUS;
+const PLAYER_STATE_MIN_MS = 80;          // Protege o servidor contra cliente transmitindo estado em excesso.
+const EVENT_BROADCAST_INTERVAL_MS = 1000;
+const WARFRONT_BROADCAST_INTERVAL_MS = 1000;
+
 // ===================== V18.0 WARFRONT • SECTOR CONTROL =====================
 const WARFRONT_CAPTURE_RADIUS=360;
 const WARFRONT_CAPTURE_RATE=5.6; // ~18s solo para um ponto neutro.
@@ -184,6 +194,57 @@ class Room {
   publicNpc(e){
     const {damageContrib,ownerGroupMemberIds,ownerGroupPromise,_configScale,_configRewardMult,_configSpeedMult,_configColorOverride,_configSizeOverride,...rest}=e;
     return rest;
+  }
+
+  // Estado de rede compacto. Mantemos os dados completos no servidor, mas enviamos números quantizados.
+  npcNetFrame(e){
+    return {
+      id:e.id,
+      x:Math.round(Number(e.x)||0),
+      y:Math.round(Number(e.y)||0),
+      hp:Math.max(0,Math.round(Number(e.hp)||0)),
+      shield:Math.max(0,Math.round(Number(e.shield)||0)),
+      angle:Math.round((Number(e.angle)||0)*100)/100,
+      bossPhase:Number(e.bossPhase)||0
+    };
+  }
+
+  // Envia somente campos que realmente mudaram desde o último pacote daquele jogador.
+  npcNetPatch(e,prev){
+    const cur=this.npcNetFrame(e);
+    if(!prev)return {cur,patch:cur};
+    const patch={id:cur.id};
+    if(cur.x!==prev.x)patch.x=cur.x;
+    if(cur.y!==prev.y)patch.y=cur.y;
+    if(cur.hp!==prev.hp)patch.hp=cur.hp;
+    if(cur.shield!==prev.shield)patch.shield=cur.shield;
+    if(cur.angle!==prev.angle)patch.angle=cur.angle;
+    if(cur.bossPhase!==prev.bossPhase)patch.bossPhase=cur.bossPhase;
+    return {cur,patch:Object.keys(patch).length>1?patch:null};
+  }
+
+  // Interest management: perto = 4 Hz; longe = correção de 2,5 s. Cada cliente mantém seu delta próprio.
+  sendNpcBatches(now){
+    if(!this.clients.size)return;
+    for(const c of this.clients){
+      const p=c.player;if(!p)continue;
+      c.npcNetState ||= new Map();
+      const farRefresh=now-(c.lastNpcFarRefreshAt||0)>=NPC_FAR_REFRESH_MS;
+      const entities=[];
+      for(const e of this.npcs.values()){
+        const dx=e.x-p.x,dy=e.y-p.y;
+        const near=dx*dx+dy*dy<=NPC_NEAR_RADIUS_SQ;
+        if(!near&&!farRefresh)continue;
+        const {cur,patch}=this.npcNetPatch(e,c.npcNetState.get(e.id));
+        c.npcNetState.set(e.id,cur);
+        if(patch)entities.push(patch);
+      }
+      if(farRefresh){
+        c.lastNpcFarRefreshAt=now;
+        for(const id of c.npcNetState.keys())if(!this.npcs.has(id))c.npcNetState.delete(id);
+      }
+      if(entities.length)safeJsonSend(c,{type:'npc_batch',entities});
+    }
   }
 
   makeOre(type=null,opts={}){
@@ -423,7 +484,7 @@ class Room {
       });
     }
     this.warfrontFullController=currentFull;
-    if(this.clients.size&&now-this.lastWarfrontBroadcastAt>=500){this.lastWarfrontBroadcastAt=now;this.broadcast({type:'warfront_control',warfront:this.warfrontPayload(),serverTime:now});}
+    if(this.clients.size&&now-this.lastWarfrontBroadcastAt>=WARFRONT_BROADCAST_INTERVAL_MS){this.lastWarfrontBroadcastAt=now;this.broadcast({type:'warfront_control',warfront:this.warfrontPayload(),serverTime:now});}
   }
 
   eventPayload(){return this.event?{...this.event,convoy:this.convoy?{...this.convoy}:null}:null;}
@@ -435,19 +496,22 @@ class Room {
   }
   snapshot(viewerUserId=null){return {type:'world_snapshot',roomKey:this.key,mapId:this.mapId,territoryFaction:this.territoryFaction,npcs:[...this.npcs.values()].map(e=>this.publicNpc(e)),ores:[...this.ores.values()],players:[...this.players.values()].filter(p=>p.userId!==viewerUserId).map(p=>this.publicPlayer(p)),event:this.eventPayload(),warfront:this.warfrontPayload(),serverTime:nowMs()};}
   broadcast(payload,exclude=null){for(const c of this.clients)if(c!==exclude)safeJsonSend(c,payload);}
-  broadcastEvent(force=false){const now=nowMs();if(!force&&now-this.lastEventBroadcastAt<500)return;this.lastEventBroadcastAt=now;this.broadcast({type:'event_update',event:this.eventPayload(),serverTime:now});}
+  broadcastEvent(force=false){const now=nowMs();if(!force&&now-this.lastEventBroadcastAt<EVENT_BROADCAST_INTERVAL_MS)return;this.lastEventBroadcastAt=now;this.broadcast({type:'event_update',event:this.eventPayload(),serverTime:now});}
 
   addClient(ws,player){
     this.clients.add(ws);this.players.set(player.userId,player);ws.room=this;ws.player=player;
     safeJsonSend(ws,this.snapshot(player.userId));
+    // Snapshot inicial já contém todos os NPCs: ele vira a base do delta para não reenviar tudo em seguida.
+    ws.npcNetState=new Map([...this.npcs.values()].map(e=>[e.id,this.npcNetFrame(e)]));
+    ws.lastNpcFarRefreshAt=nowMs();
     this.broadcast({type:'world_player_spawn',entity:this.publicPlayer(player)},ws);
   }
   removeClient(ws){
-    if(!this.clients.has(ws))return;this.clients.delete(ws);if(ws.player)this.players.delete(ws.player.userId);if(ws.player)this.broadcast({type:'world_player_leave',userId:ws.player.userId});ws.room=null;ws.player=null;
+    if(!this.clients.has(ws))return;this.clients.delete(ws);if(ws.player)this.players.delete(ws.player.userId);if(ws.player)this.broadcast({type:'world_player_leave',userId:ws.player.userId});ws.room=null;ws.player=null;ws.npcNetState=null;ws.lastNpcFarRefreshAt=0;
   }
   updatePlayer(ws,msg){
     const p=ws.player;if(!p)return;
-    const now=nowMs();if(now-(ws.lastPlayerStateAt||0)<35)return;ws.lastPlayerStateAt=now;
+    const now=nowMs();if(now-(ws.lastPlayerStateAt||0)<PLAYER_STATE_MIN_MS)return;ws.lastPlayerStateAt=now;
     p.x=clamp(msg.x,0,this.map.world.w);p.y=clamp(msg.y,0,this.map.world.h);p.angle=Number(msg.angle)||0;p.hp=Math.max(0,Number(msg.hp)||0);p.shield=Math.max(0,Number(msg.shield)||0);p.maxHp=Math.max(1,Number(msg.maxHp)||1);p.maxShield=Math.max(0,Number(msg.maxShield)||0);p.faction=String(msg.faction||p.faction||'earth');p.shipId=shortText(msg.shipId||p.shipId||'phoenix',40);p.shipDesignId=msg.shipDesignId?shortText(msg.shipDesignId,64):null;p.level=Math.max(1,Number(msg.level)||1);p.pilotTitle=shortText(msg.pilotTitle||p.pilotTitle||'Piloto Estelar',64);
     p.laserFiring=!!msg.laserFiring;p.laserColor=safeColor(msg.laserColor,p.laserColor||'#76d9ff');p.laserAmmoId=shortText(msg.laserAmmoId||p.laserAmmoId||'lcb10',24);p.laserAmmoName=shortText(msg.laserAmmoName||p.laserAmmoName||'PLS-1',20);p.targetId=msg.targetId?shortText(msg.targetId,96):null;p.targetIsPlayer=!!msg.targetIsPlayer;
     const pet=msg.pet&&typeof msg.pet==='object'?msg.pet:null;
@@ -636,13 +700,21 @@ class Room {
         }
       }
     }
-    if(now-this.lastBroadcastAt>=100){this.lastBroadcastAt=now;this.broadcast({type:'npc_batch',entities:[...this.npcs.values()].map(e=>({id:e.id,x:e.x,y:e.y,hp:e.hp,shield:e.shield,angle:e.angle,bossPhase:e.bossPhase}))});}
+    if(now-this.lastBroadcastAt>=NPC_BATCH_INTERVAL_MS){this.lastBroadcastAt=now;this.sendNpcBatches(now);}
     this.broadcastEvent(false);
   }
 }
 
 export function attachSharedUniverse(server,{authenticate,loadLiveOps,loadBattleGroup,loadNpcConfig,loadWorldConfig}){
-  const wss=new WebSocketServer({server,path:'/ws',perMessageDeflate:false});const rooms=new Map();
+  const wss=new WebSocketServer({
+    server,
+    path:'/ws',
+    perMessageDeflate:{
+      threshold:512,
+      concurrencyLimit:5,
+      zlibDeflateOptions:{level:3}
+    }
+  });const rooms=new Map();
   const world={
     liveOps:{events:[],catalog:[],server_time:0},
     lastLiveOpsAt:0,

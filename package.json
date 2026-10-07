@@ -1,6 +1,6 @@
 {
   "name": "stellar-legacy",
-  "version": "18.1.7",
+  "version": "18.1.8",
   "type": "module",
   "scripts": {
     "start": "node server/index.js",
@@ -9,10 +9,11 @@
   "dependencies": {
     "express": "^4.21.2",
     "@supabase/supabase-js": "^2.57.4",
-    "ws": "^8.18.0"
+    "ws": "^8.18.0",
+    "compression": "^1.7.5"
   },
   "engines": {
     "node": ">=18"
   },
-  "release": "battle-pass-data-driven-v18-1-7b"
+  "release": "network-optimization-v18-1-8"
 }

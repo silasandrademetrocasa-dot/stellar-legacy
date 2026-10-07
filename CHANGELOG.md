@@ -1,3 +1,26 @@
+# V18.1.8 — NETWORK OPTIMIZATION • BANDWIDTH REDUCTION
+
+- Shared Universe mantém simulação autoritativa em 20 Hz, mas NPCs próximos passam a ser transmitidos em 4 Hz com interpolação no cliente.
+- NPCs distantes recebem atualização lenta (2,5 s) e pacotes diferenciais enviam somente campos alterados.
+- Cada jogador recebe atualização frequente apenas dos NPCs dentro de uma área de interesse de 2.200 unidades.
+- WebSocket agora negocia `permessage-deflate` para compactar lotes maiores de realtime.
+- Sincronização de jogador passa a ser adaptativa: combate 10 Hz, movimento ~6,7 Hz e ocioso ~0,67 Hz.
+- Coordenadas/ângulos de rede são quantizados para reduzir JSON sem alterar a simulação interna.
+- Eventos e Warfront tiveram broadcasts periódicos reduzidos; mudanças importantes continuam usando envio forçado.
+- Respostas HTTP textuais usam gzip/deflate via `compression`.
+- Assets gráficos ganham cache de 24 horas com revisão por versão; F5 e testes repetidos deixam de baixar as mesmas imagens.
+- Preload de qualidade ALTA deixa de baixar todos os ícones de recursos antes de serem necessários.
+- Snapshot inicial completo é preservado para garantir consistência ao entrar no mapa.
+
+# V18.1.7C — LOJAS COMUM + PREMIUM DATA DRIVEN • STAGE 3
+
+- Loja Comum passa a ser montada pelos produtos existentes no catálogo SQL marcados como ativos/visíveis.
+- ADM controla preço, moeda, quantidade entregue, nível mínimo, ordem, aba, nome/descrição e disponibilidade.
+- Loja Premium migra planos 7/30/90/180 dias para `premium_catalog_v12`; dias e preços deixam de ficar hardcoded no navegador.
+- `shops.runtime.json` materializado pelo Render com fallback em disco.
+- Compra comum valida visibilidade e nível mínimo no servidor. Compra Premium valida nível e duração configurada no banco.
+- Passe Premium continua com preço vinculado à temporada da aba PASSE para impedir preço duplicado.
+
 # V18.1.7B — PASSE DE TEMPORADA DATA DRIVEN • STAGE 2
 
 - Temporada, início/fim, quantidade de tiers, pontos por tier, pontos por missão diária e preço Premium agora vêm do Supabase.

@@ -127,3 +127,7 @@ O servidor agora respeita `schedule_mode`: `interval`, `weekly` ou `once`. A age
 Runtime: `pass.runtime.json`. Fonte: `game_battle_pass_seasons_v1817b` + `game_battle_pass_tiers_v1817b`.
 
 Controla temporada ativa, datas, tiers, pontos, preço Premium e recompensas Free/Premium. A Loja Premium resolve o Passe pela temporada ativa, evitando preço ou entitlement divergente do calendário.
+
+
+## V18.1.7C — Lojas Comum + Premium
+`get_shops_runtime_config_v1817c()` alimenta `shops.runtime.json`. A Loja Comum usa `live_shop_prices_v16` como catálogo de itens existentes e a Premium usa `premium_catalog_v12`. O ADM edita preço, quantidade, nível, ordem e disponibilidade sem redeploy; o backend continua sendo a autoridade da compra.

@@ -913,3 +913,15 @@ export async function adminUpdateBattlePassSeasonOnline(seasonKey,payload={}){
 export async function adminUpdateBattlePassTierOnline(seasonKey,tierNo,payload={}){
   return serverFetch(`/api/admin/runtime/pass/seasons/${encodeURIComponent(String(seasonKey||''))}/tiers/${encodeURIComponent(String(tierNo||''))}`,{method:'POST',body:JSON.stringify(payload||{})},true);
 }
+
+
+// V18.1.7C • Lojas Comum + Premium Data Driven
+export async function loadShopsRuntimeConfigOnline(refresh=false){
+  return serverFetch(`/api/runtime/shops${refresh?'?refresh=1':''}`,{},true);
+}
+export async function adminUpdateCommonShopItemOnline(catalogKey,payload={}){
+  return serverFetch(`/api/admin/runtime/shops/common/${encodeURIComponent(String(catalogKey||''))}`,{method:'POST',body:JSON.stringify(payload||{})},true);
+}
+export async function adminUpdatePremiumShopItemOnline(productId,payload={}){
+  return serverFetch(`/api/admin/runtime/shops/premium/${encodeURIComponent(String(productId||''))}`,{method:'POST',body:JSON.stringify(payload||{})},true);
+}

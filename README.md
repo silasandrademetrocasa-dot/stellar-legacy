@@ -257,3 +257,7 @@ Calendário Live Ops editável no ADM: dias da semana, horário, duração, repe
 
 ### V18.1.7B
 Passe de Temporada Data Driven: calendário, preço, progressão e recompensas por tier editáveis pela Central ADM, usando snapshot temporário do Render.
+
+
+### V18.1.7C
+Lojas Comum + Premium Data Driven. O catálogo de itens existentes pode ser organizado pelo ADM sem novo deploy: preço, moeda, quantidade, nível, ordem, aba e disponibilidade. Os planos Premium 7/30/90/180 dias também passam a vir do Supabase.
