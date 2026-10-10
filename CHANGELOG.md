@@ -1,3 +1,11 @@
+# V18.1.9.1 — HOTFIX LOJA / CONFIRMAÇÃO DE COMPRA
+
+- Corrigido clique de **COMPRAR** na aba LASERS da Loja Comum: botão deixava `onBuy` sem ação, portanto não abria a confirmação.
+- Todas as categorias de equipamentos (`laser`, `generator`, `extra`) usam `buyItem()` para abrir a confirmação, preservando a validação autoritativa no servidor.
+- Drones continuam com o caminho próprio (`buyDrone()`).
+- Cache-busting de scripts/estilos em `18.1.9.1` para navegadores não reaproveitarem a versão defeituosa.
+- Sem alterações de SQL, Supabase, preços, carteiras, servidor de compras, NPCs, gráficos ou salvamentos.
+
 # V18.1.9 — ULTRA PERFORMANCE • MAPAS MAIS RAROS • FX BAIXA
 
 - NPCs comuns e bosses normais ~30% mais raros em 7 mapas, sem mudar a taxa de respawn, missão, XP, drop ou eventos.

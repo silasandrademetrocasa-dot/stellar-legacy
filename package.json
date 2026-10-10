@@ -1,6 +1,6 @@
 {
   "name": "stellar-legacy",
-  "version": "18.1.9",
+  "version": "18.1.9.1",
   "type": "module",
   "scripts": {
     "start": "node server/index.js",
@@ -15,5 +15,5 @@
   "engines": {
     "node": ">=18"
   },
-  "release": "ultra-performance-v18-1-9"
+  "release": "shop-confirm-hotfix-v18-1-9-1"
 }
