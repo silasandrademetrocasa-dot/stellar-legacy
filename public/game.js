@@ -1,7 +1,7 @@
-import { FACTIONS, SHIPS, ITEMS, LASER_AMMO, ROCKETS, NPC_TYPES, MAPS, RESOURCES } from './data.js?v=18.1.8';
-import { GAME_ASSETS } from './assets/v17/manifest.js?v=18.1.8';
-import { signUp, signIn, requestPasswordReset, restorePasswordRecoveryFromUrl, restoreSession, signOutLocal, checkGameSession, endGameSession, getUser, getSessionCredentials, loadCloudSave, saveCloudSave, updateCallsign, updatePassword, loadRankings, loadAuctionBids, saveAuctionBidOnline, markAuctionBidStatusOnline, loadAuctionMarket, upsertPlayerPresenceOnline, loadMapPresenceOnline, savePlayerLocationCheckpointOnline, loadPlayerLocationCheckpointOnline, removePlayerPresenceOnline, queuePvpAttackOnline, consumePvpDamageEventsOnline, syncArenaProfileOnline, loadArenaState, loadArenaDailyRewardStatus, claimArenaDailyReward, loadArenaOpponents, loadArenaHistory, arenaAttackOnline, listClansOnline, loadMyClanOnline, createClanOnline, joinClanOnline, leaveClanOnline, transferClanCreditsOnline, claimClanCreditGrantsOnline, recordClanAlienKillOnline, getPremiumShopOnline, testPurchasePremiumOnline, loadWarfrontStateOnline, hitWorldBossOnline, claimWorldBossRewardOnline, declareClanWarOnline, recordClanWarScoreOnline, loadLiveOpsOnline, adminUpdateLiveEventScheduleOnline, purchaseLiveCatalogOnline, economyActionOnline, getChatHistoryOnline, sendChatMessageOnline, getMyDesignersOnline, setDesignLoadoutOnline, claimGateDroneDesignOnline, claimEventDesignerOnline, getAdminStatus, adminSearchAccounts, adminRecentActions, adminBanAccount, adminUnbanAccount, adminResetAccount, adminDeleteAccount, pushTelemetryBatch, adminTelemetryOverview, adminPlayerTelemetry, getBattleGroupOnline, createBattleGroupOnline, inviteBattleGroupOnline, searchBattleGroupPlayersOnline, inviteBattleGroupUserOnline, respondBattleGroupInviteOnline, leaveBattleGroupOnline, kickBattleGroupMemberOnline, setBattleGroupRallyOnline, loadRuntimeConfigOnline, loadNpcRuntimeConfigOnline, loadWorldRuntimeConfigOnline, loadSystemsRuntimeConfigOnline, loadAdminRuntimeMonitorOnline, adminUpdateRuntimeModuleOnline, adminUpdateNpcRuntimeOnline, adminUpdateNpcSpawnRuntimeOnline, adminUpdateWorldMapOnline, adminUpdateWorldResourceOnline, adminUpdateWorldSectorOnline, adminUpdateWorldPortalOnline, adminUpdateWorldResourcePoolOnline, adminUpdateMissionCategoryOnline, adminUpdateEconomyServiceOnline, adminUpdateCraftingRecipeOnline, loadBattlePassRuntimeConfigOnline, adminUpdateBattlePassSeasonOnline, adminUpdateBattlePassTierOnline, loadShopsRuntimeConfigOnline, adminUpdateCommonShopItemOnline, adminUpdatePremiumShopItemOnline } from './api.js?v=18.1.8';
-import { SharedUniverseClient } from './world.js?v=18.1.8';
+import { FACTIONS, SHIPS, ITEMS, LASER_AMMO, ROCKETS, NPC_TYPES, MAPS, RESOURCES } from './data.js?v=18.1.9';
+import { GAME_ASSETS } from './assets/v17/manifest.js?v=18.1.9';
+import { signUp, signIn, requestPasswordReset, restorePasswordRecoveryFromUrl, restoreSession, signOutLocal, checkGameSession, endGameSession, getUser, getSessionCredentials, loadCloudSave, saveCloudSave, updateCallsign, updatePassword, loadRankings, loadAuctionBids, saveAuctionBidOnline, markAuctionBidStatusOnline, loadAuctionMarket, upsertPlayerPresenceOnline, loadMapPresenceOnline, savePlayerLocationCheckpointOnline, loadPlayerLocationCheckpointOnline, removePlayerPresenceOnline, queuePvpAttackOnline, consumePvpDamageEventsOnline, syncArenaProfileOnline, loadArenaState, loadArenaDailyRewardStatus, claimArenaDailyReward, loadArenaOpponents, loadArenaHistory, arenaAttackOnline, listClansOnline, loadMyClanOnline, createClanOnline, joinClanOnline, leaveClanOnline, transferClanCreditsOnline, claimClanCreditGrantsOnline, recordClanAlienKillOnline, getPremiumShopOnline, testPurchasePremiumOnline, loadWarfrontStateOnline, hitWorldBossOnline, claimWorldBossRewardOnline, declareClanWarOnline, recordClanWarScoreOnline, loadLiveOpsOnline, adminUpdateLiveEventScheduleOnline, purchaseLiveCatalogOnline, economyActionOnline, getChatHistoryOnline, sendChatMessageOnline, getMyDesignersOnline, setDesignLoadoutOnline, claimGateDroneDesignOnline, claimEventDesignerOnline, getAdminStatus, adminSearchAccounts, adminRecentActions, adminBanAccount, adminUnbanAccount, adminResetAccount, adminDeleteAccount, pushTelemetryBatch, adminTelemetryOverview, adminPlayerTelemetry, getBattleGroupOnline, createBattleGroupOnline, inviteBattleGroupOnline, searchBattleGroupPlayersOnline, inviteBattleGroupUserOnline, respondBattleGroupInviteOnline, leaveBattleGroupOnline, kickBattleGroupMemberOnline, setBattleGroupRallyOnline, loadRuntimeConfigOnline, loadNpcRuntimeConfigOnline, loadWorldRuntimeConfigOnline, loadSystemsRuntimeConfigOnline, loadAdminRuntimeMonitorOnline, adminUpdateRuntimeModuleOnline, adminUpdateNpcRuntimeOnline, adminUpdateNpcSpawnRuntimeOnline, adminUpdateWorldMapOnline, adminUpdateWorldResourceOnline, adminUpdateWorldSectorOnline, adminUpdateWorldPortalOnline, adminUpdateWorldResourcePoolOnline, adminUpdateMissionCategoryOnline, adminUpdateEconomyServiceOnline, adminUpdateCraftingRecipeOnline, loadBattlePassRuntimeConfigOnline, adminUpdateBattlePassSeasonOnline, adminUpdateBattlePassTierOnline, loadShopsRuntimeConfigOnline, adminUpdateCommonShopItemOnline, adminUpdatePremiumShopItemOnline } from './api.js?v=18.1.9';
+import { SharedUniverseClient } from './world.js?v=18.1.9';
 
 const canvas = document.querySelector('#game');
 const ctx = canvas.getContext('2d');
@@ -3881,16 +3881,25 @@ function renderFactionChoice(){
 
 function screenPos(x,y){return{x:x-state.camera.x+W/2,y:y-state.camera.y+H/2};}
 function spawnParticle(x,y,text,color){const cap=qualityProfile().particles;if(cap<=0)return;if(state.particles.length>=cap)state.particles.splice(0,state.particles.length-cap+1);state.particles.push({x,y,text,color,life:1,vy:rand(20,32)});}
+function capVisualFx(){
+  const mode=resolvedQualityMode(),cap=mode==='low'?24:Infinity;
+  if(state.fx.length>cap)state.fx.splice(0,state.fx.length-cap);
+}
 function spawnImpactFx(x,y,color='#7edcff',size=24,type='impact'){
-  state.fx.push({x,y,color,size,type,life:1,maxLife:1,rot:rand(0,TWO_PI)});
+  const low=resolvedQualityMode()==='low';
+  state.fx.push({x,y,color,size:low?size*.65:size,type,life:low?.50:1,maxLife:low?.50:1,rot:rand(0,TWO_PI)});
+  capVisualFx();
 }
 function spawnExplosionFx(x,y,color='#ff754f',boss=false){
-  state.fx.push({x,y,color,size:boss?110:64,type:'explosion',life:1.15,maxLife:1.15,rot:rand(0,TWO_PI)});
-  const sparks=boss?18:10;
+  const low=resolvedQualityMode()==='low';
+  const life=low?.52:1.15;
+  state.fx.push({x,y,color,size:low?(boss?73:43):(boss?110:64),type:'explosion',life,maxLife:life,rot:rand(0,TWO_PI)});
+  const sparks=low?(boss?4:2):(boss?18:10);
   for(let i=0;i<sparks;i++){
-    const a=rand(0,TWO_PI),speed=rand(boss?85:55,boss?190:125);
-    state.fx.push({x,y,vx:Math.cos(a)*speed,vy:Math.sin(a)*speed,color:i%3===0?'#fff2b0':color,size:rand(2,5),type:'spark',life:rand(.45,.9),maxLife:.9,rot:0});
+    const a=rand(0,TWO_PI),speed=rand(boss?85:55,boss?190:125),sparkLife=low?rand(.2,.4):rand(.45,.9);
+    state.fx.push({x,y,vx:Math.cos(a)*speed,vy:Math.sin(a)*speed,color:i%3===0?'#fff2b0':color,size:rand(2,low?3.2:5),type:'spark',life:sparkLife,maxLife:sparkLife,rot:0});
   }
+  capVisualFx();
 }
 function seededUnit(key){let h=2166136261;for(let i=0;i<key.length;i++){h^=key.charCodeAt(i);h=Math.imul(h,16777619);}return((h>>>0)%100000)/100000;}
 function createLandmarks(){
@@ -4869,11 +4878,20 @@ function drawRocketFx(){
 function drawFx(){
   for(const f of state.fx){if(!onScreenWorld(f.x,f.y,180))continue;const p=screenPos(f.x,f.y),a=Math.max(0,f.life/(f.maxLife||1)),q=1-a;ctx.save();ctx.globalAlpha=Math.min(1,a*1.4);ctx.translate(p.x,p.y);ctx.rotate(f.rot||0);
     if(f.type==='explosion'){
+      if(resolvedQualityMode()==='low'){
+        // Sem gradientes e sombras na qualidade BAIXA: um brilho e um anel simples.
+        const r=f.size*(.60+q*.45);
+        ctx.fillStyle=f.color;ctx.globalAlpha=Math.min(.55,a*.62);
+        ctx.beginPath();ctx.arc(0,0,r*.66,0,TWO_PI);ctx.fill();
+        ctx.strokeStyle='#ffd3a3';ctx.lineWidth=1.4;ctx.globalAlpha=a*.7;
+        ctx.beginPath();ctx.arc(0,0,r,0,TWO_PI);ctx.stroke();
+        ctx.restore();continue;
+      }
       const r=f.size*(.72+q*.48),g=ctx.createRadialGradient(0,0,0,0,0,r);g.addColorStop(0,'rgba(255,255,255,.98)');g.addColorStop(.14,'rgba(255,238,188,.95)');g.addColorStop(.34,f.color);g.addColorStop(.68,'rgba(255,102,48,.28)');g.addColorStop(1,'rgba(255,72,38,0)');ctx.fillStyle=g;ctx.globalCompositeOperation='lighter';ctx.beginPath();ctx.arc(0,0,r,0,TWO_PI);ctx.fill();
       ctx.strokeStyle=`rgba(255,230,175,${a*.8})`;ctx.lineWidth=2.2;ctx.shadowColor=f.color;ctx.shadowBlur=12;ctx.beginPath();ctx.arc(0,0,f.size*(.42+q*.78),0,TWO_PI);ctx.stroke();ctx.shadowBlur=0;
       ctx.strokeStyle=`rgba(255,140,90,${a*.42})`;ctx.lineWidth=1;ctx.beginPath();ctx.arc(0,0,f.size*(.62+q*1.08),0,TWO_PI);ctx.stroke();
     }else if(f.type==='spark'){
-      ctx.fillStyle=f.color;ctx.shadowColor=f.color;ctx.shadowBlur=8;ctx.beginPath();ctx.arc(0,0,f.size,0,TWO_PI);ctx.fill();
+      ctx.fillStyle=f.color;ctx.shadowColor=f.color;ctx.shadowBlur=resolvedQualityMode()==='low'?0:8;ctx.beginPath();ctx.arc(0,0,f.size,0,TWO_PI);ctx.fill();
     }else if(f.type==='shield'||f.type==='shieldcharge'){
       const r=f.size*(.76+q*.48);ctx.globalCompositeOperation='lighter';ctx.strokeStyle=f.color;ctx.shadowColor=f.color;ctx.shadowBlur=12;ctx.lineWidth=f.type==='shieldcharge'?2.8:2.2;ctx.beginPath();ctx.ellipse(0,0,r,r*.72,0,0,TWO_PI);ctx.stroke();
       ctx.globalAlpha=a*.52;ctx.setLineDash([7,5]);ctx.rotate(q*.7);ctx.beginPath();ctx.arc(0,0,r*.84,-.4,2.2);ctx.stroke();ctx.setLineDash([]);

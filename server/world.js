@@ -7,7 +7,11 @@ const LIVE_OPS_REFRESH_MS = 15000;
 
 // V18.1.8 • NETWORK OPTIMIZATION
 // A simulação segue em 20 Hz. Somente a frequência/quantidade de dados enviados pela rede é reduzida.
-const NPC_BATCH_INTERVAL_MS = 250;       // 4 Hz para NPCs próximos; interpolação mantém fluidez visual.
+const NPC_BATCH_INTERVAL_MS = 250;       // Combate/próximos: 4 Hz; interpolação no cliente.
+const NPC_MID_REFRESH_MS = 500;         // NPCs a distância intermediária: até 2 Hz.
+const NPC_CLOSE_RADIUS_SQ = 1250 * 1250;
+const NPC_SOCKET_BACKPRESSURE_BYTES = 256 * 1024; // Descarta apenas frames de movimento sob rede congestionada.
+const IDLE_ROOM_TTL_MS = 2 * 60 * 1000; // Desmontar salas sem jogadores após 2 minutos.
 const NPC_FAR_REFRESH_MS = 2500;         // NPCs distantes recebem correção lenta para minimapa/consistência.
 const NPC_NEAR_RADIUS = 2200;
 const NPC_NEAR_RADIUS_SQ = NPC_NEAR_RADIUS * NPC_NEAR_RADIUS;
@@ -228,17 +232,22 @@ class Room {
     if(!this.clients.size)return;
     for(const c of this.clients){
       const p=c.player;if(!p)continue;
+      // Backpressure: mensagens críticas seguem intactas, apenas este lote de movimento aguarda a rede.
+      // Não alteramos npcNetState quando ignoramos o lote: o próximo envia o delta verdadeiro.
+      if(c.bufferedAmount>NPC_SOCKET_BACKPRESSURE_BYTES)continue;
       c.npcNetState ||= new Map();
       const farRefresh=now-(c.lastNpcFarRefreshAt||0)>=NPC_FAR_REFRESH_MS;
+      const midRefresh=now-(c.lastNpcMidRefreshAt||0)>=NPC_MID_REFRESH_MS;
       const entities=[];
       for(const e of this.npcs.values()){
-        const dx=e.x-p.x,dy=e.y-p.y;
-        const near=dx*dx+dy*dy<=NPC_NEAR_RADIUS_SQ;
-        if(!near&&!farRefresh)continue;
+        const dx=e.x-p.x,dy=e.y-p.y,distSq=dx*dx+dy*dy;
+        if(distSq>NPC_NEAR_RADIUS_SQ){if(!farRefresh)continue;}
+        else if(distSq>NPC_CLOSE_RADIUS_SQ&&!midRefresh)continue;
         const {cur,patch}=this.npcNetPatch(e,c.npcNetState.get(e.id));
         c.npcNetState.set(e.id,cur);
         if(patch)entities.push(patch);
       }
+      if(midRefresh)c.lastNpcMidRefreshAt=now;
       if(farRefresh){
         c.lastNpcFarRefreshAt=now;
         for(const id of c.npcNetState.keys())if(!this.npcs.has(id))c.npcNetState.delete(id);
@@ -291,11 +300,25 @@ class Room {
       e.name=e._configColorOverride?e.name:base.name;e.color=e._configColorOverride||base.color;e.size=e._configSizeOverride||base.size;e.resources={...(base.resources||{})};
       this.broadcast({type:'npc_patch',entity:{id:e.id,name:e.name,hp:e.hp,maxHp:e.maxHp,shield:e.shield,maxShield:e.maxShield,credits:e.credits,uridium:e.uridium,xp:e.xp,speed:e.speed,damage:e.damage,color:e.color,size:e.size,resources:e.resources}});
     }
-    // Contagem menor passa a valer naturalmente nas próximas mortes; contagem maior entra agora.
-    // Limpamos apenas respawns normais pendentes para não ressuscitar uma configuração antiga.
+    // Ajuste de população em tempo real: menos NPCs sem despawnar alvos já reivindicados.
+    // Bosses/NPCs de evento não pertencem à densidade normal e não são afetados.
     this.respawns=this.respawns.filter(r=>r.kind!=='npc');
-    for(const group of this.world.npcSpawnGroups(this.mapId)){
-      const target=Math.max(0,Math.round(Number(group.count)||0)),current=this.nonEventNpcCount(group.type);
+    const groups=this.world.npcSpawnGroups(this.mapId);
+    const desired=new Map(groups.map(g=>[String(g.type),Math.max(0,Math.round(Number(g.count)||0))]));
+    const types=new Set([...desired.keys(),...[...this.npcs.values()].filter(e=>!e.eventNpc).map(e=>String(e.type))]);
+    for(const type of types){
+      const current=[...this.npcs.values()].filter(e=>!e.eventNpc&&String(e.type)===type&&e.hp>0);
+      let excess=current.length-(desired.get(type)||0);
+      for(const e of current.reverse()){
+        if(excess<=0)break;
+        if(e.ownerUserId||nowMs()-Number(e.lastDamageAt||0)<15000)continue;
+        this.npcs.delete(e.id);
+        this.broadcast({type:'npc_remove',entityId:e.id,reason:'runtime_density'});
+        excess--;
+      }
+    }
+    for(const group of groups){
+      const target=desired.get(String(group.type))||0,current=this.nonEventNpcCount(group.type);
       for(let i=current;i<target;i++){const e=this.makeNpc(group.type);if(e){this.npcs.set(e.id,e);this.broadcast({type:'npc_spawn',entity:this.publicNpc(e)});}}
     }
   }
@@ -495,19 +518,26 @@ class Room {
       pet:p.pet?{...p.pet}:null};
   }
   snapshot(viewerUserId=null){return {type:'world_snapshot',roomKey:this.key,mapId:this.mapId,territoryFaction:this.territoryFaction,npcs:[...this.npcs.values()].map(e=>this.publicNpc(e)),ores:[...this.ores.values()],players:[...this.players.values()].filter(p=>p.userId!==viewerUserId).map(p=>this.publicPlayer(p)),event:this.eventPayload(),warfront:this.warfrontPayload(),serverTime:nowMs()};}
-  broadcast(payload,exclude=null){for(const c of this.clients)if(c!==exclude)safeJsonSend(c,payload);}
+  broadcast(payload,exclude=null){
+    if(!this.clients.size)return;
+    const wire=JSON.stringify(payload); // Serializar apenas uma vez por sala.
+    for(const c of this.clients){if(c===exclude||c.readyState!==WebSocket.OPEN)continue;try{c.send(wire);}catch{}}
+  }
   broadcastEvent(force=false){const now=nowMs();if(!force&&now-this.lastEventBroadcastAt<EVENT_BROADCAST_INTERVAL_MS)return;this.lastEventBroadcastAt=now;this.broadcast({type:'event_update',event:this.eventPayload(),serverTime:now});}
 
   addClient(ws,player){
+    // Sala pode ter ficado em repouso: atualizar evento antes do snapshot de quem retornou.
+    this.ensureEvent(false);
     this.clients.add(ws);this.players.set(player.userId,player);ws.room=this;ws.player=player;
     safeJsonSend(ws,this.snapshot(player.userId));
     // Snapshot inicial já contém todos os NPCs: ele vira a base do delta para não reenviar tudo em seguida.
     ws.npcNetState=new Map([...this.npcs.values()].map(e=>[e.id,this.npcNetFrame(e)]));
     ws.lastNpcFarRefreshAt=nowMs();
+    ws.lastNpcMidRefreshAt=nowMs();
     this.broadcast({type:'world_player_spawn',entity:this.publicPlayer(player)},ws);
   }
   removeClient(ws){
-    if(!this.clients.has(ws))return;this.clients.delete(ws);if(ws.player)this.players.delete(ws.player.userId);if(ws.player)this.broadcast({type:'world_player_leave',userId:ws.player.userId});ws.room=null;ws.player=null;ws.npcNetState=null;ws.lastNpcFarRefreshAt=0;
+    if(!this.clients.has(ws))return;this.clients.delete(ws);if(ws.player)this.players.delete(ws.player.userId);if(ws.player)this.broadcast({type:'world_player_leave',userId:ws.player.userId});ws.room=null;ws.player=null;ws.npcNetState=null;ws.lastNpcFarRefreshAt=0;ws.lastNpcMidRefreshAt=0;
   }
   updatePlayer(ws,msg){
     const p=ws.player;if(!p)return;
@@ -846,7 +876,7 @@ export function attachSharedUniverse(server,{authenticate,loadLiveOps,loadBattle
   world.refreshWorldConfig(true).catch(()=>{});
   world.refreshNpcConfig(true).catch(()=>{});
   world.refreshLiveOps(true).catch(()=>{});
-  let last=nowMs(),lastActivityCleanup=0;const timer=setInterval(()=>{const n=nowMs(),dt=Math.min(.12,(n-last)/1000);last=n;if(n-world.lastLiveOpsAt>=LIVE_OPS_REFRESH_MS)world.refreshLiveOps(false).catch(()=>{});if(n-world.lastNpcConfigAt>=12000)world.refreshNpcConfig(false).catch(()=>{});if(n-world.lastWorldConfigAt>=15000)world.refreshWorldConfig(false).catch(()=>{});for(const [key,r] of rooms){r.tick(dt);if(r.clients.size===0&&n-(r.lastUsedAt||n)>30*60*1000)rooms.delete(key);else if(r.clients.size>0)r.lastUsedAt=n;}if(n-lastActivityCleanup>60000){lastActivityCleanup=n;for(const [uid,at] of world.npcActivity)if(n-Number(at)>10*60*1000)world.npcActivity.delete(uid);}},50);
+  let last=nowMs(),lastActivityCleanup=0;const timer=setInterval(()=>{const n=nowMs(),dt=Math.min(.12,(n-last)/1000);last=n;if(n-world.lastLiveOpsAt>=LIVE_OPS_REFRESH_MS)world.refreshLiveOps(false).catch(()=>{});if(n-world.lastNpcConfigAt>=12000)world.refreshNpcConfig(false).catch(()=>{});if(n-world.lastWorldConfigAt>=15000)world.refreshWorldConfig(false).catch(()=>{});for(const [key,r] of rooms){if(r.clients.size>0){r.lastUsedAt=n;r.tick(dt);}else if(n-(r.lastUsedAt||n)>IDLE_ROOM_TTL_MS)rooms.delete(key);}if(n-lastActivityCleanup>60000){lastActivityCleanup=n;for(const [uid,at] of world.npcActivity)if(n-Number(at)>10*60*1000)world.npcActivity.delete(uid);}},50);
   timer.unref?.();
   return world;
 }

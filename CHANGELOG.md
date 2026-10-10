@@ -1,3 +1,18 @@
+# V18.1.9 — ULTRA PERFORMANCE • MAPAS MAIS RAROS • FX BAIXA
+
+- NPCs comuns e bosses normais ~30% mais raros em 7 mapas, sem mudar a taxa de respawn, missão, XP, drop ou eventos.
+- `sql/V18_1_9_NPC_POPULATION.sql` altera o Supabase (Data Driven), com rollback dedicado.
+- Fallback local `public/data.js` reduzido para manter densidade parecida offline/sem conexão SQL.
+- Salas vazias deixam de simular NPCs; após 2 minutos sem jogadores são removidas da memória.
+- Na entrada de novo jogador, o evento da sala em repouso é atualizado antes do snapshot.
+- NPCs em 0–1.250u seguem 4 Hz; 1.250–2.200u usam até 2 Hz; distantes 0,4 Hz.
+- Em clientes lentos, descartamos apenas frames de movimento quando há fila >256 KiB (sem perder estado de delta).
+- Broadcasts idênticos para sala são serializados uma única vez.
+- Explosões em qualidade BAIXA: flash simples, 2 faíscas (4 para boss), sem gradientes/sombras e vida visual mais curta.
+- Explosões e impactos em MÉDIA/ALTA mantêm o desenho original.
+- População acima da configuração é reduzida em tempo real, preservando alvos já reivindicados.
+- A V18.1.8 de compressão, cache de imagens e rede incremental permanece integral.
+
 # V18.1.8 — NETWORK OPTIMIZATION • BANDWIDTH REDUCTION
 
 - Shared Universe mantém simulação autoritativa em 20 Hz, mas NPCs próximos passam a ser transmitidos em 4 Hz com interpolação no cliente.
