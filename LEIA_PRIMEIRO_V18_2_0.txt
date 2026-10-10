@@ -1,0 +1,17 @@
+STELLAR LEGACY V18.2.0 — MOBILE LITE
+
+Esta versão usa a V18.1.9.1 (Loja corrigida) como base.
+
+COMO INSTALAR
+1. Extraia este ZIP.
+2. Suba o conteúdo extraído na raiz do repositório GitHub (não faça upload apenas do ZIP).
+3. Aguarde deploy automático do Render após o commit.
+4. Entre no jogo, abra CONFIGURAÇÕES e escolha QUALIDADE BAIXA (ou AUTO no celular fraco).
+5. Teste movimentação, combate, portal, radar, loja/compra e troca de mapas.
+
+IMPORTANTE
+- Não execute SQL: nada de banco foi modificado.
+- Naves, NPCs, drones e AUX mantêm os MESMOS SPRITES.
+- Modo MÉDIO e ALTO preservados.
+- Efeito de desempenho depende do aparelho; a melhoria é técnica e ainda requer teste no celular real.
+- Esta versão NÃO altera a taxa de dados de rede: é focada em renderização local.

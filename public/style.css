@@ -2615,3 +2615,33 @@ body[data-quality="low"] .hud-panel,body[data-quality="low"] .modal-card{backdro
 .admin-runtime-shops-grid{display:grid;gap:8px;max-height:590px;overflow:auto;padding-right:3px}.admin-shop-card{border:1px solid rgba(255,203,104,.13);border-radius:10px;background:linear-gradient(180deg,rgba(24,19,10,.76),rgba(8,10,15,.88));padding:9px;display:grid;gap:8px}.admin-shop-head{display:flex;align-items:center;justify-content:space-between;gap:10px}.admin-shop-head div{display:flex;flex-direction:column;gap:2px}.admin-shop-head b{font-size:9px;color:#ffe09a;letter-spacing:.05em}.admin-shop-head small{font:7px ui-monospace,SFMono-Regular,Consolas,monospace;color:#756d5e}.admin-shop-head label{font-size:7px;color:#b9a77c;font-weight:900}.admin-shop-fields{display:grid;grid-template-columns:minmax(150px,1.5fr) repeat(5,minmax(80px,1fr));gap:6px}.admin-shop-fields label,.admin-shop-description{display:flex;flex-direction:column;gap:3px;color:#847862;font-size:6.5px;font-weight:1000;letter-spacing:.07em}.admin-shop-fields input,.admin-shop-fields select,.admin-shop-description textarea{width:100%;min-width:0;border:1px solid rgba(255,201,95,.14);border-radius:7px;background:#0a0d12;color:#e7dec9;padding:7px;font-size:8px;outline:none}.admin-shop-description textarea{min-height:58px;resize:vertical}.admin-shop-flags{display:flex;flex-wrap:wrap;gap:10px;align-items:center}.admin-shop-flags label{font-size:7px;color:#b8aa8d;font-weight:900}.admin-shop-save{justify-self:end}.admin-shop-note{font-size:7px;color:#7b715d}.admin-shop-card.locked-pass{border-color:rgba(178,118,255,.2)}
 @media(max-width:900px){.admin-shop-fields{grid-template-columns:repeat(3,minmax(0,1fr))}}
 @media(max-width:620px){.admin-shop-fields{grid-template-columns:1fr 1fr}.admin-shop-save{width:100%}.admin-shop-head{align-items:flex-start}}
+
+/* V18.2.0 MOBILE LITE — apenas quando qualidade BAIXA estiver selecionada.
+   Remove blur/backdrop/filter do HUD, sem esconder painéis ou alterar clicks. */
+body[data-quality="low"] .hud-panel,
+body[data-quality="low"] #topbar,
+body[data-quality="low"] #weaponBar,
+body[data-quality="low"] #leftStats,
+body[data-quality="low"] #minimapPanel,
+body[data-quality="low"] #chatDock {
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+  box-shadow: none !important;
+  background-color: rgba(5,13,27,.96);
+}
+body[data-quality="low"] .brand-logo,
+body[data-quality="low"] .ship-hud-portrait img,
+body[data-quality="low"] .faction-mini-icon,
+body[data-quality="low"] .ammo-art,
+body[data-quality="low"] .product-icon img,
+body[data-quality="low"] .ship-visual img,
+body[data-quality="low"] .drone-art,
+body[data-quality="low"] .pet-avatar img {
+  filter: none !important;
+}
+body[data-quality="low"] .small-btn,
+body[data-quality="low"] .action-btn,
+body[data-quality="low"] .ammo-btn,
+body[data-quality="low"] .pet-gear {
+  box-shadow: none !important;
+}

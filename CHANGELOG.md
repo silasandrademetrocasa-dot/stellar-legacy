@@ -1,3 +1,20 @@
+# V18.2.0 — MOBILE LITE / QUALIDADE BAIXA
+
+- Canvas da qualidade BAIXA passa de DPR 0,90 para 0,70 (cerca de 40% menos pixels desenhados por quadro, considerando a mesma tela).
+- Mantém alvo de 30 FPS para preservar movimento e controles; jogo não mexe em ticks de combate, física ou rede.
+- Na BAIXA, fundo preservado sem filtros CSS de saturação/brilho nem dois gradientes de sombreamento desenhados continuamente.
+- Iluminação ambiental, estrelas decorativas e partículas secundárias reduzidas/desabilitadas apenas em BAIXA.
+- Explosões e lasers permanecem visíveis, mas são menores, mais curtos e com menos faíscas, feixes, sombras e gradientes.
+- Portais fora da tela não são desenhados; portais na BAIXA ficam com sprite, aro e nome estáticos e leves.
+- Efeitos de foguetes, escudo e reparo exibem versões simplificadas apenas na BAIXA.
+- Sprites originais de naves/NPCs/drones/AUX preservados; sombras, halos e filtros caros passam a ser desligados na BAIXA.
+- Redesenho do minimapa limitado a cerca de 5–6 Hz quando na BAIXA (radar e entidades permanecem funcionais).
+- Atualização visual do HUD limitada a ~6–7 Hz na BAIXA, reduzindo reflow/DOM; lógica e controles continuam na frequência normal e comandos atualizam a interface imediatamente.
+- HUD no modo BAIXO sem backdrop blur e sombras CSS pesadas, mantendo interações e modais.
+- Assets de imagens não mudaram de revisão; apenas JS/CSS com cache atualizado para 18.2.0.
+- Nenhum SQL ou alteração em contas, progresso, lojas, assinaturas, economia, missões, NPCs ou servidor.
+- Base da V18.1.9.1 com HOTFIX da confirmação de compra preservada.
+
 # V18.1.9.1 — HOTFIX LOJA / CONFIRMAÇÃO DE COMPRA
 
 - Corrigido clique de **COMPRAR** na aba LASERS da Loja Comum: botão deixava `onBuy` sem ação, portanto não abria a confirmação.

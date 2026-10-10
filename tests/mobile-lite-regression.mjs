@@ -1,0 +1,26 @@
+import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
+import { dirname, resolve } from 'node:path';
+const root=resolve(dirname(fileURLToPath(import.meta.url)),'..');
+const game=readFileSync(resolve(root,'public/game.js'),'utf8');
+const css=readFileSync(resolve(root,'public/style.css'),'utf8');
+const html=readFileSync(resolve(root,'public/index.html'),'utf8');
+const pkg=JSON.parse(readFileSync(resolve(root,'package.json'),'utf8'));
+assert.equal(pkg.version,'18.2.0');
+assert.match(game, /low:\{label:'BAIXA',dpr:\.70,fps:30/);
+assert.match(game, /if\(ultraLow\)\{ctx\.restore\(\);return true;\}/);
+assert.match(game, /if\(resolvedQualityMode\(\)==='low'\)\{\s*ctx\.save\(\);ctx\.strokeStyle=color/);
+assert.match(game, /lastLowMinimapDrawAt>=180/);
+assert.match(game, /now-lastLowHudUpdateAt>=150/);
+assert.match(game, /if\(resolvedQualityMode\(\)==='low'\)return;\s*const fx=npcFxProfile/);
+assert.match(css, /body\[data-quality="low"\] \.hud-panel/);
+assert.match(css, /backdrop-filter: none !important/);
+assert.match(html,/game\.js\?v=18\.2\.0/);
+assert.match(html,/style\.css\?v=18\.2\.0/);
+// Login, economy, and network cadence must remain unchanged in this graphics-only release.
+assert.match(game,/setInterval\(\(\)=>\{\s*if\(!authenticated\)return;\s*checkGameSession\(\)/);
+assert.match(game,/function syncSharedUniversePlayer\(force=false\)/);
+assert.match(game,/function openSpendConfirm\(/);
+assert.match(game,/onBuy=\(\)=>buyItem\(id\)/);
+console.log('PASSOU: perfil BAIXO, HUD, minimapa, lasers, efeitos, cache e Loja preservada.');
