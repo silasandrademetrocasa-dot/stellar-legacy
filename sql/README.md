@@ -17,3 +17,8 @@ A posição persistente continua em `player_location_v1774`. Desde a V17.9.4, `p
 
 ## V18.1.5 — Systems Runtime
 Missões, serviços econômicos e crafting passam a ser configurados no Supabase e materializados pelo Render em `systems.runtime.json`. O banco de produção já contém as tabelas/RPCs `game_mission_category_v1815`, `game_mission_custom_v1815`, `game_economy_service_v1815`, `game_crafting_recipe_v1815` e `get_systems_runtime_config_v1815`.
+
+
+## V18.2.1 — Cupons SQL-First
+
+`V18_2_1_COUPONS_SQL_FIRST.sql` cria um sistema transacional de cupons sem necessidade de novos ZIPs por campanha. Veja `../COUPONS_SQL_FIRST.md` para INSERTs e manutenção. Estrutura instalada no Supabase de produção em 10/10/2026.

@@ -687,6 +687,15 @@ export async function economyActionOnline(action, payload = {}) {
 
 
 
+// ===================== V18.2.1 CUPONS SQL-FIRST =====================
+// Resgate autoritativo: o servidor valida o login e a função SQL entrega o prêmio.
+export async function redeemGameCouponOnline(code) {
+  return authedServerFetch('/api/coupons/redeem', {
+    method: 'POST',
+    body: JSON.stringify({ code: String(code||'').trim().toUpperCase().slice(0,64) }),
+  });
+}
+
 // ===================== V16.2 CHAT DOCK =====================
 export async function getChatHistoryOnline({channel='global', recipientCallsign='', limit=60}={}) {
   const rows = await authedSupabaseFetch('/rest/v1/rpc/get_chat_history_v16', {

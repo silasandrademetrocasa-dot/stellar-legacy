@@ -1,3 +1,16 @@
+# V18.2.1 — CUPONS SQL-FIRST / RESGATE POR SUPABASE
+
+- Sistema de cupons dinâmicos com códigos e prêmios definidos por SQL; basta cadastrar INSERT nas próximas campanhas.
+- Novo endpoint autenticado `POST /api/coupons/redeem` integra `redeem_game_coupon_v1821`.
+- Campo LOJA PREMIUM → RESGATE ONLINE ligado ao servidor; `EVENTO7D` legado preservado.
+- Cupom AUX-9 + Modo Sentinela migrado para o motor SQL, mantendo código, sem concedê-lo automaticamente.
+- Suporte a recompensas permitidas: AUX-9, Sentinela/outros módulos do AUX, CR/STL, itens da Loja, munição, mísseis e naves.
+- Validação no banco: validade, limite total, um uso por conta, níveis, valores máximos, anti-duplicação, auditoria.
+- Proteção de saves para que cliente desatualizado não sobrescreva um prêmio resgatado em outra aba.
+- Operação transacional no Supabase (sem SQL por cupom além de INSERT).
+- Base V18.2.0 MOBILE LITE e HOTFIX de Loja integralmente preservados.
+- Arquivos: `COUPONS_SQL_FIRST.md`, `sql/V18_2_1_COUPONS_SQL_FIRST.sql`.
+
 # V18.2.0 — MOBILE LITE / QUALIDADE BAIXA
 
 - Canvas da qualidade BAIXA passa de DPR 0,90 para 0,70 (cerca de 40% menos pixels desenhados por quadro, considerando a mesma tela).

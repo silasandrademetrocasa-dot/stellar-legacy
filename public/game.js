@@ -1,7 +1,7 @@
-import { FACTIONS, SHIPS, ITEMS, LASER_AMMO, ROCKETS, NPC_TYPES, MAPS, RESOURCES } from './data.js?v=18.2.0';
-import { GAME_ASSETS } from './assets/v17/manifest.js?v=18.2.0';
-import { signUp, signIn, requestPasswordReset, restorePasswordRecoveryFromUrl, restoreSession, signOutLocal, checkGameSession, endGameSession, getUser, getSessionCredentials, loadCloudSave, saveCloudSave, updateCallsign, updatePassword, loadRankings, loadAuctionBids, saveAuctionBidOnline, markAuctionBidStatusOnline, loadAuctionMarket, upsertPlayerPresenceOnline, loadMapPresenceOnline, savePlayerLocationCheckpointOnline, loadPlayerLocationCheckpointOnline, removePlayerPresenceOnline, queuePvpAttackOnline, consumePvpDamageEventsOnline, syncArenaProfileOnline, loadArenaState, loadArenaDailyRewardStatus, claimArenaDailyReward, loadArenaOpponents, loadArenaHistory, arenaAttackOnline, listClansOnline, loadMyClanOnline, createClanOnline, joinClanOnline, leaveClanOnline, transferClanCreditsOnline, claimClanCreditGrantsOnline, recordClanAlienKillOnline, getPremiumShopOnline, testPurchasePremiumOnline, loadWarfrontStateOnline, hitWorldBossOnline, claimWorldBossRewardOnline, declareClanWarOnline, recordClanWarScoreOnline, loadLiveOpsOnline, adminUpdateLiveEventScheduleOnline, purchaseLiveCatalogOnline, economyActionOnline, getChatHistoryOnline, sendChatMessageOnline, getMyDesignersOnline, setDesignLoadoutOnline, claimGateDroneDesignOnline, claimEventDesignerOnline, getAdminStatus, adminSearchAccounts, adminRecentActions, adminBanAccount, adminUnbanAccount, adminResetAccount, adminDeleteAccount, pushTelemetryBatch, adminTelemetryOverview, adminPlayerTelemetry, getBattleGroupOnline, createBattleGroupOnline, inviteBattleGroupOnline, searchBattleGroupPlayersOnline, inviteBattleGroupUserOnline, respondBattleGroupInviteOnline, leaveBattleGroupOnline, kickBattleGroupMemberOnline, setBattleGroupRallyOnline, loadRuntimeConfigOnline, loadNpcRuntimeConfigOnline, loadWorldRuntimeConfigOnline, loadSystemsRuntimeConfigOnline, loadAdminRuntimeMonitorOnline, adminUpdateRuntimeModuleOnline, adminUpdateNpcRuntimeOnline, adminUpdateNpcSpawnRuntimeOnline, adminUpdateWorldMapOnline, adminUpdateWorldResourceOnline, adminUpdateWorldSectorOnline, adminUpdateWorldPortalOnline, adminUpdateWorldResourcePoolOnline, adminUpdateMissionCategoryOnline, adminUpdateEconomyServiceOnline, adminUpdateCraftingRecipeOnline, loadBattlePassRuntimeConfigOnline, adminUpdateBattlePassSeasonOnline, adminUpdateBattlePassTierOnline, loadShopsRuntimeConfigOnline, adminUpdateCommonShopItemOnline, adminUpdatePremiumShopItemOnline } from './api.js?v=18.2.0';
-import { SharedUniverseClient } from './world.js?v=18.2.0';
+import { FACTIONS, SHIPS, ITEMS, LASER_AMMO, ROCKETS, NPC_TYPES, MAPS, RESOURCES } from './data.js?v=18.2.1';
+import { GAME_ASSETS } from './assets/v17/manifest.js?v=18.2.1';
+import { signUp, signIn, requestPasswordReset, restorePasswordRecoveryFromUrl, restoreSession, signOutLocal, checkGameSession, endGameSession, getUser, getSessionCredentials, loadCloudSave, saveCloudSave, updateCallsign, updatePassword, loadRankings, loadAuctionBids, saveAuctionBidOnline, markAuctionBidStatusOnline, loadAuctionMarket, upsertPlayerPresenceOnline, loadMapPresenceOnline, savePlayerLocationCheckpointOnline, loadPlayerLocationCheckpointOnline, removePlayerPresenceOnline, queuePvpAttackOnline, consumePvpDamageEventsOnline, syncArenaProfileOnline, loadArenaState, loadArenaDailyRewardStatus, claimArenaDailyReward, loadArenaOpponents, loadArenaHistory, arenaAttackOnline, listClansOnline, loadMyClanOnline, createClanOnline, joinClanOnline, leaveClanOnline, transferClanCreditsOnline, claimClanCreditGrantsOnline, recordClanAlienKillOnline, getPremiumShopOnline, testPurchasePremiumOnline, loadWarfrontStateOnline, hitWorldBossOnline, claimWorldBossRewardOnline, declareClanWarOnline, recordClanWarScoreOnline, loadLiveOpsOnline, adminUpdateLiveEventScheduleOnline, purchaseLiveCatalogOnline, economyActionOnline, getChatHistoryOnline, sendChatMessageOnline, redeemGameCouponOnline, getMyDesignersOnline, setDesignLoadoutOnline, claimGateDroneDesignOnline, claimEventDesignerOnline, getAdminStatus, adminSearchAccounts, adminRecentActions, adminBanAccount, adminUnbanAccount, adminResetAccount, adminDeleteAccount, pushTelemetryBatch, adminTelemetryOverview, adminPlayerTelemetry, getBattleGroupOnline, createBattleGroupOnline, inviteBattleGroupOnline, searchBattleGroupPlayersOnline, inviteBattleGroupUserOnline, respondBattleGroupInviteOnline, leaveBattleGroupOnline, kickBattleGroupMemberOnline, setBattleGroupRallyOnline, loadRuntimeConfigOnline, loadNpcRuntimeConfigOnline, loadWorldRuntimeConfigOnline, loadSystemsRuntimeConfigOnline, loadAdminRuntimeMonitorOnline, adminUpdateRuntimeModuleOnline, adminUpdateNpcRuntimeOnline, adminUpdateNpcSpawnRuntimeOnline, adminUpdateWorldMapOnline, adminUpdateWorldResourceOnline, adminUpdateWorldSectorOnline, adminUpdateWorldPortalOnline, adminUpdateWorldResourcePoolOnline, adminUpdateMissionCategoryOnline, adminUpdateEconomyServiceOnline, adminUpdateCraftingRecipeOnline, loadBattlePassRuntimeConfigOnline, adminUpdateBattlePassSeasonOnline, adminUpdateBattlePassTierOnline, loadShopsRuntimeConfigOnline, adminUpdateCommonShopItemOnline, adminUpdatePremiumShopItemOnline } from './api.js?v=18.2.1';
+import { SharedUniverseClient } from './world.js?v=18.2.1';
 
 const canvas = document.querySelector('#game');
 const ctx = canvas.getContext('2d');
@@ -3405,7 +3405,11 @@ async function flushCloudSave(force=false){
   if(!authenticated||!progress||cloudBusy||(!cloudDirty&&!force))return;
   cloudBusy=true;setSync('SALVANDO','busy');
   try{const result=await saveCloudSave(progress);if(result?.statePatch){const patch=result.statePatch;if(Number.isFinite(Number(patch.credits)))progress.profile.credits=Number(patch.credits);if(patch.serverEconomy)progress.serverEconomy={...(progress.serverEconomy||{}),...patch.serverEconomy};localStorage.setItem(saveKey(),JSON.stringify(progress));updateUI();if(patch.serverEconomy?.lastClanCollectionDate)showToast('CLÃ • coleta diária de 10% sincronizada','system');}cloudDirty=false;setSync('ONLINE','ok');}
-  catch(e){console.warn('cloud save',e);if(e?.code==='SAVE_OWNER_MISMATCH'){setSync('BLOQUEADO','err');forceLogoutBecauseSessionMoved('Proteção de conta: um save de outro usuário foi bloqueado.',getUser()?.id||null);return;}setSync('OFFLINE','err');}
+  catch(e){console.warn('cloud save',e);
+    if(e?.code==='SAVE_COUPON_STALE'){
+      try{const remote=await loadCloudSave();if(remote?.state){installEconomyState(remote.state);setSync('ONLINE','ok');showToast('Prêmios de cupom sincronizados com o servidor','reward');return;}}catch(syncErr){console.warn('coupon save reconcile',syncErr);}
+    }
+    if(e?.code==='SAVE_OWNER_MISMATCH'){setSync('BLOQUEADO','err');forceLogoutBecauseSessionMoved('Proteção de conta: um save de outro usuário foi bloqueado.',getUser()?.id||null);return;}setSync('OFFLINE','err');}
   finally{cloudBusy=false;}
 }
 
@@ -5705,18 +5709,51 @@ function renderPremiumShop(){
   const st=premiumRuntime.state||{},products=premiumCatalogForRender(),couponHint=Object.keys(PREMIUM_EVENT_COUPONS)[0]||'EVENTO7D';
   const activeUntil=effectivePremiumUntilMs();
   if(ui.premiumModeChip){ui.premiumModeChip.textContent=premiumCanPurchase()?'ATIVO':'CATÁLOGO';ui.premiumModeChip.classList.toggle('active',premiumCanPurchase());}
-  ui.premiumBenefits.innerHTML=`<div class="premium-status-card"><span>PREMIUM</span><b>${premiumActive()?'ATIVO':'INATIVO'}</b><small>${premiumActive()?`até ${formatPremiumUntil(new Date(activeUntil).toISOString())} • AUTO-COMBATE LIBERADO`:'Auto-combate • reparo grátis • regen 2X • míssil -20% • Elite -5% • Portais -10%'}</small></div><div class="premium-status-card"><span>PASSE PREMIUM</span><b>${st.battle_pass_active?'ATIVO':'INATIVO'}</b><small>Temporada ${escHtml(st.current_season||battlePassSeasonKey()||'—')} • AUTO-COMBATE • trilha Premium configurada no Passe</small></div><div class="premium-coupon-card"><div class="premium-coupon-copy"><span>CUPOM DE EVENTO</span><b>RESGATE</b><small>${escHtml(couponHint)} • 7 dias Premium + 1 Nanobot de Reparo • Comum.</small></div><div class="premium-coupon-form"><input id="premiumCouponInput" maxlength="32" autocomplete="off" placeholder="DIGITE O CUPOM" /><button class="small-btn gold" id="premiumCouponRedeem" type="button">RESGATAR</button></div></div>`;
-  if(!products.length){ui.premiumProductGrid.innerHTML='<div class="muted">Catálogo Premium indisponível.</div>';return;}
-  ui.premiumProductGrid.innerHTML=products.map(p=>{
+  ui.premiumBenefits.innerHTML=`<div class="premium-status-card"><span>PREMIUM</span><b>${premiumActive()?'ATIVO':'INATIVO'}</b><small>${premiumActive()?`até ${formatPremiumUntil(new Date(activeUntil).toISOString())} • AUTO-COMBATE LIBERADO`:'Auto-combate • reparo grátis • regen 2X • míssil -20% • Elite -5% • Portais -10%'}</small></div><div class="premium-status-card"><span>PASSE PREMIUM</span><b>${st.battle_pass_active?'ATIVO':'INATIVO'}</b><small>Temporada ${escHtml(st.current_season||battlePassSeasonKey()||'—')} • AUTO-COMBATE • trilha Premium configurada no Passe</small></div><div class="premium-coupon-card"><div class="premium-coupon-copy"><span>CUPONS DE EVENTO</span><b>RESGATE ONLINE</b><small>Códigos administrados pelo Supabase • AUX-9, Stellarium, itens e outros prêmios. Cupom clássico ${escHtml(couponHint)} preservado.</small></div><div class="premium-coupon-form"><input id="premiumCouponInput" maxlength="64" autocomplete="off" placeholder="DIGITE SEU CUPOM" /><button class="small-btn gold" id="premiumCouponRedeem" type="button">RESGATAR</button></div></div>`;
+  if(!products.length){ui.premiumProductGrid.innerHTML='<div class="muted">Catálogo Premium indisponível.</div>';}
+  else {ui.premiumProductGrid.innerHTML=products.map(p=>{
     const owned=p.category==='battle_pass'?!!st.battle_pass_active:false,levelLocked=Number(progress?.profile?.level||1)<Math.max(1,Number(p.min_level)||1);
     const typeLabel=p.category==='elite_item'?'ITEM ELITE':p.category==='battle_pass'?'PASSE MENSAL':'ASSINATURA';
     const buttonDisabled=owned||levelLocked||!premiumCanPurchase();
     const buttonLabel=owned?'ATIVO / OBTIDO':levelLocked?`REQUER LV ${Math.max(1,Number(p.min_level)||1)}`:!premiumCanPurchase()?'INDISPONÍVEL':p.category==='premium'?(premiumActive()?'PRORROGAR':'ATIVAR'):'ATIVAR';
     return `<article class="premium-product ${p.category}"><div class="premium-product-icon">${premiumProductIcon(p)}</div><div class="premium-product-copy"><span class="premium-product-type">${typeLabel}</span><h3>${escHtml(p.name)}</h3><p>${escHtml(p.description||'')}</p></div><div class="premium-product-price">R$ ${Number(p.price_brl||0).toFixed(2).replace('.',',')}</div><button class="${premiumCanPurchase()?'gold-btn':'ghost-btn'}" data-premium-buy="${escHtml(p.id)}" ${buttonDisabled?'disabled':''}>${buttonLabel}</button></article>`;
   }).join('');
-  ui.premiumProductGrid.querySelectorAll('[data-premium-buy]').forEach(b=>b.onclick=()=>testPremiumPurchaseNow(b.dataset.premiumBuy));
+  ui.premiumProductGrid.querySelectorAll('[data-premium-buy]').forEach(b=>b.onclick=()=>testPremiumPurchaseNow(b.dataset.premiumBuy));}
   const couponBtn=document.getElementById('premiumCouponRedeem');const couponInput=document.getElementById('premiumCouponInput');
-  if(couponBtn&&couponInput){const submit=async()=>{const code=String(couponInput.value||'').trim();if(!code){showToast('Digite um cupom válido');return;}try{const res=redeemPremiumCouponLocal(code);couponInput.value='';showToast(`Cupom resgatado • Premium liberado até ${formatPremiumUntil(new Date(res.until).toISOString())}`,'reward');await flushCloudSave(true);await refreshAndRenderPremium(true);}catch(e){showToast(String(e?.message||e));}};couponBtn.onclick=submit;couponInput.onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();submit();}};}
+  if(couponBtn&&couponInput){
+    let redeeming=false;
+    const submit=async()=>{
+      const code=String(couponInput.value||'').trim().toUpperCase();
+      if(!code){showToast('Digite um cupom válido');return;}
+      if(redeeming)return;
+      redeeming=true;couponBtn.disabled=true;couponBtn.textContent='RESGATANDO...';
+      try{
+        if(PREMIUM_EVENT_COUPONS[code]){
+          // Compatibilidade com os cupons antigos que já existiam no aplicativo.
+          const result=redeemPremiumCouponLocal(code);
+          await flushCloudSave(true);
+          showToast(`Cupom resgatado • Premium até ${formatPremiumUntil(new Date(result.until).toISOString())}`,'reward');
+        }else{
+          const result=await queueEconomy(async()=>{
+            await syncBeforeEconomy();
+            if(cloudBusy||cloudDirty)throw new Error('Salvamento em andamento. Tente novamente em alguns segundos.');
+            const redeemed=await redeemGameCouponOnline(code);
+            if(!redeemed?.ok||!redeemed?.state)throw new Error('Falha ao confirmar o prêmio no banco.');
+            installEconomyState(redeemed.state);
+            return redeemed;
+          });
+          syncSharedUniversePlayer(true);
+          showToast(`CUPOM RESGATADO • ${result.title||'Prêmio entregue!'}`,'reward');
+          pushActivity(`CUPOM • ${result.title||'Recompensa entregue'}`,'reward');
+        }
+        couponInput.value='';
+        await refreshAndRenderPremium(true);
+      }catch(e){showToast(String(e?.message||e));}
+      finally{redeeming=false;couponBtn.disabled=false;couponBtn.textContent='RESGATAR';}
+    };
+    couponBtn.onclick=submit;
+    couponInput.onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();submit();}};
+  }
 }
 async function refreshAndRenderPremium(force=false){await refreshPremiumState(force);renderPremiumShop();if(ui.passModal&&!ui.passModal.classList.contains('hidden'))renderProgression();renderGalaxyGate();renderShop();}
 async function testPremiumPurchaseNow(productId){
@@ -7065,6 +7102,15 @@ async function afterAuth(){
     const remote=await loadCloudSave();
     if(remote?.state?.accountOwnerId&&String(remote.state.accountOwnerId)!==accountId){
       throw Object.assign(new Error('Proteção de conta: o save online está vinculado a outro usuário.'),{code:'SAVE_OWNER_MISMATCH'});
+    }
+    // Se outra aba resgatou um cupom, nunca preferir o save local antigo mesmo que
+    // o timestamp clientSavedAt seja mais recente.
+    const authoritativeClaims=remote?.state?.couponClaimsV1821||{};
+    const localClaims=local?.couponClaimsV1821||{};
+    if(local&&Object.entries(authoritativeClaims).some(([code,at])=>localClaims[code]!==at)){
+      console.warn('[coupon] local save sem o prêmio mais recente: usando Supabase');
+      local=null;
+      try{localStorage.removeItem(saveKey());}catch{}
     }
     const localStamp=Number(local?.clientSavedAt)||0;
     const remoteStamp=Number(remote?.state?.clientSavedAt)||Date.parse(remote?.updated_at||'')||0;
