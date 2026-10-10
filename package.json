@@ -1,6 +1,6 @@
 {
   "name": "stellar-legacy",
-  "version": "18.2.1",
+  "version": "18.2.2",
   "type": "module",
   "scripts": {
     "start": "node server/index.js",
@@ -15,5 +15,5 @@
   "engines": {
     "node": ">=18"
   },
-  "release": "sql-coupons-v18-2-1"
+  "release": "smart-missions-v18-2-2"
 }

@@ -2645,3 +2645,15 @@ body[data-quality="low"] .ammo-btn,
 body[data-quality="low"] .pet-gear {
   box-shadow: none !important;
 }
+
+/* V18.2.2 • Jornada concluída recolhida e no rodapé das missões */
+.pilot-journey-panel.collapsed{gap:0;margin:10px 0 0;padding:0;opacity:.88;background:linear-gradient(180deg,rgba(8,29,38,.72),rgba(4,17,25,.85));border-color:rgba(95,231,170,.25)}
+.pilot-journey-panel.collapsed .pilot-journey-grid{display:none!important}
+.pilot-journey-panel .journey-toggle{width:100%;display:flex;text-align:left;align-items:center;justify-content:space-between;gap:12px;cursor:pointer;color:inherit;border:0;background:none;font:inherit;padding:4px 2px}
+.pilot-journey-panel .journey-toggle:focus-visible{outline:2px solid #6edbff;outline-offset:2px}
+.pilot-journey-panel.collapsed .journey-toggle{padding:10px 13px}
+.pilot-journey-panel.collapsed .journey-toggle h3{font-size:12px;margin:2px 0}
+.pilot-journey-panel.collapsed .journey-toggle .eyebrow{font-size:9px;color:#8be4c2}
+.pilot-journey-panel .journey-toggle>span{white-space:nowrap;flex-shrink:0}
+.smart-mission-notice{font-size:10px;line-height:1.5;color:#9cddca;padding:9px 12px;margin-bottom:12px;background:rgba(7,38,35,.65);border:1px solid rgba(94,213,167,.20);border-radius:10px}
+@media(max-width:680px){.pilot-journey-panel.collapsed .journey-toggle{padding:9px 11px}.pilot-journey-panel.collapsed .journey-toggle h3{font-size:11px}.smart-mission-notice{font-size:9px}}

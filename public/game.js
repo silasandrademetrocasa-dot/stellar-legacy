@@ -1,7 +1,7 @@
-import { FACTIONS, SHIPS, ITEMS, LASER_AMMO, ROCKETS, NPC_TYPES, MAPS, RESOURCES } from './data.js?v=18.2.1';
-import { GAME_ASSETS } from './assets/v17/manifest.js?v=18.2.1';
-import { signUp, signIn, requestPasswordReset, restorePasswordRecoveryFromUrl, restoreSession, signOutLocal, checkGameSession, endGameSession, getUser, getSessionCredentials, loadCloudSave, saveCloudSave, updateCallsign, updatePassword, loadRankings, loadAuctionBids, saveAuctionBidOnline, markAuctionBidStatusOnline, loadAuctionMarket, upsertPlayerPresenceOnline, loadMapPresenceOnline, savePlayerLocationCheckpointOnline, loadPlayerLocationCheckpointOnline, removePlayerPresenceOnline, queuePvpAttackOnline, consumePvpDamageEventsOnline, syncArenaProfileOnline, loadArenaState, loadArenaDailyRewardStatus, claimArenaDailyReward, loadArenaOpponents, loadArenaHistory, arenaAttackOnline, listClansOnline, loadMyClanOnline, createClanOnline, joinClanOnline, leaveClanOnline, transferClanCreditsOnline, claimClanCreditGrantsOnline, recordClanAlienKillOnline, getPremiumShopOnline, testPurchasePremiumOnline, loadWarfrontStateOnline, hitWorldBossOnline, claimWorldBossRewardOnline, declareClanWarOnline, recordClanWarScoreOnline, loadLiveOpsOnline, adminUpdateLiveEventScheduleOnline, purchaseLiveCatalogOnline, economyActionOnline, getChatHistoryOnline, sendChatMessageOnline, redeemGameCouponOnline, getMyDesignersOnline, setDesignLoadoutOnline, claimGateDroneDesignOnline, claimEventDesignerOnline, getAdminStatus, adminSearchAccounts, adminRecentActions, adminBanAccount, adminUnbanAccount, adminResetAccount, adminDeleteAccount, pushTelemetryBatch, adminTelemetryOverview, adminPlayerTelemetry, getBattleGroupOnline, createBattleGroupOnline, inviteBattleGroupOnline, searchBattleGroupPlayersOnline, inviteBattleGroupUserOnline, respondBattleGroupInviteOnline, leaveBattleGroupOnline, kickBattleGroupMemberOnline, setBattleGroupRallyOnline, loadRuntimeConfigOnline, loadNpcRuntimeConfigOnline, loadWorldRuntimeConfigOnline, loadSystemsRuntimeConfigOnline, loadAdminRuntimeMonitorOnline, adminUpdateRuntimeModuleOnline, adminUpdateNpcRuntimeOnline, adminUpdateNpcSpawnRuntimeOnline, adminUpdateWorldMapOnline, adminUpdateWorldResourceOnline, adminUpdateWorldSectorOnline, adminUpdateWorldPortalOnline, adminUpdateWorldResourcePoolOnline, adminUpdateMissionCategoryOnline, adminUpdateEconomyServiceOnline, adminUpdateCraftingRecipeOnline, loadBattlePassRuntimeConfigOnline, adminUpdateBattlePassSeasonOnline, adminUpdateBattlePassTierOnline, loadShopsRuntimeConfigOnline, adminUpdateCommonShopItemOnline, adminUpdatePremiumShopItemOnline } from './api.js?v=18.2.1';
-import { SharedUniverseClient } from './world.js?v=18.2.1';
+import { FACTIONS, SHIPS, ITEMS, LASER_AMMO, ROCKETS, NPC_TYPES, MAPS, RESOURCES } from './data.js?v=18.2.2';
+import { GAME_ASSETS } from './assets/v17/manifest.js?v=18.2.2';
+import { signUp, signIn, requestPasswordReset, restorePasswordRecoveryFromUrl, restoreSession, signOutLocal, checkGameSession, endGameSession, getUser, getSessionCredentials, loadCloudSave, saveCloudSave, updateCallsign, updatePassword, loadRankings, loadAuctionBids, saveAuctionBidOnline, markAuctionBidStatusOnline, loadAuctionMarket, upsertPlayerPresenceOnline, loadMapPresenceOnline, savePlayerLocationCheckpointOnline, loadPlayerLocationCheckpointOnline, removePlayerPresenceOnline, queuePvpAttackOnline, consumePvpDamageEventsOnline, syncArenaProfileOnline, loadArenaState, loadArenaDailyRewardStatus, claimArenaDailyReward, loadArenaOpponents, loadArenaHistory, arenaAttackOnline, listClansOnline, loadMyClanOnline, createClanOnline, joinClanOnline, leaveClanOnline, transferClanCreditsOnline, claimClanCreditGrantsOnline, recordClanAlienKillOnline, getPremiumShopOnline, testPurchasePremiumOnline, loadWarfrontStateOnline, hitWorldBossOnline, claimWorldBossRewardOnline, declareClanWarOnline, recordClanWarScoreOnline, loadLiveOpsOnline, adminUpdateLiveEventScheduleOnline, purchaseLiveCatalogOnline, economyActionOnline, getChatHistoryOnline, sendChatMessageOnline, redeemGameCouponOnline, getMyDesignersOnline, setDesignLoadoutOnline, claimGateDroneDesignOnline, claimEventDesignerOnline, getAdminStatus, adminSearchAccounts, adminRecentActions, adminBanAccount, adminUnbanAccount, adminResetAccount, adminDeleteAccount, pushTelemetryBatch, adminTelemetryOverview, adminPlayerTelemetry, getBattleGroupOnline, createBattleGroupOnline, inviteBattleGroupOnline, searchBattleGroupPlayersOnline, inviteBattleGroupUserOnline, respondBattleGroupInviteOnline, leaveBattleGroupOnline, kickBattleGroupMemberOnline, setBattleGroupRallyOnline, loadRuntimeConfigOnline, loadNpcRuntimeConfigOnline, loadWorldRuntimeConfigOnline, loadSystemsRuntimeConfigOnline, loadAdminRuntimeMonitorOnline, adminUpdateRuntimeModuleOnline, adminUpdateNpcRuntimeOnline, adminUpdateNpcSpawnRuntimeOnline, adminUpdateWorldMapOnline, adminUpdateWorldResourceOnline, adminUpdateWorldSectorOnline, adminUpdateWorldPortalOnline, adminUpdateWorldResourcePoolOnline, adminUpdateMissionCategoryOnline, adminUpdateEconomyServiceOnline, adminUpdateCraftingRecipeOnline, loadBattlePassRuntimeConfigOnline, adminUpdateBattlePassSeasonOnline, adminUpdateBattlePassTierOnline, loadShopsRuntimeConfigOnline, adminUpdateCommonShopItemOnline, adminUpdatePremiumShopItemOnline } from './api.js?v=18.2.2';
+import { SharedUniverseClient } from './world.js?v=18.2.2';
 
 const canvas = document.querySelector('#game');
 const ctx = canvas.getContext('2d');
@@ -1138,7 +1138,7 @@ setInterval(()=>{if(authenticated)refreshRuntimeConfig(false);},45000);
 // ===================== V18.1.1 NPC + RECOMPENSAS DATA DRIVEN =====================
 const NPC_RUNTIME_CACHE_PREFIX='stellar_npc_runtime_v1811';
 const NPC_FALLBACK_SNAPSHOT=Object.fromEntries(Object.entries(NPC_TYPES).map(([key,row])=>[key,{...row,resources:{...(row.resources||{})}}]));
-const npcRuntimeConfig={version:0,updatedAt:null,lastFetchAt:0,source:'fallback'};
+const npcRuntimeConfig={version:0,updatedAt:null,lastFetchAt:0,source:'fallback',spawns:[]};
 function npcRuntimeCacheKey(){return `${NPC_RUNTIME_CACHE_PREFIX}:${String(getUser()?.id||'guest')}`;}
 function normalizeNpcRuntimeConfig(raw,source='online'){
   if(!raw||typeof raw!=='object'||!Array.isArray(raw.npcs)||!raw.npcs.length)return false;
@@ -1147,13 +1147,14 @@ function normalizeNpcRuntimeConfig(raw,source='online'){
     const fallback=NPC_FALLBACK_SNAPSHOT[key]||{};
     NPC_TYPES[key]={...fallback,...NPC_TYPES[key],name:String(row.name||fallback.name||key),hp:Math.max(1,Number(row.hp)||1),shield:Math.max(0,Number(row.shield)||0),credits:Math.max(0,Number(row.credits)||0),uridium:Math.max(0,Number(row.stl)||0),xp:Math.max(0,Number(row.xp)||0),speed:Math.max(1,Number(row.speed)||1),damage:Math.max(0,Number(row.damage)||0),color:String(row.color||fallback.color||'#ff755d'),size:Math.max(4,Number(row.size)||18),resources:row.resources&&typeof row.resources==='object'?{...row.resources}:{...(fallback.resources||{})},respawnMinMs:Math.max(1000,Number(row.respawn_min_ms)||6000),respawnMaxMs:Math.max(1000,Number(row.respawn_max_ms)||13000),enabled:row.enabled!==false};
   }
+  npcRuntimeConfig.spawns=Array.isArray(raw.spawns)?raw.spawns.filter(x=>x?.enabled!==false&&Number(x?.spawn_count)>0).map(x=>({map_id:String(x.map_id||''),npc_key:String(x.npc_key||''),spawn_count:Number(x.spawn_count)||0})):[];
   npcRuntimeConfig.version=Math.max(0,Number(raw.version)||0);npcRuntimeConfig.updatedAt=raw.updated_at||null;npcRuntimeConfig.source=source;return true;
 }
 function loadNpcRuntimeConfigCache(){try{const raw=JSON.parse(localStorage.getItem(npcRuntimeCacheKey())||'null');return !!(raw&&normalizeNpcRuntimeConfig(raw,'cache'));}catch{return false;}}
 function saveNpcRuntimeConfigCache(raw){try{localStorage.setItem(npcRuntimeCacheKey(),JSON.stringify(raw));}catch{}}
 async function refreshNpcRuntimeConfig(force=false){
   if(!authenticated||!getUser()?.id)return null;const now=Date.now();if(!force&&now-npcRuntimeConfig.lastFetchAt<30000)return null;npcRuntimeConfig.lastFetchAt=now;
-  try{const raw=await loadNpcRuntimeConfigOnline();if(!raw)return null;const changed=Number(raw.version)!==Number(npcRuntimeConfig.version)||npcRuntimeConfig.source!=='online';if(changed){normalizeNpcRuntimeConfig(raw,'online');saveNpcRuntimeConfigCache(raw);console.info(`[npc-config] v${npcRuntimeConfig.version} aplicado no cliente`);try{renderAll();}catch{}}return raw;}catch(err){console.warn('[npc-config] usando cache/fallback',err);if(npcRuntimeConfig.source==='fallback')loadNpcRuntimeConfigCache();return null;}
+  try{const raw=await loadNpcRuntimeConfigOnline();if(!raw)return null;const changed=Number(raw.version)!==Number(npcRuntimeConfig.version)||npcRuntimeConfig.source!=='online';if(changed){normalizeNpcRuntimeConfig(raw,'online');saveNpcRuntimeConfigCache(raw);console.info(`[npc-config] v${npcRuntimeConfig.version} aplicado no cliente`);try{if(progress&&ui.missionModal&&!ui.missionModal.classList.contains('hidden'))renderMissions();renderAll();}catch{}}return raw;}catch(err){console.warn('[npc-config] usando cache/fallback',err);if(npcRuntimeConfig.source==='fallback')loadNpcRuntimeConfigCache();return null;}
 }
 setInterval(()=>{if(authenticated)refreshNpcRuntimeConfig(false);},45000);
 
@@ -1388,7 +1389,7 @@ function taskOre(resource,target,id=null){return {id:id||`ore_${resource}_${targ
 function makeMission({id,title,desc,tasks,group='mix',sequence=false,rewardFactor=.5,tag='',flatReward=null}) {
   return {id,title,desc,tasks,group,sequence,rewardFactor,tag,flatReward};
 }
-function buildDailyMissions(){
+function buildLegacyDailyMissions(){
   const key=missionPeriodKey('daily'),rng=seededRng(hashStringSeed(`daily:${key}`)),rule=systemsMissionCategory('daily'),cfg=rule?.config||{},factor=Number(rule?.rewardFactor??.5);
   const huntNpc=pickSeeded(MISSION_NPCS,rng);
   const huntTarget=huntNpc.startsWith('boss')?Math.max(1,Number(cfg.hunt_boss_target)||50):Math.max(1,Number(cfg.hunt_normal_target)||100);
@@ -1422,6 +1423,113 @@ function buildDailyMissions(){
       ],
       group:'mix',rewardFactor:factor,tag:`DIÁRIA • BÔNUS ${Math.round(factor*100)}%`
     }),
+  ];
+}
+// V18.2.2 — Missões Inteligentes: somente alvos que nascem em mapas desbloqueados.
+// O catálogo é calculado localmente a partir dos mesmos snapshots de NPC e mapas do Supabase.
+const SMART_MAP_REQUIRED_LEVEL={x1:1,x2:3,x3:7,x4:10,b41:15,b42:15,b43:15};
+function smartPilotLevel(){return Math.max(1,Math.floor(Number(progress?.profile?.level)||1));}
+function smartMapLevel(mapId){return Math.max(1,Number(MAPS[mapId]?.minLevel)||SMART_MAP_REQUIRED_LEVEL[mapId]||1);}
+function smartMissionMaps(level=smartPilotLevel()){
+  return Object.entries(MAPS).filter(([id,map])=>
+    SMART_MAP_REQUIRED_LEVEL[id]!==undefined&&map?.enabled!==false&&smartMapLevel(id)<=level&&
+    !map.gate).map(([id])=>id);
+}
+function smartNpcSpawnMaps(npc){
+  if(npcRuntimeConfig.source!=='fallback'){
+    return npcRuntimeConfig.spawns.filter(x=>x.npc_key===npc&&x.spawn_count>0).map(x=>x.map_id);
+  }
+  return Object.entries(MAPS).filter(([,map])=>Array.isArray(map?.enemyGroups)&&map.enemyGroups.some(x=>x.type===npc&&Number(x.count)>0)).map(([id])=>id);
+}
+function smartNpcMaps(npc,level=smartPilotLevel()){
+  const available=new Set(smartMissionMaps(level));
+  return smartNpcSpawnMaps(npc).filter(id=>available.has(id));
+}
+function smartOreMaps(ore,level=smartPilotLevel()){
+  return smartMissionMaps(level).filter(id=>(Number(MAPS[id]?.oreCount)||0)>0&&MAPS[id]?.ores?.includes(ore)&&RESOURCES[ore]?.enabled!==false);
+}
+function smartNpcPool(level=smartPilotLevel(),bosses=false){
+  const source=bosses?BOSS_MISSION_NPCS:NORMAL_MISSION_NPCS;
+  // NPCs de alto dano/vida não entram nos contratos diários de pilotos iniciantes.
+  return source.filter(id=>NPC_TYPES[id]?.enabled!==false&&smartNpcMaps(id,level).length>0);
+}
+function smartMissionRequirement(mission,level=smartPilotLevel()){
+  if(!mission?.tasks?.length)return {ok:false,minLevel:1,reason:'Contrato sem objetivos'};
+  const required=mission.tasks.map(task=>{
+    if(task.type==='kill'){
+      if(!NPC_TYPES[task.npc]||NPC_TYPES[task.npc].enabled===false)return {minLevel:45,reason:'NPC indisponível'};
+      const maps=smartNpcSpawnMaps(task.npc).filter(id=>MAPS[id]?.enabled!==false);
+      if(!maps.length)return {minLevel:45,reason:'NPC indisponível nos mapas'};
+      const minLevel=Math.min(...maps.map(smartMapLevel));
+      return {minLevel,reason:`Requer nível ${minLevel} • ${maps.sort((a,b)=>smartMapLevel(a)-smartMapLevel(b))[0].toUpperCase()}`};
+    }
+    if(task.type==='ore'){
+      const maps=Object.keys(MAPS).filter(id=>SMART_MAP_REQUIRED_LEVEL[id]!==undefined&&MAPS[id]?.enabled!==false&&MAPS[id]?.ores?.includes(task.resource)&&RESOURCES[task.resource]?.enabled!==false);
+      if(!maps.length)return {minLevel:45,reason:'Minério indisponível'};
+      const minLevel=Math.min(...maps.map(smartMapLevel));
+      return {minLevel,reason:`Requer nível ${minLevel} • ${maps.sort((a,b)=>smartMapLevel(a)-smartMapLevel(b))[0].toUpperCase()}`};
+    }
+    return {minLevel:45,reason:'Objetivo desconhecido'};
+  });
+  const maxReq=Math.max(1,...required.map(x=>x.minLevel));
+  return {ok:maxReq<=level,minLevel:maxReq,reason:required.find(x=>x.minLevel>level)?.reason||'Disponível nos seus mapas'};
+}
+function smartMissionPlayable(mission,category,level=smartPilotLevel()){
+  if(!smartMissionRequirement(mission,level).ok)return false;
+  // Um NPC disponível não significa que uma diária com 50 BOSS é razoável.
+  if(category==='daily'){
+    const band=smartDailyBand(level);
+    return mission.tasks.every(t=>t.type==='kill'?
+      (Number(t.target)<=band.huntMax&&!t.npc.startsWith('boss')):
+      (t.type==='ore'&&Number(t.target)<=band.oreMax));
+  }
+  return true;
+}
+function smartDailyBand(level){
+  if(level<7)return {hunt:12,huntMax:22,ore:65,oreMax:120,combo:7};
+  if(level<10)return {hunt:20,huntMax:30,ore:100,oreMax:160,combo:12};
+  if(level<15)return {hunt:28,huntMax:44,ore:150,oreMax:220,combo:18};
+  return {hunt:40,huntMax:58,ore:200,oreMax:300,combo:25};
+}
+function smartDailyKillTarget(npc,base,level){
+  const def=NPC_TYPES[npc]||{},hp=Math.max(1200,Number(def.hp||0)+Number(def.shield||0));
+  const budget=level<7?85000:level<10?140000:level<15?500000:1800000;
+  return Math.max(2,Math.min(base,Math.floor(budget/hp)));
+}
+function smartDailySeed(){return `smart-v1822:${missionPeriodKey('daily')}:${getUser()?.id||'pilot'}:${smartPilotLevel()}`;}
+function buildDailyMissions(){
+  const level=smartPilotLevel(),band=smartDailyBand(level),rng=seededRng(hashStringSeed(smartDailySeed()));
+  const rule=systemsMissionCategory('daily'),cfg=rule?.config||{},factor=Number(rule?.rewardFactor??.5);
+  const available=smartNpcPool(level,false);
+  // Prioriza alvos compatíveis com o nível e com a resistência do NPC.
+  const common=available.filter(id=>Number(NPC_TYPES[id]?.hp||0)+Number(NPC_TYPES[id]?.shield||0)<=
+    (level<7?18000:level<10?55000:level<15?260000:Infinity));
+  const pool=common.length?common:available;
+  const n1=pickSeeded(pool,rng)||'streuner';
+  const n2=pickSeeded(pool,rng,[n1])||n1;
+  const orePool=missionOrePool('daily').filter(id=>smartOreMaps(id,level).length>0);
+  const ore=pickSeeded(orePool.length?orePool:smartMissionMaps(level).flatMap(id=>MAPS[id]?.ores||[]).filter((id,i,a)=>a.indexOf(id)===i),rng)||'Prometium';
+  const tag=`DIÁRIA INTELIGENTE • NÍVEL ${level} • BÔNUS ${Math.round(factor*100)}%`;
+  const huntTarget=smartDailyKillTarget(n1,Math.min(band.huntMax,Math.max(1,Math.round(Number(cfg.smart_hunt_target)||band.hunt))),level);
+  const oreTarget=Math.min(band.oreMax,Math.max(1,Math.round(Number(cfg.smart_ore_target)||band.ore)));
+  const comboTarget=Math.min(band.huntMax,Math.max(1,Math.round(Number(cfg.smart_combo_target)||band.combo)));
+  const oldOreTarget=Math.max(1,Number(cfg.ore_target)||500);
+  const oreFlat=cfg.ore_flat_reward&&typeof cfg.ore_flat_reward==='object'?cfg.ore_flat_reward:{credits:750000,uridium:750,xp:2500};
+  const scaledOreFlat=Object.fromEntries(['credits','uridium','xp'].map(k=>[k,Math.max(0,Math.round((Number(oreFlat[k])||0)*Math.min(1,oreTarget/oldOreTarget)))]));
+  return [
+    makeMission({id:'daily_hunt',title:`Caçada do Dia • ${NPC_TYPES[n1]?.name||n1}`,
+      desc:`Alvo disponível nos seus setores: ${smartNpcMaps(n1,level).map(x=>x.toUpperCase()).join(' / ')}.`,
+      tasks:[taskKill(n1,huntTarget,'daily_hunt_target')],group:'npc',rewardFactor:factor,tag}),
+    makeMission({id:'daily_ore',title:`Mineração do Dia • ${RESOURCES[ore]?.name||ore}`,
+      desc:`Recurso disponível nos seus setores: ${smartOreMaps(ore,level).map(x=>x.toUpperCase()).join(' / ')}.`,
+      tasks:[taskOre(ore,oreTarget,'daily_ore_target')],group:'ore',rewardFactor:factor,tag,
+      flatReward:scaledOreFlat}),
+    makeMission({id:'daily_combo',title:'Operação Combinada do Dia',
+      desc:'Combate + coleta, sem BOSS obrigatório. Todos os alvos estão nos setores liberados.',
+      tasks:[taskKill(n1,smartDailyKillTarget(n1,comboTarget,level),'daily_combo_a'),
+        ...(n2!==n1?[taskKill(n2,smartDailyKillTarget(n2,Math.max(2,Math.round(comboTarget*.6)),level),'daily_combo_b')]:[]),
+        taskOre(ore,Math.min(band.oreMax,Math.max(20,Math.round(oreTarget*.45))),'daily_combo_ore')],
+      group:'hybrid',rewardFactor:factor,tag})
   ];
 }
 function buildTierMissions(category,steps){
@@ -1531,15 +1639,46 @@ function buildSpecialMissions(){
 }
 
 let CACHED_WEEKLY_MISSIONS=null,CACHED_MONTHLY_MISSIONS=null,CACHED_SPECIAL_MISSIONS=null;
+// Uma entrada por categoria para evitar reconstruir centenas de contratos em cada HUD.
+const SMART_MISSION_CATALOG_CACHE=new Map();
 function getMissionLibrary(category){
   if(category==='daily')return buildDailyMissions();
-  if(category==='weekly')return CACHED_WEEKLY_MISSIONS ||= buildTierMissions('weekly',missionSteps('weekly',WEEKLY_STEPS));
-  if(category==='monthly')return CACHED_MONTHLY_MISSIONS ||= buildTierMissions('monthly',missionSteps('monthly',MONTHLY_STEPS));
-  if(category==='special')return CACHED_SPECIAL_MISSIONS ||= buildSpecialMissions();
-  return [];
+  const signature=`${category}:${smartPilotLevel()}:${npcRuntimeConfig.version}:${worldRuntimeConfig.version}:${systemsRuntimeConfig.version}`;
+  const cached=SMART_MISSION_CATALOG_CACHE.get(category);
+  if(cached?.signature===signature)return cached.missions;
+  const missions=category==='weekly'?buildTierMissions('weekly',missionSteps('weekly',WEEKLY_STEPS)):
+    category==='monthly'?buildTierMissions('monthly',missionSteps('monthly',MONTHLY_STEPS)):
+    category==='special'?buildSpecialMissions():[];
+  SMART_MISSION_CATALOG_CACHE.set(category,{signature,missions});
+  return missions;
 }
 function missionById(category,id){return getMissionLibrary(category).find(m=>m.id===id)||null;}
-function freshMissions(){return {balanceVersion:'17.7',active:{daily:null,weekly:null,monthly:null,special:null},completed:{}};}
+function activeMissionDefinition(category,active){return active?.definition?.id===active?.id&&Array.isArray(active.definition.tasks)?active.definition:missionById(category,active?.id);}
+function smartCalcExistingBonus(mission,active){
+  const bonus={credits:0,uridium:0,xp:0},factor=missionFactor(mission);
+  for(const t of mission.tasks){const count=Math.min(t.target,Math.max(0,Number(active.taskProgress?.[t.id])||0));
+    if(t.type==='kill'){const r=npcKillReward(NPC_TYPES[t.npc]);bonus.credits+=r.credits*factor*count;bonus.uridium+=r.uridium*factor*count;bonus.xp+=r.xp*factor*count;}
+    else if(t.type==='ore')bonus.credits+=(RESOURCES[t.resource]?.sell||0)*factor*count;
+  }
+  return Object.fromEntries(Object.entries(bonus).map(([k,v])=>[k,Math.round(v)]));
+}
+function smartRepairDailyActive(active){
+  // Resgata os dados da missão da V18.2.1 quando possível.
+  const original=active?.definition?.id===active.id?active.definition:buildLegacyDailyMissions().find(x=>x.id===active.id);
+  if(smartMissionPlayable(original,'daily')){active.definition=structuredClone(original);return false;}
+  const alternative=buildDailyMissions().find(m=>m.id===active.id)||buildDailyMissions()[0];
+  if(!alternative)return false;
+  const preserved={};
+  for(const task of alternative.tasks){const matching=original?.tasks?.find(t=>t.id===task.id&&t.type===task.type&&
+     (t.type==='kill'?t.npc===task.npc:t.resource===task.resource));
+    if(matching)preserved[task.id]=Math.min(task.target,Math.max(0,Number(active.taskProgress?.[task.id])||0));
+  }
+  active.definition=structuredClone(alternative);active.taskProgress=preserved;
+  active.bonus=smartCalcExistingBonus(alternative,active);active.flatRewardApplied=false;
+  active.complete=alternative.tasks.every(t=>(Number(preserved[t.id])||0)>=t.target);
+  active.smartAutoReplaced=true;return true;
+}
+function freshMissions(){return {balanceVersion:'17.7',smartVersion:'18.2.2',active:{daily:null,weekly:null,monthly:null,special:null},completed:{},dailyReroll:{key:'',used:0}};}
 function missionInstanceKey(category,id){return `${category}:${missionPeriodKey(category)}:${id}`;}
 function missionCompleted(category,id){return !!progress?.missions?.completed?.[missionInstanceKey(category,id)];}
 function missionUnlocked(){return true;}
@@ -1549,15 +1688,19 @@ function normalizeMissionState(){
   progress.missions ||= freshMissions();
   progress.missions.active ||= {daily:null,weekly:null,monthly:null,special:null};
   progress.missions.completed ||= {};
+  progress.missions.dailyReroll ||= {key:'',used:0};
+  if(progress.missions.dailyReroll.key!==missionPeriodKey('daily'))progress.missions.dailyReroll={key:missionPeriodKey('daily'),used:0};
   for(const category of Object.keys(MISSION_CATEGORIES)){
     if(progress.missions.active[category]===undefined)progress.missions.active[category]=null;
     const active=progress.missions.active[category];
-    if(active && (active.period!==missionPeriodKey(category) || !missionById(category,active.id))){
+    if(active && (active.period!==missionPeriodKey(category) || !activeMissionDefinition(category,active))){
       progress.missions.active[category]=null;
       continue;
     }
     if(active){
-      const mission=missionById(category,active.id);
+      if(category==='daily'&&(!active.definition||!smartMissionPlayable(active.definition,'daily')))smartRepairDailyActive(active);
+      else if(!active.definition){const legacy=missionById(category,active.id);if(legacy)active.definition=structuredClone(legacy);}
+      const mission=activeMissionDefinition(category,active);
       active.taskProgress ||= {};
       // Migração de saves com missão antiga de uma tarefa.
       if(mission?.tasks?.length===1 && active.progress && active.taskProgress[mission.tasks[0].id]===undefined){
@@ -1573,7 +1716,7 @@ function normalizeMissionState(){
   if(progress.missions.balanceVersion!=='17.7'){
     for(const category of Object.keys(MISSION_CATEGORIES)){
       const active=progress.missions.active[category];if(!active)continue;
-      const mission=missionById(category,active.id);if(!mission)continue;
+      const mission=activeMissionDefinition(category,active);if(!mission)continue;
       const next={credits:0,uridium:0,xp:0},factor=missionFactor(mission);
       for(const task of mission.tasks||[]){
         const units=Math.max(0,Math.min(task.target,Number(active.taskProgress?.[task.id])||0));if(!units)continue;
@@ -1676,7 +1819,7 @@ function updateMissionButton(){
 function activeMissionEntries(){
   if(!progress)return [];
   normalizeMissionState();
-  return Object.entries(progress.missions.active).filter(([,active])=>!!active).map(([category,active])=>({category,active,mission:missionById(category,active.id)})).filter(x=>x.mission);
+  return Object.entries(progress.missions.active).filter(([,active])=>!!active).map(([category,active])=>({category,active,mission:activeMissionDefinition(category,active)})).filter(x=>x.mission);
 }
 function activeMissionTaskSummary(mission,active){
   const pending=(mission.tasks||[]).find(t=>!taskDone(active,t))||(mission.tasks||[])[0];
@@ -1713,17 +1856,31 @@ function acceptMission(category,id){
   normalizeMissionState();
   if(progress.missions.active[category]){showToast('Você já tem uma missão ativa nessa categoria');return;}
   const mission=missionById(category,id);if(!mission)return;
+  if(!smartMissionPlayable(mission,category)){showToast(smartMissionRequirement(mission).reason+' • contrato indisponível');return;}
   const key=missionInstanceKey(category,id);
   if(progress.missions.completed[key]){showToast('Essa missão já foi concluída neste ciclo');return;}
   progress.missions.active[category]={
-    id,period:missionPeriodKey(category),complete:false,acceptedAt:Date.now(),
+    id,definition:structuredClone(mission),period:missionPeriodKey(category),complete:false,acceptedAt:Date.now(),
     taskProgress:{},bonus:{credits:0,uridium:0,xp:0},flatRewardApplied:false
   };
   saveGame();renderMissions();updateMissionButton();state.missionHudSignature='';renderActiveMissionHud(true);showToast(`${mission.title} aceita — progresso iniciado`);
 }
+function smartRerollDailyMission(){
+  normalizeMissionState();const active=progress.missions.active.daily;
+  if(!active)return;
+  const used=Number(progress.missions.dailyReroll?.used)||0;
+  if(used>=1){showToast('Troca gratuita já utilizada hoje');return;}
+  const alternatives=getMissionLibrary('daily').filter(m=>m.id!==active.id&&!missionCompleted('daily',m.id)&&smartMissionPlayable(m,'daily'));
+  if(!alternatives.length){showToast('Não há outro contrato disponível hoje');return;}
+  const pick=alternatives[hashStringSeed(`${smartDailySeed()}:${active.id}`)%alternatives.length];
+  progress.missions.dailyReroll.used=1;
+  progress.missions.active.daily={id:pick.id,definition:structuredClone(pick),period:missionPeriodKey('daily'),complete:false,acceptedAt:Date.now(),taskProgress:{},bonus:{credits:0,uridium:0,xp:0},flatRewardApplied:false};
+  saveGame();renderMissions();updateMissionButton();state.missionHudSignature='';renderActiveMissionHud(true);
+  showToast(`Troca gratuita • ${pick.title} • progresso anterior não transferido`,'mission');
+}
 function abandonMission(category){
   normalizeMissionState();const active=progress.missions.active[category];if(!active)return;
-  const mission=missionById(category,active.id);progress.missions.active[category]=null;
+  const mission=activeMissionDefinition(category,active);progress.missions.active[category]=null;
   saveGame();renderMissions();updateMissionButton();state.missionHudSignature='';renderActiveMissionHud(true);showToast(`${mission?.title||'Missão'} abandonada`);
 }
 const MISSION_ITEM_REWARD_POOLS={
@@ -1778,21 +1935,25 @@ function finishMissionAutomatically(category,mission,active){
   saveGame();updateMissionButton();state.missionHudSignature='';renderActiveMissionHud(true);updateUI();
   if(ui.missionModal&&!ui.missionModal.classList.contains('hidden'))renderMissions();
 }
-function claimMission(category){normalizeMissionState();const active=progress.missions.active[category];if(!active||!active.complete)return;finishMissionAutomatically(category,missionById(category,active.id),active);}
-function missionEvent(type,payload={}){if(!progress||!featureUnlocked('missions'))return;normalizeMissionState();let anyChanged=false;const finished=[];for(const category of Object.keys(MISSION_CATEGORIES)){if(MISSION_CATEGORIES[category]?.enabled===false)continue;const active=progress.missions.active[category];if(!active||active.complete)continue;const mission=missionById(category,active.id);if(!mission)continue;let categoryChanged=false;let eventAmount=type==='collectOre'?Math.max(0,Number(payload.amount)||0):1;if(eventAmount<=0)continue;for(let i=0;i<mission.tasks.length;i++){const task=mission.tasks[i];if(!taskUnlocked(mission,active,i))continue;const current=taskCurrent(active,task),remaining=Math.max(0,task.target-current);if(!remaining)continue;let matches=false;if(type==='kill'&&task.type==='kill'&&payload.enemy?.type===task.npc)matches=true;if(type==='collectOre'&&task.type==='ore'&&payload.type===task.resource)matches=true;if(!matches)continue;const add=Math.min(remaining,type==='kill'?1:eventAmount);if(add<=0)continue;active.taskProgress[task.id]=current+add;addMissionReward(active,mission,task.type==='kill'?'kill':'ore',payload,add);categoryChanged=true;anyChanged=true;if(mission.sequence)break;if(type==='kill')break;}if(categoryChanged){active.complete=mission.tasks.every(x=>taskDone(active,x));if(active.complete)finished.push({category,mission,active});}}for(const item of finished)finishMissionAutomatically(item.category,item.mission,item.active);if(anyChanged&&!finished.length){saveGame();updateMissionButton();if(ui.missionModal&&!ui.missionModal.classList.contains('hidden'))renderMissions();}}
+function claimMission(category){normalizeMissionState();const active=progress.missions.active[category];if(!active||!active.complete)return;finishMissionAutomatically(category,activeMissionDefinition(category,active),active);}
+function missionEvent(type,payload={}){if(!progress||!featureUnlocked('missions'))return;normalizeMissionState();let anyChanged=false;const finished=[];for(const category of Object.keys(MISSION_CATEGORIES)){if(MISSION_CATEGORIES[category]?.enabled===false)continue;const active=progress.missions.active[category];if(!active||active.complete)continue;const mission=activeMissionDefinition(category,active);if(!mission)continue;let categoryChanged=false;let eventAmount=type==='collectOre'?Math.max(0,Number(payload.amount)||0):1;if(eventAmount<=0)continue;for(let i=0;i<mission.tasks.length;i++){const task=mission.tasks[i];if(!taskUnlocked(mission,active,i))continue;const current=taskCurrent(active,task),remaining=Math.max(0,task.target-current);if(!remaining)continue;let matches=false;if(type==='kill'&&task.type==='kill'&&payload.enemy?.type===task.npc)matches=true;if(type==='collectOre'&&task.type==='ore'&&payload.type===task.resource)matches=true;if(!matches)continue;const add=Math.min(remaining,type==='kill'?1:eventAmount);if(add<=0)continue;active.taskProgress[task.id]=current+add;addMissionReward(active,mission,task.type==='kill'?'kill':'ore',payload,add);categoryChanged=true;anyChanged=true;if(mission.sequence)break;if(type==='kill')break;}if(categoryChanged){active.complete=mission.tasks.every(x=>taskDone(active,x));if(active.complete)finished.push({category,mission,active});}}for(const item of finished)finishMissionAutomatically(item.category,item.mission,item.active);if(anyChanged&&!finished.length){saveGame();updateMissionButton();if(ui.missionModal&&!ui.missionModal.classList.contains('hidden'))renderMissions();}}
 const MISSION_UI_PREFS_KEY='stellar_mission_ui_v1765';
-const missionUiPrefs={loaded:false,collapsed:{}};
+const missionUiPrefs={loaded:false,collapsed:{},journeyCollapsed:null,journeyCompletedSeen:false};
+function journeyIsCollapsed(j){loadMissionUiPrefs();if(j.completed&&!missionUiPrefs.journeyCompletedSeen){missionUiPrefs.journeyCollapsed=true;missionUiPrefs.journeyCompletedSeen=true;saveMissionUiPrefs();}return missionUiPrefs.journeyCollapsed===null?!!j.completed:!!missionUiPrefs.journeyCollapsed;}
 function loadMissionUiPrefs(){
   if(missionUiPrefs.loaded)return;missionUiPrefs.loaded=true;
-  try{const raw=JSON.parse(localStorage.getItem(MISSION_UI_PREFS_KEY)||'{}');if(raw.collapsed&&typeof raw.collapsed==='object')missionUiPrefs.collapsed={...raw.collapsed};}catch{}
+  try{const raw=JSON.parse(localStorage.getItem(MISSION_UI_PREFS_KEY)||'{}');if(raw.collapsed&&typeof raw.collapsed==='object')missionUiPrefs.collapsed={...raw.collapsed};if(typeof raw.journeyCollapsed==='boolean')missionUiPrefs.journeyCollapsed=raw.journeyCollapsed;missionUiPrefs.journeyCompletedSeen=raw.journeyCompletedSeen===true;}catch{}
 }
-function saveMissionUiPrefs(){try{localStorage.setItem(MISSION_UI_PREFS_KEY,JSON.stringify({collapsed:missionUiPrefs.collapsed}));}catch{}}
+function saveMissionUiPrefs(){try{localStorage.setItem(MISSION_UI_PREFS_KEY,JSON.stringify({collapsed:missionUiPrefs.collapsed,journeyCollapsed:missionUiPrefs.journeyCollapsed,journeyCompletedSeen:missionUiPrefs.journeyCompletedSeen}));}catch{}}
 function toggleMissionCategory(category){loadMissionUiPrefs();missionUiPrefs.collapsed[category]=!missionUiPrefs.collapsed[category];saveMissionUiPrefs();renderMissions();}
 function missionGroupLabel(group){
   return group==='npc'?'NPC':group==='boss'?'BOSS':group==='ore'?'PEDRAS':group==='hybrid'?'NPC + PEDRA':'MISTAS';
 }
 function missionSeriesKey(mission){if(!mission?.tasks?.length)return mission?.id||'';if(mission.tasks.length!==1)return `unique:${mission.id}`;const task=mission.tasks[0];if(task.type==='kill')return `kill:${task.npc}`;if(task.type==='ore')return `ore:${task.resource}`;return `unique:${mission.id}`;}
-function visibleMissionCatalog(category,missions){const pending=missions.filter(m=>!missionCompleted(category,m.id));if(category!=='weekly'&&category!=='monthly')return pending;const bySeries=new Map();for(const mission of pending){const key=missionSeriesKey(mission);if(!bySeries.has(key))bySeries.set(key,[]);bySeries.get(key).push(mission);}const visible=[];const active=progress.missions.active[category];for(const list of bySeries.values()){list.sort((a,b)=>(a.tasks?.[0]?.target||0)-(b.tasks?.[0]?.target||0));const activeMission=active?list.find(m=>m.id===active.id):null;visible.push(activeMission||list[0]);}return visible;}
+function visibleMissionCatalog(category,missions){const active=progress?.missions?.active?.[category];
+  const pending=missions.filter(m=>!missionCompleted(category,m.id)&&smartMissionPlayable(m,category)).map(m=>active?.id===m.id?activeMissionDefinition(category,active)||m:m);
+  if(active&&!pending.some(m=>m.id===active.id)){const legacy=activeMissionDefinition(category,active);if(legacy)pending.unshift(legacy);}
+if(category!=='weekly'&&category!=='monthly')return pending;const bySeries=new Map();for(const mission of pending){const key=missionSeriesKey(mission);if(!bySeries.has(key))bySeries.set(key,[]);bySeries.get(key).push(mission);}const visible=[];for(const list of bySeries.values()){list.sort((a,b)=>(a.tasks?.[0]?.target||0)-(b.tasks?.[0]?.target||0));const activeMission=active?list.find(m=>m.id===active.id):null;visible.push(activeMission||list[0]);}return visible;}
 
 function renderMissionFilter(section,category,grid,missions){
   if(missions.length<=12)return;
@@ -1822,19 +1983,22 @@ function renderMissionFilter(section,category,grid,missions){
 function renderMissions(){
   if(!ui.missionContent||!progress)return;
   loadMissionUiPrefs();normalizeMissionState();normalizePilotJourney();ui.missionContent.innerHTML='';
-  ui.missionContent.appendChild(journeyPanel());
+  const journey=journeyPanel();
+  if(!normalizePilotJourney().completed)ui.missionContent.appendChild(journey);
   for(const [category,meta] of Object.entries(MISSION_CATEGORIES)){
     if(meta?.enabled===false)continue;
     const allMissions=getMissionLibrary(category);const missions=visibleMissionCatalog(category,allMissions);
+    const futureCount=allMissions.filter(m=>!smartMissionPlayable(m,category)).length;
     const categoryLocked=!missionCategoryUnlocked(category),collapsed=categoryLocked||!!missionUiPrefs.collapsed[category];
     const section=document.createElement('section');section.className=`mission-category${collapsed?' collapsed':''}${categoryLocked?' level-locked-section':''}`;section.style.setProperty('--mission-accent',meta.accent);
     const active=progress.missions.active[category];
     const head=document.createElement('button');head.type='button';head.className='mission-category-head';head.setAttribute('aria-expanded',String(!collapsed));
-    const summary=categoryLocked?`LIBERA NO NÍVEL ${missionCategoryRequiredLevel(category)}`:(active?'1 missão ativa • ATIVA':`${missions.length} contratos disponíveis agora • LIVRE`);
+    const summary=categoryLocked?`LIBERA NO NÍVEL ${missionCategoryRequiredLevel(category)}`:(active?`1 missão ativa • ${missions.length} adequadas ao seu nível`:`${missions.length} disponíveis no seu nível${futureCount?` • ${futureCount} futuras`:''}`);
     head.innerHTML=`<span><b>${meta.label}</b><small>${summary}</small></span><em>${categoryLocked?'🔒':collapsed?'▸':'▾'}</em>`;
     head.onclick=()=>categoryLocked?showToast(`${meta.label} libera no nível ${missionCategoryRequiredLevel(category)}`):toggleMissionCategory(category);section.appendChild(head);
     const body=document.createElement('div');body.className='mission-category-body';
     const grid=document.createElement('div');grid.className='mission-grid';
+    if(!categoryLocked){const notice=document.createElement('div');notice.className='smart-mission-notice';notice.textContent=`✓ Contratos elegíveis para o nível ${smartPilotLevel()}. Alvos dos seus mapas liberados. ${futureCount?futureCount+' contratos mais avançados ficam ocultos.':''}`;body.appendChild(notice);}
     renderMissionFilter(body,category,grid,missions);
     for(const mission of missions){
       const isActive=active?.id===mission.id,done=missionCompleted(category,mission.id),slotLocked=!!active&&!isActive,locked=slotLocked;if(done)continue;
@@ -1852,6 +2016,7 @@ function renderMissions(){
       const actions=document.createElement('div');actions.className='mission-actions';
       if(isActive){
         const primary=document.createElement('button');primary.className='small-btn';primary.textContent='EM ANDAMENTO';primary.disabled=true;actions.appendChild(primary);
+        if(category==='daily'&&(Number(progress.missions.dailyReroll?.used)||0)<1){const reroll=document.createElement('button');reroll.className='ghost-btn';reroll.textContent='TROCAR GRÁTIS (1/DIA)';reroll.onclick=()=>smartRerollDailyMission();actions.appendChild(reroll);}
         const abandon=document.createElement('button');abandon.className='ghost-btn';abandon.textContent='ABANDONAR';abandon.onclick=()=>abandonMission(category);actions.appendChild(abandon);
       }else{
         const b=document.createElement('button');b.className='small-btn';b.disabled=locked;b.textContent=slotLocked?'OUTRA ATIVA':'ACEITAR';
@@ -1861,6 +2026,7 @@ function renderMissions(){
     }
     body.appendChild(grid);section.appendChild(body);ui.missionContent.appendChild(section);
   }
+  if(normalizePilotJourney().completed)ui.missionContent.appendChild(journey);
   updateMissionButton();
 }
 function openMissions(){if(!featureUnlocked('missions')){showFeatureLock('missions','Missões');return;}closeNavigationModals(ui.missionModal);normalizeMissionState();renderMissions();ui.missionModal.classList.remove('hidden');}
@@ -1883,7 +2049,7 @@ function journeyStepPct(step=currentJourneyStep()){if(!step)return 100;return Ma
 function grantJourneyReward(step){if(!step||progress.journey.claimed[step.id])return;progress.journey.claimed[step.id]=Date.now();try{step.grant?.();}catch(e){console.warn('journey grant',step.id,e);}pushActivity(`JORNADA • ${step.label} • ${step.reward}`,'reward');}
 function advanceJourney(){const j=normalizePilotJourney();let guard=0;while(!j.completed&&guard++<PILOT_JOURNEY_STEPS.length){const step=PILOT_JOURNEY_STEPS[j.step];const value=journeyStepValue(step);if(value<step.target)break;grantJourneyReward(step);j.step++;j.progress=0;if(j.step>=PILOT_JOURNEY_STEPS.length){j.completed=true;j.completedAt=Date.now();queueCelebration('mission','JORNADA CONCLUÍDA','Treinamento inicial finalizado • novos sistemas liberam conforme seu nível');showToast('Jornada do Piloto concluída','reward');break;}const next=PILOT_JOURNEY_STEPS[j.step];queueCelebration('mission','JORNADA AVANÇOU',`${next.label} • ${next.desc}`);}saveGame();state.missionHudSignature='';renderActiveMissionHud(true);if(ui.missionModal&&!ui.missionModal.classList.contains('hidden'))renderMissions();}
 function journeyEvent(type,amount=1){if(!progress)return;const j=normalizePilotJourney(),step=currentJourneyStep();if(!step||step.event!==type)return;if(typeof step.value==='function'){advanceJourney();return;}j.progress=Math.max(0,(Number(j.progress)||0)+Math.max(0,Number(amount)||0));advanceJourney();}
-function journeyPanel(){const j=normalizePilotJourney(),section=document.createElement('section');section.className='pilot-journey-panel';const current=currentJourneyStep();section.innerHTML=`<div class="pilot-journey-head"><div><div class="eyebrow">JORNADA DO PILOTO</div><h3>${j.completed?'TREINAMENTO CONCLUÍDO':escHtml(current?.label||'Jornada')}</h3><small>${j.completed?'Você já domina os fundamentos do Stellar Legacy.':'Tutorial orgânico • siga os objetivos enquanto joga normalmente.'}</small></div><span>${j.completed?'100%':`${j.step+1}/${PILOT_JOURNEY_STEPS.length}`}</span></div>`;const grid=document.createElement('div');grid.className='pilot-journey-grid';PILOT_JOURNEY_STEPS.forEach((s,i)=>{const done=i<j.step||j.completed,active=i===j.step&&!j.completed,locked=i>j.step&&!j.completed,val=done?s.target:active?journeyStepValue(s):0,pct=done?100:active?journeyStepPct(s):0;const card=document.createElement('article');card.className=`pilot-journey-step${done?' done':''}${active?' active':''}${locked?' locked':''}`;card.innerHTML=`<div class="pilot-journey-step-top"><b>${i+1}. ${escHtml(s.label)}</b><span>${done?'✓':active?'ATUAL':'🔒'}</span></div><p>${escHtml(s.desc)}</p><div class="pilot-journey-progress"><i style="width:${pct}%"></i></div><small>${active?`${fmt(Math.min(val,s.target))} / ${fmt(s.target)} • `:''}${escHtml(s.reward)}</small>`;grid.appendChild(card);});section.appendChild(grid);return section;}
+function journeyPanel(){const j=normalizePilotJourney(),section=document.createElement('section');section.className='pilot-journey-panel';const current=currentJourneyStep();const collapsed=journeyIsCollapsed(j);section.classList.toggle('collapsed',collapsed);section.innerHTML=`<button type="button" class="pilot-journey-head journey-toggle" aria-expanded="${!collapsed}"><div><div class="eyebrow">JORNADA DO PILOTO • ${j.completed?'FINALIZADA':'EM ANDAMENTO'}</div><h3>${j.completed?'TREINAMENTO CONCLUÍDO':escHtml(current?.label||'Jornada')}</h3><small>${j.completed?'Concluída • toque para consultar o histórico':'Toque para recolher/expandir o treinamento.'}</small></div><span>${j.completed?'100%':`${j.step+1}/${PILOT_JOURNEY_STEPS.length}`} ${collapsed?'▸':'▾'}</span></button>`;const grid=document.createElement('div');grid.className='pilot-journey-grid';PILOT_JOURNEY_STEPS.forEach((s,i)=>{const done=i<j.step||j.completed,active=i===j.step&&!j.completed,locked=i>j.step&&!j.completed,val=done?s.target:active?journeyStepValue(s):0,pct=done?100:active?journeyStepPct(s):0;const card=document.createElement('article');card.className=`pilot-journey-step${done?' done':''}${active?' active':''}${locked?' locked':''}`;card.innerHTML=`<div class="pilot-journey-step-top"><b>${i+1}. ${escHtml(s.label)}</b><span>${done?'✓':active?'ATUAL':'🔒'}</span></div><p>${escHtml(s.desc)}</p><div class="pilot-journey-progress"><i style="width:${pct}%"></i></div><small>${active?`${fmt(Math.min(val,s.target))} / ${fmt(s.target)} • `:''}${escHtml(s.reward)}</small>`;grid.appendChild(card);});section.appendChild(grid);section.querySelector('.journey-toggle').onclick=()=>{missionUiPrefs.journeyCollapsed=!collapsed;saveMissionUiPrefs();renderMissions();};return section;}
 function openJourneyPanel(){closeNavigationModals(ui.missionModal);normalizeMissionState();renderMissions();ui.missionModal.classList.remove('hidden');}
 
 // ===================== PROGRESSÃO V12 • FREE + PREMIUM =====================
@@ -3046,7 +3212,7 @@ function processPlayerLevelUps(){
     queueCelebration('mission','RECOMPENSA LIBERADA',`Nível ${progress.profile.level} • abra PASSE para resgatar`);
     const unlocked=progressionUnlocksAtLevel(progress.profile.level);if(unlocked.length)queueCelebration('mission','NOVO ACESSO',unlocked.join(' • '));
   }
-  if(gained){normalizeLevelRewards();updatePassBadge();saveGame();}
+  if(gained){normalizeLevelRewards();updatePassBadge();normalizeMissionState();saveGame();}
   return gained;
 }
 
@@ -7055,7 +7221,7 @@ ui.loginForm.onsubmit=async e=>{e.preventDefault();ui.authMessage.textContent='E
 ui.registerForm.onsubmit=async e=>{e.preventDefault();ui.authMessage.textContent='Criando conta...';try{const result=await signUp({callsign:ui.registerCallsign.value,email:ui.registerEmail.value,password:ui.registerPassword.value});if(result.requires_confirmation){showAuthMode('login');ui.loginEmail.value=ui.registerEmail.value;ui.authMessage.textContent='Conta criada. Confirme o e-mail e depois entre.';return;}await afterAuth();}catch(err){ui.authMessage.textContent=err.message;}};
 if(ui.forgotPasswordBtn)ui.forgotPasswordBtn.onclick=async()=>{const email=String(ui.loginEmail?.value||'').trim();ui.authMessage.textContent='Enviando recuperação...';try{await requestPasswordReset(email);ui.authMessage.textContent='E-mail de recuperação enviado. Abra o link recebido para criar uma nova senha.';}catch(err){ui.authMessage.textContent=err.message;}};
 if(ui.recoveryForm)ui.recoveryForm.onsubmit=async e=>{e.preventDefault();const a=ui.recoveryPassword?.value||'',b=ui.recoveryPasswordConfirm?.value||'';if(a!==b){ui.authMessage.textContent='As senhas não conferem.';return;}ui.authMessage.textContent='Atualizando senha...';try{await updatePassword(a);signOutLocal();showAuthMode('login');ui.loginPassword.value='';ui.authMessage.textContent='Senha atualizada. Entre com a nova senha.';}catch(err){ui.authMessage.textContent=err.message;}};
-ui.logoutBtn.onclick=async()=>{await flushTelemetry(true).catch(()=>{});telemetryRuntime.sessionOpen=false;sharedUniverse.close();sharedUniverseRuntime.ready=false;sharedUniverseRuntime.event=null;if(movementPositionRuntime.loadedFromCheckpoint||movementPositionRuntime.hasMovedSinceLoad)commitRuntimePosition('logout');await flushCloudSave(true);await removePlayerPresenceOnline().catch(()=>{});clearOnlinePlayers();await endGameSession().catch(()=>signOutLocal());authenticated=false;progress=null;npcRuntimeConfig.version=0;npcRuntimeConfig.updatedAt=null;npcRuntimeConfig.source='fallback';worldRuntimeConfig.version=0;worldRuntimeConfig.updatedAt=null;worldRuntimeConfig.source='fallback';passRuntimeConfig.version=0;passRuntimeConfig.updatedAt=null;passRuntimeConfig.activeSeason=null;passRuntimeConfig.seasons=[];passRuntimeConfig.tiers=new Map();passRuntimeConfig.source='fallback';runtimeConfigRuntime.version=0;runtimeConfigRuntime.isAdmin=false;runtimeConfigRuntime.source='fallback';runtimeConfigRuntime.modules=new Map(RUNTIME_FALLBACK_MODULES.map(x=>[x.module_key,x]));runtimeConfigRuntime.flags=new Map(Object.entries(RUNTIME_FALLBACK_FLAGS).map(([flag_key,enabled])=>[flag_key,{flag_key,enabled,config:{}}]));applyRuntimeMenuConfig();clanRuntime.state=null;clanRuntime.clans=[];clanRuntime.lastAt=0;warfrontRuntime.state=null;warfrontRuntime.clans=[];warfrontRuntime.lastAt=0;warfrontRuntime.pendingBossDamage=0;premiumRuntime.state=null;premiumRuntime.lastAt=0;updateClanBadge();updatePremiumBadge();chatRuntime.messages=[];chatRuntime.lastSignature='';renderChatTabs();renderChatMessages();state.target=null;player.laserFiring=false;for(const modal of dismissibleModals())modal.classList.add('hidden');ui.factionModal.classList.add('hidden');ui.portalPrompt?.classList.add('hidden');ui.baseTradePrompt?.classList.add('hidden');ui.petFloatPanel?.classList.add('hidden');ui.loginModal.classList.remove('hidden');if(ui.userLabel)ui.userLabel.textContent='—';if(ui.rankChip)ui.rankChip.textContent='Piloto Básico';if(ui.loginPassword)ui.loginPassword.value='';setSync('LOCAL','');showAuthMode('login');};
+ui.logoutBtn.onclick=async()=>{await flushTelemetry(true).catch(()=>{});telemetryRuntime.sessionOpen=false;sharedUniverse.close();sharedUniverseRuntime.ready=false;sharedUniverseRuntime.event=null;if(movementPositionRuntime.loadedFromCheckpoint||movementPositionRuntime.hasMovedSinceLoad)commitRuntimePosition('logout');await flushCloudSave(true);await removePlayerPresenceOnline().catch(()=>{});clearOnlinePlayers();await endGameSession().catch(()=>signOutLocal());authenticated=false;progress=null;npcRuntimeConfig.version=0;npcRuntimeConfig.updatedAt=null;npcRuntimeConfig.source='fallback';npcRuntimeConfig.spawns=[];worldRuntimeConfig.version=0;worldRuntimeConfig.updatedAt=null;worldRuntimeConfig.source='fallback';passRuntimeConfig.version=0;passRuntimeConfig.updatedAt=null;passRuntimeConfig.activeSeason=null;passRuntimeConfig.seasons=[];passRuntimeConfig.tiers=new Map();passRuntimeConfig.source='fallback';runtimeConfigRuntime.version=0;runtimeConfigRuntime.isAdmin=false;runtimeConfigRuntime.source='fallback';runtimeConfigRuntime.modules=new Map(RUNTIME_FALLBACK_MODULES.map(x=>[x.module_key,x]));runtimeConfigRuntime.flags=new Map(Object.entries(RUNTIME_FALLBACK_FLAGS).map(([flag_key,enabled])=>[flag_key,{flag_key,enabled,config:{}}]));applyRuntimeMenuConfig();clanRuntime.state=null;clanRuntime.clans=[];clanRuntime.lastAt=0;warfrontRuntime.state=null;warfrontRuntime.clans=[];warfrontRuntime.lastAt=0;warfrontRuntime.pendingBossDamage=0;premiumRuntime.state=null;premiumRuntime.lastAt=0;updateClanBadge();updatePremiumBadge();chatRuntime.messages=[];chatRuntime.lastSignature='';renderChatTabs();renderChatMessages();state.target=null;player.laserFiring=false;for(const modal of dismissibleModals())modal.classList.add('hidden');ui.factionModal.classList.add('hidden');ui.portalPrompt?.classList.add('hidden');ui.baseTradePrompt?.classList.add('hidden');ui.petFloatPanel?.classList.add('hidden');ui.loginModal.classList.remove('hidden');if(ui.userLabel)ui.userLabel.textContent='—';if(ui.rankChip)ui.rankChip.textContent='Piloto Básico';if(ui.loginPassword)ui.loginPassword.value='';setSync('LOCAL','');showAuthMode('login');};
 
 function startLoadedGame(){
   if(!telemetryRuntime.sessionOpen)telemetryStartSession();

@@ -1,3 +1,17 @@
+# V18.2.2 — SMART MISSIONS / JORNADA RECOLHÍVEL
+
+- JORNADA DO PILOTO: ao completar treinamento, card sai do topo das missões e passa para o fim da tela com status FINALIZADA; recolhido automaticamente na primeira conclusão e abre/fecha ao tocar no cabeçalho. Preferência gravada localmente; jornadas ainda em andamento continuam em destaque no topo, mas também podem ser recolhidas.
+- MISSÕES DIÁRIAS: escolhem NPCs comuns/minérios dos mapas atualmente acessíveis pelo nível do piloto, usando as configurações de mapas, minérios e spawns de NPC recebidas do Supabase. NPCs desativados ou sem spawn ativo não são sorteados.
+- Metas diárias ajustadas ao nível e ao HP + escudo do alvo para evitar caçadas longas contra NPCs muito resistentes. Operação Combinada mistura NPCs e mineração sem obrigar a matar BOSS.
+- Elegibilidade de semanais, mensais, especiais e contratos customizados conferida por alvo e mapa. Contratos ainda inacessíveis ficam ocultos (contagem de futuros na seção) e NÃO podem ser aceitos fora do nível permitido.
+- Missões ativas salvam uma cópia estável dos objetivos, para o jogador não perder a missão ao subir de nível ou atualizar as configurações online.
+- Migração de diária da versão anterior: substitui objetivo impossível automaticamente por um elegível, preservando apenas progresso de NPC/minério realmente correspondente e recalculando bônus parcial (sem duplicação de recompensas).
+- Uma troca voluntária gratuita de diária por ciclo: escolhe outra opção disponível, sem reaproveitar a progressão abandonada; contratos completados continuam completados no dia.
+- Biblioteca de contratos semanais/mensais/especiais com cache local por nível e versão de NPC/mapas/sistemas para manter a renderização leve em celular.
+- Recompensa fixa da diária de mineração ajustada proporcionalmente à meta menor; chances de itens e economia existente mantidas.
+- Nenhuma mudança de SQL necessária: usa APIs/data-driven já instaladas; sem alterar jogadores existentes, cupons, save online ou módulos de servidor. Requer deploy deste ZIP para o cliente receber o novo comportamento.
+- Base V18.2.1 CUPONS SQL-FIRST + V18.2.0 MOBILE LITE integralmente preservadas.
+
 # V18.2.1 — CUPONS SQL-FIRST / RESGATE POR SUPABASE
 
 - Sistema de cupons dinâmicos com códigos e prêmios definidos por SQL; basta cadastrar INSERT nas próximas campanhas.
