@@ -1,7 +1,7 @@
-import { FACTIONS, SHIPS, ITEMS, LASER_AMMO, ROCKETS, NPC_TYPES, MAPS, RESOURCES } from './data.js?v=18.2.5';
-import { GAME_ASSETS } from './assets/v17/manifest.js?v=18.2.5';
-import { signUp, signIn, requestPasswordReset, restorePasswordRecoveryFromUrl, restoreSession, signOutLocal, checkGameSession, endGameSession, getUser, getSessionCredentials, loadCloudSave, saveCloudSave, updateCallsign, updatePassword, loadRankings, loadAuctionBids, saveAuctionBidOnline, markAuctionBidStatusOnline, loadAuctionMarket, upsertPlayerPresenceOnline, loadMapPresenceOnline, savePlayerLocationCheckpointOnline, loadPlayerLocationCheckpointOnline, removePlayerPresenceOnline, queuePvpAttackOnline, consumePvpDamageEventsOnline, syncArenaProfileOnline, loadArenaState, loadArenaDailyRewardStatus, claimArenaDailyReward, loadArenaOpponents, loadArenaHistory, arenaAttackOnline, listClansOnline, loadMyClanOnline, createClanOnline, joinClanOnline, leaveClanOnline, transferClanCreditsOnline, claimClanCreditGrantsOnline, recordClanAlienKillOnline, getPremiumShopOnline, testPurchasePremiumOnline, loadWarfrontStateOnline, hitWorldBossOnline, claimWorldBossRewardOnline, declareClanWarOnline, recordClanWarScoreOnline, loadLiveOpsOnline, adminUpdateLiveEventScheduleOnline, purchaseLiveCatalogOnline, economyActionOnline, getChatHistoryOnline, sendChatMessageOnline, redeemGameCouponOnline, getMyDesignersOnline, setDesignLoadoutOnline, claimGateDroneDesignOnline, claimEventDesignerOnline, getAdminStatus, adminSearchAccounts, adminRecentActions, adminBanAccount, adminUnbanAccount, adminResetAccount, adminDeleteAccount, pushTelemetryBatch, adminTelemetryOverview, adminPlayerTelemetry, getBattleGroupOnline, createBattleGroupOnline, inviteBattleGroupOnline, searchBattleGroupPlayersOnline, inviteBattleGroupUserOnline, respondBattleGroupInviteOnline, leaveBattleGroupOnline, kickBattleGroupMemberOnline, setBattleGroupRallyOnline, loadRuntimeConfigOnline, loadNpcRuntimeConfigOnline, loadWorldRuntimeConfigOnline, loadSystemsRuntimeConfigOnline, loadAdminRuntimeMonitorOnline, adminUpdateRuntimeModuleOnline, adminUpdateNpcRuntimeOnline, adminUpdateNpcSpawnRuntimeOnline, adminUpdateWorldMapOnline, adminUpdateWorldResourceOnline, adminUpdateWorldSectorOnline, adminUpdateWorldPortalOnline, adminUpdateWorldResourcePoolOnline, adminUpdateMissionCategoryOnline, adminUpdateEconomyServiceOnline, adminUpdateCraftingRecipeOnline, loadBattlePassRuntimeConfigOnline, adminUpdateBattlePassSeasonOnline, adminUpdateBattlePassTierOnline, loadShopsRuntimeConfigOnline, adminUpdateCommonShopItemOnline, adminUpdatePremiumShopItemOnline, loadBonusConfigOnline, adminUpdateBonusConfigOnline } from './api.js?v=18.2.5';
-import { SharedUniverseClient } from './world.js?v=18.2.5';
+import { FACTIONS, SHIPS, ITEMS, LASER_AMMO, ROCKETS, NPC_TYPES, MAPS, RESOURCES } from './data.js?v=18.2.6';
+import { GAME_ASSETS } from './assets/v17/manifest.js?v=18.2.6';
+import { signUp, signIn, requestPasswordReset, restorePasswordRecoveryFromUrl, restoreSession, signOutLocal, checkGameSession, endGameSession, getUser, getSessionCredentials, loadCloudSave, saveCloudSave, updateCallsign, updatePassword, loadRankings, loadAuctionBids, saveAuctionBidOnline, markAuctionBidStatusOnline, loadAuctionMarket, upsertPlayerPresenceOnline, loadMapPresenceOnline, savePlayerLocationCheckpointOnline, loadPlayerLocationCheckpointOnline, removePlayerPresenceOnline, queuePvpAttackOnline, consumePvpDamageEventsOnline, syncArenaProfileOnline, loadArenaState, loadArenaDailyRewardStatus, claimArenaDailyReward, loadArenaOpponents, loadArenaHistory, arenaAttackOnline, listClansOnline, loadMyClanOnline, createClanOnline, joinClanOnline, leaveClanOnline, transferClanCreditsOnline, claimClanCreditGrantsOnline, recordClanAlienKillOnline, getPremiumShopOnline, testPurchasePremiumOnline, loadWarfrontStateOnline, hitWorldBossOnline, claimWorldBossRewardOnline, declareClanWarOnline, recordClanWarScoreOnline, loadLiveOpsOnline, adminUpdateLiveEventScheduleOnline, purchaseLiveCatalogOnline, economyActionOnline, getChatHistoryOnline, sendChatMessageOnline, redeemGameCouponOnline, getMyDesignersOnline, setDesignLoadoutOnline, claimGateDroneDesignOnline, claimEventDesignerOnline, getAdminStatus, adminSearchAccounts, adminRecentActions, adminBanAccount, adminUnbanAccount, adminResetAccount, adminDeleteAccount, pushTelemetryBatch, adminTelemetryOverview, adminPlayerTelemetry, getBattleGroupOnline, createBattleGroupOnline, inviteBattleGroupOnline, searchBattleGroupPlayersOnline, inviteBattleGroupUserOnline, respondBattleGroupInviteOnline, leaveBattleGroupOnline, kickBattleGroupMemberOnline, setBattleGroupRallyOnline, loadRuntimeConfigOnline, loadNpcRuntimeConfigOnline, loadWorldRuntimeConfigOnline, loadSystemsRuntimeConfigOnline, loadAdminRuntimeMonitorOnline, adminUpdateRuntimeModuleOnline, adminUpdateNpcRuntimeOnline, adminUpdateNpcSpawnRuntimeOnline, adminUpdateWorldMapOnline, adminUpdateWorldResourceOnline, adminUpdateWorldSectorOnline, adminUpdateWorldPortalOnline, adminUpdateWorldResourcePoolOnline, adminUpdateMissionCategoryOnline, adminUpdateEconomyServiceOnline, adminUpdateCraftingRecipeOnline, loadBattlePassRuntimeConfigOnline, adminUpdateBattlePassSeasonOnline, adminUpdateBattlePassTierOnline, loadShopsRuntimeConfigOnline, adminUpdateCommonShopItemOnline, adminUpdatePremiumShopItemOnline, loadBonusConfigOnline, adminUpdateBonusConfigOnline } from './api.js?v=18.2.6';
+import { SharedUniverseClient } from './world.js?v=18.2.6';
 
 const canvas = document.querySelector('#game');
 const ctx = canvas.getContext('2d');
@@ -526,12 +526,33 @@ function handleSharedUniverseMessage(msg){
     sharedUniverseRuntime.event=msg.event||null;
     if(previousEventId!==nextEventId||!nextEventId||msg.event?.complete)purgeSharedEventEntities(nextEventId&&!msg.event?.complete?nextEventId:null);
     galaxyEventRuntime.convoy=msg.event?.convoy?{...msg.event.convoy}:null;
-    if(msg.event){const ev=currentGalaxyEvent(),rec=galaxyEventRecord(ev);rec.value=Math.max(0,Number(msg.event.progress)||0);rec.complete=!!msg.event.complete;}
+    // O progresso global da SALA nunca substitui a missão individual persistida no Supabase.
     return;
   }
-  if(msg.type==='event_credit'){
-    sharedUniverseRuntime.event=msg.event||sharedUniverseRuntime.event;const ev=currentGalaxyEvent(),rec=galaxyEventRecord(ev);if(!rec.rewarded)completeGalaxyEvent(ev);return;
+  if(msg.type==='event_personal_update'){
+    const ev=currentGalaxyEvent(),data=msg.personal||{};
+    if(!ev?.eventId||String(msg.eventId)!==String(ev.eventId)||String(data.eventId)!==String(ev.eventId))return;
+    const rec=galaxyEventRecord(ev);
+    rec.value=Math.max(Number(rec.value)||0,Math.max(0,Math.min(ev.target,Number(data.progress)||0)));
+    // Não remover nunca um estado de recompensa já entregue no save.
+    rec.rewarded=!!rec.rewarded||!!data.rewarded;
+    rec.complete=!!rec.rewarded||!!data.complete;
+    if(data.rewardedNow&&data.state){
+      // O servidor já aplicou créditos/STL/XP e registrou a recompensa UMA vez.
+      installEconomyState(data.state);
+      const fresh=galaxyEventRecord(ev);fresh.value=ev.target;fresh.complete=true;fresh.rewarded=true;
+      playSfx('event');triggerCombatFlash('gold');
+      const r=data.reward||{};
+      queueCelebration('mission',ev.name,`+${fmt(r.credits||0)} CR • +${fmt(r.uridium||0)} STL • +${fmt(r.xp||0)} XP`);
+      pushActivity(`EVENTO • ${ev.name} concluído e registrado no servidor`,'reward');
+      claimEventDesignerDrop(ev).catch(()=>{});
+    }
+    saveGame();renderGalaxyEvent();renderGalaxyEventHud(ev,galaxyEventRecord(ev));return;
   }
+  if(msg.type==='event_personal_error'){
+    showToast(msg.message||'Falha ao sincronizar evento.','system');return;
+  }
+  if(msg.type==='event_credit')return; // Evento legado: premiação agora exclusivamente via RPC.
 }
 const sharedUniverse=new SharedUniverseClient({
   getCredentials:()=>getSessionCredentials(),
@@ -2915,6 +2936,7 @@ function triggerCombatFlash(kind='cyan'){
   if(!ui.combatFlash)return;ui.combatFlash.className=`combat-flash flash-${kind}`;void ui.combatFlash.offsetWidth;ui.combatFlash.classList.add('play');setTimeout(()=>ui.combatFlash?.classList.remove('play'),420);
 }
 function completeGalaxyEvent(ev=currentGalaxyEvent()){
+  if(sharedUniverseMap())return; // V18.2.6: somente Supabase credita eventos multiplayer.
   const rec=galaxyEventRecord(ev);if(rec.rewarded)return;rec.value=ev.target;rec.complete=true;rec.rewarded=true;const r=galaxyEventRewardScaled(ev);progress.profile.credits+=r.credits;progress.profile.uridium+=r.uridium;progress.profile.xp+=r.xp;telemetryEconomy('event',{cr:r.credits,stl:r.uridium,xp:r.xp});normalizeWarfrontProgress();progress.warfront.skillCores+=r.cores;processPlayerLevelUps();playSfx('event');triggerCombatFlash('gold');queueCelebration('mission',ev.name,`+${fmt(r.credits)} CR • +${fmt(r.uridium)} STL • +${fmt(r.xp)} XP${r.cores?` • +${r.cores} CORE`:''}`);pushActivity(`EVENTO • ${ev.name} concluído • +${fmt(r.credits)} CR • +${fmt(r.uridium)} STL`,'reward');saveGame();renderGalaxyEvent();claimEventDesignerDrop(ev).catch(()=>{});
 }
 function addGalaxyEventProgress(amount=1,ev=currentGalaxyEvent()){
@@ -2945,7 +2967,7 @@ function updateGalaxyConvoy(dt,ev,rec){const c=galaxyEventRuntime.convoy;if(!c||
   if(d<=14){rec.value=100;completeGalaxyEvent(ev);galaxyEventRuntime.convoy=null;}
   else if(c.hp<=0){playSfx('explosion');spawnExplosionFx(c.x,c.y,'#65dcff',true);showToast('COMBOIO DESTRUÍDO • novo cargueiro em 15s');galaxyEventRuntime.convoy=null;galaxyEventRuntime.retryAt=nowSec()+15;rec.value=0;}
 }
-function updateGalaxyEvent(dt){if(!progress)return;if(isGalaxyGateMap()){ui.galaxyEventHud?.classList.add('hidden');return;}if(sharedUniverseMap()){const ev=currentGalaxyEvent();if(ev.id==='none'){ui.galaxyEventHud?.classList.add('hidden');return;}const rec=galaxyEventRecord(ev);if(sharedWorldEvent()){rec.value=Math.max(0,Number(sharedWorldEvent().progress)||0);rec.complete=!!sharedWorldEvent().complete;galaxyEventRuntime.convoy=sharedWorldEvent().convoy?{...sharedWorldEvent().convoy}:null;}renderGalaxyEventHud(ev,rec);return;}ensureGalaxyEventWorld();const ev=currentGalaxyEvent(),rec=galaxyEventRecord(ev);if(galaxyEventProfile(ev).mode==='convoy'&&!rec.complete&&galaxyEventEligible(ev))updateGalaxyConvoy(dt,ev,rec);renderGalaxyEventHud(ev,rec);}
+function updateGalaxyEvent(dt){if(!progress)return;if(isGalaxyGateMap()){ui.galaxyEventHud?.classList.add('hidden');return;}if(sharedUniverseMap()){const ev=currentGalaxyEvent();if(ev.id==='none'){ui.galaxyEventHud?.classList.add('hidden');return;}const rec=galaxyEventRecord(ev);if(sharedWorldEvent()){galaxyEventRuntime.convoy=sharedWorldEvent().convoy?{...sharedWorldEvent().convoy}:null;}renderGalaxyEventHud(ev,rec);return;}ensureGalaxyEventWorld();const ev=currentGalaxyEvent(),rec=galaxyEventRecord(ev);if(galaxyEventProfile(ev).mode==='convoy'&&!rec.complete&&galaxyEventEligible(ev))updateGalaxyConvoy(dt,ev,rec);renderGalaxyEventHud(ev,rec);}
 function galaxyEventKill(enemy){if(!enemy)return;if(sharedUniverseMap())return;const ev=currentGalaxyEvent(),rec=galaxyEventRecord(ev),mode=galaxyEventProfile(ev).mode;if(rec.complete)return;if(mode==='battle_wave'&&state.currentMap?.battle)addGalaxyEventProgress(1,ev);else if(enemy.eventNpc&&enemy.eventId===ev.eventId&&(mode==='wave'||mode==='boss'))addGalaxyEventProgress(1,ev);}
 function galaxyEventOrePickup(ore,amount){if(sharedUniverseMap())return;const ev=currentGalaxyEvent(),rec=galaxyEventRecord(ev),mode=galaxyEventProfile(ev).mode;if(rec.complete||mode!=='ore'||!ore?.eventOre||ore.eventId!==ev.eventId)return;addGalaxyEventProgress(amount,ev);}
 function renderGalaxyEventHud(ev=currentGalaxyEvent(),rec=galaxyEventRecord(ev)){
@@ -3576,8 +3598,8 @@ async function flushCloudSave(force=false){
   cloudBusy=true;setSync('SALVANDO','busy');
   try{const result=await saveCloudSave(progress);if(result?.statePatch){const patch=result.statePatch;if(Number.isFinite(Number(patch.credits)))progress.profile.credits=Number(patch.credits);if(patch.serverEconomy)progress.serverEconomy={...(progress.serverEconomy||{}),...patch.serverEconomy};localStorage.setItem(saveKey(),JSON.stringify(progress));updateUI();if(patch.serverEconomy?.lastClanCollectionDate)showToast('CLÃ • coleta diária de 10% sincronizada','system');}cloudDirty=false;setSync('ONLINE','ok');}
   catch(e){console.warn('cloud save',e);
-    if(e?.code==='SAVE_COUPON_STALE'){
-      try{const remote=await loadCloudSave();if(remote?.state){installEconomyState(remote.state);setSync('ONLINE','ok');showToast('Prêmios de cupom sincronizados com o servidor','reward');return;}}catch(syncErr){console.warn('coupon save reconcile',syncErr);}
+    if(e?.code==='SAVE_COUPON_STALE'||e?.code==='SAVE_EVENT_STALE'){
+      try{const remote=await loadCloudSave();if(remote?.state){installEconomyState(remote.state);setSync('ONLINE','ok');showToast('Recompensas sincronizadas com o servidor','reward');return;}}catch(syncErr){console.warn('coupon save reconcile',syncErr);}
     }
     if(e?.code==='SAVE_OWNER_MISMATCH'){setSync('BLOQUEADO','err');forceLogoutBecauseSessionMoved('Proteção de conta: um save de outro usuário foi bloqueado.',getUser()?.id||null);return;}setSync('OFFLINE','err');}
   finally{cloudBusy=false;}
@@ -4120,7 +4142,7 @@ function spawnOre(type=null){
 // Posições e reaparecimento persistem no save: saltar mapas/relogar não gera caixas extras.
 // V18.2.4: setores comuns X-1..X-4 = 20; setores Battle 4-1..4-3 = 30.
 // Portais Astrais (Aurora/Nexus/Eclipse) NÃO oferecem BOX BÔNUS.
-// V18.2.5 • Configuração ao vivo da BOX BÔNUS e do Materializador (somente ADM edita).
+// V18.2.6 • Configuração ao vivo da BOX BÔNUS e do Materializador (somente ADM edita).
 const BONUS_CONFIG_DEFAULT={
   map_counts:{x1:20,x2:20,x3:20,x4:20,b41:30,b42:30,b43:30},
   respawn_min_ms:40000,respawn_max_ms:70000,premium_discount_pct:10,
@@ -6869,7 +6891,7 @@ async function loadAdminRuntimeMonitor(force=false){
   finally{adminRuntimeMonitor.busy=false;if(ui.adminRuntimeMonitorRefresh)ui.adminRuntimeMonitorRefresh.disabled=false;}
 }
 
-// V18.2.5 • Editor da BOX BÔNUS / custos dos Portais.
+// V18.2.6 • Editor da BOX BÔNUS / custos dos Portais.
 const adminBonusEditor={snapshot:null,busy:false};
 function adminBonusMessage(message,kind='muted'){
   if(ui.adminRuntimeBonusMessage){ui.adminRuntimeBonusMessage.textContent=message;ui.adminRuntimeBonusMessage.className=`admin-runtime-interface-message ${kind}`;}

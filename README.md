@@ -1,3 +1,5 @@
+> **V18.2.6 — Eventos por período:** progresso persistido por jogador no Supabase, sem reinício ao trocar de mapa ou atualizar. Consulte `EVENTOS_PERIODO_V18_2_6.md`.
+
 ### V18.2.5 — BOX BÔNUS EDITÁVEL PELO ADM (ATUAL)
 
 Nova aba **ADM → BOX BÔNUS**: mapa, respawn, pesos e quantidades de prêmios, preços dos três portais (STL ou Poeira) e desconto Premium. Tudo salvo no Supabase e aplicado sem ZIP em alterações futuras. Portais Astrais continuam sem BOX. Consulte `ADMIN_BONUS_LIVE_V18_2_5.md`. Banco de produção já migrado.

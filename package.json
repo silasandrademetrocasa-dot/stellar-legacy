@@ -1,6 +1,6 @@
 {
   "name": "stellar-legacy",
-  "version": "18.2.5",
+  "version": "18.2.6",
   "type": "module",
   "scripts": {
     "start": "node server/index.js",
@@ -15,5 +15,5 @@
   "engines": {
     "node": ">=18"
   },
-  "release": "admin-bonus-live-v18-2-5"
+  "release": "event-period-persistence-v18-2-6"
 }

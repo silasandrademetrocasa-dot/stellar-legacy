@@ -154,6 +154,7 @@ class Room {
     this.convoy=null;
     this.convoyRetryAt=0;
     this.nextEventWaveAt=0;
+    this.nextEventBossAt=0;
     this.lastBroadcastAt=0;
     this.lastEventBroadcastAt=0;
     this.lastWarfrontBroadcastAt=0;
@@ -375,6 +376,7 @@ class Room {
     if(!force&&this.event?.eventId===ev.eventId)return;
     this.clearEventEntities(this.event?'event_rotate':'event_start');
     this.event={...ev,progress:0,complete:false};
+    this.nextEventBossAt=0;
     if(!this.eventEligible(ev))return;
     const profile=this.eventProfile(ev),mode=profile.mode;
     if(mode==='wave'||mode==='battle_wave') this.spawnEventWave(profile.waveCount||6);
@@ -524,12 +526,28 @@ class Room {
     for(const c of this.clients){if(c===exclude||c.readyState!==WebSocket.OPEN)continue;try{c.send(wire);}catch{}}
   }
   broadcastEvent(force=false){const now=nowMs();if(!force&&now-this.lastEventBroadcastAt<EVENT_BROADCAST_INTERVAL_MS)return;this.lastEventBroadcastAt=now;this.broadcast({type:'event_update',event:this.eventPayload(),serverTime:now});}
+  // V18.2.6: progresso é individual, por EVENT ID + janela, persistido no Supabase.
+  sendPersonalEventStatus(ws,ev=this.event){
+    if(!ws?.identity?.accessToken||!ev?.eventId||!this.world.loadPlayerEventProgress)return;
+    this.world.loadPlayerEventProgress(ws.identity.accessToken,ev.eventId)
+      .then(data=>{if(data&&ws.readyState===WebSocket.OPEN&&ws.room?.event?.eventId===ev.eventId)
+        safeJsonSend(ws,{type:'event_personal_update',eventId:ev.eventId,personal:data});})
+      .catch(err=>console.warn('[event-status]',err?.message||err));
+  }
+  creditPersonalEvent(ws,ev,amount){
+    if(!ws?.identity?.accessToken||!ev?.eventId||!this.world.recordPlayerEventProgress)return;
+    this.world.recordPlayerEventProgress(ws.identity.accessToken,ev.eventId,amount)
+      .then(data=>{if(data&&ws.readyState===WebSocket.OPEN&&ws.room?.event?.eventId===ev.eventId)
+        safeJsonSend(ws,{type:'event_personal_update',eventId:ev.eventId,personal:data});})
+      .catch(err=>{console.warn('[event-progress]',err?.message||err);safeJsonSend(ws,{type:'event_personal_error',eventId:ev.eventId,message:'Não foi possível salvar o evento. Tente novamente.'});});
+  }
 
   addClient(ws,player){
     // Sala pode ter ficado em repouso: atualizar evento antes do snapshot de quem retornou.
     this.ensureEvent(false);
     this.clients.add(ws);this.players.set(player.userId,player);ws.room=this;ws.player=player;
     safeJsonSend(ws,this.snapshot(player.userId));
+    this.sendPersonalEventStatus(ws);
     // Snapshot inicial já contém todos os NPCs: ele vira a base do delta para não reenviar tudo em seguida.
     ws.npcNetState=new Map([...this.npcs.values()].map(e=>[e.id,this.npcNetFrame(e)]));
     ws.lastNpcFarRefreshAt=nowMs();
@@ -663,9 +681,12 @@ class Room {
     // A BOX nunca é compartilhada. Mesmo se o dono ficou inativo (>120s), ela continua sendo dele.
     if(ownerRoomClient&&!eligible.includes(ownerRoomClient))safeJsonSend(ownerRoomClient,{type:'npc_loot_credit',entity:dead,ownerUserId:ownerId});
 
-    const mode=this.eventMode();
-    if(mode==='battle_wave'&&!this.event?.complete)this.addEventProgress(1);
-    else if(e.eventNpc&&this.event?.eventId===e.eventId&&(mode==='wave'||mode==='boss'))this.addEventProgress(1);
+    const mode=this.eventMode(),ev=this.event;
+    if(ev && ((mode==='battle_wave'&&this.map.battle)||(e.eventNpc&&ev.eventId===e.eventId&&(mode==='wave'||mode==='boss')))){
+      // Mesmos elegíveis do abate; cada conta avança UMA vez, independente da sala.
+      for(const c of eligible)this.creditPersonalEvent(c,ev,1);
+    }
+    if(e.eventNpc&&this.event?.eventId===e.eventId&&mode==='boss')this.nextEventBossAt=nowMs()+25000;
     if(!e.eventNpc){const delay=this.world.npcRespawnDelay(e.type);if(this.desiredNpcCount(e.type)>0)this.respawns.push({kind:'npc',type:e.type,at:nowMs()+delay});}
   }
 
@@ -675,19 +696,15 @@ class Room {
     this.ores.delete(o.id);this.eventParticipants.add(p.userId);
     safeJsonSend(ws,{type:'ore_collected',ore:o});this.broadcast({type:'ore_remove',entityId:o.id,collectorUserId:p.userId},ws);
     const mode=this.eventMode();
-    if(o.eventOre&&this.event?.eventId===o.eventId&&mode==='ore')this.addEventProgress(o.amount);
+    if(o.eventOre&&this.event?.eventId===o.eventId&&mode==='ore')this.creditPersonalEvent(ws,this.event,o.amount);
     if(!o.eventOre){const min=Math.max(1000,Number(this.map.oreRespawnMinMs)||5000),max=Math.max(min,Number(this.map.oreRespawnMaxMs)||12000);this.oreRespawns.push({type:o.type,at:nowMs()+rand(min,max)});}
   }
 
   addEventProgress(amount){
-    if(!this.event||this.event.complete)return;
+    if(!this.event)return;
+    // Indicador de sala apenas: não pode finalizar o evento pessoal de outros pilotos.
     this.event.progress=Math.min(this.event.target,Math.max(0,this.event.progress+Math.max(0,Number(amount)||0)));
-    if(this.event.progress>=this.event.target){
-      this.event.complete=true;this.broadcastEvent(true);
-      for(const c of this.clients){if(this.eventParticipants.has(c.player?.userId))safeJsonSend(c,{type:'event_credit',event:this.eventPayload()});}
-      this.clearEventEntities('event_complete',false);
-      if(this.clients.size)this.broadcast(this.snapshot());
-    }else this.broadcastEvent(true);
+    this.broadcastEvent(true);
   }
 
   tick(dt){
@@ -718,13 +735,23 @@ class Room {
         const alive=[...this.npcs.values()].filter(e=>e.eventNpc&&e.eventId===this.event.eventId).length,minimum=profile.minAlive||3,targetWave=profile.waveCount||6;
         if(alive<minimum)this.spawnEventWave(Math.max(1,targetWave-alive));
       }
+      // O BOSS retorna após 25s para permitir que outros pilotos concluam a mesma janela.
+      // Quem já recebeu o prêmio continua bloqueado pelo registro pessoal no banco.
+      if(mode==='boss'&&now>=this.nextEventBossAt&&!([...this.npcs.values()].some(e=>e.eventNpc&&e.eventId===this.event.eventId&&e.hp>0))){
+        this.spawnPrime();this.nextEventBossAt=now+25000;
+      }
       if(mode==='ore'){
         const alive=[...this.ores.values()].filter(o=>o.eventOre&&o.eventId===this.event.eventId).length,minimum=profile.oreRespawnMin||5,targetCount=profile.oreCount||12;
         if(alive<minimum)this.spawnEventOres(Math.max(1,targetCount-alive));
       }
       if(mode==='convoy'){
         if(!this.convoy&&now>=this.convoyRetryAt)this.startConvoy();
-        if(this.convoy){const c=this.convoy;const close=[...this.players.values()].filter(p=>Math.hypot(p.x-c.x,p.y-c.y)<950);if(close.length){for(const p of close)this.eventParticipants.add(p.userId);const dx=c.tx-c.x,dy=c.ty-c.y,d=Math.hypot(dx,dy);if(d>10){const step=Math.min(d,c.speed*dt);c.x+=dx/Math.max(1,d)*step;c.y+=dy/Math.max(1,d)*step;this.event.progress=Math.max(this.event.progress,Math.round((1-d/c.totalDistance)*100));}if(d<=14)this.addEventProgress(100-this.event.progress);}
+        if(this.convoy){const c=this.convoy;const close=[...this.players.values()].filter(p=>Math.hypot(p.x-c.x,p.y-c.y)<950);if(close.length){for(const p of close)this.eventParticipants.add(p.userId);const dx=c.tx-c.x,dy=c.ty-c.y,d=Math.hypot(dx,dy);if(d>10){const step=Math.min(d,c.speed*dt);c.x+=dx/Math.max(1,d)*step;c.y+=dy/Math.max(1,d)*step;this.event.progress=Math.max(this.event.progress,Math.round((1-d/c.totalDistance)*100));}if(d<=14){
+        const current=this.event;
+        this.addEventProgress(100-this.event.progress);
+        for(const cws of this.clients){const pilot=cws.player;if(pilot&&Math.hypot(pilot.x-c.x,pilot.y-c.y)<950)this.creditPersonalEvent(cws,current,100);}
+        this.convoy=null;this.convoyRetryAt=now+15000;
+      }}
           const nearby=[...this.npcs.values()].filter(e=>e.eventNpc&&e.hp>0&&Math.hypot(e.x-c.x,e.y-c.y)<270);if(nearby.length&&now-c.lastHitAt>800){c.lastHitAt=now;const dmg=nearby.reduce((sum,e)=>sum+Math.max(1000,e.damage*.12),0);c.hp=Math.max(0,c.hp-dmg);if(c.hp<=0){this.convoy=null;this.event.progress=0;this.convoyRetryAt=now+15000;this.broadcastEvent(true);}}
           if(now>=this.nextEventWaveAt){this.nextEventWaveAt=now+(profile.waveRespawnMs||12000);this.spawnEventWave(profile.waveCount||3);}
         }
@@ -735,7 +762,7 @@ class Room {
   }
 }
 
-export function attachSharedUniverse(server,{authenticate,loadLiveOps,loadBattleGroup,loadNpcConfig,loadWorldConfig}){
+export function attachSharedUniverse(server,{authenticate,loadLiveOps,loadBattleGroup,loadNpcConfig,loadWorldConfig,loadPlayerEventProgress,recordPlayerEventProgress}){
   const wss=new WebSocketServer({
     server,
     path:'/ws',
@@ -762,6 +789,8 @@ export function attachSharedUniverse(server,{authenticate,loadLiveOps,loadBattle
     portalEdgePoint(fromSector,toSector,map){const a=this.worldRuntime.sectors.get(String(fromSector||'')),b=this.worldRuntime.sectors.get(String(toSector||''));const w=map?.world?.w||6000,h=map?.world?.h||4500,inset=175,cx=w/2,cy=h/2;if(!a||!b)return{x:cx,y:cy};const vx=((Number(b.graph_x)-Number(a.graph_x))/100)*w,vy=((Number(b.graph_y)-Number(a.graph_y))/100)*h,ax=Math.abs(vx),ay=Math.abs(vy),tx=ax>0?(cx-inset)/ax:Infinity,ty=ay>0?(cy-inset)/ay:Infinity,t=Math.max(0,Math.min(tx,ty));return{x:Math.round(Math.max(inset,Math.min(w-inset,cx+vx*t))),y:Math.round(Math.max(inset,Math.min(h-inset,cy+vy*t)))};},
     portalsForRoom(mapId,territoryFaction){const origin=this.sectorForRoom(mapId,territoryFaction);if(!origin)return MAPS[mapId]?.portals||[];const map=this.mapDefinition(mapId)||MAPS.x1,out=[];for(const link of this.worldRuntime.portals){if(link.enabled===false)continue;let target=null;if(link.from_sector===origin.sector_label)target=link.to_sector;else if(link.bidirectional!==false&&link.to_sector===origin.sector_label)target=link.from_sector;if(!target)continue;const dest=this.worldRuntime.sectors.get(target);if(!dest||dest.enabled===false)continue;const pos=this.portalEdgePoint(origin.sector_label,target,map);out.push({...pos,to:dest.map_id,targetLabel:target,targetTerritoryFaction:dest.territory_faction||null,battle:!!this.mapDefinition(dest.map_id)?.battle});}return out;},
     loadBattleGroup:loadBattleGroup||null,
+    loadPlayerEventProgress:loadPlayerEventProgress||null,
+    recordPlayerEventProgress:recordPlayerEventProgress||null,
     npcActivity:new Map(),
     announcementCooldowns:new Map(),
     npcDefinition(type){

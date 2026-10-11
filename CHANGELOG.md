@@ -1,3 +1,15 @@
+## V18.2.6 — EVENTOS POR PERÍODO (10/10/2026)
+
+- Corrige reinício do progresso de eventos ao atualizar o navegador, trocar de mapa ou recriar sala.
+- Progresso individual por `user_id + event_id` persistido no Supabase e sincronizado quando o piloto entra no mapa.
+- Abates e minérios coletados somam continuamente na mesma janela, independentemente do mapa elegível.
+- Recompensa de conclusão contabilizada uma vez no Supabase, com registro imutável no save e proteção contra saves antigos.
+- Mensagens `event_personal_update` são independentes do contador coletivo da sala.
+- Novo BOSS de evento pode voltar após 25s para outros participantes, sem recompensar novamente quem já concluiu.
+- Corrigido erro `SAVE_EVENT_STALE` com sincronização da versão atual do jogador.
+- Mantidos: Loja, Bonus Boxes, Poeira Stellar, giros, Modo BAIXO, Smart Missions e painel ADM.
+- Banco de produção já atualizado; migração incluída em `sql/V18_2_6_EVENTOS_POR_PERIODO.sql` apenas para documentação.
+
 # V18.2.5 — ADM BOX BÔNUS LIVE
 
 - Nova aba **BOX BÔNUS** na Central ADM, com quantidades por mapa, respawn, mínimos/máximos e pesos das sete recompensas, preço de STL e Poeira por portal, desconto Premium.
