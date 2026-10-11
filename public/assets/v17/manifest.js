@@ -1,4 +1,5 @@
 export const GAME_ASSETS = {
+  bonus: { box: '/assets/v18/bonus/bonus-box.webp', dust: '/assets/v18/bonus/stellar-dust.webp' },
   branding: {
     logo: '/assets/v8/branding/logo-v8.png',
     earth: '/assets/v8/branding/earth.png',

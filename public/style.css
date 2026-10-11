@@ -2657,3 +2657,13 @@ body[data-quality="low"] .pet-gear {
 .pilot-journey-panel .journey-toggle>span{white-space:nowrap;flex-shrink:0}
 .smart-mission-notice{font-size:10px;line-height:1.5;color:#9cddca;padding:9px 12px;margin-bottom:12px;background:rgba(7,38,35,.65);border:1px solid rgba(94,213,167,.20);border-radius:10px}
 @media(max-width:680px){.pilot-journey-panel.collapsed .journey-toggle{padding:9px 11px}.pilot-journey-panel.collapsed .journey-toggle h3{font-size:11px}.smart-mission-notice{font-size:9px}}
+
+/* V18.2.3 • Poeira Stellar / Bonus Box - leve também no Android */
+.gate-dust-wallet{display:inline-flex;align-items:center;gap:4px;margin-left:9px;color:#dfc7ff;font-size:10px}
+.gate-dust-wallet img,.gate-dust-caption img{width:25px;height:25px;object-fit:contain}
+.gate-dust-spin-panel{padding:9px 10px;margin:8px 0;border:1px solid rgba(164,107,255,.35);border-radius:12px;background:rgba(62,22,97,.22)}
+.gate-dust-caption{display:flex;align-items:center;gap:8px;font-size:10px;font-weight:900;color:#dac4ff;letter-spacing:.04em;margin-bottom:7px}
+.gate-dust-caption small{display:block;color:#9baec1;font-weight:600;letter-spacing:0;margin-top:2px}
+.gate-dust-btn{border-color:rgba(173,115,255,.42)!important;background:rgba(69,34,114,.34)!important}
+.gate-dust-btn:disabled{opacity:.38!important}
+@media(max-width:680px){.gate-dust-wallet{font-size:9px;margin-left:4px}.gate-dust-wallet img{width:18px;height:18px}.gate-dust-spin-panel{padding:8px}}

@@ -483,3 +483,12 @@ Versão anterior mantida no histórico do projeto base.
 - Render materializa também `npcs.runtime.json`, mantendo os quatro runtimes no mesmo padrão de snapshot temporário.
 - Botão `ATUALIZAR RUNTIME` força apenas a renovação dos snapshots; não edita configuração.
 - Nenhum editor de balanceamento foi exposto nesta etapa.
+
+## V18.2.3 — BOX BÔNUS E POEIRA STELLAR
+
+- Novo sprite de BOX BÔNUS no mapa (WEBP otimizado) e ícone de Poeira Stellar.
+- Box aleatória (um entre sete prêmios): PLS-1/PLS-2/PLS-3/SIP-2, CR, STL e Poeira Stellar.
+- Box em todos os mapas, reposição 40–70 s e persistência no save individual por mapa.
+- Coleta manual por proximidade e automática pelo AUX-9 em modo Salvager.
+- Materializador aceita STL ou Poeira Stellar; uma Poeira por giro. Todos os protocolos a 100 STL, ou 90 STL com Premium.
+- Pagamento validado pelo servidor; save, cupons, Smart Missions e qualidade BAIXA preservados.

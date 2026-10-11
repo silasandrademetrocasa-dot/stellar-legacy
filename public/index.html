@@ -6,7 +6,7 @@
 <meta content="width=device-width,initial-scale=1,user-scalable=no" name="viewport"/>
 <meta content="#030816" name="theme-color"/>
 <title>Stellar Legacy</title>
-<link href="/style.css?v=18.2.2" rel="stylesheet"/>
+<link href="/style.css?v=18.2.3" rel="stylesheet"/>
 </head>
 <body>
 <div id="app">
@@ -398,10 +398,11 @@
             <div class="eyebrow">GERADOR GALÁCTICO</div>
             <h3>Sortear energia</h3>
           </div>
-          <div class="gate-generator-wallet">STL <b id="gateUriText">0</b></div>
+          <div class="gate-generator-wallet">STL <b id="gateUriText">0</b> <span class="gate-dust-wallet"><img src="/assets/v18/bonus/stellar-dust.webp" alt=""/> POEIRA <b id="gateDustText">0</b></span></div>
         </div>
-        <p class="muted" id="gateSpinCostNote">Cada sorteio custa <b>100 Stellarium</b>. PREMIUM recebe <b>10% de desconto</b> no Materializador. Pode vir peça do portal selecionado, <b>Núcleos Quânticos</b>, munição, míssil, Voidite, Créditos, Bônus de Salto ou <b>Vida Astral Reserva</b>.</p>
+        <p class="muted" id="gateSpinCostNote">Cada sorteio custa <b>100 STL</b> nos três portais ou <b>1 Poeira Stellar</b> por giro. PREMIUM paga <b>90 STL</b> por giro; Poeira sempre custa <b>1 unidade</b>. Pode vir peça do portal selecionado, <b>Núcleos Quânticos</b>, munição, míssil, Voidite, Créditos, Bônus de Salto ou <b>Vida Astral Reserva</b>.</p>
         <div class="gate-spin-buttons" id="gateSpinButtons"></div>
+        <div class="gate-dust-spin-panel"><div class="gate-dust-caption"><img src="/assets/v18/bonus/stellar-dust.webp" alt=""/><span>GIRAR COM POEIRA STELLAR <small>1 POEIRA = 1 GIRO • SEM STL</small></span></div><div class="gate-spin-buttons" id="gateDustSpinButtons"></div></div>
         <div class="gate-generator-inventory">
           <div><span>BÔNUS DE SALTO</span><b id="gateJumpBonus">0</b></div>
           <div><span>VIDAS RESERVA</span><b id="gateLifeBonus">0</b></div>
@@ -939,6 +940,6 @@
   </div>
 </div>
 </div>
-<script src="/game.js?v=18.2.2" type="module"></script>
+<script src="/game.js?v=18.2.3" type="module"></script>
 </body>
 </html>

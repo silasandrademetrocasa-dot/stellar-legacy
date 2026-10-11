@@ -1,0 +1,14 @@
+STELLAR LEGACY V18.2.3 - BOX BONUS + POEIRA STELLAR
+
+ZIP COMPLETO PARA INSTALADOR DO GITHUB.
+
+1. Envie o ZIP à raiz do repositório stellar-legacy.
+2. Rode Actions > Instalar versão do Stellar Legacy > Run workflow.
+3. Aguarde deploy Render e atualize o jogo.
+
+NOVO: 7 prêmios aleatórios na BOX BÔNUS; coleta manual/AUX Salvager;
+Poeira Stellar 1 unidade = 1 giro de portal sem gastar STL.
+Agora 100 STL/giros dos 3 portais, Premium 90 STL.
+
+Os preços já foram ajustados no Supabase principal. Não é necessário executar SQL.
+Instruções detalhadas: BONUS_BOX_POEIRA_V18_2_3.md.

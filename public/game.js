@@ -1,7 +1,7 @@
-import { FACTIONS, SHIPS, ITEMS, LASER_AMMO, ROCKETS, NPC_TYPES, MAPS, RESOURCES } from './data.js?v=18.2.2';
-import { GAME_ASSETS } from './assets/v17/manifest.js?v=18.2.2';
-import { signUp, signIn, requestPasswordReset, restorePasswordRecoveryFromUrl, restoreSession, signOutLocal, checkGameSession, endGameSession, getUser, getSessionCredentials, loadCloudSave, saveCloudSave, updateCallsign, updatePassword, loadRankings, loadAuctionBids, saveAuctionBidOnline, markAuctionBidStatusOnline, loadAuctionMarket, upsertPlayerPresenceOnline, loadMapPresenceOnline, savePlayerLocationCheckpointOnline, loadPlayerLocationCheckpointOnline, removePlayerPresenceOnline, queuePvpAttackOnline, consumePvpDamageEventsOnline, syncArenaProfileOnline, loadArenaState, loadArenaDailyRewardStatus, claimArenaDailyReward, loadArenaOpponents, loadArenaHistory, arenaAttackOnline, listClansOnline, loadMyClanOnline, createClanOnline, joinClanOnline, leaveClanOnline, transferClanCreditsOnline, claimClanCreditGrantsOnline, recordClanAlienKillOnline, getPremiumShopOnline, testPurchasePremiumOnline, loadWarfrontStateOnline, hitWorldBossOnline, claimWorldBossRewardOnline, declareClanWarOnline, recordClanWarScoreOnline, loadLiveOpsOnline, adminUpdateLiveEventScheduleOnline, purchaseLiveCatalogOnline, economyActionOnline, getChatHistoryOnline, sendChatMessageOnline, redeemGameCouponOnline, getMyDesignersOnline, setDesignLoadoutOnline, claimGateDroneDesignOnline, claimEventDesignerOnline, getAdminStatus, adminSearchAccounts, adminRecentActions, adminBanAccount, adminUnbanAccount, adminResetAccount, adminDeleteAccount, pushTelemetryBatch, adminTelemetryOverview, adminPlayerTelemetry, getBattleGroupOnline, createBattleGroupOnline, inviteBattleGroupOnline, searchBattleGroupPlayersOnline, inviteBattleGroupUserOnline, respondBattleGroupInviteOnline, leaveBattleGroupOnline, kickBattleGroupMemberOnline, setBattleGroupRallyOnline, loadRuntimeConfigOnline, loadNpcRuntimeConfigOnline, loadWorldRuntimeConfigOnline, loadSystemsRuntimeConfigOnline, loadAdminRuntimeMonitorOnline, adminUpdateRuntimeModuleOnline, adminUpdateNpcRuntimeOnline, adminUpdateNpcSpawnRuntimeOnline, adminUpdateWorldMapOnline, adminUpdateWorldResourceOnline, adminUpdateWorldSectorOnline, adminUpdateWorldPortalOnline, adminUpdateWorldResourcePoolOnline, adminUpdateMissionCategoryOnline, adminUpdateEconomyServiceOnline, adminUpdateCraftingRecipeOnline, loadBattlePassRuntimeConfigOnline, adminUpdateBattlePassSeasonOnline, adminUpdateBattlePassTierOnline, loadShopsRuntimeConfigOnline, adminUpdateCommonShopItemOnline, adminUpdatePremiumShopItemOnline } from './api.js?v=18.2.2';
-import { SharedUniverseClient } from './world.js?v=18.2.2';
+import { FACTIONS, SHIPS, ITEMS, LASER_AMMO, ROCKETS, NPC_TYPES, MAPS, RESOURCES } from './data.js?v=18.2.3';
+import { GAME_ASSETS } from './assets/v17/manifest.js?v=18.2.3';
+import { signUp, signIn, requestPasswordReset, restorePasswordRecoveryFromUrl, restoreSession, signOutLocal, checkGameSession, endGameSession, getUser, getSessionCredentials, loadCloudSave, saveCloudSave, updateCallsign, updatePassword, loadRankings, loadAuctionBids, saveAuctionBidOnline, markAuctionBidStatusOnline, loadAuctionMarket, upsertPlayerPresenceOnline, loadMapPresenceOnline, savePlayerLocationCheckpointOnline, loadPlayerLocationCheckpointOnline, removePlayerPresenceOnline, queuePvpAttackOnline, consumePvpDamageEventsOnline, syncArenaProfileOnline, loadArenaState, loadArenaDailyRewardStatus, claimArenaDailyReward, loadArenaOpponents, loadArenaHistory, arenaAttackOnline, listClansOnline, loadMyClanOnline, createClanOnline, joinClanOnline, leaveClanOnline, transferClanCreditsOnline, claimClanCreditGrantsOnline, recordClanAlienKillOnline, getPremiumShopOnline, testPurchasePremiumOnline, loadWarfrontStateOnline, hitWorldBossOnline, claimWorldBossRewardOnline, declareClanWarOnline, recordClanWarScoreOnline, loadLiveOpsOnline, adminUpdateLiveEventScheduleOnline, purchaseLiveCatalogOnline, economyActionOnline, getChatHistoryOnline, sendChatMessageOnline, redeemGameCouponOnline, getMyDesignersOnline, setDesignLoadoutOnline, claimGateDroneDesignOnline, claimEventDesignerOnline, getAdminStatus, adminSearchAccounts, adminRecentActions, adminBanAccount, adminUnbanAccount, adminResetAccount, adminDeleteAccount, pushTelemetryBatch, adminTelemetryOverview, adminPlayerTelemetry, getBattleGroupOnline, createBattleGroupOnline, inviteBattleGroupOnline, searchBattleGroupPlayersOnline, inviteBattleGroupUserOnline, respondBattleGroupInviteOnline, leaveBattleGroupOnline, kickBattleGroupMemberOnline, setBattleGroupRallyOnline, loadRuntimeConfigOnline, loadNpcRuntimeConfigOnline, loadWorldRuntimeConfigOnline, loadSystemsRuntimeConfigOnline, loadAdminRuntimeMonitorOnline, adminUpdateRuntimeModuleOnline, adminUpdateNpcRuntimeOnline, adminUpdateNpcSpawnRuntimeOnline, adminUpdateWorldMapOnline, adminUpdateWorldResourceOnline, adminUpdateWorldSectorOnline, adminUpdateWorldPortalOnline, adminUpdateWorldResourcePoolOnline, adminUpdateMissionCategoryOnline, adminUpdateEconomyServiceOnline, adminUpdateCraftingRecipeOnline, loadBattlePassRuntimeConfigOnline, adminUpdateBattlePassSeasonOnline, adminUpdateBattlePassTierOnline, loadShopsRuntimeConfigOnline, adminUpdateCommonShopItemOnline, adminUpdatePremiumShopItemOnline } from './api.js?v=18.2.3';
+import { SharedUniverseClient } from './world.js?v=18.2.3';
 
 const canvas = document.querySelector('#game');
 const ctx = canvas.getContext('2d');
@@ -154,6 +154,7 @@ function trimAssetCache(){
 }
 function preloadAssets(){
   requestAssetImage(GAME_ASSETS.loot?.cargo);
+  requestAssetImage(GAME_ASSETS.bonus?.box);
   [...new Set(flattenAssetPaths(GAME_ASSETS))].filter(qualityShouldPreload).forEach(requestAssetImage);
   setTimeout(trimAssetCache,1500);
 }
@@ -165,6 +166,7 @@ function preloadActiveGameplayAssets(){
   const activeOreTypes=[...new Set((state.ores||[]).map(o=>o?.type).filter(Boolean))];
   activeOreTypes.forEach(type=>requestAssetImage(GAME_ASSETS.resources?.[type]));
   requestAssetImage(GAME_ASSETS.loot?.cargo);
+  requestAssetImage(GAME_ASSETS.bonus?.box);
   requestAssetImage(shipMapAsset(progress.activeShipId));
   requestAssetImage(shipCardAsset(progress.activeShipId));
   requestAssetImage(droneMapAsset(progress?.pet?.level>=10?'petElite':'pet'));
@@ -293,7 +295,7 @@ const ui = {
   toast: $('#toast'), baseTradePrompt: $('#baseTradePrompt'), baseTradePromptInfo: $('#baseTradePromptInfo'), repairModal: $('#repairModal'), repairModalText: $('#repairModalText'), repairShipName: $('#repairShipName'), repairBonusCount: $('#repairBonusCount'), repairUriCount: $('#repairUriCount'), repairUseBonus: $('#repairUseBonus'), repairUseUri: $('#repairUseUri'), repairUseAurora: $('#repairUseAurora'), gameCelebration: $('#gameCelebration'), celebrationPanel: $('#celebrationPanel'), celebrationKicker: $('#celebrationKicker'), celebrationTitle: $('#celebrationTitle'), celebrationSubtitle: $('#celebrationSubtitle'), portalPrompt: $('#portalPrompt'), portalPromptMap: $('#portalPromptMap'), jumpTransition: $('#jumpTransition'), jumpTitle: $('#jumpTitle'), jumpSubtitle: $('#jumpSubtitle'), factionModal: $('#factionModal'), factionCards: $('#factionCards'),
   mapBtn: $('#mapBtn'), mapModal: $('#mapModal'), closeMap: $('#closeMap'), mapNetwork: $('#mapNetwork'),
   missionBtn: $('#missionBtn'), missionActiveCount: $('#missionActiveCount'), missionModal: $('#missionModal'), closeMission: $('#closeMission'), missionContent: $('#missionContent'), passBtn: $('#passBtn'), passTierBadge: $('#passTierBadge'), passModal: $('#passModal'), closePass: $('#closePass'), passContent: $('#passContent'), activeMissionPanel: $('#activeMissionPanel'), activeMissionCategory: $('#activeMissionCategory'), activeMissionTitle: $('#activeMissionTitle'), activeMissionTask: $('#activeMissionTask'), activeMissionProgressBar: $('#activeMissionProgressBar'), activeMissionProgressText: $('#activeMissionProgressText'), activeMissionRewardFactor: $('#activeMissionRewardFactor'), activeMissionDots: $('#activeMissionDots'), activeMissionToggle: $('#activeMissionToggle'), activeMissionBody: $('#activeMissionBody'), activeMissionOpen: $('#activeMissionOpen'), activityPanel: $('#activityPanel'), activityFeed: $('#activityFeed'), activityClearBtn: $('#activityClearBtn'),
-  gateBtn: $('#gateBtn'), gatePieceBadge: $('#gatePieceBadge'), gateModal: $('#gateModal'), closeGate: $('#closeGate'), gatePiecesText: $('#gatePiecesText'), gateLivesText: $('#gateLivesText'), gateCompletedText: $('#gateCompletedText'), gatePieceGrid: $('#gatePieceGrid'), gateJumpBtn: $('#gateJumpBtn'), gateUriText: $('#gateUriText'), gateSpinButtons: $('#gateSpinButtons'), gateJumpBonus: $('#gateJumpBonus'), gateLifeBonus: $('#gateLifeBonus'), gateLogDisks: $('#gateLogDisks'), useLifeBonus: $('#useLifeBonus'), buyGateLife: $('#buyGateLife'), gateResultBox: $('#gateResultBox'), gateRoundsGrid: $('#gateRoundsGrid'), gateAlphaStatusTitle: $('#gateAlphaStatusTitle'), gateAlphaStatusText: $('#gateAlphaStatusText'), gateHud: $('#gateHud'), gateHudRound: $('#gateHudRound'), gateHudWave: $('#gateHudWave'), gateHudRemaining: $('#gateHudRemaining'), gateHudNext: $('#gateHudNext'), gateHudLives: $('#gateHudLives'),
+  gateBtn: $('#gateBtn'), gatePieceBadge: $('#gatePieceBadge'), gateModal: $('#gateModal'), closeGate: $('#closeGate'), gatePiecesText: $('#gatePiecesText'), gateLivesText: $('#gateLivesText'), gateCompletedText: $('#gateCompletedText'), gatePieceGrid: $('#gatePieceGrid'), gateJumpBtn: $('#gateJumpBtn'), gateUriText: $('#gateUriText'), gateDustText: $('#gateDustText'), gateSpinButtons: $('#gateSpinButtons'), gateDustSpinButtons: $('#gateDustSpinButtons'), gateJumpBonus: $('#gateJumpBonus'), gateLifeBonus: $('#gateLifeBonus'), gateLogDisks: $('#gateLogDisks'), useLifeBonus: $('#useLifeBonus'), buyGateLife: $('#buyGateLife'), gateResultBox: $('#gateResultBox'), gateRoundsGrid: $('#gateRoundsGrid'), gateAlphaStatusTitle: $('#gateAlphaStatusTitle'), gateAlphaStatusText: $('#gateAlphaStatusText'), gateHud: $('#gateHud'), gateHudRound: $('#gateHudRound'), gateHudWave: $('#gateHudWave'), gateHudRemaining: $('#gateHudRemaining'), gateHudNext: $('#gateHudNext'), gateHudLives: $('#gateHudLives'),
   gateProtocolTabs: $('#gateProtocolTabs'), gateCoreLabel: $('#gateCoreLabel'), gateProtocolLabel: $('#gateProtocolLabel'), gateCombatProtocol: $('#gateCombatProtocol'), gateRewardNote: $('#gateRewardNote'), gateHudTitle: $('#gateHudTitle'),
   abilityBar: $('#abilityBar'), shipAbilityBtn: $('#shipAbilityBtn'), shipAbilityIcon: $('#shipAbilityIcon'), shipAbilityName: $('#shipAbilityName'), shipAbilityStatus: $('#shipAbilityStatus'), shipAbilityFill: $('#shipAbilityFill'), petKamiAbilityBtn: $('#petKamiAbilityBtn'), petKamiAbilityStatus: $('#petKamiAbilityStatus'), petKamiAbilityFill: $('#petKamiAbilityFill'), bossPhaseHud: $('#bossPhaseHud'), bossPhaseName: $('#bossPhaseName'), bossPhaseLabel: $('#bossPhaseLabel'), bossPhaseHpFill: $('#bossPhaseHpFill'), bossPhaseShieldFill: $('#bossPhaseShieldFill'), bossPhaseHpText: $('#bossPhaseHpText'), bossPhaseShieldText: $('#bossPhaseShieldText'), bossPhaseDistance: $('#bossPhaseDistance'), bossPhaseStatus: $('#bossPhaseStatus'), targetLockHud: $('#targetLockHud'), targetLockToggle: $('#targetLockToggle'), targetLockDetail: $('#targetLockDetail'), targetLockName: $('#targetLockName'), targetLockPortrait: $('#targetLockPortrait'), targetLockPortraitWrap: $('#targetLockPortraitWrap'), targetLockType: $('#targetLockType'), targetLockDistance: $('#targetLockDistance'), targetLockThreat: $('#targetLockThreat'), targetLockHpFill: $('#targetLockHpFill'), targetLockHpText: $('#targetLockHpText'), targetLockShieldFill: $('#targetLockShieldFill'), targetLockShieldText: $('#targetLockShieldText'), combatStateHud: $('#combatStateHud'), combatStateText: $('#combatStateText'), combatStateMeta: $('#combatStateMeta'), combatFlash: $('#combatFlash'), galaxyEventHud: $('#galaxyEventHud'), galaxyEventToggle: $('#galaxyEventToggle'), galaxyEventIcon: $('#galaxyEventIcon'), galaxyEventName: $('#galaxyEventName'), galaxyEventObjective: $('#galaxyEventObjective'), galaxyEventTimer: $('#galaxyEventTimer'), galaxyEventProgress: $('#galaxyEventProgress'),
   shipMenuBtn: $('#shipMenuBtn'), battleTopStatus: $('#battleTopStatus'), playerPanel: $('#playerPanel'), playerPanelToggle: $('#playerPanelToggle'), playerPanelContent: $('#playerPanelContent'), petBtn: $('#petBtn'), petModal: $('#petModal'), closePet: $('#closePet'), petContent: $('#petContent'),
@@ -559,7 +561,7 @@ function premiumPassActive(){return !!premiumRuntime.state?.battle_pass_active;}
 function premiumCanPurchase(){return !!premiumRuntime.state?.can_purchase||isAdminPilot();}
 function premiumAutoCombatAccess(){return premiumActive()||premiumPassActive();}
 function premiumElitePrice(price,currency){const p=Math.max(0,Math.round(Number(price)||0));return currency==='uridium'&&premiumActive()?Math.max(1,Math.floor(p*.95)):p;}
-function alphaSpinUnitCost(){const gd=galaxyGateDef(),q=liveQuote(`gate_spin:${gd.key}`),base=Math.max(1,Math.round(Number(q?.basePrice??q?.price??gd.spinCost)||gd.spinCost));return premiumActive()?Math.max(1,Math.floor(base*.90)):base;}
+function alphaSpinUnitCost(){return premiumActive()?90:100;} // V18.2.3: valor único para todos os portais
 function premiumLocalPlanById(id){return null;}
 function premiumCatalogForRender(){
   const account=Array.isArray(premiumRuntime.state?.catalog)?premiumRuntime.state.catalog:[],byId=new Map(account.map(p=>[String(p.id),p]));
@@ -766,7 +768,7 @@ function telemetryTrackEconomyTransition(action,before,after,info={}){if(!before
 function queueEconomy(fn){const run=economyRuntime.queue.then(fn,fn);economyRuntime.queue=run.catch(()=>{});return run;}
 async function waitCloudIdle(maxMs=1800){const start=Date.now();while(cloudBusy&&Date.now()-start<maxMs)await new Promise(r=>setTimeout(r,35));}
 async function syncBeforeEconomy(){await waitCloudIdle();if(cloudDirty)await flushCloudSave(false);await waitCloudIdle();}
-function installEconomyState(state){if(!state||typeof state!=='object')throw new Error('Servidor não retornou o estado econômico atualizado.');installServerStatePreservingPosition(state);cloudDirty=false;try{localStorage.setItem(saveKey(),JSON.stringify(progress));}catch{}computeStats(true);buildAmmoButtons();refreshPetViews();renderShop();renderCargo();renderGalaxyGate();refreshPilotViews();updateUI();}
+function installEconomyState(state){if(!state||typeof state!=='object')throw new Error('Servidor não retornou o estado econômico atualizado.');installServerStatePreservingPosition(state);createBonusBoxes();cloudDirty=false;try{localStorage.setItem(saveKey(),JSON.stringify(progress));}catch{}computeStats(true);buildAmmoButtons();refreshPetViews();renderShop();renderCargo();renderGalaxyGate();refreshPilotViews();updateUI();}
 async function runEconomyAction(action,payload={},options={}){
   const {applyState=true,flush=true}=options;
   return queueEconomy(async()=>{if(flush)await syncBeforeEconomy();const before=progress?{credits:Number(progress.profile?.credits)||0,uridium:Number(progress.profile?.uridium)||0}:null;const result=await economyActionOnline(action,payload);if(applyState&&result?.state){installEconomyState(result.state);telemetryTrackEconomyTransition(action,before,progress?.profile,result?.info||{});}return result;});
@@ -2273,8 +2275,8 @@ const GALAXY_ECLIPSE_ROUNDS = [
 ];
 const GALAXY_GATE_DEFS={
   alpha:{key:'alpha',label:'AURORA',mapId:'ggAlpha',pieces:34,spinCost:100,rounds:GALAXY_ALPHA_ROUNDS,enemyScale:.90,damageScale:.72,rewardScale:1.05,totalRewardMult:1.25,logReward:100,baseLives:3,maxLives:5,lifeCost:4000000,roundReward:{cores:5,credits:500000,ammoId:'mcb25',ammoQty:500},finalReward:{credits:10000000,uridium:5000,cores:100,ammoId:'mcb25',ammoQty:10000,rocketId:'plt2026',rocketQty:100,voidite:12},unlock:null},
-  beta:{key:'beta',label:'NEXUS',mapId:'ggBeta',pieces:48,spinCost:125,rounds:GALAXY_NEXUS_ROUNDS,enemyScale:1.00,damageScale:.85,rewardScale:1.25,totalRewardMult:1.50,logReward:200,baseLives:3,maxLives:5,lifeCost:8000000,roundReward:{cores:10,credits:1000000,ammoId:'mcb50',ammoQty:750},finalReward:{credits:25000000,uridium:12500,cores:200,ammoId:'mcb50',ammoQty:10000,rocketId:'plt2021',rocketQty:200,voidite:28},unlock:null},
-  gamma:{key:'gamma',label:'ECLIPSE',mapId:'ggGamma',pieces:64,spinCost:150,rounds:GALAXY_ECLIPSE_ROUNDS,enemyScale:1.08,damageScale:.95,rewardScale:1.50,totalRewardMult:1.75,logReward:300,baseLives:3,maxLives:5,lifeCost:15000000,roundReward:{cores:15,credits:2000000,ammoId:'ucb100',ammoQty:1000},finalReward:{credits:60000000,uridium:30000,cores:300,ammoId:'ucb100',ammoQty:10000,rocketId:'plt3030',rocketQty:300,voidite:55},unlock:null},
+  beta:{key:'beta',label:'NEXUS',mapId:'ggBeta',pieces:48,spinCost:100,rounds:GALAXY_NEXUS_ROUNDS,enemyScale:1.00,damageScale:.85,rewardScale:1.25,totalRewardMult:1.50,logReward:200,baseLives:3,maxLives:5,lifeCost:8000000,roundReward:{cores:10,credits:1000000,ammoId:'mcb50',ammoQty:750},finalReward:{credits:25000000,uridium:12500,cores:200,ammoId:'mcb50',ammoQty:10000,rocketId:'plt2021',rocketQty:200,voidite:28},unlock:null},
+  gamma:{key:'gamma',label:'ECLIPSE',mapId:'ggGamma',pieces:64,spinCost:100,rounds:GALAXY_ECLIPSE_ROUNDS,enemyScale:1.08,damageScale:.95,rewardScale:1.50,totalRewardMult:1.75,logReward:300,baseLives:3,maxLives:5,lifeCost:15000000,roundReward:{cores:15,credits:2000000,ammoId:'ucb100',ammoQty:1000},finalReward:{credits:60000000,uridium:30000,cores:300,ammoId:'ucb100',ammoQty:10000,rocketId:'plt3030',rocketQty:300,voidite:55},unlock:null},
 };
 function freshGateProtocol(){return {pieces:[],built:false,lives:GALAXY_GATE_BASE_LIVES,completed:0,failed:0,run:null,lastCompletion:null};}
 function freshGalaxyGateState(){return {jumpBonus:0,lifeBonus:0,repairBonus:0,lastResults:[],selected:'alpha',alpha:freshGateProtocol(),beta:freshGateProtocol(),gamma:freshGateProtocol()};}
@@ -2368,7 +2370,7 @@ const petRuntime = {
   lastKami: -999, kamiArmed: false, kamiActivationId: 0
 };
 const state = {
-  currentMap: MAPS.x1, camera: { x: 620, y: MAPS.x1.world.h/2 }, target: null, pvpShotPending:false, pvpRocketPending:false, enemies: [], loot: [], ores: [], particles: [], fx: [], rocketFx: [], landmarks: [], enemyRespawns: [], oreRespawns: [], lastPortalAt: 0, radarRange: 1500, jumping: false,
+  currentMap: MAPS.x1, camera: { x: 620, y: MAPS.x1.world.h/2 }, target: null, pvpShotPending:false, pvpRocketPending:false, enemies: [], loot: [], ores: [], bonusBoxes: [], particles: [], fx: [], rocketFx: [], landmarks: [], enemyRespawns: [], oreRespawns: [], lastPortalAt: 0, radarRange: 1500, jumping: false,
   lastPlayerDamageAt:nowSec(), repairFxAt:0, shieldRepairFxAt:0,
   pointerNavActive:false, pointerNavId:null, lastTargetTapId:null, lastTargetTapAt:0, combatAlertText:'', combatAlertKind:'', combatAlertUntil:0, lowHpWarned:false, eventSpawnKey:'', missionHudPage:0, missionHudSignature:'', portalCombatUntil:0,
   shopTab: 'ships', hangarTab: 'ships', hangarEquipFilter:'all', hangarDroneFilter:'all', hangarPetFilter:'all', toastTimer: null, ammoUiExpanded: true, statsUiExpanded: true, playerUiExpanded: true, missionUiExpanded: true, petUiExpanded: true, minimapUiExpanded: true, chatUiExpanded: true, topMetaExpanded: true, topbarDockExpanded: true, targetLockUiExpanded:true, galaxyEventUiExpanded:true,
@@ -3499,6 +3501,8 @@ function hydrateProgress(){
   progress.profile.callsign=account?.callsign || account?.email?.split('@')[0] || progress.profile.callsign || 'Pilot';
   progress.profile.level=Math.max(1,Math.min(PLAYER_MAX_LEVEL,Number(progress.profile.level)||1));
   progress.profile.xp=Math.max(0,Number(progress.profile.xp)||0);
+  progress.stellarDust=Math.max(0,Math.floor(Number(progress.stellarDust)||0));
+  progress.bonusBoxesByMap ||= {};
   progress.profile.aliensKilled=Math.max(0,Math.floor(Number(progress.profile.aliensKilled)||0));
   progress.profile.ggCompleted=Math.max(0,Math.floor(Number(progress.profile.ggCompleted)||0));
   normalizeWarfrontProgress();
@@ -3936,7 +3940,7 @@ function updatePet(dt){
       const goal=petMoveGoalNearCombatTarget(task);targetX=goal.x;targetY=goal.y;
     }else followOrRoam();
   }else if(mode==='box'&&pet.gearsOwned.box){
-    task=petLockedCollectionTarget(state.loot,'box',l=>!Number.isFinite(l.expiresAt)||now<l.expiresAt);
+    task=petLockedCollectionTarget([...state.loot,...(state.bonusBoxes||[])],'box',l=>l.id.startsWith('bonus_')||!Number.isFinite(l.expiresAt)||now<l.expiresAt);
     if(task){targetX=task.x;targetY=task.y;petRuntime.taskType='box';petRuntime.taskId=task.id;}
     else followOrRoam();
   }else if(mode==='ore'&&pet.gearsOwned.ore){
@@ -3990,8 +3994,9 @@ function updatePet(dt){
     }
   }
   if(mode==='box'&&task&&Math.hypot(task.x-petRuntime.x,task.y-petRuntime.y)<28){
-    if(!Number.isFinite(task.expiresAt)||now<task.expiresAt)sellPetCargoBox(task);
-    state.loot=state.loot.filter(x=>x.id!==task.id);petRuntime.taskId=null;
+    if(String(task.id).startsWith('bonus_'))collectBonusBox(task,true);
+    else{if(!Number.isFinite(task.expiresAt)||now<task.expiresAt)sellPetCargoBox(task);state.loot=state.loot.filter(x=>x.id!==task.id);}
+    petRuntime.taskId=null;
   }
   if(mode==='ore'&&task&&Math.hypot(task.x-petRuntime.x,task.y-petRuntime.y)<24){
     if(task.sharedWorld&&sharedUniverseMap()){if(sharedUniverseOnline()&&!sharedUniverseRuntime.pendingOres.has(task.id)){sharedUniverseRuntime.pendingOres.add(task.id);sharedUniverse.collectOre(task.id);}petRuntime.taskId=null;return;}
@@ -4111,6 +4116,100 @@ function spawnOre(type=null){
   const names=state.currentMap.ores||[];let oreType=type;if(!oreType){const weights=state.currentMap.oreWeights||{},total=names.reduce((sum,k)=>sum+Math.max(.01,Number(weights[k])||1),0);let roll=Math.random()*Math.max(.01,total);for(const k of names){roll-=Math.max(.01,Number(weights[k])||1);if(roll<=0){oreType=k;break;}}oreType ||= names[0]||'Prometium';}const pos=randomMapPosition(100);const res=RESOURCES[oreType]||{color:'#fff'};
   state.ores.push({id:`ore_${Math.random().toString(16).slice(2)}`,x:pos.x,y:pos.y,type:oreType,amount:1,color:res.color,r:rand(7,13),rot:rand(0,TWO_PI),shape:Array.from({length:7},()=>rand(.72,1.18))});
 }
+// V18.2.3 — BOX BONUS individual por piloto, independente das pedras/NPCs.
+// Posições e reaparecimento persistem no save: saltar mapas/relogar não gera caixas extras.
+const BONUS_BOX_TARGET_NORMAL=12;
+const BONUS_BOX_TARGET_GATE=6;
+const BONUS_BOX_RESPAWN_MIN_MS=40000;
+const BONUS_BOX_RESPAWN_MAX_MS=70000;
+const BONUS_BOX_REWARDS=[
+  {kind:'ammo',id:'lcb10',min:15,max:100,label:'PLS-1'},
+  {kind:'ammo',id:'mcb25',min:15,max:75,label:'PLS-2'},
+  {kind:'ammo',id:'mcb50',min:15,max:50,label:'PLS-3'},
+  {kind:'ammo',id:'sab50',min:15,max:75,label:'SIP-2'},
+  {kind:'credits',min:100,max:10000,label:'CR'},
+  {kind:'uridium',min:1,max:200,label:'STL'},
+  {kind:'stellarDust',min:1,max:2,label:'Poeira Stellar'}
+];
+function bonusBoxMapKey(){return locationStorageKey();}
+function currentBonusBoxState(){
+  if(!progress)return null;
+  progress.bonusBoxesByMap ||= {};
+  const key=bonusBoxMapKey();
+  let row=progress.bonusBoxesByMap[key];
+  if(!row||typeof row!=='object'||!Array.isArray(row.boxes)){
+    row={boxes:[],pending:0,initialized:false};progress.bonusBoxesByMap[key]=row;
+  }
+  return row;
+}
+function spawnBonusBox(row){
+  if(!row||!state.currentMap)return;
+  const pos=randomMapPosition(220);
+  row.counter=Math.max(0,Math.floor(Number(row.counter)||0))+1;
+  row.boxes.push({id:`bonus_${Date.now().toString(36)}_${row.counter}_${Math.random().toString(36).slice(2,9)}`,x:pos.x,y:pos.y});
+}
+function createBonusBoxes(){
+  if(!progress||!state.currentMap)return;
+  const row=currentBonusBoxState();if(!row)return;
+  const goal=state.currentMap.gate?BONUS_BOX_TARGET_GATE:BONUS_BOX_TARGET_NORMAL;
+  if(!row.initialized){row.initialized=true;while(row.boxes.length<goal)spawnBonusBox(row);cloudDirty=true;}
+  // Nunca recriar caixas consumidas durante o tempo de respawn.
+  state.bonusBoxes=row.boxes;
+}
+function updateBonusBoxes(){
+  if(!progress||!state.currentMap)return;
+  const row=currentBonusBoxState();if(!row)return;
+  if(state.bonusBoxes!==row.boxes)state.bonusBoxes=row.boxes;
+  const goal=state.currentMap.gate?BONUS_BOX_TARGET_GATE:BONUS_BOX_TARGET_NORMAL;
+  if(!row.initialized){createBonusBoxes();return;}
+  const now=Date.now(),respawns=Array.isArray(row.respawns)?row.respawns:[];
+  row.respawns=respawns;
+  let changed=false;
+  for(let i=respawns.length-1;i>=0;i--){
+    if(respawns[i]>now)continue;
+    if(row.boxes.length<goal){spawnBonusBox(row);changed=true;}
+    respawns.splice(i,1);changed=true;
+  }
+  if(changed)saveGame();
+}
+function collectBonusBox(box,fromPet=false){
+  if(!progress||!box)return false;
+  const row=currentBonusBoxState();const index=row?.boxes?.findIndex(b=>b.id===box.id)??-1;
+  if(index<0)return false;
+  // Apenas UMA das sete recompensas por caixa (chance igual de cada tipo).
+  const def=BONUS_BOX_REWARDS[Math.floor(Math.random()*BONUS_BOX_REWARDS.length)];
+  const qty=Math.floor(def.min+Math.random()*(def.max-def.min+1));
+  if(def.kind==='ammo'){
+    progress.ammo ||= {};progress.ammo[def.id]=(Number(progress.ammo[def.id])||0)+qty;
+    refreshAmmoCounters();
+  }else if(def.kind==='credits'||def.kind==='uridium'){
+    progress.profile[def.kind]=(Number(progress.profile[def.kind])||0)+qty;
+    telemetryEconomy('other',def.kind==='credits'?{cr:qty}:{stl:qty});
+  }else if(def.kind==='stellarDust'){
+    progress.stellarDust=Math.max(0,Number(progress.stellarDust)||0)+qty;
+  }
+  row.boxes.splice(index,1);
+  row.respawns ||= [];
+  row.respawns.push(Date.now()+BONUS_BOX_RESPAWN_MIN_MS+Math.random()*(BONUS_BOX_RESPAWN_MAX_MS-BONUS_BOX_RESPAWN_MIN_MS));
+  playSfx('pickup');spawnParticle(box.x,box.y,`+${fmt(qty)} ${def.label}`,'#b78aff');
+  pushActivity(`${fromPet?'AUX-9 • ':''}BOX BÔNUS • +${fmt(qty)} ${def.label}`,'reward');
+  telemetryCounter('boxes',1);titleStatAdd('boxes',1);battlePassEvent('box',1);
+  if(fromPet)addPetXp(5);
+  saveGame();updateUI();
+  if(ui.gateModal&&!ui.gateModal.classList.contains('hidden'))renderGalaxyGate();
+  return true;
+}
+function drawBonusBoxes(){
+  const img=assetImage(GAME_ASSETS.bonus.box),low=resolvedQualityMode()==='low';
+  for(const box of state.bonusBoxes||[]){
+    if(!onScreenWorld(box.x,box.y,70))continue;
+    const p=screenPos(box.x,box.y);ctx.save();ctx.translate(p.x,p.y);
+    const size=low?34:40,scale=low?1:1+Math.sin(nowSec()*2+box.x)*.035;
+    if(img?.naturalWidth){ctx.drawImage(img,-size*scale/2,-size*scale/2,size*scale,size*scale);}
+    else{ctx.fillStyle='#35d9ff';ctx.strokeStyle='#ffe28a';ctx.lineWidth=2;ctx.fillRect(-12,-12,24,24);ctx.strokeRect(-12,-12,24,24);}
+    ctx.restore();
+  }
+}
 function createOres(){state.ores=[];state.oreRespawns=[];const count=state.currentMap.oreCount||(state.currentMap.battle?72:48);for(let i=0;i<count;i++)spawnOre();}
 function makeEnemy(type){
   const base=NPC_TYPES[type],cluster=state.landmarks.length&&Math.random()<.74?state.landmarks[Math.floor(Math.random()*state.landmarks.length)]:null;
@@ -4187,7 +4286,7 @@ function setupAlphaMap(resume=false){
   const gd=galaxyGateDef();progress.mapId=gd.mapId;state.currentMap=MAPS[gd.mapId];state.radarRange=mapRadarRange();computeStats(true);
   player.x=state.currentMap.world.w/2;player.y=state.currentMap.world.h/2;player.tx=player.x;player.ty=player.y;
   petRuntime.x=player.x+82;petRuntime.y=player.y+64;petRuntime.tx=petRuntime.x;petRuntime.ty=petRuntime.y;petRuntime.roamX=null;petRuntime.roamY=null;petRuntime.nextRoamAt=0;
-  state.camera.x=player.x;state.camera.y=player.y;state.target=null;state.loot=[];state.ores=[];state.landmarks=[];state.fx=[];state.rocketFx=[];state.enemyRespawns=[];state.oreRespawns=[];
+  state.camera.x=player.x;state.camera.y=player.y;state.target=null;state.loot=[];state.ores=[];state.landmarks=[];state.fx=[];state.rocketFx=[];state.enemyRespawns=[];state.oreRespawns=[];createBonusBoxes();
   if(resume&&Object.values(a.run.remaining||{}).some(v=>Number(v)>0))restoreAlphaGateEnemies();else state.enemies=[];
 
   const def=galaxyGateDef().rounds[a.run.round-1];
@@ -4262,7 +4361,7 @@ function completeAlphaGate(){
   setTimeout(()=>runMapTransition('x1',null,`${gd.label} CONCLUÍDO • PACOTE FINAL RECEBIDO`),1800);
 }
 function failAlphaGate(){const a=alphaGate(),gd=galaxyGateDef();a.failed++;a.pieces=[];a.built=false;a.lives=gd.baseLives;a.run=null;showToast(`PORTAL ASTRAL ${gd.label} PERDIDO — sem vidas restantes; o portal precisa ser remontado`);saveGame();setTimeout(()=>runMapTransition('x1',null,`${gd.label} PERDIDO`),900);}
-function handleAlphaDeath(){const a=alphaGate(),gd=galaxyGateDef();telemetryCounter('deaths',1);titleStatAdd('deaths',1);syncAlphaGateSnapshot();a.lives=Math.max(0,a.lives-1);if(a.lives<=0){failAlphaGate();return;}a.run.active=true;progress.mapId='x1';progress.territoryFaction=progress.profile.faction;const b=basePointForFaction(progress.profile.faction);player.x=b.x;player.y=b.y;player.tx=b.x;player.ty=b.y;progress.x=b.x;progress.y=b.y;progress.hp=1;player.hp=1;player.shield=0;progress.shield=0;state.currentMap=MAPS.x1;state.radarRange=mapRadarRange();state.enemies=[];state.loot=[];state.ores=[];state.landmarks=[];state.target=null;state.repairRequired={shipId:progress.activeShipId,source:`Portal Astral ${gd.label}`};saveGame();openRepairModal();showToast(`${gd.label}: -1 vida • ${a.lives} restante(s) • repare sua nave na base e retorne ao mesmo Round`);}
+function handleAlphaDeath(){const a=alphaGate(),gd=galaxyGateDef();telemetryCounter('deaths',1);titleStatAdd('deaths',1);syncAlphaGateSnapshot();a.lives=Math.max(0,a.lives-1);if(a.lives<=0){failAlphaGate();return;}a.run.active=true;progress.mapId='x1';progress.territoryFaction=progress.profile.faction;const b=basePointForFaction(progress.profile.faction);player.x=b.x;player.y=b.y;player.tx=b.x;player.ty=b.y;progress.x=b.x;progress.y=b.y;progress.hp=1;player.hp=1;player.shield=0;progress.shield=0;state.currentMap=MAPS.x1;state.radarRange=mapRadarRange();state.enemies=[];state.loot=[];state.ores=[];state.landmarks=[];createBonusBoxes();state.target=null;state.repairRequired={shipId:progress.activeShipId,source:`Portal Astral ${gd.label}`};saveGame();openRepairModal();showToast(`${gd.label}: -1 vida • ${a.lives} restante(s) • repare sua nave na base e retorne ao mesmo Round`);}
 function updateAlphaGate(){
   if(!isGalaxyGateMap())return;
   const a=alphaGate(),run=a.run;if(!run?.active)return;
@@ -4374,7 +4473,7 @@ function setMap(mapId,preserve=false,fromMapId=null,targetTerritoryFaction=null,
 
   petRuntime.x=player.x+82;petRuntime.y=player.y+64;petRuntime.tx=petRuntime.x;petRuntime.ty=petRuntime.y;petRuntime.roamX=null;petRuntime.roamY=null;petRuntime.nextRoamAt=0;
   state.camera.x=player.x;state.camera.y=player.y;state.target=null;state.loot=[];state.fx=[];state.rocketFx=[];
-  clearOnlinePlayers();createLandmarks();state.ores=[];state.enemies=[];state.enemyRespawns=[];state.oreRespawns=[];galaxyEventRuntime.mapKey=null;sharedUniverseRuntime.event=null;joinSharedUniverse();saveGame();
+  clearOnlinePlayers();createLandmarks();state.ores=[];state.enemies=[];state.enemyRespawns=[];state.oreRespawns=[];galaxyEventRuntime.mapKey=null;sharedUniverseRuntime.event=null;createBonusBoxes();joinSharedUniverse();saveGame();
   forceAuthoritativeLocationCheckpoint(false);
   if(authenticated)flushCloudSave(true).catch(()=>{});
 
@@ -4431,7 +4530,7 @@ function movePlayerToHomeBase(){
   player.x=b.x;player.y=b.y;player.tx=b.x;player.ty=b.y;
   state.camera.x=b.x;state.camera.y=b.y;
   state.target=null;player.laserFiring=false;state.fx=[];state.rocketFx=[];
-  createLandmarks();state.ores=[];state.enemies=[];state.enemyRespawns=[];state.oreRespawns=[];sharedUniverseRuntime.event=null;joinSharedUniverse();
+  createLandmarks();state.ores=[];state.enemies=[];state.enemyRespawns=[];state.oreRespawns=[];sharedUniverseRuntime.event=null;createBonusBoxes();joinSharedUniverse();
 }
 function finishShipRepair(method='repair'){
   progress.repairRequired=null;
@@ -4776,6 +4875,7 @@ function updatePlayer(dt){
       if(empty)state.loot.splice(i,1);
     }
   }
+  for(const box of [...(state.bonusBoxes||[])])if(Math.hypot(box.x-player.x,box.y-player.y)<37)collectBonusBox(box,false);
   for(let i=state.ores.length-1;i>=0;i--){const o=state.ores[i];if(Math.hypot(o.x-player.x,o.y-player.y)<30){if(o.sharedWorld&&sharedUniverseMap()){if(cargoFree()<=0){showToast('Porão cheio');continue;}if(sharedUniverseOnline()&&!sharedUniverseRuntime.pendingOres.has(o.id)){sharedUniverseRuntime.pendingOres.add(o.id);sharedUniverse.collectOre(o.id);}continue;}const got=addCargoResource(o.type,o.amount);if(got>0){playSfx('pickup');spawnParticle(o.x,o.y,`+${got} ${o.type}`,o.color);pushActivity(`Pedra • +${fmt(got)} ${o.type} • ${fmt((RESOURCES[o.type]?.sell||0)*got)} CR na base`,'ore');telemetryCounter('ore_nodes',1);telemetryCounter('ore_units',got);titleStatAdd('oreUnits',got);journeyEvent('ore',got);missionEvent('collectOre',{amount:got,type:o.type,mapId:progress.mapId});galaxyEventOrePickup(o,got);state.ores.splice(i,1);{const min=Math.max(1,Number(state.currentMap.oreRespawnMinMs||5000)/1000),max=Math.max(min,Number(state.currentMap.oreRespawnMaxMs||12000)/1000);state.oreRespawns.push({type:o.type,at:nowSec()+rand(min,max)});}saveGame();}else showToast('Porão cheio');}}
   if(player.hp<=0){
     if(isGalaxyGateMap())handleAlphaDeath();
@@ -4992,7 +5092,7 @@ function drawOnlinePlayers(){
 
 
 let lastLowHudUpdateAt=0;
-function update(dt){if(!progress||gameBootstrapRuntime.loading)return;telemetryTick(dt);processRespawns();updateCombatAbilities();updatePlayer(dt);updateSharedUniverseInterpolation(dt);updateEnemies(dt);updatePet(dt);updateOnlineWorld(dt);updateWarfrontRuntime();updateGalaxyEvent(dt);updateParticles(dt);updateFx(dt);updateAlphaGate();updateAuctionSystem();
+function update(dt){if(!progress||gameBootstrapRuntime.loading)return;telemetryTick(dt);processRespawns();updateBonusBoxes();updateCombatAbilities();updatePlayer(dt);updateSharedUniverseInterpolation(dt);updateEnemies(dt);updatePet(dt);updateOnlineWorld(dt);updateWarfrontRuntime();updateGalaxyEvent(dt);updateParticles(dt);updateFx(dt);updateAlphaGate();updateAuctionSystem();
   // Controles, combate e simulação continuam na cadência normal. Apenas o HUD de BAIXA
   // evita recalcular tooltips, classes CSS e texto em dezenas de nós 30x por segundo.
   const low=resolvedQualityMode()==='low',now=performance.now();
@@ -5296,7 +5396,7 @@ function drawMinimap(){
   mm.fillStyle=getFaction()?.color||'#fff';mm.beginPath();mm.arc(px,py,4.5,0,TWO_PI);mm.fill();mm.strokeStyle='rgba(255,255,255,.7)';mm.stroke();
 }
 let lastLowMinimapDrawAt=0;
-function draw(){const q=qualityProfile();ctx.clearRect(0,0,W,H);if(!progress||gameBootstrapRuntime.loading){drawNebula();drawStars();return;}if(!(q.background&&drawMapBackground()))drawNebula();drawStars();drawEnvironmentLighting();if(q.grid)drawSectorGrid();drawBounds();drawLandmarks();drawBaseSafeZone();drawPortals();drawWarfrontControlWorld();drawOres();drawLoot();drawGalaxyEventWorld();state.enemies.forEach(e=>e.hp>0&&onScreenWorld(e.x,e.y,180)&&drawEnemy(e));drawOnlinePlayers();if(q.fx)drawRocketFx();drawPlayer();drawPet();if(q.fx)drawFx();drawParticles();drawNavigationOverlay();if(resolvedQualityMode()!=='low'||performance.now()-lastLowMinimapDrawAt>=180){drawMinimap();lastLowMinimapDrawAt=performance.now();}}
+function draw(){const q=qualityProfile();ctx.clearRect(0,0,W,H);if(!progress||gameBootstrapRuntime.loading){drawNebula();drawStars();return;}if(!(q.background&&drawMapBackground()))drawNebula();drawStars();drawEnvironmentLighting();if(q.grid)drawSectorGrid();drawBounds();drawLandmarks();drawBaseSafeZone();drawPortals();drawWarfrontControlWorld();drawOres();drawBonusBoxes();drawLoot();drawGalaxyEventWorld();state.enemies.forEach(e=>e.hp>0&&onScreenWorld(e.x,e.y,180)&&drawEnemy(e));drawOnlinePlayers();if(q.fx)drawRocketFx();drawPlayer();drawPet();if(q.fx)drawFx();drawParticles();drawNavigationOverlay();if(resolvedQualityMode()!=='low'||performance.now()-lastLowMinimapDrawAt>=180){drawMinimap();lastLowMinimapDrawAt=performance.now();}}
 
 function ammoWarningClass(qty,perUse){
   if(qty<=0)return 'empty';
@@ -5408,7 +5508,7 @@ function ownsExtraItem(itemId){
 function itemSellValue(item){if(!item)return 0;const key=item.type==='drone'?`drone:${item.id}`:`item:${item.id}`,row=liveCatalog(key);return row?Math.max(1,Math.floor((Number(row.price)||0)*.5)):0;}
 let pendingConfirmAction=null;
 let confirmReturnModal=null;
-function saleCurrencyLabel(currency){return currency==='uridium'?'STL':'CR';}
+function saleCurrencyLabel(currency){return currency==='dust'?'POEIRA STELLAR':currency==='uridium'?'STL':'CR';}
 function closeSaleConfirm(){pendingConfirmAction=null;ui.saleConfirmModal?.classList.add('hidden');const back=confirmReturnModal;confirmReturnModal=null;if(back)back.classList.remove('hidden');}
 function openConfirmModal({eyebrow='CONFIRMAÇÃO',title='Confirmar ação?',itemName='Item',detail='Revise a ação antes de continuar.',value=0,currency='credits',valueLabel='VALOR',confirmLabel='CONFIRMAR',confirmClass='danger-btn',onConfirm}){
   confirmReturnModal=dismissibleModals().find(modal=>modal!==ui.saleConfirmModal&&!modal.classList.contains('hidden'))||null;
@@ -5960,12 +6060,28 @@ function rollAlphaOnce(){
   if(r<95){g.jumpBonus++;return {kind:'jump',label:'Bônus de Salto +1'};}
   g.lifeBonus=(g.lifeBonus||0)+1;return {kind:'life',label:'Vida Astral Reserva +1'};
 }
-function spinAlpha(amount){
-  normalizeGalaxyGateState();const key=currentGateKey(),q=liveQuote(`gate_spin:${key}`),unit=q?Math.max(1,Math.floor(q.basePrice*(premiumActive()?0.90:1))):null,cost=unit==null?null:amount*unit;
-  if(cost==null){showToast('Preço do Materializador ainda não sincronizou com o Supabase');refreshLiveOpsState(true).then(()=>renderGalaxyGate());return;}
-  if(progress.profile.uridium<cost){showToast(`Faltam ${fmt(cost-progress.profile.uridium)} STL para ${amount} sorteio${amount>1?'s':''}`);return;}
-  openSpendConfirm({title:`Girar portal ${galaxyGateDef().label}?`,itemName:`${amount} sorteio${amount>1?'s':''} do Portal Astral`,detail:'Preço, sorteio e recompensas serão processados pelo servidor.',value:cost,currency:'uridium',confirmLabel:'CONFIRMAR GIRO',onConfirm:()=>runEconomyAction('gate_spin',{protocol:key,amount}).then(r=>{const info=r?.info||{},results=Array.isArray(info.results)?info.results:[],summary={};results.forEach(x=>summary[x.label]=(summary[x.label]||0)+1);const pieces=results.filter(x=>x.kind==='piece').length,lines=Object.entries(summary).slice(0,12).map(([label,count])=>`${count>1?`${count}× `:''}${label}`);ui.gateResultBox.innerHTML=`<b>${info.amount||amount} sorteio${(info.amount||amount)>1?'s':''} • ${fmt(info.cost||cost)} STL • SERVIDOR</b>${pieces?`<div class="gate-piece-win">✦ ${pieces} peça${pieces>1?'s':''} encontrada${pieces>1?'s':''}</div>`:''}<div>${lines.join(' • ')}</div>`;renderGalaxyGate();refreshAmmoCounters();refreshPilotViews();updateUI();requestAnimationFrame(()=>{renderGalaxyGate();refreshAmmoCounters();updateUI();});}).catch(e=>showToast(e.message||'Materializador recusado pelo servidor'))});
+function spinAlpha(amount,payment='uridium'){
+  normalizeGalaxyGateState();
+  const key=currentGateKey(),dust=payment==='dust',unit=dust?1:alphaSpinUnitCost(),cost=unit*amount;
+  const available=dust?Math.max(0,Math.floor(Number(progress.stellarDust)||0)):(Number(progress.profile.uridium)||0);
+  const unitText=dust?'Poeira Stellar':'STL';
+  if(available<cost){showToast(`Faltam ${fmt(cost-available)} ${unitText} para ${amount} giro(s)`);return;}
+  openSpendConfirm({
+    title:`Girar portal ${galaxyGateDef().label}?`,
+    itemName:`${amount} giro(s) • ${dust?'POEIRA STELLAR':'STELLARIUM'}`,
+    detail:dust?'Cada giro usa 1 Poeira Stellar; nenhuma STL será descontada.':'100 STL por giro em todos os portais • Premium paga 90 STL.',
+    value:cost,currency:dust?'dust':'uridium',confirmLabel:'CONFIRMAR GIRO',
+    onConfirm:()=>runEconomyAction('gate_spin',{protocol:key,amount,payment}).then(r=>{
+      const info=r?.info||{},results=Array.isArray(info.results)?info.results:[],summary={};
+      results.forEach(x=>summary[x.label]=(summary[x.label]||0)+1);
+      const pieces=results.filter(x=>x.kind==='piece').length;
+      const lines=Object.entries(summary).slice(0,12).map(([label,count])=>`${count>1?`${count}× `:''}${label}`);
+      ui.gateResultBox.innerHTML=`<b>${info.amount||amount} giro(s) • ${fmt(info.cost??cost)} ${dust?'POEIRA':'STL'} • SERVIDOR</b>${pieces?`<div class="gate-piece-win">✦ ${pieces} peça(s) encontrada(s)</div>`:''}<div>${lines.join(' • ')}</div>`;
+      renderGalaxyGate();refreshAmmoCounters();refreshPilotViews();updateUI();
+    }).catch(e=>showToast(e.message||'Materializador recusado pelo servidor'))
+  });
 }
+
 function useGalaxyLifeBonus(){
   normalizeGalaxyGateState();const g=progress.galaxyGate,a=alphaGate(),gd=galaxyGateDef();
   if((g.lifeBonus||0)<=0){showToast('Você não possui Vida Astral na reserva');return;}
@@ -6003,7 +6119,7 @@ function renderGalaxyGate(){
   if(!progress||!ui.gatePieceGrid)return;normalizeGalaxyGateState();
   const g=progress.galaxyGate,gd=galaxyGateDef(),a=alphaGate(),count=a.pieces.length,atBase=isAtTrader(),unlocked=gateUnlocked(gd.key),lifeQuote=liveQuote(`gate_life:${gd.key}`),lifeCost=lifeQuote?.price??gd.lifeCost;
   if(ui.gatePieceBadge)ui.gatePieceBadge.textContent=`${gd.label} ${count}/${gd.pieces}`;
-  ui.gatePiecesText.textContent=`${count} / ${gd.pieces}`;ui.gateLivesText.textContent=`${a.lives} / ${gd.maxLives}`;ui.gateCompletedText.textContent=a.completed;ui.gateUriText.textContent=fmt(progress.profile.uridium);ui.gateJumpBonus.textContent=fmt(g.jumpBonus);
+  ui.gatePiecesText.textContent=`${count} / ${gd.pieces}`;ui.gateLivesText.textContent=`${a.lives} / ${gd.maxLives}`;ui.gateCompletedText.textContent=a.completed;ui.gateUriText.textContent=fmt(progress.profile.uridium);if(ui.gateDustText)ui.gateDustText.textContent=fmt(progress.stellarDust||0);ui.gateJumpBonus.textContent=fmt(g.jumpBonus);
   if(ui.gateLifeBonus)ui.gateLifeBonus.textContent=fmt(g.lifeBonus||0);
   if(ui.gateLogDisks){normalizePilotBio();ui.gateLogDisks.textContent=fmt(progress.pilotBio.logDisks);}
   if(ui.gateCoreLabel)ui.gateCoreLabel.textContent=gd.label;if(ui.gateProtocolLabel)ui.gateProtocolLabel.textContent=`PORTAL ${gd.label}`;
@@ -6011,7 +6127,8 @@ function renderGalaxyGate(){
   if(ui.gateRewardNote)ui.gateRewardNote.innerHTML=`<b>PACOTE FINAL ${gd.label}:</b> ${gateFinalRewardText(gd)}<br><small>Cada Round limpo também paga ${gateRoundRewardText(gd)}. Bônus adicional sobre os abates: +${Math.round((gd.totalRewardMult-1)*100)}% no fechamento.</small>`;
   if(ui.gateProtocolTabs)ui.gateProtocolTabs.querySelectorAll('[data-gate-protocol]').forEach(b=>{const key=b.dataset.gateProtocol;b.classList.toggle('active',key===gd.key);b.disabled=false;b.title=`${GALAXY_GATE_DEFS[key].label} • disponível`;});
   ui.gatePieceGrid.innerHTML=Array.from({length:gd.pieces},(_,i)=>`<span class="gate-piece ${a.pieces.includes(i+1)?'found':''}" title="Peça ${i+1}">${i+1}</span>`).join('');
-  ui.gateSpinButtons.innerHTML='';[1,5,10,50,100].forEach(n=>{const cost=n*alphaSpinUnitCost(),b=document.createElement('button');b.className='small-btn gate-spin-btn';b.innerHTML=`${n}x <small>${fmt(cost)} STL${premiumActive()?' • -10%':''}</small>`;b.disabled=progress.profile.uridium<cost;b.onclick=()=>spinAlpha(n);ui.gateSpinButtons.appendChild(b);});
+  ui.gateSpinButtons.innerHTML='';[1,5,10,50,100].forEach(n=>{const cost=n*alphaSpinUnitCost(),b=document.createElement('button');b.className='small-btn gate-spin-btn';b.innerHTML=`${n}x <small>${fmt(cost)} STL${premiumActive()?' • -10%':''}</small>`;b.disabled=progress.profile.uridium<cost;b.onclick=()=>spinAlpha(n,'uridium');ui.gateSpinButtons.appendChild(b);});
+  if(ui.gateDustSpinButtons){ui.gateDustSpinButtons.innerHTML='';[1,5,10,50,100].forEach(n=>{const b=document.createElement('button');b.className='small-btn gate-spin-btn gate-dust-btn';b.innerHTML=`${n}x <small>${n} Poeira${n>1?'s':''}</small>`;b.disabled=(Number(progress.stellarDust)||0)<n;b.onclick=()=>spinAlpha(n,'dust');ui.gateDustSpinButtons.appendChild(b);});}
   renderGateRounds();
   if(a.run?.active){ui.gateAlphaStatusTitle.textContent=`${gd.label} em andamento • Round ${a.run.round}`;ui.gateAlphaStatusText.textContent=`${a.lives}/${gd.maxLives} vidas. Você pode fugir, regenerar e retornar ao combate; NPCs eliminados continuam eliminados.`;ui.gateJumpBtn.textContent=isGalaxyGateMap()?`VOCÊ ESTÁ NO ${gd.label}`:atBase?`RETORNAR AO ${gd.label}`:'VOLTE À BASE X-1';ui.gateJumpBtn.disabled=isGalaxyGateMap()||!atBase||a.lives<=0;}
   else if(a.built){ui.gateAlphaStatusTitle.textContent=`PORTAL ${gd.label} MONTADO`;ui.gateAlphaStatusText.textContent=`${gd.pieces}/${gd.pieces} peças • ${gd.rounds.length} rounds • ${a.lives}/${gd.maxLives} vidas • pensado para kite e progressão FREE.`;ui.gateJumpBtn.textContent=atBase?`SALTAR PARA O ${gd.label}`:'VOLTE À BASE X-1';ui.gateJumpBtn.disabled=!atBase;}
@@ -7244,9 +7361,9 @@ function startLoadedGame(){
   authoritativeLocationRuntime.lastAt=0;authoritativeLocationRuntime.lastX=null;authoritativeLocationRuntime.lastY=null;authoritativeLocationRuntime.lastKey=null;authoritativeLocationRuntime.lastSavedAt=0;authoritativeLocationRuntime.pending=false;
   movementPositionRuntime.wasMoving=false;movementPositionRuntime.lastCommitAt=0;movementPositionRuntime.lastX=null;movementPositionRuntime.lastY=null;movementPositionRuntime.loadedFromCheckpoint=!!savedLocation;movementPositionRuntime.hasMovedSinceLoad=false;movementPositionRuntime.spawnX=savedX;movementPositionRuntime.spawnY=savedY;
   if(isGalaxyGateMap()){
-    const gd=galaxyGateDef();player.x=savedX??MAPS[gd.mapId].world.w/2;player.y=savedY??MAPS[gd.mapId].world.h/2;player.tx=player.x;player.ty=player.y;petRuntime.x=player.x+82;petRuntime.y=player.y+64;petRuntime.tx=petRuntime.x;petRuntime.ty=petRuntime.y;petRuntime.roamX=null;petRuntime.roamY=null;petRuntime.nextRoamAt=0;state.camera.x=player.x;state.camera.y=player.y;state.target=null;state.loot=[];state.fx=[];state.rocketFx=[];state.ores=[];state.landmarks=[];state.enemyRespawns=[];state.oreRespawns=[];restoreAlphaGateEnemies();const a=alphaGate(),def=galaxyGateDef().rounds[a.run.round-1],alive=alphaRemainingCount(),now=Date.now();if(a.run.waveIndex<def.waves.length&&!a.run.nextWaveAt){a.run.nextWaveAt=now+GALAXY_ALPHA_WAVE_INTERVAL_MS;}else if(a.run.waveIndex>=def.waves.length&&alive===0&&a.run.round<galaxyGateDef().rounds.length&&!a.run.nextRoundAt){a.run.nextRoundAt=now+GALAXY_ALPHA_ROUND_INTERVAL_MS;}renderAll();preloadActiveGameplayAssets();return;
+    const gd=galaxyGateDef();player.x=savedX??MAPS[gd.mapId].world.w/2;player.y=savedY??MAPS[gd.mapId].world.h/2;player.tx=player.x;player.ty=player.y;petRuntime.x=player.x+82;petRuntime.y=player.y+64;petRuntime.tx=petRuntime.x;petRuntime.ty=petRuntime.y;petRuntime.roamX=null;petRuntime.roamY=null;petRuntime.nextRoamAt=0;state.camera.x=player.x;state.camera.y=player.y;state.target=null;state.loot=[];state.fx=[];state.rocketFx=[];state.ores=[];state.landmarks=[];state.enemyRespawns=[];state.oreRespawns=[];createBonusBoxes();restoreAlphaGateEnemies();const a=alphaGate(),def=galaxyGateDef().rounds[a.run.round-1],alive=alphaRemainingCount(),now=Date.now();if(a.run.waveIndex<def.waves.length&&!a.run.nextWaveAt){a.run.nextWaveAt=now+GALAXY_ALPHA_WAVE_INTERVAL_MS;}else if(a.run.waveIndex>=def.waves.length&&alive===0&&a.run.round<galaxyGateDef().rounds.length&&!a.run.nextRoundAt){a.run.nextRoundAt=now+GALAXY_ALPHA_ROUND_INTERVAL_MS;}renderAll();preloadActiveGameplayAssets();return;
   }
-  const spawnBase=currentBasePoint();player.x=savedX??(progress.mapId==='x1'?spawnBase.x:400);player.y=savedY??(progress.mapId==='x1'?spawnBase.y:state.currentMap.world.h/2);player.tx=player.x;player.ty=player.y;petRuntime.x=player.x+82;petRuntime.y=player.y+64;petRuntime.tx=petRuntime.x;petRuntime.ty=petRuntime.y;petRuntime.roamX=null;petRuntime.roamY=null;petRuntime.nextRoamAt=0;state.camera.x=player.x;state.camera.y=player.y;state.target=null;state.loot=[];state.fx=[];state.rocketFx=[];createLandmarks();state.ores=[];state.enemies=[];state.enemyRespawns=[];state.oreRespawns=[];galaxyEventRuntime.mapKey=null;sharedUniverseRuntime.event=null;
+  const spawnBase=currentBasePoint();player.x=savedX??(progress.mapId==='x1'?spawnBase.x:400);player.y=savedY??(progress.mapId==='x1'?spawnBase.y:state.currentMap.world.h/2);player.tx=player.x;player.ty=player.y;petRuntime.x=player.x+82;petRuntime.y=player.y+64;petRuntime.tx=petRuntime.x;petRuntime.ty=petRuntime.y;petRuntime.roamX=null;petRuntime.roamY=null;petRuntime.nextRoamAt=0;state.camera.x=player.x;state.camera.y=player.y;state.target=null;state.loot=[];state.fx=[];state.rocketFx=[];createLandmarks();state.ores=[];state.enemies=[];state.enemyRespawns=[];state.oreRespawns=[];galaxyEventRuntime.mapKey=null;sharedUniverseRuntime.event=null;createBonusBoxes();
   try{joinSharedUniverse();}catch(e){console.error('[bootstrap] shared universe join failed',e);}
   try{renderAll();}catch(e){console.error('[bootstrap] initial render failed',e);try{updateUI();}catch{}}
   preloadActiveGameplayAssets();

@@ -261,3 +261,7 @@ Passe de Temporada Data Driven: calendário, preço, progressão e recompensas p
 
 ### V18.1.7C
 Lojas Comum + Premium Data Driven. O catálogo de itens existentes pode ser organizado pelo ADM sem novo deploy: preço, moeda, quantidade, nível, ordem, aba e disponibilidade. Os planos Premium 7/30/90/180 dias também passam a vir do Supabase.
+
+### V18.2.3 — BOX BÔNUS + POEIRA STELLAR
+
+Caixas bônus de loot individual espalhadas por todos os setores, também coletadas pelo Salvager do AUX-9. A Poeira Stellar abre um giro de qualquer Portal Astral sem consumir STL. Giro padrão: 100 STL (Premium: 90 STL). Veja `BONUS_BOX_POEIRA_V18_2_3.md`.
