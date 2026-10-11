@@ -17,7 +17,7 @@ assert.match(server,/const unit=payment==='dust'\?/);
 assert.doesNotMatch(server,/const baseUnit=100,unit=payment==='dust'\?1:/);
 assert.match(sql,/public\.is_game_admin_v1763\(v_uid\)/);
 assert.match(sql,/REVOKE ALL ON public\.bonus_box_config_v1825/);
-const source=game.slice(game.indexOf('// V18.2.5 • Configuração ao vivo da BOX'),game.indexOf('function bonusBoxMapKey()'));
+const source=game.slice(game.indexOf('const BONUS_CONFIG_DEFAULT='),game.indexOf('function bonusBoxMapKey()'));
 const ctx={Math,Date,structuredClone,setInterval:()=>0,authenticated:false,getUser:()=>null,
  progress:{mapId:'x1'},state:{currentMap:{id:'x1',gate:false}}};
 vm.createContext(ctx);

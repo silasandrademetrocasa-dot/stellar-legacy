@@ -1,3 +1,10 @@
+# V18.2.8 — BOX Sprite & Ship Vitals Fix
+- BOX BÔNUS: corrige imagem lazy não carregada no Canvas; sprite WebP fica visível.
+- BX/Poeira: cache protegido e versão da imagem por pasta, sem recarregar todas as naves.
+- Fallback da BOX não é mais quadrado chapado.
+- Barras de HP/escudo seguem o piloto no mapa, mesmo com HUD NAVE recolhido, compatíveis com modo BAIXO.
+- Economia, ADM, AUX e eventos inalterados.
+
 ## V18.2.7 — AUX-9 EXTRATOR HOTFIX (10/10/2026)
 
 - Corrige AUX parado em cima das pedras nos mapas online: WebSocket distinguia coletor nave/AUX, mas servidor validava somente a posição da nave.

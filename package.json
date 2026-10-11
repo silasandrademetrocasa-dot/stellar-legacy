@@ -1,6 +1,6 @@
 {
   "name": "stellar-legacy",
-  "version": "18.2.7",
+  "version": "18.2.8",
   "type": "module",
   "scripts": {
     "start": "node server/index.js",
@@ -15,5 +15,5 @@
   "engines": {
     "node": ">=18"
   },
-  "release": "aux-ore-collector-v18-2-7"
+  "release": "bonus-box-ship-vitals-fix-v18-2-8"
 }

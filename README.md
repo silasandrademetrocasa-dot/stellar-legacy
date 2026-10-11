@@ -279,3 +279,11 @@ Lojas Comum + Premium Data Driven. O catálogo de itens existentes pode ser orga
 ### V18.2.3 — BOX BÔNUS + POEIRA STELLAR
 
 Caixas bônus de loot individual espalhadas por todos os setores, também coletadas pelo Salvager do AUX-9. A Poeira Stellar abre um giro de qualquer Portal Astral sem consumir STL. Giro padrão: 100 STL (Premium: 90 STL). Veja `BONUS_BOX_POEIRA_V18_2_3.md`.
+
+
+## V18.2.8 — Sprite BOX BÔNUS + barras da nave
+- Imagens desenhadas via Canvas usam carregamento eager (sem fazer preload de todos os assets); sprites das BOX não são mais imagens lazy sem DOM.
+- Cache protege as imagens pequenas da BOX e Poeira Stellar e renova somente o cache da pasta bonus.
+- A BOX tem silhueta hexagonal visível enquanto o asset carrega, sem quadrado chapado.
+- Indicadores de HP (vermelho) e escudo (azul) sempre acima da própria nave em todos os modos, mesmo com a aba NAVE recolhida.
+- Sem mudanças na economia, ADM, AUX, mapas, eventos, saves ou quantidade das BOX.
