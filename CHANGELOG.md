@@ -1,3 +1,11 @@
+# V18.2.5 — ADM BOX BÔNUS LIVE
+
+- Nova aba **BOX BÔNUS** na Central ADM, com quantidades por mapa, respawn, mínimos/máximos e pesos das sete recompensas, preço de STL e Poeira por portal, desconto Premium.
+- Tabela e RPCs restritas no Supabase; atualização por ADM autenticado, bloqueio de usuários comuns e validação de valores.
+- Preço de cada giro agora é carregado no servidor do banco de dados; valores mostrados no cliente vêm do mesmo runtime.
+- Restrições de 0 BOX BÔNUS em Aurora/Nexus/Eclipse continuam fixas.
+- Todos os saves antigos preservados.
+
 # V18.2.4 — BOX BÔNUS POR MAPA
 
 - X-1, X-2, X-3, X-4: 20 BOX BÔNUS por setor e piloto.

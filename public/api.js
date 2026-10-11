@@ -934,3 +934,11 @@ export async function adminUpdateCommonShopItemOnline(catalogKey,payload={}){
 export async function adminUpdatePremiumShopItemOnline(productId,payload={}){
   return serverFetch(`/api/admin/runtime/shops/premium/${encodeURIComponent(String(productId||''))}`,{method:'POST',body:JSON.stringify(payload||{})},true);
 }
+
+// V18.2.5 • BOX BÔNUS editável por ADM.
+export async function loadBonusConfigOnline(refresh=false){
+  return serverFetch(`/api/runtime/bonus${refresh?'?refresh=1':''}`,{},true);
+}
+export async function adminUpdateBonusConfigOnline(config){
+  return serverFetch('/api/admin/runtime/bonus',{method:'POST',body:JSON.stringify({config})},true);
+}

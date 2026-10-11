@@ -1,7 +1,7 @@
-import { FACTIONS, SHIPS, ITEMS, LASER_AMMO, ROCKETS, NPC_TYPES, MAPS, RESOURCES } from './data.js?v=18.2.4';
-import { GAME_ASSETS } from './assets/v17/manifest.js?v=18.2.4';
-import { signUp, signIn, requestPasswordReset, restorePasswordRecoveryFromUrl, restoreSession, signOutLocal, checkGameSession, endGameSession, getUser, getSessionCredentials, loadCloudSave, saveCloudSave, updateCallsign, updatePassword, loadRankings, loadAuctionBids, saveAuctionBidOnline, markAuctionBidStatusOnline, loadAuctionMarket, upsertPlayerPresenceOnline, loadMapPresenceOnline, savePlayerLocationCheckpointOnline, loadPlayerLocationCheckpointOnline, removePlayerPresenceOnline, queuePvpAttackOnline, consumePvpDamageEventsOnline, syncArenaProfileOnline, loadArenaState, loadArenaDailyRewardStatus, claimArenaDailyReward, loadArenaOpponents, loadArenaHistory, arenaAttackOnline, listClansOnline, loadMyClanOnline, createClanOnline, joinClanOnline, leaveClanOnline, transferClanCreditsOnline, claimClanCreditGrantsOnline, recordClanAlienKillOnline, getPremiumShopOnline, testPurchasePremiumOnline, loadWarfrontStateOnline, hitWorldBossOnline, claimWorldBossRewardOnline, declareClanWarOnline, recordClanWarScoreOnline, loadLiveOpsOnline, adminUpdateLiveEventScheduleOnline, purchaseLiveCatalogOnline, economyActionOnline, getChatHistoryOnline, sendChatMessageOnline, redeemGameCouponOnline, getMyDesignersOnline, setDesignLoadoutOnline, claimGateDroneDesignOnline, claimEventDesignerOnline, getAdminStatus, adminSearchAccounts, adminRecentActions, adminBanAccount, adminUnbanAccount, adminResetAccount, adminDeleteAccount, pushTelemetryBatch, adminTelemetryOverview, adminPlayerTelemetry, getBattleGroupOnline, createBattleGroupOnline, inviteBattleGroupOnline, searchBattleGroupPlayersOnline, inviteBattleGroupUserOnline, respondBattleGroupInviteOnline, leaveBattleGroupOnline, kickBattleGroupMemberOnline, setBattleGroupRallyOnline, loadRuntimeConfigOnline, loadNpcRuntimeConfigOnline, loadWorldRuntimeConfigOnline, loadSystemsRuntimeConfigOnline, loadAdminRuntimeMonitorOnline, adminUpdateRuntimeModuleOnline, adminUpdateNpcRuntimeOnline, adminUpdateNpcSpawnRuntimeOnline, adminUpdateWorldMapOnline, adminUpdateWorldResourceOnline, adminUpdateWorldSectorOnline, adminUpdateWorldPortalOnline, adminUpdateWorldResourcePoolOnline, adminUpdateMissionCategoryOnline, adminUpdateEconomyServiceOnline, adminUpdateCraftingRecipeOnline, loadBattlePassRuntimeConfigOnline, adminUpdateBattlePassSeasonOnline, adminUpdateBattlePassTierOnline, loadShopsRuntimeConfigOnline, adminUpdateCommonShopItemOnline, adminUpdatePremiumShopItemOnline } from './api.js?v=18.2.4';
-import { SharedUniverseClient } from './world.js?v=18.2.4';
+import { FACTIONS, SHIPS, ITEMS, LASER_AMMO, ROCKETS, NPC_TYPES, MAPS, RESOURCES } from './data.js?v=18.2.5';
+import { GAME_ASSETS } from './assets/v17/manifest.js?v=18.2.5';
+import { signUp, signIn, requestPasswordReset, restorePasswordRecoveryFromUrl, restoreSession, signOutLocal, checkGameSession, endGameSession, getUser, getSessionCredentials, loadCloudSave, saveCloudSave, updateCallsign, updatePassword, loadRankings, loadAuctionBids, saveAuctionBidOnline, markAuctionBidStatusOnline, loadAuctionMarket, upsertPlayerPresenceOnline, loadMapPresenceOnline, savePlayerLocationCheckpointOnline, loadPlayerLocationCheckpointOnline, removePlayerPresenceOnline, queuePvpAttackOnline, consumePvpDamageEventsOnline, syncArenaProfileOnline, loadArenaState, loadArenaDailyRewardStatus, claimArenaDailyReward, loadArenaOpponents, loadArenaHistory, arenaAttackOnline, listClansOnline, loadMyClanOnline, createClanOnline, joinClanOnline, leaveClanOnline, transferClanCreditsOnline, claimClanCreditGrantsOnline, recordClanAlienKillOnline, getPremiumShopOnline, testPurchasePremiumOnline, loadWarfrontStateOnline, hitWorldBossOnline, claimWorldBossRewardOnline, declareClanWarOnline, recordClanWarScoreOnline, loadLiveOpsOnline, adminUpdateLiveEventScheduleOnline, purchaseLiveCatalogOnline, economyActionOnline, getChatHistoryOnline, sendChatMessageOnline, redeemGameCouponOnline, getMyDesignersOnline, setDesignLoadoutOnline, claimGateDroneDesignOnline, claimEventDesignerOnline, getAdminStatus, adminSearchAccounts, adminRecentActions, adminBanAccount, adminUnbanAccount, adminResetAccount, adminDeleteAccount, pushTelemetryBatch, adminTelemetryOverview, adminPlayerTelemetry, getBattleGroupOnline, createBattleGroupOnline, inviteBattleGroupOnline, searchBattleGroupPlayersOnline, inviteBattleGroupUserOnline, respondBattleGroupInviteOnline, leaveBattleGroupOnline, kickBattleGroupMemberOnline, setBattleGroupRallyOnline, loadRuntimeConfigOnline, loadNpcRuntimeConfigOnline, loadWorldRuntimeConfigOnline, loadSystemsRuntimeConfigOnline, loadAdminRuntimeMonitorOnline, adminUpdateRuntimeModuleOnline, adminUpdateNpcRuntimeOnline, adminUpdateNpcSpawnRuntimeOnline, adminUpdateWorldMapOnline, adminUpdateWorldResourceOnline, adminUpdateWorldSectorOnline, adminUpdateWorldPortalOnline, adminUpdateWorldResourcePoolOnline, adminUpdateMissionCategoryOnline, adminUpdateEconomyServiceOnline, adminUpdateCraftingRecipeOnline, loadBattlePassRuntimeConfigOnline, adminUpdateBattlePassSeasonOnline, adminUpdateBattlePassTierOnline, loadShopsRuntimeConfigOnline, adminUpdateCommonShopItemOnline, adminUpdatePremiumShopItemOnline, loadBonusConfigOnline, adminUpdateBonusConfigOnline } from './api.js?v=18.2.5';
+import { SharedUniverseClient } from './world.js?v=18.2.5';
 
 const canvas = document.querySelector('#game');
 const ctx = canvas.getContext('2d');
@@ -309,7 +309,7 @@ const ui = {
   shopBtn: $('#shopBtn'), shopModal: $('#shopModal'), closeShop: $('#closeShop'), shopTabs: $('#shopTabs'), shopGrid: $('#shopGrid'), shopCredits: $('#shopCredits'), shopStellarium: $('#shopStellarium'),
   hangarBtn: $('#hangarBtn'), hangarModal: $('#hangarModal'), closeHangar: $('#closeHangar'), hangarTabs: $('#hangarTabs'), hangarContent: $('#hangarContent'), hangarShipName: $('#hangarShipName'),
   bottomHudDock: $('#bottomHudDock'), chatDock: $('#chatDock'), chatToggle: $('#chatToggle'), chatBody: $('#chatBody'), chatTabs: $('#chatTabs'), chatStatus: $('#chatStatus'), chatChannelChip: $('#chatChannelChip'), chatPrivateRow: $('#chatPrivateRow'), chatPrivateCallsign: $('#chatPrivateCallsign'), chatPrivateOpen: $('#chatPrivateOpen'), chatFeed: $('#chatFeed'), chatForm: $('#chatForm'), chatInput: $('#chatInput'), chatSend: $('#chatSend'),
-  loginModal: $('#loginModal'), loginTabBtn: $('#loginTabBtn'), registerTabBtn: $('#registerTabBtn'), loginForm: $('#loginForm'), registerForm: $('#registerForm'), recoveryForm: $('#recoveryForm'), forgotPasswordBtn: $('#forgotPasswordBtn'), recoveryPassword: $('#recoveryPassword'), recoveryPasswordConfirm: $('#recoveryPasswordConfirm'), loginEmail: $('#loginEmail'), loginPassword: $('#loginPassword'), registerCallsign: $('#registerCallsign'), registerEmail: $('#registerEmail'), registerPassword: $('#registerPassword'), authMessage: $('#authMessage'), userLabel: $('#userLabel'), rankChip: $('#rankChip'), syncLabel: $('#syncLabel'), worldSyncLabel: $('#worldSyncLabel'), logoutBtn: $('#logoutBtn'), safeZoneLabel: $('#safeZoneLabel'), cargoUsed: $('#cargoUsed'), cargoMax: $('#cargoMax'), cargoBtn: $('#cargoBtn'), cargoModal: $('#cargoModal'), closeCargo: $('#closeCargo'), cargoSummary: $('#cargoSummary'), cargoGrid: $('#cargoGrid'), sellAllCargo: $('#sellAllCargo'), refineryGrid: $('#refineryGrid'), baseServiceGrid: $('#baseServiceGrid'), adminBtn: $('#adminBtn'), adminModal: $('#adminModal'), closeAdmin: $('#closeAdmin'), adminSearchInput: $('#adminSearchInput'), adminSearchBtn: $('#adminSearchBtn'), adminRefreshBtn: $('#adminRefreshBtn'), adminUserList: $('#adminUserList'), adminActionLog: $('#adminActionLog'), adminMessage: $('#adminMessage'), adminBanDuration: $('#adminBanDuration'), adminBanReason: $('#adminBanReason'), adminTotalAccounts: $('#adminTotalAccounts'), adminOnlineAccounts: $('#adminOnlineAccounts'), adminBannedAccounts: $('#adminBannedAccounts'), adminRuntimeMonitorRefresh: $('#adminRuntimeMonitorRefresh'), adminRuntimeMonitorGrid: $('#adminRuntimeMonitorGrid'), adminRuntimeMonitorFoot: $('#adminRuntimeMonitorFoot'), adminRuntimeTabs: $('#adminRuntimeTabs'), adminRuntimeMonitorPanel: $('#adminRuntimeMonitorPanel'), adminRuntimeInterfacePanel: $('#adminRuntimeInterfacePanel'), adminRuntimeInterfaceReload: $('#adminRuntimeInterfaceReload'), adminRuntimeInterfaceGrid: $('#adminRuntimeInterfaceGrid'), adminRuntimeInterfaceMessage: $('#adminRuntimeInterfaceMessage'), adminRuntimeNpcPanel: $('#adminRuntimeNpcPanel'), adminRuntimeNpcReload: $('#adminRuntimeNpcReload'), adminRuntimeNpcGrid: $('#adminRuntimeNpcGrid'), adminRuntimeNpcMessage: $('#adminRuntimeNpcMessage'), adminRuntimeWorldPanel: $('#adminRuntimeWorldPanel'), adminRuntimeWorldReload: $('#adminRuntimeWorldReload'), adminRuntimeWorldTabs: $('#adminRuntimeWorldTabs'), adminRuntimeWorldGrid: $('#adminRuntimeWorldGrid'), adminRuntimeWorldMessage: $('#adminRuntimeWorldMessage'), adminRuntimeSystemsPanel: $('#adminRuntimeSystemsPanel'), adminRuntimeSystemsReload: $('#adminRuntimeSystemsReload'), adminRuntimeSystemsTabs: $('#adminRuntimeSystemsTabs'), adminRuntimeSystemsGrid: $('#adminRuntimeSystemsGrid'), adminRuntimeSystemsMessage: $('#adminRuntimeSystemsMessage'), adminRuntimeEventsPanel: $('#adminRuntimeEventsPanel'), adminRuntimeEventsReload: $('#adminRuntimeEventsReload'), adminRuntimeEventsGrid: $('#adminRuntimeEventsGrid'), adminRuntimeEventsMessage: $('#adminRuntimeEventsMessage'), adminRuntimePassPanel: $('#adminRuntimePassPanel'), adminRuntimePassReload: $('#adminRuntimePassReload'), adminRuntimePassSeason: $('#adminRuntimePassSeason'), adminRuntimePassGrid: $('#adminRuntimePassGrid'), adminRuntimePassMessage: $('#adminRuntimePassMessage'), adminRuntimeShopsPanel: $('#adminRuntimeShopsPanel'), adminRuntimeShopsReload: $('#adminRuntimeShopsReload'), adminRuntimeShopsTabs: $('#adminRuntimeShopsTabs'), adminRuntimeShopsGrid: $('#adminRuntimeShopsGrid'), adminRuntimeShopsMessage: $('#adminRuntimeShopsMessage'), adminTelemetrySummary: $('#adminTelemetrySummary'), adminHealthToggle: $('#adminHealthToggle'), adminTelemetryHealth: $('#adminTelemetryHealth'), adminTelemetrySources: $('#adminTelemetrySources'), adminTelemetryMilestones: $('#adminTelemetryMilestones'), adminTelemetryPlayers: $('#adminTelemetryPlayers'), adminTelemetryDetail: $('#adminTelemetryDetail'), configBtn: $('#configBtn'), configModal: $('#configModal'), closeConfig: $('#closeConfig'), qualityButtons: $('#qualityButtons'), qualityCurrentBadge: $('#qualityCurrentBadge'), performanceHint: $('#performanceHint'), audioEnabledToggle: $('#audioEnabledToggle'), audioVolumeRange: $('#audioVolumeRange'), audioVolumeValue: $('#audioVolumeValue'), hudSettingsGrid: $('#hudSettingsGrid'), settingsTabs: $('#settingsTabs'), settingsGamePanel: $('#settingsGamePanel'), settingsRankingPanel: $('#settingsRankingPanel'), settingsAccountPanel: $('#settingsAccountPanel'), rankingRefreshBtn: $('#rankingRefreshBtn'), rankingMyPatent: $('#rankingMyPatent'), rankingPatentGuide: $('#rankingPatentGuide'), rankingPoints: $('#rankingPoints'), rankingArena: $('#rankingArena'), rankingAliens: $('#rankingAliens'), rankingGg: $('#rankingGg'), rankingUpdated: $('#rankingUpdated'), accountEmail: $('#accountEmail'), accountCallsign: $('#accountCallsign'), accountSaveName: $('#accountSaveName'), accountNameStatus: $('#accountNameStatus'), accountNewPassword: $('#accountNewPassword'), accountConfirmPassword: $('#accountConfirmPassword'), accountSavePassword: $('#accountSavePassword'), accountPasswordStatus: $('#accountPasswordStatus'), accountSummary: $('#accountSummary'),
+  loginModal: $('#loginModal'), loginTabBtn: $('#loginTabBtn'), registerTabBtn: $('#registerTabBtn'), loginForm: $('#loginForm'), registerForm: $('#registerForm'), recoveryForm: $('#recoveryForm'), forgotPasswordBtn: $('#forgotPasswordBtn'), recoveryPassword: $('#recoveryPassword'), recoveryPasswordConfirm: $('#recoveryPasswordConfirm'), loginEmail: $('#loginEmail'), loginPassword: $('#loginPassword'), registerCallsign: $('#registerCallsign'), registerEmail: $('#registerEmail'), registerPassword: $('#registerPassword'), authMessage: $('#authMessage'), userLabel: $('#userLabel'), rankChip: $('#rankChip'), syncLabel: $('#syncLabel'), worldSyncLabel: $('#worldSyncLabel'), logoutBtn: $('#logoutBtn'), safeZoneLabel: $('#safeZoneLabel'), cargoUsed: $('#cargoUsed'), cargoMax: $('#cargoMax'), cargoBtn: $('#cargoBtn'), cargoModal: $('#cargoModal'), closeCargo: $('#closeCargo'), cargoSummary: $('#cargoSummary'), cargoGrid: $('#cargoGrid'), sellAllCargo: $('#sellAllCargo'), refineryGrid: $('#refineryGrid'), baseServiceGrid: $('#baseServiceGrid'), adminBtn: $('#adminBtn'), adminModal: $('#adminModal'), closeAdmin: $('#closeAdmin'), adminSearchInput: $('#adminSearchInput'), adminSearchBtn: $('#adminSearchBtn'), adminRefreshBtn: $('#adminRefreshBtn'), adminUserList: $('#adminUserList'), adminActionLog: $('#adminActionLog'), adminMessage: $('#adminMessage'), adminBanDuration: $('#adminBanDuration'), adminBanReason: $('#adminBanReason'), adminTotalAccounts: $('#adminTotalAccounts'), adminOnlineAccounts: $('#adminOnlineAccounts'), adminBannedAccounts: $('#adminBannedAccounts'), adminRuntimeMonitorRefresh: $('#adminRuntimeMonitorRefresh'), adminRuntimeMonitorGrid: $('#adminRuntimeMonitorGrid'), adminRuntimeMonitorFoot: $('#adminRuntimeMonitorFoot'), adminRuntimeTabs: $('#adminRuntimeTabs'), adminRuntimeMonitorPanel: $('#adminRuntimeMonitorPanel'), adminRuntimeInterfacePanel: $('#adminRuntimeInterfacePanel'), adminRuntimeInterfaceReload: $('#adminRuntimeInterfaceReload'), adminRuntimeInterfaceGrid: $('#adminRuntimeInterfaceGrid'), adminRuntimeInterfaceMessage: $('#adminRuntimeInterfaceMessage'), adminRuntimeNpcPanel: $('#adminRuntimeNpcPanel'), adminRuntimeNpcReload: $('#adminRuntimeNpcReload'), adminRuntimeNpcGrid: $('#adminRuntimeNpcGrid'), adminRuntimeNpcMessage: $('#adminRuntimeNpcMessage'), adminRuntimeWorldPanel: $('#adminRuntimeWorldPanel'), adminRuntimeWorldReload: $('#adminRuntimeWorldReload'), adminRuntimeWorldTabs: $('#adminRuntimeWorldTabs'), adminRuntimeWorldGrid: $('#adminRuntimeWorldGrid'), adminRuntimeWorldMessage: $('#adminRuntimeWorldMessage'), adminRuntimeSystemsPanel: $('#adminRuntimeSystemsPanel'), adminRuntimeSystemsReload: $('#adminRuntimeSystemsReload'), adminRuntimeSystemsTabs: $('#adminRuntimeSystemsTabs'), adminRuntimeSystemsGrid: $('#adminRuntimeSystemsGrid'), adminRuntimeSystemsMessage: $('#adminRuntimeSystemsMessage'), adminRuntimeEventsPanel: $('#adminRuntimeEventsPanel'), adminRuntimeEventsReload: $('#adminRuntimeEventsReload'), adminRuntimeEventsGrid: $('#adminRuntimeEventsGrid'), adminRuntimeEventsMessage: $('#adminRuntimeEventsMessage'), adminRuntimePassPanel: $('#adminRuntimePassPanel'), adminRuntimePassReload: $('#adminRuntimePassReload'), adminRuntimePassSeason: $('#adminRuntimePassSeason'), adminRuntimePassGrid: $('#adminRuntimePassGrid'), adminRuntimePassMessage: $('#adminRuntimePassMessage'), adminRuntimeBonusPanel: $('#adminRuntimeBonusPanel'), adminRuntimeBonusReload: $('#adminRuntimeBonusReload'), adminRuntimeBonusGrid: $('#adminRuntimeBonusGrid'), adminRuntimeBonusMessage: $('#adminRuntimeBonusMessage'), gateSpinCostNote: $('#gateSpinCostNote'), gateDustSpinCaption: $('#gateDustSpinCaption'), adminRuntimeShopsPanel: $('#adminRuntimeShopsPanel'), adminRuntimeShopsReload: $('#adminRuntimeShopsReload'), adminRuntimeShopsTabs: $('#adminRuntimeShopsTabs'), adminRuntimeShopsGrid: $('#adminRuntimeShopsGrid'), adminRuntimeShopsMessage: $('#adminRuntimeShopsMessage'), adminTelemetrySummary: $('#adminTelemetrySummary'), adminHealthToggle: $('#adminHealthToggle'), adminTelemetryHealth: $('#adminTelemetryHealth'), adminTelemetrySources: $('#adminTelemetrySources'), adminTelemetryMilestones: $('#adminTelemetryMilestones'), adminTelemetryPlayers: $('#adminTelemetryPlayers'), adminTelemetryDetail: $('#adminTelemetryDetail'), configBtn: $('#configBtn'), configModal: $('#configModal'), closeConfig: $('#closeConfig'), qualityButtons: $('#qualityButtons'), qualityCurrentBadge: $('#qualityCurrentBadge'), performanceHint: $('#performanceHint'), audioEnabledToggle: $('#audioEnabledToggle'), audioVolumeRange: $('#audioVolumeRange'), audioVolumeValue: $('#audioVolumeValue'), hudSettingsGrid: $('#hudSettingsGrid'), settingsTabs: $('#settingsTabs'), settingsGamePanel: $('#settingsGamePanel'), settingsRankingPanel: $('#settingsRankingPanel'), settingsAccountPanel: $('#settingsAccountPanel'), rankingRefreshBtn: $('#rankingRefreshBtn'), rankingMyPatent: $('#rankingMyPatent'), rankingPatentGuide: $('#rankingPatentGuide'), rankingPoints: $('#rankingPoints'), rankingArena: $('#rankingArena'), rankingAliens: $('#rankingAliens'), rankingGg: $('#rankingGg'), rankingUpdated: $('#rankingUpdated'), accountEmail: $('#accountEmail'), accountCallsign: $('#accountCallsign'), accountSaveName: $('#accountSaveName'), accountNameStatus: $('#accountNameStatus'), accountNewPassword: $('#accountNewPassword'), accountConfirmPassword: $('#accountConfirmPassword'), accountSavePassword: $('#accountSavePassword'), accountPasswordStatus: $('#accountPasswordStatus'), accountSummary: $('#accountSummary'),
 };
 
 const SAVE_KEY_PREFIX = 'stellarLegacyV5Save';
@@ -561,7 +561,7 @@ function premiumPassActive(){return !!premiumRuntime.state?.battle_pass_active;}
 function premiumCanPurchase(){return !!premiumRuntime.state?.can_purchase||isAdminPilot();}
 function premiumAutoCombatAccess(){return premiumActive()||premiumPassActive();}
 function premiumElitePrice(price,currency){const p=Math.max(0,Math.round(Number(price)||0));return currency==='uridium'&&premiumActive()?Math.max(1,Math.floor(p*.95)):p;}
-function alphaSpinUnitCost(){return premiumActive()?90:100;} // V18.2.3: valor único para todos os portais
+function alphaSpinUnitCost(key=currentGateKey()){const base=Math.max(1,Math.floor(Number(bonusGatePrices(key).stl)||100));return premiumActive()?Math.max(1,Math.floor(base*(1-Math.max(0,Math.min(50,Number(bonusConfig().premium_discount_pct)||0))/100))):base;}
 function premiumLocalPlanById(id){return null;}
 function premiumCatalogForRender(){
   const account=Array.isArray(premiumRuntime.state?.catalog)?premiumRuntime.state.catalog:[],byId=new Map(account.map(p=>[String(p.id),p]));
@@ -4120,26 +4120,56 @@ function spawnOre(type=null){
 // Posições e reaparecimento persistem no save: saltar mapas/relogar não gera caixas extras.
 // V18.2.4: setores comuns X-1..X-4 = 20; setores Battle 4-1..4-3 = 30.
 // Portais Astrais (Aurora/Nexus/Eclipse) NÃO oferecem BOX BÔNUS.
-const BONUS_BOX_TARGET_X=20;
-const BONUS_BOX_TARGET_BATTLE=30;
+// V18.2.5 • Configuração ao vivo da BOX BÔNUS e do Materializador (somente ADM edita).
+const BONUS_CONFIG_DEFAULT={
+  map_counts:{x1:20,x2:20,x3:20,x4:20,b41:30,b42:30,b43:30},
+  respawn_min_ms:40000,respawn_max_ms:70000,premium_discount_pct:10,
+  gate_prices:{alpha:{stl:100,dust:1},beta:{stl:100,dust:1},gamma:{stl:100,dust:1}},
+  rewards:[
+    {kind:'ammo',id:'lcb10',min:15,max:100,weight:1,label:'PLS-1'},
+    {kind:'ammo',id:'mcb25',min:15,max:75,weight:1,label:'PLS-2'},
+    {kind:'ammo',id:'mcb50',min:15,max:50,weight:1,label:'PLS-3'},
+    {kind:'ammo',id:'sab50',min:15,max:75,weight:1,label:'SIP-2'},
+    {kind:'credits',min:100,max:10000,weight:1,label:'CR'},
+    {kind:'uridium',min:1,max:200,weight:1,label:'STL'},
+    {kind:'stellarDust',min:1,max:2,weight:1,label:'Poeira Stellar'}
+  ]
+};
+const bonusConfigRuntime={config:structuredClone(BONUS_CONFIG_DEFAULT),version:0,lastFetchAt:0,busy:false,source:'fallback'};
+function bonusConfig(){return bonusConfigRuntime.config||BONUS_CONFIG_DEFAULT;}
+function bonusGatePrices(key){return bonusConfig().gate_prices?.[key]||BONUS_CONFIG_DEFAULT.gate_prices[key]||BONUS_CONFIG_DEFAULT.gate_prices.alpha;}
+function bonusDustUnitCost(key=currentGateKey()){return Math.max(1,Math.floor(Number(bonusGatePrices(key).dust)||1));}
+function normalizeBonusRuntime(raw){
+  if(!raw?.config||!Array.isArray(raw.config.rewards)||!raw.config.gate_prices||!raw.config.map_counts)return false;
+  const c=raw.config;
+  bonusConfigRuntime.config={...structuredClone(BONUS_CONFIG_DEFAULT),...c,
+    rewards:c.rewards.map((r,i)=>({...BONUS_CONFIG_DEFAULT.rewards[i],...r})),
+    gate_prices:{...BONUS_CONFIG_DEFAULT.gate_prices,...c.gate_prices},
+    map_counts:{...BONUS_CONFIG_DEFAULT.map_counts,...c.map_counts}
+  };
+  bonusConfigRuntime.version=Math.max(0,Number(raw.version)||0);bonusConfigRuntime.source='online';
+  return true;
+}
+async function refreshBonusRuntime(force=false){
+  if(!authenticated||!getUser()?.id)return;
+  const now=Date.now();if(bonusConfigRuntime.busy||(!force&&now-bonusConfigRuntime.lastFetchAt<30000))return;
+  bonusConfigRuntime.busy=true;bonusConfigRuntime.lastFetchAt=now;
+  try{
+    const data=await loadBonusConfigOnline(force);
+    const changed=Number(data?.version)!==bonusConfigRuntime.version||bonusConfigRuntime.source!=='online';
+    if(normalizeBonusRuntime(data)&&changed&&progress){createBonusBoxes();renderGalaxyGate();}
+  }catch(err){console.warn('[bonus-runtime] configuração anterior mantida',err);}
+  finally{bonusConfigRuntime.busy=false;}
+}
+setInterval(()=>{if(authenticated)refreshBonusRuntime(false);},45000);
+
 function bonusBoxTargetForMap(){
   const mapId=String(progress?.mapId||state.currentMap?.id||'');
+  // Portais são sempre proibidos, inclusive quando o ADM altera outros mapas.
   if(state.currentMap?.gate||/^gg(?:Alpha|Beta|Gamma)$/i.test(mapId))return 0;
-  if(mapId==='x1'||mapId==='x2'||mapId==='x3'||mapId==='x4')return BONUS_BOX_TARGET_X;
-  if(mapId==='b41'||mapId==='b42'||mapId==='b43')return BONUS_BOX_TARGET_BATTLE;
-  return 0;
+  return Math.max(0,Math.min(100,Number(bonusConfig().map_counts?.[mapId])||0));
 }
-const BONUS_BOX_RESPAWN_MIN_MS=40000;
-const BONUS_BOX_RESPAWN_MAX_MS=70000;
-const BONUS_BOX_REWARDS=[
-  {kind:'ammo',id:'lcb10',min:15,max:100,label:'PLS-1'},
-  {kind:'ammo',id:'mcb25',min:15,max:75,label:'PLS-2'},
-  {kind:'ammo',id:'mcb50',min:15,max:50,label:'PLS-3'},
-  {kind:'ammo',id:'sab50',min:15,max:75,label:'SIP-2'},
-  {kind:'credits',min:100,max:10000,label:'CR'},
-  {kind:'uridium',min:1,max:200,label:'STL'},
-  {kind:'stellarDust',min:1,max:2,label:'Poeira Stellar'}
-];
+
 function bonusBoxMapKey(){return locationStorageKey();}
 function currentBonusBoxState(){
   if(!progress)return null;
@@ -4175,6 +4205,7 @@ function createBonusBoxes(){
   let changed=!row.initialized;
   row.initialized=true;
   if(row.boxes.length>goal){row.boxes.length=goal;changed=true;}
+  if(row.respawns.length>Math.max(0,goal-row.boxes.length)){row.respawns.length=Math.max(0,goal-row.boxes.length);changed=true;}
   // Migração 12→20/30: mantém cooldowns antigos sem gerar prêmios duplicados.
   // Número de caixas ativas + caixas aguardando respawn não ultrapassa o teto.
   const missing=Math.max(0,goal-row.boxes.length-row.respawns.length);
@@ -4207,7 +4238,10 @@ function collectBonusBox(box,fromPet=false){
   const row=currentBonusBoxState();const index=row?.boxes?.findIndex(b=>b.id===box.id)??-1;
   if(index<0)return false;
   // Apenas UMA das sete recompensas por caixa (chance igual de cada tipo).
-  const def=BONUS_BOX_REWARDS[Math.floor(Math.random()*BONUS_BOX_REWARDS.length)];
+  const pool=bonusConfig().rewards.filter(r=>Number(r.weight)>0);
+  const total=pool.reduce((n,r)=>n+Number(r.weight),0);if(total<=0)return false;
+  let roll=Math.random()*total,def=pool[pool.length-1];
+  for(const row of pool){roll-=Number(row.weight);if(roll<0){def=row;break;}}
   const qty=Math.floor(def.min+Math.random()*(def.max-def.min+1));
   if(def.kind==='ammo'){
     progress.ammo ||= {};progress.ammo[def.id]=(Number(progress.ammo[def.id])||0)+qty;
@@ -4220,7 +4254,7 @@ function collectBonusBox(box,fromPet=false){
   }
   row.boxes.splice(index,1);
   row.respawns ||= [];
-  row.respawns.push(Date.now()+BONUS_BOX_RESPAWN_MIN_MS+Math.random()*(BONUS_BOX_RESPAWN_MAX_MS-BONUS_BOX_RESPAWN_MIN_MS));
+  row.respawns.push(Date.now()+Number(bonusConfig().respawn_min_ms)+Math.random()*(Number(bonusConfig().respawn_max_ms)-Number(bonusConfig().respawn_min_ms)));
   playSfx('pickup');spawnParticle(box.x,box.y,`+${fmt(qty)} ${def.label}`,'#b78aff');
   pushActivity(`${fromPet?'AUX-9 • ':''}BOX BÔNUS • +${fmt(qty)} ${def.label}`,'reward');
   telemetryCounter('boxes',1);titleStatAdd('boxes',1);battlePassEvent('box',1);
@@ -6093,14 +6127,14 @@ function rollAlphaOnce(){
 }
 function spinAlpha(amount,payment='uridium'){
   normalizeGalaxyGateState();
-  const key=currentGateKey(),dust=payment==='dust',unit=dust?1:alphaSpinUnitCost(),cost=unit*amount;
+  const key=currentGateKey(),dust=payment==='dust',unit=dust?bonusDustUnitCost(key):alphaSpinUnitCost(key),cost=unit*amount;
   const available=dust?Math.max(0,Math.floor(Number(progress.stellarDust)||0)):(Number(progress.profile.uridium)||0);
   const unitText=dust?'Poeira Stellar':'STL';
   if(available<cost){showToast(`Faltam ${fmt(cost-available)} ${unitText} para ${amount} giro(s)`);return;}
   openSpendConfirm({
     title:`Girar portal ${galaxyGateDef().label}?`,
     itemName:`${amount} giro(s) • ${dust?'POEIRA STELLAR':'STELLARIUM'}`,
-    detail:dust?'Cada giro usa 1 Poeira Stellar; nenhuma STL será descontada.':'100 STL por giro em todos os portais • Premium paga 90 STL.',
+    detail:dust?`Cada giro usa ${unit} Poeira Stellar; nenhuma STL será descontada.`:`${unit} STL por giro neste portal${premiumActive()?' (Premium ativo)':''}.`,
     value:cost,currency:dust?'dust':'uridium',confirmLabel:'CONFIRMAR GIRO',
     onConfirm:()=>runEconomyAction('gate_spin',{protocol:key,amount,payment}).then(r=>{
       const info=r?.info||{},results=Array.isArray(info.results)?info.results:[],summary={};
@@ -6156,10 +6190,12 @@ function renderGalaxyGate(){
   if(ui.gateCoreLabel)ui.gateCoreLabel.textContent=gd.label;if(ui.gateProtocolLabel)ui.gateProtocolLabel.textContent=`PORTAL ${gd.label}`;
   if(ui.gateCombatProtocol)ui.gateCombatProtocol.textContent=`${gd.label} • ${gd.rounds.length} ROUNDS • ${gd.baseLives} VIDAS BASE / ${gd.maxLives} MÁX • DANO NPC ${Math.round(gd.damageScale*100)}%`;
   if(ui.gateRewardNote)ui.gateRewardNote.innerHTML=`<b>PACOTE FINAL ${gd.label}:</b> ${gateFinalRewardText(gd)}<br><small>Cada Round limpo também paga ${gateRoundRewardText(gd)}. Bônus adicional sobre os abates: +${Math.round((gd.totalRewardMult-1)*100)}% no fechamento.</small>`;
+  if(ui.gateDustSpinCaption)ui.gateDustSpinCaption.textContent=`${fmt(bonusDustUnitCost(gd.key))} POEIRA POR GIRO • SEM STL`;
+  if(ui.gateSpinCostNote)ui.gateSpinCostNote.innerHTML=`Giro em ${gd.label}: <b>${fmt(alphaSpinUnitCost(gd.key))} STL</b> ou <b>${fmt(bonusDustUnitCost(gd.key))} Poeira Stellar</b>. Premium: ${fmt(bonusConfig().premium_discount_pct||0)}% de desconto nos giros em STL.`;
   if(ui.gateProtocolTabs)ui.gateProtocolTabs.querySelectorAll('[data-gate-protocol]').forEach(b=>{const key=b.dataset.gateProtocol;b.classList.toggle('active',key===gd.key);b.disabled=false;b.title=`${GALAXY_GATE_DEFS[key].label} • disponível`;});
   ui.gatePieceGrid.innerHTML=Array.from({length:gd.pieces},(_,i)=>`<span class="gate-piece ${a.pieces.includes(i+1)?'found':''}" title="Peça ${i+1}">${i+1}</span>`).join('');
-  ui.gateSpinButtons.innerHTML='';[1,5,10,50,100].forEach(n=>{const cost=n*alphaSpinUnitCost(),b=document.createElement('button');b.className='small-btn gate-spin-btn';b.innerHTML=`${n}x <small>${fmt(cost)} STL${premiumActive()?' • -10%':''}</small>`;b.disabled=progress.profile.uridium<cost;b.onclick=()=>spinAlpha(n,'uridium');ui.gateSpinButtons.appendChild(b);});
-  if(ui.gateDustSpinButtons){ui.gateDustSpinButtons.innerHTML='';[1,5,10,50,100].forEach(n=>{const b=document.createElement('button');b.className='small-btn gate-spin-btn gate-dust-btn';b.innerHTML=`${n}x <small>${n} Poeira${n>1?'s':''}</small>`;b.disabled=(Number(progress.stellarDust)||0)<n;b.onclick=()=>spinAlpha(n,'dust');ui.gateDustSpinButtons.appendChild(b);});}
+  ui.gateSpinButtons.innerHTML='';[1,5,10,50,100].forEach(n=>{const cost=n*alphaSpinUnitCost(),b=document.createElement('button');b.className='small-btn gate-spin-btn';b.innerHTML=`${n}x <small>${fmt(cost)} STL${premiumActive()?` • -${fmt(bonusConfig().premium_discount_pct)}%`:''}</small>`;b.disabled=progress.profile.uridium<cost;b.onclick=()=>spinAlpha(n,'uridium');ui.gateSpinButtons.appendChild(b);});
+  if(ui.gateDustSpinButtons){ui.gateDustSpinButtons.innerHTML='';[1,5,10,50,100].forEach(n=>{const b=document.createElement('button');b.className='small-btn gate-spin-btn gate-dust-btn';b.innerHTML=`${n}x <small>${fmt(n*bonusDustUnitCost(gd.key))} Poeira</small>`;b.disabled=(Number(progress.stellarDust)||0)<n*bonusDustUnitCost(gd.key);b.onclick=()=>spinAlpha(n,'dust');ui.gateDustSpinButtons.appendChild(b);});}
   renderGateRounds();
   if(a.run?.active){ui.gateAlphaStatusTitle.textContent=`${gd.label} em andamento • Round ${a.run.round}`;ui.gateAlphaStatusText.textContent=`${a.lives}/${gd.maxLives} vidas. Você pode fugir, regenerar e retornar ao combate; NPCs eliminados continuam eliminados.`;ui.gateJumpBtn.textContent=isGalaxyGateMap()?`VOCÊ ESTÁ NO ${gd.label}`:atBase?`RETORNAR AO ${gd.label}`:'VOLTE À BASE X-1';ui.gateJumpBtn.disabled=isGalaxyGateMap()||!atBase||a.lives<=0;}
   else if(a.built){ui.gateAlphaStatusTitle.textContent=`PORTAL ${gd.label} MONTADO`;ui.gateAlphaStatusText.textContent=`${gd.pieces}/${gd.pieces} peças • ${gd.rounds.length} rounds • ${a.lives}/${gd.maxLives} vidas • pensado para kite e progressão FREE.`;ui.gateJumpBtn.textContent=atBase?`SALTAR PARA O ${gd.label}`:'VOLTE À BASE X-1';ui.gateJumpBtn.disabled=!atBase;}
@@ -6833,10 +6869,59 @@ async function loadAdminRuntimeMonitor(force=false){
   finally{adminRuntimeMonitor.busy=false;if(ui.adminRuntimeMonitorRefresh)ui.adminRuntimeMonitorRefresh.disabled=false;}
 }
 
+// V18.2.5 • Editor da BOX BÔNUS / custos dos Portais.
+const adminBonusEditor={snapshot:null,busy:false};
+function adminBonusMessage(message,kind='muted'){
+  if(ui.adminRuntimeBonusMessage){ui.adminRuntimeBonusMessage.textContent=message;ui.adminRuntimeBonusMessage.className=`admin-runtime-interface-message ${kind}`;}
+}
+const BONUS_MAP_LABELS={x1:'X-1',x2:'X-2',x3:'X-3',x4:'X-4',b41:'4-1',b42:'4-2',b43:'4-3'};
+function renderAdminBonusEditor(){
+  const host=ui.adminRuntimeBonusGrid;if(!host)return;
+  const raw=adminBonusEditor.snapshot,c=raw?.config;if(!c){host.innerHTML='<div class="empty-state">Carregue a configuração das caixas.</div>';return;}
+  const numberField=(field,value,min,max,label)=>`<label>${label}<input type="number" step="1" min="${min}" max="${max}" data-bonus-field="${field}" value="${Math.round(Number(value)||0)}"></label>`;
+  const maps=Object.entries(BONUS_MAP_LABELS).map(([id,label])=>numberField(`map:${id}`,c.map_counts?.[id],0,100,label)).join('');
+  const rewards=c.rewards.map((r,i)=>`<div class="admin-bonus-reward" data-bonus-reward="${i}"><b>${escHtml(BONUS_CONFIG_DEFAULT.rewards[i]?.label||r.kind)}</b><div class="admin-shop-fields">${numberField(`min:${i}`,r.min,1,10000000,'MÍN')}${numberField(`max:${i}`,r.max,1,10000000,'MÁX')}${numberField(`weight:${i}`,r.weight,0,100,'PESO')}</div></div>`).join('');
+  const gates=[['alpha','AURORA'],['beta','NEXUS'],['gamma','ECLIPSE']].map(([id,name])=>`<div class="admin-bonus-reward"><b>${name}</b><div class="admin-shop-fields">${numberField(`gate-stl:${id}`,c.gate_prices[id]?.stl,1,100000,'STL/GIRO')}${numberField(`gate-dust:${id}`,c.gate_prices[id]?.dust,1,100,'POEIRA/GIRO')}</div></div>`).join('');
+  host.innerHTML=`<article class="admin-bonus-block"><h4>🌌 DISTRIBUIÇÃO POR MAPA</h4><p>Portais Astrais (AURORA/NEXUS/ECLIPSE) permanecem com 0 BOX BÔNUS por regra do jogo.</p><div class="admin-shop-fields">${maps}</div></article>
+  <article class="admin-bonus-block"><h4>⏳ REAPARECIMENTO</h4><div class="admin-shop-fields">${numberField('respawn-min',Math.round(c.respawn_min_ms/1000),5,3600,'MÍN. (SEG)')}${numberField('respawn-max',Math.round(c.respawn_max_ms/1000),5,3600,'MÁX. (SEG)')}</div></article>
+  <article class="admin-bonus-block"><h4>🎁 RECOMPENSAS DA BOX</h4><p>PESO 0 = desativada. Probabilidade relativa ao total dos pesos; cada caixa dá somente um prêmio.</p>${rewards}</article>
+  <article class="admin-bonus-block"><h4>💎 MATERIALIZADOR</h4><p>Os preços são cobrados pelo servidor. Premium desconta apenas STL, nunca Poeira.</p><div class="admin-shop-fields">${numberField('discount',c.premium_discount_pct,0,50,'DESCONTO PREMIUM (%)')}</div>${gates}</article>
+  <button class="small-btn gold admin-bonus-submit" type="button" data-bonus-save="1">SALVAR CONFIGURAÇÃO BÔNUS</button>`;
+}
+async function loadAdminBonusEditor(force=false){
+  if(adminBonusEditor.busy)return;
+  adminBonusEditor.busy=true;ui.adminRuntimeBonusReload&&(ui.adminRuntimeBonusReload.disabled=true);
+  try{adminBonusEditor.snapshot=await loadBonusConfigOnline(force);renderAdminBonusEditor();adminBonusMessage(`Configuração v${adminBonusEditor.snapshot.version} carregada.`, 'ok');}
+  catch(err){adminBonusMessage(err.message||'Falha ao carregar configuração.', 'err');}
+  finally{adminBonusEditor.busy=false;ui.adminRuntimeBonusReload&&(ui.adminRuntimeBonusReload.disabled=false);}
+}
+async function saveAdminBonusEditor(button){
+  if(adminBonusEditor.busy||!adminBonusEditor.snapshot?.config)return;
+  const c=structuredClone(adminBonusEditor.snapshot.config),f=id=>ui.adminRuntimeBonusGrid?.querySelector(`[data-bonus-field="${id}"]`);
+  const integer=(id,min,max)=>{const el=f(id),v=Number(el?.value);if(!el||!Number.isInteger(v)||v<min||v>max)throw Error(`Campo ${id} precisa ficar entre ${min} e ${max}.`);return v;};
+  try{
+    for(const id of Object.keys(BONUS_MAP_LABELS))c.map_counts[id]=integer(`map:${id}`,0,100);
+    c.respawn_min_ms=integer('respawn-min',5,3600)*1000;c.respawn_max_ms=integer('respawn-max',5,3600)*1000;
+    if(c.respawn_min_ms>c.respawn_max_ms)throw Error('Respawn mínimo não pode exceder o máximo.');
+    c.premium_discount_pct=integer('discount',0,50);
+    for(const gate of ['alpha','beta','gamma']){c.gate_prices[gate].stl=integer(`gate-stl:${gate}`,1,100000);c.gate_prices[gate].dust=integer(`gate-dust:${gate}`,1,100);}
+    for(let i=0;i<c.rewards.length;i++){const r=c.rewards[i],maxAllowed=r.kind==='credits'?10000000:r.kind==='uridium'?100000:r.kind==='stellarDust'?100:1000000;
+      r.min=integer(`min:${i}`,1,maxAllowed);r.max=integer(`max:${i}`,1,maxAllowed);r.weight=integer(`weight:${i}`,0,100);
+      if(r.min>r.max)throw Error(`${BONUS_CONFIG_DEFAULT.rewards[i].label}: mínimo maior que máximo.`);
+    }
+    if(!c.rewards.some(r=>r.weight>0))throw Error('Ative pelo menos uma recompensa (peso maior que zero).');
+    adminBonusEditor.busy=true;if(button)button.disabled=true;adminBonusMessage('Salvando no Supabase...');
+    const raw=await adminUpdateBonusConfigOnline(c);adminBonusEditor.snapshot=raw;normalizeBonusRuntime(raw);
+    if(progress){createBonusBoxes();renderGalaxyGate();}
+    renderAdminBonusEditor();adminBonusMessage(`Salvo com sucesso • versão ${raw.version} • jogadores atualizam em até ~45 segundos.`, 'ok');showToast('Configuração de BOX BÔNUS salva!','reward');
+  }catch(err){adminBonusMessage(err.message||'Falha ao salvar configuração.','err');}
+  finally{adminBonusEditor.busy=false;if(button)button.disabled=false;}
+}
+
 // ===================== V18.1.6B • ADMIN INTERFACE EDITOR =====================
 const adminInterfaceEditor={busy:false,activeTab:'runtime',snapshot:null};
 function setAdminRuntimeTab(tab='runtime'){
-  const next=['runtime','interface','npcs','world','systems','events','pass','shops'].includes(tab)?tab:'runtime';adminInterfaceEditor.activeTab=next;
+  const next=['runtime','interface','npcs','world','systems','events','pass','shops','bonus'].includes(tab)?tab:'runtime';adminInterfaceEditor.activeTab=next;
   ui.adminRuntimeTabs?.querySelectorAll('[data-admin-runtime-tab]').forEach(b=>b.classList.toggle('active',b.dataset.adminRuntimeTab===next));
   ui.adminRuntimeMonitorPanel?.classList.toggle('hidden',next!=='runtime');
   ui.adminRuntimeInterfacePanel?.classList.toggle('hidden',next!=='interface');
@@ -6846,6 +6931,7 @@ function setAdminRuntimeTab(tab='runtime'){
   ui.adminRuntimeEventsPanel?.classList.toggle('hidden',next!=='events');
   ui.adminRuntimePassPanel?.classList.toggle('hidden',next!=='pass');
   ui.adminRuntimeShopsPanel?.classList.toggle('hidden',next!=='shops');
+  ui.adminRuntimeBonusPanel?.classList.toggle('hidden',next!=='bonus');
   if(next==='interface'&&!adminInterfaceEditor.snapshot)loadAdminInterfaceEditor(false);
   if(next==='npcs'&&!adminNpcEditor.snapshot)loadAdminNpcEditor(false);
   if(next==='world'&&!adminWorldEditor.snapshot)loadAdminWorldEditor(false);
@@ -6853,6 +6939,7 @@ function setAdminRuntimeTab(tab='runtime'){
   if(next==='events'&&!adminEventsEditor.snapshot)loadAdminEventsEditor(false);
   if(next==='pass'&&!adminPassEditor.snapshot)loadAdminPassEditor(false);
   if(next==='shops'&&!adminShopsEditor.snapshot)loadAdminShopsEditor(false);
+  if(next==='bonus'&&!adminBonusEditor.snapshot)loadAdminBonusEditor(false);
 }
 function adminInterfaceMessage(text,kind='muted'){if(!ui.adminRuntimeInterfaceMessage)return;ui.adminRuntimeInterfaceMessage.textContent=text||'';ui.adminRuntimeInterfaceMessage.className=`admin-runtime-interface-message ${kind}`.trim();}
 function adminModuleGroupLabel(row){if(!row?.parent_key)return 'TOPO';const p=adminInterfaceEditor.snapshot?.modules?.find(x=>x.module_key===row.parent_key);return p?.label||row.parent_key;}
@@ -7261,6 +7348,8 @@ if(ui.adminRuntimeEventsGrid)ui.adminRuntimeEventsGrid.onclick=e=>{const save=e.
 if(ui.adminRuntimePassReload)ui.adminRuntimePassReload.onclick=()=>loadAdminPassEditor(true);
 if(ui.adminRuntimePassSeason)ui.adminRuntimePassSeason.onclick=e=>{const save=e.target.closest('[data-pass-season-save]');if(save)saveAdminPassSeason(save.dataset.passSeasonSave,save.closest('[data-pass-season]'),save);};
 if(ui.adminRuntimePassGrid)ui.adminRuntimePassGrid.onclick=e=>{const save=e.target.closest('[data-pass-tier-save]');if(save)saveAdminPassTier(Number(save.dataset.passTierSave),save.closest('[data-pass-tier]'),save);};
+if(ui.adminRuntimeBonusReload)ui.adminRuntimeBonusReload.onclick=()=>loadAdminBonusEditor(true);
+if(ui.adminRuntimeBonusGrid)ui.adminRuntimeBonusGrid.onclick=e=>{const b=e.target.closest('[data-bonus-save]');if(b)saveAdminBonusEditor(b);};
 if(ui.adminRuntimeShopsReload)ui.adminRuntimeShopsReload.onclick=()=>loadAdminShopsEditor(true);
 if(ui.adminRuntimeShopsTabs)ui.adminRuntimeShopsTabs.onclick=e=>{const b=e.target.closest('[data-admin-shops-view]');if(b)adminShopsSetView(b.dataset.adminShopsView);};
 if(ui.adminRuntimeShopsGrid)ui.adminRuntimeShopsGrid.onclick=e=>{const common=e.target.closest('[data-common-shop-save]');if(common){saveAdminCommonShop(common.dataset.commonShopSave,common.closest('[data-common-shop]'),common);return;}const premium=e.target.closest('[data-premium-shop-save]');if(premium){saveAdminPremiumShop(premium.dataset.premiumShopSave,premium.closest('[data-premium-shop]'),premium);}};
@@ -7476,7 +7565,7 @@ async function afterAuth(){
     try{state.currentMap=MAPS[progress.mapId]||MAPS.x1;const ship=SHIPS[progress.activeShipId]||SHIPS.phoenix;player.maxHp=Math.max(1,Number(ship.hp)||1);player.maxShield=Math.max(0,Number(progress.shield)||0);player.hp=Math.max(1,Math.min(player.maxHp,Number(progress.hp)||player.maxHp));player.shield=Math.max(0,Math.min(player.maxShield,Number(progress.shield)||0));player.x=Number(progress.x)||currentBasePoint().x;player.y=Number(progress.y)||state.currentMap.world.h/2;player.tx=player.x;player.ty=player.y;state.camera.x=player.x;state.camera.y=player.y;joinSharedUniverse();syncOnlineWorld();updateUI();gameBootstrapRuntime.ready=true;}catch(inner){console.error('[bootstrap] emergency fallback failed',inner);}
   }finally{gameBootstrapRuntime.loading=false;}
 
-  renderChatTabs();refreshChatHistory(true);updatePassBadge();syncAuctionBidsOnline();syncOnlineWorld();syncClanCreditGrants(true);refreshClanState(true);refreshWarfrontState(true).catch(()=>{});refreshRuntimeConfig(true).catch(()=>{});refreshNpcRuntimeConfig(true).catch(()=>{});refreshWorldRuntimeConfig(true).catch(()=>{});refreshSystemsRuntimeConfig(true).catch(()=>{});refreshPassRuntimeConfig(true).catch(()=>{});refreshShopsRuntimeConfig(true).catch(()=>{});
+  renderChatTabs();refreshChatHistory(true);updatePassBadge();refreshBonusRuntime(true).catch(()=>{});syncAuctionBidsOnline();syncOnlineWorld();syncClanCreditGrants(true);refreshClanState(true);refreshWarfrontState(true).catch(()=>{});refreshRuntimeConfig(true).catch(()=>{});refreshNpcRuntimeConfig(true).catch(()=>{});refreshWorldRuntimeConfig(true).catch(()=>{});refreshSystemsRuntimeConfig(true).catch(()=>{});refreshPassRuntimeConfig(true).catch(()=>{});refreshShopsRuntimeConfig(true).catch(()=>{});
 
   // Se a posição do servidor chegou depois dos 650ms e o jogador ainda não moveu a nave,
   // ela pode corrigir o ponto inicial sem tocar em economia/inventário.

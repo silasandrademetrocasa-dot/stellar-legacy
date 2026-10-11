@@ -1,4 +1,8 @@
-### V18.2.4 — BOX BÔNUS POR MAPA (ATUAL)
+### V18.2.5 — BOX BÔNUS EDITÁVEL PELO ADM (ATUAL)
+
+Nova aba **ADM → BOX BÔNUS**: mapa, respawn, pesos e quantidades de prêmios, preços dos três portais (STL ou Poeira) e desconto Premium. Tudo salvo no Supabase e aplicado sem ZIP em alterações futuras. Portais Astrais continuam sem BOX. Consulte `ADMIN_BONUS_LIVE_V18_2_5.md`. Banco de produção já migrado.
+
+### V18.2.4 — BOX BÔNUS POR MAPA
 
 Agora são **20 BOX BÔNUS** em cada mapa X-1, X-2, X-3 e X-4, e **30 BOX BÔNUS** em cada Battle Map 4-1, 4-2 e 4-3. Os portais AURORA, NEXUS e ECLIPSE **não possuem BOX BÔNUS**.
 

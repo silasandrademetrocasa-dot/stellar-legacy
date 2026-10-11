@@ -6,7 +6,7 @@
 <meta content="width=device-width,initial-scale=1,user-scalable=no" name="viewport"/>
 <meta content="#030816" name="theme-color"/>
 <title>Stellar Legacy</title>
-<link href="/style.css?v=18.2.4" rel="stylesheet"/>
+<link href="/style.css?v=18.2.5" rel="stylesheet"/>
 </head>
 <body>
 <div id="app">
@@ -400,9 +400,9 @@
           </div>
           <div class="gate-generator-wallet">STL <b id="gateUriText">0</b> <span class="gate-dust-wallet"><img src="/assets/v18/bonus/stellar-dust.webp" alt=""/> POEIRA <b id="gateDustText">0</b></span></div>
         </div>
-        <p class="muted" id="gateSpinCostNote">Cada sorteio custa <b>100 STL</b> nos três portais ou <b>1 Poeira Stellar</b> por giro. PREMIUM paga <b>90 STL</b> por giro; Poeira sempre custa <b>1 unidade</b>. Pode vir peça do portal selecionado, <b>Núcleos Quânticos</b>, munição, míssil, Voidite, Créditos, Bônus de Salto ou <b>Vida Astral Reserva</b>.</p>
+        <p class="muted" id="gateSpinCostNote">Os custos em STL e Poeira Stellar são definidos pelo ADM. O desconto Premium vale apenas para STL. Pode vir peça do portal selecionado, <b>Núcleos Quânticos</b>, munição, míssil, Voidite, Créditos, Bônus de Salto ou <b>Vida Astral Reserva</b>.</p>
         <div class="gate-spin-buttons" id="gateSpinButtons"></div>
-        <div class="gate-dust-spin-panel"><div class="gate-dust-caption"><img src="/assets/v18/bonus/stellar-dust.webp" alt=""/><span>GIRAR COM POEIRA STELLAR <small>1 POEIRA = 1 GIRO • SEM STL</small></span></div><div class="gate-spin-buttons" id="gateDustSpinButtons"></div></div>
+        <div class="gate-dust-spin-panel"><div class="gate-dust-caption"><img src="/assets/v18/bonus/stellar-dust.webp" alt=""/><span>GIRAR COM POEIRA STELLAR <small><span id="gateDustSpinCaption">GIROS COM POEIRA • SEM STL</span></small></span></div><div class="gate-spin-buttons" id="gateDustSpinButtons"></div></div>
         <div class="gate-generator-inventory">
           <div><span>BÔNUS DE SALTO</span><b id="gateJumpBonus">0</b></div>
           <div><span>VIDAS RESERVA</span><b id="gateLifeBonus">0</b></div>
@@ -581,6 +581,7 @@
         <button type="button" data-admin-runtime-tab="events">EVENTOS</button>
         <button type="button" data-admin-runtime-tab="pass">PASSE</button>
         <button type="button" data-admin-runtime-tab="shops">LOJAS</button>
+        <button type="button" data-admin-runtime-tab="bonus">BOX BÔNUS</button>
       </div>
       <div id="adminRuntimeMonitorPanel">
         <div class="admin-runtime-monitor-grid" id="adminRuntimeMonitorGrid"><div class="empty-state">Aguardando status dos runtimes...</div></div>
@@ -657,6 +658,12 @@
         </div>
         <div class="admin-runtime-shops-grid" id="adminRuntimeShopsGrid"><div class="empty-state">Carregue a configuração das lojas.</div></div>
         <div class="admin-runtime-interface-message muted" id="adminRuntimeShopsMessage">Nenhuma alteração pendente.</div>
+      </div>
+      <div class="admin-runtime-bonus-panel hidden" id="adminRuntimeBonusPanel">
+        <div class="admin-runtime-interface-toolbar"><div><b>EDITOR DE BOX BÔNUS & POEIRA STELLAR</b><small>V18.2.5 • Quantidade por mapa, respawn, peso dos prêmios e preços de giros. Alterações gravadas no Supabase.</small></div>
+          <button class="small-btn" id="adminRuntimeBonusReload" type="button">RECARREGAR</button></div>
+        <div class="admin-runtime-bonus-grid" id="adminRuntimeBonusGrid"><div class="empty-state">Carregue a configuração da BOX BÔNUS.</div></div>
+        <div class="admin-runtime-interface-message muted" id="adminRuntimeBonusMessage">Nenhuma alteração pendente.</div>
       </div>
     </section>
     <section class="admin-telemetry-section">
@@ -940,6 +947,6 @@
   </div>
 </div>
 </div>
-<script src="/game.js?v=18.2.4" type="module"></script>
+<script src="/game.js?v=18.2.5" type="module"></script>
 </body>
 </html>

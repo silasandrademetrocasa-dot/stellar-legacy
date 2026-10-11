@@ -22,3 +22,7 @@ Missões, serviços econômicos e crafting passam a ser configurados no Supabase
 ## V18.2.1 — Cupons SQL-First
 
 `V18_2_1_COUPONS_SQL_FIRST.sql` cria um sistema transacional de cupons sem necessidade de novos ZIPs por campanha. Veja `../COUPONS_SQL_FIRST.md` para INSERTs e manutenção. Estrutura instalada no Supabase de produção em 10/10/2026.
+
+## V18.2.5 — Painel ADM de BOX BÔNUS
+
+`V18_2_5_ADMIN_BONUS_LIVE.sql` cria a configuração ao vivo, uma função somente de leitura para jogadores autenticados e outra para edição autorizada pelo ADM. Banco de produção já atualizado em 10/10/2026.

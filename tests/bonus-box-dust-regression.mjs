@@ -18,7 +18,7 @@ const ctx={
  progress:{mapId:'x1',profile:{credits:100,uridium:10},ammo:{lcb10:0,mcb25:0,mcb50:0,sab50:0},stellarDust:0,bonusBoxesByMap:{}},
  state:{bonusBoxes:[],currentMap:{id:'x1',world:{w:6000,h:4500},gate:false}},
  locationStorageKey:()=>ctx.mapKey||'x1:earth',randomMapPosition:()=>({x:2500,y:2200}),
- cloudDirty:false,Date,nowSec:()=>1000, fmt:n=>String(n), resolvedQualityMode:()=> 'low',
+ cloudDirty:false,Date,structuredClone,setInterval:()=>0,authenticated:false,getUser:()=>null,nowSec:()=>1000, fmt:n=>String(n), resolvedQualityMode:()=> 'low',
  saveGame:()=>events.push('save'),playSfx:()=>{},spawnParticle:()=>{},pushActivity:()=>{},
  telemetryCounter:()=>{},telemetryEconomy:()=>{},titleStatAdd:()=>{},battlePassEvent:()=>{},
  refreshAmmoCounters:()=>{},updateUI:()=>{},addPetXp:()=>{},
@@ -112,7 +112,8 @@ assert.match(game,/petLockedCollectionTarget\(\[\.\.\.state\.loot,\.\.\.\(state\
 assert.match(game,/collectBonusBox\(task,true\)/);
 assert.match(game,/for\(const box of \[\.\.\.\(state\.bonusBoxes\|\|\[\]\)\]\)/);
 assert.match(server,/payment=String\(payload\.payment\|\|'uridium'\)/);
-assert.match(server,/const baseUnit=100,unit=payment==='dust'\?1:\(premium\?90:100\)/);
+assert.match(server,/loadBonusRuntimeForUser\(req\)/,'Preço deve vir do Supabase');
+assert.match(server,/const unit=payment==='dust'\?/,'Cobrança por forma de pagamento');
 assert.match(server,/state\.stellarDust=balance-cost/);
 assert.match(game,/smartVersion:'18\.2\.2'/,'Smart Missions preservadas');
 console.log('PASSOU: 20 BOX X1-X4, 30 BOX 4-X, zero em Aurora/Nexus/Eclipse, migração de saves, cooldown sem duplicação, PET, recompensas, giro STL/Poeira, Smart Missions.');

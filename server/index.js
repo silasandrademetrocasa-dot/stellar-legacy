@@ -627,7 +627,7 @@ async function accountUser(sb, user, preferred = '') {
   return { id: user.id, email: user.email, callsign };
 }
 
-app.get('/health', (req, res) => res.json({ ok: true, game: 'Stellar Legacy', version: '18.2.2', universe: 'shared' }));
+app.get('/health', (req, res) => res.json({ ok: true, game: 'Stellar Legacy', version: '18.2.5', universe: 'shared' }));
 
 
 app.get('/api/config', (req, res) => {
@@ -643,7 +643,7 @@ app.get('/api/config', (req, res) => {
 
 app.get('/api/meta', (req, res) => res.json({
   name: 'Stellar Legacy',
-  version: '18.2.2',
+  version: '18.2.5',
   authReady: Boolean(SUPABASE_URL && SUPABASE_KEY),
   diagnostics: configStatus(),
   features: ['login', 'cloud_save', 'factions', 'safe_zone', 'shop', 'owned_ships', 'equipment_slots', 'inventory', 'drones', 'ammo', 'rockets', 'expanded_expedition_maps', 'cargo_hold', 'ore_trading', 'npc_cargo_boxes', 'npc_respawn', 'minimap_navigation', 'waypoints', 'landmark_discovery', 'combat_fx', 'pet_modules', 'auto_buy_cpu', 'v8_asset_identity', 'mission_control_v93', 'mission_acceptance_tracking', 'expanded_enemy_density', 'online_player_presence', 'real_player_auction', 'rank_nameplates_v12', 'clans_v12', 'clan_vault_v12', 'premium_shop_v12', 'battle_pass_paid_v12', 'premium_subscription_v12', 'clan_daily_economy_v12', 'portal_neutral_zone_v12', 'base_only_equipment_v12', 'single_session_v1214', 'manual_login_v141', 'account_bound_save_v141', 'unique_callsign_v141', 'premium_auto_combat_v141', 'shared_universe_v15', 'authoritative_npcs_v15', 'shared_ores_v15', 'shared_events_v15', 'websocket_world_v15', 'npc_contribution_v15', 'realtime_player_socket_v151', 'remote_laser_fx_v151', 'remote_aux9_v151', 'low_latency_world_v151', 'live_ops_v16', 'server_authoritative_shop_v16', 'supabase_event_schedule_v16', 'economy_guard_v161', 'server_auto_buy_v161', 'server_trader_v161', 'server_pet_slots_v161', 'server_materializer_v161', 'server_quantum_cores_v161', 'economy_fast_path_v1767', 'chat_dock_v162', 'drone_designers_v163', 'designer_sets_v163', 'nexus_eclipse_designer_drops_v163', 'global_chat_v162', 'clan_chat_v162', 'private_chat_v162', 'bottom_hud_reflow_v162', 'ship_designers_v165', 'aux_designers_v165', 'designer_ship_abilities_v165', 'event_designer_drops_v165', 'social_minimap_v165', 'realtime_designer_visuals_v165', 'data_driven_core_v1810', 'data_driven_npcs_v1811', 'server_runtime_topbar_cache_v1813', 'data_driven_world_v1814', 'data_driven_systems_v1815', 'admin_runtime_monitor_v1816a', 'admin_interface_editor_v1816b', 'admin_npc_editor_v1816c', 'admin_world_editor_v1816d', 'admin_systems_editor_v1816e', 'event_scheduler_v1817a', 'battle_pass_data_driven_v1817b', 'shops_data_driven_v1817c'],
@@ -1209,7 +1209,12 @@ app.post('/api/economy/action', requireUser, asyncRoute(async (req,res)=>{
     else if(action==='gate_spin'){
       const key=String(payload.protocol||'alpha'),amount=Math.max(1,Math.min(100,Math.floor(Number(payload.amount)||1)));if(!GATE_SERVER_DEFS[key]||![1,5,10,50,100].includes(amount))throw Object.assign(new Error('Sorteio de portal inválido.'),{status:400});if(!gateUnlockedServer(state,key))throw Object.assign(new Error(`${GATE_SERVER_DEFS[key].label} ainda está bloqueado.`),{status:409});const row=liveCatalogRow(snapshot,`gate_spin:${key}`);if(!row)throw Object.assign(new Error('Materializador sem preço publicado no LIVE OPS.'),{status:404});const payment=String(payload.payment||'uridium');
       if(!['uridium','dust'].includes(payment))throw Object.assign(new Error('Forma de pagamento inválida.'),{status:400});
-      const baseUnit=100,unit=payment==='dust'?1:(premium?90:100),cost=unit*amount;
+      const bonusCfg=(await loadBonusRuntimeForUser(req)).config;
+      const gatePrice=bonusCfg.gate_prices?.[key];if(!gatePrice)throw Object.assign(new Error('Preço do portal não configurado.'),{status:409});
+      const baseUnit=Math.max(1,Math.floor(Number(gatePrice.stl)||100));
+      const discount=Math.max(0,Math.min(50,Number(bonusCfg.premium_discount_pct)||0));
+      const unit=payment==='dust'?Math.max(1,Math.floor(Number(gatePrice.dust)||1)):(premium?Math.max(1,Math.floor(baseUnit*(1-discount/100))):baseUnit);
+      const cost=unit*amount;
       if(payment==='dust'){
         const balance=Math.max(0,Math.floor(Number(state.stellarDust)||0));
         if(balance<cost)throw Object.assign(new Error(`Poeira Stellar insuficiente: faltam ${cost-balance}.`),{status:409});
@@ -1222,6 +1227,21 @@ app.post('/api/economy/action', requireUser, asyncRoute(async (req,res)=>{
     const updated_at=await writeEconomySave(req,state);return {state,updated_at,info};
   });
   res.json({ok:true,...result,server_ms:Date.now()-routeStarted});
+}));
+
+// V18.2.5: fonte única dos preços de giros. Busca autenticada; falha bloqueia cobrança desatualizada.
+async function loadBonusRuntimeForUser(req){
+  const {data,error}=await req.sb.rpc('get_bonus_box_config_v1825');
+  if(error||!data?.config)throw Object.assign(new Error('Configuração de BOX BÔNUS indisponível; tente novamente.'),{status:503});
+  return data;
+}
+app.get('/api/runtime/bonus',requireUser,asyncRoute(async(req,res)=>res.json(await loadBonusRuntimeForUser(req))));
+app.post('/api/admin/runtime/bonus',requireUser,asyncRoute(async(req,res)=>{
+  const config=req.body?.config;
+  if(!config||typeof config!=='object'||Array.isArray(config))return res.status(400).json({error:'Configuração JSON inválida.'});
+  const {data,error}=await req.sb.rpc('admin_update_bonus_box_config_v1825',{p_config:config});
+  if(error){const message=String(error.message||'Falha ao atualizar bônus.');return res.status(/administrativ|permiss|negado/i.test(message)?403:400).json({error:message});}
+  res.json(data);
 }));
 
 // ===================== PLAYER TELEMETRY =====================
@@ -1335,7 +1355,7 @@ app.post('/api/player/location', requireUser, asyncRoute(async (req,res)=>{
   return res.json(data||{ok:true});
 }));
 
-app.get('/api/world/status', (req, res) => res.json({ ok: true, version: '18.2.2', ...sharedUniverse.stats() }));
+app.get('/api/world/status', (req, res) => res.json({ ok: true, version: '18.2.5', ...sharedUniverse.stats() }));
 
 app.get('*', (req, res) => res.sendFile(path.join(__dirname, '../public/index.html')));
 
