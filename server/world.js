@@ -691,10 +691,28 @@ class Room {
   }
 
   handleOreCollect(ws,msg){
-    const p=ws.player,o=this.ores.get(String(msg.entityId||''));if(!p||!o)return;
-    if(Math.hypot(p.x-o.x,p.y-o.y)>90)return safeJsonSend(ws,{type:'ore_collect_result',entityId:o.id,ok:false,reason:'range'});
+    const p=ws.player,entityId=String(msg.entityId||''),o=this.ores.get(entityId);
+    if(!p)return;
+    if(!o)return safeJsonSend(ws,{type:'ore_collect_result',entityId,ok:false,reason:'missing'});
+    const collector=msg.collector==='pet'?'pet':'ship';
+    if(collector==='pet'){
+      // AUX-9 equipado com EXTRATOR. A posição registrada pelo servidor vem de player_state.
+      // A nave pode estar longe da pedra, mas o AUX deve alcançá-la de verdade.
+      const pet=p.pet;
+      if(!pet?.owned||pet.activeGear!=='ore')return safeJsonSend(ws,{type:'ore_collect_result',entityId,ok:false,reason:'pet_inactive'});
+      const radar=this.map.battle?2200:1650;
+      const collectRange=Math.max(300,radar*.5),tetherRange=Math.max(900,radar*.82)*1.25;
+      const distanceToPlayer=Math.hypot(p.x-o.x,p.y-o.y);
+      const distancePetPlayer=Math.hypot(pet.x-p.x,pet.y-p.y);
+      const distancePetOre=Math.hypot(pet.x-o.x,pet.y-o.y);
+      if(distanceToPlayer>collectRange+40||distancePetPlayer>tetherRange+40||distancePetOre>90)
+        return safeJsonSend(ws,{type:'ore_collect_result',entityId,ok:false,reason:'pet_range'});
+    }else if(Math.hypot(p.x-o.x,p.y-o.y)>90){
+      return safeJsonSend(ws,{type:'ore_collect_result',entityId,ok:false,reason:'range'});
+    }
+    // Remoção atômica na instância da sala: um minério rende uma coleta.
     this.ores.delete(o.id);this.eventParticipants.add(p.userId);
-    safeJsonSend(ws,{type:'ore_collected',ore:o});this.broadcast({type:'ore_remove',entityId:o.id,collectorUserId:p.userId},ws);
+    safeJsonSend(ws,{type:'ore_collected',ore:o,collector});this.broadcast({type:'ore_remove',entityId:o.id,collectorUserId:p.userId},ws);
     const mode=this.eventMode();
     if(o.eventOre&&this.event?.eventId===o.eventId&&mode==='ore')this.creditPersonalEvent(ws,this.event,o.amount);
     if(!o.eventOre){const min=Math.max(1000,Number(this.map.oreRespawnMinMs)||5000),max=Math.max(min,Number(this.map.oreRespawnMaxMs)||12000);this.oreRespawns.push({type:o.type,at:nowMs()+rand(min,max)});}

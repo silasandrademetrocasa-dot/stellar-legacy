@@ -1,6 +1,6 @@
 {
   "name": "stellar-legacy",
-  "version": "18.2.6",
+  "version": "18.2.7",
   "type": "module",
   "scripts": {
     "start": "node server/index.js",
@@ -15,5 +15,5 @@
   "engines": {
     "node": ">=18"
   },
-  "release": "event-period-persistence-v18-2-6"
+  "release": "aux-ore-collector-v18-2-7"
 }

@@ -1,3 +1,5 @@
+> **V18.2.7 — AUX-9 EXTRATOR:** correção da coleta de minério em mapas online pelo módulo do AUX. O servidor valida a posição do AUX, e não apenas da nave. Sem SQL. Consulte `AUX_EXTRATOR_V18_2_7.md`.
+
 > **V18.2.6 — Eventos por período:** progresso persistido por jogador no Supabase, sem reinício ao trocar de mapa ou atualizar. Consulte `EVENTOS_PERIODO_V18_2_6.md`.
 
 ### V18.2.5 — BOX BÔNUS EDITÁVEL PELO ADM (ATUAL)

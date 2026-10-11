@@ -1,3 +1,12 @@
+## V18.2.7 — AUX-9 EXTRATOR HOTFIX (10/10/2026)
+
+- Corrige AUX parado em cima das pedras nos mapas online: WebSocket distinguia coletor nave/AUX, mas servidor validava somente a posição da nave.
+- Coleta pelo AUX-9 agora exige EXTRATOR equipado e distância legítima entre AUX/pedra, com limite de radar e tether da nave para impedir coleta remota.
+- Sincroniza posição do AUX imediatamente antes de enviar pedido, controla intervalo de tentativas e responde quando o minério já foi removido.
+- Mantém exclusividade do minério por sala: sem duplicação de recompensa; a coleta entra normalmente nas missões, telemetria, eventos e XP do AUX.
+- Em mapas locais, XP/telemetria e respawn do minério agora seguem o mesmo fluxo da coleta manual e a configuração do mapa.
+- Nenhum SQL: mantém saves, efeitos, performance BAIXA, cupons, ADM e economia da V18.2.6.
+
 ## V18.2.6 — EVENTOS POR PERÍODO (10/10/2026)
 
 - Corrige reinício do progresso de eventos ao atualizar o navegador, trocar de mapa ou recriar sala.
