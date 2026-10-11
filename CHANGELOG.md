@@ -1,3 +1,13 @@
+# V18.2.4 — BOX BÔNUS POR MAPA
+
+- X-1, X-2, X-3, X-4: 20 BOX BÔNUS por setor e piloto.
+- Battle Maps 4-1, 4-2 e 4-3 (`b41`, `b42`, `b43`): 30 BOX BÔNUS por setor e piloto.
+- Portais Astrais AURORA (`ggAlpha`), NEXUS (`ggBeta`) e ECLIPSE (`ggGamma`): **0 BOX BÔNUS**. Dados legados de caixas destes portais são eliminados ao acessá-los (sem tocar na Poeira Stellar acumulada ou nas recompensas).
+- Migração V18.2.3 → V18.2.4 sem duplicação de caixas em cooldown: as novas vagas são criadas sem consumir/antecipar reposições pendentes. Quantidade de caixas ativas chega ao novo limite após os respawns.
+- Coleta pelo piloto e AUX-9 Salvager, sete prêmios, cooldown 40–70s, preço dos giros, modo BAIXO e Smart Missions mantidos.
+- Testes: distribuição por mapa, persistência, migração, ausência de caixas nos portais e regressões de loja/cupons.
+- Sem alterações SQL; deploy do ZIP atualiza JS e cache de assets para `18.2.4`.
+
 # V18.2.2 — SMART MISSIONS / JORNADA RECOLHÍVEL
 
 - JORNADA DO PILOTO: ao completar treinamento, card sai do topo das missões e passa para o fim da tela com status FINALIZADA; recolhido automaticamente na primeira conclusão e abre/fecha ao tocar no cabeçalho. Preferência gravada localmente; jornadas ainda em andamento continuam em destaque no topo, mas também podem ser recolhidas.

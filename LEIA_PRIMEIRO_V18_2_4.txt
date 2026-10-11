@@ -1,0 +1,18 @@
+STELLAR LEGACY V18.2.4 - BOX BONUS POR MAPA
+
+ZIP COMPLETO PARA INSTALADOR AUTOMATICO DO GITHUB.
+
+1. Envie stellar-legacy-v18.2.4-BONUS-BOX-MAPAS.zip para a raiz do repositorio stellar-legacy.
+2. Em Actions > Instalar versao do Stellar Legacy > Run workflow.
+3. Aguarde Render publicar. Reabra/atualize o jogo (cache JS 18.2.4).
+
+REGRAS:
+- X-1 / X-2 / X-3 / X-4: 20 caixas por mapa.
+- Battle Maps 4-1 / 4-2 / 4-3: 30 caixas por mapa.
+- Portais AURORA / NEXUS / ECLIPSE: SEM BOX BONUS.
+- Cooldown de reposicao de 40 a 70 segundos, preservado entre sessoes.
+- Coleta manual ou com AUX Salvager e recompensas V18.2.3 intactas.
+- Poeira Stellar e giros com 100 STL / 90 STL Premium ou 1 Poeira preservados.
+
+Nao e necessario executar SQL. Os saldos e saves sao preservados.
+Veja BONUS_BOX_DISTRIBUICAO_V18_2_4.md para detalhes.

@@ -1,3 +1,9 @@
+### V18.2.4 — BOX BÔNUS POR MAPA (ATUAL)
+
+Agora são **20 BOX BÔNUS** em cada mapa X-1, X-2, X-3 e X-4, e **30 BOX BÔNUS** em cada Battle Map 4-1, 4-2 e 4-3. Os portais AURORA, NEXUS e ECLIPSE **não possuem BOX BÔNUS**.
+
+Caixas coletadas continuam respeitando o cooldown 40–70 segundos, mesmo após atualizar/relogar. O AUX-9 Salvager, os sete prêmios e a Poeira Stellar para giros de portais seguem inalterados. Não é necessário SQL; basta atualizar o ZIP.
+
 # Stellar Legacy 18.1.4 — Data Driven World
 
 Hotfix da V18.1 Data Driven: a barra superior agora usa um roteador único de ações por `module_key`, mantendo cliques funcionais mesmo depois de nome/ordem/visibilidade serem reorganizados pelo Supabase.

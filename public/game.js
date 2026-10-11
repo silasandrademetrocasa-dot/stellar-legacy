@@ -1,7 +1,7 @@
-import { FACTIONS, SHIPS, ITEMS, LASER_AMMO, ROCKETS, NPC_TYPES, MAPS, RESOURCES } from './data.js?v=18.2.3';
-import { GAME_ASSETS } from './assets/v17/manifest.js?v=18.2.3';
-import { signUp, signIn, requestPasswordReset, restorePasswordRecoveryFromUrl, restoreSession, signOutLocal, checkGameSession, endGameSession, getUser, getSessionCredentials, loadCloudSave, saveCloudSave, updateCallsign, updatePassword, loadRankings, loadAuctionBids, saveAuctionBidOnline, markAuctionBidStatusOnline, loadAuctionMarket, upsertPlayerPresenceOnline, loadMapPresenceOnline, savePlayerLocationCheckpointOnline, loadPlayerLocationCheckpointOnline, removePlayerPresenceOnline, queuePvpAttackOnline, consumePvpDamageEventsOnline, syncArenaProfileOnline, loadArenaState, loadArenaDailyRewardStatus, claimArenaDailyReward, loadArenaOpponents, loadArenaHistory, arenaAttackOnline, listClansOnline, loadMyClanOnline, createClanOnline, joinClanOnline, leaveClanOnline, transferClanCreditsOnline, claimClanCreditGrantsOnline, recordClanAlienKillOnline, getPremiumShopOnline, testPurchasePremiumOnline, loadWarfrontStateOnline, hitWorldBossOnline, claimWorldBossRewardOnline, declareClanWarOnline, recordClanWarScoreOnline, loadLiveOpsOnline, adminUpdateLiveEventScheduleOnline, purchaseLiveCatalogOnline, economyActionOnline, getChatHistoryOnline, sendChatMessageOnline, redeemGameCouponOnline, getMyDesignersOnline, setDesignLoadoutOnline, claimGateDroneDesignOnline, claimEventDesignerOnline, getAdminStatus, adminSearchAccounts, adminRecentActions, adminBanAccount, adminUnbanAccount, adminResetAccount, adminDeleteAccount, pushTelemetryBatch, adminTelemetryOverview, adminPlayerTelemetry, getBattleGroupOnline, createBattleGroupOnline, inviteBattleGroupOnline, searchBattleGroupPlayersOnline, inviteBattleGroupUserOnline, respondBattleGroupInviteOnline, leaveBattleGroupOnline, kickBattleGroupMemberOnline, setBattleGroupRallyOnline, loadRuntimeConfigOnline, loadNpcRuntimeConfigOnline, loadWorldRuntimeConfigOnline, loadSystemsRuntimeConfigOnline, loadAdminRuntimeMonitorOnline, adminUpdateRuntimeModuleOnline, adminUpdateNpcRuntimeOnline, adminUpdateNpcSpawnRuntimeOnline, adminUpdateWorldMapOnline, adminUpdateWorldResourceOnline, adminUpdateWorldSectorOnline, adminUpdateWorldPortalOnline, adminUpdateWorldResourcePoolOnline, adminUpdateMissionCategoryOnline, adminUpdateEconomyServiceOnline, adminUpdateCraftingRecipeOnline, loadBattlePassRuntimeConfigOnline, adminUpdateBattlePassSeasonOnline, adminUpdateBattlePassTierOnline, loadShopsRuntimeConfigOnline, adminUpdateCommonShopItemOnline, adminUpdatePremiumShopItemOnline } from './api.js?v=18.2.3';
-import { SharedUniverseClient } from './world.js?v=18.2.3';
+import { FACTIONS, SHIPS, ITEMS, LASER_AMMO, ROCKETS, NPC_TYPES, MAPS, RESOURCES } from './data.js?v=18.2.4';
+import { GAME_ASSETS } from './assets/v17/manifest.js?v=18.2.4';
+import { signUp, signIn, requestPasswordReset, restorePasswordRecoveryFromUrl, restoreSession, signOutLocal, checkGameSession, endGameSession, getUser, getSessionCredentials, loadCloudSave, saveCloudSave, updateCallsign, updatePassword, loadRankings, loadAuctionBids, saveAuctionBidOnline, markAuctionBidStatusOnline, loadAuctionMarket, upsertPlayerPresenceOnline, loadMapPresenceOnline, savePlayerLocationCheckpointOnline, loadPlayerLocationCheckpointOnline, removePlayerPresenceOnline, queuePvpAttackOnline, consumePvpDamageEventsOnline, syncArenaProfileOnline, loadArenaState, loadArenaDailyRewardStatus, claimArenaDailyReward, loadArenaOpponents, loadArenaHistory, arenaAttackOnline, listClansOnline, loadMyClanOnline, createClanOnline, joinClanOnline, leaveClanOnline, transferClanCreditsOnline, claimClanCreditGrantsOnline, recordClanAlienKillOnline, getPremiumShopOnline, testPurchasePremiumOnline, loadWarfrontStateOnline, hitWorldBossOnline, claimWorldBossRewardOnline, declareClanWarOnline, recordClanWarScoreOnline, loadLiveOpsOnline, adminUpdateLiveEventScheduleOnline, purchaseLiveCatalogOnline, economyActionOnline, getChatHistoryOnline, sendChatMessageOnline, redeemGameCouponOnline, getMyDesignersOnline, setDesignLoadoutOnline, claimGateDroneDesignOnline, claimEventDesignerOnline, getAdminStatus, adminSearchAccounts, adminRecentActions, adminBanAccount, adminUnbanAccount, adminResetAccount, adminDeleteAccount, pushTelemetryBatch, adminTelemetryOverview, adminPlayerTelemetry, getBattleGroupOnline, createBattleGroupOnline, inviteBattleGroupOnline, searchBattleGroupPlayersOnline, inviteBattleGroupUserOnline, respondBattleGroupInviteOnline, leaveBattleGroupOnline, kickBattleGroupMemberOnline, setBattleGroupRallyOnline, loadRuntimeConfigOnline, loadNpcRuntimeConfigOnline, loadWorldRuntimeConfigOnline, loadSystemsRuntimeConfigOnline, loadAdminRuntimeMonitorOnline, adminUpdateRuntimeModuleOnline, adminUpdateNpcRuntimeOnline, adminUpdateNpcSpawnRuntimeOnline, adminUpdateWorldMapOnline, adminUpdateWorldResourceOnline, adminUpdateWorldSectorOnline, adminUpdateWorldPortalOnline, adminUpdateWorldResourcePoolOnline, adminUpdateMissionCategoryOnline, adminUpdateEconomyServiceOnline, adminUpdateCraftingRecipeOnline, loadBattlePassRuntimeConfigOnline, adminUpdateBattlePassSeasonOnline, adminUpdateBattlePassTierOnline, loadShopsRuntimeConfigOnline, adminUpdateCommonShopItemOnline, adminUpdatePremiumShopItemOnline } from './api.js?v=18.2.4';
+import { SharedUniverseClient } from './world.js?v=18.2.4';
 
 const canvas = document.querySelector('#game');
 const ctx = canvas.getContext('2d');
@@ -4116,10 +4116,19 @@ function spawnOre(type=null){
   const names=state.currentMap.ores||[];let oreType=type;if(!oreType){const weights=state.currentMap.oreWeights||{},total=names.reduce((sum,k)=>sum+Math.max(.01,Number(weights[k])||1),0);let roll=Math.random()*Math.max(.01,total);for(const k of names){roll-=Math.max(.01,Number(weights[k])||1);if(roll<=0){oreType=k;break;}}oreType ||= names[0]||'Prometium';}const pos=randomMapPosition(100);const res=RESOURCES[oreType]||{color:'#fff'};
   state.ores.push({id:`ore_${Math.random().toString(16).slice(2)}`,x:pos.x,y:pos.y,type:oreType,amount:1,color:res.color,r:rand(7,13),rot:rand(0,TWO_PI),shape:Array.from({length:7},()=>rand(.72,1.18))});
 }
-// V18.2.3 — BOX BONUS individual por piloto, independente das pedras/NPCs.
+// V18.2.4 — BOX BONUS individual por piloto, independente das pedras/NPCs.
 // Posições e reaparecimento persistem no save: saltar mapas/relogar não gera caixas extras.
-const BONUS_BOX_TARGET_NORMAL=12;
-const BONUS_BOX_TARGET_GATE=6;
+// V18.2.4: setores comuns X-1..X-4 = 20; setores Battle 4-1..4-3 = 30.
+// Portais Astrais (Aurora/Nexus/Eclipse) NÃO oferecem BOX BÔNUS.
+const BONUS_BOX_TARGET_X=20;
+const BONUS_BOX_TARGET_BATTLE=30;
+function bonusBoxTargetForMap(){
+  const mapId=String(progress?.mapId||state.currentMap?.id||'');
+  if(state.currentMap?.gate||/^gg(?:Alpha|Beta|Gamma)$/i.test(mapId))return 0;
+  if(mapId==='x1'||mapId==='x2'||mapId==='x3'||mapId==='x4')return BONUS_BOX_TARGET_X;
+  if(mapId==='b41'||mapId==='b42'||mapId==='b43')return BONUS_BOX_TARGET_BATTLE;
+  return 0;
+}
 const BONUS_BOX_RESPAWN_MIN_MS=40000;
 const BONUS_BOX_RESPAWN_MAX_MS=70000;
 const BONUS_BOX_REWARDS=[
@@ -4150,17 +4159,38 @@ function spawnBonusBox(row){
 }
 function createBonusBoxes(){
   if(!progress||!state.currentMap)return;
+  const goal=bonusBoxTargetForMap();
+  if(goal===0){
+    // Remove apenas as antigas BOX dos portais; nunca toca nas recompensas do piloto.
+    // Isso migra os saves da V18.2.3 sem permitir coleta residual nos portais.
+    const cache=progress.bonusBoxesByMap||{};
+    for(const id of ['ggAlpha','ggBeta','ggGamma']){
+      if(Object.hasOwn(cache,id)){delete cache[id];cloudDirty=true;}
+    }
+    state.bonusBoxes=[];
+    return;
+  }
   const row=currentBonusBoxState();if(!row)return;
-  const goal=state.currentMap.gate?BONUS_BOX_TARGET_GATE:BONUS_BOX_TARGET_NORMAL;
-  if(!row.initialized){row.initialized=true;while(row.boxes.length<goal)spawnBonusBox(row);cloudDirty=true;}
-  // Nunca recriar caixas consumidas durante o tempo de respawn.
+  row.respawns=Array.isArray(row.respawns)?row.respawns:[];
+  let changed=!row.initialized;
+  row.initialized=true;
+  if(row.boxes.length>goal){row.boxes.length=goal;changed=true;}
+  // Migração 12→20/30: mantém cooldowns antigos sem gerar prêmios duplicados.
+  // Número de caixas ativas + caixas aguardando respawn não ultrapassa o teto.
+  const missing=Math.max(0,goal-row.boxes.length-row.respawns.length);
+  for(let i=0;i<missing;i++){spawnBonusBox(row);changed=true;}
+  if(changed)cloudDirty=true;
   state.bonusBoxes=row.boxes;
 }
 function updateBonusBoxes(){
   if(!progress||!state.currentMap)return;
+  const goal=bonusBoxTargetForMap();
+  if(goal===0){
+    if(state.bonusBoxes?.length)state.bonusBoxes=[];
+    return;
+  }
   const row=currentBonusBoxState();if(!row)return;
   if(state.bonusBoxes!==row.boxes)state.bonusBoxes=row.boxes;
-  const goal=state.currentMap.gate?BONUS_BOX_TARGET_GATE:BONUS_BOX_TARGET_NORMAL;
   if(!row.initialized){createBonusBoxes();return;}
   const now=Date.now(),respawns=Array.isArray(row.respawns)?row.respawns:[];
   row.respawns=respawns;
@@ -4173,7 +4203,7 @@ function updateBonusBoxes(){
   if(changed)saveGame();
 }
 function collectBonusBox(box,fromPet=false){
-  if(!progress||!box)return false;
+  if(!progress||!box||bonusBoxTargetForMap()===0)return false;
   const row=currentBonusBoxState();const index=row?.boxes?.findIndex(b=>b.id===box.id)??-1;
   if(index<0)return false;
   // Apenas UMA das sete recompensas por caixa (chance igual de cada tipo).
@@ -4200,6 +4230,7 @@ function collectBonusBox(box,fromPet=false){
   return true;
 }
 function drawBonusBoxes(){
+  if(bonusBoxTargetForMap()===0)return;
   const img=assetImage(GAME_ASSETS.bonus.box),low=resolvedQualityMode()==='low';
   for(const box of state.bonusBoxes||[]){
     if(!onScreenWorld(box.x,box.y,70))continue;

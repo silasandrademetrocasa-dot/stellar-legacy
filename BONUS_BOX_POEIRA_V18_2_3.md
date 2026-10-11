@@ -1,3 +1,5 @@
+> **Atualização V18.2.4:** distribuição mudou: 20 BOX em X-1..X-4; 30 em 4-1..4-3; **nenhuma** nos Portais Astrais. Para instalação, use o ZIP V18.2.4. O conteúdo V18.2.3 a seguir é histórico.
+
 # Stellar Legacy V18.2.3 — BOX BÔNUS + POEIRA STELLAR
 
 ## Implantação
@@ -10,7 +12,7 @@
 
 ## BOX BÔNUS
 
-- 12 caixas por mapa normal/batalha, 6 por mapa de Portal Astral.
+- **[Regra antiga da V18.2.3 — substituída]** 12 caixas por mapa normal/batalha, 6 por Portal Astral.
 - Distribuição individual por piloto, registrada no próprio save por mapa. Não recria caixas ao relogar ou trocar mapas; reposição após 40–70 segundos.
 - Coleta manual por proximidade (37 unidades); o AUX-9 no módulo **Salvager (box)** também coleta automaticamente.
 - Cada BOX concede exatamente uma das 7 recompensas, com 1/7 de probabilidade por tipo (distribuição uniforme); quantidades inteiras aleatórias inclusivas.
