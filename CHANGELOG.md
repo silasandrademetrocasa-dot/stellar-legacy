@@ -567,3 +567,9 @@ Versão anterior mantida no histórico do projeto base.
 - Coleta manual por proximidade e automática pelo AUX-9 em modo Salvager.
 - Materializador aceita STL ou Poeira Stellar; uma Poeira por giro. Todos os protocolos a 100 STL, ou 90 STL com Premium.
 - Pagamento validado pelo servidor; save, cupons, Smart Missions e qualidade BAIXA preservados.
+
+
+## V18.2.13 — Loja Premium ADM staging
+Abas de Assinaturas/Pacotes/Passe/Níveis com simulações SQL sem cobranças nem alteração no save. Loja Atual e cupons preservados. SQL V18.3.2 existente reutilizado.
+
+Consulta somente leitura das 12 ofertas para pilotos autenticados via RPC SQL V18.3.3; ADM usa V18.3.2 para simular.

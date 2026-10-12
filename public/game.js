@@ -1,7 +1,7 @@
-import { FACTIONS, SHIPS, ITEMS, LASER_AMMO, ROCKETS, NPC_TYPES, MAPS, RESOURCES } from './data.js?v=18.2.12';
-import { GAME_ASSETS } from './assets/v17/manifest.js?v=18.2.12';
-import { signUp, signIn, requestPasswordReset, restorePasswordRecoveryFromUrl, restoreSession, signOutLocal, checkGameSession, endGameSession, getUser, getSessionCredentials, loadCloudSave, saveCloudSave, updateCallsign, updatePassword, loadRankings, loadAuctionBids, saveAuctionBidOnline, markAuctionBidStatusOnline, loadAuctionMarket, upsertPlayerPresenceOnline, loadMapPresenceOnline, savePlayerLocationCheckpointOnline, loadPlayerLocationCheckpointOnline, removePlayerPresenceOnline, queuePvpAttackOnline, consumePvpDamageEventsOnline, syncArenaProfileOnline, loadArenaState, loadArenaDailyRewardStatus, claimArenaDailyReward, loadArenaOpponents, loadArenaHistory, arenaAttackOnline, listClansOnline, loadMyClanOnline, createClanOnline, joinClanOnline, leaveClanOnline, transferClanCreditsOnline, claimClanCreditGrantsOnline, recordClanAlienKillOnline, getPremiumShopOnline, testPurchasePremiumOnline, loadWarfrontStateOnline, hitWorldBossOnline, claimWorldBossRewardOnline, declareClanWarOnline, recordClanWarScoreOnline, loadLiveOpsOnline, adminUpdateLiveEventScheduleOnline, purchaseLiveCatalogOnline, economyActionOnline, getChatHistoryOnline, sendChatMessageOnline, redeemGameCouponOnline, getMyDesignersOnline, setDesignLoadoutOnline, claimGateDroneDesignOnline, claimEventDesignerOnline, getAdminStatus, adminSearchAccounts, adminRecentActions, adminBanAccount, adminUnbanAccount, adminResetAccount, adminDeleteAccount, pushTelemetryBatch, adminTelemetryOverview, adminPlayerTelemetry, getBattleGroupOnline, createBattleGroupOnline, inviteBattleGroupOnline, searchBattleGroupPlayersOnline, inviteBattleGroupUserOnline, respondBattleGroupInviteOnline, leaveBattleGroupOnline, kickBattleGroupMemberOnline, setBattleGroupRallyOnline, loadRuntimeConfigOnline, loadNpcRuntimeConfigOnline, loadWorldRuntimeConfigOnline, loadSystemsRuntimeConfigOnline, loadAdminRuntimeMonitorOnline, adminUpdateRuntimeModuleOnline, adminUpdateNpcRuntimeOnline, adminUpdateNpcSpawnRuntimeOnline, adminUpdateWorldMapOnline, adminUpdateWorldResourceOnline, adminUpdateWorldSectorOnline, adminUpdateWorldPortalOnline, adminUpdateWorldResourcePoolOnline, adminUpdateMissionCategoryOnline, adminUpdateEconomyServiceOnline, adminUpdateCraftingRecipeOnline, loadBattlePassRuntimeConfigOnline, adminUpdateBattlePassSeasonOnline, adminUpdateBattlePassTierOnline, loadShopsRuntimeConfigOnline, adminUpdateCommonShopItemOnline, adminUpdatePremiumShopItemOnline, loadBonusConfigOnline, adminUpdateBonusConfigOnline } from './api.js?v=18.2.12';
-import { SharedUniverseClient } from './world.js?v=18.2.12';
+import { FACTIONS, SHIPS, ITEMS, LASER_AMMO, ROCKETS, NPC_TYPES, MAPS, RESOURCES } from './data.js?v=18.2.13';
+import { GAME_ASSETS } from './assets/v17/manifest.js?v=18.2.13';
+import { signUp, signIn, requestPasswordReset, restorePasswordRecoveryFromUrl, restoreSession, signOutLocal, checkGameSession, endGameSession, getUser, getSessionCredentials, loadCloudSave, saveCloudSave, updateCallsign, updatePassword, loadRankings, loadAuctionBids, saveAuctionBidOnline, markAuctionBidStatusOnline, loadAuctionMarket, upsertPlayerPresenceOnline, loadMapPresenceOnline, savePlayerLocationCheckpointOnline, loadPlayerLocationCheckpointOnline, removePlayerPresenceOnline, queuePvpAttackOnline, consumePvpDamageEventsOnline, syncArenaProfileOnline, loadArenaState, loadArenaDailyRewardStatus, claimArenaDailyReward, loadArenaOpponents, loadArenaHistory, arenaAttackOnline, listClansOnline, loadMyClanOnline, createClanOnline, joinClanOnline, leaveClanOnline, transferClanCreditsOnline, claimClanCreditGrantsOnline, recordClanAlienKillOnline, getPremiumShopOnline, testPurchasePremiumOnline, adminPreviewPremiumStageOnline, adminSimulatePremiumStageOnline, getPremiumStageCatalogOnline, loadWarfrontStateOnline, hitWorldBossOnline, claimWorldBossRewardOnline, declareClanWarOnline, recordClanWarScoreOnline, loadLiveOpsOnline, adminUpdateLiveEventScheduleOnline, purchaseLiveCatalogOnline, economyActionOnline, getChatHistoryOnline, sendChatMessageOnline, redeemGameCouponOnline, getMyDesignersOnline, setDesignLoadoutOnline, claimGateDroneDesignOnline, claimEventDesignerOnline, getAdminStatus, adminSearchAccounts, adminRecentActions, adminBanAccount, adminUnbanAccount, adminResetAccount, adminDeleteAccount, pushTelemetryBatch, adminTelemetryOverview, adminPlayerTelemetry, getBattleGroupOnline, createBattleGroupOnline, inviteBattleGroupOnline, searchBattleGroupPlayersOnline, inviteBattleGroupUserOnline, respondBattleGroupInviteOnline, leaveBattleGroupOnline, kickBattleGroupMemberOnline, setBattleGroupRallyOnline, loadRuntimeConfigOnline, loadNpcRuntimeConfigOnline, loadWorldRuntimeConfigOnline, loadSystemsRuntimeConfigOnline, loadAdminRuntimeMonitorOnline, adminUpdateRuntimeModuleOnline, adminUpdateNpcRuntimeOnline, adminUpdateNpcSpawnRuntimeOnline, adminUpdateWorldMapOnline, adminUpdateWorldResourceOnline, adminUpdateWorldSectorOnline, adminUpdateWorldPortalOnline, adminUpdateWorldResourcePoolOnline, adminUpdateMissionCategoryOnline, adminUpdateEconomyServiceOnline, adminUpdateCraftingRecipeOnline, loadBattlePassRuntimeConfigOnline, adminUpdateBattlePassSeasonOnline, adminUpdateBattlePassTierOnline, loadShopsRuntimeConfigOnline, adminUpdateCommonShopItemOnline, adminUpdatePremiumShopItemOnline, loadBonusConfigOnline, adminUpdateBonusConfigOnline } from './api.js?v=18.2.13';
+import { SharedUniverseClient } from './world.js?v=18.2.13';
 
 const canvas = document.querySelector('#game');
 const ctx = canvas.getContext('2d');
@@ -307,7 +307,7 @@ const ui = {
   arenaBtn: $('#arenaBtn'), arenaTopCount: $('#arenaTopCount'), arenaModal: $('#arenaModal'), closeArena: $('#closeArena'), arenaRefresh: $('#arenaRefresh'), arenaAttacksLeft: $('#arenaAttacksLeft'), arenaRating: $('#arenaRating'), arenaWins: $('#arenaWins'), arenaLosses: $('#arenaLosses'), arenaPower: $('#arenaPower'), arenaDailyReward: $('#arenaDailyReward'), arenaRewardLeague: $('#arenaRewardLeague'), arenaRewardRank: $('#arenaRewardRank'), arenaRewardBonus: $('#arenaRewardBonus'), arenaRewardProgress: $('#arenaRewardProgress'), arenaRewardItems: $('#arenaRewardItems'), arenaRewardClaim: $('#arenaRewardClaim'), arenaRewardFoot: $('#arenaRewardFoot'), arenaOpponents: $('#arenaOpponents'), arenaHistory: $('#arenaHistory'), arenaResult: $('#arenaResult'), arenaBattleStage: $('#arenaBattleStage'), arenaBattleStatus: $('#arenaBattleStatus'), arenaBattleTimer: $('#arenaBattleTimer'), arenaBattleSkip: $('#arenaBattleSkip'), arenaBattleField: $('#arenaBattleField'), arenaFighterAttacker: $('#arenaFighterAttacker'), arenaFighterDefender: $('#arenaFighterDefender'), arenaAttackerName: $('#arenaAttackerName'), arenaDefenderName: $('#arenaDefenderName'), arenaAttackerShip: $('#arenaAttackerShip'), arenaDefenderShip: $('#arenaDefenderShip'), arenaAttackerShieldBar: $('#arenaAttackerShieldBar'), arenaDefenderShieldBar: $('#arenaDefenderShieldBar'), arenaAttackerHpBar: $('#arenaAttackerHpBar'), arenaDefenderHpBar: $('#arenaDefenderHpBar'), arenaAttackerShieldText: $('#arenaAttackerShieldText'), arenaDefenderShieldText: $('#arenaDefenderShieldText'), arenaAttackerHpText: $('#arenaAttackerHpText'), arenaDefenderHpText: $('#arenaDefenderHpText'), arenaBattleRound: $('#arenaBattleRound'), arenaProjectileLayer: $('#arenaProjectileLayer'), arenaBattleFeed: $('#arenaBattleFeed'), arenaBattleAnalysis: $('#arenaBattleAnalysis'),
   clanBtn: $('#clanBtn'), clanTopTag: $('#clanTopTag'), clanModal: $('#clanModal'), closeClan: $('#closeClan'), clanRefresh: $('#clanRefresh'), clanContent: $('#clanContent'), battleGroupBtn: $('#battleGroupBtn'), battleGroupTopStatus: $('#battleGroupTopStatus'), battleGroupModal: $('#battleGroupModal'), closeBattleGroup: $('#closeBattleGroup'), battleGroupRefresh: $('#battleGroupRefresh'), battleGroupContent: $('#battleGroupContent'),
   warfrontBtn: $('#warfrontBtn'), warfrontTopStatus: $('#warfrontTopStatus'), warfrontModal: $('#warfrontModal'), closeWarfront: $('#closeWarfront'), warfrontRefresh: $('#warfrontRefresh'), warfrontContent: $('#warfrontContent'), galaxyEventBtn: $('#galaxyEventBtn'), galaxyEventTopStatus: $('#galaxyEventTopStatus'), galaxyEventModal: $('#galaxyEventModal'), closeGalaxyEvent: $('#closeGalaxyEvent'), galaxyEventContent: $('#galaxyEventContent'), autoTargetToggle: $('#autoTargetToggle'), tapAttackToggle: $('#tapAttackToggle'), combatAlertsToggle: $('#combatAlertsToggle'), premiumAutoCombatSetting: $('#premiumAutoCombatSetting'), autoCombatAccessTag: $('#autoCombatAccessTag'),
-  premiumBtn: $('#premiumBtn'), premiumTopStatus: $('#premiumTopStatus'), premiumModal: $('#premiumModal'), closePremium: $('#closePremium'), premiumModeChip: $('#premiumModeChip'), premiumBenefits: $('#premiumBenefits'), premiumProductGrid: $('#premiumProductGrid'),
+  premiumBtn: $('#premiumBtn'), premiumTopStatus: $('#premiumTopStatus'), premiumModal: $('#premiumModal'), closePremium: $('#closePremium'), premiumModeChip: $('#premiumModeChip'), premiumBenefits: $('#premiumBenefits'), premiumProductGrid: $('#premiumProductGrid'), premiumStageTabs: $('#premiumStageTabs'), premiumStageInfo: $('#premiumStageInfo'),
   saleConfirmModal: $('#saleConfirmModal'), saleConfirmEyebrow: $('#saleConfirmEyebrow'), saleConfirmTitle: $('#saleConfirmTitle'), saleConfirmItem: $('#saleConfirmItem'), saleConfirmCopy: $('#saleConfirmCopy'), saleConfirmValueLabel: $('#saleConfirmValueLabel'), saleConfirmValue: $('#saleConfirmValue'), saleConfirmCancel: $('#saleConfirmCancel'), saleConfirmAccept: $('#saleConfirmAccept'),
   shopBtn: $('#shopBtn'), shopModal: $('#shopModal'), closeShop: $('#closeShop'), shopTabs: $('#shopTabs'), shopGrid: $('#shopGrid'), shopCredits: $('#shopCredits'), shopStellarium: $('#shopStellarium'),
   hangarBtn: $('#hangarBtn'), hangarModal: $('#hangarModal'), closeHangar: $('#closeHangar'), hangarTabs: $('#hangarTabs'), hangarContent: $('#hangarContent'), hangarShipName: $('#hangarShipName'),
@@ -571,6 +571,7 @@ const categories = {
 
 // ===================== V16.6 PREMIUM • CUPONS =====================
 const premiumRuntime={state:null,busy:false,lastAt:0};
+const premiumStageRuntime={state:null,busy:false,buying:false,tab:'subscriptions',error:'',pendingKeys:new Map(),lastOrder:null};
 const PREMIUM_LOCAL_PLANS=[]; // V18.1.7C: planos agora vêm 100% do Supabase.
 const PREMIUM_EVENT_COUPONS={
   EVENTO7D:{code:'EVENTO7D',name:'Cupom de Evento • 7D',days:7,items:{rep2:1},description:'Libera 1 semana de Premium e 1 Nanobot de Reparo • Comum.'}
@@ -6212,7 +6213,124 @@ function renderPremiumShop(){
     couponBtn.onclick=submit;
     couponInput.onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();submit();}};
   }
+  renderPremiumStageV18213();
 }
+
+// V18.2.13 — Vitrine de teste (separada da Loja Premium e das recompensas reais).
+// A própria RPC do Supabase exige game_admin; sessão normal nunca recebe esta prévia.
+const PREMIUM_STAGE_TABS_V18213=[
+  ['subscriptions','ASSINATURAS','premium'],
+  ['bundles','PACOTES','starter_bundle'],
+  ['pass','PASSE','battle_pass'],
+  ['tiers','NÍVEIS','pass_tiers'],
+  ['legacy','LOJA ATUAL','legacy'],
+];
+function premiumStagePriceV18213(value){return `R$ ${Math.max(0,Number(value)||0).toFixed(2).replace('.',',')}`;}
+function premiumStageIconV18213(row){
+  if(row.category==='premium')return row.billing_mode==='prepaid'?'⏱':'✦';
+  if(row.category==='starter_bundle')return row.id.includes('avancado')?'🛸':row.id.includes('piloto')?'🚀':'🌟';
+  if(row.category==='battle_pass')return '🎟️';
+  return '⚡';
+}
+function premiumStageDescV18213(row){
+  if(row.category==='premium')return row.billing_mode==='prepaid'
+    ? '7 dias avulsos, sem renovação. A simulação não ativa benefícios reais.'
+    : `Renovação simulada a cada ${Number(row.billing_months)||1} mês(es). Nenhuma cobrança ou benefício real.`;
+  if(row.category==='starter_bundle')return 'STL e itens ainda em balanceamento. Este teste não entrega recursos nem inventário.';
+  if(row.category==='battle_pass')return 'Prévia do Passe de Temporada. Não libera a trilha Premium no save.';
+  return `Simula +${Number(row.tier_quantity)||0} nível(is) da temporada. Não altera o progresso nem libera recompensas.`;
+}
+function premiumStageCloseOffV18213(){
+  if(ui.premiumStageTabs){ui.premiumStageTabs.hidden=true;ui.premiumStageTabs.innerHTML='';}
+  if(ui.premiumStageInfo){ui.premiumStageInfo.hidden=true;ui.premiumStageInfo.innerHTML='';}
+}
+function renderPremiumStageV18213(){
+  const stage=premiumStageRuntime.state;
+  if(!stage?.test_mode||stage.billing_live!==false||stage.rewards_live!==false){
+    premiumStageCloseOffV18213();return;
+  }
+  const tabs=ui.premiumStageTabs,info=ui.premiumStageInfo,grid=ui.premiumProductGrid;
+  if(!tabs||!info||!grid)return;
+  tabs.hidden=false;info.hidden=false;
+  const canSimulate=!!premiumRuntime.state?.is_admin&&!stage.public_preview;
+  if(ui.premiumModeChip){ui.premiumModeChip.textContent=canSimulate?'TESTE • ADM':'PRÉVIA • TESTE';ui.premiumModeChip.classList.remove('active');}
+  const active=PREMIUM_STAGE_TABS_V18213.some(t=>t[0]===premiumStageRuntime.tab)?premiumStageRuntime.tab:'subscriptions';
+  const season=stage.current_season||{};
+  const maxTiers=Math.max(0,Number(season.tier_count)||0);
+  const ownedTiers=stage.test_tiers?.season_key===season.season_key?Math.max(0,Number(stage.test_tiers?.purchased_tiers)||0):0;
+  tabs.innerHTML=PREMIUM_STAGE_TABS_V18213.map(([key,label])=>`<button type="button" data-premium-stage-tab="${key}" aria-pressed="${key===active}" class="premium-stage-tab${key===active?' selected':''}">${label}</button>`).join('');
+  tabs.querySelectorAll('[data-premium-stage-tab]').forEach(b=>b.onclick=()=>{if(premiumStageRuntime.buying)return;premiumStageRuntime.tab=b.dataset.premiumStageTab;renderPremiumShop();});
+  const seasonLabel=escHtml(season.name||'Nenhuma temporada ativa');
+  const subscription=stage.test_subscription;
+  const subLabel=subscription?`Assinatura de teste: ${escHtml(subscription.product_id||'')} • ${escHtml(subscription.status||'')} • próxima data prevista ${formatPremiumUntil(subscription.next_renewal_at)}`:'Sem assinatura simulada';
+  info.innerHTML=`<div class="premium-stage-safety"><b>${canSimulate?'🧪 SIMULADOR ADMINISTRATIVO':'🛍️ LOJA PREMIUM EM PREPARAÇÃO'} • SEM DINHEIRO REAL</b><span>${canSimulate?'Compras simuladas não entregam STL, Premium, itens, Passe ou tiers ao jogador. '+escHtml(subLabel):'Vitrine experimental. Os preços são de teste e as compras ainda não estão abertas. Faça login como ADM para simular pedidos.'}</span></div>`;
+  if(canSimulate&&premiumStageRuntime.lastOrder){const o=premiumStageRuntime.lastOrder;info.innerHTML+=`<div class="premium-stage-last-order" role="status">✓ Último teste: ${escHtml(o.product)} • pedido ${escHtml(String(o.id))} • ${escHtml(o.duplicate?'repetição protegida':'registrado')} • nenhuma recompensa entregue</div>`;}
+  if(active==='legacy'){
+    info.innerHTML+=`<p class="premium-stage-legacy-note">Loja original preservada. Atenção: o botão de teste antigo da Loja Atual pode ativar benefícios e conceder itens na conta ADM. Os novos botões SIMULAR das outras abas são isolados do progresso real.</p>`;
+    return;
+  }
+  const category=PREMIUM_STAGE_TABS_V18213.find(t=>t[0]===active)?.[2];
+  const offers=(Array.isArray(stage.offers)?stage.offers:[]).filter(p=>p.category===category&&p.test_only===true&&p.live_enabled===false);
+  if(active==='tiers'){
+    info.innerHTML+=`<div class="premium-stage-progress"><b>${seasonLabel}</b> • ${fmt(ownedTiers)} / ${fmt(maxTiers)} tiers simulados <span>(separado dos tiers conquistados no jogo)</span><div class="premium-stage-meter"><i style="width:${maxTiers?Math.min(100,100*ownedTiers/maxTiers):0}%"></i></div></div>`;
+  }else if(active==='pass'){
+    info.innerHTML+=`<div class="premium-stage-progress"><b>${seasonLabel}</b> • ${maxTiers} níveis • Teste sem desbloquear recompensas reais.</div>`;
+  }
+  if(!offers.length){grid.innerHTML='<div class="empty-state">Nenhuma oferta de teste nesta categoria.</div>';return;}
+  grid.innerHTML=offers.map(row=>{
+    const qty=Number(row.tier_quantity)||0;
+    const limit=category==='pass_tiers'&&(!season.season_key||ownedTiers+qty>maxTiers);
+    const noSeason=category==='battle_pass'&&!season.season_key;
+    const disabled=!canSimulate||premiumStageRuntime.buying||limit||noSeason;
+    const label=!canSimulate?'EM PREPARAÇÃO':limit?'LIMITE DA TEMPORADA':noSeason?'SEM TEMPORADA':premiumStageRuntime.buying?'AGUARDE...':'SIMULAR COMPRA';
+    const mode=row.billing_mode==='auto_renew'?`RENOVA A CADA ${Number(row.billing_months)||1} MÊS(ES)`:row.billing_mode==='prepaid'?'7 DIAS • AVULSO':'COMPRA AVULSA';
+    return `<article class="premium-product premium-stage-product ${escHtml(row.category)}" data-stage-product="${escHtml(row.id)}"><div class="premium-product-icon">${premiumStageIconV18213(row)}</div><div class="premium-product-copy"><span class="premium-product-type">${escHtml(mode)} • TESTE</span><h3>${escHtml(row.name||row.id)}</h3><p>${escHtml(premiumStageDescV18213(row))}</p></div><div class="premium-product-price">${premiumStagePriceV18213(row.price_brl)}</div><button type="button" class="gold-btn premium-stage-action" data-stage-simulate="${escHtml(row.id)}" ${disabled?'disabled':''}>${label}</button></article>`;
+  }).join('');
+  grid.querySelectorAll('[data-stage-simulate]').forEach(button=>button.onclick=()=>simulatePremiumStageV18213(button.dataset.stageSimulate));
+}
+async function loadPremiumStageV18213(){
+  if(!authenticated){premiumStageRuntime.state=null;premiumStageRuntime.error='';premiumStageCloseOffV18213();return null;}
+  if(premiumStageRuntime.busy)return premiumStageRuntime.state;
+  premiumStageRuntime.busy=true;premiumStageRuntime.error='';
+  try{
+    const response=await (premiumRuntime.state?.is_admin?adminPreviewPremiumStageOnline():getPremiumStageCatalogOnline());
+    if(!response?.test_mode||response.billing_live!==false||response.rewards_live!==false)throw new Error('Prévia da loja não está em modo teste seguro.');
+    premiumStageRuntime.state=response;
+    return response;
+  }catch(error){
+    premiumStageRuntime.state=null;
+    premiumStageRuntime.error=String(error?.message||error);
+    console.warn('V18.2.13 premium staging:',error);
+    showToast('Vitrine Premium de teste indisponível: Loja original preservada.');
+    return null;
+  }finally{
+    premiumStageRuntime.busy=false;
+    if(ui.premiumModal&&!ui.premiumModal.classList.contains('hidden'))renderPremiumShop();
+  }
+}
+async function simulatePremiumStageV18213(productId){
+  const stage=premiumStageRuntime.state;
+  if(!stage?.test_mode||stage.public_preview||!premiumRuntime.state?.is_admin||premiumStageRuntime.buying)return;
+  const offer=(stage.offers||[]).find(x=>x.id===productId&&x.test_only===true&&x.live_enabled===false);
+  if(!offer)return;
+  if(!window.confirm(`SIMULAÇÃO SEM COBRANÇA\n\n${offer.name}\n${premiumStagePriceV18213(offer.price_brl)}\n\nNÃO cobra dinheiro e NÃO entrega STL, Premium, itens ou tiers reais. Registrar teste?`))return;
+  premiumStageRuntime.buying=true;
+  const key=premiumStageRuntime.pendingKeys.get(productId)||`stg_${Date.now().toString(36)}_${Math.random().toString(36).slice(2,13)}`;
+  premiumStageRuntime.pendingKeys.set(productId,key);
+  renderPremiumShop();
+  try{
+    const result=await adminSimulatePremiumStageOnline(productId,key);
+    if(!result?.ok||result?.test_only!==true||(result.duplicate!==true&&(result?.billing_live!==false||result?.rewards_live!==false)))throw new Error('Resposta de teste inválida; nenhuma compra liberada.');
+    premiumStageRuntime.pendingKeys.delete(productId);
+    premiumStageRuntime.lastOrder={product:offer.name,id:result.order_id,duplicate:!!result.duplicate};
+    const after=await adminPreviewPremiumStageOnline();
+    if(after?.test_mode&&after.billing_live===false&&after.rewards_live===false)premiumStageRuntime.state=after;
+    showToast(`${result.duplicate?'Teste repetido reconhecido':'Simulação registrada'} • ${offer.name} • SEM cobrança`,'system');
+  }catch(error){
+    showToast(`Simulação não confirmada: ${String(error?.message||error)}`);
+  }finally{premiumStageRuntime.buying=false;renderPremiumShop();}
+}
+
 async function refreshAndRenderPremium(force=false){await refreshPremiumState(force);renderPremiumShop();if(ui.passModal&&!ui.passModal.classList.contains('hidden'))renderProgression();renderGalaxyGate();renderShop();}
 async function testPremiumPurchaseNow(productId){
   if(!premiumCanPurchase()){showToast('Compra indisponível no momento');return;}
@@ -6225,7 +6343,7 @@ async function testPremiumPurchaseNow(productId){
     await refreshAndRenderPremium(true);
   }catch(e){showToast(String(e?.message||e));}
 }
-async function openPremiumShop(){closeNavigationModals(ui.premiumModal);ui.premiumModal?.classList.remove('hidden');if(ui.premiumProductGrid)ui.premiumProductGrid.innerHTML='<div class="muted">Sincronizando Loja Premium...</div>';await Promise.all([refreshPremiumState(true),refreshShopsRuntimeConfig(true)]);renderPremiumShop();}
+async function openPremiumShop(){closeNavigationModals(ui.premiumModal);ui.premiumModal?.classList.remove('hidden');if(ui.premiumProductGrid)ui.premiumProductGrid.innerHTML='<div class="muted">Sincronizando Loja Premium...</div>';await Promise.all([refreshPremiumState(true),refreshShopsRuntimeConfig(true)]);renderPremiumShop();await loadPremiumStageV18213();}
 
 function openShop(tab='ships'){closeNavigationModals(ui.shopModal);state.shopTab=tab;Promise.all([refreshPremiumState(),refreshLiveOpsState(true),refreshShopsRuntimeConfig(true)]).finally(()=>{renderShop();ui.shopModal.classList.remove('hidden');});}
 function openHangar(tab='ships'){if(tab==='pilot'&&!featureUnlocked('pilot')){showFeatureLock('pilot','Perfil de Piloto');return;}closeNavigationModals(ui.hangarModal);state.hangarTab=tab;renderHangar();ui.hangarModal.classList.remove('hidden');refreshDesignerState(true).then(()=>{computeStats(true);renderHangar();updateUI();}).catch(()=>{});if(!canChangeEquipment())showToast('Equipamentos só mudam na base • Refinaria funciona em qualquer setor');}

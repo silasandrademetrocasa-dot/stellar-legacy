@@ -295,3 +295,7 @@ Caixas bônus de loot individual espalhadas por todos os setores, também coleta
 - A BOX tem silhueta hexagonal visível enquanto o asset carrega, sem quadrado chapado.
 - Indicadores de HP (vermelho) e escudo (azul) sempre acima da própria nave em todos os modos, mesmo com a aba NAVE recolhida.
 - Sem mudanças na economia, ADM, AUX, mapas, eventos, saves ou quantidade das BOX.
+
+
+## V18.2.13 — Loja Premium Teste ADM
+Prévia comercial acessível a todos os pilotos autenticados em modo somente leitura. Conta ADM autorizada pode simular pedidos; ofertas do staging SQL V18.3.2, simulações sem cobranças ou recompensas. Sem novo SQL. Veja `V18_2_13_PREMIUM_STAGE_ADM.md`.

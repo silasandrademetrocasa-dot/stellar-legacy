@@ -13,8 +13,8 @@ const button={disabled:false,textContent:'RESGATAR',onclick:null};
 const calls={redeem:0,apply:0,legacy:0};
 const ctx={
   document:{getElementById(id){return id==='premiumCouponRedeem'?button:input;}},
-  ui:{premiumProductGrid:{innerHTML:''},premiumBenefits:{innerHTML:''},premiumModeChip:{classList:{toggle(){}},textContent:''}},
-  premiumRuntime:{state:{}},PREMIUM_EVENT_COUPONS:{EVENTO7D:{}},
+  ui:{premiumProductGrid:{innerHTML:''},premiumBenefits:{innerHTML:''},premiumModeChip:{classList:{toggle(){}},textContent:''},premiumStageTabs:null,premiumStageInfo:null},
+  premiumRuntime:{state:{}},premiumStageRuntime:{state:null},PREMIUM_EVENT_COUPONS:{EVENTO7D:{}},
   premiumCatalogForRender:()=>[],effectivePremiumUntilMs:()=>0,
   premiumActive:()=>false,premiumCanPurchase:()=>false,premiumPassActive:()=>false,
   battlePassSeasonKey:()=>null,escHtml:String,

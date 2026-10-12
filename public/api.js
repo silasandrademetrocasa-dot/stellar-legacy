@@ -521,6 +521,26 @@ export async function getPremiumShopOnline() {
   });
 }
 
+// V18.2.13: Somente prévia/simulação administrativa, sem pagamento nem recompensas.
+export async function getPremiumStageCatalogOnline() {
+  return authedSupabaseFetch('/rest/v1/rpc/get_premium_stage_catalog_v1833', {
+    method: 'POST', body: JSON.stringify({}),
+  });
+}
+export async function adminPreviewPremiumStageOnline() {
+  return authedSupabaseFetch('/rest/v1/rpc/admin_preview_premium_stage_v1832', {
+    method: 'POST', body: JSON.stringify({}),
+  });
+}
+export async function adminSimulatePremiumStageOnline(productId, idempotencyKey) {
+  return authedSupabaseFetch('/rest/v1/rpc/admin_simulate_premium_checkout_v1832', {
+    method: 'POST', body: JSON.stringify({
+      p_product_id: String(productId || ''),
+      p_idempotency_key: String(idempotencyKey || ''),
+    }),
+  });
+}
+
 export async function testPurchasePremiumOnline(productId) {
   return authedSupabaseFetch('/rest/v1/rpc/test_purchase_premium_v12', {
     method: 'POST', body: JSON.stringify({p_product_id:String(productId||'')}),
