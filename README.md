@@ -1,3 +1,5 @@
+> **V18.2.10 — AUX-9 COMPACTO:** Painéis **DESIGNERS** e **MODOS/EXTRAS** do AUX agora recolhem e expandem com um toque, exibem modo/designer ativo no cabeçalho e lembram sua escolha no navegador. Nenhuma mudança no funcionamento do AUX ou no Supabase.
+
 > **V18.2.9 — HANGAR, REFINARIA E DRONES:** Refinaria móvel no Hangar, comércio remoto manual com EXTRA Elite, AUX-9 guarda saque no porão, drones com preços progressivos e ADM para editar base/multiplicador. Consulte `V18_2_9_HANGAR_REFINARIA_DRONES.md`.
 
 > **V18.2.7 — AUX-9 EXTRATOR:** correção da coleta de minério em mapas online pelo módulo do AUX. O servidor valida a posição do AUX, e não apenas da nave. Sem SQL. Consulte `AUX_EXTRATOR_V18_2_7.md`.

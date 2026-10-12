@@ -1,3 +1,11 @@
+## V18.2.10 — AUX-9: SEÇÕES RECOLHÍVEIS NO HANGAR
+- Os painéis de Designers e Modos/Extras do AUX-9 agora começam recolhidos, mantendo o Hangar compacto.
+- Um botão com seta abre e fecha cada seção independentemente, com animação suave e acessibilidade por teclado.
+- O cabeçalho mostra designer e modo ativo, incluindo a quantidade de módulos comprados.
+- Preferências persistidas no navegador: fechar o Hangar, alternar abas ou relogar não reabre automaticamente os cards.
+- Também funciona no modal próprio do AUX-9; nenhuma alteração em compra, coleta, combate ou saves.
+- Sem SQL; mantém economia e refinaria V18.2.9.
+
 ## V18.2.9 — HANGAR REFINARIA, TERMINAL MERCANTE ELITE & DRONES
 - Refinaria/crafting funciona em qualquer mapa via Hangar > REFINARIA; base X-1 mantém venda do porão.
 - EXTRA Elite Terminal Mercante Remoto: comércio manual fora da base, somente se equipado; servidor bloqueia contas sem o EXTRA.

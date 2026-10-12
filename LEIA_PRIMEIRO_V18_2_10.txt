@@ -1,0 +1,10 @@
+STELLAR LEGACY V18.2.10 — AUX-9 COMPACTO / HANGAR
+
+1. Suba o ZIP completo pelo instalador automático do GitHub.
+2. Aguarde o Render publicar a versão 18.2.10 (/health).
+3. Abra PILOTO > AUX-9: DESIGNERS e MODOS/EXTRAS começam recolhidos.
+4. Toque no cabeçalho (seta ▸) para expandir e escolher o modo/designer.
+5. Recolha novamente (seta ▾). Ao reabrir o Hangar, a preferência permanece.
+6. Os controles continuam funcionando no modal separado do AUX-9.
+
+Não requer SQL. Nenhum preço, saldo, save ou modo do AUX foi alterado.
