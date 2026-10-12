@@ -1,0 +1,10 @@
+STELLAR LEGACY V18.2.12 — NOVA LEILÃO 100 MILHÕES CR
+
+NOVA Elite começa cada ciclo do LEILÃO em 100.000.000 de CR.
+Lance inicial idêntico para todo jogador; independe da quantidade de drones.
+O preço automático sobe normalmente dentro de cada hora.
+O preço da Loja NOVA permanece inalterado (em STL).
+
+Banco Supabase já atualizado nesta conversa. NÃO é necessário executar SQL.
+Suba o ZIP completo pelo instalador GitHub e aguarde o Render concluir o deploy.
+Os lances anteriores não foram reescritos; alguns lotes de ciclos anteriores podem manter registros antigos, mas novos lances obedecem ao piso de 100M.

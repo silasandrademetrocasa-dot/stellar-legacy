@@ -1,3 +1,9 @@
+## V18.2.12 — NOVA NO LEILÃO: 100M CR FIXOS NA ABERTURA
+- Piso de abertura de 100.000.000 CR por lote NOVA, igual para todos os jogadores; não escala com quantidade de drones.
+- Banco rejeita qualquer lance abaixo de 100M CR, inclusive quando o navegador envia um `systemFloor` antigo.
+- A tela agora mostra a abertura correta, inclusive em lotes antigos salvos no navegador. O lance automático segue subindo durante o ciclo de uma hora.
+- Não altera a Loja, lances históricos, Halo ou outras categorias de leilão. Banco já preparado, sem SQL adicional.
+
 ## V18.2.11 — NOVA: PISO DE LEILÃO 2× HALO
 - O lote do NOVA (item:iris) começa com no mínimo 2× o preço base do HALO em Créditos: 10.000.000 CR → 20.000.000 CR atualmente.
 - O HALO permanece disponível na Loja; não foi adicionado como lote Elite. Valores da Loja preservados.
