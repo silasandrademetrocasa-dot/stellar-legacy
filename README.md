@@ -1,3 +1,5 @@
+> **V18.2.11 — LEILÃO NOVA 2× HALO:** O preço inicial do NOVA Elite no LEILÃO agora equivale a no mínimo 2× o preço-base em Créditos do HALO na Loja Comum (10M CR → 20M CR de lance inicial), sem mudar o preço em STL do NOVA. Valor acompanha edição do HALO no ADM. A regra também foi validada e protegida no Supabase via RPC `place_auction_bid_online`. Não altera saldos, lances já registrados ou ciclo de outros itens. Consulte `V18_2_11_NOVA_AUCTION_FLOOR.md`.
+
 > **V18.2.10 — AUX-9 COMPACTO:** Painéis **DESIGNERS** e **MODOS/EXTRAS** do AUX agora recolhem e expandem com um toque, exibem modo/designer ativo no cabeçalho e lembram sua escolha no navegador. Nenhuma mudança no funcionamento do AUX ou no Supabase.
 
 > **V18.2.9 — HANGAR, REFINARIA E DRONES:** Refinaria móvel no Hangar, comércio remoto manual com EXTRA Elite, AUX-9 guarda saque no porão, drones com preços progressivos e ADM para editar base/multiplicador. Consulte `V18_2_9_HANGAR_REFINARIA_DRONES.md`.

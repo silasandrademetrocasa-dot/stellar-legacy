@@ -1,3 +1,10 @@
+## V18.2.11 — NOVA: PISO DE LEILÃO 2× HALO
+- O lote do NOVA (item:iris) começa com no mínimo 2× o preço base do HALO em Créditos: 10.000.000 CR → 20.000.000 CR atualmente.
+- O HALO permanece disponível na Loja; não foi adicionado como lote Elite. Valores da Loja preservados.
+- Backend Supabase valida o piso independentemente do navegador e corrige ambiguidade em colunas do RPC de lances.
+- UI do leilão atualizada (incluindo saves antigos) e versão do cache renovada; lances já ativos não são reescritos.
+- Banco do projeto atual já atualizado; o SQL completo está incluído em `sql/V18_2_11_AUCTION_NOVA_FLOOR.sql` para referência.
+
 ## V18.2.10 — AUX-9: SEÇÕES RECOLHÍVEIS NO HANGAR
 - Os painéis de Designers e Modos/Extras do AUX-9 agora começam recolhidos, mantendo o Hangar compacto.
 - Um botão com seta abre e fecha cada seção independentemente, com animação suave e acessibilidade por teclado.

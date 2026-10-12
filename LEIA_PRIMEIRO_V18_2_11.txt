@@ -1,0 +1,10 @@
+STELLAR LEGACY V18.2.11 — LEILÃO: NOVA A PARTIR DE 2× HALO
+
+1. Banco do projeto atual JÁ ATUALIZADO: não execute SQL de novo.
+2. Suba este ZIP no instalador automático do GitHub e aguarde o deploy do Render.
+3. Abra LEILÃO e verifique o lote NOVA (item:iris).
+4. Para a base de 10M CR do HALO, o NOVA começa com 20M CR e cresce durante a hora.
+5. Lances já ativos não foram modificados. O piso novo é obrigatório para novos lances.
+
+Não altera o preço de compra do NOVA em STL, a Loja, saldo ou itens de nenhum jogador.
+SQL incluído apenas como referência/reinstalação futura.

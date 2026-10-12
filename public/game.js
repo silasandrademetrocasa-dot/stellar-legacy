@@ -1,7 +1,7 @@
-import { FACTIONS, SHIPS, ITEMS, LASER_AMMO, ROCKETS, NPC_TYPES, MAPS, RESOURCES } from './data.js?v=18.2.10';
-import { GAME_ASSETS } from './assets/v17/manifest.js?v=18.2.10';
-import { signUp, signIn, requestPasswordReset, restorePasswordRecoveryFromUrl, restoreSession, signOutLocal, checkGameSession, endGameSession, getUser, getSessionCredentials, loadCloudSave, saveCloudSave, updateCallsign, updatePassword, loadRankings, loadAuctionBids, saveAuctionBidOnline, markAuctionBidStatusOnline, loadAuctionMarket, upsertPlayerPresenceOnline, loadMapPresenceOnline, savePlayerLocationCheckpointOnline, loadPlayerLocationCheckpointOnline, removePlayerPresenceOnline, queuePvpAttackOnline, consumePvpDamageEventsOnline, syncArenaProfileOnline, loadArenaState, loadArenaDailyRewardStatus, claimArenaDailyReward, loadArenaOpponents, loadArenaHistory, arenaAttackOnline, listClansOnline, loadMyClanOnline, createClanOnline, joinClanOnline, leaveClanOnline, transferClanCreditsOnline, claimClanCreditGrantsOnline, recordClanAlienKillOnline, getPremiumShopOnline, testPurchasePremiumOnline, loadWarfrontStateOnline, hitWorldBossOnline, claimWorldBossRewardOnline, declareClanWarOnline, recordClanWarScoreOnline, loadLiveOpsOnline, adminUpdateLiveEventScheduleOnline, purchaseLiveCatalogOnline, economyActionOnline, getChatHistoryOnline, sendChatMessageOnline, redeemGameCouponOnline, getMyDesignersOnline, setDesignLoadoutOnline, claimGateDroneDesignOnline, claimEventDesignerOnline, getAdminStatus, adminSearchAccounts, adminRecentActions, adminBanAccount, adminUnbanAccount, adminResetAccount, adminDeleteAccount, pushTelemetryBatch, adminTelemetryOverview, adminPlayerTelemetry, getBattleGroupOnline, createBattleGroupOnline, inviteBattleGroupOnline, searchBattleGroupPlayersOnline, inviteBattleGroupUserOnline, respondBattleGroupInviteOnline, leaveBattleGroupOnline, kickBattleGroupMemberOnline, setBattleGroupRallyOnline, loadRuntimeConfigOnline, loadNpcRuntimeConfigOnline, loadWorldRuntimeConfigOnline, loadSystemsRuntimeConfigOnline, loadAdminRuntimeMonitorOnline, adminUpdateRuntimeModuleOnline, adminUpdateNpcRuntimeOnline, adminUpdateNpcSpawnRuntimeOnline, adminUpdateWorldMapOnline, adminUpdateWorldResourceOnline, adminUpdateWorldSectorOnline, adminUpdateWorldPortalOnline, adminUpdateWorldResourcePoolOnline, adminUpdateMissionCategoryOnline, adminUpdateEconomyServiceOnline, adminUpdateCraftingRecipeOnline, loadBattlePassRuntimeConfigOnline, adminUpdateBattlePassSeasonOnline, adminUpdateBattlePassTierOnline, loadShopsRuntimeConfigOnline, adminUpdateCommonShopItemOnline, adminUpdatePremiumShopItemOnline, loadBonusConfigOnline, adminUpdateBonusConfigOnline } from './api.js?v=18.2.10';
-import { SharedUniverseClient } from './world.js?v=18.2.10';
+import { FACTIONS, SHIPS, ITEMS, LASER_AMMO, ROCKETS, NPC_TYPES, MAPS, RESOURCES } from './data.js?v=18.2.11';
+import { GAME_ASSETS } from './assets/v17/manifest.js?v=18.2.11';
+import { signUp, signIn, requestPasswordReset, restorePasswordRecoveryFromUrl, restoreSession, signOutLocal, checkGameSession, endGameSession, getUser, getSessionCredentials, loadCloudSave, saveCloudSave, updateCallsign, updatePassword, loadRankings, loadAuctionBids, saveAuctionBidOnline, markAuctionBidStatusOnline, loadAuctionMarket, upsertPlayerPresenceOnline, loadMapPresenceOnline, savePlayerLocationCheckpointOnline, loadPlayerLocationCheckpointOnline, removePlayerPresenceOnline, queuePvpAttackOnline, consumePvpDamageEventsOnline, syncArenaProfileOnline, loadArenaState, loadArenaDailyRewardStatus, claimArenaDailyReward, loadArenaOpponents, loadArenaHistory, arenaAttackOnline, listClansOnline, loadMyClanOnline, createClanOnline, joinClanOnline, leaveClanOnline, transferClanCreditsOnline, claimClanCreditGrantsOnline, recordClanAlienKillOnline, getPremiumShopOnline, testPurchasePremiumOnline, loadWarfrontStateOnline, hitWorldBossOnline, claimWorldBossRewardOnline, declareClanWarOnline, recordClanWarScoreOnline, loadLiveOpsOnline, adminUpdateLiveEventScheduleOnline, purchaseLiveCatalogOnline, economyActionOnline, getChatHistoryOnline, sendChatMessageOnline, redeemGameCouponOnline, getMyDesignersOnline, setDesignLoadoutOnline, claimGateDroneDesignOnline, claimEventDesignerOnline, getAdminStatus, adminSearchAccounts, adminRecentActions, adminBanAccount, adminUnbanAccount, adminResetAccount, adminDeleteAccount, pushTelemetryBatch, adminTelemetryOverview, adminPlayerTelemetry, getBattleGroupOnline, createBattleGroupOnline, inviteBattleGroupOnline, searchBattleGroupPlayersOnline, inviteBattleGroupUserOnline, respondBattleGroupInviteOnline, leaveBattleGroupOnline, kickBattleGroupMemberOnline, setBattleGroupRallyOnline, loadRuntimeConfigOnline, loadNpcRuntimeConfigOnline, loadWorldRuntimeConfigOnline, loadSystemsRuntimeConfigOnline, loadAdminRuntimeMonitorOnline, adminUpdateRuntimeModuleOnline, adminUpdateNpcRuntimeOnline, adminUpdateNpcSpawnRuntimeOnline, adminUpdateWorldMapOnline, adminUpdateWorldResourceOnline, adminUpdateWorldSectorOnline, adminUpdateWorldPortalOnline, adminUpdateWorldResourcePoolOnline, adminUpdateMissionCategoryOnline, adminUpdateEconomyServiceOnline, adminUpdateCraftingRecipeOnline, loadBattlePassRuntimeConfigOnline, adminUpdateBattlePassSeasonOnline, adminUpdateBattlePassTierOnline, loadShopsRuntimeConfigOnline, adminUpdateCommonShopItemOnline, adminUpdatePremiumShopItemOnline, loadBonusConfigOnline, adminUpdateBonusConfigOnline } from './api.js?v=18.2.11';
+import { SharedUniverseClient } from './world.js?v=18.2.11';
 
 const canvas = document.querySelector('#game');
 const ctx = canvas.getContext('2d');
@@ -925,12 +925,28 @@ function eliteAuctionCatalog(){
   Object.values(PET_GEARS).filter(x=>x.currency==='uridium'&&!progress?.pet?.gearsOwned?.[x.id]).forEach(x=>out.push({ref:`petGear:${x.id}`,kind:'petGear',id:x.id,name:`AUX-9 • ${x.name}`,uri:x.cost,qty:1,unique:true}));
   return out;
 }
+// V18.2.11: no leilão, NOVA Elite inicia a 2x a base em CR do HALO.
+// O HALO permanece na Loja comum e não é criado como lote Elite.
+// A referência vem do catálogo do Supabase e não altera preços de compra na Loja.
+function auctionNovaStartFloor(){
+  const halo=Number(liveCatalog('drone:flax')?.price??ITEMS.flax?.price??10000000);
+  return Math.max(100000,Math.ceil((Math.max(0,halo)*2)/100000)*100000);
+}
 function normalizeAuctionEconomy(lot,key=progress?.auction?.hourKey||auctionHourKey()){
   if(!lot)return lot;
-  if(!Number.isFinite(Number(lot.reserve))||Number(lot.reserve)<100000||!Number.isFinite(Number(lot.finalSystemBid))){
+  const novaFloor=lot.ref==='item:iris'?auctionNovaStartFloor():100000;
+  const invalid=!Number.isFinite(Number(lot.reserve))||Number(lot.reserve)<100000||!Number.isFinite(Number(lot.finalSystemBid));
+  if(invalid){
     const rnd=auctionRand(auctionSeed(`${key}:${lot.ref}`));
-    lot.reserve=Math.max(100000,Math.round((Number(lot.uri)||1000)*70*(.75+rnd()*.5)/100000)*100000);
+    lot.reserve=Math.max(novaFloor,Math.round((Number(lot.uri)||1000)*70*(.75+rnd()*.5)/100000)*100000);
     lot.finalSystemBid=Math.max(lot.reserve+100000,Math.round(lot.reserve*(1.25+rnd()*1.75)/100000)*100000);
+  }else if(lot.ref==='item:iris'&&Number(lot.reserve)<novaFloor){
+    // Atualiza inclusive lotes já existentes no save, sem apagar lances reais.
+    const oldReserve=Math.max(100000,Number(lot.reserve));
+    const oldFinal=Math.max(oldReserve+100000,Number(lot.finalSystemBid));
+    const multiplier=Math.max(1.25,oldFinal/oldReserve);
+    lot.reserve=novaFloor;
+    lot.finalSystemBid=Math.max(novaFloor+100000,Math.round(novaFloor*multiplier/100000)*100000);
   }
   return lot;
 }
@@ -6350,7 +6366,7 @@ function auctionMinBid(lot){
   const playerBid=Number(lot?.marketBid)||0;
   // Depois que existe um jogador liderando, somente outro jogador pode cobrir
   // e precisa acrescentar no mínimo 100k.
-  if(playerBid>0)return Math.max(100000,playerBid+100000);
+  if(playerBid>0)return Math.max(100000,playerBid+100000,lot?.ref==='item:iris'?auctionNovaStartFloor():100000);
   // Antes do primeiro jogador, o preço do sistema é o próprio lance mínimo.
   // Ex.: SISTEMA = 100k -> primeiro jogador pode dar exatamente 100k.
   return Math.max(100000,auctionSystemBid(lot));
@@ -6377,7 +6393,7 @@ async function placeAuctionBid(ref,amount){
   // Se já existe jogador real, precisa cobrir +100k.
   // Se ainda é o SISTEMA, basta cobrir o preço automático atual.
   const systemFloor=auctionSystemBid(lot);
-  const liveMin=live?Math.max(100000,(Number(live.user_bid)||0)+100000):Math.max(100000,systemFloor);
+  const liveMin=live?Math.max(100000,(Number(live.user_bid)||0)+100000,lot?.ref==='item:iris'?auctionNovaStartFloor():100000):Math.max(100000,systemFloor);
   const uiMin=auctionMinBid(lot);
   const min=Math.max(liveMin,uiMin);
 

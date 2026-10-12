@@ -1,6 +1,6 @@
 {
   "name": "stellar-legacy",
-  "version": "18.2.10",
+  "version": "18.2.11",
   "type": "module",
   "scripts": {
     "start": "node server/index.js",
@@ -15,5 +15,5 @@
   "engines": {
     "node": ">=18"
   },
-  "release": "aux9-collapsible-modes-designers-v18-2-10"
+  "release": "auction-nova-minimum-2x-halo-v18-2-11"
 }
