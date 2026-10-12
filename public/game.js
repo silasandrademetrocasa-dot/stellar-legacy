@@ -1,7 +1,7 @@
-import { FACTIONS, SHIPS, ITEMS, LASER_AMMO, ROCKETS, NPC_TYPES, MAPS, RESOURCES } from './data.js?v=18.2.13';
-import { GAME_ASSETS } from './assets/v17/manifest.js?v=18.2.13';
-import { signUp, signIn, requestPasswordReset, restorePasswordRecoveryFromUrl, restoreSession, signOutLocal, checkGameSession, endGameSession, getUser, getSessionCredentials, loadCloudSave, saveCloudSave, updateCallsign, updatePassword, loadRankings, loadAuctionBids, saveAuctionBidOnline, markAuctionBidStatusOnline, loadAuctionMarket, upsertPlayerPresenceOnline, loadMapPresenceOnline, savePlayerLocationCheckpointOnline, loadPlayerLocationCheckpointOnline, removePlayerPresenceOnline, queuePvpAttackOnline, consumePvpDamageEventsOnline, syncArenaProfileOnline, loadArenaState, loadArenaDailyRewardStatus, claimArenaDailyReward, loadArenaOpponents, loadArenaHistory, arenaAttackOnline, listClansOnline, loadMyClanOnline, createClanOnline, joinClanOnline, leaveClanOnline, transferClanCreditsOnline, claimClanCreditGrantsOnline, recordClanAlienKillOnline, getPremiumShopOnline, testPurchasePremiumOnline, adminPreviewPremiumStageOnline, adminSimulatePremiumStageOnline, getPremiumStageCatalogOnline, loadWarfrontStateOnline, hitWorldBossOnline, claimWorldBossRewardOnline, declareClanWarOnline, recordClanWarScoreOnline, loadLiveOpsOnline, adminUpdateLiveEventScheduleOnline, purchaseLiveCatalogOnline, economyActionOnline, getChatHistoryOnline, sendChatMessageOnline, redeemGameCouponOnline, getMyDesignersOnline, setDesignLoadoutOnline, claimGateDroneDesignOnline, claimEventDesignerOnline, getAdminStatus, adminSearchAccounts, adminRecentActions, adminBanAccount, adminUnbanAccount, adminResetAccount, adminDeleteAccount, pushTelemetryBatch, adminTelemetryOverview, adminPlayerTelemetry, getBattleGroupOnline, createBattleGroupOnline, inviteBattleGroupOnline, searchBattleGroupPlayersOnline, inviteBattleGroupUserOnline, respondBattleGroupInviteOnline, leaveBattleGroupOnline, kickBattleGroupMemberOnline, setBattleGroupRallyOnline, loadRuntimeConfigOnline, loadNpcRuntimeConfigOnline, loadWorldRuntimeConfigOnline, loadSystemsRuntimeConfigOnline, loadAdminRuntimeMonitorOnline, adminUpdateRuntimeModuleOnline, adminUpdateNpcRuntimeOnline, adminUpdateNpcSpawnRuntimeOnline, adminUpdateWorldMapOnline, adminUpdateWorldResourceOnline, adminUpdateWorldSectorOnline, adminUpdateWorldPortalOnline, adminUpdateWorldResourcePoolOnline, adminUpdateMissionCategoryOnline, adminUpdateEconomyServiceOnline, adminUpdateCraftingRecipeOnline, loadBattlePassRuntimeConfigOnline, adminUpdateBattlePassSeasonOnline, adminUpdateBattlePassTierOnline, loadShopsRuntimeConfigOnline, adminUpdateCommonShopItemOnline, adminUpdatePremiumShopItemOnline, loadBonusConfigOnline, adminUpdateBonusConfigOnline } from './api.js?v=18.2.13';
-import { SharedUniverseClient } from './world.js?v=18.2.13';
+import { FACTIONS, SHIPS, ITEMS, LASER_AMMO, ROCKETS, NPC_TYPES, MAPS, RESOURCES } from './data.js?v=18.2.14';
+import { GAME_ASSETS } from './assets/v17/manifest.js?v=18.2.14';
+import { signUp, signIn, requestPasswordReset, restorePasswordRecoveryFromUrl, restoreSession, signOutLocal, checkGameSession, endGameSession, getUser, getSessionCredentials, loadCloudSave, saveCloudSave, updateCallsign, updatePassword, loadRankings, loadAuctionBids, saveAuctionBidOnline, markAuctionBidStatusOnline, loadAuctionMarket, upsertPlayerPresenceOnline, loadMapPresenceOnline, savePlayerLocationCheckpointOnline, loadPlayerLocationCheckpointOnline, removePlayerPresenceOnline, queuePvpAttackOnline, consumePvpDamageEventsOnline, syncArenaProfileOnline, loadArenaState, loadArenaDailyRewardStatus, claimArenaDailyReward, loadArenaOpponents, loadArenaHistory, arenaAttackOnline, listClansOnline, loadMyClanOnline, createClanOnline, joinClanOnline, leaveClanOnline, transferClanCreditsOnline, claimClanCreditGrantsOnline, recordClanAlienKillOnline, getPremiumShopOnline, testPurchasePremiumOnline, adminPreviewPremiumStageOnline, adminSimulatePremiumStageOnline, getPremiumStageCatalogOnline, loadWarfrontStateOnline, hitWorldBossOnline, claimWorldBossRewardOnline, declareClanWarOnline, recordClanWarScoreOnline, loadLiveOpsOnline, adminUpdateLiveEventScheduleOnline, purchaseLiveCatalogOnline, economyActionOnline, getChatHistoryOnline, sendChatMessageOnline, redeemGameCouponOnline, getMyDesignersOnline, setDesignLoadoutOnline, claimGateDroneDesignOnline, claimEventDesignerOnline, getAdminStatus, adminSearchAccounts, adminRecentActions, adminBanAccount, adminUnbanAccount, adminResetAccount, adminDeleteAccount, pushTelemetryBatch, adminTelemetryOverview, adminPlayerTelemetry, getBattleGroupOnline, createBattleGroupOnline, inviteBattleGroupOnline, searchBattleGroupPlayersOnline, inviteBattleGroupUserOnline, respondBattleGroupInviteOnline, leaveBattleGroupOnline, kickBattleGroupMemberOnline, setBattleGroupRallyOnline, loadRuntimeConfigOnline, loadNpcRuntimeConfigOnline, loadWorldRuntimeConfigOnline, loadSystemsRuntimeConfigOnline, loadAdminRuntimeMonitorOnline, adminUpdateRuntimeModuleOnline, adminUpdateNpcRuntimeOnline, adminUpdateNpcSpawnRuntimeOnline, adminUpdateWorldMapOnline, adminUpdateWorldResourceOnline, adminUpdateWorldSectorOnline, adminUpdateWorldPortalOnline, adminUpdateWorldResourcePoolOnline, adminUpdateMissionCategoryOnline, adminUpdateEconomyServiceOnline, adminUpdateCraftingRecipeOnline, loadBattlePassRuntimeConfigOnline, adminUpdateBattlePassSeasonOnline, adminUpdateBattlePassTierOnline, loadShopsRuntimeConfigOnline, adminUpdateCommonShopItemOnline, adminUpdatePremiumShopItemOnline, loadBonusConfigOnline, adminUpdateBonusConfigOnline } from './api.js?v=18.2.14';
+import { SharedUniverseClient } from './world.js?v=18.2.14';
 
 const canvas = document.querySelector('#game');
 const ctx = canvas.getContext('2d');
@@ -6216,11 +6216,12 @@ function renderPremiumShop(){
   renderPremiumStageV18213();
 }
 
-// V18.2.13 — Vitrine de teste (separada da Loja Premium e das recompensas reais).
+// V18.2.14 — Vitrine de teste (separada da Loja Premium e das recompensas reais).
 // A própria RPC do Supabase exige game_admin; sessão normal nunca recebe esta prévia.
 const PREMIUM_STAGE_TABS_V18213=[
   ['subscriptions','ASSINATURAS','premium'],
   ['bundles','PACOTES','starter_bundle'],
+  ['stl','RECARGAS STL','stl_pack'],
   ['pass','PASSE','battle_pass'],
   ['tiers','NÍVEIS','pass_tiers'],
   ['legacy','LOJA ATUAL','legacy'],
@@ -6229,6 +6230,7 @@ function premiumStagePriceV18213(value){return `R$ ${Math.max(0,Number(value)||0
 function premiumStageIconV18213(row){
   if(row.category==='premium')return row.billing_mode==='prepaid'?'⏱':'✦';
   if(row.category==='starter_bundle')return row.id.includes('avancado')?'🛸':row.id.includes('piloto')?'🚀':'🌟';
+  if(row.category==='stl_pack')return '💎';
   if(row.category==='battle_pass')return '🎟️';
   return '⚡';
 }
@@ -6236,7 +6238,18 @@ function premiumStageDescV18213(row){
   if(row.category==='premium')return row.billing_mode==='prepaid'
     ? '7 dias avulsos, sem renovação. A simulação não ativa benefícios reais.'
     : `Renovação simulada a cada ${Number(row.billing_months)||1} mês(es). Nenhuma cobrança ou benefício real.`;
-  if(row.category==='starter_bundle')return 'STL e itens ainda em balanceamento. Este teste não entrega recursos nem inventário.';
+  if(row.category==='stl_pack'){
+    const stl=Math.max(0,Number(row.stl_amount??row.reward_plan?.stl)||0);
+    return `${fmt(stl)} STL • recarga avulsa e repetível. Teste sem crédito de moeda.`;
+  }
+  if(row.category==='starter_bundle'){
+    const stl=Math.max(0,Number(row.stl_amount??row.reward_plan?.stl)||0);
+    const days=Math.max(0,Number(row.premium_days??row.reward_plan?.premium_days)||0);
+    const items=Array.isArray(row.bundle_items)?row.bundle_items:(Array.isArray(row.reward_plan?.items)?row.reward_plan.items:[]);
+    const itemNames={mcb50:'PLS-3',plt2021:'CMT-3',lf3:'ARC-3',sg3nb02:'VSH-5'};
+    const rewards=items.map(item=>`${fmt(Math.max(0,Number(item.quantity)||0))} ${itemNames[item.id]||String(item.id||'item')}`).join(' • ');
+    return `${fmt(stl)} STL • ${days} dias Premium • ${rewards} • compra única por conta. Teste sem entrega.`;
+  }
   if(row.category==='battle_pass')return 'Prévia do Passe de Temporada. Não libera a trilha Premium no save.';
   return `Simula +${Number(row.tier_quantity)||0} nível(is) da temporada. Não altera o progresso nem libera recompensas.`;
 }
@@ -6283,7 +6296,7 @@ function renderPremiumStageV18213(){
     const noSeason=category==='battle_pass'&&!season.season_key;
     const disabled=!canSimulate||premiumStageRuntime.buying||limit||noSeason;
     const label=!canSimulate?'EM PREPARAÇÃO':limit?'LIMITE DA TEMPORADA':noSeason?'SEM TEMPORADA':premiumStageRuntime.buying?'AGUARDE...':'SIMULAR COMPRA';
-    const mode=row.billing_mode==='auto_renew'?`RENOVA A CADA ${Number(row.billing_months)||1} MÊS(ES)`:row.billing_mode==='prepaid'?'7 DIAS • AVULSO':'COMPRA AVULSA';
+    const mode=row.category==='starter_bundle'?'COMPRA ÚNICA':row.category==='stl_pack'?'RECARGA • REPETÍVEL':row.billing_mode==='auto_renew'?`RENOVA A CADA ${Number(row.billing_months)||1} MÊS(ES)`:row.billing_mode==='prepaid'?'7 DIAS • AVULSO':'COMPRA AVULSA';
     return `<article class="premium-product premium-stage-product ${escHtml(row.category)}" data-stage-product="${escHtml(row.id)}"><div class="premium-product-icon">${premiumStageIconV18213(row)}</div><div class="premium-product-copy"><span class="premium-product-type">${escHtml(mode)} • TESTE</span><h3>${escHtml(row.name||row.id)}</h3><p>${escHtml(premiumStageDescV18213(row))}</p></div><div class="premium-product-price">${premiumStagePriceV18213(row.price_brl)}</div><button type="button" class="gold-btn premium-stage-action" data-stage-simulate="${escHtml(row.id)}" ${disabled?'disabled':''}>${label}</button></article>`;
   }).join('');
   grid.querySelectorAll('[data-stage-simulate]').forEach(button=>button.onclick=()=>simulatePremiumStageV18213(button.dataset.stageSimulate));
@@ -6300,7 +6313,7 @@ async function loadPremiumStageV18213(){
   }catch(error){
     premiumStageRuntime.state=null;
     premiumStageRuntime.error=String(error?.message||error);
-    console.warn('V18.2.13 premium staging:',error);
+    console.warn('V18.2.14 premium staging:',error);
     showToast('Vitrine Premium de teste indisponível: Loja original preservada.');
     return null;
   }finally{

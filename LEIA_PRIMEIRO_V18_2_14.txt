@@ -1,0 +1,11 @@
+STELLAR LEGACY V18.2.14 — RECARGAS STL E PACOTES ESPECIAIS (TESTE)
+
+1) Supabase V18.3.4: SQL JA INSTALADO E TESTADO. NAO PRECISA EXECUTAR NOVAMENTE.
+2) Suba TODO este ZIP com o instalador GitHub e aguarde o deploy Render.
+3) Atualize a pagina do jogo (force refresh se necessario).
+4) LOJA PREMIUM > RECARGAS STL para conferir os 6 pacotes recarregaveis.
+5) LOJA PREMIUM > PACOTES para conferir Iniciante, Piloto e Avancado (compra unica por conta).
+6) ADM pode simular compra. JOGADORES COMUNS visualizam vitrine, sem liberar compras.
+7) NENHUM dinheiro e cobrado e NENHUM STL, Premium, item ou tier e concedido por essas simulacoes.
+
+O SQL ja foi executado no Supabase pelo ChatGPT. O arquivo .sql na pasta sql serve para auditoria e reposicao futura.

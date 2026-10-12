@@ -59,6 +59,6 @@ assert(source.includes("auxFoldSectionV18210(gears,'aux:modes'"));
 assert(css.includes('.aux-fold-section.is-collapsed .aux-fold-body'));
 assert(css.includes('grid-template-rows:0fr'));
 assert(css.includes('prefers-reduced-motion'));
-assert(html.includes('/game.js?v=18.2.13'));
-assert(html.includes('/style.css?v=18.2.13'));
+assert(html.includes('/game.js?v=18.2.14'));
+assert(html.includes('/style.css?v=18.2.14'));
 console.log('PASS V18.2.10: default collapsed, independent toggles, persisted preference, active summary, accessible controls, existing mode actions and CSS transition.');

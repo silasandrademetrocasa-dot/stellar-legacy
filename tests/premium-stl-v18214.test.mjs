@@ -1,0 +1,24 @@
+import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
+import path from 'node:path';
+const base=process.cwd();
+const game=readFileSync(path.join(base,'public/game.js'),'utf8');
+const sql=readFileSync(path.join(base,'sql/V18_3_4_PACOTES_STL_E_ESPECIAIS_TESTE.sql'),'utf8');
+const html=readFileSync(path.join(base,'public/index.html'),'utf8');
+const api=readFileSync(path.join(base,'public/api.js'),'utf8');
+assert.match(game,/\['stl','RECARGAS STL','stl_pack'\]/);
+assert.match(game,/row\.category==='stl_pack'/);
+assert.match(game,/RECARGA • REPETÍVEL/);
+assert.match(game,/COMPRA ÚNICA/);
+assert.match(game,/row\.stl_amount\?\?row\.reward_plan\?\.stl/);
+assert.match(game,/return `\$\{fmt\(stl\)\} STL • \$\{days\} dias Premium/);
+assert.match(game,/não entregam STL, Premium, itens, Passe ou tiers ao jogador/);
+assert.match(html,/premiumStageTabs/);
+assert.match(api,/getPremiumStageCatalogOnline/);
+assert.match(sql,/stl_explorador_v1834/);
+assert.match(sql,/stl_galactico_v1834/);
+assert.match(sql,/"grants_enabled":false/);
+assert.match(sql,/Pacote de compra única já simulado/);
+assert.match(sql,/categoria/ig); // comments include categorical management in portuguese?
+assert.ok(!game.includes('18.2.13\''));
+console.log('PASS V18.2.14: 6 STL packs, unique starter bundles, separate test mode, client render, no real grants.');

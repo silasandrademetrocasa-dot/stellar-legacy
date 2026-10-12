@@ -1,3 +1,7 @@
+# V18.2.14 — RECARGAS STL / PACOTES COMPRA ÚNICA (TESTE)
+
+Ver `V18_2_14_RECARGAS_STL_E_PACOTES.md`.
+
 ## V18.2.12 — NOVA NO LEILÃO: 100M CR FIXOS NA ABERTURA
 - Piso de abertura de 100.000.000 CR por lote NOVA, igual para todos os jogadores; não escala com quantidade de drones.
 - Banco rejeita qualquer lance abaixo de 100M CR, inclusive quando o navegador envia um `systemFloor` antigo.

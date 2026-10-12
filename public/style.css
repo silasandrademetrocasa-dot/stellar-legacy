@@ -2700,7 +2700,7 @@ body[data-quality="low"] .pet-gear {
 @media(prefers-reduced-motion:reduce){.aux-fold-body,.aux-fold-caret{transition:none}}
 @media(max-width:680px){.aux-fold-head{min-height:52px;padding:9px 11px}.aux-fold-head-copy b{font-size:11px}.aux-fold-head-copy small{font-size:10px}.aux-fold-content{padding:10px}}
 
-/* V18.2.13 — simulação isolada da Loja Premium (ADM). Sem novas animações pesadas. */
+/* V18.2.14 — simulação isolada da Loja Premium (ADM). Sem novas animações pesadas. */
 .premium-stage-tabs{display:flex;gap:7px;overflow-x:auto;max-width:100%;padding:3px 1px 9px;margin:5px 0 2px;scrollbar-width:thin;}
 .premium-stage-tabs[hidden],.premium-stage-info[hidden]{display:none!important;}
 .premium-stage-tab{flex:0 0 auto;background:#091825;color:#d5d8cd;border:1px solid #574c2c;border-radius:9px;padding:8px 12px;min-height:34px;letter-spacing:.045em;font-size:10px;font-weight:800;}
