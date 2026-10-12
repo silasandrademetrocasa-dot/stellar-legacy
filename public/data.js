@@ -127,10 +127,11 @@ export const ITEMS = {
   },
 
   ammoAutoBuyCpu: { id: 'ammoAutoBuyCpu', type: 'extra', name: 'Repositor Automático', price: 30000000, currency: 'credits', description: 'Compra automaticamente novo pacote da munição laser e do míssil selecionados quando o estoque estiver baixo.' },
+  remoteTraderCpuElite: { id:'remoteTraderCpuElite',type:'extra',name:'Terminal Mercante Remoto • Elite',price:350000,currency:'uridium',description:'EXTRA Elite: enquanto equipado, permite vender recursos diretamente na aba Refinaria do Hangar em qualquer setor, sem retorno à base. Venda manual, nunca automática.' },
 
   // DRONES
-  flax: { id:'flax', type:'drone', name:'Halo', slots:1, price:30000000, currency:'credits', description:'Drone comum com 1 slot de equipamento.' },
-  iris: { id:'iris', type:'drone', name:'Nova', slots:2, price:900000, currency:'uridium', description:'Drone Elite com 2 slots de equipamento.' },
+  flax: { id:'flax', type:'drone', name:'Halo', slots:1, price:10000000, currency:'credits', description:'Drone comum com 1 slot de equipamento.' },
+  iris: { id:'iris', type:'drone', name:'Nova', slots:2, price:15000, currency:'uridium', description:'Drone Elite com 2 slots de equipamento.' },
 };
 
 export const LASER_AMMO = {

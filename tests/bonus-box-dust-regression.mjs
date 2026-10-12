@@ -108,7 +108,7 @@ for(const file of ['bonus-box.webp','stellar-dust.webp']){
 }
 assert.match(html,/id="gateDustSpinButtons"/);
 assert.match(html,/id="gateDustText"/);
-assert.match(game,/petLockedCollectionTarget\(\[\.\.\.state\.loot,\.\.\.\(state\.bonusBoxes\|\|\[\]\)\]/);
+assert.match(game,/petLockedCollectionTarget\(\[\.\.\.state\.loot(?:\.filter\([^;]+?\))?,\.\.\.\(state\.bonusBoxes\|\|\[\]\)\]/);
 assert.match(game,/collectBonusBox\(task,true\)/);
 assert.match(game,/for\(const box of \[\.\.\.\(state\.bonusBoxes\|\|\[\]\)\]\)/);
 assert.match(server,/payment=String\(payload\.payment\|\|'uridium'\)/);

@@ -1,8 +1,10 @@
+> **V18.2.9 — HANGAR, REFINARIA E DRONES:** Refinaria móvel no Hangar, comércio remoto manual com EXTRA Elite, AUX-9 guarda saque no porão, drones com preços progressivos e ADM para editar base/multiplicador. Consulte `V18_2_9_HANGAR_REFINARIA_DRONES.md`.
+
 > **V18.2.7 — AUX-9 EXTRATOR:** correção da coleta de minério em mapas online pelo módulo do AUX. O servidor valida a posição do AUX, e não apenas da nave. Sem SQL. Consulte `AUX_EXTRATOR_V18_2_7.md`.
 
 > **V18.2.6 — Eventos por período:** progresso persistido por jogador no Supabase, sem reinício ao trocar de mapa ou atualizar. Consulte `EVENTOS_PERIODO_V18_2_6.md`.
 
-### V18.2.5 — BOX BÔNUS EDITÁVEL PELO ADM (ATUAL)
+### V18.2.5 — BOX BÔNUS EDITÁVEL PELO ADM
 
 Nova aba **ADM → BOX BÔNUS**: mapa, respawn, pesos e quantidades de prêmios, preços dos três portais (STL ou Poeira) e desconto Premium. Tudo salvo no Supabase e aplicado sem ZIP em alterações futuras. Portais Astrais continuam sem BOX. Consulte `ADMIN_BONUS_LIVE_V18_2_5.md`. Banco de produção já migrado.
 

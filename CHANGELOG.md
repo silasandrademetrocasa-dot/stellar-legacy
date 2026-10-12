@@ -1,3 +1,11 @@
+## V18.2.9 — HANGAR REFINARIA, TERMINAL MERCANTE ELITE & DRONES
+- Refinaria/crafting funciona em qualquer mapa via Hangar > REFINARIA; base X-1 mantém venda do porão.
+- EXTRA Elite Terminal Mercante Remoto: comércio manual fora da base, somente se equipado; servidor bloqueia contas sem o EXTRA.
+- AUX-9 Salvager não vende mais caixas dos NPCs: coleta para o porão, conserva excedente enquanto caixa existir.
+- Drones Halo/Nova: preço base 10M CR/15K STL e multiplicador por compra do tipo (2× padrão), histórica sem reset ao vender.
+- Loja no ADM permite editar preços bases e o multiplicador (1–4).
+- Preservados sprites de nave/NPC, modo BAIXO, eventos, cupons, BOX BÔNUS, Premium e modos online.
+
 # V18.2.8 — BOX Sprite & Ship Vitals Fix
 - BOX BÔNUS: corrige imagem lazy não carregada no Canvas; sprite WebP fica visível.
 - BX/Poeira: cache protegido e versão da imagem por pasta, sem recarregar todas as naves.

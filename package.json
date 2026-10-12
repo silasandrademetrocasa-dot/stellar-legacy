@@ -1,6 +1,6 @@
 {
   "name": "stellar-legacy",
-  "version": "18.2.8",
+  "version": "18.2.9",
   "type": "module",
   "scripts": {
     "start": "node server/index.js",
@@ -15,5 +15,5 @@
   "engines": {
     "node": ">=18"
   },
-  "release": "bonus-box-ship-vitals-fix-v18-2-8"
+  "release": "hangar-refinery-remote-trader-drone-economy-v18-2-9"
 }

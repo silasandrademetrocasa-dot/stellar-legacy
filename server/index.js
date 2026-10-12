@@ -627,7 +627,7 @@ async function accountUser(sb, user, preferred = '') {
   return { id: user.id, email: user.email, callsign };
 }
 
-app.get('/health', (req, res) => res.json({ ok: true, game: 'Stellar Legacy', version: '18.2.8', universe: 'shared' }));
+app.get('/health', (req, res) => res.json({ ok: true, game: 'Stellar Legacy', version: '18.2.9', universe: 'shared' }));
 
 
 app.get('/api/config', (req, res) => {
@@ -643,10 +643,10 @@ app.get('/api/config', (req, res) => {
 
 app.get('/api/meta', (req, res) => res.json({
   name: 'Stellar Legacy',
-  version: '18.2.8',
+  version: '18.2.9',
   authReady: Boolean(SUPABASE_URL && SUPABASE_KEY),
   diagnostics: configStatus(),
-  features: ['login', 'cloud_save', 'factions', 'safe_zone', 'shop', 'owned_ships', 'equipment_slots', 'inventory', 'drones', 'ammo', 'rockets', 'expanded_expedition_maps', 'cargo_hold', 'ore_trading', 'npc_cargo_boxes', 'npc_respawn', 'minimap_navigation', 'waypoints', 'landmark_discovery', 'combat_fx', 'pet_modules', 'auto_buy_cpu', 'v8_asset_identity', 'mission_control_v93', 'mission_acceptance_tracking', 'expanded_enemy_density', 'online_player_presence', 'real_player_auction', 'rank_nameplates_v12', 'clans_v12', 'clan_vault_v12', 'premium_shop_v12', 'battle_pass_paid_v12', 'premium_subscription_v12', 'clan_daily_economy_v12', 'portal_neutral_zone_v12', 'base_only_equipment_v12', 'single_session_v1214', 'manual_login_v141', 'account_bound_save_v141', 'unique_callsign_v141', 'premium_auto_combat_v141', 'shared_universe_v15', 'authoritative_npcs_v15', 'shared_ores_v15', 'shared_events_v15', 'websocket_world_v15', 'npc_contribution_v15', 'realtime_player_socket_v151', 'remote_laser_fx_v151', 'remote_aux9_v151', 'low_latency_world_v151', 'live_ops_v16', 'server_authoritative_shop_v16', 'supabase_event_schedule_v16', 'economy_guard_v161', 'server_auto_buy_v161', 'server_trader_v161', 'server_pet_slots_v161', 'server_materializer_v161', 'server_quantum_cores_v161', 'economy_fast_path_v1767', 'chat_dock_v162', 'drone_designers_v163', 'designer_sets_v163', 'nexus_eclipse_designer_drops_v163', 'global_chat_v162', 'clan_chat_v162', 'private_chat_v162', 'bottom_hud_reflow_v162', 'ship_designers_v165', 'aux_designers_v165', 'designer_ship_abilities_v165', 'event_designer_drops_v165', 'social_minimap_v165', 'realtime_designer_visuals_v165', 'data_driven_core_v1810', 'data_driven_npcs_v1811', 'server_runtime_topbar_cache_v1813', 'data_driven_world_v1814', 'data_driven_systems_v1815', 'admin_runtime_monitor_v1816a', 'admin_interface_editor_v1816b', 'admin_npc_editor_v1816c', 'admin_world_editor_v1816d', 'admin_systems_editor_v1816e', 'event_scheduler_v1817a', 'battle_pass_data_driven_v1817b', 'shops_data_driven_v1817c'],
+  features: ['login', 'cloud_save', 'factions', 'safe_zone', 'shop', 'owned_ships', 'equipment_slots', 'inventory', 'drones', 'ammo', 'rockets', 'expanded_expedition_maps', 'cargo_hold', 'ore_trading', 'npc_cargo_boxes', 'npc_respawn', 'minimap_navigation', 'waypoints', 'landmark_discovery', 'combat_fx', 'pet_modules', 'auto_buy_cpu', 'v8_asset_identity', 'mission_control_v93', 'mission_acceptance_tracking', 'expanded_enemy_density', 'online_player_presence', 'real_player_auction', 'rank_nameplates_v12', 'clans_v12', 'clan_vault_v12', 'premium_shop_v12', 'battle_pass_paid_v12', 'premium_subscription_v12', 'clan_daily_economy_v12', 'portal_neutral_zone_v12', 'base_only_equipment_v12', 'single_session_v1214', 'manual_login_v141', 'account_bound_save_v141', 'unique_callsign_v141', 'premium_auto_combat_v141', 'shared_universe_v15', 'authoritative_npcs_v15', 'shared_ores_v15', 'shared_events_v15', 'websocket_world_v15', 'npc_contribution_v15', 'realtime_player_socket_v151', 'remote_laser_fx_v151', 'remote_aux9_v151', 'low_latency_world_v151', 'live_ops_v16', 'server_authoritative_shop_v16', 'supabase_event_schedule_v16', 'economy_guard_v161', 'server_auto_buy_v161', 'server_trader_v161', 'server_pet_slots_v161', 'server_materializer_v161', 'server_quantum_cores_v161', 'economy_fast_path_v1767', 'chat_dock_v162', 'drone_designers_v163', 'designer_sets_v163', 'nexus_eclipse_designer_drops_v163', 'global_chat_v162', 'clan_chat_v162', 'private_chat_v162', 'bottom_hud_reflow_v162', 'ship_designers_v165', 'aux_designers_v165', 'designer_ship_abilities_v165', 'event_designer_drops_v165', 'social_minimap_v165', 'realtime_designer_visuals_v165', 'data_driven_core_v1810', 'data_driven_npcs_v1811', 'server_runtime_topbar_cache_v1813', 'data_driven_world_v1814', 'data_driven_systems_v1815', 'admin_runtime_monitor_v1816a', 'admin_interface_editor_v1816b', 'admin_npc_editor_v1816c', 'admin_world_editor_v1816d', 'admin_systems_editor_v1816e', 'event_scheduler_v1817a', 'battle_pass_data_driven_v1817b', 'shops_data_driven_v1817c', 'hangar_refinery_v1829', 'remote_trader_elite_v1829', 'drone_progressive_pricing_v1829', 'pet_cargo_boxes_v1829'],
 }));
 
 
@@ -858,6 +858,10 @@ app.post('/api/admin/runtime/shops/common/:catalogKey', requireUser, asyncRoute(
     p_shop_visible:body.shop_visible!==false,p_enabled:body.enabled!==false
   });
   if(error){const msg=String(error.message||'Falha ao salvar produto da Loja Comum.');return res.status(/administrativ|permiss|negado/i.test(msg)?403:400).json({error:msg});}
+  if(row.kind==='drone'&&body.drone_price_multiplier!=null){
+    const {error:multError}=await req.sb.rpc('admin_update_drone_multiplier_v1829',{p_type:String(row.ref_id),p_multiplier:clampNum(body.drone_price_multiplier,1,4,2)});
+    if(multError)return res.status(/administrativ|permiss|negado/i.test(multError.message)?403:400).json({error:multError.message});
+  }
   const runtime=await refreshShopsRuntimeSnapshot(true);await loadLiveOpsSnapshot(true).catch(()=>null);res.set('Cache-Control','no-store');res.json({ok:true,catalog_key:key,runtime,saved:data||null});
 }));
 app.post('/api/admin/runtime/shops/premium/:productId', requireUser, asyncRoute(async(req,res)=>{
@@ -1092,12 +1096,26 @@ app.post('/api/live/purchase', requireUser, asyncRoute(async (req,res)=>{
     state.profile ||= {};
     const {data:premiumState}=await req.sb.rpc('get_premium_shop_v12');
     const premium=!!premiumState?.premium_active;
-    const basePrice=Math.max(0,Math.round(Number(row.price)||0));
+    // V18.2.9: cada tipo de drone dobra de preço a cada aquisição efetiva.
+    // O histórico não recua ao vender um drone; evita recomprar 1ª unidade indefinidamente.
+    const listedBase=Math.max(0,Math.round(Number(row.price)||0));
+    let droneTier=0;
+    if(row.kind==='drone'){
+      const type=String(row.ref_id||'');
+      state.dronePurchasesV1829 ||= {};
+      const owned=(Array.isArray(state.drones)?state.drones:[]).filter(d=>d.type===type).length;
+      droneTier=Math.max(owned,Math.max(0,Math.floor(Number(state.dronePurchasesV1829[type])||0)));
+      state.dronePurchasesV1829[type]=droneTier;
+    }
+    const droneMultiplier=row.kind==='drone'?Math.max(1,Math.min(4,Number(row?.meta?.drone_price_multiplier)||2)):1;
+    const basePrice=row.kind==='drone'?Math.round(listedBase*Math.pow(droneMultiplier,Math.min(droneTier,12))):listedBase;
+    if(!Number.isSafeInteger(basePrice)||basePrice<=0)throw Object.assign(new Error('Preço de drone fora do limite seguro.'),{status:409});
     const price=premium&&premiumDiscountEligible(row)?Math.max(1,Math.floor(basePrice*.95)):basePrice;
     const currency=String(row.currency||'credits')==='uridium'?'uridium':'credits';
     const balance=Math.max(0,Number(state.profile[currency])||0);
     if(balance<price)throw Object.assign(new Error(`Saldo insuficiente para ${catalogKey}.`),{status:409});
     applyLiveGrant(state,row);
+    if(row.kind==='drone')state.dronePurchasesV1829[String(row.ref_id||'')]=droneTier+1;
     state.profile[currency]=balance-price;
     // Não avance clientSavedAt em mutações econômicas: esse timestamp pertence ao snapshot do cliente.
     state.accountOwnerId=req.user.id;state.accountOwnerEmail=req.user.email||null;
@@ -1107,7 +1125,7 @@ app.post('/api/live/purchase', requireUser, asyncRoute(async (req,res)=>{
     const profile=state.profile||{};
     const securedCallsign=await ensureProfile(req.sb,req.user);
     await req.sb.from('profiles').upsert({id:req.user.id,callsign:securedCallsign,faction:profile.faction||null,level:Number(profile.level||1),xp:Number(profile.xp||0),credits:Number(profile.credits||0),uridium:Number(profile.uridium||0),aliens_killed:Number(profile.aliensKilled||0),gg_completed:Number(state.galaxyGate?.alpha?.completed||profile.ggCompleted||0),updated_at},{onConflict:'id'});
-    return {state,updated_at,purchase:{catalog_key:catalogKey,base_price:basePrice,price,currency,premium_discount:price<basePrice}};
+    return {state,updated_at,purchase:{catalog_key:catalogKey,base_price:basePrice,price,currency,drone_tier:row.kind==='drone'?droneTier+1:null,premium_discount:price<basePrice}};
   });
   res.json({ok:true,...result});
 }));
@@ -1138,7 +1156,7 @@ function activateBaseServiceServer(state,id,runtime){
   state.economyBoosts ||= {};const now=Date.now(),current=Math.max(now,Number(state.economyBoosts[id])||0),duration=Math.max(60000,Number(def.duration_ms??def.duration)||3600000),cap=now+Math.max(duration,Number(def.max_stack_ms)||21600000);state.economyBoosts[id]=Math.min(cap,current+duration);return {cost,expires_at:state.economyBoosts[id],duration_ms:duration};
 }
 function applyCraftRecipeServer(state,recipeId,runtime){
-  const recipe=runtimeCraftDef(runtime,recipeId);if(!recipe)throw Object.assign(new Error('Receita inexistente ou desativada.'),{status:404});const mapOk=String(state.mapId||'')==='x1'&&String(state.territoryFaction||state.profile?.faction||'')===String(state.profile?.faction||'');if(!mapOk)throw Object.assign(new Error('Refinaria disponível somente na sua base X-1.'),{status:409});
+  const recipe=runtimeCraftDef(runtime,recipeId);if(!recipe)throw Object.assign(new Error('Receita inexistente ou desativada.'),{status:404});// V18.2.9: refino/crafting é uma função do Hangar e pode ser feito em qualquer mapa.
   const level=Math.max(1,Number(state.profile?.level)||1),minLevel=Math.max(1,Number(recipe.min_level)||1);if(level<minLevel)throw Object.assign(new Error(`Receita libera no nível ${minLevel}.`),{status:409});state.cargo ||= {};for(const [id,qty] of Object.entries(recipe.ingredients||{})){const have=Math.max(0,Math.floor(Number(state.cargo[id])||0));if(have<qty)throw Object.assign(new Error(`Recursos insuficientes: ${id}.`),{status:409});}
   const currency=String(recipe.currency)==='uridium'?'uridium':'credits',cost=Math.max(0,Number(recipe.cost)||0);debitServer(state,cost,currency);for(const [id,qty] of Object.entries(recipe.ingredients||{})){state.cargo[id]=Math.max(0,Math.floor(Number(state.cargo[id])||0)-qty);if(state.cargo[id]<=0)delete state.cargo[id];}
   const g=recipe.grant_payload||recipe.grant||{};if(g.kind==='resource')state.cargo[g.id]=(Number(state.cargo[g.id])||0)+g.qty;else if(g.kind==='ammo'){state.ammo ||= {};state.ammo[g.id]=(Number(state.ammo[g.id])||0)+g.qty;}else if(g.kind==='rocket'){state.rockets ||= {};state.rockets[g.id]=(Number(state.rockets[g.id])||0)+g.qty;}else if(g.kind==='repair'){state.galaxyGate ||= {};state.galaxyGate.repairBonus=Math.max(0,Number(state.galaxyGate.repairBonus)||0)+g.qty;}return {...recipe,currency,cost,output_label:recipe.output_label||recipe.label};
@@ -1189,10 +1207,13 @@ app.post('/api/economy/action', requireUser, asyncRoute(async (req,res)=>{
       const recipeId=String(payload.recipe_id||'').slice(0,64),recipe=applyCraftRecipeServer(state,recipeId,systemsSnapshot);info={action,recipe_id:recipeId,cost:recipe.cost,currency:recipe.currency,ingredients:recipe.ingredients,output:recipe.output_label};
     }
     else if(action==='sell_cargo'){
-      const id=String(payload.resource_id||'all'),mapOk=String(state.mapId||'')==='x1'&&String(state.territoryFaction||state.profile?.faction||'')===String(state.profile?.faction||'');if(!mapOk)throw Object.assign(new Error('Trader disponível somente na sua base X-1.'),{status:409});state.cargo ||= {};let total=0;const sold={};const ids=id==='all'?Object.keys(state.cargo):[id];
+      const id=String(payload.resource_id||'all'),atBase=String(state.mapId||'')==='x1'&&String(state.territoryFaction||state.profile?.faction||'')===String(state.profile?.faction||'');
+      const remoteEnabled=Array.isArray(state.shipLoadout?.extras)&&state.shipLoadout.extras.includes('remoteTraderCpuElite');
+      if(!atBase&&!remoteEnabled)throw Object.assign(new Error('Venda remota requer Terminal Mercante Remoto Elite EQUIPADO na nave.'),{status:403});
+      state.cargo ||= {};let total=0;const sold={};const ids=id==='all'?Object.keys(state.cargo):[id];
       const worldCfg=await loadWorldRuntimeSnapshot(false).catch(()=>null);const resourceRows=new Map((worldCfg?.resources||[]).map(r=>[String(r.resource_key||''),r]));
       for(const rid of ids){const qty=Math.max(0,Math.floor(Number(state.cargo[rid])||0));if(!qty||rid==='Xenomit')continue;const runtimeRow=resourceRows.get(rid);let unit=runtimeRow&&runtimeRow.enabled!==false?Math.max(0,Math.round(Number(runtimeRow.sell_price)||0)):0;if(!worldCfg){const row=liveCatalogRow(snapshot,`resource:${rid}`);if(row&&String(row?.meta?.mode||'sell')==='sell')unit=Math.max(0,Math.round(Number(row.price)||0));}if(!unit)continue;total+=qty*unit;sold[rid]={qty,unit,total:qty*unit};delete state.cargo[rid];}
-      if(total<=0)throw Object.assign(new Error('Nada vendável no porão.'),{status:409});creditServer(state,total,'credits');info={action,sold,total,currency:'credits',price_source:worldCfg?'world_runtime':'live_ops_fallback'};
+      if(total<=0)throw Object.assign(new Error('Nada vendável no porão.'),{status:409});creditServer(state,total,'credits');info={action,sold,total,currency:'credits',remote:!atBase,price_source:worldCfg?'world_runtime':'live_ops_fallback'};
     }
     else if(action==='sell_inventory'){
       const itemId=String(payload.item_id||''),qty=Math.max(1,Math.min(999,Math.floor(Number(payload.qty)||1)));state.inventory ||= {};const have=Math.max(0,Math.floor(Number(state.inventory[itemId])||0));if(!itemId||have<qty)throw Object.assign(new Error('Item não disponível no inventário online.'),{status:409});const row=catalogSellRow(snapshot,itemId);if(!row)throw Object.assign(new Error('Esse item não possui preço online para venda.'),{status:404});const unit=Math.max(1,Math.floor((Number(row.price)||0)*.5)),total=unit*qty,currency=String(row.currency)==='uridium'?'uridium':'credits';state.inventory[itemId]=have-qty;if(state.inventory[itemId]<=0)delete state.inventory[itemId];creditServer(state,total,currency);info={action,item_id:itemId,qty,unit,total,currency};
@@ -1356,7 +1377,7 @@ app.post('/api/player/location', requireUser, asyncRoute(async (req,res)=>{
   return res.json(data||{ok:true});
 }));
 
-app.get('/api/world/status', (req, res) => res.json({ ok: true, version: '18.2.8', ...sharedUniverse.stats() }));
+app.get('/api/world/status', (req, res) => res.json({ ok: true, version: '18.2.9', ...sharedUniverse.stats() }));
 
 app.get('*', (req, res) => res.sendFile(path.join(__dirname, '../public/index.html')));
 
