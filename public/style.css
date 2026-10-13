@@ -2736,3 +2736,7 @@ body[data-quality="low"] .pet-gear {
 .google-login-separator{display:flex;align-items:center;gap:12px;color:#7799af;font-size:10px;text-align:center}
 .google-login-separator:before,.google-login-separator:after{content:"";height:1px;flex:1;background:rgba(140,197,221,.2)}
 @media(max-width:760px){.google-login-area{margin-bottom:10px}.google-login-btn{min-height:42px}}
+
+/* V18.2.17: documentos públicos — acesso disponível antes e depois de login. */
+.legal-links-login{display:flex;justify-content:center;align-items:center;gap:8px 15px;flex-wrap:wrap;margin-top:8px;font-size:10px;line-height:1.5}.legal-links-login span{width:100%;text-align:center;color:#82a9bf}.legal-links-login a,.legal-links-settings a{color:#85dff6;text-decoration:underline;text-underline-offset:3px}.legal-links-login a:focus-visible,.legal-links-settings a:focus-visible{outline:2px solid #66e1ff;outline-offset:3px}.legal-links-settings{display:flex;gap:12px;flex-wrap:wrap;margin-top:10px}.legal-links-settings a{display:inline-block;padding:9px 11px;border:1px solid #2c627b;border-radius:9px;font-size:10px;font-weight:850;background:#092339}.legal-settings-section{margin-top:14px}
+@media(max-width:760px){.login-card-v136{overflow-y:auto!important}.legal-links-login{margin-top:4px;gap:7px 12px;font-size:9px}}

@@ -1,6 +1,6 @@
 {
   "name": "stellar-legacy",
-  "version": "18.2.16",
+  "version": "18.2.17",
   "type": "module",
   "scripts": {
     "start": "node server/index.js",
@@ -15,5 +15,5 @@
   "engines": {
     "node": ">=18"
   },
-  "release": "google-oauth-supabase-single-session-v18-2-16"
+  "release": "public-privacy-terms-google-branding-v18-2-17"
 }
