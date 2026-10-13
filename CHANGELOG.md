@@ -1,3 +1,12 @@
+## V19.0.6 — ADM fase 2 (Portais Astrais, ondas e economia)
+- Editor visual para Aurora, Nexus e Eclipse: NPCs, ondas, rounds, intervalos, escalas e recompensas.
+- Configuracao versionada no Supabase, protegida por RPC administrativa e limites de quantidade.
+- Novas vidas nao saem do Materializador: o antigo premio raro vira bonus de salto. Reservas anteriores continuam utilizaveis.
+- Vida adicional custa 10.000 STL (na base X-1, autorizacao pelo servidor).
+- Corrigida normalizacao que restaurava vida zero em determinados saves.
+- Tentativas iniciadas preservam o snapshot das regras ate a conclusao.
+- SQL obrigatorio: sql/V19_0_6_ADM_PORTAIS.sql.
+
 ## V19.0.5 — ADM fase 1 (organização + formulários visuais)
 - Reorganiza a navegação ADM em grupos: Visão Geral, Interface, Mundo & Mapas, Sistemas, Eventos, Passe, Preços, Portais Astrais e Cupons.
 - Mundo reúne NPCs, mapas, recursos, setores, rotas e BOX; custos de giro ficam em Portais Astrais.

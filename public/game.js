@@ -1,7 +1,7 @@
-import { FACTIONS, SHIPS, ITEMS, LASER_AMMO, ROCKETS, NPC_TYPES, MAPS, RESOURCES } from './data.js?v=19.0.5';
-import { GAME_ASSETS } from './assets/v17/manifest.js?v=19.0.5';
-import { signUp, signIn, beginGoogleSignIn, restoreGoogleSignInFromUrl, requestPasswordReset, restorePasswordRecoveryFromUrl, restoreSession, signOutLocal, checkGameSession, endGameSession, getUser, getSessionCredentials, loadCloudSave, saveCloudSave, updateCallsign, updatePassword, loadRankings, loadAuctionBids, saveAuctionBidOnline, markAuctionBidStatusOnline, loadAuctionMarket, upsertPlayerPresenceOnline, loadMapPresenceOnline, savePlayerLocationCheckpointOnline, loadPlayerLocationCheckpointOnline, removePlayerPresenceOnline, queuePvpAttackOnline, consumePvpDamageEventsOnline, syncArenaProfileOnline, loadArenaState, loadArenaDailyRewardStatus, claimArenaDailyReward, loadArenaOpponents, loadArenaHistory, arenaAttackOnline, listClansOnline, loadMyClanOnline, createClanOnline, joinClanOnline, getClanRequestsOnline, reviewClanRequestOnline, cancelClanRequestOnline, setClanMemberRoleOnline, leaveClanOnline, transferClanCreditsOnline, claimClanCreditGrantsOnline, recordClanAlienKillOnline, getPremiumShopOnline, testPurchasePremiumOnline, adminPreviewPremiumStageOnline, adminSimulatePremiumStageOnline, getPremiumStageCatalogOnline, loadWarfrontStateOnline, hitWorldBossOnline, claimWorldBossRewardOnline, declareClanWarOnline, recordClanWarScoreOnline, loadLiveOpsOnline, adminUpdateLiveEventScheduleOnline, purchaseLiveCatalogOnline, economyActionOnline, getChatHistoryOnline, sendChatMessageOnline, redeemGameCouponOnline, getMyDesignersOnline, setDesignLoadoutOnline, claimGateDroneDesignOnline, claimEventDesignerOnline, getAdminStatus, adminSearchAccounts, adminRecentActions, adminBanAccount, adminUnbanAccount, adminResetAccount, adminDeleteAccount, pushTelemetryBatch, adminTelemetryOverview, adminPlayerTelemetry, getBattleGroupOnline, createBattleGroupOnline, inviteBattleGroupOnline, searchBattleGroupPlayersOnline, inviteBattleGroupUserOnline, respondBattleGroupInviteOnline, leaveBattleGroupOnline, kickBattleGroupMemberOnline, setBattleGroupRallyOnline, loadRuntimeConfigOnline, loadNpcRuntimeConfigOnline, loadWorldRuntimeConfigOnline, loadSystemsRuntimeConfigOnline, loadAdminRuntimeMonitorOnline, adminUpdateRuntimeModuleOnline, adminUpdateNpcRuntimeOnline, adminUpdateNpcSpawnRuntimeOnline, adminUpdateWorldMapOnline, adminUpdateWorldResourceOnline, adminUpdateWorldSectorOnline, adminUpdateWorldPortalOnline, adminUpdateWorldResourcePoolOnline, adminUpdateMissionCategoryOnline, adminUpdateEconomyServiceOnline, adminUpdateCraftingRecipeOnline, loadBattlePassRuntimeConfigOnline, adminUpdateBattlePassSeasonOnline, adminUpdateBattlePassTierOnline, loadShopsRuntimeConfigOnline, adminUpdateCommonShopItemOnline, adminUpdatePremiumShopItemOnline, loadBonusConfigOnline, adminUpdateBonusConfigOnline, adminCouponDashboardOnline, adminCreateCouponOnline, adminSetCouponActiveOnline } from './api.js?v=19.0.5';
-import { SharedUniverseClient } from './world.js?v=19.0.5';
+import { FACTIONS, SHIPS, ITEMS, LASER_AMMO, ROCKETS, NPC_TYPES, MAPS, RESOURCES } from './data.js?v=19.0.6';
+import { GAME_ASSETS } from './assets/v17/manifest.js?v=19.0.6';
+import { signUp, signIn, beginGoogleSignIn, restoreGoogleSignInFromUrl, requestPasswordReset, restorePasswordRecoveryFromUrl, restoreSession, signOutLocal, checkGameSession, endGameSession, getUser, getSessionCredentials, loadCloudSave, saveCloudSave, updateCallsign, updatePassword, loadRankings, loadAuctionBids, saveAuctionBidOnline, markAuctionBidStatusOnline, loadAuctionMarket, upsertPlayerPresenceOnline, loadMapPresenceOnline, savePlayerLocationCheckpointOnline, loadPlayerLocationCheckpointOnline, removePlayerPresenceOnline, queuePvpAttackOnline, consumePvpDamageEventsOnline, syncArenaProfileOnline, loadArenaState, loadArenaDailyRewardStatus, claimArenaDailyReward, loadArenaOpponents, loadArenaHistory, arenaAttackOnline, listClansOnline, loadMyClanOnline, createClanOnline, joinClanOnline, getClanRequestsOnline, reviewClanRequestOnline, cancelClanRequestOnline, setClanMemberRoleOnline, leaveClanOnline, transferClanCreditsOnline, claimClanCreditGrantsOnline, recordClanAlienKillOnline, getPremiumShopOnline, testPurchasePremiumOnline, adminPreviewPremiumStageOnline, adminSimulatePremiumStageOnline, getPremiumStageCatalogOnline, loadWarfrontStateOnline, hitWorldBossOnline, claimWorldBossRewardOnline, declareClanWarOnline, recordClanWarScoreOnline, loadLiveOpsOnline, adminUpdateLiveEventScheduleOnline, purchaseLiveCatalogOnline, economyActionOnline, getChatHistoryOnline, sendChatMessageOnline, redeemGameCouponOnline, getMyDesignersOnline, setDesignLoadoutOnline, claimGateDroneDesignOnline, claimEventDesignerOnline, getAdminStatus, adminSearchAccounts, adminRecentActions, adminBanAccount, adminUnbanAccount, adminResetAccount, adminDeleteAccount, pushTelemetryBatch, adminTelemetryOverview, adminPlayerTelemetry, getBattleGroupOnline, createBattleGroupOnline, inviteBattleGroupOnline, searchBattleGroupPlayersOnline, inviteBattleGroupUserOnline, respondBattleGroupInviteOnline, leaveBattleGroupOnline, kickBattleGroupMemberOnline, setBattleGroupRallyOnline, loadRuntimeConfigOnline, loadNpcRuntimeConfigOnline, loadWorldRuntimeConfigOnline, loadSystemsRuntimeConfigOnline, loadAdminRuntimeMonitorOnline, adminUpdateRuntimeModuleOnline, adminUpdateNpcRuntimeOnline, adminUpdateNpcSpawnRuntimeOnline, adminUpdateWorldMapOnline, adminUpdateWorldResourceOnline, adminUpdateWorldSectorOnline, adminUpdateWorldPortalOnline, adminUpdateWorldResourcePoolOnline, adminUpdateMissionCategoryOnline, adminUpdateEconomyServiceOnline, adminUpdateCraftingRecipeOnline, loadBattlePassRuntimeConfigOnline, adminUpdateBattlePassSeasonOnline, adminUpdateBattlePassTierOnline, loadShopsRuntimeConfigOnline, adminUpdateCommonShopItemOnline, adminUpdatePremiumShopItemOnline, loadBonusConfigOnline, adminUpdateBonusConfigOnline, adminCouponDashboardOnline, adminCreateCouponOnline, adminSetCouponActiveOnline, loadGalaxyGatesOnline, adminUpdateGalaxyGateOnline } from './api.js?v=19.0.6';
+import { SharedUniverseClient } from './world.js?v=19.0.6';
 
 const canvas = document.querySelector('#game');
 const ctx = canvas.getContext('2d');
@@ -2345,10 +2345,44 @@ const GALAXY_ECLIPSE_ROUNDS = [
   {round:8,name:'OMEGA ECLIPSE',waves:[{type:'bossMordon',count:1},{type:'bossDevolarium',count:1},{type:'bossSibelon',count:1}]},
 ];
 const GALAXY_GATE_DEFS={
-  alpha:{key:'alpha',label:'AURORA',mapId:'ggAlpha',pieces:34,spinCost:100,rounds:GALAXY_ALPHA_ROUNDS,enemyScale:.90,damageScale:.72,rewardScale:1.05,totalRewardMult:1.25,logReward:100,baseLives:3,maxLives:5,lifeCost:4000000,roundReward:{cores:5,credits:500000,ammoId:'mcb25',ammoQty:500},finalReward:{credits:10000000,uridium:5000,cores:100,ammoId:'mcb25',ammoQty:10000,rocketId:'plt2026',rocketQty:100,voidite:12},unlock:null},
-  beta:{key:'beta',label:'NEXUS',mapId:'ggBeta',pieces:48,spinCost:100,rounds:GALAXY_NEXUS_ROUNDS,enemyScale:1.00,damageScale:.85,rewardScale:1.25,totalRewardMult:1.50,logReward:200,baseLives:3,maxLives:5,lifeCost:8000000,roundReward:{cores:10,credits:1000000,ammoId:'mcb50',ammoQty:750},finalReward:{credits:25000000,uridium:12500,cores:200,ammoId:'mcb50',ammoQty:10000,rocketId:'plt2021',rocketQty:200,voidite:28},unlock:null},
-  gamma:{key:'gamma',label:'ECLIPSE',mapId:'ggGamma',pieces:64,spinCost:100,rounds:GALAXY_ECLIPSE_ROUNDS,enemyScale:1.08,damageScale:.95,rewardScale:1.50,totalRewardMult:1.75,logReward:300,baseLives:3,maxLives:5,lifeCost:15000000,roundReward:{cores:15,credits:2000000,ammoId:'ucb100',ammoQty:1000},finalReward:{credits:60000000,uridium:30000,cores:300,ammoId:'ucb100',ammoQty:10000,rocketId:'plt3030',rocketQty:300,voidite:55},unlock:null},
+  alpha:{key:'alpha',label:'AURORA',mapId:'ggAlpha',pieces:34,spinCost:100,rounds:GALAXY_ALPHA_ROUNDS,enemyScale:.90,damageScale:.72,rewardScale:1.05,totalRewardMult:1.25,logReward:100,baseLives:3,maxLives:5,lifeCost:10000,roundReward:{cores:5,credits:500000,ammoId:'mcb25',ammoQty:500},finalReward:{credits:10000000,uridium:5000,cores:100,ammoId:'mcb25',ammoQty:10000,rocketId:'plt2026',rocketQty:100,voidite:12},unlock:null},
+  beta:{key:'beta',label:'NEXUS',mapId:'ggBeta',pieces:48,spinCost:100,rounds:GALAXY_NEXUS_ROUNDS,enemyScale:1.00,damageScale:.85,rewardScale:1.25,totalRewardMult:1.50,logReward:200,baseLives:3,maxLives:5,lifeCost:10000,roundReward:{cores:10,credits:1000000,ammoId:'mcb50',ammoQty:750},finalReward:{credits:25000000,uridium:12500,cores:200,ammoId:'mcb50',ammoQty:10000,rocketId:'plt2021',rocketQty:200,voidite:28},unlock:null},
+  gamma:{key:'gamma',label:'ECLIPSE',mapId:'ggGamma',pieces:64,spinCost:100,rounds:GALAXY_ECLIPSE_ROUNDS,enemyScale:1.08,damageScale:.95,rewardScale:1.50,totalRewardMult:1.75,logReward:300,baseLives:3,maxLives:5,lifeCost:10000,roundReward:{cores:15,credits:2000000,ammoId:'ucb100',ammoQty:1000},finalReward:{credits:60000000,uridium:30000,cores:300,ammoId:'ucb100',ammoQty:10000,rocketId:'plt3030',rocketQty:300,voidite:55},unlock:null},
 };
+// V19.0.6 — Portais Astrais, configuracao publicada pelo servidor.
+const GATE_NPC_ALLOWED=['streuner','recruitStreuner','aiderStreuner','lordakia','saimon','mordon','devolarium','sibelon','bossLordakia','bossSaimon','bossMordon','bossDevolarium','bossSibelon'];
+const GATE_REWARD_DEFAULT={credits:0,uridium:0,cores:0,ammoId:'',ammoQty:0,rocketId:'',rocketQty:0,voidite:0};
+const GATE_DEFAULT_DEFS=structuredClone(GALAXY_GATE_DEFS);
+const gateLiveRuntime={version:0,loaded:false,lastFetch:0,busy:false};
+function normalizeGateReward(raw){return {...GATE_REWARD_DEFAULT,...(raw||{})};}
+function gateConfigDraft(key){
+  const g=GALAXY_GATE_DEFS[key]||GALAXY_GATE_DEFS.alpha;
+  return {rounds:structuredClone(g.rounds),waveIntervalMs:g.waveIntervalMs||GALAXY_ALPHA_WAVE_INTERVAL_MS,
+    roundIntervalMs:g.roundIntervalMs||GALAXY_ALPHA_ROUND_INTERVAL_MS,enemyScale:g.enemyScale,
+    damageScale:g.damageScale,rewardScale:g.rewardScale,totalRewardMult:g.totalRewardMult,
+    roundReward:normalizeGateReward(g.roundReward),finalReward:normalizeGateReward(g.finalReward)};
+}
+function applyGateLiveConfig(raw){
+  if(!raw||typeof raw!=='object'||typeof raw.config!=='object'||!raw.config)return false;
+  for(const key of ['alpha','beta','gamma']){
+    const local=structuredClone(GATE_DEFAULT_DEFS[key]),remote=raw.config[key];
+    if(remote&&Array.isArray(remote.rounds)&&remote.rounds.length){
+      local.rounds=remote.rounds.map((r,i)=>({round:i+1,name:String(r.name||`Round ${i+1}`).slice(0,60),waves:Array.isArray(r.waves)?r.waves.map(w=>({type:String(w.type),count:Number(w.count)})):[]}));
+      for(const field of ['waveIntervalMs','roundIntervalMs','enemyScale','damageScale','rewardScale','totalRewardMult'])if(Number.isFinite(Number(remote[field])))local[field]=Number(remote[field]);
+      local.roundReward=normalizeGateReward(remote.roundReward);local.finalReward=normalizeGateReward(remote.finalReward);
+    }
+    Object.assign(GALAXY_GATE_DEFS[key],local);
+  }
+  gateLiveRuntime.version=Number(raw.version)||0;gateLiveRuntime.loaded=true;gateLiveRuntime.lastFetch=Date.now();
+  return true;
+}
+async function refreshGateLiveConfig(force=false){
+  if(!authenticated||!getUser()?.id||gateLiveRuntime.busy||(!force&&Date.now()-gateLiveRuntime.lastFetch<45000))return;
+  gateLiveRuntime.busy=true;
+  try{applyGateLiveConfig(await loadGalaxyGatesOnline(force));if(progress){renderGalaxyGate();renderGateHud();}}catch(e){console.warn('[gate-v1906] mantendo configuracao local',e);}finally{gateLiveRuntime.busy=false;}
+}
+setInterval(()=>{if(authenticated)refreshGateLiveConfig(false);},60000);
+
 function freshGateProtocol(){return {pieces:[],built:false,lives:GALAXY_GATE_BASE_LIVES,completed:0,failed:0,run:null,lastCompletion:null};}
 function freshGalaxyGateState(){return {jumpBonus:0,lifeBonus:0,repairBonus:0,lastResults:[],selected:'alpha',alpha:freshGateProtocol(),beta:freshGateProtocol(),gamma:freshGateProtocol()};}
 function gateKeyForMap(mapId=progress?.mapId){return Object.values(GALAXY_GATE_DEFS).find(d=>d.mapId===mapId)?.key||null;}
@@ -2358,12 +2392,16 @@ function normalizeGalaxyGateState(){
   for(const [key,def] of Object.entries(GALAXY_GATE_DEFS)){
     g[key] ||= freshGateProtocol(); const a=g[key];
     a.pieces=Array.isArray(a.pieces)?[...new Set(a.pieces.map(Number).filter(n=>n>=1&&n<=def.pieces))]:[];
-    a.built=!!a.built||a.pieces.length>=def.pieces;a.lives=Math.max(0,Math.min(def.maxLives,Number(a.lives)||def.baseLives));a.completed=Math.max(0,Number(a.completed)||0);a.failed=Math.max(0,Number(a.failed)||0);
+    a.built=!!a.built||a.pieces.length>=def.pieces;a.lives=Math.max(0,Math.min(def.maxLives,(a.lives===null||a.lives===undefined?def.baseLives:Number(a.lives))));a.completed=Math.max(0,Number(a.completed)||0);a.failed=Math.max(0,Number(a.failed)||0);
     if(a.run){a.run.round=Math.max(1,Math.min(def.rounds.length,Number(a.run.round)||1));a.run.waveIndex=Math.max(0,Number(a.run.waveIndex)||0);a.run.remaining ||= {};a.run.killRewards ||= {credits:0,uridium:0,xp:0};a.run.roundRewardsClaimed=Array.isArray(a.run.roundRewardsClaimed)?a.run.roundRewardsClaimed.map(Number):[];a.run.nextWaveAt=Number(a.run.nextWaveAt)||0;a.run.nextRoundAt=Number(a.run.nextRoundAt)||0;a.run.active=a.run.active!==false;}
   }
 }
 function currentGateKey(){normalizeGalaxyGateState();return gateKeyForMap()||progress.galaxyGate.selected||'alpha';}
-function galaxyGateDef(key=currentGateKey()){return GALAXY_GATE_DEFS[key]||GALAXY_GATE_DEFS.alpha;}
+function galaxyGateDef(key=currentGateKey()){
+ const base=GALAXY_GATE_DEFS[key]||GALAXY_GATE_DEFS.alpha;
+ const activeRun=progress?.galaxyGate?.[key]?.run;
+ return activeRun?.gateSetup?{...base,...activeRun.gateSetup}:base;
+}
 function gateUnlocked(key){return !!GALAXY_GATE_DEFS[key];}
 function alphaGate(){normalizeGalaxyGateState();return progress.galaxyGate[currentGateKey()];}
 function isGalaxyGateMap(){return !!gateKeyForMap();}
@@ -4437,15 +4475,15 @@ function spawnAlphaWave(){
   for(let i=0;i<wave.count;i++)state.enemies.push(makeGateEnemy(wave.type,existing+i,existing+wave.count));
   a.run.waveIndex++;
   a.run.nextRoundAt=0;
-  a.run.nextWaveAt=a.run.waveIndex<def.waves.length?Date.now()+GALAXY_ALPHA_WAVE_INTERVAL_MS:0;
+  a.run.nextWaveAt=a.run.waveIndex<def.waves.length?Date.now()+(galaxyGateDef().waveIntervalMs||GALAXY_ALPHA_WAVE_INTERVAL_MS):0;
   syncAlphaGateSnapshot();saveGame();
   showToast(`${galaxyGateDef().label} • Round ${a.run.round} • Onda ${a.run.waveIndex}/${def.waves.length}: ${wave.count} ${NPC_TYPES[wave.type].name}`);
   renderGateHud();renderGalaxyGate();
 }
 function initAlphaRun(){
   const a=alphaGate(),gd=galaxyGateDef();
-  a.run={active:true,round:1,waveIndex:0,remaining:{},nextWaveAt:0,nextRoundAt:0,killRewards:{credits:0,uridium:0,xp:0},roundRewardsClaimed:[],startedAt:Date.now()};
-  a.lives=Math.max(gd.baseLives,Math.min(gd.maxLives,Number(a.lives)||gd.baseLives));
+  a.run={active:true,round:1,waveIndex:0,remaining:{},nextWaveAt:0,nextRoundAt:0,killRewards:{credits:0,uridium:0,xp:0},roundRewardsClaimed:[],gateSetup:gateConfigDraft(gd.key),startedAt:Date.now()};
+  a.lives=Math.max(gd.baseLives,Math.min(gd.maxLives,(a.lives===null||a.lives===undefined?gd.baseLives:Number(a.lives))));
 }
 function setupAlphaMap(resume=false){
   sharedUniverse.close();sharedUniverseRuntime.ready=false;sharedUniverseRuntime.event=null;updateSharedUniverseChip();
@@ -4465,18 +4503,18 @@ function setupAlphaMap(resume=false){
   // Entrada nova: o primeiro grupo nasce após 10 segundos.
   if(a.run.waveIndex===0&&alive===0){
     a.run.nextRoundAt=0;
-    a.run.nextWaveAt=now+GALAXY_ALPHA_WAVE_INTERVAL_MS;
+    a.run.nextWaveAt=now+(galaxyGateDef().waveIntervalMs||GALAXY_ALPHA_WAVE_INTERVAL_MS);
     showToast(`${galaxyGateDef().label} • Round ${a.run.round} começa em 10 segundos`);
   }
   // Save antigo / retorno após morte no meio de um round: garante que o relógio recomece.
   else if(a.run.waveIndex<def.waves.length&&!a.run.nextWaveAt){
     a.run.nextRoundAt=0;
-    a.run.nextWaveAt=now+GALAXY_ALPHA_WAVE_INTERVAL_MS;
+    a.run.nextWaveAt=now+(galaxyGateDef().waveIntervalMs||GALAXY_ALPHA_WAVE_INTERVAL_MS);
   }
   // Todas as ondas já nasceram e não há mais NPC: prepara o próximo round.
   else if(a.run.waveIndex>=def.waves.length&&alive===0&&a.run.round<galaxyGateDef().rounds.length&&!a.run.nextRoundAt){
     a.run.nextWaveAt=0;
-    a.run.nextRoundAt=now+GALAXY_ALPHA_ROUND_INTERVAL_MS;
+    a.run.nextRoundAt=now+(galaxyGateDef().roundIntervalMs||GALAXY_ALPHA_ROUND_INTERVAL_MS);
   }
 
   saveGame();renderAll();layoutHudPanels();renderGateHud();
@@ -4537,14 +4575,14 @@ function updateAlphaGate(){
   const gd=galaxyGateDef(),def=gd.rounds[run.round-1];if(!def)return;
   const now=Date.now(),alive=alphaRemainingCount();
 
-  if(run.waveIndex<def.waves.length&&!run.nextWaveAt)run.nextWaveAt=now+GALAXY_ALPHA_WAVE_INTERVAL_MS;
+  if(run.waveIndex<def.waves.length&&!run.nextWaveAt)run.nextWaveAt=now+(galaxyGateDef().waveIntervalMs||GALAXY_ALPHA_WAVE_INTERVAL_MS);
   if(run.waveIndex<def.waves.length&&run.nextWaveAt&&now>=run.nextWaveAt){run.nextWaveAt=0;spawnAlphaWave();return;}
 
   if(run.waveIndex>=def.waves.length&&alive===0){
     grantGateRoundReward(run.round);
     if(run.round>=gd.rounds.length){completeAlphaGate();return;}
-    if(!run.nextRoundAt){run.nextRoundAt=now+GALAXY_ALPHA_ROUND_INTERVAL_MS;showToast(`Round ${run.round} concluído • próximo round em ${Math.round(GALAXY_ALPHA_ROUND_INTERVAL_MS/1000)}s`);saveGame();}
-    else if(now>=run.nextRoundAt){run.round++;run.waveIndex=0;run.remaining={};run.nextRoundAt=0;run.nextWaveAt=now+GALAXY_ALPHA_WAVE_INTERVAL_MS;showToast(`${gd.label} • Round ${run.round} começa em ${Math.round(GALAXY_ALPHA_WAVE_INTERVAL_MS/1000)}s`);saveGame();}
+    if(!run.nextRoundAt){run.nextRoundAt=now+(galaxyGateDef().roundIntervalMs||GALAXY_ALPHA_ROUND_INTERVAL_MS);showToast(`Round ${run.round} concluído • próximo round em ${Math.round((galaxyGateDef().roundIntervalMs||GALAXY_ALPHA_ROUND_INTERVAL_MS)/1000)}s`);saveGame();}
+    else if(now>=run.nextRoundAt){run.round++;run.waveIndex=0;run.remaining={};run.nextRoundAt=0;run.nextWaveAt=now+(galaxyGateDef().waveIntervalMs||GALAXY_ALPHA_WAVE_INTERVAL_MS);showToast(`${gd.label} • Round ${run.round} começa em ${Math.round((galaxyGateDef().waveIntervalMs||GALAXY_ALPHA_WAVE_INTERVAL_MS)/1000)}s`);saveGame();}
   }
   renderGateHud();
 }
@@ -6464,7 +6502,7 @@ function rollAlphaOnce(){
   if(r<80){const qty=Math.round(rand(1500,12000));progress.profile.credits+=qty;return {kind:'credits',label:`Créditos +${fmt(qty)}`};}
   if(r<90){const qty=Math.max(1,Math.round(rand(4,18)));progress.cargo.Xenomit=(progress.cargo.Xenomit||0)+qty;return {kind:'xenomit',label:`Voidite +${fmt(qty)}`};}
   if(r<95){g.jumpBonus++;return {kind:'jump',label:'Bônus de Salto +1'};}
-  g.lifeBonus=(g.lifeBonus||0)+1;return {kind:'life',label:'Vida Astral Reserva +1'};
+  g.jumpBonus++;return {kind:'jump',label:'Bônus de Salto +1'}; // Vida nao cai mais no giro
 }
 function spinAlpha(amount,payment='uridium'){
   normalizeGalaxyGateState();
@@ -6496,11 +6534,11 @@ function useGalaxyLifeBonus(){
   runEconomyAction('gate_life_bonus',{protocol:gd.key}).then(()=>showToast(`${gd.label} • +1 VIDA usando a reserva`,'reward')).catch(e=>showToast(e.message||'Não foi possível usar a vida reserva'));
 }
 function buyGalaxyLife(){
-  normalizeGalaxyGateState();const a=alphaGate(),gd=galaxyGateDef(),q=liveQuote(`gate_life:${gd.key}`),cost=q?.price??gd.lifeCost;
+  normalizeGalaxyGateState();const a=alphaGate(),gd=galaxyGateDef(),cost=10000;
   if(a.lives>=gd.maxLives){showToast(`${gd.label} já está no máximo de ${gd.maxLives} vidas`);return;}
   if(!isAtTrader()){showToast('Vidas do Portal só podem ser compradas na base X-1');return;}
-  if(progress.profile.credits<cost){showToast(`Faltam ${fmt(cost-progress.profile.credits)} CR para comprar +1 vida`);return;}
-  openSpendConfirm({title:`Comprar +1 vida para ${gd.label}?`,itemName:`Vida Astral • ${gd.label}`,detail:`A vida fica vinculada ao ${gd.label}. Máximo ${gd.maxLives} vidas.`,value:cost,currency:'credits',confirmLabel:'COMPRAR VIDA',onConfirm:()=>runEconomyAction('gate_life',{protocol:gd.key}).then(()=>showToast(`${gd.label} • +1 VIDA comprada`,'reward')).catch(e=>showToast(e.message||'Compra de vida recusada'))});
+  if(progress.profile.uridium<cost){showToast(`Faltam ${fmt(cost-progress.profile.uridium)} STL para comprar +1 vida`);return;}
+  openSpendConfirm({title:`Comprar +1 vida para ${gd.label}?`,itemName:`Vida Astral • ${gd.label}`,detail:`A vida fica vinculada ao ${gd.label}. Máximo ${gd.maxLives} vidas.`,value:cost,currency:'uridium',confirmLabel:'COMPRAR VIDA',onConfirm:()=>runEconomyAction('gate_life',{protocol:gd.key}).then(()=>showToast(`${gd.label} • +1 VIDA comprada`,'reward')).catch(e=>showToast(e.message||'Compra de vida recusada'))});
 }
 
 function renderGateRounds(){
@@ -6523,7 +6561,7 @@ function renderGateHud(){
 }
 function renderGalaxyGate(){
   if(!progress||!ui.gatePieceGrid)return;normalizeGalaxyGateState();
-  const g=progress.galaxyGate,gd=galaxyGateDef(),a=alphaGate(),count=a.pieces.length,atBase=isAtTrader(),unlocked=gateUnlocked(gd.key),lifeQuote=liveQuote(`gate_life:${gd.key}`),lifeCost=lifeQuote?.price??gd.lifeCost;
+  const g=progress.galaxyGate,gd=galaxyGateDef(),a=alphaGate(),count=a.pieces.length,atBase=isAtTrader(),unlocked=gateUnlocked(gd.key),lifeCost=10000;
   if(ui.gatePieceBadge)ui.gatePieceBadge.textContent=`${gd.label} ${count}/${gd.pieces}`;
   ui.gatePiecesText.textContent=`${count} / ${gd.pieces}`;ui.gateLivesText.textContent=`${a.lives} / ${gd.maxLives}`;ui.gateCompletedText.textContent=a.completed;ui.gateUriText.textContent=fmt(progress.profile.uridium);if(ui.gateDustText)ui.gateDustText.textContent=fmt(progress.stellarDust||0);ui.gateJumpBonus.textContent=fmt(g.jumpBonus);
   if(ui.gateLifeBonus)ui.gateLifeBonus.textContent=fmt(g.lifeBonus||0);
@@ -6542,7 +6580,7 @@ function renderGalaxyGate(){
   else if(a.built){ui.gateAlphaStatusTitle.textContent=`PORTAL ${gd.label} MONTADO`;ui.gateAlphaStatusText.textContent=`${gd.pieces}/${gd.pieces} peças • ${gd.rounds.length} rounds • ${a.lives}/${gd.maxLives} vidas • pensado para kite e progressão FREE.`;ui.gateJumpBtn.textContent=atBase?`SALTAR PARA O ${gd.label}`:'VOLTE À BASE X-1';ui.gateJumpBtn.disabled=!atBase;}
   else{ui.gateAlphaStatusTitle.textContent=`${gd.label} • EM CONSTRUÇÃO`;ui.gateAlphaStatusText.textContent=`Todos os portais estão liberados. Faltam ${gd.pieces-count} peças para montar o ${gd.label}.`;ui.gateJumpBtn.textContent='PORTAL INCOMPLETO';ui.gateJumpBtn.disabled=true;}
   if(ui.useLifeBonus){ui.useLifeBonus.textContent=`USAR VIDA RESERVA +1 (${fmt(g.lifeBonus||0)})`;ui.useLifeBonus.disabled=(g.lifeBonus||0)<=0||a.lives>=gd.maxLives||!atBase;}
-  if(ui.buyGateLife){ui.buyGateLife.textContent=`COMPRAR VIDA +1 • ${fmt(lifeCost)} CR`;ui.buyGateLife.disabled=a.lives>=gd.maxLives||!atBase||progress.profile.credits<lifeCost;}
+  if(ui.buyGateLife){ui.buyGateLife.textContent=`COMPRAR VIDA +1 • ${fmt(lifeCost)} STL`;ui.buyGateLife.disabled=a.lives>=gd.maxLives||!atBase||progress.profile.uridium<lifeCost;}
   renderGateHud();
 }
 
@@ -6553,7 +6591,7 @@ function openGalaxyGate(){
     showToast(`${galaxyGateDef().label} • Round ${a.run?.round||1} • ${alphaRemainingCount()} NPCs vivos${def?` • ${a.lives} vidas`:''}`);
     return;
   }
-  closeNavigationModals(ui.gateModal);renderGalaxyGate();ui.gateModal.classList.remove('hidden');
+  closeNavigationModals(ui.gateModal);refreshGateLiveConfig(true).catch(()=>{});renderGalaxyGate();ui.gateModal.classList.remove('hidden');
 }
 
 
@@ -7212,6 +7250,74 @@ async function loadAdminRuntimeMonitor(force=false){
   finally{adminRuntimeMonitor.busy=false;if(ui.adminRuntimeMonitorRefresh)ui.adminRuntimeMonitorRefresh.disabled=false;}
 }
 
+// V19.0.6 — Editor visual de Portais Astrais, sem JSON manual.
+const gateAdminRuntime={selected:'alpha',snapshot:null,draft:{},dirty:false,busy:false};
+function gateAdmField(name,value,min,max,label,step='1'){
+ return `<label>${label}<input data-gate-field="${name}" type="number" step="${step}" min="${min}" max="${max}" value="${escHtml(String(value??0))}"></label>`;
+}
+function gateAdmReward(key,reward){
+ const r=normalizeGateReward(reward),fields=[['credits',0,100000000,'CRÉDITOS'],['uridium',0,100000,'STL'],['cores',0,1000,'NÚCLEOS'],['ammoQty',0,50000,'MUNIÇÕES'],['rocketQty',0,2000,'MÍSSEIS'],['voidite',0,500,'VOIDITE']];
+ const opts=(arr,v)=>arr.map(x=>`<option value="${escHtml(x)}" ${x===v?'selected':''}>${escHtml(x||'NENHUM')}</option>`).join('');
+ return `<section class="portal-gate-reward" data-gate-reward="${key}"><h5>${key==='roundReward'?'RECOMPENSA POR ROUND':'PACOTE FINAL'}</h5><div class="admin-shop-fields">${fields.map(([k,min,max,label])=>gateAdmField(k,r[k],min,max,label)).join('')}<label>TIPO DE MUNIÇÃO<select data-gate-reward-field="ammoId">${opts(['','lcb10','mcb25','mcb50','ucb100','sab50'],r.ammoId)}</select></label><label>TIPO DE MÍSSIL<select data-gate-reward-field="rocketId">${opts(['','r310','plt2026','plt2021','plt3030'],r.rocketId)}</select></label></div></section>`;
+}
+function renderAdminGateBuilder(){
+ if(!gateAdminRuntime.snapshot)return '<p>Sincronizando configurações de ondas e recompensas…</p>';
+ const selected=gateAdminRuntime.selected,d=gateAdminRuntime.draft[selected]||gateConfigDraft(selected);
+ const protocolTabs=['alpha','beta','gamma'].map(k=>`<button type="button" class="small-btn ${selected===k?'gold':''}" data-gate-select="${k}">${escHtml(GALAXY_GATE_DEFS[k].label)}</button>`).join('');
+ const rounds=d.rounds.map((r,i)=>`<details class="portal-gate-round" data-gate-round="${i}" ${i===0?'open':''}><summary><b>ROUND ${i+1} • ${escHtml(r.name||'Sem título')}</b> <small>${r.waves.length} ondas</small></summary><div class="portal-gate-round-body"><label>NOME DO ROUND<input data-gate-round-name maxlength="60" value="${escHtml(r.name||'')}"></label><div class="portal-gate-waves">${r.waves.map((w,j)=>`<div class="portal-gate-wave" data-gate-wave="${j}"><b>ONDA ${j+1}</b><label>NPC<select data-gate-wave-type>${GATE_NPC_ALLOWED.map(n=>`<option value="${n}" ${n===w.type?'selected':''}>${escHtml(NPC_TYPES[n]?.name||n)}</option>`).join('')}</select></label><label>QUANTIDADE<input type="number" data-gate-wave-count min="1" max="15" value="${Number(w.count)||1}"></label><button type="button" class="small-btn" data-gate-remove-wave="${i}:${j}" title="Remover onda">REMOVER</button></div>`).join('')}</div><div class="portal-gate-row-buttons"><button type="button" class="small-btn" data-gate-add-wave="${i}">+ ADICIONAR ONDA</button><button type="button" class="small-btn danger-lite" data-gate-remove-round="${i}">REMOVER ROUND</button></div></div></details>`).join('');
+ return `<div class="portal-gate-tabs">${protocolTabs}</div><p class="muted">Personalize até 20 rounds e 12 ondas por round. Limite de 240 NPCs por portal; vida adicional fixa em 10.000 STL.</p><div class="admin-shop-fields">${gateAdmField('waveIntervalMs',d.waveIntervalMs/1000,2,120,'INTERVALO ENTRE ONDAS (SEG)')}${gateAdmField('roundIntervalMs',d.roundIntervalMs/1000,2,120,'INTERVALO ENTRE ROUNDS (SEG)')}${gateAdmField('enemyScale',d.enemyScale,.25,3,'VIDA/ESCUDO DOS NPCs (x)','0.01')}${gateAdmField('damageScale',d.damageScale,.25,3,'DANO DOS NPCs (x)','0.01')}${gateAdmField('rewardScale',d.rewardScale,.25,3,'PRÊMIO DE ABATES (x)','0.01')}${gateAdmField('totalRewardMult',d.totalRewardMult,.25,3,'MULTIPLICADOR FINAL (x)','0.01')}</div><div class="portal-gate-rounds">${rounds}</div><div class="portal-gate-row-buttons"><button type="button" class="small-btn" data-gate-add-round>+ CRIAR ROUND</button></div>${gateAdmReward('roundReward',d.roundReward)}${gateAdmReward('finalReward',d.finalReward)}<div class="portal-gate-actions"><button type="button" class="small-btn gold" data-gate-save ${gateAdminRuntime.busy?'disabled':''}>SALVAR ${escHtml(GALAXY_GATE_DEFS[selected].label)}</button><small>${gateAdminRuntime.dirty?'ALTERAÇÕES NÃO SALVAS':'Configurado no servidor'} • v${gateAdminRuntime.snapshot?.version||0}</small></div>`;
+}
+function gateAdmReadFromScreen(){
+ const host=$('#adminRuntimePortalsGrid'),d=gateAdminRuntime.draft[gateAdminRuntime.selected];
+ if(!host||!d||!host.querySelector('[data-gate-add-round]'))return;
+ const field=name=>Number(host.querySelector(`[data-gate-field="${name}"]`)?.value);
+ for(const n of ['enemyScale','damageScale','rewardScale','totalRewardMult'])d[n]=field(n);
+ for(const n of ['waveIntervalMs','roundIntervalMs'])d[n]=field(n)*1000;
+ d.rounds=[...host.querySelectorAll('[data-gate-round]')].map((el,i)=>({round:i+1,name:el.querySelector('[data-gate-round-name]')?.value.trim()||`Round ${i+1}`,waves:[...el.querySelectorAll('[data-gate-wave]')].map(row=>({type:row.querySelector('[data-gate-wave-type]')?.value,count:Number(row.querySelector('[data-gate-wave-count]')?.value)}))}));
+ for(const key of ['roundReward','finalReward']){const el=host.querySelector(`[data-gate-reward="${key}"]`);if(!el)continue;const r={};for(const k of ['credits','uridium','cores','ammoQty','rocketQty','voidite'])r[k]=Number(el.querySelector(`[data-gate-field="${k}"]`)?.value);r.ammoId=el.querySelector('[data-gate-reward-field="ammoId"]')?.value||'';r.rocketId=el.querySelector('[data-gate-reward-field="rocketId"]')?.value||'';d[key]=r;}
+ gateAdminRuntime.dirty=true;
+}
+function gateAdmValidate(d){
+ if(!d.rounds.length||d.rounds.length>20)throw Error('Configure de 1 a 20 rounds.');
+ let total=0;
+ for(const r of d.rounds){if(!r.name||r.name.length>60||r.waves.length<1||r.waves.length>12)throw Error('Cada round precisa de nome e 1 a 12 ondas.');for(const w of r.waves){if(!GATE_NPC_ALLOWED.includes(w.type)||!Number.isInteger(w.count)||w.count<1||w.count>15)throw Error('NPC inválido ou quantidade fora de 1 a 15.');total+=w.count;}}
+ if(total>240)throw Error('Máximo de 240 NPCs somados por portal.');
+ if(![d.waveIntervalMs,d.roundIntervalMs].every(x=>Number.isInteger(x)&&x>=2000&&x<=120000))throw Error('Tempo deve ficar entre 2 e 120 segundos.');
+ for(const k of ['enemyScale','damageScale','rewardScale','totalRewardMult'])if(!Number.isFinite(d[k])||d[k]<.25||d[k]>3)throw Error(`${k}: escala fora de 0,25 a 3.`);
+ for(const [key,r] of [['roundReward',d.roundReward],['finalReward',d.finalReward]]){
+   for(const [field,max] of Object.entries({credits:100000000,uridium:100000,cores:1000,ammoQty:50000,rocketQty:2000,voidite:500}))if(!Number.isInteger(r[field])||r[field]<0||r[field]>max)throw Error(`${key}: ${field} fora do limite.`);
+   if(!['','lcb10','mcb25','mcb50','ucb100','sab50'].includes(r.ammoId)||!['','r310','plt2026','plt2021','plt3030'].includes(r.rocketId))throw Error('Munição ou míssil inválidos.');
+ }
+}
+async function loadAdminGateEditor(force=false){
+ if(gateAdminRuntime.busy)return;
+ if(force&&gateAdminRuntime.dirty&&!confirm('Descartar alterações não salvas dos Portais?'))return;
+ gateAdminRuntime.busy=true;
+ try{
+   const data=await loadGalaxyGatesOnline(force);applyGateLiveConfig(data);gateAdminRuntime.snapshot=data;gateAdminRuntime.draft=Object.fromEntries(['alpha','beta','gamma'].map(k=>[k,gateConfigDraft(k)]));gateAdminRuntime.dirty=false;
+ }catch(e){showToast('Não foi possível carregar regras dos Portais: '+(e.message||e));}
+ finally{gateAdminRuntime.busy=false;renderAdminPortalsEditor();}
+}
+async function saveAdminGateEditor(){
+ if(gateAdminRuntime.busy)return;gateAdmReadFromScreen();const key=gateAdminRuntime.selected,d=gateAdminRuntime.draft[key];
+ try{gateAdmValidate(d);}catch(e){showToast(e.message);return;}
+ if(!confirm(`Publicar ${d.rounds.length} rounds e novas recompensas de ${GALAXY_GATE_DEFS[key].label}?`))return;
+ gateAdminRuntime.busy=true;renderAdminPortalsEditor();
+ try{const data=await adminUpdateGalaxyGateOnline(key,d);applyGateLiveConfig(data);gateAdminRuntime.snapshot=data;gateAdminRuntime.draft[key]=gateConfigDraft(key);gateAdminRuntime.dirty=false;showToast(`Portal ${GALAXY_GATE_DEFS[key].label} atualizado no Supabase!`,'reward');}
+ catch(e){showToast(e.message||'Servidor recusou a configuração.');}
+ finally{gateAdminRuntime.busy=false;renderAdminPortalsEditor();}
+}
+function handleAdminGateBuilderClick(event){
+ const btn=event.target.closest('button');if(!btn)return false;
+ const k=btn.dataset.gateSelect;if(k){gateAdmReadFromScreen();gateAdminRuntime.selected=k;renderAdminPortalsEditor();return true;}
+ const save=btn.matches('[data-gate-save]');if(save){saveAdminGateEditor();return true;}
+ if(btn.matches('[data-gate-add-round]')){gateAdmReadFromScreen();const d=gateAdminRuntime.draft[gateAdminRuntime.selected];if(d.rounds.length>=20){showToast('Máximo 20 rounds');return true;}d.rounds.push({round:d.rounds.length+1,name:`Novo round ${d.rounds.length+1}`,waves:[{type:'streuner',count:1}]});renderAdminPortalsEditor();return true;}
+ if(btn.hasAttribute('data-gate-remove-round')){gateAdmReadFromScreen();const d=gateAdminRuntime.draft[gateAdminRuntime.selected];if(d.rounds.length<2){showToast('Pelo menos um round é obrigatório');return true;}d.rounds.splice(Number(btn.dataset.gateRemoveRound),1);d.rounds.forEach((r,i)=>r.round=i+1);renderAdminPortalsEditor();return true;}
+ if(btn.hasAttribute('data-gate-add-wave')){gateAdmReadFromScreen();const d=gateAdminRuntime.draft[gateAdminRuntime.selected],r=d.rounds[Number(btn.dataset.gateAddWave)];if(r.waves.length>=12){showToast('Máximo 12 ondas');return true;}r.waves.push({type:'streuner',count:1});renderAdminPortalsEditor();return true;}
+ if(btn.hasAttribute('data-gate-remove-wave')){gateAdmReadFromScreen();const d=gateAdminRuntime.draft[gateAdminRuntime.selected], [i,j]=btn.dataset.gateRemoveWave.split(':').map(Number);if(d.rounds[i].waves.length<2){showToast('O round precisa ter pelo menos uma onda');return true;}d.rounds[i].waves.splice(j,1);renderAdminPortalsEditor();return true;}
+ return false;
+}
+
 // V18.2.6 • Editor da BOX BÔNUS / custos dos Portais.
 const adminBonusEditor={snapshot:null,busy:false};
 function adminBonusMessage(message,kind='muted'){
@@ -7223,7 +7329,7 @@ function renderAdminPortalsEditor(){
   const c=adminBonusEditor.snapshot?.config;
   if(!c){host.innerHTML='<div class="empty-state">Abra PORTAIS ASTRAIS para carregar custos do materializador.</div>';return;}
   const costs=[['alpha','AURORA'],['beta','NEXUS'],['gamma','ECLIPSE']].map(([key,label])=>`<div class="admin-bonus-reward"><b>${label}</b><div class="admin-shop-fields"><label>STL POR GIRO<input type="number" min="1" max="100000" data-portal-cost="stl:${key}" value="${Math.max(1,Math.round(Number(c.gate_prices?.[key]?.stl)||100))}"></label><label>POEIRA POR GIRO<input type="number" min="1" max="100" data-portal-cost="dust:${key}" value="${Math.max(1,Math.round(Number(c.gate_prices?.[key]?.dust)||1))}"></label></div></div>`).join('');
-  host.innerHTML=`<article class="admin-bonus-block"><h4>🎯 PREÇOS DO MATERIALIZADOR</h4><p>Servidor calcula preços e confirma saldo; alterações têm efeito após sincronização.</p><div class="admin-shop-fields"><label>DESCONTO PREMIUM (%)<input data-portal-cost="discount" type="number" min="0" max="50" value="${Math.max(0,Math.min(50,Math.round(Number(c.premium_discount_pct)||0)))}"></label></div>${costs}<button type="button" class="small-btn gold" data-portal-price-save>SALVAR CUSTOS DE GIROS</button></article><article class="admin-bonus-block"><h4>🛸 ONDAS, NPCs E PRÊMIOS</h4><p>Etapa reservada para o editor de ondas e recompensas, que exigirá migração/validação do servidor. As regras atuais não foram alteradas.</p><div class="admin-portals-summary">${Object.values(GALAXY_GATE_DEFS).map(d=>`<details><summary>${escHtml(d.label)} • ${d.rounds.length} rounds</summary>${d.rounds.map(r=>`<p><b>Round ${r.round}: ${escHtml(r.name)}</b><small> ${r.waves.map(w=>`${escHtml(w.type)} ×${w.count}`).join(' • ')}</small></p>`).join('')}</details>`).join('')}</div></article>`;
+  host.innerHTML=`<article class="admin-bonus-block"><h4>🎯 PREÇOS DO MATERIALIZADOR</h4><p>Servidor calcula preços e confirma saldo; alterações têm efeito após sincronização.</p><div class="admin-shop-fields"><label>DESCONTO PREMIUM (%)<input data-portal-cost="discount" type="number" min="0" max="50" value="${Math.max(0,Math.min(50,Math.round(Number(c.premium_discount_pct)||0)))}"></label></div>${costs}<button type="button" class="small-btn gold" data-portal-price-save>SALVAR CUSTOS DE GIROS</button></article><article class="admin-bonus-block"><h4>🛸 ONDAS, NPCs E PRÊMIOS</h4>${renderAdminGateBuilder()}</article>`;
 }
 async function saveAdminPortalPrices(){
   if(adminBonusEditor.busy||!adminBonusEditor.snapshot?.config)return;
@@ -7252,7 +7358,7 @@ function renderAdminBonusEditor(){
 async function loadAdminBonusEditor(force=false){
   if(adminBonusEditor.busy)return;
   adminBonusEditor.busy=true;ui.adminRuntimeBonusReload&&(ui.adminRuntimeBonusReload.disabled=true);
-  try{adminBonusEditor.snapshot=await loadBonusConfigOnline(force);renderAdminBonusEditor();adminBonusMessage(`Configuração v${adminBonusEditor.snapshot.version} carregada.`, 'ok');}
+  try{adminBonusEditor.snapshot=await loadBonusConfigOnline(force);renderAdminBonusEditor();renderAdminPortalsEditor();adminBonusMessage(`Configuração v${adminBonusEditor.snapshot.version} carregada.`, 'ok');}
   catch(err){adminBonusMessage(err.message||'Falha ao carregar configuração.', 'err');}
   finally{adminBonusEditor.busy=false;ui.adminRuntimeBonusReload&&(ui.adminRuntimeBonusReload.disabled=false);}
 }
@@ -7355,7 +7461,7 @@ async function loadAdminCoupons(force=false){
  catch(e){adminCouponNotice(e?.message||'Erro ao carregar cupons.','err');}
 }
 
-// V19.0.5 — Formulários visuais sobre os JSONs EXISTENTES; não alteram o contrato do servidor.
+// V19.0.6 — Formulários visuais sobre os JSONs EXISTENTES; não alteram o contrato do servidor.
 const ADM_RESOURCE_LIST=['Prometium','Endurium','Terbium','Prometid','Duranium','Promerium','Xenomit'];
 const ADM_EDITOR_OBJECTS={};
 function admPrettyKey(key){return ({ore_pool:'Minérios disponíveis',ore_target:'Quantidade de minério',ore_flat_reward:'Prêmios fixos',ore_item_chance:'Chance de item',hunt_boss_target:'NPCs chefes',combo_boss_target:'Chefes em sequência',hunt_normal_target:'NPCs comuns',combo_normal_target:'NPCs em sequência',npc_target:'NPCs para eliminar',steps:'Metas / etapas',ammo:'Munições',rockets:'Mísseis',items:'Equipamentos',ships:'Naves',credits:'Créditos',uridium:'Stellarium',repairBonus:'Bônus de reparação',laser_damage_pct:'Dano laser (%)',shield_pct:'Escudo (%)',cargo_flat:'Capacidade do porão',speed_flat:'Velocidade',id:'Item',qty:'Quantidade',kind:'Tipo'})[key]||String(key).replace(/_/g,' ').toUpperCase();}
@@ -7470,7 +7576,7 @@ function setAdminRuntimeTab(tab='runtime'){
   if(next==='pass'&&!adminPassEditor.snapshot)loadAdminPassEditor(false);
   if(next==='shops'&&!adminShopsEditor.snapshot)loadAdminShopsEditor(false);
   if((next==='bonus'||next==='portals'||next==='world'&&adminWorldEditor.activeView==='box')&&!adminBonusEditor.snapshot)loadAdminBonusEditor(false);
-  if(next==='portals')renderAdminPortalsEditor();
+  if(next==='portals'){renderAdminPortalsEditor();if(!gateAdminRuntime.snapshot)loadAdminGateEditor(false);}
   if(next==='coupons'&&!adminCouponsRuntime.snapshot)loadAdminCoupons(false);
   queueMicrotask(enhanceAdminEditorsV1905);
 }
@@ -7895,8 +8001,8 @@ if(ui.adminRuntimePassSeason)ui.adminRuntimePassSeason.onclick=e=>{const save=e.
 if(ui.adminRuntimePassGrid)ui.adminRuntimePassGrid.onclick=e=>{const save=e.target.closest('[data-pass-tier-save]');if(save)saveAdminPassTier(Number(save.dataset.passTierSave),save.closest('[data-pass-tier]'),save);};
 if(ui.adminRuntimeBonusReload)ui.adminRuntimeBonusReload.onclick=()=>loadAdminBonusEditor(true);
 if(ui.adminRuntimeBonusGrid)ui.adminRuntimeBonusGrid.onclick=e=>{const b=e.target.closest('[data-bonus-save]');if(b)saveAdminBonusEditor(b);};
-$('#adminRuntimePortalsGrid')?.addEventListener('click',e=>{if(e.target.closest('[data-portal-price-save]'))saveAdminPortalPrices();});
-$('#adminRuntimePortalsReload')?.addEventListener('click',()=>loadAdminBonusEditor(true));
+$('#adminRuntimePortalsGrid')?.addEventListener('click',e=>{if(handleAdminGateBuilderClick(e))return;if(e.target.closest('[data-portal-price-save]'))saveAdminPortalPrices();});
+$('#adminRuntimePortalsReload')?.addEventListener('click',()=>{loadAdminBonusEditor(true);loadAdminGateEditor(true);});
 if(ui.adminRuntimeShopsReload)ui.adminRuntimeShopsReload.onclick=()=>loadAdminShopsEditor(true);
 if(ui.adminRuntimeShopsTabs)ui.adminRuntimeShopsTabs.onclick=e=>{const b=e.target.closest('[data-admin-shops-view]');if(b)adminShopsSetView(b.dataset.adminShopsView);};
 if(ui.adminRuntimeShopsGrid)ui.adminRuntimeShopsGrid.onclick=e=>{const common=e.target.closest('[data-common-shop-save]');if(common){saveAdminCommonShop(common.dataset.commonShopSave,common.closest('[data-common-shop]'),common);return;}const premium=e.target.closest('[data-premium-shop-save]');if(premium){saveAdminPremiumShop(premium.dataset.premiumShopSave,premium.closest('[data-premium-shop]'),premium);}};

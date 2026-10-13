@@ -1056,3 +1056,11 @@ export async function loadBonusConfigOnline(refresh=false){
 export async function adminUpdateBonusConfigOnline(config){
   return serverFetch('/api/admin/runtime/bonus',{method:'POST',body:JSON.stringify({config})},true);
 }
+
+// V19.0.6 — ADM Portais Astrais
+export async function loadGalaxyGatesOnline(refresh=false){
+ return serverFetch('/api/runtime/gates'+(refresh?'?refresh=1':''),{},true);
+}
+export async function adminUpdateGalaxyGateOnline(key,config){
+ return serverFetch('/api/admin/runtime/gates',{method:'POST',body:JSON.stringify({key,config})},true);
+}

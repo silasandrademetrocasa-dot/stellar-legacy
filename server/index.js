@@ -451,7 +451,7 @@ function ensureGalaxyGateServer(state){
   const g=state.galaxyGate;g.jumpBonus=Math.max(0,Number(g.jumpBonus)||0);g.lifeBonus=Math.max(0,Number(g.lifeBonus)||0);g.repairBonus=Math.max(0,Number(g.repairBonus)||0);g.lastResults=Array.isArray(g.lastResults)?g.lastResults:[];g.selected=GATE_SERVER_DEFS[g.selected]?g.selected:'alpha';
   for(const [key,def] of Object.entries(GATE_SERVER_DEFS)){
     g[key] ||= {pieces:[],built:false,lives:def.baseLives,completed:0,failed:0,run:null,lastCompletion:null};
-    const x=g[key];x.pieces=Array.isArray(x.pieces)?[...new Set(x.pieces.map(Number).filter(n=>n>=1&&n<=def.pieces))]:[];x.built=!!x.built||x.pieces.length>=def.pieces;x.lives=Math.max(0,Math.min(def.maxLives,Number(x.lives)||def.baseLives));x.completed=Math.max(0,Number(x.completed)||0);
+    const x=g[key];x.pieces=Array.isArray(x.pieces)?[...new Set(x.pieces.map(Number).filter(n=>n>=1&&n<=def.pieces))]:[];x.built=!!x.built||x.pieces.length>=def.pieces;x.lives=Math.max(0,Math.min(def.maxLives,(x.lives===null||x.lives===undefined?def.baseLives:Number(x.lives))));x.completed=Math.max(0,Number(x.completed)||0);
   }
   return g;
 }
@@ -475,7 +475,7 @@ function rollGateOnceServer(state,key){
   if(r<80){const qty=randomIntServer(1500,12000);state.profile.credits=Math.max(0,Number(state.profile.credits)||0)+qty;return {kind:'credits',qty,label:`Créditos +${qty}`};}
   if(r<90){const qty=randomIntServer(4,18);state.cargo.Xenomit=(Number(state.cargo.Xenomit)||0)+qty;return {kind:'xenomit',qty,label:`Voidite +${qty}`};}
   if(r<95){g.jumpBonus++;return {kind:'jump',label:'Bônus de Salto +1'};}
-  g.lifeBonus=(g.lifeBonus||0)+1;return {kind:'life',label:'Vida Astral Reserva +1'};
+  g.jumpBonus++;return {kind:'jump',label:'Bônus de Salto +1'}; // Vida removida dos giros V19.0.6
 }
 async function readEconomySave(req){
   const {data,error}=await req.sb.from('game_saves').select('state').eq('user_id',req.user.id).maybeSingle();if(error)throw new Error(error.message);if(!data?.state)throw Object.assign(new Error('Save online ainda não foi criado.'),{status:409});const state=structuredClone(data.state);if(String(state.accountOwnerId||req.user.id)!==req.user.id)throw Object.assign(new Error('SAVE BLOQUEADO: proprietário inválido.'),{status:409});state.profile ||= {};return state;
@@ -1194,7 +1194,7 @@ app.post('/api/economy/action', requireUser, asyncRoute(async (req,res)=>{
   const payload=(req.body?.payload&&typeof req.body.payload==='object')?req.body.payload:{};
   if(!action)return res.status(400).json({error:'Ação econômica ausente.'});
   const result=await withPurchaseLock(req.user.id,async()=>{
-    const catalogActions=new Set(['auto_buy','unlock_pet_slot','buy_quantum_cores','sell_cargo','sell_inventory','sell_drone','gate_life','gate_spin']);
+    const catalogActions=new Set(['auto_buy','unlock_pet_slot','buy_quantum_cores','sell_cargo','sell_inventory','sell_drone','gate_spin']);
     const premiumActions=new Set(['auto_buy','gate_spin']);
     const systemsActions=new Set(['base_service','craft_recipe']);
     const [snapshot,state,premiumResult,systemsSnapshot]=await Promise.all([
@@ -1248,7 +1248,14 @@ app.post('/api/economy/action', requireUser, asyncRoute(async (req,res)=>{
       const droneId=String(payload.drone_id||''),drones=Array.isArray(state.drones)?state.drones:[],idx=drones.findIndex(d=>String(d?.id||'')===droneId);if(idx<0)throw Object.assign(new Error('Drone não encontrado no save online.'),{status:404});const drone=drones[idx],row=liveCatalogRow(snapshot,`drone:${String(drone.type||'')}`);if(!row)throw Object.assign(new Error('Drone sem preço online para venda.'),{status:404});state.inventory ||= {};for(const itemId of (Array.isArray(drone.slots)?drone.slots:[]).filter(Boolean))state.inventory[itemId]=(Number(state.inventory[itemId])||0)+1;drones.splice(idx,1);state.drones=drones;const refund=Math.max(1,Math.floor((Number(row.price)||0)*.5)),currency=String(row.currency)==='uridium'?'uridium':'credits';creditServer(state,refund,currency);info={action,drone_id:droneId,drone_type:String(drone.type||''),refund,currency};
     }
     else if(action==='gate_life'){
-      const key=String(payload.protocol||'alpha'),def=GATE_SERVER_DEFS[key];if(!def)throw Object.assign(new Error('Portal inválido.'),{status:400});const g=ensureGalaxyGateServer(state),gate=g[key];const mapOk=String(state.mapId||'')==='x1'&&String(state.territoryFaction||state.profile?.faction||'')===String(state.profile?.faction||'');if(!mapOk)throw Object.assign(new Error('Compre vidas do Portal somente na sua base X-1.'),{status:409});if(gate.lives>=def.maxLives)throw Object.assign(new Error(`${def.label} já está no máximo de ${def.maxLives} vidas.`),{status:409});const row=liveCatalogRow(snapshot,`gate_life:${key}`);if(!row)throw Object.assign(new Error('Preço da vida não está publicado no LIVE OPS.'),{status:404});const cost=Math.max(0,Math.round(Number(row.price)||0));debitServer(state,cost,'credits');gate.lives=Math.min(def.maxLives,gate.lives+1);info={action,protocol:key,lives:gate.lives,max_lives:def.maxLives,cost,currency:'credits'};
+      const key=String(payload.protocol||'alpha'),def=GATE_SERVER_DEFS[key];
+      if(!def)throw Object.assign(new Error('Portal invalido.'),{status:400});
+      const g=ensureGalaxyGateServer(state),gate=g[key];
+      const mapOk=String(state.mapId||'')==='x1'&&String(state.territoryFaction||state.profile?.faction||'')===String(state.profile?.faction||'');
+      if(!mapOk)throw Object.assign(new Error('Compre vidas do Portal somente na sua base X-1.'),{status:409});
+      if(gate.lives>=def.maxLives)throw Object.assign(new Error('Limite de vidas atingido.'),{status:409});
+      const cost=10000;debitServer(state,cost,'uridium');gate.lives=Math.min(def.maxLives,gate.lives+1);
+      info={action,protocol:key,lives:gate.lives,max_lives:def.maxLives,cost,currency:'uridium'};
     }
     else if(action==='gate_life_bonus'){
       const key=String(payload.protocol||'alpha'),def=GATE_SERVER_DEFS[key];if(!def)throw Object.assign(new Error('Portal inválido.'),{status:400});const g=ensureGalaxyGateServer(state),gate=g[key];const mapOk=String(state.mapId||'')==='x1'&&String(state.territoryFaction||state.profile?.faction||'')===String(state.profile?.faction||'');if(!mapOk)throw Object.assign(new Error('Use vidas reserva somente na sua base X-1.'),{status:409});if(gate.lives>=def.maxLives)throw Object.assign(new Error(`${def.label} já está no máximo de ${def.maxLives} vidas.`),{status:409});if((g.lifeBonus||0)<=0)throw Object.assign(new Error('Nenhuma Vida Astral disponível na reserva.'),{status:409});g.lifeBonus--;gate.lives=Math.min(def.maxLives,gate.lives+1);info={action,protocol:key,lives:gate.lives,max_lives:def.maxLives,life_bonus:g.lifeBonus};
@@ -1289,6 +1296,21 @@ app.post('/api/admin/runtime/bonus',requireUser,asyncRoute(async(req,res)=>{
   const {data,error}=await req.sb.rpc('admin_update_bonus_box_config_v1825',{p_config:config});
   if(error){const message=String(error.message||'Falha ao atualizar bônus.');return res.status(/administrativ|permiss|negado/i.test(message)?403:400).json({error:message});}
   res.json(data);
+}));
+
+
+// V19.0.6 — Fonte assinada e validada no banco para ondas e recompensas dos Portais.
+app.get('/api/runtime/gates',requireUser,asyncRoute(async(req,res)=>{
+ const {data,error}=await req.sb.rpc('get_galaxy_gate_config_v1906');
+ if(error||!data?.config)return res.status(503).json({error:'Configuracao dos Portais indisponivel; confirme a migracao SQL V19.0.6.'});
+ res.json(data);
+}));
+app.post('/api/admin/runtime/gates',requireUser,asyncRoute(async(req,res)=>{
+ const key=String(req.body?.key||''),config=req.body?.config;
+ if(!['alpha','beta','gamma'].includes(key)||!config||typeof config!=='object'||Array.isArray(config))return res.status(400).json({error:'Protocolo ou configuracao invalidos.'});
+ const {data,error}=await req.sb.rpc('admin_update_galaxy_gate_config_v1906',{p_key:key,p_gate:config});
+ if(error){const message=String(error.message||'Erro ao salvar Portal.');return res.status(/permiss|negad|administrativ/i.test(message)?403:400).json({error:message});}
+ res.json(data);
 }));
 
 // ===================== PLAYER TELEMETRY =====================

@@ -2895,3 +2895,14 @@ body[data-quality="low"] .pet-gear {
 .pilot-attributes-grid summary{cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:12px}.pilot-attributes-grid summary em{color:#ffe3a7;font-style:normal;font-weight:900}
 .pilot-source-line{display:flex;justify-content:space-between;gap:9px;border-top:1px solid #16334a;padding:7px 0;font-size:11px;color:#91bbc9}.pilot-source-line:first-of-type{margin-top:10px}.pilot-source-line b{white-space:nowrap;color:#d2f4ff}
 @media(max-width:620px){.admin-runtime-tabs{position:static}.adm-struct-group{min-width:100%}.pilot-attributes-grid{grid-template-columns:1fr}}
+
+/* V19.0.6 — Portais ADM */
+.portal-gate-tabs,.portal-gate-row-buttons,.portal-gate-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:10px 0}
+.portal-gate-round{border:1px solid rgba(89,192,255,.24);background:rgba(5,17,33,.7);border-radius:12px;margin:8px 0;padding:10px}
+.portal-gate-round>summary{cursor:pointer;color:#ccefff;display:flex;justify-content:space-between;gap:12px}
+.portal-gate-round-body{padding:10px 0;display:grid;gap:10px}
+.portal-gate-waves{display:grid;gap:8px}.portal-gate-wave{display:grid;grid-template-columns:80px minmax(160px,1fr) minmax(100px,140px) auto;align-items:end;gap:8px;border:1px solid rgba(82,160,218,.16);border-radius:10px;padding:9px}
+.portal-gate-wave label,.portal-gate-round-body label,.portal-gate-reward label{display:flex;flex-direction:column;gap:5px;font-size:11px}
+.portal-gate-wave input,.portal-gate-wave select,.portal-gate-round input,.portal-gate-reward input,.portal-gate-reward select{width:100%;min-height:34px;padding:7px;background:#091b30;color:#e4f7ff;border:1px solid #2b6687;border-radius:8px}
+.portal-gate-reward{border-top:1px solid rgba(90,180,255,.22);padding-top:10px;margin:12px 0}.portal-gate-reward h5{font-size:12px;margin:0 0 8px;color:#f4d488}
+@media(max-width:720px){.portal-gate-wave{grid-template-columns:1fr 1fr}.portal-gate-wave>b{grid-column:1/-1}.portal-gate-wave>button{grid-column:1/-1}}
