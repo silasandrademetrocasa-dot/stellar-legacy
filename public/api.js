@@ -1,4 +1,5 @@
 const SESSION_KEY = 'stellarLegacyV4Session';
+const GOOGLE_OAUTH_PENDING_KEY = 'stellarLegacyGoogleOAuthPendingV18216';
 let session = null;
 let currentUser = null;
 let configPromise = null;
@@ -199,6 +200,70 @@ export async function restorePasswordRecoveryFromUrl() {
     signOutLocal();
     throw new Error('O link de recuperação expirou ou é inválido. Solicite outro e-mail.');
   }
+}
+
+// V18.2.16 — Google OAuth (redirect na mesma aba, sem gravar tokens permanentemente).
+// Usa Supabase Auth como identidade e o backend como guardião da sessão única.
+export async function beginGoogleSignIn() {
+  const { url } = await getConfig();
+  const status = await supabaseFetch('/auth/v1/settings');
+  if (status?.external?.google !== true) {
+    throw new Error('Google ainda não está habilitado no Supabase. Ative Authentication > Providers > Google antes de testar.');
+  }
+  if (session?.game_session_id) {
+    throw new Error('Saia da conta atual antes de entrar com outra conta Google.');
+  }
+  const redirectTo = `${window.location.origin}${window.location.pathname || '/'}`;
+  const request = new URL(`${url}/auth/v1/authorize`);
+  request.searchParams.set('provider', 'google');
+  request.searchParams.set('redirect_to', redirectTo);
+  // O estado é de curta duração e só vale nesta aba. Não salvamos tokens OAuth no URL.
+  sessionStorage.setItem(GOOGLE_OAUTH_PENDING_KEY, JSON.stringify({ at: Date.now(), redirectTo }));
+  window.location.assign(request.toString());
+}
+
+export async function restoreGoogleSignInFromUrl() {
+  const raw = sessionStorage.getItem(GOOGLE_OAUTH_PENDING_KEY);
+  const hash = new URLSearchParams(String(window.location.hash || '').replace(/^#/, ''));
+  const query = new URLSearchParams(String(window.location.search || ''));
+  const oauthError = hash.get('error') || query.get('error');
+  const token = hash.get('access_token');
+  // Se não iniciamos este fluxo nesta aba, não aceitamos tokens inesperados.
+  if (!raw) return null;
+  let pending = null;
+  try { pending = JSON.parse(raw); } catch {}
+  const fresh = Number.isFinite(Number(pending?.at)) && Date.now() - Number(pending.at) <= 15 * 60 * 1000;
+  const sameOrigin = pending?.redirectTo === `${window.location.origin}${window.location.pathname || '/'}`;
+  if (!fresh || !sameOrigin) {
+    sessionStorage.removeItem(GOOGLE_OAUTH_PENDING_KEY);
+    if (token || oauthError) history.replaceState({}, document.title, window.location.pathname || '/');
+    throw new Error('O login do Google expirou. Tente novamente.');
+  }
+  if (!token && !oauthError) return null;
+  // Não manter access_token / refresh_token no histórico da navegação.
+  sessionStorage.removeItem(GOOGLE_OAUTH_PENDING_KEY);
+  history.replaceState({}, document.title, window.location.pathname || '/');
+  if (oauthError) {
+    throw new Error('A autenticação pelo Google foi cancelada ou não autorizada. Tente novamente.');
+  }
+  const refreshToken = hash.get('refresh_token');
+  if (!refreshToken || hash.get('token_type')?.toLowerCase() !== 'bearer') {
+    throw new Error('O Google não retornou uma sessão válida. Tente novamente.');
+  }
+  const body = await serverFetch('/api/auth/google/session', {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${token}` },
+    body: '{}',
+  });
+  if (!body?.game_session_id || !body?.user?.id) throw new Error('Não foi possível confirmar a sessão do jogo.');
+  const now = Math.floor(Date.now() / 1000);
+  setSession({
+    access_token: token,
+    refresh_token: refreshToken,
+    expires_at: Number(hash.get('expires_at')) || now + Number(hash.get('expires_in') || 3600),
+    game_session_id: body.game_session_id,
+  }, body.user);
+  return { user: body.user, session, provider: 'google' };
 }
 
 export async function signIn({ email, password }) {

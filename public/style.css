@@ -2724,3 +2724,15 @@ body[data-quality="low"] .pet-gear {
 .premium-stage-section-title{grid-column:1/-1;display:block;margin:12px 0 2px;padding:10px 12px;border-radius:9px;border-left:3px solid #c9a355;background:#132431;color:#f7d995;font-weight:850;font-size:11px;letter-spacing:.06em;}
 .premium-stage-product.equipment_bundle{border-color:#72b7e855!important}.premium-stage-product.event_ship_bundle{border-color:#e7b05280!important}.premium-stage-product.event_ship_bundle .premium-product-type{color:#ffdd88}
 @media(max-width:560px){.premium-stage-section-title{margin-top:7px;padding:8px 10px;font-size:10px;}}
+
+/* V18.2.16 • Google OAuth (CSS leve, sem carregar scripts extras) */
+.google-login-area{display:flex;flex-direction:column;gap:8px;margin-bottom:13px}
+.google-login-btn{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;min-height:45px;padding:10px 15px;border-radius:11px;background:#fff;color:#24292f;border:1px solid #d9e1ed;font-size:12px;font-weight:900;letter-spacing:.015em;cursor:pointer;transition:border-color .16s,background .16s}
+.google-login-btn:hover:not(:disabled){background:#eef6ff;border-color:#85cdff}
+.google-login-btn:focus-visible{outline:3px solid #5cdbff;outline-offset:3px}
+.google-login-btn:disabled{opacity:.7;cursor:progress}
+.google-login-btn svg{flex-shrink:0}
+.google-login-note{font-size:10px;line-height:1.4;text-align:center;color:#91b2c9}
+.google-login-separator{display:flex;align-items:center;gap:12px;color:#7799af;font-size:10px;text-align:center}
+.google-login-separator:before,.google-login-separator:after{content:"";height:1px;flex:1;background:rgba(140,197,221,.2)}
+@media(max-width:760px){.google-login-area{margin-bottom:10px}.google-login-btn{min-height:42px}}
