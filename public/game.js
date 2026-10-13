@@ -1,7 +1,7 @@
-import { FACTIONS, SHIPS, ITEMS, LASER_AMMO, ROCKETS, NPC_TYPES, MAPS, RESOURCES } from './data.js?v=18.2.14';
-import { GAME_ASSETS } from './assets/v17/manifest.js?v=18.2.14';
-import { signUp, signIn, requestPasswordReset, restorePasswordRecoveryFromUrl, restoreSession, signOutLocal, checkGameSession, endGameSession, getUser, getSessionCredentials, loadCloudSave, saveCloudSave, updateCallsign, updatePassword, loadRankings, loadAuctionBids, saveAuctionBidOnline, markAuctionBidStatusOnline, loadAuctionMarket, upsertPlayerPresenceOnline, loadMapPresenceOnline, savePlayerLocationCheckpointOnline, loadPlayerLocationCheckpointOnline, removePlayerPresenceOnline, queuePvpAttackOnline, consumePvpDamageEventsOnline, syncArenaProfileOnline, loadArenaState, loadArenaDailyRewardStatus, claimArenaDailyReward, loadArenaOpponents, loadArenaHistory, arenaAttackOnline, listClansOnline, loadMyClanOnline, createClanOnline, joinClanOnline, leaveClanOnline, transferClanCreditsOnline, claimClanCreditGrantsOnline, recordClanAlienKillOnline, getPremiumShopOnline, testPurchasePremiumOnline, adminPreviewPremiumStageOnline, adminSimulatePremiumStageOnline, getPremiumStageCatalogOnline, loadWarfrontStateOnline, hitWorldBossOnline, claimWorldBossRewardOnline, declareClanWarOnline, recordClanWarScoreOnline, loadLiveOpsOnline, adminUpdateLiveEventScheduleOnline, purchaseLiveCatalogOnline, economyActionOnline, getChatHistoryOnline, sendChatMessageOnline, redeemGameCouponOnline, getMyDesignersOnline, setDesignLoadoutOnline, claimGateDroneDesignOnline, claimEventDesignerOnline, getAdminStatus, adminSearchAccounts, adminRecentActions, adminBanAccount, adminUnbanAccount, adminResetAccount, adminDeleteAccount, pushTelemetryBatch, adminTelemetryOverview, adminPlayerTelemetry, getBattleGroupOnline, createBattleGroupOnline, inviteBattleGroupOnline, searchBattleGroupPlayersOnline, inviteBattleGroupUserOnline, respondBattleGroupInviteOnline, leaveBattleGroupOnline, kickBattleGroupMemberOnline, setBattleGroupRallyOnline, loadRuntimeConfigOnline, loadNpcRuntimeConfigOnline, loadWorldRuntimeConfigOnline, loadSystemsRuntimeConfigOnline, loadAdminRuntimeMonitorOnline, adminUpdateRuntimeModuleOnline, adminUpdateNpcRuntimeOnline, adminUpdateNpcSpawnRuntimeOnline, adminUpdateWorldMapOnline, adminUpdateWorldResourceOnline, adminUpdateWorldSectorOnline, adminUpdateWorldPortalOnline, adminUpdateWorldResourcePoolOnline, adminUpdateMissionCategoryOnline, adminUpdateEconomyServiceOnline, adminUpdateCraftingRecipeOnline, loadBattlePassRuntimeConfigOnline, adminUpdateBattlePassSeasonOnline, adminUpdateBattlePassTierOnline, loadShopsRuntimeConfigOnline, adminUpdateCommonShopItemOnline, adminUpdatePremiumShopItemOnline, loadBonusConfigOnline, adminUpdateBonusConfigOnline } from './api.js?v=18.2.14';
-import { SharedUniverseClient } from './world.js?v=18.2.14';
+import { FACTIONS, SHIPS, ITEMS, LASER_AMMO, ROCKETS, NPC_TYPES, MAPS, RESOURCES } from './data.js?v=18.2.15';
+import { GAME_ASSETS } from './assets/v17/manifest.js?v=18.2.15';
+import { signUp, signIn, requestPasswordReset, restorePasswordRecoveryFromUrl, restoreSession, signOutLocal, checkGameSession, endGameSession, getUser, getSessionCredentials, loadCloudSave, saveCloudSave, updateCallsign, updatePassword, loadRankings, loadAuctionBids, saveAuctionBidOnline, markAuctionBidStatusOnline, loadAuctionMarket, upsertPlayerPresenceOnline, loadMapPresenceOnline, savePlayerLocationCheckpointOnline, loadPlayerLocationCheckpointOnline, removePlayerPresenceOnline, queuePvpAttackOnline, consumePvpDamageEventsOnline, syncArenaProfileOnline, loadArenaState, loadArenaDailyRewardStatus, claimArenaDailyReward, loadArenaOpponents, loadArenaHistory, arenaAttackOnline, listClansOnline, loadMyClanOnline, createClanOnline, joinClanOnline, leaveClanOnline, transferClanCreditsOnline, claimClanCreditGrantsOnline, recordClanAlienKillOnline, getPremiumShopOnline, testPurchasePremiumOnline, adminPreviewPremiumStageOnline, adminSimulatePremiumStageOnline, getPremiumStageCatalogOnline, loadWarfrontStateOnline, hitWorldBossOnline, claimWorldBossRewardOnline, declareClanWarOnline, recordClanWarScoreOnline, loadLiveOpsOnline, adminUpdateLiveEventScheduleOnline, purchaseLiveCatalogOnline, economyActionOnline, getChatHistoryOnline, sendChatMessageOnline, redeemGameCouponOnline, getMyDesignersOnline, setDesignLoadoutOnline, claimGateDroneDesignOnline, claimEventDesignerOnline, getAdminStatus, adminSearchAccounts, adminRecentActions, adminBanAccount, adminUnbanAccount, adminResetAccount, adminDeleteAccount, pushTelemetryBatch, adminTelemetryOverview, adminPlayerTelemetry, getBattleGroupOnline, createBattleGroupOnline, inviteBattleGroupOnline, searchBattleGroupPlayersOnline, inviteBattleGroupUserOnline, respondBattleGroupInviteOnline, leaveBattleGroupOnline, kickBattleGroupMemberOnline, setBattleGroupRallyOnline, loadRuntimeConfigOnline, loadNpcRuntimeConfigOnline, loadWorldRuntimeConfigOnline, loadSystemsRuntimeConfigOnline, loadAdminRuntimeMonitorOnline, adminUpdateRuntimeModuleOnline, adminUpdateNpcRuntimeOnline, adminUpdateNpcSpawnRuntimeOnline, adminUpdateWorldMapOnline, adminUpdateWorldResourceOnline, adminUpdateWorldSectorOnline, adminUpdateWorldPortalOnline, adminUpdateWorldResourcePoolOnline, adminUpdateMissionCategoryOnline, adminUpdateEconomyServiceOnline, adminUpdateCraftingRecipeOnline, loadBattlePassRuntimeConfigOnline, adminUpdateBattlePassSeasonOnline, adminUpdateBattlePassTierOnline, loadShopsRuntimeConfigOnline, adminUpdateCommonShopItemOnline, adminUpdatePremiumShopItemOnline, loadBonusConfigOnline, adminUpdateBonusConfigOnline } from './api.js?v=18.2.15';
+import { SharedUniverseClient } from './world.js?v=18.2.15';
 
 const canvas = document.querySelector('#game');
 const ctx = canvas.getContext('2d');
@@ -6216,14 +6216,14 @@ function renderPremiumShop(){
   renderPremiumStageV18213();
 }
 
-// V18.2.14 — Vitrine de teste (separada da Loja Premium e das recompensas reais).
+// V18.2.15 — Vitrine de teste (separada da Loja Premium e das recompensas reais).
 // A própria RPC do Supabase exige game_admin; sessão normal nunca recebe esta prévia.
 const PREMIUM_STAGE_TABS_V18213=[
   ['subscriptions','ASSINATURAS','premium'],
   ['bundles','PACOTES','starter_bundle'],
   ['stl','RECARGAS STL','stl_pack'],
-  ['pass','PASSE','battle_pass'],
-  ['tiers','NÍVEIS','pass_tiers'],
+  ['pass','PASSE + NÍVEIS','battle_pass'],
+  ['equipment','EQUIPAMENTOS','equipment_bundle'],
   ['legacy','LOJA ATUAL','legacy'],
 ];
 function premiumStagePriceV18213(value){return `R$ ${Math.max(0,Number(value)||0).toFixed(2).replace('.',',')}`;}
@@ -6231,6 +6231,8 @@ function premiumStageIconV18213(row){
   if(row.category==='premium')return row.billing_mode==='prepaid'?'⏱':'✦';
   if(row.category==='starter_bundle')return row.id.includes('avancado')?'🛸':row.id.includes('piloto')?'🚀':'🌟';
   if(row.category==='stl_pack')return '💎';
+  if(row.category==='equipment_bundle')return '⚔️';
+  if(row.category==='event_ship_bundle')return '🛸';
   if(row.category==='battle_pass')return '🎟️';
   return '⚡';
 }
@@ -6249,6 +6251,13 @@ function premiumStageDescV18213(row){
     const itemNames={mcb50:'PLS-3',plt2021:'CMT-3',lf3:'ARC-3',sg3nb02:'VSH-5'};
     const rewards=items.map(item=>`${fmt(Math.max(0,Number(item.quantity)||0))} ${itemNames[item.id]||String(item.id||'item')}`).join(' • ');
     return `${fmt(stl)} STL • ${days} dias Premium • ${rewards} • compra única por conta. Teste sem entrega.`;
+  }
+  if(row.category==='equipment_bundle'||row.category==='event_ship_bundle'){
+    const items=Array.isArray(row.bundle_items)?row.bundle_items:(Array.isArray(row.reward_plan?.items)?row.reward_plan.items:[]);
+    const names={lf3:'ARC-3',lf4:'ARC-4',sg3nb02:'VSH-5',g3n6900:'THR-5',g3n7900:'THR-6',repElite:'Nanobot Elite',extraSlotCpuElite:'CPU Expansora Elite'};
+    const pieces=items.map(item=>`${fmt(Math.max(0,Number(item.quantity)||0))}× ${names[item.id]||String(item.id||'item')}`).join(' • ');
+    const ship=row.event_ship_name||row.reward_plan?.ship_name||'';
+    return `${ship?'🛸 NAVE ESPECIAL: '+ship+' • ':''}${pieces} • 1 por conta • prévia sem entregar itens ou naves.`;
   }
   if(row.category==='battle_pass')return 'Prévia do Passe de Temporada. Não libera a trilha Premium no save.';
   return `Simula +${Number(row.tier_quantity)||0} nível(is) da temporada. Não altera o progresso nem libera recompensas.`;
@@ -6283,21 +6292,30 @@ function renderPremiumStageV18213(){
     return;
   }
   const category=PREMIUM_STAGE_TABS_V18213.find(t=>t[0]===active)?.[2];
-  const offers=(Array.isArray(stage.offers)?stage.offers:[]).filter(p=>p.category===category&&p.test_only===true&&p.live_enabled===false);
-  if(active==='tiers'){
-    info.innerHTML+=`<div class="premium-stage-progress"><b>${seasonLabel}</b> • ${fmt(ownedTiers)} / ${fmt(maxTiers)} tiers simulados <span>(separado dos tiers conquistados no jogo)</span><div class="premium-stage-meter"><i style="width:${maxTiers?Math.min(100,100*ownedTiers/maxTiers):0}%"></i></div></div>`;
-  }else if(active==='pass'){
-    info.innerHTML+=`<div class="premium-stage-progress"><b>${seasonLabel}</b> • ${maxTiers} níveis • Teste sem desbloquear recompensas reais.</div>`;
+  // PASSE: progresso + compra de níveis na mesma aba. EQUIPAMENTOS: kits Elite + naves de evento.
+  const categorySet=active==='pass'?['battle_pass','pass_tiers']:
+    active==='equipment'?['equipment_bundle','event_ship_bundle']:[category];
+  const offers=(Array.isArray(stage.offers)?stage.offers:[]).filter(p=>categorySet.includes(p.category)&&p.test_only===true&&p.live_enabled===false);
+  if(active==='pass'){
+    info.innerHTML+=`<div class="premium-stage-progress"><b>${seasonLabel}</b> • ${fmt(ownedTiers)} / ${fmt(maxTiers)} níveis simulados <span>(separados do progresso real)</span><div class="premium-stage-meter"><i style="width:${maxTiers?Math.min(100,100*ownedTiers/maxTiers):0}%"></i></div></div>`;
+  }else if(active==='equipment'){
+    info.innerHTML+=`<div class="premium-stage-progress"><b>⚔️ PACOTES ELITE E EVENTOS</b> • Kits de equipamentos e naves especiais existentes no jogo. <span>Ofertas de TESTE, 1 por conta, sem entrega real. A liberação futura de naves exige regras específicas para eventos.</span></div>`;
   }
   if(!offers.length){grid.innerHTML='<div class="empty-state">Nenhuma oferta de teste nesta categoria.</div>';return;}
+  let previousCategory='';
   grid.innerHTML=offers.map(row=>{
     const qty=Number(row.tier_quantity)||0;
-    const limit=category==='pass_tiers'&&(!season.season_key||ownedTiers+qty>maxTiers);
-    const noSeason=category==='battle_pass'&&!season.season_key;
+    const limit=row.category==='pass_tiers'&&(!season.season_key||ownedTiers+qty>maxTiers);
+    const noSeason=['battle_pass','pass_tiers'].includes(row.category)&&!season.season_key;
     const disabled=!canSimulate||premiumStageRuntime.buying||limit||noSeason;
     const label=!canSimulate?'EM PREPARAÇÃO':limit?'LIMITE DA TEMPORADA':noSeason?'SEM TEMPORADA':premiumStageRuntime.buying?'AGUARDE...':'SIMULAR COMPRA';
-    const mode=row.category==='starter_bundle'?'COMPRA ÚNICA':row.category==='stl_pack'?'RECARGA • REPETÍVEL':row.billing_mode==='auto_renew'?`RENOVA A CADA ${Number(row.billing_months)||1} MÊS(ES)`:row.billing_mode==='prepaid'?'7 DIAS • AVULSO':'COMPRA AVULSA';
-    return `<article class="premium-product premium-stage-product ${escHtml(row.category)}" data-stage-product="${escHtml(row.id)}"><div class="premium-product-icon">${premiumStageIconV18213(row)}</div><div class="premium-product-copy"><span class="premium-product-type">${escHtml(mode)} • TESTE</span><h3>${escHtml(row.name||row.id)}</h3><p>${escHtml(premiumStageDescV18213(row))}</p></div><div class="premium-product-price">${premiumStagePriceV18213(row.price_brl)}</div><button type="button" class="gold-btn premium-stage-action" data-stage-simulate="${escHtml(row.id)}" ${disabled?'disabled':''}>${label}</button></article>`;
+    const mode=['starter_bundle','equipment_bundle','event_ship_bundle'].includes(row.category)?'COMPRA ÚNICA':row.category==='stl_pack'?'RECARGA • REPETÍVEL':row.billing_mode==='auto_renew'?`RENOVA A CADA ${Number(row.billing_months)||1} MÊS(ES)`:row.billing_mode==='prepaid'?'7 DIAS • AVULSO':'COMPRA AVULSA';
+    const group=previousCategory!==row.category?(
+      active==='pass'?(row.category==='battle_pass'?'🎟️ PASSE DE BATALHA':'⚡ COMPRAR NÍVEIS'):
+      active==='equipment'?(row.category==='equipment_bundle'?'⚔️ KITS DE EQUIPAMENTOS ELITE':'🛸 NAVES ESPECIAIS DE EVENTO'):''):'';
+    previousCategory=row.category;
+    const groupHeader=group?`<div class="premium-stage-section-title" role="heading" aria-level="3">${group}</div>`:'';
+    return `${groupHeader}<article class="premium-product premium-stage-product ${escHtml(row.category)}" data-stage-product="${escHtml(row.id)}"><div class="premium-product-icon">${premiumStageIconV18213(row)}</div><div class="premium-product-copy"><span class="premium-product-type">${escHtml(mode)} • TESTE</span><h3>${escHtml(row.name||row.id)}</h3><p>${escHtml(premiumStageDescV18213(row))}</p></div><div class="premium-product-price">${premiumStagePriceV18213(row.price_brl)}</div><button type="button" class="gold-btn premium-stage-action" data-stage-simulate="${escHtml(row.id)}" ${disabled?'disabled':''}>${label}</button></article>`;
   }).join('');
   grid.querySelectorAll('[data-stage-simulate]').forEach(button=>button.onclick=()=>simulatePremiumStageV18213(button.dataset.stageSimulate));
 }
@@ -6313,7 +6331,7 @@ async function loadPremiumStageV18213(){
   }catch(error){
     premiumStageRuntime.state=null;
     premiumStageRuntime.error=String(error?.message||error);
-    console.warn('V18.2.14 premium staging:',error);
+    console.warn('V18.2.15 premium staging:',error);
     showToast('Vitrine Premium de teste indisponível: Loja original preservada.');
     return null;
   }finally{

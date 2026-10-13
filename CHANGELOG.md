@@ -1,3 +1,7 @@
+
+## V18.2.15 — PASSE + EQUIPAMENTOS ELITE / EVENTO (TESTE)
+- Aba Passe reúne Passe de Temporada e níveis; nova aba Equipamentos contém Elite I/II e naves Phantom/Seraph. Novas ofertas já cadastradas em SQL V18.3.6. Sem pagamento ou entrega real.
+
 # V18.2.14 — RECARGAS STL / PACOTES COMPRA ÚNICA (TESTE)
 
 Ver `V18_2_14_RECARGAS_STL_E_PACOTES.md`.

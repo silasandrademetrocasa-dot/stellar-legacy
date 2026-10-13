@@ -1,6 +1,6 @@
 {
   "name": "stellar-legacy",
-  "version": "18.2.14",
+  "version": "18.2.15",
   "type": "module",
   "scripts": {
     "start": "node server/index.js",
@@ -15,5 +15,5 @@
   "engines": {
     "node": ">=18"
   },
-  "release": "premium-stl-packs-stage-v18-2-14"
+  "release": "premium-pass-and-elite-event-equipment-stage-v18-2-15"
 }

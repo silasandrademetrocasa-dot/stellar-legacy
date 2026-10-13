@@ -521,7 +521,7 @@ export async function getPremiumShopOnline() {
   });
 }
 
-// V18.2.14: Somente prévia/simulação administrativa, sem pagamento nem recompensas.
+// V18.2.15: Somente prévia/simulação administrativa, sem pagamento nem recompensas.
 export async function getPremiumStageCatalogOnline() {
   return authedSupabaseFetch('/rest/v1/rpc/get_premium_stage_catalog_v1833', {
     method: 'POST', body: JSON.stringify({}),

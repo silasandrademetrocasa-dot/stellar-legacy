@@ -1,3 +1,6 @@
+
+> **V18.2.15:** O Passe e os níveis foram reunidos na mesma aba da Loja Premium. Nova aba EQUIPAMENTOS com kits ELITE I/II e prévias das naves de evento Phantom/Seraph. Tudo em TESTE, nenhuma cobrança ou entrega. Consulte V18_2_15_PASSE_EQUIPAMENTOS_EVENTOS.md.
+
 > Atualização V18.2.14: recargas STL em modo teste e pacotes de compra única. Leia `LEIA_PRIMEIRO_V18_2_14.txt`.
 
 > **V18.2.12 — NOVA NO LEILÃO: ABERTURA FIXA 100 MILHÕES CR.** Valor único para todos os jogadores, sem progressão por quantidade de drones nem referência ao HALO. Aumenta automaticamente durante o ciclo de leilão conforme regra normal. O banco já valida lance mínimo de 100M CR; nenhum preço da Loja foi alterado.
