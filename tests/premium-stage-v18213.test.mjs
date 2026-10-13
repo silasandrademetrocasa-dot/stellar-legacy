@@ -25,7 +25,7 @@ const offers=[
 ];
 let calls=0,previewCalls=0,confirms=0;
 const response={test_mode:true,billing_live:false,rewards_live:false,current_season:{season_key:'2026-10',name:'Temporada Outubro',tier_count:30},offers,test_tiers:null,test_subscription:null};
-const ctx={ui,console,Math,Date,Number,String,authenticated:true,premiumRuntime:{state:{is_admin:true}},premiumStageRuntime,
+const ctx={ui,console,Math,Date,Number,String,authenticated:true,premiumStageArtV18213:row=>'/assets/v19/premium-stage/'+(row.category==='premium'?'premiumMonth':'starterBundle')+'.png',premiumRuntime:{state:{is_admin:true}},premiumStageRuntime,
   escHtml:s=>String(s??'').replaceAll('<','&lt;'),fmt:n=>String(n),formatPremiumUntil:s=>String(s||''),
   adminPreviewPremiumStageOnline:async()=>{previewCalls++;return structuredClone(response)},
   adminSimulatePremiumStageOnline:async(id,key)=>{calls++;assert(key.startsWith('stg_'));return {ok:true,duplicate:false,test_only:true,billing_live:false,rewards_live:false,order_id:5,product_id:id}},

@@ -2788,3 +2788,14 @@ body[data-quality="low"] .pet-gear {
 .premium-stage-product .premium-product-icon{height:86px!important;border-radius:14px;background:radial-gradient(circle at 50% 55%,rgba(57,176,255,.18),rgba(5,14,24,.95) 70%);border:1px solid rgba(118,190,255,.14)}
 .premium-stage-product .premium-product-icon img{max-width:108px!important;max-height:78px!important;filter:drop-shadow(0 0 12px rgba(89,214,255,.28))}
 @media(max-width:700px){.pilot-skill-node{grid-template-columns:1fr;grid-template-areas:'art' 'head' 'desc' 'bonus' 'req' 'btn'}.pilot-skill-media{width:86px;height:86px;margin:0 auto 4px}}
+
+/* V19.0.2 Clan roles and requests */
+.clan-request-line{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;padding:12px 8px;border-bottom:1px solid rgba(90,200,255,.13)}
+.clan-request-line:last-child{border-bottom:0}
+.clan-request-line span{display:flex;flex-direction:column;gap:4px}
+.clan-request-line span small{font-size:10px;color:#8eafbc}
+.clan-request-actions{display:flex;align-items:center;gap:7px}
+.clan-role-select{font:700 10px Arial;background:#091c2c;border:1px solid #3287a7;border-radius:8px;padding:7px;color:#e4f8ff;max-width:150px}
+.clan-requests-box{border-color:rgba(73,189,233,.4)}
+.clan-v19-security{color:#ffd987;border-color:rgba(255,195,74,.36)}
+@media(max-width:650px){.clan-request-line{align-items:stretch}.clan-role-select{max-width:130px}.clan-request-actions button{font-size:10px}}

@@ -549,6 +549,30 @@ export async function joinClanOnline(clanId) {
   });
 }
 
+export async function getClanRequestsOnline() {
+  return authedSupabaseFetch('/rest/v1/rpc/get_clan_requests_v19', {
+    method: 'POST', body: JSON.stringify({}),
+  });
+}
+
+export async function reviewClanRequestOnline({requestId,approve}) {
+  return authedSupabaseFetch('/rest/v1/rpc/review_clan_request_v19', {
+    method: 'POST', body: JSON.stringify({p_request_id:requestId,p_approve:!!approve}),
+  });
+}
+
+export async function cancelClanRequestOnline(requestId) {
+  return authedSupabaseFetch('/rest/v1/rpc/cancel_clan_request_v19', {
+    method: 'POST', body: JSON.stringify({p_request_id:requestId}),
+  });
+}
+
+export async function setClanMemberRoleOnline({targetUserId,role}) {
+  return authedSupabaseFetch('/rest/v1/rpc/set_clan_member_role_v19', {
+    method: 'POST', body: JSON.stringify({p_target_user_id:targetUserId,p_role:role}),
+  });
+}
+
 export async function leaveClanOnline() {
   return authedSupabaseFetch('/rest/v1/rpc/leave_clan_v12', {
     method: 'POST', body: JSON.stringify({}),

@@ -1,3 +1,12 @@
+## V19.0.2 — Cargos e pedidos para alianças; Arena XP e nível seguros
+
+- Líder, Vice-líder, Membro Elite e Membro.
+- Solicitação de entrada obrigatória, aprovações do Líder/Vice e cancelamento de pedidos.
+- Repasse do cofre disponível para vice; guardas de nível/XP/roles no Supabase.
+- Arena usa curva de XP atual da V19, sem pular níveis indevidamente.
+- Auditoria nas RPCs de clã, progressão Arena e permissões de cofre.
+- Sem alterações nos saves ou na economia existente.
+
 
 ## V19.0.1 — Arte integrada no Perfil de Piloto + Loja Premium
 - adicionadas artes individuais para todas as pesquisas de DEFESA, UTILIDADE e ATAQUE no Perfil de Piloto;

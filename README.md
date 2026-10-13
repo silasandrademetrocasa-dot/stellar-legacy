@@ -1,3 +1,5 @@
+> **V19.0.2** — cargos de clã, pedidos com aprovação, vice-líder no cofre e proteção de níveis na Arena. Migrações aplicadas no Supabase atual. Confira `V19_0_2_CLAS_SEGURANCA_ARENA.md`.
+
 > Atualização local: **V19.0.1 — Arte integrada no Perfil de Piloto + Loja Premium**.
 
 # STELLAR LEGACY V19.0.0 — INTERFACE REESTRUTURADA

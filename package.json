@@ -1,6 +1,6 @@
 {
   "name": "stellar-legacy",
-  "version": "19.0.1",
+  "version": "19.0.2",
   "type": "module",
   "scripts": {
     "start": "node server/index.js",
@@ -15,5 +15,5 @@
   "engines": {
     "node": ">=18"
   },
-  "release": "v19.0.1-pilot-premium-art-integrated"
+  "release": "v19.0.2-clan-roles-request-approval-arena-xp-fix"
 }
