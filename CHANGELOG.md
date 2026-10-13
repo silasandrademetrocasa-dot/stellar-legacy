@@ -1,3 +1,12 @@
+## V19.0.7 — Correção de visibilidade do ADM Portais Astrais
+- Corrigida referência ausente `adminRuntimePortalsPanel` no registro `ui`.
+- Painel de ondas visível mesmo quando os preços do Materializador falham em carregar.
+- Cartões dos Portais não são recolhidos automaticamente; cada Round mantém expansor próprio.
+- Mensagens permanentes de falha ao carregar a configuração de ondas.
+- Preservação do rascunho de ondas quando os custos recarregam.
+- Cache-bust dos assets para V19.0.7.
+- Sem novos comandos SQL nem alterações em dados de jogadores.
+
 ## V19.0.6 — ADM fase 2 (Portais Astrais, ondas e economia)
 - Editor visual para Aurora, Nexus e Eclipse: NPCs, ondas, rounds, intervalos, escalas e recompensas.
 - Configuracao versionada no Supabase, protegida por RPC administrativa e limites de quantidade.

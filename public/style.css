@@ -2906,3 +2906,12 @@ body[data-quality="low"] .pet-gear {
 .portal-gate-wave input,.portal-gate-wave select,.portal-gate-round input,.portal-gate-reward input,.portal-gate-reward select{width:100%;min-height:34px;padding:7px;background:#091b30;color:#e4f7ff;border:1px solid #2b6687;border-radius:8px}
 .portal-gate-reward{border-top:1px solid rgba(90,180,255,.22);padding-top:10px;margin:12px 0}.portal-gate-reward h5{font-size:12px;margin:0 0 8px;color:#f4d488}
 @media(max-width:720px){.portal-gate-wave{grid-template-columns:1fr 1fr}.portal-gate-wave>b{grid-column:1/-1}.portal-gate-wave>button{grid-column:1/-1}}
+
+/* V19.0.7 • ADM Portal editor must remain visible and self-contained. */
+#adminRuntimePortalsPanel .portal-adm-section{display:block;min-width:0;margin:10px 0;padding:15px;border:1px solid rgba(75,190,255,.28);border-radius:14px;background:#06192d}
+#adminRuntimePortalsPanel .portal-adm-section>h4{color:#b8e9ff;margin:0 0 12px;font-size:14px}
+#adminRuntimePortalsPanel .portal-gate-load-state{white-space:normal;text-align:left;line-height:1.5}
+#adminRuntimePortalsPanel .portal-gate-load-state p{margin:8px 0;color:#f3c998}
+#adminRuntimePortalsPanel .portal-gate-round:focus-within{border-color:rgba(95,218,255,.65)}
+#adminRuntimePortalsPanel .portal-gate-tabs>.small-btn{flex:1 1 110px}
+@media (max-width:700px){#adminRuntimePortalsPanel .portal-adm-section{padding:10px}#adminRuntimePortalsPanel .portal-gate-wave{grid-template-columns:1fr 1fr}}
