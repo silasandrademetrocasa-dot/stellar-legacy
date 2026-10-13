@@ -1,6 +1,6 @@
 {
   "name": "stellar-legacy",
-  "version": "18.2.17",
+  "version": "19.0.0",
   "type": "module",
   "scripts": {
     "start": "node server/index.js",
@@ -15,5 +15,5 @@
   "engines": {
     "node": ">=18"
   },
-  "release": "public-privacy-terms-google-branding-v18-2-17"
+  "release": "v19-interface-clean-ammo-icons-pilot-attack"
 }

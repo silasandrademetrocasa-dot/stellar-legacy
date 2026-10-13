@@ -1,7 +1,7 @@
-import { FACTIONS, SHIPS, ITEMS, LASER_AMMO, ROCKETS, NPC_TYPES, MAPS, RESOURCES } from './data.js?v=18.2.17';
-import { GAME_ASSETS } from './assets/v17/manifest.js?v=18.2.17';
-import { signUp, signIn, beginGoogleSignIn, restoreGoogleSignInFromUrl, requestPasswordReset, restorePasswordRecoveryFromUrl, restoreSession, signOutLocal, checkGameSession, endGameSession, getUser, getSessionCredentials, loadCloudSave, saveCloudSave, updateCallsign, updatePassword, loadRankings, loadAuctionBids, saveAuctionBidOnline, markAuctionBidStatusOnline, loadAuctionMarket, upsertPlayerPresenceOnline, loadMapPresenceOnline, savePlayerLocationCheckpointOnline, loadPlayerLocationCheckpointOnline, removePlayerPresenceOnline, queuePvpAttackOnline, consumePvpDamageEventsOnline, syncArenaProfileOnline, loadArenaState, loadArenaDailyRewardStatus, claimArenaDailyReward, loadArenaOpponents, loadArenaHistory, arenaAttackOnline, listClansOnline, loadMyClanOnline, createClanOnline, joinClanOnline, leaveClanOnline, transferClanCreditsOnline, claimClanCreditGrantsOnline, recordClanAlienKillOnline, getPremiumShopOnline, testPurchasePremiumOnline, adminPreviewPremiumStageOnline, adminSimulatePremiumStageOnline, getPremiumStageCatalogOnline, loadWarfrontStateOnline, hitWorldBossOnline, claimWorldBossRewardOnline, declareClanWarOnline, recordClanWarScoreOnline, loadLiveOpsOnline, adminUpdateLiveEventScheduleOnline, purchaseLiveCatalogOnline, economyActionOnline, getChatHistoryOnline, sendChatMessageOnline, redeemGameCouponOnline, getMyDesignersOnline, setDesignLoadoutOnline, claimGateDroneDesignOnline, claimEventDesignerOnline, getAdminStatus, adminSearchAccounts, adminRecentActions, adminBanAccount, adminUnbanAccount, adminResetAccount, adminDeleteAccount, pushTelemetryBatch, adminTelemetryOverview, adminPlayerTelemetry, getBattleGroupOnline, createBattleGroupOnline, inviteBattleGroupOnline, searchBattleGroupPlayersOnline, inviteBattleGroupUserOnline, respondBattleGroupInviteOnline, leaveBattleGroupOnline, kickBattleGroupMemberOnline, setBattleGroupRallyOnline, loadRuntimeConfigOnline, loadNpcRuntimeConfigOnline, loadWorldRuntimeConfigOnline, loadSystemsRuntimeConfigOnline, loadAdminRuntimeMonitorOnline, adminUpdateRuntimeModuleOnline, adminUpdateNpcRuntimeOnline, adminUpdateNpcSpawnRuntimeOnline, adminUpdateWorldMapOnline, adminUpdateWorldResourceOnline, adminUpdateWorldSectorOnline, adminUpdateWorldPortalOnline, adminUpdateWorldResourcePoolOnline, adminUpdateMissionCategoryOnline, adminUpdateEconomyServiceOnline, adminUpdateCraftingRecipeOnline, loadBattlePassRuntimeConfigOnline, adminUpdateBattlePassSeasonOnline, adminUpdateBattlePassTierOnline, loadShopsRuntimeConfigOnline, adminUpdateCommonShopItemOnline, adminUpdatePremiumShopItemOnline, loadBonusConfigOnline, adminUpdateBonusConfigOnline } from './api.js?v=18.2.17';
-import { SharedUniverseClient } from './world.js?v=18.2.17';
+import { FACTIONS, SHIPS, ITEMS, LASER_AMMO, ROCKETS, NPC_TYPES, MAPS, RESOURCES } from './data.js?v=19.0.0';
+import { GAME_ASSETS } from './assets/v17/manifest.js?v=19.0.0';
+import { signUp, signIn, beginGoogleSignIn, restoreGoogleSignInFromUrl, requestPasswordReset, restorePasswordRecoveryFromUrl, restoreSession, signOutLocal, checkGameSession, endGameSession, getUser, getSessionCredentials, loadCloudSave, saveCloudSave, updateCallsign, updatePassword, loadRankings, loadAuctionBids, saveAuctionBidOnline, markAuctionBidStatusOnline, loadAuctionMarket, upsertPlayerPresenceOnline, loadMapPresenceOnline, savePlayerLocationCheckpointOnline, loadPlayerLocationCheckpointOnline, removePlayerPresenceOnline, queuePvpAttackOnline, consumePvpDamageEventsOnline, syncArenaProfileOnline, loadArenaState, loadArenaDailyRewardStatus, claimArenaDailyReward, loadArenaOpponents, loadArenaHistory, arenaAttackOnline, listClansOnline, loadMyClanOnline, createClanOnline, joinClanOnline, leaveClanOnline, transferClanCreditsOnline, claimClanCreditGrantsOnline, recordClanAlienKillOnline, getPremiumShopOnline, testPurchasePremiumOnline, adminPreviewPremiumStageOnline, adminSimulatePremiumStageOnline, getPremiumStageCatalogOnline, loadWarfrontStateOnline, hitWorldBossOnline, claimWorldBossRewardOnline, declareClanWarOnline, recordClanWarScoreOnline, loadLiveOpsOnline, adminUpdateLiveEventScheduleOnline, purchaseLiveCatalogOnline, economyActionOnline, getChatHistoryOnline, sendChatMessageOnline, redeemGameCouponOnline, getMyDesignersOnline, setDesignLoadoutOnline, claimGateDroneDesignOnline, claimEventDesignerOnline, getAdminStatus, adminSearchAccounts, adminRecentActions, adminBanAccount, adminUnbanAccount, adminResetAccount, adminDeleteAccount, pushTelemetryBatch, adminTelemetryOverview, adminPlayerTelemetry, getBattleGroupOnline, createBattleGroupOnline, inviteBattleGroupOnline, searchBattleGroupPlayersOnline, inviteBattleGroupUserOnline, respondBattleGroupInviteOnline, leaveBattleGroupOnline, kickBattleGroupMemberOnline, setBattleGroupRallyOnline, loadRuntimeConfigOnline, loadNpcRuntimeConfigOnline, loadWorldRuntimeConfigOnline, loadSystemsRuntimeConfigOnline, loadAdminRuntimeMonitorOnline, adminUpdateRuntimeModuleOnline, adminUpdateNpcRuntimeOnline, adminUpdateNpcSpawnRuntimeOnline, adminUpdateWorldMapOnline, adminUpdateWorldResourceOnline, adminUpdateWorldSectorOnline, adminUpdateWorldPortalOnline, adminUpdateWorldResourcePoolOnline, adminUpdateMissionCategoryOnline, adminUpdateEconomyServiceOnline, adminUpdateCraftingRecipeOnline, loadBattlePassRuntimeConfigOnline, adminUpdateBattlePassSeasonOnline, adminUpdateBattlePassTierOnline, loadShopsRuntimeConfigOnline, adminUpdateCommonShopItemOnline, adminUpdatePremiumShopItemOnline, loadBonusConfigOnline, adminUpdateBonusConfigOnline } from './api.js?v=19.0.0';
+import { SharedUniverseClient } from './world.js?v=19.0.0';
 
 const canvas = document.querySelector('#game');
 const ctx = canvas.getContext('2d');
@@ -829,15 +829,17 @@ const PILOT_SKILLS={
   tractor2:{id:'tractor2',branch:'utility',name:'Raio Trator II',max:3,values:[4,8,18],unit:'%',creditBase:60000000,desc:'Amplia o bônus de carga coletada.',requires:'greed'},
   cruelty2:{id:'cruelty2',branch:'utility',name:'Crueldade II',max:3,values:[4,10,17],unit:'%',creditBase:80000000,desc:'Amplia o bônus de Stellarium até 25% no total.',requires:'tractor2'},
   luck2:{id:'luck2',branch:'utility',name:'Sorte II',max:3,values:[2,4,8],unit:'%',creditBase:100000000,desc:'Amplia Sorte do Materializador até 12%.',requires:'cruelty2'},
-  detonation1:{id:'detonation1',branch:'offense',name:'Detonação I',max:2,values:[7,14],unit:'%',creditBase:2000000,desc:'Aumenta o dano explosivo do Nova Burst.',requires:null},
-  explosives:{id:'explosives',branch:'offense',name:'Explosivos',max:5,values:[4,8,12,18,25],unit:'%',creditBase:4000000,desc:'Aumenta o raio do Nova Burst.',requires:'detonation1'},
-  heatSeeking:{id:'heatSeeking',branch:'offense',name:'Mísseis Teleguiados',max:5,values:[1,2,4,6,10],unit:'%',creditBase:8000000,desc:'Aprimora eficiência ofensiva dos mísseis.',requires:'explosives'},
-  bounty1:{id:'bounty1',branch:'offense',name:'Caçador I',max:2,values:[2,4],unit:'%',creditBase:15000000,desc:'Aumenta dano laser em mapas de batalha e Gates.',requires:'heatSeeking'},
-  rocketFusion:{id:'rocketFusion',branch:'offense',name:'Fusão de Foguetes',max:5,values:[2,4,6,8,15],unit:'%',creditBase:25000000,desc:'Aumenta o dano dos mísseis.',requires:'bounty1'},
-  alienHunter:{id:'alienHunter',branch:'offense',name:'Caçador de Aliens',max:5,values:[2,4,6,8,12],unit:'%',creditBase:40000000,desc:'Aumenta dano laser contra NPCs.',requires:'rocketFusion'},
-  detonation2:{id:'detonation2',branch:'offense',name:'Detonação II',max:3,values:[7,14,36],unit:'%',creditBase:60000000,desc:'Amplia Detonação até 50% no total.',requires:'alienHunter'},
-  electroOptics:{id:'electroOptics',branch:'offense',name:'Eletro-Óptica',max:5,values:[5,10,15,20,25],unit:'%',creditBase:80000000,desc:'Aprimora precisão e estabilidade dos lasers.',requires:'detonation2'},
-  bounty2:{id:'bounty2',branch:'offense',name:'Caçador II',max:3,values:[2,4,8],unit:'%',creditBase:120000000,desc:'Amplia Caçador até 12% no total.',requires:'electroOptics'}
+  // V19 — Pesquisa de ATAQUE exclusiva da nave e dos lasers equipados em drones.
+  // IDs originais preservados: nunca zerar PP nem alterar o formato dos saves existentes.
+  detonation1:{id:'detonation1',branch:'offense',name:'Potência Laser I',max:2,values:[3,6],unit:'%',creditBase:2000000,desc:'Aumenta o dano dos lasers equipados na nave e nos drones.',requires:null},
+  explosives:{id:'explosives',branch:'offense',name:'Ruptura de Escudos',max:5,values:[2,4,6,8,10],unit:'%',creditBase:4000000,desc:'Aumenta dano dos lasers quando o alvo ainda tem escudo.',requires:'detonation1'},
+  heatSeeking:{id:'heatSeeking',branch:'offense',name:'Mira de Mísseis',max:5,values:[1,2,4,6,10],unit:'%',creditBase:8000000,desc:'Aumenta a chance de acerto dos mísseis contra NPCs.',requires:'explosives'},
+  bounty1:{id:'bounty1',branch:'offense',name:'Potência Laser II',max:2,values:[3,6],unit:'%',creditBase:15000000,desc:'Amplia o dano dos lasers da nave e drones em qualquer setor.',requires:'heatSeeking'},
+  rocketFusion:{id:'rocketFusion',branch:'offense',name:'Mísseis Potentes',max:5,values:[2,4,6,8,15],unit:'%',creditBase:25000000,desc:'Aumenta o dano dos mísseis da nave.',requires:'bounty1'},
+  alienHunter:{id:'alienHunter',branch:'offense',name:'Caçador de Aliens',max:5,values:[2,4,6,8,12],unit:'%',creditBase:40000000,desc:'Aumenta dano de laser da nave e dos drones contra NPCs.',requires:'rocketFusion'},
+  detonation2:{id:'detonation2',branch:'offense',name:'Precisão Crítica',max:3,values:[2,4,6],unit:'%',creditBase:60000000,desc:'Aumenta chance de acerto crítico com lasers contra NPCs.',requires:'alienHunter'},
+  electroOptics:{id:'electroOptics',branch:'offense',name:'Eletro-Óptica',max:5,values:[5,10,15,20,25],unit:'%',creditBase:80000000,desc:'Aumenta a precisão dos lasers contra NPCs.',requires:'detonation2'},
+  bounty2:{id:'bounty2',branch:'offense',name:'Combate entre Pilotos',max:3,values:[2,4,8],unit:'%',creditBase:120000000,desc:'Aumenta o dano de laser da nave e drones no PvP.',requires:'electroOptics'}
 };
 function freshPilotBio(){return {logDisks:0,totalPoints:0,skills:{},resetCount:0};}
 function normalizePilotBio(){progress.pilotBio ||= freshPilotBio();const p=progress.pilotBio;p.logDisks=Math.max(0,Math.floor(Number(p.logDisks)||0));p.totalPoints=Math.max(0,Math.min(PILOT_POINT_MAX,Math.floor(Number(p.totalPoints)||0)));p.skills ||= {};p.resetCount=Math.max(0,Math.floor(Number(p.resetCount)||0));for(const [id,skill] of Object.entries(PILOT_SKILLS))p.skills[id]=Math.max(0,Math.min(skill.max,Math.floor(Number(p.skills[id])||0)));}
@@ -856,7 +858,15 @@ function pilotRequiredLevelForPrerequisite(requiredSkill){if(!requiredSkill)retu
 function pilotRequirementInfo(skill){if(!skill?.requires)return null;const required=PILOT_SKILLS[skill.requires],need=pilotRequiredLevelForPrerequisite(required),current=pilotSkillLevel(skill.requires);return {skill:required,need,current,met:current>=need};}
 function pilotRequirementMet(skill){const req=pilotRequirementInfo(skill);return !req||req.met;}
 function togglePilotBranch(branch){loadPilotUiPrefs();pilotUiPrefs.collapsed[branch]=!pilotUiPrefs.collapsed[branch];savePilotUiPrefs();refreshPilotViews();}
-function pilotRareChanceBonus(){return pilotCombined('luck1','luck2')/100;}function pilotLootBonus(){return pilotCombined('tractor1','tractor2')/100;}function pilotEvasion(){return Math.min(.35,pilotCombined('evasive1','evasive2')/100);}function pilotBattleLaserBonus(){return pilotCombined('bounty1','bounty2')/100;}function pilotKamikazeDamageBonus(){return pilotCombined('detonation1','detonation2')/100;}function pilotKamikazeRadiusBonus(){return pilotSkillValue('explosives')/100;}
+function pilotRareChanceBonus(){return pilotCombined('luck1','luck2')/100;}
+function pilotLootBonus(){return pilotCombined('tractor1','tractor2')/100;}
+function pilotEvasion(){return Math.min(.35,pilotCombined('evasive1','evasive2')/100);}
+function pilotLaserPowerBonus(){return pilotCombined('detonation1','bounty1')/100;}
+function pilotShieldPressureBonus(){return pilotSkillValue('explosives')/100;}
+function pilotBattleLaserBonus(){return pilotSkillValue('bounty2')/100;}
+// V19: os upgrades de ATAQUE não aumentam mais o AUX. AUX continua com a própria evolução.
+function pilotKamikazeDamageBonus(){return 0;}
+function pilotKamikazeRadiusBonus(){return 0;}
 
 
 
@@ -2265,8 +2275,8 @@ function renderProgression(){
   loadPassUiPrefs();
   ui.passContent.innerHTML=`<section class="pass-hero"><div><div class="eyebrow">${escHtml(seasonCfg.name||`TEMPORADA ${progress.battlePass.season}`)}</div><h3>TIER ${unlocked} / ${battlePassTierCount()}</h3><p>${escHtml(seasonCfg.description||`5 missões diárias • ${battlePassDailyPoints()} pontos cada • Free + Premium.`)}</p></div><div class="pass-points"><span>PONTOS</span><b>${fmt(points)}</b><small>${unlocked>=battlePassTierCount()?'PASSE COMPLETO':`faltam ${fmt(nextPoints)} para o próximo tier`}</small></div></section><div class="pass-main-progress"><i style="width:${battlePassTierProgress()}%"></i></div>${premiumCta}
   <section class="${passSectionClass('missions')}"><button class="pass-section-head pass-section-toggle" type="button" data-pass-toggle="missions"><span class="pass-head-copy"><b>MISSÕES DIÁRIAS</b><small>${missions.filter(m=>daily.completed[m.id]).length}/5 concluídas hoje</small></span><em>${passSectionIcon('missions')}</em></button><div class="pass-section-body"><div class="pass-missions">${dailyHtml}</div></div></section>
-  <section class="${passSectionClass('rewards')}"><div class="pass-section-head"><button class="pass-section-title-button" type="button" data-pass-toggle="rewards"><span class="pass-head-copy"><b>RECOMPENSAS DO PASSE</b><small>FREE + PREMIUM • ${battlePassTierCount()} tiers</small></span><em>${passSectionIcon('rewards')}</em></button><div class="pass-claim-stack"><button class="ghost-btn" id="passClaimAll">RESGATAR FREE</button><button class="ghost-btn" id="passPremiumClaimAll" ${paid?'':'disabled'}>RESGATAR PREMIUM</button></div></div><div class="pass-section-body"><div class="pass-tier-grid">${tiers}</div></div></section>
-  <section class="${passSectionClass('levels','level-section')}"><div class="pass-section-head"><button class="pass-section-title-button" type="button" data-pass-toggle="levels"><span class="pass-head-copy"><b>RECOMPENSAS DE NÍVEL</b><small>LV 2 → LV ${PLAYER_MAX_LEVEL}</small></span><em>${passSectionIcon('levels')}</em></button><button class="ghost-btn" id="levelClaimAll">RESGATAR DISPONÍVEIS</button></div><div class="pass-section-body"><p class="muted">Cada recompensa de nível pode ser resgatada uma única vez.</p><div class="level-reward-grid">${levels}</div></div></section>`;
+  <section class="${passSectionClass('rewards')}"><div class="pass-section-head"><button class="pass-section-title-button" type="button" data-pass-toggle="rewards"><span class="pass-head-copy"><b>RECOMPENSAS DO PASSE</b><small>${battlePassTierCount()} níveis</small></span><em>${passSectionIcon('rewards')}</em></button><div class="pass-claim-stack"><button class="ghost-btn" id="passClaimAll">RESGATAR FREE</button><button class="ghost-btn" id="passPremiumClaimAll" ${paid?'':'disabled'}>RESGATAR PREMIUM</button></div></div><div class="pass-section-body"><div class="pass-tier-grid">${tiers}</div></div></section>
+  <section class="${passSectionClass('levels','level-section')}"><div class="pass-section-head"><button class="pass-section-title-button" type="button" data-pass-toggle="levels"><span class="pass-head-copy"><b>RECOMPENSAS DE NÍVEL</b><small>LV 2 → LV ${PLAYER_MAX_LEVEL}</small></span><em>${passSectionIcon('levels')}</em></button><button class="ghost-btn" id="levelClaimAll">RESGATAR DISPONÍVEIS</button></div><div class="pass-section-body"><div class="level-reward-grid">${levels}</div></div></section>`;
   ui.passContent.querySelectorAll('[data-pass-toggle]').forEach(b=>b.onclick=e=>{e.stopPropagation();togglePassSection(b.dataset.passToggle);});
   ui.passContent.querySelectorAll('[data-pass-claim]').forEach(b=>b.onclick=()=>claimBattlePassTier(b.dataset.passClaim));
   ui.passContent.querySelectorAll('[data-pass-premium-claim]').forEach(b=>b.onclick=()=>claimPremiumBattlePassTier(b.dataset.passPremiumClaim));
@@ -4073,8 +4083,8 @@ function computeStats(keepRatio=true){
   if(ship.bonusLowMaps&&low){hp+=ship.bonusLowMaps.hp;speed+=ship.bonusLowMaps.speed;shield*=ship.bonusLowMaps.shieldMult;laserDamage*=ship.bonusLowMaps.laserMult;rocketMult=ship.bonusLowMaps.rocketMult;}
   hp+=pilotSkillValue('hull1')+pilotSkillValue('hull2');
   shield*=1+pilotSkillValue('shieldEngineering')/100;
-  laserDamage*=1+pilotSkillValue('alienHunter')/100;
-  if(state.currentMap?.battle||state.currentMap?.gate)laserDamage*=1+pilotBattleLaserBonus();
+  laserDamage*=1+pilotSkillValue('alienHunter')/100; // bônus PvE dos lasers da nave e drones
+  laserDamage*=1+pilotLaserPowerBonus(); // ataque geral da nave (não aumenta o AUX)
   absorption=Math.min(95,absorption+pilotSkillValue('shieldMechanics'));
   rocketMult*=1+pilotSkillValue('rocketFusion')/100;
   const shipDesignBonus=shipDesignerBonuses(),petDesignBonus=petDesignerBonuses();
@@ -4788,8 +4798,9 @@ function applyLaserAmmoHit(enemy,baseDamage,ammo,color){
     if(drained>0){battlePassEvent('damage',drained);battlePassEvent('attack',1);}
     return drained;
   }
-  const damage=Math.max(0,Math.round(baseDamage*(Number(ammo?.mult)||1)));
-  if(damage>0)dealDamageToEnemy(enemy,damage,color||ammo?.color||'#7edcff',{canCrit:true,critChance:.065,critMult:1.55});
+  const shieldFactor=(Number(enemy.shield)||0)>0?1+pilotShieldPressureBonus():1;
+  const damage=Math.max(0,Math.round(baseDamage*(Number(ammo?.mult)||1)*shieldFactor));
+  if(damage>0)dealDamageToEnemy(enemy,damage,color||ammo?.color||'#7edcff',{canCrit:true,critChance:Math.min(.28,.065+pilotSkillValue('detonation2')/100),critMult:1.55});
   return damage;
 }
 function fireLaserTick(){
@@ -5129,7 +5140,9 @@ function pvpLaserBase(ids){
   let dmg=ids.reduce((sum,id)=>sum+(Number(ITEMS[id]?.damage)||0),0);
   const ship=SHIPS[progress.activeShipId],low=['x1','x2','x3','x4'].includes(progress.mapId);
   if(ship?.bonusLowMaps&&low)dmg*=Number(ship.bonusLowMaps.laserMult)||1;
-  if(state.currentMap?.battle)dmg*=1+pilotBattleLaserBonus();
+  dmg*=1+pilotLaserPowerBonus();
+  dmg*=1+pilotBattleLaserBonus();
+  if((Number(state.target?.shield)||0)>0)dmg*=1+pilotShieldPressureBonus();
   return dmg;
 }
 async function queuePvpShot(target,damage,shieldDrain=false,color='#ff657d'){
@@ -6168,16 +6181,9 @@ function renderPremiumShop(){
   const st=premiumRuntime.state||{},products=premiumCatalogForRender(),couponHint=Object.keys(PREMIUM_EVENT_COUPONS)[0]||'EVENTO7D';
   const activeUntil=effectivePremiumUntilMs();
   if(ui.premiumModeChip){ui.premiumModeChip.textContent=premiumCanPurchase()?'ATIVO':'CATÁLOGO';ui.premiumModeChip.classList.toggle('active',premiumCanPurchase());}
-  ui.premiumBenefits.innerHTML=`<div class="premium-status-card"><span>PREMIUM</span><b>${premiumActive()?'ATIVO':'INATIVO'}</b><small>${premiumActive()?`até ${formatPremiumUntil(new Date(activeUntil).toISOString())} • AUTO-COMBATE LIBERADO`:'Auto-combate • reparo grátis • regen 2X • míssil -20% • Elite -5% • Portais -10%'}</small></div><div class="premium-status-card"><span>PASSE PREMIUM</span><b>${st.battle_pass_active?'ATIVO':'INATIVO'}</b><small>Temporada ${escHtml(st.current_season||battlePassSeasonKey()||'—')} • AUTO-COMBATE • trilha Premium configurada no Passe</small></div><div class="premium-coupon-card"><div class="premium-coupon-copy"><span>CUPONS DE EVENTO</span><b>RESGATE ONLINE</b><small>Códigos administrados pelo Supabase • AUX-9, Stellarium, itens e outros prêmios. Cupom clássico ${escHtml(couponHint)} preservado.</small></div><div class="premium-coupon-form"><input id="premiumCouponInput" maxlength="64" autocomplete="off" placeholder="DIGITE SEU CUPOM" /><button class="small-btn gold" id="premiumCouponRedeem" type="button">RESGATAR</button></div></div>`;
-  if(!products.length){ui.premiumProductGrid.innerHTML='<div class="muted">Catálogo Premium indisponível.</div>';}
-  else {ui.premiumProductGrid.innerHTML=products.map(p=>{
-    const owned=p.category==='battle_pass'?!!st.battle_pass_active:false,levelLocked=Number(progress?.profile?.level||1)<Math.max(1,Number(p.min_level)||1);
-    const typeLabel=p.category==='elite_item'?'ITEM ELITE':p.category==='battle_pass'?'PASSE MENSAL':'ASSINATURA';
-    const buttonDisabled=owned||levelLocked||!premiumCanPurchase();
-    const buttonLabel=owned?'ATIVO / OBTIDO':levelLocked?`REQUER LV ${Math.max(1,Number(p.min_level)||1)}`:!premiumCanPurchase()?'INDISPONÍVEL':p.category==='premium'?(premiumActive()?'PRORROGAR':'ATIVAR'):'ATIVAR';
-    return `<article class="premium-product ${p.category}"><div class="premium-product-icon">${premiumProductIcon(p)}</div><div class="premium-product-copy"><span class="premium-product-type">${typeLabel}</span><h3>${escHtml(p.name)}</h3><p>${escHtml(p.description||'')}</p></div><div class="premium-product-price">R$ ${Number(p.price_brl||0).toFixed(2).replace('.',',')}</div><button class="${premiumCanPurchase()?'gold-btn':'ghost-btn'}" data-premium-buy="${escHtml(p.id)}" ${buttonDisabled?'disabled':''}>${buttonLabel}</button></article>`;
-  }).join('');
-  ui.premiumProductGrid.querySelectorAll('[data-premium-buy]').forEach(b=>b.onclick=()=>testPremiumPurchaseNow(b.dataset.premiumBuy));}
+  ui.premiumBenefits.innerHTML=`<div class="premium-status-card"><span>PREMIUM</span><b>${premiumActive()?'ATIVO':'INATIVO'}</b><small>${premiumActive()?`até ${formatPremiumUntil(new Date(activeUntil).toISOString())}`:'Bônus Premium desativados'}</small></div><div class="premium-status-card"><span>PASSE</span><b>${st.battle_pass_active?'ATIVO':'INATIVO'}</b><small>${escHtml(st.current_season||battlePassSeasonKey()||'—')}</small></div><details class="premium-coupon-panel v19-help-footer"><summary>🎟️ Resgatar cupom de evento</summary><div class="premium-coupon-form"><input id="premiumCouponInput" maxlength="64" autocomplete="off" placeholder="CÓDIGO DO CUPOM" /><button class="small-btn gold" id="premiumCouponRedeem" type="button">RESGATAR</button></div><p class="v19-tiny-muted">Resgate verificado pelo servidor.</p></details>`;
+  // V19: a antiga vitrine com compra de teste que entregava itens não é mais exposta.
+  ui.premiumProductGrid.innerHTML='<div class="empty-state">Carregando a vitrine Premium segura...</div>';
   const couponBtn=document.getElementById('premiumCouponRedeem');const couponInput=document.getElementById('premiumCouponInput');
   if(couponBtn&&couponInput){
     let redeeming=false;
@@ -6224,7 +6230,6 @@ const PREMIUM_STAGE_TABS_V18213=[
   ['stl','RECARGAS STL','stl_pack'],
   ['pass','PASSE + NÍVEIS','battle_pass'],
   ['equipment','EQUIPAMENTOS','equipment_bundle'],
-  ['legacy','LOJA ATUAL','legacy'],
 ];
 function premiumStagePriceV18213(value){return `R$ ${Math.max(0,Number(value)||0).toFixed(2).replace('.',',')}`;}
 function premiumStageIconV18213(row){
@@ -6265,6 +6270,7 @@ function premiumStageDescV18213(row){
 function premiumStageCloseOffV18213(){
   if(ui.premiumStageTabs){ui.premiumStageTabs.hidden=true;ui.premiumStageTabs.innerHTML='';}
   if(ui.premiumStageInfo){ui.premiumStageInfo.hidden=true;ui.premiumStageInfo.innerHTML='';}
+  if(ui.premiumProductGrid)ui.premiumProductGrid.innerHTML='<div class="empty-state">Loja Premium de teste temporariamente indisponível. Seus itens e sua conta estão seguros.</div>';
 }
 function renderPremiumStageV18213(){
   const stage=premiumStageRuntime.state;
@@ -6285,21 +6291,17 @@ function renderPremiumStageV18213(){
   const seasonLabel=escHtml(season.name||'Nenhuma temporada ativa');
   const subscription=stage.test_subscription;
   const subLabel=subscription?`Assinatura de teste: ${escHtml(subscription.product_id||'')} • ${escHtml(subscription.status||'')} • próxima data prevista ${formatPremiumUntil(subscription.next_renewal_at)}`:'Sem assinatura simulada';
-  info.innerHTML=`<div class="premium-stage-safety"><b>${canSimulate?'🧪 SIMULADOR ADMINISTRATIVO':'🛍️ LOJA PREMIUM EM PREPARAÇÃO'} • SEM DINHEIRO REAL</b><span>${canSimulate?'Compras simuladas não entregam STL, Premium, itens, Passe ou tiers ao jogador. '+escHtml(subLabel):'Vitrine experimental. Os preços são de teste e as compras ainda não estão abertas. Faça login como ADM para simular pedidos.'}</span></div>`;
+  info.innerHTML=`<div class="premium-stage-safety" title="Prévia de teste: não cobra dinheiro nem entrega recompensas."><b>🧪 ${canSimulate?'SIMULADOR ADM':'VITRINE DE TESTE'}</b><span>Sem pagamentos ou entregas reais.</span></div>`;
   if(canSimulate&&premiumStageRuntime.lastOrder){const o=premiumStageRuntime.lastOrder;info.innerHTML+=`<div class="premium-stage-last-order" role="status">✓ Último teste: ${escHtml(o.product)} • pedido ${escHtml(String(o.id))} • ${escHtml(o.duplicate?'repetição protegida':'registrado')} • nenhuma recompensa entregue</div>`;}
-  if(active==='legacy'){
-    info.innerHTML+=`<p class="premium-stage-legacy-note">Loja original preservada. Atenção: o botão de teste antigo da Loja Atual pode ativar benefícios e conceder itens na conta ADM. Os novos botões SIMULAR das outras abas são isolados do progresso real.</p>`;
-    return;
-  }
   const category=PREMIUM_STAGE_TABS_V18213.find(t=>t[0]===active)?.[2];
   // PASSE: progresso + compra de níveis na mesma aba. EQUIPAMENTOS: kits Elite + naves de evento.
   const categorySet=active==='pass'?['battle_pass','pass_tiers']:
     active==='equipment'?['equipment_bundle','event_ship_bundle']:[category];
   const offers=(Array.isArray(stage.offers)?stage.offers:[]).filter(p=>categorySet.includes(p.category)&&p.test_only===true&&p.live_enabled===false);
   if(active==='pass'){
-    info.innerHTML+=`<div class="premium-stage-progress"><b>${seasonLabel}</b> • ${fmt(ownedTiers)} / ${fmt(maxTiers)} níveis simulados <span>(separados do progresso real)</span><div class="premium-stage-meter"><i style="width:${maxTiers?Math.min(100,100*ownedTiers/maxTiers):0}%"></i></div></div>`;
+    info.innerHTML+=`<div class="premium-stage-progress"><b>${seasonLabel}</b> • ${fmt(ownedTiers)} / ${fmt(maxTiers)} níveis de teste<div class="premium-stage-meter"><i style="width:${maxTiers?Math.min(100,100*ownedTiers/maxTiers):0}%"></i></div></div>`;
   }else if(active==='equipment'){
-    info.innerHTML+=`<div class="premium-stage-progress"><b>⚔️ PACOTES ELITE E EVENTOS</b> • Kits de equipamentos e naves especiais existentes no jogo. <span>Ofertas de TESTE, 1 por conta, sem entrega real. A liberação futura de naves exige regras específicas para eventos.</span></div>`;
+    info.innerHTML+=`<div class="premium-stage-progress"><b>⚔️ ELITE E EVENTOS</b><span>1 por conta • Prévia sem entregas</span></div>`;
   }
   if(!offers.length){grid.innerHTML='<div class="empty-state">Nenhuma oferta de teste nesta categoria.</div>';return;}
   let previousCategory='';

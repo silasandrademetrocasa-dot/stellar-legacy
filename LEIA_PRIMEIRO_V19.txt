@@ -1,0 +1,42 @@
+STELLAR LEGACY V19.0.0 — LIMPEZA VISUAL, SPRITES E PERFIL DE PILOTO
+==============================================================
+
+INSTALAÇÃO
+1. Utilize o ZIP COMPLETO no instalador GitHub de sempre.
+2. Aguarde o deploy do Render e atualize o navegador (Ctrl+F5 se necessário).
+3. NÃO execute SQL: esta release não muda o esquema nem os dados do Supabase.
+4. Primeiro confirme o login Google e o personagem antigo antes de testar upgrades.
+
+O QUE MUDA
+- Loja Premium: remove a aba LOJA ATUAL; usa somente a vitrine segura de teste.
+  Não ativa pagamentos reais. O backend antigo permanece isolado para preservar compatibilidade.
+- Status Premium e Passe mais compactos; cupom acessível por painel recolhível.
+- Regras da Arena e Leilão aparecem em detalhes recolhíveis ao final da janela;
+  limites e valores seguem rigorosamente os mesmos.
+- Passe: cabeçalho de recompensas simplificado.
+- Novos sprites de PLS-1/2/3/4, SIP-2 (visual próprio) e mísseis.
+- Arte para Terminal Mercante Remoto Elite: apenas apresentação, sem alterar efeito.
+- Pesquisa ATAQUE: mesmas 9 posições e IDs; bônus focados em LASERS DA NAVE/DRONES,
+  MÍSSEIS, escudos do alvo, precisão, crítico PvE e PvP. Não aumenta mais o AUX.
+  Os pontos e níveis antigos são preservados e aplicados às posições equivalentes.
+  Atenção: habilidades já investidas mudam efeito e valores; compare seus atributos.
+- Documentação histórica V18 foi movida (NÃO EXCLUÍDA) para docs/historico-v18.
+- Todos SQL históricos e scripts/testes preservados; nenhuma reescrita de histórico Git.
+
+VALIDAÇÃO
+- 17 scripts de regressão/testes executados com sucesso (antes do ZIP final).
+- Nova suíte V19 inclui: importação de save com PP, nomes/efeitos, artes, abas,
+  desativação do checkout antigo e preservação dos scripts SQL.
+- Sintaxe Node verificada nos arquivos JS principais.
+
+LIMITES IMPORTANTES
+- A economia e o sistema autoritativo de combate online não foram migrados.
+- A pesquisa Ruptura de Escudos aumenta dano laser contra alvos com escudo; NÃO
+  bypassa a absorção/escudo no servidor. Habilidade funciona para PvE/PvP.
+- A melhora de precisão/crítico desta revisão é específica de combate PvE;
+  a habilidade Combate entre Pilotos melhora dano laser PvP.
+- Validação definitiva com dois jogadores no ambiente real deve ocorrer após deploy.
+
+ROLLBACK
+- Mantenha o ZIP V18.2.17 como retorno rápido pelo instalador de sempre.
+- Saves Supabase não foram alterados por esta atualização; não restaure SQL.

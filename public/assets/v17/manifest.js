@@ -157,18 +157,19 @@ export const GAME_ASSETS = {
     repElite: '/assets/v17/equipment/nanobot-repair.webp',
     cargoCpuCommon: '/assets/v17/equipment/cargo-cpu.webp',
     cargoCpuElite: '/assets/v17/equipment/cargo-cpu.webp',
-    ammoAutoBuyCpu: '/assets/v17/equipment/auto-restock.webp'
+    ammoAutoBuyCpu: '/assets/v17/equipment/auto-restock.webp',
+    remoteTraderCpuElite: '/assets/v19/equipment/terminal-mercante-remoto.webp'
   },
   ammo: {
-    lcb10: '/assets/v8/ammo/pls1.png',
-    mcb25: '/assets/v8/ammo/pls2.png',
-    mcb50: '/assets/v8/ammo/pls3.png',
-    ucb100: '/assets/v8/ammo/pls4.png',
-    sab50: '/assets/v8/ammo/pls3.png',
-    r310: '/assets/v8/ammo/cmt1.png',
-    plt2026: '/assets/v8/ammo/cmt2.png',
-    plt2021: '/assets/v8/ammo/cmt3.png',
-    plt3030: '/assets/v8/ammo/cmt4.png'
+    lcb10: '/assets/v19/ammo/pls1.webp',
+    mcb25: '/assets/v19/ammo/pls2.webp',
+    mcb50: '/assets/v19/ammo/pls3.webp',
+    ucb100: '/assets/v19/ammo/pls4.webp',
+    sab50: '/assets/v19/ammo/sip2.webp',
+    r310: '/assets/v19/ammo/cmt1.webp',
+    plt2026: '/assets/v19/ammo/cmt2.webp',
+    plt2021: '/assets/v19/ammo/cmt3.webp',
+    plt3030: '/assets/v19/ammo/cmt4.webp'
   },
   resources: {
     Prometium: '/assets/v17/environment/resources/ferron.webp',

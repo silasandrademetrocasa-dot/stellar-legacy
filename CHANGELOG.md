@@ -1,3 +1,11 @@
+## V19.0.0 — LIMPEZA VISUAL + EQUIPAMENTOS + ATAQUE DA NAVE (2026-10-13)
+- Removida aba legada da vitrine Premium (backend antigo isolado); mantida vitrine de teste com fail-closed.
+- Avisos e regras reduzidos e deslocados para detalhes no rodapé; cupom Premium recolhível.
+- Corrigidos 9 sprites de munição e mísseis em WebP, SIP-2 diferente da PLS-3 e ícone do Terminal Mercante Remoto Elite.
+- 9 pesquisas ATAQUE remodeladas sem upgrades do AUX; salvamentos e IDs legados preservados, novos efeitos reais de nave/drones.
+- Documentos V18 reorganizados em `docs/historico-v18/` (não excluídos); release sem SQL.
+- 17 testes/scripts de regressão passaram, incluindo cenário de save antigo com PP investido.
+
 
 ## V18.2.15 — PASSE + EQUIPAMENTOS ELITE / EVENTO (TESTE)
 - Aba Passe reúne Passe de Temporada e níveis; nova aba Equipamentos contém Elite I/II e naves Phantom/Seraph. Novas ofertas já cadastradas em SQL V18.3.6. Sem pagamento ou entrega real.

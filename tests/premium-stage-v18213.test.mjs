@@ -39,8 +39,9 @@ assert(!ui.premiumProductGrid.innerHTML.includes('Pacote Iniciante'));
 premiumStageRuntime.tab='bundles';ctx.renderPremiumStageV18213();assert(ui.premiumProductGrid.innerHTML.includes('Pacote Iniciante'));
 assert(ui.premiumProductGrid.innerHTML.includes('R$ 49,90'));
 premiumStageRuntime.tab='pass';ctx.renderPremiumStageV18213();assert(ui.premiumProductGrid.innerHTML.includes('Passe de Temporada'));
-premiumStageRuntime.tab='tiers';ctx.renderPremiumStageV18213();assert(ui.premiumProductGrid.innerHTML.includes('R$ 2,90'));
+assert(ui.premiumProductGrid.innerHTML.includes('R$ 2,90')); // níveis integrados à aba PASSE
 assert(ui.premiumProductGrid.innerHTML.includes('R$ 19,90'));
+assert(!ui.premiumStageTabs.innerHTML.includes('LOJA ATUAL'));
 response.test_tiers={season_key:'2026-10',purchased_tiers:27};premiumStageRuntime.state=structuredClone(response);ctx.renderPremiumStageV18213();assert(ui.premiumProductGrid.innerHTML.includes('LIMITE DA TEMPORADA'));
 response.test_tiers=null;premiumStageRuntime.state=structuredClone(response);premiumStageRuntime.tab='subscriptions';
 await ctx.simulatePremiumStageV18213('premium_90d');assert.equal(calls,1);assert.equal(confirms,1);

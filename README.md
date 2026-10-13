@@ -1,3 +1,15 @@
+# STELLAR LEGACY V19.0.0 — INTERFACE REESTRUTURADA
+
+**Instalação:** subir o ZIP completo pelo instalador GitHub. Sem SQL adicional.
+
+- UI mais limpa, Loja Atual removida da vitrine, cupom e regras em painéis recolhíveis.
+- Novas artes de munições/SIP-2/Terminal Mercante Remoto.
+- Árvore de ATAQUE focada na nave e nos drones, sem buff do AUX; PP e IDs de habilidades preservados.
+- Documentação histórica preservada em `docs/historico-v18/`.
+- Guia completo: [`V19_0_0_REESTRUTURACAO.md`](V19_0_0_REESTRUTURACAO.md).
+
+> **Atenção:** antigas referências a documentação V18 na sequência deste README estão arquivadas em `docs/historico-v18/`. O jogo, os saves e o SQL de produção não são reescritos nesta release.
+
 
 > **V18.2.15:** O Passe e os níveis foram reunidos na mesma aba da Loja Premium. Nova aba EQUIPAMENTOS com kits ELITE I/II e prévias das naves de evento Phantom/Seraph. Tudo em TESTE, nenhuma cobrança ou entrega. Consulte V18_2_15_PASSE_EQUIPAMENTOS_EVENTOS.md.
 
