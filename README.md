@@ -1,3 +1,5 @@
+> Atualização local: **V19.0.1 — Arte integrada no Perfil de Piloto + Loja Premium**.
+
 # STELLAR LEGACY V19.0.0 — INTERFACE REESTRUTURADA
 
 **Instalação:** subir o ZIP completo pelo instalador GitHub. Sem SQL adicional.

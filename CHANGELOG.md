@@ -1,3 +1,10 @@
+
+## V19.0.1 — Arte integrada no Perfil de Piloto + Loja Premium
+- adicionadas artes individuais para todas as pesquisas de DEFESA, UTILIDADE e ATAQUE no Perfil de Piloto;
+- adicionadas artes dedicadas para categorias da vitrine/Loja Premium de teste;
+- novos assets em `public/assets/v19/pilot-skills` e `public/assets/v19/premium-stage`;
+- ajustes visuais no layout dos cards para acomodar as novas imagens sem poluição visual.
+
 ## V19.0.0 — LIMPEZA VISUAL + EQUIPAMENTOS + ATAQUE DA NAVE (2026-10-13)
 - Removida aba legada da vitrine Premium (backend antigo isolado); mantida vitrine de teste com fail-closed.
 - Avisos e regras reduzidos e deslocados para detalhes no rodapé; cupom Premium recolhível.

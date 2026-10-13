@@ -11,9 +11,9 @@ const pkg=JSON.parse(read('package.json'));
 function segment(after,before){const a=game.indexOf(after),b=game.indexOf(before,a);assert(a>=0&&b>a,`${after} -> ${before}`);return game.slice(a,b);}
 
 test('V19 identifica a versão e mantém assets, API e backend ativos',()=>{
- assert.equal(pkg.version,'19.0.0');
- assert.match(html,/game\.js\?v=19\.0\.0/);assert.match(html,/style\.css\?v=19\.0\.0/);
- assert.match(read('server/index.js'),/version: '19\.0\.0'/);
+ assert.equal(pkg.version,'19.0.1');
+ assert.match(html,/game\.js\?v=19\.0\.1/);assert.match(html,/style\.css\?v=19\.0\.1/);
+ assert.match(read('server/index.js'),/version: '19\.0\.1'/);
  assert.match(game,/login|signInWithGoogle/i);
  assert.match(read('public/api.js'),/oauth/i);
  assert.match(read('public/privacidade.html'),/Privacidade/);

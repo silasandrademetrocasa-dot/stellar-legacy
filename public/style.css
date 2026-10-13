@@ -2774,3 +2774,17 @@ body[data-quality="low"] .pet-gear {
 .pass-section-body{padding:10px!important}
 .pass-head-copy small{font-size:9px!important}
 @media(max-width:680px){.premium-stage-safety{flex-wrap:wrap!important}.premium-coupon-panel .premium-coupon-form{flex-wrap:wrap}.premium-coupon-panel .premium-coupon-form button{min-height:34px}}
+
+
+/* V19.0.1 • Pilot + Premium art integration */
+.pilot-skill-node{display:grid;grid-template-columns:72px 1fr;grid-template-areas:'art head' 'art desc' 'art bonus' 'art req' 'art btn';column-gap:10px;align-items:start}
+.pilot-skill-media{grid-area:art;width:72px;height:72px;border-radius:14px;display:flex;align-items:center;justify-content:center;background:radial-gradient(circle at 50% 50%,rgba(88,205,255,.16),rgba(7,17,31,.96) 70%);border:1px solid rgba(110,210,255,.16);overflow:hidden}
+.pilot-skill-media img{width:100%;height:100%;object-fit:contain;filter:drop-shadow(0 0 10px rgba(88,205,255,.32))}
+.pilot-skill-head{grid-area:head}
+.pilot-skill-desc{grid-area:desc}
+.pilot-skill-bonus{grid-area:bonus}
+.pilot-skill-req{grid-area:req}
+.pilot-skill-node button{grid-area:btn}
+.premium-stage-product .premium-product-icon{height:86px!important;border-radius:14px;background:radial-gradient(circle at 50% 55%,rgba(57,176,255,.18),rgba(5,14,24,.95) 70%);border:1px solid rgba(118,190,255,.14)}
+.premium-stage-product .premium-product-icon img{max-width:108px!important;max-height:78px!important;filter:drop-shadow(0 0 12px rgba(89,214,255,.28))}
+@media(max-width:700px){.pilot-skill-node{grid-template-columns:1fr;grid-template-areas:'art' 'head' 'desc' 'bonus' 'req' 'btn'}.pilot-skill-media{width:86px;height:86px;margin:0 auto 4px}}

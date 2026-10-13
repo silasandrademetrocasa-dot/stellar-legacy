@@ -1,7 +1,7 @@
-import { FACTIONS, SHIPS, ITEMS, LASER_AMMO, ROCKETS, NPC_TYPES, MAPS, RESOURCES } from './data.js?v=19.0.0';
-import { GAME_ASSETS } from './assets/v17/manifest.js?v=19.0.0';
-import { signUp, signIn, beginGoogleSignIn, restoreGoogleSignInFromUrl, requestPasswordReset, restorePasswordRecoveryFromUrl, restoreSession, signOutLocal, checkGameSession, endGameSession, getUser, getSessionCredentials, loadCloudSave, saveCloudSave, updateCallsign, updatePassword, loadRankings, loadAuctionBids, saveAuctionBidOnline, markAuctionBidStatusOnline, loadAuctionMarket, upsertPlayerPresenceOnline, loadMapPresenceOnline, savePlayerLocationCheckpointOnline, loadPlayerLocationCheckpointOnline, removePlayerPresenceOnline, queuePvpAttackOnline, consumePvpDamageEventsOnline, syncArenaProfileOnline, loadArenaState, loadArenaDailyRewardStatus, claimArenaDailyReward, loadArenaOpponents, loadArenaHistory, arenaAttackOnline, listClansOnline, loadMyClanOnline, createClanOnline, joinClanOnline, leaveClanOnline, transferClanCreditsOnline, claimClanCreditGrantsOnline, recordClanAlienKillOnline, getPremiumShopOnline, testPurchasePremiumOnline, adminPreviewPremiumStageOnline, adminSimulatePremiumStageOnline, getPremiumStageCatalogOnline, loadWarfrontStateOnline, hitWorldBossOnline, claimWorldBossRewardOnline, declareClanWarOnline, recordClanWarScoreOnline, loadLiveOpsOnline, adminUpdateLiveEventScheduleOnline, purchaseLiveCatalogOnline, economyActionOnline, getChatHistoryOnline, sendChatMessageOnline, redeemGameCouponOnline, getMyDesignersOnline, setDesignLoadoutOnline, claimGateDroneDesignOnline, claimEventDesignerOnline, getAdminStatus, adminSearchAccounts, adminRecentActions, adminBanAccount, adminUnbanAccount, adminResetAccount, adminDeleteAccount, pushTelemetryBatch, adminTelemetryOverview, adminPlayerTelemetry, getBattleGroupOnline, createBattleGroupOnline, inviteBattleGroupOnline, searchBattleGroupPlayersOnline, inviteBattleGroupUserOnline, respondBattleGroupInviteOnline, leaveBattleGroupOnline, kickBattleGroupMemberOnline, setBattleGroupRallyOnline, loadRuntimeConfigOnline, loadNpcRuntimeConfigOnline, loadWorldRuntimeConfigOnline, loadSystemsRuntimeConfigOnline, loadAdminRuntimeMonitorOnline, adminUpdateRuntimeModuleOnline, adminUpdateNpcRuntimeOnline, adminUpdateNpcSpawnRuntimeOnline, adminUpdateWorldMapOnline, adminUpdateWorldResourceOnline, adminUpdateWorldSectorOnline, adminUpdateWorldPortalOnline, adminUpdateWorldResourcePoolOnline, adminUpdateMissionCategoryOnline, adminUpdateEconomyServiceOnline, adminUpdateCraftingRecipeOnline, loadBattlePassRuntimeConfigOnline, adminUpdateBattlePassSeasonOnline, adminUpdateBattlePassTierOnline, loadShopsRuntimeConfigOnline, adminUpdateCommonShopItemOnline, adminUpdatePremiumShopItemOnline, loadBonusConfigOnline, adminUpdateBonusConfigOnline } from './api.js?v=19.0.0';
-import { SharedUniverseClient } from './world.js?v=19.0.0';
+import { FACTIONS, SHIPS, ITEMS, LASER_AMMO, ROCKETS, NPC_TYPES, MAPS, RESOURCES } from './data.js?v=19.0.1';
+import { GAME_ASSETS } from './assets/v17/manifest.js?v=19.0.1';
+import { signUp, signIn, beginGoogleSignIn, restoreGoogleSignInFromUrl, requestPasswordReset, restorePasswordRecoveryFromUrl, restoreSession, signOutLocal, checkGameSession, endGameSession, getUser, getSessionCredentials, loadCloudSave, saveCloudSave, updateCallsign, updatePassword, loadRankings, loadAuctionBids, saveAuctionBidOnline, markAuctionBidStatusOnline, loadAuctionMarket, upsertPlayerPresenceOnline, loadMapPresenceOnline, savePlayerLocationCheckpointOnline, loadPlayerLocationCheckpointOnline, removePlayerPresenceOnline, queuePvpAttackOnline, consumePvpDamageEventsOnline, syncArenaProfileOnline, loadArenaState, loadArenaDailyRewardStatus, claimArenaDailyReward, loadArenaOpponents, loadArenaHistory, arenaAttackOnline, listClansOnline, loadMyClanOnline, createClanOnline, joinClanOnline, leaveClanOnline, transferClanCreditsOnline, claimClanCreditGrantsOnline, recordClanAlienKillOnline, getPremiumShopOnline, testPurchasePremiumOnline, adminPreviewPremiumStageOnline, adminSimulatePremiumStageOnline, getPremiumStageCatalogOnline, loadWarfrontStateOnline, hitWorldBossOnline, claimWorldBossRewardOnline, declareClanWarOnline, recordClanWarScoreOnline, loadLiveOpsOnline, adminUpdateLiveEventScheduleOnline, purchaseLiveCatalogOnline, economyActionOnline, getChatHistoryOnline, sendChatMessageOnline, redeemGameCouponOnline, getMyDesignersOnline, setDesignLoadoutOnline, claimGateDroneDesignOnline, claimEventDesignerOnline, getAdminStatus, adminSearchAccounts, adminRecentActions, adminBanAccount, adminUnbanAccount, adminResetAccount, adminDeleteAccount, pushTelemetryBatch, adminTelemetryOverview, adminPlayerTelemetry, getBattleGroupOnline, createBattleGroupOnline, inviteBattleGroupOnline, searchBattleGroupPlayersOnline, inviteBattleGroupUserOnline, respondBattleGroupInviteOnline, leaveBattleGroupOnline, kickBattleGroupMemberOnline, setBattleGroupRallyOnline, loadRuntimeConfigOnline, loadNpcRuntimeConfigOnline, loadWorldRuntimeConfigOnline, loadSystemsRuntimeConfigOnline, loadAdminRuntimeMonitorOnline, adminUpdateRuntimeModuleOnline, adminUpdateNpcRuntimeOnline, adminUpdateNpcSpawnRuntimeOnline, adminUpdateWorldMapOnline, adminUpdateWorldResourceOnline, adminUpdateWorldSectorOnline, adminUpdateWorldPortalOnline, adminUpdateWorldResourcePoolOnline, adminUpdateMissionCategoryOnline, adminUpdateEconomyServiceOnline, adminUpdateCraftingRecipeOnline, loadBattlePassRuntimeConfigOnline, adminUpdateBattlePassSeasonOnline, adminUpdateBattlePassTierOnline, loadShopsRuntimeConfigOnline, adminUpdateCommonShopItemOnline, adminUpdatePremiumShopItemOnline, loadBonusConfigOnline, adminUpdateBonusConfigOnline } from './api.js?v=19.0.1';
+import { SharedUniverseClient } from './world.js?v=19.0.1';
 
 const canvas = document.querySelector('#game');
 const ctx = canvas.getContext('2d');
@@ -193,6 +193,26 @@ function shipCardAsset(id){return (GAME_ASSETS.ships&&GAME_ASSETS.ships[id])||nu
 function shipMapAsset(id){return (GAME_ASSETS.shipMap&&GAME_ASSETS.shipMap[id])||shipCardAsset(id);}
 function droneCardAsset(id){return (GAME_ASSETS.drones&&GAME_ASSETS.drones[id])||null;}
 function droneMapAsset(id){return (GAME_ASSETS.droneMap&&GAME_ASSETS.droneMap[id])||droneCardAsset(id);}
+function pilotSkillArt(id){return (GAME_ASSETS.pilotSkills&&GAME_ASSETS.pilotSkills[id])||null;}
+function premiumStageArtV18213(row){
+  const assets=GAME_ASSETS.premiumStage||{};
+  if(row?.category==='premium'){
+    if(row.billing_mode==='prepaid')return assets.premiumWeek||null;
+    const months=Math.max(1,Number(row.billing_months)||1);
+    return months>=3?(assets.premiumElite||assets.premiumMonth||null):(assets.premiumMonth||assets.premiumElite||null);
+  }
+  if(row?.category==='battle_pass')return assets.battlePassCard||null;
+  if(row?.category==='pass_tiers')return assets.battlePassPlus||assets.battlePassCard||null;
+  if(row?.category==='stl_pack')return assets.stlPack||null;
+  if(row?.category==='starter_bundle')return assets.starterBundle||null;
+  if(row?.category==='equipment_bundle'){
+    const name=String(row?.name||row?.id||'').toLowerCase();
+    if(name.includes('arsenal')||name.includes('armas')||name.includes('elite'))return assets.arsenalBundle||assets.equipmentBundle||null;
+    return assets.equipmentBundle||assets.arsenalBundle||null;
+  }
+  if(row?.category==='event_ship_bundle')return assets.eventShipBundle||null;
+  return null;
+}
 function assetForProduct(id,type,subtype){
   if(type==='ship')return shipCardAsset(id);
   if(type==='drone')return droneCardAsset(id);
@@ -5953,7 +5973,8 @@ function buildPilotBranch(branch,meta,avail){
   for(const skill of skills){
     const lv=pilotSkillLevel(skill.id),maxed=lv>=skill.max,reqInfo=pilotRequirementInfo(skill),req=!reqInfo||reqInfo.met,cost=maxed?0:pilotSkillCreditCost(skill,lv+1),card=document.createElement('article');card.className=`pilot-skill-node${maxed?' maxed':''}${!req?' locked':''}`;
     const reqHtml=reqInfo?`<div class="pilot-skill-req">${req?'✓':'🔒'} Requer ${reqInfo.skill.name} ${reqInfo.need}/${reqInfo.skill.max}${reqInfo.current?` • atual ${reqInfo.current}/${reqInfo.skill.max}`:''}</div>`:'';
-    card.innerHTML=`<div class="pilot-skill-head"><b>${skill.name}</b><span>${lv}/${skill.max}</span></div><div class="pilot-skill-desc">${skill.desc}</div><div class="pilot-skill-bonus">ATUAL: <b>${pilotSkillBonusLabel(skill,lv)}</b>${!maxed?` • PRÓXIMO: <b>${pilotSkillBonusLabel(skill,lv+1)}</b>`:''}</div>${reqHtml}`;
+    const art=pilotSkillArt(skill.id);
+    card.innerHTML=`${art?`<div class="pilot-skill-media"><img src="${art}" alt="${skill.name}" loading="lazy"></div>`:''}<div class="pilot-skill-head"><b>${skill.name}</b><span>${lv}/${skill.max}</span></div><div class="pilot-skill-desc">${skill.desc}</div><div class="pilot-skill-bonus">ATUAL: <b>${pilotSkillBonusLabel(skill,lv)}</b>${!maxed?` • PRÓXIMO: <b>${pilotSkillBonusLabel(skill,lv+1)}</b>`:''}</div>${reqHtml}`;
     const b=document.createElement('button');b.className=maxed?'small-btn gold':'small-btn';b.disabled=maxed||!req||avail<=0||progress.profile.credits<cost;b.textContent=maxed?'MAX':`UP • 1 PP + ${fmt(cost)} CR`;b.onclick=()=>upgradePilotSkill(skill.id);card.appendChild(b);body.appendChild(card);
   }
   section.appendChild(body);return section;
@@ -6317,7 +6338,8 @@ function renderPremiumStageV18213(){
       active==='equipment'?(row.category==='equipment_bundle'?'⚔️ KITS DE EQUIPAMENTOS ELITE':'🛸 NAVES ESPECIAIS DE EVENTO'):''):'';
     previousCategory=row.category;
     const groupHeader=group?`<div class="premium-stage-section-title" role="heading" aria-level="3">${group}</div>`:'';
-    return `${groupHeader}<article class="premium-product premium-stage-product ${escHtml(row.category)}" data-stage-product="${escHtml(row.id)}"><div class="premium-product-icon">${premiumStageIconV18213(row)}</div><div class="premium-product-copy"><span class="premium-product-type">${escHtml(mode)} • TESTE</span><h3>${escHtml(row.name||row.id)}</h3><p>${escHtml(premiumStageDescV18213(row))}</p></div><div class="premium-product-price">${premiumStagePriceV18213(row.price_brl)}</div><button type="button" class="gold-btn premium-stage-action" data-stage-simulate="${escHtml(row.id)}" ${disabled?'disabled':''}>${label}</button></article>`;
+    const art=premiumStageArtV18213(row);
+    return `${groupHeader}<article class="premium-product premium-stage-product ${escHtml(row.category)}" data-stage-product="${escHtml(row.id)}"><div class="premium-product-icon">${art?`<img src="${art}" alt="${escHtml(row.name||row.id)}" loading="lazy">`:premiumStageIconV18213(row)}</div><div class="premium-product-copy"><span class="premium-product-type">${escHtml(mode)} • TESTE</span><h3>${escHtml(row.name||row.id)}</h3><p>${escHtml(premiumStageDescV18213(row))}</p></div><div class="premium-product-price">${premiumStagePriceV18213(row.price_brl)}</div><button type="button" class="gold-btn premium-stage-action" data-stage-simulate="${escHtml(row.id)}" ${disabled?'disabled':''}>${label}</button></article>`;
   }).join('');
   grid.querySelectorAll('[data-stage-simulate]').forEach(button=>button.onclick=()=>simulatePremiumStageV18213(button.dataset.stageSimulate));
 }
