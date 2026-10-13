@@ -1,118 +1,105 @@
-name: Stellar Auto Installer
-
-# STELLAR LEGACY AUTO INSTALLER
-# Para mudar a pasta de upload, altere "updates/*.zip" abaixo e as referências
-# "updates/" no script. O padrão recomendado é manter /updates.
+name: "🛠️ Instalar PATCH Stellar Legacy V19.0.6"
+run-name: "Aplicar patch V19.0.6 sem apagar o jogo • ${{ github.actor }}"
 
 on:
-  push:
-    paths:
-      - 'updates/*.zip'
   workflow_dispatch:
 
 permissions:
   contents: write
 
 concurrency:
-  group: stellar-auto-installer
+  group: stellar-zip-installer
   cancel-in-progress: false
 
 jobs:
-  install:
-    if: github.actor != 'github-actions[bot]'
-    runs-on: ubuntu-latest
+  instalar_patch:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
     steps:
-      - name: Baixar repositório
+      - name: Baixar o projeto atual
         uses: actions/checkout@v4
         with:
+          ref: main
           fetch-depth: 0
 
-      - name: Localizar ZIP mais recente
-        id: zip
+      - name: Conferir ZIP, versão base e conteúdo do patch
         shell: bash
         run: |
           set -euo pipefail
-          shopt -s nullglob
-          files=(updates/*.zip)
-          if [ ${#files[@]} -eq 0 ]; then
-            echo "Nenhum ZIP encontrado em /updates."
-            echo "found=false" >> "$GITHUB_OUTPUT"
-            exit 0
-          fi
-          newest=$(ls -1t updates/*.zip | head -n 1)
-          echo "ZIP selecionado: $newest"
-          echo "found=true" >> "$GITHUB_OUTPUT"
-          echo "path=$newest" >> "$GITHUB_OUTPUT"
+          test -f STELLAR_FASE2_PATCH_V19.0.6.zip || { echo '❌ Falta STELLAR_FASE2_PATCH_V19.0.6.zip na raiz do GitHub.'; exit 1; }
+          CURRENT=$(node -p "require('./package.json').version")
+          test "$CURRENT" = '19.0.5' || { echo "❌ Esperada V19.0.5, encontrada V$CURRENT. Nada modificado."; exit 1; }
+          python3 - <<'PY'
+          from pathlib import Path, PurePosixPath
+          import hashlib, stat, zipfile
+          p=Path('STELLAR_FASE2_PATCH_V19.0.6.zip')
+          if not zipfile.is_zipfile(p):
+              raise SystemExit('❌ ZIP inválido.')
+          root=Path('/tmp/stellar-fase2-safe')
+          root.mkdir(parents=True, exist_ok=True)
+          with zipfile.ZipFile(p) as z:
+              total=0
+              for info in z.infolist():
+                  q=PurePosixPath(info.filename)
+                  if q.is_absolute() or '..' in q.parts or not q.parts or q.parts[0]!='stellar_fase2_v19_0_6':
+                      raise SystemExit(f'❌ Caminho inseguro/inválido: {info.filename}')
+                  mode=(info.external_attr >> 16) & 0o170000
+                  if mode==stat.S_IFLNK:
+                      raise SystemExit('❌ Link simbólico não permitido no patch.')
+                  total+=info.file_size
+                  if total>20*1024*1024:
+                      raise SystemExit('❌ Patch maior que o limite de 20 MB descompactados.')
+              z.extractall(root)
+          bundle=root/'stellar_fase2_v19_0_6'
+          for filename in ['INSTALAR_FASE2.mjs', 'patches/gate_admin.js.txt','patches/gate_runtime.js.txt','sql/V19_0_6_ADM_PORTAIS.sql']:
+              if not (bundle/filename).is_file():
+                  raise SystemExit(f'❌ Arquivo obrigatório faltando no patch: {filename}')
+          print('✅ ZIP e estrutura conferidos; SHA256:', hashlib.sha256(p.read_bytes()).hexdigest())
+          PY
 
-      - name: Validar e extrair atualização
-        if: steps.zip.outputs.found == 'true'
+      - name: Aplicar somente as alterações da Fase 2
         shell: bash
         run: |
           set -euo pipefail
-          ZIP="${{ steps.zip.outputs.path }}"
-          rm -rf .stellar-update
-          mkdir -p .stellar-update/raw .stellar-update/stage
+          node /tmp/stellar-fase2-safe/stellar_fase2_v19_0_6/INSTALAR_FASE2.mjs
 
-          # Bloqueia pacotes absurdamente grandes antes de extrair.
-          bytes=$(unzip -l "$ZIP" | awk 'END {print $1+0}')
-          max=$((350*1024*1024))
-          if [ "$bytes" -gt "$max" ]; then
-            echo "ZIP excede 350 MB descompactado. Abortando."
-            exit 1
-          fi
-
-          unzip -q "$ZIP" -d .stellar-update/raw
-
-          # Aceita ZIP com os arquivos na raiz ou dentro de uma pasta principal.
-          src=.stellar-update/raw
-          entries=$(find "$src" -mindepth 1 -maxdepth 1 | wc -l | tr -d ' ')
-          dirs=$(find "$src" -mindepth 1 -maxdepth 1 -type d | wc -l | tr -d ' ')
-          if [ "$entries" = "1" ] && [ "$dirs" = "1" ]; then
-            src=$(find "$src" -mindepth 1 -maxdepth 1 -type d | head -n 1)
-          fi
-
-          if [ ! -f "$src/package.json" ]; then
-            echo "package.json não encontrado no pacote. Nenhum arquivo foi alterado."
-            exit 1
-          fi
-
-          node -e "const p=require(process.argv[1]); if(!p.name) process.exit(1); console.log('Pacote:',p.name,'versão',p.version||'sem versão')" "$src/package.json"
-          rsync -a "$src/" .stellar-update/stage/
-
-          if [ -f .stellar-update/stage/public/game.js ]; then
-            node --check .stellar-update/stage/public/game.js
-          fi
-          if [ -f .stellar-update/stage/server/index.js ]; then
-            node --check .stellar-update/stage/server/index.js
-          fi
-
-      - name: Instalar pacote no repositório
-        if: steps.zip.outputs.found == 'true'
+      - name: Conferir JavaScript e alterações previstas
         shell: bash
         run: |
           set -euo pipefail
-          rsync -a --delete \
-            --exclude='.git/' \
-            --exclude='.github/' \
-            --exclude='updates/' \
-            --exclude='.stellar-update/' \
-            .stellar-update/stage/ ./
+          test "$(node -p "require('./package.json').version")" = '19.0.6'
+          test -f sql/V19_0_6_ADM_PORTAIS.sql
+          for file in public/game.js public/api.js public/data.js server/index.js server/world.js; do
+            node --check "$file"
+          done
+          git diff --check
+          echo '✅ Arquivos alterados:'
+          git status --short
+          python3 - <<'PY'
+          import subprocess
+          allowed={'public/game.js','public/api.js','public/index.html','public/style.css',
+                   'server/index.js','package.json','CHANGELOG.md','sql/V19_0_6_ADM_PORTAIS.sql'}
+          changed=set(subprocess.check_output(['git','diff','--name-only'],text=True).splitlines())
+          unexpected=changed-allowed
+          if unexpected:raise SystemExit('❌ O patch tocou arquivos inesperados: '+', '.join(sorted(unexpected)))
+          required={'public/game.js','public/api.js','public/index.html','server/index.js','package.json'}
+          if not required.issubset(changed):raise SystemExit('❌ Não foram detectadas todas as alterações essenciais.')
+          print('✅ Patch limitado ao código e configurações previstas.')
+          PY
 
-          rm -f updates/*.zip
-          rm -rf .stellar-update
-
-      - name: Commit automático
-        if: steps.zip.outputs.found == 'true'
+      - name: Publicar patch na main (sem rsync --delete)
         shell: bash
         run: |
           set -euo pipefail
-          git config user.name "Stellar Auto Installer"
-          git config user.email "actions@users.noreply.github.com"
-          git add -A
+          git config user.name 'Stellar Legacy Installer'
+          git config user.email 'actions@users.noreply.github.com'
+          git add public/game.js public/api.js public/index.html public/style.css server/index.js package.json CHANGELOG.md sql/V19_0_6_ADM_PORTAIS.sql
+          git rm -- STELLAR_FASE2_PATCH_V19.0.6.zip
           if git diff --cached --quiet; then
-            echo "Nenhuma mudança para publicar."
+            echo 'Nenhuma alteração a publicar.'
             exit 0
           fi
-          VERSION=$(node -p "require('./package.json').version || 'update'" 2>/dev/null || echo update)
-          git commit -m "AUTO INSTALL: Stellar Legacy v${VERSION} [skip ci]"
-          git push
+          git commit -m 'deploy: Stellar Legacy V19.0.6 ADM fase 2 via patch seguro'
+          git push origin HEAD:main
+          echo '✅ V19.0.6 publicada na main, preservando os assets e arquivos existentes.'
+          echo '⚠ Execute sql/V19_0_6_ADM_PORTAIS.sql no Supabase logo após o deploy.'
