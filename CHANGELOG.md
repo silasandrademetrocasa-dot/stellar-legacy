@@ -1,3 +1,12 @@
+## V19.0.3 — CENTRAL ADM DE CUPONS
+- Editor de cupons em ADM → CUPONS, com escolha entre 99 prêmios do catálogo V19.
+- Até 12 recompensas por cupom: Premium (dias), Passe Premium da temporada, naves comuns/Elite/evento, lasers, geradores, extras, drones, munições, mísseis, recursos, Créditos e STL.
+- Código personalizado ou automático, limite global de resgates, um resgate por conta, nível mínimo, ativação/desativação e datas de início/fim.
+- Resgate validado pelo Supabase em transação, sem pagamentos; itens e benefícios entregues somente após validação do servidor.
+- Mantém cupons legados V18.2.1. Login, saves e lojas permanecem intactos.
+- SQL `sql/V19_0_3_CUPONS_ADM_CATALOGO.sql` aplicado no Supabase durante a implementação. Não precisa executar ao atualizar Render.
+- Testes de autorização ADM, resgate, Premium/Passe, bloqueio de duplicidade, compatibilidade de códigos antigos e scripts de regressão.
+
 ## V19.0.2 — Cargos e pedidos para alianças; Arena XP e nível seguros
 
 - Líder, Vice-líder, Membro Elite e Membro.

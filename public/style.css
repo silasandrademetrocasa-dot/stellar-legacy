@@ -2799,3 +2799,19 @@ body[data-quality="low"] .pet-gear {
 .clan-requests-box{border-color:rgba(73,189,233,.4)}
 .clan-v19-security{color:#ffd987;border-color:rgba(255,195,74,.36)}
 @media(max-width:650px){.clan-request-line{align-items:stretch}.clan-role-select{max-width:130px}.clan-request-actions button{font-size:10px}}
+
+/* V19.0.3 • ADM CUPONS */
+.admin-runtime-coupons-panel{padding:12px;border:1px solid rgba(83,197,255,.19);border-radius:13px;background:linear-gradient(180deg,#051627,#07101d);margin:12px 0}
+.admin-coupon-fields{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px;margin:14px 0}
+.admin-coupon-fields label,.admin-coupon-picker label{display:flex;flex-direction:column;gap:5px;font-size:10px;font-weight:900;color:#8ebfd4;letter-spacing:.07em}
+.admin-coupon-fields input,.admin-coupon-picker input,.admin-coupon-picker select{width:100%;min-width:0;padding:10px;border:1px solid rgba(105,204,255,.31);border-radius:9px;background:#06111e;color:#e6f8ff;min-height:41px}
+.admin-coupon-picker{display:grid;grid-template-columns:180px minmax(200px,1fr) 165px auto;align-items:end;gap:9px;margin-bottom:14px}
+.admin-coupon-picker>button{min-height:41px}
+.admin-coupon-cart{border:1px solid rgba(255,216,122,.2);background:rgba(28,22,12,.55);border-radius:12px;padding:12px;margin-bottom:14px}
+.admin-coupon-cart>strong{display:block;margin-bottom:9px;color:#ffdf8d}.admin-coupon-cart>button{margin-top:10px;min-height:41px;width:100%}
+.admin-coupon-reward{display:flex;gap:12px;align-items:center;justify-content:space-between;padding:8px 10px;margin:5px 0;border-radius:8px;background:#0b2335;font-size:12px}
+.admin-coupon-reward button{border:1px solid #7b4654;border-radius:6px;color:#ffc2c7;background:#2a111f;min-height:28px;padding:2px 9px}
+.admin-coupon-list-title{margin:16px 0 8px;color:#89dfff;font-size:13px;display:flex;gap:12px}.admin-coupon-issued{display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:11px;border:1px solid rgba(119,210,255,.16);background:rgba(6,20,35,.8);border-radius:10px;margin:7px 0}
+.admin-coupon-issued>div{display:flex;flex:1;min-width:210px;flex-direction:column;gap:4px}.admin-coupon-issued b{font-size:13px;color:#ffe59b}.admin-coupon-issued small{font-size:10px;color:#9cbecc;line-height:1.5}
+@media(max-width:900px){.admin-coupon-fields{grid-template-columns:repeat(2,minmax(0,1fr))}.admin-coupon-picker{grid-template-columns:1fr 1fr}}
+@media(max-width:560px){.admin-coupon-fields,.admin-coupon-picker{grid-template-columns:1fr}}

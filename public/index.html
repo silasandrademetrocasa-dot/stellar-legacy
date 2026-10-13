@@ -6,7 +6,7 @@
 <meta content="width=device-width,initial-scale=1,user-scalable=no" name="viewport"/>
 <meta content="#030816" name="theme-color"/>
 <title>Stellar Legacy</title>
-<link href="/style.css?v=19.0.2" rel="stylesheet"/>
+<link href="/style.css?v=19.0.3" rel="stylesheet"/>
 </head>
 <body>
 <div id="app">
@@ -592,6 +592,7 @@
         <button type="button" data-admin-runtime-tab="pass">PASSE</button>
         <button type="button" data-admin-runtime-tab="shops">LOJAS</button>
         <button type="button" data-admin-runtime-tab="bonus">BOX BÔNUS</button>
+        <button type="button" data-admin-runtime-tab="coupons">CUPONS</button>
       </div>
       <div id="adminRuntimeMonitorPanel">
         <div class="admin-runtime-monitor-grid" id="adminRuntimeMonitorGrid"><div class="empty-state">Aguardando status dos runtimes...</div></div>
@@ -668,6 +669,13 @@
         </div>
         <div class="admin-runtime-shops-grid" id="adminRuntimeShopsGrid"><div class="empty-state">Carregue a configuração das lojas.</div></div>
         <div class="admin-runtime-interface-message muted" id="adminRuntimeShopsMessage">Nenhuma alteração pendente.</div>
+      </div>
+      <div class="admin-runtime-coupons-panel hidden" id="adminRuntimeCouponsPanel">
+        <div class="admin-runtime-interface-toolbar"><div><b>🎟️ CENTRAL DE CUPONS • ADM</b><small>Monte um cupom com até 12 prêmios. Sem cobranças: premiação entregue pelo servidor em um resgate único.</small></div>
+          <button class="small-btn" id="adminCouponsReload" type="button">RECARREGAR</button></div>
+        <div id="adminCouponsMessage" class="admin-runtime-interface-message muted">Carregue o catálogo de prêmios.</div>
+        <div id="adminCouponsEditor"><div class="empty-state">Aguardando catálogo.</div></div>
+        <div id="adminCouponsList" class="admin-coupon-list"></div>
       </div>
       <div class="admin-runtime-bonus-panel hidden" id="adminRuntimeBonusPanel">
         <div class="admin-runtime-interface-toolbar"><div><b>EDITOR DE BOX BÔNUS & POEIRA STELLAR</b><small>V18.2.8 • Quantidade por mapa, respawn, peso dos prêmios e preços de giros. Alterações gravadas no Supabase.</small></div>
@@ -960,6 +968,6 @@
   </div>
 </div>
 </div>
-<script src="/game.js?v=19.0.2" type="module"></script>
+<script src="/game.js?v=19.0.3" type="module"></script>
 </body>
 </html>

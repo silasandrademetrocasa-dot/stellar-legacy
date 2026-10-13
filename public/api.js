@@ -805,6 +805,11 @@ export async function redeemGameCouponOnline(code) {
   });
 }
 
+// V19.0.3 • Editor ADM de cupons configuráveis. Operações validadas pelo PostgreSQL.
+export async function adminCouponDashboardOnline(){return authedServerFetch('/api/admin/coupons',{},false);}
+export async function adminCreateCouponOnline(payload){return authedServerFetch('/api/admin/coupons',{method:'POST',body:JSON.stringify(payload)},false);}
+export async function adminSetCouponActiveOnline(code,active){return authedServerFetch(`/api/admin/coupons/${encodeURIComponent(code)}/active`,{method:'POST',body:JSON.stringify({active:!!active})},false);}
+
 // ===================== V16.2 CHAT DOCK =====================
 export async function getChatHistoryOnline({channel='global', recipientCallsign='', limit=60}={}) {
   const rows = await authedSupabaseFetch('/rest/v1/rpc/get_chat_history_v16', {
