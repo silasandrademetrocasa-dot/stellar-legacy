@@ -2907,7 +2907,7 @@ body[data-quality="low"] .pet-gear {
 .portal-gate-reward{border-top:1px solid rgba(90,180,255,.22);padding-top:10px;margin:12px 0}.portal-gate-reward h5{font-size:12px;margin:0 0 8px;color:#f4d488}
 @media(max-width:720px){.portal-gate-wave{grid-template-columns:1fr 1fr}.portal-gate-wave>b{grid-column:1/-1}.portal-gate-wave>button{grid-column:1/-1}}
 
-/* V19.0.7 • ADM Portal editor must remain visible and self-contained. */
+/* V19.0.8 • ADM Portal editor must remain visible and self-contained. */
 #adminRuntimePortalsPanel .portal-adm-section{display:block;min-width:0;margin:10px 0;padding:15px;border:1px solid rgba(75,190,255,.28);border-radius:14px;background:#06192d}
 #adminRuntimePortalsPanel .portal-adm-section>h4{color:#b8e9ff;margin:0 0 12px;font-size:14px}
 #adminRuntimePortalsPanel .portal-gate-load-state{white-space:normal;text-align:left;line-height:1.5}
@@ -2915,3 +2915,19 @@ body[data-quality="low"] .pet-gear {
 #adminRuntimePortalsPanel .portal-gate-round:focus-within{border-color:rgba(95,218,255,.65)}
 #adminRuntimePortalsPanel .portal-gate-tabs>.small-btn{flex:1 1 110px}
 @media (max-width:700px){#adminRuntimePortalsPanel .portal-adm-section{padding:10px}#adminRuntimePortalsPanel .portal-gate-wave{grid-template-columns:1fr 1fr}}
+
+/* V19.0.8 • Central visual de criacao */
+.admin-content-creator{margin:12px 0 16px;padding:16px;border:1px solid rgba(80,207,255,.37);border-radius:15px;background:linear-gradient(135deg,rgba(11,36,62,.95),rgba(3,17,33,.95));}
+.admin-content-creator>summary{cursor:pointer;font-weight:900;color:#a4edff;letter-spacing:.3px;padding:4px 0 12px;}
+.admin-content-creator label{display:flex;flex-direction:column;gap:5px;font-size:11px;color:#b9e6ff;margin:6px 0;}
+.admin-content-creator input,.admin-content-creator select{width:100%;max-width:100%;padding:9px;border:1px solid rgba(83,194,255,.35);border-radius:8px;background:#071729;color:#e5f8ff;}
+.admin-content-creator input[type=checkbox]{width:auto;margin-right:7px;}
+.adm-content-task-list{display:flex;flex-direction:column;gap:8px;margin:12px 0;}
+.adm-content-task{display:grid;grid-template-columns:1fr 1.3fr .7fr auto;align-items:end;gap:8px;padding:9px;border:1px solid rgba(80,180,255,.2);border-radius:10px;}
+.adm-content-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;}
+.admin-content-line{display:flex;justify-content:space-between;align-items:center;gap:10px;border-bottom:1px solid rgba(80,180,255,.17);padding:8px 0;}
+.admin-content-line span{flex:1}.admin-content-line small{display:block;opacity:.6;margin-top:2px;}
+.admin-content-list{padding:12px;border:1px solid rgba(75,170,255,.21);border-radius:12px;margin-bottom:14px;}
+.admin-pass-switch{display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:12px 0;color:#a6dfff;font-weight:800;}
+.admin-pass-switch select{min-width:210px;background:#071729;border:1px solid #2770a1;border-radius:8px;color:#e5f8ff;padding:9px;}
+@media(max-width:780px){.adm-content-task{grid-template-columns:1fr 1fr}.adm-content-task button{grid-column:span 2}}

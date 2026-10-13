@@ -1064,3 +1064,12 @@ export async function loadGalaxyGatesOnline(refresh=false){
 export async function adminUpdateGalaxyGateOnline(key,config){
  return serverFetch('/api/admin/runtime/gates',{method:'POST',body:JSON.stringify({key,config})},true);
 }
+
+// V19.0.8 — Criadores visuais de conteudo administrativo (autenticados).
+export async function adminUpsertCustomMissionOnline(payload){return serverFetch('/api/admin/runtime/systems/custom-missions',{method:'POST',body:JSON.stringify(payload)},true);}
+export async function adminDeleteCustomMissionOnline(key){return serverFetch(`/api/admin/runtime/systems/custom-missions/${encodeURIComponent(key)}`,{method:'DELETE'},true);}
+export async function adminCreateCraftRecipeOnline(payload){return serverFetch('/api/admin/runtime/systems/new/crafting',{method:'POST',body:JSON.stringify(payload)},true);}
+export async function adminCreateEconomyServiceOnline(payload){return serverFetch('/api/admin/runtime/systems/new/economy',{method:'POST',body:JSON.stringify(payload)},true);}
+export async function adminCreatePassSeasonOnline(payload){return serverFetch('/api/admin/runtime/pass/seasons/new',{method:'POST',body:JSON.stringify(payload)},true);}
+export async function loadAuctionRulesOnline(){return serverFetch('/api/runtime/auction-rules',{},true);}
+export async function adminUpdateAuctionRulesOnline(payload){return serverFetch('/api/admin/runtime/auction-rules',{method:'POST',body:JSON.stringify(payload)},true);}

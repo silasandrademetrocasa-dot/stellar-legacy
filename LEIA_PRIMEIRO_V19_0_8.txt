@@ -1,0 +1,47 @@
+STELLAR LEGACY V19.0.8 — FASE 03 (CRIADORES VISUAIS)
+===================================================
+
+PACOTE COMPLETO para o INSTALADOR PRINCIPAL existente.
+Não crie nem substitua o workflow atual.
+
+PASSO 1 — BANCO (obrigatório para os NOVOS CRIADORES)
+No Supabase > SQL Editor, execute UMA VEZ o arquivo:
+  sql/V19_0_8_ADMIN_CONTEUDO.sql
+A migração cria as RPCs de criação de serviços, receitas e temporadas,
+a tabela de piso de preços do leilão e os controles de ADM.
+Não altera saves, contas ou missões já criadas.
+
+PASSO 2 — INSTALAÇÃO PELO MESMO GITHUB ACTIONS
+1. Envie este ZIP completo à RAIZ da branch main.
+2. Deixe APENAS UM arquivo stellar-legacy*.zip na raiz.
+3. Actions > seu instalador principal > Run workflow.
+4. Aguarde o deploy automático do Render e atualize Ctrl+F5.
+
+COMO USAR
+ADM > SISTEMAS > MISSÕES: editor novo no topo; crie 1-8 objetivos
+(NPC ou minério), adicione recompensas, salve e edite/exclua da lista.
+ADM > SISTEMAS > ECONOMIA: criar novo serviço (efeito do catálogo seguro).
+ADM > SISTEMAS > CRAFTING: criar receita com até 3 ingredientes no editor
+e produto por seleção, após salvar editar ingredientes no editor visual.
+ADM > PASSE: criar temporada DESATIVADA, selecionar na lista e configurar
+níveis/recompensas; ative manualmente quando estiver tudo pronto.
+ADM > PREÇOS > LEILÃO: editar piso da NOVA e piso geral em CR, validados
+na RPC que registra os lances. NOVA nunca abaixo de 100 milhões.
+ADM > MUNDO & MAPAS: continua sendo o editor de mapas e recursos existentes.
+
+SEGURANÇA / LIMITES
+- Criação de missões usa a RPC de ADM já existente.
+- Serviços, receitas, temporadas e leilão exigem SQL acima.
+- Novas temporadas nascem INATIVAS e com 0 prêmios, tiers DESATIVADOS.
+- Não houve migração em game_saves, profiles ou autenticação.
+- Alterações em preços não cancelam lances atuais.
+- Novos mapas e editor detalhado POR LOTE do leilão ficaram para
+  a fase 03B, pois exigem alteração de mundo e validação multiplayer.
+
+TESTES
+- node --check em game.js, api.js e server/index.js.
+- Headless browser: editor de missão, objetivos, criação de serviço/receita,
+  temporada e leilão renderizados sem erros.
+- SQL e persistência real devem ser conferidos no Supabase após aplicar.
+
+NÃO renomeie o arquivo como PATCH nem troque o instalador.

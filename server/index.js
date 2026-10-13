@@ -163,7 +163,7 @@ function sanitizeSystemsRuntime(raw){
   const economy_services=Array.isArray(raw?.economy_services)?raw.economy_services.map(x=>{
     const effect={};if(x?.effect&&typeof x.effect==='object'&&!Array.isArray(x.effect)){for(const [k,v] of Object.entries(x.effect)){if(SYSTEM_EFFECT_KEYS.has(k))effect[k]=clampNum(v,-100000,100000,0);}}
     return {service_id:String(x?.service_id||''),name:String(x?.name||'').slice(0,80),description:String(x?.description||'').slice(0,180),base_cost:Math.max(0,Math.round(Number(x?.base_cost)||0)),duration_ms:Math.round(clampNum(x?.duration_ms,60000,86400000,3600000)),level_band_size:Math.round(clampNum(x?.level_band_size,1,100,5)),level_cost_scale:clampNum(x?.level_cost_scale,0,10,.35),max_stack_ms:Math.round(clampNum(x?.max_stack_ms,60000,604800000,21600000)),effect,enabled:x?.enabled!==false,sort_order:Math.round(clampNum(x?.sort_order,0,9999,100))};
-  }).filter(x=>SYSTEM_SERVICE_IDS.has(x.service_id)):[];
+  }).filter(x=>safeWorldId(x.service_id)&&x.name&&Object.keys(x.effect).length):[];
   const crafting_recipes=Array.isArray(raw?.crafting_recipes)?raw.crafting_recipes.map(x=>{
     const g=x?.grant_payload&&typeof x.grant_payload==='object'?x.grant_payload:{};const kind=String(g.kind||'');const grant=SYSTEM_GRANT_KINDS.has(kind)?{kind,id:g.id?safeWorldId(g.id):undefined,qty:Math.max(1,Math.min(10000000,Math.floor(Number(g.qty)||1)))}:{};
     return {recipe_id:String(x?.recipe_id||'').slice(0,64),name:String(x?.name||'').slice(0,80),description:String(x?.description||'').slice(0,180),cost:Math.max(0,Math.round(Number(x?.cost)||0)),currency:String(x?.currency)==='uridium'?'uridium':'credits',ingredients:safeJsonNumberObject(x?.ingredients),grant_payload:grant,output_label:String(x?.output_label||'').slice(0,80),min_level:Math.round(clampNum(x?.min_level,1,100,1)),enabled:x?.enabled!==false,sort_order:Math.round(clampNum(x?.sort_order,0,9999,100))};
@@ -820,6 +820,50 @@ app.post('/api/admin/runtime/systems/crafting/:recipeId', requireUser, asyncRout
   const runtime=await refreshSystemsRuntimeSnapshot(true);res.set('Cache-Control','no-store');res.json({ok:true,recipe_id:key,runtime,saved:data||null});
 }));
 
+// V19.0.8 — Criar/editar missões usando a RPC existente com RLS administrativo.
+app.post('/api/admin/runtime/systems/custom-missions',requireUser,asyncRoute(async(req,res)=>{
+ const b=req.body&&typeof req.body==='object'?req.body:{};
+ const id=safeWorldId(b.mission_id),category=String(b.category||'');
+ if(!id||!SYSTEM_MISSION_CATEGORIES.has(category))return res.status(400).json({error:'ID ou categoria de missão inválidos.'});
+ const title=String(b.title||'').trim().slice(0,100),description=String(b.description||'').trim().slice(0,260);
+ const tasks=Array.isArray(b.tasks)?b.tasks.map(sanitizeMissionTask).filter(Boolean):[];
+ if(!title||tasks.length<1||tasks.length>8||tasks.length!==b.tasks.length)return res.status(400).json({error:'Informe título e de 1 a 8 objetivos válidos.'});
+ const flat=b.flat_reward&&typeof b.flat_reward==='object'&&!Array.isArray(b.flat_reward)?b.flat_reward:{};
+ const reward={credits:Math.round(clampNum(flat.credits,0,100000000,0)),uridium:Math.round(clampNum(flat.uridium,0,100000,0)),xp:Math.round(clampNum(flat.xp,0,10000000,0))};
+ const {data,error}=await req.sb.rpc('admin_upsert_custom_mission_v1815',{
+  p_mission_id:id,p_category:category,p_title:title,p_description:description,p_tasks:tasks,
+  p_group_key:String(b.group_key||'mix').slice(0,24),p_sequence:!!b.sequence,
+  p_reward_factor:clampNum(b.reward_factor,0,10,1),p_tag:String(b.tag||'').slice(0,64),
+  p_flat_reward:reward,p_enabled:b.enabled!==false,p_sort_order:Math.round(clampNum(b.sort_order,0,9999,100))
+ });
+ if(error)return res.status(/administrativ|permiss|negad/i.test(error.message)?403:400).json({error:error.message});
+ const runtime=await refreshSystemsRuntimeSnapshot(true);res.json({ok:true,mission_id:id,runtime});
+}));
+app.delete('/api/admin/runtime/systems/custom-missions/:missionId',requireUser,asyncRoute(async(req,res)=>{
+ const id=safeWorldId(req.params.missionId);if(!id)return res.status(400).json({error:'ID inválido.'});
+ const {error}=await req.sb.rpc('admin_delete_custom_mission_v1815',{p_mission_id:id});
+ if(error)return res.status(/administrativ|permiss|negad/i.test(error.message)?403:400).json({error:error.message});
+ const runtime=await refreshSystemsRuntimeSnapshot(true);res.json({ok:true,mission_id:id,runtime});
+}));
+// Novos serviços/receitas usam RPCs exclusivamente administrativas (SQL V19.0.8).
+app.post('/api/admin/runtime/systems/new/economy',requireUser,asyncRoute(async(req,res)=>{
+ const b=req.body||{},id=safeWorldId(b.service_id),effect={};
+ if(!id||!String(b.name||'').trim())return res.status(400).json({error:'ID e nome são obrigatórios.'});
+ if(!b.effect||typeof b.effect!=='object'||Array.isArray(b.effect))return res.status(400).json({error:'Escolha um efeito válido.'});
+ for(const [k,v] of Object.entries(b.effect)){if(!SYSTEM_EFFECT_KEYS.has(k))return res.status(400).json({error:'Efeito não permitido.'});effect[k]=clampNum(v,0,10000,0);}
+ if(Object.keys(effect).length!==1)return res.status(400).json({error:'Escolha exatamente um efeito.'});
+ const payload={service_id:id,name:String(b.name).trim().slice(0,80),description:String(b.description||'').slice(0,180),base_cost:Math.round(clampNum(b.base_cost,0,1000000000000,0)),duration_ms:Math.round(clampNum(b.duration_ms,60000,86400000,3600000)),max_stack_ms:Math.round(clampNum(b.max_stack_ms,60000,604800000,21600000)),level_cost_scale:clampNum(b.level_cost_scale,0,10,.35),effect,enabled:b.enabled!==false};
+ const {error}=await req.sb.rpc('admin_create_economy_service_v1908',{p_content:payload});if(error)return res.status(/administrativ|permiss|negad/i.test(error.message)?403:400).json({error:error.message});
+ const runtime=await refreshSystemsRuntimeSnapshot(true);res.json({ok:true,service_id:id,runtime});
+}));
+app.post('/api/admin/runtime/systems/new/crafting',requireUser,asyncRoute(async(req,res)=>{
+ const b=req.body||{},id=safeWorldId(b.recipe_id),ingredients=safeJsonNumberObject(b.ingredients,12,1000000);
+ const g=b.grant_payload||{},kind=String(g.kind||''),grant={kind,id:safeWorldId(g.id),qty:Math.round(clampNum(g.qty,1,10000000,1))};
+ if(!id||!String(b.name||'').trim()||!Object.keys(ingredients).length||!SYSTEM_GRANT_KINDS.has(kind)||!grant.id)return res.status(400).json({error:'Informe ID, nome, ingredientes e produto válidos.'});
+ const payload={recipe_id:id,name:String(b.name).trim().slice(0,80),description:String(b.description||'').slice(0,180),cost:Math.round(clampNum(b.cost,0,1000000000000,0)),currency:b.currency==='uridium'?'uridium':'credits',ingredients,grant_payload:grant,output_label:String(b.output_label||b.name).trim().slice(0,80),min_level:Math.round(clampNum(b.min_level,1,100,1)),enabled:b.enabled!==false};
+ const {error}=await req.sb.rpc('admin_create_crafting_recipe_v1908',{p_content:payload});if(error)return res.status(/administrativ|permiss|negad/i.test(error.message)?403:400).json({error:error.message});
+ const runtime=await refreshSystemsRuntimeSnapshot(true);res.json({ok:true,recipe_id:id,runtime});
+}));
 app.get('/api/runtime/systems', requireUser, asyncRoute(async (req,res)=>{
   const snapshot=await loadSystemsRuntimeSnapshot(Boolean(req.query?.refresh));
   res.set('Cache-Control','no-store');
@@ -829,6 +873,15 @@ app.get('/api/runtime/systems', requireUser, asyncRoute(async (req,res)=>{
 app.get('/api/runtime/pass', requireUser, asyncRoute(async (req,res)=>{
   const snapshot=await loadPassRuntimeSnapshot(Boolean(req.query?.refresh));
   res.set('Cache-Control','no-store');res.json(snapshot);
+}));
+app.post('/api/admin/runtime/pass/seasons/new',requireUser,asyncRoute(async(req,res)=>{
+ const b=req.body||{},key=String(b.season_key||'').trim();
+ if(!/^[a-z0-9_-]{3,32}$/i.test(key)||!String(b.name||'').trim())return res.status(400).json({error:'ID e nome da temporada inválidos.'});
+ const start=new Date(b.starts_at),end=new Date(b.ends_at);
+ if(!Number.isFinite(start.getTime())||!Number.isFinite(end.getTime())||end<=start)return res.status(400).json({error:'Datas da temporada inválidas.'});
+ const payload={season_key:key,name:String(b.name).trim().slice(0,80),description:String(b.description||'').slice(0,240),starts_at:start.toISOString(),ends_at:end.toISOString(),tier_count:Math.round(clampNum(b.tier_count,1,100,30)),points_per_tier:Math.round(clampNum(b.points_per_tier,1,1000000,500)),daily_points:Math.round(clampNum(b.daily_points,1,100000,100)),premium_price_brl:clampNum(b.premium_price_brl,0,99999,19.9)};
+ const {error}=await req.sb.rpc('admin_create_pass_season_v1908',{p_content:payload});if(error)return res.status(/administrativ|permiss|negad/i.test(error.message)?403:400).json({error:error.message});
+ const runtime=await refreshPassRuntimeSnapshot(true);res.json({ok:true,season_key:key,runtime});
 }));
 app.post('/api/admin/runtime/pass/seasons/:seasonKey', requireUser, asyncRoute(async(req,res)=>{
   const key=String(req.params?.seasonKey||'').trim().slice(0,32),current=await loadPassRuntimeSnapshot(false),row=current?.seasons?.find(x=>String(x.season_key)===key);if(!key||!row)return res.status(400).json({error:'Temporada inválida.'});
@@ -875,6 +928,21 @@ app.post('/api/admin/runtime/shops/premium/:productId', requireUser, asyncRoute(
   });
   if(error){const msg=String(error.message||'Falha ao salvar produto Premium.');return res.status(/administrativ|permiss|negado/i.test(msg)?403:400).json({error:msg});}
   const runtime=await refreshShopsRuntimeSnapshot(true);res.set('Cache-Control','no-store');res.json({ok:true,product_id:key,runtime,saved:data||null});
+}));
+
+
+// V19.0.8 • Leilão: valores fixados pelo banco e editáveis exclusivamente por ADM.
+app.get('/api/runtime/auction-rules',requireUser,asyncRoute(async(req,res)=>{
+ const {data,error}=await req.sb.rpc('get_auction_rules_v1908');
+ if(error)return res.status(503).json({error:'Regras do leilão indisponíveis; execute SQL V19.0.8.'});
+ res.set('Cache-Control','no-store');res.json(data);
+}));
+app.post('/api/admin/runtime/auction-rules',requireUser,asyncRoute(async(req,res)=>{
+ const b=req.body||{},nova_floor=Number(b.nova_floor),common_floor=Number(b.common_floor);
+ if(!Number.isInteger(nova_floor)||nova_floor<100000000||nova_floor>1000000000||nova_floor%100000!==0||!Number.isInteger(common_floor)||common_floor<100000||common_floor>10000000||common_floor%100000!==0)return res.status(400).json({error:'Preços inválidos. Use múltiplos de 100.000 CR.'});
+ const {data,error}=await req.sb.rpc('admin_update_auction_rules_v1908',{p_nova_floor:nova_floor,p_common_floor:common_floor});
+ if(error)return res.status(/administra|permiss|negad/i.test(error.message)?403:400).json({error:error.message});
+ res.json(data);
 }));
 
 app.get('/api/diagnostics', asyncRoute(async (req, res) => {

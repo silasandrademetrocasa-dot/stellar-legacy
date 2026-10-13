@@ -1,3 +1,9 @@
+### V19.0.8 — ADM Fase 03A: criação de conteúdo (2026-10-13)
+- Missões personalizadas com criador visual, objetivos e recompensas.
+- Criadores de serviços, crafting e temporadas do Passe.
+- Seleção de temporada e editor de piso de preços do Leilão, protegido pelo servidor.
+- SQL único V19_0_8_ADMIN_CONTEUDO.sql.
+
 ## V19.0.7 — Correção de visibilidade do ADM Portais Astrais
 - Corrigida referência ausente `adminRuntimePortalsPanel` no registro `ui`.
 - Painel de ondas visível mesmo quando os preços do Materializador falham em carregar.

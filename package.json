@@ -1,6 +1,6 @@
 {
   "name": "stellar-legacy",
-  "version": "19.0.7",
+  "version": "19.0.8",
   "type": "module",
   "scripts": {
     "start": "node server/index.js",
@@ -15,5 +15,5 @@
   "engines": {
     "node": ">=18"
   },
-  "release": "v19.0.7-adm-portals-interface-hotfix"
+  "release": "v19.0.8-adm-fase3-criadores-visuais"
 }
