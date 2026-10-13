@@ -2815,3 +2815,55 @@ body[data-quality="low"] .pet-gear {
 .admin-coupon-issued>div{display:flex;flex:1;min-width:210px;flex-direction:column;gap:4px}.admin-coupon-issued b{font-size:13px;color:#ffe59b}.admin-coupon-issued small{font-size:10px;color:#9cbecc;line-height:1.5}
 @media(max-width:900px){.admin-coupon-fields{grid-template-columns:repeat(2,minmax(0,1fr))}.admin-coupon-picker{grid-template-columns:1fr 1fr}}
 @media(max-width:560px){.admin-coupon-fields,.admin-coupon-picker{grid-template-columns:1fr}}
+
+
+/* V19.0.4 — Faction identity and logo polish (non-gameplay) */
+.login-brand-panel{
+  background:
+    radial-gradient(ellipse at 50% 17%, rgba(43,136,213,.22), transparent 58%),
+    linear-gradient(145deg, rgba(5,18,34,.98), rgba(3,10,23,.98));
+}
+.login-brand-logo{
+  display:block; width:min(360px,100%); max-width:100%; height:auto;
+  max-height:142px; object-fit:contain; margin:0 auto 6px;
+  filter:drop-shadow(0 0 12px rgba(51,175,255,.16));
+}
+.login-brand-panel h1{font-size:clamp(22px,2vw,28px)}
+.login-factions{display:flex;justify-content:center;gap:8px;width:100%;max-width:376px;align-items:stretch}
+.login-factions>div{
+  display:flex;align-items:center;justify-content:center;gap:6px;min-width:0;
+  flex:1 1 0;padding:7px 9px;border-radius:12px;
+  border:1px solid rgba(83,194,255,.25);
+  background:linear-gradient(180deg,rgba(14,41,67,.67),rgba(3,15,31,.9));
+  font-size:11px;font-weight:900;white-space:nowrap;
+  box-shadow:inset 0 1px 0 rgba(177,228,255,.055);
+}
+.login-factions>div:nth-child(2){border-color:rgba(255,112,115,.28)}
+.login-factions>div:nth-child(3){border-color:rgba(255,199,92,.31)}
+.login-factions img{display:block;flex:0 0 44px;width:44px;height:44px;max-width:44px;object-fit:contain;filter:drop-shadow(0 0 8px rgba(93,194,255,.25))}
+.login-factions>div:nth-child(2) img{filter:drop-shadow(0 0 7px rgba(255,89,91,.27))}
+.login-factions>div:nth-child(3) img{filter:drop-shadow(0 0 7px rgba(245,183,67,.27))}
+.faction-card .faction-orb{
+  width:150px;height:150px;margin:10px auto 12px;
+  background-size:144% 144%!important;
+  background-position:center!important;
+  background-repeat:no-repeat!important;
+  border:1px solid rgba(93,209,255,.16)!important;
+  border-radius:50%!important;
+  background-color:rgba(11,32,53,.24)!important;
+  box-shadow:inset 0 0 18px rgba(46,142,220,.12),0 0 21px rgba(37,148,222,.14)!important;
+}
+.faction-card:hover .faction-orb{box-shadow:0 0 26px rgba(57,173,244,.29)!important}
+@media(max-width:760px){
+  .login-brand-panel{padding:14px 12px!important}
+  .login-brand-logo{width:min(232px,84vw);max-height:90px;margin:0 auto 4px}
+  .login-brand-panel h1{font-size:20px}
+  .login-brand-panel p{margin-bottom:7px}
+  .login-factions{gap:5px}
+  .login-factions>div{padding:4px 5px;gap:3px;font-size:9px}
+  .login-factions img{width:34px;height:34px;max-width:34px;flex-basis:34px}
+}
+@media(max-height:680px) and (min-width:761px){
+  .login-brand-logo{max-height:105px}
+  .login-factions img{width:38px;height:38px;flex-basis:38px;max-width:38px}
+}

@@ -1,10 +1,10 @@
 export const GAME_ASSETS = {
   bonus: { box: '/assets/v18/bonus/bonus-box.webp', dust: '/assets/v18/bonus/stellar-dust.webp' },
   branding: {
-    logo: '/assets/v8/branding/logo-v8.png',
-    earth: '/assets/v8/branding/earth.png',
-    mars: '/assets/v8/branding/mars.png',
-    jupiter: '/assets/v8/branding/jupiter.png'
+    logo: '/assets/v19/branding/stellar-legacy-logo.webp',
+    earth: '/assets/v19/branding/earth.webp',
+    mars: '/assets/v19/branding/mars.webp',
+    jupiter: '/assets/v19/branding/jupiter.webp'
   },
   ships: {
     phoenix: '/assets/v17/ships/aurora.webp',

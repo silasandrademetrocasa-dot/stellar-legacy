@@ -1,3 +1,6 @@
+## V19.0.4 — FACÇÕES + LOGO SEM V8
+- Logo novo e emblemas novos de Terra, Marte e Júpiter; ajuste responsivo no login e seleção da facção.
+
 ## V19.0.3 — CENTRAL ADM DE CUPONS
 - Editor de cupons em ADM → CUPONS, com escolha entre 99 prêmios do catálogo V19.
 - Até 12 recompensas por cupom: Premium (dias), Passe Premium da temporada, naves comuns/Elite/evento, lasers, geradores, extras, drones, munições, mísseis, recursos, Créditos e STL.

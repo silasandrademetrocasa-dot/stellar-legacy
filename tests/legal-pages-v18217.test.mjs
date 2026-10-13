@@ -34,8 +34,8 @@ test('public links visible before login and from settings',()=>{
 test('server exposes public static files before protected endpoints',()=>{
  assert(server.indexOf('app.use(express.static(PUBLIC_DIR')>0);
  assert(server.indexOf('app.use(express.static(PUBLIC_DIR')<server.indexOf("app.get('/api/save'"));
- assert.match(server,/version: '19\.0\.3'/);
- assert(index.includes('game.js?v=19.0.3'));
+ assert.match(server,/version: '19\.0\.4'/);
+ assert(index.includes('game.js?v=19.0.4'));
 });
 test('privacy accurately documents main providers and test-mode payments',()=>{
  for(const text of ['Supabase','Render','Google','Mercado Pago','LGPD','não processa pagamentos reais'])assert(priv.includes(text));
