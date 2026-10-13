@@ -1,6 +1,6 @@
 {
   "name": "stellar-legacy",
-  "version": "19.0.4",
+  "version": "19.0.5",
   "type": "module",
   "scripts": {
     "start": "node server/index.js",
@@ -15,5 +15,5 @@
   "engines": {
     "node": ">=18"
   },
-  "release": "v19.0.4-factions-new-brand-no-v8"
+  "release": "v19.0.5-adm-phase1-visual-editors"
 }

@@ -2867,3 +2867,31 @@ body[data-quality="low"] .pet-gear {
   .login-brand-logo{max-height:105px}
   .login-factions img{width:38px;height:38px;flex-basis:38px;max-width:38px}
 }
+
+/* V19.0.5 • ADM unificado, editores visuais e painel de auditoria */
+.admin-adm-hint{padding:10px 12px;margin-bottom:10px;border-radius:11px;border:1px solid rgba(71,202,255,.18);color:#b9eaff;font-size:11px;background:#071828}
+.admin-runtime-tabs{position:sticky;top:0;z-index:6;padding:8px 4px 10px;background:#061421ed;border-radius:12px}
+.adm-fold-toggle{display:block;min-height:30px;margin:5px 0 8px;padding:5px 12px;border:1px solid rgba(92,211,255,.28);border-radius:8px;background:#08263b;color:#a5e4ff;font-size:10px;font-weight:800;cursor:pointer}
+.adm-folded > .adm-fold-body{display:none!important}
+.adm-raw-hidden{display:none!important}
+.adm-visual-kicker{font-size:9px;color:#84cbf2;font-weight:900;letter-spacing:.10em;margin:9px 0}
+.adm-visual-builder{display:flex;flex-wrap:wrap;gap:8px;padding:10px;border-radius:12px;border:1px solid rgba(86,204,255,.22);background:rgba(4,15,28,.88)}
+.adm-struct-group{display:flex;flex-direction:column;flex:1 1 220px;min-width:185px;gap:7px;padding:9px;border-radius:10px;border:1px solid rgba(78,176,230,.18)}
+.adm-struct-group > b{color:#acdfff;font-size:10px}
+.adm-struct-fields{display:flex;gap:6px;flex-wrap:wrap}
+.adm-struct-leaf{display:flex;flex-direction:column;min-width:118px;flex:1 1 118px;gap:5px;color:#83acbd;font-size:10px}
+.adm-struct-leaf input,.adm-struct-leaf select,.adm-struct-row input,.adm-struct-row select,.adm-struct-add select{width:100%;min-height:33px;max-width:100%;border:1px solid rgba(85,199,255,.3);border-radius:8px;background:#06172a;color:#def5ff;padding:6px 8px;font-size:11px}
+.adm-struct-leaf input[type=checkbox]{width:auto}
+.adm-struct-list{display:flex;flex-direction:column;gap:6px}
+.adm-struct-row{display:flex;align-items:center;gap:5px}.adm-struct-row .ghost-btn{padding:4px 8px;min-height:31px}
+.adm-struct-add{display:flex;gap:6px}.adm-struct-add select{flex:1}.adm-struct-add button{flex:0 0 auto}
+.admin-portals-summary{display:flex;flex-direction:column;gap:6px}.admin-portals-summary details{border:1px solid #29618060;padding:9px;border-radius:10px}.admin-portals-summary summary{cursor:pointer;color:#9bdfff;font-weight:800}
+.designer-summary-card:not(.is-equipped){border-color:rgba(110,205,255,.18)!important;box-shadow:none!important}
+.designer-summary-card.is-equipped{position:relative;border:2px solid #ffbb54!important;background:linear-gradient(120deg,rgba(89,58,5,.30),rgba(4,15,27,.91))!important;box-shadow:0 0 18px rgba(251,174,58,.30),inset 0 0 14px rgba(255,165,44,.11)!important}
+.designer-summary-card.is-equipped::after{content:'● ATIVO';position:absolute;right:7px;top:6px;color:#ffe5a1;font-size:8px;font-weight:900}
+.pilot-attributes-master{margin:12px 0;padding:13px;border:1px solid rgba(74,201,255,.3);border-radius:15px;background:#07192a}
+.pilot-attributes-master > summary{cursor:pointer;font-weight:900;color:#a3e6ff}.pilot-attributes-master > summary span{font-size:10px;font-weight:400;color:#7cabbf;margin-left:10px}
+.pilot-attributes-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:9px;margin-top:10px}.pilot-attributes-grid details{border:1px solid #2b719260;border-radius:10px;background:#041323;padding:10px}
+.pilot-attributes-grid summary{cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:12px}.pilot-attributes-grid summary em{color:#ffe3a7;font-style:normal;font-weight:900}
+.pilot-source-line{display:flex;justify-content:space-between;gap:9px;border-top:1px solid #16334a;padding:7px 0;font-size:11px;color:#91bbc9}.pilot-source-line:first-of-type{margin-top:10px}.pilot-source-line b{white-space:nowrap;color:#d2f4ff}
+@media(max-width:620px){.admin-runtime-tabs{position:static}.adm-struct-group{min-width:100%}.pilot-attributes-grid{grid-template-columns:1fr}}

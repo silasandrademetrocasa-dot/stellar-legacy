@@ -1,7 +1,7 @@
-import { FACTIONS, SHIPS, ITEMS, LASER_AMMO, ROCKETS, NPC_TYPES, MAPS, RESOURCES } from './data.js?v=19.0.4';
-import { GAME_ASSETS } from './assets/v17/manifest.js?v=19.0.4';
-import { signUp, signIn, beginGoogleSignIn, restoreGoogleSignInFromUrl, requestPasswordReset, restorePasswordRecoveryFromUrl, restoreSession, signOutLocal, checkGameSession, endGameSession, getUser, getSessionCredentials, loadCloudSave, saveCloudSave, updateCallsign, updatePassword, loadRankings, loadAuctionBids, saveAuctionBidOnline, markAuctionBidStatusOnline, loadAuctionMarket, upsertPlayerPresenceOnline, loadMapPresenceOnline, savePlayerLocationCheckpointOnline, loadPlayerLocationCheckpointOnline, removePlayerPresenceOnline, queuePvpAttackOnline, consumePvpDamageEventsOnline, syncArenaProfileOnline, loadArenaState, loadArenaDailyRewardStatus, claimArenaDailyReward, loadArenaOpponents, loadArenaHistory, arenaAttackOnline, listClansOnline, loadMyClanOnline, createClanOnline, joinClanOnline, getClanRequestsOnline, reviewClanRequestOnline, cancelClanRequestOnline, setClanMemberRoleOnline, leaveClanOnline, transferClanCreditsOnline, claimClanCreditGrantsOnline, recordClanAlienKillOnline, getPremiumShopOnline, testPurchasePremiumOnline, adminPreviewPremiumStageOnline, adminSimulatePremiumStageOnline, getPremiumStageCatalogOnline, loadWarfrontStateOnline, hitWorldBossOnline, claimWorldBossRewardOnline, declareClanWarOnline, recordClanWarScoreOnline, loadLiveOpsOnline, adminUpdateLiveEventScheduleOnline, purchaseLiveCatalogOnline, economyActionOnline, getChatHistoryOnline, sendChatMessageOnline, redeemGameCouponOnline, getMyDesignersOnline, setDesignLoadoutOnline, claimGateDroneDesignOnline, claimEventDesignerOnline, getAdminStatus, adminSearchAccounts, adminRecentActions, adminBanAccount, adminUnbanAccount, adminResetAccount, adminDeleteAccount, pushTelemetryBatch, adminTelemetryOverview, adminPlayerTelemetry, getBattleGroupOnline, createBattleGroupOnline, inviteBattleGroupOnline, searchBattleGroupPlayersOnline, inviteBattleGroupUserOnline, respondBattleGroupInviteOnline, leaveBattleGroupOnline, kickBattleGroupMemberOnline, setBattleGroupRallyOnline, loadRuntimeConfigOnline, loadNpcRuntimeConfigOnline, loadWorldRuntimeConfigOnline, loadSystemsRuntimeConfigOnline, loadAdminRuntimeMonitorOnline, adminUpdateRuntimeModuleOnline, adminUpdateNpcRuntimeOnline, adminUpdateNpcSpawnRuntimeOnline, adminUpdateWorldMapOnline, adminUpdateWorldResourceOnline, adminUpdateWorldSectorOnline, adminUpdateWorldPortalOnline, adminUpdateWorldResourcePoolOnline, adminUpdateMissionCategoryOnline, adminUpdateEconomyServiceOnline, adminUpdateCraftingRecipeOnline, loadBattlePassRuntimeConfigOnline, adminUpdateBattlePassSeasonOnline, adminUpdateBattlePassTierOnline, loadShopsRuntimeConfigOnline, adminUpdateCommonShopItemOnline, adminUpdatePremiumShopItemOnline, loadBonusConfigOnline, adminUpdateBonusConfigOnline, adminCouponDashboardOnline, adminCreateCouponOnline, adminSetCouponActiveOnline } from './api.js?v=19.0.4';
-import { SharedUniverseClient } from './world.js?v=19.0.4';
+import { FACTIONS, SHIPS, ITEMS, LASER_AMMO, ROCKETS, NPC_TYPES, MAPS, RESOURCES } from './data.js?v=19.0.5';
+import { GAME_ASSETS } from './assets/v17/manifest.js?v=19.0.5';
+import { signUp, signIn, beginGoogleSignIn, restoreGoogleSignInFromUrl, requestPasswordReset, restorePasswordRecoveryFromUrl, restoreSession, signOutLocal, checkGameSession, endGameSession, getUser, getSessionCredentials, loadCloudSave, saveCloudSave, updateCallsign, updatePassword, loadRankings, loadAuctionBids, saveAuctionBidOnline, markAuctionBidStatusOnline, loadAuctionMarket, upsertPlayerPresenceOnline, loadMapPresenceOnline, savePlayerLocationCheckpointOnline, loadPlayerLocationCheckpointOnline, removePlayerPresenceOnline, queuePvpAttackOnline, consumePvpDamageEventsOnline, syncArenaProfileOnline, loadArenaState, loadArenaDailyRewardStatus, claimArenaDailyReward, loadArenaOpponents, loadArenaHistory, arenaAttackOnline, listClansOnline, loadMyClanOnline, createClanOnline, joinClanOnline, getClanRequestsOnline, reviewClanRequestOnline, cancelClanRequestOnline, setClanMemberRoleOnline, leaveClanOnline, transferClanCreditsOnline, claimClanCreditGrantsOnline, recordClanAlienKillOnline, getPremiumShopOnline, testPurchasePremiumOnline, adminPreviewPremiumStageOnline, adminSimulatePremiumStageOnline, getPremiumStageCatalogOnline, loadWarfrontStateOnline, hitWorldBossOnline, claimWorldBossRewardOnline, declareClanWarOnline, recordClanWarScoreOnline, loadLiveOpsOnline, adminUpdateLiveEventScheduleOnline, purchaseLiveCatalogOnline, economyActionOnline, getChatHistoryOnline, sendChatMessageOnline, redeemGameCouponOnline, getMyDesignersOnline, setDesignLoadoutOnline, claimGateDroneDesignOnline, claimEventDesignerOnline, getAdminStatus, adminSearchAccounts, adminRecentActions, adminBanAccount, adminUnbanAccount, adminResetAccount, adminDeleteAccount, pushTelemetryBatch, adminTelemetryOverview, adminPlayerTelemetry, getBattleGroupOnline, createBattleGroupOnline, inviteBattleGroupOnline, searchBattleGroupPlayersOnline, inviteBattleGroupUserOnline, respondBattleGroupInviteOnline, leaveBattleGroupOnline, kickBattleGroupMemberOnline, setBattleGroupRallyOnline, loadRuntimeConfigOnline, loadNpcRuntimeConfigOnline, loadWorldRuntimeConfigOnline, loadSystemsRuntimeConfigOnline, loadAdminRuntimeMonitorOnline, adminUpdateRuntimeModuleOnline, adminUpdateNpcRuntimeOnline, adminUpdateNpcSpawnRuntimeOnline, adminUpdateWorldMapOnline, adminUpdateWorldResourceOnline, adminUpdateWorldSectorOnline, adminUpdateWorldPortalOnline, adminUpdateWorldResourcePoolOnline, adminUpdateMissionCategoryOnline, adminUpdateEconomyServiceOnline, adminUpdateCraftingRecipeOnline, loadBattlePassRuntimeConfigOnline, adminUpdateBattlePassSeasonOnline, adminUpdateBattlePassTierOnline, loadShopsRuntimeConfigOnline, adminUpdateCommonShopItemOnline, adminUpdatePremiumShopItemOnline, loadBonusConfigOnline, adminUpdateBonusConfigOnline, adminCouponDashboardOnline, adminCreateCouponOnline, adminSetCouponActiveOnline } from './api.js?v=19.0.5';
+import { SharedUniverseClient } from './world.js?v=19.0.5';
 
 const canvas = document.querySelector('#game');
 const ctx = canvas.getContext('2d');
@@ -5915,7 +5915,7 @@ function filteredInventoryGrid(filter,context='ship',allowed=['lasers','shields'
 function renderHangarShips(){
   const root=document.createElement('div'),defs=designerCatalog().filter(d=>d.kind==='ship'),activeDesign=currentShipDesign(),eligible=shipDesignerEligible();
   const designerBox=document.createElement('div');designerBox.className='section-box ship-designer-console';
-  const cards=defs.map(d=>`<div class="designer-summary-card ${d.rarity||'epic'}"><div class="designer-orb" style="--designer-glow:${d.visual?.glow||'#7edcff'};--designer-accent:${d.visual?.accent||'#fff'}"></div><div><b>${d.name}</b><small>${designerBonusSummary(d)}</small><span>${rarityLabel(d.rarity)} • EVENTO • Inventário ${ownedDesignQty(d.design_id)}</span></div></div>`).join('');
+  const cards=defs.map(d=>`<div class="designer-summary-card ${d.rarity||'epic'}${activeDesign?.design_id===d.design_id?' is-equipped':''}"><div class="designer-orb" style="--designer-glow:${d.visual?.glow||'#7edcff'};--designer-accent:${d.visual?.accent||'#fff'}"></div><div><b>${d.name}</b><small>${designerBonusSummary(d)}</small><span>${rarityLabel(d.rarity)} • EVENTO • Inventário ${ownedDesignQty(d.design_id)}</span></div></div>`).join('');
   designerBox.innerHTML=`<h3>DESIGNERS DE NAVE • ELITE / EVENTO</h3><div class="muted" style="font-size:12px;margin-bottom:10px">O designer ativo altera visual, atributos e a habilidade da tecla E. Naves comuns de Créditos não aceitam designer.</div><div class="designer-summary-grid">${cards||'<div class="muted">Sincronizando catálogo...</div>'}</div>`;
   const control=document.createElement('div');control.className='designer-loadout-control';const label=document.createElement('label');label.textContent=`NAVE ATIVA • ${SHIPS[progress.activeShipId]?.name||progress.activeShipId}`;const sel=document.createElement('select');sel.className='designer-select';
   const none=document.createElement('option');none.value='';none.textContent=eligible?'SEM DESIGNER':'NAVE NÃO ELEGÍVEL';sel.appendChild(none);
@@ -5965,7 +5965,7 @@ function renderHangarDrones(){
   loadHangarEquipmentPrefs();
   const root=document.createElement('div'),defs=designerCatalog().filter(d=>d.kind==='drone');root.className='hangar-drone-console';
   const summary=document.createElement('div');summary.className='section-box drone-designer-summary';
-  const cards=defs.map(d=>{const owned=ownedDesignQty(d.design_id),equipped=equippedDesignCount(d.design_id),source=d.eligibility?.source||'EVENTO';const chance=d.design_id==='drone_fury'?'10%':d.design_id==='drone_aegis'?'10%':'EVENTO FUTURO';return `<div class="designer-summary-card ${d.rarity||'rare'}"><div class="designer-orb" style="--designer-glow:${d.visual?.glow||'#7edcff'};--designer-accent:${d.visual?.accent||'#fff'}"></div><div><b>${d.name}</b><small>${designerBonusSummary(d)}</small><span>${source} • ${chance} • Inventário ${owned} • Equipado ${equipped}/8</span></div></div>`;}).join('');
+  const cards=defs.map(d=>{const owned=ownedDesignQty(d.design_id),equipped=equippedDesignCount(d.design_id),source=d.eligibility?.source||'EVENTO';const chance=d.design_id==='drone_fury'?'10%':d.design_id==='drone_aegis'?'10%':'EVENTO FUTURO';return `<div class="designer-summary-card ${d.rarity||'rare'}${equipped>0?' is-equipped':''}"><div class="designer-orb" style="--designer-glow:${d.visual?.glow||'#7edcff'};--designer-accent:${d.visual?.accent||'#fff'}"></div><div><b>${d.name}</b><small>${designerBonusSummary(d)}</small><span>${source} • ${chance} • Inventário ${owned} • Equipado ${equipped}/8</span></div></div>`;}).join('');
   summary.innerHTML=`<h3>DESIGNERS DE DRONE • SETS 8/8</h3><div class="designer-summary-grid">${cards||'<div class="muted">Sincronizando catálogo...</div>'}</div>`;root.appendChild(summary);
   root.appendChild(hangarFilterBar('drone',['all','lasers','shields'],state.hangarDroneFilter));
   const layout=document.createElement('div');layout.className='hangar-equipment-split';
@@ -6027,7 +6027,28 @@ function renderHangarPilot(){
   else{const logs=pilotPointLogCost(next);nextBox.innerHTML=`<div class="eyebrow">PRÓXIMO PONTO</div><h3>PP #${next}</h3><div>${fmt(logs)} Núcleos Quânticos • ${fmt(logs*LOG_DISK_URI_PRICE)} STL equivalente</div>`;const b=document.createElement('button');b.className='primary-btn';b.textContent='CONVERTER EM 1 PP';b.disabled=p.logDisks<logs;b.onclick=()=>convertPilotPoint();nextBox.appendChild(b);}research.appendChild(nextBox);
   const store=document.createElement('div');store.innerHTML='<div class="eyebrow">NÚCLEOS QUÂNTICOS • 300 STL CADA</div>';const row=document.createElement('div');row.className='pilot-log-buttons';[1,10,100,500].forEach(q=>{const b=document.createElement('button');b.className='small-btn';b.innerHTML=`${q}x <small>${fmt(q*LOG_DISK_URI_PRICE)} STL</small>`;b.disabled=progress.profile.uridium<q*LOG_DISK_URI_PRICE;b.onclick=()=>buyLogDisks(q);row.appendChild(b);});store.appendChild(row);research.appendChild(store);
   const reset=document.createElement('div');const resetCost=1000*Math.pow(2,p.resetCount);reset.innerHTML=`<div class="eyebrow">RECONFIGURAÇÃO</div><div>Reset #${p.resetCount+1}: ${fmt(resetCost)} STL</div>`;const rb=document.createElement('button');rb.className='ghost-btn';rb.textContent='RESETAR ÁRVORE';rb.disabled=spent<=0||progress.profile.uridium<resetCost;rb.onclick=()=>resetPilotTree();reset.appendChild(rb);research.appendChild(reset);root.appendChild(research);
-  const tree=document.createElement('div');tree.className='pilot-skill-tree';for(const [branch,meta] of Object.entries(PILOT_BRANCHES))tree.appendChild(buildPilotBranch(branch,meta,avail));root.appendChild(tree);return root;
+  const tree=document.createElement('div');tree.className='pilot-skill-tree';for(const [branch,meta] of Object.entries(PILOT_BRANCHES))tree.appendChild(buildPilotBranch(branch,meta,avail));root.appendChild(tree);root.appendChild(pilotAttributeContributionPanel());return root;
+}
+function pilotAttributeContributionPanel(){
+  if(!progress)return document.createElement('div');
+  const d=shipDesignerBonuses(),p=petDesignerBonuses(),m=droneDesignerMultipliers(),ship=SHIPS[progress.activeShipId],low=['x1','x2','x3','x4'].includes(progress.mapId);
+  const n=(v)=>`${(Number(v)||0)>=0?'+':''}${((Number(v)||0)*100).toFixed(1).replace('.',',')}%`;
+  const pctRows=(items)=>items.filter(x=>Number(x[1])!==0).map(([label,value])=>`<div class="pilot-source-line"><span>${escHtml(label)}</span><b>${n(value)}</b></div>`).join('')||'<div class="pilot-source-line"><span>Sem bônus adicionais</span><b>0%</b></div>';
+  const laserIds=[...progress.shipLoadout.lasers,...progress.drones.flatMap(dr=>dr.slots)].filter(id=>ITEMS[id]?.type==='laser');
+  const genIds=[...progress.shipLoadout.generators,...progress.drones.flatMap(dr=>dr.slots)].filter(id=>ITEMS[id]?.type==='generator');
+  const baseLaser=laserIds.reduce((sum,id)=>{const it=ITEMS[id];return sum+Number(it?.alienDamage??it?.damage??0)*(1+Number(it?.alienBonus||0));},0);
+  const baseShield=genIds.reduce((sum,id)=>sum+Number(ITEMS[id]?.shield||0),0)+petShieldSupport();
+  const baseHp=Number(ship.hp||0);
+  const totalPct=(value,base)=>base>0?` • ${((value/base-1)*100)>=0?'+':''}${((value/base-1)*100).toFixed(1).replace('.',',')}% sobre base`:' • sem referência base';
+  const data=[
+    {name:'DANO LASER',total:fmt(player.laserDamage)+totalPct(player.laserDamage,baseLaser),sources:[['Pesquisa Potência Laser',pilotLaserPowerBonus()],['Pesquisa Caçador de Aliens',pilotSkillValue('alienHunter')/100],['Designer da nave',d.damage],['Designers dos drones',m.damage-1],['Serviço de calibração',economyBoostActive('weapon')?economyServiceEffect('weapon','laser_damage_pct',3)/100:0],['Bônus de mapa X',low?(ship.bonusLowMaps?.laserMult||1)-1:0]]},
+    {name:'ESCUDO',total:fmt(player.maxShield)+totalPct(player.maxShield,baseShield),sources:[['Pesquisa Engenharia de Escudo',pilotSkillValue('shieldEngineering')/100],['Designer da nave',d.shield],['Designer AUX-9',p.shield],['Designers dos drones',m.shield-1],['Serviço de escudo',economyBoostActive('shield')?economyServiceEffect('shield','shield_pct',5)/100:0],['Bônus de mapa X',low?(ship.bonusLowMaps?.shieldMult||1)-1:0]]},
+    {name:'VIDA DA NAVE',total:fmt(player.maxHp)+totalPct(player.maxHp,baseHp),sources:[['Designer da nave',d.hp],['Designer AUX-9',p.hp],['Designers dos drones',m.hp-1]]},
+    {name:'MÍSSEIS',total:`${Math.round((Number(player.rocketMult)||1)*100)}% do multiplicador`,sources:[['Pesquisa Fusão de Foguetes',pilotSkillValue('rocketFusion')/100],['Bônus de mapa X',low?(ship.bonusLowMaps?.rocketMult||1)-1:0]]},
+    {name:'ABSORÇÃO',total:`${Number(player.shieldAbsorption)||0}%`,sources:[['Pesquisa Mecânica de Escudo (pontos percentuais)',pilotSkillValue('shieldMechanics')/100]]}
+  ];
+  const root=document.createElement('details');root.className='pilot-attributes-master';root.innerHTML=`<summary>📊 DETALHAMENTO DOS ATRIBUTOS <span>Valores totais + fontes dos bônus • expandir</span></summary><p class="muted">Totais calculados com equipamentos, nave, AUX, designers, pesquisas e serviços atuais. Bônus multiplicativos não são uma soma simples.</p><div class="pilot-attributes-grid">${data.map(x=>`<details><summary><b>${x.name}</b><em>${x.total}</em></summary>${pctRows(x.sources)}</details>`).join('')}<details><summary><b>VELOCIDADE</b><em>${fmt(player.speed)}</em></summary><div class="pilot-source-line"><span>Velocidade de fábrica</span><b>${fmt(ship.speed)}</b></div><div class="pilot-source-line"><span>Propulsores e equipamentos</span><b>+${fmt(Math.max(0,player.speed-ship.speed-(economyBoostActive('thruster')?economyServiceEffect('thruster','speed_flat',5):0)-(low?Number(ship.bonusLowMaps?.speed||0):0)))}</b></div>${low?`<div class="pilot-source-line"><span>Mapa X</span><b>+${fmt(ship.bonusLowMaps?.speed||0)}</b></div>`:''}${economyBoostActive('thruster')?`<div class="pilot-source-line"><span>Serviço de propulsão</span><b>+${fmt(economyServiceEffect('thruster','speed_flat',5))}</b></div>`:''}</details></div>`;
+  return root;
 }
 function renderHangar(){
   if(!progress)return;loadHangarEquipmentPrefs();
@@ -6093,7 +6114,7 @@ function renderPet(root=ui.petContent){
   root.appendChild(hero);
 
   const petDefs=designerCatalog().filter(d=>d.kind==='pet'),designerPanel=document.createElement('div');designerPanel.className='section-box aux-designer-console';
-  const designerCards=petDefs.map(d=>`<div class="designer-summary-card ${d.rarity||'epic'}"><div class="designer-orb" style="--designer-glow:${d.visual?.glow||'#7edcff'};--designer-accent:${d.visual?.accent||'#fff'}"></div><div><b>${d.name}</b><small>${designerBonusSummary(d)}</small><span>${rarityLabel(d.rarity)} • EVENTO • Inventário ${ownedDesignQty(d.design_id)}</span></div></div>`).join('');
+  const designerCards=petDefs.map(d=>`<div class="designer-summary-card ${d.rarity||'epic'}${petDesigner?.design_id===d.design_id?' is-equipped':''}"><div class="designer-orb" style="--designer-glow:${d.visual?.glow||'#7edcff'};--designer-accent:${d.visual?.accent||'#fff'}"></div><div><b>${d.name}</b><small>${designerBonusSummary(d)}</small><span>${rarityLabel(d.rarity)} • EVENTO • Inventário ${ownedDesignQty(d.design_id)}</span></div></div>`).join('');
   designerPanel.innerHTML=`<h3>DESIGNERS AUX-9 • EVENTOS</h3><div class="muted" style="font-size:12px;margin-bottom:10px">Itens raros de evento. Podem combinar DANO, HP, ESCUDO e XP.</div><div class="designer-summary-grid">${designerCards||'<div class="muted">Sincronizando catálogo...</div>'}</div>`;
   const dControl=document.createElement('div');dControl.className='designer-loadout-control';const dLabel=document.createElement('label');dLabel.textContent='DESIGNER ATIVO';const dSel=document.createElement('select');dSel.className='designer-select';const dNone=document.createElement('option');dNone.value='';dNone.textContent='SEM DESIGNER';dSel.appendChild(dNone);petDefs.forEach(d=>{const o=document.createElement('option');o.value=d.design_id;o.textContent=`${d.name} • ${rarityLabel(d.rarity)} • ${ownedDesignQty(d.design_id)}x`;o.disabled=ownedDesignQty(d.design_id)<=0;dSel.appendChild(o);});dSel.value=petDesigner?.design_id||'';dSel.disabled=!canChangeEquipment();dSel.onchange=()=>equipPetDesigner(dSel.value||null);dControl.append(dLabel,dSel);designerPanel.appendChild(dControl);root.appendChild(auxFoldSectionV18210(designerPanel,'aux:designers','DESIGNERS AUX-9',`Ativo: ${petDesigner?.name||'SEM DESIGNER'} • ${petDefs.length} opções`));
 
@@ -7197,6 +7218,24 @@ function adminBonusMessage(message,kind='muted'){
   if(ui.adminRuntimeBonusMessage){ui.adminRuntimeBonusMessage.textContent=message;ui.adminRuntimeBonusMessage.className=`admin-runtime-interface-message ${kind}`;}
 }
 const BONUS_MAP_LABELS={x1:'X-1',x2:'X-2',x3:'X-3',x4:'X-4',b41:'4-1',b42:'4-2',b43:'4-3'};
+function renderAdminPortalsEditor(){
+  const host=$('#adminRuntimePortalsGrid');if(!host)return;
+  const c=adminBonusEditor.snapshot?.config;
+  if(!c){host.innerHTML='<div class="empty-state">Abra PORTAIS ASTRAIS para carregar custos do materializador.</div>';return;}
+  const costs=[['alpha','AURORA'],['beta','NEXUS'],['gamma','ECLIPSE']].map(([key,label])=>`<div class="admin-bonus-reward"><b>${label}</b><div class="admin-shop-fields"><label>STL POR GIRO<input type="number" min="1" max="100000" data-portal-cost="stl:${key}" value="${Math.max(1,Math.round(Number(c.gate_prices?.[key]?.stl)||100))}"></label><label>POEIRA POR GIRO<input type="number" min="1" max="100" data-portal-cost="dust:${key}" value="${Math.max(1,Math.round(Number(c.gate_prices?.[key]?.dust)||1))}"></label></div></div>`).join('');
+  host.innerHTML=`<article class="admin-bonus-block"><h4>🎯 PREÇOS DO MATERIALIZADOR</h4><p>Servidor calcula preços e confirma saldo; alterações têm efeito após sincronização.</p><div class="admin-shop-fields"><label>DESCONTO PREMIUM (%)<input data-portal-cost="discount" type="number" min="0" max="50" value="${Math.max(0,Math.min(50,Math.round(Number(c.premium_discount_pct)||0)))}"></label></div>${costs}<button type="button" class="small-btn gold" data-portal-price-save>SALVAR CUSTOS DE GIROS</button></article><article class="admin-bonus-block"><h4>🛸 ONDAS, NPCs E PRÊMIOS</h4><p>Etapa reservada para o editor de ondas e recompensas, que exigirá migração/validação do servidor. As regras atuais não foram alteradas.</p><div class="admin-portals-summary">${Object.values(GALAXY_GATE_DEFS).map(d=>`<details><summary>${escHtml(d.label)} • ${d.rounds.length} rounds</summary>${d.rounds.map(r=>`<p><b>Round ${r.round}: ${escHtml(r.name)}</b><small> ${r.waves.map(w=>`${escHtml(w.type)} ×${w.count}`).join(' • ')}</small></p>`).join('')}</details>`).join('')}</div></article>`;
+}
+async function saveAdminPortalPrices(){
+  if(adminBonusEditor.busy||!adminBonusEditor.snapshot?.config)return;
+  const c=structuredClone(adminBonusEditor.snapshot.config),host=$('#adminRuntimePortalsGrid'),get=x=>host?.querySelector(`[data-portal-cost="${x}"]`);
+  for(const k of ['alpha','beta','gamma'])for(const cur of ['stl','dust']){
+    const v=Number(get(`${cur}:${k}`)?.value),max=cur==='stl'?100000:100;
+    if(!Number.isInteger(v)||v<1||v>max){showToast(`Valor inválido para ${k}/${cur}`);return;}
+    c.gate_prices[k][cur]=v;
+  }
+  c.premium_discount_pct=Math.max(0,Math.min(50,Math.floor(Number(get('discount')?.value)||0)));
+  adminBonusEditor.busy=true;try{const raw=await adminUpdateBonusConfigOnline(c);adminBonusEditor.snapshot=raw;normalizeBonusRuntime(raw);renderAdminPortalsEditor();renderAdminBonusEditor();showToast('Custos do materializador salvos no servidor!','reward');}catch(e){showToast(e.message||'Não foi possível salvar custos.');}finally{adminBonusEditor.busy=false;}
+}
 function renderAdminBonusEditor(){
   const host=ui.adminRuntimeBonusGrid;if(!host)return;
   const raw=adminBonusEditor.snapshot,c=raw?.config;if(!c){host.innerHTML='<div class="empty-state">Carregue a configuração das caixas.</div>';return;}
@@ -7207,7 +7246,7 @@ function renderAdminBonusEditor(){
   host.innerHTML=`<article class="admin-bonus-block"><h4>🌌 DISTRIBUIÇÃO POR MAPA</h4><p>Portais Astrais (AURORA/NEXUS/ECLIPSE) permanecem com 0 BOX BÔNUS por regra do jogo.</p><div class="admin-shop-fields">${maps}</div></article>
   <article class="admin-bonus-block"><h4>⏳ REAPARECIMENTO</h4><div class="admin-shop-fields">${numberField('respawn-min',Math.round(c.respawn_min_ms/1000),5,3600,'MÍN. (SEG)')}${numberField('respawn-max',Math.round(c.respawn_max_ms/1000),5,3600,'MÁX. (SEG)')}</div></article>
   <article class="admin-bonus-block"><h4>🎁 RECOMPENSAS DA BOX</h4><p>PESO 0 = desativada. Probabilidade relativa ao total dos pesos; cada caixa dá somente um prêmio.</p>${rewards}</article>
-  <article class="admin-bonus-block"><h4>💎 MATERIALIZADOR</h4><p>Os preços são cobrados pelo servidor. Premium desconta apenas STL, nunca Poeira.</p><div class="admin-shop-fields">${numberField('discount',c.premium_discount_pct,0,50,'DESCONTO PREMIUM (%)')}</div>${gates}</article>
+  <article class="admin-bonus-block"><h4>💎 MATERIALIZADOR</h4><p>Os preços e giros agora estão em ADM → PORTAIS ASTRAIS.</p></article>
   <button class="small-btn gold admin-bonus-submit" type="button" data-bonus-save="1">SALVAR CONFIGURAÇÃO BÔNUS</button>`;
 }
 async function loadAdminBonusEditor(force=false){
@@ -7225,8 +7264,7 @@ async function saveAdminBonusEditor(button){
     for(const id of Object.keys(BONUS_MAP_LABELS))c.map_counts[id]=integer(`map:${id}`,0,100);
     c.respawn_min_ms=integer('respawn-min',5,3600)*1000;c.respawn_max_ms=integer('respawn-max',5,3600)*1000;
     if(c.respawn_min_ms>c.respawn_max_ms)throw Error('Respawn mínimo não pode exceder o máximo.');
-    c.premium_discount_pct=integer('discount',0,50);
-    for(const gate of ['alpha','beta','gamma']){c.gate_prices[gate].stl=integer(`gate-stl:${gate}`,1,100000);c.gate_prices[gate].dust=integer(`gate-dust:${gate}`,1,100);}
+    // Valores de giro são editados separadamente em PORTAIS ASTRAIS.
     for(let i=0;i<c.rewards.length;i++){const r=c.rewards[i],maxAllowed=r.kind==='credits'?10000000:r.kind==='uridium'?100000:r.kind==='stellarDust'?100:1000000;
       r.min=integer(`min:${i}`,1,maxAllowed);r.max=integer(`max:${i}`,1,maxAllowed);r.weight=integer(`weight:${i}`,0,100);
       if(r.min>r.max)throw Error(`${BONUS_CONFIG_DEFAULT.rewards[i].label}: mínimo maior que máximo.`);
@@ -7317,29 +7355,124 @@ async function loadAdminCoupons(force=false){
  catch(e){adminCouponNotice(e?.message||'Erro ao carregar cupons.','err');}
 }
 
+// V19.0.5 — Formulários visuais sobre os JSONs EXISTENTES; não alteram o contrato do servidor.
+const ADM_RESOURCE_LIST=['Prometium','Endurium','Terbium','Prometid','Duranium','Promerium','Xenomit'];
+const ADM_EDITOR_OBJECTS={};
+function admPrettyKey(key){return ({ore_pool:'Minérios disponíveis',ore_target:'Quantidade de minério',ore_flat_reward:'Prêmios fixos',ore_item_chance:'Chance de item',hunt_boss_target:'NPCs chefes',combo_boss_target:'Chefes em sequência',hunt_normal_target:'NPCs comuns',combo_normal_target:'NPCs em sequência',npc_target:'NPCs para eliminar',steps:'Metas / etapas',ammo:'Munições',rockets:'Mísseis',items:'Equipamentos',ships:'Naves',credits:'Créditos',uridium:'Stellarium',repairBonus:'Bônus de reparação',laser_damage_pct:'Dano laser (%)',shield_pct:'Escudo (%)',cargo_flat:'Capacidade do porão',speed_flat:'Velocidade',id:'Item',qty:'Quantidade',kind:'Tipo'})[key]||String(key).replace(/_/g,' ').toUpperCase();}
+function admKindOptions(path,payload){const end=String(path.at(-1)||'');if(end==='ore_pool'||end==='ingredients')return ADM_RESOURCE_LIST.map(k=>[k,RESOURCES[k]?.name||k]);if(end==='ammo')return Object.entries(LASER_AMMO).map(([id,r])=>[id,r.name||id]);if(end==='rockets')return Object.entries(ROCKETS).map(([id,r])=>[id,r.name||id]);if(end==='items')return Object.entries(ITEMS).filter(([,r])=>r.type==='laser'||r.type==='generator'||r.type==='extra').map(([id,r])=>[id,r.name||id]);if(end==='ships')return Object.entries(SHIPS).map(([id,r])=>[id,r.name||id]);if(end==='id'){
+   const kind=String(payload?.kind||'');if(kind==='ammo')return admKindOptions(['ammo'],payload);if(kind==='rocket')return admKindOptions(['rockets'],payload);if(kind==='resource')return ADM_RESOURCE_LIST.map(id=>[id,RESOURCES[id]?.name||id]);
+ }
+ return [];}
+function admSelect(options,current,path,extra=''){
+ const seen=new Set(options.map(x=>x[0]));if(current!==undefined&&current!==null&&!seen.has(String(current)))options=[[String(current),String(current)],...options];
+ return `<select ${extra} data-adm-edit-path="${escHtml(JSON.stringify(path))}">${options.map(([v,label])=>`<option value="${escHtml(v)}" ${String(v)===String(current)?'selected':''}>${escHtml(label)}</option>`).join('')}</select>`;
+}
+function admStructuredFields(obj,path=[],root=obj){
+ const entries=Object.entries(obj||{});return entries.map(([k,v])=>{
+   const p=[...path,k],name=admPrettyKey(k),pval=escHtml(JSON.stringify(p));
+   if(Array.isArray(v)){
+     const opts=admKindOptions(p,root);const rows=v.map((value,i)=>`<div class="adm-struct-row">${opts.length?admSelect(opts,String(value),[...p,i]):`<input data-adm-edit-path="${escHtml(JSON.stringify([...p,i]))}" type="${typeof value==='number'?'number':'text'}" value="${escHtml(value)}" ${typeof value==='number'?'min="0"':''}>`}<button type="button" class="ghost-btn" data-adm-remove="${escHtml(JSON.stringify([...p,i]))}" title="Remover">×</button></div>`).join('');
+     return `<section class="adm-struct-group"><b>${escHtml(name)}</b><div class="adm-struct-list">${rows}</div><button type="button" class="small-btn" data-adm-add="${pval}">+ ADICIONAR ${escHtml(name)}</button></section>`;
+   }
+   if(v&&typeof v==='object'){
+     const opts=admKindOptions(p,root);const items=admStructuredFields(v,p,root);const addition=opts.length?`<div class="adm-struct-add">${admSelect(opts,opts.find(x=>!Object.hasOwn(v,x[0]))?.[0]||opts[0]?.[0],[...p,'__add__'],'data-adm-add-select')}<button class="small-btn" type="button" data-adm-add="${pval}">+ ITEM</button></div>`:'';
+     return `<section class="adm-struct-group"><b>${escHtml(name)}</b><div class="adm-struct-fields">${items}</div>${addition}</section>`;
+   }
+   const kind=path.length===0?String(obj.kind||''):String(root?.kind||'');
+   if(k==='kind'&&path.length===0&&['resource','ammo','rocket','repair'].includes(String(v)))return `<label class="adm-struct-leaf">${escHtml(name)}${admSelect([['resource','Recurso'],['ammo','Munição'],['rocket','Míssil'],['repair','Reparação']],v,p)}</label>`;
+   if(k==='id'&&path.length===0&&admKindOptions(p,root).length)return `<label class="adm-struct-leaf">${escHtml(name)}${admSelect(admKindOptions(p,root),v,p)}</label>`;
+   return `<label class="adm-struct-leaf">${escHtml(name)}<input data-adm-edit-path="${pval}" type="${typeof v==='number'?'number':typeof v==='boolean'?'checkbox':'text'}" ${typeof v==='number'?'step="any" min="0"':''} ${typeof v==='boolean'?(v?'checked':''):`value="${escHtml(String(v??''))}"`}></label>`;
+ }).join('');
+}
+function admGetPayload(root,path){let x=root;for(const k of path){if(x===undefined||x===null)return undefined;x=x[k];}return x;}
+function admSetPayload(root,path,value,remove=false){let ptr=root;for(const key of path.slice(0,-1)){if(ptr[key]===undefined||ptr[key]===null)ptr[key]=typeof path.at(-1)==='number'?[]:{};ptr=ptr[key];}const key=path.at(-1);if(remove){if(Array.isArray(ptr))ptr.splice(Number(key),1);else delete ptr[key];}else ptr[key]=value;}
+function admRefreshBuilder(builder){
+ let html=admStructuredFields(builder.payload||{});
+ if(builder.kind==='ingredients'){
+   const available=ADM_RESOURCE_LIST.map(id=>[id,RESOURCES[id]?.name||id]);
+   html+=`<div class="adm-struct-add adm-root-add">${admSelect(available,available.find(([id])=>!Object.hasOwn(builder.payload,id))?.[0]||available[0][0],['__add__'],'data-adm-add-select')}<button type="button" class="small-btn" data-adm-add="[]">+ INGREDIENTE</button></div>`;
+ }
+ builder.innerHTML=html;builder.linkedTextarea.value=JSON.stringify(builder.payload||{},null,2);
+}
+function enhanceAdminStructuredEditors(){
+ const modal=ui.adminModal;if(!modal)return;
+ const selectors=['[data-system-mission-field="config"]','[data-system-economy-field="effect"]','[data-system-crafting-field="ingredients"]','[data-system-crafting-field="grant_payload"]','[data-pass-tier-field="free_reward"]','[data-pass-tier-field="premium_reward"]'];
+ for(const textarea of modal.querySelectorAll(selectors.join(','))){if(textarea.dataset.structuredEnhanced==='1')continue;
+   let payload;try{payload=JSON.parse(textarea.value)}catch{continue;}if(!payload||typeof payload!=='object'||Array.isArray(payload))continue;
+   textarea.dataset.structuredEnhanced='1';textarea.classList.add('adm-raw-hidden');
+   const builder=document.createElement('div');builder.className='adm-visual-builder';builder.payload=structuredClone(payload);builder.linkedTextarea=textarea;builder.kind=textarea.dataset.systemCraftingField||textarea.dataset.systemMissionField||textarea.dataset.systemEconomyField||textarea.dataset.passTierField||'';
+   const label=document.createElement('div');label.className='adm-visual-kicker';label.textContent='EDITOR VISUAL • ESCOLHA ITENS E QUANTIDADES';const oldLabel=textarea.closest('label');if(oldLabel){oldLabel.classList.add('adm-raw-hidden');oldLabel.insertAdjacentElement('afterend',label);}else textarea.insertAdjacentElement('afterend',label);label.insertAdjacentElement('afterend',builder);
+   admRefreshBuilder(builder);
+   builder.addEventListener('change',e=>{const input=e.target.closest('[data-adm-edit-path]');if(!input)return;let path;try{path=JSON.parse(input.dataset.admEditPath)}catch{return;}if(path.at(-1)==='__add__')return;
+     const prev=admGetPayload(builder.payload,path),value=input.type==='checkbox'?input.checked:typeof prev==='number'?Number(input.value):input.value;
+     if(typeof prev==='number'&&(!Number.isFinite(value)||value<0))return;
+     admSetPayload(builder.payload,path,value);builder.linkedTextarea.value=JSON.stringify(builder.payload,null,2);
+     if(path.length===1&&path[0]==='kind')admRefreshBuilder(builder);
+   });
+   builder.addEventListener('click',e=>{
+     const rm=e.target.closest('[data-adm-remove]'),add=e.target.closest('[data-adm-add]');if(!rm&&!add)return;e.preventDefault();
+     if(rm){try{admSetPayload(builder.payload,JSON.parse(rm.dataset.admRemove),undefined,true)}catch{return;}}
+     if(add){let p;try{p=JSON.parse(add.dataset.admAdd)}catch{return;}
+       const current=admGetPayload(builder.payload,p);
+       if(Array.isArray(current)){const options=admKindOptions(p,builder.payload);const fallback=options[0]?.[0]||1;current.push(options.length?fallback:typeof current[0]==='number'?1:typeof current[0]==='string'?'':1);}
+       else if(current&&typeof current==='object'){const chosen=add.parentElement.querySelector('[data-adm-add-select]')?.value;if(chosen&&!Object.hasOwn(current,chosen))current[chosen]=1;}
+     }
+     admRefreshBuilder(builder);
+   });
+ }
+}
+const admFoldState=new Map();
+function enhanceAdminCollapsibleCards(){
+ const modal=ui.adminModal;if(!modal)return;
+ const selectors=['.admin-interface-row','.admin-npc-card','.admin-world-map-card','.admin-world-resource-card','.admin-world-sector-card','.admin-world-portal-card','.admin-system-card','.admin-events-card','.admin-event-card','.admin-pass-tier-card','.admin-pass-season-card','.admin-shop-card','.admin-bonus-block','.admin-coupon-card','.admin-coupon-list-card','.admin-world-pool-block','.admin-world-pool-row','.admin-npc-spawn-block','.admin-npc-spawn-row','.admin-bonus-reward'];
+ modal.querySelectorAll(selectors.join(',')).forEach((card,i)=>{
+   if(card.dataset.admFoldedReady)return;card.dataset.admFoldedReady='1';
+   const key=(card.closest('[id]')?.id||'admin')+':'+[...card.attributes].filter(a=>a.name.startsWith('data-')&&a.name!=='data-adm-folded-ready').map(a=>a.value).join(':')+':'+i;
+   const head=card.firstElementChild;if(!head)return;
+   const btn=document.createElement('button');btn.type='button';btn.className='adm-fold-toggle';btn.setAttribute('aria-label','Expandir ou recolher');btn.textContent='▾ EDITAR';
+   card.insertBefore(btn,head.nextSibling);
+   [...card.children].filter(c=>c!==head&&c!==btn).forEach(c=>c.classList.add('adm-fold-body'));
+   const collapsed=admFoldState.has(key)?admFoldState.get(key):true;card.classList.toggle('adm-folded',collapsed);btn.textContent=collapsed?'▸ EXPANDIR':'▾ RECOLHER';btn.setAttribute('aria-expanded',String(!collapsed));
+   btn.onclick=()=>{const isCollapsed=!card.classList.contains('adm-folded');card.classList.toggle('adm-folded',isCollapsed);admFoldState.set(key,isCollapsed);btn.textContent=isCollapsed?'▸ EXPANDIR':'▾ RECOLHER';btn.setAttribute('aria-expanded',String(!isCollapsed));};
+ });
+}
+function enhanceAdminEditorsV1905(){enhanceAdminStructuredEditors();enhanceAdminCollapsibleCards();}
+function bootAdminEditorObserver(){if(!ui.adminModal||ui.adminModal.dataset.admObserverReady)return;ui.adminModal.dataset.admObserverReady='1';
+  // Reorder existing panels only inside the ADM; DOM IDs, listeners and data sources are preserved.
+  ui.adminRuntimeWorldPanel?.insertAdjacentElement('afterend',ui.adminRuntimeNpcPanel);
+  ui.adminRuntimeNpcPanel?.insertAdjacentElement('afterend',ui.adminRuntimeBonusPanel);const observer=new MutationObserver(()=>enhanceAdminEditorsV1905());observer.observe(ui.adminModal,{childList:true,subtree:true});enhanceAdminEditorsV1905();}
 const adminInterfaceEditor={busy:false,activeTab:'runtime',snapshot:null};
 function setAdminRuntimeTab(tab='runtime'){
-  const next=['runtime','interface','npcs','world','systems','events','pass','shops','bonus','coupons'].includes(tab)?tab:'runtime';adminInterfaceEditor.activeTab=next;
+  const next=['runtime','interface','world','systems','events','pass','shops','portals','coupons','npcs','bonus'].includes(tab)?tab:'runtime';
+  adminInterfaceEditor.activeTab=next;
   ui.adminRuntimeTabs?.querySelectorAll('[data-admin-runtime-tab]').forEach(b=>b.classList.toggle('active',b.dataset.adminRuntimeTab===next));
   ui.adminRuntimeMonitorPanel?.classList.toggle('hidden',next!=='runtime');
   ui.adminRuntimeInterfacePanel?.classList.toggle('hidden',next!=='interface');
-  ui.adminRuntimeNpcPanel?.classList.toggle('hidden',next!=='npcs');
   ui.adminRuntimeWorldPanel?.classList.toggle('hidden',next!=='world');
   ui.adminRuntimeSystemsPanel?.classList.toggle('hidden',next!=='systems');
   ui.adminRuntimeEventsPanel?.classList.toggle('hidden',next!=='events');
   ui.adminRuntimePassPanel?.classList.toggle('hidden',next!=='pass');
   ui.adminRuntimeShopsPanel?.classList.toggle('hidden',next!=='shops');
-  ui.adminRuntimeBonusPanel?.classList.toggle('hidden',next!=='bonus');
   ui.adminRuntimeCouponsPanel?.classList.toggle('hidden',next!=='coupons');
+  ui.adminRuntimePortalsPanel?.classList.toggle('hidden',next!=='portals');
+  // Map/world sub-editors share one navigation group.
+  ui.adminRuntimeNpcPanel?.classList.toggle('hidden',next!=='npcs' && !(next==='world' && adminWorldEditor.activeView==='npcs'));
+  ui.adminRuntimeBonusPanel?.classList.toggle('hidden',next!=='bonus' && !(next==='world' && adminWorldEditor.activeView==='box'));
+  if(next==='world'){
+    const editingSubPanel=['box','npcs'].includes(adminWorldEditor.activeView);
+    ui.adminRuntimeWorldGrid?.classList.toggle('hidden',editingSubPanel);
+  }
   if(next==='interface'&&!adminInterfaceEditor.snapshot)loadAdminInterfaceEditor(false);
-  if(next==='npcs'&&!adminNpcEditor.snapshot)loadAdminNpcEditor(false);
+  if((next==='npcs'||next==='world'&&adminWorldEditor.activeView==='npcs')&&!adminNpcEditor.snapshot)loadAdminNpcEditor(false);
   if(next==='world'&&!adminWorldEditor.snapshot)loadAdminWorldEditor(false);
   if(next==='systems'&&!adminSystemsEditor.snapshot)loadAdminSystemsEditor(false);
   if(next==='events'&&!adminEventsEditor.snapshot)loadAdminEventsEditor(false);
   if(next==='pass'&&!adminPassEditor.snapshot)loadAdminPassEditor(false);
   if(next==='shops'&&!adminShopsEditor.snapshot)loadAdminShopsEditor(false);
-  if(next==='bonus'&&!adminBonusEditor.snapshot)loadAdminBonusEditor(false);
+  if((next==='bonus'||next==='portals'||next==='world'&&adminWorldEditor.activeView==='box')&&!adminBonusEditor.snapshot)loadAdminBonusEditor(false);
+  if(next==='portals')renderAdminPortalsEditor();
   if(next==='coupons'&&!adminCouponsRuntime.snapshot)loadAdminCoupons(false);
+  queueMicrotask(enhanceAdminEditorsV1905);
 }
 function adminInterfaceMessage(text,kind='muted'){if(!ui.adminRuntimeInterfaceMessage)return;ui.adminRuntimeInterfaceMessage.textContent=text||'';ui.adminRuntimeInterfaceMessage.className=`admin-runtime-interface-message ${kind}`.trim();}
 function adminModuleGroupLabel(row){if(!row?.parent_key)return 'TOPO';const p=adminInterfaceEditor.snapshot?.modules?.find(x=>x.module_key===row.parent_key);return p?.label||row.parent_key;}
@@ -7402,9 +7535,15 @@ async function saveAdminNpcSpawn(key,row,button){
 const adminWorldEditor={busy:false,snapshot:null,activeView:'maps'};
 function adminWorldMessage(text,kind='muted'){if(!ui.adminRuntimeWorldMessage)return;ui.adminRuntimeWorldMessage.textContent=text||'';ui.adminRuntimeWorldMessage.className=`admin-runtime-interface-message ${kind}`.trim();}
 function adminWorldSetView(view='maps'){
-  const next=['maps','resources','sectors','portals'].includes(view)?view:'maps';adminWorldEditor.activeView=next;
+  const next=['maps','resources','sectors','portals','npcs','box'].includes(view)?view:'maps';adminWorldEditor.activeView=next;
   ui.adminRuntimeWorldTabs?.querySelectorAll('[data-admin-world-view]').forEach(b=>b.classList.toggle('active',b.dataset.adminWorldView===next));
-  renderAdminWorldEditor();
+  ui.adminRuntimeNpcPanel?.classList.toggle('hidden',next!=='npcs');
+  ui.adminRuntimeBonusPanel?.classList.toggle('hidden',next!=='box');
+  ui.adminRuntimeWorldGrid?.classList.toggle('hidden',['npcs','box'].includes(next));
+  if(next==='npcs'&&!adminNpcEditor.snapshot)loadAdminNpcEditor(false);
+  if(next==='box'&&!adminBonusEditor.snapshot)loadAdminBonusEditor(false);
+  if(!['npcs','box'].includes(next))renderAdminWorldEditor();
+  queueMicrotask(enhanceAdminEditorsV1905);
 }
 function adminWorldResourceLabel(key){const r=adminWorldEditor.snapshot?.resources?.find(x=>String(x.resource_key)===String(key));return r?.name||key;}
 function adminWorldMapLabel(id){const row=adminWorldEditor.snapshot?.maps?.find(x=>String(x.map_id)===String(id));return row?.label||row?.name||adminNpcMapLabel(id);}
@@ -7549,10 +7688,14 @@ async function saveAdminPassTier(tierNo,card,button){
 // ===================== V18.1.7C • ADMIN SHOPS EDITOR =====================
 const adminShopsEditor={busy:false,snapshot:null,activeView:'common'};
 function adminShopsMessage(text,kind='muted'){if(!ui.adminRuntimeShopsMessage)return;ui.adminRuntimeShopsMessage.textContent=text||'';ui.adminRuntimeShopsMessage.className=`admin-runtime-interface-message ${kind}`.trim();}
-function adminShopsSetView(view='common'){adminShopsEditor.activeView=view==='premium'?'premium':'common';ui.adminRuntimeShopsTabs?.querySelectorAll('[data-admin-shops-view]').forEach(b=>b.classList.toggle('active',b.dataset.adminShopsView===adminShopsEditor.activeView));renderAdminShopsEditor();}
+function adminShopsSetView(view='common'){adminShopsEditor.activeView=['common','premium','auction'].includes(view)?view:'common';ui.adminRuntimeShopsTabs?.querySelectorAll('[data-admin-shops-view]').forEach(b=>b.classList.toggle('active',b.dataset.adminShopsView===adminShopsEditor.activeView));renderAdminShopsEditor();}
 function localShopDef(row){const id=String(row?.ref_id||'');if(row?.kind==='ship')return SHIPS[id]||null;if(['laser','generator','extra','drone'].includes(String(row?.kind)))return ITEMS[id]||null;if(row?.kind==='ammo')return LASER_AMMO[id]||null;if(row?.kind==='rocket')return ROCKETS[id]||null;if(row?.kind==='pet_gear')return PET_GEARS[id]||null;if(row?.kind==='pet')return {name:'AUX-9 — Unidade Base',description:'Companheiro autônomo AUX-9.'};return null;}
 function adminShopQty(row){return Math.max(1,Math.floor(Number(row?.meta?.grant?.qty)||Number(row?.quantity)||1));}
 function renderAdminShopsEditor(){
+  if(adminShopsEditor.activeView==='auction'){
+    if(ui.adminRuntimeShopsGrid){ui.adminRuntimeShopsGrid.innerHTML=`<article class="admin-system-card"><div class="admin-system-card-head"><b>LEILÃO • CENTRAL DE PREÇOS</b></div><p>Leilão NOVA com lance inicial configurado em 100.000.000 CR. Os valores de leilão estão validados pelo servidor e não devem ser editados apenas no navegador.</p><p class="muted">O editor de lotes, preços mínimos e ciclos será integrado na etapa de economia do ADM, com autorização no backend.</p></article>`;}return;
+  }
+
   if(!ui.adminRuntimeShopsGrid)return;const snap=adminShopsEditor.snapshot||{};
   if(adminShopsEditor.activeView==='premium'){
     const rows=[...(snap.premium||[])].sort((a,b)=>(Number(a.sort_order)||100)-(Number(b.sort_order)||100)||String(a.id).localeCompare(String(b.id)));
@@ -7614,7 +7757,7 @@ async function refreshAdminStatus(silent=true){
   try{const st=await getAdminStatus();adminRuntime.status=st;adminRuntime.enabled=!!st?.is_admin;ui.adminBtn?.classList.toggle('hidden',!adminRuntime.enabled);renderAdminStatus();return adminRuntime.enabled;}catch(err){adminRuntime.enabled=false;ui.adminBtn?.classList.add('hidden');if(!silent)showToast(err.message);return false;}
 }
 async function refreshAdminPanel(query=null){if(adminRuntime.busy)return;adminRuntime.busy=true;adminSetMessage('Atualizando painel...','busy');try{const q=query===null?String(ui.adminSearchInput?.value||''):String(query||'');const [status,users,actions,telemetry]=await Promise.all([getAdminStatus(),adminSearchAccounts(q),adminRecentActions(),adminTelemetryOverview()]);adminRuntime.status=status;adminRuntime.enabled=!!status?.is_admin;if(!adminRuntime.enabled)throw new Error('Acesso administrativo negado.');adminRuntime.users=users?.users||[];adminRuntime.actions=actions?.actions||[];adminRuntime.telemetry=telemetry||null;renderAdminStatus();renderAdminUsers();renderAdminActions();renderAdminTelemetry();renderAdminTelemetryDetail();adminSetMessage(`${adminRuntime.users.length} conta(s) exibida(s).`,'ok');}catch(err){adminSetMessage(err.message,'err');}finally{adminRuntime.busy=false;}}
-async function openAdminPanel(){if(!await refreshAdminStatus(false)){showToast('Acesso administrativo negado');return;}closeNavigationModals(ui.adminModal);ui.adminModal?.classList.remove('hidden');await Promise.all([refreshAdminPanel(),loadAdminRuntimeMonitor(false)]);}
+async function openAdminPanel(){bootAdminEditorObserver();if(!await refreshAdminStatus(false)){showToast('Acesso administrativo negado');return;}closeNavigationModals(ui.adminModal);ui.adminModal?.classList.remove('hidden');await Promise.all([refreshAdminPanel(),loadAdminRuntimeMonitor(false)]);}
 async function runAdminAction(action,user){if(!user||adminRuntime.busy)return;const name=user.callsign||user.email||'esta conta';let changed=false;try{adminRuntime.busy=true;if(action==='ban'){const minutes=Math.max(0,Number(ui.adminBanDuration?.value)||0),reason=String(ui.adminBanReason?.value||'').trim();if(!confirm(`Banir ${name}${minutes?` por ${minutes} minuto(s)`:' permanentemente'}?`))return;await adminBanAccount(user.user_id,{minutes,reason});changed=true;adminSetMessage(`${name} foi banido.`,'ok');}
 else if(action==='unban'){if(!confirm(`Remover o ban de ${name}?`))return;await adminUnbanAccount(user.user_id);changed=true;adminSetMessage(`Ban removido de ${name}.`,'ok');}
 else if(action==='reset'){if(!confirm(`ZERAR TODO O PROGRESSO de ${name}?\n\nLogin e callsign serão mantidos. Premium é preservado. O jogador será desconectado.`))return;await adminResetAccount(user.user_id);changed=true;adminSetMessage(`${name} foi zerado e desconectado.`,'ok');}
@@ -7752,6 +7895,8 @@ if(ui.adminRuntimePassSeason)ui.adminRuntimePassSeason.onclick=e=>{const save=e.
 if(ui.adminRuntimePassGrid)ui.adminRuntimePassGrid.onclick=e=>{const save=e.target.closest('[data-pass-tier-save]');if(save)saveAdminPassTier(Number(save.dataset.passTierSave),save.closest('[data-pass-tier]'),save);};
 if(ui.adminRuntimeBonusReload)ui.adminRuntimeBonusReload.onclick=()=>loadAdminBonusEditor(true);
 if(ui.adminRuntimeBonusGrid)ui.adminRuntimeBonusGrid.onclick=e=>{const b=e.target.closest('[data-bonus-save]');if(b)saveAdminBonusEditor(b);};
+$('#adminRuntimePortalsGrid')?.addEventListener('click',e=>{if(e.target.closest('[data-portal-price-save]'))saveAdminPortalPrices();});
+$('#adminRuntimePortalsReload')?.addEventListener('click',()=>loadAdminBonusEditor(true));
 if(ui.adminRuntimeShopsReload)ui.adminRuntimeShopsReload.onclick=()=>loadAdminShopsEditor(true);
 if(ui.adminRuntimeShopsTabs)ui.adminRuntimeShopsTabs.onclick=e=>{const b=e.target.closest('[data-admin-shops-view]');if(b)adminShopsSetView(b.dataset.adminShopsView);};
 if(ui.adminRuntimeShopsGrid)ui.adminRuntimeShopsGrid.onclick=e=>{const common=e.target.closest('[data-common-shop-save]');if(common){saveAdminCommonShop(common.dataset.commonShopSave,common.closest('[data-common-shop]'),common);return;}const premium=e.target.closest('[data-premium-shop-save]');if(premium){saveAdminPremiumShop(premium.dataset.premiumShopSave,premium.closest('[data-premium-shop]'),premium);}};

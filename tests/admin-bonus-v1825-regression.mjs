@@ -8,7 +8,7 @@ const server=fs.readFileSync(path.join(root,'server/index.js'),'utf8');
 const api=fs.readFileSync(path.join(root,'public/api.js'),'utf8');
 const html=fs.readFileSync(path.join(root,'public/index.html'),'utf8');
 const sql=fs.readFileSync(path.join(root,'sql/V18_2_5_ADMIN_BONUS_LIVE.sql'),'utf8');
-assert.match(html,/data-admin-runtime-tab="bonus"/);
+assert.match(html,/data-admin-world-view="box"/);
 assert.match(html,/id="adminRuntimeBonusGrid"/);
 assert.match(api,/adminUpdateBonusConfigOnline/);
 assert.match(server,/admin_update_bonus_box_config_v1825/);

@@ -6,7 +6,7 @@
 <meta content="width=device-width,initial-scale=1,user-scalable=no" name="viewport"/>
 <meta content="#030816" name="theme-color"/>
 <title>Stellar Legacy</title>
-<link href="/style.css?v=19.0.4" rel="stylesheet"/>
+<link href="/style.css?v=19.0.5" rel="stylesheet"/>
 </head>
 <body>
 <div id="app">
@@ -582,16 +582,17 @@
         <div><b>CONFIGURAÇÃO AO VIVO</b><small>Central ADM Data Driven • Eventos, Passe e Lojas controlados pelo runtime.</small></div>
         <button class="small-btn gold" id="adminRuntimeMonitorRefresh" type="button">ATUALIZAR RUNTIME</button>
       </div>
+      <div class="admin-adm-hint">⚙️ Administração por áreas. Abra uma categoria, expanda apenas o item que deseja editar e salve cada bloco separadamente.</div>
       <div class="admin-runtime-tabs" id="adminRuntimeTabs">
-        <button class="active" type="button" data-admin-runtime-tab="runtime">RUNTIME</button>
+        <button class="active" type="button" data-admin-runtime-tab="runtime">VISÃO GERAL</button>
         <button type="button" data-admin-runtime-tab="interface">INTERFACE</button>
-        <button type="button" data-admin-runtime-tab="npcs">NPCs</button>
-        <button type="button" data-admin-runtime-tab="world">MUNDO</button>
+        
+        <button type="button" data-admin-runtime-tab="world">MUNDO & MAPAS</button>
         <button type="button" data-admin-runtime-tab="systems">SISTEMAS</button>
         <button type="button" data-admin-runtime-tab="events">EVENTOS</button>
         <button type="button" data-admin-runtime-tab="pass">PASSE</button>
-        <button type="button" data-admin-runtime-tab="shops">LOJAS</button>
-        <button type="button" data-admin-runtime-tab="bonus">BOX BÔNUS</button>
+        <button type="button" data-admin-runtime-tab="shops">PREÇOS</button>
+        <button type="button" data-admin-runtime-tab="portals">PORTAIS ASTRAIS</button>
         <button type="button" data-admin-runtime-tab="coupons">CUPONS</button>
       </div>
       <div id="adminRuntimeMonitorPanel">
@@ -621,16 +622,18 @@
         </div>
         <div class="admin-world-subtabs" id="adminRuntimeWorldTabs">
           <button class="active" type="button" data-admin-world-view="maps">MAPAS</button>
+          <button type="button" data-admin-world-view="npcs">NPCs / SPAWNS</button>
           <button type="button" data-admin-world-view="resources">RECURSOS</button>
           <button type="button" data-admin-world-view="sectors">SETORES</button>
-          <button type="button" data-admin-world-view="portals">PORTAIS</button>
+          <button type="button" data-admin-world-view="box">BOX BÔNUS</button>
+          <button type="button" data-admin-world-view="portals">ROTAS & PORTAIS DE MAPA</button>
         </div>
         <div class="admin-runtime-world-grid" id="adminRuntimeWorldGrid"><div class="empty-state">Carregue a configuração do Mundo.</div></div>
         <div class="admin-runtime-interface-message muted" id="adminRuntimeWorldMessage">Nenhuma alteração pendente.</div>
       </div>
       <div class="admin-runtime-systems-panel hidden" id="adminRuntimeSystemsPanel">
         <div class="admin-runtime-interface-toolbar">
-          <div><b>EDITOR DE SISTEMAS</b><small>Etapa isolada: geradores de Missões, serviços da Economia e receitas de Crafting. Sem alterar Interface, NPCs ou Mundo.</small></div>
+          <div><b>EDITOR DE SISTEMAS</b><small>Geradores de missões, serviços de economia e crafting em formulários visuais • sem códigos JSON na tela.</small></div>
           <button class="small-btn" id="adminRuntimeSystemsReload" type="button">RECARREGAR</button>
         </div>
         <div class="admin-systems-subtabs" id="adminRuntimeSystemsTabs">
@@ -651,7 +654,7 @@
       </div>
       <div class="admin-runtime-pass-panel hidden" id="adminRuntimePassPanel">
         <div class="admin-runtime-interface-toolbar">
-          <div><b>PASSE DE TEMPORADA</b><small>V18.1.7B • Datas, tiers, pontos, preço e recompensas Free/Premium controlados pelo Supabase.</small></div>
+          <div><b>PASSE DE TEMPORADA</b><small>V18.1.7B • Datas, tiers, pontos e recompensas Free/Premium em formulários visuais.</small></div>
           <button class="small-btn" id="adminRuntimePassReload" type="button">RECARREGAR</button>
         </div>
         <div class="admin-pass-season" id="adminRuntimePassSeason"><div class="empty-state">Carregue a temporada do Passe.</div></div>
@@ -665,10 +668,17 @@
         </div>
         <div class="admin-shops-subtabs" id="adminRuntimeShopsTabs">
           <button class="active" type="button" data-admin-shops-view="common">LOJA COMUM</button>
-          <button type="button" data-admin-shops-view="premium">PREMIUM</button>
+          <button type="button" data-admin-shops-view="premium">LOJA PREMIUM</button>
+          <button type="button" data-admin-shops-view="auction">LEILÃO</button>
         </div>
         <div class="admin-runtime-shops-grid" id="adminRuntimeShopsGrid"><div class="empty-state">Carregue a configuração das lojas.</div></div>
         <div class="admin-runtime-interface-message muted" id="adminRuntimeShopsMessage">Nenhuma alteração pendente.</div>
+      </div>
+      <div class="admin-runtime-portals-panel hidden" id="adminRuntimePortalsPanel">
+        <div class="admin-runtime-interface-toolbar"><div><b>PORTAIS ASTRAIS • CENTRAL DE CONTROLE</b><small>Custos de giro e Poeira ao vivo • Aurora, Nexus e Eclipse. O editor de ondas e recompensas ficará na próxima fase, após validação do servidor.</small></div>
+        <button class="small-btn" id="adminRuntimePortalsReload" type="button">RECARREGAR</button></div>
+        <div class="admin-runtime-bonus-grid" id="adminRuntimePortalsGrid"><div class="empty-state">Carregue o materializador.</div></div>
+        <div class="admin-runtime-interface-message muted" id="adminRuntimePortalsMessage"></div>
       </div>
       <div class="admin-runtime-coupons-panel hidden" id="adminRuntimeCouponsPanel">
         <div class="admin-runtime-interface-toolbar"><div><b>🎟️ CENTRAL DE CUPONS • ADM</b><small>Monte um cupom com até 12 prêmios. Sem cobranças: premiação entregue pelo servidor em um resgate único.</small></div>
@@ -678,7 +688,7 @@
         <div id="adminCouponsList" class="admin-coupon-list"></div>
       </div>
       <div class="admin-runtime-bonus-panel hidden" id="adminRuntimeBonusPanel">
-        <div class="admin-runtime-interface-toolbar"><div><b>EDITOR DE BOX BÔNUS & POEIRA STELLAR</b><small>V18.2.8 • Quantidade por mapa, respawn, peso dos prêmios e preços de giros. Alterações gravadas no Supabase.</small></div>
+        <div class="admin-runtime-interface-toolbar"><div><b>EDITOR DE BOX BÔNUS & POEIRA STELLAR</b><small>V18.2.8 • Quantidade por mapa, respawn e peso dos prêmios. Custos de giros em PORTAIS ASTRAIS. Alterações gravadas no Supabase.</small></div>
           <button class="small-btn" id="adminRuntimeBonusReload" type="button">RECARREGAR</button></div>
         <div class="admin-runtime-bonus-grid" id="adminRuntimeBonusGrid"><div class="empty-state">Carregue a configuração da BOX BÔNUS.</div></div>
         <div class="admin-runtime-interface-message muted" id="adminRuntimeBonusMessage">Nenhuma alteração pendente.</div>
@@ -968,6 +978,6 @@
   </div>
 </div>
 </div>
-<script src="/game.js?v=19.0.4" type="module"></script>
+<script src="/game.js?v=19.0.5" type="module"></script>
 </body>
 </html>

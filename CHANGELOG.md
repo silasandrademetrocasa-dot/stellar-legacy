@@ -1,3 +1,11 @@
+## V19.0.5 — ADM fase 1 (organização + formulários visuais)
+- Reorganiza a navegação ADM em grupos: Visão Geral, Interface, Mundo & Mapas, Sistemas, Eventos, Passe, Preços, Portais Astrais e Cupons.
+- Mundo reúne NPCs, mapas, recursos, setores, rotas e BOX; custos de giro ficam em Portais Astrais.
+- Missões, Economia, Crafting e recompensas do Passe recebem editor visual com itens, valores, listas e botões de adicionar/remover, preservando estrutura de dados já usada pela API.
+- Cards administrativos recebem controles de expandir/recolher.
+- Designers ativos são destacados com borda exclusiva, e o Perfil de Piloto ganha detalhamento expansível de atributos e fontes de bônus.
+- Sem alteração no Supabase, preços, economia, níveis, distribuição de vida, ondas ou recompensas: mudanças sensíveis ficam para as próximas etapas.
+
 ## V19.0.4 — FACÇÕES + LOGO SEM V8
 - Logo novo e emblemas novos de Terra, Marte e Júpiter; ajuste responsivo no login e seleção da facção.
 

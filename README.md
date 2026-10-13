@@ -1,3 +1,5 @@
+> Versão atual: **V19.0.5 — ADM Fase 1: organização e editores visuais**.
+
 > **V19.0.2** — cargos de clã, pedidos com aprovação, vice-líder no cofre e proteção de níveis na Arena. Migrações aplicadas no Supabase atual. Confira `V19_0_2_CLAS_SEGURANCA_ARENA.md`.
 
 > Atualização local: **V19.0.1 — Arte integrada no Perfil de Piloto + Loja Premium**.
