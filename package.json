@@ -1,6 +1,6 @@
 {
   "name": "stellar-legacy",
-  "version": "19.0.14",
+  "version": "19.0.15",
   "type": "module",
   "scripts": {
     "start": "node server/index.js",
@@ -15,5 +15,5 @@
   "engines": {
     "node": ">=18"
   },
-  "release": "v19.0.14-ores-bonus-portals"
+  "release": "v19.0.15-player-progression-150h"
 }

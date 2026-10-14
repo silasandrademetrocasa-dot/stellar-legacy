@@ -1,3 +1,10 @@
+## V19.0.15 — XP do piloto calibrado para ~150h do nível 7 ao 32
+
+- Curva LV1–10 preservada; novos marcos LV18/22/27/32 para X-5/6/7/8.
+- Saves anteriores preservam nível e percentual de progresso na migração única V1915.
+- Validações SQL de Arena e Clã sincronizadas com os dois modelos de XP.
+- Testes de regressão e instalador original preservados.
+
 ## V19.0.14 — Recursos normais, BOX no alto mapa e portal da 2ª base
 - Mapas 4-X sem minério normal (ore_count 0), inclusive depois de criar a sala.
 - Apenas três tipos iniciais de minério nas áreas comuns; X-5 a X-8 cadastrados online com esses pools.
