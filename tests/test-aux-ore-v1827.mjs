@@ -35,5 +35,5 @@ assert(client.includes("collectOre(entityId,collector='ship')"));
 assert(game.includes("sharedUniverse.collectOre(task.id,'pet')"));
 assert(game.includes('syncSharedUniversePlayer(true);\n        sharedUniverseRuntime.pendingOres.add(task.id);'));
 assert(game.includes("if(msg.collector==='pet')addPetXp(3)"));
-const pkg=JSON.parse(fs.readFileSync(new URL('../package.json',import.meta.url)));assert.match(pkg.version,/^19\.0\.5$/);
+const pkg=JSON.parse(fs.readFileSync(new URL('../package.json',import.meta.url)));assert.match(pkg.version,/^19\.0\.14$/);
 console.log('OK: 13 cenários AUX EXTRATOR / nave / range / módulo / evento / anti-duplo + integração cliente');

@@ -274,7 +274,7 @@ class Room {
       const count=Math.max(0,Math.round(Number(group.count)||0));
       for(let i=0;i<count;i++){const e=this.makeNpc(group.type);if(e)this.npcs.set(e.id,e);}
     }
-    const oreCount=this.map.oreCount||(this.map.battle?72:48);
+    const raw=Number(this.map.oreCount);const oreCount=Number.isFinite(raw)?Math.max(0,Math.round(raw)):0;
     for(let i=0;i<oreCount;i++){const o=this.makeOre();this.ores.set(o.id,o);}
   }
 
@@ -330,6 +330,14 @@ class Room {
     for(const p of this.players.values()){p.x=clamp(p.x,25,w-25);p.y=clamp(p.y,25,h-25);}
     for(const e of this.npcs.values()){e.x=clamp(e.x,25,w-25);e.y=clamp(e.y,25,h-25);}
     for(const o of this.ores.values()){o.x=clamp(o.x,25,w-25);o.y=clamp(o.y,25,h-25);const res=this.world.resourceDefinition(o.type);if(res)o.color=res.color;}
+    // Quando o ADM troca os recursos permitidos, elimina imediatamente
+    // pedras normais legadas; nunca remove minérios temporários de EVENTO.
+    const allowedOres=new Set(this.world.resourcePool(this.mapId).map(r=>r.resource_key));
+    for(const [id,ore] of this.ores){
+      if(!ore.eventOre&&!allowedOres.has(ore.type)){
+        this.ores.delete(id);this.broadcast({type:'ore_remove',entityId:id,reason:'resource_pool_changed'});
+      }
+    }
     const target=Math.max(0,Math.round(Number(this.map.oreCount)||0));
     const normal=[...this.ores.values()].filter(o=>!o.eventOre);
     if(normal.length>target){for(const o of normal.slice(target)){this.ores.delete(o.id);this.broadcast({type:'ore_remove',entityId:o.id,reason:'runtime_count'});}}
@@ -802,11 +810,15 @@ export function attachSharedUniverse(server,{authenticate,authorizeJoin,loadLive
     worldConfigBusy:false,
     mapDefinition(mapId){return this.worldRuntime?.maps?.get?.(String(mapId||''))||MAPS[String(mapId||'')]||null;},
     resourceDefinition(key){return this.worldRuntime?.resources?.get?.(String(key||''))||RESOURCES[String(key||'')]||null;},
-    resourcePool(mapId){const rows=this.worldRuntime?.mapResources?.get?.(String(mapId||''));if(Array.isArray(rows)&&rows.length)return rows.filter(r=>r.enabled!==false&&this.resourceDefinition(r.resource_key)?.enabled!==false);return (MAPS[String(mapId||'')]?.ores||[]).map(resource_key=>({resource_key,weight:1,enabled:true}));},
+    resourcePool(mapId){const id=String(mapId||'');if(this.mapDefinition(id)?.battle)return [];const rows=this.worldRuntime?.mapResources?.get?.(id);if(Array.isArray(rows)&&rows.length)return rows.filter(r=>r.enabled!==false&&this.resourceDefinition(r.resource_key)?.enabled!==false);return (MAPS[id]?.ores||[]).map(resource_key=>({resource_key,weight:1,enabled:true}));},
     sectorForRoom(mapId,territoryFaction){const rows=[...this.worldRuntime.sectors.values()].filter(x=>x.enabled!==false&&String(x.map_id)===String(mapId));if(!rows.length)return null;if(MAPS[mapId]?.battle||this.mapDefinition(mapId)?.battle)return rows[0]||null;return rows.find(x=>String(x.territory_faction||'')===String(territoryFaction||''))||rows[0]||null;},
     portalEdgePoint(fromSector,toSector,map){const a=this.worldRuntime.sectors.get(String(fromSector||'')),b=this.worldRuntime.sectors.get(String(toSector||''));const w=map?.world?.w||6000,h=map?.world?.h||4500,inset=175,cx=w/2,cy=h/2;if(!a||!b)return{x:cx,y:cy};const vx=((Number(b.graph_x)-Number(a.graph_x))/100)*w,vy=((Number(b.graph_y)-Number(a.graph_y))/100)*h,ax=Math.abs(vx),ay=Math.abs(vy),tx=ax>0?(cx-inset)/ax:Infinity,ty=ay>0?(cy-inset)/ay:Infinity,t=Math.max(0,Math.min(tx,ty));return{x:Math.round(Math.max(inset,Math.min(w-inset,cx+vx*t))),y:Math.round(Math.max(inset,Math.min(h-inset,cy+vy*t)))};},
     portalsForRoom(mapId,territoryFaction){territoryFaction=({'b41':'earth','b42':'mars','b43':'jupiter'})[mapId]||territoryFaction;const origin=this.sectorForRoom(mapId,territoryFaction);if(!origin)return MAPS[mapId]?.portals||[];const map=this.mapDefinition(mapId)||MAPS.x1,out=[];for(const link of this.worldRuntime.portals){if(link.enabled===false)continue;let target=null;if(link.from_sector===origin.sector_label)target=link.to_sector;else if(link.bidirectional!==false&&link.to_sector===origin.sector_label)target=link.from_sector;if(!target)continue;const dest=this.worldRuntime.sectors.get(target);if(!dest||dest.enabled===false)continue;// Portais entre 4-1/4-2/4-3 são livres; acesso aos setores territoriais continua restrito.
-      if(dest.territory_faction&&dest.territory_faction!==territoryFaction)continue;const pos=this.portalEdgePoint(origin.sector_label,target,map);out.push({...pos,to:dest.map_id,targetLabel:target,targetTerritoryFaction:dest.territory_faction||null,battle:!!this.mapDefinition(dest.map_id)?.battle});}return out;},
+      if(dest.territory_faction&&dest.territory_faction!==territoryFaction)continue;const pos=this.portalEdgePoint(origin.sector_label,target,map);if(mapId==='x8'){
+        const w=map.world?.w||10000,h=map.world?.h||7400;
+        const base=territoryFaction==='earth'?{x:620,y:Math.round(h*.50)}:territoryFaction==='mars'?{x:w-620,y:Math.round(h*.28)}:{x:w-620,y:Math.round(h*.72)};
+        pos.x=base.x<w/2?w-420:420;pos.y=Math.round(base.y<h/2?h*.74:h*.26);
+      }out.push({...pos,to:dest.map_id,targetLabel:target,targetTerritoryFaction:dest.territory_faction||null,battle:!!this.mapDefinition(dest.map_id)?.battle});}return out;},
     loadBattleGroup:loadBattleGroup||null,
     loadPlayerEventProgress:loadPlayerEventProgress||null,
     recordPlayerEventProgress:recordPlayerEventProgress||null,

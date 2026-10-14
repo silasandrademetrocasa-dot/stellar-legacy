@@ -1,6 +1,6 @@
 {
   "name": "stellar-legacy",
-  "version": "19.0.13",
+  "version": "19.0.14",
   "type": "module",
   "scripts": {
     "start": "node server/index.js",
@@ -15,5 +15,5 @@
   "engines": {
     "node": ">=18"
   },
-  "release": "v19.0.13-battle-pvp-cross-faction"
+  "release": "v19.0.14-ores-bonus-portals"
 }

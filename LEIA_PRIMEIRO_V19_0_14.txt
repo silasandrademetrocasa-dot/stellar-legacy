@@ -1,0 +1,14 @@
+STELLAR LEGACY V19.0.14 — MINÉRIOS, BOX E PORTAIS
+
+1) O Supabase já recebeu as mudanças de minérios e BOX BÔNUS:
+   - Mapas Battle 4-1, 4-2, 4-3: 0 minérios normais.
+   - Mapas X-5 a X-8: só Prometium/Endurium/Terbium, mantendo 32/28/24/20 pedras.
+   - Mapas X-5 a X-8: 20 BOX BÔNUS em cada mapa, como X-1..X-4.
+2) Envie ESTE ZIP COMPLETO para a raiz do GitHub, usando o instalador principal já existente.
+3) Depois do deploy, o servidor respeita 0 pedras até após reinicialização.
+4) A saída X-8 -> X-7 foi reposicionada para longe da segunda base de Terra/Marte/Júpiter.
+5) Eventos podem criar minérios temporários próprios; o sistema deles é separado da mineração normal.
+6) O painel ADM legado dos BOX edita os mapas antigos. X-5..X-8 ficam fixados em 20 por configuração da versão; não altera suas outras configurações.
+
+Não execute SQL novamente — os dados foram atualizados pelo ChatGPT no Supabase.
+Não modifique nem exclua o instalador principal.

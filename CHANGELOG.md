@@ -1,3 +1,11 @@
+## V19.0.14 — Recursos normais, BOX no alto mapa e portal da 2ª base
+- Mapas 4-X sem minério normal (ore_count 0), inclusive depois de criar a sala.
+- Apenas três tipos iniciais de minério nas áreas comuns; X-5 a X-8 cadastrados online com esses pools.
+- X-5 a X-8 com 20 BOX BÔNUS por mapa (Supabase online + fallback), independentemente das pedras.
+- Portal do X-8 afastado da base na Terra/Marte/Júpiter; cliente e servidor usam coordenadas idênticas.
+- NPCs de evento, recursos específicos de evento, progressão por nível, restrição de facção e PvP 4-X preservados.
+- Testes automatizados e dados online validados.
+
 ## V19.0.13 — 4-X PvP público interfacções
 - Mapas 4-1, 4-2 e 4-3 livres para todas as facções com nível mínimo 15.
 - Portais PvP e navegação no mapa estelar corrigidos; setores X-1 a X-8 continuam protegidos por facção.
@@ -678,3 +686,16 @@ Consulta somente leitura das 12 ofertas para pilotos autenticados via RPC SQL V1
 - Oito tipos novos de NPCs em 16 configurações de spawn, sprites existentes reutilizados.
 - Minérios garantidos pelo fallback local/servidor; publicação dos pools em SQL pendente.
 - Workflows existentes e saves preservados.
+
+### V19.0.14 — Minérios básicos, BOX bônus altos e portais X-8
+# Stellar Legacy V19.0.14 — Minérios, boxes e portais
+
+- Recursos normais nos mapas: apenas Ferron (Prometium), Cryon (Endurium), Virel (Terbium). Eventos mantêm seus recursos temporários próprios.
+- Battle 4-1, 4-2, 4-3: `ore_count=0` online; sem criação involuntária de 72 pedras no carregamento. Os NPCs comuns continuam desligados.
+- X-5, X-6, X-7, X-8: 20 BOX BÔNUS por mapa, igual X-1 a X-4, com respawn padrão e salvamento individual.
+- ADM: distribuição de BOX BÔNUS inclui X-5 a X-8. O banco foi atualizado para não descartar estes novos campos quando ADM salvar.
+- X-8: portal de retorno deslocado para a outra lateral do mapa, afastado da base, com coordenadas idênticas na nave e na validação do servidor.
+- Rotas, invasões bloqueadas em territórios estrangeiros e Battle 4-X público (nível 15) preservados.
+
+Instalação: subir o ZIP completo no instalador principal original; SQL de minérios e bônus foi aplicado diretamente no Supabase. Não execute migração duas vezes.
+
