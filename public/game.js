@@ -1,9 +1,9 @@
-import { FACTIONS, SHIPS, ITEMS, LASER_AMMO, ROCKETS, NPC_TYPES, MAPS, RESOURCES } from './data.js?v=19.0.17';
-import { repairPulseSettings } from './repair-balance.js?v=19.0.17';
-import { xpThresholdV1770, xpThresholdV1915, migratePilotXpV1915 } from './level-curve-v1915.js?v=19.0.17';
-import { GAME_ASSETS } from './assets/v17/manifest.js?v=19.0.17';
-import { signUp, signIn, beginGoogleSignIn, restoreGoogleSignInFromUrl, requestPasswordReset, restorePasswordRecoveryFromUrl, restoreSession, signOutLocal, checkGameSession, endGameSession, getUser, getSessionCredentials, loadCloudSave, saveCloudSave, updateCallsign, updatePassword, loadRankings, loadAuctionBids, saveAuctionBidOnline, markAuctionBidStatusOnline, loadAuctionMarket, upsertPlayerPresenceOnline, loadMapPresenceOnline, savePlayerLocationCheckpointOnline, loadPlayerLocationCheckpointOnline, removePlayerPresenceOnline, queuePvpAttackOnline, consumePvpDamageEventsOnline, syncArenaProfileOnline, loadArenaState, loadArenaDailyRewardStatus, claimArenaDailyReward, loadArenaOpponents, loadArenaHistory, arenaAttackOnline, listClansOnline, loadMyClanOnline, createClanOnline, joinClanOnline, getClanRequestsOnline, reviewClanRequestOnline, cancelClanRequestOnline, setClanMemberRoleOnline, leaveClanOnline, transferClanCreditsOnline, claimClanCreditGrantsOnline, recordClanAlienKillOnline, getPremiumShopOnline, testPurchasePremiumOnline, adminPreviewPremiumStageOnline, adminSimulatePremiumStageOnline, getPremiumStageCatalogOnline, loadWarfrontStateOnline, hitWorldBossOnline, claimWorldBossRewardOnline, declareClanWarOnline, recordClanWarScoreOnline, loadLiveOpsOnline, adminUpdateLiveEventScheduleOnline, purchaseLiveCatalogOnline, economyActionOnline, getChatHistoryOnline, sendChatMessageOnline, redeemGameCouponOnline, getMyDesignersOnline, setDesignLoadoutOnline, claimGateDroneDesignOnline, claimEventDesignerOnline, getAdminStatus, adminSearchAccounts, adminRecentActions, adminBanAccount, adminUnbanAccount, adminResetAccount, adminDeleteAccount, pushTelemetryBatch, adminTelemetryOverview, adminPlayerTelemetry, getBattleGroupOnline, createBattleGroupOnline, inviteBattleGroupOnline, searchBattleGroupPlayersOnline, inviteBattleGroupUserOnline, respondBattleGroupInviteOnline, leaveBattleGroupOnline, kickBattleGroupMemberOnline, setBattleGroupRallyOnline, loadRuntimeConfigOnline, loadNpcRuntimeConfigOnline, loadWorldRuntimeConfigOnline, loadSystemsRuntimeConfigOnline, loadAdminRuntimeMonitorOnline, adminUpdateRuntimeModuleOnline, adminUpdateNpcRuntimeOnline, adminUpdateNpcSpawnRuntimeOnline, adminUpdateWorldMapOnline, adminUpdateWorldResourceOnline, adminUpdateWorldSectorOnline, adminUpdateWorldPortalOnline, adminUpdateWorldResourcePoolOnline, adminUpdateMissionCategoryOnline, adminUpdateEconomyServiceOnline, adminUpdateCraftingRecipeOnline, loadBattlePassRuntimeConfigOnline, adminUpdateBattlePassSeasonOnline, adminUpdateBattlePassTierOnline, loadShopsRuntimeConfigOnline, adminUpdateCommonShopItemOnline, adminUpdatePremiumShopItemOnline, loadBonusConfigOnline, adminUpdateBonusConfigOnline, adminCouponDashboardOnline, adminCreateCouponOnline, adminSetCouponActiveOnline, loadGalaxyGatesOnline, adminUpdateGalaxyGateOnline, adminUpsertCustomMissionOnline, adminDeleteCustomMissionOnline, adminCreateCraftRecipeOnline, adminCreateEconomyServiceOnline, adminCreatePassSeasonOnline, loadAuctionRulesOnline, adminUpdateAuctionRulesOnline, loadBalanceRuntimeOnline, adminUpdateBalanceOnline } from './api.js?v=19.0.17';
-import { SharedUniverseClient } from './world.js?v=19.0.17';
+import { FACTIONS, SHIPS, ITEMS, LASER_AMMO, ROCKETS, NPC_TYPES, MAPS, RESOURCES } from './data.js?v=20.0.0';
+import { repairPulseSettings } from './repair-balance.js?v=20.0.0';
+import { xpThresholdV1770, xpThresholdV1915, migratePilotXpV1915 } from './level-curve-v1915.js?v=20.0.0';
+import { GAME_ASSETS } from './assets/v17/manifest.js?v=20.0.0';
+import { signUp, signIn, beginGoogleSignIn, restoreGoogleSignInFromUrl, requestPasswordReset, restorePasswordRecoveryFromUrl, restoreSession, signOutLocal, checkGameSession, endGameSession, getUser, getSessionCredentials, loadCloudSave, saveCloudSave, updateCallsign, updatePassword, loadRankings, loadAuctionBids, saveAuctionBidOnline, markAuctionBidStatusOnline, loadAuctionMarket, upsertPlayerPresenceOnline, loadMapPresenceOnline, savePlayerLocationCheckpointOnline, loadPlayerLocationCheckpointOnline, removePlayerPresenceOnline, queuePvpAttackOnline, consumePvpDamageEventsOnline, syncArenaProfileOnline, loadArenaState, loadArenaDailyRewardStatus, claimArenaDailyReward, loadArenaOpponents, loadArenaHistory, arenaAttackOnline, listClansOnline, loadMyClanOnline, createClanOnline, joinClanOnline, getClanRequestsOnline, reviewClanRequestOnline, cancelClanRequestOnline, setClanMemberRoleOnline, leaveClanOnline, transferClanCreditsOnline, claimClanCreditGrantsOnline, recordClanAlienKillOnline, getPremiumShopOnline, testPurchasePremiumOnline, adminPreviewPremiumStageOnline, adminSimulatePremiumStageOnline, getPremiumStageCatalogOnline, loadWarfrontStateOnline, hitWorldBossOnline, claimWorldBossRewardOnline, declareClanWarOnline, recordClanWarScoreOnline, loadLiveOpsOnline, adminUpdateLiveEventScheduleOnline, purchaseLiveCatalogOnline, economyActionOnline, getChatHistoryOnline, sendChatMessageOnline, redeemGameCouponOnline, getMyDesignersOnline, setDesignLoadoutOnline, claimGateDroneDesignOnline, claimEventDesignerOnline, getAdminStatus, adminSearchAccounts, adminRecentActions, adminBanAccount, adminUnbanAccount, adminResetAccount, adminDeleteAccount, pushTelemetryBatch, adminTelemetryOverview, adminPlayerTelemetry, getBattleGroupOnline, createBattleGroupOnline, inviteBattleGroupOnline, searchBattleGroupPlayersOnline, inviteBattleGroupUserOnline, respondBattleGroupInviteOnline, leaveBattleGroupOnline, kickBattleGroupMemberOnline, setBattleGroupRallyOnline, loadRuntimeConfigOnline, loadNpcRuntimeConfigOnline, loadWorldRuntimeConfigOnline, loadSystemsRuntimeConfigOnline, loadAdminRuntimeMonitorOnline, adminUpdateRuntimeModuleOnline, adminUpdateNpcRuntimeOnline, adminUpdateNpcSpawnRuntimeOnline, adminUpdateWorldMapOnline, adminUpdateWorldResourceOnline, adminUpdateWorldSectorOnline, adminUpdateWorldPortalOnline, adminUpdateWorldResourcePoolOnline, adminUpdateMissionCategoryOnline, adminUpdateEconomyServiceOnline, adminUpdateCraftingRecipeOnline, loadBattlePassRuntimeConfigOnline, adminUpdateBattlePassSeasonOnline, adminUpdateBattlePassTierOnline, loadShopsRuntimeConfigOnline, adminUpdateCommonShopItemOnline, adminUpdatePremiumShopItemOnline, loadBonusConfigOnline, adminUpdateBonusConfigOnline, adminCouponDashboardOnline, adminCreateCouponOnline, adminSetCouponActiveOnline, loadGalaxyGatesOnline, adminUpdateGalaxyGateOnline, adminUpsertCustomMissionOnline, adminDeleteCustomMissionOnline, adminCreateCraftRecipeOnline, adminCreateEconomyServiceOnline, adminCreatePassSeasonOnline, loadAuctionRulesOnline, adminUpdateAuctionRulesOnline, loadBalanceRuntimeOnline, adminUpdateBalanceOnline } from './api.js?v=20.0.0';
+import { SharedUniverseClient } from './world.js?v=20.0.0';
 
 const canvas = document.querySelector('#game');
 const ctx = canvas.getContext('2d');
@@ -471,7 +471,7 @@ function sharedKillReward(entity,factor=1,opts={}){
       rollRareBossLoot(clone);
       scoreClanWar(Math.max(1,Math.round(10*share)),'boss_kill');
     }
-    addPetXp(Math.max(12,Math.round(clone.credits/120+clone.uridium*4)));
+    addPetXp(petXpForNpc(clone));
     missionEvent('kill',{enemy:clone,mapId:progress.mapId});
     battlePassEvent('kill',1);
   }
@@ -601,14 +601,12 @@ const categories = {
 const premiumRuntime={state:null,busy:false,lastAt:0};
 const premiumStageRuntime={state:null,busy:false,buying:false,tab:'subscriptions',error:'',pendingKeys:new Map(),lastOrder:null};
 const PREMIUM_LOCAL_PLANS=[]; // V18.1.7C: planos agora vêm 100% do Supabase.
-const PREMIUM_EVENT_COUPONS={
-  EVENTO7D:{code:'EVENTO7D',name:'Cupom de Evento • 7D',days:7,items:{rep2:1},description:'Libera 1 semana de Premium e 1 Nanobot de Reparo • Comum.'}
-};
+const PREMIUM_EVENT_COUPONS={}; // V20: somente cupons emitidos e resgatados no Supabase.
 function freshPremiumMeta(){return {localPremiumUntil:null,couponsRedeemed:{}};}
 function normalizePremiumMeta(){if(!progress)return freshPremiumMeta();progress.premiumMeta ||= freshPremiumMeta();progress.premiumMeta.couponsRedeemed ||= {};return progress.premiumMeta;}
 function localPremiumUntilMs(){const iso=progress?normalizePremiumMeta().localPremiumUntil:null;const ts=iso?Date.parse(iso):0;return Number.isFinite(ts)?ts:0;}
 function remotePremiumUntilMs(){const iso=premiumRuntime.state?.premium_until||null;const ts=iso?Date.parse(iso):0;return Number.isFinite(ts)?ts:0;}
-function effectivePremiumUntilMs(){return Math.max(remotePremiumUntilMs(),localPremiumUntilMs());}
+function effectivePremiumUntilMs(){return remotePremiumUntilMs();} // V20: client/save não concede Premium.
 function premiumActive(){return effectivePremiumUntilMs()>Date.now();}
 function premiumPassActive(){return !!premiumRuntime.state?.battle_pass_active;}
 function premiumCanPurchase(){return !!premiumRuntime.state?.can_purchase||isAdminPilot();}
@@ -622,8 +620,7 @@ function premiumCatalogForRender(){
   if(runtime.length)return runtime.map(p=>({...p,...(byId.get(String(p.id))||{})})).sort((a,b)=>(Number(a.sort_order)||100)-(Number(b.sort_order)||100)||String(a.id).localeCompare(String(b.id)));
   return account;
 }
-function extendLocalPremium(days){if(!progress)return 0;const meta=normalizePremiumMeta();const base=Math.max(Date.now(),effectivePremiumUntilMs());const until=base+Math.max(1,Number(days)||0)*86400000;meta.localPremiumUntil=new Date(until).toISOString();cloudDirty=true;saveGame();return until;}
-function redeemPremiumCouponLocal(code){const key=String(code||'').trim().toUpperCase();const meta=normalizePremiumMeta();const def=PREMIUM_EVENT_COUPONS[key];if(!def)throw new Error('Cupom inválido ou expirado.');if(meta.couponsRedeemed[key])throw new Error('Cupom já resgatado nesta conta.');const until=extendLocalPremium(def.days);for(const [itemId,qty] of Object.entries(def.items||{})){if(ITEMS[itemId])addInventory(itemId,Math.max(1,Number(qty)||1));}meta.couponsRedeemed[key]=new Date().toISOString();cloudDirty=true;saveGame();return {def,until};}
+// V20: fluxo local de concessão Premium removido. Cupons são processados pela RPC autenticada.
 function updatePremiumBadge(){if(!ui.premiumTopStatus)return;ui.premiumTopStatus.textContent=premiumActive()?'ATIVO':premiumPassActive()?'PASSE':'LOJA';ui.premiumBtn?.classList.toggle('gold',premiumActive()||premiumPassActive());}
 async function refreshPremiumState(force=false){if(!authenticated){updatePremiumBadge();return premiumRuntime.state;}if(!force&&premiumRuntime.state&&Date.now()-premiumRuntime.lastAt<30000){updatePremiumBadge();return premiumRuntime.state;}if(premiumRuntime.busy)return premiumRuntime.state;premiumRuntime.busy=true;try{premiumRuntime.state=await getPremiumShopOnline();premiumRuntime.lastAt=Date.now();updatePremiumBadge();renderSettings();return premiumRuntime.state;}catch(e){console.warn('premium state',e);updatePremiumBadge();renderSettings();return premiumRuntime.state;}finally{premiumRuntime.busy=false;}}
 
@@ -1441,7 +1438,7 @@ const worldRuntimeConfig={version:0,updatedAt:null,lastFetchAt:0,source:'fallbac
 function normalizeWorldRuntimeConfig(raw,source='online'){
   if(!raw||typeof raw!=='object'||!Array.isArray(raw.maps)||!raw.maps.length||!Array.isArray(raw.sectors)||!raw.sectors.length)return false;
   for(const row of raw.resources||[]){const key=String(row?.resource_key||'').trim();if(!key)continue;const fallback=WORLD_FALLBACK_RESOURCES[key]||{};RESOURCES[key]={...fallback,...RESOURCES[key],id:key,name:String(row.name||fallback.name||key),color:String(row.color||fallback.color||'#ffffff'),sell:Math.max(0,Number(row.sell_price)||0),enabled:row.enabled!==false};}
-  for(const row of raw.maps){const key=String(row?.map_id||'').trim();if(!key)continue;const fallback=WORLD_FALLBACK_MAPS[key]||{};MAPS[key]={...fallback,...MAPS[key],id:key,label:row.label??fallback.label,tier:Number(row.tier)||fallback.tier||1,name:String(row.name||fallback.name||key),risk:String(row.risk||fallback.risk||'Normal'),world:{w:Math.max(1000,Number(row.world_w)||fallback.world?.w||6000),h:Math.max(1000,Number(row.world_h)||fallback.world?.h||4500)},enemyMultiplier:Math.max(.1,Number(row.enemy_multiplier)||fallback.enemyMultiplier||1),oreCount:Math.max(0,Math.round(Number(row.ore_count)||0)),oreRespawnMinMs:Math.max(1000,Number(row.ore_respawn_min_ms)||5000),oreRespawnMaxMs:Math.max(1000,Number(row.ore_respawn_max_ms)||12000),landmarkCount:Math.max(0,Math.round(Number(row.landmark_count)||0)),minLevel:Math.max(1,Number(row.min_level)||1),battle:!!row.battle,gate:!!row.gate,enabled:row.enabled!==false,palette:row.palette&&typeof row.palette==='object'?{...row.palette}:{...(fallback.palette||{})},structures:Array.isArray(row.structures)?[...row.structures]:(fallback.structures||[])};}
+  for(const row of raw.maps){const key=String(row?.map_id||'').trim();if(!key)continue;const fallback=WORLD_FALLBACK_MAPS[key]||{};MAPS[key]={...fallback,...MAPS[key],id:key,label:row.label??fallback.label,tier:Number(row.tier)||fallback.tier||1,name:String(row.name||fallback.name||key),risk:String(row.risk||fallback.risk||'Normal'),world:{w:Math.max(1000,Number(row.world_w)||fallback.world?.w||6000),h:Math.max(1000,Number(row.world_h)||fallback.world?.h||4500)},enemyMultiplier:Math.max(.1,Number(row.enemy_multiplier)||fallback.enemyMultiplier||1),oreCount:Math.max(0,Math.round(Number(row.ore_count)||0)),oreYield:Math.max(1,Math.min(20,Math.round(Number(row.ore_yield??fallback.oreYield)||1))),oreRespawnMinMs:Math.max(1000,Number(row.ore_respawn_min_ms)||5000),oreRespawnMaxMs:Math.max(1000,Number(row.ore_respawn_max_ms)||12000),landmarkCount:Math.max(0,Math.round(Number(row.landmark_count)||0)),minLevel:Math.max(1,Number(row.min_level)||1),battle:!!row.battle,gate:!!row.gate,enabled:row.enabled!==false,palette:row.palette&&typeof row.palette==='object'?{...row.palette}:{...(fallback.palette||{})},structures:Array.isArray(row.structures)?[...row.structures]:(fallback.structures||[])};}
   const pools=new Map();for(const row of raw.map_resources||[]){const mapId=String(row?.map_id||''),key=String(row?.resource_key||'');if(!mapId||!key||row.enabled===false)continue;if(!pools.has(mapId))pools.set(mapId,[]);pools.get(mapId).push({key,weight:Math.max(.01,Number(row.weight)||1)});}
   for(const [mapId,map] of Object.entries(MAPS)){const pool=pools.get(mapId);if(pool){map.ores=pool.map(x=>x.key);map.oreWeights=Object.fromEntries(pool.map(x=>[x.key,x.weight]));}}
   MAP_GRAPH_NODES.length=0;MAP_GRAPH_LINKS.length=0;PLAYABLE_GRAPH_LABELS.clear();worldRuntimeConfig.sectorDestinations.clear();worldRuntimeConfig.sectorInfo.clear();
@@ -3924,6 +3921,12 @@ function petShieldIds(){return progress?.pet?.owned?(progress.pet.shields||[]).f
 function petDamage(){const levelBonus=petLevelBonuses().damage/100;return petLaserIds().reduce((sum,id)=>{const it=ITEMS[id];const base=it?.alienDamage??it?.damage??0;return sum+base*(1+(Number(it?.alienBonus)||0));},0)*petDesignerDamageMultiplier()*(1+levelBonus);}
 function petShieldSupport(){const levelBonus=petLevelBonuses().shield/100;return petShieldIds().reduce((sum,id)=>sum+(ITEMS[id]?.shield||0),0)*(1+levelBonus);}
 function petMaxShield(){return petShieldSupport()*(1+Number(petDesignerBonuses().shield||0));}
+function petXpForNpc(enemy){
+  if(!enemy)return 0;
+  // Recompensas monetárias não controlam a evolução do AUX-9.
+  const xp=Math.max(0,Number(enemy.xp)||0),boss=/^boss/i.test(String(enemy.type||''));
+  return Math.max(12,Math.min(boss?3500:2000,Math.round(xp*.10)));
+}
 function addPetXp(amount){
   if(!progress?.pet?.owned||amount<=0||progress.pet.level>=PET_MAX_LEVEL)return;
   progress.pet.xp+=Math.round(amount);
@@ -4301,7 +4304,7 @@ function randomMapPosition(padding=180){
 }
 function spawnOre(type=null){
   const names=state.currentMap.ores||[];let oreType=type;if(!oreType){const weights=state.currentMap.oreWeights||{},total=names.reduce((sum,k)=>sum+Math.max(.01,Number(weights[k])||1),0);let roll=Math.random()*Math.max(.01,total);for(const k of names){roll-=Math.max(.01,Number(weights[k])||1);if(roll<=0){oreType=k;break;}}oreType ||= names[0]||'Prometium';}const pos=randomMapPosition(100);const res=RESOURCES[oreType]||{color:'#fff'};
-  state.ores.push({id:`ore_${Math.random().toString(16).slice(2)}`,x:pos.x,y:pos.y,type:oreType,amount:1,color:res.color,r:rand(7,13),rot:rand(0,TWO_PI),shape:Array.from({length:7},()=>rand(.72,1.18))});
+  state.ores.push({id:`ore_${Math.random().toString(16).slice(2)}`,x:pos.x,y:pos.y,type:oreType,amount:Math.max(1,Math.round(Number(state.currentMap.oreYield)||1)),color:res.color,r:rand(7,13),rot:rand(0,TWO_PI),shape:Array.from({length:7},()=>rand(.72,1.18))});
 }
 // V18.2.4 — BOX BONUS individual por piloto, independente das pedras/NPCs.
 // Posições e reaparecimento persistem no save: saltar mapas/relogar não gera caixas extras.
@@ -4898,7 +4901,7 @@ function rewardEnemyKill(enemy){
   if(authenticated){const boss=/^boss/i.test(String(enemy.type||''));const clanType=String(enemy.type||'').replace(/^boss/i,'').toLowerCase();recordClanAlienKillOnline({npcType:clanType,isBoss:boss}).then(r=>{if(r?.status?.leveled_up){showToast(`CLÃ SUBIU PARA O LV ${r.status.new_level}!`,'reward');refreshClanState(true);}}).catch(()=>{});}
   pushActivity(`${enemy.name} • +${fmt(earnedCredits)} CR • +${fmt(earnedUri)} STL • +${fmt(earnedXp)} XP`,'combat');
   if(String(enemy.type||'').startsWith('boss')){if(!enemy.sharedReward||enemy.sharedOwner)rollRareBossLoot(enemy);scoreClanWar(enemy.sharedReward?Math.max(1,Math.round(10*Number(enemy.sharedRewardShare||0))):10,'boss_kill');}
-  addPetXp(Math.max(12,Math.round(enemy.credits/120+enemy.uridium*4)));
+  addPetXp(petXpForNpc(enemy));
   processPlayerLevelUps();
   if(enemy.sharedDropBox!==false)spawnNpcLootBox(enemy);
   missionEvent('kill',{enemy,mapId:progress.mapId});battlePassEvent('kill',1);
@@ -6343,7 +6346,7 @@ function premiumProductIcon(product){
 function formatPremiumUntil(value){if(!value)return 'INATIVO';const d=new Date(value);return Number.isNaN(d.getTime())?'INATIVO':d.toLocaleString('pt-BR');}
 function renderPremiumShop(){
   if(!ui.premiumProductGrid||!ui.premiumBenefits)return;
-  const st=premiumRuntime.state||{},products=premiumCatalogForRender(),couponHint=Object.keys(PREMIUM_EVENT_COUPONS)[0]||'EVENTO7D';
+  const st=premiumRuntime.state||{},products=premiumCatalogForRender();
   const activeUntil=effectivePremiumUntilMs();
   if(ui.premiumModeChip){ui.premiumModeChip.textContent=premiumCanPurchase()?'ATIVO':'CATÁLOGO';ui.premiumModeChip.classList.toggle('active',premiumCanPurchase());}
   ui.premiumBenefits.innerHTML=`<div class="premium-status-card"><span>PREMIUM</span><b>${premiumActive()?'ATIVO':'INATIVO'}</b><small>${premiumActive()?`até ${formatPremiumUntil(new Date(activeUntil).toISOString())}`:'Bônus Premium desativados'}</small></div><div class="premium-status-card"><span>PASSE</span><b>${st.battle_pass_active?'ATIVO':'INATIVO'}</b><small>${escHtml(st.current_season||battlePassSeasonKey()||'—')}</small></div><details class="premium-coupon-panel v19-help-footer"><summary>🎟️ Resgatar cupom de evento</summary><div class="premium-coupon-form"><input id="premiumCouponInput" maxlength="64" autocomplete="off" placeholder="CÓDIGO DO CUPOM" /><button class="small-btn gold" id="premiumCouponRedeem" type="button">RESGATAR</button></div><p class="v19-tiny-muted">Resgate verificado pelo servidor.</p></details>`;
@@ -6358,12 +6361,7 @@ function renderPremiumShop(){
       if(redeeming)return;
       redeeming=true;couponBtn.disabled=true;couponBtn.textContent='RESGATANDO...';
       try{
-        if(PREMIUM_EVENT_COUPONS[code]){
-          // Compatibilidade com os cupons antigos que já existiam no aplicativo.
-          const result=redeemPremiumCouponLocal(code);
-          await flushCloudSave(true);
-          showToast(`Cupom resgatado • Premium até ${formatPremiumUntil(new Date(result.until).toISOString())}`,'reward');
-        }else{
+        {
           const result=await queueEconomy(async()=>{
             await syncBeforeEconomy();
             if(cloudBusy||cloudDirty)throw new Error('Salvamento em andamento. Tente novamente em alguns segundos.');
@@ -7575,7 +7573,7 @@ const adminBonusEditor={snapshot:null,busy:false};
 function adminBonusMessage(message,kind='muted'){
   if(ui.adminRuntimeBonusMessage){ui.adminRuntimeBonusMessage.textContent=message;ui.adminRuntimeBonusMessage.className=`admin-runtime-interface-message ${kind}`;}
 }
-const BONUS_MAP_LABELS={x1:'X-1',x2:'X-2',x3:'X-3',x4:'X-4',b41:'4-1',b42:'4-2',b43:'4-3'};
+const BONUS_MAP_LABELS={x1:'X-1',x2:'X-2',x3:'X-3',x4:'X-4',x5:'X-5',x6:'X-6',x7:'X-7',x8:'X-8',b41:'4-1',b42:'4-2',b43:'4-3'};
 function renderAdminPortalsEditor(){
   const host=$('#adminRuntimePortalsGrid');if(!host)return;
   // Preserve unsaved form values when a separate price fetch finishes in the background.

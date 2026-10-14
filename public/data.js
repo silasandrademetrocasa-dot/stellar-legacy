@@ -99,12 +99,12 @@ export const ITEMS = {
   extraSlotCpuCommon: {
     id: 'extraSlotCpuCommon', type: 'extra', name: 'CPU Expansora de Extras • Comum',
     price: 50000000, currency: 'credits', slotBonus: 3, exclusiveGroup: 'extraSlotExpansion',
-    description: 'Enquanto equipada, libera +3 slots EXTRAS adicionais na nave ativa. Não acumula com a versão Elite.'
+    description: 'Enquanto equipada, libera +4 slots EXTRAS adicionais na nave ativa. Não acumula com a versão Elite.'
   },
   extraSlotCpuElite: {
     id: 'extraSlotCpuElite', type: 'extra', name: 'CPU Expansora de Extras • Elite',
     price: 250000, currency: 'uridium', slotBonus: 6, exclusiveGroup: 'extraSlotExpansion',
-    description: 'Enquanto equipada, libera +6 slots EXTRAS adicionais na nave ativa. Não acumula com a versão Comum.'
+    description: 'Enquanto equipada, libera +9 slots EXTRAS adicionais na nave ativa. Não acumula com a versão Comum.'
   },
 
   // ROBÔS DE REPARAÇÃO AUTOMÁTICA
@@ -125,7 +125,7 @@ export const ITEMS = {
   cargoCpuCommon: {
     id: 'cargoCpuCommon', type: 'extra', name: 'Módulo de Porão • Comum',
     price: 75000000, currency: 'credits', cargoBonus: 2500, exclusiveGroup: 'cargoExpansion',
-    description: 'Enquanto equipado, aumenta a capacidade do porão da nave ativa em +2.500 unidades. Não acumula com a versão Elite.'
+    description: 'Enquanto equipado, aumenta a capacidade do porão da nave ativa em +3.000 unidades. Não acumula com a versão Elite.'
   },
   cargoCpuElite: {
     id: 'cargoCpuElite', type: 'extra', name: 'Módulo de Porão • Elite',
@@ -269,28 +269,28 @@ export const MAPS = {
     enemyGroups: [{ type: 'lordakia', count: 5 }, { type: 'saimon', count: 6 }, { type: 'bossSaimon', count: 4 }, { type: 'mordon', count: 6 }, { type: 'sibelon', count: 3 }, { type: 'bossSibelon', count: 1 }],
   },
   x5: {
-    id:'x5', tier:5, minLevel:18, name:'Véu da Fenda', risk:'Alto', world:{w:8400,h:6100}, enemyMultiplier:1,
+    id:'x5', tier:5, oreYield:2, minLevel:18, name:'Véu da Fenda', risk:'Alto', world:{w:8400,h:6100}, enemyMultiplier:1,
     ores:["Prometium", "Endurium", "Terbium"], oreCount:74, landmarkCount:10,
     palette:{nebula:'#133948',accent:'#51e5ff',deep:'#030b13'},
     structures:["Battle Gate 4-X", "Gate X-6"], portals:[],
     enemyGroups:[{ type: 'sibelon', count: 6 }, { type: 'bossSibelon', count: 2 }, { type: 'riftScout', count: 10 }, { type: 'bossRiftScout', count: 2 }],
   },
   x6: {
-    id:'x6', tier:6, minLevel:22, name:'Desfiladeiro Vazio', risk:'Crítico', world:{w:8900,h:6500}, enemyMultiplier:1,
+    id:'x6', tier:6, oreYield:3, minLevel:22, name:'Desfiladeiro Vazio', risk:'Crítico', world:{w:8900,h:6500}, enemyMultiplier:1,
     ores:["Prometium", "Endurium", "Terbium"], oreCount:81, landmarkCount:11,
     palette:{nebula:'#3a1d50',accent:'#d28fff',deep:'#0b0517'},
     structures:["Gate X-5", "Gate X-7"], portals:[],
     enemyGroups:[{ type: 'riftScout', count: 7 }, { type: 'bossRiftScout', count: 3 }, { type: 'voidCorsair', count: 9 }, { type: 'bossVoidCorsair', count: 2 }],
   },
   x7: {
-    id:'x7', tier:7, minLevel:27, name:'Coração do Nexus', risk:'Extremo', world:{w:9400,h:6900}, enemyMultiplier:1,
+    id:'x7', tier:7, oreYield:4, minLevel:27, name:'Coração do Nexus', risk:'Extremo', world:{w:9400,h:6900}, enemyMultiplier:1,
     ores:["Prometium", "Endurium", "Terbium"], oreCount:88, landmarkCount:12,
     palette:{nebula:'#134637',accent:'#8cffb5',deep:'#030d0b'},
     structures:["Gate X-6", "Gate X-8"], portals:[],
     enemyGroups:[{ type: 'voidCorsair', count: 8 }, { type: 'bossVoidCorsair', count: 3 }, { type: 'nexusWarden', count: 8 }, { type: 'bossNexusWarden', count: 2 }],
   },
   x8: {
-    id:'x8', tier:8, minLevel:32, name:'Bastião Astral', risk:'Extremo', world:{w:10000,h:7400}, enemyMultiplier:1,
+    id:'x8', tier:8, oreYield:5, minLevel:32, name:'Bastião Astral', risk:'Extremo', world:{w:10000,h:7400}, enemyMultiplier:1,
     ores:["Prometium", "Endurium", "Terbium"], oreCount:94, landmarkCount:13,
     palette:{nebula:'#4e243d',accent:'#ff947b',deep:'#120611'},
     structures:["Nova Base", "Trader", "Hangar", "Ship Repair", "Mission Control", "Gate X-7"], portals:[],

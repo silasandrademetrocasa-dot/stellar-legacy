@@ -6,7 +6,7 @@ const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const read=(rel)=>fs.readFileSync(path.join(root,rel),'utf8');
 const html=read('public/index.html'),manifest=read('public/assets/v17/manifest.js'),css=read('public/style.css');
 const release=JSON.parse(read('package.json')).version;
-assert(Number(release.split('.').at(-1))>=5,`Versão antiga: ${release}`);
+assert(Number(release.split('.')[0])>=19,`Versão antiga: ${release}`);
 assert(html.includes(`game.js?v=${release}`),`Cache do jogo divergente de ${release}`);
 assert(html.includes(`style.css?v=${release}`),`Cache CSS divergente de ${release}`);
 for(const asset of ['stellar-legacy-logo','earth','mars','jupiter']){
