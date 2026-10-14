@@ -1,3 +1,9 @@
+## V19.0.10 — REGENERAÇÃO ADMINISTRÁVEL (HP + ESCUDO)
+- Robôs de reparo Comum/Elite agora aplicam `repairTick`, `shieldRepairTick` e `repairDelay` do Supabase em tempo real; remove valores fixos no combate.
+- Mantém reparo da base, regeneração natural de escudo, multiplicadores Premium/designers e exceção de HP sem robô.
+- Zero permitido para pulso ou espera; limites e fallback para versões antigas; teste automatizado do cálculo de pulsos.
+- Sem SQL novo nem mudanças no instalador principal.
+
 ### V19.0.8 — ADM Fase 03A: criação de conteúdo (2026-10-13)
 - Missões personalizadas com criador visual, objetivos e recompensas.
 - Criadores de serviços, crafting e temporadas do Passe.

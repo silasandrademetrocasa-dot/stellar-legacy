@@ -1,7 +1,8 @@
-import { FACTIONS, SHIPS, ITEMS, LASER_AMMO, ROCKETS, NPC_TYPES, MAPS, RESOURCES } from './data.js?v=19.0.9';
-import { GAME_ASSETS } from './assets/v17/manifest.js?v=19.0.9';
-import { signUp, signIn, beginGoogleSignIn, restoreGoogleSignInFromUrl, requestPasswordReset, restorePasswordRecoveryFromUrl, restoreSession, signOutLocal, checkGameSession, endGameSession, getUser, getSessionCredentials, loadCloudSave, saveCloudSave, updateCallsign, updatePassword, loadRankings, loadAuctionBids, saveAuctionBidOnline, markAuctionBidStatusOnline, loadAuctionMarket, upsertPlayerPresenceOnline, loadMapPresenceOnline, savePlayerLocationCheckpointOnline, loadPlayerLocationCheckpointOnline, removePlayerPresenceOnline, queuePvpAttackOnline, consumePvpDamageEventsOnline, syncArenaProfileOnline, loadArenaState, loadArenaDailyRewardStatus, claimArenaDailyReward, loadArenaOpponents, loadArenaHistory, arenaAttackOnline, listClansOnline, loadMyClanOnline, createClanOnline, joinClanOnline, getClanRequestsOnline, reviewClanRequestOnline, cancelClanRequestOnline, setClanMemberRoleOnline, leaveClanOnline, transferClanCreditsOnline, claimClanCreditGrantsOnline, recordClanAlienKillOnline, getPremiumShopOnline, testPurchasePremiumOnline, adminPreviewPremiumStageOnline, adminSimulatePremiumStageOnline, getPremiumStageCatalogOnline, loadWarfrontStateOnline, hitWorldBossOnline, claimWorldBossRewardOnline, declareClanWarOnline, recordClanWarScoreOnline, loadLiveOpsOnline, adminUpdateLiveEventScheduleOnline, purchaseLiveCatalogOnline, economyActionOnline, getChatHistoryOnline, sendChatMessageOnline, redeemGameCouponOnline, getMyDesignersOnline, setDesignLoadoutOnline, claimGateDroneDesignOnline, claimEventDesignerOnline, getAdminStatus, adminSearchAccounts, adminRecentActions, adminBanAccount, adminUnbanAccount, adminResetAccount, adminDeleteAccount, pushTelemetryBatch, adminTelemetryOverview, adminPlayerTelemetry, getBattleGroupOnline, createBattleGroupOnline, inviteBattleGroupOnline, searchBattleGroupPlayersOnline, inviteBattleGroupUserOnline, respondBattleGroupInviteOnline, leaveBattleGroupOnline, kickBattleGroupMemberOnline, setBattleGroupRallyOnline, loadRuntimeConfigOnline, loadNpcRuntimeConfigOnline, loadWorldRuntimeConfigOnline, loadSystemsRuntimeConfigOnline, loadAdminRuntimeMonitorOnline, adminUpdateRuntimeModuleOnline, adminUpdateNpcRuntimeOnline, adminUpdateNpcSpawnRuntimeOnline, adminUpdateWorldMapOnline, adminUpdateWorldResourceOnline, adminUpdateWorldSectorOnline, adminUpdateWorldPortalOnline, adminUpdateWorldResourcePoolOnline, adminUpdateMissionCategoryOnline, adminUpdateEconomyServiceOnline, adminUpdateCraftingRecipeOnline, loadBattlePassRuntimeConfigOnline, adminUpdateBattlePassSeasonOnline, adminUpdateBattlePassTierOnline, loadShopsRuntimeConfigOnline, adminUpdateCommonShopItemOnline, adminUpdatePremiumShopItemOnline, loadBonusConfigOnline, adminUpdateBonusConfigOnline, adminCouponDashboardOnline, adminCreateCouponOnline, adminSetCouponActiveOnline, loadGalaxyGatesOnline, adminUpdateGalaxyGateOnline, adminUpsertCustomMissionOnline, adminDeleteCustomMissionOnline, adminCreateCraftRecipeOnline, adminCreateEconomyServiceOnline, adminCreatePassSeasonOnline, loadAuctionRulesOnline, adminUpdateAuctionRulesOnline, loadBalanceRuntimeOnline, adminUpdateBalanceOnline } from './api.js?v=19.0.9';
-import { SharedUniverseClient } from './world.js?v=19.0.9';
+import { FACTIONS, SHIPS, ITEMS, LASER_AMMO, ROCKETS, NPC_TYPES, MAPS, RESOURCES } from './data.js?v=19.0.10';
+import { repairPulseSettings } from './repair-balance.js?v=19.0.10';
+import { GAME_ASSETS } from './assets/v17/manifest.js?v=19.0.10';
+import { signUp, signIn, beginGoogleSignIn, restoreGoogleSignInFromUrl, requestPasswordReset, restorePasswordRecoveryFromUrl, restoreSession, signOutLocal, checkGameSession, endGameSession, getUser, getSessionCredentials, loadCloudSave, saveCloudSave, updateCallsign, updatePassword, loadRankings, loadAuctionBids, saveAuctionBidOnline, markAuctionBidStatusOnline, loadAuctionMarket, upsertPlayerPresenceOnline, loadMapPresenceOnline, savePlayerLocationCheckpointOnline, loadPlayerLocationCheckpointOnline, removePlayerPresenceOnline, queuePvpAttackOnline, consumePvpDamageEventsOnline, syncArenaProfileOnline, loadArenaState, loadArenaDailyRewardStatus, claimArenaDailyReward, loadArenaOpponents, loadArenaHistory, arenaAttackOnline, listClansOnline, loadMyClanOnline, createClanOnline, joinClanOnline, getClanRequestsOnline, reviewClanRequestOnline, cancelClanRequestOnline, setClanMemberRoleOnline, leaveClanOnline, transferClanCreditsOnline, claimClanCreditGrantsOnline, recordClanAlienKillOnline, getPremiumShopOnline, testPurchasePremiumOnline, adminPreviewPremiumStageOnline, adminSimulatePremiumStageOnline, getPremiumStageCatalogOnline, loadWarfrontStateOnline, hitWorldBossOnline, claimWorldBossRewardOnline, declareClanWarOnline, recordClanWarScoreOnline, loadLiveOpsOnline, adminUpdateLiveEventScheduleOnline, purchaseLiveCatalogOnline, economyActionOnline, getChatHistoryOnline, sendChatMessageOnline, redeemGameCouponOnline, getMyDesignersOnline, setDesignLoadoutOnline, claimGateDroneDesignOnline, claimEventDesignerOnline, getAdminStatus, adminSearchAccounts, adminRecentActions, adminBanAccount, adminUnbanAccount, adminResetAccount, adminDeleteAccount, pushTelemetryBatch, adminTelemetryOverview, adminPlayerTelemetry, getBattleGroupOnline, createBattleGroupOnline, inviteBattleGroupOnline, searchBattleGroupPlayersOnline, inviteBattleGroupUserOnline, respondBattleGroupInviteOnline, leaveBattleGroupOnline, kickBattleGroupMemberOnline, setBattleGroupRallyOnline, loadRuntimeConfigOnline, loadNpcRuntimeConfigOnline, loadWorldRuntimeConfigOnline, loadSystemsRuntimeConfigOnline, loadAdminRuntimeMonitorOnline, adminUpdateRuntimeModuleOnline, adminUpdateNpcRuntimeOnline, adminUpdateNpcSpawnRuntimeOnline, adminUpdateWorldMapOnline, adminUpdateWorldResourceOnline, adminUpdateWorldSectorOnline, adminUpdateWorldPortalOnline, adminUpdateWorldResourcePoolOnline, adminUpdateMissionCategoryOnline, adminUpdateEconomyServiceOnline, adminUpdateCraftingRecipeOnline, loadBattlePassRuntimeConfigOnline, adminUpdateBattlePassSeasonOnline, adminUpdateBattlePassTierOnline, loadShopsRuntimeConfigOnline, adminUpdateCommonShopItemOnline, adminUpdatePremiumShopItemOnline, loadBonusConfigOnline, adminUpdateBonusConfigOnline, adminCouponDashboardOnline, adminCreateCouponOnline, adminSetCouponActiveOnline, loadGalaxyGatesOnline, adminUpdateGalaxyGateOnline, adminUpsertCustomMissionOnline, adminDeleteCustomMissionOnline, adminCreateCraftRecipeOnline, adminCreateEconomyServiceOnline, adminCreatePassSeasonOnline, loadAuctionRulesOnline, adminUpdateAuctionRulesOnline, loadBalanceRuntimeOnline, adminUpdateBalanceOnline } from './api.js?v=19.0.10';
+import { SharedUniverseClient } from './world.js?v=19.0.10';
 
 const canvas = document.querySelector('#game');
 const ctx = canvas.getContext('2d');
@@ -5048,29 +5049,27 @@ function updatePlayer(dt){
   state.camera.x+=(player.x-state.camera.x)*.08;state.camera.y+=(player.y-state.camera.y)*.08;
   const baseSafe=isBaseSafeZone();
   const repairBot=activeRepairBot();
-  const secondsWithoutDamage=nowSec()-state.lastPlayerDamageAt;
-  const repairDelay=5;
-
-  // Reparação em valores FIXOS por pulso de 1 segundo.
-  // HP: Base ou Repair Bot Comum = +5.000; Repair Bot Elite = +10.000.
-  // ESC: padrão = +10.000; com Repair Bot Elite = +15.000.
-  // Fora da base, o pulso só começa após 5s completos sem receber dano.
-  const regenReady=baseSafe||secondsWithoutDamage>=repairDelay;
-  if(regenReady&&player.shield<player.maxShield&&nowSec()-state.shieldRepairFxAt>=1){
-    const shieldTick=(repairBot?.id==='repElite'?15000:10000)*(premiumActive()?2:1)*designerRepairMultiplier();
+  // V19.0.10: os pulsos e o atraso dos reparadores passam a seguir o
+  // snapshot autenticado de balanceamento (ITEMS), publicado pelo ADM no Supabase.
+  // Sem robô: escudo regenera normalmente; HP só é reparado na base.
+  const repair=repairPulseSettings({
+    repairBot,
+    baseSafe,
+    secondsWithoutDamage:nowSec()-state.lastPlayerDamageAt,
+    premium:premiumActive(),
+    designerMultiplier:designerRepairMultiplier()
+  });
+  if(repair.shieldReady&&repair.shieldTick>0&&player.shield<player.maxShield&&nowSec()-state.shieldRepairFxAt>=1){
     const beforeShield=player.shield;
-    player.shield=Math.min(player.maxShield,player.shield+shieldTick);
+    player.shield=Math.min(player.maxShield,player.shield+repair.shieldTick);
     state.shieldRepairFxAt=nowSec();
     const gained=Math.max(0,Math.round(player.shield-beforeShield));
     if(gained>0){playSfx('repair');spawnParticle(player.x,player.y,`ESCUDO +${fmt(gained)}`,'#62d9ff');spawnRepairFx(player.x,player.y,'#62d9ff','shieldcharge');}
   }
 
-  const hpCanRepair=baseSafe||!!repairBot;
-  const hpDelayReady=baseSafe||secondsWithoutDamage>=Number(repairBot?.repairDelay||5);
-  if(hpCanRepair&&hpDelayReady&&player.hp<player.maxHp&&nowSec()-state.repairFxAt>=1){
-    const hpTick=(repairBot?.id==='repElite'?10000:5000)*(premiumActive()?2:1)*designerRepairMultiplier();
+  if(repair.hpReady&&repair.hpTick>0&&player.hp<player.maxHp&&nowSec()-state.repairFxAt>=1){
     const beforeHp=player.hp;
-    player.hp=Math.min(player.maxHp,player.hp+hpTick);
+    player.hp=Math.min(player.maxHp,player.hp+repair.hpTick);
     state.repairFxAt=nowSec();
     const gained=Math.max(0,Math.round(player.hp-beforeHp));
     if(gained>0){playSfx('repair');spawnParticle(player.x,player.y,`${baseSafe?'BASE':'AUTO REPAIR'} +${fmt(gained)} HP`,'#73ffc0');spawnRepairFx(player.x,player.y,'#73ffc0','repair');}
@@ -5993,7 +5992,8 @@ function renderHangarEquipment(){
   loadHangarEquipmentPrefs();
   const ship=SHIPS[progress.activeShipId],root=document.createElement('div');root.className='hangar-equipment-console';
   const repairBot=activeRepairBot(),extraCap=shipExtraCapacity(),extraBonus=extraCap-ship.extras;
-  const summary=document.createElement('div');summary.className='summary-grid hangar-summary-strip';summary.innerHTML=`<div class="stat-card">Dano<strong>${fmt(player.laserDamage)}</strong></div><div class="stat-card">Escudo<strong>${fmt(player.maxShield)}</strong></div><div class="stat-card">Absorção<strong>${player.shieldAbsorption}%</strong></div><div class="stat-card">VEL<strong>${fmt(player.speed)}</strong></div><div class="stat-card">Extras<strong>${extraCap}${extraBonus?` (+${extraBonus})`:''}</strong></div><div class="stat-card">Reparo<strong>${repairBot?`+${fmt(repairBot.id==='repElite'?10000:5000)}/s`:'OFF'}</strong></div>`;root.appendChild(summary);
+  const liveRepair=repairPulseSettings({repairBot,premium:premiumActive(),designerMultiplier:designerRepairMultiplier()});
+  const summary=document.createElement('div');summary.className='summary-grid hangar-summary-strip';summary.innerHTML=`<div class="stat-card">Dano<strong>${fmt(player.laserDamage)}</strong></div><div class="stat-card">Escudo<strong>${fmt(player.maxShield)}</strong></div><div class="stat-card">Absorção<strong>${player.shieldAbsorption}%</strong></div><div class="stat-card">VEL<strong>${fmt(player.speed)}</strong></div><div class="stat-card">Extras<strong>${extraCap}${extraBonus?` (+${extraBonus})`:''}</strong></div><div class="stat-card">Reparo HP<strong>${repairBot?`+${fmt(liveRepair.hpTick)}/s`:'OFF'}</strong></div><div class="stat-card">Regen. ESC<strong>+${fmt(liveRepair.shieldTick)}/s</strong></div>`;root.appendChild(summary);
   root.appendChild(hangarFilterBar('ship',['all','lasers','shields','engines','extras'],state.hangarEquipFilter));
   const layout=document.createElement('div');layout.className='hangar-equipment-split';
   const equipped=document.createElement('div');equipped.className='hangar-equipment-pane equipped-pane';equipped.innerHTML=`<div class="hangar-pane-title"><span>NAVE • EQUIPADOS</span><b>${ship.name}</b></div>`;
@@ -7255,7 +7255,7 @@ async function loadAdminRuntimeMonitor(force=false){
   finally{adminRuntimeMonitor.busy=false;if(ui.adminRuntimeMonitorRefresh)ui.adminRuntimeMonitorRefresh.disabled=false;}
 }
 
-// V19.0.9 • Atributos de naves e equipamentos: Supabase como fonte online.
+// V19.0.10 • Atributos de naves e equipamentos: Supabase como fonte online.
 // Preços, códigos de habilidades e sprites continuam em seus sistemas existentes.
 const BALANCE_CACHE_KEY='stellar_balance_runtime_v1909';
 const balanceRuntime={version:0,lastAt:0,busy:false,source:'fallback'};
@@ -7265,8 +7265,8 @@ const BALANCE_EDIT_FIELDS={
   lasers:['SLOTS LASER',1,32,1],generators:['SLOTS GERADORES',0,32,1],extras:['SLOTS EXTRAS',0,20,1],
   damage:['DANO LASER',0,100000,1],alienDamage:['DANO VS ALIEN',0,100000,1],alienBonus:['BÔNUS VS ALIEN (%)',0,500,.1,'pct'],
   shield:['ESCUDO',0,1000000,1],absorption:['ABSORÇÃO (%)',0,95,1],shieldRegenBonus:['BÔNUS REGEN. (%)',0,100,.01,'pct'],
-  slotBonus:['SLOTS EXTRAS ADICIONAIS',0,20,1],repairRate:['REPARAÇÃO (%)',0,100,.1,'pct'],
-  repairTick:['HP REPARADO / TICK',0,1000000,1],shieldRepairTick:['ESCUDO / TICK',0,1000000,1],
+  slotBonus:['SLOTS EXTRAS ADICIONAIS',0,20,1],repairRate:['PRIORIDADE DE REPARO (%)',0,100,.1,'pct'],
+  repairTick:['HP REPARADO / SEGUNDO',0,1000000,1],shieldRepairTick:['ESCUDO / SEGUNDO',0,1000000,1],
   repairDelay:['ESPERA PARA REPARO (s)',0,120,1],cargoBonus:['BÔNUS PORÃO',0,100000,1],slots:['SLOTS DO DRONE',1,12,1]
 };
 const BALANCE_LOW_FIELDS={hp:['HP EXTRA',0,2000000,1],speed:['VELOCIDADE EXTRA',0,1000,1],cargo:['PORÃO EXTRA',0,100000,1],laserMult:['MULTIPLICADOR LASER',.1,5,.01],rocketMult:['MULTIPLICADOR MÍSSIL',.1,5,.01],shieldMult:['MULTIPLICADOR ESCUDO',.1,5,.01]};
