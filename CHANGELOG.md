@@ -649,3 +649,12 @@ Versão anterior mantida no histórico do projeto base.
 Abas de Assinaturas/Pacotes/Passe/Níveis com simulações SQL sem cobranças nem alteração no save. Loja Atual e cupons preservados. SQL V18.3.2 existente reutilizado.
 
 Consulta somente leitura das 12 ofertas para pilotos autenticados via RPC SQL V18.3.3; ADM usa V18.3.2 para simular.
+
+## V19.0.9 — CENTRAL DE BALANCEAMENTO
+- Nova aba ADM: naves, lasers, escudos, motores, extras e drones, com busca.
+- HP, dano, absorção, regeneração, velocidade, cargo, slots e bônus de mapas gravados no Supabase.
+- Catálogo inicial baseado em 43 naves + 36 equipamentos, mantendo os valores anteriores.
+- Validação por coluna no banco, RLS, controle de versão e `is_game_admin_v1763`.
+- Sincronização online periódica e preservação do HP/escudo relativo.
+- Reconciliação de slots que excedam o novo limite, com devolução ao inventário.
+- Preços/loja, sprites e habilidades especiais preservados.

@@ -1381,6 +1381,29 @@ app.post('/api/admin/runtime/gates',requireUser,asyncRoute(async(req,res)=>{
  res.json(data);
 }));
 
+
+// V19.0.9 • Catálogo único de balanceamento validado pelo Supabase.
+// Não altera preço, compra, save ou catálogo de recompensas.
+app.get('/api/runtime/balance',requireUser,asyncRoute(async(req,res)=>{
+ const {data,error}=await req.sb.rpc('get_balance_runtime_v1909');
+ if(error||!Array.isArray(data?.entries))return res.status(503).json({error:'Balanceamento indisponível. Confirme a migração SQL V19.0.9.'});
+ res.set('Cache-Control','no-store');res.json(data);
+}));
+app.post('/api/admin/runtime/balance',requireUser,asyncRoute(async(req,res)=>{
+ const b=req.body&&typeof req.body==='object'?req.body:{};
+ if(!['ship','item'].includes(b.kind)||typeof b.item_id!=='string'||b.item_id.length>64||
+   !b.fields||Array.isArray(b.fields)||typeof b.fields!=='object'||JSON.stringify(b.fields).length>3500){
+   return res.status(400).json({error:'Dados do balanceamento inválidos.'});
+ }
+ const {data,error}=await req.sb.rpc('admin_set_balance_v1909',{
+   p_kind:b.kind,p_item_id:b.item_id,p_fields:b.fields,
+   p_expected_version:Number.isInteger(b.expected_version)?b.expected_version:null
+ });
+ if(error){const message=String(error.message||'Servidor recusou o balanceamento.');
+  return res.status(/acesso|permiss|admin|negado/i.test(message)?403:/recarregue|mudou/i.test(message)?409:400).json({error:message});}
+ res.set('Cache-Control','no-store');res.json(data);
+}));
+
 // ===================== PLAYER TELEMETRY =====================
 app.post('/api/telemetry', requireUser, asyncRoute(async(req,res)=>{
   const batch=(req.body&&typeof req.body==='object')?req.body:{};

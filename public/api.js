@@ -1073,3 +1073,11 @@ export async function adminCreateEconomyServiceOnline(payload){return serverFetc
 export async function adminCreatePassSeasonOnline(payload){return serverFetch('/api/admin/runtime/pass/seasons/new',{method:'POST',body:JSON.stringify(payload)},true);}
 export async function loadAuctionRulesOnline(){return serverFetch('/api/runtime/auction-rules',{},true);}
 export async function adminUpdateAuctionRulesOnline(payload){return serverFetch('/api/admin/runtime/auction-rules',{method:'POST',body:JSON.stringify(payload)},true);}
+
+// V19.0.9 • Balanceamento completo de naves e equipamentos.
+export async function loadBalanceRuntimeOnline(force=false){
+ return serverFetch(`/api/runtime/balance${force?'?refresh=1':''}`,{},true);
+}
+export async function adminUpdateBalanceOnline(kind,item_id,fields,expected_version){
+ return serverFetch('/api/admin/runtime/balance',{method:'POST',body:JSON.stringify({kind,item_id,fields,expected_version})},true);
+}

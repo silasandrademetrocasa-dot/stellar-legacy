@@ -2931,3 +2931,34 @@ body[data-quality="low"] .pet-gear {
 .admin-pass-switch{display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:12px 0;color:#a6dfff;font-weight:800;}
 .admin-pass-switch select{min-width:210px;background:#071729;border:1px solid #2770a1;border-radius:8px;color:#e5f8ff;padding:9px;}
 @media(max-width:780px){.adm-content-task{grid-template-columns:1fr 1fr}.adm-content-task button{grid-column:span 2}}
+
+/* V19.0.9 • BALANCEAMENTO LIVE: layout independente, acessível em telas pequenas. */
+.admin-runtime-balance-panel{display:grid;gap:11px;min-width:0}
+.admin-runtime-balance-panel.hidden{display:none!important}
+.admin-balance-tabs{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:5px;border:1px solid rgba(97,182,241,.22);border-radius:12px;padding:5px;background:rgba(10,18,31,.75)}
+.admin-balance-tabs button{background:transparent;color:#91a9c8;border:1px solid transparent;border-radius:7px;min-height:32px;font-weight:800;font-size:9px;cursor:pointer}
+.admin-balance-tabs button.active{color:#e2f5ff;border-color:rgba(91,193,255,.4);background:rgba(36,91,143,.35)}
+.admin-balance-toolbar{display:flex;align-items:center;gap:8px;justify-content:space-between;flex-wrap:wrap}
+.admin-balance-toolbar input{flex:1;min-width:180px;background:#0a101d;border:1px solid rgba(87,173,237,.3);color:#e8f7ff;border-radius:9px;padding:10px;font-size:12px;outline:none}
+.admin-balance-toolbar span,.admin-balance-note{font-size:10px;line-height:1.55;color:#9bb1c6}
+.admin-balance-note{background:rgba(17,43,65,.4);border:1px solid rgba(74,148,209,.18);border-radius:9px;padding:10px;margin:0}
+.admin-balance-grid{display:grid;gap:7px;max-height:670px;overflow-y:auto;padding-right:4px;min-height:75px}
+.admin-balance-card{border:1px solid rgba(79,175,235,.26);background:linear-gradient(180deg,rgba(14,27,43,.94),rgba(10,14,26,.92));border-radius:10px;min-width:0}
+.admin-balance-card>summary{cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:8px;padding:12px;list-style:none;user-select:none;flex-wrap:wrap}
+.admin-balance-card>summary::-webkit-details-marker{display:none}
+.admin-balance-card>summary:after{content:'▸ EDITAR';margin-left:auto;color:#94d6ff;font-size:10px;white-space:nowrap}
+.admin-balance-card[open]>summary:after{content:'▾ EDITANDO'}
+.admin-balance-card>summary b{font-size:12px;color:#d2f1ff}
+.admin-balance-card>summary small{font-size:10px;color:#8da7bf}
+.admin-balance-fields{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px;padding:12px}
+.admin-balance-fields label{display:flex;flex-direction:column;gap:5px;color:#9fb7cf;font-size:10px;font-weight:800;letter-spacing:.04em;min-width:0}
+.admin-balance-fields input{width:100%;min-width:0;padding:10px;border:1px solid rgba(98,172,221,.25);border-radius:8px;color:#e6f3ff;background:#09111d;font-size:12px;outline:none}
+.admin-balance-fields input:focus{border-color:#61baf3}
+.admin-balance-low{margin:3px 12px 12px;border:1px solid rgba(101,188,241,.17);border-radius:8px;padding:8px}
+.admin-balance-low summary{font-weight:800;color:#a5d6ff;font-size:10px;cursor:pointer}
+.admin-balance-check{display:flex;align-items:center;gap:6px;color:#b0d2ed;font-size:10px;padding:10px}
+.admin-balance-check input{accent-color:#4dacfa}
+.admin-balance-actions{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 12px 13px;flex-wrap:wrap}
+.admin-balance-actions small{font-size:9px;color:#879eae}
+@media(max-width:800px){.admin-balance-tabs{grid-template-columns:repeat(3,minmax(0,1fr))}.admin-balance-fields{grid-template-columns:repeat(2,minmax(0,1fr))}.admin-balance-tabs button{font-size:10px;min-height:38px}.admin-balance-card>summary{align-items:flex-start}.admin-balance-toolbar input{min-width:120px}}
+@media(max-width:440px){.admin-balance-fields{grid-template-columns:minmax(0,1fr)}.admin-balance-grid{max-height:60vh}.admin-balance-card>summary small{width:100%}.admin-balance-card>summary:after{margin-left:0}}

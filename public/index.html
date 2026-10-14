@@ -6,7 +6,7 @@
 <meta content="width=device-width,initial-scale=1,user-scalable=no" name="viewport"/>
 <meta content="#030816" name="theme-color"/>
 <title>Stellar Legacy</title>
-<link href="/style.css?v=19.0.8" rel="stylesheet"/>
+<link href="/style.css?v=19.0.9" rel="stylesheet"/>
 </head>
 <body>
 <div id="app">
@@ -593,6 +593,7 @@
         <button type="button" data-admin-runtime-tab="pass">PASSE</button>
         <button type="button" data-admin-runtime-tab="shops">PREÇOS</button>
         <button type="button" data-admin-runtime-tab="portals">PORTAIS ASTRAIS</button>
+        <button type="button" data-admin-runtime-tab="balance">BALANCEAMENTO</button>
         <button type="button" data-admin-runtime-tab="coupons">CUPONS</button>
       </div>
       <div id="adminRuntimeMonitorPanel">
@@ -679,6 +680,24 @@
         <button class="small-btn" id="adminRuntimePortalsReload" type="button">RECARREGAR</button></div>
         <div class="admin-runtime-bonus-grid" id="adminRuntimePortalsGrid"><div class="empty-state">Carregue o materializador.</div></div>
         <div class="admin-runtime-interface-message muted" id="adminRuntimePortalsMessage"></div>
+      </div>
+      <div class="admin-runtime-balance-panel hidden" id="adminRuntimeBalancePanel">
+        <div class="admin-runtime-interface-toolbar">
+          <div><b>⚖️ BALANCEAMENTO AO VIVO</b><small>43 naves e 36 equipamentos • HP, velocidade, lasers, escudos, slots e módulos. Valores publicados no Supabase.</small></div>
+          <button class="small-btn" id="adminBalanceReload" type="button">RECARREGAR</button>
+        </div>
+        <div class="admin-balance-tabs" id="adminBalanceTabs">
+          <button class="active" data-balance-tab="ships" type="button">NAVES</button>
+          <button data-balance-tab="lasers" type="button">LASERS</button>
+          <button data-balance-tab="shields" type="button">ESCUDOS</button>
+          <button data-balance-tab="engines" type="button">MOTORES</button>
+          <button data-balance-tab="extras" type="button">EXTRAS</button>
+          <button data-balance-tab="drones" type="button">DRONES</button>
+        </div>
+        <div class="admin-balance-toolbar"><input id="adminBalanceSearch" type="search" placeholder="Buscar por nave, ID ou equipamento..." autocomplete="off"/><span id="adminBalanceCount">Aguardando catálogo...</span></div>
+        <p class="admin-balance-note">Cada item é publicado individualmente. Os preços permanecem na aba PREÇOS. Atualizações chegam aos pilotos online em até 45 segundos; HP/escudo atualizam preservando a porcentagem atual. Reduzir slots exige conferir loadouts já equipados.</p>
+        <div id="adminBalanceGrid" class="admin-balance-grid"><div class="empty-state">Carregando balanceamento...</div></div>
+        <div class="admin-runtime-interface-message muted" id="adminBalanceMessage">Nenhuma alteração pendente.</div>
       </div>
       <div class="admin-runtime-coupons-panel hidden" id="adminRuntimeCouponsPanel">
         <div class="admin-runtime-interface-toolbar"><div><b>🎟️ CENTRAL DE CUPONS • ADM</b><small>Monte um cupom com até 12 prêmios. Sem cobranças: premiação entregue pelo servidor em um resgate único.</small></div>
@@ -978,6 +997,6 @@
   </div>
 </div>
 </div>
-<script src="/game.js?v=19.0.8" type="module"></script>
+<script src="/game.js?v=19.0.9" type="module"></script>
 </body>
 </html>
