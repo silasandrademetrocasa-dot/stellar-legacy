@@ -105,14 +105,14 @@ function safeColor(value,fallback='#76d9ff'){
   const v=String(value||'').trim();return /^#[0-9a-fA-F]{6}$/.test(v)?v:fallback;
 }
 function shortText(value,max=48){return String(value||'').replace(/[\r\n\t]/g,' ').trim().slice(0,max);}
-function basePointForFaction(factionId){
-  const w=MAPS.x1.world.w,h=MAPS.x1.world.h;
+function basePointForFaction(factionId,mapId='x1'){
+  const w=(MAPS[mapId]||MAPS.x1).world.w,h=(MAPS[mapId]||MAPS.x1).world.h;
   if(factionId==='mars') return {x:w-620,y:Math.round(h*.28)};
   if(factionId==='jupiter') return {x:w-620,y:Math.round(h*.72)};
   return {x:620,y:Math.round(h*.50)};
 }
 function roomKey(mapId,territoryFaction){
-  return ['x1','x2','x3','x4'].includes(mapId) ? `${territoryFaction||'earth'}:${mapId}` : `battle:${mapId}`;
+  return /^x[1-8]$/.test(mapId) ? `${territoryFaction||'earth'}:${mapId}` : `battle:${mapId}`;
 }
 function sanitizeRoomMap(mapId){ return MAPS[mapId] && !MAPS[mapId].gate ? mapId : 'x1'; }
 const EVENT_VARIANTS={
@@ -167,8 +167,8 @@ class Room {
   randomPosition(margin=160){
     const w=this.map.world.w,h=this.map.world.h;
     let x=rand(margin,w-margin),y=rand(margin,h-margin),tries=0;
-    if(this.mapId==='x1'){
-      const b=basePointForFaction(this.territoryFaction);
+    if(['x1','x8'].includes(this.mapId)) {
+      const b=basePointForFaction(this.territoryFaction,this.mapId);
       while(Math.hypot(x-b.x,y-b.y)<700 && tries++<50){x=rand(margin,w-margin);y=rand(margin,h-margin);}
     }
     return {x,y};
@@ -560,7 +560,7 @@ class Room {
   updatePlayer(ws,msg){
     const p=ws.player;if(!p)return;
     const now=nowMs();if(now-(ws.lastPlayerStateAt||0)<PLAYER_STATE_MIN_MS)return;ws.lastPlayerStateAt=now;
-    p.x=clamp(msg.x,0,this.map.world.w);p.y=clamp(msg.y,0,this.map.world.h);p.angle=Number(msg.angle)||0;p.hp=Math.max(0,Number(msg.hp)||0);p.shield=Math.max(0,Number(msg.shield)||0);p.maxHp=Math.max(1,Number(msg.maxHp)||1);p.maxShield=Math.max(0,Number(msg.maxShield)||0);p.faction=String(msg.faction||p.faction||'earth');p.shipId=shortText(msg.shipId||p.shipId||'phoenix',40);p.shipDesignId=msg.shipDesignId?shortText(msg.shipDesignId,64):null;p.level=Math.max(1,Number(msg.level)||1);p.pilotTitle=shortText(msg.pilotTitle||p.pilotTitle||'Piloto Estelar',64);
+    p.x=clamp(msg.x,0,this.map.world.w);p.y=clamp(msg.y,0,this.map.world.h);p.angle=Number(msg.angle)||0;p.hp=Math.max(0,Number(msg.hp)||0);p.shield=Math.max(0,Number(msg.shield)||0);p.maxHp=Math.max(1,Number(msg.maxHp)||1);p.maxShield=Math.max(0,Number(msg.maxShield)||0);p.faction=p.faction||'earth';p.shipId=shortText(msg.shipId||p.shipId||'phoenix',40);p.shipDesignId=msg.shipDesignId?shortText(msg.shipDesignId,64):null;p.level=Math.max(1,Number(msg.level)||1);p.pilotTitle=shortText(msg.pilotTitle||p.pilotTitle||'Piloto Estelar',64);
     p.laserFiring=!!msg.laserFiring;p.laserColor=safeColor(msg.laserColor,p.laserColor||'#76d9ff');p.laserAmmoId=shortText(msg.laserAmmoId||p.laserAmmoId||'lcb10',24);p.laserAmmoName=shortText(msg.laserAmmoName||p.laserAmmoName||'PLS-1',20);p.targetId=msg.targetId?shortText(msg.targetId,96):null;p.targetIsPlayer=!!msg.targetIsPlayer;
     const pet=msg.pet&&typeof msg.pet==='object'?msg.pet:null;
     if(pet?.owned){p.pet={owned:true,level:Math.max(1,Math.min(15,Number(pet.level)||1)),x:clamp(pet.x,0,this.map.world.w),y:clamp(pet.y,0,this.map.world.h),angle:Number(pet.angle)||0,activeGear:shortText(pet.activeGear||'off',24),laserTargetId:pet.laserTargetId?shortText(pet.laserTargetId,96):null,laserActive:!!pet.laserActive,laserColor:safeColor(pet.laserColor,p.laserColor),designId:pet.designId?shortText(pet.designId,64):null};}else p.pet={owned:false};
@@ -568,7 +568,7 @@ class Room {
     this.broadcast({type:'world_player_patch',entity:this.publicPlayer(p)},ws);
   }
   playerSafe(p){
-    if(this.mapId!=='x1'||this.territoryFaction!==p.faction)return false;const b=basePointForFaction(this.territoryFaction);return Math.hypot(p.x-b.x,p.y-b.y)<=520;
+    if(!['x1','x8'].includes(this.mapId)||this.territoryFaction!==p.faction)return false;const b=basePointForFaction(this.territoryFaction,this.mapId);return Math.hypot(p.x-b.x,p.y-b.y)<=520;
   }
   playerPortalNeutral(p){
     return this.world.portalsForRoom(this.mapId,this.territoryFaction).some(portal=>Math.hypot(p.x-Number(portal.x||0),p.y-Number(portal.y||0))<=PORTAL_NEUTRAL_RADIUS);
@@ -734,9 +734,9 @@ class Room {
     for(const [id,o] of this.ores)if(o.eventOre&&(!activeEventId||o.eventId!==activeEventId)){this.ores.delete(id);staleOre=true;}
     if(staleNpc||staleOre){this.respawns=this.respawns.filter(r=>r.kind!=='eventNpc');this.oreRespawns=this.oreRespawns.filter(r=>!r.eventOre);if(this.clients.size)this.broadcast(this.snapshot());}
     for(const e of this.npcs.values()){
-      const locked=this.lockedAggroPlayer(e);const near=locked?{player:locked,dist:Math.hypot(locked.x-e.x,locked.y-e.y)}:this.nearestPlayer(e);e.angle+=(Number(e.drift)||0)*dt;if(!near){e.x=clamp(e.x+Math.cos(e.angle)*e.speed*.12*dt,25,this.map.world.w-25);e.y=clamp(e.y+Math.sin(e.angle)*e.speed*.12*dt,25,this.map.world.h-25);continue;}const p=near.player,d=near.dist,dx=p.x-e.x,dy=p.y-e.y,force=!!e.forceChase,retaliating=String(e.aggroUserId||'')===String(p.userId||''),protectedNow=this.playerProtectedFromNpc(p,e),neutralX1=this.mapId==='x1'&&!retaliating;
-      if(this.mapId==='x1'){
-        const b=basePointForFaction(this.territoryFaction),bd=Math.hypot(e.x-b.x,e.y-b.y);if(bd<555){const ox=e.x-b.x,oy=e.y-b.y,od=Math.hypot(ox,oy)||1;e.x=b.x+ox/od*558;e.y=b.y+oy/od*558;}
+      const locked=this.lockedAggroPlayer(e);const near=locked?{player:locked,dist:Math.hypot(locked.x-e.x,locked.y-e.y)}:this.nearestPlayer(e);e.angle+=(Number(e.drift)||0)*dt;if(!near){e.x=clamp(e.x+Math.cos(e.angle)*e.speed*.12*dt,25,this.map.world.w-25);e.y=clamp(e.y+Math.sin(e.angle)*e.speed*.12*dt,25,this.map.world.h-25);continue;}const p=near.player,d=near.dist,dx=p.x-e.x,dy=p.y-e.y,force=!!e.forceChase,retaliating=String(e.aggroUserId||'')===String(p.userId||''),protectedNow=this.playerProtectedFromNpc(p,e),neutralX1=['x1','x8'].includes(this.mapId)&&!retaliating;
+      if(['x1','x8'].includes(this.mapId)) {
+        const b=basePointForFaction(this.territoryFaction,this.mapId),bd=Math.hypot(e.x-b.x,e.y-b.y);if(bd<555){const ox=e.x-b.x,oy=e.y-b.y,od=Math.hypot(ox,oy)||1;e.x=b.x+ox/od*558;e.y=b.y+oy/od*558;}
       }
       if(neutralX1&&!protectedNow){
         const passiveStand=Math.max(180,e.attackRange*.72);
@@ -780,7 +780,7 @@ class Room {
   }
 }
 
-export function attachSharedUniverse(server,{authenticate,loadLiveOps,loadBattleGroup,loadNpcConfig,loadWorldConfig,loadPlayerEventProgress,recordPlayerEventProgress}){
+export function attachSharedUniverse(server,{authenticate,authorizeJoin,loadLiveOps,loadBattleGroup,loadNpcConfig,loadWorldConfig,loadPlayerEventProgress,recordPlayerEventProgress}){
   const wss=new WebSocketServer({
     server,
     path:'/ws',
@@ -805,7 +805,7 @@ export function attachSharedUniverse(server,{authenticate,loadLiveOps,loadBattle
     resourcePool(mapId){const rows=this.worldRuntime?.mapResources?.get?.(String(mapId||''));if(Array.isArray(rows)&&rows.length)return rows.filter(r=>r.enabled!==false&&this.resourceDefinition(r.resource_key)?.enabled!==false);return (MAPS[String(mapId||'')]?.ores||[]).map(resource_key=>({resource_key,weight:1,enabled:true}));},
     sectorForRoom(mapId,territoryFaction){const rows=[...this.worldRuntime.sectors.values()].filter(x=>x.enabled!==false&&String(x.map_id)===String(mapId));if(!rows.length)return null;if(MAPS[mapId]?.battle||this.mapDefinition(mapId)?.battle)return rows[0]||null;return rows.find(x=>String(x.territory_faction||'')===String(territoryFaction||''))||rows[0]||null;},
     portalEdgePoint(fromSector,toSector,map){const a=this.worldRuntime.sectors.get(String(fromSector||'')),b=this.worldRuntime.sectors.get(String(toSector||''));const w=map?.world?.w||6000,h=map?.world?.h||4500,inset=175,cx=w/2,cy=h/2;if(!a||!b)return{x:cx,y:cy};const vx=((Number(b.graph_x)-Number(a.graph_x))/100)*w,vy=((Number(b.graph_y)-Number(a.graph_y))/100)*h,ax=Math.abs(vx),ay=Math.abs(vy),tx=ax>0?(cx-inset)/ax:Infinity,ty=ay>0?(cy-inset)/ay:Infinity,t=Math.max(0,Math.min(tx,ty));return{x:Math.round(Math.max(inset,Math.min(w-inset,cx+vx*t))),y:Math.round(Math.max(inset,Math.min(h-inset,cy+vy*t)))};},
-    portalsForRoom(mapId,territoryFaction){const origin=this.sectorForRoom(mapId,territoryFaction);if(!origin)return MAPS[mapId]?.portals||[];const map=this.mapDefinition(mapId)||MAPS.x1,out=[];for(const link of this.worldRuntime.portals){if(link.enabled===false)continue;let target=null;if(link.from_sector===origin.sector_label)target=link.to_sector;else if(link.bidirectional!==false&&link.to_sector===origin.sector_label)target=link.from_sector;if(!target)continue;const dest=this.worldRuntime.sectors.get(target);if(!dest||dest.enabled===false)continue;const pos=this.portalEdgePoint(origin.sector_label,target,map);out.push({...pos,to:dest.map_id,targetLabel:target,targetTerritoryFaction:dest.territory_faction||null,battle:!!this.mapDefinition(dest.map_id)?.battle});}return out;},
+    portalsForRoom(mapId,territoryFaction){territoryFaction=({'b41':'earth','b42':'mars','b43':'jupiter'})[mapId]||territoryFaction;const origin=this.sectorForRoom(mapId,territoryFaction);if(!origin)return MAPS[mapId]?.portals||[];const map=this.mapDefinition(mapId)||MAPS.x1,out=[];for(const link of this.worldRuntime.portals){if(link.enabled===false)continue;let target=null;if(link.from_sector===origin.sector_label)target=link.to_sector;else if(link.bidirectional!==false&&link.to_sector===origin.sector_label)target=link.from_sector;if(!target)continue;const dest=this.worldRuntime.sectors.get(target);if(!dest||dest.enabled===false)continue;const owner=({'4-1':'earth','4-2':'mars','4-3':'jupiter'})[dest.sector_label];if(owner&&owner!==territoryFaction)continue;if(dest.territory_faction&&dest.territory_faction!==territoryFaction)continue;const pos=this.portalEdgePoint(origin.sector_label,target,map);out.push({...pos,to:dest.map_id,targetLabel:target,targetTerritoryFaction:dest.territory_faction||null,battle:!!this.mapDefinition(dest.map_id)?.battle});}return out;},
     loadBattleGroup:loadBattleGroup||null,
     loadPlayerEventProgress:loadPlayerEventProgress||null,
     recordPlayerEventProgress:recordPlayerEventProgress||null,
@@ -848,7 +848,7 @@ export function attachSharedUniverse(server,{authenticate,loadLiveOps,loadBattle
           const resources=new Map();for(const row of raw.resources){if(!row?.resource_key)continue;const key=String(row.resource_key),obj={id:key,name:shortText(row.name||key,48),color:safeColor(row.color,'#ffffff'),sell:Math.max(0,Number(row.sell_price)||0),enabled:row.enabled!==false};resources.set(key,obj);RESOURCES[key]={...(RESOURCES[key]||{}),...obj};}
           const maps=new Map();for(const row of raw.maps){if(!row?.map_id)continue;const key=String(row.map_id),fallback=MAPS[key]||{};const map={...fallback,id:key,label:row.label??fallback.label,tier:Number(row.tier)||fallback.tier||1,name:shortText(row.name||fallback.name||key,64),risk:shortText(row.risk||fallback.risk||'Normal',32),world:{w:Math.max(1000,Number(row.world_w)||fallback.world?.w||6000),h:Math.max(1000,Number(row.world_h)||fallback.world?.h||4500)},enemyMultiplier:Math.max(.1,Number(row.enemy_multiplier)||fallback.enemyMultiplier||1),oreCount:Math.max(0,Math.round(Number(row.ore_count)||0)),oreRespawnMinMs:Math.max(1000,Number(row.ore_respawn_min_ms)||5000),oreRespawnMaxMs:Math.max(1000,Number(row.ore_respawn_max_ms)||12000),landmarkCount:Math.max(0,Math.round(Number(row.landmark_count)||0)),minLevel:Math.max(1,Number(row.min_level)||1),battle:!!row.battle,gate:!!row.gate,enabled:row.enabled!==false,palette:row.palette&&typeof row.palette==='object'?row.palette:(fallback.palette||{}),structures:Array.isArray(row.structures)?row.structures:(fallback.structures||[])};maps.set(key,map);MAPS[key]=map;}
           const mapResources=new Map();for(const row of raw.map_resources||[]){const mapId=String(row?.map_id||''),resource_key=String(row?.resource_key||'');if(!mapId||!resource_key)continue;if(!mapResources.has(mapId))mapResources.set(mapId,[]);mapResources.get(mapId).push({resource_key,weight:Math.max(.01,Number(row.weight)||1),enabled:row.enabled!==false});}
-          for(const [mapId,map] of maps){const pool=mapResources.get(mapId)||[];map.ores=pool.filter(x=>x.enabled!==false).map(x=>x.resource_key);map.oreWeights=Object.fromEntries(pool.map(x=>[x.resource_key,x.weight]));}
+          for(const [mapId,map] of maps){const pool=(mapResources.get(mapId)||[]).filter(x=>x.enabled!==false);if(pool.length){map.ores=pool.map(x=>x.resource_key);map.oreWeights=Object.fromEntries(pool.map(x=>[x.resource_key,x.weight]));}else if(!Array.isArray(map.ores)){map.ores=[...(MAPS[mapId]?.ores||[])];}}
           const sectors=new Map();for(const row of raw.sectors||[]){if(!row?.sector_label||!maps.has(String(row.map_id)))continue;sectors.set(String(row.sector_label),{...row,sector_label:String(row.sector_label),map_id:String(row.map_id),territory_faction:row.territory_faction?String(row.territory_faction):null,graph_x:Number(row.graph_x)||0,graph_y:Number(row.graph_y)||0,min_level:Math.max(1,Number(row.min_level)||1),enabled:row.enabled!==false});}
           const portals=(raw.portals||[]).filter(x=>x?.from_sector&&x?.to_sector).map(x=>({...x,from_sector:String(x.from_sector),to_sector:String(x.to_sector),bidirectional:x.bidirectional!==false,enabled:x.enabled!==false,sort_order:Number(x.sort_order)||100}));
           this.worldRuntime={version:nextVersion,updatedAt:raw.updated_at||null,maps,resources,mapResources,sectors,portals,source:'render-cache'};this.lastWorldConfigAt=nowMs();
@@ -905,7 +905,16 @@ export function attachSharedUniverse(server,{authenticate,loadLiveOps,loadBattle
         try{const identity=await authenticate(String(msg.accessToken||''),String(msg.gameSessionId||''));if(!identity?.user?.id)throw new Error('auth');ws.isAuthed=true;ws.identity=identity;clearTimeout(ws.authTimer);safeJsonSend(ws,{type:'auth_ok',user:{id:identity.user.id,callsign:identity.callsign},serverTime:nowMs()});}catch{safeJsonSend(ws,{type:'auth_error'});try{ws.close(4401,'auth failed');}catch{}}return;
       }
       if(msg.type==='join_map'){
-        ws.room?.removeClient(ws);const r=world.room(msg.mapId,msg.territoryFaction);const p={userId:ws.identity.user.id,callsign:ws.identity.callsign||msg.callsign||'Pilot',pilotTitle:shortText(msg.pilotTitle||'Piloto Estelar',64),faction:String(msg.faction||'earth'),shipId:String(msg.shipId||'phoenix'),shipDesignId:msg.shipDesignId?shortText(msg.shipDesignId,64):null,level:Number(msg.level)||1,x:Number(msg.x)||400,y:Number(msg.y)||400,hp:Number(msg.hp)||1,maxHp:Number(msg.maxHp)||1,shield:Number(msg.shield)||0,maxShield:Number(msg.maxShield)||0,angle:Number(msg.angle)||0,laserFiring:false,laserColor:'#76d9ff',laserAmmoId:'lcb10',laserAmmoName:'PLS-1',targetId:null,targetIsPlayer:false,pet:{owned:false},updatedAt:nowMs()};r.addClient(ws,p);return;
+        const identity=ws.identity;const mapId=String(msg.mapId||'x1');
+        if(authorizeJoin){try{const fresh=await authorizeJoin(identity.accessToken,identity.user.id);identity.faction=fresh?.faction||identity.faction;identity.level=Math.max(1,Number(fresh?.level)||Number(identity.level)||1);}catch{safeJsonSend(ws,{type:'join_error',reason:'Falha ao validar progresso no servidor'});return;}}
+        const known=String(identity.faction||'');const faction=known||(['earth','mars','jupiter'].includes(String(msg.faction||''))&&mapId==='x1'?String(msg.faction):'');const level=Math.max(1,Number(identity.level)||1);
+        const owner=({'b41':'earth','b42':'mars','b43':'jupiter'})[mapId];
+        const dest=world.mapDefinition(mapId);
+        const sector=world.sectorForRoom(mapId,msg.territoryFaction);
+        const required=Math.max(1,Number(dest?.minLevel)||1,Number(sector?.min_level)||1);
+        const wrongFaction=(/^x[1-8]$/.test(mapId)&&String(msg.territoryFaction||faction)!==faction)||(owner&&owner!==faction);
+        if(!dest||dest.enabled===false||dest.gate||wrongFaction||level<required||!faction){safeJsonSend(ws,{type:'join_error',reason:wrongFaction?'INVASÕES BLOQUEADAS':`Setor indisponível / nível mínimo ${required}`});return;}
+        ws.room?.removeClient(ws);const r=world.room(mapId,/^x[1-8]$/.test(mapId)?faction:null);const p={userId:identity.user.id,callsign:identity.callsign||msg.callsign||'Pilot',pilotTitle:shortText(msg.pilotTitle||'Piloto Estelar',64),faction:faction,shipId:String(msg.shipId||'phoenix'),shipDesignId:msg.shipDesignId?shortText(msg.shipDesignId,64):null,level:Number(msg.level)||1,x:Number(msg.x)||400,y:Number(msg.y)||400,hp:Number(msg.hp)||1,maxHp:Number(msg.maxHp)||1,shield:Number(msg.shield)||0,maxShield:Number(msg.maxShield)||0,angle:Number(msg.angle)||0,laserFiring:false,laserColor:'#76d9ff',laserAmmoId:'lcb10',laserAmmoName:'PLS-1',targetId:null,targetIsPlayer:false,pet:{owned:false},updatedAt:nowMs()};r.addClient(ws,p);return;
       }
       if(msg.type==='player_state')return ws.room?.updatePlayer(ws,msg);
       if(msg.type==='npc_damage')return await ws.room?.handleDamage(ws,msg);

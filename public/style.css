@@ -2962,3 +2962,8 @@ body[data-quality="low"] .pet-gear {
 .admin-balance-actions small{font-size:9px;color:#879eae}
 @media(max-width:800px){.admin-balance-tabs{grid-template-columns:repeat(3,minmax(0,1fr))}.admin-balance-fields{grid-template-columns:repeat(2,minmax(0,1fr))}.admin-balance-tabs button{font-size:10px;min-height:38px}.admin-balance-card>summary{align-items:flex-start}.admin-balance-toolbar input{min-width:120px}}
 @media(max-width:440px){.admin-balance-fields{grid-template-columns:minmax(0,1fr)}.admin-balance-grid{max-height:60vh}.admin-balance-card>summary small{width:100%}.admin-balance-card>summary:after{margin-left:0}}
+
+/* V19.0.11 — nova região, mapa estratégico da própria facção */
+.map-network .map-node[data-map-label$="-8"]{border-color:rgba(118,244,184,.8);box-shadow:0 0 18px rgba(78,225,166,.18)}
+.map-network .map-node[data-map-label$="-5"],.map-network .map-node[data-map-label$="-6"],.map-network .map-node[data-map-label$="-7"]{border-color:rgba(179,123,255,.6)}
+@media(max-width:900px){.map-network .map-node{width:74px;min-height:49px}.map-network .map-node .node-label{font-size:17px}.map-network .map-node .node-sub{font-size:8px;max-width:68px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}}

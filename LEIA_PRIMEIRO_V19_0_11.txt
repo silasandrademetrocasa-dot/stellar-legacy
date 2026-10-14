@@ -1,0 +1,13 @@
+STELLAR LEGACY V19.0.11 — INSTALAÇÃO COMPLETA
+
+1. Remova o ZIP anterior da raiz do repositório GitHub.
+2. Coloque este ZIP completo na raiz.
+3. Execute o workflow INSTALADOR PRINCIPAL já existente, sem alterá-lo.
+4. Aguarde o deploy Render e recarregue o jogo.
+
+O Supabase já contém as estruturas principais (4 mapas, 12 setores, 13 portais,
+8 NPCs e 16 populações). O cadastro separado dos 12 pools minerais não foi
+concluído por bloqueio da ferramenta; há fallback de minérios no jogo para
+os mapas novos. NÃO execute SQL manualmente.
+
+Detalhes e limitações: V19_0_11_AEG_EXPANSAO_X8.md

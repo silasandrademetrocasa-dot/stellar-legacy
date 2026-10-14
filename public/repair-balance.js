@@ -16,7 +16,8 @@ export function repairPulseSettings({
   baseSafe=false,
   secondsWithoutDamage=0,
   premium=false,
-  designerMultiplier=1
+  designerMultiplier=1,
+  shieldRegenBonus=0
 }={}){
   // Defaults retain the behavior that players had before V19.0.10.
   const oldElite=repairBot?.id==='repElite';
@@ -24,10 +25,12 @@ export function repairPulseSettings({
   const shieldBase=repairBot?boundedSetting(repairBot.shieldRepairTick,oldElite?15000:BASE_SHIELD_PER_SECOND,1000000):BASE_SHIELD_PER_SECOND;
   const delaySeconds=repairBot?boundedSetting(repairBot.repairDelay,DEFAULT_DELAY_SECONDS,120):DEFAULT_DELAY_SECONDS;
   const multiplier=(premium?2:1)*boundedSetting(designerMultiplier,1,100);
+  // AEG: bônus percentual do gerador aplicado somente ao pulso de escudo.
+  const shieldMultiplier=1+boundedSetting(shieldRegenBonus,0,1);
   const ready=!!baseSafe||Number(secondsWithoutDamage)>=delaySeconds;
   return {
     hpTick:Math.max(0,Math.round(hpBase*multiplier)),
-    shieldTick:Math.max(0,Math.round(shieldBase*multiplier)),
+    shieldTick:Math.max(0,Math.round(shieldBase*multiplier*shieldMultiplier)),
     delaySeconds,
     hpReady:(!!baseSafe||!!repairBot)&&ready,
     shieldReady:ready

@@ -1,8 +1,8 @@
-import { FACTIONS, SHIPS, ITEMS, LASER_AMMO, ROCKETS, NPC_TYPES, MAPS, RESOURCES } from './data.js?v=19.0.10';
-import { repairPulseSettings } from './repair-balance.js?v=19.0.10';
-import { GAME_ASSETS } from './assets/v17/manifest.js?v=19.0.10';
-import { signUp, signIn, beginGoogleSignIn, restoreGoogleSignInFromUrl, requestPasswordReset, restorePasswordRecoveryFromUrl, restoreSession, signOutLocal, checkGameSession, endGameSession, getUser, getSessionCredentials, loadCloudSave, saveCloudSave, updateCallsign, updatePassword, loadRankings, loadAuctionBids, saveAuctionBidOnline, markAuctionBidStatusOnline, loadAuctionMarket, upsertPlayerPresenceOnline, loadMapPresenceOnline, savePlayerLocationCheckpointOnline, loadPlayerLocationCheckpointOnline, removePlayerPresenceOnline, queuePvpAttackOnline, consumePvpDamageEventsOnline, syncArenaProfileOnline, loadArenaState, loadArenaDailyRewardStatus, claimArenaDailyReward, loadArenaOpponents, loadArenaHistory, arenaAttackOnline, listClansOnline, loadMyClanOnline, createClanOnline, joinClanOnline, getClanRequestsOnline, reviewClanRequestOnline, cancelClanRequestOnline, setClanMemberRoleOnline, leaveClanOnline, transferClanCreditsOnline, claimClanCreditGrantsOnline, recordClanAlienKillOnline, getPremiumShopOnline, testPurchasePremiumOnline, adminPreviewPremiumStageOnline, adminSimulatePremiumStageOnline, getPremiumStageCatalogOnline, loadWarfrontStateOnline, hitWorldBossOnline, claimWorldBossRewardOnline, declareClanWarOnline, recordClanWarScoreOnline, loadLiveOpsOnline, adminUpdateLiveEventScheduleOnline, purchaseLiveCatalogOnline, economyActionOnline, getChatHistoryOnline, sendChatMessageOnline, redeemGameCouponOnline, getMyDesignersOnline, setDesignLoadoutOnline, claimGateDroneDesignOnline, claimEventDesignerOnline, getAdminStatus, adminSearchAccounts, adminRecentActions, adminBanAccount, adminUnbanAccount, adminResetAccount, adminDeleteAccount, pushTelemetryBatch, adminTelemetryOverview, adminPlayerTelemetry, getBattleGroupOnline, createBattleGroupOnline, inviteBattleGroupOnline, searchBattleGroupPlayersOnline, inviteBattleGroupUserOnline, respondBattleGroupInviteOnline, leaveBattleGroupOnline, kickBattleGroupMemberOnline, setBattleGroupRallyOnline, loadRuntimeConfigOnline, loadNpcRuntimeConfigOnline, loadWorldRuntimeConfigOnline, loadSystemsRuntimeConfigOnline, loadAdminRuntimeMonitorOnline, adminUpdateRuntimeModuleOnline, adminUpdateNpcRuntimeOnline, adminUpdateNpcSpawnRuntimeOnline, adminUpdateWorldMapOnline, adminUpdateWorldResourceOnline, adminUpdateWorldSectorOnline, adminUpdateWorldPortalOnline, adminUpdateWorldResourcePoolOnline, adminUpdateMissionCategoryOnline, adminUpdateEconomyServiceOnline, adminUpdateCraftingRecipeOnline, loadBattlePassRuntimeConfigOnline, adminUpdateBattlePassSeasonOnline, adminUpdateBattlePassTierOnline, loadShopsRuntimeConfigOnline, adminUpdateCommonShopItemOnline, adminUpdatePremiumShopItemOnline, loadBonusConfigOnline, adminUpdateBonusConfigOnline, adminCouponDashboardOnline, adminCreateCouponOnline, adminSetCouponActiveOnline, loadGalaxyGatesOnline, adminUpdateGalaxyGateOnline, adminUpsertCustomMissionOnline, adminDeleteCustomMissionOnline, adminCreateCraftRecipeOnline, adminCreateEconomyServiceOnline, adminCreatePassSeasonOnline, loadAuctionRulesOnline, adminUpdateAuctionRulesOnline, loadBalanceRuntimeOnline, adminUpdateBalanceOnline } from './api.js?v=19.0.10';
-import { SharedUniverseClient } from './world.js?v=19.0.10';
+import { FACTIONS, SHIPS, ITEMS, LASER_AMMO, ROCKETS, NPC_TYPES, MAPS, RESOURCES } from './data.js?v=19.0.11';
+import { repairPulseSettings } from './repair-balance.js?v=19.0.11';
+import { GAME_ASSETS } from './assets/v17/manifest.js?v=19.0.11';
+import { signUp, signIn, beginGoogleSignIn, restoreGoogleSignInFromUrl, requestPasswordReset, restorePasswordRecoveryFromUrl, restoreSession, signOutLocal, checkGameSession, endGameSession, getUser, getSessionCredentials, loadCloudSave, saveCloudSave, updateCallsign, updatePassword, loadRankings, loadAuctionBids, saveAuctionBidOnline, markAuctionBidStatusOnline, loadAuctionMarket, upsertPlayerPresenceOnline, loadMapPresenceOnline, savePlayerLocationCheckpointOnline, loadPlayerLocationCheckpointOnline, removePlayerPresenceOnline, queuePvpAttackOnline, consumePvpDamageEventsOnline, syncArenaProfileOnline, loadArenaState, loadArenaDailyRewardStatus, claimArenaDailyReward, loadArenaOpponents, loadArenaHistory, arenaAttackOnline, listClansOnline, loadMyClanOnline, createClanOnline, joinClanOnline, getClanRequestsOnline, reviewClanRequestOnline, cancelClanRequestOnline, setClanMemberRoleOnline, leaveClanOnline, transferClanCreditsOnline, claimClanCreditGrantsOnline, recordClanAlienKillOnline, getPremiumShopOnline, testPurchasePremiumOnline, adminPreviewPremiumStageOnline, adminSimulatePremiumStageOnline, getPremiumStageCatalogOnline, loadWarfrontStateOnline, hitWorldBossOnline, claimWorldBossRewardOnline, declareClanWarOnline, recordClanWarScoreOnline, loadLiveOpsOnline, adminUpdateLiveEventScheduleOnline, purchaseLiveCatalogOnline, economyActionOnline, getChatHistoryOnline, sendChatMessageOnline, redeemGameCouponOnline, getMyDesignersOnline, setDesignLoadoutOnline, claimGateDroneDesignOnline, claimEventDesignerOnline, getAdminStatus, adminSearchAccounts, adminRecentActions, adminBanAccount, adminUnbanAccount, adminResetAccount, adminDeleteAccount, pushTelemetryBatch, adminTelemetryOverview, adminPlayerTelemetry, getBattleGroupOnline, createBattleGroupOnline, inviteBattleGroupOnline, searchBattleGroupPlayersOnline, inviteBattleGroupUserOnline, respondBattleGroupInviteOnline, leaveBattleGroupOnline, kickBattleGroupMemberOnline, setBattleGroupRallyOnline, loadRuntimeConfigOnline, loadNpcRuntimeConfigOnline, loadWorldRuntimeConfigOnline, loadSystemsRuntimeConfigOnline, loadAdminRuntimeMonitorOnline, adminUpdateRuntimeModuleOnline, adminUpdateNpcRuntimeOnline, adminUpdateNpcSpawnRuntimeOnline, adminUpdateWorldMapOnline, adminUpdateWorldResourceOnline, adminUpdateWorldSectorOnline, adminUpdateWorldPortalOnline, adminUpdateWorldResourcePoolOnline, adminUpdateMissionCategoryOnline, adminUpdateEconomyServiceOnline, adminUpdateCraftingRecipeOnline, loadBattlePassRuntimeConfigOnline, adminUpdateBattlePassSeasonOnline, adminUpdateBattlePassTierOnline, loadShopsRuntimeConfigOnline, adminUpdateCommonShopItemOnline, adminUpdatePremiumShopItemOnline, loadBonusConfigOnline, adminUpdateBonusConfigOnline, adminCouponDashboardOnline, adminCreateCouponOnline, adminSetCouponActiveOnline, loadGalaxyGatesOnline, adminUpdateGalaxyGateOnline, adminUpsertCustomMissionOnline, adminDeleteCustomMissionOnline, adminCreateCraftRecipeOnline, adminCreateEconomyServiceOnline, adminCreatePassSeasonOnline, loadAuctionRulesOnline, adminUpdateAuctionRulesOnline, loadBalanceRuntimeOnline, adminUpdateBalanceOnline } from './api.js?v=19.0.11';
+import { SharedUniverseClient } from './world.js?v=19.0.11';
 
 const canvas = document.querySelector('#game');
 const ctx = canvas.getContext('2d');
@@ -165,7 +165,7 @@ function preloadAssets(){
 function preloadActiveGameplayAssets(){
   if(!progress)return;
   requestAssetImage(currentMapBackground());
-  if(progress.mapId==='x1')requestAssetImage(GAME_ASSETS.bases?.orbitalStation);
+  if(['x1','x8'].includes(progress.mapId))requestAssetImage(GAME_ASSETS.bases?.orbitalStation);
   Object.values(GAME_ASSETS.portals||{}).forEach(requestAssetImage);
   const activeOreTypes=[...new Set((state.ores||[]).map(o=>o?.type).filter(Boolean))];
   activeOreTypes.forEach(type=>requestAssetImage(GAME_ASSETS.resources?.[type]));
@@ -226,7 +226,7 @@ function assetForProduct(id,type,subtype){
 function factionAsset(id){return GAME_ASSETS.branding[id]||GAME_ASSETS.branding.earth;}
 function currentMapBackground(){
   if(!progress)return null;
-  return GAME_ASSETS.backgrounds[progress.mapId]||GAME_ASSETS.backgrounds.b42;
+  return GAME_ASSETS.backgrounds[progress.mapId]||({x5:GAME_ASSETS.backgrounds.x2,x6:GAME_ASSETS.backgrounds.x3,x7:GAME_ASSETS.backgrounds.x4,x8:GAME_ASSETS.backgrounds.x1})[progress.mapId]||GAME_ASSETS.backgrounds.b42;
 }
 function hexToRgba(hex,alpha=1){const h=String(hex||'#ffffff').replace('#','');const v=h.length===3?h.split('').map(c=>c+c).join(''):h;const n=parseInt(v,16)||0xffffff;return `rgba(${(n>>16)&255},${(n>>8)&255},${n&255},${alpha})`;}
 const ENVIRONMENT_PROFILES={
@@ -234,6 +234,10 @@ const ENVIRONMENT_PROFILES={
   x2:{accent:'#51f0cf',secondary:'#58aaff',edge:'#041a20',dust:'#9dfff0',motion:.38,label:'BLUE FRONTIER'},
   x3:{accent:'#c878ff',secondary:'#705cff',edge:'#160824',dust:'#e0b0ff',motion:.46,label:'SHADOW BELT'},
   x4:{accent:'#ff9a55',secondary:'#63dfff',edge:'#1d0e08',dust:'#ffd1a8',motion:.54,label:'STORM FRONT'},
+  x5:{accent:'#51e5ff',secondary:'#b489ff',edge:'#081e2d',dust:'#b7f7ff',motion:.57,label:'RIFT VEIL'},
+  x6:{accent:'#d28fff',secondary:'#78aaff',edge:'#210c2e',dust:'#edc9ff',motion:.65,label:'VOID CANYON'},
+  x7:{accent:'#8cffb5',secondary:'#8ddfff',edge:'#0b281c',dust:'#ceffe1',motion:.7,label:'NEXUS HEART'},
+  x8:{accent:'#ff947b',secondary:'#e58cff',edge:'#301021',dust:'#ffcfbf',motion:.75,label:'ASTRAL FORTRESS'},
   b41:{accent:'#6fb7ff',secondary:'#7c8fff',edge:'#061225',dust:'#a9d4ff',motion:.62,label:'WARZONE ALPHA'},
   b42:{accent:'#73ff9d',secondary:'#b17aff',edge:'#06180f',dust:'#b5ffc9',motion:.68,label:'ALIEN CORE'},
   b43:{accent:'#ff6e49',secondary:'#ffc15f',edge:'#240703',dust:'#ffd0a2',motion:.72,label:'RED ABYSS'},
@@ -340,15 +344,15 @@ const SAVE_KEY_PREFIX = 'stellarLegacyV5Save';
 const SAFE_ZONE = { mapId: 'x1', x: 620, y: MAPS.x1.world.h / 2, radius: 520 };
 const PORTAL_NEUTRAL_RADIUS = 180;
 
-function basePointForFaction(factionId){
-  const w=MAPS.x1.world.w,h=MAPS.x1.world.h;
+function basePointForFaction(factionId,mapId='x1'){
+  const w=(MAPS[mapId]||MAPS.x1).world.w,h=(MAPS[mapId]||MAPS.x1).world.h;
   if(factionId==='mars') return {x:w-620,y:Math.round(h*.28)};
   if(factionId==='jupiter') return {x:w-620,y:Math.round(h*.72)};
   return {x:620,y:Math.round(h*.50)};
 }
 function currentBasePoint(){
   const owner=currentTerritoryFaction?.()||progress?.profile?.faction||'earth';
-  return basePointForFaction(owner);
+  return basePointForFaction(owner,progress?.mapId==='x8'?'x8':'x1');
 }
 let cloudDirty = false;
 let cloudBusy = false;
@@ -1367,6 +1371,10 @@ const MAP_GRAPH_NODES = [
   { id:'2-4', x:49, y:24 }, { id:'2-3', x:63, y:24 }, { id:'2-2', x:77, y:24 }, { id:'2-1', x:91, y:16 },
   // JÚPITER — base / direita
   { id:'3-4', x:52, y:78 }, { id:'3-3', x:67, y:78 }, { id:'3-2', x:81, y:78 }, { id:'3-1', x:92, y:87 },
+  // SEGUNDA REGIÃO: cada facção tem sua própria linha X-5 > X-8.
+  {id:'1-5',x:24,y:36},{id:'1-6',x:13,y:28},{id:'1-7',x:10,y:15},{id:'1-8',x:29,y:11},
+  {id:'2-5',x:51,y:9},{id:'2-6',x:66,y:9},{id:'2-7',x:79,y:9},{id:'2-8',x:95,y:5},
+  {id:'3-5',x:53,y:93},{id:'3-6',x:66,y:93},{id:'3-7',x:79,y:93},{id:'3-8',x:94,y:96},
   // BATTLE MAPS — triângulo central
   { id:'4-1', x:50, y:53 }, { id:'4-2', x:63, y:43 }, { id:'4-3', x:68, y:59 }
 ];
@@ -1389,12 +1397,16 @@ const MAP_GRAPH_LINKS = [
   ['3-1','3-2'],
   ['3-2','3-3'],
   ['3-3','3-4'],
-  ['3-3','4-3'],
+  ['3-3','4-3'], ['3-4','4-3'],
 
+  // Acesso pela Battle 4-X própria, sem corredor entre territórios.
+  ['4-1','1-5'],['1-5','1-6'],['1-6','1-7'],['1-7','1-8'],
+  ['4-2','2-5'],['2-5','2-6'],['2-6','2-7'],['2-7','2-8'],
+  ['4-3','3-5'],['3-5','3-6'],['3-6','3-7'],['3-7','3-8'],
   // BATTLE MAPS — triângulo
   ['4-1','4-2'], ['4-1','4-3'], ['4-2','4-3']
 ];
-const PLAYABLE_GRAPH_LABELS = new Set(['1-1','1-2','1-3','1-4','2-1','2-2','2-3','2-4','3-1','3-2','3-3','3-4','4-1','4-2','4-3']);
+const PLAYABLE_GRAPH_LABELS = new Set([...['1','2','3'].flatMap(f=>Array.from({length:8},(_,i)=>`${f}-${i+1}`)), '4-1','4-2','4-3']);
 
 // ===================== V18.1.4 MAPAS + PORTAIS + RECURSOS DATA DRIVEN =====================
 const WORLD_RUNTIME_CACHE_KEY='stellar_world_runtime_v1814';
@@ -1506,7 +1518,7 @@ function buildLegacyDailyMissions(){
 }
 // V18.2.2 — Missões Inteligentes: somente alvos que nascem em mapas desbloqueados.
 // O catálogo é calculado localmente a partir dos mesmos snapshots de NPC e mapas do Supabase.
-const SMART_MAP_REQUIRED_LEVEL={x1:1,x2:3,x3:7,x4:10,b41:15,b42:15,b43:15};
+const SMART_MAP_REQUIRED_LEVEL={x1:1,x2:3,x3:7,x4:10,x5:18,x6:22,x7:27,x8:32,b41:15,b42:15,b43:15};
 function smartPilotLevel(){return Math.max(1,Math.floor(Number(progress?.profile?.level)||1));}
 function smartMapLevel(mapId){return Math.max(1,Number(MAPS[mapId]?.minLevel)||SMART_MAP_REQUIRED_LEVEL[mapId]||1);}
 function smartMissionMaps(level=smartPilotLevel()){
@@ -3171,7 +3183,7 @@ function factionFromPrefix(prefix){
 }
 function currentTerritoryFaction(){
   if(!progress)return null;
-  if(!['x1','x2','x3','x4'].includes(progress.mapId))return null;
+  if(!/^x[1-8]$/.test(progress.mapId))return null;
   return progress.territoryFaction||progress.profile.faction;
 }
 function territoryOwner(){
@@ -3196,15 +3208,18 @@ function graphDestination(label){
   if(label==='4-2')return {mapId:'b42',territoryFaction:null,battle:true};
   if(label==='4-3')return {mapId:'b43',territoryFaction:null,battle:true};
   const [prefix,tierRaw]=String(label||'').split('-'),f=factionFromPrefix(prefix),tier=Number(tierRaw);
-  if(!f||tier<1||tier>4)return null;
+  if(!f||tier<1||tier>8)return null;
   return {mapId:`x${tier}`,territoryFaction:f.id,battle:false};
 }
 function internalMapFromGraphLabel(label){return graphDestination(label)?.mapId||null;}
-function graphLevelRequirement(label){const live=worldRuntimeConfig.sectorInfo.get(String(label||''));if(live)return Math.max(1,Number(live.minLevel)||1);if(label.startsWith('4-'))return 15;const tier=Number(label.split('-')[1]||99);return tier===1?1:tier===2?3:tier===3?7:tier===4?10:99;}
+function graphLevelRequirement(label){const live=worldRuntimeConfig.sectorInfo.get(String(label||''));if(live)return Math.max(1,Number(live.minLevel)||1);if(label.startsWith('4-'))return 15;const tier=Number(label.split('-')[1]||99);return ({1:1,2:3,3:7,4:10,5:18,6:22,7:27,8:32})[tier]||99;}
 function canTravelGraphLabel(label){
   const dest=graphDestination(label);if(!dest)return {ok:false,reason:'Rota inválida'};
   const map=MAPS[dest.mapId];if(!map||map.enabled===false)return {ok:false,reason:'Setor temporariamente indisponível'};
-  if(String(label).startsWith('4-')&&!galaxyBattleMapsOpen()&&!state.currentMap?.battle)return {ok:false,reason:'BATTLE MAP FECHADO • aguarde Evento Galáctico ou World Boss'};
+  // Etapa X-8: 4-X própria funciona como corredor permanente; outra facção não entra.
+  const ownerBattle=({'4-1':'earth','4-2':'mars','4-3':'jupiter'})[label];
+  if(ownerBattle&&ownerBattle!==progress?.profile?.faction)return {ok:false,reason:'BATTLE DE OUTRA FACÇÃO • invasões bloqueadas'};
+  if(!dest.battle&&dest.territoryFaction!==progress?.profile?.faction)return {ok:false,reason:'TERRITÓRIO INIMIGO • invasões bloqueadas'};
   const req=graphLevelRequirement(label);if((progress?.profile?.level||1)<req)return {ok:false,reason:`Requer nível ${req}`};
   const foreign=!dest.battle&&dest.territoryFaction!==progress.profile.faction;
   return {ok:true,mapId:dest.mapId,territoryFaction:dest.territoryFaction,battle:dest.battle,foreign};
@@ -3215,6 +3230,7 @@ function mapArtFor(label){
   if(prefix==='4')path=tier===1?GAME_ASSETS.backgrounds.b41:tier===2?GAME_ASSETS.backgrounds.b42:GAME_ASSETS.backgrounds.b43;
   else if(tier===1)path=GAME_ASSETS.backgrounds.x1;
   else if(tier===2)path=GAME_ASSETS.backgrounds.x2;
+  else if(tier>=5)path=({5:GAME_ASSETS.backgrounds.x2,6:GAME_ASSETS.backgrounds.x3,7:GAME_ASSETS.backgrounds.x4,8:GAME_ASSETS.backgrounds.x1})[tier];
   else if(tier===3)path=prefix==='3'?GAME_ASSETS.backgrounds.x4:GAME_ASSETS.backgrounds.x3;
   else path=GAME_ASSETS.backgrounds.x4;
   return `url('${path}') center/cover no-repeat`;
@@ -3223,12 +3239,15 @@ function renderMapModal(){
   if(!ui.mapNetwork||!progress)return;
   normalizeGalaxyGateState();
   const jumps=progress.galaxyGate.jumpBonus;
-  const current=currentGraphMapLabel(),nodeMap=Object.fromEntries(MAP_GRAPH_NODES.map(n=>[n.id,n]));
+  const current=currentGraphMapLabel(),ownedPrefix=FACTIONS[progress.profile.faction]?.prefix||'1';
+  const visibleNodes=MAP_GRAPH_NODES.filter(n=>n.id.startsWith(ownedPrefix+'-')||n.id==='4-'+ownedPrefix);
+  const visibleKeys=new Set(visibleNodes.map(n=>n.id));
+  const nodeMap=Object.fromEntries(visibleNodes.map(n=>[n.id,n]));
   let html=`<svg class="map-svg" viewBox="0 0 100 100" preserveAspectRatio="none">`;
-  for(const [a,b] of MAP_GRAPH_LINKS){const na=nodeMap[a],nb=nodeMap[b];html+=`<line class="map-link" x1="${na.x}" y1="${na.y}" x2="${nb.x}" y2="${nb.y}" />`;}
+  for(const [a,b] of MAP_GRAPH_LINKS){if(!visibleKeys.has(a)||!visibleKeys.has(b))continue;const na=nodeMap[a],nb=nodeMap[b];html+=`<line class="map-link" x1="${na.x}" y1="${na.y}" x2="${nb.x}" y2="${nb.y}" />`;}
   html+='</svg>';
   html+=`<div class="map-legend"><span><i class="dot curr"></i> mapa atual</span><span><i class="dot own"></i> território aliado</span><span><i class="dot hostile"></i> território inimigo / invasão</span><span class="jump-wallet">↯ BÔNUS DE SALTO <b>${fmt(jumps)}</b></span></div>`;
-  for(const node of MAP_GRAPH_NODES){
+  for(const node of visibleNodes){
     const access=canTravelGraphLabel(node.id),active=node.id===current,battle=node.id.startsWith('4-'),foreign=!!access.foreign;
     const canJump=access.ok&&!active&&jumps>0;
     const classes=['map-node'];
@@ -3257,7 +3276,7 @@ function renderMapModal(){
 }
 function openMapModal(){if(isGalaxyGateMap()){showToast('Portal Astral ativo: complete o portal ou perca uma vida para retornar à base');return;}closeNavigationModals(ui.mapModal);renderMapModal();ui.mapModal.classList.remove('hidden');}
 function isBaseSafeZone(x=player.x,y=player.y){
-  if(!progress||progress.mapId!==SAFE_ZONE.mapId||!isOwnTerritory())return false;
+  if(!progress||!['x1','x8'].includes(progress.mapId)||!isOwnTerritory())return false;
   const b=currentBasePoint();
   return Math.hypot(x-b.x,y-b.y)<=SAFE_ZONE.radius;
 }
@@ -3288,7 +3307,7 @@ function addCargoResource(id,qty){if(!progress||qty<=0)return 0;const amount=Mat
 function playerLaserRange(){return state.currentMap?.battle ? 1250 : 900;}
 function playerRocketRange(){return state.currentMap?.battle ? 1100 : 820;}
 function mapRadarRange(){return state.currentMap?.battle ? 2200 : 1650;}
-function isAtTrader(){return progress?.mapId==='x1'&&isOwnTerritory()&&isBaseSafeZone();}
+function isAtTrader(){return ['x1','x8'].includes(progress?.mapId)&&isOwnTerritory()&&isBaseSafeZone();}
 const ACTIVITY_MAX=24;
 let activityEntries=[];
 function activityStorageKey(){return `stellar_activity_log_v1:${getUser()?.id||'guest'}`;}
@@ -4229,7 +4248,7 @@ function createLandmarks(){
   for(let i=0;i<count;i++){
     const col=(i%4)+1,row=Math.floor(i/4)+1,jx=(seededUnit(`${mapKey}:${i}:x`)-.5)*w*.09,jy=(seededUnit(`${mapKey}:${i}:y`)-.5)*h*.11;
     let x=w*(col/5)+jx,y=h*(row/(Math.ceil(count/4)+1))+jy;
-    if(mapKey==='x1'){
+    if(['x1','x8'].includes(mapKey)){
       const b=currentBasePoint();
       if(Math.hypot(x-b.x,y-b.y)<SAFE_ZONE.radius+700){
         const dir=b.x<w/2?1:-1;
@@ -4251,7 +4270,7 @@ function onScreenWorld(x,y,margin=180){const b=visibleWorldBounds(margin);return
 function randomMapPosition(padding=180){
   let x,y,tries=0;
   do{x=rand(padding,state.currentMap.world.w-padding);y=rand(padding,state.currentMap.world.h-padding);tries++;}
-  while(progress?.mapId==='x1'&&safeZoneDistance(x,y)<SAFE_ZONE.radius+120&&tries<80);
+  while(['x1','x8'].includes(progress?.mapId)&&safeZoneDistance(x,y)<SAFE_ZONE.radius+120&&tries<80);
   return {x,y};
 }
 function spawnOre(type=null){
@@ -4428,7 +4447,7 @@ function makeEnemy(type){
   const base=NPC_TYPES[type],cluster=state.landmarks.length&&Math.random()<.74?state.landmarks[Math.floor(Math.random()*state.landmarks.length)]:null;
   let pos=cluster?{x:cluster.x+rand(-520,520),y:cluster.y+rand(-420,420)}:randomMapPosition(160);
   pos.x=Math.max(160,Math.min(state.currentMap.world.w-160,pos.x));pos.y=Math.max(160,Math.min(state.currentMap.world.h-160,pos.y));
-  if(progress?.mapId==='x1'&&safeZoneDistance(pos.x,pos.y)<SAFE_ZONE.radius+180)pos=randomMapPosition(180);
+  if(['x1','x8'].includes(progress?.mapId)&&safeZoneDistance(pos.x,pos.y)<SAFE_ZONE.radius+180)pos=randomMapPosition(180);
   const battle=state.currentMap?.battle;return {id:`${type}_${Math.random().toString(16).slice(2,9)}`,type,name:base.name,x:pos.x,y:pos.y,hp:base.hp,maxHp:base.hp,shield:base.shield,maxShield:base.shield,credits:base.credits,uridium:base.uridium,xp:base.xp,speed:base.speed,baseSpeed:base.speed,damage:base.damage,baseDamage:base.damage,bossPhase:0,bossAttackScale:1,jammedUntil:0,color:base.color,size:base.size,resources:{...(base.resources||{})},attackRange:Math.min(500,(battle?250:230)+base.size*5.8),aggroRange:800,lastShot:0,angle:rand(0,TWO_PI),drift:rand(.4,1.4)};
 }
 function spawnEnemies(){state.enemies=[];state.enemyRespawns=[];const mult=Math.max(1,Number(state.currentMap.enemyMultiplier)||1);for(const group of state.currentMap.enemyGroups){const count=Math.max(1,Math.round(group.count*mult));for(let i=0;i<count;i++)state.enemies.push(makeEnemy(group.type));}}
@@ -4493,6 +4512,7 @@ function initAlphaRun(){
 }
 function setupAlphaMap(resume=false){
   sharedUniverse.close();sharedUniverseRuntime.ready=false;sharedUniverseRuntime.event=null;updateSharedUniverseChip();
+  if(/^x[1-8]$/.test(mapId)&&targetTerritoryFaction&&targetTerritoryFaction!==progress?.profile?.faction){showToast('INVASÕES BLOQUEADAS • território de outra facção');return;}
   if(progress?.pet?.activeGear==='kami')progress.pet.activeGear='off';
   cancelPetKamikazeCharge();
   const a=alphaGate();if(!a.run?.active)initAlphaRun();
@@ -4528,7 +4548,7 @@ function setupAlphaMap(resume=false){
 function enterAlphaGate(){
   const a=alphaGate();
   const gd=galaxyGateDef();if(!a.built&&!a.run){showToast(`Monte as ${gd.pieces} peças do ${gd.label} primeiro`);return;}
-  if(!isAtTrader()){showToast(`O Portal Astral ${gd.label} só pode ser acessado pela base X-1`);return;}
+  if(progress.mapId!=='x1'||!isAtTrader()){showToast(`O Portal Astral ${gd.label} só pode ser acessado pela base X-1`);return;}
   if(a.lives<=0){showToast(`O portal ${gd.label} foi perdido`);return;}
   if(!a.run)initAlphaRun();
   ui.gateModal?.classList.add('hidden');
@@ -4632,7 +4652,12 @@ function portalsForGraphLabel(label){
   const origin=graphDestination(label);
   if(!origin)return [];
   const map=MAPS[origin.mapId];
-  return graphNeighbors(label).map(targetLabel=>{
+  return graphNeighbors(label).filter(targetLabel=>{
+    const target=graphDestination(targetLabel);
+    if(!target)return false;
+    if(target.battle)return !({'b41':'earth','b42':'mars','b43':'jupiter'})[target.mapId]||({'b41':'earth','b42':'mars','b43':'jupiter'})[target.mapId]===progress?.profile?.faction;
+    return target.territoryFaction===progress?.profile?.faction;
+  }).map(targetLabel=>{
     const dest=graphDestination(targetLabel),pos=portalEdgePoint(label,targetLabel,map);
     return {
       x:pos.x,y:pos.y,
@@ -4656,12 +4681,13 @@ function setMap(mapId,preserve=false,fromMapId=null,targetTerritoryFaction=null,
   if(!MAPS[mapId])return;if(gateKeyForMap(mapId)){progress.galaxyGate.selected=gateKeyForMap(mapId);setupAlphaMap(true);return;}
   // V17.6.0: grava a posição do mapa de origem antes de alterar mapId/território.
   if(progress&&state?.currentMap)syncRuntimeLocationToProgress(true);
+  if(/^x[1-8]$/.test(mapId)&&targetTerritoryFaction&&targetTerritoryFaction!==progress?.profile?.faction){showToast('INVASÕES BLOQUEADAS • território de outra facção');return;}
   if(progress?.pet?.activeGear==='kami')progress.pet.activeGear='off';
   cancelPetKamikazeCharge();
 
-  const previousWasTerritory=['x1','x2','x3','x4'].includes(progress.mapId);
+  const previousWasTerritory=/^x[1-8]$/.test(progress.mapId);
   progress.mapId=mapId;
-  if(['x1','x2','x3','x4'].includes(mapId)){
+  if(/^x[1-8]$/.test(mapId)){
     progress.territoryFaction=targetTerritoryFaction||(previousWasTerritory?progress.territoryFaction:null)||progress.profile.faction;
   }else progress.territoryFaction=null;
 
@@ -4672,8 +4698,8 @@ function setMap(mapId,preserve=false,fromMapId=null,targetTerritoryFaction=null,
     const returnPortal=fromGraphLabel?findReturnPortal(targetLabel,fromGraphLabel):null;
     const base=currentBasePoint();
 
-    player.x=returnPortal?returnPortal.x:(mapId==='x1'?base.x:400);
-    player.y=returnPortal?returnPortal.y:(mapId==='x1'?base.y:state.currentMap.world.h/2);
+    player.x=returnPortal?returnPortal.x:(['x1','x8'].includes(mapId)?base.x:400);
+    player.y=returnPortal?returnPortal.y:(['x1','x8'].includes(mapId)?base.y:state.currentMap.world.h/2);
 
     // Nasce alguns pixels para dentro do mapa, evitando reativar instantaneamente o portal.
     if(returnPortal){
@@ -4691,7 +4717,7 @@ function setMap(mapId,preserve=false,fromMapId=null,targetTerritoryFaction=null,
   if(authenticated)flushCloudSave(true).catch(()=>{});
 
   const owner=territoryOwner(),home=isOwnTerritory();
-  showToast(mapId==='x1'?(home?`Base ${owner?.short||''} • Zona Segura`:`INVASÃO • Base ${owner?.short||''}`):`Entrando em ${displayMapLabel(mapId,currentTerritoryFaction())}`);
+  showToast(['x1','x8'].includes(mapId)?`Base ${mapId==='x8'?'Avançada ':''}${owner?.short||''} • Zona Segura`:`Entrando em ${displayMapLabel(mapId,currentTerritoryFaction())}`);
   renderMapModal();syncOnlineWorld();
 }
 function runMapTransition(targetMapId,fromMapId=null,mode='PORTAL QUÂNTICO',targetTerritoryFaction=null,fromGraphLabel=null){
@@ -5057,7 +5083,8 @@ function updatePlayer(dt){
     baseSafe,
     secondsWithoutDamage:nowSec()-state.lastPlayerDamageAt,
     premium:premiumActive(),
-    designerMultiplier:designerRepairMultiplier()
+    designerMultiplier:designerRepairMultiplier(),
+    shieldRegenBonus:player.shieldRegenBoost||0
   });
   if(repair.shieldReady&&repair.shieldTick>0&&player.shield<player.maxShield&&nowSec()-state.shieldRepairFxAt>=1){
     const beforeShield=player.shield;
@@ -5111,17 +5138,17 @@ function updateEnemies(dt){
   for(const e of state.enemies){
     if(e.hp<=0||sharedMode&&e.sharedWorld)continue;updateBossPhase(e);
     const dx=player.x-e.x,dy=player.y-e.y,d=Math.hypot(dx,dy);e.angle+=dt*e.drift;
-    if(progress.mapId==='x1'&&safeZoneDistance(e.x,e.y)<SAFE_ZONE.radius+35){
+    if(['x1','x8'].includes(progress.mapId)&&safeZoneDistance(e.x,e.y)<SAFE_ZONE.radius+35){
       const b=currentBasePoint(),ox=e.x-b.x,oy=e.y-b.y,od=Math.hypot(ox,oy)||1;
       e.x=b.x+ox/od*(SAFE_ZONE.radius+38);e.y=b.y+oy/od*(SAFE_ZONE.radius+38);
     }
-    const forceChase=!!e.gateEnemy||!!e.forceChase,retaliating=!!e.playerProvoked,neutralX1=progress.mapId==='x1'&&!retaliating,protectedNow=baseSafe&&!retaliating;
+    const forceChase=!!e.gateEnemy||!!e.forceChase,retaliating=!!e.playerProvoked,neutralX1=['x1','x8'].includes(progress.mapId)&&!retaliating,protectedNow=baseSafe&&!retaliating;
     if(neutralX1&&!protectedNow&&d<=e.aggroRange){
       const passiveStand=Math.max(180,e.attackRange*.72);
       if(d>passiveStand){const nd=Math.max(1,d),nx=e.x+dx/nd*e.speed*.72*dt,ny=e.y+dy/nd*e.speed*.72*dt;if(!(safeZoneDistance(nx,ny)<SAFE_ZONE.radius+25)){e.x=nx;e.y=ny;}}
     }else if(!protectedNow&&!neutralX1&&d<=e.aggroRange&&d>e.attackRange*.8){
       const nd=Math.max(1,d),nx=e.x+dx/nd*e.speed*dt,ny=e.y+dy/nd*e.speed*dt;
-      if(!(progress.mapId==='x1'&&safeZoneDistance(nx,ny)<SAFE_ZONE.radius+25&&!retaliating)){e.x=nx;e.y=ny;}
+      if(!(['x1','x8'].includes(progress.mapId)&&safeZoneDistance(nx,ny)<SAFE_ZONE.radius+25&&!retaliating)){e.x=nx;e.y=ny;}
     }else if(d>e.aggroRange||protectedNow){e.x+=Math.cos(e.angle)*e.speed*.16*dt;e.y+=Math.sin(e.angle)*e.speed*.16*dt;}
     e.x=Math.max(25,Math.min(state.currentMap.world.w-25,e.x));e.y=Math.max(25,Math.min(state.currentMap.world.h-25,e.y));
     if(!protectedNow&&!neutralX1&&nowSec()>=(e.jammedUntil||0)&&d<e.attackRange&&nowSec()-e.lastShot>((e.name.includes('Boss')?1.6:1.15)*(e.bossAttackScale||1))){e.lastShot=nowSec();e.lastAttackPlayerAt=nowSec();takePlayerDamage(e.damage*rand(.92,1.12));spawnParticle(player.x,player.y-28,Math.round(e.damage),'#ff8080');}
@@ -5151,7 +5178,7 @@ function upsertRealtimePlayer(raw,spawn=false){
 }
 function remoteTargetEntity(id,isPlayer){if(!id)return null;if(isPlayer){if(String(id)===String(getUser()?.id||''))return {id,isPlayer:true,x:player.x,y:player.y,hp:player.hp};return onlineWorld.players.get(String(id))||null;}return state.enemies.find(e=>e.id===id&&e.hp>0)||null;}
 function onlineTerritoryKey(){
-  return ['x1','x2','x3','x4'].includes(progress?.mapId)?(currentTerritoryFaction()||progress.profile.faction):'battle';
+  return /^x[1-8]$/.test(progress?.mapId||'')?(currentTerritoryFaction()||progress.profile.faction):'battle';
 }
 function onlinePlayerEnemy(rp){return !!rp&&!isBattleGroupMember(rp.id)&&rp.faction&&rp.faction!==progress?.profile?.faction;}
 async function syncOnlineWorld(){
@@ -5412,7 +5439,7 @@ function drawStars(){const fraction=qualityProfile().stars;if(fraction<=0)return
 function drawNebula(){const pal=state.currentMap.palette||{nebula:'#173159',accent:'#66d9ff',deep:'#030816'};const g=ctx.createRadialGradient(W*.62,H*.36,20,W*.62,H*.36,Math.max(W,H)*.72);g.addColorStop(0,`${pal.nebula}55`);g.addColorStop(.38,`${pal.nebula}22`);g.addColorStop(1,'rgba(0,0,0,0)');ctx.fillStyle=g;ctx.fillRect(0,0,W,H);const g2=ctx.createRadialGradient(W*.18,H*.78,10,W*.18,H*.78,Math.max(W,H)*.42);g2.addColorStop(0,`${pal.accent}1f`);g2.addColorStop(1,'rgba(0,0,0,0)');ctx.fillStyle=g2;ctx.fillRect(0,0,W,H);}
 function drawBounds(){const p=screenPos(0,0);ctx.strokeStyle='rgba(60,140,255,.13)';ctx.lineWidth=2;ctx.strokeRect(p.x,p.y,state.currentMap.world.w,state.currentMap.world.h);}
 function drawBaseSafeZone(){
-  if(progress.mapId!=='x1')return;
+  if(!['x1','x8'].includes(progress.mapId))return;
   const b=currentBasePoint(),p=screenPos(b.x,b.y),f=territoryOwner()||getFaction(),home=isOwnTerritory(),q=qualityProfile(),light=q.sceneLight??1,pulse=1+Math.sin(nowSec()*1.8)*.008;
   ctx.save();ctx.translate(p.x,p.y);
   ctx.strokeStyle=home?hexToRgba(f?.color||'#5ce8ff',.72):'rgba(255,90,110,.68)';ctx.fillStyle=home?'rgba(40,220,170,.018)':'rgba(255,65,82,.018)';ctx.lineWidth=2;ctx.beginPath();ctx.arc(0,0,SAFE_ZONE.radius*pulse,0,TWO_PI);ctx.fill();ctx.stroke();
@@ -5587,7 +5614,7 @@ function drawMinimap(){
   mm.clearRect(0,0,minimap.width,minimap.height);const bg=mm.createLinearGradient(0,0,0,minimap.height);bg.addColorStop(0,'#081522');bg.addColorStop(1,'#040b14');mm.fillStyle=bg;mm.fillRect(0,0,minimap.width,minimap.height);mm.strokeStyle='rgba(75,180,255,.5)';mm.strokeRect(1,1,minimap.width-2,minimap.height-2);
   const sx=minimap.width/state.currentMap.world.w,sy=minimap.height/state.currentMap.world.h;
   mm.strokeStyle='rgba(78,180,255,.08)';mm.lineWidth=.7;for(let x=0;x<=state.currentMap.world.w;x+=1000){mm.beginPath();mm.moveTo(x*sx,0);mm.lineTo(x*sx,minimap.height);mm.stroke();}for(let y=0;y<=state.currentMap.world.h;y+=1000){mm.beginPath();mm.moveTo(0,y*sy);mm.lineTo(minimap.width,y*sy);mm.stroke();}
-  if(progress.mapId==='x1'){const b=currentBasePoint();mm.strokeStyle='rgba(100,255,190,.65)';mm.lineWidth=2;mm.beginPath();mm.arc(b.x*sx,b.y*sy,SAFE_ZONE.radius*Math.min(sx,sy),0,TWO_PI);mm.stroke();}
+  if(['x1','x8'].includes(progress.mapId)){const b=currentBasePoint();mm.strokeStyle='rgba(100,255,190,.65)';mm.lineWidth=2;mm.beginPath();mm.arc(b.x*sx,b.y*sy,SAFE_ZONE.radius*Math.min(sx,sy),0,TWO_PI);mm.stroke();}
   for(const p of resolvedPortals()){mm.fillStyle='#56dbff';mm.beginPath();mm.arc(p.x*sx,p.y*sy,4,0,TWO_PI);mm.fill();}
   const sectorControl=sectorControlState();if(sectorControl){for(const node of sectorControl.nodes||[]){const x=node.x*sx,y=node.y*sy,r=Math.max(5,(Number(node.radius)||360)*Math.min(sx,sy)),color=node.owner?sectorFactionColor(node.owner):(node.challenger?sectorFactionColor(node.challenger):'#8aa0ad');mm.fillStyle=node.contested?'rgba(255,255,255,.12)':hexToRgba(color,.10);mm.strokeStyle=node.contested?'#ffffff':color;mm.lineWidth=node.contested?1.7:1.1;mm.setLineDash(node.contested?[3,2]:[]);mm.beginPath();mm.arc(x,y,r,0,TWO_PI);mm.fill();mm.stroke();mm.setLineDash([]);mm.fillStyle=color;mm.beginPath();mm.arc(x,y,3.5,0,TWO_PI);mm.fill();mm.fillStyle='#ffffff';mm.font='bold 6px Arial';mm.textAlign='center';mm.fillText(String(node.id||'?'),x,y+2);}}
   for(const l of state.landmarks){mm.fillStyle=l.type==='wreck'?'#ffc45a':l.type==='scan'?'#bd78ff':'#4fd7ff';mm.fillRect(l.x*sx-1,l.y*sy-1,2,2);}
@@ -5992,7 +6019,7 @@ function renderHangarEquipment(){
   loadHangarEquipmentPrefs();
   const ship=SHIPS[progress.activeShipId],root=document.createElement('div');root.className='hangar-equipment-console';
   const repairBot=activeRepairBot(),extraCap=shipExtraCapacity(),extraBonus=extraCap-ship.extras;
-  const liveRepair=repairPulseSettings({repairBot,premium:premiumActive(),designerMultiplier:designerRepairMultiplier()});
+  const liveRepair=repairPulseSettings({repairBot,premium:premiumActive(),designerMultiplier:designerRepairMultiplier(),shieldRegenBonus:player.shieldRegenBoost||0});
   const summary=document.createElement('div');summary.className='summary-grid hangar-summary-strip';summary.innerHTML=`<div class="stat-card">Dano<strong>${fmt(player.laserDamage)}</strong></div><div class="stat-card">Escudo<strong>${fmt(player.maxShield)}</strong></div><div class="stat-card">Absorção<strong>${player.shieldAbsorption}%</strong></div><div class="stat-card">VEL<strong>${fmt(player.speed)}</strong></div><div class="stat-card">Extras<strong>${extraCap}${extraBonus?` (+${extraBonus})`:''}</strong></div><div class="stat-card">Reparo HP<strong>${repairBot?`+${fmt(liveRepair.hpTick)}/s`:'OFF'}</strong></div><div class="stat-card">Regen. ESC<strong>+${fmt(liveRepair.shieldTick)}/s</strong></div>`;root.appendChild(summary);
   root.appendChild(hangarFilterBar('ship',['all','lasers','shields','engines','extras'],state.hangarEquipFilter));
   const layout=document.createElement('div');layout.className='hangar-equipment-split';
@@ -6200,7 +6227,7 @@ function economyBoostActive(id){normalizeEconomyBoosts();const def=BASE_SERVICES
 function economyBoostRemaining(id){const ms=Math.max(0,Number(progress?.economyBoosts?.[id]||0)-Date.now());const m=Math.ceil(ms/60000);return m>60?`${Math.floor(m/60)}h ${m%60}min`:`${m}min`;}
 function baseServiceCost(def){const lv=Math.max(1,Number(progress?.profile?.level)||1),bandSize=Math.max(1,Number(def?.levelBandSize)||5),band=Math.floor((lv-1)/bandSize),scale=Math.max(0,Number(def?.levelCostScale)||0);return Math.round((Number(def?.baseCost)||0)*(1+band*scale));}
 function economyServiceEffect(id,key,fallback=0){const n=Number(BASE_SERVICES_V1783?.[id]?.effect?.[key]);return Number.isFinite(n)?n:fallback;}
-async function buyBaseService(id){const def=BASE_SERVICES_V1783[id];if(!def)return;if(!isAtTrader()){showToast('Serviço disponível somente na sua base X-1');return;}try{const r=await runEconomyAction('base_service',{service_id:id});computeStats(true);renderCargo();updateUI();showToast(`${def.name} • ativo por ${Math.max(1,Math.round((Number(r?.info?.duration_ms)||def.duration||3600000)/60000))} min • ${fmt(r?.info?.cost||0)} CR`,'shop');}catch(e){showToast(e.message||'Serviço recusado pelo servidor');}}
+async function buyBaseService(id){const def=BASE_SERVICES_V1783[id];if(!def)return;if(!isAtTrader()){showToast('Serviço disponível na base X-1 ou X-8');return;}try{const r=await runEconomyAction('base_service',{service_id:id});computeStats(true);renderCargo();updateUI();showToast(`${def.name} • ativo por ${Math.max(1,Math.round((Number(r?.info?.duration_ms)||def.duration||3600000)/60000))} min • ${fmt(r?.info?.cost||0)} CR`,'shop');}catch(e){showToast(e.message||'Serviço recusado pelo servidor');}}
 function renderBaseServices(){if(!ui.baseServiceGrid||!progress)return;normalizeEconomyBoosts();ui.baseServiceGrid.innerHTML=Object.entries(BASE_SERVICES_V1783).filter(([,d])=>d?.enabled!==false).map(([id,d])=>{const active=economyBoostActive(id),cost=baseServiceCost(d),afford=progress.profile.credits>=cost;return `<article class="base-service-card${active?' active':''}"><div><span>${active?'ATIVO':'SERVIÇO'}</span><b>${escHtml(d.name)}</b><p>${escHtml(d.desc)}</p></div><div class="base-service-foot"><small>${active?`restam ${economyBoostRemaining(id)}`:`${fmt(cost)} CR`}</small><button class="small-btn ${afford?'gold':''}" data-base-service="${id}" ${afford?'':'disabled'}>${active?'ESTENDER +1H':'ATIVAR'}</button></div></article>`;}).join('');ui.baseServiceGrid.querySelectorAll('[data-base-service]').forEach(b=>b.onclick=()=>buyBaseService(b.dataset.baseService));}
 
 let CRAFT_RECIPES_V1782={
@@ -6269,8 +6296,8 @@ function cargoSaleValue(){let total=0;for(const [id,qty] of Object.entries(progr
 function canSellCargoNow(){return isAtTrader()||hasExtra('remoteTraderCpuElite');}
 async function sellCargoResource(id){if(!canSellCargoNow()){showToast('Venda fora da base exige o Terminal Mercante Remoto Elite equipado');return;}const qty=progress.cargo[id]||0,price=liveResourcePrice(id);if(qty<=0||price<=0){showToast('Recurso sem preço ativo no Supabase');return;}try{const r=await runEconomyAction('sell_cargo',{resource_id:id});journeyEvent('sell',1);showToast(`${qty} ${id} vendidos por ${fmt(r?.info?.total||0)} CR • servidor`);if(state.hangarTab==='refinery')renderHangar();}catch(e){showToast(e.message||'Venda recusada pelo servidor');}}
 async function sellAllCargo(){if(!canSellCargoNow()){showToast('Para vender fora da base, equipe o Terminal Mercante Remoto Elite');return;}try{const r=await runEconomyAction('sell_cargo',{resource_id:'all'});journeyEvent('sell',1);showToast(`Porão vendido: +${fmt(r?.info?.total||0)} CR • servidor`);if(state.hangarTab==='refinery')renderHangar();}catch(e){showToast(e.message||'Venda recusada pelo servidor');}}
-function renderCargo(){if(!progress)return;const atBase=isAtTrader();const xeno=progress.cargo?.Xenomit||0;const cargoBonus=cargoExtraBonus();ui.cargoSummary.innerHTML=`<b>${fmt(cargoUsed())}/${fmt(cargoCapacity())}</b> unidades ocupadas${cargoBonus?` • Expansão equipada: <b>+${fmt(cargoBonus)}</b>`:''} • Valor vendável: <b>${fmt(cargoSaleValue())} CR</b><br><span class="muted">${atBase?'Trader disponível: você está na base.':'Para vender recursos, retorne à Zona Segura do seu X-1.'} ${xeno?`• Voidite: <b>${fmt(xeno)}</b> (não ocupa porão)`:''}</span>`;ui.cargoGrid.innerHTML='';const entries=Object.entries(progress.cargo||{}).filter(([,q])=>q>0);if(!entries.length){ui.cargoGrid.innerHTML='<div class="empty-state">Seu porão está vazio. Colete minérios no mapa ou caixas deixadas pelos NPCs.</div>';}for(const [id,qty] of entries){const r=RESOURCES[id]||{name:id,color:'#fff'},price=liveResourcePrice(id),special=id==='Xenomit';const c=document.createElement('div');c.className='cargo-card';c.innerHTML=`<div class="cargo-ore" style="--ore:${r.color}"><img src="${GAME_ASSETS.resources[id]||GAME_ASSETS.loot.cargo}" alt="${r.name}"></div><div><b>${r.name}</b><div class="muted">${fmt(qty)} un. • ${special?'especial • não ocupa porão':(price?fmt(price)+' CR/un.':'não vendável')}</div></div>`;const b=document.createElement('button');b.className='ghost-btn';b.textContent=price?'Vender':'Guardar';b.disabled=!atBase||!price;b.onclick=()=>sellCargoResource(id);c.appendChild(b);ui.cargoGrid.appendChild(c);}ui.sellAllCargo.disabled=!atBase||cargoSaleValue()<=0;renderRefinery();renderBaseServices();}
-function openCargo(){if(!isAtTrader()){showToast('Venda de recursos disponível somente na base X-1');return;}closeNavigationModals(ui.cargoModal);renderCargo();ui.cargoModal.classList.remove('hidden');}
+function renderCargo(){if(!progress)return;const atBase=isAtTrader();const xeno=progress.cargo?.Xenomit||0;const cargoBonus=cargoExtraBonus();ui.cargoSummary.innerHTML=`<b>${fmt(cargoUsed())}/${fmt(cargoCapacity())}</b> unidades ocupadas${cargoBonus?` • Expansão equipada: <b>+${fmt(cargoBonus)}</b>`:''} • Valor vendável: <b>${fmt(cargoSaleValue())} CR</b><br><span class="muted">${atBase?'Trader disponível: você está na base.':'Para vender recursos, retorne à sua base X-1 ou X-8.'} ${xeno?`• Voidite: <b>${fmt(xeno)}</b> (não ocupa porão)`:''}</span>`;ui.cargoGrid.innerHTML='';const entries=Object.entries(progress.cargo||{}).filter(([,q])=>q>0);if(!entries.length){ui.cargoGrid.innerHTML='<div class="empty-state">Seu porão está vazio. Colete minérios no mapa ou caixas deixadas pelos NPCs.</div>';}for(const [id,qty] of entries){const r=RESOURCES[id]||{name:id,color:'#fff'},price=liveResourcePrice(id),special=id==='Xenomit';const c=document.createElement('div');c.className='cargo-card';c.innerHTML=`<div class="cargo-ore" style="--ore:${r.color}"><img src="${GAME_ASSETS.resources[id]||GAME_ASSETS.loot.cargo}" alt="${r.name}"></div><div><b>${r.name}</b><div class="muted">${fmt(qty)} un. • ${special?'especial • não ocupa porão':(price?fmt(price)+' CR/un.':'não vendável')}</div></div>`;const b=document.createElement('button');b.className='ghost-btn';b.textContent=price?'Vender':'Guardar';b.disabled=!atBase||!price;b.onclick=()=>sellCargoResource(id);c.appendChild(b);ui.cargoGrid.appendChild(c);}ui.sellAllCargo.disabled=!atBase||cargoSaleValue()<=0;renderRefinery();renderBaseServices();}
+function openCargo(){if(!isAtTrader()){showToast('Venda de recursos na base X-1 ou X-8');return;}closeNavigationModals(ui.cargoModal);renderCargo();ui.cargoModal.classList.remove('hidden');}
 
 // ===================== V12 LOJA PREMIUM =====================
 function premiumProductIcon(product){
@@ -6535,13 +6562,13 @@ function useGalaxyLifeBonus(){
   normalizeGalaxyGateState();const g=progress.galaxyGate,a=alphaGate(),gd=galaxyGateDef();
   if((g.lifeBonus||0)<=0){showToast('Você não possui Vida Astral na reserva');return;}
   if(a.lives>=gd.maxLives){showToast(`${gd.label} já está no máximo de ${gd.maxLives} vidas`);return;}
-  if(!isAtTrader()){showToast('Use a Vida Astral na sua base X-1');return;}
+  if(progress.mapId!=='x1'||!isAtTrader()){showToast('Use a Vida Astral na sua base X-1');return;}
   runEconomyAction('gate_life_bonus',{protocol:gd.key}).then(()=>showToast(`${gd.label} • +1 VIDA usando a reserva`,'reward')).catch(e=>showToast(e.message||'Não foi possível usar a vida reserva'));
 }
 function buyGalaxyLife(){
   normalizeGalaxyGateState();const a=alphaGate(),gd=galaxyGateDef(),cost=10000;
   if(a.lives>=gd.maxLives){showToast(`${gd.label} já está no máximo de ${gd.maxLives} vidas`);return;}
-  if(!isAtTrader()){showToast('Vidas do Portal só podem ser compradas na base X-1');return;}
+  if(progress.mapId!=='x1'||!isAtTrader()){showToast('Vidas do Portal só podem ser compradas na base X-1');return;}
   if(progress.profile.uridium<cost){showToast(`Faltam ${fmt(cost-progress.profile.uridium)} STL para comprar +1 vida`);return;}
   openSpendConfirm({title:`Comprar +1 vida para ${gd.label}?`,itemName:`Vida Astral • ${gd.label}`,detail:`A vida fica vinculada ao ${gd.label}. Máximo ${gd.maxLives} vidas.`,value:cost,currency:'uridium',confirmLabel:'COMPRAR VIDA',onConfirm:()=>runEconomyAction('gate_life',{protocol:gd.key}).then(()=>showToast(`${gd.label} • +1 VIDA comprada`,'reward')).catch(e=>showToast(e.message||'Compra de vida recusada'))});
 }
@@ -6566,7 +6593,7 @@ function renderGateHud(){
 }
 function renderGalaxyGate(){
   if(!progress||!ui.gatePieceGrid)return;normalizeGalaxyGateState();
-  const g=progress.galaxyGate,gd=galaxyGateDef(),a=alphaGate(),count=a.pieces.length,atBase=isAtTrader(),unlocked=gateUnlocked(gd.key),lifeCost=10000;
+  const g=progress.galaxyGate,gd=galaxyGateDef(),a=alphaGate(),count=a.pieces.length,atBase=progress.mapId==='x1'&&isAtTrader(),unlocked=gateUnlocked(gd.key),lifeCost=10000;
   if(ui.gatePieceBadge)ui.gatePieceBadge.textContent=`${gd.label} ${count}/${gd.pieces}`;
   ui.gatePiecesText.textContent=`${count} / ${gd.pieces}`;ui.gateLivesText.textContent=`${a.lives} / ${gd.maxLives}`;ui.gateCompletedText.textContent=a.completed;ui.gateUriText.textContent=fmt(progress.profile.uridium);if(ui.gateDustText)ui.gateDustText.textContent=fmt(progress.stellarDust||0);ui.gateJumpBonus.textContent=fmt(g.jumpBonus);
   if(ui.gateLifeBonus)ui.gateLifeBonus.textContent=fmt(g.lifeBonus||0);
@@ -8305,7 +8332,7 @@ if(ui.minimapToggle){ui.minimapToggle.onclick=e=>{e.stopPropagation();toggleMini
 if(ui.minimapHeader)ui.minimapHeader.onclick=()=>toggleMinimapUi();
 if(ui.hudToggle)ui.hudToggle.onclick=()=>toggleHudUi();
 if(ui.closeShop)ui.closeShop.onclick=()=>ui.shopModal.classList.add('hidden');
-if(ui.cargoBtn)ui.cargoBtn.onclick=()=>{if(isAtTrader())openCargo();else showToast('O Porão comercial só abre na base X-1');};
+if(ui.cargoBtn)ui.cargoBtn.onclick=()=>{if(isAtTrader())openCargo();else showToast('O Porão comercial abre na base X-1 ou X-8');};
 if(ui.activityClearBtn)ui.activityClearBtn.onclick=()=>clearActivityFeed();
 if(ui.repairUseBonus)ui.repairUseBonus.onclick=()=>repairDestroyedWithBonus();
 if(ui.repairUseUri)ui.repairUseUri.onclick=()=>repairDestroyedWithUri();
@@ -8322,7 +8349,7 @@ document.addEventListener('keydown',e=>{
   if(['j','J'].includes(e.key)||e.key==='Enter'){const portal=nearbyPortal();if(portal){e.preventDefault();jumpThroughPortal(portal);}}
   const k=e.key.toLowerCase();
   if(k==='e')useShipAbility();if(k==='k')triggerPetKamikaze();
-  if(k==='h')toggleHudUi();if(k==='b')openShop();if(k==='c'){if(isAtTrader())openCargo();else showToast('Venda de recursos disponível somente na base X-1');}
+  if(k==='h')toggleHudUi();if(k==='b')openShop();if(k==='c'){if(isAtTrader())openCargo();else showToast('Venda de recursos na base X-1 ou X-8');}
   if(k==='m')openMapModal();if(k==='w')openWarfront();if(k==='y')openPremiumShop();if(k==='q')openMissions();if(k==='x')openProgression();if(k==='g')openGalaxyGate();if(k==='p')openHangar('pet');if(k==='o')openHangar('pilot');if(k==='l')openAuction();if(k==='a')openArena();if(k==='n')openClan();
   if(['1','2','3','4','5'].includes(e.key)){progress.selectedLaserAmmo=Object.keys(LASER_AMMO)[Number(e.key)-1];buildAmmoButtons();saveGame();}
 });
@@ -8383,6 +8410,7 @@ function startLoadedGame(){
   if(!telemetryRuntime.sessionOpen)telemetryStartSession();
   state.lastPlayerDamageAt=nowSec();
   normalizeGalaxyGateState();normalizeCombatAbilities();
+  if(/^x[1-8]$/.test(progress.mapId)&&progress.territoryFaction&&progress.territoryFaction!==progress.profile.faction){progress.mapId='x1';progress.territoryFaction=progress.profile.faction;}
   const loadedGateKey=gateKeyForMap(progress.mapId);if(loadedGateKey&&!progress.galaxyGate[loadedGateKey]?.run?.active){progress.mapId='x1';progress.territoryFaction=progress.profile.faction;}else if(loadedGateKey)progress.galaxyGate.selected=loadedGateKey;
   const savedLocation=savedLocationForCurrentMap(),savedX=savedLocation?.x??null,savedY=savedLocation?.y??null;
   state.currentMap=MAPS[progress.mapId]||MAPS.x1;state.radarRange=mapRadarRange();
@@ -8402,7 +8430,7 @@ function startLoadedGame(){
   if(isGalaxyGateMap()){
     const gd=galaxyGateDef();player.x=savedX??MAPS[gd.mapId].world.w/2;player.y=savedY??MAPS[gd.mapId].world.h/2;player.tx=player.x;player.ty=player.y;petRuntime.x=player.x+82;petRuntime.y=player.y+64;petRuntime.tx=petRuntime.x;petRuntime.ty=petRuntime.y;petRuntime.roamX=null;petRuntime.roamY=null;petRuntime.nextRoamAt=0;state.camera.x=player.x;state.camera.y=player.y;state.target=null;state.loot=[];state.fx=[];state.rocketFx=[];state.ores=[];state.landmarks=[];state.enemyRespawns=[];state.oreRespawns=[];createBonusBoxes();restoreAlphaGateEnemies();const a=alphaGate(),def=galaxyGateDef().rounds[a.run.round-1],alive=alphaRemainingCount(),now=Date.now();if(a.run.waveIndex<def.waves.length&&!a.run.nextWaveAt){a.run.nextWaveAt=now+GALAXY_ALPHA_WAVE_INTERVAL_MS;}else if(a.run.waveIndex>=def.waves.length&&alive===0&&a.run.round<galaxyGateDef().rounds.length&&!a.run.nextRoundAt){a.run.nextRoundAt=now+GALAXY_ALPHA_ROUND_INTERVAL_MS;}renderAll();preloadActiveGameplayAssets();return;
   }
-  const spawnBase=currentBasePoint();player.x=savedX??(progress.mapId==='x1'?spawnBase.x:400);player.y=savedY??(progress.mapId==='x1'?spawnBase.y:state.currentMap.world.h/2);player.tx=player.x;player.ty=player.y;petRuntime.x=player.x+82;petRuntime.y=player.y+64;petRuntime.tx=petRuntime.x;petRuntime.ty=petRuntime.y;petRuntime.roamX=null;petRuntime.roamY=null;petRuntime.nextRoamAt=0;state.camera.x=player.x;state.camera.y=player.y;state.target=null;state.loot=[];state.fx=[];state.rocketFx=[];createLandmarks();state.ores=[];state.enemies=[];state.enemyRespawns=[];state.oreRespawns=[];galaxyEventRuntime.mapKey=null;sharedUniverseRuntime.event=null;createBonusBoxes();
+  const spawnBase=currentBasePoint();player.x=savedX??(['x1','x8'].includes(progress.mapId)?spawnBase.x:400);player.y=savedY??(['x1','x8'].includes(progress.mapId)?spawnBase.y:state.currentMap.world.h/2);player.tx=player.x;player.ty=player.y;petRuntime.x=player.x+82;petRuntime.y=player.y+64;petRuntime.tx=petRuntime.x;petRuntime.ty=petRuntime.y;petRuntime.roamX=null;petRuntime.roamY=null;petRuntime.nextRoamAt=0;state.camera.x=player.x;state.camera.y=player.y;state.target=null;state.loot=[];state.fx=[];state.rocketFx=[];createLandmarks();state.ores=[];state.enemies=[];state.enemyRespawns=[];state.oreRespawns=[];galaxyEventRuntime.mapKey=null;sharedUniverseRuntime.event=null;createBonusBoxes();
   try{joinSharedUniverse();}catch(e){console.error('[bootstrap] shared universe join failed',e);}
   try{renderAll();}catch(e){console.error('[bootstrap] initial render failed',e);try{updateUI();}catch{}}
   preloadActiveGameplayAssets();

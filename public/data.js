@@ -189,6 +189,15 @@ export const NPC_TYPES = {
 
   sibelon: { name: 'Colossar', hp: 200000, shield: 200000, credits: 650000, uridium: 400, xp: 12000, speed: 30, damage: 7950, color: '#66ffcb', size: 36, resources: { Prometium: 200, Terbium: 200, Endurium: 200, Prometid: 32, Duranium: 32, Promerium: 4 } },
   bossSibelon: { name: 'Colossar Prime', hp: 400000, shield: 400000, credits: 1300000, uridium: 800, xp: 24000, speed: 30, damage: 15900, color: '#19d59d', size: 45, resources: { Prometium: 400, Terbium: 400, Endurium: 400, Prometid: 64, Duranium: 64, Promerium: 8, Xenomit: 16 } },
+  // V19.0.11 — linha de inimigos da segunda região; mesmo universo, dificuldade escalonada.
+  riftScout: { name:'Batedor da Fenda', hp:270000, shield:175000, credits:700000, uridium:550, xp:15500, speed:86, damage:4600, color:'#4bdaff', size:32, resources:{Prometid:26,Duranium:30,Promerium:6} },
+  bossRiftScout: { name:'Batedor da Fenda Prime', hp:510000, shield:360000, credits:1550000, uridium:950, xp:34000, speed:75, damage:8500, color:'#8ceaff', size:44, resources:{Prometid:26,Duranium:30,Promerium:6} },
+  voidCorsair: { name:'Corsário do Vazio', hp:420000, shield:350000, credits:1100000, uridium:800, xp:23500, speed:92, damage:6700, color:'#e58cff', size:35, resources:{Prometid:26,Duranium:30,Promerium:6} },
+  bossVoidCorsair: { name:'Corsário do Vazio Prime', hp:820000, shield:650000, credits:2250000, uridium:1450, xp:48000, speed:70, damage:12800, color:'#ff9fd0', size:48, resources:{Prometid:26,Duranium:30,Promerium:6} },
+  nexusWarden: { name:'Guardião Nexus', hp:660000, shield:550000, credits:1700000, uridium:1200, xp:38000, speed:80, damage:9400, color:'#7fffbb', size:40, resources:{Prometid:26,Duranium:30,Promerium:6} },
+  bossNexusWarden: { name:'Guardião Nexus Prime', hp:1250000, shield:1050000, credits:3650000, uridium:2150, xp:79000, speed:65, damage:17800, color:'#ffe08b', size:53, resources:{Prometid:26,Duranium:30,Promerium:6} },
+  astralReaper: { name:'Ceifador Astral', hp:920000, shield:780000, credits:2400000, uridium:1700, xp:60000, speed:100, damage:13200, color:'#fe877a', size:44, resources:{Prometid:26,Duranium:30,Promerium:6} },
+  bossAstralReaper: { name:'Ceifador Astral Prime', hp:1850000, shield:1550000, credits:4900000, uridium:3100, xp:125000, speed:80, damage:24800, color:'#fb4a8f', size:61, resources:{Prometid:26,Duranium:30,Promerium:6} },
 };
 
 
@@ -251,6 +260,34 @@ export const MAPS = {
     structures: ['Jump Gate X-2', 'Jump Gate X-3', 'Battle Gate'],
     portals: [{ x: 560, y: 1100, to: 'x2' }, { x: 560, y: 4500, to: 'x3' }, { x: 7200, y: 2800, to: 'battleHome' }],
     enemyGroups: [{ type: 'lordakia', count: 5 }, { type: 'saimon', count: 6 }, { type: 'bossSaimon', count: 4 }, { type: 'mordon', count: 6 }, { type: 'sibelon', count: 3 }, { type: 'bossSibelon', count: 1 }],
+  },
+  x5: {
+    id:'x5', tier:5, minLevel:18, name:'Véu da Fenda', risk:'Alto', world:{w:8400,h:6100}, enemyMultiplier:1,
+    ores:["Endurium", "Terbium", "Prometid"], oreCount:74, landmarkCount:10,
+    palette:{nebula:'#133948',accent:'#51e5ff',deep:'#030b13'},
+    structures:["Battle Gate 4-X", "Gate X-6"], portals:[],
+    enemyGroups:[{ type: 'sibelon', count: 6 }, { type: 'bossSibelon', count: 2 }, { type: 'riftScout', count: 10 }, { type: 'bossRiftScout', count: 2 }],
+  },
+  x6: {
+    id:'x6', tier:6, minLevel:22, name:'Desfiladeiro Vazio', risk:'Crítico', world:{w:8900,h:6500}, enemyMultiplier:1,
+    ores:["Terbium", "Prometid", "Duranium"], oreCount:81, landmarkCount:11,
+    palette:{nebula:'#3a1d50',accent:'#d28fff',deep:'#0b0517'},
+    structures:["Gate X-5", "Gate X-7"], portals:[],
+    enemyGroups:[{ type: 'riftScout', count: 7 }, { type: 'bossRiftScout', count: 3 }, { type: 'voidCorsair', count: 9 }, { type: 'bossVoidCorsair', count: 2 }],
+  },
+  x7: {
+    id:'x7', tier:7, minLevel:27, name:'Coração do Nexus', risk:'Extremo', world:{w:9400,h:6900}, enemyMultiplier:1,
+    ores:["Duranium", "Promerium", "Terbium"], oreCount:88, landmarkCount:12,
+    palette:{nebula:'#134637',accent:'#8cffb5',deep:'#030d0b'},
+    structures:["Gate X-6", "Gate X-8"], portals:[],
+    enemyGroups:[{ type: 'voidCorsair', count: 8 }, { type: 'bossVoidCorsair', count: 3 }, { type: 'nexusWarden', count: 8 }, { type: 'bossNexusWarden', count: 2 }],
+  },
+  x8: {
+    id:'x8', tier:8, minLevel:32, name:'Bastião Astral', risk:'Extremo', world:{w:10000,h:7400}, enemyMultiplier:1,
+    ores:["Duranium", "Promerium", "Terbium"], oreCount:94, landmarkCount:13,
+    palette:{nebula:'#4e243d',accent:'#ff947b',deep:'#120611'},
+    structures:["Nova Base", "Trader", "Hangar", "Ship Repair", "Mission Control", "Gate X-7"], portals:[],
+    enemyGroups:[{ type: 'nexusWarden', count: 7 }, { type: 'bossNexusWarden', count: 3 }, { type: 'astralReaper', count: 7 }, { type: 'bossAstralReaper', count: 2 }],
   },
   b41: {
     id: 'b41', label: '4-1', tier: 41, battle: true, name: 'Deep Battle Alpha', risk: 'Extremo', world: { w: 9800, h: 7000 }, enemyMultiplier: 1.90, ores: ['Terbium'], oreCount: 72, landmarkCount: 10,

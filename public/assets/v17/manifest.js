@@ -97,6 +97,14 @@ export const GAME_ASSETS = {
     zephyr: '/assets/v17/ships-map/gale.webp'
   },
   npcs: {
+    riftScout: '/assets/v17/npcs/dreadnox.webp',
+    bossRiftScout: '/assets/v17/npcs/dreadnox-prime.webp',
+    voidCorsair: '/assets/v17/npcs/colossar.webp',
+    bossVoidCorsair: '/assets/v17/npcs/colossar-prime.webp',
+    nexusWarden: '/assets/v17/npcs/colossar.webp',
+    bossNexusWarden: '/assets/v17/npcs/colossar-prime.webp',
+    astralReaper: '/assets/v17/npcs/dreadnox.webp',
+    bossAstralReaper: '/assets/v17/npcs/dreadnox-prime.webp',
     streuner: '/assets/v17/npcs/scavenger.webp',
     recruitStreuner: '/assets/v17/npcs/scavenger-scout.webp',
     aiderStreuner: '/assets/v17/npcs/scavenger-support.webp',

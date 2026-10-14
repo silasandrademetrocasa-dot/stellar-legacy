@@ -1245,7 +1245,7 @@ const CRAFT_RECIPES_V1782={
 function runtimeServiceDef(runtime,id){const rows=Array.isArray(runtime?.economy_services)?runtime.economy_services:null;if(rows){const hit=rows.find(x=>x.service_id===id);return hit?(hit.enabled===false?null:hit):null;}return BASE_SERVICES_V1783[id]||null;}
 function runtimeCraftDef(runtime,id){const rows=Array.isArray(runtime?.crafting_recipes)?runtime.crafting_recipes:null;if(rows){const hit=rows.find(x=>x.recipe_id===id);return hit?(hit.enabled===false?null:hit):null;}return CRAFT_RECIPES_V1782[id]||null;}
 function activateBaseServiceServer(state,id,runtime){
-  const def=runtimeServiceDef(runtime,id);if(!def)throw Object.assign(new Error('Serviço inexistente ou desativado.'),{status:404});const mapOk=String(state.mapId||'')==='x1'&&String(state.territoryFaction||state.profile?.faction||'')===String(state.profile?.faction||'');if(!mapOk)throw Object.assign(new Error('Serviço disponível somente na sua base X-1.'),{status:409});
+  const def=runtimeServiceDef(runtime,id);if(!def)throw Object.assign(new Error('Serviço inexistente ou desativado.'),{status:404});const mapOk=['x1','x8'].includes(String(state.mapId||''))&&String(state.territoryFaction||state.profile?.faction||'')===String(state.profile?.faction||'');if(!mapOk)throw Object.assign(new Error('Serviço disponível somente nas bases X-1 e X-8.'),{status:409});
   const lv=Math.max(1,Number(state.profile?.level)||1),bandSize=Math.max(1,Number(def.level_band_size)||5),band=Math.floor((lv-1)/bandSize),scale=Math.max(0,Number(def.level_cost_scale)||0),base=Math.max(0,Number(def.base_cost??def.baseCost)||0),cost=Math.round(base*(1+band*scale));debitServer(state,cost,'credits');
   state.economyBoosts ||= {};const now=Date.now(),current=Math.max(now,Number(state.economyBoosts[id])||0),duration=Math.max(60000,Number(def.duration_ms??def.duration)||3600000),cap=now+Math.max(duration,Number(def.max_stack_ms)||21600000);state.economyBoosts[id]=Math.min(cap,current+duration);return {cost,expires_at:state.economyBoosts[id],duration_ms:duration};
 }
@@ -1301,7 +1301,7 @@ app.post('/api/economy/action', requireUser, asyncRoute(async (req,res)=>{
       const recipeId=String(payload.recipe_id||'').slice(0,64),recipe=applyCraftRecipeServer(state,recipeId,systemsSnapshot);info={action,recipe_id:recipeId,cost:recipe.cost,currency:recipe.currency,ingredients:recipe.ingredients,output:recipe.output_label};
     }
     else if(action==='sell_cargo'){
-      const id=String(payload.resource_id||'all'),atBase=String(state.mapId||'')==='x1'&&String(state.territoryFaction||state.profile?.faction||'')===String(state.profile?.faction||'');
+      const id=String(payload.resource_id||'all'),atBase=['x1','x8'].includes(String(state.mapId||''))&&String(state.territoryFaction||state.profile?.faction||'')===String(state.profile?.faction||'');
       const remoteEnabled=Array.isArray(state.shipLoadout?.extras)&&state.shipLoadout.extras.includes('remoteTraderCpuElite');
       if(!atBase&&!remoteEnabled)throw Object.assign(new Error('Venda remota requer Terminal Mercante Remoto Elite EQUIPADO na nave.'),{status:403});
       state.cargo ||= {};let total=0;const sold={};const ids=id==='all'?Object.keys(state.cargo):[id];
@@ -1578,6 +1578,13 @@ const sharedUniverse = attachSharedUniverse(server, {
     if(error)throw new Error(error.message);
     return data&&typeof data==='object'?data:null;
   },
+  authorizeJoin: async (token,userId) => {
+    const sb=supabaseForToken(token);if(!sb)throw new Error('Sem autenticação');
+    const {data,error}=await sb.from('game_saves').select('state').eq('user_id',userId).maybeSingle();
+    if(error)throw new Error(error.message);
+    const profile=data?.state?.profile||{};
+    return {faction:String(profile.faction||''),level:Math.max(1,Number(profile.level)||1)};
+  },
   authenticate: async (token, gameSessionId) => {
     if (!token || !gameSessionId) throw new Error('Sessão do universo ausente.');
     const base = supabaseBase();
@@ -1593,7 +1600,10 @@ const sharedUniverse = attachSharedUniverse(server, {
     });
     if (sessionError || !sessionState?.valid) throw new Error('Sessão do jogo substituída.');
     const callsign = await ensureProfile(sb, data.user);
-    return { user: data.user, callsign, accessToken: token };
+    const {data:savedProfile}=await sb.from('game_saves').select('state').eq('user_id',data.user.id).maybeSingle();
+    const profile=savedProfile?.state?.profile||{};
+    // 4-X e setores territoriais são autorizados exclusivamente pelo save no servidor.
+    return {user:data.user,callsign,accessToken:token,faction:String(profile.faction||''),level:Math.max(1,Number(profile.level)||1)};
   },
 });
 

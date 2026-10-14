@@ -664,3 +664,11 @@ Consulta somente leitura das 12 ofertas para pilotos autenticados via RPC SQL V1
 - Sincronização online periódica e preservação do HP/escudo relativo.
 - Reconciliação de slots que excedam o novo limite, com devolução ao inventário.
 - Preços/loja, sprites e habilidades especiais preservados.
+
+## V19.0.11 — Expansão X-5 a X-8 e escudos AEG
+- AEG aplica bônus real de regeneração do escudo de acordo com os atributos online.
+- Quatro mapas novos e 12 setores por facção; segunda base segura em X-8.
+- Rota X-4 / Battle 4-X própria / X-5 até X-8, requisitos de nível e proteção anti-invasão.
+- Oito tipos novos de NPCs em 16 configurações de spawn, sprites existentes reutilizados.
+- Minérios garantidos pelo fallback local/servidor; publicação dos pools em SQL pendente.
+- Workflows existentes e saves preservados.
