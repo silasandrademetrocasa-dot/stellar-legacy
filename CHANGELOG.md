@@ -1,3 +1,8 @@
+## V19.0.16 — Leilão configurável no ADM
+- Conversão STL → CR, multiplicadores por categoria, exceções por item e prévia em tempo real; piso do Nova mantido.
+- Preço inicial calculado pelo catálogo verdadeiro no Supabase, com defesa contra pisos falsos enviados pelo navegador.
+- Sem alterações em mapa, NPCs, loja, assets ou lances existentes.
+
 ## V19.0.15 — XP do piloto calibrado para ~150h do nível 7 ao 32
 
 - Curva LV1–10 preservada; novos marcos LV18/22/27/32 para X-5/6/7/8.

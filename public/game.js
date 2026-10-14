@@ -1,9 +1,9 @@
-import { FACTIONS, SHIPS, ITEMS, LASER_AMMO, ROCKETS, NPC_TYPES, MAPS, RESOURCES } from './data.js?v=19.0.15';
-import { repairPulseSettings } from './repair-balance.js?v=19.0.15';
-import { xpThresholdV1770, xpThresholdV1915, migratePilotXpV1915 } from './level-curve-v1915.js?v=19.0.15';
-import { GAME_ASSETS } from './assets/v17/manifest.js?v=19.0.15';
-import { signUp, signIn, beginGoogleSignIn, restoreGoogleSignInFromUrl, requestPasswordReset, restorePasswordRecoveryFromUrl, restoreSession, signOutLocal, checkGameSession, endGameSession, getUser, getSessionCredentials, loadCloudSave, saveCloudSave, updateCallsign, updatePassword, loadRankings, loadAuctionBids, saveAuctionBidOnline, markAuctionBidStatusOnline, loadAuctionMarket, upsertPlayerPresenceOnline, loadMapPresenceOnline, savePlayerLocationCheckpointOnline, loadPlayerLocationCheckpointOnline, removePlayerPresenceOnline, queuePvpAttackOnline, consumePvpDamageEventsOnline, syncArenaProfileOnline, loadArenaState, loadArenaDailyRewardStatus, claimArenaDailyReward, loadArenaOpponents, loadArenaHistory, arenaAttackOnline, listClansOnline, loadMyClanOnline, createClanOnline, joinClanOnline, getClanRequestsOnline, reviewClanRequestOnline, cancelClanRequestOnline, setClanMemberRoleOnline, leaveClanOnline, transferClanCreditsOnline, claimClanCreditGrantsOnline, recordClanAlienKillOnline, getPremiumShopOnline, testPurchasePremiumOnline, adminPreviewPremiumStageOnline, adminSimulatePremiumStageOnline, getPremiumStageCatalogOnline, loadWarfrontStateOnline, hitWorldBossOnline, claimWorldBossRewardOnline, declareClanWarOnline, recordClanWarScoreOnline, loadLiveOpsOnline, adminUpdateLiveEventScheduleOnline, purchaseLiveCatalogOnline, economyActionOnline, getChatHistoryOnline, sendChatMessageOnline, redeemGameCouponOnline, getMyDesignersOnline, setDesignLoadoutOnline, claimGateDroneDesignOnline, claimEventDesignerOnline, getAdminStatus, adminSearchAccounts, adminRecentActions, adminBanAccount, adminUnbanAccount, adminResetAccount, adminDeleteAccount, pushTelemetryBatch, adminTelemetryOverview, adminPlayerTelemetry, getBattleGroupOnline, createBattleGroupOnline, inviteBattleGroupOnline, searchBattleGroupPlayersOnline, inviteBattleGroupUserOnline, respondBattleGroupInviteOnline, leaveBattleGroupOnline, kickBattleGroupMemberOnline, setBattleGroupRallyOnline, loadRuntimeConfigOnline, loadNpcRuntimeConfigOnline, loadWorldRuntimeConfigOnline, loadSystemsRuntimeConfigOnline, loadAdminRuntimeMonitorOnline, adminUpdateRuntimeModuleOnline, adminUpdateNpcRuntimeOnline, adminUpdateNpcSpawnRuntimeOnline, adminUpdateWorldMapOnline, adminUpdateWorldResourceOnline, adminUpdateWorldSectorOnline, adminUpdateWorldPortalOnline, adminUpdateWorldResourcePoolOnline, adminUpdateMissionCategoryOnline, adminUpdateEconomyServiceOnline, adminUpdateCraftingRecipeOnline, loadBattlePassRuntimeConfigOnline, adminUpdateBattlePassSeasonOnline, adminUpdateBattlePassTierOnline, loadShopsRuntimeConfigOnline, adminUpdateCommonShopItemOnline, adminUpdatePremiumShopItemOnline, loadBonusConfigOnline, adminUpdateBonusConfigOnline, adminCouponDashboardOnline, adminCreateCouponOnline, adminSetCouponActiveOnline, loadGalaxyGatesOnline, adminUpdateGalaxyGateOnline, adminUpsertCustomMissionOnline, adminDeleteCustomMissionOnline, adminCreateCraftRecipeOnline, adminCreateEconomyServiceOnline, adminCreatePassSeasonOnline, loadAuctionRulesOnline, adminUpdateAuctionRulesOnline, loadBalanceRuntimeOnline, adminUpdateBalanceOnline } from './api.js?v=19.0.15';
-import { SharedUniverseClient } from './world.js?v=19.0.15';
+import { FACTIONS, SHIPS, ITEMS, LASER_AMMO, ROCKETS, NPC_TYPES, MAPS, RESOURCES } from './data.js?v=19.0.16';
+import { repairPulseSettings } from './repair-balance.js?v=19.0.16';
+import { xpThresholdV1770, xpThresholdV1915, migratePilotXpV1915 } from './level-curve-v1915.js?v=19.0.16';
+import { GAME_ASSETS } from './assets/v17/manifest.js?v=19.0.16';
+import { signUp, signIn, beginGoogleSignIn, restoreGoogleSignInFromUrl, requestPasswordReset, restorePasswordRecoveryFromUrl, restoreSession, signOutLocal, checkGameSession, endGameSession, getUser, getSessionCredentials, loadCloudSave, saveCloudSave, updateCallsign, updatePassword, loadRankings, loadAuctionBids, saveAuctionBidOnline, markAuctionBidStatusOnline, loadAuctionMarket, upsertPlayerPresenceOnline, loadMapPresenceOnline, savePlayerLocationCheckpointOnline, loadPlayerLocationCheckpointOnline, removePlayerPresenceOnline, queuePvpAttackOnline, consumePvpDamageEventsOnline, syncArenaProfileOnline, loadArenaState, loadArenaDailyRewardStatus, claimArenaDailyReward, loadArenaOpponents, loadArenaHistory, arenaAttackOnline, listClansOnline, loadMyClanOnline, createClanOnline, joinClanOnline, getClanRequestsOnline, reviewClanRequestOnline, cancelClanRequestOnline, setClanMemberRoleOnline, leaveClanOnline, transferClanCreditsOnline, claimClanCreditGrantsOnline, recordClanAlienKillOnline, getPremiumShopOnline, testPurchasePremiumOnline, adminPreviewPremiumStageOnline, adminSimulatePremiumStageOnline, getPremiumStageCatalogOnline, loadWarfrontStateOnline, hitWorldBossOnline, claimWorldBossRewardOnline, declareClanWarOnline, recordClanWarScoreOnline, loadLiveOpsOnline, adminUpdateLiveEventScheduleOnline, purchaseLiveCatalogOnline, economyActionOnline, getChatHistoryOnline, sendChatMessageOnline, redeemGameCouponOnline, getMyDesignersOnline, setDesignLoadoutOnline, claimGateDroneDesignOnline, claimEventDesignerOnline, getAdminStatus, adminSearchAccounts, adminRecentActions, adminBanAccount, adminUnbanAccount, adminResetAccount, adminDeleteAccount, pushTelemetryBatch, adminTelemetryOverview, adminPlayerTelemetry, getBattleGroupOnline, createBattleGroupOnline, inviteBattleGroupOnline, searchBattleGroupPlayersOnline, inviteBattleGroupUserOnline, respondBattleGroupInviteOnline, leaveBattleGroupOnline, kickBattleGroupMemberOnline, setBattleGroupRallyOnline, loadRuntimeConfigOnline, loadNpcRuntimeConfigOnline, loadWorldRuntimeConfigOnline, loadSystemsRuntimeConfigOnline, loadAdminRuntimeMonitorOnline, adminUpdateRuntimeModuleOnline, adminUpdateNpcRuntimeOnline, adminUpdateNpcSpawnRuntimeOnline, adminUpdateWorldMapOnline, adminUpdateWorldResourceOnline, adminUpdateWorldSectorOnline, adminUpdateWorldPortalOnline, adminUpdateWorldResourcePoolOnline, adminUpdateMissionCategoryOnline, adminUpdateEconomyServiceOnline, adminUpdateCraftingRecipeOnline, loadBattlePassRuntimeConfigOnline, adminUpdateBattlePassSeasonOnline, adminUpdateBattlePassTierOnline, loadShopsRuntimeConfigOnline, adminUpdateCommonShopItemOnline, adminUpdatePremiumShopItemOnline, loadBonusConfigOnline, adminUpdateBonusConfigOnline, adminCouponDashboardOnline, adminCreateCouponOnline, adminSetCouponActiveOnline, loadGalaxyGatesOnline, adminUpdateGalaxyGateOnline, adminUpsertCustomMissionOnline, adminDeleteCustomMissionOnline, adminCreateCraftRecipeOnline, adminCreateEconomyServiceOnline, adminCreatePassSeasonOnline, loadAuctionRulesOnline, adminUpdateAuctionRulesOnline, loadBalanceRuntimeOnline, adminUpdateBalanceOnline } from './api.js?v=19.0.16';
+import { SharedUniverseClient } from './world.js?v=19.0.16';
 
 const canvas = document.querySelector('#game');
 const ctx = canvas.getContext('2d');
@@ -953,19 +953,49 @@ function auctionHourKey(d=new Date()){return `${d.getFullYear()}-${String(d.getM
 function auctionSecondsLeft(){const d=new Date(),next=new Date(d);next.setMinutes(60,0,0);return Math.max(0,Math.ceil((next-d)/1000));}
 function auctionSeed(str){let h=2166136261>>>0;for(let i=0;i<str.length;i++){h^=str.charCodeAt(i);h=Math.imul(h,16777619);}return h>>>0;}
 function auctionRand(seed){let x=seed>>>0;return()=>{x=(Math.imul(1664525,x)+1013904223)>>>0;return x/4294967296;};}
-function eliteAuctionCatalog(){
+function eliteAuctionCatalog(includeOwned=false){
   const out=[];
-  Object.values(SHIPS).filter(x=>x.currency==='uridium'&&!x.eventOnly&&x.shopAvailable!==false&&x.auctionEligible!==false&&!progress?.ownedShips?.includes(x.id)).forEach(x=>out.push({ref:`ship:${x.id}`,kind:'ship',id:x.id,name:x.name,uri:x.price,qty:1,unique:true}));
-  Object.values(ITEMS).filter(x=>x.currency==='uridium'&&!x.eventOnly&&x.shopAvailable!==false&&x.auctionEligible!==false&&!(x.type==='extra'&&progress&&ownsExtraItem(x.id))&&!(x.type==='drone'&&(progress?.drones?.length||0)>=8)).forEach(x=>out.push({ref:`item:${x.id}`,kind:'item',id:x.id,name:x.name,uri:x.price,qty:1,unique:x.type==='extra'||x.type==='drone'}));
+  Object.values(SHIPS).filter(x=>x.currency==='uridium'&&!x.eventOnly&&x.shopAvailable!==false&&x.auctionEligible!==false&&(includeOwned||!progress?.ownedShips?.includes(x.id))).forEach(x=>out.push({ref:`ship:${x.id}`,kind:'ship',id:x.id,name:x.name,uri:x.price,qty:1,unique:true}));
+  Object.values(ITEMS).filter(x=>x.currency==='uridium'&&!x.eventOnly&&x.shopAvailable!==false&&x.auctionEligible!==false&&(includeOwned||!(x.type==='extra'&&progress&&ownsExtraItem(x.id)))&&(includeOwned||!(x.type==='drone'&&(progress?.drones?.length||0)>=8))).forEach(x=>out.push({ref:`item:${x.id}`,kind:'item',id:x.id,name:x.name,uri:x.price,qty:1,unique:x.type==='extra'||x.type==='drone'}));
   Object.values(LASER_AMMO).filter(x=>x.currency==='uridium'&&x.purchasable!==false).forEach(x=>out.push({ref:`ammo:${x.id}`,kind:'ammo',id:x.id,name:`${x.name} • pacote ${fmt(x.pack)}`,uri:x.price,qty:x.pack}));
   Object.values(ROCKETS).filter(x=>x.currency==='uridium').forEach(x=>out.push({ref:`rocket:${x.id}`,kind:'rocket',id:x.id,name:`${x.name} • pacote ${fmt(x.pack)}`,uri:x.price,qty:x.pack}));
-  Object.values(PET_GEARS).filter(x=>x.currency==='uridium'&&!progress?.pet?.gearsOwned?.[x.id]).forEach(x=>out.push({ref:`petGear:${x.id}`,kind:'petGear',id:x.id,name:`AUX-9 • ${x.name}`,uri:x.cost,qty:1,unique:true}));
+  Object.values(PET_GEARS).filter(x=>x.currency==='uridium'&&(includeOwned||!progress?.pet?.gearsOwned?.[x.id])).forEach(x=>out.push({ref:`petGear:${x.id}`,kind:'petGear',id:x.id,name:`AUX-9 • ${x.name}`,uri:x.cost,qty:1,unique:true}));
   return out;
 }
 // V18.2.12: abertura fixa de 100 milhões de Créditos para NOVA Elite no leilão.
 // Mesmo valor para todos os jogadores, independentemente de quantos drones possuem.
 // A Loja NOVA continua com preço e moeda próprios; a regra vale apenas para leilão.
-const auctionPriceRules={nova_floor:100000000,common_floor:100000,version:0};
+// V19.0.16 — conversão e múltiplos por categoria/lot editáveis no ADM.
+const AUCTION_CATEGORY_DEFAULTS={ammo:2.5,rocket:2,ship:.03,laser:.04,generator:.04,drone:.05,extra:.04,petGear:.05};
+const AUCTION_CATEGORY_LABELS={ammo:'MUNIÇÕES ELITE',rocket:'MÍSSEIS ELITE',ship:'NAVES ELITE',laser:'LASERS ELITE',generator:'GERADORES ELITE',drone:'DRONES ELITE',extra:'EXTRAS ELITE',petGear:'MÓDULOS AUX-9'};
+const auctionPriceRules={nova_floor:100000000,common_floor:100000,stl_to_credits:6667,category_multipliers:{...AUCTION_CATEGORY_DEFAULTS},item_multipliers:{},version:0};
+function auctionLotCategory(lot){
+ if(lot?.kind!=='item')return lot?.kind==='petGear'?'petGear':String(lot?.kind||'');
+ return ITEMS[lot.id]?.type||'extra';
+}
+function auctionLotCatalogRef(lot){
+ if(!lot)return '';
+ if(lot.kind==='item')return `${auctionLotCategory(lot)}:${lot.id}`;
+ if(lot.kind==='petGear')return `pet_gear:${lot.id}`;
+ return `${lot.kind}:${lot.id}`;
+}
+function auctionLotShopStl(lot){
+ const row=liveCatalog(auctionLotCatalogRef(lot));
+ if(row?.enabled!==false && row?.currency==='uridium' && Number(row.price)>0)return Number(row.price);
+ return Math.max(1,Number(lot?.uri)||1);
+}
+function auctionCategoryMultiplier(category){
+ const n=Number(auctionPriceRules.category_multipliers?.[category]);
+ return Number.isFinite(n)&&n>=.01&&n<=15?n:AUCTION_CATEGORY_DEFAULTS[category]||1;
+}
+function auctionOpeningFloor(lot){
+ const common=Math.max(100000,Math.round(Number(auctionPriceRules.common_floor)||100000));
+ if(lot?.ref==='item:iris')return Math.max(100000000,Math.round(Number(auctionPriceRules.nova_floor)||100000000));
+ const ref=String(lot?.ref||''),over=Number(auctionPriceRules.item_multipliers?.[ref]);
+ const mult=Number.isFinite(over)&&over>=.01&&over<=15?over:auctionCategoryMultiplier(auctionLotCategory(lot));
+ const value=auctionLotShopStl(lot)*Number(auctionPriceRules.stl_to_credits||6667)*mult;
+ return Math.max(common,Math.ceil(value/100000)*100000);
+}
 async function refreshAuctionRules(){
  try{const d=await loadAuctionRulesOnline();if(d?.nova_floor>=100000000&&d?.common_floor>=100000){Object.assign(auctionPriceRules,d);if(progress?.auction?.lots){for(const lot of Object.values(progress.auction.lots))normalizeAuctionEconomy(lot);}if(ui.auctionModal&&!ui.auctionModal.classList.contains('hidden'))renderAuction();}}
  catch(e){console.warn('[auction-v1908] mantendo preços do jogo',e);}
@@ -973,22 +1003,13 @@ async function refreshAuctionRules(){
 function auctionNovaStartFloor(){return auctionPriceRules.nova_floor||100000000;}
 function normalizeAuctionEconomy(lot,key=progress?.auction?.hourKey||auctionHourKey()){
   if(!lot)return lot;
-  if(lot.ref==='item:iris'){
-    // Começa em 100M em todo ciclo; corrige também lotes antigos salvos no navegador.
-    // Conserva o preço automático progressivo do leilão durante a hora.
-    const floor=auctionNovaStartFloor(),oldFinal=Number(lot.finalSystemBid);
-    if(Number(lot.reserve)!==floor||!Number.isFinite(oldFinal)||oldFinal<=floor){
-      const rnd=auctionRand(auctionSeed(`${key}:${lot.ref}`));
-      lot.reserve=floor;
-      lot.finalSystemBid=Math.max(floor+100000,Math.round(floor*(1.25+rnd()*1.75)/100000)*100000);
-    }
-    return lot;
-  }
-  const invalid=!Number.isFinite(Number(lot.reserve))||Number(lot.reserve)<auctionPriceRules.common_floor||!Number.isFinite(Number(lot.finalSystemBid))||Number(lot.finalSystemBid)<Number(lot.reserve);
-  if(invalid){
+  const floor=auctionOpeningFloor(lot),oldFinal=Number(lot.finalSystemBid);
+  // Recalcula ao mudar conversão, preço da Loja ou multiplicador no ADM.
+  // Nunca altera um lance real: marketBid, leader e userBid são preservados.
+  if(Number(lot.reserve)!==floor||!Number.isFinite(oldFinal)||oldFinal<=floor){
     const rnd=auctionRand(auctionSeed(`${key}:${lot.ref}`));
-    lot.reserve=Math.max(auctionPriceRules.common_floor,Math.round((Number(lot.uri)||1000)*70*(.75+rnd()*.5)/100000)*100000);
-    lot.finalSystemBid=Math.max(lot.reserve+100000,Math.round(lot.reserve*(1.25+rnd()*1.75)/100000)*100000);
+    lot.reserve=floor;
+    lot.finalSystemBid=Math.max(floor+100000,Math.ceil(floor*(1.25+rnd()*1.75)/100000)*100000);
   }
   return lot;
 }
@@ -6660,7 +6681,7 @@ function auctionMinBid(lot){
   const playerBid=Number(lot?.marketBid)||0;
   // Depois que existe um jogador liderando, somente outro jogador pode cobrir
   // e precisa acrescentar no mínimo 100k.
-  if(playerBid>0)return Math.max(100000,playerBid+100000,lot?.ref==='item:iris'?auctionNovaStartFloor():100000);
+  if(playerBid>0)return Math.max(100000,playerBid+100000,auctionOpeningFloor(lot));
   // Antes do primeiro jogador, o preço do sistema é o próprio lance mínimo.
   // Ex.: SISTEMA = 100k -> primeiro jogador pode dar exatamente 100k.
   return Math.max(100000,auctionSystemBid(lot));
@@ -6687,7 +6708,7 @@ async function placeAuctionBid(ref,amount){
   // Se já existe jogador real, precisa cobrir +100k.
   // Se ainda é o SISTEMA, basta cobrir o preço automático atual.
   const systemFloor=auctionSystemBid(lot);
-  const liveMin=live?Math.max(100000,(Number(live.user_bid)||0)+100000,lot?.ref==='item:iris'?auctionNovaStartFloor():100000):Math.max(100000,systemFloor);
+  const liveMin=live?Math.max(100000,(Number(live.user_bid)||0)+100000,auctionOpeningFloor(lot)):Math.max(100000,systemFloor);
   const uiMin=auctionMinBid(lot);
   const min=Math.max(liveMin,uiMin);
 
@@ -8085,7 +8106,23 @@ function localShopDef(row){const id=String(row?.ref_id||'');if(row?.kind==='ship
 function adminShopQty(row){return Math.max(1,Math.floor(Number(row?.meta?.grant?.qty)||Number(row?.quantity)||1));}
 function renderAdminShopsEditor(){
   if(adminShopsEditor.activeView==='auction'){
-    if(ui.adminRuntimeShopsGrid){ui.adminRuntimeShopsGrid.innerHTML=`<article class="admin-content-creator"><h3>🏷️ LEILÃO • CONTROLE DE PREÇOS</h3><p class="muted">Os preços são gravados no Supabase e validados na função que registra os lances. Mudanças não cancelam lances atuais.</p><div class="admin-shop-fields"><label>LANCE MÍNIMO • NOVA (CR)<input type="number" data-auction-rule="nova_floor" min="100000000" max="1000000000" step="100000" value="${auctionPriceRules.nova_floor}"></label><label>PISO DE OUTROS LOTES (CR)<input type="number" data-auction-rule="common_floor" min="100000" max="10000000" step="100000" value="${auctionPriceRules.common_floor}"></label></div><small>Incremento fixo: 100.000 CR • NOVA não pode ficar abaixo de 100 milhões.</small><div class="adm-content-actions"><button type="button" class="small-btn gold" data-auction-rule-save>SALVAR PREÇOS NO SERVIDOR</button><small>CONFIGURAÇÃO v${auctionPriceRules.version||0}</small></div></article>`;}return;
+    if(!ui.adminRuntimeShopsGrid)return;
+    const categoryRows=Object.keys(AUCTION_CATEGORY_DEFAULTS).map(key=>`<label>${AUCTION_CATEGORY_LABELS[key]} • x<input data-auction-category="${key}" type="number" min="0.01" max="15" step="0.01" value="${Number(auctionCategoryMultiplier(key))}"></label>`).join('');
+    const catalog=eliteAuctionCatalog(true).filter(x=>x.ref!=='item:iris'),allLots=[...new Map(catalog.map(x=>[x.ref,x])).values()];
+    const previews=allLots.map(lot=>{
+      const override=auctionPriceRules.item_multipliers?.[lot.ref];
+      return `<tr data-auction-preview="${escHtml(lot.ref)}"><td><b>${escHtml(lot.name)}</b><small>${escHtml(lot.ref)}</small></td><td>${fmt(auctionLotShopStl(lot))} STL</td><td><input type="number" min="0.01" max="15" step="0.01" placeholder="Padrão" data-auction-item="${escHtml(lot.ref)}" value="${override==null?'':Number(override)}" aria-label="Multiplicador exclusivo ${escHtml(lot.name)}"></td><td data-auction-floor-preview="${escHtml(lot.ref)}">${fmt(auctionOpeningFloor(lot))} CR</td></tr>`;
+    }).join('');
+    ui.adminRuntimeShopsGrid.innerHTML=`<article class="admin-content-creator admin-auction-pricing">
+      <h3>🏷️ LEILÃO • PRECIFICAÇÃO COMPLETA</h3>
+      <p class="muted">Todos os valores ficam no Supabase. A abertura é calculada a partir do preço STL da loja; o servidor recusa lances abaixo do piso oficial. Editar não cancela lances já ativos.</p>
+      <div class="admin-auction-parameters"><label>CONVERSÃO • 1 STL = QUANTOS CR?<input type="number" data-auction-rule="stl_to_credits" min="100" max="100000" step="1" value="${auctionPriceRules.stl_to_credits||6667}"></label><label>NOVA • PISO FIXO (CR)<input type="number" data-auction-rule="nova_floor" min="100000000" max="1000000000" step="100000" value="${auctionPriceRules.nova_floor}"></label><label>PISO MÍNIMO GERAL (CR)<input type="number" data-auction-rule="common_floor" min="100000" max="10000000" step="100000" value="${auctionPriceRules.common_floor}"></label></div>
+      <h4>MULTIPLICADORES POR CATEGORIA</h4><div class="admin-auction-parameters">${categoryRows}</div>
+      <p class="admin-shop-note">Fórmula: <b>preço STL × conversão × multiplicador</b>, arredondado para cima em 100 mil CR. Ex.: PLS-3 → ${fmt(auctionOpeningFloor({ref:'ammo:mcb50',kind:'ammo',id:'mcb50',uri:3000}))} CR.</p>
+      <h4>EXCEÇÕES POR ITEM • OPCIONAL</h4><p class="admin-shop-note">Deixe vazio para usar o multiplicador da categoria. O Nova mantém sempre seu piso fixo.</p>
+      <div class="admin-auction-lots"><table><thead><tr><th>ITEM</th><th>VALOR DA LOJA</th><th>MULT. PRÓPRIO</th><th>ABERTURA ATUAL</th></tr></thead><tbody>${previews}</tbody></table></div>
+      <div class="adm-content-actions"><button type="button" class="small-btn gold" data-auction-rule-save>SALVAR E PUBLICAR NO SERVIDOR</button><small>REGRA v${auctionPriceRules.version||0} • novo lance validado pelo banco</small></div>
+    </article>`;return;
   }
 
   if(!ui.adminRuntimeShopsGrid)return;const snap=adminShopsEditor.snapshot||{};
@@ -8107,10 +8144,28 @@ async function adminShopsApply(result,message){const runtime=result?.runtime||aw
 async function saveAdminCommonShop(key,card,button){if(adminShopsEditor.busy||!key||!card)return;const f=n=>card.querySelector(`[data-common-shop-field="${n}"]`),payload={display_name:String(f('display_name')?.value||'').trim(),description:String(f('description')?.value||'').trim(),price:Math.max(0,Math.round(Number(f('price')?.value)||0)),currency:String(f('currency')?.value||'credits'),quantity:Math.max(1,Math.round(Number(f('quantity')?.value)||1)),min_level:Math.max(1,Math.min(100,Math.round(Number(f('min_level')?.value)||1))),sort_order:Math.max(0,Math.min(9999,Math.round(Number(f('sort_order')?.value)||0))),shop_tab:String(f('shop_tab')?.value||''),drone_price_multiplier:f('drone_price_multiplier')?Math.max(1,Math.min(4,Number(f('drone_price_multiplier')?.value)||2)):null,shop_visible:!!f('shop_visible')?.checked,enabled:!!f('enabled')?.checked};adminShopsEditor.busy=true;if(button)button.disabled=true;adminShopsMessage(`Salvando ${key}...`);try{await adminShopsApply(await adminUpdateCommonShopItemOnline(key,payload),`${key} salvo`);showToast('Loja Comum atualizada');}catch(e){adminShopsMessage(e.message||'Falha ao salvar produto.','err');}finally{adminShopsEditor.busy=false;if(button)button.disabled=false;}}
 async function saveAdminPremiumShop(key,card,button){if(adminShopsEditor.busy||!key||!card)return;const row=adminShopsEditor.snapshot?.premium?.find(x=>String(x.id)===String(key)),f=n=>card.querySelector(`[data-premium-shop-field="${n}"]`),payload={name:String(f('name')?.value||'').trim(),description:String(f('description')?.value||'').trim(),price_brl:Math.max(0,Number(f('price_brl')?.value)||0),quantity:Math.max(1,Math.round(Number(f('quantity')?.value)||1)),min_level:Math.max(1,Math.min(100,Math.round(Number(f('min_level')?.value)||1))),sort_order:Math.max(0,Math.min(9999,Math.round(Number(f('sort_order')?.value)||0))),active:!!f('active')?.checked,days:Math.max(1,Math.min(3650,Math.round(Number(f('days')?.value)||Number(row?.meta?.days)||30)))};adminShopsEditor.busy=true;if(button)button.disabled=true;adminShopsMessage(`Salvando ${key}...`);try{await adminShopsApply(await adminUpdatePremiumShopItemOnline(key,payload),`${key} salvo`);showToast('Loja Premium atualizada');}catch(e){adminShopsMessage(e.message||'Falha ao salvar Premium.','err');}finally{adminShopsEditor.busy=false;if(button)button.disabled=false;}}
 
-async function saveAdminAuctionRules(){const g=ui.adminRuntimeShopsGrid,read=k=>Number(g?.querySelector(`[data-auction-rule="${k}"]`)?.value),b={nova_floor:read('nova_floor'),common_floor:read('common_floor')};
- if(!Number.isInteger(b.nova_floor)||b.nova_floor<100000000||b.nova_floor>1000000000||b.nova_floor%100000!==0||!Number.isInteger(b.common_floor)||b.common_floor<100000||b.common_floor>10000000||b.common_floor%100000!==0){adminShopsMessage('Preços devem ser múltiplos de 100.000 CR.','err');return;}
- if(!confirm(`Publicar NOVA ${fmt(b.nova_floor)} CR e piso comum ${fmt(b.common_floor)} CR?`))return;
- try{const d=await adminUpdateAuctionRulesOnline(b);Object.assign(auctionPriceRules,d);renderAdminShopsEditor();adminShopsMessage('Preços de leilão salvos no Supabase.','ok');showToast('Preços publicados no servidor!','reward');}catch(e){adminShopsMessage(e.message||'Falha ao salvar leilão.','err');}}
+async function saveAdminAuctionRules(){
+ const g=ui.adminRuntimeShopsGrid;
+ const read=k=>Number(g?.querySelector(`[data-auction-rule="${k}"]`)?.value);
+ const b={version:Number(auctionPriceRules.version)||1,nova_floor:read('nova_floor'),common_floor:read('common_floor'),stl_to_credits:read('stl_to_credits'),category_multipliers:{},item_multipliers:{}};
+ for(const key of Object.keys(AUCTION_CATEGORY_DEFAULTS)){
+   const v=Number(g?.querySelector(`[data-auction-category="${key}"]`)?.value);
+   if(!Number.isFinite(v)||v<.01||v>15){adminShopsMessage(`Multiplicador inválido para ${key}.`,'err');return;}
+   b.category_multipliers[key]=v;
+ }
+ for(const input of g?.querySelectorAll('[data-auction-item]')||[]){
+   if(!input.value.trim())continue;
+   const v=Number(input.value);
+   if(!Number.isFinite(v)||v<.01||v>15){adminShopsMessage(`Multiplicador inválido para ${input.dataset.auctionItem}.`,'err');return;}
+   b.item_multipliers[input.dataset.auctionItem]=v;
+ }
+ if(!Number.isInteger(b.nova_floor)||b.nova_floor<100000000||b.nova_floor>1000000000||b.nova_floor%100000!==0||!Number.isInteger(b.common_floor)||b.common_floor<100000||b.common_floor>10000000||b.common_floor%100000!==0||!Number.isInteger(b.stl_to_credits)||b.stl_to_credits<100||b.stl_to_credits>100000){adminShopsMessage('Conversão ou pisos inválidos: confira limites e passos de 100 mil CR.','err');return;}
+ if(!confirm(`Publicar conversão 1 STL = ${fmt(b.stl_to_credits)} CR, pisos e multiplicadores? Novos lances serão validados pelo servidor.`))return;
+ adminShopsEditor.busy=true;const button=g?.querySelector('[data-auction-rule-save]');if(button)button.disabled=true;
+ try{const d=await adminUpdateAuctionRulesOnline(b);Object.assign(auctionPriceRules,d);for(const lot of Object.values(progress?.auction?.lots||{}))normalizeAuctionEconomy(lot);renderAdminShopsEditor();renderAuction();adminShopsMessage('Conversão e multiplicadores publicados no Supabase.','ok');showToast('Leilão atualizado ao vivo!','reward');}
+ catch(e){adminShopsMessage(e.message||'Falha ao salvar leilão.','err');}
+ finally{adminShopsEditor.busy=false;if(button)button.disabled=false;}
+}
 function adminDate(value){if(!value)return '—';try{return new Date(value).toLocaleString('pt-BR',{dateStyle:'short',timeStyle:'short'});}catch{return String(value);}}
 function adminSetMessage(text,kind=''){if(!ui.adminMessage)return;ui.adminMessage.textContent=text||'';ui.adminMessage.className=`admin-message ${kind}`.trim();}
 function renderAdminStatus(){const st=adminRuntime.status||{};if(ui.adminTotalAccounts)ui.adminTotalAccounts.textContent=fmt(st.total_accounts||0);if(ui.adminOnlineAccounts)ui.adminOnlineAccounts.textContent=fmt(st.online_accounts||0);if(ui.adminBannedAccounts)ui.adminBannedAccounts.textContent=fmt(st.banned_accounts||0);}
@@ -8302,6 +8357,24 @@ $('#adminRuntimePortalsGrid')?.addEventListener('change',e=>{if(e.target.closest
 $('#adminRuntimePortalsReload')?.addEventListener('click',()=>{loadAdminBonusEditor(true);loadAdminGateEditor(true);});
 if(ui.adminRuntimeShopsReload)ui.adminRuntimeShopsReload.onclick=()=>loadAdminShopsEditor(true);
 if(ui.adminRuntimeShopsTabs)ui.adminRuntimeShopsTabs.onclick=e=>{const b=e.target.closest('[data-admin-shops-view]');if(b)adminShopsSetView(b.dataset.adminShopsView);};
+if(ui.adminRuntimeShopsGrid)ui.adminRuntimeShopsGrid.addEventListener('input',e=>{
+ if(!e.target.closest('[data-auction-rule],[data-auction-category],[data-auction-item]'))return;
+ // Preview only. Values are published together after admin confirms.
+ const g=ui.adminRuntimeShopsGrid;
+ const test={...auctionPriceRules,category_multipliers:{...auctionPriceRules.category_multipliers},item_multipliers:{}};
+ for(const key of Object.keys(AUCTION_CATEGORY_DEFAULTS)){const n=Number(g.querySelector(`[data-auction-category="${key}"]`)?.value);if(n>=.01&&n<=15)test.category_multipliers[key]=n;}
+ for(const input of g.querySelectorAll('[data-auction-item]')){const n=Number(input.value);if(input.value.trim()&&n>=.01&&n<=15)test.item_multipliers[input.dataset.auctionItem]=n;}
+ const conversion=Number(g.querySelector('[data-auction-rule="stl_to_credits"]')?.value);
+ if(conversion>=100&&conversion<=100000)test.stl_to_credits=conversion;
+ const common=Number(g.querySelector('[data-auction-rule="common_floor"]')?.value);
+ if(common>=100000)test.common_floor=common;
+ const old={...auctionPriceRules};Object.assign(auctionPriceRules,test);
+ for(const lot of eliteAuctionCatalog().filter(x=>x.ref!=='item:iris')){
+   const cell=[...g.querySelectorAll('[data-auction-floor-preview]')].find(c=>c.dataset.auctionFloorPreview===lot.ref);
+   if(cell)cell.textContent=`${fmt(auctionOpeningFloor(lot))} CR`;
+ }
+ Object.assign(auctionPriceRules,old);
+});
 if(ui.adminRuntimeShopsGrid)ui.adminRuntimeShopsGrid.onclick=e=>{if(e.target.closest('[data-auction-rule-save]')){saveAdminAuctionRules();return;}const common=e.target.closest('[data-common-shop-save]');if(common){saveAdminCommonShop(common.dataset.commonShopSave,common.closest('[data-common-shop]'),common);return;}const premium=e.target.closest('[data-premium-shop-save]');if(premium){saveAdminPremiumShop(premium.dataset.premiumShopSave,premium.closest('[data-premium-shop]'),premium);}};
 if(ui.adminSearchInput)ui.adminSearchInput.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();refreshAdminPanel();}});
 if(ui.adminUserList)ui.adminUserList.onclick=e=>{const btn=e.target.closest('[data-admin-action]'),card=e.target.closest('[data-admin-user]');if(!btn||!card)return;const user=adminRuntime.users.find(u=>String(u.user_id)===String(card.dataset.adminUser));if(user)runAdminAction(btn.dataset.adminAction,user);};

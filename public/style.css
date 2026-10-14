@@ -2967,3 +2967,16 @@ body[data-quality="low"] .pet-gear {
 .map-network .map-node[data-map-label$="-8"]{border-color:rgba(118,244,184,.8);box-shadow:0 0 18px rgba(78,225,166,.18)}
 .map-network .map-node[data-map-label$="-5"],.map-network .map-node[data-map-label$="-6"],.map-network .map-node[data-map-label$="-7"]{border-color:rgba(179,123,255,.6)}
 @media(max-width:900px){.map-network .map-node{width:74px;min-height:49px}.map-network .map-node .node-label{font-size:17px}.map-network .map-node .node-sub{font-size:8px;max-width:68px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}}
+
+/* V19.0.16 — ADM: editor de conversão e multiplicadores do leilão */
+.admin-auction-pricing{margin:0;min-width:0;max-width:100%;}
+.admin-auction-pricing h4{font-size:11px;color:#ffe7aa;margin:13px 0 7px;}
+.admin-auction-parameters{display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:9px;}
+.admin-auction-pricing .admin-shop-note{font-size:10px;color:#9ebbd0;line-height:1.6;}
+.admin-auction-lots{overflow-x:auto;max-height:300px;overflow-y:auto;border:1px solid rgba(98,177,234,.18);border-radius:10px;}
+.admin-auction-lots table{width:100%;border-collapse:collapse;min-width:480px;}
+.admin-auction-lots th,.admin-auction-lots td{text-align:left;padding:8px;font-size:10px;border-bottom:1px solid rgba(113,189,239,.12);}
+.admin-auction-lots th{position:sticky;top:0;background:#081c30;z-index:1;color:#9bcee5;}
+.admin-auction-lots td b{display:block;color:#f5e4bf;}.admin-auction-lots td small{display:block;color:#7e9cb0;font-size:9px;}
+.admin-auction-lots td input{width:95px;min-width:75px;font-size:11px;}
+@media(max-width:680px){.admin-auction-parameters{grid-template-columns:repeat(2,minmax(0,1fr));}.admin-auction-pricing{padding:11px;}}

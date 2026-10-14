@@ -26,3 +26,8 @@ Missões, serviços econômicos e crafting passam a ser configurados no Supabase
 ## V18.2.5 — Painel ADM de BOX BÔNUS
 
 `V18_2_5_ADMIN_BONUS_LIVE.sql` cria a configuração ao vivo, uma função somente de leitura para jogadores autenticados e outra para edição autorizada pelo ADM. Banco de produção já atualizado em 10/10/2026.
+
+## V19.0.16 — Precificação dinâmica do Leilão
+`STELLAR_V19_0_16_AUCTION_PRICING.sql`: já aplicado em produção.
+O RPC do ADM permite editar CR/STL, pisos e multiplicadores por categoria e lote.
+O RPC de lance valida o piso baseado no catálogo real da loja, sem confiar no preço enviado pelo cliente.
