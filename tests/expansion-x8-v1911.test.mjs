@@ -36,7 +36,8 @@ test('12 setores adicionais conectam cada batalha 4-X ao próprio X-5 e até X-8
 });
 test('invasão bloqueada por facção no cliente e servidor, salas isoladas até X-8',()=>{
  assert(game.includes('TERRITÓRIO INIMIGO • invasões bloqueadas'));
- assert(game.includes('BATTLE DE OUTRA FACÇÃO • invasões bloqueadas'));
+ assert(!game.includes('BATTLE DE OUTRA FACÇÃO • invasões bloqueadas'));
+ assert(game.includes('if(target.battle)return true;'));
  assert(server.includes('return /^x[1-8]$/.test(mapId) ?'));
  assert(server.includes('INVASÕES BLOQUEADAS'));
  assert(server.includes('authorizeJoin'));

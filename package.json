@@ -1,6 +1,6 @@
 {
   "name": "stellar-legacy",
-  "version": "19.0.12",
+  "version": "19.0.13",
   "type": "module",
   "scripts": {
     "start": "node server/index.js",
@@ -15,5 +15,5 @@
   "engines": {
     "node": ">=18"
   },
-  "release": "v19.0.12-adm-free-map-navigation"
+  "release": "v19.0.13-battle-pvp-cross-faction"
 }

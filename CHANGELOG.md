@@ -1,3 +1,9 @@
+## V19.0.13 — 4-X PvP público interfacções
+- Mapas 4-1, 4-2 e 4-3 livres para todas as facções com nível mínimo 15.
+- Portais PvP e navegação no mapa estelar corrigidos; setores X-1 a X-8 continuam protegidos por facção.
+- Servidor aceita pilotos autorizados de qualquer facção na mesma sala PvP; ADM continua livre.
+- Nenhuma migração SQL nova.
+
 ## V19.0.10 — REGENERAÇÃO ADMINISTRÁVEL (HP + ESCUDO)
 - Robôs de reparo Comum/Elite agora aplicam `repairTick`, `shieldRepairTick` e `repairDelay` do Supabase em tempo real; remove valores fixos no combate.
 - Mantém reparo da base, regeneração natural de escudo, multiplicadores Premium/designers e exceção de HP sem robô.

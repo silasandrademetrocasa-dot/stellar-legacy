@@ -28,10 +28,10 @@ for(const id of ['2-8','3-5','4-2','1-8']){
   assert.equal(r.ok,true,r.reason);
  });
 }
-test('jogador comum não acessa mapas estrangeiros nem battle de outra facção',()=>{
+test('jogador comum não acessa mapas territoriais estrangeiros mas entra em Battle de outra facção no nível exigido',()=>{
  const c=clientSandbox(false,99);
  assert.equal(c.canTravelGraphLabel('2-8').ok,false);
- assert.equal(c.canTravelGraphLabel('4-2').ok,false);
+ assert.equal(c.canTravelGraphLabel('4-2').ok,true);
 });
 test('jogador comum respeita nível de setor próprio',()=>{
  const c=clientSandbox(false,1);
