@@ -1583,7 +1583,9 @@ const sharedUniverse = attachSharedUniverse(server, {
     const {data,error}=await sb.from('game_saves').select('state').eq('user_id',userId).maybeSingle();
     if(error)throw new Error(error.message);
     const profile=data?.state?.profile||{};
-    return {faction:String(profile.faction||''),level:Math.max(1,Number(profile.level)||1)};
+    const {data:isAdmin,error:adminErr}=await sb.rpc('is_game_admin_v1763',{p_uid:userId});
+    if(adminErr)throw new Error('Não foi possível validar permissões do setor.');
+    return {faction:String(profile.faction||''),level:Math.max(1,Number(profile.level)||1),isAdmin:isAdmin===true};
   },
   authenticate: async (token, gameSessionId) => {
     if (!token || !gameSessionId) throw new Error('Sessão do universo ausente.');
@@ -1602,8 +1604,10 @@ const sharedUniverse = attachSharedUniverse(server, {
     const callsign = await ensureProfile(sb, data.user);
     const {data:savedProfile}=await sb.from('game_saves').select('state').eq('user_id',data.user.id).maybeSingle();
     const profile=savedProfile?.state?.profile||{};
-    // 4-X e setores territoriais são autorizados exclusivamente pelo save no servidor.
-    return {user:data.user,callsign,accessToken:token,faction:String(profile.faction||''),level:Math.max(1,Number(profile.level)||1)};
+    // Autorização do ADM vem do cadastro de roles no Supabase, nunca do callsign ou do cliente.
+    const {data:isAdmin,error:adminErr}=await sb.rpc('is_game_admin_v1763',{p_uid:data.user.id});
+    if(adminErr)throw new Error('Falha ao validar privilégios da conta.');
+    return {user:data.user,callsign,accessToken:token,faction:String(profile.faction||''),level:Math.max(1,Number(profile.level)||1),isAdmin:isAdmin===true};
   },
 });
 

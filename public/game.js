@@ -1,8 +1,8 @@
-import { FACTIONS, SHIPS, ITEMS, LASER_AMMO, ROCKETS, NPC_TYPES, MAPS, RESOURCES } from './data.js?v=19.0.11';
-import { repairPulseSettings } from './repair-balance.js?v=19.0.11';
-import { GAME_ASSETS } from './assets/v17/manifest.js?v=19.0.11';
-import { signUp, signIn, beginGoogleSignIn, restoreGoogleSignInFromUrl, requestPasswordReset, restorePasswordRecoveryFromUrl, restoreSession, signOutLocal, checkGameSession, endGameSession, getUser, getSessionCredentials, loadCloudSave, saveCloudSave, updateCallsign, updatePassword, loadRankings, loadAuctionBids, saveAuctionBidOnline, markAuctionBidStatusOnline, loadAuctionMarket, upsertPlayerPresenceOnline, loadMapPresenceOnline, savePlayerLocationCheckpointOnline, loadPlayerLocationCheckpointOnline, removePlayerPresenceOnline, queuePvpAttackOnline, consumePvpDamageEventsOnline, syncArenaProfileOnline, loadArenaState, loadArenaDailyRewardStatus, claimArenaDailyReward, loadArenaOpponents, loadArenaHistory, arenaAttackOnline, listClansOnline, loadMyClanOnline, createClanOnline, joinClanOnline, getClanRequestsOnline, reviewClanRequestOnline, cancelClanRequestOnline, setClanMemberRoleOnline, leaveClanOnline, transferClanCreditsOnline, claimClanCreditGrantsOnline, recordClanAlienKillOnline, getPremiumShopOnline, testPurchasePremiumOnline, adminPreviewPremiumStageOnline, adminSimulatePremiumStageOnline, getPremiumStageCatalogOnline, loadWarfrontStateOnline, hitWorldBossOnline, claimWorldBossRewardOnline, declareClanWarOnline, recordClanWarScoreOnline, loadLiveOpsOnline, adminUpdateLiveEventScheduleOnline, purchaseLiveCatalogOnline, economyActionOnline, getChatHistoryOnline, sendChatMessageOnline, redeemGameCouponOnline, getMyDesignersOnline, setDesignLoadoutOnline, claimGateDroneDesignOnline, claimEventDesignerOnline, getAdminStatus, adminSearchAccounts, adminRecentActions, adminBanAccount, adminUnbanAccount, adminResetAccount, adminDeleteAccount, pushTelemetryBatch, adminTelemetryOverview, adminPlayerTelemetry, getBattleGroupOnline, createBattleGroupOnline, inviteBattleGroupOnline, searchBattleGroupPlayersOnline, inviteBattleGroupUserOnline, respondBattleGroupInviteOnline, leaveBattleGroupOnline, kickBattleGroupMemberOnline, setBattleGroupRallyOnline, loadRuntimeConfigOnline, loadNpcRuntimeConfigOnline, loadWorldRuntimeConfigOnline, loadSystemsRuntimeConfigOnline, loadAdminRuntimeMonitorOnline, adminUpdateRuntimeModuleOnline, adminUpdateNpcRuntimeOnline, adminUpdateNpcSpawnRuntimeOnline, adminUpdateWorldMapOnline, adminUpdateWorldResourceOnline, adminUpdateWorldSectorOnline, adminUpdateWorldPortalOnline, adminUpdateWorldResourcePoolOnline, adminUpdateMissionCategoryOnline, adminUpdateEconomyServiceOnline, adminUpdateCraftingRecipeOnline, loadBattlePassRuntimeConfigOnline, adminUpdateBattlePassSeasonOnline, adminUpdateBattlePassTierOnline, loadShopsRuntimeConfigOnline, adminUpdateCommonShopItemOnline, adminUpdatePremiumShopItemOnline, loadBonusConfigOnline, adminUpdateBonusConfigOnline, adminCouponDashboardOnline, adminCreateCouponOnline, adminSetCouponActiveOnline, loadGalaxyGatesOnline, adminUpdateGalaxyGateOnline, adminUpsertCustomMissionOnline, adminDeleteCustomMissionOnline, adminCreateCraftRecipeOnline, adminCreateEconomyServiceOnline, adminCreatePassSeasonOnline, loadAuctionRulesOnline, adminUpdateAuctionRulesOnline, loadBalanceRuntimeOnline, adminUpdateBalanceOnline } from './api.js?v=19.0.11';
-import { SharedUniverseClient } from './world.js?v=19.0.11';
+import { FACTIONS, SHIPS, ITEMS, LASER_AMMO, ROCKETS, NPC_TYPES, MAPS, RESOURCES } from './data.js?v=19.0.12';
+import { repairPulseSettings } from './repair-balance.js?v=19.0.12';
+import { GAME_ASSETS } from './assets/v17/manifest.js?v=19.0.12';
+import { signUp, signIn, beginGoogleSignIn, restoreGoogleSignInFromUrl, requestPasswordReset, restorePasswordRecoveryFromUrl, restoreSession, signOutLocal, checkGameSession, endGameSession, getUser, getSessionCredentials, loadCloudSave, saveCloudSave, updateCallsign, updatePassword, loadRankings, loadAuctionBids, saveAuctionBidOnline, markAuctionBidStatusOnline, loadAuctionMarket, upsertPlayerPresenceOnline, loadMapPresenceOnline, savePlayerLocationCheckpointOnline, loadPlayerLocationCheckpointOnline, removePlayerPresenceOnline, queuePvpAttackOnline, consumePvpDamageEventsOnline, syncArenaProfileOnline, loadArenaState, loadArenaDailyRewardStatus, claimArenaDailyReward, loadArenaOpponents, loadArenaHistory, arenaAttackOnline, listClansOnline, loadMyClanOnline, createClanOnline, joinClanOnline, getClanRequestsOnline, reviewClanRequestOnline, cancelClanRequestOnline, setClanMemberRoleOnline, leaveClanOnline, transferClanCreditsOnline, claimClanCreditGrantsOnline, recordClanAlienKillOnline, getPremiumShopOnline, testPurchasePremiumOnline, adminPreviewPremiumStageOnline, adminSimulatePremiumStageOnline, getPremiumStageCatalogOnline, loadWarfrontStateOnline, hitWorldBossOnline, claimWorldBossRewardOnline, declareClanWarOnline, recordClanWarScoreOnline, loadLiveOpsOnline, adminUpdateLiveEventScheduleOnline, purchaseLiveCatalogOnline, economyActionOnline, getChatHistoryOnline, sendChatMessageOnline, redeemGameCouponOnline, getMyDesignersOnline, setDesignLoadoutOnline, claimGateDroneDesignOnline, claimEventDesignerOnline, getAdminStatus, adminSearchAccounts, adminRecentActions, adminBanAccount, adminUnbanAccount, adminResetAccount, adminDeleteAccount, pushTelemetryBatch, adminTelemetryOverview, adminPlayerTelemetry, getBattleGroupOnline, createBattleGroupOnline, inviteBattleGroupOnline, searchBattleGroupPlayersOnline, inviteBattleGroupUserOnline, respondBattleGroupInviteOnline, leaveBattleGroupOnline, kickBattleGroupMemberOnline, setBattleGroupRallyOnline, loadRuntimeConfigOnline, loadNpcRuntimeConfigOnline, loadWorldRuntimeConfigOnline, loadSystemsRuntimeConfigOnline, loadAdminRuntimeMonitorOnline, adminUpdateRuntimeModuleOnline, adminUpdateNpcRuntimeOnline, adminUpdateNpcSpawnRuntimeOnline, adminUpdateWorldMapOnline, adminUpdateWorldResourceOnline, adminUpdateWorldSectorOnline, adminUpdateWorldPortalOnline, adminUpdateWorldResourcePoolOnline, adminUpdateMissionCategoryOnline, adminUpdateEconomyServiceOnline, adminUpdateCraftingRecipeOnline, loadBattlePassRuntimeConfigOnline, adminUpdateBattlePassSeasonOnline, adminUpdateBattlePassTierOnline, loadShopsRuntimeConfigOnline, adminUpdateCommonShopItemOnline, adminUpdatePremiumShopItemOnline, loadBonusConfigOnline, adminUpdateBonusConfigOnline, adminCouponDashboardOnline, adminCreateCouponOnline, adminSetCouponActiveOnline, loadGalaxyGatesOnline, adminUpdateGalaxyGateOnline, adminUpsertCustomMissionOnline, adminDeleteCustomMissionOnline, adminCreateCraftRecipeOnline, adminCreateEconomyServiceOnline, adminCreatePassSeasonOnline, loadAuctionRulesOnline, adminUpdateAuctionRulesOnline, loadBalanceRuntimeOnline, adminUpdateBalanceOnline } from './api.js?v=19.0.12';
+import { SharedUniverseClient } from './world.js?v=19.0.12';
 
 const canvas = document.querySelector('#game');
 const ctx = canvas.getContext('2d');
@@ -3213,14 +3213,16 @@ function graphDestination(label){
 }
 function internalMapFromGraphLabel(label){return graphDestination(label)?.mapId||null;}
 function graphLevelRequirement(label){const live=worldRuntimeConfig.sectorInfo.get(String(label||''));if(live)return Math.max(1,Number(live.minLevel)||1);if(label.startsWith('4-'))return 15;const tier=Number(label.split('-')[1]||99);return ({1:1,2:3,3:7,4:10,5:18,6:22,7:27,8:32})[tier]||99;}
+function isVerifiedAdminNavigator(){return !!authenticated && adminRuntime.enabled===true;}
 function canTravelGraphLabel(label){
   const dest=graphDestination(label);if(!dest)return {ok:false,reason:'Rota inválida'};
   const map=MAPS[dest.mapId];if(!map||map.enabled===false)return {ok:false,reason:'Setor temporariamente indisponível'};
   // Etapa X-8: 4-X própria funciona como corredor permanente; outra facção não entra.
   const ownerBattle=({'4-1':'earth','4-2':'mars','4-3':'jupiter'})[label];
-  if(ownerBattle&&ownerBattle!==progress?.profile?.faction)return {ok:false,reason:'BATTLE DE OUTRA FACÇÃO • invasões bloqueadas'};
-  if(!dest.battle&&dest.territoryFaction!==progress?.profile?.faction)return {ok:false,reason:'TERRITÓRIO INIMIGO • invasões bloqueadas'};
-  const req=graphLevelRequirement(label);if((progress?.profile?.level||1)<req)return {ok:false,reason:`Requer nível ${req}`};
+  const adminJump=isVerifiedAdminNavigator();
+  if(!adminJump&&ownerBattle&&ownerBattle!==progress?.profile?.faction)return {ok:false,reason:'BATTLE DE OUTRA FACÇÃO • invasões bloqueadas'};
+  if(!adminJump&&!dest.battle&&dest.territoryFaction!==progress?.profile?.faction)return {ok:false,reason:'TERRITÓRIO INIMIGO • invasões bloqueadas'};
+  const req=graphLevelRequirement(label);if(!adminJump&&(progress?.profile?.level||1)<req)return {ok:false,reason:`Requer nível ${req}`};
   const foreign=!dest.battle&&dest.territoryFaction!==progress.profile.faction;
   return {ok:true,mapId:dest.mapId,territoryFaction:dest.territoryFaction,battle:dest.battle,foreign};
 }
@@ -3240,21 +3242,22 @@ function renderMapModal(){
   normalizeGalaxyGateState();
   const jumps=progress.galaxyGate.jumpBonus;
   const current=currentGraphMapLabel(),ownedPrefix=FACTIONS[progress.profile.faction]?.prefix||'1';
-  const visibleNodes=MAP_GRAPH_NODES.filter(n=>n.id.startsWith(ownedPrefix+'-')||n.id==='4-'+ownedPrefix);
+  const adminJump=isVerifiedAdminNavigator();
+  const visibleNodes=MAP_GRAPH_NODES.filter(n=>adminJump||n.id.startsWith(ownedPrefix+'-')||n.id==='4-'+ownedPrefix);
   const visibleKeys=new Set(visibleNodes.map(n=>n.id));
   const nodeMap=Object.fromEntries(visibleNodes.map(n=>[n.id,n]));
   let html=`<svg class="map-svg" viewBox="0 0 100 100" preserveAspectRatio="none">`;
   for(const [a,b] of MAP_GRAPH_LINKS){if(!visibleKeys.has(a)||!visibleKeys.has(b))continue;const na=nodeMap[a],nb=nodeMap[b];html+=`<line class="map-link" x1="${na.x}" y1="${na.y}" x2="${nb.x}" y2="${nb.y}" />`;}
   html+='</svg>';
-  html+=`<div class="map-legend"><span><i class="dot curr"></i> mapa atual</span><span><i class="dot own"></i> território aliado</span><span><i class="dot hostile"></i> território inimigo / invasão</span><span class="jump-wallet">↯ BÔNUS DE SALTO <b>${fmt(jumps)}</b></span></div>`;
+  html+=`<div class="map-legend"><span><i class="dot curr"></i> mapa atual</span><span><i class="dot own"></i> território aliado</span><span><i class="dot hostile"></i> território inimigo / invasão</span><span class="jump-wallet">${adminJump?'🛡️ ADM • SALTO LIVRE':`↯ BÔNUS DE SALTO <b>${fmt(jumps)}</b>`}</span></div>`;
   for(const node of visibleNodes){
     const access=canTravelGraphLabel(node.id),active=node.id===current,battle=node.id.startsWith('4-'),foreign=!!access.foreign;
-    const canJump=access.ok&&!active&&jumps>0;
+    const canJump=access.ok&&!active&&(adminJump||jumps>0);
     const classes=['map-node'];
     if(active)classes.push('current');if(!foreign&&!battle)classes.push('faction');if(foreign)classes.push('hostile');if(battle)classes.push('battle');
     if(canJump)classes.push('travel');else if(access.ok&&!active)classes.push('no-jump');
     if(!access.ok)classes.push('locked');
-    const sub=active?'ATUAL':!access.ok?access.reason:jumps>0?'1 BÔNUS DE SALTO':'USE OS PORTAIS';
+    const sub=active?'ATUAL':!access.ok?access.reason:adminJump?'SALTO ADM • LIVRE':jumps>0?'1 BÔNUS DE SALTO':'USE OS PORTAIS';
     html+=`<div class="${classes.join(' ')}" data-map-label="${node.id}" style="left:${node.x}%;top:${node.y}%;--art:${mapArtFor(node.id)}"><div class="node-art"></div><div class="node-overlay"></div><div class="node-sub">${sub}</div>${!access.ok?'<div class="node-lock">🔒</div>':''}<div class="node-label">${node.id}</div></div>`;
   }
   ui.mapNetwork.innerHTML=html;
@@ -3264,14 +3267,14 @@ function renderMapModal(){
     const access=canTravelGraphLabel(label);
     if(!access.ok){showToast(access.reason);return;}
     normalizeGalaxyGateState();
-    if(progress.galaxyGate.jumpBonus<=0){
+    const adminJump=isVerifiedAdminNavigator();
+    if(!adminJump&&progress.galaxyGate.jumpBonus<=0){
       showToast('Sem Bônus de Salto • viaje pelos portais físicos');
       return;
     }
-    progress.galaxyGate.jumpBonus--;
-    saveGame();renderGalaxyGate();
+    if(!adminJump){progress.galaxyGate.jumpBonus--;saveGame();renderGalaxyGate();}
     ui.mapModal.classList.add('hidden');
-    runMapTransition(access.mapId,null,'BÔNUS DE SALTO CONSUMIDO',access.territoryFaction,currentGraphMapLabel());
+    runMapTransition(access.mapId,null,adminJump?'SALTO LIVRE • ADMINISTRAÇÃO':'BÔNUS DE SALTO CONSUMIDO',access.territoryFaction,currentGraphMapLabel());
   }));
 }
 function openMapModal(){if(isGalaxyGateMap()){showToast('Portal Astral ativo: complete o portal ou perca uma vida para retornar à base');return;}closeNavigationModals(ui.mapModal);renderMapModal();ui.mapModal.classList.remove('hidden');}
@@ -3403,7 +3406,7 @@ function readLatestPositionCheckpoint(){
     if(!Number.isFinite(x)||!Number.isFinite(y)||!savedAt)return null;
     // Ignora relógio impossível / checkpoint absurdamente antigo.
     if(savedAt>Date.now()+300000||savedAt<Date.now()-1000*60*60*24*30)return null;
-    const territoryFaction=['x1','x2','x3','x4'].includes(mapId)
+    const territoryFaction=/^x[1-8]$/.test(mapId)
       ? (entry.territoryFaction||progress?.profile?.faction||null)
       : null;
     return {mapId,territoryFaction,x,y,savedAt};
@@ -3444,7 +3447,7 @@ function applyPresenceCheckpoint(row){
   // mais confiável que o save econômico para restaurar posição depois de um reload.
   const local=readLatestPositionCheckpoint();
   if(local&&local.savedAt>serverAt+250)return false;
-  const territoryFaction=['x1','x2','x3','x4'].includes(mapId)
+  const territoryFaction=/^x[1-8]$/.test(mapId)
     ? (row.territory_faction||progress.profile?.faction||null)
     : null;
   progress.mapId=mapId;
@@ -3469,7 +3472,7 @@ function applyDedicatedCheckpointToProgress(row,{requireNewer=true}={}){
   if(!Number.isFinite(x)||!Number.isFinite(y)||!savedAt)return false;
   const currentStamp=Math.max(0,Number(progress.locationSavedAt)||0);
   if(requireNewer&&savedAt<=currentStamp+25)return false;
-  const territory=['x1','x2','x3','x4'].includes(mapId)?(row.territory_faction||row.territoryFaction||progress.profile?.faction||null):null;
+  const territory=/^x[1-8]$/.test(mapId)?(row.territory_faction||row.territoryFaction||progress.profile?.faction||null):null;
   progress.mapId=mapId;progress.territoryFaction=territory;
   progress.x=Math.max(35,Math.min(map.world.w-35,x));progress.y=Math.max(35,Math.min(map.world.h-35,y));
   progress.savedMapId=mapId;progress.savedTerritoryFaction=territory;progress.locationSavedAt=savedAt;
@@ -3507,7 +3510,7 @@ async function restoreBestRuntimePosition(){
   if(!valid.length)return false;
   valid.sort((a,b)=>b.savedAt-a.savedAt || (a.source==='dedicated'?-1:1));
   const best=valid[0],map=MAPS[best.mapId];
-  const territory=['x1','x2','x3','x4'].includes(best.mapId)?(best.territoryFaction||progress.profile?.faction||null):null;
+  const territory=/^x[1-8]$/.test(best.mapId)?(best.territoryFaction||progress.profile?.faction||null):null;
   progress.mapId=best.mapId;progress.territoryFaction=territory;
   progress.x=Math.max(35,Math.min(map.world.w-35,best.x));progress.y=Math.max(35,Math.min(map.world.h-35,best.y));
   progress.savedMapId=best.mapId;progress.savedTerritoryFaction=territory;progress.locationSavedAt=best.savedAt;
@@ -3661,7 +3664,7 @@ function hydrateProgress(){
   progress.profile.aliensKilled=Math.max(0,Math.floor(Number(progress.profile.aliensKilled)||0));
   progress.profile.ggCompleted=Math.max(0,Math.floor(Number(progress.profile.ggCompleted)||0));
   normalizeWarfrontProgress();
-  if(['x1','x2','x3','x4'].includes(progress.mapId))progress.territoryFaction=progress.territoryFaction||progress.profile.faction;
+  if(/^x[1-8]$/.test(progress.mapId))progress.territoryFaction=progress.territoryFaction||progress.profile.faction;
   else progress.territoryFaction=null;
   progress.positionByMap ||= {};
   if(!progress.savedMapId)progress.savedMapId=progress.mapId;
@@ -4512,7 +4515,6 @@ function initAlphaRun(){
 }
 function setupAlphaMap(resume=false){
   sharedUniverse.close();sharedUniverseRuntime.ready=false;sharedUniverseRuntime.event=null;updateSharedUniverseChip();
-  if(/^x[1-8]$/.test(mapId)&&targetTerritoryFaction&&targetTerritoryFaction!==progress?.profile?.faction){showToast('INVASÕES BLOQUEADAS • território de outra facção');return;}
   if(progress?.pet?.activeGear==='kami')progress.pet.activeGear='off';
   cancelPetKamikazeCharge();
   const a=alphaGate();if(!a.run?.active)initAlphaRun();
@@ -4655,6 +4657,7 @@ function portalsForGraphLabel(label){
   return graphNeighbors(label).filter(targetLabel=>{
     const target=graphDestination(targetLabel);
     if(!target)return false;
+    if(isVerifiedAdminNavigator())return true;
     if(target.battle)return !({'b41':'earth','b42':'mars','b43':'jupiter'})[target.mapId]||({'b41':'earth','b42':'mars','b43':'jupiter'})[target.mapId]===progress?.profile?.faction;
     return target.territoryFaction===progress?.profile?.faction;
   }).map(targetLabel=>{
@@ -4681,7 +4684,7 @@ function setMap(mapId,preserve=false,fromMapId=null,targetTerritoryFaction=null,
   if(!MAPS[mapId])return;if(gateKeyForMap(mapId)){progress.galaxyGate.selected=gateKeyForMap(mapId);setupAlphaMap(true);return;}
   // V17.6.0: grava a posição do mapa de origem antes de alterar mapId/território.
   if(progress&&state?.currentMap)syncRuntimeLocationToProgress(true);
-  if(/^x[1-8]$/.test(mapId)&&targetTerritoryFaction&&targetTerritoryFaction!==progress?.profile?.faction){showToast('INVASÕES BLOQUEADAS • território de outra facção');return;}
+  if(!isVerifiedAdminNavigator()&&/^x[1-8]$/.test(mapId)&&targetTerritoryFaction&&targetTerritoryFaction!==progress?.profile?.faction){showToast('INVASÕES BLOQUEADAS • território de outra facção');return;}
   if(progress?.pet?.activeGear==='kami')progress.pet.activeGear='off';
   cancelPetKamikazeCharge();
 
@@ -4717,7 +4720,7 @@ function setMap(mapId,preserve=false,fromMapId=null,targetTerritoryFaction=null,
   if(authenticated)flushCloudSave(true).catch(()=>{});
 
   const owner=territoryOwner(),home=isOwnTerritory();
-  showToast(['x1','x8'].includes(mapId)?`Base ${mapId==='x8'?'Avançada ':''}${owner?.short||''} • Zona Segura`:`Entrando em ${displayMapLabel(mapId,currentTerritoryFaction())}`);
+  showToast(['x1','x8'].includes(mapId)&&home?`Base ${mapId==='x8'?'Avançada ':''}${owner?.short||''} • Zona Segura`:`Entrando em ${displayMapLabel(mapId,currentTerritoryFaction())}${!home&&currentTerritoryFaction()?' • INSPEÇÃO ADM':''}`);
   renderMapModal();syncOnlineWorld();
 }
 function runMapTransition(targetMapId,fromMapId=null,mode='PORTAL QUÂNTICO',targetTerritoryFaction=null,fromGraphLabel=null){
@@ -8140,7 +8143,8 @@ function renderAdminTelemetryDetail(){if(!ui.adminTelemetryDetail)return;const d
 
 async function openAdminTelemetryDetail(userId){try{adminRuntime.telemetryDetail=await adminPlayerTelemetry(userId);renderAdminTelemetryDetail();}catch(e){adminSetMessage(e.message,'err');}}
 async function refreshAdminStatus(silent=true){
-  try{const st=await getAdminStatus();adminRuntime.status=st;adminRuntime.enabled=!!st?.is_admin;ui.adminBtn?.classList.toggle('hidden',!adminRuntime.enabled);renderAdminStatus();return adminRuntime.enabled;}catch(err){adminRuntime.enabled=false;ui.adminBtn?.classList.add('hidden');if(!silent)showToast(err.message);return false;}
+  const checkedUser=String(getUser()?.id||'');
+  try{const st=await getAdminStatus();if(!authenticated||String(getUser()?.id||'')!==checkedUser)return false;adminRuntime.status=st;adminRuntime.enabled=!!st?.is_admin;ui.adminBtn?.classList.toggle('hidden',!adminRuntime.enabled);renderAdminStatus();return adminRuntime.enabled;}catch(err){adminRuntime.enabled=false;ui.adminBtn?.classList.add('hidden');if(!silent)showToast(err.message);return false;}
 }
 async function refreshAdminPanel(query=null){if(adminRuntime.busy)return;adminRuntime.busy=true;adminSetMessage('Atualizando painel...','busy');try{const q=query===null?String(ui.adminSearchInput?.value||''):String(query||'');const [status,users,actions,telemetry]=await Promise.all([getAdminStatus(),adminSearchAccounts(q),adminRecentActions(),adminTelemetryOverview()]);adminRuntime.status=status;adminRuntime.enabled=!!status?.is_admin;if(!adminRuntime.enabled)throw new Error('Acesso administrativo negado.');adminRuntime.users=users?.users||[];adminRuntime.actions=actions?.actions||[];adminRuntime.telemetry=telemetry||null;renderAdminStatus();renderAdminUsers();renderAdminActions();renderAdminTelemetry();renderAdminTelemetryDetail();adminSetMessage(`${adminRuntime.users.length} conta(s) exibida(s).`,'ok');}catch(err){adminSetMessage(err.message,'err');}finally{adminRuntime.busy=false;}}
 async function openAdminPanel(){bootAdminEditorObserver();if(!await refreshAdminStatus(false)){showToast('Acesso administrativo negado');return;}closeNavigationModals(ui.adminModal);ui.adminModal?.classList.remove('hidden');await Promise.all([refreshAdminPanel(),loadAdminRuntimeMonitor(false)]);}
@@ -8404,13 +8408,13 @@ ui.loginForm.onsubmit=async e=>{e.preventDefault();ui.authMessage.textContent='E
 ui.registerForm.onsubmit=async e=>{e.preventDefault();ui.authMessage.textContent='Criando conta...';try{const result=await signUp({callsign:ui.registerCallsign.value,email:ui.registerEmail.value,password:ui.registerPassword.value});if(result.requires_confirmation){showAuthMode('login');ui.loginEmail.value=ui.registerEmail.value;ui.authMessage.textContent='Conta criada. Confirme o e-mail e depois entre.';return;}await afterAuth();}catch(err){ui.authMessage.textContent=err.message;}};
 if(ui.forgotPasswordBtn)ui.forgotPasswordBtn.onclick=async()=>{const email=String(ui.loginEmail?.value||'').trim();ui.authMessage.textContent='Enviando recuperação...';try{await requestPasswordReset(email);ui.authMessage.textContent='E-mail de recuperação enviado. Abra o link recebido para criar uma nova senha.';}catch(err){ui.authMessage.textContent=err.message;}};
 if(ui.recoveryForm)ui.recoveryForm.onsubmit=async e=>{e.preventDefault();const a=ui.recoveryPassword?.value||'',b=ui.recoveryPasswordConfirm?.value||'';if(a!==b){ui.authMessage.textContent='As senhas não conferem.';return;}ui.authMessage.textContent='Atualizando senha...';try{await updatePassword(a);signOutLocal();showAuthMode('login');ui.loginPassword.value='';ui.authMessage.textContent='Senha atualizada. Entre com a nova senha.';}catch(err){ui.authMessage.textContent=err.message;}};
-ui.logoutBtn.onclick=async()=>{await flushTelemetry(true).catch(()=>{});telemetryRuntime.sessionOpen=false;sharedUniverse.close();sharedUniverseRuntime.ready=false;sharedUniverseRuntime.event=null;if(movementPositionRuntime.loadedFromCheckpoint||movementPositionRuntime.hasMovedSinceLoad)commitRuntimePosition('logout');await flushCloudSave(true);await removePlayerPresenceOnline().catch(()=>{});clearOnlinePlayers();await endGameSession().catch(()=>signOutLocal());authenticated=false;progress=null;npcRuntimeConfig.version=0;npcRuntimeConfig.updatedAt=null;npcRuntimeConfig.source='fallback';npcRuntimeConfig.spawns=[];worldRuntimeConfig.version=0;worldRuntimeConfig.updatedAt=null;worldRuntimeConfig.source='fallback';passRuntimeConfig.version=0;passRuntimeConfig.updatedAt=null;passRuntimeConfig.activeSeason=null;passRuntimeConfig.seasons=[];passRuntimeConfig.tiers=new Map();passRuntimeConfig.source='fallback';runtimeConfigRuntime.version=0;runtimeConfigRuntime.isAdmin=false;runtimeConfigRuntime.source='fallback';runtimeConfigRuntime.modules=new Map(RUNTIME_FALLBACK_MODULES.map(x=>[x.module_key,x]));runtimeConfigRuntime.flags=new Map(Object.entries(RUNTIME_FALLBACK_FLAGS).map(([flag_key,enabled])=>[flag_key,{flag_key,enabled,config:{}}]));applyRuntimeMenuConfig();clanRuntime.state=null;clanRuntime.clans=[];clanRuntime.lastAt=0;warfrontRuntime.state=null;warfrontRuntime.clans=[];warfrontRuntime.lastAt=0;warfrontRuntime.pendingBossDamage=0;premiumRuntime.state=null;premiumRuntime.lastAt=0;updateClanBadge();updatePremiumBadge();chatRuntime.messages=[];chatRuntime.lastSignature='';renderChatTabs();renderChatMessages();state.target=null;player.laserFiring=false;for(const modal of dismissibleModals())modal.classList.add('hidden');ui.factionModal.classList.add('hidden');ui.portalPrompt?.classList.add('hidden');ui.baseTradePrompt?.classList.add('hidden');ui.petFloatPanel?.classList.add('hidden');ui.loginModal.classList.remove('hidden');if(ui.userLabel)ui.userLabel.textContent='—';if(ui.rankChip)ui.rankChip.textContent='Piloto Básico';if(ui.loginPassword)ui.loginPassword.value='';setSync('LOCAL','');showAuthMode('login');};
+ui.logoutBtn.onclick=async()=>{await flushTelemetry(true).catch(()=>{});telemetryRuntime.sessionOpen=false;sharedUniverse.close();sharedUniverseRuntime.ready=false;sharedUniverseRuntime.event=null;if(movementPositionRuntime.loadedFromCheckpoint||movementPositionRuntime.hasMovedSinceLoad)commitRuntimePosition('logout');await flushCloudSave(true);await removePlayerPresenceOnline().catch(()=>{});clearOnlinePlayers();await endGameSession().catch(()=>signOutLocal());authenticated=false;adminRuntime.enabled=false;adminRuntime.status=null;progress=null;npcRuntimeConfig.version=0;npcRuntimeConfig.updatedAt=null;npcRuntimeConfig.source='fallback';npcRuntimeConfig.spawns=[];worldRuntimeConfig.version=0;worldRuntimeConfig.updatedAt=null;worldRuntimeConfig.source='fallback';passRuntimeConfig.version=0;passRuntimeConfig.updatedAt=null;passRuntimeConfig.activeSeason=null;passRuntimeConfig.seasons=[];passRuntimeConfig.tiers=new Map();passRuntimeConfig.source='fallback';runtimeConfigRuntime.version=0;runtimeConfigRuntime.isAdmin=false;runtimeConfigRuntime.source='fallback';runtimeConfigRuntime.modules=new Map(RUNTIME_FALLBACK_MODULES.map(x=>[x.module_key,x]));runtimeConfigRuntime.flags=new Map(Object.entries(RUNTIME_FALLBACK_FLAGS).map(([flag_key,enabled])=>[flag_key,{flag_key,enabled,config:{}}]));applyRuntimeMenuConfig();clanRuntime.state=null;clanRuntime.clans=[];clanRuntime.lastAt=0;warfrontRuntime.state=null;warfrontRuntime.clans=[];warfrontRuntime.lastAt=0;warfrontRuntime.pendingBossDamage=0;premiumRuntime.state=null;premiumRuntime.lastAt=0;updateClanBadge();updatePremiumBadge();chatRuntime.messages=[];chatRuntime.lastSignature='';renderChatTabs();renderChatMessages();state.target=null;player.laserFiring=false;for(const modal of dismissibleModals())modal.classList.add('hidden');ui.factionModal.classList.add('hidden');ui.portalPrompt?.classList.add('hidden');ui.baseTradePrompt?.classList.add('hidden');ui.petFloatPanel?.classList.add('hidden');ui.loginModal.classList.remove('hidden');if(ui.userLabel)ui.userLabel.textContent='—';if(ui.rankChip)ui.rankChip.textContent='Piloto Básico';if(ui.loginPassword)ui.loginPassword.value='';setSync('LOCAL','');showAuthMode('login');};
 
 function startLoadedGame(){
   if(!telemetryRuntime.sessionOpen)telemetryStartSession();
   state.lastPlayerDamageAt=nowSec();
   normalizeGalaxyGateState();normalizeCombatAbilities();
-  if(/^x[1-8]$/.test(progress.mapId)&&progress.territoryFaction&&progress.territoryFaction!==progress.profile.faction){progress.mapId='x1';progress.territoryFaction=progress.profile.faction;}
+  if(!isVerifiedAdminNavigator()&&/^x[1-8]$/.test(progress.mapId)&&progress.territoryFaction&&progress.territoryFaction!==progress.profile.faction){progress.mapId='x1';progress.territoryFaction=progress.profile.faction;}
   const loadedGateKey=gateKeyForMap(progress.mapId);if(loadedGateKey&&!progress.galaxyGate[loadedGateKey]?.run?.active){progress.mapId='x1';progress.territoryFaction=progress.profile.faction;}else if(loadedGateKey)progress.galaxyGate.selected=loadedGateKey;
   const savedLocation=savedLocationForCurrentMap(),savedX=savedLocation?.x??null,savedY=savedLocation?.y??null;
   state.currentMap=MAPS[progress.mapId]||MAPS.x1;state.radarRange=mapRadarRange();
@@ -8440,7 +8444,7 @@ function startLoadedGame(){
 async function afterAuth(){
   const generation=++gameBootstrapRuntime.generation;
   gameBootstrapRuntime.loading=true;gameBootstrapRuntime.ready=false;gameBootstrapRuntime.lastError=null;
-  authenticated=true;ui.loginModal.classList.add('hidden');ui.userLabel.textContent=getUser()?.callsign||getUser()?.email?.split('@')[0]||'Pilot';loadActivityLog();refreshAdminStatus(true);refreshClanState(true).then(()=>refreshRankings(true)).catch(()=>{});setSync('SINCRONIZANDO','busy');
+  authenticated=true;ui.loginModal.classList.add('hidden');ui.userLabel.textContent=getUser()?.callsign||getUser()?.email?.split('@')[0]||'Pilot';loadActivityLog();await refreshAdminStatus(true);refreshClanState(true).then(()=>refreshRankings(true)).catch(()=>{});setSync('SINCRONIZANDO','busy');
   try{
     const accountId=String(getUser()?.id||'');
     let local=readLocalGameState();

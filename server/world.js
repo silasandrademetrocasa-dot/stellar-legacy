@@ -906,15 +906,20 @@ export function attachSharedUniverse(server,{authenticate,authorizeJoin,loadLive
       }
       if(msg.type==='join_map'){
         const identity=ws.identity;const mapId=String(msg.mapId||'x1');
-        if(authorizeJoin){try{const fresh=await authorizeJoin(identity.accessToken,identity.user.id);identity.faction=fresh?.faction||identity.faction;identity.level=Math.max(1,Number(fresh?.level)||Number(identity.level)||1);}catch{safeJsonSend(ws,{type:'join_error',reason:'Falha ao validar progresso no servidor'});return;}}
+        if(authorizeJoin){try{const fresh=await authorizeJoin(identity.accessToken,identity.user.id);identity.faction=fresh?.faction||identity.faction;identity.level=Math.max(1,Number(fresh?.level)||Number(identity.level)||1);identity.isAdmin=fresh?.isAdmin===true;}catch{safeJsonSend(ws,{type:'join_error',reason:'Falha ao validar progresso no servidor'});return;}}
         const known=String(identity.faction||'');const faction=known||(['earth','mars','jupiter'].includes(String(msg.faction||''))&&mapId==='x1'?String(msg.faction):'');const level=Math.max(1,Number(identity.level)||1);
+        const admin=identity.isAdmin===true;
+        const territorial=/^x[1-8]$/.test(mapId);
+        const territory=territorial?(admin?String(msg.territoryFaction||faction):faction):null;
+        const validTerritory=!territorial||['earth','mars','jupiter'].includes(territory);
         const owner=({'b41':'earth','b42':'mars','b43':'jupiter'})[mapId];
         const dest=world.mapDefinition(mapId);
-        const sector=world.sectorForRoom(mapId,msg.territoryFaction);
+        const sector=world.sectorForRoom(mapId,territory);
+        const sectorValid=!territorial||!sector||String(sector.territory_faction||'')===territory;
         const required=Math.max(1,Number(dest?.minLevel)||1,Number(sector?.min_level)||1);
-        const wrongFaction=(/^x[1-8]$/.test(mapId)&&String(msg.territoryFaction||faction)!==faction)||(owner&&owner!==faction);
-        if(!dest||dest.enabled===false||dest.gate||wrongFaction||level<required||!faction){safeJsonSend(ws,{type:'join_error',reason:wrongFaction?'INVASÕES BLOQUEADAS':`Setor indisponível / nível mínimo ${required}`});return;}
-        ws.room?.removeClient(ws);const r=world.room(mapId,/^x[1-8]$/.test(mapId)?faction:null);const p={userId:identity.user.id,callsign:identity.callsign||msg.callsign||'Pilot',pilotTitle:shortText(msg.pilotTitle||'Piloto Estelar',64),faction:faction,shipId:String(msg.shipId||'phoenix'),shipDesignId:msg.shipDesignId?shortText(msg.shipDesignId,64):null,level:Number(msg.level)||1,x:Number(msg.x)||400,y:Number(msg.y)||400,hp:Number(msg.hp)||1,maxHp:Number(msg.maxHp)||1,shield:Number(msg.shield)||0,maxShield:Number(msg.maxShield)||0,angle:Number(msg.angle)||0,laserFiring:false,laserColor:'#76d9ff',laserAmmoId:'lcb10',laserAmmoName:'PLS-1',targetId:null,targetIsPlayer:false,pet:{owned:false},updatedAt:nowMs()};r.addClient(ws,p);return;
+        const wrongFaction=!admin&&((territorial&&String(msg.territoryFaction||faction)!==faction)||(owner&&owner!==faction));
+        if(!dest||dest.enabled===false||dest.gate||!validTerritory||!sectorValid||wrongFaction||(!admin&&level<required)||!faction){safeJsonSend(ws,{type:'join_error',reason:wrongFaction?'INVASÕES BLOQUEADAS':`Setor indisponível / nível mínimo ${required}`});return;}
+        ws.room?.removeClient(ws);const r=world.room(mapId,territory);const p={userId:identity.user.id,callsign:identity.callsign||msg.callsign||'Pilot',pilotTitle:shortText(msg.pilotTitle||'Piloto Estelar',64),faction:faction,shipId:String(msg.shipId||'phoenix'),shipDesignId:msg.shipDesignId?shortText(msg.shipDesignId,64):null,level:level,x:Number(msg.x)||400,y:Number(msg.y)||400,hp:Number(msg.hp)||1,maxHp:Number(msg.maxHp)||1,shield:Number(msg.shield)||0,maxShield:Number(msg.maxShield)||0,angle:Number(msg.angle)||0,laserFiring:false,laserColor:'#76d9ff',laserAmmoId:'lcb10',laserAmmoName:'PLS-1',targetId:null,targetIsPlayer:false,pet:{owned:false},updatedAt:nowMs()};r.addClient(ws,p);return;
       }
       if(msg.type==='player_state')return ws.room?.updatePlayer(ws,msg);
       if(msg.type==='npc_damage')return await ws.room?.handleDamage(ws,msg);

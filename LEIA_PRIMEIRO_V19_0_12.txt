@@ -1,0 +1,9 @@
+STELLAR LEGACY V19.0.12 - SALTO LIVRE ADM
+
+1. Envie o ZIP completo para o instalador principal GitHub (substituindo o ZIP anterior).
+2. Execute o workflow principal sem alterá-lo.
+3. Após deploy, entre com conta ADM verdadeira e clique no mapa estelar.
+4. Teste X-5 outra facção abaixo do nível; observe que nao consome bônus.
+5. Com conta comum, confira que outro território, nível e bônus continuam bloqueados.
+
+SQL NOVO: nao necessario.
