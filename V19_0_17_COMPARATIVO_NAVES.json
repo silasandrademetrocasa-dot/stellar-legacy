@@ -1,0 +1,281 @@
+{
+  "aegis": {
+    "hp_before": 375000,
+    "hp_after": 455000,
+    "speed_after": 315,
+    "lasers_after": 11,
+    "generators_after": 18,
+    "extras_after": 4,
+    "cargo_after": 2250
+  },
+  "basilisk": {
+    "hp_before": 325000,
+    "hp_after": 450000,
+    "speed_after": 330,
+    "lasers_after": 15,
+    "generators_after": 17,
+    "extras_after": 4,
+    "cargo_after": 1650
+  },
+  "berserker": {
+    "hp_before": 500000,
+    "hp_after": 620000,
+    "speed_after": 300,
+    "lasers_after": 8,
+    "generators_after": 18,
+    "extras_after": 4,
+    "cargo_after": 1650
+  },
+  "centurion": {
+    "hp_before": 365000,
+    "hp_after": 455000,
+    "speed_after": 335,
+    "lasers_after": 16,
+    "generators_after": 17,
+    "extras_after": 4,
+    "cargo_after": 1600
+  },
+  "citadel": {
+    "hp_before": 650000,
+    "hp_after": 750000,
+    "speed_after": 250,
+    "lasers_after": 8,
+    "generators_after": 21,
+    "extras_after": 5,
+    "cargo_after": 4500
+  },
+  "cyborg": {
+    "hp_before": 365000,
+    "hp_after": 455000,
+    "speed_after": 325,
+    "lasers_after": 16,
+    "generators_after": 17,
+    "extras_after": 4,
+    "cargo_after": 1600
+  },
+  "defcom": {
+    "hp_before": 150000,
+    "hp_after": 290000,
+    "speed_after": 380,
+    "lasers_after": 12,
+    "generators_after": 11,
+    "extras_after": 3,
+    "cargo_after": 900
+  },
+  "defcomRaven": {
+    "hp_before": 287500,
+    "hp_after": 365000,
+    "speed_after": 385,
+    "lasers_after": 12,
+    "generators_after": 12,
+    "extras_after": 3,
+    "cargo_after": 1000
+  },
+  "diminisher": {
+    "hp_before": 356000,
+    "hp_after": 460000,
+    "speed_after": 325,
+    "lasers_after": 15,
+    "generators_after": 17,
+    "extras_after": 4,
+    "cargo_after": 1700
+  },
+  "disruptor": {
+    "hp_before": 356000,
+    "hp_after": 450000,
+    "speed_after": 345,
+    "lasers_after": 14,
+    "generators_after": 16,
+    "extras_after": 4,
+    "cargo_after": 1650
+  },
+  "goliathX": {
+    "hp_before": 356000,
+    "hp_after": 540000,
+    "speed_after": 305,
+    "lasers_after": 15,
+    "generators_after": 18,
+    "extras_after": 5,
+    "cargo_after": 1900
+  },
+  "hammerclaw": {
+    "hp_before": 377500,
+    "hp_after": 465000,
+    "speed_after": 305,
+    "lasers_after": 13,
+    "generators_after": 18,
+    "extras_after": 4,
+    "cargo_after": 1900
+  },
+  "hecate": {
+    "hp_before": 377500,
+    "hp_after": 475000,
+    "speed_after": 320,
+    "lasers_after": 15,
+    "generators_after": 17,
+    "extras_after": 4,
+    "cargo_after": 1600
+  },
+  "holo": {
+    "hp_before": 375000,
+    "hp_after": 445000,
+    "speed_after": 330,
+    "lasers_after": 15,
+    "generators_after": 16,
+    "extras_after": 4,
+    "cargo_after": 1650
+  },
+  "hyperion": {
+    "hp_before": 400000,
+    "hp_after": 480000,
+    "speed_after": 320,
+    "lasers_after": 15,
+    "generators_after": 18,
+    "extras_after": 4,
+    "cargo_after": 1750
+  },
+  "keres": {
+    "hp_before": 356000,
+    "hp_after": 445000,
+    "speed_after": 330,
+    "lasers_after": 15,
+    "generators_after": 17,
+    "extras_after": 4,
+    "cargo_after": 1650
+  },
+  "mimesis": {
+    "hp_before": 386000,
+    "hp_after": 430000,
+    "speed_after": 350,
+    "lasers_after": 13,
+    "generators_after": 15,
+    "extras_after": 4,
+    "cargo_after": 1650
+  },
+  "orcus": {
+    "hp_before": 300000,
+    "hp_after": 440000,
+    "speed_after": 320,
+    "lasers_after": 15,
+    "generators_after": 16,
+    "extras_after": 4,
+    "cargo_after": 1750
+  },
+  "paladin": {
+    "hp_before": 325000,
+    "hp_after": 500000,
+    "speed_after": 315,
+    "lasers_after": 13,
+    "generators_after": 20,
+    "extras_after": 4,
+    "cargo_after": 1750
+  },
+  "retiarus": {
+    "hp_before": 386000,
+    "hp_after": 465000,
+    "speed_after": 340,
+    "lasers_after": 15,
+    "generators_after": 16,
+    "extras_after": 4,
+    "cargo_after": 1600
+  },
+  "sentinel": {
+    "hp_before": 356000,
+    "hp_after": 535000,
+    "speed_after": 305,
+    "lasers_after": 15,
+    "generators_after": 18,
+    "extras_after": 4,
+    "cargo_after": 1800
+  },
+  "solace": {
+    "hp_before": 356000,
+    "hp_after": 465000,
+    "speed_after": 320,
+    "lasers_after": 15,
+    "generators_after": 17,
+    "extras_after": 4,
+    "cargo_after": 1800
+  },
+  "solaris": {
+    "hp_before": 377500,
+    "hp_after": 460000,
+    "speed_after": 330,
+    "lasers_after": 15,
+    "generators_after": 17,
+    "extras_after": 4,
+    "cargo_after": 1650
+  },
+  "spearhead": {
+    "hp_before": 200000,
+    "hp_after": 280000,
+    "speed_after": 410,
+    "lasers_after": 7,
+    "generators_after": 12,
+    "extras_after": 3,
+    "cargo_after": 650
+  },
+  "spectrum": {
+    "hp_before": 356000,
+    "hp_after": 510000,
+    "speed_after": 310,
+    "lasers_after": 15,
+    "generators_after": 18,
+    "extras_after": 4,
+    "cargo_after": 1750
+  },
+  "tartarus": {
+    "hp_before": 360000,
+    "hp_after": 460000,
+    "speed_after": 345,
+    "lasers_after": 14,
+    "generators_after": 16,
+    "extras_after": 4,
+    "cargo_after": 1700
+  },
+  "tempest": {
+    "hp_before": 300000,
+    "hp_after": 450000,
+    "speed_after": 360,
+    "lasers_after": 14,
+    "generators_after": 16,
+    "extras_after": 4,
+    "cargo_after": 1700
+  },
+  "venom": {
+    "hp_before": 356000,
+    "hp_after": 450000,
+    "speed_after": 335,
+    "lasers_after": 15,
+    "generators_after": 17,
+    "extras_after": 4,
+    "cargo_after": 1700
+  },
+  "yamato": {
+    "hp_before": 260000,
+    "hp_after": 340000,
+    "speed_after": 365,
+    "lasers_after": 10,
+    "generators_after": 13,
+    "extras_after": 3,
+    "cargo_after": 1100
+  },
+  "yRonin": {
+    "hp_before": 300000,
+    "hp_after": 390000,
+    "speed_after": 375,
+    "lasers_after": 11,
+    "generators_after": 14,
+    "extras_after": 3,
+    "cargo_after": 1200
+  },
+  "zephyr": {
+    "hp_before": 250000,
+    "hp_after": 380000,
+    "speed_after": 370,
+    "lasers_after": 13,
+    "generators_after": 16,
+    "extras_after": 4,
+    "cargo_after": 1650
+  }
+}

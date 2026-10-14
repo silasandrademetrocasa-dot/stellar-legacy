@@ -22,37 +22,37 @@ export const SHIPS = {
   pusat: { id:'pusat', name:'Striker', lasers:16, generators:12, speed:370, cargo:500, hp:225000, extras:3, price:3500000, currency:'uridium', role:'Elite ofensiva de alta velocidade' },
 
   // Naves com habilidades especiais: catálogo futuro de Evento / Missão / Passe.
-  aegis: { id:'aegis', name:'Seraph', lasers:10, generators:15, speed:300, cargo:2000, hp:375000, extras:3, price:0, currency:'uridium', eventOnly:true, role:'EVENTO • suporte', ability:'Hull Mend • Barrier Mend • Repair Beacon' },
-  basilisk: { id:'basilisk', name:'Venatrix', lasers:15, generators:17, speed:310, cargo:1500, hp:325000, extras:3, price:0, currency:'uridium', eventOnly:true, role:'EVENTO • controle tóxico', ability:'Toxic Veil • Overdrive Valor' },
-  berserker: { id:'berserker', name:'Ravager', lasers:5, generators:16, speed:290, cargo:1500, hp:500000, extras:3, price:0, currency:'uridium', eventOnly:true, role:'EVENTO • contra-ataque', ability:'Barrier Link • Fury Core • Retaliation' },
-  centurion: { id:'centurion', name:'Praetor', lasers:16, generators:16, speed:300, cargo:1500, hp:365000, extras:3, price:0, currency:'uridium', eventOnly:true, role:'EVENTO • projetos instáveis', ability:'Projetos especiais com bônus e habilidades' },
-  citadel: { id:'citadel', name:'Bulwark', lasers:7, generators:20, speed:240, cargo:4000, hp:650000, extras:5, price:0, currency:'uridium', eventOnly:true, role:'EVENTO • tanque pesado', ability:'Taunt Beacon • Warp Surge • Guardian Field • Bastion Mode' },
-  cyborg: { id:'cyborg', name:'Nexus Prime', lasers:16, generators:16, speed:300, cargo:1500, hp:365000, extras:3, price:0, currency:'uridium', eventOnly:true, role:'EVENTO • dano contínuo', ability:'Rift Collapse' },
-  defcom: { id:'defcom', name:'Phantom', lasers:12, generators:8, speed:340, cargo:800, hp:150000, extras:2, price:0, currency:'uridium', eventOnly:true, role:'EVENTO • camuflagem', ability:'Phase Cloak' },
-  defcomRaven: { id:'defcomRaven', name:'Wraith', lasers:12, generators:8, speed:340, cargo:800, hp:287500, extras:2, price:0, currency:'uridium', eventOnly:true, role:'EVENTO • camuflagem reforçada', ability:'Phase Cloak' },
-  diminisher: { id:'diminisher', name:'Nullifier', lasers:15, generators:15, speed:300, cargo:1600, hp:356000, extras:3, price:0, currency:'uridium', eventOnly:true, role:'EVENTO • anti-escudo', ability:'Barrier Break' },
-  disruptor: { id:'disruptor', name:'Interdictor', lasers:14, generators:14, speed:300, cargo:1500, hp:356000, extras:3, price:0, currency:'uridium', eventOnly:true, role:'EVENTO • interferência', ability:'Vector Redirect • Barrier Scramble • Signal Blackout' },
-  goliathX: { id:'goliathX', name:'Leviathan-X', lasers:15, generators:15, speed:300, cargo:1500, hp:356000, extras:3, price:0, currency:'uridium', eventOnly:true, role:'EVENTO • congelamento', ability:'Cryo Talon' },
-  hammerclaw: { id:'hammerclaw', name:'Ironclaw', lasers:12, generators:15, speed:290, cargo:1500, hp:377500, extras:3, price:0, currency:'uridium', eventOnly:true, role:'EVENTO • suporte pesado', ability:'Hull Mend • Barrier Mend • Repair Beacon' },
-  hecate: { id:'hecate', name:'Lumina', lasers:15, generators:16, speed:300, cargo:1500, hp:377500, extras:3, price:0, currency:'uridium', eventOnly:true, role:'EVENTO • feixe de partículas', ability:'Photon Lance' },
-  holo: { id:'holo', name:'Mirage', lasers:15, generators:15, speed:300, cargo:1500, hp:375000, extras:3, price:0, currency:'uridium', eventOnly:true, role:'EVENTO • reversão', ability:'Self Rewind • Target Rewind' },
-  hyperion: { id:'hyperion', name:'Gravastar', lasers:15, generators:16, speed:300, cargo:1500, hp:400000, extras:3, price:0, currency:'uridium', eventOnly:true, role:'EVENTO • controle gravitacional', ability:'Gravity Lock' },
-  keres: { id:'keres', name:'Plaguewing', lasers:15, generators:16, speed:300, cargo:1500, hp:356000, extras:3, price:0, currency:'uridium', eventOnly:true, role:'EVENTO • contágio', ability:'Contagion Spread • Phase Feint' },
-  mimesis: { id:'mimesis', name:'Echo', lasers:12, generators:14, speed:300, cargo:1500, hp:386000, extras:3, price:0, currency:'uridium', eventOnly:true, role:'EVENTO • evasão', ability:'Echo Scramble • Phase Shift' },
-  orcus: { id:'orcus', name:'Doppel', lasers:15, generators:15, speed:280, cargo:1500, hp:300000, extras:3, price:0, currency:'uridium', eventOnly:true, role:'EVENTO • duplicação', ability:'Echo Clone • Energy Assimilation' },
-  paladin: { id:'paladin', name:'Warden', lasers:12, generators:18, speed:300, cargo:1500, hp:325000, extras:3, price:0, currency:'uridium', eventOnly:true, role:'EVENTO • sobrevivência', ability:'Void Ripper • Final Stand' },
-  retiarus: { id:'retiarus', name:'Lancer', lasers:15, generators:14, speed:310, cargo:1500, hp:386000, extras:3, price:0, currency:'uridium', eventOnly:true, role:'EVENTO • tiro carregado', ability:'Overcharge • Charged Lance' },
-  sentinel: { id:'sentinel', name:'Guardian', lasers:15, generators:15, speed:300, cargo:1600, hp:356000, extras:3, price:0, currency:'uridium', eventOnly:true, role:'EVENTO • defesa', ability:'Fortress Matrix' },
-  solace: { id:'solace', name:'Reclaimer', lasers:15, generators:15, speed:300, cargo:1500, hp:356000, extras:3, price:0, currency:'uridium', eventOnly:true, role:'EVENTO • reparação', ability:'Nanite Swarm' },
-  solaris: { id:'solaris', name:'Helios', lasers:15, generators:15, speed:300, cargo:1500, hp:377500, extras:3, price:0, currency:'uridium', eventOnly:true, role:'EVENTO • incêndio', ability:'Solar Burn' },
-  spearhead: { id:'spearhead', name:'Pathfinder', lasers:5, generators:12, speed:370, cargo:500, hp:200000, extras:2, price:0, currency:'uridium', eventOnly:true, role:'EVENTO • reconhecimento', ability:'Phase Cloak • Signal Jam • Hunter Mark • Deep Scan' },
-  spectrum: { id:'spectrum', name:'Prism', lasers:15, generators:15, speed:300, cargo:1500, hp:356000, extras:3, price:0, currency:'uridium', eventOnly:true, role:'EVENTO • defesa prismática', ability:'Prism Barrier' },
-  tartarus: { id:'tartarus', name:'Hellrunner', lasers:14, generators:15, speed:220, cargo:1500, hp:360000, extras:3, price:0, currency:'uridium', eventOnly:true, role:'EVENTO • velocidade / foguetes', ability:'Barrage Mode • Vector Boost' },
-  tempest: { id:'tempest', name:'Stormrider', lasers:14, generators:15, speed:330, cargo:1500, hp:300000, extras:3, price:0, currency:'uridium', eventOnly:true, role:'EVENTO • eletricidade', ability:'Arc Link • Arc Discharge • Arc Reserve' },
-  venom: { id:'venom', name:'Viper', lasers:15, generators:15, speed:300, cargo:1600, hp:356000, extras:3, price:0, currency:'uridium', eventOnly:true, role:'EVENTO • dano contínuo', ability:'Rift Collapse' },
-  yamato: { id:'yamato', name:'Kensei', lasers:8, generators:12, speed:260, cargo:1000, hp:260000, extras:2, price:0, currency:'uridium', eventOnly:true, role:'EVENTO • aceleração', ability:'Warp Surge' },
-  yRonin: { id:'yRonin', name:'Shogun', lasers:8, generators:12, speed:260, cargo:1000, hp:300000, extras:2, price:0, currency:'uridium', eventOnly:true, role:'EVENTO • aceleração', ability:'Warp Surge' },
-  zephyr: { id:'zephyr', name:'Gale', lasers:12, generators:16, speed:300, cargo:1500, hp:250000, extras:3, price:0, currency:'uridium', eventOnly:true, role:'EVENTO • momentum', ability:'Kinetic Drive • Tri-Barrage' },
+  aegis: { id:'aegis', name:'Seraph', lasers:11, generators:18, speed:315, cargo:2250, hp:455000, extras:4, price:0, currency:'uridium', eventOnly:true, role:'EVENTO • suporte', ability:'Hull Mend • Barrier Mend • Repair Beacon' },
+  basilisk: { id:'basilisk', name:'Venatrix', lasers:15, generators:17, speed:330, cargo:1650, hp:450000, extras:4, price:0, currency:'uridium', eventOnly:true, role:'EVENTO • controle tóxico', ability:'Toxic Veil • Overdrive Valor' },
+  berserker: { id:'berserker', name:'Ravager', lasers:8, generators:18, speed:300, cargo:1650, hp:620000, extras:4, price:0, currency:'uridium', eventOnly:true, role:'EVENTO • contra-ataque', ability:'Barrier Link • Fury Core • Retaliation' },
+  centurion: { id:'centurion', name:'Praetor', lasers:16, generators:17, speed:335, cargo:1600, hp:455000, extras:4, price:0, currency:'uridium', eventOnly:true, role:'EVENTO • projetos instáveis', ability:'Projetos especiais com bônus e habilidades' },
+  citadel: { id:'citadel', name:'Bulwark', lasers:8, generators:21, speed:250, cargo:4500, hp:750000, extras:5, price:0, currency:'uridium', eventOnly:true, role:'EVENTO • tanque pesado', ability:'Taunt Beacon • Warp Surge • Guardian Field • Bastion Mode' },
+  cyborg: { id:'cyborg', name:'Nexus Prime', lasers:16, generators:17, speed:325, cargo:1600, hp:455000, extras:4, price:0, currency:'uridium', eventOnly:true, role:'EVENTO • dano contínuo', ability:'Rift Collapse' },
+  defcom: { id:'defcom', name:'Phantom', lasers:12, generators:11, speed:380, cargo:900, hp:290000, extras:3, price:0, currency:'uridium', eventOnly:true, role:'EVENTO • camuflagem', ability:'Phase Cloak' },
+  defcomRaven: { id:'defcomRaven', name:'Wraith', lasers:12, generators:12, speed:385, cargo:1000, hp:365000, extras:3, price:0, currency:'uridium', eventOnly:true, role:'EVENTO • camuflagem reforçada', ability:'Phase Cloak' },
+  diminisher: { id:'diminisher', name:'Nullifier', lasers:15, generators:17, speed:325, cargo:1700, hp:460000, extras:4, price:0, currency:'uridium', eventOnly:true, role:'EVENTO • anti-escudo', ability:'Barrier Break' },
+  disruptor: { id:'disruptor', name:'Interdictor', lasers:14, generators:16, speed:345, cargo:1650, hp:450000, extras:4, price:0, currency:'uridium', eventOnly:true, role:'EVENTO • interferência', ability:'Vector Redirect • Barrier Scramble • Signal Blackout' },
+  goliathX: { id:'goliathX', name:'Leviathan-X', lasers:15, generators:18, speed:305, cargo:1900, hp:540000, extras:5, price:0, currency:'uridium', eventOnly:true, role:'EVENTO • congelamento', ability:'Cryo Talon' },
+  hammerclaw: { id:'hammerclaw', name:'Ironclaw', lasers:13, generators:18, speed:305, cargo:1900, hp:465000, extras:4, price:0, currency:'uridium', eventOnly:true, role:'EVENTO • suporte pesado', ability:'Hull Mend • Barrier Mend • Repair Beacon' },
+  hecate: { id:'hecate', name:'Lumina', lasers:15, generators:17, speed:320, cargo:1600, hp:475000, extras:4, price:0, currency:'uridium', eventOnly:true, role:'EVENTO • feixe de partículas', ability:'Photon Lance' },
+  holo: { id:'holo', name:'Mirage', lasers:15, generators:16, speed:330, cargo:1650, hp:445000, extras:4, price:0, currency:'uridium', eventOnly:true, role:'EVENTO • reversão', ability:'Self Rewind • Target Rewind' },
+  hyperion: { id:'hyperion', name:'Gravastar', lasers:15, generators:18, speed:320, cargo:1750, hp:480000, extras:4, price:0, currency:'uridium', eventOnly:true, role:'EVENTO • controle gravitacional', ability:'Gravity Lock' },
+  keres: { id:'keres', name:'Plaguewing', lasers:15, generators:17, speed:330, cargo:1650, hp:445000, extras:4, price:0, currency:'uridium', eventOnly:true, role:'EVENTO • contágio', ability:'Contagion Spread • Phase Feint' },
+  mimesis: { id:'mimesis', name:'Echo', lasers:13, generators:15, speed:350, cargo:1650, hp:430000, extras:4, price:0, currency:'uridium', eventOnly:true, role:'EVENTO • evasão', ability:'Echo Scramble • Phase Shift' },
+  orcus: { id:'orcus', name:'Doppel', lasers:15, generators:16, speed:320, cargo:1750, hp:440000, extras:4, price:0, currency:'uridium', eventOnly:true, role:'EVENTO • duplicação', ability:'Echo Clone • Energy Assimilation' },
+  paladin: { id:'paladin', name:'Warden', lasers:13, generators:20, speed:315, cargo:1750, hp:500000, extras:4, price:0, currency:'uridium', eventOnly:true, role:'EVENTO • sobrevivência', ability:'Void Ripper • Final Stand' },
+  retiarus: { id:'retiarus', name:'Lancer', lasers:15, generators:16, speed:340, cargo:1600, hp:465000, extras:4, price:0, currency:'uridium', eventOnly:true, role:'EVENTO • tiro carregado', ability:'Overcharge • Charged Lance' },
+  sentinel: { id:'sentinel', name:'Guardian', lasers:15, generators:18, speed:305, cargo:1800, hp:535000, extras:4, price:0, currency:'uridium', eventOnly:true, role:'EVENTO • defesa', ability:'Fortress Matrix' },
+  solace: { id:'solace', name:'Reclaimer', lasers:15, generators:17, speed:320, cargo:1800, hp:465000, extras:4, price:0, currency:'uridium', eventOnly:true, role:'EVENTO • reparação', ability:'Nanite Swarm' },
+  solaris: { id:'solaris', name:'Helios', lasers:15, generators:17, speed:330, cargo:1650, hp:460000, extras:4, price:0, currency:'uridium', eventOnly:true, role:'EVENTO • incêndio', ability:'Solar Burn' },
+  spearhead: { id:'spearhead', name:'Pathfinder', lasers:7, generators:12, speed:410, cargo:650, hp:280000, extras:3, price:0, currency:'uridium', eventOnly:true, role:'EVENTO • reconhecimento', ability:'Phase Cloak • Signal Jam • Hunter Mark • Deep Scan' },
+  spectrum: { id:'spectrum', name:'Prism', lasers:15, generators:18, speed:310, cargo:1750, hp:510000, extras:4, price:0, currency:'uridium', eventOnly:true, role:'EVENTO • defesa prismática', ability:'Prism Barrier' },
+  tartarus: { id:'tartarus', name:'Hellrunner', lasers:14, generators:16, speed:345, cargo:1700, hp:460000, extras:4, price:0, currency:'uridium', eventOnly:true, role:'EVENTO • velocidade / foguetes', ability:'Barrage Mode • Vector Boost' },
+  tempest: { id:'tempest', name:'Stormrider', lasers:14, generators:16, speed:360, cargo:1700, hp:450000, extras:4, price:0, currency:'uridium', eventOnly:true, role:'EVENTO • eletricidade', ability:'Arc Link • Arc Discharge • Arc Reserve' },
+  venom: { id:'venom', name:'Viper', lasers:15, generators:17, speed:335, cargo:1700, hp:450000, extras:4, price:0, currency:'uridium', eventOnly:true, role:'EVENTO • dano contínuo', ability:'Rift Collapse' },
+  yamato: { id:'yamato', name:'Kensei', lasers:10, generators:13, speed:365, cargo:1100, hp:340000, extras:3, price:0, currency:'uridium', eventOnly:true, role:'EVENTO • aceleração', ability:'Warp Surge' },
+  yRonin: { id:'yRonin', name:'Shogun', lasers:11, generators:14, speed:375, cargo:1200, hp:390000, extras:3, price:0, currency:'uridium', eventOnly:true, role:'EVENTO • aceleração', ability:'Warp Surge' },
+  zephyr: { id:'zephyr', name:'Gale', lasers:13, generators:16, speed:370, cargo:1650, hp:380000, extras:4, price:0, currency:'uridium', eventOnly:true, role:'EVENTO • momentum', ability:'Kinetic Drive • Tri-Barrage' },
 };
 
 export const ITEMS = {
@@ -64,6 +64,9 @@ export const ITEMS = {
   lf3: { id:'lf3', type:'laser', name:'ARC-3', damage:175, alienBonus:0.15, price:125000, currency:'uridium', description:'Laser Elite • dano 175 • +15% contra aliens.' },
   lf4: { id:'lf4', type:'laser', name:'ARC-4', damage:200, price:500000, currency:'uridium', description:'Laser Elite de alto desempenho • dano 200.' },
 
+  lfx: { id:'lfx', type:'laser', name:'ARC-X', damage:250, alienBonus:0.04, price:0, currency:'uridium', eventOnly:true, description:'Laser de evento • 250 dano base • +4% contra aliens.' },
+  lfomega: { id:'lfomega', type:'laser', name:'ARC-Ω', damage:265, alienBonus:0.06, price:0, currency:'uridium', eventOnly:true, description:'Laser raro de evento • 265 dano base • +6% contra aliens.' },
+
   // SPEED GENERATORS
   g3n1010: { id: 'g3n1010', type: 'generator', subtype: 'speed', name: 'THR-1', speed: 2, price: 250000, currency: 'credits', description: '+2 velocidade.' },
   g3n2010: { id: 'g3n2010', type: 'generator', subtype: 'speed', name: 'THR-2', speed: 3, price: 1000000, currency: 'credits', description: '+3 velocidade.' },
@@ -72,18 +75,20 @@ export const ITEMS = {
   g3n6900: { id: 'g3n6900', type: 'generator', subtype: 'speed', name: 'THR-5', speed: 7, price: 80000, currency: 'uridium', description: '+7 velocidade.' },
   g3n7900: { id: 'g3n7900', type: 'generator', subtype: 'speed', name: 'THR-6', speed: 10, price: 250000, currency: 'uridium', description: '+10 velocidade.' },
 
+  g3n8700: { id:'g3n8700', type:'generator', subtype:'speed', name:'THR-7', speed:14, price:0, currency:'uridium', eventOnly:true, description:'Motor raro de evento • +14 velocidade.' },
+
   // SHIELD GENERATORS
   fs01: { id:'fs01', type:'generator', subtype:'shield', name:'AEG-1', shield:3200, absorption:70, shieldRegenBonus:0.0625, price:15000000, currency:'credits', description:'3.200 escudo • 70% absorção • +6,25% regeneração.' },
   fs02: { id:'fs02', type:'generator', subtype:'shield', name:'AEG-2', shield:5600, absorption:75, shieldRegenBonus:0.0625, price:80000000, currency:'credits', description:'5.600 escudo • 75% absorção • +6,25% regeneração.' },
-  fs03: { id:'fs03', type:'generator', subtype:'shield', name:'AEG-3', shield:8000, absorption:80, shieldRegenBonus:0.0625, price:0, currency:'uridium', eventOnly:true, description:'8.000 escudo • 80% absorção • recompensa de evento/missão.' },
-  fs04: { id:'fs04', type:'generator', subtype:'shield', name:'AEG-4', shield:11400, absorption:80, shieldRegenBonus:0.0625, price:0, currency:'uridium', eventOnly:true, description:'11.400 escudo • 80% absorção • recompensa de evento.' },
-  sg3nb00: { id:'sg3nb00', type:'generator', subtype:'shield', name:'VSH-0', shield:9000, absorption:70, price:0, currency:'uridium', eventOnly:true, description:'9.000 escudo • 70% absorção • recompensa especial.' },
+  fs03: { id:'fs03', type:'generator', subtype:'shield', name:'AEG-3', shield:12500, absorption:82, shieldRegenBonus:0.0625, price:0, currency:'uridium', eventOnly:true, description:'12.500 escudo • 82% absorção • +6,25% regeneração • EVENTO.' },
+  fs04: { id:'fs04', type:'generator', subtype:'shield', name:'AEG-4', shield:17200, absorption:84, shieldRegenBonus:0.0625, price:0, currency:'uridium', eventOnly:true, description:'17.200 escudo • 84% absorção • +6,25% regeneração • EVENTO RARO.' },
+  sg3nb00: { id:'sg3nb00', type:'generator', subtype:'shield', name:'VSH-0', shield:13500, absorption:78, price:0, currency:'uridium', eventOnly:true, description:'13.500 escudo • 78% absorção • EVENTO.' },
   sg3na01: { id:'sg3na01', type:'generator', subtype:'shield', name:'VSH-1', shield:1000, absorption:40, price:1000000, currency:'credits', description:'1.000 escudo • 40% absorção.' },
   sg3na02: { id:'sg3na02', type:'generator', subtype:'shield', name:'VSH-2', shield:5000, absorption:50, price:5000000, currency:'credits', description:'5.000 escudo • 50% absorção.' },
   sg3na03: { id:'sg3na03', type:'generator', subtype:'shield', name:'VSH-3', shield:5000, absorption:60, price:20000000, currency:'credits', description:'5.000 escudo • 60% absorção.' },
   sg3nb01: { id:'sg3nb01', type:'generator', subtype:'shield', name:'VSH-4', shield:9500, absorption:70, price:60000000, currency:'credits', description:'9.500 escudo • 70% absorção.' },
   sg3nb02: { id:'sg3nb02', type:'generator', subtype:'shield', name:'VSH-5', shield:10000, absorption:80, price:250000, currency:'uridium', description:'10.000 escudo • 80% absorção.' },
-  sg3nb03: { id:'sg3nb03', type:'generator', subtype:'shield', name:'VSH-6', shield:11450, absorption:80, price:0, currency:'uridium', eventOnly:true, description:'11.450 escudo • 80% absorção • evento/missão.' },
+  sg3nb03: { id:'sg3nb03', type:'generator', subtype:'shield', name:'VSH-6', shield:17500, absorption:85, price:0, currency:'uridium', eventOnly:true, description:'17.500 escudo • 85% absorção • EVENTO RARO.' },
 
   // EXTRAS
   autoLaserCpu: { id: 'autoLaserCpu', type: 'extra', name: 'Mira Autônoma', price: 10000000, currency: 'credits', description: 'Ao selecionar um alvo, inicia o laser automaticamente.' },
@@ -113,6 +118,8 @@ export const ITEMS = {
     price: 180000, currency: 'uridium', repairRate: 0.02, repairTick: 10000, shieldRepairTick: 15000, repairDelay: 5, exclusiveGroup: 'repairBot',
     description: 'Após 5s sem receber dano, repara +10.000 HP por segundo. Enquanto equipado, o escudo regenera +15.000 por segundo.'
   },
+
+  repPrime: { id:'repPrime', type:'extra', name:'Nanobot Prime', price:0, currency:'uridium', eventOnly:true, exclusiveGroup:'repairBot', repairRate:0.024, repairTick:12000, shieldRepairTick:18000, repairDelay:5, description:'Reparador raro de evento • 12.000 HP/s e 18.000 escudo/s após 5s fora de combate.' },
 
   // EXPANSÃO DE PORÃO
   cargoCpuCommon: {

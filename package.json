@@ -1,6 +1,6 @@
 {
   "name": "stellar-legacy",
-  "version": "19.0.16",
+  "version": "19.0.17",
   "type": "module",
   "scripts": {
     "start": "node server/index.js",
@@ -15,5 +15,5 @@
   "engines": {
     "node": ">=18"
   },
-  "release": "v19.0.16-auction-pricing-admin"
+  "release": "v19.0.17-event-balance"
 }

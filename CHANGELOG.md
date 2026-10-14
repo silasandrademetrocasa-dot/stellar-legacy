@@ -1,3 +1,11 @@
+## V19.0.17 — BALANCEAMENTO DE EVENTOS
+- 31 naves de evento equilibradas por funcao; 4 escudos reajustados.
+- Novos ARC-X, ARC-Ω, THR-7 e Nanobot Prime somente para recompensas de evento.
+- Catálogo de cupons ADM expandido de 99 para 103 recompensas.
+- SQL com snapshot de seguranca e rollback protegido; atributos editáveis no ADM → BALANCEAMENTO.
+- Sem mudanças em lojas, NPCs, economia, jogadores e graficos.
+- Testes de regressao: 112 passaram.
+
 ## V19.0.16 — Leilão configurável no ADM
 - Conversão STL → CR, multiplicadores por categoria, exceções por item e prévia em tempo real; piso do Nova mantido.
 - Preço inicial calculado pelo catálogo verdadeiro no Supabase, com defesa contra pisos falsos enviados pelo navegador.
