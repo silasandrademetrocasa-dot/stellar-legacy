@@ -1,3 +1,17 @@
+## V20.1.0 - SPRITES + PvP Battle 4-X (15/10/2026)
+- Clique/toque em naves de outros jogadores nos mapas 4-1,4-2,4-3, incluindo mesma faccao.
+- Nenhum PvP nos mapas X-1..X-8; membros do mesmo grupo sao protegidos.
+- RPC Supabase valida mapa, presenca, distancia, dano e cooldown; sem wipe de dados.
+- 8 sprites PNG novos e transparentes de equipamentos especiais.
+- 128 testes aprovados; teste real com duas contas segue pendente.
+
+## V20.1.0 - SPRITES + PvP Battle 4-X (15/10/2026)
+- Clique/toque em naves de outros jogadores nos mapas 4-1,4-2,4-3, incluindo mesma faccao.
+- Nenhum PvP nos mapas X-1..X-8; membros do mesmo grupo sao protegidos.
+- RPC Supabase valida mapa, presenca, distancia, dano e cooldown; sem wipe de dados.
+- 8 sprites PNG novos e transparentes de equipamentos especiais.
+- 128 testes aprovados; teste real com duas contas segue pendente.
+
 ## V20.0.0 — Integridade, Economia, Endgame (14/10/2026)
 
 # STELLAR LEGACY — V20.0.0 | ATUALIZAÇÃO POR ETAPAS

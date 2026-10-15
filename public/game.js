@@ -1,9 +1,9 @@
-import { FACTIONS, SHIPS, ITEMS, LASER_AMMO, ROCKETS, NPC_TYPES, MAPS, RESOURCES } from './data.js?v=20.0.0';
-import { repairPulseSettings } from './repair-balance.js?v=20.0.0';
-import { xpThresholdV1770, xpThresholdV1915, migratePilotXpV1915 } from './level-curve-v1915.js?v=20.0.0';
-import { GAME_ASSETS } from './assets/v17/manifest.js?v=20.0.0';
-import { signUp, signIn, beginGoogleSignIn, restoreGoogleSignInFromUrl, requestPasswordReset, restorePasswordRecoveryFromUrl, restoreSession, signOutLocal, checkGameSession, endGameSession, getUser, getSessionCredentials, loadCloudSave, saveCloudSave, updateCallsign, updatePassword, loadRankings, loadAuctionBids, saveAuctionBidOnline, markAuctionBidStatusOnline, loadAuctionMarket, upsertPlayerPresenceOnline, loadMapPresenceOnline, savePlayerLocationCheckpointOnline, loadPlayerLocationCheckpointOnline, removePlayerPresenceOnline, queuePvpAttackOnline, consumePvpDamageEventsOnline, syncArenaProfileOnline, loadArenaState, loadArenaDailyRewardStatus, claimArenaDailyReward, loadArenaOpponents, loadArenaHistory, arenaAttackOnline, listClansOnline, loadMyClanOnline, createClanOnline, joinClanOnline, getClanRequestsOnline, reviewClanRequestOnline, cancelClanRequestOnline, setClanMemberRoleOnline, leaveClanOnline, transferClanCreditsOnline, claimClanCreditGrantsOnline, recordClanAlienKillOnline, getPremiumShopOnline, testPurchasePremiumOnline, adminPreviewPremiumStageOnline, adminSimulatePremiumStageOnline, getPremiumStageCatalogOnline, loadWarfrontStateOnline, hitWorldBossOnline, claimWorldBossRewardOnline, declareClanWarOnline, recordClanWarScoreOnline, loadLiveOpsOnline, adminUpdateLiveEventScheduleOnline, purchaseLiveCatalogOnline, economyActionOnline, getChatHistoryOnline, sendChatMessageOnline, redeemGameCouponOnline, getMyDesignersOnline, setDesignLoadoutOnline, claimGateDroneDesignOnline, claimEventDesignerOnline, getAdminStatus, adminSearchAccounts, adminRecentActions, adminBanAccount, adminUnbanAccount, adminResetAccount, adminDeleteAccount, pushTelemetryBatch, adminTelemetryOverview, adminPlayerTelemetry, getBattleGroupOnline, createBattleGroupOnline, inviteBattleGroupOnline, searchBattleGroupPlayersOnline, inviteBattleGroupUserOnline, respondBattleGroupInviteOnline, leaveBattleGroupOnline, kickBattleGroupMemberOnline, setBattleGroupRallyOnline, loadRuntimeConfigOnline, loadNpcRuntimeConfigOnline, loadWorldRuntimeConfigOnline, loadSystemsRuntimeConfigOnline, loadAdminRuntimeMonitorOnline, adminUpdateRuntimeModuleOnline, adminUpdateNpcRuntimeOnline, adminUpdateNpcSpawnRuntimeOnline, adminUpdateWorldMapOnline, adminUpdateWorldResourceOnline, adminUpdateWorldSectorOnline, adminUpdateWorldPortalOnline, adminUpdateWorldResourcePoolOnline, adminUpdateMissionCategoryOnline, adminUpdateEconomyServiceOnline, adminUpdateCraftingRecipeOnline, loadBattlePassRuntimeConfigOnline, adminUpdateBattlePassSeasonOnline, adminUpdateBattlePassTierOnline, loadShopsRuntimeConfigOnline, adminUpdateCommonShopItemOnline, adminUpdatePremiumShopItemOnline, loadBonusConfigOnline, adminUpdateBonusConfigOnline, adminCouponDashboardOnline, adminCreateCouponOnline, adminSetCouponActiveOnline, loadGalaxyGatesOnline, adminUpdateGalaxyGateOnline, adminUpsertCustomMissionOnline, adminDeleteCustomMissionOnline, adminCreateCraftRecipeOnline, adminCreateEconomyServiceOnline, adminCreatePassSeasonOnline, loadAuctionRulesOnline, adminUpdateAuctionRulesOnline, loadBalanceRuntimeOnline, adminUpdateBalanceOnline } from './api.js?v=20.0.0';
-import { SharedUniverseClient } from './world.js?v=20.0.0';
+import { FACTIONS, SHIPS, ITEMS, LASER_AMMO, ROCKETS, NPC_TYPES, MAPS, RESOURCES } from './data.js?v=20.1.0';
+import { repairPulseSettings } from './repair-balance.js?v=20.1.0';
+import { xpThresholdV1770, xpThresholdV1915, migratePilotXpV1915 } from './level-curve-v1915.js?v=20.1.0';
+import { GAME_ASSETS } from './assets/v17/manifest.js?v=20.1.0';
+import { signUp, signIn, beginGoogleSignIn, restoreGoogleSignInFromUrl, requestPasswordReset, restorePasswordRecoveryFromUrl, restoreSession, signOutLocal, checkGameSession, endGameSession, getUser, getSessionCredentials, loadCloudSave, saveCloudSave, updateCallsign, updatePassword, loadRankings, loadAuctionBids, saveAuctionBidOnline, markAuctionBidStatusOnline, loadAuctionMarket, upsertPlayerPresenceOnline, loadMapPresenceOnline, savePlayerLocationCheckpointOnline, loadPlayerLocationCheckpointOnline, removePlayerPresenceOnline, queuePvpAttackOnline, consumePvpDamageEventsOnline, syncArenaProfileOnline, loadArenaState, loadArenaDailyRewardStatus, claimArenaDailyReward, loadArenaOpponents, loadArenaHistory, arenaAttackOnline, listClansOnline, loadMyClanOnline, createClanOnline, joinClanOnline, getClanRequestsOnline, reviewClanRequestOnline, cancelClanRequestOnline, setClanMemberRoleOnline, leaveClanOnline, transferClanCreditsOnline, claimClanCreditGrantsOnline, recordClanAlienKillOnline, getPremiumShopOnline, testPurchasePremiumOnline, adminPreviewPremiumStageOnline, adminSimulatePremiumStageOnline, getPremiumStageCatalogOnline, loadWarfrontStateOnline, hitWorldBossOnline, claimWorldBossRewardOnline, declareClanWarOnline, recordClanWarScoreOnline, loadLiveOpsOnline, adminUpdateLiveEventScheduleOnline, purchaseLiveCatalogOnline, economyActionOnline, getChatHistoryOnline, sendChatMessageOnline, redeemGameCouponOnline, getMyDesignersOnline, setDesignLoadoutOnline, claimGateDroneDesignOnline, claimEventDesignerOnline, getAdminStatus, adminSearchAccounts, adminRecentActions, adminBanAccount, adminUnbanAccount, adminResetAccount, adminDeleteAccount, pushTelemetryBatch, adminTelemetryOverview, adminPlayerTelemetry, getBattleGroupOnline, createBattleGroupOnline, inviteBattleGroupOnline, searchBattleGroupPlayersOnline, inviteBattleGroupUserOnline, respondBattleGroupInviteOnline, leaveBattleGroupOnline, kickBattleGroupMemberOnline, setBattleGroupRallyOnline, loadRuntimeConfigOnline, loadNpcRuntimeConfigOnline, loadWorldRuntimeConfigOnline, loadSystemsRuntimeConfigOnline, loadAdminRuntimeMonitorOnline, adminUpdateRuntimeModuleOnline, adminUpdateNpcRuntimeOnline, adminUpdateNpcSpawnRuntimeOnline, adminUpdateWorldMapOnline, adminUpdateWorldResourceOnline, adminUpdateWorldSectorOnline, adminUpdateWorldPortalOnline, adminUpdateWorldResourcePoolOnline, adminUpdateMissionCategoryOnline, adminUpdateEconomyServiceOnline, adminUpdateCraftingRecipeOnline, loadBattlePassRuntimeConfigOnline, adminUpdateBattlePassSeasonOnline, adminUpdateBattlePassTierOnline, loadShopsRuntimeConfigOnline, adminUpdateCommonShopItemOnline, adminUpdatePremiumShopItemOnline, loadBonusConfigOnline, adminUpdateBonusConfigOnline, adminCouponDashboardOnline, adminCreateCouponOnline, adminSetCouponActiveOnline, loadGalaxyGatesOnline, adminUpdateGalaxyGateOnline, adminUpsertCustomMissionOnline, adminDeleteCustomMissionOnline, adminCreateCraftRecipeOnline, adminCreateEconomyServiceOnline, adminCreatePassSeasonOnline, loadAuctionRulesOnline, adminUpdateAuctionRulesOnline, loadBalanceRuntimeOnline, adminUpdateBalanceOnline } from './api.js?v=20.1.0';
+import { SharedUniverseClient } from './world.js?v=20.1.0';
 
 const canvas = document.querySelector('#game');
 const ctx = canvas.getContext('2d');
@@ -3130,7 +3130,7 @@ function spawnCombatText(x,y,text,color='#fff',opts={}){const cap=qualityProfile
 function combatCritical(base,{chance=.065,mult=1.55}={}){chance=Math.max(0,Math.min(.85,Number(chance||0)+designerCritChanceBonus()));const critical=Math.random()<chance;return {critical,damage:Math.round(base*(critical?mult:1))};}
 function setCombatAlert(text,kind='combat',seconds=1.8){if(!combatPrefs.alerts)return;state.combatAlertText=text;state.combatAlertKind=kind;state.combatAlertUntil=nowSec()+seconds;if(kind==='danger'||kind==='shield')playSfx('warning');}
 function nearestCombatTarget(excludeId=null){const range=playerLaserRange();const candidates=state.enemies.filter(e=>e.hp>0&&e.id!==excludeId&&enemyDistance(e)<=range&&onScreenWorld(e.x,e.y,90));candidates.sort((a,b)=>enemyDistance(a)-enemyDistance(b));return candidates[0]||null;}
-function selectCombatTarget(target,{silent=false}={}){if(!target||target.hp<=0)return false;state.target=target;state.pointerNavActive=false;if(!silent){playSfx('target');pushActivity(`${target.isPlayer?'PVP':'Alvo selecionado'} • ${target.callsign||target.name}`,'combat');}updateTargetLockHud();return true;}
+function selectCombatTarget(target,{silent=false}={}){if(!target||target.hp<=0||target.isPlayer&&!pvpTargetAllowed(target))return false;state.target=target;state.pointerNavActive=false;if(!silent){playSfx('target');pushActivity(`${target.isPlayer?'PVP':'Alvo selecionado'} • ${target.callsign||target.name}`,'combat');}updateTargetLockHud();return true;}
 function autoAcquireNextTarget(excludeId=null){if(!combatPrefs.autoTarget||!premiumAutoCombatAccess()||!progress||state.jumping)return null;const next=nearestCombatTarget(excludeId);if(next){selectCombatTarget(next,{silent:true});player.laserFiring=true;setCombatAlert('AUTO-COMBATE • NOVO ALVO','ability',1.0);return next;}return null;}
 function npcFxProfile(type){
   const t=String(type||'').toLowerCase(),boss=t.startsWith('boss');
@@ -4968,7 +4968,7 @@ function fireLaserTick(){
   playSfx('laser');
 
   if(state.target.isPlayer){
-    if(!pvpTargetAllowed(state.target)){player.laserFiring=false;showToast('Fogo amigo bloqueado');return;}
+    if(!pvpTargetAllowed(state.target)){player.laserFiring=false;showToast('PvP permitido apenas em 4-1 / 4-2 / 4-3, fora do seu grupo');return;}
     if(state.pvpShotPending)return;
     const shotAmmo=ammo,base=pvpLaserBase(firingIds),raw=Math.round(base*(Number(shotAmmo.mult)||1)*rand(.95,1.08));
     player.lastLaserShot=nowSec();
@@ -5012,7 +5012,7 @@ function fireRocket(manual=false){
   if(!rocketReady()){if(manual)showToast('Míssil recarregando');return;}
 
   if(state.target.isPlayer){
-    if(!pvpTargetAllowed(state.target)){if(manual)showToast('Fogo amigo bloqueado');return;}
+    if(!pvpTargetAllowed(state.target)){if(manual)showToast('PvP permitido apenas nos mapas 4-X');return;}
     if(state.pvpRocketPending)return;
 
     const shotRocket=r;
@@ -5216,7 +5216,11 @@ function remoteTargetEntity(id,isPlayer){if(!id)return null;if(isPlayer){if(Stri
 function onlineTerritoryKey(){
   return /^x[1-8]$/.test(progress?.mapId||'')?(currentTerritoryFaction()||progress.profile.faction):'battle';
 }
-function onlinePlayerEnemy(rp){return !!rp&&!isBattleGroupMember(rp.id)&&rp.faction&&rp.faction!==progress?.profile?.faction;}
+function isPublicPvpSector(mapId=progress?.mapId){return ['b41','b42','b43'].includes(String(mapId||''));}
+// Em 4-1, 4-2 e 4-3 todo piloto fora do seu grupo pode ser combatido,
+// inclusive da mesma faccao. Fora desses setores, nenhum piloto e alvo PvP.
+function onlinePlayerEnemy(rp){return pvpTargetAllowed(rp);}
+
 async function syncOnlineWorld(){
   if(!authenticated||!progress||onlineWorld.busy)return;
   onlineWorld.busy=true;
@@ -5261,6 +5265,8 @@ async function syncPvpInbox(){
   try{
     const events=await consumePvpDamageEventsOnline();
     for(const ev of events){
+      // Eventos atrasados nunca causam dano depois de sair de um Battle Map.
+      if(!isPublicPvpSector())continue;
       const dmg=Math.max(0,Number(ev.damage)||0);
       if(ev.shield_drain){
         const drained=Math.min(player.shield,dmg);player.shield=Math.max(0,player.shield-drained);
@@ -5277,10 +5283,11 @@ async function syncPvpInbox(){
   finally{pvpInboxBusy=false;}
 }
 function pvpTargetAllowed(target){
-  if(!target?.isPlayer)return false;
-  if(target.faction===progress.profile.faction)return false;
-  return true;
+  return !!progress && isPublicPvpSector() && !!target?.isPlayer
+    && String(target.id||'')!==String(getUser()?.id||'')
+    && Number(target.hp)>0 && !isBattleGroupMember(target.id);
 }
+
 function pvpLaserBase(ids){
   let dmg=ids.reduce((sum,id)=>sum+(Number(ITEMS[id]?.damage)||0),0);
   const ship=SHIPS[progress.activeShipId],low=['x1','x2','x3','x4'].includes(progress.mapId);
@@ -8224,13 +8231,24 @@ function setPointerDestination(ev){const p=worldPoint(ev);player.tx=Math.max(40,
 function pointerAction(ev){
   if(!gameplayPointerAllowed()||ev.button!==0)return;
   const p=worldPoint(ev);
+  // Prioridade ao sprite do piloto nos Battle Maps; a selecao nao depende da faccao.
+  // Testa TODOS os pilotos antes do NPC: isso resolve sobreposicoes na tela e no toque.
+  const pilot=[...onlineWorld.players.values()].filter(pvpTargetAllowed)
+    .map(rp=>({rp,dist:Math.hypot(rp.x-p.x,rp.y-p.y)}))
+    .filter(hit=>hit.dist<=Math.max(50,onlineShipSize(hit.rp.shipId)*.73))
+    .sort((a,b)=>a.dist-b.dist)[0]?.rp;
+  if(pilot){
+    const same=state.target?.id===pilot.id,quick=same&&Date.now()-state.lastTargetTapAt<900;
+    if(selectCombatTarget(pilot)){
+      state.lastTargetTapId=pilot.id;state.lastTargetTapAt=Date.now();
+      setCombatAlert(`PVP 4-X • ${pilot.callsign||'PILOTO'} SELECIONADO`,'combat',1.6);
+      if(autoLaserEnabled()||(combatPrefs.tapAttack&&quick))player.laserFiring=true;
+      if(quick)showToast(`Ataque iniciado contra ${pilot.callsign||'piloto'}`);
+    }
+    return;
+  }
   const found=state.enemies.find(e=>e.hp>0&&Math.hypot(e.x-p.x,e.y-p.y)<=e.size*1.8+18);
   if(found){const same=state.target?.id===found.id,quick=same&&Date.now()-state.lastTargetTapAt<900;selectCombatTarget(found);state.lastTargetTapId=found.id;state.lastTargetTapAt=Date.now();if(autoLaserEnabled()||(combatPrefs.tapAttack&&quick)){player.laserFiring=true;if(quick)setCombatAlert('LOCK CONFIRMADO • LASER ATIVO','combat',1.2);}return;}
-  const hostile=[...onlineWorld.players.values()].filter(rp=>onlinePlayerEnemy(rp)&&rp.hp>0).sort((a,b)=>Math.hypot(a.x-p.x,a.y-p.y)-Math.hypot(b.x-p.x,b.y-p.y))[0];
-  if(hostile&&Math.hypot(hostile.x-p.x,hostile.y-p.y)<=Math.max(34,hostile.size*1.7)){
-    const same=state.target?.id===hostile.id,quick=same&&Date.now()-state.lastTargetTapAt<900;selectCombatTarget(hostile);state.lastTargetTapId=hostile.id;state.lastTargetTapAt=Date.now();
-    if(autoLaserEnabled()||(combatPrefs.tapAttack&&quick))player.laserFiring=true;return;
-  }
   const clickedPortal=portalAtWorld(p.x,p.y),readyPortal=nearbyPortal();
   if(clickedPortal&&readyPortal&&clickedPortal.to===readyPortal.to&&Math.hypot(clickedPortal.x-readyPortal.x,clickedPortal.y-readyPortal.y)<1){state.pointerNavActive=false;jumpThroughPortal(readyPortal);return;}
   setPointerDestination(ev);state.pointerNavActive=true;state.pointerNavId=ev.pointerId;

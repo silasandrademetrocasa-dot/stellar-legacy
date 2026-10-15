@@ -1,6 +1,6 @@
 {
   "name": "stellar-legacy",
-  "version": "20.0.0",
+  "version": "20.1.0",
   "type": "module",
   "scripts": {
     "start": "node server/index.js",
@@ -15,5 +15,5 @@
   "engines": {
     "node": ">=18"
   },
-  "release": "v20.0.0-balanced-economy"
+  "release": "v20.1.0-balanced-economy"
 }
