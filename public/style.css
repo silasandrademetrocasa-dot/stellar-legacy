@@ -3006,3 +3006,39 @@ body[data-quality="low"] .pet-gear {
 .battle-config-actions-v2013{display:flex;flex-wrap:wrap;gap:8px;align-items:center}.battle-config-actions-v2013 button{flex:1;min-width:100px}
 .bulk-unequip-v2013{margin:8px 0;border:1px solid #d09f6180;color:#ffe3c0;font-weight:700;padding:8px 12px;border-radius:8px}
 @media(max-width:700px){.battle-config-toolbar-v2013{padding-left:0;gap:3px}.battle-conf-btn-v2013{font-size:10px;padding:6px 7px}.battle-config-toolbar-v2013 small{font-size:9px}}
+
+
+/* V20.1.4 — CONF 1 / CONF 2 no proprio HUD NAVE, nao mais em MUNICOES.
+   Este painel tinha altura fixa e overflow:hidden; sem sobrescrever os dois,
+   os botoes seriam cortados nos celulares. Outros cards nao mudam. */
+#topHudDock #leftStats:not(.collapsed){
+  height:166px!important;min-height:166px!important;max-height:166px!important;
+  overflow:hidden!important;
+}
+#topHudDock #leftStats .battle-config-ship-v2014{
+  box-sizing:border-box;width:100%;max-width:100%;
+  display:grid!important;grid-template-columns:minmax(0,1fr) minmax(0,1fr);
+  gap:4px;align-items:center;align-content:start;
+  margin-top:5px;padding:6px 0 0;border-left:0;border-top:1px solid rgba(91,191,255,.18);
+}
+#topHudDock #leftStats .battle-config-ship-v2014 .battle-conf-btn-v2013{
+  box-sizing:border-box;min-width:0!important;max-width:100%;width:100%;
+  min-height:30px!important;padding:6px 2px!important;
+  line-height:1.2;font-size:10px!important;text-align:center;
+  touch-action:manipulation;
+}
+#topHudDock #leftStats .battle-config-ship-v2014 #battleConfCooldown{
+  grid-column:1/-1;display:block!important;min-width:0;width:100%;
+  text-align:center;color:#a9dce9;font-size:9px!important;
+  line-height:1.1;font-variant-numeric:tabular-nums;
+}
+#topHudDock #leftStats.collapsed .battle-config-ship-v2014{display:none!important;}
+#topHudDock #leftStats .battle-config-head-chip-v2014{
+  font-size:9px;line-height:1;color:#9cfbf0;font-weight:900;
+  border:1px solid rgba(66,210,207,.55);background:rgba(23,76,97,.65);
+  border-radius:6px;padding:4px 6px;pointer-events:none;white-space:nowrap;
+}
+@media(max-width:700px){
+ #topHudDock #leftStats:not(.collapsed){height:172px!important;min-height:172px!important;max-height:172px!important;}
+ #topHudDock #leftStats .battle-config-ship-v2014 .battle-conf-btn-v2013{font-size:9px!important;min-height:32px!important;padding:6px 1px!important;}
+}

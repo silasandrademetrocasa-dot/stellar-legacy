@@ -58,8 +58,8 @@ test('telemetria mede apenas tempo ativo visível e não inventa histórico',()=
 });
 test('UI mostra os três gargalos e a meta, sem alterar curva e PvP',()=>{
  for(const x of ['ROTA FULL ELITE','NAVE COMUM FORTE','PRIMEIROS 4 NOVA','FULL ELITE','350','450','ARC-4','VSH-5','THR-6'])assert(game.includes(x),x);
- assert(html.includes('/game.js?v=20.1.3'));
- assert.equal(JSON.parse(readFileSync(new URL('../package.json',import.meta.url),'utf8')).version,'20.1.3');
+ assert(html.includes('/game.js?v=20.1.4'));
+ assert.equal(JSON.parse(readFileSync(new URL('../package.json',import.meta.url),'utf8')).version,'20.1.4');
  assert.match(game,/function levelXpThreshold\(level\)\{return xpThresholdV1915\(level\);\}/);
  assert.match(game,/canvas.addEventListener\('pointerdown',pointerAction\)/);
 });
