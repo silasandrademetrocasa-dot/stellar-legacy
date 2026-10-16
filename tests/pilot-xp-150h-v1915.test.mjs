@@ -22,7 +22,7 @@ test('todos os marcos LV10,18,22,27,32 correspondem a 4/20/45/90/150h estimadas'
   const delta=milestones[i].xp-milestones[i-1].xp;
   assert(Math.abs(delta/rates[i-1]-hours[i-1])<.02);
  }
- assert.equal(packageJson.version,'20.1.0');
+ assert.equal(packageJson.version,'20.1.1');
 });
 test('saves novos já usam V1915, antigos migram apenas uma vez preservando lv e percentual',()=>{
  for(const level of [1,3,7,10,11,14,17,18,20,22,26,27,30,32,38,43]){

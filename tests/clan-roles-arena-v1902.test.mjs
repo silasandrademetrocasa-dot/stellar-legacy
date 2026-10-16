@@ -7,7 +7,7 @@ const api=readFileSync(resolve(base,'public/api.js'),'utf8');
 const sql=readFileSync(resolve(base,'sql/STELLAR_V19_0_2_CLAS_ARENA_SECURITY.sql'),'utf8');
 const extra=readFileSync(resolve(base,'sql/STELLAR_V19_0_2_LEVEL_INTEGRITY.sql'),'utf8');
 const pkg=JSON.parse(readFileSync(resolve(base,'package.json'),'utf8'));
-assert.equal(pkg.version,'20.1.0');
+assert.equal(pkg.version,'20.1.1');
 assert.match(game,/clanRoleNameV19/);
 for(const s of ['LÍDER','VICE-LÍDER','MEMBRO ELITE','MEMBRO'])assert(game.includes(s));
 assert.match(game,/reviewClanRequestNow\(review\.dataset\.clanReview/);

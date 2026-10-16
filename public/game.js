@@ -1,9 +1,9 @@
-import { FACTIONS, SHIPS, ITEMS, LASER_AMMO, ROCKETS, NPC_TYPES, MAPS, RESOURCES } from './data.js?v=20.1.0';
-import { repairPulseSettings } from './repair-balance.js?v=20.1.0';
-import { xpThresholdV1770, xpThresholdV1915, migratePilotXpV1915 } from './level-curve-v1915.js?v=20.1.0';
-import { GAME_ASSETS } from './assets/v17/manifest.js?v=20.1.0';
-import { signUp, signIn, beginGoogleSignIn, restoreGoogleSignInFromUrl, requestPasswordReset, restorePasswordRecoveryFromUrl, restoreSession, signOutLocal, checkGameSession, endGameSession, getUser, getSessionCredentials, loadCloudSave, saveCloudSave, updateCallsign, updatePassword, loadRankings, loadAuctionBids, saveAuctionBidOnline, markAuctionBidStatusOnline, loadAuctionMarket, upsertPlayerPresenceOnline, loadMapPresenceOnline, savePlayerLocationCheckpointOnline, loadPlayerLocationCheckpointOnline, removePlayerPresenceOnline, queuePvpAttackOnline, consumePvpDamageEventsOnline, syncArenaProfileOnline, loadArenaState, loadArenaDailyRewardStatus, claimArenaDailyReward, loadArenaOpponents, loadArenaHistory, arenaAttackOnline, listClansOnline, loadMyClanOnline, createClanOnline, joinClanOnline, getClanRequestsOnline, reviewClanRequestOnline, cancelClanRequestOnline, setClanMemberRoleOnline, leaveClanOnline, transferClanCreditsOnline, claimClanCreditGrantsOnline, recordClanAlienKillOnline, getPremiumShopOnline, testPurchasePremiumOnline, adminPreviewPremiumStageOnline, adminSimulatePremiumStageOnline, getPremiumStageCatalogOnline, loadWarfrontStateOnline, hitWorldBossOnline, claimWorldBossRewardOnline, declareClanWarOnline, recordClanWarScoreOnline, loadLiveOpsOnline, adminUpdateLiveEventScheduleOnline, purchaseLiveCatalogOnline, economyActionOnline, getChatHistoryOnline, sendChatMessageOnline, redeemGameCouponOnline, getMyDesignersOnline, setDesignLoadoutOnline, claimGateDroneDesignOnline, claimEventDesignerOnline, getAdminStatus, adminSearchAccounts, adminRecentActions, adminBanAccount, adminUnbanAccount, adminResetAccount, adminDeleteAccount, pushTelemetryBatch, adminTelemetryOverview, adminPlayerTelemetry, getBattleGroupOnline, createBattleGroupOnline, inviteBattleGroupOnline, searchBattleGroupPlayersOnline, inviteBattleGroupUserOnline, respondBattleGroupInviteOnline, leaveBattleGroupOnline, kickBattleGroupMemberOnline, setBattleGroupRallyOnline, loadRuntimeConfigOnline, loadNpcRuntimeConfigOnline, loadWorldRuntimeConfigOnline, loadSystemsRuntimeConfigOnline, loadAdminRuntimeMonitorOnline, adminUpdateRuntimeModuleOnline, adminUpdateNpcRuntimeOnline, adminUpdateNpcSpawnRuntimeOnline, adminUpdateWorldMapOnline, adminUpdateWorldResourceOnline, adminUpdateWorldSectorOnline, adminUpdateWorldPortalOnline, adminUpdateWorldResourcePoolOnline, adminUpdateMissionCategoryOnline, adminUpdateEconomyServiceOnline, adminUpdateCraftingRecipeOnline, loadBattlePassRuntimeConfigOnline, adminUpdateBattlePassSeasonOnline, adminUpdateBattlePassTierOnline, loadShopsRuntimeConfigOnline, adminUpdateCommonShopItemOnline, adminUpdatePremiumShopItemOnline, loadBonusConfigOnline, adminUpdateBonusConfigOnline, adminCouponDashboardOnline, adminCreateCouponOnline, adminSetCouponActiveOnline, loadGalaxyGatesOnline, adminUpdateGalaxyGateOnline, adminUpsertCustomMissionOnline, adminDeleteCustomMissionOnline, adminCreateCraftRecipeOnline, adminCreateEconomyServiceOnline, adminCreatePassSeasonOnline, loadAuctionRulesOnline, adminUpdateAuctionRulesOnline, loadBalanceRuntimeOnline, adminUpdateBalanceOnline } from './api.js?v=20.1.0';
-import { SharedUniverseClient } from './world.js?v=20.1.0';
+import { FACTIONS, SHIPS, ITEMS, LASER_AMMO, ROCKETS, NPC_TYPES, MAPS, RESOURCES } from './data.js?v=20.1.1';
+import { repairPulseSettings } from './repair-balance.js?v=20.1.1';
+import { xpThresholdV1770, xpThresholdV1915, migratePilotXpV1915 } from './level-curve-v1915.js?v=20.1.1';
+import { GAME_ASSETS } from './assets/v17/manifest.js?v=20.1.1';
+import { signUp, signIn, beginGoogleSignIn, restoreGoogleSignInFromUrl, requestPasswordReset, restorePasswordRecoveryFromUrl, restoreSession, signOutLocal, checkGameSession, endGameSession, getUser, getSessionCredentials, loadCloudSave, saveCloudSave, updateCallsign, updatePassword, loadRankings, loadAuctionBids, saveAuctionBidOnline, markAuctionBidStatusOnline, loadAuctionMarket, upsertPlayerPresenceOnline, loadMapPresenceOnline, savePlayerLocationCheckpointOnline, loadPlayerLocationCheckpointOnline, removePlayerPresenceOnline, queuePvpAttackOnline, consumePvpDamageEventsOnline, syncArenaProfileOnline, loadArenaState, loadArenaDailyRewardStatus, claimArenaDailyReward, loadArenaOpponents, loadArenaHistory, arenaAttackOnline, listClansOnline, loadMyClanOnline, createClanOnline, joinClanOnline, getClanRequestsOnline, reviewClanRequestOnline, cancelClanRequestOnline, setClanMemberRoleOnline, leaveClanOnline, transferClanCreditsOnline, claimClanCreditGrantsOnline, recordClanAlienKillOnline, getPremiumShopOnline, testPurchasePremiumOnline, adminPreviewPremiumStageOnline, adminSimulatePremiumStageOnline, getPremiumStageCatalogOnline, loadWarfrontStateOnline, hitWorldBossOnline, claimWorldBossRewardOnline, declareClanWarOnline, recordClanWarScoreOnline, loadLiveOpsOnline, adminUpdateLiveEventScheduleOnline, purchaseLiveCatalogOnline, economyActionOnline, getChatHistoryOnline, sendChatMessageOnline, redeemGameCouponOnline, getMyDesignersOnline, setDesignLoadoutOnline, claimGateDroneDesignOnline, claimEventDesignerOnline, getAdminStatus, adminSearchAccounts, adminRecentActions, adminBanAccount, adminUnbanAccount, adminResetAccount, adminDeleteAccount, pushTelemetryBatch, adminTelemetryOverview, adminPlayerTelemetry, getBattleGroupOnline, createBattleGroupOnline, inviteBattleGroupOnline, searchBattleGroupPlayersOnline, inviteBattleGroupUserOnline, respondBattleGroupInviteOnline, leaveBattleGroupOnline, kickBattleGroupMemberOnline, setBattleGroupRallyOnline, loadRuntimeConfigOnline, loadNpcRuntimeConfigOnline, loadWorldRuntimeConfigOnline, loadSystemsRuntimeConfigOnline, loadAdminRuntimeMonitorOnline, adminUpdateRuntimeModuleOnline, adminUpdateNpcRuntimeOnline, adminUpdateNpcSpawnRuntimeOnline, adminUpdateWorldMapOnline, adminUpdateWorldResourceOnline, adminUpdateWorldSectorOnline, adminUpdateWorldPortalOnline, adminUpdateWorldResourcePoolOnline, adminUpdateMissionCategoryOnline, adminUpdateEconomyServiceOnline, adminUpdateCraftingRecipeOnline, loadBattlePassRuntimeConfigOnline, adminUpdateBattlePassSeasonOnline, adminUpdateBattlePassTierOnline, loadShopsRuntimeConfigOnline, adminUpdateCommonShopItemOnline, adminUpdatePremiumShopItemOnline, loadBonusConfigOnline, adminUpdateBonusConfigOnline, adminCouponDashboardOnline, adminCreateCouponOnline, adminSetCouponActiveOnline, loadGalaxyGatesOnline, adminUpdateGalaxyGateOnline, adminUpsertCustomMissionOnline, adminDeleteCustomMissionOnline, adminCreateCraftRecipeOnline, adminCreateEconomyServiceOnline, adminCreatePassSeasonOnline, loadAuctionRulesOnline, adminUpdateAuctionRulesOnline, loadBalanceRuntimeOnline, adminUpdateBalanceOnline } from './api.js?v=20.1.1';
+import { SharedUniverseClient } from './world.js?v=20.1.1';
 
 const canvas = document.querySelector('#game');
 const ctx = canvas.getContext('2d');
@@ -2517,7 +2517,7 @@ const petRuntime = {
   lastKami: -999, kamiArmed: false, kamiActivationId: 0
 };
 const state = {
-  currentMap: MAPS.x1, camera: { x: 620, y: MAPS.x1.world.h/2 }, target: null, pvpShotPending:false, pvpRocketPending:false, enemies: [], loot: [], ores: [], bonusBoxes: [], particles: [], fx: [], rocketFx: [], landmarks: [], enemyRespawns: [], oreRespawns: [], lastPortalAt: 0, radarRange: 1500, jumping: false,
+  currentMap: MAPS.x1, camera: { x: 620, y: MAPS.x1.world.h/2 }, target: null, pvpShotPending:0, pvpRocketPending:false, pvpReservedAmmo:{}, pvpRetryUntil:0, pvpErrorLastToastAt:0, enemies: [], loot: [], ores: [], bonusBoxes: [], particles: [], fx: [], rocketFx: [], landmarks: [], enemyRespawns: [], oreRespawns: [], lastPortalAt: 0, radarRange: 1500, jumping: false,
   lastPlayerDamageAt:nowSec(), repairFxAt:0, shieldRepairFxAt:0,
   pointerNavActive:false, pointerNavId:null, lastTargetTapId:null, lastTargetTapAt:0, combatAlertText:'', combatAlertKind:'', combatAlertUntil:0, lowHpWarned:false, eventSpawnKey:'', missionHudPage:0, missionHudSignature:'', portalCombatUntil:0,
   shopTab: 'ships', hangarTab: 'ships', hangarEquipFilter:'all', hangarDroneFilter:'all', hangarPetFilter:'all', toastTimer: null, ammoUiExpanded: true, statsUiExpanded: true, playerUiExpanded: true, missionUiExpanded: true, petUiExpanded: true, minimapUiExpanded: true, chatUiExpanded: true, topMetaExpanded: true, topbarDockExpanded: true, targetLockUiExpanded:true, galaxyEventUiExpanded:true,
@@ -4964,26 +4964,36 @@ function fireLaserTick(){
   }
   if(nowSec()-player.lastLaserShot<.42)return;
 
-  const firingCount=Math.min(totalLasers,stock),firingIds=laserIds.slice(0,firingCount);
-  playSfx('laser');
-
   if(state.target.isPlayer){
     if(!pvpTargetAllowed(state.target)){player.laserFiring=false;showToast('PvP permitido apenas em 4-1 / 4-2 / 4-3, fora do seu grupo');return;}
-    if(state.pvpShotPending)return;
-    const shotAmmo=ammo,base=pvpLaserBase(firingIds),raw=Math.round(base*(Number(shotAmmo.mult)||1)*rand(.95,1.08));
+    // V20.1.1: continuamos atacando enquanto o piloto permanecer no alcance.
+    // Uma resposta atrasada, um missil simultaneo ou um 429 nao desliga o laser.
+    if(Date.now() < (state.pvpRetryUntil||0) || Number(state.pvpShotPending||0)>=3)return;
+    const reserved=Math.max(0,Number(state.pvpReservedAmmo?.[ammo.id])||0);
+    const available=Math.max(0,stock-reserved);
+    if(!available)return; // disparos anteriores ainda nao confirmados
+    const firingCount=Math.min(totalLasers,available),firingIds=laserIds.slice(0,firingCount);
+    const shotAmmo=ammo,target=state.target,base=pvpLaserBase(firingIds);
+    const raw=Math.round(base*(Number(shotAmmo.mult)||1)*rand(.95,1.08));
+    state.pvpReservedAmmo[shotAmmo.id]=reserved+firingCount;
     player.lastLaserShot=nowSec();
-    queuePvpShot(state.target,shotAmmo.shieldDrain?Math.round(base*(Number(shotAmmo.mult)||2)):raw,!!shotAmmo.shieldDrain,shotAmmo.color).then(row=>{
+    playSfx('laser');
+    queuePvpShot(target,shotAmmo.shieldDrain?Math.round(base*(Number(shotAmmo.mult)||2)):raw,!!shotAmmo.shieldDrain,shotAmmo.color).then(row=>{
       if(!row)return;
       progress.ammo[shotAmmo.id]=Math.max(0,(progress.ammo[shotAmmo.id]||0)-firingCount);
       refreshAmmoCounters();saveGame();
       if(progress.ammo[shotAmmo.id]<=0){
         const replacement=recoverActiveLaser(shotAmmo.id,true);
-        if(!replacement){player.laserFiring=false;showToast(`${shortLaserLabel(shotAmmo.id)} acabou • sem munição reserva`);}
+        if(!replacement && player.laserFiring){player.laserFiring=false;showToast(`${shortLaserLabel(shotAmmo.id)} acabou • sem munição reserva`);}
       }
+    }).finally(()=>{
+      state.pvpReservedAmmo[shotAmmo.id]=Math.max(0,(state.pvpReservedAmmo[shotAmmo.id]||0)-firingCount);
     });
     return;
   }
 
+  const firingCount=Math.min(totalLasers,stock),firingIds=laserIds.slice(0,firingCount);
+  playSfx('laser');
   const allBase=laserPveBase(laserIds),firingBase=laserPveBase(firingIds),fraction=allBase>0?firingBase/allBase:0;
   player.lastLaserShot=nowSec();
   progress.ammo[ammo.id]=Math.max(0,stock-firingCount);
@@ -5245,11 +5255,14 @@ async function syncOnlineWorld(){
       rp.isPlayer=true;const live=rp.realtime&&Date.now()-(rp.realtimeUpdatedAt||0)<2500;if(!live){rp.tx=Number(row.x)||0;rp.ty=Number(row.y)||0;rp.targetAngle=Number(row.angle)||0;rp.hp=Number(row.hp)||0;rp.maxHp=Number(row.max_hp)||1;rp.shield=Number(row.shield)||0;rp.maxShield=Number(row.max_shield)||0;}
       rp.callsign=row.callsign||rp.callsign||'Pilot';rp.name=rp.callsign;rp.shipId=row.ship_id||rp.shipId||'phoenix';rp.faction=row.faction||rp.faction||null;rp.level=Number(row.level)||rp.level||1;
       rp.rankCode=row.rank_code||'pilot_basic';rp.rankTitle=row.rank_title||'Piloto Básico';rp.pilotTitle=row.pilot_title||rp.pilotTitle||'Piloto Estelar';rp.clanTag=row.clan_tag||'';rp.isAdmin=!!row.is_admin;
-      rp.territoryFaction=row.territory_faction||territory;rp.size=onlineShipSize(rp.shipId)*.48;rp.updatedAt=row.updated_at;
+      rp.territoryFaction=row.territory_faction||territory;rp.size=onlineShipSize(rp.shipId)*.48;rp.updatedAt=row.updated_at;rp.lastPresenceSeenAt=Date.now();
     }
     for(const id of [...onlineWorld.players.keys()]){
       if(!seen.has(id)){
-        const rp=onlineWorld.players.get(id);if(rp?.realtime&&Date.now()-(rp.realtimeUpdatedAt||0)<5000)continue;
+        const rp=onlineWorld.players.get(id),now=Date.now();
+        if(rp?.realtime&&now-(rp.realtimeUpdatedAt||0)<5000)continue;
+        // Presenca atrasada por uma consulta nao derruba o lock PvP.
+        if(state.target?.isPlayer&&state.target.id===id&&now-(rp?.lastPresenceSeenAt||0)<8000)continue;
         if(state.target?.isPlayer&&state.target.id===id){state.target=null;player.laserFiring=false;}
         onlineWorld.players.delete(id);
       }
@@ -5298,8 +5311,8 @@ function pvpLaserBase(ids){
   return dmg;
 }
 async function queuePvpShot(target,damage,shieldDrain=false,color='#ff657d'){
-  if(!target?.isPlayer||state.pvpShotPending)return null;
-  state.pvpShotPending=true;
+  if(!target?.isPlayer||Number(state.pvpShotPending||0)>=3)return null;
+  state.pvpShotPending=Number(state.pvpShotPending||0)+1;
   try{
     const row=await queuePvpAttackOnline({
       targetUserId:target.id,damage:Math.max(0,Math.round(damage)),shieldDrain,
@@ -5314,10 +5327,19 @@ async function queuePvpShot(target,damage,shieldDrain=false,color='#ff657d'){
     if(effective>0){spawnImpactFx(target.x,target.y,shieldDrain?'#79f1ff':color,32,shieldDrain?'shield':'impact');if(target.clanTag&&target.clanTag!==currentClanTag())scoreClanWar(Math.max(1,Math.min(6,Math.floor(effective/50000))),'pvp_damage');}
     return row;
   }catch(e){
-    player.laserFiring=false;
-    showToast(String(e?.message||e).replace(/^.*?:\s*/,''));
+    const message=String(e?.message||e).replace(/^.*?:\s*/,''),now=Date.now();
+    const limit=/proximo disparo|429|limite de (taxa|requisicoes)|rate.limit/i.test(message);
+    const distance=/distante|alcance/i.test(message);
+    const permission=/PvP permitido somente|Fogo amigo|mesmo grupo|nivel minimo|sess[aã]o ausente/i.test(message);
+    // So interromper em bloqueio real. Erros momentaneos nao cancelam o autoataque.
+    if(permission)player.laserFiring=false;
+    state.pvpRetryUntil=Math.max(state.pvpRetryUntil||0,now+(limit?160:distance?330:permission?650:900));
+    if(!limit && now-(state.pvpErrorLastToastAt||0)>4800){
+      state.pvpErrorLastToastAt=now;
+      showToast(distance?'Alvo fora do alcance • ataque aguardando aproximacao':permission?message:'PvP sincronizando • laser continua ativo');
+    }
     return null;
-  }finally{state.pvpShotPending=false;}
+  }finally{state.pvpShotPending=Math.max(0,Number(state.pvpShotPending||1)-1);}
 }
 function updateOnlineWorld(dt){
   if(!authenticated||!progress)return;const now=Date.now(),presenceInterval=sharedUniverseOnline()?4500:1200;

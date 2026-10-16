@@ -764,3 +764,13 @@ Consulta somente leitura das 12 ofertas para pilotos autenticados via RPC SQL V1
 
 Instalação: subir o ZIP completo no instalador principal original; SQL de minérios e bônus foi aplicado diretamente no Supabase. Não execute migração duas vezes.
 
+
+## V20.1.1 — PvP contínuo e cadência responsiva (15/10/2026)
+
+- Corrigido o erro que desativava `player.laserFiring` em toda rejeição da RPC de PvP, até mesmo por cooldown, timeout e desconexão momentânea.
+- Mantém o ataque ativado até cancelamento do jogador, ausência permanente do alvo, munição esgotada ou bloqueio real de segurança. Fora do alcance a salva pausa, retornando quando a nave adversária volta a estar ao alcance.
+- Até três salvas de laser PvP em trânsito por vez, respeitando a cadência base de 0,42s e o estoque reservado até confirmação do Supabase.
+- Tolerância de 8s a falhas transitórias de lista de presenças antes de liberar um alvo PvP travado.
+- Supabase: janela mínima de ataques ajustada de 0,35s para 0,16s e restaurador automático de níveis de 15/10 atualizado para **preservar a mudança na virada do dia**.
+- Proteções preservadas: PvP apenas 4-X, isolamento por grupo, limite de dano, distância e presença autenticada. Sem mexer em economia, naves, sprites, lojas ou salvamentos.
+- Novos testes de erros temporários, concorrência limitada, preservação do lock e integridade da reserva de munições.
