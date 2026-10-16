@@ -1,3 +1,8 @@
+## V20.1.2 — PROGRESSÃO INICIAL + ROTA FULL ELITE
+- Reforços únicos de recompensas LV3,5,7,10,12,15,18,22; total +49 mi CR / +50 mil STL (pagos ao longo da progressão).
+- Novo monitor em Passe: nave Comum, 4 Nova, build Elite; tempo ativo medido desde a versão.
+- Nenhuma alteração de preços, drops, NPCs, XP, Premium, PvP ou dados existentes.
+
 ## V20.1.0 - SPRITES + PvP Battle 4-X (15/10/2026)
 - Clique/toque em naves de outros jogadores nos mapas 4-1,4-2,4-3, incluindo mesma faccao.
 - Nenhum PvP nos mapas X-1..X-8; membros do mesmo grupo sao protegidos.

@@ -1,9 +1,10 @@
-import { FACTIONS, SHIPS, ITEMS, LASER_AMMO, ROCKETS, NPC_TYPES, MAPS, RESOURCES } from './data.js?v=20.1.1';
-import { repairPulseSettings } from './repair-balance.js?v=20.1.1';
-import { xpThresholdV1770, xpThresholdV1915, migratePilotXpV1915 } from './level-curve-v1915.js?v=20.1.1';
-import { GAME_ASSETS } from './assets/v17/manifest.js?v=20.1.1';
-import { signUp, signIn, beginGoogleSignIn, restoreGoogleSignInFromUrl, requestPasswordReset, restorePasswordRecoveryFromUrl, restoreSession, signOutLocal, checkGameSession, endGameSession, getUser, getSessionCredentials, loadCloudSave, saveCloudSave, updateCallsign, updatePassword, loadRankings, loadAuctionBids, saveAuctionBidOnline, markAuctionBidStatusOnline, loadAuctionMarket, upsertPlayerPresenceOnline, loadMapPresenceOnline, savePlayerLocationCheckpointOnline, loadPlayerLocationCheckpointOnline, removePlayerPresenceOnline, queuePvpAttackOnline, consumePvpDamageEventsOnline, syncArenaProfileOnline, loadArenaState, loadArenaDailyRewardStatus, claimArenaDailyReward, loadArenaOpponents, loadArenaHistory, arenaAttackOnline, listClansOnline, loadMyClanOnline, createClanOnline, joinClanOnline, getClanRequestsOnline, reviewClanRequestOnline, cancelClanRequestOnline, setClanMemberRoleOnline, leaveClanOnline, transferClanCreditsOnline, claimClanCreditGrantsOnline, recordClanAlienKillOnline, getPremiumShopOnline, testPurchasePremiumOnline, adminPreviewPremiumStageOnline, adminSimulatePremiumStageOnline, getPremiumStageCatalogOnline, loadWarfrontStateOnline, hitWorldBossOnline, claimWorldBossRewardOnline, declareClanWarOnline, recordClanWarScoreOnline, loadLiveOpsOnline, adminUpdateLiveEventScheduleOnline, purchaseLiveCatalogOnline, economyActionOnline, getChatHistoryOnline, sendChatMessageOnline, redeemGameCouponOnline, getMyDesignersOnline, setDesignLoadoutOnline, claimGateDroneDesignOnline, claimEventDesignerOnline, getAdminStatus, adminSearchAccounts, adminRecentActions, adminBanAccount, adminUnbanAccount, adminResetAccount, adminDeleteAccount, pushTelemetryBatch, adminTelemetryOverview, adminPlayerTelemetry, getBattleGroupOnline, createBattleGroupOnline, inviteBattleGroupOnline, searchBattleGroupPlayersOnline, inviteBattleGroupUserOnline, respondBattleGroupInviteOnline, leaveBattleGroupOnline, kickBattleGroupMemberOnline, setBattleGroupRallyOnline, loadRuntimeConfigOnline, loadNpcRuntimeConfigOnline, loadWorldRuntimeConfigOnline, loadSystemsRuntimeConfigOnline, loadAdminRuntimeMonitorOnline, adminUpdateRuntimeModuleOnline, adminUpdateNpcRuntimeOnline, adminUpdateNpcSpawnRuntimeOnline, adminUpdateWorldMapOnline, adminUpdateWorldResourceOnline, adminUpdateWorldSectorOnline, adminUpdateWorldPortalOnline, adminUpdateWorldResourcePoolOnline, adminUpdateMissionCategoryOnline, adminUpdateEconomyServiceOnline, adminUpdateCraftingRecipeOnline, loadBattlePassRuntimeConfigOnline, adminUpdateBattlePassSeasonOnline, adminUpdateBattlePassTierOnline, loadShopsRuntimeConfigOnline, adminUpdateCommonShopItemOnline, adminUpdatePremiumShopItemOnline, loadBonusConfigOnline, adminUpdateBonusConfigOnline, adminCouponDashboardOnline, adminCreateCouponOnline, adminSetCouponActiveOnline, loadGalaxyGatesOnline, adminUpdateGalaxyGateOnline, adminUpsertCustomMissionOnline, adminDeleteCustomMissionOnline, adminCreateCraftRecipeOnline, adminCreateEconomyServiceOnline, adminCreatePassSeasonOnline, loadAuctionRulesOnline, adminUpdateAuctionRulesOnline, loadBalanceRuntimeOnline, adminUpdateBalanceOnline } from './api.js?v=20.1.1';
-import { SharedUniverseClient } from './world.js?v=20.1.1';
+import { FACTIONS, SHIPS, ITEMS, LASER_AMMO, ROCKETS, NPC_TYPES, MAPS, RESOURCES } from './data.js?v=20.1.2';
+import { repairPulseSettings } from './repair-balance.js?v=20.1.2';
+import { xpThresholdV1770, xpThresholdV1915, migratePilotXpV1915 } from './level-curve-v1915.js?v=20.1.2';
+import { applyRecruitBonusV2012, eliteRouteSnapshotV2012, freshEliteRouteJournalV2012, ELITE_ROUTE_TARGETS_V2012, novaTierPriceV2012 } from './progression-plan-v2012.js?v=20.1.2';
+import { GAME_ASSETS } from './assets/v17/manifest.js?v=20.1.2';
+import { signUp, signIn, beginGoogleSignIn, restoreGoogleSignInFromUrl, requestPasswordReset, restorePasswordRecoveryFromUrl, restoreSession, signOutLocal, checkGameSession, endGameSession, getUser, getSessionCredentials, loadCloudSave, saveCloudSave, updateCallsign, updatePassword, loadRankings, loadAuctionBids, saveAuctionBidOnline, markAuctionBidStatusOnline, loadAuctionMarket, upsertPlayerPresenceOnline, loadMapPresenceOnline, savePlayerLocationCheckpointOnline, loadPlayerLocationCheckpointOnline, removePlayerPresenceOnline, queuePvpAttackOnline, consumePvpDamageEventsOnline, syncArenaProfileOnline, loadArenaState, loadArenaDailyRewardStatus, claimArenaDailyReward, loadArenaOpponents, loadArenaHistory, arenaAttackOnline, listClansOnline, loadMyClanOnline, createClanOnline, joinClanOnline, getClanRequestsOnline, reviewClanRequestOnline, cancelClanRequestOnline, setClanMemberRoleOnline, leaveClanOnline, transferClanCreditsOnline, claimClanCreditGrantsOnline, recordClanAlienKillOnline, getPremiumShopOnline, testPurchasePremiumOnline, adminPreviewPremiumStageOnline, adminSimulatePremiumStageOnline, getPremiumStageCatalogOnline, loadWarfrontStateOnline, hitWorldBossOnline, claimWorldBossRewardOnline, declareClanWarOnline, recordClanWarScoreOnline, loadLiveOpsOnline, adminUpdateLiveEventScheduleOnline, purchaseLiveCatalogOnline, economyActionOnline, getChatHistoryOnline, sendChatMessageOnline, redeemGameCouponOnline, getMyDesignersOnline, setDesignLoadoutOnline, claimGateDroneDesignOnline, claimEventDesignerOnline, getAdminStatus, adminSearchAccounts, adminRecentActions, adminBanAccount, adminUnbanAccount, adminResetAccount, adminDeleteAccount, pushTelemetryBatch, adminTelemetryOverview, adminPlayerTelemetry, getBattleGroupOnline, createBattleGroupOnline, inviteBattleGroupOnline, searchBattleGroupPlayersOnline, inviteBattleGroupUserOnline, respondBattleGroupInviteOnline, leaveBattleGroupOnline, kickBattleGroupMemberOnline, setBattleGroupRallyOnline, loadRuntimeConfigOnline, loadNpcRuntimeConfigOnline, loadWorldRuntimeConfigOnline, loadSystemsRuntimeConfigOnline, loadAdminRuntimeMonitorOnline, adminUpdateRuntimeModuleOnline, adminUpdateNpcRuntimeOnline, adminUpdateNpcSpawnRuntimeOnline, adminUpdateWorldMapOnline, adminUpdateWorldResourceOnline, adminUpdateWorldSectorOnline, adminUpdateWorldPortalOnline, adminUpdateWorldResourcePoolOnline, adminUpdateMissionCategoryOnline, adminUpdateEconomyServiceOnline, adminUpdateCraftingRecipeOnline, loadBattlePassRuntimeConfigOnline, adminUpdateBattlePassSeasonOnline, adminUpdateBattlePassTierOnline, loadShopsRuntimeConfigOnline, adminUpdateCommonShopItemOnline, adminUpdatePremiumShopItemOnline, loadBonusConfigOnline, adminUpdateBonusConfigOnline, adminCouponDashboardOnline, adminCreateCouponOnline, adminSetCouponActiveOnline, loadGalaxyGatesOnline, adminUpdateGalaxyGateOnline, adminUpsertCustomMissionOnline, adminDeleteCustomMissionOnline, adminCreateCraftRecipeOnline, adminCreateEconomyServiceOnline, adminCreatePassSeasonOnline, loadAuctionRulesOnline, adminUpdateAuctionRulesOnline, loadBalanceRuntimeOnline, adminUpdateBalanceOnline } from './api.js?v=20.1.2';
+import { SharedUniverseClient } from './world.js?v=20.1.2';
 
 const canvas = document.querySelector('#game');
 const ctx = canvas.getContext('2d');
@@ -2243,7 +2244,7 @@ function levelRewardDef(level){
   if(level===35){addRewardQty(r.ammo,'ucb100',5000);r.repairBonus+=2;}
   if(level===40)r.items.push('lf4');
   if(level===44){r.credits+=10000000;r.uridium+=10000;addRewardQty(r.ammo,'ucb100',10000);r.items.push('lf4');r.repairBonus+=3;}
-  return r;
+  return applyRecruitBonusV2012(r,level);
 }
 function fallbackBattlePassRewardDef(tier){
   const r=rewardBundle();r.credits=250000+tier*175000;r.uridium=350+tier*75;addRewardQty(r.ammo,'lcb10',1500+tier*150);
@@ -2318,6 +2319,42 @@ function savePassUiPrefs(){try{localStorage.setItem(PASS_UI_PREFS_KEY,JSON.strin
 function togglePassSection(key){loadPassUiPrefs();passUiPrefs.collapsed[key]=!passUiPrefs.collapsed[key];savePassUiPrefs();renderProgression();}
 function passSectionClass(key,extra=''){loadPassUiPrefs();return `pass-section ${extra}${passUiPrefs.collapsed[key]?' collapsed':''}`.trim();}
 function passSectionIcon(key){loadPassUiPrefs();return passUiPrefs.collapsed[key]?'▸':'▾';}
+// V20.1.2 — mede tempo ativo visível desde esta versão. Saves antigos começam a
+// medição no nível atual, sem fingir que o tempo histórico é conhecido.
+let lastEliteRouteCheckV2012=0;
+function progressionRouteJournal(){
+  if(!progress)return null;
+  const r=progress.progressionRouteV2012 ||= freshEliteRouteJournalV2012(progress.profile.level);
+  r.milestones ||= {};r.activeSeconds=Math.max(0,Number(r.activeSeconds)||0);
+  return r;
+}
+function eliteRouteTrackV2012(dt){
+  if(!progress||!authenticated||document.visibilityState!=='visible')return;
+  const r=progressionRouteJournal();r.activeSeconds+=Math.max(0,Math.min(.25,Number(dt)||0));
+  const now=Date.now();if(now-lastEliteRouteCheckV2012<5000)return;lastEliteRouteCheckV2012=now;
+  const st=eliteRouteSnapshotV2012(progress);let changed=false;
+  for(const key of ['firstCommon','fourNova','fullElite'])if(st[key]&&!r.milestones[key]){
+    r.milestones[key]={at:new Date().toISOString(),activeSeconds:Math.floor(r.activeSeconds),
+      legacy:Number(r.trackedFromLevel||1)>1&&r.activeSeconds<60};changed=true;
+  }
+  const minute=Math.floor(r.activeSeconds/60);
+  if(minute>(Number(r.lastSavedMinute)||0)){r.lastSavedMinute=minute;changed=true;}
+  if(changed)saveGame();
+}
+function eliteRoutePanelV2012(){
+  const st=eliteRouteSnapshotV2012(progress),r=progressionRouteJournal(),goal=ELITE_ROUTE_TARGETS_V2012;
+  const label=(key)=>{const v=r?.milestones?.[key];if(!v)return 'A CONQUISTAR';if(v.legacy)return 'JÁ POSSUÍA';return `${(v.activeSeconds/3600).toFixed(1).replace('.',',')} h ativas medidas`;};
+  const novaPrice=liveCatalog('drone:iris'),numBase=Math.max(st.novaCount,Math.floor(Number(progress.dronePurchasesV1829?.iris)||0));
+  const nextNova=st.novaCount<8?novaTierPriceV2012(novaPrice?.price||15000,novaPrice?.meta?.drone_price_multiplier||2,numBase+1,premiumActive()):0;
+  const pct=Math.floor(st.progress/Math.max(1,st.progressMax)*100);
+  return `<details class="elite-route-v2012"><summary><b>🚀 ROTA FULL ELITE</b><span>BUILD ${pct}% • ${st.novaCount}/8 NOVA ▾</span></summary>
+  <div class="elite-route-v2012-body"><p>Meta de balanceamento: <strong>${goal.activeHoursMin}–${goal.activeHoursMax} h ativas</strong> para jogador otimizado. Não é prazo garantido.</p>
+  <div class="elite-route-marks"><span>${st.firstCommon?'✓':'○'} NAVE COMUM FORTE <small>${label('firstCommon')}</small></span><span>${st.fourNova?'✓':'○'} PRIMEIROS 4 NOVA <small>${label('fourNova')}</small></span><span>${st.fullElite?'✓':'○'} FULL ELITE <small>${label('fullElite')}</small></span></div>
+  <div class="pass-mini-progress elite-route-track"><i style="width:${pct}%"></i></div>
+  <p>Leviathan ${st.eliteShip?'✓':'○'} • ARC-4 ${st.lasers}/31 • VSH-5 ${st.shields}/12 • THR-6 ${st.motors}/6 • Extras Elite ${st.extras}/4</p>
+  <p>Nova ${st.novaCount}/8${nextNova?` • próximo na loja: <strong>${fmt(nextNova)} STL</strong>`:''} • Tempo monitorado desde a V20.1.2: <strong>${(r.activeSeconds/3600).toFixed(1).replace('.',',')} h</strong></p>
+  <small>Horas antigas não são estimadas como reais. Itens contam quando equipados na build ativa; compras de outras naves não contam. Premium reduz 5% nos itens STL elegíveis.</small></div></details>`;
+}
 function renderProgression(){
   if(!ui.passContent||!progress)return;normalizeBattlePass();normalizeLevelRewards();updatePassBadge();
   const unlocked=battlePassTier(),points=progress.battlePass.points,daily=progress.battlePass.daily,missions=battlePassDailyMissions(),paid=premiumPassActive();
@@ -2331,7 +2368,7 @@ function renderProgression(){
   const seasonCfg=battlePassSeasonConfig(),passPrice=Number(seasonCfg.premium_price_brl||19.9).toFixed(2).replace('.',',');
   const premiumCta=!battlePassSeasonActive()?'<div class="pass-premium-cta">TEMPORADA FORA DA JANELA ATUAL • progressão e resgates pausados.</div>':paid?'<div class="pass-premium-active">✦ PASSE PREMIUM ATIVO NESTA TEMPORADA</div>':`<div class="pass-premium-cta">Passe Premium desta temporada • R$ ${passPrice} • recompensas configuradas por tier. <button class="gold-btn" id="passOpenPremium">VER PASSE PREMIUM</button></div>`;
   loadPassUiPrefs();
-  ui.passContent.innerHTML=`<section class="pass-hero"><div><div class="eyebrow">${escHtml(seasonCfg.name||`TEMPORADA ${progress.battlePass.season}`)}</div><h3>TIER ${unlocked} / ${battlePassTierCount()}</h3><p>${escHtml(seasonCfg.description||`5 missões diárias • ${battlePassDailyPoints()} pontos cada • Free + Premium.`)}</p></div><div class="pass-points"><span>PONTOS</span><b>${fmt(points)}</b><small>${unlocked>=battlePassTierCount()?'PASSE COMPLETO':`faltam ${fmt(nextPoints)} para o próximo tier`}</small></div></section><div class="pass-main-progress"><i style="width:${battlePassTierProgress()}%"></i></div>${premiumCta}
+  ui.passContent.innerHTML=`${eliteRoutePanelV2012()}<section class="pass-hero"><div><div class="eyebrow">${escHtml(seasonCfg.name||`TEMPORADA ${progress.battlePass.season}`)}</div><h3>TIER ${unlocked} / ${battlePassTierCount()}</h3><p>${escHtml(seasonCfg.description||`5 missões diárias • ${battlePassDailyPoints()} pontos cada • Free + Premium.`)}</p></div><div class="pass-points"><span>PONTOS</span><b>${fmt(points)}</b><small>${unlocked>=battlePassTierCount()?'PASSE COMPLETO':`faltam ${fmt(nextPoints)} para o próximo tier`}</small></div></section><div class="pass-main-progress"><i style="width:${battlePassTierProgress()}%"></i></div>${premiumCta}
   <section class="${passSectionClass('missions')}"><button class="pass-section-head pass-section-toggle" type="button" data-pass-toggle="missions"><span class="pass-head-copy"><b>MISSÕES DIÁRIAS</b><small>${missions.filter(m=>daily.completed[m.id]).length}/5 concluídas hoje</small></span><em>${passSectionIcon('missions')}</em></button><div class="pass-section-body"><div class="pass-missions">${dailyHtml}</div></div></section>
   <section class="${passSectionClass('rewards')}"><div class="pass-section-head"><button class="pass-section-title-button" type="button" data-pass-toggle="rewards"><span class="pass-head-copy"><b>RECOMPENSAS DO PASSE</b><small>${battlePassTierCount()} níveis</small></span><em>${passSectionIcon('rewards')}</em></button><div class="pass-claim-stack"><button class="ghost-btn" id="passClaimAll">RESGATAR FREE</button><button class="ghost-btn" id="passPremiumClaimAll" ${paid?'':'disabled'}>RESGATAR PREMIUM</button></div></div><div class="pass-section-body"><div class="pass-tier-grid">${tiers}</div></div></section>
   <section class="${passSectionClass('levels','level-section')}"><div class="pass-section-head"><button class="pass-section-title-button" type="button" data-pass-toggle="levels"><span class="pass-head-copy"><b>RECOMPENSAS DE NÍVEL</b><small>LV 2 → LV ${PLAYER_MAX_LEVEL}</small></span><em>${passSectionIcon('levels')}</em></button><button class="ghost-btn" id="levelClaimAll">RESGATAR DISPONÍVEIS</button></div><div class="pass-section-body"><div class="level-reward-grid">${levels}</div></div></section>`;
@@ -2487,6 +2524,7 @@ function freshSave(factionId) {
     missions: freshMissions(),
     battlePass: freshBattlePass(),
     levelRewards: freshLevelRewards(),
+    progressionRouteV2012:freshEliteRouteJournalV2012(1),
     pilotBio: freshPilotBio(),
     titles: freshPilotTitles(),
     journey: freshPilotJourney(),
@@ -3677,6 +3715,7 @@ function hydrateProgress(){
   // A identidade da conta é soberana; um save nunca pode renomear outro usuário.
   progress.profile.callsign=account?.callsign || account?.email?.split('@')[0] || progress.profile.callsign || 'Pilot';
   progress.profile.level=Math.max(1,Math.min(PLAYER_MAX_LEVEL,Number(progress.profile.level)||1));
+  progress.progressionRouteV2012 ||= freshEliteRouteJournalV2012(progress.profile.level);
   progress.profile.xp=Math.max(0,Number(progress.profile.xp)||0);
   progress.stellarDust=Math.max(0,Math.floor(Number(progress.stellarDust)||0));
   progress.bonusBoxesByMap ||= {};
@@ -4966,7 +5005,7 @@ function fireLaserTick(){
 
   if(state.target.isPlayer){
     if(!pvpTargetAllowed(state.target)){player.laserFiring=false;showToast('PvP permitido apenas em 4-1 / 4-2 / 4-3, fora do seu grupo');return;}
-    // V20.1.1: continuamos atacando enquanto o piloto permanecer no alcance.
+    // V20.1.2: continuamos atacando enquanto o piloto permanecer no alcance.
     // Uma resposta atrasada, um missil simultaneo ou um 429 nao desliga o laser.
     if(Date.now() < (state.pvpRetryUntil||0) || Number(state.pvpShotPending||0)>=3)return;
     const reserved=Math.max(0,Number(state.pvpReservedAmmo?.[ammo.id])||0);
@@ -5398,7 +5437,7 @@ function drawOnlinePlayers(){
 
 
 let lastLowHudUpdateAt=0;
-function update(dt){if(!progress||gameBootstrapRuntime.loading)return;telemetryTick(dt);processRespawns();updateBonusBoxes();updateCombatAbilities();updatePlayer(dt);updateSharedUniverseInterpolation(dt);updateEnemies(dt);updatePet(dt);updateOnlineWorld(dt);updateWarfrontRuntime();updateGalaxyEvent(dt);updateParticles(dt);updateFx(dt);updateAlphaGate();updateAuctionSystem();
+function update(dt){if(!progress||gameBootstrapRuntime.loading)return;telemetryTick(dt);eliteRouteTrackV2012(dt);processRespawns();updateBonusBoxes();updateCombatAbilities();updatePlayer(dt);updateSharedUniverseInterpolation(dt);updateEnemies(dt);updatePet(dt);updateOnlineWorld(dt);updateWarfrontRuntime();updateGalaxyEvent(dt);updateParticles(dt);updateFx(dt);updateAlphaGate();updateAuctionSystem();
   // Controles, combate e simulação continuam na cadência normal. Apenas o HUD de BAIXA
   // evita recalcular tooltips, classes CSS e texto em dezenas de nós 30x por segundo.
   const low=resolvedQualityMode()==='low',now=performance.now();

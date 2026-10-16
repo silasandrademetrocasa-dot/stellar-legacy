@@ -2980,3 +2980,17 @@ body[data-quality="low"] .pet-gear {
 .admin-auction-lots td b{display:block;color:#f5e4bf;}.admin-auction-lots td small{display:block;color:#7e9cb0;font-size:9px;}
 .admin-auction-lots td input{width:95px;min-width:75px;font-size:11px;}
 @media(max-width:680px){.admin-auction-parameters{grid-template-columns:repeat(2,minmax(0,1fr));}.admin-auction-pricing{padding:11px;}}
+
+/* V20.1.2 • roadmap de equipamentos no Passe */
+.elite-route-v2012{margin:12px 0;border:1px solid rgba(101,219,255,.35);background:linear-gradient(135deg,rgba(10,37,55,.94),rgba(20,18,49,.88));border-radius:13px;color:#d9f5ff;}
+.elite-route-v2012>summary{padding:12px 14px;cursor:pointer;display:flex;align-items:center;gap:8px;justify-content:space-between;list-style:none;font-size:13px;}
+.elite-route-v2012>summary::-webkit-details-marker{display:none;}
+.elite-route-v2012>summary span{font-size:11px;color:#8adfef;}
+.elite-route-v2012-body{padding:2px 14px 13px;font-size:12px;line-height:1.5;}
+.elite-route-v2012-body p{margin:8px 0;color:#d0e9f3;}
+.elite-route-v2012-body small{color:#90b7c9;}
+.elite-route-marks{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;margin:10px 0;}
+.elite-route-marks span{padding:8px;background:rgba(66,134,177,.14);border:1px solid rgba(126,203,226,.22);border-radius:8px;font-weight:700;font-size:10px;}
+.elite-route-marks small{display:block;font-weight:400;font-size:10px;margin-top:3px;}
+.elite-route-track{margin:10px 0;background:rgba(20,27,45,.9);}
+@media(max-width:560px){.elite-route-marks{grid-template-columns:1fr;}.elite-route-v2012>summary{font-size:11px}.elite-route-v2012>summary span{font-size:10px;}}

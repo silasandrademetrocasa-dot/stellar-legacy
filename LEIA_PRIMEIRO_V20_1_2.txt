@@ -1,0 +1,10 @@
+STELLAR LEGACY V20.1.2 — ROTA FULL ELITE E PROGRESSÃO INICIAL
+
+1) ZIP COMPLETO: coloque o ZIP na raiz do GitHub sem extrair; execute o workflow original stellar-installer-main.yml.
+2) Supabase: NENHUM SQL a rodar. Nesta versão, as recompensas de nível ficam no código do jogo e são salvas como os demais prêmios de nível.
+3) Passe -> ROTA FULL ELITE: ver nave Comum forte, primeiros 4 Nova, composição Elite atual e horas ativas medidas desde a V20.1.2.
+4) Bônus pontuais de créditos, munição, STL e equipamentos Comuns nos níveis 3,5,7,10,12,15,18,22. Mantidos os preços da loja, curva XP, drops, Premium, Passe e PvP.
+5) Os níveis já resgatados no save continuam resgatados: não recebem recompensa duplicada.
+6) Custos de Nova permanecem 15k,30k,60k,120k,240k,480k,960k,1,92mi STL; preço Premium -5%.
+7) META: 350 a 450 HORAS é um objetivo de balanceamento, não uma garantia de tempo no servidor. Usar telemetria real do ADM para avaliar.
+8) NÃO mexe em saves existentes, lojas, PvP, mapa, recompensas de NPC ou SQL.
