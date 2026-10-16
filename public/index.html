@@ -6,7 +6,7 @@
 <meta content="width=device-width,initial-scale=1,user-scalable=no" name="viewport"/>
 <meta content="#030816" name="theme-color"/>
 <title>Stellar Legacy</title>
-<link href="/style.css?v=20.1.2" rel="stylesheet"/>
+<link href="/style.css?v=20.1.3" rel="stylesheet"/>
 </head>
 <body>
 <div id="app">
@@ -214,6 +214,11 @@
 <div class="section actions actions-inline">
 <button class="action-btn" id="laserToggle">⚡ LASER <span class="keyhint">CTRL</span></button>
 <button class="action-btn" id="rocketFire">🚀 MÍSSIL <span class="keyhint">ESPAÇO</span></button>
+<div class="battle-config-toolbar-v2013" id="battleConfigToolbar" aria-label="Configurações de batalha">
+  <button type="button" id="battleConf1" class="battle-conf-btn-v2013 active" title="Configuração 1">CONF 1 ✓</button>
+  <button type="button" id="battleConf2" class="battle-conf-btn-v2013" title="Configuração 2">CONF 2</button>
+  <small id="battleConfCooldown" aria-live="off">PRONTO</small>
+</div>
 </div>
 </div>
 <div class="weapon-bar-content" id="weaponBarContent">
@@ -997,6 +1002,6 @@
   </div>
 </div>
 </div>
-<script src="/game.js?v=20.1.2" type="module"></script>
+<script src="/game.js?v=20.1.3" type="module"></script>
 </body>
 </html>

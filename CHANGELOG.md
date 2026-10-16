@@ -1,3 +1,9 @@
+## V20.1.3 — Configurações táticas e escudo persistente
+- CONF 1 e CONF 2 alternáveis a cada 5s; setups independentes de nave/drones no mesmo casco.
+- Escudos absolutos e HP comum; nenhuma cura na troca, na atualização de equipamentos ou no relogin.
+- Barra rápida HUD + edição no Hangar; remoção em lote na Nave, Drones e AUX-9.
+- Preserva inventário, PvP contínuo e todos os sistemas da V20.1.2.
+
 ## V20.1.2 — PROGRESSÃO INICIAL + ROTA FULL ELITE
 - Reforços únicos de recompensas LV3,5,7,10,12,15,18,22; total +49 mi CR / +50 mil STL (pagos ao longo da progressão).
 - Novo monitor em Passe: nave Comum, 4 Nova, build Elite; tempo ativo medido desde a versão.

@@ -2994,3 +2994,15 @@ body[data-quality="low"] .pet-gear {
 .elite-route-marks small{display:block;font-weight:400;font-size:10px;margin-top:3px;}
 .elite-route-track{margin:10px 0;background:rgba(20,27,45,.9);}
 @media(max-width:560px){.elite-route-marks{grid-template-columns:1fr;}.elite-route-v2012>summary{font-size:11px}.elite-route-v2012>summary span{font-size:10px;}}
+
+/* V20.1.3 — alternância de configurações de combate */
+.battle-config-toolbar-v2013{display:inline-flex;align-items:center;gap:6px;flex-wrap:wrap;padding-left:8px;border-left:1px solid rgba(140,195,255,.2)}
+.battle-conf-btn-v2013{background:#16283c;border:1px solid #457193;border-radius:9px;padding:7px 9px;font-size:11px;font-weight:800;color:#d4eaff;cursor:pointer;white-space:nowrap}
+.battle-conf-btn-v2013.active{background:#174c61;border-color:#42d2cf;box-shadow:0 0 10px #29d0e52c;color:#c6fff5}
+.battle-conf-btn-v2013:disabled:not(.active){opacity:.45;cursor:wait}
+.battle-config-toolbar-v2013 small{color:#c5cfe7;font-size:10px;min-width:37px;text-align:center;font-variant-numeric:tabular-nums}
+.battle-config-panel-v2013{border:1px solid #34849780;margin:10px 0;display:grid;gap:8px}
+.battle-config-panel-v2013 small{display:block;color:#a3c8df;font-size:11px;margin-top:4px}.battle-config-panel-v2013 p{margin:4px 0;font-size:12px;color:#d4e5f3}
+.battle-config-actions-v2013{display:flex;flex-wrap:wrap;gap:8px;align-items:center}.battle-config-actions-v2013 button{flex:1;min-width:100px}
+.bulk-unequip-v2013{margin:8px 0;border:1px solid #d09f6180;color:#ffe3c0;font-weight:700;padding:8px 12px;border-radius:8px}
+@media(max-width:700px){.battle-config-toolbar-v2013{padding-left:0;gap:3px}.battle-conf-btn-v2013{font-size:10px;padding:6px 7px}.battle-config-toolbar-v2013 small{font-size:9px}}
