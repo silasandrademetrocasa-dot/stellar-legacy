@@ -874,3 +874,6 @@ Instalação: subir o ZIP completo no instalador principal original; SQL de min�
 - Supabase: janela mínima de ataques ajustada de 0,35s para 0,16s e restaurador automático de níveis de 15/10 atualizado para **preservar a mudança na virada do dia**.
 - Proteções preservadas: PvP apenas 4-X, isolamento por grupo, limite de dano, distância e presença autenticada. Sem mexer em economia, naves, sprites, lojas ou salvamentos.
 - Novos testes de erros temporários, concorrência limitada, preservação do lock e integridade da reserva de munições.
+
+## V20.3.3 — ADM Unificado (Crafting, Economia, Navegação)
+Editor visual de ingredientes, produtos e efeitos com prévias, duplicação inativa e atalhos mobile. Validações locais sem alterar o backend/SQL. Ver V20_3_3_RELATORIO.md.

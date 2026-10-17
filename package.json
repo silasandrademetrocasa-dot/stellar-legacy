@@ -1,6 +1,6 @@
 {
   "name": "stellar-legacy",
-  "version": "20.3.0",
+  "version": "20.3.3",
   "type": "module",
   "scripts": {
     "start": "node server/index.js",
@@ -18,5 +18,5 @@
   "engines": {
     "node": ">=18"
   },
-  "release": "v20.3.0-admin-mission-builder"
+  "release": "v20.3.3-admin-sistemas-unificado"
 }

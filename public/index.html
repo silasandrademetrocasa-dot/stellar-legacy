@@ -6,7 +6,7 @@
 <meta content="width=device-width,initial-scale=1,user-scalable=no" name="viewport"/>
 <meta content="#030816" name="theme-color"/>
 <title>Stellar Legacy</title>
-<link href="/style.css?v=20.3.0" rel="stylesheet"/>
+<link href="/style.css?v=20.3.3" rel="stylesheet"/>
 </head>
 <body>
 <div id="app">
@@ -602,6 +602,14 @@
         <button type="button" data-admin-runtime-tab="balance">BALANCEAMENTO</button>
         <button type="button" data-admin-runtime-tab="coupons">CUPONS</button>
       </div>
+      <div id="adminQuickNav" class="adm-quick-navigation" aria-label="Acesso rápido ADM">
+        <button type="button" data-adm-quick="world">🌌 MAPAS</button>
+        <button type="button" data-adm-quick="systems" data-adm-system-view="missions">🎯 MISSÕES</button>
+        <button type="button" data-adm-quick="systems" data-adm-system-view="crafting">⚙️ CRAFTING</button>
+        <button type="button" data-adm-quick="systems" data-adm-system-view="economy">💰 ECONOMIA</button>
+        <button type="button" data-adm-quick="events">📅 EVENTOS</button>
+        <button type="button" data-adm-quick="shops">🛒 LOJAS</button>
+      </div>
       <div id="adminRuntimeMonitorPanel">
         <div class="admin-runtime-monitor-grid" id="adminRuntimeMonitorGrid"><div class="empty-state">Aguardando status dos runtimes...</div></div>
         <div class="admin-runtime-monitor-foot" id="adminRuntimeMonitorFoot">Etapa 2/5 • monitoramento.</div>
@@ -624,7 +632,7 @@
       </div>
       <div class="admin-runtime-world-panel hidden" id="adminRuntimeWorldPanel">
         <div class="admin-runtime-interface-toolbar">
-          <div><b>EDITOR DE MUNDO</b><small>Etapa isolada: mapas, recursos, setores, portais e pools de minério. Sem Missões/Economia/Crafting nesta versão.</small></div>
+          <div><b>EDITOR DE MUNDO</b><small>Mapas, NPCs, recursos, setores, portais e pools de minério.</small></div>
           <button class="small-btn" id="adminRuntimeWorldReload" type="button">RECARREGAR</button>
         </div>
         <div class="admin-world-subtabs" id="adminRuntimeWorldTabs">
@@ -640,7 +648,7 @@
       </div>
       <div class="admin-runtime-systems-panel hidden" id="adminRuntimeSystemsPanel">
         <div class="admin-runtime-interface-toolbar">
-          <div><b>EDITOR DE SISTEMAS</b><small>Geradores de missões, serviços de economia e crafting em formulários visuais • sem códigos JSON na tela.</small></div>
+          <div><b>EDITOR DE SISTEMAS</b><small>Missões, economia e crafting com seleção visual, prévia e duplicação segura.</small></div>
           <button class="small-btn" id="adminRuntimeSystemsReload" type="button">RECARREGAR</button>
         </div>
         <div class="admin-systems-subtabs" id="adminRuntimeSystemsTabs">
@@ -1038,6 +1046,6 @@
 </div>
 </div>
 <div class="perf-diag-overlay hidden" id="perfDiagOverlay" aria-live="off" aria-label="Contador de FPS local"><b id="perfDiagHudFps">FPS —</b><small id="perfDiagHudStutter">P95 —</small></div>
-<script src="/game.js?v=20.3.0" type="module"></script>
+<script src="/game.js?v=20.3.3" type="module"></script>
 </body>
 </html>

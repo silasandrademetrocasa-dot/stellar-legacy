@@ -11,7 +11,7 @@ import { attachSharedUniverse } from './world.js';
 
 const app = express();
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const RELEASE_VERSION = '20.3.0'; // único identificador de release nos endpoints HTTP
+const RELEASE_VERSION = '20.3.3'; // único identificador de release nos endpoints HTTP
 
 function normalizeSupabaseUrl(value = '') {
   let url = String(value || '').trim();

@@ -1,13 +1,9 @@
-# Stellar Legacy V20.3.0 — ADM de Missões Visuais
+# Stellar Legacy V20.3.3 — ADM unificado
 
-ZIP completo cumulativo construído sobre V20.2.10. **Nenhum SQL novo**.
+ZIP completo baseado na V20.3.0; integra as fases 20.3.1 (Crafting), 20.3.2 (Economia), 20.3.3 (Navegação ADM). **Não requer novo SQL.**
 
-## Instalar
-Envie somente este ZIP para a raiz do GitHub, mantendo um único ZIP `stellar-legacy*.zip` na raiz. Execute **Actions → Instalar versão do Stellar Legacy → Run workflow**. Verifique `20.3.0` em `/health` após o deploy.
+## Instalação
+Envie apenas este ZIP `stellar-legacy*.zip` para a raiz do GitHub, mantendo **um único ZIP de instalação** na raiz. Acesse Actions → Instalar versão do Stellar Legacy → Run workflow. Verifique versão `20.3.3` em `/health` e confira ADM → SISTEMAS no celular.
 
-## Novidades
-ADM → SISTEMAS → MISSÕES: modelos de missão, duplicação segura, prévia em tempo real e validação de objetivos/prêmios. A duplicação gera rascunho **inativo**, com ID vazio, para proteger a missão original. Reutiliza endpoints existentes, sem novas migrações.
-
-Detalhes: [`V20_3_0_RELATORIO.md`](V20_3_0_RELATORIO.md).
-
-O instalador não altera o banco de dados. O deploy depende da configuração existente no GitHub/Render. Salvos de jogadores e regras de combate não foram modificados intencionalmente.
+## Atenção
+Não altera intencionalmente gameplay e dados de jogadores. Crie primeiro receitas/serviços de teste **INATIVOS** e confirme a publicação antes de expor aos jogadores. Veja o relatório técnico [`V20_3_3_RELATORIO.md`](V20_3_3_RELATORIO.md).
