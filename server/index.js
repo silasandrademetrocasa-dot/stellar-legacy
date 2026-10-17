@@ -11,10 +11,12 @@ import { attachSharedUniverse } from './world.js';
 import { eliteStatus } from './elite-operations.js';
 import { warCampaignState,warRankings,safeWarCampaignInput,safeWarRulesInput } from './war-campaigns.js';
 import { createCommandCenterRouter } from './command-center-router.js';
+import { validatePlayerSave, invalidShopArguments } from './security-guard.js';
+import { createSecurityService } from './security-service.js';
 
 const app = express();
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const RELEASE_VERSION = '22.5.0'; // único identificador de release nos endpoints HTTP
+const RELEASE_VERSION = '22.6.0'; // único identificador de release nos endpoints HTTP
 
 function normalizeSupabaseUrl(value = '') {
   let url = String(value || '').trim();
@@ -29,6 +31,7 @@ const SUPABASE_KEY = String(process.env.SUPABASE_PUBLISHABLE_KEY || process.env.
 // Chave privilegiada SOMENTE no Render. Nunca retorna no /api/config nem no bundle público.
 const SUPABASE_SERVICE_KEY=String(process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SECRET_KEY || '').trim();
 const eliteAdminClient=SUPABASE_URL&&SUPABASE_SERVICE_KEY?createClient(SUPABASE_URL,SUPABASE_SERVICE_KEY,{auth:{persistSession:false,autoRefreshToken:false}}):null;
+const securityService=createSecurityService(eliteAdminClient);
 async function requireEliteAdmin(){if(!eliteAdminClient)throw new Error('Configure SUPABASE_SERVICE_ROLE_KEY no Render para persistir conquistas.');return eliteAdminClient;}
 
 
@@ -658,7 +661,7 @@ app.get('/api/meta', (req, res) => res.json({
   version: RELEASE_VERSION,
   authReady: Boolean(SUPABASE_URL && SUPABASE_KEY),
   diagnostics: configStatus(),
-  features: ['login', 'cloud_save', 'factions', 'safe_zone', 'shop', 'owned_ships', 'equipment_slots', 'inventory', 'drones', 'ammo', 'rockets', 'expanded_expedition_maps', 'cargo_hold', 'ore_trading', 'npc_cargo_boxes', 'npc_respawn', 'minimap_navigation', 'waypoints', 'landmark_discovery', 'combat_fx', 'pet_modules', 'auto_buy_cpu', 'v8_asset_identity', 'mission_control_v93', 'mission_acceptance_tracking', 'expanded_enemy_density', 'online_player_presence', 'real_player_auction', 'rank_nameplates_v12', 'clans_v12', 'clan_vault_v12', 'premium_shop_v12', 'battle_pass_paid_v12', 'premium_subscription_v12', 'clan_daily_economy_v12', 'portal_neutral_zone_v12', 'base_only_equipment_v12', 'single_session_v1214', 'manual_login_v141', 'google_oauth_login_v18216', 'public_privacy_terms_v18217', 'account_bound_save_v141', 'unique_callsign_v141', 'premium_auto_combat_v141', 'shared_universe_v15', 'authoritative_npcs_v15', 'shared_ores_v15', 'shared_events_v15', 'websocket_world_v15', 'npc_contribution_v15', 'realtime_player_socket_v151', 'remote_laser_fx_v151', 'remote_aux9_v151', 'low_latency_world_v151', 'live_ops_v16', 'server_authoritative_shop_v16', 'supabase_event_schedule_v16', 'economy_guard_v161', 'server_auto_buy_v161', 'server_trader_v161', 'server_pet_slots_v161', 'server_materializer_v161', 'server_quantum_cores_v161', 'economy_fast_path_v1767', 'chat_dock_v162', 'drone_designers_v163', 'designer_sets_v163', 'nexus_eclipse_designer_drops_v163', 'global_chat_v162', 'clan_chat_v162', 'private_chat_v162', 'bottom_hud_reflow_v162', 'ship_designers_v165', 'aux_designers_v165', 'designer_ship_abilities_v165', 'event_designer_drops_v165', 'social_minimap_v165', 'realtime_designer_visuals_v165', 'data_driven_core_v1810', 'data_driven_npcs_v1811', 'server_runtime_topbar_cache_v1813', 'data_driven_world_v1814', 'data_driven_systems_v1815', 'admin_runtime_monitor_v1816a', 'admin_interface_editor_v1816b', 'admin_npc_editor_v1816c', 'admin_world_editor_v1816d', 'admin_systems_editor_v1816e', 'event_scheduler_v1817a', 'battle_pass_data_driven_v1817b', 'shops_data_driven_v1817c', 'hangar_refinery_v1829', 'remote_trader_elite_v1829', 'drone_progressive_pricing_v1829', 'pet_cargo_boxes_v1829'],
+  features: ['server_save_guard', 'security_incidents', 'automatic_temporary_suspensions', 'admin_security_review', 'login', 'cloud_save', 'factions', 'safe_zone', 'shop', 'owned_ships', 'equipment_slots', 'inventory', 'drones', 'ammo', 'rockets', 'expanded_expedition_maps', 'cargo_hold', 'ore_trading', 'npc_cargo_boxes', 'npc_respawn', 'minimap_navigation', 'waypoints', 'landmark_discovery', 'combat_fx', 'pet_modules', 'auto_buy_cpu', 'v8_asset_identity', 'mission_control_v93', 'mission_acceptance_tracking', 'expanded_enemy_density', 'online_player_presence', 'real_player_auction', 'rank_nameplates_v12', 'clans_v12', 'clan_vault_v12', 'premium_shop_v12', 'battle_pass_paid_v12', 'premium_subscription_v12', 'clan_daily_economy_v12', 'portal_neutral_zone_v12', 'base_only_equipment_v12', 'single_session_v1214', 'manual_login_v141', 'google_oauth_login_v18216', 'public_privacy_terms_v18217', 'account_bound_save_v141', 'unique_callsign_v141', 'premium_auto_combat_v141', 'shared_universe_v15', 'authoritative_npcs_v15', 'shared_ores_v15', 'shared_events_v15', 'websocket_world_v15', 'npc_contribution_v15', 'realtime_player_socket_v151', 'remote_laser_fx_v151', 'remote_aux9_v151', 'low_latency_world_v151', 'live_ops_v16', 'server_authoritative_shop_v16', 'supabase_event_schedule_v16', 'economy_guard_v161', 'server_auto_buy_v161', 'server_trader_v161', 'server_pet_slots_v161', 'server_materializer_v161', 'server_quantum_cores_v161', 'economy_fast_path_v1767', 'chat_dock_v162', 'drone_designers_v163', 'designer_sets_v163', 'nexus_eclipse_designer_drops_v163', 'global_chat_v162', 'clan_chat_v162', 'private_chat_v162', 'bottom_hud_reflow_v162', 'ship_designers_v165', 'aux_designers_v165', 'designer_ship_abilities_v165', 'event_designer_drops_v165', 'social_minimap_v165', 'realtime_designer_visuals_v165', 'data_driven_core_v1810', 'data_driven_npcs_v1811', 'server_runtime_topbar_cache_v1813', 'data_driven_world_v1814', 'data_driven_systems_v1815', 'admin_runtime_monitor_v1816a', 'admin_interface_editor_v1816b', 'admin_npc_editor_v1816c', 'admin_world_editor_v1816d', 'admin_systems_editor_v1816e', 'event_scheduler_v1817a', 'battle_pass_data_driven_v1817b', 'shops_data_driven_v1817c', 'hangar_refinery_v1829', 'remote_trader_elite_v1829', 'drone_progressive_pricing_v1829', 'pet_cargo_boxes_v1829'],
 }));
 
 
@@ -1187,6 +1190,8 @@ app.post('/api/coupons/redeem', requireUser, asyncRoute(async (req,res)=>{
 }));
 
 app.post('/api/live/purchase', requireUser, asyncRoute(async (req,res)=>{
+  const tamper=invalidShopArguments(req.body,['catalog_key']);
+  if(tamper){const result=await securityService.report(req.user.id,tamper,'live_purchase');if(result?.auto_suspended)return res.status(403).json({error:'Conta temporariamente suspensa por violação de integridade.',code:'ACCOUNT_BANNED'});return res.status(400).json({error:'Parâmetros de compra inválidos.',code:tamper.code});}
   const catalogKey=String(req.body?.catalog_key||'').trim().slice(0,120);
   if(!catalogKey)return res.status(400).json({error:'Produto inválido.'});
   const result=await withPurchaseLock(req.user.id,async()=>{
@@ -1274,6 +1279,10 @@ app.post('/api/economy/action', requireUser, asyncRoute(async (req,res)=>{
   const routeStarted=Date.now();
   const action=String(req.body?.action||'').trim();
   const payload=(req.body?.payload&&typeof req.body.payload==='object')?req.body.payload:{};
+  const tamper=invalidShopArguments(req.body,['action','payload'])||invalidShopArguments(payload,['catalog_key','kind','qty','drone_id','item_id','resource_id','id','recipe_id','service_id','protocol','amount']);
+  if(tamper){const outcome=await securityService.report(req.user.id,tamper,'economy_action');
+    if(outcome?.auto_suspended)return res.status(403).json({error:'Conta temporariamente suspensa.',code:'ACCOUNT_BANNED'});
+    return res.status(400).json({error:'Parâmetros econômicos não autorizados.',code:tamper.code});}
   if(!action)return res.status(400).json({error:'Ação econômica ausente.'});
   const result=await withPurchaseLock(req.user.id,async()=>{
     const catalogActions=new Set(['auto_buy','unlock_pet_slot','buy_quantum_cores','sell_cargo','sell_inventory','sell_drone','gate_spin']);
@@ -1452,6 +1461,19 @@ app.get('/api/admin/status', requireUser, asyncRoute(async(req,res)=>adminRpc(re
 app.get('/api/admin/users', requireUser, asyncRoute(async(req,res)=>adminRpc(req,res,'admin_search_accounts_v1763',{p_query:String(req.query?.q||'').slice(0,120)})));
 app.get('/api/admin/actions', requireUser, asyncRoute(async(req,res)=>adminRpc(req,res,'admin_recent_actions_v1763')));
 app.get('/api/admin/telemetry', requireUser, asyncRoute(async(req,res)=>adminRpc(req,res,'admin_telemetry_overview_v1771')));
+// Histórico antifraude acessível somente ao ADM autenticado, com direito à revisão.
+app.get('/api/admin/security/incidents',requireUser,asyncRoute(async(req,res)=>{
+ const {data:adm,error:admErr}=await req.sb.rpc('admin_status_v1763');if(admErr||!adm?.is_admin)return res.status(403).json({error:'Acesso administrativo negado.'});
+ if(!eliteAdminClient)return res.status(503).json({error:'Servidor de auditoria não configurado.'});
+ const {data,error}=await eliteAdminClient.from('stellar_security_events').select('id,user_id,code,severity,context,created_at,auto_suspended,reviewed_at,review_note').order('created_at',{ascending:false}).limit(80);
+ if(error)return res.status(503).json({error:'Não foi possível carregar o histórico antifraude.'});res.set('Cache-Control','no-store');res.json({incidents:data||[]});
+}));
+app.post('/api/admin/security/incidents/:id/review',requireUser,asyncRoute(async(req,res)=>{
+ const {data:adm,error:admErr}=await req.sb.rpc('admin_status_v1763');if(admErr||!adm?.is_admin)return res.status(403).json({error:'Acesso administrativo negado.'});
+ const note=String(req.body?.note||'').trim().slice(0,200);if(!note)return res.status(400).json({error:'Informe o motivo da revisão.'});
+ const {data,error}=await req.sb.rpc('stellar_security_review_incident',{p_event_id:Number(req.params.id),p_note:note});
+ if(error)return res.status(400).json({error:'Revisão recusada.'});res.json(data);
+}));
 app.get('/api/admin/telemetry/:userId', requireUser, asyncRoute(async(req,res)=>adminRpc(req,res,'admin_player_telemetry_v1771',{p_target_user_id:req.params.userId})));
 app.post('/api/admin/users/:userId/ban', requireUser, asyncRoute(async(req,res)=>{
   const minutes=Math.max(0,Math.min(525600,Math.trunc(Number(req.body?.minutes)||0)));
@@ -1573,6 +1595,8 @@ app.put('/api/save', requireUser, asyncRoute(async (req, res) => {
   if (!state || typeof state !== 'object') return res.status(400).json({ error: 'Save inválido.' });
   const claimedOwner = String(state.accountOwnerId || '');
   if (claimedOwner && claimedOwner !== req.user.id) {
+    const outcome=await securityService.report(req.user.id,{code:'SAVE_OWNER_FORGED',severity:'critical',evidence:{kind:'owner_mismatch'}},'cloud_save');
+    if(outcome?.auto_suspended)return res.status(403).json({error:'Conta temporariamente suspensa.',code:'ACCOUNT_BANNED'});
     return res.status(409).json({ error: 'SAVE BLOQUEADO: os dados pertencem a outra conta.', code: 'SAVE_OWNER_MISMATCH' });
   }
   const securedCallsign = await ensureProfile(req.sb, req.user);
@@ -1594,6 +1618,10 @@ app.put('/api/save', requireUser, asyncRoute(async (req, res) => {
   if(incomingEliteRevision<authoritativeEliteRevision)return res.status(409).json({
     error:'SAVE_ELITE_STALE: sincronize as recompensas com o servidor.',code:'SAVE_ELITE_STALE'
   });
+  const securityFinding=validatePlayerSave(state,serverSave?.state||null,{userId:req.user.id,isAdmin:false});
+  if(securityFinding){const outcome=await securityService.report(req.user.id,securityFinding,'cloud_save');
+    if(outcome?.auto_suspended)return res.status(403).json({error:'Conta temporariamente suspensa. Contate o suporte para revisão.',code:'ACCOUNT_BANNED'});
+    return res.status(409).json({error:'SAVE REJEITADO: dados econômicos ou itens inválidos. Sincronize o progresso.',code:securityFinding.code});}
   const serverEconomy = serverSave?.state?.serverEconomy || {};
   const clientEconomy = state?.serverEconomy || {};
   const serverCollectionDate = String(serverEconomy.lastClanCollectionDate || '');
@@ -1612,6 +1640,10 @@ app.put('/api/save', requireUser, asyncRoute(async (req, res) => {
   const { error } = await req.sb.from('game_saves').upsert({ user_id: req.user.id, state, updated_at }, { onConflict: 'user_id' });
   if (error) {
     const message=String(error.message||'');
+    if(message.includes('SECURITY_')){
+      await securityService.report(req.user.id,{code:'SAVE_DB_GUARD',severity:'warn',evidence:{rule:(message.match(/SECURITY_[A-Z_]+/)||[])[0]||'DB_REJECT'}},'database_save');
+      return res.status(409).json({error:'O servidor recusou dados inconsistentes do save. Sincronize seu jogo.',code:'SAVE_DB_GUARD'});
+    }
     const code=message.includes('SAVE_COUPON_STALE')?'SAVE_COUPON_STALE':message.includes('SAVE_EVENT_STALE')?'SAVE_EVENT_STALE':null;
     return res.status(code?409:400).json({error:error.message,code});
   }
@@ -1748,8 +1780,10 @@ const sharedUniverse = attachSharedUniverse(server, {
     if(error)throw new Error(error.message);
     return data&&typeof data==='object'?data:null;
   },
+  recordSecurityViolation:(userId,finding,source)=>securityService.report(userId,finding,source),
   authorizeJoin: async (token,userId) => {
     const sb=supabaseForToken(token);if(!sb)throw new Error('Sem autenticação');
+    const access=await accountAccessState(sb);if(access?.is_banned||access?.allowed===false)throw new Error('Conta suspensa');
     const {data,error}=await sb.from('game_saves').select('state').eq('user_id',userId).maybeSingle();
     if(error)throw new Error(error.message);
     const profile=data?.state?.profile||{};

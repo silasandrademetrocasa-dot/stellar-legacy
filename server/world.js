@@ -17,7 +17,9 @@ const IDLE_ROOM_TTL_MS = 2 * 60 * 1000; // Desmontar salas sem jogadores após 2
 const NPC_FAR_REFRESH_MS = 2500;         // NPCs distantes recebem correção lenta para minimapa/consistência.
 const NPC_NEAR_RADIUS = 2200;
 const NPC_NEAR_RADIUS_SQ = NPC_NEAR_RADIUS * NPC_NEAR_RADIUS;
-const PLAYER_STATE_MIN_MS = 80;          // Protege o servidor contra cliente transmitindo estado em excesso.
+const PLAYER_STATE_MIN_MS = 80;
+const MAX_TRAVEL_UNITS_PER_SECOND=1300; // tolera boost/lag, rejeita saltos impossíveis entre updates
+const TRAVEL_GRACE_UNITS=250;          // Protege o servidor contra cliente transmitindo estado em excesso.
 const EVENT_BROADCAST_INTERVAL_MS = 1000;
 const WARFRONT_BROADCAST_INTERVAL_MS = 1000;
 
@@ -656,7 +658,20 @@ class Room {
   updatePlayer(ws,msg){
     const p=ws.player;if(!p)return;
     const now=nowMs();if(now-(ws.lastPlayerStateAt||0)<PLAYER_STATE_MIN_MS)return;ws.lastPlayerStateAt=now;
-    p.x=clamp(msg.x,0,this.map.world.w);p.y=clamp(msg.y,0,this.map.world.h);p.angle=Number(msg.angle)||0;p.hp=Math.max(0,Number(msg.hp)||0);p.shield=Math.max(0,Number(msg.shield)||0);p.maxHp=Math.max(1,Number(msg.maxHp)||1);p.maxShield=Math.max(0,Number(msg.maxShield)||0);p.faction=p.faction||'earth';p.shipId=shortText(msg.shipId||p.shipId||'phoenix',40);p.shipDesignId=msg.shipDesignId?shortText(msg.shipDesignId,64):null;p.level=Math.max(1,Number(msg.level)||1);p.pilotTitle=shortText(msg.pilotTitle||p.pilotTitle||'Piloto Estelar',64);
+    const nextX=clamp(msg.x,0,this.map.world.w),nextY=clamp(msg.y,0,this.map.world.h);
+    const dt=Math.min(4,Math.max(.08,(now-Number(p.updatedAt||now))/1000));
+    const maxDist=TRAVEL_GRACE_UNITS+MAX_TRAVEL_UNITS_PER_SECOND*dt;
+    const requestedDist=Math.hypot(nextX-p.x,nextY-p.y);
+    if(requestedDist>maxDist&&requestedDist>0){
+      const ratio=maxDist/requestedDist;
+      p.x+=((nextX-p.x)*ratio);p.y+=((nextY-p.y)*ratio);
+      ws.motionAnomalies=(ws.motionAnomalies||0)+1;
+      if(ws.motionAnomalies>=6&&(!ws.lastMotionWarningAt||now-ws.lastMotionWarningAt>60000)){
+        ws.lastMotionWarningAt=now;
+        this.world.recordSecurityViolation?.(p.userId,{code:'WORLD_MOVEMENT_ANOMALY',severity:'warn',evidence:{map:String(this.mapId),movement:Math.round(requestedDist)}},'world_motion').catch(()=>{});
+      }
+    }else{p.x=nextX;p.y=nextY;ws.motionAnomalies=Math.max(0,(ws.motionAnomalies||0)-1);}
+    p.angle=Number(msg.angle)||0;p.hp=Math.max(0,Number(msg.hp)||0);p.shield=Math.max(0,Number(msg.shield)||0);p.maxHp=Math.max(1,Number(msg.maxHp)||1);p.maxShield=Math.max(0,Number(msg.maxShield)||0);p.faction=p.faction||'earth';p.shipId=shortText(msg.shipId||p.shipId||'phoenix',40);p.shipDesignId=msg.shipDesignId?shortText(msg.shipDesignId,64):null;p.level=Math.max(1,Number(p.level)||1);p.pilotTitle=shortText(msg.pilotTitle||p.pilotTitle||'Piloto Estelar',64);
     p.laserFiring=!!msg.laserFiring;p.laserColor=safeColor(msg.laserColor,p.laserColor||'#76d9ff');p.laserAmmoId=shortText(msg.laserAmmoId||p.laserAmmoId||'lcb10',24);p.laserAmmoName=shortText(msg.laserAmmoName||p.laserAmmoName||'PLS-1',20);p.targetId=msg.targetId?shortText(msg.targetId,96):null;p.targetIsPlayer=!!msg.targetIsPlayer;
     const pet=msg.pet&&typeof msg.pet==='object'?msg.pet:null;
     if(pet?.owned){p.pet={owned:true,level:Math.max(1,Math.min(15,Number(pet.level)||1)),x:clamp(pet.x,0,this.map.world.w),y:clamp(pet.y,0,this.map.world.h),angle:Number(pet.angle)||0,activeGear:shortText(pet.activeGear||'off',24),laserTargetId:pet.laserTargetId?shortText(pet.laserTargetId,96):null,laserActive:!!pet.laserActive,laserColor:safeColor(pet.laserColor,p.laserColor),designId:pet.designId?shortText(pet.designId,64):null};}else p.pet={owned:false};
@@ -878,7 +893,7 @@ class Room {
   }
 }
 
-export function attachSharedUniverse(server,{authenticate,authorizeJoin,loadLiveOps,loadBattleGroup,loadNpcConfig,loadWorldConfig,loadPlayerEventProgress,recordPlayerEventProgress,loadWarfront,persistCapture,recordEliteEvent,recordWarDefense,loadWorldDirectives}){
+export function attachSharedUniverse(server,{authenticate,authorizeJoin,recordSecurityViolation,loadLiveOps,loadBattleGroup,loadNpcConfig,loadWorldConfig,loadPlayerEventProgress,recordPlayerEventProgress,loadWarfront,persistCapture,recordEliteEvent,recordWarDefense,loadWorldDirectives}){
   const wss=new WebSocketServer({
     server,
     path:'/ws',
@@ -889,6 +904,7 @@ export function attachSharedUniverse(server,{authenticate,authorizeJoin,loadLive
     }
   });const rooms=new Map();
   const world={
+    recordSecurityViolation,
     recordWarDefense:recordWarDefense||(()=>Promise.resolve(false)),
     loadWarfront:loadWarfront||(()=>Promise.reject(new Error('Sem conexão com o banco de relés'))),
     persistCapture:persistCapture||(()=>Promise.reject(new Error('Sem gravação de relés'))),
@@ -1056,7 +1072,15 @@ export function attachSharedUniverse(server,{authenticate,authorizeJoin,loadLive
         }
         ws.room?.removeClient(ws);const p={userId:identity.user.id,callsign:identity.callsign||msg.callsign||'Pilot',pilotTitle:shortText(msg.pilotTitle||'Piloto Estelar',64),faction:faction,shipId:String(msg.shipId||'phoenix'),shipDesignId:msg.shipDesignId?shortText(msg.shipDesignId,64):null,level:level,x:Number(msg.x)||400,y:Number(msg.y)||400,hp:Number(msg.hp)||1,maxHp:Number(msg.maxHp)||1,shield:Number(msg.shield)||0,maxShield:Number(msg.maxShield)||0,angle:Number(msg.angle)||0,laserFiring:false,laserColor:'#76d9ff',laserAmmoId:'lcb10',laserAmmoName:'PLS-1',targetId:null,targetIsPlayer:false,pet:{owned:false},updatedAt:nowMs()};r.addClient(ws,p);return;
       }
-      if(msg.type==='player_state')return ws.room?.updatePlayer(ws,msg);
+      if(msg.type==='player_state'){
+        if(authorizeJoin&&nowMs()-(ws.lastAccessAuditAt||0)>45000){
+          ws.lastAccessAuditAt=nowMs();
+          authorizeJoin(ws.identity.accessToken,ws.identity.user.id).catch(()=>{
+            ws.room?.removeClient(ws);try{ws.close(4403,'access revoked');}catch{}
+          });
+        }
+        return ws.room?.updatePlayer(ws,msg);
+      }
       if(msg.type==='npc_damage')return await ws.room?.handleDamage(ws,msg);
       if(msg.type==='collect_ore')return ws.room?.handleOreCollect(ws,msg);
       if(msg.type==='force_event'&&String(ws.identity.callsign||'').trim().toUpperCase()==='FELP22'){

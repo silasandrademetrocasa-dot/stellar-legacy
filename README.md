@@ -1,3 +1,5 @@
+> **Atualização atual:** Segurança e Antifraude. Leia [INSTALAR_V22_6_0.md](INSTALAR_V22_6_0.md).
+
 # Stellar Legacy V22.5.0 — Universo Dinâmico e Missões Coletivas
 
 **ANTES DO DEPLOY:** leia `INSTALAR_V22_5_0.md`. A nova migração SQL está **pendente**, porque o acesso de escrita ao Supabase foi bloqueado na preparação. Execute `sql/STELLAR_V22_5_0_CLAN_OPERATIONS_HALL.sql` no Supabase e confirme a execução antes de subir o ZIP.

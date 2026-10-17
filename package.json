@@ -1,6 +1,6 @@
 {
   "name": "stellar-legacy",
-  "version": "22.5.0",
+  "version": "22.6.0",
   "type": "module",
   "scripts": {
     "start": "node server/index.js",
@@ -19,5 +19,5 @@
   "engines": {
     "node": ">=18"
   },
-  "release": "universo-dinamico-clas-temporadas-resiliencia"
+  "release": "seguranca-antifraude-auditoria-autoban"
 }

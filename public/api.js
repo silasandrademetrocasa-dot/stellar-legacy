@@ -786,6 +786,15 @@ export async function adminUpdateLiveEventScheduleOnline(eventKey,payload={}) {
   }, false);
 }
 
+export async function loadAdminSecurityIncidents(){
+  return authedServerFetch('/api/admin/security/incidents');
+}
+export async function reviewAdminSecurityIncident(id,note){
+  return authedServerFetch(`/api/admin/security/incidents/${Number(id)}/review`,{
+    method:'POST',body:JSON.stringify({note:String(note||'')})
+  });
+}
+
 export async function purchaseLiveCatalogOnline(catalogKey) {
   return authedServerFetch('/api/live/purchase', {
     method: 'POST',

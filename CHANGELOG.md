@@ -1,3 +1,12 @@
+# V22.6.0 — Antifraude, Auditoria, Autoban Reversível e Guardas do Supabase
+
+- Monitoramento de tentativas de adulterar proprietário do save, moedas, itens, preços e revisões reservadas.
+- Banco valida diretamente save/inventário e impede alterações excessivas mesmo via Supabase REST.
+- Auditoria protegida no servidor, sem exposição de chave, e painel ADM para revisão.
+- Suspensão temporária por reincidência de 3 evidências críticas em 2 horas; desvios de conexão são apenas alertas.
+- Antiteleporte de multiplayer com ampla tolerância a latência e reconferência de suspensão.
+- 274 testes automatizados aprovados; SQL aplicado no projeto conectado.
+
 ## V22.5.0 — Universo Dinâmico, Clãs e Histórico Competitivo
 
 - Eventos de invasão, chefe e recursos agora alimentam o motor existente a partir das diretivas programadas; limpeza automática.

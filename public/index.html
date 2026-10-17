@@ -6,10 +6,10 @@
 <meta content="width=device-width,initial-scale=1,user-scalable=no" name="viewport"/>
 <meta content="#030816" name="theme-color"/>
 <title>Stellar Legacy</title>
-<link rel="manifest" href="/manifest.webmanifest?v=22.5.0"/>
+<link rel="manifest" href="/manifest.webmanifest?v=22.6.0"/>
 <link rel="icon" type="image/png" href="/icons/stellar-192.png"/>
 <link rel="apple-touch-icon" href="/icons/stellar-192.png"/>
-<link href="/style.css?v=22.5.0" rel="stylesheet"/>
+<link href="/style.css?v=22.6.0" rel="stylesheet"/>
 </head>
 <body>
 <div id="app">
@@ -769,6 +769,10 @@
       <div class="admin-user-list" id="adminUserList"><div class="empty-state">Buscando contas...</div></div>
     </section>
     <section class="admin-log-section">
+      <div class="settings-title"><div><b>SEGURANÇA E ANTIFRAUDE</b><small>Incidentes verificados pelo servidor • revisão de punições disponível no cadastro de jogadores.</small></div><button class="ghost-btn" type="button" id="adminSecurityRefresh">ATUALIZAR</button></div>
+      <div class="admin-action-log" id="adminSecurityIncidents"><div class="empty-state">Buscando eventos de segurança...</div></div>
+    </section>
+    <section class="admin-log-section">
       <div class="settings-title"><div><b>LOG ADMINISTRATIVO</b><small>Últimas ações executadas pelo painel.</small></div></div>
       <div class="admin-action-log" id="adminActionLog"><div class="empty-state">Nenhuma ação registrada.</div></div>
     </section>
@@ -1063,6 +1067,6 @@
 </div>
 </div>
 <div class="perf-diag-overlay hidden" id="perfDiagOverlay" aria-live="off" aria-label="Contador de FPS local"><b id="perfDiagHudFps">FPS —</b><small id="perfDiagHudStutter">P95 —</small></div>
-<script src="/game.js?v=22.5.0" type="module"></script>
+<script src="/game.js?v=22.6.0" type="module"></script>
 </body>
 </html>

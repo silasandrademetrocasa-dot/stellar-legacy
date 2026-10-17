@@ -1,6 +1,6 @@
 // V21 • Service Worker deliberadamente restrito: APENAS offline.html e ícones.
 // Nunca cacheia API, autenticação, WebSocket, dados de jogador ou HTML dinâmico.
-const CACHE='stellar-shell-v22-5-0';
+const CACHE='stellar-shell-v22-6-0';
 const OFFLINE='/offline.html';
 self.addEventListener('install',event=>{
  event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll([OFFLINE,'/icons/stellar-192.png','/icons/stellar-512.png'])).then(()=>self.skipWaiting()));
