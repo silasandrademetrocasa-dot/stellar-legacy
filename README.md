@@ -7,3 +7,7 @@ Envie apenas este ZIP `stellar-legacy*.zip` para a raiz do GitHub, mantendo **um
 
 ## Atenção
 Não altera intencionalmente gameplay e dados de jogadores. Crie primeiro receitas/serviços de teste **INATIVOS** e confirme a publicação antes de expor aos jogadores. Veja o relatório técnico [`V20_3_3_RELATORIO.md`](V20_3_3_RELATORIO.md).
+
+
+## V21.3.0 — pacote unificado
+Abra **MISSÕES → CENTRO DE COMANDO V21** para ver Elite, Guerra e Temporada. Mais detalhes em `V21_3_0_RELATORIO.md`.

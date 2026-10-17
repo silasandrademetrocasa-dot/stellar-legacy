@@ -11,7 +11,7 @@ import { attachSharedUniverse } from './world.js';
 
 const app = express();
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const RELEASE_VERSION = '20.3.3'; // único identificador de release nos endpoints HTTP
+const RELEASE_VERSION = '21.3.0'; // único identificador de release nos endpoints HTTP
 
 function normalizeSupabaseUrl(value = '') {
   let url = String(value || '').trim();
@@ -30,6 +30,9 @@ const ASSET_CACHE_MS = 24 * 60 * 60 * 1000;
 // V18.1.8 • HTTP BANDWIDTH OPTIMIZATION
 // JS/CSS/JSON textuais são comprimidos; imagens já compactadas (PNG/WebP) passam sem custo extra.
 app.use(compression({ threshold: 1024 }));
+// V21: cabeçalhos seguros que não quebram os handlers legados nem Google OAuth.
+app.disable('x-powered-by');
+app.use((req,res,next)=>{res.setHeader('X-Content-Type-Options','nosniff');res.setHeader('Referrer-Policy','strict-origin-when-cross-origin');next();});
 app.use(express.json({ limit: '1mb' }));
 
 // Assets recebem cache longo. As URLs dos assets já carregam ?asset=<versão>, portanto um novo

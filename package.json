@@ -1,13 +1,14 @@
 {
   "name": "stellar-legacy",
-  "version": "20.3.3",
+  "version": "21.3.0",
   "type": "module",
   "scripts": {
     "start": "node server/index.js",
     "dev": "node --watch server/index.js",
     "check": "node scripts/verify-release.mjs",
     "test": "node --test tests/*.test.mjs tests/shop-confirmation-regression.mjs",
-    "verify": "npm run check && npm test"
+    "verify": "npm run check && npm run check:v21 && npm test",
+    "check:v21": "node scripts/check-v21-package.mjs"
   },
   "dependencies": {
     "express": "^4.21.2",
@@ -18,5 +19,5 @@
   "engines": {
     "node": ">=18"
   },
-  "release": "v20.3.3-admin-sistemas-unificado"
+  "release": "v21.3.0-comando-elite-guerra-temporadas-pwa"
 }

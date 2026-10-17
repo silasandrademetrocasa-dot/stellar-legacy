@@ -33,7 +33,7 @@ test('duplicações exigem novo ID e começam inativas',()=>{
 test('backend mantém validação dos quatro efeitos e recompensas',()=>{
  assert.match(server,/SYSTEM_EFFECT_KEYS = new Set\(\['laser_damage_pct','shield_pct','cargo_flat','speed_flat'\]\)/);
  assert.match(server,/SYSTEM_GRANT_KINDS = new Set\(\['resource','ammo','rocket','repair'\]\)/);
- assert.match(server,/const RELEASE_VERSION = '20\.3\.3'/);
+ assert.match(server,new RegExp(`const RELEASE_VERSION = '${JSON.parse(readFileSync(new URL('../package.json',import.meta.url),'utf8')).version.replace(/\./g,'\\.')}'`));
 });
 
 test('serviço novo respeita limite de um efeito exigido pelo backend',()=>{

@@ -877,3 +877,9 @@ Instalação: subir o ZIP completo no instalador principal original; SQL de min�
 
 ## V20.3.3 — ADM Unificado (Crafting, Economia, Navegação)
 Editor visual de ingredientes, produtos e efeitos com prévias, duplicação inativa e atalhos mobile. Validações locais sem alterar o backend/SQL. Ver V20_3_3_RELATORIO.md.
+
+
+## V21.3.0 — Centro de Comando, Operações Elite, Tática, Temporadas e PWA
+- Pacote único V21.0–21.3: cinco módulos novos testáveis, painel responsivo, monitoramento de metas elite, placar Warfront, temporadas, atalho instalável Android.
+- Não gera itens ou moedas novos; não muda SQL, combate, banco ou salvamento.
+- Nota: motor monolítico continua sendo migrado gradualmente, sem refatoração arriscada nesta entrega.

@@ -3091,3 +3091,28 @@ body[data-quality="low"] .pet-gear {
 .adm-visual-filter input[type=text],.adm-visual-filter input:not([type]){min-height:35px;width:100%;padding:8px;border-radius:8px;background:#081a2b;border:1px solid #365a77;color:#dff8ff}
 .adm-visual-filter label.adm-visual-only-active{display:flex;flex:0 0 auto;align-items:center;min-height:35px;gap:7px}
 @media(max-width:620px){.adm-quick-navigation{grid-template-columns:repeat(2,minmax(0,1fr))}.adm-visual-effect-row,.adm-visual-ingredient-row{grid-template-columns:minmax(0,1.2fr) minmax(0,.8fr) 32px;gap:5px;padding:6px}.adm-visual-effect-row label,.adm-visual-ingredient-row label{font-size:9px}}
+
+/* V21 • Centro de Comando responsivo / sem animações no Canvas */
+.v21-command-modal{width:min(970px,96vw);max-height:92dvh;overflow-y:auto;background:linear-gradient(145deg,#081a29,#09111f);border:1px solid rgba(105,211,241,.28)}
+.v21-nav{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:14px 0}
+.v21-nav button{background:#0b2431;border:1px solid #254b59;color:#c5e3ed;border-radius:10px;padding:13px 5px;font-weight:800;letter-spacing:.04em;cursor:pointer}
+.v21-nav button.active{background:#1b4863;border-color:#63d8ef;color:white}
+.v21-overview{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:12px 0}
+.v21-overview>div,.v21-tactical-grid>article{border:1px solid #274553;background:#0a1c29;border-radius:10px;padding:12px;min-width:0;display:flex;flex-direction:column;gap:6px}
+.v21-overview span,.v21-tactical-grid small,.v21-tactical-grid span{font-size:10px;letter-spacing:.05em;color:#94bac7}
+.v21-overview strong,.v21-tactical-grid strong{color:#e9faff;overflow-wrap:anywhere;font-size:clamp(12px,2.6vw,16px)}
+.v21-command-content{min-height:200px}.v21-panel-heading{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;margin:14px 0 17px}
+.v21-panel-heading h3{margin:3px 0 8px;font-size:clamp(17px,3.3vw,24px);color:#e8fbff}.v21-panel-heading small{color:#5ed9f2;font-weight:800}.v21-panel-heading p,.v21-help{font-size:12px;color:#9eb8c8;line-height:1.6;max-width:620px;margin:0}.v21-panel-heading>b{font-size:24px;color:#61ecc8}
+.v21-chip{font-size:11px;white-space:nowrap;border:1px solid #386575;border-radius:12px;padding:6px;color:#a8d4e2}
+.v21-card-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.v21-operation{border:1px solid #204351;border-radius:12px;background:rgba(19,43,57,.75);padding:14px;min-width:0}.v21-operation.done{border-color:#378d76}
+.v21-operation-top{display:flex;justify-content:space-between;gap:7px;align-items:center;font-weight:800;color:#e9faff}.v21-operation-top b{color:#75e5c7;font-size:18px}
+.v21-operation p{font-size:12px;color:#95b5c5;margin:6px 0 10px}.v21-operation small{color:#bfdbe6;display:block;text-align:right;margin-top:5px}
+.v21-track{height:7px;background:#18374a;border-radius:9px;overflow:hidden;margin:8px 0}.v21-track i{display:block;height:100%;background:linear-gradient(90deg,#2ba7d5,#6de6b4);border-radius:9px}
+.v21-tactical-grid,.v21-faction-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:12px 0}
+.v21-faction-grid>div{border:1px solid #375161;background:#0c2535;border-radius:9px;padding:12px;display:flex;flex-direction:column;gap:5px}.v21-faction-grid span{font-size:11px;color:#aed2df}.v21-faction-grid strong{font-size:17px;color:#e6fbff}
+.v21-command-content h4{margin:18px 0 5px;color:#cae7f0;font-size:12px}.v21-actions{display:flex;flex-wrap:wrap;gap:8px;margin:18px 0}.v21-command-footer{border-top:1px solid #315263;padding-top:12px;margin-top:12px;display:flex;align-items:center;justify-content:space-between;gap:12px}.v21-command-footer span{font-size:10px;line-height:1.5;color:#94b7c5}.v21-command-footer button{white-space:nowrap}
+@media (max-width:620px){.v21-command-modal{max-height:95dvh;width:97vw;padding:12px}.v21-nav{gap:5px}.v21-nav button{padding:11px 2px;font-size:11px}.v21-overview{gap:5px}.v21-overview>div{padding:8px}.v21-card-grid{grid-template-columns:1fr}.v21-tactical-grid{grid-template-columns:1fr}.v21-command-footer{flex-wrap:wrap}.v21-faction-grid{gap:5px}.v21-faction-grid>div{padding:8px}}
+@media (prefers-reduced-motion:reduce){.v21-command-modal *{animation:none!important;transition:none!important}}
+
+.v21-node-list{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px}.v21-node-list>div{background:#132d3d;border:1px solid #375565;border-radius:8px;padding:9px;display:flex;flex-direction:column;gap:4px}.v21-node-list b{font-size:12px;color:#e0f8ff}.v21-node-list span{font-size:10px;color:#93cedc}@media(max-width:620px){.v21-node-list{grid-template-columns:repeat(2,minmax(0,1fr))}}

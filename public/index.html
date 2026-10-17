@@ -6,7 +6,10 @@
 <meta content="width=device-width,initial-scale=1,user-scalable=no" name="viewport"/>
 <meta content="#030816" name="theme-color"/>
 <title>Stellar Legacy</title>
-<link href="/style.css?v=20.3.3" rel="stylesheet"/>
+<link rel="manifest" href="/manifest.webmanifest?v=21.3.0"/>
+<link rel="icon" type="image/png" href="/icons/stellar-192.png"/>
+<link rel="apple-touch-icon" href="/icons/stellar-192.png"/>
+<link href="/style.css?v=21.3.0" rel="stylesheet"/>
 </head>
 <body>
 <div id="app">
@@ -28,6 +31,7 @@
     <div class="menu-dropdown">
       <button class="menu-item" id="missionBtn" type="button">MISSÕES</button>
       <button class="menu-item" id="passBtn" type="button">PASSE <span id="passTierBadge">0/30</span></button>
+      <button class="menu-item" id="commandCenterBtn" type="button">✦ CENTRO DE COMANDO V21</button>
     </div>
   </div>
 
@@ -771,6 +775,19 @@
   </div>
 </div>
 
+<div class="modal hidden" id="commandCenterModal" role="dialog" aria-modal="true" aria-labelledby="commandCenterTitle">
+  <div class="modal-card wide-card v21-command-modal">
+    <div class="modal-header"><div><div class="eyebrow">STELLAR LEGACY • V21</div><h2 id="commandCenterTitle">Centro de Comando</h2></div><button class="small-btn" type="button" id="closeCommandCenter">Fechar</button></div>
+    <nav class="v21-nav" aria-label="Seções do centro de comando">
+      <button type="button" data-v21-tab="elite" class="active">✦ ELITE</button>
+      <button type="button" data-v21-tab="guerra">⚔ GUERRA</button>
+      <button type="button" data-v21-tab="temporada">★ TEMPORADA</button>
+    </nav>
+    <div id="commandCenterContent" aria-live="polite"></div>
+    <footer class="v21-command-footer"><span>Dados consultivos. Inventário, saldos e recompensas continuam validados nos sistemas existentes.</span><button type="button" class="ghost-btn" id="installStellarApp">INSTALAR NO CELULAR</button></footer>
+  </div>
+</div>
+
 <div class="modal hidden" id="configModal">
   <div class="modal-card settings-modal-card premium-settings-card">
     <div class="modal-header">
@@ -1046,6 +1063,6 @@
 </div>
 </div>
 <div class="perf-diag-overlay hidden" id="perfDiagOverlay" aria-live="off" aria-label="Contador de FPS local"><b id="perfDiagHudFps">FPS —</b><small id="perfDiagHudStutter">P95 —</small></div>
-<script src="/game.js?v=20.3.3" type="module"></script>
+<script src="/game.js?v=21.3.0" type="module"></script>
 </body>
 </html>
