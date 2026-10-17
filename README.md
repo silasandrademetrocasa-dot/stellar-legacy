@@ -1,3 +1,30 @@
+# STELLAR LEGACY V20.2.5 — MOTOR CANVAS / MODO BAIXA
+
+Atualização completa baseada na **V20.2.4 HUD MOBILE**, conservando todos os mapas, sistemas, sprites e testes anteriores. **Não precisa executar nenhum SQL.**
+
+### Novidades desta release
+
+- **Fundo mais leve em qualidade BAIXA:** as imagens de cenário 1600×900 são reduzidas uma única vez para 1024×576 num Canvas em memória e reutilizadas a cada quadro. Imagens originais de naves, NPCs, drones e AUX-9 **não são redimensionadas**. Em MÉDIA e ALTA, fundo original continua igual. O cenário em BAIXA pode ficar ligeiramente menos nítido.
+- **Memória controlada:** o cache mantém no máximo dois fundos de mapas e volta à imagem original se a criação do Canvas falhar.
+- **Minimapa recolhido/oculto:** deixa de gastar desenho no Canvas enquanto não está visível. Quando aberto, continua com sua taxa normal de atualização.
+- **Nome dos pilotos:** larguras de nomes repetidos são medidas uma vez e reutilizadas num cache LRU de até 128 entradas; mudanças de nome/fontes são tratadas.
+- **Limites do mapa e bases:** evita desenhar borda e estação orbital quando estão completamente fora da tela, com margem para preservar a zona segura.
+- **Resize inteligente:** evita limpar o Canvas e invalidar gradientes se largura, altura e DPR não mudaram.
+- **Testes:** `npm run verify` executa testes de regressão, verifica imports/versionamento e sprites em build.
+
+### Instalação pelo GitHub Actions
+
+1. Valide a V20.2.4 que já está em teste. Coloque **apenas este ZIP completo** na raiz do GitHub, sem extrair; remova outros arquivos `stellar-legacy*.zip` da raiz.
+2. Vá em **Actions → Instalar versão do Stellar Legacy → Run workflow**.
+3. Confira o deploy no Render e o endpoint `/health` exibindo `20.2.5`.
+4. No Android, compare FPS na qualidade BAIXA e no mesmo mapa antes/depois, com mesmo número de NPCs. Confira mapa, troca de setor, minimapa aberto/fechado, NPCs, AUX, PvP, troca CONF 1/2 e escudos.
+
+Os ganhos de FPS **não são garantidos**, pois dependem da carga de CPU/GPU do aparelho, das condições do navegador e da quantidade de objetos em jogo. Não houve deploy remoto nem alteração de conta/save feita neste pacote.
+
+Leia `V20_2_5_RELATORIO.md` para ver as mudanças e validações.
+
+---
+
 # STELLAR LEGACY V20.2.4 — HUD MOBILE MAIS LEVE
 
 **Atualização incremental completa sobre a V20.2.3.** Não há SQL adicional nem alterações em dados do Supabase.

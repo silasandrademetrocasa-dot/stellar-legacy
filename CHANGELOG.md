@@ -1,3 +1,11 @@
+## V20.2.5 — otimização conservadora do Canvas (Android / BAIXA)
+
+- Fundo gráfico BAIXA pré-reduzido em Canvas 1024 px, cache LRU máx. 2 cenários (`modules/backdrop-raster-cache.js`).
+- Minimapa não é desenhado quando recolhido/oculto; borda e base não são desenhadas se estão fora da câmera.
+- Medições de texto do callsign são reutilizadas com LRU 128 (`modules/text-width-cache.js`).
+- Resize evita reinicializar o contexto se nada mudou; QA: regressões de gameplay intactas.
+- Release `20.2.5` em servidor, HTML, imports, pacote e diagnóstico; nenhum SQL adicionado.
+
 ## V20.2.4 — HUD mobile: cadências independentes e layout agrupado
 
 - Ciclo de simulação, movimento e combate preservado; somente o ritmo das atualizações de interface muda.

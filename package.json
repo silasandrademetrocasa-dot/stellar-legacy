@@ -1,6 +1,6 @@
 {
   "name": "stellar-legacy",
-  "version": "20.2.4",
+  "version": "20.2.5",
   "type": "module",
   "scripts": {
     "start": "node server/index.js",
@@ -18,5 +18,5 @@
   "engines": {
     "node": ">=18"
   },
-  "release": "v20.2.4-hud-mobile-scheduler"
+  "release": "v20.2.5-canvas-mobile-cache"
 }
