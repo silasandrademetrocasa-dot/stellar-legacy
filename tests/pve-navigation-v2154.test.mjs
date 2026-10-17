@@ -2,7 +2,7 @@ import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {MAPS} from '../public/data.js';
-import {movementSpeed,followShipCamera,PVE_MAP_DIMENSIONS,PVE_CRUISE_FACTOR,PVP_MAP_DIMENSIONS,PVP_CRUISE_FACTOR} from '../public/modules/ship-navigation.js';
+import {movementSpeed,nominalMovementSpeed,FLIGHT_PACING_FACTOR,followShipCamera,PVE_MAP_DIMENSIONS,PVE_CRUISE_FACTOR,PVP_MAP_DIMENSIONS,PVP_CRUISE_FACTOR} from '../public/modules/ship-navigation.js';
 const sql=readFileSync(new URL('../sql/V21_5_4_EQUILIBRIO_MAPAS_PVE.sql',import.meta.url),'utf8');
 test('todos os oito mapas PvE crescem e correspondem ao modulo de dimensoes',()=>{
  assert.equal(Object.keys(PVE_MAP_DIMENSIONS).length,8);
@@ -15,9 +15,9 @@ test('todos os oito mapas PvE crescem e correspondem ao modulo de dimensoes',()=
 test('CONF corrida continua mais rapida e ambos os modos usam mesmo equilibrio',()=>{
  for(const id of [...Object.keys(PVE_MAP_DIMENSIONS),...Object.keys(PVP_MAP_DIMENSIONS)]){
   const factor=id.startsWith('x')?PVE_CRUISE_FACTOR:PVP_CRUISE_FACTOR;
-  assert.equal(movementSpeed(400,id),400*factor);
+  assert.equal(movementSpeed(400,id),400*factor*FLIGHT_PACING_FACTOR);
   assert.ok(movementSpeed(700,id)>movementSpeed(400,id));
-  assert.equal(movementSpeed(700,id,1.3),700*1.3*factor);
+  assert.equal(movementSpeed(700,id,1.3),700*1.3*factor*FLIGHT_PACING_FACTOR);
  }
 });
 test('arenas temporizadas nao sofrem alteracao de velocidade ou escala',()=>{

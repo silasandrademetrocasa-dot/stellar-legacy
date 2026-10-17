@@ -4,6 +4,10 @@ export const PVP_SECTORS=new Set(['b41','b42','b43']);
 export const PVE_SECTORS=new Set(['x1','x2','x3','x4','x5','x6','x7','x8']);
 export const PVP_CRUISE_FACTOR=0.88;
 export const PVE_CRUISE_FACTOR=0.88;
+// Ajuste de sensacao de pilotagem: nao muda os pontos VELOCIDADE no perfil/HUD.
+// Passo em unidades/segundo = velocidade nominal * fator de deslocamento.
+// Corrida, boost e CONF de escudos mantem suas vantagens relativas.
+export const FLIGHT_PACING_FACTOR=0.72;
 export const PVP_MAP_DIMENSIONS=Object.freeze({
   b41:Object.freeze({w:11800,h:8400}),
   b42:Object.freeze({w:12500,h:8900}),
@@ -20,12 +24,20 @@ export const PVE_MAP_DIMENSIONS=Object.freeze({
   x7:Object.freeze({w:11300,h:8300}),
   x8:Object.freeze({w:12000,h:8900}),
 });
-export function movementSpeed(baseSpeed,mapId,abilityMultiplier=1){
+// Valor nominal que o piloto ja via na V22: nunca sofre o fator de deslocamento.
+export function nominalMovementSpeed(baseSpeed,mapId,abilityMultiplier=1){
   const speed=Math.max(0,Number(baseSpeed)||0);
   const ability=Math.max(0,Number(abilityMultiplier)||0);
   const id=String(mapId||'');
   const cruiseFactor=PVP_SECTORS.has(id)?PVP_CRUISE_FACTOR:PVE_SECTORS.has(id)?PVE_CRUISE_FACTOR:1;
   return speed*ability*cruiseFactor;
+}
+// A navegacao consome menos unidades por segundo nos mapas principais,
+// mas os atributos (e o numero exibido) permanecem identicos aos anteriores.
+export function movementSpeed(baseSpeed,mapId,abilityMultiplier=1){
+  const id=String(mapId||'');
+  const paced=PVP_SECTORS.has(id)||PVE_SECTORS.has(id);
+  return nominalMovementSpeed(baseSpeed,id,abilityMultiplier)*(paced?FLIGHT_PACING_FACTOR:1);
 }
 
 // Camera acompanha a nave de perto. Atraso visual maximo em 14 unidades,

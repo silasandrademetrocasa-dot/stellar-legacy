@@ -1,6 +1,6 @@
 {
   "name": "stellar-legacy",
-  "version": "22.0.0",
+  "version": "22.0.1",
   "type": "module",
   "scripts": {
     "start": "node server/index.js",
@@ -19,5 +19,5 @@
   "engines": {
     "node": ">=18"
   },
-  "release": "temporadas-competitivas-elite-universo-clas-motor"
+  "release": "ajuste-de-deslocamento-sem-mudar-velocidade-nominal"
 }

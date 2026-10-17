@@ -1,3 +1,10 @@
+## 22.0.1 — Ritmo de deslocamento (sem alterar o atributo VELOCIDADE)
+
+- Nave percorre 28% menos distancia por segundo no PvE X-1–X-8 e PvP 4-1–4-3, mas exibe o mesmo valor de velocidade da V22.0.0.
+- CONF de corrida e habilidade temporaria preservam suas proporcoes; camera continua centralizada.
+- Mapas temporizados, dados do personagem, combate, escudos, saves e SQL nao foram alterados.
+- Testes de regressao especificos para movimento versus numero visivel.
+
 ## 22.0.0 — Centro de Comando, temporadas e fundação para expansão
 
 - Campeonato Galáctico: temporadas competitivas com início/fim editáveis, ranking de pilotos, facções e clãs, pontuação autoritativa de capturas/defesas, resgate único de prêmios após encerramento e histórico persistente.

@@ -2,7 +2,7 @@ import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {MAPS} from '../public/data.js';
-import {movementSpeed,followShipCamera,PVP_MAP_DIMENSIONS,PVP_CRUISE_FACTOR,PVE_MAP_DIMENSIONS,PVE_CRUISE_FACTOR} from '../public/modules/ship-navigation.js';
+import {movementSpeed,nominalMovementSpeed,FLIGHT_PACING_FACTOR,followShipCamera,PVP_MAP_DIMENSIONS,PVP_CRUISE_FACTOR,PVE_MAP_DIMENSIONS,PVE_CRUISE_FACTOR} from '../public/modules/ship-navigation.js';
 const game=readFileSync(new URL('../public/game.js',import.meta.url),'utf8');
 const sql=readFileSync(new URL('../sql/V21_5_3_CAMERA_MAPA_BALANCEADO.sql',import.meta.url),'utf8');
 test('camera cola no piloto em FPS baixo sem gerar distorcao/olhar adiante',()=>{
@@ -36,8 +36,8 @@ test('mapas PvP existentes continuam estaveis e PvE ampliado no novo pacote',()=
 test('CONF corrida continua proporcionalmente mais veloz que CONF escudos',()=>{
   const slow=movementSpeed(420,'b41');const fast=movementSpeed(730,'b41');
   assert.ok(fast>slow*1.7);
-  assert.equal(fast,730*PVP_CRUISE_FACTOR);
-  assert.equal(movementSpeed(730,'x1'),730*PVE_CRUISE_FACTOR);
+  assert.equal(fast,730*PVP_CRUISE_FACTOR*FLIGHT_PACING_FACTOR);
+  assert.equal(movementSpeed(730,'x1'),730*PVE_CRUISE_FACTOR*FLIGHT_PACING_FACTOR);
   assert.equal(movementSpeed(730,'ggAlpha'),730); // Arenas especiais nao alteradas
-  assert.equal(movementSpeed(730,'b41',1.2),730*1.2*PVP_CRUISE_FACTOR);
+  assert.equal(movementSpeed(730,'b41',1.2),730*1.2*PVP_CRUISE_FACTOR*FLIGHT_PACING_FACTOR);
 });
