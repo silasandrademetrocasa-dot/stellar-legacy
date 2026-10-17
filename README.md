@@ -1,41 +1,31 @@
-# Stellar Legacy — V20.1.4 CLEAR
+# Stellar Legacy — V20.2.0 FUNDAÇÃO (Etapa 1)
 
-**Edição de limpeza do repositório, sem alterações na lógica do jogo.**
+Release completa baseada na **V20.1.4 CLEAR**, mantendo combate, dados/saves, API, lojas, eventos e Supabase. **Nenhum SQL novo.**
 
-Versão funcional preservada: `20.1.4` (inclui as configurações táticas CONF 1/2 e os botões na aba NAVE do celular).
+## O que muda
 
-## O que esta edição faz
+1. **Primeira separação do monolito:** perfis gráficos e escolha de qualidade automática isolados em `public/modules/quality-profiles.js`; valores e comportamento da V20.1.4 mantidos.
+2. **Testes regressivos mantidos:** uma suíte pequena e escolhida de 17 arquivos verifica CONF 1/2 e escudos, HUD mobile, PvP, progressão, ADM/segurança, leilão, compras, reparação e qualidade. Sem testes históricos obsoletos.
+3. **Verificação de release automática no Render:** `npm run verify` valida sintaxe, imports locais, 216 assets, IDs de HTML, versionamento e regressões. O `render.yaml` roda esse comando **na compilação, antes de publicar**.
+4. **Versão padronizada:** V20.2.0 no package.json, URLs de cache de JS/CSS e nos três endpoints HTTP de status. Nada foi alterado nas regras online.
 
-- Remove testes temporários de desenvolvimento, relatórios antigos redundantes, arquivos de testes SQL e imagens substituídas não referenciadas pelo código atual.
-- Preserva integralmente os arquivos de jogo (`public/`), API/servidor (`server/`), assets utilizados, configuracões do Render e histórico `CHANGELOG.md`.
-- Preserva as migrações SQL de produção, scripts de reversão e o snapshot `sql/CURRENT_BACKEND.sql` para recuperação/continuidade do Supabase.
-- Mantém o instalador automático `.github/workflows/stellar-installer-main.yml`.
-- Não executa SQL e não altera registros, saves, inventário, jogadores ou contas.
+## Como instalar (ZIP completo)
 
-## Como instalar o ZIP completo pelo GitHub
+1. Suba somente o arquivo `stellar-legacy-V20.2.0-FUNDACAO-ETAPA1.zip` para a raiz do GitHub, **sem extrair**, removendo outros ZIPs `stellar-legacy*.zip` da raiz.
+2. GitHub → **Actions** → **Instalar versão do Stellar Legacy** → **Run workflow**.
+3. Em um serviço Render **já existente**, confirme em **Settings → Build Command** que o comando é `npm install && npm run verify` (o `render.yaml` nem sempre atualiza automaticamente serviços criados fora de Blueprints). Acompanhe o deploy e confirme que `/health` exibe `20.2.0`.
+4. Teste **login, posição da nave após F5, CONF 1/2 com escudo danificado, NPCs, loja, PvP, celular e ADM** com sua conta. Os testes estáticos não substituem testes no jogo real.
 
-1. Deixe somente **este ZIP** (sem extrair) na raiz do repositório, com nome começando por `stellar-legacy`.
-2. Em **Actions**, execute manualmente o workflow **Instalar versão do Stellar Legacy** (`stellar-installer-main.yml`).
-3. O instalador extrai o conteúdo, valida os arquivos necessários, substitui o código e efetua o commit na `main`.
-4. Acompanhe o deploy do Render, limpe/atualize o cache no navegador e valide login, mapa, NPCs, CONF 1/2 e loja.
+**Importante:** O instalador existente preserva `.github/`. Ele já basta para esta atualização: a validação acontece no `render.yaml`, não depende de substituir um workflow do GitHub. Este ZIP **não altera o banco Supabase**, e nem suas contas. **Não execute SQL antigo outra vez.**
 
-**Atenção:** O instalador utiliza `rsync --delete` na raiz e preserva `.github/` por exclusão. Se quiser eliminar o workflow antigo `.github/workflows/main.yml` da `main`, exclua esse arquivo pelo GitHub separadamente. A versão CLEAR omite esse workflow legado do pacote.
+## Desenvolvimento futuro
 
-## Inicialização local / Render
-
-- Node.js 18 ou superior.
 - `npm install`
-- `npm start`
-- Render: `render.yaml` configura `npm install`, `npm start` e health check `/health`.
-- Segredos reais nunca devem ser colocados no ZIP; utilize variáveis de ambiente no Render.
+- `npm run check` — verificação estática, sem rede.
+- `npm test` — testes automáticos, sem login ou Supabase real.
+- `npm run verify` — roda check + testes.
+- `npm start` — servidor.
 
-## Organização
+Próxima etapa recomendada: extrair cache/carregamento de imagens e telemetria do monolito **separadamente**, mantendo testes ao redor de cada mudança.
 
-- `public/` — HTML, CSS, cliente web e imagens em uso, incluindo assets de versões antigas **ainda referenciados**.
-- `server/` — servidor de API e simulação de mundo.
-- `sql/` — snapshot, migrações e reversões do Supabase (não executar em lote novamente).
-- `.github/workflows/stellar-installer-main.yml` — instalador oficial por ZIP.
-- `CHANGELOG.md` — histórico geral; `V20_1_3_CONFIGURACOES_TATICAS.md` e `V20_1_4_CONF_NO_PAINEL_NAVE.md` registram a mecânica mais recente.
-- `CLEAR_V20_1_4_RELATORIO.md` e `REMOCOES_CLEAR.txt` — auditoria desta limpeza.
-
-**Nota:** eliminar arquivos de um ZIP/release não reescreve nem reduz o histórico antigo do GitHub, nem o banco de dados remoto. Histórico anterior pode ser recuperado em commits/ZIPs antigos.
+Consulte `V20_2_0_RELATORIO.md` para resultados e limites dos testes.

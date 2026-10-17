@@ -1,0 +1,33 @@
+import assert from 'node:assert/strict';
+import {readFileSync, existsSync} from 'node:fs';
+import {resolve} from 'node:path';
+const base=resolve(import.meta.dirname,'..');
+const game=readFileSync(resolve(base,'public/game.js'),'utf8');
+const api=readFileSync(resolve(base,'public/api.js'),'utf8');
+const sql=readFileSync(resolve(base,'sql/STELLAR_V19_0_2_CLAS_ARENA_SECURITY.sql'),'utf8');
+const extra=readFileSync(resolve(base,'sql/STELLAR_V19_0_2_LEVEL_INTEGRITY.sql'),'utf8');
+const pkg=JSON.parse(readFileSync(resolve(base,'package.json'),'utf8'));
+assert.match(pkg.version,/^\d+\.\d+\.\d+$/);
+assert.match(game,/clanRoleNameV19/);
+for(const s of ['LÍDER','VICE-LÍDER','MEMBRO ELITE','MEMBRO'])assert(game.includes(s));
+assert.match(game,/reviewClanRequestNow\(review\.dataset\.clanReview/);
+assert.match(game,/cancelClanRequestNow\(cancel\.dataset\.clanCancel/);
+assert.match(game,/setClanMemberRoleNow\(select\.dataset\.clanRoleTarget/);
+assert.match(game,/SOLICITAR ENTRADA/);
+assert.match(game,/if\(!r\?\.pending\)throw new Error\('Servidor desatualizado/);
+assert.match(game,/const computedArenaLevel=levelFromXp\(progress\.profile\.xp,PLAYER_MAX_LEVEL\)/);
+assert.match(game,/\$\{canManage\?`<section class="clan-panel"><h3>REPASSE DO LÍDER \/ VICE/);
+for(const name of ['get_clan_requests_v19','review_clan_request_v19','cancel_clan_request_v19','set_clan_member_role_v19']){
+ assert(api.includes(`/rest/v1/rpc/${name}`),name);
+ assert(sql.includes(`function public.${name}`),name);
+}
+assert.match(sql,/insert into public\.clan_join_requests_v19\(user_id,clan_id,status/);
+assert.doesNotMatch(sql,/insert into public\.clan_members\(user_id,clan_id,role\) values\(v_uid,p_clan_id/);
+assert.match(sql,/v_role not in\('owner','deputy'\)/);
+assert.match(sql,/revoke all on function public\.evaluate_clan_level_v12\(uuid\) from PUBLIC,anon,authenticated/);
+assert.match(sql,/15000::double precision \* power\(\(v_i - 1\)::double precision/);
+assert.match(extra,/v_xp:=least\(greatest\(0/);
+assert.match(extra,/least\(v_level,v_saved_level,v_calc_level\)<v_req/);
+assert(existsSync(resolve(base,'public/assets/v19/pilot-skills/hull1.png')));
+assert(existsSync(resolve(base,'public/assets/v19/premium-stage/premiumWeek.png')));
+console.log('PASS V19.0.4: cargos, pedidos, approval gate, cofre vice, arena XP, validacao XP+save, assets preservados.');

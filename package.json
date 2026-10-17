@@ -1,10 +1,13 @@
 {
   "name": "stellar-legacy",
-  "version": "20.1.4",
+  "version": "20.2.0",
   "type": "module",
   "scripts": {
     "start": "node server/index.js",
-    "dev": "node --watch server/index.js"
+    "dev": "node --watch server/index.js",
+    "check": "node scripts/verify-release.mjs",
+    "test": "node --test tests/*.test.mjs tests/shop-confirmation-regression.mjs",
+    "verify": "npm run check && npm test"
   },
   "dependencies": {
     "express": "^4.21.2",
@@ -15,5 +18,5 @@
   "engines": {
     "node": ">=18"
   },
-  "release": "v20.1.4-mobile-conf-in-nave"
+  "release": "v20.2.0-fundacao-tests-build-guard"
 }
