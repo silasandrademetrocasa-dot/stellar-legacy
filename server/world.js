@@ -1,5 +1,6 @@
 import { randomUUID } from 'crypto';
 import { WebSocketServer, WebSocket } from 'ws';
+import {selectLiveDirective,directiveToWorldEvent} from './universe-directives.js';
 import {captureElapsedSeconds, classifyWarfrontCaptureError, withCaptureTimeout, CAPTURE_FAILURE_BACKOFF_MS} from './warfront-capture.js';
 import { FACTIONS, MAPS, NPC_TYPES, RESOURCES } from '../public/data.js';
 
@@ -363,7 +364,7 @@ class Room {
     if(this.clients.size)this.broadcast(this.snapshot());
   }
 
-  currentEventDef(){ return this.world.currentEvent(); }
+  currentEventDef(){ const live=this.world.currentEvent();if(live&&this.eventEligible(live))return live;return directiveToWorldEvent(selectLiveDirective(this.world.directives,this.mapId),this.mapId); }
   eventProfile(ev=this.event){return eventVariant(ev?.id);}
   eventMode(ev=this.event){return this.eventProfile(ev).mode;}
   eventEligible(ev){
@@ -372,6 +373,7 @@ class Room {
     if(rules.battle_only)return !!this.map.battle;
     if(rules.normal_only&&this.map.battle)return false;
     if(Number(rules.min_tier||0)>Number(this.map.tier||0))return false;
+    if(ev.source==='universe-directive')return !this.map.gate&&(mode!=='ore'||!this.map.battle);
     if(mode==='battle_wave')return !!this.map.battle;
     if(mode==='boss')return !!this.map.battle||Number(this.map.tier||1)>=2;
     return !this.map.battle;
@@ -622,14 +624,14 @@ class Room {
   broadcastEvent(force=false){const now=nowMs();if(!force&&now-this.lastEventBroadcastAt<EVENT_BROADCAST_INTERVAL_MS)return;this.lastEventBroadcastAt=now;this.broadcast({type:'event_update',event:this.eventPayload(),serverTime:now});}
   // V18.2.6: progresso é individual, por EVENT ID + janela, persistido no Supabase.
   sendPersonalEventStatus(ws,ev=this.event){
-    if(!ws?.identity?.accessToken||!ev?.eventId||!this.world.loadPlayerEventProgress)return;
+    if(ev?.source==='universe-directive'||!ws?.identity?.accessToken||!ev?.eventId||!this.world.loadPlayerEventProgress)return;
     this.world.loadPlayerEventProgress(ws.identity.accessToken,ev.eventId)
       .then(data=>{if(data&&ws.readyState===WebSocket.OPEN&&ws.room?.event?.eventId===ev.eventId)
         safeJsonSend(ws,{type:'event_personal_update',eventId:ev.eventId,personal:data});})
       .catch(err=>console.warn('[event-status]',err?.message||err));
   }
   creditPersonalEvent(ws,ev,amount){
-    if(!ws?.identity?.accessToken||!ev?.eventId||!this.world.recordPlayerEventProgress)return;
+    if(ev?.source==='universe-directive'||!ws?.identity?.accessToken||!ev?.eventId||!this.world.recordPlayerEventProgress)return;
     this.world.recordPlayerEventProgress(ws.identity.accessToken,ev.eventId,amount)
       .then(data=>{if(data&&ws.readyState===WebSocket.OPEN&&ws.room?.event?.eventId===ev.eventId)
         safeJsonSend(ws,{type:'event_personal_update',eventId:ev.eventId,personal:data});})
@@ -876,7 +878,7 @@ class Room {
   }
 }
 
-export function attachSharedUniverse(server,{authenticate,authorizeJoin,loadLiveOps,loadBattleGroup,loadNpcConfig,loadWorldConfig,loadPlayerEventProgress,recordPlayerEventProgress,loadWarfront,persistCapture,recordEliteEvent,recordWarDefense}){
+export function attachSharedUniverse(server,{authenticate,authorizeJoin,loadLiveOps,loadBattleGroup,loadNpcConfig,loadWorldConfig,loadPlayerEventProgress,recordPlayerEventProgress,loadWarfront,persistCapture,recordEliteEvent,recordWarDefense,loadWorldDirectives}){
   const wss=new WebSocketServer({
     server,
     path:'/ws',
@@ -891,6 +893,7 @@ export function attachSharedUniverse(server,{authenticate,authorizeJoin,loadLive
     loadWarfront:loadWarfront||(()=>Promise.reject(new Error('Sem conexão com o banco de relés'))),
     persistCapture:persistCapture||(()=>Promise.reject(new Error('Sem gravação de relés'))),
     recordEliteEvent:recordEliteEvent||(()=>Promise.resolve()),
+    directives:[],lastDirectivesAt:0,directivesBusy:false,
     liveOps:{events:[],catalog:[],server_time:0},
     lastLiveOpsAt:0,
     liveOpsBusy:false,
@@ -975,6 +978,25 @@ export function attachSharedUniverse(server,{authenticate,authorizeJoin,loadLive
     markNpcActivity(userId,at=nowMs()){const uid=String(userId||'');if(uid)this.npcActivity.set(uid,Number(at)||nowMs());},
     lastNpcActivity(userId){return Number(this.npcActivity.get(String(userId||''))||0);},
     findClient(userId){const uid=String(userId||'');for(const r of rooms.values())for(const c of r.clients)if(String(c.player?.userId||'')===uid)return c;return null;},
+    async refreshDirectives(force=false){
+      const now=nowMs();if(!loadWorldDirectives)return this.directives;
+      if(!force && now-this.lastDirectivesAt<20000)return this.directives;
+      if(this.directivesBusy)return this.directives;
+      this.directivesBusy=true;
+      try{
+        const rows=await loadWorldDirectives();
+        if(!Array.isArray(rows))throw new Error('Resposta inválida de operações do universo');
+        const before=this.directives;this.directives=rows.slice(0,80);this.lastDirectivesAt=nowMs();
+        const changed=rooms.size>0&&[...rooms.values()].some(room=>{
+          const old=selectLiveDirective(before,room.mapId)?.id;
+          const next=selectLiveDirective(this.directives,room.mapId)?.id;
+          return old!==next;
+        });
+        if(changed)for(const room of rooms.values())room.ensureEvent(true);
+      }catch(e){this.lastDirectivesAt=nowMs();console.warn('[universe-directives]',e?.message||e);}
+      finally{this.directivesBusy=false;}
+      return this.directives;
+    },
     currentEvent(){return resolveLiveEvent(world.liveOps?.events||[],nowMs());},
     async refreshLiveOps(force=false){
       const now=nowMs();
@@ -996,7 +1018,7 @@ export function attachSharedUniverse(server,{authenticate,authorizeJoin,loadLive
       return world.liveOps;
     },
     room(mapId,territoryFaction){const requested=String(mapId||'x1'),def=this.mapDefinition(requested),id=def&&def.enabled!==false&&!def.gate?requested:sanitizeRoomMap(requested),key=roomKey(id,territoryFaction);if(!rooms.has(key))rooms.set(key,new Room(world,id,territoryFaction));return rooms.get(key);},
-    stats(){return {rooms:rooms.size,clients:[...rooms.values()].reduce((s,r)=>s+r.clients.size,0),npcs:[...rooms.values()].reduce((s,r)=>s+r.npcs.size,0),ores:[...rooms.values()].reduce((s,r)=>s+r.ores.size,0),event:world.currentEvent(),liveOpsUpdatedAt:world.lastLiveOpsAt,npcConfigVersion:Number(world.npcRuntime?.version)||0,npcConfigUpdatedAt:world.npcRuntime?.updatedAt||null,worldConfigVersion:Number(world.worldRuntime?.version)||0,worldConfigUpdatedAt:world.worldRuntime?.updatedAt||null};}
+    stats(){return {rooms:rooms.size,clients:[...rooms.values()].reduce((s,r)=>s+r.clients.size,0),npcs:[...rooms.values()].reduce((s,r)=>s+r.npcs.size,0),ores:[...rooms.values()].reduce((s,r)=>s+r.ores.size,0),event:world.currentEvent(),directivesCached:world.directives.length,directivesUpdatedAt:world.lastDirectivesAt,liveOpsUpdatedAt:world.lastLiveOpsAt,npcConfigVersion:Number(world.npcRuntime?.version)||0,npcConfigUpdatedAt:world.npcRuntime?.updatedAt||null,worldConfigVersion:Number(world.worldRuntime?.version)||0,worldConfigUpdatedAt:world.worldRuntime?.updatedAt||null};}
   };
 
   wss.on('connection',ws=>{
@@ -1050,7 +1072,8 @@ export function attachSharedUniverse(server,{authenticate,authorizeJoin,loadLive
   world.refreshWorldConfig(true).catch(()=>{});
   world.refreshNpcConfig(true).catch(()=>{});
   world.refreshLiveOps(true).catch(()=>{});
-  let last=nowMs(),lastActivityCleanup=0;const timer=setInterval(()=>{const n=nowMs(),dt=Math.min(.12,(n-last)/1000);last=n;if(n-world.lastLiveOpsAt>=LIVE_OPS_REFRESH_MS)world.refreshLiveOps(false).catch(()=>{});if(n-world.lastNpcConfigAt>=12000)world.refreshNpcConfig(false).catch(()=>{});if(n-world.lastWorldConfigAt>=15000)world.refreshWorldConfig(false).catch(()=>{});for(const [key,r] of rooms){if(r.clients.size>0){r.lastUsedAt=n;r.tick(dt);if(r.warfrontControl&&n-r.lastWarfrontSyncAt>15000){r.lastWarfrontSyncAt=n;r.reconcileWarfrontState().catch(err=>console.warn('Falha sincronizando relés:',err?.message));}}else if(n-(r.lastUsedAt||n)>IDLE_ROOM_TTL_MS)rooms.delete(key);}if(n-lastActivityCleanup>60000){lastActivityCleanup=n;for(const [uid,at] of world.npcActivity)if(n-Number(at)>10*60*1000)world.npcActivity.delete(uid);}},50);
+  world.refreshDirectives(true).catch(()=>{});
+  let last=nowMs(),lastActivityCleanup=0;const timer=setInterval(()=>{const n=nowMs(),dt=Math.min(.12,(n-last)/1000);last=n;if(n-world.lastLiveOpsAt>=LIVE_OPS_REFRESH_MS)world.refreshLiveOps(false).catch(()=>{});if(n-world.lastNpcConfigAt>=12000)world.refreshNpcConfig(false).catch(()=>{});if(n-world.lastWorldConfigAt>=15000)world.refreshWorldConfig(false).catch(()=>{});if(n-world.lastDirectivesAt>=20000)world.refreshDirectives(false).catch(()=>{});for(const [key,r] of rooms){if(r.clients.size>0){r.lastUsedAt=n;r.tick(dt);if(r.warfrontControl&&n-r.lastWarfrontSyncAt>15000){r.lastWarfrontSyncAt=n;r.reconcileWarfrontState().catch(err=>console.warn('Falha sincronizando relés:',err?.message));}}else if(n-(r.lastUsedAt||n)>IDLE_ROOM_TTL_MS)rooms.delete(key);}if(n-lastActivityCleanup>60000){lastActivityCleanup=n;for(const [uid,at] of world.npcActivity)if(n-Number(at)>10*60*1000)world.npcActivity.delete(uid);}},50);
   timer.unref?.();
   return world;
 }

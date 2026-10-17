@@ -14,7 +14,7 @@ import { createCommandCenterRouter } from './command-center-router.js';
 
 const app = express();
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const RELEASE_VERSION = '22.0.1'; // único identificador de release nos endpoints HTTP
+const RELEASE_VERSION = '22.5.0'; // único identificador de release nos endpoints HTTP
 
 function normalizeSupabaseUrl(value = '') {
   let url = String(value || '').trim();
@@ -1715,6 +1715,17 @@ const sharedUniverse = attachSharedUniverse(server, {
     const {error}=await sb.rpc('stellar_record_elite_event',{p_user_id:userId,p_kind:kind,p_amount:1});
     if(error)throw new Error(error.message);
   },
+  loadWorldDirectives:async()=>{
+    // A lista operacional vem do banco autenticado pelo servidor, nunca do cliente.
+    if(!eliteAdminClient)return [];
+    const now=new Date().toISOString();
+    const {data,error}=await eliteAdminClient.from('stellar_world_directives')
+      .select('id,title,description,map_id,category,starts_at,ends_at,enabled')
+      .eq('enabled',true).lte('starts_at',now).gt('ends_at',now)
+      .order('starts_at',{ascending:true}).limit(80);
+    if(error)throw new Error(error.message);
+    return data||[];
+  },
   loadLiveOps: async()=>loadLiveOpsSnapshot(false),
   loadNpcConfig: async()=>loadNpcRuntimeSnapshot(false),
   loadWorldConfig: async()=>loadWorldRuntimeSnapshot(false),
@@ -1792,7 +1803,7 @@ shopsRefreshTimer.unref?.();
 refreshShopsRuntimeSnapshot(true).then(cfg=>console.log(`[shops-runtime] v${cfg.version} cacheado em ${SHOPS_RUNTIME_FILE}`)).catch(err=>console.warn('[shops-runtime] bootstrap:',err.message));
 
 server.listen(port, () => {
-  console.log(`Stellar Legacy V18.2.2 :${port}`);
+  console.log(`Stellar Legacy ${RELEASE_VERSION} :${port}`);
   console.log('Supabase config:', configStatus());
   console.log('Shared Universe: ONLINE');
 });

@@ -20,6 +20,8 @@ export function safeDirective(raw={}) {
  const title=String(raw.title||'').trim(),description=String(raw.description||'').trim(),map_id=String(raw.map_id||'all');
  const category=String(raw.category||'alert'),start=Date.parse(raw.starts_at),end=Date.parse(raw.ends_at);
  if(title.length<3||title.length>80||description.length>280||!['alert','invasion','boss','resource'].includes(category)||!['all',...Array.from({length:8},(_,i)=>`x${i+1}`),'b41','b42','b43','ggAlpha','ggBeta','ggGamma'].includes(map_id))throw new Error('Aviso de universo inválido.');
+ if(category!=='alert'&&/^gg(?:Alpha|Beta|Gamma)$/.test(map_id))throw new Error('Portais especiais recebem apenas avisos: invasões não funcionam nas arenas.');
+ if(category==='resource'&&/^b4[123]$/.test(map_id))throw new Error('Minérios especiais só podem surgir nos mapas de exploração PvE.');
  if(!Number.isFinite(start)||!Number.isFinite(end)||end<=start||end-start>30*86400000)throw new Error('Duração inválida do evento.');
  return {title,description,category,map_id,starts_at:new Date(start).toISOString(),ends_at:new Date(end).toISOString(),enabled:raw.enabled===true};
 }

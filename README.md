@@ -1,3 +1,13 @@
+# Stellar Legacy V22.5.0 — Universo Dinâmico e Missões Coletivas
+
+**ANTES DO DEPLOY:** leia `INSTALAR_V22_5_0.md`. A nova migração SQL está **pendente**, porque o acesso de escrita ao Supabase foi bloqueado na preparação. Execute `sql/STELLAR_V22_5_0_CLAN_OPERATIONS_HALL.sql` no Supabase e confirme a execução antes de subir o ZIP.
+
+Novidades: invasões, chefes e recursos programados no ADM via servidor; missões coletivas e recompensas únicas para o cofre do clã; arquivo competitivo; novos módulos de servidor e testes.
+
+O motor existente de eventos, combate, territórios A/B/C, CONF 1/2, saves e balanceamento de movimento permanece preservado. Eventos dinâmicos não adicionam recompensas inéditas.
+
+Documentação: `V22_5_0_RELATORIO.md` e `INSTALAR_V22_5_0.md`.
+
 # Stellar Legacy — 22.0.0
 
 **Entrega unificada: Campeonato Galáctico + Elite equipável + Operações do Universo + Rankings de Clãs + organização modular.**

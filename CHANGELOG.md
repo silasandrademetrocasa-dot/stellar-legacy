@@ -1,3 +1,11 @@
+## V22.5.0 — Universo Dinâmico, Clãs e Histórico Competitivo
+
+- Eventos de invasão, chefe e recursos agora alimentam o motor existente a partir das diretivas programadas; limpeza automática.
+- Missões coletivas de clã com contadores do servidor, editor ADM e recompensa única para o cofre.
+- Histórico de temporadas encerradas com facção vencedora e resgates.
+- Módulos independentes, testes e relatório de instalação SQL. **Migração SQL ainda não aplicada** nesta execução devido ao bloqueio da conexão de escrita.
+- Preservados combate, territórios, movimentação V22.0.1 e dados dos pilotos.
+
 ## 22.0.1 — Ritmo de deslocamento (sem alterar o atributo VELOCIDADE)
 
 - Nave percorre 28% menos distancia por segundo no PvE X-1–X-8 e PvP 4-1–4-3, mas exibe o mesmo valor de velocidade da V22.0.0.

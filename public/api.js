@@ -1113,3 +1113,8 @@ export async function saveCompetitiveSeasonOnline(data){return serverFetch('/api
 export async function saveWorldDirectiveOnline(data){return serverFetch('/api/command/admin/directive',{method:'POST',body:JSON.stringify(data)},true);}
 
 export async function unequipEliteTitleOnline(){return serverFetch('/api/command/elite/unequip-title',{method:'POST'},true);}
+
+// Missões de clã — métricas verificadas exclusivamente pelo servidor.
+export async function loadClanOperationsOnline(){return serverFetch('/api/command/clan/operations',{},true);}
+export async function claimClanOperationOnline(id){return serverFetch(`/api/command/clan/operations/${encodeURIComponent(id)}/claim`,{method:'POST',body:'{}'},true);}
+export async function saveAdminClanOperationOnline(data){return serverFetch('/api/command/admin/clan-operation',{method:'POST',body:JSON.stringify(data)},true);}

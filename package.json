@@ -1,6 +1,6 @@
 {
   "name": "stellar-legacy",
-  "version": "22.0.1",
+  "version": "22.5.0",
   "type": "module",
   "scripts": {
     "start": "node server/index.js",
@@ -19,5 +19,5 @@
   "engines": {
     "node": ">=18"
   },
-  "release": "ajuste-de-deslocamento-sem-mudar-velocidade-nominal"
+  "release": "universo-dinamico-clas-temporadas-resiliencia"
 }
