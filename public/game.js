@@ -3758,7 +3758,6 @@ function renderBattleConfigHudV2013(){
     b.textContent=`CONF ${target}${c.active===target?' ✓':''}`;b.title=c.active===target?`Configuração ${target} atual`:(remaining>0?`Disponível em ${(remaining/1000).toFixed(1)}s`:`Trocar para configuração ${target}`);
   }
   const note=document.getElementById('battleConfCooldown');if(note)note.textContent=remaining>0?`${(remaining/1000).toFixed(1)}s`:'PRONTO';
-  const shipConfChip=document.getElementById('battleConfHeaderV2014');if(shipConfChip){shipConfChip.textContent=`C${c.active}`;shipConfChip.title=`Configuração ${c.active} ativa`;}
 }
 function renderBattleConfigHangarV2013(){
   const c=ensureBattleConfigsV2013();const div=document.createElement('section');div.className='section-box battle-config-panel-v2013';

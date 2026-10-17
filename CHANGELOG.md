@@ -1,10 +1,8 @@
-## V20.1.4 — Controles CONF 1/2 no HUD NAVE (16/10/2026)
+## V20.1.4 — Botões CONF 1 / CONF 2 no HUD NAVE (mobile)
 
-- CONF 1 e CONF 2 sairam do painel inferior MUNIÇÕES e agora ficam no card NAVE, abaixo do HP/ESC/VEL/PORÃO.
-- Botões adaptados a celular; a altura do card NAVE expandido comporta botoes e contador de 5 segundos.
-- Card recolhido oculta controles mas exibe identificador C1/C2 junto do título.
-- Nenhuma mudança nas regras de escudo persistente, HP, laser continuo, cooldown ou salvamento.
-- Sem SQL.
+- Interface Android: troca de configurações dentro do painel NAVE, independente do menu MUNIÇÕES recolhido.
+- Botões acessíveis em tela pequena, com PRONTO / 5s visível. Sem duplicar ações, sem alterar cálculo de escudo nem persistência.
+- Mantidos assets, PvP contínuo, dois perfis táticos e fluxos ADM.
 
 ## V20.1.3 — Configurações táticas e escudo persistente
 - CONF 1 e CONF 2 alternáveis a cada 5s; setups independentes de nave/drones no mesmo casco.

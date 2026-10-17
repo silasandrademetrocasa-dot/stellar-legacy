@@ -1,8 +1,0 @@
-STELLAR LEGACY V20.1.4 — CONFIGURACOES NO HUD NAVE
-
-1) Suba o ZIP completo na raiz do GitHub.
-2) Execute Actions > Instalar versão do Stellar Legacy (workflow original).
-3) Aguarde Render e atualize a pagina no celular.
-4) Expanda NAVE: botoes CONF 1 / CONF 2 aparecem logo abaixo de HP/ESC/VEL/PORAO.
-5) Cooldown de troca continua 5 s. Escudos nao regeneram ao alternar.
-6) Nenhum SQL novo; nao e necessario alterar Supabase.

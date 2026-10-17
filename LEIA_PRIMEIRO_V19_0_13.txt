@@ -1,9 +1,0 @@
-STELLAR LEGACY V19.0.13 — MAPAS 4-X LIVRES PARA TODAS AS FACÇÕES
-
-1. Envie somente este ZIP completo via instalador principal já existente do GitHub.
-2. Teste com Terra, Marte e Júpiter no nível 15 em 4-1/4-2/4-3.
-3. Jogadores nível 14 devem ser barrados, mesmo via entrada direta no WebSocket.
-4. Teste a passagem 4-X para X-5 SOMENTE da facção do piloto.
-5. ADM continua livre em todos os mapas.
-
-SQL NOVO: não necessário; requisitos de nível já existentes no Supabase.

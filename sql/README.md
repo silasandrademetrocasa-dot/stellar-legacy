@@ -1,33 +1,13 @@
-# SQL atual do Stellar Legacy
+# SQL do Stellar Legacy V20.1.4 CLEAR
 
-O banco de produção já está migrado. O ZIP mantém somente referências técnicas atuais; migrations antigas ficam no histórico do Git e não viajam mais em releases.
+O banco de produção **não deve ser reexecutado do zero** ao instalar o ZIP CLEAR. Nenhuma migração foi aplicada nesta operação. Os arquivos SQL de produção foram mantidos como referência e contingência.
 
-- `CURRENT_BACKEND.sql`: snapshot consolidado do backend principal.
-- `V17_7_1_TELEMETRY_TITLES.sql`: telemetria, milestones e títulos.
-- `V17_7_5_POSITION_SQL_CLEANUP.sql`: persistência robusta de posição + limpeza das tabelas legadas.
+- `CURRENT_BACKEND.sql`: referência consolidada do backend principal; não substitui automaticamente todas as migrações posteriores.
+- `V17_7_1_TELEMETRY_TITLES.sql`, `V17_7_5_POSITION_SQL_CLEANUP.sql`: telemetria e persistência de posição.
+- `V18_*`, `V19_*`, `STELLAR_V19_*`, `V20_*`: migrações incrementais e configurações posteriores; cuidado com ordem e aplicação duplicada.
+- Migrações com `ROLLBACK`/`REVERTER`: rotas de contingência, intencionalmente preservadas.
+- `V18_2_1_COUPONS_SQL_FIRST.sql`: regras de cupom; detalhes em `../COUPONS_SQL_FIRST.md`.
+- `STELLAR_V19_0_16_AUCTION_PRICING.sql`: leilão e regras de preço editáveis pelo ADM.
+- `STELLAR_V20_1_PVP_4X.sql`, `STELLAR_V20_1_1_PVP_CADENCIA.sql`: regras PvP e cadência.
 
-### Limpeza 17.7.5
-Foram removidas tabelas antigas vazias que não participavam mais do runtime: `ammunition`, `inventory`, `inventory_items`, `owned_ships`, `player_drones`, `player_state`, `ship_loadout` e as tabelas temporárias `chatgpt_deploy_*`.
-
-A posição persistente continua em `player_location_v1774`. Desde a V17.9.4, `player_presence` NÃO sobrescreve a posição persistente; isso evita que o spawn/base contamine o último checkpoint real.
-
-## V18.1.1 — NPC Runtime Config
-`V18_1_1_NPC_RUNTIME_CONFIG.sql` move stats, recompensas, respawn e população por mapa dos NPCs para o Supabase. O servidor mantém fallback do `public/data.js` caso a configuração remota não esteja disponível.
-
-
-## V18.1.5 — Systems Runtime
-Missões, serviços econômicos e crafting passam a ser configurados no Supabase e materializados pelo Render em `systems.runtime.json`. O banco de produção já contém as tabelas/RPCs `game_mission_category_v1815`, `game_mission_custom_v1815`, `game_economy_service_v1815`, `game_crafting_recipe_v1815` e `get_systems_runtime_config_v1815`.
-
-
-## V18.2.1 — Cupons SQL-First
-
-`V18_2_1_COUPONS_SQL_FIRST.sql` cria um sistema transacional de cupons sem necessidade de novos ZIPs por campanha. Veja `../COUPONS_SQL_FIRST.md` para INSERTs e manutenção. Estrutura instalada no Supabase de produção em 10/10/2026.
-
-## V18.2.5 — Painel ADM de BOX BÔNUS
-
-`V18_2_5_ADMIN_BONUS_LIVE.sql` cria a configuração ao vivo, uma função somente de leitura para jogadores autenticados e outra para edição autorizada pelo ADM. Banco de produção já atualizado em 10/10/2026.
-
-## V19.0.16 — Precificação dinâmica do Leilão
-`STELLAR_V19_0_16_AUCTION_PRICING.sql`: já aplicado em produção.
-O RPC do ADM permite editar CR/STL, pisos e multiplicadores por categoria e lote.
-O RPC de lance valida o piso baseado no catálogo real da loja, sem confiar no preço enviado pelo cliente.
+A edição CLEAR remove apenas scripts de teste e duplicatas já armazenadas em `sql/`; não descarta migrações com potencial efeito no Supabase nem scripts de reversão. A pasta SQL não é necessária para o boot do Node, mas é importante para manutenção futura.

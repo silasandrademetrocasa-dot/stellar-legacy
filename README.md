@@ -1,324 +1,41 @@
-> Versão atual: **V19.0.5 — ADM Fase 1: organização e editores visuais**.
+# Stellar Legacy — V20.1.4 CLEAR
 
-> **V19.0.2** — cargos de clã, pedidos com aprovação, vice-líder no cofre e proteção de níveis na Arena. Migrações aplicadas no Supabase atual. Confira `V19_0_2_CLAS_SEGURANCA_ARENA.md`.
+**Edição de limpeza do repositório, sem alterações na lógica do jogo.**
 
-> Atualização local: **V19.0.1 — Arte integrada no Perfil de Piloto + Loja Premium**.
+Versão funcional preservada: `20.1.4` (inclui as configurações táticas CONF 1/2 e os botões na aba NAVE do celular).
 
-# STELLAR LEGACY V19.0.0 — INTERFACE REESTRUTURADA
+## O que esta edição faz
 
-**Instalação:** subir o ZIP completo pelo instalador GitHub. Sem SQL adicional.
+- Remove testes temporários de desenvolvimento, relatórios antigos redundantes, arquivos de testes SQL e imagens substituídas não referenciadas pelo código atual.
+- Preserva integralmente os arquivos de jogo (`public/`), API/servidor (`server/`), assets utilizados, configuracões do Render e histórico `CHANGELOG.md`.
+- Preserva as migrações SQL de produção, scripts de reversão e o snapshot `sql/CURRENT_BACKEND.sql` para recuperação/continuidade do Supabase.
+- Mantém o instalador automático `.github/workflows/stellar-installer-main.yml`.
+- Não executa SQL e não altera registros, saves, inventário, jogadores ou contas.
 
-- UI mais limpa, Loja Atual removida da vitrine, cupom e regras em painéis recolhíveis.
-- Novas artes de munições/SIP-2/Terminal Mercante Remoto.
-- Árvore de ATAQUE focada na nave e nos drones, sem buff do AUX; PP e IDs de habilidades preservados.
-- Documentação histórica preservada em `docs/historico-v18/`.
-- Guia completo: [`V19_0_0_REESTRUTURACAO.md`](V19_0_0_REESTRUTURACAO.md).
+## Como instalar o ZIP completo pelo GitHub
 
-> **Atenção:** antigas referências a documentação V18 na sequência deste README estão arquivadas em `docs/historico-v18/`. O jogo, os saves e o SQL de produção não são reescritos nesta release.
+1. Deixe somente **este ZIP** (sem extrair) na raiz do repositório, com nome começando por `stellar-legacy`.
+2. Em **Actions**, execute manualmente o workflow **Instalar versão do Stellar Legacy** (`stellar-installer-main.yml`).
+3. O instalador extrai o conteúdo, valida os arquivos necessários, substitui o código e efetua o commit na `main`.
+4. Acompanhe o deploy do Render, limpe/atualize o cache no navegador e valide login, mapa, NPCs, CONF 1/2 e loja.
 
+**Atenção:** O instalador utiliza `rsync --delete` na raiz e preserva `.github/` por exclusão. Se quiser eliminar o workflow antigo `.github/workflows/main.yml` da `main`, exclua esse arquivo pelo GitHub separadamente. A versão CLEAR omite esse workflow legado do pacote.
 
-> **V18.2.15:** O Passe e os níveis foram reunidos na mesma aba da Loja Premium. Nova aba EQUIPAMENTOS com kits ELITE I/II e prévias das naves de evento Phantom/Seraph. Tudo em TESTE, nenhuma cobrança ou entrega. Consulte V18_2_15_PASSE_EQUIPAMENTOS_EVENTOS.md.
+## Inicialização local / Render
 
-> Atualização V18.2.14: recargas STL em modo teste e pacotes de compra única. Leia `LEIA_PRIMEIRO_V18_2_14.txt`.
+- Node.js 18 ou superior.
+- `npm install`
+- `npm start`
+- Render: `render.yaml` configura `npm install`, `npm start` e health check `/health`.
+- Segredos reais nunca devem ser colocados no ZIP; utilize variáveis de ambiente no Render.
 
-> **V18.2.12 — NOVA NO LEILÃO: ABERTURA FIXA 100 MILHÕES CR.** Valor único para todos os jogadores, sem progressão por quantidade de drones nem referência ao HALO. Aumenta automaticamente durante o ciclo de leilão conforme regra normal. O banco já valida lance mínimo de 100M CR; nenhum preço da Loja foi alterado.
+## Organização
 
-> **V18.2.11 — LEILÃO NOVA 2× HALO:** O preço inicial do NOVA Elite no LEILÃO agora equivale a no mínimo 2× o preço-base em Créditos do HALO na Loja Comum (10M CR → 20M CR de lance inicial), sem mudar o preço em STL do NOVA. Valor acompanha edição do HALO no ADM. A regra também foi validada e protegida no Supabase via RPC `place_auction_bid_online`. Não altera saldos, lances já registrados ou ciclo de outros itens. Consulte `V18_2_11_NOVA_AUCTION_FLOOR.md`.
+- `public/` — HTML, CSS, cliente web e imagens em uso, incluindo assets de versões antigas **ainda referenciados**.
+- `server/` — servidor de API e simulação de mundo.
+- `sql/` — snapshot, migrações e reversões do Supabase (não executar em lote novamente).
+- `.github/workflows/stellar-installer-main.yml` — instalador oficial por ZIP.
+- `CHANGELOG.md` — histórico geral; `V20_1_3_CONFIGURACOES_TATICAS.md` e `V20_1_4_CONF_NO_PAINEL_NAVE.md` registram a mecânica mais recente.
+- `CLEAR_V20_1_4_RELATORIO.md` e `REMOCOES_CLEAR.txt` — auditoria desta limpeza.
 
-> **V18.2.10 — AUX-9 COMPACTO:** Painéis **DESIGNERS** e **MODOS/EXTRAS** do AUX agora recolhem e expandem com um toque, exibem modo/designer ativo no cabeçalho e lembram sua escolha no navegador. Nenhuma mudança no funcionamento do AUX ou no Supabase.
-
-> **V18.2.9 — HANGAR, REFINARIA E DRONES:** Refinaria móvel no Hangar, comércio remoto manual com EXTRA Elite, AUX-9 guarda saque no porão, drones com preços progressivos e ADM para editar base/multiplicador. Consulte `V18_2_9_HANGAR_REFINARIA_DRONES.md`.
-
-> **V18.2.7 — AUX-9 EXTRATOR:** correção da coleta de minério em mapas online pelo módulo do AUX. O servidor valida a posição do AUX, e não apenas da nave. Sem SQL. Consulte `AUX_EXTRATOR_V18_2_7.md`.
-
-> **V18.2.6 — Eventos por período:** progresso persistido por jogador no Supabase, sem reinício ao trocar de mapa ou atualizar. Consulte `EVENTOS_PERIODO_V18_2_6.md`.
-
-### V18.2.5 — BOX BÔNUS EDITÁVEL PELO ADM
-
-Nova aba **ADM → BOX BÔNUS**: mapa, respawn, pesos e quantidades de prêmios, preços dos três portais (STL ou Poeira) e desconto Premium. Tudo salvo no Supabase e aplicado sem ZIP em alterações futuras. Portais Astrais continuam sem BOX. Consulte `ADMIN_BONUS_LIVE_V18_2_5.md`. Banco de produção já migrado.
-
-### V18.2.4 — BOX BÔNUS POR MAPA
-
-Agora são **20 BOX BÔNUS** em cada mapa X-1, X-2, X-3 e X-4, e **30 BOX BÔNUS** em cada Battle Map 4-1, 4-2 e 4-3. Os portais AURORA, NEXUS e ECLIPSE **não possuem BOX BÔNUS**.
-
-Caixas coletadas continuam respeitando o cooldown 40–70 segundos, mesmo após atualizar/relogar. O AUX-9 Salvager, os sete prêmios e a Poeira Stellar para giros de portais seguem inalterados. Não é necessário SQL; basta atualizar o ZIP.
-
-# Stellar Legacy 18.1.4 — Data Driven World
-
-Hotfix da V18.1 Data Driven: a barra superior agora usa um roteador único de ações por `module_key`, mantendo cliques funcionais mesmo depois de nome/ordem/visibilidade serem reorganizados pelo Supabase.
-
-Preserva integralmente NPC Runtime V18.1.1, Warfront, posição, grupos e economia.
-
-Propriedade autoritativa de NPCs no Shared Universe, grupos multi-facção e divisão de recompensa apenas entre membros ativos no mesmo setor. A box continua exclusiva do primeiro atacante.
-
-
-Atualização de observabilidade da progressão. O jogo registra métricas agregadas de evolução/economia para o painel ADM e adiciona um perfil de títulos exibidos sob o callsign. O reset completo de conta permanece uma ferramenta administrativa; jogadores comuns não recebem controle para apagar o próprio progresso.
-
-A telemetria é enviada em lotes idempotentes e protegida por RPC autenticada. O ADM acompanha tempo médio até níveis-chave, CR/STL/XP por hora, fontes de recompensa, gastos, kills, missões, mineração, mortes e saltos.
-
-# Stellar Legacy V17.6.1 — Environment Asset Loading Hotfix
-
-Hotfix do revamp de cenário: força atualização dos assets no navegador/CDN, mantém fundos visíveis no modo LOW e integra base, recursos e portais ao preload ativo sem alterar naves/NPCs/AUX/drones.
-
-# Stellar Legacy V17.5.1 — Event Cleanup Hotfix
-
-Visual pass focado em NPCs e bosses, preservando gameplay e o Performance Pass da V17.4.
-
-# Stellar Legacy V17.4.0 — Performance + Mobile Pass
-
-A V17.4 reduz download e consumo de memória/GPU, adiciona qualidade AUTO adaptativa e melhora o uso em celulares sem alterar gameplay. Veja `PERFORMANCE_V17_4.md`.
-
-## V16.7.8 — AUX EQUIPMENT + SHIELD SUPPORT
-- Corrigida a aba de equipamentos do AUX-9 no Hangar.
-- Escudos equipados no AUX-9 agora somam escudo à nave como suporte, igual aos drones.
-- Absorção e regeneração dos geradores do AUX entram nas estatísticas da nave.
-
-## V16.7.7 — AGGRO + PORTAL REWARDS + REALTIME MATERIALIZER
-- Perseguição normal limitada a 800u e ataque até 500u.
-- NPCs de evento deixam de perseguir o jogador através do mapa inteiro.
-- Pacotes finais dos Portais Astrais fortemente melhorados.
-- Materializador atualiza ganhos e peças imediatamente após os giros.
-
-## V16.7.6 — PORTAL REFORGE
-- AURORA, NEXUS e ECLIPSE liberados desde o início.
-- Rounds e ondas refeitos para progressão estratégica e viável para jogador FREE com itens de Créditos.
-- Sistema de vidas: 3 vidas base, até 5 com compra em Créditos ou Vida Astral Reserva.
-- Materializador troca o drop de reparo por Vida Astral Reserva.
-- Recompensa por Round + pacote final garantido com CR, STL, Núcleos, munição, míssil e Voidite.
-- Botão de reparar removido da tela do Portal.
-
-# V16.7.5 — AUCTION / AUTO-COMBATE / X-1 / AUX-9
-- Nova removido do leilão quando o piloto já possui 8 drones.
-- AUTO-COMBATE escolhe somente o NPC mais próximo dentro do alcance laser e visível na tela.
-- NPCs do X-1 perseguem de forma passiva, mas só atacam depois de receber dano.
-- AUX-9 acompanha a velocidade real da nave e ganha aceleração curta para recuperar distância.
-- Progressão AUX-9 adaptada para 20 níveis com capacidade de slots e bônus por nível, sem combustível.
-
-# V16.7.4 — X-1 NEUTRAL + PREMIUM POLISH
-- Em mapas X-1 os NPCs ficam passivos até serem atacados pelo jogador.
-- Ao receber dano, o NPC entra em retaliação e pode perseguir/atacar normalmente.
-- Loja Premium compactada e reorganizada; cupom abaixo dos status Premium/Passe.
-- Cards Premium menores e uniformes.
-
-# V16.7.3 — MODO DE BATALHA
-- HUD slim, clean e bem compacto.
-- Menos informação visível no topo para liberar mais área de combate.
-- Missões, AUX e Atividades com visual reduzido e leitura rápida.
-
-# V16.7.2 — TOP GRID COMPACT
-- Redução de altura e largura dos painéis superiores para liberar mais área útil da tela.
-- Grid do topo mantida padronizada com cards mais compactos.
-
-# Stellar Legacy V16.7.0 — HUD DOCK POLISH + EVENT CATALOG
-
-Patch focado em acabamento do HUD inferior e preparação do calendário de eventos. O chat fica travado no rodapé esquerdo, o mapa no rodapé direito e a barra de munições permanece centralizada sem empurrar os docks laterais. NPCs de evento agora aparecem destacados no minimapa mesmo quando estão fora do alcance visual normal.
-
-## Catálogo de eventos (sem ativação automática nova)
-- Eventos atuais continuam como estão no Supabase.
-- O arquivo `sql/V16_6_EVENT_CATALOG_DORMANT.sql` adiciona o catálogo expandido em modo `enabled = false`, para você escolher depois por mês/semana.
-- A lista humana de eventos está em `EVENT_CATALOG_V16_6.md`.
-
-# Stellar Legacy V16.6.0 — HUD / PREMIUM / EVENTS
-
-Esta release junta as duas últimas etapas da V16: **SHIP + AUX DESIGNERS** e **VISUAL & SOCIAL FINAL**. O sistema de designers fica conectado ao Supabase, com drops de evento, habilidade individual da nave, bônus de atributos e visual sincronizado no Shared Universe.
-
-## Designers de nave
-Os designs REAPER, BULWARK, VITALIS, RECLAIMER, SCHOLAR e APEX cobrem DANO, ESCUDO, HP, REPARAÇÃO, XP e CRÍTICO. Eles só podem ser usados em naves ELITE (STL) ou ESPECIAIS DE EVENTO. A tecla **E** passa a usar a habilidade do designer ativo; sem designer, a habilidade de classe continua funcionando.
-
-## Designers AUX-9
-PREDATOR, BASTION, VITALIS AUX, SAVANT e OMEGA SYMBIOSIS são exclusivos de eventos. Os bônus podem afetar dano do AUX, HP/escudo como suporte e XP. O OMEGA é o drop mítico híbrido.
-
-## Social final
-O radar agora mostra aliados da mesma companhia e membros da mesma aliança além dos hostis. Designs de nave e AUX também são enviados pelo WebSocket, permitindo que outros jogadores enxerguem o visual raro equipado em tempo real.
-
-## Segurança operacional
-Agenda de eventos, preços, catálogo de designers e probabilidades de drop continuam no Supabase. O claim de designers de evento é validado por RPC autenticada, confere a janela oficial do evento e aceita apenas uma tentativa por jogador em cada ciclo.
-
----
-
-# Stellar Legacy V16.0.0 — LIVE OPS CORE (ETAPA 1)
-
-Esta versão inicia a migração operacional para o Supabase em etapas. Eventos e preços deixam de ser definidos pelo cliente nos mapas online, e as compras principais passam por validação no servidor.
-
-# Stellar Legacy V15.2.0 — TACTICAL HUD + AGGRO LOCK
-
-## V15.2 — TACTICAL HUD + AGGRO LOCK
-
-- Target Lock e Evento Galáctico recolhíveis.
-- Aggro PVE autoritativo: o primeiro jogador que acerta o NPC vira o alvo prioritário.
-- Portal neutro protege apenas enquanto o jogador não inicia combate contra o NPC.
-- Base continua totalmente segura.
-
-
-A V15 transforma os mapas principais em um universo realmente compartilhado. Jogadores na mesma sala veem os mesmos NPCs, os mesmos minérios, os mesmos eventos e o mesmo estado de combate PVE. O Render mantém o World Server em tempo real por WebSocket e o Supabase continua como camada persistente de conta e progresso.
-
-## V15.0 — pontos principais
-- World Server autoritativo em `server/world.js`.
-- Cliente realtime em `public/world.js`.
-- Salas por território/mapa: Terra/Marte/Júpiter X-1..X-4 e salas BATTLE 4-1..4-3.
-- NPCs compartilhados com movimento, HP, escudo, morte, respawn e ataque coordenados.
-- Recursos compartilhados com coleta exclusiva e respawn global.
-- Eventos Galácticos sincronizados por relógio do servidor.
-- Contribuição de dano por jogador e assistência proporcional.
-- Base pronta para Party/Grupo de Batalha sem reconstruir o motor PVE.
-- Galaxy Gate/AURORA continua privado por jogador.
-- Se o realtime cair, o cliente congela o mundo em vez de inventar uma cópia local.
-
-## Deploy
-1. Suba o ZIP completo pelo instalador atual.
-2. O Render executará `npm install` e instalará também a dependência `ws`.
-3. Não há SQL novo obrigatório na V15.
-4. Após o deploy, `/health` deve informar V15.2.0 e `/api/world/status` mostra salas, clientes, NPCs e minérios ativos.
-
-## Teste recomendado com duas contas
-Abra duas janelas, entre no mesmo mapa/território e valide: selecionar o mesmo NPC, observar HP caindo nas duas telas, matar em conjunto, coletar a mesma pedra e confirmar que ela desaparece nas duas janelas. Em seguida valide um Evento Galáctico e o status UNIVERSO/ping no painel JOGADOR.
-
----
-
-# Stellar Legacy V14.1.0 — HUD DOCK SYSTEM
-
-# Stellar Legacy V13.5.0 — Clean UI + AUX-9 + Combat Audio
-
-Atualização de interface aplicada sobre a base V13.1.0 WARFRONT, preservando as mecânicas e o backend existentes.
-
-## Principais mudanças
-- Barra superior mais fina, sem a logo grande.
-- NAVE, MISSÕES, AUX-9, PORTAIS e HABILIDADES organizados no topo.
-- Habilidades rápidas da nave/AUX-9 integradas à barra superior.
-- Textos visuais LASER CTRL, MÍSSIL ESPAÇO e MÍSSIL PRONTO removidos da barra de munição; os atalhos continuam funcionando.
-- Navegação de menus em modo exclusivo: abrir um menu principal fecha o anterior.
-- Portal Astral AURORA disponível; NEXUS e ECLIPSE continuam visíveis, porém bloqueados como EM BREVE.
-- Compatível com os saves e o backend da V13.1.0.
-
-## Instalação
-1. Suba os arquivos desta pasta no Git/Render.
-2. Execute `sql/V13_3_STELLAR_IDENTITY.sql` se estiver instalando esta versão em outro banco; no projeto principal o ajuste de identidade já foi aplicado.
-3. Confirme `SUPABASE_URL` e `SUPABASE_PUBLISHABLE_KEY` no Render.
-4. Faça o deploy/restart do serviço.
-
-## Controles preservados
-- `CTRL`: laser
-- `ESPAÇO`: míssil
-- `E`: habilidade da nave
-- `K`: Nova Burst do AUX-9
-- `W`: WARFRONT
-## V14.1.0 — HUD DOCK SYSTEM
-
-- Sequência do HUD: JOGADOR → NAVE → MISSÕES → AUX-9.
-- Topbar pode ser escondida sem deixar vão; cards sobem automaticamente.
-- Munições e mapa ficam dockados no rodapé, lado a lado.
-- Munição recolhida mantém OVERDRIVE e KAMIKAZE visíveis.
-- Estados de recolhimento são persistidos no navegador.
-
-## V13.5.0
-
-- Interface limpa de textos de teste, versões e instruções internas.
-- AUX-9 com papéis exclusivos por módulo, sem misturar combate e coleta.
-- Áudio procedural de combate e animações com controle de volume.
-- Perfil de Piloto atualiza imediatamente após compras e upgrades.
-
-
-## V14.1.0
-Epic Combat & Galaxy Events: Target Lock, feedback de dano, eventos rotativos, comboio e Battle Maps por evento.
-
-
-## V14.1 ACCOUNT GUARD
-Antes de liberar novos cadastros/renomes, execute `sql/V14_1_ACCOUNT_GUARD.sql` uma vez no Supabase. O jogo passa a exigir login manual, vincula saves à conta autenticada e bloqueia callsigns duplicados. AUTO-COMBATE é exclusivo para PREMIUM 30D ou PASSE MENSAL.
-
-
-## V15.1 — Realtime Combat Presence
-- Players: posição/ângulo/HP/escudo via WebSocket (~13 Hz).
-- NPCs: servidor 20 Hz, broadcast 10 Hz, interpolação cliente.
-- Laser remoto: cor + munição usada.
-- AUX-9 remoto: posição, modo, nível e disparo visíveis.
-- Supabase continua como persistência e fallback, não como transporte primário de movimento.
-
-## Painel ADM
-A V17.6.3 usa a tabela existente `public.game_admins` como fonte de autorização. A migration `sql/V17_6_3_ADMIN_CONTROL_PANEL.sql` cria moderação, log e RPCs seguras. No projeto principal do Supabase esta migration já foi aplicada; o arquivo permanece no ZIP para reproduzir o ambiente em outro banco.
-
-## 17.9.1 — Position Root Fix
-- spawn usa checkpoint dedicado/local, não presence efêmera;
-- movimento confirma posição no fim do trajeto e durante deslocamentos longos;
-- trigger no Supabase espelha presence para o checkpoint dedicado;
-- estado econômico não substitui mais a localização atual;
-- SQL legado/temporário removido do banco e do ZIP.
-
-
-## V18.1.3 — Server Runtime Topbar Cache
-- Topbar agora usa snapshot SQL materializado pelo Render em JSON temporário.
-- Browser não consulta mais diretamente o RPC da topbar.
-- Ordem das abas usa CSS `order`; nenhum nó é reanexado no DOM.
-- Handlers originais dos botões permanecem intactos.
-- Configuração continua vindo do Supabase e pode mudar sem alterar o código do cliente.
-
-## V18.1.4 — Mapas + Portais + Recursos Data Driven
-
-- Mapas, setores, rotas de portal e recursos passam a ser configurados no Supabase.
-- O Render materializa `world.runtime.json` em cache temporário e o navegador consome via `/api/runtime/world`.
-- Shared Universe usa o mesmo snapshot para quantidade/respawn de minérios e zonas de portal.
-- Preço de venda de recursos passa a usar o World Runtime, com fallback seguro.
-- Grafo de setores (`1-1` ... `4-3`) e níveis mínimos podem ser alterados sem novo deploy.
-- Código/engine e gráficos continuam no Git; o banco apenas configura conteúdo conhecido.
-
-## V18.1.5 — Missions + Economy + Crafting Runtime
-
-O Runtime de sistemas usa `Supabase -> Render -> systems.runtime.json -> cliente/servidor`.
-
-Agora são configuráveis sem redeploy:
-- níveis e multiplicadores das categorias de missão;
-- metas/steps e pools de minério dos geradores de missão;
-- chance de bônus das missões;
-- missões customizadas via banco;
-- custos, duração, escala e efeito dos serviços econômicos da base;
-- receitas de crafting, ingredientes, custo/moeda, nível mínimo e saída.
-
-O código mantém fallback local para continuidade do jogo se o runtime remoto estiver temporariamente indisponível.
-
-
-
-### V18.1.6C
-Editor de NPCs isolado no ADM. Permite editar atributos/recompensas/respawn e a população dos vínculos de mapa já existentes. Cada alteração atualiza `npcs.runtime.json` imediatamente pelo Render, sem redeploy.
-
-
-### V18.1.6D
-
-Editor de Mundo no painel ADM: mapas, recursos, setores, portais e pools de minério com atualização do `world.runtime.json` sem redeploy.
-
-
-### V18.1.6E
-
-`ADM > CONFIGURAÇÃO AO VIVO > SISTEMAS` adiciona editores de Missões, Economia e Crafting. As alterações passam pelo backend autenticado, atualizam o Supabase e renovam `systems.runtime.json` sem deploy.
-## V18.1.6 FINAL — Central ADM Data Driven
-
-A Central ADM consolidada possui cinco áreas em `ADM > CONFIGURAÇÃO AO VIVO`: **RUNTIME, INTERFACE, NPCs, MUNDO e SISTEMAS**. As alterações passam por backend autenticado e RPCs administrativas, regeneram os snapshots temporários do Render e são consumidas pelo jogo sem redeploy.
-
-Snapshots ativos: `topbar.runtime.json`, `npcs.runtime.json`, `world.runtime.json` e `systems.runtime.json`. O Git continua responsável pela engine, segurança e assets; o Supabase configura apenas conteúdo conhecido e validado pelo motor.
-
-
-
-### V18.1.7A
-Calendário Live Ops editável no ADM: dias da semana, horário, duração, repetição e ativação de eventos, com resolução autoritativa no Shared Universe.
-
-
-### V18.1.7B
-Passe de Temporada Data Driven: calendário, preço, progressão e recompensas por tier editáveis pela Central ADM, usando snapshot temporário do Render.
-
-
-### V18.1.7C
-Lojas Comum + Premium Data Driven. O catálogo de itens existentes pode ser organizado pelo ADM sem novo deploy: preço, moeda, quantidade, nível, ordem, aba e disponibilidade. Os planos Premium 7/30/90/180 dias também passam a vir do Supabase.
-
-### V18.2.3 — BOX BÔNUS + POEIRA STELLAR
-
-Caixas bônus de loot individual espalhadas por todos os setores, também coletadas pelo Salvager do AUX-9. A Poeira Stellar abre um giro de qualquer Portal Astral sem consumir STL. Giro padrão: 100 STL (Premium: 90 STL). Veja `BONUS_BOX_POEIRA_V18_2_3.md`.
-
-
-## V18.2.8 — Sprite BOX BÔNUS + barras da nave
-- Imagens desenhadas via Canvas usam carregamento eager (sem fazer preload de todos os assets); sprites das BOX não são mais imagens lazy sem DOM.
-- Cache protege as imagens pequenas da BOX e Poeira Stellar e renova somente o cache da pasta bonus.
-- A BOX tem silhueta hexagonal visível enquanto o asset carrega, sem quadrado chapado.
-- Indicadores de HP (vermelho) e escudo (azul) sempre acima da própria nave em todos os modos, mesmo com a aba NAVE recolhida.
-- Sem mudanças na economia, ADM, AUX, mapas, eventos, saves ou quantidade das BOX.
-
-
-## V18.2.13 — Loja Premium Teste ADM
-Prévia comercial acessível a todos os pilotos autenticados em modo somente leitura. Conta ADM autorizada pode simular pedidos; ofertas do staging SQL V18.3.2, simulações sem cobranças ou recompensas. Sem novo SQL. Veja `V18_2_13_PREMIUM_STAGE_ADM.md`.
+**Nota:** eliminar arquivos de um ZIP/release não reescreve nem reduz o histórico antigo do GitHub, nem o banco de dados remoto. Histórico anterior pode ser recuperado em commits/ZIPs antigos.

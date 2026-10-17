@@ -84,18 +84,17 @@
       <button aria-label="Expandir / recolher painel da nave" class="stats-expand-btn" id="statsToggle" title="Expandir / recolher painel da nave">▾</button>
       <div class="stats-toolbar-label">NAVE</div>
     </div>
-    <span class="battle-config-head-chip-v2014" id="battleConfHeaderV2014" aria-label="Configuração tática ativa">C1</span>
   </div>
   <div class="stack left-stats-content compact-ship-metrics" id="leftStatsContent">
     <div><span>HP</span><b><span id="hp">0</span>/<span id="maxHp">0</span></b></div>
     <div><span>ESC</span><b><span id="shield">0</span>/<span id="maxShield">0</span></b></div>
     <div><span>VEL</span><b id="speed">0</b></div>
     <div><span>PORÃO</span><b><span id="cargoUsed">0</span>/<span id="cargoMax">0</span></b></div>
-  </div>
-  <div class="battle-config-toolbar-v2013 battle-config-ship-v2014" id="battleConfigToolbar" aria-label="Trocar configuração de batalha da nave">
-    <button type="button" id="battleConf1" class="battle-conf-btn-v2013 active" title="Configuração 1" aria-label="Ativar configuração 1">CONF 1 ✓</button>
-    <button type="button" id="battleConf2" class="battle-conf-btn-v2013" title="Configuração 2" aria-label="Ativar configuração 2">CONF 2</button>
-    <small id="battleConfCooldown" role="status" aria-live="off">PRONTO</small>
+    <section class="battle-config-toolbar-v2013 battle-config-ship-hud-v2014" id="battleConfigToolbar" aria-label="Trocar configuração de combate da nave">
+      <button type="button" id="battleConf1" class="battle-conf-btn-v2013 active" aria-label="Ativar configuração 1" title="Configuração 1">CONF 1 ✓</button>
+      <button type="button" id="battleConf2" class="battle-conf-btn-v2013" aria-label="Ativar configuração 2" title="Configuração 2">CONF 2</button>
+      <small id="battleConfCooldown" aria-live="off" aria-atomic="true">PRONTO</small>
+    </section>
   </div>
 </section>
 
@@ -220,6 +219,7 @@
 <div class="section actions actions-inline">
 <button class="action-btn" id="laserToggle">⚡ LASER <span class="keyhint">CTRL</span></button>
 <button class="action-btn" id="rocketFire">🚀 MÍSSIL <span class="keyhint">ESPAÇO</span></button>
+
 </div>
 </div>
 <div class="weapon-bar-content" id="weaponBarContent">
