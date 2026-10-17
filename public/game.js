@@ -1,27 +1,29 @@
-import { movementSpeed, followShipCamera } from './modules/ship-navigation.js?v=21.5.4';
-import {renderV21CommandCenter,V21_TABS} from './modules/v21/command-center-view.js?v=21.5.4';
-import {registerStellarPwaV21,offerInstallV21} from './modules/v21/pwa.js?v=21.5.4';
-import { ECONOMY_EFFECTS, CRAFT_OUTPUT_KINDS, normalizeEconomyEffects, normalizeCraftIngredients, normalizeCraftOutput, formatCraftPreview } from './modules/admin-visual-builders.js?v=21.5.4';
-import { ADMIN_MISSION_PRESETS, createAdminMissionPreset, duplicateAdminMission, validateAdminMissionDraft, previewAdminMission } from './modules/admin-mission-builder.js?v=21.5.4';
-import { createHudContentCache } from './modules/hud-content-cache.js?v=21.5.4';
-import { createAuxiliaryWorkScheduler } from './modules/aux-work-scheduler.js?v=21.5.4';
-import { npcVisualDetail } from './modules/npc-render-detail.js?v=21.5.4';
-import { createBackdropRasterCache } from './modules/backdrop-raster-cache.js?v=21.5.4';
-import { createTextWidthCache } from './modules/text-width-cache.js?v=21.5.4';
-import { createHudUpdateScheduler } from './modules/hud-update-scheduler.js?v=21.5.4';
-import { createAssetCache, flattenAssetPaths } from './modules/asset-cache.js?v=21.5.4';
-import { createSceneGradientCache } from './modules/scene-gradient-cache.js?v=21.5.4';
-import { createPerformanceMonitor, formatPerformanceReport } from './modules/performance-monitor.js?v=21.5.4';
-import { createFrameGate } from './modules/frame-gate.js?v=21.5.4';
-import { QUALITY_PROFILES, initialAutoQualityForDevice } from './modules/quality-profiles.js?v=21.5.4';
-import { freshBattleConfigsV2013, captureCombatBuildV2013, exchangeCombatBuildV2013, combatConfigRemainingV2013, clampStoredShieldV2013 } from './combat-config-v2013.js?v=21.5.4';
-import { FACTIONS, SHIPS, ITEMS, LASER_AMMO, ROCKETS, NPC_TYPES, MAPS, RESOURCES } from './data.js?v=21.5.4';
-import { repairPulseSettings } from './repair-balance.js?v=21.5.4';
-import { xpThresholdV1770, xpThresholdV1915, migratePilotXpV1915 } from './level-curve-v1915.js?v=21.5.4';
-import { applyRecruitBonusV2012, eliteRouteSnapshotV2012, freshEliteRouteJournalV2012, ELITE_ROUTE_TARGETS_V2012, novaTierPriceV2012 } from './progression-plan-v2012.js?v=21.5.4';
-import { GAME_ASSETS } from './assets/v17/manifest.js?v=21.5.4';
-import { signUp, signIn, beginGoogleSignIn, restoreGoogleSignInFromUrl, requestPasswordReset, restorePasswordRecoveryFromUrl, restoreSession, signOutLocal, checkGameSession, endGameSession, getUser, getSessionCredentials, loadCloudSave, saveCloudSave, loadEliteOperationsOnline, claimEliteOperationOnline, loadWarCampaignsOnline, claimWarSupplyOnline, claimWarCampaignOnline, loadAdminWarCampaignsOnline, saveAdminWarCampaignOnline, saveAdminWarRulesOnline, loadAdminEliteObjectivesOnline, saveAdminEliteObjectiveOnline, updateCallsign, updatePassword, loadRankings, loadAuctionBids, saveAuctionBidOnline, markAuctionBidStatusOnline, loadAuctionMarket, upsertPlayerPresenceOnline, loadMapPresenceOnline, savePlayerLocationCheckpointOnline, loadPlayerLocationCheckpointOnline, removePlayerPresenceOnline, queuePvpAttackOnline, consumePvpDamageEventsOnline, syncArenaProfileOnline, loadArenaState, loadArenaDailyRewardStatus, claimArenaDailyReward, loadArenaOpponents, loadArenaHistory, arenaAttackOnline, listClansOnline, loadMyClanOnline, createClanOnline, joinClanOnline, getClanRequestsOnline, reviewClanRequestOnline, cancelClanRequestOnline, setClanMemberRoleOnline, leaveClanOnline, transferClanCreditsOnline, claimClanCreditGrantsOnline, recordClanAlienKillOnline, getPremiumShopOnline, testPurchasePremiumOnline, adminPreviewPremiumStageOnline, adminSimulatePremiumStageOnline, getPremiumStageCatalogOnline, loadWarfrontStateOnline, loadSectorOwnershipOnline, hitWorldBossOnline, claimWorldBossRewardOnline, declareClanWarOnline, recordClanWarScoreOnline, loadLiveOpsOnline, adminUpdateLiveEventScheduleOnline, purchaseLiveCatalogOnline, economyActionOnline, getChatHistoryOnline, sendChatMessageOnline, redeemGameCouponOnline, getMyDesignersOnline, setDesignLoadoutOnline, claimGateDroneDesignOnline, claimEventDesignerOnline, getAdminStatus, adminSearchAccounts, adminRecentActions, adminBanAccount, adminUnbanAccount, adminResetAccount, adminDeleteAccount, pushTelemetryBatch, adminTelemetryOverview, adminPlayerTelemetry, getBattleGroupOnline, createBattleGroupOnline, inviteBattleGroupOnline, searchBattleGroupPlayersOnline, inviteBattleGroupUserOnline, respondBattleGroupInviteOnline, leaveBattleGroupOnline, kickBattleGroupMemberOnline, setBattleGroupRallyOnline, loadRuntimeConfigOnline, loadNpcRuntimeConfigOnline, loadWorldRuntimeConfigOnline, loadSystemsRuntimeConfigOnline, loadAdminRuntimeMonitorOnline, adminUpdateRuntimeModuleOnline, adminUpdateNpcRuntimeOnline, adminUpdateNpcSpawnRuntimeOnline, adminUpdateWorldMapOnline, adminUpdateWorldResourceOnline, adminUpdateWorldSectorOnline, adminUpdateWorldPortalOnline, adminUpdateWorldResourcePoolOnline, adminUpdateMissionCategoryOnline, adminUpdateEconomyServiceOnline, adminUpdateCraftingRecipeOnline, loadBattlePassRuntimeConfigOnline, adminUpdateBattlePassSeasonOnline, adminUpdateBattlePassTierOnline, loadShopsRuntimeConfigOnline, adminUpdateCommonShopItemOnline, adminUpdatePremiumShopItemOnline, loadBonusConfigOnline, adminUpdateBonusConfigOnline, adminCouponDashboardOnline, adminCreateCouponOnline, adminSetCouponActiveOnline, loadGalaxyGatesOnline, adminUpdateGalaxyGateOnline, adminUpsertCustomMissionOnline, adminDeleteCustomMissionOnline, adminCreateCraftRecipeOnline, adminCreateEconomyServiceOnline, adminCreatePassSeasonOnline, loadAuctionRulesOnline, adminUpdateAuctionRulesOnline, loadBalanceRuntimeOnline, adminUpdateBalanceOnline } from './api.js?v=21.5.4';
-import { SharedUniverseClient } from './world.js?v=21.5.4';
+import { movementSpeed, followShipCamera } from './modules/ship-navigation.js?v=22.0.0';
+import { loadCommandOverviewOnline,claimCompetitiveSeasonOnline,equipEliteTitleOnline,unequipEliteTitleOnline,loadCommandAdminOnline,saveCompetitiveSeasonOnline,saveWorldDirectiveOnline } from './api.js?v=22.0.0';
+import {renderV21CommandCenter,V21_TABS} from './modules/v21/command-center-view.js?v=22.0.0';
+import {renderEliteEquipTitles,renderCompetitiveSection,renderUniverseDirectives} from './modules/v22/command-upgrades.js?v=22.0.0';
+import {registerStellarPwaV21,offerInstallV21} from './modules/v21/pwa.js?v=22.0.0';
+import { ECONOMY_EFFECTS, CRAFT_OUTPUT_KINDS, normalizeEconomyEffects, normalizeCraftIngredients, normalizeCraftOutput, formatCraftPreview } from './modules/admin-visual-builders.js?v=22.0.0';
+import { ADMIN_MISSION_PRESETS, createAdminMissionPreset, duplicateAdminMission, validateAdminMissionDraft, previewAdminMission } from './modules/admin-mission-builder.js?v=22.0.0';
+import { createHudContentCache } from './modules/hud-content-cache.js?v=22.0.0';
+import { createAuxiliaryWorkScheduler } from './modules/aux-work-scheduler.js?v=22.0.0';
+import { npcVisualDetail } from './modules/npc-render-detail.js?v=22.0.0';
+import { createBackdropRasterCache } from './modules/backdrop-raster-cache.js?v=22.0.0';
+import { createTextWidthCache } from './modules/text-width-cache.js?v=22.0.0';
+import { createHudUpdateScheduler } from './modules/hud-update-scheduler.js?v=22.0.0';
+import { createAssetCache, flattenAssetPaths } from './modules/asset-cache.js?v=22.0.0';
+import { createSceneGradientCache } from './modules/scene-gradient-cache.js?v=22.0.0';
+import { createPerformanceMonitor, formatPerformanceReport } from './modules/performance-monitor.js?v=22.0.0';
+import { createFrameGate } from './modules/frame-gate.js?v=22.0.0';
+import { QUALITY_PROFILES, initialAutoQualityForDevice } from './modules/quality-profiles.js?v=22.0.0';
+import { freshBattleConfigsV2013, captureCombatBuildV2013, exchangeCombatBuildV2013, combatConfigRemainingV2013, clampStoredShieldV2013 } from './combat-config-v2013.js?v=22.0.0';
+import { FACTIONS, SHIPS, ITEMS, LASER_AMMO, ROCKETS, NPC_TYPES, MAPS, RESOURCES } from './data.js?v=22.0.0';
+import { repairPulseSettings } from './repair-balance.js?v=22.0.0';
+import { xpThresholdV1770, xpThresholdV1915, migratePilotXpV1915 } from './level-curve-v1915.js?v=22.0.0';
+import { applyRecruitBonusV2012, eliteRouteSnapshotV2012, freshEliteRouteJournalV2012, ELITE_ROUTE_TARGETS_V2012, novaTierPriceV2012 } from './progression-plan-v2012.js?v=22.0.0';
+import { GAME_ASSETS } from './assets/v17/manifest.js?v=22.0.0';
+import { signUp, signIn, beginGoogleSignIn, restoreGoogleSignInFromUrl, requestPasswordReset, restorePasswordRecoveryFromUrl, restoreSession, signOutLocal, checkGameSession, endGameSession, getUser, getSessionCredentials, loadCloudSave, saveCloudSave, loadEliteOperationsOnline, claimEliteOperationOnline, loadWarCampaignsOnline, claimWarSupplyOnline, claimWarCampaignOnline, loadAdminWarCampaignsOnline, saveAdminWarCampaignOnline, saveAdminWarRulesOnline, loadAdminEliteObjectivesOnline, saveAdminEliteObjectiveOnline, updateCallsign, updatePassword, loadRankings, loadAuctionBids, saveAuctionBidOnline, markAuctionBidStatusOnline, loadAuctionMarket, upsertPlayerPresenceOnline, loadMapPresenceOnline, savePlayerLocationCheckpointOnline, loadPlayerLocationCheckpointOnline, removePlayerPresenceOnline, queuePvpAttackOnline, consumePvpDamageEventsOnline, syncArenaProfileOnline, loadArenaState, loadArenaDailyRewardStatus, claimArenaDailyReward, loadArenaOpponents, loadArenaHistory, arenaAttackOnline, listClansOnline, loadMyClanOnline, createClanOnline, joinClanOnline, getClanRequestsOnline, reviewClanRequestOnline, cancelClanRequestOnline, setClanMemberRoleOnline, leaveClanOnline, transferClanCreditsOnline, claimClanCreditGrantsOnline, recordClanAlienKillOnline, getPremiumShopOnline, testPurchasePremiumOnline, adminPreviewPremiumStageOnline, adminSimulatePremiumStageOnline, getPremiumStageCatalogOnline, loadWarfrontStateOnline, loadSectorOwnershipOnline, hitWorldBossOnline, claimWorldBossRewardOnline, declareClanWarOnline, recordClanWarScoreOnline, loadLiveOpsOnline, adminUpdateLiveEventScheduleOnline, purchaseLiveCatalogOnline, economyActionOnline, getChatHistoryOnline, sendChatMessageOnline, redeemGameCouponOnline, getMyDesignersOnline, setDesignLoadoutOnline, claimGateDroneDesignOnline, claimEventDesignerOnline, getAdminStatus, adminSearchAccounts, adminRecentActions, adminBanAccount, adminUnbanAccount, adminResetAccount, adminDeleteAccount, pushTelemetryBatch, adminTelemetryOverview, adminPlayerTelemetry, getBattleGroupOnline, createBattleGroupOnline, inviteBattleGroupOnline, searchBattleGroupPlayersOnline, inviteBattleGroupUserOnline, respondBattleGroupInviteOnline, leaveBattleGroupOnline, kickBattleGroupMemberOnline, setBattleGroupRallyOnline, loadRuntimeConfigOnline, loadNpcRuntimeConfigOnline, loadWorldRuntimeConfigOnline, loadSystemsRuntimeConfigOnline, loadAdminRuntimeMonitorOnline, adminUpdateRuntimeModuleOnline, adminUpdateNpcRuntimeOnline, adminUpdateNpcSpawnRuntimeOnline, adminUpdateWorldMapOnline, adminUpdateWorldResourceOnline, adminUpdateWorldSectorOnline, adminUpdateWorldPortalOnline, adminUpdateWorldResourcePoolOnline, adminUpdateMissionCategoryOnline, adminUpdateEconomyServiceOnline, adminUpdateCraftingRecipeOnline, loadBattlePassRuntimeConfigOnline, adminUpdateBattlePassSeasonOnline, adminUpdateBattlePassTierOnline, loadShopsRuntimeConfigOnline, adminUpdateCommonShopItemOnline, adminUpdatePremiumShopItemOnline, loadBonusConfigOnline, adminUpdateBonusConfigOnline, adminCouponDashboardOnline, adminCreateCouponOnline, adminSetCouponActiveOnline, loadGalaxyGatesOnline, adminUpdateGalaxyGateOnline, adminUpsertCustomMissionOnline, adminDeleteCustomMissionOnline, adminCreateCraftRecipeOnline, adminCreateEconomyServiceOnline, adminCreatePassSeasonOnline, loadAuctionRulesOnline, adminUpdateAuctionRulesOnline, loadBalanceRuntimeOnline, adminUpdateBalanceOnline } from './api.js?v=22.0.0';
+import { SharedUniverseClient } from './world.js?v=22.0.0';
 
 const canvas = document.querySelector('#game');
 const ctx = canvas.getContext('2d');
@@ -1019,6 +1021,8 @@ function achievementUnlockedCount(){syncAchievements(false);return ACHIEVEMENT_D
 function buildAchievementsPanel(){syncAchievements(false);const section=document.createElement('section');section.className='pilot-achievement-profile';const count=achievementUnlockedCount();section.innerHTML=`<div class="pilot-achievement-head"><div><div class="eyebrow">CONQUISTAS</div><h3>REGISTRO DO PILOTO</h3><small>${count}/${ACHIEVEMENT_DEFS.length} conquistas concluídas • foco em identidade, não inflação.</small></div><span>${Math.round(count/ACHIEVEMENT_DEFS.length*100)}%</span></div>`;const grid=document.createElement('div');grid.className='pilot-achievement-grid';for(const def of ACHIEVEMENT_DEFS){const pg=achievementProgress(def),open=achievementUnlocked(def.id),card=document.createElement('article');card.className=`pilot-achievement-card${open?' unlocked':''}`;card.innerHTML=`<div class="pilot-achievement-icon">${def.icon}</div><div class="pilot-achievement-main"><span>${escHtml(def.group)}</span><b>${escHtml(def.label)}</b><p>${escHtml(def.desc)}</p><div class="pilot-achievement-track"><i style="width:${pg.pct}%"></i></div><small>${fmt(Math.min(pg.current,pg.target))} / ${fmt(pg.target)}</small></div><em>${open?'✓':'○'}</em>`;grid.appendChild(card);}section.appendChild(grid);return section;}
 
 // ===================== V17.9.3 PILOT TITLES =====================
+let serverEliteEquippedTitleV22=null;
+let serverEliteTitleOwnerV22=null;
 const PILOT_TITLES=[
   {id:'pioneer',group:'PROGRESSÃO',label:'Pioneiro Estelar',desc:'Título inicial de todo piloto.',target:1,metric:()=>1,format:(n)=>`${fmt(n)}/1`,req:'Disponível desde o início.'},
   {id:'cadet',group:'PROGRESSÃO',label:'Cadete Estelar',desc:'Primeiros sistemas dominados.',target:5,metric:()=>Number(progress?.profile?.level||1),format:(n)=>`Nível ${fmt(n)}/5`,req:'Alcance o nível 5.'},
@@ -1043,9 +1047,9 @@ function normalizePilotTitles(){if(!progress)return freshPilotTitles();progress.
 function pilotTitleDef(id){return PILOT_TITLES.find(x=>x.id===id)||PILOT_TITLES[0];}
 function pilotTitleProgress(idOrDef){const def=typeof idOrDef==='string'?pilotTitleDef(idOrDef):idOrDef;let current=0;try{current=Math.max(0,Number(def?.metric?.())||0);}catch{}const target=Math.max(1,Number(def?.target)||1);return {current,target,pct:Math.max(0,Math.min(100,current/target*100)),text:def?.format?def.format(Math.min(current,target)): `${fmt(Math.min(current,target))}/${fmt(target)}`};}
 function pilotTitleUnlocked(idOrDef){const def=typeof idOrDef==='string'?pilotTitleDef(idOrDef):idOrDef;return pilotTitleProgress(def).current>=pilotTitleProgress(def).target;}
-function activePilotTitle(){normalizePilotTitles();const def=pilotTitleDef(progress?.titles?.selected||'pioneer');return pilotTitleUnlocked(def)?def:PILOT_TITLES[0];}
+function activePilotTitle(){normalizePilotTitles();const def=pilotTitleDef(progress?.titles?.selected||'pioneer');const base=pilotTitleUnlocked(def)?def:PILOT_TITLES[0];return serverEliteTitleOwnerV22===getUser()?.id&&serverEliteEquippedTitleV22?{...base,label:serverEliteEquippedTitleV22}:base;}
 function titleStatAdd(key,amount=1){if(!progress)return;normalizePilotTitles();progress.titles.stats[key]=Math.max(0,(Number(progress.titles.stats[key])||0)+Math.max(0,Number(amount)||0));syncAchievements(true);}
-function selectPilotTitle(id){normalizePilotTitles();const def=pilotTitleDef(id);if(!pilotTitleUnlocked(def)){showToast(`Título bloqueado • ${def.req}`);return;}progress.titles.selected=def.id;saveGame();syncSharedUniversePlayer(true);syncOnlineWorld();telemetryMarkTitle();renderHangar();showToast(`Título equipado: ${def.label}`,'system');}
+function selectPilotTitle(id){normalizePilotTitles();const def=pilotTitleDef(id);if(!pilotTitleUnlocked(def)){showToast(`Título bloqueado • ${def.req}`);return;}progress.titles.selected=def.id;serverEliteEquippedTitleV22=null;serverEliteTitleOwnerV22=null;void unequipEliteTitleOnline().catch(err=>showToast('Falha ao remover título de Elite: '+err.message));saveGame();syncSharedUniversePlayer(true);syncOnlineWorld();telemetryMarkTitle();renderHangar();showToast(`Título equipado: ${def.label}`,'system');}
 
 // ===================== REAL-PLAYER ONLINE AUCTION =====================
 function freshAuctionState(){return {hourKey:null,lots:{},history:[],onlineReady:false,legacyEscrowMigrated:false,marketVersion:3};}
@@ -8802,6 +8806,34 @@ async function saveWarAdminRules(){
  catch(e){showToast(String(e?.message||e),'system');}
 }
 const COMMAND_MODAL_V21=document.getElementById('commandCenterModal');
+// Progresso competitivo e avisos nao entram no save local: sempre vem do servidor.
+const commandRuntimeV22={overview:null,loading:false,error:null,admin:{isAdmin:false,seasons:[],directives:[],seasonDraft:null,directiveDraft:null}};
+async function refreshCommandV22(){
+ if(commandRuntimeV22.loading)return;commandRuntimeV22.loading=true;commandRuntimeV22.error=null;
+ try{const userId=getUser()?.id;const data=await loadCommandOverviewOnline();if(userId!==getUser()?.id)return;commandRuntimeV22.overview=data;serverEliteTitleOwnerV22=userId;serverEliteEquippedTitleV22=data.equippedTitle?.title||null;commandRuntimeV22.admin.isAdmin=eliteServerRuntime.state?.isAdmin===true||adminRuntime.enabled===true;if(commandRuntimeV22.admin.isAdmin)await refreshCommandAdminV22(false);}
+ catch(e){commandRuntimeV22.error=String(e?.message||e);}
+ finally{commandRuntimeV22.loading=false;if(!COMMAND_MODAL_V21.classList.contains('hidden'))renderCommandCenterV21();}
+}
+async function refreshCommandAdminV22(render=true){
+ try{const data=await loadCommandAdminOnline();commandRuntimeV22.admin.seasons=data.seasons||[];commandRuntimeV22.admin.directives=data.directives||[];commandRuntimeV22.admin.isAdmin=true;}
+ catch(e){console.warn('Centro ADM',e?.message);}
+ if(render&&!COMMAND_MODAL_V21.classList.contains('hidden'))renderCommandCenterV21();
+}
+function readCommandEditorV22(selector,initial){const form=COMMAND_MODAL_V21.querySelector(selector);if(!form)throw new Error('Formulário não encontrado.');const data={...initial};
+ for(const node of form.querySelectorAll('[data-command-field]'))data[node.dataset.commandField]=node.type==='checkbox'?node.checked:node.value;
+ return data;
+}
+async function saveCommandSeasonV22(){try{const data=readCommandEditorV22('[data-command-season-form]',commandRuntimeV22.admin.seasonDraft);for(const key of ['min_points','top_n','reward_credits','reward_stl'])data[key]=Number(data[key]);for(const key of ['starts_at','ends_at'])data[key]=new Date(data[key]).toISOString();await saveCompetitiveSeasonOnline(data);commandRuntimeV22.admin.seasonDraft=null;await refreshCommandAdminV22(false);await refreshCommandV22();showToast('Temporada salva no servidor.','reward');}catch(e){showToast(e.message||String(e));}}
+async function saveCommandDirectiveV22(){try{const data=readCommandEditorV22('[data-command-directive-form]',commandRuntimeV22.admin.directiveDraft);for(const key of ['starts_at','ends_at'])data[key]=new Date(data[key]).toISOString();await saveWorldDirectiveOnline(data);commandRuntimeV22.admin.directiveDraft=null;await refreshCommandAdminV22(false);await refreshCommandV22();showToast('Aviso de operação salvo.','reward');}catch(e){showToast(e.message||String(e));}}
+async function unequipCommandEliteTitleV22(){try{await unequipEliteTitleOnline();serverEliteEquippedTitleV22=null;serverEliteTitleOwnerV22=null;syncSharedUniversePlayer(true);showToast('Título comum restaurado.','reward');await refreshCommandV22();}catch(e){showToast(e.message||String(e));}}
+async function claimCommandSeasonV22(id){try{
+ await waitCloudIdle();await flushCloudSave(true);await waitCloudIdle();if(cloudDirty)throw new Error('Aguarde a sincronização do save.');
+ const result=await claimCompetitiveSeasonOnline(id);
+ if(result?.state){progress.profile.credits=Number(result.state.profile?.credits)||0;progress.profile.uridium=Number(result.state.profile?.uridium)||0;progress.serverEliteRevision=Number(result.state.serverEliteRevision)||0;saveGame();updateUI();}
+ showToast(result?.already_claimed?'Prêmio já resgatado':`TEMPORADA CONCLUÍDA • ${Number(result?.credits)||0} CR + ${Number(result?.stl)||0} STL`,'reward');await refreshCommandV22();
+ }catch(e){showToast(e.message||String(e));}}
+async function equipCommandEliteTitleV22(id){try{const data=await equipEliteTitleOnline(id);serverEliteTitleOwnerV22=getUser()?.id;serverEliteEquippedTitleV22=data.title;syncSharedUniversePlayer(true);showToast(`Título equipado: ${data.title}`,'reward');await refreshCommandV22();}catch(e){showToast(e.message||String(e));}}
+
 let commandTabV21='elite';
 const eliteServerRuntime={state:null,userId:null,loading:false,error:null};
 const adminEliteRuntime={items:[],draft:null,error:null};
@@ -8821,7 +8853,7 @@ async function saveEliteAdminDraft(){
 async function refreshEliteOperations(){
  if(eliteServerRuntime.loading)return;
  eliteServerRuntime.loading=true;eliteServerRuntime.error=null;
- try{const current=await loadEliteOperationsOnline();if(uid===getUser()?.id){eliteServerRuntime.state=current;if(current?.isAdmin)void loadAdminEliteObjectives();}}
+ try{const userId=getUser()?.id;const current=await loadEliteOperationsOnline();if(userId===getUser()?.id){eliteServerRuntime.userId=userId;eliteServerRuntime.state=current;if(current?.isAdmin)void loadAdminEliteObjectives();}}
  catch(e){eliteServerRuntime.error=String(e?.message||'Sem conexão com operações de elite');}
  finally{eliteServerRuntime.loading=false;if(!COMMAND_MODAL_V21?.classList.contains('hidden'))renderCommandCenterV21();}
 }
@@ -8850,7 +8882,7 @@ function commandSnapshotV21(){
     callsign:p.callsign||getUser()?.callsign||'PILOTO',
     metrics:{level:p.level||1,aliensKilled:p.aliensKilled||0,missions:stats.missions||0,mapJumps:stats.mapJumps||0,ggCompleted:p.ggCompleted||0,boxes:stats.boxes||0},
     eliteRewards:{...(eliteServerRuntime.userId===getUser()?.id?eliteServerRuntime.state:null),error:eliteServerRuntime.error,loading:eliteServerRuntime.loading},
-    adminElite:adminEliteRuntime,warCampaigns:{...warServerRuntime,myFaction:progress?.profile?.faction},adminWar:adminWarRuntime,
+    adminElite:adminEliteRuntime,userId:getUser()?.id,competitive:{...commandRuntimeV22.overview,error:commandRuntimeV22.error,loading:commandRuntimeV22.loading},adminCommand:commandRuntimeV22.admin,warCampaigns:{...warServerRuntime,myFaction:progress?.profile?.faction},adminWar:adminWarRuntime,
     war:{faction:p.faction,map:progress?.mapId,worldReady:sharedUniverseRuntime.ready,
       warfront:sharedUniverseRuntime.warfront,boss:worldBossState(),clanWar:currentClanWar(),clan:clanState().clan},
     season:{season:battlePassSeasonConfig(),tier:battlePassTier(),tierCount:battlePassTierCount(),points:progress?.battlePass?.points||0,
@@ -8859,7 +8891,11 @@ function commandSnapshotV21(){
 }
 function renderCommandCenterV21(){
   const body=document.getElementById('commandCenterContent');if(!body||!progress)return;
-  body.innerHTML=renderV21CommandCenter(commandSnapshotV21(),commandTabV21);
+  const snapshot=commandSnapshotV21();
+  body.innerHTML=renderV21CommandCenter(snapshot,commandTabV21);
+  if(commandTabV21==='temporada')body.insertAdjacentHTML('beforeend',renderCompetitiveSection(snapshot,snapshot.adminCommand)+renderUniverseDirectives(snapshot,progress?.mapId));
+  if(commandTabV21==='elite')body.insertAdjacentHTML('beforeend',renderEliteEquipTitles(snapshot));
+
   for(const btn of COMMAND_MODAL_V21.querySelectorAll('[data-v21-tab]')){
     const active=btn.dataset.v21Tab===commandTabV21;
     btn.classList.toggle('active',active);btn.setAttribute('aria-pressed',String(active));
@@ -8867,11 +8903,23 @@ function renderCommandCenterV21(){
 }
 function openCommandCenterV21(){
   if(!authenticated||!progress){showToast('Entre com uma conta para acessar o Centro de Comando');return;}
-  closeNavigationModals(COMMAND_MODAL_V21);commandTabV21='elite';renderCommandCenterV21();COMMAND_MODAL_V21?.classList.remove('hidden');void refreshEliteOperations();void refreshWarCampaigns();
+  closeNavigationModals(COMMAND_MODAL_V21);commandTabV21='elite';renderCommandCenterV21();COMMAND_MODAL_V21?.classList.remove('hidden');void refreshEliteOperations();void refreshWarCampaigns();void refreshCommandV22();
 }
 document.getElementById('commandCenterBtn')?.addEventListener('click',openCommandCenterV21);
 document.getElementById('closeCommandCenter')?.addEventListener('click',()=>COMMAND_MODAL_V21?.classList.add('hidden'));
 COMMAND_MODAL_V21?.addEventListener('click',e=>{
+ if(e.target.closest('[data-command-admin-refresh]')){void refreshCommandAdminV22();return;}
+ if(e.target.closest('[data-command-new-season]')){const start=new Date(Date.now()+86400000),end=new Date(start.getTime()+30*86400000);commandRuntimeV22.admin.seasonDraft={title:'Nova temporada',starts_at:start.toISOString(),ends_at:end.toISOString(),min_points:10,top_n:10,reward_credits:0,reward_stl:0,enabled:false};commandRuntimeV22.admin.directiveDraft=null;renderCommandCenterV21();return;}
+ if(e.target.closest('[data-command-new-directive]')){const start=new Date(Date.now()+3600000),end=new Date(start.getTime()+86400000);commandRuntimeV22.admin.directiveDraft={title:'Nova operação',description:'',map_id:'all',category:'alert',starts_at:start.toISOString(),ends_at:end.toISOString(),enabled:false};commandRuntimeV22.admin.seasonDraft=null;renderCommandCenterV21();return;}
+ const seasonEdit=e.target.closest('[data-command-edit-season]');if(seasonEdit){const s=commandRuntimeV22.admin.seasons.find(x=>x.id===seasonEdit.dataset.commandEditSeason);if(s){commandRuntimeV22.admin.seasonDraft={...s};commandRuntimeV22.admin.directiveDraft=null;renderCommandCenterV21();}return;}
+ const directiveEdit=e.target.closest('[data-command-edit-directive]');if(directiveEdit){const s=commandRuntimeV22.admin.directives.find(x=>String(x.id)===directiveEdit.dataset.commandEditDirective);if(s){commandRuntimeV22.admin.directiveDraft={...s};commandRuntimeV22.admin.seasonDraft=null;renderCommandCenterV21();}return;}
+ if(e.target.closest('[data-command-editor-cancel]')){commandRuntimeV22.admin.seasonDraft=null;commandRuntimeV22.admin.directiveDraft=null;renderCommandCenterV21();return;}
+ if(e.target.closest('[data-command-unequip]')){void unequipCommandEliteTitleV22();return;}
+ if(e.target.closest('[data-command-season-save]')){void saveCommandSeasonV22();return;}
+ if(e.target.closest('[data-command-directive-save]')){void saveCommandDirectiveV22();return;}
+ const seasonClaim=e.target.closest('[data-command-season-claim]');if(seasonClaim){void claimCommandSeasonV22(seasonClaim.dataset.commandSeasonClaim);return;}
+ const equip=e.target.closest('[data-command-equip]');if(equip){void equipCommandEliteTitleV22(equip.dataset.commandEquip);return;}
+
  if(e.target.closest('[data-war-refresh]')){void refreshWarCampaigns();return;}
  if(e.target.closest('[data-war-supply]')){void performWarClaim('supply');return;}
  const campaignClaim=e.target.closest('[data-war-campaign-claim]');if(campaignClaim){void performWarClaim('campaign',campaignClaim.dataset.warCampaignClaim);return;}
@@ -8891,7 +8939,7 @@ COMMAND_MODAL_V21?.addEventListener('click',e=>{
  if(e.target.closest('[data-elite-admin-save]')){void saveEliteAdminDraft();return;}
  const claim=e.target.closest('[data-elite-claim]');if(claim){void claimEliteOperation(claim.dataset.eliteClaim);return;}
  if(e.target.closest('[data-elite-refresh]')){void refreshEliteOperations();return;}
- const tab=e.target.closest('[data-v21-tab]');if(tab&&V21_TABS.includes(tab.dataset.v21Tab)){commandTabV21=tab.dataset.v21Tab;renderCommandCenterV21();if(commandTabV21==='guerra')void refreshWarCampaigns();return;}
+ const tab=e.target.closest('[data-v21-tab]');if(tab&&V21_TABS.includes(tab.dataset.v21Tab)){commandTabV21=tab.dataset.v21Tab;renderCommandCenterV21();if(commandTabV21==='guerra')void refreshWarCampaigns();if(commandTabV21==='temporada')void refreshCommandV22();return;}
  const action=e.target.closest('[data-v21-action]')?.dataset.v21Action;
  const actions={missions:()=>openMissions(),pilot:()=>openPilotProfile(),warfront:()=>openWarfront(),clan:()=>openClan(),events:()=>openGalaxyEvent(),pass:()=>openProgression()};
  if(action&&Object.hasOwn(actions,action))actions[action]();
@@ -9158,7 +9206,7 @@ ui.registerForm.onsubmit=async e=>{e.preventDefault();ui.authMessage.textContent
 if(ui.forgotPasswordBtn)ui.forgotPasswordBtn.onclick=async()=>{const email=String(ui.loginEmail?.value||'').trim();ui.authMessage.textContent='Enviando recuperação...';try{await requestPasswordReset(email);ui.authMessage.textContent='E-mail de recuperação enviado. Abra o link recebido para criar uma nova senha.';}catch(err){ui.authMessage.textContent=err.message;}};
 if(ui.recoveryForm)ui.recoveryForm.onsubmit=async e=>{e.preventDefault();const a=ui.recoveryPassword?.value||'',b=ui.recoveryPasswordConfirm?.value||'';if(a!==b){ui.authMessage.textContent='As senhas não conferem.';return;}ui.authMessage.textContent='Atualizando senha...';try{await updatePassword(a);signOutLocal();showAuthMode('login');ui.loginPassword.value='';ui.authMessage.textContent='Senha atualizada. Entre com a nova senha.';}catch(err){ui.authMessage.textContent=err.message;}};
 for(const id of [1,2])document.getElementById(`battleConf${id}`)?.addEventListener('click',()=>switchBattleConfigV2013(id));
-ui.logoutBtn.onclick=async()=>{await flushTelemetry(true).catch(()=>{});telemetryRuntime.sessionOpen=false;sharedUniverse.close();sharedUniverseRuntime.ready=false;sharedUniverseRuntime.event=null;if(movementPositionRuntime.loadedFromCheckpoint||movementPositionRuntime.hasMovedSinceLoad)commitRuntimePosition('logout');await flushCloudSave(true);await removePlayerPresenceOnline().catch(()=>{});clearOnlinePlayers();await endGameSession().catch(()=>signOutLocal());authenticated=false;adminRuntime.enabled=false;adminRuntime.status=null;progress=null;npcRuntimeConfig.version=0;npcRuntimeConfig.updatedAt=null;npcRuntimeConfig.source='fallback';npcRuntimeConfig.spawns=[];worldRuntimeConfig.version=0;worldRuntimeConfig.updatedAt=null;worldRuntimeConfig.source='fallback';passRuntimeConfig.version=0;passRuntimeConfig.updatedAt=null;passRuntimeConfig.activeSeason=null;passRuntimeConfig.seasons=[];passRuntimeConfig.tiers=new Map();passRuntimeConfig.source='fallback';runtimeConfigRuntime.version=0;runtimeConfigRuntime.isAdmin=false;runtimeConfigRuntime.source='fallback';runtimeConfigRuntime.modules=new Map(RUNTIME_FALLBACK_MODULES.map(x=>[x.module_key,x]));runtimeConfigRuntime.flags=new Map(Object.entries(RUNTIME_FALLBACK_FLAGS).map(([flag_key,enabled])=>[flag_key,{flag_key,enabled,config:{}}]));applyRuntimeMenuConfig();clanRuntime.state=null;clanRuntime.clans=[];clanRuntime.lastAt=0;warfrontRuntime.state=null;warfrontRuntime.clans=[];warfrontRuntime.lastAt=0;warfrontRuntime.pendingBossDamage=0;premiumRuntime.state=null;premiumRuntime.lastAt=0;updateClanBadge();updatePremiumBadge();chatRuntime.messages=[];chatRuntime.lastSignature='';renderChatTabs();renderChatMessages();state.target=null;player.laserFiring=false;for(const modal of dismissibleModals())modal.classList.add('hidden');ui.factionModal.classList.add('hidden');ui.portalPrompt?.classList.add('hidden');ui.baseTradePrompt?.classList.add('hidden');ui.petFloatPanel?.classList.add('hidden');ui.loginModal.classList.remove('hidden');if(ui.userLabel)ui.userLabel.textContent='—';if(ui.rankChip)ui.rankChip.textContent='Piloto Básico';if(ui.loginPassword)ui.loginPassword.value='';setSync('LOCAL','');showAuthMode('login');};
+ui.logoutBtn.onclick=async()=>{await flushTelemetry(true).catch(()=>{});telemetryRuntime.sessionOpen=false;sharedUniverse.close();sharedUniverseRuntime.ready=false;sharedUniverseRuntime.event=null;if(movementPositionRuntime.loadedFromCheckpoint||movementPositionRuntime.hasMovedSinceLoad)commitRuntimePosition('logout');await flushCloudSave(true);await removePlayerPresenceOnline().catch(()=>{});clearOnlinePlayers();await endGameSession().catch(()=>signOutLocal());authenticated=false;serverEliteEquippedTitleV22=null;serverEliteTitleOwnerV22=null;commandRuntimeV22.overview=null;adminRuntime.enabled=false;adminRuntime.status=null;progress=null;npcRuntimeConfig.version=0;npcRuntimeConfig.updatedAt=null;npcRuntimeConfig.source='fallback';npcRuntimeConfig.spawns=[];worldRuntimeConfig.version=0;worldRuntimeConfig.updatedAt=null;worldRuntimeConfig.source='fallback';passRuntimeConfig.version=0;passRuntimeConfig.updatedAt=null;passRuntimeConfig.activeSeason=null;passRuntimeConfig.seasons=[];passRuntimeConfig.tiers=new Map();passRuntimeConfig.source='fallback';runtimeConfigRuntime.version=0;runtimeConfigRuntime.isAdmin=false;runtimeConfigRuntime.source='fallback';runtimeConfigRuntime.modules=new Map(RUNTIME_FALLBACK_MODULES.map(x=>[x.module_key,x]));runtimeConfigRuntime.flags=new Map(Object.entries(RUNTIME_FALLBACK_FLAGS).map(([flag_key,enabled])=>[flag_key,{flag_key,enabled,config:{}}]));applyRuntimeMenuConfig();clanRuntime.state=null;clanRuntime.clans=[];clanRuntime.lastAt=0;warfrontRuntime.state=null;warfrontRuntime.clans=[];warfrontRuntime.lastAt=0;warfrontRuntime.pendingBossDamage=0;premiumRuntime.state=null;premiumRuntime.lastAt=0;updateClanBadge();updatePremiumBadge();chatRuntime.messages=[];chatRuntime.lastSignature='';renderChatTabs();renderChatMessages();state.target=null;player.laserFiring=false;for(const modal of dismissibleModals())modal.classList.add('hidden');ui.factionModal.classList.add('hidden');ui.portalPrompt?.classList.add('hidden');ui.baseTradePrompt?.classList.add('hidden');ui.petFloatPanel?.classList.add('hidden');ui.loginModal.classList.remove('hidden');if(ui.userLabel)ui.userLabel.textContent='—';if(ui.rankChip)ui.rankChip.textContent='Piloto Básico';if(ui.loginPassword)ui.loginPassword.value='';setSync('LOCAL','');showAuthMode('login');};
 
 function startLoadedGame(){
   if(!telemetryRuntime.sessionOpen)telemetryStartSession();
@@ -9201,7 +9249,7 @@ function startLoadedGame(){
 async function afterAuth(){
   const generation=++gameBootstrapRuntime.generation;
   gameBootstrapRuntime.loading=true;gameBootstrapRuntime.ready=false;gameBootstrapRuntime.lastError=null;
-  authenticated=true;ui.loginModal.classList.add('hidden');ui.userLabel.textContent=getUser()?.callsign||getUser()?.email?.split('@')[0]||'Pilot';loadActivityLog();await refreshAdminStatus(true);refreshClanState(true).then(()=>refreshRankings(true)).catch(()=>{});setSync('SINCRONIZANDO','busy');
+  authenticated=true;void refreshCommandV22();ui.loginModal.classList.add('hidden');ui.userLabel.textContent=getUser()?.callsign||getUser()?.email?.split('@')[0]||'Pilot';loadActivityLog();await refreshAdminStatus(true);refreshClanState(true).then(()=>refreshRankings(true)).catch(()=>{});setSync('SINCRONIZANDO','busy');
   try{
     const accountId=String(getUser()?.id||'');
     let local=readLocalGameState();

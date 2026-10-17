@@ -1,36 +1,22 @@
-# Stellar Legacy — V21.5.4
+# Stellar Legacy — 22.0.0
 
-**Equilíbrio estendido aos mapas PvE X-1 a X-8.** Leia `INSTALAR_V21_5_4.md` e `V21_5_4_RELATORIO.md`.
-
-**SQL do pacote:** `sql/V21_5_4_EQUILIBRIO_MAPAS_PVE.sql`. A V21.5.4 contém todo o código anterior; use apenas este ZIP no instalador.
-
-# ATUALIZAÇÃO COM SQL — LEIA PRIMEIRO
-
-Consulte **`INSTALAR_V21_4_0_LEIA_PRIMEIRO.md`** antes de instalar. É obrigatório rodar a migração SQL e configurar a service_role key PRIVADA no Render para que as conquistas A/B/C sobrevivam ao F5 e à desconexão.
-
----
-
-# Stellar Legacy V20.3.3 — ADM unificado
-
-ZIP completo baseado na V20.3.0; integra as fases 20.3.1 (Crafting), 20.3.2 (Economia), 20.3.3 (Navegação ADM). **Não requer novo SQL.**
+**Entrega unificada: Campeonato Galáctico + Elite equipável + Operações do Universo + Rankings de Clãs + organização modular.**
 
 ## Instalação
-Envie apenas este ZIP `stellar-legacy*.zip` para a raiz do GitHub, mantendo **um único ZIP de instalação** na raiz. Acesse Actions → Instalar versão do Stellar Legacy → Run workflow. Verifique versão `20.3.3` em `/health` e confira ADM → SISTEMAS no celular.
 
-## Atenção
-Não altera intencionalmente gameplay e dados de jogadores. Crie primeiro receitas/serviços de teste **INATIVOS** e confirme a publicação antes de expor aos jogadores. Veja o relatório técnico [`V20_3_3_RELATORIO.md`](V20_3_3_RELATORIO.md).
+1. SQLs da V22 **já foram aplicados e conferidos** no Supabase `stellar-legacy`. Arquivos de referência: `sql/STELLAR_V22_0_0_TEMPORADAS_ELITE_UNIVERSO.sql` e `sql/STELLAR_V22_0_1_TITULOS_ALTERNAVEIS.sql`.
+2. Mantenha `SUPABASE_SERVICE_ROLE_KEY` **somente no Render** (nunca no cliente ou ZIP preenchido).
+3. Coloque somente o ZIP completo da V22 na raiz do GitHub, sem extrair, e execute `Actions → Instalar versão do Stellar Legacy → Run workflow`.
+4. Confira a versão em `/health`, acesso ao Centro de Comando, Guerra (A/B/C), Elite, Temporada e ADM.
 
+### Conteúdo
 
-## V21.3.0 — pacote unificado
-Abra **MISSÕES → CENTRO DE COMANDO V21** para ver Elite, Guerra e Temporada. Mais detalhes em `V21_3_0_RELATORIO.md`.
+- **Temporada** no Centro de Comando: classificação por capturas e defesas de guerra confirmadas pelo servidor; ranking de clãs/facções; histórico e resgate seguro após o encerramento.
+- **ADM** na aba Temporada: criação e edição de temporadas futuras (rascunhos por padrão) e avisos de operações por mapa.
+- **Elite**: equipar títulos conquistados, exibir na identificação da nave e voltar aos títulos comuns.
+- **Universo**: alertas com validade automática. **Apenas comunicação e calendário** — NPCs, ondas e recompensas continuam gerenciados pelo sistema existente de Eventos.
+- **Motor**: funções novas separadas em módulos; combate, CONF 1/2, navegação, A/B/C e saves preservados.
 
-### Guerra de Facções — Centro de Comando
+**Atenção:** nenhuma temporada ou alerta ficou ativo automaticamente. O Passe de Batalha atual funciona separadamente. Novos spawns e missões especiais de clã com recompensas exigem outro ciclo de desenvolvimento.
 
-A tela **GUERRA** mostra os nove relés em 4-1/4-2/4-3, os suprimentos diários, histórico, campanhas, rankings e editor de campanhas/regras somente para ADM. O banco foi atualizado com as migrações `V21_5_0_GUERRA_FACCOES.sql` e `V21_5_0B_CLAN_SNAPSHOT.sql`. Consulte `INSTALACAO_GUERRA_FACCOES.md` para os passos de publicação e teste.
-
-
-## Correção de sincronização PvP
-Consulte `INSTALACAO_CORRECAO_PVP.md`.
-
-## Captura de relés / confirmação
-Para instalar a correção da conquista territorial, leia `INSTALAR_CORRECAO_CAPTURA.md`. A verificação SQL está em `sql/V21_5_2_VERIFICACAO_CAPTURA.sql` e não altera dados.
+Leia `INSTALAR_V22_0_0.md`, `V22_0_0_RELATORIO.md` e `CHANGELOG.md`.

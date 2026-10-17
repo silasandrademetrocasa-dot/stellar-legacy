@@ -1103,3 +1103,13 @@ export async function claimWarCampaignOnline(id){return authedServerFetch(`/api/
 export async function loadAdminWarCampaignsOnline(){return authedServerFetch('/api/admin/war/campaigns',{},false);}
 export async function saveAdminWarCampaignOnline(payload){return authedServerFetch('/api/admin/war/campaigns',{method:'POST',body:JSON.stringify(payload)},false);}
 export async function saveAdminWarRulesOnline(payload){return authedServerFetch('/api/admin/war/rules',{method:'POST',body:JSON.stringify(payload)},false);}
+
+// Temporadas competitivas, titulos Elite equipaveis e operacoes do universo.
+export async function loadCommandOverviewOnline(){return serverFetch('/api/command/overview',{},true);}
+export async function claimCompetitiveSeasonOnline(id){return serverFetch(`/api/command/season/${encodeURIComponent(id)}/claim`,{method:'POST'},true);}
+export async function equipEliteTitleOnline(objective_id){return serverFetch('/api/command/elite/equip-title',{method:'POST',body:JSON.stringify({objective_id})},true);}
+export async function loadCommandAdminOnline(){return serverFetch('/api/command/admin',{},true);}
+export async function saveCompetitiveSeasonOnline(data){return serverFetch('/api/command/admin/season',{method:'POST',body:JSON.stringify(data)},true);}
+export async function saveWorldDirectiveOnline(data){return serverFetch('/api/command/admin/directive',{method:'POST',body:JSON.stringify(data)},true);}
+
+export async function unequipEliteTitleOnline(){return serverFetch('/api/command/elite/unequip-title',{method:'POST'},true);}

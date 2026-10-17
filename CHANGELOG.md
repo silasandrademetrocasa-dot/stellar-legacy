@@ -1,3 +1,14 @@
+## 22.0.0 — Centro de Comando, temporadas e fundação para expansão
+
+- Campeonato Galáctico: temporadas competitivas com início/fim editáveis, ranking de pilotos, facções e clãs, pontuação autoritativa de capturas/defesas, resgate único de prêmios após encerramento e histórico persistente.
+- Elite: títulos já conquistados agora são equipáveis no nome da nave, com opção de voltar ao título comum; progresso segue no servidor.
+- Universo: anúncios programados por mapa e categoria no ADM, ativação pelo calendário, sem gerar NPCs ou recompensas artificialmente.
+- Clãs: contribuição histórica das conquistas calculada pelo ID do clã registrado no momento de cada ação; exibição na classificação competitiva.
+- Motor: novas rotas e validações isoladas em `server/command-center-router.js`, `server/competitive-seasons.js` e componentes `public/modules/v22`; 7 testes de regressão adicionais e verificações completas de release.
+- Banco: `sql/STELLAR_V22_0_0_TEMPORADAS_ELITE_UNIVERSO.sql` e `sql/STELLAR_V22_0_1_TITULOS_ALTERNAVEIS.sql` executados no Supabase. Nenhuma temporada ativada.
+- Proteção: configurações de temporada congeladas depois do início, prêmio não pode ser resgatado duas vezes, RLS e permissões restritas, relés A/B/C e saves mantidos.
+- Limite desta fase: novos spawns de invasão, missões coletivas com prêmios inéditos e refatoração completa do `game.js` NÃO foram implementados; precisam de etapas específicas de backend e balanceamento.
+
 ## 21.5.4 — Navegação PvE balanceada
 - X-1 a X-8 recebem mapas mais amplos e fator de navegação 0,88; CONF corrida mantém vantagem.
 - Câmara centralizada e sprites proporcionais preservados; portais proporcionais ao tamanho do mundo.

@@ -10,10 +10,11 @@ import { randomUUID } from 'crypto';
 import { attachSharedUniverse } from './world.js';
 import { eliteStatus } from './elite-operations.js';
 import { warCampaignState,warRankings,safeWarCampaignInput,safeWarRulesInput } from './war-campaigns.js';
+import { createCommandCenterRouter } from './command-center-router.js';
 
 const app = express();
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const RELEASE_VERSION = '21.5.4'; // único identificador de release nos endpoints HTTP
+const RELEASE_VERSION = '22.0.0'; // único identificador de release nos endpoints HTTP
 
 function normalizeSupabaseUrl(value = '') {
   let url = String(value || '').trim();
@@ -1470,7 +1471,7 @@ app.get('/api/elite',requireUser,asyncRoute(async(req,res)=>{
   req.sb.rpc('is_game_admin_v1763',{p_uid:req.user.id})
  ]);
  if(counters.error||claims.error||objectives.error)return res.status(503).json({error:'Operações de Elite indisponíveis. Execute o SQL de instalação.',detail:String(counters.error?.message||claims.error?.message||objectives.error?.message||'')});
- res.json({ok:true,objectives:eliteStatus(counters.data||{},claims.data||[],objectives.data||[]),titles:(claims.data||[]).map(x=>({name:x.title,earned_at:x.claimed_at})),isAdmin:adminCheck.data===true&&!adminCheck.error});
+ res.json({ok:true,objectives:eliteStatus(counters.data||{},claims.data||[],objectives.data||[]),titles:(claims.data||[]).map(x=>({name:x.title,objective_id:x.objective_id,earned_at:x.claimed_at})),isAdmin:adminCheck.data===true&&!adminCheck.error});
 }));
 app.post('/api/elite/claim',requireUser,asyncRoute(async(req,res)=>{
  const objectiveId=String(req.body?.objectiveId||'');
@@ -1557,6 +1558,9 @@ app.post('/api/admin/war/campaigns',requireUser,asyncRoute(async(req,res)=>{
  const id=String(req.body?.id||'');if(id&&!/^[0-9a-f-]{36}$/i.test(id))return res.status(400).json({error:'ID inválido.'});if(id)payload.id=id;
  const {data,error}=await sb.from('stellar_war_campaigns').upsert(payload,{onConflict:'id'}).select().single();if(error)return res.status(409).json({error:error.message});res.json({ok:true,campaign:data});
 }));
+
+// Sistemas adicionais do Centro de Comando isolados do motor de combate.
+app.use('/api/command',requireUser,createCommandCenterRouter({serviceClient:eliteAdminClient}));
 
 app.get('/api/save', requireUser, asyncRoute(async (req, res) => {
   const { data, error } = await req.sb.from('game_saves').select('state,updated_at').eq('user_id', req.user.id).maybeSingle();
