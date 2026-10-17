@@ -13,7 +13,7 @@ import { warCampaignState,warRankings,safeWarCampaignInput,safeWarRulesInput } f
 
 const app = express();
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const RELEASE_VERSION = '21.5.1'; // único identificador de release nos endpoints HTTP
+const RELEASE_VERSION = '21.5.2'; // único identificador de release nos endpoints HTTP
 
 function normalizeSupabaseUrl(value = '') {
   let url = String(value || '').trim();
@@ -1686,7 +1686,7 @@ const server = http.createServer(app);
 const sharedUniverse = attachSharedUniverse(server, {
   loadWarfront:async mapId=>{
     const sb=await requireEliteAdmin();
-    const {data,error}=await sb.from('stellar_warfront_nodes').select('map_id,node_id,owner,revision,captured_at').eq('map_id',mapId);
+    const {data,error}=await sb.from('stellar_warfront_nodes').select('map_id,node_id,owner,revision,captured_at,captured_by').eq('map_id',mapId);
     if(error)throw new Error(error.message);
     if(!Array.isArray(data)||data.length!==3)throw new Error('Relés não inicializados no SQL.');
     return data;

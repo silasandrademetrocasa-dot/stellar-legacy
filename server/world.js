@@ -1,5 +1,6 @@
 import { randomUUID } from 'crypto';
 import { WebSocketServer, WebSocket } from 'ws';
+import {captureElapsedSeconds, classifyWarfrontCaptureError, withCaptureTimeout, CAPTURE_FAILURE_BACKOFF_MS} from './warfront-capture.js';
 import { FACTIONS, MAPS, NPC_TYPES, RESOURCES } from '../public/data.js';
 
 const PORTAL_NEUTRAL_RADIUS = 180;
@@ -35,7 +36,7 @@ function warfrontMapLabel(mapId){return WARFRONT_MAP_LABELS[mapId]||String(mapId
 function warfrontFactionLabel(factionId){return WARFRONT_FACTION_LABELS[factionId]||String(factionId||'NEUTRO').toUpperCase();}
 function warfrontNodesForMap(mapId,map){
   const layout=WARFRONT_NODE_LAYOUT[mapId]||[];
-  return layout.map(([id,label,nx,ny])=>({id,label,x:Math.round(map.world.w*nx),y:Math.round(map.world.h*ny),radius:WARFRONT_CAPTURE_RADIUS,owner:null,challenger:null,progress:0,contested:false,nearby:{earth:0,mars:0,jupiter:0},capturedAt:0}));
+  return layout.map(([id,label,nx,ny])=>({id,label,x:Math.round(map.world.w*nx),y:Math.round(map.world.h*ny),radius:WARFRONT_CAPTURE_RADIUS,owner:null,challenger:null,progress:0,contested:false,nearby:{earth:0,mars:0,jupiter:0},capturedAt:0,lastControlAt:0,revision:0,persisting:false,retryAt:0,captureError:null}));
 }
 
 const SAO_PAULO_OFFSET_MS=3*60*60*1000; // America/Sao_Paulo • UTC-3 em 2026.
@@ -447,12 +448,16 @@ class Room {
     for(const n of this.warfrontControl.nodes)if(scores[n.owner]!==undefined)scores[n.owner]++;
     const ranked=WARFRONT_FACTIONS.map(id=>({id,score:scores[id]})).sort((a,b)=>b.score-a.score);
     const dominant=ranked[0].score>ranked[1].score?ranked[0].id:null;
-    return {mapId:this.mapId,nodes:this.warfrontControl.nodes.map(n=>({id:n.id,label:n.label,x:n.x,y:n.y,radius:n.radius,owner:n.owner,challenger:n.challenger,progress:Math.round(n.progress*10)/10,contested:!!n.contested,nearby:{...n.nearby},capturedAt:n.capturedAt||0})),scores,dominantFaction:dominant,serverTime:nowMs()};
+    return {mapId:this.mapId,nodes:this.warfrontControl.nodes.map(n=>({id:n.id,label:n.label,x:n.x,y:n.y,radius:n.radius,owner:n.owner,challenger:n.challenger,progress:Math.round(n.progress*10)/10,contested:!!n.contested,nearby:{...n.nearby},capturedAt:n.capturedAt||0,persisting:!!n.persisting,captureError:n.captureError&&nowMs()-(n.captureError.at||0)<30000?{code:n.captureError.code,message:n.captureError.message}:null})),scores,dominantFaction:dominant,serverTime:nowMs()};
   }
   updateWarfrontControl(dt,now){
     if(!this.warfrontControl)return;
     let lastChange=null;
     for(const node of this.warfrontControl.nodes){
+      // O dt geral da sala é limitado para proteger o combate. A captura, porém,
+      // precisa acompanhar segundos REAIS, sem acelerar em períodos de inatividade.
+      const captureDt=captureElapsedSeconds(node.lastControlAt,now);
+      node.lastControlAt=now;
       const counts={earth:0,mars:0,jupiter:0};
       const candidates={earth:[],mars:[],jupiter:[]};
       for(const p of this.players.values()){
@@ -477,7 +482,9 @@ class Room {
           node.challenger=null;node.progress=0;node.defenseEligible=false;continue;
         }
         if(node.challenger!==faction){node.challenger=faction;node.progress=0;node.defenseEligible=false;}
-        node.progress=Math.min(100,node.progress+WARFRONT_CAPTURE_RATE*weight*dt);
+        if(now<Number(node.retryAt||0))continue; // Não inundar o banco se ele estiver indisponível.
+        node.captureError=null;
+        node.progress=Math.min(100,node.progress+WARFRONT_CAPTURE_RATE*weight*captureDt);
         if(node.progress>=20)node.defenseEligible=true;
         if(node.progress>=100&&!node.persisting){
           // Só aplicar a mudança depois do COMMIT. Na falha, o dono antigo permanece.
@@ -485,11 +492,15 @@ class Room {
           if(!actor?.userId)continue;
           const formerOwner=node.owner,expectedRevision=node.revision||0;
           node.persisting=true;
-          this.world.persistCapture(this.mapId,node.id,faction,expectedRevision,actor.userId).then(row=>{
+          // Rede lenta não pode deixar uma captura eternamente pendente.
+          withCaptureTimeout(this.world.persistCapture(this.mapId,node.id,faction,expectedRevision,actor.userId)).then(row=>{
             node.owner=row.owner;
             node.revision=Number(row.revision)||expectedRevision+1;
             node.capturedAt=Date.parse(row.captured_at||'')||Date.now();
             node.progress=0;node.challenger=null;node.defenseEligible=false;
+            node.retryAt=0;node.captureError=null;
+            const actorSocket=this.world.findClient(actor.userId);
+            if(actorSocket?.room===this)safeJsonSend(actorSocket,{type:'warfront_capture_result',ok:true,mapId:this.mapId,nodeId:node.id,owner:row.owner,revision:node.revision});
             const change={type:'captured',node,faction,formerOwner,actor,allies:counts[faction]};
             this.world.broadcastGlobalAnnouncement({
               kind:'warfront_point',key:`warfront_point:${this.mapId}:${node.id}:${faction}:${node.revision}`,
@@ -502,19 +513,27 @@ class Room {
             this.refreshWarfrontDomination(Date.now(),change);
             this.broadcast({type:'warfront_control',warfront:this.warfrontPayload(),serverTime:Date.now()});
           }).catch(async err=>{
-            console.error('Conquista não gravada:',err?.message||err);
-            // Conflitos com outra instância são resolvidos recuperando a verdade do banco.
-            try{const rows=await this.world.loadWarfront(this.mapId);const saved=rows.find(r=>r.node_id===node.id);
-              if(saved){node.owner=saved.owner;node.revision=Number(saved.revision)||0;node.capturedAt=Date.parse(saved.captured_at||'')||0;}
-            }catch{}
+            const problem=classifyWarfrontCaptureError(err);
+            console.error('[warfront-capture-failed]',{mapId:this.mapId,nodeId:node.id,code:problem.code,detail:String(err?.message||err).slice(0,220)});
+            // Uma resposta lenta pode gravar depois do timeout; consulte o banco
+            // antes de apresentar falha ou autorizar outra tentativa.
+            let confirmed=false;
+            try{const rows=await withCaptureTimeout(this.world.loadWarfront(this.mapId),5000);const saved=rows.find(r=>r.node_id===node.id);
+              if(saved){node.owner=saved.owner;node.revision=Number(saved.revision)||0;node.capturedAt=Date.parse(saved.captured_at||'')||0;
+                confirmed=saved.owner===faction&&Number(saved.revision)>expectedRevision&&String(saved.captured_by||'')===String(actor.userId);}
+            }catch(lookupErr){console.warn('[warfront-capture-check]',String(lookupErr?.message||lookupErr).slice(0,160));}
             node.progress=0;node.challenger=null;node.defenseEligible=false;
+            if(confirmed){node.retryAt=0;node.captureError=null;this.refreshWarfrontDomination(Date.now(),null);}
+            else{node.retryAt=Date.now()+CAPTURE_FAILURE_BACKOFF_MS;node.captureError={...problem,at:Date.now()};}
+            const actorSocket=this.world.findClient(actor.userId);
+            if(actorSocket?.room===this)safeJsonSend(actorSocket,{type:'warfront_capture_result',ok:confirmed,mapId:this.mapId,nodeId:node.id,owner:node.owner,revision:node.revision,...(confirmed?{}:problem)});
             const owners=this.warfrontControl.nodes.map(n=>n.owner);
             this.warfrontFullController=owners[0]&&owners.every(o=>o===owners[0])?owners[0]:null;
             this.broadcast({type:'warfront_control',warfront:this.warfrontPayload(),serverTime:Date.now()});
           }).finally(()=>{node.persisting=false;});
         }
       }else if(node.challenger&&node.progress>0){
-        node.progress=Math.max(0,node.progress-WARFRONT_DECAY_RATE*dt);
+        node.progress=Math.max(0,node.progress-WARFRONT_DECAY_RATE*captureDt);
         if(node.progress<=0){
           // Defesa somente após ameaça real >=20%, invasor ausente e defensor da facção presente.
           const defender=candidates[node.owner]?.[0]?.player;

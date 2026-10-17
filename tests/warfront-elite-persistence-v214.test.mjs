@@ -12,7 +12,7 @@ test('Warfront: hydrate ocorre antes de aceitar o jogador na sala',()=>{
  assert.match(world,/if\(!Array\.isArray\(rows\)\|\|rows\.length!==3\)/);
 });
 test('Warfront: conquista troca dono diretamente e apenas depois do COMMIT SQL',()=>{
- assert.match(world,/persistCapture\(this\.mapId,node\.id,faction,expectedRevision,actor\.userId\)\.then/);
+ assert.match(world,/withCaptureTimeout\(this\.world\.persistCapture\(this\.mapId,node\.id,faction,expectedRevision,actor\.userId\)\)\.then/);
  const begin=world.indexOf('persistCapture(this.mapId');const assign=world.indexOf('node.owner=row.owner',begin);
  assert.ok(begin>=0&&assign>begin);
  assert.doesNotMatch(world,/node\.owner=null;node\.progress=0;node\.challenger=faction/);

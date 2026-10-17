@@ -1,3 +1,9 @@
+## 21.5.2 — Captura estável e confirmação no banco
+- Relés A/B/C avançam pelo tempo real decorrido no servidor, independente do `dt` limitado da simulação de combate.
+- Prazo máximo para a confirmação, tratamento de conflito e diagnóstico de erro de gravação.
+- Feedback de captura confirmada diretamente no jogador, sem alterar a propriedade antes do banco.
+- Nenhuma migração destrutiva ou redefinição de territórios.
+
 ## 21.5.1 — Correção WARFRONT e sincronização dos relés
 - Exibe erros de ingresso no mapa PvP; botão reconectar.
 - Leitura segura de A/B/C persistidos mesmo com sala temporariamente indisponível.

@@ -25,3 +25,6 @@ A tela **GUERRA** mostra os nove relés em 4-1/4-2/4-3, os suprimentos diários,
 
 ## Correção de sincronização PvP
 Consulte `INSTALACAO_CORRECAO_PVP.md`.
+
+## Captura de relés / confirmação
+Para instalar a correção da conquista territorial, leia `INSTALAR_CORRECAO_CAPTURA.md`. A verificação SQL está em `sql/V21_5_2_VERIFICACAO_CAPTURA.sql` e não altera dados.
