@@ -33,6 +33,9 @@ Documentação: `V22_5_0_RELATORIO.md` e `INSTALAR_V22_5_0.md`.
 
 Leia `INSTALAR_V22_0_0.md`, `V22_0_0_RELATORIO.md` e `CHANGELOG.md`.
 
-### Segurança V22.7.0
+### Segurança V22.8.0
 
 Leia **`INSTALAR_V22_7_0.md`** antes de subir o ZIP. Há duas fases de SQL: a etapa A foi aplicada, a etapa B deve ser executada apenas depois do deploy. Compras com dinheiro real permanecem desligadas até a migração completa de recompensas para o servidor.
+
+## Segurança e recompensas NPC
+A V22.8.0 apresenta o primeiro ledger server-authoritative de CR/STL por abate de NPC compartilhado. Leia `INSTALAR_V22_8_0.md` e `V22_8_0_RELATORIO.md`; a migração SQL já foi aplicada no Supabase do projeto, mas esta versão ainda precisa de deploy pelo GitHub Actions. Não habilite compras com dinheiro real até que XP, caixas, missões e todas as demais fontes de renda estejam protegidas por transações do servidor.

@@ -7,8 +7,10 @@ export function admitNpcDamage(ws,{hitId,damage},now=Date.now()){
  const state=ws._npcDamageThrottle||(ws._npcDamageThrottle={at:now,lastHitAt:0,budget:NPC_DAMAGE_THROTTLE.burst,seen:new Map()});
  const elapsed=Math.max(0,Math.min(30,(now-state.at)/1000));
  state.budget=Math.min(NPC_DAMAGE_THROTTLE.burst,state.budget+elapsed*NPC_DAMAGE_THROTTLE.refillPerSecond);state.at=now;
- const key=String(hitId||'').slice(0,120);
- if(key && state.seen.has(key))return {allowed:false,reason:'replay'};
+ const key=String(hitId||'');
+ // Disparo identificavel: o cliente oficial sempre envia hitId (laser/SAB/foguetes).
+ if(!/^[a-zA-Z0-9_-]{1,120}$/.test(key))return {allowed:false,reason:'hit_id_invalid'};
+ if(state.seen.has(key))return {allowed:false,reason:'replay'};
  if(now-state.lastHitAt<NPC_DAMAGE_THROTTLE.minIntervalMs)return {allowed:false,reason:'rate'};
  const cost=Math.min(5_000_000,d);
  if(state.budget<cost)return {allowed:false,reason:'budget'};

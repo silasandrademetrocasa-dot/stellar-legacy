@@ -23,6 +23,9 @@ export function validatePlayerSave(incoming,stored,{userId,isAdmin=false}={}){
   }
  }
  if(stored&&!isAdmin){
+  const oldNpcRev=Number(stored.serverNpcRewardRevision)||0;
+  const newNpcRev=Number(incoming.serverNpcRewardRevision)||0;
+  if(newNpcRev>oldNpcRev)return issue('SAVE_NPC_REVISION_FORGED','critical','Revisão de abates gerenciada pelo servidor.',{field:'serverNpcRewardRevision'});
   const oldPurchase=Number(stored.serverPurchaseRevision)||0;const newPurchase=Number(incoming.serverPurchaseRevision)||0;
   if(newPurchase>oldPurchase)return issue('SAVE_PURCHASE_REVISION_FORGED','critical','Revisao de compra alterada pelo navegador.');
   const oldElite=Number(stored.serverEliteRevision)||0;const newElite=Number(incoming.serverEliteRevision)||0;

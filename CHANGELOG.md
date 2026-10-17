@@ -962,9 +962,15 @@ Editor visual de ingredientes, produtos e efeitos com prévias, duplicação ina
 - Editor visual mobile no Centro de Comando → Guerra.
 - SQLs V21_5_0 e V21_5_0B aplicados e validados no Supabase conectado.
 
-## V22.7.0 — Segurança do save e da economia
+## V22.8.0 — Segurança do save e da economia
 - Novas rotas de gravação por `service_role` no Render, bloqueio faseado de escrita direta em `game_saves` e `profiles`.
 - Revisão econômica monotônica contra repetição/retrocesso de saves após compras online.
 - Contenção de flooding e replays de dano NPC no WebSocket sem autoban por lag.
 - Migração SQL A de privilégios aplicada; SQL B fica pendente até novo código ser publicado.
 - Mantidos saves, mapas, clãs, temporada, HUD, PNG/WebP e sistemas de combate existentes.
+
+## V22.8.0 — recompensas de NPC confirmadas no servidor
+- SQL idempotente para concessão de CR/STL de NPCs compartilhados com comprovante único por abate.
+- Rejeição de saves atrasados após concessão de recompensa NPC.
+- Limites por golpe e ID de disparo obrigatório no multiplayer.
+- SQL da etapa final da V22.7.0 aplicado somente após confirmação do deploy no Render.

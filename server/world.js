@@ -735,7 +735,9 @@ class Room {
     const hitPolicy=admitNpcDamage(ws,msg,now);
     if(!hitPolicy.allowed)return safeJsonSend(ws,{type:'damage_result',hitId:msg.hitId||null,entityId:e.id,actual:0,rejected:hitPolicy.reason});
     const dist=Math.hypot(p.x-e.x,p.y-e.y);if(dist>1450)return safeJsonSend(ws,{type:'damage_result',hitId:msg.hitId||null,entityId:e.id,actual:0,rejected:'range'});
-    let amount=clamp(msg.damage,0,5000000);if(amount<=0)return;
+    // Teto conservador: clientes nao ADM nao podem injetar golpes de 5M no NPC.
+    // Evita false-positives em builds fortes; validar loadout no servidor e a proxima etapa.
+    let amount=clamp(msg.damage,0,ws.identity?.isAdmin===true?5000000:2000000);if(amount<=0)return;
     const mode=String(msg.mode||'damage');const beforeShield=e.shield,beforeHp=e.hp;let actual=0;
     if(mode==='shield_drain'){
       actual=Math.min(e.shield,Math.round(amount));e.shield=Math.max(0,e.shield-actual);
@@ -792,7 +794,16 @@ class Room {
       // Apenas o abate validado pelo servidor gera progresso permanente de Elite.
       this.world.recordEliteEvent?.(c.player.userId,'npc_kill').catch(err=>console.warn('Elite NPC:',err?.message));
       const isOwner=String(c.player?.userId||'')===ownerId;
-      safeJsonSend(c,{type:'kill_credit',entity:dead,factor,groupShared:!!rewardGroupId,eligibleCount:eligible.length,ownerUserId:ownerId,ownerGroupId:rewardGroupId||null,dropBox:isOwner});
+      // Somente a sala online define o NPC, a divisão e o ID do abate.
+      // O Supabase confirma a concessão em transação idempotente ANTES de informar o cliente.
+      const killKey=`${this.key}:${e.id}`.slice(0,180);
+      try{
+        const serverReward=await this.world.grantNpcReward(c.player.userId,killKey,String(e.type||'npc'),Math.max(0,Math.round((Number(e.credits)||0)*factor)),Math.max(0,Math.round((Number(e.uridium)||0)*factor)));
+        safeJsonSend(c,{type:'kill_credit',entity:dead,factor,serverReward,groupShared:!!rewardGroupId,eligibleCount:eligible.length,ownerUserId:ownerId,ownerGroupId:rewardGroupId||null,dropBox:isOwner});
+      }catch(err){
+        console.error('[npc-reward] falha no ledger',{npc:e.id,error:String(err?.message||err).slice(0,180)});
+        safeJsonSend(c,{type:'npc_reward_error',entityId:e.id,message:'Recompensa econômica indisponível. Nenhum saldo foi adicionado pelo navegador.'});
+      }
     }
 
     // A BOX nunca é compartilhada. Mesmo se o dono ficou inativo (>120s), ela continua sendo dele.
@@ -897,7 +908,7 @@ class Room {
   }
 }
 
-export function attachSharedUniverse(server,{authenticate,authorizeJoin,recordSecurityViolation,loadLiveOps,loadBattleGroup,loadNpcConfig,loadWorldConfig,loadPlayerEventProgress,recordPlayerEventProgress,loadWarfront,persistCapture,recordEliteEvent,recordWarDefense,loadWorldDirectives}){
+export function attachSharedUniverse(server,{authenticate,authorizeJoin,recordSecurityViolation,loadLiveOps,loadBattleGroup,loadNpcConfig,loadWorldConfig,loadPlayerEventProgress,recordPlayerEventProgress,loadWarfront,persistCapture,recordEliteEvent,recordWarDefense,loadWorldDirectives,grantNpcReward}){
   const wss=new WebSocketServer({
     server,
     path:'/ws',
@@ -913,6 +924,7 @@ export function attachSharedUniverse(server,{authenticate,authorizeJoin,recordSe
     loadWarfront:loadWarfront||(()=>Promise.reject(new Error('Sem conexão com o banco de relés'))),
     persistCapture:persistCapture||(()=>Promise.reject(new Error('Sem gravação de relés'))),
     recordEliteEvent:recordEliteEvent||(()=>Promise.resolve()),
+    grantNpcReward:grantNpcReward||(()=>Promise.reject(new Error('Recompensa NPC não configurada no servidor'))),
     directives:[],lastDirectivesAt:0,directivesBusy:false,
     liveOps:{events:[],catalog:[],server_time:0},
     lastLiveOpsAt:0,

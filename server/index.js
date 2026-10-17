@@ -16,7 +16,7 @@ import { createSecurityService } from './security-service.js';
 
 const app = express();
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const RELEASE_VERSION = '22.7.0'; // único identificador de release nos endpoints HTTP
+const RELEASE_VERSION = '22.8.0'; // único identificador de release nos endpoints HTTP
 
 function normalizeSupabaseUrl(value = '') {
   let url = String(value || '').trim();
@@ -1632,6 +1632,16 @@ app.put('/api/save', requireUser, asyncRoute(async (req, res) => {
     await securityService.report(req.user.id,{code:'SAVE_PURCHASE_REVISION_FORGED',severity:'critical',evidence:{kind:'reserved_revision'}},'cloud_save');
     return res.status(409).json({error:'Revisao de compras invalida.',code:'SAVE_RESERVED_REVISION'});
   }
+  // Recompensas NPC são escritas no save pelo PostgreSQL, nunca pelo navegador.
+  const authoritativeNpcRevision=Math.max(0,Number(serverSave?.state?.serverNpcRewardRevision)||0);
+  const incomingNpcRevision=Math.max(0,Number(state?.serverNpcRewardRevision)||0);
+  if(incomingNpcRevision<authoritativeNpcRevision)return res.status(409).json({
+    error:'Recompensas NPC atualizadas pelo servidor. Sincronize o save.',code:'SAVE_NPC_STALE'
+  });
+  if(incomingNpcRevision>authoritativeNpcRevision){
+    await securityService.report(req.user.id,{code:'SAVE_NPC_REVISION_FORGED',severity:'critical',evidence:{kind:'npc_reward_revision'}},'cloud_save');
+    return res.status(409).json({error:'Revisão NPC não autorizada.',code:'SAVE_RESERVED_REVISION'});
+  }
   // Recompensas Elite podem ser resgatadas enquanto há save em voo.
   // Um save velho jamais pode sobrescrever moedas e revisão confirmadas pelo SQL.
   const authoritativeEliteRevision=Number(serverSave?.state?.serverEliteRevision)||0;
@@ -1665,7 +1675,7 @@ app.put('/api/save', requireUser, asyncRoute(async (req, res) => {
       await securityService.report(req.user.id,{code:'SAVE_DB_GUARD',severity:'warn',evidence:{rule:(message.match(/SECURITY_[A-Z_]+/)||[])[0]||'DB_REJECT'}},'database_save');
       return res.status(409).json({error:'O servidor recusou dados inconsistentes do save. Sincronize seu jogo.',code:'SAVE_DB_GUARD'});
     }
-    const code=message.includes('SAVE_COUPON_STALE')?'SAVE_COUPON_STALE':message.includes('SAVE_EVENT_STALE')?'SAVE_EVENT_STALE':null;
+    const code=message.includes('SAVE_NPC_STALE')?'SAVE_NPC_STALE':message.includes('SAVE_COUPON_STALE')?'SAVE_COUPON_STALE':message.includes('SAVE_EVENT_STALE')?'SAVE_EVENT_STALE':null;
     return res.status(code?409:400).json({error:error.message,code});
   }
 
@@ -1762,6 +1772,16 @@ const sharedUniverse = attachSharedUniverse(server, {
     const sb=await requireEliteAdmin();
     const {data,error}=await sb.rpc('stellar_record_war_defense',{p_map_id:mapId,p_node_id:nodeId,p_faction:faction,p_actor:actorUserId});
     if(error)throw new Error(error.message);return data===true;
+  },
+  grantNpcReward:async(userId,killKey,npcType,baseCredits,baseStl)=>{
+    const sb=await requireEliteAdmin();
+    const {data,error}=await sb.rpc('stellar_grant_npc_reward_v228',{
+      p_user_id:userId,p_kill_key:killKey,p_npc_type:npcType,
+      p_base_credits:baseCredits,p_base_stl:baseStl
+    });
+    if(error)throw new Error(String(error.message||'Recompensa NPC recusada'));
+    if(!data||!Number.isSafeInteger(Number(data.revision))||Number(data.revision)<1)throw new Error('Recompensa NPC sem confirmação verificável.');
+    return data;
   },
   recordEliteEvent:async(userId,kind)=>{
     const sb=await requireEliteAdmin();
