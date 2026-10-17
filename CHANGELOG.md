@@ -1,3 +1,8 @@
+## V20.2.3 — Cache de gradientes e culling sem alocação
+- Reaproveita gradientes estáticos de fundo, iluminação secundária e nébula.
+- Testes de visibilidade sem alocação de bounds por entidade.
+- Nenhuma regra de combate, mapa, save ou SQL alterada.
+
 ## V20.2.2 — Monitor de Desempenho Local (Etapa 3)
 
 - Diagnóstico voluntário de FPS, quadros longos, percentil 95, tempo do desenho, cache e heap JS (quando suportado).

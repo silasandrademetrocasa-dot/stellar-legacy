@@ -24,7 +24,7 @@ test('copiar relatório exige clique e não transmite dados automaticamente',()=
   assert.doesNotMatch(game.slice(game.indexOf('// Diagnóstico opt-in:'),game.indexOf("if(ui.hudSettingsGrid)")),/pushTelemetryBatch|fetch\(|saveCloudSave|saveGame\(/);
 });
 test('módulo tem import com versão atual e HUD não intercepta toques no mobile',()=>{
-  assert.match(game,/from '\.\/modules\/performance-monitor\.js\?v=20\.2\.2';/);
+  assert.match(game,/from '\.\/modules\/performance-monitor\.js\?v=20\.2\.3';/);
   assert.match(css,/\.perf-diag-overlay\{[^}]+pointer-events:none/);
   assert.match(css,/@media\(max-width:680px\)\{\.perf-diag-grid/);
 });

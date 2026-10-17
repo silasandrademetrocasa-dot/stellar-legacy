@@ -1,6 +1,6 @@
 {
   "name": "stellar-legacy",
-  "version": "20.2.2",
+  "version": "20.2.3",
   "type": "module",
   "scripts": {
     "start": "node server/index.js",
@@ -18,5 +18,5 @@
   "engines": {
     "node": ">=18"
   },
-  "release": "v20.2.2-monitor-de-desempenho-local"
+  "release": "v20.2.3-cache-de-gradientes-e-culling"
 }

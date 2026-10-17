@@ -1,3 +1,7 @@
+# STELLAR LEGACY V20.2.3 — OTIMIZAÇÃO GRÁFICA
+
+ZIP completo baseado na V20.2.2. Leia `V20_2_3_RELATORIO.md` para mudanças e testes. Nenhum SQL novo.
+
 # Stellar Legacy — V20.2.2 MONITOR DE DESEMPENHO (Etapa 3)
 
 Release completa baseada na **V20.2.1 MOTOR GRÁFICO E CACHE**. **Sem SQL novo, sem mudanças no combate nem nos saves.**
