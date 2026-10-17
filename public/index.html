@@ -6,7 +6,7 @@
 <meta content="width=device-width,initial-scale=1,user-scalable=no" name="viewport"/>
 <meta content="#030816" name="theme-color"/>
 <title>Stellar Legacy</title>
-<link href="/style.css?v=20.2.5" rel="stylesheet"/>
+<link href="/style.css?v=20.2.6" rel="stylesheet"/>
 </head>
 <body>
 <div id="app">
@@ -794,7 +794,7 @@
         <div class="performance-hint" id="performanceHint">Analisando dispositivo...</div>
       </section>
       <section class="settings-section perf-diagnostics-section" id="perfDiagnosticsSection">
-        <div class="settings-title"><div><b>DIAGNÓSTICO DE DESEMPENHO</b><small>FPS, engasgos, tempo do desenho e cache de sprites. Sem enviar informações ao servidor.</small></div></div>
+        <div class="settings-title"><div><b>DIAGNÓSTICO DE DESEMPENHO</b><small>FPS, tempo de simulação e tempo de desenho separados. Sem enviar informações ao servidor.</small></div></div>
         <div class="perf-diag-controls">
           <label><input type="checkbox" id="perfDiagEnabled"/> Ativar medições neste dispositivo</label>
           <label><input type="checkbox" id="perfDiagShowHud" disabled/> Mostrar contador compacto na tela</label>
@@ -803,6 +803,8 @@
           <div><span>FPS OBSERVADOS</span><b id="perfDiagFps">—</b></div>
           <div><span>QUADRO P95</span><b id="perfDiagFrame">—</b></div>
           <div><span>RENDER + UPDATE P95</span><b id="perfDiagWork">—</b></div>
+          <div><span>SIMULAÇÃO JS P95</span><b id="perfDiagUpdate">—</b></div>
+          <div><span>CANVAS P95</span><b id="perfDiagDraw">—</b></div>
           <div><span>QUADROS LONGOS</span><b id="perfDiagStutters">—</b></div>
           <div><span>IMAGENS NO CACHE</span><b id="perfDiagCache">—</b></div>
           <div><span>HEAP JAVASCRIPT</span><b id="perfDiagHeap">—</b></div>
@@ -1024,6 +1026,6 @@
 </div>
 </div>
 <div class="perf-diag-overlay hidden" id="perfDiagOverlay" aria-live="off" aria-label="Contador de FPS local"><b id="perfDiagHudFps">FPS —</b><small id="perfDiagHudStutter">P95 —</small></div>
-<script src="/game.js?v=20.2.5" type="module"></script>
+<script src="/game.js?v=20.2.6" type="module"></script>
 </body>
 </html>

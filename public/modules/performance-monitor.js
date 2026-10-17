@@ -19,7 +19,7 @@ export function createPerformanceMonitor({capacity=SAMPLE_LIMIT}={}) {
     if(enabled!==next){enabled=next;clear();}
   }
   function pause(){prevAt=null;}
-  function record(at,workMs,targetFps=60){
+  function record(at,workMs,targetFps=60,stages=null){
     if(!enabled||!finiteNonnegative(at)||!finiteNonnegative(workMs))return false;
     const time=Number(at),work=Number(workMs),target=Math.max(1,Math.min(240,Number(targetFps)||60));
     if(prevAt===null){prevAt=time;return false;}
@@ -29,7 +29,9 @@ export function createPerformanceMonitor({capacity=SAMPLE_LIMIT}={}) {
     if(!Number.isFinite(interval)||interval<=0||interval>MAX_SAMPLE_GAP_MS)return false;
     const threshold=Math.max(80,2500/target);
     const stalled=interval>threshold;
-    const frame={interval,work:Math.min(work,MAX_SAMPLE_GAP_MS),stalled};
+    const frame={interval,work:Math.min(work,MAX_SAMPLE_GAP_MS),stalled,
+      update:finiteNonnegative(stages?.updateMs)?Math.min(stages.updateMs,MAX_SAMPLE_GAP_MS):null,
+      draw:finiteNonnegative(stages?.drawMs)?Math.min(stages.drawMs,MAX_SAMPLE_GAP_MS):null};
     frames.push(frame);
     framesSeen++;
     if(stalled)stutters++;
@@ -38,6 +40,7 @@ export function createPerformanceMonitor({capacity=SAMPLE_LIMIT}={}) {
   }
   function snapshot(){
     const intervals=frames.map(x=>x.interval),work=frames.map(x=>x.work);
+    const updates=frames.map(x=>x.update).filter(Number.isFinite),draws=frames.map(x=>x.draw).filter(Number.isFinite);
     const totalMs=intervals.reduce((a,b)=>a+b,0);
     return {
       enabled,
@@ -45,6 +48,8 @@ export function createPerformanceMonitor({capacity=SAMPLE_LIMIT}={}) {
       fps:frames.length&&totalMs>0?Math.round((frames.length*1000/totalMs)*10)/10:null,
       frameP95Ms:percentile(intervals,.95),
       workP95Ms:percentile(work,.95),
+      updateP95Ms:percentile(updates,.95),
+      drawP95Ms:percentile(draws,.95),
       longFrames:frames.filter(x=>x.stalled).length,
       totalFramesSeen:framesSeen,
       totalLongFrames:stutters,
@@ -65,6 +70,8 @@ export function formatPerformanceReport(snapshot,{version='?',quality='?',resolu
     `FPS observados: ${numeric(snapshot?.fps)}`,
     `Intervalo entre quadros p95: ${numeric(snapshot?.frameP95Ms,' ms')}`,
     `Tempo update + desenho p95: ${numeric(snapshot?.workP95Ms,' ms')}`,
+    `Tempo atualização JS p95: ${numeric(snapshot?.updateP95Ms,' ms')}`,
+    `Tempo desenho Canvas p95: ${numeric(snapshot?.drawP95Ms,' ms')}`,
     `Quadros longos (janela): ${Math.max(0,Number(snapshot?.longFrames)||0)}`,
     `Heap JS do navegador: ${numeric(heapMb,' MB')} (se disponível)`,
     `Imagens no cache do jogo: ${Math.max(0,Number(cache?.count)||0)}`,

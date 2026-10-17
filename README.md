@@ -1,3 +1,29 @@
+# STELLAR LEGACY V20.2.6 — NPCs / Diagnóstico de Gargalos (Android)
+
+Release completa, incremental sobre a **V20.2.5**. **Não exige SQL novo.**
+
+## O que mudou
+
+- No gráfico **BAIXO**, NPCs comuns usam um caminho de renderização simplificado, mantendo os sprites originais (mesma resolução). Os efeitos de pulsação, banco e sombra dos NPCs comuns não são calculados nesse modo.
+- A distâncias superiores a 280 unidades, os NPCs comuns deixam de desenhar a etiqueta com o nome; acima de 500 unidades, também deixam de desenhar barras de vida/escudo. **NPC selecionado, chefes e NPCs de evento sempre mantêm barras e nome, independentemente da distância.** Alvos, combate, movimento, HP, escudo, drops e respawn não foram alterados.
+- O painel **CONF → JOGO → DIAGNÓSTICO DE DESEMPENHO** mostra agora tempo P95 de **SIMULAÇÃO JS** e **CANVAS**, separados, além do FPS e do tempo total do quadro.
+- Botão **Copiar relatório técnico** inclui os dois valores. A medição permanece desativada por padrão; não faz envio automático.
+- Testes de regressão: **164/164 aprovados**. Release `20.2.6` coerente no HTML, imports, servidor e pacote.
+
+## Teste e instalação
+
+1. Conclua o teste da V20.2.5 e anote o FPS no **mesmo mapa/cenário**.
+2. Coloque **somente este ZIP**, sem extrair, na raiz do GitHub; remova os outros `stellar-legacy*.zip` da raiz.
+3. GitHub Actions → **Instalar versão do Stellar Legacy** → **Run workflow**; confira o deploy Render e `/health` exibindo `20.2.6`.
+4. Faça um teste no **gráfico BAIXO**, preferencialmente durante combate com vários NPCs. Abra **CONF → JOGO**, ative diagnóstico e deixe rodar pelo menos 30–60 segundos.
+5. Copie o relatório e envie aqui, em especial **FPS observados**, **Tempo atualização JS p95**, **Tempo desenho Canvas p95**, **Tempo update + desenho p95** e **Intervalo entre quadros p95**. Se o tempo total de trabalho for baixo, mas FPS continuar em 14, investigaremos o limite de hardware/browser/composição e tarefas assíncronas.
+
+**Importante:** Os testes garantem consistência local do código; não simulam o FPS de um Android real. Não há promessa de ganho de FPS nesta versão. Nenhuma alteração remota ao banco, Render ou GitHub foi feita para gerar este ZIP.
+
+Veja `V20_2_6_RELATORIO.md` para detalhes técnicos.
+
+---
+
 # STELLAR LEGACY V20.2.5 — MOTOR CANVAS / MODO BAIXA
 
 Atualização completa baseada na **V20.2.4 HUD MOBILE**, conservando todos os mapas, sistemas, sprites e testes anteriores. **Não precisa executar nenhum SQL.**

@@ -15,7 +15,7 @@ test('diagnóstico aparece na central de configuração com ativação inicialme
   assert.match(html,/id="perfDiagCopy" disabled/);
 });
 test('captura do FPS é opt-in e não altera a ordem update/draw/qualidade automática',()=>{
-  assert.match(game,/if\(PERF_MONITOR\.isEnabled\(\)\)\{\s*const start=performance\.now\(\);update\(dt\);draw\(\);\s*PERF_MONITOR\.record/);
+  assert.match(game,/if\(PERF_MONITOR\.isEnabled\(\)\)\{\s*const start=performance\.now\(\);update\(dt\);\s*const renderStart=performance\.now\(\);draw\(\);const end=performance\.now\(\);\s*PERF_MONITOR\.record/);
   assert.match(game,/\}else\{update\(dt\);draw\(\);\}\s*monitorAutoPerformance\(t\)/);
   assert.match(game,/PERF_MONITOR\.pause\(\);requestAnimationFrame\(loop\)/);
 });

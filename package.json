@@ -1,6 +1,6 @@
 {
   "name": "stellar-legacy",
-  "version": "20.2.5",
+  "version": "20.2.6",
   "type": "module",
   "scripts": {
     "start": "node server/index.js",
@@ -18,5 +18,5 @@
   "engines": {
     "node": ">=18"
   },
-  "release": "v20.2.5-canvas-mobile-cache"
+  "release": "v20.2.6-npc-canvas-profile"
 }

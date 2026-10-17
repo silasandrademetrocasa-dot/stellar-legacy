@@ -1,3 +1,13 @@
+## V20.2.6 — Performance NPC (render LOD) + diagnóstico separado
+
+- `public/modules/npc-render-detail.js`: classificação `full`, `bars`, `sprite` somente para apresentação de NPCs comuns distantes no gráfico BAIXO.
+- `public/game.js`: caminho Canvas simplificado na qualidade BAIXA; preserva imagem original, chefes, eventos, selecionado; tempo JS e Canvas coletados separadamente apenas com diagnóstico ativo.
+- `public/modules/performance-monitor.js`: P95 de simulação e desenho, preservando a interface de medição antiga e limite de amostras.
+- `public/index.html`: duas métricas P95 adicionais em CONF → JOGO.
+- `tests/npc-render-detail-v2026.test.mjs`, `tests/performance-breakdown-v2026.test.mjs`: novos testes; `tests/performance-ui-v2022.test.mjs` atualizado para ordem de chamadas com medição separada.
+- `package.json`, `server/index.js`, imports frontend: versão 20.2.6.
+- Não modifica SQL, schemas, save, autenticação, PvP ou combate.
+
 ## V20.2.5 — otimização conservadora do Canvas (Android / BAIXA)
 
 - Fundo gráfico BAIXA pré-reduzido em Canvas 1024 px, cache LRU máx. 2 cenários (`modules/backdrop-raster-cache.js`).
