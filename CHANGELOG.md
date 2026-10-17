@@ -1,3 +1,9 @@
+## 21.5.1 — Correção WARFRONT e sincronização dos relés
+- Exibe erros de ingresso no mapa PvP; botão reconectar.
+- Leitura segura de A/B/C persistidos mesmo com sala temporariamente indisponível.
+- Eventos e capturas continuam exclusivos do servidor sincronizado.
+- Migração de leitura RLS aplicada no Supabase, sem alterações em saves ou donos.
+
 ## 21.4.0 — Operações de Elite e Domínio Persistente
 
 - Correção da perda de domínio dos relés A/B/C após F5, sala vazia, Render reiniciado ou mudança de sessão: estado gravado no Supabase, não na memória.

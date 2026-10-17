@@ -736,6 +736,13 @@ export async function removePlayerPresenceOnline() {
 
 
 
+// Leitura autenticada e SEM escrita: domínio no banco enquanto a sala está reconectando.
+export async function loadSectorOwnershipOnline(mapId){
+  const id=String(mapId||'');
+  if(!['b41','b42','b43'].includes(id))throw new Error('Mapa de controle inválido.');
+  return authedServerFetch(`/api/world/sector-state?mapId=${encodeURIComponent(id)}`);
+}
+
 // ===================== V13.1 WARFRONT =====================
 export async function loadWarfrontStateOnline() {
   return authedSupabaseFetch('/rest/v1/rpc/get_warfront_state_v131', {

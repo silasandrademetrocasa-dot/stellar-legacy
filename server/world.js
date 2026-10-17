@@ -1005,9 +1005,14 @@ export function attachSharedUniverse(server,{authenticate,authorizeJoin,loadLive
         const required=Math.max(1,Number(dest?.minLevel)||1,Number(sector?.min_level)||1);
         // Somente X-1..X-8 são territoriais; b41,b42,b43 são PvP públicos de nível mínimo.
         const wrongFaction=!admin&&territorial&&String(msg.territoryFaction||faction)!==faction;
-        if(!dest||dest.enabled===false||dest.gate||!validTerritory||!sectorValid||wrongFaction||(!admin&&level<required)||!faction){safeJsonSend(ws,{type:'join_error',reason:wrongFaction?'INVASÕES BLOQUEADAS':`Setor indisponível / nível mínimo ${required}`});return;}
+        if(!dest||dest.enabled===false||dest.gate||!validTerritory||!sectorValid||wrongFaction||(!admin&&level<required)||!faction){safeJsonSend(ws,{type:'join_error',code:'MAP_JOIN_DENIED',reason:wrongFaction?'INVASÕES BLOQUEADAS':`Setor indisponível / nível mínimo ${required}`});return;}
         const r=world.room(mapId,territory);
-        try{await r.ready;}catch(err){rooms.delete(r.key);safeJsonSend(ws,{type:'join_error',reason:'CONTROLE TERRITORIAL INDISPONÍVEL: configure o banco da conquista no Supabase.'});return;}
+        try{await r.ready;}catch(err){
+          rooms.delete(r.key);
+          console.error('[warfront-join]',{mapId,code:'WARFRONT_DB_UNAVAILABLE',detail:String(err?.message||err).slice(0,180)});
+          safeJsonSend(ws,{type:'join_error',code:'WARFRONT_DB_UNAVAILABLE',reason:'Falha na conexão do servidor com a persistência dos setores. Verifique SUPABASE_SERVICE_ROLE_KEY no Render e a migração no Supabase.'});
+          return;
+        }
         ws.room?.removeClient(ws);const p={userId:identity.user.id,callsign:identity.callsign||msg.callsign||'Pilot',pilotTitle:shortText(msg.pilotTitle||'Piloto Estelar',64),faction:faction,shipId:String(msg.shipId||'phoenix'),shipDesignId:msg.shipDesignId?shortText(msg.shipDesignId,64):null,level:level,x:Number(msg.x)||400,y:Number(msg.y)||400,hp:Number(msg.hp)||1,maxHp:Number(msg.maxHp)||1,shield:Number(msg.shield)||0,maxShield:Number(msg.maxShield)||0,angle:Number(msg.angle)||0,laserFiring:false,laserColor:'#76d9ff',laserAmmoId:'lcb10',laserAmmoName:'PLS-1',targetId:null,targetIsPlayer:false,pet:{owned:false},updatedAt:nowMs()};r.addClient(ws,p);return;
       }
       if(msg.type==='player_state')return ws.room?.updatePlayer(ws,msg);

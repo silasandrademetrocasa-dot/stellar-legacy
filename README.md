@@ -21,3 +21,7 @@ Abra **MISSÕES → CENTRO DE COMANDO V21** para ver Elite, Guerra e Temporada. 
 ### Guerra de Facções — Centro de Comando
 
 A tela **GUERRA** mostra os nove relés em 4-1/4-2/4-3, os suprimentos diários, histórico, campanhas, rankings e editor de campanhas/regras somente para ADM. O banco foi atualizado com as migrações `V21_5_0_GUERRA_FACCOES.sql` e `V21_5_0B_CLAN_SNAPSHOT.sql`. Consulte `INSTALACAO_GUERRA_FACCOES.md` para os passos de publicação e teste.
+
+
+## Correção de sincronização PvP
+Consulte `INSTALACAO_CORRECAO_PVP.md`.

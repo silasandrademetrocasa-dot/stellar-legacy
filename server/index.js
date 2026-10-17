@@ -13,7 +13,7 @@ import { warCampaignState,warRankings,safeWarCampaignInput,safeWarRulesInput } f
 
 const app = express();
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const RELEASE_VERSION = '21.5.0'; // único identificador de release nos endpoints HTTP
+const RELEASE_VERSION = '21.5.1'; // único identificador de release nos endpoints HTTP
 
 function normalizeSupabaseUrl(value = '') {
   let url = String(value || '').trim();
@@ -1650,6 +1650,16 @@ app.post('/api/player/location', requireUser, asyncRoute(async (req,res)=>{
   return res.json(data||{ok:true});
 }));
 
+// Read-only relay ownership for clients whose PvP websocket has not joined yet.
+// Uses the player's JWT + RLS. It NEVER accepts client-supplied capture/progress writes.
+app.get('/api/world/sector-state',requireUser,asyncRoute(async(req,res)=>{
+  const mapId=String(req.query.mapId||'');
+  if(!['b41','b42','b43'].includes(mapId))return res.status(400).json({error:'Mapa de disputa inválido.',code:'INVALID_SECTOR_MAP'});
+  const {data,error}=await req.sb.from('stellar_warfront_nodes').select('map_id,node_id,owner,revision,captured_at').eq('map_id',mapId).order('node_id');
+  if(error){console.warn('[sector-read]',error.code||'database_error');return res.status(503).json({error:'Não foi possível consultar o domínio dos setores.',code:'SECTOR_READ_UNAVAILABLE'});}
+  if(!Array.isArray(data)||data.length!==3)return res.status(503).json({error:'Setores ainda não inicializados no banco.',code:'SECTOR_DATA_MISSING'});
+  res.setHeader('Cache-Control','no-store');res.json({ok:true,mapId,nodes:data});
+}));
 app.get('/api/world/status', (req, res) => res.json({ ok: true, version: RELEASE_VERSION, ...sharedUniverse.stats() }));
 
 app.get('*', (req, res) => res.sendFile(path.join(__dirname, '../public/index.html')));
