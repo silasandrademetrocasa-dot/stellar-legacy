@@ -10,17 +10,28 @@ function percentile(values,p){
 }
 export function createPerformanceMonitor({capacity=SAMPLE_LIMIT}={}) {
   const limit=Math.max(10,Math.min(SAMPLE_LIMIT,Math.floor(Number(capacity)||SAMPLE_LIMIT)));
-  let enabled=false,prevAt=null,prevWork=null;
+  let enabled=false,prevAt=null,prevWork=null,prevTickAt=null;
+  const rafTicks=[];
   const frames=[];
   const sceneFrames={game:[],settings:[]};
   let prevContext=null;
   let framesSeen=0,stutters=0;
-  function clear(){frames.length=0;sceneFrames.game.length=0;sceneFrames.settings.length=0;framesSeen=0;stutters=0;prevAt=null;prevWork=null;prevContext=null;}
+  function clear(){frames.length=0;sceneFrames.game.length=0;sceneFrames.settings.length=0;rafTicks.length=0;framesSeen=0;stutters=0;prevAt=null;prevWork=null;prevContext=null;prevTickAt=null;}
   function setEnabled(value){
     const next=Boolean(value);
     if(enabled!==next){enabled=next;clear();}
   }
-  function pause(){prevAt=null;prevWork=null;prevContext=null;}
+  function pause(){prevAt=null;prevWork=null;prevContext=null;prevTickAt=null;}
+  function recordTick(at,accepted){
+    if(!enabled||!finiteNonnegative(at))return false;
+    const time=Number(at),previous=prevTickAt;prevTickAt=time;
+    if(previous===null)return false;
+    const interval=time-previous;
+    if(!Number.isFinite(interval)||interval<=0||interval>MAX_SAMPLE_GAP_MS)return false;
+    rafTicks.push({interval,accepted:!!accepted});
+    if(rafTicks.length>limit)rafTicks.shift();
+    return true;
+  }
   function record(at,workMs,targetFps=60,stages=null){
     if(!enabled||!finiteNonnegative(at)||!finiteNonnegative(workMs))return false;
     const time=Number(at),work=Number(workMs),target=Math.max(1,Math.min(240,Number(targetFps)||60));
@@ -57,8 +68,13 @@ export function createPerformanceMonitor({capacity=SAMPLE_LIMIT}={}) {
     const updates=sampleFrames.map(x=>x.update).filter(Number.isFinite),draws=sampleFrames.map(x=>x.draw).filter(Number.isFinite);
     const nums=k=>sampleFrames.map(f=>f[k]).filter(Number.isFinite);
     const totalMs=intervals.reduce((a,b)=>a+b,0);
+    const rafTotal=rafTicks.length,rafSkipped=rafTicks.filter(x=>!x.accepted).length;
+    const rafDuration=rafTicks.reduce((sum,x)=>sum+x.interval,0);
     return {
       enabled,
+      rafFps:rafTotal&&rafDuration>0?Math.round(rafTotal*10000/rafDuration)/10:null,
+      rafP95Ms:percentile(rafTicks.map(x=>x.interval),.95),
+      rafTotal,rafSkipped,rafAccepted:rafTotal-rafSkipped,
       samples:sampleFrames.length,
       fps:sampleFrames.length&&totalMs>0?Math.round((sampleFrames.length*1000/totalMs)*10)/10:null,
       frameP95Ms:percentile(intervals,.95),
@@ -79,7 +95,7 @@ export function createPerformanceMonitor({capacity=SAMPLE_LIMIT}={}) {
       totalLongFrames:stutters,
     };
   }
-  return {setEnabled,pause,record,snapshot,clear,isEnabled:()=>enabled};
+  return {setEnabled,pause,recordTick,record,snapshot,clear,isEnabled:()=>enabled};
 }
 
 // Apenas informações técnicas agregadas, sem user agent, ID, nome, email, token ou endereço.
@@ -92,6 +108,9 @@ export function formatPerformanceReport(snapshot,{version='?',quality='?',resolu
     `Resolução de tela: ${String(resolution).slice(0,24)}`,
     `Amostras: ${Math.max(0,Number(snapshot?.samples)||0)}`,
     `FPS observados: ${numeric(snapshot?.fps)}`,
+    `rAF bruto do navegador (amostras): ${numeric(snapshot?.rafFps)} FPS`,
+    `Intervalo rAF bruto p95: ${numeric(snapshot?.rafP95Ms,' ms')}`,
+    `Quadros pulados pelo limitador: ${Math.max(0,Number(snapshot?.rafSkipped)||0)} de ${Math.max(0,Number(snapshot?.rafTotal)||0)} chamadas rAF`,
     `FPS jogando: ${numeric(scenes?.game?.fps)} (${Math.max(0,Number(scenes?.game?.samples)||0)} amostras)`,
     `FPS em configurações: ${numeric(scenes?.settings?.fps)} (${Math.max(0,Number(scenes?.settings?.samples)||0)} amostras)`,
     `Intervalo entre quadros p95: ${numeric(snapshot?.frameP95Ms,' ms')}`,
@@ -110,7 +129,7 @@ export function formatPerformanceReport(snapshot,{version='?',quality='?',resolu
     `Heap JS do navegador: ${numeric(heapMb,' MB')} (se disponível)`,
     `Imagens no cache do jogo: ${Math.max(0,Number(cache?.count)||0)}`,
     `Imagens com falha: ${Math.max(0,Number(cache?.failed)||0)}`,
-    'Observação: as métricas jogando e em configurações são amostradas separadamente. Com CONF aberta o Canvas de fundo fica estático, mas a simulação continua. Espera entre quadros inclui limite de FPS, navegador, SO e outras tarefas; não equivale ao tempo da GPU. Não mede RAM total, GPU ou latência de rede.',
+    'Observação: rAF bruto é uma medida das chamadas recebidas do navegador; o limitador descarta parte delas. Jogando e configurações mantêm históricos separados que podem ser de sessões anteriores (até 240 amostras cada). Espera entre quadros não mede a GPU, RAM total ou latência de rede.',
   ];
   return data.join('\n');
 }

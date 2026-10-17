@@ -1,3 +1,13 @@
+## V20.2.10 — Diagnóstico rAF e tolerância de agendamento
+- Novo agendador isolado com tolerância pequena contra jitter de callbacks rAF: evita que um par de 16 ms seja penalizado por fração de milissegundo.
+- Monitor opt-in de FPS bruto do rAF, intervalos e rejeições por limite: diferencia tempo do navegador de quadros realmente simulados.
+- Preserva as regras do jogo, SQLs, sincronização e salvamento. Consulte `V20_2_10_RELATORIO.md`.
+
+## V20.2.10 — Diagnóstico rAF e tolerância de agendamento
+- Novo agendador isolado com tolerância pequena contra jitter de callbacks rAF: evita que um par de 16 ms seja penalizado por fração de milissegundo.
+- Monitor opt-in de FPS bruto do rAF, intervalos e rejeições por limite: diferencia tempo do navegador de quadros realmente simulados.
+- Preserva as regras do jogo, SQLs, sincronização e salvamento. Consulte `V20_2_10_RELATORIO.md`.
+
 ## V20.2.9 — Configurações Mobile, FPS por Cena
 - Interrompe apenas desenho atrás de CONF; simulação e sincronização continuam.
 - Renderização de configurações sob demanda; ranking renderizado somente na aba correspondente.
