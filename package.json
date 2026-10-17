@@ -1,6 +1,6 @@
 {
   "name": "stellar-legacy",
-  "version": "21.5.2",
+  "version": "21.5.3",
   "type": "module",
   "scripts": {
     "start": "node server/index.js",
@@ -19,5 +19,5 @@
   "engines": {
     "node": ">=18"
   },
-  "release": "guerra-faccoes-completa"
+  "release": "navegacao-camera-map-space"
 }

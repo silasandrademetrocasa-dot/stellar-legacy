@@ -1,3 +1,10 @@
+## 21.5.3 — Navegação e escala PvP
+- Câmera acompanhando o piloto perto do centro, com atraso máximo de 14 unidades.
+- Sprites sem alongamento/torção na curva (nave local e outros pilotos).
+- Mapas PvP 4-1/4-2/4-3 ampliados aproximadamente 20% por eixo; portais fallback alinhados.
+- Velocidade de viagem 12% menor nos mapas PvP, mantendo vantagem proporcional da CONF de corrida. PvE não alterado.
+- Migração SQL de mapas, sem redefinir A/B/C ou saves; testes automatizados.
+
 ## 21.5.2 — Captura estável e confirmação no banco
 - Relés A/B/C avançam pelo tempo real decorrido no servidor, independente do `dt` limitado da simulação de combate.
 - Prazo máximo para a confirmação, tratamento de conflito e diagnóstico de erro de gravação.
