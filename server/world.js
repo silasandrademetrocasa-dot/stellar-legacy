@@ -468,9 +468,17 @@ class Room {
       if(node.contested)continue;
       if(active.length===1){
         const faction=active[0],weight=Math.max(1,Math.min(3,counts[faction]));
-        if(node.owner===faction){node.challenger=null;node.progress=0;continue;}
-        if(node.challenger!==faction){node.challenger=faction;node.progress=0;}
+        if(node.owner===faction){
+          // Defesa real: um inimigo iniciou captura >=20%, recuou e a facção dona permaneceu.
+          if(node.challenger&&node.challenger!==faction&&node.defenseEligible){
+            const defender=candidates[faction][0]?.player;
+            if(defender?.userId)this.world.recordWarDefense?.(this.mapId,node.id,faction,defender.userId).catch(err=>console.warn('Defesa:',err?.message));
+          }
+          node.challenger=null;node.progress=0;node.defenseEligible=false;continue;
+        }
+        if(node.challenger!==faction){node.challenger=faction;node.progress=0;node.defenseEligible=false;}
         node.progress=Math.min(100,node.progress+WARFRONT_CAPTURE_RATE*weight*dt);
+        if(node.progress>=20)node.defenseEligible=true;
         if(node.progress>=100&&!node.persisting){
           // Só aplicar a mudança depois do COMMIT. Na falha, o dono antigo permanece.
           const actor=candidates[faction][0]?.player||null;
@@ -481,7 +489,7 @@ class Room {
             node.owner=row.owner;
             node.revision=Number(row.revision)||expectedRevision+1;
             node.capturedAt=Date.parse(row.captured_at||'')||Date.now();
-            node.progress=0;node.challenger=null;
+            node.progress=0;node.challenger=null;node.defenseEligible=false;
             const change={type:'captured',node,faction,formerOwner,actor,allies:counts[faction]};
             this.world.broadcastGlobalAnnouncement({
               kind:'warfront_point',key:`warfront_point:${this.mapId}:${node.id}:${faction}:${node.revision}`,
@@ -499,7 +507,7 @@ class Room {
             try{const rows=await this.world.loadWarfront(this.mapId);const saved=rows.find(r=>r.node_id===node.id);
               if(saved){node.owner=saved.owner;node.revision=Number(saved.revision)||0;node.capturedAt=Date.parse(saved.captured_at||'')||0;}
             }catch{}
-            node.progress=0;node.challenger=null;
+            node.progress=0;node.challenger=null;node.defenseEligible=false;
             const owners=this.warfrontControl.nodes.map(n=>n.owner);
             this.warfrontFullController=owners[0]&&owners.every(o=>o===owners[0])?owners[0]:null;
             this.broadcast({type:'warfront_control',warfront:this.warfrontPayload(),serverTime:Date.now()});
@@ -507,7 +515,14 @@ class Room {
         }
       }else if(node.challenger&&node.progress>0){
         node.progress=Math.max(0,node.progress-WARFRONT_DECAY_RATE*dt);
-        if(node.progress<=0)node.challenger=null;
+        if(node.progress<=0){
+          // Defesa somente após ameaça real >=20%, invasor ausente e defensor da facção presente.
+          const defender=candidates[node.owner]?.[0]?.player;
+          if(node.defenseEligible&&defender?.userId&&!node.contested){
+            this.world.recordWarDefense?.(this.mapId,node.id,node.owner,defender.userId).catch(err=>console.warn('Defesa:',err?.message));
+          }
+          node.challenger=null;node.defenseEligible=false;
+        }
       }
     }
     this.refreshWarfrontDomination(now,lastChange);
@@ -842,7 +857,7 @@ class Room {
   }
 }
 
-export function attachSharedUniverse(server,{authenticate,authorizeJoin,loadLiveOps,loadBattleGroup,loadNpcConfig,loadWorldConfig,loadPlayerEventProgress,recordPlayerEventProgress,loadWarfront,persistCapture,recordEliteEvent}){
+export function attachSharedUniverse(server,{authenticate,authorizeJoin,loadLiveOps,loadBattleGroup,loadNpcConfig,loadWorldConfig,loadPlayerEventProgress,recordPlayerEventProgress,loadWarfront,persistCapture,recordEliteEvent,recordWarDefense}){
   const wss=new WebSocketServer({
     server,
     path:'/ws',
@@ -853,6 +868,7 @@ export function attachSharedUniverse(server,{authenticate,authorizeJoin,loadLive
     }
   });const rooms=new Map();
   const world={
+    recordWarDefense:recordWarDefense||(()=>Promise.resolve(false)),
     loadWarfront:loadWarfront||(()=>Promise.reject(new Error('Sem conexão com o banco de relés'))),
     persistCapture:persistCapture||(()=>Promise.reject(new Error('Sem gravação de relés'))),
     recordEliteEvent:recordEliteEvent||(()=>Promise.resolve()),

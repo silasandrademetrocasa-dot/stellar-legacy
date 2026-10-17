@@ -17,3 +17,7 @@ Não altera intencionalmente gameplay e dados de jogadores. Crie primeiro receit
 
 ## V21.3.0 — pacote unificado
 Abra **MISSÕES → CENTRO DE COMANDO V21** para ver Elite, Guerra e Temporada. Mais detalhes em `V21_3_0_RELATORIO.md`.
+
+### Guerra de Facções — Centro de Comando
+
+A tela **GUERRA** mostra os nove relés em 4-1/4-2/4-3, os suprimentos diários, histórico, campanhas, rankings e editor de campanhas/regras somente para ADM. O banco foi atualizado com as migrações `V21_5_0_GUERRA_FACCOES.sql` e `V21_5_0B_CLAN_SNAPSHOT.sql`. Consulte `INSTALACAO_GUERRA_FACCOES.md` para os passos de publicação e teste.

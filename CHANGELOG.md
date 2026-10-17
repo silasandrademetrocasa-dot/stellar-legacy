@@ -894,3 +894,11 @@ Editor visual de ingredientes, produtos e efeitos com prévias, duplicação ina
 - Pacote único V21.0–21.3: cinco módulos novos testáveis, painel responsivo, monitoramento de metas elite, placar Warfront, temporadas, atalho instalável Android.
 - Não gera itens ou moedas novos; não muda SQL, combate, banco ou salvamento.
 - Nota: motor monolítico continua sendo migrado gradualmente, sem refatoração arriscada nesta entrega.
+
+## 21.5.0 — Guerra de Facções
+- Histórico de conquistas persistido no banco e pontuação por captura/defesa.
+- Suprimentos diários por territórios controlados e recompensas por campanha, com limite e resgate único.
+- Rankings de facção, pilotos e clãs com filiação histórica registrada no evento.
+- Campanhas com período configurável, encerramento automático por data e domínio territorial permanente.
+- Editor visual mobile no Centro de Comando → Guerra.
+- SQLs V21_5_0 e V21_5_0B aplicados e validados no Supabase conectado.

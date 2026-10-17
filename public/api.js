@@ -1088,3 +1088,11 @@ export async function claimEliteOperationOnline(objectiveId){return authedServer
 
 export async function loadAdminEliteObjectivesOnline(){return authedServerFetch('/api/admin/elite/objectives',{},false);}
 export async function saveAdminEliteObjectiveOnline(payload){return authedServerFetch('/api/admin/elite/objectives',{method:'POST',body:JSON.stringify(payload)},false);}
+
+// Campanhas e domínio: APIs autenticadas; nenhum campo de pontuação é enviado pelo cliente.
+export async function loadWarCampaignsOnline(){return authedServerFetch('/api/war/campaigns',{},false);}
+export async function claimWarSupplyOnline(){return authedServerFetch('/api/war/supply/claim',{method:'POST',body:'{}'},false);}
+export async function claimWarCampaignOnline(id){return authedServerFetch(`/api/war/campaigns/${encodeURIComponent(String(id))}/claim`,{method:'POST',body:'{}'},false);}
+export async function loadAdminWarCampaignsOnline(){return authedServerFetch('/api/admin/war/campaigns',{},false);}
+export async function saveAdminWarCampaignOnline(payload){return authedServerFetch('/api/admin/war/campaigns',{method:'POST',body:JSON.stringify(payload)},false);}
+export async function saveAdminWarRulesOnline(payload){return authedServerFetch('/api/admin/war/rules',{method:'POST',body:JSON.stringify(payload)},false);}

@@ -9,10 +9,11 @@ import { createClient } from '@supabase/supabase-js';
 import { randomUUID } from 'crypto';
 import { attachSharedUniverse } from './world.js';
 import { eliteStatus } from './elite-operations.js';
+import { warCampaignState,warRankings,safeWarCampaignInput,safeWarRulesInput } from './war-campaigns.js';
 
 const app = express();
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const RELEASE_VERSION = '21.4.0'; // único identificador de release nos endpoints HTTP
+const RELEASE_VERSION = '21.5.0'; // único identificador de release nos endpoints HTTP
 
 function normalizeSupabaseUrl(value = '') {
   let url = String(value || '').trim();
@@ -1501,6 +1502,62 @@ app.post('/api/admin/elite/objectives',requireUser,asyncRoute(async(req,res)=>{
  if(error)return res.status(400).json({error:error.message});res.json({ok:true,item:data});
 }));
 
+
+// Guerra de Facções: painel e rankings sempre originados do Supabase, nunca do save local.
+app.get('/api/war/campaigns',requireUser,asyncRoute(async(req,res)=>{
+ const sb=await requireEliteAdmin();
+ const queries=await Promise.all([
+  sb.from('stellar_war_campaigns').select('*').order('starts_at',{ascending:false}).limit(20),
+  sb.from('stellar_warfront_nodes').select('map_id,node_id,owner,captured_at,revision').order('map_id'),
+  sb.from('stellar_war_rules').select('*').eq('id',1).single(),
+  sb.from('stellar_war_actions').select('kind,map_id,node_id,faction,occurred_at,points').order('occurred_at',{ascending:false}).limit(25),
+  sb.from('stellar_war_scores').select('campaign_id,user_id,faction,clan_id,points,captures,defenses').order('points',{ascending:false}).limit(500),
+  sb.from('stellar_war_supply_claims').select('claim_day').eq('user_id',req.user.id).order('claim_day',{ascending:false}).limit(1),
+  sb.from('stellar_war_campaign_claims').select('campaign_id').eq('user_id',req.user.id).limit(50),
+  req.sb.rpc('is_game_admin_v1763',{p_uid:req.user.id})
+ ]);
+ const failed=queries.find(q=>q.error);if(failed)return res.status(503).json({error:'Guerra indisponível. Verifique a migração do banco.',detail:failed.error.message});
+ const [campaigns,nodes,rules,actions,scores,supply,claimed,adm]=queries.map(q=>q.data);
+ const active=(campaigns||[]).find(c=>warCampaignState(c)==='ativa')||null;
+ const recent=(campaigns||[]).filter(c=>c.enabled).slice(0,8);
+ const targetIds=new Set(recent.map(c=>c.id));const participants=(scores||[]).filter(s=>targetIds.has(s.campaign_id));
+ const clanIds=[...new Set(participants.map(s=>s.clan_id).filter(Boolean))];
+ const clans=clanIds.length?await sb.from('clans').select('id,tag,name').in('id',clanIds):{data:[]};
+ const claimsSet=new Set((claimed||[]).map(c=>c.campaign_id));
+ const campaignRows=recent.map(c=>{
+   const ranking=warRankings(c,participants,[],clans.data||[]);
+   const mine=participants.find(s=>s.campaign_id===c.id&&s.user_id===req.user.id)||null;
+   const best=ranking.factions[0]?.points||0;
+   const eligible=warCampaignState(c)==='encerrada'&&mine&&Number(mine.points)>=Number(c.min_points);
+   // Não publicar UUIDs dos pilotos de outras contas no endpoint.
+   ranking.pilots=ranking.pilots.map(p=>({rank:p.rank,pilot:p.userId===req.user.id?'VOCÊ':`PILOTO #${p.rank}`,isYou:p.userId===req.user.id,faction:p.faction,points:p.points,captures:p.captures,defenses:p.defenses}));
+   return {id:c.id,title:c.title,starts_at:c.starts_at,ends_at:c.ends_at,state:warCampaignState(c),min_points:c.min_points,reward_credits:c.reward_credits,reward_stl:c.reward_stl,my_points:Number(mine?.points)||0,my_faction:mine?.faction||null,claimable:Boolean(eligible&&!claimsSet.has(c.id)),claimed:claimsSet.has(c.id),winner:ranking.factions.filter(f=>f.points===best&&best>0).map(f=>f.faction),ranking};
+ });
+ const today=new Intl.DateTimeFormat('en-CA',{timeZone:'America/Sao_Paulo',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
+ res.json({ok:true,nodes:nodes||[],rules:rules||{},actions:actions||[],campaigns:campaignRows,active_id:active?.id||null,supply_claimed_today:supply?.[0]?.claim_day===today,isAdmin:adm===true});
+}));
+app.post('/api/war/supply/claim',requireUser,asyncRoute(async(req,res)=>{
+ const {data,error}=await req.sb.rpc('stellar_claim_war_supply');if(error)return res.status(409).json({error:error.message});res.json(data);
+}));
+app.post('/api/war/campaigns/:id/claim',requireUser,asyncRoute(async(req,res)=>{
+ const id=String(req.params.id);if(!/^[0-9a-f-]{36}$/i.test(id))return res.status(400).json({error:'Campanha inválida.'});
+ const {data,error}=await req.sb.rpc('stellar_claim_war_campaign',{p_campaign_id:id});if(error)return res.status(409).json({error:error.message});res.json(data);
+}));
+async function requireWarAdmin(req,res){const {data,error}=await req.sb.rpc('is_game_admin_v1763',{p_uid:req.user.id});if(error||data!==true){res.status(403).json({error:'Somente ADM.'});return null;}return requireEliteAdmin();}
+app.get('/api/admin/war/campaigns',requireUser,asyncRoute(async(req,res)=>{
+ const sb=await requireWarAdmin(req,res);if(!sb)return;const [c,r]=await Promise.all([sb.from('stellar_war_campaigns').select('*').order('starts_at',{ascending:false}).limit(100),sb.from('stellar_war_rules').select('*').eq('id',1).single()]);
+ if(c.error||r.error)return res.status(503).json({error:c.error?.message||r.error?.message});res.json({campaigns:c.data||[],rules:r.data});
+}));
+app.post('/api/admin/war/rules',requireUser,asyncRoute(async(req,res)=>{
+ const sb=await requireWarAdmin(req,res);if(!sb)return;let rule;try{rule=safeWarRulesInput(req.body);}catch(e){return res.status(400).json({error:e.message});}
+ const {data,error}=await sb.from('stellar_war_rules').update({...rule,updated_at:new Date().toISOString()}).eq('id',1).select().single();if(error)return res.status(400).json({error:error.message});res.json({ok:true,rule:data});
+}));
+app.post('/api/admin/war/campaigns',requireUser,asyncRoute(async(req,res)=>{
+ const sb=await requireWarAdmin(req,res);if(!sb)return;let payload;try{payload=safeWarCampaignInput(req.body);}catch(e){return res.status(400).json({error:e.message});}
+ const id=String(req.body?.id||'');if(id&&!/^[0-9a-f-]{36}$/i.test(id))return res.status(400).json({error:'ID inválido.'});if(id)payload.id=id;
+ const {data,error}=await sb.from('stellar_war_campaigns').upsert(payload,{onConflict:'id'}).select().single();if(error)return res.status(409).json({error:error.message});res.json({ok:true,campaign:data});
+}));
+
 app.get('/api/save', requireUser, asyncRoute(async (req, res) => {
   const { data, error } = await req.sb.from('game_saves').select('state,updated_at').eq('user_id', req.user.id).maybeSingle();
   if (error) return res.status(400).json({ error: error.message });
@@ -1633,6 +1690,11 @@ const sharedUniverse = attachSharedUniverse(server, {
     const row=Array.isArray(data)?data[0]:data;
     if(!row||row.owner!==faction)throw new Error('Captura não confirmada no banco.');
     return row;
+  },
+  recordWarDefense:async(mapId,nodeId,faction,actorUserId)=>{
+    const sb=await requireEliteAdmin();
+    const {data,error}=await sb.rpc('stellar_record_war_defense',{p_map_id:mapId,p_node_id:nodeId,p_faction:faction,p_actor:actorUserId});
+    if(error)throw new Error(error.message);return data===true;
   },
   recordEliteEvent:async(userId,kind)=>{
     const sb=await requireEliteAdmin();
