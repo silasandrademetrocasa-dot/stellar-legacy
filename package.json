@@ -1,6 +1,6 @@
 {
   "name": "stellar-legacy",
-  "version": "20.2.0",
+  "version": "20.2.1",
   "type": "module",
   "scripts": {
     "start": "node server/index.js",
@@ -18,5 +18,5 @@
   "engines": {
     "node": ">=18"
   },
-  "release": "v20.2.0-fundacao-tests-build-guard"
+  "release": "v20.2.1-motor-grafico-cache-seguro"
 }

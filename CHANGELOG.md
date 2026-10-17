@@ -1,3 +1,9 @@
+## V20.2.1 — Motor gráfico (Etapa 2)
+- Cache de imagens isolado em módulo com retry e limpeza cuidadosa de fundos inativos.
+- Sprites de entidades protegidos; conteúdo visual não alterado.
+- Testes do cache integrados à verificação de release.
+- Sem SQL novo, sem alteração em saves e regras de combate.
+
 ## V20.1.4 — Botões CONF 1 / CONF 2 no HUD NAVE (mobile)
 
 - Interface Android: troca de configurações dentro do painel NAVE, independente do menu MUNIÇÕES recolhido.
