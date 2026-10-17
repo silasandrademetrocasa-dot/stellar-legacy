@@ -1,3 +1,9 @@
+## V20.3.0 — Editor ADM de Missões Visuais
+- Modelos de missão: Patrulha NPC, Coleta minério, Expedição mista.
+- Botão duplicar rascunho sem sobrescrever original.
+- Prévia responsiva em tempo real e validação de objetivos e prêmios.
+- Nenhuma migração SQL nem novas rotas de backend.
+
 ## V20.2.10 — Diagnóstico rAF e tolerância de agendamento
 - Novo agendador isolado com tolerância pequena contra jitter de callbacks rAF: evita que um par de 16 ms seja penalizado por fração de milissegundo.
 - Monitor opt-in de FPS bruto do rAF, intervalos e rejeições por limite: diferencia tempo do navegador de quadros realmente simulados.

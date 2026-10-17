@@ -3051,3 +3051,19 @@ body[data-quality="low"] .pet-gear {
 .perf-diag-overlay b{font-size:14px;letter-spacing:.06em;color:#dffbff}
 .perf-diag-overlay small{font-size:9px;color:#9ed2df}
 @media(max-width:680px){.perf-diag-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.perf-diag-grid>div{padding:7px 8px}.perf-diag-grid b{font-size:14px}.perf-diag-overlay{left:6px;bottom:calc(var(--bottom-dock-height,156px) + 12px);padding:5px 7px}}
+
+/* V20.3.0 — Missões visuais / modelos, prévia e duplicação (ADM). */
+.adm-mission-preset-toolbar{display:flex;align-items:center;flex-wrap:wrap;gap:8px;margin:12px 0;padding:11px;border:1px solid rgba(88,201,244,.28);border-radius:10px;background:rgba(4,22,38,.7)}
+.adm-mission-preset-toolbar>b{flex-basis:100%;font-size:10px;letter-spacing:.1em;color:#93deff}
+.adm-mission-preset-toolbar button{white-space:normal;min-height:36px}
+.adm-mission-preview{display:flex;flex-direction:column;gap:7px;margin:14px 0 6px;padding:12px;border:1px solid rgba(91,214,245,.36);border-radius:12px;background:rgba(9,31,50,.92);color:#d9f6ff;overflow-wrap:anywhere}
+.adm-mission-preview>b{font-size:10px;letter-spacing:.1em;color:#90dcfa}
+.adm-mission-preview>strong{font-size:15px}
+.adm-mission-preview>small{font-size:11px;color:#b7d5e4}
+.adm-mission-preview>ul{margin:5px 0;padding-left:20px;font-size:12px;line-height:1.6}
+.adm-mission-validation{font-size:11px;padding:7px 10px;border-radius:7px}
+.adm-mission-validation.warning{background:rgba(255,194,71,.11);border:1px solid rgba(255,194,71,.28);color:#ffe3aa}
+.adm-mission-validation.valid{background:rgba(69,195,133,.1);border:1px solid rgba(69,195,133,.25);color:#c1ffd6}
+.admin-content-line{flex-wrap:wrap}
+.admin-content-line>button{flex-shrink:0}
+@media(max-width:620px){.adm-mission-preset-toolbar button{flex:1 1 120px}.admin-content-line span{flex-basis:100%}.admin-content-line>button{flex:1 1 70px}}

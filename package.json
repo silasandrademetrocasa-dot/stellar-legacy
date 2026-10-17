@@ -1,6 +1,6 @@
 {
   "name": "stellar-legacy",
-  "version": "20.2.10",
+  "version": "20.3.0",
   "type": "module",
   "scripts": {
     "start": "node server/index.js",
@@ -18,5 +18,5 @@
   "engines": {
     "node": ">=18"
   },
-  "release": "v20.2.10-frame-scheduler-profiler"
+  "release": "v20.3.0-admin-mission-builder"
 }
