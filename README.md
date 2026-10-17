@@ -1,3 +1,9 @@
+# Stellar Legacy V20.2.9 — Central de Configurações Mobile
+
+- Instale o ZIP completo via GitHub Actions, depois de validar a V20.2.8.
+- Novos dados de FPS separados entre jogo e configurações em CONF > JOGO.
+- Leia `V20_2_9_RELATORIO.md` para detalhes e cuidados.
+
 # STELLAR LEGACY — V20.2.8 (HUD MOBILE OTIMIZADO)
 
 **Base:** V20.2.7 completa, sem migrações SQL.

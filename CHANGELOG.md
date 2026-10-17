@@ -1,3 +1,9 @@
+## V20.2.9 — Configurações Mobile, FPS por Cena
+- Interrompe apenas desenho atrás de CONF; simulação e sincronização continuam.
+- Renderização de configurações sob demanda; ranking renderizado somente na aba correspondente.
+- FPS e amostras separados para jogo e configurações; evita medir transições como travamentos.
+- Atualização das métricas do painel só enquanto ele está visível.
+
 ## V20.2.8 — Otimização do HUD guiada por diagnóstico (Android / BAIXA)
 - Diagnóstico recebido da V20.2.7: 14,7 FPS; interface HUD p95 22,4 ms; jogabilidade p95 4,8 ms; serviços p95 2 ms; Canvas p95 8,8 ms.
 - Novo módulo `public/modules/hud-content-cache.js`: só altera textos e URLs de sprites do HUD quando seus valores mudarem.

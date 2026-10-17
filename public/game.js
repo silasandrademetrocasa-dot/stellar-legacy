@@ -1,21 +1,21 @@
-import { createHudContentCache } from './modules/hud-content-cache.js?v=20.2.8';
-import { createAuxiliaryWorkScheduler } from './modules/aux-work-scheduler.js?v=20.2.8';
-import { npcVisualDetail } from './modules/npc-render-detail.js?v=20.2.8';
-import { createBackdropRasterCache } from './modules/backdrop-raster-cache.js?v=20.2.8';
-import { createTextWidthCache } from './modules/text-width-cache.js?v=20.2.8';
-import { createHudUpdateScheduler } from './modules/hud-update-scheduler.js?v=20.2.8';
-import { createAssetCache, flattenAssetPaths } from './modules/asset-cache.js?v=20.2.8';
-import { createSceneGradientCache } from './modules/scene-gradient-cache.js?v=20.2.8';
-import { createPerformanceMonitor, formatPerformanceReport } from './modules/performance-monitor.js?v=20.2.8';
-import { QUALITY_PROFILES, initialAutoQualityForDevice } from './modules/quality-profiles.js?v=20.2.8';
-import { freshBattleConfigsV2013, captureCombatBuildV2013, exchangeCombatBuildV2013, combatConfigRemainingV2013, clampStoredShieldV2013 } from './combat-config-v2013.js?v=20.2.8';
-import { FACTIONS, SHIPS, ITEMS, LASER_AMMO, ROCKETS, NPC_TYPES, MAPS, RESOURCES } from './data.js?v=20.2.8';
-import { repairPulseSettings } from './repair-balance.js?v=20.2.8';
-import { xpThresholdV1770, xpThresholdV1915, migratePilotXpV1915 } from './level-curve-v1915.js?v=20.2.8';
-import { applyRecruitBonusV2012, eliteRouteSnapshotV2012, freshEliteRouteJournalV2012, ELITE_ROUTE_TARGETS_V2012, novaTierPriceV2012 } from './progression-plan-v2012.js?v=20.2.8';
-import { GAME_ASSETS } from './assets/v17/manifest.js?v=20.2.8';
-import { signUp, signIn, beginGoogleSignIn, restoreGoogleSignInFromUrl, requestPasswordReset, restorePasswordRecoveryFromUrl, restoreSession, signOutLocal, checkGameSession, endGameSession, getUser, getSessionCredentials, loadCloudSave, saveCloudSave, updateCallsign, updatePassword, loadRankings, loadAuctionBids, saveAuctionBidOnline, markAuctionBidStatusOnline, loadAuctionMarket, upsertPlayerPresenceOnline, loadMapPresenceOnline, savePlayerLocationCheckpointOnline, loadPlayerLocationCheckpointOnline, removePlayerPresenceOnline, queuePvpAttackOnline, consumePvpDamageEventsOnline, syncArenaProfileOnline, loadArenaState, loadArenaDailyRewardStatus, claimArenaDailyReward, loadArenaOpponents, loadArenaHistory, arenaAttackOnline, listClansOnline, loadMyClanOnline, createClanOnline, joinClanOnline, getClanRequestsOnline, reviewClanRequestOnline, cancelClanRequestOnline, setClanMemberRoleOnline, leaveClanOnline, transferClanCreditsOnline, claimClanCreditGrantsOnline, recordClanAlienKillOnline, getPremiumShopOnline, testPurchasePremiumOnline, adminPreviewPremiumStageOnline, adminSimulatePremiumStageOnline, getPremiumStageCatalogOnline, loadWarfrontStateOnline, hitWorldBossOnline, claimWorldBossRewardOnline, declareClanWarOnline, recordClanWarScoreOnline, loadLiveOpsOnline, adminUpdateLiveEventScheduleOnline, purchaseLiveCatalogOnline, economyActionOnline, getChatHistoryOnline, sendChatMessageOnline, redeemGameCouponOnline, getMyDesignersOnline, setDesignLoadoutOnline, claimGateDroneDesignOnline, claimEventDesignerOnline, getAdminStatus, adminSearchAccounts, adminRecentActions, adminBanAccount, adminUnbanAccount, adminResetAccount, adminDeleteAccount, pushTelemetryBatch, adminTelemetryOverview, adminPlayerTelemetry, getBattleGroupOnline, createBattleGroupOnline, inviteBattleGroupOnline, searchBattleGroupPlayersOnline, inviteBattleGroupUserOnline, respondBattleGroupInviteOnline, leaveBattleGroupOnline, kickBattleGroupMemberOnline, setBattleGroupRallyOnline, loadRuntimeConfigOnline, loadNpcRuntimeConfigOnline, loadWorldRuntimeConfigOnline, loadSystemsRuntimeConfigOnline, loadAdminRuntimeMonitorOnline, adminUpdateRuntimeModuleOnline, adminUpdateNpcRuntimeOnline, adminUpdateNpcSpawnRuntimeOnline, adminUpdateWorldMapOnline, adminUpdateWorldResourceOnline, adminUpdateWorldSectorOnline, adminUpdateWorldPortalOnline, adminUpdateWorldResourcePoolOnline, adminUpdateMissionCategoryOnline, adminUpdateEconomyServiceOnline, adminUpdateCraftingRecipeOnline, loadBattlePassRuntimeConfigOnline, adminUpdateBattlePassSeasonOnline, adminUpdateBattlePassTierOnline, loadShopsRuntimeConfigOnline, adminUpdateCommonShopItemOnline, adminUpdatePremiumShopItemOnline, loadBonusConfigOnline, adminUpdateBonusConfigOnline, adminCouponDashboardOnline, adminCreateCouponOnline, adminSetCouponActiveOnline, loadGalaxyGatesOnline, adminUpdateGalaxyGateOnline, adminUpsertCustomMissionOnline, adminDeleteCustomMissionOnline, adminCreateCraftRecipeOnline, adminCreateEconomyServiceOnline, adminCreatePassSeasonOnline, loadAuctionRulesOnline, adminUpdateAuctionRulesOnline, loadBalanceRuntimeOnline, adminUpdateBalanceOnline } from './api.js?v=20.2.8';
-import { SharedUniverseClient } from './world.js?v=20.2.8';
+import { createHudContentCache } from './modules/hud-content-cache.js?v=20.2.9';
+import { createAuxiliaryWorkScheduler } from './modules/aux-work-scheduler.js?v=20.2.9';
+import { npcVisualDetail } from './modules/npc-render-detail.js?v=20.2.9';
+import { createBackdropRasterCache } from './modules/backdrop-raster-cache.js?v=20.2.9';
+import { createTextWidthCache } from './modules/text-width-cache.js?v=20.2.9';
+import { createHudUpdateScheduler } from './modules/hud-update-scheduler.js?v=20.2.9';
+import { createAssetCache, flattenAssetPaths } from './modules/asset-cache.js?v=20.2.9';
+import { createSceneGradientCache } from './modules/scene-gradient-cache.js?v=20.2.9';
+import { createPerformanceMonitor, formatPerformanceReport } from './modules/performance-monitor.js?v=20.2.9';
+import { QUALITY_PROFILES, initialAutoQualityForDevice } from './modules/quality-profiles.js?v=20.2.9';
+import { freshBattleConfigsV2013, captureCombatBuildV2013, exchangeCombatBuildV2013, combatConfigRemainingV2013, clampStoredShieldV2013 } from './combat-config-v2013.js?v=20.2.9';
+import { FACTIONS, SHIPS, ITEMS, LASER_AMMO, ROCKETS, NPC_TYPES, MAPS, RESOURCES } from './data.js?v=20.2.9';
+import { repairPulseSettings } from './repair-balance.js?v=20.2.9';
+import { xpThresholdV1770, xpThresholdV1915, migratePilotXpV1915 } from './level-curve-v1915.js?v=20.2.9';
+import { applyRecruitBonusV2012, eliteRouteSnapshotV2012, freshEliteRouteJournalV2012, ELITE_ROUTE_TARGETS_V2012, novaTierPriceV2012 } from './progression-plan-v2012.js?v=20.2.9';
+import { GAME_ASSETS } from './assets/v17/manifest.js?v=20.2.9';
+import { signUp, signIn, beginGoogleSignIn, restoreGoogleSignInFromUrl, requestPasswordReset, restorePasswordRecoveryFromUrl, restoreSession, signOutLocal, checkGameSession, endGameSession, getUser, getSessionCredentials, loadCloudSave, saveCloudSave, updateCallsign, updatePassword, loadRankings, loadAuctionBids, saveAuctionBidOnline, markAuctionBidStatusOnline, loadAuctionMarket, upsertPlayerPresenceOnline, loadMapPresenceOnline, savePlayerLocationCheckpointOnline, loadPlayerLocationCheckpointOnline, removePlayerPresenceOnline, queuePvpAttackOnline, consumePvpDamageEventsOnline, syncArenaProfileOnline, loadArenaState, loadArenaDailyRewardStatus, claimArenaDailyReward, loadArenaOpponents, loadArenaHistory, arenaAttackOnline, listClansOnline, loadMyClanOnline, createClanOnline, joinClanOnline, getClanRequestsOnline, reviewClanRequestOnline, cancelClanRequestOnline, setClanMemberRoleOnline, leaveClanOnline, transferClanCreditsOnline, claimClanCreditGrantsOnline, recordClanAlienKillOnline, getPremiumShopOnline, testPurchasePremiumOnline, adminPreviewPremiumStageOnline, adminSimulatePremiumStageOnline, getPremiumStageCatalogOnline, loadWarfrontStateOnline, hitWorldBossOnline, claimWorldBossRewardOnline, declareClanWarOnline, recordClanWarScoreOnline, loadLiveOpsOnline, adminUpdateLiveEventScheduleOnline, purchaseLiveCatalogOnline, economyActionOnline, getChatHistoryOnline, sendChatMessageOnline, redeemGameCouponOnline, getMyDesignersOnline, setDesignLoadoutOnline, claimGateDroneDesignOnline, claimEventDesignerOnline, getAdminStatus, adminSearchAccounts, adminRecentActions, adminBanAccount, adminUnbanAccount, adminResetAccount, adminDeleteAccount, pushTelemetryBatch, adminTelemetryOverview, adminPlayerTelemetry, getBattleGroupOnline, createBattleGroupOnline, inviteBattleGroupOnline, searchBattleGroupPlayersOnline, inviteBattleGroupUserOnline, respondBattleGroupInviteOnline, leaveBattleGroupOnline, kickBattleGroupMemberOnline, setBattleGroupRallyOnline, loadRuntimeConfigOnline, loadNpcRuntimeConfigOnline, loadWorldRuntimeConfigOnline, loadSystemsRuntimeConfigOnline, loadAdminRuntimeMonitorOnline, adminUpdateRuntimeModuleOnline, adminUpdateNpcRuntimeOnline, adminUpdateNpcSpawnRuntimeOnline, adminUpdateWorldMapOnline, adminUpdateWorldResourceOnline, adminUpdateWorldSectorOnline, adminUpdateWorldPortalOnline, adminUpdateWorldResourcePoolOnline, adminUpdateMissionCategoryOnline, adminUpdateEconomyServiceOnline, adminUpdateCraftingRecipeOnline, loadBattlePassRuntimeConfigOnline, adminUpdateBattlePassSeasonOnline, adminUpdateBattlePassTierOnline, loadShopsRuntimeConfigOnline, adminUpdateCommonShopItemOnline, adminUpdatePremiumShopItemOnline, loadBonusConfigOnline, adminUpdateBonusConfigOnline, adminCouponDashboardOnline, adminCreateCouponOnline, adminSetCouponActiveOnline, loadGalaxyGatesOnline, adminUpdateGalaxyGateOnline, adminUpsertCustomMissionOnline, adminDeleteCustomMissionOnline, adminCreateCraftRecipeOnline, adminCreateEconomyServiceOnline, adminCreatePassSeasonOnline, loadAuctionRulesOnline, adminUpdateAuctionRulesOnline, loadBalanceRuntimeOnline, adminUpdateBalanceOnline } from './api.js?v=20.2.9';
+import { SharedUniverseClient } from './world.js?v=20.2.9';
 
 const canvas = document.querySelector('#game');
 const ctx = canvas.getContext('2d');
@@ -133,9 +133,19 @@ function perfHeapMb(){
 function perfFormat(value,suffix=''){return Number.isFinite(value)?`${Math.round(value*10)/10}${suffix}`:'—';}
 function updatePerfDiagnostics(){
   const stats=PERF_MONITOR.snapshot(),cache=ASSET_CACHE.stats(),heap=perfHeapMb();
+  const gameStats=PERF_MONITOR.snapshot('game'),settingsStats=PERF_MONITOR.snapshot('settings');
   const active=stats.enabled;
-  const value=(id,text)=>{const el=document.getElementById(id);if(el)el.textContent=text;};
+  const value=(id,text)=>{const el=document.getElementById(id);if(el&&el.textContent!==text)el.textContent=text;};
+  value('perfDiagHudFps',`FPS ${perfFormat(stats.fps)}`);
+  value('perfDiagHudStutter',`P95 ${perfFormat(stats.frameP95Ms,' ms')} • engasgos ${stats.longFrames}`);
+  document.getElementById('perfDiagOverlay')?.classList.toggle('hidden',!active||!perfHudVisible);
+  // Fora de CONF, o relatório visível é só o contador; 17+ cards não precisam ser atualizados.
+  if(!isSettingsOpenV2029())return;
   value('perfDiagFps',active?perfFormat(stats.fps):'—');
+  value('perfDiagGameFps',active?perfFormat(gameStats.fps):'—');
+  value('perfDiagSettingsFps',active?perfFormat(settingsStats.fps):'—');
+  value('perfDiagGameSamples',active?String(gameStats.samples):'—');
+  value('perfDiagSettingsSamples',active?String(settingsStats.samples):'—');
   value('perfDiagFrame',active?perfFormat(stats.frameP95Ms,' ms'):'—');
   value('perfDiagWork',active?perfFormat(stats.workP95Ms,' ms'):'—');
   value('perfDiagUpdate',active?perfFormat(stats.updateP95Ms,' ms'):'—');
@@ -150,9 +160,6 @@ function updatePerfDiagnostics(){
   value('perfDiagStutters',active?String(stats.longFrames):'—');
   value('perfDiagCache',active?`${cache.count} • ${cache.failed} falha(s)`:'—');
   value('perfDiagHeap',active?perfFormat(heap,' MB'):'—');
-  value('perfDiagHudFps',`FPS ${perfFormat(stats.fps)}`);
-  value('perfDiagHudStutter',`P95 ${perfFormat(stats.frameP95Ms,' ms')} • engasgos ${stats.longFrames}`);
-  document.getElementById('perfDiagOverlay')?.classList.toggle('hidden',!active||!perfHudVisible);
   const show=document.getElementById('perfDiagShowHud');
   if(show){show.checked=perfHudVisible&&active;show.disabled=!active;}
   const enabled=document.getElementById('perfDiagEnabled');if(enabled)enabled.checked=active;
@@ -163,8 +170,9 @@ function updatePerfDiagnostics(){
 }
 function perfReport(){
   return formatPerformanceReport(PERF_MONITOR.snapshot(),{
-    version:'20.2.8',quality:qualityBadgeLabel(),
+    version:'20.2.9',quality:qualityBadgeLabel(),
     resolution:`${innerWidth}x${innerHeight}`,heapMb:perfHeapMb(),cache:ASSET_CACHE.stats(),
+    scenes:{game:PERF_MONITOR.snapshot('game'),settings:PERF_MONITOR.snapshot('settings')},
   });
 }
 function togglePerfDiagnostics(active){
@@ -2862,8 +2870,10 @@ let clanViewTab='overview';
 const warfrontRuntime={state:null,clans:[],busy:false,lastAt:0,pendingBossDamage:0,lastDamageFlush:0,lastBossSync:0};
 function myRankingRow(){const me=getUser()?.id;return rankingsCache.find(r=>r.id===me)||null;}
 function updateRankChip(){if(!ui.rankChip)return;ui.rankChip.textContent=clanRuntime.state?.is_admin?'ADMINISTRADOR':(myRankingRow()?.rank_title||'Piloto Básico');}
+function isSettingsOpenV2029(){return !!ui.configModal&&!ui.configModal.classList.contains('hidden');}
 function renderSettings(){
-  if(!ui.configModal)return;
+  // V20.2.9: atualizações em segundo plano não reprocessam a árvore de CONF escondida.
+  if(!isSettingsOpenV2029())return;
 document.body.dataset.quality=resolvedQualityMode();
   if(ui.qualityCurrentBadge)ui.qualityCurrentBadge.textContent=qualityBadgeLabel();
   updatePerfDiagnostics();
@@ -2890,6 +2900,7 @@ document.body.dataset.quality=resolvedQualityMode();
   ui.settingsRankingPanel?.classList.toggle('hidden',settingsTab!=='ranking');
   ui.settingsAccountPanel?.classList.toggle('hidden',settingsTab!=='account');
   if(settingsTab==='account')renderAccountSettings();
+  else if(settingsTab==='ranking')renderRankings();
 }
 function rankingRows(metric){
   const rows=[...rankingsCache];
@@ -2935,13 +2946,16 @@ function renderMyPatent(){
   updateRankChip();
 }
 function renderRankings(){
+  // Os dados do ranking podem sincronizar de fundo, mas o DOM pesado só renderiza na aba aberta.
+  if(!isSettingsOpenV2029()){updateRankChip();return;}
+  if(settingsTab==='account'){renderAccountSettings();updateRankChip();return;}
+  if(settingsTab!=='ranking'){updateRankChip();return;}
   renderPatentGuide();
   renderMyPatent();
   renderRankingBoard(ui.rankingPoints,'points');
   renderRankingBoard(ui.rankingArena,'arena');
   renderRankingBoard(ui.rankingAliens,'aliens');
   renderRankingBoard(ui.rankingGg,'gg');
-  if(settingsTab==='account')renderAccountSettings();
   updateRankChip();
   if(ui.rankingUpdated)ui.rankingUpdated.textContent=rankingsLoadedAt?`Atualizado ${new Date(rankingsLoadedAt).toLocaleTimeString('pt-BR')}`:'Ranking ainda não carregado.';
 }
@@ -2968,7 +2982,7 @@ async function saveAccountPassword(){
   catch(err){ui.accountPasswordStatus.textContent=err.message;}
 }
 function switchSettingsTab(tab){settingsTab=['game','ranking','account'].includes(tab)?tab:'game';renderSettings();if(settingsTab==='ranking')refreshRankings();if(settingsTab==='account'&&!rankingsCache.length)refreshRankings();}
-function openSettings(){closeNavigationModals(ui.configModal);renderSettings();if(!rankingsCache.length)refreshRankings().catch(()=>{});ui.configModal?.classList.remove('hidden');}
+function openSettings(){closeNavigationModals(ui.configModal);ui.configModal?.classList.remove('hidden');renderSettings();if((settingsTab==='ranking'||settingsTab==='account')&&!rankingsCache.length)refreshRankings().catch(()=>{});}
 
 // ===================== CLÃS / ALIANÇAS V11.2 =====================
 function escHtml(value){return String(value??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));}
@@ -9007,11 +9021,14 @@ let last=performance.now();function loop(t){
   }
   const minFrame=1000/qualityProfile().fps;if(t-last<minFrame){requestAnimationFrame(loop);return;}
   const dt=Math.min((t-last)/1000,.05);last=t;
+  // CONF cobre toda a tela: não redesenhar universo invisível. A simulação, timers,
+  // PvP e sincronização permanecem ativos na mesma frequência anterior.
+  const inSettings=isSettingsOpenV2029();
   if(PERF_MONITOR.isEnabled()){
     const start=performance.now(),phases={};update(dt,phases);
-    const renderStart=performance.now();draw();const end=performance.now();
-    PERF_MONITOR.record(t,end-start,qualityProfile().fps,{updateMs:renderStart-start,drawMs:end-renderStart,phases});
-  }else{update(dt);draw();}
+    const renderStart=performance.now();if(!inSettings)draw();const end=performance.now();
+    PERF_MONITOR.record(t,end-start,qualityProfile().fps,{updateMs:renderStart-start,drawMs:end-renderStart,phases,context:inSettings?'settings':'game'});
+  }else{update(dt);if(!inSettings)draw();}
   monitorAutoPerformance(t);requestAnimationFrame(loop);
 }requestAnimationFrame(loop);
 setInterval(()=>{if(document.visibilityState==='visible')trimAssetCache();},30000);

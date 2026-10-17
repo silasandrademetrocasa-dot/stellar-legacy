@@ -30,6 +30,6 @@ test('módulo NPC está somente na renderização, sem tocar em combate',()=>{
 });
 test('diagnóstico mede atualização e desenho sem alterar ciclo de combate',()=>{
  const game=readFileSync(new URL('../public/game.js',import.meta.url),'utf8');
- assert.match(game,/const renderStart=performance\.now\(\);draw\(\);const end=performance\.now\(\)/);
+ assert.match(game,/const renderStart=performance\.now\(\);if\(!inSettings\)draw\(\);const end=performance\.now\(\)/);
  assert.match(game,/updateMs:renderStart-start,drawMs:end-renderStart/);
 });

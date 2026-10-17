@@ -1,6 +1,6 @@
 {
   "name": "stellar-legacy",
-  "version": "20.2.8",
+  "version": "20.2.9",
   "type": "module",
   "scripts": {
     "start": "node server/index.js",
@@ -18,5 +18,5 @@
   "engines": {
     "node": ">=18"
   },
-  "release": "v20.2.8-hud-mobile-bottleneck"
+  "release": "v20.2.9-settings-mobile-performance"
 }

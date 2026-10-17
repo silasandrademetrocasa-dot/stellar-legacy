@@ -12,17 +12,20 @@ export function createPerformanceMonitor({capacity=SAMPLE_LIMIT}={}) {
   const limit=Math.max(10,Math.min(SAMPLE_LIMIT,Math.floor(Number(capacity)||SAMPLE_LIMIT)));
   let enabled=false,prevAt=null,prevWork=null;
   const frames=[];
+  const sceneFrames={game:[],settings:[]};
+  let prevContext=null;
   let framesSeen=0,stutters=0;
-  function clear(){frames.length=0;framesSeen=0;stutters=0;prevAt=null;prevWork=null;}
+  function clear(){frames.length=0;sceneFrames.game.length=0;sceneFrames.settings.length=0;framesSeen=0;stutters=0;prevAt=null;prevWork=null;prevContext=null;}
   function setEnabled(value){
     const next=Boolean(value);
     if(enabled!==next){enabled=next;clear();}
   }
-  function pause(){prevAt=null;prevWork=null;}
+  function pause(){prevAt=null;prevWork=null;prevContext=null;}
   function record(at,workMs,targetFps=60,stages=null){
     if(!enabled||!finiteNonnegative(at)||!finiteNonnegative(workMs))return false;
     const time=Number(at),work=Number(workMs),target=Math.max(1,Math.min(240,Number(targetFps)||60));
-    if(prevAt===null){prevAt=time;prevWork=work;return false;}
+    const context=stages?.context==='settings'?'settings':'game';
+    if(prevAt===null||prevContext!==context){prevAt=time;prevWork=work;prevContext=context;return false;}
     const interval=time-prevAt;
     const wait=prevWork===null?null:Math.max(0,interval-prevWork);
     prevAt=time;prevWork=work;
@@ -41,20 +44,23 @@ export function createPerformanceMonitor({capacity=SAMPLE_LIMIT}={}) {
       hudAmmo:finiteNonnegative(stages?.phases?.hudAmmoMs)?stages.phases.hudAmmoMs:null,
       prep:finiteNonnegative(stages?.phases?.prepMs)?stages.phases.prepMs:null};
     frames.push(frame);
+    sceneFrames[context].push(frame);
+    if(sceneFrames[context].length>limit)sceneFrames[context].shift();
     framesSeen++;
     if(stalled)stutters++;
     if(frames.length>limit)frames.shift();
     return true;
   }
-  function snapshot(){
-    const intervals=frames.map(x=>x.interval),work=frames.map(x=>x.work);
-    const updates=frames.map(x=>x.update).filter(Number.isFinite),draws=frames.map(x=>x.draw).filter(Number.isFinite);
-    const nums=k=>frames.map(f=>f[k]).filter(Number.isFinite);
+  function snapshot(context='all'){
+    const sampleFrames=context==='game'||context==='settings'?sceneFrames[context]:frames;
+    const intervals=sampleFrames.map(x=>x.interval),work=sampleFrames.map(x=>x.work);
+    const updates=sampleFrames.map(x=>x.update).filter(Number.isFinite),draws=sampleFrames.map(x=>x.draw).filter(Number.isFinite);
+    const nums=k=>sampleFrames.map(f=>f[k]).filter(Number.isFinite);
     const totalMs=intervals.reduce((a,b)=>a+b,0);
     return {
       enabled,
-      samples:frames.length,
-      fps:frames.length&&totalMs>0?Math.round((frames.length*1000/totalMs)*10)/10:null,
+      samples:sampleFrames.length,
+      fps:sampleFrames.length&&totalMs>0?Math.round((sampleFrames.length*1000/totalMs)*10)/10:null,
       frameP95Ms:percentile(intervals,.95),
       workP95Ms:percentile(work,.95),
       updateP95Ms:percentile(updates,.95),
@@ -68,7 +74,7 @@ export function createPerformanceMonitor({capacity=SAMPLE_LIMIT}={}) {
       hudCriticalP95Ms:percentile(nums('hudCritical'),.95),
       hudAmmoP95Ms:percentile(nums('hudAmmo'),.95),
       hudFullSamples:nums('hudFull').length,
-      longFrames:frames.filter(x=>x.stalled).length,
+      longFrames:sampleFrames.filter(x=>x.stalled).length,
       totalFramesSeen:framesSeen,
       totalLongFrames:stutters,
     };
@@ -77,7 +83,7 @@ export function createPerformanceMonitor({capacity=SAMPLE_LIMIT}={}) {
 }
 
 // Apenas informações técnicas agregadas, sem user agent, ID, nome, email, token ou endereço.
-export function formatPerformanceReport(snapshot,{version='?',quality='?',resolution='?',heapMb=null,cache=null}={}){
+export function formatPerformanceReport(snapshot,{version='?',quality='?',resolution='?',heapMb=null,cache=null,scenes=null}={}){
   const numeric=(n,suffix='')=>Number.isFinite(n)?`${Math.round(n*10)/10}${suffix}`:'indisponível';
   const data=[
     'STELLAR LEGACY — DIAGNÓSTICO LOCAL',
@@ -86,6 +92,8 @@ export function formatPerformanceReport(snapshot,{version='?',quality='?',resolu
     `Resolução de tela: ${String(resolution).slice(0,24)}`,
     `Amostras: ${Math.max(0,Number(snapshot?.samples)||0)}`,
     `FPS observados: ${numeric(snapshot?.fps)}`,
+    `FPS jogando: ${numeric(scenes?.game?.fps)} (${Math.max(0,Number(scenes?.game?.samples)||0)} amostras)`,
+    `FPS em configurações: ${numeric(scenes?.settings?.fps)} (${Math.max(0,Number(scenes?.settings?.samples)||0)} amostras)`,
     `Intervalo entre quadros p95: ${numeric(snapshot?.frameP95Ms,' ms')}`,
     `Tempo update + desenho p95: ${numeric(snapshot?.workP95Ms,' ms')}`,
     `Tempo atualização JS p95: ${numeric(snapshot?.updateP95Ms,' ms')}`,
@@ -102,7 +110,7 @@ export function formatPerformanceReport(snapshot,{version='?',quality='?',resolu
     `Heap JS do navegador: ${numeric(heapMb,' MB')} (se disponível)`,
     `Imagens no cache do jogo: ${Math.max(0,Number(cache?.count)||0)}`,
     `Imagens com falha: ${Math.max(0,Number(cache?.failed)||0)}`,
-    'Observação: espera entre quadros inclui limite de FPS, navegador, SO e outras tarefas; não equivale ao tempo da GPU. Não mede RAM total, GPU ou latência de rede.',
+    'Observação: as métricas jogando e em configurações são amostradas separadamente. Com CONF aberta o Canvas de fundo fica estático, mas a simulação continua. Espera entre quadros inclui limite de FPS, navegador, SO e outras tarefas; não equivale ao tempo da GPU. Não mede RAM total, GPU ou latência de rede.',
   ];
   return data.join('\n');
 }

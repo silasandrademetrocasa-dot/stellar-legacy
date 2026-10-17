@@ -6,7 +6,7 @@
 <meta content="width=device-width,initial-scale=1,user-scalable=no" name="viewport"/>
 <meta content="#030816" name="theme-color"/>
 <title>Stellar Legacy</title>
-<link href="/style.css?v=20.2.8" rel="stylesheet"/>
+<link href="/style.css?v=20.2.9" rel="stylesheet"/>
 </head>
 <body>
 <div id="app">
@@ -801,6 +801,8 @@
         </div>
         <div class="perf-diag-grid" aria-live="off">
           <div><span>FPS OBSERVADOS</span><b id="perfDiagFps">—</b></div>
+          <div><span>FPS JOGANDO</span><b id="perfDiagGameFps">—</b><small id="perfDiagGameSamples">—</small></div>
+          <div><span>FPS EM CONFIGURAÇÕES</span><b id="perfDiagSettingsFps">—</b><small id="perfDiagSettingsSamples">—</small></div>
           <div><span>QUADRO P95</span><b id="perfDiagFrame">—</b></div>
           <div><span>RENDER + UPDATE P95</span><b id="perfDiagWork">—</b></div>
           <div><span>SIMULAÇÃO JS P95</span><b id="perfDiagUpdate">—</b></div>
@@ -1033,6 +1035,6 @@
 </div>
 </div>
 <div class="perf-diag-overlay hidden" id="perfDiagOverlay" aria-live="off" aria-label="Contador de FPS local"><b id="perfDiagHudFps">FPS —</b><small id="perfDiagHudStutter">P95 —</small></div>
-<script src="/game.js?v=20.2.8" type="module"></script>
+<script src="/game.js?v=20.2.9" type="module"></script>
 </body>
 </html>
