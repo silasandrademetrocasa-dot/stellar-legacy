@@ -4,6 +4,7 @@ import {readFileSync} from 'node:fs';
 
 const html=readFileSync(new URL('../public/index.html',import.meta.url),'utf8');
 const game=readFileSync(new URL('../public/game.js',import.meta.url),'utf8');
+const version=JSON.parse(readFileSync(new URL('../package.json',import.meta.url),'utf8')).version;
 const css=readFileSync(new URL('../public/style.css',import.meta.url),'utf8');
 
 test('diagnóstico aparece na central de configuração com ativação inicialmente desligada',()=>{
@@ -24,7 +25,7 @@ test('copiar relatório exige clique e não transmite dados automaticamente',()=
   assert.doesNotMatch(game.slice(game.indexOf('// Diagnóstico opt-in:'),game.indexOf("if(ui.hudSettingsGrid)")),/pushTelemetryBatch|fetch\(|saveCloudSave|saveGame\(/);
 });
 test('módulo tem import com versão atual e HUD não intercepta toques no mobile',()=>{
-  assert.match(game,/from '\.\/modules\/performance-monitor\.js\?v=20\.2\.3';/);
+  assert.ok(game.includes(`from './modules/performance-monitor.js?v=${version}';`));
   assert.match(css,/\.perf-diag-overlay\{[^}]+pointer-events:none/);
   assert.match(css,/@media\(max-width:680px\)\{\.perf-diag-grid/);
 });

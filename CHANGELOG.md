@@ -1,3 +1,11 @@
+## V20.2.4 — HUD mobile: cadências independentes e layout agrupado
+
+- Ciclo de simulação, movimento e combate preservado; somente o ritmo das atualizações de interface muda.
+- Em BAIXA: atualizações críticas ~140 ms; munições ~380 ms; painel completo ~850 ms. Menus e chamadas explícitas de `updateUI` atualizam na hora.
+- Layout de HUD consolidado em um `requestAnimationFrame` por ciclo, com leituras de geometria antes das escritas CSS e prevenção de valores CSS repetidos.
+- Cache dos gráficos, diagnóstico, persistência, SQL e rotinas servidor inalterados.
+- Testes automáticos ampliados e URLs versionadas como 20.2.4.
+
 ## V20.2.3 — Cache de gradientes e culling sem alocação
 - Reaproveita gradientes estáticos de fundo, iluminação secundária e nébula.
 - Testes de visibilidade sem alocação de bounds por entidade.

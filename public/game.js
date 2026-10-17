@@ -1,15 +1,16 @@
-import { createAssetCache, flattenAssetPaths } from './modules/asset-cache.js?v=20.2.3';
-import { createSceneGradientCache } from './modules/scene-gradient-cache.js?v=20.2.3';
-import { createPerformanceMonitor, formatPerformanceReport } from './modules/performance-monitor.js?v=20.2.3';
-import { QUALITY_PROFILES, initialAutoQualityForDevice } from './modules/quality-profiles.js?v=20.2.3';
-import { freshBattleConfigsV2013, captureCombatBuildV2013, exchangeCombatBuildV2013, combatConfigRemainingV2013, clampStoredShieldV2013 } from './combat-config-v2013.js?v=20.2.3';
-import { FACTIONS, SHIPS, ITEMS, LASER_AMMO, ROCKETS, NPC_TYPES, MAPS, RESOURCES } from './data.js?v=20.2.3';
-import { repairPulseSettings } from './repair-balance.js?v=20.2.3';
-import { xpThresholdV1770, xpThresholdV1915, migratePilotXpV1915 } from './level-curve-v1915.js?v=20.2.3';
-import { applyRecruitBonusV2012, eliteRouteSnapshotV2012, freshEliteRouteJournalV2012, ELITE_ROUTE_TARGETS_V2012, novaTierPriceV2012 } from './progression-plan-v2012.js?v=20.2.3';
-import { GAME_ASSETS } from './assets/v17/manifest.js?v=20.2.3';
-import { signUp, signIn, beginGoogleSignIn, restoreGoogleSignInFromUrl, requestPasswordReset, restorePasswordRecoveryFromUrl, restoreSession, signOutLocal, checkGameSession, endGameSession, getUser, getSessionCredentials, loadCloudSave, saveCloudSave, updateCallsign, updatePassword, loadRankings, loadAuctionBids, saveAuctionBidOnline, markAuctionBidStatusOnline, loadAuctionMarket, upsertPlayerPresenceOnline, loadMapPresenceOnline, savePlayerLocationCheckpointOnline, loadPlayerLocationCheckpointOnline, removePlayerPresenceOnline, queuePvpAttackOnline, consumePvpDamageEventsOnline, syncArenaProfileOnline, loadArenaState, loadArenaDailyRewardStatus, claimArenaDailyReward, loadArenaOpponents, loadArenaHistory, arenaAttackOnline, listClansOnline, loadMyClanOnline, createClanOnline, joinClanOnline, getClanRequestsOnline, reviewClanRequestOnline, cancelClanRequestOnline, setClanMemberRoleOnline, leaveClanOnline, transferClanCreditsOnline, claimClanCreditGrantsOnline, recordClanAlienKillOnline, getPremiumShopOnline, testPurchasePremiumOnline, adminPreviewPremiumStageOnline, adminSimulatePremiumStageOnline, getPremiumStageCatalogOnline, loadWarfrontStateOnline, hitWorldBossOnline, claimWorldBossRewardOnline, declareClanWarOnline, recordClanWarScoreOnline, loadLiveOpsOnline, adminUpdateLiveEventScheduleOnline, purchaseLiveCatalogOnline, economyActionOnline, getChatHistoryOnline, sendChatMessageOnline, redeemGameCouponOnline, getMyDesignersOnline, setDesignLoadoutOnline, claimGateDroneDesignOnline, claimEventDesignerOnline, getAdminStatus, adminSearchAccounts, adminRecentActions, adminBanAccount, adminUnbanAccount, adminResetAccount, adminDeleteAccount, pushTelemetryBatch, adminTelemetryOverview, adminPlayerTelemetry, getBattleGroupOnline, createBattleGroupOnline, inviteBattleGroupOnline, searchBattleGroupPlayersOnline, inviteBattleGroupUserOnline, respondBattleGroupInviteOnline, leaveBattleGroupOnline, kickBattleGroupMemberOnline, setBattleGroupRallyOnline, loadRuntimeConfigOnline, loadNpcRuntimeConfigOnline, loadWorldRuntimeConfigOnline, loadSystemsRuntimeConfigOnline, loadAdminRuntimeMonitorOnline, adminUpdateRuntimeModuleOnline, adminUpdateNpcRuntimeOnline, adminUpdateNpcSpawnRuntimeOnline, adminUpdateWorldMapOnline, adminUpdateWorldResourceOnline, adminUpdateWorldSectorOnline, adminUpdateWorldPortalOnline, adminUpdateWorldResourcePoolOnline, adminUpdateMissionCategoryOnline, adminUpdateEconomyServiceOnline, adminUpdateCraftingRecipeOnline, loadBattlePassRuntimeConfigOnline, adminUpdateBattlePassSeasonOnline, adminUpdateBattlePassTierOnline, loadShopsRuntimeConfigOnline, adminUpdateCommonShopItemOnline, adminUpdatePremiumShopItemOnline, loadBonusConfigOnline, adminUpdateBonusConfigOnline, adminCouponDashboardOnline, adminCreateCouponOnline, adminSetCouponActiveOnline, loadGalaxyGatesOnline, adminUpdateGalaxyGateOnline, adminUpsertCustomMissionOnline, adminDeleteCustomMissionOnline, adminCreateCraftRecipeOnline, adminCreateEconomyServiceOnline, adminCreatePassSeasonOnline, loadAuctionRulesOnline, adminUpdateAuctionRulesOnline, loadBalanceRuntimeOnline, adminUpdateBalanceOnline } from './api.js?v=20.2.3';
-import { SharedUniverseClient } from './world.js?v=20.2.3';
+import { createHudUpdateScheduler } from './modules/hud-update-scheduler.js?v=20.2.4';
+import { createAssetCache, flattenAssetPaths } from './modules/asset-cache.js?v=20.2.4';
+import { createSceneGradientCache } from './modules/scene-gradient-cache.js?v=20.2.4';
+import { createPerformanceMonitor, formatPerformanceReport } from './modules/performance-monitor.js?v=20.2.4';
+import { QUALITY_PROFILES, initialAutoQualityForDevice } from './modules/quality-profiles.js?v=20.2.4';
+import { freshBattleConfigsV2013, captureCombatBuildV2013, exchangeCombatBuildV2013, combatConfigRemainingV2013, clampStoredShieldV2013 } from './combat-config-v2013.js?v=20.2.4';
+import { FACTIONS, SHIPS, ITEMS, LASER_AMMO, ROCKETS, NPC_TYPES, MAPS, RESOURCES } from './data.js?v=20.2.4';
+import { repairPulseSettings } from './repair-balance.js?v=20.2.4';
+import { xpThresholdV1770, xpThresholdV1915, migratePilotXpV1915 } from './level-curve-v1915.js?v=20.2.4';
+import { applyRecruitBonusV2012, eliteRouteSnapshotV2012, freshEliteRouteJournalV2012, ELITE_ROUTE_TARGETS_V2012, novaTierPriceV2012 } from './progression-plan-v2012.js?v=20.2.4';
+import { GAME_ASSETS } from './assets/v17/manifest.js?v=20.2.4';
+import { signUp, signIn, beginGoogleSignIn, restoreGoogleSignInFromUrl, requestPasswordReset, restorePasswordRecoveryFromUrl, restoreSession, signOutLocal, checkGameSession, endGameSession, getUser, getSessionCredentials, loadCloudSave, saveCloudSave, updateCallsign, updatePassword, loadRankings, loadAuctionBids, saveAuctionBidOnline, markAuctionBidStatusOnline, loadAuctionMarket, upsertPlayerPresenceOnline, loadMapPresenceOnline, savePlayerLocationCheckpointOnline, loadPlayerLocationCheckpointOnline, removePlayerPresenceOnline, queuePvpAttackOnline, consumePvpDamageEventsOnline, syncArenaProfileOnline, loadArenaState, loadArenaDailyRewardStatus, claimArenaDailyReward, loadArenaOpponents, loadArenaHistory, arenaAttackOnline, listClansOnline, loadMyClanOnline, createClanOnline, joinClanOnline, getClanRequestsOnline, reviewClanRequestOnline, cancelClanRequestOnline, setClanMemberRoleOnline, leaveClanOnline, transferClanCreditsOnline, claimClanCreditGrantsOnline, recordClanAlienKillOnline, getPremiumShopOnline, testPurchasePremiumOnline, adminPreviewPremiumStageOnline, adminSimulatePremiumStageOnline, getPremiumStageCatalogOnline, loadWarfrontStateOnline, hitWorldBossOnline, claimWorldBossRewardOnline, declareClanWarOnline, recordClanWarScoreOnline, loadLiveOpsOnline, adminUpdateLiveEventScheduleOnline, purchaseLiveCatalogOnline, economyActionOnline, getChatHistoryOnline, sendChatMessageOnline, redeemGameCouponOnline, getMyDesignersOnline, setDesignLoadoutOnline, claimGateDroneDesignOnline, claimEventDesignerOnline, getAdminStatus, adminSearchAccounts, adminRecentActions, adminBanAccount, adminUnbanAccount, adminResetAccount, adminDeleteAccount, pushTelemetryBatch, adminTelemetryOverview, adminPlayerTelemetry, getBattleGroupOnline, createBattleGroupOnline, inviteBattleGroupOnline, searchBattleGroupPlayersOnline, inviteBattleGroupUserOnline, respondBattleGroupInviteOnline, leaveBattleGroupOnline, kickBattleGroupMemberOnline, setBattleGroupRallyOnline, loadRuntimeConfigOnline, loadNpcRuntimeConfigOnline, loadWorldRuntimeConfigOnline, loadSystemsRuntimeConfigOnline, loadAdminRuntimeMonitorOnline, adminUpdateRuntimeModuleOnline, adminUpdateNpcRuntimeOnline, adminUpdateNpcSpawnRuntimeOnline, adminUpdateWorldMapOnline, adminUpdateWorldResourceOnline, adminUpdateWorldSectorOnline, adminUpdateWorldPortalOnline, adminUpdateWorldResourcePoolOnline, adminUpdateMissionCategoryOnline, adminUpdateEconomyServiceOnline, adminUpdateCraftingRecipeOnline, loadBattlePassRuntimeConfigOnline, adminUpdateBattlePassSeasonOnline, adminUpdateBattlePassTierOnline, loadShopsRuntimeConfigOnline, adminUpdateCommonShopItemOnline, adminUpdatePremiumShopItemOnline, loadBonusConfigOnline, adminUpdateBonusConfigOnline, adminCouponDashboardOnline, adminCreateCouponOnline, adminSetCouponActiveOnline, loadGalaxyGatesOnline, adminUpdateGalaxyGateOnline, adminUpsertCustomMissionOnline, adminDeleteCustomMissionOnline, adminCreateCraftRecipeOnline, adminCreateEconomyServiceOnline, adminCreatePassSeasonOnline, loadAuctionRulesOnline, adminUpdateAuctionRulesOnline, loadBalanceRuntimeOnline, adminUpdateBalanceOnline } from './api.js?v=20.2.4';
+import { SharedUniverseClient } from './world.js?v=20.2.4';
 
 const canvas = document.querySelector('#game');
 const ctx = canvas.getContext('2d');
@@ -146,7 +147,7 @@ function updatePerfDiagnostics(){
 }
 function perfReport(){
   return formatPerformanceReport(PERF_MONITOR.snapshot(),{
-    version:'20.2.3',quality:qualityBadgeLabel(),
+    version:'20.2.4',quality:qualityBadgeLabel(),
     resolution:`${innerWidth}x${innerHeight}`,heapMb:perfHeapMb(),cache:ASSET_CACHE.stats(),
   });
 }
@@ -2575,15 +2576,15 @@ function shortLaserLabel(id){return ({lcb10:'x1',mcb25:'x2',mcb50:'x3',ucb100:'x
 function shortRocketLabel(id){return ({r310:'R310',plt2026:'PLT26',plt2021:'PLT21',plt3030:'PLT30'})[id]||id.replace(/[^a-z0-9]/gi,'').toUpperCase();}
 function ammoTooltipText(a,qty,laserUse,petUse,bursts){const mode=a.shieldDrain?'CAPTURA ESCUDO x2':`dano x${a.mult}`;return `${a.name} • ${mode}\nEstoque: ${fmt(qty)}\nNave: -${laserUse}/rajada${petUse?` • AUX-9: -${petUse}`:''}\nRajadas restantes: ~${fmt(bursts)}`;}
 function rocketTooltipText(r,qty){return `${r.name} • dano ${fmt(r.damage)}\nEstoque: ${fmt(qty)}\nConsumo: -1/disparo`; }
-function applyAmmoUiState(){ if(!ui.weaponBar) return; ui.weaponBar.classList.toggle('collapsed', !state.ammoUiExpanded); if(ui.weaponBarToggle) ui.weaponBarToggle.textContent = state.ammoUiExpanded ? '▾' : '▸'; requestAnimationFrame(layoutHudPanels); }
+function applyAmmoUiState(){ if(!ui.weaponBar) return; ui.weaponBar.classList.toggle('collapsed', !state.ammoUiExpanded); if(ui.weaponBarToggle) ui.weaponBarToggle.textContent = state.ammoUiExpanded ? '▾' : '▸'; requestHudLayoutV2024(); }
 function loadAmmoUiState(){ try{ const raw=localStorage.getItem('stellar_ammo_ui_expanded'); if(raw!==null) state.ammoUiExpanded = raw==='1'; }catch{} applyAmmoUiState(); }
 function toggleAmmoUi(){ state.ammoUiExpanded=!state.ammoUiExpanded; try{ localStorage.setItem('stellar_ammo_ui_expanded', state.ammoUiExpanded?'1':'0'); }catch{} applyAmmoUiState(); syncHudButton(); }
 
-function applyStatsUiState(){ if(!ui.leftStats) return; ui.leftStats.classList.toggle('collapsed', !state.statsUiExpanded); if(ui.statsToggle) ui.statsToggle.textContent = state.statsUiExpanded ? '▾' : '▸'; requestAnimationFrame(layoutHudPanels); }
+function applyStatsUiState(){ if(!ui.leftStats) return; ui.leftStats.classList.toggle('collapsed', !state.statsUiExpanded); if(ui.statsToggle) ui.statsToggle.textContent = state.statsUiExpanded ? '▾' : '▸'; requestHudLayoutV2024(); }
 function loadStatsUiState(){ try{ const raw=localStorage.getItem('stellar_stats_ui_expanded'); if(raw!==null) state.statsUiExpanded = raw==='1'; }catch{} applyStatsUiState(); }
 function toggleStatsUi(){ state.statsUiExpanded=!state.statsUiExpanded; try{ localStorage.setItem('stellar_stats_ui_expanded', state.statsUiExpanded?'1':'0'); }catch{} applyStatsUiState(); syncHudButton(); }
 
-function applyPlayerUiState(){ if(!ui.playerPanel) return; ui.playerPanel.classList.toggle('collapsed', !state.playerUiExpanded); if(ui.playerPanelToggle) ui.playerPanelToggle.textContent = state.playerUiExpanded ? '▾' : '▸'; requestAnimationFrame(layoutHudPanels); }
+function applyPlayerUiState(){ if(!ui.playerPanel) return; ui.playerPanel.classList.toggle('collapsed', !state.playerUiExpanded); if(ui.playerPanelToggle) ui.playerPanelToggle.textContent = state.playerUiExpanded ? '▾' : '▸'; requestHudLayoutV2024(); }
 function loadPlayerUiState(){ try{ const raw=localStorage.getItem('stellar_player_ui_expanded'); if(raw!==null) state.playerUiExpanded = raw==='1'; }catch{} applyPlayerUiState(); }
 function togglePlayerUi(){ state.playerUiExpanded=!state.playerUiExpanded; try{ localStorage.setItem('stellar_player_ui_expanded', state.playerUiExpanded?'1':'0'); }catch{} applyPlayerUiState(); }
 
@@ -2592,7 +2593,7 @@ function applyMissionUiState(){
   if(!ui.activeMissionPanel)return;
   ui.activeMissionPanel.classList.toggle('collapsed',!state.missionUiExpanded);
   if(ui.activeMissionToggle)ui.activeMissionToggle.textContent=state.missionUiExpanded?'▾':'▸';
-  requestAnimationFrame(layoutHudPanels);
+  requestHudLayoutV2024();
 }
 function loadMissionUiState(){try{const raw=localStorage.getItem('stellar_mission_ui_expanded');if(raw!==null)state.missionUiExpanded=raw==='1';}catch{}applyMissionUiState();}
 function toggleMissionUi(){state.missionUiExpanded=!state.missionUiExpanded;try{localStorage.setItem('stellar_mission_ui_expanded',state.missionUiExpanded?'1':'0');}catch{}applyMissionUiState();}
@@ -2601,7 +2602,7 @@ function applyPetUiState(){
   if(!ui.petFloatPanel)return;
   ui.petFloatPanel.classList.toggle('collapsed',!state.petUiExpanded);
   if(ui.petFloatToggle)ui.petFloatToggle.textContent=state.petUiExpanded?'▾':'▸';
-  requestAnimationFrame(layoutHudPanels);
+  requestHudLayoutV2024();
 }
 function loadPetUiState(){try{const raw=localStorage.getItem('stellar_pet_ui_expanded');if(raw!==null)state.petUiExpanded=raw==='1';}catch{}applyPetUiState();}
 function togglePetUi(){state.petUiExpanded=!state.petUiExpanded;try{localStorage.setItem('stellar_pet_ui_expanded',state.petUiExpanded?'1':'0');}catch{}applyPetUiState();}
@@ -2633,7 +2634,7 @@ function saveChatPrefs(){try{localStorage.setItem(CHAT_STATE_KEY,JSON.stringify(
 function applyChatUiState(){
   if(!ui.chatDock)return;ui.chatDock.classList.toggle('collapsed',!state.chatUiExpanded);
   if(ui.chatToggle){ui.chatToggle.textContent=state.chatUiExpanded?'▾':'▸';ui.chatToggle.setAttribute('aria-label',state.chatUiExpanded?'Minimizar chat':'Expandir chat');}
-  requestAnimationFrame(layoutHudPanels);
+  requestHudLayoutV2024();
 }
 function toggleChatUi(){state.chatUiExpanded=!state.chatUiExpanded;saveChatPrefs();applyChatUiState();syncHudButton();}
 function chatChannelLabel(){return chatRuntime.channel==='clan'?'ALIANÇA':chatRuntime.channel==='private'?'PV':'GLOBAL';}
@@ -2694,12 +2695,12 @@ function applyTopbarDockState(){
     ui.topbarDockToggle.title=state.topbarDockExpanded?'Esconder menu superior':'Mostrar menu superior';
   }
   if(!state.topbarDockExpanded)document.querySelectorAll('.menu-group.open').forEach(x=>x.classList.remove('open'));
-  requestAnimationFrame(layoutHudPanels);
+  requestHudLayoutV2024();
 }
 function loadTopbarDockState(){try{const raw=localStorage.getItem('stellar_topbar_dock_expanded');if(raw!==null)state.topbarDockExpanded=raw==='1';}catch{}applyTopbarDockState();}
 function toggleTopbarDock(){state.topbarDockExpanded=!state.topbarDockExpanded;try{localStorage.setItem('stellar_topbar_dock_expanded',state.topbarDockExpanded?'1':'0');}catch{}applyTopbarDockState();}
 
-function applyMinimapUiState(){ if(!ui.minimapPanel) return; ui.minimapPanel.classList.toggle('collapsed', !state.minimapUiExpanded); if(ui.minimapToggle) ui.minimapToggle.textContent = state.minimapUiExpanded ? '▾' : '▸'; requestAnimationFrame(layoutHudPanels); }
+function applyMinimapUiState(){ if(!ui.minimapPanel) return; ui.minimapPanel.classList.toggle('collapsed', !state.minimapUiExpanded); if(ui.minimapToggle) ui.minimapToggle.textContent = state.minimapUiExpanded ? '▾' : '▸'; requestHudLayoutV2024(); }
 function loadMinimapUiState(){ try{ const raw=localStorage.getItem('stellar_minimap_ui_expanded'); if(raw!==null) state.minimapUiExpanded = raw==='1'; }catch{} applyMinimapUiState(); }
 function toggleMinimapUi(){ state.minimapUiExpanded=!state.minimapUiExpanded; try{ localStorage.setItem('stellar_minimap_ui_expanded', state.minimapUiExpanded?'1':'0'); }catch{} applyMinimapUiState(); syncHudButton(); }
 function applyTopMetaUiState(){ if(!ui.topbar) return; ui.topbar.classList.toggle('meta-collapsed', !state.topMetaExpanded); }
@@ -2749,7 +2750,7 @@ function applyHudVisibility(){
   ui.bottomHudDock?.classList.toggle('minimap-disabled',!hudVisibility.minimap);
   ui.bottomHudDock?.classList.toggle('weapons-disabled',!hudVisibility.weapons);
   ui.gateHud?.classList.toggle('hud-user-disabled',!hudVisibility.gate);
-  requestAnimationFrame(layoutHudPanels);
+  requestHudLayoutV2024();
 }
 function setHudVisibility(key,value){if(!(key in HUD_VISIBILITY_DEFAULT))return;hudVisibility[key]=!!value;saveHudVisibility();applyHudVisibility();renderSettings();updatePetFloat();renderGateHud();layoutHudPanels();}
 function applyAutoQualityResolution(next,announce=false){
@@ -3209,37 +3210,47 @@ function updateCombatStateHud(){if(!ui.combatStateHud||!progress)return;const no
 function drawGalaxyEventWorld(){const c=galaxyEventRuntime.convoy;if(!c||!onScreenWorld(c.x,c.y,180))return;const p=screenPos(c.x,c.y),a=Math.atan2(c.ty-c.y,c.tx-c.x);ctx.save();ctx.translate(p.x,p.y);ctx.rotate(a);ctx.shadowColor='#63eaff';ctx.shadowBlur=18;ctx.fillStyle='rgba(12,49,74,.96)';ctx.strokeStyle='#8cf3ff';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(32,0);ctx.lineTo(5,-16);ctx.lineTo(-28,-11);ctx.lineTo(-20,0);ctx.lineTo(-28,11);ctx.lineTo(5,16);ctx.closePath();ctx.fill();ctx.stroke();ctx.restore();const w=92,ratio=Math.max(0,c.hp/c.maxHp);ctx.fillStyle='rgba(4,18,27,.9)';ctx.fillRect(p.x-w/2,p.y-35,w,6);ctx.fillStyle=ratio>.35?'#56f0c5':'#ff5f7c';ctx.fillRect(p.x-w/2,p.y-35,w*ratio,6);ctx.fillStyle='#c8f7ff';ctx.font='bold 10px Arial';ctx.textAlign='center';ctx.fillText('COMBOIO QUÂNTICO',p.x,p.y+30);}
 
 
+let hudLayoutPendingV2024=false;
+function requestHudLayoutV2024(){
+  if(hudLayoutPendingV2024)return;
+  hudLayoutPendingV2024=true;
+  requestAnimationFrame(()=>{
+    hudLayoutPendingV2024=false;
+    layoutHudPanels();
+  });
+}
+function updateHudLayoutVariableV2024(root,key,value){
+  if(root.style.getPropertyValue(key)!==value)root.style.setProperty(key,value);
+}
 function layoutHudPanels(){
+  // Leia toda a geometria antes de modificar estilos para evitar reflow intercalado.
   const root=document.documentElement;
   const topbarVisible=!!ui.topbar&&state.topbarDockExpanded&&getComputedStyle(ui.topbar).display!=='none';
   const topbarH=topbarVisible?Math.ceil(ui.topbar.getBoundingClientRect().height):0;
   const topDockOffset=topbarVisible?topbarH+14:6;
-  root.style.setProperty('--hud-top-offset',`${topbarVisible?topbarH+8:6}px`);
-  root.style.setProperty('--top-dock-offset',`${topDockOffset}px`);
-
   const mapVisible=!!ui.minimapPanel&&getComputedStyle(ui.minimapPanel).display!=='none'&&!ui.minimapPanel.classList.contains('hidden')&&!ui.minimapPanel.classList.contains('hud-user-hidden');
   const mapW=mapVisible?Math.ceil(ui.minimapPanel.getBoundingClientRect().width):0;
-  root.style.setProperty('--map-dock-width',`${mapW}px`);
   const chatVisible=!!ui.chatDock&&getComputedStyle(ui.chatDock).display!=='none'&&!ui.chatDock.classList.contains('hidden')&&!ui.chatDock.classList.contains('hud-user-hidden');
-  const chatExpanded=332;
-  const chatCollapsed=162;
+  const chatExpanded=332,chatCollapsed=162;
   const minimapExpanded=window.innerWidth<=680?172:window.innerWidth<=820?188:window.innerWidth<=1100?210:window.innerWidth<=1280?228:252;
   const minimapCollapsed=window.innerWidth<=680?136:window.innerWidth<=820?144:window.innerWidth<=1100?152:window.innerWidth<=1280?160:168;
   const chatW=chatVisible?(ui.chatDock.classList.contains('collapsed')?chatCollapsed:chatExpanded):0;
   const minimapDockW=mapVisible?(ui.minimapPanel.classList.contains('collapsed')?minimapCollapsed:minimapExpanded):0;
-  root.style.setProperty('--chat-dock-width-current',`${chatW}px`);
-  root.style.setProperty('--minimap-dock-width-current',`${minimapDockW}px`);
-
   const weaponVisible=!!ui.weaponBar&&getComputedStyle(ui.weaponBar).display!=='none';
   const weaponH=weaponVisible?Math.ceil(ui.weaponBar.getBoundingClientRect().height):0;
-  root.style.setProperty('--weaponbar-height',`${weaponH+12}px`);
   const bottomItems=[ui.chatDock,ui.weaponBar,ui.minimapPanel].filter(el=>el&&getComputedStyle(el).display!=='none');
   const legacyBottomH=bottomItems.length?Math.max(...bottomItems.map(el=>Math.ceil(el.getBoundingClientRect().height))):0;
-  // V17.9.3: no mobile o HUD inferior vira dois andares (chat/mapa + munições).
-  // Usar apenas o maior filho fazia os painéis flutuantes invadirem a barra de munição.
   const dockRect=ui.bottomHudDock&&getComputedStyle(ui.bottomHudDock).display!=='none'?ui.bottomHudDock.getBoundingClientRect():null;
   const bottomH=window.innerWidth<=760&&dockRect?Math.ceil(dockRect.height):legacyBottomH;
-  root.style.setProperty('--bottom-dock-height',`${bottomH+12}px`);
+  for(const [key,val] of [
+    ['--hud-top-offset',`${topbarVisible?topbarH+8:6}px`],
+    ['--top-dock-offset',`${topDockOffset}px`],
+    ['--map-dock-width',`${mapW}px`],
+    ['--chat-dock-width-current',`${chatW}px`],
+    ['--minimap-dock-width-current',`${minimapDockW}px`],
+    ['--weaponbar-height',`${weaponH+12}px`],
+    ['--bottom-dock-height',`${bottomH+12}px`]
+  ])updateHudLayoutVariableV2024(root,key,val);
 }
 function getFaction(){return progress?.profile?.faction ? FACTIONS[progress.profile.faction] : null;}
 function factionFromPrefix(prefix){
@@ -5528,12 +5539,33 @@ function drawOnlinePlayers(){
 
 
 
-let lastLowHudUpdateAt=0;
+// V20.2.4: simulação e comandos continuam em cada tick; HUD executa tarefas em ritmos próprios.
+const HUD_SCHEDULER=createHudUpdateScheduler();
+function updateCriticalHudV2024(){
+  if(!progress)return;
+  if(ui.coordLabel)ui.coordLabel.textContent=`${Math.round(player.x)} / ${Math.round(player.y)}`;
+  ui.hp.textContent=fmt(player.hp);
+  ui.maxHp.textContent=fmt(player.maxHp);
+  ui.shield.textContent=fmt(player.shield);
+  ui.maxShield.textContent=fmt(player.maxShield);
+  ui.speed.textContent=fmt(player.speed*shipAbilitySpeedMultiplier());
+  ui.laserToggle.classList.toggle('active',player.laserFiring);
+  ui.rocketCd.textContent=rocketReady()?'MÍSSIL PRONTO':`MÍSSIL ${(getRocketCooldown()-(nowSec()-player.lastRocketShot)).toFixed(1)}s`;
+  renderBattleConfigHudV2013();
+  updateAbilityHud();
+  updateBossHud();
+  updateTargetLockHud();
+  updateCombatStateHud();
+}
+function updateFrameHudV2024(){
+  const work=HUD_SCHEDULER.next(resolvedQualityMode(),performance.now());
+  if(work.full){updateUI();return;}
+  if(work.fast)updateCriticalHudV2024();
+  if(work.ammo)refreshAmmoCounters();
+}
 function update(dt){if(!progress||gameBootstrapRuntime.loading)return;telemetryTick(dt);eliteRouteTrackV2012(dt);processRespawns();updateBonusBoxes();updateCombatAbilities();updatePlayer(dt);updateSharedUniverseInterpolation(dt);updateEnemies(dt);updatePet(dt);updateOnlineWorld(dt);updateWarfrontRuntime();updateGalaxyEvent(dt);updateParticles(dt);updateFx(dt);updateAlphaGate();updateAuctionSystem();
-  // Controles, combate e simulação continuam na cadência normal. Apenas o HUD de BAIXA
-  // evita recalcular tooltips, classes CSS e texto em dezenas de nós 30x por segundo.
-  const low=resolvedQualityMode()==='low',now=performance.now();
-  if(!low||now-lastLowHudUpdateAt>=150){updateUI();lastLowHudUpdateAt=now;}
+  // V20.2.4: atualizações DOM não limitam a frequência da simulação/gameplay.
+  updateFrameHudV2024();
 }
 
 function drawSectorGrid(){
@@ -5941,6 +5973,7 @@ function updateBaseTradePrompt(){
   if(ui.baseTradePromptInfo)ui.baseTradePromptInfo.textContent=`Porão ${fmt(cargoUsed())}/${fmt(cargoCapacity())} • ${fmt(cargoSaleValue())} CR`;
 }
 function updateUI(){
+  HUD_SCHEDULER.markFull(performance.now());
   refreshAmmoCounters();renderBattleConfigHudV2013();
   const f=getFaction(),ship=SHIPS[progress.activeShipId],baseSafe=isBaseSafeZone(),portalSafe=isPortalNeutralZone(),safe=baseSafe||portalSafe;ui.factionLabel.textContent=f?.short||'—';ui.factionLabel.style.color=f?.color||'';ui.mapLabel.textContent=displayMapLabel(progress.mapId);if(ui.sectorName)ui.sectorName.textContent=state.currentMap.name||'Setor';if(ui.coordLabel)ui.coordLabel.textContent=`${Math.round(player.x)} / ${Math.round(player.y)}`;if(ui.routeLabel){const rd=routeDistance();ui.routeLabel.textContent=rd>35?`${fmt(rd)}u`:'PARADO';ui.routeLabel.parentElement?.classList.toggle('active',rd>35);}if(ui.discoveriesLabel){const found=state.landmarks.filter(l=>progress.discoveries?.[`${progress.mapId}:${l.id}`]).length;ui.discoveriesLabel.textContent=`${found}/${state.landmarks.length}`;}const shipDesign=currentShipDesign();ui.shipLabel.textContent=shipDesign?`${ship.name} • ${shipDesign.name}`:ship.name;if(ui.lvl){const lv=Number(progress.profile.level)||1,xp=Math.max(0,Number(progress.profile.xp)||0);ui.lvl.textContent=`${lv} • ${fmt(xp)} XP`;const maxed=lv>=PLAYER_MAX_LEVEL,next=maxed?levelXpThreshold(PLAYER_MAX_LEVEL):levelXpThreshold(lv+1),missing=maxed?0:Math.max(0,next-xp);const tip=maxed?`Nível máximo • ${fmt(xp)} XP total`:`${fmt(xp)} XP total • faltam ${fmt(missing)} XP para o nível ${lv+1} • ${Math.round(levelProgressPercent(xp,lv))}% do nível atual`;ui.lvl.title=tip;ui.lvl.parentElement.title=tip;}ui.hp.textContent=fmt(player.hp);ui.maxHp.textContent=fmt(player.maxHp);ui.shield.textContent=fmt(player.shield);ui.maxShield.textContent=fmt(player.maxShield);ui.speed.textContent=fmt(player.speed*shipAbilitySpeedMultiplier());if(ui.dmg)ui.dmg.textContent=fmt(player.laserDamage*currentLaserAmmo().mult);ui.credits.textContent=fmt(progress.profile.credits);ui.uridium.textContent=fmt(progress.profile.uridium);ui.xp.textContent=fmt(progress.profile.xp);ui.xp.title=progress.profile.level>=PLAYER_MAX_LEVEL?'Nível máximo':`Próximo nível: ${fmt(levelXpThreshold(progress.profile.level+1))} XP • ${Math.round(levelProgressPercent(progress.profile.xp,progress.profile.level))}%`;if(ui.droneCount)ui.droneCount.textContent=progress.drones.length;ui.laserToggle.classList.toggle('active',player.laserFiring);ui.rocketCd.textContent=rocketReady()?'MÍSSIL PRONTO':`MÍSSIL ${(getRocketCooldown()-(nowSec()-player.lastRocketShot)).toFixed(1)}s`;
   if(ui.shipHudArt)ui.shipHudArt.src=shipCardAsset(progress.activeShipId)||shipCardAsset('phoenix');
@@ -8846,8 +8879,8 @@ loadTopMetaUiState();
 loadTopbarDockState();
 syncHudButton();
 layoutHudPanels();
-window.addEventListener('resize', layoutHudPanels);
-window.addEventListener('orientationchange', ()=>setTimeout(layoutHudPanels, 120));
+window.addEventListener('resize', requestHudLayoutV2024);
+window.addEventListener('orientationchange', ()=>setTimeout(requestHudLayoutV2024, 120));
 boot();
 setInterval(()=>{
   if(!authenticated)return;

@@ -1,3 +1,25 @@
+# STELLAR LEGACY V20.2.4 — HUD MOBILE MAIS LEVE
+
+**Atualização incremental completa sobre a V20.2.3.** Não há SQL adicional nem alterações em dados do Supabase.
+
+- `public/modules/hud-update-scheduler.js`: separa atualização de valores críticos da batalha, contadores de munição e atualização completa do HUD.
+- O perfil BAIXA mostra informações críticas aproximadamente a cada 140 ms, munições a cada 380 ms e atualização geral a cada 850 ms. Em MÉDIA/ALTA: aproximadamente 100 ms / 300 ms / 550 ms. Atualizações após ações explícitas continuam imediatas.
+- `public/game.js`: reposicionamento do HUD agrupa as leituras de tamanho antes de escrever variáveis CSS, não reaplica variáveis sem mudança e evita pedidos duplicados de layout no mesmo quadro.
+- O painel CONF → JOGO continua com diagnóstico voluntário de FPS, P95 e tempo do desenho.
+- `tests/hud-scheduler-v2024.test.mjs`: casos de regressão para os limites e atualização imediata. Testes anteriores preservados.
+
+### Instalação
+
+1. Primeiro valide a V20.2.3. Envie apenas este ZIP completo para a raiz do GitHub (sem extrair e sem deixar outros ZIPs de instalação na raiz).
+2. Actions → Instalar versão do Stellar Legacy → Run workflow.
+3. Confira `/health` com versão `20.2.4` e o build com `npm run verify`.
+4. No Android, teste HP/escudo, cooldown de 5 s da CONF 1/2, barra de munições, abrir/fechar chat/minimapa e mudança de orientação.
+5. Meça o FPS da V20.2.3 e da V20.2.4 no mesmo dispositivo, mapa e perfil BAIXA. O ganho de FPS ainda depende dos testes no aparelho.
+
+Leia `V20_2_4_RELATORIO.md` para os detalhes de segurança e validação.
+
+---
+
 # STELLAR LEGACY V20.2.3 — OTIMIZAÇÃO GRÁFICA
 
 ZIP completo baseado na V20.2.2. Leia `V20_2_3_RELATORIO.md` para mudanças e testes. Nenhum SQL novo.

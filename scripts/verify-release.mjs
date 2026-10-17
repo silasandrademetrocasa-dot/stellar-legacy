@@ -13,7 +13,7 @@ const release=String(pkg.version||'');
 assert(/^\d+\.\d+\.\d+$/.test(release),'package.json sem versão válida');
 assert(pkg.scripts?.start==='node server/index.js','start do Render divergiu');
 const html=read('public/index.html'),game=read('public/game.js'),server=read('server/index.js');
-for(const p of ['public/game.js','public/api.js','public/data.js','public/style.css','public/modules/quality-profiles.js','public/modules/asset-cache.js','public/modules/performance-monitor.js','public/modules/scene-gradient-cache.js','server/index.js','server/world.js','render.yaml','.github/workflows/stellar-installer-main.yml']){
+for(const p of ['public/game.js','public/api.js','public/data.js','public/style.css','public/modules/quality-profiles.js','public/modules/asset-cache.js','public/modules/performance-monitor.js','public/modules/scene-gradient-cache.js','public/modules/hud-update-scheduler.js','server/index.js','server/world.js','render.yaml','.github/workflows/stellar-installer-main.yml']){
   assert(existsSync(resolve(ROOT,p)),`arquivo essencial ausente: ${p}`);
 }
 assert(html.includes(`/game.js?v=${release}`),'HTML carrega game.js com versão divergente');
