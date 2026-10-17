@@ -72,6 +72,6 @@ test('render economico nao altera simulacao, ativos de naves nem salvamento',()=
   assert.match(game,/const img=resolvedQualityMode\(\)==='low'\?BACKDROP_RASTER_CACHE\.get\(original\):original/);
   assert.match(game,/minimapIsVisibleForCanvasV2025\(\)/);
   assert.match(game,/if\(!onScreenWorld\(b\.x,b\.y,Math\.max\(SAFE_ZONE\.radius\+40,310\)\)\)return/);
-  for(const fn of ['updatePlayer(dt)','updateEnemies(dt)','updatePet(dt)','updateOnlineWorld(dt)','updateFrameHudV2024()','drawPlayer();','drawPet();'])assert.ok(game.includes(fn),fn);
+  for(const fn of ['updatePlayer(dt)','updateEnemies(dt)','updatePet(dt)','updateOnlineWorld(dt)','updateFrameHudV2024(profile)','drawPlayer();','drawPet();'])assert.ok(game.includes(fn),fn);
   assert.ok(game.includes('ctx.drawImage(img,-img.naturalWidth*sc/2'));
 });

@@ -1,3 +1,25 @@
+# STELLAR LEGACY — V20.2.8 (HUD MOBILE OTIMIZADO)
+
+**Base:** V20.2.7 completa, sem migrações SQL.
+
+## Como instalar
+1. Termine de verificar a V20.2.7.
+2. Coloque o ZIP V20.2.8 na raiz do GitHub como o **único** arquivo `stellar-legacy*.zip` de instalação.
+3. Execute **GitHub Actions → Instalar versão do Stellar Legacy → Run workflow**.
+4. Confirme `20.2.8` no jogo e no `/health` do Render.
+5. No Android use **CONF → JOGO → DIAGNÓSTICO**, qualidade BAIXA e mesmo mapa para comparação.
+
+## Onde olhar no relatório
+- `Interface HUD JS p95` — soma do tempo gasto no HUD por quadro.
+- `HUD completo p95` — **somente** os quadros que atualizaram o HUD completo.
+- `HUD crítico p95` — **somente** quadros com HP, escudo e cooldowns rápidos.
+- `HUD munições p95` — custo da rotina de estoque e seleção de munição.
+- `FPS observados`, `Espera entre quadros p95` e `Quadros longos` — ajudam a distinguir JS de outras limitações do navegador.
+
+O modo BAIXO continua limitado a 30 FPS; não houve alteração no timestep, regras de dano ou no esquema de contas.
+
+---
+
 > **V20.2.7:** perfil granular do loop e cadências auxiliares. Consulte `V20_2_7_RELATORIO.md` para mudanças e testes.
 
 # STELLAR LEGACY V20.2.6 — NPCs / Diagnóstico de Gargalos (Android)

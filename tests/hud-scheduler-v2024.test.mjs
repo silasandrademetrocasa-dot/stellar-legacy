@@ -27,7 +27,7 @@ test('updateUI explicito pausa o render periodico sem bloquear controles',()=>{
 test('motor preserva simulacao e disponibiliza HUD critico',()=>{
   const game=readFileSync(new URL('../public/game.js',import.meta.url),'utf8');
   assert.match(game,/function updateCriticalHudV2024\(\)/);
-  for(const name of ['updatePlayer(dt)','updateEnemies(dt)','updatePet(dt)','updateOnlineWorld(dt)','updateFrameHudV2024()'])assert.ok(game.includes(name),name);
+  for(const name of ['updatePlayer(dt)','updateEnemies(dt)','updatePet(dt)','updateOnlineWorld(dt)','updateFrameHudV2024(profile)'])assert.ok(game.includes(name),name);
   assert.match(game,/function updateUI\(\)\{\s*HUD_SCHEDULER\.markFull/);
   assert.ok(!game.includes('lastLowHudUpdateAt'));
 });

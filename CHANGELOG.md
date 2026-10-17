@@ -1,3 +1,13 @@
+## V20.2.8 — Otimização do HUD guiada por diagnóstico (Android / BAIXA)
+- Diagnóstico recebido da V20.2.7: 14,7 FPS; interface HUD p95 22,4 ms; jogabilidade p95 4,8 ms; serviços p95 2 ms; Canvas p95 8,8 ms.
+- Novo módulo `public/modules/hud-content-cache.js`: só altera textos e URLs de sprites do HUD quando seus valores mudarem.
+- Reconciliação de menus do ADM/nível passa a ocorrer por assinatura de nível e configuração no ciclo periódico; chamadas explícitas continuam imediatas.
+- Munições com assinatura de estoque, seleção e custo por disparo: não recria tooltips/atributos quando não muda; invalida ao reconstruir botões.
+- Evita varredura `Array.from().filter()` para hostis do radar no HUD; contador sem array temporário.
+- Mantidas atualizações de HP/escudo/alvo/cooldowns e configurações CONF1/2 na trilha rápida; nenhuma alteração de balanceamento ou velocidade de simulação.
+- Perfil local adiciona HUD completo p95, HUD crítico p95, HUD munições p95 e número de amostras de HUD completo; tudo sem envio de dados.
+- Testes unitários e regressivos adicionais, sem alterações em SQL, servidor de combate, sprites, lojas ou saves.
+
 ## V20.2.7 — Diagnóstico de gargalos JS e cadências auxiliares
 - Recebido diagnóstico V20.2.6: 12,4 FPS, atualização JS p95 20,3ms, Canvas p95 7,1ms.
 - Instrumentação opt-in por etapa: gameplay, serviços/eventos, HUD e espera entre quadros.

@@ -25,7 +25,7 @@ test('módulo NPC está somente na renderização, sem tocar em combate',()=>{
  assert.match(game,/const npcDetail=npcVisualDetail/);
  assert.match(game,/if\(npcDetail==='sprite'\)return/);
  assert.match(game,/if\(npcDetail==='full'\)/);
- for(const symbol of ['updateEnemies(dt)','updateSharedUniverseInterpolation(dt)','drawPlayer();','drawPet();','updateFrameHudV2024()'])
+ for(const symbol of ['updateEnemies(dt)','updateSharedUniverseInterpolation(dt)','drawPlayer();','drawPet();','updateFrameHudV2024(profile)'])
    assert.ok(game.includes(symbol),symbol);
 });
 test('diagnóstico mede atualização e desenho sem alterar ciclo de combate',()=>{

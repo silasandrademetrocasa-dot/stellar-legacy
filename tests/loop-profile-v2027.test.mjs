@@ -7,7 +7,7 @@ const to=code.indexOf('\nfunction drawSectorGrid()',from);
 const update=code.slice(from,to);
 test('movimento, NPC, AUX, escudos e HUD crítico não são pulados pelo scheduler',()=>{
  assert.ok(from>=0&&to>from);
- for(const call of ['updateCombatAbilities();','updatePlayer(dt);','updateSharedUniverseInterpolation(dt);','updateEnemies(dt);','updatePet(dt);','updateWarfrontRuntime();','updateGalaxyEvent(dt);','updateParticles(dt);','updateFx(dt);','updateAlphaGate();','updateFrameHudV2024();']){
+ for(const call of ['updateCombatAbilities();','updatePlayer(dt);','updateSharedUniverseInterpolation(dt);','updateEnemies(dt);','updatePet(dt);','updateWarfrontRuntime();','updateGalaxyEvent(dt);','updateParticles(dt);','updateFx(dt);','updateAlphaGate();','updateFrameHudV2024(profile);']){
   assert.ok(update.includes(call),'chamada ausente: '+call);
  }
  assert.match(update,/if\(isPublicPvpSector\(\)\|\|AUX_WORK_V2027\.due\('onlinePolling',100\)\)updateOnlineWorld\(dt\);/);

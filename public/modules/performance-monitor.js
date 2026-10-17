@@ -36,6 +36,9 @@ export function createPerformanceMonitor({capacity=SAMPLE_LIMIT}={}) {
       gameplay:finiteNonnegative(stages?.phases?.gameplayMs)?stages.phases.gameplayMs:null,
       services:finiteNonnegative(stages?.phases?.servicesMs)?stages.phases.servicesMs:null,
       hud:finiteNonnegative(stages?.phases?.hudMs)?stages.phases.hudMs:null,
+      hudFull:finiteNonnegative(stages?.phases?.hudFullMs)?stages.phases.hudFullMs:null,
+      hudCritical:finiteNonnegative(stages?.phases?.hudCriticalMs)?stages.phases.hudCriticalMs:null,
+      hudAmmo:finiteNonnegative(stages?.phases?.hudAmmoMs)?stages.phases.hudAmmoMs:null,
       prep:finiteNonnegative(stages?.phases?.prepMs)?stages.phases.prepMs:null};
     frames.push(frame);
     framesSeen++;
@@ -61,6 +64,10 @@ export function createPerformanceMonitor({capacity=SAMPLE_LIMIT}={}) {
       gameplayP95Ms:percentile(nums('gameplay'),.95),
       servicesP95Ms:percentile(nums('services'),.95),
       hudP95Ms:percentile(nums('hud'),.95),
+      hudFullP95Ms:percentile(nums('hudFull'),.95),
+      hudCriticalP95Ms:percentile(nums('hudCritical'),.95),
+      hudAmmoP95Ms:percentile(nums('hudAmmo'),.95),
+      hudFullSamples:nums('hudFull').length,
       longFrames:frames.filter(x=>x.stalled).length,
       totalFramesSeen:framesSeen,
       totalLongFrames:stutters,
@@ -88,6 +95,9 @@ export function formatPerformanceReport(snapshot,{version='?',quality='?',resolu
     `Jogabilidade JS p95: ${numeric(snapshot?.gameplayP95Ms,' ms')}`,
     `Serviços e eventos JS p95: ${numeric(snapshot?.servicesP95Ms,' ms')}`,
     `Interface HUD JS p95: ${numeric(snapshot?.hudP95Ms,' ms')}`,
+    `HUD completo p95: ${numeric(snapshot?.hudFullP95Ms,' ms')} (${Math.max(0,Number(snapshot?.hudFullSamples)||0)} amostras)`,
+    `HUD crítico p95: ${numeric(snapshot?.hudCriticalP95Ms,' ms')}`,
+    `HUD munições p95: ${numeric(snapshot?.hudAmmoP95Ms,' ms')}`,
     `Quadros longos (janela): ${Math.max(0,Number(snapshot?.longFrames)||0)}`,
     `Heap JS do navegador: ${numeric(heapMb,' MB')} (se disponível)`,
     `Imagens no cache do jogo: ${Math.max(0,Number(cache?.count)||0)}`,
