@@ -961,3 +961,10 @@ Editor visual de ingredientes, produtos e efeitos com prévias, duplicação ina
 - Campanhas com período configurável, encerramento automático por data e domínio territorial permanente.
 - Editor visual mobile no Centro de Comando → Guerra.
 - SQLs V21_5_0 e V21_5_0B aplicados e validados no Supabase conectado.
+
+## V22.7.0 — Segurança do save e da economia
+- Novas rotas de gravação por `service_role` no Render, bloqueio faseado de escrita direta em `game_saves` e `profiles`.
+- Revisão econômica monotônica contra repetição/retrocesso de saves após compras online.
+- Contenção de flooding e replays de dano NPC no WebSocket sem autoban por lag.
+- Migração SQL A de privilégios aplicada; SQL B fica pendente até novo código ser publicado.
+- Mantidos saves, mapas, clãs, temporada, HUD, PNG/WebP e sistemas de combate existentes.

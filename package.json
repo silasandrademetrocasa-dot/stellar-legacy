@@ -1,6 +1,6 @@
 {
   "name": "stellar-legacy",
-  "version": "22.6.0",
+  "version": "22.7.0",
   "type": "module",
   "scripts": {
     "start": "node server/index.js",
@@ -19,5 +19,5 @@
   "engines": {
     "node": ">=18"
   },
-  "release": "seguranca-antifraude-auditoria-autoban"
+  "release": "seguranca-economia-escrita-servidor"
 }

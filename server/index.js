@@ -16,7 +16,7 @@ import { createSecurityService } from './security-service.js';
 
 const app = express();
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const RELEASE_VERSION = '22.6.0'; // único identificador de release nos endpoints HTTP
+const RELEASE_VERSION = '22.7.0'; // único identificador de release nos endpoints HTTP
 
 function normalizeSupabaseUrl(value = '') {
   let url = String(value || '').trim();
@@ -33,6 +33,14 @@ const SUPABASE_SERVICE_KEY=String(process.env.SUPABASE_SERVICE_ROLE_KEY || proce
 const eliteAdminClient=SUPABASE_URL&&SUPABASE_SERVICE_KEY?createClient(SUPABASE_URL,SUPABASE_SERVICE_KEY,{auth:{persistSession:false,autoRefreshToken:false}}):null;
 const securityService=createSecurityService(eliteAdminClient);
 async function requireEliteAdmin(){if(!eliteAdminClient)throw new Error('Configure SUPABASE_SERVICE_ROLE_KEY no Render para persistir conquistas.');return eliteAdminClient;}
+// O navegador e o token JWT nunca recebem permissao de escrita direta nos saves.
+// Todas as gravacoes passam pelo Render depois da validacao de usuario, sessao e regras.
+async function writeVerifiedSave(req,state,updated_at){
+  const service=await requireEliteAdmin();
+  const {error}=await service.from('game_saves').upsert({user_id:req.user.id,state,updated_at},{onConflict:'user_id'});
+  return error;
+}
+
 
 
 const PUBLIC_DIR = path.join(__dirname, '../public');
@@ -496,11 +504,12 @@ async function readEconomySave(req){
   const {data,error}=await req.sb.from('game_saves').select('state').eq('user_id',req.user.id).maybeSingle();if(error)throw new Error(error.message);if(!data?.state)throw Object.assign(new Error('Save online ainda não foi criado.'),{status:409});const state=structuredClone(data.state);if(String(state.accountOwnerId||req.user.id)!==req.user.id)throw Object.assign(new Error('SAVE BLOQUEADO: proprietário inválido.'),{status:409});state.profile ||= {};return state;
 }
 async function writeEconomySave(req,state){
+  state.serverPurchaseRevision=Math.max(0,Math.floor(Number(state.serverPurchaseRevision)||0))+1;
   state.accountOwnerId=req.user.id;state.accountOwnerEmail=req.user.email||null;const updated_at=new Date().toISOString();
   const profile=state.profile||{};let securedCallsign=normalizeCallsign(profile.callsign||'');if(!securedCallsign)securedCallsign=await ensureProfile(req.sb,req.user);
   state.profile={...profile,callsign:securedCallsign};
-  const savePromise=req.sb.from('game_saves').upsert({user_id:req.user.id,state,updated_at},{onConflict:'user_id'});
-  const profilePromise=req.sb.from('profiles').upsert({id:req.user.id,callsign:securedCallsign,faction:profile.faction||null,level:Number(profile.level||1),xp:Number(profile.xp||0),credits:Number(profile.credits||0),uridium:Number(profile.uridium||0),aliens_killed:Number(profile.aliensKilled||0),gg_completed:Number(state.galaxyGate?.alpha?.completed||profile.ggCompleted||0),updated_at},{onConflict:'id'});
+  const savePromise=writeVerifiedSave(req,state,updated_at).then(error=>({error}));
+  const profilePromise=(await requireEliteAdmin()).from('profiles').upsert({id:req.user.id,callsign:securedCallsign,faction:profile.faction||null,level:Number(profile.level||1),xp:Number(profile.xp||0),credits:Number(profile.credits||0),uridium:Number(profile.uridium||0),aliens_killed:Number(profile.aliensKilled||0),gg_completed:Number(state.galaxyGate?.alpha?.completed||profile.ggCompleted||0),updated_at},{onConflict:'id'});
   const [{error:saveError},{error:profileError}]=await Promise.all([savePromise,profilePromise]);if(saveError)throw new Error(saveError.message);if(profileError)throw new Error(profileError.message);return updated_at;
 }
 function debitServer(state,amount,currency){const c=currency==='uridium'?'uridium':'credits',price=Math.max(0,Math.round(Number(amount)||0)),balance=Math.max(0,Number(state.profile?.[c])||0);if(balance<price)throw Object.assign(new Error(`Saldo insuficiente: faltam ${price-balance} ${c==='uridium'?'STL':'CR'}.`),{status:409});state.profile[c]=balance-price;return {currency:c,price,balance:state.profile[c]};}
@@ -1230,14 +1239,16 @@ app.post('/api/live/purchase', requireUser, asyncRoute(async (req,res)=>{
     applyLiveGrant(state,row);
     if(row.kind==='drone')state.dronePurchasesV1829[String(row.ref_id||'')]=droneTier+1;
     state.profile[currency]=balance-price;
+    // Uma compra confirmada so pode ser sobreposta por um save com a mesma revisao.
+    state.serverPurchaseRevision=Math.max(0,Math.floor(Number(state.serverPurchaseRevision)||0))+1;
     // Não avance clientSavedAt em mutações econômicas: esse timestamp pertence ao snapshot do cliente.
     state.accountOwnerId=req.user.id;state.accountOwnerEmail=req.user.email||null;
     const updated_at=new Date().toISOString();
-    const {error:writeError}=await req.sb.from('game_saves').upsert({user_id:req.user.id,state,updated_at},{onConflict:'user_id'});
+    const writeError=await writeVerifiedSave(req,state,updated_at);
     if(writeError)throw new Error(writeError.message);
     const profile=state.profile||{};
     const securedCallsign=await ensureProfile(req.sb,req.user);
-    await req.sb.from('profiles').upsert({id:req.user.id,callsign:securedCallsign,faction:profile.faction||null,level:Number(profile.level||1),xp:Number(profile.xp||0),credits:Number(profile.credits||0),uridium:Number(profile.uridium||0),aliens_killed:Number(profile.aliensKilled||0),gg_completed:Number(state.galaxyGate?.alpha?.completed||profile.ggCompleted||0),updated_at},{onConflict:'id'});
+    await (await requireEliteAdmin()).from('profiles').upsert({id:req.user.id,callsign:securedCallsign,faction:profile.faction||null,level:Number(profile.level||1),xp:Number(profile.xp||0),credits:Number(profile.credits||0),uridium:Number(profile.uridium||0),aliens_killed:Number(profile.aliensKilled||0),gg_completed:Number(state.galaxyGate?.alpha?.completed||profile.ggCompleted||0),updated_at},{onConflict:'id'});
     return {state,updated_at,purchase:{catalog_key:catalogKey,base_price:basePrice,price,currency,drone_tier:row.kind==='drone'?droneTier+1:null,premium_discount:price<basePrice}};
   });
   res.json({ok:true,...result});
@@ -1611,6 +1622,16 @@ app.put('/api/save', requireUser, asyncRoute(async (req, res) => {
   // aberto durante o reset, ele não pode sobrescrever a cobrança com um save antigo.
   let statePatch = null;
   const { data: serverSave } = await req.sb.from('game_saves').select('state').eq('user_id', req.user.id).maybeSingle();
+  // Compras economicas confirmadas pelo Render nao podem ser desfeitas com save antigo.
+  const authoritativePurchaseRevision=Math.max(0,Number(serverSave?.state?.serverPurchaseRevision)||0);
+  const incomingPurchaseRevision=Math.max(0,Number(state?.serverPurchaseRevision)||0);
+  if(incomingPurchaseRevision<authoritativePurchaseRevision)return res.status(409).json({
+    error:'Economia atualizada pelo servidor. Sincronize antes de salvar.',code:'SAVE_ECONOMY_STALE'
+  });
+  if(incomingPurchaseRevision>authoritativePurchaseRevision){
+    await securityService.report(req.user.id,{code:'SAVE_PURCHASE_REVISION_FORGED',severity:'critical',evidence:{kind:'reserved_revision'}},'cloud_save');
+    return res.status(409).json({error:'Revisao de compras invalida.',code:'SAVE_RESERVED_REVISION'});
+  }
   // Recompensas Elite podem ser resgatadas enquanto há save em voo.
   // Um save velho jamais pode sobrescrever moedas e revisão confirmadas pelo SQL.
   const authoritativeEliteRevision=Number(serverSave?.state?.serverEliteRevision)||0;
@@ -1637,7 +1658,7 @@ app.put('/api/save', requireUser, asyncRoute(async (req, res) => {
   }
 
   const updated_at = new Date().toISOString();
-  const { error } = await req.sb.from('game_saves').upsert({ user_id: req.user.id, state, updated_at }, { onConflict: 'user_id' });
+  const error = await writeVerifiedSave(req,state,updated_at);
   if (error) {
     const message=String(error.message||'');
     if(message.includes('SECURITY_')){
@@ -1649,7 +1670,7 @@ app.put('/api/save', requireUser, asyncRoute(async (req, res) => {
   }
 
   const profile = state.profile || {};
-  await req.sb.from('profiles').upsert({
+  await (await requireEliteAdmin()).from('profiles').upsert({
     id: req.user.id,
     callsign: securedCallsign,
     faction: profile.faction || null,

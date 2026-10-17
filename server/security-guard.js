@@ -23,6 +23,8 @@ export function validatePlayerSave(incoming,stored,{userId,isAdmin=false}={}){
   }
  }
  if(stored&&!isAdmin){
+  const oldPurchase=Number(stored.serverPurchaseRevision)||0;const newPurchase=Number(incoming.serverPurchaseRevision)||0;
+  if(newPurchase>oldPurchase)return issue('SAVE_PURCHASE_REVISION_FORGED','critical','Revisao de compra alterada pelo navegador.');
   const oldElite=Number(stored.serverEliteRevision)||0;const newElite=Number(incoming.serverEliteRevision)||0;
   if(newElite>oldElite)return issue('SAVE_RESERVED_REVISION','critical','Tentativa de avançar revisão controlada pelo servidor.',{field:'serverEliteRevision'});
   const oldCoupon=Number(stored.serverCouponRevision)||0;const newCoupon=Number(incoming.serverCouponRevision)||0;

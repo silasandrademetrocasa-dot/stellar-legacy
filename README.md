@@ -32,3 +32,7 @@ Documentação: `V22_5_0_RELATORIO.md` e `INSTALAR_V22_5_0.md`.
 **Atenção:** nenhuma temporada ou alerta ficou ativo automaticamente. O Passe de Batalha atual funciona separadamente. Novos spawns e missões especiais de clã com recompensas exigem outro ciclo de desenvolvimento.
 
 Leia `INSTALAR_V22_0_0.md`, `V22_0_0_RELATORIO.md` e `CHANGELOG.md`.
+
+### Segurança V22.7.0
+
+Leia **`INSTALAR_V22_7_0.md`** antes de subir o ZIP. Há duas fases de SQL: a etapa A foi aplicada, a etapa B deve ser executada apenas depois do deploy. Compras com dinheiro real permanecem desligadas até a migração completa de recompensas para o servidor.

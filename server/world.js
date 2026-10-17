@@ -1,4 +1,5 @@
 import { randomUUID } from 'crypto';
+import {admitNpcDamage} from './combat-throttle.js';
 import { WebSocketServer, WebSocket } from 'ws';
 import {selectLiveDirective,directiveToWorldEvent} from './universe-directives.js';
 import {captureElapsedSeconds, classifyWarfrontCaptureError, withCaptureTimeout, CAPTURE_FAILURE_BACKOFF_MS} from './warfront-capture.js';
@@ -729,7 +730,10 @@ class Room {
 
   async handleDamage(ws,msg){
     const p=ws.player,e=this.npcs.get(String(msg.entityId||''));if(!p||!e||e.hp<=0)return;
-    const now=nowMs();if(now-(ws.lastWorldDamageAt||0)<25)return;ws.lastWorldDamageAt=now;
+    const now=nowMs();
+    if(!this.playerFresh(p)||String(ws.identity?.user?.id||'')!==String(p.userId))return;
+    const hitPolicy=admitNpcDamage(ws,msg,now);
+    if(!hitPolicy.allowed)return safeJsonSend(ws,{type:'damage_result',hitId:msg.hitId||null,entityId:e.id,actual:0,rejected:hitPolicy.reason});
     const dist=Math.hypot(p.x-e.x,p.y-e.y);if(dist>1450)return safeJsonSend(ws,{type:'damage_result',hitId:msg.hitId||null,entityId:e.id,actual:0,rejected:'range'});
     let amount=clamp(msg.damage,0,5000000);if(amount<=0)return;
     const mode=String(msg.mode||'damage');const beforeShield=e.shield,beforeHp=e.hp;let actual=0;
