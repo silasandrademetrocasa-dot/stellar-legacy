@@ -1,3 +1,21 @@
+# Stellar Legacy — V20.2.2 MONITOR DE DESEMPENHO (Etapa 3)
+
+Release completa baseada na **V20.2.1 MOTOR GRÁFICO E CACHE**. **Sem SQL novo, sem mudanças no combate nem nos saves.**
+
+## Nesta atualização
+
+- Abra **CONF → JOGO → DIAGNÓSTICO DE DESEMPENHO**. A medição local é opcional e vem desligada por padrão.
+- Mostra FPS observado, intervalo p95 entre quadros, tempo p95 de `update` + `draw`, quadros longos, imagens no cache e memória heap JS do navegador quando disponível.
+- HUD compacto opcional de FPS e botão *Copiar relatório técnico*: dados copiados manualmente ao clipboard, nunca enviados automaticamente.
+- No máximo 240 amostras; evita contar troca de aba como engasgo.
+- Perfil de qualidade AUTO e proteção de sprites de naves/NPC/AUX mantidos.
+
+**Instalação:** um ZIP completo na raiz do GitHub, execute `Actions → Instalar versão do Stellar Legacy → Run workflow` (remova ZIPs anteriores da raiz). Confirme versão `20.2.2` em `/health`. Sem SQL adicional.
+
+Leia `V20_2_2_RELATORIO.md`. Histórico abaixo.
+
+---
+
 # Stellar Legacy — V20.2.1 MOTOR GRÁFICO (Etapa 2)
 
 Release completa baseada na **V20.2.0 FUNDAÇÃO**, mantendo combate, dados/saves, API, lojas, eventos e Supabase. **Nenhum SQL novo.**

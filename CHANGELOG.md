@@ -1,3 +1,10 @@
+## V20.2.2 — Monitor de Desempenho Local (Etapa 3)
+
+- Diagnóstico voluntário de FPS, quadros longos, percentil 95, tempo do desenho, cache e heap JS (quando suportado).
+- HUD opcional e botão para copiar relatório local sem dados de conta.
+- Nenhum SQL ou alteração deliberada de combate, saves, Render ou Supabase.
+- Verificações de release e testes automatizados ampliados.
+
 ## V20.2.1 — Motor gráfico (Etapa 2)
 - Cache de imagens isolado em módulo com retry e limpeza cuidadosa de fundos inativos.
 - Sprites de entidades protegidos; conteúdo visual não alterado.
