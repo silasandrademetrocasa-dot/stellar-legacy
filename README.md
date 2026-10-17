@@ -1,3 +1,9 @@
+# ATUALIZAÇÃO COM SQL — LEIA PRIMEIRO
+
+Consulte **`INSTALAR_V21_4_0_LEIA_PRIMEIRO.md`** antes de instalar. É obrigatório rodar a migração SQL e configurar a service_role key PRIVADA no Render para que as conquistas A/B/C sobrevivam ao F5 e à desconexão.
+
+---
+
 # Stellar Legacy V20.3.3 — ADM unificado
 
 ZIP completo baseado na V20.3.0; integra as fases 20.3.1 (Crafting), 20.3.2 (Economia), 20.3.3 (Navegação ADM). **Não requer novo SQL.**

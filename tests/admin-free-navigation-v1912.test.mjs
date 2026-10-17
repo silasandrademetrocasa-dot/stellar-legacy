@@ -116,7 +116,7 @@ test('WebSocket bloqueia player próprio de nível insuficiente',async()=>{
  assert.equal(r.added.length,0);assert.match(r.sent[0].reason,/nível mínimo/);
 });
 test('autorização da role ADM é obtida por RPC SQL com UID autenticado em login e salto',()=>{
- assert.equal((server.match(/\.rpc\('is_game_admin_v1763'/g)||[]).length,2);
+ assert.ok((server.match(/\.rpc\('is_game_admin_v1763'/g)||[]).length>=2);
  assert(server.includes('p_uid:userId'));assert(server.includes('p_uid:data.user.id'));
  assert(game.includes('await refreshAdminStatus(true)'));
  assert(game.includes("if(!isVerifiedAdminNavigator()&&/^x[1-8]$/.test(progress.mapId)"));

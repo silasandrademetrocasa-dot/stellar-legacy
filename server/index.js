@@ -8,10 +8,11 @@ import { fileURLToPath } from 'url';
 import { createClient } from '@supabase/supabase-js';
 import { randomUUID } from 'crypto';
 import { attachSharedUniverse } from './world.js';
+import { eliteStatus } from './elite-operations.js';
 
 const app = express();
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const RELEASE_VERSION = '21.3.0'; // único identificador de release nos endpoints HTTP
+const RELEASE_VERSION = '21.4.0'; // único identificador de release nos endpoints HTTP
 
 function normalizeSupabaseUrl(value = '') {
   let url = String(value || '').trim();
@@ -23,6 +24,11 @@ function normalizeSupabaseUrl(value = '') {
 
 const SUPABASE_URL = normalizeSupabaseUrl(process.env.SUPABASE_URL || '');
 const SUPABASE_KEY = String(process.env.SUPABASE_PUBLISHABLE_KEY || process.env.SUPABASE_ANON_KEY || '').trim();
+// Chave privilegiada SOMENTE no Render. Nunca retorna no /api/config nem no bundle público.
+const SUPABASE_SERVICE_KEY=String(process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SECRET_KEY || '').trim();
+const eliteAdminClient=SUPABASE_URL&&SUPABASE_SERVICE_KEY?createClient(SUPABASE_URL,SUPABASE_SERVICE_KEY,{auth:{persistSession:false,autoRefreshToken:false}}):null;
+async function requireEliteAdmin(){if(!eliteAdminClient)throw new Error('Configure SUPABASE_SERVICE_ROLE_KEY no Render para persistir conquistas.');return eliteAdminClient;}
+
 
 const PUBLIC_DIR = path.join(__dirname, '../public');
 const ASSET_CACHE_MS = 24 * 60 * 60 * 1000;
@@ -1453,6 +1459,48 @@ app.post('/api/admin/users/:userId/unban', requireUser, asyncRoute(async(req,res
 app.post('/api/admin/users/:userId/reset', requireUser, asyncRoute(async(req,res)=>adminRpc(req,res,'admin_reset_account_v1763',{p_target_user_id:req.params.userId})));
 app.delete('/api/admin/users/:userId', requireUser, asyncRoute(async(req,res)=>adminRpc(req,res,'admin_delete_account_v1763',{p_target_user_id:req.params.userId})));
 
+// Dados de progresso e resgates lidos da base autenticada, nunca do navegador.
+// Status: somente tabelas autenticadas. Metricas observadas sao do servidor.
+app.get('/api/elite',requireUser,asyncRoute(async(req,res)=>{
+ const [counters,claims,objectives,adminCheck]=await Promise.all([
+  req.sb.from('stellar_elite_counters').select('npc_kills,sector_captures').eq('user_id',req.user.id).maybeSingle(),
+  req.sb.from('stellar_elite_claims').select('objective_id,title,claimed_at').eq('user_id',req.user.id),
+  req.sb.from('stellar_elite_objectives').select('objective_id,label,title,metric,target,credits,stl,enabled,sort_order').eq('enabled',true).order('sort_order'),
+  req.sb.rpc('is_game_admin_v1763',{p_uid:req.user.id})
+ ]);
+ if(counters.error||claims.error||objectives.error)return res.status(503).json({error:'Operações de Elite indisponíveis. Execute o SQL de instalação.',detail:String(counters.error?.message||claims.error?.message||objectives.error?.message||'')});
+ res.json({ok:true,objectives:eliteStatus(counters.data||{},claims.data||[],objectives.data||[]),titles:(claims.data||[]).map(x=>({name:x.title,earned_at:x.claimed_at})),isAdmin:adminCheck.data===true&&!adminCheck.error});
+}));
+app.post('/api/elite/claim',requireUser,asyncRoute(async(req,res)=>{
+ const objectiveId=String(req.body?.objectiveId||'');
+ if(!/^[a-z][a-z0-9_]{2,39}$/.test(objectiveId))return res.status(400).json({error:'Objetivo inválido.'});
+ const {data,error}=await req.sb.rpc('stellar_claim_elite_objective',{p_objective_id:objectiveId});
+ if(error)return res.status(409).json({error:error.message||'Resgate não autorizado.'});
+ res.json(data);
+}));
+app.get('/api/admin/elite/objectives',requireUser,asyncRoute(async(req,res)=>{
+ const {data:admin,error:adminError}=await req.sb.rpc('is_game_admin_v1763',{p_uid:req.user.id});
+ if(adminError||admin!==true)return res.status(403).json({error:'Acesso reservado ao ADM.'});
+ const sb=await requireEliteAdmin();const {data,error}=await sb.from('stellar_elite_objectives').select('*').order('sort_order');
+ if(error)return res.status(503).json({error:error.message});res.json({items:data||[]});
+}));
+app.post('/api/admin/elite/objectives',requireUser,asyncRoute(async(req,res)=>{
+ const {data:admin,error:adminError}=await req.sb.rpc('is_game_admin_v1763',{p_uid:req.user.id});
+ if(adminError||admin!==true)return res.status(403).json({error:'Acesso reservado ao ADM.'});
+ const b=req.body||{},id=String(b.objective_id||'').trim(),metric=String(b.metric||'');
+ const label=String(b.label||'').trim(),title=String(b.title||'').trim();
+ const target=Number(b.target),credits=Number(b.credits),stl=Number(b.stl),sortOrder=Number(b.sort_order);
+ if(!/^[a-z][a-z0-9_]{2,39}$/.test(id)||!['npc_kills','sector_captures'].includes(metric)||label.length<3||label.length>70||title.length<3||title.length>70||!Number.isSafeInteger(target)||target<1||target>1000000||!Number.isSafeInteger(credits)||credits<0||credits>500000||!Number.isSafeInteger(stl)||stl<0||stl>1000)return res.status(400).json({error:'Confira ID, tipo, metas e prêmios.'});
+ const sb=await requireEliteAdmin();
+ // Não editar tipo/meta de um objetivo já resgatado: protege os requisitos históricos.
+ const {data:claims,error:clErr}=await sb.from('stellar_elite_claims').select('objective_id').eq('objective_id',id).limit(1);
+ if(clErr)return res.status(503).json({error:clErr.message});
+ if(claims?.length){const {data:current}=await sb.from('stellar_elite_objectives').select('metric,target').eq('objective_id',id).maybeSingle();if(current&&(current.metric!==metric||Number(current.target)!==target))return res.status(409).json({error:'Não altere métrica/meta de um objetivo com resgates. Crie outro ID.'});}
+ const payload={objective_id:id,label,title,metric,target,credits,stl,enabled:b.enabled===true,sort_order:Number.isFinite(sortOrder)?Math.max(0,Math.min(9999,Math.trunc(sortOrder))):100,updated_at:new Date().toISOString()};
+ const {data,error}=await sb.from('stellar_elite_objectives').upsert(payload,{onConflict:'objective_id'}).select().single();
+ if(error)return res.status(400).json({error:error.message});res.json({ok:true,item:data});
+}));
+
 app.get('/api/save', requireUser, asyncRoute(async (req, res) => {
   const { data, error } = await req.sb.from('game_saves').select('state,updated_at').eq('user_id', req.user.id).maybeSingle();
   if (error) return res.status(400).json({ error: error.message });
@@ -1478,6 +1526,13 @@ app.put('/api/save', requireUser, asyncRoute(async (req, res) => {
   // aberto durante o reset, ele não pode sobrescrever a cobrança com um save antigo.
   let statePatch = null;
   const { data: serverSave } = await req.sb.from('game_saves').select('state').eq('user_id', req.user.id).maybeSingle();
+  // Recompensas Elite podem ser resgatadas enquanto há save em voo.
+  // Um save velho jamais pode sobrescrever moedas e revisão confirmadas pelo SQL.
+  const authoritativeEliteRevision=Number(serverSave?.state?.serverEliteRevision)||0;
+  const incomingEliteRevision=Number(state?.serverEliteRevision)||0;
+  if(incomingEliteRevision<authoritativeEliteRevision)return res.status(409).json({
+    error:'SAVE_ELITE_STALE: sincronize as recompensas com o servidor.',code:'SAVE_ELITE_STALE'
+  });
   const serverEconomy = serverSave?.state?.serverEconomy || {};
   const clientEconomy = state?.serverEconomy || {};
   const serverCollectionDate = String(serverEconomy.lastClanCollectionDate || '');
@@ -1562,6 +1617,28 @@ app.use((err, req, res, next) => {
 const port = process.env.PORT || 3000;
 const server = http.createServer(app);
 const sharedUniverse = attachSharedUniverse(server, {
+  loadWarfront:async mapId=>{
+    const sb=await requireEliteAdmin();
+    const {data,error}=await sb.from('stellar_warfront_nodes').select('map_id,node_id,owner,revision,captured_at').eq('map_id',mapId);
+    if(error)throw new Error(error.message);
+    if(!Array.isArray(data)||data.length!==3)throw new Error('Relés não inicializados no SQL.');
+    return data;
+  },
+  persistCapture:async(mapId,nodeId,faction,revision,actorUserId)=>{
+    const sb=await requireEliteAdmin();
+    const {data,error}=await sb.rpc('stellar_commit_warfront_capture',{
+      p_map_id:mapId,p_node_id:nodeId,p_faction:faction,p_expected_revision:revision,p_actor:actorUserId
+    });
+    if(error)throw new Error(error.message);
+    const row=Array.isArray(data)?data[0]:data;
+    if(!row||row.owner!==faction)throw new Error('Captura não confirmada no banco.');
+    return row;
+  },
+  recordEliteEvent:async(userId,kind)=>{
+    const sb=await requireEliteAdmin();
+    const {error}=await sb.rpc('stellar_record_elite_event',{p_user_id:userId,p_kind:kind,p_amount:1});
+    if(error)throw new Error(error.message);
+  },
   loadLiveOps: async()=>loadLiveOpsSnapshot(false),
   loadNpcConfig: async()=>loadNpcRuntimeSnapshot(false),
   loadWorldConfig: async()=>loadWorldRuntimeSnapshot(false),

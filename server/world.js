@@ -159,7 +159,21 @@ class Room {
     this.lastEventBroadcastAt=0;
     this.lastWarfrontBroadcastAt=0;
     this.warfrontFullController=null;
-    this.warfrontControl=this.map.battle?{mapId:this.mapId,nodes:warfrontNodesForMap(this.mapId,this.map),startedAt:nowMs()}:null;
+    this.warfrontControl=this.map.battle&&WARFRONT_NODE_LAYOUT[this.mapId]?{mapId:this.mapId,nodes:warfrontNodesForMap(this.mapId,this.map),startedAt:nowMs()}:null;
+    // O estado de cada relé pertence ao banco, não à sessão WebSocket / sala em RAM.
+    this.ready=this.warfrontControl?this.world.loadWarfront(this.mapId).then(rows=>{
+      if(!Array.isArray(rows)||rows.length!==3)throw new Error('PERSISTENCIA_DOS_RELES_INDISPONIVEL');
+      for(const node of this.warfrontControl.nodes){
+        const row=rows.find(item=>item.node_id===node.id);
+        if(!row)throw new Error('RELE_SEM_ESTADO_NO_BANCO');
+        node.owner=WARFRONT_FACTIONS.includes(row.owner)?row.owner:null;
+        node.revision=Number(row.revision)||0;
+        node.capturedAt=Date.parse(row.captured_at||'')||0;
+      }
+      const owners=this.warfrontControl.nodes.map(n=>n.owner);
+      this.warfrontFullController=owners[0]&&owners.every(o=>o===owners[0])?owners[0]:null;
+    }):Promise.resolve();
+    this.lastWarfrontSyncAt=0;this.warfrontSyncing=false;
     this.generateBaseWorld();
     this.ensureEvent(true);
   }
@@ -437,7 +451,6 @@ class Room {
   }
   updateWarfrontControl(dt,now){
     if(!this.warfrontControl)return;
-    const previousFull=this.warfrontFullController||null;
     let lastChange=null;
     for(const node of this.warfrontControl.nodes){
       const counts={earth:0,mars:0,jupiter:0};
@@ -449,6 +462,7 @@ class Room {
       }
       for(const list of Object.values(candidates))list.sort((a,b)=>a.distance-b.distance);
       node.nearby=counts;
+      if(node.persisting)continue;
       const active=WARFRONT_FACTIONS.filter(id=>counts[id]>0);
       node.contested=active.length>1;
       if(node.contested)continue;
@@ -457,34 +471,73 @@ class Room {
         if(node.owner===faction){node.challenger=null;node.progress=0;continue;}
         if(node.challenger!==faction){node.challenger=faction;node.progress=0;}
         node.progress=Math.min(100,node.progress+WARFRONT_CAPTURE_RATE*weight*dt);
-        if(node.progress>=100){
+        if(node.progress>=100&&!node.persisting){
+          // Só aplicar a mudança depois do COMMIT. Na falha, o dono antigo permanece.
           const actor=candidates[faction][0]?.player||null;
-          if(node.owner){
-            const formerOwner=node.owner;
-            node.owner=null;node.progress=0;node.challenger=faction;
-            lastChange={type:'neutralized',node,faction,formerOwner,actor,allies:counts[faction]};
-          }else{
-            node.owner=faction;node.challenger=null;node.progress=0;node.capturedAt=now;
-            lastChange={type:'captured',node,faction,formerOwner:null,actor,allies:counts[faction]};
+          if(!actor?.userId)continue;
+          const formerOwner=node.owner,expectedRevision=node.revision||0;
+          node.persisting=true;
+          this.world.persistCapture(this.mapId,node.id,faction,expectedRevision,actor.userId).then(row=>{
+            node.owner=row.owner;
+            node.revision=Number(row.revision)||expectedRevision+1;
+            node.capturedAt=Date.parse(row.captured_at||'')||Date.now();
+            node.progress=0;node.challenger=null;
+            const change={type:'captured',node,faction,formerOwner,actor,allies:counts[faction]};
             this.world.broadcastGlobalAnnouncement({
-              kind:'warfront_point',
-              key:`warfront_point:${this.mapId}:${node.id}:${faction}`,
-              mapId:this.mapId,
-              nodeId:node.id,
-              nodeLabel:node.label,
-              faction,
-              actorUserId:actor?.userId||null,
-              actorCallsign:shortText(actor?.callsign||'PILOTO',32),
-              title:`⚔ WARFRONT • ${shortText(actor?.callsign||'PILOTO',32)} CONQUISTOU ${node.id} • ${warfrontMapLabel(this.mapId)}`,
-              subtitle:`${node.label} agora pertence à ${warfrontFactionLabel(faction)}${counts[faction]>1?` • ${counts[faction]} pilotos na captura`:''}`
+              kind:'warfront_point',key:`warfront_point:${this.mapId}:${node.id}:${faction}:${node.revision}`,
+              mapId:this.mapId,nodeId:node.id,nodeLabel:node.label,faction,
+              actorUserId:actor.userId,actorCallsign:shortText(actor.callsign||'PILOTO',32),
+              title:`⚔ WARFRONT • ${shortText(actor.callsign||'PILOTO',32)} CONQUISTOU ${node.id} • ${warfrontMapLabel(this.mapId)}`,
+              subtitle:`${node.label} agora pertence à ${warfrontFactionLabel(faction)}`
             });
-          }
+            this.world.recordEliteEvent?.(actor.userId,'sector_capture').catch(err=>console.warn('Elite capture:',err?.message));
+            this.refreshWarfrontDomination(Date.now(),change);
+            this.broadcast({type:'warfront_control',warfront:this.warfrontPayload(),serverTime:Date.now()});
+          }).catch(async err=>{
+            console.error('Conquista não gravada:',err?.message||err);
+            // Conflitos com outra instância são resolvidos recuperando a verdade do banco.
+            try{const rows=await this.world.loadWarfront(this.mapId);const saved=rows.find(r=>r.node_id===node.id);
+              if(saved){node.owner=saved.owner;node.revision=Number(saved.revision)||0;node.capturedAt=Date.parse(saved.captured_at||'')||0;}
+            }catch{}
+            node.progress=0;node.challenger=null;
+            const owners=this.warfrontControl.nodes.map(n=>n.owner);
+            this.warfrontFullController=owners[0]&&owners.every(o=>o===owners[0])?owners[0]:null;
+            this.broadcast({type:'warfront_control',warfront:this.warfrontPayload(),serverTime:Date.now()});
+          }).finally(()=>{node.persisting=false;});
         }
       }else if(node.challenger&&node.progress>0){
         node.progress=Math.max(0,node.progress-WARFRONT_DECAY_RATE*dt);
         if(node.progress<=0)node.challenger=null;
       }
     }
+    this.refreshWarfrontDomination(now,lastChange);
+    if(this.clients.size&&now-this.lastWarfrontBroadcastAt>=WARFRONT_BROADCAST_INTERVAL_MS){this.lastWarfrontBroadcastAt=now;this.broadcast({type:'warfront_control',warfront:this.warfrontPayload(),serverTime:now});}
+  }
+  async reconcileWarfrontState(){
+    if(!this.warfrontControl||this.warfrontSyncing||this.warfrontControl.nodes.some(n=>n.persisting))return;
+    this.warfrontSyncing=true;
+    try{
+      const rows=await this.world.loadWarfront(this.mapId);
+      let changed=false;
+      for(const node of this.warfrontControl.nodes){
+        const row=rows.find(x=>x.node_id===node.id);
+        if(!row)continue;
+        const revision=Number(row.revision)||0;
+        if(revision<=Number(node.revision||0))continue;
+        node.owner=WARFRONT_FACTIONS.includes(row.owner)?row.owner:null;
+        node.revision=revision;node.capturedAt=Date.parse(row.captured_at||'')||0;
+        node.progress=0;node.challenger=null;changed=true;
+      }
+      if(changed){
+        const owners=this.warfrontControl.nodes.map(n=>n.owner);
+        this.warfrontFullController=owners[0]&&owners.every(o=>o===owners[0])?owners[0]:null;
+        this.broadcast({type:'warfront_control',warfront:this.warfrontPayload(),serverTime:Date.now()});
+      }
+    }finally{this.warfrontSyncing=false;}
+  }
+  refreshWarfrontDomination(now,lastChange=null){
+    if(!this.warfrontControl)return;
+    const previousFull=this.warfrontFullController||null;
     const scores={earth:0,mars:0,jupiter:0};
     for(const n of this.warfrontControl.nodes)if(scores[n.owner]!==undefined)scores[n.owner]++;
     const currentFull=WARFRONT_FACTIONS.find(id=>scores[id]===this.warfrontControl.nodes.length)||null;
@@ -517,7 +570,6 @@ class Room {
       });
     }
     this.warfrontFullController=currentFull;
-    if(this.clients.size&&now-this.lastWarfrontBroadcastAt>=WARFRONT_BROADCAST_INTERVAL_MS){this.lastWarfrontBroadcastAt=now;this.broadcast({type:'warfront_control',warfront:this.warfrontPayload(),serverTime:now});}
   }
 
   eventPayload(){return this.event?{...this.event,convoy:this.convoy?{...this.convoy}:null}:null;}
@@ -682,6 +734,8 @@ class Room {
     });
     const factor=eligible.length?1/eligible.length:0;
     for(const c of eligible){
+      // Apenas o abate validado pelo servidor gera progresso permanente de Elite.
+      this.world.recordEliteEvent?.(c.player.userId,'npc_kill').catch(err=>console.warn('Elite NPC:',err?.message));
       const isOwner=String(c.player?.userId||'')===ownerId;
       safeJsonSend(c,{type:'kill_credit',entity:dead,factor,groupShared:!!rewardGroupId,eligibleCount:eligible.length,ownerUserId:ownerId,ownerGroupId:rewardGroupId||null,dropBox:isOwner});
     }
@@ -788,7 +842,7 @@ class Room {
   }
 }
 
-export function attachSharedUniverse(server,{authenticate,authorizeJoin,loadLiveOps,loadBattleGroup,loadNpcConfig,loadWorldConfig,loadPlayerEventProgress,recordPlayerEventProgress}){
+export function attachSharedUniverse(server,{authenticate,authorizeJoin,loadLiveOps,loadBattleGroup,loadNpcConfig,loadWorldConfig,loadPlayerEventProgress,recordPlayerEventProgress,loadWarfront,persistCapture,recordEliteEvent}){
   const wss=new WebSocketServer({
     server,
     path:'/ws',
@@ -799,6 +853,9 @@ export function attachSharedUniverse(server,{authenticate,authorizeJoin,loadLive
     }
   });const rooms=new Map();
   const world={
+    loadWarfront:loadWarfront||(()=>Promise.reject(new Error('Sem conexão com o banco de relés'))),
+    persistCapture:persistCapture||(()=>Promise.reject(new Error('Sem gravação de relés'))),
+    recordEliteEvent:recordEliteEvent||(()=>Promise.resolve()),
     liveOps:{events:[],catalog:[],server_time:0},
     lastLiveOpsAt:0,
     liveOpsBusy:false,
@@ -933,7 +990,9 @@ export function attachSharedUniverse(server,{authenticate,authorizeJoin,loadLive
         // Somente X-1..X-8 são territoriais; b41,b42,b43 são PvP públicos de nível mínimo.
         const wrongFaction=!admin&&territorial&&String(msg.territoryFaction||faction)!==faction;
         if(!dest||dest.enabled===false||dest.gate||!validTerritory||!sectorValid||wrongFaction||(!admin&&level<required)||!faction){safeJsonSend(ws,{type:'join_error',reason:wrongFaction?'INVASÕES BLOQUEADAS':`Setor indisponível / nível mínimo ${required}`});return;}
-        ws.room?.removeClient(ws);const r=world.room(mapId,territory);const p={userId:identity.user.id,callsign:identity.callsign||msg.callsign||'Pilot',pilotTitle:shortText(msg.pilotTitle||'Piloto Estelar',64),faction:faction,shipId:String(msg.shipId||'phoenix'),shipDesignId:msg.shipDesignId?shortText(msg.shipDesignId,64):null,level:level,x:Number(msg.x)||400,y:Number(msg.y)||400,hp:Number(msg.hp)||1,maxHp:Number(msg.maxHp)||1,shield:Number(msg.shield)||0,maxShield:Number(msg.maxShield)||0,angle:Number(msg.angle)||0,laserFiring:false,laserColor:'#76d9ff',laserAmmoId:'lcb10',laserAmmoName:'PLS-1',targetId:null,targetIsPlayer:false,pet:{owned:false},updatedAt:nowMs()};r.addClient(ws,p);return;
+        const r=world.room(mapId,territory);
+        try{await r.ready;}catch(err){rooms.delete(r.key);safeJsonSend(ws,{type:'join_error',reason:'CONTROLE TERRITORIAL INDISPONÍVEL: configure o banco da conquista no Supabase.'});return;}
+        ws.room?.removeClient(ws);const p={userId:identity.user.id,callsign:identity.callsign||msg.callsign||'Pilot',pilotTitle:shortText(msg.pilotTitle||'Piloto Estelar',64),faction:faction,shipId:String(msg.shipId||'phoenix'),shipDesignId:msg.shipDesignId?shortText(msg.shipDesignId,64):null,level:level,x:Number(msg.x)||400,y:Number(msg.y)||400,hp:Number(msg.hp)||1,maxHp:Number(msg.maxHp)||1,shield:Number(msg.shield)||0,maxShield:Number(msg.maxShield)||0,angle:Number(msg.angle)||0,laserFiring:false,laserColor:'#76d9ff',laserAmmoId:'lcb10',laserAmmoName:'PLS-1',targetId:null,targetIsPlayer:false,pet:{owned:false},updatedAt:nowMs()};r.addClient(ws,p);return;
       }
       if(msg.type==='player_state')return ws.room?.updatePlayer(ws,msg);
       if(msg.type==='npc_damage')return await ws.room?.handleDamage(ws,msg);
@@ -951,7 +1010,7 @@ export function attachSharedUniverse(server,{authenticate,authorizeJoin,loadLive
   world.refreshWorldConfig(true).catch(()=>{});
   world.refreshNpcConfig(true).catch(()=>{});
   world.refreshLiveOps(true).catch(()=>{});
-  let last=nowMs(),lastActivityCleanup=0;const timer=setInterval(()=>{const n=nowMs(),dt=Math.min(.12,(n-last)/1000);last=n;if(n-world.lastLiveOpsAt>=LIVE_OPS_REFRESH_MS)world.refreshLiveOps(false).catch(()=>{});if(n-world.lastNpcConfigAt>=12000)world.refreshNpcConfig(false).catch(()=>{});if(n-world.lastWorldConfigAt>=15000)world.refreshWorldConfig(false).catch(()=>{});for(const [key,r] of rooms){if(r.clients.size>0){r.lastUsedAt=n;r.tick(dt);}else if(n-(r.lastUsedAt||n)>IDLE_ROOM_TTL_MS)rooms.delete(key);}if(n-lastActivityCleanup>60000){lastActivityCleanup=n;for(const [uid,at] of world.npcActivity)if(n-Number(at)>10*60*1000)world.npcActivity.delete(uid);}},50);
+  let last=nowMs(),lastActivityCleanup=0;const timer=setInterval(()=>{const n=nowMs(),dt=Math.min(.12,(n-last)/1000);last=n;if(n-world.lastLiveOpsAt>=LIVE_OPS_REFRESH_MS)world.refreshLiveOps(false).catch(()=>{});if(n-world.lastNpcConfigAt>=12000)world.refreshNpcConfig(false).catch(()=>{});if(n-world.lastWorldConfigAt>=15000)world.refreshWorldConfig(false).catch(()=>{});for(const [key,r] of rooms){if(r.clients.size>0){r.lastUsedAt=n;r.tick(dt);if(r.warfrontControl&&n-r.lastWarfrontSyncAt>15000){r.lastWarfrontSyncAt=n;r.reconcileWarfrontState().catch(err=>console.warn('Falha sincronizando relés:',err?.message));}}else if(n-(r.lastUsedAt||n)>IDLE_ROOM_TTL_MS)rooms.delete(key);}if(n-lastActivityCleanup>60000){lastActivityCleanup=n;for(const [uid,at] of world.npcActivity)if(n-Number(at)>10*60*1000)world.npcActivity.delete(uid);}},50);
   timer.unref?.();
   return world;
 }

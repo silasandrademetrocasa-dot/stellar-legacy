@@ -54,7 +54,7 @@ test('V21 PWA: apenas ícones e tela offline em cache; API e saves online não s
 });
 test('V21 versão alinhada em HTML, servidor e imports',()=>{
  const pkg=JSON.parse(file('package.json'));const html=file('public/index.html'),server=file('server/index.js'),game=file('public/game.js');
- assert.equal(pkg.version,'21.3.0');assert.match(html,/manifest.webmanifest\?v=21\.3\.0/);
- assert.ok(server.includes("const RELEASE_VERSION = '21.3.0'"));
- assert.ok(game.includes("'./modules/v21/command-center-view.js?v=21.3.0'"));
+ assert.equal(pkg.version,'21.4.0');assert.ok(html.includes(`manifest.webmanifest?v=${pkg.version}`));
+ assert.ok(server.includes(`const RELEASE_VERSION = '${pkg.version}'`));
+ assert.ok(game.includes(`'./modules/v21/command-center-view.js?v=${pkg.version}'`));
 });

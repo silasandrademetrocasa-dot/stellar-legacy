@@ -1081,3 +1081,10 @@ export async function loadBalanceRuntimeOnline(force=false){
 export async function adminUpdateBalanceOnline(kind,item_id,fields,expected_version){
  return serverFetch('/api/admin/runtime/balance',{method:'POST',body:JSON.stringify({kind,item_id,fields,expected_version})},true);
 }
+
+// Operacoes de Elite — medidas e resgates exclusivamente no servidor.
+export async function loadEliteOperationsOnline(){return authedServerFetch('/api/elite',{},false);}
+export async function claimEliteOperationOnline(objectiveId){return authedServerFetch('/api/elite/claim',{method:'POST',body:JSON.stringify({objectiveId:String(objectiveId||'')})},false);}
+
+export async function loadAdminEliteObjectivesOnline(){return authedServerFetch('/api/admin/elite/objectives',{},false);}
+export async function saveAdminEliteObjectiveOnline(payload){return authedServerFetch('/api/admin/elite/objectives',{method:'POST',body:JSON.stringify(payload)},false);}

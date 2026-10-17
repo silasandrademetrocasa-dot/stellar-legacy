@@ -1,6 +1,6 @@
 {
   "name": "stellar-legacy",
-  "version": "21.3.0",
+  "version": "21.4.0",
   "type": "module",
   "scripts": {
     "start": "node server/index.js",
@@ -19,5 +19,5 @@
   "engines": {
     "node": ">=18"
   },
-  "release": "v21.3.0-comando-elite-guerra-temporadas-pwa"
+  "release": "elite-warfront-persistencia"
 }

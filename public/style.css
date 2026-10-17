@@ -3116,3 +3116,16 @@ body[data-quality="low"] .pet-gear {
 @media (prefers-reduced-motion:reduce){.v21-command-modal *{animation:none!important;transition:none!important}}
 
 .v21-node-list{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px}.v21-node-list>div{background:#132d3d;border:1px solid #375565;border-radius:8px;padding:9px;display:flex;flex-direction:column;gap:4px}.v21-node-list b{font-size:12px;color:#e0f8ff}.v21-node-list span{font-size:10px;color:#93cedc}@media(max-width:620px){.v21-node-list{grid-template-columns:repeat(2,minmax(0,1fr))}}
+
+/* Operacoes de Elite — reutiliza cards do Centro de Comando */
+.v21-verified-ops{margin:12px 0 20px;padding:12px;border:1px solid rgba(76,200,220,.26);border-radius:12px;background:rgba(15,38,58,.45)}
+.v21-verified-ops .v21-operation button{margin-top:10px;min-height:38px;width:100%}
+.v21-verified-ops .v21-operation button:disabled{opacity:.65;cursor:default}
+
+.v21-admin-elite{padding:14px;margin:14px 0;border:1px solid rgba(247,184,66,.3);border-radius:12px}
+.v21-admin-entries{display:flex;flex-wrap:wrap;gap:7px;margin:10px 0}
+.v21-admin-form{display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:10px;padding:12px;border-radius:10px;background:rgba(2,12,26,.6)}
+.v21-admin-form label{display:flex;flex-direction:column;gap:5px;font-size:12px}
+.v21-admin-form input,.v21-admin-form select{width:100%;min-height:38px;padding:7px;color:inherit;background:#10253d;border:1px solid #42617a;border-radius:7px}
+.v21-admin-form .v21-admin-toggle{display:flex;flex-direction:row;align-items:center}
+.v21-admin-form .v21-admin-toggle input{width:auto}

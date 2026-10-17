@@ -1,3 +1,14 @@
+## 21.4.0 — Operações de Elite e Domínio Persistente
+
+- Correção da perda de domínio dos relés A/B/C após F5, sala vazia, Render reiniciado ou mudança de sessão: estado gravado no Supabase, não na memória.
+- Captura direta sobre o proprietário anterior, sem apagar domínio até outra facção concluir 100%.
+- Controle transacional de revisão e reconciliação entre instâncias do servidor.
+- Operações de Elite validadas por eventos do servidor (abates de NPCs e relés), resgates únicos e títulos/CR/STL persistidos.
+- Editor visual ADM de metas, quantidade, premiação e publicação, com segurança de papéis.
+- Proteção `SAVE_ELITE_STALE` contra saves antigos anulando recompensas confirmadas.
+- Removidos sufixos de versão nos nomes visíveis do Centro de Comando.
+- **Migração SQL e chave privada no Render OBRIGATÓRIAS antes do deploy.**
+
 ## V20.3.0 — Editor ADM de Missões Visuais
 - Modelos de missão: Patrulha NPC, Coleta minério, Expedição mista.
 - Botão duplicar rascunho sem sobrescrever original.
