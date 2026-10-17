@@ -1,3 +1,10 @@
+## V20.2.7 — Diagnóstico de gargalos JS e cadências auxiliares
+- Recebido diagnóstico V20.2.6: 12,4 FPS, atualização JS p95 20,3ms, Canvas p95 7,1ms.
+- Instrumentação opt-in por etapa: gameplay, serviços/eventos, HUD e espera entre quadros.
+- Retirada alocação de array por frame no controle de respawn; clock de NPC compartilhado.
+- Auxiliares com cadência moderada; PvP 4-X mantém checagem por frame.
+- Sem SQL ou mudança intencional de combate, save ou assets.
+
 ## V20.2.6 — Performance NPC (render LOD) + diagnóstico separado
 
 - `public/modules/npc-render-detail.js`: classificação `full`, `bars`, `sprite` somente para apresentação de NPCs comuns distantes no gráfico BAIXO.

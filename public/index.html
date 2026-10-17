@@ -6,7 +6,7 @@
 <meta content="width=device-width,initial-scale=1,user-scalable=no" name="viewport"/>
 <meta content="#030816" name="theme-color"/>
 <title>Stellar Legacy</title>
-<link href="/style.css?v=20.2.6" rel="stylesheet"/>
+<link href="/style.css?v=20.2.7" rel="stylesheet"/>
 </head>
 <body>
 <div id="app">
@@ -805,6 +805,10 @@
           <div><span>RENDER + UPDATE P95</span><b id="perfDiagWork">—</b></div>
           <div><span>SIMULAÇÃO JS P95</span><b id="perfDiagUpdate">—</b></div>
           <div><span>CANVAS P95</span><b id="perfDiagDraw">—</b></div>
+          <div><span>ESPERA ENTRE QUADROS P95*</span><b id="perfDiagWait">—</b></div>
+          <div><span>JOGABILIDADE JS P95</span><b id="perfDiagGameplay">—</b></div>
+          <div><span>SERVIÇOS/EVENTOS JS P95</span><b id="perfDiagServices">—</b></div>
+          <div><span>HUD JS P95</span><b id="perfDiagHudCost">—</b></div>
           <div><span>QUADROS LONGOS</span><b id="perfDiagStutters">—</b></div>
           <div><span>IMAGENS NO CACHE</span><b id="perfDiagCache">—</b></div>
           <div><span>HEAP JAVASCRIPT</span><b id="perfDiagHeap">—</b></div>
@@ -813,7 +817,7 @@
           <button type="button" class="small-btn" id="perfDiagCopy" disabled>Copiar relatório técnico</button>
           <button type="button" class="ghost-btn" id="perfDiagReset" disabled>Reiniciar amostras</button>
         </div>
-        <small class="perf-diag-notice" id="perfDiagStatus">Desligado. O relatório é local e não inclui dados de login. A memória do navegador aparece apenas quando disponível.</small>
+        <small class="perf-diag-notice" id="perfDiagStatus">Desligado. O relatório é local e não inclui dados de login. *Espera é estimada e inclui o limite de FPS e o agendamento do navegador, não mede GPU.</small>
       </section>
       <section class="settings-section">
         <div class="settings-title"><div><b>ÁUDIO</b><small>Laser, mísseis, impactos, explosões, alertas e efeitos do jogo.</small></div><span id="audioVolumeValue">70%</span></div>
@@ -1026,6 +1030,6 @@
 </div>
 </div>
 <div class="perf-diag-overlay hidden" id="perfDiagOverlay" aria-live="off" aria-label="Contador de FPS local"><b id="perfDiagHudFps">FPS —</b><small id="perfDiagHudStutter">P95 —</small></div>
-<script src="/game.js?v=20.2.6" type="module"></script>
+<script src="/game.js?v=20.2.7" type="module"></script>
 </body>
 </html>

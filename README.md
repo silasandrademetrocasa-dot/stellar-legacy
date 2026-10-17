@@ -1,3 +1,5 @@
+> **V20.2.7:** perfil granular do loop e cadências auxiliares. Consulte `V20_2_7_RELATORIO.md` para mudanças e testes.
+
 # STELLAR LEGACY V20.2.6 — NPCs / Diagnóstico de Gargalos (Android)
 
 Release completa, incremental sobre a **V20.2.5**. **Não exige SQL novo.**
