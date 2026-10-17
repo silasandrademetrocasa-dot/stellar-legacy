@@ -1,3 +1,9 @@
+# Stellar Legacy — V21.5.4
+
+**Equilíbrio estendido aos mapas PvE X-1 a X-8.** Leia `INSTALAR_V21_5_4.md` e `V21_5_4_RELATORIO.md`.
+
+**SQL do pacote:** `sql/V21_5_4_EQUILIBRIO_MAPAS_PVE.sql`. A V21.5.4 contém todo o código anterior; use apenas este ZIP no instalador.
+
 # ATUALIZAÇÃO COM SQL — LEIA PRIMEIRO
 
 Consulte **`INSTALAR_V21_4_0_LEIA_PRIMEIRO.md`** antes de instalar. É obrigatório rodar a migração SQL e configurar a service_role key PRIVADA no Render para que as conquistas A/B/C sobrevivam ao F5 e à desconexão.

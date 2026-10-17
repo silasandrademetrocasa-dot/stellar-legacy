@@ -2,7 +2,7 @@ import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {MAPS} from '../public/data.js';
-import {movementSpeed,followShipCamera,PVP_MAP_DIMENSIONS,PVP_CRUISE_FACTOR} from '../public/modules/ship-navigation.js';
+import {movementSpeed,followShipCamera,PVP_MAP_DIMENSIONS,PVP_CRUISE_FACTOR,PVE_MAP_DIMENSIONS,PVE_CRUISE_FACTOR} from '../public/modules/ship-navigation.js';
 const game=readFileSync(new URL('../public/game.js',import.meta.url),'utf8');
 const sql=readFileSync(new URL('../sql/V21_5_3_CAMERA_MAPA_BALANCEADO.sql',import.meta.url),'utf8');
 test('camera cola no piloto em FPS baixo sem gerar distorcao/olhar adiante',()=>{
@@ -26,10 +26,9 @@ test('nave local e remota preservam proporcoes dos sprites e continuam girando',
   assert.doesNotMatch(online,/ctx\.transform\(1,0,bank/);
   assert.doesNotMatch(local,/ctx\.scale\(1\+Math\.abs\(bank/);
 });
-test('mapas PvP 20% maiores com IDs e pontos preservados, sem afetar PvE',()=>{
+test('mapas PvP existentes continuam estaveis e PvE ampliado no novo pacote',()=>{
   for(const [key,expected] of Object.entries(PVP_MAP_DIMENSIONS))assert.deepEqual(MAPS[key].world,expected);
-  assert.equal(MAPS.x1.world.w,6000);
-  assert.equal(MAPS.x2.world.h,4800);
+  for(const [key,expected] of Object.entries(PVE_MAP_DIMENSIONS))assert.deepEqual(MAPS[key].world,expected);
   assert.match(sql,/UPDATE public\.game_map_config_v1814/);
   assert.doesNotMatch(sql,/UPDATE public\.stellar_warfront_nodes/);
   assert.match(sql,/world_w=9800/);
@@ -38,6 +37,7 @@ test('CONF corrida continua proporcionalmente mais veloz que CONF escudos',()=>{
   const slow=movementSpeed(420,'b41');const fast=movementSpeed(730,'b41');
   assert.ok(fast>slow*1.7);
   assert.equal(fast,730*PVP_CRUISE_FACTOR);
-  assert.equal(movementSpeed(730,'x1'),730);
+  assert.equal(movementSpeed(730,'x1'),730*PVE_CRUISE_FACTOR);
+  assert.equal(movementSpeed(730,'ggAlpha'),730); // Arenas especiais nao alteradas
   assert.equal(movementSpeed(730,'b41',1.2),730*1.2*PVP_CRUISE_FACTOR);
 });

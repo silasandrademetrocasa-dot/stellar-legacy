@@ -1,3 +1,8 @@
+## 21.5.4 — Navegação PvE balanceada
+- X-1 a X-8 recebem mapas mais amplos e fator de navegação 0,88; CONF corrida mantém vantagem.
+- Câmara centralizada e sprites proporcionais preservados; portais proporcionais ao tamanho do mundo.
+- Migração SQL idempotente e condicional; arenas especiais, PvP e saves preservados.
+
 ## 21.5.3 — Navegação e escala PvP
 - Câmera acompanhando o piloto perto do centro, com atraso máximo de 14 unidades.
 - Sprites sem alongamento/torção na curva (nave local e outros pilotos).
