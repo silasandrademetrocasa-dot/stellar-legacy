@@ -3146,3 +3146,115 @@ body[data-quality="low"] .pet-gear {
 .v22-admin>.ghost-btn{margin:5px}.v22-form{display:grid;gap:9px;border:1px solid #35647d;padding:12px;margin:10px 0;border-radius:12px}
 .v22-form label{display:flex;flex-direction:column;gap:4px;font-size:.83rem}.v22-form label:has(input[type=checkbox]){flex-direction:row;align-items:center}
 .v22-form input,.v22-form textarea,.v22-form select{min-width:0;max-width:100%;box-sizing:border-box;background:#091928;color:#e4f5ff;border:1px solid #3c6078;border-radius:8px;padding:9px}
+
+
+/* ===================== HUD COMPACTO • JANELAS RECOLHIDAS =====================
+   O modo recolhido ocupa só um botão: não mantém a largura de cartões inteiros.
+   Regras no fim do CSS prevalecem sobre tamanhos de versões antigas. */
+#topHudDock #playerPanel.collapsed,
+#topHudDock #leftStats.collapsed,
+#topHudDock #activeMissionPanel.collapsed,
+#topHudDock #petFloatPanel.collapsed{
+  width:40px!important;min-width:40px!important;max-width:40px!important;
+  height:40px!important;min-height:40px!important;max-height:40px!important;
+  padding:2px!important;display:flex!important;align-items:center!important;justify-content:center!important;
+  flex:0 0 40px!important;overflow:hidden!important;border-radius:11px!important;
+}
+#topHudDock #playerPanel.collapsed .player-float-content,
+#topHudDock #playerPanel.collapsed .top-meta,
+#topHudDock #leftStats.collapsed .left-stats-content,
+#topHudDock #activeMissionPanel.collapsed .active-mission-body,
+#topHudDock #petFloatPanel.collapsed .pet-float-body{display:none!important;}
+#topHudDock #playerPanel.collapsed .player-float-head,
+#topHudDock #leftStats.collapsed .stats-toolbar,
+#topHudDock #activeMissionPanel.collapsed .active-mission-head,
+#topHudDock #petFloatPanel.collapsed .pet-float-head{
+  display:flex!important;align-items:center!important;justify-content:center!important;
+  width:36px!important;height:36px!important;min-height:36px!important;
+  padding:0!important;margin:0!important;border:0!important;gap:0!important;
+}
+#topHudDock #playerPanel.collapsed .player-float-head>div,
+#topHudDock #leftStats.collapsed .stats-toolbar-label,
+#topHudDock #activeMissionPanel.collapsed .active-mission-head>div:first-child,
+#topHudDock #activeMissionPanel.collapsed #activeMissionOpen,
+#topHudDock #petFloatPanel.collapsed .pet-float-head>span,
+#topHudDock #petFloatPanel.collapsed #petFloatLevel{display:none!important;}
+#topHudDock #leftStats.collapsed .stats-toolbar-left,
+#topHudDock #activeMissionPanel.collapsed .active-mission-controls,
+#topHudDock #petFloatPanel.collapsed .pet-float-head-actions{
+  display:flex!important;align-items:center!important;justify-content:center!important;
+  width:36px!important;height:36px!important;margin:0!important;padding:0!important;gap:0!important;
+}
+#topHudDock #playerPanel.collapsed #playerPanelToggle,
+#topHudDock #leftStats.collapsed #statsToggle,
+#topHudDock #activeMissionPanel.collapsed #activeMissionToggle,
+#topHudDock #petFloatPanel.collapsed #petFloatToggle{
+  display:grid!important;place-items:center!important;
+  width:36px!important;min-width:36px!important;max-width:36px!important;
+  height:36px!important;min-height:36px!important;max-height:36px!important;
+  padding:0!important;margin:0!important;border:0!important;background:transparent!important;
+  box-shadow:none!important;font-size:0!important;line-height:1!important;cursor:pointer;
+}
+#topHudDock #playerPanel.collapsed #playerPanelToggle::after{content:'J';font-size:13px;}
+#topHudDock #leftStats.collapsed #statsToggle::after{content:'N';font-size:13px;}
+#topHudDock #activeMissionPanel.collapsed #activeMissionToggle::after{content:'M';font-size:13px;}
+#topHudDock #petFloatPanel.collapsed #petFloatToggle::after{content:'A';font-size:13px;}
+#topHudDock #playerPanel.collapsed #playerPanelToggle::after,
+#topHudDock #leftStats.collapsed #statsToggle::after,
+#topHudDock #activeMissionPanel.collapsed #activeMissionToggle::after,
+#topHudDock #petFloatPanel.collapsed #petFloatToggle::after{display:block;font-weight:1000;letter-spacing:0;color:#9feaff;}
+#topHudDock #petFloatPanel.collapsed #petFloatToggle::after{color:#9affef;}
+#topHudDock #activeMissionPanel.collapsed #activeMissionToggle::after{color:#c6adff;}
+#topHudDock #playerPanel.collapsed #playerPanelToggle::after{color:#b5aaff;}
+
+/* Indicadores táticos da direita: quando recolhidos não ficam com 176px de largura. */
+#rightHudStack > .galaxy-event-hud.collapsed,
+#rightHudStack > .target-lock-hud.collapsed{
+  position:relative!important;align-self:flex-end!important;
+  width:40px!important;min-width:40px!important;max-width:40px!important;
+  height:40px!important;min-height:40px!important;max-height:40px!important;
+  flex:0 0 40px!important;margin:0!important;padding:2px!important;
+  border-radius:11px!important;overflow:hidden!important;
+}
+#rightHudStack > .galaxy-event-hud.collapsed{
+  display:flex!important;align-items:center!important;justify-content:center!important;
+  gap:0!important;grid-template-columns:none!important;
+}
+#rightHudStack > .galaxy-event-hud.collapsed .galaxy-event-copy,
+#rightHudStack > .galaxy-event-hud.collapsed .galaxy-event-side{display:none!important;}
+#rightHudStack > .galaxy-event-hud.collapsed .galaxy-event-icon{
+  display:block!important;font-size:19px!important;line-height:1!important;margin:0!important;
+}
+#rightHudStack > .target-lock-hud.collapsed .target-lock-head{
+  display:flex!important;align-items:center!important;justify-content:center!important;
+  height:36px!important;min-height:36px!important;width:36px!important;padding:0!important;margin:0!important;border:0!important;
+}
+#rightHudStack > .target-lock-hud.collapsed .target-lock-head>span:first-child,
+#rightHudStack > .target-lock-hud.collapsed .target-lock-head-actions>b,
+#rightHudStack > .target-lock-hud.collapsed .target-lock-main{display:none!important;}
+#rightHudStack > .target-lock-hud.collapsed .target-lock-head-actions{display:flex!important;align-items:center!important;justify-content:center!important;gap:0!important;}
+#rightHudStack > .target-lock-hud.collapsed #targetLockToggle{
+  display:grid!important;place-items:center!important;width:36px!important;height:36px!important;
+  min-width:36px!important;border:0!important;padding:0!important;background:transparent!important;transform:none!important;
+}
+/* Reaproveita a área liberada à direita para MISSÕES e AUX, sem atrapalhar o HUD expandido. */
+html.hud-right-mini #rightHudStack{width:40px!important;}
+html.hud-right-mini #topHudDock{right:56px!important;}
+html.hud-right-empty #rightHudStack{width:0!important;}
+html.hud-right-empty #topHudDock{right:8px!important;}
+@media(max-width:680px){
+  html.hud-right-mini #topHudDock{right:50px!important;}
+  html.hud-right-empty #topHudDock{right:6px!important;}
+}
+
+/* Prioridade absoluta: esconder no jogo supera o modo compacto (missões/eventos inexistentes). */
+#topHudDock > .hud-panel.hidden,
+#topHudDock > .hud-panel.hud-user-disabled,
+#rightHudStack > .galaxy-event-hud.hidden,
+#rightHudStack > .target-lock-hud.hidden{display:none!important;}
+
+/* A cascata usa IDs duplos no dock; visibilidade precisa ganhar de .collapsed. */
+#topHudDock #playerPanel.hidden,#topHudDock #leftStats.hidden,
+#topHudDock #activeMissionPanel.hidden,#topHudDock #petFloatPanel.hidden,
+#topHudDock #playerPanel.hud-user-disabled,#topHudDock #leftStats.hud-user-disabled,
+#topHudDock #activeMissionPanel.hud-user-disabled,#topHudDock #petFloatPanel.hud-user-disabled{display:none!important;}

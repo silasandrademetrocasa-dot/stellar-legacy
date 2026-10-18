@@ -993,3 +993,9 @@ Editor visual de ingredientes, produtos e efeitos com prévias, duplicação ina
 - Atualização da agenda LIVE OPS e do HUD de evento na sala, inclusive quando o jogador permanece no mapa.
 - AUX Sentinela revida apenas a NPCs que efetivamente causaram dano ao piloto; não caça neutros, NPCs apenas selecionados nem pilotos PvP.
 - Suite ampliada para 304 testes, sem SQL adicional.
+
+## V22.9.3 — HUD compacto de verdade
+- Cartões do HUD recolhidos ficam 40 × 40 px; botões J/N/M/A.
+- Eventos e Target Lock compactos; espaço do dock calculado conforme visibilidade.
+- Acessibilidade: aria-expanded e evento recolhido reabre antes de abrir o modal.
+- Nenhuma modificação de SQL ou saldos.
