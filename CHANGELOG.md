@@ -1,3 +1,11 @@
+## V22.12.0 — Designers Galácticos e Sprites (18/10/2026)
+- Integração real no mapa dos designers de bases Terra/Marte/Júpiter, derivados das artes aprovadas.
+- Novas imagens de naves iniciais por facção para o ID de gameplay phoenix. A nave inicial existente mantém exatamente os mesmos atributos; somente o designer visual muda.
+- NPCs atualizados para cinco novas silhuetas: explorador, caçador, minerador, pesado e elite.
+- Caixas de NPC, bônus, minérios e portais comuns/PvP substituídos por sprites WebP transparentes recortados das artes aprovadas.
+- Cache do cliente atualizado; qualidade baixa preserva as otimizações de canvas.
+- Sem SQL ou mudança de economia, inventário, progressão, recompensas, combate ou autenticação.
+
 ## V22.11.1 — Loading galáctico e missões inclusivas do Passe (18/10/2026)
 - Carregamento cinematográfico com arte de guerra entre três facções, comprimida para mobile; lasers suaves e barra de progresso, sem atrasar acesso.
 - Informações de fornecedor interno removidas das mensagens e confirmações de compra voltadas ao jogador.

@@ -1,10 +1,15 @@
 export const GAME_ASSETS = {
-  bonus: { box: '/assets/v18/bonus/bonus-box.webp', dust: '/assets/v18/bonus/stellar-dust.webp' },
+  bonus: { box: '/assets/v2212/boxes/bonus.webp', dust: '/assets/v18/bonus/stellar-dust.webp' },
   branding: {
     logo: '/assets/v19/branding/stellar-legacy-logo.webp',
     earth: '/assets/v19/branding/earth.webp',
     mars: '/assets/v19/branding/mars.webp',
     jupiter: '/assets/v19/branding/jupiter.webp'
+  },
+  starterDesigners: {
+    earth: {card: '/assets/v2212/ships/earth.webp', map: '/assets/v2212/ships/earth-map.webp'},
+    mars: {card: '/assets/v2212/ships/mars.webp', map: '/assets/v2212/ships/mars-map.webp'},
+    jupiter: {card: '/assets/v2212/ships/jupiter.webp', map: '/assets/v2212/ships/jupiter-map.webp'}
   },
   ships: {
     phoenix: '/assets/v17/ships/aurora.webp',
@@ -97,28 +102,28 @@ export const GAME_ASSETS = {
     zephyr: '/assets/v17/ships-map/gale.webp'
   },
   npcs: {
-    riftScout: '/assets/v17/npcs/dreadnox.webp',
-    bossRiftScout: '/assets/v17/npcs/dreadnox-prime.webp',
-    voidCorsair: '/assets/v17/npcs/colossar.webp',
-    bossVoidCorsair: '/assets/v17/npcs/colossar-prime.webp',
-    nexusWarden: '/assets/v17/npcs/colossar.webp',
-    bossNexusWarden: '/assets/v17/npcs/colossar-prime.webp',
-    astralReaper: '/assets/v17/npcs/dreadnox.webp',
-    bossAstralReaper: '/assets/v17/npcs/dreadnox-prime.webp',
-    streuner: '/assets/v17/npcs/scavenger.webp',
-    recruitStreuner: '/assets/v17/npcs/scavenger-scout.webp',
-    aiderStreuner: '/assets/v17/npcs/scavenger-support.webp',
-    lordakia: '/assets/v17/npcs/vrax.webp',
-    saimon: '/assets/v17/npcs/zyron.webp',
-    mordon: '/assets/v17/npcs/kharon.webp',
-    devolarium: '/assets/v17/npcs/dreadnox.webp',
-    sibelon: '/assets/v17/npcs/colossar.webp',
-    bossStreuner: '/assets/v17/npcs/scavenger-prime.webp',
-    bossLordakia: '/assets/v17/npcs/vrax-prime.webp',
-    bossSaimon: '/assets/v17/npcs/zyron-prime.webp',
-    bossMordon: '/assets/v17/npcs/kharon-prime.webp',
-    bossDevolarium: '/assets/v17/npcs/dreadnox-prime.webp',
-    bossSibelon: '/assets/v17/npcs/colossar-prime.webp'
+    riftScout: '/assets/v2212/npcs/scout.webp',
+    bossRiftScout: '/assets/v2212/npcs/elite.webp',
+    voidCorsair: '/assets/v2212/npcs/heavy.webp',
+    bossVoidCorsair: '/assets/v2212/npcs/elite.webp',
+    nexusWarden: '/assets/v2212/npcs/heavy.webp',
+    bossNexusWarden: '/assets/v2212/npcs/elite.webp',
+    astralReaper: '/assets/v2212/npcs/elite.webp',
+    bossAstralReaper: '/assets/v2212/npcs/elite.webp',
+    streuner: '/assets/v2212/npcs/scout.webp',
+    recruitStreuner: '/assets/v2212/npcs/scout.webp',
+    aiderStreuner: '/assets/v2212/npcs/scout.webp',
+    lordakia: '/assets/v2212/npcs/fighter.webp',
+    saimon: '/assets/v2212/npcs/fighter.webp',
+    mordon: '/assets/v2212/npcs/miner.webp',
+    devolarium: '/assets/v2212/npcs/heavy.webp',
+    sibelon: '/assets/v2212/npcs/heavy.webp',
+    bossStreuner: '/assets/v2212/npcs/elite.webp',
+    bossLordakia: '/assets/v2212/npcs/elite.webp',
+    bossSaimon: '/assets/v2212/npcs/elite.webp',
+    bossMordon: '/assets/v2212/npcs/elite.webp',
+    bossDevolarium: '/assets/v2212/npcs/elite.webp',
+    bossSibelon: '/assets/v2212/npcs/elite.webp'
   },
   drones: {
     flax: '/assets/v17/drones/halo.webp',
@@ -223,28 +228,31 @@ export const GAME_ASSETS = {
     eventShipBundle: '/assets/v19/premium-stage/eventShipBundle.png'
   },
   resources: {
-    Prometium: '/assets/v17/environment/resources/ferron.webp',
-    Endurium: '/assets/v17/environment/resources/cryon.webp',
-    Terbium: '/assets/v17/environment/resources/virel.webp',
-    Prometid: '/assets/v17/environment/resources/ferrite.webp',
-    Duranium: '/assets/v17/environment/resources/duracite.webp',
-    Promerium: '/assets/v17/environment/resources/solarium.webp',
-    Xenomit: '/assets/v17/environment/resources/voidite.webp',
+    Prometium: '/assets/v2212/ores/blue.webp',
+    Endurium: '/assets/v2212/ores/gold.webp',
+    Terbium: '/assets/v2212/ores/red.webp',
+    Prometid: '/assets/v2212/ores/teal.webp',
+    Duranium: '/assets/v2212/ores/gold.webp',
+    Promerium: '/assets/v2212/ores/prismatic.webp',
+    Xenomit: '/assets/v2212/ores/violet.webp',
     credits: '/assets/v17/environment/resources/credits.webp'
   },
   loot: {
-    cargo: '/assets/v17/loot/cargo-box.webp',
+    cargo: '/assets/v2212/boxes/common.webp',
     mystery: '/assets/v8/loot/mystery-box.png',
     repair: '/assets/v8/loot/repair.png',
     energy: '/assets/v8/loot/energy.png'
   },
   bases: {
-    orbitalStation: '/assets/v17/environment/orbital-station.webp'
+    orbitalStation: '/assets/v17/environment/orbital-station.webp',
+    earth: '/assets/v2212/bases/earth.webp',
+    mars: '/assets/v2212/bases/mars.webp',
+    jupiter: '/assets/v2212/bases/jupiter.webp'
   },
   portals: {
-    standard: '/assets/v17/environment/portals/portal-standard.webp',
-    warzone: '/assets/v17/environment/portals/portal-warzone.webp',
-    shadow: '/assets/v17/environment/portals/portal-shadow.webp'
+    standard: '/assets/v2212/portals/common.webp',
+    warzone: '/assets/v2212/portals/pvp.webp',
+    shadow: '/assets/v2212/portals/common.webp'
   },
   backgrounds: {
     x1: '/assets/v17/environment/x1.webp',
