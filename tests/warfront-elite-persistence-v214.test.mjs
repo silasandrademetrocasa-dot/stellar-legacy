@@ -5,11 +5,12 @@ import {eliteStatus} from '../server/elite-operations.js';
 import {renderV21CommandCenter} from '../public/modules/v21/command-center-view.js';
 const file=p=>readFileSync(new URL('../'+p,import.meta.url),'utf8');
 const world=file('server/world.js'),api=file('server/index.js'),sql=file('sql/V21_4_0_WARFRONT_ELITE_PERSISTENCIA.sql'),ui=file('public/game.js');
-test('Warfront: hydrate ocorre antes de aceitar o jogador na sala',()=>{
- assert.match(world,/this\.ready=this\.warfrontControl\?this\.world\.loadWarfront/);
- assert.match(world,/await r\.ready;.*?catch\(err\)/s);
- assert.ok(world.indexOf('await r.ready')<world.indexOf('r.addClient(ws,p)'));
- assert.match(world,/if\(!Array\.isArray\(rows\)\|\|rows\.length!==3\)/);
+test('Warfront: sala entra sem aguardar banco e captura só é habilitada após sincronização',()=>{
+ assert.match(world,/this\.ready=this\.warfrontControl\?this\.reconcileWarfrontState\(\)/);
+ assert.doesNotMatch(world,/await r\.ready/);
+ assert.match(world,/if\(!this\.warfrontControl\|\|!this\.warfrontSynced\)return;/);
+ assert.match(world,/this\.warfrontSynced=true/);
+ assert.match(world,/if\(!Array\.isArray\(rows\)\|\|rows\.length!==this\.warfrontControl\.nodes\.length\)/);
 });
 test('Warfront: conquista troca dono diretamente e apenas depois do COMMIT SQL',()=>{
  assert.match(world,/withCaptureTimeout\(this\.world\.persistCapture\(this\.mapId,node\.id,faction,expectedRevision,actor\.userId\)\)\.then/);

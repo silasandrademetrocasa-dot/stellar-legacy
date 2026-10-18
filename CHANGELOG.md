@@ -980,3 +980,10 @@ Editor visual de ingredientes, produtos e efeitos com prévias, duplicação ina
 - Rejeição de saves atrasados após concessão de recompensa NPC.
 - Limites por golpe e ID de disparo obrigatório no multiplayer.
 - SQL da etapa final da V22.7.0 aplicado somente após confirmação do deploy no Render.
+
+## V22.9.1 — Relés PvP, eventos em tempo real e AUX Sentinela defensivo
+- Entrada imediata no PvP enquanto os relés são lidos em segundo plano; a captura permanece bloqueada até a confirmação do Supabase.
+- Retentativa automática de leitura dos relés sem necessidade de pular mapa.
+- Atualização da agenda LIVE OPS e do HUD de evento na sala, inclusive quando o jogador permanece no mapa.
+- AUX Sentinela revida apenas a NPCs que efetivamente causaram dano ao piloto; não caça neutros, NPCs apenas selecionados nem pilotos PvP.
+- Suite ampliada para 304 testes, sem SQL adicional.

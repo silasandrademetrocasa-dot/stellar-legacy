@@ -17,7 +17,7 @@ import { createSecurityService } from './security-service.js';
 
 const app = express();
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const RELEASE_VERSION = '22.9.0'; // único identificador de release nos endpoints HTTP
+const RELEASE_VERSION = '22.9.1'; // único identificador de release nos endpoints HTTP
 
 function normalizeSupabaseUrl(value = '') {
   let url = String(value || '').trim();
@@ -1820,7 +1820,7 @@ const sharedUniverse = attachSharedUniverse(server, {
     if(error)throw new Error(error.message);
     return data||[];
   },
-  loadLiveOps: async()=>loadLiveOpsSnapshot(false),
+  loadLiveOps: async(force=false)=>loadLiveOpsSnapshot(force),
   loadNpcConfig: async()=>loadNpcRuntimeSnapshot(false),
   loadWorldConfig: async()=>loadWorldRuntimeSnapshot(false),
   loadSystemsConfig: async()=>loadSystemsRuntimeSnapshot(false),

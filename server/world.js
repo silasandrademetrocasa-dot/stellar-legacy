@@ -165,18 +165,12 @@ class Room {
     this.lastWarfrontBroadcastAt=0;
     this.warfrontFullController=null;
     this.warfrontControl=this.map.battle&&WARFRONT_NODE_LAYOUT[this.mapId]?{mapId:this.mapId,nodes:warfrontNodesForMap(this.mapId,this.map),startedAt:nowMs()}:null;
-    // O estado de cada relé pertence ao banco, não à sessão WebSocket / sala em RAM.
-    this.ready=this.warfrontControl?this.world.loadWarfront(this.mapId).then(rows=>{
-      if(!Array.isArray(rows)||rows.length!==3)throw new Error('PERSISTENCIA_DOS_RELES_INDISPONIVEL');
-      for(const node of this.warfrontControl.nodes){
-        const row=rows.find(item=>item.node_id===node.id);
-        if(!row)throw new Error('RELE_SEM_ESTADO_NO_BANCO');
-        node.owner=WARFRONT_FACTIONS.includes(row.owner)?row.owner:null;
-        node.revision=Number(row.revision)||0;
-        node.capturedAt=Date.parse(row.captured_at||'')||0;
-      }
-      const owners=this.warfrontControl.nodes.map(n=>n.owner);
-      this.warfrontFullController=owners[0]&&owners.every(o=>o===owners[0])?owners[0]:null;
+    this.warfrontSynced=!this.warfrontControl;
+    this.warfrontSyncError=null;
+    // A sala entra imediatamente. Capturas e pontuações só começam depois de ler o banco.
+    // A consulta é assíncrona e nunca impede que eventos e NPCs apareçam no primeiro mapa.
+    this.ready=this.warfrontControl?this.reconcileWarfrontState().catch(err=>{
+      console.warn('[warfront-initial-sync]',this.mapId,String(err?.message||err).slice(0,160));
     }):Promise.resolve();
     this.lastWarfrontSyncAt=0;this.warfrontSyncing=false;
     this.generateBaseWorld();
@@ -362,8 +356,8 @@ class Room {
     if(normal.length>target){for(const o of normal.slice(target)){this.ores.delete(o.id);this.broadcast({type:'ore_remove',entityId:o.id,reason:'runtime_count'});}}
     else for(let i=normal.length;i<target;i++){const o=this.makeOre();this.ores.set(o.id,o);this.broadcast({type:'ore_spawn',ore:o});}
     this.oreRespawns=this.oreRespawns.filter(r=>r.eventOre);
-    if(this.map.battle&&!this.warfrontControl)this.warfrontControl={mapId:this.mapId,nodes:warfrontNodesForMap(this.mapId,this.map),startedAt:nowMs()};
-    if(!this.map.battle)this.warfrontControl=null;
+    if(this.map.battle&&!this.warfrontControl){this.warfrontControl={mapId:this.mapId,nodes:warfrontNodesForMap(this.mapId,this.map),startedAt:nowMs()};this.warfrontSynced=false;this.reconcileWarfrontState().catch(()=>{});}
+    if(!this.map.battle){this.warfrontControl=null;this.warfrontSynced=true;}
     if(this.clients.size)this.broadcast(this.snapshot());
   }
 
@@ -448,7 +442,7 @@ class Room {
   }
 
   warfrontPayload(){
-    if(!this.warfrontControl)return null;
+    if(!this.warfrontControl||!this.warfrontSynced)return null;
     const scores={earth:0,mars:0,jupiter:0};
     for(const n of this.warfrontControl.nodes)if(scores[n.owner]!==undefined)scores[n.owner]++;
     const ranked=WARFRONT_FACTIONS.map(id=>({id,score:scores[id]})).sort((a,b)=>b.score-a.score);
@@ -456,7 +450,8 @@ class Room {
     return {mapId:this.mapId,nodes:this.warfrontControl.nodes.map(n=>({id:n.id,label:n.label,x:n.x,y:n.y,radius:n.radius,owner:n.owner,challenger:n.challenger,progress:Math.round(n.progress*10)/10,contested:!!n.contested,nearby:{...n.nearby},capturedAt:n.capturedAt||0,persisting:!!n.persisting,captureError:n.captureError&&nowMs()-(n.captureError.at||0)<30000?{code:n.captureError.code,message:n.captureError.message}:null})),scores,dominantFaction:dominant,serverTime:nowMs()};
   }
   updateWarfrontControl(dt,now){
-    if(!this.warfrontControl)return;
+    // Sem confirmação de persistência, ninguém captura um relé em estado provisório.
+    if(!this.warfrontControl||!this.warfrontSynced)return;
     let lastChange=null;
     for(const node of this.warfrontControl.nodes){
       // O dt geral da sala é limitado para proteger o combate. A captura, porém,
@@ -556,22 +551,28 @@ class Room {
     if(!this.warfrontControl||this.warfrontSyncing||this.warfrontControl.nodes.some(n=>n.persisting))return;
     this.warfrontSyncing=true;
     try{
-      const rows=await this.world.loadWarfront(this.mapId);
-      let changed=false;
+      const rows=await withCaptureTimeout(this.world.loadWarfront(this.mapId),6500);
+      if(!Array.isArray(rows)||rows.length!==this.warfrontControl.nodes.length)throw new Error('Relés incompletos no banco');
+      const initial=!this.warfrontSynced;
+      let changed=initial;
       for(const node of this.warfrontControl.nodes){
         const row=rows.find(x=>x.node_id===node.id);
-        if(!row)continue;
+        if(!row)throw new Error('Relé sem registro persistido');
         const revision=Number(row.revision)||0;
-        if(revision<=Number(node.revision||0))continue;
+        if(!initial&&revision<=Number(node.revision||0))continue;
         node.owner=WARFRONT_FACTIONS.includes(row.owner)?row.owner:null;
         node.revision=revision;node.capturedAt=Date.parse(row.captured_at||'')||0;
         node.progress=0;node.challenger=null;changed=true;
       }
+      this.warfrontSynced=true;this.warfrontSyncError=null;
       if(changed){
         const owners=this.warfrontControl.nodes.map(n=>n.owner);
         this.warfrontFullController=owners[0]&&owners.every(o=>o===owners[0])?owners[0]:null;
-        this.broadcast({type:'warfront_control',warfront:this.warfrontPayload(),serverTime:Date.now()});
+        this.broadcast({type:'warfront_control',warfront:this.warfrontPayload(),serverTime:nowMs()});
       }
+    }catch(err){
+      this.warfrontSyncError=String(err?.message||err).slice(0,160);
+      throw err; // o ciclo de 15 s tentará novamente sem expulsar jogadores da sala.
     }finally{this.warfrontSyncing=false;}
   }
   refreshWarfrontDomination(now,lastChange=null){
@@ -1035,9 +1036,9 @@ export function attachSharedUniverse(server,{authenticate,authorizeJoin,recordSe
         if(!Array.isArray(rows))throw new Error('Resposta inválida de operações do universo');
         const before=this.directives;this.directives=rows.slice(0,80);this.lastDirectivesAt=nowMs();
         const changed=rooms.size>0&&[...rooms.values()].some(room=>{
-          const old=selectLiveDirective(before,room.mapId)?.id;
-          const next=selectLiveDirective(this.directives,room.mapId)?.id;
-          return old!==next;
+          const old=selectLiveDirective(before,room.mapId);
+          const next=selectLiveDirective(this.directives,room.mapId);
+          return JSON.stringify(old||null)!==JSON.stringify(next||null);
         });
         if(changed)for(const room of rooms.values())room.ensureEvent(true);
       }catch(e){this.lastDirectivesAt=nowMs();console.warn('[universe-directives]',e?.message||e);}
@@ -1052,13 +1053,17 @@ export function attachSharedUniverse(server,{authenticate,authorizeJoin,recordSe
       if(world.liveOpsBusy)return world.liveOps;
       world.liveOpsBusy=true;
       try{
-        const data=await loadLiveOps();
+        const data=await loadLiveOps(force);
         if(data&&Array.isArray(data.events)){
-          const before=world.currentEvent()?.eventId||null;
+          const before=world.currentEvent();
           world.liveOps=data;
           world.lastLiveOpsAt=nowMs();
-          const after=world.currentEvent()?.eventId||null;
-          if(before!==after||force)for(const r of rooms.values())r.ensureEvent(true);
+          const after=world.currentEvent();
+          const changed=JSON.stringify(before)!==JSON.stringify(after);
+          for(const r of rooms.values()){
+            if(changed)r.ensureEvent(true);
+            else if(force){r.ensureEvent(false);r.broadcastEvent(true);}
+          }
         }
       }catch(err){console.warn('LIVE OPS refresh failed:',err?.message||err);}
       finally{world.liveOpsBusy=false;}
@@ -1095,13 +1100,16 @@ export function attachSharedUniverse(server,{authenticate,authorizeJoin,recordSe
         const wrongFaction=!admin&&territorial&&String(msg.territoryFaction||faction)!==faction;
         if(!dest||dest.enabled===false||dest.gate||!validTerritory||!sectorValid||wrongFaction||(!admin&&level<required)||!faction){safeJsonSend(ws,{type:'join_error',code:'MAP_JOIN_DENIED',reason:wrongFaction?'INVASÕES BLOQUEADAS':`Setor indisponível / nível mínimo ${required}`});return;}
         const r=world.room(mapId,territory);
-        try{await r.ready;}catch(err){
-          rooms.delete(r.key);
-          console.error('[warfront-join]',{mapId,code:'WARFRONT_DB_UNAVAILABLE',detail:String(err?.message||err).slice(0,180)});
-          safeJsonSend(ws,{type:'join_error',code:'WARFRONT_DB_UNAVAILABLE',reason:'Falha na conexão do servidor com a persistência dos setores. Verifique SUPABASE_SERVICE_ROLE_KEY no Render e a migração no Supabase.'});
-          return;
-        }
-        ws.room?.removeClient(ws);const p={userId:identity.user.id,callsign:identity.callsign||msg.callsign||'Pilot',pilotTitle:shortText(msg.pilotTitle||'Piloto Estelar',64),faction:faction,shipId:String(msg.shipId||'phoenix'),shipDesignId:msg.shipDesignId?shortText(msg.shipDesignId,64):null,level:level,x:Number(msg.x)||400,y:Number(msg.y)||400,hp:Number(msg.hp)||1,maxHp:Number(msg.maxHp)||1,shield:Number(msg.shield)||0,maxShield:Number(msg.maxShield)||0,angle:Number(msg.angle)||0,laserFiring:false,laserColor:'#76d9ff',laserAmmoId:'lcb10',laserAmmoName:'PLS-1',targetId:null,targetIsPlayer:false,pet:{owned:false},updatedAt:nowMs()};r.addClient(ws,p);return;
+        // Não aguardar a consulta de relés para abrir o PvP. O controlador permanece
+        // travado até a primeira leitura válida e publica os donos oficiais depois.
+        ws.room?.removeClient(ws);const p={userId:identity.user.id,callsign:identity.callsign||msg.callsign||'Pilot',pilotTitle:shortText(msg.pilotTitle||'Piloto Estelar',64),faction:faction,shipId:String(msg.shipId||'phoenix'),shipDesignId:msg.shipDesignId?shortText(msg.shipDesignId,64):null,level:level,x:Number(msg.x)||400,y:Number(msg.y)||400,hp:Number(msg.hp)||1,maxHp:Number(msg.maxHp)||1,shield:Number(msg.shield)||0,maxShield:Number(msg.maxShield)||0,angle:Number(msg.angle)||0,laserFiring:false,laserColor:'#76d9ff',laserAmmoId:'lcb10',laserAmmoName:'PLS-1',targetId:null,targetIsPlayer:false,pet:{owned:false},updatedAt:nowMs()};r.addClient(ws,p);
+        // Verificar eventos imediatamente ao entrar (sem depender de trocar de mapa).
+        Promise.allSettled([world.refreshLiveOps?.(nowMs()-(world.lastLiveOpsAt||0)>3000)??Promise.resolve(),world.refreshDirectives?.(false)??Promise.resolve()]).then(()=>{
+          if(ws.room!==r)return;
+          r.ensureEvent?.(false);
+          if(typeof r.eventPayload==='function')safeJsonSend(ws,{type:'event_update',event:r.eventPayload(),serverTime:nowMs()});
+        }).catch(()=>{});
+        return;
       }
       if(msg.type==='player_state'){
         if(authorizeJoin&&nowMs()-(ws.lastAccessAuditAt||0)>45000){

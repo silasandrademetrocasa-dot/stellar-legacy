@@ -3,10 +3,11 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 const src=(path)=>fs.readFileSync(new URL('../'+path,import.meta.url),'utf8');
 const game=src('public/game.js'),server=src('server/index.js'),ws=src('public/world.js'),sql=src('sql/V21_5_1_RELAY_READONLY.sql');
-test('falha de ingresso na sala PvP é mostrada ao jogador',()=>{
+test('sala PvP entra rapidamente e falha do banco nunca autoriza captura fantasma',()=>{
   assert.match(ws,/msg\.type==='join_error'/);assert.match(ws,/map_error/);
   assert.match(game,/SALA PvP INDISPONÍVEL/);assert.match(game,/data-warfront-reconnect/);
-  assert.match(src('server/world.js'),/WARFRONT_DB_UNAVAILABLE/);
+  assert.match(src('server/world.js'),/warfrontSyncError/);
+  assert.match(src('server/world.js'),/!this\.warfrontSynced/);
 });
 test('posse de relés pode ser lida com JWT sem desbloquear escrita',()=>{
   assert.match(server,/api\/world\/sector-state/);assert.match(server,/requireUser/);
