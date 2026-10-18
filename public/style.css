@@ -3884,3 +3884,23 @@ body.stellar-hud-quiet #gateHud{visibility:visible;}
 #bottomHudDock #weaponBar.compact-ammo-ui.collapsed .weapon-toolbar-actions{display:none!important;}
 #bottomHudDock #weaponBar.hud-user-hidden,
 #bottomHudDock #weaponBar.hidden{display:none!important;}
+
+/* AUX-9 • protocolos táticos (HUD modular, sem alterar economia) */
+.aux-protocol-console{display:flex;flex-direction:column;gap:10px}
+.aux-protocol-console h3{margin:0}
+.aux-protocol-console .muted{font-size:12px;line-height:1.45}
+.aux-protocol-budget{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:9px 11px;border-radius:10px;border:1px solid rgba(91,195,255,.22);background:rgba(5,24,38,.85);color:#a6e7fa;font-size:11px;font-weight:800;letter-spacing:.07em}
+.aux-protocol-budget b{color:#fcdf91;font-size:13px}
+.aux-protocol-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,285px),1fr));gap:8px}
+.aux-protocol-card{display:grid;grid-template-columns:30px minmax(0,1fr) auto;align-items:center;gap:9px;padding:10px;border-radius:12px;border:1px solid rgba(89,170,219,.18);background:linear-gradient(145deg,rgba(7,23,40,.94),rgba(4,15,27,.91));min-width:0}
+.aux-protocol-icon{display:grid;place-items:center;font-size:20px;width:30px}
+.aux-protocol-desc{display:flex;flex-direction:column;gap:4px;min-width:0}
+.aux-protocol-desc b{color:#d7faff;font-size:11px;letter-spacing:.045em}
+.aux-protocol-desc small{color:#99b9cb;font-size:10px;line-height:1.4}
+.aux-protocol-stepper{display:flex;align-items:center;gap:5px;white-space:nowrap}
+.aux-protocol-stepper button{border:1px solid rgba(91,212,255,.38);background:rgba(15,52,76,.94);color:#dbfbff;border-radius:9px;width:32px;height:36px;font-weight:900;font-size:18px;touch-action:manipulation;cursor:pointer}
+.aux-protocol-stepper button:disabled{opacity:.25;cursor:not-allowed}
+.aux-protocol-stepper strong{min-width:26px;text-align:center;font-size:11px;color:#ffe3a2}
+@media(max-width:480px){.aux-protocol-card{grid-template-columns:26px minmax(0,1fr) auto;padding:8px;gap:6px}.aux-protocol-stepper button{width:30px;height:34px}}
+
+.aux-protocol-card.is-locked{opacity:.62;border-style:dashed}

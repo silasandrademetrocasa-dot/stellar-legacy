@@ -14,6 +14,18 @@ export function validatePlayerSave(incoming,stored,{userId,isAdmin=false}={}){
   const prior=currency(stored,key);const delta=v-(Number.isFinite(prior)?prior:0);
   if(!isAdmin&&stored&&delta>(key==='credits'?SECURITY_LIMITS.creditsPerSave:SECURITY_LIMITS.stlPerSave))return issue('SAVE_UNEXPLAINED_BALANCE','warn','Aumento de saldo acima do limite por save.',{field:key,increment:Math.round(delta)});
  }
+ // Protocolos alteram apenas habilidades locais, nunca dinheiro: limitar campos e pontos
+ // evita payloads absurdos sem punir uma migração/lag com autoban.
+ if(incoming?.pet?.protocols!=null){
+  const p=incoming.pet.protocols,ids=['guard','ore','box','repair','kami'];
+  const level=Math.max(1,Math.min(20,Math.trunc(Number(incoming.pet.level)||1)));
+  const capacity=Math.min(12,level+2);
+  if(!p||typeof p!=='object'||Array.isArray(p)||Object.keys(p).some(k=>!ids.includes(k)))
+   return issue('SAVE_AUX_PROTOCOL_INVALID','warn','Configuração dos protocolos do AUX fora do formato.');
+  let sum=0;
+  for(const id of ids){const n=p[id]??0;if(!Number.isInteger(n)||n<0||n>3)return issue('SAVE_AUX_PROTOCOL_INVALID','warn','Nível de protocolo inválido.',{protocol:id});sum+=n;}
+  if(sum>capacity)return issue('SAVE_AUX_PROTOCOL_INVALID','warn','Protocolos excederam os espaços de nível.',{points:sum,capacity});
+ }
  for(const [group,max] of Object.entries(entries)){
   const bucket=incoming[group];if(bucket==null)continue;
   if(typeof bucket!=='object'||Array.isArray(bucket))return issue('SAVE_INVALID_INVENTORY','warn','Inventário com formato inválido.',{group});

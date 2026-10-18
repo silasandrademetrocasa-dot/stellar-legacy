@@ -1,31 +1,32 @@
-import {createHudIntelligence} from './modules/hud-intelligence.js?v=22.10.1';
-import {sentinelAttackerEligible, selectSentinelAttacker} from './modules/sentinel-defense.js?v=22.10.1';
-import { movementSpeed, nominalMovementSpeed, followShipCamera } from './modules/ship-navigation.js?v=22.10.1';
-import { loadCommandOverviewOnline,claimCompetitiveSeasonOnline,equipEliteTitleOnline,unequipEliteTitleOnline,loadCommandAdminOnline,saveCompetitiveSeasonOnline,saveWorldDirectiveOnline,loadClanOperationsOnline,claimClanOperationOnline,saveAdminClanOperationOnline } from './api.js?v=22.10.1';
-import {renderV21CommandCenter,V21_TABS} from './modules/v21/command-center-view.js?v=22.10.1';
-import {renderEliteEquipTitles,renderCompetitiveSection,renderUniverseDirectives} from './modules/v22/command-upgrades.js?v=22.10.1';
-import {registerStellarPwaV21,offerInstallV21} from './modules/v21/pwa.js?v=22.10.1';
-import { ECONOMY_EFFECTS, CRAFT_OUTPUT_KINDS, normalizeEconomyEffects, normalizeCraftIngredients, normalizeCraftOutput, formatCraftPreview } from './modules/admin-visual-builders.js?v=22.10.1';
-import { ADMIN_MISSION_PRESETS, createAdminMissionPreset, duplicateAdminMission, validateAdminMissionDraft, previewAdminMission } from './modules/admin-mission-builder.js?v=22.10.1';
-import { createHudContentCache } from './modules/hud-content-cache.js?v=22.10.1';
-import { createAuxiliaryWorkScheduler } from './modules/aux-work-scheduler.js?v=22.10.1';
-import { npcVisualDetail } from './modules/npc-render-detail.js?v=22.10.1';
-import { createBackdropRasterCache } from './modules/backdrop-raster-cache.js?v=22.10.1';
-import { createTextWidthCache } from './modules/text-width-cache.js?v=22.10.1';
-import { createHudUpdateScheduler } from './modules/hud-update-scheduler.js?v=22.10.1';
-import { createAssetCache, flattenAssetPaths } from './modules/asset-cache.js?v=22.10.1';
-import { createSceneGradientCache } from './modules/scene-gradient-cache.js?v=22.10.1';
-import { createPerformanceMonitor, formatPerformanceReport } from './modules/performance-monitor.js?v=22.10.1';
-import { createFrameGate } from './modules/frame-gate.js?v=22.10.1';
-import { QUALITY_PROFILES, initialAutoQualityForDevice } from './modules/quality-profiles.js?v=22.10.1';
-import { freshBattleConfigsV2013, captureCombatBuildV2013, exchangeCombatBuildV2013, combatConfigRemainingV2013, clampStoredShieldV2013 } from './combat-config-v2013.js?v=22.10.1';
-import { FACTIONS, SHIPS, ITEMS, LASER_AMMO, ROCKETS, NPC_TYPES, MAPS, RESOURCES } from './data.js?v=22.10.1';
-import { repairPulseSettings } from './repair-balance.js?v=22.10.1';
-import { xpThresholdV1770, xpThresholdV1915, migratePilotXpV1915 } from './level-curve-v1915.js?v=22.10.1';
-import { applyRecruitBonusV2012, eliteRouteSnapshotV2012, freshEliteRouteJournalV2012, ELITE_ROUTE_TARGETS_V2012, novaTierPriceV2012 } from './progression-plan-v2012.js?v=22.10.1';
-import { GAME_ASSETS } from './assets/v17/manifest.js?v=22.10.1';
-import { signUp, signIn, beginGoogleSignIn, restoreGoogleSignInFromUrl, requestPasswordReset, restorePasswordRecoveryFromUrl, restoreSession, signOutLocal, checkGameSession, endGameSession, getUser, getSessionCredentials, loadCloudSave, saveCloudSave, loadEliteOperationsOnline, claimEliteOperationOnline, loadWarCampaignsOnline, claimWarSupplyOnline, claimWarCampaignOnline, loadAdminWarCampaignsOnline, saveAdminWarCampaignOnline, saveAdminWarRulesOnline, loadAdminEliteObjectivesOnline, saveAdminEliteObjectiveOnline, updateCallsign, updatePassword, loadRankings, loadAuctionBids, saveAuctionBidOnline, markAuctionBidStatusOnline, loadAuctionMarket, upsertPlayerPresenceOnline, loadMapPresenceOnline, savePlayerLocationCheckpointOnline, loadPlayerLocationCheckpointOnline, removePlayerPresenceOnline, queuePvpAttackOnline, consumePvpDamageEventsOnline, syncArenaProfileOnline, loadArenaState, loadArenaDailyRewardStatus, claimArenaDailyReward, loadArenaOpponents, loadArenaHistory, arenaAttackOnline, listClansOnline, loadMyClanOnline, createClanOnline, joinClanOnline, getClanRequestsOnline, reviewClanRequestOnline, cancelClanRequestOnline, setClanMemberRoleOnline, leaveClanOnline, transferClanCreditsOnline, claimClanCreditGrantsOnline, recordClanAlienKillOnline, getPremiumShopOnline, testPurchasePremiumOnline, adminPreviewPremiumStageOnline, adminSimulatePremiumStageOnline, getPremiumStageCatalogOnline, loadWarfrontStateOnline, loadSectorOwnershipOnline, hitWorldBossOnline, claimWorldBossRewardOnline, declareClanWarOnline, recordClanWarScoreOnline, loadLiveOpsOnline, adminUpdateLiveEventScheduleOnline, purchaseLiveCatalogOnline, economyActionOnline, getChatHistoryOnline, sendChatMessageOnline, redeemGameCouponOnline, getMyDesignersOnline, setDesignLoadoutOnline, claimGateDroneDesignOnline, claimEventDesignerOnline, getAdminStatus, adminSearchAccounts, adminRecentActions, adminBanAccount, adminUnbanAccount, adminResetAccount, adminDeleteAccount, pushTelemetryBatch, adminTelemetryOverview, adminPlayerTelemetry, getBattleGroupOnline, createBattleGroupOnline, inviteBattleGroupOnline, searchBattleGroupPlayersOnline, inviteBattleGroupUserOnline, respondBattleGroupInviteOnline, leaveBattleGroupOnline, kickBattleGroupMemberOnline, setBattleGroupRallyOnline, loadRuntimeConfigOnline, loadNpcRuntimeConfigOnline, loadWorldRuntimeConfigOnline, loadSystemsRuntimeConfigOnline, loadAdminRuntimeMonitorOnline, adminUpdateRuntimeModuleOnline, adminUpdateNpcRuntimeOnline, adminUpdateNpcSpawnRuntimeOnline, adminUpdateWorldMapOnline, adminUpdateWorldResourceOnline, adminUpdateWorldSectorOnline, adminUpdateWorldPortalOnline, adminUpdateWorldResourcePoolOnline, adminUpdateMissionCategoryOnline, adminUpdateEconomyServiceOnline, adminUpdateCraftingRecipeOnline, loadBattlePassRuntimeConfigOnline, adminUpdateBattlePassSeasonOnline, adminUpdateBattlePassTierOnline, loadShopsRuntimeConfigOnline, adminUpdateCommonShopItemOnline, adminUpdatePremiumShopItemOnline, loadBonusConfigOnline, adminUpdateBonusConfigOnline, adminCouponDashboardOnline, adminCreateCouponOnline, adminSetCouponActiveOnline, loadGalaxyGatesOnline, adminUpdateGalaxyGateOnline, adminUpsertCustomMissionOnline, adminDeleteCustomMissionOnline, adminCreateCraftRecipeOnline, adminCreateEconomyServiceOnline, adminCreatePassSeasonOnline, loadAuctionRulesOnline, adminUpdateAuctionRulesOnline, loadBalanceRuntimeOnline, adminUpdateBalanceOnline,loadAdminSecurityIncidents,reviewAdminSecurityIncident } from './api.js?v=22.10.1';
-import { SharedUniverseClient } from './world.js?v=22.10.1';
+import {createHudIntelligence} from './modules/hud-intelligence.js?v=22.11.0';
+import {sentinelAttackerEligible, selectSentinelAttacker} from './modules/sentinel-defense.js?v=22.11.0';
+import {AUX_PROTOCOL_TYPES, AUX_PROTOCOL_IDS, normalizeAuxProtocols, auxProtocolSlotsUsed, changeAuxProtocolRank, auxProtocolStats} from './modules/aux-protocols.js?v=22.11.0';
+import { movementSpeed, nominalMovementSpeed, followShipCamera } from './modules/ship-navigation.js?v=22.11.0';
+import { loadCommandOverviewOnline,claimCompetitiveSeasonOnline,equipEliteTitleOnline,unequipEliteTitleOnline,loadCommandAdminOnline,saveCompetitiveSeasonOnline,saveWorldDirectiveOnline,loadClanOperationsOnline,claimClanOperationOnline,saveAdminClanOperationOnline } from './api.js?v=22.11.0';
+import {renderV21CommandCenter,V21_TABS} from './modules/v21/command-center-view.js?v=22.11.0';
+import {renderEliteEquipTitles,renderCompetitiveSection,renderUniverseDirectives} from './modules/v22/command-upgrades.js?v=22.11.0';
+import {registerStellarPwaV21,offerInstallV21} from './modules/v21/pwa.js?v=22.11.0';
+import { ECONOMY_EFFECTS, CRAFT_OUTPUT_KINDS, normalizeEconomyEffects, normalizeCraftIngredients, normalizeCraftOutput, formatCraftPreview } from './modules/admin-visual-builders.js?v=22.11.0';
+import { ADMIN_MISSION_PRESETS, createAdminMissionPreset, duplicateAdminMission, validateAdminMissionDraft, previewAdminMission } from './modules/admin-mission-builder.js?v=22.11.0';
+import { createHudContentCache } from './modules/hud-content-cache.js?v=22.11.0';
+import { createAuxiliaryWorkScheduler } from './modules/aux-work-scheduler.js?v=22.11.0';
+import { npcVisualDetail } from './modules/npc-render-detail.js?v=22.11.0';
+import { createBackdropRasterCache } from './modules/backdrop-raster-cache.js?v=22.11.0';
+import { createTextWidthCache } from './modules/text-width-cache.js?v=22.11.0';
+import { createHudUpdateScheduler } from './modules/hud-update-scheduler.js?v=22.11.0';
+import { createAssetCache, flattenAssetPaths } from './modules/asset-cache.js?v=22.11.0';
+import { createSceneGradientCache } from './modules/scene-gradient-cache.js?v=22.11.0';
+import { createPerformanceMonitor, formatPerformanceReport } from './modules/performance-monitor.js?v=22.11.0';
+import { createFrameGate } from './modules/frame-gate.js?v=22.11.0';
+import { QUALITY_PROFILES, initialAutoQualityForDevice } from './modules/quality-profiles.js?v=22.11.0';
+import { freshBattleConfigsV2013, captureCombatBuildV2013, exchangeCombatBuildV2013, combatConfigRemainingV2013, clampStoredShieldV2013 } from './combat-config-v2013.js?v=22.11.0';
+import { FACTIONS, SHIPS, ITEMS, LASER_AMMO, ROCKETS, NPC_TYPES, MAPS, RESOURCES } from './data.js?v=22.11.0';
+import { repairPulseSettings } from './repair-balance.js?v=22.11.0';
+import { xpThresholdV1770, xpThresholdV1915, migratePilotXpV1915 } from './level-curve-v1915.js?v=22.11.0';
+import { applyRecruitBonusV2012, eliteRouteSnapshotV2012, freshEliteRouteJournalV2012, ELITE_ROUTE_TARGETS_V2012, novaTierPriceV2012 } from './progression-plan-v2012.js?v=22.11.0';
+import { GAME_ASSETS } from './assets/v17/manifest.js?v=22.11.0';
+import { signUp, signIn, beginGoogleSignIn, restoreGoogleSignInFromUrl, requestPasswordReset, restorePasswordRecoveryFromUrl, restoreSession, signOutLocal, checkGameSession, endGameSession, getUser, getSessionCredentials, loadCloudSave, saveCloudSave, loadEliteOperationsOnline, claimEliteOperationOnline, loadWarCampaignsOnline, claimWarSupplyOnline, claimWarCampaignOnline, loadAdminWarCampaignsOnline, saveAdminWarCampaignOnline, saveAdminWarRulesOnline, loadAdminEliteObjectivesOnline, saveAdminEliteObjectiveOnline, updateCallsign, updatePassword, loadRankings, loadAuctionBids, saveAuctionBidOnline, markAuctionBidStatusOnline, loadAuctionMarket, upsertPlayerPresenceOnline, loadMapPresenceOnline, savePlayerLocationCheckpointOnline, loadPlayerLocationCheckpointOnline, removePlayerPresenceOnline, queuePvpAttackOnline, consumePvpDamageEventsOnline, syncArenaProfileOnline, loadArenaState, loadArenaDailyRewardStatus, claimArenaDailyReward, loadArenaOpponents, loadArenaHistory, arenaAttackOnline, listClansOnline, loadMyClanOnline, createClanOnline, joinClanOnline, getClanRequestsOnline, reviewClanRequestOnline, cancelClanRequestOnline, setClanMemberRoleOnline, leaveClanOnline, transferClanCreditsOnline, claimClanCreditGrantsOnline, recordClanAlienKillOnline, getPremiumShopOnline, testPurchasePremiumOnline, adminPreviewPremiumStageOnline, adminSimulatePremiumStageOnline, getPremiumStageCatalogOnline, loadWarfrontStateOnline, loadSectorOwnershipOnline, hitWorldBossOnline, claimWorldBossRewardOnline, declareClanWarOnline, recordClanWarScoreOnline, loadLiveOpsOnline, adminUpdateLiveEventScheduleOnline, purchaseLiveCatalogOnline, economyActionOnline, getChatHistoryOnline, sendChatMessageOnline, redeemGameCouponOnline, getMyDesignersOnline, setDesignLoadoutOnline, claimGateDroneDesignOnline, claimEventDesignerOnline, getAdminStatus, adminSearchAccounts, adminRecentActions, adminBanAccount, adminUnbanAccount, adminResetAccount, adminDeleteAccount, pushTelemetryBatch, adminTelemetryOverview, adminPlayerTelemetry, getBattleGroupOnline, createBattleGroupOnline, inviteBattleGroupOnline, searchBattleGroupPlayersOnline, inviteBattleGroupUserOnline, respondBattleGroupInviteOnline, leaveBattleGroupOnline, kickBattleGroupMemberOnline, setBattleGroupRallyOnline, loadRuntimeConfigOnline, loadNpcRuntimeConfigOnline, loadWorldRuntimeConfigOnline, loadSystemsRuntimeConfigOnline, loadAdminRuntimeMonitorOnline, adminUpdateRuntimeModuleOnline, adminUpdateNpcRuntimeOnline, adminUpdateNpcSpawnRuntimeOnline, adminUpdateWorldMapOnline, adminUpdateWorldResourceOnline, adminUpdateWorldSectorOnline, adminUpdateWorldPortalOnline, adminUpdateWorldResourcePoolOnline, adminUpdateMissionCategoryOnline, adminUpdateEconomyServiceOnline, adminUpdateCraftingRecipeOnline, loadBattlePassRuntimeConfigOnline, adminUpdateBattlePassSeasonOnline, adminUpdateBattlePassTierOnline, loadShopsRuntimeConfigOnline, adminUpdateCommonShopItemOnline, adminUpdatePremiumShopItemOnline, loadBonusConfigOnline, adminUpdateBonusConfigOnline, adminCouponDashboardOnline, adminCreateCouponOnline, adminSetCouponActiveOnline, loadGalaxyGatesOnline, adminUpdateGalaxyGateOnline, adminUpsertCustomMissionOnline, adminDeleteCustomMissionOnline, adminCreateCraftRecipeOnline, adminCreateEconomyServiceOnline, adminCreatePassSeasonOnline, loadAuctionRulesOnline, adminUpdateAuctionRulesOnline, loadBalanceRuntimeOnline, adminUpdateBalanceOnline,loadAdminSecurityIncidents,reviewAdminSecurityIncident } from './api.js?v=22.11.0';
+import { SharedUniverseClient } from './world.js?v=22.11.0';
 
 const canvas = document.querySelector('#game');
 const ctx = canvas.getContext('2d');
@@ -1449,7 +1450,7 @@ function freshPet(){
     laserSlotsUnlocked:0, shieldSlotsUnlocked:0,
     lasers:[], shields:[],
     gearsOwned:{guard:false,box:false,ore:false,repair:false,kami:false},
-    activeGear:'off', kamikazeReadyAt:0
+    activeGear:'off', kamikazeReadyAt:0, protocols:{guard:0,ore:0,box:0,repair:0,kami:0}
   };
 }
 
@@ -3361,7 +3362,11 @@ function forceGalaxyEvent(){refreshLiveOpsState(true).then(()=>showToast('LIVE O
 function spawnCombatText(x,y,text,color='#fff',opts={}){const cap=qualityProfile().particles;if(cap<=0)return;if(state.particles.length>=cap)state.particles.splice(0,state.particles.length-cap+1);state.particles.push({x,y,text,color,life:opts.critical?1.25:1,vy:opts.critical?42:30,vx:rand(-7,7),combat:true,critical:!!opts.critical,kind:opts.kind||'damage'});}
 function combatCritical(base,{chance=.065,mult=1.55}={}){chance=Math.max(0,Math.min(.85,Number(chance||0)+designerCritChanceBonus()));const critical=Math.random()<chance;return {critical,damage:Math.round(base*(critical?mult:1))};}
 function setCombatAlert(text,kind='combat',seconds=1.8){if(!combatPrefs.alerts)return;state.combatAlertText=text;state.combatAlertKind=kind;state.combatAlertUntil=nowSec()+seconds;if(kind==='danger'||kind==='shield')playSfx('warning');}
-function nearestCombatTarget(excludeId=null){const range=playerLaserRange();const candidates=state.enemies.filter(e=>e.hp>0&&e.id!==excludeId&&enemyDistance(e)<=range&&onScreenWorld(e.x,e.y,90));candidates.sort((a,b)=>enemyDistance(a)-enemyDistance(b));return candidates[0]||null;}
+function nearestCombatTarget(excludeId=null){const range=playerLaserRange();const candidates=state.enemies.filter(e=>e.hp>0&&e.id!==excludeId&&enemyDistance(e)<=range&&onScreenWorld(e.x,e.y,90));candidates.sort((a,b)=>{
+    const ageA=nowSec()-(Number(a.lastAttackPlayerAt)||0),ageB=nowSec()-(Number(b.lastAttackPlayerAt)||0);
+    const threatA=ageA>=0&&ageA<8?0:1,threatB=ageB>=0&&ageB<8?0:1;
+    return threatA-threatB || enemyDistance(a)-enemyDistance(b);
+  });return candidates[0]||null;}
 function selectCombatTarget(target,{silent=false}={}){if(!target||target.hp<=0||target.isPlayer&&!pvpTargetAllowed(target))return false;state.target=target;state.pointerNavActive=false;if(!silent){playSfx('target');pushActivity(`${target.isPlayer?'PVP':'Alvo selecionado'} • ${target.callsign||target.name}`,'combat');}updateTargetLockHud();return true;}
 function autoAcquireNextTarget(excludeId=null){if(!combatPrefs.autoTarget||!premiumAutoCombatAccess()||!progress||state.jumping)return null;const next=nearestCombatTarget(excludeId);if(next){selectCombatTarget(next,{silent:true});player.laserFiring=true;setCombatAlert('AUTO-COMBATE • NOVO ALVO','ability',1.0);return next;}return null;}
 function npcFxProfile(type){
@@ -3394,7 +3399,7 @@ function updateTargetLockHud(){
 }
 
 function countRadarHostilesV2028(){let count=0;for(const rp of onlineWorld.players.values())if(onlinePlayerEnemy(rp)&&Math.hypot(rp.x-player.x,rp.y-player.y)<=state.radarRange)count++;return count;}
-function updateCombatStateHud(){if(!ui.combatStateHud||!progress)return;const now=nowSec(),hpRatio=player.hp/Math.max(1,player.maxHp),hostiles=countRadarHostilesV2028(),combat=player.laserFiring||now-state.lastPlayerDamageAt<5||state.enemies.some(e=>e.hp>0&&now-(e.lastAttackPlayerAt||-99)<4);let text='',meta='',kind='';if(state.combatAlertUntil>now){text=state.combatAlertText;kind=state.combatAlertKind;meta=hostiles?`PVP ${hostiles} • ALERTA`:'ALERTA TÁTICO';}else if(hpRatio<=.25){text='CASCO CRÍTICO';meta=`HP ${Math.round(hpRatio*100)}%`;kind='danger';}else if(combat){text='EM COMBATE';meta=hostiles?`PVP ${hostiles} • ${state.target?fmt(enemyDistance(state.target))+'u':'SEM LOCK'}`:(state.target?`${state.target.name||'ALVO'} • ${fmt(enemyDistance(state.target))}u`:'HOSTIL DETECTADO');kind='combat';}else if(hostiles){text='PVP NO RADAR';meta=`${hostiles} piloto(s) hostil(is)`;kind='pvp';}ui.combatStateHud.classList.toggle('hidden',!text);if(!text)return;ui.combatStateHud.dataset.kind=kind;HUD_CONTENT_CACHE.text(ui.combatStateText,text);HUD_CONTENT_CACHE.text(ui.combatStateMeta,meta);}
+function updateCombatStateHud(){if(!ui.combatStateHud||!progress)return;const now=nowSec(),hpRatio=player.hp/Math.max(1,player.maxHp),hostiles=countRadarHostilesV2028(),combat=player.laserFiring||now-state.lastPlayerDamageAt<5||state.enemies.some(e=>e.hp>0&&now-(e.lastAttackPlayerAt||-99)<4);let text='',meta='',kind='';if(state.combatAlertUntil>now){text=state.combatAlertText;kind=state.combatAlertKind;meta=hostiles?`PVP ${hostiles} • ALERTA`:'ALERTA TÁTICO';}else if(hpRatio<=.25){text='CASCO CRÍTICO';meta=`HP ${Math.round(hpRatio*100)}%`;kind='danger';}else if(player.maxShield>0&&player.shield/Math.max(1,player.maxShield)<=.15&&combat){text='ESCUDO CRÍTICO';meta=`ESC ${Math.round(100*player.shield/Math.max(1,player.maxShield))}% • PROTEJA A NAVE`;kind='shield';}else if(combat){text='EM COMBATE';meta=hostiles?`PVP ${hostiles} • ${state.target?fmt(enemyDistance(state.target))+'u':'SEM LOCK'}`:(state.target?`${state.target.name||'ALVO'} • ${fmt(enemyDistance(state.target))}u`:'HOSTIL DETECTADO');kind='combat';}else if(hostiles){text='PVP NO RADAR';meta=`${hostiles} piloto(s) hostil(is)`;kind='pvp';}ui.combatStateHud.classList.toggle('hidden',!text);if(!text)return;ui.combatStateHud.dataset.kind=kind;HUD_CONTENT_CACHE.text(ui.combatStateText,text);HUD_CONTENT_CACHE.text(ui.combatStateMeta,meta);}
 function drawGalaxyEventWorld(){const c=galaxyEventRuntime.convoy;if(!c||!onScreenWorld(c.x,c.y,180))return;const p=screenPos(c.x,c.y),a=Math.atan2(c.ty-c.y,c.tx-c.x);ctx.save();ctx.translate(p.x,p.y);ctx.rotate(a);ctx.shadowColor='#63eaff';ctx.shadowBlur=18;ctx.fillStyle='rgba(12,49,74,.96)';ctx.strokeStyle='#8cf3ff';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(32,0);ctx.lineTo(5,-16);ctx.lineTo(-28,-11);ctx.lineTo(-20,0);ctx.lineTo(-28,11);ctx.lineTo(5,16);ctx.closePath();ctx.fill();ctx.stroke();ctx.restore();const w=92,ratio=Math.max(0,c.hp/c.maxHp);ctx.fillStyle='rgba(4,18,27,.9)';ctx.fillRect(p.x-w/2,p.y-35,w,6);ctx.fillStyle=ratio>.35?'#56f0c5':'#ff5f7c';ctx.fillRect(p.x-w/2,p.y-35,w*ratio,6);ctx.fillStyle='#c8f7ff';ctx.font='bold 10px Arial';ctx.textAlign='center';ctx.fillText('COMBOIO QUÂNTICO',p.x,p.y+30);}
 
 
@@ -4059,6 +4064,7 @@ function hydrateProgress(){
   progress.pet.gearsOwned ||= {guard:false,box:false,ore:false,repair:false,kami:false};
   for(const key of ['guard','box','ore','repair','kami']) if(progress.pet.gearsOwned[key]===undefined) progress.pet.gearsOwned[key]=false;
   progress.pet.activeGear ||= 'off';
+  progress.pet.protocols=normalizeAuxProtocols(progress.pet.protocols,petSlotCapacity('protocol',progress.pet.level));
   progress.pet.kamikazeReadyAt=Math.max(0,Number(progress.pet.kamikazeReadyAt)||0);
   // Nova Burst é uma habilidade de ativação única. Nunca restaura armado após reload/save antigo.
   if(progress.pet.activeGear==='kami')progress.pet.activeGear='off';
@@ -4239,6 +4245,7 @@ function petLevelThreshold(level){const lv=Math.max(1,Math.min(PET_MAX_LEVEL,Num
 function petLevelXp(level){return petLevelThreshold(Math.min(PET_MAX_LEVEL,(Number(level)||1)+1));}
 function petLevelFromXp(xp){let level=1;for(let lv=2;lv<=PET_MAX_LEVEL;lv++){if(Number(xp)>=petLevelThreshold(lv))level=lv;else break;}return level;}
 function petSlotCapacity(kind,level=progress?.pet?.level||1){const def=petLevelDef(level);return kind==='laser'?def.laser:kind==='shield'?def.shield:kind==='gear'?def.gear:def.protocol;}
+function petProtocolEffects(){return auxProtocolStats(normalizeAuxProtocols(progress?.pet?.protocols,petSlotCapacity('protocol',progress?.pet?.level||1)));}
 function petLevelBonuses(level=progress?.pet?.level||1){let damage=0,shield=0,tier=1;for(let lv=1;lv<=Math.min(PET_MAX_LEVEL,Number(level)||1);lv++){const d=PET_LEVEL_TABLE[lv];if(d?.damageBonus!=null)damage=Math.max(damage,Number(d.damageBonus)||0);if(d?.shieldBonus!=null)shield=Math.max(shield,Number(d.shieldBonus)||0);if(d?.tier!=null)tier=Math.max(tier,Number(d.tier)||1);}return {damage,shield,tier};}
 function petRange(){return 300+(progress?.pet?.owned?(progress.pet.level||1):1)*34;}
 function petSlotCost(slotNumber){const v=livePetSlotPrices.get(Number(slotNumber));return Number.isFinite(Number(v))?Number(v):null;}
@@ -4323,8 +4330,12 @@ function collectPetCargoBox(drop){
   if(before>after)addPetXp(Math.max(4,(before-after)*2));
   return empty;
 }
-function petCollectionRange(){return Math.max(300,(Number(state?.radarRange)||1500)*.5);}
-function petCombatSearchRange(){return playerLaserRange();}
+function petCollectionRange(type='ore'){
+  const base=Math.max(300,(Number(state?.radarRange)||1500)*.5);
+  // Mineração online continua limitada ao alcance autorizado pelo servidor.
+  return type==='box'?base*petProtocolEffects().boxSeekRange:(type==='ore'&&!sharedUniverseMap()?base*petProtocolEffects().oreSeekRange:base);
+}
+function petCombatSearchRange(){return playerLaserRange()*petProtocolEffects().guardRange;}
 function petTetherRange(){return Math.max(900,(Number(state?.radarRange)||1500)*.82);}
 function petWithinPlayerRadar(obj,range=petCollectionRange()){
   return !!obj&&Number.isFinite(obj.x)&&Number.isFinite(obj.y)&&Math.hypot(obj.x-player.x,obj.y-player.y)<=range;
@@ -4334,7 +4345,7 @@ function petNearestToPlayer(list,range=petCombatSearchRange()){
   for(const obj of list){if(!petWithinPlayerRadar(obj,range))continue;const d=Math.hypot(obj.x-player.x,obj.y-player.y);if(d<bestD){best=obj;bestD=d;}}
   return best;
 }
-function petNearestToPet(list,range=petCollectionRange()){
+function petNearestToPet(list,range=petCollectionRange(progress?.pet?.activeGear)){
   let best=null,bestD=Infinity;
   for(const obj of list){if(!petWithinPlayerRadar(obj,range))continue;const d=Math.hypot(obj.x-petRuntime.x,obj.y-petRuntime.y);if(d<bestD){best=obj;bestD=d;}}
   return best;
@@ -4342,9 +4353,28 @@ function petNearestToPet(list,range=petCollectionRange()){
 function petLockedCollectionTarget(list,type,validFn=()=>true){
   if(petRuntime.taskType===type&&petRuntime.taskId){
     const locked=list.find(obj=>obj.id===petRuntime.taskId);
-    if(locked&&validFn(locked)&&petWithinPlayerRadar(locked))return locked;
+    if(locked&&validFn(locked)&&petWithinPlayerRadar(locked,petCollectionRange(type)))return locked;
   }
-  const next=petNearestToPet(list.filter(validFn));
+  const range=petCollectionRange(type),valid=list.filter(obj=>validFn(obj)&&petWithinPlayerRadar(obj,range));
+  const rank=Math.max(0,Number(progress?.pet?.protocols?.[type])||0);
+  // Protocolos melhoram a decisão: prioriza caixa próxima do vencimento e minério
+  // mais valioso SE houver recursos ao alcance. Não altera nem inventa o prêmio.
+  let next=null,bestScore=Infinity;
+  for(const obj of valid){
+    const distance=Math.hypot(obj.x-petRuntime.x,obj.y-petRuntime.y);
+    let bonus=0;
+    if(type==='box'&&rank>0){
+      const remaining=Number(obj.expiresAt)-nowSec();
+      if(Number.isFinite(remaining)&&remaining>=0&&remaining<12)bonus+=Math.min(70,rank*20);
+      if(String(obj.id).startsWith('bonus_'))bonus+=rank*10;
+    }
+    if(type==='ore'&&rank>0){
+      const sell=Math.max(0,Number(RESOURCES[obj.type]?.sell)||0);
+      bonus+=Math.min(65,Math.log10(1+sell)*rank*7);
+    }
+    const score=distance-bonus;
+    if(score<bestScore){bestScore=score;next=obj;}
+  }
   petRuntime.taskId=next?.id||null;
   return next;
 }
@@ -4369,7 +4399,7 @@ function petChooseRoamPoint(force=false){
   const now=nowSec();
   // Mantém o mesmo waypoint por alguns segundos. Chegar ao ponto não dispara outra escolha imediata.
   if(!force&&petRuntime.roamX!=null&&petRuntime.roamY!=null&&now<petRuntime.nextRoamAt)return;
-  const angle=rand(0,TWO_PI),radius=rand(90,Math.min(250,petCollectionRange()*.20));
+  const angle=rand(0,TWO_PI),radius=rand(90,Math.min(250,petCollectionRange('ore')*.20));
   petRuntime.roamX=Math.max(45,Math.min(state.currentMap.world.w-45,player.x+Math.cos(angle)*radius));
   petRuntime.roamY=Math.max(45,Math.min(state.currentMap.world.h-45,player.y+Math.sin(angle)*radius));
   petRuntime.nextRoamAt=now+rand(7,12);
@@ -4377,7 +4407,7 @@ function petChooseRoamPoint(force=false){
 function petMovementSpeed(taskType){
   const base=Math.max(220,Number(player.speed)||320);
   if(taskType==='roam')return Math.max(165,Math.min(250,base*.56));
-  if(taskType==='box'||taskType==='ore')return Math.max(230,Math.min(340,base*.74));
+  if(taskType==='box'||taskType==='ore')return Math.max(230,Math.min(390,base*.74* (taskType==='box'?petProtocolEffects().boxMoveSpeed:petProtocolEffects().oreMoveSpeed)));
   if(taskType==='escort')return Math.max(235,Math.min(360,base*.78));
   if(taskType==='repair')return Math.max(215,Math.min(315,base*.68));
   return Math.max(260,Math.min(390,base*.84));
@@ -4391,7 +4421,7 @@ function petFireAt(task){
   // Nunca atacar alvos neutros, pilotos PvP ou NPCs que só foram selecionados manualmente.
   if(!sentinelAttackerEligible(task,nowSec()))return;
   const pd=Math.hypot(task.x-petRuntime.x,task.y-petRuntime.y),lasers=petLaserIds();
-  if(pd>420||!lasers.length||nowSec()-petRuntime.lastShot<=.58)return;
+  if(pd>420*petProtocolEffects().guardRange||!lasers.length||nowSec()-petRuntime.lastShot<=petProtocolEffects().guardShotDelay)return;
   let ammo=currentLaserAmmo(),stock=ammoQty(ammo.id);
   if(stock<=0){ammo=recoverActiveLaser(ammo.id,true);stock=ammo?ammoQty(ammo.id):0;}
   if(!ammo||stock<=0)return;
@@ -4408,7 +4438,7 @@ function petFireAt(task){
     });
     return;
   }
-  const rawBase=Math.round(laserPveBase(ids)*petDesignerDamageMultiplier()*rand(.95,1.08));
+  const rawBase=Math.round(laserPveBase(ids)*petDesignerDamageMultiplier()*petProtocolEffects().guardDamage*rand(.95,1.08));
   progress.ammo[ammo.id]=Math.max(0,stock-firing);
   if(rawBase>0)applyLaserAmmoHit(task,rawBase,ammo,ammo.color);
   refreshAmmoCounters();
@@ -4452,7 +4482,7 @@ function updatePet(dt){
     petRuntime.taskId=null;
     if(player.hp<player.maxHp){
       petRuntime.taskType='repair';targetX=player.x+72;targetY=player.y-78;
-      player.hp=Math.min(player.maxHp,player.hp+player.maxHp*(0.012+pet.level*0.0008)*dt*(premiumActive()?2:1));
+      player.hp=Math.min(player.maxHp,player.hp+player.maxHp*(0.012+pet.level*0.0008)*dt*(premiumActive()?2:1)*petProtocolEffects().repairRate);
     }else followOrRoam();
   }else if(mode==='kami'&&pet.gearsOwned.kami&&petRuntime.kamiArmed){
     const selected=state.target&&!state.target.isPlayer&&state.target.hp>0&&petWithinPlayerRadar(state.target,petCombatSearchRange())?state.target:null;
@@ -4484,8 +4514,8 @@ function updatePet(dt){
     petRuntime.lastKami=now;
     progress.pet.kamikazeReadyAt=Date.now()+PET_KAMIKAZE_COOLDOWN*1000;
     const activationId=petRuntime.kamiActivationId;
-    const boomDmg=Math.round((3500+pet.level*650+petDamage()*2.5)*(1+pilotKamikazeDamageBonus()));
-    const boomRadius=110*(1+pilotKamikazeRadiusBonus());
+    const boomDmg=Math.round((3500+pet.level*650+petDamage()*2.5)*(1+pilotKamikazeDamageBonus())*petProtocolEffects().kamiDamage);
+    const boomRadius=110*(1+pilotKamikazeRadiusBonus())*petProtocolEffects().kamiRadius;
     const victims=state.enemies.filter(e=>e.hp>0&&Math.hypot(e.x-petRuntime.x,e.y-petRuntime.y)<boomRadius);
     playSfx('explosion');
     spawnParticle(petRuntime.x,petRuntime.y,'NOVA BURST','#ff7d8f');
@@ -6670,7 +6700,7 @@ function renderPet(root=ui.petContent){
   }
   const base=petLevelThreshold(pet.level),need=pet.level<PET_MAX_LEVEL?petLevelXp(pet.level):base,pct=pet.level>=PET_MAX_LEVEL?100:Math.min(100,(pet.xp-base)/Math.max(1,need-base)*100),petDesigner=currentPetDesign(),petVisual=petDesigner?.visual||{},petDef=petLevelDef(pet.level),petBonus=petLevelBonuses(pet.level);
   const hero=document.createElement('div');hero.className=`pet-hero ${petDesigner?'has-designer '+(petDesigner.rarity||''):''}`;if(petDesigner)hero.style.setProperty('--designer-glow',petVisual.glow||'#7edcff');
-  hero.innerHTML=`<div class="pet-avatar designer-pet-art-wrap"><img src="${droneCardAsset(pet.level>=10?'petElite':'pet')}" alt="AUX-9" ${petDesigner?`style="filter:${designerVisualCss(petDesigner)}"`:''}>${petDesigner?`<span class="designer-equipped-badge">${rarityLabel(petDesigner.rarity)} • ${petDesigner.name}</span>`:''}</div><div class="pet-hero-copy"><div class="eyebrow">UNIDADE AUX-9</div><h2>Nível ${pet.level} / ${PET_MAX_LEVEL}</h2><div class="pet-xpbar"><span style="width:${pct}%"></span></div><div class="muted">${pet.level>=PET_MAX_LEVEL?'Nível máximo':`${fmt(pet.xp)} XP total • próximo ${fmt(need)}`} • Dano ${fmt(petDamage())} • Suporte ESC +${fmt(petShieldSupport())}</div><div class="pet-level-strip"><span>LASER <b>${petDef.laser}</b></span><span>ESCUDO <b>${petDef.shield}</b></span><span>MÓDULOS <b>${petDef.gear}</b></span><span>PROTOCOLOS <b>${petDef.protocol}</b></span></div><div class="muted">Bônus de nível: <b>${petBonus.damage?`DANO +${petBonus.damage}%`:''}${petBonus.damage&&petBonus.shield?' • ':''}${petBonus.shield?`ESCUDO +${petBonus.shield}%`:''}${!petBonus.damage&&!petBonus.shield?'progressão de equipamento':''}</b> • Tier ${petBonus.tier}${petDesigner?` • ${designerBonusSummary(petDesigner)}`:''}</div></div>`;
+  hero.innerHTML=`<div class="pet-avatar designer-pet-art-wrap"><img src="${droneCardAsset(pet.level>=10?'petElite':'pet')}" alt="AUX-9" ${petDesigner?`style="filter:${designerVisualCss(petDesigner)}"`:''}>${petDesigner?`<span class="designer-equipped-badge">${rarityLabel(petDesigner.rarity)} • ${petDesigner.name}</span>`:''}</div><div class="pet-hero-copy"><div class="eyebrow">UNIDADE AUX-9</div><h2>Nível ${pet.level} / ${PET_MAX_LEVEL}</h2><div class="pet-xpbar"><span style="width:${pct}%"></span></div><div class="muted">${pet.level>=PET_MAX_LEVEL?'Nível máximo':`${fmt(pet.xp)} XP total • próximo ${fmt(need)}`} • Dano ${fmt(Math.round(petDamage()*(pet.activeGear==='guard'?petProtocolEffects().guardDamage:1)))} • Suporte ESC +${fmt(petShieldSupport())}</div><div class="pet-level-strip"><span>LASER <b>${petDef.laser}</b></span><span>ESCUDO <b>${petDef.shield}</b></span><span>MÓDULOS <b>${petDef.gear}</b></span><span>PROTOCOLOS <b>${petDef.protocol}</b></span></div><div class="muted">Bônus de nível: <b>${petBonus.damage?`DANO +${petBonus.damage}%`:''}${petBonus.damage&&petBonus.shield?' • ':''}${petBonus.shield?`ESCUDO +${petBonus.shield}%`:''}${!petBonus.damage&&!petBonus.shield?'progressão de equipamento':''}</b> • Tier ${petBonus.tier}${petDesigner?` • ${designerBonusSummary(petDesigner)}`:''}</div></div>`;
   root.appendChild(hero);
 
   const petDefs=designerCatalog().filter(d=>d.kind==='pet'),designerPanel=document.createElement('div');designerPanel.className='section-box aux-designer-console';
@@ -6684,6 +6714,11 @@ function renderPet(root=ui.petContent){
   Object.values(PET_GEARS).forEach(g=>{const owned=pet.gearsOwned[g.id],b=document.createElement('button');b.className=`pet-gear ${pet.activeGear===g.id?'active':''}`;const gearArt={guard:GAME_ASSETS.equipment.autoLaserCpu,box:GAME_ASSETS.equipment.ammoAutoBuyCpu,ore:GAME_ASSETS.equipment.rocketTurboCpu,repair:GAME_ASSETS.equipment.rep2,kami:GAME_ASSETS.equipment.autoRocketCpu}[g.id];b.innerHTML=`${gearArt?`<img class="pet-gear-art" src="${gearArt}" alt="">`:''}<b>${g.name}</b><small>${g.description}</small><em>${owned?'COMPRADO':'ELITE • '+fmt(g.cost)+' STL'}</em>`;b.onclick=()=>owned?(g.id==='kami'?triggerPetKamikaze():setPetGear(g.id)):buyPetGear(g.id);gearGrid.appendChild(b);});
   gears.appendChild(gearGrid);root.appendChild(auxFoldSectionV18210(gears,'aux:modes','MODOS / EXTRAS DO AUX-9',`Ativo: ${pet.activeGear==='off'?'COMPANHIA':(PET_GEARS[pet.activeGear]?.name||'COMPANHIA')} • ${Object.values(PET_GEARS).filter(g=>pet.gearsOwned[g.id]).length}/${Object.keys(PET_GEARS).length} módulos comprados`));
 
+  const protocolSlots=petSlotCapacity('protocol',pet.level),protocolRanks=normalizeAuxProtocols(pet.protocols,protocolSlots);
+  const protocolPanel=document.createElement('div');protocolPanel.className='section-box aux-protocol-console';
+  protocolPanel.innerHTML=`<h3>PROTOCOLOS DO AUX-9</h3><p class="muted">Distribua os espaços liberados por nível. Máximo 3 níveis por protocolo. Sem custo em CR/STL; não aumenta a quantidade de minério recebida do servidor.</p><div class="aux-protocol-budget">ESPAÇOS USADOS <b>${auxProtocolSlotsUsed(protocolRanks)} / ${protocolSlots}</b></div><div class="aux-protocol-grid">${AUX_PROTOCOL_TYPES.map(def=>`<div class="aux-protocol-card${pet.gearsOwned?.[def.id]?'':' is-locked'}"><span class="aux-protocol-icon">${def.icon}</span><div class="aux-protocol-desc"><b>${def.label}</b><small>${def.bonus}${pet.gearsOwned?.[def.id]?'':' • Requer módulo'}</small></div><div class="aux-protocol-stepper"><button type="button" data-protocol-id="${def.id}" data-protocol-delta="-1" aria-label="Diminuir ${def.label}" ${protocolRanks[def.id]<=0?'disabled':''}>−</button><strong>${protocolRanks[def.id]}/3</strong><button type="button" data-protocol-id="${def.id}" data-protocol-delta="1" aria-label="Aumentar ${def.label}" ${!pet.gearsOwned?.[def.id]||protocolRanks[def.id]>=3||auxProtocolSlotsUsed(protocolRanks)>=protocolSlots?'disabled':''}>+</button></div></div>`).join('')}</div>`;
+  protocolPanel.querySelectorAll('[data-protocol-id]').forEach(btn=>btn.onclick=()=>changePetProtocol(btn.dataset.protocolId,Number(btn.dataset.protocolDelta)));
+  root.appendChild(auxFoldSectionV18210(protocolPanel,'aux:protocols','PROTOCOLOS / EFICIÊNCIA',`${auxProtocolSlotsUsed(protocolRanks)}/${protocolSlots} espaços • 5 especializações`));
   const progression=document.createElement('div');progression.className='section-box pet-level-progression';progression.innerHTML=`<h3>PROGRESSÃO AUX-9 • NÍVEL ${pet.level}</h3><div class="pet-level-strip"><span>LASER <b>${petDef.laser}</b></span><span>ESCUDO <b>${petDef.shield}</b></span><span>MÓDULOS <b>${petDef.gear}</b></span><span>PROTOCOLOS <b>${petDef.protocol}</b></span><span>TIER <b>${petBonus.tier}</b></span></div><div class="muted">Sem combustível. O nível define a capacidade máxima de equipamento.</div>`;root.appendChild(progression);
   loadHangarEquipmentPrefs();root.appendChild(hangarFilterBar('pet',['all','lasers','shields'],state.hangarPetFilter));
   const equipmentLayout=document.createElement('div');equipmentLayout.className='hangar-equipment-split pet-equipment-split';
@@ -6697,6 +6732,16 @@ function renderPet(root=ui.petContent){
   }
   const inv=document.createElement('div');inv.className='hangar-equipment-pane inventory-pane';inv.innerHTML='<div class="hangar-pane-title"><span>INVENTÁRIO • AUX-9</span><b>Lasers / Escudos</b></div>';inv.appendChild(hangarSection('EQUIPAMENTOS',HANGAR_FILTER_LABELS[state.hangarPetFilter],`pet:inventory:${state.hangarPetFilter}`,filteredInventoryGrid(state.hangarPetFilter,'pet',['lasers','shields'])));
   equipmentLayout.append(equippedPane,inv);root.appendChild(equipmentLayout);
+}
+function changePetProtocol(id,delta){
+  if(!progress?.pet?.owned||!AUX_PROTOCOL_IDS.includes(id))return;
+  if(delta>0&&!progress.pet.gearsOwned?.[id]){showToast('Compre o módulo do AUX-9 para especializar');return;}
+  const slots=petSlotCapacity('protocol',progress.pet.level);
+  const before=normalizeAuxProtocols(progress.pet.protocols,slots);
+  const after=changeAuxProtocolRank(before,id,delta,slots);
+  if(before[id]===after[id]){showToast('Limite de espaços ou nível do protocolo atingido');return;}
+  progress.pet.protocols=after;
+  saveGame();refreshPetViews();showToast('Protocolos do AUX-9 atualizados');
 }
 function refreshPetViews(){
   renderPet();updatePetFloat();

@@ -1,3 +1,12 @@
+## V22.11.0 — Combate aprimorado e protocolos do AUX-9
+- Cinco especializações distribuíveis usando os espaços do nível: Sentinela, Minerador, Salvager, Reclaimer e Nova Burst, com máximo 3 pontos cada e orçamento geral de nível.
+- Efeitos moderados sobre alcance/velocidade, reparação e dano. Módulo correspondente precisa estar comprado para receber novos pontos.
+- Melhor seleção de mineração e caixas, incluindo prioridade para boxes próximos de expirar. Mineração online não recebe minérios extras gerados pelo cliente.
+- Auto-combate prioriza NPC que atacou recentemente; HUD informa escudo crítico.
+- Sentinela **continua exclusivamente defensivo**, sem atacar NPC neutro, piloto PvP ou somente selecionado.
+- Proteção de entrada no Render contra alocação adulterada; sem SQL novo, sem alteração de créditos ou STL.
+- Testes e guia em `INSTALAR_V22_11_0.md`.
+
 ## V22.10.1 — Hotfix de Munições (18/10/2026)
 - Corrigido o bug visual no qual a toolbar de armas ocupava a largura inteira e deixava o arsenal com largura zero, fazendo o painel crescer demais.
 - Cabeçalho e arsenal ficam em linhas distintas, com altura limitada e botões de laser e míssil acessíveis em fileiras horizontais.
