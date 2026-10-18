@@ -6,10 +6,10 @@
 <meta content="width=device-width,initial-scale=1,user-scalable=no" name="viewport"/>
 <meta content="#030816" name="theme-color"/>
 <title>Stellar Legacy</title>
-<link rel="manifest" href="/manifest.webmanifest?v=22.9.3"/>
+<link rel="manifest" href="/manifest.webmanifest?v=22.9.4"/>
 <link rel="icon" type="image/png" href="/icons/stellar-192.png"/>
 <link rel="apple-touch-icon" href="/icons/stellar-192.png"/>
-<link href="/style.css?v=22.9.3" rel="stylesheet"/>
+<link href="/style.css?v=22.9.4" rel="stylesheet"/>
 </head>
 <body>
 <div id="app">
@@ -134,7 +134,10 @@
 <section class="hud-panel activity-float-panel" id="activityPanel">
   <div class="activity-float-head">
     <span>ATIVIDADES</span>
-    <button id="activityClearBtn" type="button" title="Limpar histórico">×</button>
+    <div class="activity-head-actions">
+      <button id="activityToggle" type="button" title="Recolher / expandir Atividade" aria-label="Recolher Atividade">▾</button>
+      <button id="activityClearBtn" type="button" title="Limpar histórico">×</button>
+    </div>
   </div>
   <div class="activity-feed" id="activityFeed">
     <div class="activity-empty">As últimas ações e recompensas aparecem aqui.</div>
@@ -170,6 +173,7 @@
 <div class="combat-flash" id="combatFlash" aria-hidden="true"></div>
 
 <section class="hud-panel gate-hud hidden" id="gateHud">
+  <button id="gateHudToggle" class="gate-hud-toggle" type="button" title="Recolher / expandir Portal Astral" aria-label="Recolher Portal Astral">▾</button>
   <div class="gate-hud-title" id="gateHudTitle">PORTAL ASTRAL AURORA</div>
   <div class="gate-hud-row"><span>ROUND</span><b id="gateHudRound">1 / 8</b></div>
   <div class="gate-hud-row"><span>ONDA</span><b id="gateHudWave">1 / 4</b></div>
@@ -1067,6 +1071,6 @@
 </div>
 </div>
 <div class="perf-diag-overlay hidden" id="perfDiagOverlay" aria-live="off" aria-label="Contador de FPS local"><b id="perfDiagHudFps">FPS —</b><small id="perfDiagHudStutter">P95 —</small></div>
-<script src="/game.js?v=22.9.3" type="module"></script>
+<script src="/game.js?v=22.9.4" type="module"></script>
 </body>
 </html>

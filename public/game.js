@@ -1,30 +1,30 @@
-import {sentinelAttackerEligible, selectSentinelAttacker} from './modules/sentinel-defense.js?v=22.9.3';
-import { movementSpeed, nominalMovementSpeed, followShipCamera } from './modules/ship-navigation.js?v=22.9.3';
-import { loadCommandOverviewOnline,claimCompetitiveSeasonOnline,equipEliteTitleOnline,unequipEliteTitleOnline,loadCommandAdminOnline,saveCompetitiveSeasonOnline,saveWorldDirectiveOnline,loadClanOperationsOnline,claimClanOperationOnline,saveAdminClanOperationOnline } from './api.js?v=22.9.3';
-import {renderV21CommandCenter,V21_TABS} from './modules/v21/command-center-view.js?v=22.9.3';
-import {renderEliteEquipTitles,renderCompetitiveSection,renderUniverseDirectives} from './modules/v22/command-upgrades.js?v=22.9.3';
-import {registerStellarPwaV21,offerInstallV21} from './modules/v21/pwa.js?v=22.9.3';
-import { ECONOMY_EFFECTS, CRAFT_OUTPUT_KINDS, normalizeEconomyEffects, normalizeCraftIngredients, normalizeCraftOutput, formatCraftPreview } from './modules/admin-visual-builders.js?v=22.9.3';
-import { ADMIN_MISSION_PRESETS, createAdminMissionPreset, duplicateAdminMission, validateAdminMissionDraft, previewAdminMission } from './modules/admin-mission-builder.js?v=22.9.3';
-import { createHudContentCache } from './modules/hud-content-cache.js?v=22.9.3';
-import { createAuxiliaryWorkScheduler } from './modules/aux-work-scheduler.js?v=22.9.3';
-import { npcVisualDetail } from './modules/npc-render-detail.js?v=22.9.3';
-import { createBackdropRasterCache } from './modules/backdrop-raster-cache.js?v=22.9.3';
-import { createTextWidthCache } from './modules/text-width-cache.js?v=22.9.3';
-import { createHudUpdateScheduler } from './modules/hud-update-scheduler.js?v=22.9.3';
-import { createAssetCache, flattenAssetPaths } from './modules/asset-cache.js?v=22.9.3';
-import { createSceneGradientCache } from './modules/scene-gradient-cache.js?v=22.9.3';
-import { createPerformanceMonitor, formatPerformanceReport } from './modules/performance-monitor.js?v=22.9.3';
-import { createFrameGate } from './modules/frame-gate.js?v=22.9.3';
-import { QUALITY_PROFILES, initialAutoQualityForDevice } from './modules/quality-profiles.js?v=22.9.3';
-import { freshBattleConfigsV2013, captureCombatBuildV2013, exchangeCombatBuildV2013, combatConfigRemainingV2013, clampStoredShieldV2013 } from './combat-config-v2013.js?v=22.9.3';
-import { FACTIONS, SHIPS, ITEMS, LASER_AMMO, ROCKETS, NPC_TYPES, MAPS, RESOURCES } from './data.js?v=22.9.3';
-import { repairPulseSettings } from './repair-balance.js?v=22.9.3';
-import { xpThresholdV1770, xpThresholdV1915, migratePilotXpV1915 } from './level-curve-v1915.js?v=22.9.3';
-import { applyRecruitBonusV2012, eliteRouteSnapshotV2012, freshEliteRouteJournalV2012, ELITE_ROUTE_TARGETS_V2012, novaTierPriceV2012 } from './progression-plan-v2012.js?v=22.9.3';
-import { GAME_ASSETS } from './assets/v17/manifest.js?v=22.9.3';
-import { signUp, signIn, beginGoogleSignIn, restoreGoogleSignInFromUrl, requestPasswordReset, restorePasswordRecoveryFromUrl, restoreSession, signOutLocal, checkGameSession, endGameSession, getUser, getSessionCredentials, loadCloudSave, saveCloudSave, loadEliteOperationsOnline, claimEliteOperationOnline, loadWarCampaignsOnline, claimWarSupplyOnline, claimWarCampaignOnline, loadAdminWarCampaignsOnline, saveAdminWarCampaignOnline, saveAdminWarRulesOnline, loadAdminEliteObjectivesOnline, saveAdminEliteObjectiveOnline, updateCallsign, updatePassword, loadRankings, loadAuctionBids, saveAuctionBidOnline, markAuctionBidStatusOnline, loadAuctionMarket, upsertPlayerPresenceOnline, loadMapPresenceOnline, savePlayerLocationCheckpointOnline, loadPlayerLocationCheckpointOnline, removePlayerPresenceOnline, queuePvpAttackOnline, consumePvpDamageEventsOnline, syncArenaProfileOnline, loadArenaState, loadArenaDailyRewardStatus, claimArenaDailyReward, loadArenaOpponents, loadArenaHistory, arenaAttackOnline, listClansOnline, loadMyClanOnline, createClanOnline, joinClanOnline, getClanRequestsOnline, reviewClanRequestOnline, cancelClanRequestOnline, setClanMemberRoleOnline, leaveClanOnline, transferClanCreditsOnline, claimClanCreditGrantsOnline, recordClanAlienKillOnline, getPremiumShopOnline, testPurchasePremiumOnline, adminPreviewPremiumStageOnline, adminSimulatePremiumStageOnline, getPremiumStageCatalogOnline, loadWarfrontStateOnline, loadSectorOwnershipOnline, hitWorldBossOnline, claimWorldBossRewardOnline, declareClanWarOnline, recordClanWarScoreOnline, loadLiveOpsOnline, adminUpdateLiveEventScheduleOnline, purchaseLiveCatalogOnline, economyActionOnline, getChatHistoryOnline, sendChatMessageOnline, redeemGameCouponOnline, getMyDesignersOnline, setDesignLoadoutOnline, claimGateDroneDesignOnline, claimEventDesignerOnline, getAdminStatus, adminSearchAccounts, adminRecentActions, adminBanAccount, adminUnbanAccount, adminResetAccount, adminDeleteAccount, pushTelemetryBatch, adminTelemetryOverview, adminPlayerTelemetry, getBattleGroupOnline, createBattleGroupOnline, inviteBattleGroupOnline, searchBattleGroupPlayersOnline, inviteBattleGroupUserOnline, respondBattleGroupInviteOnline, leaveBattleGroupOnline, kickBattleGroupMemberOnline, setBattleGroupRallyOnline, loadRuntimeConfigOnline, loadNpcRuntimeConfigOnline, loadWorldRuntimeConfigOnline, loadSystemsRuntimeConfigOnline, loadAdminRuntimeMonitorOnline, adminUpdateRuntimeModuleOnline, adminUpdateNpcRuntimeOnline, adminUpdateNpcSpawnRuntimeOnline, adminUpdateWorldMapOnline, adminUpdateWorldResourceOnline, adminUpdateWorldSectorOnline, adminUpdateWorldPortalOnline, adminUpdateWorldResourcePoolOnline, adminUpdateMissionCategoryOnline, adminUpdateEconomyServiceOnline, adminUpdateCraftingRecipeOnline, loadBattlePassRuntimeConfigOnline, adminUpdateBattlePassSeasonOnline, adminUpdateBattlePassTierOnline, loadShopsRuntimeConfigOnline, adminUpdateCommonShopItemOnline, adminUpdatePremiumShopItemOnline, loadBonusConfigOnline, adminUpdateBonusConfigOnline, adminCouponDashboardOnline, adminCreateCouponOnline, adminSetCouponActiveOnline, loadGalaxyGatesOnline, adminUpdateGalaxyGateOnline, adminUpsertCustomMissionOnline, adminDeleteCustomMissionOnline, adminCreateCraftRecipeOnline, adminCreateEconomyServiceOnline, adminCreatePassSeasonOnline, loadAuctionRulesOnline, adminUpdateAuctionRulesOnline, loadBalanceRuntimeOnline, adminUpdateBalanceOnline,loadAdminSecurityIncidents,reviewAdminSecurityIncident } from './api.js?v=22.9.3';
-import { SharedUniverseClient } from './world.js?v=22.9.3';
+import {sentinelAttackerEligible, selectSentinelAttacker} from './modules/sentinel-defense.js?v=22.9.4';
+import { movementSpeed, nominalMovementSpeed, followShipCamera } from './modules/ship-navigation.js?v=22.9.4';
+import { loadCommandOverviewOnline,claimCompetitiveSeasonOnline,equipEliteTitleOnline,unequipEliteTitleOnline,loadCommandAdminOnline,saveCompetitiveSeasonOnline,saveWorldDirectiveOnline,loadClanOperationsOnline,claimClanOperationOnline,saveAdminClanOperationOnline } from './api.js?v=22.9.4';
+import {renderV21CommandCenter,V21_TABS} from './modules/v21/command-center-view.js?v=22.9.4';
+import {renderEliteEquipTitles,renderCompetitiveSection,renderUniverseDirectives} from './modules/v22/command-upgrades.js?v=22.9.4';
+import {registerStellarPwaV21,offerInstallV21} from './modules/v21/pwa.js?v=22.9.4';
+import { ECONOMY_EFFECTS, CRAFT_OUTPUT_KINDS, normalizeEconomyEffects, normalizeCraftIngredients, normalizeCraftOutput, formatCraftPreview } from './modules/admin-visual-builders.js?v=22.9.4';
+import { ADMIN_MISSION_PRESETS, createAdminMissionPreset, duplicateAdminMission, validateAdminMissionDraft, previewAdminMission } from './modules/admin-mission-builder.js?v=22.9.4';
+import { createHudContentCache } from './modules/hud-content-cache.js?v=22.9.4';
+import { createAuxiliaryWorkScheduler } from './modules/aux-work-scheduler.js?v=22.9.4';
+import { npcVisualDetail } from './modules/npc-render-detail.js?v=22.9.4';
+import { createBackdropRasterCache } from './modules/backdrop-raster-cache.js?v=22.9.4';
+import { createTextWidthCache } from './modules/text-width-cache.js?v=22.9.4';
+import { createHudUpdateScheduler } from './modules/hud-update-scheduler.js?v=22.9.4';
+import { createAssetCache, flattenAssetPaths } from './modules/asset-cache.js?v=22.9.4';
+import { createSceneGradientCache } from './modules/scene-gradient-cache.js?v=22.9.4';
+import { createPerformanceMonitor, formatPerformanceReport } from './modules/performance-monitor.js?v=22.9.4';
+import { createFrameGate } from './modules/frame-gate.js?v=22.9.4';
+import { QUALITY_PROFILES, initialAutoQualityForDevice } from './modules/quality-profiles.js?v=22.9.4';
+import { freshBattleConfigsV2013, captureCombatBuildV2013, exchangeCombatBuildV2013, combatConfigRemainingV2013, clampStoredShieldV2013 } from './combat-config-v2013.js?v=22.9.4';
+import { FACTIONS, SHIPS, ITEMS, LASER_AMMO, ROCKETS, NPC_TYPES, MAPS, RESOURCES } from './data.js?v=22.9.4';
+import { repairPulseSettings } from './repair-balance.js?v=22.9.4';
+import { xpThresholdV1770, xpThresholdV1915, migratePilotXpV1915 } from './level-curve-v1915.js?v=22.9.4';
+import { applyRecruitBonusV2012, eliteRouteSnapshotV2012, freshEliteRouteJournalV2012, ELITE_ROUTE_TARGETS_V2012, novaTierPriceV2012 } from './progression-plan-v2012.js?v=22.9.4';
+import { GAME_ASSETS } from './assets/v17/manifest.js?v=22.9.4';
+import { signUp, signIn, beginGoogleSignIn, restoreGoogleSignInFromUrl, requestPasswordReset, restorePasswordRecoveryFromUrl, restoreSession, signOutLocal, checkGameSession, endGameSession, getUser, getSessionCredentials, loadCloudSave, saveCloudSave, loadEliteOperationsOnline, claimEliteOperationOnline, loadWarCampaignsOnline, claimWarSupplyOnline, claimWarCampaignOnline, loadAdminWarCampaignsOnline, saveAdminWarCampaignOnline, saveAdminWarRulesOnline, loadAdminEliteObjectivesOnline, saveAdminEliteObjectiveOnline, updateCallsign, updatePassword, loadRankings, loadAuctionBids, saveAuctionBidOnline, markAuctionBidStatusOnline, loadAuctionMarket, upsertPlayerPresenceOnline, loadMapPresenceOnline, savePlayerLocationCheckpointOnline, loadPlayerLocationCheckpointOnline, removePlayerPresenceOnline, queuePvpAttackOnline, consumePvpDamageEventsOnline, syncArenaProfileOnline, loadArenaState, loadArenaDailyRewardStatus, claimArenaDailyReward, loadArenaOpponents, loadArenaHistory, arenaAttackOnline, listClansOnline, loadMyClanOnline, createClanOnline, joinClanOnline, getClanRequestsOnline, reviewClanRequestOnline, cancelClanRequestOnline, setClanMemberRoleOnline, leaveClanOnline, transferClanCreditsOnline, claimClanCreditGrantsOnline, recordClanAlienKillOnline, getPremiumShopOnline, testPurchasePremiumOnline, adminPreviewPremiumStageOnline, adminSimulatePremiumStageOnline, getPremiumStageCatalogOnline, loadWarfrontStateOnline, loadSectorOwnershipOnline, hitWorldBossOnline, claimWorldBossRewardOnline, declareClanWarOnline, recordClanWarScoreOnline, loadLiveOpsOnline, adminUpdateLiveEventScheduleOnline, purchaseLiveCatalogOnline, economyActionOnline, getChatHistoryOnline, sendChatMessageOnline, redeemGameCouponOnline, getMyDesignersOnline, setDesignLoadoutOnline, claimGateDroneDesignOnline, claimEventDesignerOnline, getAdminStatus, adminSearchAccounts, adminRecentActions, adminBanAccount, adminUnbanAccount, adminResetAccount, adminDeleteAccount, pushTelemetryBatch, adminTelemetryOverview, adminPlayerTelemetry, getBattleGroupOnline, createBattleGroupOnline, inviteBattleGroupOnline, searchBattleGroupPlayersOnline, inviteBattleGroupUserOnline, respondBattleGroupInviteOnline, leaveBattleGroupOnline, kickBattleGroupMemberOnline, setBattleGroupRallyOnline, loadRuntimeConfigOnline, loadNpcRuntimeConfigOnline, loadWorldRuntimeConfigOnline, loadSystemsRuntimeConfigOnline, loadAdminRuntimeMonitorOnline, adminUpdateRuntimeModuleOnline, adminUpdateNpcRuntimeOnline, adminUpdateNpcSpawnRuntimeOnline, adminUpdateWorldMapOnline, adminUpdateWorldResourceOnline, adminUpdateWorldSectorOnline, adminUpdateWorldPortalOnline, adminUpdateWorldResourcePoolOnline, adminUpdateMissionCategoryOnline, adminUpdateEconomyServiceOnline, adminUpdateCraftingRecipeOnline, loadBattlePassRuntimeConfigOnline, adminUpdateBattlePassSeasonOnline, adminUpdateBattlePassTierOnline, loadShopsRuntimeConfigOnline, adminUpdateCommonShopItemOnline, adminUpdatePremiumShopItemOnline, loadBonusConfigOnline, adminUpdateBonusConfigOnline, adminCouponDashboardOnline, adminCreateCouponOnline, adminSetCouponActiveOnline, loadGalaxyGatesOnline, adminUpdateGalaxyGateOnline, adminUpsertCustomMissionOnline, adminDeleteCustomMissionOnline, adminCreateCraftRecipeOnline, adminCreateEconomyServiceOnline, adminCreatePassSeasonOnline, loadAuctionRulesOnline, adminUpdateAuctionRulesOnline, loadBalanceRuntimeOnline, adminUpdateBalanceOnline,loadAdminSecurityIncidents,reviewAdminSecurityIncident } from './api.js?v=22.9.4';
+import { SharedUniverseClient } from './world.js?v=22.9.4';
 
 const canvas = document.querySelector('#game');
 const ctx = canvas.getContext('2d');
@@ -375,8 +375,8 @@ const ui = {
   laserAmmoButtons: $('#laserAmmoButtons'), rocketAmmoButtons: $('#rocketAmmoButtons'), laserToggle: $('#laserToggle'), rocketFire: $('#rocketFire'), autoLaser: $('#autoLaser'), autoRocket: $('#autoRocket'), turboRocket: $('#turboRocket'), rocketCd: $('#rocketCd'), weaponBar: $('#weaponBar'), weaponBarContent: $('#weaponBarContent'), weaponBarToggle: $('#weaponBarToggle'),
   toast: $('#toast'), baseTradePrompt: $('#baseTradePrompt'), baseTradePromptInfo: $('#baseTradePromptInfo'), repairModal: $('#repairModal'), repairModalText: $('#repairModalText'), repairShipName: $('#repairShipName'), repairBonusCount: $('#repairBonusCount'), repairUriCount: $('#repairUriCount'), repairUseBonus: $('#repairUseBonus'), repairUseUri: $('#repairUseUri'), repairUseAurora: $('#repairUseAurora'), gameCelebration: $('#gameCelebration'), celebrationPanel: $('#celebrationPanel'), celebrationKicker: $('#celebrationKicker'), celebrationTitle: $('#celebrationTitle'), celebrationSubtitle: $('#celebrationSubtitle'), portalPrompt: $('#portalPrompt'), portalPromptMap: $('#portalPromptMap'), jumpTransition: $('#jumpTransition'), jumpTitle: $('#jumpTitle'), jumpSubtitle: $('#jumpSubtitle'), factionModal: $('#factionModal'), factionCards: $('#factionCards'),
   mapBtn: $('#mapBtn'), mapModal: $('#mapModal'), closeMap: $('#closeMap'), mapNetwork: $('#mapNetwork'),
-  missionBtn: $('#missionBtn'), missionActiveCount: $('#missionActiveCount'), missionModal: $('#missionModal'), closeMission: $('#closeMission'), missionContent: $('#missionContent'), passBtn: $('#passBtn'), passTierBadge: $('#passTierBadge'), passModal: $('#passModal'), closePass: $('#closePass'), passContent: $('#passContent'), activeMissionPanel: $('#activeMissionPanel'), activeMissionCategory: $('#activeMissionCategory'), activeMissionTitle: $('#activeMissionTitle'), activeMissionTask: $('#activeMissionTask'), activeMissionProgressBar: $('#activeMissionProgressBar'), activeMissionProgressText: $('#activeMissionProgressText'), activeMissionRewardFactor: $('#activeMissionRewardFactor'), activeMissionDots: $('#activeMissionDots'), activeMissionToggle: $('#activeMissionToggle'), activeMissionBody: $('#activeMissionBody'), activeMissionOpen: $('#activeMissionOpen'), activityPanel: $('#activityPanel'), activityFeed: $('#activityFeed'), activityClearBtn: $('#activityClearBtn'),
-  gateBtn: $('#gateBtn'), gatePieceBadge: $('#gatePieceBadge'), gateModal: $('#gateModal'), closeGate: $('#closeGate'), gatePiecesText: $('#gatePiecesText'), gateLivesText: $('#gateLivesText'), gateCompletedText: $('#gateCompletedText'), gatePieceGrid: $('#gatePieceGrid'), gateJumpBtn: $('#gateJumpBtn'), gateUriText: $('#gateUriText'), gateDustText: $('#gateDustText'), gateSpinButtons: $('#gateSpinButtons'), gateDustSpinButtons: $('#gateDustSpinButtons'), gateJumpBonus: $('#gateJumpBonus'), gateLifeBonus: $('#gateLifeBonus'), gateLogDisks: $('#gateLogDisks'), useLifeBonus: $('#useLifeBonus'), buyGateLife: $('#buyGateLife'), gateResultBox: $('#gateResultBox'), gateRoundsGrid: $('#gateRoundsGrid'), gateAlphaStatusTitle: $('#gateAlphaStatusTitle'), gateAlphaStatusText: $('#gateAlphaStatusText'), gateHud: $('#gateHud'), gateHudRound: $('#gateHudRound'), gateHudWave: $('#gateHudWave'), gateHudRemaining: $('#gateHudRemaining'), gateHudNext: $('#gateHudNext'), gateHudLives: $('#gateHudLives'),
+  missionBtn: $('#missionBtn'), missionActiveCount: $('#missionActiveCount'), missionModal: $('#missionModal'), closeMission: $('#closeMission'), missionContent: $('#missionContent'), passBtn: $('#passBtn'), passTierBadge: $('#passTierBadge'), passModal: $('#passModal'), closePass: $('#closePass'), passContent: $('#passContent'), activeMissionPanel: $('#activeMissionPanel'), activeMissionCategory: $('#activeMissionCategory'), activeMissionTitle: $('#activeMissionTitle'), activeMissionTask: $('#activeMissionTask'), activeMissionProgressBar: $('#activeMissionProgressBar'), activeMissionProgressText: $('#activeMissionProgressText'), activeMissionRewardFactor: $('#activeMissionRewardFactor'), activeMissionDots: $('#activeMissionDots'), activeMissionToggle: $('#activeMissionToggle'), activeMissionBody: $('#activeMissionBody'), activeMissionOpen: $('#activeMissionOpen'), activityPanel: $('#activityPanel'), activityToggle: $('#activityToggle'), activityFeed: $('#activityFeed'), activityClearBtn: $('#activityClearBtn'),
+  gateBtn: $('#gateBtn'), gatePieceBadge: $('#gatePieceBadge'), gateModal: $('#gateModal'), closeGate: $('#closeGate'), gatePiecesText: $('#gatePiecesText'), gateLivesText: $('#gateLivesText'), gateCompletedText: $('#gateCompletedText'), gatePieceGrid: $('#gatePieceGrid'), gateJumpBtn: $('#gateJumpBtn'), gateUriText: $('#gateUriText'), gateDustText: $('#gateDustText'), gateSpinButtons: $('#gateSpinButtons'), gateDustSpinButtons: $('#gateDustSpinButtons'), gateJumpBonus: $('#gateJumpBonus'), gateLifeBonus: $('#gateLifeBonus'), gateLogDisks: $('#gateLogDisks'), useLifeBonus: $('#useLifeBonus'), buyGateLife: $('#buyGateLife'), gateResultBox: $('#gateResultBox'), gateRoundsGrid: $('#gateRoundsGrid'), gateAlphaStatusTitle: $('#gateAlphaStatusTitle'), gateAlphaStatusText: $('#gateAlphaStatusText'), gateHud: $('#gateHud'), gateHudToggle: $('#gateHudToggle'), gateHudRound: $('#gateHudRound'), gateHudWave: $('#gateHudWave'), gateHudRemaining: $('#gateHudRemaining'), gateHudNext: $('#gateHudNext'), gateHudLives: $('#gateHudLives'),
   gateProtocolTabs: $('#gateProtocolTabs'), gateCoreLabel: $('#gateCoreLabel'), gateProtocolLabel: $('#gateProtocolLabel'), gateCombatProtocol: $('#gateCombatProtocol'), gateRewardNote: $('#gateRewardNote'), gateHudTitle: $('#gateHudTitle'),
   abilityBar: $('#abilityBar'), shipAbilityBtn: $('#shipAbilityBtn'), shipAbilityIcon: $('#shipAbilityIcon'), shipAbilityName: $('#shipAbilityName'), shipAbilityStatus: $('#shipAbilityStatus'), shipAbilityFill: $('#shipAbilityFill'), petKamiAbilityBtn: $('#petKamiAbilityBtn'), petKamiAbilityStatus: $('#petKamiAbilityStatus'), petKamiAbilityFill: $('#petKamiAbilityFill'), bossPhaseHud: $('#bossPhaseHud'), bossPhaseName: $('#bossPhaseName'), bossPhaseLabel: $('#bossPhaseLabel'), bossPhaseHpFill: $('#bossPhaseHpFill'), bossPhaseShieldFill: $('#bossPhaseShieldFill'), bossPhaseHpText: $('#bossPhaseHpText'), bossPhaseShieldText: $('#bossPhaseShieldText'), bossPhaseDistance: $('#bossPhaseDistance'), bossPhaseStatus: $('#bossPhaseStatus'), targetLockHud: $('#targetLockHud'), targetLockToggle: $('#targetLockToggle'), targetLockDetail: $('#targetLockDetail'), targetLockName: $('#targetLockName'), targetLockPortrait: $('#targetLockPortrait'), targetLockPortraitWrap: $('#targetLockPortraitWrap'), targetLockType: $('#targetLockType'), targetLockDistance: $('#targetLockDistance'), targetLockThreat: $('#targetLockThreat'), targetLockHpFill: $('#targetLockHpFill'), targetLockHpText: $('#targetLockHpText'), targetLockShieldFill: $('#targetLockShieldFill'), targetLockShieldText: $('#targetLockShieldText'), combatStateHud: $('#combatStateHud'), combatStateText: $('#combatStateText'), combatStateMeta: $('#combatStateMeta'), combatFlash: $('#combatFlash'), galaxyEventHud: $('#galaxyEventHud'), galaxyEventToggle: $('#galaxyEventToggle'), galaxyEventIcon: $('#galaxyEventIcon'), galaxyEventName: $('#galaxyEventName'), galaxyEventObjective: $('#galaxyEventObjective'), galaxyEventTimer: $('#galaxyEventTimer'), galaxyEventProgress: $('#galaxyEventProgress'),
   shipMenuBtn: $('#shipMenuBtn'), battleTopStatus: $('#battleTopStatus'), playerPanel: $('#playerPanel'), playerPanelToggle: $('#playerPanelToggle'), playerPanelContent: $('#playerPanelContent'), petBtn: $('#petBtn'), petModal: $('#petModal'), closePet: $('#closePet'), petContent: $('#petContent'),
@@ -2738,6 +2738,35 @@ function applyPetUiState(){
 }
 function loadPetUiState(){try{const raw=localStorage.getItem('stellar_pet_ui_expanded');if(raw!==null)state.petUiExpanded=raw==='1';}catch{}applyPetUiState();}
 function togglePetUi(){state.petUiExpanded=!state.petUiExpanded;try{localStorage.setItem('stellar_pet_ui_expanded',state.petUiExpanded?'1':'0');}catch{}applyPetUiState();}
+
+// Janelas extras do HUD: mesma experiência 40×40 das janelas superiores.
+// Persistência local por painel; conteúdo não é desmontado ao recolher.
+const EXTRA_HUD_COLLAPSE_KEY='stellar_extra_hud_collapse_v2294';
+const extraHudCollapse={activity:false,gate:false};
+function applyExtraHudCollapsed(key){
+  if(key!=='activity'&&key!=='gate')return;
+  const panel=key==='activity'?ui.activityPanel:ui.gateHud;
+  const toggle=key==='activity'?ui.activityToggle:ui.gateHudToggle;
+  if(!panel||!toggle)return;
+  const collapsed=!!extraHudCollapse[key];
+  panel.classList.toggle('collapsed',collapsed);
+  toggle.textContent=collapsed?'▸':'▾';
+  toggle.setAttribute('aria-expanded',String(!collapsed));
+  toggle.setAttribute('aria-label',(collapsed?'Expandir ':'Recolher ')+(key==='activity'?'Atividade':'Portal Astral'));
+  requestHudLayoutV2024();
+}
+function loadExtraHudCollapse(){
+  try{const value=JSON.parse(localStorage.getItem(EXTRA_HUD_COLLAPSE_KEY)||'{}');
+    for(const key of ['activity','gate'])if(typeof value?.[key]==='boolean')extraHudCollapse[key]=value[key];
+  }catch{}
+  applyExtraHudCollapsed('activity');applyExtraHudCollapsed('gate');
+}
+function toggleExtraHudCollapse(key){
+  if(key!=='activity'&&key!=='gate')return;
+  extraHudCollapse[key]=!extraHudCollapse[key];
+  try{localStorage.setItem(EXTRA_HUD_COLLAPSE_KEY,JSON.stringify(extraHudCollapse));}catch{}
+  applyExtraHudCollapsed(key);
+}
 
 // O tamanho reservado pelo HUD tático acompanha o estado real dos eventos/alvos.
 // Classes de visibilidade mudam durante o jogo, então observamos ambas as janelas.
@@ -9223,6 +9252,8 @@ if(ui.hudToggle)ui.hudToggle.onclick=()=>toggleHudUi();
 if(ui.closeShop)ui.closeShop.onclick=()=>ui.shopModal.classList.add('hidden');
 if(ui.cargoBtn)ui.cargoBtn.onclick=()=>{if(isAtTrader())openCargo();else showToast('O Porão comercial abre na base X-1 ou X-8');};
 if(ui.activityClearBtn)ui.activityClearBtn.onclick=()=>clearActivityFeed();
+if(ui.activityToggle)ui.activityToggle.onclick=e=>{e.stopPropagation();toggleExtraHudCollapse('activity');};
+if(ui.gateHudToggle)ui.gateHudToggle.onclick=e=>{e.stopPropagation();toggleExtraHudCollapse('gate');};
 if(ui.repairUseBonus)ui.repairUseBonus.onclick=()=>repairDestroyedWithBonus();
 if(ui.repairUseUri)ui.repairUseUri.onclick=()=>repairDestroyedWithUri();
 if(ui.repairUseAurora)ui.repairUseAurora.onclick=()=>recoverWithAurora();
@@ -9448,6 +9479,7 @@ document.body.dataset.device=DEVICE_CAPS.mobile?'mobile':'desktop';
 document.body.dataset.reducedMotion=DEVICE_CAPS.reducedMotion?'1':'0';
 loadActivityLog();
 loadHudVisibility();
+loadExtraHudCollapse();
 loadChatPrefs();
 renderSettings();
 preloadAssets();

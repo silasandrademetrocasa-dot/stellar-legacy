@@ -1,3 +1,12 @@
+## V22.9.4 — HUD compacto em todas as janelas (18/10/2026)
+- Os 9 controles da visibilidade do HUD agora podem ocupar só 40 × 40 px quando recolhidos: Jogador, Nave, AUX-9, Missões, Atividade, Chat, Minimapa, Munições e Portal Astral.
+- Atividade e Portal Astral ganham botão de recolher e preferência local preservada ao reiniciar o jogo.
+- Chat, Radar e Munições não mantêm largura/altura de card, mesmo no layout móvel de duas linhas.
+- A barra de Munições recolhida oculta controles de tiro/habilidades, mas mantém acesso para expandir. A execução do combate não foi alterada.
+- Preferência CONF de ocultar tem precedência sobre compactação; janelas contextuais ausentes continuam ocultas.
+- Se os cinco cards superiores estão recolhidos, quebram linha no celular para não cortar o último botão quando um evento abre na direita.
+- Atualização de versão e cache de assets frontend. Não altera economia, combates, dados ou SQL.
+
 ## V22.9.2 — Mineração confirmada e visibilidade de eventos entre mapas
 - Corrige callback ausente de `grantOreReward` entre Render e o motor WebSocket (falha comprovada nos logs).
 - Mostra eventos ativos fora do mapa elegível no HUD, sem criar recompensas fora do setor.

@@ -3258,3 +3258,158 @@ html.hud-right-empty #topHudDock{right:8px!important;}
 #topHudDock #activeMissionPanel.hidden,#topHudDock #petFloatPanel.hidden,
 #topHudDock #playerPanel.hud-user-disabled,#topHudDock #leftStats.hud-user-disabled,
 #topHudDock #activeMissionPanel.hud-user-disabled,#topHudDock #petFloatPanel.hud-user-disabled{display:none!important;}
+
+/* ===== HUD • RECOLHER TODAS AS JANELAS 40x40 =====
+   Disponível para os nove controles da tela de configuração.
+   A regra fica no final, vencendo larguras mínimas históricas do dock. */
+:root{--hud-mini-size:40px;}
+
+/* ATIVIDADE: o botão de limpeza continua somente no modo expandido. */
+#activityPanel .activity-head-actions{display:flex;align-items:center;gap:5px;}
+#activityPanel #activityToggle{width:24px;height:24px;min-height:24px;padding:0;border-radius:7px;
+ border:1px solid rgba(91,191,255,.35);background:rgba(7,27,42,.8);color:#8be8ff;cursor:pointer;}
+#topHudDock #activityPanel.collapsed{
+ width:40px!important;min-width:40px!important;max-width:40px!important;
+ height:40px!important;min-height:40px!important;max-height:40px!important;
+ padding:2px!important;margin:0!important;flex:0 0 40px!important;
+ display:flex!important;align-items:center!important;justify-content:center!important;
+ border-radius:11px!important;overflow:hidden!important;
+}
+#topHudDock #activityPanel.collapsed .activity-float-head{
+ width:36px!important;height:36px!important;min-height:36px!important;
+ border:0!important;padding:0!important;margin:0!important;
+ display:flex!important;align-items:center!important;justify-content:center!important;
+}
+#topHudDock #activityPanel.collapsed .activity-float-head>span,
+#topHudDock #activityPanel.collapsed #activityClearBtn,
+#topHudDock #activityPanel.collapsed .activity-feed{display:none!important;}
+#topHudDock #activityPanel.collapsed .activity-head-actions{width:36px!important;height:36px!important;justify-content:center!important;}
+#topHudDock #activityPanel.collapsed #activityToggle{
+ display:grid!important;place-items:center!important;
+ width:36px!important;min-width:36px!important;max-width:36px!important;
+ height:36px!important;min-height:36px!important;max-height:36px!important;
+ padding:0!important;margin:0!important;border:0!important;
+ background:transparent!important;font-size:0!important;line-height:1!important;
+}
+#topHudDock #activityPanel.collapsed #activityToggle::after{content:'T';font-size:13px;font-weight:1000;color:#73e7d3;}
+
+/* CHAT e MINIMAPA: apenas o toggle, não metade da largura da tela. */
+.bottom-hud-dock #chatDock.collapsed,
+.bottom-hud-dock #minimapPanel.collapsed{
+ box-sizing:border-box!important;width:40px!important;min-width:40px!important;max-width:40px!important;
+ height:40px!important;min-height:40px!important;max-height:40px!important;
+ flex:0 0 40px!important;padding:2px!important;margin:0!important;
+ align-self:end!important;overflow:hidden!important;border-radius:11px!important;
+ display:flex!important;align-items:center!important;justify-content:center!important;
+}
+#chatDock.collapsed .chat-toolbar,
+#minimapPanel.collapsed .minimap-toolbar{
+ display:flex!important;justify-content:center!important;align-items:center!important;
+ width:36px!important;height:36px!important;min-height:36px!important;
+ padding:0!important;margin:0!important;gap:0!important;border:0!important;
+}
+#chatDock.collapsed .chat-toolbar-left,
+#minimapPanel.collapsed .minimap-toolbar-left{
+ display:flex!important;justify-content:center!important;align-items:center!important;
+ width:36px!important;height:36px!important;padding:0!important;margin:0!important;gap:0!important;
+}
+#chatDock.collapsed .chat-toolbar-title,
+#chatDock.collapsed .chat-channel-chip,
+#chatDock.collapsed #chatBody,
+#minimapPanel.collapsed .stats-toolbar-label,
+#minimapPanel.collapsed #minimap,
+#minimapPanel.collapsed .minimap-social-legend{display:none!important;}
+#chatDock.collapsed #chatToggle,
+#minimapPanel.collapsed #minimapToggle{
+ display:grid!important;place-items:center!important;
+ width:36px!important;min-width:36px!important;max-width:36px!important;
+ height:36px!important;min-height:36px!important;max-height:36px!important;
+ padding:0!important;margin:0!important;border:0!important;
+ transform:none!important;background:transparent!important;font-size:0!important;line-height:1!important;
+}
+#chatDock.collapsed #chatToggle::after{content:'C';font-size:13px;font-weight:1000;color:#7edbff;}
+#minimapPanel.collapsed #minimapToggle::after{content:'R';font-size:13px;font-weight:1000;color:#7ae8dc;}
+
+/* MUNIÇÕES: fecha inclusive habilidades e botões de disparo; reabre com M. */
+.bottom-hud-dock #weaponBar.collapsed,
+.bottom-hud-dock #weaponBar.compact-ammo-ui.collapsed{
+ box-sizing:border-box!important;position:relative!important;
+ width:40px!important;min-width:40px!important;max-width:40px!important;
+ height:40px!important;min-height:40px!important;max-height:40px!important;
+ padding:2px!important;margin:0!important;flex:0 0 40px!important;
+ align-self:end!important;justify-self:start!important;
+ display:flex!important;align-items:center!important;justify-content:center!important;
+ border-radius:11px!important;overflow:hidden!important;
+}
+#weaponBar.collapsed .weapon-bar-content,
+#weaponBar.collapsed .section.actions,
+#weaponBar.collapsed .weapon-toolbar-label,
+#weaponBar.collapsed .bottom-combat-abilities{display:none!important;}
+#weaponBar.collapsed .weapon-toolbar,
+#weaponBar.collapsed .weapon-toolbar-left{
+ display:flex!important;align-items:center!important;justify-content:center!important;
+ width:36px!important;height:36px!important;min-height:36px!important;
+ margin:0!important;padding:0!important;gap:0!important;
+}
+#weaponBar.collapsed #weaponBarToggle{
+ display:grid!important;place-items:center!important;
+ width:36px!important;min-width:36px!important;max-width:36px!important;
+ height:36px!important;min-height:36px!important;max-height:36px!important;
+ padding:0!important;margin:0!important;border:0!important;
+ transform:none!important;background:transparent!important;font-size:0!important;line-height:1!important;
+}
+#weaponBar.collapsed #weaponBarToggle::after{content:'M';font-size:13px;font-weight:1000;color:#ffde94;}
+
+/* PORTAL ASTRAL: botão só aparece quando o portal está de fato ativo. */
+#gateHud .gate-hud-toggle{float:right;display:grid;place-items:center;width:25px;height:25px;
+ padding:0;border:1px solid rgba(193,137,255,.4);border-radius:7px;
+ background:rgba(53,18,88,.5);color:#dab9ff;font-size:14px;cursor:pointer;}
+#gateHud.collapsed{
+ width:40px!important;min-width:40px!important;max-width:40px!important;
+ height:40px!important;min-height:40px!important;max-height:40px!important;
+ padding:2px!important;display:flex!important;align-items:center!important;justify-content:center!important;
+ overflow:hidden!important;border-radius:11px!important;
+}
+#gateHud.collapsed .gate-hud-title,
+#gateHud.collapsed .gate-hud-row,
+#gateHud.collapsed .gate-hud-lives{display:none!important;}
+#gateHud.collapsed #gateHudToggle{
+ display:grid!important;place-items:center!important;
+ width:36px!important;min-width:36px!important;max-width:36px!important;
+ height:36px!important;min-height:36px!important;max-height:36px!important;
+ margin:0!important;padding:0!important;border:0!important;background:transparent!important;
+ font-size:0!important;line-height:1!important;float:none!important;
+}
+#gateHud.collapsed #gateHudToggle::after{content:'P';font-size:13px;font-weight:1000;color:#d7b0ff;}
+
+/* Esconder via CONF ou por ausência do conteúdo tem sempre prioridade. */
+#topHudDock #activityPanel.hidden,#topHudDock #activityPanel.hud-user-disabled,
+.bottom-hud-dock #chatDock.hidden,.bottom-hud-dock #chatDock.hud-user-hidden,
+.bottom-hud-dock #minimapPanel.hidden,.bottom-hud-dock #minimapPanel.hud-user-hidden,
+.bottom-hud-dock #weaponBar.hidden,.bottom-hud-dock #weaponBar.hud-user-hidden,
+#gateHud.hidden,#gateHud.hud-user-disabled{display:none!important;}
+
+/* Em tela móvel, a munição recolhida deixa de ocupar a linha inteira. */
+@media(max-width:760px){
+ .bottom-hud-dock #weaponBar.collapsed,
+ .bottom-hud-dock #weaponBar.compact-ammo-ui.collapsed{
+   grid-column:1!important;grid-row:2!important;justify-self:start!important;
+   width:40px!important;max-width:40px!important;min-height:40px!important;max-height:40px!important;
+ }
+ .bottom-hud-dock #chatDock.collapsed{grid-column:1!important;grid-row:1!important;justify-self:start!important;width:40px!important;max-width:40px!important;}
+ .bottom-hud-dock #minimapPanel.collapsed{grid-column:2!important;grid-row:1!important;justify-self:end!important;width:40px!important;max-width:40px!important;}
+}
+/* A preferência CONF de ocultar sempre vence os seletores móveis compactos. */
+#bottomHudDock.bottom-hud-dock #weaponBar.hud-user-hidden,
+#bottomHudDock.bottom-hud-dock #weaponBar.hidden,
+#bottomHudDock.bottom-hud-dock #chatDock.hud-user-hidden,
+#bottomHudDock.bottom-hud-dock #minimapPanel.hud-user-hidden,
+#topHudDock #activityPanel.hud-user-disabled,
+#gateHud.hud-user-disabled,#gateHud.hidden{display:none!important;}
+/* Quando todos os cartões superiores estão compactos, não cortar o último botão
+   caso um evento expandido reserve espaço na lateral direita do celular. */
+@media(max-width:680px){
+ #topHudDock:has(> #playerPanel.collapsed):has(> #leftStats.collapsed):has(> #activeMissionPanel.collapsed):has(> #petFloatPanel.collapsed):has(> #activityPanel.collapsed){
+   flex-wrap:wrap!important;overflow:visible!important;row-gap:5px!important;
+ }
+}
