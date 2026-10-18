@@ -619,13 +619,13 @@ class Room {
       laserFiring:!!p.laserFiring,laserColor:p.laserColor||'#76d9ff',laserAmmoId:p.laserAmmoId||'lcb10',laserAmmoName:p.laserAmmoName||'PLS-1',targetId:p.targetId||null,targetIsPlayer:!!p.targetIsPlayer,
       pet:p.pet?{...p.pet}:null};
   }
-  snapshot(viewerUserId=null){return {type:'world_snapshot',roomKey:this.key,mapId:this.mapId,territoryFaction:this.territoryFaction,npcs:[...this.npcs.values()].map(e=>this.publicNpc(e)),ores:[...this.ores.values()],players:[...this.players.values()].filter(p=>p.userId!==viewerUserId).map(p=>this.publicPlayer(p)),event:this.eventPayload(),warfront:this.warfrontPayload(),serverTime:nowMs()};}
+  snapshot(viewerUserId=null){return {type:'world_snapshot',roomKey:this.key,mapId:this.mapId,territoryFaction:this.territoryFaction,npcs:[...this.npcs.values()].map(e=>this.publicNpc(e)),ores:[...this.ores.values()],players:[...this.players.values()].filter(p=>p.userId!==viewerUserId).map(p=>this.publicPlayer(p)),event:this.eventPayload(),globalEvent:this.world.currentEvent(),warfront:this.warfrontPayload(),serverTime:nowMs()};}
   broadcast(payload,exclude=null){
     if(!this.clients.size)return;
     const wire=JSON.stringify(payload); // Serializar apenas uma vez por sala.
     for(const c of this.clients){if(c===exclude||c.readyState!==WebSocket.OPEN)continue;try{c.send(wire);}catch{}}
   }
-  broadcastEvent(force=false){const now=nowMs();if(!force&&now-this.lastEventBroadcastAt<EVENT_BROADCAST_INTERVAL_MS)return;this.lastEventBroadcastAt=now;this.broadcast({type:'event_update',event:this.eventPayload(),serverTime:now});}
+  broadcastEvent(force=false){const now=nowMs();if(!force&&now-this.lastEventBroadcastAt<EVENT_BROADCAST_INTERVAL_MS)return;this.lastEventBroadcastAt=now;this.broadcast({type:'event_update',event:this.eventPayload(),globalEvent:this.world.currentEvent(),serverTime:now});}
   // V18.2.6: progresso é individual, por EVENT ID + janela, persistido no Supabase.
   sendPersonalEventStatus(ws,ev=this.event){
     if(ev?.source==='universe-directive'||!ws?.identity?.accessToken||!ev?.eventId||!this.world.loadPlayerEventProgress)return;
@@ -924,7 +924,7 @@ class Room {
   }
 }
 
-export function attachSharedUniverse(server,{authenticate,authorizeJoin,recordSecurityViolation,loadLiveOps,loadBattleGroup,loadNpcConfig,loadWorldConfig,loadPlayerEventProgress,recordPlayerEventProgress,loadWarfront,persistCapture,recordEliteEvent,recordWarDefense,loadWorldDirectives,grantNpcReward}){
+export function attachSharedUniverse(server,{authenticate,authorizeJoin,recordSecurityViolation,loadLiveOps,loadBattleGroup,loadNpcConfig,loadWorldConfig,loadPlayerEventProgress,recordPlayerEventProgress,loadWarfront,persistCapture,recordEliteEvent,recordWarDefense,loadWorldDirectives,grantNpcReward,grantOreReward}){
   const wss=new WebSocketServer({
     server,
     path:'/ws',
@@ -941,6 +941,7 @@ export function attachSharedUniverse(server,{authenticate,authorizeJoin,recordSe
     persistCapture:persistCapture||(()=>Promise.reject(new Error('Sem gravação de relés'))),
     recordEliteEvent:recordEliteEvent||(()=>Promise.resolve()),
     grantNpcReward:grantNpcReward||(()=>Promise.reject(new Error('Recompensa NPC não configurada no servidor'))),
+    grantOreReward:grantOreReward||(()=>Promise.reject(new Error('Pagamento de minério não configurado no servidor'))),
     directives:[],lastDirectivesAt:0,directivesBusy:false,
     liveOps:{events:[],catalog:[],server_time:0},
     lastLiveOpsAt:0,
@@ -1070,6 +1071,16 @@ export function attachSharedUniverse(server,{authenticate,authorizeJoin,recordSe
       return world.liveOps;
     },
     room(mapId,territoryFaction){const requested=String(mapId||'x1'),def=this.mapDefinition(requested),id=def&&def.enabled!==false&&!def.gate?requested:sanitizeRoomMap(requested),key=roomKey(id,territoryFaction);if(!rooms.has(key))rooms.set(key,new Room(world,id,territoryFaction));return rooms.get(key);},
+    broadcastGlobalEventStatus(force=false){
+      const globalEvent=this.currentEvent();
+      const signature=globalEvent?.eventId||'none';
+      if(!force&&signature===this.lastGlobalEventSignature)return;
+      this.lastGlobalEventSignature=signature;
+      for(const room of rooms.values())if(room.clients.size){
+        room.ensureEvent(false);
+        room.broadcastEvent(true);
+      }
+    },
     stats(){return {rooms:rooms.size,clients:[...rooms.values()].reduce((s,r)=>s+r.clients.size,0),npcs:[...rooms.values()].reduce((s,r)=>s+r.npcs.size,0),ores:[...rooms.values()].reduce((s,r)=>s+r.ores.size,0),event:world.currentEvent(),directivesCached:world.directives.length,directivesUpdatedAt:world.lastDirectivesAt,liveOpsUpdatedAt:world.lastLiveOpsAt,npcConfigVersion:Number(world.npcRuntime?.version)||0,npcConfigUpdatedAt:world.npcRuntime?.updatedAt||null,worldConfigVersion:Number(world.worldRuntime?.version)||0,worldConfigUpdatedAt:world.worldRuntime?.updatedAt||null};}
   };
 
@@ -1107,7 +1118,7 @@ export function attachSharedUniverse(server,{authenticate,authorizeJoin,recordSe
         Promise.allSettled([world.refreshLiveOps?.(nowMs()-(world.lastLiveOpsAt||0)>3000)??Promise.resolve(),world.refreshDirectives?.(false)??Promise.resolve()]).then(()=>{
           if(ws.room!==r)return;
           r.ensureEvent?.(false);
-          if(typeof r.eventPayload==='function')safeJsonSend(ws,{type:'event_update',event:r.eventPayload(),serverTime:nowMs()});
+          if(typeof r.eventPayload==='function')safeJsonSend(ws,{type:'event_update',event:r.eventPayload(),globalEvent:world.currentEvent(),serverTime:nowMs()});
         }).catch(()=>{});
         return;
       }
@@ -1136,7 +1147,7 @@ export function attachSharedUniverse(server,{authenticate,authorizeJoin,recordSe
   world.refreshNpcConfig(true).catch(()=>{});
   world.refreshLiveOps(true).catch(()=>{});
   world.refreshDirectives(true).catch(()=>{});
-  let last=nowMs(),lastActivityCleanup=0;const timer=setInterval(()=>{const n=nowMs(),dt=Math.min(.12,(n-last)/1000);last=n;if(n-world.lastLiveOpsAt>=LIVE_OPS_REFRESH_MS)world.refreshLiveOps(false).catch(()=>{});if(n-world.lastNpcConfigAt>=12000)world.refreshNpcConfig(false).catch(()=>{});if(n-world.lastWorldConfigAt>=15000)world.refreshWorldConfig(false).catch(()=>{});if(n-world.lastDirectivesAt>=20000)world.refreshDirectives(false).catch(()=>{});for(const [key,r] of rooms){if(r.clients.size>0){r.lastUsedAt=n;r.tick(dt);if(r.warfrontControl&&n-r.lastWarfrontSyncAt>15000){r.lastWarfrontSyncAt=n;r.reconcileWarfrontState().catch(err=>console.warn('Falha sincronizando relés:',err?.message));}}else if(n-(r.lastUsedAt||n)>IDLE_ROOM_TTL_MS)rooms.delete(key);}if(n-lastActivityCleanup>60000){lastActivityCleanup=n;for(const [uid,at] of world.npcActivity)if(n-Number(at)>10*60*1000)world.npcActivity.delete(uid);}},50);
+  let last=nowMs(),lastActivityCleanup=0,lastGlobalEventCheckAt=0;const timer=setInterval(()=>{const n=nowMs(),dt=Math.min(.12,(n-last)/1000);last=n;if(n-lastGlobalEventCheckAt>1000){lastGlobalEventCheckAt=n;world.broadcastGlobalEventStatus(false);}if(n-world.lastLiveOpsAt>=LIVE_OPS_REFRESH_MS)world.refreshLiveOps(false).catch(()=>{});if(n-world.lastNpcConfigAt>=12000)world.refreshNpcConfig(false).catch(()=>{});if(n-world.lastWorldConfigAt>=15000)world.refreshWorldConfig(false).catch(()=>{});if(n-world.lastDirectivesAt>=20000)world.refreshDirectives(false).catch(()=>{});for(const [key,r] of rooms){if(r.clients.size>0){r.lastUsedAt=n;r.tick(dt);if(r.warfrontControl&&n-r.lastWarfrontSyncAt>15000){r.lastWarfrontSyncAt=n;r.reconcileWarfrontState().catch(err=>console.warn('Falha sincronizando relés:',err?.message));}}else if(n-(r.lastUsedAt||n)>IDLE_ROOM_TTL_MS)rooms.delete(key);}if(n-lastActivityCleanup>60000){lastActivityCleanup=n;for(const [uid,at] of world.npcActivity)if(n-Number(at)>10*60*1000)world.npcActivity.delete(uid);}},50);
   timer.unref?.();
   return world;
 }

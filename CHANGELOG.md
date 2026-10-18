@@ -1,3 +1,9 @@
+## V22.9.2 — Mineração confirmada e visibilidade de eventos entre mapas
+- Corrige callback ausente de `grantOreReward` entre Render e o motor WebSocket (falha comprovada nos logs).
+- Mostra eventos ativos fora do mapa elegível no HUD, sem criar recompensas fora do setor.
+- Atualiza o status do evento global na virada de janela e na entrada de sala, sem pular de mapa.
+- 309 testes locais; nenhum SQL adicional; saves e relés preservados.
+
 ## V22.9.0 — Mineração online verificável e proteção de resgates
 - Ledger de mineração no Supabase, idempotência, verificação de sessão e posição pelo servidor.
 - Novo guard de resgates de Passe Free, Premium e níveis contra restauração/replay.
