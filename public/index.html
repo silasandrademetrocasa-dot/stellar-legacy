@@ -6,10 +6,10 @@
 <meta content="width=device-width,initial-scale=1,user-scalable=no" name="viewport"/>
 <meta content="#030816" name="theme-color"/>
 <title>Stellar Legacy</title>
-<link rel="manifest" href="/manifest.webmanifest?v=22.9.4"/>
+<link rel="manifest" href="/manifest.webmanifest?v=22.9.5"/>
 <link rel="icon" type="image/png" href="/icons/stellar-192.png"/>
 <link rel="apple-touch-icon" href="/icons/stellar-192.png"/>
-<link href="/style.css?v=22.9.4" rel="stylesheet"/>
+<link href="/style.css?v=22.9.5" rel="stylesheet"/>
 </head>
 <body>
 <div id="app">
@@ -220,42 +220,39 @@
 </section>
 <section class="hud-panel compact-ammo-ui" id="weaponBar">
 <div class="weapon-toolbar">
-<div class="weapon-toolbar-left">
-<button aria-label="Expandir / recolher menu de munições" class="weapon-expand-btn" id="weaponBarToggle" title="Expandir / recolher menu de munições">▾</button>
-<div class="weapon-toolbar-label">MUNIÇÕES</div>
-</div>
-<div class="section actions actions-inline">
-<button class="action-btn" id="laserToggle">⚡ LASER <span class="keyhint">CTRL</span></button>
-<button class="action-btn" id="rocketFire">🚀 MÍSSIL <span class="keyhint">ESPAÇO</span></button>
-
-</div>
+  <div class="weapon-toolbar-left">
+    <button aria-label="Expandir / recolher menu de munições" class="weapon-expand-btn" id="weaponBarToggle" title="Expandir / recolher menu de munições">▾</button>
+    <div class="weapon-toolbar-label">ARMAS</div>
+  </div>
+  <div class="section actions actions-inline weapon-toolbar-actions">
+    <button class="action-btn compact-action" id="laserToggle" title="Ativar / pausar laser automático • CTRL"><span class="action-icon">⚡</span><span class="action-copy"><b>LASER</b><small>CTRL</small></span></button>
+    <button class="action-btn compact-action" id="rocketFire" title="Disparar míssil • ESPAÇO"><span class="action-icon">🚀</span><span class="action-copy"><b>MÍSSIL</b><small>ESPAÇO</small></span></button>
+    <div class="cooldown-pill weapon-toolbar-pill" id="rocketCd">MÍSSIL PRONTO</div>
+  </div>
 </div>
 <div class="weapon-bar-content" id="weaponBarContent">
-<div class="ammo-clusters">
-<div class="section weapon-section ammo-bubble-section">
-<div class="section-title">LASER</div>
-<div class="button-row ammo-bubbles" id="laserAmmoButtons"></div>
-</div>
-<div class="section weapon-section ammo-bubble-section">
-<div class="section-title">MÍSSEIS</div>
-<div class="button-row ammo-bubbles" id="rocketAmmoButtons"></div>
-</div>
-</div>
-<div class="bottom-combat-abilities" id="abilityBar" aria-label="Habilidades de combate">
-  <button class="ability-btn ship-ability" id="shipAbilityBtn" type="button" title="Habilidade individual da nave / designer • tecla E">
-    <span class="ability-icon" id="shipAbilityIcon">✦</span>
-    <span class="ability-copy"><b id="shipAbilityName">HABILIDADE</b><small id="shipAbilityStatus">PRONTA • E</small></span>
-    <i id="shipAbilityFill"></i>
-  </button>
-  <button class="ability-btn pet-kami-ability" id="petKamiAbilityBtn" type="button" title="Nova Burst AUX-9 • tecla K">
-    <span class="ability-icon">☄</span>
-    <span class="ability-copy"><b>KAMIKAZE</b><small id="petKamiAbilityStatus">BLOQUEADO • K</small></span>
-    <i id="petKamiAbilityFill"></i>
-  </button>
-</div>
-<div class="section extras compact extras-inline">
-<div class="cooldown-pill" id="rocketCd">MÍSSIL PRONTO</div>
-</div>
+  <div class="ammo-clusters" aria-label="Seleção de munições e mísseis">
+    <div class="section weapon-section ammo-bubble-section laser-section">
+      <div class="section-title">LASER</div>
+      <div class="button-row ammo-bubbles" id="laserAmmoButtons"></div>
+    </div>
+    <div class="section weapon-section ammo-bubble-section rocket-section">
+      <div class="section-title">MÍSSEIS</div>
+      <div class="button-row ammo-bubbles" id="rocketAmmoButtons"></div>
+    </div>
+  </div>
+  <div class="bottom-combat-abilities compact-ability-tray" id="abilityBar" aria-label="Habilidades de combate">
+    <button class="ability-btn ship-ability compact-square" id="shipAbilityBtn" type="button" title="Habilidade individual da nave / designer • tecla E">
+      <span class="ability-icon" id="shipAbilityIcon">✦</span>
+      <span class="ability-copy"><b id="shipAbilityName">HABILIDADE</b><small id="shipAbilityStatus">PRONTA • E</small></span>
+      <i id="shipAbilityFill"></i>
+    </button>
+    <button class="ability-btn pet-kami-ability aux-only-action" id="petKamiAbilityBtn" type="button" title="Nova Burst AUX-9 • tecla K">
+      <span class="ability-icon">☄</span>
+      <span class="ability-copy"><b>KAMIKAZE</b><small id="petKamiAbilityStatus">BLOQUEADO • K</small></span>
+      <i id="petKamiAbilityFill"></i>
+    </button>
+  </div>
 </div>
 </section>
 <section class="hud-panel minimap-panel" id="minimapPanel">
@@ -1071,6 +1068,6 @@
 </div>
 </div>
 <div class="perf-diag-overlay hidden" id="perfDiagOverlay" aria-live="off" aria-label="Contador de FPS local"><b id="perfDiagHudFps">FPS —</b><small id="perfDiagHudStutter">P95 —</small></div>
-<script src="/game.js?v=22.9.4" type="module"></script>
+<script src="/game.js?v=22.9.5" type="module"></script>
 </body>
 </html>

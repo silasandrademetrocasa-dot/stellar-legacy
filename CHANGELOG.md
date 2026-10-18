@@ -1,3 +1,11 @@
+## V22.9.5 — Base do HUD em fases + barra de munições reorganizada (18/10/2026)
+- Barra inferior refeita para mobile: lasers e mísseis em dois blocos próprios, com seleção espaçada, compacta e sem sobreposição visual.
+- Habilidade principal da nave vira um botão quadrado compacto ao lado do arsenal; Kamikaze sai do rodapé e fica reservado ao AUX-9.
+- Controles de Laser, Míssil e recarga imediata continuam acessíveis na própria barra, mas com footprint menor e mais limpo.
+- Estado recolhido do painel de munições permanece mínimo e sem bloquear outros modais.
+- Entrega a base visual da fase de HUD Inteligente para evolução posterior de perfis, ocultação contextual, recolher geral e editor visual.
+- Nenhum SQL novo. Economia, progressão, PvP, eventos e mineração não foram alterados.
+
 ## V22.9.4 — HUD compacto em todas as janelas (18/10/2026)
 - Os 9 controles da visibilidade do HUD agora podem ocupar só 40 × 40 px quando recolhidos: Jogador, Nave, AUX-9, Missões, Atividade, Chat, Minimapa, Munições e Portal Astral.
 - Atividade e Portal Astral ganham botão de recolher e preferência local preservada ao reiniciar o jogo.

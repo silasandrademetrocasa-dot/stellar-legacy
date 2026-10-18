@@ -1,6 +1,6 @@
 {
   "name": "stellar-legacy",
-  "version": "22.9.4",
+  "version": "22.9.5",
   "type": "module",
   "scripts": {
     "start": "node server/index.js",
@@ -19,5 +19,5 @@
   "engines": {
     "node": ">=18"
   },
-  "release": "hud-todas-janelas-compactas"
+  "release": "hud-fases-base-municoes-compactas"
 }
