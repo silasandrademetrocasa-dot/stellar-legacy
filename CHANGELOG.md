@@ -1,3 +1,9 @@
+## V22.10.1 — Hotfix de Munições (18/10/2026)
+- Corrigido o bug visual no qual a toolbar de armas ocupava a largura inteira e deixava o arsenal com largura zero, fazendo o painel crescer demais.
+- Cabeçalho e arsenal ficam em linhas distintas, com altura limitada e botões de laser e míssil acessíveis em fileiras horizontais.
+- Barra recolhida volta a ficar com 40 × 40 px; editor e perfis de HUD preservados.
+- Validado em navegadores com viewports 360, 390, 690 e 1100 px; sem SQL novo.
+
 ## V22.10.0 — HUD Inteligente, cinco fases completas (18/10/2026)
 - Editor visual do HUD: arrastar painéis pelo marcador em modo edição, salvar posições separadas por perfil, redefinir posições e sair com um toque.
 - Perfis de apresentação PvE, PvP, Mineração e Imersivo; visibilidade e estados recolhidos armazenados localmente para cada perfil; alternância opcional PvE/PvP ao trocar mapas.

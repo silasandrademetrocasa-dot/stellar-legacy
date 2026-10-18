@@ -3754,3 +3754,133 @@ body.stellar-hud-quiet #gateHud{visibility:visible;}
 /* Atalho fora da faixa de toque do Chat, principalmente no mobile */
 .hud-intelligence-quick{bottom:calc(var(--bottom-dock-height,118px) + 52px);}
 @media(max-width:680px){.hud-intelligence-quick{bottom:calc(var(--bottom-dock-height,118px) + 48px);}}
+
+/* V22.10.1 — HOTFIX REAL DO PAINEL DE MUNICOES
+   O toolbar acima ocupava 100% dentro do flex horizontal e deixava o
+   weaponBarContent com largura zero. A grade entao crescia na vertical.
+   Em todas as larguras, toolbar e arsenal agora ocupam linhas próprias. */
+#bottomHudDock #weaponBar,
+#bottomHudDock #weaponBar.compact-ammo-ui{
+  display:flex!important;
+  flex-direction:column!important;
+  flex-wrap:nowrap!important;
+  align-items:stretch!important;
+  justify-content:flex-start!important;
+  gap:6px!important;
+  height:max-content!important;
+  min-height:0!important;
+  max-height:min(32vh,260px)!important;
+  box-sizing:border-box!important;
+  overflow:hidden!important;
+  padding:7px 8px 8px!important;
+}
+#bottomHudDock #weaponBar .weapon-toolbar{
+  display:flex!important;
+  width:100%!important;
+  flex:0 0 auto!important;
+  align-items:center!important;
+  justify-content:space-between!important;
+  gap:6px!important;
+  min-height:30px!important;
+  max-height:38px!important;
+  flex-wrap:nowrap!important;
+}
+#bottomHudDock #weaponBar .weapon-toolbar-left{
+  display:flex!important;align-items:center!important;
+  gap:5px!important;min-width:0!important;flex:0 0 auto!important;
+}
+#bottomHudDock #weaponBar .weapon-toolbar-actions{
+  display:flex!important;flex-direction:row!important;align-items:center!important;
+  justify-content:flex-end!important;flex:0 1 auto!important;
+  width:auto!important;min-width:0!important;
+  max-width:100%!important;gap:4px!important;flex-wrap:nowrap!important;
+}
+#bottomHudDock #weaponBar .weapon-toolbar-actions .compact-action{
+  display:flex!important;flex:0 1 auto!important;
+  width:auto!important;min-width:0!important;
+  max-width:100px!important;white-space:nowrap!important;
+}
+#bottomHudDock #weaponBar .weapon-toolbar-pill{
+  min-width:0!important;width:auto!important;max-width:108px!important;
+  flex:0 1 auto!important;white-space:nowrap!important;
+  overflow:hidden!important;text-overflow:ellipsis!important;
+}
+#bottomHudDock #weaponBar #weaponBarContent{
+  display:grid!important;
+  grid-template-columns:minmax(0,1fr) 50px!important;
+  align-items:end!important;
+  gap:6px!important;
+  flex:0 0 auto!important;
+  width:100%!important;min-width:0!important;
+  height:auto!important;min-height:0!important;max-height:none!important;
+  overflow:hidden!important;
+}
+#bottomHudDock #weaponBar .ammo-clusters{
+  display:grid!important;grid-template-columns:minmax(0,1fr) minmax(0,1fr)!important;
+  width:100%!important;min-width:0!important;
+  align-items:stretch!important;gap:6px!important;
+  overflow:hidden!important;padding:0!important;
+}
+#bottomHudDock #weaponBar .weapon-section{
+  display:flex!important;flex-direction:column!important;align-items:stretch!important;
+  gap:4px!important;min-width:0!important;width:100%!important;
+  padding:5px 6px!important;overflow:hidden!important;
+}
+#bottomHudDock #weaponBar .ammo-bubbles{
+  display:flex!important;flex-wrap:nowrap!important;
+  align-items:center!important;justify-content:flex-start!important;
+  width:100%!important;max-width:100%!important;min-width:0!important;
+  gap:5px!important;overflow-x:auto!important;overflow-y:hidden!important;
+  overscroll-behavior-x:contain!important;scrollbar-width:none!important;
+  touch-action:pan-x!important;padding:2px!important;
+}
+#bottomHudDock #weaponBar .ammo-bubbles::-webkit-scrollbar{display:none!important;}
+#bottomHudDock #weaponBar .ammo-btn.circular{
+  width:50px!important;min-width:50px!important;max-width:50px!important;
+  flex:0 0 50px!important;height:50px!important;min-height:50px!important;
+  padding:4px 2px!important;border-radius:11px!important;
+  touch-action:manipulation!important;
+}
+#bottomHudDock #weaponBar .compact-ability-tray{
+  width:50px!important;min-width:50px!important;max-width:50px!important;
+  display:flex!important;justify-content:flex-end!important;align-items:flex-end!important;
+  padding:0!important;flex:0 0 50px!important;
+}
+#bottomHudDock #weaponBar .compact-ability-tray .compact-square{
+  width:50px!important;min-width:50px!important;max-width:50px!important;
+  height:50px!important;min-height:50px!important;flex:0 0 50px!important;
+}
+#bottomHudDock #weaponBar .aux-only-action{display:none!important;}
+@media(max-width:760px){
+  #bottomHudDock #weaponBar,
+  #bottomHudDock #weaponBar.compact-ammo-ui{
+    width:100%!important;max-width:100%!important;
+    min-width:0!important;max-height:240px!important;
+  }
+  #bottomHudDock #weaponBar .weapon-toolbar{max-height:34px!important;}
+  #bottomHudDock #weaponBar .weapon-toolbar-label{font-size:9px!important;}
+  #bottomHudDock #weaponBar .weapon-toolbar-pill{max-width:72px!important;font-size:7px!important;}
+  #bottomHudDock #weaponBar .weapon-toolbar-actions .compact-action{padding:3px 5px!important;max-width:78px!important;}
+  #bottomHudDock #weaponBar .compact-action .action-icon{font-size:11px!important;}
+  #bottomHudDock #weaponBar .compact-action .action-copy b{font-size:8px!important;}
+  #bottomHudDock #weaponBar .compact-action .action-copy small{font-size:6px!important;}
+  #bottomHudDock #weaponBar #weaponBarContent{grid-template-columns:minmax(0,1fr) 48px!important;gap:5px!important;}
+  #bottomHudDock #weaponBar .ammo-clusters{grid-template-columns:minmax(0,1fr)!important;gap:4px!important;}
+  #bottomHudDock #weaponBar .weapon-section{gap:3px!important;padding:4px 5px!important;}
+  #bottomHudDock #weaponBar .section-title{font-size:8px!important;}
+  #bottomHudDock #weaponBar .ammo-btn.circular{width:48px!important;min-width:48px!important;max-width:48px!important;flex-basis:48px!important;height:46px!important;min-height:46px!important;}
+  #bottomHudDock #weaponBar .compact-ability-tray{width:48px!important;min-width:48px!important;max-width:48px!important;}
+  #bottomHudDock #weaponBar .compact-ability-tray .compact-square{width:48px!important;min-width:48px!important;max-width:48px!important;height:48px!important;min-height:48px!important;}
+}
+#bottomHudDock #weaponBar.collapsed,
+#bottomHudDock #weaponBar.compact-ammo-ui.collapsed{
+  width:40px!important;min-width:40px!important;max-width:40px!important;
+  height:40px!important;min-height:40px!important;max-height:40px!important;
+  padding:3px!important;overflow:hidden!important;
+}
+#bottomHudDock #weaponBar.collapsed #weaponBarContent,
+#bottomHudDock #weaponBar.compact-ammo-ui.collapsed #weaponBarContent,
+#bottomHudDock #weaponBar.collapsed .weapon-toolbar-actions,
+#bottomHudDock #weaponBar.compact-ammo-ui.collapsed .weapon-toolbar-actions{display:none!important;}
+#bottomHudDock #weaponBar.hud-user-hidden,
+#bottomHudDock #weaponBar.hidden{display:none!important;}
