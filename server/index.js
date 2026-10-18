@@ -12,11 +12,12 @@ import { eliteStatus } from './elite-operations.js';
 import { warCampaignState,warRankings,safeWarCampaignInput,safeWarRulesInput } from './war-campaigns.js';
 import { createCommandCenterRouter } from './command-center-router.js';
 import { validatePlayerSave, invalidShopArguments } from './security-guard.js';
+import { validateRewardClaimContinuity } from './reward-claim-guard.js';
 import { createSecurityService } from './security-service.js';
 
 const app = express();
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const RELEASE_VERSION = '22.8.0'; // único identificador de release nos endpoints HTTP
+const RELEASE_VERSION = '22.9.0'; // único identificador de release nos endpoints HTTP
 
 function normalizeSupabaseUrl(value = '') {
   let url = String(value || '').trim();
@@ -1642,6 +1643,16 @@ app.put('/api/save', requireUser, asyncRoute(async (req, res) => {
     await securityService.report(req.user.id,{code:'SAVE_NPC_REVISION_FORGED',severity:'critical',evidence:{kind:'npc_reward_revision'}},'cloud_save');
     return res.status(409).json({error:'Revisão NPC não autorizada.',code:'SAVE_RESERVED_REVISION'});
   }
+  // Coletas de minério confirmadas pelo servidor não podem ser desfeitas por saves antigos.
+  const authoritativeOreRevision=Math.max(0,Number(serverSave?.state?.serverOreRevision)||0);
+  const incomingOreRevision=Math.max(0,Number(state?.serverOreRevision)||0);
+  if(incomingOreRevision<authoritativeOreRevision)return res.status(409).json({
+    error:'Minérios atualizados pelo servidor. Sincronize o save.',code:'SAVE_ORE_STALE'
+  });
+  if(incomingOreRevision>authoritativeOreRevision){
+    await securityService.report(req.user.id,{code:'SAVE_ORE_REVISION_FORGED',severity:'critical',evidence:{kind:'ore_revision'}},'cloud_save');
+    return res.status(409).json({error:'Revisão de minério não autorizada.',code:'SAVE_RESERVED_REVISION'});
+  }
   // Recompensas Elite podem ser resgatadas enquanto há save em voo.
   // Um save velho jamais pode sobrescrever moedas e revisão confirmadas pelo SQL.
   const authoritativeEliteRevision=Number(serverSave?.state?.serverEliteRevision)||0;
@@ -1649,6 +1660,8 @@ app.put('/api/save', requireUser, asyncRoute(async (req, res) => {
   if(incomingEliteRevision<authoritativeEliteRevision)return res.status(409).json({
     error:'SAVE_ELITE_STALE: sincronize as recompensas com o servidor.',code:'SAVE_ELITE_STALE'
   });
+  const claimRollback=validateRewardClaimContinuity(state,serverSave?.state||null);
+  if(claimRollback)return res.status(409).json({error:claimRollback.reason,code:claimRollback.code});
   const securityFinding=validatePlayerSave(state,serverSave?.state||null,{userId:req.user.id,isAdmin:false});
   if(securityFinding){const outcome=await securityService.report(req.user.id,securityFinding,'cloud_save');
     if(outcome?.auto_suspended)return res.status(403).json({error:'Conta temporariamente suspensa. Contate o suporte para revisão.',code:'ACCOUNT_BANNED'});
@@ -1781,6 +1794,14 @@ const sharedUniverse = attachSharedUniverse(server, {
     });
     if(error)throw new Error(String(error.message||'Recompensa NPC recusada'));
     if(!data||!Number.isSafeInteger(Number(data.revision))||Number(data.revision)<1)throw new Error('Recompensa NPC sem confirmação verificável.');
+    return data;
+  },
+  grantOreReward:async(userId,oreKey,resource,amount)=>{
+    const sb=await requireEliteAdmin();
+    const {data,error}=await sb.rpc('stellar_grant_ore_reward_v229',{
+      p_user_id:userId,p_ore_key:oreKey,p_resource:resource,p_amount:amount
+    });
+    if(error)throw new Error(String(error.message||'Coleta online recusada'));
     return data;
   },
   recordEliteEvent:async(userId,kind)=>{

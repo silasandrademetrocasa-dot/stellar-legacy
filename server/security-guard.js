@@ -23,6 +23,8 @@ export function validatePlayerSave(incoming,stored,{userId,isAdmin=false}={}){
   }
  }
  if(stored&&!isAdmin){
+  const oldOreRev=Number(stored.serverOreRevision)||0;const newOreRev=Number(incoming.serverOreRevision)||0;
+  if(newOreRev>oldOreRev)return issue('SAVE_ORE_REVISION_FORGED','critical','Revisão de mineração controlada pelo servidor.');
   const oldNpcRev=Number(stored.serverNpcRewardRevision)||0;
   const newNpcRev=Number(incoming.serverNpcRewardRevision)||0;
   if(newNpcRev>oldNpcRev)return issue('SAVE_NPC_REVISION_FORGED','critical','Revisão de abates gerenciada pelo servidor.',{field:'serverNpcRewardRevision'});

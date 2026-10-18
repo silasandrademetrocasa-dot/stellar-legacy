@@ -818,7 +818,7 @@ class Room {
     if(!e.eventNpc){const delay=this.world.npcRespawnDelay(e.type);if(this.desiredNpcCount(e.type)>0)this.respawns.push({kind:'npc',type:e.type,at:nowMs()+delay});}
   }
 
-  handleOreCollect(ws,msg){
+  async handleOreCollect(ws,msg){
     const p=ws.player,entityId=String(msg.entityId||''),o=this.ores.get(entityId);
     if(!p)return;
     if(!o)return safeJsonSend(ws,{type:'ore_collect_result',entityId,ok:false,reason:'missing'});
@@ -838,9 +838,24 @@ class Room {
     }else if(Math.hypot(p.x-o.x,p.y-o.y)>90){
       return safeJsonSend(ws,{type:'ore_collect_result',entityId,ok:false,reason:'range'});
     }
-    // Remoção atômica na instância da sala: um minério rende uma coleta.
-    this.ores.delete(o.id);this.eventParticipants.add(p.userId);
-    safeJsonSend(ws,{type:'ore_collected',ore:o,collector});this.broadcast({type:'ore_remove',entityId:o.id,collectorUserId:p.userId},ws);
+    // A sala verifica existência/distância; o banco concede a carga em transação idempotente.
+    // Remove primeiro da sala para impedir coleta concorrente, e restaura se o banco falhar.
+    this.ores.delete(o.id);
+    const oreKey=`${this.key}:${o.id}`.slice(0,180);
+    let receipt;
+    try {
+      if(!this.world.grantOreReward)throw new Error('Concessão de minério indisponível.');
+      receipt=await this.world.grantOreReward(p.userId,oreKey,o.type,Math.trunc(Number(o.amount)||0));
+      if(!receipt||!Number.isSafeInteger(Number(receipt.revision))||Number(receipt.revision)<1)
+        throw new Error('Minério não confirmado no banco.');
+    } catch(err) {
+      this.ores.set(o.id,o);
+      console.warn('[ore-grant]',String(err?.message||err).slice(0,200));
+      return safeJsonSend(ws,{type:'ore_collect_result',entityId,ok:false,reason:'persistence_error'});
+    }
+    this.eventParticipants.add(p.userId);
+    safeJsonSend(ws,{type:'ore_collected',ore:o,collector,reward:receipt});
+    this.broadcast({type:'ore_remove',entityId:o.id,collectorUserId:p.userId},ws);
     const mode=this.eventMode();
     if(o.eventOre&&this.event?.eventId===o.eventId&&mode==='ore')this.creditPersonalEvent(ws,this.event,o.amount);
     if(!o.eventOre){const min=Math.max(1000,Number(this.map.oreRespawnMinMs)||5000),max=Math.max(min,Number(this.map.oreRespawnMaxMs)||12000);this.oreRespawns.push({type:o.type,at:nowMs()+rand(min,max)});}
@@ -1098,7 +1113,7 @@ export function attachSharedUniverse(server,{authenticate,authorizeJoin,recordSe
         return ws.room?.updatePlayer(ws,msg);
       }
       if(msg.type==='npc_damage')return await ws.room?.handleDamage(ws,msg);
-      if(msg.type==='collect_ore')return ws.room?.handleOreCollect(ws,msg);
+      if(msg.type==='collect_ore')return await ws.room?.handleOreCollect(ws,msg);
       if(msg.type==='force_event'&&String(ws.identity.callsign||'').trim().toUpperCase()==='FELP22'){
         await world.refreshLiveOps(true);
         safeJsonSend(ws,{type:'live_ops_refresh',ok:true,event:world.currentEvent(),serverTime:nowMs()});

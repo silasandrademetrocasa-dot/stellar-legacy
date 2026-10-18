@@ -1,6 +1,6 @@
 {
   "name": "stellar-legacy",
-  "version": "22.8.0",
+  "version": "22.9.0",
   "type": "module",
   "scripts": {
     "start": "node server/index.js",
@@ -19,5 +19,5 @@
   "engines": {
     "node": ">=18"
   },
-  "release": "seguranca-economia-escrita-servidor"
+  "release": "ore-online-e-recibos-progresso-seguros"
 }

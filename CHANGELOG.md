@@ -1,3 +1,9 @@
+## V22.9.0 — Mineração online verificável e proteção de resgates
+- Ledger de mineração no Supabase, idempotência, verificação de sessão e posição pelo servidor.
+- Novo guard de resgates de Passe Free, Premium e níveis contra restauração/replay.
+- Reconciliação de saves defasados, incluindo mineração.
+- Ainda pendente: autoridade total sobre missões, caixas, XP, pontos do Passe, cálculo de dano e pagamentos reais (não habilitar).
+
 # V22.6.0 — Antifraude, Auditoria, Autoban Reversível e Guardas do Supabase
 
 - Monitoramento de tentativas de adulterar proprietário do save, moedas, itens, preços e revisões reservadas.
