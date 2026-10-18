@@ -6,10 +6,10 @@
 <meta content="width=device-width,initial-scale=1,user-scalable=no" name="viewport"/>
 <meta content="#030816" name="theme-color"/>
 <title>Stellar Legacy</title>
-<link rel="manifest" href="/manifest.webmanifest?v=22.9.5"/>
+<link rel="manifest" href="/manifest.webmanifest?v=22.10.0"/>
 <link rel="icon" type="image/png" href="/icons/stellar-192.png"/>
 <link rel="apple-touch-icon" href="/icons/stellar-192.png"/>
-<link href="/style.css?v=22.9.5" rel="stylesheet"/>
+<link href="/style.css?v=22.10.0" rel="stylesheet"/>
 </head>
 <body>
 <div id="app">
@@ -63,6 +63,7 @@
 </nav>
 </header>
 
+<button class="hud-intelligence-quick" id="hudIntelligenceQuick" type="button" title="Recolher ou restaurar todas as janelas do HUD" aria-label="Recolher ou restaurar tudo">▤ HUD −</button>
 <button class="topbar-dock-toggle" id="topbarDockToggle" type="button" aria-label="Esconder barra superior" title="Esconder / mostrar menu superior">▲</button>
 
 <div class="top-hud-dock" id="topHudDock" aria-label="HUD principal">
@@ -269,6 +270,9 @@
 </section>
 </div>
 
+<div id="hudEditorBar" class="stellar-hud-editor hidden" role="toolbar" aria-label="Editor de posições do HUD">
+  <span>⠿ MOVER JANELAS</span><button id="hudFinishEdit" type="button">✓ CONCLUIR</button><button id="hudResetEditor" type="button" hidden>REDEFINIR</button>
+</div>
 <div id="toast"></div>
 <div class="game-celebration hidden" id="gameCelebration" aria-live="polite">
   <div class="celebration-burst"></div>
@@ -872,6 +876,25 @@
           <label><input type="checkbox" id="combatAlertsToggle" checked/> Alertas épicos de escudo, casco e PvP</label>
         </div>
       </section>
+      <section class="settings-section stellar-hud-settings" id="hudIntelligenceSection">
+        <div class="settings-title"><div><b>HUD INTELIGENTE</b><small>Posicione janelas, salve perfis, simplifique o combate e recolha tudo com um toque.</small></div></div>
+        <label class="stellar-hud-form-label" for="hudProfileSelect">PERFIL DE JOGO</label>
+        <select id="hudProfileSelect" aria-label="Perfil do HUD">
+          <option value="pve">PvE • NPCs e missões</option>
+          <option value="pvp">PvP • Guerra e relés</option>
+          <option value="mine">Mineração • AUX e porão</option>
+          <option value="explore">Imersivo • Mapa livre</option>
+        </select>
+        <label class="stellar-hud-check"><input type="checkbox" id="hudAutoProfile"> Trocar PvE/PvP automaticamente ao mudar de setor</label>
+        <label class="stellar-hud-check"><input type="checkbox" id="hudQuietMode"> HUD discreto fora de combate (alertas continuam visíveis)</label>
+        <label class="stellar-hud-check"><input type="checkbox" id="hudCustomPositions"> Usar as posições personalizadas deste perfil</label>
+        <div class="stellar-hud-settings-actions">
+          <button type="button" class="small-btn" id="hudStartEdit">⠿ EDITAR HUD</button>
+          <button type="button" class="ghost-btn" id="hudResetPositions">POSIÇÕES PADRÃO</button>
+          <button type="button" class="ghost-btn" id="hudResetAll">RESTAURAR HUD PADRÃO</button>
+        </div>
+        <small class="muted stellar-hud-note">Arraste os marcadores no modo edição; as posições são salvas no aparelho por perfil. "Ocultar" não é o mesmo que "recolher".</small>
+      </section>
       <section class="settings-section">
         <div class="settings-title"><div><b>VISIBILIDADE DO HUD</b><small>Escolha o que fica visível durante o jogo.</small></div></div>
         <div class="hud-settings-grid" id="hudSettingsGrid">
@@ -1068,6 +1091,6 @@
 </div>
 </div>
 <div class="perf-diag-overlay hidden" id="perfDiagOverlay" aria-live="off" aria-label="Contador de FPS local"><b id="perfDiagHudFps">FPS —</b><small id="perfDiagHudStutter">P95 —</small></div>
-<script src="/game.js?v=22.9.5" type="module"></script>
+<script src="/game.js?v=22.10.0" type="module"></script>
 </body>
 </html>

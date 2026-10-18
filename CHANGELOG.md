@@ -1,3 +1,13 @@
+## V22.10.0 — HUD Inteligente, cinco fases completas (18/10/2026)
+- Editor visual do HUD: arrastar painéis pelo marcador em modo edição, salvar posições separadas por perfil, redefinir posições e sair com um toque.
+- Perfis de apresentação PvE, PvP, Mineração e Imersivo; visibilidade e estados recolhidos armazenados localmente para cada perfil; alternância opcional PvE/PvP ao trocar mapas.
+- Modo discreto opt-in: oculta somente painéis secundários enquanto o piloto está fora de combate; mantém avisos de eventos, alertas e sistemas em funcionamento; desativa em combate automaticamente.
+- Atalho de recolher/restaurar todas as janelas, com snapshot de cada painel para reabrir o que estava aberto sem modificar preferências persistentes.
+- Seções expansíveis nos modais Missões, Hangar, Clã, Passe, AUX e administração. Mantém os filhos reais no DOM; redecora conteúdo dinâmico após renderização sem reescrever funcionalidades internas.
+- Mantidos os painéis 40×40 px da V22.9.4 e a barra de munições compacta/organizada da V22.9.5, com Kamikaze restrito ao AUX.
+- Sem SQL, sem mutações de dados de jogadores, transações, economia ou combate.
+- Testes automatizados de fluxos e testes isolados de interface em 390px, 680px e 1100px; validação multiplayer após deploy permanece pendente.
+
 ## V22.9.5 — Base do HUD em fases + barra de munições reorganizada (18/10/2026)
 - Barra inferior refeita para mobile: lasers e mísseis em dois blocos próprios, com seleção espaçada, compacta e sem sobreposição visual.
 - Habilidade principal da nave vira um botão quadrado compacto ao lado do arsenal; Kamikaze sai do rodapé e fica reservado ao AUX-9.
