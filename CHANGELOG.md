@@ -1,3 +1,10 @@
+## V22.11.1 — Loading galáctico e missões inclusivas do Passe (18/10/2026)
+- Carregamento cinematográfico com arte de guerra entre três facções, comprimida para mobile; lasers suaves e barra de progresso, sem atrasar acesso.
+- Informações de fornecedor interno removidas das mensagens e confirmações de compra voltadas ao jogador.
+- Sete missões diárias gratuitas sem obrigação de AUX, inclusive boxes bônus, venda de recursos e consumo real de munição; adicional Premium opcional.
+- Dificuldade progressiva para iniciantes, preservação de progresso diário por ID e separação de coleta NPC versus bônus.
+- Sem migração SQL e sem mudança de economia, combate, naves ou saves.
+
 ## V22.11.0 — Combate aprimorado e protocolos do AUX-9
 - Cinco especializações distribuíveis usando os espaços do nível: Sentinela, Minerador, Salvager, Reclaimer e Nova Burst, com máximo 3 pontos cada e orçamento geral de nível.
 - Efeitos moderados sobre alcance/velocidade, reparação e dano. Módulo correspondente precisa estar comprado para receber novos pontos.

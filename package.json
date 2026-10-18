@@ -1,6 +1,6 @@
 {
   "name": "stellar-legacy",
-  "version": "22.11.0",
+  "version": "22.11.1",
   "type": "module",
   "scripts": {
     "start": "node server/index.js",
@@ -19,5 +19,5 @@
   "engines": {
     "node": ">=18"
   },
-  "release": "combat-aux-inteligente-protocolos"
+  "release": "cinematic-splash-playable-daily-missions"
 }
