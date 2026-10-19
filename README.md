@@ -1,20 +1,13 @@
-# Stellar Legacy V30.1.2 — Pacote enxuto
+# Instalador Universal Stellar Legacy
 
-Versão de produção com sprites de 16 direções para naves, drones e NPCs, preservando designers, saves, controles, SQL e compatibilidade com Render.
+Substitua **somente** `.github/workflows/stellar-installer-main.yml` e adicione `scripts/stellar-universal-installer.py` ao GitHub **uma única vez**. Depois, o fluxo automático aceita um ZIP por execução, na raiz do repositório.
 
-## Instalação pelo GitHub Actions
+**ZIP completo**: contém `package.json`, `public/game.js`, `public/api.js`, `public/data.js`, `server/index.js`. Detectado automaticamente como `full`; arquivos antigos em `public/`, `server/`, `sql/` e `tests/` que não aparecem no ZIP serão excluídos. NÃO envia `.github` no pacote.
 
-1. Faça backup/commit de alterações pessoais do repositório.
-2. Remova ZIPs `stellar-legacy*.zip` antigos da raiz do GitHub.
-3. Suba **somente** `stellar-legacy-V30.1.2-COMPLETO-LIMPO.zip` para a raiz (não extraia).
-4. Rode **Actions → Instalar versão do Stellar Legacy → Run workflow**.
-5. O instalador usa `rsync --delete` para remover docs/testes antigos do Git e preserva `.github/` e os scripts do instalador.
+**ZIP de atualização**: inclui `stellar-install.json` com `{"type":"update","baseVersion":"30.1.2"}` e os arquivos alterados. Preserva todos os arquivos não citados.
 
-## Verificação
+**Patch**: arquivos alterados sem manifesto são detectados como `patch`; não apaga outros. Adicione `stellar-install.json` com `{"type":"patch","baseVersion":"30.1.2","delete":["public/arquivo-antigo.js"]}` para exclusões explícitas. O campo `baseVersion` é opcional, mas recomendado.
 
-`npm run verify`: arquivos essenciais, imports, assets, smoke tests. Para rodar os **353 testes de regressão históricos**, use o ZIP de backup separado `stellar-legacy-V30-BACKUP-DOCS-TESTES.zip`, restaurando temporariamente a pasta `tests/` e `package.json` ajustado se necessário.
+**Versões:** não edite `package.json` em patch apenas para mudar o número se `public/index.html`, `server/index.js` e imports ainda estiverem na versão antiga; a verificação de release bloqueará o deploy. Pacotes completos devem manter todas as referências sincronizadas.
 
-**Sem SQL novo.** O diretório `sql/` permanece intacto. O repositório remoto não é atualizado até o instalador executar com sucesso.
-
-### Orientação oficial dos atlas
-Frame 0 = NORTE; sentido horário; jogador angle=0 -> LESTE; NPCs usando atan2 direto; drones acompanham órbita tangencial.
+**Segurança:** bloqueia traversal, symlink, sobrescrita de `.github` e do próprio instalador; limita tamanho expandido; valida sintaxe, consistência do release e testes antes de publicar. `git push` só ocorre após validações. Como qualquer workflow GitHub, esta instalação não é uma transação atômica contra falhas na etapa final de push.
