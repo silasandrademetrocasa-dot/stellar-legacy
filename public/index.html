@@ -6,10 +6,10 @@
 <meta content="width=device-width,initial-scale=1,user-scalable=no" name="viewport"/>
 <meta content="#030816" name="theme-color"/>
 <title>Stellar Legacy</title>
-<link rel="manifest" href="/manifest.webmanifest?v=30.5.0"/>
+<link rel="manifest" href="/manifest.webmanifest?v=32.0.0"/>
 <link rel="icon" type="image/png" href="/icons/stellar-192.png"/>
 <link rel="apple-touch-icon" href="/icons/stellar-192.png"/>
-<link href="/style.css?v=30.5.0" rel="stylesheet"/>
+<link href="/style.css?v=32.0.0" rel="stylesheet"/>
 </head>
 <body>
 <div class="stellar-boot-splash" id="stellarBootSplash" role="status" aria-label="Preparando Stellar Legacy">
@@ -167,7 +167,7 @@
 <div class="right-hud-stack" id="rightHudStack">
 <section class="target-lock-hud hidden" id="targetLockHud" aria-live="polite">
   <div class="target-lock-head">
-    <span>🎯 TARGET LOCK</span>
+    <span>🎯 TARGET LOCK</span><button type="button" id="nextNpcTargetV32" class="next-npc-target-v32" title="Próximo NPC visível • T" aria-label="Selecionar próximo NPC">PRÓXIMO ◉</button>
     <span class="target-lock-head-actions"><b id="targetLockType">HOSTIL</b><button class="tactical-collapse-btn" id="targetLockToggle" type="button" title="Minimizar / expandir Target Lock" aria-label="Minimizar Target Lock">▾</button></span>
   </div>
   <div class="target-lock-main"><span class="target-lock-portrait-wrap" id="targetLockPortraitWrap"><img id="targetLockPortrait" alt="" /></span><div class="target-lock-copy"><div class="target-lock-name" id="targetLockName">SEM ALVO</div>
@@ -1104,6 +1104,6 @@
 </div>
 </div>
 <div class="perf-diag-overlay hidden" id="perfDiagOverlay" aria-live="off" aria-label="Contador de FPS local"><b id="perfDiagHudFps">FPS —</b><small id="perfDiagHudStutter">P95 —</small></div>
-<script src="/game.js?v=30.5.0" type="module"></script>
+<script src="/game.js?v=32.0.0" type="module"></script>
 </body>
 </html>

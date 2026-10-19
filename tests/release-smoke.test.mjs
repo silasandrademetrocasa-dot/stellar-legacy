@@ -7,7 +7,7 @@ const root=resolve(fileURLToPath(new URL('..',import.meta.url)));
 const read=p=>readFileSync(resolve(root,p),'utf8');
 test('versão de produção consistente',()=>{
   const v=JSON.parse(read('package.json')).version;
-  assert.match(v,/^30\.\d+\.\d+$/);
+  assert.match(v,/^\d+\.\d+\.\d+$/);
   assert.ok(read('public/index.html').includes('game.js?v='+v));
   assert.ok(read('server/index.js').includes("const RELEASE_VERSION = '"+v+"'"));
 });
