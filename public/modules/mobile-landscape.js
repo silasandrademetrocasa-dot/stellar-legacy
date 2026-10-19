@@ -1,4 +1,4 @@
-// V32.1.2 • Landscape-first is a presentation preference, not a forced browser lock.
+// V32.1.3 • Landscape-first is a presentation preference, not a forced browser lock.
 // No render-loop, authentication, save or gameplay dependencies.
 export function isMobileLandscape(width,height,mobile){
   return !!mobile && Number(width)>Number(height) && Number(height)<=650;

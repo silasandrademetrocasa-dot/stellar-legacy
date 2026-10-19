@@ -1,4 +1,4 @@
-# V32.1.2 — Mobile Experience Pro 2.0 • Landscape First
+# V32.1.3 — Mobile Experience Pro 2.0 • Landscape First
 
 - Jogo agora usa layout horizontal de três colunas no mobile: chat à esquerda, munições e habilidades no centro, radar à direita. Permissões de HUD oculto/recolhido preservadas.
 - Barra superior de 36px com rolagem horizontal para acessar todos os menus, sem reduzir tamanho do texto a níveis ilegíveis.

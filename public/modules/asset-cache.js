@@ -2,7 +2,7 @@
 // Não acessa a rede, o DOM, timers nem dados de usuário diretamente: dependências injetadas.
 // Nunca descarte sprites de naves, NPCs, drones ou AUX via limpeza automática.
 
-const ASSET_REVISION = '32.1.2';
+const ASSET_REVISION = '32.1.3';
 export function versionedAssetUrl(path) {
   const value=String(path||'');
   if(!value)return value;
