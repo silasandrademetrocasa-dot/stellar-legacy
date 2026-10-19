@@ -3991,7 +3991,7 @@ body.stellar-hud-quiet #gateHud{visibility:visible;}
 @media(max-width:680px){.next-npc-target-v32{font-size:8px;padding:3px 5px}}
 
 
-/* ===== V33.0.0 MOBILE EXPERIENCE PRO: layer final, depois dos overrides antigos ===== */
+/* ===== V34.0.0 MOBILE EXPERIENCE PRO: layer final, depois dos overrides antigos ===== */
 .mobile-combat-mode-btn{display:none;}
 @media (hover:none),(pointer:coarse){
   .mobile-combat-mode-btn{display:block;position:fixed;right:calc(env(safe-area-inset-right, 0px) + 7px);top:calc(env(safe-area-inset-top, 0px) + 48px);z-index:42;min-height:30px;padding:4px 9px;border-radius:9px;border:1px solid rgba(85,217,255,.35);background:rgba(5,20,36,.88);color:#c5efff;font-size:10px;font-weight:900;touch-action:manipulation;}
@@ -4027,7 +4027,7 @@ body.stellar-hud-quiet #gateHud{visibility:visible;}
 }
 
 
-/* ===== V33.0.0: MOBILE EXPERIENCE PRO 2.0 • LANDSCAPE FIRST ===== */
+/* ===== V34.0.0: MOBILE EXPERIENCE PRO 2.0 • LANDSCAPE FIRST ===== */
 .mobile-landscape-tip{display:none;}
 @media(max-width:650px) and (orientation:portrait){
   .mobile-landscape-tip:not(.hidden){
@@ -4108,7 +4108,7 @@ body.mobile-landscape-pro .combat-state-hud{top:calc(env(safe-area-inset-top,0px
 body.mobile-landscape-pro .combat-state-hud small{display:none!important;}
 /* Manter COMPACTO disponível sem disputar espaço com o painel do evento. */
 body.mobile-landscape-pro .mobile-combat-mode-btn{display:none!important;}
-/* V33.0.0: mover o atalho global do HUD para a faixa superior, ao lado do menu CONF. */
+/* V34.0.0: mover o atalho global do HUD para a faixa superior, ao lado do menu CONF. */
 body.mobile-landscape-pro .hud-intelligence-quick{
   top:calc(env(safe-area-inset-top,0px) + 7px)!important;
   right:calc(env(safe-area-inset-right,0px) + 46px)!important;
@@ -4308,7 +4308,7 @@ body.mobile-landscape-pro #hangarModal .hangar-inventory-grid{grid-template-colu
  body.mobile-landscape-pro #bottomHudDock #weaponBar{height:54px!important;min-height:54px!important;max-height:54px!important;}
  body.mobile-landscape-pro #topHudDock>.hud-panel:not(.collapsed){max-height:90px!important;}
 }
-/* V33.0.0 final cascade guards: older weapon-grid selectors must not stretch each ammo family. */
+/* V34.0.0 final cascade guards: older weapon-grid selectors must not stretch each ammo family. */
 body.mobile-landscape-pro #bottomHudDock #weaponBar .ammo-clusters .weapon-section{
   width:max-content!important;max-width:none!important;min-width:max-content!important;flex:0 0 auto!important;
 }
@@ -4335,7 +4335,7 @@ body.mobile-landscape-pro #bottomHudDock #minimapPanel.collapsed #minimap{
   display:none!important;
 }
 
-/* V33.0.0 — modais mais compactos no landscape para evitar cortes verticais. */
+/* V34.0.0 — modais mais compactos no landscape para evitar cortes verticais. */
 body.mobile-landscape-pro .modal{padding:4px 6px!important;align-items:flex-start!important;}
 body.mobile-landscape-pro .modal>.modal-card{
   width:min(100%,calc(100vw - 10px))!important;
@@ -4441,7 +4441,7 @@ body.mobile-landscape-pro .modal .mission-card p{font-size:9px!important;min-hei
   body.mobile-landscape-pro .modal .section-box{padding:7px!important;margin-bottom:6px!important;}
 }
 
-/* V33.0.0 — minimapa maior no landscape mobile para melhor leitura. */
+/* V34.0.0 — minimapa maior no landscape mobile para melhor leitura. */
 body.mobile-landscape-pro{
   --minimap-dock-width-expanded:268px;
   --minimap-dock-width-collapsed:68px;
@@ -4469,7 +4469,7 @@ body.mobile-landscape-pro #bottomHudDock #minimapPanel.collapsed{
 }
 
 
-/* V33.0.0 - Chat mobile em landscape com campo de digitação sempre visível. */
+/* V34.0.0 - Chat mobile em landscape com campo de digitação sempre visível. */
 body.mobile-landscape-pro #bottomHudDock.bottom-hud-dock #chatDock:not(.collapsed){
   width:100%!important;height:176px!important;min-height:176px!important;max-height:176px!important;
   overflow:hidden!important;display:flex!important;flex-direction:column!important;
@@ -4574,3 +4574,12 @@ body.mobile-landscape-pro #chatDock:not(.collapsed) #chatForm{
 /* Leitura do status e das categorias sem aumentar a altura dos painéis. */
 body.mobile-landscape-pro #topHudDock .hud-panel:not(.collapsed) .stats-toolbar-label,
 body.mobile-landscape-pro #topHudDock .hud-panel:not(.collapsed) .player-float-head b{letter-spacing:.04em!important;}
+
+/* V34 — alerta de boss na fase final, leve para a GPU mobile. */
+.boss-phase-hud.boss-danger-v34{border-color:rgba(255,85,111,.9)!important;background:rgba(39,6,17,.94)!important;}
+.boss-phase-hud.boss-danger-v34 #bossPhaseStatus{color:#ffbd98!important;font-weight:800!important;}
+@media(max-width:760px) and (orientation:landscape){
+ body.mobile-landscape-pro .boss-phase-hud{max-width:230px!important;left:50%!important;top:calc(var(--top-dock-offset) + 6px)!important;padding:5px 8px!important;pointer-events:none!important;}
+ body.mobile-landscape-pro .boss-phase-hud .boss-phase-values{gap:4px!important;font-size:7px!important;}
+ body.mobile-landscape-pro .boss-phase-hud #bossPhaseStatus{font-size:8px!important;letter-spacing:0!important;}
+}

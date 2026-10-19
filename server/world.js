@@ -1,3 +1,4 @@
+import { idleNpcStep, shouldLeashNpc, NpcAggroWindow } from './npc-intelligence-v34.js';
 import { randomUUID } from 'crypto';
 import {admitNpcDamage} from './combat-throttle.js';
 import {PORTAL_NEUTRAL_RADIUS,playerInNeutralPortalRange} from './portal-safety.js';
@@ -202,16 +203,18 @@ class Room {
       bossPhase:0,bossAttackScale:1,jammedUntil:0,color:opts.color||base.color,size:opts.size||base.size,
       resources:{...(base.resources||{})},attackRange:Math.min(500,(battle?250:230)+base.size*5.8),aggroRange:800,
       lastShot:0,angle:rand(0,Math.PI*2),drift:rand(.4,1.4),eventNpc:!!opts.eventNpc,eventId:opts.eventId||null,
+      patrolHomeX:p.x,patrolHomeY:p.y,patrolReturning:false,
       forceChase:!!opts.forceChase,damageContrib:new Map(),lastDamageAt:0,aggroUserId:null,aggroStartedAt:0,spawnedAt:nowMs(),
       ownerUserId:null,ownerGroupId:null,claimedAt:0,ownerGroupMemberIds:new Set(),ownerGroupPromise:null,
       _configScale:Number(opts.scale||1),_configRewardMult:Number(opts.rewardMult||1),_configSpeedMult:Number(opts.speedMult||1),_configColorOverride:opts.color||null,_configSizeOverride:opts.size||null
     };
     if(opts.x!=null)e.x=opts.x;if(opts.y!=null)e.y=opts.y;
+    e.patrolHomeX=e.x;e.patrolHomeY=e.y;
     return e;
   }
 
   publicNpc(e){
-    const {damageContrib,ownerGroupMemberIds,ownerGroupPromise,_configScale,_configRewardMult,_configSpeedMult,_configColorOverride,_configSizeOverride,...rest}=e;
+    const {patrolHomeX,patrolHomeY,patrolReturning,damageContrib,ownerGroupMemberIds,ownerGroupPromise,_configScale,_configRewardMult,_configSpeedMult,_configColorOverride,_configSizeOverride,...rest}=e;
     return rest;
   }
 
@@ -419,8 +422,9 @@ class Room {
   spawnEventWave(count=6){
     const ev=this.event;if(!ev)return;const profile=this.eventProfile(ev),pool=this.eventPool(ev),rewardMult=profile.rewardMult||1.22;
     const alive=[...this.npcs.values()].filter(e=>e.eventNpc&&e.eventId===ev.eventId&&e.hp>0).length;
-    const maxAlive=Math.max(1,Number(profile.maxAlive)||Math.max(Number(profile.waveCount)||6,(Number(profile.minAlive)||3)*2));
-    count=Math.max(0,Math.min(Math.max(0,Number(count)||0),maxAlive-alive));
+    const maxAlive=Math.max(1,Math.min(48,Number(profile.maxAlive)||Math.max(Number(profile.waveCount)||6,(Number(profile.minAlive)||3)*2)));
+    // V34: bounded spawn work each tick. Never touch reward calculations.
+    count=Math.max(0,Math.min(12,Math.max(0,Number(count)||0),maxAlive-alive));
     for(let i=0;i<count;i++){
       const type=pool[Math.floor(Math.random()*pool.length)],baseName=(this.world.npcDefinition(type)?.name||String(type||'NPC')).toUpperCase();
       const e=this.makeNpc(type,{eventNpc:true,eventId:ev.eventId,forceChase:true,rewardMult,scale:profile.scale||1,color:profile.color,size:profile.size,speedMult:profile.speedMult||1,name:profile.namePrefix?(profile.namePrefix+' '+baseName):undefined});
@@ -434,6 +438,8 @@ class Room {
   }
   spawnEventOres(count=12){
     const ev=this.event;if(!ev)return;const profile=this.eventProfile(ev),pool=Array.isArray(profile.orePool)&&profile.orePool.length?profile.orePool:['Prometium','Endurium','Terbium','Promerium'],amountRange=Array.isArray(profile.oreAmount)?profile.oreAmount:[12,26];
+    const alive=[...this.ores.values()].filter(o=>o.eventOre&&o.eventId===ev.eventId).length;
+    count=Math.max(0,Math.min(20,Math.floor(Number(count)||0),48-alive));
     for(let i=0;i<count;i++){const o=this.makeOre(pool[Math.floor(Math.random()*pool.length)],{eventOre:true,eventId:ev.eventId,amount:rand(amountRange[0],amountRange[1]),r:rand(11,17)});this.ores.set(o.id,o);this.broadcast({type:'ore_spawn',ore:o});}
   }
   startConvoy(){
@@ -870,8 +876,21 @@ class Room {
     this.broadcastEvent(true);
   }
 
+  // Lightweight, server-authoritative patrol for unengaged common NPCs.
+  applyIdlePatrolV34(e,dt){
+    if(!shouldLeashNpc(e)){
+      e.x=clamp(e.x+Math.cos(e.angle)*e.speed*.12*dt,25,this.map.world.w-25);
+      e.y=clamp(e.y+Math.sin(e.angle)*e.speed*.12*dt,25,this.map.world.h-25);
+      return;
+    }
+    const move=idleNpcStep(e,{dt,worldW:this.map.world.w,worldH:this.map.world.h});
+    e.x=move.x;e.y=move.y;e.patrolReturning=move.returning;
+  }
+
   tick(dt){
     this.ensureEvent(false);const now=nowMs();
+    // Only build this lookup once per server tick; no change to combat/authority.
+    const clientByUserId=new Map([...this.clients].filter(c=>c.player?.userId).map(c=>[String(c.player.userId),c]));
     this.updateWarfrontControl(dt,now);
     const activeEventId=this.event?.eventId||null;
     let staleNpc=false,staleOre=false;
@@ -879,7 +898,13 @@ class Room {
     for(const [id,o] of this.ores)if(o.eventOre&&(!activeEventId||o.eventId!==activeEventId)){this.ores.delete(id);staleOre=true;}
     if(staleNpc||staleOre){this.respawns=this.respawns.filter(r=>r.kind!=='eventNpc');this.oreRespawns=this.oreRespawns.filter(r=>!r.eventOre);if(this.clients.size)this.broadcast(this.snapshot());}
     for(const e of this.npcs.values()){
-      const locked=this.lockedAggroPlayer(e);const near=locked?{player:locked,dist:Math.hypot(locked.x-e.x,locked.y-e.y)}:this.nearestPlayer(e);e.angle+=(Number(e.drift)||0)*dt;if(!near){e.x=clamp(e.x+Math.cos(e.angle)*e.speed*.12*dt,25,this.map.world.w-25);e.y=clamp(e.y+Math.sin(e.angle)*e.speed*.12*dt,25,this.map.world.h-25);continue;}const p=near.player,d=near.dist,dx=p.x-e.x,dy=p.y-e.y,force=!!e.forceChase,retaliating=String(e.aggroUserId||'')===String(p.userId||''),protectedNow=this.playerProtectedFromNpc(p,e),neutralX1=['x1','x8'].includes(this.mapId)&&!retaliating;
+      const locked=this.lockedAggroPlayer(e);const near=locked?{player:locked,dist:Math.hypot(locked.x-e.x,locked.y-e.y)}:this.nearestPlayer(e);
+      e.angle+=(Number(e.drift)||0)*dt;
+      // No player in acquisition range: ordinary NPCs patrol their spawn sector,
+      // never drifting indefinitely toward map borders. Bosses/events are exempt.
+      if(!near || (!locked && shouldLeashNpc(e) && near.dist>NpcAggroWindow(e))){this.applyIdlePatrolV34(e,dt);continue;}
+      e.patrolReturning=false;
+      const p=near.player,d=near.dist,dx=p.x-e.x,dy=p.y-e.y,force=!!e.forceChase,retaliating=String(e.aggroUserId||'')===String(p.userId||''),protectedNow=this.playerProtectedFromNpc(p,e),neutralX1=['x1','x8'].includes(this.mapId)&&!retaliating;
       if(['x1','x8'].includes(this.mapId)) {
         const b=basePointForFaction(this.territoryFaction,this.mapId),bd=Math.hypot(e.x-b.x,e.y-b.y);if(bd<555){const ox=e.x-b.x,oy=e.y-b.y,od=Math.hypot(ox,oy)||1;e.x=b.x+ox/od*558;e.y=b.y+oy/od*558;}
       }
@@ -888,7 +913,7 @@ class Room {
         if(d<=e.aggroRange&&d>passiveStand){const nd=Math.max(1,d);e.x=clamp(e.x+dx/nd*e.speed*.72*dt,25,this.map.world.w-25);e.y=clamp(e.y+dy/nd*e.speed*.72*dt,25,this.map.world.h-25);}
         else if(d>e.aggroRange){e.x=clamp(e.x+Math.cos(e.angle)*e.speed*.16*dt,25,this.map.world.w-25);e.y=clamp(e.y+Math.sin(e.angle)*e.speed*.16*dt,25,this.map.world.h-25);}
       }else if(!protectedNow&&!neutralX1&&d<=e.aggroRange&&d>e.attackRange*.8){const nd=Math.max(1,d);e.x=clamp(e.x+dx/nd*e.speed*dt,25,this.map.world.w-25);e.y=clamp(e.y+dy/nd*e.speed*dt,25,this.map.world.h-25);}else if(d>e.aggroRange||protectedNow){e.x=clamp(e.x+Math.cos(e.angle)*e.speed*.16*dt,25,this.map.world.w-25);e.y=clamp(e.y+Math.sin(e.angle)*e.speed*.16*dt,25,this.map.world.h-25);}
-      const attackDelay=((String(e.type).startsWith('boss')?1.6:1.15)*(e.bossAttackScale||1))*1000;if(!protectedNow&&!neutralX1&&d<e.attackRange&&now-(e.lastShot||0)>=attackDelay){e.lastShot=now;const victim=[...this.clients].find(c=>c.player?.userId===p.userId);safeJsonSend(victim,{type:'npc_attack',entityId:e.id,damage:Math.max(1,Math.round(e.damage*rand(.92,1.12))),x:e.x,y:e.y,retaliation:retaliating,aggroUserId:e.aggroUserId||null});}
+      const attackDelay=((String(e.type).startsWith('boss')?1.6:1.15)*(e.bossAttackScale||1))*1000;if(!protectedNow&&!neutralX1&&d<e.attackRange&&now-(e.lastShot||0)>=attackDelay){e.lastShot=now;const victim=clientByUserId.get(String(p.userId));safeJsonSend(victim,{type:'npc_attack',entityId:e.id,damage:Math.max(1,Math.round(e.damage*rand(.92,1.12))),x:e.x,y:e.y,retaliation:retaliating,aggroUserId:e.aggroUserId||null});}
     }
     for(let i=this.respawns.length-1;i>=0;i--){const r=this.respawns[i];if(now<r.at)continue;this.respawns.splice(i,1);if(r.kind==='eventNpc'&&this.event?.eventId!==r.eventId)continue;if(r.kind==='npc'&&this.nonEventNpcCount(r.type)>=this.desiredNpcCount(r.type))continue;const profile=r.kind==='eventNpc'?this.eventProfile():null,baseName=(this.world.npcDefinition(r.type)?.name||String(r.type||'NPC')).toUpperCase();const e=this.makeNpc(r.type,r.kind==='eventNpc'?{eventNpc:true,eventId:r.eventId,forceChase:true,rewardMult:profile?.rewardMult||1.22,scale:profile?.scale||1,color:profile?.color,size:profile?.size,speedMult:profile?.speedMult||1,name:profile?.namePrefix?(profile.namePrefix+' '+baseName):undefined}:{});if(e){this.npcs.set(e.id,e);this.broadcast({type:'npc_spawn',entity:this.publicNpc(e)});}}
     for(let i=this.oreRespawns.length-1;i>=0;i--){const r=this.oreRespawns[i];if(now<r.at)continue;this.oreRespawns.splice(i,1);if(r.eventOre&&this.event?.eventId!==r.eventId)continue;const o=this.makeOre(r.type,r.eventOre?{eventOre:true,eventId:r.eventId,amount:r.amount}:{});this.ores.set(o.id,o);this.broadcast({type:'ore_spawn',ore:o});}
