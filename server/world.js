@@ -144,7 +144,7 @@ class Room {
       speed:Math.max(10,Math.round(base.speed*(opts.speedMult||1))),baseSpeed:Math.max(10,Math.round(base.speed*(opts.speedMult||1))),
       damage:Math.round(base.damage*Math.max(1,(opts.scale||1)*.82)),baseDamage:Math.round(base.damage*Math.max(1,(opts.scale||1)*.82)),
       bossPhase:0,bossAttackScale:1,jammedUntil:0,color:opts.color||base.color,size:opts.size||base.size,
-      resources:{...(base.resources||{})},attackRange:Math.min(500,(battle?250:230)+base.size*5.8),aggroRange:800,
+      resources:{...(base.resources||{})},attackRange:Math.min(500,(battle?250:230)+base.size*5.8),aggroRange:1000,
       lastShot:0,angle:rand(0,Math.PI*2),drift:rand(.4,1.4),eventNpc:!!opts.eventNpc,eventId:opts.eventId||null,
       patrolHomeX:p.x,patrolHomeY:p.y,patrolReturning:false,
       forceChase:!!opts.forceChase,damageContrib:new Map(),lastDamageAt:0,aggroUserId:null,aggroStartedAt:0,spawnedAt:nowMs(),

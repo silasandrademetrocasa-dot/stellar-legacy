@@ -57,7 +57,7 @@ test('integration retains server-safe shot constraints and preserves sprite fall
  assert.match(world,/turnNpcToward\(e\.angle/);
  assert.match(world,/this\.playerProtectedFromNpc\(p,e\)/);
  assert.match(game,/STAGED_PRELOADER_V342\.clear\(\)/);
- assert.match(game,/e\.sharedWorld&&Number\.isFinite\(e\.angle\)/);
+ assert.match(game,/e\.sharedWorld&&Number\.isFinite\(e\.visualAngle\)/);
 });
 
 test('retarget picks the strongest prior attacker, not nearest noncombatant',()=>{

@@ -5,7 +5,7 @@ export function shouldLeashNpc(e){
   return !!e&&e.hp>0&&!e.eventNpc&&!e.forceChase&&!e.gateEnemy&&!e.worldBoss&&
     !String(e.type||'').startsWith('boss')&&!e.aggroUserId;
 }
-export function NpcAggroWindow(e){return clamp(finite(e?.aggroRange,800),200,1600);}
+export function NpcAggroWindow(e){return clamp(finite(e?.aggroRange,1000),200,1600);}
 export function idleNpcStep(e,{dt=0,worldW=6000,worldH=4500,leash=680}={}){
   const x=finite(e?.x),y=finite(e?.y),hx=finite(e?.patrolHomeX,x),hy=finite(e?.patrolHomeY,y);
   const range=clamp(finite(leash,680),200,1400),speed=clamp(finite(e?.speed,80),0,1800),step=clamp(finite(dt),0,.15)*speed;
