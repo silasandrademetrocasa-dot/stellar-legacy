@@ -28,4 +28,4 @@ Nota: esta revisão é de compactação e limpeza, não inclui alterações em c
 - **V30.5.0**: Smart Combat Engine: atualização escalonada de NPCs comuns distantes sem suspender bosses, eventos, NPCs agressivos ou próximos. Simulação online e valores de combate preservados.
 
 
-- **V32.0.3**: ajuste visual da zona neutra do portal: raio aumentado para melhorar a área segura ao redor do portal e aro tracejado bem mais transparente para não poluir a tela.
+- **V32.1.0**: ajuste visual da zona neutra do portal: raio aumentado para melhorar a área segura ao redor do portal e aro tracejado bem mais transparente para não poluir a tela.
