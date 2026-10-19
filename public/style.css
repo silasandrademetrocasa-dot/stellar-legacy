@@ -3991,7 +3991,7 @@ body.stellar-hud-quiet #gateHud{visibility:visible;}
 @media(max-width:680px){.next-npc-target-v32{font-size:8px;padding:3px 5px}}
 
 
-/* ===== V32.1.1 MOBILE EXPERIENCE PRO: layer final, depois dos overrides antigos ===== */
+/* ===== V32.1.2 MOBILE EXPERIENCE PRO: layer final, depois dos overrides antigos ===== */
 .mobile-combat-mode-btn{display:none;}
 @media (hover:none),(pointer:coarse){
   .mobile-combat-mode-btn{display:block;position:fixed;right:calc(env(safe-area-inset-right, 0px) + 7px);top:calc(env(safe-area-inset-top, 0px) + 48px);z-index:42;min-height:30px;padding:4px 9px;border-radius:9px;border:1px solid rgba(85,217,255,.35);background:rgba(5,20,36,.88);color:#c5efff;font-size:10px;font-weight:900;touch-action:manipulation;}
@@ -4024,4 +4024,256 @@ body.stellar-hud-quiet #gateHud{visibility:visible;}
   body.mobile-combat-pro #bottomHudDock #minimapPanel{max-height:80px!important;}
   body.mobile-combat-pro #bottomHudDock #minimap{height:62px!important;}
   body.mobile-combat-pro #bottomHudDock #weaponBar{max-height:74px!important;}
+}
+
+
+/* ===== V32.1.2: MOBILE EXPERIENCE PRO 2.0 • LANDSCAPE FIRST ===== */
+.mobile-landscape-tip{display:none;}
+@media(max-width:650px) and (orientation:portrait){
+  .mobile-landscape-tip:not(.hidden){
+    position:fixed;z-index:39;top:calc(env(safe-area-inset-top, 0px) + 105px);
+    left:8px;right:8px;display:flex;align-items:center;gap:8px;min-height:58px;
+    padding:8px 9px;border:1px solid rgba(86,220,255,.3);border-radius:12px;
+    background:rgba(4,23,38,.94);box-shadow:0 5px 18px rgba(0,0,0,.25);
+    font-family:Arial,Helvetica,sans-serif;color:#dff8ff;pointer-events:auto;
+  }
+  .mobile-landscape-tip-icon{font-size:22px;line-height:1;color:#66dfff;flex:0 0 auto;transform:rotate(-90deg);}
+  .mobile-landscape-tip-copy{display:flex;flex:1 1 auto;min-width:0;flex-direction:column;gap:3px;}
+  .mobile-landscape-tip-copy strong{font-size:10px;letter-spacing:.05em;}
+  .mobile-landscape-tip-copy small{font-size:9px;line-height:1.25;color:#92c2d5;}
+  .mobile-landscape-launch{flex:0 0 auto;min-height:34px!important;padding:5px 8px;border:1px solid #57d8ff;border-radius:7px;background:rgba(11,63,81,.95);color:#ecfcff;font-weight:900;font-size:9px;touch-action:manipulation;}
+  .mobile-landscape-dismiss{flex:0 0 27px;height:28px;min-height:28px!important;padding:0;border:1px solid rgba(116,175,205,.34);background:rgba(9,27,41,.88);border-radius:7px;color:#a5d7e8;font-size:18px;touch-action:manipulation;}
+}
+/* Esta camada só atua no celular deitado (detectado em JS); desktop não muda. */
+body.mobile-landscape-pro{--bottom-dock-height:108px!important;--weaponbar-height:52px!important;--hud-top-card-height:108px!important;}
+body.mobile-landscape-pro #topbar.compact-command-bar{
+  top:calc(env(safe-area-inset-top,0px) + 3px)!important;
+  left:calc(env(safe-area-inset-left,0px) + 5px)!important;
+  right:calc(env(safe-area-inset-right,0px) + 5px)!important;
+  height:36px!important;min-height:36px!important;max-height:36px!important;
+  padding:2px 5px!important;overflow:visible!important;gap:3px!important;
+}
+body.mobile-landscape-pro #topbar .command-actions{
+  width:100%!important;min-width:0!important;min-height:30px!important;
+  display:flex!important;align-items:center!important;gap:4px!important;flex-wrap:nowrap!important;
+  overflow-x:visible!important;overflow-y:visible!important;scrollbar-width:none!important;
+}
+body.mobile-landscape-pro #topbar .command-actions::-webkit-scrollbar{display:none;}
+body.mobile-landscape-pro #topbar .command-actions .small-btn{
+  height:28px!important;min-height:28px!important;padding:3px 8px!important;font-size:9px!important;white-space:nowrap!important;
+}
+/* O nav, menus drop-down, HUD e combate não devem cobrir a mesma faixa. */
+body.mobile-landscape-pro #topHudDock{
+  top:calc(env(safe-area-inset-top,0px) + 45px)!important;
+  left:calc(env(safe-area-inset-left,0px) + 5px)!important;
+  right:calc(env(safe-area-inset-right,0px) + 180px)!important;
+  width:auto!important;max-height:128px!important;gap:4px!important;
+  flex-wrap:nowrap!important;align-items:flex-start!important;
+}
+body.mobile-landscape-pro #topHudDock>.hud-panel:not(.collapsed){
+  width:min(160px,23vw)!important;min-width:105px!important;max-width:160px!important;
+  max-height:112px!important;height:auto!important;min-height:0!important;overflow:auto!important;
+  padding:5px 6px!important;
+}
+body.mobile-landscape-pro #topHudDock>.hud-panel.collapsed{
+  width:34px!important;min-width:34px!important;max-width:34px!important;
+  height:34px!important;min-height:34px!important;max-height:34px!important;padding:0!important;
+}
+body.mobile-landscape-pro #topHudDock>.hud-panel.collapsed button{touch-action:manipulation;}
+body.mobile-landscape-pro .right-hud-stack{
+  position:fixed!important;top:calc(env(safe-area-inset-top,0px) + 46px)!important;
+  right:calc(env(safe-area-inset-right,0px) + 5px)!important;
+  width:min(164px,22vw)!important;max-width:164px!important;gap:3px!important;
+}
+body.mobile-landscape-pro .right-hud-stack .galaxy-event-hud,
+body.mobile-landscape-pro .right-hud-stack .target-lock-hud{max-height:70px!important;padding:4px 6px!important;overflow:hidden!important;}
+body.mobile-landscape-pro .combat-state-hud{top:calc(env(safe-area-inset-top,0px) + 44px)!important;max-width:190px!important;padding:4px 7px!important;}
+body.mobile-landscape-pro .combat-state-hud small{display:none!important;}
+/* Manter COMPACTO disponível sem disputar espaço com o painel do evento. */
+body.mobile-landscape-pro .mobile-combat-mode-btn{
+  display:block!important;position:fixed!important;left:calc(env(safe-area-inset-left,0px) + 7px)!important;
+  right:auto!important;top:auto!important;bottom:calc(env(safe-area-inset-bottom,0px) + 117px)!important;
+  transform:none!important;z-index:35!important;font-size:9px!important;padding:4px 7px!important;
+  min-height:28px!important;
+}
+/* Três colunas de verdade: chat | armas | minimapa. Sem empilhar em duas linhas. */
+body.mobile-landscape-pro #bottomHudDock.bottom-hud-dock{
+  display:grid!important;
+  grid-template-columns:minmax(92px,clamp(105px,18vw,152px)) minmax(0,1fr) minmax(95px,clamp(104px,17vw,146px))!important;
+  grid-template-rows:auto!important;align-items:end!important;gap:5px!important;
+  left:calc(env(safe-area-inset-left,0px) + 5px)!important;
+  right:calc(env(safe-area-inset-right,0px) + 5px)!important;
+  bottom:calc(env(safe-area-inset-bottom,0px) + 5px)!important;
+  width:auto!important;max-height:104px!important;
+  overflow:visible!important;pointer-events:none!important;
+}
+body.mobile-landscape-pro #bottomHudDock.bottom-hud-dock>.hud-panel{pointer-events:auto!important;position:relative!important;left:auto!important;right:auto!important;bottom:auto!important;top:auto!important;transform:none!important;box-sizing:border-box!important;margin:0!important;}
+body.mobile-landscape-pro #bottomHudDock.bottom-hud-dock #chatDock,
+body.mobile-landscape-pro #bottomHudDock.bottom-hud-dock #minimapPanel,
+body.mobile-landscape-pro #bottomHudDock.bottom-hud-dock #weaponBar{
+  grid-row:1!important;align-self:end!important;max-height:100px!important;min-height:0!important;
+  max-width:none!important;min-width:0!important;
+}
+body.mobile-landscape-pro #bottomHudDock.bottom-hud-dock #chatDock{
+  grid-column:1!important;width:100%!important;height:90px!important;
+  flex-basis:auto!important;padding:4px 5px!important;overflow:hidden!important;
+}
+body.mobile-landscape-pro #chatDock .chat-toolbar{min-height:20px!important;height:20px!important;padding:0!important;}
+body.mobile-landscape-pro #chatDock .chat-body{padding:0!important;gap:2px!important;min-height:0!important;}
+body.mobile-landscape-pro #chatDock .chat-tabs{display:none!important;}
+body.mobile-landscape-pro #chatDock .chat-feed{height:22px!important;max-height:22px!important;min-height:0!important;overflow-y:auto!important;}
+body.mobile-landscape-pro #chatDock .chat-compose{min-height:24px!important;height:24px!important;margin-top:auto!important;gap:2px!important;}
+body.mobile-landscape-pro #chatDock .chat-compose input,
+body.mobile-landscape-pro #chatDock .chat-compose button{min-height:22px!important;height:22px!important;padding:2px 4px!important;font-size:9px!important;}
+body.mobile-landscape-pro #bottomHudDock.bottom-hud-dock #minimapPanel{
+  grid-column:3!important;justify-self:end!important;width:100%!important;height:90px!important;
+  padding:3px 4px!important;overflow:hidden!important;
+}
+body.mobile-landscape-pro #minimapPanel .minimap-toolbar{min-height:18px!important;max-height:18px!important;height:18px!important;padding:0!important;margin:0 0 2px!important;}
+body.mobile-landscape-pro #bottomHudDock #minimapPanel #minimap{
+  position:relative!important;inset:auto!important;display:block!important;width:100%!important;
+  height:56px!important;max-height:56px!important;min-height:56px!important;
+  border-radius:6px!important;margin:0!important;
+}
+body.mobile-landscape-pro #minimapPanel .minimap-social-legend{height:9px!important;min-height:9px!important;max-height:9px!important;padding:0!important;overflow:hidden!important;font-size:5px!important;}
+body.mobile-landscape-pro #bottomHudDock.bottom-hud-dock #weaponBar,
+body.mobile-landscape-pro #bottomHudDock.bottom-hud-dock #weaponBar.compact-ammo-ui{
+  grid-column:2!important;justify-self:stretch!important;width:100%!important;
+  height:52px!important;min-height:52px!important;max-height:52px!important;
+  padding:3px 4px!important;display:flex!important;flex-direction:row!important;flex-wrap:nowrap!important;
+  align-items:center!important;gap:4px!important;overflow:hidden!important;
+}
+body.mobile-landscape-pro #bottomHudDock #weaponBar .weapon-toolbar{
+  display:flex!important;flex:0 0 22px!important;width:22px!important;min-width:22px!important;
+  height:26px!important;min-height:0!important;max-height:26px!important;padding:0!important;
+}
+body.mobile-landscape-pro #bottomHudDock #weaponBar .weapon-toolbar-label{display:none!important;}
+body.mobile-landscape-pro #bottomHudDock #weaponBar #weaponBarContent{
+  display:grid!important;grid-template-columns:minmax(0,1fr) auto!important;flex:1 1 auto!important;
+  width:auto!important;min-width:0!important;gap:4px!important;align-items:center!important;overflow:hidden!important;
+}
+body.mobile-landscape-pro #bottomHudDock #weaponBar .ammo-clusters{
+  display:flex!important;flex-wrap:nowrap!important;align-items:center!important;
+  min-width:0!important;width:100%!important;gap:6px!important;
+  overflow-x:auto!important;overflow-y:hidden!important;scrollbar-width:none!important;
+  touch-action:pan-x!important;overscroll-behavior-x:contain!important;padding:2px 1px!important;
+}
+body.mobile-landscape-pro #bottomHudDock #weaponBar .ammo-clusters::-webkit-scrollbar{display:none!important;}
+body.mobile-landscape-pro #bottomHudDock #weaponBar .weapon-section{
+  display:flex!important;flex:0 0 auto!important;flex-direction:row!important;
+  min-width:0!important;padding:0!important;gap:3px!important;
+}
+body.mobile-landscape-pro #bottomHudDock #weaponBar .ammo-bubbles{display:flex!important;flex-wrap:nowrap!important;gap:3px!important;}
+body.mobile-landscape-pro #bottomHudDock #weaponBar .ammo-btn.circular{
+  width:36px!important;height:36px!important;min-width:36px!important;max-width:36px!important;
+  min-height:36px!important;max-height:36px!important;flex:0 0 36px!important;
+  padding:2px!important;touch-action:manipulation!important;
+}
+body.mobile-landscape-pro #bottomHudDock #weaponBar .ammo-btn.circular .ammo-code{font-size:9px!important;}
+body.mobile-landscape-pro #bottomHudDock #weaponBar .ammo-btn.circular .ammo-qty{font-size:7px!important;margin-top:2px!important;}
+body.mobile-landscape-pro #bottomHudDock #weaponBar .compact-ability-tray{
+  display:flex!important;flex:0 0 auto!important;flex-wrap:nowrap!important;gap:3px!important;
+  width:auto!important;min-width:0!important;padding:0!important;border:0!important;
+}
+body.mobile-landscape-pro #bottomHudDock #weaponBar .compact-ability-tray .compact-square{
+  width:36px!important;height:36px!important;min-width:36px!important;max-width:36px!important;
+  min-height:36px!important;max-height:36px!important;flex:0 0 36px!important;touch-action:manipulation!important;
+}
+body.mobile-landscape-pro #bottomHudDock #weaponBar.collapsed,
+body.mobile-landscape-pro #bottomHudDock #weaponBar.compact-ammo-ui.collapsed{
+  justify-self:start!important;width:40px!important;max-width:40px!important;
+  height:40px!important;min-height:40px!important;max-height:40px!important;
+}
+body.mobile-landscape-pro #bottomHudDock #weaponBar.collapsed #weaponBarContent{display:none!important;}
+body.mobile-landscape-pro #bottomHudDock #chatDock.collapsed,
+body.mobile-landscape-pro #bottomHudDock #minimapPanel.collapsed{
+  width:40px!important;min-width:40px!important;max-width:40px!important;
+  height:40px!important;min-height:40px!important;max-height:40px!important;
+  justify-self:start!important;overflow:hidden!important;
+}
+body.mobile-landscape-pro #bottomHudDock #minimapPanel.collapsed{justify-self:end!important;}
+/* Respeitar HUD oculto e não repor o mapa, chat ou munição desabilitado pelo usuário. */
+body.mobile-landscape-pro #bottomHudDock #chatDock.hud-user-hidden,
+body.mobile-landscape-pro #bottomHudDock #minimapPanel.hud-user-hidden,
+body.mobile-landscape-pro #bottomHudDock #weaponBar.hud-user-hidden,
+body.mobile-landscape-pro #bottomHudDock .hud-panel.hidden{display:none!important;}
+/* Hangar horizontal: abas acessíveis, atributos achatados, builds lado a lado. */
+body.mobile-landscape-pro #hangarModal{padding:3px 5px!important;align-items:center!important;}
+body.mobile-landscape-pro #hangarModal>.modal-card{
+  box-sizing:border-box!important;width:100%!important;max-width:100%!important;
+  height:calc(100dvh - 8px)!important;min-height:0!important;max-height:calc(100dvh - 8px)!important;
+  padding:7px 9px!important;overflow-y:auto!important;overflow-x:hidden!important;
+  border-radius:11px!important;overscroll-behavior:contain!important;
+}
+body.mobile-landscape-pro #hangarModal .modal-header{
+  display:flex!important;flex-direction:row!important;flex-wrap:nowrap!important;
+  align-items:center!important;min-height:38px!important;gap:7px!important;
+  position:sticky!important;top:0!important;z-index:8!important;
+  background:rgba(5,20,34,.98)!important;margin-bottom:4px!important;padding:2px 4px!important;
+}
+body.mobile-landscape-pro #hangarModal .modal-header .eyebrow{font-size:7px!important;}
+body.mobile-landscape-pro #hangarModal .modal-header h2{font-size:16px!important;margin:0!important;}
+body.mobile-landscape-pro #hangarModal .modal-header .wallet{font-size:9px!important;padding:4px 7px!important;margin-left:auto!important;white-space:nowrap!important;}
+body.mobile-landscape-pro #hangarModal #closeHangar{min-height:30px!important;height:30px!important;padding:4px 9px!important;font-size:10px!important;flex:0 0 auto!important;}
+body.mobile-landscape-pro #hangarModal #hangarTabs{
+  display:flex!important;flex-wrap:nowrap!important;overflow-x:auto!important;overflow-y:hidden!important;
+  gap:5px!important;position:sticky!important;top:43px!important;z-index:7!important;
+  padding:4px!important;margin-bottom:5px!important;scrollbar-width:none!important;
+}
+body.mobile-landscape-pro #hangarModal #hangarTabs::-webkit-scrollbar{display:none;}
+body.mobile-landscape-pro #hangarModal #hangarTabs button{
+  min-height:28px!important;padding:4px 8px!important;white-space:nowrap!important;font-size:9px!important;flex:0 0 auto!important;
+}
+body.mobile-landscape-pro #hangarModal .hangar-summary-strip{
+  display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:5px!important;margin-bottom:5px!important;
+}
+body.mobile-landscape-pro #hangarModal .hangar-summary-strip .stat-card{
+  min-height:39px!important;padding:5px 7px!important;font-size:10px!important;border-radius:8px!important;
+}
+body.mobile-landscape-pro #hangarModal .hangar-summary-strip .stat-card strong{font-size:12px!important;margin-top:2px!important;}
+body.mobile-landscape-pro #hangarModal .hangar-equipment-console{gap:5px!important;}
+body.mobile-landscape-pro #hangarModal .hangar-equipment-split{
+  display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:7px!important;
+}
+body.mobile-landscape-pro #hangarModal .hangar-pane-title{position:static!important;min-height:28px!important;padding:5px 8px!important;}
+body.mobile-landscape-pro #hangarModal .hangar-filter-bar{position:static!important;padding:4px!important;gap:3px!important;}
+body.mobile-landscape-pro #hangarModal .hangar-filter-btn{min-height:27px!important;padding:4px 7px!important;}
+body.mobile-landscape-pro #hangarModal .hangar-preset-grid-v3030{
+  display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:5px!important;
+}
+body.mobile-landscape-pro #hangarModal .hangar-preset-card-v3030{padding:5px!important;gap:4px!important;}
+body.mobile-landscape-pro #hangarModal .hangar-preset-card-v3030 button{min-height:27px!important;padding:3px 4px!important;font-size:9px!important;}
+body.mobile-landscape-pro #hangarModal .section-box{margin-bottom:6px!important;padding:7px!important;}
+body.mobile-landscape-pro #hangarModal .hangar-section-head{min-height:29px!important;padding:4px 7px!important;}
+body.mobile-landscape-pro #hangarModal .hangar-section-body{padding:6px!important;}
+body.mobile-landscape-pro #hangarModal .hangar-slot-grid,
+body.mobile-landscape-pro #hangarModal .hangar-inventory-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:4px!important;}
+@media(max-width:740px) and (orientation:landscape){
+ body.mobile-landscape-pro #bottomHudDock.bottom-hud-dock{grid-template-columns:99px minmax(0,1fr) 101px!important;gap:4px!important;}
+ body.mobile-landscape-pro #hangarModal .hangar-preset-grid-v3030{grid-template-columns:repeat(2,minmax(0,1fr))!important;}
+ body.mobile-landscape-pro #hangarModal .hangar-summary-strip{grid-template-columns:repeat(4,minmax(0,1fr))!important;}
+ body.mobile-landscape-pro #topHudDock{right:150px!important;}
+ body.mobile-landscape-pro .right-hud-stack{width:145px!important;}
+}
+@media(max-height:390px) and (orientation:landscape){
+ body.mobile-landscape-pro #bottomHudDock.bottom-hud-dock{max-height:88px!important;}
+ body.mobile-landscape-pro #bottomHudDock #chatDock,
+ body.mobile-landscape-pro #bottomHudDock #minimapPanel{height:78px!important;max-height:78px!important;}
+ body.mobile-landscape-pro #bottomHudDock #minimapPanel #minimap{height:45px!important;max-height:45px!important;min-height:45px!important;}
+ body.mobile-landscape-pro #bottomHudDock #weaponBar{height:48px!important;min-height:48px!important;max-height:48px!important;}
+ body.mobile-landscape-pro #topHudDock>.hud-panel:not(.collapsed){max-height:90px!important;}
+}
+/* V32.1.2 final cascade guards: older weapon-grid selectors must not stretch each ammo family. */
+body.mobile-landscape-pro #bottomHudDock #weaponBar .ammo-clusters .weapon-section{
+  width:max-content!important;max-width:none!important;min-width:max-content!important;flex:0 0 auto!important;
+}
+body.mobile-landscape-pro #bottomHudDock #weaponBar .ammo-clusters .ammo-bubbles,
+body.mobile-landscape-pro #bottomHudDock #weaponBar #laserAmmoButtons,
+body.mobile-landscape-pro #bottomHudDock #weaponBar #rocketAmmoButtons{
+  display:flex!important;width:max-content!important;max-width:none!important;min-width:max-content!important;
+  flex:0 0 auto!important;grid-template-columns:none!important;gap:3px!important;flex-wrap:nowrap!important;
+}
+body.mobile-landscape-pro #bottomHudDock #weaponBar #abilityBar{
+  display:flex!important;width:max-content!important;min-width:max-content!important;max-width:none!important;
+  flex:0 0 auto!important;flex-basis:auto!important;gap:3px!important;justify-content:flex-end!important;
 }

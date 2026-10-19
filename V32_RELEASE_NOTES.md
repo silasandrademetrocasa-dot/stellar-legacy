@@ -1,4 +1,4 @@
-# STELLAR LEGACY V32.1.1 — candidato de integração
+# STELLAR LEGACY V32.1.2 — candidato de integração
 
 Base: V30.5.0 mais o desenvolvimento incremental da V32.
 
@@ -19,3 +19,5 @@ Base: V30.5.0 mais o desenvolvimento incremental da V32.
 - Nenhum deploy no Render ou push no GitHub realizado. Conta Render requer confirmação do workspace antes de qualquer ação.
 - Nenhuma migração SQL necessária para as alterações feitas; nenhum SQL executado.
 - Instalação: ZIP completo compatível com instalador universal, sem .github/ ou script protegido do instalador.
+
+- **V32.1.2**: Mobile Experience Pro 2.0: landscape-first, 3 colunas no HUD inferior, hangar horizontal responsivo e convite não bloqueante a girar a tela.

@@ -3,13 +3,13 @@
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8"/>
-<meta content="width=device-width,initial-scale=1,user-scalable=no" name="viewport"/>
+<meta content="width=device-width,initial-scale=1,user-scalable=no,viewport-fit=cover" name="viewport"/>
 <meta content="#030816" name="theme-color"/>
 <title>Stellar Legacy</title>
-<link rel="manifest" href="/manifest.webmanifest?v=32.1.1"/>
+<link rel="manifest" href="/manifest.webmanifest?v=32.1.2"/>
 <link rel="icon" type="image/png" href="/icons/stellar-192.png"/>
 <link rel="apple-touch-icon" href="/icons/stellar-192.png"/>
-<link href="/style.css?v=32.1.1" rel="stylesheet"/>
+<link href="/style.css?v=32.1.2" rel="stylesheet"/>
 </head>
 <body>
 <div class="stellar-boot-splash" id="stellarBootSplash" role="status" aria-label="Preparando Stellar Legacy">
@@ -209,6 +209,12 @@
   <small id="bossPhaseStatus">ESTÁVEL</small>
 </section>
 
+<aside id="mobileLandscapeHint" class="mobile-landscape-tip hidden" aria-hidden="true" aria-label="Jogar em tela horizontal">
+  <div class="mobile-landscape-tip-icon" aria-hidden="true">▣</div>
+  <div class="mobile-landscape-tip-copy"><strong>JOGUE NA HORIZONTAL</strong><small data-landscape-status>Mais visão de combate, munições e minimapa organizados.</small></div>
+  <button id="mobileLandscapeLaunch" class="mobile-landscape-launch" type="button">GIRAR / TELA CHEIA</button>
+  <button id="mobileLandscapeDismiss" class="mobile-landscape-dismiss" type="button" aria-label="Continuar no modo vertical">×</button>
+</aside>
 <button id="mobileCombatModeBtn" class="mobile-combat-mode-btn" type="button" aria-pressed="false" aria-label="Alternar interface compacta de combate" title="Alternar interface compacta">COMPACTO</button>
 <div class="bottom-hud-dock" id="bottomHudDock">
 <section class="hud-panel chat-dock" id="chatDock" aria-label="Chat dos pilotos">
@@ -1105,6 +1111,6 @@
 </div>
 </div>
 <div class="perf-diag-overlay hidden" id="perfDiagOverlay" aria-live="off" aria-label="Contador de FPS local"><b id="perfDiagHudFps">FPS —</b><small id="perfDiagHudStutter">P95 —</small></div>
-<script src="/game.js?v=32.1.1" type="module"></script>
+<script src="/game.js?v=32.1.2" type="module"></script>
 </body>
 </html>
