@@ -1,4 +1,4 @@
-# V32.1.7 Mobile Experience Pro
+# V32.1.8 Mobile Experience Pro
 
 - Novo botão COMPACTO/EXPANDIR para alternar layout do combate no celular.
 - Preferência persistida no dispositivo; inicia compacta em aparelhos mobile.

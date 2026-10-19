@@ -1,4 +1,4 @@
-# STELLAR LEGACY V32.1.7 — candidato de integração
+# STELLAR LEGACY V32.1.8 — candidato de integração
 
 Base: V30.5.0 mais o desenvolvimento incremental da V32.
 
@@ -20,4 +20,6 @@ Base: V30.5.0 mais o desenvolvimento incremental da V32.
 - Nenhuma migração SQL necessária para as alterações feitas; nenhum SQL executado.
 - Instalação: ZIP completo compatível com instalador universal, sem .github/ ou script protegido do instalador.
 
-- **V32.1.7**: Mobile Experience Pro 2.0: landscape-first, 3 colunas no HUD inferior, hangar horizontal responsivo e convite não bloqueante a girar a tela.
+- **V32.1.8**: Mobile Experience Pro 2.0: landscape-first, 3 colunas no HUD inferior, hangar horizontal responsivo e convite não bloqueante a girar a tela.
+
+- **V32.1.8**: chat com altura igual à do minimapa e envio de mensagens acessível no horizontal; nomes PLS/SIP/CMT no HUD; nomenclatura Stellar na coleta dos minérios (online, AUX e nave); radar no landscape limitado a 10 atualizações por segundo para reduzir custo gráfico. IDs internos e SQL preservados.

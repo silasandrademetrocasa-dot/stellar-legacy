@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 const css=readFileSync(new URL('../public/style.css', import.meta.url), 'utf8');
 
-test('V32.1.7 removes compact button and enlarges landscape mobile chat/minimap',()=>{
+test('V32.1.8 removes compact button and enlarges landscape mobile chat/minimap',()=>{
   assert.match(css,/body\.mobile-landscape-pro \.mobile-combat-mode-btn\{display:none!important;\}/);
   assert.match(css,/#bottomHudDock\.bottom-hud-dock\{[\s\S]*max-height:170px!important;/);
   assert.match(css,/#bottomHudDock\.bottom-hud-dock #chatDock\{[\s\S]*height:156px!important;/);

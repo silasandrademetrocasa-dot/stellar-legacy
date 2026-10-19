@@ -1,4 +1,4 @@
-# V32.1.7 — Mobile Experience Pro 2.0 • Landscape First
+# V32.1.8 — Mobile Experience Pro 2.0 • Landscape First
 
 - Jogo agora usa layout horizontal de três colunas no mobile: chat à esquerda, munições e habilidades no centro, radar à direita. Permissões de HUD oculto/recolhido preservadas.
 - Barra superior de 36px com rolagem horizontal para acessar todos os menus, sem reduzir tamanho do texto a níveis ilegíveis.
@@ -8,3 +8,5 @@
 - Modo COMPACTO/EXPANDIR da V32.1.1 preservado. Preferências anteriores e saves mantidos.
 - Sem mudanças em SQL, RPCs, multiplayer, dano, inventário, efeitos visuais ou economia.
 - Requer validação visual em Android/iOS e medição real de FPS para verificar impacto de layout.
+
+- **V32.1.8**: chat com altura igual à do minimapa e envio de mensagens acessível no horizontal; nomes PLS/SIP/CMT no HUD; nomenclatura Stellar na coleta dos minérios (online, AUX e nave); radar no landscape limitado a 10 atualizações por segundo para reduzir custo gráfico. IDs internos e SQL preservados.
