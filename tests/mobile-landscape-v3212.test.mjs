@@ -18,7 +18,7 @@ test('não altera inicialização de contas e mantém aviso opcional',()=>{
   assert.match(html,/id="mobileLandscapeDismiss"/);
   assert.match(html,/id="mobileLandscapeLaunch"/);
   assert.match(css,/body\.mobile-landscape-pro #bottomHudDock\.bottom-hud-dock/);
-  assert.match(css,/grid-template-columns:minmax\(92px,clamp\(105px,18vw,152px\)\) minmax\(0,1fr\) minmax\(95px,clamp\(104px,17vw,146px\)\)/);
+  assert.match(css,/grid-template-columns:minmax\(120px,clamp\(146px,21vw,210px\)\) minmax\(0,1fr\) minmax\(122px,clamp\(150px,20vw,205px\)\)/);
 });
 test('alternativa manual quando bloqueio de orientação não disponível',()=>{
   const mod=readFileSync(new URL('../public/modules/mobile-landscape.js',import.meta.url),'utf8');
