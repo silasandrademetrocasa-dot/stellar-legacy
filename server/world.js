@@ -1,4 +1,5 @@
 import { idleNpcStep, shouldLeashNpc, NpcAggroWindow } from './npc-intelligence-v34.js';
+import { perceptionPlayers, nearestPerceivedPlayer, turnNpcToward, selectAggroSuccessor } from './npc-intelligence-v343.js';
 import { resolveLiveEvent } from './live-event-scheduler-v341.js';
 import { eventControlProfile } from '../public/modules/event-control-profile-v3411.js';
 import { randomUUID } from 'crypto';
@@ -644,13 +645,17 @@ class Room {
   playerFresh(p){return !!p&&p.hp>0&&nowMs()-(p.updatedAt||0)<=8000;}
   lockedAggroPlayer(e){
     if(e.aggroUserId){const locked=this.players.get(e.aggroUserId);if(this.playerFresh(locked))return locked;
-      const next=[...e.damageContrib.keys()].map(id=>this.players.get(id)).find(p=>this.playerFresh(p));
+      const next=selectAggroSuccessor(e.damageContrib,this.players,p=>this.playerFresh(p));
       if(next){e.aggroUserId=next.userId;e.aggroStartedAt=nowMs();return next;}e.aggroUserId=null;e.aggroStartedAt=0;
     }
     return null;
   }
   nearestPlayer(e){
-    let best=null,dist=Infinity;for(const p of this.players.values()){if(!this.playerFresh(p)||this.playerProtectedFromNpc(p,e))continue;const d=Math.hypot(p.x-e.x,p.y-e.y);if(d<dist){dist=d;best=p;}}return best?{player:best,dist}:null;
+    // Percepcao congelada por tick: protegidos/recem-desconectados sao
+    // calculados uma unica vez, sem recalcular portais para cada NPC.
+    return nearestPerceivedPlayer(e,this._npcPerceptionV343||perceptionPlayers(this.players.values(),{
+      now:nowMs(),isProtected:p=>this.playerSafe(p)||this.playerPortalNeutral(p)
+    }));
   }
 
   applyBossPhase(e){
@@ -826,6 +831,7 @@ class Room {
       return;
     }
     const move=idleNpcStep(e,{dt,worldW:this.map.world.w,worldH:this.map.world.h});
+    if(move.returning)e.angle=turnNpcToward(e.angle,e.x,e.y,move.x,move.y,dt,3.2);
     e.x=move.x;e.y=move.y;e.patrolReturning=move.returning;
   }
 
@@ -833,6 +839,10 @@ class Room {
     this.ensureEvent(false);const now=nowMs();
     // Only build this lookup once per server tick; no change to combat/authority.
     const clientByUserId=new Map([...this.clients].filter(c=>c.player?.userId).map(c=>[String(c.player.userId),c]));
+    // Jogadores elegiveis: snapshot reaproveitado por todos os NPCs neste tick.
+    this._npcPerceptionV343=perceptionPlayers(this.players.values(),{
+      now,isProtected:p=>this.playerSafe(p)||this.playerPortalNeutral(p)
+    });
     this.updateWarfrontControl(dt,now);
     const activeEventId=this.event?.eventId||null;
     let staleNpc=false,staleOre=false;
@@ -846,6 +856,9 @@ class Room {
       // never drifting indefinitely toward map borders. Bosses/events are exempt.
       if(!near || (!locked && shouldLeashNpc(e) && near.dist>NpcAggroWindow(e))){this.applyIdlePatrolV34(e,dt);continue;}
       e.patrolReturning=false;
+      // NPCs olham para o alvo durante perseguicao/combate, com curva suave.
+      // A direcao e apenas visual: nao muda projeteis, distancia ou DPS.
+      e.angle=turnNpcToward(e.angle,e.x,e.y,near.player.x,near.player.y,dt);
       const p=near.player,d=near.dist,dx=p.x-e.x,dy=p.y-e.y,force=!!e.forceChase,retaliating=String(e.aggroUserId||'')===String(p.userId||''),protectedNow=this.playerProtectedFromNpc(p,e),neutralX1=['x1','x8'].includes(this.mapId)&&!retaliating;
       if(['x1','x8'].includes(this.mapId)) {
         const b=basePointForFaction(this.territoryFaction,this.mapId),bd=Math.hypot(e.x-b.x,e.y-b.y);if(bd<555){const ox=e.x-b.x,oy=e.y-b.y,od=Math.hypot(ox,oy)||1;e.x=b.x+ox/od*558;e.y=b.y+oy/od*558;}
