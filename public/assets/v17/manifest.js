@@ -7,9 +7,9 @@ export const GAME_ASSETS = {
     jupiter: '/assets/v19/branding/jupiter.webp'
   },
   starterDesigners: {
-    earth: {card: '/assets/v2212/ships/earth.webp', map: '/assets/v2212/ships/earth-map.webp'},
-    mars: {card: '/assets/v2212/ships/mars.webp', map: '/assets/v2212/ships/mars-map.webp'},
-    jupiter: {card: '/assets/v2212/ships/jupiter.webp', map: '/assets/v2212/ships/jupiter-map.webp'}
+    earth: {card: '/assets/v2212/ships/earth.webp', map: '/assets/v17/ships-map/pathfinder.webp', showcase: '/assets/v2212/ships/earth-map.webp'},
+    mars: {card: '/assets/v2212/ships/mars.webp', map: '/assets/v17/ships-map/raptor.webp', showcase: '/assets/v2212/ships/mars-map.webp'},
+    jupiter: {card: '/assets/v2212/ships/jupiter.webp', map: '/assets/v17/ships-map/guardian.webp', showcase: '/assets/v2212/ships/jupiter-map.webp'}
   },
   ships: {
     phoenix: '/assets/v17/ships/aurora.webp',

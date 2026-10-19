@@ -1,3 +1,10 @@
+## V22.12.1 — Naves top-down em combate (18/10/2026)
+- Mapas usam sprites ortográficos existentes para as três naves iniciais e 22 tipos de NPC; artes de apresentação V22.12.0 preservadas.
+- Rotação contínua do Canvas corrigida para os NPCs top-down, sem aparência lateral/virada.
+- Retirado o efeito de deformação dinâmica (banking/escala) aplicado aos NPCs.
+- Caixas, bônus, mineração, bases, portais, combate, progressão, Supabase e saves não modificados.
+- Pacote integral para substituir diretamente os arquivos no repositório GitHub (sem aplicar patch).
+
 ## V22.12.0 — Designers Galácticos e Sprites (18/10/2026)
 - Integração real no mapa dos designers de bases Terra/Marte/Júpiter, derivados das artes aprovadas.
 - Novas imagens de naves iniciais por facção para o ID de gameplay phoenix. A nave inicial existente mantém exatamente os mesmos atributos; somente o designer visual muda.
