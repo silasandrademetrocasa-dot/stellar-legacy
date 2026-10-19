@@ -17,4 +17,4 @@ Nota: esta revisão é de compactação e limpeza, não inclui alterações em c
 
 - **V30.1.2**: bosses 32 directions; common NPCs remain 16.
 
-- **V30.2.1**: revisão completa dos visuais do hangar e do casco das naves: previews padronizados para toda a frota, cobertura validada para todas as 43 naves e renderização do mapa priorizando a arte individual de cada nave para evitar reaproveitar o layout da nave anterior.
+- **V30.2.2**: CONF 1/2 ganhou botões de cópia rápida entre configurações, o painel do AUX-9 removeu a seção de “sprites 360° no mapa” e o visual do AUX-9 foi atualizado com nova arte padronizada no hangar.

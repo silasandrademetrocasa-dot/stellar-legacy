@@ -218,8 +218,8 @@ export const GAME_ASSETS = {
   drones: {
     flax: '/assets/v17/drones/halo.webp',
     iris: '/assets/v17/drones/nova.webp',
-    pet: '/assets/v17/drones/aux9.webp',
-    petElite: '/assets/v17/drones/aux9-elite.webp'
+    pet: '/assets/v3022/drones/aux9.webp',
+    petElite: '/assets/v3022/drones/aux9-elite.webp'
   },
   droneMap: {
     flax: '/assets/v17/drones-map/halo.webp',
