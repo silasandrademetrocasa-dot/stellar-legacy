@@ -1,41 +1,17 @@
-> **Atualização atual:** Segurança e Antifraude. Leia [INSTALAR_V22_6_0.md](INSTALAR_V22_6_0.md).
+# Stellar Legacy V30.0.5 — Pacote enxuto
 
-# Stellar Legacy V22.5.0 — Universo Dinâmico e Missões Coletivas
+Versão de produção com sprites de 16 direções para naves, drones e NPCs, preservando designers, saves, controles, SQL e compatibilidade com Render.
 
-**ANTES DO DEPLOY:** leia `INSTALAR_V22_5_0.md`. A nova migração SQL está **pendente**, porque o acesso de escrita ao Supabase foi bloqueado na preparação. Execute `sql/STELLAR_V22_5_0_CLAN_OPERATIONS_HALL.sql` no Supabase e confirme a execução antes de subir o ZIP.
+## Instalação pelo GitHub Actions
 
-Novidades: invasões, chefes e recursos programados no ADM via servidor; missões coletivas e recompensas únicas para o cofre do clã; arquivo competitivo; novos módulos de servidor e testes.
+1. Faça backup/commit de alterações pessoais do repositório.
+2. Remova ZIPs `stellar-legacy*.zip` antigos da raiz do GitHub.
+3. Suba **somente** `stellar-legacy-V30.0.5-COMPLETO-LIMPO.zip` para a raiz (não extraia).
+4. Rode **Actions → Instalar versão do Stellar Legacy → Run workflow**.
+5. O instalador usa `rsync --delete` para remover docs/testes antigos do Git e preserva `.github/` e os scripts do instalador.
 
-O motor existente de eventos, combate, territórios A/B/C, CONF 1/2, saves e balanceamento de movimento permanece preservado. Eventos dinâmicos não adicionam recompensas inéditas.
+## Verificação
 
-Documentação: `V22_5_0_RELATORIO.md` e `INSTALAR_V22_5_0.md`.
+`npm run verify`: arquivos essenciais, imports, assets, smoke tests. Para rodar os **353 testes de regressão históricos**, use o ZIP de backup separado `stellar-legacy-V30-BACKUP-DOCS-TESTES.zip`, restaurando temporariamente a pasta `tests/` e `package.json` ajustado se necessário.
 
-# Stellar Legacy — 22.0.0
-
-**Entrega unificada: Campeonato Galáctico + Elite equipável + Operações do Universo + Rankings de Clãs + organização modular.**
-
-## Instalação
-
-1. SQLs da V22 **já foram aplicados e conferidos** no Supabase `stellar-legacy`. Arquivos de referência: `sql/STELLAR_V22_0_0_TEMPORADAS_ELITE_UNIVERSO.sql` e `sql/STELLAR_V22_0_1_TITULOS_ALTERNAVEIS.sql`.
-2. Mantenha `SUPABASE_SERVICE_ROLE_KEY` **somente no Render** (nunca no cliente ou ZIP preenchido).
-3. Coloque somente o ZIP completo da V22 na raiz do GitHub, sem extrair, e execute `Actions → Instalar versão do Stellar Legacy → Run workflow`.
-4. Confira a versão em `/health`, acesso ao Centro de Comando, Guerra (A/B/C), Elite, Temporada e ADM.
-
-### Conteúdo
-
-- **Temporada** no Centro de Comando: classificação por capturas e defesas de guerra confirmadas pelo servidor; ranking de clãs/facções; histórico e resgate seguro após o encerramento.
-- **ADM** na aba Temporada: criação e edição de temporadas futuras (rascunhos por padrão) e avisos de operações por mapa.
-- **Elite**: equipar títulos conquistados, exibir na identificação da nave e voltar aos títulos comuns.
-- **Universo**: alertas com validade automática. **Apenas comunicação e calendário** — NPCs, ondas e recompensas continuam gerenciados pelo sistema existente de Eventos.
-- **Motor**: funções novas separadas em módulos; combate, CONF 1/2, navegação, A/B/C e saves preservados.
-
-**Atenção:** nenhuma temporada ou alerta ficou ativo automaticamente. O Passe de Batalha atual funciona separadamente. Novos spawns e missões especiais de clã com recompensas exigem outro ciclo de desenvolvimento.
-
-Leia `INSTALAR_V22_0_0.md`, `V22_0_0_RELATORIO.md` e `CHANGELOG.md`.
-
-### Segurança V22.8.0
-
-Leia **`INSTALAR_V22_7_0.md`** antes de subir o ZIP. Há duas fases de SQL: a etapa A foi aplicada, a etapa B deve ser executada apenas depois do deploy. Compras com dinheiro real permanecem desligadas até a migração completa de recompensas para o servidor.
-
-## Segurança e recompensas NPC
-A V22.8.0 apresenta o primeiro ledger server-authoritative de CR/STL por abate de NPC compartilhado. Leia `INSTALAR_V22_8_0.md` e `V22_8_0_RELATORIO.md`; a migração SQL já foi aplicada no Supabase do projeto, mas esta versão ainda precisa de deploy pelo GitHub Actions. Não habilite compras com dinheiro real até que XP, caixas, missões e todas as demais fontes de renda estejam protegidas por transações do servidor.
+**Sem SQL novo.** O diretório `sql/` permanece intacto. O repositório remoto não é atualizado até o instalador executar com sucesso.
