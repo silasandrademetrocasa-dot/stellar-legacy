@@ -17,7 +17,7 @@ import { createSecurityService } from './security-service.js';
 
 const app = express();
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const RELEASE_VERSION = '34.0.0'; // único identificador de release nos endpoints HTTP
+const RELEASE_VERSION = '34.1.0'; // único identificador de release nos endpoints HTTP
 
 function normalizeSupabaseUrl(value = '') {
   let url = String(value || '').trim();
@@ -1163,6 +1163,7 @@ app.post('/api/admin/runtime/events/:eventKey', requireUser, asyncRoute(async(re
   const key=safeWorldId(req.params?.eventKey),current=await loadLiveOpsSnapshot(false),row=current?.events?.find(x=>String(x.event_key)===key);
   if(!key||!row)return res.status(400).json({error:'Evento inválido.'});
   const body=req.body&&typeof req.body==='object'?req.body:{},mode=['interval','weekly','once'].includes(String(body.schedule_mode))?String(body.schedule_mode):String(row.schedule_mode||'interval');
+  if(row.rules?.weekend_rotation===true&&(mode!=='interval'||Number(body.duration_minutes)!==120))return res.status(409).json({error:'Agenda WEEKEND: a duração fixa de 120 min e a rotação são gerenciadas pelo calendário galáctico. É possível ativar/desativar este evento.'});
   const weekdays=[...new Set((Array.isArray(body.weekdays)?body.weekdays:[]).map(Number).filter(n=>Number.isInteger(n)&&n>=0&&n<=6))].sort((a,b)=>a-b);
   const localTime=String(body.start_local_time||'').trim();
   if(mode==='weekly'&&(!weekdays.length||!/^([01]\d|2[0-3]):[0-5]\d(?::[0-5]\d)?$/.test(localTime)))return res.status(400).json({error:'Agenda semanal precisa de pelo menos um dia e horário HH:MM.'});

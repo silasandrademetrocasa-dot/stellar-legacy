@@ -47,3 +47,5 @@
 4. Evento iniciado/concluído: NPCs extras somem ao encerrar, sem duplicação de recompensa.
 5. No celular deitado: chat e campo de envio visíveis, minimapa expande/recolhe; FPS durante combate, evento, hangar e base.
 6. Multiplayer: duas contas em aparelhos diferentes, movimentos, dano PvP, troca de mapa, reconexão.
+
+- **V34.1.0**: hotfix visual pós-teste focado na proporção dos minérios do mapa.

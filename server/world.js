@@ -1,4 +1,5 @@
 import { idleNpcStep, shouldLeashNpc, NpcAggroWindow } from './npc-intelligence-v34.js';
+import { resolveLiveEvent } from './live-event-scheduler-v341.js';
 import { randomUUID } from 'crypto';
 import {admitNpcDamage} from './combat-throttle.js';
 import {PORTAL_NEUTRAL_RADIUS,playerInNeutralPortalRange} from './portal-safety.js';
@@ -43,66 +44,6 @@ function warfrontFactionLabel(factionId){return WARFRONT_FACTION_LABELS[factionI
 function warfrontNodesForMap(mapId,map){
   const layout=WARFRONT_NODE_LAYOUT[mapId]||[];
   return layout.map(([id,label,nx,ny])=>({id,label,x:Math.round(map.world.w*nx),y:Math.round(map.world.h*ny),radius:WARFRONT_CAPTURE_RADIUS,owner:null,challenger:null,progress:0,contested:false,nearby:{earth:0,mars:0,jupiter:0},capturedAt:0,lastControlAt:0,revision:0,persisting:false,retryAt:0,captureError:null}));
-}
-
-const SAO_PAULO_OFFSET_MS=3*60*60*1000; // America/Sao_Paulo • UTC-3 em 2026.
-function saoPauloClock(now=Date.now()){
-  const localMs=now-SAO_PAULO_OFFSET_MS,d=new Date(localMs);
-  return {localMs,offsetMs:SAO_PAULO_OFFSET_MS,day:d.getUTCDay(),year:d.getUTCFullYear(),month:d.getUTCMonth(),date:d.getUTCDate(),hour:d.getUTCHours(),minute:d.getUTCMinutes()};
-}
-function localTimeMinutes(value){
-  const m=String(value||'').match(/^(\d{1,2}):(\d{2})(?::(\d{2}))?/);if(!m)return null;
-  const h=Number(m[1]),min=Number(m[2]),sec=Number(m[3]||0);if(h<0||h>23||min<0||min>59||sec<0||sec>59)return null;
-  return h*60+min+sec/60;
-}
-function cappedEventEnd(row,start,duration){
-  let end=start+duration;const hardEnd=Date.parse(row?.ends_at||'');if(Number.isFinite(hardEnd))end=Math.min(end,hardEnd);return end;
-}
-function weeklyEventWindow(row,now,duration){
-  const days=[...new Set((Array.isArray(row?.weekdays)?row.weekdays:[]).map(Number).filter(n=>Number.isInteger(n)&&n>=0&&n<=6))];
-  const timeMin=localTimeMinutes(row?.start_local_time);if(!days.length||timeMin==null)return null;
-  const clock=saoPauloClock(now);
-  for(const dayOffset of [0,-1]){
-    const probe=new Date(clock.localMs+dayOffset*86400000),weekday=probe.getUTCDay();if(!days.includes(weekday))continue;
-    const localStart=Date.UTC(probe.getUTCFullYear(),probe.getUTCMonth(),probe.getUTCDate())+Math.round(timeMin*60000);
-    const start=localStart+clock.offsetMs,end=cappedEventEnd(row,start,duration);
-    const hardEnd=Date.parse(row?.ends_at||'');if(Number.isFinite(hardEnd)&&start>=hardEnd)continue;
-    if(now>=start&&now<end)return {start,end,slot:Math.floor(start/86400000)};
-  }
-  return null;
-}
-function buildEventPayload(row,start,end,slot){
-  return {
-    id:String(row.event_key||''),
-    icon:String(row.icon||'✦'),
-    name:String(row.name||row.event_key||'EVENTO'),
-    desc:String(row.description||''),
-    target:Math.max(1,Number(row.target)||1),
-    reward:row.reward&&typeof row.reward==='object'?row.reward:{},
-    rules:row.rules&&typeof row.rules==='object'?row.rules:{},
-    priority:Number(row.priority)||100,
-    start,end,slot,
-    eventId:`v1817:${String(row.event_key||'event')}:${start}`
-  };
-}
-function resolveLiveEvent(rows, now=Date.now()){
-  const pool=(Array.isArray(rows)?rows:[]).filter(row=>row?.enabled).sort((a,b)=>(Number(a.priority)||100)-(Number(b.priority)||100)||String(a.event_key||'').localeCompare(String(b.event_key||'')));
-  const active=[];
-  for(const row of pool){
-    const duration=Math.max(1,Number(row.duration_minutes)||1)*60000,mode=String(row.schedule_mode||'interval');let window=null;
-    if(mode==='weekly')window=weeklyEventWindow(row,now,duration);
-    else if(mode==='once'){
-      const start=Date.parse(row.starts_at||'');if(Number.isFinite(start)){const end=cappedEventEnd(row,start,duration);if(now>=start&&now<end)window={start,end,slot:0};}
-    }else{
-      const base=Date.parse(row.starts_at||''),repeat=Math.max(1,Number(row.repeat_minutes)||1)*60000,hardEnd=Date.parse(row?.ends_at||'');
-      if(Number.isFinite(base)&&now>=base&&(!Number.isFinite(hardEnd)||now<hardEnd)){
-        const cycle=Math.max(0,Math.floor((now-base)/repeat)),start=base+cycle*repeat,end=cappedEventEnd(row,start,duration);
-        if(now>=start&&now<end)window={start,end,slot:cycle};
-      }
-    }
-    if(window)active.push(buildEventPayload(row,window.start,window.end,window.slot));
-  }
-  active.sort((a,b)=>a.priority-b.priority||a.start-b.start||a.id.localeCompare(b.id));return active[0]||null;
 }
 
 function clamp(n,min,max){ return Math.max(min,Math.min(max,Number(n)||0)); }
@@ -283,7 +224,7 @@ class Room {
       oreType ||= pool[0]?.resource_key || (this.map.ores||[])[0] || 'Prometium';
     }
     const p=this.randomPosition(120),res=this.world.resourceDefinition(oreType)||RESOURCES[oreType]||RESOURCES.Prometium;
-    return {id:opts.id||`${opts.eventOre?'evtore':'ore'}_${randomUUID().slice(0,10)}`,x:p.x,y:p.y,type:oreType,amount:Math.max(1,Math.round(opts.amount??(opts.eventOre?1:this.map.oreYield||1))),color:res.color,r:opts.r||rand(7,13),rot:rand(0,Math.PI*2),shape:Array.from({length:7},()=>rand(.72,1.18)),eventOre:!!opts.eventOre,eventId:opts.eventId||null};
+    return {id:opts.id||`${opts.eventOre?'evtore':'ore'}_${randomUUID().slice(0,10)}`,x:p.x,y:p.y,type:oreType,amount:Math.max(1,Math.round(opts.amount??(opts.eventOre?1:this.map.oreYield||1))),color:res.color,r:opts.r||rand(6,10),rot:rand(0,Math.PI*2),shape:Array.from({length:7},()=>rand(.72,1.18)),eventOre:!!opts.eventOre,eventId:opts.eventId||null};
   }
 
   generateBaseWorld(){
@@ -440,7 +381,7 @@ class Room {
     const ev=this.event;if(!ev)return;const profile=this.eventProfile(ev),pool=Array.isArray(profile.orePool)&&profile.orePool.length?profile.orePool:['Prometium','Endurium','Terbium','Promerium'],amountRange=Array.isArray(profile.oreAmount)?profile.oreAmount:[12,26];
     const alive=[...this.ores.values()].filter(o=>o.eventOre&&o.eventId===ev.eventId).length;
     count=Math.max(0,Math.min(20,Math.floor(Number(count)||0),48-alive));
-    for(let i=0;i<count;i++){const o=this.makeOre(pool[Math.floor(Math.random()*pool.length)],{eventOre:true,eventId:ev.eventId,amount:rand(amountRange[0],amountRange[1]),r:rand(11,17)});this.ores.set(o.id,o);this.broadcast({type:'ore_spawn',ore:o});}
+    for(let i=0;i<count;i++){const o=this.makeOre(pool[Math.floor(Math.random()*pool.length)],{eventOre:true,eventId:ev.eventId,amount:rand(amountRange[0],amountRange[1]),r:rand(8,12)});this.ores.set(o.id,o);this.broadcast({type:'ore_spawn',ore:o});}
   }
   startConvoy(){
     const ev=this.event;if(!ev)return;const profile=this.eventProfile(ev),sx=420,sy=420,tx=this.map.world.w-420,ty=this.map.world.h-420;

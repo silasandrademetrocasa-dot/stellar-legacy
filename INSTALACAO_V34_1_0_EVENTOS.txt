@@ -1,0 +1,19 @@
+STELLAR LEGACY — V34.1.0 GALACTIC WEEKEND EVENTS
+
+ORDEM OBRIGATÓRIA DE INSTALAÇÃO
+
+1. Faça backup do deploy atual V34.0.1 e das configurações do banco.
+2. Envie este ZIP pelo instalador universal do GitHub (a pasta .github NÃO é substituída pelo pacote).
+3. Aguarde o Render publicar a V34.1.0 e ficar saudável.
+4. Execute sql/V34_1_0_GALACTIC_WEEKEND_EVENTS.sql no SQL Editor do Supabase.
+5. Aguarde até 15 segundos para o servidor atualizar LIVE OPS, e reabra o menu EVENTOS do jogo.
+6. Verifique a grade de sábado/domingo: 11h–13h, 14h–16h, 17h–19h e 20h–22h.
+
+O SQL deve ser executado APÓS o código. Caso contrário, a versão antiga ainda interpreta os cinco eventos como intervalos.
+
+FUSO: America/Sao_Paulo. A primeira semana inicia em 24/10/2026.
+ROTAÇÃO: INVASÃO RIFT, ANOMALIA PRIME, SURTO DE MINERAÇÃO, COMBOIO QUÂNTICO, RUPTURA WARFRONT, repetindo continuamente.
+RECOMPENSAS: sem alterações. Validador SQL confere que evento, início e janela combinam com o slot oficial.
+ROLLBACK: sql/V34_1_0_WEEKEND_EVENTS_ROLLBACK.sql, depois restaurar o código anterior.
+
+Este arquivo não executa migração ou deploy sozinho.
