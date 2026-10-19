@@ -17,4 +17,8 @@ Nota: esta revisão é de compactação e limpeza, não inclui alterações em c
 
 - **V30.1.2**: bosses 32 directions; common NPCs remain 16.
 
-- **V30.2.3**: barra de munição mais fina no dock inferior, remoção dos botões visuais de LASER/CTRL e MÍSSIL/ESPAÇO, remoção do contador “MÍSSIL PRONTO” e redução do espaço vertical ocupado pela HUD de armas.
+- **V30.3.0**: barra de munição mais fina no dock inferior, remoção dos botões visuais de LASER/CTRL e MÍSSIL/ESPAÇO, remoção do contador “MÍSSIL PRONTO” e redução do espaço vertical ocupado pela HUD de armas.
+
+- **V30.3.0**: presets locais PVE/PVP/FARM/BOSS por nave, aplicação sem criar itens, mantendo escudo e HP; cópia de configurações preserva o escudo armazenado do destino; interface compacta no hangar.
+
+- **V30.3.1**: proteção contra travamento do loop principal (rAF agendado em finally) e isolamento de falhas do painel de presets, preservando combate e progresso. Registro de erro local sem telemetria externa.

@@ -5,14 +5,14 @@ import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 const root=resolve(fileURLToPath(new URL('..',import.meta.url)));
 
-test('V30.2.3: barra de armas remove controles visuais redundantes do topo',()=>{
+test('V30.3.1: barra de armas remove controles visuais redundantes do topo',()=>{
   const html=readFileSync(resolve(root,'public/index.html'),'utf8');
   assert.ok(!html.includes('id="laserToggle"'));
   assert.ok(!html.includes('id="rocketFire"'));
   assert.ok(!html.includes('id="rocketCd"'));
 });
 
-test('V30.2.3: game.js tolera ausência dos controles visuais removidos',()=>{
+test('V30.3.1: game.js tolera ausência dos controles visuais removidos',()=>{
   const js=readFileSync(resolve(root,'public/game.js'),'utf8');
   assert.ok(js.includes('if(ui.laserToggle)ui.laserToggle.classList.toggle'));
   assert.ok(js.includes('if(ui.rocketCd)HUD_CONTENT_CACHE.text(ui.rocketCd'));
