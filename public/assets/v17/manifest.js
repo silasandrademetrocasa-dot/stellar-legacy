@@ -263,6 +263,18 @@ export const GAME_ASSETS = {
     bossDevolarium: '/assets/v30/npcsheets/elite.webp',
     bossSibelon: '/assets/v30/npcsheets/elite.webp'
   },
+  npcMapSheets32: {
+    bossRiftScout: '/assets/v30/npcsheets32/elite.webp',
+    bossVoidCorsair: '/assets/v30/npcsheets32/elite.webp',
+    bossNexusWarden: '/assets/v30/npcsheets32/elite.webp',
+    bossAstralReaper: '/assets/v30/npcsheets32/elite.webp',
+    bossStreuner: '/assets/v30/npcsheets32/elite.webp',
+    bossLordakia: '/assets/v30/npcsheets32/elite.webp',
+    bossSaimon: '/assets/v30/npcsheets32/elite.webp',
+    bossMordon: '/assets/v30/npcsheets32/elite.webp',
+    bossDevolarium: '/assets/v30/npcsheets32/elite.webp',
+    bossSibelon: '/assets/v30/npcsheets32/elite.webp'
+  },
   equipment: {
     lf1: '/assets/v17/equipment/arc1.webp',
     mp1: '/assets/v17/equipment/arcp1.webp',

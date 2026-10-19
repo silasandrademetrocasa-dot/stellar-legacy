@@ -1,6 +1,6 @@
 {
   "name": "stellar-legacy",
-  "version": "30.1.1",
+  "version": "30.1.2",
   "type": "module",
   "scripts": {
     "start": "node server/index.js",
@@ -19,5 +19,5 @@
   "engines": {
     "node": ">=18"
   },
-  "release": "players plus drones and AUX 32 directions"
+  "release": "bosses 32 directions; common NPCs remain 16"
 }

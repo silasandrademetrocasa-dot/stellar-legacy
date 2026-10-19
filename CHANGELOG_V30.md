@@ -14,3 +14,5 @@ Nota: esta revisão é de compactação e limpeza, não inclui alterações em c
 - **V30.1.0**: players 32 directions, calibrated north and clockwise.
 
 - **V30.1.1**: players plus drones and AUX 32 directions.
+
+- **V30.1.2**: bosses 32 directions; common NPCs remain 16.
