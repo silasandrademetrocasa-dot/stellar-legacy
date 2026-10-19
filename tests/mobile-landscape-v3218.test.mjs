@@ -22,5 +22,5 @@ test('chat não pode ser limitado a 100px e mantém input visível na horizontal
  assert.match(css,/#bottomHudDock #chatDock:not\(\.collapsed\) \.chat-compose\{[^}]*display:grid!important;/);
 });
 test('minimapa no celular não é repintado em cada quadro',()=>{
- assert.match(game,/const mapInterval=document\.body\.classList\.contains\('mobile-landscape-pro'\)\?100:/);
+ assert.match(game,/const mapInterval=minimapPaintInterval\(\{mobile:DEVICE_CAPS\.mobile/);
 });

@@ -1,11 +1,12 @@
 import { randomUUID } from 'crypto';
 import {admitNpcDamage} from './combat-throttle.js';
+import {PORTAL_NEUTRAL_RADIUS,playerInNeutralPortalRange} from './portal-safety.js';
+import {socketMessageAllowed,boundedVital} from './realtime-guard.js';
 import { WebSocketServer, WebSocket } from 'ws';
 import {selectLiveDirective,directiveToWorldEvent} from './universe-directives.js';
 import {captureElapsedSeconds, classifyWarfrontCaptureError, withCaptureTimeout, CAPTURE_FAILURE_BACKOFF_MS} from './warfront-capture.js';
 import { FACTIONS, MAPS, NPC_TYPES, RESOURCES } from '../public/data.js';
 
-const PORTAL_NEUTRAL_RADIUS = 180;
 const LIVE_OPS_REFRESH_MS = 15000;
 
 // V18.1.8 • NETWORK OPTIMIZATION
@@ -673,7 +674,7 @@ class Room {
         this.world.recordSecurityViolation?.(p.userId,{code:'WORLD_MOVEMENT_ANOMALY',severity:'warn',evidence:{map:String(this.mapId),movement:Math.round(requestedDist)}},'world_motion').catch(()=>{});
       }
     }else{p.x=nextX;p.y=nextY;ws.motionAnomalies=Math.max(0,(ws.motionAnomalies||0)-1);}
-    p.angle=Number(msg.angle)||0;p.hp=Math.max(0,Number(msg.hp)||0);p.shield=Math.max(0,Number(msg.shield)||0);p.maxHp=Math.max(1,Number(msg.maxHp)||1);p.maxShield=Math.max(0,Number(msg.maxShield)||0);p.faction=p.faction||'earth';p.shipId=shortText(msg.shipId||p.shipId||'phoenix',40);p.shipDesignId=msg.shipDesignId?shortText(msg.shipDesignId,64):null;p.level=Math.max(1,Number(p.level)||1);p.pilotTitle=shortText(msg.pilotTitle||p.pilotTitle||'Piloto Estelar',64);
+    p.angle=boundedVital(msg.angle,{fallback:0,max:1e6,min:-1e6});p.maxHp=boundedVital(msg.maxHp,{fallback:Math.max(1,p.maxHp||1),max:1e12,min:1});p.maxShield=boundedVital(msg.maxShield,{fallback:p.maxShield||0,max:1e12});p.hp=Math.min(p.maxHp,boundedVital(msg.hp,{fallback:p.hp||0,max:1e12}));p.shield=Math.min(p.maxShield,boundedVital(msg.shield,{fallback:p.shield||0,max:1e12}));p.faction=p.faction||'earth';p.shipId=shortText(msg.shipId||p.shipId||'phoenix',40);p.shipDesignId=msg.shipDesignId?shortText(msg.shipDesignId,64):null;p.level=Math.max(1,Number(p.level)||1);p.pilotTitle=shortText(msg.pilotTitle||p.pilotTitle||'Piloto Estelar',64);
     p.laserFiring=!!msg.laserFiring;p.laserColor=safeColor(msg.laserColor,p.laserColor||'#76d9ff');p.laserAmmoId=shortText(msg.laserAmmoId||p.laserAmmoId||'lcb10',24);p.laserAmmoName=shortText(msg.laserAmmoName||p.laserAmmoName||'PLS-1',20);p.targetId=msg.targetId?shortText(msg.targetId,96):null;p.targetIsPlayer=!!msg.targetIsPlayer;
     const pet=msg.pet&&typeof msg.pet==='object'?msg.pet:null;
     if(pet?.owned){p.pet={owned:true,level:Math.max(1,Math.min(15,Number(pet.level)||1)),x:clamp(pet.x,0,this.map.world.w),y:clamp(pet.y,0,this.map.world.h),angle:Number(pet.angle)||0,activeGear:shortText(pet.activeGear||'off',24),laserTargetId:pet.laserTargetId?shortText(pet.laserTargetId,96):null,laserActive:!!pet.laserActive,laserColor:safeColor(pet.laserColor,p.laserColor),designId:pet.designId?shortText(pet.designId,64):null};}else p.pet={owned:false};
@@ -684,7 +685,7 @@ class Room {
     if(!['x1','x8'].includes(this.mapId)||this.territoryFaction!==p.faction)return false;const b=basePointForFaction(this.territoryFaction,this.mapId);return Math.hypot(p.x-b.x,p.y-b.y)<=520;
   }
   playerPortalNeutral(p){
-    return this.world.portalsForRoom(this.mapId,this.territoryFaction).some(portal=>Math.hypot(p.x-Number(portal.x||0),p.y-Number(portal.y||0))<=PORTAL_NEUTRAL_RADIUS);
+    return playerInNeutralPortalRange(p,this.world.portalsForRoom(this.mapId,this.territoryFaction),{mapId:this.mapId,battle:!!this.map?.battle});
   }
   playerProtectedFromNpc(p,e=null){
     const retaliating=String(e?.aggroUserId||'')===String(p?.userId||'');
@@ -928,6 +929,7 @@ export function attachSharedUniverse(server,{authenticate,authorizeJoin,recordSe
   const wss=new WebSocketServer({
     server,
     path:'/ws',
+    maxPayload:64*1024, // no JSON do jogo requer payload maior; bloqueia floods grandes
     perMessageDeflate:{
       threshold:512,
       concurrencyLimit:5,
@@ -1088,7 +1090,8 @@ export function attachSharedUniverse(server,{authenticate,authorizeJoin,recordSe
     try{ws._socket?.setNoDelay?.(true);}catch{}
     ws.isAuthed=false;ws.authTimer=setTimeout(()=>{try{ws.close(4401,'auth timeout');}catch{}},8000);
     ws.on('message',async raw=>{
-      let msg;try{msg=JSON.parse(String(raw));}catch{return;}
+      if(!socketMessageAllowed(ws))return;
+      let msg;try{msg=JSON.parse(String(raw));if(!msg||typeof msg!=='object'||Array.isArray(msg))return;}catch{return;}
       if(msg.type==='ping')return safeJsonSend(ws,{type:'pong',ts:msg.ts,serverTime:nowMs()});
       if(!ws.isAuthed){
         if(msg.type!=='auth')return;
@@ -1133,7 +1136,7 @@ export function attachSharedUniverse(server,{authenticate,authorizeJoin,recordSe
       }
       if(msg.type==='npc_damage')return await ws.room?.handleDamage(ws,msg);
       if(msg.type==='collect_ore')return await ws.room?.handleOreCollect(ws,msg);
-      if(msg.type==='force_event'&&String(ws.identity.callsign||'').trim().toUpperCase()==='FELP22'){
+      if(msg.type==='force_event'&&ws.identity?.isAdmin===true&&String(ws.identity.callsign||'').trim().toUpperCase()==='FELP22'){
         await world.refreshLiveOps(true);
         safeJsonSend(ws,{type:'live_ops_refresh',ok:true,event:world.currentEvent(),serverTime:nowMs()});
         return;
