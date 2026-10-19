@@ -16,3 +16,5 @@ Nota: esta revisão é de compactação e limpeza, não inclui alterações em c
 - **V30.1.1**: players plus drones and AUX 32 directions.
 
 - **V30.1.2**: bosses 32 directions; common NPCs remain 16.
+
+- **V30.2.0**: renderização mobile otimizada: proteção do cache dos atlas V30, LOD intermediário para NPCs distantes, DPR mínimo melhorado no perfil baixo e seleção AUTO menos agressiva; sprites de naves/drones/AUX/bosses preservados, sem alteração de combate/SQL.
