@@ -27,5 +27,5 @@ test('sprites direcionais de jogadores, drones e NPCs acessíveis',async()=>{
 });
 test('integrador 16 posições e designers preservados',()=>{
   const game=read('public/game.js');
-  for(const signature of ['drawAuxSpriteSheet(sheet,a,size','drawAuxSpriteSheet(sheet,face,size','drawAuxSpriteSheet(sheet,a+Math.PI,size','drawDesignerAuraLocal'])assert.ok(game.includes(signature),signature);
+  for(const signature of ['drawAuxSpriteSheet(sheet,a,size','drawAuxSpriteSheet(sheet,heading,size','drawAuxSpriteSheet(sheet,a+Math.PI/2,size','drawDesignerAuraLocal'])assert.ok(game.includes(signature),signature);
 });
