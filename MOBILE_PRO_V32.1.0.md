@@ -7,4 +7,4 @@
 - Sem alterações em SQL, economia, combate ou lógica de inventário.
 - Requer testes visuais e de toque em aparelhos reais antes de produção.
 
-- **V34.1.0**: ajuste visual complementar dos minérios, melhorando a leitura no mobile e no PC.
+- **V34.1.1**: ajuste visual complementar dos minérios, melhorando a leitura no mobile e no PC.

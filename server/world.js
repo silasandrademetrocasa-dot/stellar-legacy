@@ -1,5 +1,6 @@
 import { idleNpcStep, shouldLeashNpc, NpcAggroWindow } from './npc-intelligence-v34.js';
 import { resolveLiveEvent } from './live-event-scheduler-v341.js';
+import { eventControlProfile } from '../public/modules/event-control-profile-v3411.js';
 import { randomUUID } from 'crypto';
 import {admitNpcDamage} from './combat-throttle.js';
 import {PORTAL_NEUTRAL_RADIUS,playerInNeutralPortalRange} from './portal-safety.js';
@@ -307,7 +308,7 @@ class Room {
   }
 
   currentEventDef(){ const live=this.world.currentEvent();if(live&&this.eventEligible(live))return live;return directiveToWorldEvent(selectLiveDirective(this.world.directives,this.mapId),this.mapId); }
-  eventProfile(ev=this.event){return eventVariant(ev?.id);}
+  eventProfile(ev=this.event){return eventControlProfile(eventVariant(ev?.id),ev?.rules?.event_control);}
   eventMode(ev=this.event){return this.eventProfile(ev).mode;}
   eventEligible(ev){
     if(!ev)return false;
@@ -862,7 +863,7 @@ class Room {
       const profile=this.eventProfile(),mode=profile.mode;
       if(mode==='wave'||mode==='battle_wave'){
         const alive=[...this.npcs.values()].filter(e=>e.eventNpc&&e.eventId===this.event.eventId).length,minimum=profile.minAlive||3,targetWave=profile.waveCount||6;
-        if(alive<minimum)this.spawnEventWave(Math.max(1,targetWave-alive));
+        if(alive<minimum&&(!profile.waveRespawnMs||now>=this.nextEventWaveAt)){this.spawnEventWave(Math.max(1,targetWave-alive));if(profile.waveRespawnMs)this.nextEventWaveAt=now+profile.waveRespawnMs;}
       }
       // O BOSS retorna após 25s para permitir que outros pilotos concluam a mesma janela.
       // Quem já recebeu o prêmio continua bloqueado pelo registro pessoal no banco.
@@ -1014,7 +1015,7 @@ export function attachSharedUniverse(server,{authenticate,authorizeJoin,recordSe
       finally{this.directivesBusy=false;}
       return this.directives;
     },
-    currentEvent(){return resolveLiveEvent(world.liveOps?.events||[],nowMs());},
+    currentEvent(){return resolveLiveEvent(world.liveOps?.events||[],nowMs(),world.liveOps?.weekend_settings,world.liveOps?.manual_override);},
     async refreshLiveOps(force=false){
       const now=nowMs();
       if(!loadLiveOps)return world.liveOps;

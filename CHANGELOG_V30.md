@@ -32,4 +32,4 @@ Nota: esta revisão é de compactação e limpeza, não inclui alterações em c
 
 - **V32.1.8**: Mobile Experience Pro 2.0: landscape-first, 3 colunas no HUD inferior, hangar horizontal responsivo e convite não bloqueante a girar a tela.
 
-- **V34.1.0**: ajuste fino no tamanho visual dos minérios. Recursos comuns e especiais ficaram menores e mais proporcionais no mapa, sem alterar coleta, respawn ou economia.
+- **V34.1.1**: ajuste fino no tamanho visual dos minérios. Recursos comuns e especiais ficaram menores e mais proporcionais no mapa, sem alterar coleta, respawn ou economia.

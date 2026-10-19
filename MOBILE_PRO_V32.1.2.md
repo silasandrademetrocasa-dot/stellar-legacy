@@ -11,4 +11,4 @@
 
 - **V32.1.8**: chat com altura igual à do minimapa e envio de mensagens acessível no horizontal; nomes PLS/SIP/CMT no HUD; nomenclatura Stellar na coleta dos minérios (online, AUX e nave); radar no landscape limitado a 10 atualizações por segundo para reduzir custo gráfico. IDs internos e SQL preservados.
 
-- **V34.1.0**: recursos minerais menores e mais proporcionais no campo de visão.
+- **V34.1.1**: recursos minerais menores e mais proporcionais no campo de visão.

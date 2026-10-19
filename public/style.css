@@ -3991,7 +3991,7 @@ body.stellar-hud-quiet #gateHud{visibility:visible;}
 @media(max-width:680px){.next-npc-target-v32{font-size:8px;padding:3px 5px}}
 
 
-/* ===== V34.1.0 MOBILE EXPERIENCE PRO: layer final, depois dos overrides antigos ===== */
+/* ===== V34.1.1 MOBILE EXPERIENCE PRO: layer final, depois dos overrides antigos ===== */
 .mobile-combat-mode-btn{display:none;}
 @media (hover:none),(pointer:coarse){
   .mobile-combat-mode-btn{display:block;position:fixed;right:calc(env(safe-area-inset-right, 0px) + 7px);top:calc(env(safe-area-inset-top, 0px) + 48px);z-index:42;min-height:30px;padding:4px 9px;border-radius:9px;border:1px solid rgba(85,217,255,.35);background:rgba(5,20,36,.88);color:#c5efff;font-size:10px;font-weight:900;touch-action:manipulation;}
@@ -4027,7 +4027,7 @@ body.stellar-hud-quiet #gateHud{visibility:visible;}
 }
 
 
-/* ===== V34.1.0: MOBILE EXPERIENCE PRO 2.0 • LANDSCAPE FIRST ===== */
+/* ===== V34.1.1: MOBILE EXPERIENCE PRO 2.0 • LANDSCAPE FIRST ===== */
 .mobile-landscape-tip{display:none;}
 @media(max-width:650px) and (orientation:portrait){
   .mobile-landscape-tip:not(.hidden){
@@ -4108,7 +4108,7 @@ body.mobile-landscape-pro .combat-state-hud{top:calc(env(safe-area-inset-top,0px
 body.mobile-landscape-pro .combat-state-hud small{display:none!important;}
 /* Manter COMPACTO disponível sem disputar espaço com o painel do evento. */
 body.mobile-landscape-pro .mobile-combat-mode-btn{display:none!important;}
-/* V34.1.0: mover o atalho global do HUD para a faixa superior, ao lado do menu CONF. */
+/* V34.1.1: mover o atalho global do HUD para a faixa superior, ao lado do menu CONF. */
 body.mobile-landscape-pro .hud-intelligence-quick{
   top:calc(env(safe-area-inset-top,0px) + 7px)!important;
   right:calc(env(safe-area-inset-right,0px) + 46px)!important;
@@ -4308,7 +4308,7 @@ body.mobile-landscape-pro #hangarModal .hangar-inventory-grid{grid-template-colu
  body.mobile-landscape-pro #bottomHudDock #weaponBar{height:54px!important;min-height:54px!important;max-height:54px!important;}
  body.mobile-landscape-pro #topHudDock>.hud-panel:not(.collapsed){max-height:90px!important;}
 }
-/* V34.1.0 final cascade guards: older weapon-grid selectors must not stretch each ammo family. */
+/* V34.1.1 final cascade guards: older weapon-grid selectors must not stretch each ammo family. */
 body.mobile-landscape-pro #bottomHudDock #weaponBar .ammo-clusters .weapon-section{
   width:max-content!important;max-width:none!important;min-width:max-content!important;flex:0 0 auto!important;
 }
@@ -4335,7 +4335,7 @@ body.mobile-landscape-pro #bottomHudDock #minimapPanel.collapsed #minimap{
   display:none!important;
 }
 
-/* V34.1.0 — modais mais compactos no landscape para evitar cortes verticais. */
+/* V34.1.1 — modais mais compactos no landscape para evitar cortes verticais. */
 body.mobile-landscape-pro .modal{padding:4px 6px!important;align-items:flex-start!important;}
 body.mobile-landscape-pro .modal>.modal-card{
   width:min(100%,calc(100vw - 10px))!important;
@@ -4441,7 +4441,7 @@ body.mobile-landscape-pro .modal .mission-card p{font-size:9px!important;min-hei
   body.mobile-landscape-pro .modal .section-box{padding:7px!important;margin-bottom:6px!important;}
 }
 
-/* V34.1.0 — minimapa maior no landscape mobile para melhor leitura. */
+/* V34.1.1 — minimapa maior no landscape mobile para melhor leitura. */
 body.mobile-landscape-pro{
   --minimap-dock-width-expanded:268px;
   --minimap-dock-width-collapsed:68px;
@@ -4469,7 +4469,7 @@ body.mobile-landscape-pro #bottomHudDock #minimapPanel.collapsed{
 }
 
 
-/* V34.1.0 - Chat mobile em landscape com campo de digitação sempre visível. */
+/* V34.1.1 - Chat mobile em landscape com campo de digitação sempre visível. */
 body.mobile-landscape-pro #bottomHudDock.bottom-hud-dock #chatDock:not(.collapsed){
   width:100%!important;height:176px!important;min-height:176px!important;max-height:176px!important;
   overflow:hidden!important;display:flex!important;flex-direction:column!important;
@@ -4584,7 +4584,7 @@ body.mobile-landscape-pro #topHudDock .hud-panel:not(.collapsed) .player-float-h
  body.mobile-landscape-pro .boss-phase-hud #bossPhaseStatus{font-size:8px!important;letter-spacing:0!important;}
 }
 
-/* V34.1.0 • calendário de eventos de fim de semana — leve no mobile */
+/* V34.1.1 • calendário de eventos de fim de semana — leve no mobile */
 .weekend-event-calendar{border:1px solid rgba(80,211,255,.25);background:linear-gradient(155deg,rgba(5,29,44,.95),rgba(5,15,28,.97));border-radius:13px;padding:12px;margin:0 0 12px}
 .weekend-event-calendar-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:9px}
 .weekend-event-calendar-head h3{margin:2px 0 3px;color:#dffaff;font-size:14px}
@@ -4600,3 +4600,6 @@ body.mobile-landscape-pro #topHudDock .hud-panel:not(.collapsed) .player-float-h
 .weekend-adm-note{padding:8px;border-radius:8px;background:rgba(12,56,52,.65);border:1px solid rgba(107,233,185,.23);color:#abeed6;font-size:10px;font-weight:750;margin:6px 0}
 .admin-event-card.weekend-scheduled .admin-event-fields,.admin-event-card.weekend-scheduled .admin-event-weekdays{display:none!important}
 @media(max-width:800px){.weekend-event-schedule{grid-template-columns:1fr}.weekend-event-slot{grid-template-columns:52px 82px minmax(0,1fr);padding:5px;font-size:8px}.weekend-event-calendar{padding:8px}.weekend-event-calendar-head h3{font-size:12px}.weekend-event-calendar-head p{font-size:9px}.weekend-next b{font-size:12px}}
+/* V34.1.1 • Event Control Center • cards flexíveis desktop/mobile */
+.event-center{display:grid;gap:14px;width:100%;color:#dce9ff}.event-center-header,.event-center-block{border:1px solid rgba(95,170,255,.22);border-radius:14px;padding:14px;background:linear-gradient(135deg,rgba(15,37,61,.9),rgba(5,13,29,.94))}.event-center-header span{font:700 10px Arial;color:#75dcff;letter-spacing:1.1px}.event-center-header h3{font-size:19px;margin:5px 0}.event-center-header p,.event-center-help{font-size:11px;line-height:1.5;color:#aac0d7;margin:5px 0 10px}.event-center-block h4{font-size:14px;color:#a9eaff;margin:2px 0 8px}.event-center-title,.event-center-actions{display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap}.event-center-title strong{font-size:13px}.event-center-title small{display:block;color:#93abc7;font-size:10px;margin-top:3px}.event-center-slots,.event-center-event-list{display:grid;gap:8px;margin:12px 0}.event-center-slot,.event-center-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}.event-center-slot{grid-template-columns:minmax(95px,1.1fr) minmax(100px,1fr) minmax(110px,1fr) auto;border-radius:10px;padding:8px;background:rgba(15,41,69,.7)}.event-center-slot>button{align-self:end}.event-center label{display:flex;flex-direction:column;gap:4px;font-size:10px;color:#b8cfe7}.event-center label:has(input[type=checkbox]){display:flex;flex-direction:row;align-items:center;font-size:11px}.event-center input:not([type=checkbox]),.event-center select{width:100%;min-width:0;box-sizing:border-box;border-radius:7px;background:#0c1d34;border:1px solid #355474;color:#f1f7ff;padding:8px;font-size:12px}.event-center input[type=checkbox]{accent-color:#51d6ff}.event-center-preview{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:6px;margin-top:12px}.event-center-preview span,.event-center-manual-status{padding:8px;border:1px solid rgba(95,170,255,.15);border-radius:8px;background:rgba(17,38,65,.7);font-size:11px}.event-center-event{display:grid;gap:12px;border:1px solid rgba(103,175,245,.25);border-radius:12px;padding:12px;background:rgba(13,28,48,.7)}.event-center-event>button{justify-self:start}.event-center-advanced{border:1px dashed #355474;padding:10px;border-radius:10px}.event-center-advanced summary{cursor:pointer;font-size:11px;color:#78ddff}.event-center-advanced small{font-size:10px;color:#9eaec7}.event-center-manual-status{margin:10px 0}.event-center-actions>label{min-width:120px;flex:1}
+@media(max-width:700px){.event-center-slot{grid-template-columns:repeat(2,minmax(0,1fr))}.event-center-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.event-center-slot>button{min-height:32px}}

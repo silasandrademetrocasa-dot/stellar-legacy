@@ -780,6 +780,16 @@ export async function loadLiveOpsOnline(force=false) {
   return authedServerFetch(`/api/live-ops${suffix}`, {}, false);
 }
 
+export async function adminUpdateWeekendSettingsOnline(payload){
+  return authedServerFetch('/api/admin/runtime/events/central/settings',{method:'POST',body:JSON.stringify(payload)},false);
+}
+export async function adminUpdateWeekendEventOnline(eventKey,payload){
+  return authedServerFetch(`/api/admin/runtime/events/central/event/${encodeURIComponent(String(eventKey||''))}`,{method:'POST',body:JSON.stringify(payload)},false);
+}
+export async function adminSetManualEventOnline(payload){
+  return authedServerFetch('/api/admin/runtime/events/central/manual',{method:'POST',body:JSON.stringify(payload)},false);
+}
+
 export async function adminUpdateLiveEventScheduleOnline(eventKey,payload={}) {
   return authedServerFetch(`/api/admin/runtime/events/${encodeURIComponent(String(eventKey||''))}`, {
     method:'POST', body:JSON.stringify(payload&&typeof payload==='object'?payload:{})

@@ -1,51 +1,45 @@
-// Stellar Legacy • V34.1.0 • horário oficial America/Sao_Paulo.
-// Brasil utiliza UTC-3 sem horário de verão desde 2019. A origem da rotação
-// é sábado 24/10/2026; sequências persistem entre fins de semana e restarts.
+// Stellar Legacy V34.1.1 — Agenda de eventos dirigida pelo Supabase.
+// Mantém os oito slots da V34.1.1 como fallback para migração segura.
 export const WEEKEND_SLOT_HOURS=Object.freeze([11,14,17,20]);
 export const WEEKEND_EVENT_DURATION_MS=120*60*1000;
 const HOUR_MS=3600000, DAY_MS=86400000, SP_OFFSET_MS=3*HOUR_MS;
-const EPOCH_SATURDAY_DATE=Date.UTC(2026,9,24);
-const WEEK_MS=7*DAY_MS;
-
-export function weekendRotationRows(rows){
-  return (Array.isArray(rows)?rows:[])
-    .filter(row=>row?.enabled!==false && row?.rules?.weekend_rotation===true && row?.schedule_mode==='interval')
-    .sort((a,b)=>(Number(a.priority)||100)-(Number(b.priority)||100)||String(a.event_key||'').localeCompare(String(b.event_key||'')));
+const EPOCH_SATURDAY_DATE=Date.UTC(2026,9,24),WEEK_MS=7*DAY_MS;
+const DEFAULT_SLOTS=Object.freeze([6,0].flatMap(day=>WEEKEND_SLOT_HOURS.map(hour=>Object.freeze({day,start:String(hour).padStart(2,'0')+':00',duration:120}))));
+export const WEEKEND_DEFAULT_SETTINGS=Object.freeze({enabled:true,timezone:'America/Sao_Paulo',slots:DEFAULT_SLOTS});
+const toMinute=value=>{const m=/^([01]\d|2[0-3]):([0-5]\d)$/.exec(String(value||''));return m?Number(m[1])*60+Number(m[2]):null;};
+export function validateWeekendSettings(settings){
+  if(!settings||!Array.isArray(settings.slots)||settings.slots.length<1||settings.slots.length>16)throw new Error('A agenda precisa de 1 a 16 horários.');
+  const slots=settings.slots.map(raw=>{
+    const day=Number(raw?.day),start=String(raw?.start||''),duration=Number(raw?.duration),at=toMinute(start);
+    if(!Number.isInteger(day)||day<0||day>6||at==null||!Number.isInteger(duration)||duration<15||duration>360||at+duration>1440)throw new Error('Dia, horário ou duração inválidos. Use 15 a 360 minutos e termine antes da meia-noite.');
+    return {day,start,duration,minute:at};
+  }).sort((a,b)=>(a.day===6?0:a.day===0?1:a.day+1)-(b.day===6?0:b.day===0?1:b.day+1)||a.minute-b.minute);
+  const byDay=new Map();
+  for(const s of slots){const last=byDay.get(s.day)||0;if(s.minute<last)throw new Error('Os horários do mesmo dia não podem se sobrepor.');byDay.set(s.day,s.minute+s.duration);}
+  return {enabled:settings.enabled!==false,timezone:'America/Sao_Paulo',slots:slots.map(({day,start,duration})=>({day,start,duration}))};
 }
-export function weekendRotationEnabled(rows){
-  return weekendRotationRows(rows).length>0;
+export function weekendSchedule(settings){
+  try{return validateWeekendSettings(settings||WEEKEND_DEFAULT_SETTINGS);}catch{return validateWeekendSettings(WEEKEND_DEFAULT_SETTINGS);}
 }
-function slotForDay(localDay,dayIndex,slotIndex,rows){
-  const saturdayDate=localDay-(dayIndex===1?DAY_MS:0);
-  const weekIndex=Math.floor((saturdayDate-EPOCH_SATURDAY_DATE)/WEEK_MS);
-  if(weekIndex<0)return null;
-  const serial=weekIndex*8+dayIndex*4+slotIndex;
-  const row=rows[((serial%rows.length)+rows.length)%rows.length];
-  const start=localDay+WEEKEND_SLOT_HOURS[slotIndex]*HOUR_MS+SP_OFFSET_MS;
-  return {event_key:String(row.event_key),name:String(row.name||row.event_key),icon:String(row.icon||'✦'),start,end:start+WEEKEND_EVENT_DURATION_MS,serial,weekIndex,dayIndex,slotIndex,row};
+export function weekendRotationRows(rows){return (Array.isArray(rows)?rows:[]).filter(r=>r?.enabled!==false&&r?.rules?.weekend_rotation===true&&r?.schedule_mode==='interval').sort((a,b)=>(Number(a.priority)||100)-(Number(b.priority)||100)||String(a.event_key||'').localeCompare(String(b.event_key||'')));}
+export function weekendRotationEnabled(rows,settings=null){return settings?.enabled!==false&&weekendRotationRows(rows).length>0;}
+function slotForDay(localDay,weekIndex,index,rows,config){
+  const slot=config.slots[index];
+  const weekday=new Date(localDay).getUTCDay();if(weekday!==slot.day)return null;
+  const serial=weekIndex*config.slots.length+index,row=rows[((serial%rows.length)+rows.length)%rows.length];
+  const start=localDay+toMinute(slot.start)*60000+SP_OFFSET_MS;
+  return {event_key:String(row.event_key),name:String(row.name||row.event_key),icon:String(row.icon||'✦'),start,end:start+slot.duration*60000,serial,weekIndex,dayIndex:weekday===6?0:weekday===0?1:weekday+1,slotIndex:index,row};
 }
-export function activeWeekendSlot(sourceRows,now=Date.now()){
-  const rows=weekendRotationRows(sourceRows);if(!rows.length)return null;
-  const localNow=now-SP_OFFSET_MS,dayMs=Math.floor(localNow/DAY_MS)*DAY_MS,day=new Date(dayMs).getUTCDay();
-  if(day!==6&&day!==0)return null;
-  for(let index=0;index<4;index++){
-    const slot=slotForDay(dayMs,day===6?0:1,index,rows);
-    if(slot&&now>=slot.start&&now<slot.end)return slot;
-  }
-  return null;
+function weekIndexForDay(dayMs){const dow=new Date(dayMs).getUTCDay(),daysSinceSat=(dow+1)%7,sat=dayMs-daysSinceSat*DAY_MS;return Math.floor((sat-EPOCH_SATURDAY_DATE)/WEEK_MS);}
+export function activeWeekendSlot(sourceRows,now=Date.now(),settings=null){
+  const rows=weekendRotationRows(sourceRows),config=weekendSchedule(settings);if(!rows.length||!config.enabled)return null;
+  const localDay=Math.floor((now-SP_OFFSET_MS)/DAY_MS)*DAY_MS,weekIndex=weekIndexForDay(localDay);if(weekIndex<0)return null;
+  for(let i=0;i<config.slots.length;i++){const slot=slotForDay(localDay,weekIndex,i,rows,config);if(slot&&now>=slot.start&&now<slot.end)return slot;}return null;
 }
-export function upcomingWeekendSlots(sourceRows,now=Date.now(),limit=8){
-  const rows=weekendRotationRows(sourceRows);if(!rows.length)return [];
-  const localNow=now-SP_OFFSET_MS,localDay=Math.floor(localNow/DAY_MS)*DAY_MS;
-  const items=[];
-  for(let dayOffset=0;dayOffset<=17&&items.length<limit;dayOffset++){
-    const dayMs=localDay+dayOffset*DAY_MS,dow=new Date(dayMs).getUTCDay();
-    if(dow!==6&&dow!==0)continue;
-    for(let index=0;index<4&&items.length<limit;index++){
-      const slot=slotForDay(dayMs,dow===6?0:1,index,rows);
-      if(slot&&slot.end>now)items.push(slot);
-    }
-  }
+export function upcomingWeekendSlots(sourceRows,now=Date.now(),limit=8,settings=null){
+  const rows=weekendRotationRows(sourceRows),config=weekendSchedule(settings);if(!rows.length||!config.enabled)return [];
+  const localDay=Math.floor((now-SP_OFFSET_MS)/DAY_MS)*DAY_MS,items=[];
+  for(let d=0;d<=35&&items.length<limit;d++){const dayMs=localDay+d*DAY_MS,weekIndex=weekIndexForDay(dayMs);if(weekIndex<0)continue;for(let i=0;i<config.slots.length&&items.length<limit;i++){const slot=slotForDay(dayMs,weekIndex,i,rows,config);if(slot&&slot.end>now)items.push(slot);}}
   return items;
 }
 export function weekendSlotSignature(slot){return slot?`v1817:${slot.event_key}:${slot.start}`:null;}

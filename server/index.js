@@ -17,7 +17,7 @@ import { createSecurityService } from './security-service.js';
 
 const app = express();
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const RELEASE_VERSION = '34.1.0'; // único identificador de release nos endpoints HTTP
+const RELEASE_VERSION = '34.1.1'; // único identificador de release nos endpoints HTTP
 
 function normalizeSupabaseUrl(value = '') {
   let url = String(value || '').trim();
@@ -1180,6 +1180,35 @@ app.post('/api/admin/runtime/events/:eventKey', requireUser, asyncRoute(async(re
   if(error){const msg=String(error.message||'Falha ao salvar agenda do evento.');return res.status(/administrativ|permiss|negado/i.test(msg)?403:400).json({error:msg});}
   const runtime=await loadLiveOpsSnapshot(true);try{await sharedUniverse.refreshLiveOps(true);}catch{}
   res.set('Cache-Control','no-store');res.json({ok:true,event_key:key,runtime,saved:data||null});
+}));
+
+// V34.1.1 — controle total dos eventos: somente RPCs com checagem de ADM no banco.
+async function saveEventCenter(req,res,procedure,args){
+  const {data,error}=await req.sb.rpc(procedure,args);
+  if(error){const message=String(error.message||'Falha ao salvar eventos.');return res.status(/administrativ|negado|permiss/i.test(message)?403:400).json({error:message});}
+  const runtime=await loadLiveOpsSnapshot(true);
+  try{await sharedUniverse.refreshLiveOps(true);}catch{}
+  res.set('Cache-Control','no-store');return res.json({ok:true,runtime,saved:data||null});
+}
+app.post('/api/admin/runtime/events/central/settings',requireUser,asyncRoute(async(req,res)=>{
+  const raw=req.body||{};
+  if(typeof raw.enabled!=='boolean'||!Array.isArray(raw.slots))return res.status(400).json({error:'Agenda inválida.'});
+  return saveEventCenter(req,res,'admin_set_weekend_settings_v3411',{p_enabled:raw.enabled,p_slots:raw.slots});
+}));
+app.post('/api/admin/runtime/events/central/event/:eventKey',requireUser,asyncRoute(async(req,res)=>{
+  const key=safeWorldId(req.params.eventKey),body=req.body||{};
+  if(!key||typeof body.enabled!=='boolean')return res.status(400).json({error:'Evento inválido.'});
+  return saveEventCenter(req,res,'admin_set_weekend_event_v3411',{
+    p_event_key:key,p_enabled:body.enabled,p_priority:body.priority,
+    p_target:body.target,p_reward:body.reward,p_controls:body.controls||{}
+  });
+}));
+app.post('/api/admin/runtime/events/central/manual',requireUser,asyncRoute(async(req,res)=>{
+  const body=req.body||{},stop=body.stop===true;
+  if(!stop&&!safeWorldId(body.event_key))return res.status(400).json({error:'Evento inválido.'});
+  return saveEventCenter(req,res,'admin_set_manual_event_v3411',{
+    p_event_key:stop?null:safeWorldId(body.event_key),p_duration_minutes:stop?null:body.duration_minutes,p_stop:stop
+  });
 }));
 
 // V18.2.1 — cupons cadastrados exclusivamente no Supabase.

@@ -40,11 +40,20 @@ function buildEventPayload(row,start,end,slot){
     eventId:`v1817:${String(row.event_key||'event')}:${start}`
   };
 }
-export function resolveLiveEvent(rows, now=Date.now()){
-  const weekendMode=weekendRotationEnabled(rows);
-  const scheduled=weekendMode?activeWeekendSlot(rows,now):null;
+export function resolveLiveEvent(rows, now=Date.now(), settings=null, manualOverride=null){
+  const weekendMode=weekendRotationEnabled(rows,settings);
+  const scheduled=weekendMode?activeWeekendSlot(rows,now,settings):null;
+  // Interromper o calendário não pode reativar os ciclos antigos de 75 min.
+  const manual=manualOverride&&typeof manualOverride==='object'?manualOverride:null;
+  if(manual?.event_key){
+    const chosen=(Array.isArray(rows)?rows:[]).find(row=>row.enabled!==false&&row.event_key===manual.event_key);
+    const start=Date.parse(manual.start_at||''),end=Date.parse(manual.end_at||'');
+    if(chosen&&Number.isFinite(start)&&Number.isFinite(end)&&now>=start&&now<end){
+      return buildEventPayload(chosen,start,end,0);
+    }
+  }
   // Rotação semanal ocupa um único slot; eventos pontuais manuais são exceções.
-  const pool=(Array.isArray(rows)?rows:[]).filter(row=>row?.enabled&&(!weekendMode||row.schedule_mode==='once'||row.schedule_mode==='weekly')).sort((a,b)=>(Number(a.priority)||100)-(Number(b.priority)||100)||String(a.event_key||'').localeCompare(String(b.event_key||'')));
+  const pool=(Array.isArray(rows)?rows:[]).filter(row=>row?.enabled&&!(row.schedule_mode==='interval'&&row?.rules?.weekend_rotation===true)).sort((a,b)=>(Number(a.priority)||100)-(Number(b.priority)||100)||String(a.event_key||'').localeCompare(String(b.event_key||'')));
   const active=[];
   for(const row of pool){
     const duration=Math.max(1,Number(row.duration_minutes)||1)*60000,mode=String(row.schedule_mode||'interval');let window=null;

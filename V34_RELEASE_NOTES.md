@@ -1,4 +1,4 @@
-# STELLAR LEGACY V34.1.0 — GALACTIC EXPANSION
+# STELLAR LEGACY V34.1.1 — GALACTIC EXPANSION
 
 **Pacote único consolidado para instalar e testar**, derivado da V33.0.0. Sem migração SQL; não foi realizado deploy no Render/GitHub.
 
