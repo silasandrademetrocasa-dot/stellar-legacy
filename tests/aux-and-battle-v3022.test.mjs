@@ -6,14 +6,14 @@ import { fileURLToPath } from 'node:url';
 import { GAME_ASSETS } from '../public/assets/v17/manifest.js';
 const root=resolve(fileURLToPath(new URL('..',import.meta.url)));
 
-test('V30.3.1: AUX-9 usa arte padronizada atualizada',()=>{
+test('V30.4.0: AUX-9 usa arte padronizada atualizada',()=>{
   assert.equal(GAME_ASSETS.drones.pet,'/assets/v3022/drones/aux9.webp');
   assert.equal(GAME_ASSETS.drones.petElite,'/assets/v3022/drones/aux9-elite.webp');
   assert.ok(existsSync(resolve(root,'public/assets/v3022/drones/aux9.webp')));
   assert.ok(existsSync(resolve(root,'public/assets/v3022/drones/aux9-elite.webp')));
 });
 
-test('V30.3.1: hangar traz cópia rápida de configurações e remove preview 360 do AUX',()=>{
+test('V30.4.0: hangar traz cópia rápida de configurações e remove preview 360 do AUX',()=>{
   const game=readFileSync(resolve(root,'public/game.js'),'utf8');
   assert.ok(game.includes('function copyBattleConfigV2013('));
   assert.ok(game.includes('COPIAR CONF 1 → 2'));

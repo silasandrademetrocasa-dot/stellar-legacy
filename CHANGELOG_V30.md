@@ -21,4 +21,6 @@ Nota: esta revisão é de compactação e limpeza, não inclui alterações em c
 
 - **V30.3.0**: presets locais PVE/PVP/FARM/BOSS por nave, aplicação sem criar itens, mantendo escudo e HP; cópia de configurações preserva o escudo armazenado do destino; interface compacta no hangar.
 
-- **V30.3.1**: proteção contra travamento do loop principal (rAF agendado em finally) e isolamento de falhas do painel de presets, preservando combate e progresso. Registro de erro local sem telemetria externa.
+- **V30.4.0**: proteção contra travamento do loop principal (rAF agendado em finally) e isolamento de falhas do painel de presets, preservando combate e progresso. Registro de erro local sem telemetria externa.
+
+- **V30.4.0**: Hangar Pro com previsão de itens disponíveis e indisponíveis para presets, confirmação segura quando faltam itens, exclusão de presets e comparação de atributos das naves. Sem mudança de dano ou SQL.
