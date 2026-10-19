@@ -1,199 +1,53 @@
-name: 🚀 Instalar versão do Stellar Legacy
-run-name: Instalar ZIP do Stellar Legacy • ${{ github.actor }}
-
+name: 🚀 Stellar Legacy — Instalador Universal
+run-name: Instalar ZIP universal • ${{ github.actor }}
 on:
   workflow_dispatch:
-
 permissions:
   contents: write
-
 concurrency:
   group: stellar-zip-installer
   cancel-in-progress: false
-
 jobs:
   instalar:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
-
+    timeout-minutes: 20
     steps:
-      - name: Baixar a main
+      - name: Checkout main
         uses: actions/checkout@v4
         with:
           ref: main
           fetch-depth: 0
-
-      - name: Localizar e validar ZIP
+      - name: Selecionar ZIP
         shell: bash
         run: |
           set -euo pipefail
-
-          mapfile -t ZIPS < <(find . -maxdepth 1 -type f -name 'stellar-legacy*.zip' -printf '%T@ %p\n' | sort -nr | cut -d' ' -f2-)
-
-          if [ "${#ZIPS[@]}" -eq 0 ]; then
-            echo "❌ Nenhum ZIP encontrado na raiz."
+          mapfile -t ZIPS < <(find . -maxdepth 1 -type f -iname '*.zip' -printf '%P\n' | sort)
+          if [ "${#ZIPS[@]}" -ne 1 ]; then
+            printf 'Exatamente um ZIP deve estar na raiz. Encontrados: %s\n' "${#ZIPS[@]}"
+            printf '%s\n' "${ZIPS[@]}"
             exit 1
           fi
-
-          if [ "${#ZIPS[@]}" -gt 1 ]; then
-            echo "❌ Há mais de um ZIP na raiz:"
-            printf ' - %s\n' "${ZIPS[@]}"
-            echo "Deixe apenas o ZIP que deseja instalar."
-            exit 1
-          fi
-
-          ZIP_FILE="${ZIPS[0]#./}"
-          export ZIP_FILE
-
-          echo "ZIP_FILE=$ZIP_FILE" >> "$GITHUB_ENV"
-          echo "📦 ZIP selecionado: $ZIP_FILE"
-
-          python3 - <<'PY'
-          import hashlib, os, zipfile
-          from pathlib import Path
-
-          p = Path(os.environ['ZIP_FILE'])
-          data = p.read_bytes()
-          print(f'✅ Tamanho: {len(data)} bytes')
-          print(f'✅ SHA-256: {hashlib.sha256(data).hexdigest()}')
-
-          if not zipfile.is_zipfile(p):
-              raise SystemExit('❌ O arquivo encontrado não é um ZIP válido.')
-
-          print('✅ ZIP válido.')
-          PY
-
-      - name: Extrair e identificar versão
+          echo "STELLAR_ZIP=${ZIPS[0]}" >> "$GITHUB_ENV"
+      - name: Aplicar ZIP com segurança
+        run: python3 scripts/stellar-universal-installer.py "$STELLAR_ZIP"
+      - name: Validar projeto
         shell: bash
         run: |
           set -euo pipefail
-
-          rm -rf /tmp/stellar-release
-          mkdir -p /tmp/stellar-release
-
-          python3 - <<'PY'
-          import json, os, stat, zipfile
-          from pathlib import Path, PurePosixPath
-
-          zip_path = Path(os.environ['ZIP_FILE'])
-          out = Path('/tmp/stellar-release')
-
-          with zipfile.ZipFile(zip_path) as z:
-              total = 0
-              for info in z.infolist():
-                  p = PurePosixPath(info.filename)
-                  if p.is_absolute() or '..' in p.parts:
-                      raise SystemExit(f'❌ Caminho inválido no ZIP: {info.filename}')
-                  mode = (info.external_attr >> 16) & 0o170000
-                  if mode == stat.S_IFLNK:
-                      raise SystemExit(f'❌ Link simbólico não permitido: {info.filename}')
-                  total += info.file_size
-                  if total > 2 * 1024 * 1024 * 1024:
-                      raise SystemExit('❌ ZIP descompactado acima de 2 GB.')
-              z.extractall(out)
-
-          def valid_root(path: Path) -> bool:
-              return (
-                  (path / 'package.json').is_file()
-                  and (path / 'public' / 'game.js').is_file()
-                  and (path / 'public' / 'api.js').is_file()
-                  and (path / 'public' / 'data.js').is_file()
-                  and (path / 'server' / 'index.js').is_file()
-              )
-
-          source = out
-          if not valid_root(source):
-              children = [p for p in out.iterdir() if p.name not in {'__MACOSX', '.DS_Store'}]
-              dirs = [p for p in children if p.is_dir()]
-              files = [p for p in children if p.is_file()]
-              if len(dirs) == 1 and not files and valid_root(dirs[0]):
-                  source = dirs[0]
-              else:
-                  raise SystemExit('❌ Estrutura inválida: package.json, public/ e server/ não encontrados.')
-
-          pkg = json.loads((source / 'package.json').read_text(encoding='utf-8'))
-          version = str(pkg.get('version', '')).strip()
-          if not version:
-              raise SystemExit('❌ package.json sem versão.')
-
-          with open(os.environ['GITHUB_ENV'], 'a', encoding='utf-8') as env:
-              env.write(f'SOURCE_DIR={source}\n')
-              env.write(f'STELLAR_VERSION={version}\n')
-
-          print(f'✅ Estrutura validada: {source}')
-          print(f'✅ Versão detectada: {version}')
-          PY
-
-      - name: Instalar nova versão
-        shell: bash
-        run: |
-          set -euo pipefail
-
-          rsync -a --checksum --delete \
-            --exclude='.git/' \
-            --exclude='.github/' \
-            --exclude='stellar-legacy*.zip' \
-            "$SOURCE_DIR/" ./
-
-          # Força package.json da versão nova para evitar qualquer cache/timestamp antigo.
-          cp -f "$SOURCE_DIR/package.json" ./package.json
-
-          # Remove o ZIP usado depois da instalação.
-          rm -f "$ZIP_FILE"
-
-          echo "✅ Stellar Legacy V$STELLAR_VERSION instalado."
-
-      - name: Validar o jogo antes do commit
-        shell: bash
-        run: |
-          set -euo pipefail
-
-          test -f package.json
-          test -f public/game.js
-          test -f public/api.js
-          test -f public/data.js
-          test -f server/index.js
-
-          PACKAGE_VERSION=$(node -p "require('./package.json').version")
-          echo "package.json=$PACKAGE_VERSION | detectada=$STELLAR_VERSION"
-
-          if [ "$PACKAGE_VERSION" != "$STELLAR_VERSION" ]; then
-            echo "❌ Versão divergente."
-            exit 1
-          fi
-
+          for p in package.json public/game.js public/api.js public/data.js server/index.js; do test -f "$p"; done
           node --check public/game.js
           node --check public/api.js
           node --check public/data.js
           node --check server/index.js
-
-          echo "✅ Validação concluída na V$PACKAGE_VERSION."
-
-      - name: Mostrar alterações
-        shell: bash
-        run: |
-          git status --short
-          echo "### Stellar Legacy V$STELLAR_VERSION" >> "$GITHUB_STEP_SUMMARY"
-          echo '```text' >> "$GITHUB_STEP_SUMMARY"
-          git status --short >> "$GITHUB_STEP_SUMMARY"
-          echo '```' >> "$GITHUB_STEP_SUMMARY"
-
-      - name: Commit e Push na main
+          npm run check
+          npm test
+      - name: Publicar somente se testes passarem
         shell: bash
         run: |
           set -euo pipefail
-
           git config user.name "Stellar Legacy Installer"
           git config user.email "actions@users.noreply.github.com"
-
           git add -A
-
-          if git diff --cached --quiet; then
-            echo "Nada novo para publicar."
-            exit 0
-          fi
-
-          git commit -m "deploy: Stellar Legacy V${STELLAR_VERSION} via ZIP installer"
+          if git diff --cached --quiet; then echo "Nenhuma alteração"; exit 0; fi
+          git commit -m "deploy: Stellar Legacy via Universal ZIP Installer"
           git push origin HEAD:main
-
-          echo "✅ V$STELLAR_VERSION publicada na main."
