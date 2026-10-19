@@ -10,3 +10,5 @@
 Nota: esta revisão é de compactação e limpeza, não inclui alterações em combate, economia ou SQL.
 
 - **V30.0.6**: corrigida orientação real dos sprites; atlas reconstruídos a partir de uma única frente de cada modelo, 16 ângulos matemáticos, NPCs mirando na direção correta, drones alinhados ao movimento e testes cardeais.
+
+- **V30.1.0**: players 32 directions, calibrated north and clockwise.
