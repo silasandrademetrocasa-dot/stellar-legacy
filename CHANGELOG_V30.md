@@ -17,4 +17,4 @@ Nota: esta revisão é de compactação e limpeza, não inclui alterações em c
 
 - **V30.1.2**: bosses 32 directions; common NPCs remain 16.
 
-- **V30.2.2**: CONF 1/2 ganhou botões de cópia rápida entre configurações, o painel do AUX-9 removeu a seção de “sprites 360° no mapa” e o visual do AUX-9 foi atualizado com nova arte padronizada no hangar.
+- **V30.2.3**: barra de munição mais fina no dock inferior, remoção dos botões visuais de LASER/CTRL e MÍSSIL/ESPAÇO, remoção do contador “MÍSSIL PRONTO” e redução do espaço vertical ocupado pela HUD de armas.
