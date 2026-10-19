@@ -1,4 +1,4 @@
-# STELLAR LEGACY V32.0.0 — candidato de integração
+# STELLAR LEGACY V32.0.1 — candidato de integração
 
 Base: V30.5.0 mais o desenvolvimento incremental da V32.
 
