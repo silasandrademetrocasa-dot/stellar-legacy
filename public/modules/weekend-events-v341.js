@@ -1,5 +1,5 @@
-// Stellar Legacy V34.4.1 — Agenda de eventos dirigida pelo Supabase.
-// Mantém os oito slots da V34.4.1 como fallback para migração segura.
+// Stellar Legacy V34.4.2 — Agenda de eventos dirigida pelo Supabase.
+// Mantém os oito slots da V34.4.2 como fallback para migração segura.
 export const WEEKEND_SLOT_HOURS=Object.freeze([11,14,17,20]);
 export const WEEKEND_EVENT_DURATION_MS=120*60*1000;
 const HOUR_MS=3600000, DAY_MS=86400000, SP_OFFSET_MS=3*HOUR_MS;

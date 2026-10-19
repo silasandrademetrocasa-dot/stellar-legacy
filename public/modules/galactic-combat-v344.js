@@ -1,4 +1,4 @@
-// V34.4.1 — Visual combat interpolation and target feedback.
+// V34.4.2 — Visual combat interpolation and target feedback.
 // This module only interpolates already-authorized positions. It does not
 // modify authoritative server coordinates, damage, cooldowns or loot.
 const finite=(n,fallback=0)=>Number.isFinite(Number(n))?Number(n):fallback;

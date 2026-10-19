@@ -1,4 +1,4 @@
-// V34.4.1 - percepcao e orientacao de NPCs no servidor.
+// V34.4.2 - percepcao e orientacao de NPCs no servidor.
 // Apenas direcao visual e escolha de alvo; nunca calcula dano, loot ou velocidade.
 const valid = value=>Number.isFinite(Number(value));
 export function perceptionPlayers(players,{now,isProtected}={}){
