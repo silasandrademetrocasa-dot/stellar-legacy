@@ -17,4 +17,4 @@ Nota: esta revisão é de compactação e limpeza, não inclui alterações em c
 
 - **V30.1.2**: bosses 32 directions; common NPCs remain 16.
 
-- **V30.2.0**: renderização mobile otimizada: proteção do cache dos atlas V30, LOD intermediário para NPCs distantes, DPR mínimo melhorado no perfil baixo e seleção AUTO menos agressiva; sprites de naves/drones/AUX/bosses preservados, sem alteração de combate/SQL.
+- **V30.2.1**: revisão completa dos visuais do hangar e do casco das naves: previews padronizados para toda a frota, cobertura validada para todas as 43 naves e renderização do mapa priorizando a arte individual de cada nave para evitar reaproveitar o layout da nave anterior.
