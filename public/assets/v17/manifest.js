@@ -137,6 +137,10 @@ export const GAME_ASSETS = {
     pet: '/assets/v17/drones-map/aux9.webp',
     petElite: '/assets/v17/drones-map/aux9-elite.webp'
   },
+  droneMapSheets: {
+    pet: '/assets/v17/drones-map/aux9-sheet.png',
+    petElite: '/assets/v17/drones-map/aux9-elite-sheet.png'
+  },
   equipment: {
     lf1: '/assets/v17/equipment/arc1.webp',
     mp1: '/assets/v17/equipment/arcp1.webp',

@@ -1,6 +1,6 @@
 {
   "name": "stellar-legacy",
-  "version": "22.12.1",
+  "version": "22.12.3",
   "type": "module",
   "scripts": {
     "start": "node server/index.js",
@@ -19,5 +19,5 @@
   "engines": {
     "node": ">=18"
   },
-  "release": "upgrade-designers-spaceships-npcs-bases-portals-resources"
+  "release": "aux9-integrated-sprite-preview"
 }
