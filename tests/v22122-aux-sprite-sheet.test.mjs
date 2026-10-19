@@ -8,7 +8,7 @@ const game=read('public/game.js');
 
 test('AUX-9 usa spritesheet direcional com fallback seguro',()=>{
   assert.match(manifest,/droneMapSheets:/);
-  for(const p of ['public/assets/v17/drones-map/aux9-sheet.png','public/assets/v17/drones-map/aux9-elite-sheet.png']) assert.ok(existsSync(new URL(p,root)), `missing ${p}`);
+  for(const p of ['public/assets/v17/drones-map/aux9-sheet.webp','public/assets/v17/drones-map/aux9-elite-sheet.webp']) assert.ok(existsSync(new URL(p,root)), `missing ${p}`);
   assert.match(game,/function drawAuxSpriteSheet\(/);
   assert.match(game,/droneMapSheetAsset\(/);
   assert.match(game,/drawAuxSpriteSheet\(sheet,q\.angle\|\|0,size/);
