@@ -15,9 +15,10 @@ const LIVE_OPS_REFRESH_MS = 15000;
 
 // V18.1.8 • NETWORK OPTIMIZATION
 // A simulação segue em 20 Hz. Somente a frequência/quantidade de dados enviados pela rede é reduzida.
-const NPC_BATCH_INTERVAL_MS = 250;       // Combate/próximos: 4 Hz; interpolação no cliente.
+const NPC_BATCH_INTERVAL_MS = 125;       // Muito próximos: até 8 Hz; demais próximos: 4 Hz.
 const NPC_MID_REFRESH_MS = 500;         // NPCs a distância intermediária: até 2 Hz.
 const NPC_CLOSE_RADIUS_SQ = 1250 * 1250;
+const NPC_FAST_RADIUS_SQ = 800 * 800; // Somente entidades dentro de 800u recebem 8 Hz.
 const NPC_SOCKET_BACKPRESSURE_BYTES = 256 * 1024; // Descarta apenas frames de movimento sob rede congestionada.
 const IDLE_ROOM_TTL_MS = 2 * 60 * 1000; // Desmontar salas sem jogadores após 2 minutos.
 const NPC_FAR_REFRESH_MS = 2500;         // NPCs distantes recebem correção lenta para minimapa/consistência.
@@ -188,7 +189,7 @@ class Room {
     return {cur,patch:Object.keys(patch).length>1?patch:null};
   }
 
-  // Interest management: perto = 4 Hz; longe = correção de 2,5 s. Cada cliente mantém seu delta próprio.
+  // Interest management: <800u = 8 Hz; <1250u = 4 Hz; médio = 2 Hz; longe = 0,4 Hz.
   sendNpcBatches(now){
     if(!this.clients.size)return;
     for(const c of this.clients){
@@ -199,15 +200,18 @@ class Room {
       c.npcNetState ||= new Map();
       const farRefresh=now-(c.lastNpcFarRefreshAt||0)>=NPC_FAR_REFRESH_MS;
       const midRefresh=now-(c.lastNpcMidRefreshAt||0)>=NPC_MID_REFRESH_MS;
+      const nearRefresh=now-(c.lastNpcNearRefreshAt||0)>=250;
       const entities=[];
       for(const e of this.npcs.values()){
         const dx=e.x-p.x,dy=e.y-p.y,distSq=dx*dx+dy*dy;
         if(distSq>NPC_NEAR_RADIUS_SQ){if(!farRefresh)continue;}
         else if(distSq>NPC_CLOSE_RADIUS_SQ&&!midRefresh)continue;
+        else if(distSq>NPC_FAST_RADIUS_SQ&&!nearRefresh)continue;
         const {cur,patch}=this.npcNetPatch(e,c.npcNetState.get(e.id));
         c.npcNetState.set(e.id,cur);
         if(patch)entities.push(patch);
       }
+      if(nearRefresh)c.lastNpcNearRefreshAt=now;
       if(midRefresh)c.lastNpcMidRefreshAt=now;
       if(farRefresh){
         c.lastNpcFarRefreshAt=now;
@@ -602,10 +606,11 @@ class Room {
     ws.npcNetState=new Map([...this.npcs.values()].map(e=>[e.id,this.npcNetFrame(e)]));
     ws.lastNpcFarRefreshAt=nowMs();
     ws.lastNpcMidRefreshAt=nowMs();
+    ws.lastNpcNearRefreshAt=nowMs();
     this.broadcast({type:'world_player_spawn',entity:this.publicPlayer(player)},ws);
   }
   removeClient(ws){
-    if(!this.clients.has(ws))return;this.clients.delete(ws);if(ws.player)this.players.delete(ws.player.userId);if(ws.player)this.broadcast({type:'world_player_leave',userId:ws.player.userId});ws.room=null;ws.player=null;ws.npcNetState=null;ws.lastNpcFarRefreshAt=0;ws.lastNpcMidRefreshAt=0;
+    if(!this.clients.has(ws))return;this.clients.delete(ws);if(ws.player)this.players.delete(ws.player.userId);if(ws.player)this.broadcast({type:'world_player_leave',userId:ws.player.userId});ws.room=null;ws.player=null;ws.npcNetState=null;ws.lastNpcFarRefreshAt=0;ws.lastNpcMidRefreshAt=0;ws.lastNpcNearRefreshAt=0;
   }
   updatePlayer(ws,msg){
     const p=ws.player;if(!p)return;

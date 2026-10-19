@@ -8,7 +8,7 @@ import {weekendCenterHtml} from '../public/modules/event-control-ui-v3411.js';
 const names=['invasion','prime','mining','convoy','battle'];
 const events=names.map((event_key,i)=>({event_key,name:event_key,priority:10*(i+1),enabled:true,schedule_mode:'interval',target:15,reward:{credits:100,xp:10,uridium:2,cores:0},rules:{weekend_rotation:true}}));
 const at=x=>Date.parse(x);
-test('V34.4.0 mantém oito horários padrão e rotação preexistente',()=>{
+test('V34.4.1 mantém oito horários padrão e rotação preexistente',()=>{
  const c=weekendSchedule(); assert.equal(c.slots.length,8);
  assert.equal(activeWeekendSlot(events,at('2026-10-24T14:00:00Z'),c)?.event_key,'invasion');
  assert.equal(activeWeekendSlot(events,at('2026-10-31T14:00:00Z'),c)?.event_key,'convoy');

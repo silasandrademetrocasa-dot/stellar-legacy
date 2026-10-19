@@ -17,7 +17,7 @@ import { createSecurityService } from './security-service.js';
 
 const app = express();
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const RELEASE_VERSION = '34.4.0'; // único identificador de release nos endpoints HTTP
+const RELEASE_VERSION = '34.4.1'; // único identificador de release nos endpoints HTTP
 
 function normalizeSupabaseUrl(value = '') {
   let url = String(value || '').trim();
@@ -1182,7 +1182,7 @@ app.post('/api/admin/runtime/events/:eventKey', requireUser, asyncRoute(async(re
   res.set('Cache-Control','no-store');res.json({ok:true,event_key:key,runtime,saved:data||null});
 }));
 
-// V34.4.0 — controle total dos eventos: somente RPCs com checagem de ADM no banco.
+// V34.4.1 — controle total dos eventos: somente RPCs com checagem de ADM no banco.
 async function saveEventCenter(req,res,procedure,args){
   const {data,error}=await req.sb.rpc(procedure,args);
   if(error){const message=String(error.message||'Falha ao salvar eventos.');return res.status(/administrativ|negado|permiss/i.test(message)?403:400).json({error:message});}

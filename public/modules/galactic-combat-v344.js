@@ -1,4 +1,4 @@
-// V34.4.0 — Visual combat interpolation and target feedback.
+// V34.4.1 — Visual combat interpolation and target feedback.
 // This module only interpolates already-authorized positions. It does not
 // modify authoritative server coordinates, damage, cooldowns or loot.
 const finite=(n,fallback=0)=>Number.isFinite(Number(n))?Number(n):fallback;
@@ -9,7 +9,7 @@ export function smoothNpcPosition(entity,{now=0,dt=0}={}){
   const age=Math.max(0,finite(now)-finite(entity?.netAt,now));
   const velocityX=clamp(finite(entity?.vx),-720,720),velocityY=clamp(finite(entity?.vy),-720,720);
   // Never extrapolate a stale packet: this prevents endless ghost chasing.
-  const lead=age<520?Math.min(0.11,Math.max(0,age)/1000+0.045):0;
+  const lead=age<280?Math.min(0.11,Math.max(0,age)/1000+0.025):age<760?0.11*(760-age)/480:0;
   const destX=targetX+velocityX*lead,destY=targetY+velocityY*lead;
   const gap=Math.hypot(destX-x,destY-y);
   if(gap>520)return {x:targetX,y:targetY,snapped:true};
