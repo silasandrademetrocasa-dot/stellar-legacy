@@ -28,6 +28,6 @@ Nota: esta revisão é de compactação e limpeza, não inclui alterações em c
 - **V30.5.0**: Smart Combat Engine: atualização escalonada de NPCs comuns distantes sem suspender bosses, eventos, NPCs agressivos ou próximos. Simulação online e valores de combate preservados.
 
 
-- **V32.1.3**: ajuste visual da zona neutra do portal: raio aumentado para melhorar a área segura ao redor do portal e aro tracejado bem mais transparente para não poluir a tela.
+- **V32.1.4**: ajuste visual da zona neutra do portal: raio aumentado para melhorar a área segura ao redor do portal e aro tracejado bem mais transparente para não poluir a tela.
 
-- **V32.1.3**: Mobile Experience Pro 2.0: landscape-first, 3 colunas no HUD inferior, hangar horizontal responsivo e convite não bloqueante a girar a tela.
+- **V32.1.4**: Mobile Experience Pro 2.0: landscape-first, 3 colunas no HUD inferior, hangar horizontal responsivo e convite não bloqueante a girar a tela.
