@@ -4,7 +4,7 @@ import {readFileSync} from 'node:fs';
 const css=readFileSync(new URL('../public/style.css', import.meta.url), 'utf8');
 const js=readFileSync(new URL('../public/game.js', import.meta.url), 'utf8');
 
-test('V32.1.6 minimap resize and modal compaction hooks exist',()=>{
+test('V32.1.7 minimap resize and modal compaction hooks exist',()=>{
   assert.match(js,/function syncMinimapCanvasSize\(\)\{/);
   assert.match(js,/syncMinimapCanvasSize\(\);[^]*?\}/);
   assert.match(js,/applyMinimapUiState\(\)\{[^]*requestAnimationFrame\(syncMinimapCanvasSize\); \}/);
