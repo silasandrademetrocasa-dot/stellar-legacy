@@ -2,6 +2,7 @@ import { idleNpcStep, shouldLeashNpc, NpcAggroWindow } from './npc-intelligence-
 import { perceptionPlayers, nearestPerceivedPlayer, turnNpcToward, selectAggroSuccessor } from './npc-intelligence-v343.js';
 import { resolveLiveEvent } from './live-event-scheduler-v341.js';
 import { eventControlProfile } from '../public/modules/event-control-profile-v3411.js';
+import { eventStage, eventStageTuning, bossCombatTuning } from '../public/modules/event-evolution-v345.js';
 import { randomUUID } from 'crypto';
 import {admitNpcDamage} from './combat-throttle.js';
 import {PORTAL_NEUTRAL_RADIUS,playerInNeutralPortalRange} from './portal-safety.js';
@@ -148,7 +149,7 @@ class Room {
       resources:{...(base.resources||{})},attackRange:Math.min(500,(battle?250:230)+base.size*5.8),aggroRange:1000,
       lastShot:0,angle:rand(0,Math.PI*2),drift:rand(.4,1.4),eventNpc:!!opts.eventNpc,eventId:opts.eventId||null,
       patrolHomeX:p.x,patrolHomeY:p.y,patrolReturning:false,
-      forceChase:!!opts.forceChase,damageContrib:new Map(),lastDamageAt:0,aggroUserId:null,aggroStartedAt:0,spawnedAt:nowMs(),
+      forceChase:!!opts.forceChase,rarePatrol:!!opts.rarePatrol,damageContrib:new Map(),lastDamageAt:0,aggroUserId:null,aggroStartedAt:0,spawnedAt:nowMs(),
       ownerUserId:null,ownerGroupId:null,claimedAt:0,ownerGroupMemberIds:new Set(),ownerGroupPromise:null,
       _configScale:Number(opts.scale||1),_configRewardMult:Number(opts.rewardMult||1),_configSpeedMult:Number(opts.speedMult||1),_configColorOverride:opts.color||null,_configSizeOverride:opts.size||null
     };
@@ -234,9 +235,18 @@ class Room {
   }
 
   generateBaseWorld(){
-    for(const group of this.world.npcSpawnGroups(this.mapId)){
+    const groups=this.world.npcSpawnGroups(this.mapId);
+    const rareGroup=groups.filter(g=>Number(g.count)>0).at(-1);
+    for(const group of groups){
       const count=Math.max(0,Math.round(Number(group.count)||0));
-      for(let i=0;i<count;i++){const e=this.makeNpc(group.type);if(e)this.npcs.set(e.id,e);}
+      for(let i=0;i<count;i++){
+        // A single rare patrol REPLACES one ordinary spawn on tier 2+ maps.
+        // No extra NPC, extra reward, or map-wide performance cost.
+        const rarePatrol=!this.map.battle&&Number(this.map.tier||1)>=2&&group===rareGroup&&i===0;
+        const baseName=this.world.npcDefinition(group.type)?.name||String(group.type);
+        const opts=rarePatrol?{rarePatrol:true,name:'PATRULHA RARA • '+baseName,color:'#ffd069',scale:1.15}:{};
+        const e=this.makeNpc(group.type,opts);if(e)this.npcs.set(e.id,e);
+      }
     }
     const raw=Number(this.map.oreCount);const oreCount=Number.isFinite(raw)?Math.max(0,Math.round(raw)):0;
     for(let i=0;i<oreCount;i++){const o=this.makeOre();this.ores.set(o.id,o);}
@@ -261,7 +271,7 @@ class Room {
       e.maxHp=Math.max(1,Math.round(Number(base.hp)*scale));e.hp=Math.max(0,Math.min(e.maxHp,Math.round(e.maxHp*hpRatio)));
       e.maxShield=Math.max(0,Math.round(Number(base.shield||0)*scale));e.shield=Math.max(0,Math.min(e.maxShield,Math.round(e.maxShield*shieldRatio)));
       e.credits=Math.max(0,Math.round(Number(base.credits||0)*rewardMult));e.uridium=Math.max(0,Math.round(Number(base.uridium||0)*rewardMult));e.xp=Math.max(0,Math.round(Number(base.xp||0)*rewardMult));
-      e.baseSpeed=Math.max(10,Math.round(Number(base.speed||10)*speedMult));e.baseDamage=Math.round(Number(base.damage||0)*Math.max(1,scale*.82));{const phase=Math.max(0,Math.min(2,Number(e.bossPhase)||0));e.speed=Math.round(e.baseSpeed*(phase===1?1.16:phase===2?1.36:1));e.damage=Math.round(e.baseDamage*(phase===1?1.20:phase===2?1.48:1));}
+      e.baseSpeed=Math.max(10,Math.round(Number(base.speed||10)*speedMult));e.baseDamage=Math.round(Number(base.damage||0)*Math.max(1,scale*.82));{const phase=Math.max(0,Math.min(2,Number(e.bossPhase)||0)),t=String(e.type||'').startsWith('boss')?bossCombatTuning(this.event?.id,phase):{speed:1,damage:1,attackDelay:1};e.speed=Math.round(e.baseSpeed*t.speed);e.damage=Math.round(e.baseDamage*t.damage);e.bossAttackScale=t.attackDelay;}
       e.name=e._configColorOverride?e.name:base.name;e.color=e._configColorOverride||base.color;e.size=e._configSizeOverride||base.size;e.resources={...(base.resources||{})};
       this.broadcast({type:'npc_patch',entity:{id:e.id,name:e.name,hp:e.hp,maxHp:e.maxHp,shield:e.shield,maxShield:e.maxShield,credits:e.credits,uridium:e.uridium,xp:e.xp,speed:e.speed,damage:e.damage,color:e.color,size:e.size,resources:e.resources}});
     }
@@ -315,6 +325,8 @@ class Room {
   currentEventDef(){ const live=this.world.currentEvent();if(live&&this.eventEligible(live))return live;return directiveToWorldEvent(selectLiveDirective(this.world.directives,this.mapId),this.mapId); }
   eventProfile(ev=this.event){return eventControlProfile(eventVariant(ev?.id),ev?.rules?.event_control);}
   eventMode(ev=this.event){return this.eventProfile(ev).mode;}
+  eventStageNow(now=nowMs()){return eventStage(this.event,now,this.eventProfile().phaseCount??4);}
+  eventTuningNow(now=nowMs()){return eventStageTuning(this.eventProfile(),this.eventStageNow(now));}
   eventEligible(ev){
     if(!ev)return false;
     const rules=ev.rules||{},mode=this.eventMode(ev);
@@ -334,7 +346,7 @@ class Room {
     // Never allow delayed event respawns from a finished/rotated event to come back later.
     this.respawns=this.respawns.filter(r=>r.kind!=='eventNpc');
     this.oreRespawns=this.oreRespawns.filter(r=>!r.eventOre);
-    this.convoy=null;this.convoyRetryAt=0;this.nextEventWaveAt=0;
+    this.convoy=null;this.convoyRetryAt=0;this.nextEventWaveAt=0;this.lastEventStageIndex=-1;
     if(clearParticipants)this.eventParticipants.clear();
     if(npcIds.length||oreIds.length)this.broadcast({type:'event_cleanup',reason,npcIds,oreIds,eventId:this.event?.eventId||null,serverTime:nowMs()});
     return {npcIds,oreIds};
@@ -348,8 +360,9 @@ class Room {
     }
     if(!force&&this.event?.eventId===ev.eventId)return;
     this.clearEventEntities(this.event?'event_rotate':'event_start');
-    this.event={...ev,progress:0,complete:false};
+    this.event={...ev,progress:0,complete:false,stage:0,stageName:'RECONHECIMENTO'};
     this.nextEventBossAt=0;
+    this.lastEventStageIndex=-1;
     if(!this.eventEligible(ev))return;
     const profile=this.eventProfile(ev),mode=profile.mode;
     if(mode==='wave'||mode==='battle_wave') this.spawnEventWave(profile.waveCount||6);
@@ -369,19 +382,23 @@ class Room {
   spawnEventWave(count=6){
     const ev=this.event;if(!ev)return;const profile=this.eventProfile(ev),pool=this.eventPool(ev),rewardMult=profile.rewardMult||1.22;
     const alive=[...this.npcs.values()].filter(e=>e.eventNpc&&e.eventId===ev.eventId&&e.hp>0).length;
-    const maxAlive=Math.max(1,Math.min(48,Number(profile.maxAlive)||Math.max(Number(profile.waveCount)||6,(Number(profile.minAlive)||3)*2)));
+    const stageTuning=this.eventTuningNow();let eliteBudget=stageTuning.eliteCount;
+    const maxAlive=Math.max(1,Math.min(48,Number(profile.maxAlive)||Math.max(stageTuning.waveTarget,(Number(profile.minAlive)||3)*2)));
     // V34: bounded spawn work each tick. Never touch reward calculations.
     count=Math.max(0,Math.min(12,Math.max(0,Number(count)||0),maxAlive-alive));
     for(let i=0;i<count;i++){
       const type=pool[Math.floor(Math.random()*pool.length)],baseName=(this.world.npcDefinition(type)?.name||String(type||'NPC')).toUpperCase();
-      const e=this.makeNpc(type,{eventNpc:true,eventId:ev.eventId,forceChase:true,rewardMult,scale:profile.scale||1,color:profile.color,size:profile.size,speedMult:profile.speedMult||1,name:profile.namePrefix?(profile.namePrefix+' '+baseName):undefined});
+      const elite=eliteBudget>0 && (i===0 || i===2);if(elite)eliteBudget--;
+      const e=this.makeNpc(type,{eventNpc:true,eventId:ev.eventId,forceChase:true,rewardMult,
+        scale:(profile.scale||1)*(elite?1.16:1),color:elite?'#ffca6b':profile.color,size:profile.size,
+        speedMult:profile.speedMult||1,name:elite?('ELITE '+(profile.namePrefix?profile.namePrefix+' ':'')+baseName):(profile.namePrefix?(profile.namePrefix+' '+baseName):undefined)});
       if(e){this.npcs.set(e.id,e);this.broadcast({type:'npc_spawn',entity:this.publicNpc(e)});}
     }
   }
   spawnPrime(){
     const ev=this.event;if(!ev)return;const profile=this.eventProfile(ev);
     const e=this.makeNpc(profile.bossType||'bossSibelon',{eventNpc:true,eventId:ev.eventId,forceChase:true,name:profile.bossName||'RIFT TYRANT',scale:profile.bossScale||4.2,rewardMult:profile.bossRewardMult||2.4,size:profile.bossSize||68,color:profile.bossColor||'#ff4f9a'});
-    if(e){e.aggroRange=800;e.attackRange=500;this.npcs.set(e.id,e);this.broadcast({type:'npc_spawn',entity:this.publicNpc(e)});}
+    if(e){e.aggroRange=1000;e.attackRange=500;this.npcs.set(e.id,e);this.broadcast({type:'npc_spawn',entity:this.publicNpc(e)});}
   }
   spawnEventOres(count=12){
     const ev=this.event;if(!ev)return;const profile=this.eventProfile(ev),pool=Array.isArray(profile.orePool)&&profile.orePool.length?profile.orePool:['Prometium','Endurium','Terbium','Promerium'],amountRange=Array.isArray(profile.oreAmount)?profile.oreAmount:[12,26];
@@ -566,7 +583,7 @@ class Room {
     this.warfrontFullController=currentFull;
   }
 
-  eventPayload(){return this.event?{...this.event,convoy:this.convoy?{...this.convoy}:null}:null;}
+  eventPayload(){if(!this.event)return null;const stage=this.eventStageNow();return {...this.event,stage:stage.number,stageTotal:stage.total,stageName:stage.label,stageProgress:stage.progress,convoy:this.convoy?{...this.convoy}:null};}
   publicPlayer(p){
     if(!p)return null;
     return {userId:p.userId,callsign:p.callsign,pilotTitle:p.pilotTitle||'Piloto Estelar',faction:p.faction,shipId:p.shipId,shipDesignId:p.shipDesignId||null,level:p.level,x:p.x,y:p.y,angle:p.angle,hp:p.hp,maxHp:p.maxHp,shield:p.shield,maxShield:p.maxShield,updatedAt:p.updatedAt,
@@ -664,7 +681,15 @@ class Room {
   }
 
   applyBossPhase(e){
-    if(!String(e.type||'').startsWith('boss')||e.hp<=0)return;const total=Math.max(1,e.maxHp+e.maxShield),remain=Math.max(0,e.hp)+Math.max(0,e.shield),ratio=remain/total;let phase=0;if(ratio<=.33)phase=2;else if(ratio<=.66)phase=1;if(phase===e.bossPhase)return;e.bossPhase=phase;const mult=phase===0?1:phase===1?1.16:1.36;e.speed=Math.round(e.baseSpeed*mult);e.damage=Math.round(e.baseDamage*(phase===0?1:phase===1?1.20:1.48));e.bossAttackScale=phase===0?1:phase===1?.88:.70;
+    if(!String(e.type||'').startsWith('boss')||e.hp<=0)return;const total=Math.max(1,e.maxHp+e.maxShield),remain=Math.max(0,e.hp)+Math.max(0,e.shield),ratio=remain/total;let phase=0;if(ratio<=.33)phase=2;else if(ratio<=.66)phase=1;if(phase===e.bossPhase)return;e.bossPhase=phase;const tuning=bossCombatTuning(e.eventId?.includes('titan')?'titan':this.event?.id,phase);
+    e.speed=Math.round(e.baseSpeed*tuning.speed);e.damage=Math.round(e.baseDamage*tuning.damage);e.bossAttackScale=tuning.attackDelay;
+    // Reinforcements are tied to a boss HP phase transition, never to every damage packet.
+    // Use the existing bounded wave spawner; no extra event rewards or duplicate claims.
+    if(phase>0 && e.eventNpc && this.event?.eventId===e.eventId){
+      const wanted=this.eventTuningNow().bossEscortCount;
+      const alive=[...this.npcs.values()].filter(n=>n.eventNpc&&n.eventId===e.eventId&&n.id!==e.id&&n.hp>0).length;
+      if(wanted>alive)this.spawnEventWave(Math.min(3,wanted-alive));
+    }
   }
 
   async groupStateForWs(ws,force=false){
@@ -775,7 +800,7 @@ class Room {
       for(const c of eligible)this.creditPersonalEvent(c,ev,1);
     }
     if(e.eventNpc&&this.event?.eventId===e.eventId&&mode==='boss')this.nextEventBossAt=nowMs()+25000;
-    if(!e.eventNpc){const delay=this.world.npcRespawnDelay(e.type);if(this.desiredNpcCount(e.type)>0)this.respawns.push({kind:'npc',type:e.type,at:nowMs()+delay});}
+    if(!e.eventNpc){const delay=this.world.npcRespawnDelay(e.type);if(this.desiredNpcCount(e.type)>0)this.respawns.push({kind:'npc',type:e.type,rarePatrol:!!e.rarePatrol,at:nowMs()+delay});}
   }
 
   async handleOreCollect(ws,msg){
@@ -875,26 +900,31 @@ class Room {
       }else if(!protectedNow&&!neutralX1&&d<=e.aggroRange&&d>e.attackRange*.8){const nd=Math.max(1,d);e.x=clamp(e.x+dx/nd*e.speed*dt,25,this.map.world.w-25);e.y=clamp(e.y+dy/nd*e.speed*dt,25,this.map.world.h-25);}else if(d>e.aggroRange||protectedNow){e.x=clamp(e.x+Math.cos(e.angle)*e.speed*.16*dt,25,this.map.world.w-25);e.y=clamp(e.y+Math.sin(e.angle)*e.speed*.16*dt,25,this.map.world.h-25);}
       const attackDelay=((String(e.type).startsWith('boss')?1.6:1.15)*(e.bossAttackScale||1))*1000;if(!protectedNow&&!neutralX1&&d<e.attackRange&&now-(e.lastShot||0)>=attackDelay){e.lastShot=now;const victim=clientByUserId.get(String(p.userId));safeJsonSend(victim,{type:'npc_attack',entityId:e.id,damage:Math.max(1,Math.round(e.damage*rand(.92,1.12))),x:e.x,y:e.y,retaliation:retaliating,aggroUserId:e.aggroUserId||null});}
     }
-    for(let i=this.respawns.length-1;i>=0;i--){const r=this.respawns[i];if(now<r.at)continue;this.respawns.splice(i,1);if(r.kind==='eventNpc'&&this.event?.eventId!==r.eventId)continue;if(r.kind==='npc'&&this.nonEventNpcCount(r.type)>=this.desiredNpcCount(r.type))continue;const profile=r.kind==='eventNpc'?this.eventProfile():null,baseName=(this.world.npcDefinition(r.type)?.name||String(r.type||'NPC')).toUpperCase();const e=this.makeNpc(r.type,r.kind==='eventNpc'?{eventNpc:true,eventId:r.eventId,forceChase:true,rewardMult:profile?.rewardMult||1.22,scale:profile?.scale||1,color:profile?.color,size:profile?.size,speedMult:profile?.speedMult||1,name:profile?.namePrefix?(profile.namePrefix+' '+baseName):undefined}:{});if(e){this.npcs.set(e.id,e);this.broadcast({type:'npc_spawn',entity:this.publicNpc(e)});}}
+    for(let i=this.respawns.length-1;i>=0;i--){const r=this.respawns[i];if(now<r.at)continue;this.respawns.splice(i,1);if(r.kind==='eventNpc'&&this.event?.eventId!==r.eventId)continue;if(r.kind==='npc'&&this.nonEventNpcCount(r.type)>=this.desiredNpcCount(r.type))continue;const profile=r.kind==='eventNpc'?this.eventProfile():null,baseName=(this.world.npcDefinition(r.type)?.name||String(r.type||'NPC')).toUpperCase();const e=this.makeNpc(r.type,r.kind==='eventNpc'?{eventNpc:true,eventId:r.eventId,forceChase:true,rewardMult:profile?.rewardMult||1.22,scale:profile?.scale||1,color:profile?.color,size:profile?.size,speedMult:profile?.speedMult||1,name:profile?.namePrefix?(profile.namePrefix+' '+baseName):undefined}:(r.rarePatrol?{rarePatrol:true,name:'PATRULHA RARA • '+baseName,color:'#ffd069',scale:1.15}:{}));if(e){this.npcs.set(e.id,e);this.broadcast({type:'npc_spawn',entity:this.publicNpc(e)});}}
     for(let i=this.oreRespawns.length-1;i>=0;i--){const r=this.oreRespawns[i];if(now<r.at)continue;this.oreRespawns.splice(i,1);if(r.eventOre&&this.event?.eventId!==r.eventId)continue;const o=this.makeOre(r.type,r.eventOre?{eventOre:true,eventId:r.eventId,amount:r.amount}:{});this.ores.set(o.id,o);this.broadcast({type:'ore_spawn',ore:o});}
     if(this.event&&!this.event.complete){
-      const profile=this.eventProfile(),mode=profile.mode;
+      const profile=this.eventProfile(),mode=profile.mode,stage=this.eventStageNow(now),tuning=eventStageTuning(profile,stage);
+      if(stage.index!==this.lastEventStageIndex){
+        this.lastEventStageIndex=stage.index;this.event.stage=stage.number;this.event.stageName=stage.label;
+        // Transitions are server-driven; only one broadcast per boundary.
+        this.broadcastEvent(true);
+      }
       if(mode==='wave'||mode==='battle_wave'){
-        const alive=[...this.npcs.values()].filter(e=>e.eventNpc&&e.eventId===this.event.eventId).length,minimum=profile.minAlive||3,targetWave=profile.waveCount||6;
+        const alive=[...this.npcs.values()].filter(e=>e.eventNpc&&e.eventId===this.event.eventId).length,minimum=Math.min(12,(profile.minAlive||3)+Math.min(2,stage.index)),targetWave=tuning.waveTarget;
         if(alive<minimum&&(!profile.waveRespawnMs||now>=this.nextEventWaveAt)){this.spawnEventWave(Math.max(1,targetWave-alive));if(profile.waveRespawnMs)this.nextEventWaveAt=now+profile.waveRespawnMs;}
       }
       // O BOSS retorna após 25s para permitir que outros pilotos concluam a mesma janela.
       // Quem já recebeu o prêmio continua bloqueado pelo registro pessoal no banco.
-      if(mode==='boss'&&now>=this.nextEventBossAt&&!([...this.npcs.values()].some(e=>e.eventNpc&&e.eventId===this.event.eventId&&e.hp>0))){
+      if(mode==='boss'&&now>=this.nextEventBossAt&&!([...this.npcs.values()].some(e=>e.eventNpc&&e.eventId===this.event.eventId&&e.hp>0&&String(e.type||'').startsWith('boss')))){
         this.spawnPrime();this.nextEventBossAt=now+25000;
       }
       if(mode==='ore'){
-        const alive=[...this.ores.values()].filter(o=>o.eventOre&&o.eventId===this.event.eventId).length,minimum=profile.oreRespawnMin||5,targetCount=profile.oreCount||12;
+        const alive=[...this.ores.values()].filter(o=>o.eventOre&&o.eventId===this.event.eventId).length,minimum=Math.min(16,(profile.oreRespawnMin||5)+stage.index*2),targetCount=tuning.oreTarget;
         if(alive<minimum)this.spawnEventOres(Math.max(1,targetCount-alive));
       }
       if(mode==='convoy'){
         if(!this.convoy&&now>=this.convoyRetryAt)this.startConvoy();
-        if(this.convoy){const c=this.convoy;const close=[...this.players.values()].filter(p=>Math.hypot(p.x-c.x,p.y-c.y)<950);if(close.length){for(const p of close)this.eventParticipants.add(p.userId);const dx=c.tx-c.x,dy=c.ty-c.y,d=Math.hypot(dx,dy);if(d>10){const step=Math.min(d,c.speed*dt);c.x+=dx/Math.max(1,d)*step;c.y+=dy/Math.max(1,d)*step;this.event.progress=Math.max(this.event.progress,Math.round((1-d/c.totalDistance)*100));}if(d<=14){
+        if(this.convoy){const c=this.convoy;c.speed=Math.round((profile.convoySpeed||105)*tuning.convoySpeedScale);const close=[...this.players.values()].filter(p=>Math.hypot(p.x-c.x,p.y-c.y)<950);if(close.length){for(const p of close)this.eventParticipants.add(p.userId);const dx=c.tx-c.x,dy=c.ty-c.y,d=Math.hypot(dx,dy);if(d>10){const step=Math.min(d,c.speed*dt);c.x+=dx/Math.max(1,d)*step;c.y+=dy/Math.max(1,d)*step;this.event.progress=Math.max(this.event.progress,Math.round((1-d/c.totalDistance)*100));}if(d<=14){
         const current=this.event;
         this.addEventProgress(100-this.event.progress);
         for(const cws of this.clients){const pilot=cws.player;if(pilot&&Math.hypot(pilot.x-c.x,pilot.y-c.y)<950)this.creditPersonalEvent(cws,current,100);}

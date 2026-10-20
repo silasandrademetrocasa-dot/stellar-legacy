@@ -1,4 +1,4 @@
-# STELLAR LEGACY V34.4.3 — DUAL FLIGHT SYNC
+# STELLAR LEGACY V34.5.0 — DUAL FLIGHT SYNC
 
 Correção focada na travada visual ao acompanhar dois pilotos cruzando o mapa com velocidade contínua.
 

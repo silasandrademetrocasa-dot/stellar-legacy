@@ -1,4 +1,4 @@
-// V34.4.3 — NPC movement deltas: server packets may contain only X OR Y.
+// V34.5.0 — NPC movement deltas: server packets may contain only X OR Y.
 // Keep server coordinates separate from interpolated visual coordinates.
 // No combat stats, drops, server authority or collision rules are modified.
 const safe=(v,f=0)=>Number.isFinite(v)?v:f;

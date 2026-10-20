@@ -1,4 +1,4 @@
-// V34.4.3 - multiplayer cruise stabilization with server-clock timeline.
+// V34.5.0 - multiplayer cruise stabilization with server-clock timeline.
 // Render-only interpolation. No changes to PvP authority, player physics or saved coordinates.
 const clamp=(v,lo,hi)=>Math.max(lo,Math.min(hi,v));
 const finite=(v,backup=0)=>Number.isFinite(Number(v))?Number(v):backup;
