@@ -1,51 +1,51 @@
-import {loadRelayDominationOnline,relayModuleActionOnline,claimRelayMissionOnline,saveRelayAdminOnline,repairRelayOnline} from './api.js?v=34.6.0';
-import { weekendCenterHtml,weekendSlotRowHtml } from './modules/event-control-ui-v3411.js?v=34.6.0';
-import { adminUpdateWeekendSettingsOnline,adminUpdateWeekendEventOnline,adminSetManualEventOnline } from './api.js?v=34.6.0';
-import { bossHudCue, npcThreatLabel } from './modules/tactical-hud-v34.js?v=34.6.0';
-import { allowBackdropFilter, renderFxCount } from './modules/render-budget-v34.js?v=34.6.0';
-import { stellarOreName } from './modules/stellar-display-names.js?v=34.6.0';
-import { rankVisibleNpcTargets } from './modules/combat-target-priority.js?v=34.6.0';
-import { upcomingWeekendSlots, weekendRotationEnabled, weekendSchedule, validateWeekendSettings } from './modules/weekend-events-v341.js?v=34.6.0';
-import { eventControlProfile } from './modules/event-control-profile-v3411.js?v=34.6.0';
-import {eventStage} from './modules/event-evolution-v345.js?v=34.6.0';
-import { minimapPaintInterval } from './modules/minimap-cadence-v33.js?v=34.6.0';
-import { npcUpdateDecision, nearestNpcInRange } from './modules/smart-combat-engine.js?v=34.6.0';
-import { npcPatrolPosition } from './modules/npc-patrol.js?v=34.6.0';
-import { setupMobileLandscape } from './modules/mobile-landscape.js?v=34.6.0';
-import {directionalIndex, directionalGridForImage} from './modules/sprite-orientation.js?v=34.6.0';
-import {createHudIntelligence} from './modules/hud-intelligence.js?v=34.6.0';
-import {sentinelAttackerEligible, selectSentinelAttacker} from './modules/sentinel-defense.js?v=34.6.0';
-import {AUX_PROTOCOL_TYPES, AUX_PROTOCOL_IDS, normalizeAuxProtocols, auxProtocolSlotsUsed, changeAuxProtocolRank, auxProtocolStats} from './modules/aux-protocols.js?v=34.6.0';
-import { movementSpeed, nominalMovementSpeed, followShipCamera } from './modules/ship-navigation.js?v=34.6.0';
-import { loadCommandOverviewOnline,claimCompetitiveSeasonOnline,equipEliteTitleOnline,unequipEliteTitleOnline,loadCommandAdminOnline,saveCompetitiveSeasonOnline,saveWorldDirectiveOnline,loadClanOperationsOnline,claimClanOperationOnline,saveAdminClanOperationOnline } from './api.js?v=34.6.0';
-import {renderV21CommandCenter,V21_TABS} from './modules/v21/command-center-view.js?v=34.6.0';
-import {renderEliteEquipTitles,renderCompetitiveSection,renderUniverseDirectives} from './modules/v22/command-upgrades.js?v=34.6.0';
-import {registerStellarPwaV21,offerInstallV21} from './modules/v21/pwa.js?v=34.6.0';
-import { ECONOMY_EFFECTS, CRAFT_OUTPUT_KINDS, normalizeEconomyEffects, normalizeCraftIngredients, normalizeCraftOutput, formatCraftPreview } from './modules/admin-visual-builders.js?v=34.6.0';
-import { ADMIN_MISSION_PRESETS, createAdminMissionPreset, duplicateAdminMission, validateAdminMissionDraft, previewAdminMission } from './modules/admin-mission-builder.js?v=34.6.0';
-import { createHudContentCache } from './modules/hud-content-cache.js?v=34.6.0';
-import { createAuxiliaryWorkScheduler } from './modules/aux-work-scheduler.js?v=34.6.0';
-import { npcVisualDetail } from './modules/npc-render-detail.js?v=34.6.0';
-import { smoothNpcPosition, smoothNpcHeading, npcCombatLockCue, rocketVisualTarget } from './modules/galactic-combat-v344.js?v=34.6.0';
-import {mergeNpcMotionPatch} from './modules/npc-motion-v3441.js?v=34.6.0';
-import {recordRemotePilotPosition,advanceRemotePilotVisual} from './modules/multiplayer-motion-v3442.js?v=34.6.0';
-import { createBackdropRasterCache } from './modules/backdrop-raster-cache.js?v=34.6.0';
-import { createTextWidthCache } from './modules/text-width-cache.js?v=34.6.0';
-import { createHudUpdateScheduler } from './modules/hud-update-scheduler.js?v=34.6.0';
-import { createAssetCache, flattenAssetPaths } from './modules/asset-cache.js?v=34.6.0';
-import { createSceneGradientCache } from './modules/scene-gradient-cache.js?v=34.6.0';
-import { createPerformanceMonitor, formatPerformanceReport } from './modules/performance-monitor.js?v=34.6.0';
-import { createFrameGate } from './modules/frame-gate.js?v=34.6.0';
-import { createStagedAssetPreloader } from './modules/staged-preload-v342.js?v=34.6.0';
-import { QUALITY_PROFILES, initialAutoQualityForDevice } from './modules/quality-profiles.js?v=34.6.0';
-import { freshBattleConfigsV2013, captureCombatBuildV2013, exchangeCombatBuildV2013, combatConfigRemainingV2013, clampStoredShieldV2013 } from './combat-config-v2013.js?v=34.6.0';
-import { FACTIONS, SHIPS, ITEMS, LASER_AMMO, ROCKETS, NPC_TYPES, MAPS, RESOURCES } from './data.js?v=34.6.0';
-import { repairPulseSettings } from './repair-balance.js?v=34.6.0';
-import { xpThresholdV1770, xpThresholdV1915, migratePilotXpV1915 } from './level-curve-v1915.js?v=34.6.0';
-import { applyRecruitBonusV2012, eliteRouteSnapshotV2012, freshEliteRouteJournalV2012, ELITE_ROUTE_TARGETS_V2012, novaTierPriceV2012 } from './progression-plan-v2012.js?v=34.6.0';
-import { GAME_ASSETS } from './assets/v17/manifest.js?v=34.6.0';
-import { signUp, signIn, beginGoogleSignIn, restoreGoogleSignInFromUrl, requestPasswordReset, restorePasswordRecoveryFromUrl, restoreSession, signOutLocal, checkGameSession, endGameSession, getUser, getSessionCredentials, loadCloudSave, saveCloudSave, loadEliteOperationsOnline, claimEliteOperationOnline, loadWarCampaignsOnline, claimWarSupplyOnline, claimWarCampaignOnline, loadAdminWarCampaignsOnline, saveAdminWarCampaignOnline, saveAdminWarRulesOnline, loadAdminEliteObjectivesOnline, saveAdminEliteObjectiveOnline, updateCallsign, updatePassword, loadRankings, loadAuctionBids, saveAuctionBidOnline, markAuctionBidStatusOnline, loadAuctionMarket, upsertPlayerPresenceOnline, loadMapPresenceOnline, savePlayerLocationCheckpointOnline, loadPlayerLocationCheckpointOnline, removePlayerPresenceOnline, queuePvpAttackOnline, consumePvpDamageEventsOnline, syncArenaProfileOnline, loadArenaState, loadArenaDailyRewardStatus, claimArenaDailyReward, loadArenaOpponents, loadArenaHistory, arenaAttackOnline, listClansOnline, loadMyClanOnline, createClanOnline, joinClanOnline, getClanRequestsOnline, reviewClanRequestOnline, cancelClanRequestOnline, setClanMemberRoleOnline, leaveClanOnline, transferClanCreditsOnline, claimClanCreditGrantsOnline, recordClanAlienKillOnline, getPremiumShopOnline, testPurchasePremiumOnline, adminPreviewPremiumStageOnline, adminSimulatePremiumStageOnline, getPremiumStageCatalogOnline, loadWarfrontStateOnline, loadSectorOwnershipOnline, hitWorldBossOnline, claimWorldBossRewardOnline, declareClanWarOnline, recordClanWarScoreOnline, loadLiveOpsOnline, adminUpdateLiveEventScheduleOnline, purchaseLiveCatalogOnline, economyActionOnline, getChatHistoryOnline, sendChatMessageOnline, redeemGameCouponOnline, getMyDesignersOnline, setDesignLoadoutOnline, claimGateDroneDesignOnline, claimEventDesignerOnline, getAdminStatus, adminSearchAccounts, adminRecentActions, adminBanAccount, adminUnbanAccount, adminResetAccount, adminDeleteAccount, pushTelemetryBatch, adminTelemetryOverview, adminPlayerTelemetry, getBattleGroupOnline, createBattleGroupOnline, inviteBattleGroupOnline, searchBattleGroupPlayersOnline, inviteBattleGroupUserOnline, respondBattleGroupInviteOnline, leaveBattleGroupOnline, kickBattleGroupMemberOnline, setBattleGroupRallyOnline, loadRuntimeConfigOnline, loadNpcRuntimeConfigOnline, loadWorldRuntimeConfigOnline, loadSystemsRuntimeConfigOnline, loadAdminRuntimeMonitorOnline, adminUpdateRuntimeModuleOnline, adminUpdateNpcRuntimeOnline, adminUpdateNpcSpawnRuntimeOnline, adminUpdateWorldMapOnline, adminUpdateWorldResourceOnline, adminUpdateWorldSectorOnline, adminUpdateWorldPortalOnline, adminUpdateWorldResourcePoolOnline, adminUpdateMissionCategoryOnline, adminUpdateEconomyServiceOnline, adminUpdateCraftingRecipeOnline, loadBattlePassRuntimeConfigOnline, adminUpdateBattlePassSeasonOnline, adminUpdateBattlePassTierOnline, loadShopsRuntimeConfigOnline, adminUpdateCommonShopItemOnline, adminUpdatePremiumShopItemOnline, loadBonusConfigOnline, adminUpdateBonusConfigOnline, adminCouponDashboardOnline, adminCreateCouponOnline, adminSetCouponActiveOnline, loadGalaxyGatesOnline, adminUpdateGalaxyGateOnline, adminUpsertCustomMissionOnline, adminDeleteCustomMissionOnline, adminCreateCraftRecipeOnline, adminCreateEconomyServiceOnline, adminCreatePassSeasonOnline, loadAuctionRulesOnline, adminUpdateAuctionRulesOnline, loadBalanceRuntimeOnline, adminUpdateBalanceOnline,loadAdminSecurityIncidents,reviewAdminSecurityIncident } from './api.js?v=34.6.0';
-import { SharedUniverseClient } from './world.js?v=34.6.0';
+import {loadRelayDominationOnline,relayModuleActionOnline,claimRelayMissionOnline,saveRelayAdminOnline,repairRelayOnline,adminReleaseRelayOnline} from './api.js?v=34.6.1';
+import { weekendCenterHtml,weekendSlotRowHtml } from './modules/event-control-ui-v3411.js?v=34.6.1';
+import { adminUpdateWeekendSettingsOnline,adminUpdateWeekendEventOnline,adminSetManualEventOnline } from './api.js?v=34.6.1';
+import { bossHudCue, npcThreatLabel } from './modules/tactical-hud-v34.js?v=34.6.1';
+import { allowBackdropFilter, renderFxCount } from './modules/render-budget-v34.js?v=34.6.1';
+import { stellarOreName } from './modules/stellar-display-names.js?v=34.6.1';
+import { rankVisibleNpcTargets } from './modules/combat-target-priority.js?v=34.6.1';
+import { upcomingWeekendSlots, weekendRotationEnabled, weekendSchedule, validateWeekendSettings } from './modules/weekend-events-v341.js?v=34.6.1';
+import { eventControlProfile } from './modules/event-control-profile-v3411.js?v=34.6.1';
+import {eventStage} from './modules/event-evolution-v345.js?v=34.6.1';
+import { minimapPaintInterval } from './modules/minimap-cadence-v33.js?v=34.6.1';
+import { npcUpdateDecision, nearestNpcInRange } from './modules/smart-combat-engine.js?v=34.6.1';
+import { npcPatrolPosition } from './modules/npc-patrol.js?v=34.6.1';
+import { setupMobileLandscape } from './modules/mobile-landscape.js?v=34.6.1';
+import {directionalIndex, directionalGridForImage} from './modules/sprite-orientation.js?v=34.6.1';
+import {createHudIntelligence} from './modules/hud-intelligence.js?v=34.6.1';
+import {sentinelAttackerEligible, selectSentinelAttacker} from './modules/sentinel-defense.js?v=34.6.1';
+import {AUX_PROTOCOL_TYPES, AUX_PROTOCOL_IDS, normalizeAuxProtocols, auxProtocolSlotsUsed, changeAuxProtocolRank, auxProtocolStats} from './modules/aux-protocols.js?v=34.6.1';
+import { movementSpeed, nominalMovementSpeed, followShipCamera } from './modules/ship-navigation.js?v=34.6.1';
+import { loadCommandOverviewOnline,claimCompetitiveSeasonOnline,equipEliteTitleOnline,unequipEliteTitleOnline,loadCommandAdminOnline,saveCompetitiveSeasonOnline,saveWorldDirectiveOnline,loadClanOperationsOnline,claimClanOperationOnline,saveAdminClanOperationOnline } from './api.js?v=34.6.1';
+import {renderV21CommandCenter,V21_TABS} from './modules/v21/command-center-view.js?v=34.6.1';
+import {renderEliteEquipTitles,renderCompetitiveSection,renderUniverseDirectives} from './modules/v22/command-upgrades.js?v=34.6.1';
+import {registerStellarPwaV21,offerInstallV21} from './modules/v21/pwa.js?v=34.6.1';
+import { ECONOMY_EFFECTS, CRAFT_OUTPUT_KINDS, normalizeEconomyEffects, normalizeCraftIngredients, normalizeCraftOutput, formatCraftPreview } from './modules/admin-visual-builders.js?v=34.6.1';
+import { ADMIN_MISSION_PRESETS, createAdminMissionPreset, duplicateAdminMission, validateAdminMissionDraft, previewAdminMission } from './modules/admin-mission-builder.js?v=34.6.1';
+import { createHudContentCache } from './modules/hud-content-cache.js?v=34.6.1';
+import { createAuxiliaryWorkScheduler } from './modules/aux-work-scheduler.js?v=34.6.1';
+import { npcVisualDetail } from './modules/npc-render-detail.js?v=34.6.1';
+import { smoothNpcPosition, smoothNpcHeading, npcCombatLockCue, rocketVisualTarget } from './modules/galactic-combat-v344.js?v=34.6.1';
+import {mergeNpcMotionPatch} from './modules/npc-motion-v3441.js?v=34.6.1';
+import {recordRemotePilotPosition,advanceRemotePilotVisual} from './modules/multiplayer-motion-v3442.js?v=34.6.1';
+import { createBackdropRasterCache } from './modules/backdrop-raster-cache.js?v=34.6.1';
+import { createTextWidthCache } from './modules/text-width-cache.js?v=34.6.1';
+import { createHudUpdateScheduler } from './modules/hud-update-scheduler.js?v=34.6.1';
+import { createAssetCache, flattenAssetPaths } from './modules/asset-cache.js?v=34.6.1';
+import { createSceneGradientCache } from './modules/scene-gradient-cache.js?v=34.6.1';
+import { createPerformanceMonitor, formatPerformanceReport } from './modules/performance-monitor.js?v=34.6.1';
+import { createFrameGate } from './modules/frame-gate.js?v=34.6.1';
+import { createStagedAssetPreloader } from './modules/staged-preload-v342.js?v=34.6.1';
+import { QUALITY_PROFILES, initialAutoQualityForDevice } from './modules/quality-profiles.js?v=34.6.1';
+import { freshBattleConfigsV2013, captureCombatBuildV2013, exchangeCombatBuildV2013, combatConfigRemainingV2013, clampStoredShieldV2013 } from './combat-config-v2013.js?v=34.6.1';
+import { FACTIONS, SHIPS, ITEMS, LASER_AMMO, ROCKETS, NPC_TYPES, MAPS, RESOURCES } from './data.js?v=34.6.1';
+import { repairPulseSettings } from './repair-balance.js?v=34.6.1';
+import { xpThresholdV1770, xpThresholdV1915, migratePilotXpV1915 } from './level-curve-v1915.js?v=34.6.1';
+import { applyRecruitBonusV2012, eliteRouteSnapshotV2012, freshEliteRouteJournalV2012, ELITE_ROUTE_TARGETS_V2012, novaTierPriceV2012 } from './progression-plan-v2012.js?v=34.6.1';
+import { GAME_ASSETS } from './assets/v17/manifest.js?v=34.6.1';
+import { signUp, signIn, beginGoogleSignIn, restoreGoogleSignInFromUrl, requestPasswordReset, restorePasswordRecoveryFromUrl, restoreSession, signOutLocal, checkGameSession, endGameSession, getUser, getSessionCredentials, loadCloudSave, saveCloudSave, loadEliteOperationsOnline, claimEliteOperationOnline, loadWarCampaignsOnline, claimWarSupplyOnline, claimWarCampaignOnline, loadAdminWarCampaignsOnline, saveAdminWarCampaignOnline, saveAdminWarRulesOnline, loadAdminEliteObjectivesOnline, saveAdminEliteObjectiveOnline, updateCallsign, updatePassword, loadRankings, loadAuctionBids, saveAuctionBidOnline, markAuctionBidStatusOnline, loadAuctionMarket, upsertPlayerPresenceOnline, loadMapPresenceOnline, savePlayerLocationCheckpointOnline, loadPlayerLocationCheckpointOnline, removePlayerPresenceOnline, queuePvpAttackOnline, consumePvpDamageEventsOnline, syncArenaProfileOnline, loadArenaState, loadArenaDailyRewardStatus, claimArenaDailyReward, loadArenaOpponents, loadArenaHistory, arenaAttackOnline, listClansOnline, loadMyClanOnline, createClanOnline, joinClanOnline, getClanRequestsOnline, reviewClanRequestOnline, cancelClanRequestOnline, setClanMemberRoleOnline, leaveClanOnline, transferClanCreditsOnline, claimClanCreditGrantsOnline, recordClanAlienKillOnline, getPremiumShopOnline, testPurchasePremiumOnline, adminPreviewPremiumStageOnline, adminSimulatePremiumStageOnline, getPremiumStageCatalogOnline, loadWarfrontStateOnline, loadSectorOwnershipOnline, hitWorldBossOnline, claimWorldBossRewardOnline, declareClanWarOnline, recordClanWarScoreOnline, loadLiveOpsOnline, adminUpdateLiveEventScheduleOnline, purchaseLiveCatalogOnline, economyActionOnline, getChatHistoryOnline, sendChatMessageOnline, redeemGameCouponOnline, getMyDesignersOnline, setDesignLoadoutOnline, claimGateDroneDesignOnline, claimEventDesignerOnline, getAdminStatus, adminSearchAccounts, adminRecentActions, adminBanAccount, adminUnbanAccount, adminResetAccount, adminDeleteAccount, pushTelemetryBatch, adminTelemetryOverview, adminPlayerTelemetry, getBattleGroupOnline, createBattleGroupOnline, inviteBattleGroupOnline, searchBattleGroupPlayersOnline, inviteBattleGroupUserOnline, respondBattleGroupInviteOnline, leaveBattleGroupOnline, kickBattleGroupMemberOnline, setBattleGroupRallyOnline, loadRuntimeConfigOnline, loadNpcRuntimeConfigOnline, loadWorldRuntimeConfigOnline, loadSystemsRuntimeConfigOnline, loadAdminRuntimeMonitorOnline, adminUpdateRuntimeModuleOnline, adminUpdateNpcRuntimeOnline, adminUpdateNpcSpawnRuntimeOnline, adminUpdateWorldMapOnline, adminUpdateWorldResourceOnline, adminUpdateWorldSectorOnline, adminUpdateWorldPortalOnline, adminUpdateWorldResourcePoolOnline, adminUpdateMissionCategoryOnline, adminUpdateEconomyServiceOnline, adminUpdateCraftingRecipeOnline, loadBattlePassRuntimeConfigOnline, adminUpdateBattlePassSeasonOnline, adminUpdateBattlePassTierOnline, loadShopsRuntimeConfigOnline, adminUpdateCommonShopItemOnline, adminUpdatePremiumShopItemOnline, loadBonusConfigOnline, adminUpdateBonusConfigOnline, adminCouponDashboardOnline, adminCreateCouponOnline, adminSetCouponActiveOnline, loadGalaxyGatesOnline, adminUpdateGalaxyGateOnline, adminUpsertCustomMissionOnline, adminDeleteCustomMissionOnline, adminCreateCraftRecipeOnline, adminCreateEconomyServiceOnline, adminCreatePassSeasonOnline, loadAuctionRulesOnline, adminUpdateAuctionRulesOnline, loadBalanceRuntimeOnline, adminUpdateBalanceOnline,loadAdminSecurityIncidents,reviewAdminSecurityIncident } from './api.js?v=34.6.1';
+import { SharedUniverseClient } from './world.js?v=34.6.1';
 
 const canvas = document.querySelector('#game');
 const ctx = canvas.getContext('2d');
@@ -322,7 +322,7 @@ function shipMapAsset(id,faction=progress?.profile?.faction){
 }
 const STATIC_SHIP_RENDER_IDS=new Set(Object.keys(GAME_ASSETS.shipMap||{}));
 function shipMapSheetAsset(id,faction=progress?.profile?.faction){
-  // V34.6.0: todas as naves usam o casco visual único no mapa para evitar reaproveitar atlas genéricos.
+  // V34.6.1: todas as naves usam o casco visual único no mapa para evitar reaproveitar atlas genéricos.
   // Se houver arte estática individual, priorizamos a rotação do sprite próprio da nave.
   if(STATIC_SHIP_RENDER_IDS.has(id)&&shipMapAsset(id,faction))return null;
   return (GAME_ASSETS.shipMapSheets32&&GAME_ASSETS.shipMapSheets32[id])||(GAME_ASSETS.shipMapSheets&&GAME_ASSETS.shipMapSheets[id])||null;
@@ -534,7 +534,7 @@ function bootstrapDelay(ms){return new Promise(resolve=>setTimeout(resolve,ms));
 // ===================== V15.1 SHARED UNIVERSE • REALTIME COMBAT PRESENCE =====================
 const sharedUniverseRuntime={ready:false,status:'offline',latency:0,event:null,globalEvent:null,warfront:null,roomKey:null,lastPlayerSyncAt:0,lastCombatSignature:'',lastPlayerSentX:null,lastPlayerSentY:null,lastPlayerSentAngle:null,lastPlayerSentHp:null,lastPlayerSentShield:null,pendingOres:new Set(),lastSnapshotToastAt:0,mapError:null,sectorFallback:null,sectorReadPending:false,sectorReadAt:0,sectorReadError:null,sectorReadGeneration:0};
 const SHARED_SYNC_COMBAT_MS=100;
-const SHARED_SYNC_MOVE_MS=100; // V34.6.0: cruise multiplayer, ~10 Hz por piloto.
+const SHARED_SYNC_MOVE_MS=100; // V34.6.1: cruise multiplayer, ~10 Hz por piloto.
 const SHARED_SYNC_IDLE_MS=1500;
 function sharedUniverseMap(){return !!authenticated&&!!progress&&!isGalaxyGateMap();}
 function sharedUniverseOnline(){return sharedUniverseMap()&&sharedUniverseRuntime.ready&&sharedUniverse.isOnline();}
@@ -596,7 +596,7 @@ function sectorFactionLabel(id){return FACTIONS[id]?.short||'NEUTRO';}
 function sectorControlScore(id){return Math.max(0,Number(sectorControlState()?.scores?.[id])||0);}
 function sectorControlNearbyTotal(node){return Object.values(node?.nearby||{}).reduce((s,n)=>s+Math.max(0,Number(n)||0),0);}
 // V34.6: PvP relays are server-owned structures; no client may declare ownership or damage.
-const relayAttackRuntime={nodeId:null,interval:null};
+const relayAttackRuntime={nodeId:null,waitingNodeId:null,interval:null};
 const relayWorkshopRuntime={state:null,loading:false,lastAt:0,active:null,mapId:null,errors:0};
 function relayCurrentBonus(){
  const st=relayWorkshopRuntime.state;if(!st?.enabled||!progress)return null;
@@ -624,11 +624,37 @@ async function refreshRelayWorkshop(force=false){
  finally{relayWorkshopRuntime.loading=false;if(ui.warfrontModal&&!ui.warfrontModal.classList.contains('hidden'))renderWarfront();}
 }
 function relayCombatPanelHtml(sc){
- return `<div class="relay-combat-v346"><div class="section-kicker">V34.6 • RELAY DOMINATION • CONQUISTA 24H</div><div class="relay-combat-grid-v346">${(sc.nodes||[]).map(n=>{
+ return `<div class="relay-combat-v346"><div class="section-kicker">RELAY DOMINATION • CONQUISTA 24H</div><div class="relay-combat-grid-v346">${(sc.nodes||[]).map(n=>{
  const sh=Math.max(0,Number(n.shield)||0),hp=Math.max(0,Number(n.hp)||0),maxSh=Math.max(1,Number(n.maxShield)||240000),maxHp=Math.max(1,Number(n.maxHp)||360000),prot=Date.now()<Number(n.protectedUntil||0);
- return `<article class="relay-combat-card-v346"><div><b>${escHtml(n.label||n.id)} • ${escHtml(n.id)}</b><small>${n.ownerClanId?'CLÃ DOMINANTE':'FACÇÃO / NEUTRO'} • ${escHtml(sectorFactionLabel(n.owner))}</small></div><small>ESCUDO ${fmt(sh)} / ${fmt(maxSh)}</small><div class="relay-meter-v346 shield"><i style="width:${Math.round(sh/maxSh*100)}%"></i></div><small>HP ${fmt(hp)} / ${fmt(maxHp)}</small><div class="relay-meter-v346 hull"><i style="width:${Math.round(hp/maxHp*100)}%"></i></div><small>${prot?'PROTEÇÃO TEMPORÁRIA':hp<=0?'NÚCLEO VULNERÁVEL • ENTRE NA ZONA':'DESTRUA O RELÉ PARA CONQUISTAR'}</small><button class="${relayAttackRuntime.nodeId===n.id?'danger-btn':'ghost-btn'}" data-relay-attack="${escHtml(n.id)}" ${prot||hp<=0?'disabled':''}>${relayAttackRuntime.nodeId===n.id?'PARAR ATAQUE':'ATACAR RELÉ'}</button></article>`;}).join('')}</div></div>`;
+ return `<article class="relay-combat-card-v346"><div><b>${escHtml(n.label||n.id)} • ${escHtml(n.id)}</b><small>${n.ownerClanId?'CLÃ DOMINANTE':'FACÇÃO / NEUTRO'} • ${escHtml(sectorFactionLabel(n.owner))}</small></div><small>ESCUDO ${fmt(sh)} / ${fmt(maxSh)}</small><div class="relay-meter-v346 shield"><i style="width:${Math.round(sh/maxSh*100)}%"></i></div><small>HP ${fmt(hp)} / ${fmt(maxHp)}</small><div class="relay-meter-v346 hull"><i style="width:${Math.round(hp/maxHp*100)}%"></i></div><small>${prot?'PROTEÇÃO TEMPORÁRIA':hp<=0?'NÚCLEO VULNERÁVEL • ENTRE NA ZONA':'DESTRUA O RELÉ PARA CONQUISTAR'}</small><small class="relay-map-hint">Toque no relé diretamente no mapa para mirar e atacar.</small></article>`;}).join('')}</div></div>`;
 }
-function stopRelayAttack(){if(relayAttackRuntime.interval)clearInterval(relayAttackRuntime.interval);relayAttackRuntime.interval=null;relayAttackRuntime.nodeId=null;}
+function stopRelayAttack(){if(relayAttackRuntime.interval)clearInterval(relayAttackRuntime.interval);relayAttackRuntime.interval=null;relayAttackRuntime.nodeId=null;relayAttackRuntime.waitingNodeId=null;}
+function selectRelayWorld(node){
+ if(!node?.relayMode||!sharedUniverseOnline())return false;
+ if(relayWorkshopRuntime.state?.clan?.id&&node.ownerClanId===relayWorkshopRuntime.state.clan.id){showToast('Seu clã já domina este relé.');return true;}
+ state.target=null;player.laserFiring=false;updateTargetLockHud();state.pointerNavActive=false;
+ // Click twice to cancel. One click selects and follows the target as NPCs do.
+ if(relayAttackRuntime.nodeId===node.id||relayAttackRuntime.waitingNodeId===node.id){stopRelayAttack();showToast('Ataque ao relé interrompido.');return true;}
+ stopRelayAttack();
+ if(Number(node.hp)<=0){showToast('Núcleo vulnerável: aproxime-se para conquistar.');player.tx=node.x;player.ty=node.y;return true;}
+ if(Date.now()<Number(node.protectedUntil||0)){showToast('Relé sob proteção temporária.');return true;}
+ const dist=Math.hypot(player.x-node.x,player.y-node.y);
+ if(dist>1120){
+   relayAttackRuntime.waitingNodeId=node.id;
+   const distance=Math.max(1,dist),stopAt=850;
+   player.tx=node.x+(player.x-node.x)*stopAt/distance;
+   player.ty=node.y+(player.y-node.y)*stopAt/distance;
+   showToast('RELÉ '+node.id+' selecionado • aproximando para atacar');
+ }else{toggleRelayAttack(node.id);}
+ return true;
+}
+function updateRelayTargetApproach(){
+ const id=relayAttackRuntime.waitingNodeId;if(!id)return;
+ const node=sectorControlState()?.nodes?.find(n=>n.id===id);
+ if(!node||!node.relayMode||!sharedUniverseOnline()||!state.currentMap?.battle||Number(node.hp)<=0||Date.now()<Number(node.protectedUntil||0)){stopRelayAttack();return;}
+ if(Math.hypot(player.x-node.x,player.y-node.y)<=1090){relayAttackRuntime.waitingNodeId=null;toggleRelayAttack(id);}
+}
+
 function toggleRelayAttack(nodeId){
  if(relayAttackRuntime.nodeId===nodeId){stopRelayAttack();renderWarfront();return;}
  if(!sharedUniverseOnline()||!state.currentMap?.battle){showToast('Entre online em um mapa PvP para atacar o relé.');return;}
@@ -642,28 +668,44 @@ function toggleRelayAttack(nodeId){
  },700);renderWarfront();
 }
 function relayWorkshopHtml(){
- const st=relayWorkshopRuntime.state;if(!st?.enabled)return `<section class="warfront-panel relay-workshop-v346"><div class="section-kicker">OFICINA DE GUERRA • V34.6</div><small> ${relayWorkshopRuntime.loading?'Sincronizando...':'Aguardando SQL V34.6 no Supabase ou sincronização da oficina.'}</small><button class="ghost-btn" data-relay-refresh>ATUALIZAR</button></section>`;
+ const st=relayWorkshopRuntime.state;if(!st?.enabled)return `<section class="warfront-panel relay-workshop-v346"><div class="section-kicker">OFICINA DE GUERRA</div><small> ${relayWorkshopRuntime.loading?'Sincronizando...':'Aguardando atualização do banco ou sincronização da oficina.'}</small><button class="ghost-btn" data-relay-refresh>ATUALIZAR</button></section>`;
  const cl=st.clan,owner=cl?.isOwner===true,inventory=st.inventory||[],pieces=st.pieces||[],partLabel={weapon_parts:'Peças bélicas',shield_parts:'Núcleos',hull_parts:'Ligas de casco',circuit_parts:'Circuitos'};
  const ownedModules=inventory.map(m=>`<option value="${escHtml(m.id)}">${escHtml(m.category)} ${escHtml(m.attribute)} LV${m.level}${m.slot?' • EQUIPADO '+m.map_id+'/'+m.node_id+'/'+m.slot:''}</option>`).join('');
  const missions=[['capture_week','2 conquistas/semana','5 peças bélicas'],['defend_week','3 defesas/semana','5 núcleos de escudo'],['hunter_week','100 NPCs coletivos/semana','5 ligas de casco'],['domination_week','5 conquistas/semana','5 circuitos']];
  const bonus=st.global||{},active=relayCurrentBonus();
- return `<section class="warfront-panel relay-workshop-v346"><div class="section-kicker">OFICINA DE GUERRA DO CLÃ • V34.6</div><h3>RELAY DOMINATION • 9 RELÉS</h3><p>${cl?`CLÃ ${escHtml(cl.tag||cl.name)} • LV ${fmt(cl.level||1)} • COFRE ${fmt(cl.vault_credits||0)} CR`:'Entre em um clã para fabricar e equipar módulos.'}</p><div class="relay-bonus-v346"><b>SUPREMACIA</b><small>3/3 de um mapa: bônus do clã em todos os mapas. 9/9 mesma facção: bônus para toda a facção. Nunca acumulam módulos iguais.</small><strong>${active?`+${active.value}% ${escHtml(active.attribute.toUpperCase())} • LV${active.level}`:'SEM BÔNUS GLOBAL ATIVO'}</strong><span>Clã: ${(bonus.clanMaps||[]).length} mapa(s) 3/3 • Facção 9/9: ${escHtml(bonus.factionDominance||'nenhuma')}</span></div>
+ return `<section class="warfront-panel relay-workshop-v346"><div class="section-kicker">OFICINA DE GUERRA DO CLÃ</div><h3>RELAY DOMINATION • 9 RELÉS</h3><p>${cl?`CLÃ ${escHtml(cl.tag||cl.name)} • LV ${fmt(cl.level||1)} • COFRE ${fmt(cl.vault_credits||0)} CR`:'Entre em um clã para fabricar e equipar módulos.'}</p><div class="relay-bonus-v346"><b>SUPREMACIA</b><small>3/3 de um mapa: bônus do clã em todos os mapas. 9/9 mesma facção: bônus para toda a facção. Nunca acumulam módulos iguais.</small><strong>${active?`+${active.value}% ${escHtml(active.attribute.toUpperCase())} • LV${active.level}`:'SEM BÔNUS GLOBAL ATIVO'}</strong><span>Clã: ${(bonus.clanMaps||[]).length} mapa(s) 3/3 • Facção 9/9: ${escHtml(bonus.factionDominance||'nenhuma')}</span></div>
  <div class="relay-parts-v346">${Object.keys(partLabel).map(k=>`<span>${partLabel[k]} <b>${fmt(pieces.find(p=>p.part_type===k)?.quantity||0)}</b></span>`).join('')}</div>
  <div class="section-kicker">MISSÕES COLETIVAS SEMANAIS</div><div class="relay-missions-v346">${missions.map(([id,label,reward])=>`<div><small>${label}<span> • ${reward}</span></small><button class="ghost-btn" data-relay-mission="${id}" ${!owner||st.missions?.some(m=>m.mission_id===id&&new Date(m.period_start).getTime()>Date.now()-8*864e5)?'disabled':''}>RESGATAR</button></div>`).join('')}</div>
- ${owner?`<div class="section-kicker">MÓDULOS • 8 SLOTS • SEM DUPLICAR BÔNUS</div><div class="relay-actions-v346"><select id="relayCategoryV346"><option value="weapon">ARMA</option><option value="shield">ESCUDO</option><option value="hp">HP</option><option value="bonus">BÔNUS</option></select><select id="relayAttributeV346"><option value="weapon">ARMA</option><option value="shield">ESCUDO</option><option value="hp">HP</option><option value="damage">DANO</option><option value="speed">VELOCIDADE</option><option value="xp">XP</option><option value="resources">RECURSOS</option></select><button class="primary-btn" data-relay-action="craft">FABRICAR LV1 (5 PEÇAS)</button></div><div class="relay-actions-v346"><select id="relayModuleV346">${ownedModules||'<option value="">SEM MÓDULOS</option>'}</select><button class="ghost-btn" data-relay-action="upgrade">EVOLUIR</button><button class="ghost-btn" data-relay-action="unequip">REMOVER</button></div><div class="relay-actions-v346"><select id="relayMapV346"><option value="b41">4-1</option><option value="b42">4-2</option><option value="b43">4-3</option></select><select id="relayNodeV346"><option>A</option><option>B</option><option>C</option></select><select id="relaySlotV346">${Array.from({length:8},(_,i)=>`<option value="${i+1}">${i+1} • ${i<2?'ARMA':i<4?'ESCUDO':i<6?'HP':'BÔNUS'}</option>`).join('')}</select><button class="primary-btn" data-relay-action="equip">EQUIPAR</button></div><small>LV1: 5 peças, 0 CR • LV2: +12 peças, 100.000 CR, clã LV3 • LV3: +25 peças, 350.000 CR, clã LV5. Somente o líder pode gastar recursos.</small>`:'<small>Peças e melhorias pertencem ao clã. Apenas o líder pode fabricar, instalar ou aprimorar módulos.</small>'}
- ${isAdminPilot()?`<div class="section-kicker">ADM • CONTROLE DE GUERRA</div><div class="relay-actions-v346"><label>HP BASE<input type="number" id="relayAdmHpV346" value="${Number(st.rules?.max_hp)||360000}" min="10000" max="3000000"></label><label>ESCUDO<input type="number" id="relayAdmShieldV346" value="${Number(st.rules?.max_shield)||240000}" min="10000" max="2000000"></label><label>DANO POR ATAQUE<input type="number" id="relayAdmDamageV346" value="${Number(st.rules?.hit_damage)||12000}" min="100" max="50000"></label><button class="ghost-btn" data-relay-admin-save>SALVAR GUERRA</button></div>`:''}
+ ${owner?`<div class="section-kicker">MÓDULOS • 8 SLOTS • SEM DUPLICAR BÔNUS</div><div class="relay-actions-v346"><select id="relayCategoryV346"><option value="weapon">ARMA</option><option value="shield">ESCUDO</option><option value="hp">HP</option><option value="bonus">BÔNUS</option></select><select id="relayAttributeV346"><option value="weapon">ARMA</option><option value="shield">ESCUDO</option><option value="hp">HP</option><option value="damage">DANO</option><option value="speed">VELOCIDADE</option><option value="xp">XP</option><option value="resources">RECURSOS</option></select><button class="primary-btn" data-relay-action="craft">FABRICAR LV1 (5 PEÇAS)</button></div><div class="relay-actions-v346"><select id="relayModuleV346">${ownedModules||'<option value="">SEM MÓDULOS</option>'}</select><button class="ghost-btn" data-relay-action="upgrade">EVOLUIR</button><button class="ghost-btn" data-relay-action="unequip">REMOVER</button></div><div class="relay-actions-v346"><select id="relayMapV346"><option value="b41">4-1</option><option value="b42">4-2</option><option value="b43">4-3</option></select><select id="relayNodeV346"><option>A</option><option>B</option><option>C</option></select><select id="relaySlotV346">${Array.from({length:8},(_,i)=>`<option value="${i+1}">${i+1} • ${i<2?'ARMA':i<4?'ESCUDO':i<6?'HP':'BÔNUS'}</option>`).join('')}</select><button class="primary-btn" data-relay-action="equip">EQUIPAR</button></div><small>Selecione um módulo e clique em EVOLUIR para consultar o custo e confirmar. Somente o líder pode gastar recursos.</small>`:'<small>Peças e melhorias pertencem ao clã. Apenas o líder pode fabricar, instalar ou aprimorar módulos.</small>'}
+ ${isAdminPilot()?`<div class="section-kicker">ADM • CONTROLE DE GUERRA</div>
+ <div class="relay-admin-fields-v3461">
+ ${[['relayAdmHpV346','HP BASE','max_hp',10000,3000000],['relayAdmShieldV346','ESCUDO BASE','max_shield',10000,2000000],['relayAdmDamageV346','DANO POR ATAQUE','hit_damage',100,50000],['relayAdmCooldownV346','INTERVALO DE DISPARO (MS)','hit_cooldown_ms',400,3000],['relayAdmCaptureV346','TEMPO DE CONQUISTA (MS)','capture_ms',5000,60000],['relayAdmProtectionV346','PROTEÇÃO PÓS-CONQUISTA (MS)','protection_ms',10000,180000]].map(([id,label,key,min,max])=>`<label>${label}<input type="number" inputmode="numeric" id="${id}" value="${Number(st.rules?.[key])}" min="${min}" max="${max}" step="1"></label>`).join('')}
+ <label>MULTIPLICADOR DE GUERRA (FIM DE SEMANA)<input type="number" id="relayAdmWeekendV346" value="${Number(st.rules?.weekend_multiplier||1.2)}" min="1" max="2" step="0.05"></label>
+ <label class="relay-admin-enable-v3461"><input type="checkbox" id="relayAdmEnabledV346" ${st.rules?.enabled?'checked':''}> SISTEMA DE RELÉS ATIVO</label>
+ </div><div class="relay-admin-footer-v3461"><small>Valores do servidor. Altere e clique em salvar; o novo limite-base se aplica às próximas reconstruções. Os relés existentes não são curados durante combate.</small><button type="button" class="primary-btn" data-relay-admin-save>SALVAR CONTROLES DA GUERRA</button></div>
+ <div class="section-kicker">TESTES ADM • LIBERAR DOMÍNIO</div>
+ <div class="relay-admin-reset-v3461"><label>MAPA<select id="relayAdmReleaseMapV346"><option value="b41">4-1</option><option value="b42">4-2</option><option value="b43">4-3</option></select></label><label>RELÉ<select id="relayAdmReleaseNodeV346"><option>A</option><option>B</option><option>C</option></select></label>
+ <button type="button" class="ghost-btn" data-relay-admin-release="clan">EXPULSAR CLÃ</button><button type="button" class="danger-btn" data-relay-admin-release="all">LIBERAR CLÃ + FACÇÃO</button></div>
+ <small>Libera o domínio para testes, devolve módulos ao inventário e preserva o histórico. Não apaga créditos nem níveis.</small>`:''}
  ${owner?`<div class="section-kicker">REPARAÇÃO • FORA DE COMBATE</div><div class="relay-actions-v346"><select id="relayRepairMapV346"><option value="b41">4-1</option><option value="b42">4-2</option><option value="b43">4-3</option></select><select id="relayRepairNodeV346"><option>A</option><option>B</option><option>C</option></select><button class="ghost-btn" data-relay-repair>REPARAR • 3.000 CR</button></div>`:''}
  <button class="ghost-btn" data-relay-refresh>ATUALIZAR OFICINA</button></section>`;
 }
 async function performRelayAction(action){
  const id=document.getElementById('relayModuleV346')?.value||null,category=document.getElementById('relayCategoryV346')?.value,attr=document.getElementById('relayAttributeV346')?.value;
  if(action==='craft'&&!(category==='bonus'?['damage','shield','hp','speed','xp','resources'].includes(attr):category===attr)){showToast('Selecione um atributo compatível com a categoria.');return;}
+ if(action==='upgrade'){
+   const mod=relayWorkshopRuntime.state?.inventory?.find(m=>m.id===id);
+   if(!mod){showToast('Escolha primeiro um módulo para evoluir.');return;}
+   if(Number(mod.level)>=3){showToast('Módulo já está no nível máximo.');return;}
+   const cost=Number(mod.level)===1?{pieces:12,credits:100000,clanLevel:3}:{pieces:25,credits:350000,clanLevel:5};
+   if(!confirm(`EVOLUÇÃO DO MÓDULO • NÍVEL ${Number(mod.level)+1}\n\nPeças de ${mod.category}: ${cost.pieces}\nCréditos do cofre: ${fmt(cost.credits)} CR\nNível mínimo do clã: ${cost.clanLevel}\n\nConfirmar evolução?`))return;
+ }
  const body={action,moduleId:id,category,attribute:attr,mapId:document.getElementById('relayMapV346')?.value,nodeId:document.getElementById('relayNodeV346')?.value,slot:Number(document.getElementById('relaySlotV346')?.value)||1};
  try{await relayModuleActionOnline(body);showToast('OFICINA DO CLÃ • '+action.toUpperCase()+' confirmado no banco','reward');await refreshRelayWorkshop(true);}
  catch(e){showToast('OFICINA • '+String(e.message).slice(0,125));}
 }
 function sectorControlNodeHtml(node){const owner=node?.owner||null,challenger=node?.challenger||null,ownerLabel=owner?sectorFactionLabel(owner):'NEUTRO',ownerColor=owner?sectorFactionColor(owner):'#8aa0ad',challengeLabel=node?.captureError?'ERRO DE GRAVAÇÃO':node?.persisting?'CONFIRMANDO...':node?.contested?'CONTESTADO':challenger?'CAPTURANDO':'ESTÁVEL',challengeColor=node?.contested?'#ffffff':challenger?sectorFactionColor(challenger):ownerColor,progress=Math.max(0,Math.min(100,Number(node?.progress)||0)),near=sectorControlNearbyTotal(node);return `<article class="sector-node-card${node?.contested?' contested':''}" style="--sector-owner:${ownerColor};--sector-challenge:${challengeColor}"><div class="sector-node-symbol">${escHtml(node?.id||'?')}</div><div class="sector-node-main"><div><b>${escHtml(node?.label||'PONTO')}</b><small>${escHtml(ownerLabel)} • ${near} PILOTO(S) NA ZONA</small></div><strong>${escHtml(challengeLabel)}</strong></div><div class="sector-node-track"><i style="width:${progress}%"></i></div><div class="sector-node-foot"><span>${node?.captureError?escHtml(node.captureError.message||'Falha ao salvar no banco'):node?.persisting?'AGUARDANDO CONFIRMAÇÃO NO BANCO':challenger?`${escHtml(sectorFactionLabel(challenger))} • ${Math.round(progress)}%`:owner?'SETOR CONTROLADO':'AGUARDANDO CAPTURA'}</span>${state.currentMap?.battle?`<button class="ghost-btn" data-warfront-nav="${escHtml(node?.id||'')}">IR</button>`:''}</div></article>`;}
-function sectorControlPanelHtml(){const sc=sectorControlState();if(!state.currentMap?.battle)return `<section class="warfront-panel sector-control-panel"><div class="section-kicker">CONTROLE DE SETOR</div><div class="sector-control-empty"><b>ENTRE EM 4-1 / 4-2 / 4-3</b><span>Os pontos de controle são sincronizados pelo Shared Universe quando você entra em um Battle Map.</span></div></section>`;if(!sc)return `<section class="warfront-panel sector-control-panel"><div class="section-kicker">CONTROLE DE SETOR</div><div class="sector-control-empty"><b>${sharedUniverseRuntime.mapError?'SALA PvP INDISPONÍVEL':'SINCRONIZANDO SETOR...'}</b><span>${escHtml(sharedUniverseRuntime.mapError||sharedUniverseRuntime.sectorReadError||'Aguardando o estado tático do servidor.')}</span><button class="ghost-btn" data-warfront-reconnect>TENTAR NOVAMENTE</button></div></section>`;const scores=sc.scores||{},dominant=sc.dominantFaction||null;return `<section class="warfront-panel sector-control-panel"><div class="sector-control-head"><div><div class="section-kicker">CONTROLE DE SETOR • ${escHtml(displayMapLabel(progress.mapId))}</div><h3>${dominant?`${escHtml(sectorFactionLabel(dominant))} EM VANTAGEM`:'SETOR DISPUTADO'}</h3><small>${sc.readOnly?'VISUALIZAÇÃO DO BANCO • Conexão PvP indisponível. A captura e os eventos aguardam a sala online.':'Capture os 3 relés. Mais pilotos da mesma facção aceleram a captura até o limite de 3.'}</small></div><div class="sector-scoreboard">${['earth','mars','jupiter'].map(id=>`<div style="--faction:${sectorFactionColor(id)}"><span>${escHtml(sectorFactionLabel(id))}</span><b>${fmt(scores[id]||0)}/3</b></div>`).join('')}</div></div><div class="sector-node-grid">${(sc.nodes||[]).map(sectorControlNodeHtml).join('')}</div><div class="warfront-rule-banner">${sc.readOnly?`<b>CONTROLE OFFLINE:</b> ${escHtml(sharedUniverseRuntime.mapError||'Aguardando o servidor PvP.')} <button class="ghost-btn" data-warfront-reconnect>RECONECTAR</button>`:'<b>DOMÍNIO PERSISTENTE:</b> o relé pertence à facção vencedora até outra completar a captura.'}</div>${sc.relayMode?relayCombatPanelHtml(sc):''}</section>`;}
+function sectorControlPanelHtml(){const sc=sectorControlState();if(!state.currentMap?.battle)return `<section class="warfront-panel sector-control-panel"><div class="section-kicker">CONTROLE DE SETOR</div><div class="sector-control-empty"><b>ENTRE EM 4-1 / 4-2 / 4-3</b><span>Os pontos de controle são sincronizados pelo Shared Universe quando você entra em um Battle Map.</span></div></section>`;if(!sc)return `<section class="warfront-panel sector-control-panel"><div class="section-kicker">CONTROLE DE SETOR</div><div class="sector-control-empty"><b>${sharedUniverseRuntime.mapError?'SALA PvP INDISPONÍVEL':'SINCRONIZANDO SETOR...'}</b><span>${escHtml(sharedUniverseRuntime.mapError||sharedUniverseRuntime.sectorReadError||'Aguardando o estado tático do servidor.')}</span><button class="ghost-btn" data-warfront-reconnect>TENTAR NOVAMENTE</button></div></section>`;const scores=sc.scores||{},dominant=sc.dominantFaction||null;return `<section class="warfront-panel sector-control-panel"><div class="sector-control-head"><div><div class="section-kicker">CONTROLE DE SETOR • ${escHtml(displayMapLabel(progress.mapId))}</div><h3>${dominant?`${escHtml(sectorFactionLabel(dominant))} EM VANTAGEM`:'SETOR DISPUTADO'}</h3><small>${sc.readOnly?'VISUALIZAÇÃO DO BANCO • Conexão PvP indisponível. A captura e os eventos aguardam a sala online.':'Destrua os escudos e o núcleo do relé no mapa e aproxime-se para conquistar. Mais aliados aceleram a ocupação.'}</small></div><div class="sector-scoreboard">${['earth','mars','jupiter'].map(id=>`<div style="--faction:${sectorFactionColor(id)}"><span>${escHtml(sectorFactionLabel(id))}</span><b>${fmt(scores[id]||0)}/3</b></div>`).join('')}</div></div><div class="sector-node-grid">${(sc.nodes||[]).map(sectorControlNodeHtml).join('')}</div><div class="warfront-rule-banner">${sc.readOnly?`<b>CONTROLE OFFLINE:</b> ${escHtml(sharedUniverseRuntime.mapError||'Aguardando o servidor PvP.')} <button class="ghost-btn" data-warfront-reconnect>RECONECTAR</button>`:'<b>DOMÍNIO PERSISTENTE:</b> ataque o relé no mapa para derrubar as defesas e conquistar para seu clã. A facção também é registrada.'}</div>${sc.relayMode?relayCombatPanelHtml(sc):''}</section>`;}
 
 function normalizeSharedNpc(raw){
   const base=NPC_TYPES[raw.type]||{},x=Number(raw.x)||0,y=Number(raw.y)||0;return {...raw,x,y,tx:x,ty:y,netX:x,netY:y,netAt:Date.now(),vx:0,vy:0,visualAngle:Number(raw.angle)||0,sharedWorld:true,name:raw.name||base.name||raw.type,color:raw.color||base.color||'#ff755d',size:Number(raw.size||base.size||18),resources:{...(raw.resources||base.resources||{})},lastShot:0,lastAttackPlayerAt:0,jammedUntil:Number(raw.jammedUntil)||0,bossAttackScale:Number(raw.bossAttackScale)||1};
@@ -2682,7 +2724,7 @@ function eliteRoutePanelV2012(){
   <div class="elite-route-marks"><span>${st.firstCommon?'✓':'○'} NAVE COMUM FORTE <small>${label('firstCommon')}</small></span><span>${st.fourNova?'✓':'○'} PRIMEIROS 4 NOVA <small>${label('fourNova')}</small></span><span>${st.fullElite?'✓':'○'} FULL ELITE <small>${label('fullElite')}</small></span></div>
   <div class="pass-mini-progress elite-route-track"><i style="width:${pct}%"></i></div>
   <p>Leviathan ${st.eliteShip?'✓':'○'} • ARC-4 ${st.lasers}/31 • VSH-5 ${st.shields}/12 • THR-6 ${st.motors}/6 • Extras Elite ${st.extras}/4</p>
-  <p>Nova ${st.novaCount}/8${nextNova?` • próximo na loja: <strong>${fmt(nextNova)} STL</strong>`:''} • Tempo monitorado desde a V20.1.3: <strong>${(r.activeSeconds/3600).toFixed(1).replace('.',',')} h</strong></p>
+  <p>Nova ${st.novaCount}/8${nextNova?` • próximo na loja: <strong>${fmt(nextNova)} STL</strong>`:''} • Tempo monitorado: <strong>${(r.activeSeconds/3600).toFixed(1).replace('.',',')} h</strong></p>
   <small>Horas antigas não são estimadas como reais. Itens contam quando equipados na build ativa; compras de outras naves não contam. Premium reduz 5% nos itens STL elegíveis.</small></div></details>`;
 }
 function renderProgression(){
@@ -3138,7 +3180,7 @@ function applyQualityMode(mode,persist=true){
   preloadAssets();if(progress)preloadActiveGameplayAssets();resize();renderSettings();
   showToast(mode==='auto'?`Modo AUTO • ${qualityProfile().label}`:`Qualidade ${qualityProfile().label} ativada`);
 }
-// V34.6.0: preferencia local para liberar espaco de combate no mobile.
+// V34.6.1: preferencia local para liberar espaco de combate no mobile.
 const MOBILE_COMBAT_LAYOUT_KEY='stellar_mobile_combat_compact_v3210';
 function setMobileCombatCompact(enabled,persist=true){
   document.body.classList.toggle('mobile-combat-pro',!!enabled);
@@ -3389,7 +3431,7 @@ function renderClan(){
     const ownPending=clanRuntime.requests?.outgoing||[],hasPending=ownPending.length>0;
     const list=(clanRuntime.clans||[]).map(c=>`<div class="clan-public-row"><div><b>[${escHtml(c.tag)}] ${escHtml(c.name)}</b><small>LV ${fmt(c.level||1)} • ${fmt(c.member_count||0)} membro(s)</small></div><span class="clan-role">POR APROVAÇÃO</span><button class="ghost-btn" data-clan-join="${escHtml(c.id)}" ${hasPending||!clanRuntime.requestsReady?'disabled':''}>${hasPending?'PEDIDO PENDENTE':'SOLICITAR ENTRADA'}</button></div>`).join('')||'<div class="muted">Nenhuma aliança criada ainda.</div>';
     const pendingHtml=ownPending.map(r=>`<div class="clan-request-line"><span><b>[${escHtml(r.clan_tag||'')}] ${escHtml(r.clan_name||'Aliança')}</b><small>Solicitação aguardando resposta</small></span><button class="ghost-btn" data-clan-cancel="${escHtml(r.id)}">CANCELAR PEDIDO</button></div>`).join('');
-    ui.clanContent.innerHTML=`${!clanRuntime.requestsReady?'<div class="clan-panel clan-v19-security">⚠️ Aguardando migração SQL V19.0.2 para habilitar pedidos com segurança.</div>':''}${pendingHtml?`<section class="clan-panel"><h3>MEUS PEDIDOS • AGUARDANDO APROVAÇÃO</h3>${pendingHtml}</section>`:''}${pending>0?`<div class="clan-panel clan-pending"><b>CRÉDITOS PENDENTES</b><div class="clan-tax-preview">Você tem <b>${fmt(pending)} CR</b> aguardando entrega.</div></div>`:''}<div class="clan-panel clan-create-box"><div class="clan-empty-title"><div class="eyebrow">FUNDE UMA ALIANÇA</div><h3>Crie seu clã ou solicite entrada em um existente</h3></div><div class="clan-create-grid"><label>NOME DO CLÃ<input id="clanCreateName" maxlength="28" placeholder="Ex.: Guardiões Orbitais"></label><label>TAG<input id="clanCreateTag" maxlength="6" placeholder="GO"></label><button class="primary-btn" id="clanCreateSubmit" ${!clanRuntime.requestsReady?'disabled':''}>CRIAR</button></div></div><div class="clan-panel"><h3>ALIANÇAS DISPONÍVEIS</h3>${list}</div>`;
+    ui.clanContent.innerHTML=`${!clanRuntime.requestsReady?'<div class="clan-panel clan-v19-security">⚠️ Aguardando atualização de segurança do banco para habilitar pedidos com segurança.</div>':''}${pendingHtml?`<section class="clan-panel"><h3>MEUS PEDIDOS • AGUARDANDO APROVAÇÃO</h3>${pendingHtml}</section>`:''}${pending>0?`<div class="clan-panel clan-pending"><b>CRÉDITOS PENDENTES</b><div class="clan-tax-preview">Você tem <b>${fmt(pending)} CR</b> aguardando entrega.</div></div>`:''}<div class="clan-panel clan-create-box"><div class="clan-empty-title"><div class="eyebrow">FUNDE UMA ALIANÇA</div><h3>Crie seu clã ou solicite entrada em um existente</h3></div><div class="clan-create-grid"><label>NOME DO CLÃ<input id="clanCreateName" maxlength="28" placeholder="Ex.: Guardiões Orbitais"></label><label>TAG<input id="clanCreateTag" maxlength="6" placeholder="GO"></label><button class="primary-btn" id="clanCreateSubmit" ${!clanRuntime.requestsReady?'disabled':''}>CRIAR</button></div></div><div class="clan-panel"><h3>ALIANÇAS DISPONÍVEIS</h3>${list}</div>`;
     return;
   }
   const c=st.clan,members=Array.isArray(st.members)?st.members:[],txs=Array.isArray(st.transactions)?st.transactions:[],owner=st.role==='owner',canManage=clanCanManageV19(st.role),status=st.level_status||{};
@@ -3426,9 +3468,9 @@ function renderClan(){
   ui.clanContent.innerHTML=header+body;
 }
 async function openClan(){if(!featureUnlocked('clan')){showFeatureLock('clan','Clã');return;}clanViewTab='overview';closeNavigationModals(ui.clanModal);ui.clanModal?.classList.remove('hidden');if(ui.clanContent)ui.clanContent.innerHTML='<div class="muted">Sincronizando aliança...</div>';await syncClanCreditGrants(true);await refreshClanState(true);}
-async function createClanNow(){if(!clanRuntime.requestsReady){showToast('Aguardando migração de segurança V19.0.2 do banco.');return;}const name=$('#clanCreateName')?.value||'',tag=$('#clanCreateTag')?.value||'';try{await createClanOnline({name,tag});showToast(`Clã [${tag.toUpperCase()}] criado`);await refreshClanState(true);syncOnlineWorld();}catch(e){showToast(e.message);}}
+async function createClanNow(){if(!clanRuntime.requestsReady){showToast('Aguardando atualização de segurança do banco.');return;}const name=$('#clanCreateName')?.value||'',tag=$('#clanCreateTag')?.value||'';try{await createClanOnline({name,tag});showToast(`Clã [${tag.toUpperCase()}] criado`);await refreshClanState(true);syncOnlineWorld();}catch(e){showToast(e.message);}}
 async function joinClanNow(id){
-  if(!clanRuntime.requestsReady){showToast('Aguardando migração de segurança V19.0.2 do banco.');return;}
+  if(!clanRuntime.requestsReady){showToast('Aguardando atualização de segurança do banco.');return;}
   try{const r=await joinClanOnline(id);if(!r?.pending)throw new Error('Servidor desatualizado: entrada direta bloqueada no cliente.');showToast('Pedido enviado! Aguarde a aprovação do líder ou vice-líder.');await refreshClanState(true);}catch(e){showToast(e.message);}
 }
 async function reviewClanRequestNow(id,approve){try{await reviewClanRequestOnline({requestId:id,approve});showToast(approve?'Jogador aprovado na aliança.':'Pedido recusado.');await refreshClanState(true);syncOnlineWorld();}catch(e){showToast(e.message);}}
@@ -3447,7 +3489,9 @@ function warfrontClanName(id){const all=[...(warfrontRuntime.clans||[])];const c
 function blueprintCardHtml(bp){normalizeWarfrontProgress();const have=Number(progress.warfront.blueprints[bp.id]||0),cores=progress.warfront.skillCores,ready=have>=bp.need&&cores>=bp.cores;return `<div class="blueprint-card ${ready?'ready':''}"><div class="blueprint-icon">${bp.icon}</div><div><b>${bp.name}</b><small>${bp.desc}</small><div class="blueprint-progress"><i style="width:${Math.min(100,have/bp.need*100)}%"></i></div><span>FRAGMENTOS ${fmt(have)}/${fmt(bp.need)} • CORES ${fmt(cores)}/${fmt(bp.cores)}</span></div><button class="small-btn" data-blueprint-craft="${bp.id}" ${ready?'':'disabled'}>CONSTRUIR</button></div>`;}
 function abilityMasteryHtml(){normalizeWarfrontProgress();const cls=abilityClassId(),def=shipAbilityDef(),lv=abilityMasteryLevel(),cost=lv>=5?0:[2,4,7,11][lv-1];return `<div class="mastery-card"><div class="mastery-title"><span>${def.icon}</span><div><b>${def.name} • MASTERY ${lv}/5</b><small>+${Math.round((abilityPowerMultiplier()-1)*100)}% potência • -${Math.round((1-abilityCooldownMultiplier())*100)}% recarga</small></div></div><div class="mastery-pips">${[1,2,3,4,5].map(n=>`<i class="${n<=lv?'on':''}"></i>`).join('')}</div>${lv<5?`<button class="primary-btn" data-mastery-upgrade>EVOLUIR • ${cost} CORE${cost>1?'S':''}</button>`:'<div class="mastery-max">MASTERY MÁXIMA</div>'}</div>`;}
 function renderWarfront(){if(!ui.warfrontContent)return;
- const values={};for(const id of ['relayCategoryV346','relayAttributeV346','relayModuleV346','relayMapV346','relayNodeV346','relaySlotV346','relayRepairMapV346','relayRepairNodeV346','relayAdmHpV346','relayAdmShieldV346','relayAdmDamageV346']){const el=document.getElementById(id);if(el)values[id]=el.value;}
+ // Do not destroy focused input/select during periodic live updates.
+ const focused=document.activeElement;if(focused&&ui.warfrontContent.contains(focused)&&['INPUT','SELECT','TEXTAREA'].includes(focused.tagName))return;
+ const values={};for(const id of ['relayCategoryV346','relayAttributeV346','relayModuleV346','relayMapV346','relayNodeV346','relaySlotV346','relayRepairMapV346','relayRepairNodeV346','relayAdmHpV346','relayAdmShieldV346','relayAdmDamageV346','relayAdmCooldownV346','relayAdmCaptureV346','relayAdmProtectionV346','relayAdmWeekendV346','relayAdmReleaseMapV346','relayAdmReleaseNodeV346']){const el=document.getElementById(id);if(el)values[id]=el.value;}
  normalizeWarfrontProgress();const st=warfrontRuntime.state,wb=worldBossState(),war=currentClanWar(),myClan=clanState().clan,myRole=clanState().role;const bp=Object.values(WARFRONT_BLUEPRINTS).map(blueprintCardHtml).join('');let bossHtml='<div class="muted">World Boss indisponível no momento.</div>';if(wb){const hp=Math.max(0,Number(wb.hp)||0),max=Math.max(1,Number(wb.max_hp)||1),dead=hp<=0,claimed=!!wb.claimed;bossHtml=`<div class="world-boss-card ${dead?'dead':''}"><div class="world-boss-head"><div><span class="threat-chip">AMEAÇA GLOBAL</span><h3>${escHtml(wb.name||'NEMESIS PRIME')}</h3><small>${dead?'DERROTADO • recompensa disponível':`Encerra ${new Date(wb.ends_at).toLocaleString('pt-BR')}`}</small></div><b>${dead?'ELIMINADO':`${(hp/max*100).toFixed(2)}%`}</b></div><div class="world-boss-track"><i style="width:${Math.round(hp/max*100)}%"></i></div><div class="world-boss-stats"><span>HP <b>${fmt(hp)} / ${fmt(max)}</b></span><span>SEU DANO <b>${fmt(wb.my_damage||0)}</b></span><span>RANK <b>#${fmt(wb.my_rank||0)||'—'}</b></span></div><div class="warfront-actions">${dead?`<button class="primary-btn" data-worldboss-claim ${claimed?'disabled':''}>${claimed?'RECOMPENSA RESGATADA':'RESGATAR RECOMPENSA'}</button>`:`<button class="danger-btn" data-worldboss-engage>ENGAJAR EM MAPA BATTLE</button>`}</div></div>`;}
 let warHtml='';if(!myClan)warHtml='<div class="war-empty">Entre em um clã para participar das Guerras de Clãs.</div>';else if(war){const mine=war.my_side==='attacker'?Number(war.attacker_score||0):Number(war.defender_score||0),theirs=war.my_side==='attacker'?Number(war.defender_score||0):Number(war.attacker_score||0),opp=war.my_side==='attacker'?war.defender:war.attacker;warHtml=`<div class="clan-war-live"><div class="war-vs"><div><small>SEU CLÃ</small><b>[${escHtml(myClan.tag)}]</b><strong>${fmt(mine)}</strong></div><span>VS</span><div><small>RIVAL</small><b>[${escHtml(opp?.tag||'?')}]</b><strong>${fmt(theirs)}</strong></div></div><div class="war-score-track"><i style="width:${Math.min(100,(mine/Math.max(1,mine+theirs))*100)}%"></i></div><small>Termina ${new Date(war.ends_at).toLocaleString('pt-BR')} • BOSS +10 pts • PvP causa pontos por dano • World Boss também pontua.</small></div>`;}else if(myRole==='owner'){const opts=(warfrontRuntime.clans||[]).filter(c=>c.id!==myClan.id).map(c=>`<option value="${c.id}">[${escHtml(c.tag)}] ${escHtml(c.name)} • LV ${fmt(c.level||1)}</option>`).join('');warHtml=`<div class="war-declare clan-war-declare-card"><div class="war-declare-head"><div><span class="war-declare-kicker">PROTOCOLO DE CONFLITO</span><b>DECLARAR GUERRA</b><small>Escolha um clã rival e inicie uma guerra de 12 horas.</small></div><span class="war-declare-duration">12H</span></div><div class="war-declare-controls"><label class="war-target-field"><span>CLÃ RIVAL</span><div class="war-select-wrap"><select id="warTargetClan"><option value="">Selecionar clã rival...</option>${opts}</select></div></label><button class="danger-btn war-declare-btn" data-war-declare disabled><span class="war-declare-icon">⚔</span><span>DECLARAR GUERRA</span></button></div><div class="war-declare-note"><span>⚠</span><p><b>Somente o líder pode declarar.</b> A guerra permanece ativa por 12 horas após a confirmação.</p></div></div>`;}else warHtml='<div class="war-empty">Somente o líder pode declarar uma guerra.</div>';
 ui.warfrontContent.innerHTML=`${sectorControlPanelHtml()}${relayWorkshopHtml()}<div class="warfront-grid"><section class="warfront-panel worldboss-panel"><div class="section-kicker">WORLD BOSS</div>${bossHtml}</section><section class="warfront-panel"><div class="section-kicker">GUERRA DE CLÃS</div>${warHtml}</section></div><section class="warfront-panel"><div class="section-kicker">MASTERY DA HABILIDADE</div>${abilityMasteryHtml()}</section><section class="warfront-panel"><div class="section-kicker">BLUEPRINT FORGE • ${fmt(progress.warfront.skillCores)} CORES</div><div class="blueprint-grid">${bp}</div><small class="warfront-hint">BOSS comuns têm chance de dropar fragmentos. World Boss garante fragmentos + cores conforme sua contribuição.</small></section>`;
@@ -3465,7 +3509,7 @@ function rollRareBossLoot(enemy){if(!enemy||enemy.worldBoss||!String(enemy.type|
 function craftBlueprint(id){normalizeWarfrontProgress();const bp=WARFRONT_BLUEPRINTS[id];if(!bp)return;const have=progress.warfront.blueprints[id]||0;if(have<bp.need||progress.warfront.skillCores<bp.cores){showToast('Fragmentos ou cores insuficientes');return;}progress.warfront.blueprints[id]-=bp.need;progress.warfront.skillCores-=bp.cores;progress.inventory[bp.itemId]=(progress.inventory[bp.itemId]||0)+bp.qty;progress.warfront.crafted[id]=(progress.warfront.crafted[id]||0)+1;saveGame();renderWarfront();renderHangar();showToast(`${bp.name} CONSTRUÍDO!`,'reward');pushActivity(`FORJA • ${bp.name} criado`,'reward');}
 function upgradeAbilityMastery(){normalizeWarfrontProgress();const cls=abilityClassId(),lv=abilityMasteryLevel();if(lv>=5){showToast('Mastery máxima');return;}const cost=[2,4,7,11][lv-1];if(progress.warfront.skillCores<cost){showToast(`Você precisa de ${cost} Skill Cores`);return;}progress.warfront.skillCores-=cost;progress.warfront.skillMastery[cls]=lv+1;saveGame();renderWarfront();updateAbilityHud();const name=shipAbilityDef().name;showToast(`${name} • MASTERY ${lv+1}!`,'reward');pushActivity(`MASTERY • ${name} subiu para ${lv+1}`,'reward');}
 async function scoreClanWar(points,reason){if(!authenticated||!currentClanTag())return;try{const r=await recordClanWarScoreOnline(points,reason);if(r?.scored){warfrontRuntime.state ||= {};warfrontRuntime.state.war=r.war||warfrontRuntime.state.war;updateWarfrontBadge();}}catch{}}
-function updateWarfrontRuntime(){if(!authenticated||!progress)return;if(relayWorkshopRuntime.mapId!==progress.mapId){relayWorkshopRuntime.mapId=progress.mapId;const prev=JSON.stringify(relayWorkshopRuntime.active);relayWorkshopRuntime.active=relayCurrentBonus();if(prev!==JSON.stringify(relayWorkshopRuntime.active))computeStats(true);refreshRelayWorkshop(true).catch(()=>{});}if(Date.now()-relayWorkshopRuntime.lastAt>60000&&!relayWorkshopRuntime.loading)refreshRelayWorkshop(false).catch(()=>{});if(relayAttackRuntime.nodeId&&(!state.currentMap?.battle||!sharedUniverseOnline()))stopRelayAttack();if(warfrontRuntime.pendingBossDamage>0)flushWorldBossDamage();if(activeWorldBossEnemy()&&Date.now()-warfrontRuntime.lastBossSync>5000){warfrontRuntime.lastBossSync=Date.now();refreshWarfrontState(true).catch(()=>{});}}
+function updateWarfrontRuntime(){if(!authenticated||!progress)return;updateRelayTargetApproach();if(relayWorkshopRuntime.mapId!==progress.mapId){relayWorkshopRuntime.mapId=progress.mapId;const prev=JSON.stringify(relayWorkshopRuntime.active);relayWorkshopRuntime.active=relayCurrentBonus();if(prev!==JSON.stringify(relayWorkshopRuntime.active))computeStats(true);refreshRelayWorkshop(true).catch(()=>{});}if(Date.now()-relayWorkshopRuntime.lastAt>60000&&!relayWorkshopRuntime.loading)refreshRelayWorkshop(false).catch(()=>{});if(relayAttackRuntime.nodeId&&(!state.currentMap?.battle||!sharedUniverseOnline()))stopRelayAttack();if(warfrontRuntime.pendingBossDamage>0)flushWorldBossDamage();if(activeWorldBossEnemy()&&Date.now()-warfrontRuntime.lastBossSync>5000){warfrontRuntime.lastBossSync=Date.now();refreshWarfrontState(true).catch(()=>{});}}
 
 
 // ===================== V14.0 COMBAT TARGET + GALAXY EVENT DIRECTOR =====================
@@ -4195,7 +4239,7 @@ function copyBattleConfigV2013(from,to){
   saveGame();flushCloudSave(true).catch(()=>{});renderHangar();updateUI();
   showToast(`CONF ${from} copiada para CONF ${to}`,'system');
 }
-// V34.6.0: presets are equipment blueprints, never copies of owned inventory.
+// V34.6.1: presets are equipment blueprints, never copies of owned inventory.
 const STELLAR_PRESET_KINDS_V3030=['PVE','PVP','FARM','BOSS'];
 function battlePresetKeyV3030(){return `stellar_battle_presets_v3030_${getUser()?.id||'local'}_${progress?.activeShipId||'none'}`;}
 function readBattlePresetsV3030(){
@@ -6079,7 +6123,7 @@ function updateOnlineWorld(dt){
   if(now-onlineWorld.lastSyncAt>presenceInterval&&!onlineWorld.busy)syncOnlineWorld();
   syncPvpInbox();syncClanCreditGrants();if(Date.now()-battleGroupRuntime.lastAt>6000)refreshBattleGroup(false);
   for(const rp of onlineWorld.players.values()){
-    // V34.6.0: interpolate buffered remote pilot packets instead of jittery 55ms prediction.
+    // V34.6.1: interpolate buffered remote pilot packets instead of jittery 55ms prediction.
     // Never touch local player position or the server-authoritative combat coordinates.
     if(!advanceRemotePilotVisual(rp,{now,dt})){
       const k=1-Math.exp(-Math.min(.08,Math.max(0,dt))*8);
@@ -6149,7 +6193,7 @@ function updateCriticalHudV2024(){
   HUD_CONTENT_CACHE.text(ui.shield,fmt(player.shield));
   HUD_CONTENT_CACHE.text(ui.maxShield,fmt(player.maxShield));
   HUD_CONTENT_CACHE.text(ui.speed,fmt(nominalMovementSpeed(player.speed,progress?.mapId,shipAbilitySpeedMultiplier())));
-  // V34.6.0: controles de ataque foram removidos da barra de munições.
+  // V34.6.1: controles de ataque foram removidos da barra de munições.
   // A atualização rápida do HUD deve tolerar sua ausência, como updateUI().
   if(ui.laserToggle)ui.laserToggle.classList.toggle('active',player.laserFiring);
   if(ui.rocketCd)HUD_CONTENT_CACHE.text(ui.rocketCd,rocketReady()?'MÍSSIL PRONTO':`MÍSSIL ${(getRocketCooldown()-(nowSec()-player.lastRocketShot)).toFixed(1)}s`);
@@ -6332,7 +6376,7 @@ function drawPortals(){
       ctx.strokeStyle=c.main;ctx.lineWidth=2;ctx.beginPath();ctx.ellipse(0,0,29,46,0,0,TWO_PI);ctx.stroke();
       ctx.fillStyle=c.core;ctx.font='bold 11px Arial';ctx.textAlign='center';ctx.fillText(portal.targetLabel||displayMapLabel(portal.to,portal.targetTerritoryFaction),0,-60);ctx.restore();continue;
     }
-    // V34.6.0: somente portais de mapas não-PvP mostram zona neutra, com visual ainda mais limpo.
+    // V34.6.1: somente portais de mapas não-PvP mostram zona neutra, com visual ainda mais limpo.
     if(portalHasNeutralSafety(portal,state.currentMap)){
       ctx.save();ctx.setLineDash([12,16]);ctx.strokeStyle=hexToRgba(c.main,.045);ctx.lineWidth=.9;ctx.beginPath();ctx.arc(0,0,PORTAL_NEUTRAL_RADIUS,0,TWO_PI);ctx.stroke();ctx.setLineDash([]);ctx.restore();
     }
@@ -6505,6 +6549,12 @@ function drawPlayer(){
 function drawParticles(){if(resolvedQualityMode()==='low'){ctx.save();ctx.textAlign='center';ctx.font='bold 12px Arial';for(const p of state.particles){const q=screenPos(p.x,p.y);if(q.x<-30||q.x>W+30||q.y<-30||q.y>H+30)continue;ctx.globalAlpha=Math.max(0,Math.min(1,p.life));ctx.fillStyle=p.color;ctx.fillText(p.text,q.x,q.y);}ctx.restore();return;}ctx.textAlign='center';for(const p of state.particles){const q=screenPos(p.x,p.y),alpha=Math.max(0,Math.min(1,p.life));if(q.x<-80||q.x>W+80||q.y<-80||q.y>H+80)continue;ctx.globalAlpha=alpha;ctx.fillStyle=p.color;if(p.combat){ctx.font=p.critical?'900 18px Arial':'800 13px Arial';ctx.lineWidth=p.critical?4:3;ctx.strokeStyle='rgba(0,0,0,.78)';ctx.strokeText(p.text,q.x,q.y);ctx.shadowColor=p.color;ctx.shadowBlur=p.critical?12:5;ctx.fillText(p.text,q.x,q.y);ctx.shadowBlur=0;}else{ctx.font='12px Arial';ctx.fillText(p.text,q.x,q.y);}}ctx.globalAlpha=1;}
 function drawWarfrontControlWorld(){
   const sc=sectorControlState();if(!sc||!state.currentMap?.battle)return;
+  const aim=sc.nodes?.find(n=>n.id===relayAttackRuntime.nodeId&&n.relayMode);
+  if(aim&&Math.hypot(aim.x-player.x,aim.y-player.y)<=1200&&Number(aim.hp)>0){
+    const a=screenPos(player.x,player.y),b=screenPos(aim.x,aim.y);
+    ctx.save();ctx.strokeStyle='rgba(255,192,78,.72)';ctx.lineWidth=1.8;
+    ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.stroke();ctx.restore();
+  }
   for(const node of sc.nodes||[]){
     const radius=Math.max(120,Number(node.radius)||360);if(!onScreenWorld(node.x,node.y,radius+120))continue;
     const p=screenPos(node.x,node.y),owner=node.owner||null,challenger=node.challenger||null,baseColor=owner?sectorFactionColor(owner):(challenger?sectorFactionColor(challenger):'#87a4b5'),pulse=1+Math.sin(nowSec()*3+Number(node.x)*.001)*.04;
@@ -6521,6 +6571,11 @@ function drawWarfrontControlWorld(){
       const sh=Math.max(0,Number(node.shield)||0),maxSh=Math.max(1,Number(node.maxShield)||240000),hp=Math.max(0,Number(node.hp)||0),maxHp=Math.max(1,Number(node.maxHp)||360000);
       ctx.lineWidth=3;ctx.strokeStyle='#4fb9f4';ctx.beginPath();ctx.arc(0,0,49,-Math.PI/2,-Math.PI/2+TWO_PI*Math.min(1,sh/maxSh));ctx.stroke();
       ctx.strokeStyle='#ff806d';ctx.beginPath();ctx.arc(0,0,54,-Math.PI/2,-Math.PI/2+TWO_PI*Math.min(1,hp/maxHp));ctx.stroke();
+      if(relayAttackRuntime.nodeId===node.id||relayAttackRuntime.waitingNodeId===node.id){
+        ctx.strokeStyle='#ffe078';ctx.lineWidth=2.4;ctx.setLineDash([7,4]);ctx.beginPath();ctx.arc(0,0,64,0,TWO_PI);ctx.stroke();ctx.setLineDash([]);
+        ctx.fillStyle='#ffe078';ctx.font='bold 9px Arial';ctx.textAlign='center';ctx.fillText(relayAttackRuntime.nodeId===node.id?'ATACANDO':'ALVO SELECIONADO',0,-72);
+      }
+
     }
     const progress=Math.max(0,Math.min(100,Number(node.progress)||0));if(challenger&&progress>0){ctx.strokeStyle=sectorFactionColor(challenger);ctx.lineWidth=5;ctx.beginPath();ctx.arc(0,0,42,-Math.PI/2,-Math.PI/2+TWO_PI*(progress/100));ctx.stroke();}
     ctx.textAlign='center';ctx.fillStyle='#f4fbff';ctx.font='900 18px Arial';ctx.fillText(String(node.id||'?'),0,node.relayMode?5:6);ctx.fillStyle=node.contested?'#ffffff':baseColor;ctx.font='900 10px Arial';ctx.fillText(node.contested?'CONTESTADO':owner?sectorFactionLabel(owner):(challenger?`CAPTURA ${sectorFactionLabel(challenger)}`:'NEUTRO'),0,60);ctx.fillStyle='rgba(214,239,250,.8)';ctx.font='700 8px Arial';ctx.fillText(`${sectorControlNearbyTotal(node)} PILOTO(S)`,0,74);ctx.restore();
@@ -8353,7 +8408,7 @@ function renderAdminBalance(){
  const grid=ui.adminBalanceGrid;if(!grid)return;
  const data=balanceAdminRuntime.snapshot,tab=balanceAdminRuntime.tab;
  ui.adminBalanceTabs?.querySelectorAll('[data-balance-tab]').forEach(b=>b.classList.toggle('active',b.dataset.balanceTab===tab));
- if(!data?.entries?.length){grid.innerHTML='<div class="empty-state">A configuração não está disponível. Verifique o SQL V19.0.9 e clique em RECARREGAR.</div>';return;}
+ if(!data?.entries?.length){grid.innerHTML='<div class="empty-state">A configuração não está disponível. Verifique a configuração do banco e clique em RECARREGAR.</div>';return;}
  const search=String(ui.adminBalanceSearch?.value||'').trim().toLowerCase();
  const rows=data.entries.filter(row=>balanceCategory(row)===tab&&(!search||`${row.item_id} ${row.params?.name||''}`.toLowerCase().includes(search)));
  if(ui.adminBalanceCount)ui.adminBalanceCount.textContent=`${rows.length} itens • versão ${data.version}`;
@@ -9343,6 +9398,9 @@ function pointerAction(ev){
     }
     return;
   }
+  // World relay is a native click/touch combat target (not a battle-panel button).
+  const clickedRelay=state.currentMap?.battle&&sharedUniverseOnline()?sectorControlState()?.nodes?.filter(n=>n.relayMode&&Math.hypot(n.x-p.x,n.y-p.y)<72).sort((a,b)=>Math.hypot(a.x-p.x,a.y-p.y)-Math.hypot(b.x-p.x,b.y-p.y))[0]:null;
+  if(clickedRelay&&selectRelayWorld(clickedRelay))return;
   const found=state.enemies.find(e=>e.hp>0&&Math.hypot(e.x-p.x,e.y-p.y)<=e.size*1.8+18);
   if(found){const same=state.target?.id===found.id,quick=same&&Date.now()-state.lastTargetTapAt<900;selectCombatTarget(found);state.lastTargetTapId=found.id;state.lastTargetTapAt=Date.now();if(autoLaserEnabled()||(combatPrefs.tapAttack&&quick)){player.laserFiring=true;if(quick)setCombatAlert('LOCK CONFIRMADO • LASER ATIVO','combat',1.2);}return;}
   const clickedPortal=portalAtWorld(p.x,p.y),readyPortal=nearbyPortal();
@@ -9616,7 +9674,7 @@ if(ui.closeGalaxyEvent)ui.closeGalaxyEvent.onclick=()=>ui.galaxyEventModal.class
 if(ui.galaxyEventContent)ui.galaxyEventContent.onclick=e=>{const force=e.target.closest('[data-force-event]');if(force){forceGalaxyEvent(force.dataset.forceEvent);return;}if(e.target.closest('[data-event-map]')){ui.galaxyEventModal.classList.add('hidden');openMapModal();return;}if(e.target.closest('[data-event-warfront]')){ui.galaxyEventModal.classList.add('hidden');openWarfront();return;}};
 if(ui.closeWarfront)ui.closeWarfront.onclick=()=>ui.warfrontModal.classList.add('hidden');
 if(ui.warfrontRefresh)ui.warfrontRefresh.onclick=()=>{refreshWarfrontState(true);refreshSectorReadOnly(true).catch(()=>{});if(!sharedUniverseRuntime.ready&&state.currentMap?.battle)joinSharedUniverse();};
-if(ui.warfrontContent)ui.warfrontContent.onclick=e=>{const attack=e.target.closest('[data-relay-attack]');if(attack){toggleRelayAttack(attack.dataset.relayAttack);return;}if(e.target.closest('[data-relay-refresh]')){refreshRelayWorkshop(true);return;}const act=e.target.closest('[data-relay-action]');if(act){performRelayAction(act.dataset.relayAction);return;}const mission=e.target.closest('[data-relay-mission]');if(mission){claimRelayMissionOnline(mission.dataset.relayMission).then(()=>{showToast('MISSÃO DE CLÃ • PEÇAS RECEBIDAS!','reward');refreshRelayWorkshop(true);}).catch(err=>showToast(err.message));return;}if(e.target.closest('[data-relay-repair]')){repairRelayOnline({mapId:$('#relayRepairMapV346')?.value,nodeId:$('#relayRepairNodeV346')?.value}).then(()=>{showToast('RELÉ REPARADO • +100.000 ESCUDO/HP','reward');refreshRelayWorkshop(true);}).catch(err=>showToast(err.message));return;}if(e.target.closest('[data-relay-admin-save]')){const hp=Number($('#relayAdmHpV346')?.value),shield=Number($('#relayAdmShieldV346')?.value),damage=Number($('#relayAdmDamageV346')?.value);saveRelayAdminOnline({max_hp:hp,max_shield:shield,hit_damage:damage}).then(()=>{showToast('RELÉS • AJUSTES ADM SALVOS','reward');refreshRelayWorkshop(true);}).catch(err=>showToast(err.message));return;}if(e.target.closest('[data-warfront-reconnect]')){joinSharedUniverse();refreshSectorReadOnly(true).catch(()=>{});renderWarfront();return;}const nav=e.target.closest('[data-warfront-nav]');if(nav){const node=(sectorControlState()?.nodes||[]).find(n=>String(n.id)===String(nav.dataset.warfrontNav));if(node&&state.currentMap?.battle){player.tx=Math.max(35,Math.min(state.currentMap.world.w-35,Number(node.x)||player.x));player.ty=Math.max(35,Math.min(state.currentMap.world.h-35,Number(node.y)||player.y));ui.warfrontModal.classList.add('hidden');showToast(`ROTA WARFRONT • PONTO ${node.id}`,'system');}return;}const craft=e.target.closest('[data-blueprint-craft]');if(craft){craftBlueprint(craft.dataset.blueprintCraft);return;}if(e.target.closest('[data-mastery-upgrade]')){upgradeAbilityMastery();return;}if(e.target.closest('[data-worldboss-engage]')){spawnWorldBossEncounter();ui.warfrontModal.classList.add('hidden');return;}if(e.target.closest('[data-worldboss-claim]')){claimWorldBossNow();return;}if(e.target.closest('[data-war-declare]')){declareWarNow();return;}};
+if(ui.warfrontContent)ui.warfrontContent.onclick=e=>{const attack=e.target.closest('[data-relay-attack]');if(attack){toggleRelayAttack(attack.dataset.relayAttack);return;}if(e.target.closest('[data-relay-refresh]')){refreshRelayWorkshop(true);return;}const act=e.target.closest('[data-relay-action]');if(act){performRelayAction(act.dataset.relayAction);return;}const mission=e.target.closest('[data-relay-mission]');if(mission){claimRelayMissionOnline(mission.dataset.relayMission).then(()=>{showToast('MISSÃO DE CLÃ • PEÇAS RECEBIDAS!','reward');refreshRelayWorkshop(true);}).catch(err=>showToast(err.message));return;}if(e.target.closest('[data-relay-repair]')){repairRelayOnline({mapId:$('#relayRepairMapV346')?.value,nodeId:$('#relayRepairNodeV346')?.value}).then(()=>{showToast('RELÉ REPARADO • +100.000 ESCUDO/HP','reward');refreshRelayWorkshop(true);}).catch(err=>showToast(err.message));return;}if(e.target.closest('[data-relay-admin-release]')){const kind=e.target.closest('[data-relay-admin-release]').dataset.relayAdminRelease,mapId=$('#relayAdmReleaseMapV346')?.value,nodeId=$('#relayAdmReleaseNodeV346')?.value;const label=kind==='all'?'clã E facção':'clã';if(!confirm(`ADMINISTRADOR: expulsar ${label} do relé ${nodeId} em ${mapId}?\n\nOs módulos voltam ao inventário e o histórico será preservado.`))return;adminReleaseRelayOnline({mapId,nodeId,clearFaction:kind==='all'}).then(()=>{showToast('DOMÍNIO LIBERADO PELO ADM','reward');refreshRelayWorkshop(true);refreshSectorReadOnly(true).catch(()=>{});}).catch(err=>showToast(err.message));return;}if(e.target.closest('[data-relay-admin-save]')){const hp=Number($('#relayAdmHpV346')?.value),shield=Number($('#relayAdmShieldV346')?.value),damage=Number($('#relayAdmDamageV346')?.value);saveRelayAdminOnline({max_hp:hp,max_shield:shield,hit_damage:damage,hit_cooldown_ms:Number($('#relayAdmCooldownV346')?.value),capture_ms:Number($('#relayAdmCaptureV346')?.value),protection_ms:Number($('#relayAdmProtectionV346')?.value),weekend_multiplier:Number($('#relayAdmWeekendV346')?.value),enabled:!!$('#relayAdmEnabledV346')?.checked}).then(()=>{showToast('RELÉS • AJUSTES ADM SALVOS','reward');refreshRelayWorkshop(true);}).catch(err=>showToast(err.message));return;}if(e.target.closest('[data-warfront-reconnect]')){joinSharedUniverse();refreshSectorReadOnly(true).catch(()=>{});renderWarfront();return;}const nav=e.target.closest('[data-warfront-nav]');if(nav){const node=(sectorControlState()?.nodes||[]).find(n=>String(n.id)===String(nav.dataset.warfrontNav));if(node&&state.currentMap?.battle){player.tx=Math.max(35,Math.min(state.currentMap.world.w-35,Number(node.x)||player.x));player.ty=Math.max(35,Math.min(state.currentMap.world.h-35,Number(node.y)||player.y));ui.warfrontModal.classList.add('hidden');showToast(`ROTA WARFRONT • PONTO ${node.id}`,'system');}return;}const craft=e.target.closest('[data-blueprint-craft]');if(craft){craftBlueprint(craft.dataset.blueprintCraft);return;}if(e.target.closest('[data-mastery-upgrade]')){upgradeAbilityMastery();return;}if(e.target.closest('[data-worldboss-engage]')){spawnWorldBossEncounter();ui.warfrontModal.classList.add('hidden');return;}if(e.target.closest('[data-worldboss-claim]')){claimWorldBossNow();return;}if(e.target.closest('[data-war-declare]')){declareWarNow();return;}};
 if(ui.warfrontContent)ui.warfrontContent.onchange=e=>{if(e.target?.id==='warTargetClan'){const btn=ui.warfrontContent.querySelector('[data-war-declare]');if(btn)btn.disabled=!String(e.target.value||'').trim();}};
 if(ui.closeClan)ui.closeClan.onclick=()=>ui.clanModal.classList.add('hidden');
 if(ui.clanRefresh)ui.clanRefresh.onclick=()=>refreshClanState(true);
@@ -10040,7 +10098,7 @@ function monitorAutoPerformance(t){
 }
 const FRAME_GATE_V20210=createFrameGate();
 let last=performance.now();FRAME_GATE_V20210.reset(last);
-// V34.6.0: o próximo quadro é sempre agendado, mesmo se UI/efeitos falharem.
+// V34.6.1: o próximo quadro é sempre agendado, mesmo se UI/efeitos falharem.
 // O erro aparece nos logs e num aviso leve, sem provocar loop infinito de notificações.
 const frameRecoveryV3031={errors:0,lastLog:0,lastToast:0};
 function loop(t){
@@ -10065,7 +10123,7 @@ function loop(t){
     frameRecoveryV3031.errors++;
     if(t-frameRecoveryV3031.lastLog>3000){
       frameRecoveryV3031.lastLog=t;
-      console.error('[stellar-frame-recovery V34.6.0]',err);
+      console.error('[stellar-frame-recovery V34.6.1]',err);
       // Não enviar diagnósticos nem dados do usuário a serviços externos.
     }
     if(t-frameRecoveryV3031.lastToast>15000){

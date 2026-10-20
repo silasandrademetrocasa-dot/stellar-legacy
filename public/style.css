@@ -4632,3 +4632,17 @@ body.mobile-landscape-pro #topHudDock .hud-panel:not(.collapsed) .player-float-h
 .relay-actions-v346 button,.relay-combat-card-v346 button{min-height:32px;font-size:10px}
 @media(max-width:640px){.relay-combat-grid-v346{grid-template-columns:repeat(2,minmax(0,1fr))}.relay-combat-card-v346{padding:7px}.relay-parts-v346{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:430px){.relay-combat-grid-v346{grid-template-columns:minmax(0,1fr)}.relay-actions-v346 select{min-width:70px}}
+
+/* Relay admin: small editable numeric inputs and compact reset actions, no huge legacy textareas. */
+.relay-admin-fields-v3461{display:grid;grid-template-columns:repeat(auto-fit,minmax(165px,1fr));gap:9px;margin:10px 0 12px}
+.relay-admin-fields-v3461 label,.relay-admin-reset-v3461 label{display:flex;flex-direction:column;gap:5px;color:#bde6ff;font:700 10px Arial;min-width:0}
+.relay-admin-fields-v3461 input:not([type=checkbox]),.relay-admin-reset-v3461 select{display:block;box-sizing:border-box;width:100%;min-height:34px;height:36px;max-height:38px;padding:5px 9px;background:#081a2b;border:1px solid rgba(98,203,255,.44);border-radius:7px;color:#f1f9ff;font:600 12px Arial;outline-offset:2px}
+.relay-admin-fields-v3461 input:focus-visible,.relay-admin-reset-v3461 select:focus-visible{outline:2px solid #74dfff;border-color:#74dfff}
+.relay-admin-fields-v3461 .relay-admin-enable-v3461{display:flex;flex-direction:row;align-items:center;gap:8px;padding:7px}
+.relay-admin-enable-v3461 input[type=checkbox]{width:17px;height:17px;accent-color:#5adeff;flex-shrink:0}
+.relay-admin-footer-v3461{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin:8px 0 16px}
+.relay-admin-footer-v3461 small{flex:1 1 210px;color:#9bbacc;font-size:10px;line-height:1.4}
+.relay-admin-reset-v3461{display:grid;grid-template-columns:repeat(2,minmax(95px,1fr)) repeat(2,minmax(130px,auto));gap:8px;margin:10px 0}
+.relay-admin-reset-v3461 button{align-self:end;min-height:36px;white-space:normal;font-size:10px}
+.relay-map-hint{color:#78cde9;font-style:italic}
+@media(max-width:820px){.relay-admin-reset-v3461{grid-template-columns:repeat(2,minmax(0,1fr))}.relay-admin-reset-v3461 button{min-width:0}}

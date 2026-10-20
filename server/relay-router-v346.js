@@ -50,6 +50,14 @@ export function createRelayRouter({serviceClient}){
    const {data:yes,error:authError}=await req.sb.rpc('is_game_admin_v1763',{p_uid:req.user.id});if(authError||yes!==true)return fail(res,'Somente ADM',403);
    const {data,error}=await sb().from('stellar_relay_rules_v346').select('*').eq('id',1).single();if(error)return fail(res,error,503);res.json({ok:true,rules:data});
  }));
+ r.post('/admin/release',wrap(async(req,res)=>{
+   const mapId=String(req.body?.mapId||''),nodeId=String(req.body?.nodeId||''),clearFaction=req.body?.clearFaction;
+   if(!RELAY_MAPS.includes(mapId)||!RELAY_IDS.includes(nodeId)||typeof clearFaction!=='boolean')return fail(res,'Relé ou ação inválidos',400);
+   const {data:yes,error:authError}=await req.sb.rpc('is_game_admin_v1763',{p_uid:req.user.id});
+   if(authError||yes!==true)return fail(res,'Somente ADM',403);
+   const {data,error}=await sb().rpc('stellar_relay_admin_release_v3461',{p_map_id:mapId,p_node_id:nodeId,p_clear_faction:clearFaction,p_actor:req.user.id});
+   if(error)return fail(res,error);res.set('Cache-Control','no-store');res.json(data);
+ }));
  r.post('/admin/rules',wrap(async(req,res)=>{
    const {data:yes,error:authError}=await req.sb.rpc('is_game_admin_v1763',{p_uid:req.user.id});if(authError||yes!==true)return fail(res,'Somente ADM',403);
    const limits={max_hp:[10000,3000000],max_shield:[10000,2000000],hit_damage:[100,50000],hit_cooldown_ms:[400,3000],capture_ms:[5000,60000],protection_ms:[10000,180000]};
