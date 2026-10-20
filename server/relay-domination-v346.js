@@ -1,6 +1,8 @@
 // V34.6 — deterministic limits shared by server, UI tests and SQL migrations.
 export const RELAY_MAPS=Object.freeze(['b41','b42','b43']);
 export const RELAY_IDS=Object.freeze(['A','B','C']);
+export const RELAY_SLOT_ATTRIBUTES=Object.freeze({1:'laser',2:'missile',3:'capacitor',4:'regenerator',5:'armor',6:'nanobots'});
+export const RELAY_NEUTRAL_MODULES=Object.freeze([{slot:1,category:'weapon',attribute:'laser',level:1},{slot:2,category:'weapon',attribute:'missile',level:1},{slot:3,category:'shield',attribute:'capacitor',level:1},{slot:4,category:'shield',attribute:'regenerator',level:1},{slot:5,category:'hp',attribute:'armor',level:1},{slot:6,category:'hp',attribute:'nanobots',level:1},{slot:7,category:'bonus',attribute:'damage',level:1},{slot:8,category:'bonus',attribute:'xp',level:1}]);
 export const RELAY_SLOTS=Object.freeze({weapon:[1,2],shield:[3,4],hp:[5,6],bonus:[7,8]});
 export const RELAY_BONUS_VALUES=Object.freeze({damage:[3,4,5],shield:[5,7,9],hp:[5,7,9],speed:[2,3,4],xp:[5,7,10],resources:[3,4,5]});
 export const RELAY_PARTS=Object.freeze({weapon:'weapon_parts',shield:'shield_parts',hp:'hull_parts',bonus:'circuit_parts'});
@@ -11,7 +13,7 @@ export function validRelayKey(map,node){return RELAY_MAPS.includes(map)&&RELAY_I
 export function validModule(module){
  if(!module||!Number.isInteger(Number(module.level))||module.level<1||module.level>3)return false;
  const cat=slotCategory(module.slot),attr=String(module.attribute||'');
- return cat===module.category && (cat!=='bonus'||Object.hasOwn(RELAY_BONUS_VALUES,attr)) && (cat==='bonus'||attr===cat);
+ return cat===module.category && (cat==='bonus'?Object.hasOwn(RELAY_BONUS_VALUES,attr):attr===RELAY_SLOT_ATTRIBUTES[module.slot]||attr===cat);
 }
 export function slotAssignmentAllowed(modules,module){
  if(!validModule(module)||!Array.isArray(modules))return false;

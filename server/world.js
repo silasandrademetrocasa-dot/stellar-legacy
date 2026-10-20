@@ -11,7 +11,7 @@ import { WebSocketServer, WebSocket } from 'ws';
 import {selectLiveDirective,directiveToWorldEvent} from './universe-directives.js';
 import {captureElapsedSeconds, classifyWarfrontCaptureError, withCaptureTimeout, CAPTURE_FAILURE_BACKOFF_MS} from './warfront-capture.js';
 import { FACTIONS, MAPS, NPC_TYPES, RESOURCES } from '../public/data.js';
-import { RELAY_BASE,applyRelayDamage } from './relay-domination-v346.js';
+import { RELAY_BASE,RELAY_NEUTRAL_MODULES,applyRelayDamage } from './relay-domination-v346.js';
 
 const LIVE_OPS_REFRESH_MS = 15000;
 
@@ -419,7 +419,7 @@ class Room {
     for(const n of this.warfrontControl.nodes)if(scores[n.owner]!==undefined)scores[n.owner]++;
     const ranked=WARFRONT_FACTIONS.map(id=>({id,score:scores[id]})).sort((a,b)=>b.score-a.score);
     const dominant=ranked[0].score>ranked[1].score?ranked[0].id:null;
-    return {mapId:this.mapId,relayMode:this.warfrontControl.nodes.some(n=>n.relayMode===true),nodes:this.warfrontControl.nodes.map(n=>({relayMode:!!n.relayMode,ownerClanId:n.ownerClanId||null,hp:n.relayHp??0,maxHp:n.relayMaxHp||RELAY_BASE.hp,shield:n.relayShield??0,maxShield:n.relayMaxShield||RELAY_BASE.shield,protectedUntil:n.protectedUntil||0,modules:n.relayModules||[],id:n.id,label:n.label,x:n.x,y:n.y,radius:n.radius,owner:n.owner,challenger:n.challenger,progress:Math.round(n.progress*10)/10,contested:!!n.contested,nearby:{...n.nearby},capturedAt:n.capturedAt||0,persisting:!!n.persisting,captureError:n.captureError&&nowMs()-(n.captureError.at||0)<30000?{code:n.captureError.code,message:n.captureError.message}:null})),scores,dominantFaction:dominant,serverTime:nowMs()};
+    return {mapId:this.mapId,relayMode:this.warfrontControl.nodes.some(n=>n.relayMode===true),nodes:this.warfrontControl.nodes.map(n=>({relayMode:!!n.relayMode,ownerClanId:n.ownerClanId||null,hp:n.relayHp??0,maxHp:n.relayMaxHp||RELAY_BASE.hp,shield:n.relayShield??0,maxShield:n.relayMaxShield||RELAY_BASE.shield,protectedUntil:n.protectedUntil||0,modules:n.ownerClanId?(n.relayModules||[]):RELAY_NEUTRAL_MODULES,id:n.id,label:n.label,x:n.x,y:n.y,radius:n.radius,owner:n.owner,challenger:n.challenger,progress:Math.round(n.progress*10)/10,contested:!!n.contested,nearby:{...n.nearby},capturedAt:n.capturedAt||0,persisting:!!n.persisting,captureError:n.captureError&&nowMs()-(n.captureError.at||0)<30000?{code:n.captureError.code,message:n.captureError.message}:null})),scores,dominantFaction:dominant,serverTime:nowMs()};
   }
   async handleRelayAttack(ws,msg){
     const p=ws?.player,node=this.warfrontControl?.nodes?.find(n=>n.id===String(msg?.nodeId||''));
@@ -547,16 +547,24 @@ class Room {
         }
       }
     }
-    // V34.6 turrets target an opposing clan only; bounded cadence, no NPCs or FX objects spawned.
+    // Two independently timed defensive weapons. Neutral relays have virtual LV1 equipment,
+    // never deposited in any clan inventory or eligible for faction bonuses.
     for(const node of this.warfrontControl.nodes){
-      if(!node.relayMode||!node.ownerClanId||!node.relayHp||now-(node.lastTurretShotAt||0)<1250)continue;
-      const weapons=(node.relayModules||[]).filter(m=>m.category==='weapon').slice(0,2);
+      if(!node.relayMode||!node.relayHp)continue;
+      const weapons=(node.ownerClanId?node.relayModules:RELAY_NEUTRAL_MODULES).filter(m=>m.category==='weapon'&&[1,2].includes(Number(m.slot)));
       if(!weapons.length)continue;
-      const hostile=[...this.clients].filter(c=>c.player&&this.playerFresh(c.player)&&c.player.clanId!==node.ownerClanId&&!this.playerPortalNeutral(c.player)&&Math.hypot(c.player.x-node.x,c.player.y-node.y)<=RELAY_BASE.weaponRange).sort((a,b)=>Math.hypot(a.player.x-node.x,a.player.y-node.y)-Math.hypot(b.player.x-node.x,b.player.y-node.y))[0];
-      if(!hostile)continue;node.lastTurretShotAt=now;
-      const damage=weapons.reduce((sum,m)=>sum+Math.min(3500,1000+Number(m.level||1)*800),0);
-      safeJsonSend(hostile,{type:'relay_turret_attack',nodeId:node.id,x:node.x,y:node.y,damage});
-      this.broadcast({type:'relay_turret_fx',nodeId:node.id,targetUserId:hostile.player.userId,x:node.x,y:node.y});
+      const hostile=[...this.clients].filter(c=>c.player&&this.playerFresh(c.player)&&(!node.ownerClanId||c.player.clanId!==node.ownerClanId)&&!this.playerPortalNeutral(c.player)&&Math.hypot(c.player.x-node.x,c.player.y-node.y)<=Math.min(RELAY_BASE.weaponRange,node.radius+150)).sort((a,b)=>Math.hypot(a.player.x-node.x,a.player.y-node.y)-Math.hypot(b.player.x-node.x,b.player.y-node.y))[0];
+      if(!hostile)continue;
+      node.relayTurretAt||={};
+      for(const module of weapons){
+        const missile=Number(module.slot)===2,cooldown=missile?3200:1150,slot=Number(module.slot);
+        if(now-(node.relayTurretAt[slot]||0)<cooldown)continue;
+        node.relayTurretAt[slot]=now;
+        const lv=Math.min(3,Math.max(1,Number(module.level)||1));
+        const damage=missile?1600+1000*lv:700+650*lv;
+        safeJsonSend(hostile,{type:'relay_turret_attack',nodeId:node.id,x:node.x,y:node.y,damage,weapon:missile?'missile':'laser'});
+        this.broadcast({type:'relay_turret_fx',nodeId:node.id,targetUserId:hostile.player.userId,x:node.x,y:node.y,weapon:missile?'missile':'laser'});
+      }
     }
     this.refreshWarfrontDomination(now,lastChange);
     if(this.clients.size&&now-this.lastWarfrontBroadcastAt>=WARFRONT_BROADCAST_INTERVAL_MS){this.lastWarfrontBroadcastAt=now;this.broadcast({type:'warfront_control',warfront:this.warfrontPayload(),serverTime:now});}

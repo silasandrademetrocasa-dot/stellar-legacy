@@ -4646,3 +4646,24 @@ body.mobile-landscape-pro #topHudDock .hud-panel:not(.collapsed) .player-float-h
 .relay-admin-reset-v3461 button{align-self:end;min-height:36px;white-space:normal;font-size:10px}
 .relay-map-hint{color:#78cde9;font-style:italic}
 @media(max-width:820px){.relay-admin-reset-v3461{grid-template-columns:repeat(2,minmax(0,1fr))}.relay-admin-reset-v3461 button{min-width:0}}
+
+/* Relay hangar: individual inventory per owned relay, modeled after ship hangar. */
+.relay-hangar-modal-v3462{width:min(1080px,96vw);max-height:88vh;overflow-y:auto;background:linear-gradient(155deg,#081d33,#020d1c)}
+.relay-hangar-summary-v3462{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;background:#0b2941;border:1px solid #27607b;border-radius:10px;padding:11px;margin-bottom:12px}
+.relay-hangar-summary-v3462 span{display:flex;flex-direction:column;gap:4px}.relay-hangar-summary-v3462 b{font-size:12px}.relay-hangar-summary-v3462 small{color:#a6c6d8;font-size:11px}
+.relay-hangar-cols-v3462{display:grid;grid-template-columns:1fr 1.1fr;gap:12px}
+.relay-hangar-slots-v3462{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:9px}
+.relay-hangar-slot-v3462{display:flex;flex-direction:column;gap:7px;align-items:flex-start;justify-content:center;text-align:left;min-height:65px;background:#0a1d30;color:#e2f6ff;border:1px solid rgba(92,176,229,.3);border-radius:10px;padding:9px;min-width:0}
+.relay-hangar-slot-v3462.active{background:#153c59;border-color:#70dbff;box-shadow:0 0 0 1px rgba(79,217,255,.15)}
+.relay-hangar-slot-v3462 b{font-size:11px}.relay-hangar-slot-v3462 small{font-size:10px;color:#a8c6d9;overflow-wrap:anywhere}
+.relay-hangar-detail-v3462{display:flex;flex-direction:column;gap:5px;margin:9px 0;padding:10px;background:#0e293e;border-radius:10px}.relay-hangar-detail-v3462 strong{font-size:13px}.relay-hangar-detail-v3462 small{font-size:10px;color:#b6d7e9}
+.relay-hangar-items-v3462{max-height:230px;overflow:auto;display:flex;flex-direction:column;gap:7px;margin:9px 0}
+.relay-hangar-item-v3462{display:flex;align-items:center;justify-content:space-between;gap:6px;border:1px solid rgba(96,171,214,.25);background:#08192c;border-radius:9px;padding:9px}
+.relay-hangar-item-v3462 span{display:grid;gap:4px}.relay-hangar-item-v3462 b{font-size:11px}.relay-hangar-item-v3462 small,.relay-hangar-empty-v3462{font-size:10px;color:#97bbd0}.relay-hangar-item-actions-v3462{display:flex;gap:5px;flex-wrap:wrap}.relay-hangar-item-actions-v3462 button:disabled{opacity:.4;cursor:not-allowed}
+.relay-hangar-craft-v3462{display:grid;grid-template-columns:1fr 1fr;gap:7px;align-items:center;border:1px dashed rgba(98,185,234,.4);border-radius:10px;padding:10px}.relay-hangar-craft-v3462 b{grid-column:1/-1;font-size:10px;color:#8ee4ff}
+.relay-hangar-craft-v3462 select{color:#e2f6ff;background:#06192b;border:1px solid #4380a5;padding:8px;border-radius:7px;min-width:0}
+.relay-hangar-equipped-v3462{padding:8px;color:#75e8c0;font-size:11px}.relay-hangar-footer-v3462{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:9px 0 0;margin-top:10px;border-top:1px solid #21465b}.relay-hangar-footer-v3462 small{font-size:10px;color:#98bdd1}
+.relay-hangar-tip-v3462{display:flex;flex-direction:column;gap:5px;padding:12px;border-radius:10px;border:1px solid rgba(98,206,244,.26);background:#0a253c;font-size:12px}.relay-hangar-tip-v3462 small{font-size:11px;color:#a6d3e5}
+@media(max-width:700px){.relay-hangar-modal-v3462{padding:10px;width:98vw}.relay-hangar-cols-v3462{grid-template-columns:1fr}.relay-hangar-slots-v3462{grid-template-columns:repeat(2,minmax(0,1fr))}.relay-hangar-item-actions-v3462 button{min-height:30px;padding:5px 8px}.relay-hangar-craft-v3462{grid-template-columns:1fr 1fr}}
+
+.relay-hangar-full-inventory-v3462{margin-top:12px;border:1px solid #1c4a69;border-radius:9px;background:#071b2e;padding:9px}.relay-hangar-full-inventory-v3462 summary{font-size:11px;font-weight:800;cursor:pointer;color:#91dffe}.relay-hangar-full-grid-v3462{display:grid;grid-template-columns:repeat(auto-fit,minmax(168px,1fr));gap:7px;margin-top:8px;max-height:140px;overflow:auto}.relay-hangar-full-grid-v3462>div{display:grid;gap:4px;padding:8px;border-radius:7px;background:#0c283e}.relay-hangar-full-grid-v3462 b{font-size:10px}.relay-hangar-full-grid-v3462 small{font-size:9px;color:#9cd1e6}

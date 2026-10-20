@@ -6,10 +6,10 @@
 <meta content="width=device-width,initial-scale=1,user-scalable=no,viewport-fit=cover" name="viewport"/>
 <meta content="#030816" name="theme-color"/>
 <title>Stellar Legacy</title>
-<link rel="manifest" href="/manifest.webmanifest?v=34.6.1"/>
+<link rel="manifest" href="/manifest.webmanifest?v=34.6.2"/>
 <link rel="icon" type="image/png" href="/icons/stellar-192.png"/>
 <link rel="apple-touch-icon" href="/icons/stellar-192.png"/>
-<link href="/style.css?v=34.6.1" rel="stylesheet"/>
+<link href="/style.css?v=34.6.2" rel="stylesheet"/>
 </head>
 <body>
 <div class="stellar-boot-splash" id="stellarBootSplash" role="status" aria-label="Preparando Stellar Legacy">
@@ -573,7 +573,7 @@
   <div class="modal-card wide-card clan-modal-card">
     <div class="modal-header">
       <div><div class="eyebrow">ALIANÇAS • COFRE COMPARTILHADO</div><h2>Clã / Aliança</h2></div>
-      <div class="arena-header-actions"><button class="ghost-btn" id="clanRefresh">ATUALIZAR</button><button class="small-btn" id="closeClan">Fechar</button></div>
+      <div class="arena-header-actions"><button class="ghost-btn" id="clanRelayInventoryBtn" type="button">INVENTÁRIO DOS RELÉS</button><button class="ghost-btn" id="clanRefresh">ATUALIZAR</button><button class="small-btn" id="closeClan">Fechar</button></div>
     </div>
     <div id="clanContent" class="clan-content"><div class="muted">Carregando dados da aliança...</div></div>
   </div>
@@ -588,6 +588,13 @@
     </div>
         <div id="warfrontContent" class="warfront-content"><div class="muted">Sincronizando frente de guerra...</div></div>
   </div>
+</div>
+
+<div class="modal hidden fixed-modal" id="relayHangarModal" role="dialog" aria-modal="true" aria-labelledby="relayHangarTitle">
+ <div class="modal-card wide-card relay-hangar-modal-v3462">
+  <div class="modal-header"><div><div class="eyebrow">OFICINA TERRITORIAL • INVENTÁRIO DO CLÃ</div><h2 id="relayHangarTitle">RELÉ • EQUIPAMENTOS</h2></div><button class="small-btn" id="closeRelayHangar" type="button">FECHAR</button></div>
+  <div id="relayHangarContent"><div class="muted">Carregando módulos do servidor...</div></div>
+ </div>
 </div>
 
 <div class="modal hidden" id="galaxyEventModal">
@@ -1111,6 +1118,6 @@
 </div>
 </div>
 <div class="perf-diag-overlay hidden" id="perfDiagOverlay" aria-live="off" aria-label="Contador de FPS local"><b id="perfDiagHudFps">FPS —</b><small id="perfDiagHudStutter">P95 —</small></div>
-<script src="/game.js?v=34.6.1" type="module"></script>
+<script src="/game.js?v=34.6.2" type="module"></script>
 </body>
 </html>

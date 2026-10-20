@@ -1,0 +1,13 @@
+STELLAR LEGACY V34.6.2 — ORDEM DE INSTALACAO
+
+1. Suba o ZIP completo pelo Instalador Universal do GitHub.
+2. Confirme no Render que o novo deploy esta LIVE.
+3. Depois, execute no Supabase:
+   sql/V34_6_2_RELAY_HANGAR_TYPED_MODULES.sql
+4. Teste o inventario de CLA, a selecao direta de um rele ja dominado,
+   os tipos ARMA 1 LASER e ARMA 2 MISSEIS, e a troca de modulo no mesmo slot.
+5. Em caso de retorno a versao anterior, restaure o codigo antes de aplicar:
+   sql/V34_6_2_RELAY_HANGAR_ROLLBACK.sql
+
+NAO EXECUTAR SQL ANTES DO DEPLOY DO CODIGO.
+NAO SUBSTITUIR OU REMOVER A PASTA .github DO REPOSITORIO.
