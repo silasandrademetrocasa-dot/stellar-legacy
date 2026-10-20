@@ -18,7 +18,7 @@ import { createSecurityService } from './security-service.js';
 
 const app = express();
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const RELEASE_VERSION = '34.6.2'; // único identificador de release nos endpoints HTTP
+const RELEASE_VERSION = '34.6.3'; // único identificador de release nos endpoints HTTP
 
 function normalizeSupabaseUrl(value = '') {
   let url = String(value || '').trim();
@@ -1802,10 +1802,11 @@ const sharedUniverse = attachSharedUniverse(server, {
     if(error)throw new Error(error.message);
     if(!Array.isArray(data)||data.length!==3)throw new Error('Relés não inicializados no SQL.');
     // Compatible with the old database until the V34.6 SQL is applied.
-    const [stateResult,moduleResult,rulesResult]=await Promise.all([
+    const [stateResult,moduleResult,rulesResult,balanceResult]=await Promise.all([
       sb.from('stellar_relay_state_v346').select('*').eq('map_id',mapId),
       sb.from('stellar_relay_modules_v346').select('id,category,attribute,level,map_id,node_id,slot,clan_id').eq('map_id',mapId),
-      sb.from('stellar_relay_rules_v346').select('*').eq('id',1).maybeSingle()
+      sb.from('stellar_relay_rules_v346').select('*').eq('id',1).maybeSingle(),
+      sb.from('stellar_relay_module_balance_v3463').select('*')
     ]);
     const missing=x=>/does not exist|schema cache|PGRST205|42P01/i.test(x?.message||'');
     if([stateResult,moduleResult,rulesResult].some(x=>x.error)){
@@ -1815,8 +1816,13 @@ const sharedUniverse = attachSharedUniverse(server, {
     const rules=rulesResult.data;
     return data.map(row=>({...row,relay:rules?.enabled===true?{
       ...(stateResult.data||[]).find(st=>st.node_id===row.node_id),
-      modules:(moduleResult.data||[]).filter(m=>m.node_id===row.node_id),rules
+      modules:(moduleResult.data||[]).filter(m=>m.node_id===row.node_id),balance:balanceResult.data||[],rules
     }:null}));
+  },
+  readRelayLoadout:async userId=>{
+    const {data,error}=await (await requireEliteAdmin()).from('game_saves').select('state').eq('user_id',userId).maybeSingle();
+    if(error||!data?.state)throw new Error('Equipamentos da nave não sincronizados.');
+    return data.state;
   },
   loadActorClan:async userId=>{
     const {data,error}=await (await requireEliteAdmin()).from('clan_members').select('clan_id').eq('user_id',userId).maybeSingle();

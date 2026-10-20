@@ -1143,6 +1143,7 @@ export const loadRelayDominationOnline=()=>serverFetch('/api/relay/state',{},tru
 export const relayModuleActionOnline=payload=>serverFetch('/api/relay/module',{method:'POST',body:JSON.stringify(payload)},true);
 export const claimRelayMissionOnline=id=>serverFetch(`/api/relay/mission/${encodeURIComponent(id)}/claim`,{method:'POST',body:'{}'},true);
 export const saveRelayAdminOnline=payload=>serverFetch('/api/relay/admin/rules',{method:'POST',body:JSON.stringify(payload)},true);
+export const saveRelayModuleBalanceOnline=payload=>serverFetch('/api/relay/admin/module-balance',{method:'POST',body:JSON.stringify(payload)},true);
 export const adminReleaseRelayOnline=payload=>serverFetch('/api/relay/admin/release',{method:'POST',body:JSON.stringify(payload)},true);
 
 export const repairRelayOnline=payload=>serverFetch('/api/relay/repair',{method:'POST',body:JSON.stringify(payload)},true);

@@ -29,7 +29,7 @@ test('neutral stations have exactly eight LV1 virtual modules without applying p
  assert.deepEqual(RELAY_NEUTRAL_MODULES.map(x=>x.slot),[1,2,3,4,5,6,7,8]);
  assert.ok(RELAY_NEUTRAL_MODULES.every(x=>x.level===1&&validModule(x)));
  const world=read('server/world.js');assert.match(world,/node\.ownerClanId\?node\.relayModules:RELAY_NEUTRAL_MODULES/);
- assert.match(world,/missile\?3200:1150/);
+ assert.match(world,/relayTurretStats\(module,node\.relayBalance\)/);
  assert.match(world,/Math\.min\(RELAY_BASE\.weaponRange,node\.radius\+150\)/);
 });
 test('hangar is independent and opens from owned map relay, no equipment controls inside battle menu',()=>{

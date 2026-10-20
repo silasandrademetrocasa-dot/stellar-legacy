@@ -19,9 +19,9 @@ export function slotAssignmentAllowed(modules,module){
  if(!validModule(module)||!Array.isArray(modules))return false;
  return !modules.some(m=>Number(m.slot)===Number(module.slot)||module.category==='bonus'&&m.category==='bonus'&&m.attribute===module.attribute);
 }
-export function bestBonus(modules){
+export function bestBonus(modules,balance=[]){
  const eligible=(modules||[]).filter(m=>m?.category==='bonus'&&Object.hasOwn(RELAY_BONUS_VALUES,m.attribute)&&Number.isInteger(Number(m.level))&&m.level>=1&&m.level<=3);
- const sorted=eligible.map(m=>({attribute:m.attribute,level:Number(m.level),value:RELAY_BONUS_VALUES[m.attribute][Number(m.level)-1]})).sort((a,b)=>b.level-a.level||b.value-a.value||a.attribute.localeCompare(b.attribute));
+ const sorted=eligible.map(m=>({attribute:m.attribute,level:Number(m.level),value:Number(balance.find(b=>b.category==='bonus'&&b.attribute===m.attribute&&Number(b.level)===Number(m.level))?.bonus_pct??RELAY_BONUS_VALUES[m.attribute][Number(m.level)-1])})).sort((a,b)=>b.level-a.level||b.value-a.value||a.attribute.localeCompare(b.attribute));
  return sorted[0]||null;
 }
 export function clanSupremacy(nodes,clanId){
@@ -33,13 +33,13 @@ export function factionSupremacy(nodes){
  const owners=new Set(nodes.filter(n=>validRelayKey(n.map_id,n.node_id)).map(n=>n.owner));
  return owners.size===1&&['earth','mars','jupiter'].includes([...owners][0])?[...owners][0]:null;
 }
-export function derivedGlobalBonus(nodes,modules,clanId,faction){
+export function derivedGlobalBonus(nodes,modules,clanId,faction,balance=[]){
  const maps=clanSupremacy(nodes,clanId),dominant=factionSupremacy(nodes);
  const own=nodes.filter(n=>maps.includes(n.map_id)&&n.owner_clan_id===clanId);
- const clan=bestBonus(modules.filter(m=>own.some(n=>n.map_id===m.map_id&&n.node_id===m.node_id)));
- const fac=dominant===faction?bestBonus(modules.filter(m=>nodes.some(n=>n.map_id===m.map_id&&n.node_id===m.node_id&&n.owner===faction))):null;
+ const clan=bestBonus(modules.filter(m=>own.some(n=>n.map_id===m.map_id&&n.node_id===m.node_id)),balance);
+ const fac=dominant===faction?bestBonus(modules.filter(m=>nodes.some(n=>n.map_id===m.map_id&&n.node_id===m.node_id&&n.owner===faction)),balance):null;
  // Only the single strongest bonus, not additive, even when both regimes apply.
- const strongest=bestBonus([...(clan?[{...clan,category:'bonus'}]:[]),...(fac?[{...fac,category:'bonus'}]:[])]);
+ const strongest=[clan,fac].filter(Boolean).sort((a,b)=>b.level-a.level||b.value-a.value||a.attribute.localeCompare(b.attribute))[0]||null;
  return {clanMaps:maps,factionDominance:dominant,clanBonus:clan,factionBonus:fac,active:strongest};
 }
 export function applyRelayDamage(shield,hp,damage){

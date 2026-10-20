@@ -12,6 +12,7 @@ import {selectLiveDirective,directiveToWorldEvent} from './universe-directives.j
 import {captureElapsedSeconds, classifyWarfrontCaptureError, withCaptureTimeout, CAPTURE_FAILURE_BACKOFF_MS} from './warfront-capture.js';
 import { FACTIONS, MAPS, NPC_TYPES, RESOURCES } from '../public/data.js';
 import { RELAY_BASE,RELAY_NEUTRAL_MODULES,applyRelayDamage } from './relay-domination-v346.js';
+import {relayShipLoadoutDamage,relayTurretStats} from './relay-combat-v3463.js';
 
 const LIVE_OPS_REFRESH_MS = 15000;
 
@@ -430,10 +431,22 @@ class Room {
     if(now<node.protectedUntil||node.relayHp<=0)return safeJsonSend(ws,{type:'relay_hit_result',ok:false,reason:'Estrutura protegida ou já destruída.'});
     if(Math.hypot(p.x-node.x,p.y-node.y)>RELAY_BASE.attackRange||this.playerPortalNeutral(p))return safeJsonSend(ws,{type:'relay_hit_result',ok:false,reason:'Aproxime-se do relé e saia da zona neutra.'});
     const cooldown=Math.max(400,Number(rules.hit_cooldown_ms)||RELAY_BASE.hitCooldownMs);
-    if(now-(ws._relayHitAt||0)<cooldown||ws._relayBusy)return;
-    ws._relayHitAt=now;ws._relayBusy=true;
+    const rocketShot=msg?.weapon==='rocket';
+    if((rocketShot?now-(ws._relayRocketAt||0)<2500:now-(ws._relayHitAt||0)<cooldown)||ws._relayBusy)return;
+    if(!rocketShot)ws._relayHitAt=now;ws._relayBusy=true;
     try{
-      const damage=Math.max(100,Math.min(50000,Number(rules.hit_damage)||RELAY_BASE.hit));
+      const kind=msg?.weapon==='rocket'?'rocket':'laser';
+      if(!ws._relayEquipmentCache||now-ws._relayEquipmentCache.at>4000){
+        const authoritative=await this.world.readRelayLoadout(p.userId);
+        ws._relayEquipmentCache={at:now,state:authoritative};
+      }
+      const save=ws._relayEquipmentCache.state;
+      const gear=relayShipLoadoutDamage(save,p.laserAmmoId,kind==='rocket'?String(msg.rocketId||''):null);
+      let damage=kind==='rocket'?gear.rocketDamage:gear.laserDamage;
+      if(damage<1)return safeJsonSend(ws,{type:'relay_hit_result',ok:false,reason:'Equipe lasers/mísseis e verifique a munição.'});
+      // Cap is only an anti-abuse ceiling; no fixed 12.000 damage per pulse.
+      damage=Math.min(500000,Math.max(1,Math.round(damage)));
+      if(kind==='rocket')ws._relayRocketAt=now;
       const result=await withCaptureTimeout(this.world.damageRelay(this.mapId,node.id,damage,p.userId),4500);
       if(result?.ok&&Number(result.revision)>=Number(node.relayRevision||0)){
         node.relayHp=Number(result.hp)||0;node.relayShield=Number(result.shield)||0;node.relayRevision=Number(result.revision)||0;
@@ -557,11 +570,12 @@ class Room {
       if(!hostile)continue;
       node.relayTurretAt||={};
       for(const module of weapons){
-        const missile=Number(module.slot)===2,cooldown=missile?3200:1150,slot=Number(module.slot);
+        const missile=Number(module.slot)===2,slot=Number(module.slot),balance=relayTurretStats(module,node.relayBalance);
+        const cooldown=balance.cooldownMs;
         if(now-(node.relayTurretAt[slot]||0)<cooldown)continue;
         node.relayTurretAt[slot]=now;
         const lv=Math.min(3,Math.max(1,Number(module.level)||1));
-        const damage=missile?1600+1000*lv:700+650*lv;
+        const damage=balance.damage;
         safeJsonSend(hostile,{type:'relay_turret_attack',nodeId:node.id,x:node.x,y:node.y,damage,weapon:missile?'missile':'laser'});
         this.broadcast({type:'relay_turret_fx',nodeId:node.id,targetUserId:hostile.player.userId,x:node.x,y:node.y,weapon:missile?'missile':'laser'});
       }
@@ -582,14 +596,14 @@ class Room {
         if(!row)throw new Error('Relé sem registro persistido');
         const revision=Number(row.revision)||0;
         const relayRevision=Number(row.relay?.revision)||0;
-        const relaySignature=JSON.stringify(row.relay?.modules||[]);
+        const relaySignature=JSON.stringify([row.relay?.modules||[],row.relay?.balance||[]]);
         if(!initial&&revision<=Number(node.revision||0)&&relayRevision<=Number(node.relayRevision||0)&&relaySignature===node.relaySignature)continue;
         node.owner=WARFRONT_FACTIONS.includes(row.owner)?row.owner:null;
         node.revision=revision;node.capturedAt=Date.parse(row.captured_at||'')||0;
         node.relayMode=!!row.relay;node.relayRevision=relayRevision;node.relaySignature=relaySignature;
         node.ownerClanId=row.relay?.owner_clan_id||null;node.relayHp=Number(row.relay?.hp??0);node.relayShield=Number(row.relay?.shield??0);
         node.relayMaxHp=Number(row.relay?.max_hp)||RELAY_BASE.hp;node.relayMaxShield=Number(row.relay?.max_shield)||RELAY_BASE.shield;
-        node.protectedUntil=Date.parse(row.relay?.protected_until||'')||0;node.relayModules=row.relay?.modules||[];node.relayRules=row.relay?.rules||null;
+        node.protectedUntil=Date.parse(row.relay?.protected_until||'')||0;node.relayModules=row.relay?.modules||[];node.relayRules=row.relay?.rules||null;node.relayBalance=row.relay?.balance||[];
         node.progress=0;node.challenger=null;changed=true;
       }
       this.warfrontSynced=true;this.warfrontSyncError=null;

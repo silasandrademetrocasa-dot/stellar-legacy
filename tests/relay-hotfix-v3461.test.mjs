@@ -19,8 +19,8 @@ test('workshop editing does not lose keyboard focus from live re-renders',()=>{
  for(const key of ['relayAdmHpV346','relayAdmShieldV346','relayAdmDamageV346','relayAdmCooldownV346','relayAdmCaptureV346','relayAdmProtectionV346','relayAdmWeekendV346','relayAdmEnabledV346'])assert.ok(game.includes(key),key);
 });
 test('module upgrade costs appear only on explicit request and require confirmation',()=>{
- assert.match(game,/if\(action==='upgrade'\)/);
- assert.match(game,/confirm\(`EVOLUÇÃO DO MÓDULO/);
+ assert.match(game,/if\(action==='upgrade'&&!confirmed\)/);
+ assert.match(game,/openConfirmModal\(\{eyebrow:'OFICINA • EVOLUÇÃO'/);
  assert.doesNotMatch(game,/LV1: 5 peças, 0 CR • LV2/);
 });
 test('UI no longer advertises version badges',()=>{
