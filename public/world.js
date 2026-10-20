@@ -21,6 +21,7 @@ export class SharedUniverseClient {
   join(payload,fromAuth=false){this.mapJoinError=null;this.pendingJoin={...payload};if(!this.authed){this.connect();return false;}return this.send({type:'join_map',...payload});}
   updatePlayer(payload){return this.send({type:'player_state',...payload});}
   damageNpc(payload){return this.send({type:'npc_damage',...payload});}
+  attackRelay(nodeId){return this.send({type:'relay_attack',nodeId});}
   collectOre(entityId,collector='ship'){return this.send({type:'collect_ore',entityId,collector:collector==='pet'?'pet':'ship'});}
   forceEvent(index){return this.send({type:'force_event',index});}
   close(){this.mapJoinError=null;this.manual=true;clearTimeout(this.reconnectTimer);clearInterval(this.pingTimer);this.reconnectTimer=null;this.pingTimer=null;try{this.ws?.close(1000,'logout');}catch{}this.ws=null;this.authed=false;this.status('offline');}

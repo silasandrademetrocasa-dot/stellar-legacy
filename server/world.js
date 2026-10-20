@@ -11,6 +11,7 @@ import { WebSocketServer, WebSocket } from 'ws';
 import {selectLiveDirective,directiveToWorldEvent} from './universe-directives.js';
 import {captureElapsedSeconds, classifyWarfrontCaptureError, withCaptureTimeout, CAPTURE_FAILURE_BACKOFF_MS} from './warfront-capture.js';
 import { FACTIONS, MAPS, NPC_TYPES, RESOURCES } from '../public/data.js';
+import { RELAY_BASE,applyRelayDamage } from './relay-domination-v346.js';
 
 const LIVE_OPS_REFRESH_MS = 15000;
 
@@ -418,8 +419,32 @@ class Room {
     for(const n of this.warfrontControl.nodes)if(scores[n.owner]!==undefined)scores[n.owner]++;
     const ranked=WARFRONT_FACTIONS.map(id=>({id,score:scores[id]})).sort((a,b)=>b.score-a.score);
     const dominant=ranked[0].score>ranked[1].score?ranked[0].id:null;
-    return {mapId:this.mapId,nodes:this.warfrontControl.nodes.map(n=>({id:n.id,label:n.label,x:n.x,y:n.y,radius:n.radius,owner:n.owner,challenger:n.challenger,progress:Math.round(n.progress*10)/10,contested:!!n.contested,nearby:{...n.nearby},capturedAt:n.capturedAt||0,persisting:!!n.persisting,captureError:n.captureError&&nowMs()-(n.captureError.at||0)<30000?{code:n.captureError.code,message:n.captureError.message}:null})),scores,dominantFaction:dominant,serverTime:nowMs()};
+    return {mapId:this.mapId,relayMode:this.warfrontControl.nodes.some(n=>n.relayMode===true),nodes:this.warfrontControl.nodes.map(n=>({relayMode:!!n.relayMode,ownerClanId:n.ownerClanId||null,hp:n.relayHp??0,maxHp:n.relayMaxHp||RELAY_BASE.hp,shield:n.relayShield??0,maxShield:n.relayMaxShield||RELAY_BASE.shield,protectedUntil:n.protectedUntil||0,modules:n.relayModules||[],id:n.id,label:n.label,x:n.x,y:n.y,radius:n.radius,owner:n.owner,challenger:n.challenger,progress:Math.round(n.progress*10)/10,contested:!!n.contested,nearby:{...n.nearby},capturedAt:n.capturedAt||0,persisting:!!n.persisting,captureError:n.captureError&&nowMs()-(n.captureError.at||0)<30000?{code:n.captureError.code,message:n.captureError.message}:null})),scores,dominantFaction:dominant,serverTime:nowMs()};
   }
+  async handleRelayAttack(ws,msg){
+    const p=ws?.player,node=this.warfrontControl?.nodes?.find(n=>n.id===String(msg?.nodeId||''));
+    if(!p||!node?.relayMode||!this.warfrontSynced||!this.playerFresh(p)||ws.identity?.user?.id!==p.userId)return;
+    if(!p.clanId)return safeJsonSend(ws,{type:'relay_hit_result',ok:false,reason:'Entre em um clã antes de atacar relés.'});
+    if(p.clanId&&node.ownerClanId===p.clanId)return safeJsonSend(ws,{type:'relay_hit_result',ok:false,reason:'Seu clã já domina este relé.'});
+    const now=nowMs(),rules=node.relayRules||{};
+    if(now<node.protectedUntil||node.relayHp<=0)return safeJsonSend(ws,{type:'relay_hit_result',ok:false,reason:'Estrutura protegida ou já destruída.'});
+    if(Math.hypot(p.x-node.x,p.y-node.y)>RELAY_BASE.attackRange||this.playerPortalNeutral(p))return safeJsonSend(ws,{type:'relay_hit_result',ok:false,reason:'Aproxime-se do relé e saia da zona neutra.'});
+    const cooldown=Math.max(400,Number(rules.hit_cooldown_ms)||RELAY_BASE.hitCooldownMs);
+    if(now-(ws._relayHitAt||0)<cooldown||ws._relayBusy)return;
+    ws._relayHitAt=now;ws._relayBusy=true;
+    try{
+      const damage=Math.max(100,Math.min(50000,Number(rules.hit_damage)||RELAY_BASE.hit));
+      const result=await withCaptureTimeout(this.world.damageRelay(this.mapId,node.id,damage,p.userId),4500);
+      if(result?.ok&&Number(result.revision)>=Number(node.relayRevision||0)){
+        node.relayHp=Number(result.hp)||0;node.relayShield=Number(result.shield)||0;node.relayRevision=Number(result.revision)||0;
+        this.broadcast({type:'relay_hit_fx',nodeId:node.id,userId:p.userId,x:node.x,y:node.y,actual:result.actual,shield:node.relayShield,hp:node.relayHp});
+        this.broadcast({type:'warfront_control',warfront:this.warfrontPayload(),serverTime:nowMs()});
+      }
+      safeJsonSend(ws,{type:'relay_hit_result',...result,nodeId:node.id});
+    }catch(e){safeJsonSend(ws,{type:'relay_hit_result',ok:false,reason:'Falha ao registrar o ataque. Tente novamente.'});}
+    finally{ws._relayBusy=false;}
+  }
+
   updateWarfrontControl(dt,now){
     // Sem confirmação de persistência, ninguém captura um relé em estado provisório.
     if(!this.warfrontControl||!this.warfrontSynced)return;
@@ -440,35 +465,41 @@ class Room {
       node.nearby=counts;
       if(node.persisting)continue;
       const active=WARFRONT_FACTIONS.filter(id=>counts[id]>0);
-      node.contested=active.length>1;
+      // In relay combat, two unrelated clans from the same faction also contest.
+      const clanCompetitors=node.relayMode?new Set([...this.players.values()].filter(p=>p.clanId&&this.playerFresh(p)&&Math.hypot(p.x-node.x,p.y-node.y)<=node.radius).map(p=>p.clanId)):null;
+      node.contested=active.length>1||(node.relayMode&&clanCompetitors.size>1);
       if(node.contested)continue;
       if(active.length===1){
         const faction=active[0],weight=Math.max(1,Math.min(3,counts[faction]));
-        if(node.owner===faction){
+        if(node.relayMode && (node.relayHp>0 || now<Number(node.protectedUntil||0))){node.challenger=null;node.challengerClanId=null;node.progress=0;node.defenseEligible=false;continue;}
+        if(node.relayMode&&!candidates[faction].some(v=>v.player.clanId && v.player.clanId!==node.ownerClanId)){node.challenger=null;node.challengerClanId=null;node.progress=0;continue;}
+        if(node.relayMode?node.ownerClanId===candidates[faction][0]?.player.clanId:node.owner===faction){
           // Defesa real: um inimigo iniciou captura >=20%, recuou e a facção dona permaneceu.
           if(node.challenger&&node.challenger!==faction&&node.defenseEligible){
             const defender=candidates[faction][0]?.player;
             if(defender?.userId)this.world.recordWarDefense?.(this.mapId,node.id,faction,defender.userId).catch(err=>console.warn('Defesa:',err?.message));
           }
-          node.challenger=null;node.progress=0;node.defenseEligible=false;continue;
+          node.challenger=null;node.challengerClanId=null;node.progress=0;node.defenseEligible=false;continue;
         }
-        if(node.challenger!==faction){node.challenger=faction;node.progress=0;node.defenseEligible=false;}
+        const relayChallenger=node.relayMode?candidates[faction].find(v=>v.player.clanId&&v.player.clanId!==node.ownerClanId)?.player.clanId:null;
+        if(node.challenger!==faction||(node.relayMode&&node.challengerClanId!==relayChallenger)){node.challenger=faction;node.challengerClanId=relayChallenger;node.progress=0;node.defenseEligible=false;}
         if(now<Number(node.retryAt||0))continue; // Não inundar o banco se ele estiver indisponível.
         node.captureError=null;
-        node.progress=Math.min(100,node.progress+WARFRONT_CAPTURE_RATE*weight*captureDt);
+        node.progress=Math.min(100,node.progress+(node.relayMode?100000/Math.max(5000,Number(node.relayRules?.capture_ms)||RELAY_BASE.neutralCaptureMs):WARFRONT_CAPTURE_RATE)*weight*captureDt);
         if(node.progress>=20)node.defenseEligible=true;
         if(node.progress>=100&&!node.persisting){
           // Só aplicar a mudança depois do COMMIT. Na falha, o dono antigo permanece.
-          const actor=candidates[faction][0]?.player||null;
+          const actor=node.relayMode?candidates[faction].find(x=>x.player.clanId===node.challengerClanId)?.player:candidates[faction][0]?.player||null;
           if(!actor?.userId)continue;
           const formerOwner=node.owner,expectedRevision=node.revision||0;
           node.persisting=true;
           // Rede lenta não pode deixar uma captura eternamente pendente.
-          withCaptureTimeout(this.world.persistCapture(this.mapId,node.id,faction,expectedRevision,actor.userId)).then(row=>{
+          withCaptureTimeout((node.relayMode?this.world.persistRelayCapture:this.world.persistCapture)(this.mapId,node.id,faction,expectedRevision,actor.userId)).then(row=>{
             node.owner=row.owner;
             node.revision=Number(row.revision)||expectedRevision+1;
             node.capturedAt=Date.parse(row.captured_at||'')||Date.now();
-            node.progress=0;node.challenger=null;node.defenseEligible=false;
+            if(node.relayMode){node.ownerClanId=actor.clanId;node.relayHp=node.relayMaxHp;node.relayShield=node.relayMaxShield;node.protectedUntil=Date.now()+(node.relayRules?.protection_ms||RELAY_BASE.protectionMs);node.relayModules=[];}
+            node.progress=0;node.challenger=null;node.challengerClanId=null;node.defenseEligible=false;
             node.retryAt=0;node.captureError=null;
             const actorSocket=this.world.findClient(actor.userId);
             if(actorSocket?.room===this)safeJsonSend(actorSocket,{type:'warfront_capture_result',ok:true,mapId:this.mapId,nodeId:node.id,owner:row.owner,revision:node.revision});
@@ -491,9 +522,10 @@ class Room {
             let confirmed=false;
             try{const rows=await withCaptureTimeout(this.world.loadWarfront(this.mapId),5000);const saved=rows.find(r=>r.node_id===node.id);
               if(saved){node.owner=saved.owner;node.revision=Number(saved.revision)||0;node.capturedAt=Date.parse(saved.captured_at||'')||0;
+                if(saved.relay){node.ownerClanId=saved.relay.owner_clan_id||null;node.relayHp=Number(saved.relay.hp)||0;node.relayShield=Number(saved.relay.shield)||0;node.relayModules=saved.relay.modules||[];node.protectedUntil=Date.parse(saved.relay.protected_until||'')||0;}
                 confirmed=saved.owner===faction&&Number(saved.revision)>expectedRevision&&String(saved.captured_by||'')===String(actor.userId);}
             }catch(lookupErr){console.warn('[warfront-capture-check]',String(lookupErr?.message||lookupErr).slice(0,160));}
-            node.progress=0;node.challenger=null;node.defenseEligible=false;
+            node.progress=0;node.challenger=null;node.challengerClanId=null;node.defenseEligible=false;
             if(confirmed){node.retryAt=0;node.captureError=null;this.refreshWarfrontDomination(Date.now(),null);}
             else{node.retryAt=Date.now()+CAPTURE_FAILURE_BACKOFF_MS;node.captureError={...problem,at:Date.now()};}
             const actorSocket=this.world.findClient(actor.userId);
@@ -511,9 +543,20 @@ class Room {
           if(node.defenseEligible&&defender?.userId&&!node.contested){
             this.world.recordWarDefense?.(this.mapId,node.id,node.owner,defender.userId).catch(err=>console.warn('Defesa:',err?.message));
           }
-          node.challenger=null;node.defenseEligible=false;
+          node.challenger=null;node.challengerClanId=null;node.defenseEligible=false;
         }
       }
+    }
+    // V34.6 turrets target an opposing clan only; bounded cadence, no NPCs or FX objects spawned.
+    for(const node of this.warfrontControl.nodes){
+      if(!node.relayMode||!node.ownerClanId||!node.relayHp||now-(node.lastTurretShotAt||0)<1250)continue;
+      const weapons=(node.relayModules||[]).filter(m=>m.category==='weapon').slice(0,2);
+      if(!weapons.length)continue;
+      const hostile=[...this.clients].filter(c=>c.player&&this.playerFresh(c.player)&&c.player.clanId!==node.ownerClanId&&!this.playerPortalNeutral(c.player)&&Math.hypot(c.player.x-node.x,c.player.y-node.y)<=RELAY_BASE.weaponRange).sort((a,b)=>Math.hypot(a.player.x-node.x,a.player.y-node.y)-Math.hypot(b.player.x-node.x,b.player.y-node.y))[0];
+      if(!hostile)continue;node.lastTurretShotAt=now;
+      const damage=weapons.reduce((sum,m)=>sum+Math.min(3500,1000+Number(m.level||1)*800),0);
+      safeJsonSend(hostile,{type:'relay_turret_attack',nodeId:node.id,x:node.x,y:node.y,damage});
+      this.broadcast({type:'relay_turret_fx',nodeId:node.id,targetUserId:hostile.player.userId,x:node.x,y:node.y});
     }
     this.refreshWarfrontDomination(now,lastChange);
     if(this.clients.size&&now-this.lastWarfrontBroadcastAt>=WARFRONT_BROADCAST_INTERVAL_MS){this.lastWarfrontBroadcastAt=now;this.broadcast({type:'warfront_control',warfront:this.warfrontPayload(),serverTime:now});}
@@ -530,9 +573,15 @@ class Room {
         const row=rows.find(x=>x.node_id===node.id);
         if(!row)throw new Error('Relé sem registro persistido');
         const revision=Number(row.revision)||0;
-        if(!initial&&revision<=Number(node.revision||0))continue;
+        const relayRevision=Number(row.relay?.revision)||0;
+        const relaySignature=JSON.stringify(row.relay?.modules||[]);
+        if(!initial&&revision<=Number(node.revision||0)&&relayRevision<=Number(node.relayRevision||0)&&relaySignature===node.relaySignature)continue;
         node.owner=WARFRONT_FACTIONS.includes(row.owner)?row.owner:null;
         node.revision=revision;node.capturedAt=Date.parse(row.captured_at||'')||0;
+        node.relayMode=!!row.relay;node.relayRevision=relayRevision;node.relaySignature=relaySignature;
+        node.ownerClanId=row.relay?.owner_clan_id||null;node.relayHp=Number(row.relay?.hp??0);node.relayShield=Number(row.relay?.shield??0);
+        node.relayMaxHp=Number(row.relay?.max_hp)||RELAY_BASE.hp;node.relayMaxShield=Number(row.relay?.max_shield)||RELAY_BASE.shield;
+        node.protectedUntil=Date.parse(row.relay?.protected_until||'')||0;node.relayModules=row.relay?.modules||[];node.relayRules=row.relay?.rules||null;
         node.progress=0;node.challenger=null;changed=true;
       }
       this.warfrontSynced=true;this.warfrontSyncError=null;
@@ -784,6 +833,7 @@ class Room {
       const killKey=`${this.key}:${e.id}`.slice(0,180);
       try{
         const serverReward=await this.world.grantNpcReward(c.player.userId,killKey,String(e.type||'npc'),Math.max(0,Math.round((Number(e.credits)||0)*factor)),Math.max(0,Math.round((Number(e.uridium)||0)*factor)));
+        this.world.recordRelayPve?.(c.player.userId,`npc:${this.key}:${e.id}:${c.player.userId}`,'npc').catch(()=>{});
         safeJsonSend(c,{type:'kill_credit',entity:dead,factor,serverReward,groupShared:!!rewardGroupId,eligibleCount:eligible.length,ownerUserId:ownerId,ownerGroupId:rewardGroupId||null,dropBox:isOwner});
       }catch(err){
         console.error('[npc-reward] falha no ledger',{npc:e.id,error:String(err?.message||err).slice(0,180)});
@@ -830,7 +880,7 @@ class Room {
     let receipt;
     try {
       if(!this.world.grantOreReward)throw new Error('Concessão de minério indisponível.');
-      receipt=await this.world.grantOreReward(p.userId,oreKey,o.type,Math.trunc(Number(o.amount)||0));
+      receipt=await this.world.grantOreReward(p.userId,oreKey,o.type,Math.trunc(Number(o.amount)||0),this.mapId);
       if(!receipt||!Number.isSafeInteger(Number(receipt.revision))||Number(receipt.revision)<1)
         throw new Error('Minério não confirmado no banco.');
     } catch(err) {
@@ -838,6 +888,7 @@ class Room {
       console.warn('[ore-grant]',String(err?.message||err).slice(0,200));
       return safeJsonSend(ws,{type:'ore_collect_result',entityId,ok:false,reason:'persistence_error'});
     }
+    if(receipt.granted===true)this.world.recordRelayPve?.(p.userId,`ore:${oreKey}:${p.userId}`,'ore').catch(()=>{});
     this.eventParticipants.add(p.userId);
     safeJsonSend(ws,{type:'ore_collected',ore:o,collector,reward:receipt});
     this.broadcast({type:'ore_remove',entityId:o.id,collectorUserId:p.userId},ws);
@@ -940,7 +991,7 @@ class Room {
   }
 }
 
-export function attachSharedUniverse(server,{authenticate,authorizeJoin,recordSecurityViolation,loadLiveOps,loadBattleGroup,loadNpcConfig,loadWorldConfig,loadPlayerEventProgress,recordPlayerEventProgress,loadWarfront,persistCapture,recordEliteEvent,recordWarDefense,loadWorldDirectives,grantNpcReward,grantOreReward}){
+export function attachSharedUniverse(server,{authenticate,authorizeJoin,recordSecurityViolation,loadLiveOps,loadBattleGroup,loadNpcConfig,loadWorldConfig,loadPlayerEventProgress,recordPlayerEventProgress,loadWarfront,persistCapture,persistRelayCapture,damageRelay,loadActorClan,recordRelayPve,recordEliteEvent,recordWarDefense,loadWorldDirectives,grantNpcReward,grantOreReward}){
   const wss=new WebSocketServer({
     server,
     path:'/ws',
@@ -954,6 +1005,10 @@ export function attachSharedUniverse(server,{authenticate,authorizeJoin,recordSe
   const world={
     recordSecurityViolation,
     recordWarDefense:recordWarDefense||(()=>Promise.resolve(false)),
+    damageRelay:damageRelay||(()=>Promise.reject(new Error("SQL V34.6 pendente"))),
+    persistRelayCapture:persistRelayCapture||(()=>Promise.reject(new Error("SQL V34.6 pendente"))),
+    loadActorClan:loadActorClan||(()=>Promise.resolve(null)),
+    recordRelayPve:recordRelayPve||(()=>Promise.resolve(false)),
     loadWarfront:loadWarfront||(()=>Promise.reject(new Error('Sem conexão com o banco de relés'))),
     persistCapture:persistCapture||(()=>Promise.reject(new Error('Sem gravação de relés'))),
     recordEliteEvent:recordEliteEvent||(()=>Promise.resolve()),
@@ -1128,10 +1183,13 @@ export function attachSharedUniverse(server,{authenticate,authorizeJoin,recordSe
         // Somente X-1..X-8 são territoriais; b41,b42,b43 são PvP públicos de nível mínimo.
         const wrongFaction=!admin&&territorial&&String(msg.territoryFaction||faction)!==faction;
         if(!dest||dest.enabled===false||dest.gate||!validTerritory||!sectorValid||wrongFaction||(!admin&&level<required)||!faction){safeJsonSend(ws,{type:'join_error',code:'MAP_JOIN_DENIED',reason:wrongFaction?'INVASÕES BLOQUEADAS':`Setor indisponível / nível mínimo ${required}`});return;}
+        if(/^b4[123]$/.test(mapId)){
+          try{identity.clanId=await world.loadActorClan(identity.user.id);}catch{identity.clanId=null;}
+        }
         const r=world.room(mapId,territory);
         // Não aguardar a consulta de relés para abrir o PvP. O controlador permanece
         // travado até a primeira leitura válida e publica os donos oficiais depois.
-        ws.room?.removeClient(ws);const p={userId:identity.user.id,callsign:identity.callsign||msg.callsign||'Pilot',pilotTitle:shortText(msg.pilotTitle||'Piloto Estelar',64),faction:faction,shipId:String(msg.shipId||'phoenix'),shipDesignId:msg.shipDesignId?shortText(msg.shipDesignId,64):null,level:level,x:Number(msg.x)||400,y:Number(msg.y)||400,hp:Number(msg.hp)||1,maxHp:Number(msg.maxHp)||1,shield:Number(msg.shield)||0,maxShield:Number(msg.maxShield)||0,angle:Number(msg.angle)||0,laserFiring:false,laserColor:'#76d9ff',laserAmmoId:'lcb10',laserAmmoName:'PLS-1',targetId:null,targetIsPlayer:false,pet:{owned:false},updatedAt:nowMs()};r.addClient(ws,p);
+        ws.room?.removeClient(ws);const p={clanId:identity.clanId||null,userId:identity.user.id,callsign:identity.callsign||msg.callsign||'Pilot',pilotTitle:shortText(msg.pilotTitle||'Piloto Estelar',64),faction:faction,shipId:String(msg.shipId||'phoenix'),shipDesignId:msg.shipDesignId?shortText(msg.shipDesignId,64):null,level:level,x:Number(msg.x)||400,y:Number(msg.y)||400,hp:Number(msg.hp)||1,maxHp:Number(msg.maxHp)||1,shield:Number(msg.shield)||0,maxShield:Number(msg.maxShield)||0,angle:Number(msg.angle)||0,laserFiring:false,laserColor:'#76d9ff',laserAmmoId:'lcb10',laserAmmoName:'PLS-1',targetId:null,targetIsPlayer:false,pet:{owned:false},updatedAt:nowMs()};r.addClient(ws,p);
         // Verificar eventos imediatamente ao entrar (sem depender de trocar de mapa).
         Promise.allSettled([world.refreshLiveOps?.(nowMs()-(world.lastLiveOpsAt||0)>3000)??Promise.resolve(),world.refreshDirectives?.(false)??Promise.resolve()]).then(()=>{
           if(ws.room!==r)return;
@@ -1150,6 +1208,7 @@ export function attachSharedUniverse(server,{authenticate,authorizeJoin,recordSe
         return ws.room?.updatePlayer(ws,msg);
       }
       if(msg.type==='npc_damage')return await ws.room?.handleDamage(ws,msg);
+      if(msg.type==='relay_attack')return await ws.room?.handleRelayAttack(ws,msg);
       if(msg.type==='collect_ore')return await ws.room?.handleOreCollect(ws,msg);
       if(msg.type==='force_event'&&ws.identity?.isAdmin===true&&String(ws.identity.callsign||'').trim().toUpperCase()==='FELP22'){
         await world.refreshLiveOps(true);

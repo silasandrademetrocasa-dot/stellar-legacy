@@ -1,6 +1,6 @@
 {
   "name": "stellar-legacy",
-  "version": "34.5.0",
+  "version": "34.6.0",
   "type": "module",
   "scripts": {
     "start": "node server/index.js",
@@ -19,5 +19,5 @@
   "engines": {
     "node": ">=18"
   },
-  "release": "Progressive asset preload and NPC perception/retarget performance"
+  "release": "Relay Domination & Clan Warfare"
 }

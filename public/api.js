@@ -1137,3 +1137,11 @@ export async function unequipEliteTitleOnline(){return serverFetch('/api/command
 export async function loadClanOperationsOnline(){return serverFetch('/api/command/clan/operations',{},true);}
 export async function claimClanOperationOnline(id){return serverFetch(`/api/command/clan/operations/${encodeURIComponent(id)}/claim`,{method:'POST',body:'{}'},true);}
 export async function saveAdminClanOperationOnline(data){return serverFetch('/api/command/admin/clan-operation',{method:'POST',body:JSON.stringify(data)},true);}
+
+// V34.6 — relay management, game-session authenticated. Mutations never use the public token directly against tables.
+export const loadRelayDominationOnline=()=>serverFetch('/api/relay/state',{},true);
+export const relayModuleActionOnline=payload=>serverFetch('/api/relay/module',{method:'POST',body:JSON.stringify(payload)},true);
+export const claimRelayMissionOnline=id=>serverFetch(`/api/relay/mission/${encodeURIComponent(id)}/claim`,{method:'POST',body:'{}'},true);
+export const saveRelayAdminOnline=payload=>serverFetch('/api/relay/admin/rules',{method:'POST',body:JSON.stringify(payload)},true);
+
+export const repairRelayOnline=payload=>serverFetch('/api/relay/repair',{method:'POST',body:JSON.stringify(payload)},true);

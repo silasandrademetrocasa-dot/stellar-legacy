@@ -11,13 +11,14 @@ import { attachSharedUniverse } from './world.js';
 import { eliteStatus } from './elite-operations.js';
 import { warCampaignState,warRankings,safeWarCampaignInput,safeWarRulesInput } from './war-campaigns.js';
 import { createCommandCenterRouter } from './command-center-router.js';
+import { createRelayRouter } from './relay-router-v346.js';
 import { validatePlayerSave, invalidShopArguments } from './security-guard.js';
 import { validateRewardClaimContinuity } from './reward-claim-guard.js';
 import { createSecurityService } from './security-service.js';
 
 const app = express();
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const RELEASE_VERSION = '34.5.0'; // único identificador de release nos endpoints HTTP
+const RELEASE_VERSION = '34.6.0'; // único identificador de release nos endpoints HTTP
 
 function normalizeSupabaseUrl(value = '') {
   let url = String(value || '').trim();
@@ -1625,6 +1626,7 @@ app.post('/api/admin/war/campaigns',requireUser,asyncRoute(async(req,res)=>{
 
 // Sistemas adicionais do Centro de Comando isolados do motor de combate.
 app.use('/api/command',requireUser,createCommandCenterRouter({serviceClient:eliteAdminClient}));
+app.use('/api/relay',requireUser,createRelayRouter({serviceClient:eliteAdminClient}));
 
 app.get('/api/save', requireUser, asyncRoute(async (req, res) => {
   const { data, error } = await req.sb.from('game_saves').select('state,updated_at').eq('user_id', req.user.id).maybeSingle();
@@ -1799,7 +1801,39 @@ const sharedUniverse = attachSharedUniverse(server, {
     const {data,error}=await sb.from('stellar_warfront_nodes').select('map_id,node_id,owner,revision,captured_at,captured_by').eq('map_id',mapId);
     if(error)throw new Error(error.message);
     if(!Array.isArray(data)||data.length!==3)throw new Error('Relés não inicializados no SQL.');
-    return data;
+    // Compatible with the old database until the V34.6 SQL is applied.
+    const [stateResult,moduleResult,rulesResult]=await Promise.all([
+      sb.from('stellar_relay_state_v346').select('*').eq('map_id',mapId),
+      sb.from('stellar_relay_modules_v346').select('id,category,attribute,level,map_id,node_id,slot,clan_id').eq('map_id',mapId),
+      sb.from('stellar_relay_rules_v346').select('*').eq('id',1).maybeSingle()
+    ]);
+    const missing=x=>/does not exist|schema cache|PGRST205|42P01/i.test(x?.message||'');
+    if([stateResult,moduleResult,rulesResult].some(x=>x.error)){
+      if([stateResult,moduleResult,rulesResult].every(x=>!x.error||missing(x.error)))return data;
+      throw new Error([stateResult,moduleResult,rulesResult].find(x=>x.error)?.error?.message||'Falha nos relés');
+    }
+    const rules=rulesResult.data;
+    return data.map(row=>({...row,relay:rules?.enabled===true?{
+      ...(stateResult.data||[]).find(st=>st.node_id===row.node_id),
+      modules:(moduleResult.data||[]).filter(m=>m.node_id===row.node_id),rules
+    }:null}));
+  },
+  loadActorClan:async userId=>{
+    const {data,error}=await (await requireEliteAdmin()).from('clan_members').select('clan_id').eq('user_id',userId).maybeSingle();
+    if(error)throw new Error(error.message);return data?.clan_id||null;
+  },
+  damageRelay:async(mapId,nodeId,damage,userId)=>{
+    const {data,error}=await (await requireEliteAdmin()).rpc('stellar_relay_damage_v346',{p_map_id:mapId,p_node_id:nodeId,p_damage:damage,p_attacker:userId});
+    if(error)throw new Error(error.message);return data;
+  },
+  persistRelayCapture:async(mapId,nodeId,faction,revision,actorUserId)=>{
+    const {data,error}=await (await requireEliteAdmin()).rpc('stellar_relay_capture_v346',{p_map_id:mapId,p_node_id:nodeId,p_faction:faction,p_expected_revision:revision,p_actor:actorUserId});
+    if(error)throw new Error(error.message);const row=Array.isArray(data)?data[0]:data;
+    if(!row||row.owner!==faction)throw new Error('Conquista não confirmada pelo banco');return row;
+  },
+  recordRelayPve:async(userId,key,kind)=>{
+    const {error}=await (await requireEliteAdmin()).rpc('stellar_relay_record_pve_v346',{p_user_id:userId,p_event_key:key,p_kind:kind});
+    if(error&&!/PGRST202|does not exist|schema cache/i.test(error.message))console.warn('[relay-pve]',error.message);
   },
   persistCapture:async(mapId,nodeId,faction,revision,actorUserId)=>{
     const sb=await requireEliteAdmin();
@@ -1826,10 +1860,15 @@ const sharedUniverse = attachSharedUniverse(server, {
     if(!data||!Number.isSafeInteger(Number(data.revision))||Number(data.revision)<1)throw new Error('Recompensa NPC sem confirmação verificável.');
     return data;
   },
-  grantOreReward:async(userId,oreKey,resource,amount)=>{
+  grantOreReward:async(userId,oreKey,resource,amount,mapId)=>{
     const sb=await requireEliteAdmin();
+    let confirmedAmount=amount;
+    // V34.6 bonus is read from persisted control; browser cannot self-assign ore bonuses.
+    try{const {data:bonus,error:bonusErr}=await sb.rpc('stellar_relay_active_bonus_v346',{p_user_id:userId,p_map_id:mapId});
+      if(!bonusErr&&bonus?.attribute==='resources')confirmedAmount=Math.min(1000,Math.max(1,Math.round(amount*(1+Number(bonus.value||0)/100))));
+    }catch{}
     const {data,error}=await sb.rpc('stellar_grant_ore_reward_v229',{
-      p_user_id:userId,p_ore_key:oreKey,p_resource:resource,p_amount:amount
+      p_user_id:userId,p_ore_key:oreKey,p_resource:resource,p_amount:confirmedAmount
     });
     if(error)throw new Error(String(error.message||'Coleta online recusada'));
     return data;

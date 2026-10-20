@@ -1,0 +1,62 @@
+import {Router} from 'express';
+import {derivedGlobalBonus,RELAY_MAPS,RELAY_IDS,RELAY_BONUS_VALUES,validRelayModuleId} from './relay-domination-v346.js';
+const wrap=fn=>(req,res,next)=>Promise.resolve(fn(req,res)).catch(next);
+const fail=(res,error,status=409)=>res.status(status).json({error:String(error?.message||error||'Falha no relé').slice(0,200)});
+export function createRelayRouter({serviceClient}){
+ const r=Router();
+ const sb=()=>{if(!serviceClient)throw Object.assign(new Error('Servidor sem chave privilegiada do banco.'),{status:503});return serviceClient;};
+ r.get('/state',wrap(async(req,res)=>{
+   const db=sb();
+   const [controls,owners,states,modules,member,profile]=await Promise.all([
+     db.from('stellar_relay_rules_v346').select('*').eq('id',1).maybeSingle(),
+     db.from('stellar_warfront_nodes').select('map_id,node_id,owner,revision'),
+     db.from('stellar_relay_state_v346').select('*').limit(9),
+     db.from('stellar_relay_modules_v346').select('id,clan_id,category,attribute,level,map_id,node_id,slot').not('map_id','is',null).limit(72),
+     db.from('clan_members').select('clan_id').eq('user_id',req.user.id).maybeSingle(),
+     db.from('profiles').select('faction').eq('id',req.user.id).maybeSingle()
+   ]);
+   const error=[controls,owners,states,modules,member,profile].find(q=>q.error)?.error;if(error)return fail(res,error,503);
+   const clanId=member.data?.clan_id||null;
+   const rows=(owners.data||[]).map(o=>({...o,...(states.data||[]).find(s=>s.map_id===o.map_id&&s.node_id===o.node_id)}));
+   const installed=(modules.data||[]).filter(m=>m.map_id&&m.node_id);
+   const global=derivedGlobalBonus(rows,installed,clanId,profile.data?.faction||null);
+   let inventory=[],pieces=[],missions=[],clan=null;
+   if(clanId){const [inv,part,claims,c,data]=await Promise.all([
+     db.from('stellar_relay_modules_v346').select('*').eq('clan_id',clanId).order('created_at',{ascending:false}).limit(150),
+     db.from('stellar_relay_clan_parts_v346').select('*').eq('clan_id',clanId),
+     db.from('stellar_relay_mission_claims_v346').select('mission_id,period_start').eq('clan_id',clanId).order('period_start',{ascending:false}).limit(30),
+     db.from('clans').select('id,name,tag,level,owner_id,vault_credits').eq('id',clanId).maybeSingle(),
+     db.from('stellar_relay_clan_pve_v346').select('period_start,npc_kills,ore_collections').eq('clan_id',clanId).order('period_start',{ascending:false}).limit(1)
+   ]); const err=[inv,part,claims,c,data].find(x=>x.error)?.error;if(err)return fail(res,err,503);
+   inventory=inv.data||[];pieces=part.data||[];missions=claims.data||[];clan={...c.data,isOwner:c.data?.owner_id===req.user.id,pve:(data.data||[])[0]||null};}
+   res.set('Cache-Control','no-store');res.json({ok:true,enabled:controls.data?.enabled===true,rules:controls.data,nodes:rows,installedModules:installed,inventory,pieces,missions,clan,global,bonusCatalog:RELAY_BONUS_VALUES,serverTime:Date.now()});
+ }));
+ r.post('/module',wrap(async(req,res)=>{
+   const {action,moduleId,category,attribute,mapId,nodeId,slot}=req.body||{};
+   if(!['craft','upgrade','equip','unequip'].includes(action))return fail(res,'Ação inválida',400);
+   if(moduleId!=null&&!validRelayModuleId(moduleId))return fail(res,'Módulo inválido',400);
+   if(mapId!=null&&!RELAY_MAPS.includes(mapId))return fail(res,'Mapa inválido',400);
+   if(nodeId!=null&&!RELAY_IDS.includes(nodeId))return fail(res,'Relé inválido',400);
+   if(slot!=null&&(!Number.isInteger(slot)||slot<1||slot>8))return fail(res,'Slot inválido',400);
+   const {data,error}=await req.sb.rpc('stellar_relay_module_action_v346',{p_action:action,p_module_id:moduleId||null,p_category:category||null,p_attribute:attribute||null,p_map_id:mapId||null,p_node_id:nodeId||null,p_slot:slot??null});
+   if(error)return fail(res,error);res.json(data);
+ }));
+ r.post('/repair',wrap(async(req,res)=>{const map=String(req.body?.mapId||''),node=String(req.body?.nodeId||'');if(!RELAY_MAPS.includes(map)||!RELAY_IDS.includes(node))return fail(res,'Relé inválido',400);const {data,error}=await req.sb.rpc('stellar_relay_repair_v346',{p_map_id:map,p_node_id:node});if(error)return fail(res,error);res.json(data); }));
+ r.post('/mission/:id/claim',wrap(async(req,res)=>{
+   if(!['capture_week','defend_week','hunter_week','domination_week'].includes(req.params.id))return fail(res,'Missão inválida',400);
+   const {data,error}=await req.sb.rpc('stellar_relay_claim_mission_v346',{p_mission_id:req.params.id});if(error)return fail(res,error);res.json(data);
+ }));
+ r.get('/admin',wrap(async(req,res)=>{
+   const {data:yes,error:authError}=await req.sb.rpc('is_game_admin_v1763',{p_uid:req.user.id});if(authError||yes!==true)return fail(res,'Somente ADM',403);
+   const {data,error}=await sb().from('stellar_relay_rules_v346').select('*').eq('id',1).single();if(error)return fail(res,error,503);res.json({ok:true,rules:data});
+ }));
+ r.post('/admin/rules',wrap(async(req,res)=>{
+   const {data:yes,error:authError}=await req.sb.rpc('is_game_admin_v1763',{p_uid:req.user.id});if(authError||yes!==true)return fail(res,'Somente ADM',403);
+   const limits={max_hp:[10000,3000000],max_shield:[10000,2000000],hit_damage:[100,50000],hit_cooldown_ms:[400,3000],capture_ms:[5000,60000],protection_ms:[10000,180000]};
+   const patch={updated_at:new Date().toISOString()};for(const [key,range] of Object.entries(limits)){if(req.body?.[key]===undefined)continue;const v=req.body[key];if(!Number.isSafeInteger(v)||v<range[0]||v>range[1])return fail(res,`${key}: fora dos limites`,400);patch[key]=v;}
+   if(typeof req.body?.enabled==='boolean')patch.enabled=req.body.enabled;
+   if(req.body?.weekend_multiplier!==undefined){const x=Number(req.body.weekend_multiplier);if(!Number.isFinite(x)||x<1||x>2)return fail(res,'Multiplicador inválido',400);patch.weekend_multiplier=x;}
+   const {data,error}=await sb().from('stellar_relay_rules_v346').update(patch).eq('id',1).select('*').single();if(error)return fail(res,error);res.json({ok:true,rules:data});
+ }));
+ return r;
+}

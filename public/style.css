@@ -4603,3 +4603,32 @@ body.mobile-landscape-pro #topHudDock .hud-panel:not(.collapsed) .player-float-h
 /* V34.5.0 • Event Control Center • cards flexíveis desktop/mobile */
 .event-center{display:grid;gap:14px;width:100%;color:#dce9ff}.event-center-header,.event-center-block{border:1px solid rgba(95,170,255,.22);border-radius:14px;padding:14px;background:linear-gradient(135deg,rgba(15,37,61,.9),rgba(5,13,29,.94))}.event-center-header span{font:700 10px Arial;color:#75dcff;letter-spacing:1.1px}.event-center-header h3{font-size:19px;margin:5px 0}.event-center-header p,.event-center-help{font-size:11px;line-height:1.5;color:#aac0d7;margin:5px 0 10px}.event-center-block h4{font-size:14px;color:#a9eaff;margin:2px 0 8px}.event-center-title,.event-center-actions{display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap}.event-center-title strong{font-size:13px}.event-center-title small{display:block;color:#93abc7;font-size:10px;margin-top:3px}.event-center-slots,.event-center-event-list{display:grid;gap:8px;margin:12px 0}.event-center-slot,.event-center-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}.event-center-slot{grid-template-columns:minmax(95px,1.1fr) minmax(100px,1fr) minmax(110px,1fr) auto;border-radius:10px;padding:8px;background:rgba(15,41,69,.7)}.event-center-slot>button{align-self:end}.event-center label{display:flex;flex-direction:column;gap:4px;font-size:10px;color:#b8cfe7}.event-center label:has(input[type=checkbox]){display:flex;flex-direction:row;align-items:center;font-size:11px}.event-center input:not([type=checkbox]),.event-center select{width:100%;min-width:0;box-sizing:border-box;border-radius:7px;background:#0c1d34;border:1px solid #355474;color:#f1f7ff;padding:8px;font-size:12px}.event-center input[type=checkbox]{accent-color:#51d6ff}.event-center-preview{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:6px;margin-top:12px}.event-center-preview span,.event-center-manual-status{padding:8px;border:1px solid rgba(95,170,255,.15);border-radius:8px;background:rgba(17,38,65,.7);font-size:11px}.event-center-event{display:grid;gap:12px;border:1px solid rgba(103,175,245,.25);border-radius:12px;padding:12px;background:rgba(13,28,48,.7)}.event-center-event>button{justify-self:start}.event-center-advanced{border:1px dashed #355474;padding:10px;border-radius:10px}.event-center-advanced summary{cursor:pointer;font-size:11px;color:#78ddff}.event-center-advanced small{font-size:10px;color:#9eaec7}.event-center-manual-status{margin:10px 0}.event-center-actions>label{min-width:120px;flex:1}
 @media(max-width:700px){.event-center-slot{grid-template-columns:repeat(2,minmax(0,1fr))}.event-center-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.event-center-slot>button{min-height:32px}}
+/* V34.6 — modular relay stations / clan war workshop. Responsive mobile-first. */
+.relay-combat-v346{margin-top:12px;padding:12px;border:1px solid rgba(98,191,245,.26);border-radius:12px;background:linear-gradient(145deg,rgba(15,42,65,.88),rgba(5,17,31,.94))}
+.relay-combat-grid-v346{display:grid;grid-template-columns:repeat(auto-fit,minmax(195px,1fr));gap:8px;margin-top:8px}
+.relay-combat-card-v346{min-width:0;border:1px solid rgba(111,169,207,.25);border-radius:10px;padding:10px;display:flex;flex-direction:column;gap:5px;background:rgba(4,15,29,.73)}
+.relay-combat-card-v346>div:first-child{display:flex;flex-direction:column;gap:2px}
+.relay-combat-card-v346 b{letter-spacing:.055em;color:#ecf7ff}
+.relay-combat-card-v346 small{color:#a8c7db;font-size:10px;overflow-wrap:anywhere}
+.relay-meter-v346{height:6px;border-radius:9px;background:rgba(64,110,139,.25);overflow:hidden}
+.relay-meter-v346 i{height:100%;display:block;border-radius:9px;transition:width .4s linear}
+.relay-meter-v346.shield i{background:linear-gradient(90deg,#267bd2,#77e7ff)}
+.relay-meter-v346.hull i{background:linear-gradient(90deg,#b95139,#ff9b7a)}
+.relay-workshop-v346{margin:12px 0;padding:14px;background:linear-gradient(155deg,rgba(15,39,65,.87),rgba(4,14,24,.96));border:1px solid rgba(82,193,248,.3);border-radius:12px}
+.relay-workshop-v346>p{font-size:12px;color:#bdd2e2;margin:6px 0}
+.relay-workshop-v346 .section-kicker{margin-top:10px;letter-spacing:.09em}
+.relay-bonus-v346{display:flex;gap:5px;flex-direction:column;padding:10px;background:rgba(18,63,86,.4);border-radius:8px;border:1px solid rgba(94,214,237,.22)}
+.relay-bonus-v346 strong{color:#7af0df;font-size:15px}
+.relay-bonus-v346 small,.relay-bonus-v346 span{font-size:10px;color:#b7d2e2}
+.relay-parts-v346{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;margin:10px 0}
+.relay-parts-v346 span{display:flex;justify-content:space-between;gap:5px;background:rgba(37,83,104,.35);padding:6px 8px;border-radius:7px;font-size:11px}
+.relay-missions-v346{display:flex;flex-direction:column;gap:5px}
+.relay-missions-v346>div{display:flex;justify-content:space-between;align-items:center;gap:6px;padding:7px 8px;background:rgba(17,40,63,.5);border-radius:7px}
+.relay-missions-v346 small{font-size:11px;color:#bcd7e6}
+.relay-actions-v346{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:8px 0}
+.relay-actions-v346 select,.relay-actions-v346 input{background:#081a2b;color:#e0f4ff;border:1px solid rgba(115,186,230,.42);min-height:32px;border-radius:6px;padding:4px;max-width:100%;flex:1 1 92px;font-size:11px}
+.relay-actions-v346 label{display:flex;flex:1 1 112px;flex-direction:column;gap:4px;font-size:10px}
+.relay-actions-v346 label input{width:100%}
+.relay-actions-v346 button,.relay-combat-card-v346 button{min-height:32px;font-size:10px}
+@media(max-width:640px){.relay-combat-grid-v346{grid-template-columns:repeat(2,minmax(0,1fr))}.relay-combat-card-v346{padding:7px}.relay-parts-v346{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:430px){.relay-combat-grid-v346{grid-template-columns:minmax(0,1fr)}.relay-actions-v346 select{min-width:70px}}
