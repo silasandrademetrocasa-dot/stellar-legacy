@@ -35,12 +35,29 @@ export function drawRelayStation(ctx,node,{quality='medium',mobile=false,time=0,
   const b=visualFxBudget(quality,mobile),health=relayVisualHealth(node),mounts=relayVisualLoadout(node);
   // Caller has already translated to the node center. Draw only inside a balanced save/restore.
   ctx.save();
-  const destroyed=health.destroyed,neutral=!node.ownerClanId;
+  const destroyed=health.destroyed,neutral=!node.ownerClanId,level=Math.max(1,Math.min(3,Number(node.relayLevel||node.level)||1));
+  const cLevel=level>=3?'#ffdca3':level===2?'#92bfff':baseColor;
   // Angular hull is intentionally sprite-sized so it stays readable in the mobile map.
-  ctx.fillStyle=destroyed?'#25252f':'#10273b';ctx.strokeStyle=destroyed?'#805b62':baseColor;ctx.lineWidth=2;
+  ctx.fillStyle=destroyed?'#25252f':level===3?'#24304d':level===2?'#132c49':'#10273b';ctx.strokeStyle=destroyed?'#805b62':cLevel;ctx.lineWidth=2;
   ctx.beginPath();for(let i=0;i<8;i++){const a=TAU*i/8-Math.PI/8,r=i%2?34:31,x=Math.cos(a)*r,y=Math.sin(a)*r*.83;
     if(i===0)ctx.moveTo(x,y);else ctx.lineTo(x,y);}
   ctx.closePath();ctx.fill();ctx.stroke();
+  // Visible silhouette stages. No raster effects and no costly shadows in mobile LOW.
+  if(level>=2){
+    ctx.fillStyle=destroyed?'#372d39':'#193f58';ctx.strokeStyle=cLevel;ctx.lineWidth=1.5;
+    for(const side of [-1,1]){
+      ctx.beginPath();ctx.moveTo(side*23,-21);ctx.lineTo(side*39,-23);ctx.lineTo(side*48,-11);ctx.lineTo(side*45,13);ctx.lineTo(side*28,19);ctx.closePath();ctx.fill();ctx.stroke();
+      ctx.fillStyle='#5be4ff';ctx.fillRect(side*37-2,-3,4,8);ctx.fillStyle=destroyed?'#372d39':'#193f58';
+    }
+  }
+  if(level>=3){
+    ctx.strokeStyle=destroyed?'#826170':'#ffd476';ctx.fillStyle='#242846';ctx.lineWidth=2;
+    for(const side of [-1,1]){
+      ctx.beginPath();ctx.moveTo(side*16,-28);ctx.lineTo(side*24,-45);ctx.lineTo(side*11,-53);ctx.lineTo(side*4,-34);ctx.closePath();ctx.fill();ctx.stroke();
+      ctx.beginPath();ctx.moveTo(side*16,25);ctx.lineTo(side*25,42);ctx.lineTo(side*12,48);ctx.lineTo(side*5,30);ctx.closePath();ctx.fill();ctx.stroke();
+    }
+    ctx.strokeStyle='rgba(255,212,110,.80)';ctx.beginPath();ctx.arc(0,0,45,Math.PI*.13,Math.PI*.87);ctx.stroke();
+  }
   // Layered armor plates, not a blurred full-screen effect.
   ctx.fillStyle=destroyed?'#4b3d46':'#183b51';ctx.strokeStyle='rgba(183,233,250,.40)';ctx.lineWidth=.9;
   for(let side of [-1,1]){ctx.beginPath();ctx.moveTo(side*8,-18);ctx.lineTo(side*24,-10);ctx.lineTo(side*27,7);ctx.lineTo(side*8,13);ctx.closePath();ctx.fill();if(b.relayGeometry>1)ctx.stroke();}
@@ -67,9 +84,9 @@ export function drawRelayStation(ctx,node,{quality='medium',mobile=false,time=0,
   }
   // Core pulse communicates energy and neutral defense without changing damage or state.
   const pulse=b.relayGlow?0.86+.14*Math.sin(time*3):1;
-  ctx.fillStyle=destroyed?'#321f30':neutral?'#5bc3e1':'#54e8ff';ctx.strokeStyle=destroyed?'#a66b6d':'#e5ffff';ctx.lineWidth=1.3;
+  ctx.fillStyle=destroyed?'#321f30':neutral?'#5bc3e1':level>=3?'#ffd476':level===2?'#9dc4ff':'#54e8ff';ctx.strokeStyle=destroyed?'#a66b6d':'#e5ffff';ctx.lineWidth=1.3;
   ctx.beginPath();ctx.arc(0,0,destroyed?7:8*pulse,0,TAU);ctx.fill();ctx.stroke();
-  if(b.relayGlow&&health.shieldRatio>0&&!destroyed){ctx.globalAlpha=.26+.17*Math.sin(time*2);ctx.strokeStyle='#69cfff';ctx.lineWidth=1.8;ctx.beginPath();ctx.arc(0,0,39,0,TAU);ctx.stroke();ctx.globalAlpha=1;}
+  if(b.relayGlow&&health.shieldRatio>0&&!destroyed){ctx.globalAlpha=.26+.17*Math.sin(time*2);ctx.strokeStyle='#69cfff';ctx.lineWidth=1.8;ctx.beginPath();ctx.arc(0,0,level>=3?50:level===2?44:39,0,TAU);ctx.stroke();ctx.globalAlpha=1;}
   if(health.critical||destroyed){ctx.strokeStyle=destroyed?'#ff6f5c':'#ffba62';ctx.lineWidth=1.6;ctx.beginPath();ctx.moveTo(-10,-10);ctx.lineTo(-3,-4);ctx.lineTo(1,2);ctx.lineTo(10,12);ctx.stroke();}
   ctx.restore();
 }

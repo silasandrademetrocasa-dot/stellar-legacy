@@ -420,7 +420,7 @@ class Room {
     for(const n of this.warfrontControl.nodes)if(scores[n.owner]!==undefined)scores[n.owner]++;
     const ranked=WARFRONT_FACTIONS.map(id=>({id,score:scores[id]})).sort((a,b)=>b.score-a.score);
     const dominant=ranked[0].score>ranked[1].score?ranked[0].id:null;
-    return {mapId:this.mapId,relayMode:this.warfrontControl.nodes.some(n=>n.relayMode===true),nodes:this.warfrontControl.nodes.map(n=>({relayMode:!!n.relayMode,ownerClanId:n.ownerClanId||null,hp:n.relayHp??0,maxHp:n.relayMaxHp||RELAY_BASE.hp,shield:n.relayShield??0,maxShield:n.relayMaxShield||RELAY_BASE.shield,protectedUntil:n.protectedUntil||0,modules:n.ownerClanId?(n.relayModules||[]):RELAY_NEUTRAL_MODULES,id:n.id,label:n.label,x:n.x,y:n.y,radius:n.radius,owner:n.owner,challenger:n.challenger,progress:Math.round(n.progress*10)/10,contested:!!n.contested,nearby:{...n.nearby},capturedAt:n.capturedAt||0,persisting:!!n.persisting,captureError:n.captureError&&nowMs()-(n.captureError.at||0)<30000?{code:n.captureError.code,message:n.captureError.message}:null})),scores,dominantFaction:dominant,serverTime:nowMs()};
+    return {mapId:this.mapId,relayMode:this.warfrontControl.nodes.some(n=>n.relayMode===true),nodes:this.warfrontControl.nodes.map(n=>({relayMode:!!n.relayMode,ownerClanId:n.ownerClanId||null,relayLevel:n.relayLevel||1,hp:n.relayHp??0,maxHp:n.relayMaxHp||RELAY_BASE.hp,shield:n.relayShield??0,maxShield:n.relayMaxShield||RELAY_BASE.shield,protectedUntil:n.protectedUntil||0,modules:n.ownerClanId?(n.relayModules||[]):RELAY_NEUTRAL_MODULES,id:n.id,label:n.label,x:n.x,y:n.y,radius:n.radius,owner:n.owner,challenger:n.challenger,progress:Math.round(n.progress*10)/10,contested:!!n.contested,nearby:{...n.nearby},capturedAt:n.capturedAt||0,persisting:!!n.persisting,captureError:n.captureError&&nowMs()-(n.captureError.at||0)<30000?{code:n.captureError.code,message:n.captureError.message}:null})),scores,dominantFaction:dominant,serverTime:nowMs()};
   }
   async handleRelayAttack(ws,msg){
     const p=ws?.player,node=this.warfrontControl?.nodes?.find(n=>n.id===String(msg?.nodeId||''));
@@ -608,12 +608,12 @@ class Room {
         if(!row)throw new Error('Relé sem registro persistido');
         const revision=Number(row.revision)||0;
         const relayRevision=Number(row.relay?.revision)||0;
-        const relaySignature=JSON.stringify([row.relay?.modules||[],row.relay?.balance||[]]);
+        const relaySignature=JSON.stringify([row.relay?.modules||[],row.relay?.balance||[],row.relay?.level||1]);
         if(!initial&&revision<=Number(node.revision||0)&&relayRevision<=Number(node.relayRevision||0)&&relaySignature===node.relaySignature)continue;
         node.owner=WARFRONT_FACTIONS.includes(row.owner)?row.owner:null;
         node.revision=revision;node.capturedAt=Date.parse(row.captured_at||'')||0;
         node.relayMode=!!row.relay;node.relayRevision=relayRevision;node.relaySignature=relaySignature;
-        node.ownerClanId=row.relay?.owner_clan_id||null;node.relayHp=Number(row.relay?.hp??0);node.relayShield=Number(row.relay?.shield??0);
+        node.ownerClanId=row.relay?.owner_clan_id||null;node.relayLevel=Math.min(3,Math.max(1,Number(row.relay?.level)||1));node.relayHp=Number(row.relay?.hp??0);node.relayShield=Number(row.relay?.shield??0);
         node.relayMaxHp=Number(row.relay?.max_hp)||RELAY_BASE.hp;node.relayMaxShield=Number(row.relay?.max_shield)||RELAY_BASE.shield;
         node.protectedUntil=Date.parse(row.relay?.protected_until||'')||0;node.relayModules=row.relay?.modules||[];node.relayRules=row.relay?.rules||null;node.relayBalance=row.relay?.balance||[];
         node.progress=0;node.challenger=null;changed=true;

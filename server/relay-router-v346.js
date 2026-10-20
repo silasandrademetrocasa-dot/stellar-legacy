@@ -16,18 +16,21 @@ export function createRelayRouter({serviceClient}){
      db.from('profiles').select('faction').eq('id',req.user.id).maybeSingle()
    ]);
    const error=[controls,owners,states,modules,member,profile].find(q=>q.error)?.error;if(error)return fail(res,error,503);
-   const [balanceResult,missionResult]=await Promise.all([
+   const [balanceResult,missionResult,tierResult,fortResult]=await Promise.all([
       db.from('stellar_relay_module_balance_v3463').select('*').order('category').order('attribute').order('level'),
-      req.sb.rpc('stellar_relay_mission_progress_v3463')
+      req.sb.rpc('stellar_relay_mission_progress_v3463'),
+      db.from('stellar_relay_fortification_tiers_v350').select('*').order('level'),
+      db.from('stellar_relay_fortifications_v350').select('map_id,node_id,level,updated_at').limit(9)
    ]);
    // Deploy-safe: before new SQL, legacy relay UI and older inventory keep working.
    const missing=x=>/42P01|PGRST205|PGRST202|schema cache|does not exist|42883/i.test(String(x?.message||''));
-   if((balanceResult.error&&!missing(balanceResult.error))||(missionResult.error&&!missing(missionResult.error)))
-     return fail(res,balanceResult.error||missionResult.error,503);
+   if((balanceResult.error&&!missing(balanceResult.error))||(missionResult.error&&!missing(missionResult.error))||(tierResult.error&&!missing(tierResult.error))||(fortResult.error&&!missing(fortResult.error)))
+     return fail(res,balanceResult.error||missionResult.error||tierResult.error||fortResult.error,503);
    const balance=balanceResult.data||[];
    const missionProgress=missionResult.data||{};
    const clanId=member.data?.clan_id||null;
-   const rows=(owners.data||[]).map(o=>({...o,...(states.data||[]).find(s=>s.map_id===o.map_id&&s.node_id===o.node_id)}));
+   const fortifications=fortResult.data||[],fortificationTiers=tierResult.data||[];
+   const rows=(owners.data||[]).map(o=>({...o,...(states.data||[]).find(s=>s.map_id===o.map_id&&s.node_id===o.node_id),fortificationLevel:Number(fortifications.find(f=>f.map_id===o.map_id&&f.node_id===o.node_id)?.level||1)}));
    const installed=(modules.data||[]).filter(m=>m.map_id&&m.node_id);
    const global=derivedGlobalBonus(rows,installed,clanId,profile.data?.faction||null,balance);
    let inventory=[],pieces=[],missions=[],clan=null;
@@ -39,7 +42,42 @@ export function createRelayRouter({serviceClient}){
      db.from('stellar_relay_clan_pve_v346').select('period_start,npc_kills,ore_collections').eq('clan_id',clanId).order('period_start',{ascending:false}).limit(1)
    ]); const err=[inv,part,claims,c,data].find(x=>x.error)?.error;if(err)return fail(res,err,503);
    inventory=inv.data||[];pieces=part.data||[];missions=claims.data||[];clan={...c.data,isOwner:c.data?.owner_id===req.user.id,pve:(data.data||[])[0]||null};}
-   res.set('Cache-Control','no-store');res.json({ok:true,enabled:controls.data?.enabled===true,rules:controls.data,nodes:rows,installedModules:installed,inventory,pieces,missions,missionProgress,balance,clan,global,bonusCatalog:RELAY_BONUS_VALUES,serverTime:Date.now()});
+   res.set('Cache-Control','no-store');res.json({ok:true,enabled:controls.data?.enabled===true,rules:controls.data,nodes:rows,installedModules:installed,inventory,pieces,missions,missionProgress,balance,fortificationTiers,clan,global,bonusCatalog:RELAY_BONUS_VALUES,serverTime:Date.now()});
+ }));
+ // V35: relay structure upgrade is not the same thing as a slot module upgrade.
+ // SQL locks the clan, module parts and relay atomically; the browser never supplies prices.
+ r.post('/fortification/upgrade',wrap(async(req,res)=>{
+   const mapId=String(req.body?.mapId||''),nodeId=String(req.body?.nodeId||'');
+   if(!RELAY_MAPS.includes(mapId)||!RELAY_IDS.includes(nodeId))return fail(res,'Relé inválido',400);
+   const expectedLevel=req.body?.expectedLevel;
+   if(!Number.isInteger(expectedLevel)||expectedLevel<1||expectedLevel>2)return fail(res,'Nível esperado inválido',400);
+   const {data,error}=await req.sb.rpc('stellar_relay_fortification_upgrade_v350',{p_map_id:mapId,p_node_id:nodeId,p_expected_level:expectedLevel});
+   if(error)return fail(res,error);
+   res.set('Cache-Control','no-store');res.json(data);
+ }));
+ r.post('/admin/fortification-tier',wrap(async(req,res)=>{
+   const {data:yes,error:authError}=await req.sb.rpc('is_game_admin_v1763',{p_uid:req.user.id});
+   if(authError||yes!==true)return fail(res,'Somente ADM',403);
+   const level=Number(req.body?.level),fields={hp_bonus:[0,3000000],shield_bonus:[0,3000000],parts_each:[0,250],credits:[0,10000000],min_clan_level:[1,50]};
+   if(![1,2,3].includes(level))return fail(res,'Nível inválido',400);
+   const patch={updated_at:new Date().toISOString()};
+   for(const [key,[lo,hi]] of Object.entries(fields)){
+     if(req.body?.[key]===undefined)continue;
+     const v=req.body[key];if(!Number.isSafeInteger(v)||v<lo||v>hi)return fail(res,`Valor inválido: ${key}`,400);
+     patch[key]=v;
+   }
+   // The baseline is global and may be edited only through the existing relay rules screen.
+   if(level===1&&(Number(patch.hp_bonus||0)!==0||Number(patch.shield_bonus||0)!==0||Number(patch.credits||0)!==0||Number(patch.parts_each||0)!==0))
+     return fail(res,'Nível 1 não tem custo nem bônus estrutural.',400);
+   const db=sb();const {data,error}=await db.from('stellar_relay_fortification_tiers_v350').update(patch).eq('level',level).select('*').single();
+   if(error)return fail(res,error);
+   // Recompute affected relays in DB (values never come from the client).
+   if(level>1){
+     const {data:relays,error:lookupError}=await db.from('stellar_relay_fortifications_v350').select('map_id,node_id').eq('level',level).limit(9);
+     if(lookupError)return fail(res,lookupError);
+     for(const relay of relays||[]){const {error:recomputeError}=await db.rpc('stellar_relay_recompute_v346',{p_map_id:relay.map_id,p_node_id:relay.node_id});if(recomputeError)return fail(res,recomputeError);}
+   }
+   res.set('Cache-Control','no-store');res.json({ok:true,tier:data});
  }));
  r.post('/module',wrap(async(req,res)=>{
    const {action,moduleId,category,attribute,mapId,nodeId,slot}=req.body||{};

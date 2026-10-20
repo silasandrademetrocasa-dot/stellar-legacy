@@ -1147,3 +1147,7 @@ export const saveRelayModuleBalanceOnline=payload=>serverFetch('/api/relay/admin
 export const adminReleaseRelayOnline=payload=>serverFetch('/api/relay/admin/release',{method:'POST',body:JSON.stringify(payload)},true);
 
 export const repairRelayOnline=payload=>serverFetch('/api/relay/repair',{method:'POST',body:JSON.stringify(payload)},true);
+
+// V35: fortifications are server-authenticated, atomic and independent from ship modules.
+export const upgradeRelayFortificationOnline=payload=>serverFetch('/api/relay/fortification/upgrade',{method:'POST',body:JSON.stringify(payload)},true);
+export const saveRelayFortificationTierOnline=payload=>serverFetch('/api/relay/admin/fortification-tier',{method:'POST',body:JSON.stringify(payload)},true);

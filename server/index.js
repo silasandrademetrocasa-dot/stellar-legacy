@@ -18,7 +18,7 @@ import { createSecurityService } from './security-service.js';
 
 const app = express();
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const RELEASE_VERSION = '34.7.1'; // único identificador de release nos endpoints HTTP
+const RELEASE_VERSION = '35.0.0'; // único identificador de release nos endpoints HTTP
 
 function normalizeSupabaseUrl(value = '') {
   let url = String(value || '').trim();
@@ -1802,11 +1802,12 @@ const sharedUniverse = attachSharedUniverse(server, {
     if(error)throw new Error(error.message);
     if(!Array.isArray(data)||data.length!==3)throw new Error('Relés não inicializados no SQL.');
     // Compatible with the old database until the V34.6 SQL is applied.
-    const [stateResult,moduleResult,rulesResult,balanceResult]=await Promise.all([
+    const [stateResult,moduleResult,rulesResult,balanceResult,fortResult]=await Promise.all([
       sb.from('stellar_relay_state_v346').select('*').eq('map_id',mapId),
       sb.from('stellar_relay_modules_v346').select('id,category,attribute,level,map_id,node_id,slot,clan_id').eq('map_id',mapId),
       sb.from('stellar_relay_rules_v346').select('*').eq('id',1).maybeSingle(),
-      sb.from('stellar_relay_module_balance_v3463').select('*')
+      sb.from('stellar_relay_module_balance_v3463').select('*'),
+      sb.from('stellar_relay_fortifications_v350').select('map_id,node_id,level').eq('map_id',mapId)
     ]);
     const missing=x=>/does not exist|schema cache|PGRST205|42P01/i.test(x?.message||'');
     if([stateResult,moduleResult,rulesResult].some(x=>x.error)){
@@ -1816,7 +1817,8 @@ const sharedUniverse = attachSharedUniverse(server, {
     const rules=rulesResult.data;
     return data.map(row=>({...row,relay:rules?.enabled===true?{
       ...(stateResult.data||[]).find(st=>st.node_id===row.node_id),
-      modules:(moduleResult.data||[]).filter(m=>m.node_id===row.node_id),balance:balanceResult.data||[],rules
+      modules:(moduleResult.data||[]).filter(m=>m.node_id===row.node_id),balance:balanceResult.data||[],
+      level:Number((fortResult.data||[]).find(f=>f.node_id===row.node_id)?.level||1),rules
     }:null}));
   },
   readRelayLoadout:async userId=>{

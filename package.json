@@ -1,6 +1,6 @@
 {
   "name": "stellar-legacy",
-  "version": "34.7.1",
+  "version": "35.0.0",
   "type": "module",
   "scripts": {
     "start": "node server/index.js",
@@ -19,5 +19,5 @@
   "engines": {
     "node": ">=18"
   },
-  "release": "Visual Revolution Completa • Naves, Relés, Combate e FPS"
+  "release": "Galactic Ascension • Relés Fortificados, Economia, Missões, PvP, Eventos e Estabilidade"
 }

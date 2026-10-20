@@ -1,54 +1,56 @@
-import {createAmmoHudBudget,ammoDisplaySignature} from './modules/ammo-hud-budget-v347.js?v=34.7.1';
-import {visualFxBudget,relayVisualLoadout,relayVisualHealth,relayImpactType,drawRelayStation,drawPortalGateAccents,drawOreEventAccents,drawShipWingLights} from './modules/visual-revolution-v347.js?v=34.7.1';
-import {RELAY_SLOT_CATALOG,RELAY_BONUS_CATALOG,relayModuleFitsSlot,relayModuleName,relaySlotModules,relayBonusDuplicate} from './modules/relay-hangar-v3462.js?v=34.7.1';
-import {loadRelayDominationOnline,relayModuleActionOnline,claimRelayMissionOnline,saveRelayAdminOnline,saveRelayModuleBalanceOnline,repairRelayOnline,adminReleaseRelayOnline} from './api.js?v=34.7.1';
-import { weekendCenterHtml,weekendSlotRowHtml } from './modules/event-control-ui-v3411.js?v=34.7.1';
-import { adminUpdateWeekendSettingsOnline,adminUpdateWeekendEventOnline,adminSetManualEventOnline } from './api.js?v=34.7.1';
-import { bossHudCue, npcThreatLabel } from './modules/tactical-hud-v34.js?v=34.7.1';
-import { allowBackdropFilter, renderFxCount } from './modules/render-budget-v34.js?v=34.7.1';
-import { stellarOreName } from './modules/stellar-display-names.js?v=34.7.1';
-import { rankVisibleNpcTargets } from './modules/combat-target-priority.js?v=34.7.1';
-import { upcomingWeekendSlots, weekendRotationEnabled, weekendSchedule, validateWeekendSettings } from './modules/weekend-events-v341.js?v=34.7.1';
-import { eventControlProfile } from './modules/event-control-profile-v3411.js?v=34.7.1';
-import {eventStage} from './modules/event-evolution-v345.js?v=34.7.1';
-import { minimapPaintInterval } from './modules/minimap-cadence-v33.js?v=34.7.1';
-import { npcUpdateDecision, nearestNpcInRange } from './modules/smart-combat-engine.js?v=34.7.1';
-import { npcPatrolPosition } from './modules/npc-patrol.js?v=34.7.1';
-import { setupMobileLandscape } from './modules/mobile-landscape.js?v=34.7.1';
-import {directionalIndex, directionalGridForImage} from './modules/sprite-orientation.js?v=34.7.1';
-import {createHudIntelligence} from './modules/hud-intelligence.js?v=34.7.1';
-import {sentinelAttackerEligible, selectSentinelAttacker} from './modules/sentinel-defense.js?v=34.7.1';
-import {AUX_PROTOCOL_TYPES, AUX_PROTOCOL_IDS, normalizeAuxProtocols, auxProtocolSlotsUsed, changeAuxProtocolRank, auxProtocolStats} from './modules/aux-protocols.js?v=34.7.1';
-import { movementSpeed, nominalMovementSpeed, followShipCamera } from './modules/ship-navigation.js?v=34.7.1';
-import { loadCommandOverviewOnline,claimCompetitiveSeasonOnline,equipEliteTitleOnline,unequipEliteTitleOnline,loadCommandAdminOnline,saveCompetitiveSeasonOnline,saveWorldDirectiveOnline,loadClanOperationsOnline,claimClanOperationOnline,saveAdminClanOperationOnline } from './api.js?v=34.7.1';
-import {renderV21CommandCenter,V21_TABS} from './modules/v21/command-center-view.js?v=34.7.1';
-import {renderEliteEquipTitles,renderCompetitiveSection,renderUniverseDirectives} from './modules/v22/command-upgrades.js?v=34.7.1';
-import {registerStellarPwaV21,offerInstallV21} from './modules/v21/pwa.js?v=34.7.1';
-import { ECONOMY_EFFECTS, CRAFT_OUTPUT_KINDS, normalizeEconomyEffects, normalizeCraftIngredients, normalizeCraftOutput, formatCraftPreview } from './modules/admin-visual-builders.js?v=34.7.1';
-import { ADMIN_MISSION_PRESETS, createAdminMissionPreset, duplicateAdminMission, validateAdminMissionDraft, previewAdminMission } from './modules/admin-mission-builder.js?v=34.7.1';
-import { createHudContentCache } from './modules/hud-content-cache.js?v=34.7.1';
-import { createAuxiliaryWorkScheduler } from './modules/aux-work-scheduler.js?v=34.7.1';
-import { npcVisualDetail } from './modules/npc-render-detail.js?v=34.7.1';
-import { smoothNpcPosition, smoothNpcHeading, npcCombatLockCue, rocketVisualTarget } from './modules/galactic-combat-v344.js?v=34.7.1';
-import {mergeNpcMotionPatch} from './modules/npc-motion-v3441.js?v=34.7.1';
-import {recordRemotePilotPosition,advanceRemotePilotVisual} from './modules/multiplayer-motion-v3442.js?v=34.7.1';
-import { createBackdropRasterCache } from './modules/backdrop-raster-cache.js?v=34.7.1';
-import { createTextWidthCache } from './modules/text-width-cache.js?v=34.7.1';
-import { createHudUpdateScheduler } from './modules/hud-update-scheduler.js?v=34.7.1';
-import { createAssetCache, flattenAssetPaths } from './modules/asset-cache.js?v=34.7.1';
-import { createSceneGradientCache } from './modules/scene-gradient-cache.js?v=34.7.1';
-import { createPerformanceMonitor, formatPerformanceReport } from './modules/performance-monitor.js?v=34.7.1';
-import { createFrameGate } from './modules/frame-gate.js?v=34.7.1';
-import { createStagedAssetPreloader } from './modules/staged-preload-v342.js?v=34.7.1';
-import { QUALITY_PROFILES, initialAutoQualityForDevice } from './modules/quality-profiles.js?v=34.7.1';
-import { freshBattleConfigsV2013, captureCombatBuildV2013, exchangeCombatBuildV2013, combatConfigRemainingV2013, clampStoredShieldV2013 } from './combat-config-v2013.js?v=34.7.1';
-import { FACTIONS, SHIPS, ITEMS, LASER_AMMO, ROCKETS, NPC_TYPES, MAPS, RESOURCES } from './data.js?v=34.7.1';
-import { repairPulseSettings } from './repair-balance.js?v=34.7.1';
-import { xpThresholdV1770, xpThresholdV1915, migratePilotXpV1915 } from './level-curve-v1915.js?v=34.7.1';
-import { applyRecruitBonusV2012, eliteRouteSnapshotV2012, freshEliteRouteJournalV2012, ELITE_ROUTE_TARGETS_V2012, novaTierPriceV2012 } from './progression-plan-v2012.js?v=34.7.1';
-import { GAME_ASSETS } from './assets/v17/manifest.js?v=34.7.1';
-import { signUp, signIn, beginGoogleSignIn, restoreGoogleSignInFromUrl, requestPasswordReset, restorePasswordRecoveryFromUrl, restoreSession, signOutLocal, checkGameSession, endGameSession, getUser, getSessionCredentials, loadCloudSave, saveCloudSave, loadEliteOperationsOnline, claimEliteOperationOnline, loadWarCampaignsOnline, claimWarSupplyOnline, claimWarCampaignOnline, loadAdminWarCampaignsOnline, saveAdminWarCampaignOnline, saveAdminWarRulesOnline, loadAdminEliteObjectivesOnline, saveAdminEliteObjectiveOnline, updateCallsign, updatePassword, loadRankings, loadAuctionBids, saveAuctionBidOnline, markAuctionBidStatusOnline, loadAuctionMarket, upsertPlayerPresenceOnline, loadMapPresenceOnline, savePlayerLocationCheckpointOnline, loadPlayerLocationCheckpointOnline, removePlayerPresenceOnline, queuePvpAttackOnline, consumePvpDamageEventsOnline, syncArenaProfileOnline, loadArenaState, loadArenaDailyRewardStatus, claimArenaDailyReward, loadArenaOpponents, loadArenaHistory, arenaAttackOnline, listClansOnline, loadMyClanOnline, createClanOnline, joinClanOnline, getClanRequestsOnline, reviewClanRequestOnline, cancelClanRequestOnline, setClanMemberRoleOnline, leaveClanOnline, transferClanCreditsOnline, claimClanCreditGrantsOnline, recordClanAlienKillOnline, getPremiumShopOnline, testPurchasePremiumOnline, adminPreviewPremiumStageOnline, adminSimulatePremiumStageOnline, getPremiumStageCatalogOnline, loadWarfrontStateOnline, loadSectorOwnershipOnline, hitWorldBossOnline, claimWorldBossRewardOnline, declareClanWarOnline, recordClanWarScoreOnline, loadLiveOpsOnline, adminUpdateLiveEventScheduleOnline, purchaseLiveCatalogOnline, economyActionOnline, getChatHistoryOnline, sendChatMessageOnline, redeemGameCouponOnline, getMyDesignersOnline, setDesignLoadoutOnline, claimGateDroneDesignOnline, claimEventDesignerOnline, getAdminStatus, adminSearchAccounts, adminRecentActions, adminBanAccount, adminUnbanAccount, adminResetAccount, adminDeleteAccount, pushTelemetryBatch, adminTelemetryOverview, adminPlayerTelemetry, getBattleGroupOnline, createBattleGroupOnline, inviteBattleGroupOnline, searchBattleGroupPlayersOnline, inviteBattleGroupUserOnline, respondBattleGroupInviteOnline, leaveBattleGroupOnline, kickBattleGroupMemberOnline, setBattleGroupRallyOnline, loadRuntimeConfigOnline, loadNpcRuntimeConfigOnline, loadWorldRuntimeConfigOnline, loadSystemsRuntimeConfigOnline, loadAdminRuntimeMonitorOnline, adminUpdateRuntimeModuleOnline, adminUpdateNpcRuntimeOnline, adminUpdateNpcSpawnRuntimeOnline, adminUpdateWorldMapOnline, adminUpdateWorldResourceOnline, adminUpdateWorldSectorOnline, adminUpdateWorldPortalOnline, adminUpdateWorldResourcePoolOnline, adminUpdateMissionCategoryOnline, adminUpdateEconomyServiceOnline, adminUpdateCraftingRecipeOnline, loadBattlePassRuntimeConfigOnline, adminUpdateBattlePassSeasonOnline, adminUpdateBattlePassTierOnline, loadShopsRuntimeConfigOnline, adminUpdateCommonShopItemOnline, adminUpdatePremiumShopItemOnline, loadBonusConfigOnline, adminUpdateBonusConfigOnline, adminCouponDashboardOnline, adminCreateCouponOnline, adminSetCouponActiveOnline, loadGalaxyGatesOnline, adminUpdateGalaxyGateOnline, adminUpsertCustomMissionOnline, adminDeleteCustomMissionOnline, adminCreateCraftRecipeOnline, adminCreateEconomyServiceOnline, adminCreatePassSeasonOnline, loadAuctionRulesOnline, adminUpdateAuctionRulesOnline, loadBalanceRuntimeOnline, adminUpdateBalanceOnline,loadAdminSecurityIncidents,reviewAdminSecurityIncident } from './api.js?v=34.7.1';
-import { SharedUniverseClient } from './world.js?v=34.7.1';
+import {createAmmoHudBudget,ammoDisplaySignature} from './modules/ammo-hud-budget-v347.js?v=35.0.0';
+import {visualFxBudget,relayVisualLoadout,relayVisualHealth,relayImpactType,drawRelayStation,drawPortalGateAccents,drawOreEventAccents,drawShipWingLights} from './modules/visual-revolution-v347.js?v=35.0.0';
+import {fortificationNextLevel,fortificationStats,fortificationCanAfford} from './modules/galactic-ascension-v350.js?v=35.0.0';
+import {upgradeRelayFortificationOnline,saveRelayFortificationTierOnline} from './api.js?v=35.0.0';
+import {RELAY_SLOT_CATALOG,RELAY_BONUS_CATALOG,relayModuleFitsSlot,relayModuleName,relaySlotModules,relayBonusDuplicate} from './modules/relay-hangar-v3462.js?v=35.0.0';
+import {loadRelayDominationOnline,relayModuleActionOnline,claimRelayMissionOnline,saveRelayAdminOnline,saveRelayModuleBalanceOnline,repairRelayOnline,adminReleaseRelayOnline} from './api.js?v=35.0.0';
+import { weekendCenterHtml,weekendSlotRowHtml } from './modules/event-control-ui-v3411.js?v=35.0.0';
+import { adminUpdateWeekendSettingsOnline,adminUpdateWeekendEventOnline,adminSetManualEventOnline } from './api.js?v=35.0.0';
+import { bossHudCue, npcThreatLabel } from './modules/tactical-hud-v34.js?v=35.0.0';
+import { allowBackdropFilter, renderFxCount } from './modules/render-budget-v34.js?v=35.0.0';
+import { stellarOreName } from './modules/stellar-display-names.js?v=35.0.0';
+import { rankVisibleNpcTargets } from './modules/combat-target-priority.js?v=35.0.0';
+import { upcomingWeekendSlots, weekendRotationEnabled, weekendSchedule, validateWeekendSettings } from './modules/weekend-events-v341.js?v=35.0.0';
+import { eventControlProfile } from './modules/event-control-profile-v3411.js?v=35.0.0';
+import {eventStage} from './modules/event-evolution-v345.js?v=35.0.0';
+import { minimapPaintInterval } from './modules/minimap-cadence-v33.js?v=35.0.0';
+import { npcUpdateDecision, nearestNpcInRange } from './modules/smart-combat-engine.js?v=35.0.0';
+import { npcPatrolPosition } from './modules/npc-patrol.js?v=35.0.0';
+import { setupMobileLandscape } from './modules/mobile-landscape.js?v=35.0.0';
+import {directionalIndex, directionalGridForImage} from './modules/sprite-orientation.js?v=35.0.0';
+import {createHudIntelligence} from './modules/hud-intelligence.js?v=35.0.0';
+import {sentinelAttackerEligible, selectSentinelAttacker} from './modules/sentinel-defense.js?v=35.0.0';
+import {AUX_PROTOCOL_TYPES, AUX_PROTOCOL_IDS, normalizeAuxProtocols, auxProtocolSlotsUsed, changeAuxProtocolRank, auxProtocolStats} from './modules/aux-protocols.js?v=35.0.0';
+import { movementSpeed, nominalMovementSpeed, followShipCamera } from './modules/ship-navigation.js?v=35.0.0';
+import { loadCommandOverviewOnline,claimCompetitiveSeasonOnline,equipEliteTitleOnline,unequipEliteTitleOnline,loadCommandAdminOnline,saveCompetitiveSeasonOnline,saveWorldDirectiveOnline,loadClanOperationsOnline,claimClanOperationOnline,saveAdminClanOperationOnline } from './api.js?v=35.0.0';
+import {renderV21CommandCenter,V21_TABS} from './modules/v21/command-center-view.js?v=35.0.0';
+import {renderEliteEquipTitles,renderCompetitiveSection,renderUniverseDirectives} from './modules/v22/command-upgrades.js?v=35.0.0';
+import {registerStellarPwaV21,offerInstallV21} from './modules/v21/pwa.js?v=35.0.0';
+import { ECONOMY_EFFECTS, CRAFT_OUTPUT_KINDS, normalizeEconomyEffects, normalizeCraftIngredients, normalizeCraftOutput, formatCraftPreview } from './modules/admin-visual-builders.js?v=35.0.0';
+import { ADMIN_MISSION_PRESETS, createAdminMissionPreset, duplicateAdminMission, validateAdminMissionDraft, previewAdminMission } from './modules/admin-mission-builder.js?v=35.0.0';
+import { createHudContentCache } from './modules/hud-content-cache.js?v=35.0.0';
+import { createAuxiliaryWorkScheduler } from './modules/aux-work-scheduler.js?v=35.0.0';
+import { npcVisualDetail } from './modules/npc-render-detail.js?v=35.0.0';
+import { smoothNpcPosition, smoothNpcHeading, npcCombatLockCue, rocketVisualTarget } from './modules/galactic-combat-v344.js?v=35.0.0';
+import {mergeNpcMotionPatch} from './modules/npc-motion-v3441.js?v=35.0.0';
+import {recordRemotePilotPosition,advanceRemotePilotVisual} from './modules/multiplayer-motion-v3442.js?v=35.0.0';
+import { createBackdropRasterCache } from './modules/backdrop-raster-cache.js?v=35.0.0';
+import { createTextWidthCache } from './modules/text-width-cache.js?v=35.0.0';
+import { createHudUpdateScheduler } from './modules/hud-update-scheduler.js?v=35.0.0';
+import { createAssetCache, flattenAssetPaths } from './modules/asset-cache.js?v=35.0.0';
+import { createSceneGradientCache } from './modules/scene-gradient-cache.js?v=35.0.0';
+import { createPerformanceMonitor, formatPerformanceReport } from './modules/performance-monitor.js?v=35.0.0';
+import { createFrameGate } from './modules/frame-gate.js?v=35.0.0';
+import { createStagedAssetPreloader } from './modules/staged-preload-v342.js?v=35.0.0';
+import { QUALITY_PROFILES, initialAutoQualityForDevice } from './modules/quality-profiles.js?v=35.0.0';
+import { freshBattleConfigsV2013, captureCombatBuildV2013, exchangeCombatBuildV2013, combatConfigRemainingV2013, clampStoredShieldV2013 } from './combat-config-v2013.js?v=35.0.0';
+import { FACTIONS, SHIPS, ITEMS, LASER_AMMO, ROCKETS, NPC_TYPES, MAPS, RESOURCES } from './data.js?v=35.0.0';
+import { repairPulseSettings } from './repair-balance.js?v=35.0.0';
+import { xpThresholdV1770, xpThresholdV1915, migratePilotXpV1915 } from './level-curve-v1915.js?v=35.0.0';
+import { applyRecruitBonusV2012, eliteRouteSnapshotV2012, freshEliteRouteJournalV2012, ELITE_ROUTE_TARGETS_V2012, novaTierPriceV2012 } from './progression-plan-v2012.js?v=35.0.0';
+import { GAME_ASSETS } from './assets/v17/manifest.js?v=35.0.0';
+import { signUp, signIn, beginGoogleSignIn, restoreGoogleSignInFromUrl, requestPasswordReset, restorePasswordRecoveryFromUrl, restoreSession, signOutLocal, checkGameSession, endGameSession, getUser, getSessionCredentials, loadCloudSave, saveCloudSave, loadEliteOperationsOnline, claimEliteOperationOnline, loadWarCampaignsOnline, claimWarSupplyOnline, claimWarCampaignOnline, loadAdminWarCampaignsOnline, saveAdminWarCampaignOnline, saveAdminWarRulesOnline, loadAdminEliteObjectivesOnline, saveAdminEliteObjectiveOnline, updateCallsign, updatePassword, loadRankings, loadAuctionBids, saveAuctionBidOnline, markAuctionBidStatusOnline, loadAuctionMarket, upsertPlayerPresenceOnline, loadMapPresenceOnline, savePlayerLocationCheckpointOnline, loadPlayerLocationCheckpointOnline, removePlayerPresenceOnline, queuePvpAttackOnline, consumePvpDamageEventsOnline, syncArenaProfileOnline, loadArenaState, loadArenaDailyRewardStatus, claimArenaDailyReward, loadArenaOpponents, loadArenaHistory, arenaAttackOnline, listClansOnline, loadMyClanOnline, createClanOnline, joinClanOnline, getClanRequestsOnline, reviewClanRequestOnline, cancelClanRequestOnline, setClanMemberRoleOnline, leaveClanOnline, transferClanCreditsOnline, claimClanCreditGrantsOnline, recordClanAlienKillOnline, getPremiumShopOnline, testPurchasePremiumOnline, adminPreviewPremiumStageOnline, adminSimulatePremiumStageOnline, getPremiumStageCatalogOnline, loadWarfrontStateOnline, loadSectorOwnershipOnline, hitWorldBossOnline, claimWorldBossRewardOnline, declareClanWarOnline, recordClanWarScoreOnline, loadLiveOpsOnline, adminUpdateLiveEventScheduleOnline, purchaseLiveCatalogOnline, economyActionOnline, getChatHistoryOnline, sendChatMessageOnline, redeemGameCouponOnline, getMyDesignersOnline, setDesignLoadoutOnline, claimGateDroneDesignOnline, claimEventDesignerOnline, getAdminStatus, adminSearchAccounts, adminRecentActions, adminBanAccount, adminUnbanAccount, adminResetAccount, adminDeleteAccount, pushTelemetryBatch, adminTelemetryOverview, adminPlayerTelemetry, getBattleGroupOnline, createBattleGroupOnline, inviteBattleGroupOnline, searchBattleGroupPlayersOnline, inviteBattleGroupUserOnline, respondBattleGroupInviteOnline, leaveBattleGroupOnline, kickBattleGroupMemberOnline, setBattleGroupRallyOnline, loadRuntimeConfigOnline, loadNpcRuntimeConfigOnline, loadWorldRuntimeConfigOnline, loadSystemsRuntimeConfigOnline, loadAdminRuntimeMonitorOnline, adminUpdateRuntimeModuleOnline, adminUpdateNpcRuntimeOnline, adminUpdateNpcSpawnRuntimeOnline, adminUpdateWorldMapOnline, adminUpdateWorldResourceOnline, adminUpdateWorldSectorOnline, adminUpdateWorldPortalOnline, adminUpdateWorldResourcePoolOnline, adminUpdateMissionCategoryOnline, adminUpdateEconomyServiceOnline, adminUpdateCraftingRecipeOnline, loadBattlePassRuntimeConfigOnline, adminUpdateBattlePassSeasonOnline, adminUpdateBattlePassTierOnline, loadShopsRuntimeConfigOnline, adminUpdateCommonShopItemOnline, adminUpdatePremiumShopItemOnline, loadBonusConfigOnline, adminUpdateBonusConfigOnline, adminCouponDashboardOnline, adminCreateCouponOnline, adminSetCouponActiveOnline, loadGalaxyGatesOnline, adminUpdateGalaxyGateOnline, adminUpsertCustomMissionOnline, adminDeleteCustomMissionOnline, adminCreateCraftRecipeOnline, adminCreateEconomyServiceOnline, adminCreatePassSeasonOnline, loadAuctionRulesOnline, adminUpdateAuctionRulesOnline, loadBalanceRuntimeOnline, adminUpdateBalanceOnline,loadAdminSecurityIncidents,reviewAdminSecurityIncident } from './api.js?v=35.0.0';
+import { SharedUniverseClient } from './world.js?v=35.0.0';
 
 const canvas = document.querySelector('#game');
 const ctx = canvas.getContext('2d');
@@ -602,6 +604,7 @@ function sectorControlNearbyTotal(node){return Object.values(node?.nearby||{}).r
 const relayAttackRuntime={nodeId:null,waitingNodeId:null,interval:null,lastShotSec:0};
 const relayWorkshopRuntime={state:null,loading:false,lastAt:0,active:null,mapId:null,errors:0};
 const relayHangarRuntime={mapId:null,nodeId:null,selectedSlot:1,busy:false};
+const relayMissionBusy=new Set();
 function relayCurrentBonus(){
  const st=relayWorkshopRuntime.state;if(!st?.enabled||!progress)return null;
  const clanId=st.clan?.id,mod=st.installedModules||[];
@@ -710,6 +713,10 @@ function relayWorkshopHtml(){
  <label>MULTIPLICADOR DE GUERRA (FIM DE SEMANA)<input type="number" id="relayAdmWeekendV346" value="${Number(st.rules?.weekend_multiplier||1.2)}" min="1" max="2" step="0.05"></label>
  <label class="relay-admin-enable-v3461"><input type="checkbox" id="relayAdmEnabledV346" ${st.rules?.enabled?'checked':''}> SISTEMA DE RELÉS ATIVO</label>
  </div><div class="relay-admin-footer-v3461"><small>Valores do servidor. Altere e clique em salvar; o novo limite-base se aplica às próximas reconstruções. Os relés existentes não são curados durante combate.</small><button type="button" class="primary-btn" data-relay-admin-save>SALVAR CONTROLES DA GUERRA</button></div>
+ <details class="relay-admin-balance-v3463 relay-admin-fortification-v350"><summary>ADM • NÍVEIS DA ESTRUTURA DO RELÉ (${st.fortificationTiers?.length||0} NÍVEIS)</summary>
+ <small>Níveis estruturais não são níveis de equipamentos. O valor-base é editado acima. LV2 e LV3 adicionam resistência e exigem recursos reais do cofre e do clã.</small>
+ ${(st.fortificationTiers||[]).map(t=>`<div class="relay-admin-balance-row-v3463" data-relay-fort-tier-row="${t.level}"><b>FORTALEZA LV${t.level}</b><div class="relay-admin-balance-fields-v3463">${[['hp_bonus','HP EXTRA'],['shield_bonus','ESCUDO EXTRA'],['parts_each','PEÇAS DE CADA TIPO'],['credits','CRÉDITOS'],['min_clan_level','NÍVEL MÍNIMO DO CLÃ']].map(([key,label])=>`<label>${label}<input type="number" min="${key==='min_clan_level'?1:0}" max="${key==='credits'?10000000:key==='parts_each'?250:key==='min_clan_level'?50:3000000}" step="1" data-relay-fort-tier-field="${key}" value="${Number(t[key])||0}" ${t.level===1?'readonly':''}></label>`).join('')}${t.level>1?`<button class="primary-btn" data-relay-fort-tier-save="${t.level}">SALVAR LV${t.level}</button>`:'<small>LV1 fixo • custo 0 • resistência base</small>'}</div></div>`).join('')||'<small>SQL V35 pendente. Níveis permanecem no padrão LV1.</small>'}
+ </details>
  <details class="relay-admin-balance-v3463"><summary>ADM • CONFIGURAR CADA MÓDULO E NÍVEL (${st.balance?.length||0} CONFIGURAÇÕES)</summary>
  <small>Valores reais do servidor. Alterações em armas aparecem na próxima sincronização; custos são cobrados pelo banco; bônus globais usam o melhor módulo.</small>
  ${(st.balance||[]).map(row=>{const k=`${row.category}:${row.attribute}:${row.level}`;const fields=row.category==='weapon'?[['damage','DANO',20000],['cooldown_ms','RECARGA MS',10000]]:row.category==='shield'?[['shield_bonus','ESCUDO EXTRA',3000000]]:row.category==='hp'?[['hp_bonus','HP EXTRA',3000000]]:[['bonus_pct','BÔNUS %',25]];
@@ -741,12 +748,23 @@ function renderRelayHangar(){
  const inv=st?.inventory||[],selected=RELAY_SLOT_CATALOG[relayHangarRuntime.selectedSlot-1],equipped=inv.find(m=>m.map_id===mapId&&m.node_id===nodeId&&Number(m.slot)===selected.slot);
  const candidates=relaySlotModules(inv,selected.slot),partKey=({weapon:'weapon_parts',shield:'shield_parts',hp:'hull_parts',bonus:'circuit_parts'})[selected.category];
  const partCount=Number(st?.pieces?.find(p=>p.part_type===partKey)?.quantity||0);
+ const fortLevel=Math.min(3,Math.max(1,Number(node?.fortificationLevel)||1));
+ const fortNext=fortificationNextLevel(fortLevel,st?.fortificationTiers||[]);
+ const fortAfford=fortificationCanAfford(fortNext,clan,st?.pieces||[]);
+ const fortStats=fortificationStats(node,st?.fortificationTiers||[]);
  const bonusAttrs=Object.entries(RELAY_BONUS_CATALOG);
  const craftAttrs=selected.category==='bonus'?bonusAttrs:[[selected.attribute,selected.name]];
  const chosenCraft=craftAttrs[0]?.[0];const craftBalance=st?.balance?.find(x=>x.category===selected.category&&x.attribute===chosenCraft&&Number(x.level)===1);
  const craftPieces=Number(craftBalance?.parts??5),craftCredits=Number(craftBalance?.credits??0),craftMinClan=Number(craftBalance?.min_clan_level??1);
  document.getElementById('relayHangarTitle').textContent=`RELÉ ${nodeId||'—'} • ${mapId?displayMapLabel(mapId):'SETOR'}`;
  root.innerHTML=`<div class="relay-hangar-summary-v3462"><span><b>${owned?'CLÃ DOMINANTE':node?.owner_clan_id?'RELÉ RIVAL':'RELÉ SEM CLÃ'}</b><small>${owned?'Selecione um slot para instalar os seus equipamentos.':'Somente o clã dominante pode gerenciar módulos.'}</small></span><span><b>ESCUDO ${fmt(node?.shield||0)}/${fmt(node?.max_shield||0)}</b><b>HP ${fmt(node?.hp||0)}/${fmt(node?.max_hp||0)}</b></span></div>
+ <section class="relay-fortification-v350" data-fort-level="${fortLevel}">
+   <div class="relay-fortification-top-v350"><div><span class="section-kicker">ASCENSÃO GALÁCTICA • ESTRUTURA</span><b>FORTALEZA LV${fortLevel} • ${fortLevel===3?'CITADELA':fortLevel===2?'FORTIFICADO':'POSTO INICIAL'}</b>
+   <small>O nível do RELÉ é independente dos módulos. Estrutura: +${fmt(fortStats.hpBonus)} HP e +${fmt(fortStats.shieldBonus)} de escudo além da base.</small></div><strong>${'★'.repeat(fortLevel)}${'☆'.repeat(3-fortLevel)}</strong></div>
+   <div class="relay-fortification-progress-v350">${[1,2,3].map(i=>`<span class="${i<=fortLevel?'active':''}"></span>`).join('')}</div>
+   ${fortNext?`<div class="relay-fortification-cost-v350"><span>PRÓXIMO LV${fortNext.level} • +${fmt(fortNext.hp_bonus)} HP / +${fmt(fortNext.shield_bonus)} escudo da estrutura (total estrutural)</span><small>${fmt(fortNext.credits)} CR • ${fmt(fortNext.parts_each)} ligas + ${fmt(fortNext.parts_each)} núcleos • CLÃ LV${fortNext.min_clan_level} • melhoria não repara automaticamente.</small></div><button type="button" class="primary-btn" data-relay-fort-upgrade ${!canEdit||!fortAfford?'disabled':''}>EVOLUIR ESTRUTURA LV${fortNext.level}</button>`:'<b class="relay-fortification-max-v350">NÍVEL MÁXIMO • CIDADELA ESTELAR</b>'}
+   ${!st?.fortificationTiers?.length?'<small>O upgrade estrutural será habilitado após o SQL da V35.</small>':''}
+ </section>
  <div class="relay-hangar-cols-v3462"><div><div class="section-kicker">SLOTS DA ESTRUTURA • TOQUE PARA CONFIGURAR</div><div class="relay-hangar-slots-v3462">${RELAY_SLOT_CATALOG.map(slot=>{
  const cur=inv.find(m=>m.map_id===mapId&&m.node_id===nodeId&&Number(m.slot)===slot.slot);
  const neutral=!node?.owner_clan_id,display=cur?`${relayModuleName(cur)} • LV${cur.level}`:neutral?'DEFESA PADRÃO • LV1':'LIVRE';
@@ -762,6 +780,22 @@ function renderRelayHangar(){
  </div></div>
  <details class="relay-hangar-full-inventory-v3462" open><summary>INVENTÁRIO COMPLETO DO CLÃ • ${inv.length} MÓDULO(S)</summary><div class="relay-hangar-full-grid-v3462">${inv.length?inv.map(m=>`<div><b>${escHtml(relayModuleName(m))} • LV${m.level}</b><small>${m.map_id?`EQUIPADO • ${escHtml(m.map_id)}/${escHtml(m.node_id)} / SLOT ${m.slot}`:'DISPONÍVEL NO INVENTÁRIO'}</small></div>`).join(''):'<small>Sem módulos fabricados. Complete missões para conseguir peças.</small>'}</div></details>
  <div class="relay-hangar-footer-v3462"><small>Arma 1: laser rápido. Arma 2: míssil pesado. Relés neutros: defesas virtuais nível 1 sem gerar itens ou bônus de facção.</small><button class="ghost-btn" type="button" data-relay-hangar-refresh>ATUALIZAR INVENTÁRIO</button></div>`;
+}
+async function upgradeRelayFortificationNow(confirmed=false){
+ if(relayHangarRuntime.busy)return;
+ const st=relayWorkshopRuntime.state,clan=st?.clan,mapId=relayHangarRuntime.mapId,nodeId=relayHangarRuntime.nodeId;
+ const node=st?.nodes?.find(n=>n.map_id===mapId&&n.node_id===nodeId);
+ if(!clan?.isOwner||node?.owner_clan_id!==clan.id){showToast('Somente o líder do clã dominante pode evoluir o relé.');return;}
+ const next=fortificationNextLevel(node.fortificationLevel,st.fortificationTiers||[]);
+ if(!next)return showToast('Relé no nível máximo ou SQL V35 pendente.');
+ if(!fortificationCanAfford(next,clan,st.pieces||[]))return showToast('Cofre, peças ou nível do clã insuficiente.');
+ if(!confirmed){openConfirmModal({eyebrow:'FORTALEZA • ASCENSÃO',title:`Evoluir o relé ${nodeId} para LV${next.level}?`,
+   itemName:`${displayMapLabel(mapId)} • RELÉ ${nodeId}`,detail:`Serão consumidos ${fmt(next.parts_each)} ligas de casco e ${fmt(next.parts_each)} núcleos de escudo. Nível mínimo do clã: ${next.min_clan_level}. A evolução NÃO repara durante combate.`,
+   value:next.credits,currency:'credits',valueLabel:'CUSTO NO COFRE DO CLÃ',confirmLabel:'EVOLUIR FORTALEZA',confirmClass:'primary-btn',onConfirm:()=>upgradeRelayFortificationNow(true)});return;}
+ relayHangarRuntime.busy=true;
+ try{await upgradeRelayFortificationOnline({mapId,nodeId,expectedLevel:Number(node.fortificationLevel)||1});showToast('RELÉ • ESTRUTURA EVOLUÍDA E REGISTRADA NO SERVIDOR','reward');await refreshRelayWorkshop(true);}
+ catch(e){showToast('FORTALEZA • '+String(e?.message||e).slice(0,130));}
+ finally{relayHangarRuntime.busy=false;renderRelayHangar();}
 }
 async function performRelayHangarAction(action,id,confirmed=false){
  if(relayHangarRuntime.busy)return;
@@ -9875,11 +9909,13 @@ relayHangarModal?.addEventListener('change',e=>{
 });
 relayHangarModal?.addEventListener('click',e=>{
  if(e.target===relayHangarModal||e.target.closest('#closeRelayHangar')){closeRelayHangar();return;}
+ if(e.target.closest('[data-relay-fort-upgrade]')){upgradeRelayFortificationNow();return;}
  const selected=e.target.closest('[data-relay-slot]');if(selected){relayHangarRuntime.selectedSlot=Number(selected.dataset.relaySlot)||1;renderRelayHangar();return;}
  const action=e.target.closest('[data-relay-hangar-action]');if(action){performRelayHangarAction(action.dataset.relayHangarAction,action.dataset.relayModuleId);return;}
  if(e.target.closest('[data-relay-hangar-refresh]')){refreshRelayWorkshop(true).catch(err=>showToast(err.message));return;}
 });
-if(ui.warfrontContent)ui.warfrontContent.onclick=e=>{const attack=e.target.closest('[data-relay-attack]');if(attack){toggleRelayAttack(attack.dataset.relayAttack);return;}if(e.target.closest('[data-relay-refresh]')){refreshRelayWorkshop(true);return;}const act=e.target.closest('[data-relay-action]');if(act){performRelayAction(act.dataset.relayAction);return;}const mission=e.target.closest('[data-relay-mission]');if(mission){claimRelayMissionOnline(mission.dataset.relayMission).then(()=>{showToast('MISSÃO DE CLÃ • PEÇAS RECEBIDAS!','reward');refreshRelayWorkshop(true);}).catch(err=>showToast(err.message));return;}if(e.target.closest('[data-relay-repair]')){repairRelayOnline({mapId:$('#relayRepairMapV346')?.value,nodeId:$('#relayRepairNodeV346')?.value}).then(()=>{showToast('RELÉ REPARADO • +100.000 ESCUDO/HP','reward');refreshRelayWorkshop(true);}).catch(err=>showToast(err.message));return;}if(e.target.closest('[data-relay-admin-release]')){const kind=e.target.closest('[data-relay-admin-release]').dataset.relayAdminRelease,mapId=$('#relayAdmReleaseMapV346')?.value,nodeId=$('#relayAdmReleaseNodeV346')?.value;const label=kind==='all'?'clã E facção':'clã';if(!confirm(`ADMINISTRADOR: expulsar ${label} do relé ${nodeId} em ${mapId}?\n\nOs módulos voltam ao inventário e o histórico será preservado.`))return;adminReleaseRelayOnline({mapId,nodeId,clearFaction:kind==='all'}).then(()=>{showToast('DOMÍNIO LIBERADO PELO ADM','reward');refreshRelayWorkshop(true);refreshSectorReadOnly(true).catch(()=>{});}).catch(err=>showToast(err.message));return;}const saveBalance=e.target.closest('[data-relay-balance-save]');if(saveBalance){const key=String(saveBalance.dataset.relayBalanceSave||'').split(':'),row=saveBalance.closest('[data-relay-balance-row]');if(key.length!==3||!row)return;const body={category:key[0],attribute:key[1],level:Number(key[2])};for(const input of row.querySelectorAll('[data-relay-balance-field]'))body[input.dataset.relayBalanceField]=Number(input.value);saveBalance.disabled=true;saveRelayModuleBalanceOnline(body).then(()=>{row.closest('.relay-admin-balance-v3463').open=false;showToast('MÓDULO • LV'+body.level+' SALVO NO SERVIDOR','reward');return refreshRelayWorkshop(true);}).catch(err=>showToast(String(err.message||err))).finally(()=>{saveBalance.disabled=false;});return;}
+if(ui.warfrontContent)ui.warfrontContent.onclick=e=>{const attack=e.target.closest('[data-relay-attack]');if(attack){toggleRelayAttack(attack.dataset.relayAttack);return;}if(e.target.closest('[data-relay-refresh]')){refreshRelayWorkshop(true);return;}const act=e.target.closest('[data-relay-action]');if(act){performRelayAction(act.dataset.relayAction);return;}const mission=e.target.closest('[data-relay-mission]');if(mission){const id=mission.dataset.relayMission;if(relayMissionBusy.has(id))return;const progressRow=relayWorkshopRuntime.state?.missionProgress?.[id];if(!progressRow||progressRow.claimed||Number(progressRow.count)<Number(progressRow.target))return showToast('Esta missão ainda não está disponível para resgate.');relayMissionBusy.add(id);mission.disabled=true;claimRelayMissionOnline(id).then(()=>{showToast('MISSÃO DE CLÃ • PEÇAS RECEBIDAS!','reward');return refreshRelayWorkshop(true);}).catch(err=>showToast(err.message)).finally(()=>{relayMissionBusy.delete(id);mission.disabled=false;});return;}if(e.target.closest('[data-relay-repair]')){repairRelayOnline({mapId:$('#relayRepairMapV346')?.value,nodeId:$('#relayRepairNodeV346')?.value}).then(()=>{showToast('RELÉ REPARADO • +100.000 ESCUDO/HP','reward');refreshRelayWorkshop(true);}).catch(err=>showToast(err.message));return;}if(e.target.closest('[data-relay-admin-release]')){const kind=e.target.closest('[data-relay-admin-release]').dataset.relayAdminRelease,mapId=$('#relayAdmReleaseMapV346')?.value,nodeId=$('#relayAdmReleaseNodeV346')?.value;const label=kind==='all'?'clã E facção':'clã';if(!confirm(`ADMINISTRADOR: expulsar ${label} do relé ${nodeId} em ${mapId}?\n\nOs módulos voltam ao inventário e o histórico será preservado.`))return;adminReleaseRelayOnline({mapId,nodeId,clearFaction:kind==='all'}).then(()=>{showToast('DOMÍNIO LIBERADO PELO ADM','reward');refreshRelayWorkshop(true);refreshSectorReadOnly(true).catch(()=>{});}).catch(err=>showToast(err.message));return;}const fortTierSave=e.target.closest('[data-relay-fort-tier-save]');if(fortTierSave){const row=fortTierSave.closest('[data-relay-fort-tier-row]');if(!row)return;const body={level:Number(fortTierSave.dataset.relayFortTierSave)};for(const input of row.querySelectorAll('[data-relay-fort-tier-field]'))body[input.dataset.relayFortTierField]=Number(input.value);fortTierSave.disabled=true;saveRelayFortificationTierOnline(body).then(()=>{showToast('FORTALEZA LV'+body.level+' • SALVA NO SQL','reward');return refreshRelayWorkshop(true);}).catch(err=>showToast(String(err?.message||err))).finally(()=>fortTierSave.disabled=false);return;}
+ const saveBalance=e.target.closest('[data-relay-balance-save]');if(saveBalance){const key=String(saveBalance.dataset.relayBalanceSave||'').split(':'),row=saveBalance.closest('[data-relay-balance-row]');if(key.length!==3||!row)return;const body={category:key[0],attribute:key[1],level:Number(key[2])};for(const input of row.querySelectorAll('[data-relay-balance-field]'))body[input.dataset.relayBalanceField]=Number(input.value);saveBalance.disabled=true;saveRelayModuleBalanceOnline(body).then(()=>{row.closest('.relay-admin-balance-v3463').open=false;showToast('MÓDULO • LV'+body.level+' SALVO NO SERVIDOR','reward');return refreshRelayWorkshop(true);}).catch(err=>showToast(String(err.message||err))).finally(()=>{saveBalance.disabled=false;});return;}
  if(e.target.closest('[data-relay-admin-save]')){const hp=Number($('#relayAdmHpV346')?.value),shield=Number($('#relayAdmShieldV346')?.value);saveRelayAdminOnline({max_hp:hp,max_shield:shield,hit_cooldown_ms:Number($('#relayAdmCooldownV346')?.value),capture_ms:Number($('#relayAdmCaptureV346')?.value),protection_ms:Number($('#relayAdmProtectionV346')?.value),weekend_multiplier:Number($('#relayAdmWeekendV346')?.value),enabled:!!$('#relayAdmEnabledV346')?.checked}).then(()=>{showToast('RELÉS • AJUSTES ADM SALVOS','reward');refreshRelayWorkshop(true);}).catch(err=>showToast(err.message));return;}if(e.target.closest('[data-warfront-reconnect]')){joinSharedUniverse();refreshSectorReadOnly(true).catch(()=>{});renderWarfront();return;}const nav=e.target.closest('[data-warfront-nav]');if(nav){const node=(sectorControlState()?.nodes||[]).find(n=>String(n.id)===String(nav.dataset.warfrontNav));if(node&&state.currentMap?.battle){player.tx=Math.max(35,Math.min(state.currentMap.world.w-35,Number(node.x)||player.x));player.ty=Math.max(35,Math.min(state.currentMap.world.h-35,Number(node.y)||player.y));ui.warfrontModal.classList.add('hidden');showToast(`ROTA WARFRONT • PONTO ${node.id}`,'system');}return;}const craft=e.target.closest('[data-blueprint-craft]');if(craft){craftBlueprint(craft.dataset.blueprintCraft);return;}if(e.target.closest('[data-mastery-upgrade]')){upgradeAbilityMastery();return;}if(e.target.closest('[data-worldboss-engage]')){spawnWorldBossEncounter();ui.warfrontModal.classList.add('hidden');return;}if(e.target.closest('[data-worldboss-claim]')){claimWorldBossNow();return;}if(e.target.closest('[data-war-declare]')){declareWarNow();return;}};
 if(ui.warfrontContent)ui.warfrontContent.onchange=e=>{if(e.target?.id==='warTargetClan'){const btn=ui.warfrontContent.querySelector('[data-war-declare]');if(btn)btn.disabled=!String(e.target.value||'').trim();}};
 if(ui.closeClan)ui.closeClan.onclick=()=>ui.clanModal.classList.add('hidden');
