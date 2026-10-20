@@ -1,4 +1,4 @@
-# Stellar Legacy V34.4.2 — NPC motion patch
+# Stellar Legacy V34.4.3 — NPC motion patch
 
 Ajustes de movimentação, sem SQL e sem mudanças nas recompensas, dano, saves ou eventos.
 

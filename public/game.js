@@ -1,49 +1,49 @@
-import { weekendCenterHtml,weekendSlotRowHtml } from './modules/event-control-ui-v3411.js?v=34.4.2';
-import { adminUpdateWeekendSettingsOnline,adminUpdateWeekendEventOnline,adminSetManualEventOnline } from './api.js?v=34.4.2';
-import { bossHudCue, npcThreatLabel } from './modules/tactical-hud-v34.js?v=34.4.2';
-import { allowBackdropFilter, renderFxCount } from './modules/render-budget-v34.js?v=34.4.2';
-import { stellarOreName } from './modules/stellar-display-names.js?v=34.4.2';
-import { rankVisibleNpcTargets } from './modules/combat-target-priority.js?v=34.4.2';
-import { upcomingWeekendSlots, weekendRotationEnabled, weekendSchedule, validateWeekendSettings } from './modules/weekend-events-v341.js?v=34.4.2';
-import { eventControlProfile } from './modules/event-control-profile-v3411.js?v=34.4.2';
-import { minimapPaintInterval } from './modules/minimap-cadence-v33.js?v=34.4.2';
-import { npcUpdateDecision, nearestNpcInRange } from './modules/smart-combat-engine.js?v=34.4.2';
-import { npcPatrolPosition } from './modules/npc-patrol.js?v=34.4.2';
-import { setupMobileLandscape } from './modules/mobile-landscape.js?v=34.4.2';
-import {directionalIndex, directionalGridForImage} from './modules/sprite-orientation.js?v=34.4.2';
-import {createHudIntelligence} from './modules/hud-intelligence.js?v=34.4.2';
-import {sentinelAttackerEligible, selectSentinelAttacker} from './modules/sentinel-defense.js?v=34.4.2';
-import {AUX_PROTOCOL_TYPES, AUX_PROTOCOL_IDS, normalizeAuxProtocols, auxProtocolSlotsUsed, changeAuxProtocolRank, auxProtocolStats} from './modules/aux-protocols.js?v=34.4.2';
-import { movementSpeed, nominalMovementSpeed, followShipCamera } from './modules/ship-navigation.js?v=34.4.2';
-import { loadCommandOverviewOnline,claimCompetitiveSeasonOnline,equipEliteTitleOnline,unequipEliteTitleOnline,loadCommandAdminOnline,saveCompetitiveSeasonOnline,saveWorldDirectiveOnline,loadClanOperationsOnline,claimClanOperationOnline,saveAdminClanOperationOnline } from './api.js?v=34.4.2';
-import {renderV21CommandCenter,V21_TABS} from './modules/v21/command-center-view.js?v=34.4.2';
-import {renderEliteEquipTitles,renderCompetitiveSection,renderUniverseDirectives} from './modules/v22/command-upgrades.js?v=34.4.2';
-import {registerStellarPwaV21,offerInstallV21} from './modules/v21/pwa.js?v=34.4.2';
-import { ECONOMY_EFFECTS, CRAFT_OUTPUT_KINDS, normalizeEconomyEffects, normalizeCraftIngredients, normalizeCraftOutput, formatCraftPreview } from './modules/admin-visual-builders.js?v=34.4.2';
-import { ADMIN_MISSION_PRESETS, createAdminMissionPreset, duplicateAdminMission, validateAdminMissionDraft, previewAdminMission } from './modules/admin-mission-builder.js?v=34.4.2';
-import { createHudContentCache } from './modules/hud-content-cache.js?v=34.4.2';
-import { createAuxiliaryWorkScheduler } from './modules/aux-work-scheduler.js?v=34.4.2';
-import { npcVisualDetail } from './modules/npc-render-detail.js?v=34.4.2';
-import { smoothNpcPosition, smoothNpcHeading, npcCombatLockCue, rocketVisualTarget } from './modules/galactic-combat-v344.js?v=34.4.2';
-import {mergeNpcMotionPatch} from './modules/npc-motion-v3441.js?v=34.4.2';
-import {recordRemotePilotPosition,advanceRemotePilotVisual} from './modules/multiplayer-motion-v3442.js?v=34.4.2';
-import { createBackdropRasterCache } from './modules/backdrop-raster-cache.js?v=34.4.2';
-import { createTextWidthCache } from './modules/text-width-cache.js?v=34.4.2';
-import { createHudUpdateScheduler } from './modules/hud-update-scheduler.js?v=34.4.2';
-import { createAssetCache, flattenAssetPaths } from './modules/asset-cache.js?v=34.4.2';
-import { createSceneGradientCache } from './modules/scene-gradient-cache.js?v=34.4.2';
-import { createPerformanceMonitor, formatPerformanceReport } from './modules/performance-monitor.js?v=34.4.2';
-import { createFrameGate } from './modules/frame-gate.js?v=34.4.2';
-import { createStagedAssetPreloader } from './modules/staged-preload-v342.js?v=34.4.2';
-import { QUALITY_PROFILES, initialAutoQualityForDevice } from './modules/quality-profiles.js?v=34.4.2';
-import { freshBattleConfigsV2013, captureCombatBuildV2013, exchangeCombatBuildV2013, combatConfigRemainingV2013, clampStoredShieldV2013 } from './combat-config-v2013.js?v=34.4.2';
-import { FACTIONS, SHIPS, ITEMS, LASER_AMMO, ROCKETS, NPC_TYPES, MAPS, RESOURCES } from './data.js?v=34.4.2';
-import { repairPulseSettings } from './repair-balance.js?v=34.4.2';
-import { xpThresholdV1770, xpThresholdV1915, migratePilotXpV1915 } from './level-curve-v1915.js?v=34.4.2';
-import { applyRecruitBonusV2012, eliteRouteSnapshotV2012, freshEliteRouteJournalV2012, ELITE_ROUTE_TARGETS_V2012, novaTierPriceV2012 } from './progression-plan-v2012.js?v=34.4.2';
-import { GAME_ASSETS } from './assets/v17/manifest.js?v=34.4.2';
-import { signUp, signIn, beginGoogleSignIn, restoreGoogleSignInFromUrl, requestPasswordReset, restorePasswordRecoveryFromUrl, restoreSession, signOutLocal, checkGameSession, endGameSession, getUser, getSessionCredentials, loadCloudSave, saveCloudSave, loadEliteOperationsOnline, claimEliteOperationOnline, loadWarCampaignsOnline, claimWarSupplyOnline, claimWarCampaignOnline, loadAdminWarCampaignsOnline, saveAdminWarCampaignOnline, saveAdminWarRulesOnline, loadAdminEliteObjectivesOnline, saveAdminEliteObjectiveOnline, updateCallsign, updatePassword, loadRankings, loadAuctionBids, saveAuctionBidOnline, markAuctionBidStatusOnline, loadAuctionMarket, upsertPlayerPresenceOnline, loadMapPresenceOnline, savePlayerLocationCheckpointOnline, loadPlayerLocationCheckpointOnline, removePlayerPresenceOnline, queuePvpAttackOnline, consumePvpDamageEventsOnline, syncArenaProfileOnline, loadArenaState, loadArenaDailyRewardStatus, claimArenaDailyReward, loadArenaOpponents, loadArenaHistory, arenaAttackOnline, listClansOnline, loadMyClanOnline, createClanOnline, joinClanOnline, getClanRequestsOnline, reviewClanRequestOnline, cancelClanRequestOnline, setClanMemberRoleOnline, leaveClanOnline, transferClanCreditsOnline, claimClanCreditGrantsOnline, recordClanAlienKillOnline, getPremiumShopOnline, testPurchasePremiumOnline, adminPreviewPremiumStageOnline, adminSimulatePremiumStageOnline, getPremiumStageCatalogOnline, loadWarfrontStateOnline, loadSectorOwnershipOnline, hitWorldBossOnline, claimWorldBossRewardOnline, declareClanWarOnline, recordClanWarScoreOnline, loadLiveOpsOnline, adminUpdateLiveEventScheduleOnline, purchaseLiveCatalogOnline, economyActionOnline, getChatHistoryOnline, sendChatMessageOnline, redeemGameCouponOnline, getMyDesignersOnline, setDesignLoadoutOnline, claimGateDroneDesignOnline, claimEventDesignerOnline, getAdminStatus, adminSearchAccounts, adminRecentActions, adminBanAccount, adminUnbanAccount, adminResetAccount, adminDeleteAccount, pushTelemetryBatch, adminTelemetryOverview, adminPlayerTelemetry, getBattleGroupOnline, createBattleGroupOnline, inviteBattleGroupOnline, searchBattleGroupPlayersOnline, inviteBattleGroupUserOnline, respondBattleGroupInviteOnline, leaveBattleGroupOnline, kickBattleGroupMemberOnline, setBattleGroupRallyOnline, loadRuntimeConfigOnline, loadNpcRuntimeConfigOnline, loadWorldRuntimeConfigOnline, loadSystemsRuntimeConfigOnline, loadAdminRuntimeMonitorOnline, adminUpdateRuntimeModuleOnline, adminUpdateNpcRuntimeOnline, adminUpdateNpcSpawnRuntimeOnline, adminUpdateWorldMapOnline, adminUpdateWorldResourceOnline, adminUpdateWorldSectorOnline, adminUpdateWorldPortalOnline, adminUpdateWorldResourcePoolOnline, adminUpdateMissionCategoryOnline, adminUpdateEconomyServiceOnline, adminUpdateCraftingRecipeOnline, loadBattlePassRuntimeConfigOnline, adminUpdateBattlePassSeasonOnline, adminUpdateBattlePassTierOnline, loadShopsRuntimeConfigOnline, adminUpdateCommonShopItemOnline, adminUpdatePremiumShopItemOnline, loadBonusConfigOnline, adminUpdateBonusConfigOnline, adminCouponDashboardOnline, adminCreateCouponOnline, adminSetCouponActiveOnline, loadGalaxyGatesOnline, adminUpdateGalaxyGateOnline, adminUpsertCustomMissionOnline, adminDeleteCustomMissionOnline, adminCreateCraftRecipeOnline, adminCreateEconomyServiceOnline, adminCreatePassSeasonOnline, loadAuctionRulesOnline, adminUpdateAuctionRulesOnline, loadBalanceRuntimeOnline, adminUpdateBalanceOnline,loadAdminSecurityIncidents,reviewAdminSecurityIncident } from './api.js?v=34.4.2';
-import { SharedUniverseClient } from './world.js?v=34.4.2';
+import { weekendCenterHtml,weekendSlotRowHtml } from './modules/event-control-ui-v3411.js?v=34.4.3';
+import { adminUpdateWeekendSettingsOnline,adminUpdateWeekendEventOnline,adminSetManualEventOnline } from './api.js?v=34.4.3';
+import { bossHudCue, npcThreatLabel } from './modules/tactical-hud-v34.js?v=34.4.3';
+import { allowBackdropFilter, renderFxCount } from './modules/render-budget-v34.js?v=34.4.3';
+import { stellarOreName } from './modules/stellar-display-names.js?v=34.4.3';
+import { rankVisibleNpcTargets } from './modules/combat-target-priority.js?v=34.4.3';
+import { upcomingWeekendSlots, weekendRotationEnabled, weekendSchedule, validateWeekendSettings } from './modules/weekend-events-v341.js?v=34.4.3';
+import { eventControlProfile } from './modules/event-control-profile-v3411.js?v=34.4.3';
+import { minimapPaintInterval } from './modules/minimap-cadence-v33.js?v=34.4.3';
+import { npcUpdateDecision, nearestNpcInRange } from './modules/smart-combat-engine.js?v=34.4.3';
+import { npcPatrolPosition } from './modules/npc-patrol.js?v=34.4.3';
+import { setupMobileLandscape } from './modules/mobile-landscape.js?v=34.4.3';
+import {directionalIndex, directionalGridForImage} from './modules/sprite-orientation.js?v=34.4.3';
+import {createHudIntelligence} from './modules/hud-intelligence.js?v=34.4.3';
+import {sentinelAttackerEligible, selectSentinelAttacker} from './modules/sentinel-defense.js?v=34.4.3';
+import {AUX_PROTOCOL_TYPES, AUX_PROTOCOL_IDS, normalizeAuxProtocols, auxProtocolSlotsUsed, changeAuxProtocolRank, auxProtocolStats} from './modules/aux-protocols.js?v=34.4.3';
+import { movementSpeed, nominalMovementSpeed, followShipCamera } from './modules/ship-navigation.js?v=34.4.3';
+import { loadCommandOverviewOnline,claimCompetitiveSeasonOnline,equipEliteTitleOnline,unequipEliteTitleOnline,loadCommandAdminOnline,saveCompetitiveSeasonOnline,saveWorldDirectiveOnline,loadClanOperationsOnline,claimClanOperationOnline,saveAdminClanOperationOnline } from './api.js?v=34.4.3';
+import {renderV21CommandCenter,V21_TABS} from './modules/v21/command-center-view.js?v=34.4.3';
+import {renderEliteEquipTitles,renderCompetitiveSection,renderUniverseDirectives} from './modules/v22/command-upgrades.js?v=34.4.3';
+import {registerStellarPwaV21,offerInstallV21} from './modules/v21/pwa.js?v=34.4.3';
+import { ECONOMY_EFFECTS, CRAFT_OUTPUT_KINDS, normalizeEconomyEffects, normalizeCraftIngredients, normalizeCraftOutput, formatCraftPreview } from './modules/admin-visual-builders.js?v=34.4.3';
+import { ADMIN_MISSION_PRESETS, createAdminMissionPreset, duplicateAdminMission, validateAdminMissionDraft, previewAdminMission } from './modules/admin-mission-builder.js?v=34.4.3';
+import { createHudContentCache } from './modules/hud-content-cache.js?v=34.4.3';
+import { createAuxiliaryWorkScheduler } from './modules/aux-work-scheduler.js?v=34.4.3';
+import { npcVisualDetail } from './modules/npc-render-detail.js?v=34.4.3';
+import { smoothNpcPosition, smoothNpcHeading, npcCombatLockCue, rocketVisualTarget } from './modules/galactic-combat-v344.js?v=34.4.3';
+import {mergeNpcMotionPatch} from './modules/npc-motion-v3441.js?v=34.4.3';
+import {recordRemotePilotPosition,advanceRemotePilotVisual} from './modules/multiplayer-motion-v3442.js?v=34.4.3';
+import { createBackdropRasterCache } from './modules/backdrop-raster-cache.js?v=34.4.3';
+import { createTextWidthCache } from './modules/text-width-cache.js?v=34.4.3';
+import { createHudUpdateScheduler } from './modules/hud-update-scheduler.js?v=34.4.3';
+import { createAssetCache, flattenAssetPaths } from './modules/asset-cache.js?v=34.4.3';
+import { createSceneGradientCache } from './modules/scene-gradient-cache.js?v=34.4.3';
+import { createPerformanceMonitor, formatPerformanceReport } from './modules/performance-monitor.js?v=34.4.3';
+import { createFrameGate } from './modules/frame-gate.js?v=34.4.3';
+import { createStagedAssetPreloader } from './modules/staged-preload-v342.js?v=34.4.3';
+import { QUALITY_PROFILES, initialAutoQualityForDevice } from './modules/quality-profiles.js?v=34.4.3';
+import { freshBattleConfigsV2013, captureCombatBuildV2013, exchangeCombatBuildV2013, combatConfigRemainingV2013, clampStoredShieldV2013 } from './combat-config-v2013.js?v=34.4.3';
+import { FACTIONS, SHIPS, ITEMS, LASER_AMMO, ROCKETS, NPC_TYPES, MAPS, RESOURCES } from './data.js?v=34.4.3';
+import { repairPulseSettings } from './repair-balance.js?v=34.4.3';
+import { xpThresholdV1770, xpThresholdV1915, migratePilotXpV1915 } from './level-curve-v1915.js?v=34.4.3';
+import { applyRecruitBonusV2012, eliteRouteSnapshotV2012, freshEliteRouteJournalV2012, ELITE_ROUTE_TARGETS_V2012, novaTierPriceV2012 } from './progression-plan-v2012.js?v=34.4.3';
+import { GAME_ASSETS } from './assets/v17/manifest.js?v=34.4.3';
+import { signUp, signIn, beginGoogleSignIn, restoreGoogleSignInFromUrl, requestPasswordReset, restorePasswordRecoveryFromUrl, restoreSession, signOutLocal, checkGameSession, endGameSession, getUser, getSessionCredentials, loadCloudSave, saveCloudSave, loadEliteOperationsOnline, claimEliteOperationOnline, loadWarCampaignsOnline, claimWarSupplyOnline, claimWarCampaignOnline, loadAdminWarCampaignsOnline, saveAdminWarCampaignOnline, saveAdminWarRulesOnline, loadAdminEliteObjectivesOnline, saveAdminEliteObjectiveOnline, updateCallsign, updatePassword, loadRankings, loadAuctionBids, saveAuctionBidOnline, markAuctionBidStatusOnline, loadAuctionMarket, upsertPlayerPresenceOnline, loadMapPresenceOnline, savePlayerLocationCheckpointOnline, loadPlayerLocationCheckpointOnline, removePlayerPresenceOnline, queuePvpAttackOnline, consumePvpDamageEventsOnline, syncArenaProfileOnline, loadArenaState, loadArenaDailyRewardStatus, claimArenaDailyReward, loadArenaOpponents, loadArenaHistory, arenaAttackOnline, listClansOnline, loadMyClanOnline, createClanOnline, joinClanOnline, getClanRequestsOnline, reviewClanRequestOnline, cancelClanRequestOnline, setClanMemberRoleOnline, leaveClanOnline, transferClanCreditsOnline, claimClanCreditGrantsOnline, recordClanAlienKillOnline, getPremiumShopOnline, testPurchasePremiumOnline, adminPreviewPremiumStageOnline, adminSimulatePremiumStageOnline, getPremiumStageCatalogOnline, loadWarfrontStateOnline, loadSectorOwnershipOnline, hitWorldBossOnline, claimWorldBossRewardOnline, declareClanWarOnline, recordClanWarScoreOnline, loadLiveOpsOnline, adminUpdateLiveEventScheduleOnline, purchaseLiveCatalogOnline, economyActionOnline, getChatHistoryOnline, sendChatMessageOnline, redeemGameCouponOnline, getMyDesignersOnline, setDesignLoadoutOnline, claimGateDroneDesignOnline, claimEventDesignerOnline, getAdminStatus, adminSearchAccounts, adminRecentActions, adminBanAccount, adminUnbanAccount, adminResetAccount, adminDeleteAccount, pushTelemetryBatch, adminTelemetryOverview, adminPlayerTelemetry, getBattleGroupOnline, createBattleGroupOnline, inviteBattleGroupOnline, searchBattleGroupPlayersOnline, inviteBattleGroupUserOnline, respondBattleGroupInviteOnline, leaveBattleGroupOnline, kickBattleGroupMemberOnline, setBattleGroupRallyOnline, loadRuntimeConfigOnline, loadNpcRuntimeConfigOnline, loadWorldRuntimeConfigOnline, loadSystemsRuntimeConfigOnline, loadAdminRuntimeMonitorOnline, adminUpdateRuntimeModuleOnline, adminUpdateNpcRuntimeOnline, adminUpdateNpcSpawnRuntimeOnline, adminUpdateWorldMapOnline, adminUpdateWorldResourceOnline, adminUpdateWorldSectorOnline, adminUpdateWorldPortalOnline, adminUpdateWorldResourcePoolOnline, adminUpdateMissionCategoryOnline, adminUpdateEconomyServiceOnline, adminUpdateCraftingRecipeOnline, loadBattlePassRuntimeConfigOnline, adminUpdateBattlePassSeasonOnline, adminUpdateBattlePassTierOnline, loadShopsRuntimeConfigOnline, adminUpdateCommonShopItemOnline, adminUpdatePremiumShopItemOnline, loadBonusConfigOnline, adminUpdateBonusConfigOnline, adminCouponDashboardOnline, adminCreateCouponOnline, adminSetCouponActiveOnline, loadGalaxyGatesOnline, adminUpdateGalaxyGateOnline, adminUpsertCustomMissionOnline, adminDeleteCustomMissionOnline, adminCreateCraftRecipeOnline, adminCreateEconomyServiceOnline, adminCreatePassSeasonOnline, loadAuctionRulesOnline, adminUpdateAuctionRulesOnline, loadBalanceRuntimeOnline, adminUpdateBalanceOnline,loadAdminSecurityIncidents,reviewAdminSecurityIncident } from './api.js?v=34.4.3';
+import { SharedUniverseClient } from './world.js?v=34.4.3';
 
 const canvas = document.querySelector('#game');
 const ctx = canvas.getContext('2d');
@@ -320,7 +320,7 @@ function shipMapAsset(id,faction=progress?.profile?.faction){
 }
 const STATIC_SHIP_RENDER_IDS=new Set(Object.keys(GAME_ASSETS.shipMap||{}));
 function shipMapSheetAsset(id,faction=progress?.profile?.faction){
-  // V34.4.2: todas as naves usam o casco visual único no mapa para evitar reaproveitar atlas genéricos.
+  // V34.4.3: todas as naves usam o casco visual único no mapa para evitar reaproveitar atlas genéricos.
   // Se houver arte estática individual, priorizamos a rotação do sprite próprio da nave.
   if(STATIC_SHIP_RENDER_IDS.has(id)&&shipMapAsset(id,faction))return null;
   return (GAME_ASSETS.shipMapSheets32&&GAME_ASSETS.shipMapSheets32[id])||(GAME_ASSETS.shipMapSheets&&GAME_ASSETS.shipMapSheets[id])||null;
@@ -532,7 +532,7 @@ function bootstrapDelay(ms){return new Promise(resolve=>setTimeout(resolve,ms));
 // ===================== V15.1 SHARED UNIVERSE • REALTIME COMBAT PRESENCE =====================
 const sharedUniverseRuntime={ready:false,status:'offline',latency:0,event:null,globalEvent:null,warfront:null,roomKey:null,lastPlayerSyncAt:0,lastCombatSignature:'',lastPlayerSentX:null,lastPlayerSentY:null,lastPlayerSentAngle:null,lastPlayerSentHp:null,lastPlayerSentShield:null,pendingOres:new Set(),lastSnapshotToastAt:0,mapError:null,sectorFallback:null,sectorReadPending:false,sectorReadAt:0,sectorReadError:null,sectorReadGeneration:0};
 const SHARED_SYNC_COMBAT_MS=100;
-const SHARED_SYNC_MOVE_MS=150;
+const SHARED_SYNC_MOVE_MS=100; // V34.4.3: cruise multiplayer, ~10 Hz por piloto.
 const SHARED_SYNC_IDLE_MS=1500;
 function sharedUniverseMap(){return !!authenticated&&!!progress&&!isGalaxyGateMap();}
 function sharedUniverseOnline(){return sharedUniverseMap()&&sharedUniverseRuntime.ready&&sharedUniverse.isOnline();}
@@ -3065,7 +3065,7 @@ function applyQualityMode(mode,persist=true){
   preloadAssets();if(progress)preloadActiveGameplayAssets();resize();renderSettings();
   showToast(mode==='auto'?`Modo AUTO • ${qualityProfile().label}`:`Qualidade ${qualityProfile().label} ativada`);
 }
-// V34.4.2: preferencia local para liberar espaco de combate no mobile.
+// V34.4.3: preferencia local para liberar espaco de combate no mobile.
 const MOBILE_COMBAT_LAYOUT_KEY='stellar_mobile_combat_compact_v3210';
 function setMobileCombatCompact(enabled,persist=true){
   document.body.classList.toggle('mobile-combat-pro',!!enabled);
@@ -4118,7 +4118,7 @@ function copyBattleConfigV2013(from,to){
   saveGame();flushCloudSave(true).catch(()=>{});renderHangar();updateUI();
   showToast(`CONF ${from} copiada para CONF ${to}`,'system');
 }
-// V34.4.2: presets are equipment blueprints, never copies of owned inventory.
+// V34.4.3: presets are equipment blueprints, never copies of owned inventory.
 const STELLAR_PRESET_KINDS_V3030=['PVE','PVP','FARM','BOSS'];
 function battlePresetKeyV3030(){return `stellar_battle_presets_v3030_${getUser()?.id||'local'}_${progress?.activeShipId||'none'}`;}
 function readBattlePresetsV3030(){
@@ -5743,7 +5743,8 @@ function updatePlayer(dt){
   syncRuntimeLocationToProgress(false);
   syncAuthoritativePlayerLocation(false);
   const stillMoving=Math.hypot(player.tx-player.x,player.ty-player.y)>2;
-  if(movementPositionRuntime.wasMoving&&!stillMoving){movementPositionRuntime.wasMoving=false;commitRuntimePosition('movement_end');}
+  const justFinishedMoving=movementPositionRuntime.wasMoving&&!stillMoving;
+  if(justFinishedMoving){movementPositionRuntime.wasMoving=false;commitRuntimePosition('movement_end');}
   Object.assign(state.camera,followShipCamera(state.camera,player,dt));
   const baseSafe=isBaseSafeZone();
   const repairBot=activeRepairBot();
@@ -5794,7 +5795,7 @@ function updatePlayer(dt){
   }
   progress.hp=player.hp;progress.shield=player.shield;progress.x=player.x;progress.y=player.y;
   const configs=progress.combatConfigsV2013;if(configs?.profiles?.[configs.active])configs.profiles[configs.active].shield=clampStoredShieldV2013(player.shield,player.maxShield);
-  syncSharedUniversePlayer();
+  syncSharedUniversePlayer(justFinishedMoving);
 }
 function updateBossPhase(e){
   if(!e?.type?.startsWith('boss')||e.hp<=0)return;const total=Math.max(1,e.maxHp+e.maxShield),remain=Math.max(0,e.hp)+Math.max(0,e.shield),ratio=remain/total;let next=e.bossPhase||0;if(ratio<=.33)next=2;else if(ratio<=.66)next=Math.max(next,1);if(next===(e.bossPhase||0))return;e.bossPhase=next;
@@ -6000,7 +6001,7 @@ function updateOnlineWorld(dt){
   if(now-onlineWorld.lastSyncAt>presenceInterval&&!onlineWorld.busy)syncOnlineWorld();
   syncPvpInbox();syncClanCreditGrants();if(Date.now()-battleGroupRuntime.lastAt>6000)refreshBattleGroup(false);
   for(const rp of onlineWorld.players.values()){
-    // V34.4.2: interpolate buffered remote pilot packets instead of jittery 55ms prediction.
+    // V34.4.3: interpolate buffered remote pilot packets instead of jittery 55ms prediction.
     // Never touch local player position or the server-authoritative combat coordinates.
     if(!advanceRemotePilotVisual(rp,{now,dt})){
       const k=1-Math.exp(-Math.min(.08,Math.max(0,dt))*8);
@@ -6070,7 +6071,7 @@ function updateCriticalHudV2024(){
   HUD_CONTENT_CACHE.text(ui.shield,fmt(player.shield));
   HUD_CONTENT_CACHE.text(ui.maxShield,fmt(player.maxShield));
   HUD_CONTENT_CACHE.text(ui.speed,fmt(nominalMovementSpeed(player.speed,progress?.mapId,shipAbilitySpeedMultiplier())));
-  // V34.4.2: controles de ataque foram removidos da barra de munições.
+  // V34.4.3: controles de ataque foram removidos da barra de munições.
   // A atualização rápida do HUD deve tolerar sua ausência, como updateUI().
   if(ui.laserToggle)ui.laserToggle.classList.toggle('active',player.laserFiring);
   if(ui.rocketCd)HUD_CONTENT_CACHE.text(ui.rocketCd,rocketReady()?'MÍSSIL PRONTO':`MÍSSIL ${(getRocketCooldown()-(nowSec()-player.lastRocketShot)).toFixed(1)}s`);
@@ -6253,7 +6254,7 @@ function drawPortals(){
       ctx.strokeStyle=c.main;ctx.lineWidth=2;ctx.beginPath();ctx.ellipse(0,0,29,46,0,0,TWO_PI);ctx.stroke();
       ctx.fillStyle=c.core;ctx.font='bold 11px Arial';ctx.textAlign='center';ctx.fillText(portal.targetLabel||displayMapLabel(portal.to,portal.targetTerritoryFaction),0,-60);ctx.restore();continue;
     }
-    // V34.4.2: somente portais de mapas não-PvP mostram zona neutra, com visual ainda mais limpo.
+    // V34.4.3: somente portais de mapas não-PvP mostram zona neutra, com visual ainda mais limpo.
     if(portalHasNeutralSafety(portal,state.currentMap)){
       ctx.save();ctx.setLineDash([12,16]);ctx.strokeStyle=hexToRgba(c.main,.045);ctx.lineWidth=.9;ctx.beginPath();ctx.arc(0,0,PORTAL_NEUTRAL_RADIUS,0,TWO_PI);ctx.stroke();ctx.setLineDash([]);ctx.restore();
     }
@@ -9949,7 +9950,7 @@ function monitorAutoPerformance(t){
 }
 const FRAME_GATE_V20210=createFrameGate();
 let last=performance.now();FRAME_GATE_V20210.reset(last);
-// V34.4.2: o próximo quadro é sempre agendado, mesmo se UI/efeitos falharem.
+// V34.4.3: o próximo quadro é sempre agendado, mesmo se UI/efeitos falharem.
 // O erro aparece nos logs e num aviso leve, sem provocar loop infinito de notificações.
 const frameRecoveryV3031={errors:0,lastLog:0,lastToast:0};
 function loop(t){
@@ -9974,7 +9975,7 @@ function loop(t){
     frameRecoveryV3031.errors++;
     if(t-frameRecoveryV3031.lastLog>3000){
       frameRecoveryV3031.lastLog=t;
-      console.error('[stellar-frame-recovery V34.4.2]',err);
+      console.error('[stellar-frame-recovery V34.4.3]',err);
       // Não enviar diagnósticos nem dados do usuário a serviços externos.
     }
     if(t-frameRecoveryV3031.lastToast>15000){

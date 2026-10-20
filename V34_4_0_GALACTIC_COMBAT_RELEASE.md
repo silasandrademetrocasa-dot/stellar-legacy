@@ -1,4 +1,4 @@
-# STELLAR LEGACY V34.4.2 — GALACTIC COMBAT 2.0
+# STELLAR LEGACY V34.4.3 — GALACTIC COMBAT 2.0
 
 Construída integralmente a partir do pacote V34.3.0 (NPC & Performance).
 
