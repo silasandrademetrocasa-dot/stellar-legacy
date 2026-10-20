@@ -434,8 +434,9 @@ class Room {
     const rocketShot=msg?.weapon==='rocket';
     if((rocketShot?now-(ws._relayRocketAt||0)<2500:now-(ws._relayHitAt||0)<cooldown)||ws._relayBusy)return;
     if(!rocketShot)ws._relayHitAt=now;ws._relayBusy=true;
+    let attackStage='loadout';
+    const kind=msg?.weapon==='rocket'?'rocket':'laser';
     try{
-      const kind=msg?.weapon==='rocket'?'rocket':'laser';
       if(!ws._relayEquipmentCache||now-ws._relayEquipmentCache.at>4000){
         const authoritative=await this.world.readRelayLoadout(p.userId);
         ws._relayEquipmentCache={at:now,state:authoritative};
@@ -447,14 +448,25 @@ class Room {
       // Cap is only an anti-abuse ceiling; no fixed 12.000 damage per pulse.
       damage=Math.min(500000,Math.max(1,Math.round(damage)));
       if(kind==='rocket')ws._relayRocketAt=now;
-      const result=await withCaptureTimeout(this.world.damageRelay(this.mapId,node.id,damage,p.userId),4500);
+      attackStage='database';
+      const result=await withCaptureTimeout(this.world.damageRelay(this.mapId,node.id,damage,p.userId),5500);
       if(result?.ok&&Number(result.revision)>=Number(node.relayRevision||0)){
         node.relayHp=Number(result.hp)||0;node.relayShield=Number(result.shield)||0;node.relayRevision=Number(result.revision)||0;
         this.broadcast({type:'relay_hit_fx',nodeId:node.id,userId:p.userId,x:node.x,y:node.y,actual:result.actual,shield:node.relayShield,hp:node.relayHp});
         this.broadcast({type:'warfront_control',warfront:this.warfrontPayload(),serverTime:nowMs()});
       }
-      safeJsonSend(ws,{type:'relay_hit_result',...result,nodeId:node.id});
-    }catch(e){safeJsonSend(ws,{type:'relay_hit_result',ok:false,reason:'Falha ao registrar o ataque. Tente novamente.'});}
+      safeJsonSend(ws,{type:'relay_hit_result',...result,nodeId:node.id,weapon:kind});
+    }catch(e){
+      // These errors used to be swallowed completely, making a missing callback look like a SQL bug.
+      const detail=String(e?.message||e||'unknown').slice(0,180);
+      const timeout=/timeout|timed.out|aborted/i.test(detail);
+      const code=timeout?'RELAY_ATTACK_TIMEOUT':attackStage==='loadout'?'RELAY_LOADOUT_ERROR':'RELAY_DB_ERROR';
+      console.warn('[relay-attack]',{map:this.mapId,node:node.id,stage:attackStage,code,detail});
+      const reason=timeout?'Servidor demorou a confirmar o ataque. Tente novamente.':
+        attackStage==='loadout'?'Falha ao sincronizar os equipamentos da nave. Tente novamente.':
+        'Falha ao confirmar o dano do relé no banco. Tente novamente.';
+      safeJsonSend(ws,{type:'relay_hit_result',ok:false,nodeId:node.id,weapon:kind,code,reason});
+    }
     finally{ws._relayBusy=false;}
   }
 
@@ -1013,7 +1025,7 @@ class Room {
   }
 }
 
-export function attachSharedUniverse(server,{authenticate,authorizeJoin,recordSecurityViolation,loadLiveOps,loadBattleGroup,loadNpcConfig,loadWorldConfig,loadPlayerEventProgress,recordPlayerEventProgress,loadWarfront,persistCapture,persistRelayCapture,damageRelay,loadActorClan,recordRelayPve,recordEliteEvent,recordWarDefense,loadWorldDirectives,grantNpcReward,grantOreReward}){
+export function attachSharedUniverse(server,{authenticate,authorizeJoin,recordSecurityViolation,loadLiveOps,loadBattleGroup,loadNpcConfig,loadWorldConfig,loadPlayerEventProgress,recordPlayerEventProgress,loadWarfront,persistCapture,persistRelayCapture,damageRelay,readRelayLoadout,loadActorClan,recordRelayPve,recordEliteEvent,recordWarDefense,loadWorldDirectives,grantNpcReward,grantOreReward}){
   const wss=new WebSocketServer({
     server,
     path:'/ws',
@@ -1028,6 +1040,7 @@ export function attachSharedUniverse(server,{authenticate,authorizeJoin,recordSe
     recordSecurityViolation,
     recordWarDefense:recordWarDefense||(()=>Promise.resolve(false)),
     damageRelay:damageRelay||(()=>Promise.reject(new Error("SQL V34.6 pendente"))),
+    readRelayLoadout:readRelayLoadout||(()=>Promise.reject(new Error("Leitura de equipamentos não configurada"))),
     persistRelayCapture:persistRelayCapture||(()=>Promise.reject(new Error("SQL V34.6 pendente"))),
     loadActorClan:loadActorClan||(()=>Promise.resolve(null)),
     recordRelayPve:recordRelayPve||(()=>Promise.resolve(false)),

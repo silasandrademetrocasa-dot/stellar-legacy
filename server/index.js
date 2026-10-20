@@ -18,7 +18,7 @@ import { createSecurityService } from './security-service.js';
 
 const app = express();
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const RELEASE_VERSION = '34.6.3'; // único identificador de release nos endpoints HTTP
+const RELEASE_VERSION = '34.6.4'; // único identificador de release nos endpoints HTTP
 
 function normalizeSupabaseUrl(value = '') {
   let url = String(value || '').trim();
@@ -1821,7 +1821,8 @@ const sharedUniverse = attachSharedUniverse(server, {
   },
   readRelayLoadout:async userId=>{
     const {data,error}=await (await requireEliteAdmin()).from('game_saves').select('state').eq('user_id',userId).maybeSingle();
-    if(error||!data?.state)throw new Error('Equipamentos da nave não sincronizados.');
+    if(error){const err=new Error('Equipamentos da nave não sincronizados.');err.code=error.code||'RELAY_LOADOUT_QUERY_FAILED';throw err;}
+    if(!data?.state)throw Object.assign(new Error('Save de equipamentos ainda não disponível.'),{code:'RELAY_LOADOUT_SAVE_MISSING'});
     return data.state;
   },
   loadActorClan:async userId=>{

@@ -95,7 +95,7 @@ export function createRelayRouter({serviceClient}){
  }));
  r.post('/admin/rules',wrap(async(req,res)=>{
    const {data:yes,error:authError}=await req.sb.rpc('is_game_admin_v1763',{p_uid:req.user.id});if(authError||yes!==true)return fail(res,'Somente ADM',403);
-   const limits={max_hp:[10000,3000000],max_shield:[10000,2000000],hit_damage:[100,50000],hit_cooldown_ms:[400,3000],capture_ms:[5000,60000],protection_ms:[10000,180000]};
+   const limits={max_hp:[10000,12000000],max_shield:[10000,8000000],hit_damage:[100,50000],hit_cooldown_ms:[400,3000],capture_ms:[5000,60000],protection_ms:[10000,180000]};
    const patch={updated_at:new Date().toISOString()};for(const [key,range] of Object.entries(limits)){if(req.body?.[key]===undefined)continue;const v=req.body[key];if(!Number.isSafeInteger(v)||v<range[0]||v>range[1])return fail(res,`${key}: fora dos limites`,400);patch[key]=v;}
    if(typeof req.body?.enabled==='boolean')patch.enabled=req.body.enabled;
    if(req.body?.weekend_multiplier!==undefined){const x=Number(req.body.weekend_multiplier);if(!Number.isFinite(x)||x<1||x>2)return fail(res,'Multiplicador inválido',400);patch.weekend_multiplier=x;}
