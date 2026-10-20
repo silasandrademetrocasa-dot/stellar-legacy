@@ -4675,3 +4675,31 @@ body.mobile-landscape-pro #topHudDock .hud-panel:not(.collapsed) .player-float-h
 .relay-mission-row-v3463.ready-v3463{border:1px solid #ffaf39;background:rgba(208,104,20,.16)}.relay-mission-row-v3463.ready-v3463 .relay-mission-count-v3463{color:#ffb557}.relay-mission-row-v3463.ready-v3463 .relay-mission-track-v3463 span{background:#ffad36}
 .relay-mission-row-v3463.claimed-v3463{opacity:.68}.relay-mission-row-v3463.claimed-v3463 .relay-mission-track-v3463 span{background:#4fce9a}
 .relay-admin-balance-v3463{margin:15px 0;padding:12px;border:1px solid #235f7e;border-radius:12px;background:#071a2b}.relay-admin-balance-v3463>summary{cursor:pointer;color:#87d7ff;font-weight:800;margin-bottom:8px}.relay-admin-balance-row-v3463{padding:10px 0;border-bottom:1px solid #224059}.relay-admin-balance-fields-v3463{display:flex;flex-wrap:wrap;gap:8px;align-items:flex-end;margin-top:8px}.relay-admin-balance-fields-v3463 label{display:flex;flex-direction:column;gap:3px;min-width:90px;flex:1;font-size:10px;color:#add9ef}.relay-admin-balance-fields-v3463 input{width:100%;min-width:0;background:#07192c;color:#e9f7ff;border:1px solid #34627f;border-radius:6px;padding:8px}.relay-admin-balance-fields-v3463 button{min-width:100px}
+
+/* Visual Revolution: mobile weapon HUD stays crisp without full-frame GPU blur.
+   Fast HUD UI must not steal the canvas' painting budget while both are visible. */
+body.mobile-landscape-pro #weaponBar.compact-ammo-ui,
+body.mobile-combat-pro #weaponBar.compact-ammo-ui,
+body[data-device="mobile"] #weaponBar.compact-ammo-ui{
+  backdrop-filter:none!important;-webkit-backdrop-filter:none!important;
+  background:rgba(5,17,30,.97)!important;
+  box-shadow:0 2px 9px rgba(0,0,0,.26)!important;
+}
+body.mobile-landscape-pro #weaponBar .ammo-btn.circular.active,
+body.mobile-combat-pro #weaponBar .ammo-btn.circular.active,
+body[data-device="mobile"] #weaponBar .ammo-btn.circular.active{
+  transform:none!important;
+  box-shadow:inset 0 0 0 1px rgba(116,229,255,.55)!important;
+  outline:1px solid rgba(100,217,255,.55);
+}
+body.mobile-landscape-pro #weaponBar .ammo-btn.circular.active::before,
+body.mobile-combat-pro #weaponBar .ammo-btn.circular.active::before,
+body[data-device="mobile"] #weaponBar .ammo-btn.circular.active::before{
+  box-shadow:none!important;
+}
+body.mobile-landscape-pro #weaponBar .ability-btn.ready,
+body.mobile-combat-pro #weaponBar .ability-btn.ready,
+body[data-device="mobile"] #weaponBar .ability-btn.ready{
+  animation:none!important;
+  box-shadow:inset 0 0 0 1px rgba(94,209,255,.3)!important;
+}

@@ -75,7 +75,7 @@ export function createRelayRouter({serviceClient}){
    const category=String(b.category||''),attribute=String(b.attribute||''),level=Number(b.level);
    const allowedAttributes={weapon:['laser','missile'],shield:['capacitor','regenerator'],hp:['armor','nanobots'],bonus:['damage','shield','hp','speed','xp','resources']};
    if(!allowedAttributes[category]?.includes(attribute)||![1,2,3].includes(level))return fail(res,'Módulo ou nível inválido',400);
-   const fields={damage:[0,20000],cooldown_ms:[0,10000],shield_bonus:[0,500000],hp_bonus:[0,500000],bonus_pct:[0,25],parts:[0,250],credits:[0,10000000],min_clan_level:[1,50]};
+   const fields={damage:[0,20000],cooldown_ms:[0,10000],shield_bonus:[0,3000000],hp_bonus:[0,3000000],bonus_pct:[0,25],parts:[0,250],credits:[0,10000000],min_clan_level:[1,50]};
    const patch={updated_at:new Date().toISOString()};
    for(const [k,[low,high]] of Object.entries(fields)){
      if(b[k]===undefined)continue;
