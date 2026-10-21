@@ -5,7 +5,7 @@ export const WARBOT_FACTIONS = Object.freeze(['earth','mars','jupiter']);
 export const WARBOT_DEFAULT = Object.freeze({enabled:false,mode:'training',bots_per_faction:2,tier:1,attack_players:false,ends_at:null});
 const COLORS={earth:'#52cfff',mars:'#ff7d5e',jupiter:'#e5bb65'};
 const LABELS={earth:'TERRA',mars:'MARTE',jupiter:'JÚPITER'};
-const NPC_CADENCE_MS=300, BOT_RESPAWN_MS=22000, TARGET_RADIUS=1450;
+const NPC_CADENCE_MS=150, BOT_RESPAWN_MS=22000, TARGET_RADIUS=1450;
 export const WARBOT_ROLES=Object.freeze(['interceptor','assault','guardian','support']);
 const ROLE_LABELS={interceptor:'INTERCEPTOR',assault:'ASSALTO',guardian:'GUARDIÃO',support:'SUPORTE'};
 export const warbotRole=i=>WARBOT_ROLES[Math.max(0,Math.floor(Number(i)||0))%4];
@@ -133,7 +133,7 @@ export function createWarbotEngine(room){
       else if(settings.mode==='training')choice.ws.send(JSON.stringify({type:'warbot_spar_hit',entityId:b.id,estimatedDamage:b.damage}));
       else if(settings.attack_players)choice.ws.send(JSON.stringify({type:'npc_attack',entityId:b.id,damage:b.damage,retaliation:false}));
     }
-    if(now-lastPublishedAt>=300){lastPublishedAt=now;broadcastBots();}
+    if(now-lastPublishedAt>=150){lastPublishedAt=now;broadcastBots();}
   }
   function handleHit(ws,msg,admitDamage){
     const b=bots.get(String(msg.entityId||'')),p=ws.player;

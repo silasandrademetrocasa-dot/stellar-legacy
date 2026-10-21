@@ -1,6 +1,6 @@
 // V38.1.0 — painel de recompensas da arena e editor no ADM.
 // Sem loops de render e sem alterações no motor de combate.
-import {loadAstralRewardsV381,lockAstralRewardV381,claimAstralRewardV381,adminSetAstralRewardV381} from '../api.js?v=47.7.2';
+import {loadAstralRewardsV381,lockAstralRewardV381,claimAstralRewardV381,adminSetAstralRewardV381} from '../api.js?v=47.7.3';
 const names={alpha:'AURORA',beta:'NEXUS',gamma:'ECLIPSE'};
 const order=['alpha','beta','gamma'];
 let latest=null,loading=false;

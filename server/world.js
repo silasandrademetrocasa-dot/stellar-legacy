@@ -1137,7 +1137,7 @@ export function attachSharedUniverse(server,{authenticate,authorizeJoin,recordSe
     },
     npcSpawnGroups(mapId){
       const key=String(mapId||''),rows=this.npcRuntime?.spawns?.get?.(key);
-      if(this.npcRuntime?.version>0&&Array.isArray(rows))return rows.filter(r=>r.enabled!==false&&Number(r.count)>0&&this.npcDefinition(r.type)?.enabled!==false).map(r=>({type:r.type,count:Math.max(0,Math.round(Number(r.count)||0))}));
+      if(this.npcRuntime?.version>0&&Array.isArray(rows)&&(rows.length>0||!/^u[1-3]$/.test(key)))return rows.filter(r=>r.enabled!==false&&Number(r.count)>0&&this.npcDefinition(r.type)?.enabled!==false).map(r=>({type:r.type,count:Math.max(0,Math.round(Number(r.count)||0))}));
       const map=MAPS[key]||MAPS.x1,mult=Math.max(1,Number(map.enemyMultiplier)||1);
       return (map.enemyGroups||[]).map(g=>({type:g.type,count:Math.max(1,Math.round((Number(g.count)||0)*mult))}));
     },
@@ -1280,7 +1280,9 @@ export function attachSharedUniverse(server,{authenticate,authorizeJoin,recordSe
         const r=world.room(mapId,territory);
         // Não aguardar a consulta de relés para abrir o PvP. O controlador permanece
         // travado até a primeira leitura válida e publica os donos oficiais depois.
-        ws.room?.removeClient(ws);const p={clanId:identity.clanId||null,userId:identity.user.id,callsign:identity.callsign||msg.callsign||'Pilot',pilotTitle:shortText(msg.pilotTitle||'Piloto Estelar',64),faction:faction,shipId:String(msg.shipId||'phoenix'),shipDesignId:msg.shipDesignId?shortText(msg.shipDesignId,64):null,level:level,x:Number(msg.x)||400,y:Number(msg.y)||400,hp:Number(msg.hp)||1,maxHp:Number(msg.maxHp)||1,shield:Number(msg.shield)||0,maxShield:Number(msg.maxShield)||0,angle:Number(msg.angle)||0,laserFiring:false,laserColor:'#76d9ff',laserAmmoId:'lcb10',laserAmmoName:'PLS-1',targetId:null,targetIsPlayer:false,pet:{owned:false},updatedAt:nowMs()};r.addClient(ws,p);
+        ws.room?.removeClient(ws);const p={clanId:identity.clanId||null,userId:identity.user.id,callsign:identity.callsign||msg.callsign||'Pilot',pilotTitle:shortText(msg.pilotTitle||'Piloto Estelar',64),faction:faction,shipId:String(msg.shipId||'phoenix'),shipDesignId:msg.shipDesignId?shortText(msg.shipDesignId,64):null,level:level,x:Number(msg.x)||400,y:Number(msg.y)||400,hp:Number(msg.hp)||1,maxHp:Number(msg.maxHp)||1,shield:Number(msg.shield)||0,maxShield:Number(msg.maxShield)||0,angle:Number(msg.angle)||0,laserFiring:false,laserColor:'#76d9ff',laserAmmoId:'lcb10',laserAmmoName:'PLS-1',targetId:null,targetIsPlayer:false,pet:{owned:false},updatedAt:nowMs()};// U-X maps: reconcile NPC population once before the initial authoritative snapshot.
+        if(/^u[1-3]$/.test(mapId)&&r.npcs.size===0&&world.npcSpawnGroups(mapId).some(g=>g.count>0))r.applyNpcRuntimeConfig();
+        r.addClient(ws,p);
         // Verificar eventos imediatamente ao entrar (sem depender de trocar de mapa).
         Promise.allSettled([world.refreshLiveOps?.(nowMs()-(world.lastLiveOpsAt||0)>3000)??Promise.resolve(),world.refreshDirectives?.(false)??Promise.resolve()]).then(()=>{
           if(ws.room!==r)return;

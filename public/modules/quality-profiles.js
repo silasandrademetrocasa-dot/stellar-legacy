@@ -6,7 +6,9 @@ export const QUALITY_PROFILES={
   // mas nunca rebaixa ou descarta os sprites V17/V30 de NAVE, NPC, DRONES ou AUX-9.
   high:{label:'ALTA',dpr:2,fps:60,background:true,backgroundAlpha:.78,stars:1,grid:false,fx:true,particles:105,preload:'smart',saturation:1.16,contrast:1.08,sceneLight:1,assetCap:54},
   medium:{label:'MÉDIA',dpr:1.30,fps:45,background:true,backgroundAlpha:.56,stars:.52,grid:false,fx:true,particles:48,preload:'core',saturation:1.05,contrast:1.03,sceneLight:.68,assetCap:34},
-  low:{label:'BAIXA',dpr:1.0,fps:30,background:true,backgroundAlpha:.44,stars:0,grid:false,fx:true,particles:6,preload:'minimal',saturation:1,contrast:1,sceneLight:0,assetCap:24},
+  // 120 e apenas o teto de rAF para monitores de alta atualizacao; na pratica o hardware decide o FPS.
+  // Preserva resolucao e densidade minima para baixo consumo de GPU.
+  low:{label:'BAIXA',dpr:1.0,fps:120,background:true,backgroundAlpha:.44,stars:0,grid:false,fx:true,particles:6,preload:'minimal',saturation:1,contrast:1,sceneLight:0,assetCap:24},
 };
 
 export function initialAutoQualityForDevice(caps={},viewportWidth=Infinity){

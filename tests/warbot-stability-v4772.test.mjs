@@ -55,14 +55,14 @@ test('old minimap and topbar remain single-instance and update to current map',(
  assert.equal((html.match(/id="minimapMapLabelV4771"/g)||[]).length,1);
  assert.equal((html.match(/id="frontierExpansionBtnV42"/g)||[]).length,1);
  assert.ok(game.includes("'MAPA '+displayMapLabel(progress.mapId,currentTerritoryFaction())"));
- assert.ok(html.includes('/game.js?v=47.7.2'));
+ assert.ok(html.includes('/game.js?v=47.7.3'));
 });
 test('no changes to reward, drop, capture, saves, or SQL in this release',()=>{
  const pkg=JSON.parse(read('package.json'));
- assert.equal(pkg.version,'47.7.2');assert.match(pkg.scripts.check,/v4772-apply-patch/);
+ assert.equal(pkg.version,'47.7.3');assert.match(pkg.scripts.check,/v4773-apply-patch/);
  const engine=read('server/warbot-engine-v477.js');
  assert.doesNotMatch(engine,/grantNpcReward|persistCapture\(|battlePassEvent|saveGame\(/);
- const patch=read('scripts/v4772-apply-patch.mjs');
+ const patch=read('scripts/v4773-apply-patch.mjs');
  assert.doesNotMatch(patch,/DROP\s+TABLE|DELETE\s+FROM|UPDATE\s+public\.game_saves/i);
  assert.ok(patch.includes('offscreen battle effects'));
 });

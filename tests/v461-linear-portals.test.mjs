@@ -51,7 +51,7 @@ test('SQL leaves U-X records and pilots untouched and invalidates world cache on
 });
 test('release v46.1 contains physical portal positions in both client and server',()=>{
  const p=JSON.parse(read('package.json'));
- assert.equal(p.version,'47.7.2');assert.match(p.scripts.check,/v4772-apply-patch/);
+ assert.equal(p.version,'47.7.3');assert.match(p.scripts.check,/v4773-apply-patch/);
  if(!existsSync(new URL('../public/game.js',import.meta.url))){const patch=read('scripts/v461-apply-patch.mjs');assert.match(patch,/portalPointV461/);assert.match(patch,/graphNeighbors/);return;}
  const g=read('public/game.js'),s=read('server/world.js'),r=read('public/modules/frontier-routing-v440.js');
  assert.match(g,/portalPointV461\(fromLabel,toLabel,map.world\)/);

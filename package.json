@@ -1,11 +1,11 @@
 {
   "name": "stellar-legacy",
-  "version": "47.7.2",
+  "version": "47.7.3",
   "type": "module",
   "scripts": {
     "start": "node server/index.js",
     "dev": "node --watch server/index.js",
-    "check": "node scripts/v4772-apply-patch.mjs && node scripts/verify-release.mjs",
+    "check": "node scripts/v4773-apply-patch.mjs && node scripts/verify-release.mjs",
     "test": "node --test tests/*.test.mjs",
     "verify": "npm run check && npm run check:v21 && npm test",
     "check:v21": "node scripts/check-v21-package.mjs"
@@ -19,5 +19,5 @@
   "engines": {
     "node": ">=18"
   },
-  "release": "Bot Wars Stability V47.7.2: protected-zone hit guard, offscreen combat audio/FX culling, no gameplay changes"
+  "release": "Performance Rescue V47.7.3: low-FPS unlocked, 150ms Warbot tick, authoritative U-1/U-3 admin navigation and NPC room re-sync"
 }
