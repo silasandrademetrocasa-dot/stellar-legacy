@@ -4811,3 +4811,18 @@ body[data-device="mobile"] #weaponBar .ability-btn.ready{
 .astral-adm-grid input,.astral-adm-grid select{width:100%;min-width:0;padding:7px;border-radius:5px;background:#101a30;color:#e5f4ff;border:1px solid #587295}
 .astral-rewards-history{margin:14px 0 0;font-size:12px;line-height:1.7}
 @media(max-width:660px){.astral-adm-grid{grid-template-columns:1fr}.astral-rewards-box{padding:8px}.astral-rewards-actions button{width:100%}}
+
+/* UNIFIED_EXPANSION_V42 */
+.frontier-quick-v42{position:fixed;right:12px;top:72px;z-index:28;background:#172641;color:#d5ebff;border:1px solid #6aa4e0;border-radius:8px;padding:7px 10px;font-size:11px;font-weight:800;cursor:pointer;max-width:110px}
+.frontier-panel-v42{width:min(850px,95vw);max-height:88vh;overflow:auto}
+.frontier-content-v42{color:#e0edff;font-size:13px;line-height:1.55}
+.frontier-tabs-v42{display:flex;flex-wrap:wrap;gap:5px;margin:10px 0}
+.frontier-tabs-v42 button{font-size:11px;padding:7px;border:1px solid #576786;background:#172341;color:#c8ddfb;border-radius:8px}
+.frontier-tabs-v42 button.active{background:#315886;color:white}
+.frontier-card-v42{padding:11px;margin:8px 0;border:1px solid #415c7b;border-radius:10px;background:rgba(10,22,45,.75)}
+.frontier-card-v42 h4{margin:0 0 6px;color:#b3ddff}
+.frontier-card-v42 small{color:#b0bcd0}
+.frontier-card-v42 button{margin:8px 0 0;padding:7px 10px;background:#315886;border:1px solid #9bc8fa;color:white;border-radius:7px;cursor:pointer}
+.frontier-card-v42 button:disabled{opacity:.5;cursor:default}
+.frontier-input-v42{padding:7px;border-radius:5px;background:#111b2e;border:1px solid #6b85a5;color:white;max-width:100%}
+@media(max-width:640px){.frontier-quick-v42{right:7px;top:59px;font-size:10px;padding:5px 7px}.frontier-panel-v42{width:98vw;max-height:85vh}.frontier-content-v42{font-size:12px}}

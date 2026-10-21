@@ -1,0 +1,76 @@
+// Stellar Legacy — Unificação V39–V42: telas auxiliares, sem loops de quadro/Canvas.
+// Toda alteração de moeda/material depende de RPC transacional do servidor.
+import {loadUnifiedExpansionV42,actUnifiedExpansionV42,squadUnifiedExpansionV42,adminUnifiedExpansionV42} from '../api.js';
+const el=id=>document.getElementById(id);
+const esc=s=>String(s??'').replace(/[&<>"']/g,k=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[k]));
+const fmt=v=>Number(v||0).toLocaleString('pt-BR');
+const tabs=[['forge','39 • FORJA'],['war','40 • GUERRA'],['scout','41 • EXPLORAÇÃO'],['civil','42 • CIVILIZAÇÃO'],['admin','ADMIN']];
+let snapshot=null,tab='forge',working=false;
+const entry=(kind)=>Array.isArray(snapshot?.catalog)?snapshot.catalog.filter(a=>a.kind===kind):[];
+const amount=(s,k)=>Math.max(0,Number(s?.[k]||0));
+const btn=(act,code,title,qty=1)=>`<button type="button" data-v42-action="${esc(act)}" data-v42-code="${esc(code)}" data-v42-qty="${qty}">${esc(title)}</button>`;
+const costText=obj=>Object.entries(obj||{}).map(([k,v])=>`${fmt(v)} ${esc(k)}`).join(' • ');
+function forge(){return `<p>FABRICAÇÃO ASTRAL — protótipos colecionáveis que não alteram o dano ou escudo até validação do motor.</p>
+<p>Materiais: ${['Aurorium','Nexium','Eclipsium'].map(k=>`${esc(k)} <b>${fmt(snapshot.materials?.[k])}</b>`).join(' · ')}</p>
+${entry('forge').map(x=>{const count=snapshot.items?.find(i=>i.code===x.code)?.quantity||0;return `<section class="frontier-card-v42"><h4>${esc(x.title)}</h4><small>Necessário: ${costText(x.rule.cost)} • Produzidos: ${fmt(count)}</small><div>${btn('forge',x.code,'FABRICAR 1')}</div></section>`}).join('')}`}
+function war(){const scores=(snapshot?.warScores||[]);const squad=snapshot?.squad;
+return `<p>GALACTIC SQUADS — equipes de até quatro pilotos da mesma facção. O ranking utiliza abates confirmados no servidor nos últimos sete dias.</p>
+<section class="frontier-card-v42"><h4>MEU ESQUADRÃO</h4>${squad&&squad.code?`<p>Código do grupo: <b>${esc(squad.code)}</b> · ${fmt(squad.members)}/4 membros · ${esc(squad.faction)}</p>${btn('leave','squad','SAIR DO GRUPO')}`:
+`<p>Você ainda não participa de um esquadrão.</p>${btn('create','squad','CRIAR ESQUADRÃO')} <input id="frontierInviteV42" class="frontier-input-v42" maxlength="8" placeholder="Código de convite" aria-label="Código do esquadrão"/> ${btn('join','squad','ENTRAR')}`}</section>
+<section class="frontier-card-v42"><h4>ATIVIDADE DAS FACÇÕES · 7 DIAS</h4>
+${scores.length?scores.map((x,i)=>`<div>${i+1}º ${esc(x.faction)} — <strong>${fmt(x.verifiedKills)}</strong> abates confirmados</div>`).join(''):'<small>Ainda não há abates verificados nesta janela.</small>'}
+<small>Esse ranking é um primeiro passo. Domínio territorial PvP e combates em grupo exigem integração adicional com o servidor de mundo.</small></section>`}
+function scout(){const active=(snapshot.expeditions||[]).find(x=>!x.claimed),research=snapshot.researchPoints;
+return `<p>EXPEDIÇÕES — missões cronometradas com custos reais e pontos de pesquisa entregues pelo servidor.</p><p>Pontos de pesquisa: <b>${fmt(research)}</b> · Créditos: <b>${fmt(snapshot.credits)}</b></p>
+${active?`<section class="frontier-card-v42"><h4>EXPEDIÇÃO EM ANDAMENTO</h4><div>${esc(active.code)} · ${new Date(active.readyAt).toLocaleString('pt-BR')}</div>${Date.now()>=Date.parse(active.readyAt)?btn('expedition_claim',active.code,'COLETAR PESQUISA'): '<small>Missão ainda em andamento. Volte após a conclusão.</small>'}</section>`:''}
+${entry('expedition').map(x=>`<section class="frontier-card-v42"><h4>${esc(x.title)}</h4><small>${fmt(x.rule.credits)} CR · ${fmt(x.rule.minutes)} minutos · ${fmt(x.rule.research)} pontos de pesquisa</small><div>${active?'<small>Conclua a expedição em andamento antes de iniciar outra.</small>':btn('expedition_start',x.code,'INICIAR EXPEDIÇÃO')}</div></section>`).join('')}`}
+function civil(){return `<p>PROJETOS DE FACÇÃO — doe materiais para objetivos coletivos persistidos no servidor.</p><p>Sua facção: <b>${esc(snapshot.faction||'não definida')}</b></p>
+${entry('project').map(x=>{const s=(snapshot.projects||[]).find(p=>p.faction===snapshot.faction&&p.project===x.code);const total=s?.total||0;return `<section class="frontier-card-v42"><h4>${esc(x.title)}</h4><div>Contribuições da facção: <b>${fmt(total)}</b> / meta ${fmt(x.rule.goal)}</div><small>Cada ponto usa ${fmt(x.rule.perPoint)} ${esc(x.rule.resource)}</small><div><input class="frontier-input-v42" type="number" min="1" max="100" value="1" data-v42-amount="${esc(x.code)}" aria-label="Quantidade para ${esc(x.title)}"/> ${btn('donate',x.code,'CONTRIBUIR')}</div></section>`}).join('')}
+<small>Os projetos são objetivos cooperativos. Buffs globais e bônus de PvP não estão ativados nesta integração inicial.</small>`}
+function admin(){if(!snapshot?.isAdmin)return '<p>Área administrativa restrita.</p>';
+return `<p>ADMIN — custos configuráveis sem editar código. Campos estruturais não podem ser alterados.</p>
+${(snapshot.catalog||[]).map(x=>{const r=x.rule||{};const fields=x.kind==='forge'?Object.entries(r.cost||{}).map(([k,v])=>`<label>${esc(k)} <input type="number" min="0" max="10000" value="${fmt(v).replaceAll('.','')}" class="frontier-input-v42" data-v42-edit="${esc(x.code)}" data-v42-field="${esc(k)}"/></label>`).join(' • '): x.kind==='expedition'?['credits','minutes','research'].map(k=>`<label>${k} <input type="number" min="1" value="${Number(r[k]||0)}" class="frontier-input-v42" data-v42-edit="${esc(x.code)}" data-v42-field="${k}"/></label>`).join(' • '):`<label>Material / ponto <input type="number" min="1" max="100" value="${Number(r.perPoint||1)}" class="frontier-input-v42" data-v42-edit="${esc(x.code)}" data-v42-field="perPoint"/></label>`;
+return `<section class="frontier-card-v42"><h4>${esc(x.title)}</h4>${fields}<div>${btn('admin_save',x.code,'SALVAR CONFIGURAÇÃO')}</div></section>`}).join('')}`}
+function render(){const root=el('frontierExpansionContentV42');if(!root)return;
+if(!snapshot){root.innerHTML='<p>Carregando operações do universo…</p>';return;}
+root.innerHTML=`<div class="frontier-tabs-v42">${tabs.filter(x=>x[0]!=='admin'||snapshot.isAdmin).map(([id,label])=>`<button data-v42-tab="${id}" class="${tab===id?'active':''}">${label}</button>`).join('')}</div>${({forge,war,scout,civil,admin}[tab]||forge)()}`;
+root.querySelectorAll('[data-v42-tab]').forEach(b=>b.addEventListener('click',()=>{tab=b.dataset.v42Tab;render()}));
+root.querySelectorAll('[data-v42-action]').forEach(b=>b.addEventListener('click',async()=>{
+ if(working)return;
+ const action=b.dataset.v42Action,code=b.dataset.v42Code;
+ if(action==='donate'&&!confirm('Contribuir materiais ao projeto? Esta ação é permanente.'))return;
+ working=true;b.disabled=true;b.textContent='PROCESSANDO…';
+ try{
+   let result;
+   if(action==='create'||action==='join'||action==='leave')result=await squadUnifiedExpansionV42(action,action==='join'?(el('frontierInviteV42')?.value||'').trim().toLowerCase():'');
+   else if(action==='admin_save'){
+     const x=snapshot.catalog.find(x=>x.code===code);
+     const data={};root.querySelectorAll(`[data-v42-edit="${code}"]`).forEach(i=>data[i.dataset.v42Field]=Number(i.value));
+     result=await adminUnifiedExpansionV42(code,x.kind==='forge'?{cost:data}:data);
+   }
+   else {
+     const n=action==='donate'?Math.floor(Number(root.querySelector(`[data-v42-amount="${code}"]`)?.value)||1):Number(b.dataset.v42Qty||1);
+     if(n<1||n>100)throw Error('A quantidade deve ser de 1 a 100.');
+     result=await actUnifiedExpansionV42(action,code,n,crypto.randomUUID());
+   }
+   if(!result?.ok)throw Error(result?.error||'Operação não confirmada');
+   // Não manter saldos desatualizados no navegador; nova carga obrigatória.
+   if(['forge','donate','expedition_start'].includes(action)){
+     alert('Operação confirmada no Supabase. O jogo será recarregado para sincronizar moedas, recursos e a revisão do save.');
+     location.reload();return;
+   }
+   await refresh();
+ }catch(e){alert(String(e?.message||e));}
+ finally{working=false;const now=el('frontierExpansionContentV42');if(now&&!snapshot)now.textContent='Falha ao sincronizar.';}
+ }));
+}
+async function refresh(){const root=el('frontierExpansionContentV42');if(root)root.textContent='Sincronizando com o servidor…';
+ try{snapshot=await loadUnifiedExpansionV42();if(snapshot?.error)throw Error(snapshot.error);render();}
+ catch(e){snapshot=null;if(root)root.textContent=`Expansões indisponíveis: ${e?.message||e}. Confira a migração SQL.`;}
+}
+function boot(){const button=el('frontierExpansionBtnV42'),modal=el('frontierExpansionModalV42');if(!button||!modal)return;
+ button.addEventListener('click',()=>{modal.classList.remove('hidden');refresh()});
+ el('frontierExpansionCloseV42')?.addEventListener('click',()=>modal.classList.add('hidden'));
+ modal.addEventListener('click',e=>{if(e.target===modal)modal.classList.add('hidden')});
+}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();

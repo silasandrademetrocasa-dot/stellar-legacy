@@ -1,0 +1,22 @@
+STELLAR LEGACY — PACOTE ÚNICO V39–V42
+BASE REQUERIDA: V38.1.0. V38.1 já deve estar no GitHub E SQL instalado.
+VERSÃO FINAL DO PACOTE: 42.0.0.
+
+ATENÇÃO: Esta entrega é uma PRIMEIRA IMPLEMENTAÇÃO JOGÁVEL/ADMINISTRÁVEL de
+quatro subsistemas. NÃO é a conclusão das 24 etapas discutidas no roadmap.
+Detalhamento do que está pronto e do que falta em V42_0_0_RELEASE_NOTES.md.
+
+1. FAÇA BACKUP de game_saves, profiles e das configurações atuais.
+2. Execute sql/STELLAR_V39_TO_V42_UNIFIED.sql no SQL Editor do seu Supabase.
+3. Envie APENAS ESTE ZIP para a raiz do GitHub (não extraia manualmente).
+4. No Actions, execute o Instalador Universal. Deve haver só um ZIP na raiz.
+5. A instalação faz PATCH dos arquivos presentes, testa e atualiza para 42.0.0.
+6. Aguarde o Render ficar Live e teste a aba ✦ UNIVERSO após login.
+7. Teste em conta não ADM e ADM antes de abrir a atualização a todos.
+
+NÃO coloque este ZIP sobre qualquer branch diferente de 38.1.0.
+A migração não precisa ser repetida a cada deploy. Não altera os saves ao instalar.
+Nenhum pagamento online, item premium ou recompensa financeira foi implementado.
+
+ROLLBACK: voltar código à V38.1.0. As tabelas u42 podem permanecer; não execute
+DROP em produção. Verifique sincronização das revisões antes de reverter um save.

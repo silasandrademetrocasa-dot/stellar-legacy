@@ -1171,3 +1171,9 @@ export async function loadAstralRewardsV381(){return authedServerFetch('/api/ast
 export async function lockAstralRewardV381(gate){return authedServerFetch('/api/astral-rewards/lock',{method:'POST',body:JSON.stringify({gate})});}
 export async function claimAstralRewardV381(gate){return authedServerFetch('/api/astral-rewards/claim',{method:'POST',body:JSON.stringify({gate})});}
 export async function adminSetAstralRewardV381(gate,config){return authedServerFetch('/api/admin/astral-rewards',{method:'POST',body:JSON.stringify({gate,config})});}
+
+// V39–V42: APIs autenticadas; nenhum acesso direto a segredos.
+export async function loadUnifiedExpansionV42(){return authedServerFetch('/api/frontier/v42');}
+export async function actUnifiedExpansionV42(action,code,amount=1,idempotencyKey){return authedServerFetch('/api/frontier/v42/action',{method:'POST',body:JSON.stringify({action,code,amount,idempotencyKey})});}
+export async function squadUnifiedExpansionV42(action,inviteCode=''){return authedServerFetch('/api/frontier/v42/squad',{method:'POST',body:JSON.stringify({action,inviteCode})});}
+export async function adminUnifiedExpansionV42(code,cost){return authedServerFetch('/api/admin/frontier/v42/catalog',{method:'POST',body:JSON.stringify({code,cost})});}

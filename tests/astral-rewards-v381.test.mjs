@@ -33,7 +33,7 @@ test('rotas de resgate usam identidade autenticada e service role apenas no serv
 test('atualização incremental é idempotente e preserva o game.js',()=>{
  const patch=read('scripts/v381-apply-patch.mjs');
  const pkg=JSON.parse(read('package.json'));
- assert.equal(pkg.version,'38.1.0');
+ assert.ok(Number(pkg.version.split('.')[0])>=38, 'release não pode regredir');
  assert.equal(pkg.scripts.start,'node server/index.js');
  assert.match(patch,/if\(!c\.includes\('attachAstralRewardsV381\(app,'\)\)/);
  assert.match(patch,/if\(c\.includes\('export async function loadAstralRewardsV381\('/);

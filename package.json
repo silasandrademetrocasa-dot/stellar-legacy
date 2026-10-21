@@ -1,11 +1,11 @@
 {
   "name": "stellar-legacy",
-  "version": "38.1.0",
+  "version": "42.0.0",
   "type": "module",
   "scripts": {
     "start": "node server/index.js",
     "dev": "node --watch server/index.js",
-    "check": "node scripts/v381-apply-patch.mjs && node scripts/verify-release.mjs",
+    "check": "node scripts/v42-apply-patch.mjs && node scripts/verify-release.mjs",
     "test": "node --test tests/*.test.mjs",
     "verify": "npm run check && npm run check:v21 && npm test",
     "check:v21": "node scripts/check-v21-package.mjs"
@@ -17,5 +17,5 @@
     "compression": "^1.7.5"
   },
   "engines": {"node": ">=18"},
-  "release": "Astral Rewards · Bônus por dificuldade, materiais únicos, semanais, ADM e resgate único"
+  "release": "Unified Expansion V39–V42: Astral Forge, Galactic Squads, Scouting, Faction Research"
 }
