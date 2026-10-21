@@ -5,7 +5,45 @@ export const WARBOT_FACTIONS = Object.freeze(['earth','mars','jupiter']);
 export const WARBOT_DEFAULT = Object.freeze({enabled:false,mode:'training',bots_per_faction:2,tier:1,attack_players:false,ends_at:null});
 const COLORS={earth:'#52cfff',mars:'#ff7d5e',jupiter:'#e5bb65'};
 const LABELS={earth:'TERRA',mars:'MARTE',jupiter:'JÚPITER'};
-const NPC_CADENCE_MS=360, BOT_RESPAWN_MS=22000, TARGET_RADIUS=1100;
+const NPC_CADENCE_MS=300, BOT_RESPAWN_MS=22000, TARGET_RADIUS=1450;
+export const WARBOT_ROLES=Object.freeze(['interceptor','assault','guardian','support']);
+const ROLE_LABELS={interceptor:'INTERCEPTOR',assault:'ASSALTO',guardian:'GUARDIÃO',support:'SUPORTE'};
+export const warbotRole=i=>WARBOT_ROLES[Math.max(0,Math.floor(Number(i)||0))%4];
+export function warbotPlayerEligible(room,bot,ws,settings,now=Date.now()){
+  const p=ws?.player,provoked=bot.aggroPilotId===p?.userId&&bot.aggroPilotUntil>now;
+  if(!p||!room.playerFresh(p)||Number(p.hp)<=0||!Number.isFinite(p.x)||!Number.isFinite(p.y))return false;
+  if(room.playerSafe?.(p)||room.playerPortalNeutral?.(p))return false;
+  if(p.faction===bot.faction&&!(settings.mode==='training'&&provoked))return false;
+  return settings.mode==='training'?provoked:settings.attack_players===true;
+}
+export function warbotTarget(bot,others,clients,room,settings,now=Date.now()){
+  let pilot=null,pilotScore=Infinity;
+  for(const ws of clients){
+    if(!warbotPlayerEligible(room,bot,ws,settings,now))continue;
+    const p=ws.player,d=Math.hypot(bot.x-p.x,bot.y-p.y);
+    if(d>TARGET_RADIUS)continue;
+    const score=d-(bot.aggroPilotId===p.userId&&bot.aggroPilotUntil>now?600:0);
+    if(score<pilotScore){pilot={kind:'pilot',target:p,ws,dist:d};pilotScore=score;}
+  }
+  if(pilot)return pilot; // Pilot ALWAYS takes priority when ADM has permitted attack.
+  let enemy=null,best=Infinity;
+  for(const other of others){
+    if(other.faction===bot.faction||other.hp<=0)continue;
+    const d=Math.hypot(bot.x-other.x,bot.y-other.y),score=d-(other.shield<=0?80:0);
+    if(score<best){enemy={kind:'bot',target:other,dist:d};best=score;}
+  }
+  return enemy;
+}
+export function warbotTacticalMove(b,goal,engaged,dt,world){
+  const dx=goal.x-b.x,dy=goal.y-b.y,d=Math.max(1,Math.hypot(dx,dy)),nx=dx/d,ny=dy/d;
+  const role=b.role||'assault',ideal=role==='support'?540:role==='guardian'?430:role==='interceptor'?310:380;
+  const weak=(b.shield||0)/Math.max(1,b.maxShield||1)<.2&&(b.hp||0)<(b.maxHp||1)*.75;
+  const forward=weak&&engaged?-.95:d>ideal+70?1:d<ideal-95?-.6:0;
+  const orbit=engaged?(role==='interceptor'?.85:role==='support'?.3:.48):0;
+  const side=b.index%2===0?1:-1,dxm=nx*forward-ny*orbit*side,dym=ny*forward+nx*orbit*side,mag=Math.max(1,Math.hypot(dxm,dym));
+  const step=Math.max(0,Math.min(.45,dt))*b.speed;
+  return {x:clamp(b.x+dxm/mag*step,95,world.w-95),y:clamp(b.y+dym/mag*step,95,world.h-95),angle:Math.atan2(dy,dx)};
+}
 const clamp=(v,min,max)=>Math.min(max,Math.max(min,Number(v)||min));
 export function cleanWarbotConfig(input,now=Date.now()){
   const mode=input?.mode==='conquest'?'conquest':'training';
@@ -20,7 +58,7 @@ export function activeWarbotConfig(input,now=Date.now()){
 export function createWarbotEngine(room){
   const bots=new Map();let settings={...WARBOT_DEFAULT};let nextFrameAt=0,lastTick=0,lastPublishedAt=0;
   function publicBot(b){
-    return {id:b.id,type:'mordon',warBot:true,faction:b.faction,name:b.name,x:Math.round(b.x),y:Math.round(b.y),angle:b.angle,visualAngle:b.angle,
+    return {id:b.id,type:'mordon',warBot:true,faction:b.faction,role:b.role,name:b.name,x:Math.round(b.x),y:Math.round(b.y),angle:b.angle,visualAngle:b.angle,
       hp:Math.round(b.hp),maxHp:b.maxHp,shield:Math.round(b.shield),maxShield:b.maxShield,size:26,color:b.color,
       speed:b.speed,credits:0,uridium:0,xp:0,resources:{},bossPhase:0,eventNpc:false,ownerUserId:null};
   }
@@ -36,8 +74,9 @@ export function createWarbotEngine(room){
     const angle=idx*2.31+WARBOT_FACTIONS.indexOf(faction)*2.1;
     const pos={x:clamp(anchor.x+Math.cos(angle)*520,120,w-120),y:clamp(anchor.y+Math.sin(angle)*520,120,h-120)};
     const tier=settings.tier, hp=90000*tier,shield=150000*tier;
-    Object.assign(bot,{id:`warbot_${room.mapId}_${faction}_${idx}`,name:`${LABELS[faction]} • ${idx+1}`,faction,color:COLORS[faction],
-      ...pos,hp,maxHp:hp,shield,maxShield:shield,speed:180+tier*18,damage:1200*tier,angle:0,lastShotAt:0,lastPilotShotAt:0,
+    const role=warbotRole(idx);
+    Object.assign(bot,{id:`warbot_${room.mapId}_${faction}_${idx}`,name:`${LABELS[faction]} • ${ROLE_LABELS[role]}`,faction,role,index:idx,color:COLORS[faction],
+      ...pos,hp,maxHp:hp,shield,maxShield:shield,speed:(role==='interceptor'?245:role==='guardian'?155:role==='support'?175:205)+tier*15,damage:(role==='assault'?1500:role==='interceptor'?1250:role==='guardian'?1000:900)*tier,angle:0,lastShotAt:0,lastPilotShotAt:0,aggroPilotId:null,aggroPilotUntil:0,
       targetId:null,spawnAt:Date.now(),respawnAt:0});
   }
   function configure(raw){
@@ -76,43 +115,31 @@ export function createWarbotEngine(room){
     if(!settings.enabled||!room.clients.size)return;
     if(settings.ends_at&&Date.parse(settings.ends_at)<=now){configure({...settings,enabled:false});return;}
     if(now<nextFrameAt)return;
-    const delta=lastTick?Math.min(.45,(now-lastTick)/1000):.30;lastTick=now;nextFrameAt=now+NPC_CADENCE_MS;
-    for(const b of bots.values()){
+    const delta=lastTick?Math.min(.45,(now-lastTick)/1000):.3;lastTick=now;nextFrameAt=now+NPC_CADENCE_MS;
+    const pilots=[...room.clients],roster=[...bots.values()];
+    for(const b of roster){
       if(b.hp<=0){if(now>=b.respawnAt){spawn(b,b.faction,Number(b.id.split('_').at(-1))||0);room.broadcast({type:'npc_spawn',entity:publicBot(b)});}continue;}
-      const {target,dist}=nearestEnemy(b);
-      const patrol=chooseTargetNode(b);const goal=target&&dist<TARGET_RADIUS*2?target:patrol;
-      const dx=goal.x-b.x,dy=goal.y-b.y,d=Math.hypot(dx,dy)||1;
-      b.angle=Math.atan2(dy,dx);
-      const comfortable=target&&dist<TARGET_RADIUS?70:145;
-      if(d>comfortable){const step=Math.min(d-comfortable,b.speed*delta);b.x=clamp(b.x+dx/d*step,75,room.map.world.w-75);b.y=clamp(b.y+dy/d*step,75,room.map.world.h-75);}
-      if(target&&dist<950&&now-b.lastShotAt>=1150){
-        b.lastShotAt=now;const dmg=b.damage;
-        hurt(target,dmg);
-        room.broadcast({type:'warbot_fire',from:{x:b.x,y:b.y},to:{x:target.x,y:target.y},color:b.color,source:b.id,target:target.id});
-      }
-      // Optional player skirmish. Training is ALWAYS non-lethal and does not change player vitals.
-      if(now-b.lastPilotShotAt>=1800){
-        const victims=[...room.clients].filter(ws=>ws.player&&room.playerFresh(ws.player)&&ws.player.hp>0&&ws.player.faction!==b.faction);
-        let nearest=null,nearDist=780;
-        for(const ws of victims){const p=ws.player,d=Math.hypot(p.x-b.x,p.y-b.y);if(d<nearDist){nearDist=d;nearest=ws;}}
-        if(nearest&&(settings.mode==='training'||settings.attack_players)){
-          // In training only pilots engaging these bots are targeted, never passive travelers.
-          if(settings.mode==='training'&&now-(nearest._lastWarbotHitAt||0)>15000)continue;
-          b.lastPilotShotAt=now;
-          room.broadcast({type:'warbot_fire',from:{x:b.x,y:b.y},to:{x:nearest.player.x,y:nearest.player.y},color:b.color,source:b.id,target:'pilot'});
-          if(settings.mode==='training'){
-            nearest.send(JSON.stringify({type:'warbot_spar_hit',entityId:b.id,estimatedDamage:b.damage}));
-          }else if(settings.attack_players){
-            nearest.send(JSON.stringify({type:'npc_attack',entityId:b.id,damage:b.damage,retaliation:false}));
-          }
-        }
-      }
+      const choice=warbotTarget(b,roster,pilots,room,settings,now);
+      const target=choice?.target||chooseTargetNode(b);
+      const moved=warbotTacticalMove(b,target,!!choice,delta,room.map.world);
+      b.x=moved.x;b.y=moved.y;b.angle=moved.angle;
+      if(!choice||choice.dist>=1050)continue;
+      const last=choice.kind==='pilot'?'lastPilotShotAt':'lastShotAt';
+      const cadence=choice.kind==='pilot'?1300:b.role==='interceptor'?900:1150;
+      if(now-(b[last]||0)<cadence)continue;
+      b[last]=now;
+      room.broadcast({type:'warbot_fire',from:{x:b.x,y:b.y},to:{x:target.x,y:target.y},color:b.color,source:b.id,target:choice.kind==='pilot'?'pilot':target.id});
+      if(choice.kind==='bot')hurt(target,b.damage);
+      else if(settings.mode==='training')choice.ws.send(JSON.stringify({type:'warbot_spar_hit',entityId:b.id,estimatedDamage:b.damage}));
+      else if(settings.attack_players)choice.ws.send(JSON.stringify({type:'npc_attack',entityId:b.id,damage:b.damage,retaliation:false}));
     }
-    if(now-lastPublishedAt>=350){lastPublishedAt=now;broadcastBots();}
+    if(now-lastPublishedAt>=300){lastPublishedAt=now;broadcastBots();}
   }
   function handleHit(ws,msg,admitDamage){
     const b=bots.get(String(msg.entityId||'')),p=ws.player;
     if(!settings.enabled||!b||b.hp<=0||!p||!room.playerFresh(p)||String(ws.identity?.user?.id||'')!==String(p.userId))return;
+    if(settings.mode==='conquest'&&p.faction===b.faction)return; // Friendly fire is disabled for conquest
+    if(settings.mode==='conquest'&&p.faction===b.faction)return; // no friendly-fire in conquest
     // Same protection for bot shots as ordinary NPC hits: validation, rate limiting, range and cap.
     const policy=admitDamage(ws,msg,Date.now());
     if(!policy.allowed)return ws.send(JSON.stringify({type:'warbot_damage_result',entityId:b.id,actual:0,rejected:policy.reason}));
@@ -122,7 +149,7 @@ export function createWarbotEngine(room){
     const beforeShield=b.shield,beforeHp=b.hp;
     const actual=msg.mode==='shield_drain'?Math.min(amount,b.shield):hurt(b,amount);
     if(msg.mode==='shield_drain')b.shield-=actual;
-    ws._lastWarbotHitAt=Date.now();
+    if(actual>0){ws._lastWarbotHitAt=Date.now();b.aggroPilotId=p.userId;b.aggroPilotUntil=Date.now()+20000;}
     ws.send(JSON.stringify({type:'warbot_damage_result',entityId:b.id,actual,mode:msg.mode||'damage',critical:!!msg.critical,beforeShield,beforeHp,hp:b.hp,shield:b.shield}));
     room.broadcast({type:'npc_patch',entity:{id:b.id,hp:b.hp,shield:b.shield}});
     // No kill/reward/XP/loot events. Shared killNpc() is NEVER called.

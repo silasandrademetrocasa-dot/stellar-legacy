@@ -40,10 +40,10 @@ test('persistent SQL adds six routes and changes map and sector minimums, withou
 });
 test('release, cache versions and earlier core security tests remain connected',()=>{
  const pkg=JSON.parse(read('package.json'));
- assert.equal(pkg.version,'47.7.0');assert.match(pkg.scripts.check,/v477-apply-patch/);
- assert.ok(read('public/index.html').includes('/game.js?v=47.7.0'));
- assert.ok(read('server/index.js').includes("const RELEASE_VERSION = '47.7.0'"));
- assert.ok(read('tests/v450-galactic-ascension.test.mjs').includes('v477-apply-patch'));
+ assert.equal(pkg.version,'47.7.1');assert.match(pkg.scripts.check,/v4771-apply-patch/);
+ assert.ok(read('public/index.html').includes('/game.js?v=47.7.1'));
+ assert.ok(read('server/index.js').includes("const RELEASE_VERSION = '47.7.1'"));
+ assert.ok(read('tests/v450-galactic-ascension.test.mjs').includes('v4771-apply-patch'));
  assert.ok(read('server/world.js').includes('sectorEntryAllowedV450'));
  assert.ok(read('server/world.js').includes('mergeFrontierServerPortalsV440'));
 });

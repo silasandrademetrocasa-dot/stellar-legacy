@@ -1,11 +1,11 @@
 {
   "name": "stellar-legacy",
-  "version": "47.7.0",
+  "version": "47.7.1",
   "type": "module",
   "scripts": {
     "start": "node server/index.js",
     "dev": "node --watch server/index.js",
-    "check": "node scripts/v477-apply-patch.mjs && node scripts/verify-release.mjs",
+    "check": "node scripts/v4771-apply-patch.mjs && node scripts/verify-release.mjs",
     "test": "node --test tests/*.test.mjs",
     "verify": "npm run check && npm run check:v21 && npm test",
     "check:v21": "node scripts/check-v21-package.mjs"
@@ -19,5 +19,5 @@
   "engines": {
     "node": ">=18"
   },
-  "release": "Galactic Bot Wars V47.7: ADM per-map OFF by default, conquest and safe training bot skirmishes; no rewards or autonomous SQL captures"
+  "release": "Bot Wars Polish V47.7.1: tactical NPC targeting of enemy pilots, faction sprites, minimap sector label and topbar universe button"
 }

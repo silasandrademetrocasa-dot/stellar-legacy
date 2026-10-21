@@ -4877,3 +4877,7 @@ body[data-device="mobile"] #weaponBar .ability-btn.ready{
 .warbot-adm-controls .warbot-adm-check{justify-content:flex-start}
 .warbot-adm-controls input{accent-color:#6beaff}
 @media(max-width:520px){.warbot-adm-grid{grid-template-columns:1fr}.warbot-adm-controls select{max-width:54%}}
+
+/* V47.7.1 TOPBAR */
+.universe-top-btn{position:static!important;inset:auto!important;transform:none!important;display:inline-flex!important;align-items:center;justify-content:center;white-space:nowrap;font-size:11px;box-shadow:none!important}
+#minimapMapLabelV4771{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}

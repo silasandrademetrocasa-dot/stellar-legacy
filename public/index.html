@@ -6,10 +6,10 @@
 <meta content="width=device-width,initial-scale=1,user-scalable=no,viewport-fit=cover" name="viewport"/>
 <meta content="#030816" name="theme-color"/>
 <title>Stellar Legacy</title>
-<link rel="manifest" href="/manifest.webmanifest?v=47.7.0"/>
+<link rel="manifest" href="/manifest.webmanifest?v=47.7.1"/>
 <link rel="icon" type="image/png" href="/icons/stellar-192.png"/>
 <link rel="apple-touch-icon" href="/icons/stellar-192.png"/>
-<link href="/style.css?v=47.7.0" rel="stylesheet"/>
+<link href="/style.css?v=47.7.1" rel="stylesheet"/>
 </head>
 <body>
 <div class="stellar-boot-splash" id="stellarBootSplash" role="status" aria-label="Preparando Stellar Legacy">
@@ -66,6 +66,7 @@
 
   <button class="small-btn clan-top-btn" id="clanBtn" type="button">CLÃ <span id="clanTopTag">—</span></button>
   <button class="small-btn" id="mapBtn" type="button">MAPA</button>
+  <button class="small-btn universe-top-btn" id="frontierExpansionBtnV42" type="button" title="Expansões do Universo">✦ UNIVERSO</button>
   <button class="small-btn auction-top-btn" id="auctionBtn" type="button">LEILÃO <span id="auctionTopClock">60:00</span></button>
 
   <div class="menu-group menu-group-right" data-menu-group="shops">
@@ -280,7 +281,7 @@
 <div class="minimap-toolbar tappable-toolbar" id="minimapHeader">
 <div class="minimap-toolbar-left">
 <button aria-label="Expandir / recolher minimapa" class="stats-expand-btn" id="minimapToggle" title="Expandir / recolher minimapa">▾</button>
-<div class="stats-toolbar-label">MAPA</div>
+<div class="stats-toolbar-label" id="minimapMapLabelV4771">MAPA</div>
 </div>
 </div>
 <canvas height="220" id="minimap" width="220"></canvas>
@@ -612,7 +613,7 @@
 </div>
 
 
-<button id="frontierExpansionBtnV42" class="frontier-quick-v42" type="button" title="Expansoes do Universo">✦ UNIVERSO</button>
+
 <div id="frontierExpansionModalV42" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="frontierExpansionTitleV42"><div class="modal-card frontier-panel-v42"><div class="modal-header"><div><div class="eyebrow">EXPANSÃO UNIFICADA</div><h2 id="frontierExpansionTitleV42">UNIVERSO ESTELAR</h2></div><button class="small-btn" id="frontierExpansionCloseV42" type="button">FECHAR</button></div><div id="frontierExpansionContentV42" class="frontier-content-v42"></div></div></div>
 <div class="modal hidden" id="adminModal">
   <div class="modal-card admin-modal-card">
@@ -1130,8 +1131,8 @@
 </div>
 </div>
 <div class="perf-diag-overlay hidden" id="perfDiagOverlay" aria-live="off" aria-label="Contador de FPS local"><b id="perfDiagHudFps">FPS —</b><small id="perfDiagHudStutter">P95 —</small></div>
-<script src="/game.js?v=47.7.0" type="module"></script>
-<script type="module" src="/modules/astral-rewards-v381.js?v=47.7.0"></script>
-<script type="module" src="/modules/unified-expansion-v42.js?v=47.7.0"></script>
+<script src="/game.js?v=47.7.1" type="module"></script>
+<script type="module" src="/modules/astral-rewards-v381.js?v=47.7.1"></script>
+<script type="module" src="/modules/unified-expansion-v42.js?v=47.7.1"></script>
 </body>
 </html>

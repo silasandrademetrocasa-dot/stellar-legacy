@@ -42,11 +42,11 @@ test('SQL function is read-only, admin-authorized and no public executable privi
 });
 test('all components are wired into V45, and source saves are never rewritten',()=>{
  const p=JSON.parse(read('package.json'));
- assert.equal(p.version,'47.7.0');assert.match(p.scripts.check,/v477-apply-patch/);
+ assert.equal(p.version,'47.7.1');assert.match(p.scripts.check,/v4771-apply-patch/);
  assert.match(read('server/world.js'),/sectorEntryAllowedV450\(mapId,territorial,sector,territory\)/);
  assert.match(read('server/world.js'),/frontierEliteRespawnV450\(this\.mapId,r\.type,this\.npcs\.values\(\)\)/);
  assert.match(read('server/index.js'),/attachFrontierAuditV450\(app/);
  assert.match(read('public/modules/unified-expansion-v42.js'),/renderFrontierAuditV450/);
  assert.match(read('public/api.js'),/loadFrontierAuditV450/);
- assert.match(read('tests/v440-galactic-supremacy.test.mjs'),/v477-apply-patch/);
+ assert.match(read('tests/v440-galactic-supremacy.test.mjs'),/v4771-apply-patch/);
 });
