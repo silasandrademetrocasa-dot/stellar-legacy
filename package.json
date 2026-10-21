@@ -1,11 +1,11 @@
 {
   "name": "stellar-legacy",
-  "version": "44.0.0",
+  "version": "45.0.0",
   "type": "module",
   "scripts": {
     "start": "node server/index.js",
     "dev": "node --watch server/index.js",
-    "check": "node scripts/v440-apply-patch.mjs && node scripts/verify-release.mjs",
+    "check": "node scripts/v450-apply-patch.mjs && node scripts/verify-release.mjs",
     "test": "node --test tests/*.test.mjs",
     "verify": "npm run check && npm run check:v21 && npm test",
     "check:v21": "node scripts/check-v21-package.mjs"
@@ -16,6 +16,8 @@
     "ws": "^8.18.0",
     "compression": "^1.7.5"
   },
-  "engines": {"node": ">=18"},
-  "release": "Galactic Supremacy: canonical Frontier routes, NPC spawns, bounded private ADM test kit, world refresh and raid compatibility"
+  "engines": {
+    "node": ">=18"
+  },
+  "release": "Galactic Ascension: neutral-world join fix, persistent U3 boss, admin-controlled world diagnostics"
 }

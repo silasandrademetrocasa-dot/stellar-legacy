@@ -1,3 +1,4 @@
+import {sectorEntryAllowedV450,frontierEliteRespawnV450} from './frontier-stability-v450.js';
 import {frontierBossSetupV440} from '../public/modules/frontier-boss-v440.js';
 import {mergeFrontierServerPortalsV440} from '../public/modules/frontier-routing-v440.js';
 import {registerFrontierSectorsV435,frontierServerPortalsV435} from '../public/modules/frontier-sectors-v435.js';
@@ -301,7 +302,7 @@ class Room {
     }
     for(const group of groups){
       const target=desired.get(String(group.type))||0,current=this.nonEventNpcCount(group.type);
-      for(let i=current;i<target;i++){const e=this.makeNpc(group.type);if(e){this.npcs.set(e.id,e);this.broadcast({type:'npc_spawn',entity:this.publicNpc(e)});}}
+      for(let i=current;i<target;i++){const e=this.makeNpc(group.type,frontierEliteRespawnV450(this.mapId,group.type,this.npcs.values())||{});if(e){this.npcs.set(e.id,e);this.broadcast({type:'npc_spawn',entity:this.publicNpc(e)});}}
     }
   }
 
@@ -1020,7 +1021,7 @@ class Room {
       }else if(!protectedNow&&!neutralX1&&d<=e.aggroRange&&d>e.attackRange*.8){const nd=Math.max(1,d);e.x=clamp(e.x+dx/nd*e.speed*dt,25,this.map.world.w-25);e.y=clamp(e.y+dy/nd*e.speed*dt,25,this.map.world.h-25);}else if(d>e.aggroRange||protectedNow){e.x=clamp(e.x+Math.cos(e.angle)*e.speed*.16*dt,25,this.map.world.w-25);e.y=clamp(e.y+Math.sin(e.angle)*e.speed*.16*dt,25,this.map.world.h-25);}
       const attackDelay=((String(e.type).startsWith('boss')?1.6:1.15)*(e.bossAttackScale||1))*1000;if(!protectedNow&&!neutralX1&&d<e.attackRange&&now-(e.lastShot||0)>=attackDelay){e.lastShot=now;const victim=clientByUserId.get(String(p.userId));safeJsonSend(victim,{type:'npc_attack',entityId:e.id,damage:Math.max(1,Math.round(e.damage*rand(.92,1.12))),x:e.x,y:e.y,retaliation:retaliating,aggroUserId:e.aggroUserId||null});}
     }
-    for(let i=this.respawns.length-1;i>=0;i--){const r=this.respawns[i];if(now<r.at)continue;this.respawns.splice(i,1);if(r.kind==='eventNpc'&&this.event?.eventId!==r.eventId)continue;if(r.kind==='npc'&&this.nonEventNpcCount(r.type)>=this.desiredNpcCount(r.type))continue;const profile=r.kind==='eventNpc'?this.eventProfile():null,baseName=(this.world.npcDefinition(r.type)?.name||String(r.type||'NPC')).toUpperCase();const e=this.makeNpc(r.type,r.kind==='eventNpc'?{eventNpc:true,eventId:r.eventId,forceChase:true,rewardMult:profile?.rewardMult||1.22,scale:profile?.scale||1,color:profile?.color,size:profile?.size,speedMult:profile?.speedMult||1,name:profile?.namePrefix?(profile.namePrefix+' '+baseName):undefined}:(r.rarePatrol?{rarePatrol:true,name:'PATRULHA RARA • '+baseName,color:'#ffd069',scale:1.15}:{}));if(e){this.npcs.set(e.id,e);this.broadcast({type:'npc_spawn',entity:this.publicNpc(e)});}}
+    for(let i=this.respawns.length-1;i>=0;i--){const r=this.respawns[i];if(now<r.at)continue;this.respawns.splice(i,1);if(r.kind==='eventNpc'&&this.event?.eventId!==r.eventId)continue;if(r.kind==='npc'&&this.nonEventNpcCount(r.type)>=this.desiredNpcCount(r.type))continue;const profile=r.kind==='eventNpc'?this.eventProfile():null,baseName=(this.world.npcDefinition(r.type)?.name||String(r.type||'NPC')).toUpperCase();const e=this.makeNpc(r.type,r.kind==='eventNpc'?{eventNpc:true,eventId:r.eventId,forceChase:true,rewardMult:profile?.rewardMult||1.22,scale:profile?.scale||1,color:profile?.color,size:profile?.size,speedMult:profile?.speedMult||1,name:profile?.namePrefix?(profile.namePrefix+' '+baseName):undefined}:(frontierEliteRespawnV450(this.mapId,r.type,this.npcs.values())||(r.rarePatrol?{rarePatrol:true,name:'PATRULHA RARA • '+baseName,color:'#ffd069',scale:1.15}:{})));if(e){this.npcs.set(e.id,e);this.broadcast({type:'npc_spawn',entity:this.publicNpc(e)});}}
     for(let i=this.oreRespawns.length-1;i>=0;i--){const r=this.oreRespawns[i];if(now<r.at)continue;this.oreRespawns.splice(i,1);if(r.eventOre&&this.event?.eventId!==r.eventId)continue;const o=this.makeOre(r.type,r.eventOre?{eventOre:true,eventId:r.eventId,amount:r.amount}:{});this.ores.set(o.id,o);this.broadcast({type:'ore_spawn',ore:o});}
     if(this.event&&!this.event.complete){
       const profile=this.eventProfile(),mode=profile.mode,stage=this.eventStageNow(now),tuning=eventStageTuning(profile,stage);
@@ -1249,7 +1250,7 @@ export function attachSharedUniverse(server,{authenticate,authorizeJoin,recordSe
         const owner=({'b41':'earth','b42':'mars','b43':'jupiter'})[mapId];
         const dest=world.mapDefinition(mapId);
         const sector=world.sectorForRoom(mapId,territory);
-        const sectorValid=!territorial||!sector||String(sector.territory_faction||'')===territory;
+        const sectorValid=sectorEntryAllowedV450(mapId,territorial,sector,territory);
         const required=Math.max(1,Number(dest?.minLevel)||1,Number(sector?.min_level)||1);
         // Somente X-1..X-8 são territoriais; b41,b42,b43 são PvP públicos de nível mínimo.
         const wrongFaction=!admin&&territorial&&String(msg.territoryFaction||faction)!==faction;

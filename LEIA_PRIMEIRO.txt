@@ -1,27 +1,34 @@
-STELLAR LEGACY — V44.0 GALACTIC SUPREMACY (ZIP ÚNICO)
-BASE EXATA: 43.5.0 | INSTALAÇÃO: Universal ZIP Installer | DESTINO: 44.0.0
+STELLAR LEGACY — V45.0 GALACTIC ASCENSION — ZIP ÚNICO
+BASE EXATA: 44.0.0 -> 45.0.0 — UNIVERSAL ZIP INSTALLER
 
-CORREÇÕES REAIS NESTE PACOTE
-• U-1, U-2 e U-3: sincroniza portais físicos entre clientes/servidor; o grafo oficial do Supabase prevalece sobre conexões fixas. Desativar um link no ADM não o faz reaparecer automaticamente.
-• Cadastro no banco: 5 ligações bidirecionais de U-1/U-2/U-3 para X-8 de Terra/Marte/Júpiter, 9 configurações de NPCs para os 3 mapas; preserva alterações existentes do ADM.
-• Um chefe de elite em cada setor U; U-3 possui GUARDIÃO DO VAZIO, com HP/escudo maiores e fases normais dos chefes. Substitui um NPC existente sem aumentar o número total no mapa.
-• ADM: botão "+5 PARA TESTES" para os quatro módulos Astrais. Adiciona somente ao próprio inventário do ADM, até 30 por módulo, com histórico imutável de concessão. Nunca concede relés, moedas ou materiais.
-• Cache/versionamento e regressões da V43.1 e V43.5 atualizados; versão continua interna e não aparece nas telas dos jogadores.
-• MANTIDOS os sistemas existentes: pesquisa, raids semanais verificadas pelo ledger, Warfront, lojas, clãs e mercado DESATIVADO.
+ENTREGUE E TESTÁVEL NESTE PACOTE:
+1) BUG DE ENTRADA NOS SETORES U-1/U-2/U-3: servidor reconhece nós neutros publicados
+   no SQL, mantém o isolamento de salas pela facção autenticada e preserva bloqueio
+   territorial X-1..X-8. Falhas de mapa indisponível não bloqueiam invasões antigas.
+2) GUARDIÃO DO VAZIO U-3: o boss especial continua a reaparecer após um abate,
+   respeitando população de NPCs definida no ADM. Também ressurge quando o ADM
+   ajusta densidade de NPCs sem criar mais um NPC que o permitido.
+3) ADM > UNIVERSO ESTELAR > ADMIN: diagnóstico visual de U-1..U-3,
+   links bidirecionais, grupos de NPCs, recursos e raid semanal, com revisão de
+   versões de configuração. Somente um ADM autenticado pode consultar.
+4) Fixação das importações JS em 45.0.0 e atualização dos testes legados da V43.5
+   e V44 que verificam versões, sem remover os testes de segurança.
+5) SQL ADITIVO: uma única função privada de diagnóstico; nenhum save, inventário,
+   saldo, relé, preço ou economia é alterado por este pacote.
 
-ATENÇÃO — NÃO CHAMAR DE HOMOLOGAÇÃO TOTAL
-• Este pacote NÃO substitui todos os caminhos de dano/escudo/movimento herdados por um motor 100% autoritativo. Bônus Astrais perigosos devem permanecer desativados até teste de duas contas.
-• Raid continua baseada em chefes de mundo e objetivos de esquadrão: não adiciona arena isolada de quatro jogadores.
-• Mercado permanece fechado, porque faltam testes financeiros concorrentes e auditoria.
-• Otimização: este pacote não aumenta quantidade de NPCs por mapa, mas a meta de 25–30 FPS precisa ser medida no Android real.
-• Foram aprovados 13 testes locais em fixture e verificação de sintaxe. Teste completo de centenas de casos e teste multiplayer real somente depois da instalação no GitHub e Render.
+NÃO ENTREGUE COMO CONCLUÍDO:
+- Motor de combate totalmente autoritativo: cliente ainda reporta dano e estados;
+  permaneça com os bônus Astrais desativados até testes com duas contas.
+- Raids: desafio de esquadrão e chefes U3 mantidos, ainda não arena instanciada 4P.
+- Mercado: continue desativado até auditoria de transações concorrentes.
+- FPS: melhorias de lógica/nenhum NPC extra; FPS 25–30 requer medida real no Android.
 
-INSTALAÇÃO
-1. Preserve backup GitHub + Supabase.
-2. Aplique UMA VEZ o SQL contido em sql/STELLAR_V44_0_GALACTIC_SUPREMACY.sql usando a migração no Supabase. É aditivo; não modifica saves, saldos nem relés.
-3. Remova ZIP anterior da raiz do GitHub. Envie somente ESTE ZIP para a raiz.
-4. Execute Actions > Instalador Universal. Se um teste falhar, NÃO publique à força; use o log para corrigir o pacote.
-5. Aguarde Render ficar live. Saia e entre novamente no jogo para atualizar cache.
-6. Na conta FELP22[ADM], MAPA deve mostrar U-1/U-2/U-3, e ADM > MUNDO & MAPAS deve listar os setores e NPCs. Teste entrada e saída em facções diferentes. Valide raid e kit no ADM.
+INSTALAÇÃO:
+1. Backup GitHub / Supabase. SQL pode ser aplicado como migração após V44.0.
+2. Subir SOMENTE este ZIP na raiz do GitHub. Excluir ZIPs antigos.
+3. Actions > Instalador Universal > Run workflow. Conferir npm run check, npm test.
+4. Render atualiza automaticamente main. Aguardar live. Reiniciar navegador.
+5. FELP22[ADM]: testar salto MAPA U-1..U-3 e confirmar que o ADM mostra diagnóstico.
+6. Usar uma segunda conta para verificar nível e bloqueio de facção no servidor.
 
-Não há alteração automática de jogadores; o SQL fica separado do código.
+Não atribuir ao pacote status de 100% de jogabilidade antes de testes no Render.

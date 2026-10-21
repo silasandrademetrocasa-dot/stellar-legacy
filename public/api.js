@@ -1213,3 +1213,5 @@ export async function adminRaidV435(target,minimum,reward,enabled){return authed
 export async function claimRaidV435(){return authedServerFetch('/api/frontier/raid/claim',{method:'POST',body:'{}'});}
 
 export async function adminAstralTestKitV440(code,quantity=5){return authedServerFetch('/api/admin/frontier/test-kit',{method:'POST',body:JSON.stringify({code,quantity})});}
+
+export async function loadFrontierAuditV450(){return authedServerFetch('/api/admin/frontier/diagnostics');}
