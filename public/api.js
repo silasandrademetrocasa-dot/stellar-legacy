@@ -1158,3 +1158,10 @@ export const claimDominionOnline=kind=>serverFetch('/api/relay/dominion/claim',{
 export const declareDominionWarOnline=(targetClanId,startsAt=null)=>serverFetch('/api/relay/dominion/declare',{method:'POST',body:JSON.stringify({targetClanId,startsAt})},true);
 export const saveDominionRulesOnline=payload=>serverFetch('/api/relay/dominion/admin/rules',{method:'POST',body:JSON.stringify(payload)},true);
 export const claimDominionWarPrizeOnline=warId=>serverFetch('/api/relay/dominion/war/prize',{method:'POST',body:JSON.stringify({warId})},true);
+
+// V37 • Contratos de fronteira sempre verificados no SQL.
+export const loadFrontierStateOnline=()=>serverFetch('/api/frontier/state',{},true);
+export const claimFrontierContractOnline=contractId=>serverFetch('/api/frontier/claim',{method:'POST',body:JSON.stringify({contractId})},true);
+export const craftFrontierTechOnline=()=>serverFetch('/api/frontier/craft',{method:'POST',body:'{}'},true);
+export const claimFrontierClanOnline=()=>serverFetch('/api/frontier/clan-claim',{method:'POST',body:'{}'},true);
+export const saveFrontierAdminContractOnline=payload=>serverFetch('/api/frontier/admin/contract',{method:'POST',body:JSON.stringify(payload)},true);

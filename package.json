@@ -1,6 +1,6 @@
 {
   "name": "stellar-legacy",
-  "version": "36.0.0",
+  "version": "37.0.0",
   "type": "module",
   "scripts": {
     "start": "node server/index.js",
@@ -19,5 +19,5 @@
   "engines": {
     "node": ">=18"
   },
-  "release": "Galactic Dominion • Fortalezas, Guerras, Territórios, Missões e FPS"
+  "release": "Beyond the Frontier • Expedições, Caça Elite, Prospecção, Craft e Missões de Clã"
 }

@@ -4725,3 +4725,31 @@ body[data-device="mobile"] #weaponBar .ability-btn.ready{
 .dominion-admin-fields-v360{display:grid;grid-template-columns:repeat(auto-fit,minmax(135px,1fr));gap:6px}
 .dominion-v360 button{max-width:100%;min-height:34px}
 @media(max-width:600px){.dominion-v360{padding:8px;margin:8px 0}.dominion-summary-v360{gap:4px}.dominion-summary-v360 span{padding:8px 2px}.dominion-summary-v360 b{font-size:11px}.dominion-v360 summary{font-size:11px}}
+
+/* V37 • Expedições galácticas — renderização estática e leve, inclusive no celular. */
+.frontier-v370{border:1px solid rgba(104,214,246,.23);background:linear-gradient(130deg,rgba(9,28,50,.73),rgba(17,18,45,.86));border-radius:13px;padding:12px;margin-block:12px}
+.frontier-v370 h3{margin:3px 0 8px;color:#d8f8ff;letter-spacing:.03em;font-size:1.02rem}
+.frontier-v370>small{display:block;color:#a6bed5;margin-bottom:10px;line-height:1.45}
+.frontier-grid-v370{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,245px),1fr));gap:9px;margin:11px 0}
+.frontier-card-v370{display:flex;flex-direction:column;gap:6px;min-width:0;padding:10px;border:1px solid rgba(134,209,237,.18);border-radius:10px;background:rgba(9,21,40,.72)}
+.frontier-title-v370{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.frontier-title-v370 b{color:#dff9ff;font-size:.86rem}
+.frontier-title-v370 span{white-space:nowrap;border-radius:16px;padding:2px 6px;background:rgba(88,192,237,.14);color:#91e4ff;font-size:.65rem}
+.frontier-card-v370 small,.frontier-tech-v370 small{color:#aebfd2;font-size:.72rem;line-height:1.36}
+.frontier-meter-v370{height:5px;width:100%;overflow:hidden;border-radius:6px;background:#152b3e}
+.frontier-meter-v370 i{display:block;height:100%;background:#67dbef;border-radius:6px}
+.frontier-card-v370 button{margin-top:auto;min-height:31px;padding:6px 8px;font-size:.71rem}
+.frontier-tech-v370{display:flex;align-items:center;justify-content:space-between;gap:9px;padding:10px;margin-top:8px;border-radius:10px;background:rgba(25,45,66,.5);border:1px solid rgba(108,200,234,.18)}
+.frontier-tech-v370>div{min-width:0;display:flex;flex-direction:column;gap:4px}
+.frontier-tech-v370 b{font-size:.82rem;color:#baf2ff}
+.frontier-tech-v370 button{font-size:.7rem;white-space:normal;min-height:34px}
+.frontier-admin-v370{margin-top:10px}
+.frontier-admin-v370 summary{cursor:pointer;padding:8px;color:#8ad8fa}
+.frontier-admin-row-v370{display:grid;grid-template-columns:repeat(auto-fit,minmax(100px,1fr));gap:7px;border-top:1px solid rgba(115,202,238,.2);padding:12px 0}
+.frontier-admin-row-v370>b{grid-column:1/-1;font-size:.8rem}
+.frontier-admin-row-v370 label{display:flex;flex-direction:column;gap:4px;font-size:.68rem;color:#b8d0df}
+.frontier-admin-row-v370 input[type=number]{width:100%;min-width:0}
+.frontier-admin-row-v370 input[type=checkbox]{align-self:flex-start}
+.frontier-v370 [disabled]{opacity:.54}
+@media(max-width:680px){.frontier-v370{padding:8px}.frontier-grid-v370{grid-template-columns:1fr;gap:7px}.frontier-tech-v370{align-items:stretch;flex-direction:column}.frontier-tech-v370 button{width:100%}}
+@media(prefers-reduced-motion:reduce){.frontier-v370 *{animation:none!important;transition:none!important}}

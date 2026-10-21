@@ -1,0 +1,19 @@
+// V37: presentation only. Source of truth: authenticated SQL reward ledgers.
+const esc=x=>String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const fmt=n=>new Intl.NumberFormat('pt-BR').format(Number(n)||0);
+export function frontierPanelHtml(state,{admin=false}={}){
+ if(!state?.ok)return `<section class="warfront-panel frontier-v370"><div class="section-kicker">BEYOND THE FRONTIER</div><h3>✦ EXPEDIÇÕES DA FRONTEIRA</h3><small>${esc(state?.error||'Sincronizando os contratos do SQL V37...')}</small></section>`;
+ const contracts=Array.isArray(state.contracts)?state.contracts:[];
+ const tech=state.tech||{},clan=state.clan||{};
+ return `<section class="warfront-panel frontier-v370"><div class="section-kicker">V37 • BEYOND THE FRONTIER</div>
+ <h3>✦ EXPLORAÇÃO • CAÇA ELITE • PROSPECÇÃO</h3>
+ <small>Progresso semanal conferido pelo servidor. Abates e coleta só contam com recibo SQL de combate/mineração. Setores de referência: X-6, X-7 e X-8.</small>
+ <div class="frontier-grid-v370">${contracts.map(c=>{
+  const count=Math.max(0,Number(c.count)||0),target=Math.max(1,Number(c.target)||1),ready=c.enabled!==false&&!!c.unlocked&&count>=target&&!c.claimed;
+  return `<article class="frontier-card-v370"><div class="frontier-title-v370"><b>${esc(c.title)}</b><span>${esc(String(c.sector).toUpperCase())} • LV ${fmt(c.minLevel)}</span></div><small>${esc(c.kind==='npc'?'CAÇAR':'MINERAR')} ${esc(c.targetType)}</small><div class="frontier-meter-v370"><i style="width:${Math.min(100,Math.round(count/target*100))}%"></i></div><small>${fmt(count)}/${fmt(target)} • ${fmt(c.credits)} CR • ${fmt(c.stl)} STL • ${fmt(c.shards)} FRAGMENTOS</small><button type="button" class="${ready?'primary-btn':'ghost-btn'}" data-frontier-claim="${esc(c.id)}" ${ready?'':'disabled'}>${c.enabled===false?'CONTRATO SUSPENSO':c.claimed?'RESGATADO NESTA SEMANA':!c.unlocked?'NÍVEL INSUFICIENTE':ready?'RESGATAR CONTRATO':'CAÇADA EM ANDAMENTO'}</button></article>`;
+ }).join('')}</div>
+ <div class="frontier-tech-v370"><div><b>⚙ MÓDULO EXPLORADOR LV${Math.max(1,Number(tech.level)||1)}/3</b><small>${fmt(tech.shards)} fragmentos • melhora em +10% a recompensa de créditos/STL a cada evolução • sem bônus PvP</small></div><button type="button" class="primary-btn" data-frontier-craft ${!tech.nextCost||Number(tech.shards)<Number(tech.nextCost)?'disabled':''}>${Number(tech.level)>=3?'NÍVEL MÁXIMO':`EVOLUIR • ${fmt(tech.nextCost)} FRAGMENTOS`}</button></div>
+ <div class="frontier-tech-v370"><div><b>🤝 EXPEDIÇÃO DO CLÃ</b><small>${fmt(clan.kills||0)}/${fmt(clan.target||8)} bosses confirmados nesta semana • recompensa: 125.000 CR para o cofre</small></div><button type="button" class="ghost-btn" data-frontier-clan-claim ${!clan.hasClan||clan.claimed||Number(clan.kills)<Number(clan.target)?'disabled':''}>${clan.claimed?'RECOMPENSA COLETIVA RESGATADA':'RESGATAR MISSÃO COLETIVA (LÍDER)'}</button></div>
+ ${admin?`<details class="frontier-admin-v370"><summary>⚙ ADM • BALANCEAR CONTRATOS</summary>${contracts.map(c=>`<div class="frontier-admin-row-v370" data-frontier-admin-row="${esc(c.id)}"><b>${esc(c.title)}</b>${[['target_count','Meta',c.target,1,250],['reward_credits','Créditos',c.credits,0,3000000],['reward_stl','STL',c.stl,0,10000],['reward_shards','Fragmentos',c.shards,1,20],['min_level','Nível',c.minLevel,1,70]].map(([k,label,v,min,max])=>`<label>${label}<input data-frontier-field="${k}" type="number" min="${min}" max="${max}" value="${Number(v)||0}"></label>`).join('')}<label>Ativado<input type="checkbox" data-frontier-active ${c.enabled!==false?'checked':''}></label><button type="button" class="ghost-btn" data-frontier-admin-save="${esc(c.id)}">SALVAR SQL</button></div>`).join('')}</details>`:''}
+ <button type="button" class="ghost-btn" data-frontier-refresh>ATUALIZAR EXPEDIÇÕES</button></section>`;
+}

@@ -1,0 +1,13 @@
+STELLAR LEGACY V37.0.0 — BEYOND THE FRONTIER
+
+1. Suba o ZIP completo com o Instalador Universal existente no GitHub.
+2. Espere o Render ficar LIVE, com versão 37.0.0.
+3. Peça ao ChatGPT para aplicar sql/V37_0_0_BEYOND_THE_FRONTIER.sql.
+4. Depois do SQL, abra Frente de Guerra > Beyond the Frontier.
+5. Complete e resgate os contratos semanais; experimente o crafting de Módulo Explorador.
+
+IMPORTANTE:
+- O arquivo ZIP NÃO contém a pasta .github — o workflow deve permanecer no repositório.
+- Nenhum SQL foi aplicado durante a criação desta versão.
+- O rollback SQL bloqueia exclusão caso haja recompensas ou crafting persistidos.
+- Bosses e regiões utilizadas são os setores já existentes X-6, X-7 e X-8; sem mapa X-9 nesta fase.

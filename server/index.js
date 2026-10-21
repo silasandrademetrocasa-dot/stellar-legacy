@@ -13,13 +13,14 @@ import { warCampaignState,warRankings,safeWarCampaignInput,safeWarRulesInput } f
 import { createCommandCenterRouter } from './command-center-router.js';
 import { createRelayRouter } from './relay-router-v346.js';
 import {createDominionRouter} from './dominion-router-v360.js';
+import {createFrontierRouter} from './frontier-router-v370.js';
 import { validatePlayerSave, invalidShopArguments } from './security-guard.js';
 import { validateRewardClaimContinuity } from './reward-claim-guard.js';
 import { createSecurityService } from './security-service.js';
 
 const app = express();
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const RELEASE_VERSION = '36.0.0'; // único identificador de release nos endpoints HTTP
+const RELEASE_VERSION = '37.0.0'; // único identificador de release nos endpoints HTTP
 
 function normalizeSupabaseUrl(value = '') {
   let url = String(value || '').trim();
@@ -1629,6 +1630,7 @@ app.post('/api/admin/war/campaigns',requireUser,asyncRoute(async(req,res)=>{
 app.use('/api/command',requireUser,createCommandCenterRouter({serviceClient:eliteAdminClient}));
 app.use('/api/relay',requireUser,createRelayRouter({serviceClient:eliteAdminClient}));
 app.use('/api/relay/dominion',requireUser,createDominionRouter({serviceClient:eliteAdminClient}));
+app.use('/api/frontier',requireUser,createFrontierRouter({serviceClient:eliteAdminClient}));
 
 app.get('/api/save', requireUser, asyncRoute(async (req, res) => {
   const { data, error } = await req.sb.from('game_saves').select('state,updated_at').eq('user_id', req.user.id).maybeSingle();
