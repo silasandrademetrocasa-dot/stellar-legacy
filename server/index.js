@@ -1,3 +1,4 @@
+import {attachFrontierAdminV440} from './frontier-admin-v440.js';
 import {attachAstralIntegrationsV435} from './astral-integrations-v435.js';
 import {attachAstralCombatV431} from './astral-combat-v431.js';
 import {attachStageBV426} from './stage-b-v426.js';
@@ -27,7 +28,7 @@ import { createSecurityService } from './security-service.js';
 
 const app = express();
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const RELEASE_VERSION = '43.5.0'; // único identificador de release nos endpoints HTTP
+const RELEASE_VERSION = '44.0.0'; // único identificador de release nos endpoints HTTP
 
 function normalizeSupabaseUrl(value = '') {
   let url = String(value || '').trim();
@@ -1473,6 +1474,7 @@ attachStageAV423(app,{requireUser,asyncRoute});
 attachStageBV426(app,{requireUser,asyncRoute});
 
 attachAstralIntegrationsV435(app,{requireUser,asyncRoute});
+attachFrontierAdminV440(app,{requireUser,asyncRoute});
 attachAstralCombatV431(app,{requireUser,asyncRoute});
 
 // V19.0.9 • Catálogo único de balanceamento validado pelo Supabase.

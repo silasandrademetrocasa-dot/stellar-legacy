@@ -37,7 +37,7 @@ test('admin route validates booleans and never accepts damage amount',async()=>{
 });
 test('cache imports and source anchors match current release',()=>{
  const version=JSON.parse(read('package.json')).version;
- assert.match(version,/^43\.\d+\.\d+$/);
+ assert.match(version,/^\d+\.\d+\.\d+$/);
  for(const file of ['public/game.js','public/modules/stage-a-v423.js','public/modules/unified-expansion-v42.js','public/modules/astral-rewards-v381.js','public/modules/stage-b-v426.js']){
   assert.ok(read(file).includes(`?v=${version}`),file);
  }

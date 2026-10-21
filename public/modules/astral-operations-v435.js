@@ -1,5 +1,5 @@
-import {loadStageAV423,adminAstralModuleV435,adminRaidV435,loadRaidV435,claimRaidV435} from '../api.js?v=43.5.0';
-import {astralEquipmentBonusesV435,astralModuleCodesV435} from './astral-systems-v435.js?v=43.5.0';
+import {loadStageAV423,adminAstralModuleV435,adminRaidV435,loadRaidV435,claimRaidV435,adminAstralTestKitV440} from '../api.js?v=44.0.0';
+import {astralEquipmentBonusesV435,astralModuleCodesV435} from './astral-systems-v435.js?v=44.0.0';
 let ticket=0;
 const el=(tag,text)=>{const x=document.createElement(tag);if(text!=null)x.textContent=text;return x;};
 const labels={astral_guard:'Guardião Astral',eclipse_lance:'Lança Eclipse',nexus_drive:'Núcleo Nexus',trinity_matrix:'Matriz Trina'};
@@ -17,7 +17,13 @@ export async function renderAstralOperationsV435(root,tab,isAdmin){
         for(const code of astralModuleCodesV435){const def=(data.definitions||[]).find(d=>d.code===code),label=el('label',labels[code]||code+' ');
           const toggle=el('input');toggle.type='checkbox';toggle.checked=def?.combatEnabled===true;label.append(toggle);
           const save=el('button','SALVAR');save.type='button';save.onclick=async()=>{save.disabled=true;try{await adminAstralModuleV435(code,toggle.checked);window.dispatchEvent(new Event('stellar-astral-loadout-updated'));save.textContent='SALVO';}catch{save.textContent='TENTE NOVAMENTE';}finally{save.disabled=false;}};
-          const row=el('div');row.append(label,save);card.append(row);
+          const row=el('div');row.append(label,save);
+          const kit=el('button','+5 PARA TESTES');kit.type='button';kit.title='Apenas no seu próprio inventário ADM • máximo 30 unidades';
+          kit.onclick=async()=>{kit.disabled=true;try{const result=await adminAstralTestKitV440(code,5);
+            if(!result?.ok)throw Error('Kit indisponível');kit.textContent='TOTAL '+Number(result.quantity||0);
+            window.dispatchEvent(new Event('stellar-astral-loadout-updated'));
+           }catch{kit.textContent='LIMITE OU INDISPONÍVEL';}finally{kit.disabled=false;}};
+          row.append(kit);card.append(row);
         }
       }
       if(isAdmin&&tab==='admin'){

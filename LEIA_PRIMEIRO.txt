@@ -1,29 +1,27 @@
-STELLAR LEGACY — V43.5.0 (PACOTE ÚNICO DE INTEGRAÇÃO)
-BASE: 43.1.0 | DESTINO: 43.5.0 | INSTALADOR UNIVERSAL
+STELLAR LEGACY — V44.0 GALACTIC SUPREMACY (ZIP ÚNICO)
+BASE EXATA: 43.5.0 | INSTALAÇÃO: Universal ZIP Installer | DESTINO: 44.0.0
 
-ENTREGA INCLUÍDA
-• U-1 Nebulosa do Véu, U-2 Cemitério Iônico, U-3 Horizonte do Vazio: definições PvE, NPCs, mineração, portais de ida e volta, gráfico de rotas e sincronização de salas por facção.
-• Quatro módulos Astrais: bônus limitados por configuração da nave, item possuído e tecnologia explicitamente ativada pelo ADM. A troca de configuração mantém escudo armazenado; recalcular a configuração não deve aumentar escudo instantaneamente.
-• Forja/ADM: quatro controles de tecnologia em área própria, sem gerenciamento de módulos de relé.
-• Raids semanais: progresso de chefes a partir do histórico de eliminações, requisito de contribuição pessoal, recompensa de pesquisa resgatável apenas uma vez por piloto/semana, controles ADM de meta e prêmio.
-• Reaproveita Warfront, facções, clãs e mercado existentes, sem sobrescrevê-los.
+CORREÇÕES REAIS NESTE PACOTE
+• U-1, U-2 e U-3: sincroniza portais físicos entre clientes/servidor; o grafo oficial do Supabase prevalece sobre conexões fixas. Desativar um link no ADM não o faz reaparecer automaticamente.
+• Cadastro no banco: 5 ligações bidirecionais de U-1/U-2/U-3 para X-8 de Terra/Marte/Júpiter, 9 configurações de NPCs para os 3 mapas; preserva alterações existentes do ADM.
+• Um chefe de elite em cada setor U; U-3 possui GUARDIÃO DO VAZIO, com HP/escudo maiores e fases normais dos chefes. Substitui um NPC existente sem aumentar o número total no mapa.
+• ADM: botão "+5 PARA TESTES" para os quatro módulos Astrais. Adiciona somente ao próprio inventário do ADM, até 30 por módulo, com histórico imutável de concessão. Nunca concede relés, moedas ou materiais.
+• Cache/versionamento e regressões da V43.1 e V43.5 atualizados; versão continua interna e não aparece nas telas dos jogadores.
+• MANTIDOS os sistemas existentes: pesquisa, raids semanais verificadas pelo ledger, Warfront, lojas, clãs e mercado DESATIVADO.
 
-LIMITAÇÕES IMPORTANTES — NÃO CONFUNDIR COM PRODUÇÃO HOMOLOGADA
-• O dano de NPC, movimento, HP e escudo não são integralmente calculados pelo servidor em todos os caminhos de combate herdados. Os efeitos da Forja continuam DESATIVADOS no banco inicialmente, inclusive módulos defensivos. NÃO liberar efeitos de defesa/velocidade para jogadores competitivos sem auditoria adicional da autoridade do servidor.
-• O sistema de raid usa chefes e esquadrões já existentes. NÃO adiciona uma arena instanciada inédita com chefe exclusivo.
-• O mercado entre jogadores permanece DESATIVADO até teste concorrente com duas contas reais.
-• Mapas novos têm paletas, NPCs e recursos do motor atual, não sprites ou modelos exclusivos novos.
-• Validações locais: 5 testes de integração, checagens de sintaxe e patch aplicado duas vezes sobre fixture. O teste COMPLETO do jogo e a validação de duas contas ocorrem no GitHub/Render. Ainda não foi feito teste E2E real em produção.
+ATENÇÃO — NÃO CHAMAR DE HOMOLOGAÇÃO TOTAL
+• Este pacote NÃO substitui todos os caminhos de dano/escudo/movimento herdados por um motor 100% autoritativo. Bônus Astrais perigosos devem permanecer desativados até teste de duas contas.
+• Raid continua baseada em chefes de mundo e objetivos de esquadrão: não adiciona arena isolada de quatro jogadores.
+• Mercado permanece fechado, porque faltam testes financeiros concorrentes e auditoria.
+• Otimização: este pacote não aumenta quantidade de NPCs por mapa, mas a meta de 25–30 FPS precisa ser medida no Android real.
+• Foram aprovados 13 testes locais em fixture e verificação de sintaxe. Teste completo de centenas de casos e teste multiplayer real somente depois da instalação no GitHub e Render.
 
-ORDEM DE INSTALAÇÃO
-1. Faça backup do banco e do GitHub.
-2. Instale a migração sql/STELLAR_V43_5_GALACTIC_EVOLUTION.sql no Supabase. Não reaplique em produção até confirmar o resultado.
-3. Remova ZIPs antigos da raiz do repositório. Envie APENAS este ZIP para a raiz.
-4. Actions > Instalador Universal > Run workflow. O script v435-apply-patch.mjs aplica integração no código atual e verifica os imports na etapa de check.
-5. Verifique o status no Render. Entre como FELP22[ADM], e com uma conta não-ADM de teste, e valide portais X-8 ⇄ U-1 ⇄ U-2 ⇄ U-3, limitações de níveis, geração de NPCs e minérios.
-6. Entre no Universo > Administração: valide toggles e missão semanal. Teste módulos separadamente, com escudos e PvP protegidos.
+INSTALAÇÃO
+1. Preserve backup GitHub + Supabase.
+2. Aplique UMA VEZ o SQL contido em sql/STELLAR_V44_0_GALACTIC_SUPREMACY.sql usando a migração no Supabase. É aditivo; não modifica saves, saldos nem relés.
+3. Remova ZIP anterior da raiz do GitHub. Envie somente ESTE ZIP para a raiz.
+4. Execute Actions > Instalador Universal. Se um teste falhar, NÃO publique à força; use o log para corrigir o pacote.
+5. Aguarde Render ficar live. Saia e entre novamente no jogo para atualizar cache.
+6. Na conta FELP22[ADM], MAPA deve mostrar U-1/U-2/U-3, e ADM > MUNDO & MAPAS deve listar os setores e NPCs. Teste entrada e saída em facções diferentes. Valide raid e kit no ADM.
 
-Sem exclusões de SQL, saves ou arquivos do motor principal. Sem concessões automáticas de moedas/recompensas.
-
-CORRECAO DO TESTE #249 — 21/10/2026
-O teste de integracao antigo exigia a chamada removida na evolucao para os 4 modulos Astrais. O script agora verifica a posse, configuracao ativa e a integracao real dos bonus de dano, escudo e velocidade, preservando os demais testes. SQL e funcionalidades permanecem inalterados.
+Não há alteração automática de jogadores; o SQL fica separado do código.

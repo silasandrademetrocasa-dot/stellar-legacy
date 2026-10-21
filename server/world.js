@@ -1,3 +1,5 @@
+import {frontierBossSetupV440} from '../public/modules/frontier-boss-v440.js';
+import {mergeFrontierServerPortalsV440} from '../public/modules/frontier-routing-v440.js';
 import {registerFrontierSectorsV435,frontierServerPortalsV435} from '../public/modules/frontier-sectors-v435.js';
 import {safeAstralProfileV431,astralNpcHitCapV431} from './astral-combat-v431.js';
 import { idleNpcStep, shouldLeashNpc, NpcAggroWindow } from './npc-intelligence-v34.js';
@@ -250,7 +252,7 @@ class Room {
         const rarePatrol=!this.map.battle&&Number(this.map.tier||1)>=2&&group===rareGroup&&i===0;
         const baseName=this.world.npcDefinition(group.type)?.name||String(group.type);
         const opts=rarePatrol?{rarePatrol:true,name:'PATRULHA RARA • '+baseName,color:'#ffd069',scale:1.15}:{};
-        const e=this.makeNpc(group.type,opts);if(e)this.npcs.set(e.id,e);
+        const e=this.makeNpc(group.type,frontierBossSetupV440(this.mapId,group.type,i)||opts);if(e)this.npcs.set(e.id,e);
       }
     }
     const raw=Number(this.map.oreCount);const oreCount=Number.isFinite(raw)?Math.max(0,Math.round(raw)):0;
@@ -1103,7 +1105,7 @@ export function attachSharedUniverse(server,{authenticate,authorizeJoin,recordSe
         const w=map.world?.w||10000,h=map.world?.h||7400;
         const base=territoryFaction==='earth'?{x:620,y:Math.round(h*.50)}:territoryFaction==='mars'?{x:w-620,y:Math.round(h*.28)}:{x:w-620,y:Math.round(h*.72)};
         pos.x=base.x<w/2?w-420:420;pos.y=Math.round(base.y<h/2?h*.74:h*.26);
-      }out.push({...pos,to:dest.map_id,targetLabel:target,targetTerritoryFaction:dest.territory_faction||null,battle:!!this.mapDefinition(dest.map_id)?.battle});}return out.concat(frontierServerPortalsV435(mapId,territoryFaction,map));},
+      }out.push({...pos,to:dest.map_id,targetLabel:target,targetTerritoryFaction:dest.territory_faction||null,battle:!!this.mapDefinition(dest.map_id)?.battle});}return mergeFrontierServerPortalsV440(mapId,territoryFaction,map,out,this.worldRuntime.portals);},
     loadBattleGroup:loadBattleGroup||null,
     loadPlayerEventProgress:loadPlayerEventProgress||null,
     recordPlayerEventProgress:recordPlayerEventProgress||null,

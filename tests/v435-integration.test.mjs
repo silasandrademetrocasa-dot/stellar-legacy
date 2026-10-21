@@ -36,7 +36,7 @@ test('ADM never grants relay modules or accepts damage amounts',async()=>{
  res=response();await routes['/api/admin/frontier/astral-module']({body:{code:'nexus_drive',enabled:false},sb:{rpc:async()=>({data:{ok:true},error:null})}},res);assert.equal(res.body.ok,true);
 });
 test('release, map, backend and UI integrate with no dependency on old patch',()=>{
- const p=JSON.parse(read('package.json'));assert.equal(p.version,'43.5.0');assert.match(p.scripts.check,/v435-apply-patch/);
+ const p=JSON.parse(read('package.json'));assert.equal(p.version,'44.0.0');assert.match(p.scripts.check,/v440-apply-patch/);
  for(const k of ['registerFrontierSectorsV435','sectorPortalsV435','astralEquipmentBonusesV435'])assert.ok(read('public/game.js').includes(k));
  assert.ok(read('server/world.js').includes('frontierServerPortalsV435'));
  assert.ok(read('server/index.js').includes('attachAstralIntegrationsV435'));
