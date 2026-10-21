@@ -1206,3 +1206,8 @@ export async function adminClanV426(structure,goal,enabled){return authedServerF
 
 // Regulagem da tecnologia Astral, com autorizacao de ADM no banco.
 export async function adminAstralPowerV431(enabled){return authedServerFetch('/api/admin/frontier/astral-power',{method:'POST',body:JSON.stringify({enabled})});}
+
+export async function adminAstralModuleV435(code,enabled){return authedServerFetch('/api/admin/frontier/astral-module',{method:'POST',body:JSON.stringify({code,enabled})});}
+export async function loadRaidV435(){return authedServerFetch('/api/frontier/raid');}
+export async function adminRaidV435(target,minimum,reward,enabled){return authedServerFetch('/api/admin/frontier/raid',{method:'POST',body:JSON.stringify({target,minimum,reward,enabled})});}
+export async function claimRaidV435(){return authedServerFetch('/api/frontier/raid/claim',{method:'POST',body:'{}'});}

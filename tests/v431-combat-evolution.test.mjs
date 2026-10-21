@@ -37,11 +37,14 @@ test('admin route validates booleans and never accepts damage amount',async()=>{
 });
 test('cache imports and source anchors match current release',()=>{
  const version=JSON.parse(read('package.json')).version;
- assert.equal(version,'43.1.0');
+ assert.match(version,/^43\.\d+\.\d+$/);
  for(const file of ['public/game.js','public/modules/stage-a-v423.js','public/modules/unified-expansion-v42.js','public/modules/astral-rewards-v381.js','public/modules/stage-b-v426.js']){
   assert.ok(read(file).includes(`?v=${version}`),file);
  }
- const game=read('public/game.js');assert.ok(game.includes('verifiedAstralPveBonusV431(astralCombatV431.snapshot'));
+ const game=read('public/game.js');assert.ok(game.includes('astralEquipmentBonusesV435(astralCombatV431.owner===getUser()?.id?astralCombatV431.snapshot:null'), 'Bonus requer inventario autenticado');
+ assert.ok(game.includes('progress?.combatConfigsV2013?.active||1'), 'Bonus usa a configuracao ativa');
+ assert.ok(game.includes('laserDamage*=1+astralV435.npcDamagePercent/100;'), 'Bonus PvE de armamento confirmado');
+ assert.ok(game.includes('shield*=1+astralV435.shieldPercent/100;') && game.includes('speed*=1+astralV435.speedPercent/100;'), 'Bonus de suporte integrado nas estatisticas');
  assert.ok(read('server/world.js').includes('ASTRAL_NPC_HIT_GUARD_V431'));
  assert.match(read('server/index.js'),/readAstralCombatProfile:async userId/);
 });

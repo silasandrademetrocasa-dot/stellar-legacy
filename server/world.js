@@ -1,3 +1,4 @@
+import {registerFrontierSectorsV435,frontierServerPortalsV435} from '../public/modules/frontier-sectors-v435.js';
 import {safeAstralProfileV431,astralNpcHitCapV431} from './astral-combat-v431.js';
 import { idleNpcStep, shouldLeashNpc, NpcAggroWindow } from './npc-intelligence-v34.js';
 import { perceptionPlayers, nearestPerceivedPlayer, turnNpcToward, selectAggroSuccessor } from './npc-intelligence-v343.js';
@@ -15,6 +16,7 @@ import { FACTIONS, MAPS, NPC_TYPES, RESOURCES } from '../public/data.js';
 import { RELAY_BASE,RELAY_NEUTRAL_MODULES,applyRelayDamage } from './relay-domination-v346.js';
 import {relayShipLoadoutDamage,relayTurretStats} from './relay-combat-v3463.js';
 
+registerFrontierSectorsV435(MAPS);
 const LIVE_OPS_REFRESH_MS = 15000;
 
 // V18.1.8 • NETWORK OPTIMIZATION
@@ -67,7 +69,7 @@ function basePointForFaction(factionId,mapId='x1'){
   return {x:620,y:Math.round(h*.50)};
 }
 function roomKey(mapId,territoryFaction){
-  return /^x[1-8]$/.test(mapId) ? `${territoryFaction||'earth'}:${mapId}` : `battle:${mapId}`;
+  return /^(?:x[1-8]|u[1-3])$/.test(mapId) ? `${territoryFaction||'earth'}:${mapId}` : `battle:${mapId}`;
 }
 function sanitizeRoomMap(mapId){ return MAPS[mapId] && !MAPS[mapId].gate ? mapId : 'x1'; }
 const EVENT_VARIANTS={
@@ -1096,12 +1098,12 @@ export function attachSharedUniverse(server,{authenticate,authorizeJoin,recordSe
     resourcePool(mapId){const id=String(mapId||'');if(this.mapDefinition(id)?.battle)return [];const rows=this.worldRuntime?.mapResources?.get?.(id);if(Array.isArray(rows)&&rows.length)return rows.filter(r=>r.enabled!==false&&this.resourceDefinition(r.resource_key)?.enabled!==false);return (MAPS[id]?.ores||[]).map(resource_key=>({resource_key,weight:1,enabled:true}));},
     sectorForRoom(mapId,territoryFaction){const rows=[...this.worldRuntime.sectors.values()].filter(x=>x.enabled!==false&&String(x.map_id)===String(mapId));if(!rows.length)return null;if(MAPS[mapId]?.battle||this.mapDefinition(mapId)?.battle)return rows[0]||null;return rows.find(x=>String(x.territory_faction||'')===String(territoryFaction||''))||rows[0]||null;},
     portalEdgePoint(fromSector,toSector,map){const a=this.worldRuntime.sectors.get(String(fromSector||'')),b=this.worldRuntime.sectors.get(String(toSector||''));const w=map?.world?.w||6000,h=map?.world?.h||4500,inset=175,cx=w/2,cy=h/2;if(!a||!b)return{x:cx,y:cy};const vx=((Number(b.graph_x)-Number(a.graph_x))/100)*w,vy=((Number(b.graph_y)-Number(a.graph_y))/100)*h,ax=Math.abs(vx),ay=Math.abs(vy),tx=ax>0?(cx-inset)/ax:Infinity,ty=ay>0?(cy-inset)/ay:Infinity,t=Math.max(0,Math.min(tx,ty));return{x:Math.round(Math.max(inset,Math.min(w-inset,cx+vx*t))),y:Math.round(Math.max(inset,Math.min(h-inset,cy+vy*t)))};},
-    portalsForRoom(mapId,territoryFaction){territoryFaction=({'b41':'earth','b42':'mars','b43':'jupiter'})[mapId]||territoryFaction;const origin=this.sectorForRoom(mapId,territoryFaction);if(!origin)return MAPS[mapId]?.portals||[];const map=this.mapDefinition(mapId)||MAPS.x1,out=[];for(const link of this.worldRuntime.portals){if(link.enabled===false)continue;let target=null;if(link.from_sector===origin.sector_label)target=link.to_sector;else if(link.bidirectional!==false&&link.to_sector===origin.sector_label)target=link.from_sector;if(!target)continue;const dest=this.worldRuntime.sectors.get(target);if(!dest||dest.enabled===false)continue;// Portais entre 4-1/4-2/4-3 são livres; acesso aos setores territoriais continua restrito.
+    portalsForRoom(mapId,territoryFaction){territoryFaction=({'b41':'earth','b42':'mars','b43':'jupiter'})[mapId]||territoryFaction;const origin=this.sectorForRoom(mapId,territoryFaction);if(!origin)return /^u[1-3]$/.test(mapId)?frontierServerPortalsV435(mapId,territoryFaction,this.mapDefinition(mapId)||MAPS.x1):(MAPS[mapId]?.portals||[]);const map=this.mapDefinition(mapId)||MAPS.x1,out=[];for(const link of this.worldRuntime.portals){if(link.enabled===false)continue;let target=null;if(link.from_sector===origin.sector_label)target=link.to_sector;else if(link.bidirectional!==false&&link.to_sector===origin.sector_label)target=link.from_sector;if(!target)continue;const dest=this.worldRuntime.sectors.get(target);if(!dest||dest.enabled===false)continue;// Portais entre 4-1/4-2/4-3 são livres; acesso aos setores territoriais continua restrito.
       if(dest.territory_faction&&dest.territory_faction!==territoryFaction)continue;const pos=this.portalEdgePoint(origin.sector_label,target,map);if(mapId==='x8'){
         const w=map.world?.w||10000,h=map.world?.h||7400;
         const base=territoryFaction==='earth'?{x:620,y:Math.round(h*.50)}:territoryFaction==='mars'?{x:w-620,y:Math.round(h*.28)}:{x:w-620,y:Math.round(h*.72)};
         pos.x=base.x<w/2?w-420:420;pos.y=Math.round(base.y<h/2?h*.74:h*.26);
-      }out.push({...pos,to:dest.map_id,targetLabel:target,targetTerritoryFaction:dest.territory_faction||null,battle:!!this.mapDefinition(dest.map_id)?.battle});}return out;},
+      }out.push({...pos,to:dest.map_id,targetLabel:target,targetTerritoryFaction:dest.territory_faction||null,battle:!!this.mapDefinition(dest.map_id)?.battle});}return out.concat(frontierServerPortalsV435(mapId,territoryFaction,map));},
     loadBattleGroup:loadBattleGroup||null,
     loadPlayerEventProgress:loadPlayerEventProgress||null,
     recordPlayerEventProgress:recordPlayerEventProgress||null,
@@ -1239,7 +1241,7 @@ export function attachSharedUniverse(server,{authenticate,authorizeJoin,recordSe
         if(authorizeJoin){try{const fresh=await authorizeJoin(identity.accessToken,identity.user.id);identity.faction=fresh?.faction||identity.faction;identity.level=Math.max(1,Number(fresh?.level)||Number(identity.level)||1);identity.isAdmin=fresh?.isAdmin===true;}catch{safeJsonSend(ws,{type:'join_error',reason:'Falha ao validar progresso no servidor'});return;}}
         const known=String(identity.faction||'');const faction=known||(['earth','mars','jupiter'].includes(String(msg.faction||''))&&mapId==='x1'?String(msg.faction):'');const level=Math.max(1,Number(identity.level)||1);
         const admin=identity.isAdmin===true;
-        const territorial=/^x[1-8]$/.test(mapId);
+        const territorial=/^(?:x[1-8]|u[1-3])$/.test(mapId); // FRONTIER_ROOMS_V435
         const territory=territorial?(admin?String(msg.territoryFaction||faction):faction):null;
         const validTerritory=!territorial||['earth','mars','jupiter'].includes(territory);
         const owner=({'b41':'earth','b42':'mars','b43':'jupiter'})[mapId];

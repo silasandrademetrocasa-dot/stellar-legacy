@@ -1,10 +1,11 @@
+import {renderAstralOperationsV435} from './astral-operations-v435.js';
 import {renderAstralCombatAdminV431} from './astral-combat-admin-v431.js';
 import {renderStageBV426} from './stage-b-v426.js';
 import {renderStageAV423} from './stage-a-v423.js';
 // Stellar Legacy — Unificação V39–V42: telas auxiliares, sem loops de quadro/Canvas.
 // Toda alteração de moeda/material depende de RPC transacional do servidor.
-import {loadUnifiedExpansionV42,actUnifiedExpansionV42,squadUnifiedExpansionV42,adminUnifiedExpansionV42} from '../api.js?v=43.1.0';
-import {loadSquadObjectiveV421,claimSquadObjectiveV421,adminSquadObjectiveV421} from '../api.js?v=43.1.0';
+import {loadUnifiedExpansionV42,actUnifiedExpansionV42,squadUnifiedExpansionV42,adminUnifiedExpansionV42} from '../api.js?v=43.5.0';
+import {loadSquadObjectiveV421,claimSquadObjectiveV421,adminSquadObjectiveV421} from '../api.js?v=43.5.0';
 const el=id=>document.getElementById(id);
 const esc=s=>String(s??'').replace(/[&<>"']/g,k=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[k]));
 const fmt=v=>Number(v||0).toLocaleString('pt-BR');
@@ -41,7 +42,7 @@ root.innerHTML=`<div class="frontier-tabs-v42">${tabs.filter(x=>x[0]!=='admin'||
 if(tab==='war')void v421ObjectiveRender(root);
 if(tab==='forge'||tab==='war'||tab==='admin')void renderStageAV423(root,tab);
 if(tab==='scout'||tab==='civil'||tab==='admin')void renderStageBV426(root,tab);
-if(tab==='forge'||tab==='admin')void renderAstralCombatAdminV431(root,tab,snapshot.isAdmin);
+if(tab==='forge'||tab==='war'||tab==='admin')void renderAstralOperationsV435(root,tab,snapshot.isAdmin);
 if(tab==='admin' && snapshot?.isAdmin)void v421AdminRender(root);
 root.querySelectorAll('[data-v42-tab]').forEach(b=>b.addEventListener('click',()=>{tab=b.dataset.v42Tab;render()}));
 root.querySelectorAll('[data-v42-action]').forEach(b=>b.addEventListener('click',async()=>{
