@@ -1,3 +1,4 @@
+import {createWarbotEngine} from './warbot-engine-v477.js';
 import {portalPointV461} from '../public/modules/portal-layout-v461.js';
 import {applyGalacticProgressionV451} from '../public/modules/galactic-progression-v451.js';
 import {sectorEntryAllowedV450,frontierEliteRespawnV450} from './frontier-stability-v450.js';
@@ -109,6 +110,7 @@ class Room {
     this.clients=new Set();
     this.players=new Map();
     this.npcs=new Map();
+    this.warbotEngine=createWarbotEngine(this);
     this.ores=new Map();
     this.respawns=[];
     this.oreRespawns=[];
@@ -132,6 +134,7 @@ class Room {
     }):Promise.resolve();
     this.lastWarfrontSyncAt=0;this.warfrontSyncing=false;
     this.generateBaseWorld();
+    this.warbotEngine.configure(world.warbotSettings.get(this.mapId));
     this.ensureEvent(true);
   }
 
@@ -682,7 +685,7 @@ class Room {
       laserFiring:!!p.laserFiring,laserColor:p.laserColor||'#76d9ff',laserAmmoId:p.laserAmmoId||'lcb10',laserAmmoName:p.laserAmmoName||'PLS-1',targetId:p.targetId||null,targetIsPlayer:!!p.targetIsPlayer,
       pet:p.pet?{...p.pet}:null};
   }
-  snapshot(viewerUserId=null){return {type:'world_snapshot',roomKey:this.key,mapId:this.mapId,territoryFaction:this.territoryFaction,npcs:[...this.npcs.values()].map(e=>this.publicNpc(e)),ores:[...this.ores.values()],players:[...this.players.values()].filter(p=>p.userId!==viewerUserId).map(p=>this.publicPlayer(p)),event:this.eventPayload(),globalEvent:this.world.currentEvent(),warfront:this.warfrontPayload(),serverTime:nowMs()};}
+  snapshot(viewerUserId=null){return {type:'world_snapshot',roomKey:this.key,mapId:this.mapId,territoryFaction:this.territoryFaction,npcs:[...this.npcs.values()].map(e=>this.publicNpc(e)).concat([...this.warbotEngine.bots.values()].filter(e=>e.hp>0).map(e=>this.warbotEngine.publicBot(e))),ores:[...this.ores.values()],players:[...this.players.values()].filter(p=>p.userId!==viewerUserId).map(p=>this.publicPlayer(p)),event:this.eventPayload(),globalEvent:this.world.currentEvent(),warfront:this.warfrontPayload(),serverTime:nowMs()};}
   broadcast(payload,exclude=null){
     if(!this.clients.size)return;
     const wire=JSON.stringify(payload); // Serializar apenas uma vez por sala.
@@ -806,6 +809,7 @@ class Room {
   }
 
   async handleDamage(ws,msg){
+    if(this.warbotEngine.bots.has(String(msg.entityId||'')))return this.warbotEngine.handleHit(ws,msg,admitNpcDamage);
     const p=ws.player,e=this.npcs.get(String(msg.entityId||''));if(!p||!e||e.hp<=0)return;
     const now=nowMs();
     if(!this.playerFresh(p)||String(ws.identity?.user?.id||'')!==String(p.userId))return;
@@ -998,6 +1002,7 @@ class Room {
       now,isProtected:p=>this.playerSafe(p)||this.playerPortalNeutral(p)
     });
     this.updateWarfrontControl(dt,now);
+    this.warbotEngine.tick(dt,now);
     const activeEventId=this.event?.eventId||null;
     let staleNpc=false,staleOre=false;
     for(const [id,e] of this.npcs)if(e.eventNpc&&(!activeEventId||e.eventId!==activeEventId)){this.npcs.delete(id);staleNpc=true;}
@@ -1064,7 +1069,7 @@ class Room {
   }
 }
 
-export function attachSharedUniverse(server,{authenticate,authorizeJoin,recordSecurityViolation,loadLiveOps,loadBattleGroup,loadNpcConfig,loadWorldConfig,loadPlayerEventProgress,recordPlayerEventProgress,loadWarfront,persistCapture,persistRelayCapture,damageRelay,readRelayLoadout,readAstralCombatProfile,loadActorClan,recordRelayPve,recordEliteEvent,recordWarDefense,loadWorldDirectives,grantNpcReward,grantOreReward}){
+export function attachSharedUniverse(server,{authenticate,authorizeJoin,recordSecurityViolation,loadLiveOps,loadBattleGroup,loadNpcConfig,loadWorldConfig,loadPlayerEventProgress,recordPlayerEventProgress,loadWarfront,persistCapture,persistRelayCapture,damageRelay,readRelayLoadout,readAstralCombatProfile,loadActorClan,recordRelayPve,recordEliteEvent,recordWarDefense,loadWorldDirectives,grantNpcReward,grantOreReward,loadWarbotConfig}){
   const wss=new WebSocketServer({
     server,
     path:'/ws',
@@ -1089,6 +1094,21 @@ export function attachSharedUniverse(server,{authenticate,authorizeJoin,recordSe
     recordEliteEvent:recordEliteEvent||(()=>Promise.resolve()),
     grantNpcReward:grantNpcReward||(()=>Promise.reject(new Error('Recompensa NPC não configurada no servidor'))),
     grantOreReward:grantOreReward||(()=>Promise.reject(new Error('Pagamento de minério não configurado no servidor'))),
+    warbotSettings:new Map(),lastWarbotConfigAt:0,warbotConfigBusy:false,
+    async refreshWarbotSettings(force=false){
+      const now=nowMs();if(!loadWarbotConfig)return this.warbotSettings;
+      if(!force&&now-this.lastWarbotConfigAt<10000)return this.warbotSettings;
+      if(this.warbotConfigBusy)return this.warbotSettings;
+      this.warbotConfigBusy=true;
+      try{
+        const rows=await loadWarbotConfig();if(!Array.isArray(rows))throw Error('Configuração Warbot inválida');
+        const next=new Map(rows.filter(x=>['b41','b42','b43'].includes(x?.map_id)).map(x=>[x.map_id,x]));
+        this.warbotSettings=next;
+        for(const room of rooms.values())room.warbotEngine.configure(next.get(room.mapId));
+      }catch(e){console.warn('[warbot-config] Modo seguro DESLIGADO:',String(e.message||e));this.warbotSettings=new Map();for(const room of rooms.values())room.warbotEngine.configure(null);}
+      finally{this.lastWarbotConfigAt=nowMs();this.warbotConfigBusy=false;}
+      return this.warbotSettings;
+    },
     directives:[],lastDirectivesAt:0,directivesBusy:false,
     liveOps:{events:[],catalog:[],server_time:0},
     lastLiveOpsAt:0,
@@ -1292,10 +1312,11 @@ export function attachSharedUniverse(server,{authenticate,authorizeJoin,recordSe
   });
 
   world.refreshWorldConfig(true).catch(()=>{});
+  world.refreshWarbotSettings(true).catch(()=>{});
   world.refreshNpcConfig(true).catch(()=>{});
   world.refreshLiveOps(true).catch(()=>{});
   world.refreshDirectives(true).catch(()=>{});
-  let last=nowMs(),lastActivityCleanup=0,lastGlobalEventCheckAt=0;const timer=setInterval(()=>{const n=nowMs(),dt=Math.min(.12,(n-last)/1000);last=n;if(n-lastGlobalEventCheckAt>1000){lastGlobalEventCheckAt=n;world.broadcastGlobalEventStatus(false);}if(n-world.lastLiveOpsAt>=LIVE_OPS_REFRESH_MS)world.refreshLiveOps(false).catch(()=>{});if(n-world.lastNpcConfigAt>=12000)world.refreshNpcConfig(false).catch(()=>{});if(n-world.lastWorldConfigAt>=15000)world.refreshWorldConfig(false).catch(()=>{});if(n-world.lastDirectivesAt>=20000)world.refreshDirectives(false).catch(()=>{});for(const [key,r] of rooms){if(r.clients.size>0){r.lastUsedAt=n;r.tick(dt);if(r.warfrontControl&&n-r.lastWarfrontSyncAt>15000){r.lastWarfrontSyncAt=n;r.reconcileWarfrontState().catch(err=>console.warn('Falha sincronizando relés:',err?.message));}}else if(n-(r.lastUsedAt||n)>IDLE_ROOM_TTL_MS)rooms.delete(key);}if(n-lastActivityCleanup>60000){lastActivityCleanup=n;for(const [uid,at] of world.npcActivity)if(n-Number(at)>10*60*1000)world.npcActivity.delete(uid);}},50);
+  let last=nowMs(),lastActivityCleanup=0,lastGlobalEventCheckAt=0;const timer=setInterval(()=>{const n=nowMs(),dt=Math.min(.12,(n-last)/1000);last=n;if(n-lastGlobalEventCheckAt>1000){lastGlobalEventCheckAt=n;world.broadcastGlobalEventStatus(false);}if(n-world.lastLiveOpsAt>=LIVE_OPS_REFRESH_MS)world.refreshLiveOps(false).catch(()=>{});if(n-world.lastNpcConfigAt>=12000)world.refreshNpcConfig(false).catch(()=>{});if(n-world.lastWorldConfigAt>=15000)world.refreshWorldConfig(false).catch(()=>{});if(n-world.lastDirectivesAt>=20000)world.refreshDirectives(false).catch(()=>{});if(n-world.lastWarbotConfigAt>=10000)world.refreshWarbotSettings(false).catch(()=>{});for(const [key,r] of rooms){if(r.clients.size>0){r.lastUsedAt=n;r.tick(dt);if(r.warfrontControl&&n-r.lastWarfrontSyncAt>15000){r.lastWarfrontSyncAt=n;r.reconcileWarfrontState().catch(err=>console.warn('Falha sincronizando relés:',err?.message));}}else if(n-(r.lastUsedAt||n)>IDLE_ROOM_TTL_MS)rooms.delete(key);}if(n-lastActivityCleanup>60000){lastActivityCleanup=n;for(const [uid,at] of world.npcActivity)if(n-Number(at)>10*60*1000)world.npcActivity.delete(uid);}},50);
   timer.unref?.();
   return world;
 }

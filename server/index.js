@@ -7,6 +7,7 @@ import {attachStageAV423} from './stage-a-v423.js';
 import {attachSquadObjectivesV421} from './squad-objectives-v421.js';
 import {attachFrontierUnifiedV42} from './frontier-unified-v42.js';
 import {attachAstralRewardsV381} from './astral-rewards-v381.js';
+import {cleanWarbotConfig,WARBOT_MAPS} from './warbot-engine-v477.js';
 import express from 'express';
 import compression from 'compression';
 import http from 'http';
@@ -29,7 +30,7 @@ import { createSecurityService } from './security-service.js';
 
 const app = express();
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const RELEASE_VERSION = '47.0.0'; // único identificador de release nos endpoints HTTP
+const RELEASE_VERSION = '47.7.0'; // único identificador de release nos endpoints HTTP
 
 function normalizeSupabaseUrl(value = '') {
   let url = String(value || '').trim();
@@ -1531,6 +1532,36 @@ app.post('/api/admin/coupons',requireUser,asyncRoute(async(req,res)=>{
 app.post('/api/admin/coupons/:code/active',requireUser,asyncRoute(async(req,res)=>adminRpc(req,res,'admin_set_coupon_active_v193',{
   p_code:String(req.params.code||'').slice(0,64),p_active:req.body?.active===true
 })));
+
+// V47.7: controlled, expiring Warbot sessions; ADMIN check from authenticated RPC.
+async function requireWarbotAdministrator(req,res){
+  const {data,error}=await req.sb.rpc('admin_status_v1763');
+  if(error||data?.is_admin!==true){res.status(403).json({error:'Apenas administradores podem controlar bots.'});return false;}
+  return true;
+}
+app.get('/api/admin/warbots',requireUser,asyncRoute(async(req,res)=>{
+  if(!await requireWarbotAdministrator(req,res))return;
+  const sb=await requireEliteAdmin();
+  const {data,error}=await sb.from('stellar_warbot_events_v477').select('map_id,enabled,mode,bots_per_faction,tier,attack_players,ends_at,updated_at').order('map_id');
+  if(error)return res.status(503).json({error:'Execute primeiro o SQL V47.7 no Supabase.'});
+  res.set('Cache-Control','no-store');res.json({ok:true,maps:data||[]});
+}));
+app.post('/api/admin/warbots',requireUser,asyncRoute(async(req,res)=>{
+  if(!await requireWarbotAdministrator(req,res))return;
+  const raw=req.body||{},map_id=String(raw.map_id||'');
+  if(!WARBOT_MAPS.includes(map_id)||typeof raw.enabled!=='boolean')return res.status(400).json({error:'Mapa ou ativação inválida.'});
+  if(raw.enabled&&(!['conquest','training'].includes(raw.mode)||!Number.isInteger(raw.bots_per_faction)||raw.bots_per_faction<1||raw.bots_per_faction>4||!Number.isInteger(raw.tier)||raw.tier<1||raw.tier>3))return res.status(400).json({error:'Modo, quantidade ou dificuldade inválida.'});
+  const duration=Number(raw.duration_minutes);
+  if(raw.enabled&&(!Number.isInteger(duration)||duration<5||duration>120))return res.status(400).json({error:'Duração deve ser de 5 a 120 minutos.'});
+  const cleaned=cleanWarbotConfig({enabled:raw.enabled,mode:raw.mode,bots_per_faction:raw.bots_per_faction,tier:raw.tier,attack_players:raw.attack_players===true,ends_at:raw.enabled?new Date(Date.now()+duration*60000).toISOString():null});
+  const sb=await requireEliteAdmin();
+  const values={map_id,...cleaned,updated_at:new Date().toISOString(),updated_by:req.user.id};
+  const {error}=await sb.from('stellar_warbot_events_v477').upsert(values,{onConflict:'map_id'});
+  if(error)return res.status(503).json({error:'Não foi possível persistir Warbots. Confira a migração V47.7.'});
+  await sharedUniverse.refreshWarbotSettings(true);
+  res.set('Cache-Control','no-store');res.json({ok:true,map_id,configuration:cleaned});
+}));
+
 app.get('/api/admin/status', requireUser, asyncRoute(async(req,res)=>adminRpc(req,res,'admin_status_v1763')));
 app.get('/api/admin/users', requireUser, asyncRoute(async(req,res)=>adminRpc(req,res,'admin_search_accounts_v1763',{p_query:String(req.query?.q||'').slice(0,120)})));
 app.get('/api/admin/actions', requireUser, asyncRoute(async(req,res)=>adminRpc(req,res,'admin_recent_actions_v1763')));
@@ -1829,6 +1860,12 @@ app.use((err, req, res, next) => {
 const port = process.env.PORT || 3000;
 const server = http.createServer(app);
 const sharedUniverse = attachSharedUniverse(server, {
+  loadWarbotConfig:async()=>{
+    const sb=await requireEliteAdmin();
+    const {data,error}=await sb.from('stellar_warbot_events_v477').select('map_id,enabled,mode,bots_per_faction,tier,attack_players,ends_at');
+    if(error)throw new Error('SQL Warbot V47.7 indisponível');
+    return data||[];
+  },
   loadWarfront:async mapId=>{
     const sb=await requireEliteAdmin();
     const {data,error}=await sb.from('stellar_warfront_nodes').select('map_id,node_id,owner,revision,captured_at,captured_by').eq('map_id',mapId);
