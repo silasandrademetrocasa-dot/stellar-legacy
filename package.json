@@ -1,11 +1,11 @@
 {
   "name": "stellar-legacy",
-  "version": "42.6.2",
+  "version": "43.1.0",
   "type": "module",
   "scripts": {
     "start": "node server/index.js",
     "dev": "node --watch server/index.js",
-    "check": "node scripts/v4262-player-cleanup.mjs && node scripts/verify-release.mjs",
+    "check": "node scripts/v431-apply-patch.mjs && node scripts/verify-release.mjs",
     "test": "node --test tests/*.test.mjs",
     "verify": "npm run check && npm run check:v21 && npm test",
     "check:v21": "node scripts/check-v21-package.mjs"
@@ -16,6 +16,8 @@
     "ws": "^8.18.0",
     "compression": "^1.7.5"
   },
-  "engines": {"node": ">=18"},
-  "release": "Maintenance • Player-facing presentation and repository cleanup"
+  "engines": {
+    "node": ">=18"
+  },
+  "release": "Combat Evolution: gated NPC laser power, loadout synchronization, server anomaly monitoring"
 }

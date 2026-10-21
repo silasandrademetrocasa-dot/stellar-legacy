@@ -1203,3 +1203,6 @@ export async function fundClanProjectV426(structure,points,requestId){return aut
 export async function adminSectorV426(code,minutes,kills,cost,reward,enabled){return authedServerFetch('/api/admin/frontier/v426/sector',{method:'POST',body:JSON.stringify({code,minutes,kills,cost,reward,enabled})});}
 export async function adminMarketV426(feeBps,enabled){return authedServerFetch('/api/admin/frontier/v426/market',{method:'POST',body:JSON.stringify({feeBps,enabled})});}
 export async function adminClanV426(structure,goal,enabled){return authedServerFetch('/api/admin/frontier/v426/clan',{method:'POST',body:JSON.stringify({structure,goal,enabled})});}
+
+// Regulagem da tecnologia Astral, com autorizacao de ADM no banco.
+export async function adminAstralPowerV431(enabled){return authedServerFetch('/api/admin/frontier/astral-power',{method:'POST',body:JSON.stringify({enabled})});}

@@ -1,3 +1,4 @@
+import {safeAstralProfileV431,astralNpcHitCapV431} from './astral-combat-v431.js';
 import { idleNpcStep, shouldLeashNpc, NpcAggroWindow } from './npc-intelligence-v34.js';
 import { perceptionPlayers, nearestPerceivedPlayer, turnNpcToward, selectAggroSuccessor } from './npc-intelligence-v343.js';
 import { resolveLiveEvent } from './live-event-scheduler-v341.js';
@@ -806,6 +807,36 @@ class Room {
     // Teto conservador: clientes nao ADM nao podem injetar golpes de 5M no NPC.
     // Evita false-positives em builds fortes; validar loadout no servidor e a proxima etapa.
     let amount=clamp(msg.damage,0,ws.identity?.isAdmin===true?5000000:2000000);if(amount<=0)return;
+    /* ASTRAL_NPC_HIT_GUARD_V431 */
+    // Na ativacao de dano Astral, a sala confere o modulo e o teto a partir
+    // do inventario salvo. Enquanto a funcionalidade estiver pausada,
+    // preserva-se integralmente a regra de dano anterior.
+    if(ws.identity?.isAdmin!==true&&String(msg.mode||'damage')==='damage'&&this.world.readAstralCombatProfile){
+      try{
+        const cached=ws._astralCombatV431;
+        if(!cached||now-cached.at>12000){
+          const profile=safeAstralProfileV431(await this.world.readAstralCombatProfile(p.userId));
+          const save=profile.npcDamagePercent>0?await this.world.readRelayLoadout(p.userId):null;
+          ws._astralCombatV431={at:now,profile,save};
+        }
+        const verified=ws._astralCombatV431;
+        if(verified?.profile?.npcDamagePercent>0){
+          const baseline=relayShipLoadoutDamage(verified.save,p.laserAmmoId).laserDamage;
+          const cap=astralNpcHitCapV431(baseline,verified.profile.npcDamagePercent);
+          if(cap!==null&&amount>cap){
+            this.world.recordSecurityViolation?.(p.userId,{code:'ASTRAL_NPC_HIT_BOUND',severity:'warn',evidence:{map:String(this.mapId),reported:Math.round(amount),cap}},'astral_combat').catch(()=>{});
+            return safeJsonSend(ws,{type:'damage_result',hitId:msg.hitId||null,entityId:e.id,actual:0,rejected:'damage_limit'});
+          }
+        }
+      }catch(err){
+        // Nao desconectar piloto por oscilacao do banco; sem melhoria Astral
+        // autorizada neste momento. A auditoria e o alerta permanecem no servidor.
+        if(!ws._astralCombatWarnAt||now-ws._astralCombatWarnAt>30000){ws._astralCombatWarnAt=now;console.warn('[astral-combat]',String(err?.message||err).slice(0,100));}
+      }
+    }
+    // Um alvo pode morrer enquanto a consulta de perfil aguarda resposta.
+    if(!this.npcs.has(e.id)||e.hp<=0||ws.player!==p||!this.playerFresh(p))return;
+
     const mode=String(msg.mode||'damage');const beforeShield=e.shield,beforeHp=e.hp;let actual=0;
     if(mode==='shield_drain'){
       actual=Math.min(e.shield,Math.round(amount));e.shield=Math.max(0,e.shield-actual);
@@ -1025,7 +1056,7 @@ class Room {
   }
 }
 
-export function attachSharedUniverse(server,{authenticate,authorizeJoin,recordSecurityViolation,loadLiveOps,loadBattleGroup,loadNpcConfig,loadWorldConfig,loadPlayerEventProgress,recordPlayerEventProgress,loadWarfront,persistCapture,persistRelayCapture,damageRelay,readRelayLoadout,loadActorClan,recordRelayPve,recordEliteEvent,recordWarDefense,loadWorldDirectives,grantNpcReward,grantOreReward}){
+export function attachSharedUniverse(server,{authenticate,authorizeJoin,recordSecurityViolation,loadLiveOps,loadBattleGroup,loadNpcConfig,loadWorldConfig,loadPlayerEventProgress,recordPlayerEventProgress,loadWarfront,persistCapture,persistRelayCapture,damageRelay,readRelayLoadout,readAstralCombatProfile,loadActorClan,recordRelayPve,recordEliteEvent,recordWarDefense,loadWorldDirectives,grantNpcReward,grantOreReward}){
   const wss=new WebSocketServer({
     server,
     path:'/ws',
@@ -1041,6 +1072,7 @@ export function attachSharedUniverse(server,{authenticate,authorizeJoin,recordSe
     recordWarDefense:recordWarDefense||(()=>Promise.resolve(false)),
     damageRelay:damageRelay||(()=>Promise.reject(new Error("SQL V34.6 pendente"))),
     readRelayLoadout:readRelayLoadout||(()=>Promise.reject(new Error("Leitura de equipamentos não configurada"))),
+    readAstralCombatProfile:readAstralCombatProfile||null,
     persistRelayCapture:persistRelayCapture||(()=>Promise.reject(new Error("SQL V34.6 pendente"))),
     loadActorClan:loadActorClan||(()=>Promise.resolve(null)),
     recordRelayPve:recordRelayPve||(()=>Promise.resolve(false)),

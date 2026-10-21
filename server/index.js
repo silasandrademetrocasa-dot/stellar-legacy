@@ -1,3 +1,4 @@
+import {attachAstralCombatV431} from './astral-combat-v431.js';
 import {attachStageBV426} from './stage-b-v426.js';
 import {attachStageAV423} from './stage-a-v423.js';
 import {attachSquadObjectivesV421} from './squad-objectives-v421.js';
@@ -25,7 +26,7 @@ import { createSecurityService } from './security-service.js';
 
 const app = express();
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const RELEASE_VERSION = '42.6.2'; // único identificador de release nos endpoints HTTP
+const RELEASE_VERSION = '43.1.0'; // único identificador de release nos endpoints HTTP
 
 function normalizeSupabaseUrl(value = '') {
   let url = String(value || '').trim();
@@ -1470,6 +1471,8 @@ attachStageAV423(app,{requireUser,asyncRoute});
 // V42.4-42.6: instâncias de investigação, mercado com custódia e clãs.
 attachStageBV426(app,{requireUser,asyncRoute});
 
+attachAstralCombatV431(app,{requireUser,asyncRoute});
+
 // V19.0.9 • Catálogo único de balanceamento validado pelo Supabase.
 // Não altera preço, compra, save ou catálogo de recompensas.
 app.get('/api/runtime/balance',requireUser,asyncRoute(async(req,res)=>{
@@ -1844,6 +1847,11 @@ const sharedUniverse = attachSharedUniverse(server, {
       modules:(moduleResult.data||[]).filter(m=>m.node_id===row.node_id),balance:balanceResult.data||[],
       level:Number((fortResult.data||[]).find(f=>f.node_id===row.node_id)?.level||1),rules
     }:null}));
+  },
+  readAstralCombatProfile:async userId=>{
+    const {data,error}=await (await requireEliteAdmin()).rpc('stellar_u431_combat_profile',{p_user:userId});
+    if(error)throw new Error('Perfil de combate indisponível.');
+    return data;
   },
   readRelayLoadout:async userId=>{
     const {data,error}=await (await requireEliteAdmin()).from('game_saves').select('state').eq('user_id',userId).maybeSingle();

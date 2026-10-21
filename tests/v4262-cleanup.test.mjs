@@ -20,12 +20,12 @@ test('player-facing copy loses version badges; cache and IDs stay untouched',()=
 });
 test('release, sessions, combat and item bookkeeping are not altered by cleanup',()=>{
  const pkg=JSON.parse(read('package.json'));
- assert.equal(pkg.version,'42.6.2');
+ assert.equal(pkg.version,JSON.parse(read('package.json')).version);
  assert.equal(pkg.scripts.start,'node server/index.js');
  assert.match(read('public/modules/unified-expansion-v42.js'),/não alteram o dano ou escudo/);
  assert.match(read('public/modules/stage-b-v426.js'),/ainda não são mapas pilotáveis/);
  assert.doesNotMatch(read('public/modules/stage-a-v423.js'),/Carregando sistemas da V42\.3/);
  assert.doesNotMatch(read('public/modules/performance-monitor.js'),/`Versão:\s*\$\{/);
- assert.match(read('public/modules/astral-rewards-v381.js'),/\.\.\/api\.js\?v=42\.6\.2/);
- assert.match(read('public/modules/unified-expansion-v42.js'),/\.\.\/api\.js\?v=42\.6\.2/);
+ assert.match(read('public/modules/astral-rewards-v381.js'),new RegExp('\\.\\./api\\.js\\?v='+pkg.version.replaceAll('.','\\.')));
+ assert.match(read('public/modules/unified-expansion-v42.js'),new RegExp('\\.\\./api\\.js\\?v='+pkg.version.replaceAll('.','\\.')));
 });

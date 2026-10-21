@@ -1,5 +1,5 @@
 // Etapa 1 — V42.2/V42.3: UI leve sob demanda; nunca dentro do loop de jogo.
-import {loadStageAV423,saveLoadoutV423,loadOpsV423,claimOpsV423,adminOpsV423} from '../api.js?v=42.6.2';
+import {loadStageAV423,saveLoadoutV423,loadOpsV423,claimOpsV423,adminOpsV423} from '../api.js?v=43.1.0';
 const cfgs=[1,2];
 const slots=[['defense','Defesa'],['engine','Motor'],['weapon','Armamento'],['utility','Suporte']];
 const fmt=n=>Number(n||0).toLocaleString('pt-BR');
@@ -30,7 +30,7 @@ async function forge(card,root,index){
    for(const opt of [{code:'',name:'Nenhum'},...items.filter(m=>m.slot===slot).map(m=>({code:m.code,name:`${m.code} · ${fmt(inventory.get(m.code)||0)} fabricado(s)`}))]){
     const option=node('option',opt.name);option.value=opt.code;option.selected=opt.code===current;select.append(option);
    }
-   const save=node('button','EQUIPAR');save.type='button';save.onclick=async()=>{save.disabled=true;try{await saveLoadoutV423(conf,slot,select.value||null);const fresh=await loadStageAV423();if(!card.isConnected)return;data.items=fresh.items;data.equipped=fresh.equipped;await forgeReload(card,root);}catch(e){alertError(e);}finally{save.disabled=false;}};
+   const save=node('button','EQUIPAR');save.type='button';save.onclick=async()=>{save.disabled=true;try{await saveLoadoutV423(conf,slot,select.value||null);window.dispatchEvent(new Event('stellar-astral-loadout-updated'));const fresh=await loadStageAV423();if(!card.isConnected)return;data.items=fresh.items;data.equipped=fresh.equipped;await forgeReload(card,root);}catch(e){alertError(e);}finally{save.disabled=false;}};
    name.append(select);row.append(name,save);section.append(row);
   }
   card.append(section);
