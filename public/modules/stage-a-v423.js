@@ -1,5 +1,5 @@
 // Etapa 1 — V42.2/V42.3: UI leve sob demanda; nunca dentro do loop de jogo.
-import {loadStageAV423,saveLoadoutV423,loadOpsV423,claimOpsV423,adminOpsV423} from '../api.js?v=46.1.0';
+import {loadStageAV423,saveLoadoutV423,loadOpsV423,claimOpsV423,adminOpsV423} from '../api.js?v=46.2.0';
 const cfgs=[1,2];
 const slots=[['defense','Defesa'],['engine','Motor'],['weapon','Armamento'],['utility','Suporte']];
 const fmt=n=>Number(n||0).toLocaleString('pt-BR');

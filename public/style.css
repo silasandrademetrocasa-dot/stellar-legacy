@@ -4850,3 +4850,12 @@ body[data-device="mobile"] #weaponBar .ability-btn.ready{
 .frontier-final-v426 label input[type=checkbox]{align-self:flex-start}
 .frontier-final-v426 section{overflow-wrap:anywhere}
 @media(max-width:640px){.frontier-sectors-v426{grid-template-columns:1fr}.frontier-final-v426 label{width:100%}}
+
+/* V46.2 Audio Engine UI */
+.audio-settings-row{grid-template-columns:minmax(120px,1fr) minmax(180px,1.3fr) minmax(140px,1fr) auto;align-items:stretch}
+.audio-preset{justify-content:space-between}
+.audio-preset select{min-width:108px;max-width:150px;background:#0b2637;color:#b9eeff;border:1px solid #27617a;border-radius:6px;padding:5px;font-size:10px}
+.audio-preview-btn{align-self:stretch;white-space:nowrap;color:#6fe4ff;border:1px solid #21688a;background:#071b2b}
+.audio-hint{display:block;color:#7e9daa;font-size:10px;margin-top:8px}
+@media(max-width:860px){.audio-settings-row{grid-template-columns:1fr 1fr}}
+@media(max-width:540px){.audio-settings-row{grid-template-columns:1fr}.audio-preview-btn{min-height:34px}}

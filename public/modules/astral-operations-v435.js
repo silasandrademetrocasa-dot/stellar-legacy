@@ -1,5 +1,5 @@
-import {loadStageAV423,adminAstralModuleV435,adminRaidV435,loadRaidV435,claimRaidV435,adminAstralTestKitV440} from '../api.js?v=46.1.0';
-import {astralEquipmentBonusesV435,astralModuleCodesV435} from './astral-systems-v435.js?v=46.1.0';
+import {loadStageAV423,adminAstralModuleV435,adminRaidV435,loadRaidV435,claimRaidV435,adminAstralTestKitV440} from '../api.js?v=46.2.0';
+import {astralEquipmentBonusesV435,astralModuleCodesV435} from './astral-systems-v435.js?v=46.2.0';
 let ticket=0;
 const el=(tag,text)=>{const x=document.createElement(tag);if(text!=null)x.textContent=text;return x;};
 const labels={astral_guard:'Guardião Astral',eclipse_lance:'Lança Eclipse',nexus_drive:'Núcleo Nexus',trinity_matrix:'Matriz Trina'};
