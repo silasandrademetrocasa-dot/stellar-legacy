@@ -4794,3 +4794,20 @@ body[data-device="mobile"] #weaponBar .ability-btn.ready{
 .astral-admin-preview-v380>b{font-size:11px;color:#d4f4ff}
 .astral-admin-preview-v380>span{font-size:9px;font-weight:800;letter-spacing:.08em;color:#93dfff}
 .astral-admin-preview-v380>small{font-size:10px;color:#b2cadd;line-height:1.4}
+
+/* ASTRAL_REWARDS_V381 */
+.astral-rewards-box{margin:12px 0;padding:12px;border:1px solid rgba(175,216,255,.35);border-radius:12px;background:rgba(15,27,55,.82);font-size:12px;color:#e4f2ff}
+.astral-rewards-title{font-weight:800;letter-spacing:.07em;color:#c6e9ff;margin-bottom:8px}
+.astral-rewards-box p{margin:5px 0 9px;line-height:1.65;overflow-wrap:anywhere}
+.astral-rewards-box small{display:block;color:#afc7df;line-height:1.5;margin:5px 0}
+.astral-rewards-actions{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin:8px 0}
+.astral-rewards-actions button:disabled{opacity:.5;cursor:not-allowed}
+.astral-adm-toggle{margin:8px 0 12px}
+.astral-rewards-adm{padding:12px;border:1px solid rgba(160,185,255,.3);border-radius:12px;max-height:65vh;overflow:auto}
+.astral-rewards-adm.hidden{display:none}
+.astral-adm-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px}
+.astral-adm-grid fieldset{min-width:0;border:1px solid #667994;border-radius:9px;padding:9px}
+.astral-adm-grid label{display:flex;flex-direction:column;margin:6px 0;font-size:12px;gap:3px}
+.astral-adm-grid input,.astral-adm-grid select{width:100%;min-width:0;padding:7px;border-radius:5px;background:#101a30;color:#e5f4ff;border:1px solid #587295}
+.astral-rewards-history{margin:14px 0 0;font-size:12px;line-height:1.7}
+@media(max-width:660px){.astral-adm-grid{grid-template-columns:1fr}.astral-rewards-box{padding:8px}.astral-rewards-actions button{width:100%}}

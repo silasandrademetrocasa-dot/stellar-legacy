@@ -1165,3 +1165,9 @@ export const claimFrontierContractOnline=contractId=>serverFetch('/api/frontier/
 export const craftFrontierTechOnline=()=>serverFetch('/api/frontier/craft',{method:'POST',body:'{}'},true);
 export const claimFrontierClanOnline=()=>serverFetch('/api/frontier/clan-claim',{method:'POST',body:'{}'},true);
 export const saveFrontierAdminContractOnline=payload=>serverFetch('/api/frontier/admin/contract',{method:'POST',body:JSON.stringify(payload)},true);
+
+// V38.1 — Astral Rewards: sessão autenticada do jogo, nunca service_role no navegador.
+export async function loadAstralRewardsV381(){return authedServerFetch('/api/astral-rewards');}
+export async function lockAstralRewardV381(gate){return authedServerFetch('/api/astral-rewards/lock',{method:'POST',body:JSON.stringify({gate})});}
+export async function claimAstralRewardV381(gate){return authedServerFetch('/api/astral-rewards/claim',{method:'POST',body:JSON.stringify({gate})});}
+export async function adminSetAstralRewardV381(gate,config){return authedServerFetch('/api/admin/astral-rewards',{method:'POST',body:JSON.stringify({gate,config})});}

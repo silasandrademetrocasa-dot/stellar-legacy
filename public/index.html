@@ -6,10 +6,10 @@
 <meta content="width=device-width,initial-scale=1,user-scalable=no,viewport-fit=cover" name="viewport"/>
 <meta content="#030816" name="theme-color"/>
 <title>Stellar Legacy</title>
-<link rel="manifest" href="/manifest.webmanifest?v=38.0.0"/>
+<link rel="manifest" href="/manifest.webmanifest?v=38.1.0"/>
 <link rel="icon" type="image/png" href="/icons/stellar-192.png"/>
 <link rel="apple-touch-icon" href="/icons/stellar-192.png"/>
-<link href="/style.css?v=38.0.0" rel="stylesheet"/>
+<link href="/style.css?v=38.1.0" rel="stylesheet"/>
 </head>
 <body>
 <div class="stellar-boot-splash" id="stellarBootSplash" role="status" aria-label="Preparando Stellar Legacy">
@@ -469,6 +469,7 @@
       <div class="gate-reward-note">
         <b>RECOMPENSA FINAL:</b> <span id="gateRewardNote">Cada portal possui recompensa por Round e um pacote final garantido com Núcleos Quânticos, CR, STL, munição, míssil e Voidite.</span>
       </div>
+<div id="astralRewardV381" class="astral-rewards-box" aria-live="polite"><small>ASTRAL REWARDS · aguarde a prévia…</small></div>
     </section>
   </div>
 </div>
@@ -623,6 +624,7 @@
       <div><span>BANIDAS</span><b id="adminBannedAccounts">0</b></div>
     </div>
     <section class="admin-runtime-monitor-section">
+<div class="astral-adm-toggle"><button type="button" class="small-btn gold" id="astralAdminOpenV381">✦ ASTRAL REWARDS · ADM</button><div id="astralAdminEditorV381" class="astral-rewards-adm hidden"></div></div>
       <div class="settings-title admin-runtime-monitor-head">
         <div><b>CONFIGURAÇÃO AO VIVO</b><small>Central ADM Data Driven • Eventos, Passe e Lojas controlados pelo runtime.</small></div>
         <button class="small-btn gold" id="adminRuntimeMonitorRefresh" type="button">ATUALIZAR RUNTIME</button>
@@ -1121,6 +1123,7 @@
 </div>
 </div>
 <div class="perf-diag-overlay hidden" id="perfDiagOverlay" aria-live="off" aria-label="Contador de FPS local"><b id="perfDiagHudFps">FPS —</b><small id="perfDiagHudStutter">P95 —</small></div>
-<script src="/game.js?v=38.0.0" type="module"></script>
+<script src="/game.js?v=38.1.0" type="module"></script>
+<script type="module" src="/modules/astral-rewards-v381.js?v=38.1.0"></script>
 </body>
 </html>
