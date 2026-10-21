@@ -1,15 +1,22 @@
-STELLAR LEGACY — V45.1 GALACTIC PROGRESSION REBALANCE
+STELLAR LEGACY V46.0 — GALACTIC WARFARE / PROGRESSÃO BALANCEADA
 
-INSTALL: 1) Execute SQL STELLAR_V45_1_GALACTIC_PROGRESSION.sql in Supabase.
-2) Retire todos os ZIPs antigos da raiz do GitHub; envie somente este arquivo ZIP na raiz.
-3) Execute o Universal ZIP Installer; confira os testes e o deploy do Render.
-4) Teste a rota X-1->X-2->X-3->X-4->X-5->X-6->X-7->X-8->U-1->U-2->U-3 com as 3 facções.
-5) Na X-1 de cada facção, portal 4-1/4-2/4-3 nível 15. O PvP não é necessário para avançar no PvE.
+1. Instalar o SQL sql/STELLAR_V46_0_GALACTIC_WARFARE.sql no Supabase.
+2. Subir EXCLUSIVAMENTE este ZIP na raiz do GitHub. Remover o ZIP anterior.
+3. Executar GitHub Actions → Stellar Legacy — Instalador Universal.
+4. Conferir testes automáticos e a publicação do Render.
+5. Testar usando conta nova: acompanhar XP, missões, abates e upgrades.
 
-NÍVEIS PvE: X1=1 X2=3 X3=5 X4=7 X5=9 X6=12 X7=15 X8=18 U1=20 U2=21 U3=22.
-PvP 4-X=15. Rotas anteriores mantidas como alternativas; nenhuma invasão de território.
-NPCs: densidade por mapa reequilibrada (NPC stats, recompensas e níveis do jogador não alterados).
+Incluído:
+ - Curva de XP mais acessível do nível 1 ao 22, com endgame crescente.
+ - Migração de XP por progresso proporcional, SEM redefinir level ou premiar levelups retroativos.
+ - Avisos de desbloqueio nos níveis certos, inclusive PvP no 15 e U3 no 22.
+ - Painel ADM de XP e mapas somente leitura, sem conceder itens ou créditos.
+ - Rebalanceamento de densidade de NPCs intermediários, sem mudar recompensa individual.
+ - Dimensões dos portais Aurora/Nexus/Eclipse no SQL alinhadas ao client.
+ - Testes novos de regressão e conservação de contas.
 
-SEGURANÇA: SQL aditivo, sem alterações de game_saves, wallet, relés, mercado, equip / recompensas.
-A migração é executada separadamente e não é aplicada pelo ZIP. Base obrigatória: V45.0.0.
-Esta versão NÃO finaliza todas as raids, combate autoritativo ou mercado.
+NÃO incluido nessa atualização: instâncias de raid multiplayer, combate totalmente autoritativo,
+mercado ativo ou novo sistema de relés. Os módulos existentes são preservados, não liberados.
+
+ZIP tipo patch — requer base V45.1.0 publicada no GitHub.
+Não gera alterações de jogadores no SQL; somente configurações oficiais de mundo/NPC.
