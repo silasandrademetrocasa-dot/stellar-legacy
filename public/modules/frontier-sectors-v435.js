@@ -1,8 +1,8 @@
 // Three additional PvE rooms. Reuses the existing world, NPC and mining engines.
 const NEW_SECTORS=Object.freeze([
- {id:'u1',label:'U-1',name:'Nebulosa do Véu',tier:9,minLevel:25,width:12600,height:9100,color:'#5a3d89',accent:'#a4b0ff',npcs:[['riftScout',7],['voidCorsair',7],['bossRiftScout',2]]},
- {id:'u2',label:'U-2',name:'Cemitério Iônico',tier:10,minLevel:30,width:13600,height:9900,color:'#244a59',accent:'#73e6df',npcs:[['voidCorsair',8],['nexusWarden',7],['bossVoidCorsair',2]]},
- {id:'u3',label:'U-3',name:'Horizonte do Vazio',tier:11,minLevel:35,width:14800,height:10600,color:'#563450',accent:'#ffa1c9',npcs:[['nexusWarden',8],['astralReaper',7],['bossAstralReaper',2]]}
+ {id:'u1',label:'U-1',name:'Nebulosa do Véu',tier:9,minLevel:20,width:12600,height:9100,color:'#5a3d89',accent:'#a4b0ff',npcs:[['riftScout',7],['voidCorsair',7],['bossRiftScout',2]]},
+ {id:'u2',label:'U-2',name:'Cemitério Iônico',tier:10,minLevel:21,width:13600,height:9900,color:'#244a59',accent:'#73e6df',npcs:[['voidCorsair',8],['nexusWarden',7],['bossVoidCorsair',2]]},
+ {id:'u3',label:'U-3',name:'Horizonte do Vazio',tier:11,minLevel:22,width:14800,height:10600,color:'#563450',accent:'#ffa1c9',npcs:[['nexusWarden',8],['astralReaper',7],['bossAstralReaper',2]]}
 ]);
 export function registerFrontierSectorsV435(maps){
   for(const s of NEW_SECTORS){

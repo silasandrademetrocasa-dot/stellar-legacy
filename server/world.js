@@ -1,3 +1,4 @@
+import {applyGalacticProgressionV451} from '../public/modules/galactic-progression-v451.js';
 import {sectorEntryAllowedV450,frontierEliteRespawnV450} from './frontier-stability-v450.js';
 import {frontierBossSetupV440} from '../public/modules/frontier-boss-v440.js';
 import {mergeFrontierServerPortalsV440} from '../public/modules/frontier-routing-v440.js';
@@ -20,6 +21,7 @@ import { RELAY_BASE,RELAY_NEUTRAL_MODULES,applyRelayDamage } from './relay-domin
 import {relayShipLoadoutDamage,relayTurretStats} from './relay-combat-v3463.js';
 
 registerFrontierSectorsV435(MAPS);
+applyGalacticProgressionV451(MAPS);
 const LIVE_OPS_REFRESH_MS = 15000;
 
 // V18.1.8 • NETWORK OPTIMIZATION

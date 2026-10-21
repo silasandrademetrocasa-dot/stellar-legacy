@@ -1,34 +1,15 @@
-STELLAR LEGACY — V45.0 GALACTIC ASCENSION — ZIP ÚNICO
-BASE EXATA: 44.0.0 -> 45.0.0 — UNIVERSAL ZIP INSTALLER
+STELLAR LEGACY — V45.1 GALACTIC PROGRESSION REBALANCE
 
-ENTREGUE E TESTÁVEL NESTE PACOTE:
-1) BUG DE ENTRADA NOS SETORES U-1/U-2/U-3: servidor reconhece nós neutros publicados
-   no SQL, mantém o isolamento de salas pela facção autenticada e preserva bloqueio
-   territorial X-1..X-8. Falhas de mapa indisponível não bloqueiam invasões antigas.
-2) GUARDIÃO DO VAZIO U-3: o boss especial continua a reaparecer após um abate,
-   respeitando população de NPCs definida no ADM. Também ressurge quando o ADM
-   ajusta densidade de NPCs sem criar mais um NPC que o permitido.
-3) ADM > UNIVERSO ESTELAR > ADMIN: diagnóstico visual de U-1..U-3,
-   links bidirecionais, grupos de NPCs, recursos e raid semanal, com revisão de
-   versões de configuração. Somente um ADM autenticado pode consultar.
-4) Fixação das importações JS em 45.0.0 e atualização dos testes legados da V43.5
-   e V44 que verificam versões, sem remover os testes de segurança.
-5) SQL ADITIVO: uma única função privada de diagnóstico; nenhum save, inventário,
-   saldo, relé, preço ou economia é alterado por este pacote.
+INSTALL: 1) Execute SQL STELLAR_V45_1_GALACTIC_PROGRESSION.sql in Supabase.
+2) Retire todos os ZIPs antigos da raiz do GitHub; envie somente este arquivo ZIP na raiz.
+3) Execute o Universal ZIP Installer; confira os testes e o deploy do Render.
+4) Teste a rota X-1->X-2->X-3->X-4->X-5->X-6->X-7->X-8->U-1->U-2->U-3 com as 3 facções.
+5) Na X-1 de cada facção, portal 4-1/4-2/4-3 nível 15. O PvP não é necessário para avançar no PvE.
 
-NÃO ENTREGUE COMO CONCLUÍDO:
-- Motor de combate totalmente autoritativo: cliente ainda reporta dano e estados;
-  permaneça com os bônus Astrais desativados até testes com duas contas.
-- Raids: desafio de esquadrão e chefes U3 mantidos, ainda não arena instanciada 4P.
-- Mercado: continue desativado até auditoria de transações concorrentes.
-- FPS: melhorias de lógica/nenhum NPC extra; FPS 25–30 requer medida real no Android.
+NÍVEIS PvE: X1=1 X2=3 X3=5 X4=7 X5=9 X6=12 X7=15 X8=18 U1=20 U2=21 U3=22.
+PvP 4-X=15. Rotas anteriores mantidas como alternativas; nenhuma invasão de território.
+NPCs: densidade por mapa reequilibrada (NPC stats, recompensas e níveis do jogador não alterados).
 
-INSTALAÇÃO:
-1. Backup GitHub / Supabase. SQL pode ser aplicado como migração após V44.0.
-2. Subir SOMENTE este ZIP na raiz do GitHub. Excluir ZIPs antigos.
-3. Actions > Instalador Universal > Run workflow. Conferir npm run check, npm test.
-4. Render atualiza automaticamente main. Aguardar live. Reiniciar navegador.
-5. FELP22[ADM]: testar salto MAPA U-1..U-3 e confirmar que o ADM mostra diagnóstico.
-6. Usar uma segunda conta para verificar nível e bloqueio de facção no servidor.
-
-Não atribuir ao pacote status de 100% de jogabilidade antes de testes no Render.
+SEGURANÇA: SQL aditivo, sem alterações de game_saves, wallet, relés, mercado, equip / recompensas.
+A migração é executada separadamente e não é aplicada pelo ZIP. Base obrigatória: V45.0.0.
+Esta versão NÃO finaliza todas as raids, combate autoritativo ou mercado.
