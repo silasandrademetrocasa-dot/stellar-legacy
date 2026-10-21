@@ -319,20 +319,20 @@ export const MAPS = {
   },
   ggAlpha: {
     id: 'ggAlpha', label: 'AURORA', tier: 90, gate: true, battle: true, name: 'Portal Astral Alpha', risk: 'Portal',
-    world: { w: 7200, h: 5200 }, enemyMultiplier: 1, ores: [], oreCount: 0, landmarkCount: 0,
-    palette: { nebula: '#2f1d5e', accent: '#b278ff', deep: '#03030d' },
+    world: { w: 11500, h: 8500 }, enemyMultiplier: 1, ores: [], oreCount: 0, landmarkCount: 0,
+    palette: { nebula: '#124b50', accent: '#62ffe0', deep: '#020e16' },
     structures: ['Portal Astral Alpha'], portals: [], enemyGroups: [],
   },
   ggBeta: {
     id: 'ggBeta', label: 'NEXUS', tier: 94, gate: true, battle: true, name: 'Portal Astral Beta', risk: 'Portal Elite',
-    world: { w: 7800, h: 5600 }, enemyMultiplier: 1, ores: [], oreCount: 0, landmarkCount: 0,
-    palette: { nebula: '#153f54', accent: '#55e6ff', deep: '#020c13' },
+    world: { w: 13200, h: 9600 }, enemyMultiplier: 1, ores: [], oreCount: 0, landmarkCount: 0,
+    palette: { nebula: '#332052', accent: '#b49aff', deep: '#090819' },
     structures: ['Portal Astral Beta'], portals: [], enemyGroups: [],
   },
   ggGamma: {
     id: 'ggGamma', label: 'ECLIPSE', tier: 99, gate: true, battle: true, name: 'Portal Astral Gamma', risk: 'Portal Extremo',
-    world: { w: 8400, h: 6200 }, enemyMultiplier: 1, ores: [], oreCount: 0, landmarkCount: 0,
-    palette: { nebula: '#5a1729', accent: '#ff4778', deep: '#100208' },
+    world: { w: 14800, h: 10800 }, enemyMultiplier: 1, ores: [], oreCount: 0, landmarkCount: 0,
+    palette: { nebula: '#4d1627', accent: '#ff9b59', deep: '#12060e' },
     structures: ['Portal Astral Gamma'], portals: [], enemyGroups: [],
   },
 };

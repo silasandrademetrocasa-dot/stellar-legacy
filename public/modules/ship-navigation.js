@@ -2,6 +2,7 @@
 // Mapas de exploração e PvP equilibrados: mantem vantagens proporcionais das CONF de corrida, sem mudar combate.
 export const PVP_SECTORS=new Set(['b41','b42','b43']);
 export const PVE_SECTORS=new Set(['x1','x2','x3','x4','x5','x6','x7','x8']);
+export const ASTRAL_SECTORS=new Set(['ggAlpha','ggBeta','ggGamma']);
 export const PVP_CRUISE_FACTOR=0.88;
 export const PVE_CRUISE_FACTOR=0.88;
 // Ajuste de sensacao de pilotagem: nao muda os pontos VELOCIDADE no perfil/HUD.
@@ -29,14 +30,14 @@ export function nominalMovementSpeed(baseSpeed,mapId,abilityMultiplier=1){
   const speed=Math.max(0,Number(baseSpeed)||0);
   const ability=Math.max(0,Number(abilityMultiplier)||0);
   const id=String(mapId||'');
-  const cruiseFactor=PVP_SECTORS.has(id)?PVP_CRUISE_FACTOR:PVE_SECTORS.has(id)?PVE_CRUISE_FACTOR:1;
+  const cruiseFactor=PVP_SECTORS.has(id)?PVP_CRUISE_FACTOR:(PVE_SECTORS.has(id)||ASTRAL_SECTORS.has(id))?PVE_CRUISE_FACTOR:1;
   return speed*ability*cruiseFactor;
 }
 // A navegacao consome menos unidades por segundo nos mapas principais,
 // mas os atributos (e o numero exibido) permanecem identicos aos anteriores.
 export function movementSpeed(baseSpeed,mapId,abilityMultiplier=1){
   const id=String(mapId||'');
-  const paced=PVP_SECTORS.has(id)||PVE_SECTORS.has(id);
+  const paced=PVP_SECTORS.has(id)||PVE_SECTORS.has(id)||ASTRAL_SECTORS.has(id);
   return nominalMovementSpeed(baseSpeed,id,abilityMultiplier)*(paced?FLIGHT_PACING_FACTOR:1);
 }
 

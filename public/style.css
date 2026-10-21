@@ -4753,3 +4753,44 @@ body[data-device="mobile"] #weaponBar .ability-btn.ready{
 .frontier-v370 [disabled]{opacity:.54}
 @media(max-width:680px){.frontier-v370{padding:8px}.frontier-grid-v370{grid-template-columns:1fr;gap:7px}.frontier-tech-v370{align-items:stretch;flex-direction:column}.frontier-tech-v370 button{width:100%}}
 @media(prefers-reduced-motion:reduce){.frontier-v370 *{animation:none!important;transition:none!important}}
+
+
+/* ===== V38.0.0 • ASTRAL GATES: REBIRTH ===== */
+#gateModal{--astral-main:#5affdb;--astral-rim:#259bd5;--astral-dark:#042532;--astral-bright:#d6fff1}
+#gateModal[data-astral-protocol="beta"]{--astral-main:#a38aff;--astral-rim:#57baff;--astral-dark:#1c103b;--astral-bright:#f0e4ff}
+#gateModal[data-astral-protocol="gamma"]{--astral-main:#ff7284;--astral-rim:#ffb453;--astral-dark:#310b1b;--astral-bright:#ffe0be}
+#gateModal .gate-portal-visual{
+ background:radial-gradient(circle at 50% 49%,var(--astral-main) -110%,var(--astral-dark) 46%,rgba(0,0,0,0) 71%);
+ border:1px solid color-mix(in srgb,var(--astral-main) 42%,transparent);
+ box-shadow:0 0 26px color-mix(in srgb,var(--astral-main) 18%,transparent),inset 0 0 24px color-mix(in srgb,var(--astral-main) 20%,transparent);
+}
+#gateModal .gate-portal-visual:before{content:"";position:absolute;inset:10px;border:2px dashed color-mix(in srgb,var(--astral-rim) 65%,transparent);border-radius:50%;animation:ggspin 24s linear infinite;pointer-events:none}
+#gateModal .gate-ring{border-color:var(--astral-main);box-shadow:0 0 15px color-mix(in srgb,var(--astral-main) 33%,transparent)}
+#gateModal .gate-ring.ring-2{border-color:var(--astral-rim)}
+#gateModal .gate-ring.ring-3{border-color:var(--astral-bright);opacity:.58}
+#gateModal .gate-core{font-size:clamp(10px,2vw,16px);letter-spacing:.09em;text-align:center;
+ background:radial-gradient(circle at 37% 32%,var(--astral-bright),var(--astral-main) 12%,var(--astral-dark) 58%,#03030b 88%);
+ border:1px solid var(--astral-rim);box-shadow:0 0 32px color-mix(in srgb,var(--astral-main) 45%,transparent)}
+#gateModal .gate-portal-caption{position:absolute;bottom:8px;left:0;right:0;text-align:center;font:800 9px Arial,sans-serif;letter-spacing:.19em;color:var(--astral-main);opacity:.85}
+#gateModal .gate-protocol-tabs .small-btn.active{border-color:var(--astral-main);color:var(--astral-bright);box-shadow:0 0 12px color-mix(in srgb,var(--astral-main) 22%,transparent)}
+#gateModal .gate-piece.found{border-color:var(--astral-main);color:var(--astral-bright);background:color-mix(in srgb,var(--astral-dark) 74%,#163446)}
+#gateModal .gate-piece-progress{height:7px;border-radius:7px;background:#061221;border:1px solid color-mix(in srgb,var(--astral-main) 28%,transparent);margin:10px 0 5px;overflow:hidden}
+#gateModal .gate-piece-progress i{display:block;width:var(--gate-progress,0%);height:100%;background:linear-gradient(90deg,var(--astral-rim),var(--astral-main));transition:width .2s ease}
+.gate-hud[data-astral-protocol="alpha"]{border-color:rgba(90,255,219,.52)!important}
+.gate-hud[data-astral-protocol="beta"]{border-color:rgba(163,138,255,.56)!important}
+.gate-hud[data-astral-protocol="gamma"]{border-color:rgba(255,114,132,.57)!important}
+@media (prefers-reduced-motion:reduce){#gateModal .gate-ring,#gateModal .gate-portal-visual:before{animation:none!important}}
+@media(max-width:680px){#gateModal .gate-portal-visual:before{animation:none!important}#gateModal .gate-ring{box-shadow:none!important;animation:none!important}#gateModal .gate-portal-visual{box-shadow:none!important}}
+
+#gateModal[data-low-fx="true"] .gate-ring,#gateModal[data-low-fx="true"] .gate-portal-visual:before{animation:none!important;box-shadow:none!important}
+
+#gateModal .gate-materializer-sprite{position:absolute;width:94%;height:94%;object-fit:contain;z-index:1;pointer-events:none;filter:drop-shadow(0 0 9px color-mix(in srgb,var(--astral-main) 28%,transparent));opacity:.85}
+#gateModal .gate-ring{z-index:2;opacity:.35}
+#gateModal .gate-core{z-index:3;width:73px;height:73px;box-shadow:0 0 18px color-mix(in srgb,var(--astral-main) 30%,transparent)}
+#gateModal .gate-portal-caption{z-index:4}
+@media(max-width:680px){#gateModal .gate-materializer-sprite{filter:none}}
+
+.astral-admin-preview-v380{display:flex;flex-direction:column;gap:4px;padding:9px 11px;border:1px solid rgba(114,205,255,.23);border-radius:9px;background:rgba(9,26,46,.72);margin:8px 0 12px}
+.astral-admin-preview-v380>b{font-size:11px;color:#d4f4ff}
+.astral-admin-preview-v380>span{font-size:9px;font-weight:800;letter-spacing:.08em;color:#93dfff}
+.astral-admin-preview-v380>small{font-size:10px;color:#b2cadd;line-height:1.4}
