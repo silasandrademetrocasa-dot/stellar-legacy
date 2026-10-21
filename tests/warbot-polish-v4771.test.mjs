@@ -65,13 +65,13 @@ test('faction WebP renders using cached image, no shadow performance cost',()=>{
 });
 test('HUD and minimap use exact current map and remove floating UNIVERSO button',()=>{
  const game=read('public/game.js'),html=read('public/index.html'),pkg=JSON.parse(read('package.json'));
- assert.equal(pkg.version,'47.7.1');assert.match(pkg.scripts.check,/v4771-apply-patch/);
+ assert.equal(pkg.version,'47.7.2');assert.match(pkg.scripts.check,/v4772-apply-patch/);
  assert.match(game,/spriteImage:assetImage\(WARBOT_SHIP_ASSETS\[e\.faction\]\)/);
  assert.match(game,/MAPA '\+displayMapLabel\(progress\.mapId,currentTerritoryFaction\(\)\)/);
  assert.match(html,/id="minimapMapLabelV4771"/);
  assert.equal((html.match(/id="frontierExpansionBtnV42"/g)||[]).length,1);
  assert.match(html,/<nav class="top-actions command-actions"[\s\S]*?id="frontierExpansionBtnV42"[\s\S]*?<\/nav>/);
- assert.match(html,/\/game\.js\?v=47\.7\.1/);
+ assert.match(html,/\/game\.js\?v=47\.7\.2/);
 });
 test('authoritative ephemeral gameplay never rewards bot combat or persists captures',()=>{
  const g=read('server/warbot-engine-v477.js');

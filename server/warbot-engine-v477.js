@@ -139,7 +139,12 @@ export function createWarbotEngine(room){
     const b=bots.get(String(msg.entityId||'')),p=ws.player;
     if(!settings.enabled||!b||b.hp<=0||!p||!room.playerFresh(p)||String(ws.identity?.user?.id||'')!==String(p.userId))return;
     if(settings.mode==='conquest'&&p.faction===b.faction)return; // Friendly fire is disabled for conquest
-    if(settings.mode==='conquest'&&p.faction===b.faction)return; // no friendly-fire in conquest
+    // A pilot in a safe base / neutral portal cannot attack bots while immune to retaliation.
+    // Match the protection the same authoritative room already applies to NPC attacks.
+    if(room.playerSafe?.(p)||room.playerPortalNeutral?.(p)){
+      ws.send(JSON.stringify({type:'warbot_damage_result',entityId:b.id,actual:0,rejected:'safe_zone'}));
+      return;
+    }
     // Same protection for bot shots as ordinary NPC hits: validation, rate limiting, range and cap.
     const policy=admitDamage(ws,msg,Date.now());
     if(!policy.allowed)return ws.send(JSON.stringify({type:'warbot_damage_result',entityId:b.id,actual:0,rejected:policy.reason}));
