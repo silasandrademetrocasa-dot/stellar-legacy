@@ -1,23 +1,16 @@
 {
-  "name": "stellar-legacy",
-  "version": "46.0.0",
-  "type": "module",
-  "scripts": {
-    "start": "node server/index.js",
-    "dev": "node --watch server/index.js",
-    "check": "node scripts/v460-apply-patch.mjs && node scripts/verify-release.mjs",
-    "test": "node --test tests/*.test.mjs",
-    "verify": "npm run check && npm run check:v21 && npm test",
-    "check:v21": "node scripts/check-v21-package.mjs"
-  },
-  "dependencies": {
-    "express": "^4.21.2",
-    "@supabase/supabase-js": "^2.57.4",
-    "ws": "^8.18.0",
-    "compression": "^1.7.5"
-  },
-  "engines": {
-    "node": ">=18"
-  },
-  "release": "Galactic Warfare V46: accessible pilot XP L1-22 with proportional migration, corrected unlocks, new ADM balance preview, NPC transition and Galaxy Gate arena dimensions"
+ "name":"stellar-legacy",
+ "version":"46.1.0",
+ "type":"module",
+ "scripts":{
+  "start":"node server/index.js",
+  "dev":"node --watch server/index.js",
+  "check":"node scripts/v461-apply-patch.mjs && node scripts/verify-release.mjs",
+  "test":"node --test tests/*.test.mjs",
+  "verify":"npm run check && npm run check:v21 && npm test",
+  "check:v21":"node scripts/check-v21-package.mjs"
+ },
+ "dependencies":{"express":"^4.21.2","@supabase/supabase-js":"^2.57.4","ws":"^8.18.0","compression":"^1.7.5"},
+ "engines":{"node":">=18"},
+ "release":"Linear Portals V46.1: only sequential faction PvE links, PvP from faction X-1 at level 15, mapped edge and center locations"
 }

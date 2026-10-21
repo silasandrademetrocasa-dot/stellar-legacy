@@ -30,8 +30,8 @@ test('DB-enabled links only: no automatic restoration of disabled U routes in se
  const data=[{from_sector:'1-8',to_sector:'U-1',enabled:true}];
  const server=mergeFrontierServerPortalsV440('x8','earth',map,[{...original,x:30,y:30}],data);
  assert.equal(server.length,1);
- assert.equal(server[0].x,11130);
- assert.equal(server[0].y,1650);
+ assert.equal(server[0].x,Math.round(map.world.w/2));
+ assert.equal(server[0].y,Math.round(map.world.h/2));
  assert.equal(mergeFrontierServerPortalsV440('x8','earth',map,[],data).length,0);
  assert.equal(filteredFrontierPortalsV440('1-8','earth',[],true).length,0);
  assert.equal(filteredFrontierPortalsV440('1-8','earth',['U-1'],true).length,1);
@@ -67,11 +67,11 @@ test('SQL is additive, bounded and role-protected',()=>{
 });
 test('Installer keeps the existing live releases and migrates old tests without disabling them',()=>{
  const p=JSON.parse(read('package.json'));
- assert.equal(p.version,'46.0.0');assert.match(p.scripts.check,/v460-apply-patch/);
+ assert.equal(p.version,'46.1.0');assert.match(p.scripts.check,/v461-apply-patch/);
  assert.match(read('server/world.js'),/mergeFrontierServerPortalsV440/);
  assert.match(read('public/game.js'),/filteredFrontierPortalsV440/);
  assert.match(read('public/modules/astral-operations-v435.js'),/adminAstralTestKitV440/);
  assert.match(read('server/index.js'),/attachFrontierAdminV440/);
- assert.match(read('tests/v435-integration.test.mjs'),/v460-apply-patch/);
+ assert.match(read('tests/v435-integration.test.mjs'),/v461-apply-patch/);
  assert.match(read('tests/v431-combat-evolution.test.mjs'),/\\d\+|\\d/);
 });
