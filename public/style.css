@@ -4703,3 +4703,25 @@ body[data-device="mobile"] #weaponBar .ability-btn.ready{
   animation:none!important;
   box-shadow:inset 0 0 0 1px rgba(94,209,255,.3)!important;
 }
+
+/* V36 • Galactic Dominion: no perpetual CSS animations; cheap mobile layout. */
+.dominion-v360{padding:12px;margin:12px 0;border:1px solid rgba(92,184,248,.32);border-radius:12px;background:rgba(9,24,44,.76);content-visibility:auto;contain-intrinsic-size:auto 390px}
+.dominion-v360 h3{margin:5px 0 11px;color:#b4eaff;font-size:15px;letter-spacing:.03em}
+.dominion-summary-v360{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin:7px 0 10px}
+.dominion-summary-v360 span{display:flex;flex-direction:column;gap:4px;padding:10px 4px;background:rgba(85,153,215,.10);border:1px solid rgba(129,198,236,.21);border-radius:8px;text-align:center;min-width:0}
+.dominion-summary-v360 b{color:#b5e8ff;font-size:clamp(11px,2vw,16px);overflow-wrap:anywhere}
+.dominion-v360 small{display:block;color:#abc0d5;font-size:11px;line-height:1.45}
+.dominion-summary-v360 small{font-size:10px}
+.dominion-rewards-v360{display:grid;grid-template-columns:repeat(auto-fit,minmax(165px,1fr));gap:8px}
+.dominion-rewards-v360>div{display:grid;align-content:start;gap:6px;padding:10px;border:1px solid rgba(115,189,232,.24);border-radius:8px}
+.dominion-rewards-v360 b,.dominion-note-v360 b{color:#d7edff;font-size:12px}
+.dominion-v360 details{margin-top:9px;padding:8px;border:1px solid rgba(115,189,232,.2);border-radius:8px}
+.dominion-v360 summary{cursor:pointer;color:#cde5ff;font-size:12px;font-weight:700;min-height:25px}
+.dominion-v360 label{display:grid;gap:4px;margin:8px 0;font-size:11px}
+.dominion-v360 select,.dominion-v360 input[type=number]{max-width:100%;min-width:0;padding:8px;border:1px solid rgba(123,190,235,.35);border-radius:6px;background:#112740;color:#e7f6ff}
+.dominion-war-row-v360{display:grid;gap:2px;padding:7px 4px;border-bottom:1px solid rgba(148,197,241,.12)}
+.dominion-war-row-v360 b{font-size:12px}
+.dominion-note-v360{display:grid;gap:5px;padding:10px 3px}
+.dominion-admin-fields-v360{display:grid;grid-template-columns:repeat(auto-fit,minmax(135px,1fr));gap:6px}
+.dominion-v360 button{max-width:100%;min-height:34px}
+@media(max-width:600px){.dominion-v360{padding:8px;margin:8px 0}.dominion-summary-v360{gap:4px}.dominion-summary-v360 span{padding:8px 2px}.dominion-summary-v360 b{font-size:11px}.dominion-v360 summary{font-size:11px}}

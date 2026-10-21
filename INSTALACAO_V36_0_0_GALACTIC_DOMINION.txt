@@ -1,0 +1,15 @@
+STELLAR LEGACY V36.0.0 — GALACTIC DOMINION
+
+1. Faça backup opcional do ZIP V35 antes de atualizar.
+2. Suba ESTE ZIP COMPLETO pelo Universal ZIP Installer do GitHub.
+3. Verifique que a Action e o deploy do Render terminaram com sucesso.
+4. Confira GET /health com version: 36.0.0.
+5. Só após confirmar Render Live, aplique:
+   sql/V36_0_0_GALACTIC_DOMINION.sql
+6. Valide guerra, reparação, ranking, cofre e FPS.
+
+ROLLBACK:
+ sql/V36_0_0_GALACTIC_DOMINION_ROLLBACK.sql
+
+NÃO execute o SQL antes de o novo servidor entrar Live.
+NÃO suba a pasta .github pelo ZIP; o instalador preserva os workflows atuais.

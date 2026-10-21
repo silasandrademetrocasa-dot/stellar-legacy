@@ -1151,3 +1151,10 @@ export const repairRelayOnline=payload=>serverFetch('/api/relay/repair',{method:
 // V35: fortifications are server-authenticated, atomic and independent from ship modules.
 export const upgradeRelayFortificationOnline=payload=>serverFetch('/api/relay/fortification/upgrade',{method:'POST',body:JSON.stringify(payload)},true);
 export const saveRelayFortificationTierOnline=payload=>serverFetch('/api/relay/admin/fortification-tier',{method:'POST',body:JSON.stringify(payload)},true);
+
+// V36 • all Dominion operations are authenticated, persisted and server-authoritative.
+export const loadDominionStateOnline=()=>serverFetch('/api/relay/dominion/state',{},true);
+export const claimDominionOnline=kind=>serverFetch('/api/relay/dominion/claim',{method:'POST',body:JSON.stringify({kind})},true);
+export const declareDominionWarOnline=(targetClanId,startsAt=null)=>serverFetch('/api/relay/dominion/declare',{method:'POST',body:JSON.stringify({targetClanId,startsAt})},true);
+export const saveDominionRulesOnline=payload=>serverFetch('/api/relay/dominion/admin/rules',{method:'POST',body:JSON.stringify(payload)},true);
+export const claimDominionWarPrizeOnline=warId=>serverFetch('/api/relay/dominion/war/prize',{method:'POST',body:JSON.stringify({warId})},true);

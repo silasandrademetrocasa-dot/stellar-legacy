@@ -1,6 +1,6 @@
 {
   "name": "stellar-legacy",
-  "version": "35.0.0",
+  "version": "36.0.0",
   "type": "module",
   "scripts": {
     "start": "node server/index.js",
@@ -19,5 +19,5 @@
   "engines": {
     "node": ">=18"
   },
-  "release": "Galactic Ascension • Relés Fortificados, Economia, Missões, PvP, Eventos e Estabilidade"
+  "release": "Galactic Dominion • Fortalezas, Guerras, Territórios, Missões e FPS"
 }

@@ -58,6 +58,35 @@ export function drawRelayStation(ctx,node,{quality='medium',mobile=false,time=0,
     }
     ctx.strokeStyle='rgba(255,212,110,.80)';ctx.beginPath();ctx.arc(0,0,45,Math.PI*.13,Math.PI*.87);ctx.stroke();
   }
+  // V36 Galactic Dominion: higher-tier relay silhouettes remain recognizable even
+  // with every cosmetic effect disabled. On low quality only a few plain strokes.
+  if(level>=2){
+    ctx.save();ctx.strokeStyle=destroyed?'#6b5860':level===3?'#e0c16e':'#7badce';
+    ctx.fillStyle=destroyed?'#342c35':'#192d48';ctx.lineWidth=b.relayGeometry>=3?2:1.2;
+    for(const sign of [-1,1]){
+      // Dual reinforced pylons visible behind weapon hardpoints.
+      ctx.beginPath();ctx.moveTo(sign*29,-19);ctx.lineTo(sign*44,-15);
+      ctx.lineTo(sign*49,-6);ctx.lineTo(sign*31,-3);ctx.closePath();ctx.fill();ctx.stroke();
+      ctx.beginPath();ctx.moveTo(sign*29,19);ctx.lineTo(sign*44,15);
+      ctx.lineTo(sign*49,6);ctx.lineTo(sign*31,3);ctx.closePath();ctx.fill();ctx.stroke();
+    }
+    if(b.relayGeometry>1&&health.shieldRatio>0){
+      ctx.strokeStyle='#65bde9';ctx.globalAlpha=.3+.35*health.shieldRatio;
+      ctx.beginPath();ctx.arc(0,0,level===3?57:48,Math.PI*.14,Math.PI*.86);
+      ctx.moveTo(level===3?-51:-42,-16);ctx.arc(0,0,level===3?57:48,Math.PI*1.14,Math.PI*1.86);ctx.stroke();ctx.globalAlpha=1;
+    }
+    if(level===3&&b.relayGeometry>=3){
+      // Four luminous vents make the citadel distinct without shadowBlur or spritesheets.
+      ctx.fillStyle=destroyed?'#805754':'#ffcc71';
+      for(let ix of [-1,1])for(let iy of [-1,1])ctx.fillRect(ix*38-2,iy*34-2,4,4);
+    }
+    ctx.restore();
+  }
+  // Clan/faction targeting stripe, intentionally static for mobile performance.
+  if(!destroyed){
+   const factionColor={earth:'#5ea9ff',mars:'#ff7b6c',jupiter:'#ffce6c'}[String(node.owner||'')];
+   if(factionColor){ctx.fillStyle=factionColor;ctx.fillRect(-10,-28,20,3);}
+  }
   // Layered armor plates, not a blurred full-screen effect.
   ctx.fillStyle=destroyed?'#4b3d46':'#183b51';ctx.strokeStyle='rgba(183,233,250,.40)';ctx.lineWidth=.9;
   for(let side of [-1,1]){ctx.beginPath();ctx.moveTo(side*8,-18);ctx.lineTo(side*24,-10);ctx.lineTo(side*27,7);ctx.lineTo(side*8,13);ctx.closePath();ctx.fill();if(b.relayGeometry>1)ctx.stroke();}

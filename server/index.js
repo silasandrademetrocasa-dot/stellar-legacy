@@ -12,13 +12,14 @@ import { eliteStatus } from './elite-operations.js';
 import { warCampaignState,warRankings,safeWarCampaignInput,safeWarRulesInput } from './war-campaigns.js';
 import { createCommandCenterRouter } from './command-center-router.js';
 import { createRelayRouter } from './relay-router-v346.js';
+import {createDominionRouter} from './dominion-router-v360.js';
 import { validatePlayerSave, invalidShopArguments } from './security-guard.js';
 import { validateRewardClaimContinuity } from './reward-claim-guard.js';
 import { createSecurityService } from './security-service.js';
 
 const app = express();
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const RELEASE_VERSION = '35.0.0'; // único identificador de release nos endpoints HTTP
+const RELEASE_VERSION = '36.0.0'; // único identificador de release nos endpoints HTTP
 
 function normalizeSupabaseUrl(value = '') {
   let url = String(value || '').trim();
@@ -1627,6 +1628,7 @@ app.post('/api/admin/war/campaigns',requireUser,asyncRoute(async(req,res)=>{
 // Sistemas adicionais do Centro de Comando isolados do motor de combate.
 app.use('/api/command',requireUser,createCommandCenterRouter({serviceClient:eliteAdminClient}));
 app.use('/api/relay',requireUser,createRelayRouter({serviceClient:eliteAdminClient}));
+app.use('/api/relay/dominion',requireUser,createDominionRouter({serviceClient:eliteAdminClient}));
 
 app.get('/api/save', requireUser, asyncRoute(async (req, res) => {
   const { data, error } = await req.sb.from('game_saves').select('state,updated_at').eq('user_id', req.user.id).maybeSingle();
@@ -1976,6 +1978,18 @@ const shopsRefreshTimer=setInterval(()=>{refreshShopsRuntimeSnapshot(true).catch
 shopsRefreshTimer.unref?.();
 refreshShopsRuntimeSnapshot(true).then(cfg=>console.log(`[shops-runtime] v${cfg.version} cacheado em ${SHOPS_RUNTIME_FILE}`)).catch(err=>console.warn('[shops-runtime] bootstrap:',err.message));
 
+// V36: at most one lightweight SQL tick per 60s, only while clients are online.
+// Never recompute defensive capacity on frames or client fire events.
+let dominionRegenInFlight=false;let dominionSqlWarned=false;
+const dominionRegenTimer=setInterval(async()=>{
+ if(!eliteAdminClient||dominionRegenInFlight||sharedUniverse.stats().clients===0)return;
+ dominionRegenInFlight=true;
+ try{const {error}=await eliteAdminClient.rpc('stellar_dominion_regen_v360');
+  if(error&&!/PGRST202|42883|schema cache/i.test(String(error.message||''))&&!dominionSqlWarned){dominionSqlWarned=true;console.warn('[dominion-regen]',String(error.message||'').slice(0,150));}
+ }catch(err){if(!dominionSqlWarned){dominionSqlWarned=true;console.warn('[dominion-regen]',String(err?.message||err).slice(0,150));}}
+ finally{dominionRegenInFlight=false;}
+},60000);
+dominionRegenTimer.unref?.();
 server.listen(port, () => {
   console.log(`Stellar Legacy ${RELEASE_VERSION} :${port}`);
   console.log('Supabase config:', configStatus());
