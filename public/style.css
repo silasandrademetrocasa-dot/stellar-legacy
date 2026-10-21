@@ -4859,3 +4859,8 @@ body[data-device="mobile"] #weaponBar .ability-btn.ready{
 .audio-hint{display:block;color:#7e9daa;font-size:10px;margin-top:8px}
 @media(max-width:860px){.audio-settings-row{grid-template-columns:1fr 1fr}}
 @media(max-width:540px){.audio-settings-row{grid-template-columns:1fr}.audio-preview-btn{min-height:34px}}
+
+/* V47.0 — Combat Reborn • sem impacto no HUD principal */
+.reborn-audio-cues{display:flex;align-items:center;gap:9px;font-size:11px;color:#b1dcec;margin-top:9px;padding:7px 10px;border:1px solid rgba(82,204,245,.15);border-radius:8px;background:rgba(3,20,37,.52)}
+.reborn-audio-cues input{accent-color:#55dfff}
+@media(max-width:550px){.reborn-audio-cues{font-size:10px;line-height:1.45}}

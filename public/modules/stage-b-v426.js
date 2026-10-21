@@ -1,6 +1,6 @@
 // V42.4–42.6 | lightweight, on-demand Universe panels; no animation-frame hooks.
 import {loadExplorationV426,startSectorV426,claimSectorV426,loadMarketV426,offerMarketV426,buyMarketV426,cancelMarketV426,
- loadClanProjectsV426,fundClanProjectV426,adminSectorV426,adminMarketV426,adminClanV426} from '../api.js?v=46.2.0';
+ loadClanProjectsV426,fundClanProjectV426,adminSectorV426,adminMarketV426,adminClanV426} from '../api.js?v=47.0.0';
 const fmt=x=>Number(x||0).toLocaleString('pt-BR');
 const node=(tag,txt,cls)=>{const el=document.createElement(tag);if(txt!==undefined)el.textContent=String(txt);if(cls)el.className=cls;return el;};
 const valid=(v,min,max)=>Number.isSafeInteger(Number(v))&&Number(v)>=min&&Number(v)<=max;

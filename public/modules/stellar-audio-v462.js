@@ -3,13 +3,13 @@
 export const STELLAR_SFX_KINDS=Object.freeze([
   'laser','petLaser','rocket','impact','shield','explosion','pickup',
   'portal','ability','reward','target','warning','repair','ui',
-  'critical','event','ore','boss'
+  'critical','event','ore','boss','engine','laserHeavy','portalPvp','portalAstral','shieldBreak'
 ]);
 const COOLDOWN=Object.freeze({
   laser:115,petLaser:160,rocket:220,impact:100,shield:140,
   explosion:250,pickup:145,portal:750,ability:280,reward:450,
   target:210,warning:600,repair:1200,ui:70,critical:240,
-  event:650,ore:270,boss:1100
+  event:650,ore:270,boss:1100,engine:2450,laserHeavy:115,portalPvp:800,portalAstral:850,shieldBreak:1200
 });
 const PRESETS=Object.freeze({
   cinematic:{voices:14,gain:1,layers:3},
@@ -147,6 +147,23 @@ export function createStellarAudio(getSettings=()=>({enabled:true,volume:.7,prof
         tone(230*v,420*v,.07,'triangle',.34);
         if(mid)noise(.095,.28,1600,.035);
         if(rich)tone(600,390,.105,'sine',.16,.07);break;
+      case 'engine':
+        tone(78*v,112*v,.24,'triangle',.16);
+        if(rich)tone(125*v,96*v,.19,'sine',.10,.06);break;
+      case 'laserHeavy':
+        tone(1450*v,240*v,.14,'sawtooth',.66);
+        if(mid)tone(2150*v,560*v,.10,'square',.24,.012);
+        if(rich)noise(.08,.18,4700,.01,true);break;
+      case 'portalPvp':
+        tone(310*v,85*v,.42,'sawtooth',.45);
+        if(mid)tone(110,760,.40,'triangle',.34,.14);break;
+      case 'portalAstral':
+        tone(78,940,.52,'sine',.49);
+        if(mid)tone(130,1400*v,.43,'triangle',.27,.08);
+        if(rich)tone(620,1720,.26,'sine',.18,.25);break;
+      case 'shieldBreak':
+        noise(.23,.46,2250);
+        if(mid)tone(840*v,96*v,.26,'square',.35,.045);break;
       case 'boss':
         tone(82,46,.50,'sawtooth',.57);
         if(mid)noise(.45,.40,520,.05);
