@@ -4831,3 +4831,10 @@ body[data-device="mobile"] #weaponBar .ability-btn.ready{
 .frontier-objective-v421{border-color:#74b5e9}
 .frontier-objective-v421 div{margin:3px 0}
 .frontier-objective-v421 button{max-width:100%;white-space:normal}
+
+/* STAGE_A_V423 */
+.frontier-stage-v423{border-color:#82b9f1}
+.frontier-v423-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:7px 0}
+.frontier-v423-row label{flex:1 1 210px}
+.frontier-v423-row select{width:100%;margin-top:3px}
+.frontier-stage-v423 button{max-width:100%;white-space:normal}

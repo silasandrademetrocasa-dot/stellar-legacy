@@ -1,0 +1,15 @@
+STELLAR LEGACY V42.3 - PACOTE 1/2
+BASE: V42.1.0 no GitHub. NAO subir antes dessa base.
+1. Salve backup Supabase (saves/contas).
+2. SQL em sql/STELLAR_V42_3_ETAPA1.sql -> aplicar Supabase.
+3. Deixe somente este ZIP na raiz do repositório e execute Instalador Universal.
+4. Teste equipar nas duas configuracoes, criar esquadrao, concluir operacoes.
+5. Ao publicar o pacote 2/2, a versao base sera 42.3.0.
+
+ENTREGUE: equipamento fabricado pode ser atribuido às configuracoes 1 e 2, com
+inventario validado; operacoes semanais progressivas por esquadrao com abates
+verificados no servidor, recompensas atomicas e ADM para metas.
+
+NAO ENTREGUE AINDA: efeitos reais dos modulos no motor de combate, chefes raid em
+tempo real e guerras territoriais. Os efeitos estao DESLIGADOS por segurança.
+Esse arquivo nao remove saves, naves, HUD, configuracoes atuais ou itens.

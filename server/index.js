@@ -1,3 +1,4 @@
+import {attachStageAV423} from './stage-a-v423.js';
 import {attachSquadObjectivesV421} from './squad-objectives-v421.js';
 import {attachFrontierUnifiedV42} from './frontier-unified-v42.js';
 import {attachAstralRewardsV381} from './astral-rewards-v381.js';
@@ -23,7 +24,7 @@ import { createSecurityService } from './security-service.js';
 
 const app = express();
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const RELEASE_VERSION = '42.1.0'; // único identificador de release nos endpoints HTTP
+const RELEASE_VERSION = '42.3.0'; // único identificador de release nos endpoints HTTP
 
 function normalizeSupabaseUrl(value = '') {
   let url = String(value || '').trim();
@@ -1461,6 +1462,9 @@ attachFrontierUnifiedV42(app,{requireUser,asyncRoute});
 
 // V42.1: objetivo semanal de esquadrão baseado em abates confirmados.
 attachSquadObjectivesV421(app,{requireUser,asyncRoute});
+
+// V42.2+42.3: loadouts e operacoes, sem afetar o loop Canvas.
+attachStageAV423(app,{requireUser,asyncRoute});
 
 // V19.0.9 • Catálogo único de balanceamento validado pelo Supabase.
 // Não altera preço, compra, save ou catálogo de recompensas.

@@ -1182,3 +1182,10 @@ export async function adminUnifiedExpansionV42(code,cost){return authedServerFet
 export async function loadSquadObjectiveV421(){return authedServerFetch('/api/frontier/v421/squad-objective');}
 export async function claimSquadObjectiveV421(){return authedServerFetch('/api/frontier/v421/squad-objective/claim',{method:'POST',body:'{}'});}
 export async function adminSquadObjectiveV421(goal,minimumPersonal,rewardResearch){return authedServerFetch('/api/admin/frontier/v421/squad-objective',{method:'POST',body:JSON.stringify({goal,minimumPersonal,rewardResearch})});}
+
+// V42.3 - equipagem persistente + operacoes cooperativas verificadas.
+export async function loadStageAV423(){return authedServerFetch('/api/frontier/v423/loadouts');}
+export async function saveLoadoutV423(config,slot,item){return authedServerFetch('/api/frontier/v423/loadouts',{method:'POST',body:JSON.stringify({config,slot,item})});}
+export async function loadOpsV423(){return authedServerFetch('/api/frontier/v423/operations');}
+export async function claimOpsV423(tier){return authedServerFetch('/api/frontier/v423/operations/claim',{method:'POST',body:JSON.stringify({tier})});}
+export async function adminOpsV423(tier,goal,minimum,reward,enabled){return authedServerFetch('/api/admin/frontier/v423/operations',{method:'POST',body:JSON.stringify({tier,goal,minimum,reward,enabled})});}
