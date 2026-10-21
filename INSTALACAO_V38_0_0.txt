@@ -1,7 +1,0 @@
-STELLAR LEGACY V38.0.0 — INSTALAÇÃO EM UM ÚNICO ZIP
-1. Use o Instalador Universal do repositório. Não inclua .github dentro do ZIP.
-2. Aguarde workflow e Render Live; o game volta a carregar todos os sprites.
-3. SQL: NENHUMA MIGRAÇÃO. Consulte apenas o script opcional READ_ONLY_CHECK.
-4. Teste Aurora, Nexus, Eclipse, todos os inimigos no minimapa, movimento,
-   checkpoints, bosses e FPS no celular. Não expanda DB sem necessidade.
-Rollback: volte ao deploy/commit V37.0.0; o banco não precisa de rollback.

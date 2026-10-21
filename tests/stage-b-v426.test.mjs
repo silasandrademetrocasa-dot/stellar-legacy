@@ -31,7 +31,7 @@ test('SQL has escrow inventory, same-tx credit transfer, idempotency and row loc
 });
 test('release base, UI and audit check disabled ship buff flags',()=>{
  const pkg=JSON.parse(read('package.json'));
- assert.equal(pkg.version,'42.6.1');
+ assert.equal(pkg.version,'42.6.2');
  assert.match(read('public/modules/stage-b-v426.js'),/ainda não são mapas pilotáveis/);
  assert.doesNotMatch(read('sql/STELLAR_V42_6_FINAL.sql'),/UPDATE public\.stellar_u423_module_rules/);
  assert.doesNotMatch(read('sql/STELLAR_V42_6_FINAL.sql'),/DELETE FROM public\.game_saves/);

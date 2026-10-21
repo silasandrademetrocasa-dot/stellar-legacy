@@ -103,7 +103,6 @@ export function formatPerformanceReport(snapshot,{version='?',quality='?',resolu
   const numeric=(n,suffix='')=>Number.isFinite(n)?`${Math.round(n*10)/10}${suffix}`:'indisponível';
   const data=[
     'STELLAR LEGACY — DIAGNÓSTICO LOCAL',
-    `Versão: ${String(version).slice(0,30)}`,
     `Qualidade: ${String(quality).slice(0,24)}`,
     `Resolução de tela: ${String(resolution).slice(0,24)}`,
     `Amostras: ${Math.max(0,Number(snapshot?.samples)||0)}`,

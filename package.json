@@ -1,16 +1,21 @@
 {
-  "name":"stellar-legacy",
-  "version":"42.6.1",
-  "type":"module",
-  "scripts":{
-    "start":"node server/index.js",
-    "dev":"node --watch server/index.js",
-    "check":"node scripts/v4261-apply-patch.mjs && node scripts/verify-release.mjs",
-    "test":"node --test tests/*.test.mjs",
-    "verify":"npm run check && npm run check:v21 && npm test",
-    "check:v21":"node scripts/check-v21-package.mjs"
+  "name": "stellar-legacy",
+  "version": "42.6.2",
+  "type": "module",
+  "scripts": {
+    "start": "node server/index.js",
+    "dev": "node --watch server/index.js",
+    "check": "node scripts/v4262-player-cleanup.mjs && node scripts/verify-release.mjs",
+    "test": "node --test tests/*.test.mjs",
+    "verify": "npm run check && npm run check:v21 && npm test",
+    "check:v21": "node scripts/check-v21-package.mjs"
   },
-  "dependencies":{"express":"^4.21.2","@supabase/supabase-js":"^2.57.4","ws":"^8.18.0","compression":"^1.7.5"},
-  "engines":{"node":">=18"},
-  "release":"V42.6.1 Hotfix | Astral Rewards admin + portal sync + shared login"
+  "dependencies": {
+    "express": "^4.21.2",
+    "@supabase/supabase-js": "^2.57.4",
+    "ws": "^8.18.0",
+    "compression": "^1.7.5"
+  },
+  "engines": {"node": ">=18"},
+  "release": "Maintenance • Player-facing presentation and repository cleanup"
 }

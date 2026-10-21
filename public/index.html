@@ -6,10 +6,10 @@
 <meta content="width=device-width,initial-scale=1,user-scalable=no,viewport-fit=cover" name="viewport"/>
 <meta content="#030816" name="theme-color"/>
 <title>Stellar Legacy</title>
-<link rel="manifest" href="/manifest.webmanifest?v=42.6.1"/>
+<link rel="manifest" href="/manifest.webmanifest?v=42.6.2"/>
 <link rel="icon" type="image/png" href="/icons/stellar-192.png"/>
 <link rel="apple-touch-icon" href="/icons/stellar-192.png"/>
-<link href="/style.css?v=42.6.1" rel="stylesheet"/>
+<link href="/style.css?v=42.6.2" rel="stylesheet"/>
 </head>
 <body>
 <div class="stellar-boot-splash" id="stellarBootSplash" role="status" aria-label="Preparando Stellar Legacy">
@@ -597,7 +597,7 @@
 <div class="modal hidden fixed-modal" id="relayHangarModal" role="dialog" aria-modal="true" aria-labelledby="relayHangarTitle">
  <div class="modal-card wide-card relay-hangar-modal-v3462">
   <div class="modal-header"><div><div class="eyebrow">OFICINA TERRITORIAL • INVENTÁRIO DO CLÃ</div><h2 id="relayHangarTitle">RELÉ • EQUIPAMENTOS</h2></div><button class="small-btn" id="closeRelayHangar" type="button">FECHAR</button></div>
-  <div id="relayHangarContent"><div class="muted">Carregando módulos do servidor...</div></div>
+  <div id="relayHangarContent"><div class="muted">Carregando equipamentos...</div></div>
  </div>
 </div>
 
@@ -617,7 +617,7 @@
 <div class="modal hidden" id="adminModal">
   <div class="modal-card admin-modal-card">
     <div class="modal-header admin-modal-header">
-      <div><div class="eyebrow">CENTRAL ADMINISTRATIVA</div><h2>CONTROLE DE CONTAS</h2><p class="muted">Banimento, reset de progresso e exclusão definitiva protegidos pelo backend.</p></div>
+      <div><div class="eyebrow">CENTRAL ADMINISTRATIVA</div><h2>CONTROLE DE CONTAS</h2><p class="muted">Gerencie contas, restrições e recuperação de progresso.</p></div>
       <button class="ghost-btn" id="closeAdmin" type="button">FECHAR</button>
     </div>
     <div class="admin-kpis">
@@ -628,8 +628,8 @@
     <section class="admin-runtime-monitor-section">
 <div class="astral-adm-toggle"><button type="button" class="small-btn gold" id="astralAdminOpenV381">✦ ASTRAL REWARDS · ADM</button><div id="astralAdminEditorV381" class="astral-rewards-adm hidden"></div></div>
       <div class="settings-title admin-runtime-monitor-head">
-        <div><b>CONFIGURAÇÃO AO VIVO</b><small>Central ADM Data Driven • Eventos, Passe e Lojas controlados pelo runtime.</small></div>
-        <button class="small-btn gold" id="adminRuntimeMonitorRefresh" type="button">ATUALIZAR RUNTIME</button>
+        <div><b>CONFIGURAÇÃO AO VIVO</b><small>Gerencie eventos, passe e lojas em um só lugar.</small></div>
+        <button class="small-btn gold" id="adminRuntimeMonitorRefresh" type="button">ATUALIZAR CONFIGURAÇÕES</button>
       </div>
       <div class="admin-adm-hint">⚙️ Administração por áreas. Abra uma categoria, expanda apenas o item que deseja editar e salve cada bloco separadamente.</div>
       <div class="admin-runtime-tabs" id="adminRuntimeTabs">
@@ -654,8 +654,8 @@
         <button type="button" data-adm-quick="shops">🛒 LOJAS</button>
       </div>
       <div id="adminRuntimeMonitorPanel">
-        <div class="admin-runtime-monitor-grid" id="adminRuntimeMonitorGrid"><div class="empty-state">Aguardando status dos runtimes...</div></div>
-        <div class="admin-runtime-monitor-foot" id="adminRuntimeMonitorFoot">Etapa 2/5 • monitoramento.</div>
+        <div class="admin-runtime-monitor-grid" id="adminRuntimeMonitorGrid"><div class="empty-state">Aguardando informações dos sistemas...</div></div>
+        <div class="admin-runtime-monitor-foot" id="adminRuntimeMonitorFoot">Acompanhamento das atividades.</div>
       </div>
       <div class="admin-runtime-interface-panel hidden" id="adminRuntimeInterfacePanel">
         <div class="admin-runtime-interface-toolbar">
@@ -1125,8 +1125,8 @@
 </div>
 </div>
 <div class="perf-diag-overlay hidden" id="perfDiagOverlay" aria-live="off" aria-label="Contador de FPS local"><b id="perfDiagHudFps">FPS —</b><small id="perfDiagHudStutter">P95 —</small></div>
-<script src="/game.js?v=42.6.1" type="module"></script>
-<script type="module" src="/modules/astral-rewards-v381.js?v=42.6.1"></script>
-<script type="module" src="/modules/unified-expansion-v42.js?v=42.6.1"></script>
+<script src="/game.js?v=42.6.2" type="module"></script>
+<script type="module" src="/modules/astral-rewards-v381.js?v=42.6.2"></script>
+<script type="module" src="/modules/unified-expansion-v42.js?v=42.6.2"></script>
 </body>
 </html>

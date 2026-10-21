@@ -1,24 +1,24 @@
 // Etapa 1 — V42.2/V42.3: UI leve sob demanda; nunca dentro do loop de jogo.
-import {loadStageAV423,saveLoadoutV423,loadOpsV423,claimOpsV423,adminOpsV423} from '../api.js?v=42.6.1';
+import {loadStageAV423,saveLoadoutV423,loadOpsV423,claimOpsV423,adminOpsV423} from '../api.js?v=42.6.2';
 const cfgs=[1,2];
 const slots=[['defense','Defesa'],['engine','Motor'],['weapon','Armamento'],['utility','Suporte']];
 const fmt=n=>Number(n||0).toLocaleString('pt-BR');
 function node(tag,text,cls){const e=document.createElement(tag);if(text!=null)e.textContent=text;if(cls)e.className=cls;return e;}
-function alertError(e){alert(String(e?.message||e));}
+function alertError(e){console.warn('[equipamentos]',e);alert('Não foi possível concluir esta ação. Tente novamente.');}
 let activeRequest=0;
 export async function renderStageAV423(root,tab){
- const index=++activeRequest;const card=node('section','Carregando sistemas da V42.3…','frontier-card-v42 frontier-stage-v423');root.append(card);
+ const index=++activeRequest;const card=node('section','Preparando suas configurações…','frontier-card-v42 frontier-stage-v423');root.append(card);
  try{
   if(tab==='forge')await forge(card,root,index);
   else if(tab==='war')await war(card,root,index,false);
   else if(tab==='admin')await war(card,root,index,true);
- }catch(e){if(card.isConnected)card.textContent='Módulo V42.3 indisponível: '+String(e?.message||e);}
+ }catch(e){if(card.isConnected)card.textContent='Este painel está temporariamente indisponível. Tente novamente.';}
 }
 const alive=(card,root,index)=>card.isConnected&&index===activeRequest&&root.contains(card);
 async function forge(card,root,index){
  const data=await loadStageAV423();if(!alive(card,root,index))return;
- card.replaceChildren(node('h4','V42.2 • CONFIGURAÇÕES ASTRAIS'));
- card.append(node('p','Equipamentos fabricados são persistidos em duas configurações. Bônus de dano/escudo ainda NÃO estão ativos até validação do motor de combate.'));
+ card.replaceChildren(node('h4','CONFIGURAÇÕES ASTRAIS'));
+ card.append(node('p','Equipe os módulos fabricados nas duas configurações. Seus efeitos de combate ainda não estão disponíveis.'));
  const inventory=new Map((data.items||[]).map(x=>[x.code,Number(x.qty)]));
  const items=Array.isArray(data.definitions)?data.definitions:[];
  const equipped=Array.isArray(data.equipped)?data.equipped:[];
@@ -35,14 +35,14 @@ async function forge(card,root,index){
   }
   card.append(section);
  }
- card.append(node('small','Quantidade fabricada limita o número de posições ocupadas. Trocas não alteram escudos atuais, atributos PvP ou histórico do piloto.'));
+ card.append(node('small','Cada módulo ocupa uma posição de equipamento. As trocas preservam o estado atual da nave.'));
 }
 async function forgeReload(card,root){const i=++activeRequest;await forge(card,root,i);}
 async function war(card,root,index,admin){
  const p=await loadOpsV423();if(!alive(card,root,index))return;
- card.replaceChildren(node('h4',admin?'V42.3 • ADM OPERAÇÕES':'V42.3 • OPERAÇÕES COOPERATIVAS'));
+ card.replaceChildren(node('h4',admin?'ADMINISTRAÇÃO DE OPERAÇÕES':'OPERAÇÕES COOPERATIVAS'));
  if(!admin){
-  card.append(node('p','Progresso confirmado pelo ledger de NPCs do servidor. Esta etapa é preparação para raids; chefes cooperativos em tempo real ainda não estão ativados.'));
+  card.append(node('p','Os abates do esquadrão contam para a missão. Novos desafios cooperativos chegarão em breve.'));
   card.append(node('div',`${fmt(p.teamKills)} abates do esquadrão • ${fmt(p.personalKills)} seus nesta semana.`));
   if(!p.inSquad)card.append(node('p','Participe de um esquadrão para concluir operações.'));
  }

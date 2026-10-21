@@ -1,8 +1,0 @@
-STELLAR LEGACY — RELAY TARGETING / ADMIN HOTFIX
-
-1. Suba o ZIP pelo Instalador Universal e aguarde o deploy Live do Render.
-2. Solicite aplicação do SQL sql/V34_6_1_RELAY_ADM_RELEASE.sql no Supabase.
-3. Teste clique no relé no mapa; clique novamente para parar; confirme custo ao evoluir.
-4. ADM: salve atributos e teste expulsão do clã ou liberação total do relé.
-
-IMPORTANTE: sem .github/ dentro do ZIP. O workflow existente não será substituído.
