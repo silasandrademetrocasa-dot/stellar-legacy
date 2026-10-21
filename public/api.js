@@ -1177,3 +1177,8 @@ export async function loadUnifiedExpansionV42(){return authedServerFetch('/api/f
 export async function actUnifiedExpansionV42(action,code,amount=1,idempotencyKey){return authedServerFetch('/api/frontier/v42/action',{method:'POST',body:JSON.stringify({action,code,amount,idempotencyKey})});}
 export async function squadUnifiedExpansionV42(action,inviteCode=''){return authedServerFetch('/api/frontier/v42/squad',{method:'POST',body:JSON.stringify({action,inviteCode})});}
 export async function adminUnifiedExpansionV42(code,cost){return authedServerFetch('/api/admin/frontier/v42/catalog',{method:'POST',body:JSON.stringify({code,cost})});}
+
+// V42.1 — objetivo semanal cooperativo: dados e resgate autoritativos.
+export async function loadSquadObjectiveV421(){return authedServerFetch('/api/frontier/v421/squad-objective');}
+export async function claimSquadObjectiveV421(){return authedServerFetch('/api/frontier/v421/squad-objective/claim',{method:'POST',body:'{}'});}
+export async function adminSquadObjectiveV421(goal,minimumPersonal,rewardResearch){return authedServerFetch('/api/admin/frontier/v421/squad-objective',{method:'POST',body:JSON.stringify({goal,minimumPersonal,rewardResearch})});}

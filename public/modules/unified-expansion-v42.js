@@ -1,6 +1,7 @@
 // Stellar Legacy — Unificação V39–V42: telas auxiliares, sem loops de quadro/Canvas.
 // Toda alteração de moeda/material depende de RPC transacional do servidor.
 import {loadUnifiedExpansionV42,actUnifiedExpansionV42,squadUnifiedExpansionV42,adminUnifiedExpansionV42} from '../api.js';
+import {loadSquadObjectiveV421,claimSquadObjectiveV421,adminSquadObjectiveV421} from '../api.js';
 const el=id=>document.getElementById(id);
 const esc=s=>String(s??'').replace(/[&<>"']/g,k=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[k]));
 const fmt=v=>Number(v||0).toLocaleString('pt-BR');
@@ -34,6 +35,8 @@ return `<section class="frontier-card-v42"><h4>${esc(x.title)}</h4>${fields}<div
 function render(){const root=el('frontierExpansionContentV42');if(!root)return;
 if(!snapshot){root.innerHTML='<p>Carregando operações do universo…</p>';return;}
 root.innerHTML=`<div class="frontier-tabs-v42">${tabs.filter(x=>x[0]!=='admin'||snapshot.isAdmin).map(([id,label])=>`<button data-v42-tab="${id}" class="${tab===id?'active':''}">${label}</button>`).join('')}</div>${({forge,war,scout,civil,admin}[tab]||forge)()}`;
+if(tab==='war')void v421ObjectiveRender(root);
+if(tab==='admin' && snapshot?.isAdmin)void v421AdminRender(root);
 root.querySelectorAll('[data-v42-tab]').forEach(b=>b.addEventListener('click',()=>{tab=b.dataset.v42Tab;render()}));
 root.querySelectorAll('[data-v42-action]').forEach(b=>b.addEventListener('click',async()=>{
  if(working)return;
@@ -74,3 +77,29 @@ function boot(){const button=el('frontierExpansionBtnV42'),modal=el('frontierExp
  modal.addEventListener('click',e=>{if(e.target===modal)modal.classList.add('hidden')});
 }
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
+
+// V42.1: renderização somente sob demanda, fora do loop Canvas.
+async function v421ObjectiveRender(root){
+ const card=document.createElement('section');card.className='frontier-card-v42 frontier-objective-v421';card.textContent='Carregando objetivo semanal do esquadrão…';root.append(card);
+ try{
+  const p=await loadSquadObjectiveV421();if(!card.isConnected)return;
+  if(!p.inSquad){card.textContent='OBJETIVO SEMANAL — Entre em um esquadrão para participar.';return;}
+  const total=Number(p.verifiedKills||0),goal=Number(p.goal||100),mine=Number(p.personalKills||0),min=Number(p.minimumPersonal||10);
+  const line=document.createElement('div');line.textContent='OBJETIVO SEMANAL DE ESQUADRÃO';line.style.fontWeight='bold';
+  const desc=document.createElement('p');desc.textContent=total+' / '+goal+' abates confirmados · Seus: '+mine+' / '+min+' · Recompensa: '+Number(p.rewardResearch||0)+' pontos de pesquisa.';
+  const status=document.createElement('small');status.textContent=p.claimed?'Resgatado nesta semana.':p.eligible?'Missão concluída — resgate disponível.':'Elimine NPCs com seu esquadrão para liberar o resgate.';
+  card.replaceChildren(line,desc,status);
+  if(Array.isArray(p.team)){for(const member of p.team){const row=document.createElement('div');row.textContent=(member.callsign||'Piloto')+' — '+Number(member.kills||0)+' abates';card.append(row);}}
+  if(p.eligible){const button=document.createElement('button');button.type='button';button.textContent='RESGATAR PESQUISA DO ESQUADRÃO';card.append(button);button.addEventListener('click',async()=>{button.disabled=true;try{const claimed=await claimSquadObjectiveV421();if(!claimed?.ok)throw Error('Resgate indisponível.');await refresh();}catch(error){alert(error?.message||String(error));button.disabled=false;}});}
+ }catch(err){if(card.isConnected)card.textContent='Objetivo semanal indisponível: '+String(err?.message||err);}
+}
+async function v421AdminRender(root){
+ const card=document.createElement('section');card.className='frontier-card-v42';card.textContent='Carregando controle da missão semanal…';root.append(card);
+ try{const p=await loadSquadObjectiveV421();if(!card.isConnected)return;card.replaceChildren();
+ const title=document.createElement('h4');title.textContent='V42.1 — OBJETIVOS DE ESQUADRÃO';card.append(title);
+ const fields=[['Abates do esquadrão',p.goal,20,10000],['Abates mínimos por piloto',p.minimumPersonal,1,1000],['Pontos de pesquisa',p.rewardResearch,1,1000]];
+ const inputs=[];for(const [name,value,min,max] of fields){const label=document.createElement('label');label.textContent=name+' ';const input=document.createElement('input');input.type='number';input.min=min;input.max=max;input.value=value;input.className='frontier-input-v42';label.append(input);card.append(label,document.createElement('div'));inputs.push(input);} 
+ const save=document.createElement('button');save.type='button';save.textContent='SALVAR OBJETIVO SEMANAL';card.append(save);
+ save.addEventListener('click',async()=>{save.disabled=true;try{const [goal,min,reward]=inputs.map(i=>Number(i.value));const r=await adminSquadObjectiveV421(goal,min,reward);if(!r?.ok)throw Error('Configuração não aceita.');await refresh();}catch(err){alert(err?.message||String(err));save.disabled=false;}});
+ }catch(err){if(card.isConnected)card.textContent='Admin de objetivos indisponível: '+String(err?.message||err);}
+}

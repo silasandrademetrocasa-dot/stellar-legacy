@@ -1,3 +1,4 @@
+import {attachSquadObjectivesV421} from './squad-objectives-v421.js';
 import {attachFrontierUnifiedV42} from './frontier-unified-v42.js';
 import {attachAstralRewardsV381} from './astral-rewards-v381.js';
 import express from 'express';
@@ -22,7 +23,7 @@ import { createSecurityService } from './security-service.js';
 
 const app = express();
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const RELEASE_VERSION = '42.0.0'; // único identificador de release nos endpoints HTTP
+const RELEASE_VERSION = '42.1.0'; // único identificador de release nos endpoints HTTP
 
 function normalizeSupabaseUrl(value = '') {
   let url = String(value || '').trim();
@@ -1457,6 +1458,9 @@ attachAstralRewardsV381(app,{requireUser,asyncRoute,requireEliteAdmin});
 
 // V39–42: extensoes incrementais autenticadas.
 attachFrontierUnifiedV42(app,{requireUser,asyncRoute});
+
+// V42.1: objetivo semanal de esquadrão baseado em abates confirmados.
+attachSquadObjectivesV421(app,{requireUser,asyncRoute});
 
 // V19.0.9 • Catálogo único de balanceamento validado pelo Supabase.
 // Não altera preço, compra, save ou catálogo de recompensas.

@@ -4826,3 +4826,8 @@ body[data-device="mobile"] #weaponBar .ability-btn.ready{
 .frontier-card-v42 button:disabled{opacity:.5;cursor:default}
 .frontier-input-v42{padding:7px;border-radius:5px;background:#111b2e;border:1px solid #6b85a5;color:white;max-width:100%}
 @media(max-width:640px){.frontier-quick-v42{right:7px;top:59px;font-size:10px;padding:5px 7px}.frontier-panel-v42{width:98vw;max-height:85vh}.frontier-content-v42{font-size:12px}}
+
+/* SQUAD_OBJECTIVES_V421 */
+.frontier-objective-v421{border-color:#74b5e9}
+.frontier-objective-v421 div{margin:3px 0}
+.frontier-objective-v421 button{max-width:100%;white-space:normal}

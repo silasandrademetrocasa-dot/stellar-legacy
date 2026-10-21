@@ -1,0 +1,18 @@
+STELLAR LEGACY V42.1.0 — PRÓXIMA ETAPA SEGURA
+BASE OBRIGATÓRIA: V42.0.0 já publicada no GitHub.
+
+O SQL STELLAR_V42_1_SQUAD_OBJECTIVES.sql já foi executado no Supabase
+stellar-legacy. NÃO é necessário reaplicá-lo.
+
+1. Faça backup e verifique que package.json está na V42.0.0 no GitHub.
+2. Suba APENAS este ZIP na raiz do GitHub, sem extrair.
+3. Dispare o workflow do Instalador Universal.
+4. Os novos módulos de missão semanal são integrados por script seguro.
+5. Aguarde checks e Render Live; teste com duas contas do mesmo esquadrão.
+6. Teste Meta 100 NPCs, 10 por piloto, resgate 60 pesquisa uma vez por semana.
+7. Teste editor de metas no ADM, saída/reentrada de grupo e FPS em celular.
+
+O pacote atualiza SOMENTE da V42.0.0 à V42.1.0.
+Não usa DROP/TRUNCATE nem reseta jogadores/saves.
+Missões de esquadrão NÃO substituem PvP territorial, novos mapas
+ou o comércio entre jogadores — expansões ainda pendentes.
