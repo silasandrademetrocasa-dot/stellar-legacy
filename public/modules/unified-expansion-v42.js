@@ -1,3 +1,4 @@
+import {renderStageBV426} from './stage-b-v426.js';
 import {renderStageAV423} from './stage-a-v423.js';
 // Stellar Legacy — Unificação V39–V42: telas auxiliares, sem loops de quadro/Canvas.
 // Toda alteração de moeda/material depende de RPC transacional do servidor.
@@ -38,6 +39,7 @@ if(!snapshot){root.innerHTML='<p>Carregando operações do universo…</p>';retu
 root.innerHTML=`<div class="frontier-tabs-v42">${tabs.filter(x=>x[0]!=='admin'||snapshot.isAdmin).map(([id,label])=>`<button data-v42-tab="${id}" class="${tab===id?'active':''}">${label}</button>`).join('')}</div>${({forge,war,scout,civil,admin}[tab]||forge)()}`;
 if(tab==='war')void v421ObjectiveRender(root);
 if(tab==='forge'||tab==='war'||tab==='admin')void renderStageAV423(root,tab);
+if(tab==='scout'||tab==='civil'||tab==='admin')void renderStageBV426(root,tab);
 if(tab==='admin' && snapshot?.isAdmin)void v421AdminRender(root);
 root.querySelectorAll('[data-v42-tab]').forEach(b=>b.addEventListener('click',()=>{tab=b.dataset.v42Tab;render()}));
 root.querySelectorAll('[data-v42-action]').forEach(b=>b.addEventListener('click',async()=>{

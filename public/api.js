@@ -1189,3 +1189,17 @@ export async function saveLoadoutV423(config,slot,item){return authedServerFetch
 export async function loadOpsV423(){return authedServerFetch('/api/frontier/v423/operations');}
 export async function claimOpsV423(tier){return authedServerFetch('/api/frontier/v423/operations/claim',{method:'POST',body:JSON.stringify({tier})});}
 export async function adminOpsV423(tier,goal,minimum,reward,enabled){return authedServerFetch('/api/admin/frontier/v423/operations',{method:'POST',body:JSON.stringify({tier,goal,minimum,reward,enabled})});}
+
+// V42.4–42.6 | trusted HTTP bridge; never pass balance, damage, kill count or rewards.
+export async function loadExplorationV426(){return authedServerFetch('/api/frontier/v426/exploration');}
+export async function startSectorV426(sector,requestId){return authedServerFetch('/api/frontier/v426/exploration/start',{method:'POST',body:JSON.stringify({sector,requestId})});}
+export async function claimSectorV426(runId){return authedServerFetch('/api/frontier/v426/exploration/claim',{method:'POST',body:JSON.stringify({runId})});}
+export async function loadMarketV426(){return authedServerFetch('/api/frontier/v426/market');}
+export async function offerMarketV426(item,quantity,unitPrice,requestId){return authedServerFetch('/api/frontier/v426/market/sell',{method:'POST',body:JSON.stringify({item,quantity,unitPrice,requestId})});}
+export async function buyMarketV426(offerId){return authedServerFetch('/api/frontier/v426/market/buy',{method:'POST',body:JSON.stringify({offerId})});}
+export async function cancelMarketV426(offerId){return authedServerFetch('/api/frontier/v426/market/cancel',{method:'POST',body:JSON.stringify({offerId})});}
+export async function loadClanProjectsV426(){return authedServerFetch('/api/frontier/v426/clan');}
+export async function fundClanProjectV426(structure,points,requestId){return authedServerFetch('/api/frontier/v426/clan/fund',{method:'POST',body:JSON.stringify({structure,points,requestId})});}
+export async function adminSectorV426(code,minutes,kills,cost,reward,enabled){return authedServerFetch('/api/admin/frontier/v426/sector',{method:'POST',body:JSON.stringify({code,minutes,kills,cost,reward,enabled})});}
+export async function adminMarketV426(feeBps,enabled){return authedServerFetch('/api/admin/frontier/v426/market',{method:'POST',body:JSON.stringify({feeBps,enabled})});}
+export async function adminClanV426(structure,goal,enabled){return authedServerFetch('/api/admin/frontier/v426/clan',{method:'POST',body:JSON.stringify({structure,goal,enabled})});}

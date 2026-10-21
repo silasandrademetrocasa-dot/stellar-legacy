@@ -4838,3 +4838,15 @@ body[data-device="mobile"] #weaponBar .ability-btn.ready{
 .frontier-v423-row label{flex:1 1 210px}
 .frontier-v423-row select{width:100%;margin-top:3px}
 .frontier-stage-v423 button{max-width:100%;white-space:normal}
+
+/* V426_FINAL_FRONTIER */
+.frontier-final-v426{border-color:#70adce}
+.frontier-sectors-v426{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:9px;margin:13px 0}
+.frontier-sector-v426{display:flex;flex-direction:column;gap:6px;justify-content:space-between;padding:14px;border-radius:10px;border:1px solid #466489;background:radial-gradient(circle at 70% 18%,rgba(100,160,255,.2),transparent 58%),#101b33}
+.frontier-sector-star-v426{font-size:28px;color:#91caff;text-shadow:0 0 18px #4083d5}
+.frontier-sector-v426 strong{color:#c2e1ff}
+.frontier-sector-v426 button,.frontier-final-v426 button{width:auto;max-width:100%;white-space:normal}
+.frontier-final-v426 label{display:inline-flex;flex-direction:column;gap:4px;margin:6px 10px 6px 0;min-width:140px;max-width:100%}
+.frontier-final-v426 label input[type=checkbox]{align-self:flex-start}
+.frontier-final-v426 section{overflow-wrap:anywhere}
+@media(max-width:640px){.frontier-sectors-v426{grid-template-columns:1fr}.frontier-final-v426 label{width:100%}}

@@ -1,0 +1,61 @@
+STELLAR LEGACY — SEGUNDA ETAPA V42.4 + V42.5 + V42.6
+===================================================
+BASE OBRIGATÓRIA NO GITHUB: 42.3.0
+DESTINO: 42.6.0
+
+O QUE ESTE ZIP ENTREGA EFETIVAMENTE
+- V42.4: 3 setores de INVESTIGAÇÃO INSTANCIADA, metas de NPCs verificadas pelo
+  ledger do servidor, custo e pagamento em pesquisa, histórico e configurações ADM.
+  Os setores têm painel tático, mas NÃO são mapas pilotáveis dentro do Canvas PvE.
+- V42.5: mercado de módulos Astrais fabricados, custódia de estoque durante
+  anúncio, compra atômica usando créditos, cancelamento e devolução, histórico
+  de ofertas, limite de anúncio e taxa configurável pelo ADM.
+- V42.5: três projetos de pesquisa de clã financiados com pesquisa acumulada,
+  saldo e contribuições persistentes, metas configuráveis pelo ADM.
+- V42.6: UI integrada ao painel Universo, validação de entradas pelo servidor,
+  funções SQL com check de JWT, restrições RLS, idempotência no início de ações,
+  testes locais de validação de comandos e atualização idempotente.
+- Atualiza recursos sem mexer no save existente de outros jogadores ou declarar
+  bônus de combate descontrolados.
+
+AINDA NÃO ENTREGUE COMO FUNCIONALIDADE COMPLETA
+- Setores pilotáveis no mapa PvE ou pelo sistema de portais da nave.
+- Chefes de raid sincronizados no mundo e guerra PvP de esquadrões end-to-end.
+- Aplicação dos bônus dos módulos V42.3 ao motor de dano, escudo e movimento.
+- Sistema de construção visível no espaço (clãs recebem projeto de pesquisa,
+  ainda não recebem estruturas físicas nem buffs de combate).
+Essas demandas exigem integração específica com o motor principal e testes
+multiplayer reais; NÃO confunda esta versão com a conclusão de todas as metas.
+
+INSTALAÇÃO RECOMENDADA
+1. Backup do Supabase e confira que GitHub/main usa 42.3.0.
+2. Execute o arquivo sql/STELLAR_V42_6_FINAL.sql no projeto stellar-legacy
+   (é uma migração adicional; SEM DROP, TRUNCATE ou atualização em massa de saves).
+3. Apague ZIPs antigos da raiz do GitHub; envie somente ESTE ZIP à raiz.
+4. Execute Actions -> Instalador Universal -> Run workflow.
+5. Valide o pipeline e o Render; após login abra ✦ UNIVERSO:
+   - Exploração: iniciar investigação, abates, resgatar pesquisa, refresh.
+   - Civilização: mercado começa DESATIVADO; habilite no ADM somente no
+     teste supervisionado com duas contas. Anuncie módulo livre, compre
+     pela outra conta, cancele,
+     testar simultaneidade, retorno ao jogo e revisão do save.
+   - Clãs: doar pesquisa, trocar de clã, validar projeto e histórico.
+   - ADM: editar custos, prêmios, taxa e habilitação.
+6. Teste FPS e save de jogador real em Android antes de liberar comércio ao público.
+
+SEGURANÇA / ROLLBACK
+- SQL tem RLS e privilégios de tabela revogados a anon/authenticated; acessos
+  são efetuados por funções SECURITY DEFINER com auth.uid() e validação interna.
+- Mercado começa PAUSADO por padrão até validação com contas reais.
+- Não remova tabelas com ofertas abertas: itens sob custódia podem ser perdidos.
+  Se precisar desativar o recurso, pause o mercado pelo editor ADM.
+- Não aplique regras de combate dos módulos sem validação do motor de mundo.
+- Versão do manifesto é obrigatória: base 42.3.0, destino 42.6.0.
+
+TESTES NO AMBIENTE DE DESENVOLVIMENTO
+- Node --check dos novos módulos e script;
+- Quatro testes unitários, inclusive simulação de validação HTTP;
+- Patch executado duas vezes em fixture 42.3 com resultado idêntico;
+- SQL compilado em Supabase via transação com ROLLBACK (nenhuma migração aplicada).
+- Ainda não rodamos a suíte COMPLETA da aplicação original nem E2E de mercado
+  com dois pilotos vivos; dependem do GitHub Actions e do ambiente de jogo.

@@ -1,0 +1,55 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {readFileSync} from 'node:fs';
+import {validateSellInput,validateSectorStart,validateClanFund} from '../server/stage-b-v426.js';
+const read=p=>readFileSync(new URL('../'+p,import.meta.url),'utf8');
+const id='98a836fc-3f59-4935-a2b2-aaabc3dfbb10';
+test('strict server-bound inputs; reject client-forged credits, quantities, ids',()=>{
+ assert.equal(validateSellInput({item:'astral_guard',quantity:1,unitPrice:1000,requestId:id}),true);
+ assert.equal(validateSellInput({item:'astral_guard',quantity:999,unitPrice:1000,requestId:id}),false);
+ assert.equal(validateSellInput({item:'astral_guard',quantity:2.5,unitPrice:1000,requestId:id}),false);
+ assert.equal(validateSellInput({item:'../../bad',quantity:1,unitPrice:1000,requestId:id}),false);
+ assert.equal(validateSellInput({item:'astral_guard',quantity:1,unitPrice:1000,requestId:'BAD'}),false);
+ assert.equal(validateSectorStart({sector:'nebula_veil',requestId:id}),true);
+ assert.equal(validateSectorStart({sector:'nebula_veil',requestId:'bad'}),false);
+ assert.equal(validateClanFund({structure:'observatory',points:500,requestId:id}),true);
+ assert.equal(validateClanFund({structure:'observatory',points:501,requestId:id}),false);
+});
+test('SQL has escrow inventory, same-tx credit transfer, idempotency and row locks',()=>{
+ const s=read('sql/STELLAR_V42_6_FINAL.sql');
+ assert.match(s,/CREATE OR REPLACE FUNCTION public\.stellar_u426_market_sell/);
+ assert.match(s,/UPDATE public\.stellar_u42_inventory SET quantity=quantity-p_qty/);
+ assert.match(s,/UPDATE public\.game_saves SET state=jsonb_set\(jsonb_set\(state/);
+ assert.match(s,/UPDATE public\.stellar_u426_market_offers SET status='sold'/);
+ assert.match(s,/UNIQUE\(seller,request_id\)/);
+ assert.match(s,/SELECT \* INTO o FROM public\.stellar_u426_market_offers WHERE id=p_offer FOR UPDATE/);
+ assert.match(s,/PERFORM 1 FROM public\.game_saves WHERE user_id IN \(u,o\.seller\) ORDER BY user_id FOR UPDATE/);
+ assert.match(s,/CREATE UNIQUE INDEX IF NOT EXISTS stellar_u426_sector_one_active/);
+ assert.match(s,/enabled boolean NOT NULL DEFAULT false, -- activate only after two-account market tests/);
+ assert.match(s,/stellar_npc_reward_ledger/);
+ assert.match(s,/CREATE OR REPLACE FUNCTION public\.stellar_u426_clan_fund/);
+});
+test('release base, UI and audit check disabled ship buff flags',()=>{
+ const pkg=JSON.parse(read('package.json'));
+ assert.equal(pkg.version,'42.6.0');
+ assert.match(read('public/modules/stage-b-v426.js'),/ainda não são mapas pilotáveis/);
+ assert.doesNotMatch(read('sql/STELLAR_V42_6_FINAL.sql'),/UPDATE public\.stellar_u423_module_rules/);
+ assert.doesNotMatch(read('sql/STELLAR_V42_6_FINAL.sql'),/DELETE FROM public\.game_saves/);
+});
+test('HTTP bridge rejects invalid attempts and never forwards forged balances or loot',async()=>{
+ const {attachStageBV426}=await import('../server/stage-b-v426.js');
+ const routes={GET:{},POST:{}};
+ const app={get:(path,...args)=>{routes.GET[path]=args.at(-1)},post:(path,...args)=>{routes.POST[path]=args.at(-1)}};
+ attachStageBV426(app,{requireUser:()=>{},asyncRoute:fn=>fn});
+ assert.equal(Object.keys(routes.GET).length,3);assert.equal(Object.keys(routes.POST).length,9);
+ const log=[],req=(body)=>({body,sb:{rpc:async(name,args)=>{log.push({name,args});return{data:{ok:true},error:null}}}});
+ const res=()=>({code:200,status(x){this.code=x;return this},json(x){this.body=x;return this},set(){return this}});
+ let r=res();await routes.POST['/api/frontier/v426/market/sell'](req({item:'astral_guard',quantity:10,unitPrice:1000,requestId:id}),r);
+ assert.equal(r.code,400);assert.equal(log.length,0);
+ r=res();await routes.POST['/api/frontier/v426/market/sell'](req({item:'astral_guard',quantity:2,unitPrice:50000,requestId:id,credits:9999999,damage:999999}),r);
+ assert.equal(r.code,200);
+ assert.equal(log[0].name,'stellar_u426_market_sell');
+ assert.deepEqual(log[0].args,{p_item:'astral_guard',p_qty:2,p_unit:50000,p_request:id});
+ r=res();await routes.POST['/api/frontier/v426/exploration/start'](req({sector:'nebula_veil',requestId:id,verifiedKills:9999999}),r);
+ assert.deepEqual(log[1].args,{p_sector:'nebula_veil',p_request:id});
+});
