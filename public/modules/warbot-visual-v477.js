@@ -1,18 +1,18 @@
-// V47.7.1: real faction sprites already present in the project's asset cache.
+// V47.7.4: production-vetted Prime/Elite ship sprites from the existing NPC art pipeline.
 export const WARBOT_SHIP_ASSETS=Object.freeze({
-  earth:'/assets/v2212/ships/earth-map.webp',
-  mars:'/assets/v2212/ships/mars-map.webp',
-  jupiter:'/assets/v2212/ships/jupiter-map.webp'
+  earth:'/assets/v17/npcs/colossar-prime.webp',
+  mars:'/assets/v17/npcs/dreadnox-prime.webp',
+  jupiter:'/assets/v17/npcs/kharon-prime.webp'
 });
 const COLORS={earth:'#58d8ff',mars:'#ff8969',jupiter:'#e7c36f'};
 export function drawWarbotShipV477(ctx,e,selected=false,quality='low',time=0){
   const c=COLORS[e.faction]||'#a4d6ee',img=e.spriteImage;
-  const size=e.role==='guardian'?76:e.role==='interceptor'?54:64;
-  ctx.save();ctx.translate(e.x,e.y);ctx.rotate(e.angle||0);
+  const size=e.role==='guardian'?67:e.role==='interceptor'?48:57;
+  ctx.save();ctx.translate(e.x,e.y);ctx.rotate((Number(e.visualAngle??e.angle)||0)-Math.PI/2);
   if(img?.naturalWidth>0&&img?.naturalHeight>0){
     const f=size/Math.max(img.naturalWidth,img.naturalHeight);
-    ctx.save();ctx.rotate(Math.PI/2); // top-down source images point upward
-    ctx.drawImage(img,-img.naturalWidth*f/2,-img.naturalHeight*f/2,img.naturalWidth*f,img.naturalHeight*f);ctx.restore();
+    // NPC Prime art uses the same heading-to-sprite correction as drawEnemy().
+    ctx.drawImage(img,-img.naturalWidth*f/2,-img.naturalHeight*f/2,img.naturalWidth*f,img.naturalHeight*f);
   }else{
     // Fallback while the reused image is loading.
     const scale=size/65;ctx.scale(scale,scale);ctx.fillStyle=c;ctx.strokeStyle='#e5f7ff';ctx.lineWidth=1.2;

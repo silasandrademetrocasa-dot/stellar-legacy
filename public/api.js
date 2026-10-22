@@ -910,6 +910,11 @@ export async function claimEventDesignerOnline({eventId, eventKey}={}) {
 export async function getAdminStatus(){
   return authedServerFetch('/api/admin/status');
 }
+// V47.7.4 — server-authenticated U-X preflight; never takes admin claims from the browser.
+export async function frontierAdminAccessV4774(mapId){
+  if(!/^u[1-3]$/.test(String(mapId||'')))throw new Error('Setor inválido');
+  return authedServerFetch('/api/frontier/admin-entry?mapId='+encodeURIComponent(mapId));
+}
 export async function adminSearchAccounts(query=''){
   return authedServerFetch(`/api/admin/users?q=${encodeURIComponent(String(query||''))}`);
 }

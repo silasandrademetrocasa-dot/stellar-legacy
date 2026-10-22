@@ -15,7 +15,7 @@ function setup(protection={}){
 test('roles and three preexisting faction sprite paths',()=>{
  assert.equal(WARBOT_DEFAULT.enabled,false);
  assert.deepEqual([0,1,2,3].map(warbotRole),['interceptor','assault','guardian','support']);
- for(const f of ['earth','mars','jupiter'])assert.equal(WARBOT_SHIP_ASSETS[f],`/assets/v2212/ships/${f}-map.webp`);
+ assert.deepEqual(Object.values(WARBOT_SHIP_ASSETS).map(x=>x.split('/').at(-1)),['colossar-prime.webp','dreadnox-prime.webp','kharon-prime.webp']);
 });
 test('authorized pilot outranks NPC bot when ADM allows attacks',()=>{
  const f=setup();f.engine.configure(conf('conquest',{attack_players:true}));
@@ -61,17 +61,17 @@ test('tactical movement flanks, retreats, and respects bounds',()=>{
 test('faction WebP renders using cached image, no shadow performance cost',()=>{
  const calls=[];const ctx={save(){calls.push('save')},restore(){calls.push('restore')},rotate(){},translate(){},drawImage(){calls.push('drawImage')},setLineDash(){},beginPath(){},arc(){},stroke(){}};
  drawWarbotShipV477(ctx,{x:0,y:0,faction:'mars',role:'interceptor',spriteImage:{naturalWidth:140,naturalHeight:90}},true,'low');
- assert.deepEqual(calls,['save','save','drawImage','restore','restore']);
+ assert.deepEqual(calls,['save','drawImage','restore']);
 });
 test('HUD and minimap use exact current map and remove floating UNIVERSO button',()=>{
  const game=read('public/game.js'),html=read('public/index.html'),pkg=JSON.parse(read('package.json'));
- assert.equal(pkg.version,'47.7.3');assert.match(pkg.scripts.check,/v4773-apply-patch/);
+ assert.equal(pkg.version,'47.7.4');assert.match(pkg.scripts.check,/v4774-apply-patch/);
  assert.match(game,/spriteImage:assetImage\(WARBOT_SHIP_ASSETS\[e\.faction\]\)/);
  assert.match(game,/MAPA '\+displayMapLabel\(progress\.mapId,currentTerritoryFaction\(\)\)/);
  assert.match(html,/id="minimapMapLabelV4771"/);
  assert.equal((html.match(/id="frontierExpansionBtnV42"/g)||[]).length,1);
  assert.match(html,/<nav class="top-actions command-actions"[\s\S]*?id="frontierExpansionBtnV42"[\s\S]*?<\/nav>/);
- assert.match(html,/\/game\.js\?v=47\.7\.3/);
+ assert.match(html,/\/game\.js\?v=47\.7\.4/);
 });
 test('authoritative ephemeral gameplay never rewards bot combat or persists captures',()=>{
  const g=read('server/warbot-engine-v477.js');

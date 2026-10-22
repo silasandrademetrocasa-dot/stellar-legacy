@@ -53,10 +53,10 @@ test('U-X NPC recovery is isolated to frontier and preserves official level guar
 });
 test('prior HUD, FX culling, SQL, saves, and economy stay untouched',()=>{
  const g=read('public/game.js'),h=read('public/index.html'),pkg=JSON.parse(read('package.json'));
- assert.equal(pkg.version,'47.7.3');assert.match(pkg.scripts.check,/v4773-apply-patch/);
+ assert.equal(pkg.version,'47.7.4');assert.match(pkg.scripts.check,/v4774-apply-patch/);
  assert.match(g,/if\(!onScreenWorld\(Number\(a\.x\),Number\(a\.y\),160\)\&\&!onScreenWorld/);
  assert.match(h,/id="minimapMapLabelV4771"/);assert.match(h,/id="frontierExpansionBtnV42"/);
- assert.match(h,/\/game\.js\?v=47\.7\.3/);
- const files=read('scripts/v4773-apply-patch.mjs');
+ assert.match(h,/\/game\.js\?v=47\.7\.4/);
+ const files=read('scripts/v4774-apply-patch.mjs');
  assert.doesNotMatch(files,/DROP\s+TABLE|DELETE\s+FROM|UPDATE\s+public\.game_saves/i);
 });

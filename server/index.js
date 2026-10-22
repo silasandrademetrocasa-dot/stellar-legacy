@@ -30,7 +30,7 @@ import { createSecurityService } from './security-service.js';
 
 const app = express();
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const RELEASE_VERSION = '47.7.3'; // único identificador de release nos endpoints HTTP
+const RELEASE_VERSION = '47.7.4'; // único identificador de release nos endpoints HTTP
 
 function normalizeSupabaseUrl(value = '') {
   let url = String(value || '').trim();
@@ -1562,6 +1562,14 @@ app.post('/api/admin/warbots',requireUser,asyncRoute(async(req,res)=>{
   res.set('Cache-Control','no-store');res.json({ok:true,map_id,configuration:cleaned});
 }));
 
+// V47.7.4: U-X preflight uses the same Supabase role authority as /ws join_map.
+app.get('/api/frontier/admin-entry',requireUser,asyncRoute(async(req,res)=>{
+  const mapId=String(req.query.mapId||'');
+  if(!/^u[1-3]$/.test(mapId))return res.status(400).json({allowed:false,error:'Setor inválido'});
+  const {data,error}=await req.sb.rpc('is_game_admin_v1763',{p_uid:req.user.id});
+  if(error)return res.status(503).json({allowed:false,error:'Não foi possível verificar ADM'});
+  res.set('Cache-Control','no-store');return res.json({allowed:data===true,mapId});
+}));
 app.get('/api/admin/status', requireUser, asyncRoute(async(req,res)=>adminRpc(req,res,'admin_status_v1763')));
 app.get('/api/admin/users', requireUser, asyncRoute(async(req,res)=>adminRpc(req,res,'admin_search_accounts_v1763',{p_query:String(req.query?.q||'').slice(0,120)})));
 app.get('/api/admin/actions', requireUser, asyncRoute(async(req,res)=>adminRpc(req,res,'admin_recent_actions_v1763')));

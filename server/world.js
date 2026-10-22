@@ -1268,6 +1268,10 @@ export function attachSharedUniverse(server,{authenticate,authorizeJoin,recordSe
         const validTerritory=!territorial||['earth','mars','jupiter'].includes(territory);
         const owner=({'b41':'earth','b42':'mars','b43':'jupiter'})[mapId];
         const dest=world.mapDefinition(mapId);
+        // U-X sector cache can be empty during startup: load authoritative SQL before admission.
+        if(/^u[1-3]$/.test(mapId)&&!world.sectorForRoom(mapId,territory)){
+          await world.refreshWorldConfig(true);
+        }
         const sector=world.sectorForRoom(mapId,territory);
         const sectorValid=sectorEntryAllowedV450(mapId,territorial,sector,territory);
         const required=Math.max(1,Number(dest?.minLevel)||1,Number(sector?.min_level)||1);
@@ -1283,6 +1287,15 @@ export function attachSharedUniverse(server,{authenticate,authorizeJoin,recordSe
         ws.room?.removeClient(ws);const p={clanId:identity.clanId||null,userId:identity.user.id,callsign:identity.callsign||msg.callsign||'Pilot',pilotTitle:shortText(msg.pilotTitle||'Piloto Estelar',64),faction:faction,shipId:String(msg.shipId||'phoenix'),shipDesignId:msg.shipDesignId?shortText(msg.shipDesignId,64):null,level:level,x:Number(msg.x)||400,y:Number(msg.y)||400,hp:Number(msg.hp)||1,maxHp:Number(msg.maxHp)||1,shield:Number(msg.shield)||0,maxShield:Number(msg.maxShield)||0,angle:Number(msg.angle)||0,laserFiring:false,laserColor:'#76d9ff',laserAmmoId:'lcb10',laserAmmoName:'PLS-1',targetId:null,targetIsPlayer:false,pet:{owned:false},updatedAt:nowMs()};// U-X maps: reconcile NPC population once before the initial authoritative snapshot.
         if(/^u[1-3]$/.test(mapId)&&r.npcs.size===0&&world.npcSpawnGroups(mapId).some(g=>g.count>0))r.applyNpcRuntimeConfig();
         r.addClient(ws,p);
+        // U-X rooms can be created before asynchronous NPC settings finish loading.
+        // Once the cached runtime is ready, repopulate only a genuinely empty frontier room.
+        if(/^u[1-3]$/.test(mapId)&&r.npcs.size===0){
+          world.refreshNpcConfig(false).then(()=>{
+            if(ws.room!==r||r.npcs.size>0)return;
+            const groups=world.npcSpawnGroups(mapId);
+            if(groups.length&&groups.some(g=>g.count>0))r.applyNpcRuntimeConfig();
+          }).catch(e=>console.warn('[frontier-ux-spawn]',String(e?.message||e).slice(0,100)));
+        }
         // Verificar eventos imediatamente ao entrar (sem depender de trocar de mapa).
         Promise.allSettled([world.refreshLiveOps?.(nowMs()-(world.lastLiveOpsAt||0)>3000)??Promise.resolve(),world.refreshDirectives?.(false)??Promise.resolve()]).then(()=>{
           if(ws.room!==r)return;

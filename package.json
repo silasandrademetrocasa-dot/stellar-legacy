@@ -1,11 +1,11 @@
 {
   "name": "stellar-legacy",
-  "version": "47.7.3",
+  "version": "47.7.4",
   "type": "module",
   "scripts": {
     "start": "node server/index.js",
     "dev": "node --watch server/index.js",
-    "check": "node scripts/v4773-apply-patch.mjs && node scripts/verify-release.mjs",
+    "check": "node scripts/v4774-apply-patch.mjs && node scripts/verify-release.mjs",
     "test": "node --test tests/*.test.mjs",
     "verify": "npm run check && npm run check:v21 && npm test",
     "check:v21": "node scripts/check-v21-package.mjs"
@@ -19,5 +19,5 @@
   "engines": {
     "node": ">=18"
   },
-  "release": "Performance Rescue V47.7.3: low-FPS unlocked, 150ms Warbot tick, authoritative U-1/U-3 admin navigation and NPC room re-sync"
+  "release": "Warbot Elite Polish V47.7.4: established Prime sprites, close-range measured flight, authenticated ADM U-X entry and NPC room recovery"
 }

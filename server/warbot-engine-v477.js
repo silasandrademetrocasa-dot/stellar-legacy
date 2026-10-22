@@ -34,15 +34,20 @@ export function warbotTarget(bot,others,clients,room,settings,now=Date.now()){
   }
   return enemy;
 }
+// V47.7.4: compact, deliberate dogfighting. Server-authoritative and animation-frame independent.
 export function warbotTacticalMove(b,goal,engaged,dt,world){
   const dx=goal.x-b.x,dy=goal.y-b.y,d=Math.max(1,Math.hypot(dx,dy)),nx=dx/d,ny=dy/d;
-  const role=b.role||'assault',ideal=role==='support'?540:role==='guardian'?430:role==='interceptor'?310:380;
-  const weak=(b.shield||0)/Math.max(1,b.maxShield||1)<.2&&(b.hp||0)<(b.maxHp||1)*.75;
-  const forward=weak&&engaged?-.95:d>ideal+70?1:d<ideal-95?-.6:0;
-  const orbit=engaged?(role==='interceptor'?.85:role==='support'?.3:.48):0;
-  const side=b.index%2===0?1:-1,dxm=nx*forward-ny*orbit*side,dym=ny*forward+nx*orbit*side,mag=Math.max(1,Math.hypot(dxm,dym));
+  const role=b.role||'assault';
+  // Keep interceptors close, supports a little farther back, all well inside weapons range.
+  const ideal=role==='support'?205:role==='guardian'?175:role==='interceptor'?115:145;
+  const weak=(b.shield||0)/Math.max(1,b.maxShield||1)<.08&&(b.hp||0)<(b.maxHp||1)*.30;
+  // Only a badly damaged craft may disengage, slowly. Normal bots never flee while locked.
+  const forward=weak&&engaged?-.20:d>ideal+28?1:d<ideal-44?-.14:0;
+  const orbit=engaged?(role==='interceptor'?.13:role==='support'?.06:.09):0;
+  const side=b.index%2===0?1:-1,dxm=nx*forward-ny*orbit*side,dym=ny*forward+nx*orbit*side;
+  const mag=Math.hypot(dxm,dym);
   const step=Math.max(0,Math.min(.45,dt))*b.speed;
-  return {x:clamp(b.x+dxm/mag*step,95,world.w-95),y:clamp(b.y+dym/mag*step,95,world.h-95),angle:Math.atan2(dy,dx)};
+  return {x:clamp(b.x+(mag>0.001?dxm/mag*step:0),95,world.w-95),y:clamp(b.y+(mag>0.001?dym/mag*step:0),95,world.h-95),angle:Math.atan2(dy,dx)};
 }
 const clamp=(v,min,max)=>Math.min(max,Math.max(min,Number(v)||min));
 export function cleanWarbotConfig(input,now=Date.now()){
@@ -76,7 +81,7 @@ export function createWarbotEngine(room){
     const tier=settings.tier, hp=90000*tier,shield=150000*tier;
     const role=warbotRole(idx);
     Object.assign(bot,{id:`warbot_${room.mapId}_${faction}_${idx}`,name:`${LABELS[faction]} • ${ROLE_LABELS[role]}`,faction,role,index:idx,color:COLORS[faction],
-      ...pos,hp,maxHp:hp,shield,maxShield:shield,speed:(role==='interceptor'?245:role==='guardian'?155:role==='support'?175:205)+tier*15,damage:(role==='assault'?1500:role==='interceptor'?1250:role==='guardian'?1000:900)*tier,angle:0,lastShotAt:0,lastPilotShotAt:0,aggroPilotId:null,aggroPilotUntil:0,
+      ...pos,hp,maxHp:hp,shield,maxShield:shield,speed:(role==='interceptor'?182:role==='guardian'?115:role==='support'?133:154)+tier*9,damage:(role==='assault'?1500:role==='interceptor'?1250:role==='guardian'?1000:900)*tier,angle:0,lastShotAt:0,lastPilotShotAt:0,aggroPilotId:null,aggroPilotUntil:0,
       targetId:null,spawnAt:Date.now(),respawnAt:0});
   }
   function configure(raw){
