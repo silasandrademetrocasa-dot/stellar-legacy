@@ -55,14 +55,14 @@ test('old minimap and topbar remain single-instance and update to current map',(
  assert.equal((html.match(/id="minimapMapLabelV4771"/g)||[]).length,1);
  assert.equal((html.match(/id="frontierExpansionBtnV42"/g)||[]).length,1);
  assert.ok(game.includes("'MAPA '+displayMapLabel(progress.mapId,currentTerritoryFaction())"));
- assert.ok(html.includes('/game.js?v=47.7.4'));
+ assert.ok(html.includes('/game.js?v=47.7.5'));
 });
 test('no changes to reward, drop, capture, saves, or SQL in this release',()=>{
  const pkg=JSON.parse(read('package.json'));
- assert.equal(pkg.version,'47.7.4');assert.match(pkg.scripts.check,/v4774-apply-patch/);
+ assert.equal(pkg.version,'47.7.5');assert.match(pkg.scripts.check,/v4775-apply-patch/);
  const engine=read('server/warbot-engine-v477.js');
  assert.doesNotMatch(engine,/grantNpcReward|persistCapture\(|battlePassEvent|saveGame\(/);
- const patch=read('scripts/v4774-apply-patch.mjs');
+ const patch=read('scripts/v4775-apply-patch.mjs');
  assert.doesNotMatch(patch,/DROP\s+TABLE|DELETE\s+FROM|UPDATE\s+public\.game_saves/i);
- assert.ok(patch.includes('offscreen battle effects'));
+ assert.ok(read('public/game.js').includes('if(!onScreenWorld(Number(a.x),Number(a.y),160)&&!onScreenWorld(Number(b.x),Number(b.y),160))return true;'),'offscreen battle effects must remain active in gameplay');
 });

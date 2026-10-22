@@ -53,14 +53,14 @@ test('V47 draw honors disabled graphics, and canvas state stays balanced',()=>{
 test('V47 patch integrates visuals, sound, safety and settings without touching economic logic',()=>{
   const g=read('public/game.js'),h=read('public/index.html'),s=read('public/modules/stellar-audio-v462.js');
   const pkg=JSON.parse(read('package.json'));
-  assert.equal(pkg.version,'47.7.4');assert.match(pkg.scripts.check,/v4774-apply-patch/);
+  assert.equal(pkg.version,'47.7.5');assert.match(pkg.scripts.check,/v4775-apply-patch/);
   for(const item of ['createCombatRebornV470','npcTacticalDriftV470','drawPortalSignatureV470','rebornFx.tick(dt)','rebornFx.draw(ctx,screenPos','playWeaponSfxV470','shieldBreak','portalPvp','portalAstral'])assert.ok(g.includes(item),item);
   assert.match(h,/id="combatRebornVisualToggle"/);
   assert.ok(h.includes('/game.js?v='+pkg.version));
   for(const item of ["'engine'","'laserHeavy'","'portalPvp'","'portalAstral'","'shieldBreak'"])assert.ok(s.includes(item),item);
-  const patch=read('scripts/v4774-apply-patch.mjs');
+  const patch=read('scripts/v4775-apply-patch.mjs');
   assert.doesNotMatch(patch,/(?:DELETE\s+FROM|DROP\s+TABLE|TRUNCATE\s+TABLE|update\s+public\.game_saves)/i);
-  assert.ok(patch.includes('v4774-apply-patch'));
+  assert.ok(patch.includes('v4775-apply-patch'));
 });
 test('V47 enforces authoritative shared-universe and PvP target guards',()=>{
   const g=read('public/game.js');

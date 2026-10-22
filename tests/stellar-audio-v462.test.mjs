@@ -32,6 +32,6 @@ test('V46.2: HTML/game integration and cache-busting use same release',()=>{
 
 test('V46.2: older version regression checks reference the current release patch',()=>{
   const read=p=>readFileSync(new URL('../'+p,import.meta.url),'utf8');
-  assert.match(read('tests/v450-galactic-ascension.test.mjs'),/v4774-apply-patch/);
-  assert.match(read('tests/v451-galactic-progression.test.mjs'),/includes\('v4774-apply-patch'\)/);
+  assert.match(read('tests/v450-galactic-ascension.test.mjs'),/v4775-apply-patch/);
+  assert.match(read('tests/v451-galactic-progression.test.mjs'),/includes\('v4775-apply-patch'\)/);
 });

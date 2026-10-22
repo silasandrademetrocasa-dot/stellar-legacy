@@ -4881,3 +4881,31 @@ body[data-device="mobile"] #weaponBar .ability-btn.ready{
 /* V47.7.1 TOPBAR */
 .universe-top-btn{position:static!important;inset:auto!important;transform:none!important;display:inline-flex!important;align-items:center;justify-content:center;white-space:nowrap;font-size:11px;box-shadow:none!important}
 #minimapMapLabelV4771{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+/* V47.7.5 TARGET LOCK: tiny HUD button must not contain the NEXT NPC action.
+   Fixes the action pushing the expand arrow off-screen in mobile landscape. */
+#rightHudStack > #targetLockHud.collapsed{
+  box-sizing:border-box!important;align-self:flex-end!important;
+  width:40px!important;min-width:40px!important;max-width:40px!important;
+  height:40px!important;min-height:40px!important;max-height:40px!important;
+  padding:0!important;margin:0!important;overflow:hidden!important;pointer-events:auto!important;
+}
+#rightHudStack > #targetLockHud.collapsed #nextNpcTargetV32{display:none!important;}
+#rightHudStack > #targetLockHud.collapsed .target-lock-main,
+#rightHudStack > #targetLockHud.collapsed .target-lock-detail,
+#rightHudStack > #targetLockHud.collapsed .target-lock-head>span:first-child,
+#rightHudStack > #targetLockHud.collapsed .target-lock-head-actions>b{display:none!important;}
+#rightHudStack > #targetLockHud.collapsed .target-lock-head,
+#rightHudStack > #targetLockHud.collapsed .target-lock-head-actions{
+  display:flex!important;justify-content:center!important;align-items:center!important;
+  width:40px!important;min-width:0!important;max-width:40px!important;
+  height:40px!important;min-height:40px!important;max-height:40px!important;
+  padding:0!important;margin:0!important;gap:0!important;
+}
+#rightHudStack > #targetLockHud.collapsed #targetLockToggle{
+  display:grid!important;place-items:center!important;flex:0 0 40px!important;
+  width:40px!important;height:40px!important;min-width:40px!important;
+  padding:0!important;margin:0!important;transform:none!important;
+  background:transparent!important;border:0!important;cursor:pointer!important;
+  pointer-events:auto!important;touch-action:manipulation;
+}

@@ -1,6 +1,6 @@
 // Read-only ADM panel: the numbers are local balancing targets, not account grants.
-import {GALACTIC_XP_ANCHORS_V460,xpThresholdV460} from '../level-curve-v460.js?v=47.7.4';
-import {GALACTIC_PVE_LEVELS_V451} from './galactic-progression-v451.js?v=47.7.4';
+import {GALACTIC_XP_ANCHORS_V460,xpThresholdV460} from '../level-curve-v460.js?v=47.7.5';
+import {GALACTIC_PVE_LEVELS_V451} from './galactic-progression-v451.js?v=47.7.5';
 const format=n=>Number(n).toLocaleString('pt-BR');
 export function renderGalacticBalanceV460(root,tab,isAdmin){
  if(tab!=='admin'||isAdmin!==true||!root)return;

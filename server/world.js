@@ -1,3 +1,4 @@
+import {frontierRoomTerritoryV4775,frontierWrongFactionV4775,frontierEntryDenialV4775} from './frontier-ux-admission-v4775.js';
 import {createWarbotEngine} from './warbot-engine-v477.js';
 import {portalPointV461} from '../public/modules/portal-layout-v461.js';
 import {applyGalacticProgressionV451} from '../public/modules/galactic-progression-v451.js';
@@ -1264,7 +1265,8 @@ export function attachSharedUniverse(server,{authenticate,authorizeJoin,recordSe
         const known=String(identity.faction||'');const faction=known||(['earth','mars','jupiter'].includes(String(msg.faction||''))&&mapId==='x1'?String(msg.faction):'');const level=Math.max(1,Number(identity.level)||1);
         const admin=identity.isAdmin===true;
         const territorial=/^(?:x[1-8]|u[1-3])$/.test(mapId); // FRONTIER_ROOMS_V435
-        const territory=territorial?(admin?String(msg.territoryFaction||faction):faction):null;
+        // Neutral U-X is isolated by the authenticated pilot's faction, never the UI 'battle' sentinel.
+        const territory=territorial?frontierRoomTerritoryV4775(mapId,faction,msg.territoryFaction,admin):null;
         const validTerritory=!territorial||['earth','mars','jupiter'].includes(territory);
         const owner=({'b41':'earth','b42':'mars','b43':'jupiter'})[mapId];
         const dest=world.mapDefinition(mapId);
@@ -1276,8 +1278,8 @@ export function attachSharedUniverse(server,{authenticate,authorizeJoin,recordSe
         const sectorValid=sectorEntryAllowedV450(mapId,territorial,sector,territory);
         const required=Math.max(1,Number(dest?.minLevel)||1,Number(sector?.min_level)||1);
         // Somente X-1..X-8 são territoriais; b41,b42,b43 são PvP públicos de nível mínimo.
-        const wrongFaction=!admin&&territorial&&String(msg.territoryFaction||faction)!==faction;
-        if(!dest||dest.enabled===false||dest.gate||!validTerritory||!sectorValid||wrongFaction||(!admin&&level<required)||!faction){safeJsonSend(ws,{type:'join_error',code:'MAP_JOIN_DENIED',reason:wrongFaction?'INVASÕES BLOQUEADAS':`Setor indisponível / nível mínimo ${required}`});return;}
+        const wrongFaction=frontierWrongFactionV4775(mapId,faction,msg.territoryFaction,admin);
+        if(!dest||dest.enabled===false||dest.gate||!validTerritory||!sectorValid||wrongFaction||(!admin&&level<required)||!faction){safeJsonSend(ws,{type:'join_error',code:'MAP_JOIN_DENIED',reason:frontierEntryDenialV4775({dest,validTerritory,sectorValid,wrongFaction,admin,level,required,faction})});return;}
         if(/^b4[123]$/.test(mapId)){
           try{identity.clanId=await world.loadActorClan(identity.user.id);}catch{identity.clanId=null;}
         }

@@ -43,8 +43,8 @@ test('two-hour telemetry snapshot compares deltas, refuses counter resets',()=>{
  assert.equal(summarizePlaytestV460(after,before).ok,false);
 });
 test('release keeps existing worlds, raids, relays, market and saves untouched',()=>{
- const pkg=JSON.parse(read('package.json'));assert.equal(pkg.version,'47.7.4');
- assert.match(pkg.scripts.check,/v4774-apply-patch/);
+ const pkg=JSON.parse(read('package.json'));assert.equal(pkg.version,'47.7.5');
+ assert.match(pkg.scripts.check,/v4775-apply-patch/);
  const game=read('public/game.js');
  assert.match(game,/migratePlayerXpCurveV460\(\);/);
  assert.match(game,/function levelXpThreshold\(level\)\{return xpThresholdV460\(level\);\}/);
