@@ -4909,3 +4909,47 @@ body[data-device="mobile"] #weaponBar .ability-btn.ready{
   background:transparent!important;border:0!important;cursor:pointer!important;
   pointer-events:auto!important;touch-action:manipulation;
 }
+
+/* V47.7.6 — restore the previous readable collapsed NPC target panel. */
+#rightHudStack > #targetLockHud.collapsed{
+  box-sizing:border-box!important;width:176px!important;min-width:176px!important;max-width:176px!important;
+  height:auto!important;min-height:65px!important;max-height:90px!important;
+  padding:6px 8px!important;margin:0!important;overflow:hidden!important;align-self:flex-end!important;
+}
+#rightHudStack > #targetLockHud.collapsed .target-lock-head{
+  display:flex!important;width:100%!important;min-width:0!important;max-width:none!important;
+  height:auto!important;min-height:28px!important;justify-content:space-between!important;gap:4px!important;
+}
+#rightHudStack > #targetLockHud.collapsed .target-lock-head>span:first-child{display:inline!important;font-size:8px!important;}
+#rightHudStack > #targetLockHud.collapsed .target-lock-head-actions{width:auto!important;max-width:none!important;min-width:0!important;height:auto!important;gap:3px!important;}
+#rightHudStack > #targetLockHud.collapsed .target-lock-head-actions>b{display:inline!important;}
+#rightHudStack > #targetLockHud.collapsed #targetLockToggle{
+  width:28px!important;height:28px!important;min-width:28px!important;flex:0 0 28px!important;
+  border:1px solid rgba(95,210,245,.3)!important;border-radius:6px!important;
+}
+#rightHudStack > #targetLockHud.collapsed .target-lock-main{display:block!important;overflow:hidden!important;max-height:30px!important;}
+#rightHudStack > #targetLockHud.collapsed .target-lock-name{display:block!important;font-size:10px!important;margin:2px 0!important;}
+#rightHudStack > #targetLockHud.collapsed .target-lock-detail,
+#rightHudStack > #targetLockHud.collapsed #nextNpcTargetV32,
+#rightHudStack > #targetLockHud.collapsed .target-lock-portrait-wrap{display:none!important;}
+body.mobile-landscape-pro #rightHudStack > #targetLockHud.collapsed{width:176px!important;min-width:176px!important;max-width:176px!important;max-height:90px!important;}
+body.mobile-landscape-pro .right-hud-stack:has(> #targetLockHud.collapsed:not(.hidden)){width:176px!important;max-width:176px!important;}
+/* Fury and normal bosses can hide behind a single reachable control. */
+#bossPhaseToggleV4776{display:grid!important;place-items:center;flex:0 0 28px;width:28px;height:28px;pointer-events:auto!important;touch-action:manipulation;z-index:2;}
+.boss-phase-hud{pointer-events:none;}
+.boss-phase-hud #bossPhaseToggleV4776{pointer-events:auto;}
+.boss-phase-hud.collapsed{
+  box-sizing:border-box!important;position:fixed!important;left:auto!important;right:calc(env(safe-area-inset-right,0px) + 54px)!important;
+  top:calc(env(safe-area-inset-top,0px) + 58px)!important;bottom:auto!important;transform:none!important;
+  width:42px!important;min-width:42px!important;max-width:42px!important;
+  height:42px!important;min-height:42px!important;max-height:42px!important;
+  padding:5px!important;border-radius:10px!important;overflow:hidden!important;pointer-events:none!important;
+}
+.boss-phase-hud.collapsed .boss-phase-top{display:flex!important;width:30px!important;height:30px!important;align-items:center!important;justify-content:center!important;margin:0!important;}
+.boss-phase-hud.collapsed .boss-phase-top>span,
+.boss-phase-hud.collapsed .boss-phase-top>b,
+.boss-phase-hud.collapsed .boss-phase-values,
+.boss-phase-hud.collapsed .boss-phase-track,
+.boss-phase-hud.collapsed #bossPhaseStatus{display:none!important;}
+.boss-phase-hud.collapsed #bossPhaseToggleV4776{display:grid!important;width:30px!important;height:30px!important;pointer-events:auto!important;}
+body.mobile-landscape-pro .boss-phase-hud.collapsed{left:auto!important;right:calc(env(safe-area-inset-right,0px) + 54px)!important;top:calc(env(safe-area-inset-top,0px) + 58px)!important;max-width:42px!important;}

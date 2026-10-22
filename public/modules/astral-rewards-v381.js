@@ -1,6 +1,7 @@
+import {stellarNoticeV4776} from './stellar-dialog-v4776.js?v=47.7.6';
 // V38.1.0 — painel de recompensas da arena e editor no ADM.
 // Sem loops de render e sem alterações no motor de combate.
-import {loadAstralRewardsV381,lockAstralRewardV381,claimAstralRewardV381,adminSetAstralRewardV381} from '../api.js?v=47.7.5';
+import {loadAstralRewardsV381,lockAstralRewardV381,claimAstralRewardV381,adminSetAstralRewardV381} from '../api.js?v=47.7.6';
 const names={alpha:'AURORA',beta:'NEXUS',gamma:'ECLIPSE'};
 const order=['alpha','beta','gamma'];
 let latest=null,loading=false;
@@ -16,7 +17,7 @@ function renderPortal(){const box=$('astralRewardV381');if(!box)return;const key
  <p>${formatQuote(q)}</p><small>${fmt(q.waves)} ondas · fator real de dificuldade ${fmt(q.difficultyMult)}× · primeira conclusão semanal: ${q.firstWeekly?'ATIVA':'já resgatada'} (${fmt(q.weeklyBonusPct)}% extra em CR, STL, Núcleos e material).</small>
  <div class="astral-rewards-actions"><small>${fmt(entry.pending)} conclusão(ões) aguardando resgate · ${fmt(entry.materialBalance)} ${escape(q.resource)} no inventário</small><button type="button" id="astralClaimV381" class="primary-btn" ${entry.pending<1?'disabled':''}>RESGATAR BÔNUS</button></div>
  <small>Prêmio adicional ao pacote tradicional do portal. Confirme sua vitória e salve o progresso antes de resgatar.</small>`;
- $('astralClaimV381')?.addEventListener('click',async()=>{const b=$('astralClaimV381');b.disabled=true;b.textContent='VALIDANDO...';try{const r=await claimAstralRewardV381(key);if(!r?.claimed)throw Error('Nenhuma nova conclusão disponível.');alert(`BÔNUS ${names[key]} RESGATADO!\n${formatQuote(r.quote)}\nReinicie o jogo para conferir seus novos itens.`);location.reload();}catch(e){alert('Não foi possível concluir esta ação. Tente novamente.');b.disabled=false;b.textContent='RESGATAR BÔNUS';}});
+ $('astralClaimV381')?.addEventListener('click',async()=>{const b=$('astralClaimV381');b.disabled=true;b.textContent='VALIDANDO...';try{await window.stellarEconomySyncBeforeV4776?.();const r=await claimAstralRewardV381(key);if(!r?.claimed)throw Error('Nenhuma nova conclusão disponível.');await stellarNoticeV4776(`BÔNUS ${names[key]} RESGATADO!\n${formatQuote(r.quote)}\nOs itens estão sendo sincronizados no jogo.`);await window.stellarEconomySyncAfterV4776?.();await refresh();}catch(e){await stellarNoticeV4776('Não foi possível concluir esta ação. Tente novamente.');b.disabled=false;b.textContent='RESGATAR BÔNUS';}});
 }
 // A portal change during a request is queued instead of being silently ignored.
 let queuedGate=null;
@@ -48,7 +49,7 @@ function renderAdmin(){const el=$('astralAdminEditorV381');if(!el||!latest?.gate
  <label>Míssil<select data-reward-key="rocketId">${['r310','plt2026','plt2021','plt3030'].map(id=>`<option value="${id}" ${id===a.config.rocketId?'selected':''}>${id}</option>`).join('')}</select></label>
  <button class="small-btn gold" type="button" data-save-astral="${key}">SALVAR ${names[key]}</button></fieldset>`}).join('')}</div>
  <div class="astral-rewards-history"><strong>Histórico de resgates</strong>${(latest.history||[]).slice(0,10).map(h=>`<div>${names[h.gate]||escape(h.gate)} · #${fmt(h.completion_number)} · ${escape(new Date(h.claimed_at).toLocaleString('pt-BR'))} ${h.first_weekly?'· bônus semanal':''}</div>`).join('')||'<small>Sem resgates nesta conta.</small>'}</div>`;
- el.querySelectorAll('[data-save-astral]').forEach(b=>b.addEventListener('click',async()=>{const key=b.dataset.saveAstral;const parent=b.closest('fieldset');const config={};parent.querySelectorAll('[data-reward-key]').forEach(input=>{config[input.dataset.rewardKey]=input.type==='number'?Number(input.value):input.value;});b.disabled=true;try{await adminSetAstralRewardV381(key,config);await refresh();alert('Recompensas de '+names[key]+' salvas com sucesso.');}catch(e){alert(e.message||String(e));}finally{b.disabled=false;}}));
+ el.querySelectorAll('[data-save-astral]').forEach(b=>b.addEventListener('click',async()=>{const key=b.dataset.saveAstral;const parent=b.closest('fieldset');const config={};parent.querySelectorAll('[data-reward-key]').forEach(input=>{config[input.dataset.rewardKey]=input.type==='number'?Number(input.value):input.value;});b.disabled=true;try{await adminSetAstralRewardV381(key,config);await refresh();await stellarNoticeV4776('Recompensas de '+names[key]+' salvas com sucesso.');}catch(e){await stellarNoticeV4776(e.message||String(e));}finally{b.disabled=false;}}));
 }
 function setup(){
  const modal=$('gateModal');if(!modal)return;

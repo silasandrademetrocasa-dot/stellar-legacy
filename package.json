@@ -1,23 +1,16 @@
 {
   "name": "stellar-legacy",
-  "version": "47.7.5",
+  "version": "47.7.6",
   "type": "module",
   "scripts": {
     "start": "node server/index.js",
     "dev": "node --watch server/index.js",
-    "check": "node scripts/v4775-apply-patch.mjs && node scripts/verify-release.mjs",
+    "check": "node scripts/v4776-apply-patch.mjs && node scripts/verify-release.mjs",
     "test": "node --test tests/*.test.mjs",
     "verify": "npm run check && npm run check:v21 && npm test",
     "check:v21": "node scripts/check-v21-package.mjs"
   },
-  "dependencies": {
-    "express": "^4.21.2",
-    "@supabase/supabase-js": "^2.57.4",
-    "ws": "^8.18.0",
-    "compression": "^1.7.5"
-  },
-  "engines": {
-    "node": ">=18"
-  },
-  "release": "V47.7.5 Frontier U-X websocket routing + target mini-HUD stability (no SQL, no FPS changes)"
+  "dependencies": {"express": "^4.21.2", "@supabase/supabase-js": "^2.57.4", "ws": "^8.18.0", "compression": "^1.7.5"},
+  "engines": {"node": ">=18"},
+  "release": "V47.7.6 HUD boss collapse, standardized confirmations, session-safe exploration, server-authoritative credit-only elite resale"
 }

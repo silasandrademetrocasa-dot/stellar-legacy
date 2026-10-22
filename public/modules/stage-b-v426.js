@@ -1,13 +1,14 @@
+import {stellarConfirmV4776,stellarNoticeV4776} from './stellar-dialog-v4776.js?v=47.7.6';
 // V42.4–42.6 | lightweight, on-demand Universe panels; no animation-frame hooks.
 import {loadExplorationV426,startSectorV426,claimSectorV426,loadMarketV426,offerMarketV426,buyMarketV426,cancelMarketV426,
- loadClanProjectsV426,fundClanProjectV426,adminSectorV426,adminMarketV426,adminClanV426} from '../api.js?v=47.7.5';
+ loadClanProjectsV426,fundClanProjectV426,adminSectorV426,adminMarketV426,adminClanV426} from '../api.js?v=47.7.6';
 const fmt=x=>Number(x||0).toLocaleString('pt-BR');
 const node=(tag,txt,cls)=>{const el=document.createElement(tag);if(txt!==undefined)el.textContent=String(txt);if(cls)el.className=cls;return el;};
 const valid=(v,min,max)=>Number.isSafeInteger(Number(v))&&Number(v)>=min&&Number(v)<=max;
 let ticket=0;
 function button(txt,cb){const b=node('button',txt);b.type='button';b.onclick=async()=>{
  if(b.disabled)return;b.disabled=true;
- try{await cb();}catch(e){alert('Não foi possível concluir esta ação. Tente novamente.')}finally{b.disabled=false;}
+ try{await cb();}catch(e){await stellarNoticeV4776(e?.message||'Não foi possível concluir esta ação. Tente novamente.')}finally{b.disabled=false;}
 };return b;}
 const isAlive=(p,root,n)=>p.isConnected&&root.contains(p)&&n===ticket;
 function input(label,value,min,max){const wrap=node('label',label+' ');const i=node('input');i.type='number';i.min=min;i.max=max;i.value=value;i.className='frontier-input-v42';wrap.append(i);return [wrap,i];}
@@ -19,7 +20,7 @@ async function drawExploration(p,root,n){
   const chart=node('div',undefined,'frontier-sectors-v426');
   for(const s of data.sectors||[]){const card=node('article',undefined,'frontier-sector-v426'),star=node('div','✦','frontier-sector-star-v426');card.append(star,node('strong',s.title),node('small',s.lore));
    card.append(node('div',`${s.minutes} min · ${s.kills} NPCs · Custo ${fmt(s.cost)} pesquisa · Ganho ${fmt(s.reward)}`));
-   if(s.enabled&&!data.active)card.append(button('INICIAR INVESTIGAÇÃO',async()=>{if(!confirm(`Investir ${fmt(s.cost)} pontos na investigação?`))return;await startSectorV426(s.code,crypto.randomUUID());await drawExploration(p,root,n);}));
+   if(s.enabled&&!data.active)card.append(button('INICIAR INVESTIGAÇÃO',async()=>{if(!await stellarConfirmV4776(`Investir ${fmt(s.cost)} pontos na investigação?`))return;await startSectorV426(s.code,crypto.randomUUID());await drawExploration(p,root,n);}));
    else if(!s.enabled)card.append(node('small','Setor temporariamente desativado pelo ADM.'));
    chart.append(card);
   }
@@ -39,12 +40,12 @@ function renderOffers(card,p,root,n,market){
  else{
   const sel=node('select');sel.className='frontier-input-v42';for(const x of stock){const opt=node('option',`${x.item} — ${fmt(x.quantity-x.equipped)} livre(s)`);opt.value=x.item;sel.append(opt);}
   const [ql,q]=input('Quantidade',1,1,5),[pl,price]=input('Preço unitário (CR)',100000,1000,100000000);sale.append(sel,ql,pl);
-  sale.append(button('ANUNCIAR',async()=>{const quantity=Number(q.value),unitPrice=Number(price.value);if(!valid(quantity,1,5)||!valid(unitPrice,1000,100000000))throw Error('Preço/quantidade inválidos');if(!confirm(`Anunciar ${quantity} módulo(s) por ${fmt(unitPrice)} CR cada?`))return;await offerMarketV426(sel.value,quantity,unitPrice,crypto.randomUUID());await drawCivil(p,root,n);}));
+  sale.append(button('ANUNCIAR',async()=>{const quantity=Number(q.value),unitPrice=Number(price.value);if(!valid(quantity,1,5)||!valid(unitPrice,1000,100000000))throw Error('Preço/quantidade inválidos');if(!await stellarConfirmV4776(`Anunciar ${quantity} módulo(s) por ${fmt(unitPrice)} CR cada?`))return;await offerMarketV426(sel.value,quantity,unitPrice,crypto.randomUUID());await drawCivil(p,root,n);}));
  }
  card.append(sale,node('h4','OFERTAS DISPONÍVEIS'));
  for(const x of market.offers||[]){const row=node('section',undefined,'frontier-card-v42');row.append(node('strong',`${x.item} · ${x.quantity}× ${fmt(x.unitPrice)} CR`),node('div','Piloto: '+x.sellerName));
   if(x.mine)row.append(node('small','Sua oferta'));
-  else row.append(button('COMPRAR POR '+fmt(Number(x.quantity)*Number(x.unitPrice))+' CR',async()=>{if(!confirm('Confirmar a compra com créditos do jogo?'))return;await buyMarketV426(x.id);location.reload();}));card.append(row);
+  else row.append(button('COMPRAR POR '+fmt(Number(x.quantity)*Number(x.unitPrice))+' CR',async()=>{if(!await stellarConfirmV4776('Confirmar a compra com créditos do jogo?'))return;await window.stellarEconomySyncBeforeV4776?.();await buyMarketV426(x.id);await window.stellarEconomySyncAfterV4776?.();await drawCivil(p,root,n);}));card.append(row);
  }
  if(!(market.offers||[]).length)card.append(node('small','Nenhuma oferta aberta.'));
  const own=(market.mine||[]).filter(x=>x.status==='open');if(own.length)card.append(node('h4','MEUS ANÚNCIOS'));
@@ -56,7 +57,7 @@ function renderClan(card,p,root,n,c){
  card.append(node('small','Sua pesquisa disponível: '+fmt(c.research)));
  for(const x of c.structures||[]){const row=node('section',undefined,'frontier-card-v42'),goal=Number(x.goal)||1,total=Number(x.total)||0;
   row.append(node('strong',x.title),node('div',`${fmt(total)} / ${fmt(goal)} pontos (${Math.min(100,Math.round(100*total/goal))}%)`));
-  if(x.enabled){const [lab,inp]=input('Contribuir pesquisa',10,1,500);row.append(lab,button('INVESTIR NO CLÃ',async()=>{const points=Number(inp.value);if(!valid(points,1,500))throw Error('Quantidade inválida');if(!confirm(`Doar ${points} pontos ao clã?`))return;await fundClanProjectV426(x.code,points,crypto.randomUUID());await drawCivil(p,root,n);}));}
+  if(x.enabled){const [lab,inp]=input('Contribuir pesquisa',10,1,500);row.append(lab,button('INVESTIR NO CLÃ',async()=>{const points=Number(inp.value);if(!valid(points,1,500))throw Error('Quantidade inválida');if(!await stellarConfirmV4776(`Doar ${points} pontos ao clã?`))return;await fundClanProjectV426(x.code,points,crypto.randomUUID());await drawCivil(p,root,n);}));}
   else row.append(node('small','Estrutura pausada pelo ADM.'));card.append(row);}
 }
 async function drawCivil(p,root,n){p.replaceChildren(node('h4','Carregando Mercado e Clãs…'));const [market,clan]=await Promise.all([loadMarketV426(),loadClanProjectsV426()]);if(!isAlive(p,root,n))return;

@@ -67,11 +67,11 @@ test('SQL is additive, bounded and role-protected',()=>{
 });
 test('Installer keeps the existing live releases and migrates old tests without disabling them',()=>{
  const p=JSON.parse(read('package.json'));
- assert.equal(p.version,'47.7.5');assert.match(p.scripts.check,/v4775-apply-patch/);
+ assert.equal(p.version,'47.7.6');assert.match(p.scripts.check,/v4776-apply-patch/);
  assert.match(read('server/world.js'),/mergeFrontierServerPortalsV440/);
  assert.match(read('public/game.js'),/filteredFrontierPortalsV440/);
  assert.match(read('public/modules/astral-operations-v435.js'),/adminAstralTestKitV440/);
  assert.match(read('server/index.js'),/attachFrontierAdminV440/);
- assert.match(read('tests/v435-integration.test.mjs'),/v4775-apply-patch/);
+ assert.match(read('tests/v435-integration.test.mjs'),/v4776-apply-patch/);
  assert.match(read('tests/v431-combat-evolution.test.mjs'),/\\d\+|\\d/);
 });

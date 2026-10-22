@@ -1,3 +1,4 @@
+import {stellarConfirmV4776,stellarNoticeV4776} from './stellar-dialog-v4776.js?v=47.7.6';
 import {renderGalacticBalanceV460} from './galactic-balance-panel-v460.js';
 import {renderFrontierAuditV450} from './frontier-audit-v450.js';
 import {renderAstralOperationsV435} from './astral-operations-v435.js';
@@ -6,8 +7,8 @@ import {renderStageBV426} from './stage-b-v426.js';
 import {renderStageAV423} from './stage-a-v423.js';
 // Stellar Legacy — Unificação V39–V42: telas auxiliares, sem loops de quadro/Canvas.
 // Toda alteração de moeda/material depende de RPC transacional do servidor.
-import {loadUnifiedExpansionV42,actUnifiedExpansionV42,squadUnifiedExpansionV42,adminUnifiedExpansionV42} from '../api.js?v=47.7.5';
-import {loadSquadObjectiveV421,claimSquadObjectiveV421,adminSquadObjectiveV421} from '../api.js?v=47.7.5';
+import {loadUnifiedExpansionV42,actUnifiedExpansionV42,squadUnifiedExpansionV42,adminUnifiedExpansionV42} from '../api.js?v=47.7.6';
+import {loadSquadObjectiveV421,claimSquadObjectiveV421,adminSquadObjectiveV421} from '../api.js?v=47.7.6';
 const el=id=>document.getElementById(id);
 const esc=s=>String(s??'').replace(/[&<>"']/g,k=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[k]));
 const fmt=v=>Number(v||0).toLocaleString('pt-BR');
@@ -51,7 +52,8 @@ root.querySelectorAll('[data-v42-tab]').forEach(b=>b.addEventListener('click',()
 root.querySelectorAll('[data-v42-action]').forEach(b=>b.addEventListener('click',async()=>{
  if(working)return;
  const action=b.dataset.v42Action,code=b.dataset.v42Code;
- if(action==='donate'&&!confirm('Contribuir materiais ao projeto? Esta ação é permanente.'))return;
+ if(action==='donate'&&!await stellarConfirmV4776('Contribuir materiais ao projeto? Esta ação é permanente.',{title:'Contribuir materiais',danger:true}))return;
+ await window.stellarEconomySyncBeforeV4776?.();
  working=true;b.disabled=true;b.textContent='PROCESSANDO…';
  try{
    let result;
@@ -67,13 +69,12 @@ root.querySelectorAll('[data-v42-action]').forEach(b=>b.addEventListener('click'
      result=await actUnifiedExpansionV42(action,code,n,crypto.randomUUID());
    }
    if(!result?.ok)throw Error(result?.error||'Operação não confirmada');
-   // Não manter saldos desatualizados no navegador; nova carga obrigatória.
-   if(['forge','donate','expedition_start'].includes(action)){
-     alert('Operação concluída! O jogo será reiniciado para atualizar seus recursos.');
-     location.reload();return;
+   // SQL operation is complete: reconcile remote save without reloading/disconnecting the pilot.
+   if(['forge','donate','expedition_start','expedition_claim'].includes(action)){
+     await window.stellarEconomySyncAfterV4776?.();
    }
    await refresh();
- }catch(e){alert('Não foi possível concluir esta ação. Confira os requisitos e tente novamente.');}
+ }catch(e){await stellarNoticeV4776(e?.message||'Não foi possível concluir esta ação. Confira os requisitos e tente novamente.',{title:'Operação não concluída'});}
  finally{working=false;const now=el('frontierExpansionContentV42');if(now&&!snapshot)now.textContent='Falha ao sincronizar.';}
  }));
 }
@@ -110,6 +111,6 @@ async function v421AdminRender(root){
  const fields=[['Abates do esquadrão',p.goal,20,10000],['Abates mínimos por piloto',p.minimumPersonal,1,1000],['Pontos de pesquisa',p.rewardResearch,1,1000]];
  const inputs=[];for(const [name,value,min,max] of fields){const label=document.createElement('label');label.textContent=name+' ';const input=document.createElement('input');input.type='number';input.min=min;input.max=max;input.value=value;input.className='frontier-input-v42';label.append(input);card.append(label,document.createElement('div'));inputs.push(input);} 
  const save=document.createElement('button');save.type='button';save.textContent='SALVAR OBJETIVO SEMANAL';card.append(save);
- save.addEventListener('click',async()=>{save.disabled=true;try{const [goal,min,reward]=inputs.map(i=>Number(i.value));const r=await adminSquadObjectiveV421(goal,min,reward);if(!r?.ok)throw Error('Configuração não aceita.');await refresh();}catch(err){alert(err?.message||String(err));save.disabled=false;}});
+ save.addEventListener('click',async()=>{save.disabled=true;try{const [goal,min,reward]=inputs.map(i=>Number(i.value));const r=await adminSquadObjectiveV421(goal,min,reward);if(!r?.ok)throw Error('Configuração não aceita.');await refresh();}catch(err){await stellarNoticeV4776(err?.message||String(err));save.disabled=false;}});
  }catch(err){if(card.isConnected)card.textContent='Não foi possível carregar os objetivos.';}
 }

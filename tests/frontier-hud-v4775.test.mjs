@@ -5,7 +5,7 @@ import {frontierRoomTerritoryV4775,frontierWrongFactionV4775,frontierEntryDenial
 import {sectorEntryAllowedV450} from '../server/frontier-stability-v450.js';
 const read=p=>readFileSync(new URL('../'+p,import.meta.url),'utf8');
 const F=['earth','mars','jupiter'];
-for(const map of ['u1','u2','u3'])test(`V47.7.5 ${map}: neutral frontier uses authenticated faction, never 'battle'`,()=>{
+for(const map of ['u1','u2','u3'])test(`V47.7.6 ${map}: neutral frontier uses authenticated faction, never 'battle'`,()=>{
  for(const faction of F){
   for(const injected of ['battle',null,undefined,'earth','mars','jupiter','admin','']){
    assert.equal(frontierRoomTerritoryV4775(map,faction,injected,true),faction);
@@ -15,7 +15,7 @@ for(const map of ['u1','u2','u3'])test(`V47.7.5 ${map}: neutral frontier uses au
   assert.equal(sectorEntryAllowedV450(map,true,{enabled:true,territory_faction:null},faction),true);
  }
 });
-test('V47.7.5 X-1..8 remains faction-protected; admin foreign navigation explicit only',()=>{
+test('V47.7.6 X-1..8 remains faction-protected; admin foreign navigation explicit only',()=>{
  for(const faction of F){
   const other=F.find(x=>x!==faction);
   for(const map of ['x1','x4','x8']){
@@ -27,21 +27,21 @@ test('V47.7.5 X-1..8 remains faction-protected; admin foreign navigation explici
   }
  }
 });
-test('V47.7.5 does not let untrusted faction or map values create private rooms',()=>{
+test('V47.7.6 does not let untrusted faction or map values create private rooms',()=>{
  for(const map of ['u1','x1','b41','b42','b43','unknown']){
   assert.equal(frontierRoomTerritoryV4775(map,'battle','mars',true),null);
   assert.equal(frontierRoomTerritoryV4775(map,'',null,false),null);
  }
  assert.equal(frontierRoomTerritoryV4775('b41','earth','mars',true),null);
 });
-test('V47.7.5 specific denial reasons are based on authoritative validation',()=>{
+test('V47.7.6 specific denial reasons are based on authoritative validation',()=>{
  const base={dest:{enabled:true,gate:false},validTerritory:true,sectorValid:true,wrongFaction:false,admin:false,level:30,required:20,faction:'earth'};
  assert.match(frontierEntryDenialV4775({...base,level:19}),/Requer nível 20/);
  assert.match(frontierEntryDenialV4775({...base,sectorValid:false}),/não sincronizado/);
  assert.match(frontierEntryDenialV4775({...base,validTerritory:false}),/Facção/);
  assert.equal(frontierEntryDenialV4775({...base,wrongFaction:true}),'INVASÕES BLOQUEADAS');
 });
-test('V47.7.5 authoritative WebSocket join uses U-X neutral routing and no X bypass',()=>{
+test('V47.7.6 authoritative WebSocket join uses U-X neutral routing and no X bypass',()=>{
  const s=read('server/world.js');
  assert.match(s,/frontierRoomTerritoryV4775\(mapId,faction,msg\.territoryFaction,admin\)/);
  assert.match(s,/frontierWrongFactionV4775\(mapId,faction,msg\.territoryFaction,admin\)/);
@@ -50,7 +50,7 @@ test('V47.7.5 authoritative WebSocket join uses U-X neutral routing and no X byp
  assert.match(s,/world\.refreshNpcConfig\(false\)/);
  assert.match(s,/ws\.room!==r\|\|r\.npcs\.size>0/);
 });
-test('V47.7.5 selected NPC mini-target hides NEXT and preserves its usable expand control',()=>{
+test('V47.7.6 selected NPC mini-target hides NEXT and preserves its usable expand control',()=>{
  const css=read('public/style.css');
  assert.match(css,/#rightHudStack > #targetLockHud\.collapsed #nextNpcTargetV32\s*\{\s*display:none!important/);
  assert.match(css,/#rightHudStack > #targetLockHud\.collapsed\s*\{/);
@@ -60,11 +60,11 @@ test('V47.7.5 selected NPC mini-target hides NEXT and preserves its usable expan
  assert.match(game,/toggleTargetLockUi\(\)/);
  assert.match(game,/loadTargetLockUiState/);
 });
-test('V47.7.5 leaves stable FPS, sound, renderer, bot AI and saves intact',()=>{
- const patch=read('scripts/v4775-apply-patch.mjs');
+test('V47.7.6 leaves stable FPS, sound, renderer, bot AI and saves intact',()=>{
+ const patch=read('scripts/v4776-apply-patch.mjs');
  const packageJSON=JSON.parse(read('package.json'));
- assert.equal(packageJSON.version,'47.7.5');
- assert.match(packageJSON.scripts.check,/v4775-apply-patch/);
+ assert.equal(packageJSON.version,'47.7.6');
+ assert.match(packageJSON.scripts.check,/v4776-apply-patch/);
  assert.doesNotMatch(patch,/UPDATE\s+game_saves|DROP\s+TABLE|fps\s*[:=]\s*30|warbotTacticalMove\(|\.damage\s*=|\.speed\s*=/i);
  assert.match(read('server/world.js'),/join_map/);
 });

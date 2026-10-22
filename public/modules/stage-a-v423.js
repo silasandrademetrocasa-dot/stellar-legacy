@@ -1,10 +1,11 @@
+import {stellarNoticeV4776} from './stellar-dialog-v4776.js?v=47.7.6';
 // Etapa 1 — V42.2/V42.3: UI leve sob demanda; nunca dentro do loop de jogo.
-import {loadStageAV423,saveLoadoutV423,loadOpsV423,claimOpsV423,adminOpsV423} from '../api.js?v=47.7.5';
+import {loadStageAV423,saveLoadoutV423,loadOpsV423,claimOpsV423,adminOpsV423} from '../api.js?v=47.7.6';
 const cfgs=[1,2];
 const slots=[['defense','Defesa'],['engine','Motor'],['weapon','Armamento'],['utility','Suporte']];
 const fmt=n=>Number(n||0).toLocaleString('pt-BR');
 function node(tag,text,cls){const e=document.createElement(tag);if(text!=null)e.textContent=text;if(cls)e.className=cls;return e;}
-function alertError(e){console.warn('[equipamentos]',e);alert('Não foi possível concluir esta ação. Tente novamente.');}
+function alertError(e){console.warn('[equipamentos]',e);void stellarNoticeV4776(e?.message||'Não foi possível concluir esta ação. Tente novamente.');}
 let activeRequest=0;
 export async function renderStageAV423(root,tab){
  const index=++activeRequest;const card=node('section','Preparando suas configurações…','frontier-card-v42 frontier-stage-v423');root.append(card);
