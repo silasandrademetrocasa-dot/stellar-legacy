@@ -363,7 +363,7 @@ export async function endGameSession() {
 export async function loadCloudSave() {
   if (!currentUser?.id) throw new Error('Usuário não identificado.');
   const body = await authedServerFetch('/api/save');
-  return { state: body?.state || null, updated_at: body?.updated_at || null };
+  return { state: body?.state || null, updated_at: body?.updated_at || null, reset_epoch:Number(body?.reset_epoch)||0 };
 }
 
 export async function saveCloudSave(state) {

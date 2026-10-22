@@ -1146,6 +1146,7 @@ const sharedUniverse=new SharedUniverseClient({
   onStatus:st=>{sharedUniverseRuntime.status=st.state;sharedUniverseRuntime.latency=st.latency||0;if(st.state==='map_error')sharedUniverseRuntime.mapError=String(st.reason||'Falha na conexão PvP');if(st.state!=='online')sharedUniverseRuntime.ready=false;updateSharedUniverseChip();}
 });
 function saveKey(){return `${SAVE_KEY_PREFIX}:${getUser()?.id || 'guest'}`;}
+let accountResetEpochV478=0; // Servidor autoritativo: nenhuma gravacao com epoch antigo.
 const TWO_PI = Math.PI * 2;
 const CARGO_BOX_LIFETIME_SEC = 30;
 const categories = {
@@ -4595,6 +4596,7 @@ function saveGame(){
   if(isGalaxyGateMap())syncAlphaGateSnapshot();
   syncRuntimeLocationToProgress();
   progress.clientSavedAt=Date.now();
+  progress.adminResetEpoch=accountResetEpochV478;
   localStorage.setItem(saveKey(),JSON.stringify(progress));
   cloudDirty=true;
 }
@@ -4697,11 +4699,12 @@ function hydrateProgress(){
 async function flushCloudSave(force=false){
   if(!authenticated||!progress||cloudBusy||(!cloudDirty&&!force))return;
   cloudBusy=true;setSync('SALVANDO','busy');
-  try{const result=await saveCloudSave(progress);if(result?.statePatch){const patch=result.statePatch;if(Number.isFinite(Number(patch.credits)))progress.profile.credits=Number(patch.credits);if(patch.serverEconomy)progress.serverEconomy={...(progress.serverEconomy||{}),...patch.serverEconomy};localStorage.setItem(saveKey(),JSON.stringify(progress));updateUI();if(patch.serverEconomy?.lastClanCollectionDate)showToast('CLÃ • coleta diária de 10% sincronizada','system');}cloudDirty=false;setSync('ONLINE','ok');}
+  try{progress.adminResetEpoch=accountResetEpochV478;const result=await saveCloudSave(progress);if(result?.statePatch){const patch=result.statePatch;if(Number.isFinite(Number(patch.credits)))progress.profile.credits=Number(patch.credits);if(patch.serverEconomy)progress.serverEconomy={...(progress.serverEconomy||{}),...patch.serverEconomy};localStorage.setItem(saveKey(),JSON.stringify(progress));updateUI();if(patch.serverEconomy?.lastClanCollectionDate)showToast('CLÃ • coleta diária de 10% sincronizada','system');}cloudDirty=false;setSync('ONLINE','ok');}
   catch(e){console.warn('cloud save',e);
     if(e?.code==='SAVE_COUPON_STALE'||e?.code==='SAVE_EVENT_STALE'||e?.code==='SAVE_ELITE_STALE'||e?.code==='SAVE_ECONOMY_STALE'||e?.code==='SAVE_NPC_STALE'||e?.code==='SAVE_ORE_STALE'){
       try{const remote=await loadCloudSave();if(remote?.state){if(e?.code==='SAVE_ELITE_STALE')installServerStatePreservingPosition(remote.state);else installEconomyState(remote.state);cloudDirty=false;setSync('ONLINE','ok');showToast('Recompensas sincronizadas com o servidor','reward');return;}}catch(syncErr){console.warn('coupon save reconcile',syncErr);}
     }
+    if(e?.code==='SAVE_RESET_STALE'){try{localStorage.removeItem(saveKey());}catch{}forceLogoutBecauseSessionMoved('Conta zerada pelo ADM. Faça login novamente para criar seu piloto.');return;}
     if(e?.code==='SAVE_OWNER_MISMATCH'){setSync('BLOQUEADO','err');forceLogoutBecauseSessionMoved('Proteção de conta: um save de outro usuário foi bloqueado.',getUser()?.id||null);return;}setSync('OFFLINE','err');}
   finally{cloudBusy=false;}
 }
@@ -9799,8 +9802,8 @@ async function refreshAdminPanel(query=null){if(adminRuntime.busy)return;adminRu
 async function openAdminPanel(){bootAdminEditorObserver();if(!await refreshAdminStatus(false)){showToast('Acesso administrativo negado');return;}closeNavigationModals(ui.adminModal);ui.adminModal?.classList.remove('hidden');await Promise.all([refreshAdminPanel(),loadAdminRuntimeMonitor(false)]);}
 async function runAdminAction(action,user){if(!user||adminRuntime.busy)return;const name=user.callsign||user.email||'esta conta';let changed=false;try{adminRuntime.busy=true;if(action==='ban'){const minutes=Math.max(0,Number(ui.adminBanDuration?.value)||0),reason=String(ui.adminBanReason?.value||'').trim();if(!await stellarConfirmV4776(`Banir ${name}${minutes?` por ${minutes} minuto(s)`:' permanentemente'}?`))return;await adminBanAccount(user.user_id,{minutes,reason});changed=true;adminSetMessage(`${name} foi banido.`,'ok');}
 else if(action==='unban'){if(!await stellarConfirmV4776(`Remover o ban de ${name}?`))return;await adminUnbanAccount(user.user_id);changed=true;adminSetMessage(`Ban removido de ${name}.`,'ok');}
-else if(action==='reset'){if(!await stellarConfirmV4776(`ZERAR TODO O PROGRESSO de ${name}?\n\nLogin e callsign serão mantidos. Premium é preservado. O jogador será desconectado.`))return;await adminResetAccount(user.user_id);changed=true;adminSetMessage(`${name} foi zerado e desconectado.`,'ok');}
-else if(action==='delete'){const typed=await stellarPromptV4776(`EXCLUSÃO DEFINITIVA.\nDigite exatamente o callsign abaixo para confirmar:\n\n${name}`,'');if(String(typed||'').trim()!==String(name).trim())throw new Error('Exclusão cancelada: callsign não confere.');if(!await stellarConfirmV4776(`ÚLTIMA CONFIRMAÇÃO: deletar ${name}? A pessoa terá que criar uma conta nova.`))return;await adminDeleteAccount(user.user_id);changed=true;adminSetMessage(`${name} foi deletado definitivamente.`,'ok');}}catch(err){adminSetMessage(err.message,'err');showToast(err.message);}finally{adminRuntime.busy=false;}if(changed)await refreshAdminPanel();}
+else if(action==='reset'){if(!await stellarConfirmV4776(`ZERAR TODO O PROGRESSO de ${name}?\n\nLogin e callsign serão mantidos. Premium é preservado. O jogador será desconectado.`))return;const resetResult=await adminResetAccount(user.user_id);if(resetResult?.verified!==true||!Number.isSafeInteger(Number(resetResult.reset_epoch)))throw new Error('O banco não confirmou o reset completo.');changed=true;adminSetMessage(`${name} foi zerado e desconectado.`,'ok');}
+else if(action==='delete'){const typed=await stellarPromptV4776(`EXCLUSÃO DEFINITIVA.\nDigite exatamente o callsign abaixo para confirmar:\n\n${name}`,'');if(String(typed||'').trim()!==String(name).trim())throw new Error('Exclusão cancelada: callsign não confere.');if(!await stellarConfirmV4776(`ÚLTIMA CONFIRMAÇÃO: deletar ${name}? A pessoa terá que criar uma conta nova.`))return;const deleteResult=await adminDeleteAccount(user.user_id);if(deleteResult?.verified!==true)throw new Error('O banco não confirmou a exclusão definitiva.');changed=true;adminSetMessage(`${name} foi deletado definitivamente.`,'ok');}}catch(err){adminSetMessage(err.message,'err');showToast(err.message);}finally{adminRuntime.busy=false;}if(changed)await refreshAdminPanel();}
 
 function renderAll(){updateBattleGroupBadge();buildAmmoButtons();renderShop();renderHangar();renderCargo();renderMapModal();renderPet();renderMissions();renderGalaxyGate();renderPilotProfile();ensureAuctionState();updatePassBadge();renderGalaxyEvent();updateUI();updateWarfrontBadge();refreshArenaBadge();}
 
@@ -10444,6 +10447,13 @@ async function afterAuth(){
       local=null;
     }
     const remote=await loadCloudSave();
+    accountResetEpochV478=Math.max(0,Math.trunc(Number(remote?.reset_epoch)||0));
+    // Never re-upload an old device save after an ADM reset. A newer local timestamp is irrelevant.
+    if(local && Math.max(0,Math.trunc(Number(local.adminResetEpoch)||0))!==accountResetEpochV478){
+      try{localStorage.removeItem(saveKey());}catch{}
+      local=null;
+      console.info('[admin-reset] save local antigo descartado; novo personagem necessário.');
+    }
     if(remote?.state?.accountOwnerId&&String(remote.state.accountOwnerId)!==accountId){
       throw Object.assign(new Error('Proteção de conta: o save online está vinculado a outro usuário.'),{code:'SAVE_OWNER_MISMATCH'});
     }

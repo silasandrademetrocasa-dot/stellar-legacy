@@ -5,7 +5,7 @@
   "scripts": {
     "start": "node server/index.js",
     "dev": "node --watch server/index.js",
-    "check": "node scripts/v4776-apply-patch-status.mjs && node scripts/verify-release.mjs",
+    "check": "node scripts/v478-prelaunch-integrity-patch.mjs && node scripts/v4776-apply-patch-status.mjs && node scripts/verify-release.mjs",
     "test": "node --test tests/*.test.mjs",
     "verify": "npm run check && npm run check:v21 && npm test",
     "check:v21": "node scripts/check-v21-package.mjs"
@@ -16,8 +16,6 @@
     "ws": "^8.18.0",
     "compression": "^1.7.5"
   },
-  "engines": {
-    "node": ">=18"
-  },
+  "engines": {"node": ">=18"},
   "release": "V47.7.6 HUD boss collapse, standardized confirmations, session-safe exploration, server-authoritative credit-only elite resale"
 }

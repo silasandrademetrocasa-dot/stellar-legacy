@@ -1704,12 +1704,20 @@ app.use('/api/frontier',requireUser,createFrontierRouter({serviceClient:eliteAdm
 app.get('/api/save', requireUser, asyncRoute(async (req, res) => {
   const { data, error } = await req.sb.from('game_saves').select('state,updated_at').eq('user_id', req.user.id).maybeSingle();
   if (error) return res.status(400).json({ error: error.message });
-  res.json({ state: data?.state || null, updated_at: data?.updated_at || null });
+  const {data: resetRecord,error: resetErr}=await req.sb.from('stellar_account_reset_epochs_v478').select('epoch').eq('user_id',req.user.id).maybeSingle();
+  if(resetErr)return res.status(503).json({error:'Integridade do reset indisponível. Execute o SQL de pré-lançamento.'});
+  res.set('Cache-Control','no-store');
+  res.json({ state: data?.state || null, updated_at: data?.updated_at || null,reset_epoch:Number(resetRecord?.epoch)||0 });
 }));
 
 app.put('/api/save', requireUser, asyncRoute(async (req, res) => {
   let state = req.body?.state;
   if (!state || typeof state !== 'object') return res.status(400).json({ error: 'Save inválido.' });
+  const {data:resetRecord,error:resetErr}=await req.sb.from('stellar_account_reset_epochs_v478').select('epoch').eq('user_id',req.user.id).maybeSingle();
+  if(resetErr)return res.status(503).json({error:'Integridade do reset indisponível. Execute o SQL de pré-lançamento.'});
+  const expectedEpoch=Math.max(0,Math.trunc(Number(resetRecord?.epoch)||0));
+  const incomingEpoch=Math.max(0,Math.trunc(Number(state.adminResetEpoch)||0));
+  if(expectedEpoch!==incomingEpoch)return res.status(409).json({error:'SAVE_RESET_STALE: progresso antigo após reset administrativo.',code:'SAVE_RESET_STALE'});
   const claimedOwner = String(state.accountOwnerId || '');
   if (claimedOwner && claimedOwner !== req.user.id) {
     const outcome=await securityService.report(req.user.id,{code:'SAVE_OWNER_FORGED',severity:'critical',evidence:{kind:'owner_mismatch'}},'cloud_save');
