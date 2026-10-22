@@ -138,8 +138,12 @@ export function createStellarAutopilotV48({credentials,getIdentity=()=>null,getS
     #autopilotPanelV48 details{border:1px solid #21415c;border-radius:9px;padding:9px}
     #autopilotPanelV48 .ap-actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:12px}
     #autopilotPanelV48 .ap-status{padding:8px;margin-top:9px;border:1px solid #1f445c;border-radius:9px;color:#9edcf4}
-    .ap-grant-row-v48{display:flex;align-items:center;gap:9px;margin:8px 0 0;font-size:12px;color:#b6eafc}
-    .ap-grant-row-v48 input{accent-color:#24c9ee;width:17px;height:17px}
+    .ap-grant-row-v48{display:flex!important;flex-direction:column;align-items:flex-start;gap:5px;margin:12px 0 0;padding:11px;border:1px solid #24627a;border-radius:11px;background:rgba(5,35,54,.8);color:#b6eafc;box-sizing:border-box;width:100%;font-size:12px}
+    .ap-grant-control-v48{display:flex!important;align-items:center;gap:9px;cursor:pointer;font-weight:800;color:#c2f5ff}
+    .ap-grant-row-v48 input{appearance:auto!important;accent-color:#24c9ee;width:19px!important;height:19px!important;flex-shrink:0}
+    .ap-grant-row-v48 small{display:block;font-size:11px;color:#9ec5d4;overflow-wrap:anywhere}
+    .ap-grant-row-v48 .ap-grant-retry-v48{border:1px solid #317d9a;color:#c9eefe;background:#103049;border-radius:9px;font-weight:800;padding:7px 10px;cursor:pointer}
+    .ap-grant-retry-v48[hidden]{display:none!important}
     `;document.head.appendChild(style);
     fab=document.createElement('button');fab.type='button';fab.id='autopilotFabV48';fab.textContent='🤖 AUTOPILOT';fab.hidden=true;fab.onclick=()=>open();document.body.appendChild(fab);
     panel=document.createElement('div');panel.id='autopilotPanelV48';panel.hidden=true;panel.innerHTML=controls();document.body.appendChild(panel);
@@ -189,14 +193,74 @@ export function createStellarAutopilotV48({credentials,getIdentity=()=>null,getS
       notify(action.reason);
     }else notify(action.reason);
   }
-  async function decorateAdminUsers(root,users){if(!root)return;if(!isAdmin){await refreshAccess();if(!isAdmin)return;}const seen=[...root.querySelectorAll('[data-admin-user]')];if(!seen.length)return;
-    try{const res=await request('/api/admin/autopilot/v48/grants');grantCache=new Map((res.grants||[]).map(x=>[String(x.user_id),x.enabled===true]));}catch{return;}
-    for(const card of seen){const id=String(card.dataset.adminUser||'');if(!id||!users.some(u=>String(u.user_id)===id)||card.querySelector('[data-ap-grant]'))continue;
-      const u=users.find(x=>String(x.user_id)===id);if(u?.is_admin)continue;
-      const wrap=document.createElement('label');wrap.className='ap-grant-row-v48';const input=document.createElement('input');input.type='checkbox';input.dataset.apGrant=id;input.checked=grantCache.get(id)===true;
-      const label=document.createElement('span');label.textContent='🤖 AUTOPILOT • acesso individual (ADM)';wrap.append(input,label);card.appendChild(wrap);
-      input.onchange=async()=>{input.disabled=true;try{await request('/api/admin/autopilot/v48/grants/'+encodeURIComponent(id),{method:'PUT',body:JSON.stringify({enabled:input.checked})});notify('Permissão do piloto atualizada');}
-        catch(e){input.checked=!input.checked;notify('Falha ao alterar permissão: '+e.message);}finally{input.disabled=false;}};
+  // Chamado EXCLUSIVAMENTE após getAdminStatus confirmar o acesso ao painel ADM.
+  // Não depende da requisição /access iniciada em paralelo no login: a V48
+  // escondia todos os checks quando refreshAccess ainda estava em andamento.
+  // A API continua a exigir permissão ADM para CONSULTAR e SALVAR.
+  async function decorateAdminUsers(root,users){
+    if(!root||!Array.isArray(users))return;
+    const known=new Map(users.map(u=>[String(u.user_id||''),u]));
+    const cards=[...root.querySelectorAll('[data-admin-user]')];
+    const controls=[];
+    for(const card of cards){
+      const id=String(card.dataset.adminUser||''),user=known.get(id);
+      if(!id||!user||user.is_admin)continue;
+      let row=card.querySelector('[data-ap-grant-row]');
+      if(!row){
+        row=document.createElement('div');row.className='ap-grant-row-v48';row.dataset.apGrantRow=id;
+        const label=document.createElement('label');label.className='ap-grant-control-v48';
+        const checkbox=document.createElement('input');checkbox.type='checkbox';checkbox.dataset.apGrant=id;checkbox.disabled=true;
+        const name=document.createElement('span');name.textContent='🤖 Liberar AUTOPILOT';
+        label.append(checkbox,name);row.appendChild(label);
+        const status=document.createElement('small');status.dataset.apGrantStatus=id;status.textContent='Consultando permissão...';row.appendChild(status);
+        const retry=document.createElement('button');retry.type='button';retry.className='ap-grant-retry-v48';retry.textContent='TENTAR NOVAMENTE';retry.hidden=true;row.appendChild(retry);
+        retry.onclick=()=>{void decorateAdminUsers(root,users);};
+        checkbox.onchange=async()=>{
+          const desired=checkbox.checked,previous=!desired;
+          checkbox.disabled=true;status.textContent='Salvando permissão...';
+          try{
+            const saved=await request('/api/admin/autopilot/v48/grants/'+encodeURIComponent(id),{method:'PUT',body:JSON.stringify({enabled:desired})});
+            if(saved?.ok!==true||typeof saved?.grant?.enabled!=='boolean')throw Error('Servidor não confirmou a alteração');
+            checkbox.checked=saved.grant.enabled===true;
+            grantCache.set(id,checkbox.checked);
+            status.textContent=checkbox.checked?'LIBERADO • confirmado pelo servidor':'BLOQUEADO • confirmado pelo servidor';
+            retry.hidden=true;
+          }catch(error){
+            checkbox.checked=grantCache.has(id)?grantCache.get(id):previous;
+            status.textContent='Falha ao salvar: '+String(error?.message||error).slice(0,120);
+            retry.hidden=false;
+          }finally{checkbox.disabled=false;}
+        };
+        card.appendChild(row);
+      }
+      const checkbox=row.querySelector('[data-ap-grant]');
+      const status=row.querySelector('[data-ap-grant-status]');
+      const retry=row.querySelector('button');
+      if(!checkbox||!status)continue;
+      checkbox.disabled=true;status.textContent='Consultando permissão...';
+      if(retry)retry.hidden=true;
+      controls.push({id,checkbox,status,retry});
+    }
+    if(!controls.length)return;
+    try{
+      const result=await request('/api/admin/autopilot/v48/grants');
+      if(!Array.isArray(result?.grants))throw Error('Resposta de permissões inválida');
+      grantCache=new Map(result.grants.map(entry=>[String(entry.user_id),entry.enabled===true]));
+      for(const {id,checkbox,status,retry} of controls){
+        // Se o painel foi recarregado, não alterar um controle antigo.
+        if(!checkbox.isConnected)continue;
+        checkbox.checked=grantCache.get(id)===true;
+        checkbox.disabled=false;
+        status.textContent=checkbox.checked?'LIBERADO • confirmado pelo servidor':'BLOQUEADO • confirmado pelo servidor';
+        if(retry)retry.hidden=true;
+      }
+    }catch(error){
+      const message='Falha ao consultar permissões: '+String(error?.message||error).slice(0,120);
+      for(const {checkbox,status,retry} of controls){
+        if(!checkbox.isConnected)continue;
+        checkbox.disabled=true;status.textContent=message;
+        if(retry)retry.hidden=false;
+      }
     }
   }
   function recordCollect(kind){if(!running)return;if(kind==='box')boxes++;else if(kind==='drop')drops++;else if(kind==='ore')ores++;}
