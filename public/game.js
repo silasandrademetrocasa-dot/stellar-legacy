@@ -61,6 +61,7 @@ import { createAssetCache, flattenAssetPaths } from './modules/asset-cache.js?v=
 import { createSceneGradientCache } from './modules/scene-gradient-cache.js?v=47.7.6';
 import { createPerformanceMonitor, formatPerformanceReport } from './modules/performance-monitor.js?v=47.7.6';
 import { createFrameGate } from './modules/frame-gate.js?v=47.7.6';
+import { createStellarAutopilotV48 } from './modules/stellar-autopilot-v48.js?v=47.7.6';
 import { createStagedAssetPreloader } from './modules/staged-preload-v342.js?v=47.7.6';
 import { QUALITY_PROFILES, initialAutoQualityForDevice } from './modules/quality-profiles.js?v=47.7.6';
 import { freshBattleConfigsV2013, captureCombatBuildV2013, exchangeCombatBuildV2013, combatConfigRemainingV2013, clampStoredShieldV2013 } from './combat-config-v2013.js?v=47.7.6';
@@ -5441,6 +5442,7 @@ function collectBonusBox(box,fromPet=false){
   pushActivity(`${fromPet?'AUX-9 • ':''}BOX BÔNUS • +${fmt(qty)} ${def.label}`,'reward');
   telemetryCounter('boxes',1);titleStatAdd('boxes',1);battlePassEvent('bonusBox',1);
   if(fromPet)addPetXp(5);
+  AUTOPILOT_V48.recordCollect('box');
   saveGame();updateUI();
   if(ui.gateModal&&!ui.gateModal.classList.contains('hidden'))renderGalaxyGate();
   return true;
@@ -6129,6 +6131,7 @@ function collectCargoBox(drop){
     if(got>0){drop.resources[id]-=got;if(drop.resources[id]<=0)delete drop.resources[id];total+=got;picked.push(`${fmt(got)} ${id}`);}
   }
   if(total>0){
+    AUTOPILOT_V48.recordCollect('drop');
     playSfx('pickup');
     battlePassEvent('dropResource',total);
     if(!drop.battlePassBoxCounted){drop.battlePassBoxCounted=true;battlePassEvent('box',1);telemetryCounter('boxes',1);titleStatAdd('boxes',1);journeyEvent('box',1);}telemetryCounter('ore_units',total);titleStatAdd('oreUnits',total);
@@ -6207,7 +6210,7 @@ function updatePlayer(dt){
     }
   }
   for(const box of [...(state.bonusBoxes||[])])if(Math.hypot(box.x-player.x,box.y-player.y)<37)collectBonusBox(box,false);
-  for(let i=state.ores.length-1;i>=0;i--){const o=state.ores[i];if(Math.hypot(o.x-player.x,o.y-player.y)<30){if(o.sharedWorld&&sharedUniverseMap()){if(cargoFree()<=0){showToast('Porão cheio');continue;}if(sharedUniverseOnline()&&!sharedUniverseRuntime.pendingOres.has(o.id)){sharedUniverseRuntime.pendingOres.add(o.id);sharedUniverse.collectOre(o.id);}continue;}const got=addCargoResource(o.type,o.amount);if(got>0){playSfx('ore');spawnParticle(o.x,o.y,`+${got} ${stellarOreName(o.type)}`,o.color);pushActivity(`Pedra • +${fmt(got)} ${stellarOreName(o.type)} • ${fmt((RESOURCES[o.type]?.sell||0)*got)} CR na base`,'ore');telemetryCounter('ore_nodes',1);telemetryCounter('ore_units',got);titleStatAdd('oreUnits',got);journeyEvent('ore',got);missionEvent('collectOre',{amount:got,type:o.type,mapId:progress.mapId});galaxyEventOrePickup(o,got);state.ores.splice(i,1);{const min=Math.max(1,Number(state.currentMap.oreRespawnMinMs||5000)/1000),max=Math.max(min,Number(state.currentMap.oreRespawnMaxMs||12000)/1000);state.oreRespawns.push({type:o.type,at:nowSec()+rand(min,max)});}saveGame();}else showToast('Porão cheio');}}
+  for(let i=state.ores.length-1;i>=0;i--){const o=state.ores[i];if(Math.hypot(o.x-player.x,o.y-player.y)<30){if(o.sharedWorld&&sharedUniverseMap()){if(cargoFree()<=0){showToast('Porão cheio');continue;}if(sharedUniverseOnline()&&!sharedUniverseRuntime.pendingOres.has(o.id)){sharedUniverseRuntime.pendingOres.add(o.id);sharedUniverse.collectOre(o.id);}continue;}const got=addCargoResource(o.type,o.amount);if(got>0){AUTOPILOT_V48.recordCollect('ore');playSfx('ore');spawnParticle(o.x,o.y,`+${got} ${stellarOreName(o.type)}`,o.color);pushActivity(`Pedra • +${fmt(got)} ${stellarOreName(o.type)} • ${fmt((RESOURCES[o.type]?.sell||0)*got)} CR na base`,'ore');telemetryCounter('ore_nodes',1);telemetryCounter('ore_units',got);titleStatAdd('oreUnits',got);journeyEvent('ore',got);missionEvent('collectOre',{amount:got,type:o.type,mapId:progress.mapId});galaxyEventOrePickup(o,got);state.ores.splice(i,1);{const min=Math.max(1,Number(state.currentMap.oreRespawnMinMs||5000)/1000),max=Math.max(min,Number(state.currentMap.oreRespawnMaxMs||12000)/1000);state.oreRespawns.push({type:o.type,at:nowSec()+rand(min,max)});}saveGame();}else showToast('Porão cheio');}}
   if(player.hp<=0){
     if(isGalaxyGateMap())handleAlphaDeath();
     else handleNormalShipDeath();
@@ -6553,7 +6556,7 @@ const AUX_WORK_V2027=createAuxiliaryWorkScheduler();
 function update(dt,profile=null){
   if(!progress||gameBootstrapRuntime.loading)return;
   const stageStart=profile?performance.now():0;
-  telemetryTick(dt);eliteRouteTrackV2012(dt);processRespawns();
+  telemetryTick(dt);eliteRouteTrackV2012(dt);processRespawns();AUTOPILOT_V48.tick();
   if(AUX_WORK_V2027.due('bonusBoxes',240))updateBonusBoxes();
   updateCombatAbilities();
   if(profile)profile.prepMs=performance.now()-stageStart;
@@ -8695,6 +8698,43 @@ function openArena(){
 
 const adminRuntime={enabled:false,status:null,users:[],actions:[],telemetry:null,telemetryDetail:null,busy:false};
 const adminRuntimeMonitor={data:null,busy:false};
+// V48 • Piloto conectado: não credita prêmios e não contorna a autorização do Render.
+const AUTOPILOT_V48=createStellarAutopilotV48({
+  credentials:()=>getSessionCredentials(),
+  getIdentity:()=>getUser()?.id||null,
+  npcTypes:Object.entries(NPC_TYPES||{}).map(([id,n])=>({id,label:n?.name||id})),
+  getSnapshot:()=>({
+    online:authenticated&&sharedUniverseOnline(),ready:!!progress&&!gameBootstrapRuntime.loading,
+    jumping:!!state.jumping,map:progress?.mapId||'',repairRequired:!!progress?.repairRequired,
+    atBase:!!progress&&isAtTrader(),canSell:!!progress&&canSellCargoNow(),buyPermitted:!!progress&&(isAtTrader()||autoBuyEnabled()),
+    base:progress?basePointForFaction(progress.profile.faction,'x1'):{x:0,y:0},
+    player:{x:player.x,y:player.y,hp:player.hp,maxHp:player.maxHp},
+    enemies:state.enemies,loot:state.loot,bonusBoxes:state.bonusBoxes,ores:state.ores,timeSec:nowSec(),
+    laserRange:playerLaserRange(),rocketRange:playerRocketRange(),rocketReady:rocketReady(),
+    credits:Number(progress?.profile?.credits)||0,stl:Number(progress?.profile?.uridium)||0,
+    xp:Number(progress?.profile?.xp)||0,kills:Number(progress?.profile?.aliensKilled)||0,
+    level:Number(progress?.profile?.level)||1,
+    cargoUsed:progress?cargoUsed():0,cargoCapacity:progress?cargoCapacity():1,cargoFree:progress?cargoFree():0,
+    ammoStock:progress?ammoQty(progress.selectedLaserAmmo):0,rocketStock:progress?rocketQty(progress.selectedRocket):0,
+    ammoQuote:progress?liveQuote('ammo:'+progress.selectedLaserAmmo):null,
+    rocketQuote:progress?liveQuote('rocket:'+progress.selectedRocket):null
+  }),
+  getGraphLabel:()=>currentGraphMapLabel(),
+  getGoalLabel:map=>displayMapLabel(map,progress?.profile?.faction||null),
+  getPortals:label=>portalsForGraphLabel(label)||[],
+  mayTravel:label=>!/^4-/.test(String(label))&&canTravelGraphLabel(label).ok,
+  navigate:(x,y)=>{if(!progress||!state.currentMap)return;const world=state.currentMap.world;
+    player.tx=Math.max(35,Math.min(world.w-35,Number(x)||player.x));
+    player.ty=Math.max(35,Math.min(world.h-35,Number(y)||player.y));},
+  jumpPortal:portal=>jumpThroughPortal(portal),
+  selectNpc:(npc,fire)=>{if(state.target?.id!==npc.id)selectCombatTarget(npc,{silent:true});player.laserFiring=!!fire;},
+  stopFire:()=>{player.laserFiring=false;state.target=null;},
+  fireRocket:()=>fireRocket(false),
+  sellCargo:()=>sellAllCargo(),
+  buyPackage:(key,kind)=>runAutoBuy(key,kind==='ammo'?'Munição Autopilot':'Mísseis Autopilot'),
+  onNotice:()=>{}
+});
+
 function adminRuntimeTime(value){if(!value)return '—';const d=new Date(value);return Number.isNaN(d.getTime())?'—':d.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit',second:'2-digit'});}
 function renderAdminRuntimeMonitor(){
   if(!ui.adminRuntimeMonitorGrid)return;const data=adminRuntimeMonitor.data?.runtimes||{};const defs=[['topbar','TOPBAR'],['npcs','NPCs'],['world','WORLD'],['systems','SYSTEMS'],['pass','PASSE']];
@@ -9798,7 +9838,7 @@ async function refreshAdminStatus(silent=true){
   const checkedUser=String(getUser()?.id||'');
   try{const st=await getAdminStatus();if(!authenticated||String(getUser()?.id||'')!==checkedUser)return false;adminRuntime.status=st;adminRuntime.enabled=!!st?.is_admin;ui.adminBtn?.classList.toggle('hidden',!adminRuntime.enabled);renderAdminStatus();return adminRuntime.enabled;}catch(err){adminRuntime.enabled=false;ui.adminBtn?.classList.add('hidden');if(!silent)showToast(err.message);return false;}
 }
-async function refreshAdminPanel(query=null){if(adminRuntime.busy)return;adminRuntime.busy=true;adminSetMessage('Atualizando painel...','busy');try{const q=query===null?String(ui.adminSearchInput?.value||''):String(query||'');const [status,users,actions,telemetry]=await Promise.all([getAdminStatus(),adminSearchAccounts(q),adminRecentActions(),adminTelemetryOverview()]);adminRuntime.status=status;adminRuntime.enabled=!!status?.is_admin;if(!adminRuntime.enabled)throw new Error('Acesso administrativo negado.');adminRuntime.users=users?.users||[];adminRuntime.actions=actions?.actions||[];adminRuntime.telemetry=telemetry||null;refreshAdminSecurityIncidents().catch(()=>{});renderAdminStatus();renderAdminUsers();renderAdminActions();renderAdminTelemetry();renderAdminTelemetryDetail();adminSetMessage(`${adminRuntime.users.length} conta(s) exibida(s).`,'ok');}catch(err){adminSetMessage(err.message,'err');}finally{adminRuntime.busy=false;}}
+async function refreshAdminPanel(query=null){if(adminRuntime.busy)return;adminRuntime.busy=true;adminSetMessage('Atualizando painel...','busy');try{const q=query===null?String(ui.adminSearchInput?.value||''):String(query||'');const [status,users,actions,telemetry]=await Promise.all([getAdminStatus(),adminSearchAccounts(q),adminRecentActions(),adminTelemetryOverview()]);adminRuntime.status=status;adminRuntime.enabled=!!status?.is_admin;if(!adminRuntime.enabled)throw new Error('Acesso administrativo negado.');adminRuntime.users=users?.users||[];adminRuntime.actions=actions?.actions||[];adminRuntime.telemetry=telemetry||null;refreshAdminSecurityIncidents().catch(()=>{});renderAdminStatus();renderAdminUsers();void AUTOPILOT_V48.decorateAdminUsers(ui.adminUserList,adminRuntime.users);renderAdminActions();renderAdminTelemetry();renderAdminTelemetryDetail();adminSetMessage(`${adminRuntime.users.length} conta(s) exibida(s).`,'ok');}catch(err){adminSetMessage(err.message,'err');}finally{adminRuntime.busy=false;}}
 async function openAdminPanel(){bootAdminEditorObserver();if(!await refreshAdminStatus(false)){showToast('Acesso administrativo negado');return;}closeNavigationModals(ui.adminModal);ui.adminModal?.classList.remove('hidden');await Promise.all([refreshAdminPanel(),loadAdminRuntimeMonitor(false)]);}
 async function runAdminAction(action,user){if(!user||adminRuntime.busy)return;const name=user.callsign||user.email||'esta conta';let changed=false;try{adminRuntime.busy=true;if(action==='ban'){const minutes=Math.max(0,Number(ui.adminBanDuration?.value)||0),reason=String(ui.adminBanReason?.value||'').trim();if(!await stellarConfirmV4776(`Banir ${name}${minutes?` por ${minutes} minuto(s)`:' permanentemente'}?`))return;await adminBanAccount(user.user_id,{minutes,reason});changed=true;adminSetMessage(`${name} foi banido.`,'ok');}
 else if(action==='unban'){if(!await stellarConfirmV4776(`Remover o ban de ${name}?`))return;await adminUnbanAccount(user.user_id);changed=true;adminSetMessage(`Ban removido de ${name}.`,'ok');}
@@ -9841,6 +9881,7 @@ function pointerAction(ev){
 }
 function pointerNavigateMove(ev){if(!state.pointerNavActive||state.pointerNavId!==ev.pointerId||!gameplayPointerAllowed())return;setPointerDestination(ev);}
 function stopPointerNavigation(ev){if(state.pointerNavId!==null&&ev.pointerId!==undefined&&state.pointerNavId!==ev.pointerId)return;state.pointerNavActive=false;state.pointerNavId=null;try{if(ev.pointerId!==undefined)canvas.releasePointerCapture(ev.pointerId);}catch(_e){}}
+canvas.addEventListener('pointerdown',e=>{if(AUTOPILOT_V48.active)AUTOPILOT_V48.stop('Controle manual retomado');}, {capture:true});
 canvas.addEventListener('pointerdown',pointerAction);
 canvas.addEventListener('pointermove',pointerNavigateMove);
 canvas.addEventListener('pointerup',stopPointerNavigation);
@@ -10437,7 +10478,7 @@ async function afterAuth(){
   astralCombatV431.owner=null;astralCombatV431.snapshot=null;++astralCombatV431.request;
   const generation=++gameBootstrapRuntime.generation;
   gameBootstrapRuntime.loading=true;gameBootstrapRuntime.ready=false;gameBootstrapRuntime.lastError=null;
-  authenticated=true;void refreshCommandV22();ui.loginModal.classList.add('hidden');ui.userLabel.textContent=getUser()?.callsign||getUser()?.email?.split('@')[0]||'Pilot';loadActivityLog();await refreshAdminStatus(true);refreshClanState(true).then(()=>refreshRankings(true)).catch(()=>{});setSync('SINCRONIZANDO','busy');
+  authenticated=true;void AUTOPILOT_V48.refreshAccess();void refreshCommandV22();ui.loginModal.classList.add('hidden');ui.userLabel.textContent=getUser()?.callsign||getUser()?.email?.split('@')[0]||'Pilot';loadActivityLog();await refreshAdminStatus(true);refreshClanState(true).then(()=>refreshRankings(true)).catch(()=>{});setSync('SINCRONIZANDO','busy');
   try{
     const accountId=String(getUser()?.id||'');
     let local=readLocalGameState();

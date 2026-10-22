@@ -1511,6 +1511,49 @@ app.post('/api/telemetry', requireUser, asyncRoute(async(req,res)=>{
   res.json(data&&typeof data==='object'?data:{ok:true});
 }));
 
+// ====== V48 • AUTOPILOT ENTITLEMENT / ADMIN GRANTS ======
+// Admin RPC is authoritative. Entitlements are never sourced from Premium or JWT metadata.
+async function autopilotAdminV48(req,res){
+  const {data,error}=await req.sb.rpc('admin_status_v1763');
+  if(error||data?.is_admin!==true){res.status(403).json({error:'Somente ADM autenticado.'});return false;}
+  return true;
+}
+app.get('/api/autopilot/v48/access',requireUser,asyncRoute(async(req,res)=>{
+  res.set('Cache-Control','no-store');
+  const {data:admin,error:err}=await req.sb.rpc('admin_status_v1763');
+  if(err)return res.status(503).json({error:'Autorização indisponível.'});
+  const isAdmin=admin?.is_admin===true;
+  if(isAdmin)return res.json({allowed:true,is_admin:true,source:'admin'});
+  const service=await requireEliteAdmin();
+  const {data,error}=await service.from('stellar_autopilot_access_v48').select('enabled,source,expires_at').eq('user_id',req.user.id).maybeSingle();
+  if(error)return res.status(503).json({error:'Permissão do Autopilot indisponível.'});
+  const active=data?.enabled===true&&(!data.expires_at||new Date(data.expires_at).getTime()>Date.now());
+  return res.json({allowed:active,is_admin:false,source:active?data.source:null});
+}));
+app.get('/api/admin/autopilot/v48/grants',requireUser,asyncRoute(async(req,res)=>{
+  if(!await autopilotAdminV48(req,res))return;
+  const service=await requireEliteAdmin();
+  const {data,error}=await service.from('stellar_autopilot_access_v48').select('user_id,enabled,source,expires_at,updated_at').limit(1000);
+  if(error)return res.status(503).json({error:'Lista de permissões indisponível.'});
+  res.set('Cache-Control','no-store');res.json({grants:data||[]});
+}));
+app.put('/api/admin/autopilot/v48/grants/:userId',requireUser,asyncRoute(async(req,res)=>{
+  if(!await autopilotAdminV48(req,res))return;
+  const userId=String(req.params.userId||'');
+  if(!/^[a-f0-9-]{36}$/i.test(userId)||typeof req.body?.enabled!=='boolean')return res.status(400).json({error:'Dados inválidos.'});
+  const service=await requireEliteAdmin();
+  const {data:user,error:userError}=await service.from('profiles').select('id').eq('id',userId).maybeSingle();
+  if(userError||!user)return res.status(404).json({error:'Jogador não encontrado.'});
+  const {data:isProtected,error:protectedError}=await req.sb.rpc('is_game_admin_v1763',{p_uid:userId});
+  if(protectedError)return res.status(503).json({error:'Não foi possível validar a conta.'});
+  if(isProtected===true)return res.status(403).json({error:'Administradores já têm acesso.'});
+  // Origem de acesso sempre ADM. Verificação de pagamento futuro exige fluxo próprio.
+  const {data,error}=await service.from('stellar_autopilot_access_v48').upsert({user_id:userId,enabled:req.body.enabled,source:'admin',granted_by:req.user.id,expires_at:null,updated_at:new Date().toISOString()},{onConflict:'user_id'}).select('user_id,enabled').single();
+  if(error)return res.status(503).json({error:'Permissão não pôde ser salva.'});
+  res.set('Cache-Control','no-store');res.json({ok:true,grant:data});
+}));
+// ====== END AUTOPILOT V48 ======
+
 // ===================== ADMIN CONTROL PANEL =====================
 async function adminRpc(req,res,name,args={}){
   const {data,error}=await req.sb.rpc(name,args);
