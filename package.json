@@ -5,7 +5,7 @@
   "scripts": {
     "start": "node server/index.js",
     "dev": "node --watch server/index.js",
-    "check": "node scripts/v481-topbar-patch.mjs && node scripts/v4811-progression-patch.mjs && node scripts/v482-hud-xp-patch.mjs && node scripts/v4825-navigation-autopilot-patch.mjs && node scripts/v48-autopilot-patch.mjs && node scripts/v483-fase3-autopilot-patch.mjs && node scripts/aplicar-hotfix-nave-v4827.mjs && node scripts/v4831-network-recovery-patch.mjs && node scripts/v484-offline-farm-patch.mjs && node scripts/v485-offline-farm-ui-patch.mjs && node scripts/v487-offline-combat-patch.mjs && node scripts/v478-prelaunch-integrity-patch.mjs && node scripts/v4776-apply-patch-status.mjs && node scripts/verify-release.mjs",
+    "check": "node scripts/v481-topbar-patch.mjs && node scripts/v4811-progression-patch.mjs && node scripts/v482-hud-xp-patch.mjs && node scripts/v4825-navigation-autopilot-patch.mjs && node scripts/v48-autopilot-patch.mjs && node scripts/v483-fase3-autopilot-patch.mjs && node scripts/aplicar-hotfix-nave-v4827.mjs && node scripts/v4831-network-recovery-patch.mjs && node scripts/v484-offline-farm-patch.mjs && node scripts/v485-offline-farm-ui-patch.mjs && node scripts/v487-offline-combat-patch.mjs && node scripts/v49-release-integrity.mjs && node scripts/v478-prelaunch-integrity-patch.mjs && node scripts/v4776-apply-patch-status.mjs && node scripts/verify-release.mjs",
     "test": "node --test tests/*.test.mjs",
     "verify": "npm run check && npm run check:v21 && npm test",
     "check:v21": "node scripts/check-v21-package.mjs"
@@ -14,10 +14,11 @@
     "express": "^4.21.2",
     "@supabase/supabase-js": "^2.57.4",
     "ws": "^8.18.0",
-    "compression": "^1.7.5"
+    "compression": "^1.7.5",
+    "web-push": "^3.6.7"
   },
   "engines": {
     "node": ">=18"
   },
-  "release": "V48.7 offline NPC PvE laser simulation, named NPCs; cumulative V48.5.1 V48.5 V48.3.1"
+  "release": "V49.0 - economic audit, independent ADM access, PWA Web Push infrastructure, NPC ROI, history (cumulative V48.7)"
 }

@@ -22,3 +22,14 @@ self.addEventListener('notificationclick',event=>{
   if(self.clients.openWindow)await self.clients.openWindow('/');
  }));
 });
+
+// STELLAR_V49_WEB_PUSH: triggered by the browser push service even with the PWA closed.
+// No game state, credits or saves are altered by this event.
+self.addEventListener('push',event=>{
+ let payload={};try{payload=event.data?.json()||{};}catch{}
+ event.waitUntil(self.registration.showNotification(String(payload.title||'Stellar Legacy • Farm concluído'),{
+  body:String(payload.body||'O tempo de Farm Offline terminou. Abra o jogo para resgatar.'),
+  icon:'/icons/stellar-192.png',badge:'/icons/stellar-192.png',tag:'stellar-farm-'+String(payload.sessionId||'v49'),
+  data:{url:'/'},requireInteraction:false
+ }));
+});

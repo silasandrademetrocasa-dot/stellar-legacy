@@ -1,0 +1,55 @@
+STELLAR LEGACY V49.0 — TODAS AS ETAPAS EM UM ZIP
+==============================================
+ATUALIZAÇÃO INCREMENTAL para o repositório GitHub existente. Não é um jogo independente.
+
+FASES INCLUÍDAS
+- V48.7.1: auditoria das vendas; discrimina CR de recursos preexistentes e gerados no farm.
+  Limita VENDAS AUTOMÁTICAS em sessões iniciadas pela V49 (padrão 30 milhões CR/h,
+  configurável no ADM). Recursos que não forem vendidos continuam no porão.
+- V48.8: check Farm Offline independente do Autopilot; permissões e limites por piloto;
+  conserva automaticamente liberações existentes como ponto inicial (SQL).
+- V48.9: Web Push Android/PWA em segundo plano (service worker, assinatura e despacho).
+  REQUER configurar VAPID, token do despachante e cron externo; sem esses dados,
+  o jogo continua com o alerta local quando aberto. Nenhum farm fica acordado por isso.
+- V49.0: histórico de sessões, auditoria ADM, taxa CR/h, XP/h, STL/h, comparação
+  de NPCs, e estratégias automáticas (mais fraco, CR, XP, STL, equilíbrio).
+- Herda cumulativamente V48.3.1, V48.4, V48.5, V48.5.1 e V48.7.
+
+ORDEM DE INSTALAÇÃO
+1) Faça backup do Supabase e confira jogadores e sessões em andamento.
+2) Aplique SÓ sql/STELLAR_V49_0_TODAS_AS_FASES.sql no Supabase.
+   Não use o script opcional de cron ainda. Este SQL NÃO liquida nem cancela sessões.
+3) Exclua qualquer ZIP anterior da raiz do GitHub.
+4) Envie este arquivo ZIP V49 na raiz do repositório. Execute a Action
+   "Instalar ZIP universal" / "Stellar Legacy — Instalador Universal".
+5) Confirme testes (npm run check / npm test), depois deploy LIVE do Render.
+6) Atualize o PWA instalado no Android e faça UM farm curto: confira compra, venda,
+   consumo, relatório, duplicação de resgate e comparação de NPCs.
+7) Para push com app FECHADO: gere um par VAPID P-256 e configure no Render:
+     STELLAR_FARM_VAPID_PUBLIC   = chave pública base64url
+     STELLAR_FARM_VAPID_PRIVATE  = chave privada base64url
+     STELLAR_FARM_VAPID_CONTACT  = mailto:endereco-do-administrador
+     STELLAR_FARM_PUSH_DISPATCH_TOKEN = segredo forte de 32+ bytes
+   Guarde a chave privada SOMENTE nas variáveis secretas do Render; NUNCA no ZIP.
+   Crie no Supabase Vault o segredo stellar_farm_dispatch_token_v49 com o mesmo token.
+   Execute sql/OPCIONAL_ATIVAR_PUSH_V49_APOS_CONFIGURAR.sql.
+   No app instalado, PILOTO > FARM OFFLINE > ATIVAR PUSH NO ANDROID.
+
+IMPORTANTE
+- Não automatize o cron sem ter as chaves; é opcional e pode ser desligado.
+- Cron do Supabase só chama o Render se existir farm terminado e aviso pendente;
+  evita acordá-lo a cada minuto sem necessidade.
+- Notificações push dependem das restrições do Android, navegador e permissões.
+  O cron e o Web Push devem ser validados com o app FECHADO num aparelho real.
+- O Resgate oficial continua no SQL em transação; não concede ganhos pelo cron.
+- Sessões iniciadas antes da V49 continuam com o modelo congelado de sua versão.
+- O V49 registra históricos antigos, mas o cap de venda só existe em novos farms.
+- Não publicar para todos antes de validar UMA liquidação de V49 no banco.
+
+ESTRUTURA DO ZIP
+- SQL da versão + script opcional cron
+- Server: engine V48.7, Farm API V49, módulo Web Push V49
+- Interface V49 e service worker
+- Check/npm e testes; hotfixes cumulativos ainda presentes
+
+SEM CHAVES SECRETAS NO ZIP. Sem necessidade de deploy separado por fase.

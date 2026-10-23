@@ -6,5 +6,5 @@ for(const file of ['server/offline-farm-v487-engine.js','server/offline-farm-v48
  if(!fs.existsSync(file))throw Error('V48.7 missing '+file);
 }
 const server=fs.readFileSync('server/offline-farm-v484.js','utf8');
-if(!server.includes('stellar_offline_farm_')||!server.includes("method==='start'||method==='claim'?'_v487'"))throw Error('V48.7 server hooks missing');
+if(!server.includes('stellar_offline_farm_')||!server.includes("method==='start'||method==='claim'?'_v49'"))throw Error('V48.7 server hooks missing');
 console.log('✅ V48.7: combat and display hooks verified');
