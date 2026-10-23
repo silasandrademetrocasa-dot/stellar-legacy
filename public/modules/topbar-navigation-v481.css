@@ -1,0 +1,58 @@
+/* STELLAR LEGACY V48.1 • barra superior limpa, sem nós originais reanexados */
+body.stellar-nav-v481 #topbar .top-actions > [data-menu-group="pilot"]{order:10!important}
+body.stellar-nav-v481 #topbar .top-actions > [data-menu-group="missions"]{order:20!important}
+body.stellar-nav-v481 #topbar .top-actions > [data-menu-group="battle"]{order:30!important}
+body.stellar-nav-v481 #topbar .top-actions > #mapBtn{order:40!important}
+body.stellar-nav-v481 #topbar .top-actions > #v481MoreGroup{order:50!important}
+body.stellar-nav-v481 #topbar .top-actions > #v481BotStop{order:55!important}
+/* Esconde somente as entradas duplicadas. Os originais preservam listeners/IDs e estado do SQL. */
+body.stellar-nav-v481 #topbar .top-actions > #clanBtn,
+body.stellar-nav-v481 #topbar .top-actions > #frontierExpansionBtnV42,
+body.stellar-nav-v481 #topbar .top-actions > #auctionBtn,
+body.stellar-nav-v481 #topbar .top-actions > [data-menu-group="shops"],
+body.stellar-nav-v481 #topbar .top-actions > #adminBtn,
+body.stellar-nav-v481 #topbar .top-actions > #configBtn,
+body.stellar-nav-v481 #hudIntelligenceQuick,
+body.stellar-nav-v481 #mobileCombatModeBtn,
+body.stellar-nav-v481 #autopilotFabV48 {display:none!important}
+body.stellar-nav-v481 #v481MoreGroup{position:relative!important;min-width:0;flex:0 0 auto}
+body.stellar-nav-v481 #v481MoreGroup > .menu-dropdown{min-width:190px;width:min(242px,calc(100vw - 28px));max-height:min(72dvh,540px);overflow-x:hidden;overflow-y:auto;overscroll-behavior:contain;grid-template-columns:minmax(0,1fr)!important}
+body.stellar-nav-v481 #v481MoreGroup .v481-menu-label{font-weight:900;font-size:9px;letter-spacing:1px;color:#8ab4ca;padding:9px 12px 3px;opacity:.85}
+body.stellar-nav-v481 #v481MoreGroup .menu-item{text-align:left;display:block;width:100%;box-sizing:border-box;min-height:36px}
+body.stellar-nav-v481 #v481MoreGroup [data-v481-gate]{float:right;color:#edcc80;font-size:10px}
+body.stellar-nav-v481 #v481MoreGroup .v481-locked{opacity:.58}
+body.stellar-nav-v481 #v481MoreGroup .v481-interface-menu{border-top:1px solid rgba(120,202,245,.16);border-bottom:1px solid rgba(120,202,245,.16)}
+body.stellar-nav-v481 #v481MoreGroup .v481-interface-menu > summary{list-style:none;cursor:pointer;padding:11px 12px;font-size:11px;font-weight:900;color:#b7ecff}
+body.stellar-nav-v481 #v481MoreGroup .v481-interface-menu > summary:before{content:'▸ ';color:#6bd8ff}
+body.stellar-nav-v481 #v481MoreGroup .v481-interface-menu[open] > summary:before{content:'▾ '}
+body.stellar-nav-v481 #v481MoreGroup .v481-interface-actions{padding:0 6px 6px}
+body.stellar-nav-v481 #v481MoreGroup [hidden],body.stellar-nav-v481 #v481BotStop[hidden],body.stellar-nav-v481 #v481AutopilotEntry[hidden]{display:none!important}
+body.stellar-nav-v481 #v481BotStop{border:1px solid #2cc9ac!important;color:#94ffe6!important;background:rgba(0,46,54,.96)!important;font-weight:900!important;white-space:nowrap;padding:7px!important;flex:0 0 auto;animation:v481-bot-glow 2.5s ease-in-out infinite}
+@keyframes v481-bot-glow{0%,100%{box-shadow:0 0 4px #26d9bb20}50%{box-shadow:0 0 11px #26d9bb72}}
+#v481NavigationNotice{position:fixed;z-index:16000;top:68px;left:50%;transform:translateX(-50%);max-width:92vw;padding:10px 15px;background:#0a2239;border:1px solid #4dc9f5;border-radius:11px;color:#dff8ff;font:700 12px system-ui,sans-serif;box-shadow:0 4px 20px #000b;pointer-events:none;opacity:0;transition:opacity .15s}
+#v481NavigationNotice.show{opacity:1}
+@media(max-width:680px){
+ body.stellar-nav-v481 #topbar .top-actions{display:flex!important;flex-wrap:nowrap!important;gap:3px!important;min-width:0;max-width:100%;}
+ body.stellar-nav-v481 #topbar .top-actions > :is(.menu-group,#mapBtn){flex:0 0 auto;min-width:0!important}
+ body.stellar-nav-v481 #topbar .top-actions > :is(.menu-group,#mapBtn) > .menu-group-toggle,
+ body.stellar-nav-v481 #topbar .top-actions > #mapBtn{padding:6px 7px!important;font-size:10px!important;letter-spacing:0!important;white-space:nowrap}
+ body.stellar-nav-v481 #topbar [data-menu-group="battle"] .menu-group-toggle > #battleTopStatus,
+ body.stellar-nav-v481 #topbar [data-menu-group="missions"] .menu-group-toggle > #missionActiveCount{display:none!important}
+ body.stellar-nav-v481 #v481MoreGroup > .menu-dropdown{position:fixed!important;left:auto!important;right:8px!important;top:calc(var(--hud-top-offset,56px) + 0px)!important;z-index:20000!important;max-height:74dvh!important}
+ body.stellar-nav-v481 #v481BotStop{padding:5px!important;font-size:9px!important}
+}
+@media(prefers-reduced-motion:reduce){body.stellar-nav-v481 #v481BotStop{animation:none}}
+
+/* Conteúdos internos ordenados por progressão sem deslocar IDs/handlers existentes. */
+body.stellar-nav-v481 #topbar [data-menu-group="pilot"].open > .menu-dropdown,
+body.stellar-nav-v481 #topbar [data-menu-group="battle"].open > .menu-dropdown{display:flex!important;flex-direction:column!important}
+body.stellar-nav-v481 #topbar #hangarBtn{order:10}
+body.stellar-nav-v481 #topbar #shipMenuBtn{order:20}
+body.stellar-nav-v481 #topbar #petBtn{order:30}
+body.stellar-nav-v481 #topbar #pilotBtn{order:40}
+body.stellar-nav-v481 #topbar #v481AutopilotEntry{order:50}
+body.stellar-nav-v481 #topbar #arenaBtn{order:10}
+body.stellar-nav-v481 #topbar #gateBtn{order:20}
+body.stellar-nav-v481 #topbar #galaxyEventBtn{order:30}
+body.stellar-nav-v481 #topbar #battleGroupBtn{order:40}
+body.stellar-nav-v481 #topbar #warfrontBtn{order:50}

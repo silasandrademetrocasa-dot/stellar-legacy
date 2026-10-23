@@ -22,11 +22,16 @@ test('retreat and trading have priority over attacking',()=>{
  assert.equal(chooseAutopilotAction({...snapshot,cargoUsed:94},{map:'x2',cargoThreshold:85}).map,'x1');
  assert.equal(chooseAutopilotAction({...snapshot,map:'x1',cargoUsed:94,canSell:true},{map:'x2'}).type,'sell');
 });
-test('collects real map drops before hunting but never invents awards',()=>{
+test('prioritizes NPC over bonus BOX and collects real drops without inventing awards',()=>{
  const s={...snapshot,enemies:[{id:'n1',type:'mordon',name:'Mordon',x:500,y:500,hp:100}],bonusBoxes:[{id:'b1',x:240,y:205}]};
- assert.equal(chooseAutopilotAction(s,{map:'x2'}).type,'move');
+ assert.equal(chooseAutopilotAction(s,{map:'x2'}).type,'hunt');
  assert.equal(chooseAutopilotAction({...s,bonusBoxes:[]},{map:'x2'}).type,'hunt');
- assert.equal(chooseAutopilotAction({...s,bonusBoxes:[],enemies:[{...s.enemies[0],type:'bossSibelon'}]},{map:'x2'}).type,'idle');
+ const realDrop={id:'drop1',x:240,y:205,expiresAt:30};
+ const collectWhileFiring=chooseAutopilotAction({...s,loot:[realDrop],laserRange:500},{map:'x2'});
+ assert.equal(collectWhileFiring.type,'move');
+ assert.equal(collectWhileFiring.targetId,'drop1');
+ assert.equal(collectWhileFiring.combatTargetId,'n1');
+ assert.equal(chooseAutopilotAction({...s,bonusBoxes:[],loot:[],enemies:[{...s.enemies[0],type:'bossSibelon'}]},{map:'x2'}).type,'idle');
 });
 test('selected NPC types only, no pilots and no warbots',()=>{
  const enemies=[{id:'p',isPlayer:true,type:'mordon',hp:10,x:203,y:201},{id:'w',warBot:true,type:'mordon',hp:10,x:204,y:202},{id:'a',type:'streuner',hp:10,x:300,y:300},{id:'b',type:'mordon',hp:10,x:350,y:200}];

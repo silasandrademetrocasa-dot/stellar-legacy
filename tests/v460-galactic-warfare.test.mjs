@@ -42,12 +42,13 @@ test('two-hour telemetry snapshot compares deltas, refuses counter resets',()=>{
  const result=summarizePlaytestV460(before,after);assert.equal(result.activeHours,2);assert.equal(result.killsPerHour,55);
  assert.equal(summarizePlaytestV460(after,before).ok,false);
 });
-test('release keeps existing worlds, raids, relays, market and saves untouched',()=>{
+test('release preserves existing worlds and uses the approved V48.2 curve',()=>{
  const pkg=JSON.parse(read('package.json'));assert.equal(pkg.version,'47.7.6');
  assert.match(pkg.scripts.check,/v4776-apply-patch/);
  const game=read('public/game.js');
  assert.match(game,/migratePlayerXpCurveV460\(\);/);
- assert.match(game,/function levelXpThreshold\(level\)\{return xpThresholdV460\(level\);\}/);
+ assert.match(game,/migratePlayerXpCurveV482\(\);/);
+ assert.match(game,/function levelXpThreshold\(level\)\{return xpThresholdV482\(level\);\}/);
  assert.match(game,/return progressionMilestonesV460\(level\);/);
  assert.match(read('public/modules/unified-expansion-v42.js'),/renderGalacticBalanceV460\(root,tab,snapshot.isAdmin\)/);
  const sql=read('sql/STELLAR_V46_0_GALACTIC_WARFARE.sql');

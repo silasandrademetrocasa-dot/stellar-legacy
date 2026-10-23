@@ -1,0 +1,24 @@
+/* V48.2 • Target-style compact HUD. No changes to positioning or HUD collapse controls. */
+#playerPanel .player-float-head>div{min-width:0;flex:1}
+#playerPanel .player-float-head #userLabel{font-size:12px!important;overflow-wrap:anywhere;line-height:1.2;color:#e9faff;letter-spacing:.015em}
+#playerPanelContent>.v482-level-row{display:block!important;border-top:1px solid #65ceee36;padding-top:9px!important;margin-top:5px!important}
+#playerPanelContent>.v482-level-row>span,#playerPanelContent>.v482-level-row>#lvl{display:none!important}
+.v482-pilot-level{width:100%;display:grid;gap:5px;padding:2px 1px 1px}
+.v482-xp-numbers,.v482-xp-footer{display:flex;align-items:center;justify-content:space-between;gap:6px;min-width:0}
+.v482-xp-numbers strong{font-size:11px;color:#c4f4ff;letter-spacing:.04em}
+.v482-xp-numbers small,.v482-xp-footer small{font-size:9px;color:#cbe8f2;white-space:nowrap;font-variant-numeric:tabular-nums}
+.v482-xp-footer small{font-size:8px;color:#8bbace}
+.v482-xp-track,.v482-gauge-track{width:100%;height:9px;background:rgba(7,20,34,.9);border:1px solid #6199b35c;box-shadow:inset 0 1px 4px #0008;border-radius:6px;overflow:hidden;position:relative}
+.v482-xp-track i,.v482-gauge-fill{display:block;width:0;height:100%;border-radius:5px;transition:width .25s ease}
+.v482-xp-track i{background:linear-gradient(90deg,#8867fb,#38ceff);box-shadow:0 0 7px #47d8ff80}
+#leftStats .stats-toolbar{flex-wrap:wrap;row-gap:2px}
+#leftStats .v482-ship-name{flex:1 1 100%;font-size:9px;color:#89cddf;padding-left:7px;letter-spacing:.025em;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+#leftStatsContent>.v482-gauge-row{display:flex!important;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:3px 4px;min-width:0;margin:3px 0 5px!important;padding:3px 2px!important}
+#leftStatsContent>.v482-gauge-row>b,#leftStatsContent>.v482-gauge-row>span{white-space:nowrap;font-size:10px;line-height:1.1}
+#leftStatsContent>.v482-gauge-row>.v482-gauge-track{flex:0 0 100%;margin-top:2px;box-sizing:border-box}
+.v482-hp-row .v482-gauge-fill{background:linear-gradient(90deg,#f43f5e,#ff9270)}
+.v482-shield-row .v482-gauge-fill{background:linear-gradient(90deg,#147cce,#43dbff)}
+.v482-cargo-row .v482-gauge-fill{background:linear-gradient(90deg,#1da881,#6eecd4)}
+#leftStatsContent>.v482-ship-speed{display:flex!important;justify-content:space-between;border-top:1px solid #65ceee30;padding-top:6px!important;margin-top:5px!important}
+#leftStatsContent>#battleConfigToolbar{order:99}
+@media(max-width:760px){.v482-xp-numbers small{font-size:8px}.v482-xp-footer small{font-size:7.5px}.v482-xp-track,.v482-gauge-track{height:8px}}

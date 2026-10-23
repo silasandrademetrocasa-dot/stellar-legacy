@@ -58,12 +58,8 @@ export function chooseAutopilotAction(raw,cfg){
     return {type:'move',x:s.base.x,y:s.base.y,reason:'Reabastecendo no comerciante'};
   }
   if(map!==c.map)return {type:'route',map:c.map,reason:`Rota até ${c.map.toUpperCase()}`};
-  const candidates=[];
-  if(c.drops&&s.cargoFree>0){for(const drop of s.loot||[])if(drop&&Number.isFinite(drop.x)&&Number.isFinite(drop.y)&&(!Number.isFinite(drop.expiresAt)||drop.expiresAt>s.timeSec))candidates.push({...drop,kind:'drop',priority:0});}
-  if(c.boxes){for(const box of s.bonusBoxes||[])if(box&&Number.isFinite(box.x)&&Number.isFinite(box.y))candidates.push({...box,kind:'box',priority:1});}
-  if(c.ores&&s.cargoFree>0){for(const ore of s.ores||[])if(ore&&Number.isFinite(ore.x)&&Number.isFinite(ore.y))candidates.push({...ore,kind:'ore',priority:2});}
-  const close=candidates.filter(e=>dist(e,player)<=1300).sort((a,b)=>a.priority-b.priority||dist(a,player)-dist(b,player))[0];
-  if(close)return {type:'move',x:close.x,y:close.y,reason:`Coletando ${close.kind}`,targetId:close.id};
+  // V48.1.2: drops reais de NPC continuam prioritários para coleta, mas NÃO
+  // cancelam o combate de NPC já alcançável. BOX BÔNUS/minério ficam atrás da caça.
   const npcs=(s.enemies||[]).filter(e=>e&&!e.isPlayer&&!e.warBot&&!e.isHidden&&e.hp>0&&Number.isFinite(e.x)&&Number.isFinite(e.y)
     &&(c.npcTypes.length===0?!String(e.type||'').toLowerCase().startsWith('boss'):c.npcTypes.includes(String(e.type||''))));
   npcs.sort((a,b)=>{
@@ -74,7 +70,23 @@ export function chooseAutopilotAction(raw,cfg){
     }
     return dist(a,player)-dist(b,player);
   });
+  const realDrops=c.drops&&Number(s.cargoFree)>0?(s.loot||[]).filter(drop=>drop&&Number.isFinite(drop.x)&&Number.isFinite(drop.y)
+    &&(!Number.isFinite(drop.expiresAt)||drop.expiresAt>s.timeSec)&&dist(drop,player)<=1300):[];
+  realDrops.sort((a,b)=>dist(a,player)-dist(b,player));
+  const drop=realDrops[0];
+  if(drop){
+    const laserRange=Math.max(0,Number(s.laserRange)||0);
+    // Só atacar um NPC válido que JÁ está no alcance real da arma; nunca dispara fora da distância.
+    const inRange=npcs.filter(e=>dist(e,player)<=laserRange).sort((a,b)=>dist(a,player)-dist(b,player))[0];
+    return {type:'move',x:drop.x,y:drop.y,reason:inRange?'Coletando drop • combatendo NPC em alcance':'Coletando drop de NPC',
+      targetId:drop.id,combatTargetId:inRange?.id||null};
+  }
   const npc=npcs[0];if(npc)return {type:'hunt',targetId:npc.id,x:npc.x,y:npc.y,reason:'Caçando '+String(npc.name||npc.type)};
+  const extras=[];
+  if(c.boxes){for(const box of s.bonusBoxes||[])if(box&&Number.isFinite(box.x)&&Number.isFinite(box.y))extras.push({...box,kind:'box',priority:0});}
+  if(c.ores&&Number(s.cargoFree)>0){for(const ore of s.ores||[])if(ore&&Number.isFinite(ore.x)&&Number.isFinite(ore.y))extras.push({...ore,kind:'ore',priority:1});}
+  const close=extras.filter(e=>dist(e,player)<=1300).sort((a,b)=>a.priority-b.priority||dist(a,player)-dist(b,player))[0];
+  if(close)return {type:'move',x:close.x,y:close.y,reason:`Coletando ${close.kind}`,targetId:close.id};
   // Não inventar inimigos ou recompensas quando a sala está vazia.
   return {type:'idle',reason:'Aguardando NPCs e drops'};
 }
@@ -97,10 +109,36 @@ export function createStellarAutopilotV48({credentials,getIdentity=()=>null,getS
     const rep=panel.querySelector('[data-ap-report]');if(rep&&started){const r=sessionReport();rep.textContent=`${r.minutes} min • ${r.kills} NPC • ${fmt(r.xp)} XP • CR líq. ${fmt(r.creditsNet)} • STL ${fmt(r.stl)} • BOX ${r.boxes} • Drop ${r.drops} • Compras ${fmt(r.spent)} CR • Falhas ${r.failures}`;}
     if(fab)fab.textContent=running?'🤖 AUTO • ON':'🤖 AUTOPILOT';
   }
-  async function refreshAccess(){if(refreshingAccess)return allowed;refreshingAccess=true;
-    try{const identity=String(getIdentity()||'');const s=await request('/api/autopilot/v48/access');if(identity!==String(getIdentity()||'')){allowed=false;return false;}authorizedId=identity;allowed=s.allowed===true;isAdmin=s.is_admin===true;lastAccessAt=now();nextAccessAt=now()+45000;if(!allowed&&running)stop('Permissão retirada pelo ADM');if(fab)fab.hidden=!allowed;if(panel&&!allowed){panel.hidden=true;panelOpen=false;}return allowed;}
-    catch(e){allowed=false;authorizedId=null;nextAccessAt=now()+12000;if(running)stop('Sem verificação de acesso online');if(fab)fab.hidden=true;return false;}
-    finally{refreshingAccess=false;renderStatus();}
+  // Compartilha a mesma consulta entre reabertura manual, login e polling; nunca
+  // interpreta uma consulta em andamento como acesso negado ao reabrir a aba.
+  let accessPromise=null;
+  async function refreshAccess(){
+    if(accessPromise)return accessPromise;
+    refreshingAccess=true;
+    accessPromise=(async()=>{
+      const identity=String(getIdentity()||'');
+      const hadPreviousGrant=allowed&&authorizedId===identity;
+      try{
+        const s=await request('/api/autopilot/v48/access');
+        if(identity!==String(getIdentity()||'')){allowed=false;authorizedId=null;return false;}
+        authorizedId=identity;allowed=s.allowed===true;isAdmin=s.is_admin===true;
+        lastAccessAt=now();nextAccessAt=now()+45000;
+        if(!allowed&&running)stop('Permissão retirada pelo ADM');
+        if(fab)fab.hidden=!allowed;
+        if(panel&&!allowed){panel.hidden=true;panelOpen=false;}
+        return allowed;
+      }catch(e){
+        allowed=false;nextAccessAt=now()+12000;
+        if(running)stop('Sem verificação de acesso online');
+        // Falha de rede NÃO é revogação: mantém somente o botão para tentar de novo.
+        // Iniciar/operar continua bloqueado até obter confirmação nova do servidor.
+        if(fab)fab.hidden=!hadPreviousGrant;
+        notify('Autopilot: não foi possível revalidar o acesso. Tente novamente.');
+        return false;
+      }
+    })();
+    try{return await accessPromise;}
+    finally{accessPromise=null;refreshingAccess=false;renderStatus();}
   }
   function exportReport(){const r=sessionReport();return `STELLAR AUTOPILOT • RELATÓRIO V48\nMapa ${r.map.toUpperCase()} • ${r.minutes} min\nNPC ${r.kills} • XP ${r.xp} • Nível ${r.levelFrom} → ${r.levelTo}\nCR líquidos ${r.creditsNet} • STL líquidos ${r.stl} • BOX ${r.boxes} • Drops ${r.drops} • Minérios ${r.ores} • Gastos munição CR ${r.spent}\nXP/h ${Math.round(r.xpPerHour)} • CR líquidos/h ${Math.round(r.crPerHour)} • STL/h ${Math.round(r.stlPerHour)}\nTentativas de compra ${r.attempts} • Falhas ${r.failures}\nSituação ${r.reason}`;}
   function controls(){return `<div class="ap-wrap"><header><b>🤖 STELLAR AUTOPILOT</b><button type="button" data-ap-close>FECHAR</button></header>
@@ -154,7 +192,18 @@ export function createStellarAutopilotV48({credentials,getIdentity=()=>null,getS
     panel.querySelector('[data-ap-copy]').onclick=()=>{const text=exportReport();navigator.clipboard?.writeText(text).then(()=>notify('Relatório copiado')).catch(()=>notify(text));};
     renderStatus();
   }
-  function open(){renderUI();if(!accessReady())return;panel.hidden=false;panelOpen=true;renderStatus();}
+  async function open(){
+    renderUI();if(!panel)return;
+    // Após uma pausa longa, a autorização de 75s expira. Revalida e reabre.
+    // Ao falhar por rede ou revogação, não exibe configuração nem inicia o bot.
+    if(!accessReady()){
+      loading=true;renderStatus();
+      const accepted=await refreshAccess();
+      loading=false;renderStatus();
+      if(!accepted||!accessReady())return;
+    }
+    panel.hidden=false;panelOpen=true;renderStatus();
+  }
   function start(){if(!accessReady())return notify('Permissão não confirmada');if(running)return;const s=getSnapshot();if(!s?.online||!s.ready)return notify('Entre no universo online para ativar');
     config=readConfig();started=now();ended=0;spent=0;attempts=0;failures=0;boxes=0;drops=0;ores=0;startStats=stats(s);lastProgress=startStats;lastTickAt=0;
     running=true;notify('Rota '+config.map.toUpperCase()+' iniciada');}
@@ -180,10 +229,20 @@ export function createStellarAutopilotV48({credentials,getIdentity=()=>null,getS
     if(config.autoBuy&&ts-lastPurchaseAttempt>7000){lastPurchaseAttempt=ts;void safeBuy(s);}
     const action=chooseAutopilotAction(s,config);
     if(action.type==='pause'){stop(action.reason);return;}
-    if(action.type!=='hunt')stopFire();
+    const collectingWhileFiring=action.type==='move'&&!!action.combatTargetId;
+    if(action.type!=='hunt'&&!collectingWhileFiring)stopFire();
     if(action.type==='route'){void routeTo(s,action.map);return;}
     if(action.type==='sell'){busy=true;Promise.resolve(sellCargo()).then(()=>notify('Venda finalizada')).catch(e=>{failures++;notify('Falha na venda: '+e.message);}).finally(()=>{busy=false;});return;}
-    if(action.type==='move'){navigate(action.x,action.y);notify(action.reason);return;}
+    if(action.type==='move'){
+      if(collectingWhileFiring){
+        const enemy=(s.enemies||[]).find(e=>e?.id===action.combatTargetId&&e.hp>0);
+        if(enemy&&dist(s.player,enemy)<=Number(s.laserRange)){
+          selectNpc(enemy,true);
+          if(config.rockets&&dist(s.player,enemy)<=Number(s.rocketRange)&&s.rocketReady)fireRocket();
+        }else stopFire();
+      }
+      navigate(action.x,action.y);notify(action.reason);return;
+    }
     if(action.type==='hunt'){
       const enemy=(s.enemies||[]).find(e=>e?.id===action.targetId&&e.hp>0);if(!enemy)return;
       const range=Math.max(180,(Number(s.laserRange)||800)*config.combatRange);const d=dist(s.player,enemy);

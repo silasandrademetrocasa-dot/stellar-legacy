@@ -1,13 +1,13 @@
 // V46 progression unlock announcements and safe two-snapshot telemetry comparison.
 export const PROGRESSION_MILESTONES_V460=Object.freeze({
-  3:['MAPA X-2'],
-  5:['MAPA X-3','MISSÕES DIÁRIAS'],
+  3:['MAPA X-2','MISSÕES DIÁRIAS'],
+  5:['MAPA X-3','MISSÕES SEMANAIS'],
   6:['PERFIL DE PILOTO'],
-  7:['MAPA X-4','MISSÕES SEMANAIS'],
+  7:['MAPA X-4','MISSÕES MENSAIS'],
   8:['CLÃ'],
   9:['MAPA X-5'],
-  10:['MISSÕES MENSAIS'],
-  12:['MAPA X-6','MISSÕES ESPECIAIS'],
+  10:['MISSÕES ESPECIAIS','CENTRAL UNIVERSO'],
+  12:['MAPA X-6'],
   15:['MAPA X-7','BATALHAS GALÁCTICAS'],
   18:['MAPA X-8'],
   20:['UNIVERSO DESCONHECIDO U-1'],
