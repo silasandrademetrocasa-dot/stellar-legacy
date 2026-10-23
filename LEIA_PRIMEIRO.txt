@@ -1,12 +1,9 @@
-STELLAR LEGACY V48.5.1 — ACESSO AO FARM OFFLINE
+STELLAR LEGACY V48.7 • FARM OFFLINE MELHORADO E NOMES OFICIAIS
 
-Esta atualizacao requer que a V48.5 esteja instalada. Corrige o bloqueio do menu superior quando o Farm Offline esta ativo.
-
-- PILOTO e MAIS sao posicionados acima do bloqueio de cliques do mapa.
-- O cartaz SYSTEM OFF vira um atalho clicavel para abrir o painel de resgate.
-- Continua impossivel mover, atacar ou fazer compras pelo mapa durante o farm.
-- Nao altera banco, permissoes, recompensas ou sessoes; nao necessita SQL.
-
-INSTALAR: Coloque APENAS este ZIP na raiz do repo. GitHub Actions > Instalador Universal > Run workflow. Aguarde validacao e deploy Render. Depois feche e abra o PWA se necessario.
-
-Nao clique em CANCELAR SEM GANHOS. Para resgatar: PILOTO > FARM OFFLINE > RESGATAR / TERMINAR, ou toque no cartaz SYSTEM OFF.
+1. FAÇA BACKUP do Supabase. Aplique sql/STELLAR_V48_7_OFFLINE_REAL_COMBAT_AND_NPC_NAMES.sql no banco (antes do ZIP).
+2. Não execute farm/resgate durante a atualização. Sessões antigas têm comportamento legado preservado.
+3. Envie somente este ZIP na raiz do GitHub e rode Actions > Instalador Universal.
+4. Verifique todos os testes, confirme Render LIVE, retorne ao app e teste com sessão curta.
+5. Modelagem: laser equipado (nave+drones), multiplicador da munição, habilidades persistidas (PvE/precisão), velocidade, capacidade e resistência HP+escudo dos NPCs. Bônus voláteis de designers, clãs e eventos não entram.
+6. A projeção é estimativa, o crédito continua apenas no claim SQL idempotente.
+7. Não libera bosses ou NPCs especiais, não altera a permissão do ADM e não permite farm na aba de combate online.

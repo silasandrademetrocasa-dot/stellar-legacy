@@ -1,3 +1,4 @@
+import {combatProfileV487,npcCombatCycleV487} from './offline-farm-v487-engine.js';
 /* STELLAR_OFFLINE_FARM_V484 — servidor: sessão persistida e liquidação SQL atômica.
  * Não roda timers em segundo plano, não faz ping artificial para manter o Render acordado.
  */
@@ -27,7 +28,15 @@ export function installOfflineFarmV484(app,{requireUser,asyncRoute,requireEliteA
     noCache(res);
     try{
       const sb=await requireEliteAdmin();
-      const {data,error}=await sb.rpc('stellar_offline_farm_'+method+(method==='start'?'_v485':'_v484'),{p_user:req.user.id,...args});
+      let fn='stellar_offline_farm_'+method+(method==='start'||method==='claim'?'_v487':'_v484');
+      if(method==='start'){
+        const {data:save,error:saveError}=await sb.from('game_saves').select('state,updated_at').eq('user_id',req.user.id).maybeSingle();
+        if(saveError||!save?.state)throw saveError||Error('FARM_SAVE_MISSING');
+        const requested=String(args.p_ammo_key||save.state.selectedLaserAmmo||'lcb10');
+        const model=combatProfileV487(save.state,requested);
+        args={...args,p_ammo_key:requested,p_combat:model,p_baseline_save_at:save.updated_at};
+      }
+      const {data,error}=await sb.rpc(fn,{p_user:req.user.id,...args});
       if(error)throw error;
       if(method==='start'&&data?.status==='running')activityCacheV484.set(String(req.user.id),{at:Date.now(),active:true});
       if(method==='cancel'||method==='claim')activityCacheV484.delete(String(req.user.id));
@@ -83,7 +92,10 @@ export function installOfflineFarmV484(app,{requireUser,asyncRoute,requireEliteA
     const sb=await adm(req,res);if(!sb)return;
     const [cfg,sessions]=await Promise.all([sb.from('stellar_offline_farm_settings_v485').select('*').eq('id',1).single(),sb.from('stellar_offline_farm_v484').select('user_id,map_id,npc_key,started_at,ends_at,minutes').eq('status','running').order('started_at',{ascending:false}).limit(100)]);
     if(cfg.error||sessions.error)return errorResponse(res,cfg.error||sessions.error);
-    noCache(res);return res.json({settings:cfg.data,sessions:sessions.data||[]});
+    const {data:catalog,error:catalogError}=await sb.from('game_npc_config_v1811').select('npc_key,name');
+    if(catalogError)throw catalogError;
+    const byKey=new Map((catalog||[]).map(x=>[x.npc_key,x.name]));
+    noCache(res);return res.json({settings:cfg.data,sessions:(sessions.data||[]).map(x=>({...x,npc_name:byKey.get(x.npc_key)||x.npc_key}))});
   }));
   app.put('/api/offline-farm/v484/admin/settings',requireUser,asyncRoute(async(req,res)=>{
     const sb=await adm(req,res);if(!sb)return;
@@ -119,29 +131,34 @@ export function previewOfflineFarmV485(f, save, prices=[], orePool=[], clock=Dat
  const hp=Math.max(0,Number(npc.hp)||0)+Math.max(0,Number(npc.shield)||0),lv=Math.max(1,Number(f.snapshot?.level)||1);
  const damage=Math.max(1,Number(f.snapshot?.damage_per_shot)||(175+lv*80));
  const killSeconds=f.snapshot?.damage_per_shot?Math.max(25,Math.min(480,Math.ceil(hp/damage*7))):Math.max(35,Math.min(480,Math.ceil(hp/(150+lv*60))*7));
- const shots=f.snapshot?.damage_per_shot?Math.max(1,Math.min(150,Math.ceil(hp/damage))):Math.max(8,Math.min(150,Math.ceil(hp/(175+lv*80))));
- const trip=Math.max(45,Math.min(600,Number(f.snapshot?.trip_seconds)||125));
+ let shots=f.snapshot?.damage_per_shot?Math.max(1,Math.min(150,Math.ceil(hp/damage))):Math.max(8,Math.min(150,Math.ceil(hp/(175+lv*80))));
+ const cycle=f.snapshot?.combat_model==='v487'?npcCombatCycleV487(f.snapshot):null;
+ const perKill=cycle?cycle.killSeconds:killSeconds;
+ if(cycle)shots=cycle.ammoPerKill;
+ const baseTrip=Math.max(45,Math.min(600,Number(f.snapshot?.trip_seconds)||125));
+ const trip=cycle?Math.max(45,Math.min(600,Math.ceil(baseTrip*350/Math.max(100,Number(f.snapshot?.ship_speed)||350)))):baseTrip;
  const limit=Math.max(20,Math.min(2000,Number(f.snapshot?.max_kills)||550));
  let cr=Math.max(0,Number(save.profile?.credits)||0),ammo=Math.max(0,Number(save.ammo?.[f.ammo_key])||0),used=0,kills=0,bought=0,buyCost=0,sold=0,saleCredits=0,mined=0,credits=0,stl=0,xp=0,reason='duration';
  const cargo={...save.cargo},earnedResources={},sellPrices=Object.fromEntries(prices.map(r=>[String(r.resource_key),Math.max(0,Number(r.sell_price)||0)]));
+ const capacity=cycle?Math.max(100,Math.min(15000,Number(f.snapshot?.cargo_capacity)||1500)):1500;
  let cargoUsed=Object.values(cargo).reduce((a,x)=>a+Math.max(0,Number(x)||0),0);
  const mineResource=orePool.find(x=>x.resource_key!=='Xenomit')?.resource_key;
- for(;kills<limit && used+killSeconds<=secs;){
-  if(ammo<shots){const pack=Number(shop.qty)||0,price=Number(shop.price)||0;
-   if(!f.auto_buy||shop.currency!=='credits'||pack<=0||price<=0||cr+credits+saleCredits-buyCost<price){reason='ammo_exhausted';break;}
+ for(;kills<limit && used+perKill<=secs;){
+  while(ammo<shots){const pack=Number(shop.qty)||0,price=Number(shop.price)||0;
+   if(!f.auto_buy||shop.currency!=='credits'||pack<=0||price<=0||cr+credits+saleCredits-buyCost<price||bought>=100){reason='ammo_exhausted';break;}
    if(used+trip>secs){reason='waiting_to_restock';break;}
    used+=trip;ammo+=pack;bought++;buyCost+=price;
   }
-  if(used+killSeconds>secs)break;
-  used+=killSeconds;ammo-=shots;kills++;credits+=Math.max(0,Number(npc.credits)||0);stl+=Math.max(0,Number(npc.stl)||0);xp+=Math.max(0,Number(npc.xp)||0);
+  if(ammo<shots||used+perKill>secs)break;
+  used+=perKill;ammo-=shots;kills++;credits+=Math.max(0,Number(npc.credits)||0);stl+=Math.max(0,Number(npc.stl)||0);xp+=Math.max(0,Number(npc.xp)||0);
   for(const [key,raw] of Object.entries(npc.resources||{})){
-   const n=Math.max(0,Math.min(1000,Number(raw)||0,1500-cargoUsed));if(n>0){cargo[key]=(Number(cargo[key])||0)+n;earnedResources[key]=(earnedResources[key]||0)+n;cargoUsed+=n;}
+   const n=Math.max(0,Math.min(1000,Number(raw)||0,capacity-cargoUsed));if(n>0){cargo[key]=(Number(cargo[key])||0)+n;earnedResources[key]=(earnedResources[key]||0)+n;cargoUsed+=n;}
   }
-  if(f.mine&&mineResource&&kills%5===0&&cargoUsed<1500){const n=Math.min(10,1500-cargoUsed);cargo[mineResource]=(Number(cargo[mineResource])||0)+n;earnedResources[mineResource]=(earnedResources[mineResource]||0)+n;cargoUsed+=n;mined+=n;}
-  if(cargoUsed>=1500){if(!f.auto_sell){reason='cargo_full';break;}if(used+trip>secs){reason='cargo_waiting_sale';break;}used+=trip;sold++;
+  if(f.mine&&mineResource&&kills%5===0&&cargoUsed<capacity){const n=Math.min(10,capacity-cargoUsed);cargo[mineResource]=(Number(cargo[mineResource])||0)+n;earnedResources[mineResource]=(earnedResources[mineResource]||0)+n;cargoUsed+=n;mined+=n;}
+  if(cargoUsed>=capacity){if(!f.auto_sell){reason='cargo_full';break;}if(used+trip>secs){reason='cargo_waiting_sale';break;}used+=trip;sold++;
    for(const [key,raw] of Object.entries(cargo)){if(key==='Xenomit'||!sellPrices[key])continue;const n=Math.max(0,Number(raw)||0);saleCredits+=n*sellPrices[key];cargo[key]=0;}
    cargoUsed=Object.values(cargo).reduce((a,x)=>a+Math.max(0,Number(x)||0),0);
   }
  }
- return {status:'running',estimated:true,elapsedSeconds:secs,durationSeconds:Math.max(1,Math.floor((end-begin)/1000)),damagePerSecond:Number(f.snapshot?.damage_per_second)||null,report:{kills,boxes_collected:kills,xp,npc_credits:credits,stl,ammo_bought:bought,ammo_spent:buyCost,sales:sold,sale_credits:saleCredits,mined_units:mined,ammo_remaining:ammo,credits_net:credits+saleCredits-buyCost,cargo_collected:earnedResources,reason}};
+ return {status:'running',estimated:true,elapsedSeconds:secs,durationSeconds:Math.max(1,Math.floor((end-begin)/1000)),damagePerSecond:cycle?Math.round(Number(f.snapshot?.damage_per_volley||0)*Number(f.snapshot?.hit_chance||.75)/.42):Number(f.snapshot?.damage_per_second)||null,report:{kills,boxes_collected:kills,xp,npc_credits:credits,stl,ammo_bought:bought,ammo_spent:buyCost,sales:sold,sale_credits:saleCredits,mined_units:mined,ammo_remaining:ammo,credits_net:credits+saleCredits-buyCost,cargo_collected:earnedResources,reason,npc_name:f.snapshot?.npc?.name||f.npc_key,laser_count:cycle?Number(f.snapshot.laser_count):null,ammo_per_kill:cycle?cycle.ammoPerKill:null,travel_per_kill:cycle?Number(f.snapshot.move_between_seconds):null}};
 }
