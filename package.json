@@ -1,6 +1,6 @@
 {
   "name": "stellar-legacy",
-  "version": "47.7.6",
+  "version": "47.7.7",
   "type": "module",
   "scripts": {
     "start": "node server/index.js",
@@ -19,5 +19,5 @@
   "engines": {
     "node": ">=18"
   },
-  "release": "V52.5 Visual Global Clean — source consolidado sem patches históricos"
+  "release": "V52.6 Direção 3D e escalas visuais corrigidas — base Clean"
 }

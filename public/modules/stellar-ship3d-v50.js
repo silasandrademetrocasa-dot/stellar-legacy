@@ -1,3 +1,4 @@
+import {modelYawFromHeadingV526,modelZoomFactorV526} from './visual-scale-v526.js';
 /* Stellar Legacy V50 • ships GLB in real-time WebGL2; no CDN/dependencies.
  * Rendering only: ship stats, hitboxes, pathfinding, fire logic and economy are untouched.
  * Self-contained; automatic 2D fallback if WebGL2 or assets fail.
@@ -134,7 +135,7 @@ export function decodeGlb(arrayBuffer){
 function renderMode(){try{return localStorage.getItem('stellar3d.v50')||'auto'}catch{return 'auto'}}
 export function createStellarShipRendererV50(){
   let canvas=null,gl=null,program=null,enabled=true,dead=false,viewportScale=.215;
-  let uploads=new Map(),cache=new Map(),requests=new Set();
+  let uploads=new Map(),cache=new Map(),requests=new Set(),modelZoom=new Map();
   let lastFrameTime=0,framesRendered=0;
   function ensureGL(){
     if(dead||!enabled||renderMode()==='off')return false;
@@ -152,6 +153,16 @@ export function createStellarShipRendererV50(){
   }
   function uploadParts(id,parts){
     if(!gl)return;
+    // Normalização VISUAL do enquadramento. Os GLBs dos cristais e boxes medem
+    // apenas 1-2 unidades, enquanto uma nave tem ~5-6. Sem isso somem no mapa.
+    let minX=Infinity,maxX=-Infinity,minY=Infinity,maxY=-Infinity,minZ=Infinity,maxZ=-Infinity;
+    for(const p of parts){const v=p.positions;for(let n=0;n<v.length;n+=3){
+      minX=Math.min(minX,v[n]);maxX=Math.max(maxX,v[n]);
+      minY=Math.min(minY,v[n+1]);maxY=Math.max(maxY,v[n+1]);
+      minZ=Math.min(minZ,v[n+2]);maxZ=Math.max(maxZ,v[n+2]);
+    }}
+    const span=Math.max(maxX-minX,maxZ-minZ+(maxY-minY)*.42,(maxY-minY)*.9);
+    modelZoom.set(id,viewportScale*modelZoomFactorV526(id,span));
     uploads.set(id,parts.map(p=>{
       const vert=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,vert);gl.bufferData(gl.ARRAY_BUFFER,p.positions,gl.STATIC_DRAW);
       const ind=gl.createBuffer();gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,ind);gl.bufferData(gl.ELEMENT_ARRAY_BUFFER,p.indices,gl.STATIC_DRAW);
@@ -170,8 +181,8 @@ export function createStellarShipRendererV50(){
     if(framesRendered>=3)return null;framesRendered++;
     gl.bindFramebuffer(gl.FRAMEBUFFER,null);gl.viewport(0,0,CANVAS_SIZE,CANVAS_SIZE);
     gl.clearColor(0,0,0,0);gl.clearDepth(1);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
-    gl.useProgram(program);gl.uniform1f(gl.getUniformLocation(program,'uYaw'),Math.PI/2-angle);
-    gl.uniform1f(gl.getUniformLocation(program,'uZoom'),viewportScale);
+    gl.useProgram(program);gl.uniform1f(gl.getUniformLocation(program,'uYaw'),modelYawFromHeadingV526(angle));
+    gl.uniform1f(gl.getUniformLocation(program,'uZoom'),modelZoom.get(shipId)||viewportScale);
     for(const p of parts){
       gl.bindBuffer(gl.ARRAY_BUFFER,p.vert);gl.enableVertexAttribArray(0);gl.vertexAttribPointer(0,3,gl.FLOAT,false,0,0);
       gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,p.ind);
