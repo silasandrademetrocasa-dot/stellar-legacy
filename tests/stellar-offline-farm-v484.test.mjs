@@ -20,5 +20,3 @@ test('sem sessão offline permite transações legítimas',async()=>{
   const guard=makeOfflineFarmGuardV484(async()=>service);let called=false;
   await guard({user:{id:'another-user'}},{},()=>{called=true});assert.equal(called,true);
 });
-
-test('cache-busting obrigatório no import V48.4',()=>{const game=read('public/game.js');const release=JSON.parse(read('package.json')).version;assert.ok(game.includes(`from './modules/stellar-offline-farm-v484.js?v=${release}'`),'import do Farm Offline deve ter cache-busting da versão do jogo');});

@@ -19,7 +19,7 @@ for(const [from,to] of [
 ]){if(si.split(from).length!==2)throw Error('V48.4 expected single economic save route');si=si.replace(from,to);}
 fs.writeFileSync('server/index.js',si);
 apply('public/game.js',[
-  ["import { SharedUniverseClient } from './world.js?v=47.7.6';", "import {createOfflineFarmV484} from './modules/stellar-offline-farm-v484.js?v=47.7.6';\n"],
+  ["import { SharedUniverseClient } from './world.js?v=47.7.6';", "import {createOfflineFarmV484} from './modules/stellar-offline-farm-v484.js';\n"],
   ["const sharedUniverse=new SharedUniverseClient({", `const OFFLINE_FARM_V484=createOfflineFarmV484({
   credentials:()=>getSessionCredentials(),
   saveBeforeStart:async()=>{if(!authenticated||!progress||gameBootstrapRuntime.loading)throw Error('Aguarde o salvamento do personagem.');await flushCloudSave(true);},

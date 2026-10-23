@@ -1,5 +1,5 @@
-// V21 • Service Worker deliberadamente restrito: APENAS offline.html e ícones.
-// Nunca cacheia API, autenticação, WebSocket, dados de jogador ou HTML dinâmico.
+// V21/V48.5 • Worker restrito: apenas offline.html e ícones cacheados.
+// Nunca cacheia API, autenticação, WebSocket ou saves.
 const CACHE='stellar-shell-v22-6-0';
 const OFFLINE='/offline.html';
 self.addEventListener('install',event=>{
@@ -13,4 +13,12 @@ self.addEventListener('fetch',event=>{
  if(req.method!=='GET'||req.mode!=='navigate')return;
  const url=new URL(req.url);if(url.origin!==self.location.origin)return;
  event.respondWith(fetch(req).catch(()=>caches.match(OFFLINE)));
+});
+// Atalha o retorno ao jogo ao tocar em alertas gerados enquanto o PWA está em execução.
+self.addEventListener('notificationclick',event=>{
+ event.notification.close();event.waitUntil(self.clients.matchAll({type:'window',includeUncontrolled:true}).then(async clients=>{
+  const existing=clients.find(c=>new URL(c.url).origin===self.location.origin);
+  if(existing){await existing.focus();return;}
+  if(self.clients.openWindow)await self.clients.openWindow('/');
+ }));
 });

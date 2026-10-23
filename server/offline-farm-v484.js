@@ -27,7 +27,7 @@ export function installOfflineFarmV484(app,{requireUser,asyncRoute,requireEliteA
     noCache(res);
     try{
       const sb=await requireEliteAdmin();
-      const {data,error}=await sb.rpc('stellar_offline_farm_'+method+'_v484',{p_user:req.user.id,...args});
+      const {data,error}=await sb.rpc('stellar_offline_farm_'+method+(method==='start'?'_v485':'_v484'),{p_user:req.user.id,...args});
       if(error)throw error;
       if(method==='start'&&data?.status==='running')activityCacheV484.set(String(req.user.id),{at:Date.now(),active:true});
       if(method==='cancel'||method==='claim')activityCacheV484.delete(String(req.user.id));
@@ -43,18 +43,62 @@ export function installOfflineFarmV484(app,{requireUser,asyncRoute,requireEliteA
       if(save.error)throw save.error;
       const map=String(save.data?.state?.mapId||'');
       if(!/^x[1-8]$/.test(map))return res.json({map,choices:[]});
-      const [spawn,npcs]=await Promise.all([sb.from('game_map_npc_spawns_v1811').select('npc_key').eq('map_id',map).eq('enabled',true),sb.from('game_npc_config_v1811').select('npc_key,name,hp,credits,stl,xp').eq('enabled',true)]);
-      if(spawn.error||npcs.error)throw spawn.error||npcs.error;
+      const [spawn,npcs,ammo,settings]=await Promise.all([sb.from('game_map_npc_spawns_v1811').select('npc_key').eq('map_id',map).eq('enabled',true),sb.from('game_npc_config_v1811').select('npc_key,name,hp,shield,credits,stl,xp').eq('enabled',true),sb.from('live_shop_prices_v16').select('ref_id,price,currency,meta').eq('kind','ammo').eq('enabled',true).eq('shop_visible',true),sb.from('stellar_offline_farm_settings_v485').select('max_minutes').eq('id',1).single()]);
+      if(spawn.error||npcs.error||ammo.error||settings.error)throw spawn.error||npcs.error||ammo.error||settings.error;
       const found=new Set((spawn.data||[]).map(r=>r.npc_key));
-      const choices=(npcs.data||[]).filter(r=>found.has(r.npc_key)&&!/^(boss|rift|elite)/i.test(r.npc_key)).map(r=>({id:r.npc_key,name:r.name,credits:r.credits,stl:r.stl})).sort((a,b)=>Number(a.credits)-Number(b.credits));
-      return res.json({map,choices});
+      const choices=(npcs.data||[]).filter(r=>found.has(r.npc_key)&&!/(boss|rift|elite|suprem|legend|lend|uber|ultra|titan)/i.test(r.npc_key+' '+r.name)).map(r=>({id:r.npc_key,name:r.name,credits:r.credits,stl:r.stl})).sort((a,b)=>Number(a.credits)-Number(b.credits));
+      return res.json({map,choices,ammunition:(ammo.data||[]).filter(r=>['lcb10','mcb25','mcb50','ucb100'].includes(r.ref_id)).map(r=>({id:r.ref_id,price:r.price,currency:r.currency,qty:Number(r.meta?.grant?.qty)||0})),maxMinutes:Number(settings.data?.max_minutes)||240,selectedAmmo:String(save.data?.state?.selectedLaserAmmo||'lcb10')});
     }catch(e){return errorResponse(res,e);}
   }));
   app.post('/api/offline-farm/v484/start',requireUser,asyncRoute(async(req,res)=>{ 
     const b=req.body||{};
-    if(![60,120,240].includes(b.minutes) || ['autoSell','autoBuy','mine'].some(k=>b[k]!==undefined&&typeof b[k]!=='boolean'))
+    if(!Number.isInteger(b.minutes)||b.minutes<30||b.minutes>720||b.minutes%30!==0 || ['autoSell','autoBuy','mine'].some(k=>b[k]!==undefined&&typeof b[k]!=='boolean'))
       return res.status(400).json({error:'Duração ou preferências inválidas.'});
-    return rpc(req,res,'start',{p_minutes:b.minutes,p_auto_sell:b.autoSell!==false,p_auto_buy:b.autoBuy!==false,p_mine:b.mine!==false,p_npc_key:typeof b.npc==='string'&&b.npc.length<=60?b.npc:null});
+    return rpc(req,res,'start',{p_minutes:b.minutes,p_auto_sell:b.autoSell!==false,p_auto_buy:b.autoBuy!==false,p_mine:b.mine!==false,p_npc_key:typeof b.npc==='string'&&b.npc.length<=60?b.npc:null,p_ammo_key:typeof b.ammo==='string'&&b.ammo.length<=20?b.ammo:null});
+  }));
+
+  // The farm cannot accrue SQL rewards while Render sleeps. This endpoint computes an
+  // explicitly non-authoritative preview from the same frozen NPC/ammo/session values.
+  app.get('/api/offline-farm/v484/preview',requireUser,asyncRoute(async(req,res)=>{
+    noCache(res);
+    try{
+      const sb=await requireEliteAdmin();
+      const {data:f,error}=await sb.from('stellar_offline_farm_v484').select('id,status,map_id,npc_key,ammo_key,minutes,auto_buy,auto_sell,mine,started_at,ends_at,snapshot,report').eq('user_id',req.user.id).order('created_at',{ascending:false}).limit(1).maybeSingle();
+      if(error)throw error;
+      if(!f||f.status!=='running')return res.json({status:f?.status||'none',report:f?.report||null});
+      const {data:save,error:saveError}=await sb.from('game_saves').select('state').eq('user_id',req.user.id).maybeSingle();
+      if(saveError)throw saveError;
+      const [resources,orePool]=await Promise.all([sb.from('game_resource_config_v1814').select('resource_key,sell_price').eq('enabled',true),sb.from('game_map_resource_pool_v1814').select('resource_key').eq('enabled',true).eq('map_id',f.map_id).order('resource_key',{ascending:true})]);
+      if(resources.error||orePool.error)throw resources.error||orePool.error;
+      return res.json(previewOfflineFarmV485(f,save?.state||{},resources.data||[],orePool.data||[]));
+    }catch(e){return errorResponse(res,e);}
+  }));
+
+  async function adm(req,res){
+    const {data,error}=await req.sb.rpc('admin_status_v1763');
+    if(error||data?.is_admin!==true){res.status(403).json({error:'Acesso exclusivo do ADM'});return null;}
+    return await requireEliteAdmin();
+  }
+  app.get('/api/offline-farm/v484/admin/settings',requireUser,asyncRoute(async(req,res)=>{
+    const sb=await adm(req,res);if(!sb)return;
+    const [cfg,sessions]=await Promise.all([sb.from('stellar_offline_farm_settings_v485').select('*').eq('id',1).single(),sb.from('stellar_offline_farm_v484').select('user_id,map_id,npc_key,started_at,ends_at,minutes').eq('status','running').order('started_at',{ascending:false}).limit(100)]);
+    if(cfg.error||sessions.error)return errorResponse(res,cfg.error||sessions.error);
+    noCache(res);return res.json({settings:cfg.data,sessions:sessions.data||[]});
+  }));
+  app.put('/api/offline-farm/v484/admin/settings',requireUser,asyncRoute(async(req,res)=>{
+    const sb=await adm(req,res);if(!sb)return;
+    const b=req.body||{};
+    const values={max_minutes:Number(b.max_minutes),damage_percent:Number(b.damage_percent),max_kills:Number(b.max_kills),travel_seconds:Number(b.travel_seconds)};
+    if(!Object.values(values).every(Number.isInteger)||values.max_minutes<30||values.max_minutes>720||values.max_minutes%30!==0||values.damage_percent<50||values.damage_percent>150||values.max_kills<20||values.max_kills>2000||values.travel_seconds<45||values.travel_seconds>600)return res.status(400).json({error:'Configuração fora dos limites de segurança.'});
+    const {data,error}=await sb.from('stellar_offline_farm_settings_v485').update({...values,updated_at:new Date().toISOString()}).eq('id',1).select('*').single();
+    if(error)return errorResponse(res,error);
+    noCache(res);return res.json({ok:true,settings:data});
+  }));
+  app.post('/api/offline-farm/v484/admin/cancel',requireUser,asyncRoute(async(req,res)=>{
+    const sb=await adm(req,res);if(!sb)return;
+    const id=String(req.body?.userId||'');if(!/^[a-f0-9-]{36}$/i.test(id))return res.status(400).json({error:'ID de piloto inválido'});
+    const {data,error}=await sb.rpc('stellar_offline_farm_cancel_v484',{p_user:id});if(error)return errorResponse(res,error);
+    return res.json(data||{ok:true});
   }));
   app.post('/api/offline-farm/v484/settle',requireUser,asyncRoute(async(req,res)=>rpc(req,res,'claim')));
   app.post('/api/offline-farm/v484/cancel',requireUser,asyncRoute(async(req,res)=>rpc(req,res,'cancel')));
@@ -64,4 +108,40 @@ export function installOfflineFarmV484(app,{requireUser,asyncRoute,requireEliteA
 export function makeOfflineFarmGuardV484(requireEliteAdmin){
   return async(req,res,next)=>{try{await offlineFarmEnsureInactiveV484(req.user.id,requireEliteAdmin);next();}
   catch(e){res.status(409).json({code:'FARM_OFFLINE_ACTIVE',error:String(e.message||'Farm offline ativo').slice(0,220)});}};
+}
+
+
+// Preview conservador: sem escrita e sem remuneração antecipada. Pagamento é EXCLUSIVAMENTE o SQL claim.
+export function previewOfflineFarmV485(f, save, prices=[], orePool=[], clock=Date.now()){
+ const begin=new Date(f.started_at).getTime(),end=new Date(f.ends_at).getTime();
+ const secs=Math.max(0,Math.floor((Math.min(clock,end)-begin)/1000));
+ const npc=f.snapshot?.npc||{}, shop=f.snapshot?.shop||{};
+ const hp=Math.max(0,Number(npc.hp)||0)+Math.max(0,Number(npc.shield)||0),lv=Math.max(1,Number(f.snapshot?.level)||1);
+ const damage=Math.max(1,Number(f.snapshot?.damage_per_shot)||(175+lv*80));
+ const killSeconds=f.snapshot?.damage_per_shot?Math.max(25,Math.min(480,Math.ceil(hp/damage*7))):Math.max(35,Math.min(480,Math.ceil(hp/(150+lv*60))*7));
+ const shots=f.snapshot?.damage_per_shot?Math.max(1,Math.min(150,Math.ceil(hp/damage))):Math.max(8,Math.min(150,Math.ceil(hp/(175+lv*80))));
+ const trip=Math.max(45,Math.min(600,Number(f.snapshot?.trip_seconds)||125));
+ const limit=Math.max(20,Math.min(2000,Number(f.snapshot?.max_kills)||550));
+ let cr=Math.max(0,Number(save.profile?.credits)||0),ammo=Math.max(0,Number(save.ammo?.[f.ammo_key])||0),used=0,kills=0,bought=0,buyCost=0,sold=0,saleCredits=0,mined=0,credits=0,stl=0,xp=0,reason='duration';
+ const cargo={...save.cargo},earnedResources={},sellPrices=Object.fromEntries(prices.map(r=>[String(r.resource_key),Math.max(0,Number(r.sell_price)||0)]));
+ let cargoUsed=Object.values(cargo).reduce((a,x)=>a+Math.max(0,Number(x)||0),0);
+ const mineResource=orePool.find(x=>x.resource_key!=='Xenomit')?.resource_key;
+ for(;kills<limit && used+killSeconds<=secs;){
+  if(ammo<shots){const pack=Number(shop.qty)||0,price=Number(shop.price)||0;
+   if(!f.auto_buy||shop.currency!=='credits'||pack<=0||price<=0||cr+credits+saleCredits-buyCost<price){reason='ammo_exhausted';break;}
+   if(used+trip>secs){reason='waiting_to_restock';break;}
+   used+=trip;ammo+=pack;bought++;buyCost+=price;
+  }
+  if(used+killSeconds>secs)break;
+  used+=killSeconds;ammo-=shots;kills++;credits+=Math.max(0,Number(npc.credits)||0);stl+=Math.max(0,Number(npc.stl)||0);xp+=Math.max(0,Number(npc.xp)||0);
+  for(const [key,raw] of Object.entries(npc.resources||{})){
+   const n=Math.max(0,Math.min(1000,Number(raw)||0,1500-cargoUsed));if(n>0){cargo[key]=(Number(cargo[key])||0)+n;earnedResources[key]=(earnedResources[key]||0)+n;cargoUsed+=n;}
+  }
+  if(f.mine&&mineResource&&kills%5===0&&cargoUsed<1500){const n=Math.min(10,1500-cargoUsed);cargo[mineResource]=(Number(cargo[mineResource])||0)+n;earnedResources[mineResource]=(earnedResources[mineResource]||0)+n;cargoUsed+=n;mined+=n;}
+  if(cargoUsed>=1500){if(!f.auto_sell){reason='cargo_full';break;}if(used+trip>secs){reason='cargo_waiting_sale';break;}used+=trip;sold++;
+   for(const [key,raw] of Object.entries(cargo)){if(key==='Xenomit'||!sellPrices[key])continue;const n=Math.max(0,Number(raw)||0);saleCredits+=n*sellPrices[key];cargo[key]=0;}
+   cargoUsed=Object.values(cargo).reduce((a,x)=>a+Math.max(0,Number(x)||0),0);
+  }
+ }
+ return {status:'running',estimated:true,elapsedSeconds:secs,durationSeconds:Math.max(1,Math.floor((end-begin)/1000)),damagePerSecond:Number(f.snapshot?.damage_per_second)||null,report:{kills,boxes_collected:kills,xp,npc_credits:credits,stl,ammo_bought:bought,ammo_spent:buyCost,sales:sold,sale_credits:saleCredits,mined_units:mined,ammo_remaining:ammo,credits_net:credits+saleCredits-buyCost,cargo_collected:earnedResources,reason}};
 }

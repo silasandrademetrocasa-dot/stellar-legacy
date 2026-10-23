@@ -1,49 +1,34 @@
-STELLAR LEGACY • V48.4 FARM OFFLINE ECONÔMICO — CUMULATIVO
+STELLAR LEGACY — V48.5 FARM OFFLINE COCKPIT + ADM
 
-IMPORTANTE: ESTE É UM BUILD CANDIDATO / BETA. TESTAR EM HOMOLOGAÇÃO ANTES DE ATIVAR EM PRODUÇÃO.
+NOVO NA V48.5
+• Painel em PILOTO > AUTOPILOT > FARM OFFLINE (sem botao flutuante)
+• Mapa somente visual, nave e AUX-9 ocultos enquanto sessao offline ativa
+• Painel de ganhos estimados por tempo: NPCs, BOX, XP, creditos, STL, mineracao, venda e compras
+• Selecao de NPC COMUM elegivel no mapa. Boss/Elite/Supremo/Lendario ficam excluidos
+• Munição selecionada (LCB10/MCB25/MCB50/UCB100) e regras de compra por credito
+• Administracao > FARM OFFLINE: limite de tempo, parametro de dano medio simulado,
+  limite de NPCs, tempo de deslocamento e cancelamento ADM de sessoes ativas
+• Alerta de conclusao no PWA se o aplicativo estiver em execucao e com permissao
 
-INSTALAÇÃO (A ORDEM É IMPORTANTE)
-1. Faça backup dos saves e do banco do Supabase.
-2. Execute o script sql/STELLAR_V48_4_FARM_OFFLINE_ECONOMICO.sql no SQL Editor do Supabase.
-3. Confirme que a tabela stellar_offline_farm_v484 e as quatro RPCs foram criadas.
-4. No GitHub, exclua o ZIP anterior da raiz e envie SOMENTE este ZIP V48.4.
-5. Actions → Stellar Legacy — Instalador Universal → Run workflow.
-6. Confira TODOS os testes da Action e o deploy do Render.
-7. No jogo, após login, abra 🌙 FARM OFFLINE, escolha NPC, duração e automações.
-8. Ao ativar, o cliente fecha o WebSocket, bloqueia jogo online e mantém a sessão no Supabase.
-9. Pode fechar a ABA do navegador; na volta resgata/encerra, consulta SQL calcula o resultado.
+LIMITACAO IMPORTANTISSIMA
+Ganhos durante a sessao sao PROJECOES! Nada eh creditado antes do resgate
+confirmado pelo SQL. O farm nao funciona como combate PvP real nem paga recompensas
+continuamente quando o Render dorme. O saldo e consolidado no retorno.
+Com aplicativo COMPLETAMENTE FECHADO, notificacao de push exige etapa adicional
+com service de push + agendador separado do Render Free (nao incluida).
+O dano medio simulado usa nivel, tipo de municao e multiplicador ADM, nao o
+calculo integral do dano da Arena PvP. O objetivo e nao falsificar dano real.
 
-REGRAS DO FARM ECONÔMICO
-- Tempo de 60/120/240 min determinado pelo relógio do Supabase, NÃO pelo navegador.
-- Mapas X-1 a X-8; nível mínimo oficial por mapa; NPCs comuns da tabela oficial de spawns.
-- Respeita créditos/STL/XP do NPC escolhido e coleta dos recursos configurados.
-- Mineração virtual: recurso permitido no mapa, em intervalos do ciclo de combate.
-- Munição é descontada do estoque. Compra automática somente de loja em CRÉDITOS.
-- Ida virtual para vender/reabastecer custa 125 segundos por viagem simulada.
-- Capacidade de carga offline conservadora de 1.500 unidades; vendas a preço oficial.
-- Se faltar munição/capacidade/saldo/tempo, simulação para ou retorna estoque restante.
-- Não gera eventos, boss, PvP, arena, missões, leilão nem recompensas de ranking.
-- Não simula dano real de inimigos nem movimento/desenho visual da nave: é uma
-  PROJEÇÃO ECONÔMICA CONSERVADORA, não o Autopilot real em segundo plano.
-- Bloqueia saves, compras e recompensas online enquanto a sessão estiver ativa.
-- Qualquer save/perfil/recompensa que se altere entre início e resgate provoca
-  conflito e NÃO CREDITA o farm. Cancelamento voluntário não gera recompensas.
-- A liquidação e o recibo são atômicos/idempotentes: duas chamadas não pagam 2x.
-- SQL usa service_role e nunca deve ser disponibilizado ao cliente/navegador.
+ORDEM DE ATUALIZACAO
+1. Realize backup e teste o SQL em homologacao, se disponivel.
+2. Rode SQL: sql/STELLAR_V48_5_FARM_OFFLINE_CONTROL.sql no Supabase.
+   Ele cria settings e uma RPC v485; adapta a liquidacao antiga para os NOVOS
+   snapshots, sem apagar progresso nem liquidar sessao automaticamente.
+3. GitHub: deixe somente ESTE zip na RAIZ. Exclua o ZIP anterior.
+4. Actions > Stellar Legacy — Instalador Universal > Run workflow.
+5. Verifique status da Action e depois Render; teste farm pequeno controlado.
+6. Antes de liberar para jogadores, valide saldo, eventos e anti-fraude com
+   uma sessao no ambiente de teste. Nao habilite sem verificar a liquidacao.
 
-LIMITAÇÕES OPERACIONAIS
-- Render Free pode hibernar quando a aba for fechada. A sessão e o relógio ficam
-  no Supabase, não dependem de manter o servidor online.
-- O tempo é simulado apenas no retorno, com CPU breve ao acionar a RPC.
-- Taxa econômica NÃO é idêntica ao combate ao vivo; é uma primeira fase segura.
-- Versão cliente, servidor e SQL precisam ser liberados juntos.
-- Não aplica SQL automaticamente: o Instalador Universal não executa migrações.
-- Inclui toda a V48.3.1 (Autopilot V48.3 + reconexão + NAVE).
-
-VALIDAÇÃO LOCAL
-- Node --check dos scripts novos.
-- Testes de integração das rotas/guards sem conexão real.
-- Teste de execução repetida do patch.
-- Ainda NÃO validado com gameplay real nem liquidação SQL em banco de produção.
-
-FIX ACTION 11:35 • `verify-release` exige ?v=47.7.6 no import do jogo. O instalador aplica essa correção automaticamente durante `npm run check`. Inclui teste de regressão.
+NAO EXECUTA SQL AUTOMATICAMENTE. Novo SQL eh necessario.
+Nao substitui o repositorio inteiro: ZIP de atualizacao acumulada para o instalador.

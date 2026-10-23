@@ -1,3 +1,4 @@
+/* STELLAR_OFFLINE_FARM_VISUAL_V485 */
 /* STELLAR_OFFLINE_FARM_V484 APPLIED */
 import {saleQuoteV4776} from './modules/sale-policy-v4776.js?v=47.7.6';
 import {stellarConfirmV4776,stellarPromptV4776} from './modules/stellar-dialog-v4776.js?v=47.7.6';
@@ -6897,7 +6898,7 @@ function drawDrones(p){const f=getFaction();progress.drones.forEach((d,i)=>{
   if(img&&img.naturalWidth){const sc=size/Math.max(img.naturalWidth,img.naturalHeight);ctx.save();ctx.translate(x,y);ctx.rotate(a+Math.PI);ctx.shadowColor=glow;ctx.shadowBlur=resolvedQualityMode()==='low'?0:(designer?.rarity==='mythic'?18:designer?13:8);if(resolvedQualityMode()!=='low'&&designer&&'filter' in ctx)ctx.filter=visual.filter||'none';ctx.drawImage(img,-img.naturalWidth*sc/2,-img.naturalHeight*sc/2,img.naturalWidth*sc,img.naturalHeight*sc);ctx.filter='none';if(designer&&resolvedQualityMode()!=='low'){ctx.rotate(-(a+Math.PI));ctx.strokeStyle=visual.accent||glow;ctx.globalAlpha=.65+.2*Math.sin(nowSec()*3+i);ctx.lineWidth=designer.rarity==='mythic'?2:1.2;ctx.beginPath();ctx.arc(0,0,size*.62,0,TWO_PI);ctx.stroke();}ctx.restore();return;}
   ctx.fillStyle=glow;ctx.beginPath();ctx.arc(x,y,designer?5:4,0,TWO_PI);ctx.fill();
 });}
-function drawPet(){
+function drawPet(){if(document.body.classList.contains('stellar-offline-active-v485'))return; 
   if(!progress?.pet?.owned)return;
   const p=screenPos(petRuntime.x,petRuntime.y),mode=progress.pet.activeGear||'off',designer=currentPetDesign(),visual=designer?.visual||{},color=visual.glow||(mode==='guard'?'#ff8c93':mode==='box'?'#ffd46b':mode==='ore'?'#7fffc4':'#7edcff');
   const petId=progress.pet.level>=10?'petElite':'pet',sheet=assetImage(droneMapSheetAsset(petId)),path=droneMapAsset(petId),img=assetImage(path),size=34+(progress.pet.level/15)*10;
@@ -6955,7 +6956,7 @@ function drawLocalShipVitals(p,shipSize){
   ctx.fillStyle='#49cfff';ctx.fillRect(x,y+7,w*shield,4);
   ctx.restore();
 }
-function drawPlayer(){
+function drawPlayer(){if(document.body.classList.contains('stellar-offline-active-v485'))return; 
   const p=screenPos(player.x,player.y),f=getFaction(),a=player.angle||0,designer=currentShipDesign(),visual=designer?.visual||{},color=visual.glow||(f?.color||'#76e0ff'),path=shipMapAsset(progress.activeShipId),img=assetImage(path),sheet=assetImage(shipMapSheetAsset(progress.activeShipId));
   const moving=routeDistance()>4,motion=moving?1:0;
   const ship=SHIPS[progress.activeShipId]||{},shipSize=(ship.id==='citadel'?105:ship.id==='bigboy'?96:ship.id==='goliath'||ship.id==='aegis'?88:78);
