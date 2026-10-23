@@ -1,3 +1,5 @@
+ATENÇÃO: guia histórico das versões anteriores. PARA INSTALAR V49.5, LEIA LEIA_PRIMEIRO_V49_5.txt. O SQL V49 principal já foi aplicado.
+
 STELLAR LEGACY V49.0 — TODAS AS ETAPAS EM UM ZIP
 ==============================================
 ATUALIZAÇÃO INCREMENTAL para o repositório GitHub existente. Não é um jogo independente.

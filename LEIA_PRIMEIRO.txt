@@ -1,3 +1,5 @@
+ATENÇÃO: guia histórico das versões anteriores. PARA INSTALAR V49.5, LEIA LEIA_PRIMEIRO_V49_5.txt. O SQL V49 principal já foi aplicado.
+
 STELLAR LEGACY V48.7 • FARM OFFLINE MELHORADO E NOMES OFICIAIS
 
 1. FAÇA BACKUP do Supabase. Aplique sql/STELLAR_V48_7_OFFLINE_REAL_COMBAT_AND_NPC_NAMES.sql no banco (antes do ZIP).

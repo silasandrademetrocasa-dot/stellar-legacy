@@ -1,0 +1,12 @@
+STELLAR LEGACY V49.5 - PACOTE ACUMULADO EM UM ZIP
+
+1. No GitHub, deixe SOMENTE este ZIP na raiz e rode a Action Instalador Universal.
+2. A Action executa scripts npm run check, incluindo o patch de resgate que impede reload/logout.
+3. SQL: A V49.0 ja esta instalada. Nenhuma nova migracao economica e necessaria. O arquivo sql/STELLAR_V49_5_COMPATIBILIDADE_ACESSO.sql e idempotente e opcional (GRANT service_role em game_admins ja aplicado), nao execute os SQLs antigos novamente.
+4. Farm: RESGATAR/TERMINAR e CANCELAR buscam save SQL e recuperam a cena atual sem relogar. Saldo atualizado apenas no resgate atomico do banco.
+5. Munição: PLS-1 a PLS-4 no painel, mantendo chaves LCB10 a UCB100 no servidor.
+6. NPC: comparador usa tempo selecionado, ammo disponivel, creditos e max_kills, sem prometer ganhos de caixas/mineracao/vendas. Previsao conservadora; nao e pagamento confirmado.
+7. ADM: check independente, auditoria, limites, vendas monitoradas. Preserva sistema V49.
+8. PUSH fechado: depende das chaves VAPID, token e cron externo opcionais ja documentados no LEIA_PRIMEIRO_V49.txt, que acompanham o ZIP. Sem eles, push nao e funcional.
+9. Teste apos deploy: criar sessao curta, encerrar, resgatar e verificar que usuario segue logado, saldo e mapa corretos.
+10. O pacote e PATCH ACUMULADO para repo atual; nao e jogo standalone.

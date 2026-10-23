@@ -1,0 +1,8 @@
+STELLAR LEGACY V49.5.1 — HOTFIX DA ACTION #315 — ZIP UNICO ACUMULADO
+
+CAUSA: O ZIP V49.5 inseriu public/data.js SINTETICO DE TESTE (479 bytes), substituindo indevidamente o catalogo real (~38 KB) no runner. Os 4 testes falharam porque nao encontraram MAPS, ROCKETS, RESOURCES.
+CORRECAO: Este ZIP nao contem public/data.js. O Instalador Universal opera em modo PATCH e preserva o arquivo completo ja existente no GitHub. Um novo teste e um guard no npm run check impedem usar novamente o catalogo sintetico.
+ESTA VERSAO CONTEM TODAS AS FASES V49.1 A V49.5, incluindo resgate sem logout, nomes PLS, comparador limitado, controles ADM e Push opcional.
+COMO INSTALAR: Na RAIZ do GitHub, apague o ZIP antigo V49.5 que falhou, envie somente este ZIP. Rode Actions > Instalador Universal > Run workflow. A Action devera passar pelos testes e entao publicar.
+SQL: Nenhum SQL novo necessario. Nao reaplique os scripts economicos.
+OBS.: Esta e uma correção do ZIP, ainda requer passar na Action e no Render para ser considerada publicada.

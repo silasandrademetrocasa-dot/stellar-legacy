@@ -17,7 +17,7 @@ export function mountFarmV49({shell,request,root=document}){
  let currentOptions=null,adminData=null;
  function syncOptions(options){
   currentOptions=options;
-  const npc=get('v484-npc');if(npc){const previous=npc.value;for(const [id,label] of STRATEGIES){const option=el('option','',label);option.value=id;npc.appendChild(option);}if([...npc.options].some(o=>o.value===previous))npc.value=previous;}
+  const npc=get('v484-npc');if(npc){const previous=npc.value;for(const [id,label] of STRATEGIES){if([...npc.options].some(o=>o.value===id))continue;const option=el('option','',label);option.value=id;npc.appendChild(option);}if([...npc.options].some(o=>o.value===previous))npc.value=previous;}
   const start=get('v484-start');if(start){start.disabled=!options.allowed;start.dataset.v49PermissionBlocked=options.allowed?'false':'true';start.title=options.allowed?'':'O ADM precisa liberar o Farm Offline';}
   const note=get('v49-strategy-note');if(note)note.textContent=options.allowed?`Limite individual: ${options.maxMinutes} min. Compare usando munição real e NPCs do ${String(options.map).toUpperCase()}.`:'Farm bloqueado: aguarde liberação exclusiva do ADM. Resgates antigos continuam disponíveis.';
  }
@@ -27,12 +27,14 @@ export function mountFarmV49({shell,request,root=document}){
   for(const f of data.sessions){const div=el('div','v49-activity');const dt=new Date(f.startedAt).toLocaleString('pt-BR');div.textContent=`${dt} • ${f.npcName} • ${String(f.map).toUpperCase()} • ${f.status}\n${format(f.kills)} NPCs • ${format(f.xp)} XP • ${format(f.stl)} STL • ${format(f.creditsNet)} CR líquidos\n${format(f.killsPerHour)} NPC/h • ${format(f.creditsPerHour)} CR/h • ${format(f.stlPerHour)} STL/h`;div.style.whiteSpace='pre-line';target.appendChild(div);}
  }catch(e){target.textContent=explain(e.message);}}
  async function compare(){const target=get('v49-strategy-list');target.textContent='Calculando rendimento...';try{
-  const ammo=get('v485-ammo')?.value||'lcb10';const out=await request('v49/strategies?ammo='+encodeURIComponent(ammo));target.replaceChildren();
+  const ammo=get('v485-ammo')?.value||'lcb10';
+  const minutes=Number(get('v484-minutes')?.value)||60, autoBuy=get('v484-buy')?.checked!==false;
+  const out=await request('v49/strategies?ammo='+encodeURIComponent(ammo)+'&minutes='+encodeURIComponent(minutes)+'&autoBuy='+(autoBuy?'1':'0'));target.replaceChildren();
   for(const [key,title] of [['credits','CR líquidos/min'],['xp','XP/min'],['stl','STL/min'],['balanced','equilibrado']]){
    const top=out.strategies?.[key]?.[0];if(!top)continue;
-   const div=el('div','v49-activity',`${title}: ${top.name} • ${format(top.perHourCredits)} CR/h • ${format(top.perHourXp)} XP/h • ${format(top.perHourStl)} STL/h • ${format(top.ammoPerKill)} munições/NPC`);target.appendChild(div);
+   const div=el('div','v49-activity',`${title}: ${top.name} • ${format(top.kills)} NPCs • ${format(top.creditsNet)} CR líquidos • ${format(top.xp)} XP • ${format(top.stl)} STL • ${format(top.ammoPerKill)} munições/NPC`);target.appendChild(div);
   }
-  target.appendChild(el('p','v49-muted','Projeções não são ganhos pagos. O NPC escolhido é validado novamente ao iniciar o farm.'));
+  target.appendChild(el('p','v49-muted',`Estimativas para ${out.minutes} min, considerando munição, orçamento e limites de abates. Não incluem venda/mineração nem garantem recompensas.`));
  }catch(e){target.textContent=explain(e.message);}}
  get('v49-history-btn').onclick=()=>void history();get('v49-compare-btn').onclick=()=>void compare();
  get('v49-history').addEventListener('toggle',e=>{if(e.target.open)void history();});
@@ -60,5 +62,5 @@ export function mountFarmV49({shell,request,root=document}){
   adm.querySelector('#v49-adm-load').onclick=()=>void load();adm.addEventListener('toggle',()=>{if(adm.open)void load();});
   adm.querySelector('#v49-adm-save').onclick=async()=>{const userId=adm.querySelector('#v49-adm-user').value,maxText=adm.querySelector('#v49-adm-max').value;try{await request('v49/admin/access',{userId,enabled:adm.querySelector('#v49-adm-grant').checked,maxMinutes:maxText?Number(maxText):null},'PUT');await load();}catch(e){adm.querySelector('#v49-adm-info').textContent=explain(e.message);}};
  }
- return {syncOptions,history,compare};
+ return {syncOptions,history,compare,applyAuthorization:()=>{const start=get('v484-start');if(start&&currentOptions)start.disabled=!currentOptions.allowed;}};
 }

@@ -1,4 +1,5 @@
 import {mountFarmV49} from './stellar-offline-v49-ui.js';
+import {LASER_AMMO} from '../data.js';
 /* STELLAR_OFFLINE_FARM_V485 • HUD & admin editor. Projeções são APENAS estimativas. */
 export function createOfflineFarmV484({credentials,saveBeforeStart,onPauseWorld,onFinish}={}){
  const css=`
@@ -8,6 +9,9 @@ export function createOfflineFarmV484({credentials,saveBeforeStart,onPauseWorld,
  #v484-panel h3{margin:0 0 6px;font-size:19px}#v484-panel p{line-height:1.45}
  #v484-panel button,#v484-panel select,#v484-panel input[type=number],#v485-adm-farm input{padding:9px 10px;margin:4px;background:#20485c;color:white;border:1px solid #377d95;border-radius:9px;max-width:100%;box-sizing:border-box}
  #v484-panel button:disabled{opacity:.5}#v484-panel label{display:block;margin:9px 0}#v484-panel pre{white-space:pre-wrap;line-height:1.55;font:12px system-ui;background:#091522;border-radius:8px;padding:10px}
+ #v484-panel select{max-width:100%;min-width:0;width:min(100%,350px)}
+ #v484-panel label{overflow-wrap:anywhere}
+ #v484-panel section{overscroll-behavior:contain}
  #v484-panel .v484-actions{display:flex;flex-wrap:wrap;gap:4px}#v484-panel .v484-error{color:#ffc4bc}#v484-panel .v485-kpis{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;margin:9px 0}
  #v484-panel .v485-kpis div{background:#09192b;border:1px solid #234967;border-radius:10px;padding:10px}#v484-panel .v485-kpis b{display:block;font-size:19px;margin-top:3px;color:#a9f0ff}#v484-panel .v485-kpis small{color:#9db7c8}
  #v484-panel .v485-progress{height:7px;overflow:hidden;border-radius:8px;background:#244258;margin:9px 0}#v484-panel .v485-progress span{display:block;height:100%;width:0;background:#49d8bc;transition:width .5s}
@@ -28,9 +32,10 @@ export function createOfflineFarmV484({credentials,saveBeforeStart,onPauseWorld,
  const style=document.createElement('style');style.textContent=css;document.head.appendChild(style);
  const escape=x=>String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','\'':'&#39;'}[c]));
  const fmt=n=>Math.round(Number(n)||0).toLocaleString('pt-BR');
+ const ammoName=id=>LASER_AMMO[String(id||'')]?.name||String(id||'');
  const shell=document.createElement('div');shell.id='v484-panel';shell.hidden=true;
  shell.innerHTML=`<section role="dialog" aria-label="Farm Offline">
- <h3>🌙 FARM OFFLINE <small>V49.0</small></h3>
+ <h3>🌙 FARM OFFLINE <small>V49.5</small></h3>
  <p style="color:#afcbd7;font-size:12px">Farm econômico com acerto no retorno. Os ganhos durante a sessão são <b>estimativas</b>, não saldo já creditado.</p>
  <div id="v484-status" role="status">Consultando...</div><div class="v485-progress"><span id="v485-progress-bar"></span></div><div id="v485-countdown" style="font-size:12px;color:#a9d0df"></div>
  <div id="v484-settings">
@@ -63,10 +68,10 @@ export function createOfflineFarmV484({credentials,saveBeforeStart,onPauseWorld,
   clearTimeout(loop);loop=setTimeout(tick,1000);
  }
  async function alertFinished(){if(typeof Notification==='undefined'||Notification.permission!=='granted')return;try{const reg=await navigator.serviceWorker?.ready;if(reg?.showNotification)await reg.showNotification('Stellar Legacy • Farm concluído',{body:'O tempo terminou. Entre no jogo para verificar e resgatar seus ganhos.',tag:'stellar-farm-v485',icon:'/icons/stellar-192.png',data:{url:'/'}});else new Notification('Farm concluído',{body:'Entre no Stellar Legacy para resgatar.'});}catch{}}
- function render(x){latest=x||{status:'none'};status=latest.status||'none';const running=status==='running';active(running);$('v484-status').textContent=running?`FARM ATIVO • ${String(x.map||'').toUpperCase()} • ${x.npc_name||x.npc} • ${x.minutes} min • ${x.ammo||''}`:status==='settled'?'✅ FARM FINALIZADO':status==='conflict'?'⚠️ ATIVIDADE ONLINE DETECTADA — SEM RECOMPENSAS':status==='cancelled'?'FARM CANCELADO':'SEM SESSÃO ATIVA';$('v484-settings').hidden=running;$('v484-start').hidden=running;$('v484-settle').hidden=!running;$('v484-cancel').hidden=!running;$('v485-live').hidden=!running;$('v484-report').hidden=!['settled','conflict'].includes(status);$('v485-progress-bar').style.width=running?'0%':'0%';$('v485-countdown').textContent='';if(status==='settled'){const r=x.report||{};$('v484-report').textContent=`RECOMPENSAS CONFIRMADAS\nNPCs ${fmt(r.kills)} • BOX ${fmt(r.boxes_collected)} • XP ${fmt(r.xp)} • STL ${fmt(r.stl)}\nCréditos NPC ${fmt(r.npc_credits)} • Venda ${fmt(r.sale_credits)}${r.starting_cargo_sale_credits!=null?`\nVendas (porão anterior): ${fmt(r.starting_cargo_sale_credits)} • recursos obtidos no farm: ${fmt(r.farm_generated_sale_credits)}`:''}\nCompras ${fmt(r.ammo_bought)} • Custo ${fmt(r.ammo_spent)} • Crédito líquido ${fmt(r.credits_net)}`;}else if(status==='conflict')$('v484-report').textContent=String(x.report?.message||'Sessão invalidada');if(!running)preview=null;tick();}
+ function render(x){latest=x||{status:'none'};status=latest.status||'none';const running=status==='running';active(running);$('v484-status').textContent=running?`FARM ATIVO • ${String(x.map||'').toUpperCase()} • ${x.npc_name||x.npc} • ${x.minutes} min • ${ammoName(x.ammo)}`:status==='settled'?'✅ FARM FINALIZADO':status==='conflict'?'⚠️ ATIVIDADE ONLINE DETECTADA — SEM RECOMPENSAS':status==='cancelled'?'FARM CANCELADO':'SEM SESSÃO ATIVA';$('v484-settings').hidden=running;$('v484-start').hidden=running;$('v484-settle').hidden=!running;$('v484-cancel').hidden=!running;$('v485-live').hidden=!running;$('v484-report').hidden=!['settled','conflict'].includes(status);$('v485-progress-bar').style.width=running?'0%':'0%';$('v485-countdown').textContent='';if(status==='settled'){const r=x.report||{};$('v484-report').textContent=`RECOMPENSAS CONFIRMADAS\nNPCs ${fmt(r.kills)} • BOX ${fmt(r.boxes_collected)} • XP ${fmt(r.xp)} • STL ${fmt(r.stl)}\nCréditos NPC ${fmt(r.npc_credits)} • Venda ${fmt(r.sale_credits)}${r.starting_cargo_sale_credits!=null?`\nVendas (porão anterior): ${fmt(r.starting_cargo_sale_credits)} • recursos obtidos no farm: ${fmt(r.farm_generated_sale_credits)}`:''}\nCompras ${fmt(r.ammo_bought)} • Custo ${fmt(r.ammo_spent)} • Crédito líquido ${fmt(r.credits_net)}`;}else if(status==='conflict')$('v484-report').textContent=String(x.report?.message||'Sessão invalidada');if(!running)preview=null;tick();}
  async function refresh(){if(!authorized)return;try{const x=await request('status');render(x);$('v484-error').textContent='';if(x.status==='running'){preview=await request('preview');if(preview?.report)showStats(preview.report);return;}
  const options=await request('options');const sel=$('v484-npc'),old=sel.value;sel.innerHTML='<option value="">Automático (mais fraco)</option>'+(options.choices||[]).map(c=>`<option value="${escape(c.id)}">${escape(c.name||c.id)} • ${fmt(c.credits)} CR</option>`).join('');if([...sel.options].some(o=>o.value===old))sel.value=old;
- const ammo=$('v485-ammo'),oldAmmo=ammo.value;ammo.innerHTML=(options.ammunition||[]).map(a=>`<option value="${escape(a.id)}">${escape(a.id.toUpperCase())} • ${fmt(a.qty)} un / ${fmt(a.price)} ${escape(a.currency==='credits'?'CR':'STL')}</option>`).join('');if([...ammo.options].some(o=>o.value===oldAmmo))ammo.value=oldAmmo;else ammo.value=options.selectedAmmo||'lcb10';
+ const ammo=$('v485-ammo'),oldAmmo=ammo.value;ammo.innerHTML=(options.ammunition||[]).map(a=>`<option value="${escape(a.id)}">${escape(ammoName(a.id))} • ${fmt(a.qty)} un / ${fmt(a.price)} ${escape(a.currency==='credits'?'CR':'STL')}</option>`).join('');if([...ammo.options].some(o=>o.value===oldAmmo))ammo.value=oldAmmo;else ammo.value=options.selectedAmmo||'lcb10';
  const mins=$('v484-minutes'),prior=mins.value;const allowed=[30,60,90,120,180,240,360,480,600,720].filter(n=>n<=(options.maxMinutes||240));mins.innerHTML=allowed.map(n=>`<option value="${n}">${n%60===0?n/60+' hora'+(n===60?'':'s'):n+' minutos'}</option>`).join('');if(allowed.includes(Number(prior)))mins.value=prior;
  v49Tools?.syncOptions(options);
  }catch(e){$('v484-error').textContent=e.message;}}

@@ -1150,7 +1150,24 @@ const OFFLINE_FARM_V484=createOfflineFarmV484({
   credentials:()=>getSessionCredentials(),
   saveBeforeStart:async()=>{if(!authenticated||!progress||gameBootstrapRuntime.loading)throw Error('Aguarde o salvamento do personagem.');await flushCloudSave(true);},
   onPauseWorld:async()=>{player.laserFiring=false;sharedUniverse.close();},
-  onFinish:async()=>{location.reload();}
+  onFinish:async()=>{
+    /* STELLAR_FARM_RECOVER_SESSION_V495 - nunca sair da conta por resgatar/cancelar. */
+    try{
+      const currentAccount=String(getUser()?.id||'');
+      if(!authenticated||!currentAccount)throw Error('Sessão do piloto ausente');
+      const serverSave=await loadCloudSave();
+      if(!serverSave?.state)throw Error('Save no servidor ainda indisponível');
+      /* O snapshot antigo do PWA não pode sobrescrever o resgate SQL. */
+      cloudDirty=false;
+      try{localStorage.setItem(saveKey(),JSON.stringify({...serverSave.state,clientSavedAt:0}));}catch{}
+      await afterAuth();
+      if(!authenticated||String(getUser()?.id||'')!==currentAccount)throw Error('Falha ao retomar sessão');
+      showToast('🌙 Farm finalizado • recompensas sincronizadas, piloto conectado','system');
+    }catch(err){
+      console.warn('[farm-v495] sincronização pós-farm',err);
+      showToast('Farm finalizado. Sincronização pendente: tente ATUALIZAR no menu.','system');
+    }
+  }
 });
 const sharedUniverse=new SharedUniverseClient({
   getCredentials:()=>getSessionCredentials(),

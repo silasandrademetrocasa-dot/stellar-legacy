@@ -1,3 +1,4 @@
+import {forecastV495} from './farm-v495-forecast.js';
 import {createHash,timingSafeEqual} from 'node:crypto';
 import {combatProfileV487,npcCombatCycleV487} from './offline-farm-v487-engine.js';
 /* STELLAR_OFFLINE_FARM_V484 — servidor: sessão persistida e liquidação SQL atômica.
@@ -28,14 +29,19 @@ async function farmNpcOptionsV49(sb,map){
  const avail=new Set(spawn.data.map(x=>x.npc_key));
  return npcs.data.filter(n=>avail.has(n.npc_key)&&onlyOrdinaryNpc(n));
 }
-function rankFarmNpcV49(npcs,model,strategy,ammoPack){
+function rankFarmNpcV49(npcs,model,strategy,ammoPack,limits={}){
+ const mins=Math.max(30,Math.min(720,Math.floor(Number(limits.minutes)||60)));
+ const maxKills=Math.max(0,Math.floor(Number(limits.maxKills)||550));
+ const stock=Math.max(0,Math.floor(Number(limits.stock)||0));
+ const credits=Math.max(0,Math.floor(Number(limits.credits)||0));
+ const autoBuy=limits.autoBuy!==false;
  return npcs.map(n=>{
   const cycle=npcCombatCycleV487({...model,npc:n});
-  const minutes=cycle.killSeconds/60;
-  const ammoCost=ammoPack?.currency==='credits'&&Number(ammoPack?.qty)>0?cycle.ammoPerKill*Number(ammoPack.price)/Number(ammoPack.qty):0;
-  const creditNet=saneMoney(n.credits)-ammoCost;
-  const metrics={credits:creditNet/minutes,xp:saneMoney(n.xp)/minutes,stl:saneMoney(n.stl)/minutes,balanced:(creditNet/10000+saneMoney(n.xp)/400+saneMoney(n.stl)*3)/minutes,weakest:-Number(n.hp||0)-Number(n.shield||0)};
-  return {id:n.npc_key,name:n.name,credits:saneMoney(n.credits),xp:saneMoney(n.xp),stl:saneMoney(n.stl),timeSeconds:cycle.killSeconds,ammoPerKill:cycle.ammoPerKill,ammoCost:Math.round(ammoCost),creditNet:Math.round(creditNet),score:metrics[strategy]??metrics.credits,perHourCredits:Math.round(creditNet*3600/cycle.killSeconds),perHourXp:Math.round(saneMoney(n.xp)*3600/cycle.killSeconds),perHourStl:Math.round(saneMoney(n.stl)*3600/cycle.killSeconds)};
+  const forecast=forecastV495({npc:n,cycle,minutes:mins,maxKills,stock,credits,autoBuy,pack:ammoPack});
+  const metrics={credits:forecast.creditsNet,xp:forecast.xp,stl:forecast.stl,balanced:forecast.creditsNet/10000+forecast.xp/400+forecast.stl*3,weakest:-Number(n.hp||0)-Number(n.shield||0)};
+  const score=forecast.kills>0?metrics[strategy]??metrics.credits:Number.NEGATIVE_INFINITY;
+  return {id:n.npc_key,name:n.name,credits:saneMoney(n.credits),xp:saneMoney(n.xp),stl:saneMoney(n.stl),timeSeconds:cycle.killSeconds,ammoPerKill:cycle.ammoPerKill,
+   score,...forecast,perHourCredits:Math.round(forecast.creditsNet*60/mins),perHourXp:Math.round(forecast.xp*60/mins),perHourStl:Math.round(forecast.stl*60/mins)};
  }).sort((a,b)=>b.score-a.score||a.id.localeCompare(b.id));
 }
 function ratio(num,den){return den>0?Math.round(num*100/den)/100:0;}
@@ -89,7 +95,9 @@ export function installOfflineFarmV484(app,{requireUser,asyncRoute,requireEliteA
           ]);
           if(quotes.error)throw quotes.error;
           const pack=quotes.data?.[0];
-          const best=rankFarmNpcV49(npcs,model,strategy,pack&&{price:pack.price,currency:pack.currency,qty:pack.meta?.grant?.qty})[0];
+          const cfg=await sb.from('stellar_offline_farm_settings_v485').select('max_kills').eq('id',1).single();
+          if(cfg.error)throw cfg.error;
+          const best=rankFarmNpcV49(npcs,model,strategy,pack&&{price:pack.price,currency:pack.currency,qty:pack.meta?.grant?.qty},{minutes:args.p_minutes,maxKills:cfg.data?.max_kills,stock:save.state.ammo?.[requested],credits:save.state.profile?.credits,autoBuy:args.p_auto_buy})[0];
           if(!best)throw Error('FARM_NO_ELIGIBLE_NPCS');
           args.p_npc_key=best.id;
         }
@@ -187,15 +195,23 @@ export function installOfflineFarmV484(app,{requireUser,asyncRoute,requireEliteA
       const {data:save,error}=await sb.from('game_saves').select('state').eq('user_id',req.user.id).maybeSingle();
       if(error||!save?.state)throw error||Error('FARM_SAVE_MISSING');
       const state=save.state,ammo=String(req.query.ammo||state.selectedLaserAmmo||'lcb10');
+      const requestedMinutes=Number(req.query.minutes);
+      const minutes=Number.isInteger(requestedMinutes)?Math.min(720,Math.max(30,requestedMinutes)):60;
+      const autoBuy=req.query.autoBuy!=='0';
       const profile=combatProfileV487(state,ammo);
-      const [npcs,quotes]=await Promise.all([
+      const [npcs,quotes,settings,grant]=await Promise.all([
         farmNpcOptionsV49(sb,state.mapId),
-        sb.from('live_shop_prices_v16').select('ref_id,price,currency,meta').eq('kind','ammo').eq('ref_id',ammo).eq('enabled',true).limit(1)
+        sb.from('live_shop_prices_v16').select('ref_id,price,currency,meta').eq('kind','ammo').eq('ref_id',ammo).eq('enabled',true).limit(1),
+        sb.from('stellar_offline_farm_settings_v485').select('max_kills').eq('id',1).single(),
+        farmGrantV49(sb,req.user.id)
       ]);
+      if(settings.error)throw settings.error;
       if(quotes.error)throw quotes.error;
       const q=quotes.data?.[0],pack=q&&{price:q.price,currency:q.currency,qty:q.meta?.grant?.qty};
-      const strategies=Object.fromEntries(['credits','xp','stl','balanced','weakest'].map(key=>[key,rankFarmNpcV49(npcs,profile,key,pack).slice(0,6)]));
-      res.json({map:state.mapId,ammo,model:'v487',strategies,disclaimer:'Estimativas sem garantia. A liquidação oficial é feita no banco após resgate.'});
+      const boundedMinutes=Math.min(minutes,grant.maxMinutes);
+      const budget={minutes:boundedMinutes,maxKills:settings.data?.max_kills,stock:state.ammo?.[ammo],credits:state.profile?.credits,autoBuy};
+      const strategies=Object.fromEntries(['credits','xp','stl','balanced','weakest'].map(key=>[key,rankFarmNpcV49(npcs,profile,key,pack,budget).slice(0,6)]));
+      res.json({map:state.mapId,ammo,minutes:boundedMinutes,autoBuy,model:'v495_forecast',strategies,disclaimer:'PROJEÇÃO NÃO GARANTIDA: simulação conservadora sem ganhos de mineração/vendas ou bônus temporários. Saldo só é creditado no resgate.'});
     }catch(e){errorResponse(res,e);}
   }));
   app.get('/api/offline-farm/v484/v49/access',requireUser,asyncRoute(async(req,res)=>{
