@@ -1,3 +1,4 @@
+/* STELLAR_AUTOPILOT_PHASE3_V483 • Fase 3: rotas, comércio e munição controlados. */
 /* Stellar Legacy V48 — Autopilot assistido (sessão aberta).
  * Não credita recompensas, não escreve saves externos e não concede acesso.
  * Todas as ações reais passam pelos métodos normais do jogo e do Render.
@@ -48,7 +49,7 @@ export function chooseAutopilotAction(raw,cfg){
   }
   const cargoRatio=(Number(s.cargoUsed)||0)/Math.max(1,Number(s.cargoCapacity)||1);
   if(c.autoSell&&cargoRatio>=c.cargoThreshold/100){
-    if(s.canSell)return {type:'sell',reason:'Vendendo recursos no comércio oficial'};
+    if(map==='x1'&&s.canSell)return {type:'sell',reason:'Vendendo recursos no comércio oficial'};
     if(map!=='x1')return {type:'route',map:'x1',reason:'Voltando à base para vender'};
     return {type:'move',x:s.base.x,y:s.base.y,reason:'Aproximando do comerciante'};
   }
@@ -58,8 +59,8 @@ export function chooseAutopilotAction(raw,cfg){
   const affordable=q=>!!q?.catalog_key&&q.currency==='credits'
     &&q.shop_visible!==false&&Number.isFinite(Number(q.price))&&Number(q.price)>0
     &&Number(q.price)<=Number(s.credits)&&Number(q.price)<=Number(s.purchaseBudgetRemaining??c.budget);
-  const lowLaser=c.autoBuy&&Number(s.ammoStock)<=c.ammoMin&&affordable(s.ammoQuote);
-  const lowRocket=c.autoBuy&&c.rockets&&Number(s.rocketStock)<=c.rocketMin&&affordable(s.rocketQuote);
+  const lowLaser=c.autoBuy&&Number(s.ammoStock)<c.ammoMin&&affordable(s.ammoQuote);
+  const lowRocket=c.autoBuy&&c.rockets&&Number(s.rocketStock)<c.rocketMin&&affordable(s.rocketQuote);
   if(lowLaser||lowRocket){
     if(!s.buyPermitted){
       if(map!=='x1')return {type:'route',map:'x1',reason:'Repondo munições: retornando à loja'};
@@ -101,16 +102,46 @@ export function chooseAutopilotAction(raw,cfg){
   // Não inventar inimigos ou recompensas quando a sala está vazia.
   return {type:'idle',reason:'Aguardando NPCs e drops'};
 }
-export function createStellarAutopilotV48({credentials,getIdentity=()=>null,getSnapshot,npcTypes=[],getPortals,getGraphLabel,getGoalLabel,mayTravel,navigate,jumpPortal,selectNpc,stopFire=()=>{},fireRocket,sellCargo,buyPackage,onNotice=()=>{}}={}){
+export function createStellarAutopilotV48({credentials,getIdentity=()=>null,getSnapshot,npcTypes=[],getPortals,getGraphLabel,getGoalLabel,mayTravel,navigate,jumpPortal,selectNpc,stopFire=()=>{},fireRocket,sellCargo,buyPackage,ensureCombatAmmo=()=>true,onNotice=()=>{}}={}){
   let allowed=false,isAdmin=false,authorizedId=null,running=false,loading=false,busy=false,lastTickAt=0,lastAccessAt=0,nextAccessAt=0,panelOpen=false;
   let config=cleanAutopilotConfig(),started=0,ended=0,spent=0,attempts=0,failures=0,boxes=0,drops=0,ores=0,reason='Desligado',startStats=null,lastProgress=null;
   let panel=null,fab=null,grantCache=new Map(),refreshingAccess=false,lastPurchaseAttempt=0,lastHealthyAt=0,lastMapId=null;
+  // STELLAR_AUTOPILOT_PHASE3_V483: checkpoints somente em memoria durante a aba conectada.
+  let pendingJump=null,lastPortalAttempt=0,nextRouteSearch=0,routeMisses=0,nextSaleAttempt=0,buyFailuresInRow=0,lastCheckpointAt=0;
   const now=()=>Date.now();
+  const resumeKey='stellar_autopilot_phase3_v483_resume';
+  function clearResume(){try{sessionStorage.removeItem(resumeKey);}catch{}}
+  function checkpoint(force=false){
+    if(!running)return;
+    const ts=now();if(!force&&ts-lastCheckpointAt<15000)return;
+    lastCheckpointAt=ts;
+    const user=String(getIdentity()||'');if(!user)return;
+    try{sessionStorage.setItem(resumeKey,JSON.stringify({user,config,started,spent,attempts,failures,boxes,drops,ores,storedAt:ts}));}catch{}
+  }
+  function restoreCheckpoint(){
+    if(running||!accessReady())return false;
+    let saved;try{saved=JSON.parse(sessionStorage.getItem(resumeKey)||'null');}catch{return false;}
+    if(!saved)return false;
+    const ts=now(),user=String(getIdentity()||'');
+    if(!user||saved.user!==user||!Number.isFinite(saved.storedAt)||ts-saved.storedAt>180000||
+        !Number.isFinite(saved.started)||ts-saved.started>360*60000){clearResume();return false;}
+    const s=getSnapshot();
+    if(!s?.online||!s.ready||!AUTOPILOT_ALLOWED_MAPS.includes(s.map))return false;
+    const recovered=cleanAutopilotConfig(saved.config);
+    if(ts-saved.started>recovered.minutes*60000){clearResume();return false;}
+    config=recovered;started=saved.started;spent=number(saved.spent,0,recovered.budget,0);
+    attempts=number(saved.attempts,0,1000000,0);failures=number(saved.failures,0,1000000,0);
+    boxes=number(saved.boxes,0,1000000,0);drops=number(saved.drops,0,1000000,0);ores=number(saved.ores,0,1000000,0);
+    ended=0;lastProgress=stats(s);startStats=lastProgress;lastHealthyAt=ts;lastMapId=s.map;
+    pendingJump=null;lastPortalAttempt=0;nextRouteSearch=0;routeMisses=0;nextSaleAttempt=0;buyFailuresInRow=0;
+    running=true;lastTickAt=0;checkpoint(true);
+    notify('Sessão restaurada e acesso validado • retomando '+config.map.toUpperCase());return true;
+  }
   function authHeaders(){const v=credentials()||{};if(!v.accessToken)throw Error('Sessão necessária');return {'Content-Type':'application/json',Authorization:`Bearer ${v.accessToken}`,'X-Game-Session-Id':v.gameSessionId||''};}
   async function request(url,options={}){const res=await fetch(url,{...options,headers:authHeaders(),cache:'no-store'});const data=await res.json().catch(()=>({}));if(!res.ok)throw Error(data.error||`Erro ${res.status}`);return data;}
   function accessReady(){return allowed&&authorizedId===String(getIdentity()||'')&&lastAccessAt>0&&now()-lastAccessAt<75000;}
   function notify(t){reason=t;onNotice(t);renderStatus();}
-  function stop(why='Interrompido'){running=false;busy=false;stopFire();reason=why;ended=now();try{const s=getSnapshot();if(s)lastProgress=stats(s);}catch{}renderStatus();}
+  function stop(why='Interrompido'){running=false;busy=false;pendingJump=null;clearResume();stopFire();reason=why;ended=now();try{const s=getSnapshot();if(s)lastProgress=stats(s);}catch{}renderStatus();}
   function stats(s){return {xp:Number(s?.xp)||0,credits:Number(s?.credits)||0,stl:Number(s?.stl)||0,kills:Number(s?.kills)||0,boxes:Number(s?.boxes)||0,level:Number(s?.level)||1};}
   function sessionReport(){const duration=Math.max(1,((running?now():ended||now())-started)/3600000);const last=lastProgress||stats(getSnapshot());const first=startStats||last;
     return {map:config.map,minutes:Math.round(duration*60),hours:duration,boxes,drops,ores,kills:Math.max(0,last.kills-first.kills),xp:Math.max(0,last.xp-first.xp),grossCredits:last.credits-first.credits+spent,creditsNet:last.credits-first.credits,stl:last.stl-first.stl,spent,levelFrom:first.level,levelTo:last.level,attempts,failures,reason,
@@ -134,6 +165,7 @@ export function createStellarAutopilotV48({credentials,getIdentity=()=>null,getS
         if(identity!==String(getIdentity()||'')){allowed=false;authorizedId=null;return false;}
         authorizedId=identity;allowed=s.allowed===true;isAdmin=s.is_admin===true;
         lastAccessAt=now();nextAccessAt=now()+45000;
+        if(allowed&&!running)restoreCheckpoint();
         if(!allowed&&running)stop('Permissão retirada pelo ADM');
         if(fab)fab.hidden=!allowed;
         if(panel&&!allowed){panel.hidden=true;panelOpen=false;}
@@ -219,27 +251,59 @@ export function createStellarAutopilotV48({credentials,getIdentity=()=>null,getS
       loading=false;renderStatus();
       if(!accepted||!accessReady())return;
     }
+    if(!panel.dataset.phase3MapInitialized&&!running){
+      const m=getSnapshot()?.map, select=panel.querySelector('[data-ap-field="map"]');
+      if(select&&AUTOPILOT_ALLOWED_MAPS.includes(m)){select.value=m;config.map=m;}
+      panel.dataset.phase3MapInitialized='1';
+    }
     panel.hidden=false;panelOpen=true;renderStatus();
   }
   function start(){if(!accessReady())return notify('Permissão não confirmada');if(running)return;const s=getSnapshot();if(!s?.online||!s.ready)return notify('Entre no universo online para ativar');
     config=readConfig();started=now();ended=0;spent=0;attempts=0;failures=0;boxes=0;drops=0;ores=0;startStats=stats(s);lastProgress=startStats;lastTickAt=0;
-    lastHealthyAt=now();lastMapId=s.map;running=true;notify('Rota '+config.map.toUpperCase()+' iniciada');}
+    lastHealthyAt=now();lastMapId=s.map;pendingJump=null;lastPortalAttempt=0;nextRouteSearch=0;routeMisses=0;nextSaleAttempt=0;buyFailuresInRow=0;running=true;checkpoint(true);notify('Rota '+config.map.toUpperCase()+' iniciada');}
   async function safeBuy(s){if(busy||!config.autoBuy||!s.buyPermitted||s.jumping||!s.ready)return;const opts=[{kind:'ammo',stock:s.ammoStock,min:config.ammoMin,quote:s.ammoQuote},{kind:'rocket',stock:s.rocketStock,min:config.rocketMin,quote:s.rocketQuote}];
-    for(const opt of opts){const q=opt.quote;if(!q||!q.catalog_key||q.shop_visible===false||Number(opt.stock)>=opt.min||q.currency!=='credits')continue;
+    for(const opt of opts){const q=opt.quote;if(!q||!q.catalog_key||q.shop_visible===false||Number(opt.stock)>=opt.min||q.currency!=='credits'||(opt.kind==='rocket'&&!config.rockets))continue;
       const cost=Number(q.price)||0;if(cost<=0||cost>config.budget-spent||cost>Number(s.credits)||!Number.isFinite(cost))continue;
-      attempts++;busy=true;try{const ok=await buyPackage(q.catalog_key,opt.kind,{atBase:!!s.atBase,credits:s.credits,budgetRemaining:config.budget-spent});if(ok){spent+=cost;notify('Reabastecimento validado pelo servidor');}else failures++;}catch(e){failures++;notify('Compra recusada: '+e.message);}finally{busy=false;}break;
+      attempts++;busy=true;try{const ok=await buyPackage(q.catalog_key,opt.kind,{atBase:!!s.atBase,credits:s.credits,budgetRemaining:config.budget-spent});if(ok){spent+=cost;buyFailuresInRow=0;notify('Reabastecimento validado pelo servidor');}
+        else{failures++;buyFailuresInRow++;notify('Compra não confirmada pelo servidor');}}
+      catch(e){failures++;buyFailuresInRow++;notify('Compra recusada: '+String(e?.message||e).slice(0,100));}
+      finally{busy=false;}
+      if(buyFailuresInRow>=3)stop('Compra não autorizada após 3 tentativas; verifique loja, saldo e CPU');
+      break;
     }
   }
-  async function routeTo(s,map){const want=getGoalLabel(map);const path=findAutopilotPortalPath(getGraphLabel(),want,getPortals,mayTravel);
-    if(!path){stop('Sem rota permitida para '+want);return;}
-    if(path.length===0)return;
-    const p=path[0];const d=dist(s.player,p);if(d>43){navigate(p.x,p.y);notify(`Portal → ${p.targetLabel}`);return;}
-    if(busy)return;busy=true;try{await jumpPortal(p);notify('Viajando para '+p.targetLabel);}catch(e){
-      failures++;notify('Portal: '+String(e.message||e).slice(0,80));
-      // A rota permanece ativa; outro tick pode revalidar os portais.
-    }finally{busy=false;}
+  async function routeTo(s,map){
+    const ts=now();
+    if(ts<nextRouteSearch)return;
+    const from=getGraphLabel(),want=getGoalLabel(map);
+    if(!from||!want){nextRouteSearch=ts+1800;notify('Aguardando grafo de portais');return;}
+    const path=findAutopilotPortalPath(from,want,getPortals,mayTravel);
+    if(!path){
+      nextRouteSearch=ts+2400;routeMisses++;
+      if(routeMisses>=8){stop('Sem rota liberada para '+want+' (8 verificações)');return;}
+      notify('Recalculando rota para '+want);return;
+    }
+    routeMisses=0;
+    if(!path.length){pendingJump=null;return;}
+    const p=path[0];
+    if(pendingJump&&pendingJump.from===from&&pendingJump.to===p.targetLabel){
+      if(ts-pendingJump.at<18000){notify('Aguardando confirmação de portal → '+p.targetLabel);return;}
+      pendingJump=null;failures++;notify('Portal sem confirmação: recalculando');
+    }
+    const distance=dist(s.player,p);
+    if(distance>43){navigate(p.x,p.y);notify('Portal → '+p.targetLabel);return;}
+    if(busy||ts-lastPortalAttempt<4500)return;
+    lastPortalAttempt=ts;busy=true;checkpoint(true);
+    try{
+      const accepted=await jumpPortal(p);
+      if(accepted===false)throw Error('Viagem recusada pelo jogo');
+      if(!running)return;
+      pendingJump={from,to:p.targetLabel,at:now()};
+      notify('Transição de mapa → '+p.targetLabel);
+    }catch(e){failures++;nextRouteSearch=now()+3500;notify('Portal: '+String(e?.message||e).slice(0,90));}
+    finally{busy=false;}
   }
-  function tick(){if(!running)return;const ts=now();if(ts-lastTickAt<380)return;lastTickAt=ts;
+  function tick(){if(!running){if(allowed&&accessReady())restoreCheckpoint();return;}const ts=now();if(ts-lastTickAt<380)return;lastTickAt=ts;
     if(ts>=nextAccessAt&&!refreshingAccess)void refreshAccess();
     if(!accessReady()){
       // Sem permissão atual válida, NENHUMA ação; tenta reconectar sem zerar a sessão.
@@ -258,8 +322,19 @@ export function createStellarAutopilotV48({credentials,getIdentity=()=>null,getS
       if(lastHealthyAt && ts-lastHealthyAt<60000){notify('Reconectando ao setor • rota preservada');return;}
       stop('Sessão offline por mais de 60s');return;
     }
-    lastHealthyAt=ts;
-    if(lastMapId!==s.map){lastMapId=s.map;notify('Setor '+String(s.map||'').toUpperCase()+' conectado • retomando rota');}
+    lastHealthyAt=ts;checkpoint();
+    if(lastMapId!==s.map){
+      lastMapId=s.map;pendingJump=null;routeMisses=0;nextRouteSearch=0;
+      notify('Setor '+String(s.map||'').toUpperCase()+' conectado • retomando rota');
+    }
+    if(pendingJump){
+      if(getGraphLabel()!==pendingJump.from){pendingJump=null;routeMisses=0;}
+      else if(ts-pendingJump.at<18000){notify('Confirmando chegada ao próximo mapa');return;}
+      else {pendingJump=null;failures++;notify('Portal demorou: nova tentativa controlada');}
+    }
+    if(ts<nextSaleAttempt&&s.map==='x1'&&config.autoSell&&Number(s.cargoUsed)/Math.max(1,Number(s.cargoCapacity))>=config.cargoThreshold/100){
+      notify('Aguardando confirmação da venda no servidor');return;
+    }
     s.purchaseBudgetRemaining=Math.max(0,config.budget-spent);
     lastProgress=stats(s);
     if(busy)return;
@@ -271,7 +346,19 @@ export function createStellarAutopilotV48({credentials,getIdentity=()=>null,getS
     const collectingWhileFiring=action.type==='move'&&!!action.combatTargetId;
     if(action.type!=='hunt'&&!collectingWhileFiring)stopFire();
     if(action.type==='route'){void routeTo(s,action.map);return;}
-    if(action.type==='sell'){busy=true;Promise.resolve(sellCargo()).then(()=>notify('Venda finalizada')).catch(e=>{failures++;notify('Falha na venda: '+e.message);}).finally(()=>{busy=false;});return;}
+    if(action.type==='sell'){
+      if(ts<nextSaleAttempt)return;
+      nextSaleAttempt=ts+6500;busy=true;
+      Promise.resolve().then(()=>sellCargo()).then(ok=>{
+        if(ok===false){failures++;notify('Venda não confirmada pela loja');}
+        else notify('Venda enviada • aguardando sincronização');
+      }).catch(e=>{failures++;notify('Falha na venda: '+String(e?.message||e).slice(0,100));})
+        .finally(()=>{busy=false;});
+      return;
+    }
+    if((action.type==='hunt'||collectingWhileFiring)&&!ensureCombatAmmo()){
+      stopFire();notify('Sem munição utilizável • aguardando reposição');return;
+    }
     if(action.type==='move'){
       if(collectingWhileFiring){
         const enemy=(s.enemies||[]).find(e=>e?.id===action.combatTargetId&&e.hp>0);

@@ -93,6 +93,20 @@ export function setupPilotShipHudV482(doc=document){
     controls.addEventListener('pointerdown',event=>event.stopPropagation());
     controls.addEventListener('touchstart',event=>event.stopPropagation(),{passive:true});
   }
+  // STELLAR-SHIP-RECOVERY-V4827: atalho de emergencia que nao depende do card recolhido.
+  const recoveryMenu=doc.querySelector('#v481MoreGroup .v481-interface-actions');
+  if(recoveryMenu&&!doc.getElementById('v482ShipRecoveryBtn')){
+    const restore=doc.createElement('button');
+    restore.id='v482ShipRecoveryBtn';restore.type='button';
+    restore.className='menu-item';restore.textContent='↗ REABRIR PAINEL NAVE';
+    restore.addEventListener('click',()=>{
+      if(ship.classList.contains('collapsed'))doc.getElementById('statsToggle')?.click();
+      ship.scrollIntoView({behavior:'smooth',block:'nearest',inline:'center'});
+      const menu=doc.getElementById('v481MoreGroup');menu?.classList.remove('open');
+      menu?.querySelector('[data-menu-toggle="more"]')?.setAttribute('aria-expanded','false');
+    });
+    recoveryMenu.appendChild(restore);
+  }
   player.dataset.v482Ready='1';ship.dataset.v482Ready='1';
   let cache='';
   const update=()=>{

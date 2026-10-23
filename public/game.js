@@ -8748,6 +8748,15 @@ const AUTOPILOT_V48=createStellarAutopilotV48({
   jumpPortal:portal=>jumpThroughPortal(portal),
   selectNpc:(npc,fire)=>{if(state.target?.id!==npc.id)selectCombatTarget(npc,{silent:true});player.laserFiring=!!fire;},
   stopFire:()=>{player.laserFiring=false;state.target=null;},
+  // STELLAR_AUTOPILOT_PHASE3_V483: a cotação em CR pode comprar LCB10 sem ela ser a munição selecionada.
+  ensureCombatAmmo:()=>{
+    if(!progress)return false;
+    if(ammoQty(progress.selectedLaserAmmo)>0)return true;
+    const next=['lcb10','mcb25','mcb50'].find(id=>ammoQty(id)>0);
+    if(!next)return false;
+    progress.selectedLaserAmmo=next;
+    updateUI();return true;
+  },
   fireRocket:()=>fireRocket(false),
   sellCargo:()=>sellAllCargo(),
   buyPackage:(key,kind)=>isAtTrader()?applyAuthoritativePurchase(key,kind==='ammo'?'Munição Autopilot':'Mísseis Autopilot'):(autoBuyEnabled()?runAutoBuy(key,kind==='ammo'?'Munição Autopilot':'Mísseis Autopilot'):Promise.resolve(false)),

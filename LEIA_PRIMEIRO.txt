@@ -1,18 +1,55 @@
-STELLAR LEGACY V46.1 - ROTAS LINEARES E PORTAIS ORGANIZADOS
+STELLAR LEGACY • FASE 3 V48.3.0 + HOTFIX NAVE V48.2.7
+PACOTE ÚNICO PARA O INSTALADOR UNIVERSAL DO GITHUB
 
-Requer base 46.0.0 já instalada. Não altera naves, XP, economia, missões, warfront/relés, contas ou saves.
+Este ZIP é uma atualização/patch de instalação, NÃO é o repositório completo.
+Não descompacte o ZIP no GitHub: o instalador universal deve receber o próprio .zip.
 
-Ordem segura:
-1. Remover outros ZIPs da RAIZ do GitHub; subir somente este ZIP.
-2. Executar Actions -> Stellar Legacy - Instalador Universal; aguardar testes e Render LIVE.
-3. Executar o SQL sql/STELLAR_V46_1_ROTAS_LINEARES.sql no Supabase (pode pedir que eu aplique).
-4. Relogar no jogo ou atualizar para receber versão e grafo novos.
-5. Testar portais de ida e volta em cada facção e os 4-X. Nunca executar o SQL ANTES de instalar a V46.1.
+CONTEÚDO
+1. Autopilot continua na troca de mapas e durante reconexão temporária.
+2. Checkpoint do bot na aba (sessionStorage). Se a página recarregar,
+   tenta retomar por até 3 minutos, apenas após revalidar a permissão
+   com o servidor e reencontrar o personagem online.
+3. Armazena o mapa selecionado como destino final. Regressa até X-1
+   para vender/reabastecer pelo grafo de portais liberados, depois volta
+   ao destino configurado.
+4. Não aciona o mesmo portal duas vezes enquanto o salto aguarda confirmação.
+   Recalcula rotas e encerra com aviso após repetidas rotas indisponíveis.
+5. Venda oficial com espera para sincronizar e evitar requisições repetidas.
+6. Munição com estoque baixo: compra no comércio oficial na base;
+   fora da base, somente com AutoBuy autorizado pelo jogo.
+   Compra respeita o orçamento configurado, o saldo e o preço em CR.
+   Após 3 compras recusadas, para com mensagem de diagnóstico.
+7. Caso a munição laser selecionada acabe, tenta equipar munição comum
+   que já exista no inventário antes de retomar a batalha.
+8. Mapa inicial sugerido no Autopilot: setor em que o jogador está.
+9. Hotfix NAVE: minimizada em 40x40, botão N clicável e CONF 1/2 ocultos.
+   Atalho alternativo em MAIS > INTERFACE / HUD > REABRIR PAINEL NAVE.
+10. Testes automáticos adicionados para rotas e compra segura.
 
-PvE: X-1 <-> X-2 <-> ... <-> X-8 <-> U-1 <-> U-2 <-> U-3.
-A parte U-1/U-2/U-3 mantém suas posições existentes; só a entrada em U-1 vinda do X-8 fica central no X-8.
-PvP: 1-1 <-> 4-1, 2-1 <-> 4-2, 3-1 <-> 4-3. Os 4-X continuam interligados; min LV 15.
-Portais físicos nos extremos (a 5,5% / 94,5% em X, 8,5% / 91,5% em Y), ou exatamente no centro se indicado.
-Bonus de salto nao pode pular mapas nem entrar diretamente no PvP; ADM continua salto livre.
+INSTALAÇÃO
+1. GitHub: deixe EXATAMENTE UM .zip na RAIZ do repositório.
+2. Envie este ZIP sem descompactar para a raiz.
+3. Abra Actions > Stellar Legacy — Instalador Universal > Run workflow.
+4. O fluxo aplicará os arquivos, executará npm run check (inclusive os
+   dois patches), e rodará npm test ANTES de gravar as alterações no main.
+5. Apenas se a Action for bem-sucedida, acompanhe o deploy no Render.
+6. Abra o jogo com a aba atualizada para evitar cache do navegador.
 
-IMPORTANTE: este é um ZIP delta, usa o instalador universal, NÃO sobe o ZIP descompactado.
+IMPORTANTE
+- Base esperada: package.json versao 47.7.6 e módulos V48/V48.2.5 presentes.
+- NÃO é necessário SQL novo. Economia, moedas, prêmios, permissões,
+  inventário e progresso continuam autoritativos no servidor.
+- O Autopilot NÃO trabalha com a aba fechada: mantém-se assistido e online.
+- NÃO foi possível validar o jogo real no Render por este ambiente.
+  Os testes finais devem ocorrer no Actions e depois no celular.
+- Não utilizar este ZIP em versão-base desconhecida: o instalador e os
+  patches interrompem a instalação diante de incompatibilidade.
+
+ROTEIRO DE TESTE NO JOGO
+A) Começar em X-2/X-3. Selecionar o mesmo mapa e iniciar Autopilot.
+B) Chegar ao limite de carga; verificar X-1 > venda oficial > retorno.
+C) Laser abaixo do mínimo: CPU oficial ou retorno à loja > compra em CR.
+D) Voltar ao setor de origem e retomar caça/mineração selecionadas.
+E) Simular troca de mapa e recarga da página; conferir retomada com grant.
+F) Minimizar NAVE, tocar N, depois tentar atalho MAIS > INTERFACE / HUD.
+G) Testar orçamento baixo e bloqueios de acesso/portal: sem loops.

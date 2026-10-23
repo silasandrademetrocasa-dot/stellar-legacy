@@ -122,3 +122,27 @@
   #topHudDock #leftStats .v482-gauge-overlay{font-size:8.3px!important}
   #topHudDock #leftStats .v482-ship-meta{font-size:8.3px!important;gap:4px}
 }
+
+/* STELLAR-SHIP-RECOVERY-V4827: manter N clicavel mesmo quando nave esta minimizada.
+   A regra anterior de CONF usa maior especificidade e mantinha os botoes visiveis. */
+#topHudDock #leftStats.collapsed{
+  box-sizing:border-box!important;
+  width:40px!important;min-width:40px!important;max-width:40px!important;
+  height:40px!important;min-height:40px!important;max-height:40px!important;
+  flex:0 0 40px!important;padding:2px!important;overflow:hidden!important;
+  position:relative!important;z-index:28!important;
+}
+#topHudDock #leftStats.collapsed .stats-toolbar #battleConfigToolbar.battle-config-ship-hud-v2014{
+  display:none!important;visibility:hidden!important;pointer-events:none!important;
+}
+#topHudDock #leftStats.collapsed .stats-toolbar{
+  display:flex!important;align-items:center!important;justify-content:center!important;
+  width:36px!important;min-width:36px!important;max-width:36px!important;
+  height:36px!important;min-height:36px!important;max-height:36px!important;
+  margin:0!important;padding:0!important;overflow:visible!important;
+}
+#topHudDock #leftStats.collapsed #statsToggle{
+  display:grid!important;place-items:center!important;position:relative!important;z-index:2!important;
+  width:36px!important;min-width:36px!important;height:36px!important;min-height:36px!important;
+  padding:0!important;margin:0!important;pointer-events:auto!important;touch-action:manipulation!important;
+}
