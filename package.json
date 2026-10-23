@@ -5,10 +5,9 @@
   "scripts": {
     "start": "node server/index.js",
     "dev": "node --watch server/index.js",
-    "check": "node scripts/v481-topbar-patch.mjs && node scripts/v4811-progression-patch.mjs && node scripts/v482-hud-xp-patch.mjs && node scripts/v4825-navigation-autopilot-patch.mjs && node scripts/v48-autopilot-patch.mjs && node scripts/v483-fase3-autopilot-patch.mjs && node scripts/aplicar-hotfix-nave-v4827.mjs && node scripts/v4831-network-recovery-patch.mjs && node scripts/v484-offline-farm-patch.mjs && node scripts/v485-offline-farm-ui-patch.mjs && node scripts/v487-offline-combat-patch.mjs && node scripts/v49-release-integrity.mjs && node scripts/v495-farm-login-recovery-patch.mjs && node scripts/v495-release-integrity.mjs && node scripts/v478-prelaunch-integrity-patch.mjs && node scripts/v4776-apply-patch-status.mjs && node scripts/v5231-preverify-cachefix.mjs && node scripts/verify-release.mjs && node scripts/v50-ships3d-integrate.mjs && node scripts/v50-ships3d-verify.mjs && node scripts/v52-all-in-one-integrate.mjs && node scripts/v52-verify.mjs && node scripts/v523-unify.mjs && node scripts/v523-verify.mjs",
+    "check": "node scripts/verify-release.mjs",
     "test": "node --test tests/*.test.mjs",
-    "verify": "npm run check && npm run check:v21 && npm test",
-    "check:v21": "node scripts/check-v21-package.mjs"
+    "verify": "npm run check && npm test"
   },
   "dependencies": {
     "express": "^4.21.2",
@@ -20,5 +19,5 @@
   "engines": {
     "node": ">=18"
   },
-  "release": "V52.3 Unified Premium Visual 3D"
+  "release": "V52.5 Visual Global Clean — source consolidado sem patches históricos"
 }

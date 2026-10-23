@@ -1,4 +1,0 @@
--- STELLAR V20 ETAPA 3: Rendimento dos minerais e XP do AUX via nova versão do servidor/cliente.
--- Esta etapa NÃO altera as pedras dos mapas (x5=32, x6=28, x7=24, x8=20).
--- Não executar comandos adicionais: lógica segura do jogo incorporada ao V20.
--- Captura Warfront continua sem recompensa monetária direta até validação autoritativa no servidor.

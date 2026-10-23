@@ -1,0 +1,10918 @@
+-- STELLAR LEGACY — ARQUIVO ÚNICO DE REFERÊNCIA DE SQL HISTÓRICO
+-- CONTÉM AS MIGRAÇÕES ANTIGAS DESATIVADAS (todas as linhas comentadas).
+-- NÃO EXECUTE COMO MIGRAÇÃO: o banco de produção já tem essas alterações.
+-- Para reconstruir o banco é necessário extrair e ordenar as migrações,
+-- conferir dependências e gerar uma baseline do esquema REAL do Supabase.
+-- Este arquivo é preservação para auditoria, não altera o banco se executado.
+
+-- ===== START CURRENT_BACKEND.sql | sha256 7761e34ff67ead6f9171d21a637b879a8d6746e60342fbf4cbf644a54ce5cd7e =====
+-- -- Stellar Legacy V12 — Premium Shop, Passe Premium e Clã 2.0
+-- -- Regras de horário em America/Sao_Paulo. pg_cron roda em UTC:
+-- -- 23:00 BRT = 02:00 UTC (rendimento); 00:00 BRT = 03:00 UTC (coleta diária).
+-- 
+-- create extension if not exists pg_cron;
+-- 
+-- alter table public.clans add column if not exists level integer not null default 1;
+-- alter table public.clans add column if not exists mission_kills jsonb not null default '{}'::jsonb;
+-- alter table public.clans add column if not exists total_interest bigint not null default 0;
+-- alter table public.clans add column if not exists total_collected bigint not null default 0;
+-- alter table public.clans add column if not exists total_transfer_fees bigint not null default 0;
+-- alter table public.clans add column if not exists last_interest_date date;
+-- alter table public.clans add column if not exists last_collection_date date;
+-- 
+-- do $$ begin
+--   alter table public.clans add constraint clans_level_v12_check check (level between 1 and 10);
+-- exception when duplicate_object then null; end $$;
+-- 
+-- alter table public.clan_transactions drop constraint if exists clan_transactions_kind_check;
+-- alter table public.clan_transactions add constraint clan_transactions_kind_check
+--   check (kind in ('donation','daily_collection','interest','transfer','level_up'));
+-- 
+-- -- Catálogo em REAL. Somente produtos Elite + Passe/Premium entram aqui.
+-- create table if not exists public.premium_catalog_v12 (
+--   id text primary key,
+--   name text not null,
+--   category text not null check (category in ('battle_pass','premium','elite_item')),
+--   price_brl numeric(10,2) not null check (price_brl >= 0),
+--   item_id text,
+--   quantity integer not null default 1 check (quantity > 0),
+--   description text,
+--   active boolean not null default true,
+--   sort_order integer not null default 100
+-- );
+-- 
+-- insert into public.premium_catalog_v12(id,name,category,price_brl,item_id,quantity,description,sort_order) values
+--  ('battle_pass_monthly','Passe de Batalha Mensal','battle_pass',19.90,null,1,'Libera a trilha Premium da temporada atual, recompensas premium e AUTO-COMBATE durante a temporada.',10),
+--  ('premium_30d','PREMIUM • 30 dias','premium',29.90,null,1,'AUTO-COMBATE, reparo gratuito da nave, regeneração HP/ESC 2x, míssil 20% mais rápido, -5% em itens Elite e -10% no Materializador.',20),
+--  ('elite_lf3','ARC-3','elite_item',4.90,'lf3',1,'Laser Elite • dano 175 • bônus PvE.',100),
+--  ('elite_lf4','ARC-4','elite_item',9.90,'lf4',1,'Laser Elite de alto desempenho.',110),
+--  ('elite_sg3nb02','VSH-5','elite_item',7.90,'sg3nb02',1,'Gerador de escudo Elite • 10.000 ESC • 80% absorção.',120),
+--  ('elite_g3n6900','THR-5','elite_item',5.90,'g3n6900',1,'Motor Elite • +7 velocidade.',130),
+--  ('elite_g3n7900','THR-6','elite_item',9.90,'g3n7900',1,'Motor Elite • +10 velocidade.',140),
+--  ('elite_repair_bot','Nanobot de Reparo • Elite','elite_item',9.90,'repElite',1,'Regenerador Elite para HP e escudo.',150),
+--  ('elite_extra_slots','CPU Expansora de Extras • Elite','elite_item',9.90,'extraSlotCpuElite',1,'Libera +6 slots EXTRAS enquanto equipada.',160),
+--  ('elite_cargo','Módulo de Porão • Elite','elite_item',9.90,'cargoCpuElite',1,'Aumenta o porão em +10.000 enquanto equipado.',170)
+-- on conflict(id) do update set
+--   name=excluded.name, category=excluded.category, price_brl=excluded.price_brl,
+--   item_id=excluded.item_id, quantity=excluded.quantity, description=excluded.description,
+--   active=excluded.active, sort_order=excluded.sort_order;
+-- 
+-- create table if not exists public.premium_accounts_v12 (
+--   user_id uuid primary key references auth.users(id) on delete cascade,
+--   premium_until timestamptz,
+--   battle_pass_season text,
+--   updated_at timestamptz not null default now()
+-- );
+-- 
+-- create table if not exists public.premium_purchases_v12 (
+--   id bigserial primary key,
+--   user_id uuid not null references auth.users(id) on delete cascade,
+--   product_id text not null references public.premium_catalog_v12(id),
+--   price_brl numeric(10,2) not null,
+--   test_purchase boolean not null default true,
+--   created_at timestamptz not null default now()
+-- );
+-- 
+-- alter table public.premium_catalog_v12 enable row level security;
+-- alter table public.premium_accounts_v12 enable row level security;
+-- alter table public.premium_purchases_v12 enable row level security;
+-- revoke all on public.premium_catalog_v12 from anon, authenticated;
+-- revoke all on public.premium_accounts_v12 from anon, authenticated;
+-- revoke all on public.premium_purchases_v12 from anon, authenticated;
+-- 
+-- -- ==================== CLÃ • REQUISITOS E LEVEL ====================
+-- create or replace function public.clan_interest_rate_v12(p_level integer)
+-- returns numeric language sql immutable as $$
+--   select case greatest(1,least(10,coalesce(p_level,1)))
+--     when 1 then 5.0 when 2 then 5.5 when 3 then 6.0 when 4 then 6.5 when 5 then 7.0
+--     when 6 then 7.5 when 7 then 8.0 when 8 then 8.5 when 9 then 9.0 else 10.0 end::numeric;
+-- $$;
+-- 
+-- create or replace function public.clan_requirement_v12(p_current_level integer)
+-- returns jsonb language sql immutable as $$
+--   select case greatest(1,least(10,coalesce(p_current_level,1)))
+--     when 1 then jsonb_build_object('next_level',2,'xp',20000,'credits',5000000,'mission',jsonb_build_object('streuner',100))
+--     when 2 then jsonb_build_object('next_level',3,'xp',60000,'credits',15000000,'mission',jsonb_build_object('lordakia',150))
+--     when 3 then jsonb_build_object('next_level',4,'xp',160000,'credits',40000000,'mission',jsonb_build_object('saimon',200))
+--     when 4 then jsonb_build_object('next_level',5,'xp',400000,'credits',100000000,'mission',jsonb_build_object('mordon',150))
+--     when 5 then jsonb_build_object('next_level',6,'xp',1120000,'credits',250000000,'mission',jsonb_build_object('devolarium',100))
+--     when 6 then jsonb_build_object('next_level',7,'xp',2880000,'credits',600000000,'mission',jsonb_build_object('sibelon',100))
+--     when 7 then jsonb_build_object('next_level',8,'xp',7680000,'credits',1200000000,'mission',jsonb_build_object('boss_mordon',50,'boss_devolarium',50))
+--     when 8 then jsonb_build_object('next_level',9,'xp',20480000,'credits',2500000000,'mission',jsonb_build_object('boss_sibelon',100))
+--     when 9 then jsonb_build_object('next_level',10,'xp',51200000,'credits',5000000000,'mission',jsonb_build_object('boss_any',300))
+--     else jsonb_build_object('next_level',null,'xp',0,'credits',0,'mission','{}'::jsonb)
+--   end;
+-- $$;
+-- 
+-- create or replace function public.clan_level_status_v12(p_clan_id uuid)
+-- returns jsonb language plpgsql security definer set search_path=public,auth as $$
+-- declare
+--   v_clan public.clans%rowtype; v_req jsonb; v_xp bigint:=0; v_members integer:=0; v_mission jsonb:='{}'::jsonb;
+--   v_ok boolean:=true; k text; target bigint; current bigint;
+-- begin
+--   select * into v_clan from public.clans where id=p_clan_id;
+--   if not found then return null; end if;
+--   v_req:=public.clan_requirement_v12(v_clan.level);
+--   select coalesce(sum(coalesce(p.xp,0)),0)::bigint,count(*)::integer into v_xp,v_members
+--   from public.clan_members cm join public.profiles p on p.id=cm.user_id where cm.clan_id=p_clan_id;
+--   for k,target in select key,(value::text)::bigint from jsonb_each(v_req->'mission') loop
+--     current:=coalesce((v_clan.mission_kills->>k)::bigint,0);
+--     v_mission:=v_mission||jsonb_build_object(k,jsonb_build_object('current',current,'target',target,'done',current>=target));
+--     if current<target then v_ok:=false; end if;
+--   end loop;
+--   if v_clan.level>=10 then v_ok:=false; end if;
+--   if v_xp<coalesce((v_req->>'xp')::bigint,0) then v_ok:=false; end if;
+--   if v_clan.vault_credits<coalesce((v_req->>'credits')::bigint,0) then v_ok:=false; end if;
+--   return jsonb_build_object(
+--     'level',v_clan.level,'interest_rate',public.clan_interest_rate_v12(v_clan.level),'member_xp',v_xp,'members',v_members,'vault_credits',v_clan.vault_credits,
+--     'requirements',v_req,'mission_progress',v_mission,'ready',v_ok
+--   );
+-- end;$$;
+-- 
+-- create or replace function public.evaluate_clan_level_v12(p_clan_id uuid)
+-- returns jsonb language plpgsql security definer set search_path=public,auth as $$
+-- declare v_status jsonb; v_level integer; v_cost bigint; v_owner uuid; v_new integer;
+-- begin
+--   select level,owner_id into v_level,v_owner from public.clans where id=p_clan_id for update;
+--   if v_level is null then return null; end if;
+--   v_status:=public.clan_level_status_v12(p_clan_id);
+--   if coalesce((v_status->>'ready')::boolean,false) then
+--     v_cost:=(v_status->'requirements'->>'credits')::bigint; v_new:=v_level+1;
+--     update public.clans set level=v_new,vault_credits=vault_credits-v_cost,mission_kills='{}'::jsonb,updated_at=now() where id=p_clan_id;
+--     insert into public.clan_transactions(clan_id,actor_id,kind,gross_amount,net_amount,burn_amount)
+--       values(p_clan_id,v_owner,'level_up',v_cost,0,v_cost);
+--     return public.clan_level_status_v12(p_clan_id)||jsonb_build_object('leveled_up',true,'new_level',v_new,'cost_paid',v_cost);
+--   end if;
+--   return v_status||jsonb_build_object('leveled_up',false);
+-- end;$$;
+-- 
+-- create or replace function public.record_clan_alien_kill_v12(p_npc_type text,p_is_boss boolean default false)
+-- returns jsonb language plpgsql security definer set search_path=public,auth as $$
+-- declare v_uid uuid:=auth.uid(); v_clan uuid; v_key text; v_kills jsonb; v_result jsonb;
+-- begin
+--   if v_uid is null then raise exception 'Sessão inválida.'; end if;
+--   select clan_id into v_clan from public.clan_members where user_id=v_uid;
+--   if v_clan is null then return jsonb_build_object('ok',true,'in_clan',false); end if;
+--   v_key:=lower(regexp_replace(coalesce(p_npc_type,''),'[^a-zA-Z0-9_]+','','g'));
+--   if v_key='' then return jsonb_build_object('ok',true,'in_clan',true); end if;
+--   select mission_kills into v_kills from public.clans where id=v_clan for update;
+--   if p_is_boss then
+--     v_kills:=jsonb_set(v_kills,array['boss_'||v_key],to_jsonb(coalesce((v_kills->>('boss_'||v_key))::bigint,0)+1),true);
+--     v_kills:=jsonb_set(v_kills,array['boss_any'],to_jsonb(coalesce((v_kills->>'boss_any')::bigint,0)+1),true);
+--   else
+--     v_kills:=jsonb_set(v_kills,array[v_key],to_jsonb(coalesce((v_kills->>v_key)::bigint,0)+1),true);
+--   end if;
+--   update public.clans set mission_kills=v_kills,updated_at=now() where id=v_clan;
+--   v_result:=public.evaluate_clan_level_v12(v_clan);
+--   return jsonb_build_object('ok',true,'in_clan',true,'status',v_result);
+-- end;$$;
+-- 
+-- -- ==================== CLÃ • ECONOMIA DIÁRIA ====================
+-- create or replace function public.process_all_clan_interest_v12()
+-- returns jsonb language plpgsql security definer set search_path=public,auth as $$
+-- declare v_date date:=(now() at time zone 'America/Sao_Paulo')::date; c record; v_amount bigint; v_count integer:=0; v_total bigint:=0;
+-- begin
+--   for c in select id,owner_id,level,vault_credits from public.clans where last_interest_date is distinct from v_date for update loop
+--     v_amount:=floor(c.vault_credits*public.clan_interest_rate_v12(c.level)/100.0)::bigint;
+--     update public.clans set vault_credits=vault_credits+v_amount,total_interest=total_interest+v_amount,last_interest_date=v_date,updated_at=now() where id=c.id;
+--     if v_amount>0 then
+--       insert into public.clan_transactions(clan_id,actor_id,kind,gross_amount,net_amount,burn_amount) values(c.id,c.owner_id,'interest',v_amount,v_amount,0);
+--     end if;
+--     v_count:=v_count+1; v_total:=v_total+v_amount;
+--   end loop;
+--   return jsonb_build_object('ok',true,'date',v_date,'clans',v_count,'interest',v_total);
+-- end;$$;
+-- 
+-- create or replace function public.process_all_clan_collection_v12()
+-- returns jsonb language plpgsql security definer set search_path=public,auth as $$
+-- declare v_date date:=(now() at time zone 'America/Sao_Paulo')::date; c record; m record; v_take bigint; v_new bigint; v_clan_total bigint; v_total bigint:=0; v_members integer:=0;
+-- begin
+--   for c in select id,owner_id from public.clans where last_collection_date is distinct from v_date for update loop
+--     v_clan_total:=0;
+--     for m in
+--       select cm.user_id,coalesce(p.credits,0)::bigint credits
+--       from public.clan_members cm join public.profiles p on p.id=cm.user_id
+--       where cm.clan_id=c.id order by cm.joined_at for update of p
+--     loop
+--       v_take:=floor(m.credits*0.10)::bigint;
+--       if v_take>0 then
+--         v_new:=m.credits-v_take;
+--         update public.profiles set credits=v_new,updated_at=now() where id=m.user_id;
+--         update public.game_saves set state=jsonb_set(
+--           jsonb_set(coalesce(state,'{}'::jsonb),'{profile}',coalesce(state->'profile','{}'::jsonb)||jsonb_build_object('credits',v_new),true),
+--           '{serverEconomy}',coalesce(state->'serverEconomy','{}'::jsonb)||jsonb_build_object('lastClanCollectionDate',v_date,'lastClanCollectionAmount',v_take),true
+--         ),updated_at=now() where user_id=m.user_id;
+--         insert into public.clan_transactions(clan_id,actor_id,kind,gross_amount,net_amount,burn_amount) values(c.id,m.user_id,'daily_collection',v_take,v_take,0);
+--         v_clan_total:=v_clan_total+v_take; v_members:=v_members+1;
+--       end if;
+--     end loop;
+--     update public.clans set vault_credits=vault_credits+v_clan_total,total_collected=total_collected+v_clan_total,last_collection_date=v_date,updated_at=now() where id=c.id;
+--     perform public.evaluate_clan_level_v12(c.id);
+--     v_total:=v_total+v_clan_total;
+--   end loop;
+--   return jsonb_build_object('ok',true,'date',v_date,'collected',v_total,'members_charged',v_members);
+-- end;$$;
+-- 
+-- -- Doação manual fica permanentemente desligada na V12.
+-- create or replace function public.donate_clan_credits_v12(p_amount bigint)
+-- returns jsonb language plpgsql security definer set search_path=public,auth as $$
+-- begin raise exception 'Na V12 o cofre recebe Créditos apenas pela coleta automática diária de 10%%.'; end;$$;
+-- 
+-- -- Repasse: valor informado sai do cofre; destinatário recebe 95%; 5% é juros queimado.
+-- create or replace function public.transfer_clan_credits_v12(p_target_callsign text,p_amount bigint)
+-- returns jsonb language plpgsql security definer set search_path=public,auth as $$
+-- declare v_uid uuid:=auth.uid(); v_clan uuid; v_role text; v_target uuid; v_target_name text; v_matches integer; v_vault bigint; v_net bigint; v_fee bigint;
+-- begin
+--   if v_uid is null then raise exception 'Sessão inválida.'; end if;
+--   if p_amount is null or p_amount<=0 then raise exception 'Informe um valor maior que zero.'; end if;
+--   select clan_id,role into v_clan,v_role from public.clan_members where user_id=v_uid;
+--   if v_clan is null then raise exception 'Você não pertence a um clã.'; end if;
+--   if v_role<>'owner' then raise exception 'Somente o líder pode usar o cofre.'; end if;
+--   select count(*) into v_matches from public.profiles where lower(callsign)=lower(trim(p_target_callsign));
+--   if v_matches=0 then raise exception 'Jogador não encontrado.'; end if;
+--   if v_matches>1 then raise exception 'Há mais de um jogador com esse callsign. Use um callsign único.'; end if;
+--   select id,callsign into v_target,v_target_name from public.profiles where lower(callsign)=lower(trim(p_target_callsign));
+--   if v_target=v_uid then raise exception 'Escolha outro jogador.'; end if;
+--   select vault_credits into v_vault from public.clans where id=v_clan for update;
+--   if coalesce(v_vault,0)<p_amount then raise exception 'Saldo insuficiente no cofre do clã.'; end if;
+--   v_net:=floor(p_amount*0.95)::bigint; v_fee:=p_amount-v_net;
+--   update public.clans set vault_credits=vault_credits-p_amount,total_transfer_fees=total_transfer_fees+v_fee,updated_at=now() where id=v_clan returning vault_credits into v_vault;
+--   insert into public.clan_credit_grants(clan_id,sender_id,recipient_id,amount) values(v_clan,v_uid,v_target,v_net);
+--   insert into public.clan_transactions(clan_id,actor_id,target_user_id,kind,gross_amount,net_amount,burn_amount) values(v_clan,v_uid,v_target,'transfer',p_amount,v_net,v_fee);
+--   return jsonb_build_object('ok',true,'target_user_id',v_target,'target_callsign',v_target_name,'gross_amount',p_amount,'net_amount',v_net,'fee',v_fee,'vault_credits',v_vault);
+-- end;$$;
+-- 
+-- create or replace function public.get_my_clan_v12()
+-- returns jsonb language plpgsql security definer set search_path=public,auth as $$
+-- declare v_uid uuid:=auth.uid(); v_clan_id uuid; v_role text; v_clan jsonb; v_members jsonb:='[]'::jsonb; v_transactions jsonb:='[]'::jsonb; v_pending bigint:=0; v_admin boolean:=false; v_status jsonb;
+-- begin
+--   if v_uid is null then raise exception 'Sessão inválida.'; end if;
+--   select exists(select 1 from public.game_admins ga where ga.user_id=v_uid and lower(coalesce(ga.role,''))='admin') into v_admin;
+--   select cm.clan_id,cm.role into v_clan_id,v_role from public.clan_members cm where cm.user_id=v_uid;
+--   select coalesce(sum(g.amount),0) into v_pending from public.clan_credit_grants g where g.recipient_id=v_uid and not g.claimed;
+--   if v_clan_id is null then return jsonb_build_object('is_admin',v_admin,'role',null,'clan',null,'members','[]'::jsonb,'transactions','[]'::jsonb,'pending_credits',v_pending); end if;
+--   select jsonb_build_object('id',c.id,'name',c.name,'tag',c.tag,'owner_id',c.owner_id,'level',c.level,'vault_credits',c.vault_credits,
+--     'total_collected',c.total_collected,'total_interest',c.total_interest,'total_transfer_fees',c.total_transfer_fees,
+--     'last_interest_date',c.last_interest_date,'last_collection_date',c.last_collection_date,'created_at',c.created_at)
+--     into v_clan from public.clans c where c.id=v_clan_id;
+--   v_status:=public.clan_level_status_v12(v_clan_id);
+--   select coalesce(jsonb_agg(jsonb_build_object('user_id',p.id,'callsign',p.callsign,'level',coalesce(p.level,1),'xp',coalesce(p.xp,0),'credits',coalesce(p.credits,0),'role',cm.role,'joined_at',cm.joined_at)
+--     order by case when cm.role='owner' then 0 else 1 end,p.callsign),'[]'::jsonb)
+--     into v_members from public.clan_members cm join public.profiles p on p.id=cm.user_id where cm.clan_id=v_clan_id;
+--   select coalesce(jsonb_agg(x.obj order by x.created_at desc),'[]'::jsonb) into v_transactions from (
+--     select t.created_at,jsonb_build_object('id',t.id,'kind',t.kind,'gross_amount',t.gross_amount,'net_amount',t.net_amount,'burn_amount',t.burn_amount,
+--       'actor_callsign',pa.callsign,'target_callsign',pt.callsign,'created_at',t.created_at) obj
+--     from public.clan_transactions t left join public.profiles pa on pa.id=t.actor_id left join public.profiles pt on pt.id=t.target_user_id
+--     where t.clan_id=v_clan_id order by t.created_at desc limit 40) x;
+--   return jsonb_build_object('is_admin',v_admin,'role',v_role,'clan',v_clan,'level_status',v_status,'members',v_members,'transactions',v_transactions,'pending_credits',v_pending);
+-- end;$$;
+-- 
+-- drop function if exists public.list_clans_v12();
+-- create function public.list_clans_v12()
+-- returns table(id uuid,name text,tag text,member_count integer,level integer,created_at timestamptz)
+-- language sql security definer set search_path=public,auth as $$
+--   select c.id,c.name,c.tag,count(cm.user_id)::integer,c.level,c.created_at
+--   from public.clans c left join public.clan_members cm on cm.clan_id=c.id
+--   group by c.id,c.name,c.tag,c.level,c.created_at order by c.level desc,count(cm.user_id) desc,c.created_at asc;
+-- $$;
+-- 
+-- -- ==================== PREMIUM SHOP / TESTE ADM ====================
+-- create or replace function public.get_premium_shop_v12()
+-- returns jsonb language plpgsql security definer set search_path=public,auth as $$
+-- declare v_uid uuid:=auth.uid(); v_admin boolean:=false; v_until timestamptz; v_season text; v_current text:=to_char((now() at time zone 'America/Sao_Paulo'),'YYYY-MM'); v_catalog jsonb;
+-- begin
+--   if v_uid is null then raise exception 'Sessão inválida.'; end if;
+--   select exists(select 1 from public.game_admins ga where ga.user_id=v_uid and lower(coalesce(ga.role,''))='admin') into v_admin;
+--   select premium_until,battle_pass_season into v_until,v_season from public.premium_accounts_v12 where user_id=v_uid;
+--   select coalesce(jsonb_agg(jsonb_build_object('id',id,'name',name,'category',category,'price_brl',price_brl,'item_id',item_id,'quantity',quantity,'description',description) order by sort_order,id),'[]'::jsonb)
+--     into v_catalog from public.premium_catalog_v12 where active;
+--   return jsonb_build_object('is_admin',v_admin,'can_purchase',v_admin,'test_mode',true,'premium_until',v_until,'premium_active',coalesce(v_until>now(),false),
+--     'battle_pass_season',v_season,'battle_pass_active',coalesce(v_season=v_current,false),'current_season',v_current,'catalog',v_catalog);
+-- end;$$;
+-- 
+-- create or replace function public.test_purchase_premium_v12(p_product_id text)
+-- returns jsonb language plpgsql security definer set search_path=public,auth as $$
+-- declare v_uid uuid:=auth.uid(); v_admin boolean:=false; v_product public.premium_catalog_v12%rowtype; v_state jsonb; v_inv jsonb; v_have integer:=0; v_until timestamptz; v_season text:=to_char((now() at time zone 'America/Sao_Paulo'),'YYYY-MM');
+-- begin
+--   if v_uid is null then raise exception 'Sessão inválida.'; end if;
+--   select exists(select 1 from public.game_admins ga where ga.user_id=v_uid and lower(coalesce(ga.role,''))='admin') into v_admin;
+--   if not v_admin then raise exception 'Compras reais ainda não foram liberadas. A Loja Premium está em modo de visualização.'; end if;
+--   select * into v_product from public.premium_catalog_v12 where id=p_product_id and active;
+--   if not found then raise exception 'Produto Premium inválido.'; end if;
+--   insert into public.premium_purchases_v12(user_id,product_id,price_brl,test_purchase) values(v_uid,v_product.id,v_product.price_brl,true);
+--   insert into public.premium_accounts_v12(user_id) values(v_uid) on conflict(user_id) do nothing;
+--   if v_product.category='premium' then
+--     update public.premium_accounts_v12 set premium_until=greatest(coalesce(premium_until,now()),now())+interval '30 days',updated_at=now() where user_id=v_uid returning premium_until into v_until;
+--     return jsonb_build_object('ok',true,'product_id',v_product.id,'category',v_product.category,'premium_until',v_until);
+--   elsif v_product.category='battle_pass' then
+--     update public.premium_accounts_v12 set battle_pass_season=v_season,updated_at=now() where user_id=v_uid;
+--     return jsonb_build_object('ok',true,'product_id',v_product.id,'category',v_product.category,'battle_pass_season',v_season);
+--   else
+--     select state into v_state from public.game_saves where user_id=v_uid for update;
+--     if v_state is null then raise exception 'Entre no jogo e salve seu progresso antes de testar compra de item.'; end if;
+--     v_inv:=case when jsonb_typeof(v_state->'inventory')='object' then v_state->'inventory' else '{}'::jsonb end;
+--     v_have:=coalesce((v_inv->>v_product.item_id)::integer,0);
+--     v_inv:=jsonb_set(v_inv,array[v_product.item_id],to_jsonb(v_have+v_product.quantity),true);
+--     v_state:=jsonb_set(v_state,'{inventory}',v_inv,true);
+--     update public.game_saves set state=v_state,updated_at=now() where user_id=v_uid;
+--     return jsonb_build_object('ok',true,'product_id',v_product.id,'category',v_product.category,'item_id',v_product.item_id,'quantity',v_product.quantity,'new_quantity',v_have+v_product.quantity);
+--   end if;
+-- end;$$;
+-- 
+-- -- Permissões RPC
+-- revoke all on function public.clan_interest_rate_v12(integer) from public,anon;
+-- revoke all on function public.clan_requirement_v12(integer) from public,anon;
+-- revoke all on function public.clan_level_status_v12(uuid) from public,anon;
+-- revoke all on function public.evaluate_clan_level_v12(uuid) from public,anon;
+-- revoke all on function public.record_clan_alien_kill_v12(text,boolean) from public,anon;
+-- revoke all on function public.process_all_clan_interest_v12() from public,anon,authenticated;
+-- revoke all on function public.process_all_clan_collection_v12() from public,anon,authenticated;
+-- revoke all on function public.get_premium_shop_v12() from public,anon;
+-- revoke all on function public.test_purchase_premium_v12(text) from public,anon;
+-- 
+-- grant execute on function public.clan_interest_rate_v12(integer) to authenticated,service_role;
+-- grant execute on function public.clan_requirement_v12(integer) to authenticated,service_role;
+-- grant execute on function public.clan_level_status_v12(uuid) to authenticated,service_role;
+-- grant execute on function public.evaluate_clan_level_v12(uuid) to authenticated,service_role;
+-- grant execute on function public.record_clan_alien_kill_v12(text,boolean) to authenticated,service_role;
+-- grant execute on function public.process_all_clan_interest_v12() to service_role,postgres;
+-- grant execute on function public.process_all_clan_collection_v12() to service_role,postgres;
+-- grant execute on function public.get_premium_shop_v12() to authenticated,service_role;
+-- grant execute on function public.test_purchase_premium_v12(text) to authenticated,service_role;
+-- 
+-- -- Recria jobs de forma idempotente.
+-- do $$
+-- declare r record;
+-- begin
+--   for r in select jobid from cron.job where jobname in ('stellar-v12-clan-interest','stellar-v12-clan-collection') loop
+--     perform cron.unschedule(r.jobid);
+--   end loop;
+-- end $$;
+-- select cron.schedule('stellar-v12-clan-interest','0 2 * * *','select public.process_all_clan_interest_v12();');
+-- select cron.schedule('stellar-v12-clan-collection','0 3 * * *','select public.process_all_clan_collection_v12();');
+-- 
+-- 
+-- -- ============================================================
+-- -- V12.1.4 — LOGIN ÚNICO / GAME SESSION LOCK
+-- -- ============================================================
+-- create table if not exists public.game_login_sessions_v1214 (
+--   user_id uuid primary key references auth.users(id) on delete cascade,
+--   session_id uuid not null,
+--   device_label text,
+--   issued_at timestamptz not null default now(),
+--   last_seen timestamptz not null default now()
+-- );
+-- 
+-- alter table public.game_login_sessions_v1214 enable row level security;
+-- revoke all on table public.game_login_sessions_v1214 from anon, authenticated;
+-- 
+-- create or replace function public.register_game_session_v1214(p_session_id uuid,p_device_label text default null)
+-- returns jsonb language plpgsql security definer set search_path=public,auth,pg_temp as $$
+-- declare v_uid uuid:=auth.uid(); v_previous uuid;
+-- begin
+--   if v_uid is null then raise exception 'Usuário não autenticado.'; end if;
+--   if p_session_id is null then raise exception 'Identificador de sessão ausente.'; end if;
+--   select session_id into v_previous from public.game_login_sessions_v1214 where user_id=v_uid;
+--   insert into public.game_login_sessions_v1214(user_id,session_id,device_label,issued_at,last_seen)
+--   values(v_uid,p_session_id,left(nullif(trim(coalesce(p_device_label,'')),''),160),now(),now())
+--   on conflict(user_id) do update set session_id=excluded.session_id,device_label=excluded.device_label,issued_at=now(),last_seen=now();
+--   return jsonb_build_object('ok',true,'session_id',p_session_id,'replaced_previous',v_previous is not null and v_previous<>p_session_id);
+-- end;$$;
+-- 
+-- create or replace function public.validate_game_session_v1214(p_session_id uuid,p_touch boolean default true)
+-- returns jsonb language plpgsql security definer set search_path=public,auth,pg_temp as $$
+-- declare v_uid uuid:=auth.uid(); v_current uuid; v_issued timestamptz; v_last_seen timestamptz;
+-- begin
+--   if v_uid is null then raise exception 'Usuário não autenticado.'; end if;
+--   select session_id,issued_at,last_seen into v_current,v_issued,v_last_seen from public.game_login_sessions_v1214 where user_id=v_uid;
+--   if v_current is null or p_session_id is null or v_current<>p_session_id then return jsonb_build_object('valid',false,'reason','replaced'); end if;
+--   if p_touch then update public.game_login_sessions_v1214 set last_seen=now() where user_id=v_uid and session_id=p_session_id returning last_seen into v_last_seen; end if;
+--   return jsonb_build_object('valid',true,'issued_at',v_issued,'last_seen',v_last_seen);
+-- end;$$;
+-- 
+-- create or replace function public.clear_game_session_v1214(p_session_id uuid)
+-- returns jsonb language plpgsql security definer set search_path=public,auth,pg_temp as $$
+-- declare v_uid uuid:=auth.uid(); v_deleted integer:=0;
+-- begin
+--   if v_uid is null then raise exception 'Usuário não autenticado.'; end if;
+--   delete from public.game_login_sessions_v1214 where user_id=v_uid and session_id=p_session_id;
+--   get diagnostics v_deleted=row_count;
+--   return jsonb_build_object('ok',true,'cleared',v_deleted>0);
+-- end;$$;
+-- 
+-- revoke all on function public.register_game_session_v1214(uuid,text) from public,anon;
+-- revoke all on function public.validate_game_session_v1214(uuid,boolean) from public,anon;
+-- revoke all on function public.clear_game_session_v1214(uuid) from public,anon;
+-- grant execute on function public.register_game_session_v1214(uuid,text) to authenticated,service_role;
+-- grant execute on function public.validate_game_session_v1214(uuid,boolean) to authenticated,service_role;
+-- grant execute on function public.clear_game_session_v1214(uuid) to authenticated,service_role;
+-- 
+-- 
+-- -- Stellar Legacy V13.1.0 — WARFRONT
+-- -- World Boss global diário + Guerra de Clãs + contribuições/recompensas.
+-- -- Execute este arquivo DEPOIS do CURRENT_BACKEND.sql da V13.1.
+-- 
+-- create extension if not exists pgcrypto;
+-- 
+-- create table if not exists public.world_boss_v131 (
+--   id text primary key,
+--   name text not null default 'NEMESIS PRIME',
+--   max_hp bigint not null check(max_hp>0),
+--   hp bigint not null check(hp>=0),
+--   spawn_at timestamptz not null default now(),
+--   ends_at timestamptz not null,
+--   defeated_at timestamptz,
+--   created_at timestamptz not null default now()
+-- );
+-- create table if not exists public.world_boss_contrib_v131 (
+--   boss_id text not null references public.world_boss_v131(id) on delete cascade,
+--   user_id uuid not null references auth.users(id) on delete cascade,
+--   clan_id uuid references public.clans(id) on delete set null,
+--   damage bigint not null default 0,
+--   hits integer not null default 0,
+--   updated_at timestamptz not null default now(),
+--   primary key(boss_id,user_id)
+-- );
+-- create table if not exists public.world_boss_claims_v131 (
+--   boss_id text not null references public.world_boss_v131(id) on delete cascade,
+--   user_id uuid not null references auth.users(id) on delete cascade,
+--   claimed_at timestamptz not null default now(),
+--   primary key(boss_id,user_id)
+-- );
+-- create table if not exists public.clan_wars_v131 (
+--   id uuid primary key default gen_random_uuid(),
+--   attacker_clan_id uuid not null references public.clans(id) on delete cascade,
+--   defender_clan_id uuid not null references public.clans(id) on delete cascade,
+--   attacker_score bigint not null default 0,
+--   defender_score bigint not null default 0,
+--   starts_at timestamptz not null default now(),
+--   ends_at timestamptz not null default (now()+interval '12 hours'),
+--   status text not null default 'active' check(status in ('active','finished')),
+--   winner_clan_id uuid references public.clans(id) on delete set null,
+--   created_by uuid not null references auth.users(id) on delete cascade,
+--   created_at timestamptz not null default now(),
+--   check(attacker_clan_id<>defender_clan_id)
+-- );
+-- create table if not exists public.clan_war_contrib_v131 (
+--   war_id uuid not null references public.clan_wars_v131(id) on delete cascade,
+--   user_id uuid not null references auth.users(id) on delete cascade,
+--   clan_id uuid not null references public.clans(id) on delete cascade,
+--   score bigint not null default 0,
+--   updated_at timestamptz not null default now(),
+--   primary key(war_id,user_id)
+-- );
+-- 
+-- alter table public.world_boss_v131 enable row level security;
+-- alter table public.world_boss_contrib_v131 enable row level security;
+-- alter table public.world_boss_claims_v131 enable row level security;
+-- alter table public.clan_wars_v131 enable row level security;
+-- alter table public.clan_war_contrib_v131 enable row level security;
+-- revoke all on public.world_boss_v131,public.world_boss_contrib_v131,public.world_boss_claims_v131,public.clan_wars_v131,public.clan_war_contrib_v131 from anon,authenticated;
+-- 
+-- create or replace function public.ensure_world_boss_v131()
+-- returns public.world_boss_v131 language plpgsql security definer set search_path=public,auth as $$
+-- declare v_key text:=to_char((now() at time zone 'America/Sao_Paulo'),'YYYYMMDD'); v_id text:='nemesis_'||v_key; v_row public.world_boss_v131%rowtype; v_end timestamptz;
+-- begin
+--   select * into v_row from public.world_boss_v131 where id=v_id;
+--   if found then return v_row; end if;
+--   v_end:=((date_trunc('day',now() at time zone 'America/Sao_Paulo')+interval '1 day') at time zone 'America/Sao_Paulo');
+--   insert into public.world_boss_v131(id,name,max_hp,hp,spawn_at,ends_at) values(v_id,'NEMESIS PRIME',250000000,250000000,now(),v_end)
+--   on conflict(id) do nothing;
+--   select * into v_row from public.world_boss_v131 where id=v_id;
+--   return v_row;
+-- end;$$;
+-- 
+-- create or replace function public.finish_expired_clan_wars_v131()
+-- returns void language plpgsql security definer set search_path=public,auth as $$
+-- begin
+--   update public.clan_wars_v131 set status='finished',winner_clan_id=case when attacker_score>defender_score then attacker_clan_id when defender_score>attacker_score then defender_clan_id else null end
+--   where status='active' and ends_at<=now();
+-- end;$$;
+-- 
+-- create or replace function public.get_warfront_state_v131()
+-- returns jsonb language plpgsql security definer set search_path=public,auth as $$
+-- declare v_uid uuid:=auth.uid(); v_clan uuid; v_boss public.world_boss_v131%rowtype; v_damage bigint:=0; v_rank integer:=0; v_claimed boolean:=false; v_war public.clan_wars_v131%rowtype; v_war_json jsonb:=null;
+-- begin
+--   if v_uid is null then raise exception 'Sessão inválida.'; end if;
+--   perform public.finish_expired_clan_wars_v131();
+--   select * into v_boss from public.ensure_world_boss_v131();
+--   select clan_id into v_clan from public.clan_members where user_id=v_uid;
+--   select coalesce(damage,0) into v_damage from public.world_boss_contrib_v131 where boss_id=v_boss.id and user_id=v_uid;
+--   select count(*)+1 into v_rank from public.world_boss_contrib_v131 where boss_id=v_boss.id and damage>v_damage;
+--   select exists(select 1 from public.world_boss_claims_v131 where boss_id=v_boss.id and user_id=v_uid) into v_claimed;
+--   if v_clan is not null then
+--     select * into v_war from public.clan_wars_v131 where status='active' and ends_at>now() and (attacker_clan_id=v_clan or defender_clan_id=v_clan) order by starts_at desc limit 1;
+--     if found then
+--       v_war_json:=jsonb_build_object('id',v_war.id,'attacker_score',v_war.attacker_score,'defender_score',v_war.defender_score,'starts_at',v_war.starts_at,'ends_at',v_war.ends_at,'my_side',case when v_war.attacker_clan_id=v_clan then 'attacker' else 'defender' end,
+--         'attacker',(select jsonb_build_object('id',id,'name',name,'tag',tag) from public.clans where id=v_war.attacker_clan_id),
+--         'defender',(select jsonb_build_object('id',id,'name',name,'tag',tag) from public.clans where id=v_war.defender_clan_id));
+--     end if;
+--   end if;
+--   return jsonb_build_object('world_boss',jsonb_build_object('id',v_boss.id,'name',v_boss.name,'max_hp',v_boss.max_hp,'hp',v_boss.hp,'spawn_at',v_boss.spawn_at,'ends_at',v_boss.ends_at,'defeated_at',v_boss.defeated_at,'my_damage',v_damage,'my_rank',case when v_damage>0 then v_rank else 0 end,'claimed',v_claimed),'war',v_war_json);
+-- end;$$;
+-- 
+-- create or replace function public.record_clan_war_score_v131(p_points integer,p_reason text default 'combat')
+-- returns jsonb language plpgsql security definer set search_path=public,auth as $$
+-- declare v_uid uuid:=auth.uid(); v_clan uuid; v_war public.clan_wars_v131%rowtype; v_pts integer:=greatest(1,least(20,coalesce(p_points,1)));
+-- begin
+--   if v_uid is null then raise exception 'Sessão inválida.'; end if;
+--   perform public.finish_expired_clan_wars_v131();
+--   select clan_id into v_clan from public.clan_members where user_id=v_uid;
+--   if v_clan is null then return jsonb_build_object('scored',false); end if;
+--   select * into v_war from public.clan_wars_v131 where status='active' and ends_at>now() and (attacker_clan_id=v_clan or defender_clan_id=v_clan) order by starts_at desc limit 1 for update;
+--   if not found then return jsonb_build_object('scored',false); end if;
+--   if v_war.attacker_clan_id=v_clan then update public.clan_wars_v131 set attacker_score=attacker_score+v_pts where id=v_war.id returning * into v_war; else update public.clan_wars_v131 set defender_score=defender_score+v_pts where id=v_war.id returning * into v_war; end if;
+--   insert into public.clan_war_contrib_v131(war_id,user_id,clan_id,score) values(v_war.id,v_uid,v_clan,v_pts) on conflict(war_id,user_id) do update set score=public.clan_war_contrib_v131.score+excluded.score,updated_at=now();
+--   return jsonb_build_object('scored',true,'points',v_pts,'reason',left(coalesce(p_reason,'combat'),40),'war',jsonb_build_object('id',v_war.id,'attacker_score',v_war.attacker_score,'defender_score',v_war.defender_score,'ends_at',v_war.ends_at,'my_side',case when v_war.attacker_clan_id=v_clan then 'attacker' else 'defender' end,'attacker',(select jsonb_build_object('id',id,'name',name,'tag',tag) from public.clans where id=v_war.attacker_clan_id),'defender',(select jsonb_build_object('id',id,'name',name,'tag',tag) from public.clans where id=v_war.defender_clan_id)));
+-- end;$$;
+-- 
+-- create or replace function public.hit_world_boss_v131(p_damage bigint)
+-- returns jsonb language plpgsql security definer set search_path=public,auth as $$
+-- declare v_uid uuid:=auth.uid(); v_clan uuid; v_boss public.world_boss_v131%rowtype; v_req bigint:=greatest(1,least(10000000,coalesce(p_damage,1))); v_applied bigint; v_before bigint; v_total bigint;
+-- begin
+--   if v_uid is null then raise exception 'Sessão inválida.'; end if;
+--   select * into v_boss from public.ensure_world_boss_v131();
+--   select * into v_boss from public.world_boss_v131 where id=v_boss.id for update;
+--   if v_boss.hp<=0 or v_boss.ends_at<=now() then return jsonb_build_object('id',v_boss.id,'name',v_boss.name,'max_hp',v_boss.max_hp,'hp',v_boss.hp,'ends_at',v_boss.ends_at,'defeated',v_boss.hp<=0,'applied',0); end if;
+--   v_before:=v_boss.hp; v_applied:=least(v_req,v_before);
+--   update public.world_boss_v131 set hp=greatest(0,hp-v_applied),defeated_at=case when hp-v_applied<=0 then coalesce(defeated_at,now()) else defeated_at end where id=v_boss.id returning * into v_boss;
+--   select clan_id into v_clan from public.clan_members where user_id=v_uid;
+--   insert into public.world_boss_contrib_v131(boss_id,user_id,clan_id,damage,hits) values(v_boss.id,v_uid,v_clan,v_applied,1) on conflict(boss_id,user_id) do update set damage=public.world_boss_contrib_v131.damage+excluded.damage,hits=public.world_boss_contrib_v131.hits+1,clan_id=excluded.clan_id,updated_at=now() returning damage into v_total;
+--   if v_clan is not null and v_applied>0 then perform public.record_clan_war_score_v131(greatest(1,least(20,(v_applied/250000)::integer)),'world_boss'); end if;
+--   return jsonb_build_object('id',v_boss.id,'name',v_boss.name,'max_hp',v_boss.max_hp,'hp',v_boss.hp,'ends_at',v_boss.ends_at,'defeated',v_boss.hp<=0,'applied',v_applied,'my_damage',v_total,'claimed',false);
+-- end;$$;
+-- 
+-- create or replace function public.claim_world_boss_reward_v131()
+-- returns jsonb language plpgsql security definer set search_path=public,auth as $$
+-- declare v_uid uuid:=auth.uid(); v_boss public.world_boss_v131%rowtype; v_damage bigint:=0; v_inserted integer:=0; v_credits bigint; v_uri bigint; v_frags integer; v_cores integer; v_bp text;
+-- begin
+--   if v_uid is null then raise exception 'Sessão inválida.'; end if;
+--   select * into v_boss from public.ensure_world_boss_v131();
+--   if v_boss.hp>0 then raise exception 'O World Boss ainda está vivo.'; end if;
+--   select coalesce(damage,0) into v_damage from public.world_boss_contrib_v131 where boss_id=v_boss.id and user_id=v_uid;
+--   if v_damage<=0 then raise exception 'Você precisa causar dano no World Boss para receber recompensa.'; end if;
+--   insert into public.world_boss_claims_v131(boss_id,user_id) values(v_boss.id,v_uid) on conflict do nothing;
+--   get diagnostics v_inserted=row_count;
+--   if v_inserted=0 then return jsonb_build_object('already_claimed',true,'boss_id',v_boss.id); end if;
+--   v_credits:=5000000+least(20000000,v_damage/10); v_uri:=5000+least(20000,v_damage/10000); v_frags:=5+least(10,greatest(0,(v_damage/5000000)::integer)); v_cores:=1+least(3,greatest(0,(v_damage/25000000)::integer));
+--   v_bp:=(array['lf4','sg3nb02','g3n7900'])[1+(floor(random()*3))::integer];
+--   return jsonb_build_object('already_claimed',false,'boss_id',v_boss.id,'credits',v_credits,'uridium',v_uri,'fragments',v_frags,'cores',v_cores,'blueprint_id',v_bp);
+-- end;$$;
+-- 
+-- create or replace function public.declare_clan_war_v131(p_target_clan_id uuid)
+-- returns jsonb language plpgsql security definer set search_path=public,auth as $$
+-- declare v_uid uuid:=auth.uid(); v_clan uuid; v_role text; v_existing integer; v_war public.clan_wars_v131%rowtype;
+-- begin
+--   if v_uid is null then raise exception 'Sessão inválida.'; end if;
+--   perform public.finish_expired_clan_wars_v131();
+--   select clan_id,role into v_clan,v_role from public.clan_members where user_id=v_uid;
+--   if v_clan is null or v_role<>'owner' then raise exception 'Somente o líder do clã pode declarar guerra.'; end if;
+--   if p_target_clan_id is null or p_target_clan_id=v_clan then raise exception 'Escolha um clã rival válido.'; end if;
+--   if not exists(select 1 from public.clans where id=p_target_clan_id) then raise exception 'Clã rival não encontrado.'; end if;
+--   select count(*) into v_existing from public.clan_wars_v131 where status='active' and ends_at>now() and (attacker_clan_id in(v_clan,p_target_clan_id) or defender_clan_id in(v_clan,p_target_clan_id));
+--   if v_existing>0 then raise exception 'Um dos clãs já está em uma guerra ativa.'; end if;
+--   insert into public.clan_wars_v131(attacker_clan_id,defender_clan_id,created_by) values(v_clan,p_target_clan_id,v_uid) returning * into v_war;
+--   return jsonb_build_object('ok',true,'war_id',v_war.id,'ends_at',v_war.ends_at);
+-- end;$$;
+-- 
+-- revoke all on function public.ensure_world_boss_v131() from public,anon;
+-- revoke all on function public.finish_expired_clan_wars_v131() from public,anon,authenticated;
+-- revoke all on function public.get_warfront_state_v131() from public,anon;
+-- revoke all on function public.hit_world_boss_v131(bigint) from public,anon;
+-- revoke all on function public.claim_world_boss_reward_v131() from public,anon;
+-- revoke all on function public.declare_clan_war_v131(uuid) from public,anon;
+-- revoke all on function public.record_clan_war_score_v131(integer,text) from public,anon;
+-- grant execute on function public.ensure_world_boss_v131() to authenticated,service_role;
+-- grant execute on function public.finish_expired_clan_wars_v131() to service_role,postgres;
+-- grant execute on function public.get_warfront_state_v131() to authenticated,service_role;
+-- grant execute on function public.hit_world_boss_v131(bigint) to authenticated,service_role;
+-- grant execute on function public.claim_world_boss_reward_v131() to authenticated,service_role;
+-- grant execute on function public.declare_clan_war_v131(uuid) to authenticated,service_role;
+-- grant execute on function public.record_clan_war_score_v131(integer,text) to authenticated,service_role;
+-- 
+-- 
+-- -- ==================== V14.1 ACCOUNT GUARD ====================
+-- -- Stellar Legacy V14.1.0 — ACCOUNT GUARD + UNIQUE CALLSIGN
+-- -- Execute uma vez no Supabase SQL Editor antes de liberar novos cadastros/renomes.
+-- 
+-- -- 1) Pré-validação: não altera jogadores existentes silenciosamente.
+-- DO $$
+-- DECLARE dupes text;
+-- BEGIN
+--   SELECT string_agg(k || ' (' || n || 'x)', ', ') INTO dupes
+--   FROM (
+--     SELECT lower(btrim(callsign)) k, count(*) n
+--     FROM public.profiles
+--     WHERE callsign is not null AND btrim(callsign) <> ''
+--     GROUP BY lower(btrim(callsign))
+--     HAVING count(*) > 1
+--   ) d;
+--   IF dupes IS NOT NULL THEN
+--     RAISE EXCEPTION 'Existem callsigns duplicados antes da V14.1: %. Renomeie os duplicados e execute novamente.', dupes;
+--   END IF;
+-- END $$;
+-- 
+-- -- 2) Garantia definitiva no banco: case-insensitive e ignorando espaços nas pontas.
+-- CREATE UNIQUE INDEX IF NOT EXISTS profiles_callsign_unique_ci_v141
+--   ON public.profiles ((lower(btrim(callsign))))
+--   WHERE callsign IS NOT NULL AND btrim(callsign) <> '';
+-- 
+-- -- 3) Consulta segura de disponibilidade sem expor a tabela de perfis.
+-- CREATE OR REPLACE FUNCTION public.callsign_available_v141(p_callsign text, p_exclude_user uuid DEFAULT NULL)
+-- RETURNS boolean
+-- LANGUAGE sql
+-- SECURITY DEFINER
+-- SET search_path=public,auth
+-- AS $$
+--   SELECT NOT EXISTS (
+--     SELECT 1
+--     FROM public.profiles p
+--     WHERE lower(btrim(p.callsign)) = lower(btrim(coalesce(p_callsign,'')))
+--       AND (p_exclude_user IS NULL OR p.id <> p_exclude_user)
+--   );
+-- $$;
+-- 
+-- REVOKE ALL ON FUNCTION public.callsign_available_v141(text,uuid) FROM public;
+-- GRANT EXECUTE ON FUNCTION public.callsign_available_v141(text,uuid) TO anon, authenticated, service_role;
+-- 
+-- -- Diagnóstico final: deve retornar zero linhas.
+-- SELECT lower(btrim(callsign)) AS callsign_normalizado, count(*) AS quantidade
+-- FROM public.profiles
+-- WHERE callsign IS NOT NULL AND btrim(callsign) <> ''
+-- GROUP BY lower(btrim(callsign))
+-- HAVING count(*) > 1;
+-- 
+-- -- 4) Benefício comercial V14.1: AUTO-COMBATE em PREMIUM e PASSE MENSAL.
+-- UPDATE public.premium_catalog_v12
+-- SET description='AUTO-COMBATE, reparo gratuito da nave, regeneração HP/ESC 2x, míssil 20% mais rápido, -5% em itens Elite e -10% no Materializador.'
+-- WHERE id='premium_30d';
+-- 
+-- UPDATE public.premium_catalog_v12
+-- SET description='Libera a trilha Premium da temporada atual, recompensas premium e AUTO-COMBATE durante a temporada.'
+-- WHERE id='battle_pass_monthly';
+-- 
+-- 
+-- -- V16.7.5 — AUX-9 slot capacity extension
+-- -- Stellar Legacy V16.7.5 — AUX-9 slot capacity extension
+-- -- Already applied to production Supabase by ChatGPT.
+-- insert into public.live_shop_prices_v16(catalog_key,kind,ref_id,price,currency,enabled,meta,updated_at)
+-- values
+-- ('pet_slot:16','pet_slot','16',2960000,'uridium',true,'{"grant":{"kind":"pet_slot","slot":16}}'::jsonb,now()),
+-- ('pet_slot:17','pet_slot','17',3315000,'uridium',true,'{"grant":{"kind":"pet_slot","slot":17}}'::jsonb,now()),
+-- ('pet_slot:18','pet_slot','18',3690000,'uridium',true,'{"grant":{"kind":"pet_slot","slot":18}}'::jsonb,now()),
+-- ('pet_slot:19','pet_slot','19',4085000,'uridium',true,'{"grant":{"kind":"pet_slot","slot":19}}'::jsonb,now()),
+-- ('pet_slot:20','pet_slot','20',4500000,'uridium',true,'{"grant":{"kind":"pet_slot","slot":20}}'::jsonb,now()),
+-- ('pet_slot:21','pet_slot','21',4935000,'uridium',true,'{"grant":{"kind":"pet_slot","slot":21}}'::jsonb,now()),
+-- ('pet_slot:22','pet_slot','22',5390000,'uridium',true,'{"grant":{"kind":"pet_slot","slot":22}}'::jsonb,now())
+-- on conflict(catalog_key) do update set
+--   kind=excluded.kind,ref_id=excluded.ref_id,price=excluded.price,currency=excluded.currency,
+--   enabled=excluded.enabled,meta=excluded.meta,updated_at=now();
+-- 
+-- 
+-- -- V16.7.6 PORTAL REFORGE • gate life prices
+-- -- Stellar Legacy V16.7.6 • Gate life prices
+-- insert into public.live_shop_prices_v16(catalog_key,kind,ref_id,price,currency,enabled,meta,updated_at) values
+-- ('gate_life:alpha','gate_life','alpha',4000000,'credits',true,'{"grant":{"kind":"gate_life","protocol":"alpha","qty":1}}'::jsonb,now()),
+-- ('gate_life:beta','gate_life','beta',8000000,'credits',true,'{"grant":{"kind":"gate_life","protocol":"beta","qty":1}}'::jsonb,now()),
+-- ('gate_life:gamma','gate_life','gamma',15000000,'credits',true,'{"grant":{"kind":"gate_life","protocol":"gamma","qty":1}}'::jsonb,now())
+-- on conflict(catalog_key) do update set kind=excluded.kind,ref_id=excluded.ref_id,price=excluded.price,currency=excluded.currency,enabled=excluded.enabled,meta=excluded.meta,updated_at=now();
+-- 
+-- ===== END CURRENT_BACKEND.sql =====
+
+-- ===== START OPCIONAL_ATIVAR_PUSH_V49_APOS_CONFIGURAR.sql | sha256 e7aeb548197786418ae55ffd5fca93e004b6b0c038202c45c7abfe3147e72c09 =====
+-- -- OPCIONAL: NÃO executar junto da migração principal.
+-- -- 1) Defina estas variáveis secretas no Render: STELLAR_FARM_VAPID_PUBLIC,
+-- --    STELLAR_FARM_VAPID_PRIVATE, STELLAR_FARM_VAPID_CONTACT,
+-- --    STELLAR_FARM_PUSH_DISPATCH_TOKEN.
+-- -- 2) Crie no Supabase Vault um segredo chamado stellar_farm_dispatch_token_v49,
+-- --    com EXATAMENTE o mesmo valor do STELLAR_FARM_PUSH_DISPATCH_TOKEN do Render.
+-- -- 3) Depois que o ZIP V49 estiver LIVE, e só então rode este script.
+-- -- 4) Cron executa a checagem no Supabase 1 vez/min; HTTP acorda o Render APENAS
+-- --    quando há uma sessão vencida com assinante pendente de aviso.
+-- CREATE EXTENSION IF NOT EXISTS pg_net WITH SCHEMA extensions;
+-- SELECT cron.schedule('stellar-farm-push-v49', '* * * * *', $cron$
+--   SELECT net.http_post(
+--     url := 'https://darkorbit-legacy.onrender.com/api/offline-farm/v49/dispatch',
+--     headers := jsonb_build_object('Content-Type','application/json',
+--       'x-stellar-farm-push-token',
+--       (SELECT decrypted_secret FROM vault.decrypted_secrets WHERE name='stellar_farm_dispatch_token_v49' LIMIT 1)),
+--     body := '{}'::jsonb,
+--     timeout_milliseconds := 20000
+--   )
+--   WHERE EXISTS (
+--     SELECT 1
+--     FROM public.stellar_offline_farm_v484 farm
+--     JOIN public.stellar_farm_push_subscriptions_v489 sub ON sub.user_id=farm.user_id AND sub.enabled
+--     WHERE farm.status='running' AND farm.ends_at<=now()
+--       AND farm.ends_at>now()-interval '12 hours'
+--       AND sub.last_notified_session_id IS DISTINCT FROM farm.id
+--   )
+--   AND EXISTS(SELECT 1 FROM vault.decrypted_secrets WHERE name='stellar_farm_dispatch_token_v49');
+-- $cron$);
+-- -- Se necessário desativar: SELECT cron.unschedule('stellar-farm-push-v49');
+-- ===== END OPCIONAL_ATIVAR_PUSH_V49_APOS_CONFIGURAR.sql =====
+
+-- ===== START STELLAR_V19_0_15_PROGRESSAO_PILOTO_150H.sql | sha256 6dc6d42e9783796ab297ac889762639d489479c1bb9156776f980a32963fd487 =====
+-- -- STELLAR LEGACY V19.0.15 | Curva de nivel do PILOTO (meta: ~150h LV7->LV32)
+-- -- COMPATIVEL COM CLIENTES ANTIGOS: saves com xpModelV1915 ausente continuam na V1770.
+-- -- Nenhum save, saldo, nivel ou XP de jogador sera modificado por esta migracao.
+-- BEGIN;
+-- 
+-- CREATE OR REPLACE FUNCTION public.player_xp_threshold_v1770(p_level integer)
+-- RETURNS bigint LANGUAGE sql IMMUTABLE STRICT
+-- SET search_path TO 'public','pg_temp'
+-- AS $old$
+--   SELECT CASE WHEN p_level<=1 THEN 0::bigint ELSE
+--     round((15000::double precision * power((p_level-1)::double precision,2.3::double precision)
+--        * power(1.20::double precision,greatest(0,p_level-2)::double precision))::numeric)::bigint
+--   END;
+-- $old$;
+-- 
+-- CREATE OR REPLACE FUNCTION public.player_xp_threshold_v1915(p_level integer,p_old_curve boolean DEFAULT false)
+-- RETURNS bigint LANGUAGE plpgsql IMMUTABLE STRICT
+-- SET search_path TO 'public','pg_temp'
+-- AS $curve$
+-- DECLARE
+--   lv integer:=greatest(1,p_level);
+--   oldxp bigint;
+--   left_lv integer;right_lv integer;left_xp bigint;right_xp bigint;
+--   old_left bigint;old_right bigint;
+-- BEGIN
+--   oldxp:=public.player_xp_threshold_v1770(lv);
+--   IF p_old_curve OR lv<=10 THEN RETURN oldxp; END IF;
+--   IF lv<=32 THEN
+--     IF lv<=18 THEN
+--       left_lv:=10;right_lv:=18;left_xp:=10099480;right_xp:=49299480;
+--     ELSIF lv<=22 THEN
+--       left_lv:=18;right_lv:=22;left_xp:=49299480;right_xp:=158299480;
+--     ELSIF lv<=27 THEN
+--       left_lv:=22;right_lv:=27;left_xp:=158299480;right_xp:=397249480;
+--     ELSE
+--       left_lv:=27;right_lv:=32;left_xp:=397249480;right_xp:=741049480;
+--     END IF;
+--     old_left:=public.player_xp_threshold_v1770(left_lv);
+--     old_right:=public.player_xp_threshold_v1770(right_lv);
+--     RETURN round(left_xp::numeric + (right_xp-left_xp)::numeric
+--       * (oldxp-old_left)::numeric / greatest(1,old_right-old_left)::numeric)::bigint;
+--   END IF;
+--   -- LV33..44: extrapolacao continua; LV32 exatamente 741.049.480 XP.
+--   RETURN round(oldxp::numeric * 741049480::numeric
+--     / greatest(1,public.player_xp_threshold_v1770(32))::numeric)::bigint;
+-- END;
+-- $curve$;
+-- 
+-- -- A verificacao do cla se adapta ao modelo salvo, sem confiar apenas no level enviado.
+-- CREATE OR REPLACE FUNCTION public.clan_check_entry_level_v19(p_uid uuid)
+-- RETURNS void LANGUAGE plpgsql STABLE SECURITY DEFINER SET search_path TO 'public','pg_temp'
+-- AS $clan$
+-- DECLARE
+--   v_req integer:=public.clan_required_level_v19();
+--   v_level integer;v_saved_level integer;v_xp bigint;v_saved_xp bigint;
+--   v_new_model boolean:=false;v_calc_level integer:=1;v_i integer;v_threshold bigint;
+-- BEGIN
+--   SELECT p.level,p.xp,
+--     coalesce(nullif(s.state #>> '{profile,level}','')::integer,p.level),
+--     coalesce(nullif(s.state #>> '{profile,xp}','')::bigint,p.xp),
+--     coalesce(nullif(s.state #>> '{profile,xpModelV1915}','')::boolean,false)
+--     INTO v_level,v_xp,v_saved_level,v_saved_xp,v_new_model
+--     FROM public.profiles p LEFT JOIN public.game_saves s ON s.user_id=p.id
+--     WHERE p.id=p_uid;
+--   IF v_level IS NULL OR v_saved_level IS NULL THEN
+--     RAISE EXCEPTION 'Perfil e save online são necessários para acessar alianças.';
+--   END IF;
+--   v_xp:=least(greatest(0,coalesce(v_xp,0)),greatest(0,coalesce(v_saved_xp,0)));
+--   FOR v_i IN 2..44 LOOP
+--     v_threshold:=public.player_xp_threshold_v1915(v_i,NOT v_new_model);
+--     EXIT WHEN v_xp<v_threshold;
+--     v_calc_level:=v_i;
+--   END LOOP;
+--   IF least(v_level,v_saved_level,v_calc_level)<v_req THEN
+--     RAISE EXCEPTION 'Aliança libera no nível % (conforme XP e save). Seu nível validado é %.',v_req,least(v_level,v_saved_level,v_calc_level);
+--   END IF;
+--   IF NOT coalesce((SELECT enabled FROM public.game_ui_modules_v1810 WHERE module_key='clan'),true) THEN
+--     RAISE EXCEPTION 'Alianças temporariamente indisponíveis.';
+--   END IF;
+-- END;
+-- $clan$;
+-- 
+-- -- Preserva INTEGRALMENTE a funcao atual da Arena (inclusive premios, transacoes e
+-- -- permissoes). Altera somente a linha que verifica qual nivel resulta do XP.
+-- DO $arena_patch$
+-- DECLARE
+--   fn text;
+--   old_line text:='v_threshold := round((15000::double precision * power((v_i - 1)::double precision, 2.3::double precision) * power(1.20::double precision, greatest(0,v_i-2)::double precision))::numeric)::bigint;';
+--   new_line text:='v_threshold := public.player_xp_threshold_v1915(v_i, coalesce((v_state #>> ''{profile,xpModelV1915}'')::boolean,false) IS NOT TRUE);';
+-- BEGIN
+--   SELECT pg_get_functiondef('public.claim_arena_daily_reward()'::regprocedure) INTO fn;
+--   IF fn IS NULL OR strpos(fn,old_line)=0 THEN
+--     RAISE EXCEPTION 'A função da Arena mudou. Nenhuma alteração aplicada. Atualize a migração após revisão.';
+--   END IF;
+--   IF strpos(fn,new_line)>0 THEN RAISE EXCEPTION 'Arena já está usando nova curva'; END IF;
+--   EXECUTE replace(fn,old_line,new_line);
+-- END;
+-- $arena_patch$;
+-- 
+-- REVOKE ALL ON FUNCTION public.player_xp_threshold_v1770(integer) FROM PUBLIC,anon,authenticated;
+-- REVOKE ALL ON FUNCTION public.player_xp_threshold_v1915(integer,boolean) FROM PUBLIC,anon,authenticated;
+-- REVOKE ALL ON FUNCTION public.clan_check_entry_level_v19(uuid) FROM PUBLIC,anon,authenticated;
+-- 
+-- -- Valida os marcos e a monotonicidade antes do COMMIT.
+-- DO $check_curve$
+-- DECLARE lv integer;prev bigint:=-1;cur bigint;
+-- BEGIN
+--   IF public.player_xp_threshold_v1915(10,false)<>10099480 OR
+--      public.player_xp_threshold_v1915(18,false)<>49299480 OR
+--      public.player_xp_threshold_v1915(22,false)<>158299480 OR
+--      public.player_xp_threshold_v1915(27,false)<>397249480 OR
+--      public.player_xp_threshold_v1915(32,false)<>741049480 THEN
+--        RAISE EXCEPTION 'Marcos da curva 150h inconsistentes';
+--   END IF;
+--   FOR lv IN 1..44 LOOP
+--     cur:=public.player_xp_threshold_v1915(lv,false);
+--     IF cur<=prev THEN RAISE EXCEPTION 'Curva nao cresce entre LV % e %',lv-1,lv; END IF;
+--     IF lv<=10 AND cur<>public.player_xp_threshold_v1770(lv) THEN
+--       RAISE EXCEPTION 'Curva inicial diferente no LV %',lv;
+--     END IF;
+--     prev:=cur;
+--   END LOOP;
+-- END;
+-- $check_curve$;
+-- COMMIT;
+-- ===== END STELLAR_V19_0_15_PROGRESSAO_PILOTO_150H.sql =====
+
+-- ===== START STELLAR_V19_0_16_AUCTION_PRICING.sql | sha256 27b7e1e6c68fcc20ce2d7ea5f1e4ef6b72b7a413fb22c951723d5340a85a66d2 =====
+-- -- STELLAR LEGACY V19.0.16 — Pricing do leilão, editável pelo ADM.
+-- -- APENAS SQL aditivo: mantém histórico de leilão, lances existentes, créditos, contas e itens.
+-- BEGIN;
+-- ALTER TABLE public.game_auction_rules_v1908
+--  ADD COLUMN IF NOT EXISTS stl_to_credits bigint NOT NULL DEFAULT 6667,
+--  ADD COLUMN IF NOT EXISTS category_multipliers jsonb NOT NULL DEFAULT '{"ammo":2.5,"rocket":2,"ship":0.03,"laser":0.04,"generator":0.04,"drone":0.05,"extra":0.04,"petGear":0.05}'::jsonb,
+--  ADD COLUMN IF NOT EXISTS item_multipliers jsonb NOT NULL DEFAULT '{}'::jsonb;
+-- 
+-- -- A função de leitura mantém o endpoint e RPC usados pelos clientes atuais.
+-- CREATE OR REPLACE FUNCTION public.get_auction_rules_v1908()
+-- RETURNS jsonb LANGUAGE plpgsql SECURITY DEFINER SET search_path TO 'public','auth','pg_temp' AS $rule_read$
+-- DECLARE r public.game_auction_rules_v1908%rowtype;
+-- BEGIN
+--  IF auth.uid() IS NULL THEN RAISE EXCEPTION 'Sessão ausente.'; END IF;
+--  SELECT * INTO r FROM public.game_auction_rules_v1908 WHERE id=1;
+--  RETURN jsonb_build_object('nova_floor',r.nova_floor,'common_floor',r.common_floor,'stl_to_credits',r.stl_to_credits,
+--  'category_multipliers',r.category_multipliers,'item_multipliers',r.item_multipliers,'version',r.version);
+-- END;
+-- $rule_read$;
+-- 
+-- -- Preço mínimo confiável. A fonte é a loja real, não o JSON vindo do cliente.
+-- CREATE OR REPLACE FUNCTION public.auction_minimum_floor_v1916(p_lot_ref text)
+-- RETURNS bigint LANGUAGE plpgsql STABLE SECURITY DEFINER SET search_path TO 'public','pg_temp' AS $floor$
+-- DECLARE
+--  r public.game_auction_rules_v1908%rowtype;
+--  v_prefix text; v_item text; v_kind text; v_price bigint; v_multiplier numeric; v_candidate numeric;
+-- BEGIN
+--  IF p_lot_ref IS NULL OR p_lot_ref !~ '^(ammo|rocket|ship|item|petGear):[a-zA-Z0-9_]+$' THEN RETURN NULL; END IF;
+--  SELECT * INTO r FROM public.game_auction_rules_v1908 WHERE id=1;
+--  IF NOT FOUND THEN RETURN NULL; END IF;
+--  v_prefix:=split_part(p_lot_ref,':',1); v_item:=split_part(p_lot_ref,':',2);
+--  IF p_lot_ref='item:iris' THEN
+--    SELECT price INTO v_price FROM public.live_shop_prices_v16 WHERE catalog_key='drone:iris' AND currency='uridium' AND enabled=true AND shop_visible=true;
+--    IF NOT FOUND THEN RETURN NULL; END IF;
+--    RETURN r.nova_floor;
+--  END IF;
+--  IF v_prefix='item' THEN
+--    SELECT kind,price INTO v_kind,v_price FROM public.live_shop_prices_v16
+--    WHERE ref_id=v_item AND kind IN ('laser','generator','drone','extra') AND currency='uridium' AND enabled=true AND shop_visible=true
+--    ORDER BY kind LIMIT 1;
+--  ELSE
+--    v_kind:=CASE WHEN v_prefix='petGear' THEN 'pet_gear' ELSE v_prefix END;
+--    SELECT kind,price INTO v_kind,v_price FROM public.live_shop_prices_v16
+--    WHERE ref_id=v_item AND kind=v_kind AND currency='uridium' AND enabled=true AND shop_visible=true LIMIT 1;
+--  END IF;
+--  IF v_kind IS NULL OR v_price IS NULL OR v_price<=0 THEN RETURN NULL; END IF;
+--  v_multiplier:=COALESCE((r.item_multipliers->>p_lot_ref)::numeric,
+--   (r.category_multipliers->>(CASE WHEN v_prefix='petGear' THEN 'petGear' ELSE v_kind END))::numeric);
+--  IF v_multiplier IS NULL OR v_multiplier<0.01 OR v_multiplier>15 THEN RETURN NULL; END IF;
+--  v_candidate:=CEIL((v_price::numeric*r.stl_to_credits::numeric*v_multiplier)/100000::numeric)*100000;
+--  RETURN GREATEST(r.common_floor,v_candidate)::bigint;
+-- END;
+-- $floor$;
+-- 
+-- -- Atualizações só via administrador registrado. Controle de versão evita sobrescrever alterações concorrentes.
+-- CREATE OR REPLACE FUNCTION public.admin_update_auction_rules_v1916(p_payload jsonb)
+-- RETURNS jsonb LANGUAGE plpgsql SECURITY DEFINER SET search_path TO 'public','auth','pg_temp' AS $adm$
+-- DECLARE
+--  r public.game_auction_rules_v1908%rowtype;
+--  v_nova bigint;v_common bigint;v_ratio bigint;v_cats jsonb;v_items jsonb;
+--  v_key text;v_value jsonb;
+-- BEGIN
+--  IF auth.uid() IS NULL OR NOT public.is_game_admin_v1763(auth.uid()) THEN RAISE EXCEPTION 'Acesso administrativo negado.'; END IF;
+--  IF jsonb_typeof(p_payload)<>'object' THEN RAISE EXCEPTION 'Configuração inválida.'; END IF;
+--  SELECT * INTO r FROM public.game_auction_rules_v1908 WHERE id=1 FOR UPDATE;
+--  IF r.version <> COALESCE((p_payload->>'version')::bigint,-1) THEN RAISE EXCEPTION 'Outra alteração já foi publicada. Recarregue o editor e revise.'; END IF;
+--  v_nova:=(p_payload->>'nova_floor')::bigint;
+--  v_common:=(p_payload->>'common_floor')::bigint;
+--  v_ratio:=(p_payload->>'stl_to_credits')::bigint;
+--  v_cats:=p_payload->'category_multipliers';v_items:=p_payload->'item_multipliers';
+--  IF v_nova NOT BETWEEN 100000000 AND 1000000000 OR v_nova%100000<>0 OR v_common NOT BETWEEN 100000 AND 10000000 OR v_common%100000<>0 OR v_ratio NOT BETWEEN 100 AND 100000 THEN RAISE EXCEPTION 'Valores de conversão ou piso fora do limite.'; END IF;
+--  IF jsonb_typeof(v_cats)<>'object' OR (SELECT COUNT(*) FROM jsonb_object_keys(v_cats))<>8 OR jsonb_typeof(v_items)<>'object' OR (SELECT COUNT(*) FROM jsonb_object_keys(v_items))>200 THEN RAISE EXCEPTION 'A lista de multiplicadores deve ter 8 categorias e até 200 exceções.'; END IF;
+--  FOR v_key,v_value IN SELECT key,value FROM jsonb_each(v_cats) LOOP
+--    IF v_key NOT IN ('ammo','rocket','ship','laser','generator','drone','extra','petGear') OR jsonb_typeof(v_value)<>'number' THEN RAISE EXCEPTION 'Categoria inválida: %',v_key; END IF;
+--    IF (v_value::text)::numeric NOT BETWEEN .01 AND 15 THEN RAISE EXCEPTION 'Multiplicador de % inválido.',v_key; END IF;
+--  END LOOP;
+--  FOR v_key,v_value IN SELECT key,value FROM jsonb_each(v_items) LOOP
+--    IF v_key !~ '^(ammo|rocket|ship|item|petGear):[a-zA-Z0-9_]+$' OR jsonb_typeof(v_value)<>'number' THEN RAISE EXCEPTION 'Exceção inválida: %',v_key; END IF;
+--    IF (v_value::text)::numeric NOT BETWEEN .01 AND 15 THEN RAISE EXCEPTION 'Multiplicador de % inválido.',v_key; END IF;
+--  END LOOP;
+--  UPDATE public.game_auction_rules_v1908 SET nova_floor=v_nova,common_floor=v_common,stl_to_credits=v_ratio,
+--  category_multipliers=v_cats,item_multipliers=v_items,version=version+1,updated_at=now() WHERE id=1 RETURNING * INTO r;
+--  RETURN jsonb_build_object('nova_floor',r.nova_floor,'common_floor',r.common_floor,'stl_to_credits',r.stl_to_credits,
+--   'category_multipliers',r.category_multipliers,'item_multipliers',r.item_multipliers,'version',r.version);
+-- END;
+-- $adm$;
+-- 
+-- -- Regra obrigatória do lado servidor para cada lance. Sem confiar em p_lot.systemFloor.
+-- CREATE OR REPLACE FUNCTION public.place_auction_bid_online(p_hour_key text,p_lot_ref text,p_user_bid bigint,p_lot jsonb)
+-- RETURNS TABLE(lot_ref text,user_bid bigint,leader_user_id uuid,leader_callsign text,lot jsonb,updated_at timestamptz)
+-- LANGUAGE plpgsql SECURITY DEFINER SET search_path TO 'public','auth','pg_temp' AS $bids$
+-- #variable_conflict use_column
+-- DECLARE
+--  v_uid uuid:=auth.uid(); v_current public.auction_bids%rowtype;
+--  v_credits bigint:=0;v_reserved bigint:=0;v_floor bigint;v_prefix text;v_lot_kind text;v_expected text;
+-- BEGIN
+--  IF v_uid IS NULL THEN RAISE EXCEPTION 'Sessão ausente.'; END IF;
+--  v_floor:=public.auction_minimum_floor_v1916(p_lot_ref);
+--  IF v_floor IS NULL THEN RAISE EXCEPTION 'Este lote não pertence ao catálogo Elite autorizado.'; END IF;
+--  v_prefix:=split_part(p_lot_ref,':',1);v_expected:=split_part(p_lot_ref,':',2);
+--  v_lot_kind:=CASE WHEN v_prefix='item' THEN 'item' WHEN v_prefix='petGear' THEN 'petGear' ELSE v_prefix END;
+--  IF jsonb_typeof(p_lot)<>'object' OR p_lot->>'ref' IS DISTINCT FROM p_lot_ref OR p_lot->>'id' IS DISTINCT FROM v_expected OR p_lot->>'kind' IS DISTINCT FROM v_lot_kind THEN RAISE EXCEPTION 'Identidade do lote inválida.'; END IF;
+--  IF p_hour_key IS NULL OR p_hour_key !~ '^[0-9]{4}-[0-9]{2}-[0-9]{2}-[0-9]{2}$' THEN RAISE EXCEPTION 'Janela do leilão inválida.'; END IF;
+--  IF p_user_bid < 100000 OR MOD(p_user_bid,100000)<>0 THEN RAISE EXCEPTION 'Use lances em passos de 100.000 CR.'; END IF;
+--  PERFORM pg_advisory_xact_lock(hashtext(p_hour_key||':'||p_lot_ref));
+--  SELECT * INTO v_current FROM public.auction_bids WHERE hour_key=p_hour_key AND lot_ref=p_lot_ref AND status='active' ORDER BY user_bid DESC,updated_at ASC LIMIT 1 FOR UPDATE;
+--  IF FOUND AND v_current.user_id=v_uid THEN RAISE EXCEPTION 'Você já está liderando este lote.'; END IF;
+--  IF FOUND THEN
+--    IF p_user_bid<GREATEST(v_current.user_bid+100000,v_floor) THEN RAISE EXCEPTION 'Lance insuficiente. Piso oficial: % CR.',v_floor; END IF;
+--  ELSIF p_user_bid<v_floor THEN RAISE EXCEPTION 'Lance abaixo do piso oficial: % CR.',v_floor; END IF;
+--  SELECT COALESCE(credits,0) INTO v_credits FROM public.profiles WHERE id=v_uid FOR UPDATE;
+--  SELECT COALESCE(SUM(user_bid),0) INTO v_reserved FROM public.auction_bids WHERE user_id=v_uid AND hour_key=p_hour_key AND status='active' AND lot_ref<>p_lot_ref;
+--  IF v_credits<v_reserved+p_user_bid THEN RAISE EXCEPTION 'Créditos insuficientes considerando os lances em garantia.'; END IF;
+--  UPDATE public.auction_bids SET status='lost',updated_at=now() WHERE hour_key=p_hour_key AND lot_ref=p_lot_ref AND status='active';
+--  INSERT INTO public.auction_bids(user_id,hour_key,lot_ref,user_bid,lot,status,created_at,updated_at)
+--  VALUES(v_uid,p_hour_key,p_lot_ref,p_user_bid,p_lot,'active',now(),now())
+--  ON CONFLICT(user_id,hour_key,lot_ref) DO UPDATE SET user_bid=excluded.user_bid,lot=excluded.lot,status='active',updated_at=now();
+--  RETURN QUERY SELECT b.lot_ref,b.user_bid,b.user_id,COALESCE(p.callsign,'Pilot'),b.lot,b.updated_at
+--  FROM public.auction_bids b LEFT JOIN public.profiles p ON p.id=b.user_id
+--  WHERE b.user_id=v_uid AND b.hour_key=p_hour_key AND b.lot_ref=p_lot_ref AND b.status='active' LIMIT 1;
+-- END;
+-- $bids$;
+-- 
+-- REVOKE ALL ON FUNCTION public.auction_minimum_floor_v1916(text) FROM PUBLIC,anon,authenticated;
+-- REVOKE ALL ON FUNCTION public.admin_update_auction_rules_v1916(jsonb) FROM PUBLIC,anon;
+-- GRANT EXECUTE ON FUNCTION public.admin_update_auction_rules_v1916(jsonb) TO authenticated;
+-- GRANT EXECUTE ON FUNCTION public.get_auction_rules_v1908() TO authenticated;
+-- GRANT EXECUTE ON FUNCTION public.place_auction_bid_online(text,text,bigint,jsonb) TO authenticated;
+-- COMMIT;
+-- ===== END STELLAR_V19_0_16_AUCTION_PRICING.sql =====
+
+-- ===== START STELLAR_V19_0_17_BALANCE_EVENTOS.sql | sha256 11f7a55fd2fb54b9c71f1e54c700485626b004f28418fa2163a1d9db839869a0 =====
+-- -- STELLAR LEGACY V19.0.17 | Balanceamento de EVENTOS - 31 naves, 4 escudos e 4 itens raros.
+-- -- Guardado por versao e atributos correntes. Nao altera contas, lances, NPCs nem precos.
+-- BEGIN;
+-- CREATE TABLE IF NOT EXISTS public.game_balance_event_backup_v1917 (
+--  kind text NOT NULL CHECK(kind IN ('ship','item')),
+--  item_id text NOT NULL,
+--  params jsonb NOT NULL,
+--  label text NOT NULL,
+--  saved_at timestamptz NOT NULL DEFAULT now(),
+--  PRIMARY KEY(kind,item_id)
+-- );
+-- ALTER TABLE public.game_balance_event_backup_v1917 ENABLE ROW LEVEL SECURITY;
+-- REVOKE ALL ON public.game_balance_event_backup_v1917 FROM PUBLIC,anon,authenticated;
+-- DO $event_balance$
+-- DECLARE v_version integer; v_count integer;
+-- BEGIN
+--   SELECT version INTO v_version FROM public.game_balance_meta_v1909 WHERE id=1 FOR UPDATE;
+--   IF v_version<>9 THEN RAISE EXCEPTION 'Balanceamento inesperado (versao %; esperado 9). Nao aplicar.',v_version; END IF;
+--   WITH changes(id,old_hp,attributes) AS (VALUES
+--     ('aegis',375000,'{"hp":455000,"speed":315,"lasers":11,"generators":18,"extras":4,"cargo":2250}'::jsonb),
+--     ('basilisk',325000,'{"hp":450000,"speed":330,"lasers":15,"generators":17,"extras":4,"cargo":1650}'::jsonb),
+--     ('berserker',500000,'{"hp":620000,"speed":300,"lasers":8,"generators":18,"extras":4,"cargo":1650}'::jsonb),
+--     ('centurion',365000,'{"hp":455000,"speed":335,"lasers":16,"generators":17,"extras":4,"cargo":1600}'::jsonb),
+--     ('citadel',650000,'{"hp":750000,"speed":250,"lasers":8,"generators":21,"extras":5,"cargo":4500}'::jsonb),
+--     ('cyborg',365000,'{"hp":455000,"speed":325,"lasers":16,"generators":17,"extras":4,"cargo":1600}'::jsonb),
+--     ('defcom',150000,'{"hp":290000,"speed":380,"lasers":12,"generators":11,"extras":3,"cargo":900}'::jsonb),
+--     ('defcomRaven',287500,'{"hp":365000,"speed":385,"lasers":12,"generators":12,"extras":3,"cargo":1000}'::jsonb),
+--     ('diminisher',356000,'{"hp":460000,"speed":325,"lasers":15,"generators":17,"extras":4,"cargo":1700}'::jsonb),
+--     ('disruptor',356000,'{"hp":450000,"speed":345,"lasers":14,"generators":16,"extras":4,"cargo":1650}'::jsonb),
+--     ('goliathX',356000,'{"hp":540000,"speed":305,"lasers":15,"generators":18,"extras":5,"cargo":1900}'::jsonb),
+--     ('hammerclaw',377500,'{"hp":465000,"speed":305,"lasers":13,"generators":18,"extras":4,"cargo":1900}'::jsonb),
+--     ('hecate',377500,'{"hp":475000,"speed":320,"lasers":15,"generators":17,"extras":4,"cargo":1600}'::jsonb),
+--     ('holo',375000,'{"hp":445000,"speed":330,"lasers":15,"generators":16,"extras":4,"cargo":1650}'::jsonb),
+--     ('hyperion',400000,'{"hp":480000,"speed":320,"lasers":15,"generators":18,"extras":4,"cargo":1750}'::jsonb),
+--     ('keres',356000,'{"hp":445000,"speed":330,"lasers":15,"generators":17,"extras":4,"cargo":1650}'::jsonb),
+--     ('mimesis',386000,'{"hp":430000,"speed":350,"lasers":13,"generators":15,"extras":4,"cargo":1650}'::jsonb),
+--     ('orcus',300000,'{"hp":440000,"speed":320,"lasers":15,"generators":16,"extras":4,"cargo":1750}'::jsonb),
+--     ('paladin',325000,'{"hp":500000,"speed":315,"lasers":13,"generators":20,"extras":4,"cargo":1750}'::jsonb),
+--     ('retiarus',386000,'{"hp":465000,"speed":340,"lasers":15,"generators":16,"extras":4,"cargo":1600}'::jsonb),
+--     ('sentinel',356000,'{"hp":535000,"speed":305,"lasers":15,"generators":18,"extras":4,"cargo":1800}'::jsonb),
+--     ('solace',356000,'{"hp":465000,"speed":320,"lasers":15,"generators":17,"extras":4,"cargo":1800}'::jsonb),
+--     ('solaris',377500,'{"hp":460000,"speed":330,"lasers":15,"generators":17,"extras":4,"cargo":1650}'::jsonb),
+--     ('spearhead',200000,'{"hp":280000,"speed":410,"lasers":7,"generators":12,"extras":3,"cargo":650}'::jsonb),
+--     ('spectrum',356000,'{"hp":510000,"speed":310,"lasers":15,"generators":18,"extras":4,"cargo":1750}'::jsonb),
+--     ('tartarus',360000,'{"hp":460000,"speed":345,"lasers":14,"generators":16,"extras":4,"cargo":1700}'::jsonb),
+--     ('tempest',300000,'{"hp":450000,"speed":360,"lasers":14,"generators":16,"extras":4,"cargo":1700}'::jsonb),
+--     ('venom',356000,'{"hp":450000,"speed":335,"lasers":15,"generators":17,"extras":4,"cargo":1700}'::jsonb),
+--     ('yamato',260000,'{"hp":340000,"speed":365,"lasers":10,"generators":13,"extras":3,"cargo":1100}'::jsonb),
+--     ('yRonin',300000,'{"hp":390000,"speed":375,"lasers":11,"generators":14,"extras":3,"cargo":1200}'::jsonb),
+--     ('zephyr',250000,'{"hp":380000,"speed":370,"lasers":13,"generators":16,"extras":4,"cargo":1650}'::jsonb)
+--   )
+--   SELECT count(*) INTO v_count FROM changes c JOIN public.game_balance_entries_v1909 e
+--      ON e.kind='ship' AND e.item_id=c.id
+--    WHERE e.params->>'role' LIKE 'EVENTO%' AND (e.params->>'hp')::integer=c.old_hp;
+--   IF v_count<>31 THEN RAISE EXCEPTION 'Naves de evento nao correspondem ao catalogo (%/31).',v_count; END IF;
+--   INSERT INTO public.game_balance_event_backup_v1917(kind,item_id,params,label)
+--     SELECT e.kind,e.item_id,e.params,e.label FROM public.game_balance_entries_v1909 e
+--     WHERE e.kind='ship' AND e.params->>'role' LIKE 'EVENTO%';
+--   GET DIAGNOSTICS v_count=ROW_COUNT;
+--   IF v_count<>31 THEN RAISE EXCEPTION 'Backup das 31 naves incompleto (%).',v_count; END IF;
+--   WITH changes(id,old_hp,attributes) AS (VALUES
+--     ('aegis',375000,'{"hp":455000,"speed":315,"lasers":11,"generators":18,"extras":4,"cargo":2250}'::jsonb),
+--     ('basilisk',325000,'{"hp":450000,"speed":330,"lasers":15,"generators":17,"extras":4,"cargo":1650}'::jsonb),
+--     ('berserker',500000,'{"hp":620000,"speed":300,"lasers":8,"generators":18,"extras":4,"cargo":1650}'::jsonb),
+--     ('centurion',365000,'{"hp":455000,"speed":335,"lasers":16,"generators":17,"extras":4,"cargo":1600}'::jsonb),
+--     ('citadel',650000,'{"hp":750000,"speed":250,"lasers":8,"generators":21,"extras":5,"cargo":4500}'::jsonb),
+--     ('cyborg',365000,'{"hp":455000,"speed":325,"lasers":16,"generators":17,"extras":4,"cargo":1600}'::jsonb),
+--     ('defcom',150000,'{"hp":290000,"speed":380,"lasers":12,"generators":11,"extras":3,"cargo":900}'::jsonb),
+--     ('defcomRaven',287500,'{"hp":365000,"speed":385,"lasers":12,"generators":12,"extras":3,"cargo":1000}'::jsonb),
+--     ('diminisher',356000,'{"hp":460000,"speed":325,"lasers":15,"generators":17,"extras":4,"cargo":1700}'::jsonb),
+--     ('disruptor',356000,'{"hp":450000,"speed":345,"lasers":14,"generators":16,"extras":4,"cargo":1650}'::jsonb),
+--     ('goliathX',356000,'{"hp":540000,"speed":305,"lasers":15,"generators":18,"extras":5,"cargo":1900}'::jsonb),
+--     ('hammerclaw',377500,'{"hp":465000,"speed":305,"lasers":13,"generators":18,"extras":4,"cargo":1900}'::jsonb),
+--     ('hecate',377500,'{"hp":475000,"speed":320,"lasers":15,"generators":17,"extras":4,"cargo":1600}'::jsonb),
+--     ('holo',375000,'{"hp":445000,"speed":330,"lasers":15,"generators":16,"extras":4,"cargo":1650}'::jsonb),
+--     ('hyperion',400000,'{"hp":480000,"speed":320,"lasers":15,"generators":18,"extras":4,"cargo":1750}'::jsonb),
+--     ('keres',356000,'{"hp":445000,"speed":330,"lasers":15,"generators":17,"extras":4,"cargo":1650}'::jsonb),
+--     ('mimesis',386000,'{"hp":430000,"speed":350,"lasers":13,"generators":15,"extras":4,"cargo":1650}'::jsonb),
+--     ('orcus',300000,'{"hp":440000,"speed":320,"lasers":15,"generators":16,"extras":4,"cargo":1750}'::jsonb),
+--     ('paladin',325000,'{"hp":500000,"speed":315,"lasers":13,"generators":20,"extras":4,"cargo":1750}'::jsonb),
+--     ('retiarus',386000,'{"hp":465000,"speed":340,"lasers":15,"generators":16,"extras":4,"cargo":1600}'::jsonb),
+--     ('sentinel',356000,'{"hp":535000,"speed":305,"lasers":15,"generators":18,"extras":4,"cargo":1800}'::jsonb),
+--     ('solace',356000,'{"hp":465000,"speed":320,"lasers":15,"generators":17,"extras":4,"cargo":1800}'::jsonb),
+--     ('solaris',377500,'{"hp":460000,"speed":330,"lasers":15,"generators":17,"extras":4,"cargo":1650}'::jsonb),
+--     ('spearhead',200000,'{"hp":280000,"speed":410,"lasers":7,"generators":12,"extras":3,"cargo":650}'::jsonb),
+--     ('spectrum',356000,'{"hp":510000,"speed":310,"lasers":15,"generators":18,"extras":4,"cargo":1750}'::jsonb),
+--     ('tartarus',360000,'{"hp":460000,"speed":345,"lasers":14,"generators":16,"extras":4,"cargo":1700}'::jsonb),
+--     ('tempest',300000,'{"hp":450000,"speed":360,"lasers":14,"generators":16,"extras":4,"cargo":1700}'::jsonb),
+--     ('venom',356000,'{"hp":450000,"speed":335,"lasers":15,"generators":17,"extras":4,"cargo":1700}'::jsonb),
+--     ('yamato',260000,'{"hp":340000,"speed":365,"lasers":10,"generators":13,"extras":3,"cargo":1100}'::jsonb),
+--     ('yRonin',300000,'{"hp":390000,"speed":375,"lasers":11,"generators":14,"extras":3,"cargo":1200}'::jsonb),
+--     ('zephyr',250000,'{"hp":380000,"speed":370,"lasers":13,"generators":16,"extras":4,"cargo":1650}'::jsonb)
+--   )
+--   UPDATE public.game_balance_entries_v1909 e SET params=e.params||c.attributes,updated_at=now()
+--    FROM changes c WHERE e.kind='ship' AND e.item_id=c.id;
+--   GET DIAGNOSTICS v_count=ROW_COUNT;
+--   IF v_count<>31 THEN RAISE EXCEPTION 'Naves atualizadas %/31',v_count; END IF;
+--   WITH changes(id,old_shield,attributes) AS (VALUES
+--     ('fs03',8000,'{"shield":12500,"absorption":82,"shieldRegenBonus":0.0625,"description":"12.500 escudo • 82% absorção • +6,25% regeneração • EVENTO."}'::jsonb),
+--     ('fs04',11400,'{"shield":17200,"absorption":84,"shieldRegenBonus":0.0625,"description":"17.200 escudo • 84% absorção • +6,25% regeneração • EVENTO RARO."}'::jsonb),
+--     ('sg3nb00',9000,'{"shield":13500,"absorption":78,"description":"13.500 escudo • 78% absorção • EVENTO."}'::jsonb),
+--     ('sg3nb03',11450,'{"shield":17500,"absorption":85,"description":"17.500 escudo • 85% absorção • EVENTO RARO."}'::jsonb)
+--   )
+--   SELECT count(*) INTO v_count FROM changes c JOIN public.game_balance_entries_v1909 e
+--    ON e.kind='item' AND e.item_id=c.id
+--    WHERE (e.params->>'shield')::integer=c.old_shield;
+--   IF v_count<>4 THEN RAISE EXCEPTION 'Escudos de evento nao correspondem ao catalogo (%/4).',v_count; END IF;
+--   INSERT INTO public.game_balance_event_backup_v1917(kind,item_id,params,label)
+--     SELECT e.kind,e.item_id,e.params,e.label FROM public.game_balance_entries_v1909 e
+--     WHERE e.kind='item' AND e.item_id IN ('fs03','fs04','sg3nb00','sg3nb03');
+--   GET DIAGNOSTICS v_count=ROW_COUNT;
+--   IF v_count<>4 THEN RAISE EXCEPTION 'Backup dos 4 escudos incompleto (%).',v_count; END IF;
+--   WITH changes(id,old_shield,attributes) AS (VALUES
+--     ('fs03',8000,'{"shield":12500,"absorption":82,"shieldRegenBonus":0.0625,"description":"12.500 escudo • 82% absorção • +6,25% regeneração • EVENTO."}'::jsonb),
+--     ('fs04',11400,'{"shield":17200,"absorption":84,"shieldRegenBonus":0.0625,"description":"17.200 escudo • 84% absorção • +6,25% regeneração • EVENTO RARO."}'::jsonb),
+--     ('sg3nb00',9000,'{"shield":13500,"absorption":78,"description":"13.500 escudo • 78% absorção • EVENTO."}'::jsonb),
+--     ('sg3nb03',11450,'{"shield":17500,"absorption":85,"description":"17.500 escudo • 85% absorção • EVENTO RARO."}'::jsonb)
+--   )
+--   UPDATE public.game_balance_entries_v1909 e SET params=e.params||c.attributes,updated_at=now()
+--   FROM changes c WHERE e.kind='item' AND e.item_id=c.id;
+--   GET DIAGNOSTICS v_count=ROW_COUNT;
+--   IF v_count<>4 THEN RAISE EXCEPTION 'Escudos atualizados %/4',v_count; END IF;
+--   SELECT count(*) INTO v_count FROM public.game_balance_entries_v1909 WHERE kind='item' AND item_id IN ('lfx','lfomega','g3n8700','repPrime');
+--   IF v_count<>0 THEN RAISE EXCEPTION 'Um dos novos equipamentos ja existe. Revisar antes de inserir.'; END IF;
+--   INSERT INTO public.game_balance_entries_v1909(kind,item_id,label,params) VALUES
+--     ('item','lfx','ARC-X','{"name":"ARC-X","description":"Laser de evento • 250 dano base e +4% contra aliens.","equipment_type":"laser","equipment_subtype":"","damage":250,"alienBonus":0.04}'::jsonb),
+--     ('item','lfomega','ARC-Ω','{"name":"ARC-Ω","description":"Laser raro de evento • 265 dano base e +6% contra aliens.","equipment_type":"laser","equipment_subtype":"","damage":265,"alienBonus":0.06}'::jsonb),
+--     ('item','g3n8700','THR-7','{"name":"THR-7","description":"Motor de evento • +14 velocidade.","equipment_type":"generator","equipment_subtype":"speed","speed":14}'::jsonb),
+--     ('item','repPrime','Nanobot Prime','{"name":"Nanobot Prime","description":"Reparador raro de evento • +12.000 HP/s e +18.000 escudo/s após 5s fora de combate.","equipment_type":"extra","equipment_subtype":"","repairRate":0.024,"repairTick":12000,"shieldRepairTick":18000,"repairDelay":5}'::jsonb);
+--   GET DIAGNOSTICS v_count=ROW_COUNT;
+--   IF v_count<>4 THEN RAISE EXCEPTION 'Novos itens inseridos %/4',v_count; END IF;
+--   INSERT INTO public.game_coupon_reward_catalog_v193(kind,item_id,name,category,rarity) VALUES
+--      ('inventory','lfx','ARC-X','LASERS','EVENTO'),
+--      ('inventory','lfomega','ARC-Ω','LASERS','EVENTO'),
+--      ('inventory','g3n8700','THR-7','GERADORES','EVENTO'),
+--      ('inventory','repPrime','Nanobot Prime','EXTRAS','EVENTO')
+--   ON CONFLICT(kind,item_id) DO NOTHING;
+--   GET DIAGNOSTICS v_count=ROW_COUNT;
+--   IF v_count<>4 THEN RAISE EXCEPTION 'Catalogo de cupons inesperado: % dos 4 itens.',v_count; END IF;
+--   UPDATE public.game_balance_meta_v1909 SET version=version+1,updated_at=now() WHERE id=1;
+--   GET DIAGNOSTICS v_count=ROW_COUNT;
+--   IF v_count<>1 THEN RAISE EXCEPTION 'Versionamento nao atualizado.'; END IF;
+-- END;
+-- $event_balance$;
+-- COMMIT;
+-- ===== END STELLAR_V19_0_17_BALANCE_EVENTOS.sql =====
+
+-- ===== START STELLAR_V19_0_17_REVERTER_EVENTOS.sql | sha256 7cad3debf5590fbb3a66d5ef81c7402f074985350d198c6a10ed9db835f542c6 =====
+-- -- STELLAR LEGACY V19.0.17 | Reverte os 35 atributos de evento usando backup atomico.
+-- -- NAO remove os 4 novos IDs, evitando saves com item sem definicao.
+-- -- Valido apenas se meta for versao 10. Se houve edicao ADM posterior, revisar antes.
+-- BEGIN;
+-- DO $revert_event$
+-- DECLARE v_count integer;v_version integer;
+-- BEGIN
+--  SELECT version INTO v_version FROM public.game_balance_meta_v1909 WHERE id=1 FOR UPDATE;
+--  IF v_version<>10 THEN RAISE EXCEPTION 'Versao de balanceamento mudou (%). Reversao manual necessaria.',v_version; END IF;
+--  SELECT count(*) INTO v_count FROM public.game_balance_event_backup_v1917;
+--  IF v_count<>35 THEN RAISE EXCEPTION 'Backup nao contem 35 itens (%).',v_count; END IF;
+--  UPDATE public.game_balance_entries_v1909 e
+--  SET params=b.params,label=b.label,updated_at=now()
+--  FROM public.game_balance_event_backup_v1917 b WHERE e.kind=b.kind AND e.item_id=b.item_id;
+--  GET DIAGNOSTICS v_count=ROW_COUNT;
+--  IF v_count<>35 THEN RAISE EXCEPTION 'Reversao incompleta %/35',v_count; END IF;
+--  UPDATE public.game_balance_meta_v1909 SET version=version+1,updated_at=now() WHERE id=1;
+-- END;
+-- $revert_event$;
+-- COMMIT;
+-- ===== END STELLAR_V19_0_17_REVERTER_EVENTOS.sql =====
+
+-- ===== START STELLAR_V19_0_2_CLAS_ARENA_SECURITY.sql | sha256 94e6a3d9897f4ce38a5086dc7b2b6849995a1859aa32a79d0617d6f46f1543f0 =====
+-- -- STELLAR LEGACY V19.0.2 | APLICAR UMA VEZ EM SUPABASE
+-- -- Nao modifica saves, saldos, experiencia ou membros existentes.
+-- -- Instala sistema de pedidos e cargos, endurece autorizacao de cofre e clan, corrige calculo de nivel da Arena.
+-- 
+-- -- 1) Novos cargos em clan_members. Preserve 'owner' para compatibilidade.
+-- alter table public.clan_members drop constraint if exists clan_members_role_check;
+-- alter table public.clan_members add constraint clan_members_role_check check (role in ('owner','deputy','elite','member'));
+-- 
+-- -- 2) Pedidos de entrada: uma solicitacao pendente por piloto, nunca associacao automatica.
+-- create table if not exists public.clan_join_requests_v19 (
+--   id uuid primary key default gen_random_uuid(),
+--   user_id uuid not null references auth.users(id) on delete cascade,
+--   clan_id uuid not null references public.clans(id) on delete cascade,
+--   status text not null default 'pending' check(status in ('pending','approved','rejected','cancelled')),
+--   reviewed_by uuid references auth.users(id) on delete set null,
+--   created_at timestamptz not null default now(),
+--   reviewed_at timestamptz,
+--   unique(user_id,clan_id)
+-- );
+-- create unique index if not exists uq_stellar_clan_pending_by_user_v19 on public.clan_join_requests_v19 (user_id) where status='pending';
+-- create index if not exists ix_stellar_clan_requests_clan_status_v19 on public.clan_join_requests_v19(clan_id,status,created_at);
+-- alter table public.clan_join_requests_v19 enable row level security;
+-- revoke all on public.clan_join_requests_v19 from PUBLIC, anon, authenticated;
+-- 
+-- -- Canonical clan level required, reflecting ADM runtime min_level, never under default 8.
+-- create or replace function public.clan_required_level_v19()
+-- returns integer language sql stable security definer set search_path=public,pg_temp as $fn$
+--  select greatest(8,coalesce((select min_level from public.game_ui_modules_v1810 where module_key='clan'),8))::integer;
+-- $fn$;
+-- 
+-- create or replace function public.clan_check_entry_level_v19(p_uid uuid)
+-- returns void language plpgsql stable security definer set search_path=public,pg_temp as $fn$
+-- declare v_req integer:=public.clan_required_level_v19(); v_level integer;
+-- begin
+--   select p.level into v_level from public.profiles p where p.id=p_uid;
+--   if coalesce(v_level,1)<v_req then raise exception 'Aliança libera no nível %. Seu nível atual é %.',v_req,coalesce(v_level,1); end if;
+--   if not coalesce((select enabled from public.game_ui_modules_v1810 where module_key='clan'),true) then
+--     raise exception 'Alianças temporariamente indisponíveis.';
+--   end if;
+-- end;$fn$;
+-- 
+-- -- Replaces direct-join RPC with apply-only RPC, leaving stable signature for old clients.
+-- create or replace function public.join_clan_v12(p_clan_id uuid)
+-- returns jsonb language plpgsql security definer set search_path=public,auth,pg_temp as $fn$
+-- declare v_uid uuid:=auth.uid(); v_name text; v_tag text; v_request uuid;
+-- begin
+--   if v_uid is null then raise exception 'Sessão inválida.'; end if;
+--   perform public.clan_check_entry_level_v19(v_uid);
+--   if exists(select 1 from public.clan_members where user_id=v_uid) then raise exception 'Você já pertence a uma aliança.'; end if;
+--   select name,tag into v_name,v_tag from public.clans where id=p_clan_id;
+--   if v_name is null then raise exception 'Aliança não encontrada.'; end if;
+--   if exists(select 1 from public.clan_join_requests_v19 where user_id=v_uid and status='pending' and clan_id<>p_clan_id) then
+--     raise exception 'Cancele seu pedido anterior antes de solicitar outra aliança.';
+--   end if;
+--   insert into public.clan_join_requests_v19(user_id,clan_id,status,created_at,reviewed_at,reviewed_by)
+--     values(v_uid,p_clan_id,'pending',now(),null,null)
+--     on conflict(user_id,clan_id) do update set
+--       status='pending', created_at=case when public.clan_join_requests_v19.status='pending' then public.clan_join_requests_v19.created_at else now() end,
+--       reviewed_at=null,reviewed_by=null
+--       returning id into v_request;
+--   return jsonb_build_object('ok',true,'pending',true,'request_id',v_request,'name',v_name,'tag',v_tag);
+-- end;$fn$;
+-- 
+-- create or replace function public.create_clan_v12(p_name text,p_tag text)
+-- returns jsonb language plpgsql security definer set search_path=public,auth,pg_temp as $fn$
+-- declare v_uid uuid:=auth.uid();v_name text:=trim(coalesce(p_name,''));v_tag text:=upper(trim(coalesce(p_tag,'')));v_id uuid;
+-- begin
+--   if v_uid is null then raise exception 'Sessão inválida.'; end if;
+--   perform public.clan_check_entry_level_v19(v_uid);
+--   if exists(select 1 from public.clan_members where user_id=v_uid) then raise exception 'Você já pertence a um clã.'; end if;
+--   if char_length(v_name)<3 or char_length(v_name)>28 then raise exception 'O nome do clã precisa ter entre 3 e 28 caracteres.'; end if;
+--   if v_tag !~ '^[A-Z0-9]{2,6}$' then raise exception 'A TAG deve ter 2 a 6 letras/números.'; end if;
+--   insert into public.clans(name,tag,owner_id) values(v_name,v_tag,v_uid) returning id into v_id;
+--   insert into public.clan_members(user_id,clan_id,role) values(v_uid,v_id,'owner');
+--   update public.clan_join_requests_v19 set status='cancelled',reviewed_at=now() where user_id=v_uid and status='pending';
+--   return jsonb_build_object('ok',true,'clan_id',v_id,'name',v_name,'tag',v_tag);
+-- exception when unique_violation then raise exception 'Nome ou TAG já está em uso ou sua conta já possui clã.';
+-- end;$fn$;
+-- 
+-- -- Shared RPC for member roles and pending requests, filtered by current membership.
+-- create or replace function public.get_clan_requests_v19()
+-- returns jsonb language plpgsql security definer set search_path=public,auth,pg_temp as $fn$
+-- declare v_uid uuid:=auth.uid();v_clan uuid;v_role text;v_incoming jsonb:='[]'::jsonb;v_outgoing jsonb:='[]'::jsonb;
+-- begin
+--   if v_uid is null then raise exception 'Sessão inválida.'; end if;
+--   select clan_id,role into v_clan,v_role from public.clan_members where user_id=v_uid;
+--   if v_role in ('owner','deputy') then
+--     select coalesce(jsonb_agg(jsonb_build_object('id',r.id,'callsign',coalesce(p.callsign,'Piloto'),'level',coalesce(p.level,1),'created_at',r.created_at) order by r.created_at),'[]'::jsonb)
+--       into v_incoming from public.clan_join_requests_v19 r left join public.profiles p on p.id=r.user_id
+--       where r.clan_id=v_clan and r.status='pending';
+--   end if;
+--   if v_clan is null then
+--     select coalesce(jsonb_agg(jsonb_build_object('id',r.id,'clan_id',c.id,'clan_name',c.name,'clan_tag',c.tag,'created_at',r.created_at) order by r.created_at),'[]'::jsonb)
+--       into v_outgoing from public.clan_join_requests_v19 r join public.clans c on c.id=r.clan_id
+--       where r.user_id=v_uid and r.status='pending';
+--   end if;
+--   return jsonb_build_object('incoming',v_incoming,'outgoing',v_outgoing,'can_review',v_role in ('owner','deputy'));
+-- end;$fn$;
+-- 
+-- create or replace function public.review_clan_request_v19(p_request_id uuid,p_approve boolean)
+-- returns jsonb language plpgsql security definer set search_path=public,auth,pg_temp as $fn$
+-- declare v_uid uuid:=auth.uid();v_clan uuid;v_role text;v_req public.clan_join_requests_v19%rowtype;
+-- begin
+--   if v_uid is null then raise exception 'Sessão inválida.'; end if;
+--   select clan_id,role into v_clan,v_role from public.clan_members where user_id=v_uid;
+--   if v_clan is null or v_role not in('owner','deputy') then raise exception 'Somente líder ou vice-líder pode analisar solicitações.'; end if;
+--   select * into v_req from public.clan_join_requests_v19 where id=p_request_id and clan_id=v_clan for update;
+--   if not found or v_req.status<>'pending' then raise exception 'Solicitação não encontrada ou já analisada.'; end if;
+--   if p_approve then
+--     perform public.clan_check_entry_level_v19(v_req.user_id);
+--     if exists(select 1 from public.clan_members where user_id=v_req.user_id) then raise exception 'Este jogador já pertence a uma aliança.'; end if;
+--     insert into public.clan_members(user_id,clan_id,role) values(v_req.user_id,v_clan,'member');
+--   end if;
+--   update public.clan_join_requests_v19 set status=case when p_approve then 'approved' else 'rejected' end,reviewed_by=v_uid,reviewed_at=now() where id=p_request_id;
+--   return jsonb_build_object('ok',true,'approved',p_approve,'request_id',p_request_id);
+-- end;$fn$;
+-- 
+-- create or replace function public.cancel_clan_request_v19(p_request_id uuid)
+-- returns jsonb language plpgsql security definer set search_path=public,auth,pg_temp as $fn$
+-- declare v_uid uuid:=auth.uid();
+-- begin
+--   if v_uid is null then raise exception 'Sessão inválida.'; end if;
+--   update public.clan_join_requests_v19 set status='cancelled',reviewed_at=now()
+--   where id=p_request_id and user_id=v_uid and status='pending';
+--   if not found then raise exception 'Solicitação não encontrada.'; end if;
+--   return jsonb_build_object('ok',true,'cancelled',true);
+-- end;$fn$;
+-- 
+-- -- Role update: owner -> deputy/elite/member; deputy -> elite/member on non-deputies.
+-- create or replace function public.set_clan_member_role_v19(p_target_user_id uuid,p_role text)
+-- returns jsonb language plpgsql security definer set search_path=public,auth,pg_temp as $fn$
+-- declare v_uid uuid:=auth.uid();v_clan uuid;v_role text;v_target_role text;v_target_name text;v_new text:=lower(trim(coalesce(p_role,'')));
+-- begin
+--   if v_uid is null then raise exception 'Sessão inválida.'; end if;
+--   select clan_id,role into v_clan,v_role from public.clan_members where user_id=v_uid;
+--   if v_role not in('owner','deputy') or v_clan is null then raise exception 'Sem permissão para cargos.'; end if;
+--   if v_new not in('deputy','elite','member') then raise exception 'Cargo inválido.'; end if;
+--   if p_target_user_id=v_uid then raise exception 'Não é possível alterar seu próprio cargo.'; end if;
+--   select cm.role,p.callsign into v_target_role,v_target_name from public.clan_members cm left join public.profiles p on p.id=cm.user_id
+--     where cm.user_id=p_target_user_id and cm.clan_id=v_clan for update of cm;
+--   if v_target_role is null then raise exception 'Jogador não pertence à sua aliança.'; end if;
+--   if v_target_role='owner' then raise exception 'Não é possível alterar o cargo do líder.'; end if;
+--   if v_role='deputy' and (v_new='deputy' or v_target_role='deputy') then raise exception 'Apenas o líder pode alterar vice-lideranças.'; end if;
+--   update public.clan_members set role=v_new where user_id=p_target_user_id and clan_id=v_clan;
+--   return jsonb_build_object('ok',true,'role',v_new,'callsign',v_target_name);
+-- end;$fn$;
+-- 
+-- -- 3) Vice-líder também gerencia recursos com as mesmas regras e taxa existentes.
+-- create or replace function public.transfer_clan_credits_v12(p_target_callsign text,p_amount bigint)
+-- returns jsonb language plpgsql security definer set search_path=public,auth,pg_temp as $fn$
+-- declare v_uid uuid:=auth.uid(); v_clan uuid; v_role text; v_target uuid; v_target_name text; v_matches integer; v_vault bigint; v_net bigint; v_fee bigint;
+-- begin
+--  if v_uid is null then raise exception 'Sessão inválida.'; end if;
+--  if p_amount is null or p_amount<=0 then raise exception 'Informe um valor maior que zero.'; end if;
+--  select clan_id,role into v_clan,v_role from public.clan_members where user_id=v_uid;
+--  if v_clan is null then raise exception 'Você não pertence a um clã.'; end if;
+--  if v_role not in('owner','deputy') then raise exception 'Somente o líder ou vice-líder pode usar o cofre.'; end if;
+--  select count(*) into v_matches from public.profiles where lower(callsign)=lower(trim(p_target_callsign));
+--  if v_matches=0 then raise exception 'Jogador não encontrado.'; end if;
+--  if v_matches>1 then raise exception 'Há mais de um jogador com esse callsign. Use um callsign único.'; end if;
+--  select id,callsign into v_target,v_target_name from public.profiles where lower(callsign)=lower(trim(p_target_callsign));
+--  if v_target=v_uid then raise exception 'Escolha outro jogador.'; end if;
+--  select vault_credits into v_vault from public.clans where id=v_clan for update;
+--  if coalesce(v_vault,0)<p_amount then raise exception 'Saldo insuficiente no cofre do clã.'; end if;
+--  v_net:=floor(p_amount*0.95)::bigint; v_fee:=p_amount-v_net;
+--  update public.clans set vault_credits=vault_credits-p_amount,total_transfer_fees=total_transfer_fees+v_fee,updated_at=now()
+--    where id=v_clan returning vault_credits into v_vault;
+--  insert into public.clan_credit_grants(clan_id,sender_id,recipient_id,amount) values(v_clan,v_uid,v_target,v_net);
+--  insert into public.clan_transactions(clan_id,actor_id,target_user_id,kind,gross_amount,net_amount,burn_amount)
+--    values(v_clan,v_uid,v_target,'transfer',p_amount,v_net,v_fee);
+--  return jsonb_build_object('ok',true,'target_user_id',v_target,'target_callsign',v_target_name,
+--    'gross_amount',p_amount,'net_amount',v_net,'fee',v_fee,'vault_credits',v_vault);
+-- end;$fn$;
+-- 
+-- -- 4) Arena XP: replaces outdated 10k*2^(level-2) curve by V19 game's XP curve.
+-- -- Keep original SQL function and all its reward logic; only fix formula.
+-- do $fix_arena$
+-- declare v_source text;
+-- begin
+--   select pg_get_functiondef('public.claim_arena_daily_reward()'::regprocedure) into v_source;
+--   if position('v_threshold := round(10000 * power(2::numeric, v_i - 2))::bigint;' in v_source)=0 then
+--     raise exception 'Arena XP function diverged; migration aborted safely.';
+--   end if;
+--   v_source := replace(v_source,
+--     'v_threshold := round(10000 * power(2::numeric, v_i - 2))::bigint;',
+--     'v_threshold := round((15000::double precision * power((v_i - 1)::double precision, 2.3::double precision) * power(1.20::double precision, greatest(0,v_i-2)::double precision))::numeric)::bigint;');
+--   execute v_source;
+-- end;$fix_arena$;
+-- 
+-- -- 5) Secure level authority for arena profile from stored save, not client-supplied level.
+-- -- Other pilot stats use existing game data; this patch addresses level spoofing in this RPC.
+-- create or replace function public.sync_arena_profile(p_callsign text,p_faction text,p_level integer,p_ship_id text,p_hp bigint,p_shield bigint,p_laser_damage bigint,p_speed integer)
+-- returns table(power bigint) language plpgsql security definer set search_path=public,pg_temp as $fn$
+-- declare v_uid uuid:=auth.uid();v_power bigint;v_level integer;
+-- begin
+--   if v_uid is null then raise exception 'Sessão ausente.'; end if;
+--   select coalesce(nullif(s.state #>> '{profile,level}','')::integer,p.level,1) into v_level
+--   from public.profiles p left join public.game_saves s on s.user_id=p.id where p.id=v_uid;
+--   v_level:=greatest(1,least(44,coalesce(v_level,1)));
+--   v_power:=greatest(1,greatest(1,coalesce(p_hp,1))+round(greatest(0,coalesce(p_shield,0))*0.9)
+--       +greatest(0,coalesce(p_laser_damage,0))*65+greatest(0,coalesce(p_speed,0))*120+v_level*5000);
+--   insert into public.arena_profiles(user_id,callsign,faction,level,ship_id,hp,shield,laser_damage,speed,power,updated_at)
+--     values(v_uid,left(coalesce(nullif(trim(p_callsign),''),'Pilot'),24),p_faction,v_level,coalesce(nullif(p_ship_id,''),'phoenix'),
+--       greatest(1,coalesce(p_hp,1)),greatest(0,coalesce(p_shield,0)),greatest(0,coalesce(p_laser_damage,0)),greatest(0,coalesce(p_speed,0)),v_power,now())
+--     on conflict(user_id) do update set callsign=excluded.callsign,faction=excluded.faction,level=excluded.level,
+--       ship_id=excluded.ship_id,hp=excluded.hp,shield=excluded.shield,laser_damage=excluded.laser_damage,
+--       speed=excluded.speed,power=excluded.power,updated_at=now();
+--   insert into public.arena_stats(user_id) values(v_uid) on conflict(user_id) do nothing;
+--   return query select v_power;
+-- end;$fn$;
+-- 
+-- -- 6) Permissions. Prevent unauthenticated RPC calls; prevent unauthorized clan-level inflation.
+-- revoke all on function public.clan_required_level_v19() from PUBLIC,anon;
+-- revoke all on function public.clan_check_entry_level_v19(uuid) from PUBLIC,anon,authenticated;
+-- revoke all on function public.get_clan_requests_v19() from PUBLIC,anon;
+-- revoke all on function public.review_clan_request_v19(uuid,boolean) from PUBLIC,anon;
+-- revoke all on function public.cancel_clan_request_v19(uuid) from PUBLIC,anon;
+-- revoke all on function public.set_clan_member_role_v19(uuid,text) from PUBLIC,anon;
+-- revoke all on function public.join_clan_v12(uuid) from PUBLIC,anon;
+-- revoke all on function public.create_clan_v12(text,text) from PUBLIC,anon;
+-- revoke all on function public.transfer_clan_credits_v12(text,bigint) from PUBLIC,anon;
+-- revoke all on function public.claim_arena_daily_reward() from PUBLIC,anon;
+-- revoke all on function public.sync_arena_profile(text,text,integer,text,bigint,bigint,bigint,integer) from PUBLIC,anon;
+-- revoke all on function public.evaluate_clan_level_v12(uuid) from PUBLIC,anon,authenticated;
+-- grant execute on function public.clan_required_level_v19() to authenticated;
+-- grant execute on function public.get_clan_requests_v19() to authenticated;
+-- grant execute on function public.review_clan_request_v19(uuid,boolean) to authenticated;
+-- grant execute on function public.cancel_clan_request_v19(uuid) to authenticated;
+-- grant execute on function public.set_clan_member_role_v19(uuid,text) to authenticated;
+-- grant execute on function public.join_clan_v12(uuid) to authenticated;
+-- grant execute on function public.create_clan_v12(text,text) to authenticated;
+-- grant execute on function public.transfer_clan_credits_v12(text,bigint) to authenticated;
+-- grant execute on function public.claim_arena_daily_reward() to authenticated;
+-- grant execute on function public.sync_arena_profile(text,text,integer,text,bigint,bigint,bigint,integer) to authenticated;
+-- ===== END STELLAR_V19_0_2_CLAS_ARENA_SECURITY.sql =====
+
+-- ===== START STELLAR_V19_0_2_LEVEL_INTEGRITY.sql | sha256 4142577f41dbcd9376afbe69d81e916a050191b2478353de068d1ca5f284d550 =====
+-- -- V19.0.2 supplementary migration: level gate validates XP under current V19 curve,
+-- -- not just the level number previously corrupted by Arena rewards.
+-- create or replace function public.clan_check_entry_level_v19(p_uid uuid)
+-- returns void language plpgsql stable security definer set search_path=public,pg_temp as $fn$
+-- declare
+--   v_req integer:=public.clan_required_level_v19();
+--   v_level integer;
+--   v_saved_level integer;
+--   v_xp bigint;
+--   v_saved_xp bigint;
+--   v_calc_level integer:=1;
+--   v_i integer;
+--   v_threshold bigint;
+-- begin
+--   select p.level,p.xp,
+--     coalesce(nullif(s.state #>> '{profile,level}','')::integer,p.level),
+--     coalesce(nullif(s.state #>> '{profile,xp}','')::bigint,p.xp)
+--     into v_level,v_xp,v_saved_level,v_saved_xp
+--     from public.profiles p left join public.game_saves s on s.user_id=p.id
+--     where p.id=p_uid;
+--   if v_level is null or v_saved_level is null then raise exception 'Perfil e save online são necessários para acessar alianças.'; end if;
+--   v_xp:=least(greatest(0,coalesce(v_xp,0)),greatest(0,coalesce(v_saved_xp,0)));
+--   for v_i in 2..44 loop
+--     v_threshold:=round((15000::double precision * power((v_i-1)::double precision,2.3::double precision) * power(1.20::double precision,greatest(0,v_i-2)::double precision))::numeric)::bigint;
+--     exit when v_xp < v_threshold;
+--     v_calc_level:=v_i;
+--   end loop;
+--   if least(v_level,v_saved_level,v_calc_level)<v_req then
+--     raise exception 'Aliança libera no nível % (conforme XP e save). Seu nível validado é %.',v_req,least(v_level,v_saved_level,v_calc_level);
+--   end if;
+--   if not coalesce((select enabled from public.game_ui_modules_v1810 where module_key='clan'),true) then
+--     raise exception 'Alianças temporariamente indisponíveis.';
+--   end if;
+-- end;$fn$;
+-- revoke all on function public.clan_check_entry_level_v19(uuid) from PUBLIC,anon,authenticated;
+-- ===== END STELLAR_V19_0_2_LEVEL_INTEGRITY.sql =====
+
+-- ===== START STELLAR_V19_0_2_OFFICER_GUARD.sql | sha256 865cc0ceb07ff5ec4aec6dd37cc893e1c79de08f0c2a6f3bef668c7b842010d3 =====
+-- -- V19.0.2: nivel para cargos elevados e para movimentar o cofre.
+-- -- Mantem cargos anteriores intactos. Impede que membros nivel <8 recebam privilegios.
+-- do $m$
+-- declare v_src text;
+-- begin
+--   v_src:=pg_get_functiondef('public.set_clan_member_role_v19(uuid,text)'::regprocedure);
+--   if position('  update public.clan_members set role=v_new where user_id=p_target_user_id and clan_id=v_clan;' in v_src)=0 then
+--     raise exception 'Cargos: assinatura mudou, abortando sem mexer.';
+--   end if;
+--   v_src:=replace(v_src,'  update public.clan_members set role=v_new where user_id=p_target_user_id and clan_id=v_clan;',
+--     '  if v_new in (''deputy'',''elite'') then perform public.clan_check_entry_level_v19(p_target_user_id); end if;'||chr(10)||
+--     '  update public.clan_members set role=v_new where user_id=p_target_user_id and clan_id=v_clan;');
+--   execute v_src;
+--   v_src:=pg_get_functiondef('public.transfer_clan_credits_v12(text,bigint)'::regprocedure);
+--   if position(' if v_role not in(''owner'',''deputy'') then' in v_src)=0 then
+--     raise exception 'Cofre: assinatura mudou, abortando sem mexer.';
+--   end if;
+--   v_src:=replace(v_src,
+--     ' if v_role not in(''owner'',''deputy'') then',
+--     '  perform public.clan_check_entry_level_v19(v_uid);'||chr(10)||' if v_role not in(''owner'',''deputy'') then');
+--   execute v_src;
+-- end;$m$;
+-- ===== END STELLAR_V19_0_2_OFFICER_GUARD.sql =====
+
+-- ===== START STELLAR_V20_1_1_PVP_CADENCIA.sql | sha256 eaa2c0e2469248c2bf216415d47d28bb447fbd351b3cde26815dc0eea1401634 =====
+-- -- STELLAR LEGACY V20.1.1 | Ajuste de cadencia PvP 4-X
+-- -- STATUS: JA APLICADO no Supabase de producao em 15/10/2026.
+-- -- NAO EXECUTAR novamente: esta migracao tem protecao contra aplicacao duplicada.
+-- -- Ela altera somente 0.35s => 0.16s na fila de ataque PvP e sincroniza
+-- -- o backup da janela temporaria nivel 1, que se encerra na meia-noite.
+-- BEGIN;
+-- DO $patch$
+-- DECLARE v_current text;
+-- DECLARE v_restore text;
+-- BEGIN
+--  SELECT pg_get_functiondef(p.oid) INTO v_current
+--  FROM pg_proc p JOIN pg_namespace n ON n.oid=p.pronamespace
+--  WHERE n.nspname='public' AND p.proname='queue_pvp_attack';
+--  SELECT original_ddl INTO v_restore
+--  FROM private.stellar_level1_snapshot_20261015
+--  WHERE scope='rpc' AND ref='queue_pvp_attack';
+--  IF v_current IS NULL OR v_restore IS NULL
+--  OR position('0.35 seconds' in v_current)=0
+--  OR position('0.35 seconds' in v_restore)=0
+--  OR position('v_attacker.level<1 OR v_target.level<1' in v_current)=0
+--  OR position('v_attacker.level<15 OR v_target.level<15' in v_restore)=0
+--  THEN RAISE EXCEPTION 'Codigo PvP alterado ou backup divergente; nao aplicar'; END IF;
+--  IF NOT EXISTS(SELECT 1 FROM cron.job WHERE jobname='stellar_level1_restore_20261015' AND active)
+--  THEN RAISE EXCEPTION 'Restauracao temporaria da meia-noite nao encontrada'; END IF;
+--  CREATE TABLE private.stellar_pvp_cadence_backup_v2011 (
+--    id integer PRIMARY KEY,
+--    previous_live_ddl text NOT NULL,
+--    previous_midnight_ddl text NOT NULL,
+--    backed_up_at timestamptz NOT NULL DEFAULT now()
+--  );
+--  REVOKE ALL ON private.stellar_pvp_cadence_backup_v2011 FROM PUBLIC, anon, authenticated;
+--  INSERT INTO private.stellar_pvp_cadence_backup_v2011(id,previous_live_ddl,previous_midnight_ddl)
+--  VALUES(1,v_current,v_restore);
+--  EXECUTE replace(v_current,'0.35 seconds','0.16 seconds');
+--  UPDATE private.stellar_level1_snapshot_20261015
+--  SET original_ddl=replace(original_ddl,'0.35 seconds','0.16 seconds')
+--  WHERE scope='rpc' AND ref='queue_pvp_attack';
+--  IF (SELECT count(*) FROM private.stellar_level1_snapshot_20261015
+--  WHERE scope='rpc' AND position('0.16 seconds' in original_ddl)>0)<>1 THEN
+--  RAISE EXCEPTION 'Backup da meia-noite nao sincronizado'; END IF;
+-- END;
+-- $patch$;
+-- COMMIT;
+-- ===== END STELLAR_V20_1_1_PVP_CADENCIA.sql =====
+
+-- ===== START STELLAR_V20_1_PVP_4X.sql | sha256 329d84745a0203334f046ed844047f8b4024d6f2ad14b22db0a806855ab1619a =====
+-- -- Stellar Legacy V20.1.0 - Battle 4-X PvP
+-- -- Somente b41/b42/b43. Ataque a qualquer faccao, exceto propria conta.
+-- -- Nenhuma conta, NPC, economia, dano existente ou registro de PvP e apagado.
+-- BEGIN;
+-- CREATE TABLE IF NOT EXISTS public.pvp_attack_cooldown_v201 (
+--   attacker_user_id uuid PRIMARY KEY,
+--   last_attack_at timestamptz NOT NULL DEFAULT '-infinity'::timestamptz
+-- );
+-- REVOKE ALL ON public.pvp_attack_cooldown_v201 FROM PUBLIC, anon, authenticated;
+-- CREATE OR REPLACE FUNCTION public.queue_pvp_attack(
+--  p_target_user_id uuid,p_damage bigint,p_shield_drain boolean,p_map_id text,p_territory_faction text)
+--  RETURNS TABLE(accepted boolean,effective_damage bigint,target_callsign text)
+--  LANGUAGE plpgsql SECURITY DEFINER SET search_path TO 'public','auth','pg_temp'
+-- AS $pvp$
+-- DECLARE
+--  v_uid uuid:=auth.uid();
+--  v_attacker public.player_presence%rowtype;
+--  v_target public.player_presence%rowtype;
+--  v_effective bigint;
+--  v_rate_count integer;
+--  v_dist numeric;
+-- BEGIN
+--  IF v_uid IS NULL THEN RAISE EXCEPTION 'Sessao ausente.'; END IF;
+--  IF p_target_user_id IS NULL OR p_target_user_id=v_uid THEN RAISE EXCEPTION 'Alvo invalido.'; END IF;
+--  -- Cliente nao escolhe mapa autorizado: servidor valida presencas reais no banco.
+--  IF p_map_id IS NULL OR p_map_id NOT IN ('b41','b42','b43') OR p_territory_faction IS DISTINCT FROM 'battle' THEN
+--    RAISE EXCEPTION 'PvP permitido somente em 4-1, 4-2 ou 4-3.';
+--  END IF;
+--  SELECT * INTO v_attacker FROM public.player_presence WHERE user_id=v_uid
+--   AND updated_at>now()-interval '12 seconds';
+--  IF v_attacker.user_id IS NULL THEN RAISE EXCEPTION 'Sua presenca online nao esta sincronizada.'; END IF;
+--  SELECT * INTO v_target FROM public.player_presence WHERE user_id=p_target_user_id
+--   AND updated_at>now()-interval '12 seconds';
+--  IF v_target.user_id IS NULL THEN RAISE EXCEPTION 'Alvo offline.'; END IF;
+--  IF v_attacker.map_id<>p_map_id OR v_target.map_id<>p_map_id
+--     OR v_attacker.territory_faction IS DISTINCT FROM 'battle'
+--     OR v_target.territory_faction IS DISTINCT FROM 'battle' THEN
+--    RAISE EXCEPTION 'Alvo fora do Battle Map.';
+--  END IF;
+--  IF v_attacker.level<15 OR v_target.level<15 THEN
+--    RAISE EXCEPTION 'PvP 4-X exige nivel minimo 15.';
+--  END IF;
+--  IF v_attacker.hp<=0 OR v_target.hp<=0 THEN RAISE EXCEPTION 'Nave destruida: ataque indisponivel.'; END IF;
+--  -- Integrantes do mesmo grupo sao aliados mesmo nas zonas de PvP publico.
+--  IF EXISTS (SELECT 1 FROM public.battle_group_members_v179 a
+--    JOIN public.battle_group_members_v179 b ON b.group_id=a.group_id
+--    WHERE a.user_id=v_uid AND b.user_id=p_target_user_id) THEN
+--    RAISE EXCEPTION 'Fogo amigo bloqueado para seu grupo.';
+--  END IF;
+--  -- Margem de sincronizacao da presenca (4,5 s) sobre alcance laser (1.250u).
+--  v_dist:=sqrt(power(v_attacker.x-v_target.x,2)+power(v_attacker.y-v_target.y,2));
+--  IF v_dist>2200 THEN RAISE EXCEPTION 'Alvo distante: aproxime-se para disparar.'; END IF;
+--  IF p_damage IS NULL OR p_damage<1 OR p_damage>100000 THEN
+--    RAISE EXCEPTION 'Dano invalido por disparo.';
+--  END IF;
+--  -- Um limite por conta, nao por alvo, evita spam alternando jogadores.
+--  INSERT INTO public.pvp_attack_cooldown_v201(attacker_user_id,last_attack_at)
+--  VALUES(v_uid,now()) ON CONFLICT (attacker_user_id)
+--  DO UPDATE SET last_attack_at=EXCLUDED.last_attack_at
+--  WHERE public.pvp_attack_cooldown_v201.last_attack_at<=now()-interval '0.35 seconds';
+--  GET DIAGNOSTICS v_rate_count=ROW_COUNT;
+--  IF v_rate_count=0 THEN RAISE EXCEPTION 'Aguarde o proximo disparo PvP.'; END IF;
+--  IF coalesce(p_shield_drain,false) THEN
+--    v_effective:=least(greatest(0,coalesce(v_target.shield,0)),p_damage);
+--  ELSE v_effective:=p_damage; END IF;
+--  IF v_effective>0 THEN
+--   INSERT INTO public.pvp_damage_events(target_user_id,attacker_user_id,attacker_callsign,damage,shield_drain)
+--   VALUES(p_target_user_id,v_uid,coalesce(v_attacker.callsign,'Pilot'),v_effective,coalesce(p_shield_drain,false));
+--  END IF;
+--  RETURN QUERY SELECT true,v_effective,coalesce(v_target.callsign,'Pilot');
+-- END;
+-- $pvp$;
+-- REVOKE ALL ON FUNCTION public.queue_pvp_attack(uuid,bigint,boolean,text,text) FROM PUBLIC,anon;
+-- GRANT EXECUTE ON FUNCTION public.queue_pvp_attack(uuid,bigint,boolean,text,text) TO authenticated;
+-- COMMIT;
+-- ===== END STELLAR_V20_1_PVP_4X.sql =====
+
+-- ===== START STELLAR_V22_0_0_TEMPORADAS_ELITE_UNIVERSO.sql | sha256 5e152894e0dce7810e64a7dc9a0160b342704e51b6f9d940f3b760ce3c18526f =====
+-- -- STELLAR LEGACY • TEMPORADAS COMPETITIVAS, ELITE EQUIPAVEL E DIRETIVAS DO UNIVERSO
+-- -- Instalacao aditiva: nao altera saves existentes, relés A/B/C nem Passe atual.
+-- -- Esta migracao NÃO inicia nenhuma temporada nem publica alertas automaticamente.
+-- begin;
+-- create table if not exists public.stellar_competitive_seasons (
+--  id uuid primary key default gen_random_uuid(),
+--  title text not null check (length(btrim(title)) between 3 and 70),
+--  starts_at timestamptz not null,
+--  ends_at timestamptz not null,
+--  enabled boolean not null default false,
+--  min_points integer not null default 10 check(min_points between 1 and 10000),
+--  top_n integer not null default 10 check(top_n between 1 and 100),
+--  reward_credits integer not null default 0 check(reward_credits between 0 and 100000),
+--  reward_stl integer not null default 0 check(reward_stl between 0 and 100),
+--  created_at timestamptz not null default now(),
+--  updated_at timestamptz not null default now(),
+--  constraint stellar_season_valid_range check(ends_at>starts_at and ends_at<=starts_at+interval '90 days')
+-- );
+-- create index if not exists stellar_comp_seasons_dates_idx on public.stellar_competitive_seasons(enabled,ends_at desc);
+-- create or replace function public.stellar_competitive_season_guard()
+-- returns trigger language plpgsql set search_path=public as $$
+-- begin
+--  if tg_op='UPDATE' and old.enabled and now()>=old.starts_at
+--     and (new.title,new.starts_at,new.ends_at,new.enabled,new.min_points,new.top_n,new.reward_credits,new.reward_stl)
+--       is distinct from
+--         (old.title,old.starts_at,old.ends_at,old.enabled,old.min_points,old.top_n,old.reward_credits,old.reward_stl) then
+--    raise exception 'SEASON_CONFIG_LOCKED_AFTER_START';
+--  end if;
+--  new.updated_at:=now();
+--  return new;
+-- end;$$;
+-- drop trigger if exists stellar_competitive_season_guard on public.stellar_competitive_seasons;
+-- create trigger stellar_competitive_season_guard
+-- before update on public.stellar_competitive_seasons
+-- for each row execute function public.stellar_competitive_season_guard();
+-- 
+-- create table if not exists public.stellar_competitive_claims (
+--  season_id uuid not null references public.stellar_competitive_seasons(id) on delete restrict,
+--  user_id uuid not null references auth.users(id) on delete cascade,
+--  points integer not null,
+--  rank integer not null,
+--  credits integer not null,
+--  stl integer not null,
+--  claimed_at timestamptz not null default now(),
+--  primary key(season_id,user_id)
+-- );
+-- -- Rank alimentado EXCLUSIVAMENTE por capturas e defesas gravadas pelo servidor.
+-- -- Nenhuma pontuacao do navegador, nenhum reset territorial.
+-- create or replace view public.stellar_season_scores with (security_invoker=true) as
+--  select s.id as season_id,a.actor_user_id as user_id,a.faction,
+--  count(*) filter(where a.kind='capture')::integer as captures,
+--  count(*) filter(where a.kind='defense')::integer as defenses,
+--  sum(case when a.kind='capture' then 10 else 3 end)::integer as points
+--  from public.stellar_competitive_seasons s
+--  join public.stellar_war_actions a on a.occurred_at>=s.starts_at and a.occurred_at<s.ends_at
+--  where s.enabled and a.actor_user_id is not null
+--  group by s.id,a.actor_user_id,a.faction;
+-- create or replace view public.stellar_season_clan_scores with (security_invoker=true) as
+--  select s.id as season_id,a.clan_id,a.faction,
+--  count(distinct a.actor_user_id)::integer as pilots,
+--  count(*) filter(where a.kind='capture')::integer as captures,
+--  count(*) filter(where a.kind='defense')::integer as defenses,
+--  sum(case when a.kind='capture' then 10 else 3 end)::integer as points
+--  from public.stellar_competitive_seasons s
+--  join public.stellar_war_actions a on a.occurred_at>=s.starts_at and a.occurred_at<s.ends_at
+--  where s.enabled and a.clan_id is not null
+--  group by s.id,a.clan_id,a.faction;
+-- 
+-- create table if not exists public.stellar_elite_selected_titles (
+--  user_id uuid primary key references auth.users(id) on delete cascade,
+--  objective_id text not null,
+--  title text not null,
+--  equipped_at timestamptz not null default now()
+-- );
+-- create table if not exists public.stellar_world_directives (
+--  id bigint generated always as identity primary key,
+--  title text not null check(length(btrim(title)) between 3 and 80),
+--  description text not null default '' check(length(description)<=280),
+--  map_id text not null default 'all' check(map_id in ('all','x1','x2','x3','x4','x5','x6','x7','x8','b41','b42','b43','ggAlpha','ggBeta','ggGamma')),
+--  category text not null default 'alert' check(category in('alert','invasion','boss','resource')),
+--  starts_at timestamptz not null,
+--  ends_at timestamptz not null,
+--  enabled boolean not null default false,
+--  updated_at timestamptz not null default now(),
+--  constraint stellar_directive_dates check(ends_at>starts_at and ends_at<=starts_at+interval '30 days')
+-- );
+-- create index if not exists stellar_directives_active_idx on public.stellar_world_directives(enabled,starts_at,ends_at);
+-- 
+-- -- Escrita administrativa SOMENTE pelo servidor com chave secreta.
+-- do $$
+-- declare t text;
+-- begin
+--  foreach t in array array['stellar_competitive_seasons','stellar_competitive_claims','stellar_elite_selected_titles','stellar_world_directives'] loop
+--   execute format('alter table public.%I enable row level security',t);
+--   execute format('revoke all on public.%I from public,anon,authenticated',t);
+--   execute format('grant select,insert,update on public.%I to service_role',t);
+--  end loop;
+-- end;$$;
+-- revoke all on public.stellar_season_scores,public.stellar_season_clan_scores from public,anon,authenticated;
+-- grant select on public.stellar_season_scores,public.stellar_season_clan_scores to service_role;
+-- grant usage,select on sequence public.stellar_world_directives_id_seq to service_role;
+-- grant select on public.stellar_competitive_seasons,public.stellar_competitive_claims,public.stellar_elite_selected_titles,public.stellar_world_directives to authenticated;
+-- create policy stellar_season_public_read on public.stellar_competitive_seasons for select to authenticated using(enabled);
+-- create policy stellar_claims_own_read on public.stellar_competitive_claims for select to authenticated using(user_id=(select auth.uid()));
+-- create policy stellar_title_own_read on public.stellar_elite_selected_titles for select to authenticated using(user_id=(select auth.uid()));
+-- create policy stellar_directives_active_read on public.stellar_world_directives for select to authenticated using(enabled and starts_at<=now() and ends_at>now());
+-- 
+-- -- Titulo equipavel: precisa ter conquista REAL em stellar_elite_claims.
+-- create or replace function public.stellar_equip_elite_title(p_objective_id text)
+-- returns jsonb language plpgsql security definer set search_path=public,pg_temp as $$
+-- declare v_uid uuid:=auth.uid();v_title text;
+-- begin
+--  if v_uid is null then raise exception 'AUTH_REQUIRED';end if;
+--  select title into v_title from public.stellar_elite_claims where user_id=v_uid and objective_id=p_objective_id;
+--  if v_title is null then raise exception 'ELITE_TITLE_NOT_EARNED';end if;
+--  insert into public.stellar_elite_selected_titles(user_id,objective_id,title)
+--  values(v_uid,p_objective_id,v_title)
+--  on conflict(user_id) do update set objective_id=excluded.objective_id,title=excluded.title,equipped_at=now();
+--  return jsonb_build_object('ok',true,'title',v_title,'objective_id',p_objective_id);
+-- end;$$;
+-- revoke all on function public.stellar_equip_elite_title(text) from public,anon;
+-- grant execute on function public.stellar_equip_elite_title(text) to authenticated;
+-- 
+-- -- Ranking competitivo ao final da temporada. Resgate único e atômico no save.
+-- -- Não usa pontos enviados pelo cliente; somente ações de combate registradas pelo servidor.
+-- create or replace function public.stellar_claim_competitive_season(p_season_id uuid)
+-- returns jsonb language plpgsql security definer set search_path=public,pg_temp as $$
+-- declare v_uid uuid:=auth.uid();v_season public.stellar_competitive_seasons;
+--  v_rank bigint;v_points bigint;v_state jsonb;v_profile jsonb;v_rev bigint;
+-- begin
+--  if v_uid is null then raise exception 'AUTH_REQUIRED';end if;
+--  select * into v_season from public.stellar_competitive_seasons where id=p_season_id and enabled for share;
+--  if not found or now()<v_season.ends_at then raise exception 'SEASON_NOT_CLOSED';end if;
+--  select scores.rnk,scores.points into v_rank,v_points from (
+--   select user_id,points,row_number() over(order by points desc,user_id) as rnk from (
+--    select a.actor_user_id as user_id,sum(case when a.kind='capture' then 10 else 3 end)::bigint as points
+--    from public.stellar_war_actions a where a.occurred_at>=v_season.starts_at and a.occurred_at<v_season.ends_at and a.actor_user_id is not null
+--    group by a.actor_user_id
+--   ) raw
+--  ) scores where scores.user_id=v_uid;
+--  if v_rank is null or v_rank>v_season.top_n or v_points<v_season.min_points then raise exception 'SEASON_REWARD_NOT_ELIGIBLE';end if;
+--  select state into v_state from public.game_saves where user_id=v_uid for update;
+--  if v_state is null then raise exception 'SAVE_NOT_FOUND';end if;
+--  if exists(select 1 from public.stellar_competitive_claims where season_id=p_season_id and user_id=v_uid) then
+--   return jsonb_build_object('ok',true,'already_claimed',true,'state',v_state);
+--  end if;
+--  insert into public.stellar_competitive_claims(season_id,user_id,points,rank,credits,stl)
+--  values(p_season_id,v_uid,v_points,v_rank,v_season.reward_credits,v_season.reward_stl);
+--  v_profile:=coalesce(v_state->'profile','{}'::jsonb);
+--  v_profile:=jsonb_set(v_profile,'{credits}',to_jsonb(greatest(0,coalesce((v_profile->>'credits')::numeric,0))+v_season.reward_credits),true);
+--  v_profile:=jsonb_set(v_profile,'{uridium}',to_jsonb(greatest(0,coalesce((v_profile->>'uridium')::numeric,0))+v_season.reward_stl),true);
+--  v_rev:=coalesce((v_state->>'serverEliteRevision')::bigint,0)+1;
+--  v_state:=jsonb_set(jsonb_set(v_state,'{profile}',v_profile,true),'{serverEliteRevision}',to_jsonb(v_rev),true);
+--  update public.game_saves set state=v_state,updated_at=now() where user_id=v_uid;
+--  return jsonb_build_object('ok',true,'already_claimed',false,'rank',v_rank,'points',v_points,'credits',v_season.reward_credits,'stl',v_season.reward_stl,'state',v_state);
+-- end;$$;
+-- revoke all on function public.stellar_claim_competitive_season(uuid) from public,anon;
+-- grant execute on function public.stellar_claim_competitive_season(uuid) to authenticated;
+-- commit;
+-- ===== END STELLAR_V22_0_0_TEMPORADAS_ELITE_UNIVERSO.sql =====
+
+-- ===== START STELLAR_V22_0_1_TITULOS_ALTERNAVEIS.sql | sha256 59dc4626d1c476f2e69a6adcf1bb4ac5f214a4285136e0363f86729abadb852e =====
+-- -- STELLAR LEGACY — restaurar titulo comum quando o piloto optar por ele.
+-- -- Complemento não destrutivo ao esquema de temporadas.
+-- begin;
+-- create or replace function public.stellar_unequip_elite_title()
+-- returns jsonb language plpgsql security definer set search_path=public,pg_temp as $$
+-- declare v_uid uuid:=auth.uid();
+-- begin
+--  if v_uid is null then raise exception 'AUTH_REQUIRED';end if;
+--  delete from public.stellar_elite_selected_titles where user_id=v_uid;
+--  return jsonb_build_object('ok',true,'title',null);
+-- end;$$;
+-- revoke all on function public.stellar_unequip_elite_title() from public,anon;
+-- grant execute on function public.stellar_unequip_elite_title() to authenticated;
+-- commit;
+-- ===== END STELLAR_V22_0_1_TITULOS_ALTERNAVEIS.sql =====
+
+-- ===== START STELLAR_V22_5_0_CLAN_OPERATIONS_HALL.sql | sha256 25e37d6dc9fa8d60f20a6d454815780fd26ff9c578a1787e3e2b74ba83cd3489 =====
+-- -- Stellar Legacy — missões coletivas de clã e histórico de campeões.
+-- -- Não zera saves, temporadas, proprietários dos pontos A/B/C, nem redistribui prêmios antigos.
+-- BEGIN;
+-- CREATE INDEX IF NOT EXISTS stellar_war_actions_clan_kind_idx ON public.stellar_war_actions(clan_id,kind) WHERE clan_id IS NOT NULL;
+-- CREATE TABLE IF NOT EXISTS public.stellar_clan_operations (
+--  id text PRIMARY KEY CHECK (id ~ '^[a-z][a-z0-9_]{2,39}$'),
+--  title text NOT NULL CHECK (char_length(trim(title)) BETWEEN 3 AND 80),
+--  metric text NOT NULL CHECK (metric IN ('capture','defense')),
+--  target integer NOT NULL CHECK (target BETWEEN 1 AND 10000),
+--  vault_credits bigint NOT NULL DEFAULT 0 CHECK (vault_credits BETWEEN 0 AND 1000000),
+--  enabled boolean NOT NULL DEFAULT false,
+--  sort_order integer NOT NULL DEFAULT 100
+-- );
+-- CREATE TABLE IF NOT EXISTS public.stellar_clan_operation_claims (
+--  clan_id uuid NOT NULL REFERENCES public.clans(id) ON DELETE CASCADE,
+--  operation_id text NOT NULL REFERENCES public.stellar_clan_operations(id) ON DELETE RESTRICT,
+--  claimed_by uuid REFERENCES auth.users(id) ON DELETE SET NULL,
+--  credits bigint NOT NULL DEFAULT 0,
+--  claimed_at timestamptz NOT NULL DEFAULT now(),
+--  PRIMARY KEY(clan_id,operation_id)
+-- );
+-- INSERT INTO public.stellar_clan_operations (id,title,metric,target,vault_credits,enabled,sort_order) VALUES
+-- ('uniao_estelar','Primeiros Setores', 'capture', 3, 25000, true, 10),
+-- ('escudo_coletivo','Linha de Defesa', 'defense', 5, 20000, true, 20),
+-- ('dominio_estelar','Campanha de Dominio', 'capture', 15, 100000, true, 30)
+-- ON CONFLICT(id) DO NOTHING;
+-- ALTER TABLE public.stellar_clan_operations ENABLE ROW LEVEL SECURITY;
+-- ALTER TABLE public.stellar_clan_operation_claims ENABLE ROW LEVEL SECURITY;
+-- REVOKE ALL ON public.stellar_clan_operations,public.stellar_clan_operation_claims FROM public,anon,authenticated;
+-- GRANT SELECT,INSERT,UPDATE ON public.stellar_clan_operations TO service_role;
+-- GRANT SELECT,INSERT ON public.stellar_clan_operation_claims TO service_role;
+-- GRANT SELECT ON public.clans TO service_role;
+-- GRANT SELECT ON public.stellar_clan_operations TO authenticated;
+-- DROP POLICY IF EXISTS stellar_clan_operation_list ON public.stellar_clan_operations;
+-- CREATE POLICY stellar_clan_operation_list ON public.stellar_clan_operations FOR SELECT TO authenticated USING(enabled);
+-- 
+-- -- A conquista é contada no clã ao qual pertencia o piloto NO MOMENTO DA CONQUISTA.
+-- -- Somente o dono atual do clã pode solicitar transferência única de Créditos ao cofre.
+-- CREATE OR REPLACE FUNCTION public.stellar_claim_clan_operation(p_operation_id text)
+-- RETURNS jsonb LANGUAGE plpgsql SECURITY DEFINER SET search_path=public,pg_temp AS $$
+-- DECLARE v_uid uuid:=auth.uid();v_clan uuid;v_objective public.stellar_clan_operations;
+--  v_progress bigint;v_old bigint;v_claimed boolean;
+-- BEGIN
+--  IF v_uid IS NULL THEN RAISE EXCEPTION 'AUTH_REQUIRED';END IF;
+--  SELECT id INTO v_clan FROM public.clans WHERE owner_id=v_uid ORDER BY created_at LIMIT 1;
+--  IF v_clan IS NULL THEN RAISE EXCEPTION 'CLAN_OWNER_REQUIRED';END IF;
+--  SELECT * INTO v_objective FROM public.stellar_clan_operations WHERE id=p_operation_id AND enabled FOR SHARE;
+--  IF NOT FOUND THEN RAISE EXCEPTION 'CLAN_OPERATION_NOT_FOUND';END IF;
+--  SELECT vault_credits INTO v_old FROM public.clans WHERE id=v_clan AND owner_id=v_uid FOR UPDATE;
+--  IF NOT FOUND THEN RAISE EXCEPTION 'CLAN_NOT_FOUND';END IF;
+--  IF EXISTS(SELECT 1 FROM public.stellar_clan_operation_claims WHERE clan_id=v_clan AND operation_id=p_operation_id) THEN
+--    RETURN jsonb_build_object('ok',true,'already_claimed',true,'clan_id',v_clan,'vault_credits',v_old);
+--  END IF;
+--  SELECT count(*) INTO v_progress FROM public.stellar_war_actions WHERE clan_id=v_clan AND kind=v_objective.metric;
+--  IF v_progress<v_objective.target THEN RAISE EXCEPTION 'CLAN_OBJECTIVE_NOT_COMPLETE';END IF;
+--  INSERT INTO public.stellar_clan_operation_claims(clan_id,operation_id,claimed_by,credits)
+--  VALUES(v_clan,p_operation_id,v_uid,v_objective.vault_credits);
+--  UPDATE public.clans SET vault_credits=coalesce(vault_credits,0)+v_objective.vault_credits,updated_at=now()
+--  WHERE id=v_clan RETURNING vault_credits INTO v_old;
+--  RETURN jsonb_build_object('ok',true,'already_claimed',false,'clan_id',v_clan,'credits',v_objective.vault_credits,'vault_credits',v_old);
+-- END;$$;
+-- REVOKE ALL ON FUNCTION public.stellar_claim_clan_operation(text) FROM public,anon;
+-- GRANT EXECUTE ON FUNCTION public.stellar_claim_clan_operation(text) TO authenticated;
+-- 
+-- -- Histórico de temporadas encerradas. Só usa ações verificadas pelo servidor.
+-- CREATE OR REPLACE VIEW public.stellar_competitive_history WITH (security_invoker=true) AS
+-- SELECT s.id,s.title,s.starts_at,s.ends_at,s.top_n,
+--  (SELECT count(DISTINCT a.actor_user_id)::int FROM public.stellar_war_actions a
+--   WHERE a.occurred_at>=s.starts_at AND a.occurred_at<s.ends_at AND a.actor_user_id IS NOT NULL) as pilots,
+--  (SELECT count(*)::int FROM public.stellar_competitive_claims c WHERE c.season_id=s.id) as rewards_claimed,
+--  (SELECT faction FROM public.stellar_war_actions a WHERE a.occurred_at>=s.starts_at AND a.occurred_at<s.ends_at
+--     GROUP BY faction ORDER BY sum(case when kind='capture' then 10 else 3 end) DESC,faction LIMIT 1) as winning_faction
+-- FROM public.stellar_competitive_seasons s
+-- WHERE s.enabled AND s.ends_at<=now();
+-- REVOKE ALL ON public.stellar_competitive_history FROM public,anon,authenticated;
+-- GRANT SELECT ON public.stellar_competitive_history TO service_role;
+-- -- Missões já resgatadas são definitivas: nem o ADM reconfigura meta ou premiação retroativamente.
+-- CREATE OR REPLACE FUNCTION public.stellar_clan_operation_guard()
+-- RETURNS trigger LANGUAGE plpgsql SET search_path=public AS $$
+-- BEGIN
+--  IF EXISTS(SELECT 1 FROM public.stellar_clan_operation_claims WHERE operation_id=old.id)
+--     AND (new.metric,new.target,new.vault_credits,new.id) IS DISTINCT FROM
+--         (old.metric,old.target,old.vault_credits,old.id) THEN
+--   RAISE EXCEPTION 'CLAN_OPERATION_LOCKED_AFTER_CLAIM';
+--  END IF;
+--  RETURN new;
+-- END;$$;
+-- DROP TRIGGER IF EXISTS stellar_clan_operation_guard ON public.stellar_clan_operations;
+-- CREATE TRIGGER stellar_clan_operation_guard BEFORE UPDATE ON public.stellar_clan_operations
+-- FOR EACH ROW EXECUTE FUNCTION public.stellar_clan_operation_guard();
+-- COMMIT;
+-- ===== END STELLAR_V22_5_0_CLAN_OPERATIONS_HALL.sql =====
+
+-- ===== START STELLAR_V22_6_0_ANTIFRAUDE.sql | sha256 97e4efd8f03947f13061b39d39508c85361b5f68121514062612fee35c0a7a65 =====
+-- -- STELLAR LEGACY: antifraude com auditoria e suspensão temporária após reincidência
+-- -- Aplica somente estruturas novas. Não edita saves, saldos ou proprietários de territórios.
+-- BEGIN;
+-- CREATE TABLE IF NOT EXISTS public.stellar_security_events (
+--  id bigserial PRIMARY KEY,
+--  user_id uuid NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+--  code text NOT NULL CHECK (code ~ '^[A-Z_]{4,64}$'),
+--  severity text NOT NULL CHECK (severity IN ('warn','critical')),
+--  context jsonb NOT NULL DEFAULT '{}'::jsonb CHECK (jsonb_typeof(context)='object' AND octet_length(context::text)<4000),
+--  created_at timestamptz NOT NULL DEFAULT now(),
+--  auto_suspended boolean NOT NULL DEFAULT false,
+--  reviewed_at timestamptz,
+--  reviewed_by uuid REFERENCES auth.users(id) ON DELETE SET NULL,
+--  review_note text
+-- );
+-- CREATE INDEX IF NOT EXISTS stellar_security_events_user_time_idx ON public.stellar_security_events(user_id,created_at DESC);
+-- CREATE INDEX IF NOT EXISTS stellar_security_events_pending_idx ON public.stellar_security_events(created_at DESC) WHERE reviewed_at IS NULL;
+-- ALTER TABLE public.stellar_security_events ENABLE ROW LEVEL SECURITY;
+-- REVOKE ALL ON public.stellar_security_events FROM PUBLIC,anon,authenticated;
+-- REVOKE ALL ON SEQUENCE public.stellar_security_events_id_seq FROM PUBLIC,anon,authenticated;
+-- GRANT SELECT,INSERT,UPDATE ON public.stellar_security_events TO service_role;
+-- GRANT USAGE,SELECT ON SEQUENCE public.stellar_security_events_id_seq TO service_role;
+-- 
+-- -- Somente credencial do servidor consegue registrar violações.
+-- CREATE OR REPLACE FUNCTION public.stellar_security_report_server(p_user_id uuid,p_code text,p_severity text,p_context jsonb DEFAULT '{}'::jsonb)
+-- RETURNS jsonb LANGUAGE plpgsql SECURITY DEFINER SET search_path = public,pg_temp AS $$
+-- DECLARE v_last timestamptz; v_count integer; v_event bigint; v_banned boolean:=false; v_admin boolean:=false;
+-- BEGIN
+--  IF auth.role() IS DISTINCT FROM 'service_role' THEN RAISE EXCEPTION 'Somente servidor autorizado'; END IF;
+--  IF p_user_id IS NULL OR p_code !~ '^[A-Z_]{4,64}$' OR p_severity NOT IN ('warn','critical') THEN RAISE EXCEPTION 'Evento inválido'; END IF;
+--  IF NOT EXISTS (SELECT 1 FROM auth.users WHERE id=p_user_id) THEN RAISE EXCEPTION 'Conta inexistente'; END IF;
+--  -- Nunca aplicar suspensão automática a admins, nem por eventos de severidade warning.
+--  SELECT EXISTS (SELECT 1 FROM public.game_admins WHERE user_id=p_user_id) INTO v_admin;
+--  SELECT max(created_at) INTO v_last FROM public.stellar_security_events WHERE user_id=p_user_id AND code=p_code AND created_at>now()-interval '1 minute';
+--  IF v_last IS NOT NULL THEN RETURN jsonb_build_object('recorded',false,'deduplicated',true,'auto_suspended',false); END IF;
+--  INSERT INTO public.stellar_security_events(user_id,code,severity,context)
+--  VALUES(p_user_id,p_code,p_severity,coalesce(p_context,'{}'::jsonb)) RETURNING id INTO v_event;
+--  IF p_severity='critical' AND NOT v_admin THEN
+--   SELECT count(*) INTO v_count FROM public.stellar_security_events
+--   WHERE user_id=p_user_id AND severity='critical' AND created_at>now()-interval '2 hours' AND reviewed_at IS NULL;
+--   IF v_count>=3 THEN
+--     INSERT INTO public.account_moderation_v1763(user_id,is_banned,banned_until,banned_reason,banned_by,updated_at)
+--     VALUES(p_user_id,true,now()+interval '24 hours','Proteção antifraude: violações graves recorrentes. Revisão disponível.',NULL,now())
+--     ON CONFLICT(user_id) DO UPDATE SET is_banned=true,banned_until=excluded.banned_until,banned_reason=excluded.banned_reason,banned_by=NULL,updated_at=now();
+--     DELETE FROM public.game_login_sessions_v1214 WHERE user_id=p_user_id;
+--     DELETE FROM public.player_presence WHERE user_id=p_user_id;
+--     UPDATE public.stellar_security_events SET auto_suspended=true WHERE id=v_event;
+--     v_banned:=true;
+--   END IF;
+--  END IF;
+--  RETURN jsonb_build_object('recorded',true,'event_id',v_event,'auto_suspended',v_banned,'critical_strikes',coalesce(v_count,0));
+-- END; $$;
+-- REVOKE ALL ON FUNCTION public.stellar_security_report_server(uuid,text,text,jsonb) FROM PUBLIC,anon,authenticated;
+-- GRANT EXECUTE ON FUNCTION public.stellar_security_report_server(uuid,text,text,jsonb) TO service_role;
+-- 
+-- -- Auditoria por ADM, sem exposição da tabela de incidentes ao navegador.
+-- CREATE OR REPLACE FUNCTION public.stellar_security_review_incident(p_event_id bigint,p_note text)
+-- RETURNS jsonb LANGUAGE plpgsql SECURITY DEFINER SET search_path=public,pg_temp AS $$
+-- DECLARE v_row public.stellar_security_events;
+-- BEGIN
+--  IF auth.uid() IS NULL OR NOT public.is_game_admin_v1763(auth.uid()) THEN RAISE EXCEPTION 'Acesso administrativo negado'; END IF;
+--  IF p_note IS NULL OR length(btrim(p_note))<3 THEN RAISE EXCEPTION 'Motivo da revisão obrigatório'; END IF;
+--  UPDATE public.stellar_security_events SET reviewed_at=now(),reviewed_by=auth.uid(),review_note=left(btrim(p_note),200)
+--  WHERE id=p_event_id RETURNING * INTO v_row;
+--  IF NOT FOUND THEN RAISE EXCEPTION 'Incidente inexistente'; END IF;
+--  RETURN jsonb_build_object('ok',true,'event_id',v_row.id,'user_id',v_row.user_id,'reviewed_at',v_row.reviewed_at);
+-- END; $$;
+-- REVOKE ALL ON FUNCTION public.stellar_security_review_incident(bigint,text) FROM PUBLIC,anon;
+-- GRANT EXECUTE ON FUNCTION public.stellar_security_review_incident(bigint,text) TO authenticated;
+-- 
+-- -- Salvaguarda do lado do banco: não pode ser contornada chamando o REST do Supabase
+-- -- diretamente. Limiares altos para não bloquear recompensas legítimas já existentes.
+-- CREATE OR REPLACE FUNCTION public.stellar_guard_saves_antifraud_v226()
+-- RETURNS trigger LANGUAGE plpgsql SECURITY DEFINER SET search_path=public,pg_temp AS $$
+-- DECLARE v_credits numeric;v_stl numeric;v_old_credits numeric;v_old_stl numeric;
+-- BEGIN
+--  IF new.state IS NULL OR jsonb_typeof(new.state)<>'object' THEN RAISE EXCEPTION 'SECURITY_SAVE_INVALID'; END IF;
+--  IF new.state ? 'accountOwnerId' AND nullif(new.state->>'accountOwnerId','') IS NOT NULL
+--     AND new.state->>'accountOwnerId' <> new.user_id::text THEN RAISE EXCEPTION 'SECURITY_OWNER_MISMATCH'; END IF;
+--  IF auth.role() = 'service_role' THEN RETURN new; END IF;
+--  IF coalesce(new.state->'profile','{}'::jsonb) ? 'credits' THEN
+--   IF jsonb_typeof(new.state#>'{profile,credits}') <> 'number' THEN RAISE EXCEPTION 'SECURITY_CREDITS_FORMAT'; END IF;
+--  END IF;
+--  IF coalesce(new.state->'profile','{}'::jsonb) ? 'uridium' THEN
+--   IF jsonb_typeof(new.state#>'{profile,uridium}') <> 'number' THEN RAISE EXCEPTION 'SECURITY_STL_FORMAT'; END IF;
+--  END IF;
+--  v_credits:=coalesce((new.state#>>'{profile,credits}')::numeric,0);
+--  v_stl:=coalesce((new.state#>>'{profile,uridium}')::numeric,0);
+--  IF v_credits<0 OR v_credits>1000000000000 OR v_stl<0 OR v_stl>10000000000 THEN RAISE EXCEPTION 'SECURITY_BALANCE_RANGE'; END IF;
+--  IF TG_OP='UPDATE' THEN
+--   IF old.state IS NOT NULL THEN
+--    v_old_credits:=coalesce((old.state#>>'{profile,credits}')::numeric,0);
+--    v_old_stl:=coalesce((old.state#>>'{profile,uridium}')::numeric,0);
+--    IF v_credits-v_old_credits>100000000 OR v_stl-v_old_stl>1000000 THEN
+--      RAISE EXCEPTION 'SECURITY_UNVERIFIED_BALANCE_INCREASE';
+--    END IF;
+--   END IF;
+--  END IF;
+--  RETURN new;
+-- EXCEPTION WHEN invalid_text_representation OR numeric_value_out_of_range THEN
+--  RAISE EXCEPTION 'SECURITY_INVALID_ECONOMY_FORMAT';
+-- END; $$;
+-- DROP TRIGGER IF EXISTS stellar_save_antifraud_v226 ON public.game_saves;
+-- CREATE TRIGGER stellar_save_antifraud_v226 BEFORE UPDATE OF state ON public.game_saves
+-- FOR EACH ROW EXECUTE FUNCTION public.stellar_guard_saves_antifraud_v226();
+-- CREATE TRIGGER stellar_save_antifraud_insert_v226 BEFORE INSERT ON public.game_saves
+-- FOR EACH ROW EXECUTE FUNCTION public.stellar_guard_saves_antifraud_v226();
+-- COMMIT;
+-- ===== END STELLAR_V22_6_0_ANTIFRAUDE.sql =====
+
+-- ===== START STELLAR_V22_6_1_INVENTARIO_GUARD.sql | sha256 5577da6fab3bf6c75cbc59e11171dd1bfc2633224f13133fee47ab32325e1eb2 =====
+-- -- Protecao das quantidades de inventario inclusive via REST direto do Supabase.
+-- -- Valida formatos e limites, sem alterar saldos nem inventarios existentes.
+-- BEGIN;
+-- CREATE OR REPLACE FUNCTION public.stellar_guard_inventory_v226()
+-- RETURNS trigger LANGUAGE plpgsql SECURITY DEFINER SET search_path=public,pg_temp AS $$
+-- DECLARE v_group text; v_payload jsonb; v_item record; v_max numeric;
+-- BEGIN
+--  IF auth.role()='service_role' THEN RETURN NEW; END IF;
+--  FOREACH v_group IN ARRAY ARRAY['inventory','ammo','rockets','cargo'] LOOP
+--   v_payload:=NEW.state->v_group;
+--   IF v_payload IS NULL THEN CONTINUE; END IF;
+--   IF jsonb_typeof(v_payload)<>'object' THEN RAISE EXCEPTION 'SECURITY_INVALID_INVENTORY_FORMAT'; END IF;
+--   v_max:=CASE WHEN v_group='ammo' THEN 1000000000000::numeric ELSE 1000000000::numeric END;
+--   FOR v_item IN SELECT key,value FROM jsonb_each(v_payload) LOOP
+--    IF jsonb_typeof(v_item.value)<>'number' THEN RAISE EXCEPTION 'SECURITY_INVALID_ITEM_TYPE'; END IF;
+--    IF (v_item.value#>>'{}')::numeric<0 OR (v_item.value#>>'{}')::numeric>v_max
+--       OR (v_item.value#>>'{}')::numeric<>trunc((v_item.value#>>'{}')::numeric) THEN
+--       RAISE EXCEPTION 'SECURITY_INVALID_ITEM_QUANTITY';
+--    END IF;
+--   END LOOP;
+--  END LOOP;
+--  RETURN NEW;
+-- EXCEPTION WHEN invalid_text_representation OR numeric_value_out_of_range THEN RAISE EXCEPTION 'SECURITY_INVALID_ITEM_QUANTITY';
+-- END; $$;
+-- DROP TRIGGER IF EXISTS stellar_inventory_guard_update_v226 ON public.game_saves;
+-- DROP TRIGGER IF EXISTS stellar_inventory_guard_insert_v226 ON public.game_saves;
+-- CREATE TRIGGER stellar_inventory_guard_update_v226 BEFORE UPDATE OF state ON public.game_saves
+-- FOR EACH ROW EXECUTE FUNCTION public.stellar_guard_inventory_v226();
+-- CREATE TRIGGER stellar_inventory_guard_insert_v226 BEFORE INSERT ON public.game_saves
+-- FOR EACH ROW EXECUTE FUNCTION public.stellar_guard_inventory_v226();
+-- COMMIT;
+-- ===== END STELLAR_V22_6_1_INVENTARIO_GUARD.sql =====
+
+-- ===== START STELLAR_V22_7_0_A_PREPARAR_SERVICE_ROLE.sql | sha256 543bff9a37dbdb09aac8a337fec1feb32a094d0157cf9b7be310e84bb16d15e1 =====
+-- -- Etapa A (segura com a versao antiga ainda no ar):
+-- -- libera a credencial privilegiada do Render, SEM revogar escrita dos jogadores.
+-- BEGIN;
+-- GRANT SELECT, INSERT, UPDATE ON public.game_saves TO service_role;
+-- GRANT SELECT, INSERT, UPDATE ON public.profiles TO service_role;
+-- COMMIT;
+-- ===== END STELLAR_V22_7_0_A_PREPARAR_SERVICE_ROLE.sql =====
+
+-- ===== START STELLAR_V22_7_0_SERVER_WRITE_GATE.sql | sha256 098f844aff7b69df0aab57cdd4cea3dff054829e8404e59106e3e59e6dbe0349 =====
+-- -- Stellar Legacy • escrita do save e espelho economico somente pelo servidor.
+-- -- ETAPA B: SOMENTE APOS deploy da V22.7.0 no Render.
+-- -- Nunca aplicar enquanto V22.6.0 ainda estiver publicada.
+-- -- Sem atualizacao de saldos, inventarios, niveis, terrenos ou saves existentes.
+-- BEGIN;
+-- 
+-- -- O service_role neste projeto nao possui grants implicitos nessas tabelas.
+-- GRANT SELECT,INSERT,UPDATE ON TABLE public.game_saves TO service_role;
+-- GRANT SELECT,INSERT,UPDATE ON TABLE public.profiles TO service_role;
+-- 
+-- -- O jogador continua lendo o proprio save via suas politicas RLS, mas nenhuma
+-- -- requisicao REST direta pode INSERT/UPDATE/DELETE um save.
+-- REVOKE INSERT,UPDATE,DELETE ON TABLE public.game_saves FROM PUBLIC, anon, authenticated;
+-- 
+-- -- Dados financeiros e progressao visiveis nos rankings pertencem ao servidor.
+-- -- O jogador ainda pode criar o perfil inicial e ajustar somente o callsign.
+-- REVOKE INSERT,UPDATE,DELETE ON TABLE public.profiles FROM PUBLIC, anon, authenticated;
+-- GRANT INSERT (id,callsign,updated_at) ON TABLE public.profiles TO authenticated;
+-- GRANT UPDATE (id,callsign,updated_at) ON TABLE public.profiles TO authenticated;
+-- 
+-- -- Revisao monetaria: o save nao pode apagar compras confirmadas pelo Render.
+-- -- Tambem protege mutacoes legadas feitas por SECURITY DEFINER.
+-- CREATE OR REPLACE FUNCTION public.stellar_guard_purchase_revision_v227()
+-- RETURNS trigger LANGUAGE plpgsql SECURITY DEFINER
+-- SET search_path = public,pg_temp AS $$
+-- DECLARE old_rev numeric; new_rev numeric;
+-- BEGIN
+--   IF NEW.state IS NULL OR jsonb_typeof(NEW.state)<>'object' THEN
+--      RAISE EXCEPTION 'SECURITY_SAVE_INVALID';
+--   END IF;
+--   IF NEW.state ? 'serverPurchaseRevision' AND
+--      jsonb_typeof(NEW.state->'serverPurchaseRevision')<>'number' THEN
+--      RAISE EXCEPTION 'SECURITY_PURCHASE_REVISION_INVALID';
+--   END IF;
+--   new_rev:=COALESCE((NEW.state->>'serverPurchaseRevision')::numeric,0);
+--   IF new_rev<0 OR new_rev>1000000000 OR new_rev<>trunc(new_rev) THEN
+--      RAISE EXCEPTION 'SECURITY_PURCHASE_REVISION_INVALID';
+--   END IF;
+--   IF TG_OP='UPDATE' THEN
+--     old_rev:=COALESCE((OLD.state->>'serverPurchaseRevision')::numeric,0);
+--     IF new_rev<old_rev THEN RAISE EXCEPTION 'SAVE_ECONOMY_STALE'; END IF;
+--     IF new_rev>old_rev+1 THEN RAISE EXCEPTION 'SECURITY_PURCHASE_REVISION_INVALID'; END IF;
+--   END IF;
+--   RETURN NEW;
+-- EXCEPTION WHEN invalid_text_representation OR numeric_value_out_of_range THEN
+--   RAISE EXCEPTION 'SECURITY_PURCHASE_REVISION_INVALID';
+-- END; $$;
+-- DROP TRIGGER IF EXISTS stellar_purchase_revision_update_v227 ON public.game_saves;
+-- DROP TRIGGER IF EXISTS stellar_purchase_revision_insert_v227 ON public.game_saves;
+-- CREATE TRIGGER stellar_purchase_revision_update_v227
+-- BEFORE UPDATE OF state ON public.game_saves
+-- FOR EACH ROW EXECUTE FUNCTION public.stellar_guard_purchase_revision_v227();
+-- CREATE TRIGGER stellar_purchase_revision_insert_v227
+-- BEFORE INSERT ON public.game_saves
+-- FOR EACH ROW EXECUTE FUNCTION public.stellar_guard_purchase_revision_v227();
+-- REVOKE ALL ON FUNCTION public.stellar_guard_purchase_revision_v227() FROM PUBLIC,anon,authenticated;
+-- 
+-- COMMIT;
+-- ===== END STELLAR_V22_7_0_SERVER_WRITE_GATE.sql =====
+
+-- ===== START STELLAR_V22_8_0_NPC_REWARD_LEDGER.sql | sha256 d16ff5443a984505bfcd6dcca52099c8477218b1086ed1b79569af26e0735470 =====
+-- -- Stellar Legacy: concessao de CR/STL de NPC exclusivamente pelo servidor.
+-- -- Compatível com a V22.7.0: nenhum save existente e alterado na instalacao.
+-- BEGIN;
+-- CREATE TABLE IF NOT EXISTS public.stellar_npc_reward_ledger (
+--  user_id uuid NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+--  kill_key text NOT NULL CHECK (length(kill_key) BETWEEN 12 AND 180),
+--  npc_type text NOT NULL DEFAULT 'npc',
+--  credits bigint NOT NULL DEFAULT 0 CHECK (credits >= 0 AND credits <= 100000000),
+--  stl bigint NOT NULL DEFAULT 0 CHECK (stl >= 0 AND stl <= 1000000),
+--  issued_at timestamptz NOT NULL DEFAULT now(),
+--  PRIMARY KEY(user_id,kill_key)
+-- );
+-- CREATE INDEX IF NOT EXISTS stellar_npc_reward_ledger_issued_idx ON public.stellar_npc_reward_ledger(user_id,issued_at DESC);
+-- ALTER TABLE public.stellar_npc_reward_ledger ENABLE ROW LEVEL SECURITY;
+-- REVOKE ALL ON public.stellar_npc_reward_ledger FROM PUBLIC,anon,authenticated;
+-- GRANT SELECT,INSERT ON public.stellar_npc_reward_ledger TO service_role;
+-- 
+-- CREATE OR REPLACE FUNCTION public.stellar_grant_npc_reward_v228(
+--  p_user_id uuid,p_kill_key text,p_npc_type text,p_base_credits bigint,p_base_stl bigint
+-- ) RETURNS jsonb
+-- LANGUAGE plpgsql SECURITY DEFINER SET search_path=public,pg_temp AS $$
+-- DECLARE
+--  v_state jsonb; v_profile jsonb; v_prior public.stellar_npc_reward_ledger%ROWTYPE;
+--  v_skills jsonb; v_greed int; v_c1 int; v_c2 int; v_bon_cr int; v_bon_stl int;
+--  v_cr bigint; v_stl bigint; v_balance_cr bigint; v_balance_stl bigint; v_rev bigint;
+-- BEGIN
+--  IF p_user_id IS NULL OR p_kill_key IS NULL OR length(p_kill_key) NOT BETWEEN 12 AND 180 OR p_npc_type IS NULL OR length(p_npc_type)>80 OR
+--     p_base_credits IS NULL OR p_base_stl IS NULL OR p_base_credits<0 OR p_base_credits>75000000 OR p_base_stl<0 OR p_base_stl>750000
+--  THEN RAISE EXCEPTION 'NPC_REWARD_INVALID'; END IF;
+--  -- Serialized by player: simultaneous NPC kills, saves and purchases cannot claim twice.
+--  SELECT state INTO v_state FROM public.game_saves WHERE user_id=p_user_id FOR UPDATE;
+--  IF NOT FOUND THEN RAISE EXCEPTION 'NPC_REWARD_SAVE_MISSING'; END IF;
+--  SELECT * INTO v_prior FROM public.stellar_npc_reward_ledger WHERE user_id=p_user_id AND kill_key=p_kill_key;
+--  IF FOUND THEN RETURN jsonb_build_object('granted',false,'credits',0,'stl',0,'revision',coalesce((v_state->>'serverNpcRewardRevision')::bigint,0),'kill_key',p_kill_key); END IF;
+--  v_profile:=coalesce(v_state->'profile','{}'::jsonb);
+--  v_skills:=coalesce(v_state#>'{pilotBio,skills}','{}'::jsonb);
+--  v_greed:=greatest(0,least(5,coalesce((v_skills->>'greed')::int,0)));
+--  v_c1:=greatest(0,least(2,coalesce((v_skills->>'cruelty1')::int,0)));
+--  v_c2:=greatest(0,least(3,coalesce((v_skills->>'cruelty2')::int,0)));
+--  v_bon_cr:=(array[0,4,8,12,18,25])[v_greed+1];
+--  v_bon_stl:=(array[0,4,8])[v_c1+1]+(array[0,4,10,17])[v_c2+1];
+--  v_cr:=round(p_base_credits*(100+v_bon_cr)/100.0);
+--  v_stl:=round(p_base_stl*(100+v_bon_stl)/100.0);
+--  v_balance_cr:=coalesce((v_profile->>'credits')::bigint,0)+v_cr;
+--  v_balance_stl:=coalesce((v_profile->>'uridium')::bigint,0)+v_stl;
+--  v_rev:=coalesce((v_state->>'serverNpcRewardRevision')::bigint,0)+1;
+--  IF v_balance_cr>1000000000000 OR v_balance_stl>10000000000 OR v_rev>1000000000 THEN RAISE EXCEPTION 'NPC_REWARD_BALANCE_LIMIT'; END IF;
+--  INSERT INTO public.stellar_npc_reward_ledger(user_id,kill_key,npc_type,credits,stl)
+--  VALUES (p_user_id,p_kill_key,p_npc_type,v_cr,v_stl);
+--  UPDATE public.game_saves SET state=jsonb_set(jsonb_set(jsonb_set(v_state,'{profile,credits}',to_jsonb(v_balance_cr),true),'{profile,uridium}',to_jsonb(v_balance_stl),true),'{serverNpcRewardRevision}',to_jsonb(v_rev),true),updated_at=now() WHERE user_id=p_user_id;
+--  UPDATE public.profiles SET credits=v_balance_cr,uridium=v_balance_stl,updated_at=now() WHERE id=p_user_id;
+--  RETURN jsonb_build_object('granted',true,'credits',v_cr,'stl',v_stl,'revision',v_rev,'kill_key',p_kill_key);
+-- EXCEPTION WHEN invalid_text_representation OR numeric_value_out_of_range THEN RAISE EXCEPTION 'NPC_REWARD_INVALID_STATE';
+-- END; $$;
+-- REVOKE ALL ON FUNCTION public.stellar_grant_npc_reward_v228(uuid,text,text,bigint,bigint) FROM PUBLIC,anon,authenticated;
+-- GRANT EXECUTE ON FUNCTION public.stellar_grant_npc_reward_v228(uuid,text,text,bigint,bigint) TO service_role;
+-- 
+-- -- Prevent rollback or fabrication of server NPC reward revision through regular save writes.
+-- CREATE OR REPLACE FUNCTION public.stellar_guard_npc_reward_revision_v228()
+-- RETURNS trigger LANGUAGE plpgsql SECURITY DEFINER SET search_path=public,pg_temp AS $$
+-- DECLARE old_rev numeric; new_rev numeric;
+-- BEGIN
+--  IF NEW.state ? 'serverNpcRewardRevision' AND jsonb_typeof(NEW.state->'serverNpcRewardRevision')<>'number' THEN RAISE EXCEPTION 'SECURITY_NPC_REWARD_REVISION'; END IF;
+--  new_rev:=coalesce((NEW.state->>'serverNpcRewardRevision')::numeric,0);
+--  IF new_rev<0 OR new_rev>1000000000 OR new_rev<>trunc(new_rev) THEN RAISE EXCEPTION 'SECURITY_NPC_REWARD_REVISION'; END IF;
+--  IF TG_OP='UPDATE' THEN
+--    old_rev:=coalesce((OLD.state->>'serverNpcRewardRevision')::numeric,0);
+--    IF new_rev<old_rev THEN RAISE EXCEPTION 'SAVE_NPC_STALE'; END IF;
+--    IF new_rev>old_rev+1 THEN RAISE EXCEPTION 'SECURITY_NPC_REWARD_REVISION'; END IF;
+--  END IF;
+--  RETURN NEW;
+-- EXCEPTION WHEN invalid_text_representation OR numeric_value_out_of_range THEN RAISE EXCEPTION 'SECURITY_NPC_REWARD_REVISION';
+-- END; $$;
+-- DROP TRIGGER IF EXISTS stellar_guard_npc_reward_revision_update_v228 ON public.game_saves;
+-- DROP TRIGGER IF EXISTS stellar_guard_npc_reward_revision_insert_v228 ON public.game_saves;
+-- CREATE TRIGGER stellar_guard_npc_reward_revision_update_v228 BEFORE UPDATE OF state ON public.game_saves FOR EACH ROW EXECUTE FUNCTION public.stellar_guard_npc_reward_revision_v228();
+-- CREATE TRIGGER stellar_guard_npc_reward_revision_insert_v228 BEFORE INSERT ON public.game_saves FOR EACH ROW EXECUTE FUNCTION public.stellar_guard_npc_reward_revision_v228();
+-- REVOKE ALL ON FUNCTION public.stellar_guard_npc_reward_revision_v228() FROM PUBLIC,anon,authenticated;
+-- COMMIT;
+-- ===== END STELLAR_V22_8_0_NPC_REWARD_LEDGER.sql =====
+
+-- ===== START STELLAR_V22_9_0_ORE_SERVER_LEDGER.sql | sha256 7d2339486f54d843534f42bcc5cf75d71e73d9d796a1128ffccbd1a086e9d2a8 =====
+-- -- Stellar Legacy 22.9: minério compartilhado confirmado no servidor, transação idempotente.
+-- -- Ativa nova função sem impactar fluxos antigos. Não altera os saves existentes.
+-- BEGIN;
+-- CREATE TABLE IF NOT EXISTS public.stellar_ore_reward_ledger (
+--  user_id uuid NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+--  ore_key text NOT NULL CHECK(length(ore_key) BETWEEN 8 AND 180),
+--  resource text NOT NULL CHECK(length(resource) BETWEEN 2 AND 64),
+--  amount integer NOT NULL CHECK(amount >= 1 AND amount <= 1000),
+--  issued_at timestamptz NOT NULL DEFAULT now(),
+--  PRIMARY KEY (user_id,ore_key)
+-- );
+-- CREATE INDEX IF NOT EXISTS stellar_ore_rewards_user_issued_idx ON public.stellar_ore_reward_ledger(user_id,issued_at DESC);
+-- ALTER TABLE public.stellar_ore_reward_ledger ENABLE ROW LEVEL SECURITY;
+-- REVOKE ALL ON TABLE public.stellar_ore_reward_ledger FROM PUBLIC,anon,authenticated;
+-- GRANT SELECT,INSERT ON TABLE public.stellar_ore_reward_ledger TO service_role;
+-- 
+-- CREATE OR REPLACE FUNCTION public.stellar_grant_ore_reward_v229(
+--  p_user_id uuid,p_ore_key text,p_resource text,p_amount integer
+-- ) RETURNS jsonb
+-- LANGUAGE plpgsql SECURITY DEFINER SET search_path=public,pg_temp AS $$
+-- DECLARE v_save jsonb;v_prior public.stellar_ore_reward_ledger%ROWTYPE;
+--  v_cargo jsonb;v_prev bigint;v_rev bigint;v_total bigint;
+-- BEGIN
+--  IF p_user_id IS NULL OR length(trim(coalesce(p_ore_key,''))) NOT BETWEEN 8 AND 180
+--  OR length(trim(coalesce(p_resource,''))) NOT BETWEEN 2 AND 64
+--  OR NOT EXISTS (SELECT 1 FROM public.game_resource_config_v1814 r WHERE r.resource_key=p_resource AND r.enabled IS TRUE)
+--  OR p_amount NOT BETWEEN 1 AND 1000 THEN RAISE EXCEPTION 'ORE_GRANT_INVALID'; END IF;
+--  SELECT state INTO v_save FROM public.game_saves WHERE user_id=p_user_id FOR UPDATE;
+--  IF NOT FOUND THEN RAISE EXCEPTION 'ORE_GRANT_SAVE_MISSING'; END IF;
+--  SELECT * INTO v_prior FROM public.stellar_ore_reward_ledger WHERE user_id=p_user_id AND ore_key=p_ore_key;
+--  v_rev:=coalesce((v_save->>'serverOreRevision')::bigint,0);
+--  IF FOUND THEN RETURN jsonb_build_object('granted',false,'amount',0,'revision',v_rev,'resource',v_prior.resource); END IF;
+--  v_cargo:=coalesce(v_save->'cargo','{}'::jsonb);
+--  IF jsonb_typeof(v_cargo)<>'object' THEN RAISE EXCEPTION 'ORE_GRANT_CARGO_INVALID'; END IF;
+--  v_prev:=coalesce((v_cargo->>p_resource)::bigint,0);
+--  v_total:=v_prev+p_amount;
+--  IF v_total>1000000000 OR v_rev>=1000000000 THEN RAISE EXCEPTION 'ORE_GRANT_LIMIT'; END IF;
+--  INSERT INTO public.stellar_ore_reward_ledger(user_id,ore_key,resource,amount) VALUES(p_user_id,p_ore_key,p_resource,p_amount);
+--  UPDATE public.game_saves SET state=jsonb_set(jsonb_set(v_save,ARRAY['cargo',p_resource],to_jsonb(v_total),true),'{serverOreRevision}',to_jsonb(v_rev+1),true),updated_at=now() WHERE user_id=p_user_id;
+--  RETURN jsonb_build_object('granted',true,'amount',p_amount,'revision',v_rev+1,'resource',p_resource);
+-- EXCEPTION WHEN invalid_text_representation OR numeric_value_out_of_range THEN RAISE EXCEPTION 'ORE_GRANT_INVALID_STATE';
+-- END;$$;
+-- REVOKE ALL ON FUNCTION public.stellar_grant_ore_reward_v229(uuid,text,text,integer) FROM PUBLIC,anon,authenticated;
+-- GRANT EXECUTE ON FUNCTION public.stellar_grant_ore_reward_v229(uuid,text,text,integer) TO service_role;
+-- 
+-- CREATE OR REPLACE FUNCTION public.stellar_guard_ore_reward_revision_v229() RETURNS trigger
+-- LANGUAGE plpgsql SECURITY DEFINER SET search_path=public,pg_temp AS $$
+-- DECLARE v_new numeric;v_old numeric;
+-- BEGIN
+--  IF NEW.state ? 'serverOreRevision' AND jsonb_typeof(NEW.state->'serverOreRevision')<>'number' THEN RAISE EXCEPTION 'SECURITY_ORE_REVISION'; END IF;
+--  v_new:=coalesce((NEW.state->>'serverOreRevision')::numeric,0);
+--  IF v_new<0 OR v_new>1000000000 OR v_new<>trunc(v_new) THEN RAISE EXCEPTION 'SECURITY_ORE_REVISION'; END IF;
+--  IF TG_OP='UPDATE' THEN
+--  v_old:=coalesce((OLD.state->>'serverOreRevision')::numeric,0);
+--  IF v_new<v_old THEN RAISE EXCEPTION 'SAVE_ORE_STALE';END IF;
+--  IF v_new>v_old+1 THEN RAISE EXCEPTION 'SECURITY_ORE_REVISION';END IF;
+--  END IF;
+--  RETURN NEW;
+-- EXCEPTION WHEN invalid_text_representation OR numeric_value_out_of_range THEN RAISE EXCEPTION 'SECURITY_ORE_REVISION';
+-- END;$$;
+-- DROP TRIGGER IF EXISTS stellar_guard_ore_revision_update_v229 ON public.game_saves;
+-- DROP TRIGGER IF EXISTS stellar_guard_ore_revision_insert_v229 ON public.game_saves;
+-- CREATE TRIGGER stellar_guard_ore_revision_update_v229 BEFORE UPDATE OF state ON public.game_saves FOR EACH ROW EXECUTE FUNCTION public.stellar_guard_ore_reward_revision_v229();
+-- CREATE TRIGGER stellar_guard_ore_revision_insert_v229 BEFORE INSERT ON public.game_saves FOR EACH ROW EXECUTE FUNCTION public.stellar_guard_ore_reward_revision_v229();
+-- REVOKE ALL ON FUNCTION public.stellar_guard_ore_reward_revision_v229() FROM PUBLIC,anon,authenticated;
+-- COMMIT;
+-- ===== END STELLAR_V22_9_0_ORE_SERVER_LEDGER.sql =====
+
+-- ===== START STELLAR_V39_TO_V42_UNIFIED.sql | sha256 2286d6a0df103ae9ad477807c65d3be643aeada297d314b4e4e0e21bb620afa4 =====
+-- -- Stellar Legacy — V39.0 a V42.0 — Unified Expansion (instalação incremental)
+-- -- REQUER V38.1.0 e V22.8 NPC ledger. SQL não remove saves nem concede prêmios retroativos.
+-- -- Conteúdo executável: Astral Forge (colecionáveis), Squads (até quatro),
+-- -- expedições assíncronas, pesquisa de facção e ranking semanal de abates verificados.
+-- -- NÃO altera dano, movimento, mapas ou bônus de combate no cliente.
+-- BEGIN;
+-- CREATE EXTENSION IF NOT EXISTS pgcrypto;
+-- 
+-- CREATE TABLE IF NOT EXISTS public.stellar_u42_catalog (
+--  code text PRIMARY KEY CHECK (code ~ '^[a-z0-9_]{2,48}$'),
+--  kind text NOT NULL CHECK (kind IN ('forge','expedition','project')),
+--  title text NOT NULL CHECK (length(title) BETWEEN 3 AND 80),
+--  rule jsonb NOT NULL CHECK(jsonb_typeof(rule)='object'),
+--  updated_at timestamptz NOT NULL DEFAULT now()
+-- );
+-- INSERT INTO public.stellar_u42_catalog(code,kind,title,rule) VALUES
+-- ('astral_guard','forge','Módulo Guardião Astral','{"cost":{"Aurorium":6,"Nexium":1},"item":"astral_guard"}'),
+-- ('nexus_drive','forge','Núcleo de Navegação Nexus','{"cost":{"Aurorium":2,"Nexium":8},"item":"nexus_drive"}'),
+-- ('eclipse_lance','forge','Lança de Energia Eclipse','{"cost":{"Nexium":5,"Eclipsium":12},"item":"eclipse_lance"}'),
+-- ('trinity_matrix','forge','Matriz Trina','{"cost":{"Aurorium":10,"Nexium":10,"Eclipsium":10},"item":"trinity_matrix"}'),
+-- ('ion_scan','expedition','Varredura Iônica','{"credits":25000,"minutes":20,"research":15}'),
+-- ('dark_survey','expedition','Reconhecimento do Vazio','{"credits":65000,"minutes":45,"research":45}'),
+-- ('rift_probe','expedition','Sonda Interdimensional','{"credits":140000,"minutes":90,"research":110}'),
+-- ('defense','project','Bastião das Facções','{"resource":"Aurorium","perPoint":1,"goal":1500}'),
+-- ('navigation','project','Rede de Navegação','{"resource":"Nexium","perPoint":1,"goal":1500}'),
+-- ('arsenal','project','Centro de Tecnologia','{"resource":"Eclipsium","perPoint":1,"goal":1500}')
+-- ON CONFLICT (code) DO NOTHING;
+-- 
+-- CREATE TABLE IF NOT EXISTS public.stellar_u42_inventory (
+--  user_id uuid NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+--  item text NOT NULL REFERENCES public.stellar_u42_catalog(code),
+--  quantity bigint NOT NULL DEFAULT 0 CHECK(quantity BETWEEN 0 AND 1000000),
+--  PRIMARY KEY(user_id,item)
+-- );
+-- CREATE TABLE IF NOT EXISTS public.stellar_u42_squads (
+--  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+--  invite_code text NOT NULL UNIQUE CHECK(length(invite_code)=8),
+--  faction text NOT NULL CHECK(length(faction) BETWEEN 2 AND 30),
+--  owner_id uuid NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+--  created_at timestamptz NOT NULL DEFAULT now()
+-- );
+-- CREATE TABLE IF NOT EXISTS public.stellar_u42_squad_members (
+--  user_id uuid PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
+--  squad_id uuid NOT NULL REFERENCES public.stellar_u42_squads(id) ON DELETE CASCADE,
+--  joined_at timestamptz NOT NULL DEFAULT now()
+-- );
+-- CREATE INDEX IF NOT EXISTS stellar_u42_squad_members_squad_idx ON public.stellar_u42_squad_members(squad_id);
+-- CREATE TABLE IF NOT EXISTS public.stellar_u42_expeditions (
+--  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+--  user_id uuid NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+--  code text NOT NULL REFERENCES public.stellar_u42_catalog(code),
+--  started_at timestamptz NOT NULL DEFAULT now(),
+--  ready_at timestamptz NOT NULL,
+--  reward_points integer NOT NULL CHECK(reward_points BETWEEN 1 AND 10000),
+--  claimed_at timestamptz
+-- );
+-- CREATE INDEX IF NOT EXISTS stellar_u42_expeditions_user_idx ON public.stellar_u42_expeditions(user_id,started_at DESC);
+-- CREATE UNIQUE INDEX IF NOT EXISTS stellar_u42_one_pending_expedition ON public.stellar_u42_expeditions(user_id) WHERE claimed_at IS NULL;
+-- CREATE TABLE IF NOT EXISTS public.stellar_u42_research (
+--  user_id uuid PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
+--  points bigint NOT NULL DEFAULT 0 CHECK(points BETWEEN 0 AND 100000000),
+--  updated_at timestamptz NOT NULL DEFAULT now()
+-- );
+-- CREATE TABLE IF NOT EXISTS public.stellar_u42_donations (
+--  id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+--  user_id uuid NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+--  faction text NOT NULL,
+--  project_code text NOT NULL REFERENCES public.stellar_u42_catalog(code),
+--  quantity integer NOT NULL CHECK(quantity BETWEEN 1 AND 100),
+--  donated_at timestamptz NOT NULL DEFAULT now()
+-- );
+-- CREATE INDEX IF NOT EXISTS stellar_u42_donations_faction_idx ON public.stellar_u42_donations(faction,project_code);
+-- -- Auditoria autoritativa do gasto dos três recursos exclusivos.
+-- CREATE TABLE IF NOT EXISTS public.stellar_u42_material_spends (
+--  user_id uuid NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+--  request_id uuid NOT NULL,
+--  material text NOT NULL CHECK(material IN ('Aurorium','Nexium','Eclipsium')),
+--  quantity bigint NOT NULL CHECK(quantity BETWEEN 1 AND 1000000),
+--  spent_at timestamptz NOT NULL DEFAULT now(),
+--  PRIMARY KEY(user_id,request_id,material)
+-- );
+-- CREATE INDEX IF NOT EXISTS stellar_u42_material_spends_idx ON public.stellar_u42_material_spends(user_id,material);
+-- CREATE TABLE IF NOT EXISTS public.stellar_u42_actions (
+--  user_id uuid NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+--  request_id uuid NOT NULL,
+--  action text NOT NULL,
+--  result jsonb NOT NULL,
+--  created_at timestamptz NOT NULL DEFAULT now(),
+--  PRIMARY KEY(user_id,request_id)
+-- );
+-- CREATE INDEX IF NOT EXISTS stellar_u42_actions_time_idx ON public.stellar_u42_actions(user_id,created_at DESC);
+-- 
+-- DO $do$
+-- DECLARE t text;
+-- BEGIN
+--  FOREACH t IN ARRAY ARRAY['stellar_u42_catalog','stellar_u42_inventory','stellar_u42_squads','stellar_u42_squad_members',
+--  'stellar_u42_expeditions','stellar_u42_research','stellar_u42_donations','stellar_u42_material_spends','stellar_u42_actions'] LOOP
+--   EXECUTE format('ALTER TABLE public.%I ENABLE ROW LEVEL SECURITY',t);
+--   EXECUTE format('REVOKE ALL ON TABLE public.%I FROM PUBLIC,anon,authenticated',t);
+--  END LOOP;
+-- END;$do$;
+-- 
+-- -- Soma confiável por facção a partir do ledger existente de abates: não aceita pontos enviados pelo navegador.
+-- CREATE OR REPLACE FUNCTION public.stellar_u42_dashboard()
+-- RETURNS jsonb LANGUAGE plpgsql SECURITY DEFINER SET search_path=public,pg_temp AS $fn$
+-- DECLARE u uuid:=auth.uid(); s jsonb; f text; squad_data jsonb; expeditions_data jsonb;
+--  item_data jsonb; score_data jsonb; project_data jsonb; research_value bigint;
+-- BEGIN
+--  IF u IS NULL THEN RAISE EXCEPTION 'SESSION_REQUIRED' USING ERRCODE='42501'; END IF;
+--  SELECT state INTO s FROM public.game_saves WHERE user_id=u;
+--  SELECT faction INTO f FROM public.profiles WHERE id=u;
+--  IF s IS NULL THEN RETURN jsonb_build_object('error','SAVE_MISSING'); END IF;
+--  SELECT coalesce(jsonb_agg(jsonb_build_object('code',c.code,'quantity',i.quantity)),'[]'::jsonb)
+--  INTO item_data FROM public.stellar_u42_inventory i JOIN public.stellar_u42_catalog c ON c.code=i.item WHERE i.user_id=u;
+--  SELECT coalesce((SELECT jsonb_build_object('code',q.invite_code,'faction',q.faction,'owner',q.owner_id=u,
+--   'members',(SELECT count(*) FROM public.stellar_u42_squad_members m WHERE m.squad_id=q.id))
+--   FROM public.stellar_u42_squads q JOIN public.stellar_u42_squad_members m ON m.squad_id=q.id WHERE m.user_id=u),'null'::jsonb)
+--  INTO squad_data;
+--  SELECT coalesce(jsonb_agg(jsonb_build_object('code',e.code,'readyAt',e.ready_at,'reward',e.reward_points,
+--  'claimed',e.claimed_at IS NOT NULL) ORDER BY e.started_at DESC),'[]'::jsonb)
+--  INTO expeditions_data FROM (SELECT * FROM public.stellar_u42_expeditions WHERE user_id=u ORDER BY started_at DESC LIMIT 12) e;
+--  SELECT coalesce(points,0) INTO research_value FROM public.stellar_u42_research WHERE user_id=u;
+--  SELECT coalesce(jsonb_agg(jsonb_build_object('faction',t.faction,'verifiedKills',t.kills) ORDER BY t.kills DESC),'[]'::jsonb)
+--  INTO score_data FROM (
+--   SELECT p.faction,count(*)::bigint AS kills FROM public.stellar_npc_reward_ledger n
+--   JOIN public.profiles p ON p.id=n.user_id
+--   WHERE n.issued_at >= now()-interval '7 days' AND p.faction IS NOT NULL
+--   GROUP BY p.faction ORDER BY kills DESC LIMIT 8
+--  ) t;
+--  SELECT coalesce(jsonb_agg(jsonb_build_object('faction',x.faction,'project',x.project_code,'total',x.total)),'[]'::jsonb)
+--  INTO project_data FROM (SELECT faction,project_code,sum(quantity)::bigint AS total
+--  FROM public.stellar_u42_donations GROUP BY faction,project_code ORDER BY faction,project_code LIMIT 60) x;
+--  RETURN jsonb_build_object(
+--  'catalog',(SELECT coalesce(jsonb_agg(jsonb_build_object('code',code,'kind',kind,'title',title,'rule',rule) ORDER BY kind,code),'[]'::jsonb) FROM public.stellar_u42_catalog),
+--  'materials',jsonb_build_object('Aurorium',coalesce(s#>'{cargo,Aurorium}','0'::jsonb),'Nexium',coalesce(s#>'{cargo,Nexium}','0'::jsonb),'Eclipsium',coalesce(s#>'{cargo,Eclipsium}','0'::jsonb)),
+--  'credits',coalesce(s#>'{profile,credits}','0'::jsonb),'faction',f,'isAdmin',public.is_game_admin_v1763(u),'items',item_data,'squad',squad_data,
+--  'expeditions',expeditions_data,'researchPoints',coalesce(research_value,0),'warScores',score_data,'projects',project_data);
+-- END;$fn$;
+-- REVOKE ALL ON FUNCTION public.stellar_u42_dashboard() FROM PUBLIC,anon;
+-- GRANT EXECUTE ON FUNCTION public.stellar_u42_dashboard() TO authenticated;
+-- 
+-- -- Economia e operações de expedição atômicas no PostgreSQL, com idempotência por solicitação.
+-- CREATE OR REPLACE FUNCTION public.stellar_u42_action(p_action text,p_code text,p_quantity integer,p_request_id uuid)
+-- RETURNS jsonb LANGUAGE plpgsql SECURITY DEFINER SET search_path=public,pg_temp AS $fn$
+-- DECLARE u uuid:=auth.uid(); s jsonb; cfg jsonb; kind text; f text;
+--  v_mat record; res_name text; have bigint; debit bigint; issued bigint; spent bigint; cargo jsonb; prof jsonb;
+--  exp_row public.stellar_u42_expeditions%ROWTYPE; prior jsonb; outcome jsonb;
+--  cost bigint; revision bigint; research_award integer;
+-- BEGIN
+--  IF u IS NULL THEN RAISE EXCEPTION 'SESSION_REQUIRED' USING ERRCODE='42501'; END IF;
+--  IF p_request_id IS NULL OR p_action NOT IN ('forge','expedition_start','expedition_claim','donate')
+--  OR p_quantity NOT BETWEEN 1 AND 100 OR p_code !~ '^[a-z0-9_]{2,48}$' THEN RAISE EXCEPTION 'ACTION_INVALID'; END IF;
+--  SELECT state INTO s FROM public.game_saves WHERE user_id=u FOR UPDATE;
+--  IF NOT FOUND THEN RAISE EXCEPTION 'SAVE_MISSING'; END IF;
+--  SELECT result INTO prior FROM public.stellar_u42_actions WHERE user_id=u AND request_id=p_request_id;
+--  IF FOUND THEN RETURN prior; END IF;
+--  SELECT c.rule,c.kind INTO cfg,kind FROM public.stellar_u42_catalog c WHERE c.code=p_code;
+--  IF NOT FOUND THEN RAISE EXCEPTION 'CATALOG_MISSING'; END IF;
+--  prof:=coalesce(s->'profile','{}'::jsonb);
+--  cargo:=coalesce(s->'cargo','{}'::jsonb);
+--  IF p_action='forge' THEN
+--   IF kind<>'forge' OR p_quantity>5 THEN RAISE EXCEPTION 'FORGE_INVALID'; END IF;
+--   FOR v_mat IN SELECT key,value FROM jsonb_each_text(cfg->'cost') LOOP
+--    debit:=v_mat.value::bigint*p_quantity;
+--    have:=coalesce((cargo->>v_mat.key)::bigint,0);
+--    -- Não confiar no cargo isoladamente: somente materiais creditados no ledger Astral V38.1.
+--    SELECT coalesce(sum((l.quote->>'resourceQty')::bigint),0) INTO issued
+--      FROM public.stellar_astral_ledger_v381 l WHERE l.user_id=u AND l.quote->>'resource'=v_mat.key;
+--    SELECT coalesce(sum(t.quantity),0) INTO spent FROM public.stellar_u42_material_spends t
+--      WHERE t.user_id=u AND t.material=v_mat.key;
+--    IF have<debit OR issued-spent<debit THEN RAISE EXCEPTION 'MATERIAL_NOT_VERIFIED: %',v_mat.key; END IF;
+--    cargo:=jsonb_set(cargo,ARRAY[v_mat.key],to_jsonb(have-debit),true);
+--    IF debit>0 THEN INSERT INTO public.stellar_u42_material_spends(user_id,request_id,material,quantity)
+--       VALUES(u,p_request_id,v_mat.key,debit); END IF;
+--   END LOOP;
+--   INSERT INTO public.stellar_u42_inventory(user_id,item,quantity) VALUES(u,p_code,p_quantity)
+--   ON CONFLICT(user_id,item) DO UPDATE SET quantity=public.stellar_u42_inventory.quantity+excluded.quantity;
+--   outcome:=jsonb_build_object('ok',true,'action',p_action,'code',p_code,'quantity',p_quantity,
+--    'notice','Protótipo criado no inventário de pesquisa. Bônus de combate ainda não ativados.');
+--  ELSIF p_action='expedition_start' THEN
+--   IF kind<>'expedition' OR p_quantity<>1 THEN RAISE EXCEPTION 'EXPEDITION_INVALID'; END IF;
+--   IF EXISTS(SELECT 1 FROM public.stellar_u42_expeditions WHERE user_id=u AND claimed_at IS NULL) THEN
+--    RAISE EXCEPTION 'EXPEDITION_ALREADY_RUNNING'; END IF;
+--   cost:=(cfg->>'credits')::bigint;
+--   have:=coalesce((prof->>'credits')::bigint,0);
+--   IF have<cost THEN RAISE EXCEPTION 'CREDITS_INSUFFICIENT'; END IF;
+--   prof:=jsonb_set(prof,'{credits}',to_jsonb(have-cost),true);
+--   INSERT INTO public.stellar_u42_expeditions(user_id,code,ready_at,reward_points)
+--   VALUES(u,p_code,now()+make_interval(mins=>(cfg->>'minutes')::integer),(cfg->>'research')::integer)
+--   RETURNING * INTO exp_row;
+--   UPDATE public.profiles SET credits=have-cost,updated_at=now() WHERE id=u;
+--   outcome:=jsonb_build_object('ok',true,'action',p_action,'readyAt',exp_row.ready_at,'expeditionId',exp_row.id);
+--  ELSIF p_action='expedition_claim' THEN
+--   IF kind<>'expedition' OR p_quantity<>1 THEN RAISE EXCEPTION 'EXPEDITION_INVALID'; END IF;
+--   SELECT * INTO exp_row FROM public.stellar_u42_expeditions
+--   WHERE user_id=u AND code=p_code AND claimed_at IS NULL ORDER BY started_at DESC LIMIT 1 FOR UPDATE;
+--   IF NOT FOUND THEN RAISE EXCEPTION 'EXPEDITION_MISSING'; END IF;
+--   IF exp_row.ready_at>now() THEN RAISE EXCEPTION 'EXPEDITION_NOT_READY'; END IF;
+--   UPDATE public.stellar_u42_expeditions SET claimed_at=now() WHERE id=exp_row.id;
+--   research_award:=exp_row.reward_points;
+--   INSERT INTO public.stellar_u42_research(user_id,points) VALUES(u,research_award)
+--    ON CONFLICT(user_id) DO UPDATE SET points=public.stellar_u42_research.points+excluded.points,updated_at=now();
+--   outcome:=jsonb_build_object('ok',true,'action',p_action,'researchPoints',research_award);
+--  ELSIF p_action='donate' THEN
+--   IF kind<>'project' THEN RAISE EXCEPTION 'PROJECT_INVALID'; END IF;
+--   SELECT faction INTO f FROM public.profiles WHERE id=u;
+--   IF f IS NULL OR length(f)<2 THEN RAISE EXCEPTION 'FACTION_MISSING'; END IF;
+--   res_name:=cfg->>'resource';
+--   have:=coalesce((cargo->>res_name)::bigint,0);
+--   debit:=(cfg->>'perPoint')::bigint*p_quantity;
+--   SELECT coalesce(sum((l.quote->>'resourceQty')::bigint),0) INTO issued
+--     FROM public.stellar_astral_ledger_v381 l WHERE l.user_id=u AND l.quote->>'resource'=res_name;
+--   SELECT coalesce(sum(t.quantity),0) INTO spent FROM public.stellar_u42_material_spends t
+--     WHERE t.user_id=u AND t.material=res_name;
+--   IF have<debit OR issued-spent<debit THEN RAISE EXCEPTION 'MATERIAL_NOT_VERIFIED: %',res_name; END IF;
+--   cargo:=jsonb_set(cargo,ARRAY[res_name],to_jsonb(have-debit),true);
+--   INSERT INTO public.stellar_u42_material_spends(user_id,request_id,material,quantity)
+--     VALUES(u,p_request_id,res_name,debit);
+--   INSERT INTO public.stellar_u42_donations(user_id,faction,project_code,quantity) VALUES(u,f,p_code,p_quantity);
+--   outcome:=jsonb_build_object('ok',true,'action',p_action,'project',p_code,'contribution',p_quantity);
+--  END IF;
+--  IF p_action IN ('forge','donate','expedition_start') THEN
+--   revision:=coalesce((s->>'serverPurchaseRevision')::bigint,0)+1;
+--   s:=jsonb_set(s,'{serverPurchaseRevision}',to_jsonb(revision),true);
+--   s:=jsonb_set(s,'{cargo}',cargo,true);
+--   s:=jsonb_set(s,'{profile}',prof,true);
+--   UPDATE public.game_saves SET state=s,updated_at=now() WHERE user_id=u;
+--  END IF;
+--  INSERT INTO public.stellar_u42_actions(user_id,request_id,action,result) VALUES(u,p_request_id,p_action,outcome);
+--  RETURN outcome;
+-- END;$fn$;
+-- REVOKE ALL ON FUNCTION public.stellar_u42_action(text,text,integer,uuid) FROM PUBLIC,anon;
+-- GRANT EXECUTE ON FUNCTION public.stellar_u42_action(text,text,integer,uuid) TO authenticated;
+-- 
+-- CREATE OR REPLACE FUNCTION public.stellar_u42_squad(p_action text,p_invite_code text DEFAULT NULL)
+-- RETURNS jsonb LANGUAGE plpgsql SECURITY DEFINER SET search_path=public,pg_temp AS $fn$
+-- DECLARE u uuid:=auth.uid(); existing uuid; q public.stellar_u42_squads%ROWTYPE;
+--  f text; new_owner uuid; n integer; code text;
+-- BEGIN
+--  IF u IS NULL THEN RAISE EXCEPTION 'SESSION_REQUIRED' USING ERRCODE='42501'; END IF;
+--  SELECT squad_id INTO existing FROM public.stellar_u42_squad_members WHERE user_id=u;
+--  IF p_action='create' THEN
+--   IF existing IS NOT NULL THEN RAISE EXCEPTION 'SQUAD_ALREADY_MEMBER'; END IF;
+--   SELECT faction INTO f FROM public.profiles WHERE id=u;
+--   IF f IS NULL OR length(f)<2 THEN RAISE EXCEPTION 'FACTION_MISSING'; END IF;
+--   code:=substr(md5(gen_random_uuid()::text),1,8);
+--   INSERT INTO public.stellar_u42_squads(invite_code,faction,owner_id) VALUES(code,f,u) RETURNING * INTO q;
+--   INSERT INTO public.stellar_u42_squad_members(user_id,squad_id) VALUES(u,q.id);
+--   RETURN jsonb_build_object('ok',true,'inviteCode',q.invite_code,'members',1);
+--  ELSIF p_action='join' THEN
+--   IF existing IS NOT NULL THEN RAISE EXCEPTION 'SQUAD_ALREADY_MEMBER'; END IF;
+--   IF p_invite_code !~ '^[a-f0-9]{8}$' THEN RAISE EXCEPTION 'INVITE_CODE_INVALID'; END IF;
+--   SELECT * INTO q FROM public.stellar_u42_squads WHERE invite_code=p_invite_code FOR UPDATE;
+--   IF NOT FOUND THEN RAISE EXCEPTION 'SQUAD_NOT_FOUND'; END IF;
+--   SELECT faction INTO f FROM public.profiles WHERE id=u;
+--   IF f IS DISTINCT FROM q.faction THEN RAISE EXCEPTION 'SQUAD_OTHER_FACTION'; END IF;
+--   SELECT count(*) INTO n FROM public.stellar_u42_squad_members WHERE squad_id=q.id;
+--   IF n>=4 THEN RAISE EXCEPTION 'SQUAD_FULL'; END IF;
+--   INSERT INTO public.stellar_u42_squad_members(user_id,squad_id) VALUES(u,q.id);
+--   RETURN jsonb_build_object('ok',true,'inviteCode',q.invite_code,'members',n+1);
+--  ELSIF p_action='leave' THEN
+--   IF existing IS NULL THEN RAISE EXCEPTION 'SQUAD_NOT_MEMBER'; END IF;
+--   SELECT * INTO q FROM public.stellar_u42_squads WHERE id=existing FOR UPDATE;
+--   DELETE FROM public.stellar_u42_squad_members WHERE user_id=u;
+--   SELECT user_id INTO new_owner FROM public.stellar_u42_squad_members WHERE squad_id=existing ORDER BY joined_at LIMIT 1;
+--   IF new_owner IS NULL THEN DELETE FROM public.stellar_u42_squads WHERE id=existing;
+--   ELSIF q.owner_id=u THEN UPDATE public.stellar_u42_squads SET owner_id=new_owner WHERE id=existing; END IF;
+--   RETURN jsonb_build_object('ok',true,'left',true);
+--  ELSE RAISE EXCEPTION 'SQUAD_ACTION_INVALID'; END IF;
+-- END;$fn$;
+-- REVOKE ALL ON FUNCTION public.stellar_u42_squad(text,text) FROM PUBLIC,anon;
+-- GRANT EXECUTE ON FUNCTION public.stellar_u42_squad(text,text) TO authenticated;
+-- 
+-- -- ADM pode editar valores sem alterar códigos/recompensas estruturais.
+-- CREATE OR REPLACE FUNCTION public.stellar_u42_admin_price(p_code text,p_cost jsonb)
+-- RETURNS jsonb LANGUAGE plpgsql SECURITY DEFINER SET search_path=public,pg_temp AS $fn$
+-- DECLARE row public.stellar_u42_catalog%ROWTYPE; k text; n numeric; merged jsonb;
+-- BEGIN
+--  IF auth.uid() IS NULL OR NOT public.is_game_admin_v1763(auth.uid()) THEN
+--   RAISE EXCEPTION 'ADMIN_ONLY' USING ERRCODE='42501'; END IF;
+--  SELECT * INTO row FROM public.stellar_u42_catalog WHERE code=p_code FOR UPDATE;
+--  IF NOT FOUND OR jsonb_typeof(p_cost)<>'object' THEN RAISE EXCEPTION 'INVALID_CONFIG'; END IF;
+--  merged:=row.rule;
+--  IF row.kind='forge' THEN
+--   IF p_cost ? 'cost' AND jsonb_typeof(p_cost->'cost')='object' THEN
+--     FOR k IN SELECT jsonb_object_keys(p_cost->'cost') LOOP
+--       IF k NOT IN ('Aurorium','Nexium','Eclipsium') THEN RAISE EXCEPTION 'INVALID_RESOURCE'; END IF;
+--       n:=(p_cost->'cost'->>k)::numeric;
+--       IF n<0 OR n>10000 OR n<>trunc(n) THEN RAISE EXCEPTION 'INVALID_PRICE'; END IF;
+--     END LOOP;
+--     merged:=jsonb_set(merged,'{cost}',p_cost->'cost',true);
+--   ELSE RAISE EXCEPTION 'INVALID_FORGE_COST'; END IF;
+--  ELSIF row.kind='expedition' THEN
+--   FOR k IN SELECT jsonb_object_keys(p_cost) LOOP
+--     IF k NOT IN ('credits','minutes','research') THEN RAISE EXCEPTION 'INVALID_FIELD'; END IF;
+--     n:=(p_cost->>k)::numeric;
+--     IF n<1 OR n>CASE k WHEN 'credits' THEN 10000000 WHEN 'minutes' THEN 1440 ELSE 10000 END OR n<>trunc(n) THEN RAISE EXCEPTION 'INVALID_NUMBER'; END IF;
+--   END LOOP;
+--   merged:=merged||p_cost;
+--  ELSE
+--   IF NOT (p_cost ? 'perPoint') THEN RAISE EXCEPTION 'INVALID_PROJECT_COST'; END IF;
+--   n:=(p_cost->>'perPoint')::numeric;
+--   IF n<1 OR n>100 OR n<>trunc(n) THEN RAISE EXCEPTION 'INVALID_PRICE'; END IF;
+--   merged:=jsonb_set(merged,'{perPoint}',to_jsonb(n::integer),true);
+--  END IF;
+--  UPDATE public.stellar_u42_catalog SET rule=merged,updated_at=now() WHERE code=p_code;
+--  RETURN jsonb_build_object('ok',true,'code',p_code,'rule',merged);
+-- END;$fn$;
+-- REVOKE ALL ON FUNCTION public.stellar_u42_admin_price(text,jsonb) FROM PUBLIC,anon;
+-- GRANT EXECUTE ON FUNCTION public.stellar_u42_admin_price(text,jsonb) TO authenticated;
+-- COMMIT;
+-- ===== END STELLAR_V39_TO_V42_UNIFIED.sql =====
+
+-- ===== START STELLAR_V42_1_SQUAD_OBJECTIVES.sql | sha256 ea06e2b534c699a2a35f21baeb8e43775e8a47c5df92cbb46e3fad3f06562443 =====
+-- -- Stellar Legacy V42.1.0 — Esquadrões: objetivos semanais com abates verificados
+-- -- Migração incremental sem sobrescrever saves, recompensas ou catálogo V42.0.
+-- BEGIN;
+-- CREATE TABLE IF NOT EXISTS public.stellar_u42_squad_objective_config_v421 (
+--  id smallint PRIMARY KEY DEFAULT 1 CHECK(id=1),
+--  weekly_kills integer NOT NULL DEFAULT 100 CHECK(weekly_kills BETWEEN 20 AND 10000),
+--  minimum_player_kills integer NOT NULL DEFAULT 10 CHECK(minimum_player_kills BETWEEN 1 AND 1000),
+--  research_points integer NOT NULL DEFAULT 60 CHECK(research_points BETWEEN 1 AND 1000),
+--  updated_at timestamptz NOT NULL DEFAULT now()
+-- );
+-- INSERT INTO public.stellar_u42_squad_objective_config_v421(id) VALUES(1) ON CONFLICT(id) DO NOTHING;
+-- CREATE TABLE IF NOT EXISTS public.stellar_u42_squad_objective_claims_v421 (
+--  user_id uuid NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+--  week_start date NOT NULL,
+--  squad_id uuid NOT NULL, -- registro histórico continua mesmo após dissolver o esquadrão
+--  credited_kills bigint NOT NULL CHECK(credited_kills>=0),
+--  granted_research integer NOT NULL CHECK(granted_research>=0),
+--  claimed_at timestamptz NOT NULL DEFAULT now(),
+--  PRIMARY KEY(user_id,week_start)
+-- );
+-- CREATE INDEX IF NOT EXISTS stellar_u42_squad_objective_claims_idx ON public.stellar_u42_squad_objective_claims_v421(squad_id,claimed_at DESC);
+-- ALTER TABLE public.stellar_u42_squad_objective_config_v421 ENABLE ROW LEVEL SECURITY;
+-- ALTER TABLE public.stellar_u42_squad_objective_claims_v421 ENABLE ROW LEVEL SECURITY;
+-- REVOKE ALL ON public.stellar_u42_squad_objective_config_v421 FROM PUBLIC,anon,authenticated;
+-- REVOKE ALL ON public.stellar_u42_squad_objective_claims_v421 FROM PUBLIC,anon,authenticated;
+-- 
+-- CREATE OR REPLACE FUNCTION public.stellar_u42_squad_objective_v421()
+-- RETURNS jsonb LANGUAGE plpgsql STABLE SECURITY DEFINER SET search_path='' AS $fn$
+-- DECLARE
+--  u uuid:=auth.uid(); v_squad uuid; v_week date:=(date_trunc('week',now() AT TIME ZONE 'UTC'))::date;
+--  v_total bigint:=0; v_personal bigint:=0; v_goal integer; v_min integer; v_reward integer;
+--  v_claimed boolean:=false; v_team jsonb:='[]'::jsonb;
+-- BEGIN
+--  IF u IS NULL THEN RAISE EXCEPTION 'SESSION_REQUIRED' USING ERRCODE='42501'; END IF;
+--  SELECT m.squad_id INTO v_squad FROM public.stellar_u42_squad_members m WHERE m.user_id=u;
+--  SELECT weekly_kills,minimum_player_kills,research_points INTO v_goal,v_min,v_reward
+--  FROM public.stellar_u42_squad_objective_config_v421 WHERE id=1;
+--  IF v_squad IS NULL THEN
+--   RETURN jsonb_build_object('inSquad',false,'weekStart',v_week,'goal',v_goal,'minimumPersonal',v_min,'rewardResearch',v_reward);
+--  END IF;
+--  SELECT coalesce(sum(kills),0),coalesce(max(kills) FILTER (WHERE player_id=u),0),
+--         coalesce(jsonb_agg(jsonb_build_object('callsign',callsign,'kills',kills) ORDER BY kills DESC),'[]'::jsonb)
+--  INTO v_total,v_personal,v_team
+--  FROM (
+--   SELECT m.user_id AS player_id,p.callsign, count(n.kill_key)::bigint AS kills
+--   FROM public.stellar_u42_squad_members m
+--   JOIN public.stellar_u42_squads s ON s.id=m.squad_id
+--   LEFT JOIN public.profiles p ON p.id=m.user_id
+--   LEFT JOIN public.stellar_npc_reward_ledger n ON n.user_id=m.user_id
+--     AND n.issued_at >= GREATEST(v_week::timestamptz,m.joined_at,s.created_at)
+--   WHERE m.squad_id=v_squad
+--   GROUP BY m.user_id,p.callsign
+--  ) team;
+--  SELECT EXISTS(SELECT 1 FROM public.stellar_u42_squad_objective_claims_v421
+--  WHERE user_id=u AND week_start=v_week) INTO v_claimed;
+--  RETURN jsonb_build_object('inSquad',true,'weekStart',v_week,'goal',v_goal,'minimumPersonal',v_min,
+--  'rewardResearch',v_reward,'verifiedKills',v_total,'personalKills',v_personal,'team',v_team,
+--  'claimed',v_claimed,'eligible',NOT v_claimed AND v_total>=v_goal AND v_personal>=v_min);
+-- END;$fn$;
+-- REVOKE ALL ON FUNCTION public.stellar_u42_squad_objective_v421() FROM PUBLIC,anon;
+-- GRANT EXECUTE ON FUNCTION public.stellar_u42_squad_objective_v421() TO authenticated;
+-- 
+-- CREATE OR REPLACE FUNCTION public.stellar_u42_squad_claim_v421()
+-- RETURNS jsonb LANGUAGE plpgsql VOLATILE SECURITY DEFINER SET search_path='' AS $fn$
+-- DECLARE
+--  u uuid:=auth.uid(); progress jsonb; v_week date; v_squad uuid; v_new uuid; v_reward integer; v_kills bigint;
+-- BEGIN
+--  IF u IS NULL THEN RAISE EXCEPTION 'SESSION_REQUIRED' USING ERRCODE='42501'; END IF;
+--  progress:=public.stellar_u42_squad_objective_v421();
+--  IF coalesce((progress->>'inSquad')::boolean,false) IS NOT TRUE THEN RAISE EXCEPTION 'SQUAD_REQUIRED'; END IF;
+--  IF coalesce((progress->>'claimed')::boolean,false) THEN RETURN jsonb_build_object('ok',true,'claimed',false,'alreadyClaimed',true); END IF;
+--  IF coalesce((progress->>'eligible')::boolean,false) IS NOT TRUE THEN RAISE EXCEPTION 'OBJECTIVE_NOT_MET'; END IF;
+--  v_week:=(progress->>'weekStart')::date;
+--  SELECT squad_id INTO v_squad FROM public.stellar_u42_squad_members WHERE user_id=u;
+--  v_reward:=(progress->>'rewardResearch')::integer;
+--  v_kills:=(progress->>'personalKills')::bigint;
+--  INSERT INTO public.stellar_u42_squad_objective_claims_v421(user_id,week_start,squad_id,credited_kills,granted_research)
+--  VALUES(u,v_week,v_squad,v_kills,v_reward)
+--  ON CONFLICT(user_id,week_start) DO NOTHING RETURNING user_id INTO v_new;
+--  IF v_new IS NULL THEN RETURN jsonb_build_object('ok',true,'claimed',false,'alreadyClaimed',true); END IF;
+--  INSERT INTO public.stellar_u42_research(user_id,points) VALUES(u,v_reward)
+--  ON CONFLICT(user_id) DO UPDATE SET points=public.stellar_u42_research.points+excluded.points,updated_at=now();
+--  RETURN jsonb_build_object('ok',true,'claimed',true,'rewardResearch',v_reward,'weekStart',v_week);
+-- END;$fn$;
+-- REVOKE ALL ON FUNCTION public.stellar_u42_squad_claim_v421() FROM PUBLIC,anon;
+-- GRANT EXECUTE ON FUNCTION public.stellar_u42_squad_claim_v421() TO authenticated;
+-- 
+-- CREATE OR REPLACE FUNCTION public.stellar_u42_squad_config_v421(p_weekly_kills integer,p_minimum_player integer,p_reward integer)
+-- RETURNS jsonb LANGUAGE plpgsql VOLATILE SECURITY DEFINER SET search_path='' AS $fn$
+-- BEGIN
+--  IF auth.uid() IS NULL OR NOT public.is_game_admin_v1763(auth.uid()) THEN
+--   RAISE EXCEPTION 'ADMIN_ONLY' USING ERRCODE='42501'; END IF;
+--  IF p_weekly_kills NOT BETWEEN 20 AND 10000 OR p_minimum_player NOT BETWEEN 1 AND 1000
+--   OR p_reward NOT BETWEEN 1 AND 1000 OR p_minimum_player>p_weekly_kills THEN
+--   RAISE EXCEPTION 'INVALID_CONFIG'; END IF;
+--  UPDATE public.stellar_u42_squad_objective_config_v421
+--  SET weekly_kills=p_weekly_kills,minimum_player_kills=p_minimum_player,research_points=p_reward,updated_at=now()
+--  WHERE id=1;
+--  RETURN jsonb_build_object('ok',true,'goal',p_weekly_kills,'minimumPersonal',p_minimum_player,'rewardResearch',p_reward);
+-- END;$fn$;
+-- REVOKE ALL ON FUNCTION public.stellar_u42_squad_config_v421(integer,integer,integer) FROM PUBLIC,anon;
+-- GRANT EXECUTE ON FUNCTION public.stellar_u42_squad_config_v421(integer,integer,integer) TO authenticated;
+-- COMMIT;
+-- ===== END STELLAR_V42_1_SQUAD_OBJECTIVES.sql =====
+
+-- ===== START STELLAR_V42_3_ETAPA1.sql | sha256 f4d21596064438bc2fb82aaf297af55680fb9793df58cebf266ab7ac7b6ac315 =====
+-- -- STELLAR LEGACY 42.3 | ETAPA 1 | somente adicoes a V42.1
+-- -- Aplicar antes do ZIP. Modulos de combate NAO recebem buffs automaticos.
+-- BEGIN;
+-- CREATE TABLE IF NOT EXISTS public.stellar_u423_module_rules (
+--  item text PRIMARY KEY REFERENCES public.stellar_u42_catalog(code),
+--  slot text NOT NULL CHECK (slot IN ('defense','engine','weapon','utility')),
+--  proposed_bonus jsonb NOT NULL DEFAULT '{}'::jsonb CHECK(jsonb_typeof(proposed_bonus)='object'),
+--  combat_enabled boolean NOT NULL DEFAULT false,
+--  updated_at timestamptz NOT NULL DEFAULT now()
+-- );
+-- INSERT INTO public.stellar_u423_module_rules(item,slot,proposed_bonus) VALUES
+--  ('astral_guard','defense','{"shieldPercent":4}'::jsonb),
+--  ('nexus_drive','engine','{"speedPercent":3}'::jsonb),
+--  ('eclipse_lance','weapon','{"npcDamagePercent":4}'::jsonb),
+--  ('trinity_matrix','utility','{"shieldPercent":2,"speedPercent":2}'::jsonb)
+-- ON CONFLICT(item) DO NOTHING;
+-- CREATE TABLE IF NOT EXISTS public.stellar_u423_loadouts (
+--  user_id uuid NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+--  config smallint NOT NULL CHECK (config IN (1,2)),
+--  slot text NOT NULL CHECK (slot IN ('defense','engine','weapon','utility')),
+--  item text NOT NULL REFERENCES public.stellar_u423_module_rules(item),
+--  equipped_at timestamptz NOT NULL DEFAULT now(),
+--  PRIMARY KEY (user_id,config,slot)
+-- );
+-- CREATE INDEX IF NOT EXISTS stellar_u423_loadout_item_idx ON public.stellar_u423_loadouts(user_id,item);
+-- CREATE TABLE IF NOT EXISTS public.stellar_u423_ops_config (
+--  tier smallint PRIMARY KEY CHECK (tier IN (1,2,3)),
+--  goal_kills integer NOT NULL CHECK (goal_kills BETWEEN 10 AND 10000),
+--  personal_min integer NOT NULL CHECK (personal_min BETWEEN 1 AND 2000),
+--  research_points integer NOT NULL CHECK (research_points BETWEEN 1 AND 5000),
+--  enabled boolean NOT NULL DEFAULT true,
+--  updated_at timestamptz NOT NULL DEFAULT now(),
+--  CHECK (personal_min<=goal_kills)
+-- );
+-- INSERT INTO public.stellar_u423_ops_config(tier,goal_kills,personal_min,research_points) VALUES
+--  (1,150,25,80),(2,400,60,200),(3,900,120,450)
+-- ON CONFLICT(tier) DO NOTHING;
+-- CREATE TABLE IF NOT EXISTS public.stellar_u423_ops_claims (
+--  user_id uuid NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+--  week_start date NOT NULL,
+--  tier smallint NOT NULL REFERENCES public.stellar_u423_ops_config(tier),
+--  squad_id uuid NOT NULL,
+--  personal_kills bigint NOT NULL,
+--  team_kills bigint NOT NULL,
+--  granted_research integer NOT NULL,
+--  claimed_at timestamptz NOT NULL DEFAULT now(),
+--  PRIMARY KEY (user_id,week_start,tier)
+-- );
+-- CREATE INDEX IF NOT EXISTS stellar_u423_ops_claim_history_idx ON public.stellar_u423_ops_claims(user_id,claimed_at DESC);
+-- DO $ddl$ DECLARE t text; BEGIN
+--  FOREACH t IN ARRAY ARRAY['stellar_u423_module_rules','stellar_u423_loadouts','stellar_u423_ops_config','stellar_u423_ops_claims'] LOOP
+--   EXECUTE format('ALTER TABLE public.%I ENABLE ROW LEVEL SECURITY',t);
+--   EXECUTE format('REVOKE ALL ON TABLE public.%I FROM PUBLIC,anon,authenticated',t);
+--  END LOOP;
+-- END $ddl$;
+-- 
+-- -- Exibe equipados e owned no servidor: nao aceita quantidade ou atributo enviado pelo navegador.
+-- CREATE OR REPLACE FUNCTION public.stellar_u423_loadout_snapshot()
+-- RETURNS jsonb LANGUAGE plpgsql STABLE SECURITY DEFINER SET search_path='' AS $fn$
+-- DECLARE u uuid:=auth.uid();
+-- BEGIN
+--  IF u IS NULL THEN RAISE EXCEPTION 'SESSION_REQUIRED' USING ERRCODE='42501'; END IF;
+--  RETURN jsonb_build_object(
+--  'items',(SELECT coalesce(jsonb_agg(jsonb_build_object('code',i.item,'qty',i.quantity)),'[]'::jsonb)
+--           FROM public.stellar_u42_inventory i WHERE i.user_id=u AND i.quantity>0),
+--  'definitions',(SELECT coalesce(jsonb_agg(jsonb_build_object('code',m.item,'slot',m.slot,'proposal',m.proposed_bonus,'combatEnabled',m.combat_enabled)),'[]'::jsonb)
+--                 FROM public.stellar_u423_module_rules m),
+--  'equipped',(SELECT coalesce(jsonb_agg(jsonb_build_object('config',l.config,'slot',l.slot,'code',l.item)),'[]'::jsonb)
+--              FROM public.stellar_u423_loadouts l WHERE l.user_id=u));
+-- END;$fn$;
+-- REVOKE ALL ON FUNCTION public.stellar_u423_loadout_snapshot() FROM PUBLIC,anon;
+-- GRANT EXECUTE ON FUNCTION public.stellar_u423_loadout_snapshot() TO authenticated;
+-- 
+-- CREATE OR REPLACE FUNCTION public.stellar_u423_equip(p_config integer,p_slot text,p_item text DEFAULT NULL)
+-- RETURNS jsonb LANGUAGE plpgsql VOLATILE SECURITY DEFINER SET search_path='' AS $fn$
+-- DECLARE u uuid:=auth.uid(); slot_found text; owned bigint; needed bigint;
+-- BEGIN
+--  IF u IS NULL THEN RAISE EXCEPTION 'SESSION_REQUIRED' USING ERRCODE='42501'; END IF;
+--  IF p_config NOT IN (1,2) OR p_slot NOT IN ('defense','engine','weapon','utility')
+--     OR length(coalesce(p_item,''))>48 THEN RAISE EXCEPTION 'INVALID_LOADOUT'; END IF;
+--  -- Bloqueio da linha central impede equipagens simultaneas acima da quantidade fabricada.
+--  PERFORM 1 FROM public.game_saves WHERE user_id=u FOR UPDATE;
+--  IF NOT FOUND THEN RAISE EXCEPTION 'SAVE_REQUIRED'; END IF;
+--  IF p_item IS NULL THEN
+--   DELETE FROM public.stellar_u423_loadouts WHERE user_id=u AND config=p_config AND slot=p_slot;
+--  ELSE
+--   SELECT m.slot INTO slot_found FROM public.stellar_u423_module_rules m WHERE m.item=p_item;
+--   IF slot_found IS DISTINCT FROM p_slot THEN RAISE EXCEPTION 'MODULE_SLOT_MISMATCH'; END IF;
+--   SELECT quantity INTO owned FROM public.stellar_u42_inventory WHERE user_id=u AND item=p_item;
+--   SELECT count(*) INTO needed FROM public.stellar_u423_loadouts
+--    WHERE user_id=u AND item=p_item AND NOT(config=p_config AND slot=p_slot);
+--   IF coalesce(owned,0)<=needed THEN RAISE EXCEPTION 'MODULE_NOT_OWNED_OR_BUSY'; END IF;
+--   INSERT INTO public.stellar_u423_loadouts(user_id,config,slot,item) VALUES(u,p_config,p_slot,p_item)
+--   ON CONFLICT(user_id,config,slot) DO UPDATE SET item=excluded.item,equipped_at=now();
+--  END IF;
+--  RETURN jsonb_build_object('ok',true,'config',p_config,'slot',p_slot,'item',p_item);
+-- END;$fn$;
+-- REVOKE ALL ON FUNCTION public.stellar_u423_equip(integer,text,text) FROM PUBLIC,anon;
+-- GRANT EXECUTE ON FUNCTION public.stellar_u423_equip(integer,text,text) TO authenticated;
+-- 
+-- -- Operacao cooperativa baseada SOMENTE em ledger de abates do servidor, nunca no cliente.
+-- CREATE OR REPLACE FUNCTION public.stellar_u423_operation_progress()
+-- RETURNS jsonb LANGUAGE plpgsql STABLE SECURITY DEFINER SET search_path='' AS $fn$
+-- DECLARE u uuid:=auth.uid(); s_id uuid; w date:=(date_trunc('week',now() AT TIME ZONE 'UTC'))::date;
+--  personal bigint:=0; team bigint:=0; tiers jsonb;
+-- BEGIN
+--  IF u IS NULL THEN RAISE EXCEPTION 'SESSION_REQUIRED' USING ERRCODE='42501'; END IF;
+--  SELECT squad_id INTO s_id FROM public.stellar_u42_squad_members WHERE user_id=u;
+--  IF s_id IS NOT NULL THEN
+--   SELECT coalesce(sum(x.kills),0),coalesce(max(x.kills) FILTER (WHERE x.player=u),0)
+--   INTO team,personal FROM (
+--    SELECT m.user_id player,count(n.kill_key)::bigint kills
+--    FROM public.stellar_u42_squad_members m
+--    JOIN public.stellar_u42_squads s ON s.id=m.squad_id
+--    LEFT JOIN public.stellar_npc_reward_ledger n ON n.user_id=m.user_id
+--     AND n.issued_at>=GREATEST(w::timestamptz,m.joined_at,s.created_at)
+--    WHERE m.squad_id=s_id GROUP BY m.user_id
+--   ) x;
+--  END IF;
+--  SELECT coalesce(jsonb_agg(jsonb_build_object('tier',c.tier,'goal',c.goal_kills,'mineRequired',c.personal_min,
+--   'reward',c.research_points,'enabled',c.enabled,'claimed',EXISTS(
+--    SELECT 1 FROM public.stellar_u423_ops_claims z WHERE z.user_id=u AND z.week_start=w AND z.tier=c.tier),
+--   'ready',(s_id IS NOT NULL AND c.enabled AND team>=c.goal_kills AND personal>=c.personal_min AND NOT EXISTS(
+--    SELECT 1 FROM public.stellar_u423_ops_claims z WHERE z.user_id=u AND z.week_start=w AND z.tier=c.tier))) ORDER BY c.tier),'[]'::jsonb)
+--  INTO tiers FROM public.stellar_u423_ops_config c;
+--  RETURN jsonb_build_object('inSquad',s_id IS NOT NULL,'weekStart',w,'teamKills',team,'personalKills',personal,'tiers',tiers);
+-- END;$fn$;
+-- REVOKE ALL ON FUNCTION public.stellar_u423_operation_progress() FROM PUBLIC,anon;
+-- GRANT EXECUTE ON FUNCTION public.stellar_u423_operation_progress() TO authenticated;
+-- 
+-- CREATE OR REPLACE FUNCTION public.stellar_u423_operation_claim(p_tier integer)
+-- RETURNS jsonb LANGUAGE plpgsql VOLATILE SECURITY DEFINER SET search_path='' AS $fn$
+-- DECLARE u uuid:=auth.uid(); p jsonb; c jsonb; v_id uuid; w date; inserted uuid; v_kills bigint; v_team bigint;
+-- BEGIN
+--  IF u IS NULL THEN RAISE EXCEPTION 'SESSION_REQUIRED' USING ERRCODE='42501'; END IF;
+--  IF p_tier NOT IN (1,2,3) THEN RAISE EXCEPTION 'INVALID_TIER'; END IF;
+--  -- A elegibilidade e apurada no banco; UNIQUE permite so um resgate por piloto/semana/tier.
+--  p:=public.stellar_u423_operation_progress();
+--  SELECT t.val INTO c FROM jsonb_array_elements(p->'tiers') AS t(val) WHERE (t.val->>'tier')::integer=p_tier;
+--  IF c IS NULL THEN RAISE EXCEPTION 'TIER_DISABLED'; END IF;
+--  IF (c->>'claimed')::boolean THEN RETURN jsonb_build_object('ok',true,'alreadyClaimed',true); END IF;
+--  IF NOT (c->>'ready')::boolean THEN RAISE EXCEPTION 'MISSION_INCOMPLETE'; END IF;
+--  w:=(p->>'weekStart')::date;
+--  v_kills:=(p->>'personalKills')::bigint;
+--  v_team:=(p->>'teamKills')::bigint;
+--  SELECT squad_id INTO v_id FROM public.stellar_u42_squad_members WHERE user_id=u;
+--  IF v_id IS NULL THEN RAISE EXCEPTION 'SQUAD_REQUIRED'; END IF;
+--  INSERT INTO public.stellar_u423_ops_claims(user_id,week_start,tier,squad_id,personal_kills,team_kills,granted_research)
+--  VALUES(u,w,p_tier,v_id,v_kills,v_team,(c->>'reward')::integer)
+--  ON CONFLICT(user_id,week_start,tier) DO NOTHING RETURNING user_id INTO inserted;
+--  IF inserted IS NULL THEN RETURN jsonb_build_object('ok',true,'alreadyClaimed',true); END IF;
+--  INSERT INTO public.stellar_u42_research(user_id,points) VALUES(u,(c->>'reward')::integer)
+--  ON CONFLICT(user_id) DO UPDATE SET points=public.stellar_u42_research.points+excluded.points,updated_at=now();
+--  RETURN jsonb_build_object('ok',true,'claimed',true,'tier',p_tier,'rewardResearch',(c->>'reward')::integer);
+-- END;$fn$;
+-- REVOKE ALL ON FUNCTION public.stellar_u423_operation_claim(integer) FROM PUBLIC,anon;
+-- GRANT EXECUTE ON FUNCTION public.stellar_u423_operation_claim(integer) TO authenticated;
+-- 
+-- CREATE OR REPLACE FUNCTION public.stellar_u423_operation_admin(p_tier integer,p_goal integer,p_min integer,p_reward integer,p_enabled boolean)
+-- RETURNS jsonb LANGUAGE plpgsql VOLATILE SECURITY DEFINER SET search_path='' AS $fn$
+-- BEGIN
+--  IF auth.uid() IS NULL OR NOT public.is_game_admin_v1763(auth.uid()) THEN
+--   RAISE EXCEPTION 'ADMIN_ONLY' USING ERRCODE='42501'; END IF;
+--  IF p_tier NOT IN (1,2,3) OR p_goal NOT BETWEEN 10 AND 10000 OR p_min NOT BETWEEN 1 AND 2000 OR p_min>p_goal
+--   OR p_reward NOT BETWEEN 1 AND 5000 OR p_enabled IS NULL THEN RAISE EXCEPTION 'INVALID_RULE'; END IF;
+--  UPDATE public.stellar_u423_ops_config SET goal_kills=p_goal,personal_min=p_min,research_points=p_reward,
+--  enabled=p_enabled,updated_at=now() WHERE tier=p_tier;
+--  RETURN jsonb_build_object('ok',true,'tier',p_tier);
+-- END;$fn$;
+-- REVOKE ALL ON FUNCTION public.stellar_u423_operation_admin(integer,integer,integer,integer,boolean) FROM PUBLIC,anon;
+-- GRANT EXECUTE ON FUNCTION public.stellar_u423_operation_admin(integer,integer,integer,integer,boolean) TO authenticated;
+-- COMMIT;
+-- ===== END STELLAR_V42_3_ETAPA1.sql =====
+
+-- ===== START STELLAR_V42_6_FINAL.sql | sha256 d84e732bc6d8941d4729c8a334632258fa760e0f553c3c1b9c5ed4b34395a03c =====
+-- -- STELLAR LEGACY V42.4-V42.6 | etapa 2/2 | additive, transactional, no player reset.
+-- -- Requires 42.3 DB, game_saves, profiles, stellar_u42_inventory and research.
+-- -- World PvP/damage and ship buffs deliberately NOT enabled here.
+-- BEGIN;
+-- CREATE EXTENSION IF NOT EXISTS pgcrypto;
+-- 
+-- -- V42.4: instanced deep-space investigations with server-verified NPC ledger goals.
+-- CREATE TABLE IF NOT EXISTS public.stellar_u426_sectors (
+--  code text PRIMARY KEY CHECK(code ~ '^[a-z0-9_]{3,32}$'),
+--  title text NOT NULL CHECK(length(title) BETWEEN 3 AND 70),
+--  lore text NOT NULL DEFAULT '' CHECK(length(lore)<=300),
+--  minutes integer NOT NULL CHECK(minutes BETWEEN 5 AND 1440),
+--  kills_required integer NOT NULL CHECK(kills_required BETWEEN 5 AND 10000),
+--  research_cost integer NOT NULL CHECK(research_cost BETWEEN 0 AND 10000),
+--  research_reward integer NOT NULL CHECK(research_reward BETWEEN 1 AND 5000),
+--  enabled boolean NOT NULL DEFAULT true,
+--  updated_at timestamptz NOT NULL DEFAULT now()
+-- );
+-- INSERT INTO public.stellar_u426_sectors(code,title,lore,minutes,kills_required,research_cost,research_reward) VALUES
+--  ('nebula_veil','Nebulosa do Véu','Investigação de sinais em uma névoa magnética desconhecida.',15,20,10,30),
+--  ('ion_graveyard','Cemitério Iônico','Rastreie destroços e documente hostilidades no setor.',30,45,25,75),
+--  ('void_horizon','Horizonte do Vazio','Estabilize uma sonda avançada entre fenômenos de gravidade.',60,80,50,150)
+-- ON CONFLICT(code) DO NOTHING;
+-- CREATE TABLE IF NOT EXISTS public.stellar_u426_sector_runs (
+--  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+--  user_id uuid NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+--  sector text NOT NULL REFERENCES public.stellar_u426_sectors(code),
+--  started_at timestamptz NOT NULL DEFAULT now(),
+--  ready_at timestamptz NOT NULL,
+--  kills_required integer NOT NULL,
+--  research_reward integer NOT NULL,
+--  claimed_at timestamptz,
+--  created_request uuid NOT NULL,
+--  UNIQUE(user_id,created_request)
+-- );
+-- CREATE UNIQUE INDEX IF NOT EXISTS stellar_u426_sector_one_active ON public.stellar_u426_sector_runs(user_id) WHERE claimed_at IS NULL;
+-- CREATE INDEX IF NOT EXISTS stellar_u426_sector_history ON public.stellar_u426_sector_runs(user_id,started_at DESC);
+-- 
+-- -- V42.5: one listing == one escrowed stack; resale does not create inventory.
+-- CREATE TABLE IF NOT EXISTS public.stellar_u426_market_rules (
+--  id integer PRIMARY KEY DEFAULT 1 CHECK(id=1),
+--  fee_bps integer NOT NULL DEFAULT 300 CHECK(fee_bps BETWEEN 0 AND 1500),
+--  enabled boolean NOT NULL DEFAULT false, -- activate only after two-account market tests
+--  updated_at timestamptz NOT NULL DEFAULT now()
+-- );
+-- INSERT INTO public.stellar_u426_market_rules(id) VALUES (1) ON CONFLICT(id) DO NOTHING;
+-- CREATE TABLE IF NOT EXISTS public.stellar_u426_market_offers (
+--  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+--  seller uuid NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+--  buyer uuid REFERENCES auth.users(id),
+--  item text NOT NULL REFERENCES public.stellar_u42_catalog(code),
+--  quantity integer NOT NULL CHECK(quantity BETWEEN 1 AND 5),
+--  unit_price bigint NOT NULL CHECK(unit_price BETWEEN 1000 AND 100000000),
+--  fee_credits bigint NOT NULL DEFAULT 0 CHECK(fee_credits>=0),
+--  status text NOT NULL DEFAULT 'open' CHECK(status IN ('open','sold','cancelled')),
+--  request_id uuid NOT NULL,
+--  listed_at timestamptz NOT NULL DEFAULT now(),
+--  closed_at timestamptz,
+--  UNIQUE(seller,request_id)
+-- );
+-- CREATE INDEX IF NOT EXISTS stellar_u426_offers_open ON public.stellar_u426_market_offers(listed_at DESC) WHERE status='open';
+-- CREATE INDEX IF NOT EXISTS stellar_u426_offers_seller ON public.stellar_u426_market_offers(seller,listed_at DESC);
+-- 
+-- -- V42.5: clan research construction is progress only (no unverified combat buffs).
+-- CREATE TABLE IF NOT EXISTS public.stellar_u426_clan_rules (
+--  structure text PRIMARY KEY CHECK(structure IN ('observatory','dockyard','research_hub')),
+--  title text NOT NULL,
+--  research_goal integer NOT NULL CHECK(research_goal BETWEEN 100 AND 100000),
+--  enabled boolean NOT NULL DEFAULT true,
+--  updated_at timestamptz NOT NULL DEFAULT now()
+-- );
+-- INSERT INTO public.stellar_u426_clan_rules(structure,title,research_goal) VALUES
+--  ('observatory','Observatório Astral',3000),
+--  ('dockyard','Estaleiro de Expedições',5000),
+--  ('research_hub','Instituto de Pesquisa',7000)
+-- ON CONFLICT(structure) DO NOTHING;
+-- CREATE TABLE IF NOT EXISTS public.stellar_u426_clan_funding (
+--  clan_id uuid NOT NULL REFERENCES public.clans(id) ON DELETE CASCADE,
+--  structure text NOT NULL REFERENCES public.stellar_u426_clan_rules(structure),
+--  research_total bigint NOT NULL DEFAULT 0 CHECK(research_total BETWEEN 0 AND 100000000),
+--  updated_at timestamptz NOT NULL DEFAULT now(),
+--  PRIMARY KEY(clan_id,structure)
+-- );
+-- CREATE TABLE IF NOT EXISTS public.stellar_u426_clan_donations (
+--  id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+--  user_id uuid NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+--  clan_id uuid NOT NULL REFERENCES public.clans(id) ON DELETE CASCADE,
+--  structure text NOT NULL REFERENCES public.stellar_u426_clan_rules(structure),
+--  research_points integer NOT NULL CHECK(research_points BETWEEN 1 AND 500),
+--  request_id uuid NOT NULL,
+--  donated_at timestamptz NOT NULL DEFAULT now(),
+--  UNIQUE(user_id,request_id)
+-- );
+-- CREATE INDEX IF NOT EXISTS stellar_u426_clan_donations_history ON public.stellar_u426_clan_donations(clan_id,donated_at DESC);
+-- 
+-- DO $ddl$ DECLARE t text; BEGIN
+--  FOREACH t IN ARRAY ARRAY['stellar_u426_sectors','stellar_u426_sector_runs','stellar_u426_market_rules',
+--  'stellar_u426_market_offers','stellar_u426_clan_rules','stellar_u426_clan_funding','stellar_u426_clan_donations'] LOOP
+--   EXECUTE format('ALTER TABLE public.%I ENABLE ROW LEVEL SECURITY',t);
+--   EXECUTE format('REVOKE ALL ON TABLE public.%I FROM PUBLIC,anon,authenticated',t);
+--  END LOOP;
+-- END $ddl$;
+-- 
+-- -- Sector dashboard: authoritative configuration; no NPC kills submitted by the browser.
+-- CREATE OR REPLACE FUNCTION public.stellar_u426_exploration()
+-- RETURNS jsonb LANGUAGE plpgsql STABLE SECURITY DEFINER SET search_path='' AS $fn$
+-- DECLARE u uuid:=auth.uid(); p bigint; active jsonb; history jsonb;
+-- BEGIN
+--  IF u IS NULL THEN RAISE EXCEPTION 'LOGIN_REQUIRED' USING ERRCODE='42501'; END IF;
+--  SELECT coalesce(points,0) INTO p FROM public.stellar_u42_research WHERE user_id=u;
+--  SELECT jsonb_build_object('id',r.id,'sector',r.sector,'startedAt',r.started_at,'readyAt',r.ready_at,
+--  'required',r.kills_required,'reward',r.research_reward,
+--  'verifiedKills',(SELECT count(*) FROM public.stellar_npc_reward_ledger l WHERE l.user_id=u AND l.issued_at>=r.started_at),
+--  'completed',r.claimed_at IS NOT NULL)
+--  INTO active FROM public.stellar_u426_sector_runs r WHERE r.user_id=u AND r.claimed_at IS NULL LIMIT 1;
+--  SELECT coalesce(jsonb_agg(jsonb_build_object('sector',h.sector,'claimedAt',h.claimed_at) ORDER BY h.claimed_at DESC),'[]'::jsonb)
+--  INTO history FROM (SELECT sector,claimed_at FROM public.stellar_u426_sector_runs WHERE user_id=u AND claimed_at IS NOT NULL ORDER BY claimed_at DESC LIMIT 12) h;
+--  RETURN jsonb_build_object('ok',true,'research',coalesce(p,0),'active',active,'history',history,
+--  'sectors',(SELECT coalesce(jsonb_agg(jsonb_build_object('code',code,'title',title,'lore',lore,'minutes',minutes,
+--  'kills',kills_required,'cost',research_cost,'reward',research_reward,'enabled',enabled) ORDER BY code),'[]'::jsonb)
+--  FROM public.stellar_u426_sectors));
+-- END;$fn$;
+-- REVOKE ALL ON FUNCTION public.stellar_u426_exploration() FROM PUBLIC,anon;
+-- GRANT EXECUTE ON FUNCTION public.stellar_u426_exploration() TO authenticated;
+-- 
+-- CREATE OR REPLACE FUNCTION public.stellar_u426_sector_start(p_sector text,p_request uuid)
+-- RETURNS jsonb LANGUAGE plpgsql VOLATILE SECURITY DEFINER SET search_path='' AS $fn$
+-- DECLARE u uuid:=auth.uid(); c public.stellar_u426_sectors%ROWTYPE; r public.stellar_u426_sector_runs%ROWTYPE; have bigint;
+-- BEGIN
+--  IF u IS NULL THEN RAISE EXCEPTION 'LOGIN_REQUIRED' USING ERRCODE='42501'; END IF;
+--  IF p_request IS NULL OR p_sector IS NULL THEN RAISE EXCEPTION 'INVALID_REQUEST'; END IF;
+--  PERFORM 1 FROM public.game_saves WHERE user_id=u FOR UPDATE;
+--  IF NOT FOUND THEN RAISE EXCEPTION 'SAVE_MISSING'; END IF;
+--  SELECT * INTO r FROM public.stellar_u426_sector_runs WHERE user_id=u AND created_request=p_request;
+--  IF FOUND THEN RETURN jsonb_build_object('ok',true,'alreadyStarted',true,'runId',r.id); END IF;
+--  IF EXISTS(SELECT 1 FROM public.stellar_u426_sector_runs WHERE user_id=u AND claimed_at IS NULL) THEN RAISE EXCEPTION 'SECTOR_ALREADY_ACTIVE'; END IF;
+--  SELECT * INTO c FROM public.stellar_u426_sectors WHERE code=p_sector AND enabled;
+--  IF NOT FOUND THEN RAISE EXCEPTION 'SECTOR_UNAVAILABLE'; END IF;
+--  INSERT INTO public.stellar_u42_research(user_id,points) VALUES(u,0) ON CONFLICT(user_id) DO NOTHING;
+--  SELECT points INTO have FROM public.stellar_u42_research WHERE user_id=u FOR UPDATE;
+--  IF have<c.research_cost THEN RAISE EXCEPTION 'RESEARCH_INSUFFICIENT'; END IF;
+--  UPDATE public.stellar_u42_research SET points=points-c.research_cost,updated_at=now() WHERE user_id=u;
+--  INSERT INTO public.stellar_u426_sector_runs(user_id,sector,ready_at,kills_required,research_reward,created_request)
+--  VALUES(u,p_sector,now()+make_interval(mins=>c.minutes),c.kills_required,c.research_reward,p_request) RETURNING * INTO r;
+--  RETURN jsonb_build_object('ok',true,'runId',r.id,'readyAt',r.ready_at);
+-- END;$fn$;
+-- REVOKE ALL ON FUNCTION public.stellar_u426_sector_start(text,uuid) FROM PUBLIC,anon;
+-- GRANT EXECUTE ON FUNCTION public.stellar_u426_sector_start(text,uuid) TO authenticated;
+-- 
+-- CREATE OR REPLACE FUNCTION public.stellar_u426_sector_claim(p_run uuid)
+-- RETURNS jsonb LANGUAGE plpgsql VOLATILE SECURITY DEFINER SET search_path='' AS $fn$
+-- DECLARE u uuid:=auth.uid(); r public.stellar_u426_sector_runs%ROWTYPE; kills bigint;
+-- BEGIN
+--  IF u IS NULL THEN RAISE EXCEPTION 'LOGIN_REQUIRED' USING ERRCODE='42501'; END IF;
+--  SELECT * INTO r FROM public.stellar_u426_sector_runs WHERE id=p_run AND user_id=u FOR UPDATE;
+--  IF NOT FOUND THEN RAISE EXCEPTION 'RUN_MISSING'; END IF;
+--  IF r.claimed_at IS NOT NULL THEN RETURN jsonb_build_object('ok',true,'alreadyClaimed',true); END IF;
+--  IF r.ready_at>now() THEN RAISE EXCEPTION 'SCAN_IN_PROGRESS'; END IF;
+--  SELECT count(*) INTO kills FROM public.stellar_npc_reward_ledger WHERE user_id=u AND issued_at>=r.started_at;
+--  IF kills<r.kills_required THEN RAISE EXCEPTION 'VERIFIED_KILLS_INCOMPLETE'; END IF;
+--  UPDATE public.stellar_u426_sector_runs SET claimed_at=now() WHERE id=r.id;
+--  INSERT INTO public.stellar_u42_research(user_id,points) VALUES(u,r.research_reward)
+--  ON CONFLICT(user_id) DO UPDATE SET points=public.stellar_u42_research.points+excluded.points,updated_at=now();
+--  RETURN jsonb_build_object('ok',true,'researchGranted',r.research_reward,'sector',r.sector);
+-- END;$fn$;
+-- REVOKE ALL ON FUNCTION public.stellar_u426_sector_claim(uuid) FROM PUBLIC,anon;
+-- GRANT EXECUTE ON FUNCTION public.stellar_u426_sector_claim(uuid) TO authenticated;
+-- 
+-- -- Market read intentionally bounded; no tokens or private emails exposed.
+-- CREATE OR REPLACE FUNCTION public.stellar_u426_market_snapshot()
+-- RETURNS jsonb LANGUAGE plpgsql STABLE SECURITY DEFINER SET search_path='' AS $fn$
+-- DECLARE u uuid:=auth.uid(); rules record; cash bigint;
+-- BEGIN
+--  IF u IS NULL THEN RAISE EXCEPTION 'LOGIN_REQUIRED' USING ERRCODE='42501'; END IF;
+--  SELECT * INTO rules FROM public.stellar_u426_market_rules WHERE id=1;
+--  SELECT coalesce((state#>>'{profile,credits}')::bigint,0) INTO cash FROM public.game_saves WHERE user_id=u;
+--  RETURN jsonb_build_object('ok',true,'credits',coalesce(cash,0),'feeBps',rules.fee_bps,'enabled',rules.enabled,
+--  'offers',(SELECT coalesce(jsonb_agg(jsonb_build_object('id',o.id,'item',o.item,'quantity',o.quantity,'unitPrice',o.unit_price,
+--  'sellerName',coalesce(p.callsign,'Piloto'),'mine',o.seller=u,'listedAt',o.listed_at) ORDER BY o.listed_at DESC),'[]'::jsonb)
+--  FROM (SELECT * FROM public.stellar_u426_market_offers WHERE status='open' ORDER BY listed_at DESC LIMIT 60) o
+--  LEFT JOIN public.profiles p ON p.id=o.seller),
+--  'mine',(SELECT coalesce(jsonb_agg(jsonb_build_object('id',id,'item',item,'status',status,'quantity',quantity,
+--  'price',unit_price,'fee',fee_credits) ORDER BY listed_at DESC),'[]'::jsonb)
+--  FROM (SELECT * FROM public.stellar_u426_market_offers WHERE seller=u ORDER BY listed_at DESC LIMIT 20) x),
+--  'stock',(SELECT coalesce(jsonb_agg(jsonb_build_object('item',i.item,'quantity',i.quantity,
+--  'equipped',(SELECT count(*) FROM public.stellar_u423_loadouts l WHERE l.user_id=u AND l.item=i.item))),'[]'::jsonb)
+--  FROM public.stellar_u42_inventory i WHERE i.user_id=u AND i.quantity>0));
+-- END;$fn$;
+-- REVOKE ALL ON FUNCTION public.stellar_u426_market_snapshot() FROM PUBLIC,anon;
+-- GRANT EXECUTE ON FUNCTION public.stellar_u426_market_snapshot() TO authenticated;
+-- 
+-- CREATE OR REPLACE FUNCTION public.stellar_u426_market_sell(p_item text,p_qty integer,p_unit bigint,p_request uuid)
+-- RETURNS jsonb LANGUAGE plpgsql VOLATILE SECURITY DEFINER SET search_path='' AS $fn$
+-- DECLARE u uuid:=auth.uid(); have bigint; used bigint; v_id uuid; rules record;
+-- BEGIN
+--  IF u IS NULL THEN RAISE EXCEPTION 'LOGIN_REQUIRED' USING ERRCODE='42501'; END IF;
+--  IF p_request IS NULL OR p_qty NOT BETWEEN 1 AND 5 OR p_unit NOT BETWEEN 1000 AND 100000000 THEN RAISE EXCEPTION 'INVALID_OFFER'; END IF;
+--  PERFORM 1 FROM public.game_saves WHERE user_id=u FOR UPDATE;
+--  IF NOT FOUND THEN RAISE EXCEPTION 'SAVE_MISSING'; END IF;
+--  SELECT id INTO v_id FROM public.stellar_u426_market_offers WHERE seller=u AND request_id=p_request;
+--  IF FOUND THEN RETURN jsonb_build_object('ok',true,'alreadyListed',true,'offerId',v_id); END IF;
+--  SELECT * INTO rules FROM public.stellar_u426_market_rules WHERE id=1;
+--  IF NOT rules.enabled THEN RAISE EXCEPTION 'MARKET_PAUSED'; END IF;
+--  IF (SELECT count(*) FROM public.stellar_u426_market_offers WHERE seller=u AND status='open')>=10 THEN RAISE EXCEPTION 'OFFER_LIMIT'; END IF;
+--  IF NOT EXISTS(SELECT 1 FROM public.stellar_u42_catalog WHERE code=p_item AND kind='forge') THEN RAISE EXCEPTION 'ITEM_NOT_TRADABLE'; END IF;
+--  SELECT quantity INTO have FROM public.stellar_u42_inventory WHERE user_id=u AND item=p_item FOR UPDATE;
+--  SELECT count(*) INTO used FROM public.stellar_u423_loadouts WHERE user_id=u AND item=p_item;
+--  IF coalesce(have,0)-used<p_qty THEN RAISE EXCEPTION 'ITEM_NOT_AVAILABLE'; END IF;
+--  UPDATE public.stellar_u42_inventory SET quantity=quantity-p_qty WHERE user_id=u AND item=p_item;
+--  INSERT INTO public.stellar_u426_market_offers(seller,item,quantity,unit_price,request_id)
+--  VALUES(u,p_item,p_qty,p_unit,p_request) RETURNING id INTO v_id;
+--  RETURN jsonb_build_object('ok',true,'offerId',v_id,'escrowed',p_qty);
+-- END;$fn$;
+-- REVOKE ALL ON FUNCTION public.stellar_u426_market_sell(text,integer,bigint,uuid) FROM PUBLIC,anon;
+-- GRANT EXECUTE ON FUNCTION public.stellar_u426_market_sell(text,integer,bigint,uuid) TO authenticated;
+-- 
+-- CREATE OR REPLACE FUNCTION public.stellar_u426_market_cancel(p_offer uuid)
+-- RETURNS jsonb LANGUAGE plpgsql VOLATILE SECURITY DEFINER SET search_path='' AS $fn$
+-- DECLARE u uuid:=auth.uid(); o public.stellar_u426_market_offers%ROWTYPE;
+-- BEGIN
+--  IF u IS NULL THEN RAISE EXCEPTION 'LOGIN_REQUIRED' USING ERRCODE='42501'; END IF;
+--  SELECT * INTO o FROM public.stellar_u426_market_offers WHERE id=p_offer AND seller=u FOR UPDATE;
+--  IF NOT FOUND THEN RAISE EXCEPTION 'OFFER_MISSING'; END IF;
+--  IF o.status='cancelled' THEN RETURN jsonb_build_object('ok',true,'alreadyCancelled',true); END IF;
+--  IF o.status<>'open' THEN RAISE EXCEPTION 'OFFER_CLOSED'; END IF;
+--  PERFORM 1 FROM public.game_saves WHERE user_id=u FOR UPDATE;
+--  IF NOT FOUND THEN RAISE EXCEPTION 'SAVE_MISSING'; END IF;
+--  UPDATE public.stellar_u426_market_offers SET status='cancelled',closed_at=now() WHERE id=o.id;
+--  INSERT INTO public.stellar_u42_inventory(user_id,item,quantity) VALUES(u,o.item,o.quantity)
+--  ON CONFLICT(user_id,item) DO UPDATE SET quantity=public.stellar_u42_inventory.quantity+excluded.quantity;
+--  RETURN jsonb_build_object('ok',true,'returned',o.quantity);
+-- END;$fn$;
+-- REVOKE ALL ON FUNCTION public.stellar_u426_market_cancel(uuid) FROM PUBLIC,anon;
+-- GRANT EXECUTE ON FUNCTION public.stellar_u426_market_cancel(uuid) TO authenticated;
+-- 
+-- CREATE OR REPLACE FUNCTION public.stellar_u426_market_buy(p_offer uuid)
+-- RETURNS jsonb LANGUAGE plpgsql VOLATILE SECURITY DEFINER SET search_path='' AS $fn$
+-- DECLARE u uuid:=auth.uid(); o public.stellar_u426_market_offers%ROWTYPE; rules record;
+--  buyer_state jsonb; seller_state jsonb; buyer_cash bigint; seller_cash bigint;
+--  total bigint; fee bigint; net bigint;
+-- BEGIN
+--  IF u IS NULL THEN RAISE EXCEPTION 'LOGIN_REQUIRED' USING ERRCODE='42501'; END IF;
+--  SELECT * INTO o FROM public.stellar_u426_market_offers WHERE id=p_offer FOR UPDATE;
+--  IF NOT FOUND THEN RAISE EXCEPTION 'OFFER_MISSING'; END IF;
+--  IF o.status='sold' AND o.buyer=u THEN RETURN jsonb_build_object('ok',true,'alreadyPurchased',true); END IF;
+--  IF o.status<>'open' OR o.seller=u THEN RAISE EXCEPTION 'OFFER_NOT_AVAILABLE'; END IF;
+--  SELECT * INTO rules FROM public.stellar_u426_market_rules WHERE id=1;
+--  IF NOT rules.enabled THEN RAISE EXCEPTION 'MARKET_PAUSED'; END IF;
+--  -- Stable UUID ordering prevents buyer/seller concurrent purchases deadlocking wallets.
+--  PERFORM 1 FROM public.game_saves WHERE user_id IN (u,o.seller) ORDER BY user_id FOR UPDATE;
+--  SELECT state INTO buyer_state FROM public.game_saves WHERE user_id=u;
+--  SELECT state INTO seller_state FROM public.game_saves WHERE user_id=o.seller;
+--  IF buyer_state IS NULL OR seller_state IS NULL THEN RAISE EXCEPTION 'SAVE_MISSING'; END IF;
+--  buyer_cash:=coalesce((buyer_state#>>'{profile,credits}')::bigint,0);
+--  seller_cash:=coalesce((seller_state#>>'{profile,credits}')::bigint,0);
+--  total:=o.unit_price*o.quantity;
+--  fee:=(total*rules.fee_bps+9999)/10000;
+--  net:=total-fee;
+--  IF buyer_cash<total THEN RAISE EXCEPTION 'CREDITS_INSUFFICIENT'; END IF;
+--  IF seller_cash>9000000000000000-net THEN RAISE EXCEPTION 'SELLER_WALLET_CAP'; END IF;
+--  UPDATE public.game_saves SET state=jsonb_set(jsonb_set(state,'{profile,credits}',to_jsonb(buyer_cash-total),true),
+--  '{serverPurchaseRevision}',to_jsonb(coalesce((state->>'serverPurchaseRevision')::bigint,0)+1),true),updated_at=now() WHERE user_id=u;
+--  UPDATE public.game_saves SET state=jsonb_set(jsonb_set(state,'{profile,credits}',to_jsonb(seller_cash+net),true),
+--  '{serverPurchaseRevision}',to_jsonb(coalesce((state->>'serverPurchaseRevision')::bigint,0)+1),true),updated_at=now() WHERE user_id=o.seller;
+--  UPDATE public.profiles SET credits=buyer_cash-total,updated_at=now() WHERE id=u;
+--  UPDATE public.profiles SET credits=seller_cash+net,updated_at=now() WHERE id=o.seller;
+--  INSERT INTO public.stellar_u42_inventory(user_id,item,quantity) VALUES(u,o.item,o.quantity)
+--  ON CONFLICT(user_id,item) DO UPDATE SET quantity=public.stellar_u42_inventory.quantity+excluded.quantity;
+--  UPDATE public.stellar_u426_market_offers SET status='sold',buyer=u,fee_credits=fee,closed_at=now() WHERE id=o.id;
+--  RETURN jsonb_build_object('ok',true,'item',o.item,'quantity',o.quantity,'paid',total,'fee',fee);
+-- END;$fn$;
+-- REVOKE ALL ON FUNCTION public.stellar_u426_market_buy(uuid) FROM PUBLIC,anon;
+-- GRANT EXECUTE ON FUNCTION public.stellar_u426_market_buy(uuid) TO authenticated;
+-- 
+-- CREATE OR REPLACE FUNCTION public.stellar_u426_clan_snapshot()
+-- RETURNS jsonb LANGUAGE plpgsql STABLE SECURITY DEFINER SET search_path='' AS $fn$
+-- DECLARE u uuid:=auth.uid(); c uuid; balance bigint;
+-- BEGIN
+--  IF u IS NULL THEN RAISE EXCEPTION 'LOGIN_REQUIRED' USING ERRCODE='42501'; END IF;
+--  SELECT clan_id INTO c FROM public.clan_members WHERE user_id=u;
+--  SELECT coalesce(points,0) INTO balance FROM public.stellar_u42_research WHERE user_id=u;
+--  RETURN jsonb_build_object('ok',true,'hasClan',c IS NOT NULL,'research',coalesce(balance,0),
+--  'structures',(SELECT coalesce(jsonb_agg(jsonb_build_object('code',r.structure,'title',r.title,'goal',r.research_goal,
+--  'enabled',r.enabled,'total',coalesce(f.research_total,0)) ORDER BY r.structure),'[]'::jsonb)
+--  FROM public.stellar_u426_clan_rules r LEFT JOIN public.stellar_u426_clan_funding f ON f.structure=r.structure AND f.clan_id=c));
+-- END;$fn$;
+-- REVOKE ALL ON FUNCTION public.stellar_u426_clan_snapshot() FROM PUBLIC,anon;
+-- GRANT EXECUTE ON FUNCTION public.stellar_u426_clan_snapshot() TO authenticated;
+-- 
+-- CREATE OR REPLACE FUNCTION public.stellar_u426_clan_fund(p_structure text,p_points integer,p_request uuid)
+-- RETURNS jsonb LANGUAGE plpgsql VOLATILE SECURITY DEFINER SET search_path='' AS $fn$
+-- DECLARE u uuid:=auth.uid(); c uuid; balance bigint; total bigint;
+-- BEGIN
+--  IF u IS NULL THEN RAISE EXCEPTION 'LOGIN_REQUIRED' USING ERRCODE='42501'; END IF;
+--  IF p_request IS NULL OR p_points NOT BETWEEN 1 AND 500 THEN RAISE EXCEPTION 'INVALID_CONTRIBUTION'; END IF;
+--  PERFORM 1 FROM public.game_saves WHERE user_id=u FOR UPDATE;
+--  IF NOT FOUND THEN RAISE EXCEPTION 'SAVE_MISSING'; END IF;
+--  IF EXISTS(SELECT 1 FROM public.stellar_u426_clan_donations WHERE user_id=u AND request_id=p_request) THEN
+--   RETURN jsonb_build_object('ok',true,'alreadyFunded',true); END IF;
+--  SELECT clan_id INTO c FROM public.clan_members WHERE user_id=u;
+--  IF c IS NULL THEN RAISE EXCEPTION 'CLAN_REQUIRED'; END IF;
+--  IF NOT EXISTS(SELECT 1 FROM public.stellar_u426_clan_rules WHERE structure=p_structure AND enabled) THEN RAISE EXCEPTION 'STRUCTURE_UNAVAILABLE'; END IF;
+--  INSERT INTO public.stellar_u42_research(user_id,points) VALUES(u,0) ON CONFLICT(user_id) DO NOTHING;
+--  SELECT points INTO balance FROM public.stellar_u42_research WHERE user_id=u FOR UPDATE;
+--  IF balance<p_points THEN RAISE EXCEPTION 'RESEARCH_INSUFFICIENT'; END IF;
+--  UPDATE public.stellar_u42_research SET points=points-p_points,updated_at=now() WHERE user_id=u;
+--  INSERT INTO public.stellar_u426_clan_funding(clan_id,structure,research_total) VALUES(c,p_structure,p_points)
+--  ON CONFLICT(clan_id,structure) DO UPDATE SET research_total=public.stellar_u426_clan_funding.research_total+excluded.research_total,updated_at=now()
+--  RETURNING research_total INTO total;
+--  INSERT INTO public.stellar_u426_clan_donations(user_id,clan_id,structure,research_points,request_id) VALUES(u,c,p_structure,p_points,p_request);
+--  RETURN jsonb_build_object('ok',true,'total',total,'spent',p_points);
+-- END;$fn$;
+-- REVOKE ALL ON FUNCTION public.stellar_u426_clan_fund(text,integer,uuid) FROM PUBLIC,anon;
+-- GRANT EXECUTE ON FUNCTION public.stellar_u426_clan_fund(text,integer,uuid) TO authenticated;
+-- 
+-- -- V42.6: Admin endpoints update bounded safe data, not free-form JSON or SQL.
+-- CREATE OR REPLACE FUNCTION public.stellar_u426_admin_sector(p_code text,p_minutes integer,p_kills integer,p_cost integer,p_reward integer,p_enabled boolean)
+-- RETURNS jsonb LANGUAGE plpgsql VOLATILE SECURITY DEFINER SET search_path='' AS $fn$
+-- BEGIN
+--  IF auth.uid() IS NULL OR NOT public.is_game_admin_v1763(auth.uid()) THEN RAISE EXCEPTION 'ADMIN_ONLY' USING ERRCODE='42501'; END IF;
+--  IF p_minutes NOT BETWEEN 5 AND 1440 OR p_kills NOT BETWEEN 5 AND 10000 OR p_cost NOT BETWEEN 0 AND 10000 OR p_reward NOT BETWEEN 1 AND 5000 OR p_enabled IS NULL THEN RAISE EXCEPTION 'INVALID_SETTINGS'; END IF;
+--  UPDATE public.stellar_u426_sectors SET minutes=p_minutes,kills_required=p_kills,research_cost=p_cost,research_reward=p_reward,enabled=p_enabled,updated_at=now() WHERE code=p_code;
+--  IF NOT FOUND THEN RAISE EXCEPTION 'SECTOR_UNKNOWN'; END IF;
+--  RETURN jsonb_build_object('ok',true,'code',p_code);
+-- END;$fn$;
+-- REVOKE ALL ON FUNCTION public.stellar_u426_admin_sector(text,integer,integer,integer,integer,boolean) FROM PUBLIC,anon;
+-- GRANT EXECUTE ON FUNCTION public.stellar_u426_admin_sector(text,integer,integer,integer,integer,boolean) TO authenticated;
+-- 
+-- CREATE OR REPLACE FUNCTION public.stellar_u426_admin_market(p_fee integer,p_enabled boolean)
+-- RETURNS jsonb LANGUAGE plpgsql VOLATILE SECURITY DEFINER SET search_path='' AS $fn$
+-- BEGIN
+--  IF auth.uid() IS NULL OR NOT public.is_game_admin_v1763(auth.uid()) THEN RAISE EXCEPTION 'ADMIN_ONLY' USING ERRCODE='42501'; END IF;
+--  IF p_fee NOT BETWEEN 0 AND 1500 OR p_enabled IS NULL THEN RAISE EXCEPTION 'INVALID_SETTINGS'; END IF;
+--  UPDATE public.stellar_u426_market_rules SET fee_bps=p_fee,enabled=p_enabled,updated_at=now() WHERE id=1;
+--  RETURN jsonb_build_object('ok',true);
+-- END;$fn$;
+-- REVOKE ALL ON FUNCTION public.stellar_u426_admin_market(integer,boolean) FROM PUBLIC,anon;
+-- GRANT EXECUTE ON FUNCTION public.stellar_u426_admin_market(integer,boolean) TO authenticated;
+-- 
+-- CREATE OR REPLACE FUNCTION public.stellar_u426_admin_clan(p_structure text,p_goal integer,p_enabled boolean)
+-- RETURNS jsonb LANGUAGE plpgsql VOLATILE SECURITY DEFINER SET search_path='' AS $fn$
+-- BEGIN
+--  IF auth.uid() IS NULL OR NOT public.is_game_admin_v1763(auth.uid()) THEN RAISE EXCEPTION 'ADMIN_ONLY' USING ERRCODE='42501'; END IF;
+--  IF p_goal NOT BETWEEN 100 AND 100000 OR p_enabled IS NULL THEN RAISE EXCEPTION 'INVALID_SETTINGS'; END IF;
+--  UPDATE public.stellar_u426_clan_rules SET research_goal=p_goal,enabled=p_enabled,updated_at=now() WHERE structure=p_structure;
+--  IF NOT FOUND THEN RAISE EXCEPTION 'STRUCTURE_UNKNOWN'; END IF;
+--  RETURN jsonb_build_object('ok',true);
+-- END;$fn$;
+-- REVOKE ALL ON FUNCTION public.stellar_u426_admin_clan(text,integer,boolean) FROM PUBLIC,anon;
+-- GRANT EXECUTE ON FUNCTION public.stellar_u426_admin_clan(text,integer,boolean) TO authenticated;
+-- COMMIT;
+-- ===== END STELLAR_V42_6_FINAL.sql =====
+
+-- ===== START STELLAR_V43_1_COMBAT_EVOLUTION.sql | sha256 f251bc63e7f1427b09ec6c87ecfeade6970e9c24f13a9a508f496fe0c3e18186 =====
+-- BEGIN;
+-- -- Integração ADITIVA. Nenhum save, saldo, item ou equipamento é modificado.
+-- -- Bônus permanecem DESATIVADOS até homologação manual pelo ADM.
+-- DO $$ BEGIN
+--  IF to_regclass('public.stellar_u423_loadouts') IS NULL
+--  OR to_regclass('public.stellar_u423_module_rules') IS NULL
+--  OR to_regclass('public.stellar_u42_inventory') IS NULL
+--  THEN RAISE EXCEPTION 'REQUIRES_V42_3_LOADOUTS'; END IF;
+-- END $$;
+-- 
+-- CREATE OR REPLACE FUNCTION public.stellar_u431_combat_profile(p_user uuid)
+-- RETURNS jsonb LANGUAGE plpgsql STABLE SECURITY DEFINER SET search_path TO '' AS $$
+-- DECLARE active_config integer:=1; buff numeric:=0; item_count integer:=0;
+-- BEGIN
+--  IF auth.role() IS DISTINCT FROM 'service_role' THEN
+--   RAISE EXCEPTION 'SERVICE_ONLY' USING ERRCODE='42501';
+--  END IF;
+--  SELECT coalesce(nullif(state #>> '{combatConfigsV2013,active}','')::integer,1)
+--  INTO active_config FROM public.game_saves WHERE user_id=p_user;
+--  active_config:=CASE WHEN active_config=2 THEN 2 ELSE 1 END;
+--  SELECT coalesce(i.quantity,0),
+--         CASE WHEN m.combat_enabled IS TRUE THEN least(4,greatest(0,coalesce((m.proposed_bonus->>'npcDamagePercent')::numeric,0))) ELSE 0 END
+--  INTO item_count,buff
+--  FROM public.stellar_u423_loadouts l
+--  JOIN public.stellar_u423_module_rules m ON m.item=l.item AND m.slot=l.slot
+--  LEFT JOIN public.stellar_u42_inventory i ON i.user_id=l.user_id AND i.item=l.item
+--  WHERE l.user_id=p_user AND l.config=active_config AND l.slot='weapon' AND l.item='eclipse_lance'
+--  LIMIT 1;
+--  IF item_count<1 OR item_count IS NULL THEN buff:=0; END IF;
+--  RETURN jsonb_build_object('enabled',coalesce(buff,0)>0,'npcDamagePercent',coalesce(buff,0),'activeConfig',active_config);
+-- END; $$;
+-- REVOKE ALL ON FUNCTION public.stellar_u431_combat_profile(uuid) FROM PUBLIC,anon,authenticated;
+-- GRANT EXECUTE ON FUNCTION public.stellar_u431_combat_profile(uuid) TO service_role;
+-- 
+-- CREATE OR REPLACE FUNCTION public.stellar_u431_admin_weapon(p_enabled boolean)
+-- RETURNS jsonb LANGUAGE plpgsql SECURITY DEFINER SET search_path TO '' AS $$
+-- BEGIN
+--  IF auth.uid() IS NULL OR NOT public.is_game_admin_v1763(auth.uid()) THEN
+--   RAISE EXCEPTION 'ADMIN_ONLY' USING ERRCODE='42501';
+--  END IF;
+--  IF p_enabled IS NULL THEN RAISE EXCEPTION 'INVALID_ENABLED'; END IF;
+--  UPDATE public.stellar_u423_module_rules
+--  SET combat_enabled=p_enabled,updated_at=now()
+--  WHERE item='eclipse_lance' AND slot='weapon';
+--  IF NOT FOUND THEN RAISE EXCEPTION 'MODULE_MISSING'; END IF;
+--  RETURN jsonb_build_object('ok',true,'enabled',p_enabled);
+-- END; $$;
+-- REVOKE ALL ON FUNCTION public.stellar_u431_admin_weapon(boolean) FROM PUBLIC,anon;
+-- GRANT EXECUTE ON FUNCTION public.stellar_u431_admin_weapon(boolean) TO authenticated;
+-- COMMIT;
+-- ===== END STELLAR_V43_1_COMBAT_EVOLUTION.sql =====
+
+-- ===== START STELLAR_V43_5_GALACTIC_EVOLUTION.sql | sha256 d8cbd8d1c47aec3a70dd44e4d790e4c7bafda0c9db0a5f6b23976f9e8e0b7248 =====
+-- BEGIN;
+-- -- Expansão aditiva. Nenhuma alteração em game_saves, saldos existentes ou relés.
+-- DO $$ BEGIN
+--  IF to_regclass('public.stellar_u423_module_rules') IS NULL OR to_regclass('public.stellar_u42_research') IS NULL OR to_regclass('public.stellar_npc_reward_ledger') IS NULL OR to_regclass('public.stellar_u42_squad_members') IS NULL THEN
+--   RAISE EXCEPTION 'PREVIOUS_EXPANSIONS_REQUIRED';
+--  END IF;
+-- END $$;
+-- 
+-- CREATE OR REPLACE FUNCTION public.stellar_u435_admin_module(p_code text,p_enabled boolean)
+-- RETURNS jsonb LANGUAGE plpgsql SECURITY DEFINER SET search_path TO '' AS $$
+-- BEGIN
+--  IF auth.uid() IS NULL OR NOT public.is_game_admin_v1763(auth.uid()) THEN RAISE EXCEPTION 'ADMIN_ONLY' USING ERRCODE='42501'; END IF;
+--  IF p_code NOT IN ('astral_guard','nexus_drive','eclipse_lance','trinity_matrix') OR p_enabled IS NULL THEN RAISE EXCEPTION 'INVALID_MODULE'; END IF;
+--  UPDATE public.stellar_u423_module_rules SET combat_enabled=p_enabled,updated_at=now() WHERE item=p_code;
+--  IF NOT FOUND THEN RAISE EXCEPTION 'MODULE_NOT_FOUND'; END IF;
+--  RETURN jsonb_build_object('ok',true,'item',p_code,'enabled',p_enabled);
+-- END $$;
+-- REVOKE ALL ON FUNCTION public.stellar_u435_admin_module(text,boolean) FROM PUBLIC,anon;
+-- GRANT EXECUTE ON FUNCTION public.stellar_u435_admin_module(text,boolean) TO authenticated;
+-- 
+-- CREATE TABLE IF NOT EXISTS public.stellar_u435_raid_config(
+--  id integer PRIMARY KEY DEFAULT 1 CHECK(id=1), target_kills integer NOT NULL DEFAULT 3 CHECK(target_kills BETWEEN 1 AND 50),
+--  min_player_kills integer NOT NULL DEFAULT 1 CHECK(min_player_kills BETWEEN 1 AND 10),
+--  research_reward integer NOT NULL DEFAULT 120 CHECK(research_reward BETWEEN 1 AND 5000),
+--  enabled boolean NOT NULL DEFAULT true, updated_at timestamptz NOT NULL DEFAULT now());
+-- ALTER TABLE public.stellar_u435_raid_config ENABLE ROW LEVEL SECURITY;
+-- REVOKE ALL ON public.stellar_u435_raid_config FROM PUBLIC,anon,authenticated;
+-- INSERT INTO public.stellar_u435_raid_config(id) VALUES(1) ON CONFLICT DO NOTHING;
+-- 
+-- CREATE TABLE IF NOT EXISTS public.stellar_u435_raid_claims(
+--  user_id uuid NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+--  week_start date NOT NULL,
+--  squad_id uuid NOT NULL, -- preserva histórico mesmo que o esquadrão seja encerrado
+--  personal_kills bigint NOT NULL,
+--  squad_kills bigint NOT NULL,
+--  reward integer NOT NULL,
+--  claimed_at timestamptz NOT NULL DEFAULT now(),
+--  PRIMARY KEY(user_id,week_start));
+-- ALTER TABLE public.stellar_u435_raid_claims ENABLE ROW LEVEL SECURITY;
+-- REVOKE ALL ON public.stellar_u435_raid_claims FROM PUBLIC,anon,authenticated;
+-- 
+-- CREATE OR REPLACE FUNCTION public.stellar_u435_raid_snapshot()
+-- RETURNS jsonb LANGUAGE plpgsql STABLE SECURITY DEFINER SET search_path TO '' AS $$
+-- DECLARE u uuid:=auth.uid(); sq uuid; wk date;
+--  total bigint:=0; mine bigint:=0; cfg record; done boolean:=false;
+-- BEGIN
+--  IF u IS NULL THEN RAISE EXCEPTION 'SESSION_REQUIRED' USING ERRCODE='42501'; END IF;
+--  SELECT * INTO cfg FROM public.stellar_u435_raid_config WHERE id=1;
+--  wk:=(timezone('America/Sao_Paulo',now()))::date -(extract(isodow from timezone('America/Sao_Paulo',now()))::int-1);
+--  SELECT squad_id INTO sq FROM public.stellar_u42_squad_members WHERE user_id=u;
+--  IF sq IS NULL THEN RETURN jsonb_build_object('ok',true,'inSquad',false,'ready',false,'target',cfg.target_kills,'minimum',cfg.min_player_kills,'reward',cfg.research_reward,'enabled',cfg.enabled); END IF;
+--  SELECT count(DISTINCT n.kill_key),count(DISTINCT n.kill_key) FILTER(WHERE n.user_id=u)
+--  INTO total,mine
+--  FROM public.stellar_npc_reward_ledger n
+--  JOIN public.stellar_u42_squad_members m ON m.user_id=n.user_id AND m.squad_id=sq
+--  WHERE n.npc_type LIKE 'boss%' AND n.issued_at>=wk::timestamp AT TIME ZONE 'America/Sao_Paulo'
+--  AND n.issued_at>=m.joined_at;
+--  SELECT EXISTS(SELECT 1 FROM public.stellar_u435_raid_claims c WHERE c.user_id=u AND c.week_start=wk) INTO done;
+--  RETURN jsonb_build_object('ok',true,'inSquad',true,'squadId',sq,'kills',total,'personal',mine,'target',cfg.target_kills,
+--  'minimum',cfg.min_player_kills,'reward',cfg.research_reward,'enabled',cfg.enabled,'claimed',done,
+--  'ready',cfg.enabled AND total>=cfg.target_kills AND mine>=cfg.min_player_kills AND NOT done);
+-- END $$;
+-- REVOKE ALL ON FUNCTION public.stellar_u435_raid_snapshot() FROM PUBLIC,anon;
+-- GRANT EXECUTE ON FUNCTION public.stellar_u435_raid_snapshot() TO authenticated;
+-- 
+-- CREATE OR REPLACE FUNCTION public.stellar_u435_raid_claim()
+-- RETURNS jsonb LANGUAGE plpgsql SECURITY DEFINER SET search_path TO '' AS $$
+-- DECLARE u uuid:=auth.uid(); row jsonb; wk date; sq uuid; reward integer;
+-- BEGIN
+--  IF u IS NULL THEN RAISE EXCEPTION 'SESSION_REQUIRED' USING ERRCODE='42501'; END IF;
+--  PERFORM pg_advisory_xact_lock(hashtext('stellar_raid_435:'||u::text));
+--  row:=public.stellar_u435_raid_snapshot();
+--  IF coalesce((row->>'ready')::boolean,false) IS DISTINCT FROM true THEN RAISE EXCEPTION 'RAID_NOT_READY_OR_CLAIMED'; END IF;
+--  wk:=(timezone('America/Sao_Paulo',now()))::date -(extract(isodow from timezone('America/Sao_Paulo',now()))::int-1);
+--  sq:=(row->>'squadId')::uuid; reward:=(row->>'reward')::integer;
+--  INSERT INTO public.stellar_u435_raid_claims(user_id,week_start,squad_id,personal_kills,squad_kills,reward)
+--  VALUES(u,wk,sq,(row->>'personal')::bigint,(row->>'kills')::bigint,reward);
+--  INSERT INTO public.stellar_u42_research(user_id,points) VALUES(u,reward)
+--  ON CONFLICT(user_id) DO UPDATE SET points=least(100000000,public.stellar_u42_research.points+excluded.points),updated_at=now();
+--  RETURN jsonb_build_object('ok',true,'reward',reward,'weekStart',wk);
+-- END $$;
+-- REVOKE ALL ON FUNCTION public.stellar_u435_raid_claim() FROM PUBLIC,anon;
+-- GRANT EXECUTE ON FUNCTION public.stellar_u435_raid_claim() TO authenticated;
+-- CREATE OR REPLACE FUNCTION public.stellar_u435_raid_admin(p_target integer,p_minimum integer,p_reward integer,p_enabled boolean)
+-- RETURNS jsonb LANGUAGE plpgsql SECURITY DEFINER SET search_path TO '' AS $$
+-- BEGIN
+--  IF auth.uid() IS NULL OR NOT public.is_game_admin_v1763(auth.uid()) THEN RAISE EXCEPTION 'ADMIN_ONLY' USING ERRCODE='42501'; END IF;
+--  IF p_target NOT BETWEEN 1 AND 50 OR p_minimum NOT BETWEEN 1 AND 10 OR p_reward NOT BETWEEN 1 AND 5000 OR p_enabled IS NULL THEN RAISE EXCEPTION 'INVALID_RAID_RULES'; END IF;
+--  UPDATE public.stellar_u435_raid_config SET target_kills=p_target,min_player_kills=p_minimum,research_reward=p_reward,enabled=p_enabled,updated_at=now() WHERE id=1;
+--  RETURN jsonb_build_object('ok',true);
+-- END $$;
+-- REVOKE ALL ON FUNCTION public.stellar_u435_raid_admin(integer,integer,integer,boolean) FROM PUBLIC,anon;
+-- GRANT EXECUTE ON FUNCTION public.stellar_u435_raid_admin(integer,integer,integer,boolean) TO authenticated;
+-- COMMIT;
+-- ===== END STELLAR_V43_5_GALACTIC_EVOLUTION.sql =====
+
+-- ===== START STELLAR_V44_0_GALACTIC_SUPREMACY.sql | sha256 e0dcead171533cd64dbf5c4c19f26352153226220d44874deb557dc1665e4704 =====
+-- BEGIN;
+-- -- V44 additive finalization: U sector canonical links, spawn controls and private ADM kit.
+-- -- Never edits game_saves, player wallets, relay modules or legacy combat rewards.
+-- DO $$ BEGIN
+--  IF to_regclass('public.game_map_config_v1814') IS NULL OR to_regclass('public.stellar_u42_inventory') IS NULL
+--  OR (SELECT count(*) FROM public.game_map_config_v1814 WHERE map_id IN ('u1','u2','u3')) <> 3
+--  OR (SELECT count(*) FROM public.game_sector_nodes_v1814 WHERE sector_label IN ('U-1','U-2','U-3')) <> 3
+--  THEN RAISE EXCEPTION 'INSTALL_V435_FRONTIER_MAPS_FIRST'; END IF;
+--  IF (SELECT count(*) FROM public.game_npc_config_v1811 WHERE npc_key IN ('riftScout','voidCorsair','bossRiftScout','nexusWarden','bossVoidCorsair','astralReaper','bossAstralReaper')) <> 7
+--  THEN RAISE EXCEPTION 'MISSING_FRONTIER_NPC_DEFINITIONS'; END IF;
+-- END $$;
+-- -- Five canonical bidirectional routes: each faction's X-8 reaches U-1, then U-2 and U-3.
+-- WITH v(portal_key,from_sector,to_sector,sort_order) AS (VALUES
+--  ('stellar_u440_earth','1-8','U-1',440),
+--  ('stellar_u440_mars','2-8','U-1',441),
+--  ('stellar_u440_jupiter','3-8','U-1',442),
+--  ('stellar_u440_veil_ion','U-1','U-2',443),
+--  ('stellar_u440_ion_void','U-2','U-3',444))
+-- INSERT INTO public.game_portal_links_v1814(portal_key,from_sector,to_sector,bidirectional,enabled,sort_order)
+-- SELECT v.portal_key,v.from_sector,v.to_sector,true,true,v.sort_order FROM v
+-- WHERE NOT EXISTS (SELECT 1 FROM public.game_portal_links_v1814 p WHERE
+--  (p.from_sector=v.from_sector AND p.to_sector=v.to_sector) OR
+--  (p.bidirectional AND p.from_sector=v.to_sector AND p.to_sector=v.from_sector))
+-- ON CONFLICT(portal_key) DO NOTHING;
+-- -- Only fill missing NPC spawn rows: existing ADM modifications win.
+-- WITH spawn(map_id,npc_key,spawn_count) AS (VALUES
+--  ('u1','riftScout',7),('u1','voidCorsair',7),('u1','bossRiftScout',2),
+--  ('u2','voidCorsair',8),('u2','nexusWarden',7),('u2','bossVoidCorsair',2),
+--  ('u3','nexusWarden',8),('u3','astralReaper',7),('u3','bossAstralReaper',2))
+-- INSERT INTO public.game_map_npc_spawns_v1811(map_id,npc_key,spawn_count,enabled)
+-- SELECT map_id,npc_key,spawn_count,true FROM spawn
+-- ON CONFLICT(map_id,npc_key) DO NOTHING;
+-- -- Owned by the ADM only; no relay modules, currency or raw materials.
+-- CREATE TABLE IF NOT EXISTS public.stellar_u440_admin_test_grants(
+--  id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+--  user_id uuid NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+--  item text NOT NULL CHECK(item IN ('astral_guard','nexus_drive','eclipse_lance','trinity_matrix')),
+--  quantity integer NOT NULL CHECK(quantity BETWEEN 1 AND 5),
+--  created_at timestamptz NOT NULL DEFAULT now()
+-- );
+-- ALTER TABLE public.stellar_u440_admin_test_grants ENABLE ROW LEVEL SECURITY;
+-- REVOKE ALL ON TABLE public.stellar_u440_admin_test_grants FROM PUBLIC,anon,authenticated;
+-- CREATE OR REPLACE FUNCTION public.stellar_u440_admin_test_kit(p_code text,p_quantity integer)
+-- RETURNS jsonb LANGUAGE plpgsql SECURITY DEFINER SET search_path TO '' AS $$
+-- DECLARE u uuid:=auth.uid(); q integer;
+-- BEGIN
+--  IF u IS NULL OR NOT public.is_game_admin_v1763(u) THEN RAISE EXCEPTION 'ADMIN_ONLY' USING ERRCODE='42501'; END IF;
+--  IF p_code IS NULL OR p_code NOT IN ('astral_guard','nexus_drive','eclipse_lance','trinity_matrix')
+--  OR p_quantity IS NULL OR p_quantity NOT BETWEEN 1 AND 5 THEN RAISE EXCEPTION 'INVALID_TEST_ITEM'; END IF;
+--  -- There is deliberately no target_user parameter: admins can only grant to themselves.
+--  INSERT INTO public.stellar_u42_inventory(user_id,item,quantity) VALUES(u,p_code,p_quantity)
+--  ON CONFLICT(user_id,item) DO UPDATE SET quantity=public.stellar_u42_inventory.quantity+excluded.quantity
+--  WHERE public.stellar_u42_inventory.quantity+excluded.quantity<=30
+--  RETURNING quantity INTO q;
+--  IF q IS NULL THEN RAISE EXCEPTION 'TEST_INVENTORY_LIMIT_30'; END IF;
+--  INSERT INTO public.stellar_u440_admin_test_grants(user_id,item,quantity) VALUES(u,p_code,p_quantity);
+--  RETURN jsonb_build_object('ok',true,'item',p_code,'quantity',q,'added',p_quantity);
+-- END $$;
+-- REVOKE ALL ON FUNCTION public.stellar_u440_admin_test_kit(text,integer) FROM PUBLIC,anon;
+-- GRANT EXECUTE ON FUNCTION public.stellar_u440_admin_test_kit(text,integer) TO authenticated;
+-- -- Invalidate the two relevant runtimes so both the web client and Node rooms refresh.
+-- UPDATE public.game_runtime_meta_v1810 SET version=version+1,updated_at=now() WHERE config_key IN ('world','npc');
+-- COMMIT;
+-- ===== END STELLAR_V44_0_GALACTIC_SUPREMACY.sql =====
+
+-- ===== START STELLAR_V45_0_GALACTIC_ASCENSION.sql | sha256 01c24e9cf443b887ae49990a424447882525c835c5cc405383b92930f25da332 =====
+-- BEGIN;
+-- -- V45 is additive: no save, inventory, relay, currency or Warfront modification.
+-- DO $$ BEGIN
+--  IF to_regclass('public.game_sector_nodes_v1814') IS NULL
+--  OR to_regclass('public.game_map_npc_spawns_v1811') IS NULL
+--  OR to_regclass('public.stellar_u435_raid_config') IS NULL
+--  THEN RAISE EXCEPTION 'PREREQUISITE_V44_SQL_MISSING'; END IF;
+-- END $$;
+-- CREATE OR REPLACE FUNCTION public.stellar_u450_admin_diagnostics()
+-- RETURNS jsonb LANGUAGE plpgsql SECURITY DEFINER SET search_path TO '' AS $$
+-- DECLARE
+--  v_uid uuid:=auth.uid();
+--  v_maps jsonb;v_routes jsonb;v_raid jsonb;v_total integer;v_world bigint;v_npc bigint;
+-- BEGIN
+--  IF v_uid IS NULL OR NOT public.is_game_admin_v1763(v_uid)
+--  THEN RAISE EXCEPTION 'ADMIN_ONLY' USING ERRCODE='42501';END IF;
+--  SELECT coalesce(jsonb_agg(jsonb_build_object(
+--   'id',m.map_id,'label',m.label,'name',m.name,'enabled',m.enabled,
+--   'spawnTypes',(SELECT count(*) FROM public.game_map_npc_spawns_v1811 n WHERE n.map_id=m.map_id AND n.enabled AND n.spawn_count>0),
+--   'resourceTypes',(SELECT count(*) FROM public.game_map_resource_pool_v1814 r WHERE r.map_id=m.map_id AND r.enabled)
+--  ) ORDER BY m.map_id),'[]'::jsonb) INTO v_maps
+--  FROM public.game_map_config_v1814 m WHERE m.map_id IN ('u1','u2','u3');
+--  SELECT coalesce(jsonb_agg(jsonb_build_object(
+--   'from',p.from_sector,'to',p.to_sector,'enabled',p.enabled,'bidirectional',p.bidirectional
+--  ) ORDER BY p.sort_order),'[]'::jsonb) INTO v_routes
+--  FROM public.game_portal_links_v1814 p
+--  WHERE p.portal_key IN ('stellar_u440_earth','stellar_u440_mars','stellar_u440_jupiter','stellar_u440_veil_ion','stellar_u440_ion_void');
+--  SELECT jsonb_build_object('enabled',r.enabled,'target',r.target_kills,'minimum',r.min_player_kills,'reward',r.research_reward)
+--  INTO v_raid FROM public.stellar_u435_raid_config r WHERE r.id=1;
+--  SELECT count(*) INTO v_total FROM public.game_map_config_v1814;
+--  SELECT version INTO v_world FROM public.game_runtime_meta_v1810 WHERE config_key='world';
+--  SELECT version INTO v_npc FROM public.game_runtime_meta_v1810 WHERE config_key='npc';
+--  RETURN jsonb_build_object('maps',v_maps,'routes',v_routes,'raid',coalesce(v_raid,'{}'::jsonb),
+--    'totalMaps',v_total,'worldRevision',v_world,'npcRevision',v_npc);
+-- END $$;
+-- REVOKE ALL ON FUNCTION public.stellar_u450_admin_diagnostics() FROM PUBLIC,anon;
+-- GRANT EXECUTE ON FUNCTION public.stellar_u450_admin_diagnostics() TO authenticated;
+-- COMMIT;
+-- ===== END STELLAR_V45_0_GALACTIC_ASCENSION.sql =====
+
+-- ===== START STELLAR_V45_1_GALACTIC_PROGRESSION.sql | sha256 f638dc35202afd7145a9b41c164c211402cfbd62841c058e3ebe4317eefea8c1 =====
+-- BEGIN;
+-- -- Stellar Legacy V45.1 — level progression and faction PvP entry. No save/ledger/market mutation.
+-- DO $$ BEGIN
+--  IF to_regclass('public.game_map_config_v1814') IS NULL OR
+--     to_regclass('public.game_sector_nodes_v1814') IS NULL OR
+--     to_regclass('public.game_portal_links_v1814') IS NULL OR
+--     to_regclass('public.game_map_npc_spawns_v1811') IS NULL OR
+--     to_regclass('public.game_runtime_meta_v1810') IS NULL
+--  THEN RAISE EXCEPTION 'V45_PREREQUISITES_MISSING';END IF;
+--  IF (SELECT count(*) FROM public.game_map_config_v1814 WHERE map_id IN ('x1','x2','x3','x4','x5','x6','x7','x8','u1','u2','u3'))<>11
+--  OR (SELECT count(*) FROM public.game_sector_nodes_v1814 WHERE sector_label IN ('1-1','2-1','3-1','1-4','2-4','3-4','1-5','2-5','3-5','4-1','4-2','4-3','U-1','U-2','U-3'))<>15
+--  THEN RAISE EXCEPTION 'V45_MAP_OR_SECTOR_INCOMPLETE';END IF;
+-- END $$;
+-- -- Exact levels on map definitions (server join uses both map and sector). All factions equal.
+-- WITH levels(map_id,min_level) AS (
+--  VALUES ('x1',1),('x2',3),('x3',5),('x4',7),('x5',9),('x6',12),('x7',15),('x8',18),('u1',20),('u2',21),('u3',22))
+-- UPDATE public.game_map_config_v1814 m SET min_level=l.min_level,updated_at=now()
+-- FROM levels l WHERE m.map_id=l.map_id AND m.min_level IS DISTINCT FROM l.min_level;
+-- WITH levels(map_id,min_level) AS (
+--  VALUES ('x1',1),('x2',3),('x3',5),('x4',7),('x5',9),('x6',12),('x7',15),('x8',18),('u1',20),('u2',21),('u3',22),('b41',15),('b42',15),('b43',15))
+-- UPDATE public.game_sector_nodes_v1814 s SET min_level=l.min_level,updated_at=now()
+-- FROM levels l WHERE s.map_id=l.map_id AND s.min_level IS DISTINCT FROM l.min_level;
+-- -- Own-faction PvP entries at each starting map + uninterrupted PvE X-4 -> X-5.
+-- -- All links are bidirectional, keep previous battle routes as optional alternatives.
+-- INSERT INTO public.game_portal_links_v1814(portal_key,from_sector,to_sector,bidirectional,enabled,sort_order)
+-- VALUES
+--  ('stellar_v451_earth_pvp','1-1','4-1',true,true,120),
+--  ('stellar_v451_mars_pvp','2-1','4-2',true,true,121),
+--  ('stellar_v451_jupiter_pvp','3-1','4-3',true,true,122),
+--  ('stellar_v451_earth_pve','1-4','1-5',true,true,123),
+--  ('stellar_v451_mars_pve','2-4','2-5',true,true,124),
+--  ('stellar_v451_jupiter_pve','3-4','3-5',true,true,125)
+-- ON CONFLICT(portal_key) DO UPDATE SET from_sector=excluded.from_sector,to_sector=excluded.to_sector,
+--  bidirectional=true,enabled=true,sort_order=excluded.sort_order,updated_at=now();
+-- -- Rebalance density only: keep enemy stats and reward definitions unchanged.
+-- -- Introduce transitional enemies to lower the equipment cliff between tiers 5–18.
+-- WITH distribution(map_id,npc_key,spawn_count) AS (
+--  VALUES
+--  ('x3','mordon',6),('x3','devolarium',2),('x3','bossMordon',2),
+--  ('x4','bossSibelon',1),('x4','sibelon',3),('x4','bossSaimon',2),
+--  ('x5','riftScout',6),('x5','bossRiftScout',1),('x5','sibelon',3),('x5','bossSibelon',1),('x5','mordon',6),
+--  ('x6','voidCorsair',5),('x6','bossVoidCorsair',1),('x6','bossRiftScout',1),('x6','devolarium',4),
+--  ('x7','bossNexusWarden',1),('x7','bossVoidCorsair',1),('x7','nexusWarden',6),('x7','riftScout',5),
+--  ('x8','bossAstralReaper',1),('x8','bossNexusWarden',1),('x8','astralReaper',5)
+-- )
+-- INSERT INTO public.game_map_npc_spawns_v1811(map_id,npc_key,spawn_count,enabled)
+-- SELECT d.map_id,d.npc_key,d.spawn_count,true FROM distribution d
+-- ON CONFLICT(map_id,npc_key) DO UPDATE SET spawn_count=excluded.spawn_count,enabled=true,updated_at=now();
+-- UPDATE public.game_runtime_meta_v1810 SET version=version+1,updated_at=now() WHERE config_key IN ('world','npc');
+-- COMMIT;
+-- ===== END STELLAR_V45_1_GALACTIC_PROGRESSION.sql =====
+
+-- ===== START STELLAR_V46_0_GALACTIC_WARFARE.sql | sha256 2ee0a42dac0ac31d58d7d8e4196815e6e5a1a7147b08b9a9b20a254d94ff452e =====
+-- BEGIN;
+-- -- Stellar Legacy V46 Galactic Warfare — conservative NPC composition and official arena sizes.
+-- -- NO player saves/XP/levels/accounts, currencies, market, PvP relays or raid payouts modified.
+-- DO $$ BEGIN
+--  IF (SELECT count(*) FROM public.game_map_config_v1814 WHERE map_id IN ('x1','x2','x3','x4','x5','x6','x7','x8','u1','u2','u3'))<>11 THEN
+--   RAISE EXCEPTION 'V46_EXPECTED_V451_MAPS_MISSING';
+--  END IF;
+--  IF (SELECT count(*) FROM public.game_portal_links_v1814 WHERE portal_key LIKE 'stellar_v451_%' AND enabled)<>6 THEN
+--   RAISE EXCEPTION 'V46_EXPECTED_V451_PORTALS_MISSING';
+--  END IF;
+--  IF (SELECT count(*) FROM public.game_map_config_v1814 WHERE map_id IN ('ggAlpha','ggBeta','ggGamma'))<>3 THEN
+--   RAISE EXCEPTION 'V46_ARENA_CONFIG_MISSING';
+--  END IF;
+-- END $$;
+-- -- Align persisted Galaxy Gate room dimensions with client ASTRAL_ARENAS.
+-- UPDATE public.game_map_config_v1814 AS m
+-- SET world_w=v.w, world_h=v.h,updated_at=now()
+-- FROM (VALUES ('ggAlpha',11500,8500),('ggBeta',13200,9600),('ggGamma',14800,10800)) AS v(id,w,h)
+-- WHERE m.map_id=v.id AND (m.world_w IS DISTINCT FROM v.w OR m.world_h IS DISTINCT FROM v.h);
+-- -- More entry-level enemies, fewer high-health bosses at the 5–12 milestones.
+-- -- Attributes, XP, cash and STL per kill stay unchanged, no reward exploit.
+-- INSERT INTO public.game_map_npc_spawns_v1811(map_id,npc_key,spawn_count,enabled)
+-- VALUES
+--  ('x3','saimon',16,true),('x3','mordon',7,true),('x3','devolarium',1,true),('x3','bossDevolarium',1,true),
+--  ('x4','saimon',15,true),('x4','mordon',7,true),('x4','sibelon',2,true),('x4','bossSibelon',1,true),
+--  ('x5','mordon',9,true),('x5','riftScout',4,true),('x5','sibelon',2,true),('x5','bossRiftScout',1,true),
+--  ('x6','devolarium',6,true),('x6','riftScout',9,true),('x6','voidCorsair',3,true),('x6','bossVoidCorsair',1,true)
+-- ON CONFLICT(map_id,npc_key) DO UPDATE SET spawn_count=excluded.spawn_count,enabled=excluded.enabled,updated_at=now();
+-- UPDATE public.game_runtime_meta_v1810 SET version=version+1,updated_at=now() WHERE config_key IN ('world','npc');
+-- COMMIT;
+-- ===== END STELLAR_V46_0_GALACTIC_WARFARE.sql =====
+
+-- ===== START STELLAR_V46_1_ROTAS_LINEARES.sql | sha256 ec753d99d0a68337ef40351903b3765c58ff9c76aaa4e716f0738be451daa521 =====
+-- BEGIN;
+-- -- Stellar Legacy V46.1: topologia linear PvE / PvP somente a partir de X-1 da propria faccao.
+-- -- Preserva U-1/U-2/U-3, posicoes da base, saves, NPCs, relés, loot, pagamentos e níveis.
+-- DO $$ BEGIN
+--  IF (SELECT COUNT(*) FROM public.game_sector_nodes_v1814 WHERE enabled AND sector_label ~ '^([123]-[1-8]|4-[1-3]|U-[123])$') <> 30 THEN
+--   RAISE EXCEPTION 'V461_SECTORS_INCOMPLETE'; END IF;
+--  IF (SELECT COUNT(*) FROM public.game_portal_links_v1814 WHERE portal_key IN
+--  ('stellar_u440_earth','stellar_u440_mars','stellar_u440_jupiter','stellar_u440_veil_ion','stellar_u440_ion_void') AND enabled)<>5 THEN
+--   RAISE EXCEPTION 'V461_FRONTIER_LINKS_MISSING'; END IF;
+-- END $$;
+-- -- Apenas pares entre X-1..X-8 e 4-1..4-3: qualquer atalho não aprovado fica desativado e reversível.
+-- -- Os cinco links envolvendo U permanecem intocados, com disposição inalterada dentro dos U.
+-- WITH desired(a,b) AS (
+--  SELECT f::text||'-'||i::text, f::text||'-'||(i+1)::text
+--  FROM generate_series(1,3) AS f CROSS JOIN generate_series(1,7) AS i
+--  UNION ALL VALUES ('1-1','4-1'),('2-1','4-2'),('3-1','4-3'),
+--                   ('4-1','4-2'),('4-1','4-3'),('4-2','4-3')
+-- )
+-- UPDATE public.game_portal_links_v1814 p
+-- SET enabled=EXISTS(SELECT 1 FROM desired d WHERE (p.from_sector=d.a AND p.to_sector=d.b) OR (p.bidirectional AND p.from_sector=d.b AND p.to_sector=d.a)),
+--     updated_at=now()
+-- WHERE p.from_sector ~ '^([123]-[1-8]|4-[1-3])$'
+--   AND p.to_sector ~ '^([123]-[1-8]|4-[1-3])$'
+--   AND p.enabled IS DISTINCT FROM EXISTS(SELECT 1 FROM desired d WHERE (p.from_sector=d.a AND p.to_sector=d.b) OR (p.bidirectional AND p.from_sector=d.b AND p.to_sector=d.a));
+-- -- Garante as 27 conexões previstas mesmo em instalações com rotas antigas ausentes.
+-- WITH desired(a,b,ord) AS (
+--  SELECT f::text||'-'||i::text,f::text||'-'||(i+1)::text,4600+f*100+i
+--  FROM generate_series(1,3) AS f CROSS JOIN generate_series(1,7) AS i
+--  UNION ALL VALUES ('1-1','4-1',4911),('2-1','4-2',4912),('3-1','4-3',4913),
+--                   ('4-1','4-2',4941),('4-1','4-3',4942),('4-2','4-3',4943)
+-- )
+-- INSERT INTO public.game_portal_links_v1814(portal_key,from_sector,to_sector,bidirectional,enabled,sort_order)
+-- SELECT 'stellar_v461_'||replace(d.a,'-','_')||'__'||replace(d.b,'-','_'),d.a,d.b,true,true,d.ord FROM desired d
+-- WHERE NOT EXISTS(SELECT 1 FROM public.game_portal_links_v1814 p WHERE
+--  p.from_sector=d.a AND p.to_sector=d.b AND p.enabled AND p.bidirectional
+--  OR p.from_sector=d.b AND p.to_sector=d.a AND p.enabled AND p.bidirectional)
+-- ON CONFLICT(portal_key) DO UPDATE SET bidirectional=true,enabled=true,updated_at=now();
+-- -- Falha fechada caso alguma conexão não aprovada permaneça habilitada.
+-- DO $$ DECLARE wrong_links int; good_links int; BEGIN
+--  WITH desired(a,b) AS (
+--  SELECT f::text||'-'||i::text,f::text||'-'||(i+1)::text FROM generate_series(1,3) f CROSS JOIN generate_series(1,7) i
+--  UNION ALL VALUES ('1-1','4-1'),('2-1','4-2'),('3-1','4-3'),('4-1','4-2'),('4-1','4-3'),('4-2','4-3'))
+--  SELECT count(*) FILTER(WHERE NOT EXISTS(SELECT 1 FROM desired d WHERE
+--  (p.from_sector=d.a AND p.to_sector=d.b) OR (p.bidirectional AND p.from_sector=d.b AND p.to_sector=d.a))),
+--  count(*) FILTER(WHERE EXISTS(SELECT 1 FROM desired d WHERE
+--  (p.from_sector=d.a AND p.to_sector=d.b) OR (p.bidirectional AND p.from_sector=d.b AND p.to_sector=d.a)))
+--  INTO wrong_links,good_links FROM public.game_portal_links_v1814 p
+--  WHERE p.enabled AND p.from_sector ~ '^([123]-[1-8]|4-[1-3])$' AND p.to_sector ~ '^([123]-[1-8]|4-[1-3])$';
+--  IF wrong_links<>0 OR good_links<>27 THEN RAISE EXCEPTION 'V461_TOPOLOGY_INVALID: off-route %, expected 27 got %',wrong_links,good_links; END IF;
+-- END $$;
+-- UPDATE public.game_runtime_meta_v1810 SET version=version+1,updated_at=now() WHERE config_key='world';
+-- COMMIT;
+-- ===== END STELLAR_V46_1_ROTAS_LINEARES.sql =====
+
+-- ===== START STELLAR_V47_7_GALACTIC_BOT_WARS.sql | sha256 664e47b2d18af0294e30df3021c1fce03a27892641e1358f966c3ff3ef3431ad =====
+-- -- Stellar Legacy V47.7 — Bot Wars (default OFF)
+-- -- Executar no Supabase SQL Editor ANTES do deploy da V47.7.
+-- -- Sem modificações em saves, saldos, NPCs existentes, Warfront A/B/C ou preços.
+-- BEGIN;
+-- CREATE TABLE IF NOT EXISTS public.stellar_warbot_events_v477 (
+--   map_id text PRIMARY KEY CHECK (map_id IN ('b41','b42','b43')),
+--   enabled boolean NOT NULL DEFAULT false,
+--   mode text NOT NULL DEFAULT 'training' CHECK (mode IN ('training','conquest')),
+--   bots_per_faction integer NOT NULL DEFAULT 2 CHECK (bots_per_faction BETWEEN 1 AND 4),
+--   tier integer NOT NULL DEFAULT 1 CHECK (tier BETWEEN 1 AND 3),
+--   attack_players boolean NOT NULL DEFAULT false,
+--   ends_at timestamptz,
+--   updated_at timestamptz NOT NULL DEFAULT now(),
+--   updated_by uuid,
+--   CONSTRAINT warbot_duration_requires_end CHECK (NOT enabled OR ends_at IS NOT NULL),
+--   CONSTRAINT warbot_training_nonlethal CHECK (NOT attack_players OR mode='conquest')
+-- );
+-- ALTER TABLE public.stellar_warbot_events_v477 ENABLE ROW LEVEL SECURITY;
+-- REVOKE ALL ON public.stellar_warbot_events_v477 FROM PUBLIC, anon, authenticated;
+-- GRANT SELECT, INSERT, UPDATE ON public.stellar_warbot_events_v477 TO service_role;
+-- INSERT INTO public.stellar_warbot_events_v477(map_id,enabled,mode,bots_per_faction,tier,attack_players)
+-- VALUES ('b41',false,'training',2,1,false),('b42',false,'training',2,1,false),('b43',false,'training',2,1,false)
+-- ON CONFLICT (map_id) DO NOTHING;
+-- COMMIT;
+-- -- Verificação:
+-- -- SELECT map_id,enabled,mode,bots_per_faction,tier,attack_players,ends_at FROM public.stellar_warbot_events_v477 ORDER BY map_id;
+-- ===== END STELLAR_V47_7_GALACTIC_BOT_WARS.sql =====
+
+-- ===== START STELLAR_V47_8_0_PRELAUNCH_RESET_DELETE.sql | sha256 4beea848bde2dcfbcf157f77311d14536e005239e12ce8840a4258989c7d9aca =====
+-- -- Stellar Legacy • prelaunch: ADM reset/delete integrity, no player is reset by migration.
+-- -- Apply once via Supabase SQL editor or MCP. Reset/delete only on deliberate authenticated ADM action.
+-- BEGIN;
+-- 
+-- CREATE TABLE IF NOT EXISTS public.stellar_account_reset_epochs_v478 (
+--   user_id uuid PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
+--   epoch bigint NOT NULL DEFAULT 1 CHECK(epoch >= 1),
+--   reset_at timestamptz NOT NULL DEFAULT now()
+-- );
+-- ALTER TABLE public.stellar_account_reset_epochs_v478 ENABLE ROW LEVEL SECURITY;
+-- REVOKE ALL ON public.stellar_account_reset_epochs_v478 FROM PUBLIC, anon, authenticated;
+-- GRANT SELECT ON public.stellar_account_reset_epochs_v478 TO authenticated;
+-- DROP POLICY IF EXISTS stellar_reset_epoch_read_own_v478 ON public.stellar_account_reset_epochs_v478;
+-- CREATE POLICY stellar_reset_epoch_read_own_v478
+-- ON public.stellar_account_reset_epochs_v478 FOR SELECT TO authenticated
+-- USING (user_id = (SELECT auth.uid()));
+-- 
+-- -- A stale local save must not be able to revive a freshly reset account, even during an in-flight write.
+-- CREATE OR REPLACE FUNCTION public.stellar_verify_save_reset_epoch_v478()
+-- RETURNS trigger LANGUAGE plpgsql SECURITY DEFINER SET search_path TO 'public', 'pg_temp' AS $fn$
+-- DECLARE v_epoch bigint;
+-- BEGIN
+--  SELECT epoch INTO v_epoch FROM public.stellar_account_reset_epochs_v478 WHERE user_id=NEW.user_id;
+--  IF FOUND AND COALESCE(NULLIF(NEW.state->>'adminResetEpoch','')::bigint,0) <> v_epoch THEN
+--    RAISE EXCEPTION 'SAVE_RESET_STALE: save anterior ao reset administrativo.' USING ERRCODE='23514';
+--  END IF;
+--  RETURN NEW;
+-- END
+-- $fn$;
+-- REVOKE ALL ON FUNCTION public.stellar_verify_save_reset_epoch_v478() FROM PUBLIC,anon,authenticated;
+-- DROP TRIGGER IF EXISTS stellar_save_reset_epoch_guard_v478 ON public.game_saves;
+-- CREATE TRIGGER stellar_save_reset_epoch_guard_v478
+--  BEFORE INSERT OR UPDATE OF state ON public.game_saves
+--  FOR EACH ROW EXECUTE FUNCTION public.stellar_verify_save_reset_epoch_v478();
+-- 
+-- DO $fn$
+-- BEGIN
+--  IF to_regprocedure('public.admin_reset_account_v1763_legacy_v478(uuid)') IS NULL THEN
+--    ALTER FUNCTION public.admin_reset_account_v1763(uuid) RENAME TO admin_reset_account_v1763_legacy_v478;
+--  END IF;
+--  IF to_regprocedure('public.admin_delete_account_v1763_legacy_v478(uuid)') IS NULL THEN
+--    ALTER FUNCTION public.admin_delete_account_v1763(uuid) RENAME TO admin_delete_account_v1763_legacy_v478;
+--  END IF;
+-- END
+-- $fn$;
+-- -- Bypass of the new reset marker through old procedures must not be possible for players.
+-- REVOKE ALL ON FUNCTION public.admin_reset_account_v1763_legacy_v478(uuid) FROM PUBLIC,anon,authenticated;
+-- REVOKE ALL ON FUNCTION public.admin_delete_account_v1763_legacy_v478(uuid) FROM PUBLIC,anon,authenticated;
+-- 
+-- CREATE OR REPLACE FUNCTION public.admin_reset_account_v1763(p_target_user_id uuid)
+-- RETURNS jsonb LANGUAGE plpgsql SECURITY DEFINER SET search_path TO 'public','auth','pg_temp' AS $fn$
+-- DECLARE v_admin uuid := auth.uid(); v_result jsonb; v_table text; v_epoch bigint;
+-- BEGIN
+--  IF v_admin IS NULL OR NOT public.is_game_admin_v1763(v_admin) THEN RAISE EXCEPTION 'Acesso administrativo negado.'; END IF;
+--  IF p_target_user_id IS NULL OR p_target_user_id=v_admin OR public.is_game_admin_v1763(p_target_user_id) THEN RAISE EXCEPTION 'Conta protegida contra reset.'; END IF;
+--  -- Serialize resets with another ADM reset of the same target.
+--  PERFORM pg_advisory_xact_lock(hashtextextended(p_target_user_id::text,478));
+--  -- Existing procedure keeps identity, callsign, and premium, and resets core arena/save/profile.
+--  v_result := public.admin_reset_account_v1763_legacy_v478(p_target_user_id);
+--  IF COALESCE((v_result->>'ok')::boolean,false) IS NOT TRUE THEN RAISE EXCEPTION 'Reset legado não confirmado.'; END IF;
+-- 
+--  -- Dedicated player progression/reward histories absent in the older reset.
+--  FOREACH v_table IN ARRAY ARRAY[
+--    'galaxy_event_progress_v1826', 'game_coupon_redemptions_v1821', 'game_coupon_redemptions_v193',
+--    'stellar_elite_counters','stellar_elite_claims','stellar_elite_selected_titles',
+--    'stellar_competitive_claims','stellar_war_campaign_claims','stellar_war_supply_claims','stellar_war_defense_cooldowns','stellar_war_scores',
+--    'stellar_npc_reward_ledger','stellar_ore_reward_ledger',
+--    'stellar_astral_cursor_v381','stellar_astral_ledger_v381','stellar_astral_quote_lock_v381',
+--    'stellar_frontier_claims_v370','stellar_frontier_ship_tech_v370',
+--    'stellar_u42_actions','stellar_u42_donations','stellar_u42_expeditions','stellar_u42_inventory',
+--    'stellar_u42_material_spends','stellar_u42_research','stellar_u42_squad_members',
+--    'stellar_u42_squad_objective_claims_v421','stellar_u423_loadouts','stellar_u423_ops_claims',
+--    'stellar_u426_clan_donations','stellar_u426_sector_runs','stellar_u435_raid_claims',
+--    'stellar_u440_admin_test_grants','stellar_season_scores'
+--  ] LOOP
+--   IF to_regclass(format('public.%I',v_table)) IS NOT NULL THEN
+--    EXECUTE format('DELETE FROM public.%I WHERE user_id=$1',v_table) USING p_target_user_id;
+--   END IF;
+--  END LOOP;
+--  DELETE FROM public.stellar_dominion_claims_v360 WHERE actor=p_target_user_id;
+--  DELETE FROM public.stellar_dominion_war_claims_v360 WHERE actor=p_target_user_id;
+--  DELETE FROM public.stellar_frontier_clan_claims_v370 WHERE actor=p_target_user_id;
+--  DELETE FROM public.stellar_relay_mission_claims_v346 WHERE actor=p_target_user_id;
+--  -- Keep forensic security logs, market shared offers and Premium history intact.
+--  UPDATE public.stellar_u426_market_offers SET buyer=NULL WHERE buyer=p_target_user_id;
+--  INSERT INTO public.stellar_account_reset_epochs_v478(user_id,epoch,reset_at)
+--  VALUES(p_target_user_id,1,now())
+--  ON CONFLICT(user_id) DO UPDATE SET epoch=public.stellar_account_reset_epochs_v478.epoch+1,reset_at=now()
+--  RETURNING epoch INTO v_epoch;
+--  -- Active sessions were invalidated by the legacy RPC; never create a new save here.
+--  RETURN v_result||jsonb_build_object('reset_epoch',v_epoch,'verified',true,
+--  'message','Conta zerada no servidor. Progresso local antigo bloqueado; login e Premium preservados.');
+-- END
+-- $fn$;
+-- REVOKE ALL ON FUNCTION public.admin_reset_account_v1763(uuid) FROM PUBLIC,anon;
+-- GRANT EXECUTE ON FUNCTION public.admin_reset_account_v1763(uuid) TO authenticated;
+-- 
+-- CREATE OR REPLACE FUNCTION public.admin_delete_account_v1763(p_target_user_id uuid)
+-- RETURNS jsonb LANGUAGE plpgsql SECURITY DEFINER SET search_path TO 'public','auth','pg_temp' AS $fn$
+-- DECLARE v_admin uuid := auth.uid(); v_result jsonb;
+-- BEGIN
+--  IF v_admin IS NULL OR NOT public.is_game_admin_v1763(v_admin) THEN RAISE EXCEPTION 'Acesso administrativo negado.'; END IF;
+--  IF p_target_user_id IS NULL OR p_target_user_id=v_admin OR public.is_game_admin_v1763(p_target_user_id) THEN RAISE EXCEPTION 'Conta administrativa protegida.'; END IF;
+--  PERFORM pg_advisory_xact_lock(hashtextextended(p_target_user_id::text,478));
+--  -- Legacy deletion encounters foreign keys configured with NO ACTION. Clean these up first.
+--  DELETE FROM public.game_coupon_redemptions_v193 WHERE user_id=p_target_user_id;
+--  UPDATE public.game_coupons_v193 SET created_by=v_admin WHERE created_by=p_target_user_id;
+--  DELETE FROM public.premium_checkout_tests_v1832 WHERE user_id=p_target_user_id;
+--  DELETE FROM public.premium_pass_tier_tests_v1832 WHERE user_id=p_target_user_id;
+--  DELETE FROM public.premium_subscription_tests_v1832 WHERE user_id=p_target_user_id;
+--  DELETE FROM public.stellar_relay_mission_claims_v346 WHERE actor=p_target_user_id;
+--  DELETE FROM public.stellar_relay_pve_events_v346 WHERE actor=p_target_user_id;
+--  UPDATE public.stellar_u426_market_offers SET buyer=NULL WHERE buyer=p_target_user_id;
+--  v_result := public.admin_delete_account_v1763_legacy_v478(p_target_user_id);
+--  IF COALESCE((v_result->>'ok')::boolean,false) IS NOT TRUE OR EXISTS(SELECT 1 FROM auth.users WHERE id=p_target_user_id) THEN
+--   RAISE EXCEPTION 'Exclusão não confirmada: usuário ainda presente.';
+--  END IF;
+--  RETURN v_result||jsonb_build_object('verified',true,'message','Conta excluída e ausência no Auth confirmada.');
+-- END
+-- $fn$;
+-- REVOKE ALL ON FUNCTION public.admin_delete_account_v1763(uuid) FROM PUBLIC,anon;
+-- GRANT EXECUTE ON FUNCTION public.admin_delete_account_v1763(uuid) TO authenticated;
+-- COMMIT;
+-- ===== END STELLAR_V47_8_0_PRELAUNCH_RESET_DELETE.sql =====
+
+-- ===== START STELLAR_V48_1_1_MISSOES_PASSE_NIVEIS.sql | sha256 0d69f8fa748bc7e561bb9e5662ec5df79262ef3887242497a60b3bcede3b25b5 =====
+-- -- STELLAR LEGACY V48.1.1 • EXECUTAR SOMENTE DEPOIS DO TESTE DE FARM.
+-- -- Compatível com tabelas atuais de UI e categorias de missões (confirmadas no projeto).
+-- -- NÃO muda saves, saldos, recompensas, moedas ou conquistas existentes.
+-- BEGIN;
+-- DO $guard$
+-- BEGIN
+--  IF (SELECT COUNT(*) FROM public.game_mission_category_v1815 WHERE category IN ('daily','weekly','monthly','special'))<>4 THEN
+--     RAISE EXCEPTION 'V48.1.1: catálogo de categorias incompleto; operação cancelada';
+--  END IF;
+--  IF (SELECT COUNT(*) FROM public.game_ui_modules_v1810 WHERE module_key IN ('missions_menu','missions','pass'))<>3 THEN
+--     RAISE EXCEPTION 'V48.1.1: módulos de menu incompletos; operação cancelada';
+--  END IF;
+-- END $guard$;
+-- UPDATE public.game_mission_category_v1815
+-- SET min_level=CASE category
+--   WHEN 'daily' THEN 3
+--   WHEN 'weekly' THEN 5
+--   WHEN 'monthly' THEN 7
+--   WHEN 'special' THEN 10 END,
+--  updated_at=now()
+-- WHERE category IN ('daily','weekly','monthly','special')
+--  AND min_level IS DISTINCT FROM CASE category
+--   WHEN 'daily' THEN 3
+--   WHEN 'weekly' THEN 5
+--   WHEN 'monthly' THEN 7
+--   WHEN 'special' THEN 10 END;
+-- UPDATE public.game_ui_modules_v1810
+-- SET min_level=1
+-- WHERE module_key IN ('missions_menu','missions','pass') AND min_level<>1;
+-- COMMIT;
+-- -- CONFERÊNCIA após aplicação:
+-- SELECT category,min_level FROM public.game_mission_category_v1815
+-- WHERE category IN ('daily','weekly','monthly','special') ORDER BY min_level;
+-- SELECT module_key,min_level FROM public.game_ui_modules_v1810
+-- WHERE module_key IN ('missions_menu','missions','pass') ORDER BY module_key;
+-- ===== END STELLAR_V48_1_1_MISSOES_PASSE_NIVEIS.sql =====
+
+-- ===== START STELLAR_V48_4_FARM_OFFLINE_ECONOMICO.sql | sha256 d62de100408d097444624c2bad3c9d86da77e2302a9e74585674f6aaabf91a18 =====
+-- -- STELLAR LEGACY V48.4 • servidor offline econômico por período (Render Free pode hibernar).
+-- -- EXECUTAR UMA VEZ NO SUPABASE SQL EDITOR ANTES DO DEPLOY.
+-- -- Todas as funções acessíveis apenas pelo service_role do Render.
+-- CREATE TABLE IF NOT EXISTS public.stellar_offline_farm_v484 (
+--  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+--  user_id uuid NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+--  status text NOT NULL DEFAULT 'running' CHECK(status IN ('running','settled','cancelled','conflict')),
+--  map_id text NOT NULL,
+--  npc_key text NOT NULL,
+--  ammo_key text NOT NULL,
+--  minutes integer NOT NULL CHECK(minutes IN (60,120,240)),
+--  auto_sell boolean NOT NULL DEFAULT true,
+--  auto_buy boolean NOT NULL DEFAULT true,
+--  mine boolean NOT NULL DEFAULT true,
+--  snapshot jsonb NOT NULL,
+--  baseline_save_at timestamptz NOT NULL,
+--  started_at timestamptz NOT NULL DEFAULT now(),
+--  ends_at timestamptz NOT NULL,
+--  completed_at timestamptz,
+--  report jsonb,
+--  created_at timestamptz NOT NULL DEFAULT now()
+-- );
+-- CREATE UNIQUE INDEX IF NOT EXISTS stellar_offline_farm_v484_one_running ON public.stellar_offline_farm_v484(user_id) WHERE status='running';
+-- CREATE INDEX IF NOT EXISTS stellar_offline_farm_v484_user_created ON public.stellar_offline_farm_v484(user_id,created_at DESC);
+-- ALTER TABLE public.stellar_offline_farm_v484 ENABLE ROW LEVEL SECURITY;
+-- REVOKE ALL ON public.stellar_offline_farm_v484 FROM PUBLIC,anon,authenticated;
+-- GRANT SELECT,INSERT,UPDATE ON public.stellar_offline_farm_v484 TO service_role;
+-- 
+-- CREATE OR REPLACE FUNCTION public.stellar_offline_farm_start_v484(p_user uuid,p_minutes integer,p_auto_sell boolean DEFAULT true,p_auto_buy boolean DEFAULT true,p_mine boolean DEFAULT true,p_npc_key text DEFAULT NULL)
+-- RETURNS jsonb LANGUAGE plpgsql SECURITY DEFINER SET search_path = '' AS $$
+-- DECLARE s record; c record; q record; v_npc record; v_map text; v_ammo text; v_id uuid; v_level integer;
+-- BEGIN
+--  IF coalesce(auth.role(),'') <> 'service_role' THEN RAISE EXCEPTION 'ONLY_SERVICE_ROLE'; END IF;
+--  IF p_minutes NOT IN (60,120,240) THEN RAISE EXCEPTION 'INVALID_DURATION'; END IF;
+--  PERFORM pg_advisory_xact_lock(hashtextextended(p_user::text,484));
+--  IF EXISTS(SELECT 1 FROM public.stellar_offline_farm_v484 WHERE user_id=p_user AND status='running') THEN RAISE EXCEPTION 'FARM_ALREADY_RUNNING'; END IF;
+--  SELECT state,updated_at INTO s FROM public.game_saves WHERE user_id=p_user FOR UPDATE;
+--  SELECT updated_at INTO c FROM public.profiles WHERE id=p_user FOR UPDATE;
+--  IF c.updated_at IS NULL THEN RAISE EXCEPTION 'FARM_PROFILE_MISSING'; END IF;
+--  IF s.state IS NULL OR s.state->'profile' IS NULL THEN RAISE EXCEPTION 'FARM_SAVE_MISSING'; END IF;
+--  v_map:=s.state->>'mapId'; v_ammo:=coalesce(nullif(s.state->>'selectedLaserAmmo',''),'lcb10');
+--  v_level:=greatest(1,least(50,coalesce((s.state#>>'{profile,level}')::integer,1)));
+--  IF v_map !~ '^x[1-8]$' OR coalesce(s.state->>'repairRequired','false') NOT IN ('false','null') THEN RAISE EXCEPTION 'FARM_MAP_OR_REPAIR_UNSUPPORTED'; END IF;
+--  IF v_level < (CASE v_map WHEN 'x1' THEN 1 WHEN 'x2' THEN 3 WHEN 'x3' THEN 5 WHEN 'x4' THEN 7 WHEN 'x5' THEN 9 WHEN 'x6' THEN 12 WHEN 'x7' THEN 15 WHEN 'x8' THEN 18 ELSE 99 END)
+--  THEN RAISE EXCEPTION 'FARM_LEVEL_INSUFFICIENT'; END IF;
+--  IF NOT EXISTS(SELECT 1 FROM public.stellar_autopilot_access_v48 a WHERE a.user_id=p_user AND a.enabled=true AND (a.expires_at IS NULL OR a.expires_at>now()))
+--    AND NOT EXISTS(SELECT 1 FROM public.game_admins WHERE user_id=p_user) THEN
+--    RAISE EXCEPTION 'FARM_ACCESS_REQUIRED';
+--  END IF;
+--  SELECT n.npc_key,n.hp,n.shield,n.credits,n.stl,n.xp,n.resources INTO v_npc
+--  FROM public.game_map_npc_spawns_v1811 m
+--  JOIN public.game_npc_config_v1811 n ON n.npc_key=m.npc_key
+--  WHERE m.map_id=v_map AND m.enabled=true AND n.enabled=true AND n.npc_key !~* '^(boss|rift|elite)' AND coalesce(m.spawn_count,0)>0 AND (p_npc_key IS NULL OR n.npc_key=p_npc_key)
+--  ORDER BY n.hp+n.shield ASC,n.npc_key ASC LIMIT 1;
+--  IF v_npc.npc_key IS NULL THEN RAISE EXCEPTION 'FARM_NO_ELIGIBLE_NPCS'; END IF;
+--  -- Munição apenas de crédito; STL/premium é consumido se houver estoque, nunca comprado aqui.
+--  SELECT catalog_key,price,currency,(meta#>>'{grant,qty}')::integer AS qty INTO q FROM public.live_shop_prices_v16
+--  WHERE kind='ammo' AND ref_id=v_ammo AND enabled=true AND shop_visible=true LIMIT 1;
+--  INSERT INTO public.stellar_offline_farm_v484(user_id,map_id,npc_key,ammo_key,minutes,auto_sell,auto_buy,mine,snapshot,baseline_save_at,ends_at)
+--  VALUES(p_user,v_map,v_npc.npc_key,v_ammo,p_minutes,coalesce(p_auto_sell,true),coalesce(p_auto_buy,true),coalesce(p_mine,true),
+--  jsonb_build_object('npc',to_jsonb(v_npc),'level',v_level,'profile_updated_at',c.updated_at,'shop',CASE WHEN q.catalog_key IS NOT NULL THEN to_jsonb(q) ELSE '{}'::jsonb END),s.updated_at,now()+make_interval(mins=>p_minutes))
+--  RETURNING id INTO v_id;
+--  RETURN jsonb_build_object('ok',true,'id',v_id,'status','running','map',v_map,'npc',v_npc.npc_key,'minutes',p_minutes,'ends_at',(SELECT ends_at FROM public.stellar_offline_farm_v484 WHERE id=v_id));
+-- END $$;
+-- 
+-- CREATE OR REPLACE FUNCTION public.stellar_offline_farm_status_v484(p_user uuid)
+-- RETURNS jsonb LANGUAGE plpgsql SECURITY DEFINER SET search_path = '' AS $$
+-- DECLARE s record;
+-- BEGIN
+--  IF coalesce(auth.role(),'') <> 'service_role' THEN RAISE EXCEPTION 'ONLY_SERVICE_ROLE'; END IF;
+--  SELECT * INTO s FROM public.stellar_offline_farm_v484 WHERE user_id=p_user ORDER BY (status='running') DESC, created_at DESC LIMIT 1;
+--  IF s.id IS NULL THEN RETURN jsonb_build_object('status','none'); END IF;
+--  RETURN jsonb_build_object('id',s.id,'status',s.status,'map',s.map_id,'npc',s.npc_key,'minutes',s.minutes,'started_at',s.started_at,'ends_at',s.ends_at,'report',s.report);
+-- END $$;
+-- 
+-- CREATE OR REPLACE FUNCTION public.stellar_offline_farm_cancel_v484(p_user uuid)
+-- RETURNS jsonb LANGUAGE plpgsql SECURITY DEFINER SET search_path = '' AS $$
+-- DECLARE s record;
+-- BEGIN
+--  IF coalesce(auth.role(),'') <> 'service_role' THEN RAISE EXCEPTION 'ONLY_SERVICE_ROLE'; END IF;
+--  PERFORM pg_advisory_xact_lock(hashtextextended(p_user::text,484));
+--  SELECT * INTO s FROM public.stellar_offline_farm_v484 WHERE user_id=p_user AND status='running' FOR UPDATE;
+--  IF s.id IS NULL THEN RETURN jsonb_build_object('ok',true,'status','none'); END IF;
+--  UPDATE public.stellar_offline_farm_v484 SET status='cancelled',completed_at=now(),report='{"reason":"cancelled","kills":0}'::jsonb WHERE id=s.id;
+--  RETURN jsonb_build_object('ok',true,'status','cancelled');
+-- END $$;
+-- 
+-- CREATE OR REPLACE FUNCTION public.stellar_offline_farm_claim_v484(p_user uuid)
+-- RETURNS jsonb LANGUAGE plpgsql SECURITY DEFINER SET search_path = '' AS $$
+-- DECLARE f record; sv record; p record; npc jsonb; shop jsonb;
+--  v_end timestamptz; target_seconds integer; elapsed integer:=0; kill_seconds integer; trip_seconds integer:=125; shots integer;
+--  k integer:=0; sold_count integer:=0; bought integer:=0; mined integer:=0; earned_cr bigint:=0; earned_stl bigint:=0; earned_xp bigint:=0; sale_cr bigint:=0; purchase_cr bigint:=0;
+--  cr bigint; stl bigint; xp bigint; ammo_key text; ammo_qty bigint; ammo_pack_qty integer; ammo_pack_price bigint; cargo jsonb; v_cargo_used bigint:=0; capacity bigint:=1500;
+--  res record; q integer; n integer; v_price bigint; v_resource text; mine_resource text; got_resources jsonb:='{}'::jsonb; sold_resources jsonb:='{}'::jsonb;
+--  st jsonb; v_report jsonb; reason text:='duration'; has_other_activity boolean; max_kills integer:=550;
+-- BEGIN
+--  IF coalesce(auth.role(),'') <> 'service_role' THEN RAISE EXCEPTION 'ONLY_SERVICE_ROLE'; END IF;
+--  PERFORM pg_advisory_xact_lock(hashtextextended(p_user::text,484));
+--  SELECT * INTO f FROM public.stellar_offline_farm_v484 WHERE user_id=p_user ORDER BY (status='running') DESC,created_at DESC LIMIT 1 FOR UPDATE;
+--  IF f.id IS NULL THEN RETURN jsonb_build_object('status','none'); END IF;
+--  IF f.status<>'running' THEN RETURN jsonb_build_object('ok',f.status='settled','status',f.status,'report',f.report); END IF;
+--  SELECT state,updated_at INTO sv FROM public.game_saves WHERE user_id=p_user FOR UPDATE;
+--  SELECT updated_at INTO p FROM public.profiles WHERE id=p_user FOR UPDATE;
+--  IF sv.state IS NULL THEN RAISE EXCEPTION 'FARM_SAVE_MISSING'; END IF;
+--  -- Um save ou recompensa real no período invalida a simulação: jamais misturar farm vivo e offline.
+--  SELECT EXISTS(SELECT 1 FROM public.stellar_npc_reward_ledger WHERE user_id=p_user AND issued_at>=f.started_at)
+--   OR EXISTS(SELECT 1 FROM public.stellar_ore_reward_ledger WHERE user_id=p_user AND issued_at>=f.started_at) INTO has_other_activity;
+--  IF (sv.updated_at IS DISTINCT FROM f.baseline_save_at) OR (p.updated_at IS DISTINCT FROM (f.snapshot->>'profile_updated_at')::timestamptz) OR has_other_activity THEN
+--    v_report:=jsonb_build_object('reason','online_activity_or_save_changed','kills',0,'message','Farm offline cancelado: houve atividade online ou alteração do save após ativação. Nenhuma recompensa offline foi gerada.');
+--    UPDATE public.stellar_offline_farm_v484 SET status='conflict',completed_at=now(),report=v_report WHERE id=f.id;
+--    RETURN jsonb_build_object('ok',false,'status','conflict','report',v_report);
+--  END IF;
+--  v_end:=least(now(),f.ends_at);
+--  target_seconds:=greatest(0,floor(extract(epoch from v_end-f.started_at))::integer);
+--  npc:=f.snapshot->'npc'; shop:=f.snapshot->'shop'; ammo_key:=f.ammo_key;
+--  kill_seconds:=greatest(35,least(480,ceil((coalesce((npc->>'hp')::numeric,0)+coalesce((npc->>'shield')::numeric,0))/(150+coalesce((f.snapshot->>'level')::numeric,1)*60))*7)::integer);
+--  shots:=greatest(8,least(150,ceil((coalesce((npc->>'hp')::numeric,0)+coalesce((npc->>'shield')::numeric,0))/(175+coalesce((f.snapshot->>'level')::numeric,1)*80))::integer));
+--  ammo_qty:=greatest(0,coalesce((sv.state->'ammo'->>ammo_key)::bigint,0));
+--  ammo_pack_qty:=greatest(0,least(100000,coalesce((shop->>'qty')::integer,0)));
+--  ammo_pack_price:=greatest(0,coalesce((shop->>'price')::bigint,0));
+--  cr:=greatest(0,coalesce((sv.state#>>'{profile,credits}')::bigint,0));
+--  stl:=greatest(0,coalesce((sv.state#>>'{profile,uridium}')::bigint,0));
+--  xp:=greatest(0,coalesce((sv.state#>>'{profile,xp}')::bigint,0));
+--  cargo:=coalesce(sv.state->'cargo','{}'::jsonb);
+--  SELECT resource_key INTO mine_resource FROM public.game_map_resource_pool_v1814 WHERE map_id=f.map_id AND enabled=true AND resource_key<>'Xenomit' ORDER BY resource_key LIMIT 1;
+--  SELECT coalesce(sum(greatest(0,least(100000000, CASE WHEN value ~ '^[0-9]+$' THEN value::bigint ELSE 0 END))),0) INTO v_cargo_used FROM jsonb_each_text(cargo);
+--  WHILE elapsed+kill_seconds<=target_seconds AND k<max_kills LOOP
+--    IF ammo_qty < shots THEN
+--      IF NOT f.auto_buy OR coalesce(shop->>'currency','')<>'credits' OR ammo_pack_qty<=0 OR ammo_pack_price<=0 OR cr+earned_cr+sale_cr-purchase_cr<ammo_pack_price THEN reason:='ammo_exhausted';EXIT;END IF;
+--      IF elapsed+trip_seconds>target_seconds THEN reason:='waiting_to_restock';EXIT;END IF;
+--      -- Mesmo estoque oficial e preço do snapshot salvo. Sem compra de STL.
+--      elapsed:=elapsed+trip_seconds; ammo_qty:=ammo_qty+ammo_pack_qty;purchase_cr:=purchase_cr+ammo_pack_price;bought:=bought+1;
+--    END IF;
+--    IF elapsed+kill_seconds>target_seconds THEN EXIT; END IF;
+--    ammo_qty:=ammo_qty-shots; elapsed:=elapsed+kill_seconds; k:=k+1;
+--    earned_cr:=earned_cr+greatest(0,coalesce((npc->>'credits')::bigint,0));
+--    earned_stl:=earned_stl+greatest(0,coalesce((npc->>'stl')::bigint,0));
+--    earned_xp:=earned_xp+greatest(0,coalesce((npc->>'xp')::bigint,0));
+--    FOR res IN SELECT key,value FROM jsonb_each_text(coalesce(npc->'resources','{}'::jsonb)) LOOP
+--      IF v_cargo_used >= capacity THEN EXIT; END IF;
+--      n:=least(capacity-v_cargo_used, greatest(0,least(1000, CASE WHEN res.value ~ '^[0-9]+$' THEN res.value::integer ELSE 0 END)));
+--      IF n>0 THEN
+--        cargo:=jsonb_set(cargo,ARRAY[res.key],to_jsonb(coalesce((cargo->>res.key)::bigint,0)+n),true);
+--        got_resources:=jsonb_set(got_resources,ARRAY[res.key],to_jsonb(coalesce((got_resources->>res.key)::bigint,0)+n),true);
+--        v_cargo_used:=v_cargo_used+n;
+--      END IF;
+--    END LOOP;
+--    IF f.mine AND mine_resource IS NOT NULL AND k%5=0 AND v_cargo_used<capacity THEN
+--      n:=least(10,capacity-v_cargo_used);
+--      cargo:=jsonb_set(cargo,ARRAY[mine_resource],to_jsonb(coalesce((cargo->>mine_resource)::bigint,0)+n),true);
+--      got_resources:=jsonb_set(got_resources,ARRAY[mine_resource],to_jsonb(coalesce((got_resources->>mine_resource)::bigint,0)+n),true);
+--      v_cargo_used:=v_cargo_used+n;mined:=mined+n;
+--    END IF;
+--    IF v_cargo_used>=capacity THEN
+--      IF NOT f.auto_sell THEN reason:='cargo_full';EXIT; END IF;
+--      IF elapsed+trip_seconds>target_seconds THEN reason:='cargo_waiting_sale';EXIT;END IF;
+--      elapsed:=elapsed+trip_seconds;sold_count:=sold_count+1;
+--      FOR res IN SELECT key,value FROM jsonb_each_text(cargo) LOOP
+--        q:=greatest(0,least(100000000,CASE WHEN res.value ~ '^[0-9]+$' THEN res.value::integer ELSE 0 END));
+--        IF res.key='Xenomit' OR q=0 THEN CONTINUE;END IF;
+--        SELECT greatest(0,sell_price) INTO v_price FROM public.game_resource_config_v1814 WHERE resource_key=res.key AND enabled=true LIMIT 1;
+--        IF v_price IS NULL THEN CONTINUE;END IF;
+--        sale_cr:=sale_cr+q*v_price;
+--        sold_resources:=jsonb_set(sold_resources,ARRAY[res.key],to_jsonb(coalesce((sold_resources->>res.key)::bigint,0)+q),true);
+--        cargo:=jsonb_set(cargo,ARRAY[res.key],'0'::jsonb,true);
+--      END LOOP;
+--      SELECT coalesce(sum(greatest(0,CASE WHEN value ~ '^[0-9]+$' THEN value::bigint ELSE 0 END)),0) INTO v_cargo_used FROM jsonb_each_text(cargo);
+--    END IF;
+--  END LOOP;
+--  IF elapsed=0 AND target_seconds<kill_seconds THEN reason:='waiting'; END IF;
+--  IF cr+earned_cr+sale_cr-purchase_cr<0 THEN RAISE EXCEPTION 'FARM_CREDITS_UNDERFLOW'; END IF;
+--  IF cr+earned_cr+sale_cr-purchase_cr>1000000000000 OR stl+earned_stl>10000000000 THEN RAISE EXCEPTION 'FARM_ECONOMY_LIMIT'; END IF;
+--  st:=sv.state;
+--  st:=jsonb_set(st,ARRAY['profile','credits'],to_jsonb(cr+earned_cr+sale_cr-purchase_cr),true);
+--  st:=jsonb_set(st,ARRAY['profile','uridium'],to_jsonb(stl+earned_stl),true);
+--  st:=jsonb_set(st,ARRAY['profile','xp'],to_jsonb(xp+earned_xp),true);
+--  st:=jsonb_set(st,ARRAY['profile','aliensKilled'],to_jsonb(coalesce((st#>>'{profile,aliensKilled}')::bigint,0)+k),true);
+--  st:=jsonb_set(st,ARRAY['ammo',ammo_key],to_jsonb(ammo_qty),true);
+--  st:=jsonb_set(st,ARRAY['cargo'],cargo,true);
+--  IF k>0 THEN st:=jsonb_set(st,ARRAY['serverNpcRewardRevision'],to_jsonb(coalesce((st->>'serverNpcRewardRevision')::integer,0)+1),true); END IF;
+--  IF mined>0 THEN st:=jsonb_set(st,ARRAY['serverOreRevision'],to_jsonb(coalesce((st->>'serverOreRevision')::integer,0)+1),true); END IF;
+--  IF purchase_cr>0 OR sale_cr>0 THEN st:=jsonb_set(st,ARRAY['serverPurchaseRevision'],to_jsonb(coalesce((st->>'serverPurchaseRevision')::integer,0)+1),true); END IF;
+--  v_report:=jsonb_build_object('reason',reason,'duration_seconds',target_seconds,'elapsed_simulated',elapsed,'map',f.map_id,'npc',f.npc_key,'kills',k,'boxes_collected',k,'xp',earned_xp,'npc_credits',earned_cr,'stl',earned_stl,'mined_units',mined,'cargo_collected',got_resources,'cargo_sold',sold_resources,'sales',sold_count,'sale_credits',sale_cr,'ammo_bought',bought,'ammo_spent',purchase_cr,'ammo_remaining',ammo_qty,'credits_net',earned_cr+sale_cr-purchase_cr,'ended_at',v_end);
+--  UPDATE public.game_saves SET state=st,updated_at=now() WHERE user_id=p_user;
+--  UPDATE public.profiles SET xp=(SELECT coalesce((st#>>'{profile,xp}')::bigint,0)),credits=cr+earned_cr+sale_cr-purchase_cr,uridium=stl+earned_stl,aliens_killed=coalesce((st#>>'{profile,aliensKilled}')::bigint,0),updated_at=now() WHERE id=p_user;
+--  UPDATE public.stellar_offline_farm_v484 SET status='settled',report=v_report,completed_at=now() WHERE id=f.id;
+--  RETURN jsonb_build_object('ok',true,'status','settled','report',v_report);
+-- END $$;
+-- 
+-- REVOKE ALL ON FUNCTION public.stellar_offline_farm_start_v484(uuid,integer,boolean,boolean,boolean,text) FROM PUBLIC,anon,authenticated;
+-- REVOKE ALL ON FUNCTION public.stellar_offline_farm_status_v484(uuid) FROM PUBLIC,anon,authenticated;
+-- REVOKE ALL ON FUNCTION public.stellar_offline_farm_cancel_v484(uuid) FROM PUBLIC,anon,authenticated;
+-- REVOKE ALL ON FUNCTION public.stellar_offline_farm_claim_v484(uuid) FROM PUBLIC,anon,authenticated;
+-- GRANT EXECUTE ON FUNCTION public.stellar_offline_farm_start_v484(uuid,integer,boolean,boolean,boolean,text) TO service_role;
+-- GRANT EXECUTE ON FUNCTION public.stellar_offline_farm_status_v484(uuid) TO service_role;
+-- GRANT EXECUTE ON FUNCTION public.stellar_offline_farm_cancel_v484(uuid) TO service_role;
+-- GRANT EXECUTE ON FUNCTION public.stellar_offline_farm_claim_v484(uuid) TO service_role;
+-- ===== END STELLAR_V48_4_FARM_OFFLINE_ECONOMICO.sql =====
+
+-- ===== START STELLAR_V48_5_FARM_OFFLINE_CONTROL.sql | sha256 3723fa2ebf2e6233303e8ad0b2b492878a01cabe014718afd5eddb43d310bd18 =====
+-- -- V48.5 — Controle ADM e projeção visual. Não modifica sessões históricas.
+-- BEGIN;
+-- CREATE TABLE IF NOT EXISTS public.stellar_offline_farm_settings_v485 (
+--  id smallint PRIMARY KEY DEFAULT 1 CHECK(id=1),
+--  max_minutes integer NOT NULL DEFAULT 240 CHECK(max_minutes BETWEEN 30 AND 720 AND max_minutes % 30=0),
+--  damage_percent integer NOT NULL DEFAULT 100 CHECK(damage_percent BETWEEN 50 AND 150),
+--  max_kills integer NOT NULL DEFAULT 550 CHECK(max_kills BETWEEN 20 AND 2000),
+--  travel_seconds integer NOT NULL DEFAULT 125 CHECK(travel_seconds BETWEEN 45 AND 600),
+--  updated_at timestamptz NOT NULL DEFAULT now()
+-- );
+-- INSERT INTO public.stellar_offline_farm_settings_v485(id) VALUES(1) ON CONFLICT(id) DO NOTHING;
+-- ALTER TABLE public.stellar_offline_farm_settings_v485 ENABLE ROW LEVEL SECURITY;
+-- REVOKE ALL ON TABLE public.stellar_offline_farm_settings_v485 FROM PUBLIC,anon,authenticated;
+-- GRANT SELECT, UPDATE ON TABLE public.stellar_offline_farm_settings_v485 TO service_role;
+-- GRANT SELECT ON TABLE public.game_map_npc_spawns_v1811 TO service_role;
+-- GRANT SELECT ON TABLE public.game_npc_config_v1811 TO service_role;
+-- GRANT SELECT ON TABLE public.live_shop_prices_v16 TO service_role;
+-- GRANT SELECT ON TABLE public.game_resource_config_v1814 TO service_role;
+-- GRANT SELECT ON TABLE public.game_map_resource_pool_v1814 TO service_role;
+-- ALTER TABLE public.stellar_offline_farm_v484 DROP CONSTRAINT IF EXISTS stellar_offline_farm_v484_minutes_check;
+-- ALTER TABLE public.stellar_offline_farm_v484 ADD CONSTRAINT stellar_offline_farm_v484_minutes_check CHECK(minutes BETWEEN 30 AND 720 AND minutes % 30=0);
+-- 
+-- CREATE OR REPLACE FUNCTION public.stellar_offline_farm_start_v485(p_user uuid,p_minutes integer,p_auto_sell boolean DEFAULT true,p_auto_buy boolean DEFAULT true,p_mine boolean DEFAULT true,p_npc_key text DEFAULT NULL,p_ammo_key text DEFAULT NULL)
+-- RETURNS jsonb LANGUAGE plpgsql SECURITY DEFINER SET search_path = '' AS $$
+-- DECLARE s record; c record; q record; cfg record; v_npc record; v_map text; v_ammo text; v_id uuid; v_level integer; v_factor numeric; v_damage numeric;
+-- BEGIN
+--  IF coalesce(auth.role(),'') <> 'service_role' THEN RAISE EXCEPTION 'ONLY_SERVICE_ROLE'; END IF;
+--  SELECT max_minutes,damage_percent,max_kills,travel_seconds INTO STRICT cfg FROM public.stellar_offline_farm_settings_v485 WHERE id=1;
+--  IF p_minutes < 30 OR p_minutes > cfg.max_minutes OR p_minutes % 30 <> 0 THEN RAISE EXCEPTION 'INVALID_DURATION'; END IF;
+--  PERFORM pg_advisory_xact_lock(hashtextextended(p_user::text,484));
+--  IF EXISTS(SELECT 1 FROM public.stellar_offline_farm_v484 WHERE user_id=p_user AND status='running') THEN RAISE EXCEPTION 'FARM_ALREADY_RUNNING'; END IF;
+--  SELECT state,updated_at INTO s FROM public.game_saves WHERE user_id=p_user FOR UPDATE;
+--  SELECT updated_at INTO c FROM public.profiles WHERE id=p_user FOR UPDATE;
+--  IF c.updated_at IS NULL THEN RAISE EXCEPTION 'FARM_PROFILE_MISSING'; END IF;
+--  IF s.state IS NULL OR s.state->'profile' IS NULL THEN RAISE EXCEPTION 'FARM_SAVE_MISSING'; END IF;
+--  v_map:=s.state->>'mapId'; v_ammo:=coalesce(nullif(p_ammo_key,''),nullif(s.state->>'selectedLaserAmmo',''),'lcb10');
+--  IF v_ammo NOT IN ('lcb10','mcb25','mcb50','ucb100') THEN RAISE EXCEPTION 'INVALID_AMMO'; END IF;
+--  v_level:=greatest(1,least(50,coalesce((s.state#>>'{profile,level}')::integer,1)));
+--  IF v_map !~ '^x[1-8]$' OR coalesce(s.state->>'repairRequired','false') NOT IN ('false','null') THEN RAISE EXCEPTION 'FARM_MAP_OR_REPAIR_UNSUPPORTED'; END IF;
+--  IF v_level < (CASE v_map WHEN 'x1' THEN 1 WHEN 'x2' THEN 3 WHEN 'x3' THEN 5 WHEN 'x4' THEN 7 WHEN 'x5' THEN 9 WHEN 'x6' THEN 12 WHEN 'x7' THEN 15 WHEN 'x8' THEN 18 ELSE 99 END)
+--  THEN RAISE EXCEPTION 'FARM_LEVEL_INSUFFICIENT'; END IF;
+--  IF NOT EXISTS(SELECT 1 FROM public.stellar_autopilot_access_v48 a WHERE a.user_id=p_user AND a.enabled=true AND (a.expires_at IS NULL OR a.expires_at>now()))
+--    AND NOT EXISTS(SELECT 1 FROM public.game_admins WHERE user_id=p_user) THEN
+--    RAISE EXCEPTION 'FARM_ACCESS_REQUIRED';
+--  END IF;
+--  SELECT n.npc_key,n.hp,n.shield,n.credits,n.stl,n.xp,n.resources INTO v_npc
+--  FROM public.game_map_npc_spawns_v1811 m
+--  JOIN public.game_npc_config_v1811 n ON n.npc_key=m.npc_key
+--  WHERE m.map_id=v_map AND m.enabled=true AND n.enabled=true AND n.npc_key !~* '(boss|rift|elite|suprem|legend|lend|uber|ultra|titan)' AND n.name !~* '(boss|suprem|legend|lend|elite|uber|ultra)' AND coalesce(m.spawn_count,0)>0 AND (p_npc_key IS NULL OR n.npc_key=p_npc_key)
+--  ORDER BY n.hp+n.shield ASC,n.npc_key ASC LIMIT 1;
+--  IF v_npc.npc_key IS NULL THEN RAISE EXCEPTION 'FARM_NO_ELIGIBLE_NPCS'; END IF;
+--  -- Munição apenas de crédito; STL/premium é consumido se houver estoque, nunca comprado aqui.
+--  SELECT catalog_key,price,currency,(meta#>>'{grant,qty}')::integer AS qty INTO q FROM public.live_shop_prices_v16
+--  WHERE kind='ammo' AND ref_id=v_ammo AND enabled=true AND shop_visible=true LIMIT 1;
+--  IF q.catalog_key IS NULL THEN RAISE EXCEPTION 'FARM_AMMO_UNAVAILABLE'; END IF;
+--  v_factor:= CASE v_ammo WHEN 'lcb10' THEN 1 WHEN 'mcb25' THEN 2 WHEN 'mcb50' THEN 3 WHEN 'ucb100' THEN 4 ELSE 1 END;
+--  v_damage:=greatest(1,(175+v_level*80)*v_factor*cfg.damage_percent/100.0);
+--  INSERT INTO public.stellar_offline_farm_v484(user_id,map_id,npc_key,ammo_key,minutes,auto_sell,auto_buy,mine,snapshot,baseline_save_at,ends_at)
+--  VALUES(p_user,v_map,v_npc.npc_key,v_ammo,p_minutes,coalesce(p_auto_sell,true),coalesce(p_auto_buy,true),coalesce(p_mine,true),
+--  jsonb_build_object('npc',to_jsonb(v_npc),'level',v_level,'damage_per_shot',v_damage,'damage_per_second',round(v_damage/7,2),'max_kills',cfg.max_kills,'trip_seconds',cfg.travel_seconds,'damage_percent',cfg.damage_percent,'profile_updated_at',c.updated_at,'shop',CASE WHEN q.catalog_key IS NOT NULL THEN to_jsonb(q) ELSE '{}'::jsonb END),s.updated_at,now()+make_interval(mins=>p_minutes))
+--  RETURNING id INTO v_id;
+--  RETURN jsonb_build_object('ok',true,'id',v_id,'status','running','map',v_map,'npc',v_npc.npc_key,'minutes',p_minutes,'ammo',v_ammo,'damage_per_second',round(v_damage/7,2),'ends_at',(SELECT ends_at FROM public.stellar_offline_farm_v484 WHERE id=v_id));
+-- END $$;
+-- 
+-- 
+-- CREATE OR REPLACE FUNCTION public.stellar_offline_farm_claim_v484(p_user uuid)
+-- RETURNS jsonb LANGUAGE plpgsql SECURITY DEFINER SET search_path = '' AS $$
+-- DECLARE f record; sv record; p record; npc jsonb; shop jsonb;
+--  v_end timestamptz; target_seconds integer; elapsed integer:=0; kill_seconds integer; trip_seconds integer:=125; shots integer;
+--  k integer:=0; sold_count integer:=0; bought integer:=0; mined integer:=0; earned_cr bigint:=0; earned_stl bigint:=0; earned_xp bigint:=0; sale_cr bigint:=0; purchase_cr bigint:=0;
+--  cr bigint; stl bigint; xp bigint; ammo_key text; ammo_qty bigint; ammo_pack_qty integer; ammo_pack_price bigint; cargo jsonb; v_cargo_used bigint:=0; capacity bigint:=1500;
+--  res record; q integer; n integer; v_price bigint; v_resource text; mine_resource text; got_resources jsonb:='{}'::jsonb; sold_resources jsonb:='{}'::jsonb;
+--  st jsonb; v_report jsonb; reason text:='duration'; has_other_activity boolean; max_kills integer:=550;
+-- BEGIN
+--  IF coalesce(auth.role(),'') <> 'service_role' THEN RAISE EXCEPTION 'ONLY_SERVICE_ROLE'; END IF;
+--  PERFORM pg_advisory_xact_lock(hashtextextended(p_user::text,484));
+--  SELECT * INTO f FROM public.stellar_offline_farm_v484 WHERE user_id=p_user ORDER BY (status='running') DESC,created_at DESC LIMIT 1 FOR UPDATE;
+--  IF f.id IS NULL THEN RETURN jsonb_build_object('status','none'); END IF;
+--  IF f.status<>'running' THEN RETURN jsonb_build_object('ok',f.status='settled','status',f.status,'report',f.report); END IF;
+--  SELECT state,updated_at INTO sv FROM public.game_saves WHERE user_id=p_user FOR UPDATE;
+--  SELECT updated_at INTO p FROM public.profiles WHERE id=p_user FOR UPDATE;
+--  IF sv.state IS NULL THEN RAISE EXCEPTION 'FARM_SAVE_MISSING'; END IF;
+--  -- Um save ou recompensa real no período invalida a simulação: jamais misturar farm vivo e offline.
+--  SELECT EXISTS(SELECT 1 FROM public.stellar_npc_reward_ledger WHERE user_id=p_user AND issued_at>=f.started_at)
+--   OR EXISTS(SELECT 1 FROM public.stellar_ore_reward_ledger WHERE user_id=p_user AND issued_at>=f.started_at) INTO has_other_activity;
+--  IF (sv.updated_at IS DISTINCT FROM f.baseline_save_at) OR (p.updated_at IS DISTINCT FROM (f.snapshot->>'profile_updated_at')::timestamptz) OR has_other_activity THEN
+--    v_report:=jsonb_build_object('reason','online_activity_or_save_changed','kills',0,'message','Farm offline cancelado: houve atividade online ou alteração do save após ativação. Nenhuma recompensa offline foi gerada.');
+--    UPDATE public.stellar_offline_farm_v484 SET status='conflict',completed_at=now(),report=v_report WHERE id=f.id;
+--    RETURN jsonb_build_object('ok',false,'status','conflict','report',v_report);
+--  END IF;
+--  v_end:=least(now(),f.ends_at);
+--  target_seconds:=greatest(0,floor(extract(epoch from v_end-f.started_at))::integer);
+--  npc:=f.snapshot->'npc'; shop:=f.snapshot->'shop'; ammo_key:=f.ammo_key;
+--  kill_seconds:=greatest(35,least(480,ceil((coalesce((npc->>'hp')::numeric,0)+coalesce((npc->>'shield')::numeric,0))/(150+coalesce((f.snapshot->>'level')::numeric,1)*60))*7)::integer);
+--  shots:=greatest(8,least(150,ceil((coalesce((npc->>'hp')::numeric,0)+coalesce((npc->>'shield')::numeric,0))/(175+coalesce((f.snapshot->>'level')::numeric,1)*80))::integer));
+--  IF f.snapshot ? 'damage_per_shot' THEN
+--    kill_seconds:=greatest(25,least(480,ceil((coalesce((npc->>'hp')::numeric,0)+coalesce((npc->>'shield')::numeric,0))/greatest(1,(f.snapshot->>'damage_per_shot')::numeric)*7)::integer));
+--    shots:=greatest(1,least(150,ceil((coalesce((npc->>'hp')::numeric,0)+coalesce((npc->>'shield')::numeric,0))/greatest(1,(f.snapshot->>'damage_per_shot')::numeric))::integer));
+--    trip_seconds:=greatest(45,least(600,coalesce((f.snapshot->>'trip_seconds')::integer,125)));
+--    max_kills:=greatest(20,least(2000,coalesce((f.snapshot->>'max_kills')::integer,550)));
+--  END IF;
+--  ammo_qty:=greatest(0,coalesce((sv.state->'ammo'->>ammo_key)::bigint,0));
+--  ammo_pack_qty:=greatest(0,least(100000,coalesce((shop->>'qty')::integer,0)));
+--  ammo_pack_price:=greatest(0,coalesce((shop->>'price')::bigint,0));
+--  cr:=greatest(0,coalesce((sv.state#>>'{profile,credits}')::bigint,0));
+--  stl:=greatest(0,coalesce((sv.state#>>'{profile,uridium}')::bigint,0));
+--  xp:=greatest(0,coalesce((sv.state#>>'{profile,xp}')::bigint,0));
+--  cargo:=coalesce(sv.state->'cargo','{}'::jsonb);
+--  SELECT resource_key INTO mine_resource FROM public.game_map_resource_pool_v1814 WHERE map_id=f.map_id AND enabled=true AND resource_key<>'Xenomit' ORDER BY resource_key LIMIT 1;
+--  SELECT coalesce(sum(greatest(0,least(100000000, CASE WHEN value ~ '^[0-9]+$' THEN value::bigint ELSE 0 END))),0) INTO v_cargo_used FROM jsonb_each_text(cargo);
+--  WHILE elapsed+kill_seconds<=target_seconds AND k<max_kills LOOP
+--    IF ammo_qty < shots THEN
+--      IF NOT f.auto_buy OR coalesce(shop->>'currency','')<>'credits' OR ammo_pack_qty<=0 OR ammo_pack_price<=0 OR cr+earned_cr+sale_cr-purchase_cr<ammo_pack_price THEN reason:='ammo_exhausted';EXIT;END IF;
+--      IF elapsed+trip_seconds>target_seconds THEN reason:='waiting_to_restock';EXIT;END IF;
+--      -- Mesmo estoque oficial e preço do snapshot salvo. Sem compra de STL.
+--      elapsed:=elapsed+trip_seconds; ammo_qty:=ammo_qty+ammo_pack_qty;purchase_cr:=purchase_cr+ammo_pack_price;bought:=bought+1;
+--    END IF;
+--    IF elapsed+kill_seconds>target_seconds THEN EXIT; END IF;
+--    ammo_qty:=ammo_qty-shots; elapsed:=elapsed+kill_seconds; k:=k+1;
+--    earned_cr:=earned_cr+greatest(0,coalesce((npc->>'credits')::bigint,0));
+--    earned_stl:=earned_stl+greatest(0,coalesce((npc->>'stl')::bigint,0));
+--    earned_xp:=earned_xp+greatest(0,coalesce((npc->>'xp')::bigint,0));
+--    FOR res IN SELECT key,value FROM jsonb_each_text(coalesce(npc->'resources','{}'::jsonb)) LOOP
+--      IF v_cargo_used >= capacity THEN EXIT; END IF;
+--      n:=least(capacity-v_cargo_used, greatest(0,least(1000, CASE WHEN res.value ~ '^[0-9]+$' THEN res.value::integer ELSE 0 END)));
+--      IF n>0 THEN
+--        cargo:=jsonb_set(cargo,ARRAY[res.key],to_jsonb(coalesce((cargo->>res.key)::bigint,0)+n),true);
+--        got_resources:=jsonb_set(got_resources,ARRAY[res.key],to_jsonb(coalesce((got_resources->>res.key)::bigint,0)+n),true);
+--        v_cargo_used:=v_cargo_used+n;
+--      END IF;
+--    END LOOP;
+--    IF f.mine AND mine_resource IS NOT NULL AND k%5=0 AND v_cargo_used<capacity THEN
+--      n:=least(10,capacity-v_cargo_used);
+--      cargo:=jsonb_set(cargo,ARRAY[mine_resource],to_jsonb(coalesce((cargo->>mine_resource)::bigint,0)+n),true);
+--      got_resources:=jsonb_set(got_resources,ARRAY[mine_resource],to_jsonb(coalesce((got_resources->>mine_resource)::bigint,0)+n),true);
+--      v_cargo_used:=v_cargo_used+n;mined:=mined+n;
+--    END IF;
+--    IF v_cargo_used>=capacity THEN
+--      IF NOT f.auto_sell THEN reason:='cargo_full';EXIT; END IF;
+--      IF elapsed+trip_seconds>target_seconds THEN reason:='cargo_waiting_sale';EXIT;END IF;
+--      elapsed:=elapsed+trip_seconds;sold_count:=sold_count+1;
+--      FOR res IN SELECT key,value FROM jsonb_each_text(cargo) LOOP
+--        q:=greatest(0,least(100000000,CASE WHEN res.value ~ '^[0-9]+$' THEN res.value::integer ELSE 0 END));
+--        IF res.key='Xenomit' OR q=0 THEN CONTINUE;END IF;
+--        SELECT greatest(0,sell_price) INTO v_price FROM public.game_resource_config_v1814 WHERE resource_key=res.key AND enabled=true LIMIT 1;
+--        IF v_price IS NULL THEN CONTINUE;END IF;
+--        sale_cr:=sale_cr+q*v_price;
+--        sold_resources:=jsonb_set(sold_resources,ARRAY[res.key],to_jsonb(coalesce((sold_resources->>res.key)::bigint,0)+q),true);
+--        cargo:=jsonb_set(cargo,ARRAY[res.key],'0'::jsonb,true);
+--      END LOOP;
+--      SELECT coalesce(sum(greatest(0,CASE WHEN value ~ '^[0-9]+$' THEN value::bigint ELSE 0 END)),0) INTO v_cargo_used FROM jsonb_each_text(cargo);
+--    END IF;
+--  END LOOP;
+--  IF elapsed=0 AND target_seconds<kill_seconds THEN reason:='waiting'; END IF;
+--  IF cr+earned_cr+sale_cr-purchase_cr<0 THEN RAISE EXCEPTION 'FARM_CREDITS_UNDERFLOW'; END IF;
+--  IF cr+earned_cr+sale_cr-purchase_cr>1000000000000 OR stl+earned_stl>10000000000 THEN RAISE EXCEPTION 'FARM_ECONOMY_LIMIT'; END IF;
+--  st:=sv.state;
+--  st:=jsonb_set(st,ARRAY['profile','credits'],to_jsonb(cr+earned_cr+sale_cr-purchase_cr),true);
+--  st:=jsonb_set(st,ARRAY['profile','uridium'],to_jsonb(stl+earned_stl),true);
+--  st:=jsonb_set(st,ARRAY['profile','xp'],to_jsonb(xp+earned_xp),true);
+--  st:=jsonb_set(st,ARRAY['profile','aliensKilled'],to_jsonb(coalesce((st#>>'{profile,aliensKilled}')::bigint,0)+k),true);
+--  st:=jsonb_set(st,ARRAY['ammo',ammo_key],to_jsonb(ammo_qty),true);
+--  st:=jsonb_set(st,ARRAY['cargo'],cargo,true);
+--  IF k>0 THEN st:=jsonb_set(st,ARRAY['serverNpcRewardRevision'],to_jsonb(coalesce((st->>'serverNpcRewardRevision')::integer,0)+1),true); END IF;
+--  IF mined>0 THEN st:=jsonb_set(st,ARRAY['serverOreRevision'],to_jsonb(coalesce((st->>'serverOreRevision')::integer,0)+1),true); END IF;
+--  IF purchase_cr>0 OR sale_cr>0 THEN st:=jsonb_set(st,ARRAY['serverPurchaseRevision'],to_jsonb(coalesce((st->>'serverPurchaseRevision')::integer,0)+1),true); END IF;
+--  v_report:=jsonb_build_object('reason',reason,'duration_seconds',target_seconds,'elapsed_simulated',elapsed,'map',f.map_id,'npc',f.npc_key,'kills',k,'boxes_collected',k,'xp',earned_xp,'npc_credits',earned_cr,'stl',earned_stl,'mined_units',mined,'cargo_collected',got_resources,'cargo_sold',sold_resources,'sales',sold_count,'sale_credits',sale_cr,'ammo_bought',bought,'ammo_spent',purchase_cr,'ammo_remaining',ammo_qty,'credits_net',earned_cr+sale_cr-purchase_cr,'ended_at',v_end);
+--  UPDATE public.game_saves SET state=st,updated_at=now() WHERE user_id=p_user;
+--  UPDATE public.profiles SET xp=(SELECT coalesce((st#>>'{profile,xp}')::bigint,0)),credits=cr+earned_cr+sale_cr-purchase_cr,uridium=stl+earned_stl,aliens_killed=coalesce((st#>>'{profile,aliensKilled}')::bigint,0),updated_at=now() WHERE id=p_user;
+--  UPDATE public.stellar_offline_farm_v484 SET status='settled',report=v_report,completed_at=now() WHERE id=f.id;
+--  RETURN jsonb_build_object('ok',true,'status','settled','report',v_report);
+-- END $$;
+-- 
+-- 
+-- REVOKE ALL ON FUNCTION public.stellar_offline_farm_start_v485(uuid,integer,boolean,boolean,boolean,text,text) FROM PUBLIC,anon,authenticated;
+-- GRANT EXECUTE ON FUNCTION public.stellar_offline_farm_start_v485(uuid,integer,boolean,boolean,boolean,text,text) TO service_role;
+-- REVOKE ALL ON FUNCTION public.stellar_offline_farm_claim_v484(uuid) FROM PUBLIC,anon,authenticated;
+-- GRANT EXECUTE ON FUNCTION public.stellar_offline_farm_claim_v484(uuid) TO service_role;
+-- COMMIT;
+-- ===== END STELLAR_V48_5_FARM_OFFLINE_CONTROL.sql =====
+
+-- ===== START STELLAR_V48_7_OFFLINE_REAL_COMBAT_AND_NPC_NAMES.sql | sha256 72d8a544004f578819f964cd17ebe146f6d9207f94ab0d0be4f7a5337fde4497 =====
+-- -- Stellar Legacy V48.7: equipment-aware, persistent offline combat (SQL atomic).
+-- -- Apply before uploading the ZIP. No changes to running/settled sessions or balances.
+-- BEGIN;
+-- CREATE OR REPLACE FUNCTION public.stellar_offline_farm_start_v487(
+--  p_user uuid,p_minutes integer,p_auto_sell boolean,p_auto_buy boolean,p_mine boolean,
+--  p_npc_key text,p_ammo_key text,p_combat jsonb,p_baseline_save_at timestamptz
+-- ) RETURNS jsonb LANGUAGE plpgsql SECURITY DEFINER SET search_path='' AS $$
+-- DECLARE r jsonb; f record; n record; v_volley integer; v_shots integer; v_lasers integer;
+--  v_hp numeric; v_accuracy numeric; v_damage numeric; v_interval numeric;
+-- BEGIN
+--  IF coalesce(auth.role(),'') <> 'service_role' THEN RAISE EXCEPTION 'ONLY_SERVICE_ROLE'; END IF;
+--  IF coalesce(p_combat->>'combat_model','') <> 'v487' THEN RAISE EXCEPTION 'FARM_COMBAT_MODEL_REQUIRED'; END IF;
+--  v_lasers:=(p_combat->>'laser_count')::integer;
+--  v_accuracy:=(p_combat->>'hit_chance')::numeric;
+--  v_damage:=(p_combat->>'damage_per_volley')::numeric;
+--  v_interval:=(p_combat->>'fire_interval_ms')::numeric;
+--  IF v_lasers NOT BETWEEN 1 AND 64 OR v_accuracy NOT BETWEEN 0.5 AND 1
+--   OR v_damage NOT BETWEEN 1 AND 2000000 OR v_interval<>420
+--   OR (p_combat->>'move_between_seconds')::integer NOT BETWEEN 3 AND 45
+--   OR (p_combat->>'cargo_capacity')::integer NOT BETWEEN 100 AND 15000 THEN
+--   RAISE EXCEPTION 'FARM_COMBAT_INVALID'; END IF;
+--  r:=public.stellar_offline_farm_start_v485(p_user,p_minutes,p_auto_sell,p_auto_buy,p_mine,p_npc_key,p_ammo_key);
+--  SELECT * INTO f FROM public.stellar_offline_farm_v484 WHERE id=(r->>'id')::uuid FOR UPDATE;
+--  IF f.id IS NULL OR f.baseline_save_at IS DISTINCT FROM p_baseline_save_at THEN
+--   RAISE EXCEPTION 'FARM_SAVE_CHANGED_DURING_START';
+--  END IF;
+--  -- Respeitar o controle ADM congelado por sessao, sem alteracoes retroativas.
+--  v_damage:=greatest(1,least(2000000,round(v_damage*coalesce((f.snapshot->>'damage_percent')::numeric,100)/100)));
+--  SELECT name,damage INTO n FROM public.game_npc_config_v1811 WHERE npc_key=f.npc_key AND enabled=true;
+--  v_hp:=coalesce((f.snapshot#>>'{npc,hp}')::numeric,0)+coalesce((f.snapshot#>>'{npc,shield}')::numeric,0);
+--  IF v_hp<=0 THEN RAISE EXCEPTION 'FARM_NPC_INVALID'; END IF;
+--  v_volley:=ceil(v_hp/greatest(1,v_damage * v_accuracy * (1 + least(0.3,greatest(0,coalesce((p_combat->>'shield_pressure')::numeric,0))) * coalesce((f.snapshot#>>'{npc,shield}')::numeric,0)/v_hp)))::integer;
+--  IF v_volley>50000 THEN RAISE EXCEPTION 'FARM_TARGET_TOO_TOUGH'; END IF;
+--  v_volley:=greatest(1,v_volley);
+--  v_shots:=v_volley*v_lasers;
+--  IF v_shots>320000 THEN RAISE EXCEPTION 'FARM_TARGET_TOO_TOUGH'; END IF;
+--  UPDATE public.stellar_offline_farm_v484 SET snapshot= snapshot || p_combat ||
+--  jsonb_build_object('npc_name',n.name,'damage_per_volley',v_damage,'ammo_per_kill',v_shots,'combat_kill_seconds',
+--    greatest(1,least(30000,ceil(v_volley*.42)::integer + (p_combat->>'move_between_seconds')::integer)),
+--    'enemy_damage',coalesce(n.damage,0),'damage_per_second',round(v_damage*v_accuracy/.42,2))
+--  WHERE id=f.id;
+--  RETURN r || jsonb_build_object('npc_name',n.name,'laser_count',v_lasers,'damage_per_second',round(v_damage*v_accuracy/.42,2));
+-- END $$;
+-- REVOKE ALL ON FUNCTION public.stellar_offline_farm_start_v487(uuid,integer,boolean,boolean,boolean,text,text,jsonb,timestamptz) FROM PUBLIC,anon,authenticated;
+-- GRANT EXECUTE ON FUNCTION public.stellar_offline_farm_start_v487(uuid,integer,boolean,boolean,boolean,text,text,jsonb,timestamptz) TO service_role;
+-- 
+-- CREATE OR REPLACE FUNCTION public.stellar_offline_farm_claim_v487(p_user uuid)
+-- RETURNS jsonb LANGUAGE plpgsql SECURITY DEFINER SET search_path = '' AS $$
+-- DECLARE f record; sv record; p record; npc jsonb; shop jsonb;
+--  v_end timestamptz; target_seconds integer; elapsed integer:=0; kill_seconds integer; trip_seconds integer:=125; shots integer;
+--  k integer:=0; sold_count integer:=0; bought integer:=0; mined integer:=0; earned_cr bigint:=0; earned_stl bigint:=0; earned_xp bigint:=0; sale_cr bigint:=0; purchase_cr bigint:=0;
+--  cr bigint; stl bigint; xp bigint; ammo_key text; ammo_qty bigint; ammo_pack_qty integer; ammo_pack_price bigint; cargo jsonb; v_cargo_used bigint:=0; capacity bigint:=1500;
+--  res record; q integer; n integer; v_price bigint; v_resource text; mine_resource text; got_resources jsonb:='{}'::jsonb; sold_resources jsonb:='{}'::jsonb;
+--  st jsonb; v_report jsonb; reason text:='duration'; has_other_activity boolean; max_kills integer:=550;
+-- BEGIN
+--  IF coalesce(auth.role(),'') <> 'service_role' THEN RAISE EXCEPTION 'ONLY_SERVICE_ROLE'; END IF;
+--  PERFORM pg_advisory_xact_lock(hashtextextended(p_user::text,484));
+--  SELECT * INTO f FROM public.stellar_offline_farm_v484 WHERE user_id=p_user ORDER BY (status='running') DESC,created_at DESC LIMIT 1 FOR UPDATE;
+--  IF f.id IS NULL THEN RETURN jsonb_build_object('status','none'); END IF;
+--  IF f.status<>'running' THEN RETURN jsonb_build_object('ok',f.status='settled','status',f.status,'report',f.report); END IF;
+--  SELECT state,updated_at INTO sv FROM public.game_saves WHERE user_id=p_user FOR UPDATE;
+--  SELECT updated_at INTO p FROM public.profiles WHERE id=p_user FOR UPDATE;
+--  IF sv.state IS NULL THEN RAISE EXCEPTION 'FARM_SAVE_MISSING'; END IF;
+--  -- Um save ou recompensa real no período invalida a simulação: jamais misturar farm vivo e offline.
+--  SELECT EXISTS(SELECT 1 FROM public.stellar_npc_reward_ledger WHERE user_id=p_user AND issued_at>=f.started_at)
+--   OR EXISTS(SELECT 1 FROM public.stellar_ore_reward_ledger WHERE user_id=p_user AND issued_at>=f.started_at) INTO has_other_activity;
+--  IF (sv.updated_at IS DISTINCT FROM f.baseline_save_at) OR (p.updated_at IS DISTINCT FROM (f.snapshot->>'profile_updated_at')::timestamptz) OR has_other_activity THEN
+--    v_report:=jsonb_build_object('reason','online_activity_or_save_changed','kills',0,'message','Farm offline cancelado: houve atividade online ou alteração do save após ativação. Nenhuma recompensa offline foi gerada.');
+--    UPDATE public.stellar_offline_farm_v484 SET status='conflict',completed_at=now(),report=v_report WHERE id=f.id;
+--    RETURN jsonb_build_object('ok',false,'status','conflict','report',v_report);
+--  END IF;
+--  v_end:=least(now(),f.ends_at);
+--  target_seconds:=greatest(0,floor(extract(epoch from v_end-f.started_at))::integer);
+--  npc:=f.snapshot->'npc'; shop:=f.snapshot->'shop'; ammo_key:=f.ammo_key;
+--  kill_seconds:=greatest(35,least(480,ceil((coalesce((npc->>'hp')::numeric,0)+coalesce((npc->>'shield')::numeric,0))/(150+coalesce((f.snapshot->>'level')::numeric,1)*60))*7)::integer);
+--  shots:=greatest(8,least(150,ceil((coalesce((npc->>'hp')::numeric,0)+coalesce((npc->>'shield')::numeric,0))/(175+coalesce((f.snapshot->>'level')::numeric,1)*80))::integer));
+--  IF f.snapshot ? 'damage_per_shot' THEN
+--    kill_seconds:=greatest(25,least(480,ceil((coalesce((npc->>'hp')::numeric,0)+coalesce((npc->>'shield')::numeric,0))/greatest(1,(f.snapshot->>'damage_per_shot')::numeric)*7)::integer));
+--    shots:=greatest(1,least(150,ceil((coalesce((npc->>'hp')::numeric,0)+coalesce((npc->>'shield')::numeric,0))/greatest(1,(f.snapshot->>'damage_per_shot')::numeric))::integer));
+--    trip_seconds:=greatest(45,least(600,coalesce((f.snapshot->>'trip_seconds')::integer,125)));
+--    max_kills:=greatest(20,least(2000,coalesce((f.snapshot->>'max_kills')::integer,550)));
+--  END IF;
+--  IF f.snapshot->>'combat_model'='v487' THEN
+--    shots:=greatest(1,least(320000,coalesce((f.snapshot->>'ammo_per_kill')::integer,0)));
+--    kill_seconds:=greatest(1,least(30000,coalesce((f.snapshot->>'combat_kill_seconds')::integer,30000)));
+--    capacity:=greatest(100,least(15000,coalesce((f.snapshot->>'cargo_capacity')::bigint,1500)));
+--    trip_seconds:=greatest(45,least(600,ceil(trip_seconds*350.0/greatest(100,(f.snapshot->>'ship_speed')::numeric))::integer));
+--  END IF;
+--  ammo_qty:=greatest(0,coalesce((sv.state->'ammo'->>ammo_key)::bigint,0));
+--  ammo_pack_qty:=greatest(0,least(100000,coalesce((shop->>'qty')::integer,0)));
+--  ammo_pack_price:=greatest(0,coalesce((shop->>'price')::bigint,0));
+--  cr:=greatest(0,coalesce((sv.state#>>'{profile,credits}')::bigint,0));
+--  stl:=greatest(0,coalesce((sv.state#>>'{profile,uridium}')::bigint,0));
+--  xp:=greatest(0,coalesce((sv.state#>>'{profile,xp}')::bigint,0));
+--  cargo:=coalesce(sv.state->'cargo','{}'::jsonb);
+--  SELECT resource_key INTO mine_resource FROM public.game_map_resource_pool_v1814 WHERE map_id=f.map_id AND enabled=true AND resource_key<>'Xenomit' ORDER BY resource_key LIMIT 1;
+--  SELECT coalesce(sum(greatest(0,least(100000000, CASE WHEN value ~ '^[0-9]+$' THEN value::bigint ELSE 0 END))),0) INTO v_cargo_used FROM jsonb_each_text(cargo);
+--  WHILE elapsed+kill_seconds<=target_seconds AND k<max_kills LOOP
+--    WHILE ammo_qty < shots LOOP
+--      IF NOT f.auto_buy OR coalesce(shop->>'currency','')<>'credits' OR ammo_pack_qty<=0 OR ammo_pack_price<=0 OR cr+earned_cr+sale_cr-purchase_cr<ammo_pack_price OR bought>=100 THEN reason:='ammo_exhausted';EXIT;END IF;
+--      IF elapsed+trip_seconds>target_seconds THEN reason:='waiting_to_restock';EXIT;END IF;
+--      -- Cada pacote exige uma viagem virtual com débito oficial de créditos.
+--      elapsed:=elapsed+trip_seconds; ammo_qty:=ammo_qty+ammo_pack_qty;purchase_cr:=purchase_cr+ammo_pack_price;bought:=bought+1;
+--    END LOOP;
+--    IF ammo_qty<shots OR elapsed+kill_seconds>target_seconds THEN EXIT; END IF;
+--    ammo_qty:=ammo_qty-shots; elapsed:=elapsed+kill_seconds; k:=k+1;
+--    earned_cr:=earned_cr+greatest(0,coalesce((npc->>'credits')::bigint,0));
+--    earned_stl:=earned_stl+greatest(0,coalesce((npc->>'stl')::bigint,0));
+--    earned_xp:=earned_xp+greatest(0,coalesce((npc->>'xp')::bigint,0));
+--    FOR res IN SELECT key,value FROM jsonb_each_text(coalesce(npc->'resources','{}'::jsonb)) LOOP
+--      IF v_cargo_used >= capacity THEN EXIT; END IF;
+--      n:=least(capacity-v_cargo_used, greatest(0,least(1000, CASE WHEN res.value ~ '^[0-9]+$' THEN res.value::integer ELSE 0 END)));
+--      IF n>0 THEN
+--        cargo:=jsonb_set(cargo,ARRAY[res.key],to_jsonb(coalesce((cargo->>res.key)::bigint,0)+n),true);
+--        got_resources:=jsonb_set(got_resources,ARRAY[res.key],to_jsonb(coalesce((got_resources->>res.key)::bigint,0)+n),true);
+--        v_cargo_used:=v_cargo_used+n;
+--      END IF;
+--    END LOOP;
+--    IF f.mine AND mine_resource IS NOT NULL AND k%5=0 AND v_cargo_used<capacity THEN
+--      n:=least(10,capacity-v_cargo_used);
+--      cargo:=jsonb_set(cargo,ARRAY[mine_resource],to_jsonb(coalesce((cargo->>mine_resource)::bigint,0)+n),true);
+--      got_resources:=jsonb_set(got_resources,ARRAY[mine_resource],to_jsonb(coalesce((got_resources->>mine_resource)::bigint,0)+n),true);
+--      v_cargo_used:=v_cargo_used+n;mined:=mined+n;
+--    END IF;
+--    IF v_cargo_used>=capacity THEN
+--      IF NOT f.auto_sell THEN reason:='cargo_full';EXIT; END IF;
+--      IF elapsed+trip_seconds>target_seconds THEN reason:='cargo_waiting_sale';EXIT;END IF;
+--      elapsed:=elapsed+trip_seconds;sold_count:=sold_count+1;
+--      FOR res IN SELECT key,value FROM jsonb_each_text(cargo) LOOP
+--        q:=greatest(0,least(100000000,CASE WHEN res.value ~ '^[0-9]+$' THEN res.value::integer ELSE 0 END));
+--        IF res.key='Xenomit' OR q=0 THEN CONTINUE;END IF;
+--        SELECT greatest(0,sell_price) INTO v_price FROM public.game_resource_config_v1814 WHERE resource_key=res.key AND enabled=true LIMIT 1;
+--        IF v_price IS NULL THEN CONTINUE;END IF;
+--        sale_cr:=sale_cr+q*v_price;
+--        sold_resources:=jsonb_set(sold_resources,ARRAY[res.key],to_jsonb(coalesce((sold_resources->>res.key)::bigint,0)+q),true);
+--        cargo:=jsonb_set(cargo,ARRAY[res.key],'0'::jsonb,true);
+--      END LOOP;
+--      SELECT coalesce(sum(greatest(0,CASE WHEN value ~ '^[0-9]+$' THEN value::bigint ELSE 0 END)),0) INTO v_cargo_used FROM jsonb_each_text(cargo);
+--    END IF;
+--  END LOOP;
+--  IF elapsed=0 AND target_seconds<kill_seconds THEN reason:='waiting'; END IF;
+--  IF cr+earned_cr+sale_cr-purchase_cr<0 THEN RAISE EXCEPTION 'FARM_CREDITS_UNDERFLOW'; END IF;
+--  IF cr+earned_cr+sale_cr-purchase_cr>1000000000000 OR stl+earned_stl>10000000000 THEN RAISE EXCEPTION 'FARM_ECONOMY_LIMIT'; END IF;
+--  st:=sv.state;
+--  st:=jsonb_set(st,ARRAY['profile','credits'],to_jsonb(cr+earned_cr+sale_cr-purchase_cr),true);
+--  st:=jsonb_set(st,ARRAY['profile','uridium'],to_jsonb(stl+earned_stl),true);
+--  st:=jsonb_set(st,ARRAY['profile','xp'],to_jsonb(xp+earned_xp),true);
+--  st:=jsonb_set(st,ARRAY['profile','aliensKilled'],to_jsonb(coalesce((st#>>'{profile,aliensKilled}')::bigint,0)+k),true);
+--  st:=jsonb_set(st,ARRAY['ammo',ammo_key],to_jsonb(ammo_qty),true);
+--  st:=jsonb_set(st,ARRAY['cargo'],cargo,true);
+--  IF k>0 THEN st:=jsonb_set(st,ARRAY['serverNpcRewardRevision'],to_jsonb(coalesce((st->>'serverNpcRewardRevision')::integer,0)+1),true); END IF;
+--  IF mined>0 THEN st:=jsonb_set(st,ARRAY['serverOreRevision'],to_jsonb(coalesce((st->>'serverOreRevision')::integer,0)+1),true); END IF;
+--  IF purchase_cr>0 OR sale_cr>0 THEN st:=jsonb_set(st,ARRAY['serverPurchaseRevision'],to_jsonb(coalesce((st->>'serverPurchaseRevision')::integer,0)+1),true); END IF;
+--  v_report:=jsonb_build_object('reason',reason,'duration_seconds',target_seconds,'elapsed_simulated',elapsed,'map',f.map_id,'npc',f.npc_key,'kills',k,'boxes_collected',k,'xp',earned_xp,'npc_credits',earned_cr,'stl',earned_stl,'mined_units',mined,'cargo_collected',got_resources,'cargo_sold',sold_resources,'sales',sold_count,'sale_credits',sale_cr,'ammo_bought',bought,'ammo_spent',purchase_cr,'ammo_remaining',ammo_qty,'credits_net',earned_cr+sale_cr-purchase_cr,'ended_at',v_end,'npc_name',coalesce(f.snapshot->>'npc_name',(SELECT name FROM public.game_npc_config_v1811 WHERE npc_key=f.npc_key)),'combat_model',coalesce(f.snapshot->>'combat_model','v485'),'laser_count',coalesce((f.snapshot->>'laser_count')::integer,0),'ammo_per_kill',shots,'move_seconds',coalesce((f.snapshot->>'move_between_seconds')::integer,0));
+--  UPDATE public.game_saves SET state=st,updated_at=now() WHERE user_id=p_user;
+--  UPDATE public.profiles SET xp=(SELECT coalesce((st#>>'{profile,xp}')::bigint,0)),credits=cr+earned_cr+sale_cr-purchase_cr,uridium=stl+earned_stl,aliens_killed=coalesce((st#>>'{profile,aliensKilled}')::bigint,0),updated_at=now() WHERE id=p_user;
+--  UPDATE public.stellar_offline_farm_v484 SET status='settled',report=v_report,completed_at=now() WHERE id=f.id;
+--  RETURN jsonb_build_object('ok',true,'status','settled','report',v_report);
+-- END $$;
+-- REVOKE ALL ON FUNCTION public.stellar_offline_farm_claim_v487(uuid) FROM PUBLIC,anon,authenticated;
+-- GRANT EXECUTE ON FUNCTION public.stellar_offline_farm_claim_v487(uuid) TO service_role;
+-- 
+-- CREATE OR REPLACE FUNCTION public.stellar_offline_farm_status_v484(p_user uuid)
+-- RETURNS jsonb LANGUAGE plpgsql SECURITY DEFINER SET search_path='' AS $$
+-- DECLARE s record; v_name text;
+-- BEGIN
+--  IF coalesce(auth.role(),'') <> 'service_role' THEN RAISE EXCEPTION 'ONLY_SERVICE_ROLE'; END IF;
+--  SELECT * INTO s FROM public.stellar_offline_farm_v484 WHERE user_id=p_user ORDER BY (status='running') DESC,created_at DESC LIMIT 1;
+--  IF s.id IS NULL THEN RETURN jsonb_build_object('status','none'); END IF;
+--  SELECT name INTO v_name FROM public.game_npc_config_v1811 WHERE npc_key=s.npc_key LIMIT 1;
+--  RETURN jsonb_build_object('id',s.id,'status',s.status,'map',s.map_id,
+--  'npc',s.npc_key,'npc_name',coalesce(nullif(v_name,''),s.npc_key),'ammo',s.ammo_key,'minutes',s.minutes,
+--  'started_at',s.started_at,'ends_at',s.ends_at,'report',s.report);
+-- END $$;
+-- REVOKE ALL ON FUNCTION public.stellar_offline_farm_status_v484(uuid) FROM PUBLIC,anon,authenticated;
+-- GRANT EXECUTE ON FUNCTION public.stellar_offline_farm_status_v484(uuid) TO service_role;
+-- COMMIT;
+-- ===== END STELLAR_V48_7_OFFLINE_REAL_COMBAT_AND_NPC_NAMES.sql =====
+
+-- ===== START STELLAR_V48_AUTOPILOT_ACESSO.sql | sha256 cac247b855e6e36d9944f9b728f0162153cd2752c9a00d1bdfa6e6e717844661 =====
+-- -- V48 • Acesso ao Autopilot exclusivo por autorização do servidor.
+-- -- Não libera pagamentos, Premium, passe nem compra na loja.
+-- -- Seguro para executar novamente: não habilita nenhum jogador automaticamente.
+-- BEGIN;
+-- CREATE TABLE IF NOT EXISTS public.stellar_autopilot_access_v48 (
+--   user_id uuid PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
+--   enabled boolean NOT NULL DEFAULT false,
+--   source text NOT NULL DEFAULT 'admin' CHECK(source IN ('admin','verified_purchase')),
+--   granted_by uuid REFERENCES auth.users(id) ON DELETE SET NULL,
+--   updated_at timestamptz NOT NULL DEFAULT now(),
+--   expires_at timestamptz
+-- );
+-- ALTER TABLE public.stellar_autopilot_access_v48 ENABLE ROW LEVEL SECURITY;
+-- REVOKE ALL ON public.stellar_autopilot_access_v48 FROM PUBLIC,anon,authenticated;
+-- -- Leitura/escrita exclusivamente pelo Render, através da service role.
+-- -- A origem verified_purchase é reservada à futura confirmação segura de checkout;
+-- -- não existe endpoint público que possa alterar source.
+-- COMMIT;
+-- ===== END STELLAR_V48_AUTOPILOT_ACESSO.sql =====
+
+-- ===== START STELLAR_V49_0_TODAS_AS_FASES.sql | sha256 2e0e462d10a6d52cf09b60f642218eb390c0ef934cfa31b7b8380ab51a71b010 =====
+-- -- STELLAR LEGACY V49.0 • Migração acumulada 48.7.1 + 48.8 + 48.9 + 49.0
+-- -- Requer que o SQL V48.7 já tenha sido instalado. NÃO altera sessões antigas, nem executa resgates.
+-- BEGIN;
+-- CREATE TABLE IF NOT EXISTS public.stellar_offline_farm_access_v488 (
+--  user_id uuid PRIMARY KEY REFERENCES public.profiles(id) ON DELETE CASCADE,
+--  enabled boolean NOT NULL DEFAULT false, max_minutes integer,
+--  expires_at timestamptz, granted_by uuid, updated_at timestamptz NOT NULL DEFAULT now(),
+--  CONSTRAINT stellar_offline_limit_v488 CHECK(max_minutes IS NULL OR (max_minutes BETWEEN 30 AND 720 AND max_minutes % 30 = 0))
+-- );
+-- ALTER TABLE public.stellar_offline_farm_access_v488 ENABLE ROW LEVEL SECURITY;
+-- REVOKE ALL ON public.stellar_offline_farm_access_v488 FROM PUBLIC,anon,authenticated;
+-- GRANT SELECT,INSERT,UPDATE,DELETE ON public.stellar_offline_farm_access_v488 TO service_role;
+-- -- Preserva quem já tinha o check do Autopilot; a partir daqui os dois checks são independentes.
+-- INSERT INTO public.stellar_offline_farm_access_v488(user_id,enabled,expires_at,granted_by)
+--  SELECT a.user_id,a.enabled,a.expires_at,a.granted_by FROM public.stellar_autopilot_access_v48 a
+--  ON CONFLICT(user_id) DO NOTHING;
+-- 
+-- CREATE TABLE IF NOT EXISTS public.stellar_farm_push_subscriptions_v489 (
+--  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+--  user_id uuid NOT NULL REFERENCES public.profiles(id) ON DELETE CASCADE,
+--  endpoint_hash text NOT NULL,
+--  endpoint text NOT NULL,
+--  p256dh text NOT NULL,
+--  auth text NOT NULL,
+--  enabled boolean NOT NULL DEFAULT true,
+--  last_notified_session_id uuid,
+--  last_notified_at timestamptz,
+--  created_at timestamptz NOT NULL DEFAULT now(),
+--  updated_at timestamptz NOT NULL DEFAULT now(),
+--  UNIQUE(user_id,endpoint_hash),
+--  CONSTRAINT push_endpoint_hash_v489 CHECK(length(endpoint_hash)=64),
+--  CONSTRAINT push_endpoint_size_v489 CHECK(length(endpoint) BETWEEN 30 AND 3000)
+-- );
+-- CREATE INDEX IF NOT EXISTS stellar_farm_push_by_user_v489 ON public.stellar_farm_push_subscriptions_v489(user_id) WHERE enabled;
+-- CREATE INDEX IF NOT EXISTS stellar_farm_due_v489 ON public.stellar_offline_farm_v484(ends_at) WHERE status='running';
+-- ALTER TABLE public.stellar_farm_push_subscriptions_v489 ENABLE ROW LEVEL SECURITY;
+-- REVOKE ALL ON public.stellar_farm_push_subscriptions_v489 FROM PUBLIC,anon,authenticated;
+-- GRANT SELECT,INSERT,UPDATE,DELETE ON public.stellar_farm_push_subscriptions_v489 TO service_role;
+-- -- Limite de venda virtual por hora: só para sessões V49; não altera sessões anteriores.
+-- ALTER TABLE public.stellar_offline_farm_settings_v485 ADD COLUMN IF NOT EXISTS max_sale_credits bigint NOT NULL DEFAULT 30000000;
+-- CREATE OR REPLACE FUNCTION public.stellar_offline_farm_start_v485(p_user uuid,p_minutes integer,p_auto_sell boolean DEFAULT true,p_auto_buy boolean DEFAULT true,p_mine boolean DEFAULT true,p_npc_key text DEFAULT NULL,p_ammo_key text DEFAULT NULL)
+-- RETURNS jsonb LANGUAGE plpgsql SECURITY DEFINER SET search_path = '' AS $$
+-- DECLARE s record; c record; q record; cfg record; v_npc record; v_map text; v_ammo text; v_id uuid; v_level integer; v_factor numeric; v_damage numeric;
+-- BEGIN
+--  IF coalesce(auth.role(),'') <> 'service_role' THEN RAISE EXCEPTION 'ONLY_SERVICE_ROLE'; END IF;
+--  SELECT max_minutes,damage_percent,max_kills,travel_seconds INTO STRICT cfg FROM public.stellar_offline_farm_settings_v485 WHERE id=1;
+--  IF p_minutes < 30 OR p_minutes > cfg.max_minutes OR p_minutes % 30 <> 0 THEN RAISE EXCEPTION 'INVALID_DURATION'; END IF;
+--  PERFORM pg_advisory_xact_lock(hashtextextended(p_user::text,484));
+--  IF EXISTS(SELECT 1 FROM public.stellar_offline_farm_v484 WHERE user_id=p_user AND status='running') THEN RAISE EXCEPTION 'FARM_ALREADY_RUNNING'; END IF;
+--  SELECT state,updated_at INTO s FROM public.game_saves WHERE user_id=p_user FOR UPDATE;
+--  SELECT updated_at INTO c FROM public.profiles WHERE id=p_user FOR UPDATE;
+--  IF c.updated_at IS NULL THEN RAISE EXCEPTION 'FARM_PROFILE_MISSING'; END IF;
+--  IF s.state IS NULL OR s.state->'profile' IS NULL THEN RAISE EXCEPTION 'FARM_SAVE_MISSING'; END IF;
+--  v_map:=s.state->>'mapId'; v_ammo:=coalesce(nullif(p_ammo_key,''),nullif(s.state->>'selectedLaserAmmo',''),'lcb10');
+--  IF v_ammo NOT IN ('lcb10','mcb25','mcb50','ucb100') THEN RAISE EXCEPTION 'INVALID_AMMO'; END IF;
+--  v_level:=greatest(1,least(50,coalesce((s.state#>>'{profile,level}')::integer,1)));
+--  IF v_map !~ '^x[1-8]$' OR coalesce(s.state->>'repairRequired','false') NOT IN ('false','null') THEN RAISE EXCEPTION 'FARM_MAP_OR_REPAIR_UNSUPPORTED'; END IF;
+--  IF v_level < (CASE v_map WHEN 'x1' THEN 1 WHEN 'x2' THEN 3 WHEN 'x3' THEN 5 WHEN 'x4' THEN 7 WHEN 'x5' THEN 9 WHEN 'x6' THEN 12 WHEN 'x7' THEN 15 WHEN 'x8' THEN 18 ELSE 99 END)
+--  THEN RAISE EXCEPTION 'FARM_LEVEL_INSUFFICIENT'; END IF;
+--  IF NOT EXISTS(SELECT 1 FROM public.stellar_offline_farm_access_v488 a WHERE a.user_id=p_user AND a.enabled=true AND (a.expires_at IS NULL OR a.expires_at>now()) AND (a.max_minutes IS NULL OR p_minutes<=a.max_minutes))
+--    AND NOT EXISTS(SELECT 1 FROM public.game_admins WHERE user_id=p_user) THEN
+--    RAISE EXCEPTION 'FARM_ACCESS_REQUIRED';
+--  END IF;
+--  SELECT n.npc_key,n.hp,n.shield,n.credits,n.stl,n.xp,n.resources INTO v_npc
+--  FROM public.game_map_npc_spawns_v1811 m
+--  JOIN public.game_npc_config_v1811 n ON n.npc_key=m.npc_key
+--  WHERE m.map_id=v_map AND m.enabled=true AND n.enabled=true AND n.npc_key !~* '(boss|rift|elite|suprem|legend|lend|uber|ultra|titan)' AND n.name !~* '(boss|suprem|legend|lend|elite|uber|ultra)' AND coalesce(m.spawn_count,0)>0 AND (p_npc_key IS NULL OR n.npc_key=p_npc_key)
+--  ORDER BY n.hp+n.shield ASC,n.npc_key ASC LIMIT 1;
+--  IF v_npc.npc_key IS NULL THEN RAISE EXCEPTION 'FARM_NO_ELIGIBLE_NPCS'; END IF;
+--  -- Munição apenas de crédito; STL/premium é consumido se houver estoque, nunca comprado aqui.
+--  SELECT catalog_key,price,currency,(meta#>>'{grant,qty}')::integer AS qty INTO q FROM public.live_shop_prices_v16
+--  WHERE kind='ammo' AND ref_id=v_ammo AND enabled=true AND shop_visible=true LIMIT 1;
+--  IF q.catalog_key IS NULL THEN RAISE EXCEPTION 'FARM_AMMO_UNAVAILABLE'; END IF;
+--  v_factor:= CASE v_ammo WHEN 'lcb10' THEN 1 WHEN 'mcb25' THEN 2 WHEN 'mcb50' THEN 3 WHEN 'ucb100' THEN 4 ELSE 1 END;
+--  v_damage:=greatest(1,(175+v_level*80)*v_factor*cfg.damage_percent/100.0);
+--  INSERT INTO public.stellar_offline_farm_v484(user_id,map_id,npc_key,ammo_key,minutes,auto_sell,auto_buy,mine,snapshot,baseline_save_at,ends_at)
+--  VALUES(p_user,v_map,v_npc.npc_key,v_ammo,p_minutes,coalesce(p_auto_sell,true),coalesce(p_auto_buy,true),coalesce(p_mine,true),
+--  jsonb_build_object('npc',to_jsonb(v_npc),'level',v_level,'damage_per_shot',v_damage,'damage_per_second',round(v_damage/7,2),'max_kills',cfg.max_kills,'trip_seconds',cfg.travel_seconds,'damage_percent',cfg.damage_percent,'profile_updated_at',c.updated_at,'shop',CASE WHEN q.catalog_key IS NOT NULL THEN to_jsonb(q) ELSE '{}'::jsonb END),s.updated_at,now()+make_interval(mins=>p_minutes))
+--  RETURNING id INTO v_id;
+--  RETURN jsonb_build_object('ok',true,'id',v_id,'status','running','map',v_map,'npc',v_npc.npc_key,'minutes',p_minutes,'ammo',v_ammo,'damage_per_second',round(v_damage/7,2),'ends_at',(SELECT ends_at FROM public.stellar_offline_farm_v484 WHERE id=v_id));
+-- END $$;
+-- 
+-- REVOKE ALL ON FUNCTION public.stellar_offline_farm_start_v485(uuid,integer,boolean,boolean,boolean,text,text) FROM PUBLIC,anon,authenticated;
+-- GRANT EXECUTE ON FUNCTION public.stellar_offline_farm_start_v485(uuid,integer,boolean,boolean,boolean,text,text) TO service_role;
+-- 
+-- CREATE OR REPLACE FUNCTION public.stellar_offline_farm_start_v49(
+--  p_user uuid,p_minutes integer,p_auto_sell boolean,p_auto_buy boolean,p_mine boolean,
+--  p_npc_key text,p_ammo_key text,p_combat jsonb,p_baseline_save_at timestamptz
+-- ) RETURNS jsonb LANGUAGE plpgsql SECURITY DEFINER SET search_path='' AS $$
+-- DECLARE r jsonb; cfg record; v_limit bigint;
+-- BEGIN
+--  IF coalesce(auth.role(),'') <> 'service_role' THEN RAISE EXCEPTION 'ONLY_SERVICE_ROLE'; END IF;
+--  SELECT max_sale_credits INTO STRICT cfg FROM public.stellar_offline_farm_settings_v485 WHERE id=1;
+--  r:=public.stellar_offline_farm_start_v487(p_user,p_minutes,p_auto_sell,p_auto_buy,p_mine,p_npc_key,p_ammo_key,p_combat,p_baseline_save_at);
+--  v_limit:=least(1000000000000, greatest(0,cfg.max_sale_credits) * ceil(p_minutes / 60.0)::bigint);
+--  UPDATE public.stellar_offline_farm_v484 SET snapshot=snapshot || jsonb_build_object('economic_model','v49','max_sale_credits',v_limit)
+--  WHERE id=(r->>'id')::uuid AND user_id=p_user;
+--  RETURN r || jsonb_build_object('economic_model','v49','max_sale_credits',v_limit);
+-- END $$;
+-- REVOKE ALL ON FUNCTION public.stellar_offline_farm_start_v49(uuid,integer,boolean,boolean,boolean,text,text,jsonb,timestamptz) FROM PUBLIC,anon,authenticated;
+-- GRANT EXECUTE ON FUNCTION public.stellar_offline_farm_start_v49(uuid,integer,boolean,boolean,boolean,text,text,jsonb,timestamptz) TO service_role;
+-- CREATE OR REPLACE FUNCTION public.stellar_offline_farm_claim_v49(p_user uuid)
+-- RETURNS jsonb LANGUAGE plpgsql SECURITY DEFINER SET search_path = '' AS $$
+-- DECLARE f record; sv record; p record; npc jsonb; shop jsonb;
+--  v_end timestamptz; target_seconds integer; elapsed integer:=0; kill_seconds integer; trip_seconds integer:=125; shots integer;
+--  k integer:=0; sold_count integer:=0; bought integer:=0; mined integer:=0; earned_cr bigint:=0; earned_stl bigint:=0; earned_xp bigint:=0; sale_cr bigint:=0; purchase_cr bigint:=0;
+--  cr bigint; stl bigint; xp bigint; ammo_key text; ammo_qty bigint; ammo_pack_qty integer; ammo_pack_price bigint; cargo jsonb; v_cargo_used bigint:=0; capacity bigint:=1500;
+--  res record; q integer; n integer; v_price bigint; v_resource text; mine_resource text; got_resources jsonb:='{}'::jsonb; sold_resources jsonb:='{}'::jsonb;
+--  st jsonb; v_report jsonb; reason text:='duration'; has_other_activity boolean; max_kills integer:=550;
+--  sale_limit bigint:=9223372036854775807; orig_remaining jsonb:='{}'::jsonb; sale_from_prior bigint:=0; orig_part bigint:=0;
+-- BEGIN
+--  IF coalesce(auth.role(),'') <> 'service_role' THEN RAISE EXCEPTION 'ONLY_SERVICE_ROLE'; END IF;
+--  PERFORM pg_advisory_xact_lock(hashtextextended(p_user::text,484));
+--  SELECT * INTO f FROM public.stellar_offline_farm_v484 WHERE user_id=p_user ORDER BY (status='running') DESC,created_at DESC LIMIT 1 FOR UPDATE;
+--  IF f.id IS NULL THEN RETURN jsonb_build_object('status','none'); END IF;
+--  IF f.status<>'running' THEN RETURN jsonb_build_object('ok',f.status='settled','status',f.status,'report',f.report); END IF;
+--  SELECT state,updated_at INTO sv FROM public.game_saves WHERE user_id=p_user FOR UPDATE;
+--  SELECT updated_at INTO p FROM public.profiles WHERE id=p_user FOR UPDATE;
+--  IF sv.state IS NULL THEN RAISE EXCEPTION 'FARM_SAVE_MISSING'; END IF;
+--  -- Um save ou recompensa real no período invalida a simulação: jamais misturar farm vivo e offline.
+--  SELECT EXISTS(SELECT 1 FROM public.stellar_npc_reward_ledger WHERE user_id=p_user AND issued_at>=f.started_at)
+--   OR EXISTS(SELECT 1 FROM public.stellar_ore_reward_ledger WHERE user_id=p_user AND issued_at>=f.started_at) INTO has_other_activity;
+--  IF (sv.updated_at IS DISTINCT FROM f.baseline_save_at) OR (p.updated_at IS DISTINCT FROM (f.snapshot->>'profile_updated_at')::timestamptz) OR has_other_activity THEN
+--    v_report:=jsonb_build_object('reason','online_activity_or_save_changed','kills',0,'message','Farm offline cancelado: houve atividade online ou alteração do save após ativação. Nenhuma recompensa offline foi gerada.');
+--    UPDATE public.stellar_offline_farm_v484 SET status='conflict',completed_at=now(),report=v_report WHERE id=f.id;
+--    RETURN jsonb_build_object('ok',false,'status','conflict','report',v_report);
+--  END IF;
+--  v_end:=least(now(),f.ends_at);
+--  target_seconds:=greatest(0,floor(extract(epoch from v_end-f.started_at))::integer);
+--  npc:=f.snapshot->'npc'; shop:=f.snapshot->'shop'; ammo_key:=f.ammo_key;
+--  kill_seconds:=greatest(35,least(480,ceil((coalesce((npc->>'hp')::numeric,0)+coalesce((npc->>'shield')::numeric,0))/(150+coalesce((f.snapshot->>'level')::numeric,1)*60))*7)::integer);
+--  shots:=greatest(8,least(150,ceil((coalesce((npc->>'hp')::numeric,0)+coalesce((npc->>'shield')::numeric,0))/(175+coalesce((f.snapshot->>'level')::numeric,1)*80))::integer));
+--  IF f.snapshot ? 'damage_per_shot' THEN
+--    kill_seconds:=greatest(25,least(480,ceil((coalesce((npc->>'hp')::numeric,0)+coalesce((npc->>'shield')::numeric,0))/greatest(1,(f.snapshot->>'damage_per_shot')::numeric)*7)::integer));
+--    shots:=greatest(1,least(150,ceil((coalesce((npc->>'hp')::numeric,0)+coalesce((npc->>'shield')::numeric,0))/greatest(1,(f.snapshot->>'damage_per_shot')::numeric))::integer));
+--    trip_seconds:=greatest(45,least(600,coalesce((f.snapshot->>'trip_seconds')::integer,125)));
+--    max_kills:=greatest(20,least(2000,coalesce((f.snapshot->>'max_kills')::integer,550)));
+--  END IF;
+--  IF f.snapshot->>'combat_model'='v487' THEN
+--    shots:=greatest(1,least(320000,coalesce((f.snapshot->>'ammo_per_kill')::integer,0)));
+--    kill_seconds:=greatest(1,least(30000,coalesce((f.snapshot->>'combat_kill_seconds')::integer,30000)));
+--    capacity:=greatest(100,least(15000,coalesce((f.snapshot->>'cargo_capacity')::bigint,1500)));
+--    trip_seconds:=greatest(45,least(600,ceil(trip_seconds*350.0/greatest(100,(f.snapshot->>'ship_speed')::numeric))::integer));
+--  END IF;
+--  ammo_qty:=greatest(0,coalesce((sv.state->'ammo'->>ammo_key)::bigint,0));
+--  ammo_pack_qty:=greatest(0,least(100000,coalesce((shop->>'qty')::integer,0)));
+--  ammo_pack_price:=greatest(0,coalesce((shop->>'price')::bigint,0));
+--  cr:=greatest(0,coalesce((sv.state#>>'{profile,credits}')::bigint,0));
+--  stl:=greatest(0,coalesce((sv.state#>>'{profile,uridium}')::bigint,0));
+--  xp:=greatest(0,coalesce((sv.state#>>'{profile,xp}')::bigint,0));
+--  cargo:=coalesce(sv.state->'cargo','{}'::jsonb); orig_remaining:=cargo;
+--  IF f.snapshot->>'economic_model'='v49' THEN sale_limit:=greatest(0,least(1000000000000,coalesce((f.snapshot->>'max_sale_credits')::bigint,30000000))); END IF;
+--  SELECT resource_key INTO mine_resource FROM public.game_map_resource_pool_v1814 WHERE map_id=f.map_id AND enabled=true AND resource_key<>'Xenomit' ORDER BY resource_key LIMIT 1;
+--  SELECT coalesce(sum(greatest(0,least(100000000, CASE WHEN value ~ '^[0-9]+$' THEN value::bigint ELSE 0 END))),0) INTO v_cargo_used FROM jsonb_each_text(cargo);
+--  WHILE elapsed+kill_seconds<=target_seconds AND k<max_kills LOOP
+--    WHILE ammo_qty < shots LOOP
+--      IF NOT f.auto_buy OR coalesce(shop->>'currency','')<>'credits' OR ammo_pack_qty<=0 OR ammo_pack_price<=0 OR cr+earned_cr+sale_cr-purchase_cr<ammo_pack_price OR bought>=100 THEN reason:='ammo_exhausted';EXIT;END IF;
+--      IF elapsed+trip_seconds>target_seconds THEN reason:='waiting_to_restock';EXIT;END IF;
+--      -- Cada pacote exige uma viagem virtual com débito oficial de créditos.
+--      elapsed:=elapsed+trip_seconds; ammo_qty:=ammo_qty+ammo_pack_qty;purchase_cr:=purchase_cr+ammo_pack_price;bought:=bought+1;
+--    END LOOP;
+--    IF ammo_qty<shots OR elapsed+kill_seconds>target_seconds THEN EXIT; END IF;
+--    ammo_qty:=ammo_qty-shots; elapsed:=elapsed+kill_seconds; k:=k+1;
+--    earned_cr:=earned_cr+greatest(0,coalesce((npc->>'credits')::bigint,0));
+--    earned_stl:=earned_stl+greatest(0,coalesce((npc->>'stl')::bigint,0));
+--    earned_xp:=earned_xp+greatest(0,coalesce((npc->>'xp')::bigint,0));
+--    FOR res IN SELECT key,value FROM jsonb_each_text(coalesce(npc->'resources','{}'::jsonb)) LOOP
+--      IF v_cargo_used >= capacity THEN EXIT; END IF;
+--      n:=least(capacity-v_cargo_used, greatest(0,least(1000, CASE WHEN res.value ~ '^[0-9]+$' THEN res.value::integer ELSE 0 END)));
+--      IF n>0 THEN
+--        cargo:=jsonb_set(cargo,ARRAY[res.key],to_jsonb(coalesce((cargo->>res.key)::bigint,0)+n),true);
+--        got_resources:=jsonb_set(got_resources,ARRAY[res.key],to_jsonb(coalesce((got_resources->>res.key)::bigint,0)+n),true);
+--        v_cargo_used:=v_cargo_used+n;
+--      END IF;
+--    END LOOP;
+--    IF f.mine AND mine_resource IS NOT NULL AND k%5=0 AND v_cargo_used<capacity THEN
+--      n:=least(10,capacity-v_cargo_used);
+--      cargo:=jsonb_set(cargo,ARRAY[mine_resource],to_jsonb(coalesce((cargo->>mine_resource)::bigint,0)+n),true);
+--      got_resources:=jsonb_set(got_resources,ARRAY[mine_resource],to_jsonb(coalesce((got_resources->>mine_resource)::bigint,0)+n),true);
+--      v_cargo_used:=v_cargo_used+n;mined:=mined+n;
+--    END IF;
+--    IF v_cargo_used>=capacity THEN
+--      IF NOT f.auto_sell THEN reason:='cargo_full';EXIT; END IF;
+--      IF elapsed+trip_seconds>target_seconds THEN reason:='cargo_waiting_sale';EXIT;END IF;
+--      elapsed:=elapsed+trip_seconds;sold_count:=sold_count+1;
+--      FOR res IN SELECT key,value FROM jsonb_each_text(cargo) LOOP
+--        q:=greatest(0,least(100000000,CASE WHEN res.value ~ '^[0-9]+$' THEN res.value::integer ELSE 0 END));
+--        IF res.key='Xenomit' OR q=0 THEN CONTINUE;END IF;
+--        SELECT greatest(0,sell_price) INTO v_price FROM public.game_resource_config_v1814 WHERE resource_key=res.key AND enabled=true LIMIT 1;
+--        IF v_price IS NULL THEN CONTINUE;END IF;
+--        IF f.snapshot->>'economic_model'='v49' AND sale_cr + q*v_price > sale_limit THEN
+--          reason:='sale_limit_reached';EXIT;
+--        END IF;
+--        orig_part:=least(q,greatest(0,coalesce((orig_remaining->>res.key)::bigint,0)));
+--        orig_remaining:=jsonb_set(orig_remaining,ARRAY[res.key],to_jsonb(greatest(0,coalesce((orig_remaining->>res.key)::bigint,0)-orig_part)),true);
+--        sale_from_prior:=sale_from_prior+orig_part*v_price;
+--        sale_cr:=sale_cr+q*v_price;
+--        sold_resources:=jsonb_set(sold_resources,ARRAY[res.key],to_jsonb(coalesce((sold_resources->>res.key)::bigint,0)+q),true);
+--        cargo:=jsonb_set(cargo,ARRAY[res.key],'0'::jsonb,true);
+--      END LOOP;
+--      SELECT coalesce(sum(greatest(0,CASE WHEN value ~ '^[0-9]+$' THEN value::bigint ELSE 0 END)),0) INTO v_cargo_used FROM jsonb_each_text(cargo);
+--      IF reason='sale_limit_reached' THEN EXIT; END IF;
+--    END IF;
+--  END LOOP;
+--  IF elapsed=0 AND target_seconds<kill_seconds THEN reason:='waiting'; END IF;
+--  IF cr+earned_cr+sale_cr-purchase_cr<0 THEN RAISE EXCEPTION 'FARM_CREDITS_UNDERFLOW'; END IF;
+--  IF cr+earned_cr+sale_cr-purchase_cr>1000000000000 OR stl+earned_stl>10000000000 THEN RAISE EXCEPTION 'FARM_ECONOMY_LIMIT'; END IF;
+--  st:=sv.state;
+--  st:=jsonb_set(st,ARRAY['profile','credits'],to_jsonb(cr+earned_cr+sale_cr-purchase_cr),true);
+--  st:=jsonb_set(st,ARRAY['profile','uridium'],to_jsonb(stl+earned_stl),true);
+--  st:=jsonb_set(st,ARRAY['profile','xp'],to_jsonb(xp+earned_xp),true);
+--  st:=jsonb_set(st,ARRAY['profile','aliensKilled'],to_jsonb(coalesce((st#>>'{profile,aliensKilled}')::bigint,0)+k),true);
+--  st:=jsonb_set(st,ARRAY['ammo',ammo_key],to_jsonb(ammo_qty),true);
+--  st:=jsonb_set(st,ARRAY['cargo'],cargo,true);
+--  IF k>0 THEN st:=jsonb_set(st,ARRAY['serverNpcRewardRevision'],to_jsonb(coalesce((st->>'serverNpcRewardRevision')::integer,0)+1),true); END IF;
+--  IF mined>0 THEN st:=jsonb_set(st,ARRAY['serverOreRevision'],to_jsonb(coalesce((st->>'serverOreRevision')::integer,0)+1),true); END IF;
+--  IF purchase_cr>0 OR sale_cr>0 THEN st:=jsonb_set(st,ARRAY['serverPurchaseRevision'],to_jsonb(coalesce((st->>'serverPurchaseRevision')::integer,0)+1),true); END IF;
+--  v_report:=jsonb_build_object('reason',reason,'duration_seconds',target_seconds,'elapsed_simulated',elapsed,'map',f.map_id,'npc',f.npc_key,'kills',k,'boxes_collected',k,'xp',earned_xp,'npc_credits',earned_cr,'stl',earned_stl,'mined_units',mined,'cargo_collected',got_resources,'cargo_sold',sold_resources,'sales',sold_count,'sale_credits',sale_cr,'starting_cargo_sale_credits',sale_from_prior,'farm_generated_sale_credits',sale_cr-sale_from_prior,'audit_sale_cap',CASE WHEN f.snapshot->>'economic_model'='v49' THEN sale_limit ELSE NULL END,'ammo_bought',bought,'ammo_spent',purchase_cr,'ammo_remaining',ammo_qty,'credits_net',earned_cr+sale_cr-purchase_cr,'ended_at',v_end,'npc_name',coalesce(f.snapshot->>'npc_name',(SELECT name FROM public.game_npc_config_v1811 WHERE npc_key=f.npc_key)),'combat_model',coalesce(f.snapshot->>'combat_model','v485'),'laser_count',coalesce((f.snapshot->>'laser_count')::integer,0),'ammo_per_kill',shots,'move_seconds',coalesce((f.snapshot->>'move_between_seconds')::integer,0));
+--  UPDATE public.game_saves SET state=st,updated_at=now() WHERE user_id=p_user;
+--  UPDATE public.profiles SET xp=(SELECT coalesce((st#>>'{profile,xp}')::bigint,0)),credits=cr+earned_cr+sale_cr-purchase_cr,uridium=stl+earned_stl,aliens_killed=coalesce((st#>>'{profile,aliensKilled}')::bigint,0),updated_at=now() WHERE id=p_user;
+--  UPDATE public.stellar_offline_farm_v484 SET status='settled',report=v_report,completed_at=now() WHERE id=f.id;
+--  RETURN jsonb_build_object('ok',true,'status','settled','report',v_report);
+-- END $$;
+-- 
+-- REVOKE ALL ON FUNCTION public.stellar_offline_farm_claim_v49(uuid) FROM PUBLIC,anon,authenticated;
+-- GRANT EXECUTE ON FUNCTION public.stellar_offline_farm_claim_v49(uuid) TO service_role;
+-- COMMIT;
+-- ===== END STELLAR_V49_0_TODAS_AS_FASES.sql =====
+
+-- ===== START STELLAR_V49_5_COMPATIBILIDADE_ACESSO.sql | sha256 ec4b0d8a3e0a2c4ab177cb2c428488fc1edaba2b574abc1b49299f21dd55b49a =====
+-- -- V49.5: apenas permissão de leitura service_role (já aplicada em 23/10/2026).
+-- -- Reexecutável; não cria/modifica jogadores, resgates nem economia.
+-- GRANT SELECT ON TABLE public.game_admins TO service_role;
+-- REVOKE SELECT ON TABLE public.game_admins FROM anon, authenticated;
+-- ===== END STELLAR_V49_5_COMPATIBILIDADE_ACESSO.sql =====
+
+-- ===== START STELLAR_V50_FROTA_13_NAVES_APLICAR_APOS_DEPLOY.sql | sha256 d079fb49b46414b6d39d244aa5b211d7fa9aa1d7bb2ce8f6fd0385b7a74e9c28 =====
+-- -- STELLAR LEGACY V50 • FROTA 3D OFICIAL
+-- -- EXECUTAR SOMENTE DEPOIS DO DEPLOY DA V50, E DA VERIFICAÇÃO DO HANGAR!
+-- -- 13 ship IDs: phoenix leonov liberator piranha vengeance bigboy goliath citadel aegis spearhead defcom yamato nostromo.
+-- -- Não altera saldos, propriedade histórica, equipamentos, drones, habilidades, missão ou balanceamento.
+-- -- Backup privado. Sem políticas de leitura externa; acesso só administrativo interno.
+-- BEGIN;
+-- CREATE TABLE IF NOT EXISTS public.stellar_ship_v50_save_backup (
+--   user_id uuid PRIMARY KEY,
+--   previous_state jsonb NOT NULL,
+--   backed_up_at timestamptz NOT NULL DEFAULT now()
+-- );
+-- ALTER TABLE public.stellar_ship_v50_save_backup ENABLE ROW LEVEL SECURITY;
+-- REVOKE ALL ON public.stellar_ship_v50_save_backup FROM PUBLIC, anon, authenticated;
+-- CREATE TABLE IF NOT EXISTS public.stellar_ship_v50_shop_backup (
+--   catalog_key text PRIMARY KEY,
+--   was_enabled boolean,
+--   was_visible boolean,
+--   backed_up_at timestamptz NOT NULL DEFAULT now()
+-- );
+-- ALTER TABLE public.stellar_ship_v50_shop_backup ENABLE ROW LEVEL SECURITY;
+-- REVOKE ALL ON public.stellar_ship_v50_shop_backup FROM PUBLIC, anon, authenticated;
+-- 
+-- INSERT INTO public.stellar_ship_v50_save_backup(user_id,previous_state)
+-- SELECT s.user_id,s.state FROM public.game_saves s
+-- WHERE COALESCE(s.state->>'activeShipId','') NOT IN
+-- ('phoenix','leonov','liberator','piranha','vengeance','bigboy','goliath','citadel','aegis','spearhead','defcom','yamato','nostromo')
+-- ON CONFLICT(user_id) DO NOTHING;
+-- INSERT INTO public.stellar_ship_v50_shop_backup(catalog_key,was_enabled,was_visible)
+-- SELECT catalog_key,enabled,shop_visible FROM public.live_shop_prices_v16
+-- WHERE kind='ship' AND ref_id NOT IN
+-- ('phoenix','leonov','liberator','piranha','vengeance','bigboy','goliath','citadel','aegis','spearhead','defcom','yamato','nostromo')
+-- ON CONFLICT(catalog_key) DO NOTHING;
+-- 
+-- UPDATE public.game_saves s
+-- SET state = jsonb_set(
+--     jsonb_set(
+--       jsonb_set(s.state,'{activeShipId}','"phoenix"'::jsonb,true),
+--       '{ownedShips}',
+--       CASE WHEN jsonb_typeof(s.state->'ownedShips')='array' AND (s.state->'ownedShips') @> '["phoenix"]'::jsonb
+--            THEN s.state->'ownedShips'
+--            WHEN jsonb_typeof(s.state->'ownedShips')='array' THEN s.state->'ownedShips'||'["phoenix"]'::jsonb
+--            ELSE '["phoenix"]'::jsonb END,true),
+--     '{repairRequired}',
+--     CASE WHEN jsonb_typeof(s.state->'repairRequired')='object'
+--          THEN jsonb_set(s.state->'repairRequired','{shipId}','"phoenix"'::jsonb,true)
+--          ELSE coalesce(s.state->'repairRequired','null'::jsonb) END,true),
+--     updated_at = now()
+-- WHERE COALESCE(s.state->>'activeShipId','') NOT IN
+-- ('phoenix','leonov','liberator','piranha','vengeance','bigboy','goliath','citadel','aegis','spearhead','defcom','yamato','nostromo');
+-- 
+-- -- Mantém as 13 autorizadas com seus critérios atuais de Loja/Evento.
+-- -- Desabilita apenas compras das naves antigas, sem retirar propriedade do usuário.
+-- UPDATE public.live_shop_prices_v16
+-- SET enabled=false, shop_visible=false, updated_at=now()
+-- WHERE kind='ship' AND ref_id NOT IN
+-- ('phoenix','leonov','liberator','piranha','vengeance','bigboy','goliath','citadel','aegis','spearhead','defcom','yamato','nostromo');
+-- COMMIT;
+-- -- Verificação: COUNT de saves fora da frota deve ser 0.
+-- SELECT count(*) AS saves_incompativeis FROM public.game_saves
+-- WHERE coalesce(state->>'activeShipId','') NOT IN
+-- ('phoenix','leonov','liberator','piranha','vengeance','bigboy','goliath','citadel','aegis','spearhead','defcom','yamato','nostromo');
+-- ===== END STELLAR_V50_FROTA_13_NAVES_APLICAR_APOS_DEPLOY.sql =====
+
+-- ===== START V17_7_1_TELEMETRY_TITLES.sql | sha256 eefd363c23aad6baa5e4d2edc25f5c1964cb9c6975a8501b37a094d0519bcd8c =====
+-- -- Stellar Legacy V17.7.1 — Player Telemetry + Titles
+-- -- Depends on V17_6_3_ADMIN_CONTROL_PANEL.sql.
+-- 
+-- alter table public.player_presence
+--   add column if not exists pilot_title text not null default 'Piloto Estelar';
+-- 
+-- drop function if exists public.get_map_presence_v12(text,text);
+-- create function public.get_map_presence_v12(p_map_id text, p_territory_faction text)
+-- returns table(
+--   user_id uuid, callsign text, map_id text, territory_faction text,
+--   x double precision, y double precision, angle double precision, ship_id text,
+--   faction text, level integer, hp bigint, max_hp bigint, shield bigint, max_shield bigint,
+--   updated_at timestamptz, rank_code text, rank_title text, clan_tag text, is_admin boolean,
+--   pilot_title text
+-- )
+-- language sql security definer set search_path=public,auth,pg_temp as $$
+--   select pp.user_id,pp.callsign,pp.map_id,pp.territory_faction,pp.x,pp.y,pp.angle,pp.ship_id,pp.faction,pp.level,
+--          pp.hp,pp.max_hp,pp.shield,pp.max_shield,pp.updated_at,
+--          case when ga.user_id is not null then 'admin' else coalesce(r.rank_code,'pilot_basic') end,
+--          case when ga.user_id is not null then 'Administrador' else coalesce(r.rank_title,'Piloto Básico') end,
+--          c.tag,(ga.user_id is not null),coalesce(nullif(trim(pp.pilot_title),''),'Piloto Estelar')
+--   from public.player_presence pp
+--   left join public.get_public_rankings() r on r.id=pp.user_id
+--   left join public.game_admins ga on ga.user_id=pp.user_id and lower(coalesce(ga.role,''))='admin'
+--   left join public.clan_members cm on cm.user_id=pp.user_id
+--   left join public.clans c on c.id=cm.clan_id
+--   where pp.map_id=p_map_id and pp.territory_faction=p_territory_faction
+--     and pp.updated_at>=now()-interval '9 seconds'
+--   order by pp.updated_at desc;
+-- $$;
+-- revoke all on function public.get_map_presence_v12(text,text) from anon;
+-- grant execute on function public.get_map_presence_v12(text,text) to authenticated,service_role;
+-- 
+-- create table if not exists public.player_telemetry_v1771 (
+--   user_id uuid primary key references auth.users(id) on delete cascade,
+--   sessions bigint not null default 0,
+--   play_seconds bigint not null default 0,
+--   kills bigint not null default 0,
+--   boxes bigint not null default 0,
+--   ore_nodes bigint not null default 0,
+--   ore_units bigint not null default 0,
+--   missions_completed bigint not null default 0,
+--   deaths bigint not null default 0,
+--   map_jumps bigint not null default 0,
+--   level_ups bigint not null default 0,
+--   credits_earned bigint not null default 0,
+--   credits_spent bigint not null default 0,
+--   stl_earned bigint not null default 0,
+--   stl_spent bigint not null default 0,
+--   xp_earned bigint not null default 0,
+--   npc_cr bigint not null default 0, npc_stl bigint not null default 0, npc_xp bigint not null default 0,
+--   mission_cr bigint not null default 0, mission_stl bigint not null default 0, mission_xp bigint not null default 0,
+--   resource_cr bigint not null default 0, resource_stl bigint not null default 0, resource_xp bigint not null default 0,
+--   pass_cr bigint not null default 0, pass_stl bigint not null default 0, pass_xp bigint not null default 0,
+--   event_cr bigint not null default 0, event_stl bigint not null default 0, event_xp bigint not null default 0,
+--   gate_cr bigint not null default 0, gate_stl bigint not null default 0, gate_xp bigint not null default 0,
+--   discovery_cr bigint not null default 0, discovery_stl bigint not null default 0, discovery_xp bigint not null default 0,
+--   other_cr bigint not null default 0, other_stl bigint not null default 0, other_xp bigint not null default 0,
+--   last_level integer not null default 1,
+--   last_credits bigint not null default 0,
+--   last_stl bigint not null default 0,
+--   last_xp bigint not null default 0,
+--   selected_title text not null default 'Piloto Estelar',
+--   first_seen_at timestamptz not null default now(),
+--   last_seen_at timestamptz not null default now()
+-- );
+-- 
+-- create table if not exists public.player_level_milestones_v1771 (
+--   user_id uuid not null references auth.users(id) on delete cascade,
+--   level integer not null check(level between 1 and 100),
+--   reached_at timestamptz not null default now(),
+--   play_seconds bigint not null default 0,
+--   kills bigint not null default 0,
+--   credits_earned bigint not null default 0,
+--   stl_earned bigint not null default 0,
+--   xp_earned bigint not null default 0,
+--   credits_balance bigint not null default 0,
+--   stl_balance bigint not null default 0,
+--   primary key(user_id,level)
+-- );
+-- 
+-- create table if not exists public.player_telemetry_batches_v1771 (
+--   user_id uuid not null references auth.users(id) on delete cascade,
+--   batch_id text not null,
+--   created_at timestamptz not null default now(),
+--   primary key(user_id,batch_id)
+-- );
+-- 
+-- alter table public.player_telemetry_v1771 enable row level security;
+-- alter table public.player_level_milestones_v1771 enable row level security;
+-- alter table public.player_telemetry_batches_v1771 enable row level security;
+-- revoke all on public.player_telemetry_v1771,public.player_level_milestones_v1771,public.player_telemetry_batches_v1771 from anon,authenticated;
+-- 
+-- create or replace function public.telemetry_num_v1771(p_doc jsonb,p_path text[],p_min bigint default 0,p_max bigint default 1000000000000)
+-- returns bigint language plpgsql immutable set search_path=public,pg_temp as $$
+-- declare v text; n numeric;
+-- begin
+--   v:=p_doc#>>p_path;
+--   if v is null or v !~ '^-?[0-9]+([.][0-9]+)?$' then return 0; end if;
+--   n:=trunc(v::numeric);
+--   if n<p_min then return p_min; end if;
+--   if n>p_max then return p_max; end if;
+--   return n::bigint;
+-- exception when others then return 0;
+-- end;$$;
+-- revoke all on function public.telemetry_num_v1771(jsonb,text[],bigint,bigint) from public,anon,authenticated;
+-- 
+-- create or replace function public.record_player_telemetry_v1771(p_batch jsonb)
+-- returns jsonb language plpgsql security definer set search_path=public,auth,pg_temp as $$
+-- declare
+--   v_uid uuid:=auth.uid(); v_batch text; v_row public.player_telemetry_v1771%rowtype;
+--   v_sessions bigint;v_seconds bigint;v_kills bigint;v_boxes bigint;v_ore_nodes bigint;v_ore_units bigint;v_missions bigint;v_deaths bigint;v_jumps bigint;v_levelups bigint;
+--   v_spent_cr bigint;v_spent_stl bigint;v_level integer;v_credits bigint;v_stl bigint;v_xp bigint;v_title text;
+--   v_npc_cr bigint;v_npc_stl bigint;v_npc_xp bigint;v_mis_cr bigint;v_mis_stl bigint;v_mis_xp bigint;v_res_cr bigint;v_res_stl bigint;v_res_xp bigint;
+--   v_pass_cr bigint;v_pass_stl bigint;v_pass_xp bigint;v_event_cr bigint;v_event_stl bigint;v_event_xp bigint;v_gate_cr bigint;v_gate_stl bigint;v_gate_xp bigint;
+--   v_disc_cr bigint;v_disc_stl bigint;v_disc_xp bigint;v_other_cr bigint;v_other_stl bigint;v_other_xp bigint;v_cr_earned bigint;v_stl_earned bigint;v_xp_earned bigint;
+--   v_level_event jsonb;v_reached integer;
+-- begin
+--   if v_uid is null then raise exception 'Sessão inválida.'; end if;
+--   if p_batch is null or jsonb_typeof(p_batch)<>'object' then raise exception 'Telemetria inválida.'; end if;
+--   v_batch:=left(coalesce(nullif(trim(p_batch->>'batch_id'),''),gen_random_uuid()::text),80);
+--   insert into public.player_telemetry_batches_v1771(user_id,batch_id) values(v_uid,v_batch) on conflict do nothing;
+--   if not found then return jsonb_build_object('ok',true,'duplicate',true); end if;
+-- 
+--   v_sessions:=public.telemetry_num_v1771(p_batch,array['counters','sessions'],0,10);
+--   v_seconds:=public.telemetry_num_v1771(p_batch,array['counters','play_seconds'],0,900);
+--   v_kills:=public.telemetry_num_v1771(p_batch,array['counters','kills'],0,100000);
+--   v_boxes:=public.telemetry_num_v1771(p_batch,array['counters','boxes'],0,100000);
+--   v_ore_nodes:=public.telemetry_num_v1771(p_batch,array['counters','ore_nodes'],0,100000);
+--   v_ore_units:=public.telemetry_num_v1771(p_batch,array['counters','ore_units'],0,100000000);
+--   v_missions:=public.telemetry_num_v1771(p_batch,array['counters','missions_completed'],0,10000);
+--   v_deaths:=public.telemetry_num_v1771(p_batch,array['counters','deaths'],0,10000);
+--   v_jumps:=public.telemetry_num_v1771(p_batch,array['counters','map_jumps'],0,10000);
+--   v_levelups:=public.telemetry_num_v1771(p_batch,array['counters','level_ups'],0,100);
+--   v_spent_cr:=public.telemetry_num_v1771(p_batch,array['spent','cr'],0,1000000000000);
+--   v_spent_stl:=public.telemetry_num_v1771(p_batch,array['spent','stl'],0,1000000000000);
+-- 
+--   v_npc_cr:=public.telemetry_num_v1771(p_batch,array['sources','npc','cr']);v_npc_stl:=public.telemetry_num_v1771(p_batch,array['sources','npc','stl']);v_npc_xp:=public.telemetry_num_v1771(p_batch,array['sources','npc','xp']);
+--   v_mis_cr:=public.telemetry_num_v1771(p_batch,array['sources','mission','cr']);v_mis_stl:=public.telemetry_num_v1771(p_batch,array['sources','mission','stl']);v_mis_xp:=public.telemetry_num_v1771(p_batch,array['sources','mission','xp']);
+--   v_res_cr:=public.telemetry_num_v1771(p_batch,array['sources','resource','cr']);v_res_stl:=public.telemetry_num_v1771(p_batch,array['sources','resource','stl']);v_res_xp:=public.telemetry_num_v1771(p_batch,array['sources','resource','xp']);
+--   v_pass_cr:=public.telemetry_num_v1771(p_batch,array['sources','pass','cr']);v_pass_stl:=public.telemetry_num_v1771(p_batch,array['sources','pass','stl']);v_pass_xp:=public.telemetry_num_v1771(p_batch,array['sources','pass','xp']);
+--   v_event_cr:=public.telemetry_num_v1771(p_batch,array['sources','event','cr']);v_event_stl:=public.telemetry_num_v1771(p_batch,array['sources','event','stl']);v_event_xp:=public.telemetry_num_v1771(p_batch,array['sources','event','xp']);
+--   v_gate_cr:=public.telemetry_num_v1771(p_batch,array['sources','gate','cr']);v_gate_stl:=public.telemetry_num_v1771(p_batch,array['sources','gate','stl']);v_gate_xp:=public.telemetry_num_v1771(p_batch,array['sources','gate','xp']);
+--   v_disc_cr:=public.telemetry_num_v1771(p_batch,array['sources','discovery','cr']);v_disc_stl:=public.telemetry_num_v1771(p_batch,array['sources','discovery','stl']);v_disc_xp:=public.telemetry_num_v1771(p_batch,array['sources','discovery','xp']);
+--   v_other_cr:=public.telemetry_num_v1771(p_batch,array['sources','other','cr']);v_other_stl:=public.telemetry_num_v1771(p_batch,array['sources','other','stl']);v_other_xp:=public.telemetry_num_v1771(p_batch,array['sources','other','xp']);
+--   v_cr_earned:=v_npc_cr+v_mis_cr+v_res_cr+v_pass_cr+v_event_cr+v_gate_cr+v_disc_cr+v_other_cr;
+--   v_stl_earned:=v_npc_stl+v_mis_stl+v_res_stl+v_pass_stl+v_event_stl+v_gate_stl+v_disc_stl+v_other_stl;
+--   v_xp_earned:=v_npc_xp+v_mis_xp+v_res_xp+v_pass_xp+v_event_xp+v_gate_xp+v_disc_xp+v_other_xp;
+-- 
+--   v_level:=greatest(1,least(100,public.telemetry_num_v1771(p_batch,array['snapshot','level'],1,100)::integer));
+--   v_credits:=public.telemetry_num_v1771(p_batch,array['snapshot','credits'],0,9223372036854775807);
+--   v_stl:=public.telemetry_num_v1771(p_batch,array['snapshot','stl'],0,9223372036854775807);
+--   v_xp:=public.telemetry_num_v1771(p_batch,array['snapshot','xp'],0,9223372036854775807);
+--   v_title:=left(coalesce(nullif(trim(p_batch#>>'{snapshot,title}'),''),'Piloto Estelar'),64);
+-- 
+--   insert into public.player_telemetry_v1771(user_id,sessions,play_seconds,kills,boxes,ore_nodes,ore_units,missions_completed,deaths,map_jumps,level_ups,credits_earned,credits_spent,stl_earned,stl_spent,xp_earned,npc_cr,npc_stl,npc_xp,mission_cr,mission_stl,mission_xp,resource_cr,resource_stl,resource_xp,pass_cr,pass_stl,pass_xp,event_cr,event_stl,event_xp,gate_cr,gate_stl,gate_xp,discovery_cr,discovery_stl,discovery_xp,other_cr,other_stl,other_xp,last_level,last_credits,last_stl,last_xp,selected_title,first_seen_at,last_seen_at)
+--   values(v_uid,v_sessions,v_seconds,v_kills,v_boxes,v_ore_nodes,v_ore_units,v_missions,v_deaths,v_jumps,v_levelups,v_cr_earned,v_spent_cr,v_stl_earned,v_spent_stl,v_xp_earned,v_npc_cr,v_npc_stl,v_npc_xp,v_mis_cr,v_mis_stl,v_mis_xp,v_res_cr,v_res_stl,v_res_xp,v_pass_cr,v_pass_stl,v_pass_xp,v_event_cr,v_event_stl,v_event_xp,v_gate_cr,v_gate_stl,v_gate_xp,v_disc_cr,v_disc_stl,v_disc_xp,v_other_cr,v_other_stl,v_other_xp,v_level,v_credits,v_stl,v_xp,v_title,now(),now())
+--   on conflict(user_id) do update set
+--     sessions=player_telemetry_v1771.sessions+excluded.sessions,play_seconds=player_telemetry_v1771.play_seconds+excluded.play_seconds,kills=player_telemetry_v1771.kills+excluded.kills,boxes=player_telemetry_v1771.boxes+excluded.boxes,ore_nodes=player_telemetry_v1771.ore_nodes+excluded.ore_nodes,ore_units=player_telemetry_v1771.ore_units+excluded.ore_units,missions_completed=player_telemetry_v1771.missions_completed+excluded.missions_completed,deaths=player_telemetry_v1771.deaths+excluded.deaths,map_jumps=player_telemetry_v1771.map_jumps+excluded.map_jumps,level_ups=player_telemetry_v1771.level_ups+excluded.level_ups,
+--     credits_earned=player_telemetry_v1771.credits_earned+excluded.credits_earned,credits_spent=player_telemetry_v1771.credits_spent+excluded.credits_spent,stl_earned=player_telemetry_v1771.stl_earned+excluded.stl_earned,stl_spent=player_telemetry_v1771.stl_spent+excluded.stl_spent,xp_earned=player_telemetry_v1771.xp_earned+excluded.xp_earned,
+--     npc_cr=player_telemetry_v1771.npc_cr+excluded.npc_cr,npc_stl=player_telemetry_v1771.npc_stl+excluded.npc_stl,npc_xp=player_telemetry_v1771.npc_xp+excluded.npc_xp,mission_cr=player_telemetry_v1771.mission_cr+excluded.mission_cr,mission_stl=player_telemetry_v1771.mission_stl+excluded.mission_stl,mission_xp=player_telemetry_v1771.mission_xp+excluded.mission_xp,resource_cr=player_telemetry_v1771.resource_cr+excluded.resource_cr,resource_stl=player_telemetry_v1771.resource_stl+excluded.resource_stl,resource_xp=player_telemetry_v1771.resource_xp+excluded.resource_xp,
+--     pass_cr=player_telemetry_v1771.pass_cr+excluded.pass_cr,pass_stl=player_telemetry_v1771.pass_stl+excluded.pass_stl,pass_xp=player_telemetry_v1771.pass_xp+excluded.pass_xp,event_cr=player_telemetry_v1771.event_cr+excluded.event_cr,event_stl=player_telemetry_v1771.event_stl+excluded.event_stl,event_xp=player_telemetry_v1771.event_xp+excluded.event_xp,gate_cr=player_telemetry_v1771.gate_cr+excluded.gate_cr,gate_stl=player_telemetry_v1771.gate_stl+excluded.gate_stl,gate_xp=player_telemetry_v1771.gate_xp+excluded.gate_xp,discovery_cr=player_telemetry_v1771.discovery_cr+excluded.discovery_cr,discovery_stl=player_telemetry_v1771.discovery_stl+excluded.discovery_stl,discovery_xp=player_telemetry_v1771.discovery_xp+excluded.discovery_xp,other_cr=player_telemetry_v1771.other_cr+excluded.other_cr,other_stl=player_telemetry_v1771.other_stl+excluded.other_stl,other_xp=player_telemetry_v1771.other_xp+excluded.other_xp,
+--     last_level=excluded.last_level,last_credits=excluded.last_credits,last_stl=excluded.last_stl,last_xp=excluded.last_xp,selected_title=excluded.selected_title,last_seen_at=now();
+-- 
+--   select * into v_row from public.player_telemetry_v1771 where user_id=v_uid;
+--   if jsonb_typeof(p_batch->'level_events')='array' then
+--     for v_level_event in select value from jsonb_array_elements(p_batch->'level_events') loop
+--       begin v_reached:=greatest(1,least(100,(v_level_event->>'level')::integer)); exception when others then continue; end;
+--       insert into public.player_level_milestones_v1771(user_id,level,reached_at,play_seconds,kills,credits_earned,stl_earned,xp_earned,credits_balance,stl_balance)
+--       values(v_uid,v_reached,now(),v_row.play_seconds,v_row.kills,v_row.credits_earned,v_row.stl_earned,v_row.xp_earned,v_row.last_credits,v_row.last_stl)
+--       on conflict(user_id,level) do nothing;
+--     end loop;
+--   end if;
+--   return jsonb_build_object('ok',true,'duplicate',false,'play_seconds',v_row.play_seconds,'kills',v_row.kills,'last_level',v_row.last_level);
+-- end;$$;
+-- revoke all on function public.record_player_telemetry_v1771(jsonb) from public,anon;
+-- grant execute on function public.record_player_telemetry_v1771(jsonb) to authenticated,service_role;
+-- 
+-- create or replace function public.admin_telemetry_overview_v1771()
+-- returns jsonb language plpgsql security definer set search_path=public,auth,pg_temp as $$
+-- declare v_uid uuid:=auth.uid();v_summary jsonb;v_sources jsonb;v_milestones jsonb;v_players jsonb;
+-- begin
+--   if not public.is_game_admin_v1763(v_uid) then raise exception 'Acesso administrativo negado.'; end if;
+--   select jsonb_build_object('tracked_players',count(*),'play_seconds',coalesce(sum(play_seconds),0),'kills',coalesce(sum(kills),0),'missions_completed',coalesce(sum(missions_completed),0),'deaths',coalesce(sum(deaths),0),'credits_earned',coalesce(sum(credits_earned),0),'credits_spent',coalesce(sum(credits_spent),0),'stl_earned',coalesce(sum(stl_earned),0),'stl_spent',coalesce(sum(stl_spent),0),'xp_earned',coalesce(sum(xp_earned),0)) into v_summary from public.player_telemetry_v1771;
+--   select jsonb_agg(x order by x.sort_order) into v_sources from (
+--     select 1 sort_order,'npc' key,'NPCs' label,coalesce(sum(npc_cr),0) cr,coalesce(sum(npc_stl),0) stl,coalesce(sum(npc_xp),0) xp from public.player_telemetry_v1771
+--     union all select 2,'mission','Missões',coalesce(sum(mission_cr),0),coalesce(sum(mission_stl),0),coalesce(sum(mission_xp),0) from public.player_telemetry_v1771
+--     union all select 3,'resource','Recursos',coalesce(sum(resource_cr),0),coalesce(sum(resource_stl),0),coalesce(sum(resource_xp),0) from public.player_telemetry_v1771
+--     union all select 4,'pass','Passe / Nível',coalesce(sum(pass_cr),0),coalesce(sum(pass_stl),0),coalesce(sum(pass_xp),0) from public.player_telemetry_v1771
+--     union all select 5,'event','Eventos',coalesce(sum(event_cr),0),coalesce(sum(event_stl),0),coalesce(sum(event_xp),0) from public.player_telemetry_v1771
+--     union all select 6,'gate','Portais',coalesce(sum(gate_cr),0),coalesce(sum(gate_stl),0),coalesce(sum(gate_xp),0) from public.player_telemetry_v1771
+--     union all select 7,'discovery','Exploração',coalesce(sum(discovery_cr),0),coalesce(sum(discovery_stl),0),coalesce(sum(discovery_xp),0) from public.player_telemetry_v1771
+--     union all select 8,'other','Outros',coalesce(sum(other_cr),0),coalesce(sum(other_stl),0),coalesce(sum(other_xp),0) from public.player_telemetry_v1771
+--   ) x;
+--   select coalesce(jsonb_agg(row_to_json(m) order by m.level),'[]'::jsonb) into v_milestones from (
+--     select level,count(*) players,round(avg(play_seconds))::bigint avg_seconds,round(avg(kills))::bigint avg_kills,round(avg(credits_earned))::bigint avg_cr_earned,round(avg(stl_earned))::bigint avg_stl_earned from public.player_level_milestones_v1771 where level in(2,3,5,6,7,8,10,12,15,20,30,40) group by level
+--   ) m;
+--   select coalesce(jsonb_agg(row_to_json(p) order by p.last_seen_at desc),'[]'::jsonb) into v_players from (
+--     select t.user_id::text,coalesce(pr.callsign,'Pilot') callsign,t.last_level level,t.selected_title,t.play_seconds,t.sessions,t.kills,t.missions_completed,t.deaths,t.ore_units,t.credits_earned,t.credits_spent,t.stl_earned,t.stl_spent,t.xp_earned,
+--       case when t.play_seconds>0 then round(t.credits_earned*3600.0/t.play_seconds)::bigint else 0 end cr_per_hour,
+--       case when t.play_seconds>0 then round(t.stl_earned*3600.0/t.play_seconds)::bigint else 0 end stl_per_hour,
+--       case when t.play_seconds>0 then round(t.xp_earned*3600.0/t.play_seconds)::bigint else 0 end xp_per_hour,
+--       t.last_credits,t.last_stl,t.last_seen_at from public.player_telemetry_v1771 t left join public.profiles pr on pr.id=t.user_id order by t.last_seen_at desc limit 80
+--   ) p;
+--   return jsonb_build_object('summary',coalesce(v_summary,'{}'::jsonb),'sources',coalesce(v_sources,'[]'::jsonb),'milestones',v_milestones,'players',v_players);
+-- end;$$;
+-- revoke all on function public.admin_telemetry_overview_v1771() from public,anon;
+-- grant execute on function public.admin_telemetry_overview_v1771() to authenticated,service_role;
+-- 
+-- create or replace function public.admin_player_telemetry_v1771(p_target_user_id uuid)
+-- returns jsonb language plpgsql security definer set search_path=public,auth,pg_temp as $$
+-- declare v_uid uuid:=auth.uid();v_data jsonb;v_milestones jsonb;
+-- begin
+--   if not public.is_game_admin_v1763(v_uid) then raise exception 'Acesso administrativo negado.'; end if;
+--   select to_jsonb(t)||jsonb_build_object('callsign',coalesce(p.callsign,'Pilot')) into v_data from public.player_telemetry_v1771 t left join public.profiles p on p.id=t.user_id where t.user_id=p_target_user_id;
+--   select coalesce(jsonb_agg(row_to_json(m) order by m.level),'[]'::jsonb) into v_milestones from public.player_level_milestones_v1771 m where m.user_id=p_target_user_id;
+--   return jsonb_build_object('telemetry',coalesce(v_data,'{}'::jsonb),'milestones',v_milestones);
+-- end;$$;
+-- revoke all on function public.admin_player_telemetry_v1771(uuid) from public,anon;
+-- grant execute on function public.admin_player_telemetry_v1771(uuid) to authenticated,service_role;
+-- 
+-- -- The production migration also updates admin_reset_account_v1763 so an ADM test reset
+-- -- removes rows from the three telemetry tables. Keep the full account reset implementation
+-- -- in V17_6_3_ADMIN_CONTROL_PANEL.sql and add these lines before resetting public.profiles:
+-- --   delete from public.player_level_milestones_v1771 where user_id=p_target_user_id;
+-- --   delete from public.player_telemetry_batches_v1771 where user_id=p_target_user_id;
+-- --   delete from public.player_telemetry_v1771 where user_id=p_target_user_id;
+-- ===== END V17_7_1_TELEMETRY_TITLES.sql =====
+
+-- ===== START V17_7_5_POSITION_SQL_CLEANUP.sql | sha256 28536194c83b5804c4375b4ba8db6b9cf667466f4af8e3dea18bc594210974eb =====
+-- -- Stellar Legacy 17.7.5 — Position Root Fix + SQL cleanup
+-- -- Migration já aplicada no Supabase de produção.
+-- -- Mantida no ZIP apenas como referência técnica.
+-- 
+-- -- 1) O reset ADM não depende mais das tabelas normalizadas antigas.
+-- -- 2) As tabelas vazias/obsoletas foram removidas do banco:
+-- --    ammunition, inventory, inventory_items, owned_ships, player_drones,
+-- --    player_state, ship_loadout, chatgpt_deploy_chunks, chatgpt_deploy_files.
+-- -- 3) player_presence espelha a posição real para player_location_v1774.
+-- --    Assim a persistência continua funcionando mesmo se a chamada RPC direta
+-- --    de checkpoint falhar no navegador.
+-- 
+-- create or replace function public.mirror_presence_to_location_v1775()
+-- returns trigger
+-- language plpgsql
+-- security definer
+-- set search_path=public,pg_temp
+-- as $$
+-- declare
+--   v_stamp bigint;
+-- begin
+--   if new.user_id is null or new.map_id is null then return new; end if;
+--   if new.x is null or new.y is null then return new; end if;
+--   v_stamp:=floor(extract(epoch from coalesce(new.updated_at,now()))*1000)::bigint;
+-- 
+--   insert into public.player_location_v1774(
+--     user_id,map_id,territory_faction,x,y,angle,client_saved_at,updated_at
+--   ) values(
+--     new.user_id,new.map_id,new.territory_faction,new.x,new.y,coalesce(new.angle,0),v_stamp,coalesce(new.updated_at,now())
+--   )
+--   on conflict(user_id) do update set
+--     map_id=excluded.map_id,
+--     territory_faction=excluded.territory_faction,
+--     x=excluded.x,
+--     y=excluded.y,
+--     angle=excluded.angle,
+--     client_saved_at=greatest(public.player_location_v1774.client_saved_at,excluded.client_saved_at),
+--     updated_at=excluded.updated_at
+--   where excluded.updated_at>=public.player_location_v1774.updated_at;
+-- 
+--   return new;
+-- end;
+-- $$;
+-- 
+-- drop trigger if exists player_presence_location_mirror_v1775 on public.player_presence;
+-- create trigger player_presence_location_mirror_v1775
+-- after insert or update of map_id,territory_faction,x,y,angle,updated_at
+-- on public.player_presence
+-- for each row execute function public.mirror_presence_to_location_v1775();
+-- 
+-- revoke all on function public.mirror_presence_to_location_v1775() from public,anon,authenticated;
+-- 
+-- -- Os DROP abaixo também já foram aplicados em produção.
+-- drop table if exists public.ammunition restrict;
+-- drop table if exists public.inventory_items restrict;
+-- drop table if exists public.owned_ships restrict;
+-- drop table if exists public.player_drones restrict;
+-- drop table if exists public.player_state restrict;
+-- drop table if exists public.ship_loadout restrict;
+-- drop table if exists public.inventory restrict;
+-- drop table if exists public.chatgpt_deploy_chunks restrict;
+-- drop table if exists public.chatgpt_deploy_files restrict;
+-- ===== END V17_7_5_POSITION_SQL_CLEANUP.sql =====
+
+-- ===== START V17_9_0_BATTLE_GROUPS.sql | sha256 fa3810dff1d9b3ca6e982d7c52e8fe4c8e8e8f248648aa0519f34ed8dfae4c93 =====
+-- -- Applied to Supabase: battle_groups_v179, battle_group_members_v179, battle_group_invites_v179 and secured RPCs.
+-- -- Source of truth is the deployed migration v17_9_0_battle_groups.
+-- ===== END V17_9_0_BATTLE_GROUPS.sql =====
+
+-- ===== START V18_1_0_DATA_DRIVEN_CORE_STAGE1.sql | sha256 9aa8888da40973dd822b69215aa84bb605eb56731dd335b5f65bc537abe4bf1f =====
+-- -- Applied to Supabase as migration v18_1_0_data_driven_core_stage1.
+-- -- Source-of-truth schema: game_runtime_meta_v1810, game_ui_modules_v1810, game_feature_flags_v1810.
+-- -- Runtime RPC: get_game_runtime_config_v1810().
+-- -- Admin RPCs: admin_update_ui_module_v1810(), admin_update_feature_flag_v1810().
+-- ===== END V18_1_0_DATA_DRIVEN_CORE_STAGE1.sql =====
+
+-- ===== START V18_1_1_NPC_RUNTIME_CONFIG.sql | sha256 0b3d331e0007ac7ed91131c5ec339dd63977d6b6d3b9e60269d222296c2c6ccf =====
+-- -- Stellar Legacy V18.1.1 — NPCs + Recompensas Data Driven
+-- 
+-- insert into public.game_runtime_meta_v1810(config_key,version)
+-- values('npc',1)
+-- on conflict(config_key) do nothing;
+-- 
+-- create table if not exists public.game_npc_config_v1811 (
+--   npc_key text primary key,
+--   name text not null,
+--   hp bigint not null check(hp >= 1),
+--   shield bigint not null default 0 check(shield >= 0),
+--   credits bigint not null default 0 check(credits >= 0),
+--   stl bigint not null default 0 check(stl >= 0),
+--   xp bigint not null default 0 check(xp >= 0),
+--   speed numeric not null default 30 check(speed >= 1 and speed <= 1000),
+--   damage bigint not null default 1 check(damage >= 0),
+--   color text not null default '#ff755d',
+--   size numeric not null default 18 check(size >= 4 and size <= 250),
+--   resources jsonb not null default '{}'::jsonb,
+--   respawn_min_ms integer not null default 6000 check(respawn_min_ms between 1000 and 600000),
+--   respawn_max_ms integer not null default 13000 check(respawn_max_ms between 1000 and 600000),
+--   enabled boolean not null default true,
+--   updated_at timestamptz not null default now(),
+--   check(respawn_max_ms >= respawn_min_ms)
+-- );
+-- 
+-- create table if not exists public.game_map_npc_spawns_v1811 (
+--   map_id text not null,
+--   npc_key text not null references public.game_npc_config_v1811(npc_key) on delete cascade,
+--   spawn_count integer not null default 0 check(spawn_count between 0 and 500),
+--   enabled boolean not null default true,
+--   updated_at timestamptz not null default now(),
+--   primary key(map_id,npc_key)
+-- );
+-- 
+-- alter table public.game_npc_config_v1811 enable row level security;
+-- alter table public.game_map_npc_spawns_v1811 enable row level security;
+-- revoke all on public.game_npc_config_v1811,public.game_map_npc_spawns_v1811 from anon,authenticated;
+-- 
+-- create or replace function public.bump_npc_runtime_config_v1811()
+-- returns trigger
+-- language plpgsql
+-- security definer
+-- set search_path=public,pg_temp
+-- as $$
+-- begin
+--   insert into public.game_runtime_meta_v1810(config_key,version,updated_at)
+--   values('npc',1,now())
+--   on conflict(config_key) do update
+--   set version=public.game_runtime_meta_v1810.version+1,
+--       updated_at=now();
+--   return null;
+-- end;
+-- $$;
+-- 
+-- drop trigger if exists game_npc_config_bump_v1811 on public.game_npc_config_v1811;
+-- create trigger game_npc_config_bump_v1811
+-- after insert or update or delete on public.game_npc_config_v1811
+-- for each statement execute function public.bump_npc_runtime_config_v1811();
+-- 
+-- drop trigger if exists game_map_npc_spawns_bump_v1811 on public.game_map_npc_spawns_v1811;
+-- create trigger game_map_npc_spawns_bump_v1811
+-- after insert or update or delete on public.game_map_npc_spawns_v1811
+-- for each statement execute function public.bump_npc_runtime_config_v1811();
+-- 
+-- insert into public.game_npc_config_v1811
+-- (npc_key,name,hp,shield,credits,stl,xp,speed,damage,color,size,resources,respawn_min_ms,respawn_max_ms,enabled)
+-- values
+-- ('streuner','Scavenger',800,400,7500,15,200,62,60,'#ff8e47',15,'{"Prometium":10,"Terbium":10}'::jsonb,6000,13000,true),
+-- ('recruitStreuner','Scavenger Scout',600,800,9000,20,260,68,120,'#ffa852',14,'{"Prometium":12,"Terbium":12}'::jsonb,6000,13000,true),
+-- ('aiderStreuner','Scavenger Support',1500,1000,12000,25,340,72,210,'#ffbb62',16,'{"Prometium":15,"Terbium":15}'::jsonb,6000,13000,true),
+-- ('bossStreuner','Scavenger Prime',1600,800,15000,30,400,62,120,'#ff5e6e',19,'{"Prometium":20,"Terbium":20}'::jsonb,7000,15000,true),
+-- ('lordakia','Vrax',2000,2000,18000,30,480,95,240,'#9f73ff',18,'{"Prometium":20,"Terbium":20,"Endurium":20}'::jsonb,6000,13000,true),
+-- ('bossLordakia','Vrax Prime',4000,4000,36000,60,960,95,480,'#c765ff',22,'{"Prometium":40,"Terbium":40,"Endurium":40,"Xenomit":1}'::jsonb,7000,15000,true),
+-- ('saimon','Zyron',6000,6000,35000,45,960,82,600,'#55e2ff',20,'{"Prometium":40,"Terbium":40,"Endurium":40,"Prometid":2,"Duranium":2}'::jsonb,6500,13500,true),
+-- ('bossSaimon','Zyron Prime',12000,12000,70000,90,1920,82,1200,'#24b0ff',25,'{"Prometium":80,"Terbium":80,"Endurium":80,"Prometid":4,"Duranium":4,"Xenomit":2}'::jsonb,7500,15500,true),
+-- ('mordon','Kharon',20000,10000,90000,100,2400,52,1170,'#ffa34d',25,'{"Prometium":80,"Terbium":80,"Endurium":80,"Prometid":8,"Duranium":8,"Promerium":1}'::jsonb,7000,14500,true),
+-- ('bossMordon','Kharon Prime',40000,20000,180000,200,4800,52,2340,'#ff6948',31,'{"Prometium":160,"Terbium":160,"Endurium":160,"Prometid":16,"Duranium":16,"Promerium":2,"Xenomit":4}'::jsonb,8000,16500,true),
+-- ('devolarium','Dreadnox',100000,100000,300000,250,7200,38,3600,'#7edcff',32,'{"Prometium":100,"Terbium":100,"Endurium":100,"Prometid":16,"Duranium":16,"Promerium":2}'::jsonb,8000,16000,true),
+-- ('bossDevolarium','Dreadnox Prime',200000,200000,600000,500,14400,38,7200,'#c8f0ff',40,'{"Prometium":200,"Terbium":200,"Endurium":200,"Prometid":32,"Duranium":32,"Promerium":4,"Xenomit":8}'::jsonb,9000,18000,true),
+-- ('sibelon','Colossar',200000,200000,650000,400,12000,30,7950,'#66ffcb',36,'{"Prometium":200,"Terbium":200,"Endurium":200,"Prometid":32,"Duranium":32,"Promerium":4}'::jsonb,9000,18000,true),
+-- ('bossSibelon','Colossar Prime',400000,400000,1300000,800,24000,30,15900,'#19d59d',45,'{"Prometium":400,"Terbium":400,"Endurium":400,"Prometid":64,"Duranium":64,"Promerium":8,"Xenomit":16}'::jsonb,10000,20000,true)
+-- on conflict(npc_key) do nothing;
+-- 
+-- -- Contagens abaixo preservam exatamente a população efetiva da V18.1.0
+-- -- (enemyGroups * enemyMultiplier), mas agora são valores explícitos e editáveis.
+-- insert into public.game_map_npc_spawns_v1811(map_id,npc_key,spawn_count,enabled) values
+-- ('x1','streuner',24,true),('x1','recruitStreuner',13,true),('x1','aiderStreuner',11,true),
+-- ('x2','streuner',16,true),('x2','recruitStreuner',11,true),('x2','aiderStreuner',11,true),('x2','bossStreuner',8,true),('x2','lordakia',19,true),('x2','bossLordakia',5,true),
+-- ('x3','lordakia',17,true),('x3','saimon',17,true),('x3','bossSaimon',5,true),('x3','mordon',14,true),('x3','bossMordon',5,true),('x3','devolarium',5,true),('x3','bossDevolarium',2,true),
+-- ('x4','lordakia',12,true),('x4','saimon',14,true),('x4','bossSaimon',9,true),('x4','mordon',14,true),('x4','sibelon',7,true),('x4','bossSibelon',4,true),
+-- ('b41','lordakia',15,true),('b41','saimon',19,true),('b41','mordon',15,true),('b41','bossMordon',8,true),('b41','devolarium',8,true),
+-- ('b42','saimon',18,true),('b42','mordon',20,true),('b42','bossMordon',10,true),('b42','devolarium',12,true),('b42','bossDevolarium',4,true),
+-- ('b43','mordon',20,true),('b43','devolarium',18,true),('b43','bossDevolarium',9,true),('b43','sibelon',13,true),('b43','bossSibelon',7,true)
+-- on conflict(map_id,npc_key) do nothing;
+-- 
+-- create or replace function public.get_npc_runtime_config_v1811()
+-- returns jsonb
+-- language plpgsql
+-- security definer
+-- set search_path=public,pg_temp
+-- as $$
+-- declare
+--   v_version bigint:=1;
+--   v_updated timestamptz;
+--   v_npcs jsonb;
+--   v_spawns jsonb;
+-- begin
+--   select version,updated_at into v_version,v_updated
+--   from public.game_runtime_meta_v1810
+--   where config_key='npc';
+-- 
+--   select coalesce(jsonb_agg(row_to_json(n) order by n.npc_key),'[]'::jsonb)
+--   into v_npcs
+--   from (
+--     select npc_key,name,hp,shield,credits,stl,xp,speed,damage,color,size,resources,
+--            respawn_min_ms,respawn_max_ms,enabled
+--     from public.game_npc_config_v1811
+--     order by npc_key
+--   ) n;
+-- 
+--   select coalesce(jsonb_agg(row_to_json(s) order by s.map_id,s.npc_key),'[]'::jsonb)
+--   into v_spawns
+--   from (
+--     select map_id,npc_key,spawn_count,enabled
+--     from public.game_map_npc_spawns_v1811
+--     order by map_id,npc_key
+--   ) s;
+-- 
+--   return jsonb_build_object(
+--     'version',coalesce(v_version,1),
+--     'updated_at',v_updated,
+--     'npcs',v_npcs,
+--     'spawns',v_spawns
+--   );
+-- end;
+-- $$;
+-- 
+-- create or replace function public.admin_update_npc_v1811(
+--   p_npc_key text,
+--   p_name text default null,
+--   p_hp bigint default null,
+--   p_shield bigint default null,
+--   p_credits bigint default null,
+--   p_stl bigint default null,
+--   p_xp bigint default null,
+--   p_speed numeric default null,
+--   p_damage bigint default null,
+--   p_color text default null,
+--   p_size numeric default null,
+--   p_resources jsonb default null,
+--   p_respawn_min_ms integer default null,
+--   p_respawn_max_ms integer default null,
+--   p_enabled boolean default null
+-- )
+-- returns jsonb
+-- language plpgsql
+-- security definer
+-- set search_path=public,auth,pg_temp
+-- as $$
+-- declare v_uid uuid:=auth.uid();
+-- begin
+--   if not public.is_game_admin_v1763(v_uid) then raise exception 'Acesso administrativo negado.'; end if;
+--   update public.game_npc_config_v1811
+--   set name=coalesce(nullif(trim(p_name),''),name),
+--       hp=coalesce(greatest(1,p_hp),hp),
+--       shield=coalesce(greatest(0,p_shield),shield),
+--       credits=coalesce(greatest(0,p_credits),credits),
+--       stl=coalesce(greatest(0,p_stl),stl),
+--       xp=coalesce(greatest(0,p_xp),xp),
+--       speed=coalesce(greatest(1,least(1000,p_speed)),speed),
+--       damage=coalesce(greatest(0,p_damage),damage),
+--       color=coalesce(nullif(trim(p_color),''),color),
+--       size=coalesce(greatest(4,least(250,p_size)),size),
+--       resources=coalesce(p_resources,resources),
+--       respawn_min_ms=coalesce(greatest(1000,least(600000,p_respawn_min_ms)),respawn_min_ms),
+--       respawn_max_ms=coalesce(greatest(1000,least(600000,p_respawn_max_ms)),respawn_max_ms),
+--       enabled=coalesce(p_enabled,enabled),
+--       updated_at=now()
+--   where npc_key=p_npc_key;
+--   if not found then raise exception 'NPC não encontrado.'; end if;
+--   if exists(select 1 from public.game_npc_config_v1811 where npc_key=p_npc_key and respawn_max_ms<respawn_min_ms) then
+--     raise exception 'Respawn máximo deve ser maior ou igual ao mínimo.';
+--   end if;
+--   return public.get_npc_runtime_config_v1811();
+-- end;
+-- $$;
+-- 
+-- create or replace function public.admin_update_map_npc_spawn_v1811(
+--   p_map_id text,
+--   p_npc_key text,
+--   p_spawn_count integer default null,
+--   p_enabled boolean default null
+-- )
+-- returns jsonb
+-- language plpgsql
+-- security definer
+-- set search_path=public,auth,pg_temp
+-- as $$
+-- declare v_uid uuid:=auth.uid();
+-- begin
+--   if not public.is_game_admin_v1763(v_uid) then raise exception 'Acesso administrativo negado.'; end if;
+--   if not exists(select 1 from public.game_npc_config_v1811 where npc_key=p_npc_key) then raise exception 'NPC não encontrado.'; end if;
+--   insert into public.game_map_npc_spawns_v1811(map_id,npc_key,spawn_count,enabled,updated_at)
+--   values(trim(p_map_id),p_npc_key,greatest(0,least(500,coalesce(p_spawn_count,0))),coalesce(p_enabled,true),now())
+--   on conflict(map_id,npc_key) do update
+--   set spawn_count=coalesce(greatest(0,least(500,p_spawn_count)),public.game_map_npc_spawns_v1811.spawn_count),
+--       enabled=coalesce(p_enabled,public.game_map_npc_spawns_v1811.enabled),
+--       updated_at=now();
+--   return public.get_npc_runtime_config_v1811();
+-- end;
+-- $$;
+-- 
+-- revoke all on function public.get_npc_runtime_config_v1811() from public;
+-- revoke all on function public.admin_update_npc_v1811(text,text,bigint,bigint,bigint,bigint,bigint,numeric,bigint,text,numeric,jsonb,integer,integer,boolean) from public,anon;
+-- revoke all on function public.admin_update_map_npc_spawn_v1811(text,text,integer,boolean) from public,anon;
+-- grant execute on function public.get_npc_runtime_config_v1811() to anon,authenticated,service_role;
+-- grant execute on function public.admin_update_npc_v1811(text,text,bigint,bigint,bigint,bigint,bigint,numeric,bigint,text,numeric,jsonb,integer,integer,boolean) to authenticated,service_role;
+-- grant execute on function public.admin_update_map_npc_spawn_v1811(text,text,integer,boolean) to authenticated,service_role;
+-- ===== END V18_1_1_NPC_RUNTIME_CONFIG.sql =====
+
+-- ===== START V18_1_3_SERVER_RUNTIME_TOPBAR.sql | sha256 890143ded439038d259bdff2de74e9cf0a79b811ee9d683844744eacd6f51dab =====
+-- -- Stellar Legacy V18.1.3 — Server Runtime Topbar Cache
+-- -- Aplicada no Supabase: snapshot público de configuração para o Render materializar em JSON temporário.
+-- 
+-- create or replace function public.get_game_runtime_public_v1813()
+-- returns jsonb
+-- language plpgsql
+-- security definer
+-- set search_path=public,pg_temp
+-- as $$
+-- declare
+--   v_version bigint:=1;
+--   v_updated timestamptz;
+--   v_modules jsonb;
+--   v_flags jsonb;
+-- begin
+--   select version,updated_at into v_version,v_updated
+--   from public.game_runtime_meta_v1810
+--   where config_key='core';
+-- 
+--   select coalesce(jsonb_agg(row_to_json(m) order by m.parent_sort,m.sort_order,m.module_key),'[]'::jsonb)
+--   into v_modules
+--   from (
+--     select u.module_key,u.parent_key,u.label,u.sort_order,u.min_level,u.enabled,
+--            u.hide_until_level,u.admin_only,u.config,
+--            coalesce(p.sort_order,u.sort_order) parent_sort
+--     from public.game_ui_modules_v1810 u
+--     left join public.game_ui_modules_v1810 p on p.module_key=u.parent_key
+--     order by coalesce(p.sort_order,u.sort_order),u.sort_order,u.module_key
+--   ) m;
+-- 
+--   select coalesce(jsonb_agg(row_to_json(f) order by f.flag_key),'[]'::jsonb)
+--   into v_flags
+--   from (
+--     select flag_key,enabled,description,config
+--     from public.game_feature_flags_v1810
+--     order by flag_key
+--   ) f;
+-- 
+--   return jsonb_build_object(
+--     'version',coalesce(v_version,1),
+--     'updated_at',v_updated,
+--     'modules',coalesce(v_modules,'[]'::jsonb),
+--     'flags',coalesce(v_flags,'[]'::jsonb)
+--   );
+-- end;
+-- $$;
+-- 
+-- revoke all on function public.get_game_runtime_public_v1813() from public;
+-- grant execute on function public.get_game_runtime_public_v1813() to anon,authenticated,service_role;
+-- ===== END V18_1_3_SERVER_RUNTIME_TOPBAR.sql =====
+
+-- ===== START V18_1_5_SYSTEMS_RUNTIME.sql | sha256 905229ca87448f7c453c026c359c08e734896a55f3d2e3f68efec273c08687ae =====
+-- -- Stellar Legacy V18.1.5 — Systems Runtime
+-- -- Migration de produção já aplicada no Supabase.
+-- -- Objetos principais:
+-- --   public.game_mission_category_v1815
+-- --   public.game_mission_custom_v1815
+-- --   public.game_economy_service_v1815
+-- --   public.game_crafting_recipe_v1815
+-- --   public.get_systems_runtime_config_v1815()
+-- --   public.admin_update_mission_category_v1815(...)
+-- --   public.admin_upsert_custom_mission_v1815(...)
+-- --   public.admin_delete_custom_mission_v1815(...)
+-- --   public.admin_update_economy_service_v1815(...)
+-- --   public.admin_update_crafting_recipe_v1815(...)
+-- -- O runtime é materializado pelo Render em systems.runtime.json.
+-- ===== END V18_1_5_SYSTEMS_RUNTIME.sql =====
+
+-- ===== START V18_1_6C_NPC_EDITOR_SAFETY.sql | sha256 bab67dc6db89d00099245f362d289993160507942692c65012b0a8ab63aa7160 =====
+-- -- Stellar Legacy V18.1.6C — segurança dos campos opcionais do editor de NPCs.
+-- -- Mantém o valor existente quando um parâmetro opcional chega NULL.
+-- create or replace function public.admin_update_npc_v1811(
+--   p_npc_key text,
+--   p_name text default null,
+--   p_hp bigint default null,
+--   p_shield bigint default null,
+--   p_credits bigint default null,
+--   p_stl bigint default null,
+--   p_xp bigint default null,
+--   p_speed numeric default null,
+--   p_damage bigint default null,
+--   p_color text default null,
+--   p_size numeric default null,
+--   p_resources jsonb default null,
+--   p_respawn_min_ms integer default null,
+--   p_respawn_max_ms integer default null,
+--   p_enabled boolean default null
+-- )
+-- returns jsonb
+-- language plpgsql
+-- security definer
+-- set search_path=public,auth,pg_temp
+-- as $$
+-- declare v_uid uuid:=auth.uid();
+-- begin
+--   if not public.is_game_admin_v1763(v_uid) then raise exception 'Acesso administrativo negado.'; end if;
+--   update public.game_npc_config_v1811
+--   set name=case when p_name is null or trim(p_name)='' then name else trim(p_name) end,
+--       hp=case when p_hp is null then hp else greatest(1,p_hp) end,
+--       shield=case when p_shield is null then shield else greatest(0,p_shield) end,
+--       credits=case when p_credits is null then credits else greatest(0,p_credits) end,
+--       stl=case when p_stl is null then stl else greatest(0,p_stl) end,
+--       xp=case when p_xp is null then xp else greatest(0,p_xp) end,
+--       speed=case when p_speed is null then speed else greatest(1,least(1000,p_speed)) end,
+--       damage=case when p_damage is null then damage else greatest(0,p_damage) end,
+--       color=case when p_color is null or trim(p_color)='' then color else trim(p_color) end,
+--       size=case when p_size is null then size else greatest(4,least(250,p_size)) end,
+--       resources=case when p_resources is null then resources else p_resources end,
+--       respawn_min_ms=case when p_respawn_min_ms is null then respawn_min_ms else greatest(1000,least(600000,p_respawn_min_ms)) end,
+--       respawn_max_ms=case when p_respawn_max_ms is null then respawn_max_ms else greatest(1000,least(600000,p_respawn_max_ms)) end,
+--       enabled=case when p_enabled is null then enabled else p_enabled end,
+--       updated_at=now()
+--   where npc_key=p_npc_key;
+--   if not found then raise exception 'NPC não encontrado.'; end if;
+--   if exists(select 1 from public.game_npc_config_v1811 where npc_key=p_npc_key and respawn_max_ms<respawn_min_ms) then
+--     raise exception 'Respawn máximo deve ser maior ou igual ao mínimo.';
+--   end if;
+--   return public.get_npc_runtime_config_v1811();
+-- end;
+-- $$;
+-- ===== END V18_1_6C_NPC_EDITOR_SAFETY.sql =====
+
+-- ===== START V18_1_6D_WORLD_EDITOR_SAFETY.sql | sha256 c5d8b1bf9b496dd87ae36aa8f93f400fb427bcf4746494c423ab7bbaa1f2479b =====
+-- -- Stellar Legacy V18.1.6D — segurança dos campos opcionais do Editor de Mundo.
+-- 
+-- create or replace function public.admin_update_map_v1814(
+--   p_map_id text,p_name text default null,p_risk text default null,p_world_w integer default null,p_world_h integer default null,
+--   p_enemy_multiplier numeric default null,p_ore_count integer default null,p_ore_respawn_min_ms integer default null,p_ore_respawn_max_ms integer default null,
+--   p_landmark_count integer default null,p_min_level integer default null,p_enabled boolean default null,p_palette jsonb default null,p_structures jsonb default null
+-- ) returns jsonb language plpgsql security definer set search_path=public,auth,pg_temp as $$
+-- declare v_uid uuid:=auth.uid();
+-- begin
+--  if not public.is_game_admin_v1763(v_uid) then raise exception 'Acesso administrativo negado.'; end if;
+--  update public.game_map_config_v1814 set
+--   name=case when p_name is null or trim(p_name)='' then name else trim(p_name) end,
+--   risk=case when p_risk is null or trim(p_risk)='' then risk else trim(p_risk) end,
+--   world_w=case when p_world_w is null then world_w else greatest(1000,least(50000,p_world_w)) end,
+--   world_h=case when p_world_h is null then world_h else greatest(1000,least(50000,p_world_h)) end,
+--   enemy_multiplier=case when p_enemy_multiplier is null then enemy_multiplier else greatest(.1,least(10,p_enemy_multiplier)) end,
+--   ore_count=case when p_ore_count is null then ore_count else greatest(0,least(1000,p_ore_count)) end,
+--   ore_respawn_min_ms=case when p_ore_respawn_min_ms is null then ore_respawn_min_ms else greatest(1000,least(600000,p_ore_respawn_min_ms)) end,
+--   ore_respawn_max_ms=case when p_ore_respawn_max_ms is null then ore_respawn_max_ms else greatest(1000,least(600000,p_ore_respawn_max_ms)) end,
+--   landmark_count=case when p_landmark_count is null then landmark_count else greatest(0,least(100,p_landmark_count)) end,
+--   min_level=case when p_min_level is null then min_level else greatest(1,least(100,p_min_level)) end,
+--   enabled=case when p_enabled is null then enabled else p_enabled end,
+--   palette=case when p_palette is null then palette else p_palette end,
+--   structures=case when p_structures is null then structures else p_structures end,
+--   updated_at=now()
+--  where map_id=p_map_id;
+--  if not found then raise exception 'Mapa não encontrado.'; end if;
+--  if exists(select 1 from public.game_map_config_v1814 where map_id=p_map_id and ore_respawn_max_ms<ore_respawn_min_ms) then
+--    raise exception 'Respawn máximo deve ser maior ou igual ao mínimo.';
+--  end if;
+--  return public.get_world_runtime_config_v1814();
+-- end; $$;
+-- 
+-- create or replace function public.admin_update_resource_v1814(
+--  p_resource_key text,p_name text default null,p_color text default null,p_sell_price bigint default null,p_enabled boolean default null
+-- ) returns jsonb language plpgsql security definer set search_path=public,auth,pg_temp as $$
+-- declare v_uid uuid:=auth.uid();
+-- begin
+--  if not public.is_game_admin_v1763(v_uid) then raise exception 'Acesso administrativo negado.'; end if;
+--  update public.game_resource_config_v1814 set
+--   name=case when p_name is null or trim(p_name)='' then name else trim(p_name) end,
+--   color=case when p_color is null or trim(p_color)='' then color else trim(p_color) end,
+--   sell_price=case when p_sell_price is null then sell_price else greatest(0,p_sell_price) end,
+--   enabled=case when p_enabled is null then enabled else p_enabled end,
+--   updated_at=now()
+--  where resource_key=p_resource_key;
+--  if not found then raise exception 'Recurso não encontrado.'; end if;
+--  return public.get_world_runtime_config_v1814();
+-- end; $$;
+-- 
+-- create or replace function public.admin_update_sector_v1814(
+--  p_sector_label text,p_graph_x numeric default null,p_graph_y numeric default null,p_min_level integer default null,p_enabled boolean default null
+-- ) returns jsonb language plpgsql security definer set search_path=public,auth,pg_temp as $$
+-- declare v_uid uuid:=auth.uid();
+-- begin
+--  if not public.is_game_admin_v1763(v_uid) then raise exception 'Acesso administrativo negado.'; end if;
+--  update public.game_sector_nodes_v1814 set
+--   graph_x=case when p_graph_x is null then graph_x else greatest(0,least(100,p_graph_x)) end,
+--   graph_y=case when p_graph_y is null then graph_y else greatest(0,least(100,p_graph_y)) end,
+--   min_level=case when p_min_level is null then min_level else greatest(1,least(100,p_min_level)) end,
+--   enabled=case when p_enabled is null then enabled else p_enabled end,
+--   updated_at=now()
+--  where sector_label=p_sector_label;
+--  if not found then raise exception 'Setor não encontrado.'; end if;
+--  return public.get_world_runtime_config_v1814();
+-- end; $$;
+-- 
+-- create or replace function public.admin_update_portal_link_v1814(
+--  p_portal_key text,p_enabled boolean default null,p_bidirectional boolean default null,p_sort_order integer default null
+-- ) returns jsonb language plpgsql security definer set search_path=public,auth,pg_temp as $$
+-- declare v_uid uuid:=auth.uid();
+-- begin
+--  if not public.is_game_admin_v1763(v_uid) then raise exception 'Acesso administrativo negado.'; end if;
+--  update public.game_portal_links_v1814 set
+--   enabled=case when p_enabled is null then enabled else p_enabled end,
+--   bidirectional=case when p_bidirectional is null then bidirectional else p_bidirectional end,
+--   sort_order=case when p_sort_order is null then sort_order else greatest(0,least(9999,p_sort_order)) end,
+--   updated_at=now()
+--  where portal_key=p_portal_key;
+--  if not found then raise exception 'Portal não encontrado.'; end if;
+--  return public.get_world_runtime_config_v1814();
+-- end; $$;
+-- 
+-- create or replace function public.admin_update_map_resource_pool_v1816(
+--   p_map_id text,p_resource_key text,p_weight numeric default null,p_enabled boolean default null
+-- ) returns jsonb language plpgsql security definer set search_path=public,auth,pg_temp as $$
+-- declare v_uid uuid:=auth.uid();
+-- begin
+--   if not public.is_game_admin_v1763(v_uid) then raise exception 'Acesso administrativo negado.'; end if;
+--   if not exists(select 1 from public.game_map_config_v1814 where map_id=p_map_id) then raise exception 'Mapa não encontrado.'; end if;
+--   if not exists(select 1 from public.game_resource_config_v1814 where resource_key=p_resource_key) then raise exception 'Recurso não encontrado.'; end if;
+--   insert into public.game_map_resource_pool_v1814(map_id,resource_key,weight,enabled,updated_at)
+--   values(trim(p_map_id),trim(p_resource_key),case when p_weight is null then 1 else greatest(.01,least(1000,p_weight)) end,coalesce(p_enabled,true),now())
+--   on conflict(map_id,resource_key) do update
+--   set weight=case when p_weight is null then public.game_map_resource_pool_v1814.weight else greatest(.01,least(1000,p_weight)) end,
+--       enabled=case when p_enabled is null then public.game_map_resource_pool_v1814.enabled else p_enabled end,
+--       updated_at=now();
+--   return public.get_world_runtime_config_v1814();
+-- end;
+-- $$;
+-- ===== END V18_1_6D_WORLD_EDITOR_SAFETY.sql =====
+
+-- ===== START V18_1_6E_SYSTEMS_EDITOR_SAFETY.sql | sha256 0978c415a1794d4179d1497c9a2ec607302d548d3dada11454a2ed9b05c10821 =====
+-- -- Stellar Legacy V18.1.6E — segurança dos campos opcionais do Editor de Sistemas.
+-- -- Aplicada no Supabase: admin_update_mission_category_v1815, admin_update_economy_service_v1815
+-- -- e admin_update_crafting_recipe_v1815 agora preservam campos NULL via CASE.
+-- ===== END V18_1_6E_SYSTEMS_EDITOR_SAFETY.sql =====
+
+-- ===== START V18_1_7A_EVENT_SCHEDULER.sql | sha256 06a43f80d92a5360cce8dae843df3220cf6c5d569badb032ade1e5a978088302 =====
+-- -- Stellar Legacy V18.1.7A — Calendário de Eventos Data Driven
+-- 
+-- alter table public.live_event_config_v16
+--   add column if not exists schedule_mode text not null default 'interval',
+--   add column if not exists weekdays smallint[] not null default '{}'::smallint[],
+--   add column if not exists start_local_time time without time zone,
+--   add column if not exists timezone text not null default 'America/Sao_Paulo',
+--   add column if not exists ends_at timestamptz;
+-- 
+-- do $$ begin
+--   alter table public.live_event_config_v16
+--     add constraint live_event_schedule_mode_v1817a_check
+--     check (schedule_mode in ('interval','weekly','once'));
+-- exception when duplicate_object then null; end $$;
+-- 
+-- do $$ begin
+--   alter table public.live_event_config_v16
+--     add constraint live_event_timezone_v1817a_check
+--     check (timezone = 'America/Sao_Paulo');
+-- exception when duplicate_object then null; end $$;
+-- 
+-- create or replace function public.get_live_ops_v16()
+-- returns jsonb
+-- language sql
+-- security definer
+-- set search_path to 'public'
+-- as $$
+--   select jsonb_build_object(
+--     'server_time', (extract(epoch from clock_timestamp())*1000)::bigint,
+--     'events', coalesce((
+--       select jsonb_agg(jsonb_build_object(
+--         'event_key',event_key,'name',name,'icon',icon,'description',description,'enabled',enabled,
+--         'starts_at',starts_at,'duration_minutes',duration_minutes,'repeat_minutes',repeat_minutes,
+--         'schedule_mode',schedule_mode,'weekdays',weekdays,'start_local_time',start_local_time,
+--         'timezone',timezone,'ends_at',ends_at,
+--         'priority',priority,'target',target,'reward',reward,'rules',rules,'updated_at',updated_at
+--       ) order by priority,event_key)
+--       from public.live_event_config_v16
+--     ), '[]'::jsonb),
+--     'catalog', coalesce((
+--       select jsonb_agg(jsonb_build_object(
+--         'catalog_key',catalog_key,'kind',kind,'ref_id',ref_id,'price',price,'currency',currency,
+--         'enabled',enabled,'meta',meta,'updated_at',updated_at
+--       ) order by kind,catalog_key)
+--       from public.live_shop_prices_v16 where enabled
+--     ), '[]'::jsonb)
+--   );
+-- $$;
+-- 
+-- create or replace function public.admin_update_live_event_schedule_v1817a(
+--   p_event_key text,
+--   p_enabled boolean default null,
+--   p_schedule_mode text default null,
+--   p_starts_at timestamptz default null,
+--   p_duration_minutes integer default null,
+--   p_repeat_minutes integer default null,
+--   p_weekdays integer[] default null,
+--   p_start_local_time text default null,
+--   p_ends_at timestamptz default null,
+--   p_clear_ends_at boolean default false
+-- )
+-- returns jsonb
+-- language plpgsql
+-- security definer
+-- set search_path=public,auth,pg_temp
+-- as $$
+-- declare
+--   v_uid uuid:=auth.uid();
+--   v_days smallint[];
+--   v_time time;
+--   v_mode text;
+-- begin
+--   if not public.is_game_admin_v1763(v_uid) then raise exception 'Acesso administrativo negado.'; end if;
+--   if not exists(select 1 from public.live_event_config_v16 where event_key=p_event_key) then raise exception 'Evento não encontrado.'; end if;
+-- 
+--   if p_schedule_mode is not null and p_schedule_mode not in ('interval','weekly','once') then
+--     raise exception 'Modo de agenda inválido.';
+--   end if;
+-- 
+--   if p_weekdays is not null then
+--     select coalesce(array_agg(distinct x::smallint order by x::smallint),'{}'::smallint[])
+--       into v_days
+--       from unnest(p_weekdays) x
+--       where x between 0 and 6;
+--   end if;
+-- 
+--   if p_start_local_time is not null and btrim(p_start_local_time)<>'' then
+--     begin
+--       v_time:=p_start_local_time::time;
+--     exception when others then
+--       raise exception 'Horário local inválido.';
+--     end;
+--   end if;
+-- 
+--   update public.live_event_config_v16
+--   set enabled=case when p_enabled is null then enabled else p_enabled end,
+--       schedule_mode=case when p_schedule_mode is null then schedule_mode else p_schedule_mode end,
+--       starts_at=case when p_starts_at is null then starts_at else p_starts_at end,
+--       duration_minutes=case when p_duration_minutes is null then duration_minutes else greatest(1,least(10080,p_duration_minutes)) end,
+--       repeat_minutes=case when p_repeat_minutes is null then repeat_minutes else greatest(1,least(10080,p_repeat_minutes)) end,
+--       weekdays=case when p_weekdays is null then weekdays else coalesce(v_days,'{}'::smallint[]) end,
+--       start_local_time=case when p_start_local_time is null then start_local_time else v_time end,
+--       timezone='America/Sao_Paulo',
+--       ends_at=case when p_clear_ends_at then null when p_ends_at is null then ends_at else p_ends_at end,
+--       updated_at=now()
+--   where event_key=p_event_key;
+-- 
+--   select schedule_mode into v_mode from public.live_event_config_v16 where event_key=p_event_key;
+--   if v_mode='weekly' and (
+--     coalesce(array_length((select weekdays from public.live_event_config_v16 where event_key=p_event_key),1),0)=0
+--     or (select start_local_time is null from public.live_event_config_v16 where event_key=p_event_key)
+--   ) then
+--     raise exception 'Agenda semanal precisa de pelo menos um dia e um horário.';
+--   end if;
+-- 
+--   return public.get_live_ops_v16();
+-- end;
+-- $$;
+-- 
+-- revoke all on function public.admin_update_live_event_schedule_v1817a(text,boolean,text,timestamptz,integer,integer,integer[],text,timestamptz,boolean) from public,anon;
+-- grant execute on function public.admin_update_live_event_schedule_v1817a(text,boolean,text,timestamptz,integer,integer,integer[],text,timestamptz,boolean) to authenticated,service_role;
+-- ===== END V18_1_7A_EVENT_SCHEDULER.sql =====
+
+-- ===== START V18_1_7B_BATTLE_PASS_DATA_DRIVEN.sql | sha256 747187a601c5990d7d2063069fff9f29a5449ac7ef27c2e63486aca2972e816a =====
+-- 
+-- insert into public.game_runtime_meta_v1810(config_key,version)
+-- values('pass',1)
+-- on conflict(config_key) do nothing;
+-- 
+-- create table if not exists public.game_battle_pass_seasons_v1817b (
+--   season_key text primary key,
+--   name text not null,
+--   description text not null default '',
+--   starts_at timestamptz not null,
+--   ends_at timestamptz not null,
+--   tier_count integer not null default 30 check(tier_count between 1 and 100),
+--   points_per_tier integer not null default 500 check(points_per_tier between 1 and 1000000),
+--   daily_points integer not null default 100 check(daily_points between 1 and 100000),
+--   premium_price_brl numeric(10,2) not null default 19.90 check(premium_price_brl >= 0 and premium_price_brl <= 99999),
+--   enabled boolean not null default true,
+--   updated_at timestamptz not null default now(),
+--   check(ends_at > starts_at)
+-- );
+-- 
+-- create table if not exists public.game_battle_pass_tiers_v1817b (
+--   season_key text not null references public.game_battle_pass_seasons_v1817b(season_key) on delete cascade,
+--   tier_no integer not null check(tier_no between 1 and 100),
+--   free_reward jsonb not null default '{}'::jsonb,
+--   premium_reward jsonb not null default '{}'::jsonb,
+--   enabled boolean not null default true,
+--   updated_at timestamptz not null default now(),
+--   primary key(season_key,tier_no)
+-- );
+-- 
+-- alter table public.game_battle_pass_seasons_v1817b enable row level security;
+-- alter table public.game_battle_pass_tiers_v1817b enable row level security;
+-- revoke all on public.game_battle_pass_seasons_v1817b,public.game_battle_pass_tiers_v1817b from anon,authenticated;
+-- 
+-- create or replace function public.bump_pass_runtime_config_v1817b()
+-- returns trigger
+-- language plpgsql
+-- security definer
+-- set search_path=public,pg_temp
+-- as $$
+-- begin
+--   insert into public.game_runtime_meta_v1810(config_key,version,updated_at)
+--   values('pass',1,now())
+--   on conflict(config_key) do update
+--   set version=public.game_runtime_meta_v1810.version+1,updated_at=now();
+--   return null;
+-- end;
+-- $$;
+-- 
+-- drop trigger if exists battle_pass_seasons_bump_v1817b on public.game_battle_pass_seasons_v1817b;
+-- create trigger battle_pass_seasons_bump_v1817b
+-- after insert or update or delete on public.game_battle_pass_seasons_v1817b
+-- for each statement execute function public.bump_pass_runtime_config_v1817b();
+-- 
+-- drop trigger if exists battle_pass_tiers_bump_v1817b on public.game_battle_pass_tiers_v1817b;
+-- create trigger battle_pass_tiers_bump_v1817b
+-- after insert or update or delete on public.game_battle_pass_tiers_v1817b
+-- for each statement execute function public.bump_pass_runtime_config_v1817b();
+-- 
+-- insert into public.game_battle_pass_seasons_v1817b
+-- (season_key,name,description,starts_at,ends_at,tier_count,points_per_tier,daily_points,premium_price_brl,enabled)
+-- values(
+--   '2026-10','TEMPORADA OUTUBRO 2026',
+--   '30 tiers • missões diárias • trilhas Free e Premium.',
+--   '2026-10-01 00:00:00 America/Sao_Paulo',
+--   '2026-11-01 00:00:00 America/Sao_Paulo',
+--   30,500,100,19.90,true
+-- )
+-- on conflict(season_key) do nothing;
+-- 
+-- insert into public.game_battle_pass_tiers_v1817b
+-- (season_key,tier_no,free_reward,premium_reward,enabled)
+-- values
+-- ('2026-10',1,'{"credits":425000,"uridium":425,"ammo":{"lcb10":1650},"rockets":{},"items":[],"ships":[],"repairBonus":0}'::jsonb,'{"credits":850000,"uridium":850,"ammo":{"lcb10":3300},"rockets":{},"items":[],"ships":[],"repairBonus":0}'::jsonb,true),
+-- ('2026-10',2,'{"credits":600000,"uridium":500,"ammo":{"lcb10":1800},"rockets":{},"items":[],"ships":[],"repairBonus":0}'::jsonb,'{"credits":1200000,"uridium":1000,"ammo":{"lcb10":3600},"rockets":{},"items":[],"ships":[],"repairBonus":0}'::jsonb,true),
+-- ('2026-10',3,'{"credits":775000,"uridium":575,"ammo":{"lcb10":1950,"mcb25":1650},"rockets":{},"items":[],"ships":[],"repairBonus":0}'::jsonb,'{"credits":1550000,"uridium":1150,"ammo":{"lcb10":3900,"mcb25":3300},"rockets":{},"items":[],"ships":[],"repairBonus":0}'::jsonb,true),
+-- ('2026-10',4,'{"credits":950000,"uridium":650,"ammo":{"lcb10":2100},"rockets":{},"items":[],"ships":[],"repairBonus":0}'::jsonb,'{"credits":1900000,"uridium":1300,"ammo":{"lcb10":4200},"rockets":{},"items":[],"ships":[],"repairBonus":0}'::jsonb,true),
+-- ('2026-10',5,'{"credits":1125000,"uridium":725,"ammo":{"lcb10":2250,"mcb50":875},"rockets":{},"items":["lf1"],"ships":[],"repairBonus":0}'::jsonb,'{"credits":2250000,"uridium":1450,"ammo":{"lcb10":4500,"mcb50":1750},"rockets":{},"items":["lf3"],"ships":[],"repairBonus":0}'::jsonb,true),
+-- ('2026-10',6,'{"credits":1300000,"uridium":800,"ammo":{"lcb10":2400,"mcb25":1800},"rockets":{},"items":[],"ships":[],"repairBonus":0}'::jsonb,'{"credits":2600000,"uridium":1600,"ammo":{"lcb10":4800,"mcb25":3600},"rockets":{},"items":[],"ships":[],"repairBonus":0}'::jsonb,true),
+-- ('2026-10',7,'{"credits":1475000,"uridium":875,"ammo":{"lcb10":2550},"rockets":{},"items":[],"ships":[],"repairBonus":0}'::jsonb,'{"credits":2950000,"uridium":1750,"ammo":{"lcb10":5100},"rockets":{},"items":[],"ships":[],"repairBonus":0}'::jsonb,true),
+-- ('2026-10',8,'{"credits":1650000,"uridium":950,"ammo":{"lcb10":2700},"rockets":{},"items":[],"ships":[],"repairBonus":0}'::jsonb,'{"credits":3300000,"uridium":1900,"ammo":{"lcb10":5400},"rockets":{},"items":[],"ships":[],"repairBonus":0}'::jsonb,true),
+-- ('2026-10',9,'{"credits":1825000,"uridium":1025,"ammo":{"lcb10":2850,"mcb25":1950},"rockets":{},"items":[],"ships":[],"repairBonus":0}'::jsonb,'{"credits":3650000,"uridium":2050,"ammo":{"lcb10":5700,"mcb25":3900},"rockets":{},"items":[],"ships":[],"repairBonus":0}'::jsonb,true),
+-- ('2026-10',10,'{"credits":2000000,"uridium":1100,"ammo":{"lcb10":3000,"mcb50":1000,"ucb100":1300},"rockets":{},"items":["sg3na02"],"ships":[],"repairBonus":1}'::jsonb,'{"credits":4000000,"uridium":2200,"ammo":{"lcb10":6000,"mcb50":2000,"ucb100":2600},"rockets":{},"items":["sg3nb02"],"ships":[],"repairBonus":2}'::jsonb,true),
+-- ('2026-10',11,'{"credits":2175000,"uridium":1175,"ammo":{"lcb10":3150},"rockets":{},"items":[],"ships":[],"repairBonus":0}'::jsonb,'{"credits":4350000,"uridium":2350,"ammo":{"lcb10":6300},"rockets":{},"items":[],"ships":[],"repairBonus":0}'::jsonb,true),
+-- ('2026-10',12,'{"credits":2350000,"uridium":1250,"ammo":{"lcb10":3300,"mcb25":2100},"rockets":{},"items":[],"ships":[],"repairBonus":0}'::jsonb,'{"credits":4700000,"uridium":2500,"ammo":{"lcb10":6600,"mcb25":4200},"rockets":{},"items":[],"ships":[],"repairBonus":0}'::jsonb,true),
+-- ('2026-10',13,'{"credits":2525000,"uridium":1325,"ammo":{"lcb10":3450},"rockets":{},"items":[],"ships":[],"repairBonus":0}'::jsonb,'{"credits":5050000,"uridium":2650,"ammo":{"lcb10":6900},"rockets":{},"items":[],"ships":[],"repairBonus":0}'::jsonb,true),
+-- ('2026-10',14,'{"credits":2700000,"uridium":1400,"ammo":{"lcb10":3600},"rockets":{},"items":[],"ships":[],"repairBonus":0}'::jsonb,'{"credits":5400000,"uridium":2800,"ammo":{"lcb10":7200},"rockets":{},"items":[],"ships":[],"repairBonus":0}'::jsonb,true),
+-- ('2026-10',15,'{"credits":2875000,"uridium":1475,"ammo":{"lcb10":3750,"mcb25":2250,"mcb50":1125},"rockets":{},"items":["g3n3210"],"ships":[],"repairBonus":0}'::jsonb,'{"credits":5750000,"uridium":2950,"ammo":{"lcb10":7500,"mcb25":4500,"mcb50":2250},"rockets":{},"items":["g3n6900"],"ships":[],"repairBonus":0}'::jsonb,true),
+-- ('2026-10',16,'{"credits":3050000,"uridium":1550,"ammo":{"lcb10":3900},"rockets":{},"items":[],"ships":[],"repairBonus":0}'::jsonb,'{"credits":6100000,"uridium":3100,"ammo":{"lcb10":7800},"rockets":{},"items":[],"ships":[],"repairBonus":0}'::jsonb,true),
+-- ('2026-10',17,'{"credits":3225000,"uridium":1625,"ammo":{"lcb10":4050},"rockets":{},"items":[],"ships":[],"repairBonus":0}'::jsonb,'{"credits":6450000,"uridium":3250,"ammo":{"lcb10":8100},"rockets":{},"items":[],"ships":[],"repairBonus":0}'::jsonb,true),
+-- ('2026-10',18,'{"credits":3400000,"uridium":1700,"ammo":{"lcb10":4200,"mcb25":2400},"rockets":{},"items":[],"ships":[],"repairBonus":0}'::jsonb,'{"credits":6800000,"uridium":3400,"ammo":{"lcb10":8400,"mcb25":4800},"rockets":{},"items":[],"ships":[],"repairBonus":0}'::jsonb,true),
+-- ('2026-10',19,'{"credits":3575000,"uridium":1775,"ammo":{"lcb10":4350},"rockets":{},"items":[],"ships":[],"repairBonus":0}'::jsonb,'{"credits":7150000,"uridium":3550,"ammo":{"lcb10":8700},"rockets":{},"items":[],"ships":[],"repairBonus":0}'::jsonb,true),
+-- ('2026-10',20,'{"credits":3750000,"uridium":1850,"ammo":{"lcb10":4500,"mcb50":1250,"ucb100":1600},"rockets":{},"items":["lf2"],"ships":[],"repairBonus":1}'::jsonb,'{"credits":7500000,"uridium":3700,"ammo":{"lcb10":9000,"mcb50":2500,"ucb100":3200},"rockets":{},"items":["lf4"],"ships":[],"repairBonus":2}'::jsonb,true),
+-- ('2026-10',21,'{"credits":3925000,"uridium":1925,"ammo":{"lcb10":4650,"mcb25":2550},"rockets":{},"items":[],"ships":[],"repairBonus":0}'::jsonb,'{"credits":7850000,"uridium":3850,"ammo":{"lcb10":9300,"mcb25":5100},"rockets":{},"items":[],"ships":[],"repairBonus":0}'::jsonb,true),
+-- ('2026-10',22,'{"credits":4100000,"uridium":2000,"ammo":{"lcb10":4800},"rockets":{},"items":[],"ships":[],"repairBonus":0}'::jsonb,'{"credits":8200000,"uridium":4000,"ammo":{"lcb10":9600},"rockets":{},"items":[],"ships":[],"repairBonus":0}'::jsonb,true),
+-- ('2026-10',23,'{"credits":4275000,"uridium":2075,"ammo":{"lcb10":4950},"rockets":{},"items":[],"ships":[],"repairBonus":0}'::jsonb,'{"credits":8550000,"uridium":4150,"ammo":{"lcb10":9900},"rockets":{},"items":[],"ships":[],"repairBonus":0}'::jsonb,true),
+-- ('2026-10',24,'{"credits":4450000,"uridium":2150,"ammo":{"lcb10":5100,"mcb25":2700},"rockets":{},"items":[],"ships":[],"repairBonus":0}'::jsonb,'{"credits":8900000,"uridium":4300,"ammo":{"lcb10":10200,"mcb25":5400},"rockets":{},"items":[],"ships":[],"repairBonus":0}'::jsonb,true),
+-- ('2026-10',25,'{"credits":4625000,"uridium":2225,"ammo":{"lcb10":5250,"mcb50":1375},"rockets":{},"items":["sg3nb01"],"ships":[],"repairBonus":0}'::jsonb,'{"credits":9250000,"uridium":4450,"ammo":{"lcb10":10500,"mcb50":2750},"rockets":{},"items":["g3n7900"],"ships":[],"repairBonus":0}'::jsonb,true),
+-- ('2026-10',26,'{"credits":4800000,"uridium":2300,"ammo":{"lcb10":5400},"rockets":{},"items":[],"ships":[],"repairBonus":0}'::jsonb,'{"credits":9600000,"uridium":4600,"ammo":{"lcb10":10800},"rockets":{},"items":[],"ships":[],"repairBonus":0}'::jsonb,true),
+-- ('2026-10',27,'{"credits":4975000,"uridium":2375,"ammo":{"lcb10":5550,"mcb25":2850},"rockets":{},"items":[],"ships":[],"repairBonus":0}'::jsonb,'{"credits":9950000,"uridium":4750,"ammo":{"lcb10":11100,"mcb25":5700},"rockets":{},"items":[],"ships":[],"repairBonus":0}'::jsonb,true),
+-- ('2026-10',28,'{"credits":5150000,"uridium":2450,"ammo":{"lcb10":5700},"rockets":{},"items":[],"ships":[],"repairBonus":0}'::jsonb,'{"credits":10300000,"uridium":4900,"ammo":{"lcb10":11400},"rockets":{},"items":[],"ships":[],"repairBonus":0}'::jsonb,true),
+-- ('2026-10',29,'{"credits":5325000,"uridium":2525,"ammo":{"lcb10":5850},"rockets":{},"items":[],"ships":[],"repairBonus":0}'::jsonb,'{"credits":10650000,"uridium":5050,"ammo":{"lcb10":11700},"rockets":{},"items":[],"ships":[],"repairBonus":0}'::jsonb,true),
+-- ('2026-10',30,'{"credits":10500000,"uridium":5100,"ammo":{"lcb10":6000,"mcb25":3000,"mcb50":1500,"ucb100":1900},"rockets":{},"items":["g3n3310"],"ships":[],"repairBonus":1}'::jsonb,'{"credits":21000000,"uridium":10200,"ammo":{"lcb10":12000,"mcb25":6000,"mcb50":3000,"ucb100":13800},"rockets":{},"items":["sg3nb03"],"ships":["solace"],"repairBonus":5}'::jsonb,true)
+-- on conflict(season_key,tier_no) do nothing;
+-- 
+-- create or replace function public.get_battle_pass_runtime_config_v1817b()
+-- returns jsonb
+-- language plpgsql
+-- security definer
+-- set search_path=public,pg_temp
+-- as $$
+-- declare
+--   v_version bigint:=1;
+--   v_updated timestamptz;
+--   v_active public.game_battle_pass_seasons_v1817b%rowtype;
+--   v_active_json jsonb;
+--   v_seasons jsonb;
+--   v_tiers jsonb;
+-- begin
+--   select version,updated_at into v_version,v_updated
+--   from public.game_runtime_meta_v1810 where config_key='pass';
+-- 
+--   select * into v_active
+--   from public.game_battle_pass_seasons_v1817b
+--   where enabled and now()>=starts_at and now()<ends_at
+--   order by starts_at desc,season_key desc
+--   limit 1;
+-- 
+--   if found then
+--     v_active_json:=jsonb_build_object(
+--       'season_key',v_active.season_key,'name',v_active.name,'description',v_active.description,
+--       'starts_at',v_active.starts_at,'ends_at',v_active.ends_at,'tier_count',v_active.tier_count,
+--       'points_per_tier',v_active.points_per_tier,'daily_points',v_active.daily_points,
+--       'premium_price_brl',v_active.premium_price_brl,'enabled',v_active.enabled
+--     );
+--     select coalesce(jsonb_agg(jsonb_build_object(
+--       'season_key',season_key,'tier_no',tier_no,'free_reward',free_reward,
+--       'premium_reward',premium_reward,'enabled',enabled
+--     ) order by tier_no),'[]'::jsonb)
+--     into v_tiers
+--     from public.game_battle_pass_tiers_v1817b
+--     where season_key=v_active.season_key;
+--   else
+--     v_active_json:=null;
+--     v_tiers:='[]'::jsonb;
+--   end if;
+-- 
+--   select coalesce(jsonb_agg(jsonb_build_object(
+--     'season_key',season_key,'name',name,'description',description,'starts_at',starts_at,'ends_at',ends_at,
+--     'tier_count',tier_count,'points_per_tier',points_per_tier,'daily_points',daily_points,
+--     'premium_price_brl',premium_price_brl,'enabled',enabled,'updated_at',updated_at
+--   ) order by starts_at desc,season_key desc),'[]'::jsonb)
+--   into v_seasons
+--   from public.game_battle_pass_seasons_v1817b;
+-- 
+--   return jsonb_build_object(
+--     'version',coalesce(v_version,1),
+--     'updated_at',v_updated,
+--     'active_season',v_active_json,
+--     'seasons',v_seasons,
+--     'tiers',coalesce(v_tiers,'[]'::jsonb)
+--   );
+-- end;
+-- $$;
+-- 
+-- create or replace function public.admin_update_battle_pass_season_v1817b(
+--   p_season_key text,
+--   p_name text default null,
+--   p_description text default null,
+--   p_starts_at timestamptz default null,
+--   p_ends_at timestamptz default null,
+--   p_tier_count integer default null,
+--   p_points_per_tier integer default null,
+--   p_daily_points integer default null,
+--   p_premium_price_brl numeric default null,
+--   p_enabled boolean default null
+-- )
+-- returns jsonb
+-- language plpgsql
+-- security definer
+-- set search_path=public,auth,pg_temp
+-- as $$
+-- declare v_uid uuid:=auth.uid();
+-- begin
+--   if not public.is_game_admin_v1763(v_uid) then raise exception 'Acesso administrativo negado.'; end if;
+-- 
+--   update public.game_battle_pass_seasons_v1817b
+--   set name=case when p_name is null or trim(p_name)='' then name else left(trim(p_name),80) end,
+--       description=case when p_description is null then description else left(trim(p_description),240) end,
+--       starts_at=case when p_starts_at is null then starts_at else p_starts_at end,
+--       ends_at=case when p_ends_at is null then ends_at else p_ends_at end,
+--       tier_count=case when p_tier_count is null then tier_count else greatest(1,least(100,p_tier_count)) end,
+--       points_per_tier=case when p_points_per_tier is null then points_per_tier else greatest(1,least(1000000,p_points_per_tier)) end,
+--       daily_points=case when p_daily_points is null then daily_points else greatest(1,least(100000,p_daily_points)) end,
+--       premium_price_brl=case when p_premium_price_brl is null then premium_price_brl else greatest(0,least(99999,p_premium_price_brl)) end,
+--       enabled=case when p_enabled is null then enabled else p_enabled end,
+--       updated_at=now()
+--   where season_key=p_season_key;
+-- 
+--   if not found then raise exception 'Temporada não encontrada.'; end if;
+--   if exists(select 1 from public.game_battle_pass_seasons_v1817b where season_key=p_season_key and ends_at<=starts_at) then
+--     raise exception 'O fim da temporada precisa ser posterior ao início.';
+--   end if;
+-- 
+--   return public.get_battle_pass_runtime_config_v1817b();
+-- end;
+-- $$;
+-- 
+-- create or replace function public.admin_update_battle_pass_tier_v1817b(
+--   p_season_key text,
+--   p_tier_no integer,
+--   p_free_reward jsonb default null,
+--   p_premium_reward jsonb default null,
+--   p_enabled boolean default null
+-- )
+-- returns jsonb
+-- language plpgsql
+-- security definer
+-- set search_path=public,auth,pg_temp
+-- as $$
+-- declare v_uid uuid:=auth.uid();
+-- begin
+--   if not public.is_game_admin_v1763(v_uid) then raise exception 'Acesso administrativo negado.'; end if;
+--   if not exists(select 1 from public.game_battle_pass_seasons_v1817b where season_key=p_season_key) then raise exception 'Temporada não encontrada.'; end if;
+-- 
+--   insert into public.game_battle_pass_tiers_v1817b(season_key,tier_no,free_reward,premium_reward,enabled,updated_at)
+--   values(
+--     p_season_key,greatest(1,least(100,p_tier_no)),
+--     coalesce(p_free_reward,'{}'::jsonb),coalesce(p_premium_reward,'{}'::jsonb),coalesce(p_enabled,true),now()
+--   )
+--   on conflict(season_key,tier_no) do update
+--   set free_reward=case when p_free_reward is null then public.game_battle_pass_tiers_v1817b.free_reward else p_free_reward end,
+--       premium_reward=case when p_premium_reward is null then public.game_battle_pass_tiers_v1817b.premium_reward else p_premium_reward end,
+--       enabled=case when p_enabled is null then public.game_battle_pass_tiers_v1817b.enabled else p_enabled end,
+--       updated_at=now();
+-- 
+--   return public.get_battle_pass_runtime_config_v1817b();
+-- end;
+-- $$;
+-- 
+-- revoke all on function public.get_battle_pass_runtime_config_v1817b() from public;
+-- grant execute on function public.get_battle_pass_runtime_config_v1817b() to anon,authenticated,service_role;
+-- 
+-- revoke all on function public.admin_update_battle_pass_season_v1817b(text,text,text,timestamptz,timestamptz,integer,integer,integer,numeric,boolean) from public,anon;
+-- grant execute on function public.admin_update_battle_pass_season_v1817b(text,text,text,timestamptz,timestamptz,integer,integer,integer,numeric,boolean) to authenticated,service_role;
+-- 
+-- revoke all on function public.admin_update_battle_pass_tier_v1817b(text,integer,jsonb,jsonb,boolean) from public,anon;
+-- grant execute on function public.admin_update_battle_pass_tier_v1817b(text,integer,jsonb,jsonb,boolean) to authenticated,service_role;
+-- 
+-- create or replace function public.get_premium_shop_v12()
+-- returns jsonb
+-- language plpgsql
+-- security definer
+-- set search_path to 'public','auth'
+-- as $$
+-- declare
+--   v_uid uuid:=auth.uid();
+--   v_admin boolean:=false;
+--   v_until timestamptz;
+--   v_season text;
+--   v_current text;
+--   v_pass_name text;
+--   v_pass_desc text;
+--   v_pass_price numeric;
+--   v_catalog jsonb;
+-- begin
+--   if v_uid is null then raise exception 'Sessão inválida.'; end if;
+--   select exists(select 1 from public.game_admins ga where ga.user_id=v_uid and lower(coalesce(ga.role,''))='admin') into v_admin;
+--   select premium_until,battle_pass_season into v_until,v_season from public.premium_accounts_v12 where user_id=v_uid;
+-- 
+--   select season_key,name,description,premium_price_brl
+--     into v_current,v_pass_name,v_pass_desc,v_pass_price
+--   from public.game_battle_pass_seasons_v1817b
+--   where enabled and now()>=starts_at and now()<ends_at
+--   order by starts_at desc limit 1;
+-- 
+--   select coalesce(jsonb_agg(jsonb_build_object(
+--     'id',id,
+--     'name',case when category='battle_pass' and v_current is not null then v_pass_name else name end,
+--     'category',category,
+--     'price_brl',case when category='battle_pass' and v_current is not null then v_pass_price else price_brl end,
+--     'item_id',item_id,'quantity',quantity,
+--     'description',case when category='battle_pass' and v_current is not null then v_pass_desc else description end
+--   ) order by sort_order,id),'[]'::jsonb)
+--   into v_catalog
+--   from public.premium_catalog_v12
+--   where active and (category<>'battle_pass' or v_current is not null);
+-- 
+--   return jsonb_build_object(
+--     'is_admin',v_admin,'can_purchase',v_admin,'test_mode',true,'premium_until',v_until,
+--     'premium_active',coalesce(v_until>now(),false),
+--     'battle_pass_season',v_season,
+--     'battle_pass_active',coalesce(v_current is not null and v_season=v_current,false),
+--     'current_season',v_current,
+--     'catalog',v_catalog
+--   );
+-- end;
+-- $$;
+-- 
+-- create or replace function public.test_purchase_premium_v12(p_product_id text)
+-- returns jsonb
+-- language plpgsql
+-- security definer
+-- set search_path to 'public','auth'
+-- as $$
+-- declare
+--   v_uid uuid:=auth.uid();
+--   v_admin boolean:=false;
+--   v_product public.premium_catalog_v12%rowtype;
+--   v_state jsonb; v_inv jsonb; v_have integer:=0; v_until timestamptz;
+--   v_season text; v_pass_price numeric; v_effective_price numeric;
+-- begin
+--   if v_uid is null then raise exception 'Sessão inválida.'; end if;
+--   select exists(select 1 from public.game_admins ga where ga.user_id=v_uid and lower(coalesce(ga.role,''))='admin') into v_admin;
+--   if not v_admin then raise exception 'Compras reais ainda não foram liberadas. A Loja Premium está em modo de visualização.'; end if;
+-- 
+--   select * into v_product from public.premium_catalog_v12 where id=p_product_id and active;
+--   if not found then raise exception 'Produto Premium inválido.'; end if;
+-- 
+--   if v_product.category='battle_pass' then
+--     select season_key,premium_price_brl into v_season,v_pass_price
+--     from public.game_battle_pass_seasons_v1817b
+--     where enabled and now()>=starts_at and now()<ends_at
+--     order by starts_at desc limit 1;
+--     if v_season is null then raise exception 'Nenhuma temporada do Passe está ativa.'; end if;
+--     v_effective_price:=v_pass_price;
+--   else
+--     v_effective_price:=v_product.price_brl;
+--   end if;
+-- 
+--   insert into public.premium_purchases_v12(user_id,product_id,price_brl,test_purchase)
+--   values(v_uid,v_product.id,v_effective_price,true);
+-- 
+--   insert into public.premium_accounts_v12(user_id) values(v_uid) on conflict(user_id) do nothing;
+-- 
+--   if v_product.category='premium' then
+--     update public.premium_accounts_v12
+--     set premium_until=greatest(coalesce(premium_until,now()),now())+interval '30 days',updated_at=now()
+--     where user_id=v_uid returning premium_until into v_until;
+--     return jsonb_build_object('ok',true,'product_id',v_product.id,'category',v_product.category,'premium_until',v_until);
+--   elsif v_product.category='battle_pass' then
+--     update public.premium_accounts_v12 set battle_pass_season=v_season,updated_at=now() where user_id=v_uid;
+--     return jsonb_build_object('ok',true,'product_id',v_product.id,'category',v_product.category,'battle_pass_season',v_season,'price_brl',v_effective_price);
+--   else
+--     select state into v_state from public.game_saves where user_id=v_uid for update;
+--     if v_state is null then raise exception 'Entre no jogo e salve seu progresso antes de testar compra de item.'; end if;
+--     v_inv:=case when jsonb_typeof(v_state->'inventory')='object' then v_state->'inventory' else '{}'::jsonb end;
+--     v_have:=coalesce((v_inv->>v_product.item_id)::integer,0);
+--     v_inv:=jsonb_set(v_inv,array[v_product.item_id],to_jsonb(v_have+v_product.quantity),true);
+--     v_state:=jsonb_set(v_state,'{inventory}',v_inv,true);
+--     update public.game_saves set state=v_state,updated_at=now() where user_id=v_uid;
+--     return jsonb_build_object('ok',true,'product_id',v_product.id,'category',v_product.category,'item_id',v_product.item_id,
+--       'quantity',v_product.quantity,'new_quantity',v_have+v_product.quantity);
+--   end if;
+-- end;
+-- $$;
+-- 
+-- -- Hotfix da mesma versão: mantém os tiers editáveis mesmo quando a temporada sai da janela ativa.
+-- create or replace function public.get_battle_pass_runtime_config_v1817b()
+-- returns jsonb
+-- language plpgsql
+-- security definer
+-- set search_path=public,pg_temp
+-- as $$
+-- declare
+--   v_version bigint:=1; v_updated timestamptz;
+--   v_active public.game_battle_pass_seasons_v1817b%rowtype;
+--   v_active_json jsonb; v_seasons jsonb; v_tiers jsonb; v_tier_season_key text;
+-- begin
+--   select version,updated_at into v_version,v_updated from public.game_runtime_meta_v1810 where config_key='pass';
+--   select * into v_active from public.game_battle_pass_seasons_v1817b
+--   where enabled and now()>=starts_at and now()<ends_at order by starts_at desc,season_key desc limit 1;
+--   if found then
+--     v_active_json:=jsonb_build_object('season_key',v_active.season_key,'name',v_active.name,'description',v_active.description,'starts_at',v_active.starts_at,'ends_at',v_active.ends_at,'tier_count',v_active.tier_count,'points_per_tier',v_active.points_per_tier,'daily_points',v_active.daily_points,'premium_price_brl',v_active.premium_price_brl,'enabled',v_active.enabled);
+--     v_tier_season_key:=v_active.season_key;
+--   else
+--     v_active_json:=null;
+--     select season_key into v_tier_season_key from public.game_battle_pass_seasons_v1817b order by enabled desc,starts_at desc,season_key desc limit 1;
+--   end if;
+--   select coalesce(jsonb_agg(jsonb_build_object('season_key',season_key,'tier_no',tier_no,'free_reward',free_reward,'premium_reward',premium_reward,'enabled',enabled) order by tier_no),'[]'::jsonb)
+--   into v_tiers from public.game_battle_pass_tiers_v1817b where season_key=v_tier_season_key;
+--   select coalesce(jsonb_agg(jsonb_build_object('season_key',season_key,'name',name,'description',description,'starts_at',starts_at,'ends_at',ends_at,'tier_count',tier_count,'points_per_tier',points_per_tier,'daily_points',daily_points,'premium_price_brl',premium_price_brl,'enabled',enabled,'updated_at',updated_at) order by starts_at desc,season_key desc),'[]'::jsonb)
+--   into v_seasons from public.game_battle_pass_seasons_v1817b;
+--   return jsonb_build_object('version',coalesce(v_version,1),'updated_at',v_updated,'active_season',v_active_json,'editor_season_key',v_tier_season_key,'seasons',v_seasons,'tiers',coalesce(v_tiers,'[]'::jsonb));
+-- end;
+-- $$;
+-- ===== END V18_1_7B_BATTLE_PASS_DATA_DRIVEN.sql =====
+
+-- ===== START V18_1_7C_SHOPS_DATA_DRIVEN.sql | sha256 bdb3ae1941ae963a5cc1384f59c45f00b72b9c2085ee676e2648a9c676249ab8 =====
+-- -- Stellar Legacy V18.1.7C — Lojas Comum + Premium Data Driven
+-- -- Requer V18.1.7B.
+-- 
+-- insert into public.game_runtime_meta_v1810(config_key,version)
+-- values('shops',1)
+-- on conflict(config_key) do nothing;
+-- 
+-- alter table public.live_shop_prices_v16
+--   add column if not exists display_name text,
+--   add column if not exists description text,
+--   add column if not exists shop_tab text,
+--   add column if not exists shop_visible boolean not null default false,
+--   add column if not exists min_level integer not null default 1,
+--   add column if not exists sort_order integer not null default 100;
+-- 
+-- alter table public.premium_catalog_v12
+--   add column if not exists min_level integer not null default 1,
+--   add column if not exists meta jsonb not null default '{}'::jsonb;
+-- 
+-- do $$ begin
+--   alter table public.live_shop_prices_v16 add constraint live_shop_min_level_v1817c_check check (min_level between 1 and 100);
+-- exception when duplicate_object then null; end $$;
+-- do $$ begin
+--   alter table public.live_shop_prices_v16 add constraint live_shop_tab_v1817c_check check (shop_tab is null or shop_tab in ('ships','lasers','generators','drones','pet','extras','ammo','rockets'));
+-- exception when duplicate_object then null; end $$;
+-- do $$ begin
+--   alter table public.premium_catalog_v12 add constraint premium_catalog_min_level_v1817c_check check (min_level between 1 and 100);
+-- exception when duplicate_object then null; end $$;
+-- 
+-- update public.live_shop_prices_v16
+-- set shop_tab = case kind
+--   when 'ship' then 'ships' when 'laser' then 'lasers' when 'generator' then 'generators'
+--   when 'drone' then 'drones' when 'pet' then 'pet' when 'pet_gear' then 'pet'
+--   when 'extra' then 'extras' when 'ammo' then 'ammo' when 'rocket' then 'rockets' else null end,
+--     shop_visible = kind in ('ship','laser','generator','drone','pet','pet_gear','extra','ammo','rocket');
+-- 
+-- update public.live_shop_prices_v16 set shop_visible=false where ref_id in (
+--   'aegis','basilisk','berserker','centurion','citadel','cyborg','defcom','defcomRaven','diminisher','disruptor',
+--   'goliathX','hammerclaw','hecate','holo','hyperion','keres','mimesis','orcus','paladin','retiarus','sentinel',
+--   'solace','solaris','spearhead','spectrum','tartarus','tempest','venom','yamato','yRonin','zephyr',
+--   'sl01','fs03','fs04','sg3nb00','sg3nb03'
+-- );
+-- 
+-- with ranked as (
+--   select catalog_key,row_number() over(partition by coalesce(shop_tab,'zzz') order by currency,price,catalog_key)*10 rn
+--   from public.live_shop_prices_v16
+-- )
+-- update public.live_shop_prices_v16 s set sort_order=r.rn from ranked r where r.catalog_key=s.catalog_key;
+-- 
+-- insert into public.premium_catalog_v12(id,name,category,price_brl,item_id,quantity,description,active,sort_order,min_level,meta)
+-- values
+-- ('premium_7d','PREMIUM • 1 SEMANA','premium',14.90,null,1,'7 dias de Premium com todos os bônus ativos.',true,20,1,'{"days":7}'::jsonb),
+-- ('premium_30d','PREMIUM • 1 MÊS','premium',39.90,null,1,'30 dias de Premium para farm, combate e progressão.',true,30,1,'{"days":30}'::jsonb),
+-- ('premium_90d','PREMIUM • 3 MESES','premium',99.90,null,1,'90 dias de Premium com excelente custo-benefício.',true,40,1,'{"days":90}'::jsonb),
+-- ('premium_180d','PREMIUM • 6 MESES','premium',179.90,null,1,'180 dias de Premium para longa temporada.',true,50,1,'{"days":180}'::jsonb)
+-- on conflict(id) do update set name=excluded.name,category=excluded.category,price_brl=excluded.price_brl,
+-- description=excluded.description,active=excluded.active,sort_order=excluded.sort_order,min_level=excluded.min_level,meta=excluded.meta;
+-- 
+-- create or replace function public.bump_shops_runtime_config_v1817c() returns trigger
+-- language plpgsql security definer set search_path=public,pg_temp as $$
+-- begin
+--   insert into public.game_runtime_meta_v1810(config_key,version,updated_at) values('shops',1,now())
+--   on conflict(config_key) do update set version=public.game_runtime_meta_v1810.version+1,updated_at=now();
+--   return null;
+-- end; $$;
+-- 
+-- drop trigger if exists live_shop_bump_v1817c on public.live_shop_prices_v16;
+-- create trigger live_shop_bump_v1817c after insert or update or delete on public.live_shop_prices_v16
+-- for each statement execute function public.bump_shops_runtime_config_v1817c();
+-- drop trigger if exists premium_shop_bump_v1817c on public.premium_catalog_v12;
+-- create trigger premium_shop_bump_v1817c after insert or update or delete on public.premium_catalog_v12
+-- for each statement execute function public.bump_shops_runtime_config_v1817c();
+-- 
+-- create or replace function public.get_shops_runtime_config_v1817c() returns jsonb
+-- language plpgsql security definer set search_path=public,pg_temp as $$
+-- declare v_version bigint:=1; v_updated timestamptz; v_common jsonb; v_premium jsonb;
+-- begin
+--   select version,updated_at into v_version,v_updated from public.game_runtime_meta_v1810 where config_key='shops';
+--   select coalesce(jsonb_agg(jsonb_build_object(
+--     'catalog_key',catalog_key,'kind',kind,'ref_id',ref_id,'display_name',display_name,'description',description,
+--     'price',price,'currency',currency,'enabled',enabled,'shop_tab',shop_tab,'shop_visible',shop_visible,
+--     'min_level',min_level,'sort_order',sort_order,'meta',meta,'updated_at',updated_at
+--   ) order by coalesce(shop_tab,'zzz'),sort_order,catalog_key),'[]'::jsonb) into v_common
+--   from public.live_shop_prices_v16 where kind in ('ship','laser','generator','drone','pet','pet_gear','extra','ammo','rocket');
+-- 
+--   select coalesce(jsonb_agg(jsonb_build_object(
+--     'id',id,'name',name,'category',category,'price_brl',price_brl,'item_id',item_id,'quantity',quantity,
+--     'description',description,'active',active,'sort_order',sort_order,'min_level',min_level,'meta',meta
+--   ) order by sort_order,id),'[]'::jsonb) into v_premium from public.premium_catalog_v12;
+-- 
+--   return jsonb_build_object('version',coalesce(v_version,1),'updated_at',v_updated,'common',v_common,'premium',v_premium);
+-- end; $$;
+-- 
+-- create or replace function public.admin_update_common_shop_item_v1817c(
+--   p_catalog_key text,p_display_name text default null,p_description text default null,p_price bigint default null,
+--   p_currency text default null,p_quantity integer default null,p_min_level integer default null,p_sort_order integer default null,
+--   p_shop_tab text default null,p_shop_visible boolean default null,p_enabled boolean default null
+-- ) returns jsonb language plpgsql security definer set search_path=public,auth,pg_temp as $$
+-- declare v_uid uuid:=auth.uid(); v_kind text;
+-- begin
+--   if not public.is_game_admin_v1763(v_uid) then raise exception 'Acesso administrativo negado.'; end if;
+--   select kind into v_kind from public.live_shop_prices_v16 where catalog_key=p_catalog_key;
+--   if v_kind is null or v_kind not in ('ship','laser','generator','drone','pet','pet_gear','extra','ammo','rocket') then raise exception 'Produto da Loja Comum inválido.'; end if;
+--   if p_currency is not null and p_currency not in ('credits','uridium') then raise exception 'Moeda inválida.'; end if;
+--   if p_shop_tab is not null and p_shop_tab not in ('ships','lasers','generators','drones','pet','extras','ammo','rockets') then raise exception 'Aba da loja inválida.'; end if;
+-- 
+--   update public.live_shop_prices_v16 set
+--     display_name=case when p_display_name is null then display_name else nullif(trim(p_display_name),'') end,
+--     description=case when p_description is null then description else nullif(trim(p_description),'') end,
+--     price=case when p_price is null then price else greatest(0,p_price) end,
+--     currency=case when p_currency is null then currency else p_currency end,
+--     min_level=case when p_min_level is null then min_level else greatest(1,least(100,p_min_level)) end,
+--     sort_order=case when p_sort_order is null then sort_order else greatest(0,least(9999,p_sort_order)) end,
+--     shop_tab=case when p_shop_tab is null then shop_tab else p_shop_tab end,
+--     shop_visible=case when p_shop_visible is null then shop_visible else p_shop_visible end,
+--     enabled=case when p_enabled is null then enabled else p_enabled end,
+--     meta=case when p_quantity is null then meta else jsonb_set(coalesce(meta,'{}'::jsonb),'{grant}',coalesce(meta->'grant','{}'::jsonb)||jsonb_build_object('qty',greatest(1,least(10000000,p_quantity))),true) end,
+--     updated_at=now()
+--   where catalog_key=p_catalog_key;
+--   return public.get_shops_runtime_config_v1817c();
+-- end; $$;
+-- 
+-- create or replace function public.admin_update_premium_shop_item_v1817c(
+--   p_product_id text,p_name text default null,p_description text default null,p_price_brl numeric default null,
+--   p_quantity integer default null,p_min_level integer default null,p_sort_order integer default null,p_active boolean default null,p_days integer default null
+-- ) returns jsonb language plpgsql security definer set search_path=public,auth,pg_temp as $$
+-- declare v_uid uuid:=auth.uid(); v_category text;
+-- begin
+--   if not public.is_game_admin_v1763(v_uid) then raise exception 'Acesso administrativo negado.'; end if;
+--   select category into v_category from public.premium_catalog_v12 where id=p_product_id;
+--   if v_category is null then raise exception 'Produto Premium inválido.'; end if;
+--   update public.premium_catalog_v12 set
+--     name=case when p_name is null or trim(p_name)='' then name else left(trim(p_name),100) end,
+--     description=case when p_description is null then description else left(trim(p_description),300) end,
+--     price_brl=case when p_price_brl is null or v_category='battle_pass' then price_brl else greatest(0,least(99999,p_price_brl)) end,
+--     quantity=case when p_quantity is null then quantity else greatest(1,least(10000000,p_quantity)) end,
+--     min_level=case when p_min_level is null then min_level else greatest(1,least(100,p_min_level)) end,
+--     sort_order=case when p_sort_order is null then sort_order else greatest(0,least(9999,p_sort_order)) end,
+--     active=case when p_active is null then active else p_active end,
+--     meta=case when p_days is null or v_category<>'premium' then meta else coalesce(meta,'{}'::jsonb)||jsonb_build_object('days',greatest(1,least(3650,p_days))) end
+--   where id=p_product_id;
+--   return public.get_shops_runtime_config_v1817c();
+-- end; $$;
+-- 
+-- -- O LIVE OPS agora leva metadados de vitrine para o cliente.
+-- create or replace function public.get_live_ops_v16() returns jsonb language sql security definer set search_path='public' as $$
+-- select jsonb_build_object(
+--   'server_time',(extract(epoch from clock_timestamp())*1000)::bigint,
+--   'events',coalesce((select jsonb_agg(jsonb_build_object(
+--     'event_key',event_key,'name',name,'icon',icon,'description',description,'enabled',enabled,'starts_at',starts_at,
+--     'duration_minutes',duration_minutes,'repeat_minutes',repeat_minutes,'schedule_mode',schedule_mode,'weekdays',weekdays,
+--     'start_local_time',start_local_time,'timezone',timezone,'ends_at',ends_at,'priority',priority,'target',target,
+--     'reward',reward,'rules',rules,'updated_at',updated_at) order by priority,event_key) from public.live_event_config_v16),'[]'::jsonb),
+--   'catalog',coalesce((select jsonb_agg(jsonb_build_object(
+--     'catalog_key',catalog_key,'kind',kind,'ref_id',ref_id,'display_name',display_name,'description',description,
+--     'price',price,'currency',currency,'enabled',enabled,'shop_tab',shop_tab,'shop_visible',shop_visible,
+--     'min_level',min_level,'sort_order',sort_order,'meta',meta,'updated_at',updated_at
+--   ) order by coalesce(shop_tab,'zzz'),sort_order,catalog_key) from public.live_shop_prices_v16 where enabled),'[]'::jsonb)
+-- ); $$;
+-- 
+-- -- O catálogo Premium retorna metadados do banco e mantém o preço do Passe ligado à temporada ativa.
+-- create or replace function public.get_premium_shop_v12() returns jsonb language plpgsql security definer set search_path='public','auth' as $$
+-- declare v_uid uuid:=auth.uid(); v_admin boolean:=false; v_until timestamptz; v_season text; v_current text; v_pass_name text; v_pass_desc text; v_pass_price numeric; v_catalog jsonb; v_level integer:=1;
+-- begin
+--   if v_uid is null then raise exception 'Sessão inválida.'; end if;
+--   select exists(select 1 from public.game_admins ga where ga.user_id=v_uid and lower(coalesce(ga.role,''))='admin') into v_admin;
+--   select greatest(coalesce(level,1),1) into v_level from public.profiles where id=v_uid; v_level:=coalesce(v_level,1);
+--   select premium_until,battle_pass_season into v_until,v_season from public.premium_accounts_v12 where user_id=v_uid;
+--   select season_key,name,description,premium_price_brl into v_current,v_pass_name,v_pass_desc,v_pass_price from public.game_battle_pass_seasons_v1817b
+--   where enabled and now()>=starts_at and now()<ends_at order by starts_at desc limit 1;
+--   select coalesce(jsonb_agg(jsonb_build_object(
+--     'id',id,'name',case when category='battle_pass' and v_current is not null then v_pass_name else name end,
+--     'category',category,'price_brl',case when category='battle_pass' and v_current is not null then v_pass_price else price_brl end,
+--     'item_id',item_id,'quantity',quantity,'description',case when category='battle_pass' and v_current is not null then v_pass_desc else description end,
+--     'sort_order',sort_order,'min_level',min_level,'meta',meta,'locked',v_level<min_level
+--   ) order by sort_order,id),'[]'::jsonb) into v_catalog from public.premium_catalog_v12
+--   where active and (category<>'battle_pass' or v_current is not null);
+--   return jsonb_build_object('is_admin',v_admin,'can_purchase',v_admin,'test_mode',true,'premium_until',v_until,'premium_active',coalesce(v_until>now(),false),
+--     'battle_pass_season',v_season,'battle_pass_active',coalesce(v_current is not null and v_season=v_current,false),'current_season',v_current,'player_level',v_level,'catalog',v_catalog);
+-- end; $$;
+-- 
+-- create or replace function public.test_purchase_premium_v12(p_product_id text) returns jsonb language plpgsql security definer set search_path='public','auth' as $$
+-- declare v_uid uuid:=auth.uid(); v_admin boolean:=false; v_product public.premium_catalog_v12%rowtype; v_state jsonb; v_inv jsonb; v_have integer:=0; v_until timestamptz; v_season text; v_pass_price numeric; v_effective_price numeric; v_days integer:=30; v_level integer:=1;
+-- begin
+--   if v_uid is null then raise exception 'Sessão inválida.'; end if;
+--   select exists(select 1 from public.game_admins ga where ga.user_id=v_uid and lower(coalesce(ga.role,''))='admin') into v_admin;
+--   if not v_admin then raise exception 'Compras reais ainda não foram liberadas. A Loja Premium está em modo de visualização.'; end if;
+--   select greatest(coalesce(level,1),1) into v_level from public.profiles where id=v_uid; v_level:=coalesce(v_level,1);
+--   select * into v_product from public.premium_catalog_v12 where id=p_product_id and active;
+--   if not found then raise exception 'Produto Premium inválido.'; end if;
+--   if v_level<v_product.min_level then raise exception 'Nível insuficiente para este produto Premium.'; end if;
+--   if v_product.category='battle_pass' then
+--     select season_key,premium_price_brl into v_season,v_pass_price from public.game_battle_pass_seasons_v1817b
+--     where enabled and now()>=starts_at and now()<ends_at order by starts_at desc limit 1;
+--     if v_season is null then raise exception 'Nenhuma temporada do Passe está ativa.'; end if; v_effective_price:=v_pass_price;
+--   else v_effective_price:=v_product.price_brl; end if;
+--   insert into public.premium_purchases_v12(user_id,product_id,price_brl,test_purchase) values(v_uid,v_product.id,v_effective_price,true);
+--   insert into public.premium_accounts_v12(user_id) values(v_uid) on conflict(user_id) do nothing;
+--   if v_product.category='premium' then
+--     v_days:=greatest(1,least(3650,coalesce((v_product.meta->>'days')::integer,30)));
+--     update public.premium_accounts_v12 set premium_until=greatest(coalesce(premium_until,now()),now())+make_interval(days=>v_days),updated_at=now()
+--     where user_id=v_uid returning premium_until into v_until;
+--     return jsonb_build_object('ok',true,'product_id',v_product.id,'category',v_product.category,'premium_until',v_until,'days',v_days,'price_brl',v_effective_price);
+--   elsif v_product.category='battle_pass' then
+--     update public.premium_accounts_v12 set battle_pass_season=v_season,updated_at=now() where user_id=v_uid;
+--     return jsonb_build_object('ok',true,'product_id',v_product.id,'category',v_product.category,'battle_pass_season',v_season,'price_brl',v_effective_price);
+--   else
+--     select state into v_state from public.game_saves where user_id=v_uid for update;
+--     if v_state is null then raise exception 'Entre no jogo e salve seu progresso antes de testar compra de item.'; end if;
+--     v_inv:=case when jsonb_typeof(v_state->'inventory')='object' then v_state->'inventory' else '{}'::jsonb end;
+--     v_have:=coalesce((v_inv->>v_product.item_id)::integer,0);
+--     v_inv:=jsonb_set(v_inv,array[v_product.item_id],to_jsonb(v_have+v_product.quantity),true);
+--     v_state:=jsonb_set(v_state,'{inventory}',v_inv,true);
+--     update public.game_saves set state=v_state,updated_at=now() where user_id=v_uid;
+--     return jsonb_build_object('ok',true,'product_id',v_product.id,'category',v_product.category,'item_id',v_product.item_id,'quantity',v_product.quantity,'new_quantity',v_have+v_product.quantity,'price_brl',v_effective_price);
+--   end if;
+-- end; $$;
+-- 
+-- revoke all on function public.get_shops_runtime_config_v1817c() from public;
+-- grant execute on function public.get_shops_runtime_config_v1817c() to anon,authenticated,service_role;
+-- revoke all on function public.admin_update_common_shop_item_v1817c(text,text,text,bigint,text,integer,integer,integer,text,boolean,boolean) from public,anon;
+-- grant execute on function public.admin_update_common_shop_item_v1817c(text,text,text,bigint,text,integer,integer,integer,text,boolean,boolean) to authenticated,service_role;
+-- revoke all on function public.admin_update_premium_shop_item_v1817c(text,text,text,numeric,integer,integer,integer,boolean,integer) from public,anon;
+-- grant execute on function public.admin_update_premium_shop_item_v1817c(text,text,text,numeric,integer,integer,integer,boolean,integer) to authenticated,service_role;
+-- ===== END V18_1_7C_SHOPS_DATA_DRIVEN.sql =====
+
+-- ===== START V18_1_9_NPC_POPULATION.sql | sha256 bac6e8126a93802ea3fad941741f26442dbd0e73e8d2bbfb77abb4e89d983673 =====
+-- -- STELLAR LEGACY V18.1.9 • Densidade de NPCs ~30% menor
+-- -- Aplicar UMA vez no Supabase SQL Editor. Seguro para executar novamente: só diminui valores
+-- -- que ainda sejam maiores que o alvo inicial. Não modifica respawn, XP, drops ou NPCs de evento.
+-- -- Os 7 mapas normais são afetados; Galaxy Gates não são alterados.
+-- -- Backup dos valores anteriores: sql/V18_1_9_NPC_POPULATION_ROLLBACK.sql
+-- 
+-- BEGIN;
+-- WITH target(map_id,npc_key,prior_count,new_count) AS (
+--   VALUES
+--     ('b41', 'bossMordon', 8, 6),
+--     ('b41', 'devolarium', 8, 6),
+--     ('b41', 'lordakia', 15, 11),
+--     ('b41', 'mordon', 15, 11),
+--     ('b41', 'saimon', 19, 13),
+--     ('b42', 'bossDevolarium', 4, 3),
+--     ('b42', 'bossMordon', 10, 7),
+--     ('b42', 'devolarium', 12, 8),
+--     ('b42', 'mordon', 20, 14),
+--     ('b42', 'saimon', 18, 13),
+--     ('b43', 'bossDevolarium', 9, 6),
+--     ('b43', 'bossSibelon', 7, 5),
+--     ('b43', 'devolarium', 18, 13),
+--     ('b43', 'mordon', 20, 14),
+--     ('b43', 'sibelon', 13, 9),
+--     ('x1', 'aiderStreuner', 10, 7),
+--     ('x1', 'recruitStreuner', 10, 7),
+--     ('x1', 'streuner', 30, 21),
+--     ('x2', 'aiderStreuner', 11, 8),
+--     ('x2', 'bossLordakia', 5, 4),
+--     ('x2', 'bossStreuner', 8, 6),
+--     ('x2', 'lordakia', 19, 13),
+--     ('x2', 'recruitStreuner', 11, 8),
+--     ('x2', 'streuner', 16, 11),
+--     ('x3', 'bossDevolarium', 2, 1),
+--     ('x3', 'bossMordon', 5, 4),
+--     ('x3', 'bossSaimon', 5, 4),
+--     ('x3', 'devolarium', 5, 4),
+--     ('x3', 'lordakia', 17, 12),
+--     ('x3', 'mordon', 14, 10),
+--     ('x3', 'saimon', 17, 12),
+--     ('x4', 'bossSaimon', 9, 6),
+--     ('x4', 'bossSibelon', 4, 3),
+--     ('x4', 'lordakia', 12, 8),
+--     ('x4', 'mordon', 14, 10),
+--     ('x4', 'saimon', 14, 10),
+--     ('x4', 'sibelon', 7, 5)
+-- )
+-- UPDATE public.game_map_npc_spawns_v1811 AS spawn
+-- SET spawn_count = target.new_count, updated_at = NOW()
+-- FROM target
+-- WHERE spawn.map_id = target.map_id
+--   AND spawn.npc_key = target.npc_key
+--   AND spawn.enabled = TRUE
+--   AND spawn.spawn_count > target.new_count;
+-- COMMIT;
+-- ===== END V18_1_9_NPC_POPULATION.sql =====
+
+-- ===== START V18_1_9_NPC_POPULATION_ROLLBACK.sql | sha256 be9bce4c450a629cb6f4b46017e7ac8da599e6133c51ee053f2f33a8344f1a29 =====
+-- -- Restaura somente os valores originais ainda iguais à redução aplicada pela V18.1.9.
+-- -- Não sobrescreve alterações posteriores feitas manualmente no ADM.
+-- BEGIN;
+-- WITH target(map_id,npc_key,prior_count,new_count) AS (
+--   VALUES
+--     ('b41', 'bossMordon', 8, 6),
+--     ('b41', 'devolarium', 8, 6),
+--     ('b41', 'lordakia', 15, 11),
+--     ('b41', 'mordon', 15, 11),
+--     ('b41', 'saimon', 19, 13),
+--     ('b42', 'bossDevolarium', 4, 3),
+--     ('b42', 'bossMordon', 10, 7),
+--     ('b42', 'devolarium', 12, 8),
+--     ('b42', 'mordon', 20, 14),
+--     ('b42', 'saimon', 18, 13),
+--     ('b43', 'bossDevolarium', 9, 6),
+--     ('b43', 'bossSibelon', 7, 5),
+--     ('b43', 'devolarium', 18, 13),
+--     ('b43', 'mordon', 20, 14),
+--     ('b43', 'sibelon', 13, 9),
+--     ('x1', 'aiderStreuner', 10, 7),
+--     ('x1', 'recruitStreuner', 10, 7),
+--     ('x1', 'streuner', 30, 21),
+--     ('x2', 'aiderStreuner', 11, 8),
+--     ('x2', 'bossLordakia', 5, 4),
+--     ('x2', 'bossStreuner', 8, 6),
+--     ('x2', 'lordakia', 19, 13),
+--     ('x2', 'recruitStreuner', 11, 8),
+--     ('x2', 'streuner', 16, 11),
+--     ('x3', 'bossDevolarium', 2, 1),
+--     ('x3', 'bossMordon', 5, 4),
+--     ('x3', 'bossSaimon', 5, 4),
+--     ('x3', 'devolarium', 5, 4),
+--     ('x3', 'lordakia', 17, 12),
+--     ('x3', 'mordon', 14, 10),
+--     ('x3', 'saimon', 17, 12),
+--     ('x4', 'bossSaimon', 9, 6),
+--     ('x4', 'bossSibelon', 4, 3),
+--     ('x4', 'lordakia', 12, 8),
+--     ('x4', 'mordon', 14, 10),
+--     ('x4', 'saimon', 14, 10),
+--     ('x4', 'sibelon', 7, 5)
+-- )
+-- UPDATE public.game_map_npc_spawns_v1811 AS spawn
+-- SET spawn_count = target.prior_count, updated_at = NOW()
+-- FROM target
+-- WHERE spawn.map_id = target.map_id
+--   AND spawn.npc_key = target.npc_key
+--   AND spawn.spawn_count = target.new_count;
+-- COMMIT;
+-- ===== END V18_1_9_NPC_POPULATION_ROLLBACK.sql =====
+
+-- ===== START V18_2_11_AUCTION_NOVA_FLOOR.sql | sha256 608d22fe1629be03ffae7134d225f87459052fb21f84a49a1bc4dab0064839ac =====
+-- -- Stellar Legacy V18.2.11: preço inicial do NOVA (item:iris) no leilão
+-- -- é 2x o preço base (CR) do HALO (drone:flax) no Supabase, mínimo 100k.
+-- -- Não altera preço da Loja, lances antigos, saldos ou resultados.
+-- -- No projeto atual esta regra já foi instalada e verificada.
+-- CREATE OR REPLACE FUNCTION public.place_auction_bid_online(
+--   p_hour_key text, p_lot_ref text, p_user_bid bigint, p_lot jsonb
+-- )
+-- RETURNS TABLE(lot_ref text, user_bid bigint, leader_user_id uuid,
+--   leader_callsign text, lot jsonb, updated_at timestamptz)
+-- LANGUAGE plpgsql SECURITY DEFINER SET search_path TO 'public'
+-- AS $function$
+-- #variable_conflict use_column
+-- declare
+--   v_uid uuid := auth.uid();
+--   v_current public.auction_bids%rowtype;
+--   v_credits bigint := 0;
+--   v_reserved bigint := 0;
+--   v_floor bigint := greatest(100000, coalesce((p_lot->>'systemFloor')::bigint,100000));
+-- begin
+--   if v_uid is null then
+--     raise exception 'Sessão ausente.';
+--   end if;
+-- 
+--   -- Piso próprio da Nova; nunca confiar somente no piso enviado pelo cliente.
+--   if p_lot_ref = 'item:iris' then
+--     v_floor := greatest(
+--       v_floor,
+--       (select 2 * coalesce(
+--         (select price from public.live_shop_prices_v16
+--          where catalog_key='drone:flax' and currency='credits' and enabled=true limit 1),
+--         10000000))
+--     );
+--   end if;
+-- 
+--   if p_user_bid < 100000 or mod(p_user_bid,100000) <> 0 then
+--     raise exception 'O lance deve usar passos de 100.000 CR.';
+--   end if;
+--   perform pg_advisory_xact_lock(hashtext(p_hour_key || ':' || p_lot_ref));
+-- 
+--   select * into v_current
+--   from public.auction_bids
+--   where hour_key = p_hour_key and lot_ref = p_lot_ref and status = 'active'
+--   order by user_bid desc, updated_at asc
+--   limit 1 for update;
+-- 
+--   if found and v_current.user_id = v_uid then
+--     raise exception 'Você já está liderando este lote.';
+--   end if;
+--   if found then
+--     if p_user_bid < greatest(v_current.user_bid + 100000,v_floor) then
+--       raise exception 'Seu lance precisa superar o jogador atual em pelo menos 100.000 CR.';
+--     end if;
+--   elsif p_user_bid < v_floor then
+--     raise exception 'O lance está abaixo do preço atual do sistema.';
+--   end if;
+-- 
+--   select coalesce(credits,0) into v_credits
+--   from public.profiles where id = v_uid for update;
+-- 
+--   select coalesce(sum(user_bid),0) into v_reserved
+--   from public.auction_bids
+--   where user_id = v_uid and hour_key = p_hour_key and status = 'active'
+--     and lot_ref <> p_lot_ref;
+-- 
+--   if v_credits < v_reserved + p_user_bid then
+--     raise exception 'Créditos insuficientes considerando os seus lances em garantia.';
+--   end if;
+-- 
+--   update public.auction_bids set status='lost',updated_at=now()
+--   where hour_key=p_hour_key and lot_ref=p_lot_ref and status='active';
+-- 
+--   insert into public.auction_bids(
+--     user_id,hour_key,lot_ref,user_bid,lot,status,created_at,updated_at
+--   ) values (
+--     v_uid,p_hour_key,p_lot_ref,p_user_bid,coalesce(p_lot,'{}'::jsonb),
+--     'active',now(),now()
+--   )
+--   on conflict(user_id,hour_key,lot_ref)
+--   do update set user_bid=excluded.user_bid,lot=excluded.lot,
+--     status='active',updated_at=now();
+-- 
+--   return query
+--   select b.lot_ref,b.user_bid,b.user_id,coalesce(p.callsign,'Pilot'),b.lot,b.updated_at
+--   from public.auction_bids b
+--   left join public.profiles p on p.id=b.user_id
+--   where b.user_id=v_uid and b.hour_key=p_hour_key and b.lot_ref=p_lot_ref and b.status='active'
+--   limit 1;
+-- end;
+-- $function$;
+-- ===== END V18_2_11_AUCTION_NOVA_FLOOR.sql =====
+
+-- ===== START V18_2_1_COUPONS_SQL_FIRST.sql | sha256 6eb6ad4b7240a4753d4ef24e2459fdb4a3f72cc70c7fd0a42644b51c8e8b7f0b =====
+-- -- STELLAR LEGACY V18.2.1 — SISTEMA DE CUPONS CONFIGURÁVEIS VIA SQL
+-- -- EXECUTAR UMA VEZ NO SUPABASE (o assistente pode aplicar a estrutura antes do deploy).
+-- -- Próximos cupons: apenas INSERT no banco; sem alterar JS, ZIP ou Render.
+-- -- Tabelas não são expostas à REST API; somente RPC com autenticação pode resgatar.
+-- 
+-- CREATE TABLE IF NOT EXISTS public.game_coupons_v1821 (
+--   code text PRIMARY KEY CHECK (code ~ '^[A-Z0-9][A-Z0-9_-]{3,63}$'),
+--   title text NOT NULL CHECK (length(btrim(title)) BETWEEN 1 AND 100),
+--   rewards jsonb NOT NULL CHECK (jsonb_typeof(rewards)='array' AND jsonb_array_length(rewards) BETWEEN 1 AND 8),
+--   active boolean NOT NULL DEFAULT true,
+--   min_level integer NOT NULL DEFAULT 1 CHECK (min_level BETWEEN 1 AND 44),
+--   max_uses integer NOT NULL DEFAULT 1 CHECK (max_uses BETWEEN 1 AND 100000),
+--   redeemed_count integer NOT NULL DEFAULT 0 CHECK (redeemed_count >= 0),
+--   starts_at timestamptz NOT NULL DEFAULT now(),
+--   expires_at timestamptz,
+--   created_at timestamptz NOT NULL DEFAULT now(),
+--   CONSTRAINT coupon_dates_valid CHECK (expires_at IS NULL OR expires_at > starts_at)
+-- );
+-- CREATE TABLE IF NOT EXISTS public.game_coupon_redemptions_v1821 (
+--   code text NOT NULL REFERENCES public.game_coupons_v1821(code) ON DELETE RESTRICT,
+--   user_id uuid NOT NULL,
+--   redeemed_at timestamptz NOT NULL DEFAULT now(),
+--   rewards_snapshot jsonb NOT NULL,
+--   PRIMARY KEY(code,user_id)
+-- );
+-- CREATE INDEX IF NOT EXISTS game_coupon_redemptions_v1821_player_idx
+--   ON public.game_coupon_redemptions_v1821(user_id,redeemed_at DESC);
+-- 
+-- ALTER TABLE public.game_coupons_v1821 ENABLE ROW LEVEL SECURITY;
+-- ALTER TABLE public.game_coupon_redemptions_v1821 ENABLE ROW LEVEL SECURITY;
+-- REVOKE ALL ON public.game_coupons_v1821 FROM PUBLIC,anon,authenticated;
+-- REVOKE ALL ON public.game_coupon_redemptions_v1821 FROM PUBLIC,anon,authenticated;
+-- 
+-- -- Proteção contra sobrescrever um prêmio com save antigo de outra aba/dispositivo.
+-- -- A restrição se aplica apenas quando o jogador escreve no PRÓPRIO save.
+-- CREATE OR REPLACE FUNCTION public.game_coupon_protect_save_v1821()
+-- RETURNS trigger LANGUAGE plpgsql SECURITY DEFINER SET search_path = '' AS $fn$
+-- DECLARE
+--   old_claims jsonb := coalesce(OLD.state->'couponClaimsV1821','{}'::jsonb);
+--   new_claims jsonb := coalesce(NEW.state->'couponClaimsV1821','{}'::jsonb);
+-- BEGIN
+--   IF auth.uid() IS NOT NULL AND auth.uid()=OLD.user_id
+--     AND jsonb_typeof(old_claims)='object'
+--     AND NOT (jsonb_typeof(new_claims)='object' AND new_claims @> old_claims) THEN
+--     RAISE EXCEPTION 'SAVE_COUPON_STALE: Atualize o jogo para sincronizar seus prêmios antes de salvar.' USING ERRCODE='23514';
+--   END IF;
+--   RETURN NEW;
+-- END;
+-- $fn$;
+-- DROP TRIGGER IF EXISTS game_coupon_protect_save_v1821 ON public.game_saves;
+-- CREATE TRIGGER game_coupon_protect_save_v1821
+-- BEFORE UPDATE OF state ON public.game_saves
+-- FOR EACH ROW EXECUTE FUNCTION public.game_coupon_protect_save_v1821();
+-- REVOKE ALL ON FUNCTION public.game_coupon_protect_save_v1821() FROM PUBLIC,anon,authenticated;
+-- 
+-- CREATE OR REPLACE FUNCTION public.redeem_game_coupon_v1821(p_code text)
+-- RETURNS jsonb
+-- LANGUAGE plpgsql SECURITY DEFINER SET search_path = ''
+-- AS $fn$
+-- DECLARE
+--   uid uuid := auth.uid();
+--   code_input text := upper(btrim(coalesce(p_code,'')));
+--   rec public.game_coupons_v1821%ROWTYPE;
+--   saved jsonb;
+--   reward jsonb;
+--   v_kind text;
+--   item_id text;
+--   qty bigint;
+--   asset_key text;
+--   prop_name text;
+--   pet jsonb;
+--   gear_owned jsonb;
+--   owned boolean;
+--   current_num numeric;
+-- BEGIN
+--   IF uid IS NULL THEN RAISE EXCEPTION 'Você precisa estar conectado para resgatar.'; END IF;
+--   IF code_input !~ '^[A-Z0-9][A-Z0-9_-]{3,63}$' THEN RAISE EXCEPTION 'Cupom inválido.'; END IF;
+--   SELECT * INTO rec FROM public.game_coupons_v1821 WHERE code=code_input FOR UPDATE;
+--   IF NOT FOUND OR NOT rec.active OR rec.starts_at > now()
+--     OR (rec.expires_at IS NOT NULL AND rec.expires_at <= now()) THEN
+--     RAISE EXCEPTION 'Cupom inválido, inativo ou expirado.';
+--   END IF;
+--   IF rec.redeemed_count >= rec.max_uses THEN RAISE EXCEPTION 'Cupom esgotado.'; END IF;
+--   IF EXISTS (SELECT 1 FROM public.game_coupon_redemptions_v1821 WHERE code=code_input AND user_id=uid) THEN
+--     RAISE EXCEPTION 'Você já resgatou este cupom.';
+--   END IF;
+--   SELECT state INTO saved FROM public.game_saves WHERE user_id=uid FOR UPDATE;
+--   IF saved IS NULL OR jsonb_typeof(saved)<>'object' THEN RAISE EXCEPTION 'Crie um piloto e salve o jogo antes de resgatar.'; END IF;
+--   IF coalesce(nullif(saved->>'accountOwnerId',''),uid::text)<>uid::text THEN
+--     RAISE EXCEPTION 'O save pertence a outro jogador.';
+--   END IF;
+--   IF coalesce((saved #>> '{profile,level}')::int,1)<rec.min_level THEN
+--     RAISE EXCEPTION 'Este cupom requer nível %.',rec.min_level;
+--   END IF;
+--   -- Não consumir cupom para jogador que já possui todos os componentes de AUX+Sentinela.
+--   IF jsonb_array_length(rec.rewards)=1
+--      AND rec.rewards->0->>'kind'='aux_sentinel'
+--      AND coalesce((saved #>> '{pet,owned}')::boolean,false)
+--      AND coalesce((saved #>> '{pet,gearsOwned,guard}')::boolean,false) THEN
+--     RAISE EXCEPTION 'Você já possui o AUX-9 com o Sentinela.';
+--   END IF;
+-- 
+--   FOR reward IN SELECT value FROM jsonb_array_elements(rec.rewards) AS x(value) LOOP
+--     IF jsonb_typeof(reward)<>'object' THEN RAISE EXCEPTION 'Prêmio do cupom mal configurado.'; END IF;
+--     v_kind := coalesce(reward->>'kind','');
+--     item_id := coalesce(reward->>'id','');
+-- 
+--     IF v_kind IN ('aux_sentinel','aux9') THEN
+--       pet := coalesce(saved->'pet','{}'::jsonb);
+--       IF jsonb_typeof(pet)<>'object' THEN RAISE EXCEPTION 'Dados inválidos do AUX-9.'; END IF;
+--       owned := coalesce((pet->>'owned')::boolean,false);
+--       IF NOT owned THEN
+--         pet := pet || jsonb_build_object('owned',true,'level',greatest(1,coalesce((pet->>'level')::int,1)),
+--           'xp',greatest(0,coalesce((pet->>'xp')::numeric,0)), 'xpModelV175',true,
+--           'laserSlotsUnlocked',greatest(1,coalesce((pet->>'laserSlotsUnlocked')::int,0)),
+--           'shieldSlotsUnlocked',greatest(2,coalesce((pet->>'shieldSlotsUnlocked')::int,0)),
+--           'lasers','[null]'::jsonb,'shields','[null,null]'::jsonb,'activeGear','off');
+--       END IF;
+--       IF v_kind='aux_sentinel' THEN
+--         gear_owned := coalesce(pet->'gearsOwned','{}'::jsonb);
+--         IF jsonb_typeof(gear_owned)<>'object' THEN gear_owned:='{}'::jsonb; END IF;
+--         pet := pet || jsonb_build_object('gearsOwned',gear_owned||'{"guard":true}'::jsonb,'activeGear','guard');
+--       END IF;
+--       saved := jsonb_set(saved,'{pet}',pet,true);
+-- 
+--     ELSIF v_kind='pet_gear' THEN
+--       IF item_id NOT IN ('guard','box','ore','repair','kami') THEN RAISE EXCEPTION 'Módulo do AUX-9 inválido.'; END IF;
+--       pet := coalesce(saved->'pet','{}'::jsonb);
+--       IF NOT coalesce((pet->>'owned')::boolean,false) THEN RAISE EXCEPTION 'Este prêmio exige AUX-9 já adquirido.'; END IF;
+--       gear_owned := coalesce(pet->'gearsOwned','{}'::jsonb);
+--       IF jsonb_typeof(gear_owned)<>'object' THEN gear_owned:='{}'::jsonb; END IF;
+--       pet := jsonb_set(pet,'{gearsOwned}',gear_owned||jsonb_build_object(item_id,true),true);
+--       saved := jsonb_set(saved,'{pet}',pet,true);
+-- 
+--     ELSIF v_kind IN ('credits','uridium') THEN
+--       qty := coalesce((reward->>'amount')::bigint,0);
+--       IF qty<1 OR qty>100000000 THEN RAISE EXCEPTION 'Quantidade de moeda fora do limite (1 a 100 milhões).'; END IF;
+--       current_num := coalesce((saved->'profile'->>v_kind)::numeric,0);
+--       IF current_num+qty>100000000000000 THEN RAISE EXCEPTION 'Saldo máximo excedido.'; END IF;
+--       saved := jsonb_set(saved,ARRAY['profile',v_kind],to_jsonb(current_num+qty),true);
+-- 
+--     ELSIF v_kind IN ('inventory','ammo','rocket','ship') THEN
+--       IF item_id !~ '^[A-Za-z0-9_-]{1,64}$' THEN RAISE EXCEPTION 'ID do prêmio inválido.'; END IF;
+--       qty := coalesce((reward->>'qty')::bigint,1);
+--       IF qty<1 OR qty>1000000 THEN RAISE EXCEPTION 'Quantidade inválida.'; END IF;
+--       IF v_kind='ship' THEN
+--         IF qty<>1 THEN RAISE EXCEPTION 'Naves exigem quantidade 1.'; END IF;
+--         IF NOT EXISTS (SELECT 1 FROM public.live_shop_prices_v16 WHERE enabled=true AND kind='ship' AND ref_id=item_id) THEN
+--           RAISE EXCEPTION 'Nave não cadastrada na Loja.';
+--         END IF;
+--         IF coalesce(saved->'ownedShips','[]'::jsonb) ? item_id THEN
+--           RAISE EXCEPTION 'Essa nave já pertence à conta.';
+--         END IF;
+--         saved:=jsonb_set(saved,'{ownedShips}',coalesce(saved->'ownedShips','[]'::jsonb)||jsonb_build_array(item_id),true);
+--       ELSE
+--         asset_key := CASE v_kind WHEN 'inventory' THEN 'inventory' WHEN 'ammo' THEN 'ammo' ELSE 'rockets' END;
+--         IF NOT EXISTS (SELECT 1 FROM public.live_shop_prices_v16
+--           WHERE enabled=true AND ref_id=item_id
+--             AND ((v_kind='inventory' AND kind IN ('laser','generator','extra'))
+--               OR (v_kind='ammo' AND kind='ammo')
+--               OR (v_kind='rocket' AND kind='rocket'))) THEN
+--           RAISE EXCEPTION 'Item de prêmio não cadastrado na Loja.';
+--         END IF;
+--         current_num:=coalesce((saved->asset_key->>item_id)::numeric,0);
+--         IF current_num+qty>1000000000 THEN RAISE EXCEPTION 'Quantidade máxima excedida.'; END IF;
+--         saved:=jsonb_set(saved,ARRAY[asset_key,item_id],to_jsonb(current_num+qty),true);
+--       END IF;
+--     ELSE
+--       RAISE EXCEPTION 'Tipo de prêmio não suportado: %.',v_kind;
+--     END IF;
+--   END LOOP;
+-- 
+--   saved:=jsonb_set(saved,'{couponClaimsV1821}',
+--     coalesce(saved->'couponClaimsV1821','{}'::jsonb)||jsonb_build_object(code_input,now()::text),true);
+-- 
+--   UPDATE public.game_saves SET state=saved,updated_at=now() WHERE user_id=uid;
+--   INSERT INTO public.game_coupon_redemptions_v1821(code,user_id,rewards_snapshot)
+--     VALUES(code_input,uid,rec.rewards);
+--   UPDATE public.game_coupons_v1821 SET redeemed_count=redeemed_count+1 WHERE code=code_input;
+-- 
+--   RETURN jsonb_build_object('ok',true,'code',code_input,'title',rec.title,'rewards',rec.rewards,'state',saved);
+-- END;
+-- $fn$;
+-- 
+-- REVOKE ALL ON FUNCTION public.redeem_game_coupon_v1821(text) FROM PUBLIC,anon;
+-- GRANT EXECUTE ON FUNCTION public.redeem_game_coupon_v1821(text) TO authenticated;
+-- 
+-- -- Migra cupons Sentinela antigos que ainda não foram usados, mantendo o MESMO código.
+-- INSERT INTO public.game_coupons_v1821(code,title,rewards,max_uses)
+-- SELECT code,'AUX-9 + Modo Sentinela','[{"kind":"aux_sentinel"}]'::jsonb,1
+-- FROM public.stellar_aux_sentinel_coupons_v1
+-- WHERE active=true AND redeemed_by IS NULL AND (expires_at IS NULL OR expires_at>now())
+-- ON CONFLICT (code) DO NOTHING;
+-- -- O resgate agora fica somente no sistema V18.2.1 (não permitir resgates duplos pela função antiga).
+-- REVOKE EXECUTE ON FUNCTION public.redeem_aux_sentinel_coupon_v1(text) FROM authenticated;
+-- ===== END V18_2_1_COUPONS_SQL_FIRST.sql =====
+
+-- ===== START V18_2_3_GATE_SPINS_100_STL.sql | sha256 11ee752f2fe8717022f6b80e23636f217ceb7f2bd939a5250203d11a01b32502 =====
+-- -- V18.2.3 • mesmo preço para AURORA / NEXUS / ECLIPSE
+-- -- Já aplicado no banco principal do Stellar Legacy em 10/10/2026.
+-- -- Em projetos alternativos, execute apenas uma vez. A opção por Poeira é do servidor Node v18.2.3.
+-- BEGIN;
+-- UPDATE public.live_shop_prices_v16
+-- SET price=100, updated_at=now()
+-- WHERE catalog_key IN ('gate_spin:alpha','gate_spin:beta','gate_spin:gamma')
+--   AND kind='gate_spin' AND currency='uridium';
+-- DO $$ BEGIN
+--   IF (SELECT count(*) FROM public.live_shop_prices_v16
+--       WHERE catalog_key IN ('gate_spin:alpha','gate_spin:beta','gate_spin:gamma')
+--       AND enabled=true AND price=100 AND currency='uridium') <> 3 THEN
+--     RAISE EXCEPTION 'Não foi possível ajustar todos os três giros para 100 STL.';
+--   END IF;
+-- END $$;
+-- COMMIT;
+-- ===== END V18_2_3_GATE_SPINS_100_STL.sql =====
+
+-- ===== START V18_2_5_ADMIN_BONUS_LIVE.sql | sha256 2183e786105c8accbd6362ef5ca454bd1b4e077094f3845335d191b2ed2d0a85 =====
+-- -- Stellar Legacy 18.2.5: Bonus Box + Poeira Stellar editor LIVE OPS.
+-- -- Safe to run once or re-run: retains configured values after first installation.
+-- CREATE TABLE IF NOT EXISTS public.bonus_box_config_v1825 (
+--   id integer PRIMARY KEY CHECK (id=1),
+--   config jsonb NOT NULL,
+--   version integer NOT NULL DEFAULT 1,
+--   updated_at timestamptz NOT NULL DEFAULT now(),
+--   updated_by uuid
+-- );
+-- ALTER TABLE public.bonus_box_config_v1825 ENABLE ROW LEVEL SECURITY;
+-- REVOKE ALL ON public.bonus_box_config_v1825 FROM PUBLIC, anon, authenticated;
+-- 
+-- INSERT INTO public.bonus_box_config_v1825(id,config)
+-- VALUES(1, '{
+--   "map_counts":{"x1":20,"x2":20,"x3":20,"x4":20,"b41":30,"b42":30,"b43":30},
+--   "respawn_min_ms":40000,"respawn_max_ms":70000,
+--   "premium_discount_pct":10,
+--   "gate_prices":{"alpha":{"stl":100,"dust":1},"beta":{"stl":100,"dust":1},"gamma":{"stl":100,"dust":1}},
+--   "rewards":[
+--     {"kind":"ammo","id":"lcb10","min":15,"max":100,"weight":1},
+--     {"kind":"ammo","id":"mcb25","min":15,"max":75,"weight":1},
+--     {"kind":"ammo","id":"mcb50","min":15,"max":50,"weight":1},
+--     {"kind":"ammo","id":"sab50","min":15,"max":75,"weight":1},
+--     {"kind":"credits","min":100,"max":10000,"weight":1},
+--     {"kind":"uridium","min":1,"max":200,"weight":1},
+--     {"kind":"stellarDust","min":1,"max":2,"weight":1}
+--   ]}'::jsonb)
+-- ON CONFLICT(id) DO NOTHING;
+-- 
+-- CREATE OR REPLACE FUNCTION public.get_bonus_box_config_v1825()
+-- RETURNS jsonb LANGUAGE sql STABLE SECURITY DEFINER SET search_path TO ''
+-- AS $f$
+--  SELECT jsonb_build_object('version',version,'updated_at',updated_at,'config',config)
+--  FROM public.bonus_box_config_v1825 WHERE id=1;
+-- $f$;
+-- REVOKE ALL ON FUNCTION public.get_bonus_box_config_v1825() FROM PUBLIC,anon;
+-- GRANT EXECUTE ON FUNCTION public.get_bonus_box_config_v1825() TO authenticated;
+-- 
+-- CREATE OR REPLACE FUNCTION public.admin_update_bonus_box_config_v1825(p_config jsonb)
+-- RETURNS jsonb LANGUAGE plpgsql SECURITY DEFINER SET search_path TO ''
+-- AS $f$
+-- DECLARE
+--   v_uid uuid := auth.uid();
+--   v_key text;
+--   v_reward jsonb;
+--   v_rows jsonb := '[]'::jsonb;
+--   v_gate jsonb;
+--   v_maps jsonb := '{}'::jsonb;
+--   v_prices jsonb := '{}'::jsonb;
+--   v_limit integer;
+--   v_min integer;
+--   v_max integer;
+--   v_weight numeric;
+--   v_total numeric := 0;
+--   v_labels text[] := ARRAY['lcb10','mcb25','mcb50','sab50','credits','uridium','stellarDust'];
+--   v_kind text;
+--   v_id text;
+--   v_idx integer;
+--   v_respawn_min integer;
+--   v_respawn_max integer;
+--   v_discount integer;
+--   v_clean jsonb;
+--   v_out jsonb;
+-- BEGIN
+--   IF v_uid IS NULL OR NOT public.is_game_admin_v1763(v_uid) THEN
+--     RAISE EXCEPTION 'Acesso administrativo negado.' USING ERRCODE='42501';
+--   END IF;
+--   IF jsonb_typeof(p_config)<>'object' THEN
+--     RAISE EXCEPTION 'Configuração deve ser um objeto JSON.';
+--   END IF;
+--   IF jsonb_typeof(p_config->'map_counts') <> 'object'
+--      OR jsonb_typeof(p_config->'gate_prices') <> 'object'
+--      OR jsonb_typeof(p_config->'rewards') <> 'array'
+--      OR jsonb_array_length(p_config->'rewards') <> 7 THEN
+--     RAISE EXCEPTION 'Mapas, preços e as sete recompensas são obrigatórios.';
+--   END IF;
+--   FOR v_key IN SELECT unnest(ARRAY['x1','x2','x3','x4','b41','b42','b43']) LOOP
+--     IF (p_config->'map_counts'->>v_key) IS NULL OR (p_config->'map_counts'->>v_key) !~ '^[0-9]{1,3}$' THEN
+--       RAISE EXCEPTION 'Quantidade inválida para o mapa %.',v_key;
+--     END IF;
+--     v_limit := (p_config->'map_counts'->>v_key)::integer;
+--     IF v_limit>100 THEN RAISE EXCEPTION 'Máximo de 100 caixas para o mapa %.',v_key; END IF;
+--     v_maps := v_maps || jsonb_build_object(v_key,v_limit);
+--   END LOOP;
+--   v_respawn_min := (p_config->>'respawn_min_ms')::integer;
+--   v_respawn_max := (p_config->>'respawn_max_ms')::integer;
+--   IF v_respawn_min IS NULL OR v_respawn_max IS NULL
+--     OR v_respawn_min<5000 OR v_respawn_max>3600000 OR v_respawn_max<v_respawn_min THEN
+--     RAISE EXCEPTION 'Respawn precisa ser entre 5 e 3600 segundos, com mínimo <= máximo.';
+--   END IF;
+--   v_discount := (p_config->>'premium_discount_pct')::integer;
+--   IF v_discount IS NULL OR v_discount<0 OR v_discount>50 THEN
+--     RAISE EXCEPTION 'Desconto Premium permitido: 0 a 50 por cento.';
+--   END IF;
+--   FOR v_key IN SELECT unnest(ARRAY['alpha','beta','gamma']) LOOP
+--     v_gate := p_config->'gate_prices'->v_key;
+--     IF jsonb_typeof(v_gate)<>'object' THEN RAISE EXCEPTION 'Preço ausente: %.',v_key; END IF;
+--     v_min := (v_gate->>'stl')::integer;
+--     v_max := (v_gate->>'dust')::integer;
+--     IF v_min IS NULL OR v_min<1 OR v_min>100000 OR v_max IS NULL OR v_max<1 OR v_max>100 THEN
+--       RAISE EXCEPTION 'Preço inválido do portal % (STL: 1..100000, Poeira: 1..100).',v_key;
+--     END IF;
+--     v_prices := v_prices || jsonb_build_object(v_key,jsonb_build_object('stl',v_min,'dust',v_max));
+--   END LOOP;
+--   FOR v_idx IN 0..6 LOOP
+--     v_reward := p_config->'rewards'->v_idx;
+--     IF jsonb_typeof(v_reward)<>'object' THEN RAISE EXCEPTION 'Prêmio % inválido.',v_idx+1; END IF;
+--     v_id := v_labels[v_idx+1];
+--     v_kind := CASE WHEN v_idx<4 THEN 'ammo' ELSE v_id END;
+--     IF v_reward->>'kind'<>v_kind OR (v_idx<4 AND v_reward->>'id'<>v_id) THEN
+--       RAISE EXCEPTION 'Tipo de recompensa % não corresponde ao padrão permitido.',v_idx+1;
+--     END IF;
+--     v_min := (v_reward->>'min')::integer;
+--     v_max := (v_reward->>'max')::integer;
+--     v_weight := (v_reward->>'weight')::numeric;
+--     IF v_min IS NULL OR v_max IS NULL OR v_weight IS NULL
+--       OR v_min<1 OR v_max<v_min OR v_weight<0 OR v_weight>100 THEN
+--       RAISE EXCEPTION 'Intervalo/chance inválido na recompensa %.',v_id;
+--     END IF;
+--     IF v_max > (CASE WHEN v_kind='credits' THEN 10000000 WHEN v_kind='uridium' THEN 100000 WHEN v_kind='stellarDust' THEN 100 ELSE 1000000 END) THEN
+--       RAISE EXCEPTION 'Quantidade máxima de % excedida.',v_id;
+--     END IF;
+--     v_total := v_total + v_weight;
+--     v_rows := v_rows || jsonb_build_array(jsonb_build_object('kind',v_kind,'min',v_min,'max',v_max,'weight',v_weight)
+--       || CASE WHEN v_kind='ammo' THEN jsonb_build_object('id',v_id) ELSE '{}'::jsonb END);
+--   END LOOP;
+--   IF v_total<=0 THEN RAISE EXCEPTION 'Pelo menos uma recompensa deve ter chance maior que zero.'; END IF;
+--   v_clean := jsonb_build_object('map_counts',v_maps,'respawn_min_ms',v_respawn_min,
+--     'respawn_max_ms',v_respawn_max,'premium_discount_pct',v_discount,
+--     'gate_prices',v_prices,'rewards',v_rows);
+--   UPDATE public.bonus_box_config_v1825
+--     SET config=v_clean,version=version+1,updated_at=now(),updated_by=v_uid
+--     WHERE id=1;
+--   -- O cadastro de preços do LIVE OPS continua sincronizado com o painel.
+--   UPDATE public.live_shop_prices_v16 AS p
+--     SET price=(v_prices->split_part(p.catalog_key,':',2)->>'stl')::integer,updated_at=now()
+--     WHERE p.catalog_key IN ('gate_spin:alpha','gate_spin:beta','gate_spin:gamma')
+--       AND p.kind='gate_spin' AND p.currency='uridium';
+--   RETURN public.get_bonus_box_config_v1825();
+-- END;
+-- $f$;
+-- REVOKE ALL ON FUNCTION public.admin_update_bonus_box_config_v1825(jsonb) FROM PUBLIC,anon;
+-- GRANT EXECUTE ON FUNCTION public.admin_update_bonus_box_config_v1825(jsonb) TO authenticated;
+-- ===== END V18_2_5_ADMIN_BONUS_LIVE.sql =====
+
+-- ===== START V18_2_6_EVENTOS_POR_PERIODO.sql | sha256 20a93298621bc76fa460608bbb8b9ff1962db3add5c6d5afdef607eceddebf66 =====
+-- -- STELLAR LEGACY V18.2.6 - EVENTOS POR JOGADOR / PERÍODO
+-- -- Execute uma vez no Supabase (instalação do assistente). Saves e progresso preservados.
+-- CREATE TABLE IF NOT EXISTS public.galaxy_event_progress_v1826 (
+--   user_id uuid NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+--   event_id text NOT NULL CHECK (length(event_id) BETWEEN 16 AND 110),
+--   event_key text NOT NULL,
+--   event_start timestamptz NOT NULL,
+--   event_end timestamptz NOT NULL,
+--   target integer NOT NULL CHECK (target BETWEEN 1 AND 100000),
+--   progress integer NOT NULL DEFAULT 0 CHECK (progress >= 0),
+--   rewarded boolean NOT NULL DEFAULT false,
+--   rewarded_at timestamptz,
+--   updated_at timestamptz NOT NULL DEFAULT now(),
+--   PRIMARY KEY (user_id,event_id)
+-- );
+-- CREATE INDEX IF NOT EXISTS galaxy_event_progress_v1826_period_idx ON public.galaxy_event_progress_v1826 (event_end);
+-- ALTER TABLE public.galaxy_event_progress_v1826 ENABLE ROW LEVEL SECURITY;
+-- REVOKE ALL ON TABLE public.galaxy_event_progress_v1826 FROM PUBLIC,anon,authenticated;
+-- 
+-- -- Cliente não pode sobrescrever as recompensas persistidas por RPC, mesmo com um save antigo aberto.
+-- CREATE OR REPLACE FUNCTION public.galaxy_event_save_guard_v1826()
+-- RETURNS trigger LANGUAGE plpgsql SECURITY DEFINER SET search_path = '' AS $fn$
+-- DECLARE old_claims jsonb := coalesce(OLD.state->'eventRewardsV1826','{}'::jsonb);
+--         new_claims jsonb := coalesce(NEW.state->'eventRewardsV1826','{}'::jsonb);
+-- BEGIN
+--   IF auth.uid() IS NOT NULL AND auth.uid()=OLD.user_id
+--     AND jsonb_typeof(old_claims)='object'
+--     AND NOT (jsonb_typeof(new_claims)='object' AND new_claims @> old_claims)
+--   THEN RAISE EXCEPTION 'SAVE_EVENT_STALE: reabra o jogo para sincronizar a recompensa de evento.' USING ERRCODE='23514';
+--   END IF;
+--   RETURN NEW;
+-- END;
+-- $fn$;
+-- DROP TRIGGER IF EXISTS galaxy_event_save_guard_v1826 ON public.game_saves;
+-- CREATE TRIGGER galaxy_event_save_guard_v1826 BEFORE UPDATE OF state ON public.game_saves
+-- FOR EACH ROW EXECUTE FUNCTION public.galaxy_event_save_guard_v1826();
+-- REVOKE ALL ON FUNCTION public.galaxy_event_save_guard_v1826() FROM PUBLIC,anon,authenticated;
+-- 
+-- -- Status é idempotente, inclusive para saves anteriores à instalação da V18.2.6.
+-- CREATE OR REPLACE FUNCTION public.get_my_galaxy_event_progress_v1826(p_event_id text)
+-- RETURNS jsonb LANGUAGE plpgsql SECURITY DEFINER SET search_path = '' AS $fn$
+-- DECLARE uid uuid:=auth.uid(); row_ev public.galaxy_event_progress_v1826%ROWTYPE; old_rec jsonb;
+-- BEGIN
+--  IF uid IS NULL THEN RAISE EXCEPTION 'Sessão inválida.'; END IF;
+--  SELECT * INTO row_ev FROM public.galaxy_event_progress_v1826 WHERE user_id=uid AND event_id=p_event_id;
+--  IF FOUND THEN RETURN jsonb_build_object('eventId',p_event_id,'progress',row_ev.progress,'target',row_ev.target,'complete',row_ev.rewarded,'rewarded',row_ev.rewarded,'rewardedNow',false); END IF;
+--  SELECT state #> ARRAY['galaxyEvents','records',p_event_id] INTO old_rec FROM public.game_saves WHERE user_id=uid;
+--  RETURN jsonb_build_object('eventId',p_event_id,'progress',greatest(0,coalesce((old_rec->>'value')::int,0)),
+--    'complete',coalesce((old_rec->>'rewarded')::boolean,false),
+--    'rewarded',coalesce((old_rec->>'rewarded')::boolean,false),'rewardedNow',false);
+-- END;
+-- $fn$;
+-- REVOKE ALL ON FUNCTION public.get_my_galaxy_event_progress_v1826(text) FROM PUBLIC,anon;
+-- GRANT EXECUTE ON FUNCTION public.get_my_galaxy_event_progress_v1826(text) TO authenticated;
+-- 
+-- -- Chamado pelo backend WebSocket após abates/recursos validados por ele.
+-- -- Valida período ativo publicado no LIVE OPS e impede recompensa repetida.
+-- CREATE OR REPLACE FUNCTION public.record_my_galaxy_event_progress_v1826(p_event_id text,p_delta integer)
+-- RETURNS jsonb LANGUAGE plpgsql SECURITY DEFINER SET search_path = '' AS $fn$
+-- DECLARE uid uuid:=auth.uid(); k text; start_ms bigint; t_start timestamptz; t_end timestamptz;
+--         event_def public.live_event_config_v16%ROWTYPE;
+--         row_ev public.galaxy_event_progress_v1826%ROWTYPE;
+--         old_save jsonb; old_rec jsonb; new_rec jsonb; new_save jsonb;
+--         new_progress int; old_rewarded boolean; r jsonb;
+--         lv int; mult numeric; xp_mult numeric:=1; cr bigint; stl bigint; xp bigint; cores int;
+--         new_profile jsonb; new_warfront jsonb; rewards jsonb;
+-- BEGIN
+--   IF uid IS NULL THEN RAISE EXCEPTION 'Sessão inválida.'; END IF;
+--   IF p_event_id !~ '^v1817:[a-z][a-z0-9_]{1,48}:[0-9]{13}$' THEN RAISE EXCEPTION 'Identificador de período inválido.'; END IF;
+--   IF p_delta IS NULL OR p_delta<1 OR p_delta>10000 THEN RAISE EXCEPTION 'Progresso inválido.'; END IF;
+--   k:=split_part(p_event_id,':',2);start_ms:=split_part(p_event_id,':',3)::bigint;
+--   t_start:=to_timestamp(start_ms/1000.0);
+--   SELECT * INTO event_def FROM public.live_event_config_v16 WHERE event_key=k AND enabled=true;
+--   IF NOT FOUND THEN RAISE EXCEPTION 'Evento indisponível.'; END IF;
+--   t_end:=least(t_start+make_interval(mins=>event_def.duration_minutes),coalesce(event_def.ends_at,'infinity'::timestamptz));
+--   IF clock_timestamp()<t_start OR clock_timestamp()>=t_end THEN RAISE EXCEPTION 'Período do evento encerrado.'; END IF;
+--   IF event_def.schedule_mode='once' THEN
+--     IF abs(extract(epoch FROM (t_start-event_def.starts_at)))>0.5 THEN RAISE EXCEPTION 'Janela única inválida.'; END IF;
+--   ELSIF event_def.schedule_mode='weekly' THEN
+--     IF NOT (extract(dow FROM t_start AT TIME ZONE 'America/Sao_Paulo')::int = ANY(event_def.weekdays)
+--        AND (t_start AT TIME ZONE 'America/Sao_Paulo')::time = event_def.start_local_time)
+--       THEN RAISE EXCEPTION 'Janela semanal inválida.'; END IF;
+--   ELSE
+--     IF t_start<event_def.starts_at OR event_def.repeat_minutes<1
+--       OR abs(mod(extract(epoch FROM (t_start-event_def.starts_at))::numeric, (event_def.repeat_minutes*60)::numeric))>0.5
+--       THEN RAISE EXCEPTION 'Janela recorrente inválida.'; END IF;
+--   END IF;
+--   SELECT state INTO old_save FROM public.game_saves WHERE user_id=uid FOR UPDATE;
+--   IF old_save IS NULL THEN RAISE EXCEPTION 'Save online não localizado.'; END IF;
+--   old_rec:=old_save #> ARRAY['galaxyEvents','records',p_event_id];
+--   old_rewarded:=coalesce((old_rec->>'rewarded')::boolean,false)
+--      OR coalesce((old_save->'eventRewardsV1826') ? p_event_id,false);
+--   INSERT INTO public.galaxy_event_progress_v1826(user_id,event_id,event_key,event_start,event_end,target,progress,rewarded,rewarded_at)
+--   VALUES(uid,p_event_id,k,t_start,t_end,event_def.target,
+--     least(event_def.target,greatest(0,coalesce((old_rec->>'value')::int,0))),old_rewarded,
+--     CASE WHEN old_rewarded THEN now() ELSE NULL END)
+--   ON CONFLICT (user_id,event_id) DO NOTHING;
+--   SELECT * INTO row_ev FROM public.galaxy_event_progress_v1826 WHERE user_id=uid AND event_id=p_event_id FOR UPDATE;
+--   IF row_ev.rewarded THEN
+--     RETURN jsonb_build_object('eventId',p_event_id,'progress',row_ev.target,'target',row_ev.target,'complete',true,'rewarded',true,'rewardedNow',false);
+--   END IF;
+--   new_progress:=least(row_ev.target,greatest(row_ev.progress,0)+p_delta);
+--   IF new_progress<row_ev.target THEN
+--     UPDATE public.galaxy_event_progress_v1826 SET progress=new_progress,updated_at=now() WHERE user_id=uid AND event_id=p_event_id;
+--     RETURN jsonb_build_object('eventId',p_event_id,'progress',new_progress,'target',row_ev.target,'complete',false,'rewarded',false,'rewardedNow',false);
+--   END IF;
+--   -- Chegou ao objetivo, creditado no banco exatamente uma vez.
+--   lv:=greatest(1,coalesce((old_save#>>'{profile,level}')::int,1));
+--   mult:=1+least(1.5,greatest(0,lv-1)/36.0);
+--   cr:=round(coalesce((event_def.reward->>'credits')::numeric,0)*mult);
+--   stl:=round(coalesce((event_def.reward->>'uridium')::numeric,0)*mult);
+--   xp:=round(coalesce((event_def.reward->>'xp')::numeric,0)*mult*.55);
+--   cores:=greatest(0,coalesce((event_def.reward->>'cores')::integer,0));
+--   new_profile:=coalesce(old_save->'profile','{}'::jsonb);
+--   new_profile:=jsonb_set(new_profile,'{credits}',to_jsonb(coalesce((new_profile->>'credits')::bigint,0)+cr),true);
+--   new_profile:=jsonb_set(new_profile,'{uridium}',to_jsonb(coalesce((new_profile->>'uridium')::bigint,0)+stl),true);
+--   new_profile:=jsonb_set(new_profile,'{xp}',to_jsonb(coalesce((new_profile->>'xp')::bigint,0)+xp),true);
+--   new_warfront:=coalesce(old_save->'warfront','{}'::jsonb);
+--   new_warfront:=jsonb_set(new_warfront,'{skillCores}',to_jsonb(coalesce((new_warfront->>'skillCores')::int,0)+cores),true);
+--   new_rec:=coalesce(old_rec,'{}'::jsonb)||jsonb_build_object('value',row_ev.target,'complete',true,'rewarded',true,'completedAt',now()::text);
+--   rewards:=jsonb_build_object('credits',cr,'uridium',stl,'xp',xp,'cores',cores);
+--   new_save:=jsonb_set(old_save,'{profile}',new_profile,true);
+--   new_save:=jsonb_set(new_save,'{warfront}',new_warfront,true);
+--   new_save:=jsonb_set(new_save,'{galaxyEvents}',coalesce(new_save->'galaxyEvents','{"records":{}}'::jsonb),true);
+--   new_save:=jsonb_set(new_save,'{galaxyEvents,records}',coalesce(new_save#>'{galaxyEvents,records}','{}'::jsonb),true);
+--   new_save:=jsonb_set(new_save,ARRAY['galaxyEvents','records',p_event_id],new_rec,true);
+--   new_save:=jsonb_set(new_save,'{eventRewardsV1826}',coalesce(old_save->'eventRewardsV1826','{}'::jsonb)||jsonb_build_object(p_event_id,rewards),true);
+--   UPDATE public.game_saves SET state=new_save,updated_at=now() WHERE user_id=uid;
+--   UPDATE public.profiles SET credits=coalesce((new_profile->>'credits')::bigint,0),uridium=coalesce((new_profile->>'uridium')::bigint,0),xp=coalesce((new_profile->>'xp')::bigint,0),updated_at=now() WHERE id=uid;
+--   UPDATE public.galaxy_event_progress_v1826 SET progress=row_ev.target,rewarded=true,rewarded_at=now(),updated_at=now() WHERE user_id=uid AND event_id=p_event_id;
+--   RETURN jsonb_build_object('eventId',p_event_id,'progress',row_ev.target,'target',row_ev.target,'complete',true,'rewarded',true,'rewardedNow',true,'reward',rewards,'state',new_save);
+-- END;
+-- $fn$;
+-- REVOKE ALL ON FUNCTION public.record_my_galaxy_event_progress_v1826(text,integer) FROM PUBLIC,anon;
+-- GRANT EXECUTE ON FUNCTION public.record_my_galaxy_event_progress_v1826(text,integer) TO authenticated;
+-- ===== END V18_2_6_EVENTOS_POR_PERIODO.sql =====
+
+-- ===== START V18_2_9_HANGAR_ECONOMY.sql | sha256 e9ce8a0d59bc02bef3d62d018cb47f8a2fe86b4cc12f772c16baed69090785da =====
+-- -- Stellar Legacy V18.2.9 — refinaria remota, Terminal Mercante Elite e drones progressivos
+-- -- Executado no Supabase de produção durante a preparação da atualização.
+-- -- Reexecutável de forma segura para o novo EXTRA; NÃO redefine preços editados pelo ADM
+-- -- quando já estão com os novos valores.
+-- BEGIN;
+-- INSERT INTO public.live_shop_prices_v16
+--  (catalog_key,kind,ref_id,price,currency,enabled,meta,shop_tab,shop_visible,min_level,sort_order,display_name,description,updated_at)
+-- VALUES
+--  ('item:remoteTraderCpuElite','extra','remoteTraderCpuElite',350000,'uridium',true,
+--   '{"grant":{"kind":"inventory","id":"remoteTraderCpuElite","qty":1}}'::jsonb,
+--   'extras',true,1,115,'Terminal Mercante Remoto • Elite',
+--   'EXTRA Elite que permite vender manualmente recursos do porão em qualquer mapa pelo Hangar → Refinaria, enquanto equipado.',now())
+-- ON CONFLICT (catalog_key) DO NOTHING;
+-- 
+-- UPDATE public.live_shop_prices_v16
+-- SET price=10000000,meta=jsonb_set(coalesce(meta,'{}'::jsonb),'{drone_price_multiplier}','2'::jsonb,true),updated_at=now()
+-- WHERE catalog_key='drone:flax' AND price=30000000;
+-- UPDATE public.live_shop_prices_v16
+-- SET price=15000,meta=jsonb_set(coalesce(meta,'{}'::jsonb),'{drone_price_multiplier}','2'::jsonb,true),updated_at=now()
+-- WHERE catalog_key='drone:iris' AND price=900000;
+-- -- Multiplicador 2 para registros preexistentes, sem substituir mudanças posteriores do ADM.
+-- UPDATE public.live_shop_prices_v16
+-- SET meta=jsonb_set(coalesce(meta,'{}'::jsonb),'{drone_price_multiplier}','2'::jsonb,true),updated_at=now()
+-- WHERE kind='drone' AND coalesce(meta,'{}'::jsonb)->'drone_price_multiplier' IS NULL;
+-- 
+-- CREATE OR REPLACE FUNCTION public.admin_update_drone_multiplier_v1829(p_type text,p_multiplier numeric)
+-- RETURNS jsonb LANGUAGE plpgsql SECURITY DEFINER SET search_path = public,auth,pg_temp AS $$
+-- DECLARE v_uid uuid:=auth.uid();v_updated jsonb;
+-- BEGIN
+--  IF v_uid IS NULL OR NOT public.is_game_admin_v1763(v_uid) THEN
+--    RAISE EXCEPTION 'Acesso administrativo negado.' USING ERRCODE='42501';
+--  END IF;
+--  IF p_type NOT IN ('flax','iris') OR p_multiplier IS NULL OR p_multiplier<1 OR p_multiplier>4 THEN
+--    RAISE EXCEPTION 'Multiplicador inválido: permitido 1 a 4.';
+--  END IF;
+--  UPDATE public.live_shop_prices_v16
+--  SET meta=jsonb_set(coalesce(meta,'{}'::jsonb),'{drone_price_multiplier}',to_jsonb(p_multiplier),true),updated_at=now()
+--  WHERE catalog_key='drone:'||p_type AND kind='drone'
+--  RETURNING meta INTO v_updated;
+--  IF NOT FOUND THEN RAISE EXCEPTION 'Drone não encontrado.';END IF;
+--  RETURN v_updated;
+-- END;$$;
+-- REVOKE ALL ON FUNCTION public.admin_update_drone_multiplier_v1829(text,numeric) FROM PUBLIC,anon;
+-- GRANT EXECUTE ON FUNCTION public.admin_update_drone_multiplier_v1829(text,numeric) TO authenticated;
+-- -- Impede que um save antigo apague a contagem histórica de compras de drone.
+-- CREATE OR REPLACE FUNCTION public.guard_drone_purchase_history_v1829()
+-- RETURNS trigger LANGUAGE plpgsql SET search_path = public,pg_temp AS $$
+-- DECLARE k text; n_old numeric; n_new numeric; preserved jsonb;
+-- BEGIN
+--  IF NEW.state IS NULL OR OLD.state IS NULL THEN RETURN NEW; END IF;
+--  preserved:=CASE WHEN jsonb_typeof(NEW.state->'dronePurchasesV1829')='object' THEN NEW.state->'dronePurchasesV1829' ELSE '{}'::jsonb END;
+--  FOR k IN SELECT unnest(ARRAY['flax','iris']) LOOP
+--    n_old:=CASE WHEN jsonb_typeof(OLD.state->'dronePurchasesV1829'->k)='number' THEN LEAST(100000,GREATEST(0,(OLD.state->'dronePurchasesV1829'->>k)::numeric)) ELSE 0 END;
+--    n_new:=CASE WHEN jsonb_typeof(preserved->k)='number' THEN LEAST(100000,GREATEST(0,(preserved->>k)::numeric)) ELSE 0 END;
+--    IF n_old>n_new THEN preserved:=jsonb_set(preserved,ARRAY[k],to_jsonb(n_old::bigint),true); END IF;
+--  END LOOP;
+--  IF preserved<>'{}'::jsonb THEN NEW.state:=jsonb_set(NEW.state,'{dronePurchasesV1829}',preserved,true); END IF;
+--  RETURN NEW;
+-- END;$$;
+-- DROP TRIGGER IF EXISTS game_saves_drone_history_v1829 ON public.game_saves;
+-- CREATE TRIGGER game_saves_drone_history_v1829 BEFORE UPDATE ON public.game_saves
+-- FOR EACH ROW EXECUTE FUNCTION public.guard_drone_purchase_history_v1829();
+-- COMMIT;
+-- ===== END V18_2_9_HANGAR_ECONOMY.sql =====
+
+-- ===== START V18_3_2_PREMIUM_STAGE.sql | sha256 a2ece4df735ad5b02ff17e3e74c2a2080408dde3cc5156cf2632429912c352f6 =====
+-- -- STELLAR LEGACY • CATÁLOGO E ASSINATURAS (MODO DE TESTE) V18.3.2
+-- -- SAFE: Não altera premium_catalog_v12, premium_accounts_v12, game_saves ou saldos.
+-- -- Não realiza cobranças, não cria assinaturas em processadores, nem concede itens.
+-- -- Valores Premium abaixo são copiados do catálogo atual, sem mudar valores existentes.
+-- 
+-- CREATE TABLE IF NOT EXISTS public.premium_offers_stage_v1832 (
+--   product_id text PRIMARY KEY,
+--   display_name text NOT NULL,
+--   category text NOT NULL CHECK (category IN ('premium','starter_bundle','battle_pass','pass_tiers')),
+--   billing_mode text NOT NULL CHECK (billing_mode IN ('prepaid','auto_renew','one_time')),
+--   price_brl numeric(10,2) NOT NULL CHECK (price_brl >= 0),
+--   duration_days integer CHECK (duration_days > 0),
+--   billing_months integer CHECK (billing_months IN (1,3,6)),
+--   tier_quantity integer CHECK (tier_quantity > 0),
+--   reward_plan jsonb NOT NULL DEFAULT '{}'::jsonb CHECK (jsonb_typeof(reward_plan)='object'),
+--   display_order integer NOT NULL DEFAULT 100,
+--   test_only boolean NOT NULL DEFAULT true CHECK (test_only),
+--   live_enabled boolean NOT NULL DEFAULT false CHECK (NOT live_enabled),
+--   created_at timestamptz NOT NULL DEFAULT now(),
+--   updated_at timestamptz NOT NULL DEFAULT now(),
+--   CONSTRAINT premium_stage_valid_billing CHECK (
+--     (billing_mode='auto_renew' AND billing_months IS NOT NULL AND duration_days IS NULL)
+--     OR (billing_mode='prepaid' AND duration_days IS NOT NULL AND billing_months IS NULL)
+--     OR (billing_mode='one_time' AND billing_months IS NULL AND duration_days IS NULL)
+--   ),
+--   CONSTRAINT premium_stage_valid_tiers CHECK (
+--     (category='pass_tiers' AND tier_quantity IS NOT NULL)
+--     OR (category<>'pass_tiers' AND tier_quantity IS NULL)
+--   )
+-- );
+-- 
+-- CREATE TABLE IF NOT EXISTS public.premium_checkout_tests_v1832 (
+--   id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+--   user_id uuid NOT NULL REFERENCES auth.users(id),
+--   idempotency_key text NOT NULL,
+--   product_id text NOT NULL REFERENCES public.premium_offers_stage_v1832(product_id),
+--   quoted_price_brl numeric(10,2) NOT NULL,
+--   status text NOT NULL DEFAULT 'simulated_paid' CHECK (status IN ('simulated_paid')),
+--   season_key text,
+--   created_at timestamptz NOT NULL DEFAULT now(),
+--   UNIQUE (user_id,idempotency_key)
+-- );
+-- CREATE INDEX IF NOT EXISTS premium_checkout_tests_user_v1832 ON public.premium_checkout_tests_v1832(user_id,created_at DESC);
+-- 
+-- CREATE TABLE IF NOT EXISTS public.premium_subscription_tests_v1832 (
+--   user_id uuid PRIMARY KEY REFERENCES auth.users(id),
+--   product_id text NOT NULL REFERENCES public.premium_offers_stage_v1832(product_id),
+--   status text NOT NULL DEFAULT 'test_active' CHECK (status IN ('test_active','test_cancel_at_period_end')),
+--   auto_renew boolean NOT NULL DEFAULT true,
+--   started_at timestamptz NOT NULL DEFAULT now(),
+--   next_renewal_at timestamptz NOT NULL,
+--   renewal_count integer NOT NULL DEFAULT 0 CHECK (renewal_count>=0),
+--   last_checkout_id bigint REFERENCES public.premium_checkout_tests_v1832(id),
+--   updated_at timestamptz NOT NULL DEFAULT now()
+-- );
+-- 
+-- CREATE TABLE IF NOT EXISTS public.premium_pass_tier_tests_v1832 (
+--   user_id uuid NOT NULL REFERENCES auth.users(id),
+--   season_key text NOT NULL,
+--   purchased_tiers integer NOT NULL DEFAULT 0 CHECK(purchased_tiers BETWEEN 0 AND 1000),
+--   updated_at timestamptz NOT NULL DEFAULT now(),
+--   PRIMARY KEY(user_id,season_key)
+-- );
+-- 
+-- -- Defense-in-depth: nenhuma tabela de teste é exposta diretamente no Data API.
+-- ALTER TABLE public.premium_offers_stage_v1832 ENABLE ROW LEVEL SECURITY;
+-- ALTER TABLE public.premium_checkout_tests_v1832 ENABLE ROW LEVEL SECURITY;
+-- ALTER TABLE public.premium_subscription_tests_v1832 ENABLE ROW LEVEL SECURITY;
+-- ALTER TABLE public.premium_pass_tier_tests_v1832 ENABLE ROW LEVEL SECURITY;
+-- REVOKE ALL ON TABLE public.premium_offers_stage_v1832,public.premium_checkout_tests_v1832,
+--  public.premium_subscription_tests_v1832,public.premium_pass_tier_tests_v1832 FROM PUBLIC,anon,authenticated;
+-- 
+-- -- Seed: preços Premium preservados da tabela ativa. Nenhum item ativo da Loja é alterado.
+-- INSERT INTO public.premium_offers_stage_v1832
+-- (product_id,display_name,category,billing_mode,price_brl,duration_days,billing_months,reward_plan,display_order)
+-- SELECT p.id,p.name,'premium',
+-- CASE WHEN p.id='premium_7d' THEN 'prepaid' ELSE 'auto_renew' END,
+-- p.price_brl,
+-- CASE WHEN p.id='premium_7d' THEN 7 ELSE NULL END,
+-- CASE p.id WHEN 'premium_30d' THEN 1 WHEN 'premium_90d' THEN 3 WHEN 'premium_180d' THEN 6 ELSE NULL END,
+-- jsonb_build_object('entitlement','premium','source_product',p.id,'test_only',true),
+-- p.sort_order
+-- FROM public.premium_catalog_v12 p
+-- WHERE p.id IN ('premium_7d','premium_30d','premium_90d','premium_180d')
+-- ON CONFLICT (product_id) DO NOTHING;
+-- 
+-- INSERT INTO public.premium_offers_stage_v1832
+-- (product_id,display_name,category,billing_mode,price_brl,tier_quantity,reward_plan,display_order)
+-- VALUES
+-- ('starter_iniciante_v1832','Pacote Iniciante','starter_bundle','one_time',9.90,NULL,'{"status":"pending_balance","stl":null,"items":[],"grants_enabled":false}'::jsonb,101),
+-- ('starter_piloto_v1832','Pacote Piloto','starter_bundle','one_time',24.90,NULL,'{"status":"pending_balance","stl":null,"items":[],"grants_enabled":false}'::jsonb,102),
+-- ('starter_avancado_v1832','Pacote Avançado','starter_bundle','one_time',49.90,NULL,'{"status":"pending_balance","stl":null,"items":[],"grants_enabled":false}'::jsonb,103),
+-- ('battle_pass_monthly','Passe de Temporada','battle_pass','one_time',19.90,NULL,'{"entitlement":"season_premium","season":"current","grants_enabled":false}'::jsonb,110),
+-- ('pass_tiers_1_v1832','Passe • +1 nível','pass_tiers','one_time',2.90,1,'{"season":"current","grants_enabled":false}'::jsonb,121),
+-- ('pass_tiers_3_v1832','Passe • +3 níveis','pass_tiers','one_time',7.90,3,'{"season":"current","grants_enabled":false}'::jsonb,122),
+-- ('pass_tiers_5_v1832','Passe • +5 níveis','pass_tiers','one_time',11.90,5,'{"season":"current","grants_enabled":false}'::jsonb,123),
+-- ('pass_tiers_10_v1832','Passe • +10 níveis','pass_tiers','one_time',19.90,10,'{"season":"current","grants_enabled":false}'::jsonb,124)
+-- ON CONFLICT(product_id) DO NOTHING;
+-- 
+-- -- Compatibiliza o preço do Passe de teste com a temporada atual (sem alterá-la).
+-- UPDATE public.premium_offers_stage_v1832
+-- SET price_brl=(SELECT s.premium_price_brl FROM public.game_battle_pass_seasons_v1817b s
+-- WHERE s.enabled AND now()>=s.starts_at AND now()<s.ends_at ORDER BY s.starts_at DESC LIMIT 1),updated_at=now()
+-- WHERE product_id='battle_pass_monthly' AND EXISTS (
+-- SELECT 1 FROM public.game_battle_pass_seasons_v1817b s
+-- WHERE s.enabled AND now()>=s.starts_at AND now()<s.ends_at);
+-- 
+-- -- Operações administrativas de prévia/teste. Nenhum UPDATE/INSERT em tabelas de recompensas reais.
+-- CREATE OR REPLACE FUNCTION public.admin_preview_premium_stage_v1832()
+-- RETURNS jsonb LANGUAGE plpgsql SECURITY DEFINER
+-- SET search_path TO 'public','auth','pg_temp' AS $$
+-- DECLARE v_uid uuid:=auth.uid(); v_season jsonb; v_catalog jsonb; v_sub jsonb; v_pass jsonb;
+-- BEGIN
+--  IF v_uid IS NULL OR NOT public.is_game_admin_v1763(v_uid) THEN
+--   RAISE EXCEPTION 'Acesso administrativo negado' USING ERRCODE='42501';
+--  END IF;
+--  SELECT to_jsonb(s) INTO v_season FROM (
+--    SELECT season_key,name,tier_count,premium_price_brl,ends_at FROM public.game_battle_pass_seasons_v1817b
+--    WHERE enabled AND now()>=starts_at AND now()<ends_at ORDER BY starts_at DESC LIMIT 1
+--  ) s;
+--  SELECT coalesce(jsonb_agg(jsonb_build_object(
+--   'id',product_id,'name',display_name,'category',category,'billing_mode',billing_mode,
+--   'price_brl',price_brl,'duration_days',duration_days,'billing_months',billing_months,
+--   'tier_quantity',tier_quantity,'reward_plan',reward_plan,'test_only',test_only,'live_enabled',live_enabled
+--  ) ORDER BY display_order,product_id),'[]'::jsonb) INTO v_catalog
+--  FROM public.premium_offers_stage_v1832;
+--  SELECT to_jsonb(s) INTO v_sub FROM (SELECT product_id,status,auto_renew,started_at,next_renewal_at,renewal_count
+--  FROM public.premium_subscription_tests_v1832 WHERE user_id=v_uid) s;
+--  SELECT to_jsonb(t) INTO v_pass FROM (SELECT season_key,purchased_tiers FROM public.premium_pass_tier_tests_v1832
+--  WHERE user_id=v_uid AND season_key=(v_season->>'season_key')) t;
+--  RETURN jsonb_build_object('test_mode',true,'billing_live',false,'rewards_live',false,
+--  'offers',v_catalog,'current_season',v_season,'test_subscription',v_sub,'test_tiers',v_pass);
+-- END;$$;
+-- REVOKE ALL ON FUNCTION public.admin_preview_premium_stage_v1832() FROM PUBLIC,anon;
+-- GRANT EXECUTE ON FUNCTION public.admin_preview_premium_stage_v1832() TO authenticated;
+-- 
+-- CREATE OR REPLACE FUNCTION public.admin_simulate_premium_checkout_v1832(p_product_id text,p_idempotency_key text)
+-- RETURNS jsonb LANGUAGE plpgsql SECURITY DEFINER
+-- SET search_path TO 'public','auth','pg_temp' AS $$
+-- DECLARE v_uid uuid:=auth.uid(); v_product public.premium_offers_stage_v1832%rowtype;
+--  v_order public.premium_checkout_tests_v1832%rowtype;
+--  v_season text; v_max_tier integer; v_existing_tiers integer; v_new_total integer;
+-- BEGIN
+--  IF v_uid IS NULL OR NOT public.is_game_admin_v1763(v_uid) THEN
+--   RAISE EXCEPTION 'Acesso administrativo negado' USING ERRCODE='42501';
+--  END IF;
+--  IF length(coalesce(p_idempotency_key,''))<8 OR length(p_idempotency_key)>120
+--    OR p_idempotency_key !~ '^[a-zA-Z0-9:_-]+$' THEN
+--   RAISE EXCEPTION 'Chave de teste inválida';
+--  END IF;
+--  PERFORM pg_advisory_xact_lock(hashtext('premium_v1832:'||v_uid::text));
+--  SELECT * INTO v_order FROM public.premium_checkout_tests_v1832
+--  WHERE user_id=v_uid AND idempotency_key=p_idempotency_key;
+--  IF FOUND THEN
+--   IF v_order.product_id<>p_product_id THEN RAISE EXCEPTION 'Chave usada com outro produto'; END IF;
+--   RETURN jsonb_build_object('ok',true,'duplicate',true,'test_only',true,'order_id',v_order.id,
+--    'product_id',v_order.product_id,'price_brl',v_order.quoted_price_brl);
+--  END IF;
+--  SELECT * INTO v_product FROM public.premium_offers_stage_v1832 WHERE product_id=p_product_id AND test_only AND NOT live_enabled;
+--  IF NOT FOUND THEN RAISE EXCEPTION 'Oferta de teste inexistente'; END IF;
+--  IF v_product.category IN ('battle_pass','pass_tiers') THEN
+--   SELECT season_key,tier_count INTO v_season,v_max_tier FROM public.game_battle_pass_seasons_v1817b
+--   WHERE enabled AND now()>=starts_at AND now()<ends_at ORDER BY starts_at DESC LIMIT 1;
+--   IF v_season IS NULL THEN RAISE EXCEPTION 'Nenhuma temporada ativa para o teste'; END IF;
+--  END IF;
+--  IF v_product.category='pass_tiers' THEN
+--   SELECT purchased_tiers INTO v_existing_tiers FROM public.premium_pass_tier_tests_v1832
+--    WHERE user_id=v_uid AND season_key=v_season;
+--   v_new_total:=coalesce(v_existing_tiers,0)+v_product.tier_quantity;
+--   IF v_new_total>v_max_tier THEN RAISE EXCEPTION 'Teste ultrapassaria o limite de % níveis da temporada',v_max_tier; END IF;
+--  END IF;
+--  INSERT INTO public.premium_checkout_tests_v1832(user_id,idempotency_key,product_id,quoted_price_brl,season_key)
+--  VALUES(v_uid,p_idempotency_key,v_product.product_id,v_product.price_brl,v_season)
+--  RETURNING * INTO v_order;
+--  IF v_product.category='premium' AND v_product.billing_mode='auto_renew' THEN
+--   INSERT INTO public.premium_subscription_tests_v1832
+--    (user_id,product_id,status,auto_renew,started_at,next_renewal_at,renewal_count,last_checkout_id,updated_at)
+--   VALUES(v_uid,v_product.product_id,'test_active',true,now(),now()+make_interval(months=>v_product.billing_months),0,v_order.id,now())
+--   ON CONFLICT(user_id) DO UPDATE SET
+--    product_id=excluded.product_id,status='test_active',auto_renew=true,started_at=now(),
+--    next_renewal_at=excluded.next_renewal_at,renewal_count=0,last_checkout_id=v_order.id,updated_at=now();
+--  ELSIF v_product.category='pass_tiers' THEN
+--   INSERT INTO public.premium_pass_tier_tests_v1832(user_id,season_key,purchased_tiers)
+--   VALUES(v_uid,v_season,v_product.tier_quantity)
+--   ON CONFLICT(user_id,season_key) DO UPDATE SET
+--    purchased_tiers=public.premium_pass_tier_tests_v1832.purchased_tiers+excluded.purchased_tiers,updated_at=now();
+--  END IF;
+--  RETURN jsonb_build_object('ok',true,'duplicate',false,'test_only',true,
+--  'billing_live',false,'rewards_live',false,'order_id',v_order.id,'product_id',v_order.product_id,
+--  'price_brl',v_order.quoted_price_brl,'season_key',v_season,
+--  'simulated_tiers_total',CASE WHEN v_product.category='pass_tiers' THEN v_new_total ELSE NULL END);
+-- END;$$;
+-- REVOKE ALL ON FUNCTION public.admin_simulate_premium_checkout_v1832(text,text) FROM PUBLIC,anon;
+-- GRANT EXECUTE ON FUNCTION public.admin_simulate_premium_checkout_v1832(text,text) TO authenticated;
+-- 
+-- COMMENT ON TABLE public.premium_offers_stage_v1832 IS 'STAGING de produtos Premium. Somente modo teste, SEM checkout real ou concessão de itens.';
+-- COMMENT ON TABLE public.premium_checkout_tests_v1832 IS 'Simulações administrativas SEM cobrança real; não significa pagamento aprovado por processador.';
+-- COMMENT ON TABLE public.premium_subscription_tests_v1832 IS 'Assinaturas PREVIEW sem renovação real ou concessão de Premium.';
+-- COMMENT ON TABLE public.premium_pass_tier_tests_v1832 IS 'Níveis simulados em separado do Passe real (sem mexer em game_saves).';
+-- ===== END V18_3_2_PREMIUM_STAGE.sql =====
+
+-- ===== START V18_3_3_PREMIUM_PREVIEW.sql | sha256 8ab782cf6a0c4f9f4d0621181748df338ea44cf54e32b6fab2999b839fded0bd =====
+-- -- V18.3.3 • Stellar Legacy — prévia somente leitura do catálogo Premium de testes
+-- -- Visibilidade para pilotos autenticados; compras simuladas permanecem exclusivas do ADM.
+-- -- NÃO altera recompensas, save, preços, assinaturas, cartões ou cobradores.
+-- CREATE OR REPLACE FUNCTION public.get_premium_stage_catalog_v1833()
+-- RETURNS jsonb LANGUAGE plpgsql STABLE SECURITY DEFINER
+-- SET search_path TO 'public','auth','pg_temp'
+-- AS $function$
+-- DECLARE v_offers jsonb; v_season jsonb;
+-- BEGIN
+--   IF auth.uid() IS NULL THEN
+--     RAISE EXCEPTION 'Sessão inválida' USING ERRCODE='42501';
+--   END IF;
+--   SELECT coalesce(jsonb_agg(jsonb_build_object(
+--     'id',product_id,'name',display_name,'category',category,'billing_mode',billing_mode,
+--     'price_brl',price_brl,'duration_days',duration_days,'billing_months',billing_months,
+--     'tier_quantity',tier_quantity,'test_only',true,'live_enabled',false
+--   ) ORDER BY display_order,product_id),'[]'::jsonb) INTO v_offers
+--   FROM public.premium_offers_stage_v1832 WHERE test_only=true AND live_enabled=false;
+--   SELECT to_jsonb(s) INTO v_season FROM (
+--     SELECT season_key,name,tier_count,ends_at FROM public.game_battle_pass_seasons_v1817b
+--     WHERE enabled AND now()>=starts_at AND now()<ends_at ORDER BY starts_at DESC LIMIT 1
+--   ) s;
+--   RETURN jsonb_build_object('test_mode',true,'billing_live',false,'rewards_live',false,
+--     'public_preview',true,'can_simulate',false,'offers',v_offers,'current_season',v_season,
+--     'test_subscription',null,'test_tiers',null);
+-- END;$function$;
+-- REVOKE ALL ON FUNCTION public.get_premium_stage_catalog_v1833() FROM PUBLIC,anon;
+-- GRANT EXECUTE ON FUNCTION public.get_premium_stage_catalog_v1833() TO authenticated;
+-- COMMENT ON FUNCTION public.get_premium_stage_catalog_v1833() IS 'Vitrine Premium de testes; somente dados públicos de ofertas, nenhuma simulação ou cobrança.';
+-- ===== END V18_3_3_PREMIUM_PREVIEW.sql =====
+
+-- ===== START V19_0_11_EXPANSAO_X5_X8.sql | sha256 56f458180de3850458164c51419ff9555723d6dbe8b4224cd23eb868bbd131bf =====
+-- -- V19.0.11 | EXPANSÃO X-5 a X-8 por facção, 8 NPCs, 2ª base no X-8
+-- -- APENAS INSERTS AUSENTES: não reconfigura mapas, preços, NPCs anteriores, saves ou usuários.
+-- BEGIN;
+-- 
+-- insert into public.game_map_config_v1814(map_id,label,tier,name,risk,world_w,world_h,enemy_multiplier,ore_count,ore_respawn_min_ms,ore_respawn_max_ms,landmark_count,min_level,battle,gate,enabled,palette,structures) values
+-- ('x5',null,5,'Véu da Fenda','Alto',8400,6100,1,74,6000,14000,10,18,false,false,true,'{"accent": "#51e5ff", "deep": "#030b13", "nebula": "#133948"}'::jsonb,'["Portal 4-X", "Portal X-6"]'::jsonb),
+-- ('x6',null,6,'Desfiladeiro Vazio','Crítico',8900,6500,1,81,6000,14000,11,22,false,false,true,'{"accent": "#d28fff", "deep": "#0b0517", "nebula": "#3a1d50"}'::jsonb,'["Portal X-5", "Portal X-7"]'::jsonb),
+-- ('x7',null,7,'Coração do Nexus','Extremo',9400,6900,1,88,6000,14000,12,27,false,false,true,'{"accent": "#8cffb5", "deep": "#030d0b", "nebula": "#134637"}'::jsonb,'["Portal X-6", "Portal X-8"]'::jsonb),
+-- ('x8',null,8,'Bastião Astral','Extremo',10000,7400,1,94,6000,14000,13,32,false,false,true,'{"accent": "#ff947b", "deep": "#120611", "nebula": "#4e243d"}'::jsonb,'["Portal X-7", "Base Avançada", "Trader", "Hangar", "Reparação", "Mission Control"]'::jsonb)
+-- on conflict do nothing;
+-- 
+-- insert into public.game_map_resource_pool_v1814(map_id,resource_key,weight,enabled) values
+-- ('x5','Endurium',1,true),
+-- ('x5','Terbium',1,true),
+-- ('x5','Prometid',1,true),
+-- ('x6','Terbium',1,true),
+-- ('x6','Prometid',1,true),
+-- ('x6','Duranium',1,true),
+-- ('x7','Duranium',1,true),
+-- ('x7','Promerium',1,true),
+-- ('x7','Terbium',1,true),
+-- ('x8','Duranium',1,true),
+-- ('x8','Promerium',1,true),
+-- ('x8','Terbium',1,true)
+-- on conflict do nothing;
+-- 
+-- insert into public.game_sector_nodes_v1814(sector_label,map_id,territory_faction,graph_x,graph_y,min_level,enabled) values
+-- ('1-5','x5','earth',24,36,18,true),
+-- ('2-5','x5','mars',51,9,18,true),
+-- ('3-5','x5','jupiter',53,93,18,true),
+-- ('1-6','x6','earth',13,28,22,true),
+-- ('2-6','x6','mars',66,9,22,true),
+-- ('3-6','x6','jupiter',66,93,22,true),
+-- ('1-7','x7','earth',10,15,27,true),
+-- ('2-7','x7','mars',79,9,27,true),
+-- ('3-7','x7','jupiter',79,93,27,true),
+-- ('1-8','x8','earth',29,11,32,true),
+-- ('2-8','x8','mars',95,5,32,true),
+-- ('3-8','x8','jupiter',94,96,32,true)
+-- on conflict do nothing;
+-- 
+-- insert into public.game_portal_links_v1814(portal_key,from_sector,to_sector,bidirectional,enabled,sort_order) values
+-- ('p_v1911_4_1_1_5','4-1','1-5',true,true,200),
+-- ('p_v1911_1_5_1_6','1-5','1-6',true,true,210),
+-- ('p_v1911_1_6_1_7','1-6','1-7',true,true,220),
+-- ('p_v1911_1_7_1_8','1-7','1-8',true,true,230),
+-- ('p_v1911_4_2_2_5','4-2','2-5',true,true,240),
+-- ('p_v1911_2_5_2_6','2-5','2-6',true,true,250),
+-- ('p_v1911_2_6_2_7','2-6','2-7',true,true,260),
+-- ('p_v1911_2_7_2_8','2-7','2-8',true,true,270),
+-- ('p_v1911_4_3_3_5','4-3','3-5',true,true,280),
+-- ('p_v1911_3_5_3_6','3-5','3-6',true,true,290),
+-- ('p_v1911_3_6_3_7','3-6','3-7',true,true,300),
+-- ('p_v1911_3_7_3_8','3-7','3-8',true,true,310),
+-- ('p_v1911_3_4_4_3','3-4','4-3',true,true,330)
+-- on conflict do nothing;
+-- 
+-- insert into public.game_npc_config_v1811(npc_key,name,hp,shield,credits,stl,xp,speed,damage,color,size,resources,respawn_min_ms,respawn_max_ms,enabled) values
+-- ('riftScout','Batedor da Fenda',270000,175000,700000,550,15500,86,4600,'#4bdaff',32,'{"Duranium": 30, "Promerium": 6, "Prometid": 26}'::jsonb,8000,18000,true),
+-- ('bossRiftScout','Batedor da Fenda Prime',510000,360000,1550000,950,34000,75,8500,'#8ceaff',44,'{"Duranium": 30, "Promerium": 6, "Prometid": 26}'::jsonb,8000,18000,true),
+-- ('voidCorsair','Corsário do Vazio',420000,350000,1100000,800,23500,92,6700,'#e58cff',35,'{"Duranium": 30, "Promerium": 6, "Prometid": 26}'::jsonb,8000,18000,true),
+-- ('bossVoidCorsair','Corsário do Vazio Prime',820000,650000,2250000,1450,48000,70,12800,'#ff9fd0',48,'{"Duranium": 30, "Promerium": 6, "Prometid": 26}'::jsonb,8000,18000,true),
+-- ('nexusWarden','Guardião Nexus',660000,550000,1700000,1200,38000,80,9400,'#7fffbb',40,'{"Duranium": 30, "Promerium": 6, "Prometid": 26}'::jsonb,8000,18000,true),
+-- ('bossNexusWarden','Guardião Nexus Prime',1250000,1050000,3650000,2150,79000,65,17800,'#ffe08b',53,'{"Duranium": 30, "Promerium": 6, "Prometid": 26}'::jsonb,8000,18000,true),
+-- ('astralReaper','Ceifador Astral',920000,780000,2400000,1700,60000,100,13200,'#fe877a',44,'{"Duranium": 30, "Promerium": 6, "Prometid": 26}'::jsonb,8000,18000,true),
+-- ('bossAstralReaper','Ceifador Astral Prime',1850000,1550000,4900000,3100,125000,80,24800,'#fb4a8f',61,'{"Duranium": 30, "Promerium": 6, "Prometid": 26}'::jsonb,8000,18000,true)
+-- on conflict do nothing;
+-- 
+-- insert into public.game_map_npc_spawns_v1811(map_id,npc_key,spawn_count,enabled) values
+-- ('x5','sibelon',6,true),
+-- ('x5','bossSibelon',2,true),
+-- ('x5','riftScout',10,true),
+-- ('x5','bossRiftScout',2,true),
+-- ('x6','riftScout',7,true),
+-- ('x6','bossRiftScout',3,true),
+-- ('x6','voidCorsair',9,true),
+-- ('x6','bossVoidCorsair',2,true),
+-- ('x7','voidCorsair',8,true),
+-- ('x7','bossVoidCorsair',3,true),
+-- ('x7','nexusWarden',8,true),
+-- ('x7','bossNexusWarden',2,true),
+-- ('x8','nexusWarden',7,true),
+-- ('x8','bossNexusWarden',3,true),
+-- ('x8','astralReaper',7,true),
+-- ('x8','bossAstralReaper',2,true)
+-- on conflict do nothing;
+-- 
+-- DO $assert$
+-- BEGIN
+--  IF (SELECT count(*) FROM public.game_map_config_v1814 WHERE map_id IN ('x5','x6','x7','x8')) <> 4 THEN RAISE EXCEPTION 'Falha: mapas incompletos';END IF;
+--  IF (SELECT count(*) FROM public.game_sector_nodes_v1814 WHERE sector_label IN ('1-5','1-6','1-7','1-8','2-5','2-6','2-7','2-8','3-5','3-6','3-7','3-8')) <> 12 THEN RAISE EXCEPTION 'Falha: 12 setores esperados';END IF;
+--  IF (SELECT count(*) FROM public.game_portal_links_v1814 WHERE portal_key LIKE 'p_v1911_%')<>13 THEN RAISE EXCEPTION 'Falha: 13 portais esperados';END IF;
+--  IF (SELECT count(*) FROM public.game_npc_config_v1811 WHERE npc_key IN ('riftScout','bossRiftScout','voidCorsair','bossVoidCorsair','nexusWarden','bossNexusWarden','astralReaper','bossAstralReaper'))<>8 THEN RAISE EXCEPTION 'Falha: 8 NPCs esperados';END IF;
+--  IF (SELECT count(*) FROM public.game_map_npc_spawns_v1811 WHERE map_id IN ('x5','x6','x7','x8'))<>16 THEN RAISE EXCEPTION 'Falha: 16 populações esperadas';END IF;
+-- END;
+-- $assert$;
+-- COMMIT;
+-- ===== END V19_0_11_EXPANSAO_X5_X8.sql =====
+
+-- ===== START V19_0_3_CUPONS_ADM_CATALOGO.sql | sha256 8f81de233f1a7a2547bddc640a40b50f84043f25c17b40502ae38dee02817fde =====
+-- -- STELLAR LEGACY V19.0.3 • Editor de cupons ADM e resgate seguro
+-- -- Sem alterações em cupons antigos ou inventários existentes. Rodar uma vez.
+-- create table if not exists public.game_coupon_reward_catalog_v193(
+--  kind text not null, item_id text not null, name text not null, category text not null, rarity text not null,
+--  primary key(kind,item_id)
+-- );
+-- alter table public.game_coupon_reward_catalog_v193 enable row level security;
+-- revoke all on public.game_coupon_reward_catalog_v193 from public,anon,authenticated;
+-- -- O bloco de INSERT com os 99 tipos é gerado a partir do arquivo public/data.js da V19.0.2.
+-- INSERT INTO public.game_coupon_reward_catalog_v193(kind,item_id,name,category,rarity) VALUES
+-- ('inventory','lf1','ARC-1','LASERS','COMUM'),
+-- ('inventory','mp1','ARC-P1','LASERS','COMUM'),
+-- ('inventory','sl01','SOL-1','LASERS','COMUM'),
+-- ('inventory','lf2','ARC-2','LASERS','COMUM'),
+-- ('inventory','lf3','ARC-3','LASERS','ELITE'),
+-- ('inventory','lf4','ARC-4','LASERS','ELITE'),
+-- ('inventory','g3n1010','THR-1','GERADORES','COMUM'),
+-- ('inventory','g3n2010','THR-2','GERADORES','COMUM'),
+-- ('inventory','g3n3210','THR-3','GERADORES','COMUM'),
+-- ('inventory','g3n3310','THR-4','GERADORES','COMUM'),
+-- ('inventory','g3n6900','THR-5','GERADORES','ELITE'),
+-- ('inventory','g3n7900','THR-6','GERADORES','ELITE'),
+-- ('inventory','fs01','AEG-1','GERADORES','COMUM'),
+-- ('inventory','fs02','AEG-2','GERADORES','COMUM'),
+-- ('inventory','fs03','AEG-3','GERADORES','EVENTO'),
+-- ('inventory','fs04','AEG-4','GERADORES','EVENTO'),
+-- ('inventory','sg3nb00','VSH-0','GERADORES','EVENTO'),
+-- ('inventory','sg3na01','VSH-1','GERADORES','COMUM'),
+-- ('inventory','sg3na02','VSH-2','GERADORES','COMUM'),
+-- ('inventory','sg3na03','VSH-3','GERADORES','COMUM'),
+-- ('inventory','sg3nb01','VSH-4','GERADORES','COMUM'),
+-- ('inventory','sg3nb02','VSH-5','GERADORES','ELITE'),
+-- ('inventory','sg3nb03','VSH-6','GERADORES','EVENTO'),
+-- ('inventory','autoLaserCpu','Mira Autônoma','EXTRAS','COMUM'),
+-- ('inventory','autoRocketCpu','Lançador Autônomo','EXTRAS','COMUM'),
+-- ('inventory','rocketTurboCpu','Propulsor de Recarga','EXTRAS','COMUM'),
+-- ('inventory','extraSlotCpuCommon','CPU Expansora de Extras • Comum','EXTRAS','COMUM'),
+-- ('inventory','extraSlotCpuElite','CPU Expansora de Extras • Elite','EXTRAS','ELITE'),
+-- ('inventory','rep2','Nanobot de Reparo • Comum','EXTRAS','COMUM'),
+-- ('inventory','repElite','Nanobot de Reparo • Elite','EXTRAS','ELITE'),
+-- ('inventory','cargoCpuCommon','Módulo de Porão • Comum','EXTRAS','COMUM'),
+-- ('inventory','cargoCpuElite','Módulo de Porão • Elite','EXTRAS','ELITE'),
+-- ('inventory','ammoAutoBuyCpu','Repositor Automático','EXTRAS','COMUM'),
+-- ('inventory','remoteTraderCpuElite','Terminal Mercante Remoto • Elite','EXTRAS','ELITE'),
+-- ('drone','flax','Halo','DRONES','COMUM'),
+-- ('drone','iris','Nova','DRONES','ELITE'),
+-- ('ship','phoenix','Aurora','NAVES','EVENTO'),
+-- ('ship','liberator','Pioneer','NAVES','COMUM'),
+-- ('ship','piranha','Raptor','NAVES','COMUM'),
+-- ('ship','nostromo','Meridian','NAVES','COMUM'),
+-- ('ship','bigboy','Bastion','NAVES','COMUM'),
+-- ('ship','nDiplomat','Concord','NAVES','COMUM'),
+-- ('ship','nEnvoy','Vanguard','NAVES','COMUM'),
+-- ('ship','nAmbassador','Sovereign','NAVES','COMUM'),
+-- ('ship','leonov','Lynx','NAVES','ELITE'),
+-- ('ship','vengeance','Valkyrie','NAVES','ELITE'),
+-- ('ship','goliath','Leviathan','NAVES','ELITE'),
+-- ('ship','pusat','Striker','NAVES','ELITE'),
+-- ('ship','aegis','Seraph','NAVES','EVENTO'),
+-- ('ship','basilisk','Venatrix','NAVES','EVENTO'),
+-- ('ship','berserker','Ravager','NAVES','EVENTO'),
+-- ('ship','centurion','Praetor','NAVES','EVENTO'),
+-- ('ship','citadel','Bulwark','NAVES','EVENTO'),
+-- ('ship','cyborg','Nexus Prime','NAVES','EVENTO'),
+-- ('ship','defcom','Phantom','NAVES','EVENTO'),
+-- ('ship','defcomRaven','Wraith','NAVES','EVENTO'),
+-- ('ship','diminisher','Nullifier','NAVES','EVENTO'),
+-- ('ship','disruptor','Interdictor','NAVES','EVENTO'),
+-- ('ship','goliathX','Leviathan-X','NAVES','EVENTO'),
+-- ('ship','hammerclaw','Ironclaw','NAVES','EVENTO'),
+-- ('ship','hecate','Lumina','NAVES','EVENTO'),
+-- ('ship','holo','Mirage','NAVES','EVENTO'),
+-- ('ship','hyperion','Gravastar','NAVES','EVENTO'),
+-- ('ship','keres','Plaguewing','NAVES','EVENTO'),
+-- ('ship','mimesis','Echo','NAVES','EVENTO'),
+-- ('ship','orcus','Doppel','NAVES','EVENTO'),
+-- ('ship','paladin','Warden','NAVES','EVENTO'),
+-- ('ship','retiarus','Lancer','NAVES','EVENTO'),
+-- ('ship','sentinel','Guardian','NAVES','EVENTO'),
+-- ('ship','solace','Reclaimer','NAVES','EVENTO'),
+-- ('ship','solaris','Helios','NAVES','EVENTO'),
+-- ('ship','spearhead','Pathfinder','NAVES','EVENTO'),
+-- ('ship','spectrum','Prism','NAVES','EVENTO'),
+-- ('ship','tartarus','Hellrunner','NAVES','EVENTO'),
+-- ('ship','tempest','Stormrider','NAVES','EVENTO'),
+-- ('ship','venom','Viper','NAVES','EVENTO'),
+-- ('ship','yamato','Kensei','NAVES','EVENTO'),
+-- ('ship','yRonin','Shogun','NAVES','EVENTO'),
+-- ('ship','zephyr','Gale','NAVES','EVENTO'),
+-- ('ammo','lcb10','PLS-1','MUNIÇÕES','COMUM'),
+-- ('ammo','mcb25','PLS-2','MUNIÇÕES','COMUM'),
+-- ('ammo','mcb50','PLS-3','MUNIÇÕES','ELITE'),
+-- ('ammo','ucb100','PLS-4','MUNIÇÕES','ELITE'),
+-- ('ammo','sab50','SIP-2','MUNIÇÕES','ELITE'),
+-- ('rocket','r310','CMT-1','MÍSSEIS','COMUM'),
+-- ('rocket','plt2026','CMT-2','MÍSSEIS','COMUM'),
+-- ('rocket','plt2021','CMT-3','MÍSSEIS','ELITE'),
+-- ('rocket','plt3030','CMT-4','MÍSSEIS','ELITE'),
+-- ('cargo','Prometium','Ferron','RECURSOS','RECURSO'),
+-- ('cargo','Endurium','Cryon','RECURSOS','RECURSO'),
+-- ('cargo','Terbium','Virel','RECURSOS','RECURSO'),
+-- ('cargo','Prometid','Ferrite','RECURSOS','RECURSO'),
+-- ('cargo','Duranium','Duracite','RECURSOS','RECURSO'),
+-- ('cargo','Promerium','Solarium','RECURSOS','RECURSO'),
+-- ('cargo','Xenomit','Voidite','RECURSOS','RECURSO'),
+-- ('premium','premium','Premium (escolha os dias)','PREMIUM E PASSE','PREMIUM'),
+-- ('battle_pass','battle_pass','Passe Premium da temporada','PREMIUM E PASSE','PASSE'),
+-- ('credits','credits','Créditos (CR)','MOEDAS','MOEDA'),
+-- ('uridium','uridium','Stellarium (STL)','MOEDAS','MOEDA')
+-- ON CONFLICT (kind,item_id) DO UPDATE SET name=excluded.name,category=excluded.category,rarity=excluded.rarity;
+-- 
+-- create table if not exists public.game_coupons_v193(
+--  code text primary key check(code ~ '^[A-Z0-9][A-Z0-9_-]{3,63}$'),
+--  title text not null check(char_length(title) between 3 and 100),
+--  rewards jsonb not null check(jsonb_typeof(rewards)='array' and jsonb_array_length(rewards) between 1 and 12),
+--  active boolean not null default true,
+--  min_level integer not null default 1 check(min_level between 1 and 44),
+--  max_uses integer not null default 1 check(max_uses between 1 and 100000),
+--  redeemed_count integer not null default 0,
+--  starts_at timestamptz not null default now(),
+--  expires_at timestamptz,
+--  created_by uuid not null references auth.users(id),
+--  created_at timestamptz not null default now(),
+--  check(expires_at is null or expires_at>starts_at)
+-- );
+-- create table if not exists public.game_coupon_redemptions_v193(
+--  code text not null references public.game_coupons_v193(code),
+--  user_id uuid not null references auth.users(id),
+--  redeemed_at timestamptz not null default now(),
+--  rewards_snapshot jsonb not null,
+--  primary key(code,user_id)
+-- );
+-- create index if not exists game_coupon_redemptions_v193_account_idx on public.game_coupon_redemptions_v193(user_id,redeemed_at desc);
+-- alter table public.game_coupons_v193 enable row level security;
+-- alter table public.game_coupon_redemptions_v193 enable row level security;
+-- revoke all on public.game_coupons_v193 from public,anon,authenticated;
+-- revoke all on public.game_coupon_redemptions_v193 from public,anon,authenticated;
+-- 
+-- create or replace function public.admin_coupon_dashboard_v193()
+-- returns jsonb language plpgsql security definer set search_path = '' as $fn$
+-- declare uid uuid:=auth.uid();
+-- begin
+--  if uid is null or not exists(select 1 from public.game_admins where user_id=uid and lower(role)='admin') then
+--   raise exception 'Acesso administrativo negado.';
+--  end if;
+--  return jsonb_build_object(
+--    'catalog',coalesce((select jsonb_agg(jsonb_build_object('kind',kind,'id',item_id,'name',name,'category',category,'rarity',rarity) order by category,rarity,name) from public.game_coupon_reward_catalog_v193),'[]'::jsonb),
+--    'coupons',coalesce((select jsonb_agg(jsonb_build_object('code',code,'title',title,'rewards',rewards,'active',active,'max_uses',max_uses,'redeemed_count',redeemed_count,'min_level',min_level,'starts_at',starts_at,'expires_at',expires_at,'created_at',created_at) order by created_at desc) from (select * from public.game_coupons_v193 order by created_at desc limit 100) q),'[]'::jsonb)
+--  );
+-- end;$fn$;
+-- 
+-- create or replace function public.admin_create_coupon_v193(
+--  p_code text,p_title text,p_rewards jsonb,p_max_uses integer default 1,
+--  p_min_level integer default 1,p_starts_at timestamptz default null,p_expires_at timestamptz default null)
+-- returns jsonb language plpgsql security definer set search_path = '' as $fn$
+-- declare uid uuid:=auth.uid(); v_code text:=upper(btrim(coalesce(p_code,'')));
+--  r jsonb; v_kind text; v_id text; v_qty bigint; v_days integer; v_max bigint;
+--  v_start timestamptz:=coalesce(p_starts_at,now());
+-- begin
+--  if uid is null or not exists(select 1 from public.game_admins where user_id=uid and lower(role)='admin') then raise exception 'Acesso administrativo negado.'; end if;
+--  if v_code='' then v_code:='SL-'||upper(substr(replace(gen_random_uuid()::text,'-',''),1,11)); end if;
+--  if v_code !~ '^[A-Z0-9][A-Z0-9_-]{3,63}$' or v_code='EVENTO7D' then raise exception 'Código inválido ou reservado.'; end if;
+--  if exists(select 1 from public.game_coupons_v1821 where code=v_code) then raise exception 'Este código já existe no sistema antigo.'; end if;
+--  if char_length(btrim(coalesce(p_title,''))) not between 3 and 100 then raise exception 'Título deve ter entre 3 e 100 caracteres.'; end if;
+--  if coalesce(p_max_uses,0) not between 1 and 100000 then raise exception 'Limite de usos inválido.'; end if;
+--  if coalesce(p_min_level,0) not between 1 and 44 then raise exception 'Nível mínimo inválido.'; end if;
+--  if p_expires_at is not null and p_expires_at<=v_start then raise exception 'Validade precisa ser posterior ao início.'; end if;
+--  if jsonb_typeof(p_rewards) is distinct from 'array' or jsonb_array_length(p_rewards) not between 1 and 12 then raise exception 'Escolha de 1 a 12 prêmios.'; end if;
+--  for r in select value from jsonb_array_elements(p_rewards) loop
+--    if jsonb_typeof(r)<>'object' then raise exception 'Estrutura de prêmio inválida.'; end if;
+--    v_kind:=coalesce(r->>'kind',''); v_id:=coalesce(r->>'id','');
+--    if not exists(select 1 from public.game_coupon_reward_catalog_v193 where kind=v_kind and item_id=v_id) then
+--      raise exception 'Prêmio não cadastrado no catálogo: % (%).',v_id,v_kind;
+--    end if;
+--    if v_kind='premium' then
+--      v_days:=coalesce(nullif(r->>'days','')::integer,0);
+--      if v_days not between 1 and 365 then raise exception 'Premium: escolha de 1 a 365 dias.'; end if;
+--    elsif v_kind='battle_pass' then
+--      if coalesce((r->>'qty')::integer,1)<>1 then raise exception 'Passe não aceita quantidade diferente de 1.'; end if;
+--    else
+--      v_qty:=coalesce(nullif(r->>'qty','')::bigint,0);
+--      v_max:=case when v_kind in ('ship') then 1 when v_kind='drone' then 8 when v_kind='inventory' then 10000 when v_kind in ('ammo','rocket') then 10000000 when v_kind='cargo' then 100000 when v_kind in ('credits','uridium') then 100000000 else 0 end;
+--      if v_qty not between 1 and v_max then raise exception 'Quantidade inválida para %: máximo %.',v_id,v_max; end if;
+--    end if;
+--  end loop;
+--  insert into public.game_coupons_v193(code,title,rewards,active,max_uses,min_level,starts_at,expires_at,created_by)
+--  values(v_code,btrim(p_title),p_rewards,true,p_max_uses,p_min_level,v_start,p_expires_at,uid);
+--  return jsonb_build_object('ok',true,'code',v_code,'title',btrim(p_title));
+-- exception when unique_violation then raise exception 'Este código já está em uso.';
+-- end;$fn$;
+-- 
+-- create or replace function public.admin_set_coupon_active_v193(p_code text,p_active boolean)
+-- returns jsonb language plpgsql security definer set search_path = '' as $fn$
+-- declare uid uuid:=auth.uid();v_code text:=upper(btrim(coalesce(p_code,'')));
+-- begin
+--  if uid is null or not exists(select 1 from public.game_admins where user_id=uid and lower(role)='admin') then raise exception 'Acesso administrativo negado.'; end if;
+--  update public.game_coupons_v193 set active=coalesce(p_active,false) where code=v_code;
+--  if not found then raise exception 'Cupom não encontrado.'; end if;
+--  return jsonb_build_object('ok',true,'code',v_code,'active',coalesce(p_active,false));
+-- end;$fn$;
+-- 
+-- create or replace function public.redeem_game_coupon_v193(p_code text)
+-- returns jsonb language plpgsql security definer set search_path = '' as $fn$
+-- declare uid uuid:=auth.uid(); v_code text:=upper(btrim(coalesce(p_code,'')));
+--  rec public.game_coupons_v193%rowtype; saved jsonb;r jsonb;
+--  k text;i text;qty bigint;old_val numeric;v_days integer;old_until timestamptz;
+--  season text;slots integer;drone_count integer;v_drone jsonb;v_drones jsonb;v_cargo jsonb;
+--  v_result jsonb; v_limit bigint;
+-- begin
+--  if uid is null then raise exception 'Entre na sua conta para resgatar.'; end if;
+--  select * into rec from public.game_coupons_v193 where code=v_code for update;
+--  if not found then return jsonb_build_object('handled',false); end if;
+--  if not rec.active or rec.starts_at>now() or (rec.expires_at is not null and rec.expires_at<=now()) then raise exception 'Cupom inativo ou expirado.'; end if;
+--  if rec.redeemed_count>=rec.max_uses then raise exception 'Cupom esgotado.'; end if;
+--  if exists(select 1 from public.game_coupon_redemptions_v193 where code=v_code and user_id=uid) then raise exception 'Você já utilizou este cupom.'; end if;
+--  select state into saved from public.game_saves where user_id=uid for update;
+--  if jsonb_typeof(saved) is distinct from 'object' then raise exception 'Salve um personagem antes de resgatar.'; end if;
+--  if coalesce(nullif(saved->>'accountOwnerId',''),uid::text)<>uid::text then raise exception 'Save de outro jogador.'; end if;
+--  if coalesce((saved #>> '{profile,level}')::integer,1)<rec.min_level then raise exception 'Cupom exige nível %.',rec.min_level; end if;
+--  for r in select value from jsonb_array_elements(rec.rewards) loop
+--    k:=r->>'kind';i:=r->>'id';qty:=coalesce(nullif(r->>'qty','')::bigint,1);
+--    -- Desconfie de reward JSON injetado: revalide o catálogo também ao resgatar.
+--    if not exists(select 1 from public.game_coupon_reward_catalog_v193 where kind=k and item_id=i) then raise exception 'Prêmio sem cadastro autorizado.'; end if;
+--    if k='premium' then
+--      v_days:=coalesce((r->>'days')::integer,0);
+--      if v_days not between 1 and 365 then raise exception 'Premium inválido.'; end if;
+--      insert into public.premium_accounts_v12(user_id,premium_until,updated_at) values(uid,now()+(v_days||' days')::interval,now())
+--      on conflict(user_id) do update set premium_until=greatest(now(),coalesce(public.premium_accounts_v12.premium_until,now()))+(v_days||' days')::interval,updated_at=now();
+--    elsif k='battle_pass' then
+--      select season_key into season from public.game_battle_pass_seasons_v1817b where enabled and starts_at<=now() and (ends_at is null or ends_at>now()) order by starts_at desc limit 1;
+--      if season is null then raise exception 'Nenhuma temporada ativa para o Passe Premium.'; end if;
+--      if exists(select 1 from public.premium_accounts_v12 where user_id=uid and battle_pass_season=season) then raise exception 'Passe Premium desta temporada já está ativo.'; end if;
+--      insert into public.premium_accounts_v12(user_id,battle_pass_season,updated_at) values(uid,season,now())
+--      on conflict(user_id) do update set battle_pass_season=excluded.battle_pass_season,updated_at=now();
+--    elsif k in ('credits','uridium') then
+--      if qty not between 1 and 100000000 then raise exception 'Valor inválido.'; end if;
+--      old_val:=coalesce((saved->'profile'->>k)::numeric,0);
+--      if old_val+qty>100000000000000 then raise exception 'Limite de saldo excedido.'; end if;
+--      saved:=jsonb_set(saved,ARRAY['profile',k],to_jsonb(old_val+qty),true);
+--      update public.profiles set credits=case when k='credits' then (old_val+qty)::bigint else credits end,
+--        uridium=case when k='uridium' then (old_val+qty)::bigint else uridium end,updated_at=now() where id=uid;
+--    elsif k='ship' then
+--      if qty<>1 then raise exception 'Nave aceita 1 unidade.'; end if;
+--      if coalesce(saved->'ownedShips','[]'::jsonb) ? i then raise exception 'Você já possui esta nave.'; end if;
+--      saved:=jsonb_set(saved,'{ownedShips}',coalesce(saved->'ownedShips','[]'::jsonb)||jsonb_build_array(i),true);
+--    elsif k='drone' then
+--      v_drones:=coalesce(saved->'drones','[]'::jsonb);
+--      if jsonb_typeof(v_drones)<>'array' then raise exception 'Drones inválidos.'; end if;
+--      drone_count:=jsonb_array_length(v_drones);
+--      if qty<1 or qty>8 or drone_count+qty>8 then raise exception 'O jogador precisa de slots livres para receber os drones.'; end if;
+--      slots:=case when i='iris' then 2 when i='flax' then 1 else 0 end;
+--      if slots=0 then raise exception 'Drone desconhecido.'; end if;
+--      for j in 1..qty loop
+--        v_drone:=jsonb_build_object('id','d_coupon_'||replace(gen_random_uuid()::text,'-',''),'type',i,'slots',case when slots=2 then '[null,null]'::jsonb else '[null]'::jsonb end);
+--        v_drones:=v_drones||jsonb_build_array(v_drone);
+--      end loop;
+--      saved:=jsonb_set(saved,'{drones}',v_drones,true);
+--    elsif k in ('inventory','ammo','rocket','cargo') then
+--      v_limit:=case when k='inventory' then 10000 when k='cargo' then 100000 else 10000000 end;
+--      if qty<1 or qty>v_limit then raise exception 'Quantidade inválida.'; end if;
+--      k:=case when k='rocket' then 'rockets' else k end;
+--      old_val:=coalesce((saved->k->>i)::numeric,0);
+--      if old_val+qty>1000000000 then raise exception 'Estoque máximo excedido.'; end if;
+--      if k='cargo' and i<>'Xenomit' then
+--        -- Não gerar minérios acima da capacidade do porão: compatível com cargo do jogo.
+--        if qty>10000 then raise exception 'Para recursos de porão, use até 10.000 por cupom.'; end if;
+--      end if;
+--      saved:=jsonb_set(saved,array[k,i],to_jsonb(old_val+qty),true);
+--    else raise exception 'Prêmio não reconhecido.';
+--    end if;
+--  end loop;
+--  saved:=jsonb_set(saved,'{couponClaimsV1821}',coalesce(saved->'couponClaimsV1821','{}'::jsonb)||jsonb_build_object(v_code,now()::text),true);
+--  update public.game_saves set state=saved,updated_at=now() where user_id=uid;
+--  insert into public.game_coupon_redemptions_v193(code,user_id,rewards_snapshot) values(v_code,uid,rec.rewards);
+--  update public.game_coupons_v193 set redeemed_count=redeemed_count+1 where code=v_code;
+--  return jsonb_build_object('handled',true,'ok',true,'code',v_code,'title',rec.title,'rewards',rec.rewards,'state',saved);
+-- end;$fn$;
+-- 
+-- revoke all on function public.admin_coupon_dashboard_v193() from public,anon,authenticated;
+-- revoke all on function public.admin_create_coupon_v193(text,text,jsonb,integer,integer,timestamptz,timestamptz) from public,anon,authenticated;
+-- revoke all on function public.admin_set_coupon_active_v193(text,boolean) from public,anon,authenticated;
+-- revoke all on function public.redeem_game_coupon_v193(text) from public,anon,authenticated;
+-- grant execute on function public.admin_coupon_dashboard_v193() to authenticated;
+-- grant execute on function public.admin_create_coupon_v193(text,text,jsonb,integer,integer,timestamptz,timestamptz) to authenticated;
+-- grant execute on function public.admin_set_coupon_active_v193(text,boolean) to authenticated;
+-- grant execute on function public.redeem_game_coupon_v193(text) to authenticated;
+-- ===== END V19_0_3_CUPONS_ADM_CATALOGO.sql =====
+
+-- ===== START V19_0_6_ADM_PORTAIS.sql | sha256 24ceff5172ede24b990065d5baa6c2859239671153988dae9bb2415553e894c6 =====
+-- -- Stellar Legacy V19.0.6 — Fase 2 / Portais Astrais
+-- -- Execute UMA VEZ no Supabase antes de publicar o codigo V19.0.6.
+-- -- Nao altera os saves dos jogadores ou a estrutura do materializador antigo.
+-- BEGIN;
+-- CREATE TABLE IF NOT EXISTS public.galaxy_gate_config_v1906 (
+--   id smallint PRIMARY KEY DEFAULT 1 CHECK (id=1),
+--   config jsonb NOT NULL DEFAULT '{}'::jsonb CHECK (jsonb_typeof(config)='object'),
+--   version bigint NOT NULL DEFAULT 1,
+--   updated_at timestamptz NOT NULL DEFAULT now(),
+--   updated_by uuid
+-- );
+-- ALTER TABLE public.galaxy_gate_config_v1906 ENABLE ROW LEVEL SECURITY;
+-- REVOKE ALL ON TABLE public.galaxy_gate_config_v1906 FROM PUBLIC,anon,authenticated;
+-- INSERT INTO public.galaxy_gate_config_v1906(id,config) VALUES(1,'{}'::jsonb)
+-- ON CONFLICT(id) DO NOTHING;
+-- 
+-- CREATE OR REPLACE FUNCTION public.get_galaxy_gate_config_v1906()
+-- RETURNS jsonb LANGUAGE plpgsql STABLE SECURITY DEFINER SET search_path TO ''
+-- AS $fn$
+-- DECLARE v_result jsonb;
+-- BEGIN
+--  IF auth.uid() IS NULL THEN RAISE EXCEPTION 'Sessao necessaria.' USING ERRCODE='42501'; END IF;
+--  SELECT jsonb_build_object('version',version,'updated_at',updated_at,'config',config)
+--    INTO v_result FROM public.galaxy_gate_config_v1906 WHERE id=1;
+--  RETURN COALESCE(v_result,'{"version":0,"config":{}}'::jsonb);
+-- END;$fn$;
+-- REVOKE ALL ON FUNCTION public.get_galaxy_gate_config_v1906() FROM PUBLIC,anon;
+-- GRANT EXECUTE ON FUNCTION public.get_galaxy_gate_config_v1906() TO authenticated;
+-- 
+-- CREATE OR REPLACE FUNCTION public.admin_update_galaxy_gate_config_v1906(p_key text,p_gate jsonb)
+-- RETURNS jsonb LANGUAGE plpgsql VOLATILE SECURITY DEFINER SET search_path TO ''
+-- AS $fn$
+-- DECLARE
+--  v_round jsonb; v_wave jsonb; v_reward jsonb; v_key text; v_number numeric;
+--  v_i integer; v_j integer; v_count integer; v_total integer:=0;
+--  v_npcs text[]:=ARRAY['streuner','recruitStreuner','aiderStreuner','lordakia','saimon','mordon','devolarium','sibelon','bossLordakia','bossSaimon','bossMordon','bossDevolarium','bossSibelon'];
+--  v_out jsonb;
+-- BEGIN
+--  IF auth.uid() IS NULL OR NOT public.is_game_admin_v1763(auth.uid()) THEN
+--    RAISE EXCEPTION 'Permissao administrativa negada.' USING ERRCODE='42501';
+--  END IF;
+--  IF p_key NOT IN ('alpha','beta','gamma') OR jsonb_typeof(p_gate)<>'object'
+--    OR jsonb_typeof(p_gate->'rounds')<>'array' THEN
+--    RAISE EXCEPTION 'Portal/estrutura invalidos.';
+--  END IF;
+--  IF jsonb_array_length(p_gate->'rounds') NOT BETWEEN 1 AND 20 THEN
+--    RAISE EXCEPTION 'Informe entre 1 e 20 rounds.';
+--  END IF;
+--  FOREACH v_key IN ARRAY ARRAY['waveIntervalMs','roundIntervalMs'] LOOP
+--    IF coalesce(p_gate->>v_key,'') !~ '^[0-9]{4,6}$' THEN RAISE EXCEPTION 'Tempo % invalido.',v_key; END IF;
+--    IF (p_gate->>v_key)::integer NOT BETWEEN 2000 AND 120000 THEN RAISE EXCEPTION 'Tempo % fora do limite.',v_key; END IF;
+--  END LOOP;
+--  FOREACH v_key IN ARRAY ARRAY['enemyScale','damageScale','rewardScale','totalRewardMult'] LOOP
+--    IF coalesce(p_gate->>v_key,'') !~ '^[0-9]{1,2}(\.[0-9]{1,2})?$' THEN RAISE EXCEPTION 'Escala % invalida.',v_key; END IF;
+--    v_number:=(p_gate->>v_key)::numeric;
+--    IF v_number<0.25 OR v_number>3 THEN RAISE EXCEPTION 'Escala % fora de 0.25..3.',v_key; END IF;
+--  END LOOP;
+--  FOR v_i IN 0..jsonb_array_length(p_gate->'rounds')-1 LOOP
+--    v_round:=p_gate->'rounds'->v_i;
+--    IF jsonb_typeof(v_round)<>'object' OR length(coalesce(v_round->>'name','')) NOT BETWEEN 1 AND 60
+--      OR jsonb_typeof(v_round->'waves')<>'array' THEN RAISE EXCEPTION 'Round % invalido.',v_i+1; END IF;
+--    IF jsonb_array_length(v_round->'waves') NOT BETWEEN 1 AND 12 THEN RAISE EXCEPTION 'Round %: configure 1 a 12 ondas.',v_i+1; END IF;
+--    FOR v_j IN 0..jsonb_array_length(v_round->'waves')-1 LOOP
+--      v_wave:=v_round->'waves'->v_j;
+--      IF jsonb_typeof(v_wave)<>'object' OR NOT (coalesce(v_wave->>'type','')=ANY(v_npcs))
+--        OR coalesce(v_wave->>'count','') !~ '^[0-9]{1,2}$' THEN
+--        RAISE EXCEPTION 'NPC/quantidade invalidos no round %, onda %.',v_i+1,v_j+1;
+--      END IF;
+--      v_count:=(v_wave->>'count')::integer;
+--      IF v_count NOT BETWEEN 1 AND 15 THEN RAISE EXCEPTION 'Quantidade permitida: 1 a 15 NPCs por onda.'; END IF;
+--      v_total:=v_total+v_count;
+--    END LOOP;
+--  END LOOP;
+--  IF v_total>240 THEN RAISE EXCEPTION 'Maximo de 240 NPCs somados por portal.'; END IF;
+--  FOR v_reward IN SELECT p_gate->'roundReward' UNION ALL SELECT p_gate->'finalReward' LOOP
+--    IF jsonb_typeof(v_reward)<>'object' THEN RAISE EXCEPTION 'Recompensa invalida.'; END IF;
+--    FOREACH v_key IN ARRAY ARRAY['credits','uridium','cores','ammoQty','rocketQty','voidite'] LOOP
+--      IF coalesce(v_reward->>v_key,'') !~ '^[0-9]{1,11}$' THEN RAISE EXCEPTION 'Quantidade % invalida.',v_key; END IF;
+--      v_number:=(v_reward->>v_key)::numeric;
+--      IF v_number>(CASE v_key WHEN 'credits' THEN 100000000 WHEN 'uridium' THEN 100000 WHEN 'cores' THEN 1000 WHEN 'ammoQty' THEN 50000 WHEN 'rocketQty' THEN 2000 WHEN 'voidite' THEN 500 ELSE 0 END) THEN
+--        RAISE EXCEPTION 'Recompensa % acima do limite.',v_key;
+--      END IF;
+--    END LOOP;
+--    IF coalesce(v_reward->>'ammoId','') NOT IN ('','lcb10','mcb25','mcb50','ucb100','sab50')
+--     OR coalesce(v_reward->>'rocketId','') NOT IN ('','r310','plt2026','plt2021','plt3030') THEN
+--     RAISE EXCEPTION 'Tipo de municao/missil invalido.';
+--    END IF;
+--  END LOOP;
+--  -- Salva somente as chaves permitidas; o servidor valida o mesmo contrato antes do POST.
+--  UPDATE public.galaxy_gate_config_v1906 SET
+--    config=jsonb_set(config,ARRAY[p_key],jsonb_build_object(
+--     'rounds',p_gate->'rounds','waveIntervalMs',(p_gate->>'waveIntervalMs')::integer,
+--     'roundIntervalMs',(p_gate->>'roundIntervalMs')::integer,
+--     'enemyScale',(p_gate->>'enemyScale')::numeric,
+--     'damageScale',(p_gate->>'damageScale')::numeric,
+--     'rewardScale',(p_gate->>'rewardScale')::numeric,
+--     'totalRewardMult',(p_gate->>'totalRewardMult')::numeric,
+--     'roundReward',p_gate->'roundReward','finalReward',p_gate->'finalReward'),true),
+--    version=version+1,updated_at=now(),updated_by=auth.uid()
+--  WHERE id=1;
+--  RETURN public.get_galaxy_gate_config_v1906();
+-- END;$fn$;
+-- REVOKE ALL ON FUNCTION public.admin_update_galaxy_gate_config_v1906(text,jsonb) FROM PUBLIC,anon;
+-- GRANT EXECUTE ON FUNCTION public.admin_update_galaxy_gate_config_v1906(text,jsonb) TO authenticated;
+-- 
+-- -- Vida adicional sempre: 10.000 STL, para todos os tres protocolos.
+-- UPDATE public.live_shop_prices_v16
+--  SET price=10000,currency='uridium',updated_at=now()
+--  WHERE catalog_key IN ('gate_life:alpha','gate_life:beta','gate_life:gamma')
+--    AND kind='gate_life';
+-- COMMIT;
+-- ===== END V19_0_6_ADM_PORTAIS.sql =====
+
+-- ===== START V19_0_8_ADMIN_CONTEUDO.sql | sha256 b582ebcc707e7b0ff42c4bd69a4978c56e81d63814a5478eed2d670129549265 =====
+-- -- Stellar Legacy V19.0.8 — criação de conteúdo com verificação de administrador.
+-- -- Aplique após instalar o ZIP V19.0.8. Não altera saves nem usuários.
+-- BEGIN;
+-- 
+-- CREATE OR REPLACE FUNCTION public.admin_create_economy_service_v1908(p_content jsonb)
+-- RETURNS jsonb LANGUAGE plpgsql SECURITY DEFINER SET search_path TO public,auth,pg_temp AS $$
+-- DECLARE v_id text:=trim(coalesce(p_content->>'service_id',''));v_name text:=trim(coalesce(p_content->>'name',''));v_effect jsonb:=coalesce(p_content->'effect','{}'::jsonb);
+-- BEGIN
+--  IF NOT public.is_game_admin_v1763(auth.uid()) THEN RAISE EXCEPTION 'Acesso administrativo negado.'; END IF;
+--  IF v_id !~ '^[a-zA-Z0-9_-]{1,32}$' OR length(v_name) NOT BETWEEN 1 AND 80 THEN RAISE EXCEPTION 'ID ou nome inválidos.'; END IF;
+--  IF jsonb_typeof(v_effect)<>'object' OR (SELECT count(*) FROM jsonb_object_keys(v_effect))<>1 OR EXISTS(SELECT 1 FROM jsonb_object_keys(v_effect) AS x(k) WHERE k NOT IN ('laser_damage_pct','shield_pct','cargo_flat','speed_flat')) THEN RAISE EXCEPTION 'Efeito não permitido.'; END IF;
+--  IF EXISTS(SELECT 1 FROM jsonb_each_text(v_effect) AS k(name,value) WHERE value !~ '^[0-9]+(\.[0-9]+)?$' OR value::numeric>10000) THEN RAISE EXCEPTION 'Valor do efeito inválido.'; END IF;
+--  IF EXISTS(SELECT 1 FROM public.game_economy_service_v1815 WHERE service_id=v_id) THEN RAISE EXCEPTION 'Serviço com este ID já existe.'; END IF;
+--  INSERT INTO public.game_economy_service_v1815(service_id,name,description,base_cost,duration_ms,level_band_size,level_cost_scale,max_stack_ms,effect,enabled,sort_order,updated_at)
+--  VALUES(v_id,v_name,left(coalesce(p_content->>'description',''),180),greatest(0,least(1000000000000,(p_content->>'base_cost')::bigint)),greatest(60000,least(86400000,(p_content->>'duration_ms')::integer)),5,greatest(0,least(10,(p_content->>'level_cost_scale')::numeric)),greatest(60000,least(604800000,(p_content->>'max_stack_ms')::integer)),v_effect,coalesce((p_content->>'enabled')::boolean,true),100,now());
+--  RETURN jsonb_build_object('ok',true,'service_id',v_id);
+-- END;$$;
+-- 
+-- CREATE OR REPLACE FUNCTION public.admin_create_crafting_recipe_v1908(p_content jsonb)
+-- RETURNS jsonb LANGUAGE plpgsql SECURITY DEFINER SET search_path TO public,auth,pg_temp AS $$
+-- DECLARE v_id text:=trim(coalesce(p_content->>'recipe_id',''));v_name text:=trim(coalesce(p_content->>'name',''));v_i jsonb:=coalesce(p_content->'ingredients','{}'::jsonb);v_g jsonb:=coalesce(p_content->'grant_payload','{}'::jsonb);
+-- BEGIN
+--  IF NOT public.is_game_admin_v1763(auth.uid()) THEN RAISE EXCEPTION 'Acesso administrativo negado.'; END IF;
+--  IF v_id !~ '^[a-zA-Z0-9_-]{1,32}$' OR length(v_name) NOT BETWEEN 1 AND 80 THEN RAISE EXCEPTION 'ID ou nome inválidos.'; END IF;
+--  IF jsonb_typeof(v_i)<>'object' OR (SELECT count(*) FROM jsonb_object_keys(v_i)) NOT BETWEEN 1 AND 12 THEN RAISE EXCEPTION 'Informe entre 1 e 12 ingredientes.'; END IF;
+--  IF EXISTS(SELECT 1 FROM jsonb_each_text(v_i) AS t(k,v) WHERE k !~ '^[a-zA-Z0-9_-]{1,32}$' OR v !~ '^[1-9][0-9]*$' OR v::numeric>1000000) THEN RAISE EXCEPTION 'Ingrediente inválido.'; END IF;
+--  IF (v_g->>'kind') NOT IN ('resource','ammo','rocket','repair') OR (v_g->>'id') !~ '^[a-zA-Z0-9_-]{1,32}$' OR coalesce((v_g->>'qty')::numeric,0) NOT BETWEEN 1 AND 10000000 THEN RAISE EXCEPTION 'Produto inválido.'; END IF;
+--  IF EXISTS(SELECT 1 FROM public.game_crafting_recipe_v1815 WHERE recipe_id=v_id) THEN RAISE EXCEPTION 'Receita com este ID já existe.'; END IF;
+--  INSERT INTO public.game_crafting_recipe_v1815(recipe_id,name,description,cost,currency,ingredients,grant_payload,output_label,min_level,enabled,sort_order,updated_at)
+--  VALUES(v_id,v_name,left(coalesce(p_content->>'description',''),180),greatest(0,least(1000000000000,(p_content->>'cost')::bigint)),CASE WHEN p_content->>'currency'='uridium' THEN 'uridium' ELSE 'credits' END,v_i,v_g,left(coalesce(nullif(p_content->>'output_label',''),v_name),80),greatest(1,least(100,(p_content->>'min_level')::integer)),coalesce((p_content->>'enabled')::boolean,true),100,now());
+--  RETURN jsonb_build_object('ok',true,'recipe_id',v_id);
+-- END;$$;
+-- 
+-- CREATE OR REPLACE FUNCTION public.admin_create_pass_season_v1908(p_content jsonb)
+-- RETURNS jsonb LANGUAGE plpgsql SECURITY DEFINER SET search_path TO public,auth,pg_temp AS $$
+-- DECLARE v_key text:=trim(coalesce(p_content->>'season_key',''));v_name text:=trim(coalesce(p_content->>'name',''));v_start timestamptz;v_end timestamptz;v_tiers integer;v_tier integer;
+-- v_empty jsonb:='{"credits":0,"uridium":0,"ammo":{},"rockets":{},"items":[],"ships":[],"repairBonus":0}'::jsonb;
+-- BEGIN
+--  IF NOT public.is_game_admin_v1763(auth.uid()) THEN RAISE EXCEPTION 'Acesso administrativo negado.'; END IF;
+--  IF v_key !~ '^[a-zA-Z0-9_-]{3,32}$' OR length(v_name) NOT BETWEEN 1 AND 80 THEN RAISE EXCEPTION 'ID ou nome de temporada inválidos.'; END IF;
+--  v_start:=(p_content->>'starts_at')::timestamptz;v_end:=(p_content->>'ends_at')::timestamptz;v_tiers:=(p_content->>'tier_count')::integer;
+--  IF v_start IS NULL OR v_end IS NULL OR v_end<=v_start OR v_tiers NOT BETWEEN 1 AND 100 THEN RAISE EXCEPTION 'Datas ou número de níveis inválidos.'; END IF;
+--  IF EXISTS(SELECT 1 FROM public.game_battle_pass_seasons_v1817b WHERE season_key=v_key) THEN RAISE EXCEPTION 'Esta temporada já existe.'; END IF;
+--  INSERT INTO public.game_battle_pass_seasons_v1817b(season_key,name,description,starts_at,ends_at,tier_count,points_per_tier,daily_points,premium_price_brl,enabled,updated_at)
+--  VALUES(v_key,v_name,left(coalesce(p_content->>'description',''),240),v_start,v_end,v_tiers,greatest(1,least(1000000,(p_content->>'points_per_tier')::integer)),greatest(1,least(100000,(p_content->>'daily_points')::integer)),greatest(0,least(99999,(p_content->>'premium_price_brl')::numeric)),false,now());
+--  FOR v_tier IN 1..v_tiers LOOP
+--    INSERT INTO public.game_battle_pass_tiers_v1817b(season_key,tier_no,free_reward,premium_reward,enabled,updated_at)
+--    VALUES(v_key,v_tier,v_empty,v_empty,false,now());
+--  END LOOP;
+--  RETURN jsonb_build_object('ok',true,'season_key',v_key,'tier_count',v_tiers,'enabled',false);
+-- END;$$;
+-- 
+-- REVOKE ALL ON FUNCTION public.admin_create_economy_service_v1908(jsonb) FROM PUBLIC,anon;
+-- REVOKE ALL ON FUNCTION public.admin_create_crafting_recipe_v1908(jsonb) FROM PUBLIC,anon;
+-- REVOKE ALL ON FUNCTION public.admin_create_pass_season_v1908(jsonb) FROM PUBLIC,anon;
+-- GRANT EXECUTE ON FUNCTION public.admin_create_economy_service_v1908(jsonb) TO authenticated;
+-- GRANT EXECUTE ON FUNCTION public.admin_create_crafting_recipe_v1908(jsonb) TO authenticated;
+-- GRANT EXECUTE ON FUNCTION public.admin_create_pass_season_v1908(jsonb) TO authenticated;
+-- 
+-- -- Controle de preços auditável, único por servidor.
+-- CREATE TABLE IF NOT EXISTS public.game_auction_rules_v1908(
+--  id integer PRIMARY KEY CHECK(id=1),
+--  nova_floor bigint NOT NULL DEFAULT 100000000 CHECK (nova_floor BETWEEN 100000000 AND 1000000000 AND nova_floor % 100000=0),
+--  common_floor bigint NOT NULL DEFAULT 100000 CHECK (common_floor BETWEEN 100000 AND 10000000 AND common_floor % 100000=0),
+--  version bigint NOT NULL DEFAULT 1,
+--  updated_at timestamptz NOT NULL DEFAULT now()
+-- );
+-- INSERT INTO public.game_auction_rules_v1908(id) VALUES(1) ON CONFLICT(id) DO NOTHING;
+-- ALTER TABLE public.game_auction_rules_v1908 ENABLE ROW LEVEL SECURITY;
+-- REVOKE ALL ON public.game_auction_rules_v1908 FROM PUBLIC,anon,authenticated;
+-- 
+-- CREATE OR REPLACE FUNCTION public.get_auction_rules_v1908()
+-- RETURNS jsonb LANGUAGE plpgsql SECURITY DEFINER SET search_path TO public,auth,pg_temp AS $$
+-- DECLARE r public.game_auction_rules_v1908%rowtype;
+-- BEGIN
+--  IF auth.uid() IS NULL THEN RAISE EXCEPTION 'Sessão ausente.'; END IF;
+--  SELECT * INTO r FROM public.game_auction_rules_v1908 WHERE id=1;
+--  RETURN jsonb_build_object('nova_floor',r.nova_floor,'common_floor',r.common_floor,'version',r.version);
+-- END;$$;
+-- 
+-- CREATE OR REPLACE FUNCTION public.admin_update_auction_rules_v1908(p_nova_floor bigint,p_common_floor bigint)
+-- RETURNS jsonb LANGUAGE plpgsql SECURITY DEFINER SET search_path TO public,auth,pg_temp AS $$
+-- DECLARE r public.game_auction_rules_v1908%rowtype;
+-- BEGIN
+--  IF NOT public.is_game_admin_v1763(auth.uid()) THEN RAISE EXCEPTION 'Acesso administrativo negado.'; END IF;
+--  IF p_nova_floor NOT BETWEEN 100000000 AND 1000000000 OR p_nova_floor % 100000<>0 OR p_common_floor NOT BETWEEN 100000 AND 10000000 OR p_common_floor % 100000<>0 THEN RAISE EXCEPTION 'Valores de leilão inválidos.'; END IF;
+--  UPDATE public.game_auction_rules_v1908 SET nova_floor=p_nova_floor,common_floor=p_common_floor,version=version+1,updated_at=now() WHERE id=1 RETURNING * INTO r;
+--  RETURN jsonb_build_object('nova_floor',r.nova_floor,'common_floor',r.common_floor,'version',r.version);
+-- END;$$;
+-- 
+-- REVOKE ALL ON FUNCTION public.get_auction_rules_v1908() FROM PUBLIC,anon;
+-- REVOKE ALL ON FUNCTION public.admin_update_auction_rules_v1908(bigint,bigint) FROM PUBLIC,anon;
+-- GRANT EXECUTE ON FUNCTION public.get_auction_rules_v1908() TO authenticated;
+-- GRANT EXECUTE ON FUNCTION public.admin_update_auction_rules_v1908(bigint,bigint) TO authenticated;
+-- 
+-- -- Preserva a implementação V18.2.12 de liquidação, adicionando somente pisos do ADM.
+-- CREATE OR REPLACE FUNCTION public.place_auction_bid_online(p_hour_key text,p_lot_ref text,p_user_bid bigint,p_lot jsonb)
+-- RETURNS TABLE(lot_ref text,user_bid bigint,leader_user_id uuid,leader_callsign text,lot jsonb,updated_at timestamptz)
+-- LANGUAGE plpgsql SECURITY DEFINER SET search_path TO 'public' AS $function$
+-- #variable_conflict use_column
+-- declare
+--  v_uid uuid:=auth.uid();
+--  v_current public.auction_bids%rowtype;
+--  v_credits bigint:=0;
+--  v_reserved bigint:=0;
+--  v_nova_floor bigint:=100000000;
+--  v_common_floor bigint:=100000;
+--  v_floor bigint:=case when p_lot_ref='item:iris' then 100000000 else greatest(100000,coalesce((p_lot->>'systemFloor')::bigint,100000)) end;
+-- begin
+--  if v_uid is null then raise exception 'Sessão ausente.';end if;
+--  select r.nova_floor,r.common_floor into v_nova_floor,v_common_floor from public.game_auction_rules_v1908 r where r.id=1;
+--  v_floor:=case when p_lot_ref='item:iris' then greatest(100000000,coalesce(v_nova_floor,100000000)) else greatest(v_floor,coalesce(v_common_floor,100000)) end;
+--  if p_user_bid<100000 or mod(p_user_bid,100000)<>0 then raise exception 'O lance deve usar passos de 100.000 CR.';end if;
+--  perform pg_advisory_xact_lock(hashtext(p_hour_key||':'||p_lot_ref));
+--  select * into v_current from public.auction_bids where hour_key=p_hour_key and lot_ref=p_lot_ref and status='active' order by user_bid desc,updated_at asc limit 1 for update;
+--  if found and v_current.user_id=v_uid then raise exception 'Você já está liderando este lote.';end if;
+--  if found then
+--   if p_user_bid<greatest(v_current.user_bid+100000,v_floor) then raise exception 'Seu lance precisa superar o jogador atual em pelo menos 100.000 CR.';end if;
+--  elsif p_user_bid<v_floor then raise exception 'O lance está abaixo do preço atual do sistema.';end if;
+--  select coalesce(credits,0) into v_credits from public.profiles where id=v_uid for update;
+--  select coalesce(sum(user_bid),0) into v_reserved from public.auction_bids where user_id=v_uid and hour_key=p_hour_key and status='active' and lot_ref<>p_lot_ref;
+--  if v_credits<v_reserved+p_user_bid then raise exception 'Créditos insuficientes considerando os seus lances em garantia.';end if;
+--  update public.auction_bids set status='lost',updated_at=now() where hour_key=p_hour_key and lot_ref=p_lot_ref and status='active';
+--  insert into public.auction_bids(user_id,hour_key,lot_ref,user_bid,lot,status,created_at,updated_at)
+--  values(v_uid,p_hour_key,p_lot_ref,p_user_bid,coalesce(p_lot,'{}'::jsonb),'active',now(),now())
+--  on conflict(user_id,hour_key,lot_ref) do update set user_bid=excluded.user_bid,lot=excluded.lot,status='active',updated_at=now();
+--  return query select b.lot_ref,b.user_bid,b.user_id,coalesce(p.callsign,'Pilot'),b.lot,b.updated_at
+--  from public.auction_bids b left join public.profiles p on p.id=b.user_id
+--  where b.user_id=v_uid and b.hour_key=p_hour_key and b.lot_ref=p_lot_ref and b.status='active' limit 1;
+-- end;
+-- $function$;
+-- 
+-- COMMIT;
+-- ===== END V19_0_8_ADMIN_CONTEUDO.sql =====
+
+-- ===== START V19_0_9_ADM_BALANCEAMENTO.sql | sha256 6bd81e1fa402dd9a1bd3aee017f845a8c6ff18ab330a88f15b6fea4043ef091e =====
+-- -- STELLAR LEGACY V19.0.9 • CENTRAL DE BALANCEAMENTO
+-- -- Base derivada do data.js V19.0.8. Nenhuma alteração de atributos na instalação.
+-- -- RLS ligado; cliente autenticado lê; somente game_admins publica.
+-- BEGIN;
+-- CREATE TABLE IF NOT EXISTS public.game_balance_entries_v1909 (
+--  kind text NOT NULL CHECK (kind IN ('ship','item')),
+--  item_id text NOT NULL,
+--  label text NOT NULL,
+--  params jsonb NOT NULL CHECK (jsonb_typeof(params)='object'),
+--  updated_at timestamptz NOT NULL DEFAULT now(),
+--  PRIMARY KEY(kind,item_id)
+-- );
+-- CREATE TABLE IF NOT EXISTS public.game_balance_meta_v1909 (
+--  id integer PRIMARY KEY CHECK (id=1),
+--  version integer NOT NULL DEFAULT 1,
+--  updated_at timestamptz NOT NULL DEFAULT now()
+-- );
+-- INSERT INTO public.game_balance_meta_v1909(id,version) VALUES(1,1) ON CONFLICT(id) DO NOTHING;
+-- ALTER TABLE public.game_balance_entries_v1909 ENABLE ROW LEVEL SECURITY;
+-- ALTER TABLE public.game_balance_meta_v1909 ENABLE ROW LEVEL SECURITY;
+-- REVOKE ALL ON public.game_balance_entries_v1909,public.game_balance_meta_v1909 FROM PUBLIC,anon,authenticated;
+-- -- Sementes: ON CONFLICT DO NOTHING => nunca altera balanceamentos já publicados.
+-- INSERT INTO public.game_balance_entries_v1909(kind,item_id,label,params) VALUES('ship','phoenix','Aurora','{"name":"Aurora","role":"Nave inicial","hp":104000,"speed":320,"cargo":100,"lasers":1,"generators":1,"extras":1,"bonusLowMaps":null}'::jsonb) ON CONFLICT(kind,item_id) DO NOTHING;
+-- INSERT INTO public.game_balance_entries_v1909(kind,item_id,label,params) VALUES('ship','liberator','Pioneer','{"name":"Pioneer","role":"Progressão inicial","hp":116000,"speed":300,"cargo":400,"lasers":4,"generators":6,"extras":2,"bonusLowMaps":null}'::jsonb) ON CONFLICT(kind,item_id) DO NOTHING;
+-- INSERT INTO public.game_balance_entries_v1909(kind,item_id,label,params) VALUES('ship','piranha','Raptor','{"name":"Raptor","role":"Ataque rápido","hp":164000,"speed":360,"cargo":600,"lasers":6,"generators":8,"extras":2,"bonusLowMaps":null}'::jsonb) ON CONFLICT(kind,item_id) DO NOTHING;
+-- INSERT INTO public.game_balance_entries_v1909(kind,item_id,label,params) VALUES('ship','nostromo','Meridian','{"name":"Meridian","role":"Farm e progressão","hp":220000,"speed":340,"cargo":700,"lasers":7,"generators":10,"extras":3,"bonusLowMaps":null}'::jsonb) ON CONFLICT(kind,item_id) DO NOTHING;
+-- INSERT INTO public.game_balance_entries_v1909(kind,item_id,label,params) VALUES('ship','bigboy','Bastion','{"name":"Bastion","role":"Tanque comum","hp":360000,"speed":260,"cargo":800,"lasers":8,"generators":15,"extras":3,"bonusLowMaps":null}'::jsonb) ON CONFLICT(kind,item_id) DO NOTHING;
+-- INSERT INTO public.game_balance_entries_v1909(kind,item_id,label,params) VALUES('ship','nDiplomat','Concord','{"name":"Concord","role":"Nave de progressão avançada","hp":240000,"speed":340,"cargo":900,"lasers":7,"generators":10,"extras":3,"bonusLowMaps":null}'::jsonb) ON CONFLICT(kind,item_id) DO NOTHING;
+-- INSERT INTO public.game_balance_entries_v1909(kind,item_id,label,params) VALUES('ship','nEnvoy','Vanguard','{"name":"Vanguard","role":"Caçadora comum avançada","hp":160000,"speed":340,"cargo":1000,"lasers":10,"generators":10,"extras":3,"bonusLowMaps":null}'::jsonb) ON CONFLICT(kind,item_id) DO NOTHING;
+-- INSERT INTO public.game_balance_entries_v1909(kind,item_id,label,params) VALUES('ship','nAmbassador','Sovereign','{"name":"Sovereign","role":"Nave comum topo de créditos","hp":320000,"speed":340,"cargo":1500,"lasers":12,"generators":12,"extras":3,"bonusLowMaps":null}'::jsonb) ON CONFLICT(kind,item_id) DO NOTHING;
+-- INSERT INTO public.game_balance_entries_v1909(kind,item_id,label,params) VALUES('ship','leonov','Lynx','{"name":"Lynx","role":"Elite de mapas baixos","hp":164000,"speed":360,"cargo":500,"lasers":6,"generators":6,"extras":1,"bonusLowMaps":{"hp":96000,"speed":20,"cargo":500,"laserMult":1.5,"rocketMult":2,"shieldMult":2}}'::jsonb) ON CONFLICT(kind,item_id) DO NOTHING;
+-- INSERT INTO public.game_balance_entries_v1909(kind,item_id,label,params) VALUES('ship','vengeance','Valkyrie','{"name":"Valkyrie","role":"Elite veloz","hp":280000,"speed":380,"cargo":1000,"lasers":10,"generators":10,"extras":2,"bonusLowMaps":null}'::jsonb) ON CONFLICT(kind,item_id) DO NOTHING;
+-- INSERT INTO public.game_balance_entries_v1909(kind,item_id,label,params) VALUES('ship','goliath','Leviathan','{"name":"Leviathan","role":"Elite de combate pesado","hp":356000,"speed":300,"cargo":1500,"lasers":15,"generators":15,"extras":3,"bonusLowMaps":null}'::jsonb) ON CONFLICT(kind,item_id) DO NOTHING;
+-- INSERT INTO public.game_balance_entries_v1909(kind,item_id,label,params) VALUES('ship','pusat','Striker','{"name":"Striker","role":"Elite ofensiva de alta velocidade","hp":225000,"speed":370,"cargo":500,"lasers":16,"generators":12,"extras":3,"bonusLowMaps":null}'::jsonb) ON CONFLICT(kind,item_id) DO NOTHING;
+-- INSERT INTO public.game_balance_entries_v1909(kind,item_id,label,params) VALUES('ship','aegis','Seraph','{"name":"Seraph","role":"EVENTO • suporte","hp":375000,"speed":300,"cargo":2000,"lasers":10,"generators":15,"extras":3,"bonusLowMaps":null}'::jsonb) ON CONFLICT(kind,item_id) DO NOTHING;
+-- INSERT INTO public.game_balance_entries_v1909(kind,item_id,label,params) VALUES('ship','basilisk','Venatrix','{"name":"Venatrix","role":"EVENTO • controle tóxico","hp":325000,"speed":310,"cargo":1500,"lasers":15,"generators":17,"extras":3,"bonusLowMaps":null}'::jsonb) ON CONFLICT(kind,item_id) DO NOTHING;
+-- INSERT INTO public.game_balance_entries_v1909(kind,item_id,label,params) VALUES('ship','berserker','Ravager','{"name":"Ravager","role":"EVENTO • contra-ataque","hp":500000,"speed":290,"cargo":1500,"lasers":5,"generators":16,"extras":3,"bonusLowMaps":null}'::jsonb) ON CONFLICT(kind,item_id) DO NOTHING;
+-- INSERT INTO public.game_balance_entries_v1909(kind,item_id,label,params) VALUES('ship','centurion','Praetor','{"name":"Praetor","role":"EVENTO • projetos instáveis","hp":365000,"speed":300,"cargo":1500,"lasers":16,"generators":16,"extras":3,"bonusLowMaps":null}'::jsonb) ON CONFLICT(kind,item_id) DO NOTHING;
+-- INSERT INTO public.game_balance_entries_v1909(kind,item_id,label,params) VALUES('ship','citadel','Bulwark','{"name":"Bulwark","role":"EVENTO • tanque pesado","hp":650000,"speed":240,"cargo":4000,"lasers":7,"generators":20,"extras":5,"bonusLowMaps":null}'::jsonb) ON CONFLICT(kind,item_id) DO NOTHING;
+-- INSERT INTO public.game_balance_entries_v1909(kind,item_id,label,params) VALUES('ship','cyborg','Nexus Prime','{"name":"Nexus Prime","role":"EVENTO • dano contínuo","hp":365000,"speed":300,"cargo":1500,"lasers":16,"generators":16,"extras":3,"bonusLowMaps":null}'::jsonb) ON CONFLICT(kind,item_id) DO NOTHING;
+-- INSERT INTO public.game_balance_entries_v1909(kind,item_id,label,params) VALUES('ship','defcom','Phantom','{"name":"Phantom","role":"EVENTO • camuflagem","hp":150000,"speed":340,"cargo":800,"lasers":12,"generators":8,"extras":2,"bonusLowMaps":null}'::jsonb) ON CONFLICT(kind,item_id) DO NOTHING;
+-- INSERT INTO public.game_balance_entries_v1909(kind,item_id,label,params) VALUES('ship','defcomRaven','Wraith','{"name":"Wraith","role":"EVENTO • camuflagem reforçada","hp":287500,"speed":340,"cargo":800,"lasers":12,"generators":8,"extras":2,"bonusLowMaps":null}'::jsonb) ON CONFLICT(kind,item_id) DO NOTHING;
+-- INSERT INTO public.game_balance_entries_v1909(kind,item_id,label,params) VALUES('ship','diminisher','Nullifier','{"name":"Nullifier","role":"EVENTO • anti-escudo","hp":356000,"speed":300,"cargo":1600,"lasers":15,"generators":15,"extras":3,"bonusLowMaps":null}'::jsonb) ON CONFLICT(kind,item_id) DO NOTHING;
+-- INSERT INTO public.game_balance_entries_v1909(kind,item_id,label,params) VALUES('ship','disruptor','Interdictor','{"name":"Interdictor","role":"EVENTO • interferência","hp":356000,"speed":300,"cargo":1500,"lasers":14,"generators":14,"extras":3,"bonusLowMaps":null}'::jsonb) ON CONFLICT(kind,item_id) DO NOTHING;
+-- INSERT INTO public.game_balance_entries_v1909(kind,item_id,label,params) VALUES('ship','goliathX','Leviathan-X','{"name":"Leviathan-X","role":"EVENTO • congelamento","hp":356000,"speed":300,"cargo":1500,"lasers":15,"generators":15,"extras":3,"bonusLowMaps":null}'::jsonb) ON CONFLICT(kind,item_id) DO NOTHING;
+-- INSERT INTO public.game_balance_entries_v1909(kind,item_id,label,params) VALUES('ship','hammerclaw','Ironclaw','{"name":"Ironclaw","role":"EVENTO • suporte pesado","hp":377500,"speed":290,"cargo":1500,"lasers":12,"generators":15,"extras":3,"bonusLowMaps":null}'::jsonb) ON CONFLICT(kind,item_id) DO NOTHING;
+-- INSERT INTO public.game_balance_entries_v1909(kind,item_id,label,params) VALUES('ship','hecate','Lumina','{"name":"Lumina","role":"EVENTO • feixe de partículas","hp":377500,"speed":300,"cargo":1500,"lasers":15,"generators":16,"extras":3,"bonusLowMaps":null}'::jsonb) ON CONFLICT(kind,item_id) DO NOTHING;
+-- INSERT INTO public.game_balance_entries_v1909(kind,item_id,label,params) VALUES('ship','holo','Mirage','{"name":"Mirage","role":"EVENTO • reversão","hp":375000,"speed":300,"cargo":1500,"lasers":15,"generators":15,"extras":3,"bonusLowMaps":null}'::jsonb) ON CONFLICT(kind,item_id) DO NOTHING;
+-- INSERT INTO public.game_balance_entries_v1909(kind,item_id,label,params) VALUES('ship','hyperion','Gravastar','{"name":"Gravastar","role":"EVENTO • controle gravitacional","hp":400000,"speed":300,"cargo":1500,"lasers":15,"generators":16,"extras":3,"bonusLowMaps":null}'::jsonb) ON CONFLICT(kind,item_id) DO NOTHING;
+-- INSERT INTO public.game_balance_entries_v1909(kind,item_id,label,params) VALUES('ship','keres','Plaguewing','{"name":"Plaguewing","role":"EVENTO • contágio","hp":356000,"speed":300,"cargo":1500,"lasers":15,"generators":16,"extras":3,"bonusLowMaps":null}'::jsonb) ON CONFLICT(kind,item_id) DO NOTHING;
+-- INSERT INTO public.game_balance_entries_v1909(kind,item_id,label,params) VALUES('ship','mimesis','Echo','{"name":"Echo","role":"EVENTO • evasão","hp":386000,"speed":300,"cargo":1500,"lasers":12,"generators":14,"extras":3,"bonusLowMaps":null}'::jsonb) ON CONFLICT(kind,item_id) DO NOTHING;
+-- INSERT INTO public.game_balance_entries_v1909(kind,item_id,label,params) VALUES('ship','orcus','Doppel','{"name":"Doppel","role":"EVENTO • duplicação","hp":300000,"speed":280,"cargo":1500,"lasers":15,"generators":15,"extras":3,"bonusLowMaps":null}'::jsonb) ON CONFLICT(kind,item_id) DO NOTHING;
+-- INSERT INTO public.game_balance_entries_v1909(kind,item_id,label,params) VALUES('ship','paladin','Warden','{"name":"Warden","role":"EVENTO • sobrevivência","hp":325000,"speed":300,"cargo":1500,"lasers":12,"generators":18,"extras":3,"bonusLowMaps":null}'::jsonb) ON CONFLICT(kind,item_id) DO NOTHING;
+-- INSERT INTO public.game_balance_entries_v1909(kind,item_id,label,params) VALUES('ship','retiarus','Lancer','{"name":"Lancer","role":"EVENTO • tiro carregado","hp":386000,"speed":310,"cargo":1500,"lasers":15,"generators":14,"extras":3,"bonusLowMaps":null}'::jsonb) ON CONFLICT(kind,item_id) DO NOTHING;
+-- INSERT INTO public.game_balance_entries_v1909(kind,item_id,label,params) VALUES('ship','sentinel','Guardian','{"name":"Guardian","role":"EVENTO • defesa","hp":356000,"speed":300,"cargo":1600,"lasers":15,"generators":15,"extras":3,"bonusLowMaps":null}'::jsonb) ON CONFLICT(kind,item_id) DO NOTHING;
+-- INSERT INTO public.game_balance_entries_v1909(kind,item_id,label,params) VALUES('ship','solace','Reclaimer','{"name":"Reclaimer","role":"EVENTO • reparação","hp":356000,"speed":300,"cargo":1500,"lasers":15,"generators":15,"extras":3,"bonusLowMaps":null}'::jsonb) ON CONFLICT(kind,item_id) DO NOTHING;
+-- INSERT INTO public.game_balance_entries_v1909(kind,item_id,label,params) VALUES('ship','solaris','Helios','{"name":"Helios","role":"EVENTO • incêndio","hp":377500,"speed":300,"cargo":1500,"lasers":15,"generators":15,"extras":3,"bonusLowMaps":null}'::jsonb) ON CONFLICT(kind,item_id) DO NOTHING;
+-- INSERT INTO public.game_balance_entries_v1909(kind,item_id,label,params) VALUES('ship','spearhead','Pathfinder','{"name":"Pathfinder","role":"EVENTO • reconhecimento","hp":200000,"speed":370,"cargo":500,"lasers":5,"generators":12,"extras":2,"bonusLowMaps":null}'::jsonb) ON CONFLICT(kind,item_id) DO NOTHING;
+-- INSERT INTO public.game_balance_entries_v1909(kind,item_id,label,params) VALUES('ship','spectrum','Prism','{"name":"Prism","role":"EVENTO • defesa prismática","hp":356000,"speed":300,"cargo":1500,"lasers":15,"generators":15,"extras":3,"bonusLowMaps":null}'::jsonb) ON CONFLICT(kind,item_id) DO NOTHING;
+-- INSERT INTO public.game_balance_entries_v1909(kind,item_id,label,params) VALUES('ship','tartarus','Hellrunner','{"name":"Hellrunner","role":"EVENTO • velocidade / foguetes","hp":360000,"speed":220,"cargo":1500,"lasers":14,"generators":15,"extras":3,"bonusLowMaps":null}'::jsonb) ON CONFLICT(kind,item_id) DO NOTHING;
+-- INSERT INTO public.game_balance_entries_v1909(kind,item_id,label,params) VALUES('ship','tempest','Stormrider','{"name":"Stormrider","role":"EVENTO • eletricidade","hp":300000,"speed":330,"cargo":1500,"lasers":14,"generators":15,"extras":3,"bonusLowMaps":null}'::jsonb) ON CONFLICT(kind,item_id) DO NOTHING;
+-- INSERT INTO public.game_balance_entries_v1909(kind,item_id,label,params) VALUES('ship','venom','Viper','{"name":"Viper","role":"EVENTO • dano contínuo","hp":356000,"speed":300,"cargo":1600,"lasers":15,"generators":15,"extras":3,"bonusLowMaps":null}'::jsonb) ON CONFLICT(kind,item_id) DO NOTHING;
+-- INSERT INTO public.game_balance_entries_v1909(kind,item_id,label,params) VALUES('ship','yamato','Kensei','{"name":"Kensei","role":"EVENTO • aceleração","hp":260000,"speed":260,"cargo":1000,"lasers":8,"generators":12,"extras":2,"bonusLowMaps":null}'::jsonb) ON CONFLICT(kind,item_id) DO NOTHING;
+-- INSERT INTO public.game_balance_entries_v1909(kind,item_id,label,params) VALUES('ship','yRonin','Shogun','{"name":"Shogun","role":"EVENTO • aceleração","hp":300000,"speed":260,"cargo":1000,"lasers":8,"generators":12,"extras":2,"bonusLowMaps":null}'::jsonb) ON CONFLICT(kind,item_id) DO NOTHING;
+-- INSERT INTO public.game_balance_entries_v1909(kind,item_id,label,params) VALUES('ship','zephyr','Gale','{"name":"Gale","role":"EVENTO • momentum","hp":250000,"speed":300,"cargo":1500,"lasers":12,"generators":16,"extras":3,"bonusLowMaps":null}'::jsonb) ON CONFLICT(kind,item_id) DO NOTHING;
+-- INSERT INTO public.game_balance_entries_v1909(kind,item_id,label,params) VALUES('item','lf1','ARC-1','{"name":"ARC-1","description":"Laser comum • dano 65.","damage":65,"equipment_type":"laser","equipment_subtype":""}'::jsonb) ON CONFLICT(kind,item_id) DO NOTHING;
+-- INSERT INTO public.game_balance_entries_v1909(kind,item_id,label,params) VALUES('item','mp1','ARC-P1','{"name":"ARC-P1","description":"Laser comum • 70 contra pilotos / 60 contra aliens.","damage":70,"alienDamage":60,"equipment_type":"laser","equipment_subtype":""}'::jsonb) ON CONFLICT(kind,item_id) DO NOTHING;
+-- INSERT INTO public.game_balance_entries_v1909(kind,item_id,label,params) VALUES('item','sl01','SOL-1','{"name":"SOL-1","description":"Laser legado preservado em saves antigos; fora da Loja atual.","damage":125,"equipment_type":"laser","equipment_subtype":""}'::jsonb) ON CONFLICT(kind,item_id) DO NOTHING;
+-- INSERT INTO public.game_balance_entries_v1909(kind,item_id,label,params) VALUES('item','lf2','ARC-2','{"name":"ARC-2","description":"Laser comum avançado • dano 140.","damage":140,"equipment_type":"laser","equipment_subtype":""}'::jsonb) ON CONFLICT(kind,item_id) DO NOTHING;
+-- INSERT INTO public.game_balance_entries_v1909(kind,item_id,label,params) VALUES('item','lf3','ARC-3','{"name":"ARC-3","description":"Laser Elite • dano 175 • +15% contra aliens.","damage":175,"alienBonus":0.15,"equipment_type":"laser","equipment_subtype":""}'::jsonb) ON CONFLICT(kind,item_id) DO NOTHING;
+-- INSERT INTO public.game_balance_entries_v1909(kind,item_id,label,params) VALUES('item','lf4','ARC-4','{"name":"ARC-4","description":"Laser Elite de alto desempenho • dano 200.","damage":200,"equipment_type":"laser","equipment_subtype":""}'::jsonb) ON CONFLICT(kind,item_id) DO NOTHING;
+-- INSERT INTO public.game_balance_entries_v1909(kind,item_id,label,params) VALUES('item','g3n1010','THR-1','{"name":"THR-1","description":"+2 velocidade.","speed":2,"equipment_type":"generator","equipment_subtype":"speed"}'::jsonb) ON CONFLICT(kind,item_id) DO NOTHING;
+-- INSERT INTO public.game_balance_entries_v1909(kind,item_id,label,params) VALUES('item','g3n2010','THR-2','{"name":"THR-2","description":"+3 velocidade.","speed":3,"equipment_type":"generator","equipment_subtype":"speed"}'::jsonb) ON CONFLICT(kind,item_id) DO NOTHING;
+-- INSERT INTO public.game_balance_entries_v1909(kind,item_id,label,params) VALUES('item','g3n3210','THR-3','{"name":"THR-3","description":"+4 velocidade.","speed":4,"equipment_type":"generator","equipment_subtype":"speed"}'::jsonb) ON CONFLICT(kind,item_id) DO NOTHING;
+-- INSERT INTO public.game_balance_entries_v1909(kind,item_id,label,params) VALUES('item','g3n3310','THR-4','{"name":"THR-4","description":"+5 velocidade.","speed":5,"equipment_type":"generator","equipment_subtype":"speed"}'::jsonb) ON CONFLICT(kind,item_id) DO NOTHING;
+-- INSERT INTO public.game_balance_entries_v1909(kind,item_id,label,params) VALUES('item','g3n6900','THR-5','{"name":"THR-5","description":"+7 velocidade.","speed":7,"equipment_type":"generator","equipment_subtype":"speed"}'::jsonb) ON CONFLICT(kind,item_id) DO NOTHING;
+-- INSERT INTO public.game_balance_entries_v1909(kind,item_id,label,params) VALUES('item','g3n7900','THR-6','{"name":"THR-6","description":"+10 velocidade.","speed":10,"equipment_type":"generator","equipment_subtype":"speed"}'::jsonb) ON CONFLICT(kind,item_id) DO NOTHING;
+-- INSERT INTO public.game_balance_entries_v1909(kind,item_id,label,params) VALUES('item','fs01','AEG-1','{"name":"AEG-1","description":"3.200 escudo • 70% absorção • +6,25% regeneração.","shield":3200,"absorption":70,"shieldRegenBonus":0.0625,"equipment_type":"generator","equipment_subtype":"shield"}'::jsonb) ON CONFLICT(kind,item_id) DO NOTHING;
+-- INSERT INTO public.game_balance_entries_v1909(kind,item_id,label,params) VALUES('item','fs02','AEG-2','{"name":"AEG-2","description":"5.600 escudo • 75% absorção • +6,25% regeneração.","shield":5600,"absorption":75,"shieldRegenBonus":0.0625,"equipment_type":"generator","equipment_subtype":"shield"}'::jsonb) ON CONFLICT(kind,item_id) DO NOTHING;
+-- INSERT INTO public.game_balance_entries_v1909(kind,item_id,label,params) VALUES('item','fs03','AEG-3','{"name":"AEG-3","description":"8.000 escudo • 80% absorção • recompensa de evento/missão.","shield":8000,"absorption":80,"shieldRegenBonus":0.0625,"equipment_type":"generator","equipment_subtype":"shield"}'::jsonb) ON CONFLICT(kind,item_id) DO NOTHING;
+-- INSERT INTO public.game_balance_entries_v1909(kind,item_id,label,params) VALUES('item','fs04','AEG-4','{"name":"AEG-4","description":"11.400 escudo • 80% absorção • recompensa de evento.","shield":11400,"absorption":80,"shieldRegenBonus":0.0625,"equipment_type":"generator","equipment_subtype":"shield"}'::jsonb) ON CONFLICT(kind,item_id) DO NOTHING;
+-- INSERT INTO public.game_balance_entries_v1909(kind,item_id,label,params) VALUES('item','sg3nb00','VSH-0','{"name":"VSH-0","description":"9.000 escudo • 70% absorção • recompensa especial.","shield":9000,"absorption":70,"equipment_type":"generator","equipment_subtype":"shield"}'::jsonb) ON CONFLICT(kind,item_id) DO NOTHING;
+-- INSERT INTO public.game_balance_entries_v1909(kind,item_id,label,params) VALUES('item','sg3na01','VSH-1','{"name":"VSH-1","description":"1.000 escudo • 40% absorção.","shield":1000,"absorption":40,"equipment_type":"generator","equipment_subtype":"shield"}'::jsonb) ON CONFLICT(kind,item_id) DO NOTHING;
+-- INSERT INTO public.game_balance_entries_v1909(kind,item_id,label,params) VALUES('item','sg3na02','VSH-2','{"name":"VSH-2","description":"5.000 escudo • 50% absorção.","shield":5000,"absorption":50,"equipment_type":"generator","equipment_subtype":"shield"}'::jsonb) ON CONFLICT(kind,item_id) DO NOTHING;
+-- INSERT INTO public.game_balance_entries_v1909(kind,item_id,label,params) VALUES('item','sg3na03','VSH-3','{"name":"VSH-3","description":"5.000 escudo • 60% absorção.","shield":5000,"absorption":60,"equipment_type":"generator","equipment_subtype":"shield"}'::jsonb) ON CONFLICT(kind,item_id) DO NOTHING;
+-- INSERT INTO public.game_balance_entries_v1909(kind,item_id,label,params) VALUES('item','sg3nb01','VSH-4','{"name":"VSH-4","description":"9.500 escudo • 70% absorção.","shield":9500,"absorption":70,"equipment_type":"generator","equipment_subtype":"shield"}'::jsonb) ON CONFLICT(kind,item_id) DO NOTHING;
+-- INSERT INTO public.game_balance_entries_v1909(kind,item_id,label,params) VALUES('item','sg3nb02','VSH-5','{"name":"VSH-5","description":"10.000 escudo • 80% absorção.","shield":10000,"absorption":80,"equipment_type":"generator","equipment_subtype":"shield"}'::jsonb) ON CONFLICT(kind,item_id) DO NOTHING;
+-- INSERT INTO public.game_balance_entries_v1909(kind,item_id,label,params) VALUES('item','sg3nb03','VSH-6','{"name":"VSH-6","description":"11.450 escudo • 80% absorção • evento/missão.","shield":11450,"absorption":80,"equipment_type":"generator","equipment_subtype":"shield"}'::jsonb) ON CONFLICT(kind,item_id) DO NOTHING;
+-- INSERT INTO public.game_balance_entries_v1909(kind,item_id,label,params) VALUES('item','autoLaserCpu','Mira Autônoma','{"name":"Mira Autônoma","description":"Ao selecionar um alvo, inicia o laser automaticamente.","equipment_type":"extra","equipment_subtype":""}'::jsonb) ON CONFLICT(kind,item_id) DO NOTHING;
+-- INSERT INTO public.game_balance_entries_v1909(kind,item_id,label,params) VALUES('item','autoRocketCpu','Lançador Autônomo','{"name":"Lançador Autônomo","description":"Dispara automaticamente o míssil selecionado durante o combate.","equipment_type":"extra","equipment_subtype":""}'::jsonb) ON CONFLICT(kind,item_id) DO NOTHING;
+-- INSERT INTO public.game_balance_entries_v1909(kind,item_id,label,params) VALUES('item','rocketTurboCpu','Propulsor de Recarga','{"name":"Propulsor de Recarga","description":"Reduz o cooldown de mísseis pela metade.","equipment_type":"extra","equipment_subtype":""}'::jsonb) ON CONFLICT(kind,item_id) DO NOTHING;
+-- INSERT INTO public.game_balance_entries_v1909(kind,item_id,label,params) VALUES('item','extraSlotCpuCommon','CPU Expansora de Extras • Comum','{"name":"CPU Expansora de Extras • Comum","description":"Enquanto equipada, libera +3 slots EXTRAS adicionais na nave ativa. Não acumula com a versão Elite.","slotBonus":3,"equipment_type":"extra","equipment_subtype":""}'::jsonb) ON CONFLICT(kind,item_id) DO NOTHING;
+-- INSERT INTO public.game_balance_entries_v1909(kind,item_id,label,params) VALUES('item','extraSlotCpuElite','CPU Expansora de Extras • Elite','{"name":"CPU Expansora de Extras • Elite","description":"Enquanto equipada, libera +6 slots EXTRAS adicionais na nave ativa. Não acumula com a versão Comum.","slotBonus":6,"equipment_type":"extra","equipment_subtype":""}'::jsonb) ON CONFLICT(kind,item_id) DO NOTHING;
+-- INSERT INTO public.game_balance_entries_v1909(kind,item_id,label,params) VALUES('item','rep2','Nanobot de Reparo • Comum','{"name":"Nanobot de Reparo • Comum","description":"Após 5s sem receber dano, repara +5.000 HP por segundo. O escudo regenera +10.000 por segundo.","repairRate":0.01,"repairTick":5000,"shieldRepairTick":10000,"repairDelay":5,"equipment_type":"extra","equipment_subtype":""}'::jsonb) ON CONFLICT(kind,item_id) DO NOTHING;
+-- INSERT INTO public.game_balance_entries_v1909(kind,item_id,label,params) VALUES('item','repElite','Nanobot de Reparo • Elite','{"name":"Nanobot de Reparo • Elite","description":"Após 5s sem receber dano, repara +10.000 HP por segundo. Enquanto equipado, o escudo regenera +15.000 por segundo.","repairRate":0.02,"repairTick":10000,"shieldRepairTick":15000,"repairDelay":5,"equipment_type":"extra","equipment_subtype":""}'::jsonb) ON CONFLICT(kind,item_id) DO NOTHING;
+-- INSERT INTO public.game_balance_entries_v1909(kind,item_id,label,params) VALUES('item','cargoCpuCommon','Módulo de Porão • Comum','{"name":"Módulo de Porão • Comum","description":"Enquanto equipado, aumenta a capacidade do porão da nave ativa em +2.500 unidades. Não acumula com a versão Elite.","cargoBonus":2500,"equipment_type":"extra","equipment_subtype":""}'::jsonb) ON CONFLICT(kind,item_id) DO NOTHING;
+-- INSERT INTO public.game_balance_entries_v1909(kind,item_id,label,params) VALUES('item','cargoCpuElite','Módulo de Porão • Elite','{"name":"Módulo de Porão • Elite","description":"Enquanto equipado, aumenta a capacidade do porão da nave ativa em +10.000 unidades. Não acumula com a versão Comum.","cargoBonus":10000,"equipment_type":"extra","equipment_subtype":""}'::jsonb) ON CONFLICT(kind,item_id) DO NOTHING;
+-- INSERT INTO public.game_balance_entries_v1909(kind,item_id,label,params) VALUES('item','ammoAutoBuyCpu','Repositor Automático','{"name":"Repositor Automático","description":"Compra automaticamente novo pacote da munição laser e do míssil selecionados quando o estoque estiver baixo.","equipment_type":"extra","equipment_subtype":""}'::jsonb) ON CONFLICT(kind,item_id) DO NOTHING;
+-- INSERT INTO public.game_balance_entries_v1909(kind,item_id,label,params) VALUES('item','remoteTraderCpuElite','Terminal Mercante Remoto • Elite','{"name":"Terminal Mercante Remoto • Elite","description":"EXTRA Elite: enquanto equipado, permite vender recursos diretamente na aba Refinaria do Hangar em qualquer setor, sem retorno à base. Venda manual, nunca automática.","equipment_type":"extra","equipment_subtype":""}'::jsonb) ON CONFLICT(kind,item_id) DO NOTHING;
+-- INSERT INTO public.game_balance_entries_v1909(kind,item_id,label,params) VALUES('item','flax','Halo','{"name":"Halo","description":"Drone comum com 1 slot de equipamento.","slots":1,"equipment_type":"drone","equipment_subtype":""}'::jsonb) ON CONFLICT(kind,item_id) DO NOTHING;
+-- INSERT INTO public.game_balance_entries_v1909(kind,item_id,label,params) VALUES('item','iris','Nova','{"name":"Nova","description":"Drone Elite com 2 slots de equipamento.","slots":2,"equipment_type":"drone","equipment_subtype":""}'::jsonb) ON CONFLICT(kind,item_id) DO NOTHING;
+-- 
+-- CREATE OR REPLACE FUNCTION public.get_balance_runtime_v1909()
+-- RETURNS jsonb LANGUAGE plpgsql SECURITY DEFINER SET search_path TO public,auth,pg_temp AS $$
+-- DECLARE v_version integer;v_updated timestamptz;v_rows jsonb;
+-- BEGIN
+--  IF auth.uid() IS NULL THEN RAISE EXCEPTION 'Login obrigatório.'; END IF;
+--  SELECT version,updated_at INTO v_version,v_updated FROM public.game_balance_meta_v1909 WHERE id=1;
+--  SELECT coalesce(jsonb_agg(jsonb_build_object('kind',kind,'item_id',item_id,'label',label,'params',params) ORDER BY kind,item_id),'[]'::jsonb)
+--  INTO v_rows FROM public.game_balance_entries_v1909;
+--  RETURN jsonb_build_object('version',v_version,'updated_at',v_updated,'entries',v_rows);
+-- END;$$;
+-- 
+-- CREATE OR REPLACE FUNCTION public.admin_set_balance_v1909(p_kind text,p_item_id text,p_fields jsonb,p_expected_version integer DEFAULT NULL)
+-- RETURNS jsonb LANGUAGE plpgsql SECURITY DEFINER SET search_path TO public,auth,pg_temp AS $$
+-- DECLARE v_old jsonb;v_out jsonb;v_key text;v_value jsonb;v_num numeric;v_min numeric;v_max numeric;
+--  v_type text;v_subtype text;v_meta integer;v_low jsonb;v_subkey text;v_subnum numeric;
+-- BEGIN
+--  IF NOT public.is_game_admin_v1763(auth.uid()) THEN RAISE EXCEPTION 'Acesso administrativo negado.'; END IF;
+--  IF p_kind NOT IN ('ship','item') OR p_item_id IS NULL OR length(p_item_id)>64 OR jsonb_typeof(p_fields)<>'object' THEN
+--   RAISE EXCEPTION 'Registro de balanceamento inválido.';
+--  END IF;
+--  IF (SELECT count(*) FROM jsonb_object_keys(p_fields))=0 OR (SELECT count(*) FROM jsonb_object_keys(p_fields))>18 OR length(p_fields::text)>3500 THEN
+--   RAISE EXCEPTION 'Quantidade de atributos inválida.';
+--  END IF;
+--  SELECT version INTO v_meta FROM public.game_balance_meta_v1909 WHERE id=1 FOR UPDATE;
+--  IF p_expected_version IS NOT NULL AND p_expected_version<>v_meta THEN
+--   RAISE EXCEPTION 'Configuração mudou no servidor (v%). Recarregue antes de salvar.',v_meta;
+--  END IF;
+--  SELECT params INTO v_old FROM public.game_balance_entries_v1909
+--  WHERE kind=p_kind AND item_id=p_item_id FOR UPDATE;
+--  IF NOT FOUND THEN RAISE EXCEPTION 'Este equipamento ou nave não consta no catálogo autorizado.'; END IF;
+--  v_type := coalesce(v_old->>'equipment_type','');v_subtype:=coalesce(v_old->>'equipment_subtype','');
+--  v_out:=v_old;
+--  FOR v_key,v_value IN SELECT key,value FROM jsonb_each(p_fields) LOOP
+--   IF v_key IN ('name','role','description') THEN
+--    IF (v_key='role' AND p_kind<>'ship') OR (v_key='description' AND p_kind<>'item') OR
+--        jsonb_typeof(v_value)<>'string' OR length(btrim(v_value #>> '{}')) NOT BETWEEN 1 AND 180 THEN
+--     RAISE EXCEPTION 'Texto inválido para %.',v_key;
+--    END IF;
+--    v_out:=jsonb_set(v_out,ARRAY[v_key],to_jsonb(left(btrim(v_value #>> '{}'),180)),true);
+--    CONTINUE;
+--   END IF;
+--   IF p_kind='ship' THEN
+--    IF v_key NOT IN ('hp','speed','cargo','lasers','generators','extras','bonusLowMaps') THEN RAISE EXCEPTION 'Atributo de nave não permitido: %',v_key; END IF;
+--   ELSIF v_key='equipment_type' OR v_key='equipment_subtype' OR
+--     NOT ((v_type='laser' AND v_key IN ('damage','alienDamage','alienBonus')) OR
+--     (v_type='generator' AND v_subtype='speed' AND v_key='speed') OR
+--     (v_type='generator' AND v_subtype='shield' AND v_key IN ('shield','absorption','shieldRegenBonus')) OR
+--     (v_type='extra' AND v_key IN ('slotBonus','repairRate','repairTick','shieldRepairTick','repairDelay','cargoBonus') AND v_old ? v_key) OR
+--     (v_type='drone' AND v_key='slots')) THEN
+--     RAISE EXCEPTION 'Atributo de equipamento não permitido: %',v_key;
+--   END IF;
+--   IF v_key='bonusLowMaps' THEN
+--    IF p_kind<>'ship' THEN RAISE EXCEPTION 'Bônus de mapa é exclusivo de nave.'; END IF;
+--    IF v_value='null'::jsonb THEN
+--     v_out:=jsonb_set(v_out,ARRAY[v_key],'null'::jsonb,true);
+--    ELSE
+--     IF jsonb_typeof(v_value)<>'object' OR (SELECT count(*) FROM jsonb_object_keys(v_value))<>6 THEN RAISE EXCEPTION 'Bônus de mapa requer os 6 campos.'; END IF;
+--     FOR v_subkey,v_num IN SELECT key,0::numeric FROM jsonb_each(v_value) LOOP
+--      IF jsonb_typeof(v_value->v_subkey)<>'number' THEN RAISE EXCEPTION 'Bônus de mapa inválido.'; END IF;
+--      v_subnum:=(v_value->>v_subkey)::numeric;
+--      IF v_subkey IN ('hp','speed','cargo') THEN
+--       v_max:=CASE v_subkey WHEN 'hp' THEN 2000000 WHEN 'speed' THEN 1000 ELSE 100000 END;
+--       IF v_subnum<0 OR v_subnum>v_max THEN RAISE EXCEPTION 'Bônus de mapa fora do limite.'; END IF;
+--      ELSIF v_subkey IN ('laserMult','rocketMult','shieldMult') THEN
+--       IF v_subnum<0.1 OR v_subnum>5 THEN RAISE EXCEPTION 'Multiplicador de mapa fora do limite.'; END IF;
+--      ELSE RAISE EXCEPTION 'Campo de bônus de mapa inválido: %',v_subkey; END IF;
+--     END LOOP;
+--     v_out:=jsonb_set(v_out,ARRAY[v_key],v_value,true);
+--    END IF;
+--    CONTINUE;
+--   END IF;
+--   IF jsonb_typeof(v_value)<>'number' THEN RAISE EXCEPTION 'Atributo % precisa ser numérico.',v_key; END IF;
+--   v_num:=(v_value #>> '{}')::numeric;
+--   v_min:=CASE v_key WHEN 'hp' THEN 1000 WHEN 'speed' THEN CASE WHEN p_kind='ship' THEN 50 ELSE 0 END
+--          WHEN 'lasers' THEN 1 WHEN 'slots' THEN 1 ELSE 0 END;
+--   v_max:=CASE v_key WHEN 'hp' THEN 10000000 WHEN 'speed' THEN 1200 WHEN 'cargo' THEN 100000
+--     WHEN 'lasers' THEN 32 WHEN 'generators' THEN 32 WHEN 'extras' THEN 20 WHEN 'damage' THEN 100000
+--     WHEN 'alienDamage' THEN 100000 WHEN 'alienBonus' THEN 5 WHEN 'shield' THEN 1000000
+--     WHEN 'absorption' THEN 95 WHEN 'shieldRegenBonus' THEN 1 WHEN 'slotBonus' THEN 20
+--     WHEN 'repairRate' THEN 1 WHEN 'repairTick' THEN 1000000 WHEN 'shieldRepairTick' THEN 1000000
+--     WHEN 'repairDelay' THEN 120 WHEN 'cargoBonus' THEN 100000 WHEN 'slots' THEN 12 ELSE -1 END;
+--   IF v_max<0 OR v_num<v_min OR v_num>v_max OR
+--     (v_key IN ('hp','speed','cargo','lasers','generators','extras','damage','alienDamage','shield','absorption','slotBonus','repairTick','shieldRepairTick','repairDelay','cargoBonus','slots') AND v_num<>trunc(v_num)) THEN
+--     RAISE EXCEPTION 'Atributo % fora dos limites.',v_key;
+--   END IF;
+--   v_out:=jsonb_set(v_out,ARRAY[v_key],v_value,true);
+--  END LOOP;
+--  UPDATE public.game_balance_entries_v1909 SET params=v_out,label=coalesce(v_out->>'name',label),updated_at=now()
+--  WHERE kind=p_kind AND item_id=p_item_id;
+--  UPDATE public.game_balance_meta_v1909 SET version=version+1,updated_at=now() WHERE id=1;
+--  RETURN public.get_balance_runtime_v1909();
+-- END;$$;
+-- REVOKE ALL ON FUNCTION public.get_balance_runtime_v1909() FROM PUBLIC,anon;
+-- REVOKE ALL ON FUNCTION public.admin_set_balance_v1909(text,text,jsonb,integer) FROM PUBLIC,anon;
+-- GRANT EXECUTE ON FUNCTION public.get_balance_runtime_v1909() TO authenticated;
+-- GRANT EXECUTE ON FUNCTION public.admin_set_balance_v1909(text,text,jsonb,integer) TO authenticated;
+-- COMMIT;
+-- ===== END V19_0_9_ADM_BALANCEAMENTO.sql =====
+
+-- ===== START V20_ETAPA1_INTEGRIDADE.sql | sha256 4446ee6578453da636afa6f2611b6e1bc172b00d391d567058f25ce4519b6566 =====
+-- -- STELLAR V20 ETAPA 1: integridade do ADM e descrições oficiais
+-- BEGIN;
+-- CREATE OR REPLACE FUNCTION public.admin_update_bonus_box_config_v1825(p_config jsonb)
+-- RETURNS jsonb LANGUAGE plpgsql SECURITY DEFINER SET search_path TO ''
+-- AS $f$
+-- DECLARE
+--   v_uid uuid := auth.uid();
+--   v_key text;
+--   v_reward jsonb;
+--   v_rows jsonb := '[]'::jsonb;
+--   v_gate jsonb;
+--   v_maps jsonb := '{}'::jsonb;
+--   v_prices jsonb := '{}'::jsonb;
+--   v_limit integer;
+--   v_min integer;
+--   v_max integer;
+--   v_weight numeric;
+--   v_total numeric := 0;
+--   v_labels text[] := ARRAY['lcb10','mcb25','mcb50','sab50','credits','uridium','stellarDust'];
+--   v_kind text;
+--   v_id text;
+--   v_idx integer;
+--   v_respawn_min integer;
+--   v_respawn_max integer;
+--   v_discount integer;
+--   v_clean jsonb;
+--   v_out jsonb;
+-- BEGIN
+--   IF v_uid IS NULL OR NOT public.is_game_admin_v1763(v_uid) THEN
+--     RAISE EXCEPTION 'Acesso administrativo negado.' USING ERRCODE='42501';
+--   END IF;
+--   IF jsonb_typeof(p_config)<>'object' THEN
+--     RAISE EXCEPTION 'Configuração deve ser um objeto JSON.';
+--   END IF;
+--   IF jsonb_typeof(p_config->'map_counts') <> 'object'
+--      OR jsonb_typeof(p_config->'gate_prices') <> 'object'
+--      OR jsonb_typeof(p_config->'rewards') <> 'array'
+--      OR jsonb_array_length(p_config->'rewards') <> 7 THEN
+--     RAISE EXCEPTION 'Mapas, preços e as sete recompensas são obrigatórios.';
+--   END IF;
+--   FOR v_key IN SELECT unnest(ARRAY['x1','x2','x3','x4','x5','x6','x7','x8','b41','b42','b43']) LOOP
+--     IF (p_config->'map_counts'->>v_key) IS NULL OR (p_config->'map_counts'->>v_key) !~ '^[0-9]{1,3}$' THEN
+--       RAISE EXCEPTION 'Quantidade inválida para o mapa %.',v_key;
+--     END IF;
+--     v_limit := (p_config->'map_counts'->>v_key)::integer;
+--     IF v_limit>100 THEN RAISE EXCEPTION 'Máximo de 100 caixas para o mapa %.',v_key; END IF;
+--     v_maps := v_maps || jsonb_build_object(v_key,v_limit);
+--   END LOOP;
+--   v_respawn_min := (p_config->>'respawn_min_ms')::integer;
+--   v_respawn_max := (p_config->>'respawn_max_ms')::integer;
+--   IF v_respawn_min IS NULL OR v_respawn_max IS NULL
+--     OR v_respawn_min<5000 OR v_respawn_max>3600000 OR v_respawn_max<v_respawn_min THEN
+--     RAISE EXCEPTION 'Respawn precisa ser entre 5 e 3600 segundos, com mínimo <= máximo.';
+--   END IF;
+--   v_discount := (p_config->>'premium_discount_pct')::integer;
+--   IF v_discount IS NULL OR v_discount<0 OR v_discount>50 THEN
+--     RAISE EXCEPTION 'Desconto Premium permitido: 0 a 50 por cento.';
+--   END IF;
+--   FOR v_key IN SELECT unnest(ARRAY['alpha','beta','gamma']) LOOP
+--     v_gate := p_config->'gate_prices'->v_key;
+--     IF jsonb_typeof(v_gate)<>'object' THEN RAISE EXCEPTION 'Preço ausente: %.',v_key; END IF;
+--     v_min := (v_gate->>'stl')::integer;
+--     v_max := (v_gate->>'dust')::integer;
+--     IF v_min IS NULL OR v_min<1 OR v_min>100000 OR v_max IS NULL OR v_max<1 OR v_max>100 THEN
+--       RAISE EXCEPTION 'Preço inválido do portal % (STL: 1..100000, Poeira: 1..100).',v_key;
+--     END IF;
+--     v_prices := v_prices || jsonb_build_object(v_key,jsonb_build_object('stl',v_min,'dust',v_max));
+--   END LOOP;
+--   FOR v_idx IN 0..6 LOOP
+--     v_reward := p_config->'rewards'->v_idx;
+--     IF jsonb_typeof(v_reward)<>'object' THEN RAISE EXCEPTION 'Prêmio % inválido.',v_idx+1; END IF;
+--     v_id := v_labels[v_idx+1];
+--     v_kind := CASE WHEN v_idx<4 THEN 'ammo' ELSE v_id END;
+--     IF v_reward->>'kind'<>v_kind OR (v_idx<4 AND v_reward->>'id'<>v_id) THEN
+--       RAISE EXCEPTION 'Tipo de recompensa % não corresponde ao padrão permitido.',v_idx+1;
+--     END IF;
+--     v_min := (v_reward->>'min')::integer;
+--     v_max := (v_reward->>'max')::integer;
+--     v_weight := (v_reward->>'weight')::numeric;
+--     IF v_min IS NULL OR v_max IS NULL OR v_weight IS NULL
+--       OR v_min<1 OR v_max<v_min OR v_weight<0 OR v_weight>100 THEN
+--       RAISE EXCEPTION 'Intervalo/chance inválido na recompensa %.',v_id;
+--     END IF;
+--     IF v_max > (CASE WHEN v_kind='credits' THEN 10000000 WHEN v_kind='uridium' THEN 100000 WHEN v_kind='stellarDust' THEN 100 ELSE 1000000 END) THEN
+--       RAISE EXCEPTION 'Quantidade máxima de % excedida.',v_id;
+--     END IF;
+--     v_total := v_total + v_weight;
+--     v_rows := v_rows || jsonb_build_array(jsonb_build_object('kind',v_kind,'min',v_min,'max',v_max,'weight',v_weight)
+--       || CASE WHEN v_kind='ammo' THEN jsonb_build_object('id',v_id) ELSE '{}'::jsonb END);
+--   END LOOP;
+--   IF v_total<=0 THEN RAISE EXCEPTION 'Pelo menos uma recompensa deve ter chance maior que zero.'; END IF;
+--   v_clean := jsonb_build_object('map_counts',v_maps,'respawn_min_ms',v_respawn_min,
+--     'respawn_max_ms',v_respawn_max,'premium_discount_pct',v_discount,
+--     'gate_prices',v_prices,'rewards',v_rows);
+--   UPDATE public.bonus_box_config_v1825
+--     SET config=v_clean,version=version+1,updated_at=now(),updated_by=v_uid
+--     WHERE id=1;
+--   -- O cadastro de preços do LIVE OPS continua sincronizado com o painel.
+--   UPDATE public.live_shop_prices_v16 AS p
+--     SET price=(v_prices->split_part(p.catalog_key,':',2)->>'stl')::integer,updated_at=now()
+--     WHERE p.catalog_key IN ('gate_spin:alpha','gate_spin:beta','gate_spin:gamma')
+--       AND p.kind='gate_spin' AND p.currency='uridium';
+--   RETURN public.get_bonus_box_config_v1825();
+-- END;
+-- $f$;
+-- REVOKE ALL ON FUNCTION public.admin_update_bonus_box_config_v1825(jsonb) FROM PUBLIC,anon;
+-- GRANT EXECUTE ON FUNCTION public.admin_update_bonus_box_config_v1825(jsonb) TO authenticated;
+-- -- Corrige apenas os textos, sem alterar os atributos salvos por jogadores/ADM.
+-- UPDATE public.game_balance_entries_v1909 SET params=jsonb_set(params,'{description}',
+--  to_jsonb(replace(params->>'description','+2.500 unidades','+3.000 unidades')),true),updated_at=now()
+-- WHERE kind='item' AND item_id='cargoCpuCommon' AND (params->>'description') LIKE '%+2.500 unidades%';
+-- UPDATE public.game_balance_entries_v1909 SET params=jsonb_set(params,'{description}',
+--  to_jsonb(replace(params->>'description','+3 slots EXTRAS','+4 slots EXTRAS')),true),updated_at=now()
+-- WHERE kind='item' AND item_id='extraSlotCpuCommon' AND (params->>'description') LIKE '%+3 slots EXTRAS%';
+-- UPDATE public.game_balance_entries_v1909 SET params=jsonb_set(params,'{description}',
+--  to_jsonb(replace(params->>'description','+6 slots EXTRAS','+9 slots EXTRAS')),true),updated_at=now()
+-- WHERE kind='item' AND item_id='extraSlotCpuElite' AND (params->>'description') LIKE '%+6 slots EXTRAS%';
+-- -- Só invalida o cache de balanceamento se textos antigos foram realmente encontrados.
+-- -- Os atributos numéricos permanecem intactos.
+-- UPDATE public.game_balance_meta_v1909 SET version=version+1,updated_at=now() WHERE id=1
+--   AND (SELECT count(*) FROM public.game_balance_entries_v1909 e WHERE e.kind='item' AND e.item_id IN ('cargoCpuCommon','extraSlotCpuCommon','extraSlotCpuElite'))=3;
+-- -- V20: cupom EVENTO7D legado não concede Premium no navegador. A interface usa redeem_game_coupon_v193.
+-- -- NÃO criar cupom público automático que daria Premium a qualquer jogador.
+-- COMMIT;
+-- ===== END V20_ETAPA1_INTEGRIDADE.sql =====
+
+-- ===== START V20_ETAPA2_ECONOMIA_PASSE.sql | sha256 90707e19d724c633659846379054cefee0359d7583dc029b143b256feed9492c =====
+-- -- STELLAR V20 ETAPA 2: receitas viáveis e próxima temporada, preservando Outubro
+-- BEGIN;
+-- DO $v20$ BEGIN
+--   IF (SELECT count(*) FROM public.game_crafting_recipe_v1815 WHERE recipe_id IN ('ammo_pls2','rocket_pack','prometid_batch','duranium_batch','promerium_batch','repair_bonus')) <> 6 THEN
+--     RAISE EXCEPTION 'V20 craft: receitas incompletas; abortando';
+--   END IF;
+--   IF EXISTS (SELECT 1 FROM public.game_crafting_recipe_v1815 WHERE (recipe_id='ammo_pls2' AND cost NOT IN (750000,20000)) OR (recipe_id='rocket_pack' AND cost NOT IN (500000,50000)) OR (recipe_id='prometid_batch' AND cost NOT IN (200000,30000)) OR (recipe_id='duranium_batch' AND cost NOT IN (400000,25000)) OR (recipe_id='promerium_batch' AND cost NOT IN (1500000,50000)) OR (recipe_id='repair_bonus' AND cost NOT IN (1000000,150000))) THEN
+--     RAISE EXCEPTION 'V20 craft: preço foi editado no ADM; revisar antes de aplicar';
+--   END IF;
+-- END $v20$;
+-- UPDATE public.game_crafting_recipe_v1815 SET cost=20000,ingredients='{"Prometium": 20, "Endurium": 20, "Terbium": 20}'::jsonb,updated_at=now() WHERE recipe_id='ammo_pls2' AND cost IN (750000,20000);
+-- UPDATE public.game_crafting_recipe_v1815 SET cost=50000,ingredients='{"Endurium": 20, "Terbium": 50}'::jsonb,updated_at=now() WHERE recipe_id='rocket_pack' AND cost IN (500000,50000);
+-- UPDATE public.game_crafting_recipe_v1815 SET cost=30000,ingredients='{"Prometium": 75, "Endurium": 50, "Terbium": 25}'::jsonb,updated_at=now() WHERE recipe_id='prometid_batch' AND cost IN (200000,30000);
+-- UPDATE public.game_crafting_recipe_v1815 SET cost=25000,ingredients='{"Endurium": 60, "Terbium": 45, "Prometid": 3}'::jsonb,updated_at=now() WHERE recipe_id='duranium_batch' AND cost IN (400000,25000);
+-- UPDATE public.game_crafting_recipe_v1815 SET cost=50000,ingredients='{"Xenomit": 1, "Duranium": 3, "Prometid": 3}'::jsonb,updated_at=now() WHERE recipe_id='promerium_batch' AND cost IN (1500000,50000);
+-- UPDATE public.game_crafting_recipe_v1815 SET cost=150000,ingredients='{"Duranium": 2, "Endurium": 10, "Prometium": 10}'::jsonb,updated_at=now() WHERE recipe_id='repair_bonus' AND cost IN (1000000,150000);
+-- 
+-- -- Pré-configura NOVEMBRO (350 pontos/tier, 100 por missão): 21 dias para completar, Outubro inalterado.
+-- -- A nova temporada fica ativa SOMENTE dentro de sua janela futura (01 Nov - 01 Dez SP).
+-- INSERT INTO public.game_battle_pass_seasons_v1817b (season_key,name,description,starts_at,ends_at,tier_count,points_per_tier,daily_points,premium_price_brl,enabled,updated_at)
+-- SELECT '2026-11','TEMPORADA NOVEMBRO 2026','Temporada equilibrada: 30 tiers, cerca de 21 dias de missões ativas.',
+-- '2026-11-01 03:00:00+00'::timestamptz,'2026-12-01 03:00:00+00'::timestamptz,
+-- 30,350,100,premium_price_brl,true,now()
+-- FROM public.game_battle_pass_seasons_v1817b WHERE season_key='2026-10'
+-- ON CONFLICT (season_key) DO NOTHING;
+-- INSERT INTO public.game_battle_pass_tiers_v1817b (season_key,tier_no,free_reward,premium_reward,enabled,updated_at)
+-- SELECT '2026-11',tier_no,free_reward,premium_reward,true,now() FROM public.game_battle_pass_tiers_v1817b
+-- WHERE season_key='2026-10' AND enabled
+-- ON CONFLICT (season_key,tier_no) DO NOTHING;
+-- -- O ARC-X especial fica como prêmio de mérito no tier final gratuito (somente novembro).
+-- UPDATE public.game_battle_pass_tiers_v1817b SET free_reward=jsonb_set(free_reward,'{items}', ' ["lfx"] '::jsonb,true),updated_at=now()
+-- WHERE season_key='2026-11' AND tier_no=30 AND free_reward->'items'='["g3n3310"]'::jsonb;
+-- -- O laser ARC-Ω fica no último nível Premium (um único item em vez de equipamento padrão).
+-- UPDATE public.game_battle_pass_tiers_v1817b SET premium_reward=jsonb_set(premium_reward,'{items}', '["lfomega"]'::jsonb,true),updated_at=now()
+-- WHERE season_key='2026-11' AND tier_no=30 AND premium_reward->'items'='["sg3nb03"]'::jsonb;
+-- DO $v20$ BEGIN
+--  IF (SELECT count(*) FROM public.game_battle_pass_tiers_v1817b WHERE season_key='2026-11' AND enabled)<>30 THEN RAISE EXCEPTION 'V20 pass: 30 tiers necessários'; END IF;
+--  IF (SELECT points_per_tier FROM public.game_battle_pass_seasons_v1817b WHERE season_key='2026-10')<>500 THEN RAISE EXCEPTION 'V20 pass: Outubro não pode ser alterado'; END IF;
+-- END $v20$;
+-- -- Ativa a atualização das configurações para clientes e Render sem exigir novo relog.
+-- UPDATE public.game_runtime_meta_v1810 SET version=version+1,updated_at=now()
+--  WHERE config_key IN ('systems','pass');
+-- COMMIT;
+-- ===== END V20_ETAPA2_ECONOMIA_PASSE.sql =====
+
+-- ===== START V20_ETAPA3_ENDGAME.sql | sha256 4be1d30d9cf09dae2e052d4cfc15b822561d499caee1e2b6ad6d7911efc86013 =====
+-- -- STELLAR V20 ETAPA 3: Rendimento dos minerais e XP do AUX via nova versão do servidor/cliente.
+-- -- Esta etapa NÃO altera as pedras dos mapas (x5=32, x6=28, x7=24, x8=20).
+-- -- Não executar comandos adicionais: lógica segura do jogo incorporada ao V20.
+-- -- Captura Warfront continua sem recompensa monetária direta até validação autoritativa no servidor.
+-- ===== END V20_ETAPA3_ENDGAME.sql =====
+
+-- ===== START V21_4_0_WARFRONT_ELITE_PERSISTENCIA.sql | sha256 d9f8de622648550ef012130bec0a23eb21560d8a9d07b30bd36afe5d12c531fd =====
+-- -- STELLAR LEGACY — CONTROLE PERSISTENTE A/B/C E OPERAÇÕES DE ELITE
+-- -- Execute UMA VEZ no SQL Editor do Supabase ANTES do deploy do ZIP.
+-- -- As funções de escrita do domínio são exclusivamente de serviço; navegador não pode escolher dono.
+-- begin;
+-- create table if not exists public.stellar_warfront_nodes (
+--   map_id text not null check (map_id in ('b41','b42','b43')),
+--   node_id text not null check (node_id in ('A','B','C')),
+--   owner text check (owner is null or owner in ('earth','mars','jupiter')),
+--   revision bigint not null default 0 check (revision >= 0),
+--   captured_at timestamptz,
+--   captured_by uuid,
+--   primary key(map_id,node_id)
+-- );
+-- insert into public.stellar_warfront_nodes(map_id,node_id)
+-- select m,n from unnest(array['b41','b42','b43']) m cross join unnest(array['A','B','C']) n
+-- on conflict do nothing;
+-- alter table public.stellar_warfront_nodes enable row level security;
+-- revoke all on public.stellar_warfront_nodes from public,anon,authenticated;
+-- grant select,update on public.stellar_warfront_nodes to service_role;
+-- -- Nenhuma política de escrita pelo navegador.
+-- 
+-- create or replace function public.stellar_commit_warfront_capture(p_map_id text,p_node_id text,p_faction text,p_expected_revision bigint,p_actor uuid)
+-- returns public.stellar_warfront_nodes
+-- language plpgsql security invoker set search_path=public as $$
+-- declare v_row public.stellar_warfront_nodes;
+-- begin
+--  if p_map_id not in ('b41','b42','b43') or p_node_id not in ('A','B','C') or p_faction not in ('earth','mars','jupiter') or p_actor is null then
+--    raise exception 'INVALID_WARFRONT_CAPTURE';
+--  end if;
+--  update public.stellar_warfront_nodes set owner=p_faction, captured_at=now(), captured_by=p_actor, revision=revision+1
+--  where map_id=p_map_id and node_id=p_node_id and revision=p_expected_revision and owner is distinct from p_faction
+--  returning * into v_row;
+--  if not found then raise exception 'WARFRONT_REVISION_CONFLICT'; end if;
+--  return v_row;
+-- end;$$;
+-- revoke all on function public.stellar_commit_warfront_capture(text,text,text,bigint,uuid) from public,anon,authenticated;
+-- grant execute on function public.stellar_commit_warfront_capture(text,text,text,bigint,uuid) to service_role;
+-- 
+-- create table if not exists public.stellar_elite_counters (
+--  user_id uuid primary key references auth.users(id) on delete cascade,
+--  npc_kills bigint not null default 0 check (npc_kills>=0),
+--  sector_captures bigint not null default 0 check (sector_captures>=0),
+--  updated_at timestamptz not null default now()
+-- );
+-- create table if not exists public.stellar_elite_claims (
+--  user_id uuid not null references auth.users(id) on delete cascade,
+--  objective_id text not null,
+--  title text not null,
+--  credits bigint not null default 0,
+--  stl bigint not null default 0,
+--  claimed_at timestamptz not null default now(),
+--  primary key(user_id,objective_id)
+-- );
+-- alter table public.stellar_elite_counters enable row level security;
+-- alter table public.stellar_elite_claims enable row level security;
+-- revoke all on public.stellar_elite_counters,public.stellar_elite_claims from public,anon,authenticated;
+-- grant select on public.stellar_elite_counters,public.stellar_elite_claims to authenticated;
+-- grant select,insert,update on public.stellar_elite_counters to service_role;
+-- grant select,insert on public.stellar_elite_claims to service_role;
+-- drop policy if exists stellar_elite_counters_read on public.stellar_elite_counters;
+-- create policy stellar_elite_counters_read on public.stellar_elite_counters for select to authenticated using (user_id=(select auth.uid()));
+-- drop policy if exists stellar_elite_claims_read on public.stellar_elite_claims;
+-- create policy stellar_elite_claims_read on public.stellar_elite_claims for select to authenticated using (user_id=(select auth.uid()));
+-- 
+-- -- O servidor usa service_role; somente eventos efetivamente processados no Render contabilizam.
+-- create or replace function public.stellar_record_elite_event(p_user_id uuid,p_kind text,p_amount int default 1)
+-- returns void language plpgsql security invoker set search_path=public as $$
+-- begin
+--  if p_user_id is null or p_kind not in ('npc_kill','sector_capture') or p_amount<1 or p_amount>100 then
+--    raise exception 'INVALID_ELITE_EVENT';
+--  end if;
+--  insert into public.stellar_elite_counters(user_id,npc_kills,sector_captures)
+--  values(p_user_id,case when p_kind='npc_kill' then p_amount else 0 end,case when p_kind='sector_capture' then p_amount else 0 end)
+--  on conflict(user_id) do update set
+--  npc_kills=public.stellar_elite_counters.npc_kills+excluded.npc_kills,
+--  sector_captures=public.stellar_elite_counters.sector_captures+excluded.sector_captures,
+--  updated_at=now();
+-- end;$$;
+-- revoke all on function public.stellar_record_elite_event(uuid,text,int) from public,anon,authenticated;
+-- grant execute on function public.stellar_record_elite_event(uuid,text,int) to service_role;
+-- 
+-- -- O ADM pode personalizar somente as duas metricas que o servidor consegue validar.
+-- create table if not exists public.stellar_elite_objectives (
+--  objective_id text primary key check(objective_id ~ '^[a-z][a-z0-9_]{2,39}$'),
+--  label text not null check(length(trim(label)) between 3 and 70),
+--  title text not null check(length(trim(title)) between 3 and 70),
+--  metric text not null check(metric in ('npc_kills','sector_captures')),
+--  target bigint not null check(target between 1 and 1000000),
+--  credits bigint not null default 0 check(credits between 0 and 500000),
+--  stl bigint not null default 0 check(stl between 0 and 1000),
+--  enabled boolean not null default false,
+--  sort_order int not null default 100,
+--  updated_at timestamptz not null default now()
+-- );
+-- insert into public.stellar_elite_objectives(objective_id,label,title,metric,target,credits,stl,enabled,sort_order) values
+--  ('capture_1','Primeira Conquista','Conquistador','sector_captures',1,5000,10,true,10),
+--  ('capture_5','Guardiao dos Reles','Guardiao de Setores','sector_captures',5,15000,25,true,20),
+--  ('capture_25','Dominio Galactico','Dominador Galactico','sector_captures',25,50000,100,true,30),
+--  ('hunt_100','Cacada Inicial','Cacador Estelar','npc_kills',100,3000,5,true,40),
+--  ('hunt_1000','Defensor do Cosmos','Defensor do Cosmos','npc_kills',1000,30000,30,true,50),
+--  ('hunt_10000','Lenda dos Cacadores','Lenda dos Cacadores','npc_kills',10000,100000,120,true,60)
+-- on conflict(objective_id) do nothing;
+-- alter table public.stellar_elite_objectives enable row level security;
+-- revoke all on public.stellar_elite_objectives from public,anon,authenticated;
+-- grant select on public.stellar_elite_objectives to authenticated;
+-- grant select,insert,update on public.stellar_elite_objectives to service_role;
+-- drop policy if exists stellar_elite_objectives_read on public.stellar_elite_objectives;
+-- create policy stellar_elite_objectives_read on public.stellar_elite_objectives for select to authenticated using(enabled=true);
+-- 
+-- -- Premiacao atomica, idempotente, autenticada e com tabela independente do save local.
+-- -- Somente seis objetivos comprovados pelo servidor podem conceder CR/STL/titulos.
+-- create or replace function public.stellar_claim_elite_objective(p_objective_id text)
+-- returns jsonb language plpgsql security definer set search_path=public as $$
+-- declare
+--  v_uid uuid:=auth.uid();v_counters public.stellar_elite_counters;
+--  v_metric bigint;v_target bigint;v_cr bigint;v_stl bigint;v_title text;
+--  v_state jsonb;v_profile jsonb;v_rev bigint;v_objective public.stellar_elite_objectives;
+-- begin
+--  if v_uid is null then raise exception 'AUTH_REQUIRED';end if;
+--  select * into v_objective from public.stellar_elite_objectives where objective_id=p_objective_id and enabled=true for share;
+--  if not found then raise exception 'UNKNOWN_ELITE_OBJECTIVE';end if;
+--  v_target:=v_objective.target;v_cr:=v_objective.credits;v_stl:=v_objective.stl;v_title:=v_objective.title;
+--  select * into v_counters from public.stellar_elite_counters where user_id=v_uid for update;
+--  v_metric:=case when v_objective.metric='sector_captures' then coalesce(v_counters.sector_captures,0) else coalesce(v_counters.npc_kills,0) end;
+--  if v_metric<v_target then raise exception 'ELITE_OBJECTIVE_NOT_COMPLETE';end if;
+--  select state into v_state from public.game_saves where user_id=v_uid for update;
+--  if v_state is null then raise exception 'SAVE_NOT_FOUND';end if;
+--  if exists(select 1 from public.stellar_elite_claims where user_id=v_uid and objective_id=p_objective_id) then
+--   return jsonb_build_object('ok',true,'already_claimed',true,'objective_id',p_objective_id,'state',v_state);
+--  end if;
+--  insert into public.stellar_elite_claims(user_id,objective_id,title,credits,stl) values(v_uid,p_objective_id,v_title,v_cr,v_stl);
+--  v_profile:=coalesce(v_state->'profile','{}'::jsonb);
+--  v_profile:=jsonb_set(v_profile,'{credits}',to_jsonb(greatest(0,coalesce(floor((v_profile->>'credits')::numeric)::bigint,0))+v_cr),true);
+--  v_profile:=jsonb_set(v_profile,'{uridium}',to_jsonb(greatest(0,coalesce(floor((v_profile->>'uridium')::numeric)::bigint,0))+v_stl),true);
+--  v_rev:=coalesce((v_state->>'serverEliteRevision')::bigint,0)+1;
+--  v_state:=jsonb_set(jsonb_set(v_state,'{profile}',v_profile,true),'{serverEliteRevision}',to_jsonb(v_rev),true);
+--  update public.game_saves set state=v_state,updated_at=now() where user_id=v_uid;
+--  return jsonb_build_object('ok',true,'already_claimed',false,'objective_id',p_objective_id,'title',v_title,'credits',v_cr,'stl',v_stl,'state',v_state);
+-- end;$$;
+-- revoke all on function public.stellar_claim_elite_objective(text) from public,anon;
+-- grant execute on function public.stellar_claim_elite_objective(text) to authenticated;
+-- 
+-- -- Protecao contra sobrescrita de bonus por save antigo (inclusive requisicoes em voo).
+-- create or replace function public.stellar_guard_elite_save_revision()
+-- returns trigger language plpgsql set search_path=public as $$
+-- begin
+--  if coalesce((new.state->>'serverEliteRevision')::bigint,0)<coalesce((old.state->>'serverEliteRevision')::bigint,0) then
+--    raise exception 'SAVE_ELITE_STALE';
+--  end if;
+--  return new;
+-- end;$$;
+-- drop trigger if exists stellar_guard_elite_save_revision on public.game_saves;
+-- create trigger stellar_guard_elite_save_revision before update of state on public.game_saves
+-- for each row execute function public.stellar_guard_elite_save_revision();
+-- commit;
+-- ===== END V21_4_0_WARFRONT_ELITE_PERSISTENCIA.sql =====
+
+-- ===== START V21_5_0B_CLAN_SNAPSHOT.sql | sha256 e7b59538cc2a52723fdfddf00d8e4cb6fa609f224e1696ad7a45f3388dad9c2e =====
+-- -- STELLAR LEGACY GUERRA: clã vinculado na data da conquista, sem transferência retroativa
+-- begin;
+-- alter table public.stellar_war_scores add column if not exists clan_id uuid references public.clans(id) on delete set null;
+-- alter table public.stellar_war_actions add column if not exists clan_id uuid references public.clans(id) on delete set null;
+-- create or replace function public.stellar_war_validate_campaign()
+-- returns trigger language plpgsql set search_path=public as $$
+-- begin
+--  perform pg_advisory_xact_lock(552150021);
+--  if exists(select 1 from public.stellar_war_campaigns c where c.enabled and new.enabled and c.id is distinct from new.id and c.starts_at<new.ends_at and c.ends_at>new.starts_at)
+--  then raise exception 'WAR_CAMPAIGN_DATE_CONFLICT'; end if;
+--  if tg_op='UPDATE' then
+--   if now()>=old.starts_at or exists(select 1 from public.stellar_war_scores s where s.campaign_id=old.id) then
+--    if row(old.title,old.starts_at,old.ends_at,old.min_points,old.reward_credits,old.reward_stl,old.enabled)
+--    is distinct from row(new.title,new.starts_at,new.ends_at,new.min_points,new.reward_credits,new.reward_stl,new.enabled)
+--    then raise exception 'WAR_CAMPAIGN_LOCKED'; end if;
+--   end if;
+--  end if;
+--  new.updated_at=now();return new;
+-- end;$$;
+-- 
+-- create or replace function public.stellar_commit_warfront_capture(p_map_id text,p_node_id text,p_faction text,p_expected_revision bigint,p_actor uuid)
+-- returns public.stellar_warfront_nodes
+-- language plpgsql security invoker set search_path=public as $$
+-- declare v_row public.stellar_warfront_nodes;v_campaign uuid;v_points int;v_old text;v_clan uuid;
+-- begin
+--  if p_map_id not in ('b41','b42','b43') or p_node_id not in ('A','B','C') or p_faction not in ('earth','mars','jupiter') or p_actor is null then raise exception 'INVALID_WARFRONT_CAPTURE';end if;
+--  select owner into v_old from public.stellar_warfront_nodes where map_id=p_map_id and node_id=p_node_id for update;
+--  update public.stellar_warfront_nodes set owner=p_faction,captured_at=now(),captured_by=p_actor,revision=revision+1
+--  where map_id=p_map_id and node_id=p_node_id and revision=p_expected_revision and owner is distinct from p_faction returning * into v_row;
+--  if not found then raise exception 'WARFRONT_REVISION_CONFLICT';end if;
+--  select id into v_campaign from public.stellar_war_campaigns where enabled and now()>=starts_at and now()<ends_at order by starts_at desc limit 1;
+--  select clan_id into v_clan from public.clan_members where user_id=p_actor limit 1;
+--  select capture_points into v_points from public.stellar_war_rules where id=1;
+--  v_points:=coalesce(v_points,10);
+--  insert into public.stellar_war_actions(campaign_id,kind,map_id,node_id,faction,former_owner,actor_user_id,points,clan_id)
+--  values(v_campaign,'capture',p_map_id,p_node_id,p_faction,v_old,p_actor,case when v_campaign is null then 0 else v_points end,v_clan);
+--  if v_campaign is not null then
+--    insert into public.stellar_war_scores(campaign_id,user_id,faction,captures,points,clan_id)
+--    values(v_campaign,p_actor,p_faction,1,v_points,v_clan)
+--    on conflict(campaign_id,user_id) do update set captures=public.stellar_war_scores.captures+1,points=public.stellar_war_scores.points+excluded.points,updated_at=now();
+--  end if;
+--  return v_row;
+-- end;$$;
+-- create or replace function public.stellar_record_war_defense(p_map_id text,p_node_id text,p_faction text,p_actor uuid)
+-- returns boolean language plpgsql security invoker set search_path=public as $$
+-- declare v_campaign uuid;v_points int;v_clan uuid;
+-- begin
+--  if p_map_id not in('b41','b42','b43') or p_node_id not in('A','B','C') or p_faction not in('earth','mars','jupiter') or p_actor is null then raise exception 'INVALID_DEFENSE';end if;
+--  if not exists(select 1 from public.stellar_warfront_nodes where map_id=p_map_id and node_id=p_node_id and owner=p_faction) then return false;end if;
+--  insert into public.stellar_war_defense_cooldowns(user_id,map_id,node_id,defended_at) values(p_actor,p_map_id,p_node_id,now())
+--  on conflict(user_id,map_id,node_id) do update set defended_at=excluded.defended_at
+--  where public.stellar_war_defense_cooldowns.defended_at<now()-interval '10 minutes';
+--  if not found then return false;end if;
+--  select id into v_campaign from public.stellar_war_campaigns where enabled and now()>=starts_at and now()<ends_at order by starts_at desc limit 1;
+--  select clan_id into v_clan from public.clan_members where user_id=p_actor limit 1;
+--  select defense_points into v_points from public.stellar_war_rules where id=1;v_points:=coalesce(v_points,3);
+--  insert into public.stellar_war_actions(campaign_id,kind,map_id,node_id,faction,former_owner,actor_user_id,points,clan_id)
+--  values(v_campaign,'defense',p_map_id,p_node_id,p_faction,p_faction,p_actor,case when v_campaign is null then 0 else v_points end,v_clan);
+--  if v_campaign is not null then
+--  insert into public.stellar_war_scores(campaign_id,user_id,faction,defenses,points,clan_id) values(v_campaign,p_actor,p_faction,1,v_points,v_clan)
+--  on conflict(campaign_id,user_id) do update set defenses=public.stellar_war_scores.defenses+1,points=public.stellar_war_scores.points+excluded.points,updated_at=now();
+--  end if;
+--  return true;
+-- end;$$;
+-- commit;
+-- ===== END V21_5_0B_CLAN_SNAPSHOT.sql =====
+
+-- ===== START V21_5_0_GUERRA_FACCOES.sql | sha256 1b0bdcca23a1e4c8c20adcb1b3e58a099b44957a464691fd05abe122f161cf8f =====
+-- -- STELLAR LEGACY — GUERRA DE FACÇÕES | instalação única, transacional, sem apagar saves/donos
+-- -- Requer migração V21.4.0 instalada. Execute antes de publicar o código novo.
+-- begin;
+-- 
+-- create table if not exists public.stellar_war_rules (
+--  id int primary key default 1 check (id=1),
+--  daily_credits_per_node int not null default 400 check (daily_credits_per_node between 0 and 2000),
+--  daily_credits_cap int not null default 2800 check (daily_credits_cap between 0 and 10000),
+--  capture_points int not null default 10 check (capture_points between 1 and 100),
+--  defense_points int not null default 3 check (defense_points between 1 and 50),
+--  updated_at timestamptz not null default now()
+-- );
+-- insert into public.stellar_war_rules(id) values (1) on conflict do nothing;
+-- 
+-- create table if not exists public.stellar_war_campaigns (
+--  id uuid primary key default gen_random_uuid(),
+--  title text not null check (length(trim(title)) between 3 and 70),
+--  starts_at timestamptz not null,
+--  ends_at timestamptz not null,
+--  enabled boolean not null default false,
+--  min_points int not null default 10 check(min_points between 1 and 10000),
+--  reward_credits int not null default 2500 check(reward_credits between 0 and 10000),
+--  reward_stl int not null default 10 check(reward_stl between 0 and 50),
+--  created_at timestamptz not null default now(),
+--  updated_at timestamptz not null default now(),
+--  check (ends_at>starts_at+interval '5 minutes' and ends_at<=starts_at+interval '31 days')
+-- );
+-- create index if not exists stellar_war_campaign_dates_idx on public.stellar_war_campaigns(starts_at,ends_at);
+-- 
+-- -- Campanhas não podem se sobrepor ou ter regras de prêmio mudadas após início.
+-- create or replace function public.stellar_war_validate_campaign()
+-- returns trigger language plpgsql set search_path=public as $$
+-- begin
+--  perform pg_advisory_xact_lock(552150021);
+--  if exists(select 1 from public.stellar_war_campaigns c where c.enabled and new.enabled and c.id is distinct from new.id and c.starts_at<new.ends_at and c.ends_at>new.starts_at)
+--  then raise exception 'WAR_CAMPAIGN_DATE_CONFLICT'; end if;
+--  if tg_op='UPDATE' and (now()>=old.starts_at or exists(select 1 from public.stellar_war_scores s where s.campaign_id=old.id)) then
+--    if row(old.title,old.starts_at,old.ends_at,old.min_points,old.reward_credits,old.reward_stl,old.enabled)
+--    is distinct from row(new.title,new.starts_at,new.ends_at,new.min_points,new.reward_credits,new.reward_stl,new.enabled)
+--    then raise exception 'WAR_CAMPAIGN_LOCKED'; end if;
+--  end if;
+--  new.updated_at=now();return new;
+-- end;$$;
+-- 
+-- create table if not exists public.stellar_war_scores (
+--  campaign_id uuid not null references public.stellar_war_campaigns(id) on delete restrict,
+--  user_id uuid not null references auth.users(id) on delete cascade,
+--  faction text not null check(faction in('earth','mars','jupiter')),
+--  captures int not null default 0 check(captures>=0),
+--  defenses int not null default 0 check(defenses>=0),
+--  points int not null default 0 check(points>=0),
+--  updated_at timestamptz not null default now(),
+--  primary key(campaign_id,user_id)
+-- );
+-- create index if not exists stellar_war_scores_rank_idx on public.stellar_war_scores(campaign_id,points desc);
+-- create trigger stellar_war_campaign_guard before insert or update on public.stellar_war_campaigns
+-- for each row execute function public.stellar_war_validate_campaign();
+-- 
+-- create table if not exists public.stellar_war_actions (
+--  id bigint generated always as identity primary key,
+--  occurred_at timestamptz not null default now(),
+--  campaign_id uuid references public.stellar_war_campaigns(id) on delete restrict,
+--  kind text not null check(kind in('capture','defense')),
+--  map_id text not null check(map_id in('b41','b42','b43')),
+--  node_id text not null check(node_id in('A','B','C')),
+--  faction text not null check(faction in('earth','mars','jupiter')),
+--  former_owner text,
+--  actor_user_id uuid references auth.users(id) on delete set null,
+--  points int not null default 0 check(points>=0)
+-- );
+-- create index if not exists stellar_war_actions_recent_idx on public.stellar_war_actions(occurred_at desc);
+-- create index if not exists stellar_war_actions_campaign_idx on public.stellar_war_actions(campaign_id,occurred_at desc);
+-- 
+-- create table if not exists public.stellar_war_defense_cooldowns (
+--  user_id uuid not null references auth.users(id) on delete cascade,
+--  map_id text not null,
+--  node_id text not null,
+--  defended_at timestamptz not null default now(),
+--  primary key(user_id,map_id,node_id)
+-- );
+-- create table if not exists public.stellar_war_supply_claims (
+--  user_id uuid not null references auth.users(id) on delete cascade,
+--  claim_day date not null,
+--  faction text not null,
+--  owned_nodes int not null,
+--  credits bigint not null,
+--  claimed_at timestamptz not null default now(),
+--  primary key(user_id,claim_day)
+-- );
+-- create table if not exists public.stellar_war_campaign_claims (
+--  campaign_id uuid not null references public.stellar_war_campaigns(id) on delete restrict,
+--  user_id uuid not null references auth.users(id) on delete cascade,
+--  faction text not null,
+--  points int not null,
+--  victorious boolean not null,
+--  credits bigint not null,
+--  stl bigint not null,
+--  claimed_at timestamptz not null default now(),
+--  primary key(campaign_id,user_id)
+-- );
+-- 
+-- -- Auditoria no mesmo COMMIT do domínio: só o servidor de jogo, com service_role.
+-- create or replace function public.stellar_commit_warfront_capture(p_map_id text,p_node_id text,p_faction text,p_expected_revision bigint,p_actor uuid)
+-- returns public.stellar_warfront_nodes
+-- language plpgsql security invoker set search_path=public as $$
+-- declare v_row public.stellar_warfront_nodes;v_campaign uuid;v_points int;v_old text;
+-- begin
+--  if p_map_id not in ('b41','b42','b43') or p_node_id not in ('A','B','C') or p_faction not in ('earth','mars','jupiter') or p_actor is null then raise exception 'INVALID_WARFRONT_CAPTURE';end if;
+--  select owner into v_old from public.stellar_warfront_nodes where map_id=p_map_id and node_id=p_node_id for update;
+--  update public.stellar_warfront_nodes set owner=p_faction,captured_at=now(),captured_by=p_actor,revision=revision+1
+--  where map_id=p_map_id and node_id=p_node_id and revision=p_expected_revision and owner is distinct from p_faction returning * into v_row;
+--  if not found then raise exception 'WARFRONT_REVISION_CONFLICT';end if;
+--  select id into v_campaign from public.stellar_war_campaigns where enabled and now()>=starts_at and now()<ends_at order by starts_at desc limit 1;
+--  select capture_points into v_points from public.stellar_war_rules where id=1;
+--  v_points:=coalesce(v_points,10);
+--  insert into public.stellar_war_actions(campaign_id,kind,map_id,node_id,faction,former_owner,actor_user_id,points)
+--  values(v_campaign,'capture',p_map_id,p_node_id,p_faction,v_old,p_actor,case when v_campaign is null then 0 else v_points end);
+--  if v_campaign is not null then
+--    insert into public.stellar_war_scores(campaign_id,user_id,faction,captures,points)
+--    values(v_campaign,p_actor,p_faction,1,v_points)
+--    on conflict(campaign_id,user_id) do update set captures=public.stellar_war_scores.captures+1,points=public.stellar_war_scores.points+excluded.points,updated_at=now();
+--  end if;
+--  return v_row;
+-- end;$$;
+-- revoke all on function public.stellar_commit_warfront_capture(text,text,text,bigint,uuid) from public,anon,authenticated;
+-- grant execute on function public.stellar_commit_warfront_capture(text,text,text,bigint,uuid) to service_role;
+-- 
+-- -- Defesa válida: facção permanece proprietária; no máximo uma recompensa de pontos por relé/piloto a cada 10 min.
+-- create or replace function public.stellar_record_war_defense(p_map_id text,p_node_id text,p_faction text,p_actor uuid)
+-- returns boolean language plpgsql security invoker set search_path=public as $$
+-- declare v_campaign uuid;v_points int;
+-- begin
+--  if p_map_id not in('b41','b42','b43') or p_node_id not in('A','B','C') or p_faction not in('earth','mars','jupiter') or p_actor is null then raise exception 'INVALID_DEFENSE';end if;
+--  if not exists(select 1 from public.stellar_warfront_nodes where map_id=p_map_id and node_id=p_node_id and owner=p_faction) then return false;end if;
+--  insert into public.stellar_war_defense_cooldowns(user_id,map_id,node_id,defended_at) values(p_actor,p_map_id,p_node_id,now())
+--  on conflict(user_id,map_id,node_id) do update set defended_at=excluded.defended_at
+--  where public.stellar_war_defense_cooldowns.defended_at<now()-interval '10 minutes';
+--  if not found then return false;end if;
+--  select id into v_campaign from public.stellar_war_campaigns where enabled and now()>=starts_at and now()<ends_at order by starts_at desc limit 1;
+--  select defense_points into v_points from public.stellar_war_rules where id=1;v_points:=coalesce(v_points,3);
+--  insert into public.stellar_war_actions(campaign_id,kind,map_id,node_id,faction,former_owner,actor_user_id,points)
+--  values(v_campaign,'defense',p_map_id,p_node_id,p_faction,p_faction,p_actor,case when v_campaign is null then 0 else v_points end);
+--  if v_campaign is not null then
+--  insert into public.stellar_war_scores(campaign_id,user_id,faction,defenses,points) values(v_campaign,p_actor,p_faction,1,v_points)
+--  on conflict(campaign_id,user_id) do update set defenses=public.stellar_war_scores.defenses+1,points=public.stellar_war_scores.points+excluded.points,updated_at=now();
+--  end if;
+--  return true;
+-- end;$$;
+-- revoke all on function public.stellar_record_war_defense(text,text,text,uuid) from public,anon,authenticated;
+-- grant execute on function public.stellar_record_war_defense(text,text,text,uuid) to service_role;
+-- 
+-- -- Bônus logístico: resgate diário SEM moedas automáticas; não duplica e usa o save com lock.
+-- create or replace function public.stellar_claim_war_supply()
+-- returns jsonb language plpgsql security definer set search_path=public as $$
+-- declare v_uid uuid:=auth.uid();v_save jsonb;v_profile jsonb;v_faction text;v_count int;v_credits bigint;v_day date:=(now() at time zone 'America/Sao_Paulo')::date;v_revision bigint;v_previous bigint;
+-- begin
+--  if v_uid is null then raise exception 'AUTH_REQUIRED';end if;
+--  select state into v_save from public.game_saves where user_id=v_uid for update;
+--  if v_save is null then raise exception 'SAVE_NOT_FOUND';end if;
+--  v_faction=v_save#>>'{profile,faction}';if v_faction not in('earth','mars','jupiter') then raise exception 'FACTION_REQUIRED';end if;
+--  select count(*) into v_count from public.stellar_warfront_nodes where owner=v_faction;
+--  if v_count=0 then raise exception 'NO_TERRITORY';end if;
+--  select least(daily_credits_cap,daily_credits_per_node*v_count) into v_credits from public.stellar_war_rules where id=1;
+--  v_credits:=coalesce(v_credits,0);
+--  if exists(select 1 from public.stellar_war_supply_claims where user_id=v_uid and claim_day=v_day) then
+--  return jsonb_build_object('ok',true,'already_claimed',true,'credits',0,'owned_nodes',v_count,'state',v_save);
+--  end if;
+--  insert into public.stellar_war_supply_claims(user_id,claim_day,faction,owned_nodes,credits) values(v_uid,v_day,v_faction,v_count,v_credits);
+--  v_profile=coalesce(v_save->'profile','{}'::jsonb);
+--  v_previous=greatest(0,coalesce((v_profile->>'credits')::bigint,0));
+--  v_profile=jsonb_set(v_profile,'{credits}',to_jsonb(v_previous+v_credits),true);
+--  v_revision=coalesce((v_save->>'serverEliteRevision')::bigint,0)+1;
+--  v_save=jsonb_set(jsonb_set(v_save,'{profile}',v_profile,true),'{serverEliteRevision}',to_jsonb(v_revision),true);
+--  update public.game_saves set state=v_save,updated_at=now() where user_id=v_uid;
+--  return jsonb_build_object('ok',true,'already_claimed',false,'credits',v_credits,'owned_nodes',v_count,'state',v_save);
+-- end;$$;
+-- revoke all on function public.stellar_claim_war_supply() from public,anon;
+-- grant execute on function public.stellar_claim_war_supply() to authenticated;
+-- 
+-- -- Prêmios encerrados: recompensa individual calculada no servidor. Resultado da campanha NÃO muda o dono dos relés.
+-- create or replace function public.stellar_claim_war_campaign(p_campaign_id uuid)
+-- returns jsonb language plpgsql security definer set search_path=public as $$
+-- declare v_uid uuid:=auth.uid();v_campaign public.stellar_war_campaigns;v_score public.stellar_war_scores;v_best bigint;v_team bigint;v_winner boolean;v_credits bigint;v_stl bigint;v_save jsonb;v_profile jsonb;v_revision bigint;
+-- begin
+--  if v_uid is null then raise exception 'AUTH_REQUIRED';end if;
+--  select * into v_campaign from public.stellar_war_campaigns where id=p_campaign_id and enabled=true and ends_at<=now();
+--  if not found then raise exception 'CAMPAIGN_NOT_FINISHED';end if;
+--  select * into v_score from public.stellar_war_scores where campaign_id=p_campaign_id and user_id=v_uid;
+--  if not found or v_score.points<v_campaign.min_points then raise exception 'CAMPAIGN_NOT_ELIGIBLE';end if;
+--  select max(total) into v_best from (select sum(points) as total from public.stellar_war_scores where campaign_id=p_campaign_id group by faction) teams;
+--  select sum(points) into v_team from public.stellar_war_scores where campaign_id=p_campaign_id and faction=v_score.faction;
+--  v_winner=coalesce(v_team,0)=coalesce(v_best,0) and coalesce(v_team,0)>0;
+--  v_credits=case when v_winner then v_campaign.reward_credits else floor(v_campaign.reward_credits::numeric/4)::bigint end;
+--  v_stl=case when v_winner then v_campaign.reward_stl else 0 end;
+--  select state into v_save from public.game_saves where user_id=v_uid for update;
+--  if v_save is null then raise exception 'SAVE_NOT_FOUND';end if;
+--  if exists(select 1 from public.stellar_war_campaign_claims where user_id=v_uid and campaign_id=p_campaign_id) then
+--  return jsonb_build_object('ok',true,'already_claimed',true,'state',v_save);
+--  end if;
+--  insert into public.stellar_war_campaign_claims(campaign_id,user_id,faction,points,victorious,credits,stl)
+--  values(p_campaign_id,v_uid,v_score.faction,v_score.points,v_winner,v_credits,v_stl);
+--  v_profile=coalesce(v_save->'profile','{}'::jsonb);
+--  v_profile=jsonb_set(v_profile,'{credits}',to_jsonb(greatest(0,coalesce((v_profile->>'credits')::bigint,0))+v_credits),true);
+--  v_profile=jsonb_set(v_profile,'{uridium}',to_jsonb(greatest(0,coalesce((v_profile->>'uridium')::bigint,0))+v_stl),true);
+--  v_revision=coalesce((v_save->>'serverEliteRevision')::bigint,0)+1;
+--  v_save=jsonb_set(jsonb_set(v_save,'{profile}',v_profile,true),'{serverEliteRevision}',to_jsonb(v_revision),true);
+--  update public.game_saves set state=v_save,updated_at=now() where user_id=v_uid;
+--  return jsonb_build_object('ok',true,'already_claimed',false,'victorious',v_winner,'credits',v_credits,'stl',v_stl,'state',v_save);
+-- end;$$;
+-- revoke all on function public.stellar_claim_war_campaign(uuid) from public,anon;
+-- grant execute on function public.stellar_claim_war_campaign(uuid) to authenticated;
+-- 
+-- -- APIs de serviço (somente Render); tabelas não são editáveis diretamente pelo navegador.
+-- do $$declare t text;begin
+--  foreach t in array array['stellar_war_rules','stellar_war_campaigns','stellar_war_scores','stellar_war_actions','stellar_war_defense_cooldowns','stellar_war_supply_claims','stellar_war_campaign_claims'] loop
+--  execute format('alter table public.%I enable row level security',t);
+--  execute format('revoke all on public.%I from public,anon,authenticated',t);
+--  execute format('grant select,insert,update on public.%I to service_role',t);
+--  end loop;
+-- end$$;
+-- -- service role usa sequences em tabelas de auditoria.
+-- grant usage,select on sequence public.stellar_war_actions_id_seq to service_role;
+-- commit;
+-- ===== END V21_5_0_GUERRA_FACCOES.sql =====
+
+-- ===== START V21_5_1_RELAY_READONLY.sql | sha256 25c8dde333ef1931fd6acbf3db51e65bb84c3e283eb5d9645ca01f0db545a9cb =====
+-- -- Controle de setor: leitura autenticada, exclusivamente para exibir a posse existente.
+-- -- NÃO autoriza captura, mudança de dono, pontuação nem resgate pelo cliente.
+-- begin;
+-- revoke select on public.stellar_warfront_nodes from anon,authenticated;
+-- grant select (map_id,node_id,owner,revision,captured_at) on public.stellar_warfront_nodes to authenticated;
+-- drop policy if exists stellar_relay_owner_read on public.stellar_warfront_nodes;
+-- create policy stellar_relay_owner_read on public.stellar_warfront_nodes
+--  for select to authenticated using (true);
+-- commit;
+-- ===== END V21_5_1_RELAY_READONLY.sql =====
+
+-- ===== START V21_5_2_VERIFICACAO_CAPTURA.sql | sha256 60c09431306eea675bc1223ec715b97fe5e3688c6163755d91e3994ab15a4112 =====
+-- -- DIAGNÓSTICO SEGURO: somente leitura. Nenhuma alteração no banco.
+-- -- Pode ser executado no SQL Editor do Supabase sem interferir com conquistas ou saves.
+-- select
+--   (select count(*) from public.stellar_warfront_nodes) as pontos_a_b_c,
+--   (select count(*) from public.stellar_warfront_nodes where owner is not null) as pontos_dominados,
+--   (select count(*) from public.game_saves) as saves_preservados,
+--   (select count(*) from public.stellar_war_actions where kind='capture') as conquistas_registradas,
+--   (select relrowsecurity from pg_class where oid='public.stellar_warfront_nodes'::regclass) as rls_ativo,
+--   has_table_privilege('authenticated','public.stellar_warfront_nodes','UPDATE') as navegador_pode_mudar_dono,
+--   has_function_privilege('service_role','public.stellar_commit_warfront_capture(text,text,text,bigint,uuid)','EXECUTE') as servidor_pode_confirmar_captura;
+-- ===== END V21_5_2_VERIFICACAO_CAPTURA.sql =====
+
+-- ===== START V21_5_3_CAMERA_MAPA_BALANCEADO.sql | sha256 8e23b207fe59401a4faf1abc4570b778f1ee9c3ba6a58ab4cb7c4153d2641426 =====
+-- -- Stellar Legacy: balanceamento de distancias PvP (4-1, 4-2, 4-3).
+-- -- Execute somente quando for publicar o ZIP da mesma versao: muda o World Runtime vivo.
+-- -- Preserva donos A/B/C, conquistas, saves, NPCs, niveis e posicoes existentes.
+-- BEGIN;
+-- UPDATE public.game_map_config_v1814
+-- SET world_w = CASE map_id WHEN 'b41' THEN 11800 WHEN 'b42' THEN 12500 WHEN 'b43' THEN 13500 END,
+--     world_h = CASE map_id WHEN 'b41' THEN 8400 WHEN 'b42' THEN 8900 WHEN 'b43' THEN 9600 END,
+--     updated_at = now()
+-- WHERE (map_id='b41' AND world_w=9800 AND world_h=7000)
+--    OR (map_id='b42' AND world_w=10400 AND world_h=7400)
+--    OR (map_id='b43' AND world_w=11200 AND world_h=8000);
+-- -- Trigger existente map_config_bump_v1814 atualiza a versao do runtime.
+-- COMMIT;
+-- ===== END V21_5_3_CAMERA_MAPA_BALANCEADO.sql =====
+
+-- ===== START V21_5_4_EQUILIBRIO_MAPAS_PVE.sql | sha256 3c73d15ebdf765ad8790add02530d85b29dbbd60dd3e84fe6f34291dbd37b8b7 =====
+-- -- STELLAR LEGACY — ampliacao PvE X-1 a X-8 (V21.5.4).
+-- -- Aplicacao idempotente e condicionada: nunca sobrescreve ajustes personalizados do ADM.
+-- -- Preserva TODOS os saves, donos A/B/C, recompensas, NPCs, recursos, niveis e campanhas.
+-- -- Aurora/Nexus/Eclipse e PvP 4-X NAO sao alterados por esta migracao.
+-- BEGIN;
+-- WITH expected(map_id, old_w, old_h, new_w, new_h) AS (
+--  VALUES
+--   ('x1', 6000, 4500, 7200, 5400),
+--   ('x2', 6600, 4800, 7900, 5800),
+--   ('x3', 7200, 5200, 8650, 6250),
+--   ('x4', 7800, 5600, 9400, 6750),
+--   ('x5', 8400, 6100, 10100, 7300),
+--   ('x6', 8900, 6500, 10700, 7800),
+--   ('x7', 9400, 6900, 11300, 8300),
+--   ('x8', 10000, 7400, 12000, 8900)
+-- )
+-- UPDATE public.game_map_config_v1814 m
+-- SET world_w = e.new_w, world_h = e.new_h, updated_at = now()
+-- FROM expected e
+-- WHERE m.map_id = e.map_id
+--   AND m.battle = false AND m.gate = false
+--   AND m.world_w = e.old_w AND m.world_h = e.old_h;
+-- -- Trigger map_config_bump_v1814 notifica automaticamente o World Runtime.
+-- COMMIT;
+-- ===== END V21_5_4_EQUILIBRIO_MAPAS_PVE.sql =====
+
+-- ===== START V34_1_0_GALACTIC_WEEKEND_EVENTS.sql | sha256 5f699195723d5810923aba6922505e67ad11c676b7c21c0f48b24f0429185f79 =====
+-- -- STELLAR LEGACY V34.1.0 — GALACTIC WEEKEND EVENTS
+-- -- APLICAR APÓS O DEPLOY DA V34.1.0 NO RENDER.
+-- -- Roda em uma transação: prepara o validador antes de ativar a rotação.
+-- -- Não altera economias, saves, objetivos ou recompensas dos eventos.
+-- BEGIN;
+-- 
+-- DO $check$
+-- BEGIN
+--  IF (SELECT count(*) FROM public.live_event_config_v16
+--      WHERE event_key IN ('invasion','prime','mining','convoy','battle'))<>5
+--  THEN RAISE EXCEPTION 'Esperados cinco eventos cadastrados. Agenda não foi alterada.'; END IF;
+-- END;
+-- $check$;
+-- 
+-- CREATE TABLE IF NOT EXISTS public.live_event_weekend_backup_v341
+--   (event_key text PRIMARY KEY, original_row jsonb NOT NULL, backup_at timestamptz NOT NULL DEFAULT now());
+-- ALTER TABLE public.live_event_weekend_backup_v341 ENABLE ROW LEVEL SECURITY;
+-- REVOKE ALL ON TABLE public.live_event_weekend_backup_v341 FROM PUBLIC,anon,authenticated;
+-- INSERT INTO public.live_event_weekend_backup_v341(event_key,original_row)
+--   SELECT event_key,to_jsonb(t) FROM public.live_event_config_v16 t
+--   WHERE event_key IN ('invasion','prime','mining','convoy','battle')
+-- ON CONFLICT (event_key) DO NOTHING;
+-- 
+-- -- Consulta de slot único, idêntica à fila circular implementada no servidor JS.
+-- CREATE OR REPLACE FUNCTION public.weekend_event_slot_v341(p_at timestamptz)
+-- RETURNS TABLE(event_key text,event_start timestamptz,event_end timestamptz)
+-- LANGUAGE plpgsql STABLE SECURITY DEFINER SET search_path='' AS $fn$
+-- DECLARE
+--   local_ts timestamp:=p_at AT TIME ZONE 'America/Sao_Paulo';
+--   local_date date:=local_ts::date;
+--   week_day integer:=extract(dow FROM local_ts)::int;
+--   local_clock time:=local_ts::time;
+--   slot_index integer;
+--   start_hour integer;
+--   sat_date date;
+--   weeks_since_anchor integer;
+--   serial bigint;
+--   count_events integer;
+-- BEGIN
+--   IF week_day NOT IN (0,6) THEN RETURN; END IF;
+--   IF local_clock>=time '11:00' AND local_clock<time '13:00' THEN slot_index:=0;start_hour:=11;
+--   ELSIF local_clock>=time '14:00' AND local_clock<time '16:00' THEN slot_index:=1;start_hour:=14;
+--   ELSIF local_clock>=time '17:00' AND local_clock<time '19:00' THEN slot_index:=2;start_hour:=17;
+--   ELSIF local_clock>=time '20:00' AND local_clock<time '22:00' THEN slot_index:=3;start_hour:=20;
+--   ELSE RETURN; END IF;
+--   sat_date:=local_date-CASE WHEN week_day=0 THEN 1 ELSE 0 END;
+--   weeks_since_anchor:=(sat_date-date '2026-10-24')/7;
+--   IF weeks_since_anchor<0 THEN RETURN; END IF;
+--   serial:=weeks_since_anchor*8+CASE WHEN week_day=0 THEN 4 ELSE 0 END+slot_index;
+--   SELECT count(*) INTO count_events FROM public.live_event_config_v16
+--      WHERE enabled=true AND schedule_mode='interval' AND rules @> '{"weekend_rotation":true}'::jsonb;
+--   IF count_events=0 THEN RETURN; END IF;
+--   SELECT cfg.event_key INTO event_key FROM public.live_event_config_v16 cfg
+--     WHERE cfg.enabled=true AND cfg.schedule_mode='interval' AND cfg.rules @> '{"weekend_rotation":true}'::jsonb
+--     ORDER BY cfg.priority,cfg.event_key OFFSET (serial % count_events)::int LIMIT 1;
+--   event_start:=(local_date::timestamp+make_interval(hours=>start_hour)) AT TIME ZONE 'America/Sao_Paulo';
+--   event_end:=event_start+interval '120 minutes';
+--   RETURN NEXT;
+-- END;
+-- $fn$;
+-- REVOKE ALL ON FUNCTION public.weekend_event_slot_v341(timestamptz) FROM public,anon,authenticated;
+-- GRANT EXECUTE ON FUNCTION public.weekend_event_slot_v341(timestamptz) TO service_role;
+-- 
+-- CREATE OR REPLACE FUNCTION public.record_my_galaxy_event_progress_v1826(p_event_id text,p_delta integer)
+-- RETURNS jsonb LANGUAGE plpgsql SECURITY DEFINER SET search_path = '' AS $fn$
+-- DECLARE uid uuid:=auth.uid(); k text; start_ms bigint; t_start timestamptz; t_end timestamptz;
+--         event_def public.live_event_config_v16%ROWTYPE;
+--         row_ev public.galaxy_event_progress_v1826%ROWTYPE;
+--         old_save jsonb; old_rec jsonb; new_rec jsonb; new_save jsonb;
+--         new_progress int; old_rewarded boolean; r jsonb;
+--         lv int; mult numeric; xp_mult numeric:=1; cr bigint; stl bigint; xp bigint; cores int;
+--         new_profile jsonb; new_warfront jsonb; rewards jsonb;
+--         rotation_enabled boolean; weekend_key text; weekend_start timestamptz; weekend_end timestamptz;
+-- BEGIN
+--   IF uid IS NULL THEN RAISE EXCEPTION 'Sessão inválida.'; END IF;
+--   IF p_event_id !~ '^v1817:[a-z][a-z0-9_]{1,48}:[0-9]{13}$' THEN RAISE EXCEPTION 'Identificador de período inválido.'; END IF;
+--   IF p_delta IS NULL OR p_delta<1 OR p_delta>10000 THEN RAISE EXCEPTION 'Progresso inválido.'; END IF;
+--   k:=split_part(p_event_id,':',2);start_ms:=split_part(p_event_id,':',3)::bigint;
+--   t_start:=to_timestamp(start_ms/1000.0);
+--   SELECT * INTO event_def FROM public.live_event_config_v16 WHERE event_key=k AND enabled=true;
+--   IF NOT FOUND THEN RAISE EXCEPTION 'Evento indisponível.'; END IF;
+--   SELECT EXISTS(SELECT 1 FROM public.live_event_config_v16
+--     WHERE enabled=true AND schedule_mode='interval' AND rules @> '{"weekend_rotation":true}'::jsonb)
+--   INTO rotation_enabled;
+--   IF rotation_enabled AND event_def.schedule_mode='interval' THEN
+--     -- Aceita EXCLUSIVAMENTE o evento e o início do slot oficial vigente.
+--     SELECT w.event_key,w.event_start,w.event_end
+--       INTO weekend_key,weekend_start,weekend_end
+--       FROM public.weekend_event_slot_v341(clock_timestamp()) w;
+--     IF weekend_key IS NULL OR weekend_key<>k OR abs(extract(epoch FROM (t_start-weekend_start)))>0.5
+--       THEN RAISE EXCEPTION 'Período não pertence à rotação oficial do fim de semana.'; END IF;
+--     t_end:=least(weekend_end,coalesce(event_def.ends_at,'infinity'::timestamptz));
+--   ELSE
+--     t_end:=least(t_start+make_interval(mins=>event_def.duration_minutes),coalesce(event_def.ends_at,'infinity'::timestamptz));
+--     IF event_def.schedule_mode='once' THEN
+--       IF abs(extract(epoch FROM (t_start-event_def.starts_at)))>0.5 THEN RAISE EXCEPTION 'Janela única inválida.'; END IF;
+--     ELSIF event_def.schedule_mode='weekly' THEN
+--       IF NOT (extract(dow FROM t_start AT TIME ZONE 'America/Sao_Paulo')::int = ANY(event_def.weekdays)
+--          AND (t_start AT TIME ZONE 'America/Sao_Paulo')::time = event_def.start_local_time)
+--         THEN RAISE EXCEPTION 'Janela semanal inválida.'; END IF;
+--     ELSE
+--       IF t_start<event_def.starts_at OR event_def.repeat_minutes<1
+--         OR abs(mod(extract(epoch FROM (t_start-event_def.starts_at))::numeric, (event_def.repeat_minutes*60)::numeric))>0.5
+--         THEN RAISE EXCEPTION 'Janela recorrente inválida.'; END IF;
+--     END IF;
+--   END IF;
+--   IF clock_timestamp()<t_start OR clock_timestamp()>=t_end THEN RAISE EXCEPTION 'Período do evento encerrado.'; END IF;
+--   SELECT state INTO old_save FROM public.game_saves WHERE user_id=uid FOR UPDATE;
+--   IF old_save IS NULL THEN RAISE EXCEPTION 'Save online não localizado.'; END IF;
+--   old_rec:=old_save #> ARRAY['galaxyEvents','records',p_event_id];
+--   old_rewarded:=coalesce((old_rec->>'rewarded')::boolean,false)
+--      OR coalesce((old_save->'eventRewardsV1826') ? p_event_id,false);
+--   INSERT INTO public.galaxy_event_progress_v1826(user_id,event_id,event_key,event_start,event_end,target,progress,rewarded,rewarded_at)
+--   VALUES(uid,p_event_id,k,t_start,t_end,event_def.target,
+--     least(event_def.target,greatest(0,coalesce((old_rec->>'value')::int,0))),old_rewarded,
+--     CASE WHEN old_rewarded THEN now() ELSE NULL END)
+--   ON CONFLICT (user_id,event_id) DO NOTHING;
+--   SELECT * INTO row_ev FROM public.galaxy_event_progress_v1826 WHERE user_id=uid AND event_id=p_event_id FOR UPDATE;
+--   IF row_ev.rewarded THEN
+--     RETURN jsonb_build_object('eventId',p_event_id,'progress',row_ev.target,'target',row_ev.target,'complete',true,'rewarded',true,'rewardedNow',false);
+--   END IF;
+--   new_progress:=least(row_ev.target,greatest(row_ev.progress,0)+p_delta);
+--   IF new_progress<row_ev.target THEN
+--     UPDATE public.galaxy_event_progress_v1826 SET progress=new_progress,updated_at=now() WHERE user_id=uid AND event_id=p_event_id;
+--     RETURN jsonb_build_object('eventId',p_event_id,'progress',new_progress,'target',row_ev.target,'complete',false,'rewarded',false,'rewardedNow',false);
+--   END IF;
+--   -- Chegou ao objetivo, creditado no banco exatamente uma vez.
+--   lv:=greatest(1,coalesce((old_save#>>'{profile,level}')::int,1));
+--   mult:=1+least(1.5,greatest(0,lv-1)/36.0);
+--   cr:=round(coalesce((event_def.reward->>'credits')::numeric,0)*mult);
+--   stl:=round(coalesce((event_def.reward->>'uridium')::numeric,0)*mult);
+--   xp:=round(coalesce((event_def.reward->>'xp')::numeric,0)*mult*.55);
+--   cores:=greatest(0,coalesce((event_def.reward->>'cores')::integer,0));
+--   new_profile:=coalesce(old_save->'profile','{}'::jsonb);
+--   new_profile:=jsonb_set(new_profile,'{credits}',to_jsonb(coalesce((new_profile->>'credits')::bigint,0)+cr),true);
+--   new_profile:=jsonb_set(new_profile,'{uridium}',to_jsonb(coalesce((new_profile->>'uridium')::bigint,0)+stl),true);
+--   new_profile:=jsonb_set(new_profile,'{xp}',to_jsonb(coalesce((new_profile->>'xp')::bigint,0)+xp),true);
+--   new_warfront:=coalesce(old_save->'warfront','{}'::jsonb);
+--   new_warfront:=jsonb_set(new_warfront,'{skillCores}',to_jsonb(coalesce((new_warfront->>'skillCores')::int,0)+cores),true);
+--   new_rec:=coalesce(old_rec,'{}'::jsonb)||jsonb_build_object('value',row_ev.target,'complete',true,'rewarded',true,'completedAt',now()::text);
+--   rewards:=jsonb_build_object('credits',cr,'uridium',stl,'xp',xp,'cores',cores);
+--   new_save:=jsonb_set(old_save,'{profile}',new_profile,true);
+--   new_save:=jsonb_set(new_save,'{warfront}',new_warfront,true);
+--   new_save:=jsonb_set(new_save,'{galaxyEvents}',coalesce(new_save->'galaxyEvents','{"records":{}}'::jsonb),true);
+--   new_save:=jsonb_set(new_save,'{galaxyEvents,records}',coalesce(new_save#>'{galaxyEvents,records}','{}'::jsonb),true);
+--   new_save:=jsonb_set(new_save,ARRAY['galaxyEvents','records',p_event_id],new_rec,true);
+--   new_save:=jsonb_set(new_save,'{eventRewardsV1826}',coalesce(old_save->'eventRewardsV1826','{}'::jsonb)||jsonb_build_object(p_event_id,rewards),true);
+--   UPDATE public.game_saves SET state=new_save,updated_at=now() WHERE user_id=uid;
+--   UPDATE public.profiles SET credits=coalesce((new_profile->>'credits')::bigint,0),uridium=coalesce((new_profile->>'uridium')::bigint,0),xp=coalesce((new_profile->>'xp')::bigint,0),updated_at=now() WHERE id=uid;
+--   UPDATE public.galaxy_event_progress_v1826 SET progress=row_ev.target,rewarded=true,rewarded_at=now(),updated_at=now() WHERE user_id=uid AND event_id=p_event_id;
+--   RETURN jsonb_build_object('eventId',p_event_id,'progress',row_ev.target,'target',row_ev.target,'complete',true,'rewarded',true,'rewardedNow',true,'reward',rewards,'state',new_save);
+-- END;
+-- $fn$;
+-- REVOKE ALL ON FUNCTION public.record_my_galaxy_event_progress_v1826(text,integer) FROM PUBLIC,anon;
+-- GRANT EXECUTE ON FUNCTION public.record_my_galaxy_event_progress_v1826(text,integer) TO authenticated;
+-- 
+-- -- Habilitar a nova agenda SOMENTE após instalar o validador seguro acima.
+-- UPDATE public.live_event_config_v16
+--  SET schedule_mode='interval', duration_minutes=120,
+--      rules=coalesce(rules,'{}'::jsonb)||'{"weekend_rotation":true}'::jsonb,
+--      timezone='America/Sao_Paulo', ends_at=NULL,updated_at=now()
+--  WHERE event_key IN ('invasion','prime','mining','convoy','battle');
+-- 
+-- -- Inventário de agenda para conferência pós-deploy.
+-- -- SELECT event_key,name,duration_minutes,rules->>'weekend_rotation' FROM public.live_event_config_v16 ORDER BY priority;
+-- -- SELECT * FROM public.weekend_event_slot_v341('2026-10-24 11:30:00-03'::timestamptz);
+-- COMMIT;
+-- ===== END V34_1_0_GALACTIC_WEEKEND_EVENTS.sql =====
+
+-- ===== START V34_1_0_WEEKEND_EVENTS_ROLLBACK.sql | sha256 dd8268c7b9d75c56ecf84209e0ad3f600b35564c0a2606768cc5e1adb17653cb =====
+-- -- Para reverter apenas os horários de eventos se necessário.
+-- -- Execute somente após decidir reverter também o servidor para V34.0.1.
+-- BEGIN;
+-- UPDATE public.live_event_config_v16 live SET
+--   enabled=(b.original_row->>'enabled')::boolean,
+--   schedule_mode=b.original_row->>'schedule_mode',
+--   duration_minutes=(b.original_row->>'duration_minutes')::integer,
+--   repeat_minutes=(b.original_row->>'repeat_minutes')::integer,
+--   starts_at=(b.original_row->>'starts_at')::timestamptz,
+--   ends_at=(b.original_row->>'ends_at')::timestamptz,
+--   weekdays=ARRAY(SELECT jsonb_array_elements_text(b.original_row->'weekdays')::smallint),
+--   start_local_time=(b.original_row->>'start_local_time')::time,
+--   rules=b.original_row->'rules',
+--   updated_at=now()
+-- FROM public.live_event_weekend_backup_v341 b
+-- WHERE live.event_key=b.event_key;
+-- COMMIT;
+-- -- A função de progresso compatível com os modos antigos continua funcional após reverter as flags.
+-- ===== END V34_1_0_WEEKEND_EVENTS_ROLLBACK.sql =====
+
+-- ===== START V34_1_1_EVENT_CONTROL_CENTER.sql | sha256 b31a6d7fc97a4ddf2883788c4a7ceee1e1a703c5b1164fd713174ad7b9f9ce10 =====
+-- -- Stellar Legacy V34.1.1 • instalar código antes deste SQL.
+-- -- Central visual de eventos administrada no Supabase; sem alterações nos saves.
+-- BEGIN;
+-- CREATE TABLE IF NOT EXISTS public.live_event_weekend_settings_v3411 (
+--   id smallint PRIMARY KEY DEFAULT 1 CHECK (id=1),
+--   enabled boolean NOT NULL DEFAULT true,
+--   timezone text NOT NULL DEFAULT 'America/Sao_Paulo' CHECK (timezone='America/Sao_Paulo'),
+--   slots jsonb NOT NULL,
+--   updated_at timestamptz NOT NULL DEFAULT now()
+-- );
+-- ALTER TABLE public.live_event_weekend_settings_v3411 ENABLE ROW LEVEL SECURITY;
+-- REVOKE ALL ON public.live_event_weekend_settings_v3411 FROM PUBLIC,anon,authenticated;
+-- INSERT INTO public.live_event_weekend_settings_v3411(id,enabled,slots) VALUES(1,true,
+--   '[{"day":6,"start":"11:00","duration":120},{"day":6,"start":"14:00","duration":120},{"day":6,"start":"17:00","duration":120},{"day":6,"start":"20:00","duration":120},{"day":0,"start":"11:00","duration":120},{"day":0,"start":"14:00","duration":120},{"day":0,"start":"17:00","duration":120},{"day":0,"start":"20:00","duration":120}]'::jsonb)
+-- ON CONFLICT(id) DO NOTHING;
+-- 
+-- CREATE TABLE IF NOT EXISTS public.live_event_manual_override_v3411 (
+--   id smallint PRIMARY KEY DEFAULT 1 CHECK(id=1),
+--   event_key text,
+--   start_at timestamptz,
+--   end_at timestamptz,
+--   updated_at timestamptz NOT NULL DEFAULT now(),
+--   CHECK (end_at IS NULL OR start_at IS NULL OR end_at>start_at)
+-- );
+-- ALTER TABLE public.live_event_manual_override_v3411 ENABLE ROW LEVEL SECURITY;
+-- REVOKE ALL ON public.live_event_manual_override_v3411 FROM PUBLIC,anon,authenticated;
+-- INSERT INTO public.live_event_manual_override_v3411(id) VALUES(1) ON CONFLICT(id) DO NOTHING;
+-- 
+-- -- Visão LIVE OPS reutilizada por cliente e servidor (única fonte de verdade).
+-- CREATE OR REPLACE FUNCTION public.get_live_ops_v16()
+-- RETURNS jsonb LANGUAGE sql SECURITY DEFINER SET search_path='public' AS $fn$
+--  SELECT jsonb_build_object(
+--   'server_time',(extract(epoch FROM clock_timestamp())*1000)::bigint,
+--   'weekend_settings',coalesce((SELECT to_jsonb(t)-'id' FROM public.live_event_weekend_settings_v3411 t WHERE id=1),'{}'::jsonb),
+--   'manual_override',coalesce((SELECT to_jsonb(t)-'id' FROM public.live_event_manual_override_v3411 t WHERE id=1),'{}'::jsonb),
+--   'events',coalesce((SELECT jsonb_agg(jsonb_build_object(
+--     'event_key',event_key,'name',name,'icon',icon,'description',description,'enabled',enabled,
+--     'starts_at',starts_at,'duration_minutes',duration_minutes,'repeat_minutes',repeat_minutes,
+--     'schedule_mode',schedule_mode,'weekdays',weekdays,'start_local_time',start_local_time,
+--     'timezone',timezone,'ends_at',ends_at,
+--     'priority',priority,'target',target,'reward',reward,'rules',rules,'updated_at',updated_at)
+--     ORDER BY priority,event_key) FROM public.live_event_config_v16),'[]'::jsonb),
+--   'catalog',coalesce((SELECT jsonb_agg(jsonb_build_object(
+--     'catalog_key',catalog_key,'kind',kind,'ref_id',ref_id,'display_name',display_name,
+--     'description',description,'price',price,'currency',currency,'enabled',enabled,
+--     'shop_tab',shop_tab,'shop_visible',shop_visible,'min_level',min_level,'sort_order',sort_order,
+--     'meta',meta,'updated_at',updated_at) ORDER BY coalesce(shop_tab,'zzz'),sort_order,catalog_key)
+--     FROM public.live_shop_prices_v16 WHERE enabled),'[]'::jsonb)
+--  );
+-- $fn$;
+-- 
+-- -- Versão dinâmica do mesmo validador de slots usado no calendário JS.
+-- CREATE OR REPLACE FUNCTION public.weekend_event_slot_v341(p_at timestamptz)
+-- RETURNS TABLE(event_key text,event_start timestamptz,event_end timestamptz)
+-- LANGUAGE plpgsql STABLE SECURITY DEFINER SET search_path='' AS $fn$
+-- DECLARE
+--   local_ts timestamp:=p_at AT TIME ZONE 'America/Sao_Paulo';
+--   local_date date:=local_ts::date;
+--   week_day int:=extract(dow FROM local_ts)::int;
+--   local_clock time:=local_ts::time;
+--   entry jsonb; ord bigint; count_slots int; index_slots bigint;
+--   saturday_date date; weeks_since_anchor int; serial bigint; count_events int;
+--   start_minutes int; duration_minutes int;
+-- BEGIN
+--   SELECT t.slots INTO entry FROM public.live_event_weekend_settings_v3411 t WHERE id=1 AND enabled=true;
+--   IF entry IS NULL OR jsonb_typeof(entry)<>'array' OR jsonb_array_length(entry)<1 THEN RETURN; END IF;
+--   count_slots:=jsonb_array_length(entry);
+--   SELECT t.value,t.ordinality INTO entry,ord FROM public.live_event_weekend_settings_v3411 cfg,
+--     jsonb_array_elements(cfg.slots) WITH ORDINALITY t(value,ordinality)
+--     WHERE cfg.id=1 AND cfg.enabled=true AND (t.value->>'day')::int=week_day
+--     AND local_clock>=(t.value->>'start')::time
+--     AND local_clock<((t.value->>'start')::time+make_interval(mins=>(t.value->>'duration')::int))
+--     ORDER BY t.ordinality LIMIT 1;
+--   IF entry IS NULL THEN RETURN; END IF;
+--   saturday_date:=local_date-((week_day+1)%7);
+--   weeks_since_anchor:=(saturday_date-date '2026-10-24')/7;
+--   IF weeks_since_anchor<0 THEN RETURN; END IF;
+--   serial:=weeks_since_anchor*count_slots+ord-1;
+--   SELECT count(*) INTO count_events FROM public.live_event_config_v16
+--     WHERE enabled=true AND schedule_mode='interval' AND rules @> '{"weekend_rotation":true}'::jsonb;
+--   IF count_events=0 THEN RETURN; END IF;
+--   SELECT cfg.event_key INTO event_key FROM public.live_event_config_v16 cfg
+--     WHERE cfg.enabled=true AND cfg.schedule_mode='interval' AND cfg.rules @> '{"weekend_rotation":true}'::jsonb
+--     ORDER BY cfg.priority,cfg.event_key OFFSET (serial % count_events)::int LIMIT 1;
+--   start_minutes:=split_part(entry->>'start',':',1)::int*60+split_part(entry->>'start',':',2)::int;
+--   duration_minutes:=(entry->>'duration')::int;
+--   event_start:=(local_date::timestamp+make_interval(mins=>start_minutes)) AT TIME ZONE 'America/Sao_Paulo';
+--   event_end:=event_start+make_interval(mins=>duration_minutes);
+--   RETURN NEXT;
+-- END;
+-- $fn$;
+-- REVOKE ALL ON FUNCTION public.weekend_event_slot_v341(timestamptz) FROM PUBLIC,anon,authenticated;
+-- GRANT EXECUTE ON FUNCTION public.weekend_event_slot_v341(timestamptz) TO service_role;
+-- 
+-- CREATE OR REPLACE FUNCTION public.admin_set_weekend_settings_v3411(p_enabled boolean,p_slots jsonb)
+-- RETURNS jsonb LANGUAGE plpgsql SECURITY DEFINER SET search_path='' AS $fn$
+-- DECLARE rec record; last_day int:=-1; last_end int:=0; day_value int; minute_value int; duration_value int; start_text text;
+-- BEGIN
+--  IF NOT public.is_game_admin_v1763(auth.uid()) THEN RAISE EXCEPTION 'Acesso administrativo negado.'; END IF;
+--  IF jsonb_typeof(p_slots)<>'array' OR jsonb_array_length(p_slots) NOT BETWEEN 1 AND 16 THEN RAISE EXCEPTION 'Informe de 1 a 16 horários.'; END IF;
+--  FOR rec IN SELECT value FROM jsonb_array_elements(p_slots) LOOP
+--    IF jsonb_typeof(rec.value)<>'object' OR (rec.value->>'day') !~ '^[0-6]$'
+--      OR (rec.value->>'start') !~ '^([01][0-9]|2[0-3]):[0-5][0-9]$'
+--      OR (rec.value->>'duration') !~ '^\d{2,3}$' THEN RAISE EXCEPTION 'Horário inválido.'; END IF;
+--    day_value:=(rec.value->>'day')::int;start_text:=rec.value->>'start';
+--    minute_value:=split_part(start_text,':',1)::int*60+split_part(start_text,':',2)::int;
+--    duration_value:=(rec.value->>'duration')::int;
+--    IF duration_value NOT BETWEEN 15 AND 360 OR minute_value+duration_value>1440 THEN RAISE EXCEPTION 'Duração inválida ou ultrapassa meia-noite.'; END IF;
+--  END LOOP;
+--  -- Os slots devem estar ordenados a partir de sábado, sem sobreposições.
+--  FOR rec IN SELECT (value->>'day')::int AS dow,
+--     split_part(value->>'start',':',1)::int*60+split_part(value->>'start',':',2)::int AS minute,
+--     (value->>'duration')::int AS duration
+--     FROM jsonb_array_elements(p_slots)
+--     ORDER BY CASE (value->>'day')::int WHEN 6 THEN 0 WHEN 0 THEN 1 ELSE (value->>'day')::int+1 END,
+--       split_part(value->>'start',':',1)::int*60+split_part(value->>'start',':',2)::int
+--  LOOP
+--    IF rec.dow=last_day AND rec.minute<last_end THEN RAISE EXCEPTION 'Horários sobrepostos.'; END IF;
+--    last_day:=rec.dow;last_end:=rec.minute+rec.duration;
+--  END LOOP;
+--  UPDATE public.live_event_weekend_settings_v3411 SET enabled=coalesce(p_enabled,true),
+--    slots=(SELECT jsonb_agg(value ORDER BY sort_day, minute)
+--       FROM (SELECT value,CASE (value->>'day')::int WHEN 6 THEN 0 WHEN 0 THEN 1 ELSE (value->>'day')::int+1 END AS sort_day,
+--         split_part(value->>'start',':',1)::int*60+split_part(value->>'start',':',2)::int AS minute
+--         FROM jsonb_array_elements(p_slots)) sorted),updated_at=now() WHERE id=1;
+--  RETURN public.get_live_ops_v16();
+-- END;
+-- $fn$;
+-- REVOKE ALL ON FUNCTION public.admin_set_weekend_settings_v3411(boolean,jsonb) FROM PUBLIC,anon;
+-- GRANT EXECUTE ON FUNCTION public.admin_set_weekend_settings_v3411(boolean,jsonb) TO authenticated;
+-- 
+-- CREATE OR REPLACE FUNCTION public.admin_set_weekend_event_v3411(p_event_key text,p_enabled boolean,p_priority integer,p_target integer,p_reward jsonb,p_controls jsonb)
+-- RETURNS jsonb LANGUAGE plpgsql SECURITY DEFINER SET search_path='' AS $fn$
+-- DECLARE new_rules jsonb; k text; v text;
+-- BEGIN
+--  IF NOT public.is_game_admin_v1763(auth.uid()) THEN RAISE EXCEPTION 'Acesso administrativo negado.'; END IF;
+--  IF NOT EXISTS (SELECT 1 FROM public.live_event_config_v16 WHERE event_key=p_event_key AND rules @> '{"weekend_rotation":true}'::jsonb) THEN RAISE EXCEPTION 'Evento não pertence à rotação.'; END IF;
+--  IF p_priority NOT BETWEEN 1 AND 10000 OR p_target NOT BETWEEN 1 AND 100000 THEN RAISE EXCEPTION 'Prioridade ou meta fora dos limites.'; END IF;
+--  IF jsonb_typeof(p_reward)<>'object' OR (SELECT count(*) FROM jsonb_object_keys(p_reward))<>4 THEN RAISE EXCEPTION 'Recompensa deve conter 4 campos.'; END IF;
+--  FOR k IN SELECT jsonb_object_keys(p_reward) LOOP
+--   IF k NOT IN ('credits','uridium','xp','cores') THEN RAISE EXCEPTION 'Recompensa não reconhecida.'; END IF;
+--   v:=p_reward->>k;
+--   IF v !~ '^\d{1,10}$' OR v::numeric>CASE k WHEN 'credits' THEN 100000000 WHEN 'uridium' THEN 500000 WHEN 'xp' THEN 10000000 ELSE 100 END THEN RAISE EXCEPTION 'Recompensa acima do limite.'; END IF;
+--  END LOOP;
+--  IF jsonb_typeof(p_controls)<>'object' THEN RAISE EXCEPTION 'Controles inválidos.'; END IF;
+--  FOR k IN SELECT jsonb_object_keys(p_controls) LOOP
+--   IF k NOT IN ('wave_count','min_alive','ore_count','wave_interval_ms') THEN RAISE EXCEPTION 'Parâmetro do evento não permitido.'; END IF;
+--   v:=p_controls->>k;
+--   IF v !~ '^\d{1,6}$' OR v::numeric > CASE k WHEN 'wave_count' THEN 12 WHEN 'min_alive' THEN 12 WHEN 'ore_count' THEN 20 ELSE 120000 END
+--       OR v::numeric < CASE k WHEN 'wave_interval_ms' THEN 3000 ELSE 1 END THEN RAISE EXCEPTION 'Parâmetro de onda fora do limite.'; END IF;
+--  END LOOP;
+--  SELECT coalesce(rules,'{}'::jsonb) INTO new_rules FROM public.live_event_config_v16 WHERE event_key=p_event_key FOR UPDATE;
+--  UPDATE public.live_event_config_v16 SET enabled=coalesce(p_enabled,true),priority=p_priority,target=p_target,
+--     reward=p_reward,rules=new_rules||jsonb_build_object('event_control',p_controls),updated_at=now() WHERE event_key=p_event_key;
+--  RETURN public.get_live_ops_v16();
+-- END;
+-- $fn$;
+-- REVOKE ALL ON FUNCTION public.admin_set_weekend_event_v3411(text,boolean,integer,integer,jsonb,jsonb) FROM PUBLIC,anon;
+-- GRANT EXECUTE ON FUNCTION public.admin_set_weekend_event_v3411(text,boolean,integer,integer,jsonb,jsonb) TO authenticated;
+-- 
+-- CREATE OR REPLACE FUNCTION public.admin_set_manual_event_v3411(p_event_key text,p_duration_minutes integer,p_stop boolean DEFAULT false)
+-- RETURNS jsonb LANGUAGE plpgsql SECURITY DEFINER SET search_path='' AS $fn$
+-- BEGIN
+--  IF NOT public.is_game_admin_v1763(auth.uid()) THEN RAISE EXCEPTION 'Acesso administrativo negado.'; END IF;
+--  IF p_stop THEN UPDATE public.live_event_manual_override_v3411 SET event_key=NULL,start_at=NULL,end_at=NULL,updated_at=now() WHERE id=1;
+--  ELSE
+--    IF p_duration_minutes NOT BETWEEN 15 AND 360 OR NOT EXISTS (SELECT 1 FROM public.live_event_config_v16 WHERE event_key=p_event_key AND enabled=true) THEN RAISE EXCEPTION 'Evento ou duração inválida.'; END IF;
+--    UPDATE public.live_event_manual_override_v3411 SET event_key=p_event_key,start_at=clock_timestamp(),end_at=clock_timestamp()+make_interval(mins=>p_duration_minutes),updated_at=now() WHERE id=1;
+--  END IF;
+--  RETURN public.get_live_ops_v16();
+-- END;
+-- $fn$;
+-- REVOKE ALL ON FUNCTION public.admin_set_manual_event_v3411(text,integer,boolean) FROM PUBLIC,anon;
+-- GRANT EXECUTE ON FUNCTION public.admin_set_manual_event_v3411(text,integer,boolean) TO authenticated;
+-- 
+-- -- Recompensas: preservar a operação transacional existente, apenas ajustar a janela.
+-- CREATE OR REPLACE FUNCTION public.record_my_galaxy_event_progress_v1826(p_event_id text,p_delta integer)
+-- RETURNS jsonb LANGUAGE plpgsql SECURITY DEFINER SET search_path = '' AS $fn$
+-- DECLARE uid uuid:=auth.uid(); k text; start_ms bigint; t_start timestamptz; t_end timestamptz;
+--         event_def public.live_event_config_v16%ROWTYPE;
+--         row_ev public.galaxy_event_progress_v1826%ROWTYPE;
+--         old_save jsonb; old_rec jsonb; new_rec jsonb; new_save jsonb;
+--         new_progress int; old_rewarded boolean; r jsonb;
+--         lv int; mult numeric; xp_mult numeric:=1; cr bigint; stl bigint; xp bigint; cores int;
+--         new_profile jsonb; new_warfront jsonb; rewards jsonb;
+--         rotation_enabled boolean; weekend_key text; weekend_start timestamptz; weekend_end timestamptz; manual_key text; manual_start timestamptz; manual_end timestamptz;
+-- BEGIN
+--   IF uid IS NULL THEN RAISE EXCEPTION 'Sessão inválida.'; END IF;
+--   IF p_event_id !~ '^v1817:[a-z][a-z0-9_]{1,48}:[0-9]{13}$' THEN RAISE EXCEPTION 'Identificador de período inválido.'; END IF;
+--   IF p_delta IS NULL OR p_delta<1 OR p_delta>10000 THEN RAISE EXCEPTION 'Progresso inválido.'; END IF;
+--   k:=split_part(p_event_id,':',2);start_ms:=split_part(p_event_id,':',3)::bigint;
+--   t_start:=to_timestamp(start_ms/1000.0);
+--   SELECT * INTO event_def FROM public.live_event_config_v16 WHERE event_key=k AND enabled=true;
+--   IF NOT FOUND THEN RAISE EXCEPTION 'Evento indisponível.'; END IF;
+--   SELECT EXISTS(SELECT 1 FROM public.live_event_config_v16
+--     WHERE enabled=true AND schedule_mode='interval' AND rules @> '{"weekend_rotation":true}'::jsonb)
+--   INTO rotation_enabled;
+--   IF rotation_enabled AND event_def.schedule_mode='interval' THEN
+--     -- Aceita EXCLUSIVAMENTE o evento e o início do slot oficial vigente.
+--     SELECT m.event_key,m.start_at,m.end_at INTO manual_key,manual_start,manual_end
+--       FROM public.live_event_manual_override_v3411 m WHERE m.id=1 AND m.start_at<=clock_timestamp() AND m.end_at>clock_timestamp();
+--     IF manual_key=k AND manual_start IS NOT NULL AND abs(extract(epoch FROM (t_start-manual_start)))<=0.5 THEN
+--       t_end:=manual_end;
+--     ELSE
+--       -- Enquanto houver evento manual, a rotação automática fica suspensa.
+--       IF manual_key IS NOT NULL THEN RAISE EXCEPTION 'Existe um evento extraordinário em andamento.'; END IF;
+--       SELECT w.event_key,w.event_start,w.event_end
+--         INTO weekend_key,weekend_start,weekend_end
+--         FROM public.weekend_event_slot_v341(clock_timestamp()) w;
+--       IF weekend_key IS NULL OR weekend_key<>k OR abs(extract(epoch FROM (t_start-weekend_start)))>0.5
+--         THEN RAISE EXCEPTION 'Período não pertence à rotação oficial do fim de semana.'; END IF;
+--       t_end:=weekend_end;
+--     END IF;
+--     t_end:=least(t_end,coalesce(event_def.ends_at,'infinity'::timestamptz));
+--   ELSE
+--     t_end:=least(t_start+make_interval(mins=>event_def.duration_minutes),coalesce(event_def.ends_at,'infinity'::timestamptz));
+--     IF event_def.schedule_mode='once' THEN
+--       IF abs(extract(epoch FROM (t_start-event_def.starts_at)))>0.5 THEN RAISE EXCEPTION 'Janela única inválida.'; END IF;
+--     ELSIF event_def.schedule_mode='weekly' THEN
+--       IF NOT (extract(dow FROM t_start AT TIME ZONE 'America/Sao_Paulo')::int = ANY(event_def.weekdays)
+--          AND (t_start AT TIME ZONE 'America/Sao_Paulo')::time = event_def.start_local_time)
+--         THEN RAISE EXCEPTION 'Janela semanal inválida.'; END IF;
+--     ELSE
+--       IF t_start<event_def.starts_at OR event_def.repeat_minutes<1
+--         OR abs(mod(extract(epoch FROM (t_start-event_def.starts_at))::numeric, (event_def.repeat_minutes*60)::numeric))>0.5
+--         THEN RAISE EXCEPTION 'Janela recorrente inválida.'; END IF;
+--     END IF;
+--   END IF;
+--   IF clock_timestamp()<t_start OR clock_timestamp()>=t_end THEN RAISE EXCEPTION 'Período do evento encerrado.'; END IF;
+--   SELECT state INTO old_save FROM public.game_saves WHERE user_id=uid FOR UPDATE;
+--   IF old_save IS NULL THEN RAISE EXCEPTION 'Save online não localizado.'; END IF;
+--   old_rec:=old_save #> ARRAY['galaxyEvents','records',p_event_id];
+--   old_rewarded:=coalesce((old_rec->>'rewarded')::boolean,false)
+--      OR coalesce((old_save->'eventRewardsV1826') ? p_event_id,false);
+--   INSERT INTO public.galaxy_event_progress_v1826(user_id,event_id,event_key,event_start,event_end,target,progress,rewarded,rewarded_at)
+--   VALUES(uid,p_event_id,k,t_start,t_end,event_def.target,
+--     least(event_def.target,greatest(0,coalesce((old_rec->>'value')::int,0))),old_rewarded,
+--     CASE WHEN old_rewarded THEN now() ELSE NULL END)
+--   ON CONFLICT (user_id,event_id) DO NOTHING;
+--   SELECT * INTO row_ev FROM public.galaxy_event_progress_v1826 WHERE user_id=uid AND event_id=p_event_id FOR UPDATE;
+--   IF row_ev.rewarded THEN
+--     RETURN jsonb_build_object('eventId',p_event_id,'progress',row_ev.target,'target',row_ev.target,'complete',true,'rewarded',true,'rewardedNow',false);
+--   END IF;
+--   new_progress:=least(row_ev.target,greatest(row_ev.progress,0)+p_delta);
+--   IF new_progress<row_ev.target THEN
+--     UPDATE public.galaxy_event_progress_v1826 SET progress=new_progress,updated_at=now() WHERE user_id=uid AND event_id=p_event_id;
+--     RETURN jsonb_build_object('eventId',p_event_id,'progress',new_progress,'target',row_ev.target,'complete',false,'rewarded',false,'rewardedNow',false);
+--   END IF;
+--   -- Chegou ao objetivo, creditado no banco exatamente uma vez.
+--   lv:=greatest(1,coalesce((old_save#>>'{profile,level}')::int,1));
+--   mult:=1+least(1.5,greatest(0,lv-1)/36.0);
+--   cr:=round(coalesce((event_def.reward->>'credits')::numeric,0)*mult);
+--   stl:=round(coalesce((event_def.reward->>'uridium')::numeric,0)*mult);
+--   xp:=round(coalesce((event_def.reward->>'xp')::numeric,0)*mult*.55);
+--   cores:=greatest(0,coalesce((event_def.reward->>'cores')::integer,0));
+--   new_profile:=coalesce(old_save->'profile','{}'::jsonb);
+--   new_profile:=jsonb_set(new_profile,'{credits}',to_jsonb(coalesce((new_profile->>'credits')::bigint,0)+cr),true);
+--   new_profile:=jsonb_set(new_profile,'{uridium}',to_jsonb(coalesce((new_profile->>'uridium')::bigint,0)+stl),true);
+--   new_profile:=jsonb_set(new_profile,'{xp}',to_jsonb(coalesce((new_profile->>'xp')::bigint,0)+xp),true);
+--   new_warfront:=coalesce(old_save->'warfront','{}'::jsonb);
+--   new_warfront:=jsonb_set(new_warfront,'{skillCores}',to_jsonb(coalesce((new_warfront->>'skillCores')::int,0)+cores),true);
+--   new_rec:=coalesce(old_rec,'{}'::jsonb)||jsonb_build_object('value',row_ev.target,'complete',true,'rewarded',true,'completedAt',now()::text);
+--   rewards:=jsonb_build_object('credits',cr,'uridium',stl,'xp',xp,'cores',cores);
+--   new_save:=jsonb_set(old_save,'{profile}',new_profile,true);
+--   new_save:=jsonb_set(new_save,'{warfront}',new_warfront,true);
+--   new_save:=jsonb_set(new_save,'{galaxyEvents}',coalesce(new_save->'galaxyEvents','{"records":{}}'::jsonb),true);
+--   new_save:=jsonb_set(new_save,'{galaxyEvents,records}',coalesce(new_save#>'{galaxyEvents,records}','{}'::jsonb),true);
+--   new_save:=jsonb_set(new_save,ARRAY['galaxyEvents','records',p_event_id],new_rec,true);
+--   new_save:=jsonb_set(new_save,'{eventRewardsV1826}',coalesce(old_save->'eventRewardsV1826','{}'::jsonb)||jsonb_build_object(p_event_id,rewards),true);
+--   UPDATE public.game_saves SET state=new_save,updated_at=now() WHERE user_id=uid;
+--   UPDATE public.profiles SET credits=coalesce((new_profile->>'credits')::bigint,0),uridium=coalesce((new_profile->>'uridium')::bigint,0),xp=coalesce((new_profile->>'xp')::bigint,0),updated_at=now() WHERE id=uid;
+--   UPDATE public.galaxy_event_progress_v1826 SET progress=row_ev.target,rewarded=true,rewarded_at=now(),updated_at=now() WHERE user_id=uid AND event_id=p_event_id;
+--   RETURN jsonb_build_object('eventId',p_event_id,'progress',row_ev.target,'target',row_ev.target,'complete',true,'rewarded',true,'rewardedNow',true,'reward',rewards,'state',new_save);
+-- END;
+-- $fn$;
+-- REVOKE ALL ON FUNCTION public.record_my_galaxy_event_progress_v1826(text,integer) FROM PUBLIC,anon;
+-- GRANT EXECUTE ON FUNCTION public.record_my_galaxy_event_progress_v1826(text,integer) TO authenticated;
+-- 
+-- 
+-- COMMIT;
+-- ===== END V34_1_1_EVENT_CONTROL_CENTER.sql =====
+
+-- ===== START V34_5_0_EVENT_EVOLUTION_ADMIN.sql | sha256 236cfc1598146761021bb3d00b5fc8bcf07e4a788ae80c8d0b37746aaf9f97eb =====
+-- -- STELLAR LEGACY V34.5.0 — UNIVERSE & EVENT EVOLUTION
+-- -- Execute somente DEPOIS do deploy V34.5.0 (sem editar saves nem recompensas).
+-- -- A única mutação é a atualização do RPC do ADM para novos controles opcionais.
+-- -- Compatível com controles anteriores já salvos no Event Control Center.
+-- BEGIN;
+-- 
+-- CREATE OR REPLACE FUNCTION public.admin_set_weekend_event_v3411(p_event_key text,p_enabled boolean,p_priority integer,p_target integer,p_reward jsonb,p_controls jsonb)
+-- RETURNS jsonb LANGUAGE plpgsql SECURITY DEFINER SET search_path='' AS $fn$
+-- DECLARE new_rules jsonb; k text; v text;
+-- BEGIN
+--  IF NOT public.is_game_admin_v1763(auth.uid()) THEN RAISE EXCEPTION 'Acesso administrativo negado.'; END IF;
+--  IF NOT EXISTS (SELECT 1 FROM public.live_event_config_v16 WHERE event_key=p_event_key AND rules @> '{"weekend_rotation":true}'::jsonb) THEN RAISE EXCEPTION 'Evento não pertence à rotação.'; END IF;
+--  IF p_priority NOT BETWEEN 1 AND 10000 OR p_target NOT BETWEEN 1 AND 100000 THEN RAISE EXCEPTION 'Prioridade ou meta fora dos limites.'; END IF;
+--  IF jsonb_typeof(p_reward)<>'object' OR (SELECT count(*) FROM jsonb_object_keys(p_reward))<>4 THEN RAISE EXCEPTION 'Recompensa deve conter 4 campos.'; END IF;
+--  FOR k IN SELECT jsonb_object_keys(p_reward) LOOP
+--   IF k NOT IN ('credits','uridium','xp','cores') THEN RAISE EXCEPTION 'Recompensa não reconhecida.'; END IF;
+--   v:=p_reward->>k;
+--   IF v !~ '^\d{1,10}$' OR v::numeric > (CASE k WHEN 'credits' THEN 100000000 WHEN 'uridium' THEN 500000 WHEN 'xp' THEN 10000000 ELSE 100 END) THEN RAISE EXCEPTION 'Recompensa acima do limite.'; END IF;
+--  END LOOP;
+--  IF jsonb_typeof(p_controls)<>'object' THEN RAISE EXCEPTION 'Controles inválidos.'; END IF;
+--  FOR k IN SELECT jsonb_object_keys(p_controls) LOOP
+--   IF k NOT IN ('wave_count','min_alive','ore_count','wave_interval_ms','phase_count','wave_growth','elite_patrols','boss_escorts','ore_growth','convoy_speed_pct') THEN RAISE EXCEPTION 'Parâmetro do evento não permitido.'; END IF;
+--   v:=p_controls->>k;
+--   IF v !~ '^\d{1,6}$' OR v::numeric > (CASE k WHEN 'wave_count' THEN 12 WHEN 'min_alive' THEN 12 WHEN 'ore_count' THEN 20 WHEN 'phase_count' THEN 4 WHEN 'wave_growth' THEN 3 WHEN 'elite_patrols' THEN 2 WHEN 'boss_escorts' THEN 3 WHEN 'ore_growth' THEN 8 WHEN 'convoy_speed_pct' THEN 140 ELSE 120000 END)
+--       OR v::numeric < (CASE k WHEN 'wave_interval_ms' THEN 3000 WHEN 'wave_growth' THEN 0 WHEN 'elite_patrols' THEN 0 WHEN 'boss_escorts' THEN 0 WHEN 'ore_growth' THEN 0 WHEN 'convoy_speed_pct' THEN 80 ELSE 1 END) THEN RAISE EXCEPTION 'Parâmetro de onda fora do limite.'; END IF;
+--  END LOOP;
+--  SELECT coalesce(rules,'{}'::jsonb) INTO new_rules FROM public.live_event_config_v16 WHERE event_key=p_event_key FOR UPDATE;
+--  UPDATE public.live_event_config_v16 SET enabled=coalesce(p_enabled,true),priority=p_priority,target=p_target,
+--     reward=p_reward,rules=new_rules||jsonb_build_object('event_control',p_controls),updated_at=now() WHERE event_key=p_event_key;
+--  RETURN public.get_live_ops_v16();
+-- END;
+-- $fn$;
+-- REVOKE ALL ON FUNCTION public.admin_set_weekend_event_v3411(text,boolean,integer,integer,jsonb,jsonb) FROM PUBLIC,anon;
+-- GRANT EXECUTE ON FUNCTION public.admin_set_weekend_event_v3411(text,boolean,integer,integer,jsonb,jsonb) TO authenticated;
+-- 
+-- COMMIT;
+-- ===== END V34_5_0_EVENT_EVOLUTION_ADMIN.sql =====
+
+-- ===== START V34_5_0_EVENT_EVOLUTION_ROLLBACK.sql | sha256 8923b7eaf98222793f9e38108fec25fe3168e5e45e552d5d3e231fb05c470708 =====
+-- -- Restore the V34.1.1 Event Control RPC, preserving all current saves, shops and rows.
+-- BEGIN;
+-- CREATE OR REPLACE FUNCTION public.admin_set_weekend_event_v3411(p_event_key text,p_enabled boolean,p_priority integer,p_target integer,p_reward jsonb,p_controls jsonb)
+-- RETURNS jsonb LANGUAGE plpgsql SECURITY DEFINER SET search_path='' AS $fn$
+-- DECLARE new_rules jsonb; k text; v text;
+-- BEGIN
+--  IF NOT public.is_game_admin_v1763(auth.uid()) THEN RAISE EXCEPTION 'Acesso administrativo negado.'; END IF;
+--  IF NOT EXISTS (SELECT 1 FROM public.live_event_config_v16 WHERE event_key=p_event_key AND rules @> '{"weekend_rotation":true}'::jsonb) THEN RAISE EXCEPTION 'Evento não pertence à rotação.'; END IF;
+--  IF p_priority NOT BETWEEN 1 AND 10000 OR p_target NOT BETWEEN 1 AND 100000 THEN RAISE EXCEPTION 'Prioridade ou meta fora dos limites.'; END IF;
+--  IF jsonb_typeof(p_reward)<>'object' OR (SELECT count(*) FROM jsonb_object_keys(p_reward))<>4 THEN RAISE EXCEPTION 'Recompensa deve conter 4 campos.'; END IF;
+--  FOR k IN SELECT jsonb_object_keys(p_reward) LOOP
+--   IF k NOT IN ('credits','uridium','xp','cores') THEN RAISE EXCEPTION 'Recompensa não reconhecida.'; END IF;
+--   v:=p_reward->>k;
+--   IF v !~ '^\d{1,10}$' OR v::numeric > (CASE k WHEN 'credits' THEN 100000000 WHEN 'uridium' THEN 500000 WHEN 'xp' THEN 10000000 ELSE 100 END) THEN RAISE EXCEPTION 'Recompensa acima do limite.'; END IF;
+--  END LOOP;
+--  IF jsonb_typeof(p_controls)<>'object' THEN RAISE EXCEPTION 'Controles inválidos.'; END IF;
+--  FOR k IN SELECT jsonb_object_keys(p_controls) LOOP
+--   IF k NOT IN ('wave_count','min_alive','ore_count','wave_interval_ms') THEN RAISE EXCEPTION 'Parâmetro do evento não permitido.'; END IF;
+--   v:=p_controls->>k;
+--   IF v !~ '^\d{1,6}$' OR v::numeric > (CASE k WHEN 'wave_count' THEN 12 WHEN 'min_alive' THEN 12 WHEN 'ore_count' THEN 20 ELSE 120000 END)
+--       OR v::numeric < (CASE k WHEN 'wave_interval_ms' THEN 3000 ELSE 1 END) THEN RAISE EXCEPTION 'Parâmetro de onda fora do limite.'; END IF;
+--  END LOOP;
+--  SELECT coalesce(rules,'{}'::jsonb) INTO new_rules FROM public.live_event_config_v16 WHERE event_key=p_event_key FOR UPDATE;
+--  UPDATE public.live_event_config_v16 SET enabled=coalesce(p_enabled,true),priority=p_priority,target=p_target,
+--     reward=p_reward,rules=new_rules||jsonb_build_object('event_control',p_controls),updated_at=now() WHERE event_key=p_event_key;
+--  RETURN public.get_live_ops_v16();
+-- END;
+-- $fn$;
+-- REVOKE ALL ON FUNCTION public.admin_set_weekend_event_v3411(text,boolean,integer,integer,jsonb,jsonb) FROM PUBLIC,anon;
+-- GRANT EXECUTE ON FUNCTION public.admin_set_weekend_event_v3411(text,boolean,integer,integer,jsonb,jsonb) TO authenticated;
+-- COMMIT;
+-- ===== END V34_5_0_EVENT_EVOLUTION_ROLLBACK.sql =====
+
+-- ===== START V34_6_0_RELAY_DOMINATION.sql | sha256 364285c94d49fd3f936dedff74ce5852105f78fdf367e1878cb78eecd49ff5c0 =====
+-- -- STELLAR LEGACY V34.6.0 — RELAY DOMINATION. Apply AFTER Render is LIVE on v34.6.0.
+-- -- Does not remove existing sector history, saves, economy, campaigns or weekend events.
+-- BEGIN;
+-- CREATE TABLE IF NOT EXISTS public.stellar_relay_rules_v346 (
+--  id integer PRIMARY KEY DEFAULT 1 CHECK(id=1), enabled boolean NOT NULL DEFAULT true,
+--  max_shield bigint NOT NULL DEFAULT 240000 CHECK(max_shield BETWEEN 10000 AND 2000000),
+--  max_hp bigint NOT NULL DEFAULT 360000 CHECK(max_hp BETWEEN 10000 AND 3000000),
+--  hit_damage int NOT NULL DEFAULT 12000 CHECK(hit_damage BETWEEN 100 AND 50000),
+--  hit_cooldown_ms int NOT NULL DEFAULT 650 CHECK(hit_cooldown_ms BETWEEN 400 AND 3000),
+--  capture_ms int NOT NULL DEFAULT 8000 CHECK(capture_ms BETWEEN 5000 AND 60000),
+--  protection_ms int NOT NULL DEFAULT 90000 CHECK(protection_ms BETWEEN 10000 AND 180000),
+--  weekend_multiplier numeric(4,2) NOT NULL DEFAULT 1.2 CHECK(weekend_multiplier BETWEEN 1 AND 2),
+--  updated_at timestamptz NOT NULL DEFAULT now()
+-- );
+-- INSERT INTO public.stellar_relay_rules_v346(id) VALUES(1) ON CONFLICT DO NOTHING;
+-- CREATE TABLE IF NOT EXISTS public.stellar_relay_state_v346 (
+--  map_id text NOT NULL, node_id text NOT NULL,
+--  owner_clan_id uuid REFERENCES public.clans(id) ON DELETE SET NULL,
+--  hp bigint NOT NULL DEFAULT 360000 CHECK(hp BETWEEN 0 AND 3000000),
+--  shield bigint NOT NULL DEFAULT 240000 CHECK(shield BETWEEN 0 AND 2000000),
+--  max_hp bigint NOT NULL DEFAULT 360000 CHECK(max_hp BETWEEN 10000 AND 3000000),
+--  max_shield bigint NOT NULL DEFAULT 240000 CHECK(max_shield BETWEEN 10000 AND 2000000),
+--  protected_until timestamptz, last_hit_at timestamptz, revision bigint NOT NULL DEFAULT 0 CHECK(revision>=0),
+--  updated_at timestamptz NOT NULL DEFAULT now(),
+--  PRIMARY KEY(map_id,node_id),
+--  FOREIGN KEY(map_id,node_id) REFERENCES public.stellar_warfront_nodes(map_id,node_id) ON DELETE CASCADE,
+--  CHECK (hp<=max_hp AND shield<=max_shield)
+-- );
+-- INSERT INTO public.stellar_relay_state_v346(map_id,node_id)
+--  SELECT map_id,node_id FROM public.stellar_warfront_nodes ON CONFLICT DO NOTHING;
+-- CREATE TABLE IF NOT EXISTS public.stellar_relay_clan_parts_v346 (
+--  clan_id uuid NOT NULL REFERENCES public.clans(id) ON DELETE CASCADE,
+--  part_type text NOT NULL CHECK(part_type IN('weapon_parts','shield_parts','hull_parts','circuit_parts')),
+--  quantity int NOT NULL DEFAULT 0 CHECK(quantity BETWEEN 0 AND 1000000),
+--  PRIMARY KEY(clan_id,part_type)
+-- );
+-- CREATE TABLE IF NOT EXISTS public.stellar_relay_modules_v346 (
+--  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+--  clan_id uuid NOT NULL REFERENCES public.clans(id) ON DELETE CASCADE,
+--  category text NOT NULL CHECK(category IN('weapon','shield','hp','bonus')),
+--  attribute text NOT NULL CHECK(attribute IN('weapon','shield','hp','damage','speed','xp','resources')),
+--  level int NOT NULL DEFAULT 1 CHECK(level BETWEEN 1 AND 3),
+--  map_id text, node_id text, slot smallint,
+--  created_at timestamptz NOT NULL DEFAULT now(), updated_at timestamptz NOT NULL DEFAULT now(),
+--  CHECK ((category='bonus' AND attribute IN('damage','shield','hp','speed','xp','resources')) OR
+--  (category<>'bonus' AND category=attribute)),
+--  CHECK ((map_id IS NULL AND node_id IS NULL AND slot IS NULL) OR
+--    (map_id IN('b41','b42','b43') AND node_id IN('A','B','C') AND slot BETWEEN 1 AND 8)),
+--  CHECK (slot IS NULL OR
+--   (category='weapon' AND slot IN(1,2)) OR
+--   (category='shield' AND slot IN(3,4)) OR
+--   (category='hp' AND slot IN(5,6)) OR
+--   (category='bonus' AND slot IN(7,8))),
+--  FOREIGN KEY(map_id,node_id) REFERENCES public.stellar_relay_state_v346(map_id,node_id) ON DELETE RESTRICT
+-- );
+-- -- No duplicate slot and, crucially, no two bonus modules with the same attribute on the same relay.
+-- CREATE UNIQUE INDEX IF NOT EXISTS stellar_relay_slot_unique_v346 ON public.stellar_relay_modules_v346(map_id,node_id,slot) WHERE map_id IS NOT NULL;
+-- CREATE UNIQUE INDEX IF NOT EXISTS stellar_relay_bonus_unique_v346 ON public.stellar_relay_modules_v346(map_id,node_id,attribute) WHERE map_id IS NOT NULL AND category='bonus';
+-- CREATE TABLE IF NOT EXISTS public.stellar_relay_mission_claims_v346 (
+--  clan_id uuid NOT NULL REFERENCES public.clans(id) ON DELETE CASCADE,
+--  mission_id text NOT NULL CHECK(mission_id IN ('capture_week','defend_week','hunter_week','domination_week')),
+--  period_start date NOT NULL,
+--  actor uuid NOT NULL REFERENCES auth.users(id),
+--  claimed_at timestamptz NOT NULL DEFAULT now(),
+--  PRIMARY KEY(clan_id,mission_id,period_start)
+-- );
+-- CREATE TABLE IF NOT EXISTS public.stellar_relay_audit_v346 (
+--  id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+--  actor uuid, clan_id uuid, action text NOT NULL,
+--  module_id uuid, map_id text, node_id text, details jsonb NOT NULL DEFAULT '{}'::jsonb,
+--  at timestamptz NOT NULL DEFAULT now()
+-- );
+-- CREATE INDEX IF NOT EXISTS stellar_relay_audit_recent_v346 ON public.stellar_relay_audit_v346(at DESC);
+-- DO $$DECLARE t text;BEGIN FOREACH t IN ARRAY ARRAY['stellar_relay_rules_v346','stellar_relay_state_v346','stellar_relay_clan_parts_v346','stellar_relay_modules_v346','stellar_relay_mission_claims_v346','stellar_relay_audit_v346'] LOOP
+--  EXECUTE format('ALTER TABLE public.%I ENABLE ROW LEVEL SECURITY',t);
+--  EXECUTE format('REVOKE ALL ON TABLE public.%I FROM PUBLIC,anon,authenticated',t);
+--  EXECUTE format('GRANT ALL ON TABLE public.%I TO service_role',t);
+--  END LOOP; END$$;
+-- GRANT USAGE,SELECT ON SEQUENCE public.stellar_relay_audit_v346_id_seq TO service_role;
+-- -- Recompute structural module strength after equip, remove, upgrade or conquest.
+-- CREATE OR REPLACE FUNCTION public.stellar_relay_recompute_v346(p_map_id text,p_node_id text)
+-- RETURNS void LANGUAGE plpgsql SECURITY DEFINER SET search_path='' AS $fn$
+-- DECLARE bh bigint;bs bigint;mh bigint;ms bigint;
+-- BEGIN
+--  SELECT max_hp,max_shield INTO bh,bs FROM public.stellar_relay_rules_v346 WHERE id=1;
+--  SELECT coalesce(sum(CASE WHEN category='hp' THEN level*35000 ELSE 0 END),0),coalesce(sum(CASE WHEN category='shield' THEN level*40000 ELSE 0 END),0)
+--  INTO mh,ms FROM public.stellar_relay_modules_v346 WHERE map_id=p_map_id AND node_id=p_node_id;
+--  UPDATE public.stellar_relay_state_v346 SET max_hp=LEAST(3000000,bh+mh),max_shield=LEAST(2000000,bs+ms),
+--    hp=LEAST(hp,LEAST(3000000,bh+mh)),shield=LEAST(shield,LEAST(2000000,bs+ms)),revision=revision+1,updated_at=now()
+--  WHERE map_id=p_map_id AND node_id=p_node_id;
+-- END;$fn$;
+-- REVOKE ALL ON FUNCTION public.stellar_relay_recompute_v346(text,text) FROM PUBLIC,anon,authenticated;
+-- GRANT EXECUTE ON FUNCTION public.stellar_relay_recompute_v346(text,text) TO service_role;
+-- -- Atomic authenticated crafting/equip/upgrade. Only clan owner spends resources.
+-- CREATE OR REPLACE FUNCTION public.stellar_relay_module_action_v346(p_action text,p_module_id uuid DEFAULT NULL,p_category text DEFAULT NULL,p_attribute text DEFAULT NULL,p_map_id text DEFAULT NULL,p_node_id text DEFAULT NULL,p_slot int DEFAULT NULL)
+-- RETURNS jsonb LANGUAGE plpgsql SECURITY DEFINER SET search_path='' AS $fn$
+-- DECLARE uid uuid:=auth.uid(); cid uuid; cl public.clans; mod public.stellar_relay_modules_v346; part text;cost bigint;need int;minimum int;next_level int; ident uuid;
+-- BEGIN
+--  IF uid IS NULL THEN RAISE EXCEPTION 'AUTH_REQUIRED';END IF;
+--  SELECT c.* INTO cl FROM public.clans c WHERE c.owner_id=uid ORDER BY c.created_at LIMIT 1 FOR UPDATE;
+--  IF NOT FOUND THEN RAISE EXCEPTION 'ONLY_CLAN_OWNER';END IF;
+--  cid:=cl.id;
+--  IF p_action='craft' THEN
+--   IF p_category NOT IN('weapon','shield','hp','bonus') THEN RAISE EXCEPTION 'INVALID_CATEGORY';END IF;
+--   IF NOT ((p_category='bonus' AND p_attribute IN('damage','shield','hp','speed','xp','resources')) OR (p_category<>'bonus' AND p_attribute=p_category)) THEN RAISE EXCEPTION 'INVALID_ATTRIBUTE';END IF;
+--   next_level:=1;
+--  ELSE
+--   SELECT * INTO mod FROM public.stellar_relay_modules_v346 WHERE id=p_module_id AND clan_id=cid FOR UPDATE;
+--   IF NOT FOUND THEN RAISE EXCEPTION 'MODULE_NOT_OWNED';END IF;
+--   IF p_action='upgrade' THEN
+--    IF mod.level>=3 THEN RAISE EXCEPTION 'MAX_LEVEL';END IF;
+--    next_level:=mod.level+1;
+--   ELSIF p_action='equip' THEN
+--    IF p_map_id NOT IN('b41','b42','b43') OR p_node_id NOT IN('A','B','C') OR p_slot NOT BETWEEN 1 AND 8 THEN RAISE EXCEPTION 'INVALID_RELAY_OR_SLOT';END IF;
+--    IF NOT ((mod.category='weapon' AND p_slot IN(1,2)) OR (mod.category='shield' AND p_slot IN(3,4)) OR (mod.category='hp' AND p_slot IN(5,6)) OR (mod.category='bonus' AND p_slot IN(7,8))) THEN RAISE EXCEPTION 'SLOT_CATEGORY_MISMATCH'; END IF;
+--    IF NOT EXISTS(SELECT 1 FROM public.stellar_relay_state_v346 s JOIN public.stellar_warfront_nodes n ON n.map_id=s.map_id AND n.node_id=s.node_id WHERE s.map_id=p_map_id AND s.node_id=p_node_id AND s.owner_clan_id=cid) THEN RAISE EXCEPTION 'RELAY_NOT_OWNED';END IF;
+--    UPDATE public.stellar_relay_modules_v346 SET map_id=p_map_id,node_id=p_node_id,slot=p_slot,updated_at=now() WHERE id=mod.id;
+--    PERFORM public.stellar_relay_recompute_v346(p_map_id,p_node_id);
+--    IF mod.map_id IS NOT NULL AND (mod.map_id IS DISTINCT FROM p_map_id OR mod.node_id IS DISTINCT FROM p_node_id) THEN PERFORM public.stellar_relay_recompute_v346(mod.map_id,mod.node_id);END IF;
+--    INSERT INTO public.stellar_relay_audit_v346(actor,clan_id,action,module_id,map_id,node_id) VALUES(uid,cid,'equip',mod.id,p_map_id,p_node_id);
+--    RETURN jsonb_build_object('ok',true,'action','equip','id',mod.id);
+--   ELSIF p_action='unequip' THEN
+--    UPDATE public.stellar_relay_modules_v346 SET map_id=NULL,node_id=NULL,slot=NULL,updated_at=now() WHERE id=mod.id;
+--    IF mod.map_id IS NOT NULL THEN PERFORM public.stellar_relay_recompute_v346(mod.map_id,mod.node_id);END IF;
+--    INSERT INTO public.stellar_relay_audit_v346(actor,clan_id,action,module_id) VALUES(uid,cid,'unequip',mod.id);
+--    RETURN jsonb_build_object('ok',true,'action','unequip','id',mod.id);
+--   ELSE RAISE EXCEPTION 'INVALID_ACTION';END IF;
+--  END IF;
+--  part:=CASE WHEN coalesce(mod.category,p_category)='weapon' THEN 'weapon_parts' WHEN coalesce(mod.category,p_category)='shield' THEN 'shield_parts' WHEN coalesce(mod.category,p_category)='hp' THEN 'hull_parts' ELSE 'circuit_parts' END;
+--  need:=CASE next_level WHEN 1 THEN 5 WHEN 2 THEN 12 ELSE 25 END;
+--  cost:=CASE next_level WHEN 1 THEN 0 WHEN 2 THEN 100000 ELSE 350000 END;
+--  minimum:=CASE next_level WHEN 1 THEN 1 WHEN 2 THEN 3 ELSE 5 END;
+--  IF cl.level<minimum THEN RAISE EXCEPTION 'CLAN_LEVEL_REQUIRED_%',minimum;END IF;
+--  UPDATE public.stellar_relay_clan_parts_v346 SET quantity=quantity-need WHERE clan_id=cid AND part_type=part AND quantity>=need;
+--  IF NOT FOUND THEN RAISE EXCEPTION 'INSUFFICIENT_RELAY_PARTS';END IF;
+--  IF cost>0 THEN
+--   UPDATE public.clans SET vault_credits=vault_credits-cost WHERE id=cid AND vault_credits>=cost;
+--   IF NOT FOUND THEN RAISE EXCEPTION 'INSUFFICIENT_CLAN_VAULT';END IF;
+--  END IF;
+--  IF p_action='craft' THEN
+--   INSERT INTO public.stellar_relay_modules_v346(clan_id,category,attribute) VALUES(cid,p_category,p_attribute) RETURNING id INTO ident;
+--  ELSE
+--   UPDATE public.stellar_relay_modules_v346 SET level=next_level,updated_at=now() WHERE id=mod.id;ident:=mod.id;
+--   IF mod.map_id IS NOT NULL THEN PERFORM public.stellar_relay_recompute_v346(mod.map_id,mod.node_id);END IF;
+--  END IF;
+--  INSERT INTO public.stellar_relay_audit_v346(actor,clan_id,action,module_id,details) VALUES(uid,cid,p_action,ident,jsonb_build_object('level',next_level,'parts',need,'credits',cost));
+--  RETURN jsonb_build_object('ok',true,'id',ident,'level',next_level,'parts_used',need,'vault_spent',cost);
+-- END;$fn$;
+-- REVOKE ALL ON FUNCTION public.stellar_relay_module_action_v346(text,uuid,text,text,text,text,int) FROM PUBLIC,anon;
+-- GRANT EXECUTE ON FUNCTION public.stellar_relay_module_action_v346(text,uuid,text,text,text,text,int) TO authenticated;
+-- -- Server only damage. Never trust client-supplied damage or tick timing.
+-- CREATE OR REPLACE FUNCTION public.stellar_relay_damage_v346(p_map_id text,p_node_id text,p_damage integer,p_attacker uuid)
+-- RETURNS jsonb LANGUAGE plpgsql SECURITY INVOKER SET search_path='' AS $fn$
+-- DECLARE s public.stellar_relay_state_v346; old_s bigint; actual bigint; rem bigint;
+-- BEGIN
+--  IF auth.role() <> 'service_role' OR p_attacker IS NULL OR p_damage NOT BETWEEN 1 AND 50000 THEN RAISE EXCEPTION 'RELAY_DAMAGE_DENIED'; END IF;
+--  SELECT * INTO s FROM public.stellar_relay_state_v346 WHERE map_id=p_map_id AND node_id=p_node_id FOR UPDATE;
+--  IF NOT FOUND THEN RAISE EXCEPTION 'RELAY_NOT_FOUND';END IF;
+--  IF s.protected_until>now() OR s.hp=0 THEN RETURN jsonb_build_object('ok',false,'protected',s.protected_until>now(),'hp',s.hp,'shield',s.shield);END IF;
+--  old_s:=LEAST(s.shield,p_damage);rem:=p_damage-old_s;actual:=old_s+LEAST(s.hp,rem);
+--  UPDATE public.stellar_relay_state_v346 SET shield=shield-old_s,hp=hp-LEAST(hp,rem),last_hit_at=now(),revision=revision+1,updated_at=now() WHERE map_id=p_map_id AND node_id=p_node_id RETURNING * INTO s;
+--  RETURN jsonb_build_object('ok',true,'actual',actual,'hp',s.hp,'shield',s.shield,'revision',s.revision);
+-- END;$fn$;
+-- REVOKE ALL ON FUNCTION public.stellar_relay_damage_v346(text,text,integer,uuid) FROM PUBLIC,anon,authenticated;
+-- GRANT EXECUTE ON FUNCTION public.stellar_relay_damage_v346(text,text,integer,uuid) TO service_role;
+-- -- Capture is committed atomically with legacy ownership, ranking and modular unmount.
+-- CREATE OR REPLACE FUNCTION public.stellar_relay_capture_v346(p_map_id text,p_node_id text,p_faction text,p_expected_revision bigint,p_actor uuid)
+-- RETURNS public.stellar_warfront_nodes LANGUAGE plpgsql SECURITY INVOKER SET search_path='' AS $fn$
+-- DECLARE st public.stellar_relay_state_v346; roww public.stellar_warfront_nodes;cid uuid; old_owner text;campaign uuid;points integer;
+-- BEGIN
+--  IF auth.role()<>'service_role' OR p_actor IS NULL OR p_faction NOT IN('earth','mars','jupiter') THEN RAISE EXCEPTION 'RELAY_CAPTURE_DENIED';END IF;
+--  SELECT clan_id INTO cid FROM public.clan_members WHERE user_id=p_actor;
+--  IF cid IS NULL THEN RAISE EXCEPTION 'CLAN_REQUIRED';END IF;
+--  IF NOT EXISTS(SELECT 1 FROM public.profiles WHERE id=p_actor AND faction=p_faction) THEN RAISE EXCEPTION 'FACTION_MISMATCH';END IF;
+--  SELECT * INTO st FROM public.stellar_relay_state_v346 WHERE map_id=p_map_id AND node_id=p_node_id FOR UPDATE;
+--  IF NOT FOUND OR st.hp>0 OR st.protected_until>now() THEN RAISE EXCEPTION 'RELAY_NOT_VULNERABLE';END IF;
+--  SELECT * INTO roww FROM public.stellar_warfront_nodes WHERE map_id=p_map_id AND node_id=p_node_id FOR UPDATE;
+--  IF NOT FOUND OR roww.revision<>p_expected_revision THEN RAISE EXCEPTION 'WARFRONT_REVISION_CONFLICT';END IF;
+--  IF st.owner_clan_id=cid THEN RAISE EXCEPTION 'ALREADY_OWNED';END IF;
+--  old_owner:=roww.owner;
+--  UPDATE public.stellar_warfront_nodes SET owner=p_faction,captured_at=now(),captured_by=p_actor,revision=revision+1 WHERE map_id=p_map_id AND node_id=p_node_id RETURNING * INTO roww;
+--  -- Previous clan does not lose upgrades: modules safely return to inventory.
+--  UPDATE public.stellar_relay_modules_v346 SET map_id=NULL,node_id=NULL,slot=NULL,updated_at=now() WHERE map_id=p_map_id AND node_id=p_node_id;
+--  UPDATE public.stellar_relay_state_v346 SET owner_clan_id=cid,
+--   max_hp=(SELECT max_hp FROM public.stellar_relay_rules_v346 WHERE id=1),max_shield=(SELECT max_shield FROM public.stellar_relay_rules_v346 WHERE id=1),
+--   hp=(SELECT max_hp FROM public.stellar_relay_rules_v346 WHERE id=1),shield=(SELECT max_shield FROM public.stellar_relay_rules_v346 WHERE id=1),
+--   protected_until=now()+((SELECT protection_ms FROM public.stellar_relay_rules_v346 WHERE id=1)*interval '1 millisecond'),revision=revision+1,updated_at=now() WHERE map_id=p_map_id AND node_id=p_node_id;
+--  SELECT id INTO campaign FROM public.stellar_war_campaigns WHERE enabled AND now()>=starts_at AND now()<ends_at ORDER BY starts_at DESC LIMIT 1;
+--  SELECT capture_points INTO points FROM public.stellar_war_rules WHERE id=1; points:=coalesce(points,10);
+--  IF EXTRACT(ISODOW FROM (now() AT TIME ZONE 'America/Sao_Paulo')) IN (6,7) THEN
+--   points:=floor(points*(SELECT weekend_multiplier FROM public.stellar_relay_rules_v346 WHERE id=1))::int;
+--  END IF;
+--  INSERT INTO public.stellar_war_actions(campaign_id,kind,map_id,node_id,faction,former_owner,actor_user_id,points,clan_id) VALUES(campaign,'capture',p_map_id,p_node_id,p_faction,old_owner,p_actor,CASE WHEN campaign IS NULL THEN 0 ELSE points END,cid);
+--  IF campaign IS NOT NULL THEN
+--   INSERT INTO public.stellar_war_scores(campaign_id,user_id,faction,captures,points,clan_id) VALUES(campaign,p_actor,p_faction,1,points,cid)
+--   ON CONFLICT(campaign_id,user_id) DO UPDATE SET captures=public.stellar_war_scores.captures+1,points=public.stellar_war_scores.points+EXCLUDED.points,updated_at=now();
+--  END IF;
+--  INSERT INTO public.stellar_relay_audit_v346(actor,clan_id,action,map_id,node_id,details) VALUES(p_actor,cid,'capture',p_map_id,p_node_id,jsonb_build_object('faction',p_faction,'previous_faction',old_owner));
+--  RETURN roww;
+-- END;$fn$;
+-- REVOKE ALL ON FUNCTION public.stellar_relay_capture_v346(text,text,text,bigint,uuid) FROM PUBLIC,anon,authenticated;
+-- GRANT EXECUTE ON FUNCTION public.stellar_relay_capture_v346(text,text,text,bigint,uuid) TO service_role;
+-- -- Server-verified PvE contribution, weekly per clan with event de-duplication.
+-- CREATE TABLE IF NOT EXISTS public.stellar_relay_clan_pve_v346 (
+--  clan_id uuid NOT NULL REFERENCES public.clans(id) ON DELETE CASCADE,
+--  period_start date NOT NULL, npc_kills bigint NOT NULL DEFAULT 0 CHECK(npc_kills>=0),
+--  ore_collections bigint NOT NULL DEFAULT 0 CHECK(ore_collections>=0),
+--  PRIMARY KEY(clan_id,period_start)
+-- );
+-- CREATE TABLE IF NOT EXISTS public.stellar_relay_pve_events_v346 (
+--  event_key text PRIMARY KEY CHECK(length(event_key) BETWEEN 8 AND 180),
+--  actor uuid NOT NULL REFERENCES auth.users(id),
+--  recorded_at timestamptz NOT NULL DEFAULT now()
+-- );
+-- ALTER TABLE public.stellar_relay_clan_pve_v346 ENABLE ROW LEVEL SECURITY;
+-- ALTER TABLE public.stellar_relay_pve_events_v346 ENABLE ROW LEVEL SECURITY;
+-- REVOKE ALL ON TABLE public.stellar_relay_clan_pve_v346,public.stellar_relay_pve_events_v346 FROM PUBLIC,anon,authenticated;
+-- GRANT ALL ON TABLE public.stellar_relay_clan_pve_v346,public.stellar_relay_pve_events_v346 TO service_role;
+-- CREATE OR REPLACE FUNCTION public.stellar_relay_record_pve_v346(p_user_id uuid,p_event_key text,p_kind text)
+-- RETURNS boolean LANGUAGE plpgsql SECURITY INVOKER SET search_path='' AS $fn$
+-- DECLARE cid uuid;start_date date:=(date_trunc('week',now() AT TIME ZONE 'America/Sao_Paulo'))::date;
+-- BEGIN
+--  IF auth.role()<>'service_role' OR p_user_id IS NULL OR length(p_event_key) NOT BETWEEN 8 AND 180 OR p_kind NOT IN ('npc','ore') THEN RAISE EXCEPTION 'RELAY_PVE_DENIED'; END IF;
+--  SELECT clan_id INTO cid FROM public.clan_members WHERE user_id=p_user_id;
+--  IF cid IS NULL THEN RETURN false;END IF;
+--  INSERT INTO public.stellar_relay_pve_events_v346(event_key,actor) VALUES(p_event_key,p_user_id) ON CONFLICT DO NOTHING;
+--  IF NOT FOUND THEN RETURN false;END IF;
+--  INSERT INTO public.stellar_relay_clan_pve_v346(clan_id,period_start,npc_kills,ore_collections) VALUES(cid,start_date,CASE WHEN p_kind='npc' THEN 1 ELSE 0 END,CASE WHEN p_kind='ore' THEN 1 ELSE 0 END)
+--  ON CONFLICT(clan_id,period_start) DO UPDATE SET npc_kills=public.stellar_relay_clan_pve_v346.npc_kills+EXCLUDED.npc_kills,ore_collections=public.stellar_relay_clan_pve_v346.ore_collections+EXCLUDED.ore_collections;
+--  RETURN true;
+-- END;$fn$;
+-- REVOKE ALL ON FUNCTION public.stellar_relay_record_pve_v346(uuid,text,text) FROM PUBLIC,anon,authenticated;
+-- GRANT EXECUTE ON FUNCTION public.stellar_relay_record_pve_v346(uuid,text,text) TO service_role;
+-- -- Offline-combat repairs; only the leader of the owning clan may spend its vault.
+-- CREATE OR REPLACE FUNCTION public.stellar_relay_repair_v346(p_map_id text,p_node_id text)
+-- RETURNS jsonb LANGUAGE plpgsql SECURITY DEFINER SET search_path='' AS $fn$
+-- DECLARE uid uuid:=auth.uid(); cid uuid;s public.stellar_relay_state_v346;cost bigint:=3000;
+-- BEGIN
+--  IF uid IS NULL THEN RAISE EXCEPTION 'AUTH_REQUIRED';END IF;
+--  SELECT id INTO cid FROM public.clans WHERE owner_id=uid FOR UPDATE;
+--  IF cid IS NULL THEN RAISE EXCEPTION 'ONLY_CLAN_OWNER';END IF;
+--  SELECT * INTO s FROM public.stellar_relay_state_v346 WHERE map_id=p_map_id AND node_id=p_node_id FOR UPDATE;
+--  IF NOT FOUND OR s.owner_clan_id IS DISTINCT FROM cid THEN RAISE EXCEPTION 'RELAY_NOT_OWNED';END IF;
+--  IF s.last_hit_at>now()-interval '15 seconds' THEN RAISE EXCEPTION 'RELAY_IN_COMBAT';END IF;
+--  IF s.hp>=s.max_hp AND s.shield>=s.max_shield THEN RAISE EXCEPTION 'RELAY_FULL';END IF;
+--  UPDATE public.clans SET vault_credits=vault_credits-cost WHERE id=cid AND vault_credits>=cost;
+--  IF NOT FOUND THEN RAISE EXCEPTION 'INSUFFICIENT_CLAN_VAULT';END IF;
+--  UPDATE public.stellar_relay_state_v346 SET hp=LEAST(max_hp,hp+100000),shield=LEAST(max_shield,shield+100000),revision=revision+1,updated_at=now()
+--  WHERE map_id=p_map_id AND node_id=p_node_id RETURNING * INTO s;
+--  INSERT INTO public.stellar_relay_audit_v346(actor,clan_id,action,map_id,node_id,details) VALUES(uid,cid,'repair',p_map_id,p_node_id,jsonb_build_object('credits',cost));
+--  RETURN jsonb_build_object('ok',true,'hp',s.hp,'shield',s.shield,'cost',cost);
+-- END;$fn$;
+-- REVOKE ALL ON FUNCTION public.stellar_relay_repair_v346(text,text) FROM PUBLIC,anon;
+-- GRANT EXECUTE ON FUNCTION public.stellar_relay_repair_v346(text,text) TO authenticated;
+-- -- Read-only active bonus selection for server-authoritative rewards (one best attribute total).
+-- CREATE OR REPLACE FUNCTION public.stellar_relay_active_bonus_v346(p_user_id uuid,p_map_id text)
+-- RETURNS jsonb LANGUAGE plpgsql SECURITY INVOKER SET search_path='' AS $fn$
+-- DECLARE cid uuid;fac text;winner record;faction_all boolean;
+-- BEGIN
+--  IF auth.role()<>'service_role' OR p_user_id IS NULL THEN RAISE EXCEPTION 'RELAY_BONUS_DENIED';END IF;
+--  SELECT clan_id INTO cid FROM public.clan_members WHERE user_id=p_user_id;
+--  SELECT faction INTO fac FROM public.profiles WHERE id=p_user_id;
+--  SELECT count(*)=9 INTO faction_all FROM public.stellar_warfront_nodes WHERE owner=fac;
+--  SELECT m.attribute,m.level,
+--    CASE m.attribute
+--      WHEN 'damage' THEN (ARRAY[3,4,5])[m.level]
+--      WHEN 'shield' THEN (ARRAY[5,7,9])[m.level]
+--      WHEN 'hp' THEN (ARRAY[5,7,9])[m.level]
+--      WHEN 'speed' THEN (ARRAY[2,3,4])[m.level]
+--      WHEN 'xp' THEN (ARRAY[5,7,10])[m.level]
+--      WHEN 'resources' THEN (ARRAY[3,4,5])[m.level] END AS value
+--  INTO winner
+--  FROM public.stellar_relay_modules_v346 m
+--  JOIN public.stellar_relay_state_v346 s ON s.map_id=m.map_id AND s.node_id=m.node_id
+--  JOIN public.stellar_warfront_nodes n ON n.map_id=s.map_id AND n.node_id=s.node_id
+--  WHERE m.category='bonus' AND
+--    ((cid IS NOT NULL AND s.owner_clan_id=cid AND (
+--        s.map_id=p_map_id OR
+--        (SELECT count(*) FROM public.stellar_relay_state_v346 sc WHERE sc.map_id=s.map_id AND sc.owner_clan_id=cid)=3
+--    )) OR (faction_all AND n.owner=fac))
+--  ORDER BY m.level DESC,value DESC,m.attribute ASC LIMIT 1;
+--  IF winner IS NULL THEN RETURN NULL; END IF;
+--  RETURN jsonb_build_object('attribute',winner.attribute,'level',winner.level,'value',winner.value);
+-- END;$fn$;
+-- REVOKE ALL ON FUNCTION public.stellar_relay_active_bonus_v346(uuid,text) FROM PUBLIC,anon,authenticated;
+-- GRANT EXECUTE ON FUNCTION public.stellar_relay_active_bonus_v346(uuid,text) TO service_role;
+-- -- Free mission parts, each once weekly; progress verified against server-recorded records.
+-- CREATE OR REPLACE FUNCTION public.stellar_relay_claim_mission_v346(p_mission_id text)
+-- RETURNS jsonb LANGUAGE plpgsql SECURITY DEFINER SET search_path='' AS $fn$
+-- DECLARE uid uuid:=auth.uid();cid uuid;counted bigint;pt text;reward int;start_date date:=(date_trunc('week',now() AT TIME ZONE 'America/Sao_Paulo'))::date;
+-- BEGIN
+--  IF uid IS NULL THEN RAISE EXCEPTION 'AUTH_REQUIRED';END IF;
+--  SELECT id INTO cid FROM public.clans WHERE owner_id=uid;
+--  IF cid IS NULL THEN RAISE EXCEPTION 'ONLY_CLAN_OWNER';END IF;
+--  IF p_mission_id='capture_week' THEN
+--   SELECT count(*) INTO counted FROM public.stellar_war_actions WHERE clan_id=cid AND kind='capture' AND occurred_at >= (start_date::timestamp AT TIME ZONE 'America/Sao_Paulo');pt:='weapon_parts';reward:=5;
+--  ELSIF p_mission_id='defend_week' THEN
+--   SELECT count(*) INTO counted FROM public.stellar_war_actions WHERE clan_id=cid AND kind='defense' AND occurred_at >= (start_date::timestamp AT TIME ZONE 'America/Sao_Paulo');pt:='shield_parts';reward:=5;
+--  ELSIF p_mission_id='hunter_week' THEN
+--   SELECT coalesce(sum(e.npc_kills),0) INTO counted FROM public.stellar_relay_clan_pve_v346 e WHERE e.clan_id=cid AND e.period_start=start_date;pt:='hull_parts';reward:=5;
+--  ELSIF p_mission_id='domination_week' THEN
+--   SELECT count(*) INTO counted FROM public.stellar_war_actions WHERE clan_id=cid AND kind='capture' AND occurred_at >= (start_date::timestamp AT TIME ZONE 'America/Sao_Paulo');pt:='circuit_parts';reward:=5;
+--  ELSE RAISE EXCEPTION 'UNKNOWN_MISSION';END IF;
+--  IF counted<(CASE p_mission_id WHEN 'capture_week' THEN 2 WHEN 'defend_week' THEN 3 WHEN 'domination_week' THEN 5 ELSE 100 END) THEN RAISE EXCEPTION 'MISSION_NOT_COMPLETE';END IF;
+--  INSERT INTO public.stellar_relay_mission_claims_v346(clan_id,mission_id,period_start,actor) VALUES(cid,p_mission_id,start_date,uid);
+--  INSERT INTO public.stellar_relay_clan_parts_v346(clan_id,part_type,quantity) VALUES(cid,pt,reward)
+--  ON CONFLICT(clan_id,part_type) DO UPDATE SET quantity=public.stellar_relay_clan_parts_v346.quantity+EXCLUDED.quantity;
+--  INSERT INTO public.stellar_relay_audit_v346(actor,clan_id,action,details) VALUES(uid,cid,'mission',jsonb_build_object('mission',p_mission_id,'parts',reward));
+--  RETURN jsonb_build_object('ok',true,'mission',p_mission_id,'parts',reward,'part_type',pt);
+-- END;$fn$;
+-- REVOKE ALL ON FUNCTION public.stellar_relay_claim_mission_v346(text) FROM PUBLIC,anon;
+-- GRANT EXECUTE ON FUNCTION public.stellar_relay_claim_mission_v346(text) TO authenticated;
+-- COMMIT;
+-- ===== END V34_6_0_RELAY_DOMINATION.sql =====
+
+-- ===== START V34_6_0_RELAY_DOMINATION_ROLLBACK.sql | sha256 d9f8146942afc87071ea6eb648b1044f32112bc7cdd68595cde3da86b0da32d9 =====
+-- -- SAFE ROLLBACK: re-enable the proven V34.5 capture mode without deleting anything.
+-- -- Run only if you also roll back the code release to V34.5.0.
+-- -- Saves, war scores, relay modules, clan parts and audit logs remain intact.
+-- BEGIN;
+-- UPDATE public.stellar_relay_rules_v346 SET enabled=false,updated_at=now() WHERE id=1;
+-- COMMIT;
+-- ===== END V34_6_0_RELAY_DOMINATION_ROLLBACK.sql =====
+
+-- ===== START V34_6_1_RELAY_ADM_RELEASE.sql | sha256 99de2543fbec0ec8b94b93a64920e7a750b5971e2c3dcbefa62e4e95eed0dc2d =====
+-- -- STELLAR LEGACY — RELAY TARGETING / ADMIN RELEASE HOTFIX
+-- -- Apply AFTER the V34.6.1 server deployment. This is additive and reversible.
+-- -- No player save, credits, clan level, modules or war history are deleted.
+-- BEGIN;
+-- CREATE OR REPLACE FUNCTION public.stellar_relay_admin_release_v3461(
+--   p_map_id text,p_node_id text,p_clear_faction boolean,p_actor uuid
+-- ) RETURNS jsonb LANGUAGE plpgsql SECURITY INVOKER SET search_path='' AS $fn$
+-- DECLARE
+--  st public.stellar_relay_state_v346;
+--  previous public.stellar_warfront_nodes;
+--  rules public.stellar_relay_rules_v346;
+--  modules_returned int;
+-- BEGIN
+--  IF auth.role()<>'service_role' OR p_actor IS NULL OR p_clear_faction IS NULL
+--     OR p_map_id NOT IN ('b41','b42','b43') OR p_node_id NOT IN ('A','B','C')
+--  THEN RAISE EXCEPTION 'RELAY_ADMIN_RELEASE_DENIED'; END IF;
+--  -- Defense-in-depth: caller is also checked using user's JWT at the HTTP route.
+--  IF NOT public.is_game_admin_v1763(p_actor) THEN RAISE EXCEPTION 'ADMIN_REQUIRED'; END IF;
+--  SELECT * INTO rules FROM public.stellar_relay_rules_v346 WHERE id=1;
+--  IF NOT FOUND THEN RAISE EXCEPTION 'RELAY_RULES_UNAVAILABLE'; END IF;
+--  SELECT * INTO st FROM public.stellar_relay_state_v346
+--  WHERE map_id=p_map_id AND node_id=p_node_id FOR UPDATE;
+--  IF NOT FOUND THEN RAISE EXCEPTION 'RELAY_NOT_FOUND'; END IF;
+--  SELECT * INTO previous FROM public.stellar_warfront_nodes
+--  WHERE map_id=p_map_id AND node_id=p_node_id FOR UPDATE;
+--  IF NOT FOUND THEN RAISE EXCEPTION 'WARFRONT_NOT_FOUND'; END IF;
+--  -- Inventory retains category, attribute and upgrade level; only slots are unassigned.
+--  UPDATE public.stellar_relay_modules_v346
+--  SET map_id=NULL,node_id=NULL,slot=NULL,updated_at=now()
+--  WHERE map_id=p_map_id AND node_id=p_node_id;
+--  GET DIAGNOSTICS modules_returned = ROW_COUNT;
+--  UPDATE public.stellar_relay_state_v346 SET
+--    owner_clan_id=NULL,
+--    max_hp=rules.max_hp,max_shield=rules.max_shield,
+--    hp=rules.max_hp,shield=rules.max_shield,
+--    protected_until=NULL,last_hit_at=NULL,
+--    revision=revision+1,updated_at=now()
+--  WHERE map_id=p_map_id AND node_id=p_node_id;
+--  IF p_clear_faction THEN
+--    UPDATE public.stellar_warfront_nodes SET
+--      owner=NULL,captured_by=NULL,captured_at=NULL,revision=revision+1
+--    WHERE map_id=p_map_id AND node_id=p_node_id;
+--  END IF;
+--  INSERT INTO public.stellar_relay_audit_v346
+--    (actor,clan_id,action,map_id,node_id,details)
+--  VALUES (p_actor,st.owner_clan_id,'admin_release',p_map_id,p_node_id,
+--    jsonb_build_object('clear_faction',p_clear_faction,'previous_faction',previous.owner,
+--      'previous_clan',st.owner_clan_id,'modules_returned',modules_returned));
+--  RETURN jsonb_build_object('ok',true,'map_id',p_map_id,'node_id',p_node_id,
+--    'faction_released',p_clear_faction,'modules_returned',modules_returned);
+-- END;$fn$;
+-- REVOKE ALL ON FUNCTION public.stellar_relay_admin_release_v3461(text,text,boolean,uuid)
+--  FROM PUBLIC,anon,authenticated;
+-- GRANT EXECUTE ON FUNCTION public.stellar_relay_admin_release_v3461(text,text,boolean,uuid) TO service_role;
+-- COMMIT;
+-- ===== END V34_6_1_RELAY_ADM_RELEASE.sql =====
+
+-- ===== START V34_6_1_RELAY_ADM_RELEASE_ROLLBACK.sql | sha256 e4c89b67af77520bb6fdd4c36a245f01a0f381f18f260e015133e4c1fd33df4f =====
+-- -- Non-destructive rollback for V34.6.1 admin-release feature.
+-- -- Apply only if reverting server code to V34.6.0.
+-- BEGIN;
+-- REVOKE ALL ON FUNCTION public.stellar_relay_admin_release_v3461(text,text,boolean,uuid) FROM PUBLIC,anon,authenticated,service_role;
+-- COMMIT;
+-- ===== END V34_6_1_RELAY_ADM_RELEASE_ROLLBACK.sql =====
+
+-- ===== START V34_6_2_RELAY_HANGAR_ROLLBACK.sql | sha256 312b7ae4423fe85d43ff3ad2b2d628e035972ab6803331e7ff151e79f3d0243a =====
+-- -- STELLAR LEGACY V34.6.2 — ROLLBACK DE COMPATIBILIDADE
+-- -- Primeiro restaure o codigo V34.6.1, depois execute este SQL.
+-- BEGIN;
+-- ALTER TABLE public.stellar_relay_modules_v346 DROP CONSTRAINT IF EXISTS relay_module_typed_attribute_v3462,
+--  DROP CONSTRAINT IF EXISTS relay_module_typed_slot_v3462;
+-- UPDATE public.stellar_relay_modules_v346
+-- SET attribute=CASE WHEN category IN('weapon','shield','hp') THEN category ELSE attribute END,updated_at=now()
+-- WHERE category IN('weapon','shield','hp');
+-- ALTER TABLE public.stellar_relay_modules_v346
+--  ADD CONSTRAINT relay_module_legacy_attribute_v3462 CHECK (attribute IN('weapon','shield','hp','damage','speed','xp','resources')),
+--  ADD CONSTRAINT relay_module_legacy_category_v3462 CHECK ((category='bonus' AND attribute IN('damage','shield','hp','speed','xp','resources')) OR (category<>'bonus' AND category=attribute));
+-- CREATE OR REPLACE FUNCTION public.stellar_relay_module_action_v346(p_action text,p_module_id uuid DEFAULT NULL,p_category text DEFAULT NULL,p_attribute text DEFAULT NULL,p_map_id text DEFAULT NULL,p_node_id text DEFAULT NULL,p_slot int DEFAULT NULL)
+-- RETURNS jsonb LANGUAGE plpgsql SECURITY DEFINER SET search_path='' AS $fn$
+-- DECLARE uid uuid:=auth.uid(); cid uuid; cl public.clans; mod public.stellar_relay_modules_v346; part text;cost bigint;need int;minimum int;next_level int; ident uuid;
+-- BEGIN
+--  IF uid IS NULL THEN RAISE EXCEPTION 'AUTH_REQUIRED';END IF;
+--  SELECT c.* INTO cl FROM public.clans c WHERE c.owner_id=uid ORDER BY c.created_at LIMIT 1 FOR UPDATE;
+--  IF NOT FOUND THEN RAISE EXCEPTION 'ONLY_CLAN_OWNER';END IF;
+--  cid:=cl.id;
+--  IF p_action='craft' THEN
+--   IF p_category NOT IN('weapon','shield','hp','bonus') THEN RAISE EXCEPTION 'INVALID_CATEGORY';END IF;
+--   IF NOT ((p_category='bonus' AND p_attribute IN('damage','shield','hp','speed','xp','resources')) OR (p_category<>'bonus' AND p_attribute=p_category)) THEN RAISE EXCEPTION 'INVALID_ATTRIBUTE';END IF;
+--   next_level:=1;
+--  ELSE
+--   SELECT * INTO mod FROM public.stellar_relay_modules_v346 WHERE id=p_module_id AND clan_id=cid FOR UPDATE;
+--   IF NOT FOUND THEN RAISE EXCEPTION 'MODULE_NOT_OWNED';END IF;
+--   IF p_action='upgrade' THEN
+--    IF mod.level>=3 THEN RAISE EXCEPTION 'MAX_LEVEL';END IF;
+--    next_level:=mod.level+1;
+--   ELSIF p_action='equip' THEN
+--    IF p_map_id NOT IN('b41','b42','b43') OR p_node_id NOT IN('A','B','C') OR p_slot NOT BETWEEN 1 AND 8 THEN RAISE EXCEPTION 'INVALID_RELAY_OR_SLOT';END IF;
+--    IF NOT ((mod.category='weapon' AND p_slot IN(1,2)) OR (mod.category='shield' AND p_slot IN(3,4)) OR (mod.category='hp' AND p_slot IN(5,6)) OR (mod.category='bonus' AND p_slot IN(7,8))) THEN RAISE EXCEPTION 'SLOT_CATEGORY_MISMATCH'; END IF;
+--    IF NOT EXISTS(SELECT 1 FROM public.stellar_relay_state_v346 s JOIN public.stellar_warfront_nodes n ON n.map_id=s.map_id AND n.node_id=s.node_id WHERE s.map_id=p_map_id AND s.node_id=p_node_id AND s.owner_clan_id=cid) THEN RAISE EXCEPTION 'RELAY_NOT_OWNED';END IF;
+--    UPDATE public.stellar_relay_modules_v346 SET map_id=p_map_id,node_id=p_node_id,slot=p_slot,updated_at=now() WHERE id=mod.id;
+--    PERFORM public.stellar_relay_recompute_v346(p_map_id,p_node_id);
+--    IF mod.map_id IS NOT NULL AND (mod.map_id IS DISTINCT FROM p_map_id OR mod.node_id IS DISTINCT FROM p_node_id) THEN PERFORM public.stellar_relay_recompute_v346(mod.map_id,mod.node_id);END IF;
+--    INSERT INTO public.stellar_relay_audit_v346(actor,clan_id,action,module_id,map_id,node_id) VALUES(uid,cid,'equip',mod.id,p_map_id,p_node_id);
+--    RETURN jsonb_build_object('ok',true,'action','equip','id',mod.id);
+--   ELSIF p_action='unequip' THEN
+--    UPDATE public.stellar_relay_modules_v346 SET map_id=NULL,node_id=NULL,slot=NULL,updated_at=now() WHERE id=mod.id;
+--    IF mod.map_id IS NOT NULL THEN PERFORM public.stellar_relay_recompute_v346(mod.map_id,mod.node_id);END IF;
+--    INSERT INTO public.stellar_relay_audit_v346(actor,clan_id,action,module_id) VALUES(uid,cid,'unequip',mod.id);
+--    RETURN jsonb_build_object('ok',true,'action','unequip','id',mod.id);
+--   ELSE RAISE EXCEPTION 'INVALID_ACTION';END IF;
+--  END IF;
+--  part:=CASE WHEN coalesce(mod.category,p_category)='weapon' THEN 'weapon_parts' WHEN coalesce(mod.category,p_category)='shield' THEN 'shield_parts' WHEN coalesce(mod.category,p_category)='hp' THEN 'hull_parts' ELSE 'circuit_parts' END;
+--  need:=CASE next_level WHEN 1 THEN 5 WHEN 2 THEN 12 ELSE 25 END;
+--  cost:=CASE next_level WHEN 1 THEN 0 WHEN 2 THEN 100000 ELSE 350000 END;
+--  minimum:=CASE next_level WHEN 1 THEN 1 WHEN 2 THEN 3 ELSE 5 END;
+--  IF cl.level<minimum THEN RAISE EXCEPTION 'CLAN_LEVEL_REQUIRED_%',minimum;END IF;
+--  UPDATE public.stellar_relay_clan_parts_v346 SET quantity=quantity-need WHERE clan_id=cid AND part_type=part AND quantity>=need;
+--  IF NOT FOUND THEN RAISE EXCEPTION 'INSUFFICIENT_RELAY_PARTS';END IF;
+--  IF cost>0 THEN
+--   UPDATE public.clans SET vault_credits=vault_credits-cost WHERE id=cid AND vault_credits>=cost;
+--   IF NOT FOUND THEN RAISE EXCEPTION 'INSUFFICIENT_CLAN_VAULT';END IF;
+--  END IF;
+--  IF p_action='craft' THEN
+--   INSERT INTO public.stellar_relay_modules_v346(clan_id,category,attribute) VALUES(cid,p_category,p_attribute) RETURNING id INTO ident;
+--  ELSE
+--   UPDATE public.stellar_relay_modules_v346 SET level=next_level,updated_at=now() WHERE id=mod.id;ident:=mod.id;
+--   IF mod.map_id IS NOT NULL THEN PERFORM public.stellar_relay_recompute_v346(mod.map_id,mod.node_id);END IF;
+--  END IF;
+--  INSERT INTO public.stellar_relay_audit_v346(actor,clan_id,action,module_id,details) VALUES(uid,cid,p_action,ident,jsonb_build_object('level',next_level,'parts',need,'credits',cost));
+--  RETURN jsonb_build_object('ok',true,'id',ident,'level',next_level,'parts_used',need,'vault_spent',cost);
+-- END;$fn$;
+-- REVOKE ALL ON FUNCTION public.stellar_relay_module_action_v346(text,uuid,text,text,text,text,int) FROM PUBLIC,anon;
+-- GRANT EXECUTE ON FUNCTION public.stellar_relay_module_action_v346(text,uuid,text,text,text,text,int) TO authenticated;
+-- COMMIT;
+-- ===== END V34_6_2_RELAY_HANGAR_ROLLBACK.sql =====
+
+-- ===== START V34_6_2_RELAY_HANGAR_TYPED_MODULES.sql | sha256 fe55bbee0a79d32cdb2ef968b814372a0c3d7c6ad4294d023f90f76e4719aa22 =====
+-- -- STELLAR LEGACY V34.6.2 — INVENTARIO INDIVIDUAL / ARMAS ESPECIALIZADAS.
+-- -- Install AFTER V34.6.2 is Live; no retroactive inventory rewards, no clan ownership or save changes.
+-- BEGIN;
+-- DO $migrate$
+-- DECLARE c record;
+-- BEGIN
+--  FOR c IN SELECT conname FROM pg_constraint
+--    WHERE conrelid='public.stellar_relay_modules_v346'::regclass AND contype='c'
+--      AND pg_get_constraintdef(oid) ILIKE '%attribute%'
+--  LOOP EXECUTE format('ALTER TABLE public.stellar_relay_modules_v346 DROP CONSTRAINT %I',c.conname);END LOOP;
+-- END;$migrate$;
+-- UPDATE public.stellar_relay_modules_v346
+-- SET attribute=CASE
+--  WHEN category='weapon' THEN CASE WHEN slot=2 THEN 'missile' ELSE 'laser' END
+--  WHEN category='shield' THEN CASE WHEN slot=4 THEN 'regenerator' ELSE 'capacitor' END
+--  WHEN category='hp' THEN CASE WHEN slot=6 THEN 'nanobots' ELSE 'armor' END
+--  ELSE attribute END,
+-- updated_at=now()
+-- WHERE (category='weapon' AND attribute='weapon') OR (category='shield' AND attribute='shield') OR (category='hp' AND attribute='hp');
+-- ALTER TABLE public.stellar_relay_modules_v346
+--  ADD CONSTRAINT relay_module_typed_attribute_v3462 CHECK (
+--   (category='weapon' AND attribute IN('laser','missile')) OR
+--   (category='shield' AND attribute IN('capacitor','regenerator')) OR
+--   (category='hp' AND attribute IN('armor','nanobots')) OR
+--   (category='bonus' AND attribute IN('damage','shield','hp','speed','xp','resources'))
+--  ),
+--  ADD CONSTRAINT relay_module_typed_slot_v3462 CHECK (slot IS NULL OR
+--   (category='bonus' AND slot IN (7,8)) OR
+--   (attribute='laser' AND slot=1) OR (attribute='missile' AND slot=2) OR
+--   (attribute='capacitor' AND slot=3) OR (attribute='regenerator' AND slot=4) OR
+--   (attribute='armor' AND slot=5) OR (attribute='nanobots' AND slot=6)
+--  );
+-- -- Atomic crafting and equipment operations inherit the existing ownership, vault and piece validations.
+-- CREATE OR REPLACE FUNCTION public.stellar_relay_module_action_v346(p_action text,p_module_id uuid DEFAULT NULL,p_category text DEFAULT NULL,p_attribute text DEFAULT NULL,p_map_id text DEFAULT NULL,p_node_id text DEFAULT NULL,p_slot int DEFAULT NULL)
+-- RETURNS jsonb LANGUAGE plpgsql SECURITY DEFINER SET search_path='' AS $fn$
+-- DECLARE uid uuid:=auth.uid(); cid uuid; cl public.clans; mod public.stellar_relay_modules_v346; part text;cost bigint;need int;minimum int;next_level int; ident uuid;
+-- BEGIN
+--  IF uid IS NULL THEN RAISE EXCEPTION 'AUTH_REQUIRED';END IF;
+--  SELECT c.* INTO cl FROM public.clans c WHERE c.owner_id=uid ORDER BY c.created_at LIMIT 1 FOR UPDATE;
+--  IF NOT FOUND THEN RAISE EXCEPTION 'ONLY_CLAN_OWNER';END IF;
+--  cid:=cl.id;
+--  IF p_action='craft' THEN
+--   IF p_category NOT IN('weapon','shield','hp','bonus') THEN RAISE EXCEPTION 'INVALID_CATEGORY';END IF;
+--   IF NOT ((p_category='bonus' AND p_attribute IN('damage','shield','hp','speed','xp','resources')) OR (p_category='weapon' AND p_attribute IN('laser','missile')) OR (p_category='shield' AND p_attribute IN('capacitor','regenerator')) OR (p_category='hp' AND p_attribute IN('armor','nanobots'))) THEN RAISE EXCEPTION 'INVALID_ATTRIBUTE';END IF;
+--   next_level:=1;
+--  ELSE
+--   SELECT * INTO mod FROM public.stellar_relay_modules_v346 WHERE id=p_module_id AND clan_id=cid FOR UPDATE;
+--   IF NOT FOUND THEN RAISE EXCEPTION 'MODULE_NOT_OWNED';END IF;
+--   IF p_action='upgrade' THEN
+--    IF mod.level>=3 THEN RAISE EXCEPTION 'MAX_LEVEL';END IF;
+--    next_level:=mod.level+1;
+--   ELSIF p_action='equip' THEN
+--    IF p_map_id NOT IN('b41','b42','b43') OR p_node_id NOT IN('A','B','C') OR p_slot NOT BETWEEN 1 AND 8 THEN RAISE EXCEPTION 'INVALID_RELAY_OR_SLOT';END IF;
+--    IF NOT ((mod.category='weapon' AND p_slot IN(1,2)) OR (mod.category='shield' AND p_slot IN(3,4)) OR (mod.category='hp' AND p_slot IN(5,6)) OR (mod.category='bonus' AND p_slot IN(7,8))) THEN RAISE EXCEPTION 'SLOT_CATEGORY_MISMATCH'; END IF;
+--    IF mod.category<>'bonus' AND mod.attribute <> (CASE p_slot WHEN 1 THEN 'laser' WHEN 2 THEN 'missile' WHEN 3 THEN 'capacitor' WHEN 4 THEN 'regenerator' WHEN 5 THEN 'armor' WHEN 6 THEN 'nanobots' ELSE '?' END) THEN RAISE EXCEPTION 'SLOT_SUBTYPE_MISMATCH'; END IF;
+--    IF NOT EXISTS(SELECT 1 FROM public.stellar_relay_state_v346 s JOIN public.stellar_warfront_nodes n ON n.map_id=s.map_id AND n.node_id=s.node_id WHERE s.map_id=p_map_id AND s.node_id=p_node_id AND s.owner_clan_id=cid) THEN RAISE EXCEPTION 'RELAY_NOT_OWNED';END IF;
+--    -- Equipar em um slot ocupado faz troca atomica: modulo anterior volta ao inventario.
+--    UPDATE public.stellar_relay_modules_v346 SET map_id=NULL,node_id=NULL,slot=NULL,updated_at=now()
+--    WHERE map_id=p_map_id AND node_id=p_node_id AND slot=p_slot AND id<>mod.id AND clan_id=cid;
+--    UPDATE public.stellar_relay_modules_v346 SET map_id=p_map_id,node_id=p_node_id,slot=p_slot,updated_at=now() WHERE id=mod.id;
+--    PERFORM public.stellar_relay_recompute_v346(p_map_id,p_node_id);
+--    IF mod.map_id IS NOT NULL AND (mod.map_id IS DISTINCT FROM p_map_id OR mod.node_id IS DISTINCT FROM p_node_id) THEN PERFORM public.stellar_relay_recompute_v346(mod.map_id,mod.node_id);END IF;
+--    INSERT INTO public.stellar_relay_audit_v346(actor,clan_id,action,module_id,map_id,node_id) VALUES(uid,cid,'equip',mod.id,p_map_id,p_node_id);
+--    RETURN jsonb_build_object('ok',true,'action','equip','id',mod.id);
+--   ELSIF p_action='unequip' THEN
+--    UPDATE public.stellar_relay_modules_v346 SET map_id=NULL,node_id=NULL,slot=NULL,updated_at=now() WHERE id=mod.id;
+--    IF mod.map_id IS NOT NULL THEN PERFORM public.stellar_relay_recompute_v346(mod.map_id,mod.node_id);END IF;
+--    INSERT INTO public.stellar_relay_audit_v346(actor,clan_id,action,module_id) VALUES(uid,cid,'unequip',mod.id);
+--    RETURN jsonb_build_object('ok',true,'action','unequip','id',mod.id);
+--   ELSE RAISE EXCEPTION 'INVALID_ACTION';END IF;
+--  END IF;
+--  part:=CASE WHEN coalesce(mod.category,p_category)='weapon' THEN 'weapon_parts' WHEN coalesce(mod.category,p_category)='shield' THEN 'shield_parts' WHEN coalesce(mod.category,p_category)='hp' THEN 'hull_parts' ELSE 'circuit_parts' END;
+--  need:=CASE next_level WHEN 1 THEN 5 WHEN 2 THEN 12 ELSE 25 END;
+--  cost:=CASE next_level WHEN 1 THEN 0 WHEN 2 THEN 100000 ELSE 350000 END;
+--  minimum:=CASE next_level WHEN 1 THEN 1 WHEN 2 THEN 3 ELSE 5 END;
+--  IF cl.level<minimum THEN RAISE EXCEPTION 'CLAN_LEVEL_REQUIRED_%',minimum;END IF;
+--  UPDATE public.stellar_relay_clan_parts_v346 SET quantity=quantity-need WHERE clan_id=cid AND part_type=part AND quantity>=need;
+--  IF NOT FOUND THEN RAISE EXCEPTION 'INSUFFICIENT_RELAY_PARTS';END IF;
+--  IF cost>0 THEN
+--   UPDATE public.clans SET vault_credits=vault_credits-cost WHERE id=cid AND vault_credits>=cost;
+--   IF NOT FOUND THEN RAISE EXCEPTION 'INSUFFICIENT_CLAN_VAULT';END IF;
+--  END IF;
+--  IF p_action='craft' THEN
+--   INSERT INTO public.stellar_relay_modules_v346(clan_id,category,attribute) VALUES(cid,p_category,p_attribute) RETURNING id INTO ident;
+--  ELSE
+--   UPDATE public.stellar_relay_modules_v346 SET level=next_level,updated_at=now() WHERE id=mod.id;ident:=mod.id;
+--   IF mod.map_id IS NOT NULL THEN PERFORM public.stellar_relay_recompute_v346(mod.map_id,mod.node_id);END IF;
+--  END IF;
+--  INSERT INTO public.stellar_relay_audit_v346(actor,clan_id,action,module_id,details) VALUES(uid,cid,p_action,ident,jsonb_build_object('level',next_level,'parts',need,'credits',cost));
+--  RETURN jsonb_build_object('ok',true,'id',ident,'level',next_level,'parts_used',need,'vault_spent',cost);
+-- END;$fn$;
+-- REVOKE ALL ON FUNCTION public.stellar_relay_module_action_v346(text,uuid,text,text,text,text,int) FROM PUBLIC,anon;
+-- GRANT EXECUTE ON FUNCTION public.stellar_relay_module_action_v346(text,uuid,text,text,text,text,int) TO authenticated;
+-- COMMIT;
+-- ===== END V34_6_2_RELAY_HANGAR_TYPED_MODULES.sql =====
+
+-- ===== START V34_6_3_RELAY_COMBAT_BALANCE_MISSIONS.sql | sha256 d76bb6b037600f57feb2574f84a02c4516c4579606cbf1c4ba249aa58b982d18 =====
+-- -- STELLAR LEGACY V34.6.3 • RELAY COMBAT / MODULE BALANCE / CLAN MISSION PROGRESS
+-- -- Apply only AFTER the matching Render deployment is LIVE.
+-- -- Non-destructive to player saves, clan vault, equipment, missions already claimed and capture history.
+-- BEGIN;
+-- CREATE TABLE IF NOT EXISTS public.stellar_relay_module_balance_v3463 (
+--  category text NOT NULL CHECK(category IN ('weapon','shield','hp','bonus')),
+--  attribute text NOT NULL CHECK(attribute IN ('laser','missile','capacitor','regenerator','armor','nanobots','damage','shield','hp','speed','xp','resources')),
+--  level integer NOT NULL CHECK(level BETWEEN 1 AND 3),
+--  damage integer NOT NULL DEFAULT 0 CHECK(damage BETWEEN 0 AND 20000),
+--  cooldown_ms integer NOT NULL DEFAULT 0 CHECK(cooldown_ms BETWEEN 0 AND 10000),
+--  shield_bonus integer NOT NULL DEFAULT 0 CHECK(shield_bonus BETWEEN 0 AND 500000),
+--  hp_bonus integer NOT NULL DEFAULT 0 CHECK(hp_bonus BETWEEN 0 AND 500000),
+--  bonus_pct numeric(5,2) NOT NULL DEFAULT 0 CHECK(bonus_pct BETWEEN 0 AND 25),
+--  parts integer NOT NULL CHECK(parts BETWEEN 0 AND 250),
+--  credits bigint NOT NULL CHECK(credits BETWEEN 0 AND 10000000),
+--  min_clan_level integer NOT NULL CHECK(min_clan_level BETWEEN 1 AND 50),
+--  updated_at timestamptz NOT NULL DEFAULT now(),
+--  PRIMARY KEY(category,attribute,level),
+--  CHECK ((category='weapon' AND attribute IN ('laser','missile')) OR
+--   (category='shield' AND attribute IN ('capacitor','regenerator')) OR
+--   (category='hp' AND attribute IN ('armor','nanobots')) OR
+--   (category='bonus' AND attribute IN ('damage','shield','hp','speed','xp','resources')))
+-- );
+-- INSERT INTO public.stellar_relay_module_balance_v3463(category,attribute,level,damage,cooldown_ms,shield_bonus,hp_bonus,bonus_pct,parts,credits,min_clan_level)
+-- VALUES
+-- ('weapon','laser',1,1350,1150,0,0,0,5,0,1),
+-- ('weapon','laser',2,2000,1150,0,0,0,12,100000,3),
+-- ('weapon','laser',3,2650,1150,0,0,0,25,350000,5),
+-- ('weapon','missile',1,2600,3200,0,0,0,5,0,1),
+-- ('weapon','missile',2,3600,3200,0,0,0,12,100000,3),
+-- ('weapon','missile',3,4600,3200,0,0,0,25,350000,5),
+-- ('shield','capacitor',1,0,0,40000,0,0,5,0,1),
+-- ('shield','capacitor',2,0,0,80000,0,0,12,100000,3),
+-- ('shield','capacitor',3,0,0,120000,0,0,25,350000,5),
+-- ('shield','regenerator',1,0,0,40000,0,0,5,0,1),
+-- ('shield','regenerator',2,0,0,80000,0,0,12,100000,3),
+-- ('shield','regenerator',3,0,0,120000,0,0,25,350000,5),
+-- ('hp','armor',1,0,0,0,35000,0,5,0,1),
+-- ('hp','armor',2,0,0,0,70000,0,12,100000,3),
+-- ('hp','armor',3,0,0,0,105000,0,25,350000,5),
+-- ('hp','nanobots',1,0,0,0,35000,0,5,0,1),
+-- ('hp','nanobots',2,0,0,0,70000,0,12,100000,3),
+-- ('hp','nanobots',3,0,0,0,105000,0,25,350000,5),
+-- ('bonus','damage',1,0,0,0,0,3,5,0,1),
+-- ('bonus','damage',2,0,0,0,0,4,12,100000,3),
+-- ('bonus','damage',3,0,0,0,0,5,25,350000,5),
+-- ('bonus','shield',1,0,0,0,0,5,5,0,1),
+-- ('bonus','shield',2,0,0,0,0,7,12,100000,3),
+-- ('bonus','shield',3,0,0,0,0,9,25,350000,5),
+-- ('bonus','hp',1,0,0,0,0,5,5,0,1),
+-- ('bonus','hp',2,0,0,0,0,7,12,100000,3),
+-- ('bonus','hp',3,0,0,0,0,9,25,350000,5),
+-- ('bonus','speed',1,0,0,0,0,2,5,0,1),
+-- ('bonus','speed',2,0,0,0,0,3,12,100000,3),
+-- ('bonus','speed',3,0,0,0,0,4,25,350000,5),
+-- ('bonus','xp',1,0,0,0,0,5,5,0,1),
+-- ('bonus','xp',2,0,0,0,0,7,12,100000,3),
+-- ('bonus','xp',3,0,0,0,0,10,25,350000,5),
+-- ('bonus','resources',1,0,0,0,0,3,5,0,1),
+-- ('bonus','resources',2,0,0,0,0,4,12,100000,3),
+-- ('bonus','resources',3,0,0,0,0,5,25,350000,5)
+-- ON CONFLICT (category,attribute,level) DO NOTHING;
+-- ALTER TABLE public.stellar_relay_module_balance_v3463 ENABLE ROW LEVEL SECURITY;
+-- REVOKE ALL ON public.stellar_relay_module_balance_v3463 FROM PUBLIC,anon,authenticated;
+-- GRANT SELECT,INSERT,UPDATE ON public.stellar_relay_module_balance_v3463 TO service_role;
+-- 
+-- CREATE OR REPLACE FUNCTION public.stellar_relay_module_action_v346(p_action text,p_module_id uuid DEFAULT NULL,p_category text DEFAULT NULL,p_attribute text DEFAULT NULL,p_map_id text DEFAULT NULL,p_node_id text DEFAULT NULL,p_slot int DEFAULT NULL)
+-- RETURNS jsonb LANGUAGE plpgsql SECURITY DEFINER SET search_path='' AS $fn$
+-- DECLARE uid uuid:=auth.uid(); cid uuid; cl public.clans; mod public.stellar_relay_modules_v346; part text;cost bigint;need int;minimum int;next_level int; ident uuid;
+-- BEGIN
+--  IF uid IS NULL THEN RAISE EXCEPTION 'AUTH_REQUIRED';END IF;
+--  SELECT c.* INTO cl FROM public.clans c WHERE c.owner_id=uid ORDER BY c.created_at LIMIT 1 FOR UPDATE;
+--  IF NOT FOUND THEN RAISE EXCEPTION 'ONLY_CLAN_OWNER';END IF;
+--  cid:=cl.id;
+--  IF p_action='craft' THEN
+--   IF p_category NOT IN('weapon','shield','hp','bonus') THEN RAISE EXCEPTION 'INVALID_CATEGORY';END IF;
+--   IF NOT ((p_category='bonus' AND p_attribute IN('damage','shield','hp','speed','xp','resources')) OR (p_category='weapon' AND p_attribute IN('laser','missile')) OR (p_category='shield' AND p_attribute IN('capacitor','regenerator')) OR (p_category='hp' AND p_attribute IN('armor','nanobots'))) THEN RAISE EXCEPTION 'INVALID_ATTRIBUTE';END IF;
+--   next_level:=1;
+--  ELSE
+--   SELECT * INTO mod FROM public.stellar_relay_modules_v346 WHERE id=p_module_id AND clan_id=cid FOR UPDATE;
+--   IF NOT FOUND THEN RAISE EXCEPTION 'MODULE_NOT_OWNED';END IF;
+--   IF p_action='upgrade' THEN
+--    IF mod.level>=3 THEN RAISE EXCEPTION 'MAX_LEVEL';END IF;
+--    next_level:=mod.level+1;
+--   ELSIF p_action='equip' THEN
+--    IF p_map_id NOT IN('b41','b42','b43') OR p_node_id NOT IN('A','B','C') OR p_slot NOT BETWEEN 1 AND 8 THEN RAISE EXCEPTION 'INVALID_RELAY_OR_SLOT';END IF;
+--    IF NOT ((mod.category='weapon' AND p_slot IN(1,2)) OR (mod.category='shield' AND p_slot IN(3,4)) OR (mod.category='hp' AND p_slot IN(5,6)) OR (mod.category='bonus' AND p_slot IN(7,8))) THEN RAISE EXCEPTION 'SLOT_CATEGORY_MISMATCH'; END IF;
+--    IF mod.category<>'bonus' AND mod.attribute <> (CASE p_slot WHEN 1 THEN 'laser' WHEN 2 THEN 'missile' WHEN 3 THEN 'capacitor' WHEN 4 THEN 'regenerator' WHEN 5 THEN 'armor' WHEN 6 THEN 'nanobots' ELSE '?' END) THEN RAISE EXCEPTION 'SLOT_SUBTYPE_MISMATCH'; END IF;
+--    IF NOT EXISTS(SELECT 1 FROM public.stellar_relay_state_v346 s JOIN public.stellar_warfront_nodes n ON n.map_id=s.map_id AND n.node_id=s.node_id WHERE s.map_id=p_map_id AND s.node_id=p_node_id AND s.owner_clan_id=cid) THEN RAISE EXCEPTION 'RELAY_NOT_OWNED';END IF;
+--    -- Equipar em um slot ocupado faz troca atomica: modulo anterior volta ao inventario.
+--    UPDATE public.stellar_relay_modules_v346 SET map_id=NULL,node_id=NULL,slot=NULL,updated_at=now()
+--    WHERE map_id=p_map_id AND node_id=p_node_id AND slot=p_slot AND id<>mod.id AND clan_id=cid;
+--    UPDATE public.stellar_relay_modules_v346 SET map_id=p_map_id,node_id=p_node_id,slot=p_slot,updated_at=now() WHERE id=mod.id;
+--    PERFORM public.stellar_relay_recompute_v346(p_map_id,p_node_id);
+--    IF mod.map_id IS NOT NULL AND (mod.map_id IS DISTINCT FROM p_map_id OR mod.node_id IS DISTINCT FROM p_node_id) THEN PERFORM public.stellar_relay_recompute_v346(mod.map_id,mod.node_id);END IF;
+--    INSERT INTO public.stellar_relay_audit_v346(actor,clan_id,action,module_id,map_id,node_id) VALUES(uid,cid,'equip',mod.id,p_map_id,p_node_id);
+--    RETURN jsonb_build_object('ok',true,'action','equip','id',mod.id);
+--   ELSIF p_action='unequip' THEN
+--    UPDATE public.stellar_relay_modules_v346 SET map_id=NULL,node_id=NULL,slot=NULL,updated_at=now() WHERE id=mod.id;
+--    IF mod.map_id IS NOT NULL THEN PERFORM public.stellar_relay_recompute_v346(mod.map_id,mod.node_id);END IF;
+--    INSERT INTO public.stellar_relay_audit_v346(actor,clan_id,action,module_id) VALUES(uid,cid,'unequip',mod.id);
+--    RETURN jsonb_build_object('ok',true,'action','unequip','id',mod.id);
+--   ELSE RAISE EXCEPTION 'INVALID_ACTION';END IF;
+--  END IF;
+--  part:=CASE WHEN coalesce(mod.category,p_category)='weapon' THEN 'weapon_parts' WHEN coalesce(mod.category,p_category)='shield' THEN 'shield_parts' WHEN coalesce(mod.category,p_category)='hp' THEN 'hull_parts' ELSE 'circuit_parts' END;
+--  SELECT b.parts,b.credits,b.min_clan_level INTO need,cost,minimum
+--  FROM public.stellar_relay_module_balance_v3463 b
+--  WHERE b.category=coalesce(mod.category,p_category) AND b.attribute=coalesce(mod.attribute,p_attribute) AND b.level=next_level;
+--  IF NOT FOUND THEN RAISE EXCEPTION 'RELAY_MODULE_BALANCE_MISSING';END IF;
+--  IF cl.level<minimum THEN RAISE EXCEPTION 'CLAN_LEVEL_REQUIRED_%',minimum;END IF;
+--  UPDATE public.stellar_relay_clan_parts_v346 SET quantity=quantity-need WHERE clan_id=cid AND part_type=part AND quantity>=need;
+--  IF NOT FOUND THEN RAISE EXCEPTION 'INSUFFICIENT_RELAY_PARTS';END IF;
+--  IF cost>0 THEN
+--   UPDATE public.clans SET vault_credits=vault_credits-cost WHERE id=cid AND vault_credits>=cost;
+--   IF NOT FOUND THEN RAISE EXCEPTION 'INSUFFICIENT_CLAN_VAULT';END IF;
+--  END IF;
+--  IF p_action='craft' THEN
+--   INSERT INTO public.stellar_relay_modules_v346(clan_id,category,attribute) VALUES(cid,p_category,p_attribute) RETURNING id INTO ident;
+--  ELSE
+--   UPDATE public.stellar_relay_modules_v346 SET level=next_level,updated_at=now() WHERE id=mod.id;ident:=mod.id;
+--   IF mod.map_id IS NOT NULL THEN PERFORM public.stellar_relay_recompute_v346(mod.map_id,mod.node_id);END IF;
+--  END IF;
+--  INSERT INTO public.stellar_relay_audit_v346(actor,clan_id,action,module_id,details) VALUES(uid,cid,p_action,ident,jsonb_build_object('level',next_level,'parts',need,'credits',cost));
+--  RETURN jsonb_build_object('ok',true,'id',ident,'level',next_level,'parts_used',need,'vault_spent',cost);
+-- END;$fn$;
+-- CREATE OR REPLACE FUNCTION public.stellar_relay_recompute_v346(p_map_id text,p_node_id text)
+-- RETURNS void LANGUAGE plpgsql SECURITY DEFINER SET search_path='' AS $fn$
+-- DECLARE bh bigint;bs bigint;mh bigint;ms bigint;
+-- BEGIN
+--  SELECT max_hp,max_shield INTO bh,bs FROM public.stellar_relay_rules_v346 WHERE id=1;
+--  SELECT coalesce(sum(b.hp_bonus),0),coalesce(sum(b.shield_bonus),0) INTO mh,ms
+--  FROM public.stellar_relay_modules_v346 m
+--  JOIN public.stellar_relay_module_balance_v3463 b ON b.category=m.category AND b.attribute=m.attribute AND b.level=m.level
+--  WHERE m.map_id=p_map_id AND m.node_id=p_node_id;
+--  UPDATE public.stellar_relay_state_v346 SET max_hp=LEAST(3000000,bh+mh),max_shield=LEAST(2000000,bs+ms),
+--    hp=LEAST(hp,LEAST(3000000,bh+mh)),shield=LEAST(shield,LEAST(2000000,bs+ms)),revision=revision+1,updated_at=now()
+--  WHERE map_id=p_map_id AND node_id=p_node_id;
+-- END;$fn$;
+-- CREATE OR REPLACE FUNCTION public.stellar_relay_active_bonus_v346(p_user_id uuid,p_map_id text)
+-- RETURNS jsonb LANGUAGE plpgsql SECURITY INVOKER SET search_path='' AS $fn$
+-- DECLARE cid uuid;fac text;winner record;faction_all boolean;
+-- BEGIN
+--  IF auth.role()<>'service_role' OR p_user_id IS NULL THEN RAISE EXCEPTION 'RELAY_BONUS_DENIED';END IF;
+--  SELECT clan_id INTO cid FROM public.clan_members WHERE user_id=p_user_id;
+--  SELECT faction INTO fac FROM public.profiles WHERE id=p_user_id;
+--  SELECT count(*)=9 INTO faction_all FROM public.stellar_warfront_nodes WHERE owner=fac;
+--  SELECT m.attribute,m.level,
+--    b.bonus_pct AS value
+--  INTO winner
+--  FROM public.stellar_relay_modules_v346 m
+--  JOIN public.stellar_relay_module_balance_v3463 b ON b.category=m.category AND b.attribute=m.attribute AND b.level=m.level
+--  JOIN public.stellar_relay_state_v346 s ON s.map_id=m.map_id AND s.node_id=m.node_id
+--  JOIN public.stellar_warfront_nodes n ON n.map_id=s.map_id AND n.node_id=s.node_id
+--  WHERE m.category='bonus' AND
+--    ((cid IS NOT NULL AND s.owner_clan_id=cid AND (
+--        s.map_id=p_map_id OR
+--        (SELECT count(*) FROM public.stellar_relay_state_v346 sc WHERE sc.map_id=s.map_id AND sc.owner_clan_id=cid)=3
+--    )) OR (faction_all AND n.owner=fac))
+--  ORDER BY m.level DESC,value DESC,m.attribute ASC LIMIT 1;
+--  IF winner IS NULL THEN RETURN NULL; END IF;
+--  RETURN jsonb_build_object('attribute',winner.attribute,'level',winner.level,'value',winner.value);
+-- END;$fn$;
+-- CREATE OR REPLACE FUNCTION public.stellar_relay_damage_v346(p_map_id text,p_node_id text,p_damage integer,p_attacker uuid)
+-- RETURNS jsonb LANGUAGE plpgsql SECURITY INVOKER SET search_path='' AS $fn$
+-- DECLARE s public.stellar_relay_state_v346; old_s bigint; actual bigint; rem bigint;
+-- BEGIN
+--  IF auth.role() <> 'service_role' OR p_attacker IS NULL OR p_damage NOT BETWEEN 1 AND 500000 THEN RAISE EXCEPTION 'RELAY_DAMAGE_DENIED'; END IF;
+--  SELECT * INTO s FROM public.stellar_relay_state_v346 WHERE map_id=p_map_id AND node_id=p_node_id FOR UPDATE;
+--  IF NOT FOUND THEN RAISE EXCEPTION 'RELAY_NOT_FOUND';END IF;
+--  IF s.protected_until>now() OR s.hp=0 THEN RETURN jsonb_build_object('ok',false,'protected',s.protected_until>now(),'hp',s.hp,'shield',s.shield);END IF;
+--  old_s:=LEAST(s.shield,p_damage);rem:=p_damage-old_s;actual:=old_s+LEAST(s.hp,rem);
+--  UPDATE public.stellar_relay_state_v346 SET shield=shield-old_s,hp=hp-LEAST(hp,rem),last_hit_at=now(),revision=revision+1,updated_at=now() WHERE map_id=p_map_id AND node_id=p_node_id RETURNING * INTO s;
+--  RETURN jsonb_build_object('ok',true,'actual',actual,'hp',s.hp,'shield',s.shield,'revision',s.revision);
+-- END;$fn$;
+-- -- Server-recorded mission progress, exactly the same targets and clock as the claim RPC.
+-- CREATE OR REPLACE FUNCTION public.stellar_relay_mission_progress_v3463()
+-- RETURNS jsonb LANGUAGE plpgsql SECURITY DEFINER SET search_path='' AS $fn$
+-- DECLARE uid uuid:=auth.uid();cid uuid;week_date date:=date_trunc('week',now() AT TIME ZONE 'America/Sao_Paulo')::date;
+--  captures bigint;defenses bigint;hunts bigint; claimed text[];
+-- BEGIN
+--  IF uid IS NULL THEN RAISE EXCEPTION 'AUTH_REQUIRED'; END IF;
+--  SELECT clan_id INTO cid FROM public.clan_members WHERE user_id=uid;
+--  IF cid IS NULL THEN RETURN jsonb_build_object('week',week_date,'capture_week',jsonb_build_object('count',0,'target',2,'claimed',false),'defend_week',jsonb_build_object('count',0,'target',3,'claimed',false),'hunter_week',jsonb_build_object('count',0,'target',100,'claimed',false),'domination_week',jsonb_build_object('count',0,'target',5,'claimed',false));END IF;
+--  SELECT count(*) FILTER (WHERE kind='capture'),count(*) FILTER (WHERE kind='defense') INTO captures,defenses
+--  FROM public.stellar_war_actions WHERE clan_id=cid AND kind IN ('capture','defense') AND occurred_at>=(week_date::timestamp AT TIME ZONE 'America/Sao_Paulo');
+--  SELECT coalesce(npc_kills,0) INTO hunts FROM public.stellar_relay_clan_pve_v346 WHERE clan_id=cid AND period_start=week_date;
+--  SELECT array_agg(mission_id) INTO claimed FROM public.stellar_relay_mission_claims_v346 WHERE clan_id=cid AND period_start=week_date;
+--  claimed:=coalesce(claimed,ARRAY[]::text[]);
+--  RETURN jsonb_build_object('week',week_date,
+--   'capture_week',jsonb_build_object('count',captures,'target',2,'claimed','capture_week'=ANY(claimed)),
+--   'defend_week',jsonb_build_object('count',defenses,'target',3,'claimed','defend_week'=ANY(claimed)),
+--   'hunter_week',jsonb_build_object('count',coalesce(hunts,0),'target',100,'claimed','hunter_week'=ANY(claimed)),
+--   'domination_week',jsonb_build_object('count',captures,'target',5,'claimed','domination_week'=ANY(claimed)));
+-- END;$fn$;
+-- REVOKE ALL ON FUNCTION public.stellar_relay_mission_progress_v3463() FROM PUBLIC,anon;
+-- GRANT EXECUTE ON FUNCTION public.stellar_relay_mission_progress_v3463() TO authenticated;
+-- COMMIT;
+-- ===== END V34_6_3_RELAY_COMBAT_BALANCE_MISSIONS.sql =====
+
+-- ===== START V34_6_3_RELAY_COMBAT_BALANCE_ROLLBACK.sql | sha256 9a32826d69b0b89fffbb5c3b81b386b462348157e4e618d7795d81f8e3757e1c =====
+-- -- Restore pre-expansion functions; preserves any saved module-balance rows.
+-- BEGIN;
+-- CREATE OR REPLACE FUNCTION public.stellar_relay_module_action_v346(p_action text,p_module_id uuid DEFAULT NULL,p_category text DEFAULT NULL,p_attribute text DEFAULT NULL,p_map_id text DEFAULT NULL,p_node_id text DEFAULT NULL,p_slot int DEFAULT NULL)
+-- RETURNS jsonb LANGUAGE plpgsql SECURITY DEFINER SET search_path='' AS $fn$
+-- DECLARE uid uuid:=auth.uid(); cid uuid; cl public.clans; mod public.stellar_relay_modules_v346; part text;cost bigint;need int;minimum int;next_level int; ident uuid;
+-- BEGIN
+--  IF uid IS NULL THEN RAISE EXCEPTION 'AUTH_REQUIRED';END IF;
+--  SELECT c.* INTO cl FROM public.clans c WHERE c.owner_id=uid ORDER BY c.created_at LIMIT 1 FOR UPDATE;
+--  IF NOT FOUND THEN RAISE EXCEPTION 'ONLY_CLAN_OWNER';END IF;
+--  cid:=cl.id;
+--  IF p_action='craft' THEN
+--   IF p_category NOT IN('weapon','shield','hp','bonus') THEN RAISE EXCEPTION 'INVALID_CATEGORY';END IF;
+--   IF NOT ((p_category='bonus' AND p_attribute IN('damage','shield','hp','speed','xp','resources')) OR (p_category='weapon' AND p_attribute IN('laser','missile')) OR (p_category='shield' AND p_attribute IN('capacitor','regenerator')) OR (p_category='hp' AND p_attribute IN('armor','nanobots'))) THEN RAISE EXCEPTION 'INVALID_ATTRIBUTE';END IF;
+--   next_level:=1;
+--  ELSE
+--   SELECT * INTO mod FROM public.stellar_relay_modules_v346 WHERE id=p_module_id AND clan_id=cid FOR UPDATE;
+--   IF NOT FOUND THEN RAISE EXCEPTION 'MODULE_NOT_OWNED';END IF;
+--   IF p_action='upgrade' THEN
+--    IF mod.level>=3 THEN RAISE EXCEPTION 'MAX_LEVEL';END IF;
+--    next_level:=mod.level+1;
+--   ELSIF p_action='equip' THEN
+--    IF p_map_id NOT IN('b41','b42','b43') OR p_node_id NOT IN('A','B','C') OR p_slot NOT BETWEEN 1 AND 8 THEN RAISE EXCEPTION 'INVALID_RELAY_OR_SLOT';END IF;
+--    IF NOT ((mod.category='weapon' AND p_slot IN(1,2)) OR (mod.category='shield' AND p_slot IN(3,4)) OR (mod.category='hp' AND p_slot IN(5,6)) OR (mod.category='bonus' AND p_slot IN(7,8))) THEN RAISE EXCEPTION 'SLOT_CATEGORY_MISMATCH'; END IF;
+--    IF mod.category<>'bonus' AND mod.attribute <> (CASE p_slot WHEN 1 THEN 'laser' WHEN 2 THEN 'missile' WHEN 3 THEN 'capacitor' WHEN 4 THEN 'regenerator' WHEN 5 THEN 'armor' WHEN 6 THEN 'nanobots' ELSE '?' END) THEN RAISE EXCEPTION 'SLOT_SUBTYPE_MISMATCH'; END IF;
+--    IF NOT EXISTS(SELECT 1 FROM public.stellar_relay_state_v346 s JOIN public.stellar_warfront_nodes n ON n.map_id=s.map_id AND n.node_id=s.node_id WHERE s.map_id=p_map_id AND s.node_id=p_node_id AND s.owner_clan_id=cid) THEN RAISE EXCEPTION 'RELAY_NOT_OWNED';END IF;
+--    -- Equipar em um slot ocupado faz troca atomica: modulo anterior volta ao inventario.
+--    UPDATE public.stellar_relay_modules_v346 SET map_id=NULL,node_id=NULL,slot=NULL,updated_at=now()
+--    WHERE map_id=p_map_id AND node_id=p_node_id AND slot=p_slot AND id<>mod.id AND clan_id=cid;
+--    UPDATE public.stellar_relay_modules_v346 SET map_id=p_map_id,node_id=p_node_id,slot=p_slot,updated_at=now() WHERE id=mod.id;
+--    PERFORM public.stellar_relay_recompute_v346(p_map_id,p_node_id);
+--    IF mod.map_id IS NOT NULL AND (mod.map_id IS DISTINCT FROM p_map_id OR mod.node_id IS DISTINCT FROM p_node_id) THEN PERFORM public.stellar_relay_recompute_v346(mod.map_id,mod.node_id);END IF;
+--    INSERT INTO public.stellar_relay_audit_v346(actor,clan_id,action,module_id,map_id,node_id) VALUES(uid,cid,'equip',mod.id,p_map_id,p_node_id);
+--    RETURN jsonb_build_object('ok',true,'action','equip','id',mod.id);
+--   ELSIF p_action='unequip' THEN
+--    UPDATE public.stellar_relay_modules_v346 SET map_id=NULL,node_id=NULL,slot=NULL,updated_at=now() WHERE id=mod.id;
+--    IF mod.map_id IS NOT NULL THEN PERFORM public.stellar_relay_recompute_v346(mod.map_id,mod.node_id);END IF;
+--    INSERT INTO public.stellar_relay_audit_v346(actor,clan_id,action,module_id) VALUES(uid,cid,'unequip',mod.id);
+--    RETURN jsonb_build_object('ok',true,'action','unequip','id',mod.id);
+--   ELSE RAISE EXCEPTION 'INVALID_ACTION';END IF;
+--  END IF;
+--  part:=CASE WHEN coalesce(mod.category,p_category)='weapon' THEN 'weapon_parts' WHEN coalesce(mod.category,p_category)='shield' THEN 'shield_parts' WHEN coalesce(mod.category,p_category)='hp' THEN 'hull_parts' ELSE 'circuit_parts' END;
+--  need:=CASE next_level WHEN 1 THEN 5 WHEN 2 THEN 12 ELSE 25 END;
+--  cost:=CASE next_level WHEN 1 THEN 0 WHEN 2 THEN 100000 ELSE 350000 END;
+--  minimum:=CASE next_level WHEN 1 THEN 1 WHEN 2 THEN 3 ELSE 5 END;
+--  IF cl.level<minimum THEN RAISE EXCEPTION 'CLAN_LEVEL_REQUIRED_%',minimum;END IF;
+--  UPDATE public.stellar_relay_clan_parts_v346 SET quantity=quantity-need WHERE clan_id=cid AND part_type=part AND quantity>=need;
+--  IF NOT FOUND THEN RAISE EXCEPTION 'INSUFFICIENT_RELAY_PARTS';END IF;
+--  IF cost>0 THEN
+--   UPDATE public.clans SET vault_credits=vault_credits-cost WHERE id=cid AND vault_credits>=cost;
+--   IF NOT FOUND THEN RAISE EXCEPTION 'INSUFFICIENT_CLAN_VAULT';END IF;
+--  END IF;
+--  IF p_action='craft' THEN
+--   INSERT INTO public.stellar_relay_modules_v346(clan_id,category,attribute) VALUES(cid,p_category,p_attribute) RETURNING id INTO ident;
+--  ELSE
+--   UPDATE public.stellar_relay_modules_v346 SET level=next_level,updated_at=now() WHERE id=mod.id;ident:=mod.id;
+--   IF mod.map_id IS NOT NULL THEN PERFORM public.stellar_relay_recompute_v346(mod.map_id,mod.node_id);END IF;
+--  END IF;
+--  INSERT INTO public.stellar_relay_audit_v346(actor,clan_id,action,module_id,details) VALUES(uid,cid,p_action,ident,jsonb_build_object('level',next_level,'parts',need,'credits',cost));
+--  RETURN jsonb_build_object('ok',true,'id',ident,'level',next_level,'parts_used',need,'vault_spent',cost);
+-- END;$fn$;
+-- CREATE OR REPLACE FUNCTION public.stellar_relay_recompute_v346(p_map_id text,p_node_id text)
+-- RETURNS void LANGUAGE plpgsql SECURITY DEFINER SET search_path='' AS $fn$
+-- DECLARE bh bigint;bs bigint;mh bigint;ms bigint;
+-- BEGIN
+--  SELECT max_hp,max_shield INTO bh,bs FROM public.stellar_relay_rules_v346 WHERE id=1;
+--  SELECT coalesce(sum(CASE WHEN category='hp' THEN level*35000 ELSE 0 END),0),coalesce(sum(CASE WHEN category='shield' THEN level*40000 ELSE 0 END),0)
+--  INTO mh,ms FROM public.stellar_relay_modules_v346 WHERE map_id=p_map_id AND node_id=p_node_id;
+--  UPDATE public.stellar_relay_state_v346 SET max_hp=LEAST(3000000,bh+mh),max_shield=LEAST(2000000,bs+ms),
+--    hp=LEAST(hp,LEAST(3000000,bh+mh)),shield=LEAST(shield,LEAST(2000000,bs+ms)),revision=revision+1,updated_at=now()
+--  WHERE map_id=p_map_id AND node_id=p_node_id;
+-- END;$fn$;
+-- CREATE OR REPLACE FUNCTION public.stellar_relay_active_bonus_v346(p_user_id uuid,p_map_id text)
+-- RETURNS jsonb LANGUAGE plpgsql SECURITY INVOKER SET search_path='' AS $fn$
+-- DECLARE cid uuid;fac text;winner record;faction_all boolean;
+-- BEGIN
+--  IF auth.role()<>'service_role' OR p_user_id IS NULL THEN RAISE EXCEPTION 'RELAY_BONUS_DENIED';END IF;
+--  SELECT clan_id INTO cid FROM public.clan_members WHERE user_id=p_user_id;
+--  SELECT faction INTO fac FROM public.profiles WHERE id=p_user_id;
+--  SELECT count(*)=9 INTO faction_all FROM public.stellar_warfront_nodes WHERE owner=fac;
+--  SELECT m.attribute,m.level,
+--    CASE m.attribute
+--      WHEN 'damage' THEN (ARRAY[3,4,5])[m.level]
+--      WHEN 'shield' THEN (ARRAY[5,7,9])[m.level]
+--      WHEN 'hp' THEN (ARRAY[5,7,9])[m.level]
+--      WHEN 'speed' THEN (ARRAY[2,3,4])[m.level]
+--      WHEN 'xp' THEN (ARRAY[5,7,10])[m.level]
+--      WHEN 'resources' THEN (ARRAY[3,4,5])[m.level] END AS value
+--  INTO winner
+--  FROM public.stellar_relay_modules_v346 m
+--  JOIN public.stellar_relay_state_v346 s ON s.map_id=m.map_id AND s.node_id=m.node_id
+--  JOIN public.stellar_warfront_nodes n ON n.map_id=s.map_id AND n.node_id=s.node_id
+--  WHERE m.category='bonus' AND
+--    ((cid IS NOT NULL AND s.owner_clan_id=cid AND (
+--        s.map_id=p_map_id OR
+--        (SELECT count(*) FROM public.stellar_relay_state_v346 sc WHERE sc.map_id=s.map_id AND sc.owner_clan_id=cid)=3
+--    )) OR (faction_all AND n.owner=fac))
+--  ORDER BY m.level DESC,value DESC,m.attribute ASC LIMIT 1;
+--  IF winner IS NULL THEN RETURN NULL; END IF;
+--  RETURN jsonb_build_object('attribute',winner.attribute,'level',winner.level,'value',winner.value);
+-- END;$fn$;
+-- CREATE OR REPLACE FUNCTION public.stellar_relay_damage_v346(p_map_id text,p_node_id text,p_damage integer,p_attacker uuid)
+-- RETURNS jsonb LANGUAGE plpgsql SECURITY INVOKER SET search_path='' AS $fn$
+-- DECLARE s public.stellar_relay_state_v346; old_s bigint; actual bigint; rem bigint;
+-- BEGIN
+--  IF auth.role() <> 'service_role' OR p_attacker IS NULL OR p_damage NOT BETWEEN 1 AND 50000 THEN RAISE EXCEPTION 'RELAY_DAMAGE_DENIED'; END IF;
+--  SELECT * INTO s FROM public.stellar_relay_state_v346 WHERE map_id=p_map_id AND node_id=p_node_id FOR UPDATE;
+--  IF NOT FOUND THEN RAISE EXCEPTION 'RELAY_NOT_FOUND';END IF;
+--  IF s.protected_until>now() OR s.hp=0 THEN RETURN jsonb_build_object('ok',false,'protected',s.protected_until>now(),'hp',s.hp,'shield',s.shield);END IF;
+--  old_s:=LEAST(s.shield,p_damage);rem:=p_damage-old_s;actual:=old_s+LEAST(s.hp,rem);
+--  UPDATE public.stellar_relay_state_v346 SET shield=shield-old_s,hp=hp-LEAST(hp,rem),last_hit_at=now(),revision=revision+1,updated_at=now() WHERE map_id=p_map_id AND node_id=p_node_id RETURNING * INTO s;
+--  RETURN jsonb_build_object('ok',true,'actual',actual,'hp',s.hp,'shield',s.shield,'revision',s.revision);
+-- END;$fn$;
+-- COMMIT;
+-- ===== END V34_6_3_RELAY_COMBAT_BALANCE_ROLLBACK.sql =====
+
+-- ===== START V35_0_0_GALACTIC_ASCENSION_FORTIFICATIONS.sql | sha256 695aa62ea1010f9a57fec16fa3db734b19934dff4202dba86447dce2b12925c7 =====
+-- -- STELLAR LEGACY V35.0.0 — GALACTIC ASCENSION / FORTIFICATIONS
+-- -- APPLY AFTER V35.0.0 IS LIVE. SQL is transactional and preserves ownership,
+-- -- clan vault values, module inventory, player saves, war actions and mission claims.
+-- BEGIN;
+-- CREATE TABLE IF NOT EXISTS public.stellar_relay_fortification_tiers_v350 (
+--  level integer PRIMARY KEY CHECK(level BETWEEN 1 AND 3),
+--  hp_bonus bigint NOT NULL DEFAULT 0 CHECK(hp_bonus BETWEEN 0 AND 3000000),
+--  shield_bonus bigint NOT NULL DEFAULT 0 CHECK(shield_bonus BETWEEN 0 AND 3000000),
+--  parts_each integer NOT NULL DEFAULT 0 CHECK(parts_each BETWEEN 0 AND 250),
+--  credits bigint NOT NULL DEFAULT 0 CHECK(credits BETWEEN 0 AND 10000000),
+--  min_clan_level integer NOT NULL DEFAULT 1 CHECK(min_clan_level BETWEEN 1 AND 50),
+--  updated_at timestamptz NOT NULL DEFAULT now(),
+--  CONSTRAINT fortification_level_one_v350 CHECK(level<>1 OR (hp_bonus=0 AND shield_bonus=0 AND parts_each=0 AND credits=0 AND min_clan_level=1))
+-- );
+-- INSERT INTO public.stellar_relay_fortification_tiers_v350(level,hp_bonus,shield_bonus,parts_each,credits,min_clan_level)
+-- VALUES (1,0,0,0,0,1),(2,250000,250000,12,2000000,3),(3,750000,750000,25,5000000,5)
+-- ON CONFLICT(level) DO NOTHING;
+-- CREATE TABLE IF NOT EXISTS public.stellar_relay_fortifications_v350 (
+--  map_id text NOT NULL CHECK(map_id IN ('b41','b42','b43')),
+--  node_id text NOT NULL CHECK(node_id IN ('A','B','C')),
+--  level integer NOT NULL DEFAULT 1 REFERENCES public.stellar_relay_fortification_tiers_v350(level),
+--  updated_at timestamptz NOT NULL DEFAULT now(),
+--  PRIMARY KEY(map_id,node_id),
+--  FOREIGN KEY(map_id,node_id) REFERENCES public.stellar_relay_state_v346(map_id,node_id) ON DELETE RESTRICT
+-- );
+-- INSERT INTO public.stellar_relay_fortifications_v350(map_id,node_id,level)
+-- SELECT map_id,node_id,1 FROM public.stellar_relay_state_v346
+-- ON CONFLICT(map_id,node_id) DO NOTHING;
+-- CREATE TABLE IF NOT EXISTS public.stellar_relay_fortification_audit_v350 (
+--  id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+--  actor uuid NOT NULL,
+--  clan_id uuid NOT NULL,
+--  map_id text NOT NULL,
+--  node_id text NOT NULL,
+--  previous_level integer NOT NULL,
+--  new_level integer NOT NULL,
+--  credits_spent bigint NOT NULL,
+--  parts_each_used integer NOT NULL,
+--  created_at timestamptz NOT NULL DEFAULT now(),
+--  CONSTRAINT relay_fortification_sequential_v350 CHECK(new_level=previous_level+1)
+-- );
+-- CREATE INDEX IF NOT EXISTS stellar_relay_fortification_audit_recent_v350
+-- ON public.stellar_relay_fortification_audit_v350(created_at DESC);
+-- ALTER TABLE public.stellar_relay_fortification_tiers_v350 ENABLE ROW LEVEL SECURITY;
+-- ALTER TABLE public.stellar_relay_fortifications_v350 ENABLE ROW LEVEL SECURITY;
+-- ALTER TABLE public.stellar_relay_fortification_audit_v350 ENABLE ROW LEVEL SECURITY;
+-- REVOKE ALL ON public.stellar_relay_fortification_tiers_v350,public.stellar_relay_fortifications_v350,public.stellar_relay_fortification_audit_v350 FROM PUBLIC,anon,authenticated;
+-- GRANT SELECT,UPDATE ON public.stellar_relay_fortification_tiers_v350 TO service_role;
+-- GRANT SELECT,INSERT,UPDATE ON public.stellar_relay_fortifications_v350 TO service_role;
+-- GRANT SELECT,INSERT ON public.stellar_relay_fortification_audit_v350 TO service_role;
+-- -- Existing module system remains intact. Tier bonuses are additive to current base
+-- -- and current equipped modules. Module swaps and tier upgrade NEVER heal in battle.
+-- CREATE OR REPLACE FUNCTION public.stellar_relay_recompute_v346(p_map_id text,p_node_id text)
+-- RETURNS void LANGUAGE plpgsql SECURITY DEFINER SET search_path='' AS $fn$
+-- DECLARE bh bigint;bs bigint;mh bigint;ms bigint;th bigint;ts bigint;
+-- BEGIN
+--  SELECT max_hp,max_shield INTO bh,bs FROM public.stellar_relay_rules_v346 WHERE id=1;
+--  IF NOT FOUND THEN RAISE EXCEPTION 'RELAY_RULES_UNAVAILABLE'; END IF;
+--  SELECT coalesce(sum(b.hp_bonus),0),coalesce(sum(b.shield_bonus),0) INTO mh,ms
+--  FROM public.stellar_relay_modules_v346 m
+--  JOIN public.stellar_relay_module_balance_v3463 b
+--  ON b.category=m.category AND b.attribute=m.attribute AND b.level=m.level
+--  WHERE m.map_id=p_map_id AND m.node_id=p_node_id;
+--  SELECT coalesce(t.hp_bonus,0),coalesce(t.shield_bonus,0) INTO th,ts
+--  FROM public.stellar_relay_fortifications_v350 f
+--  JOIN public.stellar_relay_fortification_tiers_v350 t ON t.level=f.level
+--  WHERE f.map_id=p_map_id AND f.node_id=p_node_id;
+--  UPDATE public.stellar_relay_state_v346 SET
+--    max_hp=LEAST(16000000,bh+mh+coalesce(th,0)),
+--    max_shield=LEAST(10000000,bs+ms+coalesce(ts,0)),
+--    hp=LEAST(hp,LEAST(16000000,bh+mh+coalesce(th,0))),
+--    shield=LEAST(shield,LEAST(10000000,bs+ms+coalesce(ts,0))),
+--    revision=revision+1,updated_at=now()
+--  WHERE map_id=p_map_id AND node_id=p_node_id;
+-- END;$fn$;
+-- -- Capture and admin release in 34.6 rebuild the base directly; this deferred
+-- -- trigger restores the tier's proper max after a clan changes while respecting
+-- -- historic modules (the old clan's items return to inventory before the update).
+-- CREATE OR REPLACE FUNCTION public.stellar_relay_fortification_transfer_v350()
+-- RETURNS trigger LANGUAGE plpgsql SECURITY DEFINER SET search_path='' AS $fn$
+-- BEGIN
+--  IF NEW.owner_clan_id IS NOT DISTINCT FROM OLD.owner_clan_id THEN RETURN NEW;END IF;
+--  PERFORM public.stellar_relay_recompute_v346(NEW.map_id,NEW.node_id);
+--  -- Conquest/admin release already heals to the base. Finish reconstruction
+--  -- to the correct FULL max (no free healing on ordinary equipment switches).
+--  UPDATE public.stellar_relay_state_v346
+--  SET hp=max_hp,shield=max_shield,revision=revision+1,updated_at=now()
+--  WHERE map_id=NEW.map_id AND node_id=NEW.node_id;
+--  RETURN NEW;
+-- END;$fn$;
+-- DROP TRIGGER IF EXISTS stellar_relay_fortification_transfer_v350 ON public.stellar_relay_state_v346;
+-- CREATE TRIGGER stellar_relay_fortification_transfer_v350
+-- AFTER UPDATE OF owner_clan_id ON public.stellar_relay_state_v346
+-- FOR EACH ROW WHEN(OLD.owner_clan_id IS DISTINCT FROM NEW.owner_clan_id)
+-- EXECUTE FUNCTION public.stellar_relay_fortification_transfer_v350();
+-- -- Admin and member JWTs have no raw write access. Only clan leader may buy a tier,
+-- -- and prices, prerequisites and parts are loaded and locked by the SQL.
+-- CREATE OR REPLACE FUNCTION public.stellar_relay_fortification_upgrade_v350(p_map_id text,p_node_id text,p_expected_level integer)
+-- RETURNS jsonb LANGUAGE plpgsql SECURITY DEFINER SET search_path='' AS $fn$
+-- DECLARE uid uuid:=auth.uid(); cl public.clans; st public.stellar_relay_state_v346;
+--  fort public.stellar_relay_fortifications_v350; cfg public.stellar_relay_fortification_tiers_v350;
+-- BEGIN
+--  IF uid IS NULL THEN RAISE EXCEPTION 'AUTH_REQUIRED';END IF;
+--  IF p_map_id NOT IN('b41','b42','b43') OR p_node_id NOT IN('A','B','C') THEN RAISE EXCEPTION 'INVALID_RELAY';END IF;
+--  SELECT * INTO cl FROM public.clans WHERE owner_id=uid ORDER BY created_at LIMIT 1 FOR UPDATE;
+--  IF NOT FOUND THEN RAISE EXCEPTION 'ONLY_CLAN_OWNER'; END IF;
+--  SELECT * INTO st FROM public.stellar_relay_state_v346 WHERE map_id=p_map_id AND node_id=p_node_id FOR UPDATE;
+--  IF NOT FOUND THEN RAISE EXCEPTION 'RELAY_NOT_FOUND';END IF;
+--  IF st.owner_clan_id IS DISTINCT FROM cl.id THEN RAISE EXCEPTION 'RELAY_NOT_OWNED';END IF;
+--  SELECT * INTO fort FROM public.stellar_relay_fortifications_v350 WHERE map_id=p_map_id AND node_id=p_node_id FOR UPDATE;
+--  IF NOT FOUND THEN RAISE EXCEPTION 'FORTIFICATION_NOT_READY';END IF;
+--  IF fort.level>=3 THEN RAISE EXCEPTION 'MAX_LEVEL';END IF;
+--  IF p_expected_level NOT BETWEEN 1 AND 2 OR fort.level IS DISTINCT FROM p_expected_level THEN RAISE EXCEPTION 'STALE_FORTIFICATION_LEVEL';END IF;
+--  SELECT * INTO cfg FROM public.stellar_relay_fortification_tiers_v350 WHERE level=fort.level+1 FOR SHARE;
+--  IF NOT FOUND THEN RAISE EXCEPTION 'FORTIFICATION_PRICE_MISSING';END IF;
+--  IF cl.level<cfg.min_clan_level THEN RAISE EXCEPTION 'CLAN_LEVEL_REQUIRED_%',cfg.min_clan_level;END IF;
+--  UPDATE public.stellar_relay_clan_parts_v346 SET quantity=quantity-cfg.parts_each
+--  WHERE clan_id=cl.id AND part_type='hull_parts' AND quantity>=cfg.parts_each;
+--  IF NOT FOUND THEN RAISE EXCEPTION 'INSUFFICIENT_HULL_PARTS';END IF;
+--  UPDATE public.stellar_relay_clan_parts_v346 SET quantity=quantity-cfg.parts_each
+--  WHERE clan_id=cl.id AND part_type='shield_parts' AND quantity>=cfg.parts_each;
+--  IF NOT FOUND THEN RAISE EXCEPTION 'INSUFFICIENT_SHIELD_PARTS';END IF;
+--  UPDATE public.clans SET vault_credits=vault_credits-cfg.credits
+--  WHERE id=cl.id AND vault_credits>=cfg.credits;
+--  IF NOT FOUND THEN RAISE EXCEPTION 'INSUFFICIENT_CLAN_VAULT';END IF;
+--  UPDATE public.stellar_relay_fortifications_v350 SET level=cfg.level,updated_at=now()
+--  WHERE map_id=p_map_id AND node_id=p_node_id;
+--  PERFORM public.stellar_relay_recompute_v346(p_map_id,p_node_id);
+--  INSERT INTO public.stellar_relay_fortification_audit_v350(actor,clan_id,map_id,node_id,previous_level,new_level,credits_spent,parts_each_used)
+--  VALUES(uid,cl.id,p_map_id,p_node_id,fort.level,cfg.level,cfg.credits,cfg.parts_each);
+--  RETURN jsonb_build_object('ok',true,'map_id',p_map_id,'node_id',p_node_id,
+--   'level',cfg.level,'spent_credits',cfg.credits,'parts_each_used',cfg.parts_each,
+--   'hp_bonus',cfg.hp_bonus,'shield_bonus',cfg.shield_bonus);
+-- END;$fn$;
+-- REVOKE ALL ON FUNCTION public.stellar_relay_fortification_upgrade_v350(text,text,integer) FROM PUBLIC,anon;
+-- GRANT EXECUTE ON FUNCTION public.stellar_relay_fortification_upgrade_v350(text,text,integer) TO authenticated;
+-- COMMIT;
+-- ===== END V35_0_0_GALACTIC_ASCENSION_FORTIFICATIONS.sql =====
+
+-- ===== START V35_0_0_GALACTIC_ASCENSION_ROLLBACK.sql | sha256 1fa774bf95a448ff89e95f8c5c4b55e3f8197699632e6e56fb49ceef13d1079f =====
+-- -- V35 rollback. Run only if reverting runtime to V34.7.1 and AFTER checking
+-- -- that no V35 tier upgrade must be refunded; no automatic refund/erase of logs.
+-- BEGIN;
+-- DROP TRIGGER IF EXISTS stellar_relay_fortification_transfer_v350 ON public.stellar_relay_state_v346;
+-- DROP FUNCTION IF EXISTS public.stellar_relay_fortification_transfer_v350();
+-- REVOKE ALL ON FUNCTION public.stellar_relay_fortification_upgrade_v350(text,text,integer) FROM PUBLIC,authenticated,anon;
+-- -- Keep V35 tables & audit for recovery. Existing level should not be silently lost.
+-- -- Restore the V34.7.1 module-only recompute (not new tiers).
+-- CREATE OR REPLACE FUNCTION public.stellar_relay_recompute_v346(p_map_id text,p_node_id text)
+-- RETURNS void LANGUAGE plpgsql SECURITY DEFINER SET search_path='' AS $fn$
+-- DECLARE bh bigint;bs bigint;mh bigint;ms bigint;
+-- BEGIN
+--  SELECT max_hp,max_shield INTO bh,bs FROM public.stellar_relay_rules_v346 WHERE id=1;
+--  SELECT coalesce(sum(b.hp_bonus),0),coalesce(sum(b.shield_bonus),0) INTO mh,ms
+--  FROM public.stellar_relay_modules_v346 m
+--  JOIN public.stellar_relay_module_balance_v3463 b ON b.category=m.category AND b.attribute=m.attribute AND b.level=m.level
+--  WHERE m.map_id=p_map_id AND m.node_id=p_node_id;
+--  UPDATE public.stellar_relay_state_v346
+--  SET max_hp=LEAST(16000000,bh+mh),max_shield=LEAST(10000000,bs+ms),
+--  hp=LEAST(hp,LEAST(16000000,bh+mh)),
+--  shield=LEAST(shield,LEAST(10000000,bs+ms)),revision=revision+1,updated_at=now()
+--  WHERE map_id=p_map_id AND node_id=p_node_id;
+-- END;$fn$;
+-- COMMIT;
+-- ===== END V35_0_0_GALACTIC_ASCENSION_ROLLBACK.sql =====
+
+-- ===== START V36_0_0_GALACTIC_DOMINION.sql | sha256 d4150b6c9036d5be72f4e7516c522a5ba2ae44ec97523eb09530ed87bda31792 =====
+-- -- STELLAR LEGACY V36.0.0 - GALACTIC DOMINION
+-- -- Run after V36.0.0 is LIVE. Transactional, additive; no user save/inventory resets.
+-- BEGIN;
+-- DO $preflight$
+-- BEGIN
+--  IF to_regclass('public.stellar_relay_state_v346') IS NULL
+--     OR to_regclass('public.stellar_relay_fortifications_v350') IS NULL
+--     OR to_regclass('public.stellar_war_actions') IS NULL
+--     OR (SELECT count(*) FROM public.stellar_relay_state_v346)<>9
+--  THEN RAISE EXCEPTION 'V36_REQUIRES_V35_LIVE_WITH_9_RELAYS'; END IF;
+-- END;$preflight$;
+-- CREATE TABLE IF NOT EXISTS public.stellar_dominion_rules_v360 (
+--  id integer PRIMARY KEY DEFAULT 1 CHECK(id=1),
+--  enabled boolean NOT NULL DEFAULT true,
+--  regen_hp_tick integer NOT NULL DEFAULT 3000 CHECK(regen_hp_tick BETWEEN 0 AND 50000),
+--  regen_shield_tick integer NOT NULL DEFAULT 5000 CHECK(regen_shield_tick BETWEEN 0 AND 50000),
+--  regen_idle_seconds integer NOT NULL DEFAULT 60 CHECK(regen_idle_seconds BETWEEN 30 AND 3600),
+--  daily_credits_per_relay integer NOT NULL DEFAULT 15000 CHECK(daily_credits_per_relay BETWEEN 0 AND 100000),
+--  daily_credits_cap integer NOT NULL DEFAULT 90000 CHECK(daily_credits_cap BETWEEN 0 AND 900000),
+--  weekly_war_actions integer NOT NULL DEFAULT 3 CHECK(weekly_war_actions BETWEEN 1 AND 100),
+--  weekly_credits integer NOT NULL DEFAULT 120000 CHECK(weekly_credits BETWEEN 0 AND 500000),
+--  war_reward_credits integer NOT NULL DEFAULT 60000 CHECK(war_reward_credits BETWEEN 0 AND 300000),
+--  war_hours integer NOT NULL DEFAULT 24 CHECK(war_hours BETWEEN 1 AND 72),
+--  war_cooldown_hours integer NOT NULL DEFAULT 24 CHECK(war_cooldown_hours BETWEEN 1 AND 168),
+--  updated_at timestamptz NOT NULL DEFAULT now()
+-- );
+-- INSERT INTO public.stellar_dominion_rules_v360(id) VALUES(1) ON CONFLICT(id) DO NOTHING;
+-- CREATE TABLE IF NOT EXISTS public.stellar_dominion_wars_v360 (
+--  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+--  attacker uuid NOT NULL REFERENCES public.clans(id) ON DELETE RESTRICT,
+--  defender uuid NOT NULL REFERENCES public.clans(id) ON DELETE RESTRICT,
+--  declared_by uuid NOT NULL,
+--  starts_at timestamptz NOT NULL DEFAULT now(),
+--  ends_at timestamptz NOT NULL,
+--  created_at timestamptz NOT NULL DEFAULT now(),
+--  CHECK(attacker<>defender),CHECK(ends_at>starts_at)
+-- );
+-- CREATE INDEX IF NOT EXISTS stellar_dominion_wars_attacker_v360 ON public.stellar_dominion_wars_v360(attacker,ends_at DESC);
+-- CREATE INDEX IF NOT EXISTS stellar_dominion_wars_defender_v360 ON public.stellar_dominion_wars_v360(defender,ends_at DESC);
+-- CREATE TABLE IF NOT EXISTS public.stellar_dominion_claims_v360 (
+--  clan_id uuid NOT NULL REFERENCES public.clans(id) ON DELETE RESTRICT,
+--  claim_kind text NOT NULL CHECK(claim_kind IN ('daily','weekly')),
+--  period_start date NOT NULL,
+--  actor uuid NOT NULL,
+--  credits bigint NOT NULL CHECK(credits BETWEEN 0 AND 900000),
+--  earned_at timestamptz NOT NULL DEFAULT now(),
+--  PRIMARY KEY(clan_id,claim_kind,period_start)
+-- );
+-- CREATE INDEX IF NOT EXISTS stellar_dominion_claims_recent_v360 ON public.stellar_dominion_claims_v360(earned_at DESC);
+-- CREATE TABLE IF NOT EXISTS public.stellar_dominion_war_claims_v360 (
+--  war_id uuid PRIMARY KEY REFERENCES public.stellar_dominion_wars_v360(id) ON DELETE RESTRICT,
+--  clan_id uuid NOT NULL REFERENCES public.clans(id) ON DELETE RESTRICT,
+--  actor uuid NOT NULL,
+--  credits bigint NOT NULL CHECK(credits BETWEEN 0 AND 300000),
+--  claimed_at timestamptz NOT NULL DEFAULT now()
+-- );
+-- ALTER TABLE public.stellar_dominion_rules_v360 ENABLE ROW LEVEL SECURITY;
+-- ALTER TABLE public.stellar_dominion_wars_v360 ENABLE ROW LEVEL SECURITY;
+-- ALTER TABLE public.stellar_dominion_claims_v360 ENABLE ROW LEVEL SECURITY;
+-- ALTER TABLE public.stellar_dominion_war_claims_v360 ENABLE ROW LEVEL SECURITY;
+-- REVOKE ALL ON public.stellar_dominion_rules_v360,public.stellar_dominion_wars_v360,public.stellar_dominion_claims_v360,public.stellar_dominion_war_claims_v360 FROM PUBLIC,anon,authenticated;
+-- GRANT SELECT,UPDATE ON public.stellar_dominion_rules_v360 TO service_role;
+-- GRANT SELECT ON public.stellar_dominion_wars_v360,public.stellar_dominion_claims_v360,public.stellar_dominion_war_claims_v360 TO service_role;
+-- -- Regen may run only with the service role; never expose manual healing to players.
+-- -- One SQL call covers at most nine relays. Idle attacks + destroyed relays are excluded.
+-- CREATE OR REPLACE FUNCTION public.stellar_dominion_regen_v360()
+-- RETURNS jsonb LANGUAGE plpgsql SECURITY DEFINER SET search_path='' AS $fn$
+-- DECLARE cfg public.stellar_dominion_rules_v360; changed integer:=0;
+-- BEGIN
+--  IF auth.role() IS DISTINCT FROM 'service_role' THEN RAISE EXCEPTION 'DOMINION_SERVICE_ONLY';END IF;
+--  SELECT * INTO cfg FROM public.stellar_dominion_rules_v360 WHERE id=1;
+--  IF NOT FOUND OR NOT cfg.enabled THEN RETURN jsonb_build_object('ok',true,'updated',0);END IF;
+--  WITH loadouts AS (
+--    SELECT s.map_id,s.node_id,
+--     COALESCE(MAX(m.level) FILTER(WHERE m.category='hp' AND m.attribute='nanobots'),0)::integer AS nano_lv,
+--     COALESCE(MAX(m.level) FILTER(WHERE m.category='shield' AND m.attribute='regenerator'),0)::integer AS regen_lv
+--    FROM public.stellar_relay_state_v346 s
+--    LEFT JOIN public.stellar_relay_modules_v346 m ON m.map_id=s.map_id AND m.node_id=s.node_id
+--    WHERE s.owner_clan_id IS NOT NULL AND s.hp>0 AND
+--     (s.last_hit_at IS NULL OR s.last_hit_at<now()-make_interval(secs=>cfg.regen_idle_seconds))
+--    GROUP BY s.map_id,s.node_id
+--  ), applied AS (
+--    UPDATE public.stellar_relay_state_v346 s SET
+--     hp=LEAST(s.max_hp,s.hp+cfg.regen_hp_tick*(1+l.nano_lv)),
+--     shield=LEAST(s.max_shield,s.shield+cfg.regen_shield_tick*(1+l.regen_lv)),
+--     revision=s.revision+1,updated_at=now()
+--    FROM loadouts l WHERE s.map_id=l.map_id AND s.node_id=l.node_id
+--    AND (s.last_hit_at IS NULL OR s.last_hit_at<now()-make_interval(secs=>cfg.regen_idle_seconds))
+--    AND s.hp>0 AND s.owner_clan_id IS NOT NULL
+--    AND (s.hp<s.max_hp AND cfg.regen_hp_tick>0 OR s.shield<s.max_shield AND cfg.regen_shield_tick>0)
+--    RETURNING s.map_id
+--  ) SELECT count(*) INTO changed FROM applied;
+--  RETURN jsonb_build_object('ok',true,'updated',changed);
+-- END;$fn$;
+-- REVOKE ALL ON FUNCTION public.stellar_dominion_regen_v360() FROM PUBLIC,anon,authenticated;
+-- GRANT EXECUTE ON FUNCTION public.stellar_dominion_regen_v360() TO service_role;
+-- -- A war declaration never transfers credits or territory. Clan owner only.
+-- -- Ordered advisory lock serializes simultaneous declarations for the same clan pair.
+-- CREATE OR REPLACE FUNCTION public.stellar_dominion_declare_v360(p_defender uuid,p_starts_at timestamptz DEFAULT NULL)
+-- RETURNS jsonb LANGUAGE plpgsql SECURITY DEFINER SET search_path='' AS $fn$
+-- DECLARE uid uuid:=auth.uid(); cl public.clans; target public.clans; cfg public.stellar_dominion_rules_v360; w public.stellar_dominion_wars_v360; battle_start timestamptz;battle_end timestamptz;
+-- BEGIN
+--  IF uid IS NULL THEN RAISE EXCEPTION 'AUTH_REQUIRED';END IF;
+--  SELECT * INTO cl FROM public.clans WHERE owner_id=uid ORDER BY created_at LIMIT 1;
+--  IF NOT FOUND THEN RAISE EXCEPTION 'ONLY_CLAN_OWNER';END IF;
+--  IF p_defender IS NULL OR p_defender=cl.id THEN RAISE EXCEPTION 'INVALID_RIVAL_CLAN';END IF;
+--  SELECT * INTO target FROM public.clans WHERE id=p_defender;
+--  IF NOT FOUND THEN RAISE EXCEPTION 'RIVAL_CLAN_NOT_FOUND';END IF;
+--  SELECT * INTO cfg FROM public.stellar_dominion_rules_v360 WHERE id=1;
+--  IF NOT FOUND OR NOT cfg.enabled THEN RAISE EXCEPTION 'DOMINION_DISABLED';END IF;
+--  battle_start:=COALESCE(p_starts_at,now());
+--  IF p_starts_at IS NOT NULL AND (battle_start<now()+interval '2 minutes' OR battle_start>now()+interval '7 days')
+--  THEN RAISE EXCEPTION 'WAR_SCHEDULE_OUT_OF_RANGE';END IF;
+--  battle_end:=battle_start+make_interval(hours=>cfg.war_hours);
+--  PERFORM pg_advisory_xact_lock(hashtext(LEAST(cl.id::text,p_defender::text)||':'||GREATEST(cl.id::text,p_defender::text))::bigint);
+--  IF EXISTS(SELECT 1 FROM public.stellar_dominion_wars_v360
+--   WHERE ((attacker=cl.id AND defender=p_defender) OR (attacker=p_defender AND defender=cl.id))
+--   AND ends_at>battle_start-make_interval(hours=>cfg.war_cooldown_hours)
+--   AND starts_at<battle_end+make_interval(hours=>cfg.war_cooldown_hours)) THEN RAISE EXCEPTION 'WAR_ACTIVE_OR_COOLDOWN';END IF;
+--  -- Limit unbounded spam: an attacker can have only one live offensive war.
+--  IF EXISTS(SELECT 1 FROM public.stellar_dominion_wars_v360 WHERE attacker=cl.id AND ends_at>battle_start AND starts_at<battle_end) THEN RAISE EXCEPTION 'ATTACKER_ALREADY_AT_WAR';END IF;
+--  INSERT INTO public.stellar_dominion_wars_v360(attacker,defender,declared_by,starts_at,ends_at)
+--  VALUES(cl.id,p_defender,uid,battle_start,battle_end) RETURNING * INTO w;
+--  RETURN jsonb_build_object('ok',true,'war_id',w.id,'starts_at',w.starts_at,'ends_at',w.ends_at);
+-- END;$fn$;
+-- REVOKE ALL ON FUNCTION public.stellar_dominion_declare_v360(uuid,timestamptz) FROM PUBLIC,anon;
+-- GRANT EXECUTE ON FUNCTION public.stellar_dominion_declare_v360(uuid,timestamptz) TO authenticated;
+-- -- Daily and weekly clan payouts are based ONLY on authoritative relay ownership and
+-- -- authenticated capture/defense logs, respectively. Idempotent unique period per clan.
+-- CREATE OR REPLACE FUNCTION public.stellar_dominion_claim_v360(p_kind text)
+-- RETURNS jsonb LANGUAGE plpgsql SECURITY DEFINER SET search_path='' AS $fn$
+-- DECLARE uid uuid:=auth.uid(); cl public.clans; cfg public.stellar_dominion_rules_v360;
+--  day_start date; period date; owned integer; war_count integer; award bigint; inserted integer:=0;
+-- BEGIN
+--  IF uid IS NULL THEN RAISE EXCEPTION 'AUTH_REQUIRED';END IF;
+--  IF p_kind NOT IN('daily','weekly') OR p_kind IS NULL THEN RAISE EXCEPTION 'INVALID_REWARD_KIND';END IF;
+--  SELECT c.* INTO cl FROM public.clan_members cm JOIN public.clans c ON c.id=cm.clan_id
+--  WHERE cm.user_id=uid FOR UPDATE OF c;
+--  IF NOT FOUND THEN RAISE EXCEPTION 'CLAN_REQUIRED';END IF;
+--  SELECT * INTO cfg FROM public.stellar_dominion_rules_v360 WHERE id=1;
+--  IF NOT FOUND OR NOT cfg.enabled THEN RAISE EXCEPTION 'DOMINION_DISABLED';END IF;
+--  day_start:=(now() AT TIME ZONE 'America/Sao_Paulo')::date;
+--  period:=CASE WHEN p_kind='weekly' THEN date_trunc('week',now() AT TIME ZONE 'America/Sao_Paulo')::date ELSE day_start END;
+--  IF p_kind='daily' THEN
+--    SELECT count(*) INTO owned FROM public.stellar_relay_state_v346 WHERE owner_clan_id=cl.id AND hp>0;
+--    IF owned=0 THEN RAISE EXCEPTION 'NO_ACTIVE_CLAN_RELAY';END IF;
+--    award:=LEAST(cfg.daily_credits_cap,owned*cfg.daily_credits_per_relay);
+--  ELSE
+--    SELECT count(*) INTO war_count FROM public.stellar_war_actions
+--    WHERE clan_id=cl.id AND kind IN('capture','defense') AND occurred_at >= (period::timestamp AT TIME ZONE 'America/Sao_Paulo')
+--    AND occurred_at<((period+7)::timestamp AT TIME ZONE 'America/Sao_Paulo');
+--    IF war_count<cfg.weekly_war_actions THEN RAISE EXCEPTION 'WEEKLY_OBJECTIVE_INCOMPLETE';END IF;
+--    award:=cfg.weekly_credits;
+--  END IF;
+--  INSERT INTO public.stellar_dominion_claims_v360(clan_id,claim_kind,period_start,actor,credits)
+--  VALUES(cl.id,p_kind,period,uid,award) ON CONFLICT DO NOTHING;
+--  GET DIAGNOSTICS inserted=ROW_COUNT;
+--  IF inserted<>1 THEN RAISE EXCEPTION 'DOMINION_REWARD_ALREADY_CLAIMED';END IF;
+--  UPDATE public.clans SET vault_credits=vault_credits+award,updated_at=now() WHERE id=cl.id;
+--  RETURN jsonb_build_object('ok',true,'kind',p_kind,'credits',award,'period',period);
+-- END;$fn$;
+-- REVOKE ALL ON FUNCTION public.stellar_dominion_claim_v360(text) FROM PUBLIC,anon;
+-- GRANT EXECUTE ON FUNCTION public.stellar_dominion_claim_v360(text) TO authenticated;
+-- -- End-of-war prize is paid to the winner only, never to a tie or no-fight war.
+-- -- The same official capture/defense action log used by existing PvP remains the source.
+-- CREATE OR REPLACE FUNCTION public.stellar_dominion_war_prize_v360(p_war_id uuid)
+-- RETURNS jsonb LANGUAGE plpgsql SECURITY DEFINER SET search_path='' AS $fn$
+-- DECLARE uid uuid:=auth.uid(); cl public.clans; w public.stellar_dominion_wars_v360; cfg public.stellar_dominion_rules_v360;
+--  sa bigint;sb bigint;award bigint;inserted integer;
+-- BEGIN
+--  IF uid IS NULL THEN RAISE EXCEPTION 'AUTH_REQUIRED';END IF;
+--  SELECT c.* INTO cl FROM public.clan_members cm JOIN public.clans c ON c.id=cm.clan_id WHERE cm.user_id=uid FOR UPDATE OF c;
+--  IF NOT FOUND THEN RAISE EXCEPTION 'CLAN_REQUIRED';END IF;
+--  SELECT * INTO w FROM public.stellar_dominion_wars_v360 WHERE id=p_war_id FOR UPDATE;
+--  IF NOT FOUND OR cl.id NOT IN (w.attacker,w.defender) THEN RAISE EXCEPTION 'WAR_NOT_FOUND_FOR_CLAN';END IF;
+--  IF w.ends_at>now() THEN RAISE EXCEPTION 'WAR_NOT_FINISHED';END IF;
+--  SELECT * INTO cfg FROM public.stellar_dominion_rules_v360 WHERE id=1;
+--  IF NOT FOUND OR NOT cfg.enabled THEN RAISE EXCEPTION 'DOMINION_DISABLED';END IF;
+--  SELECT coalesce(sum(CASE WHEN kind='capture' THEN 5 ELSE 2 END),0) INTO sa
+--  FROM public.stellar_war_actions WHERE clan_id=w.attacker AND kind IN('capture','defense') AND occurred_at>=w.starts_at AND occurred_at<w.ends_at;
+--  SELECT coalesce(sum(CASE WHEN kind='capture' THEN 5 ELSE 2 END),0) INTO sb
+--  FROM public.stellar_war_actions WHERE clan_id=w.defender AND kind IN('capture','defense') AND occurred_at>=w.starts_at AND occurred_at<w.ends_at;
+--  IF sa=sb OR greatest(sa,sb)=0 OR (cl.id=w.attacker AND sa<=sb) OR (cl.id=w.defender AND sb<=sa) THEN
+--    RAISE EXCEPTION 'WAR_PRIZE_NOT_WON';END IF;
+--  award:=cfg.war_reward_credits;
+--  INSERT INTO public.stellar_dominion_war_claims_v360(war_id,clan_id,actor,credits) VALUES(w.id,cl.id,uid,award) ON CONFLICT DO NOTHING;
+--  GET DIAGNOSTICS inserted=ROW_COUNT;
+--  IF inserted<>1 THEN RAISE EXCEPTION 'WAR_PRIZE_ALREADY_CLAIMED';END IF;
+--  UPDATE public.clans SET vault_credits=vault_credits+award,updated_at=now() WHERE id=cl.id;
+--  RETURN jsonb_build_object('ok',true,'war_id',w.id,'credits',award,'attacker_score',sa,'defender_score',sb);
+-- END;$fn$;
+-- REVOKE ALL ON FUNCTION public.stellar_dominion_war_prize_v360(uuid) FROM PUBLIC,anon;
+-- GRANT EXECUTE ON FUNCTION public.stellar_dominion_war_prize_v360(uuid) TO authenticated;
+-- COMMIT;
+-- ===== END V36_0_0_GALACTIC_DOMINION.sql =====
+
+-- ===== START V36_0_0_GALACTIC_DOMINION_ROLLBACK.sql | sha256 ead359222cb74fbb0542585c6db8241ba94915b7fba74218d8d179847ce06351 =====
+-- -- Restore V35 without dropping records from newer systems. Safe, non-destructive.
+-- -- If reverting runtime to V35, do not erase the V36 tables or historical claims.
+-- BEGIN;
+-- REVOKE ALL ON FUNCTION public.stellar_dominion_war_prize_v360(uuid) FROM PUBLIC,anon,authenticated;
+-- REVOKE ALL ON FUNCTION public.stellar_dominion_claim_v360(text) FROM PUBLIC,anon,authenticated;
+-- REVOKE ALL ON FUNCTION public.stellar_dominion_declare_v360(uuid,timestamptz) FROM PUBLIC,anon,authenticated;
+-- REVOKE ALL ON FUNCTION public.stellar_dominion_regen_v360() FROM PUBLIC,anon,authenticated,service_role;
+-- UPDATE public.stellar_dominion_rules_v360 SET enabled=false,updated_at=now() WHERE id=1;
+-- COMMIT;
+-- ===== END V36_0_0_GALACTIC_DOMINION_ROLLBACK.sql =====
+
+-- ===== START V37_0_0_BEYOND_THE_FRONTIER.sql | sha256 a6cdd67d05ca99a4e54037239d940ea50f31f79c2f2f521fc0466e7d6a59f2b9 =====
+-- -- STELLAR LEGACY V37.0.0 • BEYOND THE FRONTIER
+-- -- Execute SOMENTE depois que o código V37.0.0 estiver Live.
+-- -- Usa exclusivamente recibos de NPC/mineração emitidos pelo servidor e não altera saves durante instalação.
+-- BEGIN;
+-- DO $preflight$
+-- BEGIN
+--  IF to_regclass('public.game_saves') IS NULL OR to_regclass('public.stellar_npc_reward_ledger') IS NULL
+--  OR to_regclass('public.stellar_ore_reward_ledger') IS NULL OR to_regclass('public.stellar_dominion_rules_v360') IS NULL
+--  OR to_regclass('public.clan_members') IS NULL THEN RAISE EXCEPTION 'FRONTIER_V37_REQUIRES_V36_AND_REWARD_LEDGERS';END IF;
+-- END;$preflight$;
+-- CREATE TABLE IF NOT EXISTS public.stellar_frontier_contracts_v370 (
+--  id text PRIMARY KEY CHECK (id ~ '^[a-z0-9_]{3,36}$'),
+--  title text NOT NULL CHECK (length(title) BETWEEN 3 AND 80),
+--  sector text NOT NULL CHECK (sector IN ('x6','x7','x8')),
+--  min_level integer NOT NULL CHECK (min_level BETWEEN 1 AND 70),
+--  task_kind text NOT NULL CHECK (task_kind IN ('npc','ore')),
+--  target_type text NOT NULL CHECK (length(target_type) BETWEEN 2 AND 50),
+--  target_count integer NOT NULL CHECK (target_count BETWEEN 1 AND 250),
+--  reward_credits integer NOT NULL CHECK (reward_credits BETWEEN 0 AND 3000000),
+--  reward_stl integer NOT NULL CHECK (reward_stl BETWEEN 0 AND 10000),
+--  reward_shards integer NOT NULL CHECK (reward_shards BETWEEN 1 AND 20),
+--  enabled boolean NOT NULL DEFAULT true,
+--  updated_at timestamptz NOT NULL DEFAULT now()
+-- );
+-- INSERT INTO public.stellar_frontier_contracts_v370(id,title,sector,min_level,task_kind,target_type,target_count,reward_credits,reward_stl,reward_shards)
+-- VALUES
+--  ('void_patrol','Patrulha do Desfiladeiro','x6',22,'npc','voidCorsair',12,250000,350,2),
+--  ('nexus_guard','Guardiões do Nexus','x7',27,'npc','nexusWarden',10,400000,500,3),
+--  ('astral_prime','Caçada ao Ceifador Prime','x8',32,'npc','bossAstralReaper',3,750000,800,5),
+--  ('deep_mining','Prospecção de Cristais','x8',32,'ore','Terbium',24,220000,280,2)
+-- ON CONFLICT(id) DO NOTHING;
+-- CREATE TABLE IF NOT EXISTS public.stellar_frontier_ship_tech_v370 (
+--  user_id uuid PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
+--  level integer NOT NULL DEFAULT 1 CHECK(level BETWEEN 1 AND 3),
+--  shards integer NOT NULL DEFAULT 0 CHECK(shards BETWEEN 0 AND 100000),
+--  updated_at timestamptz NOT NULL DEFAULT now()
+-- );
+-- CREATE TABLE IF NOT EXISTS public.stellar_frontier_claims_v370 (
+--  user_id uuid NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+--  contract_id text NOT NULL REFERENCES public.stellar_frontier_contracts_v370(id),
+--  week_start date NOT NULL,
+--  credits bigint NOT NULL CHECK(credits BETWEEN 0 AND 5000000),
+--  stl integer NOT NULL CHECK(stl BETWEEN 0 AND 15000),
+--  shards integer NOT NULL CHECK(shards BETWEEN 1 AND 20),
+--  claimed_at timestamptz NOT NULL DEFAULT now(),
+--  PRIMARY KEY(user_id,contract_id,week_start)
+-- );
+-- CREATE TABLE IF NOT EXISTS public.stellar_frontier_clan_claims_v370 (
+--  clan_id uuid NOT NULL REFERENCES public.clans(id) ON DELETE CASCADE,
+--  week_start date NOT NULL,
+--  actor uuid NOT NULL,
+--  credits integer NOT NULL CHECK(credits BETWEEN 0 AND 500000),
+--  claimed_at timestamptz NOT NULL DEFAULT now(),
+--  PRIMARY KEY(clan_id,week_start)
+-- );
+-- CREATE INDEX IF NOT EXISTS stellar_frontier_npc_receipts_v370 ON public.stellar_npc_reward_ledger(user_id,npc_type,issued_at DESC);
+-- CREATE INDEX IF NOT EXISTS stellar_frontier_ore_receipts_v370 ON public.stellar_ore_reward_ledger(user_id,resource,issued_at DESC);
+-- CREATE INDEX IF NOT EXISTS stellar_frontier_npc_clan_v370 ON public.stellar_npc_reward_ledger(npc_type,issued_at DESC);
+-- ALTER TABLE public.stellar_frontier_contracts_v370 ENABLE ROW LEVEL SECURITY;
+-- ALTER TABLE public.stellar_frontier_ship_tech_v370 ENABLE ROW LEVEL SECURITY;
+-- ALTER TABLE public.stellar_frontier_claims_v370 ENABLE ROW LEVEL SECURITY;
+-- ALTER TABLE public.stellar_frontier_clan_claims_v370 ENABLE ROW LEVEL SECURITY;
+-- REVOKE ALL ON public.stellar_frontier_contracts_v370,public.stellar_frontier_ship_tech_v370,public.stellar_frontier_claims_v370,public.stellar_frontier_clan_claims_v370 FROM PUBLIC,anon,authenticated;
+-- GRANT SELECT,UPDATE ON public.stellar_frontier_contracts_v370 TO service_role;
+-- GRANT SELECT ON public.stellar_frontier_ship_tech_v370,public.stellar_frontier_claims_v370,public.stellar_frontier_clan_claims_v370 TO service_role;
+-- -- Estado da exploração: somente contratos e contadores confirmados pelo servidor.
+-- CREATE OR REPLACE FUNCTION public.stellar_frontier_state_v370()
+-- RETURNS jsonb LANGUAGE plpgsql SECURITY DEFINER SET search_path='' AS $fn$
+-- DECLARE uid uuid:=auth.uid(); s jsonb; p date; r public.stellar_frontier_contracts_v370; row_json jsonb; contracts jsonb:='[]'::jsonb;
+--  cnt bigint; userlevel integer; tech public.stellar_frontier_ship_tech_v370; cid uuid; team_kills bigint:=0; team_claimed boolean:=false;
+-- BEGIN
+--  IF uid IS NULL THEN RAISE EXCEPTION 'AUTH_REQUIRED';END IF;
+--  SELECT state INTO s FROM public.game_saves WHERE user_id=uid;
+--  IF NOT FOUND THEN RAISE EXCEPTION 'FRONTIER_SAVE_MISSING';END IF;
+--  userlevel:=coalesce((s#>>'{profile,level}')::integer,1);
+--  p:=date_trunc('week',now() AT TIME ZONE 'America/Sao_Paulo')::date;
+--  SELECT * INTO tech FROM public.stellar_frontier_ship_tech_v370 WHERE user_id=uid;
+--  FOR r IN SELECT * FROM public.stellar_frontier_contracts_v370 ORDER BY min_level,id LOOP
+--   IF r.task_kind='npc' THEN
+--    SELECT count(*) INTO cnt FROM public.stellar_npc_reward_ledger n
+--    WHERE n.user_id=uid AND n.npc_type=r.target_type AND n.issued_at>=(p::timestamp AT TIME ZONE 'America/Sao_Paulo');
+--   ELSE
+--    SELECT count(*) INTO cnt FROM public.stellar_ore_reward_ledger o
+--    WHERE o.user_id=uid AND o.resource=r.target_type AND o.issued_at>=(p::timestamp AT TIME ZONE 'America/Sao_Paulo');
+--   END IF;
+--   row_json:=jsonb_build_object('id',r.id,'title',r.title,'sector',r.sector,'minLevel',r.min_level,
+--    'kind',r.task_kind,'targetType',r.target_type,'count',least(cnt,r.target_count),'target',r.target_count,
+--    'credits',r.reward_credits,'stl',r.reward_stl,'shards',r.reward_shards,'unlocked',userlevel>=r.min_level,
+--    'enabled',r.enabled,'claimed',EXISTS(SELECT 1 FROM public.stellar_frontier_claims_v370 c WHERE c.user_id=uid AND c.contract_id=r.id AND c.week_start=p));
+--   contracts:=contracts||jsonb_build_array(row_json);
+--  END LOOP;
+--  SELECT cm.clan_id INTO cid FROM public.clan_members cm WHERE cm.user_id=uid;
+--  IF cid IS NOT NULL THEN
+--   SELECT count(*) INTO team_kills FROM public.stellar_npc_reward_ledger n
+--   JOIN public.clan_members cm ON cm.user_id=n.user_id
+--   WHERE cm.clan_id=cid AND n.npc_type IN ('bossVoidCorsair','bossNexusWarden','bossAstralReaper')
+--     AND n.issued_at>=(p::timestamp AT TIME ZONE 'America/Sao_Paulo');
+--   SELECT EXISTS(SELECT 1 FROM public.stellar_frontier_clan_claims_v370 c WHERE c.clan_id=cid AND c.week_start=p) INTO team_claimed;
+--  END IF;
+--  RETURN jsonb_build_object('ok',true,'week',p,'level',userlevel,'contracts',contracts,
+--  'tech',jsonb_build_object('level',coalesce(tech.level,1),'shards',coalesce(tech.shards,0),'nextCost',CASE coalesce(tech.level,1) WHEN 1 THEN 5 WHEN 2 THEN 15 ELSE 0 END),
+--  'clan',jsonb_build_object('kills',least(team_kills,8),'target',8,'claimed',team_claimed,'hasClan',cid IS NOT NULL),
+--  'serverTime',now());
+-- END;$fn$;
+-- -- Uma recompensa por contrato por semana. Nenhum dado de recompensa vem do cliente.
+-- CREATE OR REPLACE FUNCTION public.stellar_frontier_claim_v370(p_id text)
+-- RETURNS jsonb LANGUAGE plpgsql SECURITY DEFINER SET search_path='' AS $fn$
+-- DECLARE uid uuid:=auth.uid(); r public.stellar_frontier_contracts_v370; s jsonb; tech public.stellar_frontier_ship_tech_v370;
+--  p date; cnt bigint; inserted integer; reward_cr bigint;reward_stl bigint; current_cr bigint;current_stl bigint; rev bigint; new_shards integer;
+-- BEGIN
+--  IF uid IS NULL THEN RAISE EXCEPTION 'AUTH_REQUIRED'; END IF;
+--  SELECT state INTO s FROM public.game_saves WHERE user_id=uid FOR UPDATE;
+--  IF NOT FOUND THEN RAISE EXCEPTION 'FRONTIER_SAVE_MISSING';END IF;
+--  SELECT * INTO r FROM public.stellar_frontier_contracts_v370 WHERE id=p_id AND enabled FOR SHARE;
+--  IF NOT FOUND THEN RAISE EXCEPTION 'FRONTIER_CONTRACT_MISSING';END IF;
+--  IF coalesce((s#>>'{profile,level}')::integer,1)<r.min_level THEN RAISE EXCEPTION 'FRONTIER_LEVEL_REQUIRED';END IF;
+--  p:=date_trunc('week',now() AT TIME ZONE 'America/Sao_Paulo')::date;
+--  IF r.task_kind='npc' THEN
+--   SELECT count(*) INTO cnt FROM public.stellar_npc_reward_ledger n WHERE n.user_id=uid AND n.npc_type=r.target_type AND n.issued_at>=(p::timestamp AT TIME ZONE 'America/Sao_Paulo');
+--  ELSE
+--   SELECT count(*) INTO cnt FROM public.stellar_ore_reward_ledger o WHERE o.user_id=uid AND o.resource=r.target_type AND o.issued_at>=(p::timestamp AT TIME ZONE 'America/Sao_Paulo');
+--  END IF;
+--  IF cnt<r.target_count THEN RAISE EXCEPTION 'FRONTIER_OBJECTIVE_INCOMPLETE';END IF;
+--  INSERT INTO public.stellar_frontier_ship_tech_v370(user_id) VALUES(uid) ON CONFLICT(user_id) DO NOTHING;
+--  SELECT * INTO tech FROM public.stellar_frontier_ship_tech_v370 WHERE user_id=uid FOR UPDATE;
+--  reward_cr:=round(r.reward_credits*(1+(tech.level-1)*0.1));reward_stl:=round(r.reward_stl*(1+(tech.level-1)*0.1));
+--  current_cr:=coalesce((s#>>'{profile,credits}')::bigint,0);current_stl:=coalesce((s#>>'{profile,uridium}')::bigint,0);
+--  rev:=coalesce((s->>'serverNpcRewardRevision')::bigint,0);
+--  IF current_cr+reward_cr>1000000000000 OR current_stl+reward_stl>10000000000 OR rev>=1000000000 THEN RAISE EXCEPTION 'FRONTIER_BALANCE_LIMIT';END IF;
+--  INSERT INTO public.stellar_frontier_claims_v370(user_id,contract_id,week_start,credits,stl,shards)
+--  VALUES(uid,p_id,p,reward_cr,reward_stl,r.reward_shards) ON CONFLICT DO NOTHING;
+--  GET DIAGNOSTICS inserted=ROW_COUNT;
+--  IF inserted<>1 THEN RAISE EXCEPTION 'FRONTIER_ALREADY_CLAIMED';END IF;
+--  UPDATE public.stellar_frontier_ship_tech_v370 SET shards=shards+r.reward_shards,updated_at=now() WHERE user_id=uid;
+--  UPDATE public.game_saves SET state=jsonb_set(jsonb_set(jsonb_set(s,'{profile,credits}',to_jsonb(current_cr+reward_cr),true),'{profile,uridium}',to_jsonb(current_stl+reward_stl),true),'{serverNpcRewardRevision}',to_jsonb(rev+1),true),updated_at=now() WHERE user_id=uid;
+--  UPDATE public.profiles SET credits=current_cr+reward_cr,uridium=current_stl+reward_stl,updated_at=now() WHERE id=uid;
+--  RETURN jsonb_build_object('ok',true,'credits',reward_cr,'stl',reward_stl,'shards',r.reward_shards,'revision',rev+1,'contract',p_id);
+-- END;$fn$;
+-- -- Craft da nave: Módulo Explorador LV1 a LV3; bonifica pagamentos futuros de expedição (+10%/LV), nunca HP/PvP.
+-- CREATE OR REPLACE FUNCTION public.stellar_frontier_craft_v370()
+-- RETURNS jsonb LANGUAGE plpgsql SECURITY DEFINER SET search_path='' AS $fn$
+-- DECLARE uid uuid:=auth.uid(); tech public.stellar_frontier_ship_tech_v370; cost integer;
+-- BEGIN
+--  IF uid IS NULL THEN RAISE EXCEPTION 'AUTH_REQUIRED';END IF;
+--  INSERT INTO public.stellar_frontier_ship_tech_v370(user_id) VALUES(uid) ON CONFLICT(user_id) DO NOTHING;
+--  SELECT * INTO tech FROM public.stellar_frontier_ship_tech_v370 WHERE user_id=uid FOR UPDATE;
+--  IF tech.level>=3 THEN RAISE EXCEPTION 'FRONTIER_TECH_MAX_LEVEL';END IF;
+--  cost:=CASE tech.level WHEN 1 THEN 5 ELSE 15 END;
+--  IF tech.shards<cost THEN RAISE EXCEPTION 'FRONTIER_INSUFFICIENT_SHARDS';END IF;
+--  UPDATE public.stellar_frontier_ship_tech_v370 SET level=level+1,shards=shards-cost,updated_at=now() WHERE user_id=uid;
+--  RETURN jsonb_build_object('ok',true,'level',tech.level+1,'spent',cost);
+-- END;$fn$;
+-- -- Objetivo cooperativo: 8 boss kills confirmados por recibos, uma transferência ao cofre por semana.
+-- CREATE OR REPLACE FUNCTION public.stellar_frontier_clan_claim_v370()
+-- RETURNS jsonb LANGUAGE plpgsql SECURITY DEFINER SET search_path='' AS $fn$
+-- DECLARE uid uuid:=auth.uid(); cl public.clans; kills integer; week date; inserted integer;
+-- BEGIN
+--  IF uid IS NULL THEN RAISE EXCEPTION 'AUTH_REQUIRED';END IF;
+--  SELECT * INTO cl FROM public.clans WHERE owner_id=uid ORDER BY created_at LIMIT 1 FOR UPDATE;
+--  IF NOT FOUND THEN RAISE EXCEPTION 'FRONTIER_ONLY_CLAN_OWNER';END IF;
+--  week:=date_trunc('week',now() AT TIME ZONE 'America/Sao_Paulo')::date;
+--  SELECT count(*) INTO kills FROM public.stellar_npc_reward_ledger n JOIN public.clan_members cm ON cm.user_id=n.user_id
+--  WHERE cm.clan_id=cl.id AND n.npc_type IN ('bossVoidCorsair','bossNexusWarden','bossAstralReaper')
+--  AND n.issued_at>=(week::timestamp AT TIME ZONE 'America/Sao_Paulo');
+--  IF kills<8 THEN RAISE EXCEPTION 'FRONTIER_CLAN_OBJECTIVE_INCOMPLETE'; END IF;
+--  INSERT INTO public.stellar_frontier_clan_claims_v370(clan_id,week_start,actor,credits)
+--  VALUES(cl.id,week,uid,125000) ON CONFLICT DO NOTHING;
+--  GET DIAGNOSTICS inserted=ROW_COUNT;
+--  IF inserted<>1 THEN RAISE EXCEPTION 'FRONTIER_CLAN_ALREADY_CLAIMED';END IF;
+--  UPDATE public.clans SET vault_credits=vault_credits+125000,updated_at=now() WHERE id=cl.id;
+--  RETURN jsonb_build_object('ok',true,'credits',125000,'week',week);
+-- END;$fn$;
+-- REVOKE ALL ON FUNCTION public.stellar_frontier_state_v370() FROM PUBLIC,anon;
+-- REVOKE ALL ON FUNCTION public.stellar_frontier_claim_v370(text) FROM PUBLIC,anon;
+-- REVOKE ALL ON FUNCTION public.stellar_frontier_craft_v370() FROM PUBLIC,anon;
+-- REVOKE ALL ON FUNCTION public.stellar_frontier_clan_claim_v370() FROM PUBLIC,anon;
+-- GRANT EXECUTE ON FUNCTION public.stellar_frontier_state_v370() TO authenticated;
+-- GRANT EXECUTE ON FUNCTION public.stellar_frontier_claim_v370(text) TO authenticated;
+-- GRANT EXECUTE ON FUNCTION public.stellar_frontier_craft_v370() TO authenticated;
+-- GRANT EXECUTE ON FUNCTION public.stellar_frontier_clan_claim_v370() TO authenticated;
+-- COMMIT;
+-- ===== END V37_0_0_BEYOND_THE_FRONTIER.sql =====
+
+-- ===== START V37_0_0_BEYOND_THE_FRONTIER_ROLLBACK.sql | sha256 fd8d9155516bbdf8cedef05996d6e3b09a10fcc70e0761fa25c4d2acdb192398 =====
+-- -- V37 rollback (only if no claims/crafts have been made; preserves previous V36 systems).
+-- BEGIN;
+-- DO $safe$
+-- BEGIN
+--  IF EXISTS(SELECT 1 FROM public.stellar_frontier_claims_v370 LIMIT 1)
+--  OR EXISTS(SELECT 1 FROM public.stellar_frontier_clan_claims_v370 LIMIT 1)
+--  OR EXISTS(SELECT 1 FROM public.stellar_frontier_ship_tech_v370 WHERE level>1 OR shards>0 LIMIT 1)
+--  THEN RAISE EXCEPTION 'V37_ROLLBACK_BLOCKED_PROGRESS_EXISTS';END IF;
+-- END;$safe$;
+-- DROP FUNCTION IF EXISTS public.stellar_frontier_clan_claim_v370();
+-- DROP FUNCTION IF EXISTS public.stellar_frontier_craft_v370();
+-- DROP FUNCTION IF EXISTS public.stellar_frontier_claim_v370(text);
+-- DROP FUNCTION IF EXISTS public.stellar_frontier_state_v370();
+-- DROP TABLE IF EXISTS public.stellar_frontier_clan_claims_v370;
+-- DROP TABLE IF EXISTS public.stellar_frontier_claims_v370;
+-- DROP TABLE IF EXISTS public.stellar_frontier_ship_tech_v370;
+-- DROP TABLE IF EXISTS public.stellar_frontier_contracts_v370;
+-- COMMIT;
+-- ===== END V37_0_0_BEYOND_THE_FRONTIER_ROLLBACK.sql =====
+
+-- ===== START V38_0_0_ASTRAL_GATES_READ_ONLY_CHECK.sql | sha256 575f4d5c9c6a8e6112e9b3076ed233bb1f6d58cb5e434810131aeade18170f26 =====
+-- -- V38.0.0: somente verificação; esta versão NÃO exige SQL de migração.
+-- -- Não altera nem lê dados pessoais de jogadores.
+-- SELECT
+--  to_regclass('public.galaxy_gate_config_v1906') IS NOT NULL AS portal_admin_config_exists,
+--  to_regclass('public.game_saves') IS NOT NULL AS player_save_table_exists,
+--  to_regclass('public.stellar_dominion_rules_v360') IS NOT NULL AS previous_release_exists,
+--  to_regclass('public.stellar_frontier_contracts_v370') IS NOT NULL AS frontier_release_exists;
+-- ===== END V38_0_0_ASTRAL_GATES_READ_ONLY_CHECK.sql =====
+
+-- ===== START V38_1_0_ASTRAL_REWARDS.sql | sha256 57dacd01d387594a760a5446ecd24bb1383d93cd571db815299e140f80b23fbd =====
+-- -- Stellar Legacy V38.1.0 — Astral Rewards
+-- -- Requer V19.0.6 (galaxy_gate_config_v1906) e saves V38.0.0.
+-- -- Aplique ANTES de publicar o ZIP. Prêmios V38.1 são adicionais aos legados.
+-- BEGIN;
+-- CREATE TABLE IF NOT EXISTS public.stellar_astral_config_v381 (
+--  gate text PRIMARY KEY CHECK (gate IN ('alpha','beta','gamma')),
+--  config jsonb NOT NULL CHECK (jsonb_typeof(config)='object'),
+--  revision bigint NOT NULL DEFAULT 1,
+--  updated_at timestamptz NOT NULL DEFAULT now(),
+--  updated_by uuid
+-- );
+-- ALTER TABLE public.stellar_astral_config_v381 ENABLE ROW LEVEL SECURITY;
+-- REVOKE ALL ON public.stellar_astral_config_v381 FROM PUBLIC,anon,authenticated;
+-- INSERT INTO public.stellar_astral_config_v381(gate,config) VALUES
+--  ('alpha','{"label":"AURORA","resource":"Aurorium","referenceWaves":18,"credits":2500000,"stl":1500,"cores":15,"ammoId":"mcb25","ammoQty":1500,"rocketId":"plt2026","rocketQty":30,"voidite":3,"resourceQty":6,"weeklyBonusPct":25}'::jsonb),
+--  ('beta','{"label":"NEXUS","resource":"Nexium","referenceWaves":21,"credits":6000000,"stl":3500,"cores":35,"ammoId":"mcb50","ammoQty":2800,"rocketId":"plt2021","rocketQty":60,"voidite":7,"resourceQty":12,"weeklyBonusPct":30}'::jsonb),
+--  ('gamma','{"label":"ECLIPSE","resource":"Eclipsium","referenceWaves":24,"credits":15000000,"stl":8000,"cores":75,"ammoId":"ucb100","ammoQty":5000,"rocketId":"plt3030","rocketQty":120,"voidite":15,"resourceQty":25,"weeklyBonusPct":40}'::jsonb)
+-- ON CONFLICT(gate) DO NOTHING;
+-- CREATE TABLE IF NOT EXISTS public.stellar_astral_cursor_v381 (
+--  user_id uuid NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+--  gate text NOT NULL CHECK (gate IN ('alpha','beta','gamma')),
+--  last_completed bigint NOT NULL DEFAULT 0 CHECK(last_completed>=0),
+--  updated_at timestamptz NOT NULL DEFAULT now(),
+--  PRIMARY KEY(user_id,gate)
+-- );
+-- ALTER TABLE public.stellar_astral_cursor_v381 ENABLE ROW LEVEL SECURITY;
+-- REVOKE ALL ON public.stellar_astral_cursor_v381 FROM PUBLIC,anon,authenticated;
+-- CREATE TABLE IF NOT EXISTS public.stellar_astral_ledger_v381 (
+--  user_id uuid NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+--  gate text NOT NULL CHECK (gate IN ('alpha','beta','gamma')),
+--  completion_number bigint NOT NULL CHECK(completion_number>0),
+--  week_id text NOT NULL,
+--  first_weekly boolean NOT NULL DEFAULT false,
+--  quote jsonb NOT NULL,
+--  config_revision bigint NOT NULL,
+--  claimed_at timestamptz NOT NULL DEFAULT now(),
+--  PRIMARY KEY(user_id,gate,completion_number)
+-- );
+-- CREATE INDEX IF NOT EXISTS stellar_astral_ledger_user_date ON public.stellar_astral_ledger_v381(user_id,claimed_at DESC);
+-- ALTER TABLE public.stellar_astral_ledger_v381 ENABLE ROW LEVEL SECURITY;
+-- REVOKE ALL ON public.stellar_astral_ledger_v381 FROM PUBLIC,anon,authenticated;
+-- -- Prêmio congelado antes da batalha: o ADM não muda um prêmio em andamento.
+-- CREATE TABLE IF NOT EXISTS public.stellar_astral_quote_lock_v381 (
+--  user_id uuid NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+--  gate text NOT NULL CHECK(gate IN ('alpha','beta','gamma')),
+--  completion_number bigint NOT NULL CHECK(completion_number>0),
+--  quote jsonb NOT NULL,
+--  config_revision bigint NOT NULL,
+--  week_id text NOT NULL,
+--  locked_at timestamptz NOT NULL DEFAULT now(),
+--  PRIMARY KEY(user_id,gate,completion_number)
+-- );
+-- ALTER TABLE public.stellar_astral_quote_lock_v381 ENABLE ROW LEVEL SECURITY;
+-- REVOKE ALL ON public.stellar_astral_quote_lock_v381 FROM PUBLIC,anon,authenticated;
+-- -- Marca o histórico anterior como já contabilizado, sem pagar novamente.
+-- INSERT INTO public.stellar_astral_cursor_v381(user_id,gate,last_completed)
+-- SELECT s.user_id,g.gate,GREATEST(0,COALESCE((CASE WHEN (s.state#>>ARRAY['galaxyGate',g.gate,'completed']) ~ '^[0-9]{1,12}$' THEN (s.state#>>ARRAY['galaxyGate',g.gate,'completed'])::bigint ELSE 0 END),0))
+-- FROM public.game_saves s CROSS JOIN (VALUES('alpha'),('beta'),('gamma')) AS g(gate)
+-- ON CONFLICT(user_id,gate) DO NOTHING;
+-- 
+-- -- O mesmo cálculo é usado tanto no painel de prévia como na concessão real.
+-- CREATE OR REPLACE FUNCTION public.stellar_astral_quote_v381(p_gate text,p_first_weekly boolean DEFAULT false)
+-- RETURNS jsonb LANGUAGE plpgsql STABLE SECURITY DEFINER SET search_path=public,pg_temp AS $fn$
+-- DECLARE c jsonb; live jsonb; v_waves integer; v_enemy numeric:=1; v_damage numeric:=1; v_mult numeric; v_bonus numeric;
+-- BEGIN
+--  IF p_gate NOT IN ('alpha','beta','gamma') THEN RAISE EXCEPTION 'ASTRAL_GATE_INVALID'; END IF;
+--  SELECT config INTO c FROM public.stellar_astral_config_v381 WHERE gate=p_gate;
+--  IF c IS NULL THEN RAISE EXCEPTION 'ASTRAL_CONFIG_MISSING'; END IF;
+--  SELECT config->p_gate INTO live FROM public.galaxy_gate_config_v1906 WHERE id=1;
+--  SELECT COALESCE(sum(jsonb_array_length(r.value->'waves')),0)::integer INTO v_waves
+--  FROM jsonb_array_elements(CASE WHEN jsonb_typeof(live->'rounds')='array' THEN live->'rounds' ELSE '[]'::jsonb END) r;
+--  IF v_waves<1 THEN v_waves:=(c->>'referenceWaves')::integer; END IF;
+--  IF (live->>'enemyScale') ~ '^[0-9]+(\.[0-9]+)?$' THEN v_enemy:=least(3,greatest(0.25,(live->>'enemyScale')::numeric)); END IF;
+--  IF (live->>'damageScale') ~ '^[0-9]+(\.[0-9]+)?$' THEN v_damage:=least(3,greatest(0.25,(live->>'damageScale')::numeric)); END IF;
+--  v_mult:=round(greatest(0.5,least(3,(v_waves::numeric/(c->>'referenceWaves')::numeric)*sqrt(v_enemy*v_damage))),3);
+--  v_bonus:=CASE WHEN p_first_weekly THEN 1+(c->>'weeklyBonusPct')::numeric/100 ELSE 1 END;
+--  RETURN jsonb_build_object('gate',p_gate,'label',c->>'label','resource',c->>'resource',
+--   'waves',v_waves,'difficultyMult',v_mult,'firstWeekly',p_first_weekly,'weeklyBonusPct',(c->>'weeklyBonusPct')::integer,
+--   'credits',round((c->>'credits')::numeric*v_mult*v_bonus)::bigint,
+--   'stl',round((c->>'stl')::numeric*v_mult*v_bonus)::bigint,
+--   'cores',round((c->>'cores')::numeric*v_mult*v_bonus)::bigint,
+--   'ammoId',c->>'ammoId','ammoQty',round((c->>'ammoQty')::numeric*v_mult)::bigint,
+--   'rocketId',c->>'rocketId','rocketQty',round((c->>'rocketQty')::numeric*v_mult)::bigint,
+--   'voidite',round((c->>'voidite')::numeric*v_mult)::bigint,
+--   'resourceQty',round((c->>'resourceQty')::numeric*v_mult*v_bonus)::bigint);
+-- END;$fn$;
+-- REVOKE ALL ON FUNCTION public.stellar_astral_quote_v381(text,boolean) FROM PUBLIC,anon;
+-- GRANT EXECUTE ON FUNCTION public.stellar_astral_quote_v381(text,boolean) TO authenticated,service_role;
+-- 
+-- CREATE OR REPLACE FUNCTION public.stellar_astral_lock_quote_v381(p_gate text)
+-- RETURNS jsonb LANGUAGE plpgsql VOLATILE SECURITY DEFINER SET search_path=public,pg_temp AS $fn$
+-- DECLARE u uuid:=auth.uid(); s jsonb; n bigint; last_n bigint; q jsonb; rev bigint; wk text;
+-- BEGIN
+--  IF u IS NULL OR p_gate NOT IN ('alpha','beta','gamma') THEN RAISE EXCEPTION 'ASTRAL_LOCK_INVALID' USING ERRCODE='42501'; END IF;
+--  SELECT state INTO s FROM public.game_saves WHERE user_id=u;
+--  IF s IS NULL THEN RAISE EXCEPTION 'ASTRAL_SAVE_MISSING'; END IF;
+--  n:=greatest(0,coalesce((s#>>ARRAY['galaxyGate',p_gate,'completed'])::bigint,0));
+--  SELECT last_completed INTO last_n FROM public.stellar_astral_cursor_v381 WHERE user_id=u AND gate=p_gate;
+--  last_n:=coalesce(last_n,0);
+--  IF n>last_n THEN
+--    SELECT quote INTO q FROM public.stellar_astral_quote_lock_v381 WHERE user_id=u AND gate=p_gate AND completion_number=last_n+1;
+--    RETURN jsonb_build_object('locked',q IS NOT NULL,'pending',n-last_n,'quote',q);
+--  END IF;
+--  IF n<last_n THEN RAISE EXCEPTION 'ASTRAL_SAVE_STALE'; END IF;
+--  IF coalesce((s#>>ARRAY['galaxyGate',p_gate,'built'])::boolean,false)=false THEN
+--    RETURN jsonb_build_object('locked',false,'pending',0,'reason','GATE_NOT_BUILT');
+--  END IF;
+--  wk:=to_char(timezone('America/Sao_Paulo',now()),'IYYY-IW');
+--  q:=public.stellar_astral_quote_v381(p_gate,NOT EXISTS(
+--  SELECT 1 FROM public.stellar_astral_ledger_v381 WHERE user_id=u AND gate=p_gate AND week_id=wk));
+--  SELECT revision INTO rev FROM public.stellar_astral_config_v381 WHERE gate=p_gate;
+--  INSERT INTO public.stellar_astral_quote_lock_v381(user_id,gate,completion_number,quote,config_revision,week_id)
+--  VALUES(u,p_gate,last_n+1,q,rev,wk) ON CONFLICT DO NOTHING;
+--  SELECT quote INTO q FROM public.stellar_astral_quote_lock_v381 WHERE user_id=u AND gate=p_gate AND completion_number=last_n+1;
+--  RETURN jsonb_build_object('locked',true,'pending',0,'quote',q);
+-- END;$fn$;
+-- REVOKE ALL ON FUNCTION public.stellar_astral_lock_quote_v381(text) FROM PUBLIC,anon;
+-- GRANT EXECUTE ON FUNCTION public.stellar_astral_lock_quote_v381(text) TO authenticated;
+-- 
+-- CREATE OR REPLACE FUNCTION public.stellar_astral_dashboard_v381()
+-- RETURNS jsonb LANGUAGE plpgsql VOLATILE SECURITY DEFINER SET search_path=public,pg_temp AS $fn$
+-- DECLARE u uuid:=auth.uid(); row record; s jsonb; result jsonb:='{}'::jsonb; history jsonb; current_count bigint; last_count bigint; wk text;
+-- BEGIN
+--  IF u IS NULL THEN RAISE EXCEPTION 'ASTRAL_AUTH_REQUIRED' USING ERRCODE='42501'; END IF;
+--  wk:=to_char(timezone('America/Sao_Paulo',now()),'IYYY-IW');
+--  SELECT state INTO s FROM public.game_saves WHERE user_id=u;
+--  FOR row IN SELECT gate,config,revision FROM public.stellar_astral_config_v381 ORDER BY gate LOOP
+--   current_count:=GREATEST(0,COALESCE((s#>>ARRAY['galaxyGate',row.gate,'completed'])::bigint,0));
+--   SELECT last_completed INTO last_count FROM public.stellar_astral_cursor_v381 WHERE user_id=u AND gate=row.gate;
+--   -- Se o SQL for aplicado antes do cadastro, cursor ausente equivale a zero.
+--   result:=jsonb_set(result,ARRAY[row.gate],jsonb_build_object(
+--    'quote',COALESCE((SELECT ql.quote FROM public.stellar_astral_quote_lock_v381 ql
+--       WHERE ql.user_id=u AND ql.gate=row.gate AND ql.completion_number=coalesce(last_count,0)+1),
+--       public.stellar_astral_quote_v381(row.gate,NOT EXISTS(
+--       SELECT 1 FROM public.stellar_astral_ledger_v381 l WHERE l.user_id=u AND l.gate=row.gate AND l.week_id=wk))),
+--    'config',row.config,'revision',row.revision,
+--    'pending',greatest(0,current_count-coalesce(last_count,0)),
+--    'materialBalance',coalesce((s#>>ARRAY['cargo',row.config->>'resource'])::bigint,0)),true);
+--  END LOOP;
+--  SELECT COALESCE(jsonb_agg(to_jsonb(t) ORDER BY t.claimed_at DESC),'[]'::jsonb) INTO history FROM
+--   (SELECT gate,completion_number,week_id,first_weekly,quote,claimed_at FROM public.stellar_astral_ledger_v381
+--    WHERE user_id=u ORDER BY claimed_at DESC LIMIT 20) t;
+--  RETURN jsonb_build_object('gates',result,'history',history,'week',wk);
+-- END;$fn$;
+-- REVOKE ALL ON FUNCTION public.stellar_astral_dashboard_v381() FROM PUBLIC,anon;
+-- GRANT EXECUTE ON FUNCTION public.stellar_astral_dashboard_v381() TO authenticated;
+-- 
+-- CREATE OR REPLACE FUNCTION public.stellar_admin_set_astral_v381(p_gate text,p_config jsonb)
+-- RETURNS jsonb LANGUAGE plpgsql VOLATILE SECURITY DEFINER SET search_path=public,pg_temp AS $fn$
+-- DECLARE c jsonb; k text; limits jsonb:='{"referenceWaves":100,"credits":50000000,"stl":50000,"cores":500,"ammoQty":40000,"rocketQty":1000,"voidite":200,"resourceQty":200,"weeklyBonusPct":100}'::jsonb;
+-- BEGIN
+--  IF auth.uid() IS NULL OR NOT public.is_game_admin_v1763(auth.uid()) THEN RAISE EXCEPTION 'ASTRAL_ADMIN_ONLY' USING ERRCODE='42501'; END IF;
+--  IF p_gate NOT IN ('alpha','beta','gamma') OR jsonb_typeof(p_config)<>'object' THEN RAISE EXCEPTION 'ASTRAL_CONFIG_INVALID'; END IF;
+--  SELECT config INTO c FROM public.stellar_astral_config_v381 WHERE gate=p_gate;
+--  IF c IS NULL THEN RAISE EXCEPTION 'ASTRAL_GATE_INVALID'; END IF;
+--  FOR k IN SELECT jsonb_object_keys(p_config) LOOP
+--   IF NOT (limits ? k OR k IN ('ammoId','rocketId')) THEN RAISE EXCEPTION 'ASTRAL_FIELD_INVALID %',k; END IF;
+--   IF limits ? k THEN
+--     IF jsonb_typeof(p_config->k)<>'number' OR (p_config->>k)::numeric<0 OR (p_config->>k)::numeric>(limits->>k)::numeric OR (p_config->>k)::numeric<>trunc((p_config->>k)::numeric)
+--     THEN RAISE EXCEPTION 'ASTRAL_AMOUNT_INVALID %',k; END IF;
+--     IF k='referenceWaves' AND (p_config->>k)::integer<1 THEN RAISE EXCEPTION 'ASTRAL_WAVES_INVALID'; END IF;
+--   ELSIF k='ammoId' AND (p_config->>k) NOT IN ('lcb10','mcb25','mcb50','ucb100','sab50') THEN RAISE EXCEPTION 'ASTRAL_AMMO_INVALID';
+--   ELSIF k='rocketId' AND (p_config->>k) NOT IN ('r310','plt2026','plt2021','plt3030') THEN RAISE EXCEPTION 'ASTRAL_ROCKET_INVALID'; END IF;
+--  END LOOP;
+--  UPDATE public.stellar_astral_config_v381 SET config=c||p_config,revision=revision+1,updated_at=now(),updated_by=auth.uid() WHERE gate=p_gate;
+--  RETURN public.stellar_astral_dashboard_v381();
+-- END;$fn$;
+-- REVOKE ALL ON FUNCTION public.stellar_admin_set_astral_v381(text,jsonb) FROM PUBLIC,anon;
+-- GRANT EXECUTE ON FUNCTION public.stellar_admin_set_astral_v381(text,jsonb) TO authenticated;
+-- 
+-- CREATE OR REPLACE FUNCTION public.stellar_claim_astral_v381(p_user_id uuid,p_gate text)
+-- RETURNS jsonb LANGUAGE plpgsql VOLATILE SECURITY DEFINER SET search_path=public,pg_temp AS $fn$
+-- DECLARE s jsonb; n bigint; last_n bigint; wk text; lock_week text; weekly boolean; q jsonb; rev bigint; cr bigint; stl bigint; cores bigint;
+--         c jsonb; a jsonb; rockets jsonb; bio jsonb; prof jsonb; res text; v bigint;
+-- BEGIN
+--  IF p_user_id IS NULL OR p_gate NOT IN ('alpha','beta','gamma') THEN RAISE EXCEPTION 'ASTRAL_INVALID_CLAIM'; END IF;
+--  SELECT state INTO s FROM public.game_saves WHERE user_id=p_user_id FOR UPDATE;
+--  IF NOT FOUND THEN RAISE EXCEPTION 'ASTRAL_SAVE_MISSING'; END IF;
+--  n:=greatest(0,coalesce((s#>>ARRAY['galaxyGate',p_gate,'completed'])::bigint,0));
+--  INSERT INTO public.stellar_astral_cursor_v381(user_id,gate,last_completed) VALUES(p_user_id,p_gate,0) ON CONFLICT DO NOTHING;
+--  SELECT last_completed INTO last_n FROM public.stellar_astral_cursor_v381 WHERE user_id=p_user_id AND gate=p_gate FOR UPDATE;
+--  IF n<=last_n THEN RETURN jsonb_build_object('claimed',false,'reason','NO_PENDING_COMPLETION'); END IF;
+--  wk:=to_char(timezone('America/Sao_Paulo',now()),'IYYY-IW');
+--  weekly:=NOT EXISTS(SELECT 1 FROM public.stellar_astral_ledger_v381 WHERE user_id=p_user_id AND gate=p_gate AND week_id=wk);
+--  SELECT locked.quote,locked.config_revision,locked.week_id INTO q,rev,lock_week
+--  FROM public.stellar_astral_quote_lock_v381 locked
+--  WHERE locked.user_id=p_user_id AND locked.gate=p_gate AND locked.completion_number=last_n+1 FOR UPDATE;
+--  IF q IS NULL THEN
+--    q:=public.stellar_astral_quote_v381(p_gate,weekly);
+--    SELECT revision INTO rev FROM public.stellar_astral_config_v381 WHERE gate=p_gate;
+--  ELSE
+--    wk:=lock_week;
+--    weekly:=(q->>'firstWeekly')::boolean;
+--  END IF;
+--  INSERT INTO public.stellar_astral_ledger_v381(user_id,gate,completion_number,week_id,first_weekly,quote,config_revision)
+--  VALUES(p_user_id,p_gate,last_n+1,wk,weekly,q,rev);
+--  cr:=(q->>'credits')::bigint;stl:=(q->>'stl')::bigint;cores:=(q->>'cores')::bigint;res:=q->>'resource';
+--  prof:=coalesce(s->'profile','{}'::jsonb);
+--  prof:=prof||jsonb_build_object('credits',coalesce((prof->>'credits')::bigint,0)+cr,'uridium',coalesce((prof->>'uridium')::bigint,0)+stl);
+--  s:=jsonb_set(s,'{profile}',prof,true);
+--  bio:=coalesce(s->'pilotBio','{}'::jsonb);
+--  bio:=bio||jsonb_build_object('logDisks',coalesce((bio->>'logDisks')::bigint,0)+cores);
+--  s:=jsonb_set(s,'{pilotBio}',bio,true);
+--  c:=coalesce(s->'cargo','{}'::jsonb);
+--  c:=c||jsonb_build_object('Xenomit',coalesce((c->>'Xenomit')::bigint,0)+(q->>'voidite')::bigint,
+--    res,coalesce((c->>res)::bigint,0)+(q->>'resourceQty')::bigint);
+--  s:=jsonb_set(s,'{cargo}',c,true);
+--  a:=coalesce(s->'ammo','{}'::jsonb);
+--  a:=a||jsonb_build_object(q->>'ammoId',coalesce((a->>(q->>'ammoId'))::bigint,0)+(q->>'ammoQty')::bigint);
+--  s:=jsonb_set(s,'{ammo}',a,true);
+--  rockets:=coalesce(s->'rockets','{}'::jsonb);
+--  rockets:=rockets||jsonb_build_object(q->>'rocketId',coalesce((rockets->>(q->>'rocketId'))::bigint,0)+(q->>'rocketQty')::bigint);
+--  s:=jsonb_set(s,'{rockets}',rockets,true);
+--  -- Usa a revisão de compras já reconhecida pelo backend para bloquear saves antigos.
+--  s:=jsonb_set(s,'{serverPurchaseRevision}',to_jsonb(coalesce((s->>'serverPurchaseRevision')::bigint,0)+1),true);
+--  UPDATE public.game_saves SET state=s,updated_at=now() WHERE user_id=p_user_id;
+--  UPDATE public.profiles SET credits=(prof->>'credits')::bigint,uridium=(prof->>'uridium')::bigint,updated_at=now() WHERE id=p_user_id;
+--  UPDATE public.stellar_astral_cursor_v381 SET last_completed=last_n+1,updated_at=now() WHERE user_id=p_user_id AND gate=p_gate;
+--  DELETE FROM public.stellar_astral_quote_lock_v381 WHERE user_id=p_user_id AND gate=p_gate AND completion_number=last_n+1;
+--  RETURN jsonb_build_object('claimed',true,'quote',q,'completion',last_n+1,'revision',s->'serverPurchaseRevision');
+-- END;$fn$;
+-- REVOKE ALL ON FUNCTION public.stellar_claim_astral_v381(uuid,text) FROM PUBLIC,anon,authenticated;
+-- GRANT EXECUTE ON FUNCTION public.stellar_claim_astral_v381(uuid,text) TO service_role;
+-- COMMIT;
+-- ===== END V38_1_0_ASTRAL_REWARDS.sql =====
+

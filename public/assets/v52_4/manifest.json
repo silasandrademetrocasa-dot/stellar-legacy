@@ -1,0 +1,19 @@
+{
+  "ships": {
+    "phoenix": "AURORA",
+    "leonov": "LYNX",
+    "liberator": "PIONEER",
+    "piranha": "RAPTOR",
+    "vengeance": "VALKYRIE",
+    "bigboy": "BASTION",
+    "goliath": "LEVIATHAN",
+    "citadel": "BULWARK",
+    "aegis": "SERAPH",
+    "spearhead": "PATHFINDER",
+    "defcom": "PHANTOM",
+    "yamato": "KENSEI",
+    "nostromo": "MERIDIAN"
+  },
+  "orientation": "top-down +Z front",
+  "assets": "rendered directly from v50/v52_3 GLBs"
+}

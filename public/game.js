@@ -1,5 +1,3 @@
-/* STELLAR_VISUAL_FLEET_V52_3 */
-/* STELLAR_VISUAL_FLEET_V52_0 */
 /* STELLAR_SHIPS3D_FLEET_V50 */
 /* STELLAR_OFFLINE_FARM_VISUAL_V485 */
 /* STELLAR_OFFLINE_FARM_V484 APPLIED */
@@ -80,21 +78,80 @@ import { xpThresholdV460, migratePilotXpV460 } from './level-curve-v460.js?v=47.
 import { xpThresholdV482, migratePilotXpV482 } from './level-curve-v482.js?v=47.7.6';
 import { applyRecruitBonusV2012, eliteRouteSnapshotV2012, freshEliteRouteJournalV2012, ELITE_ROUTE_TARGETS_V2012, novaTierPriceV2012 } from './progression-plan-v2012.js?v=47.7.6';
 import { GAME_ASSETS } from './assets/v17/manifest.js?v=47.7.6';
-/* STELLAR_VISUAL_FLEET_V52_0: preview GLB cards across Hangar/Shop/AUX, resource icons */
-for(const id of ["phoenix","leonov","liberator","piranha","vengeance","bigboy","goliath","citadel","aegis","spearhead","defcom","yamato","nostromo"])GAME_ASSETS.ships[id]='/assets/v52_3/cards/ship_'+id+'.png';
-for(const id of ["streuner","recruitStreuner","aiderStreuner","bossStreuner","lordakia","bossLordakia","saimon","bossSaimon","mordon","bossMordon","devolarium","bossDevolarium","sibelon","bossSibelon"])GAME_ASSETS.npcs[id]='/assets/v52_3/cards/npc_'+id+'.png';
-for(const id of ["Prometium","Endurium","Terbium","Prometid","Duranium","Promerium","Xenomit"])GAME_ASSETS.resources[id]='/assets/v52_3/cards/ore_'+id+'.png';
-GAME_ASSETS.drones.pet='/assets/v52_3/cards/aux9.png';
-GAME_ASSETS.drones.petElite='/assets/v52_3/cards/aux9.png';
-GAME_ASSETS.droneMap.pet='/assets/v52_3/cards/aux9.png';
-GAME_ASSETS.droneMap.petElite='/assets/v52_3/cards/aux9.png';
-GAME_ASSETS.bonus.box='/assets/v52_3/cards/box_bonus.png';
-GAME_ASSETS.loot.cargo='/assets/v52_3/cards/box_loot.png';
-STELLAR_3D_V50.preload('phoenix');
-
 import { signUp, signIn, beginGoogleSignIn, restoreGoogleSignInFromUrl, requestPasswordReset, restorePasswordRecoveryFromUrl, restoreSession, signOutLocal, checkGameSession, endGameSession, getUser, getSessionCredentials, loadCloudSave, saveCloudSave, loadEliteOperationsOnline, claimEliteOperationOnline, loadWarCampaignsOnline, claimWarSupplyOnline, claimWarCampaignOnline, loadAdminWarCampaignsOnline, saveAdminWarCampaignOnline, saveAdminWarRulesOnline, loadAdminEliteObjectivesOnline, saveAdminEliteObjectiveOnline, updateCallsign, updatePassword, loadRankings, loadAuctionBids, saveAuctionBidOnline, markAuctionBidStatusOnline, loadAuctionMarket, upsertPlayerPresenceOnline, loadMapPresenceOnline, savePlayerLocationCheckpointOnline, loadPlayerLocationCheckpointOnline, removePlayerPresenceOnline, queuePvpAttackOnline, consumePvpDamageEventsOnline, syncArenaProfileOnline, loadArenaState, loadArenaDailyRewardStatus, claimArenaDailyReward, loadArenaOpponents, loadArenaHistory, arenaAttackOnline, listClansOnline, loadMyClanOnline, createClanOnline, joinClanOnline, getClanRequestsOnline, reviewClanRequestOnline, cancelClanRequestOnline, setClanMemberRoleOnline, leaveClanOnline, transferClanCreditsOnline, claimClanCreditGrantsOnline, recordClanAlienKillOnline, getPremiumShopOnline, testPurchasePremiumOnline, adminPreviewPremiumStageOnline, adminSimulatePremiumStageOnline, getPremiumStageCatalogOnline, loadWarfrontStateOnline, loadSectorOwnershipOnline, hitWorldBossOnline, claimWorldBossRewardOnline, declareClanWarOnline, recordClanWarScoreOnline, loadLiveOpsOnline, adminUpdateLiveEventScheduleOnline, purchaseLiveCatalogOnline, economyActionOnline, getChatHistoryOnline, sendChatMessageOnline, redeemGameCouponOnline, getMyDesignersOnline, setDesignLoadoutOnline, claimGateDroneDesignOnline, claimEventDesignerOnline, getAdminStatus, adminSearchAccounts, adminRecentActions, adminBanAccount, adminUnbanAccount, adminResetAccount, adminDeleteAccount, pushTelemetryBatch, adminTelemetryOverview, adminPlayerTelemetry, getBattleGroupOnline, createBattleGroupOnline, inviteBattleGroupOnline, searchBattleGroupPlayersOnline, inviteBattleGroupUserOnline, respondBattleGroupInviteOnline, leaveBattleGroupOnline, kickBattleGroupMemberOnline, setBattleGroupRallyOnline, loadRuntimeConfigOnline, loadNpcRuntimeConfigOnline, loadWorldRuntimeConfigOnline, loadSystemsRuntimeConfigOnline, loadAdminRuntimeMonitorOnline, adminUpdateRuntimeModuleOnline, adminUpdateNpcRuntimeOnline, adminUpdateNpcSpawnRuntimeOnline, adminUpdateWorldMapOnline, adminUpdateWorldResourceOnline, adminUpdateWorldSectorOnline, adminUpdateWorldPortalOnline, adminUpdateWorldResourcePoolOnline, adminUpdateMissionCategoryOnline, adminUpdateEconomyServiceOnline, adminUpdateCraftingRecipeOnline, loadBattlePassRuntimeConfigOnline, adminUpdateBattlePassSeasonOnline, adminUpdateBattlePassTierOnline, loadShopsRuntimeConfigOnline, adminUpdateCommonShopItemOnline, adminUpdatePremiumShopItemOnline, loadBonusConfigOnline, adminUpdateBonusConfigOnline, adminCouponDashboardOnline, adminCreateCouponOnline, adminSetCouponActiveOnline, loadGalaxyGatesOnline, adminUpdateGalaxyGateOnline, adminUpsertCustomMissionOnline, adminDeleteCustomMissionOnline, adminCreateCraftRecipeOnline, adminCreateEconomyServiceOnline, adminCreatePassSeasonOnline, loadAuctionRulesOnline, adminUpdateAuctionRulesOnline, loadBalanceRuntimeOnline, adminUpdateBalanceOnline,loadAdminSecurityIncidents,reviewAdminSecurityIncident } from './api.js?v=47.7.6';
 import {createOfflineFarmV484} from './modules/stellar-offline-farm-v484.js?v=47.7.6';
 import { SharedUniverseClient } from './world.js?v=47.7.6';
+
+const SHIP_VISUAL_IDS_V525=["phoenix", "leonov", "liberator", "piranha", "vengeance", "bigboy", "goliath", "citadel", "aegis", "spearhead", "defcom", "yamato", "nostromo"];
+const NPC_VISUAL_IDS_V525=["streuner", "recruitStreuner", "aiderStreuner", "bossStreuner", "lordakia", "bossLordakia", "saimon", "bossSaimon", "mordon", "bossMordon", "devolarium", "bossDevolarium", "sibelon", "bossSibelon"];
+
+/* STELLAR_V524_GLOBAL_VISUALS: modelo de imagem atual compartilhado */
+for(const id of SHIP_VISUAL_IDS_V525){
+ GAME_ASSETS.ships[id]='/assets/v52_4/ships/'+id+'.png';
+ GAME_ASSETS.shipMap[id]='/assets/v52_4/ships/'+id+'.png';
+ // Disable old directional atlases: the fallback 2D uses the top-down PNG itself.
+ if(GAME_ASSETS.shipMapSheets32)delete GAME_ASSETS.shipMapSheets32[id];
+ if(GAME_ASSETS.shipMapSheets)delete GAME_ASSETS.shipMapSheets[id];
+}
+for(const id of NPC_VISUAL_IDS_V525){
+ GAME_ASSETS.npcs[id]='/assets/v52_4/npcs/npc_'+id+'.png';
+ if(GAME_ASSETS.npcMapSheets32)delete GAME_ASSETS.npcMapSheets32[id];
+ if(GAME_ASSETS.npcMapSheets)delete GAME_ASSETS.npcMapSheets[id];
+}
+for(const id of ['pet','petElite']){
+ GAME_ASSETS.drones[id]='/assets/v52_4/aux9.png';
+ GAME_ASSETS.droneMap[id]='/assets/v52_4/aux9.png';
+ if(GAME_ASSETS.droneMapSheets32)delete GAME_ASSETS.droneMapSheets32[id];
+ if(GAME_ASSETS.droneMapSheets)delete GAME_ASSETS.droneMapSheets[id];
+}
+// Ore and loot image set kept from the approved enhanced classic V52.3 artwork.
+for(const id of ['Prometium','Endurium','Terbium','Prometid','Duranium','Promerium','Xenomit']){
+ GAME_ASSETS.resources[id]='/assets/v52_3/cards/ore_'+id+'.png';
+}
+GAME_ASSETS.bonus.box='/assets/v52_3/cards/box_bonus.png';
+GAME_ASSETS.loot.cargo='/assets/v52_3/cards/box_loot.png';
+// The starter faction has a shared Aurora hull; only gameplay/faction changes, not the art.
+for(const faction of Object.keys(GAME_ASSETS.starterDesigners||{})){
+ GAME_ASSETS.starterDesigners[faction].card='/assets/v52_4/ships/phoenix.png';
+ GAME_ASSETS.starterDesigners[faction].map='/assets/v52_4/ships/phoenix.png';
+ GAME_ASSETS.starterDesigners[faction].showcase='/assets/v52_4/ships/phoenix.png';
+}
+const STELLAR_VISUAL_SETTING_V525='stellar3d.v50';
+function stellarVisualModeV524(){
+ try{const mode=localStorage.getItem(STELLAR_VISUAL_SETTING_V525);return mode==='off'?'2d':mode==='on'?'3d':'auto';}catch{return 'auto'}
+}
+function stellarCan3dV524(){
+ const mode=stellarVisualModeV524();
+ return STELLAR_3D_V50.supported&&(mode==='3d'||(mode==='auto'&&resolvedQualityMode()!=='low'));
+}
+function stellarSetVisualModeV524(mode){
+ STELLAR_3D_V50.setMode(mode==='2d'?'off':mode==='3d'?'on':'auto');
+ if(mode!=='2d'&&progress?.activeShipId)STELLAR_3D_V50.preload(progress.activeShipId);
+ renderSettings();
+}
+function stellarEnsureVisualSettingsV524(){
+ if(!ui.configModal||!ui.qualityButtons)return;
+ let section=ui.configModal.querySelector('#stellarVisualSectionV524');
+ if(!section){
+  section=document.createElement('section');section.id='stellarVisualSectionV524';section.className='settings-section';
+  section.innerHTML='<div class="settings-title"><div><b>VISUAL DO JOGO</b><small>Aplica-se a naves, AUX-9, NPCs, minérios e caixas.</small></div></div>'+
+   '<div class="quality-grid" role="group" aria-label="Visual do jogo">'+
+   '<button type="button" class="quality-card" data-stellar-visual="auto"><b>AUTOMÁTICO</b><span>3D se disponível; senão novas imagens 2D.</span></button>'+
+   '<button type="button" class="quality-card" data-stellar-visual="3d"><b>3D</b><span>Prioriza modelos 3D de todos os elementos.</span></button>'+
+   '<button type="button" class="quality-card" data-stellar-visual="2d"><b>2D</b><span>Imagens superiores novas, mais leve.</span></button></div>'+
+   '<small id="stellarVisualStatusV524" class="performance-hint"></small>';
+  const anchor=ui.qualityButtons.closest('.settings-section')||ui.qualityButtons.parentElement;
+  anchor.after(section);
+  section.addEventListener('click',event=>{const button=event.target.closest('[data-stellar-visual]');if(button)stellarSetVisualModeV524(button.dataset.stellarVisual)});
+ }
+ const current=stellarVisualModeV524();
+ for(const b of section.querySelectorAll('[data-stellar-visual]')){
+  const selected=b.dataset.stellarVisual===current;
+  b.classList.toggle('active',selected);b.setAttribute('aria-pressed',String(selected));
+ }
+ const status=section.querySelector('#stellarVisualStatusV524');
+ if(status)status.textContent=!STELLAR_3D_V50.supported?'WebGL2 indisponível: fallback 2D novo':current==='2d'?'Modo 2D ativado':current==='3d'?'Modo 3D ativado • fallback automático em falhas':'Automático • qualidade '+resolvedQualityMode().toUpperCase();
+}
 
 const canvas = document.querySelector('#game');
 const ctx = canvas.getContext('2d');
@@ -331,7 +388,7 @@ const NPC_WORLD_SPRITES = Object.freeze({
   astralReaper: '/assets/v17/npcs/colossar.webp',
   bossAstralReaper: '/assets/v17/npcs/colossar-prime.webp',
 });
-function npcWorldSpriteAsset(type){return NPC_WORLD_SPRITES[type] || GAME_ASSETS.npcs?.[type] || null;}
+function npcWorldSpriteAsset(type){return NPC_VISUAL_IDS_V525.includes(type)?GAME_ASSETS.npcs[type]:(NPC_WORLD_SPRITES[type]||GAME_ASSETS.npcs?.[type]||null);}
 function shipCardAsset(id,faction=progress?.profile?.faction){
   if(id==='phoenix' && GAME_ASSETS.starterDesigners?.[faction])return GAME_ASSETS.starterDesigners[faction].card;
   return (GAME_ASSETS.ships&&GAME_ASSETS.ships[id])||null;
@@ -3507,6 +3564,7 @@ function isSettingsOpenV2029(){return !!ui.configModal&&!ui.configModal.classLis
 function renderSettings(){
   // V20.2.9: atualizações em segundo plano não reprocessam a árvore de CONF escondida.
   if(!isSettingsOpenV2029())return;
+  stellarEnsureVisualSettingsV524();
 document.body.dataset.quality=resolvedQualityMode();
   if(ui.qualityCurrentBadge)ui.qualityCurrentBadge.textContent=qualityBadgeLabel();
   updatePerfDiagnostics();
@@ -5518,7 +5576,7 @@ function drawBonusBoxes(){
     if(!onScreenWorld(box.x,box.y,70))continue;
     const p=screenPos(box.x,box.y);ctx.save();ctx.translate(p.x,p.y);
     const size=low?34:40,scale=low?1:1+Math.sin(nowSec()*2+box.x)*.035;
-    if(resolvedQualityMode()==='high'&&STELLAR_3D_V50.drawAsset(ctx,'box_bonus',0,size*scale)){ /* V52.3: modelo 3D box bônus */ }else if(img?.naturalWidth){ctx.drawImage(img,-size*scale/2,-size*scale/2,size*scale,size*scale);}
+    if(stellarCan3dV524()&&STELLAR_3D_V50.drawAsset(ctx,'box_bonus',0,size*scale)){ /* V52.3: modelo 3D box bônus */ }else if(img?.naturalWidth){ctx.drawImage(img,-size*scale/2,-size*scale/2,size*scale,size*scale);}
     else{
       // Reserva visual breve se a imagem ainda estiver baixando ou falhar: uma caixa facetada, nunca um quadrado azul.
       ctx.fillStyle='rgba(12,23,45,.95)';ctx.strokeStyle='#e8bb52';ctx.lineWidth=2;
@@ -6551,7 +6609,7 @@ function drawPilotNameplate({x,y,rankCode='pilot_basic',clanTag='',callsign='Pil
 function drawRemotePet(rp){
   const q=rp?.pet;if(!q?.owned||!Number.isFinite(q.x)||!Number.isFinite(q.y)||!onScreenWorld(q.x,q.y,140))return;const p=screenPos(q.x,q.y),mode=q.activeGear||'off',designer=designById(q.designId),visual=designer?.visual||{},color=visual.glow||(mode==='guard'?'#ff8c93':mode==='box'?'#ffd46b':mode==='ore'?'#7fffc4':'#7edcff'),petId=(q.level||1)>=10?'petElite':'pet',sheet=assetImage(droneMapSheetAsset(petId)),path=droneMapAsset(petId),img=assetImage(path);
   const size=30+Math.min(15,Number(q.level)||1)/15*9;
-  if(!(drawAuxSpriteSheet(sheet,q.angle||0,size,{x:p.x,y:p.y,color,designer,alpha:.9}))){if(resolvedQualityMode()!=='low'&&STELLAR_3D_V50.drawAssetAt(ctx,'aux9',q.angle||0,42,p.x,p.y)){ /* V52 AUX remoto */ }else if(img&&img.naturalWidth){const sc=size/Math.max(img.naturalWidth,img.naturalHeight);ctx.save();ctx.translate(p.x,p.y);ctx.rotate((q.angle||0)+Math.PI/2);ctx.globalAlpha=.9;ctx.shadowColor=color;ctx.shadowBlur=resolvedQualityMode()==='low'?0:(designer?16:10);if(resolvedQualityMode()!=='low'&&designer)ctx.filter=designerVisualCss(designer);ctx.drawImage(img,-img.naturalWidth*sc/2,-img.naturalHeight*sc/2,img.naturalWidth*sc,img.naturalHeight*sc);ctx.filter='none';if(designer&&resolvedQualityMode()!=='low'){ctx.rotate(-((q.angle||0)+Math.PI/2));ctx.strokeStyle=visual.accent||color;ctx.lineWidth=designer.rarity==='mythic'?2:1.2;ctx.globalAlpha=.78;ctx.beginPath();ctx.arc(0,0,size*.62,0,TWO_PI);ctx.stroke();}ctx.restore();}else{ctx.fillStyle=color;ctx.beginPath();ctx.arc(p.x,p.y,7,0,TWO_PI);ctx.fill();}}
+  if(stellarCan3dV524()&&STELLAR_3D_V50.drawAssetAt(ctx,'aux9',q.angle||0,size,p.x,p.y)){ /* 3D AUX remoto */ }else if(!(drawAuxSpriteSheet(sheet,q.angle||0,size,{x:p.x,y:p.y,color,designer,alpha:.9}))){if(stellarCan3dV524()&&STELLAR_3D_V50.drawAssetAt(ctx,'aux9',q.angle||0,42,p.x,p.y)){ /* V52 AUX remoto */ }else if(img&&img.naturalWidth){const sc=size/Math.max(img.naturalWidth,img.naturalHeight);ctx.save();ctx.translate(p.x,p.y);ctx.rotate((q.angle||0)+Math.PI/2);ctx.globalAlpha=.9;ctx.shadowColor=color;ctx.shadowBlur=resolvedQualityMode()==='low'?0:(designer?16:10);if(resolvedQualityMode()!=='low'&&designer)ctx.filter=designerVisualCss(designer);ctx.drawImage(img,-img.naturalWidth*sc/2,-img.naturalHeight*sc/2,img.naturalWidth*sc,img.naturalHeight*sc);ctx.filter='none';if(designer&&resolvedQualityMode()!=='low'){ctx.rotate(-((q.angle||0)+Math.PI/2));ctx.strokeStyle=visual.accent||color;ctx.lineWidth=designer.rarity==='mythic'?2:1.2;ctx.globalAlpha=.78;ctx.beginPath();ctx.arc(0,0,size*.62,0,TWO_PI);ctx.stroke();}ctx.restore();}else{ctx.fillStyle=color;ctx.beginPath();ctx.arc(p.x,p.y,7,0,TWO_PI);ctx.fill();}}
   ctx.fillStyle=color;ctx.font='bold 9px Arial';ctx.textAlign='center';ctx.fillText(`AUX-9 LV ${q.level||1}${designer?' • '+designer.name:''}`,p.x,p.y+24);
   if(q.laserActive&&q.laserTargetId){const t=remoteTargetEntity(q.laserTargetId,false)||remoteTargetEntity(q.laserTargetId,true);if(t&&t.hp>0){const sp=screenPos(t.x,t.y),c=q.laserColor||rp.laserColor||'#76d9ff';ctx.save();ctx.strokeStyle=c;ctx.shadowColor=c;ctx.shadowBlur=8;ctx.globalAlpha=.9;ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(p.x,p.y);ctx.lineTo(sp.x,sp.y);ctx.stroke();ctx.restore();}}
 }
@@ -6562,7 +6620,7 @@ function drawOnlinePlayers(){
   for(const rp of onlineWorld.players.values()){
     if(!onScreenWorld(rp.x,rp.y,180))continue;const p=screenPos(rp.x,rp.y),f=FACTIONS[rp.faction],enemy=onlinePlayerEnemy(rp),sameGroup=isBattleGroupMember(rp.id),sameClan=!!currentClanTag()&&!!rp.clanTag&&rp.clanTag===currentClanTag(),color=sameGroup?'#63e8ff':enemy?'#ff4d69':sameClan?'#ffe16b':(f?.color||'#69ffbd'),path=shipMapAsset(rp.shipId,rp.faction),img=assetImage(path),sheet=assetImage(shipMapSheetAsset(rp.shipId,rp.faction)),size=onlineShipSize(rp.shipId),designer=designById(rp.shipDesignId),visual=designer?.visual||{},moving=Math.hypot((rp.tx??rp.x)-rp.x,(rp.ty??rp.y)-rp.y)>2;
     ctx.save();ctx.translate(p.x,p.y);ctx.globalAlpha=.92;if(state.target?.isPlayer&&state.target.id===rp.id){const rr=size*.55+18;ctx.strokeStyle='#ffed6f';ctx.lineWidth=2;ctx.setLineDash([6,4]);ctx.beginPath();ctx.arc(0,0,rr,0,TWO_PI);ctx.stroke();ctx.setLineDash([]);}
-    if(sheet&&sheet.naturalWidth){ctx.save();ctx.rotate((rp.angle||0)+Math.PI/2);drawEngineWakeLocal(size,visual.glow||color,moving?1:0,Number(rp.level)||0);ctx.restore();drawAuxSpriteSheet(sheet,rp.angle||0,size,{x:0,y:0,color:visual.glow||color,designer,alpha:1});drawDesignerAuraLocal(size,designer,visual,Number(rp.level)||0);}else if(STELLAR_3D_V50.draw(ctx,isShipAllowedV50(rp.shipId)?rp.shipId:'phoenix',rp.angle||0,size)){
+    if(sheet&&sheet.naturalWidth){ctx.save();ctx.rotate((rp.angle||0)+Math.PI/2);drawEngineWakeLocal(size,visual.glow||color,moving?1:0,Number(rp.level)||0);ctx.restore();drawAuxSpriteSheet(sheet,rp.angle||0,size,{x:0,y:0,color:visual.glow||color,designer,alpha:1});drawDesignerAuraLocal(size,designer,visual,Number(rp.level)||0);}else if(stellarCan3dV524()&&STELLAR_3D_V50.draw(ctx,isShipAllowedV50(rp.shipId)?rp.shipId:'phoenix',rp.angle||0,size)){
       ctx.save();ctx.rotate((rp.angle||0)+Math.PI/2);drawEngineWakeLocal(size,visual.glow||color,moving?1:0,Number(rp.level)||0);ctx.restore();
       drawDesignerAuraLocal(size,designer,visual,Number(rp.level)||0);
     }else if(img&&img.naturalWidth){const sc=size/Math.max(img.naturalWidth,img.naturalHeight);ctx.save();ctx.rotate((rp.angle||0)+Math.PI/2);drawEngineWakeLocal(size,visual.glow||color,moving?1:0,Number(rp.level)||0);ctx.shadowColor=visual.glow||color;ctx.shadowBlur=resolvedQualityMode()==='low'?0:(designer?18:10);if(resolvedQualityMode()!=='low'&&designer)ctx.filter=designerVisualCss(designer);ctx.drawImage(img,-img.naturalWidth*sc/2,-img.naturalHeight*sc/2,img.naturalWidth*sc,img.naturalHeight*sc);ctx.filter='none';ctx.restore();drawDesignerAuraLocal(size,designer,visual,Number(rp.level)||0);}else{ctx.rotate(rp.angle||0);drawShipModel(rp.shipId,color);}
@@ -6841,7 +6899,7 @@ function drawPortals(){
 function drawOres(){for(const o of state.ores){if(!onScreenWorld(o.x,o.y,100))continue;
   const p=screenPos(o.x,o.y),path=GAME_ASSETS.resources[o.type];
   const img=assetImage(path);
-  if(resolvedQualityMode()==='high'&&STELLAR_3D_V50.drawAssetAt(ctx,'ore_'+o.type,(o.rot||0)+nowSec()*.08,Math.max(26,o.r*3.2),p.x,p.y))continue; if(img&&img.naturalWidth){
+  if(stellarCan3dV524()&&STELLAR_3D_V50.drawAssetAt(ctx,'ore_'+o.type,(o.rot||0)+nowSec()*.08,Math.max(26,o.r*3.2),p.x,p.y))continue; if(img&&img.naturalWidth){
     const size=Math.max(20,o.r*2.35),pulse=.95+Math.sin(nowSec()*2.2+o.x*.01)*.05;
     ctx.save();ctx.translate(p.x,p.y);ctx.rotate((o.rot||0)+nowSec()*.08);ctx.globalAlpha=.96;ctx.shadowColor=o.color;ctx.shadowBlur=resolvedQualityMode()==='low'?0:((qualityProfile().sceneLight??1)>.55?10:3);
     const scale=(size*pulse)/Math.max(img.naturalWidth,img.naturalHeight),w=img.naturalWidth*scale,h=img.naturalHeight*scale;ctx.drawImage(img,-w/2,-h/2,w,h);
@@ -6856,7 +6914,7 @@ function drawLoot(){for(const l of state.loot){
   if(remaining<=0||!onScreenWorld(l.x,l.y,100))continue;
   const p=screenPos(l.x,l.y),pulse=.92+Math.sin(nowSec()*4+l.x*.02)*.08,img=assetImage(GAME_ASSETS.loot.cargo);
   const dyingAlpha=remaining<=5?(.38+.62*Math.abs(Math.sin(nowSec()*7))):1;
-  if(resolvedQualityMode()==='high'&&STELLAR_3D_V50.drawAssetAt(ctx,'box_loot',0,42*pulse,p.x,p.y))continue; if(img&&img.naturalWidth){
+  if(stellarCan3dV524()&&STELLAR_3D_V50.drawAssetAt(ctx,'box_loot',0,42*pulse,p.x,p.y))continue; if(img&&img.naturalWidth){
     ctx.save();ctx.globalAlpha=dyingAlpha;ctx.translate(p.x,p.y);ctx.rotate(Math.sin(nowSec()+l.x)*.06);
     ctx.shadowColor=remaining<=5?'#ff5a4c':'#ffbd48';ctx.shadowBlur=resolvedQualityMode()==='low'?0:((qualityProfile().sceneLight??1)>.55?(remaining<=5?16:9):2);
     const size=42*pulse,sc=size/Math.max(img.naturalWidth,img.naturalHeight);
@@ -6903,7 +6961,9 @@ function drawEnemy(e){
     ctx.rotate(nowSec()*(phase===2?.30:-.18));ctx.beginPath();ctx.arc(0,0,rr,0,TWO_PI);ctx.stroke();ctx.restore();
   }
   if(state.target?.id===e.id){const rr=e.size+18+Math.sin(nowSec()*6)*2;ctx.strokeStyle=claimColor||(e.eventNpc?'rgba(255,190,72,.98)':'rgba(255,74,95,.98)');ctx.lineWidth=2;ctx.setLineDash([7,4]);ctx.beginPath();ctx.arc(0,0,rr,0,TWO_PI);ctx.stroke();ctx.setLineDash([]);ctx.rotate(-nowSec()*.55);for(let i=0;i<4;i++){ctx.rotate(Math.PI/2);ctx.beginPath();ctx.moveTo(rr+3,-8);ctx.lineTo(rr+3,8);ctx.lineTo(rr-5,8);ctx.stroke();}ctx.rotate(nowSec()*.55);}
-  if((sheet&&sheet.naturalWidth)||(img&&img.naturalWidth)){
+  if(stellarCan3dV524()&&STELLAR_3D_V50.drawAsset(ctx,'npc_'+e.type,e.sharedWorld&&Number.isFinite(e.visualAngle)?e.visualAngle:Math.atan2(player.y-e.y,player.x-e.x),e.size*(boss?3.45:3.08))){
+    /* V52.5 NPC model drawn */
+  }else if((sheet&&sheet.naturalWidth)||(img&&img.naturalWidth)){
     // NPC online mira na direcao autenticada do servidor; NPC local permanece
     // com a referencia de alvo que ja usava antes desta atualizacao.
     const heading=e.sharedWorld&&Number.isFinite(e.visualAngle)?e.visualAngle:Math.atan2(player.y-e.y,player.x-e.x),face=heading-Math.PI/2,size=e.size*(boss?3.45:3.08),fx=npcFxProfile(e.type);
@@ -6941,7 +7001,7 @@ function drawPet(){if(document.body.classList.contains('stellar-offline-active-v
   if(!progress?.pet?.owned)return;
   const p=screenPos(petRuntime.x,petRuntime.y),mode=progress.pet.activeGear||'off',designer=currentPetDesign(),visual=designer?.visual||{},color=visual.glow||(mode==='guard'?'#ff8c93':mode==='box'?'#ffd46b':mode==='ore'?'#7fffc4':'#7edcff');
   const petId=progress.pet.level>=10?'petElite':'pet',sheet=assetImage(droneMapSheetAsset(petId)),path=droneMapAsset(petId),img=assetImage(path),size=34+(progress.pet.level/15)*10;
-  if(!(drawAuxSpriteSheet(sheet,petRuntime.angle||0,size,{x:p.x,y:p.y,color,designer,alpha:1}))){if(resolvedQualityMode()!=='low'&&STELLAR_3D_V50.drawAssetAt(ctx,'aux9',petRuntime.angle||0,48,p.x,p.y)){ /* V52 AUX local: GLB renderizado */ }else if(img&&img.naturalWidth){const sc=size/Math.max(img.naturalWidth,img.naturalHeight);ctx.save();ctx.translate(p.x,p.y);ctx.rotate((petRuntime.angle||0)+Math.PI/2);ctx.shadowColor=color;ctx.shadowBlur=resolvedQualityMode()==='low'?0:(designer?18:12);if(resolvedQualityMode()!=='low'&&designer)ctx.filter=designerVisualCss(designer);ctx.drawImage(img,-img.naturalWidth*sc/2,-img.naturalHeight*sc/2,img.naturalWidth*sc,img.naturalHeight*sc);ctx.filter='none';if(designer&&resolvedQualityMode()!=='low'){ctx.rotate(-((petRuntime.angle||0)+Math.PI/2));ctx.strokeStyle=visual.accent||color;ctx.globalAlpha=.68+.2*Math.sin(nowSec()*3);ctx.lineWidth=designer.rarity==='mythic'?2.2:1.4;ctx.beginPath();ctx.arc(0,0,size*.62,0,TWO_PI);ctx.stroke();}ctx.restore();}
+  if(stellarCan3dV524()&&STELLAR_3D_V50.drawAssetAt(ctx,'aux9',petRuntime.angle||0,size,p.x,p.y)){ /* 3D AUX local */ }else if(!(drawAuxSpriteSheet(sheet,petRuntime.angle||0,size,{x:p.x,y:p.y,color,designer,alpha:1}))){if(stellarCan3dV524()&&STELLAR_3D_V50.drawAssetAt(ctx,'aux9',petRuntime.angle||0,48,p.x,p.y)){ /* V52 AUX local: GLB renderizado */ }else if(img&&img.naturalWidth){const sc=size/Math.max(img.naturalWidth,img.naturalHeight);ctx.save();ctx.translate(p.x,p.y);ctx.rotate((petRuntime.angle||0)+Math.PI/2);ctx.shadowColor=color;ctx.shadowBlur=resolvedQualityMode()==='low'?0:(designer?18:12);if(resolvedQualityMode()!=='low'&&designer)ctx.filter=designerVisualCss(designer);ctx.drawImage(img,-img.naturalWidth*sc/2,-img.naturalHeight*sc/2,img.naturalWidth*sc,img.naturalHeight*sc);ctx.filter='none';if(designer&&resolvedQualityMode()!=='low'){ctx.rotate(-((petRuntime.angle||0)+Math.PI/2));ctx.strokeStyle=visual.accent||color;ctx.globalAlpha=.68+.2*Math.sin(nowSec()*3);ctx.lineWidth=designer.rarity==='mythic'?2.2:1.4;ctx.beginPath();ctx.arc(0,0,size*.62,0,TWO_PI);ctx.stroke();}ctx.restore();}
   else{ctx.fillStyle=color;ctx.beginPath();ctx.arc(p.x,p.y,8,0,TWO_PI);ctx.fill();}}
   ctx.fillStyle=color;ctx.font='bold 10px Arial';ctx.textAlign='center';ctx.fillText(`AUX-9 LV ${progress.pet.level}${designer?' • '+designer.name:''}`,p.x,p.y+28);
   if(petRuntime.laserTargetId&&nowSec()<petRuntime.laserUntil){const e=state.enemies.find(x=>x.id===petRuntime.laserTargetId&&x.hp>0)||onlineWorld.players.get(petRuntime.laserTargetId);if(e&&e.hp>0){const t=screenPos(e.x,e.y),ammo=currentLaserAmmo();drawLaserFxLine(p.x,p.y,t.x,t.y,ammo.id,ammo.color,.82,.68);}}
@@ -7000,7 +7060,7 @@ function drawPlayer(){if(document.body.classList.contains('stellar-offline-activ
   const moving=routeDistance()>4,motion=moving?1:0;
   const ship=SHIPS[progress.activeShipId]||{},shipSize=(ship.id==='citadel'?105:ship.id==='bigboy'?96:ship.id==='goliath'||ship.id==='aegis'?88:78);
   ctx.save();ctx.translate(p.x,p.y);
-  if(STELLAR_3D_V50.draw(ctx,progress.activeShipId,a,shipSize)){
+  if(stellarCan3dV524()&&STELLAR_3D_V50.draw(ctx,progress.activeShipId,a,shipSize)){
     ctx.save();ctx.rotate(a+Math.PI/2);drawEngineWakeLocal(shipSize,color,motion,progress.profile.level||0);ctx.restore();
     drawDesignerAuraLocal(shipSize,designer,visual,progress.profile.level||0);
   }else{
@@ -7475,9 +7535,7 @@ function renderHangarShips(){
   const none=document.createElement('option');none.value='';none.textContent=eligible?'SEM DESIGNER':'NAVE NÃO ELEGÍVEL';sel.appendChild(none);
   defs.forEach(d=>{const opt=document.createElement('option');opt.value=d.design_id;opt.textContent=`${d.name} • ${rarityLabel(d.rarity)} • ${ownedDesignQty(d.design_id)}x`;opt.disabled=ownedDesignQty(d.design_id)<=0;sel.appendChild(opt);});sel.value=activeDesign?.design_id||'';sel.disabled=!eligible||!canChangeEquipment();sel.onchange=()=>equipShipDesigner(sel.value||null);control.append(label,sel);if(!eligible){const note=document.createElement('small');note.textContent='Ative uma nave ELITE (STL) ou ESPECIAL DE EVENTO para usar designers.';control.appendChild(note);}designerBox.appendChild(control);root.appendChild(designerBox);
 
-  const modeBar=document.createElement('div');modeBar.className='section-box';modeBar.style.cssText='display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:10px;margin:8px 0';
-  const ship3dMode=document.createElement('button');ship3dMode.type='button';ship3dMode.className='small-btn';ship3dMode.textContent='NAVE 3D: '+(STELLAR_3D_V50.getMode()==='off'?'DESLIGADO':'ATIVO');ship3dMode.onclick=()=>{STELLAR_3D_V50.setMode(STELLAR_3D_V50.getMode()==='off'?'auto':'off');renderHangar();};
-  const ship3dInfo=document.createElement('small');ship3dInfo.textContent='3D leve com fallback 2D em aparelhos incompatíveis • 13 naves';modeBar.append(ship3dMode,ship3dInfo);root.appendChild(modeBar);
+  // V52.5: Configurações > Visual do jogo (um seletor global).
   const wrap=document.createElement('div');wrap.className='ship-grid';
   const catalog=Object.values(SHIPS).filter(s=>isShipAllowedV50(s.id));
   const orderedShips=[...catalog.filter(s=>progress.ownedShips.includes(s.id)),...catalog.filter(s=>!progress.ownedShips.includes(s.id))];

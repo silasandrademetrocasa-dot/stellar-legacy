@@ -170,7 +170,7 @@ export function createStellarShipRendererV50(){
     if(framesRendered>=3)return null;framesRendered++;
     gl.bindFramebuffer(gl.FRAMEBUFFER,null);gl.viewport(0,0,CANVAS_SIZE,CANVAS_SIZE);
     gl.clearColor(0,0,0,0);gl.clearDepth(1);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
-    gl.useProgram(program);gl.uniform1f(gl.getUniformLocation(program,'uYaw'),Math.PI/2+angle);
+    gl.useProgram(program);gl.uniform1f(gl.getUniformLocation(program,'uYaw'),Math.PI/2-angle);
     gl.uniform1f(gl.getUniformLocation(program,'uZoom'),viewportScale);
     for(const p of parts){
       gl.bindBuffer(gl.ARRAY_BUFFER,p.vert);gl.enableVertexAttribArray(0);gl.vertexAttribPointer(0,3,gl.FLOAT,false,0,0);
@@ -202,7 +202,7 @@ export function createStellarShipRendererV50(){
   function draw(ctx,shipId,angle,size){return isShipAllowedV50(shipId)?drawKey(ctx,shipId,angle,size):false;}
   function drawAsset(ctx,id,angle,size){return Boolean(EXT_MODEL_ASSET[id])&&drawKey(ctx,id,angle,size);}
   function drawAssetAt(ctx,id,angle,size,x,y){ctx.save();ctx.translate(x,y);const ok=drawAsset(ctx,id,angle,size);ctx.restore();return ok;}
-  function setMode(mode){try{localStorage.setItem('stellar3d.v50',mode==='off'?'off':'auto')}catch{};if(mode==='auto')preload('phoenix');}
+  function setMode(mode){try{localStorage.setItem('stellar3d.v50',['off','on','auto'].includes(mode)?mode:'auto')}catch{};if(mode!=='off')preload('phoenix');}
   function getMode(){return renderMode()}
   return {draw,drawAsset,drawAssetAt,preload,setMode,getMode,get supported(){return !dead}};
 }
