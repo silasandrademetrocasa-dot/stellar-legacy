@@ -1,0 +1,33 @@
+STELLAR LEGACY — V50.1 CORREÇÃO DO ERRO "V50 player 3D renderer: âncora encontrada 0x"
+
+FALHA ORIGINAL
+GitHub Actions: Validar projeto -> scripts/v50-ships3d-integrate.mjs, linha 27.
+O integrador buscava exatamente "  if(img&&img.naturalWidth){\n    const size=shipSize,"
+no game.js, mas essa forma de escrita mudou nas versões recentes.
+
+CORREÇÃO V50.1
+- Inserção estrutural no escopo de drawPlayer(), preservando o renderizador 2D original
+  como fallback (sem buscar o if da imagem por texto exato).
+- Jogadores remotos: detecta if(img && img.naturalWidth) com espaçamento flexível.
+- Verifica que o bloco de desenho foi encontrado uma única vez; caso contrário
+  aborta a instalação antes de salvar qualquer arquivo do projeto.
+- Mantém as 13 naves, seus GLBs, modelos LOD e todos os patches V49.5 no ZIP cumulativo.
+- Script idempotente: se todos os arquivos já tiverem o patch, não instala em duplicidade.
+- Nave ativa fora da frota -> Aurora ao carregar; sem apagar inventário/cargo/equipamentos.
+
+INSTRUÇÕES
+1. Não execute ainda o SQL da V50.
+2. Baixe o ZIP STELLAR_LEGACY_V50_1_CORRIGIDO_ANCORA_RENDER_ACUMULADO.zip.
+3. Instale o ZIP pelo workflow habitual do GitHub Actions.
+4. Aguarde a etapa "Validar projeto" passar e confira o deploy do Render.
+5. Entre no jogo e confira Hangar, 3D/2D, nave Aurora e FPS.
+6. SOMENTE após conferir que a versão nova entrou, aplique o SQL da V50 incluído
+   em sql/STELLAR_V50_FROTA_13_NAVES_APLICAR_APOS_DEPLOY.sql.
+
+VALIDAÇÃO LOCAL
+- Testado com cópia do public/game.js real de release anterior (V19.0.5),
+  inclusive condicional if(img && img.naturalWidth) reformatada para simular mudança.
+- Aplicação 1x e 2x (idempotência), sintaxe JS, leitura dos 13 GLBs, migração
+  Aurora/inventário, passando sem exceções no ambiente de teste.
+- Não tenho o snapshot do game.js atual do GitHub (conector não expôs repos);
+  se outra âncora tiver mudado a validação aborta com erro indicando o trecho.

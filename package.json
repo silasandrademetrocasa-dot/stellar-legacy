@@ -5,7 +5,7 @@
   "scripts": {
     "start": "node server/index.js",
     "dev": "node --watch server/index.js",
-    "check": "node scripts/v481-topbar-patch.mjs && node scripts/v4811-progression-patch.mjs && node scripts/v482-hud-xp-patch.mjs && node scripts/v4825-navigation-autopilot-patch.mjs && node scripts/v48-autopilot-patch.mjs && node scripts/v483-fase3-autopilot-patch.mjs && node scripts/aplicar-hotfix-nave-v4827.mjs && node scripts/v4831-network-recovery-patch.mjs && node scripts/v484-offline-farm-patch.mjs && node scripts/v485-offline-farm-ui-patch.mjs && node scripts/v487-offline-combat-patch.mjs && node scripts/v49-release-integrity.mjs && node scripts/v495-farm-login-recovery-patch.mjs && node scripts/v495-release-integrity.mjs && node scripts/v478-prelaunch-integrity-patch.mjs && node scripts/v4776-apply-patch-status.mjs && node scripts/verify-release.mjs",
+    "check": "node scripts/v481-topbar-patch.mjs && node scripts/v4811-progression-patch.mjs && node scripts/v482-hud-xp-patch.mjs && node scripts/v4825-navigation-autopilot-patch.mjs && node scripts/v48-autopilot-patch.mjs && node scripts/v483-fase3-autopilot-patch.mjs && node scripts/aplicar-hotfix-nave-v4827.mjs && node scripts/v4831-network-recovery-patch.mjs && node scripts/v484-offline-farm-patch.mjs && node scripts/v485-offline-farm-ui-patch.mjs && node scripts/v487-offline-combat-patch.mjs && node scripts/v49-release-integrity.mjs && node scripts/v495-farm-login-recovery-patch.mjs && node scripts/v495-release-integrity.mjs && node scripts/v478-prelaunch-integrity-patch.mjs && node scripts/v4776-apply-patch-status.mjs && node scripts/verify-release.mjs && node scripts/v50-ships3d-integrate.mjs && node scripts/v50-ships3d-verify.mjs",
     "test": "node --test tests/*.test.mjs",
     "verify": "npm run check && npm run check:v21 && npm test",
     "check:v21": "node scripts/check-v21-package.mjs"
@@ -20,5 +20,5 @@
   "engines": {
     "node": ">=18"
   },
-  "release": "V49.5 cumulativa: farm logout fix, nomes PLS, estimativas por sessao, auditoria V49, ADM, push opcional"
+  "release": "V50.1 Frota 3D — corrigida ancóra player render: patch estrutural robusto + fallback 2D + 13 naves"
 }

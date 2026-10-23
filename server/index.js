@@ -1758,6 +1758,17 @@ app.get('/api/save', requireUser, asyncRoute(async (req, res) => {
   res.json({ state: data?.state || null, updated_at: data?.updated_at || null,reset_epoch:Number(resetRecord?.epoch)||0 });
 }));
 
+/* STELLAR_SHIPS3D_FLEET_V50: server-authoritative 13 ships, without deleting ownership/inventory */
+const SHIP_IDS_V50=new Set(["phoenix","leonov","liberator","piranha","vengeance","bigboy","goliath","citadel","aegis","spearhead","defcom","yamato","nostromo"]);
+function normalizeShipSaveV50(state){
+  if(!state||typeof state!=='object')return;
+  if(SHIP_IDS_V50.has(String(state.activeShipId||'')))return;
+  state.activeShipId='phoenix';
+  if(!Array.isArray(state.ownedShips))state.ownedShips=[];
+  if(!state.ownedShips.includes('phoenix'))state.ownedShips.push('phoenix');
+  if(state.repairRequired&&typeof state.repairRequired==='object')state.repairRequired.shipId='phoenix';
+}
+app.use('/api/save',(req,res,next)=>{if(req.method==='PUT'&&req.body?.state)normalizeShipSaveV50(req.body.state);next();});
 app.put('/api/save', requireUser, OFFLINE_FARM_GUARD_V484, asyncRoute(async (req, res) => {
   let state = req.body?.state;
   if (!state || typeof state !== 'object') return res.status(400).json({ error: 'Save inválido.' });

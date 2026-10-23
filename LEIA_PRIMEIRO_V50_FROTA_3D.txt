@@ -1,0 +1,53 @@
+STELLAR LEGACY — V50 FROTA 3D OFICIAL (ZIP CUMULATIVO V49.5 + V50)
+
+1) O QUE ALTERA
+- Exatamente 13 naves permitidas: Aurora / phoenix, Lynx / leonov, Pioneer / liberator,
+  Raptor / piranha, Valkyrie / vengeance, Bastion / bigboy, Leviathan / goliath,
+  Bulwark / citadel, Seraph / aegis, Pathfinder / spearhead, Phantom / defcom,
+  Kensei / yamato e Meridian / nostromo.
+- Os GLB low-LOD são carregados sob demanda pelo WebGL2 nativo, sem CDN.
+- Renderização de naves locais e pilotos remotos em 3D com 32 direções; GLB armazenado
+  no mesmo servidor. GPU usa shader simples, sem sombras caras. Cache LRU limitado.
+- Mantém sprite 2D se WebGL2/asset não puder carregar. Botão NAVE 3D: ATIVO / DESLIGADO no Hangar.
+- O catálogo histórico permanece para integridade de saves, mas naves descontinuadas
+  são ocultadas no Hangar, barradas na troca e bloqueadas na compra.
+- Nave ativa fora do catálogo muda para Aurora ao carregar/salvar; propriedade histórica,
+  moedas, inventário, drones e histórico são preservados.
+- O normalizador ORIGINAL do jogo devolve equipamento acima da capacidade de Aurora
+  ao inventário, respeitando regras atuais de nave e equipamentos.
+- Naves especiais aprovadas mantêm requisitos/eventOnly e não ficam grátis.
+- Nenhum sistema de combate, velocidade, dano, mineração, autopilot, rotas ou NPC é alterado.
+
+2) DEPLOY ÚNICO
+- Este ZIP tem o patch cumulativo da V49.5 mais a V50. Não é um jogo standalone.
+- Suba SOMENTE este ZIP na raiz do GitHub do Stellar Legacy.
+- GitHub Actions -> Instalador Universal -> Run workflow.
+- O instalador deve executar npm run check, cujo final valida V50, e o Render fazer
+  auto-deploy caso esteja conectado à main.
+- Se o patch falhar por âncora do game.js ter mudado, a Action deve abortar em vez de
+  fazer substituições às cegas. NUNCA usar rsync --delete manual sem o instalador.
+
+3) SUPABASE — APÓS CONFIRMAR O DEPLOY
+- Execute sql/STELLAR_V50_FROTA_13_NAVES_APLICAR_APOS_DEPLOY.sql no SQL Editor.
+- O SQL grava backup privado de saves atingidos e flags de loja, muda activeShipId
+  incompatível para phoenix e oculta apenas naves fora das 13.
+- NÃO execute antes de instalar a V50 (o cliente antigo poderia sobrescrever o save).
+- Não repita os SQLs antigos da V49.0, já aplicados.
+
+4) TESTES MANUAIS QUE PRECISAMOS FAZER
+A) Abrir Hangar: exatamente 13 nomes; os não obtidos continuam bloqueados.
+B) Abrir a Aurora, ativar NAVE 3D e girar; desligar para comparar com o sprite.
+C) Com outro jogador: verificar que também aparece a nave 3D dele, sem engasgos.
+D) Simular conta que usava Prism/spectrum: activeShipId vira Aurora, moedas e
+   inventário intactos; gear acima de 1 slot retorna ao inventário do jogador.
+E) Confirmar loja sem nDiplomat/nEnvoy/nAmbassador/pusat e sem naves antigas.
+F) Rodar testes de desempenho em BAIXA, MÉDIA e ALTA: FPS, 1/10/30 jogadores e NPCs.
+G) Testar autopilot trocando de mapa e farm; V50 não modifica lógica dessas funções.
+
+5) LIMITAÇÕES
+- Validado offline: sintaxe JS, 13 GLB reais, patch idempotente em código de teste,
+  filtro/retorno Aurora sem apagar equipamento. Ainda NÃO validado com o repositório
+  V49.5 completo, nem com navegador real/Render; testar após a Action.
+- Sem deploy nesta entrega: a conexão GitHub não expôs repositórios e Render requer
+  seleção explícita de workspace. Banco de produção também NÃO foi modificado.
+- Não criar designer/cor de nave nesta etapa, fica como fase futura.

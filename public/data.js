@@ -336,3 +336,10 @@ export const MAPS = {
     structures: ['Portal Astral Gamma'], portals: [], enemyGroups: [],
   },
 };
+
+/* STELLAR_SHIPS3D_FLEET_V50: 43 historic definitions preserved for backwards-compatible saves;
+ * only the 13 approved classes are playable/marketable. */
+{
+ const allowed=new Set(["phoenix","leonov","liberator","piranha","vengeance","bigboy","goliath","citadel","aegis","spearhead","defcom","yamato","nostromo"]);
+ for(const [id,ship] of Object.entries(SHIPS)){if(!allowed.has(id)){ship.shopAvailable=false;ship.auctionEligible=false;ship.eventOnly=true;ship.unavailableV50=true;}}
+}

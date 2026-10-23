@@ -1,3 +1,4 @@
+/* STELLAR_SHIPS3D_FLEET_V50 */
 /* STELLAR_OFFLINE_FARM_VISUAL_V485 */
 /* STELLAR_OFFLINE_FARM_V484 APPLIED */
 import {saleQuoteV4776} from './modules/sale-policy-v4776.js?v=47.7.6';
@@ -69,6 +70,8 @@ import { createStagedAssetPreloader } from './modules/staged-preload-v342.js?v=4
 import { QUALITY_PROFILES, initialAutoQualityForDevice } from './modules/quality-profiles.js?v=47.7.6';
 import { freshBattleConfigsV2013, captureCombatBuildV2013, exchangeCombatBuildV2013, combatConfigRemainingV2013, clampStoredShieldV2013 } from './combat-config-v2013.js?v=47.7.6';
 import { FACTIONS, SHIPS, ITEMS, LASER_AMMO, ROCKETS, NPC_TYPES, MAPS, RESOURCES } from './data.js?v=47.7.6';
+import { createStellarShipRendererV50, isShipAllowedV50, ensureAllowedShipSaveV50 } from './modules/stellar-ship3d-v50.js';
+const STELLAR_3D_V50=createStellarShipRendererV50();
 import { repairPulseSettings } from './repair-balance.js?v=47.7.6';
 import { xpThresholdV1770, xpThresholdV1915, migratePilotXpV1915 } from './level-curve-v1915.js?v=47.7.6';
 import { xpThresholdV460, migratePilotXpV460 } from './level-curve-v460.js?v=47.7.6';
@@ -1213,7 +1216,8 @@ async function refreshPremiumState(force=false){if(!authenticated){updatePremium
 const liveOpsRuntime={state:null,catalog:new Map(),busy:false,lastAt:0};
 const livePetSlotPrices=new Map();
 function liveCatalog(key){return liveOpsRuntime.catalog.get(String(key||''))||null;}
-function liveQuote(key){const row=liveCatalog(key);if(!row||row.enabled===false)return null;const base=Math.max(0,Math.round(Number(row.price)||0)),discount=String(row.currency)==='uridium'&&premiumActive()&&['ship','laser','generator','drone','extra','pet','pet_gear'].includes(String(row.kind||''));return {...row,basePrice:base,price:discount?Math.max(1,Math.floor(base*.95)):base,currency:String(row.currency)==='uridium'?'uridium':'credits'};}
+function liveQuote(key){
+  if(String(key||'').startsWith('ship:')&&!isShipAllowedV50(String(key).slice(5)))return null;const row=liveCatalog(key);if(!row||row.enabled===false)return null;const base=Math.max(0,Math.round(Number(row.price)||0)),discount=String(row.currency)==='uridium'&&premiumActive()&&['ship','laser','generator','drone','extra','pet','pet_gear'].includes(String(row.kind||''));return {...row,basePrice:base,price:discount?Math.max(1,Math.floor(base*.95)):base,currency:String(row.currency)==='uridium'?'uridium':'credits'};}
 function applyLiveCatalog(rows){
   liveOpsRuntime.catalog=new Map();livePetSlotPrices.clear();
   for(const row of Array.isArray(rows)?rows:[]){
@@ -4657,6 +4661,7 @@ function loadLocalGame(){
 }
 function hydrateProgress(){
   if(!progress)return;
+  if(ensureAllowedShipSaveV50(progress)){cloudDirty=true;try{console.info('[ships3d-v50] nave incompatível convertida em Aurora; equipamento preservado');}catch{}}
   const account=getUser();
   if(!progress.profile?.faction || !SHIPS[progress.activeShipId]) throw new Error('save incompleto');
   if(progress.accountOwnerId&&account?.id&&String(progress.accountOwnerId)!==String(account.id))throw new Error('SAVE_OWNER_MISMATCH');
@@ -6543,7 +6548,10 @@ function drawOnlinePlayers(){
   for(const rp of onlineWorld.players.values()){
     if(!onScreenWorld(rp.x,rp.y,180))continue;const p=screenPos(rp.x,rp.y),f=FACTIONS[rp.faction],enemy=onlinePlayerEnemy(rp),sameGroup=isBattleGroupMember(rp.id),sameClan=!!currentClanTag()&&!!rp.clanTag&&rp.clanTag===currentClanTag(),color=sameGroup?'#63e8ff':enemy?'#ff4d69':sameClan?'#ffe16b':(f?.color||'#69ffbd'),path=shipMapAsset(rp.shipId,rp.faction),img=assetImage(path),sheet=assetImage(shipMapSheetAsset(rp.shipId,rp.faction)),size=onlineShipSize(rp.shipId),designer=designById(rp.shipDesignId),visual=designer?.visual||{},moving=Math.hypot((rp.tx??rp.x)-rp.x,(rp.ty??rp.y)-rp.y)>2;
     ctx.save();ctx.translate(p.x,p.y);ctx.globalAlpha=.92;if(state.target?.isPlayer&&state.target.id===rp.id){const rr=size*.55+18;ctx.strokeStyle='#ffed6f';ctx.lineWidth=2;ctx.setLineDash([6,4]);ctx.beginPath();ctx.arc(0,0,rr,0,TWO_PI);ctx.stroke();ctx.setLineDash([]);}
-    if(sheet&&sheet.naturalWidth){ctx.save();ctx.rotate((rp.angle||0)+Math.PI/2);drawEngineWakeLocal(size,visual.glow||color,moving?1:0,Number(rp.level)||0);ctx.restore();drawAuxSpriteSheet(sheet,rp.angle||0,size,{x:0,y:0,color:visual.glow||color,designer,alpha:1});drawDesignerAuraLocal(size,designer,visual,Number(rp.level)||0);}else if(img&&img.naturalWidth){const sc=size/Math.max(img.naturalWidth,img.naturalHeight);ctx.save();ctx.rotate((rp.angle||0)+Math.PI/2);drawEngineWakeLocal(size,visual.glow||color,moving?1:0,Number(rp.level)||0);ctx.shadowColor=visual.glow||color;ctx.shadowBlur=resolvedQualityMode()==='low'?0:(designer?18:10);if(resolvedQualityMode()!=='low'&&designer)ctx.filter=designerVisualCss(designer);ctx.drawImage(img,-img.naturalWidth*sc/2,-img.naturalHeight*sc/2,img.naturalWidth*sc,img.naturalHeight*sc);ctx.filter='none';ctx.restore();drawDesignerAuraLocal(size,designer,visual,Number(rp.level)||0);}else{ctx.rotate(rp.angle||0);drawShipModel(rp.shipId,color);}
+    if(sheet&&sheet.naturalWidth){ctx.save();ctx.rotate((rp.angle||0)+Math.PI/2);drawEngineWakeLocal(size,visual.glow||color,moving?1:0,Number(rp.level)||0);ctx.restore();drawAuxSpriteSheet(sheet,rp.angle||0,size,{x:0,y:0,color:visual.glow||color,designer,alpha:1});drawDesignerAuraLocal(size,designer,visual,Number(rp.level)||0);}else if(STELLAR_3D_V50.draw(ctx,isShipAllowedV50(rp.shipId)?rp.shipId:'phoenix',rp.angle||0,size)){
+      ctx.save();ctx.rotate((rp.angle||0)+Math.PI/2);drawEngineWakeLocal(size,visual.glow||color,moving?1:0,Number(rp.level)||0);ctx.restore();
+      drawDesignerAuraLocal(size,designer,visual,Number(rp.level)||0);
+    }else if(img&&img.naturalWidth){const sc=size/Math.max(img.naturalWidth,img.naturalHeight);ctx.save();ctx.rotate((rp.angle||0)+Math.PI/2);drawEngineWakeLocal(size,visual.glow||color,moving?1:0,Number(rp.level)||0);ctx.shadowColor=visual.glow||color;ctx.shadowBlur=resolvedQualityMode()==='low'?0:(designer?18:10);if(resolvedQualityMode()!=='low'&&designer)ctx.filter=designerVisualCss(designer);ctx.drawImage(img,-img.naturalWidth*sc/2,-img.naturalHeight*sc/2,img.naturalWidth*sc,img.naturalHeight*sc);ctx.filter='none';ctx.restore();drawDesignerAuraLocal(size,designer,visual,Number(rp.level)||0);}else{ctx.rotate(rp.angle||0);drawShipModel(rp.shipId,color);}
     if(moving){ctx.save();ctx.rotate((rp.angle||0)+Math.PI/2);drawShipWingLights(ctx,{quality:resolvedQualityMode(),mobile:DEVICE_CAPS.mobile,size,color});ctx.restore();}
     ctx.restore();
     drawRemoteLaser(rp,p);drawRemotePet(rp);
@@ -6978,6 +6986,10 @@ function drawPlayer(){if(document.body.classList.contains('stellar-offline-activ
   const moving=routeDistance()>4,motion=moving?1:0;
   const ship=SHIPS[progress.activeShipId]||{},shipSize=(ship.id==='citadel'?105:ship.id==='bigboy'?96:ship.id==='goliath'||ship.id==='aegis'?88:78);
   ctx.save();ctx.translate(p.x,p.y);
+  if(STELLAR_3D_V50.draw(ctx,progress.activeShipId,a,shipSize)){
+    ctx.save();ctx.rotate(a+Math.PI/2);drawEngineWakeLocal(shipSize,color,motion,progress.profile.level||0);ctx.restore();
+    drawDesignerAuraLocal(shipSize,designer,visual,progress.profile.level||0);
+  }else{
   if(sheet&&sheet.naturalWidth){
     const size=shipSize;ctx.save();ctx.rotate(a+Math.PI/2);drawEngineWakeLocal(size,color,motion,progress.profile.level||0);ctx.restore();drawAuxSpriteSheet(sheet,a,size,{x:0,y:0,color,designer,alpha:1});
     drawDesignerAuraLocal(size,designer,visual,progress.profile.level||0);
@@ -6987,6 +6999,7 @@ function drawPlayer(){if(document.body.classList.contains('stellar-offline-activ
     drawDesignerAuraLocal(size,designer,visual,progress.profile.level||0);
   }else{ctx.rotate(a||0);drawShipModel(progress.activeShipId,color);}
   if(moving){ctx.save();ctx.rotate(a+Math.PI/2);drawShipWingLights(ctx,{quality:resolvedQualityMode(),mobile:DEVICE_CAPS.mobile,size:shipSize,color});ctx.restore();}
+    }
   ctx.restore();drawDrones(p);
   drawLocalShipVitals(p,shipSize);
   ctx.strokeStyle=designer?(visual.accent||'rgba(119,228,255,.45)'):'rgba(119,228,255,.23)';ctx.lineWidth=designer?1.4:1;ctx.beginPath();ctx.arc(p.x,p.y,25,0,TWO_PI);ctx.stroke();
@@ -7252,7 +7265,8 @@ function sellInventoryItem(itemId,qty=1){
   const total=itemSellValue(item)*qty;if(total<=0){showToast('Este item não tem cotação de revenda publicada no ADM.');return;}
   openSaleConfirm({title:'Vender equipamento?',itemName:`${item.name}${qty>1?` ×${qty}`:''}`,detail:'Confirme antes de remover o item do inventário. A venda é definitiva.',value:total,currency:'credits',onConfirm:()=>performSellInventoryItem(itemId,qty)});
 }
-function buyShip(shipId){const ship=SHIPS[shipId];if(!ship)return;if(progress.ownedShips.includes(shipId)){showToast('Nave já obtida');return;}const q=liveQuote(`ship:${shipId}`);if(!q||q.shop_visible===false){showToast('Produto indisponível na Loja');return;}if(!ensureShopLevel(q))return;if(!canAfford(q.price,q.currency)){showToast('Saldo insuficiente');return;}openSpendConfirm({title:'Comprar nave?',itemName:ship.name,detail:`Preço confirmado.${q.price<q.basePrice?' PREMIUM -5% aplicado no servidor.':''}`,value:q.price,currency:q.currency,onConfirm:()=>applyAuthoritativePurchase(q.catalog_key,ship.name)});}
+function buyShip(shipId){
+  if(!isShipAllowedV50(shipId)){showToast('Nave indisponível na frota atual.');return;}const ship=SHIPS[shipId];if(!ship)return;if(progress.ownedShips.includes(shipId)){showToast('Nave já obtida');return;}const q=liveQuote(`ship:${shipId}`);if(!q||q.shop_visible===false){showToast('Produto indisponível na Loja');return;}if(!ensureShopLevel(q))return;if(!canAfford(q.price,q.currency)){showToast('Saldo insuficiente');return;}openSpendConfirm({title:'Comprar nave?',itemName:ship.name,detail:`Preço confirmado.${q.price<q.basePrice?' PREMIUM -5% aplicado no servidor.':''}`,value:q.price,currency:q.currency,onConfirm:()=>applyAuthoritativePurchase(q.catalog_key,ship.name)});}
 function buyItem(itemId){const item=ITEMS[itemId];if(!item)return;if(item.type==='drone'){buyDrone(itemId);return;}if(item.type==='extra'&&ownsExtraItem(itemId)){showToast('Esse EXTRA já pertence à sua conta');return;}const q=liveQuote(`item:${itemId}`);if(!q||q.shop_visible===false){showToast('Produto indisponível na Loja');return;}if(!ensureShopLevel(q))return;if(!canAfford(q.price,q.currency)){showToast('Saldo insuficiente');return;}openSpendConfirm({title:'Comprar item?',itemName:item.name,detail:`Preço confirmado.${q.price<q.basePrice?' PREMIUM -5% aplicado no servidor.':''}`,value:q.price,currency:q.currency,onConfirm:()=>applyAuthoritativePurchase(q.catalog_key,item.name)});}
 function droneNextQuote(type){
   const q=liveQuote(`drone:${type}`);if(!q)return null;
@@ -7308,6 +7322,7 @@ function renderShop(){
 
 function returnShipEquipmentToInventory(){for(const k of ['lasers','generators','extras'])for(const id of progress.shipLoadout[k])if(id)addInventory(id);}
 function switchShip(shipId){
+  if(!isShipAllowedV50(shipId)){showToast('Esta nave foi retirada da frota. Ative uma das 13 naves disponíveis.');return;}
   if(!canChangeEquipment()){showToast('Troca de nave/equipamentos disponível somente na sua base X-1');return;}
   if(!progress.ownedShips.includes(shipId)){showToast('Compre essa nave na Loja');return;}
   if(progress.repairRequired){
@@ -7446,8 +7461,11 @@ function renderHangarShips(){
   const none=document.createElement('option');none.value='';none.textContent=eligible?'SEM DESIGNER':'NAVE NÃO ELEGÍVEL';sel.appendChild(none);
   defs.forEach(d=>{const opt=document.createElement('option');opt.value=d.design_id;opt.textContent=`${d.name} • ${rarityLabel(d.rarity)} • ${ownedDesignQty(d.design_id)}x`;opt.disabled=ownedDesignQty(d.design_id)<=0;sel.appendChild(opt);});sel.value=activeDesign?.design_id||'';sel.disabled=!eligible||!canChangeEquipment();sel.onchange=()=>equipShipDesigner(sel.value||null);control.append(label,sel);if(!eligible){const note=document.createElement('small');note.textContent='Ative uma nave ELITE (STL) ou ESPECIAL DE EVENTO para usar designers.';control.appendChild(note);}designerBox.appendChild(control);root.appendChild(designerBox);
 
+  const modeBar=document.createElement('div');modeBar.className='section-box';modeBar.style.cssText='display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:10px;margin:8px 0';
+  const ship3dMode=document.createElement('button');ship3dMode.type='button';ship3dMode.className='small-btn';ship3dMode.textContent='NAVE 3D: '+(STELLAR_3D_V50.getMode()==='off'?'DESLIGADO':'ATIVO');ship3dMode.onclick=()=>{STELLAR_3D_V50.setMode(STELLAR_3D_V50.getMode()==='off'?'auto':'off');renderHangar();};
+  const ship3dInfo=document.createElement('small');ship3dInfo.textContent='3D leve com fallback 2D em aparelhos incompatíveis • 13 naves';modeBar.append(ship3dMode,ship3dInfo);root.appendChild(modeBar);
   const wrap=document.createElement('div');wrap.className='ship-grid';
-  const catalog=Object.values(SHIPS);
+  const catalog=Object.values(SHIPS).filter(s=>isShipAllowedV50(s.id));
   const orderedShips=[...catalog.filter(s=>progress.ownedShips.includes(s.id)),...catalog.filter(s=>!progress.ownedShips.includes(s.id))];
   orderedShips.forEach(s=>{
     const owned=progress.ownedShips.includes(s.id),active=s.id===progress.activeShipId,event=!!s.eventOnly||s.shopAvailable===false,design=active?activeDesign:null,visual=design?.visual||{},c=document.createElement('div');c.className=`ship-card ${active?'active-ship':''} ${design?'has-designer '+(design.rarity||''):''}`;if(design)c.style.setProperty('--designer-glow',visual.glow||'#7edcff');
