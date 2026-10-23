@@ -23,9 +23,12 @@ test('nave mostra somente nome e botões originais de configuração no cabeçal
  assert.match(css,/#topHudDock #leftStats \.stats-toolbar #battleConfigToolbar/);
  assert.doesNotMatch(source,/textContent\s*=\s*['"`]NAVE ATUAL/);
 });
-test('barras HP, ESC, PORÃO com valores internos e velocidade por ultimo',()=>{
+test('barras HP e ESC + PORÃO e VEL na mesma linha sem corte',()=>{
  assert.match(source,/v482-gauge-overlay/);
  assert.match(source,/v482-gauge-numbers/);
+ assert.match(source,/id='v482ShipMeta'/);
+ assert.match(source,/id=\"v482CargoText\"/);
+ assert.match(source,/id=\"v482SpeedText\"/);
  assert.match(source,/\[hp,shield,cargo,speed\]/);
  assert.match(css,/#topHudDock #leftStats \.v482-gauge-overlay/);
 });
@@ -36,6 +39,7 @@ test('nao substitui listeners de troca de configuração nem altera save',()=>{
 });
 test('script usa cache novo, idempotente e mantem versao principal do jogo',()=>{
  assert.match(patch,/pilot-ship-hud-v482\.css','pilot-ship-hud-v482\.js/);
- assert.match(patch,/\?v=48\.2\.3/);
+ assert.match(patch,/\?v=48\.2\.6/);
+ assert.match(patch,/48\.2\.5/);
  assert.match(patch,/html\.replaceAll\(older,newer\)/);
 });

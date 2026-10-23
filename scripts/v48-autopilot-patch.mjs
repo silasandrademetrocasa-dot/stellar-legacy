@@ -91,7 +91,12 @@ const AUTOPILOT_V48=createStellarAutopilotV48({
 `;
 patch('public/game.js',s=>{
  s=once(s,IMPORT_ANCHOR,IMPORT_ANCHOR+'\n'+IMPORT_V48,'import');
- s=once(s,CONTROLLER_ANCHOR,CONTROLLER_ANCHOR+'\n'+CONTROLLER_V48,'instância');
+ // V48.2.6: a V48.2.5 altera as cotações de munições dentro deste controlador.
+ // A instância tem IDENTIDADE estável, mas o texto literal deixou de bater.
+ // Nunca interpretar a alteração de campos do objeto como nova instalação.
+ const controllerMatches=s.match(/\bconst\s+AUTOPILOT_V48\s*=\s*createStellarAutopilotV48\s*\(/g)||[];
+ if(controllerMatches.length>1)throw Error('V48: instância AUTOPILOT duplicada no game.js; corrigir antes de publicar');
+ if(controllerMatches.length===0)s=once(s,CONTROLLER_ANCHOR,CONTROLLER_ANCHOR+'\n'+CONTROLLER_V48,'instância');
  s=once(s,'authenticated=true;void refreshCommandV22();','authenticated=true;void AUTOPILOT_V48.refreshAccess();void refreshCommandV22();','verificação no login');
  s=once(s,"canvas.addEventListener('pointerdown',pointerAction);","canvas.addEventListener('pointerdown',e=>{if(AUTOPILOT_V48.active)AUTOPILOT_V48.stop('Controle manual retomado');}, {capture:true});\ncanvas.addEventListener('pointerdown',pointerAction);",'controle manual');
  s=once(s,'telemetryTick(dt);eliteRouteTrackV2012(dt);processRespawns();','telemetryTick(dt);eliteRouteTrackV2012(dt);processRespawns();AUTOPILOT_V48.tick();','tick');

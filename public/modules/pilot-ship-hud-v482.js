@@ -66,10 +66,18 @@ export function setupPilotShipHudV482(doc=document){
   for(const row of [hp,shield,cargo,speed])if(row&&row.parentElement===stats)stats.appendChild(row);
   const gauges=[
     [ensureBarRow(hp,'hp'),'hp','maxHp'],
-    [ensureBarRow(shield,'shield'),'shield','maxShield'],
-    [ensureBarRow(cargo,'cargo'),'cargoUsed','cargoMax']
+    [ensureBarRow(shield,'shield'),'shield','maxShield']
   ];
-  speed?.classList.add('v482-ship-speed');
+  let meta=doc.getElementById('v482ShipMeta');
+  if(stats && !meta){
+    meta=doc.createElement('div');
+    meta.id='v482ShipMeta';
+    meta.className='v482-ship-meta';
+    meta.innerHTML='<span class="v482-ship-meta-item"><strong>PORÃO</strong><span class="v482-ship-meta-value" id="v482CargoText">0 / 0</span></span><span class="v482-ship-meta-sep">•</span><span class="v482-ship-meta-item"><strong>VEL</strong><span class="v482-ship-meta-value" id="v482SpeedText">0</span></span>';
+    stats.appendChild(meta);
+  }
+  cargo?.classList.add('v482-hidden-source');
+  speed?.classList.add('v482-hidden-source');
   const toolbar=doc.getElementById('statsHeader'),left=toolbar?.querySelector('.stats-toolbar-left');
   toolbar?.querySelector('.stats-toolbar-label')?.remove(); // Sem titulo NAVE / NAVE ATUAL
   let shipName=doc.getElementById('v482ShipName');
@@ -102,12 +110,16 @@ export function setupPilotShipHudV482(doc=document){
     for(const [track,currentId,maxId] of gauges){
       updateGauge(track,parseHudNumberV482(doc.getElementById(currentId)?.textContent),parseHudNumberV482(doc.getElementById(maxId)?.textContent));
     }
-    if(shipName){const label=shortName(doc.getElementById('shipLabel')?.textContent);if(shipName.textContent!==label)shipName.textContent=label;shipName.title=label;}
+    if(shipName){const label=shortName(doc.getElementById('shipLabel')?.textContent);const view=label&&label!=='—'?`(${label})`:'(—)';if(shipName.textContent!==view)shipName.textContent=view;shipName.title=label||'—';}
+    const cargoCurrent=parseHudNumberV482(doc.getElementById('cargoUsed')?.textContent),cargoMax=parseHudNumberV482(doc.getElementById('cargoMax')?.textContent);
+    const cargoText=doc.getElementById('v482CargoText'); if(cargoText){const t=`${nf.format(cargoCurrent)} / ${nf.format(cargoMax)}`; if(cargoText.textContent!==t)cargoText.textContent=t;}
+    const speedText=doc.getElementById('v482SpeedText'); if(speedText){const t=nf.format(parseHudNumberV482(doc.getElementById('speed')?.textContent)); if(speedText.textContent!==t)speedText.textContent=t;}
   };
   update();
   const interval=setInterval(update,450);
   return ()=>clearInterval(interval);
 }
+
 function boot(){setupPilotShipHudV482();}
 if(typeof document!=='undefined'){
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();

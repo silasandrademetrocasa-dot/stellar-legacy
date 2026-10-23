@@ -53,9 +53,20 @@ export function chooseAutopilotAction(raw,cfg){
     return {type:'move',x:s.base.x,y:s.base.y,reason:'Aproximando do comerciante'};
   }
   // Reabastecimento fora da base exige o CPU padrão. Sem ele, voltar ao comércio.
-  if(c.autoBuy&&Number(s.ammoStock)<=0&&!s.buyPermitted){
-    if(map!=='x1')return {type:'route',map:'x1',reason:'Munição esgotada: voltando à loja'};
-    return {type:'move',x:s.base.x,y:s.base.y,reason:'Reabastecendo no comerciante'};
+  // Uma volta à base deve abastecer munições e mísseis antes de retomar o setor escolhido.
+  // Preços e saldos vêm da loja oficial; nenhum item é gerado localmente.
+  const affordable=q=>!!q?.catalog_key&&q.currency==='credits'
+    &&q.shop_visible!==false&&Number.isFinite(Number(q.price))&&Number(q.price)>0
+    &&Number(q.price)<=Number(s.credits)&&Number(q.price)<=Number(s.purchaseBudgetRemaining??c.budget);
+  const lowLaser=c.autoBuy&&Number(s.ammoStock)<=c.ammoMin&&affordable(s.ammoQuote);
+  const lowRocket=c.autoBuy&&c.rockets&&Number(s.rocketStock)<=c.rocketMin&&affordable(s.rocketQuote);
+  if(lowLaser||lowRocket){
+    if(!s.buyPermitted){
+      if(map!=='x1')return {type:'route',map:'x1',reason:'Repondo munições: retornando à loja'};
+      return {type:'move',x:s.base.x,y:s.base.y,reason:'Aproximando do comerciante'};
+    }
+    // Não atravessar o portal de volta enquanto o servidor ainda compra o próximo pacote.
+    return {type:'idle',reason:'Reabastecendo '+(lowLaser?'laser':'mísseis')+' na loja oficial'};
   }
   if(map!==c.map)return {type:'route',map:c.map,reason:`Rota até ${c.map.toUpperCase()}`};
   // V48.1.2: drops reais de NPC continuam prioritários para coleta, mas NÃO
@@ -93,7 +104,7 @@ export function chooseAutopilotAction(raw,cfg){
 export function createStellarAutopilotV48({credentials,getIdentity=()=>null,getSnapshot,npcTypes=[],getPortals,getGraphLabel,getGoalLabel,mayTravel,navigate,jumpPortal,selectNpc,stopFire=()=>{},fireRocket,sellCargo,buyPackage,onNotice=()=>{}}={}){
   let allowed=false,isAdmin=false,authorizedId=null,running=false,loading=false,busy=false,lastTickAt=0,lastAccessAt=0,nextAccessAt=0,panelOpen=false;
   let config=cleanAutopilotConfig(),started=0,ended=0,spent=0,attempts=0,failures=0,boxes=0,drops=0,ores=0,reason='Desligado',startStats=null,lastProgress=null;
-  let panel=null,fab=null,grantCache=new Map(),refreshingAccess=false,lastPurchaseAttempt=0;
+  let panel=null,fab=null,grantCache=new Map(),refreshingAccess=false,lastPurchaseAttempt=0,lastHealthyAt=0,lastMapId=null;
   const now=()=>Date.now();
   function authHeaders(){const v=credentials()||{};if(!v.accessToken)throw Error('Sessão necessária');return {'Content-Type':'application/json',Authorization:`Bearer ${v.accessToken}`,'X-Game-Session-Id':v.gameSessionId||''};}
   async function request(url,options={}){const res=await fetch(url,{...options,headers:authHeaders(),cache:'no-store'});const data=await res.json().catch(()=>({}));if(!res.ok)throw Error(data.error||`Erro ${res.status}`);return data;}
@@ -128,10 +139,16 @@ export function createStellarAutopilotV48({credentials,getIdentity=()=>null,getS
         if(panel&&!allowed){panel.hidden=true;panelOpen=false;}
         return allowed;
       }catch(e){
-        allowed=false;nextAccessAt=now()+12000;
+        nextAccessAt=now()+12000;
+        // Rede instável após salto: nenhuma ação enquanto o acesso não for revalidado.
+        // O bot preserva a rota por tempo limitado e retoma só após confirmação oficial.
+        if(running&&authorizedId===identity&&lastAccessAt>0&&now()-lastAccessAt<150000){
+          allowed=false;notify('Aguardando autorização online • rota preservada');
+          if(fab)fab.hidden=false;
+          return false;
+        }
+        allowed=false;authorizedId=null;
         if(running)stop('Sem verificação de acesso online');
-        // Falha de rede NÃO é revogação: mantém somente o botão para tentar de novo.
-        // Iniciar/operar continua bloqueado até obter confirmação nova do servidor.
         if(fab)fab.hidden=!hadPreviousGrant;
         notify('Autopilot: não foi possível revalidar o acesso. Tente novamente.');
         return false;
@@ -206,27 +223,49 @@ export function createStellarAutopilotV48({credentials,getIdentity=()=>null,getS
   }
   function start(){if(!accessReady())return notify('Permissão não confirmada');if(running)return;const s=getSnapshot();if(!s?.online||!s.ready)return notify('Entre no universo online para ativar');
     config=readConfig();started=now();ended=0;spent=0;attempts=0;failures=0;boxes=0;drops=0;ores=0;startStats=stats(s);lastProgress=startStats;lastTickAt=0;
-    running=true;notify('Rota '+config.map.toUpperCase()+' iniciada');}
-  async function safeBuy(s){if(busy||!config.autoBuy||!s.buyPermitted)return;const opts=[{kind:'ammo',stock:s.ammoStock,min:config.ammoMin,quote:s.ammoQuote},{kind:'rocket',stock:s.rocketStock,min:config.rocketMin,quote:s.rocketQuote}];
+    lastHealthyAt=now();lastMapId=s.map;running=true;notify('Rota '+config.map.toUpperCase()+' iniciada');}
+  async function safeBuy(s){if(busy||!config.autoBuy||!s.buyPermitted||s.jumping||!s.ready)return;const opts=[{kind:'ammo',stock:s.ammoStock,min:config.ammoMin,quote:s.ammoQuote},{kind:'rocket',stock:s.rocketStock,min:config.rocketMin,quote:s.rocketQuote}];
     for(const opt of opts){const q=opt.quote;if(!q||!q.catalog_key||q.shop_visible===false||Number(opt.stock)>=opt.min||q.currency!=='credits')continue;
       const cost=Number(q.price)||0;if(cost<=0||cost>config.budget-spent||cost>Number(s.credits)||!Number.isFinite(cost))continue;
-      attempts++;busy=true;try{const ok=await buyPackage(q.catalog_key,opt.kind);if(ok){spent+=cost;notify('Reabastecimento validado pelo servidor');}else failures++;}catch(e){failures++;notify('Compra recusada: '+e.message);}finally{busy=false;}break;
+      attempts++;busy=true;try{const ok=await buyPackage(q.catalog_key,opt.kind,{atBase:!!s.atBase,credits:s.credits,budgetRemaining:config.budget-spent});if(ok){spent+=cost;notify('Reabastecimento validado pelo servidor');}else failures++;}catch(e){failures++;notify('Compra recusada: '+e.message);}finally{busy=false;}break;
     }
   }
   async function routeTo(s,map){const want=getGoalLabel(map);const path=findAutopilotPortalPath(getGraphLabel(),want,getPortals,mayTravel);
     if(!path){stop('Sem rota permitida para '+want);return;}
     if(path.length===0)return;
     const p=path[0];const d=dist(s.player,p);if(d>43){navigate(p.x,p.y);notify(`Portal → ${p.targetLabel}`);return;}
-    if(busy)return;busy=true;try{await jumpPortal(p);notify('Viajando para '+p.targetLabel);}catch(e){stop('Portal recusado: '+e.message);}finally{busy=false;}
+    if(busy)return;busy=true;try{await jumpPortal(p);notify('Viajando para '+p.targetLabel);}catch(e){
+      failures++;notify('Portal: '+String(e.message||e).slice(0,80));
+      // A rota permanece ativa; outro tick pode revalidar os portais.
+    }finally{busy=false;}
   }
   function tick(){if(!running)return;const ts=now();if(ts-lastTickAt<380)return;lastTickAt=ts;
     if(ts>=nextAccessAt&&!refreshingAccess)void refreshAccess();
-    if(!accessReady()){stop('Acesso precisa ser validado');return;}
+    if(!accessReady()){
+      // Sem permissão atual válida, NENHUMA ação; tenta reconectar sem zerar a sessão.
+      if(authorizedId===String(getIdentity()||'')&&lastAccessAt>0&&ts-lastAccessAt<150000){
+        if(!refreshingAccess&&ts>=nextAccessAt)void refreshAccess();
+        notify('Autorização pendente • retomada automática');return;
+      }
+      stop('Acesso precisa ser validado');return;
+    }
     if(ts-started>config.minutes*60000){stop('Tempo de farm concluído');return;}
-    const s=getSnapshot();if(!s||!s.online||!s.ready){stop('Sessão offline');return;}
+    const s=getSnapshot();
+    if(s?.jumping){notify('Aguardando transição de setor');return;}
+    if(!s||!s.online||!s.ready){
+      // Troca entre setores derruba transitoriamente a conexão WS.
+      // Nunca trata 1-20s de reconexão como desistência do usuário.
+      if(lastHealthyAt && ts-lastHealthyAt<60000){notify('Reconectando ao setor • rota preservada');return;}
+      stop('Sessão offline por mais de 60s');return;
+    }
+    lastHealthyAt=ts;
+    if(lastMapId!==s.map){lastMapId=s.map;notify('Setor '+String(s.map||'').toUpperCase()+' conectado • retomando rota');}
+    s.purchaseBudgetRemaining=Math.max(0,config.budget-spent);
     lastProgress=stats(s);
     if(busy)return;
     if(config.autoBuy&&ts-lastPurchaseAttempt>7000){lastPurchaseAttempt=ts;void safeBuy(s);}
+    // A compra oficial pode começar neste mesmo tick; não iniciar salto antes de confirmar.
+    if(busy)return;
     const action=chooseAutopilotAction(s,config);
     if(action.type==='pause'){stop(action.reason);return;}
     const collectingWhileFiring=action.type==='move'&&!!action.combatTargetId;

@@ -46,10 +46,13 @@ if(!html.includes('/modules/pilot-ship-hud-v482.js')){
   if(!html.includes('</body>'))throw Error('V48.2 </body> ausente');
   html=html.replace('</body>',`  ${newScript}\n</body>`);markupChanges++;
 }
-// V48.2.3: nova query somente nos dois assets visuais para vencer cache de navegadores mobile.
+// V48.2.6: atualiza assets visuais das V48.2.0, V48.2.3, V48.2.4 e V48.2.5 em aparelhos com cache antigo.
 for(const asset of ['pilot-ship-hud-v482.css','pilot-ship-hud-v482.js']){
-  const older=`/modules/${asset}?v=48.2.0`,newer=`/modules/${asset}?v=48.2.3`;
-  if(html.includes(older)){html=html.replaceAll(older,newer);markupChanges++;}
+  const newer=`/modules/${asset}?v=48.2.6`;
+  for(const oldVersion of ['48.2.0','48.2.3','48.2.4','48.2.5']){
+    const older=`/modules/${asset}?v=${oldVersion}`;
+    if(html.includes(older)){html=html.replaceAll(older,newer);markupChanges++;}
+  }
 }
 if(markupChanges)fs.writeFileSync(htmlFile,html,'utf8');
 // Upgrade unlock-announcement labels to match the already-configured mission categories.

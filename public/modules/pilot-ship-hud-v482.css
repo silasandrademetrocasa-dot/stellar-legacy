@@ -90,3 +90,35 @@
   #topHudDock #leftStats .stats-toolbar{gap:2px!important}
   #topHudDock #leftStats .stats-toolbar-left{gap:2px!important}
 }
+
+
+/* V48.2.4 — cabeçalho ainda mais compacto e card recolhido limpo */
+#topHudDock #leftStats .stats-toolbar-left{flex:1 1 auto;min-width:0}
+#topHudDock #leftStats #v482ShipName{font-size:10px!important;max-width:100px}
+#topHudDock #leftStats .stats-toolbar #battleConfigToolbar.battle-config-ship-hud-v2014{max-width:none!important;gap:4px!important}
+#topHudDock #leftStats .stats-toolbar #battleConfigToolbar .battle-conf-btn-v2013{padding:3px 7px!important;font-size:8.5px!important}
+#topHudDock #leftStats #leftStatsContent>.v482-cargo-row{display:none!important}
+#topHudDock #leftStats #leftStatsContent>.v482-ship-speed{display:none!important}
+#topHudDock #leftStats .v482-ship-meta{
+  display:flex!important;align-items:center;justify-content:center;gap:6px;
+  margin:2px 0 0!important;padding:2px 4px 0!important;border-top:1px solid rgba(105,207,242,.18)!important;
+  font-size:9px!important;font-weight:850;color:#f5fcff!important;white-space:nowrap;
+  text-shadow:0 1px 3px rgba(0,0,0,.9),0 0 2px #071221;
+}
+#topHudDock #leftStats .v482-ship-meta-item{display:inline-flex;align-items:center;gap:4px;min-width:0}
+#topHudDock #leftStats .v482-ship-meta-item strong{font-size:9px!important;color:#fff!important;letter-spacing:0!important}
+#topHudDock #leftStats .v482-ship-meta-value{font-variant-numeric:tabular-nums}
+#topHudDock #leftStats .v482-ship-meta-sep{opacity:.8}
+#topHudDock #leftStats .v482-hidden-source{display:none!important}
+#topHudDock #leftStats.collapsed{height:32px!important;min-height:32px!important;max-height:32px!important;overflow:hidden!important}
+#topHudDock #leftStats.collapsed #leftStatsContent,
+#topHudDock #leftStats.collapsed #battleConfigToolbar,
+#topHudDock #leftStats.collapsed #v482ShipName{display:none!important}
+#topHudDock #leftStats.collapsed .stats-toolbar{min-height:28px!important;margin:0!important}
+@media(max-width:760px){
+  #topHudDock #leftStats:not(.collapsed){height:122px!important;min-height:122px!important;max-height:122px!important}
+  #topHudDock #leftStats .stats-toolbar{gap:4px!important;margin-bottom:4px!important}
+  #topHudDock #leftStats #v482ShipName{max-width:82px;font-size:9.5px!important}
+  #topHudDock #leftStats .v482-gauge-overlay{font-size:8.3px!important}
+  #topHudDock #leftStats .v482-ship-meta{font-size:8.3px!important;gap:4px}
+}

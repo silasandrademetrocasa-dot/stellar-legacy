@@ -1,0 +1,43 @@
+/* Stellar V48.2.5 — mapa de rotas limpo, responsivo e igual para cada facção. */
+#mapModal .map-card{max-width:min(1080px,98vw);padding:12px!important;overflow-x:auto}
+#mapModal #mapNetwork{
+  width:100%;height:610px!important;min-height:610px!important;overflow:hidden!important;
+  background:radial-gradient(circle at 50% 34%,rgba(22,67,102,.20),transparent 64%),#03101d!important;
+}
+#mapModal #mapNetwork .map-legend{
+  top:6px;right:7px;left:7px;bottom:auto;flex-direction:row;flex-wrap:wrap;
+  justify-content:center;align-items:center;gap:4px 11px;
+  padding:6px 8px;border-radius:9px;font-size:9px;z-index:4;pointer-events:none;
+}
+#mapModal #mapNetwork .map-legend>span{gap:4px}
+#mapModal #mapNetwork .map-legend .dot{width:7px;height:7px}
+#mapModal #mapNetwork .map-svg{z-index:0}
+#mapModal #mapNetwork .map-link{stroke:rgba(91,184,241,.34);stroke-width:.68}
+#mapModal #mapNetwork .map-node{
+  z-index:1;width:clamp(50px,11vw,90px);height:48px;min-height:48px;padding:4px!important;
+  border-radius:9px;display:flex;justify-content:center;align-items:flex-end;
+  text-align:center;background:linear-gradient(180deg,#0b2138ef,#061525fa);overflow:hidden;
+  box-sizing:border-box;box-shadow:0 1px 8px #0007;
+}
+#mapModal #mapNetwork .map-node .node-art{opacity:.12}
+#mapModal #mapNetwork .map-node .node-label{position:relative;z-index:2;font-size:15px!important;line-height:1.1;font-weight:950}
+#mapModal #mapNetwork .map-node .node-sub{position:absolute;z-index:2;left:2px;right:2px;top:4px;font-size:7px!important;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;opacity:.83}
+#mapModal #mapNetwork .map-node .node-lock{font-size:10px;top:3px;right:3px}
+#mapModal #mapNetwork .map-node.locked{opacity:.58;filter:none}
+#mapModal #mapNetwork .map-node.current{opacity:1!important;background:linear-gradient(180deg,#244965,#10273e)}
+#mapModal #mapNetwork .map-node.current .node-label{color:#fff}
+#mapModal .v4825-route-tabs{display:flex;flex-wrap:wrap;gap:5px;align-items:center;margin:7px 0;padding:0 1px}
+#mapModal .v4825-route-tabs button{border:1px solid #477a94;background:#0b2337;color:#c7efff;border-radius:8px;min-height:29px;padding:5px 10px;font-size:10px;font-weight:850;cursor:pointer}
+#mapModal .v4825-route-tabs button[aria-pressed="true"]{background:#155371;color:white;border-color:#6ce2ff}
+#mapModal .v4825-route-tabs[hidden]{display:none!important}
+#mapModal #mapNetwork[data-v4825-admin-all="1"]{min-width:850px!important}
+#mapModal #mapNetwork[data-v4825-admin-all="1"] .map-node{width:70px!important;height:43px;min-height:43px}
+#mapModal #mapNetwork[data-v4825-admin-all="1"] .map-node .node-label{font-size:13px!important}
+@media(max-width:600px){
+  #mapModal .modal-header{gap:5px}
+  #mapModal .map-card{padding:8px!important;max-height:95dvh;overflow-x:auto}
+  #mapModal #mapNetwork{height:530px!important;min-height:530px!important}
+  #mapModal #mapNetwork .map-node{width:clamp(46px,15vw,65px);height:42px;min-height:42px}
+  #mapModal #mapNetwork .map-node .node-label{font-size:13px!important}
+  #mapModal #mapNetwork .map-legend{font-size:8px;gap:3px 7px}
+}

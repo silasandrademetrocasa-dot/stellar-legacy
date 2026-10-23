@@ -62,6 +62,7 @@ import { createSceneGradientCache } from './modules/scene-gradient-cache.js?v=47
 import { createPerformanceMonitor, formatPerformanceReport } from './modules/performance-monitor.js?v=47.7.6';
 import { createFrameGate } from './modules/frame-gate.js?v=47.7.6';
 import { createStellarAutopilotV48 } from './modules/stellar-autopilot-v48.js?v=47.7.6';
+import {routeMapLayoutV4825} from './modules/route-map-layout-v4825.js?v=47.7.6';
 import { createStagedAssetPreloader } from './modules/staged-preload-v342.js?v=47.7.6';
 import { QUALITY_PROFILES, initialAutoQualityForDevice } from './modules/quality-profiles.js?v=47.7.6';
 import { freshBattleConfigsV2013, captureCombatBuildV2013, exchangeCombatBuildV2013, combatConfigRemainingV2013, clampStoredShieldV2013 } from './combat-config-v2013.js?v=47.7.6';
@@ -4023,13 +4024,14 @@ function mapArtFor(label){
   else path=GAME_ASSETS.backgrounds.x4;
   return `url('${path}') center/cover no-repeat`;
 }
+let routeMapViewV4825='all';
 function renderMapModal(){ensureFrontierGraphV435();
   if(!ui.mapNetwork||!progress)return;
   normalizeGalaxyGateState();
   const jumps=progress.galaxyGate.jumpBonus;
   const current=currentGraphMapLabel(),ownedPrefix=FACTIONS[progress.profile.faction]?.prefix||'1';
   const adminJump=isVerifiedAdminNavigator();
-  const visibleNodes=MAP_GRAPH_NODES.filter(n=>adminJump||n.id.startsWith(ownedPrefix+'-')||/^4-[123]$/.test(n.id)||/^U-[123]$/.test(n.id));
+  const visibleNodes=routeMapLayoutV4825(MAP_GRAPH_NODES,{admin:adminJump,prefix:ownedPrefix,view:routeMapViewV4825});
   const visibleKeys=new Set(visibleNodes.map(n=>n.id));
   const nodeMap=Object.fromEntries(visibleNodes.map(n=>[n.id,n]));
   let html=`<svg class="map-svg" viewBox="0 0 100 100" preserveAspectRatio="none">`;
@@ -4043,10 +4045,23 @@ function renderMapModal(){ensureFrontierGraphV435();
     if(active)classes.push('current');if(!foreign&&!battle)classes.push('faction');if(foreign)classes.push('hostile');if(battle)classes.push('battle');
     if(canJump)classes.push('travel');else if(access.ok&&!active)classes.push('no-jump');
     if(!access.ok)classes.push('locked');
-    const sub=active?'ATUAL':!access.ok?access.reason:adminJump?'SALTO ADM • LIVRE':jumps>0?'1 BÔNUS DE SALTO':'USE OS PORTAIS';
+    const sub=active?'VOCÊ ESTÁ AQUI':!access.ok?(/^Requer nível/i.test(access.reason)?`LV ${graphLevelRequirement(node.id)}`:'BLOQUEADO'):adminJump?'ADM • SALTO LIVRE':jumps>0?'SALTO DISPONÍVEL':'PORTAL';
     html+=`<div class="${classes.join(' ')}" data-map-label="${node.id}" style="left:${node.x}%;top:${node.y}%;--art:${mapArtFor(node.id)}"><div class="node-art"></div><div class="node-overlay"></div><div class="node-sub">${sub}</div>${!access.ok?'<div class="node-lock">🔒</div>':''}<div class="node-label">${node.id}</div></div>`;
   }
-  ui.mapNetwork.innerHTML=html;
+  let filters=document.getElementById('v4825RouteFilters');
+  if(!filters){
+    filters=document.createElement('nav');filters.id='v4825RouteFilters';filters.className='v4825-route-tabs';
+    filters.setAttribute('aria-label','Filtrar rotas por território');
+    ui.mapNetwork.before(filters);
+    filters.addEventListener('click',event=>{const btn=event.target.closest('[data-route-view-v4825]');if(!btn)return;
+      routeMapViewV4825=btn.dataset.routeViewV4825;
+      renderMapModal();});
+  }
+  filters.hidden=!adminJump;
+  if(adminJump){filters.innerHTML=[['all','TODOS'],['1','TERRA'],['2','MARTE'],['3','JÚPITER']].map(([id,label])=>
+     '<button type="button" data-route-view-v4825="'+id+'" aria-pressed="'+String(routeMapViewV4825===id)+'">'+label+'</button>').join('');}
+  ui.mapNetwork.dataset.v4825AdminAll=adminJump&&routeMapViewV4825==='all'?'1':'0';
+    ui.mapNetwork.innerHTML=html;
   ui.mapNetwork.querySelectorAll('.map-node[data-map-label]').forEach(el=>el.addEventListener('click',async()=>{
     const label=el.dataset.mapLabel;
     if(label===current)return;
@@ -4707,7 +4722,7 @@ async function flushCloudSave(force=false){
   try{progress.adminResetEpoch=accountResetEpochV478;const result=await saveCloudSave(progress);if(result?.statePatch){const patch=result.statePatch;if(Number.isFinite(Number(patch.credits)))progress.profile.credits=Number(patch.credits);if(patch.serverEconomy)progress.serverEconomy={...(progress.serverEconomy||{}),...patch.serverEconomy};localStorage.setItem(saveKey(),JSON.stringify(progress));updateUI();if(patch.serverEconomy?.lastClanCollectionDate)showToast('CLÃ • coleta diária de 10% sincronizada','system');}cloudDirty=false;setSync('ONLINE','ok');}
   catch(e){console.warn('cloud save',e);
     if(e?.code==='SAVE_COUPON_STALE'||e?.code==='SAVE_EVENT_STALE'||e?.code==='SAVE_ELITE_STALE'||e?.code==='SAVE_ECONOMY_STALE'||e?.code==='SAVE_NPC_STALE'||e?.code==='SAVE_ORE_STALE'){
-      try{const remote=await loadCloudSave();if(remote?.state){if(e?.code==='SAVE_ELITE_STALE')installServerStatePreservingPosition(remote.state);else installEconomyState(remote.state);cloudDirty=false;setSync('ONLINE','ok');showToast('Recompensas sincronizadas com o servidor','reward');return;}}catch(syncErr){console.warn('coupon save reconcile',syncErr);}
+      try{const remote=await loadCloudSave();if(remote?.state){if(e?.code==='SAVE_ELITE_STALE')installServerStatePreservingPosition(remote.state);else installEconomyState(remote.state);cloudDirty=false;setSync('ONLINE','ok');console.info('[save-reconcile] Recompensas sincronizadas com o servidor');return;}}catch(syncErr){console.warn('coupon save reconcile',syncErr);}
     }
     if(e?.code==='SAVE_RESET_STALE'){try{localStorage.removeItem(saveKey());}catch{}forceLogoutBecauseSessionMoved('Conta zerada pelo ADM. Faça login novamente para criar seu piloto.');return;}
     if(e?.code==='SAVE_OWNER_MISMATCH'){setSync('BLOQUEADO','err');forceLogoutBecauseSessionMoved('Proteção de conta: um save de outro usuário foi bloqueado.',getUser()?.id||null);return;}setSync('OFFLINE','err');}
@@ -8719,9 +8734,9 @@ const AUTOPILOT_V48=createStellarAutopilotV48({
     xp:Number(progress?.profile?.xp)||0,kills:Number(progress?.profile?.aliensKilled)||0,
     level:Number(progress?.profile?.level)||1,
     cargoUsed:progress?cargoUsed():0,cargoCapacity:progress?cargoCapacity():1,cargoFree:progress?cargoFree():0,
-    ammoStock:progress?ammoQty(progress.selectedLaserAmmo):0,rocketStock:progress?rocketQty(progress.selectedRocket):0,
-    ammoQuote:progress?liveQuote('ammo:'+progress.selectedLaserAmmo):null,
-    rocketQuote:progress?liveQuote('rocket:'+progress.selectedRocket):null
+    ammoStock:progress?ammoQty((([liveQuote('ammo:'+progress.selectedLaserAmmo),liveQuote('ammo:lcb10')].find(q=>q&&q.currency==='credits'&&q.shop_visible!==false)||{}).catalog_key||'').split(':')[1]||progress.selectedLaserAmmo):0,rocketStock:progress?rocketQty((([liveQuote('rocket:'+progress.selectedRocket),liveQuote('rocket:r310')].find(q=>q&&q.currency==='credits'&&q.shop_visible!==false)||{}).catalog_key||'').split(':')[1]||progress.selectedRocket):0,
+    ammoQuote:progress?([liveQuote('ammo:'+progress.selectedLaserAmmo),liveQuote('ammo:lcb10')].find(q=>q&&q.currency==='credits'&&q.shop_visible!==false)||null):null,
+    rocketQuote:progress?([liveQuote('rocket:'+progress.selectedRocket),liveQuote('rocket:r310')].find(q=>q&&q.currency==='credits'&&q.shop_visible!==false)||null):null
   }),
   getGraphLabel:()=>currentGraphMapLabel(),
   getGoalLabel:map=>displayMapLabel(map,progress?.profile?.faction||null),
@@ -8735,7 +8750,7 @@ const AUTOPILOT_V48=createStellarAutopilotV48({
   stopFire:()=>{player.laserFiring=false;state.target=null;},
   fireRocket:()=>fireRocket(false),
   sellCargo:()=>sellAllCargo(),
-  buyPackage:(key,kind)=>runAutoBuy(key,kind==='ammo'?'Munição Autopilot':'Mísseis Autopilot'),
+  buyPackage:(key,kind)=>isAtTrader()?applyAuthoritativePurchase(key,kind==='ammo'?'Munição Autopilot':'Mísseis Autopilot'):(autoBuyEnabled()?runAutoBuy(key,kind==='ammo'?'Munição Autopilot':'Mísseis Autopilot'):Promise.resolve(false)),
   onNotice:()=>{}
 });
 
