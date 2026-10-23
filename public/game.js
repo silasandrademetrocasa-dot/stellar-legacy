@@ -1,3 +1,4 @@
+/* STELLAR_OFFLINE_FARM_V484 APPLIED */
 import {saleQuoteV4776} from './modules/sale-policy-v4776.js?v=47.7.6';
 import {stellarConfirmV4776,stellarPromptV4776} from './modules/stellar-dialog-v4776.js?v=47.7.6';
 import {createWarbotAdminV477} from './modules/warbot-admin-v477.js?v=47.7.6';
@@ -74,6 +75,7 @@ import { xpThresholdV482, migratePilotXpV482 } from './level-curve-v482.js?v=47.
 import { applyRecruitBonusV2012, eliteRouteSnapshotV2012, freshEliteRouteJournalV2012, ELITE_ROUTE_TARGETS_V2012, novaTierPriceV2012 } from './progression-plan-v2012.js?v=47.7.6';
 import { GAME_ASSETS } from './assets/v17/manifest.js?v=47.7.6';
 import { signUp, signIn, beginGoogleSignIn, restoreGoogleSignInFromUrl, requestPasswordReset, restorePasswordRecoveryFromUrl, restoreSession, signOutLocal, checkGameSession, endGameSession, getUser, getSessionCredentials, loadCloudSave, saveCloudSave, loadEliteOperationsOnline, claimEliteOperationOnline, loadWarCampaignsOnline, claimWarSupplyOnline, claimWarCampaignOnline, loadAdminWarCampaignsOnline, saveAdminWarCampaignOnline, saveAdminWarRulesOnline, loadAdminEliteObjectivesOnline, saveAdminEliteObjectiveOnline, updateCallsign, updatePassword, loadRankings, loadAuctionBids, saveAuctionBidOnline, markAuctionBidStatusOnline, loadAuctionMarket, upsertPlayerPresenceOnline, loadMapPresenceOnline, savePlayerLocationCheckpointOnline, loadPlayerLocationCheckpointOnline, removePlayerPresenceOnline, queuePvpAttackOnline, consumePvpDamageEventsOnline, syncArenaProfileOnline, loadArenaState, loadArenaDailyRewardStatus, claimArenaDailyReward, loadArenaOpponents, loadArenaHistory, arenaAttackOnline, listClansOnline, loadMyClanOnline, createClanOnline, joinClanOnline, getClanRequestsOnline, reviewClanRequestOnline, cancelClanRequestOnline, setClanMemberRoleOnline, leaveClanOnline, transferClanCreditsOnline, claimClanCreditGrantsOnline, recordClanAlienKillOnline, getPremiumShopOnline, testPurchasePremiumOnline, adminPreviewPremiumStageOnline, adminSimulatePremiumStageOnline, getPremiumStageCatalogOnline, loadWarfrontStateOnline, loadSectorOwnershipOnline, hitWorldBossOnline, claimWorldBossRewardOnline, declareClanWarOnline, recordClanWarScoreOnline, loadLiveOpsOnline, adminUpdateLiveEventScheduleOnline, purchaseLiveCatalogOnline, economyActionOnline, getChatHistoryOnline, sendChatMessageOnline, redeemGameCouponOnline, getMyDesignersOnline, setDesignLoadoutOnline, claimGateDroneDesignOnline, claimEventDesignerOnline, getAdminStatus, adminSearchAccounts, adminRecentActions, adminBanAccount, adminUnbanAccount, adminResetAccount, adminDeleteAccount, pushTelemetryBatch, adminTelemetryOverview, adminPlayerTelemetry, getBattleGroupOnline, createBattleGroupOnline, inviteBattleGroupOnline, searchBattleGroupPlayersOnline, inviteBattleGroupUserOnline, respondBattleGroupInviteOnline, leaveBattleGroupOnline, kickBattleGroupMemberOnline, setBattleGroupRallyOnline, loadRuntimeConfigOnline, loadNpcRuntimeConfigOnline, loadWorldRuntimeConfigOnline, loadSystemsRuntimeConfigOnline, loadAdminRuntimeMonitorOnline, adminUpdateRuntimeModuleOnline, adminUpdateNpcRuntimeOnline, adminUpdateNpcSpawnRuntimeOnline, adminUpdateWorldMapOnline, adminUpdateWorldResourceOnline, adminUpdateWorldSectorOnline, adminUpdateWorldPortalOnline, adminUpdateWorldResourcePoolOnline, adminUpdateMissionCategoryOnline, adminUpdateEconomyServiceOnline, adminUpdateCraftingRecipeOnline, loadBattlePassRuntimeConfigOnline, adminUpdateBattlePassSeasonOnline, adminUpdateBattlePassTierOnline, loadShopsRuntimeConfigOnline, adminUpdateCommonShopItemOnline, adminUpdatePremiumShopItemOnline, loadBonusConfigOnline, adminUpdateBonusConfigOnline, adminCouponDashboardOnline, adminCreateCouponOnline, adminSetCouponActiveOnline, loadGalaxyGatesOnline, adminUpdateGalaxyGateOnline, adminUpsertCustomMissionOnline, adminDeleteCustomMissionOnline, adminCreateCraftRecipeOnline, adminCreateEconomyServiceOnline, adminCreatePassSeasonOnline, loadAuctionRulesOnline, adminUpdateAuctionRulesOnline, loadBalanceRuntimeOnline, adminUpdateBalanceOnline,loadAdminSecurityIncidents,reviewAdminSecurityIncident } from './api.js?v=47.7.6';
+import {createOfflineFarmV484} from './modules/stellar-offline-farm-v484.js?v=47.7.6';
 import { SharedUniverseClient } from './world.js?v=47.7.6';
 
 const canvas = document.querySelector('#game');
@@ -1143,6 +1145,12 @@ function handleSharedUniverseMessage(msg){
   }
   if(msg.type==='event_credit')return; // Evento legado: premiação agora exclusivamente via RPC.
 }
+const OFFLINE_FARM_V484=createOfflineFarmV484({
+  credentials:()=>getSessionCredentials(),
+  saveBeforeStart:async()=>{if(!authenticated||!progress||gameBootstrapRuntime.loading)throw Error('Aguarde o salvamento do personagem.');await flushCloudSave(true);},
+  onPauseWorld:async()=>{player.laserFiring=false;sharedUniverse.close();},
+  onFinish:async()=>{location.reload();}
+});
 const sharedUniverse=new SharedUniverseClient({
   getCredentials:()=>getSessionCredentials(),
   onMessage:handleSharedUniverseMessage,
@@ -10506,7 +10514,7 @@ async function afterAuth(){
   astralCombatV431.owner=null;astralCombatV431.snapshot=null;++astralCombatV431.request;
   const generation=++gameBootstrapRuntime.generation;
   gameBootstrapRuntime.loading=true;gameBootstrapRuntime.ready=false;gameBootstrapRuntime.lastError=null;
-  authenticated=true;void AUTOPILOT_V48.refreshAccess();void refreshCommandV22();ui.loginModal.classList.add('hidden');ui.userLabel.textContent=getUser()?.callsign||getUser()?.email?.split('@')[0]||'Pilot';loadActivityLog();await refreshAdminStatus(true);refreshClanState(true).then(()=>refreshRankings(true)).catch(()=>{});setSync('SINCRONIZANDO','busy');
+  void OFFLINE_FARM_V484.enable();authenticated=true;void AUTOPILOT_V48.refreshAccess();void refreshCommandV22();ui.loginModal.classList.add('hidden');ui.userLabel.textContent=getUser()?.callsign||getUser()?.email?.split('@')[0]||'Pilot';loadActivityLog();await refreshAdminStatus(true);refreshClanState(true).then(()=>refreshRankings(true)).catch(()=>{});setSync('SINCRONIZANDO','busy');
   try{
     const accountId=String(getUser()?.id||'');
     let local=readLocalGameState();

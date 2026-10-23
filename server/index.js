@@ -1,3 +1,4 @@
+/* STELLAR_OFFLINE_FARM_V484 APPLIED */
 import {saleQuoteV4776} from '../public/modules/sale-policy-v4776.js';
 import {attachFrontierAuditV450} from './frontier-audit-v450.js';
 import {attachFrontierAdminV440} from './frontier-admin-v440.js';
@@ -18,6 +19,7 @@ import os from 'os';
 import { fileURLToPath } from 'url';
 import { createClient } from '@supabase/supabase-js';
 import { randomUUID } from 'crypto';
+import {installOfflineFarmV484,offlineFarmEnsureInactiveV484,makeOfflineFarmGuardV484} from './offline-farm-v484.js';
 import { attachSharedUniverse } from './world.js';
 import { eliteStatus } from './elite-operations.js';
 import { warCampaignState,warRankings,safeWarCampaignInput,safeWarRulesInput } from './war-campaigns.js';
@@ -1331,7 +1333,10 @@ function applyCraftRecipeServer(state,recipeId,runtime){
   const g=recipe.grant_payload||recipe.grant||{};if(g.kind==='resource')state.cargo[g.id]=(Number(state.cargo[g.id])||0)+g.qty;else if(g.kind==='ammo'){state.ammo ||= {};state.ammo[g.id]=(Number(state.ammo[g.id])||0)+g.qty;}else if(g.kind==='rocket'){state.rockets ||= {};state.rockets[g.id]=(Number(state.rockets[g.id])||0)+g.qty;}else if(g.kind==='repair'){state.galaxyGate ||= {};state.galaxyGate.repairBonus=Math.max(0,Number(state.galaxyGate.repairBonus)||0)+g.qty;}return {...recipe,currency,cost,output_label:recipe.output_label||recipe.label};
 }
 
-app.post('/api/economy/action', requireUser, asyncRoute(async (req,res)=>{
+// Offline routes and live-economy guards installed BEFORE normal economy/save routes.
+installOfflineFarmV484(app,{requireUser,asyncRoute,requireEliteAdmin});
+const OFFLINE_FARM_GUARD_V484=makeOfflineFarmGuardV484(requireEliteAdmin);
+app.post('/api/economy/action', requireUser, OFFLINE_FARM_GUARD_V484, asyncRoute(async (req,res)=>{
   const routeStarted=Date.now();
   const action=String(req.body?.action||'').trim();
   const payload=(req.body?.payload&&typeof req.body.payload==='object')?req.body.payload:{};
@@ -1753,7 +1758,7 @@ app.get('/api/save', requireUser, asyncRoute(async (req, res) => {
   res.json({ state: data?.state || null, updated_at: data?.updated_at || null,reset_epoch:Number(resetRecord?.epoch)||0 });
 }));
 
-app.put('/api/save', requireUser, asyncRoute(async (req, res) => {
+app.put('/api/save', requireUser, OFFLINE_FARM_GUARD_V484, asyncRoute(async (req, res) => {
   let state = req.body?.state;
   if (!state || typeof state !== 'object') return res.status(400).json({ error: 'Save inválido.' });
   const {data:resetRecord,error:resetErr}=await req.sb.from('stellar_account_reset_epochs_v478').select('epoch').eq('user_id',req.user.id).maybeSingle();
@@ -1995,6 +2000,7 @@ const sharedUniverse = attachSharedUniverse(server, {
     if(error)throw new Error(error.message);return data===true;
   },
   grantNpcReward:async(userId,killKey,npcType,baseCredits,baseStl)=>{
+    await offlineFarmEnsureInactiveV484(userId,requireEliteAdmin);
     const sb=await requireEliteAdmin();
     const {data,error}=await sb.rpc('stellar_grant_npc_reward_v228',{
       p_user_id:userId,p_kill_key:killKey,p_npc_type:npcType,
@@ -2005,6 +2011,7 @@ const sharedUniverse = attachSharedUniverse(server, {
     return data;
   },
   grantOreReward:async(userId,oreKey,resource,amount,mapId)=>{
+    await offlineFarmEnsureInactiveV484(userId,requireEliteAdmin);
     const sb=await requireEliteAdmin();
     let confirmedAmount=amount;
     // V34.6 bonus is read from persisted control; browser cannot self-assign ore bonuses.
@@ -2057,6 +2064,7 @@ const sharedUniverse = attachSharedUniverse(server, {
   },
   recordSecurityViolation:(userId,finding,source)=>securityService.report(userId,finding,source),
   authorizeJoin: async (token,userId) => {
+    await offlineFarmEnsureInactiveV484(userId,requireEliteAdmin);
     const sb=supabaseForToken(token);if(!sb)throw new Error('Sem autenticação');
     const access=await accountAccessState(sb);if(access?.is_banned||access?.allowed===false)throw new Error('Conta suspensa');
     const {data,error}=await sb.from('game_saves').select('state').eq('user_id',userId).maybeSingle();

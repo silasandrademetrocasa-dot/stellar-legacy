@@ -1,68 +1,49 @@
-CORREÇÃO DA ACTION #307 — V48.3.1
+STELLAR LEGACY • V48.4 FARM OFFLINE ECONÔMICO — CUMULATIVO
 
-A execução #307 (23/10/2026) foi bloqueada após 459 testes passarem e 1 falhar.
-Arquivo: tests/stellar-v4826-autopilot-install-integrity.test.mjs
-Motivo: teste legado V48.2.6 ainda exigia lastHealthyAt<60000 e a antiga mensagem de reconexão.
+IMPORTANTE: ESTE É UM BUILD CANDIDATO / BETA. TESTAR EM HOMOLOGAÇÃO ANTES DE ATIVAR EM PRODUÇÃO.
 
-Este pacote é CUMULATIVO: contém novamente a Fase 3 V48.3, hotfix NAVE V48.2.7
- e a recuperação de rede V48.3.1. Também substitui o teste antigo por uma verificação
- compatível com a nova pausa segura quando a rede desaparece.
+INSTALAÇÃO (A ORDEM É IMPORTANTE)
+1. Faça backup dos saves e do banco do Supabase.
+2. Execute o script sql/STELLAR_V48_4_FARM_OFFLINE_ECONOMICO.sql no SQL Editor do Supabase.
+3. Confirme que a tabela stellar_offline_farm_v484 e as quatro RPCs foram criadas.
+4. No GitHub, exclua o ZIP anterior da raiz e envie SOMENTE este ZIP V48.4.
+5. Actions → Stellar Legacy — Instalador Universal → Run workflow.
+6. Confira TODOS os testes da Action e o deploy do Render.
+7. No jogo, após login, abra 🌙 FARM OFFLINE, escolha NPC, duração e automações.
+8. Ao ativar, o cliente fecha o WebSocket, bloqueia jogo online e mantém a sessão no Supabase.
+9. Pode fechar a ABA do navegador; na volta resgata/encerra, consulta SQL calcula o resultado.
 
-INSTALAÇÃO NO GITHUB:
-1. Excluir da RAIZ do repositório o ZIP anterior STELLAR_LEGACY_V48_3_1_RECUPERACAO_CONEXAO_ACUMULADO.zip.
-2. Enviar APENAS STELLAR_LEGACY_V48_3_1_CORRIGIDO_ACTION_307.zip para a RAIZ.
-3. Executar Actions > Stellar Legacy — Instalador Universal > Run workflow.
-4. A Action aplica o pacote e roda a suíte. Se passar, faz commit e Render deploya.
+REGRAS DO FARM ECONÔMICO
+- Tempo de 60/120/240 min determinado pelo relógio do Supabase, NÃO pelo navegador.
+- Mapas X-1 a X-8; nível mínimo oficial por mapa; NPCs comuns da tabela oficial de spawns.
+- Respeita créditos/STL/XP do NPC escolhido e coleta dos recursos configurados.
+- Mineração virtual: recurso permitido no mapa, em intervalos do ciclo de combate.
+- Munição é descontada do estoque. Compra automática somente de loja em CRÉDITOS.
+- Ida virtual para vender/reabastecer custa 125 segundos por viagem simulada.
+- Capacidade de carga offline conservadora de 1.500 unidades; vendas a preço oficial.
+- Se faltar munição/capacidade/saldo/tempo, simulação para ou retorna estoque restante.
+- Não gera eventos, boss, PvP, arena, missões, leilão nem recompensas de ranking.
+- Não simula dano real de inimigos nem movimento/desenho visual da nave: é uma
+  PROJEÇÃO ECONÔMICA CONSERVADORA, não o Autopilot real em segundo plano.
+- Bloqueia saves, compras e recompensas online enquanto a sessão estiver ativa.
+- Qualquer save/perfil/recompensa que se altere entre início e resgate provoca
+  conflito e NÃO CREDITA o farm. Cancelamento voluntário não gera recompensas.
+- A liquidação e o recibo são atômicos/idempotentes: duas chamadas não pagam 2x.
+- SQL usa service_role e nunca deve ser disponibilizado ao cliente/navegador.
 
-NÃO fazer deploy manual do código, NEM rodar SQL. O fluxo é o mesmo de antes.
-O patch anterior NÃO foi publicado pela Action #307, pois o teste bloqueou o commit.
+LIMITAÇÕES OPERACIONAIS
+- Render Free pode hibernar quando a aba for fechada. A sessão e o relógio ficam
+  no Supabase, não dependem de manter o servidor online.
+- O tempo é simulado apenas no retorno, com CPU breve ao acionar a RPC.
+- Taxa econômica NÃO é idêntica ao combate ao vivo; é uma primeira fase segura.
+- Versão cliente, servidor e SQL precisam ser liberados juntos.
+- Não aplica SQL automaticamente: o Instalador Universal não executa migrações.
+- Inclui toda a V48.3.1 (Autopilot V48.3 + reconexão + NAVE).
 
-AVISO: esta mudança corrige o teste legado; comportamento em rede real precisa de teste no Android.
+VALIDAÇÃO LOCAL
+- Node --check dos scripts novos.
+- Testes de integração das rotas/guards sem conexão real.
+- Teste de execução repetida do patch.
+- Ainda NÃO validado com gameplay real nem liquidação SQL em banco de produção.
 
-STELLAR LEGACY V48.3.1 — RECUPERACAO DE REDE / SESSAO / AUTOPILOT
-PACOTE UNICO ACUMULADO (inclui FASE 3 V48.3 + HOTFIX NAVE V48.2.7)
-
-INSTALACAO:
-1) Envie SOMENTE este ZIP para a RAIZ do GitHub stellar-legacy.
-2) Actions > Stellar Legacy — Instalador Universal > Run workflow.
-3) Confirme que npm run check e npm test passaram antes do commit automatico.
-4) Acompanhe deploy normal no Render; abra uma aba atualizada no navegador.
-
-AJUSTES V48.3.1:
-- WebSocket: watchdog detecta socket OPEN sem mensagens/respostas por 18 segundos.
-- Reconexao controlada com pausas crescentes, sem criar conexoes concorrentes.
-- Reingresso no mapa anterior apenas apos autenticacao e snapshot de mundo.
-- Tratamento especial de erro de autenticacao: nao repetimos o mesmo token rejeitado indefinidamente.
-- Eventos de internet restabelecida / retorno da aba reavaliam a conexao.
-- HTTP no jogo e no Supabase: tempo limite de 18 segundos inclusive para resposta JSON.
-- Busca da configuracao do Supabase nao permanece presa num Promise rejeitado.
-- Falha de rede / timeout nao elimina automaticamente credenciais armazenadas na sessao.
-- Verificacao de sessao passa a ser de 20 segundos, sem requisicoes sobrepostas.
-- Autopilot interrompe temporariamente suas acoes enquanto offline e aguarda snapshot e permissao do servidor.
-- Consulta de acesso ao Autopilot recebe timeout de 15 segundos.
-- Preserva rota em problemas temporarios; a duracao configurada continua sendo limite absoluto.
-- Sem compras, vendas, ataques ou viagens sem confirmacao online.
-- Se uma compra/venda foi enviada mas nao veio resposta confiavel, o bot encerra
-  para evitar repetir transacoes possivelmente concluidas: confira estoque e saldo.
-- Restauracao de checkpoint do bot ampliada para 10 minutos com validacao oficial.
-- NAVE V48.2.7 permanece integrada e hotfix da FASE 3 permanece no mesmo ZIP.
-
-LIMITACOES IMPORTANTES:
-- O jogo permanece CLIENTE WEB; navegadores Android podem suspender scripts ao apagar a tela,
-  minimizar a pagina ou encerrar o aplicativo. Nenhum patch de reconexao contorna isso.
-- Esse patch NAO ativa farm no servidor / tela apagada.
-- O fluxo de reconexao nao garante recuperacao de todas as transacoes ja enviadas
-  se a resposta de rede se perder. Compras/vendas continuam a depender de confirmacao do servidor.
-- Nao altera salvamentos, recompensas, XP, moedas, SQL, contas, economia ou tabelas Supabase.
-- Somente falhas temporarias preservam a sessao. Acesso explicitamente revogado nao e renovado.
-- Validacao real requer teste de alternancia Wi-Fi/dados moveis, tela ativa e retorno da aba.
-
-TESTE RECOMENDADO:
-A) Ativar bot com tela ligada e trocar Wi-Fi/dados moveis por 10 a 20 segundos.
-B) Confirmar RECONECTANDO, retorno ao mesmo mapa e retomada somente apos ONLINE.
-C) Deixar a internet indisponivel por >60 segundos e retornar antes de encerrar a duracao do farm.
-D) Forcar compra/venda somente em condicoes legais; validar ausencia de duplicacoes.
-E) Testar tela apagada 2 minutos e retorno: a simulacao nao roda em segundo plano.
-F) Checar logs do Render e os registros de recompensa no Supabase.
-
-PACOTE TIPO PATCH; nao substitui o repo completo e depende de base V47.7.6 e scripts V48.3.
+FIX ACTION 11:35 • `verify-release` exige ?v=47.7.6 no import do jogo. O instalador aplica essa correção automaticamente durante `npm run check`. Inclui teste de regressão.
