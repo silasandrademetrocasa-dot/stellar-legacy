@@ -46,6 +46,11 @@ if(!html.includes('/modules/pilot-ship-hud-v482.js')){
   if(!html.includes('</body>'))throw Error('V48.2 </body> ausente');
   html=html.replace('</body>',`  ${newScript}\n</body>`);markupChanges++;
 }
+// V48.2.3: nova query somente nos dois assets visuais para vencer cache de navegadores mobile.
+for(const asset of ['pilot-ship-hud-v482.css','pilot-ship-hud-v482.js']){
+  const older=`/modules/${asset}?v=48.2.0`,newer=`/modules/${asset}?v=48.2.3`;
+  if(html.includes(older)){html=html.replaceAll(older,newer);markupChanges++;}
+}
 if(markupChanges)fs.writeFileSync(htmlFile,html,'utf8');
 // Upgrade unlock-announcement labels to match the already-configured mission categories.
 const progressionFile=required('public/modules/galactic-balance-v460.js');

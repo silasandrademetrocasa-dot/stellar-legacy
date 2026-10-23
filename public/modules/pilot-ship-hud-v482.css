@@ -1,24 +1,92 @@
-/* V48.2 • Target-style compact HUD. No changes to positioning or HUD collapse controls. */
+/* Stellar Legacy V48.2.3 — valores dentro das barras; config original ao lado do nome. */
 #playerPanel .player-float-head>div{min-width:0;flex:1}
 #playerPanel .player-float-head #userLabel{font-size:12px!important;overflow-wrap:anywhere;line-height:1.2;color:#e9faff;letter-spacing:.015em}
-#playerPanelContent>.v482-level-row{display:block!important;border-top:1px solid #65ceee36;padding-top:9px!important;margin-top:5px!important}
+#playerPanelContent>.v482-level-row{display:block!important;border-top:1px solid #65ceee36;padding-top:5px!important;margin-top:3px!important}
 #playerPanelContent>.v482-level-row>span,#playerPanelContent>.v482-level-row>#lvl{display:none!important}
-.v482-pilot-level{width:100%;display:grid;gap:5px;padding:2px 1px 1px}
-.v482-xp-numbers,.v482-xp-footer{display:flex;align-items:center;justify-content:space-between;gap:6px;min-width:0}
-.v482-xp-numbers strong{font-size:11px;color:#c4f4ff;letter-spacing:.04em}
-.v482-xp-numbers small,.v482-xp-footer small{font-size:9px;color:#cbe8f2;white-space:nowrap;font-variant-numeric:tabular-nums}
-.v482-xp-footer small{font-size:8px;color:#8bbace}
-.v482-xp-track,.v482-gauge-track{width:100%;height:9px;background:rgba(7,20,34,.9);border:1px solid #6199b35c;box-shadow:inset 0 1px 4px #0008;border-radius:6px;overflow:hidden;position:relative}
-.v482-xp-track i,.v482-gauge-fill{display:block;width:0;height:100%;border-radius:5px;transition:width .25s ease}
-.v482-xp-track i{background:linear-gradient(90deg,#8867fb,#38ceff);box-shadow:0 0 7px #47d8ff80}
-#leftStats .stats-toolbar{flex-wrap:wrap;row-gap:2px}
-#leftStats .v482-ship-name{flex:1 1 100%;font-size:9px;color:#89cddf;padding-left:7px;letter-spacing:.025em;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
-#leftStatsContent>.v482-gauge-row{display:flex!important;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:3px 4px;min-width:0;margin:3px 0 5px!important;padding:3px 2px!important}
-#leftStatsContent>.v482-gauge-row>b,#leftStatsContent>.v482-gauge-row>span{white-space:nowrap;font-size:10px;line-height:1.1}
-#leftStatsContent>.v482-gauge-row>.v482-gauge-track{flex:0 0 100%;margin-top:2px;box-sizing:border-box}
-.v482-hp-row .v482-gauge-fill{background:linear-gradient(90deg,#f43f5e,#ff9270)}
-.v482-shield-row .v482-gauge-fill{background:linear-gradient(90deg,#147cce,#43dbff)}
-.v482-cargo-row .v482-gauge-fill{background:linear-gradient(90deg,#1da881,#6eecd4)}
-#leftStatsContent>.v482-ship-speed{display:flex!important;justify-content:space-between;border-top:1px solid #65ceee30;padding-top:6px!important;margin-top:5px!important}
-#leftStatsContent>#battleConfigToolbar{order:99}
-@media(max-width:760px){.v482-xp-numbers small{font-size:8px}.v482-xp-footer small{font-size:7.5px}.v482-xp-track,.v482-gauge-track{height:8px}}
+#topHudDock #playerPanel .v482-pilot-level{display:block!important;width:100%;min-width:0;padding:0!important;margin:0!important}
+#topHudDock #playerPanel .v482-xp-track,
+#topHudDock #leftStats .v482-gauge-track{
+  display:block;position:relative;box-sizing:border-box;width:100%;height:20px!important;
+  background:rgba(7,20,34,.96);border:1px solid rgba(104,170,209,.48);
+  border-radius:7px;overflow:hidden;box-shadow:inset 0 1px 5px rgba(0,0,0,.45);
+}
+#topHudDock #playerPanel .v482-xp-track>i,
+#topHudDock #leftStats .v482-gauge-track .v482-gauge-fill{
+  display:block;position:absolute;inset:0 auto 0 0;width:0;height:100%;z-index:0;
+  border-radius:5px;transition:width .22s ease;pointer-events:none;
+}
+#topHudDock #playerPanel .v482-xp-track>i{background:linear-gradient(90deg,#776afa,#42cef8)}
+#topHudDock #playerPanel .v482-xp-overlay,
+#topHudDock #leftStats .v482-gauge-overlay{
+  position:absolute;inset:0;z-index:1;display:flex;align-items:center;justify-content:center;
+  gap:6px;white-space:nowrap;text-align:center;min-width:0;
+  font-size:9px!important;font-weight:850;color:#f8ffff!important;
+  font-variant-numeric:tabular-nums;text-shadow:0 1px 3px rgba(0,0,0,.9),0 0 2px #071221;
+  pointer-events:none;
+}
+#topHudDock #playerPanel .v482-xp-overlay strong{font-size:9px!important;flex:none;color:#fff!important;letter-spacing:0!important}
+#topHudDock #playerPanel .v482-xp-overlay span{font-size:9px!important}
+#topHudDock #leftStats .stats-toolbar{
+  display:flex!important;align-items:center!important;flex-wrap:nowrap!important;
+  min-width:0;min-height:30px!important;gap:5px!important;padding:0!important;margin-bottom:5px!important;
+}
+#topHudDock #leftStats .stats-toolbar-left{display:flex!important;align-items:center;gap:4px!important;min-width:0;flex:1 1 auto}
+#topHudDock #leftStats #v482ShipName{
+  display:block;flex:1 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;
+  color:#d9faff;font-size:11px!important;font-weight:900;letter-spacing:.025em;white-space:nowrap;
+}
+/* Sobrescreve a regra anterior: toolbar em grid / largura 100% / colocada no rodapé. */
+#topHudDock #leftStats .stats-toolbar #battleConfigToolbar.battle-config-ship-hud-v2014{
+  display:flex!important;align-items:center!important;flex:0 0 auto!important;justify-content:flex-end!important;
+  flex-wrap:nowrap!important;grid-template-columns:none!important;gap:3px!important;
+  width:auto!important;min-width:0!important;max-width:66%!important;
+  margin:0!important;padding:0!important;border:0!important;box-sizing:border-box!important;
+}
+#topHudDock #leftStats .stats-toolbar #battleConfigToolbar .battle-conf-btn-v2013{
+  display:inline-flex!important;align-items:center;justify-content:center;
+  box-sizing:border-box;flex:0 0 auto;min-width:0!important;width:auto!important;
+  height:27px!important;min-height:27px!important;max-height:27px!important;
+  padding:3px 6px!important;font-size:9px!important;line-height:1!important;
+  border-radius:7px!important;white-space:nowrap!important;touch-action:manipulation;
+}
+#topHudDock #leftStats .stats-toolbar #battleConfigToolbar #battleConfCooldown{
+  position:absolute!important;width:1px!important;height:1px!important;padding:0!important;margin:-1px!important;
+  overflow:hidden!important;clip:rect(0,0,0,0)!important;white-space:nowrap!important;border:0!important;
+}
+#topHudDock #leftStats.collapsed #battleConfigToolbar{display:none!important}
+/* As linhas originais mantêm os IDs para updateUI(); só escondemos os textos antigos. */
+#topHudDock #leftStats #leftStatsContent>.v482-gauge-row{
+  display:block!important;position:relative;min-width:0;margin:2px 0 5px!important;
+  padding:0!important;line-height:1!important;border:0!important;
+}
+#topHudDock #leftStats #leftStatsContent>.v482-gauge-row>span,
+#topHudDock #leftStats #leftStatsContent>.v482-gauge-row>b{display:none!important}
+#topHudDock #leftStats #leftStatsContent>.v482-gauge-row>.v482-gauge-track{
+  display:block!important;width:100%!important;flex:none!important;margin:0!important;
+}
+#topHudDock #leftStats .v482-gauge-overlay{justify-content:space-between;padding:0 8px;gap:3px;font-size:9px!important}
+#topHudDock #leftStats .v482-gauge-overlay strong{font-size:9px!important;color:white!important;flex:0 0 auto}
+#topHudDock #leftStats .v482-gauge-overlay .v482-gauge-numbers{font-size:9px!important;white-space:nowrap}
+#topHudDock #leftStats .v482-hp-row .v482-gauge-fill{background:linear-gradient(90deg,#e84667,#ff9070)}
+#topHudDock #leftStats .v482-shield-row .v482-gauge-fill{background:linear-gradient(90deg,#197aca,#52dafd)}
+#topHudDock #leftStats .v482-cargo-row .v482-gauge-fill{background:linear-gradient(90deg,#198d75,#61e8cb)}
+#topHudDock #leftStats #leftStatsContent>.v482-ship-speed{
+  display:flex!important;justify-content:space-between;align-items:center;
+  border-top:1px solid rgba(105,207,242,.18)!important;
+  padding:3px 2px 0!important;margin:3px 0 0!important;
+}
+/* Reduz a altura anterior (164/172 px) mas preserva espaço para velocidade. */
+#topHudDock #leftStats:not(.collapsed){height:145px!important;min-height:145px!important;max-height:145px!important}
+@media(max-width:760px){
+  #topHudDock #leftStats:not(.collapsed){height:145px!important;min-height:145px!important;max-height:145px!important}
+  #topHudDock #leftStats .stats-toolbar #battleConfigToolbar .battle-conf-btn-v2013{
+    padding:3px 4px!important;font-size:8px!important;height:26px!important;min-height:26px!important;max-height:26px!important;
+  }
+  #topHudDock #leftStats #v482ShipName{font-size:10px!important}
+  #topHudDock #playerPanel .v482-xp-overlay,#topHudDock #leftStats .v482-gauge-overlay{font-size:8.5px!important}
+}
+@media(max-width:400px){
+  #topHudDock #leftStats .stats-toolbar #battleConfigToolbar .battle-conf-btn-v2013{padding:3px 3px!important;font-size:7.5px!important}
+  #topHudDock #leftStats .stats-toolbar{gap:2px!important}
+  #topHudDock #leftStats .stats-toolbar-left{gap:2px!important}
+}
