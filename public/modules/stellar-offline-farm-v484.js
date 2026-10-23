@@ -12,9 +12,12 @@ export function createOfflineFarmV484({credentials,saveBeforeStart,onPauseWorld,
  #v484-panel .v485-progress{height:7px;overflow:hidden;border-radius:8px;background:#244258;margin:9px 0}#v484-panel .v485-progress span{display:block;height:100%;width:0;background:#49d8bc;transition:width .5s}
  #v485-world-lock{display:none;position:fixed;inset:60px 0 0;z-index:5;background:transparent;touch-action:none;cursor:not-allowed}
  .stellar-offline-active-v485 #v485-world-lock{display:block}
+ /* STELLAR_OFFLINE_FARM_MENU_RESCUE_V4851 — a barra pode receber toques; somente o mapa permanece bloqueado. */
+ .stellar-offline-active-v485 #topbar{z-index:10050!important;pointer-events:auto!important;overflow:visible!important}
+ .stellar-offline-active-v485 #topbar .menu-group,.stellar-offline-active-v485 #topbar .menu-dropdown{pointer-events:auto!important}
  .stellar-offline-active-v485 .hud-panel:not(#topbar),.stellar-offline-active-v485 #topHudDock,.stellar-offline-active-v485 #hudIntelligenceQuick,.stellar-offline-active-v485 #topbarDockToggle,.stellar-offline-active-v485 #autopilotFabV48{display:none!important}
  .stellar-offline-active-v485 #topbar .top-actions > :not([data-menu-group="pilot"]):not(#v481MoreGroup){display:none!important}
- #v485-world-indicator{position:fixed;top:90px;left:50%;transform:translateX(-50%);max-width:90vw;pointer-events:none;text-align:center;background:#082032ef;border:1px solid #318d9b;border-radius:14px;padding:11px 17px;color:#d9faff;box-shadow:0 8px 36px #000a}
+ #v485-world-indicator{position:fixed;top:108px;left:50%;transform:translateX(-50%);max-width:90vw;pointer-events:auto;cursor:pointer;touch-action:manipulation;text-align:center;background:#082032ef;border:1px solid #318d9b;border-radius:14px;padding:11px 17px;color:#d9faff;box-shadow:0 8px 36px #000a}
  #v485-world-indicator strong{font-size:15px;display:block}#v485-world-indicator small{color:#9dc7d8;display:block;margin-top:6px}
  #v485-adm-farm{border:1px solid #357a90;background:#0d1e2d;padding:13px;border-radius:12px;margin:12px 0;color:#e0f5ff;font:13px system-ui}
  #v485-adm-farm summary{cursor:pointer;font-weight:800}#v485-adm-farm label{display:inline-flex;flex-direction:column;gap:4px;margin:7px 12px 7px 0}
@@ -43,8 +46,14 @@ export function createOfflineFarmV484({credentials,saveBeforeStart,onPauseWorld,
  <div class="v484-actions"><button id="v484-start">INICIAR FARM</button><button id="v484-settle">RESGATAR / TERMINAR</button><button id="v484-cancel">CANCELAR SEM GANHOS</button><button id="v484-refresh">ATUALIZAR</button><button id="v485-notify">🔔 ALERTA NO CELULAR</button><button id="v484-close">FECHAR</button></div>
  </section>`;document.body.appendChild(shell);
  const $=id=>shell.querySelector('#'+id);let status='none',busy=false,authorized=false,latest=null,preview=null,hasNotified=new Set(),loop=null,menu=null,adminReady=false;
- const lock=document.createElement('div');lock.id='v485-world-lock';lock.innerHTML='<div id="v485-world-indicator"><strong>🌙 SYSTEM OFF • FARM ATIVO</strong><small>Jogo suspenso • o tempo continua no Supabase</small></div>';document.body.appendChild(lock);
- lock.addEventListener('pointerdown',e=>{e.preventDefault();e.stopPropagation();},{passive:false});
+ const lock=document.createElement('div');lock.id='v485-world-lock';lock.innerHTML='<div id="v485-world-indicator"><strong>🌙 SYSTEM OFF • FARM ATIVO</strong><small>TOQUE PARA ABRIR FARM / RESGATAR</small></div>';document.body.appendChild(lock);
+ const farmRescueIndicator=lock.querySelector('#v485-world-indicator');
+ farmRescueIndicator.setAttribute('role','button');farmRescueIndicator.setAttribute('tabindex','0');
+ farmRescueIndicator.setAttribute('aria-label','Abrir Farm Offline para consultar e resgatar');
+ // O bloqueio permanece para o mapa; o aviso é um atalho seguro ao modal de resgate.
+ lock.addEventListener('pointerdown',e=>{if(e.target.closest?.('#v485-world-indicator')){e.stopPropagation();return;}e.preventDefault();e.stopPropagation();},{passive:false});
+ farmRescueIndicator.addEventListener('click',e=>{e.stopPropagation();open();});
+ farmRescueIndicator.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();open();}});
  async function request(path,body,method){const c=credentials?.()||{};if(!c.accessToken||!c.gameSessionId)throw Error('Faça login no jogo novamente.');const res=await fetch('/api/offline-farm/v484/'+path,{method:method||(body?'POST':'GET'),headers:{'Content-Type':'application/json',Authorization:'Bearer '+c.accessToken,'X-Game-Session-Id':c.gameSessionId},body:body?JSON.stringify(body):undefined,cache:'no-store',signal:AbortSignal.timeout(22000)});const data=await res.json().catch(()=>({}));if(!res.ok)throw Error(data.error||'Erro '+res.status);return data;}
  function installMenu(){if(menu)return;const pilot=document.querySelector('[data-menu-group="pilot"] > .menu-dropdown');if(!pilot)return;menu=document.createElement('button');menu.id='v485FarmMenuEntry';menu.className='menu-item';menu.type='button';menu.textContent='🌙 FARM OFFLINE';const auto=document.getElementById('v481AutopilotEntry');if(auto)auto.after(menu);else pilot.append(menu);menu.addEventListener('click',()=>{open();document.querySelectorAll('.menu-group.open').forEach(g=>g.classList.remove('open'));});}
  function active(yes){const was=document.body.classList.contains('stellar-offline-active-v485');document.body.classList.toggle('stellar-offline-active-v485',yes);if(yes&&!was)void onPauseWorld?.();}

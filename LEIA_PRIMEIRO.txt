@@ -1,34 +1,12 @@
-STELLAR LEGACY — V48.5 FARM OFFLINE COCKPIT + ADM
+STELLAR LEGACY V48.5.1 — ACESSO AO FARM OFFLINE
 
-NOVO NA V48.5
-• Painel em PILOTO > AUTOPILOT > FARM OFFLINE (sem botao flutuante)
-• Mapa somente visual, nave e AUX-9 ocultos enquanto sessao offline ativa
-• Painel de ganhos estimados por tempo: NPCs, BOX, XP, creditos, STL, mineracao, venda e compras
-• Selecao de NPC COMUM elegivel no mapa. Boss/Elite/Supremo/Lendario ficam excluidos
-• Munição selecionada (LCB10/MCB25/MCB50/UCB100) e regras de compra por credito
-• Administracao > FARM OFFLINE: limite de tempo, parametro de dano medio simulado,
-  limite de NPCs, tempo de deslocamento e cancelamento ADM de sessoes ativas
-• Alerta de conclusao no PWA se o aplicativo estiver em execucao e com permissao
+Esta atualizacao requer que a V48.5 esteja instalada. Corrige o bloqueio do menu superior quando o Farm Offline esta ativo.
 
-LIMITACAO IMPORTANTISSIMA
-Ganhos durante a sessao sao PROJECOES! Nada eh creditado antes do resgate
-confirmado pelo SQL. O farm nao funciona como combate PvP real nem paga recompensas
-continuamente quando o Render dorme. O saldo e consolidado no retorno.
-Com aplicativo COMPLETAMENTE FECHADO, notificacao de push exige etapa adicional
-com service de push + agendador separado do Render Free (nao incluida).
-O dano medio simulado usa nivel, tipo de municao e multiplicador ADM, nao o
-calculo integral do dano da Arena PvP. O objetivo e nao falsificar dano real.
+- PILOTO e MAIS sao posicionados acima do bloqueio de cliques do mapa.
+- O cartaz SYSTEM OFF vira um atalho clicavel para abrir o painel de resgate.
+- Continua impossivel mover, atacar ou fazer compras pelo mapa durante o farm.
+- Nao altera banco, permissoes, recompensas ou sessoes; nao necessita SQL.
 
-ORDEM DE ATUALIZACAO
-1. Realize backup e teste o SQL em homologacao, se disponivel.
-2. Rode SQL: sql/STELLAR_V48_5_FARM_OFFLINE_CONTROL.sql no Supabase.
-   Ele cria settings e uma RPC v485; adapta a liquidacao antiga para os NOVOS
-   snapshots, sem apagar progresso nem liquidar sessao automaticamente.
-3. GitHub: deixe somente ESTE zip na RAIZ. Exclua o ZIP anterior.
-4. Actions > Stellar Legacy — Instalador Universal > Run workflow.
-5. Verifique status da Action e depois Render; teste farm pequeno controlado.
-6. Antes de liberar para jogadores, valide saldo, eventos e anti-fraude com
-   uma sessao no ambiente de teste. Nao habilite sem verificar a liquidacao.
+INSTALAR: Coloque APENAS este ZIP na raiz do repo. GitHub Actions > Instalador Universal > Run workflow. Aguarde validacao e deploy Render. Depois feche e abra o PWA se necessario.
 
-NAO EXECUTA SQL AUTOMATICAMENTE. Novo SQL eh necessario.
-Nao substitui o repositorio inteiro: ZIP de atualizacao acumulada para o instalador.
+Nao clique em CANCELAR SEM GANHOS. Para resgatar: PILOTO > FARM OFFLINE > RESGATAR / TERMINAR, ou toque no cartaz SYSTEM OFF.
