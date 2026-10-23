@@ -123,7 +123,7 @@ export function createStellarAutopilotV48({credentials,getIdentity=()=>null,getS
     let saved;try{saved=JSON.parse(sessionStorage.getItem(resumeKey)||'null');}catch{return false;}
     if(!saved)return false;
     const ts=now(),user=String(getIdentity()||'');
-    if(!user||saved.user!==user||!Number.isFinite(saved.storedAt)||ts-saved.storedAt>180000||
+    if(!user||saved.user!==user||!Number.isFinite(saved.storedAt)||ts-saved.storedAt>600000||
         !Number.isFinite(saved.started)||ts-saved.started>360*60000){clearResume();return false;}
     const s=getSnapshot();
     if(!s?.online||!s.ready||!AUTOPILOT_ALLOWED_MAPS.includes(s.map))return false;
@@ -138,7 +138,17 @@ export function createStellarAutopilotV48({credentials,getIdentity=()=>null,getS
     notify('Sessão restaurada e acesso validado • retomando '+config.map.toUpperCase());return true;
   }
   function authHeaders(){const v=credentials()||{};if(!v.accessToken)throw Error('Sessão necessária');return {'Content-Type':'application/json',Authorization:`Bearer ${v.accessToken}`,'X-Game-Session-Id':v.gameSessionId||''};}
-  async function request(url,options={}){const res=await fetch(url,{...options,headers:authHeaders(),cache:'no-store'});const data=await res.json().catch(()=>({}));if(!res.ok)throw Error(data.error||`Erro ${res.status}`);return data;}
+  // STELLAR_NETWORK_RECOVERY_V4831: all grant lookups terminate, including a stalled response body.
+  async function request(url,options={}){
+    const controller=new AbortController();let expired=false;
+    const timer=setTimeout(()=>{expired=true;controller.abort();},15000);
+    try{const res=await fetch(url,{...options,headers:authHeaders(),signal:controller.signal,cache:'no-store'});
+      const data=await res.json().catch(()=>({}));
+      if(!res.ok){const e=Error(data.error||`Erro ${res.status}`);e.status=res.status;e.code=data.code||null;throw e;}
+      return data;
+    }catch(e){if(expired){const timeout=Error('Tempo limite na consulta ao Autopilot');timeout.code='NETWORK_TIMEOUT';throw timeout;}throw e;}
+    finally{clearTimeout(timer);}
+  }
   function accessReady(){return allowed&&authorizedId===String(getIdentity()||'')&&lastAccessAt>0&&now()-lastAccessAt<75000;}
   function notify(t){reason=t;onNotice(t);renderStatus();}
   function stop(why='Interrompido'){running=false;busy=false;pendingJump=null;clearResume();stopFire();reason=why;ended=now();try{const s=getSnapshot();if(s)lastProgress=stats(s);}catch{}renderStatus();}
@@ -172,12 +182,10 @@ export function createStellarAutopilotV48({credentials,getIdentity=()=>null,getS
         return allowed;
       }catch(e){
         nextAccessAt=now()+12000;
-        // Rede instável após salto: nenhuma ação enquanto o acesso não for revalidado.
-        // O bot preserva a rota por tempo limitado e retoma só após confirmação oficial.
-        if(running&&authorizedId===identity&&lastAccessAt>0&&now()-lastAccessAt<150000){
-          allowed=false;notify('Aguardando autorização online • rota preservada');
-          if(fab)fab.hidden=false;
-          return false;
+        // STELLAR_NETWORK_RECOVERY_V4831: connection loss pauses the bot, not an explicit revocation.
+        if(running&&authorizedId===identity&&identity&&!([401,403].includes(Number(e?.status)))){
+          allowed=false;notify('Rede instável • aguardando verificação; rota preservada');
+          if(fab)fab.hidden=false;checkpoint(true);return false;
         }
         allowed=false;authorizedId=null;
         if(running)stop('Sem verificação de acesso online');
@@ -265,8 +273,8 @@ export function createStellarAutopilotV48({credentials,getIdentity=()=>null,getS
     for(const opt of opts){const q=opt.quote;if(!q||!q.catalog_key||q.shop_visible===false||Number(opt.stock)>=opt.min||q.currency!=='credits'||(opt.kind==='rocket'&&!config.rockets))continue;
       const cost=Number(q.price)||0;if(cost<=0||cost>config.budget-spent||cost>Number(s.credits)||!Number.isFinite(cost))continue;
       attempts++;busy=true;try{const ok=await buyPackage(q.catalog_key,opt.kind,{atBase:!!s.atBase,credits:s.credits,budgetRemaining:config.budget-spent});if(ok){spent+=cost;buyFailuresInRow=0;notify('Reabastecimento validado pelo servidor');}
-        else{failures++;buyFailuresInRow++;notify('Compra não confirmada pelo servidor');}}
-      catch(e){failures++;buyFailuresInRow++;notify('Compra recusada: '+String(e?.message||e).slice(0,100));}
+        else{failures++;buyFailuresInRow++;stop('Compra sem confirmação • confira estoque e saldo antes de reiniciar');}}
+      catch(e){failures++;buyFailuresInRow++;stop('Compra com resposta perdida • confira estoque e saldo antes de reiniciar');}
       finally{busy=false;}
       if(buyFailuresInRow>=3)stop('Compra não autorizada após 3 tentativas; verifique loja, saldo e CPU');
       break;
@@ -307,9 +315,9 @@ export function createStellarAutopilotV48({credentials,getIdentity=()=>null,getS
     if(ts>=nextAccessAt&&!refreshingAccess)void refreshAccess();
     if(!accessReady()){
       // Sem permissão atual válida, NENHUMA ação; tenta reconectar sem zerar a sessão.
-      if(authorizedId===String(getIdentity()||'')&&lastAccessAt>0&&ts-lastAccessAt<150000){
+      if(authorizedId&&authorizedId===String(getIdentity()||'')){
         if(!refreshingAccess&&ts>=nextAccessAt)void refreshAccess();
-        notify('Autorização pendente • retomada automática');return;
+        notify('Reconectando com segurança • sem ações de economia');return;
       }
       stop('Acesso precisa ser validado');return;
     }
@@ -319,8 +327,9 @@ export function createStellarAutopilotV48({credentials,getIdentity=()=>null,getS
     if(!s||!s.online||!s.ready){
       // Troca entre setores derruba transitoriamente a conexão WS.
       // Nunca trata 1-20s de reconexão como desistência do usuário.
-      if(lastHealthyAt && ts-lastHealthyAt<60000){notify('Reconectando ao setor • rota preservada');return;}
-      stop('Sessão offline por mais de 60s');return;
+      // No network = no combat and no sales. Resume only with a fresh online snapshot.
+      if(String(getIdentity()||'')===authorizedId){notify('Sem sincronização do setor • aguardando servidor');return;}
+      stop('Sessão de jogo encerrada');return;
     }
     lastHealthyAt=ts;checkpoint();
     if(lastMapId!==s.map){
@@ -350,9 +359,9 @@ export function createStellarAutopilotV48({credentials,getIdentity=()=>null,getS
       if(ts<nextSaleAttempt)return;
       nextSaleAttempt=ts+6500;busy=true;
       Promise.resolve().then(()=>sellCargo()).then(ok=>{
-        if(ok===false){failures++;notify('Venda não confirmada pela loja');}
+        if(ok===false){failures++;stop('Venda sem confirmação • confira o porão antes de reiniciar');}
         else notify('Venda enviada • aguardando sincronização');
-      }).catch(e=>{failures++;notify('Falha na venda: '+String(e?.message||e).slice(0,100));})
+      }).catch(e=>{failures++;stop('Venda com resposta perdida • confira o porão antes de reiniciar');})
         .finally(()=>{busy=false;});
       return;
     }

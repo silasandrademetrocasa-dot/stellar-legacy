@@ -10652,10 +10652,16 @@ const HUD_INTELLIGENCE_V2296=createHudIntelligence({
   setVisibility:(key,value)=>setHudVisibility(key,value),
   getVisibility:()=>({...hudVisibility})
 });
-setInterval(()=>{
-  if(!authenticated)return;
-  checkGameSession().catch(()=>{});
-},3000);
+// STELLAR_NETWORK_RECOVERY_V4831: do not flood the database every 3 seconds; never overlap checks.
+let sessionCheckInFlightV4831=false;
+async function safeSessionCheckV4831(){
+  if(!authenticated||sessionCheckInFlightV4831||document.visibilityState==='hidden')return;
+  sessionCheckInFlightV4831=true;
+  try{await checkGameSession();if(sharedUniverseMap()&&!sharedUniverse.isOnline())sharedUniverse.recover();}catch(err){
+    if(err?.code!=='NETWORK_TIMEOUT'&&err?.code!=='NETWORK_OFFLINE')console.warn('[session-check]',err?.message||err);
+  }finally{sessionCheckInFlightV4831=false;}
+}
+setInterval(()=>{void safeSessionCheckV4831();},20000);
 setInterval(()=>{if(authenticated)refreshChatHistory(false);},CHAT_POLL_MS);
 setInterval(()=>{if(progress){saveGame();flushCloudSave();}},7000);
 setInterval(()=>{
@@ -10663,7 +10669,7 @@ setInterval(()=>{
   const moved=movementPositionRuntime.lastX===null?Math.hypot(player.tx-player.x,player.ty-player.y)>2:Math.hypot(player.x-movementPositionRuntime.lastX,player.y-movementPositionRuntime.lastY)>=8;
   if(moved)commitRuntimePosition('periodic_movement');
 },2000);
-document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'&&progress){if(movementPositionRuntime.loadedFromCheckpoint||movementPositionRuntime.hasMovedSinceLoad){commitRuntimePosition('hidden');saveGame();flushCloudSave(true);}}else if(document.visibilityState==='visible'&&authenticated){checkGameSession().catch(()=>{});preloadActiveGameplayAssets();}});
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'&&progress){if(movementPositionRuntime.loadedFromCheckpoint||movementPositionRuntime.hasMovedSinceLoad){commitRuntimePosition('hidden');saveGame();flushCloudSave(true);}}else if(document.visibilityState==='visible'&&authenticated){sharedUniverse.recover();void safeSessionCheckV4831();preloadActiveGameplayAssets();}});
 const AUTO_QUALITY_ORDER=['low','medium','high'];
 let perfWindowStart=performance.now(),perfFrames=0,perfGoodWindows=0,perfLastChange=0;
 function monitorAutoPerformance(t){

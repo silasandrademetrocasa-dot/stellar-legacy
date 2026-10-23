@@ -24,6 +24,30 @@ function notifySessionReplaced(message = 'Sua conta foi acessada em outro dispos
   } catch {}
 }
 
+// STELLAR_NETWORK_RECOVERY_V4831: transport failure must never be mistaken for a revoked login.
+function verifiedAuthDenialV4831(e){
+  return !!e&&(['SESSION_REPLACED','SESSION_REQUIRED','ACCOUNT_BANNED'].includes(e.code)||[401,403].includes(Number(e.status)));
+}
+async function boundedFetchV4831(url,options={},duration=18000){
+  const controller=new AbortController();
+  let timedOut=false;
+  const upstream=options.signal;
+  const onAbort=()=>controller.abort();
+  if(upstream){if(upstream.aborted)controller.abort();else upstream.addEventListener('abort',onAbort,{once:true});}
+  const timer=setTimeout(()=>{timedOut=true;controller.abort();},duration);
+  try{
+    const res=await fetch(url,{...options,signal:controller.signal});
+    // JSON read is also bounded; stalled response bodies must release operation locks.
+    const body=await readJson(res);
+    return {res,body};
+  }catch(e){
+    const err=new Error(timedOut?'Tempo limite de comunicação excedido.':'Conexão temporariamente indisponível.');
+    err.code=timedOut?'NETWORK_TIMEOUT':'NETWORK_OFFLINE';
+    if(upstream?.aborted)err.code='REQUEST_ABORTED';
+    throw err;
+  }finally{clearTimeout(timer);if(upstream)upstream.removeEventListener('abort',onAbort);}
+}
+
 async function serverFetch(path, options = {}, withAuth = false) {
   const headers = {
     'Content-Type': 'application/json',
@@ -35,14 +59,7 @@ async function serverFetch(path, options = {}, withAuth = false) {
     if (session?.game_session_id) headers['X-Game-Session-Id'] = session.game_session_id;
   }
 
-  let res;
-  try {
-    res = await fetch(path, { ...options, headers, cache: 'no-store' });
-  } catch {
-    throw new Error('Não foi possível conectar ao servidor do jogo. Tente novamente.');
-  }
-
-  const body = await readJson(res);
+  const {res,body} = await boundedFetchV4831(path,{...options,headers,cache:'no-store'});
   if (!res.ok) {
     const msg = body?.error || body?.message || `Erro ${res.status}`;
     const err = new Error(String(msg));
@@ -58,16 +75,15 @@ async function serverFetch(path, options = {}, withAuth = false) {
 
 async function getConfig() {
   if (!configPromise) {
-    configPromise = fetch('/api/config', { cache: 'no-store' })
-      .then(async (res) => {
-        const body = await readJson(res);
+    configPromise = boundedFetchV4831('/api/config',{cache:'no-store'})
+      .then(({res,body}) => {
         if (!res.ok) throw new Error(body.error || 'Supabase não configurado.');
         if (!body.supabaseUrl || !body.supabasePublishableKey) throw new Error('Configuração pública do Supabase incompleta.');
         return {
           url: String(body.supabaseUrl).replace(/\/+$/, ''),
           key: String(body.supabasePublishableKey),
         };
-      });
+      }).catch(e=>{configPromise=null;throw e;});
   }
   return configPromise;
 }
@@ -84,14 +100,7 @@ async function supabaseFetch(path, options = {}, withAuth = false) {
     headers.Authorization = `Bearer ${session.access_token}`;
   }
 
-  let res;
-  try {
-    res = await fetch(`${url}${path}`, { ...options, headers });
-  } catch (err) {
-    throw new Error('Seu navegador não conseguiu conectar ao Supabase. Verifique a internet e tente novamente.');
-  }
-
-  const body = await readJson(res);
+  const {res,body} = await boundedFetchV4831(`${url}${path}`,{...options,headers});
   if (!res.ok) {
     const msg = body?.msg || body?.message || body?.error_description || body?.error || `Erro ${res.status}`;
     throw new Error(String(msg));
@@ -296,8 +305,9 @@ async function refreshSession() {
     if (!body?.session?.access_token || !body?.user) throw new Error('Sessão não renovada');
     setSession(body.session, body.user);
     return true;
-  } catch {
-    signOutLocal();
+  } catch (err) {
+    if(verifiedAuthDenialV4831(err))signOutLocal();
+    // A temporary outage keeps credentials so the next attempt can refresh safely.
     return false;
   }
 }
@@ -331,13 +341,14 @@ export async function restoreSession() {
     const parsed = JSON.parse(raw);
     session = parsed.session || null;
     currentUser = parsed.user || null;
-    if (!session?.access_token || !session?.game_session_id) throw new Error('Sessão antiga; faça login novamente.');
+    if (!session?.access_token || !session?.game_session_id){const e=new Error('Sessão antiga; faça login novamente.');e.code='SESSION_REQUIRED';throw e;}
     const body = await authedServerFetch('/api/auth/me');
     currentUser = body.user;
     setSession(session, currentUser);
     return { session, user: currentUser };
-  } catch {
-    signOutLocal();
+  } catch (err) {
+    // Do not destroy sessionStorage on a 500, timeout or loss of signal.
+    if(verifiedAuthDenialV4831(err))signOutLocal();
     return null;
   }
 }
