@@ -1,0 +1,21 @@
+STELLAR LEGACY V52.3.1 — HOTFIX INSTALADOR (CUMULATIVO)
+
+Problema reportado:
+  Release V47.7.6: import do jogo sem cache-busting: ./modules/stellar-ship3d-v50.js
+
+Causa identificada:
+  scripts/v523-unify.mjs corrigia o import apenas DEPOIS de scripts/verify-release.mjs.
+  A verificacao antiga bloqueava o job antes da correcao.
+
+Correcao:
+  Incluido scripts/v5231-preverify-cachefix.mjs, executado antes de verify-release
+  no comando npm run check. E idempotente, nao mexe em save, economia nem Supabase.
+  Os modelos, imagens e instaladores V52.3 seguem intactos.
+
+Instalacao:
+  Suba ESTE ZIP pelo Instalador Universal e rode o workflow.
+  NAO rode SQL (a V52.3 nao exige migracao).
+
+Limitacao de testes:
+  Foram reproduzidos e testados os imports do codigo disponivel,
+  mas o validador original do seu repositorio nao esta acessivel neste ambiente.

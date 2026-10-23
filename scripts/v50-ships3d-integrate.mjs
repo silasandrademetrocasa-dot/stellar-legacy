@@ -21,7 +21,7 @@ function patchDrawing(s,start,end,kind,patch){
  if(part===updated)throw Error(`V50 ${kind} renderer: nenhuma alteração aplicada`);
  return s.slice(0,a)+updated+s.slice(b);
 }
-function chooseInsertAfterGameImport(s){const rx=/^import\s*\{[^\n]+\}\s*from\s*['"]\.\/data\.js\?v=[^'"\n]+['"];?\s*$/m;if(!rx.test(s))throw Error('V50: import catálogo no game.js mudou');return s.replace(rx,m=>m+"\nimport { createStellarShipRendererV50, isShipAllowedV50, ensureAllowedShipSaveV50 } from './modules/stellar-ship3d-v50.js';\nconst STELLAR_3D_V50=createStellarShipRendererV50();");}
+function chooseInsertAfterGameImport(s){const rx=/^import\s*\{[^\n]+\}\s*from\s*['"]\.\/data\.js\?v=[^'"\n]+['"];?\s*$/m;if(!rx.test(s))throw Error('V50: import catálogo no game.js mudou');return s.replace(rx,m=>m+"\nimport { createStellarShipRendererV50, isShipAllowedV50, ensureAllowedShipSaveV50 } from './modules/stellar-ship3d-v50.js?v=47.7.6';\nconst STELLAR_3D_V50=createStellarShipRendererV50();");}
 edit('public/game.js',s=>{
  s=chooseInsertAfterGameImport(s);
  // Existing ship data remain available for historical progression/auction records;

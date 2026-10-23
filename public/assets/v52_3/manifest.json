@@ -1,0 +1,199 @@
+{
+  "aux": {
+    "id": "aux9",
+    "path": "/assets/v52_3/models/aux9.glb",
+    "card": "/assets/v52_3/cards/aux9.png",
+    "triangles": null
+  },
+  "npc": {
+    "streuner": {
+      "name": "Scavenger",
+      "path": "/assets/v52_3/models/npc_streuner.glb",
+      "card": "/assets/v52_3/cards/npc_streuner.png",
+      "triangles": null
+    },
+    "recruitStreuner": {
+      "name": "Scavenger Scout",
+      "path": "/assets/v52_3/models/npc_recruitStreuner.glb",
+      "card": "/assets/v52_3/cards/npc_recruitStreuner.png",
+      "triangles": null
+    },
+    "aiderStreuner": {
+      "name": "Scavenger Support",
+      "path": "/assets/v52_3/models/npc_aiderStreuner.glb",
+      "card": "/assets/v52_3/cards/npc_aiderStreuner.png",
+      "triangles": null
+    },
+    "bossStreuner": {
+      "name": "Scavenger Prime",
+      "path": "/assets/v52_3/models/npc_bossStreuner.glb",
+      "card": "/assets/v52_3/cards/npc_bossStreuner.png",
+      "triangles": null
+    },
+    "lordakia": {
+      "name": "Vrax",
+      "path": "/assets/v52_3/models/npc_lordakia.glb",
+      "card": "/assets/v52_3/cards/npc_lordakia.png",
+      "triangles": null
+    },
+    "bossLordakia": {
+      "name": "Vrax Prime",
+      "path": "/assets/v52_3/models/npc_bossLordakia.glb",
+      "card": "/assets/v52_3/cards/npc_bossLordakia.png",
+      "triangles": null
+    },
+    "saimon": {
+      "name": "Zyron",
+      "path": "/assets/v52_3/models/npc_saimon.glb",
+      "card": "/assets/v52_3/cards/npc_saimon.png",
+      "triangles": null
+    },
+    "bossSaimon": {
+      "name": "Zyron Prime",
+      "path": "/assets/v52_3/models/npc_bossSaimon.glb",
+      "card": "/assets/v52_3/cards/npc_bossSaimon.png",
+      "triangles": null
+    },
+    "mordon": {
+      "name": "Kharon",
+      "path": "/assets/v52_3/models/npc_mordon.glb",
+      "card": "/assets/v52_3/cards/npc_mordon.png",
+      "triangles": null
+    },
+    "bossMordon": {
+      "name": "Kharon Prime",
+      "path": "/assets/v52_3/models/npc_bossMordon.glb",
+      "card": "/assets/v52_3/cards/npc_bossMordon.png",
+      "triangles": null
+    },
+    "devolarium": {
+      "name": "Dreadnox",
+      "path": "/assets/v52_3/models/npc_devolarium.glb",
+      "card": "/assets/v52_3/cards/npc_devolarium.png",
+      "triangles": null
+    },
+    "bossDevolarium": {
+      "name": "Dreadnox Prime",
+      "path": "/assets/v52_3/models/npc_bossDevolarium.glb",
+      "card": "/assets/v52_3/cards/npc_bossDevolarium.png",
+      "triangles": null
+    },
+    "sibelon": {
+      "name": "Colossar",
+      "path": "/assets/v52_3/models/npc_sibelon.glb",
+      "card": "/assets/v52_3/cards/npc_sibelon.png",
+      "triangles": null
+    },
+    "bossSibelon": {
+      "name": "Colossar Prime",
+      "path": "/assets/v52_3/models/npc_bossSibelon.glb",
+      "card": "/assets/v52_3/cards/npc_bossSibelon.png",
+      "triangles": null
+    }
+  },
+  "resources": {
+    "Prometium": {
+      "path": "/assets/v52_3/models/ore_Prometium.glb",
+      "card": "/assets/v52_3/cards/ore_Prometium.png",
+      "triangles": null
+    },
+    "Endurium": {
+      "path": "/assets/v52_3/models/ore_Endurium.glb",
+      "card": "/assets/v52_3/cards/ore_Endurium.png",
+      "triangles": null
+    },
+    "Terbium": {
+      "path": "/assets/v52_3/models/ore_Terbium.glb",
+      "card": "/assets/v52_3/cards/ore_Terbium.png",
+      "triangles": null
+    },
+    "Prometid": {
+      "path": "/assets/v52_3/models/ore_Prometid.glb",
+      "card": "/assets/v52_3/cards/ore_Prometid.png",
+      "triangles": null
+    },
+    "Duranium": {
+      "path": "/assets/v52_3/models/ore_Duranium.glb",
+      "card": "/assets/v52_3/cards/ore_Duranium.png",
+      "triangles": null
+    },
+    "Promerium": {
+      "path": "/assets/v52_3/models/ore_Promerium.glb",
+      "card": "/assets/v52_3/cards/ore_Promerium.png",
+      "triangles": null
+    },
+    "Xenomit": {
+      "path": "/assets/v52_3/models/ore_Xenomit.glb",
+      "card": "/assets/v52_3/cards/ore_Xenomit.png",
+      "triangles": null
+    }
+  },
+  "loot": {
+    "bonus": {
+      "path": "/assets/v52_3/models/box_bonus.glb",
+      "card": "/assets/v52_3/cards/box_bonus.png",
+      "triangles": null
+    },
+    "loot": {
+      "path": "/assets/v52_3/models/box_loot.glb",
+      "card": "/assets/v52_3/cards/box_loot.png",
+      "triangles": null
+    }
+  },
+  "ships": {
+    "phoenix": {
+      "name": "Aurora",
+      "card": "/assets/v52_3/cards/ship_phoenix.png"
+    },
+    "leonov": {
+      "name": "Lynx",
+      "card": "/assets/v52_3/cards/ship_leonov.png"
+    },
+    "liberator": {
+      "name": "Pioneer",
+      "card": "/assets/v52_3/cards/ship_liberator.png"
+    },
+    "piranha": {
+      "name": "Raptor",
+      "card": "/assets/v52_3/cards/ship_piranha.png"
+    },
+    "vengeance": {
+      "name": "Valkyrie",
+      "card": "/assets/v52_3/cards/ship_vengeance.png"
+    },
+    "bigboy": {
+      "name": "Bastion",
+      "card": "/assets/v52_3/cards/ship_bigboy.png"
+    },
+    "goliath": {
+      "name": "Leviathan",
+      "card": "/assets/v52_3/cards/ship_goliath.png"
+    },
+    "citadel": {
+      "name": "Bulwark",
+      "card": "/assets/v52_3/cards/ship_citadel.png"
+    },
+    "aegis": {
+      "name": "Seraph",
+      "card": "/assets/v52_3/cards/ship_aegis.png"
+    },
+    "spearhead": {
+      "name": "Pathfinder",
+      "card": "/assets/v52_3/cards/ship_spearhead.png"
+    },
+    "defcom": {
+      "name": "Phantom",
+      "card": "/assets/v52_3/cards/ship_defcom.png"
+    },
+    "yamato": {
+      "name": "Kensei",
+      "card": "/assets/v52_3/cards/ship_yamato.png"
+    },
+    "nostromo": {
+      "name": "Meridian",
+      "card": "/assets/v52_3/cards/ship_nostromo.png"
+    }
+  },
+  "visualRevision": "V52.3-U1-PREMIUM",
+  "mode": "3D optimized in high, PNG classic fallback medium/low for resources"
+}

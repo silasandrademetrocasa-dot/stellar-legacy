@@ -1,0 +1,24 @@
+STELLAR LEGACY V52.0 — PACOTE UNICO CUMULATIVO (V49.5 + V50.1 + V52)
+
+OBJETIVO
+- Rotação de todas as naves em tempo real corrigida (ângulo invertido no V50.1)
+- Loja, Hangar e HUD exibem miniaturas dos MESMOS 13 modelos 3D atuais
+- AUX-9: card/Loja/equipamento/mundo atualizados (GLB + PNG fallback)
+- NPCs Scavenger, Vrax, Zyron, Kharon, Dreadnox, Colossar e variantes Prime/Scout/Support em GLB
+- Minérios Ferron, Cryon, Virel, Ferrite, Duracite, Solarium, Voidite em GLB
+- Box bônus e loot: modelos GLB + sprites derivados da geometria para economizar GPU
+- Fallback 2D se WebGL2 estiver indisponível, ou quando a qualidade é BAIXA para NPC/AUX
+
+INSTALAR
+1. O ZIP substitui o pacote V50.1; instale NO MESMO GitHub Actions Universal.
+2. O npm run check aplica V49.5, V50.1 e V52 em ordem (são scripts idempotentes).
+3. Executa v52-verify.mjs para validar 24 modelos GLB e 37 previews PNG.
+4. Não executar o SQL V50 novamente; a restrição de 13 naves já está aplicada no seu Supabase.
+5. Teste em celular (comparar FPS 2D/3D; Hangar, Loja, AUX, minério, boss, farm, troca de mapa).
+
+AVISO
+- Código validado offline sobre uma cópia da base V50.1; deploy no Render e teste no dispositivo AINDA NÃO FEITOS.
+- Novos AUX/NPCs são protótipos 3D editáveis; prévias em PNG anexas para revisão visual após instalar, ou antes.
+- Sem alteração em inventários, saves, tabelas SQL, economia, lógica NPC ou propriedades das naves.
+- NPCs especiais fora da tabela de 14 tipos atuais continuam com visual anterior até terem um modelo.
+- Se o FPS cair, use o botão NAVE 3D: DESLIGADO no Hangar; qualidade BAIXA usa sprites para AUX/NPC.

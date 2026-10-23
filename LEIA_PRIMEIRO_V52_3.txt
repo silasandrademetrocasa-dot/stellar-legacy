@@ -1,0 +1,27 @@
+STELLAR LEGACY V52.3 — PACOTE ÚNICO, IDENTIDADE PREMIUM (SEM SQL ADICIONAL)
+
+INSTALAÇÃO
+1. Faça backup do repositório antes da instalação (branch/tag).
+2. Instale ESTE ZIP pelo instalador universal do Stellar Legacy (substitui o ZIP V52 anterior).
+3. A execução de npm run check aplica cumulativamente V50.1, V52 e V52.3. Nunca rode SQL V50 novamente.
+4. Aguarde todos os checks verdes e o deploy automático do Render, se configurado.
+5. No jogo teste 3D (Loja, Hangar, rotação), AUX Loja+equipamento+mapa, 14 NPCs,
+   minérios, bonus e loot e a performance em BAIXO/MÉDIO/ALTO.
+6. Qualidade ALTA: GLB para minério, box e loot quando disponível. MÉDIA/BAIXA: PNG clássico aprimorado para economizar processamento.
+7. Use o botão 3D/2D no Hangar se FPS cair e reporte print/performance.
+
+O QUE ESTÁ INCLUÍDO
+- 13 modelos de naves existentes (sem mudar malha/estatísticas/IDs)
+- 13 cards coerentes com os GLBs da frota
+- AUX 9 + 14 NPCs Elite DARK aprovados em modelos móveis; GLBs detalhados em assets/v52_3/hires para futura evolução
+- 7 minérios: novos GLB de cristais 3D + ícones clássicos aprimorados para fallback
+- box bônus/loot: modelos 3D com quinas reforçadas + ícones clássicos para fallback
+- bônus opcionais de caixa extra (mistério, elite, reparação, munição) apenas ASSETS; não alteram economia/spawns
+- import do renderizador com query ?v=47.7.6 para passar pelo validador histórico
+- assets com pasta V52_3 para evitar uso do cache da V52 antiga
+
+CRÍTICO
+- A arte conceitual aprovada (PREVIAS/CONCEITO_*.png) NÃO é render direto dos GLBs: é referência visual de direção de arte.
+- O modelo em tempo real usa geometria simplificada para caber no Android; não será idêntico à arte conceitual.
+- NÃO altera SQL, saves, contas, combate, balanço, spawn, valores de NPC, inventários.
+- Github/Render não recebem o ZIP automaticamente: esse arquivo precisa de instalação pelo workflow do usuário.

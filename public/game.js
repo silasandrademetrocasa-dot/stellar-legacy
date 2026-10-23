@@ -1,3 +1,5 @@
+/* STELLAR_VISUAL_FLEET_V52_3 */
+/* STELLAR_VISUAL_FLEET_V52_0 */
 /* STELLAR_SHIPS3D_FLEET_V50 */
 /* STELLAR_OFFLINE_FARM_VISUAL_V485 */
 /* STELLAR_OFFLINE_FARM_V484 APPLIED */
@@ -70,7 +72,7 @@ import { createStagedAssetPreloader } from './modules/staged-preload-v342.js?v=4
 import { QUALITY_PROFILES, initialAutoQualityForDevice } from './modules/quality-profiles.js?v=47.7.6';
 import { freshBattleConfigsV2013, captureCombatBuildV2013, exchangeCombatBuildV2013, combatConfigRemainingV2013, clampStoredShieldV2013 } from './combat-config-v2013.js?v=47.7.6';
 import { FACTIONS, SHIPS, ITEMS, LASER_AMMO, ROCKETS, NPC_TYPES, MAPS, RESOURCES } from './data.js?v=47.7.6';
-import { createStellarShipRendererV50, isShipAllowedV50, ensureAllowedShipSaveV50 } from './modules/stellar-ship3d-v50.js';
+import { createStellarShipRendererV50, isShipAllowedV50, ensureAllowedShipSaveV50 } from './modules/stellar-ship3d-v50.js?v=47.7.6';
 const STELLAR_3D_V50=createStellarShipRendererV50();
 import { repairPulseSettings } from './repair-balance.js?v=47.7.6';
 import { xpThresholdV1770, xpThresholdV1915, migratePilotXpV1915 } from './level-curve-v1915.js?v=47.7.6';
@@ -78,6 +80,18 @@ import { xpThresholdV460, migratePilotXpV460 } from './level-curve-v460.js?v=47.
 import { xpThresholdV482, migratePilotXpV482 } from './level-curve-v482.js?v=47.7.6';
 import { applyRecruitBonusV2012, eliteRouteSnapshotV2012, freshEliteRouteJournalV2012, ELITE_ROUTE_TARGETS_V2012, novaTierPriceV2012 } from './progression-plan-v2012.js?v=47.7.6';
 import { GAME_ASSETS } from './assets/v17/manifest.js?v=47.7.6';
+/* STELLAR_VISUAL_FLEET_V52_0: preview GLB cards across Hangar/Shop/AUX, resource icons */
+for(const id of ["phoenix","leonov","liberator","piranha","vengeance","bigboy","goliath","citadel","aegis","spearhead","defcom","yamato","nostromo"])GAME_ASSETS.ships[id]='/assets/v52_3/cards/ship_'+id+'.png';
+for(const id of ["streuner","recruitStreuner","aiderStreuner","bossStreuner","lordakia","bossLordakia","saimon","bossSaimon","mordon","bossMordon","devolarium","bossDevolarium","sibelon","bossSibelon"])GAME_ASSETS.npcs[id]='/assets/v52_3/cards/npc_'+id+'.png';
+for(const id of ["Prometium","Endurium","Terbium","Prometid","Duranium","Promerium","Xenomit"])GAME_ASSETS.resources[id]='/assets/v52_3/cards/ore_'+id+'.png';
+GAME_ASSETS.drones.pet='/assets/v52_3/cards/aux9.png';
+GAME_ASSETS.drones.petElite='/assets/v52_3/cards/aux9.png';
+GAME_ASSETS.droneMap.pet='/assets/v52_3/cards/aux9.png';
+GAME_ASSETS.droneMap.petElite='/assets/v52_3/cards/aux9.png';
+GAME_ASSETS.bonus.box='/assets/v52_3/cards/box_bonus.png';
+GAME_ASSETS.loot.cargo='/assets/v52_3/cards/box_loot.png';
+STELLAR_3D_V50.preload('phoenix');
+
 import { signUp, signIn, beginGoogleSignIn, restoreGoogleSignInFromUrl, requestPasswordReset, restorePasswordRecoveryFromUrl, restoreSession, signOutLocal, checkGameSession, endGameSession, getUser, getSessionCredentials, loadCloudSave, saveCloudSave, loadEliteOperationsOnline, claimEliteOperationOnline, loadWarCampaignsOnline, claimWarSupplyOnline, claimWarCampaignOnline, loadAdminWarCampaignsOnline, saveAdminWarCampaignOnline, saveAdminWarRulesOnline, loadAdminEliteObjectivesOnline, saveAdminEliteObjectiveOnline, updateCallsign, updatePassword, loadRankings, loadAuctionBids, saveAuctionBidOnline, markAuctionBidStatusOnline, loadAuctionMarket, upsertPlayerPresenceOnline, loadMapPresenceOnline, savePlayerLocationCheckpointOnline, loadPlayerLocationCheckpointOnline, removePlayerPresenceOnline, queuePvpAttackOnline, consumePvpDamageEventsOnline, syncArenaProfileOnline, loadArenaState, loadArenaDailyRewardStatus, claimArenaDailyReward, loadArenaOpponents, loadArenaHistory, arenaAttackOnline, listClansOnline, loadMyClanOnline, createClanOnline, joinClanOnline, getClanRequestsOnline, reviewClanRequestOnline, cancelClanRequestOnline, setClanMemberRoleOnline, leaveClanOnline, transferClanCreditsOnline, claimClanCreditGrantsOnline, recordClanAlienKillOnline, getPremiumShopOnline, testPurchasePremiumOnline, adminPreviewPremiumStageOnline, adminSimulatePremiumStageOnline, getPremiumStageCatalogOnline, loadWarfrontStateOnline, loadSectorOwnershipOnline, hitWorldBossOnline, claimWorldBossRewardOnline, declareClanWarOnline, recordClanWarScoreOnline, loadLiveOpsOnline, adminUpdateLiveEventScheduleOnline, purchaseLiveCatalogOnline, economyActionOnline, getChatHistoryOnline, sendChatMessageOnline, redeemGameCouponOnline, getMyDesignersOnline, setDesignLoadoutOnline, claimGateDroneDesignOnline, claimEventDesignerOnline, getAdminStatus, adminSearchAccounts, adminRecentActions, adminBanAccount, adminUnbanAccount, adminResetAccount, adminDeleteAccount, pushTelemetryBatch, adminTelemetryOverview, adminPlayerTelemetry, getBattleGroupOnline, createBattleGroupOnline, inviteBattleGroupOnline, searchBattleGroupPlayersOnline, inviteBattleGroupUserOnline, respondBattleGroupInviteOnline, leaveBattleGroupOnline, kickBattleGroupMemberOnline, setBattleGroupRallyOnline, loadRuntimeConfigOnline, loadNpcRuntimeConfigOnline, loadWorldRuntimeConfigOnline, loadSystemsRuntimeConfigOnline, loadAdminRuntimeMonitorOnline, adminUpdateRuntimeModuleOnline, adminUpdateNpcRuntimeOnline, adminUpdateNpcSpawnRuntimeOnline, adminUpdateWorldMapOnline, adminUpdateWorldResourceOnline, adminUpdateWorldSectorOnline, adminUpdateWorldPortalOnline, adminUpdateWorldResourcePoolOnline, adminUpdateMissionCategoryOnline, adminUpdateEconomyServiceOnline, adminUpdateCraftingRecipeOnline, loadBattlePassRuntimeConfigOnline, adminUpdateBattlePassSeasonOnline, adminUpdateBattlePassTierOnline, loadShopsRuntimeConfigOnline, adminUpdateCommonShopItemOnline, adminUpdatePremiumShopItemOnline, loadBonusConfigOnline, adminUpdateBonusConfigOnline, adminCouponDashboardOnline, adminCreateCouponOnline, adminSetCouponActiveOnline, loadGalaxyGatesOnline, adminUpdateGalaxyGateOnline, adminUpsertCustomMissionOnline, adminDeleteCustomMissionOnline, adminCreateCraftRecipeOnline, adminCreateEconomyServiceOnline, adminCreatePassSeasonOnline, loadAuctionRulesOnline, adminUpdateAuctionRulesOnline, loadBalanceRuntimeOnline, adminUpdateBalanceOnline,loadAdminSecurityIncidents,reviewAdminSecurityIncident } from './api.js?v=47.7.6';
 import {createOfflineFarmV484} from './modules/stellar-offline-farm-v484.js?v=47.7.6';
 import { SharedUniverseClient } from './world.js?v=47.7.6';
@@ -5504,7 +5518,7 @@ function drawBonusBoxes(){
     if(!onScreenWorld(box.x,box.y,70))continue;
     const p=screenPos(box.x,box.y);ctx.save();ctx.translate(p.x,p.y);
     const size=low?34:40,scale=low?1:1+Math.sin(nowSec()*2+box.x)*.035;
-    if(img?.naturalWidth){ctx.drawImage(img,-size*scale/2,-size*scale/2,size*scale,size*scale);}
+    if(resolvedQualityMode()==='high'&&STELLAR_3D_V50.drawAsset(ctx,'box_bonus',0,size*scale)){ /* V52.3: modelo 3D box bônus */ }else if(img?.naturalWidth){ctx.drawImage(img,-size*scale/2,-size*scale/2,size*scale,size*scale);}
     else{
       // Reserva visual breve se a imagem ainda estiver baixando ou falhar: uma caixa facetada, nunca um quadrado azul.
       ctx.fillStyle='rgba(12,23,45,.95)';ctx.strokeStyle='#e8bb52';ctx.lineWidth=2;
@@ -6537,7 +6551,7 @@ function drawPilotNameplate({x,y,rankCode='pilot_basic',clanTag='',callsign='Pil
 function drawRemotePet(rp){
   const q=rp?.pet;if(!q?.owned||!Number.isFinite(q.x)||!Number.isFinite(q.y)||!onScreenWorld(q.x,q.y,140))return;const p=screenPos(q.x,q.y),mode=q.activeGear||'off',designer=designById(q.designId),visual=designer?.visual||{},color=visual.glow||(mode==='guard'?'#ff8c93':mode==='box'?'#ffd46b':mode==='ore'?'#7fffc4':'#7edcff'),petId=(q.level||1)>=10?'petElite':'pet',sheet=assetImage(droneMapSheetAsset(petId)),path=droneMapAsset(petId),img=assetImage(path);
   const size=30+Math.min(15,Number(q.level)||1)/15*9;
-  if(!(drawAuxSpriteSheet(sheet,q.angle||0,size,{x:p.x,y:p.y,color,designer,alpha:.9}))){if(img&&img.naturalWidth){const sc=size/Math.max(img.naturalWidth,img.naturalHeight);ctx.save();ctx.translate(p.x,p.y);ctx.rotate((q.angle||0)+Math.PI/2);ctx.globalAlpha=.9;ctx.shadowColor=color;ctx.shadowBlur=resolvedQualityMode()==='low'?0:(designer?16:10);if(resolvedQualityMode()!=='low'&&designer)ctx.filter=designerVisualCss(designer);ctx.drawImage(img,-img.naturalWidth*sc/2,-img.naturalHeight*sc/2,img.naturalWidth*sc,img.naturalHeight*sc);ctx.filter='none';if(designer&&resolvedQualityMode()!=='low'){ctx.rotate(-((q.angle||0)+Math.PI/2));ctx.strokeStyle=visual.accent||color;ctx.lineWidth=designer.rarity==='mythic'?2:1.2;ctx.globalAlpha=.78;ctx.beginPath();ctx.arc(0,0,size*.62,0,TWO_PI);ctx.stroke();}ctx.restore();}else{ctx.fillStyle=color;ctx.beginPath();ctx.arc(p.x,p.y,7,0,TWO_PI);ctx.fill();}}
+  if(!(drawAuxSpriteSheet(sheet,q.angle||0,size,{x:p.x,y:p.y,color,designer,alpha:.9}))){if(resolvedQualityMode()!=='low'&&STELLAR_3D_V50.drawAssetAt(ctx,'aux9',q.angle||0,42,p.x,p.y)){ /* V52 AUX remoto */ }else if(img&&img.naturalWidth){const sc=size/Math.max(img.naturalWidth,img.naturalHeight);ctx.save();ctx.translate(p.x,p.y);ctx.rotate((q.angle||0)+Math.PI/2);ctx.globalAlpha=.9;ctx.shadowColor=color;ctx.shadowBlur=resolvedQualityMode()==='low'?0:(designer?16:10);if(resolvedQualityMode()!=='low'&&designer)ctx.filter=designerVisualCss(designer);ctx.drawImage(img,-img.naturalWidth*sc/2,-img.naturalHeight*sc/2,img.naturalWidth*sc,img.naturalHeight*sc);ctx.filter='none';if(designer&&resolvedQualityMode()!=='low'){ctx.rotate(-((q.angle||0)+Math.PI/2));ctx.strokeStyle=visual.accent||color;ctx.lineWidth=designer.rarity==='mythic'?2:1.2;ctx.globalAlpha=.78;ctx.beginPath();ctx.arc(0,0,size*.62,0,TWO_PI);ctx.stroke();}ctx.restore();}else{ctx.fillStyle=color;ctx.beginPath();ctx.arc(p.x,p.y,7,0,TWO_PI);ctx.fill();}}
   ctx.fillStyle=color;ctx.font='bold 9px Arial';ctx.textAlign='center';ctx.fillText(`AUX-9 LV ${q.level||1}${designer?' • '+designer.name:''}`,p.x,p.y+24);
   if(q.laserActive&&q.laserTargetId){const t=remoteTargetEntity(q.laserTargetId,false)||remoteTargetEntity(q.laserTargetId,true);if(t&&t.hp>0){const sp=screenPos(t.x,t.y),c=q.laserColor||rp.laserColor||'#76d9ff';ctx.save();ctx.strokeStyle=c;ctx.shadowColor=c;ctx.shadowBlur=8;ctx.globalAlpha=.9;ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(p.x,p.y);ctx.lineTo(sp.x,sp.y);ctx.stroke();ctx.restore();}}
 }
@@ -6827,7 +6841,7 @@ function drawPortals(){
 function drawOres(){for(const o of state.ores){if(!onScreenWorld(o.x,o.y,100))continue;
   const p=screenPos(o.x,o.y),path=GAME_ASSETS.resources[o.type];
   const img=assetImage(path);
-  if(img&&img.naturalWidth){
+  if(resolvedQualityMode()==='high'&&STELLAR_3D_V50.drawAssetAt(ctx,'ore_'+o.type,(o.rot||0)+nowSec()*.08,Math.max(26,o.r*3.2),p.x,p.y))continue; if(img&&img.naturalWidth){
     const size=Math.max(20,o.r*2.35),pulse=.95+Math.sin(nowSec()*2.2+o.x*.01)*.05;
     ctx.save();ctx.translate(p.x,p.y);ctx.rotate((o.rot||0)+nowSec()*.08);ctx.globalAlpha=.96;ctx.shadowColor=o.color;ctx.shadowBlur=resolvedQualityMode()==='low'?0:((qualityProfile().sceneLight??1)>.55?10:3);
     const scale=(size*pulse)/Math.max(img.naturalWidth,img.naturalHeight),w=img.naturalWidth*scale,h=img.naturalHeight*scale;ctx.drawImage(img,-w/2,-h/2,w,h);
@@ -6842,7 +6856,7 @@ function drawLoot(){for(const l of state.loot){
   if(remaining<=0||!onScreenWorld(l.x,l.y,100))continue;
   const p=screenPos(l.x,l.y),pulse=.92+Math.sin(nowSec()*4+l.x*.02)*.08,img=assetImage(GAME_ASSETS.loot.cargo);
   const dyingAlpha=remaining<=5?(.38+.62*Math.abs(Math.sin(nowSec()*7))):1;
-  if(img&&img.naturalWidth){
+  if(resolvedQualityMode()==='high'&&STELLAR_3D_V50.drawAssetAt(ctx,'box_loot',0,42*pulse,p.x,p.y))continue; if(img&&img.naturalWidth){
     ctx.save();ctx.globalAlpha=dyingAlpha;ctx.translate(p.x,p.y);ctx.rotate(Math.sin(nowSec()+l.x)*.06);
     ctx.shadowColor=remaining<=5?'#ff5a4c':'#ffbd48';ctx.shadowBlur=resolvedQualityMode()==='low'?0:((qualityProfile().sceneLight??1)>.55?(remaining<=5?16:9):2);
     const size=42*pulse,sc=size/Math.max(img.naturalWidth,img.naturalHeight);
@@ -6927,7 +6941,7 @@ function drawPet(){if(document.body.classList.contains('stellar-offline-active-v
   if(!progress?.pet?.owned)return;
   const p=screenPos(petRuntime.x,petRuntime.y),mode=progress.pet.activeGear||'off',designer=currentPetDesign(),visual=designer?.visual||{},color=visual.glow||(mode==='guard'?'#ff8c93':mode==='box'?'#ffd46b':mode==='ore'?'#7fffc4':'#7edcff');
   const petId=progress.pet.level>=10?'petElite':'pet',sheet=assetImage(droneMapSheetAsset(petId)),path=droneMapAsset(petId),img=assetImage(path),size=34+(progress.pet.level/15)*10;
-  if(!(drawAuxSpriteSheet(sheet,petRuntime.angle||0,size,{x:p.x,y:p.y,color,designer,alpha:1}))){if(img&&img.naturalWidth){const sc=size/Math.max(img.naturalWidth,img.naturalHeight);ctx.save();ctx.translate(p.x,p.y);ctx.rotate((petRuntime.angle||0)+Math.PI/2);ctx.shadowColor=color;ctx.shadowBlur=resolvedQualityMode()==='low'?0:(designer?18:12);if(resolvedQualityMode()!=='low'&&designer)ctx.filter=designerVisualCss(designer);ctx.drawImage(img,-img.naturalWidth*sc/2,-img.naturalHeight*sc/2,img.naturalWidth*sc,img.naturalHeight*sc);ctx.filter='none';if(designer&&resolvedQualityMode()!=='low'){ctx.rotate(-((petRuntime.angle||0)+Math.PI/2));ctx.strokeStyle=visual.accent||color;ctx.globalAlpha=.68+.2*Math.sin(nowSec()*3);ctx.lineWidth=designer.rarity==='mythic'?2.2:1.4;ctx.beginPath();ctx.arc(0,0,size*.62,0,TWO_PI);ctx.stroke();}ctx.restore();}
+  if(!(drawAuxSpriteSheet(sheet,petRuntime.angle||0,size,{x:p.x,y:p.y,color,designer,alpha:1}))){if(resolvedQualityMode()!=='low'&&STELLAR_3D_V50.drawAssetAt(ctx,'aux9',petRuntime.angle||0,48,p.x,p.y)){ /* V52 AUX local: GLB renderizado */ }else if(img&&img.naturalWidth){const sc=size/Math.max(img.naturalWidth,img.naturalHeight);ctx.save();ctx.translate(p.x,p.y);ctx.rotate((petRuntime.angle||0)+Math.PI/2);ctx.shadowColor=color;ctx.shadowBlur=resolvedQualityMode()==='low'?0:(designer?18:12);if(resolvedQualityMode()!=='low'&&designer)ctx.filter=designerVisualCss(designer);ctx.drawImage(img,-img.naturalWidth*sc/2,-img.naturalHeight*sc/2,img.naturalWidth*sc,img.naturalHeight*sc);ctx.filter='none';if(designer&&resolvedQualityMode()!=='low'){ctx.rotate(-((petRuntime.angle||0)+Math.PI/2));ctx.strokeStyle=visual.accent||color;ctx.globalAlpha=.68+.2*Math.sin(nowSec()*3);ctx.lineWidth=designer.rarity==='mythic'?2.2:1.4;ctx.beginPath();ctx.arc(0,0,size*.62,0,TWO_PI);ctx.stroke();}ctx.restore();}
   else{ctx.fillStyle=color;ctx.beginPath();ctx.arc(p.x,p.y,8,0,TWO_PI);ctx.fill();}}
   ctx.fillStyle=color;ctx.font='bold 10px Arial';ctx.textAlign='center';ctx.fillText(`AUX-9 LV ${progress.pet.level}${designer?' • '+designer.name:''}`,p.x,p.y+28);
   if(petRuntime.laserTargetId&&nowSec()<petRuntime.laserUntil){const e=state.enemies.find(x=>x.id===petRuntime.laserTargetId&&x.hp>0)||onlineWorld.players.get(petRuntime.laserTargetId);if(e&&e.hp>0){const t=screenPos(e.x,e.y),ammo=currentLaserAmmo();drawLaserFxLine(p.x,p.y,t.x,t.y,ammo.id,ammo.color,.82,.68);}}

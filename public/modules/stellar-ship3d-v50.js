@@ -23,7 +23,39 @@ export function ensureAllowedShipSaveV50(save){
 
 const SHIP_ASSET = Object.fromEntries(Object.entries(ALLOWED_SHIPS_V50).map(([id,name])=>
   [id,`/assets/ships3d/v50/SL_${name.toUpperCase()}_LOD.glb`]));
-const ANGULAR_BUCKETS=32,CANVAS_SIZE=160,MAX_CACHED_BITMAPS=72;
+/* STELLAR_V52_RENDER_UPGRADE */
+const EXT_MODEL_ASSET={
+  aux9:'/assets/v52_3/models/aux9.glb',
+  npc_streuner:'/assets/v52_3/models/npc_streuner.glb',
+  npc_recruitStreuner:'/assets/v52_3/models/npc_recruitStreuner.glb',
+  npc_aiderStreuner:'/assets/v52_3/models/npc_aiderStreuner.glb',
+  npc_bossStreuner:'/assets/v52_3/models/npc_bossStreuner.glb',
+  npc_lordakia:'/assets/v52_3/models/npc_lordakia.glb',
+  npc_bossLordakia:'/assets/v52_3/models/npc_bossLordakia.glb',
+  npc_saimon:'/assets/v52_3/models/npc_saimon.glb',
+  npc_bossSaimon:'/assets/v52_3/models/npc_bossSaimon.glb',
+  npc_mordon:'/assets/v52_3/models/npc_mordon.glb',
+  npc_bossMordon:'/assets/v52_3/models/npc_bossMordon.glb',
+  npc_devolarium:'/assets/v52_3/models/npc_devolarium.glb',
+  npc_bossDevolarium:'/assets/v52_3/models/npc_bossDevolarium.glb',
+  npc_sibelon:'/assets/v52_3/models/npc_sibelon.glb',
+  npc_bossSibelon:'/assets/v52_3/models/npc_bossSibelon.glb',
+  ore_Prometium:'/assets/v52_3/models/ore_Prometium.glb',
+  ore_Endurium:'/assets/v52_3/models/ore_Endurium.glb',
+  ore_Terbium:'/assets/v52_3/models/ore_Terbium.glb',
+  ore_Prometid:'/assets/v52_3/models/ore_Prometid.glb',
+  ore_Duranium:'/assets/v52_3/models/ore_Duranium.glb',
+  ore_Promerium:'/assets/v52_3/models/ore_Promerium.glb',
+  ore_Xenomit:'/assets/v52_3/models/ore_Xenomit.glb',
+  box_bonus:'/assets/v52_3/models/box_bonus.glb',
+  box_loot:'/assets/v52_3/models/box_loot.glb',
+  box_mystery:'/assets/v52_3/models/box_mystery.glb',
+  box_elite:'/assets/v52_3/models/box_elite.glb',
+  box_repair:'/assets/v52_3/models/box_repair.glb',
+  box_ammo:'/assets/v52_3/models/box_ammo.glb',
+};
+const MODEL_ASSET={...SHIP_ASSET,...EXT_MODEL_ASSET};
+const ANGULAR_BUCKETS=32,CANVAS_SIZE=160,MAX_CACHED_BITMAPS=100;
 const TAG='stellar-ships3d-v50';
 const vs=`#version 300 es
 precision highp float;
@@ -127,9 +159,9 @@ export function createStellarShipRendererV50(){
     }));
   }
   function preload(id){
-    if(!isShipAllowedV50(id)||requests.has(id)||uploads.has(id)||!ensureGL())return;
+    if(!MODEL_ASSET[id]||requests.has(id)||uploads.has(id)||!ensureGL())return;
     requests.add(id);
-    fetch(SHIP_ASSET[id],{cache:'force-cache'}).then(r=>{if(!r.ok)throw Error('GLB HTTP '+r.status);return r.arrayBuffer()})
+    fetch(MODEL_ASSET[id],{cache:'force-cache'}).then(r=>{if(!r.ok)throw Error('GLB HTTP '+r.status);return r.arrayBuffer()})
       .then(decodeGlb).then(parts=>uploadParts(id,parts)).catch(e=>console.warn(`[ship3d] ${id}: 2D fallback`,e));
   }
   function render(shipId,angle){
@@ -138,7 +170,7 @@ export function createStellarShipRendererV50(){
     if(framesRendered>=3)return null;framesRendered++;
     gl.bindFramebuffer(gl.FRAMEBUFFER,null);gl.viewport(0,0,CANVAS_SIZE,CANVAS_SIZE);
     gl.clearColor(0,0,0,0);gl.clearDepth(1);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
-    gl.useProgram(program);gl.uniform1f(gl.getUniformLocation(program,'uYaw'),Math.PI/2-angle);
+    gl.useProgram(program);gl.uniform1f(gl.getUniformLocation(program,'uYaw'),Math.PI/2+angle);
     gl.uniform1f(gl.getUniformLocation(program,'uZoom'),viewportScale);
     for(const p of parts){
       gl.bindBuffer(gl.ARRAY_BUFFER,p.vert);gl.enableVertexAttribArray(0);gl.vertexAttribPointer(0,3,gl.FLOAT,false,0,0);
@@ -151,14 +183,15 @@ export function createStellarShipRendererV50(){
     c.getContext('2d').drawImage(canvas,0,0);
     return c;
   }
-  function draw(ctx,shipId,angle,size){
-    if(renderMode()==='off'||!isShipAllowedV50(shipId)||!ensureGL())return false;
+  function drawKey(ctx,shipId,angle,size){
+    if(renderMode()==='off'||!MODEL_ASSET[shipId]||!ensureGL())return false;
     if(!uploads.has(shipId)){preload(shipId);return false;}
-    const bucket=((Math.round(((angle%(2*Math.PI)+2*Math.PI)%(2*Math.PI))*ANGULAR_BUCKETS/(2*Math.PI)))%ANGULAR_BUCKETS);
+    const buckets=shipId.startsWith('npc_')?16:ANGULAR_BUCKETS;
+    const bucket=((Math.round(((angle%(2*Math.PI)+2*Math.PI)%(2*Math.PI))*buckets/(2*Math.PI)))%buckets);
     const key=shipId+':'+bucket;
     let thumb=cache.get(key);
     if(!thumb){
-      try{thumb=render(shipId,bucket*2*Math.PI/ANGULAR_BUCKETS)}catch(e){console.warn('[ship3d] draw fallback',e);return false;}
+      try{thumb=render(shipId,bucket*2*Math.PI/buckets)}catch(e){console.warn('[ship3d] draw fallback',e);return false;}
       if(!thumb)return false;
       cache.set(key,thumb);
       if(cache.size>MAX_CACHED_BITMAPS)cache.delete(cache.keys().next().value);
@@ -166,7 +199,10 @@ export function createStellarShipRendererV50(){
     ctx.drawImage(thumb,-size*.62,-size*.62,size*1.24,size*1.24);
     return true;
   }
+  function draw(ctx,shipId,angle,size){return isShipAllowedV50(shipId)?drawKey(ctx,shipId,angle,size):false;}
+  function drawAsset(ctx,id,angle,size){return Boolean(EXT_MODEL_ASSET[id])&&drawKey(ctx,id,angle,size);}
+  function drawAssetAt(ctx,id,angle,size,x,y){ctx.save();ctx.translate(x,y);const ok=drawAsset(ctx,id,angle,size);ctx.restore();return ok;}
   function setMode(mode){try{localStorage.setItem('stellar3d.v50',mode==='off'?'off':'auto')}catch{};if(mode==='auto')preload('phoenix');}
   function getMode(){return renderMode()}
-  return {draw,preload,setMode,getMode,get supported(){return !dead}};
+  return {draw,drawAsset,drawAssetAt,preload,setMode,getMode,get supported(){return !dead}};
 }
