@@ -43,7 +43,7 @@ test('V56: Hangar unificado, sem atributos duplicados, mantém ações existente
  }
  assert(!/hangar-summary-strip';summary.innerHTML/.test(game));
  assert.match(css,/\.v56-unit-body/);assert.match(css,/@media\(max-width:600px\)/);
- assert.match(html,/stellar-premium-ui-v56\.css\?v=47\.7\.12/);
+ assert.match(html,/stellar-premium-ui-v56\.css\?v=47\.7\.13/);
 });
 test('V56: 13 sprites renderizados dos GLBs e imagens na Loja e nave selecionada',()=>{
  const names=['aurora','bastion','bulwark','kensei','leviathan','lynx','meridian','pathfinder','phantom','pioneer','raptor','seraph','valkyrie'];

@@ -23,7 +23,7 @@ test('V55: hero do hangar exibe nave e atributos reais, sem dados fixos',()=>{
   assert.match(game,/V55_SHOP_APPROVED_ART/);
 });
 test('V55: CSS carrega depois da navegação existente, tabs e responsividade',()=>{
-  assert.match(html,/stellar-premium-ui-v55\.css\?v=47\.7\.12/);
+  assert.match(html,/stellar-premium-ui-v55\.css\?v=47\.7\.13/);
   assert.ok(html.indexOf('stellar-premium-ui-v55.css')>html.indexOf('route-map-layout-v4825.css'));
   for(const x of ['#shopModal #shopGrid','#hangarModal #hangarContent>.v55-hangar-hero','@media(max-width:520px)','prefers-reduced-motion']) assert.ok(css.includes(x));
 });

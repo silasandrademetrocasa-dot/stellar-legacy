@@ -1,6 +1,6 @@
 {
   "name": "stellar-legacy",
-  "version": "47.7.12",
+  "version": "47.7.13",
   "type": "module",
   "scripts": {
     "start": "node server/index.js",
@@ -19,5 +19,5 @@
   "engines": {
     "node": ">=18"
   },
-  "release": "V57.0 Galactic ADM Center + V55/V56 cumulative"
+  "release": "V58.0 Galactic Interface Refinement + V55/V56/V57 cumulative"
 }

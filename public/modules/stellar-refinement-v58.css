@@ -1,0 +1,135 @@
+/* STELLAR LEGACY V58 - Galactic Interface Refinement
+   Responsive layout only. Keep gameplay actions and server economy authoritative.
+   All animations below are UI feedback, not render loop work. */
+:root{--v58-glow:#48d6ff;--v58-line:rgba(67,175,235,.48);--v58-ink:#d9f6ff;--v58-panel:#06152a}
+#topbar.compact-command-bar{border:1px solid var(--v58-line)!important;border-radius:10px!important;
+ background:linear-gradient(110deg,rgba(4,15,32,.99),rgba(9,34,62,.98) 55%,rgba(2,12,29,.99))!important;
+ box-shadow:inset 0 1px rgba(111,226,255,.18),0 0 16px rgba(21,126,222,.14)!important}
+#topbar .menu-group-toggle,#topbar .top-actions>.small-btn{border:1px solid rgba(59,161,219,.50)!important;border-radius:7px!important;
+ background:linear-gradient(180deg,#092a4a,#041426)!important;color:#e1f8ff!important;min-height:32px!important;
+ box-shadow:inset 0 1px rgba(103,216,255,.12)!important;white-space:nowrap}
+#topbar .menu-group-toggle:hover,#topbar .top-actions>.small-btn:hover,#topbar .menu-group.open>.menu-group-toggle{border-color:#4fd6ff!important;background:linear-gradient(180deg,#124c7d,#082a4b)!important}
+#topbar .menu-dropdown{background:linear-gradient(160deg,#071d38,#030d20)!important;border:1px solid #277ab4!important;
+ box-shadow:0 10px 30px rgba(0,0,0,.45),inset 0 0 12px rgba(34,136,220,.08)!important}
+#topbar .menu-dropdown .menu-item{border-bottom:1px solid rgba(68,142,194,.13);color:#c9f0ff}
+#topbar .menu-dropdown .menu-item:hover{background:#0d3453;color:#fff}
+#topbarDockToggle{width:31px!important;height:30px!important;min-width:31px!important;min-height:30px!important;border-radius:8px!important;font-size:11px!important}
+/* Fixed base trader: no jitter as camera/ship move or player crosses the base radius. */
+#baseTradePrompt{position:fixed!important;left:clamp(10px,2.5vw,30px)!important;right:auto!important;top:auto!important;
+ bottom:clamp(86px,11dvh,145px)!important;transform:none!important;animation:none!important;
+ max-width:min(340px,calc(100vw - 20px))!important;width:max-content!important;
+ min-width:0!important;min-height:48px!important;box-sizing:border-box!important;z-index:29!important;
+ padding:9px 12px!important;font-size:clamp(11px,2.8vw,15px)!important;border-radius:10px!important;
+ background:linear-gradient(105deg,rgba(6,69,55,.99),rgba(3,30,34,.99))!important;
+ box-shadow:inset 0 1px rgba(149,255,200,.28),0 0 13px rgba(24,217,155,.23)!important;}
+#baseTradePrompt small{font-size:clamp(9px,2.2vw,11px)!important;max-width:260px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+/* Modal cards share Hangar branding: no opaque, oversized headers or controls. */
+#cargoModal>.modal-card,#premiumModal>.modal-card,#adminModal>.modal-card,#configModal>.modal-card{
+ background:radial-gradient(ellipse at 85% 0%,rgba(22,94,169,.17),transparent 48%),linear-gradient(160deg,#06172c,#020a17 82%)!important;
+ border:1px solid var(--v58-line)!important;border-radius:11px!important;
+ box-shadow:inset 0 0 0 1px rgba(22,112,172,.25),0 10px 45px rgba(0,0,0,.4)!important}
+#cargoModal .modal-header,#premiumModal .modal-header,#adminModal .modal-header,#configModal .modal-header{
+ border-bottom:1px solid rgba(61,175,239,.35);background:linear-gradient(90deg,#06213c,#061425);
+ padding:7px 10px 9px!important;gap:8px!important;}
+#cargoModal .modal-header h2,#premiumModal .modal-header h2,#adminModal .modal-header h2,#configModal .modal-header h2{
+ font-size:clamp(17px,3.6vw,26px)!important;color:#f4fdff;text-shadow:0 0 12px rgba(54,183,255,.35)}
+#cargoModal .modal-header .small-btn,#premiumModal .modal-header .small-btn,#adminModal .modal-header .small-btn,
+#hangarModal .modal-header .small-btn{flex:0 0 auto!important;min-height:34px!important;height:34px!important;padding:6px 11px!important;font-size:11px!important}
+#cargoModal .base-service-card,#premiumModal .premium-product,#adminModal .admin-control-box{
+ border-radius:9px;border-color:rgba(59,167,236,.23);background:linear-gradient(180deg,rgba(8,31,53,.95),rgba(3,15,29,.98));}
+#cargoModal .base-service-card{min-width:0;box-sizing:border-box}
+#cargoModal .base-service-card .base-service-foot{flex-wrap:wrap;gap:7px}
+#cargoModal .base-service-card .base-service-foot button{min-width:90px;min-height:36px}
+#premiumModal .premium-stage-tabs{display:flex;max-width:100%;overflow-x:auto;flex-wrap:nowrap;gap:6px;scrollbar-width:thin;scrollbar-color:#3188bc transparent}
+#premiumModal .premium-stage-tabs button{white-space:nowrap;min-height:38px;padding:6px 12px}
+#premiumModal .premium-benefits{gap:7px}
+#premiumModal .premium-status-card{min-height:0!important;padding:9px 10px!important}
+#premiumModal .premium-product-icon img{max-height:92px;max-width:92px;object-fit:contain}
+#premiumModal .premium-product{min-height:0!important;overflow:hidden}
+#premiumModal .premium-product-copy,#premiumModal .premium-product-copy p{overflow-wrap:anywhere}
+#adminModal .v57-adm-category{min-height:64px!important}
+#adminModal .v57-adm-subnav{display:flex;flex-wrap:wrap;gap:5px}
+#adminModal .v57-adm-subnav button{min-height:34px!important;font-size:11px}
+#adminModal .v57-adm-brand{padding:9px 10px;margin-bottom:8px}
+#adminModal .v57-adm-location{overflow-wrap:anywhere}
+/* Main Hangar layout - editable slots and inventory, not giant decorative blocks. */
+#hangarModal>.modal-card{overflow-x:hidden!important}
+#hangarModal #hangarContent,#hangarModal .v56-equipment-layout,#hangarModal .hangar-equipment-console{min-width:0!important;max-width:100%!important}
+#hangarModal .ship-designer-console{padding:8px!important;margin:5px 0 9px!important}
+#hangarModal .ship-designer-console h3{font-size:13px!important;margin:0 0 6px!important}
+#hangarModal .ship-designer-console .designer-summary-grid{display:grid;grid-template-columns:1fr;gap:4px;margin:0}
+#hangarModal .ship-designer-console .designer-summary-card{min-height:0!important;padding:6px 8px!important}
+#hangarModal .ship-designer-console .designer-loadout-control{margin-top:6px!important}
+#hangarModal .v56-aux-view .v56-workstation-stage img{object-fit:contain!important;max-height:210px!important;filter:drop-shadow(0 0 10px rgba(50,185,255,.25))}
+#hangarModal .v56-aux-view .v56-workstation-stage{min-height:190px}
+/* One AUX preview only: the upper, real-perspective GLB portrait. Keep lower progression and module controls. */
+#hangarModal .pet-hangar-panel .pet-hero .pet-avatar{display:none!important}
+#hangarModal .pet-hangar-panel .pet-hero{display:block!important;min-height:0!important;padding:12px!important}
+#hangarModal .pet-hangar-panel .pet-hero .pet-hero-copy{width:100%!important;min-width:0!important}
+#hangarModal .v56-workstation-slots{min-width:0!important;overflow:visible!important}
+#hangarModal .v56-unit-body{max-width:100%}
+#hangarModal .v56-unit-btn{white-space:nowrap!important}
+#hangarModal .hangar-section-head{width:100%;box-sizing:border-box;min-height:36px!important;max-height:56px!important;
+ padding:6px 9px!important;display:flex;justify-content:space-between;gap:6px;text-align:left}
+#hangarModal .hangar-section-head>em{flex:0 0 18px;font-size:13px}
+#hangarModal .hangar-pane-title{position:static!important}
+#hangarModal .v56-workstation-stage img,#shopModal .v56-shop-ship-art img{object-fit:contain}
+/* Landscape: avoid 300px empty 'HANGAR' collapse area and overly wide side panels. */
+@media (orientation:landscape) and (max-height:650px){
+ #hangarModal>.modal-card{padding:5px 7px!important;height:calc(100dvh - 8px)!important;max-height:calc(100dvh - 8px)!important;}
+ #hangarModal .modal-header{min-height:34px!important;padding:2px 7px!important;position:sticky!important;top:0!important;z-index:8}
+ #hangarModal .v55-modal-logo img{max-width:115px!important;max-height:31px!important}
+ #hangarModal .modal-header h2{font-size:14px!important}
+ #hangarModal .v55-hero-sidebar{gap:4px!important}
+ #hangarModal .v55-hangar-hero{grid-template-columns:minmax(125px,.75fr) minmax(180px,1.45fr) minmax(125px,.75fr)!important}
+ #hangarModal .v55-hero-main{min-height:185px!important}
+ #hangarModal .v55-ship-stage{height:135px!important}
+ #hangarModal .v55-stage-ship{height:130px!important}
+ #hangarModal .v55-equip-preview{min-height:0!important;padding:7px!important}
+ #hangarModal .v55-ship-stats{grid-template-columns:repeat(6,minmax(0,1fr))!important;gap:4px!important}
+ #hangarModal .v56-unit-body{grid-template-columns:minmax(155px,.7fr) minmax(0,2.25fr)!important;align-items:start!important}
+ #hangarModal .v56-workstation-hero{min-height:0!important;padding:6px!important;position:static!important}
+ #hangarModal .v56-workstation-stage{min-height:0!important;height:160px!important}
+ #hangarModal .v56-workstation-stage img{height:148px!important}
+ #hangarModal .v56-workstation-slots .hangar-equipment-split{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+ #hangarModal .v56-equipment-head{padding:5px 9px!important}
+ #hangarModal .v56-equipment-head h3{font-size:14px!important}
+ #hangarModal .v56-config-bar{padding:5px 8px!important;gap:5px!important}
+ #hangarModal .v56-unit-btn{min-height:30px!important;padding:5px 12px!important;font-size:10px!important}
+ #baseTradePrompt{bottom:60px!important;left:10px!important;max-width:250px!important}
+ #topbar.compact-command-bar{max-width:calc(100vw - 44px)!important}
+}
+@media(max-width:600px) and (orientation:portrait){
+ #hangarModal>.modal-card,#shopModal>.modal-card,#premiumModal>.modal-card,#cargoModal>.modal-card{
+  width:calc(100vw - 10px)!important;max-width:calc(100vw - 10px)!important;padding:7px!important}
+ #hangarModal .modal-header,#shopModal .modal-header{padding:6px!important;min-height:40px!important;flex-wrap:wrap}
+ #hangarModal .v55-modal-logo img,#shopModal .v55-modal-logo img{max-width:128px!important;max-height:36px!important}
+ #hangarModal .modal-header .wallet{font-size:9px!important}
+ #hangarModal #hangarTabs,#shopModal #shopTabs{position:sticky!important;top:0;z-index:6;overflow-x:auto;flex-wrap:nowrap;gap:4px}
+ #hangarModal #hangarTabs .tab-btn,#shopModal #shopTabs .tab-btn{flex:0 0 auto!important;min-height:38px!important;font-size:11px!important;padding:6px 10px!important}
+ #hangarModal .v56-unit-body{grid-template-columns:minmax(0,1fr)!important}
+ #hangarModal .v56-workstation-hero{padding:8px;position:static!important}
+ #hangarModal .v56-workstation-stage{min-height:165px}
+ #hangarModal .v56-workstation-stage img{max-height:173px!important}
+ #hangarModal .v56-aux-view .v56-workstation-stage{min-height:160px!important}
+ #hangarModal .v56-aux-view .v56-workstation-stage img{max-height:170px!important}
+ #hangarModal .v56-workstation-slots .hangar-equipment-split{grid-template-columns:1fr!important}
+ #hangarModal .hangar-preset-grid-v3030{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+ #hangarModal .hangar-preset-card-v3030 button{min-height:36px;padding:7px}
+ #hangarModal .v56-shop-layout{display:block}
+ #premiumModal .premium-benefits{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+ #premiumModal .premium-product-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:7px!important}
+ #premiumModal .premium-product{padding:8px!important;gap:5px!important}
+ #premiumModal .premium-product-icon{height:75px!important}
+ #premiumModal .premium-product-icon img{max-height:68px}
+ #premiumModal .premium-product-copy h3{font-size:12px!important}
+ #premiumModal .premium-product-copy p{font-size:9px!important}
+ #premiumModal .premium-product-price{font-size:14px!important}
+ #cargoModal .base-service-card{padding:10px!important}
+ #cargoModal .base-service-card .base-service-foot{display:flex;justify-content:space-between!important}
+ #adminModal .v57-adm-nav{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+ #baseTradePrompt{bottom:105px!important;left:10px!important}
+ #topbar .menu-group-toggle,#topbar .top-actions>.small-btn{padding:5px 8px!important;min-height:34px!important;font-size:10px!important}
+}
+@media(max-width:340px){#premiumModal .premium-product-grid{grid-template-columns:1fr!important}}
+@media(prefers-reduced-motion:reduce){#baseTradePrompt{animation:none!important}}
