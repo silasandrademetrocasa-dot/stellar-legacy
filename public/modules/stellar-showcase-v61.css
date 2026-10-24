@@ -1,0 +1,8 @@
+/* Stellar Legacy V61 • galeria/hangar de naves e drones em perspectiva */
+.ship-card .ship-visual{height:205px!important;min-height:205px!important;background:radial-gradient(ellipse at 50% 52%,rgba(33,134,196,.3),rgba(2,9,21,.97) 78%)!important}
+.ship-visual canvas.stellar-preview-v61{width:100%;height:100%;object-fit:contain;display:block;filter:drop-shadow(0 4px 18px rgba(32,174,239,.18))}
+.product-icon:has(canvas.stellar-preview-v61){min-height:132px!important;height:145px!important;padding:1px!important;background:radial-gradient(circle at 50% 57%,rgba(29,156,214,.22),rgba(3,13,28,.98) 74%)!important}
+.product-icon canvas.stellar-preview-v61{width:100%;height:100%;display:block;object-fit:contain}
+.drone-mini-art:has(canvas.stellar-preview-v61){width:105px!important;height:78px!important;border-radius:12px;flex:0 0 auto;background:radial-gradient(circle at center,rgba(40,171,223,.18),rgba(5,15,31,.98) 75%)!important}
+.drone-mini-art canvas.stellar-preview-v61{width:100%;height:100%;display:block}
+@media(max-width:680px){.ship-card .ship-visual{height:170px!important;min-height:170px!important}.drone-mini-art:has(canvas.stellar-preview-v61){width:88px!important;height:70px!important}}

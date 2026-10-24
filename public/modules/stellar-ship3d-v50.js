@@ -92,7 +92,12 @@ const MODEL_ASSET={...SHIP_ASSET,...EXT_MODEL_ASSET,...ASTRAL_MODEL_ASSET,...REL
 for(const id of ["npc_riftScout", "npc_bossRiftScout", "npc_voidCorsair", "npc_bossVoidCorsair", "npc_nexusWarden", "npc_bossNexusWarden", "npc_astralReaper", "npc_bossAstralReaper"])MODEL_ASSET[id]=`/assets/v59/models/${id}.glb`;
 // V59: high detail for explicit 3D. Auto mode keeps optimized geometry; OFF keeps 2D fallback.
 const HQ_MODEL_ASSET_V59={"SL_AURORA":"/assets/v59/models/SL_AURORA_HQ.glb","SL_LYNX":"/assets/v59/models/SL_LYNX_HQ.glb","SL_PIONEER":"/assets/v59/models/SL_PIONEER_HQ.glb","SL_RAPTOR":"/assets/v59/models/SL_RAPTOR_HQ.glb","SL_VALKYRIE":"/assets/v59/models/SL_VALKYRIE_HQ.glb","SL_BASTION":"/assets/v59/models/SL_BASTION_HQ.glb","SL_LEVIATHAN":"/assets/v59/models/SL_LEVIATHAN_HQ.glb","SL_BULWARK":"/assets/v59/models/SL_BULWARK_HQ.glb","SL_SERAPH":"/assets/v59/models/SL_SERAPH_HQ.glb","SL_PATHFINDER":"/assets/v59/models/SL_PATHFINDER_HQ.glb","SL_PHANTOM":"/assets/v59/models/SL_PHANTOM_HQ.glb","SL_KENSEI":"/assets/v59/models/SL_KENSEI_HQ.glb","SL_MERIDIAN":"/assets/v59/models/SL_MERIDIAN_HQ.glb","npc_aiderStreuner":"/assets/v59/models/npc_aiderStreuner.glb","npc_bossDevolarium":"/assets/v59/models/npc_bossDevolarium.glb","npc_bossLordakia":"/assets/v59/models/npc_bossLordakia.glb","npc_bossMordon":"/assets/v59/models/npc_bossMordon.glb","npc_bossSaimon":"/assets/v59/models/npc_bossSaimon.glb","npc_bossSibelon":"/assets/v59/models/npc_bossSibelon.glb","npc_bossStreuner":"/assets/v59/models/npc_bossStreuner.glb","npc_devolarium":"/assets/v59/models/npc_devolarium.glb","npc_lordakia":"/assets/v59/models/npc_lordakia.glb","npc_mordon":"/assets/v59/models/npc_mordon.glb","npc_recruitStreuner":"/assets/v59/models/npc_recruitStreuner.glb","npc_saimon":"/assets/v59/models/npc_saimon.glb","npc_sibelon":"/assets/v59/models/npc_sibelon.glb","npc_streuner":"/assets/v59/models/npc_streuner.glb","aux9":"/assets/v59/models/aux9.glb","drone_common":"/assets/v59/models/drone_common.glb","drone_elite":"/assets/v59/models/drone_elite.glb","drone_a":"/assets/v59/models/drone_a.glb","drone_b":"/assets/v59/models/drone_b.glb","drone_c":"/assets/v59/models/drone_c.glb","drone_d":"/assets/v59/models/drone_d.glb","drone_e":"/assets/v59/models/drone_e.glb","npc_riftScout":"/assets/v59/models/npc_riftScout.glb","npc_bossRiftScout":"/assets/v59/models/npc_bossRiftScout.glb","npc_voidCorsair":"/assets/v59/models/npc_voidCorsair.glb","npc_bossVoidCorsair":"/assets/v59/models/npc_bossVoidCorsair.glb","npc_nexusWarden":"/assets/v59/models/npc_nexusWarden.glb","npc_bossNexusWarden":"/assets/v59/models/npc_bossNexusWarden.glb","npc_astralReaper":"/assets/v59/models/npc_astralReaper.glb","npc_bossAstralReaper":"/assets/v59/models/npc_bossAstralReaper.glb"};
-function requestedModelAssetV59(id){return renderMode()==='on'&&(HQ_MODEL_ASSET_V59[id]||null)||MODEL_ASSET[id];}
+// V61: IDs das naves no save (phoenix/goliath/...) precisam ser
+// traduzidos para o nome do GLB HQ (SL_AURORA/SL_LEVIATHAN/...).
+export function requestedModelAssetV59(id, mode=renderMode()){
+  const key=ALLOWED_SHIPS_V50[id]?`SL_${ALLOWED_SHIPS_V50[id].toUpperCase()}`:id;
+  return mode==='on'?(HQ_MODEL_ASSET_V59[key]||MODEL_ASSET[id]):MODEL_ASSET[id];
+}
 
 const ANGULAR_BUCKETS=32,CANVAS_SIZE=160,MAX_CACHED_BITMAPS=100;
 const TAG='stellar-ships3d-v50';
@@ -252,7 +257,7 @@ export function createStellarShipRendererV50(){
     return true;
   }
   function draw(ctx,shipId,angle,size){return isShipAllowedV50(shipId)?drawKey(ctx,shipId,angle,size):false;}
-  function drawAsset(ctx,id,angle,size){return Boolean(EXT_MODEL_ASSET[id]||ASTRAL_MODEL_ASSET[id]||RELAY54_MODEL_ASSET[id])&&drawKey(ctx,id,angle,size);}
+  function drawAsset(ctx,id,angle,size){return !isShipAllowedV50(id)&&Boolean(MODEL_ASSET[id])&&drawKey(ctx,id,angle,size);}
   function drawAssetAt(ctx,id,angle,size,x,y){ctx.save();ctx.translate(x,y);const ok=drawAsset(ctx,id,angle,size);ctx.restore();return ok;}
   function setMode(mode){
     const prev=renderMode();const next=['off','on','auto'].includes(mode)?mode:'auto';

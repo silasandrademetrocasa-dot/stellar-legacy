@@ -13,7 +13,7 @@ test('V59: hud neon uses original PLS/SIP/CMT selectors and real ammo artwork',(
 test('V59: 3D explicit uses detailed GLBs, AUTO preserves mobile LOD and 2D fallback',()=>{
  const s=read('public/modules/stellar-ship3d-v50.js');
  assert.match(s,/function requestedModelAssetV59/);
- assert.match(s,/renderMode\(\)==='on'/);
+ assert.match(s,/mode==='on'/);
  assert.match(s,/MODEL_ASSET\[id\]/);
  assert.match(s,/function setMode\(mode\)/);
  assert.match(s,/uploads\.clear\(\);requests\.clear\(\);modelZoom\.clear\(\)/);
@@ -30,5 +30,5 @@ test('V59: base original remains fixed and no economy or SQL migrations',()=>{
  const game=read('public/game.js'), pkg=JSON.parse(read('package.json')), guide=read('README_V59.md');
  assert.match(game,/restaurar a base panorâmica original V22\.12/);
  assert.match(guide,/Não aplica SQL/);
- assert.equal(pkg.version,'47.7.14');
+ assert.equal(pkg.version,'47.7.16');
 });

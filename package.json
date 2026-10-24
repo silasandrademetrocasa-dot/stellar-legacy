@@ -1,6 +1,6 @@
 {
   "name": "stellar-legacy",
-  "version": "47.7.14",
+  "version": "47.7.16",
   "type": "module",
   "scripts": {
     "start": "node server/index.js",
@@ -19,5 +19,5 @@
   "engines": {
     "node": ">=18"
   },
-  "release": "V59.0 Visual Premium cumulative V55/V56/V57/V58/V59"
+  "release": "V61 3D cumulative V55-V61 with V60 showroom and HQ gameplay"
 }
