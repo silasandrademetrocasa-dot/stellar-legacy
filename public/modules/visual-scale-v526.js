@@ -20,5 +20,7 @@ export const modelZoomFactorV526 = (id, visualSpan) => {
   // Frota e Bosses já têm leitura adequada; preservar sua presença visual.
   if(['phoenix','leonov','liberator','piranha','vengeance','bigboy','goliath','citadel','aegis','spearhead','defcom','yamato','nostromo'].includes(id)||String(id).startsWith('npc_boss'))return 1;
   const extent=Math.max(.1, Number(visualSpan)||1);
+  // V53 estruturas largas: reduzir zoom quando GLB extrapola o enquadramento 3D.
+  if(/^(?:portal_|astral_|base_|drone_)/.test(String(id)))return Math.max(.28,Math.min(3.4,4.25/extent));
   return Math.max(1,Math.min(3.4,5.5/extent));
 };

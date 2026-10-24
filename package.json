@@ -1,6 +1,6 @@
 {
   "name": "stellar-legacy",
-  "version": "47.7.7",
+  "version": "47.7.8",
   "type": "module",
   "scripts": {
     "start": "node server/index.js",
@@ -19,5 +19,5 @@
   "engines": {
     "node": ">=18"
   },
-  "release": "V52.6 Direção 3D e escalas visuais corrigidas — base Clean"
+  "release": "V53.0 Astral Expansion — Portais, Bases, Drones e Materializador"
 }

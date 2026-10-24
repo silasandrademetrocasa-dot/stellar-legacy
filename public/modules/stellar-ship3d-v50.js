@@ -1,4 +1,5 @@
 import {modelYawFromHeadingV526,modelZoomFactorV526} from './visual-scale-v526.js';
+import {shipPivotV53} from './stellar-astral-expansion-v53.js';
 /* Stellar Legacy V50 • ships GLB in real-time WebGL2; no CDN/dependencies.
  * Rendering only: ship stats, hitboxes, pathfinding, fire logic and economy are untouched.
  * Self-contained; automatic 2D fallback if WebGL2 or assets fail.
@@ -55,7 +56,25 @@ const EXT_MODEL_ASSET={
   box_repair:'/assets/v52_3/models/box_repair.glb',
   box_ammo:'/assets/v52_3/models/box_ammo.glb',
 };
-const MODEL_ASSET={...SHIP_ASSET,...EXT_MODEL_ASSET};
+const ASTRAL_MODEL_ASSET={
+  "portal_normal":'/assets/v53/models/portal_normal.glb',
+  "portal_pvp":'/assets/v53/models/portal_pvp.glb',
+  "portal_universe":'/assets/v53/models/portal_universe.glb',
+  "drone_common":'/assets/v53/models/drone_common.glb',
+  "drone_elite":'/assets/v53/models/drone_elite.glb',
+  "drone_a":'/assets/v53/models/drone_a.glb',
+  "drone_b":'/assets/v53/models/drone_b.glb',
+  "drone_c":'/assets/v53/models/drone_c.glb',
+  "drone_d":'/assets/v53/models/drone_d.glb',
+  "drone_e":'/assets/v53/models/drone_e.glb',
+  "astral_aurora":'/assets/v53/models/astral_aurora.glb',
+  "astral_nexus":'/assets/v53/models/astral_nexus.glb',
+  "astral_eclipse":'/assets/v53/models/astral_eclipse.glb',
+  "base_earth":'/assets/v53/models/base_earth.glb',
+  "base_mars":'/assets/v53/models/base_mars.glb',
+  "base_jupiter":'/assets/v53/models/base_jupiter.glb'
+};
+const MODEL_ASSET={...SHIP_ASSET,...EXT_MODEL_ASSET,...ASTRAL_MODEL_ASSET};
 const ANGULAR_BUCKETS=32,CANVAS_SIZE=160,MAX_CACHED_BITMAPS=100;
 const TAG='stellar-ships3d-v50';
 const vs=`#version 300 es
@@ -63,10 +82,12 @@ precision highp float;
 layout(location=0) in vec3 aPosition;
 uniform float uYaw;
 uniform float uZoom;
+uniform float uPivot;
 out vec3 vPoint;
 void main(){
   float c=cos(uYaw),s=sin(uYaw);
-  vec3 w=vec3(aPosition.x*c+aPosition.z*s,aPosition.y,-aPosition.x*s+aPosition.z*c);
+  vec3 v=vec3(aPosition.x,aPosition.y,aPosition.z-uPivot);
+  vec3 w=vec3(v.x*c+v.z*s,v.y,-v.x*s+v.z*c);
   vPoint=w;
   gl_Position=vec4(w.x*uZoom,(w.z*.91+w.y*.42)*uZoom,(-w.y*.25+w.z*.08)*uZoom,1.);
 }`;
@@ -183,6 +204,7 @@ export function createStellarShipRendererV50(){
     gl.clearColor(0,0,0,0);gl.clearDepth(1);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
     gl.useProgram(program);gl.uniform1f(gl.getUniformLocation(program,'uYaw'),modelYawFromHeadingV526(angle));
     gl.uniform1f(gl.getUniformLocation(program,'uZoom'),modelZoom.get(shipId)||viewportScale);
+    gl.uniform1f(gl.getUniformLocation(program,'uPivot'),shipPivotV53(shipId));
     for(const p of parts){
       gl.bindBuffer(gl.ARRAY_BUFFER,p.vert);gl.enableVertexAttribArray(0);gl.vertexAttribPointer(0,3,gl.FLOAT,false,0,0);
       gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,p.ind);
@@ -211,7 +233,7 @@ export function createStellarShipRendererV50(){
     return true;
   }
   function draw(ctx,shipId,angle,size){return isShipAllowedV50(shipId)?drawKey(ctx,shipId,angle,size):false;}
-  function drawAsset(ctx,id,angle,size){return Boolean(EXT_MODEL_ASSET[id])&&drawKey(ctx,id,angle,size);}
+  function drawAsset(ctx,id,angle,size){return Boolean(EXT_MODEL_ASSET[id]||ASTRAL_MODEL_ASSET[id])&&drawKey(ctx,id,angle,size);}
   function drawAssetAt(ctx,id,angle,size,x,y){ctx.save();ctx.translate(x,y);const ok=drawAsset(ctx,id,angle,size);ctx.restore();return ok;}
   function setMode(mode){try{localStorage.setItem('stellar3d.v50',['off','on','auto'].includes(mode)?mode:'auto')}catch{};if(mode!=='off')preload('phoenix');}
   function getMode(){return renderMode()}
