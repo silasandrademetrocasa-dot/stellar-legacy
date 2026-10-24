@@ -1,0 +1,6 @@
+/* V62 • fleet exhibition: approved designs, high-definition alpha previews */
+.ship-card .ship-visual{background:radial-gradient(circle at 50% 63%,rgba(63,155,202,.23),rgba(7,17,31,.97) 78%)!important}
+.ship-card .ship-visual canvas.stellar-preview-v61{image-rendering:auto;filter:drop-shadow(0 11px 12px rgba(3,19,31,.54))}
+.product-card .product-icon:has(canvas.stellar-preview-v61){height:178px!important;min-height:156px!important}
+.product-card .product-icon canvas.stellar-preview-v61{image-rendering:auto}
+@media(max-width:680px){.product-card .product-icon:has(canvas.stellar-preview-v61){height:144px!important;min-height:144px!important}}

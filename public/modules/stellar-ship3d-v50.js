@@ -92,14 +92,29 @@ const MODEL_ASSET={...SHIP_ASSET,...EXT_MODEL_ASSET,...ASTRAL_MODEL_ASSET,...REL
 for(const id of ["npc_riftScout", "npc_bossRiftScout", "npc_voidCorsair", "npc_bossVoidCorsair", "npc_nexusWarden", "npc_bossNexusWarden", "npc_astralReaper", "npc_bossAstralReaper"])MODEL_ASSET[id]=`/assets/v59/models/${id}.glb`;
 // V59: high detail for explicit 3D. Auto mode keeps optimized geometry; OFF keeps 2D fallback.
 const HQ_MODEL_ASSET_V59={"SL_AURORA":"/assets/v59/models/SL_AURORA_HQ.glb","SL_LYNX":"/assets/v59/models/SL_LYNX_HQ.glb","SL_PIONEER":"/assets/v59/models/SL_PIONEER_HQ.glb","SL_RAPTOR":"/assets/v59/models/SL_RAPTOR_HQ.glb","SL_VALKYRIE":"/assets/v59/models/SL_VALKYRIE_HQ.glb","SL_BASTION":"/assets/v59/models/SL_BASTION_HQ.glb","SL_LEVIATHAN":"/assets/v59/models/SL_LEVIATHAN_HQ.glb","SL_BULWARK":"/assets/v59/models/SL_BULWARK_HQ.glb","SL_SERAPH":"/assets/v59/models/SL_SERAPH_HQ.glb","SL_PATHFINDER":"/assets/v59/models/SL_PATHFINDER_HQ.glb","SL_PHANTOM":"/assets/v59/models/SL_PHANTOM_HQ.glb","SL_KENSEI":"/assets/v59/models/SL_KENSEI_HQ.glb","SL_MERIDIAN":"/assets/v59/models/SL_MERIDIAN_HQ.glb","npc_aiderStreuner":"/assets/v59/models/npc_aiderStreuner.glb","npc_bossDevolarium":"/assets/v59/models/npc_bossDevolarium.glb","npc_bossLordakia":"/assets/v59/models/npc_bossLordakia.glb","npc_bossMordon":"/assets/v59/models/npc_bossMordon.glb","npc_bossSaimon":"/assets/v59/models/npc_bossSaimon.glb","npc_bossSibelon":"/assets/v59/models/npc_bossSibelon.glb","npc_bossStreuner":"/assets/v59/models/npc_bossStreuner.glb","npc_devolarium":"/assets/v59/models/npc_devolarium.glb","npc_lordakia":"/assets/v59/models/npc_lordakia.glb","npc_mordon":"/assets/v59/models/npc_mordon.glb","npc_recruitStreuner":"/assets/v59/models/npc_recruitStreuner.glb","npc_saimon":"/assets/v59/models/npc_saimon.glb","npc_sibelon":"/assets/v59/models/npc_sibelon.glb","npc_streuner":"/assets/v59/models/npc_streuner.glb","aux9":"/assets/v59/models/aux9.glb","drone_common":"/assets/v59/models/drone_common.glb","drone_elite":"/assets/v59/models/drone_elite.glb","drone_a":"/assets/v59/models/drone_a.glb","drone_b":"/assets/v59/models/drone_b.glb","drone_c":"/assets/v59/models/drone_c.glb","drone_d":"/assets/v59/models/drone_d.glb","drone_e":"/assets/v59/models/drone_e.glb","npc_riftScout":"/assets/v59/models/npc_riftScout.glb","npc_bossRiftScout":"/assets/v59/models/npc_bossRiftScout.glb","npc_voidCorsair":"/assets/v59/models/npc_voidCorsair.glb","npc_bossVoidCorsair":"/assets/v59/models/npc_bossVoidCorsair.glb","npc_nexusWarden":"/assets/v59/models/npc_nexusWarden.glb","npc_bossNexusWarden":"/assets/v59/models/npc_bossNexusWarden.glb","npc_astralReaper":"/assets/v59/models/npc_astralReaper.glb","npc_bossAstralReaper":"/assets/v59/models/npc_bossAstralReaper.glb"};
-// V61: IDs das naves no save (phoenix/goliath/...) precisam ser
-// traduzidos para o nome do GLB HQ (SL_AURORA/SL_LEVIATHAN/...).
+// V62: approved ship IDs retain saves/stats; explicit 3D loads distinct GLBs.
+// Automatic uses the existing performance-optimized LOD. 2D mode remains intact.
+const FLEET_FINAL_V62 = Object.freeze({
+  'phoenix':'/assets/v62/models/SL_AURORA_FINAL.glb',
+  'liberator':'/assets/v62/models/SL_PIONEER_FINAL.glb',
+  'piranha':'/assets/v62/models/SL_RAPTOR_FINAL.glb',
+  'nostromo':'/assets/v62/models/SL_MERIDIAN_FINAL.glb',
+  'bigboy':'/assets/v62/models/SL_BASTION_FINAL.glb',
+  'leonov':'/assets/v62/models/SL_LYNX_FINAL.glb',
+  'defcom':'/assets/v62/models/SL_PHANTOM_FINAL.glb',
+  'spearhead':'/assets/v62/models/SL_PATHFINDER_FINAL.glb',
+  'yamato':'/assets/v62/models/SL_KENSEI_FINAL.glb',
+  'vengeance':'/assets/v62/models/SL_VALKYRIE_FINAL.glb',
+  'goliath':'/assets/v62/models/SL_LEVIATHAN_FINAL.glb',
+  'aegis':'/assets/v62/models/SL_SERAPH_FINAL.glb',
+  'citadel':'/assets/v62/models/SL_BULWARK_FINAL.glb'
+});
 export function requestedModelAssetV59(id, mode=renderMode()){
   const key=ALLOWED_SHIPS_V50[id]?`SL_${ALLOWED_SHIPS_V50[id].toUpperCase()}`:id;
-  return mode==='on'?(HQ_MODEL_ASSET_V59[key]||MODEL_ASSET[id]):MODEL_ASSET[id];
+  return mode==='on' ? (FLEET_FINAL_V62[id]||HQ_MODEL_ASSET_V59[key]||MODEL_ASSET[id]) : MODEL_ASSET[id];
 }
-
-const ANGULAR_BUCKETS=32,CANVAS_SIZE=160,MAX_CACHED_BITMAPS=100;
+const ANGULAR_BUCKETS=32,MAX_CACHED_BITMAPS=72;
+const sceneSize=()=>renderMode()==='on'?240:160;
 const TAG='stellar-ships3d-v50';
 const vs=`#version 300 es
 precision highp float;
@@ -123,8 +138,11 @@ uniform vec3 uEmissive;
 out vec4 outColor;
 void main(){
   vec3 n=normalize(cross(dFdx(vPoint),dFdy(vPoint)));
-  float d=abs(dot(n,normalize(vec3(.20,1.,.48))));
-  vec3 rgb=uColor.rgb*(.60+.40*d)+uEmissive*.34;
+  float d=abs(dot(n,normalize(vec3(.25,1.,.46))));
+  float fill=abs(dot(n,normalize(vec3(-.8,.25,.24))));
+  float shine=pow(max(0.,d),13.)*.15;
+  float rim=pow(1.-abs(dot(n,normalize(vec3(.05,.35,1.)))),3.)*.12;
+  vec3 rgb=uColor.rgb*(.46+.42*d+.13*fill+shine+rim)+uEmissive*.50;
   outColor=vec4(min(rgb,vec3(1.0)),uColor.a);
 }`;
 function makeShader(gl,type,source){
@@ -186,12 +204,12 @@ export function createStellarShipRendererV50(){
     if(dead||!enabled||renderMode()==='off')return false;
     if(gl)return true;
     try{
-      canvas=document.createElement('canvas');canvas.width=canvas.height=CANVAS_SIZE;
+      canvas=document.createElement('canvas');canvas.width=canvas.height=sceneSize();
       canvas.style.cssText='position:fixed;left:-9999px;top:-9999px;pointer-events:none';
       gl=canvas.getContext('webgl2',{alpha:true,premultipliedAlpha:true,antialias:false,preserveDrawingBuffer:true,depth:true,powerPreference:'low-power'});
       if(!gl)throw Error('WebGL2 não disponível');
       program=createProgram(gl);gl.useProgram(program);gl.disable(gl.CULL_FACE);gl.enable(gl.DEPTH_TEST);gl.depthFunc(gl.LEQUAL);
-      gl.viewport(0,0,CANVAS_SIZE,CANVAS_SIZE);
+      gl.viewport(0,0,canvas.width,canvas.height);
       canvas.addEventListener('webglcontextlost',e=>{e.preventDefault();dead=true;cache.clear();},false);
       return true;
     }catch(e){console.warn('[ship3d] fallback 2D:',e);dead=true;gl=null;return false;}
@@ -224,7 +242,7 @@ export function createStellarShipRendererV50(){
     const parts=uploads.get(shipId);if(!parts?.length||!gl)return null;
     const now=performance.now();if(now-lastFrameTime>16){lastFrameTime=now;framesRendered=0;}
     if(framesRendered>=3)return null;framesRendered++;
-    gl.bindFramebuffer(gl.FRAMEBUFFER,null);gl.viewport(0,0,CANVAS_SIZE,CANVAS_SIZE);
+    gl.bindFramebuffer(gl.FRAMEBUFFER,null);gl.viewport(0,0,canvas.width,canvas.height);
     gl.clearColor(0,0,0,0);gl.clearDepth(1);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
     gl.useProgram(program);gl.uniform1f(gl.getUniformLocation(program,'uYaw'),modelYawFromHeadingV526(angle));
     gl.uniform1f(gl.getUniformLocation(program,'uZoom'),modelZoom.get(shipId)||viewportScale);
@@ -236,7 +254,7 @@ export function createStellarShipRendererV50(){
       gl.uniform3fv(gl.getUniformLocation(program,'uEmissive'),p.emissive);
       gl.drawElements(gl.TRIANGLES,p.count,gl.UNSIGNED_INT,0);
     }
-    const c=document.createElement('canvas');c.width=c.height=CANVAS_SIZE;
+    const c=document.createElement('canvas');c.width=c.height=canvas.width;
     c.getContext('2d').drawImage(canvas,0,0);
     return c;
   }
@@ -268,6 +286,7 @@ export function createStellarShipRendererV50(){
       if(gl)for(const partList of uploads.values())for(const part of partList){gl.deleteBuffer(part.vert);gl.deleteBuffer(part.ind);}
       uploads.clear();requests.clear();modelZoom.clear();
     }
+    if(canvas){canvas.width=canvas.height=sceneSize();if(gl)gl.viewport(0,0,canvas.width,canvas.height);}
     if(next!=='off')preload('phoenix');
   }
   function getMode(){return renderMode()}

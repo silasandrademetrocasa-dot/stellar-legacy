@@ -53,11 +53,10 @@ test('Mineral and boxes are enlarged in BOTH GLB and sprites, no simulation chan
  assert.match(data,/streuner:\s*\{[^\n]*size:\s*15/);
 });
 test('Cache bump forces updated scripts rather than stale renderer on Android',()=>{
- const activeVersion=JSON.parse(text('package.json')).version;
- assert.match(activeVersion,/^\d+\.\d+\.\d+$/);
+ const current=JSON.parse(text('package.json')).version; assert.match(current,/^\d+\.\d+\.\d+$/);
  const html=text('public/index.html');
- assert(html.includes('/game.js?v='+activeVersion));
- assert(game.includes('stellar-ship3d-v50.js?v='+activeVersion));
+ assert(html.includes('/game.js?v='+current));
+ assert(game.includes('stellar-ship3d-v50.js?v='+current));
  assert.equal(normalizeAngle(modelYawFromHeadingV526(0)),Math.PI/2);
 });
 

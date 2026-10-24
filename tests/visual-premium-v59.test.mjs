@@ -30,5 +30,5 @@ test('V59: base original remains fixed and no economy or SQL migrations',()=>{
  const game=read('public/game.js'), pkg=JSON.parse(read('package.json')), guide=read('README_V59.md');
  assert.match(game,/restaurar a base panorâmica original V22\.12/);
  assert.match(guide,/Não aplica SQL/);
- assert.equal(pkg.version,'47.7.16');
+ assert.ok(game.includes('stellar-ship3d-v50.js?v='+pkg.version));
 });
