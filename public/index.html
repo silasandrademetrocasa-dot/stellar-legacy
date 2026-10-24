@@ -6,14 +6,16 @@
 <meta content="width=device-width,initial-scale=1,user-scalable=no,viewport-fit=cover" name="viewport"/>
 <meta content="#030816" name="theme-color"/>
 <title>Stellar Legacy</title>
-<link rel="manifest" href="/manifest.webmanifest?v=47.7.10"/>
+<link rel="manifest" href="/manifest.webmanifest?v=47.7.12"/>
 <link rel="icon" type="image/png" href="/icons/stellar-192.png"/>
 <link rel="apple-touch-icon" href="/icons/stellar-192.png"/>
-<link href="/style.css?v=47.7.10" rel="stylesheet"/>
+<link href="/style.css?v=47.7.12" rel="stylesheet"/>
   <link rel="stylesheet" href="/modules/topbar-navigation-v481.css?v=48.1.0">
   <link rel="stylesheet" href="/modules/pilot-ship-hud-v482.css?v=48.2.6">
   <link rel="stylesheet" href="/modules/route-map-layout-v4825.css?v=48.2.5">
-  <link rel="stylesheet" href="/modules/stellar-premium-ui-v55.css?v=47.7.10">
+  <link rel="stylesheet" href="/modules/stellar-premium-ui-v55.css?v=47.7.12">
+  <link rel="stylesheet" href="/modules/stellar-premium-ui-v56.css?v=47.7.12">
+  <link rel="stylesheet" href="/modules/stellar-admin-v57.css?v=47.7.12">
 </head>
 <body>
 <div class="stellar-boot-splash" id="stellarBootSplash" role="status" aria-label="Preparando Stellar Legacy">
@@ -622,9 +624,21 @@
 <div class="modal hidden" id="adminModal">
   <div class="modal-card admin-modal-card">
     <div class="modal-header admin-modal-header">
-      <div><div class="eyebrow">CENTRAL ADMINISTRATIVA</div><h2>CONTROLE DE CONTAS</h2><p class="muted">Gerencie contas, restrições e recuperação de progresso.</p></div>
+      <div><div class="eyebrow">STELLAR LEGACY • COMANDO ADMINISTRATIVO</div><h2>CENTRAL ADM</h2><p class="muted">Universo, Farm, jogadores e configurações organizados em um só lugar.</p></div>
       <button class="ghost-btn" id="closeAdmin" type="button">FECHAR</button>
     </div>
+    <div class="v57-adm-brand" aria-label="Central administrativa Stellar Legacy">
+      <img src="/assets/v19/branding/stellar-legacy-logo.webp" alt="Stellar Legacy" loading="lazy">
+      <div><span class="v57-adm-eyebrow">CENTRO DE CONTROLE • PAINEL OFICIAL</span><strong>CENTRAL ADM GALÁCTICA</strong><small>Organização por sistema · configurações sincronizadas com o servidor</small></div>
+      <span class="v57-adm-live">● ADM</span>
+    </div>
+    <nav id="v57AdmNav" class="v57-adm-nav" aria-label="Categorias administrativas"></nav>
+    <nav id="v57AdmSubnav" class="v57-adm-subnav" aria-label="Ferramentas da categoria"></nav>
+    <div id="v57AdmLocation" class="v57-adm-location" aria-live="polite"></div>
+    <section id="v57AdmFarmArea" class="v57-adm-farm-area hidden" aria-label="Farm offline ADM">
+      <div class="v57-adm-panel-head"><div><b>FARM OFFLINE • CENTRAL DE OPERAÇÕES</b><small>Parâmetros, limite de vendas e sessões de pilotos</small></div></div>
+      <div id="v57AdmFarmMount"><p class="muted">O módulo de Farm será carregado quando o jogo finalizar a inicialização.</p></div>
+    </section>
     <div class="admin-kpis">
       <div><span>CONTAS</span><b id="adminTotalAccounts">0</b></div>
       <div><span>ONLINE</span><b id="adminOnlineAccounts">0</b></div>
@@ -809,7 +823,7 @@
       </div>
       <div class="admin-message muted" id="adminMessage">Apenas contas cadastradas como administradoras no banco podem executar ações.</div>
     </section>
-    <section>
+    <section id="v57AdminPlayersSection">
       <div class="settings-title"><div><b>JOGADORES</b><small>RESET é exclusivo do ADM, mantém login/callsign, preserva Premium e zera também a telemetria. DELETAR remove a conta de autenticação.</small></div><button class="ghost-btn" id="adminRefreshBtn" type="button">ATUALIZAR</button></div>
       <div class="admin-user-list" id="adminUserList"><div class="empty-state">Buscando contas...</div></div>
     </section>
@@ -1136,9 +1150,10 @@
 </div>
 </div>
 <div class="perf-diag-overlay hidden" id="perfDiagOverlay" aria-live="off" aria-label="Contador de FPS local"><b id="perfDiagHudFps">FPS —</b><small id="perfDiagHudStutter">P95 —</small></div>
-<script src="/game.js?v=47.7.10" type="module"></script>
-<script type="module" src="/modules/astral-rewards-v381.js?v=47.7.10"></script>
-<script type="module" src="/modules/unified-expansion-v42.js?v=47.7.10"></script>
+<script src="/game.js?v=47.7.12" type="module"></script>
+<script src="/modules/stellar-admin-v57.js?v=47.7.12" type="module"></script>
+<script type="module" src="/modules/astral-rewards-v381.js?v=47.7.12"></script>
+<script type="module" src="/modules/unified-expansion-v42.js?v=47.7.12"></script>
   <script type="module" src="/modules/topbar-navigation-v481.js?v=48.1.0"></script>
   <script type="module" src="/modules/pilot-ship-hud-v482.js?v=48.2.6"></script>
 </body>

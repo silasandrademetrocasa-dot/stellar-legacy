@@ -1,0 +1,48 @@
+/* Stellar Legacy V57 — Premium ADM command center; visual only. */
+#adminModal .admin-modal-card{width:min(1340px,98vw)!important;max-height:95dvh!important;border:1px solid #287fb0!important;border-radius:19px!important;background:radial-gradient(ellipse at 70% -10%,rgba(10,94,148,.27),transparent 48%),linear-gradient(155deg,#061626 0%,#020a16 76%)!important;box-shadow:0 0 0 1px #42b8f526,0 24px 85px #000b, inset 0 0 35px #0039562e!important;color:#e3f6ff!important;scrollbar-color:#166083 #051421}
+#adminModal .admin-modal-header{border-bottom:1px solid #2383ac55;margin-bottom:10px}
+#adminModal .admin-modal-header h2{color:#f1faff;text-shadow:0 0 19px #33b7ff55;letter-spacing:.06em}
+#adminModal .v57-adm-brand{display:flex;align-items:center;gap:15px;padding:14px 17px;margin:0 0 12px;border:1px solid #2586bc88;border-radius:13px;background:linear-gradient(106deg,#0b2740ee,#051422 73%);box-shadow:inset 0 1px #8cd8ff38,0 0 19px #1c93c91c}
+#adminModal .v57-adm-brand img{width:130px;max-height:47px;object-fit:contain;object-position:left center}
+#adminModal .v57-adm-brand>div{display:flex;flex-direction:column;gap:2px;min-width:0}
+#adminModal .v57-adm-eyebrow{font-size:9px;letter-spacing:.14em;color:#62cafa;font-weight:900}
+#adminModal .v57-adm-brand strong{font-size:clamp(15px,2.6vw,24px);letter-spacing:.08em;color:white;text-shadow:0 0 17px #2ebdff78}
+#adminModal .v57-adm-brand small{color:#93b8c9;font-size:10px}
+#adminModal .v57-adm-live{margin-left:auto;color:#8bffd7;font-size:10px;font-weight:900;white-space:nowrap}
+#adminModal .v57-adm-nav{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px;margin:0 0 10px}
+#adminModal .v57-adm-category{min-width:0;display:flex;align-items:center;gap:9px;min-height:56px;padding:9px 10px;border-radius:10px;border:1px solid #25618a9c;background:linear-gradient(160deg,#0a2538,#041321);color:#ccecff;text-align:left;cursor:pointer;transition:border-color .15s,box-shadow .15s,background .15s}
+#adminModal .v57-adm-category.active{border-color:#6cddff;background:linear-gradient(170deg,#114769,#08283f);box-shadow:0 0 16px #008dff44,inset 0 0 18px #15aaff17}
+#adminModal .v57-adm-category-icon{font-size:19px;color:#56d7ff;flex:0 0 22px;text-align:center}
+#adminModal .v57-adm-category-text{display:flex;flex-direction:column;gap:3px;min-width:0}
+#adminModal .v57-adm-category strong{font-size:11px;letter-spacing:.06em;color:#e0f6ff}
+#adminModal .v57-adm-category small{font-size:9px;color:#87a9bd;font-weight:600}
+#adminModal .v57-adm-subnav{display:flex;flex-wrap:wrap;gap:7px;padding:10px;margin-bottom:9px;background:#030e1cee;border:1px solid #21628a9c;border-radius:10px}
+#adminModal .v57-adm-tool{padding:10px 14px;min-height:38px;font-size:11px;color:#aacfe0;border:1px solid #2967899c;background:#0a2030;border-radius:8px;font-weight:800;cursor:pointer}
+#adminModal .v57-adm-tool.active{color:#fff;background:linear-gradient(#12689b,#06355b);border-color:#51cbff;box-shadow:0 0 13px #00aaff3b}
+#adminModal .v57-adm-location{font-size:10px;text-transform:uppercase;letter-spacing:.12em;color:#58c9f5;border-left:3px solid #43bfff;padding:5px 9px;margin:10px 0 14px}
+#adminModal #adminRuntimeTabs,#adminModal #adminQuickNav{display:none!important}
+#adminModal[data-v57-mode="editor"] .admin-telemetry-section,#adminModal[data-v57-mode="editor"] .admin-kpis,
+#adminModal[data-v57-mode="editor"] .admin-control-box,#adminModal[data-v57-mode="editor"] #v57AdminPlayersSection,#adminModal[data-v57-mode="editor"] .admin-log-section{display:none!important}
+#adminModal[data-v57-mode="overview"] .admin-control-box,#adminModal[data-v57-mode="overview"] #v57AdminPlayersSection,#adminModal[data-v57-mode="overview"] .admin-log-section{display:none!important}
+#adminModal[data-v57-mode="players"] .admin-runtime-monitor-section,#adminModal[data-v57-mode="players"] .admin-telemetry-section,#adminModal[data-v57-mode="players"] .admin-log-section{display:none!important}
+#adminModal[data-v57-mode="farm"] .admin-runtime-monitor-section,#adminModal[data-v57-mode="farm"] .admin-telemetry-section,#adminModal[data-v57-mode="farm"] .admin-kpis,#adminModal[data-v57-mode="farm"] .admin-control-box,#adminModal[data-v57-mode="farm"] #v57AdminPlayersSection,#adminModal[data-v57-mode="farm"] .admin-log-section{display:none!important}
+#adminModal[data-v57-mode="audit"] .admin-runtime-monitor-section,#adminModal[data-v57-mode="audit"] .admin-telemetry-section,#adminModal[data-v57-mode="audit"] .admin-kpis,#adminModal[data-v57-mode="audit"] .admin-control-box,#adminModal[data-v57-mode="audit"] #v57AdminPlayersSection{display:none!important}
+#adminModal .admin-runtime-monitor-section,#adminModal .admin-telemetry-section,#adminModal .admin-control-box,#adminModal #v57AdminPlayersSection,#adminModal .admin-log-section,#adminModal #v57AdmFarmArea{border:1px solid #225d8299;border-radius:13px;background:linear-gradient(170deg,#081e32dd,#03111fe8);padding:15px;margin-bottom:12px;box-shadow:inset 0 1px #60ceff20}
+#adminModal .admin-runtime-interface-toolbar,#adminModal .settings-title{border-bottom:1px solid #2a709555;padding-bottom:9px;margin-bottom:10px}
+#adminModal .admin-world-subtabs,#adminModal .admin-systems-subtabs,#adminModal .admin-shops-subtabs,#adminModal .admin-balance-tabs{display:flex;gap:6px;flex-wrap:wrap;background:#04111eee;border-radius:9px;padding:7px}
+#adminModal .admin-runtime-interface-grid,#adminModal .admin-runtime-world-grid,#adminModal .admin-runtime-systems-grid,#adminModal .admin-runtime-events-grid,#adminModal .admin-runtime-shops-grid{min-width:0;overflow-wrap:anywhere}
+#adminModal .admin-runtime-monitor-grid>*,#adminModal .admin-world-card,#adminModal .admin-system-card,#adminModal .admin-shop-card,#adminModal .admin-npc-card,#adminModal .admin-user-card{border-color:#246d98a6!important;background:linear-gradient(152deg,#0a273c,#041321)!important}
+#adminModal button:focus-visible{outline:2px solid #92e5ff;outline-offset:2px}
+#adminModal .v57-adm-farm-area[hidden],#adminModal .v57-adm-farm-area.hidden{display:none!important}
+#adminModal #v485-adm-farm{display:block;min-width:0;margin:0;border:1px solid #2977a69a;background:#051627;padding:13px;border-radius:11px}
+#adminModal #v485-adm-farm>summary{cursor:pointer;font-size:14px;font-weight:900;color:#8ee3ff;padding:5px}
+#adminModal #v485-adm-farm label{display:inline-flex;flex-direction:column;gap:4px;font-size:11px;margin:9px 11px 7px 0;color:#abd3e6}
+#adminModal #v485-adm-farm input{min-height:38px;background:#071d2f;border:1px solid #418cbb99;border-radius:7px;padding:7px;color:#fff;max-width:240px}
+#adminModal #v485-adm-farm button{min-height:34px;padding:8px 13px;margin:6px 4px 6px 0;border-radius:7px;background:#0d3a5c;color:#bcefff;border:1px solid #3fb1e7}
+#adminModal #v485-adm-sessions{display:grid;gap:8px;margin-top:12px}
+#adminModal .v485-adm-session{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;padding:11px;border:1px solid #36769a78;border-radius:9px;background:#081f31}
+#adminModal .v57-adm-panel-head{border-bottom:1px solid #367a9a99;margin-bottom:11px;padding-bottom:10px}
+#adminModal .v57-adm-panel-head b{display:block;font-size:16px;color:#e7f9ff}
+#adminModal .v57-adm-panel-head small{color:#98b7c5}
+@media(max-width:850px){#adminModal .v57-adm-nav{grid-template-columns:repeat(3,minmax(0,1fr))}#adminModal .v57-adm-brand img{width:95px}}
+@media(max-width:570px){#adminModal .admin-modal-card{width:100vw!important;max-height:96dvh!important;border-radius:12px!important;padding:11px!important}#adminModal .v57-adm-brand{gap:8px;padding:10px}#adminModal .v57-adm-brand img{width:64px}#adminModal .v57-adm-brand small,#adminModal .v57-adm-eyebrow{font-size:8px}#adminModal .v57-adm-live{display:none}#adminModal .v57-adm-nav{grid-template-columns:repeat(2,minmax(0,1fr));gap:5px}#adminModal .v57-adm-category{min-height:47px;padding:7px;gap:5px}#adminModal .v57-adm-category strong{font-size:10px}#adminModal .v57-adm-category small{font-size:8px}#adminModal .v57-adm-tool{font-size:10px;padding:8px 9px;min-height:33px}#adminModal .admin-runtime-monitor-section,#adminModal .admin-telemetry-section,#adminModal .admin-control-box,#adminModal #v57AdminPlayersSection,#adminModal .admin-log-section,#adminModal #v57AdmFarmArea{padding:9px}#adminModal #v485-adm-farm label{display:flex;width:100%;margin-right:0}#adminModal #v485-adm-farm input{max-width:none;width:100%}}

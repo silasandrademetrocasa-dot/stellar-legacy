@@ -1,89 +1,89 @@
 /* STELLAR_SHIPS3D_FLEET_V50 */
 /* STELLAR_OFFLINE_FARM_VISUAL_V485 */
 /* STELLAR_OFFLINE_FARM_V484 APPLIED */
-import {saleQuoteV4776} from './modules/sale-policy-v4776.js?v=47.7.10';
-import {stellarConfirmV4776,stellarPromptV4776} from './modules/stellar-dialog-v4776.js?v=47.7.10';
-import {createWarbotAdminV477} from './modules/warbot-admin-v477.js?v=47.7.10';
-import {frontierAdminAccessV4774} from './api.js?v=47.7.10';
-import {drawWarbotShipV477,drawWarbotBeamV477,WARBOT_SHIP_ASSETS} from './modules/warbot-visual-v477.js?v=47.7.10';
-import {createCombatRebornV470,npcTacticalDriftV470,drawPortalSignatureV470} from './modules/combat-reborn-v470.js?v=47.7.10';
-import {createStellarAudio} from './modules/stellar-audio-v462.js?v=47.7.10';
-import {portalPointV461,CANONICAL_LINKS_V461} from './modules/portal-layout-v461.js?v=47.7.10';
-import {galacticLevelV451,applyGalacticProgressionV451} from './modules/galactic-progression-v451.js?v=47.7.10';
-import {progressionMilestonesV460} from './modules/galactic-balance-v460.js?v=47.7.10';
-import {filteredFrontierPortalsV440} from './modules/frontier-routing-v440.js?v=47.7.10';
-import {astralEquipmentBonusesV435} from './modules/astral-systems-v435.js?v=47.7.10';
-import {registerFrontierSectorsV435,sectorDestinationV435,sectorLabelV435,sectorLevelV435,sectorPortalsV435} from './modules/frontier-sectors-v435.js?v=47.7.10';
-import {loadStageAV423 as loadAstralBattleSnapshotV431} from './api.js?v=47.7.10';
-import {verifiedAstralPveBonusV431} from './modules/astral-combat-v431.js?v=47.7.10';
-import {ASTRAL_ARENAS,isAstralArena,astralRadarVisible,astralResumePoint,drawAstralRift,drawAstralBossCrest,astralBossLabel} from './modules/astral-gates-v380.js?v=47.7.10';
-import {frontierPanelHtml} from './modules/frontier-v370.js?v=47.7.10';
-import {loadFrontierStateOnline,claimFrontierContractOnline,craftFrontierTechOnline,claimFrontierClanOnline,saveFrontierAdminContractOnline} from './api.js?v=47.7.10';
-import {dominionPanelHtml} from './modules/galactic-dominion-v360.js?v=47.7.10';
-import {loadDominionStateOnline,claimDominionOnline,declareDominionWarOnline,claimDominionWarPrizeOnline,saveDominionRulesOnline} from './api.js?v=47.7.10';
-import {createAmmoHudBudget,ammoDisplaySignature} from './modules/ammo-hud-budget-v347.js?v=47.7.10';
-import {visualFxBudget,relayVisualLoadout,relayVisualHealth,relayImpactType,drawRelayStation,drawPortalGateAccents,drawOreEventAccents,drawShipWingLights} from './modules/visual-revolution-v347.js?v=47.7.10';
-import {drawRelayEliteV54,relayLevelV54} from './modules/stellar-relay-elite-v54.js?v=47.7.10';
-import {fortificationNextLevel,fortificationStats,fortificationCanAfford} from './modules/galactic-ascension-v350.js?v=47.7.10';
-import {upgradeRelayFortificationOnline,saveRelayFortificationTierOnline} from './api.js?v=47.7.10';
-import {RELAY_SLOT_CATALOG,RELAY_BONUS_CATALOG,relayModuleFitsSlot,relayModuleName,relaySlotModules,relayBonusDuplicate} from './modules/relay-hangar-v3462.js?v=47.7.10';
-import {loadRelayDominationOnline,relayModuleActionOnline,claimRelayMissionOnline,saveRelayAdminOnline,saveRelayModuleBalanceOnline,repairRelayOnline,adminReleaseRelayOnline} from './api.js?v=47.7.10';
-import { weekendCenterHtml,weekendSlotRowHtml } from './modules/event-control-ui-v3411.js?v=47.7.10';
-import { adminUpdateWeekendSettingsOnline,adminUpdateWeekendEventOnline,adminSetManualEventOnline } from './api.js?v=47.7.10';
-import { bossHudCue, npcThreatLabel } from './modules/tactical-hud-v34.js?v=47.7.10';
-import { allowBackdropFilter, renderFxCount } from './modules/render-budget-v34.js?v=47.7.10';
-import { stellarOreName } from './modules/stellar-display-names.js?v=47.7.10';
-import { rankVisibleNpcTargets } from './modules/combat-target-priority.js?v=47.7.10';
-import { upcomingWeekendSlots, weekendRotationEnabled, weekendSchedule, validateWeekendSettings } from './modules/weekend-events-v341.js?v=47.7.10';
-import { eventControlProfile } from './modules/event-control-profile-v3411.js?v=47.7.10';
-import {eventStage} from './modules/event-evolution-v345.js?v=47.7.10';
-import { minimapPaintInterval } from './modules/minimap-cadence-v33.js?v=47.7.10';
-import { npcUpdateDecision, nearestNpcInRange } from './modules/smart-combat-engine.js?v=47.7.10';
-import { npcPatrolPosition } from './modules/npc-patrol.js?v=47.7.10';
-import { setupMobileLandscape } from './modules/mobile-landscape.js?v=47.7.10';
-import {directionalIndex, directionalGridForImage} from './modules/sprite-orientation.js?v=47.7.10';
-import {createHudIntelligence} from './modules/hud-intelligence.js?v=47.7.10';
-import {sentinelAttackerEligible, selectSentinelAttacker} from './modules/sentinel-defense.js?v=47.7.10';
-import {AUX_PROTOCOL_TYPES, AUX_PROTOCOL_IDS, normalizeAuxProtocols, auxProtocolSlotsUsed, changeAuxProtocolRank, auxProtocolStats} from './modules/aux-protocols.js?v=47.7.10';
-import { movementSpeed, nominalMovementSpeed, followShipCamera } from './modules/ship-navigation.js?v=47.7.10';
-import { loadCommandOverviewOnline,claimCompetitiveSeasonOnline,equipEliteTitleOnline,unequipEliteTitleOnline,loadCommandAdminOnline,saveCompetitiveSeasonOnline,saveWorldDirectiveOnline,loadClanOperationsOnline,claimClanOperationOnline,saveAdminClanOperationOnline } from './api.js?v=47.7.10';
-import {renderV21CommandCenter,V21_TABS} from './modules/v21/command-center-view.js?v=47.7.10';
-import {renderEliteEquipTitles,renderCompetitiveSection,renderUniverseDirectives} from './modules/v22/command-upgrades.js?v=47.7.10';
-import {registerStellarPwaV21,offerInstallV21} from './modules/v21/pwa.js?v=47.7.10';
-import { ECONOMY_EFFECTS, CRAFT_OUTPUT_KINDS, normalizeEconomyEffects, normalizeCraftIngredients, normalizeCraftOutput, formatCraftPreview } from './modules/admin-visual-builders.js?v=47.7.10';
-import { ADMIN_MISSION_PRESETS, createAdminMissionPreset, duplicateAdminMission, validateAdminMissionDraft, previewAdminMission } from './modules/admin-mission-builder.js?v=47.7.10';
-import { createHudContentCache } from './modules/hud-content-cache.js?v=47.7.10';
-import { createAuxiliaryWorkScheduler } from './modules/aux-work-scheduler.js?v=47.7.10';
-import { npcVisualDetail } from './modules/npc-render-detail.js?v=47.7.10';
-import { smoothNpcPosition, smoothNpcHeading, npcCombatLockCue, rocketVisualTarget } from './modules/galactic-combat-v344.js?v=47.7.10';
-import {mergeNpcMotionPatch} from './modules/npc-motion-v3441.js?v=47.7.10';
-import {recordRemotePilotPosition,advanceRemotePilotVisual} from './modules/multiplayer-motion-v3442.js?v=47.7.10';
-import { createBackdropRasterCache } from './modules/backdrop-raster-cache.js?v=47.7.10';
-import { createTextWidthCache } from './modules/text-width-cache.js?v=47.7.10';
-import { createHudUpdateScheduler } from './modules/hud-update-scheduler.js?v=47.7.10';
-import { createAssetCache, flattenAssetPaths } from './modules/asset-cache.js?v=47.7.10';
-import { createSceneGradientCache } from './modules/scene-gradient-cache.js?v=47.7.10';
-import { createPerformanceMonitor, formatPerformanceReport } from './modules/performance-monitor.js?v=47.7.10';
-import { createFrameGate } from './modules/frame-gate.js?v=47.7.10';
-import {npcDisplaySizeV526,oreDisplaySizeV526,boxDisplaySizeV526,lootDisplaySizeV526} from './modules/visual-scale-v526.js?v=47.7.10';
-import { createStellarAutopilotV48 } from './modules/stellar-autopilot-v48.js?v=47.7.10';
-import {routeMapLayoutV4825} from './modules/route-map-layout-v4825.js?v=47.7.10';
-import { createStagedAssetPreloader } from './modules/staged-preload-v342.js?v=47.7.10';
-import { QUALITY_PROFILES, initialAutoQualityForDevice } from './modules/quality-profiles.js?v=47.7.10';
-import { freshBattleConfigsV2013, captureCombatBuildV2013, exchangeCombatBuildV2013, combatConfigRemainingV2013, clampStoredShieldV2013 } from './combat-config-v2013.js?v=47.7.10';
-import { FACTIONS, SHIPS, ITEMS, LASER_AMMO, ROCKETS, NPC_TYPES, MAPS, RESOURCES } from './data.js?v=47.7.10';
-import { createStellarShipRendererV50, isShipAllowedV50, ensureAllowedShipSaveV50 } from './modules/stellar-ship3d-v50.js?v=47.7.10';
-import {ASTRAL53, SPRITE53, baseIdV53, portalIdV53, visualDroneV53} from './modules/stellar-astral-expansion-v53.js?v=47.7.10';
+import {saleQuoteV4776} from './modules/sale-policy-v4776.js?v=47.7.12';
+import {stellarConfirmV4776,stellarPromptV4776} from './modules/stellar-dialog-v4776.js?v=47.7.12';
+import {createWarbotAdminV477} from './modules/warbot-admin-v477.js?v=47.7.12';
+import {frontierAdminAccessV4774} from './api.js?v=47.7.12';
+import {drawWarbotShipV477,drawWarbotBeamV477,WARBOT_SHIP_ASSETS} from './modules/warbot-visual-v477.js?v=47.7.12';
+import {createCombatRebornV470,npcTacticalDriftV470,drawPortalSignatureV470} from './modules/combat-reborn-v470.js?v=47.7.12';
+import {createStellarAudio} from './modules/stellar-audio-v462.js?v=47.7.12';
+import {portalPointV461,CANONICAL_LINKS_V461} from './modules/portal-layout-v461.js?v=47.7.12';
+import {galacticLevelV451,applyGalacticProgressionV451} from './modules/galactic-progression-v451.js?v=47.7.12';
+import {progressionMilestonesV460} from './modules/galactic-balance-v460.js?v=47.7.12';
+import {filteredFrontierPortalsV440} from './modules/frontier-routing-v440.js?v=47.7.12';
+import {astralEquipmentBonusesV435} from './modules/astral-systems-v435.js?v=47.7.12';
+import {registerFrontierSectorsV435,sectorDestinationV435,sectorLabelV435,sectorLevelV435,sectorPortalsV435} from './modules/frontier-sectors-v435.js?v=47.7.12';
+import {loadStageAV423 as loadAstralBattleSnapshotV431} from './api.js?v=47.7.12';
+import {verifiedAstralPveBonusV431} from './modules/astral-combat-v431.js?v=47.7.12';
+import {ASTRAL_ARENAS,isAstralArena,astralRadarVisible,astralResumePoint,drawAstralRift,drawAstralBossCrest,astralBossLabel} from './modules/astral-gates-v380.js?v=47.7.12';
+import {frontierPanelHtml} from './modules/frontier-v370.js?v=47.7.12';
+import {loadFrontierStateOnline,claimFrontierContractOnline,craftFrontierTechOnline,claimFrontierClanOnline,saveFrontierAdminContractOnline} from './api.js?v=47.7.12';
+import {dominionPanelHtml} from './modules/galactic-dominion-v360.js?v=47.7.12';
+import {loadDominionStateOnline,claimDominionOnline,declareDominionWarOnline,claimDominionWarPrizeOnline,saveDominionRulesOnline} from './api.js?v=47.7.12';
+import {createAmmoHudBudget,ammoDisplaySignature} from './modules/ammo-hud-budget-v347.js?v=47.7.12';
+import {visualFxBudget,relayVisualLoadout,relayVisualHealth,relayImpactType,drawRelayStation,drawPortalGateAccents,drawOreEventAccents,drawShipWingLights} from './modules/visual-revolution-v347.js?v=47.7.12';
+import {drawRelayEliteV54,relayLevelV54} from './modules/stellar-relay-elite-v54.js?v=47.7.12';
+import {fortificationNextLevel,fortificationStats,fortificationCanAfford} from './modules/galactic-ascension-v350.js?v=47.7.12';
+import {upgradeRelayFortificationOnline,saveRelayFortificationTierOnline} from './api.js?v=47.7.12';
+import {RELAY_SLOT_CATALOG,RELAY_BONUS_CATALOG,relayModuleFitsSlot,relayModuleName,relaySlotModules,relayBonusDuplicate} from './modules/relay-hangar-v3462.js?v=47.7.12';
+import {loadRelayDominationOnline,relayModuleActionOnline,claimRelayMissionOnline,saveRelayAdminOnline,saveRelayModuleBalanceOnline,repairRelayOnline,adminReleaseRelayOnline} from './api.js?v=47.7.12';
+import { weekendCenterHtml,weekendSlotRowHtml } from './modules/event-control-ui-v3411.js?v=47.7.12';
+import { adminUpdateWeekendSettingsOnline,adminUpdateWeekendEventOnline,adminSetManualEventOnline } from './api.js?v=47.7.12';
+import { bossHudCue, npcThreatLabel } from './modules/tactical-hud-v34.js?v=47.7.12';
+import { allowBackdropFilter, renderFxCount } from './modules/render-budget-v34.js?v=47.7.12';
+import { stellarOreName } from './modules/stellar-display-names.js?v=47.7.12';
+import { rankVisibleNpcTargets } from './modules/combat-target-priority.js?v=47.7.12';
+import { upcomingWeekendSlots, weekendRotationEnabled, weekendSchedule, validateWeekendSettings } from './modules/weekend-events-v341.js?v=47.7.12';
+import { eventControlProfile } from './modules/event-control-profile-v3411.js?v=47.7.12';
+import {eventStage} from './modules/event-evolution-v345.js?v=47.7.12';
+import { minimapPaintInterval } from './modules/minimap-cadence-v33.js?v=47.7.12';
+import { npcUpdateDecision, nearestNpcInRange } from './modules/smart-combat-engine.js?v=47.7.12';
+import { npcPatrolPosition } from './modules/npc-patrol.js?v=47.7.12';
+import { setupMobileLandscape } from './modules/mobile-landscape.js?v=47.7.12';
+import {directionalIndex, directionalGridForImage} from './modules/sprite-orientation.js?v=47.7.12';
+import {createHudIntelligence} from './modules/hud-intelligence.js?v=47.7.12';
+import {sentinelAttackerEligible, selectSentinelAttacker} from './modules/sentinel-defense.js?v=47.7.12';
+import {AUX_PROTOCOL_TYPES, AUX_PROTOCOL_IDS, normalizeAuxProtocols, auxProtocolSlotsUsed, changeAuxProtocolRank, auxProtocolStats} from './modules/aux-protocols.js?v=47.7.12';
+import { movementSpeed, nominalMovementSpeed, followShipCamera } from './modules/ship-navigation.js?v=47.7.12';
+import { loadCommandOverviewOnline,claimCompetitiveSeasonOnline,equipEliteTitleOnline,unequipEliteTitleOnline,loadCommandAdminOnline,saveCompetitiveSeasonOnline,saveWorldDirectiveOnline,loadClanOperationsOnline,claimClanOperationOnline,saveAdminClanOperationOnline } from './api.js?v=47.7.12';
+import {renderV21CommandCenter,V21_TABS} from './modules/v21/command-center-view.js?v=47.7.12';
+import {renderEliteEquipTitles,renderCompetitiveSection,renderUniverseDirectives} from './modules/v22/command-upgrades.js?v=47.7.12';
+import {registerStellarPwaV21,offerInstallV21} from './modules/v21/pwa.js?v=47.7.12';
+import { ECONOMY_EFFECTS, CRAFT_OUTPUT_KINDS, normalizeEconomyEffects, normalizeCraftIngredients, normalizeCraftOutput, formatCraftPreview } from './modules/admin-visual-builders.js?v=47.7.12';
+import { ADMIN_MISSION_PRESETS, createAdminMissionPreset, duplicateAdminMission, validateAdminMissionDraft, previewAdminMission } from './modules/admin-mission-builder.js?v=47.7.12';
+import { createHudContentCache } from './modules/hud-content-cache.js?v=47.7.12';
+import { createAuxiliaryWorkScheduler } from './modules/aux-work-scheduler.js?v=47.7.12';
+import { npcVisualDetail } from './modules/npc-render-detail.js?v=47.7.12';
+import { smoothNpcPosition, smoothNpcHeading, npcCombatLockCue, rocketVisualTarget } from './modules/galactic-combat-v344.js?v=47.7.12';
+import {mergeNpcMotionPatch} from './modules/npc-motion-v3441.js?v=47.7.12';
+import {recordRemotePilotPosition,advanceRemotePilotVisual} from './modules/multiplayer-motion-v3442.js?v=47.7.12';
+import { createBackdropRasterCache } from './modules/backdrop-raster-cache.js?v=47.7.12';
+import { createTextWidthCache } from './modules/text-width-cache.js?v=47.7.12';
+import { createHudUpdateScheduler } from './modules/hud-update-scheduler.js?v=47.7.12';
+import { createAssetCache, flattenAssetPaths } from './modules/asset-cache.js?v=47.7.12';
+import { createSceneGradientCache } from './modules/scene-gradient-cache.js?v=47.7.12';
+import { createPerformanceMonitor, formatPerformanceReport } from './modules/performance-monitor.js?v=47.7.12';
+import { createFrameGate } from './modules/frame-gate.js?v=47.7.12';
+import {npcDisplaySizeV526,oreDisplaySizeV526,boxDisplaySizeV526,lootDisplaySizeV526} from './modules/visual-scale-v526.js?v=47.7.12';
+import { createStellarAutopilotV48 } from './modules/stellar-autopilot-v48.js?v=47.7.12';
+import {routeMapLayoutV4825} from './modules/route-map-layout-v4825.js?v=47.7.12';
+import { createStagedAssetPreloader } from './modules/staged-preload-v342.js?v=47.7.12';
+import { QUALITY_PROFILES, initialAutoQualityForDevice } from './modules/quality-profiles.js?v=47.7.12';
+import { freshBattleConfigsV2013, captureCombatBuildV2013, exchangeCombatBuildV2013, combatConfigRemainingV2013, clampStoredShieldV2013 } from './combat-config-v2013.js?v=47.7.12';
+import { FACTIONS, SHIPS, ITEMS, LASER_AMMO, ROCKETS, NPC_TYPES, MAPS, RESOURCES } from './data.js?v=47.7.12';
+import { createStellarShipRendererV50, isShipAllowedV50, ensureAllowedShipSaveV50 } from './modules/stellar-ship3d-v50.js?v=47.7.12';
+import {ASTRAL53, SPRITE53, baseIdV53, portalIdV53, visualDroneV53} from './modules/stellar-astral-expansion-v53.js?v=47.7.12';
 const STELLAR_3D_V50=createStellarShipRendererV50();
-import { repairPulseSettings } from './repair-balance.js?v=47.7.10';
-import { xpThresholdV1770, xpThresholdV1915, migratePilotXpV1915 } from './level-curve-v1915.js?v=47.7.10';
-import { xpThresholdV460, migratePilotXpV460 } from './level-curve-v460.js?v=47.7.10';
-import { xpThresholdV482, migratePilotXpV482 } from './level-curve-v482.js?v=47.7.10';
-import { applyRecruitBonusV2012, eliteRouteSnapshotV2012, freshEliteRouteJournalV2012, ELITE_ROUTE_TARGETS_V2012, novaTierPriceV2012 } from './progression-plan-v2012.js?v=47.7.10';
-import { GAME_ASSETS } from './assets/v17/manifest.js?v=47.7.10';
-import { signUp, signIn, beginGoogleSignIn, restoreGoogleSignInFromUrl, requestPasswordReset, restorePasswordRecoveryFromUrl, restoreSession, signOutLocal, checkGameSession, endGameSession, getUser, getSessionCredentials, loadCloudSave, saveCloudSave, loadEliteOperationsOnline, claimEliteOperationOnline, loadWarCampaignsOnline, claimWarSupplyOnline, claimWarCampaignOnline, loadAdminWarCampaignsOnline, saveAdminWarCampaignOnline, saveAdminWarRulesOnline, loadAdminEliteObjectivesOnline, saveAdminEliteObjectiveOnline, updateCallsign, updatePassword, loadRankings, loadAuctionBids, saveAuctionBidOnline, markAuctionBidStatusOnline, loadAuctionMarket, upsertPlayerPresenceOnline, loadMapPresenceOnline, savePlayerLocationCheckpointOnline, loadPlayerLocationCheckpointOnline, removePlayerPresenceOnline, queuePvpAttackOnline, consumePvpDamageEventsOnline, syncArenaProfileOnline, loadArenaState, loadArenaDailyRewardStatus, claimArenaDailyReward, loadArenaOpponents, loadArenaHistory, arenaAttackOnline, listClansOnline, loadMyClanOnline, createClanOnline, joinClanOnline, getClanRequestsOnline, reviewClanRequestOnline, cancelClanRequestOnline, setClanMemberRoleOnline, leaveClanOnline, transferClanCreditsOnline, claimClanCreditGrantsOnline, recordClanAlienKillOnline, getPremiumShopOnline, testPurchasePremiumOnline, adminPreviewPremiumStageOnline, adminSimulatePremiumStageOnline, getPremiumStageCatalogOnline, loadWarfrontStateOnline, loadSectorOwnershipOnline, hitWorldBossOnline, claimWorldBossRewardOnline, declareClanWarOnline, recordClanWarScoreOnline, loadLiveOpsOnline, adminUpdateLiveEventScheduleOnline, purchaseLiveCatalogOnline, economyActionOnline, getChatHistoryOnline, sendChatMessageOnline, redeemGameCouponOnline, getMyDesignersOnline, setDesignLoadoutOnline, claimGateDroneDesignOnline, claimEventDesignerOnline, getAdminStatus, adminSearchAccounts, adminRecentActions, adminBanAccount, adminUnbanAccount, adminResetAccount, adminDeleteAccount, pushTelemetryBatch, adminTelemetryOverview, adminPlayerTelemetry, getBattleGroupOnline, createBattleGroupOnline, inviteBattleGroupOnline, searchBattleGroupPlayersOnline, inviteBattleGroupUserOnline, respondBattleGroupInviteOnline, leaveBattleGroupOnline, kickBattleGroupMemberOnline, setBattleGroupRallyOnline, loadRuntimeConfigOnline, loadNpcRuntimeConfigOnline, loadWorldRuntimeConfigOnline, loadSystemsRuntimeConfigOnline, loadAdminRuntimeMonitorOnline, adminUpdateRuntimeModuleOnline, adminUpdateNpcRuntimeOnline, adminUpdateNpcSpawnRuntimeOnline, adminUpdateWorldMapOnline, adminUpdateWorldResourceOnline, adminUpdateWorldSectorOnline, adminUpdateWorldPortalOnline, adminUpdateWorldResourcePoolOnline, adminUpdateMissionCategoryOnline, adminUpdateEconomyServiceOnline, adminUpdateCraftingRecipeOnline, loadBattlePassRuntimeConfigOnline, adminUpdateBattlePassSeasonOnline, adminUpdateBattlePassTierOnline, loadShopsRuntimeConfigOnline, adminUpdateCommonShopItemOnline, adminUpdatePremiumShopItemOnline, loadBonusConfigOnline, adminUpdateBonusConfigOnline, adminCouponDashboardOnline, adminCreateCouponOnline, adminSetCouponActiveOnline, loadGalaxyGatesOnline, adminUpdateGalaxyGateOnline, adminUpsertCustomMissionOnline, adminDeleteCustomMissionOnline, adminCreateCraftRecipeOnline, adminCreateEconomyServiceOnline, adminCreatePassSeasonOnline, loadAuctionRulesOnline, adminUpdateAuctionRulesOnline, loadBalanceRuntimeOnline, adminUpdateBalanceOnline,loadAdminSecurityIncidents,reviewAdminSecurityIncident } from './api.js?v=47.7.10';
-import {createOfflineFarmV484} from './modules/stellar-offline-farm-v484.js?v=47.7.10';
-import { SharedUniverseClient } from './world.js?v=47.7.10';
+import { repairPulseSettings } from './repair-balance.js?v=47.7.12';
+import { xpThresholdV1770, xpThresholdV1915, migratePilotXpV1915 } from './level-curve-v1915.js?v=47.7.12';
+import { xpThresholdV460, migratePilotXpV460 } from './level-curve-v460.js?v=47.7.12';
+import { xpThresholdV482, migratePilotXpV482 } from './level-curve-v482.js?v=47.7.12';
+import { applyRecruitBonusV2012, eliteRouteSnapshotV2012, freshEliteRouteJournalV2012, ELITE_ROUTE_TARGETS_V2012, novaTierPriceV2012 } from './progression-plan-v2012.js?v=47.7.12';
+import { GAME_ASSETS } from './assets/v17/manifest.js?v=47.7.12';
+import { signUp, signIn, beginGoogleSignIn, restoreGoogleSignInFromUrl, requestPasswordReset, restorePasswordRecoveryFromUrl, restoreSession, signOutLocal, checkGameSession, endGameSession, getUser, getSessionCredentials, loadCloudSave, saveCloudSave, loadEliteOperationsOnline, claimEliteOperationOnline, loadWarCampaignsOnline, claimWarSupplyOnline, claimWarCampaignOnline, loadAdminWarCampaignsOnline, saveAdminWarCampaignOnline, saveAdminWarRulesOnline, loadAdminEliteObjectivesOnline, saveAdminEliteObjectiveOnline, updateCallsign, updatePassword, loadRankings, loadAuctionBids, saveAuctionBidOnline, markAuctionBidStatusOnline, loadAuctionMarket, upsertPlayerPresenceOnline, loadMapPresenceOnline, savePlayerLocationCheckpointOnline, loadPlayerLocationCheckpointOnline, removePlayerPresenceOnline, queuePvpAttackOnline, consumePvpDamageEventsOnline, syncArenaProfileOnline, loadArenaState, loadArenaDailyRewardStatus, claimArenaDailyReward, loadArenaOpponents, loadArenaHistory, arenaAttackOnline, listClansOnline, loadMyClanOnline, createClanOnline, joinClanOnline, getClanRequestsOnline, reviewClanRequestOnline, cancelClanRequestOnline, setClanMemberRoleOnline, leaveClanOnline, transferClanCreditsOnline, claimClanCreditGrantsOnline, recordClanAlienKillOnline, getPremiumShopOnline, testPurchasePremiumOnline, adminPreviewPremiumStageOnline, adminSimulatePremiumStageOnline, getPremiumStageCatalogOnline, loadWarfrontStateOnline, loadSectorOwnershipOnline, hitWorldBossOnline, claimWorldBossRewardOnline, declareClanWarOnline, recordClanWarScoreOnline, loadLiveOpsOnline, adminUpdateLiveEventScheduleOnline, purchaseLiveCatalogOnline, economyActionOnline, getChatHistoryOnline, sendChatMessageOnline, redeemGameCouponOnline, getMyDesignersOnline, setDesignLoadoutOnline, claimGateDroneDesignOnline, claimEventDesignerOnline, getAdminStatus, adminSearchAccounts, adminRecentActions, adminBanAccount, adminUnbanAccount, adminResetAccount, adminDeleteAccount, pushTelemetryBatch, adminTelemetryOverview, adminPlayerTelemetry, getBattleGroupOnline, createBattleGroupOnline, inviteBattleGroupOnline, searchBattleGroupPlayersOnline, inviteBattleGroupUserOnline, respondBattleGroupInviteOnline, leaveBattleGroupOnline, kickBattleGroupMemberOnline, setBattleGroupRallyOnline, loadRuntimeConfigOnline, loadNpcRuntimeConfigOnline, loadWorldRuntimeConfigOnline, loadSystemsRuntimeConfigOnline, loadAdminRuntimeMonitorOnline, adminUpdateRuntimeModuleOnline, adminUpdateNpcRuntimeOnline, adminUpdateNpcSpawnRuntimeOnline, adminUpdateWorldMapOnline, adminUpdateWorldResourceOnline, adminUpdateWorldSectorOnline, adminUpdateWorldPortalOnline, adminUpdateWorldResourcePoolOnline, adminUpdateMissionCategoryOnline, adminUpdateEconomyServiceOnline, adminUpdateCraftingRecipeOnline, loadBattlePassRuntimeConfigOnline, adminUpdateBattlePassSeasonOnline, adminUpdateBattlePassTierOnline, loadShopsRuntimeConfigOnline, adminUpdateCommonShopItemOnline, adminUpdatePremiumShopItemOnline, loadBonusConfigOnline, adminUpdateBonusConfigOnline, adminCouponDashboardOnline, adminCreateCouponOnline, adminSetCouponActiveOnline, loadGalaxyGatesOnline, adminUpdateGalaxyGateOnline, adminUpsertCustomMissionOnline, adminDeleteCustomMissionOnline, adminCreateCraftRecipeOnline, adminCreateEconomyServiceOnline, adminCreatePassSeasonOnline, loadAuctionRulesOnline, adminUpdateAuctionRulesOnline, loadBalanceRuntimeOnline, adminUpdateBalanceOnline,loadAdminSecurityIncidents,reviewAdminSecurityIncident } from './api.js?v=47.7.12';
+import {createOfflineFarmV484} from './modules/stellar-offline-farm-v484.js?v=47.7.12';
+import { SharedUniverseClient } from './world.js?v=47.7.12';
 
 const SHIP_VISUAL_IDS_V525=["phoenix", "leonov", "liberator", "piranha", "vengeance", "bigboy", "goliath", "citadel", "aegis", "spearhead", "defcom", "yamato", "nostromo"];
 const NPC_VISUAL_IDS_V525=["streuner", "recruitStreuner", "aiderStreuner", "bossStreuner", "lordakia", "bossLordakia", "saimon", "bossSaimon", "mordon", "bossMordon", "devolarium", "bossDevolarium", "sibelon", "bossSibelon"];
@@ -4590,9 +4590,13 @@ function ensureBattleConfigsV2013(){
   if(!progress)return null;
   const existing=progress.combatConfigsV2013;
   if(!existing||!existing.profiles?.[1]||!existing.profiles?.[2]||existing.shipId!==progress.activeShipId){
-    progress.combatConfigsV2013={...freshBattleConfigsV2013(progress.shipLoadout,progress.drones,Number(progress.shield)||0),shipId:progress.activeShipId};
+    progress.combatConfigsV2013={...freshBattleConfigsV2013(progress.shipLoadout,progress.drones,Number(progress.shield)||0,progress.pet),shipId:progress.activeShipId};
   }
   const configs=progress.combatConfigsV2013;
+  // Migrate old saved configurations without overwriting equipment already owned.
+  for(const index of [1,2])if(!configs.profiles[index].petLoadout&&progress.pet){
+    configs.profiles[index].petLoadout={lasers:[...(progress.pet.lasers||[])],shields:[...(progress.pet.shields||[])],activeGear:progress.pet.activeGear||'off'};
+  }
   if(configs.active!==1&&configs.active!==2)configs.active=1;
   return configs;
 }
@@ -4601,7 +4605,7 @@ function saveActiveBattleConfigV2013(){
   const configs=ensureBattleConfigsV2013();if(!configs)return;
   const active=configs.active;
   // Never copy the shield of an inactive configuration into the running ship.
-  configs.profiles[active]=captureCombatBuildV2013(progress.shipLoadout,progress.drones,Number(player.shield)||0);
+  configs.profiles[active]=captureCombatBuildV2013(progress.shipLoadout,progress.drones,Number(player.shield)||0,progress.pet);
 }
 function copyBattleConfigV2013(from,to){
   if(!progress)return;
@@ -4609,11 +4613,12 @@ function copyBattleConfigV2013(from,to){
   from=Number(from);to=Number(to);
   if(!configs||![1,2].includes(from)||![1,2].includes(to)||from===to)return;
   saveActiveBattleConfigV2013();
-  const source=(from===configs.active?captureCombatBuildV2013(progress.shipLoadout,progress.drones,Number(player.shield)||0):configs.profiles[from]);
+  const source=(from===configs.active?captureCombatBuildV2013(progress.shipLoadout,progress.drones,Number(player.shield)||0,progress.pet):configs.profiles[from]);
   if(!source){showToast('Configuração de origem indisponível');return;}
   configs.profiles[to]={
     shipLoadout:{lasers:[...(source.shipLoadout?.lasers||[])],generators:[...(source.shipLoadout?.generators||[])],extras:[...(source.shipLoadout?.extras||[])]},
     droneSlots:Object.fromEntries(Object.entries(source.droneSlots||{}).map(([id,list])=>[String(id),[...(list||[])]])),
+    petLoadout:source.petLoadout?{lasers:[...(source.petLoadout.lasers||[])],shields:[...(source.petLoadout.shields||[])],activeGear:source.petLoadout.activeGear||'off'}:null,
     shield:Math.max(0,Math.floor(Number(configs.profiles[to]?.shield)||0)) // Mantém o escudo já existente na CONF destino.
   };
   saveGame();flushCloudSave(true).catch(()=>{});renderHangar();updateUI();
@@ -4625,7 +4630,7 @@ function battlePresetKeyV3030(){return `stellar_battle_presets_v3030_${getUser()
 function readBattlePresetsV3030(){
   try{const data=JSON.parse(localStorage.getItem(battlePresetKeyV3030())||'{}');return data&&typeof data==='object'&&!Array.isArray(data)?data:{};}catch{return {};}
 }
-function captureBattlePresetV3030(){return captureCombatBuildV2013(progress.shipLoadout,progress.drones,0);}
+function captureBattlePresetV3030(){return captureCombatBuildV2013(progress.shipLoadout,progress.drones,0,progress.pet);}
 function saveBattlePresetV3030(kind){
   if(!progress||!STELLAR_PRESET_KINDS_V3030.includes(kind))return;
   if(!canChangeEquipment()){showToast('Salve presets somente na base X-1');return;}
@@ -4640,8 +4645,8 @@ async function applyBattlePresetV3030(kind){
   const preview=battlePresetPreviewV3040(target);
   if(preview.missing>0&&!await stellarConfirmV4776(`Preset ${kind}: ${preview.missing} equipamentos indisponíveis. Slots sem item permanecerão vazios. Aplicar mesmo assim?`))return;
   const hp=player.hp,shield=player.shield;
-  const result=exchangeCombatBuildV2013({inventory:progress.inventory,shipLoadout:progress.shipLoadout,drones:progress.drones,target,ship:SHIPS[progress.activeShipId],items:ITEMS});
-  progress.inventory=result.inventory;progress.shipLoadout=result.shipLoadout;progress.drones=result.drones;
+  const result=exchangeCombatBuildV2013({inventory:progress.inventory,shipLoadout:progress.shipLoadout,drones:progress.drones,pet:progress.pet,target,ship:SHIPS[progress.activeShipId],items:ITEMS});
+  progress.inventory=result.inventory;progress.shipLoadout=result.shipLoadout;progress.drones=result.drones;if(result.petLoadout&&progress.pet)Object.assign(progress.pet,result.petLoadout);
   computeStats(false);player.hp=Math.max(0,Math.min(player.maxHp,hp));player.shield=clampStoredShieldV2013(shield,player.maxShield);
   progress.hp=player.hp;progress.shield=player.shield;
   saveGame();flushCloudSave(true).catch(()=>{});renderHangar();buildAmmoButtons();updateUI();syncSharedUniversePlayer(true);
@@ -4688,8 +4693,8 @@ function switchBattleConfigV2013(target){
   if(remaining>0){showToast(`Troca de CONF em ${(remaining/1000).toFixed(1)}s`);return;}
   const previousHp=player.hp;
   saveActiveBattleConfigV2013();
-  const newBuild=exchangeCombatBuildV2013({inventory:progress.inventory,shipLoadout:progress.shipLoadout,drones:progress.drones,target:configs.profiles[target],ship:SHIPS[progress.activeShipId],items:ITEMS});
-  progress.inventory=newBuild.inventory;progress.shipLoadout=newBuild.shipLoadout;progress.drones=newBuild.drones;
+  const newBuild=exchangeCombatBuildV2013({inventory:progress.inventory,shipLoadout:progress.shipLoadout,drones:progress.drones,pet:progress.pet,target:configs.profiles[target],ship:SHIPS[progress.activeShipId],items:ITEMS});
+  progress.inventory=newBuild.inventory;progress.shipLoadout=newBuild.shipLoadout;progress.drones=newBuild.drones;if(newBuild.petLoadout&&progress.pet)Object.assign(progress.pet,newBuild.petLoadout);
   // Stats may change, but existing HP does not scale up. The inactive shield is frozen.
   configs.active=target;configs.lastSwitchAt=Date.now();
   computeStats(false);
@@ -6890,9 +6895,11 @@ function drawBaseSafeZone(){
   ctx.save();ctx.translate(p.x,p.y);
   ctx.strokeStyle=home?hexToRgba(f?.color||'#5ce8ff',.46):'rgba(255,90,110,.34)';ctx.fillStyle=home?'rgba(40,220,170,.010)':'rgba(255,65,82,.010)';ctx.lineWidth=1.5;ctx.beginPath();ctx.arc(0,0,SAFE_ZONE.radius*pulse,0,TWO_PI);ctx.fill();ctx.stroke();
   if(light>.45){ctx.strokeStyle=home?'rgba(100,255,210,.05)':'rgba(255,85,110,.05)';ctx.lineWidth=3.5;ctx.beginPath();ctx.arc(0,0,SAFE_ZONE.radius-12,0,TWO_PI);ctx.stroke();}
-  const baseVisualId=baseIdV53(currentTerritoryFaction());
-  const baseGlbDrawn=stellarCan3dV524()&&STELLAR_3D_V50.drawAsset(ctx,baseVisualId,0,590);
-  const station=baseGlbDrawn?null:assetImage(SPRITE53(baseVisualId));
+  // V56: restaurar a base panorâmica original V22.12, sem GLB ou sprite V53 sobrescrevendo.
+  // Mantém exatamente o mesmo ponto, zona segura, interações e raio do vendedor.
+  const factionKey=String(currentTerritoryFaction()||'earth').toLowerCase();
+  const baseImagePath=GAME_ASSETS.bases?.[factionKey]||GAME_ASSETS.bases?.earth;
+  const station=assetImage(baseImagePath);
   if(station&&station.naturalWidth){const targetW=610,targetH=targetW*(station.naturalHeight/station.naturalWidth);ctx.save();ctx.shadowColor=f?.color||'#51dfff';ctx.shadowBlur=light>.6?22:0;ctx.drawImage(station,-targetW/2,-targetH/2,targetW,targetH);ctx.restore();if(light>.55){const core=ctx.createRadialGradient(0,-5,2,0,-5,70);core.addColorStop(0,'rgba(255,255,255,.22)');core.addColorStop(.3,hexToRgba(f?.color||'#55ddff',.24));core.addColorStop(1,'rgba(0,0,0,0)');ctx.fillStyle=core;ctx.beginPath();ctx.arc(0,-5,72,0,TWO_PI);ctx.fill();}}
   ctx.fillStyle=home?'#caffdf':'#ff9aa8';ctx.font='bold 12px Arial';ctx.textAlign='center';ctx.fillText(`${f?.short||''} • ${home?'BASE ORBITAL / ZONA SEGURA':'BASE INIMIGA'}`,0,-SAFE_ZONE.radius-14);ctx.restore();
 }
@@ -7406,7 +7413,7 @@ function buyRockets(id){const rocket=ROCKETS[id];if(!rocket||rocket.purchasable=
 function renderTabs(container,map,active,onPick){container.innerHTML='';for(const [id,label] of Object.entries(map)){const b=document.createElement('button');b.className=`tab-btn ${active===id?'active':''}`;b.textContent=label;b.onclick=()=>onPick(id);container.appendChild(b);}}
 function makeProductCard({id,name,desc,price,currency,type,subtype,badge,owned,onBuy,disabled=false,priceLabel=null,buttonLabel=null}){
   const card=document.createElement('div');card.className='product-card';
-  const art=assetForProduct(id,type,subtype);
+  const art=type==='ship'?(v56ShipPerspectiveArt(id)||assetForProduct(id,type,subtype)):assetForProduct(id,type,subtype);
   card.innerHTML=`<div class="product-icon">${art?`<img src="${art}" alt="${name}" loading="lazy">`:productIcon(type,subtype)}</div><div>${badge?`<span class="badge ${badge==='ELITE'?'elite':''}">${badge}</span>`:''}<h3>${name}</h3></div><div class="product-desc">${desc}</div><div class="price ${currency}">${owned?'OBTIDO':(priceLabel||priceText(price,currency))}</div>`;
   const b=document.createElement('button');b.className='buy-btn';b.textContent=owned?'Obtido':(buttonLabel||'Comprar');b.disabled=owned||disabled;b.onclick=onBuy;card.appendChild(b);return card;
 }
@@ -7453,9 +7460,13 @@ function decorateV55Shop(){
     card.classList.toggle('v55-credit-item',!!price?.classList.contains('credits'));
   });
 }
+function v56ShipPerspectiveArt(id){
+ const v={phoenix:'AURORA',leonov:'LYNX',liberator:'PIONEER',piranha:'RAPTOR',vengeance:'VALKYRIE',bigboy:'BULWARK',goliath:'LEVIATHAN',citadel:'BASTION',aegis:'MERIDIAN',spearhead:'PATHFINDER',defcom:'KENSEI',yamato:'PHANTOM',nostromo:'SERAPH'};
+ return v[id]?`/assets/v56/ships/${v[id].toLowerCase()}.webp`:shipCardAsset(id);
+}
 function renderV55HangarHero(){
   const ship=SHIPS[progress.activeShipId];if(!ship)return document.createElement('div');
-  const art=shipCardAsset(ship.id)||shipCardAsset('phoenix');
+  const art=v56ShipPerspectiveArt(ship.id)||shipCardAsset(ship.id)||shipCardAsset('phoenix');
   const current=progress.shipLoadout||{};
   const first=(list)=>((Array.isArray(list)?list:[]).filter(Boolean)[0]);
   const groups=[
@@ -7485,7 +7496,25 @@ function renderShop(){
   if(!cards.length){ui.shopGrid.innerHTML='<div class="empty-state">Nenhum produto disponível nesta categoria no momento.</div>';}
   else cards.forEach(card=>ui.shopGrid.appendChild(card));
   decorateV55Shop();
+  v56EnsureShopLayout();
   updateUI();
+}
+function v56EnsureShopLayout(){
+  const grid=ui.shopGrid;if(!grid||!progress)return;
+  let layout=document.getElementById('v56ShopLayout');
+  if(!layout){
+    layout=document.createElement('div');layout.id='v56ShopLayout';layout.className='v56-shop-layout';
+    grid.parentNode.insertBefore(layout,grid);
+    const side=document.createElement('aside');side.id='v56ShopShipPanel';side.className='v56-shop-ship-panel';
+    layout.appendChild(side);layout.appendChild(grid);
+  }
+  const ship=SHIPS[progress.activeShipId],side=document.getElementById('v56ShopShipPanel');if(!ship||!side)return;
+  side.innerHTML=`<div class="v56-shop-side-head"><small>SEU HANGAR</small><b>${escHtml(ship.name)}</b><span>NAVE ATIVA</span></div>
+    <div class="v56-shop-ship-art"><div class="v56-stage-orbit"></div><img src="${v56ShipPerspectiveArt(ship.id)||shipCardAsset(ship.id)}" loading="lazy" alt="${escHtml(ship.name)}"></div>
+    <div class="v56-shop-mini-stats"><span>HP <b>${fmt(player.maxHp)}</b></span><span>ESC <b>${fmt(player.maxShield)}</b></span><span>DANO <b>${fmt(player.laserDamage)}</b></span><span>VEL <b>${fmt(player.speed)}</b></span></div>`;
+  const btn=document.createElement('button');btn.className='v56-shop-ship-link';btn.type='button';btn.textContent='ABRIR HANGAR';
+  btn.onclick=()=>{ui.shopModal.classList.add('hidden');state.hangarTab='equipment';v56EquipTarget='ship';renderHangar();ui.hangarModal.classList.remove('hidden');};
+  side.appendChild(btn);
 }
 
 function returnShipEquipmentToInventory(){for(const k of ['lasers','generators','extras'])for(const id of progress.shipLoadout[k])if(id)addInventory(id);}
@@ -7635,7 +7664,7 @@ function renderHangarShips(){
   const orderedShips=[...catalog.filter(s=>progress.ownedShips.includes(s.id)),...catalog.filter(s=>!progress.ownedShips.includes(s.id))];
   orderedShips.forEach(s=>{
     const owned=progress.ownedShips.includes(s.id),active=s.id===progress.activeShipId,event=!!s.eventOnly||s.shopAvailable===false,design=active?activeDesign:null,visual=design?.visual||{},c=document.createElement('div');c.className=`ship-card ${active?'active-ship':''} ${design?'has-designer '+(design.rarity||''):''}`;if(design)c.style.setProperty('--designer-glow',visual.glow||'#7edcff');
-    c.innerHTML=`<div class="ship-visual designer-ship-art-wrap"><img src="${shipCardAsset(s.id)||shipCardAsset('phoenix')}" alt="${s.name}" ${design?`style="filter:${designerVisualCss(design)}"`:''}>${design?`<span class="designer-equipped-badge">${rarityLabel(design.rarity)} • ${design.name}</span>`:''}</div><div><span class="badge ${shipDesignerEligible(s.id)?'elite':''}">${owned?'OBTIDA':'BLOQUEADA'}${shipDesignerEligible(s.id)?' • ELITE':''}</span><h3>${s.name}</h3></div><div class="ship-stats">HP ${fmt(s.hp)}<br>Lasers ${s.lasers} • Geradores ${s.generators} • Extras ${s.extras}<br>VEL ${s.speed} • Cargo ${fmt(s.cargo)}${design?`<br><b>${designerBonusSummary(design)}</b>`:''}</div>`;
+    c.innerHTML=`<div class="ship-visual designer-ship-art-wrap"><img src="${v56ShipPerspectiveArt(s.id)||shipCardAsset(s.id)||shipCardAsset('phoenix')}" alt="${s.name}" ${design?`style="filter:${designerVisualCss(design)}"`:''}>${design?`<span class="designer-equipped-badge">${rarityLabel(design.rarity)} • ${design.name}</span>`:''}</div><div><span class="badge ${shipDesignerEligible(s.id)?'elite':''}">${owned?'OBTIDA':'BLOQUEADA'}${shipDesignerEligible(s.id)?' • ELITE':''}</span><h3>${s.name}</h3></div><div class="ship-stats">HP ${fmt(s.hp)}<br>Lasers ${s.lasers} • Geradores ${s.generators} • Extras ${s.extras}<br>VEL ${s.speed} • Cargo ${fmt(s.cargo)}${design?`<br><b>${designerBonusSummary(design)}</b>`:''}</div>`;
     if(!active){const baseline=SHIPS[progress.activeShipId];const diff=document.createElement('div');diff.className='ship-compare-v3040';diff.textContent=['HP','VEL','LASERS','ESCUDO SLOTS'].map((label,i)=>{const keys=['hp','speed','lasers','generators'];const delta=Number(s[keys[i]]||0)-Number(baseline[keys[i]]||0);return `${label} ${delta>0?'+':''}${fmt(delta)}`;}).join(' • ');diff.title=`Comparação com ${baseline.name}`;c.appendChild(diff);}
     const b=document.createElement('button');b.className='equip-btn';b.textContent=active?'Nave ativa':owned?'Usar nave':event?'EVENTO / MISSÃO / PASSE':'Comprar na Loja';b.disabled=active||(!owned&&event);b.onclick=()=>owned?switchShip(s.id):(ui.hangarModal.classList.add('hidden'),openShop('ships'));c.appendChild(b);wrap.appendChild(c);
   });root.appendChild(wrap);return root;
@@ -7661,7 +7690,8 @@ function renderHangarEquipment(){
   const ship=SHIPS[progress.activeShipId],root=document.createElement('div');root.className='hangar-equipment-console';
   const repairBot=activeRepairBot(),extraCap=shipExtraCapacity(),extraBonus=extraCap-ship.extras;
   const liveRepair=repairPulseSettings({repairBot,premium:premiumActive(),designerMultiplier:designerRepairMultiplier(),shieldRegenBonus:player.shieldRegenBoost||0});
-  const summary=document.createElement('div');summary.className='summary-grid hangar-summary-strip';summary.innerHTML=`<div class="stat-card">Dano<strong>${fmt(player.laserDamage)}</strong></div><div class="stat-card">Escudo<strong>${fmt(player.maxShield)}</strong></div><div class="stat-card">Absorção<strong>${player.shieldAbsorption}%</strong></div><div class="stat-card">VEL<strong>${fmt(player.speed)}</strong></div><div class="stat-card">Extras<strong>${extraCap}${extraBonus?` (+${extraBonus})`:''}</strong></div><div class="stat-card">Reparo HP<strong>${repairBot?`+${fmt(liveRepair.hpTick)}/s`:'OFF'}</strong></div><div class="stat-card">Regen. ESC<strong>+${fmt(liveRepair.shieldTick)}/s</strong></div>`;root.appendChild(summary);root.appendChild(renderBattleConfigHangarV2013());try{root.appendChild(renderPresetToolbarV3030());}catch(err){console.warn('[hangar-presets] recuperado',err);}
+  // V56: o Hangar já apresenta os atributos ao lado da nave; sem painel duplicado.
+  try{root.appendChild(renderPresetToolbarV3030());}catch(err){console.warn('[hangar-presets] recuperado',err);}
   root.appendChild(hangarFilterBar('ship',['all','lasers','shields','engines','extras'],state.hangarEquipFilter));
   const layout=document.createElement('div');layout.className='hangar-equipment-split';
   const equipped=document.createElement('div');equipped.className='hangar-equipment-pane equipped-pane';equipped.innerHTML=`<div class="hangar-pane-title"><span>NAVE • EQUIPADOS</span><b>${ship.name}</b></div>`;
@@ -7762,12 +7792,55 @@ function pilotAttributeContributionPanel(){
   const root=document.createElement('details');root.className='pilot-attributes-master';root.innerHTML=`<summary>📊 DETALHAMENTO DOS ATRIBUTOS <span>Valores totais + fontes dos bônus • expandir</span></summary><p class="muted">Totais calculados com equipamentos, nave, AUX, designers, pesquisas e serviços atuais. Bônus multiplicativos não são uma soma simples.</p><div class="pilot-attributes-grid">${data.map(x=>`<details><summary><b>${x.name}</b><em>${x.total}</em></summary>${pctRows(x.sources)}</details>`).join('')}<details><summary><b>VELOCIDADE</b><em>${fmt(player.speed)}</em></summary><div class="pilot-source-line"><span>Velocidade de fábrica</span><b>${fmt(ship.speed)}</b></div><div class="pilot-source-line"><span>Propulsores e equipamentos</span><b>+${fmt(Math.max(0,player.speed-ship.speed-(economyBoostActive('thruster')?economyServiceEffect('thruster','speed_flat',5):0)-(low?Number(ship.bonusLowMaps?.speed||0):0)))}</b></div>${low?`<div class="pilot-source-line"><span>Mapa X</span><b>+${fmt(ship.bonusLowMaps?.speed||0)}</b></div>`:''}${economyBoostActive('thruster')?`<div class="pilot-source-line"><span>Serviço de propulsão</span><b>+${fmt(economyServiceEffect('thruster','speed_flat',5))}</b></div>`:''}</details></div>`;
   return root;
 }
+// V56: gerenciador unificado, funcional, reutiliza rotinas oficiais de equipar/remover.
+const V56_EQUIP_TABS={ship:'NAVE',drones:'DRONES',aux:'AUX-9'};
+let v56EquipTarget='ship';
+function v56EquipmentView(){
+  const root=document.createElement('div');root.className='v56-equipment-layout';
+  const head=document.createElement('div');head.className='v56-equipment-head';
+  head.innerHTML='<div><small>GERENCIAMENTO DE EQUIPAMENTOS</small><h3>NAVE + DRONES + AUX-9</h3></div><small>UMA CONFIGURAÇÃO PARA TODA A FROTA</small>';
+  root.appendChild(head);
+  const selector=document.createElement('div');selector.className='v56-config-bar';
+  // Explicitly shared state: switchBattleConfigV2013 swaps ship, drones and AUX equipment together.
+  const configs=ensureBattleConfigsV2013();
+  selector.innerHTML='<b>CONFIGURAÇÃO GLOBAL</b>';
+  for(const n of [1,2]){
+    const b=document.createElement('button');b.type='button';b.className='v56-config-btn'+(configs?.active===n?' active':'');
+    b.textContent='CONF '+n+(configs?.active===n?' ✓':'');b.disabled=configs?.active===n||combatConfigRemainingV2013(configs?.lastSwitchAt)>0;
+    b.onclick=()=>switchBattleConfigV2013(n);selector.appendChild(b);
+  }
+  const note=document.createElement('small');note.textContent='Altera equipamentos da nave, dos drones e do AUX-9 • cooldown 5s • escudos persistentes';selector.appendChild(note);root.appendChild(selector);
+  const tabs=document.createElement('div');tabs.className='v56-unit-tabs';
+  for(const [id,name] of Object.entries(V56_EQUIP_TABS)){
+    const b=document.createElement('button');b.type='button';b.className='v56-unit-btn'+(v56EquipTarget===id?' active':'');b.textContent=name;
+    b.onclick=()=>{v56EquipTarget=id;renderHangar();};tabs.appendChild(b);
+  }
+  root.appendChild(tabs);
+  const body=document.createElement('div');body.className='v56-unit-body';
+  const ship=SHIPS[progress.activeShipId];
+  const isShip=v56EquipTarget==='ship',isDrone=v56EquipTarget==='drones';
+  const art=isShip?v56ShipPerspectiveArt(ship.id):isDrone?SPRITE53(visualDroneV53(progress.drones?.[0]?.type||'iris',droneDesignFor(progress.drones?.[0]?.id))):GAME_ASSETS.drones?.aux9;
+  const label=isShip?ship.name:isDrone?'DRONES • FROTA':'AUX-9 • SUPORTE';
+  const picture=document.createElement('div');picture.className='v56-workstation-hero';
+  picture.innerHTML=`<div class="v56-workstation-top"><span>UNIDADE ATIVA</span><strong>${escHtml(label)}</strong></div><div class="v56-workstation-stage"><span class="v56-stage-orbit"></span>${art?`<img src="${art}" alt="${escHtml(label)}" loading="lazy">`:''}</div><small>${isShip?'Visual de seleção da nave':isDrone?'Drones e designers equipados':'Suporte tático e módulos originais'}</small>`;
+  body.appendChild(picture);
+  const slotPane=document.createElement('div');slotPane.className='v56-workstation-slots';
+  if(isShip){
+    slotPane.appendChild(renderHangarEquipment());
+    const designer=document.createElement('div');designer.className='v56-designer-jump';
+    designer.innerHTML='<b>DESIGNERS DA NAVE</b><small>Disponíveis no painel de naves, sem mudar a economia.</small>';
+    const b=document.createElement('button');b.className='ghost-btn';b.textContent='PERSONALIZAR DESIGNER';b.onclick=()=>{state.hangarTab='ships';renderHangar();};designer.appendChild(b);slotPane.appendChild(designer);
+  }else if(isDrone){slotPane.appendChild(renderHangarDrones());}
+  else {slotPane.appendChild(renderHangarPet());}
+  body.appendChild(slotPane);root.appendChild(body);
+  return root;
+}
 function renderHangar(){
   if(!progress)return;loadHangarEquipmentPrefs();
   const tabs={ships:'NAVES',equipment:'EQUIPAMENTOS',drones:'DRONES',pet:'AUX-9',refinery:'REFINARIA',titles:'TÍTULOS',pilot:'PERFIL DE PILOTO'};
   renderTabs(ui.hangarTabs,tabs,state.hangarTab,id=>{if(id==='pilot'&&!featureUnlocked('pilot')){showFeatureLock('pilot','Perfil de Piloto');return;}state.hangarTab=id;renderHangar();});const pilotTab=[...ui.hangarTabs.querySelectorAll('.tab-btn')][Object.keys(tabs).indexOf('pilot')];if(pilotTab&&!featureUnlocked('pilot')){pilotTab.classList.add('level-locked');pilotTab.title=`Libera no nível ${featureRequiredLevel('pilot')}`;}ui.hangarContent.innerHTML='';computeStats(true);
-  const content=state.hangarTab==='ships'?renderHangarShips():state.hangarTab==='equipment'?renderHangarEquipment():state.hangarTab==='drones'?renderHangarDrones():state.hangarTab==='pet'?renderHangarPet():state.hangarTab==='refinery'?renderHangarRefinery():state.hangarTab==='titles'?renderHangarTitles():renderHangarPilot();
-  if(state.hangarTab==='ships'||state.hangarTab==='equipment')ui.hangarContent.appendChild(renderV55HangarHero());
+  const content=state.hangarTab==='ships'?renderHangarShips():['equipment','drones','pet'].includes(state.hangarTab)?(v56EquipTarget=state.hangarTab==='drones'?'drones':state.hangarTab==='pet'?'aux':v56EquipTarget,v56EquipmentView()):state.hangarTab==='refinery'?renderHangarRefinery():state.hangarTab==='titles'?renderHangarTitles():renderHangarPilot();
+  if(state.hangarTab==='ships')ui.hangarContent.appendChild(renderV55HangarHero());
   ui.hangarContent.appendChild(content);updateUI();
 }
 

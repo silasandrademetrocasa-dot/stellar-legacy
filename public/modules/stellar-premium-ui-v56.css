@@ -1,0 +1,146 @@
+/* STELLAR LEGACY V56: Galaxy Hangar, arsenal and shared equipment workbench.
+   Presentation only: purchase/equip/upgrade handlers remain the game's own.
+   Mobile-first, static gradient layers: no layout timers, no backdrop filters. */
+#hangarModal,#shopModal{--galaxy-accent:#32ccff;--galaxy-frame:#2878b4;--galaxy-black:#030b1a;--galaxy-surface:#07172a;}
+#hangarModal>.modal-card,#shopModal>.modal-card{
+ border:1px solid #317cb4;border-radius:9px;
+ background:radial-gradient(ellipse at 73% 10%,rgba(17,75,139,.22),transparent 42%),
+ radial-gradient(ellipse at 51% 62%,rgba(7,39,95,.18),transparent 53%),
+ linear-gradient(145deg,#061226,#030916 70%,#061a30)!important;
+ box-shadow:inset 0 0 0 2px rgba(8,69,122,.44),0 0 36px rgba(3,81,158,.22);
+}
+#hangarModal .modal-header,#shopModal .modal-header{
+ background:linear-gradient(100deg,#030c1d 0%,#0d2d51 45%,#041225 80%,#030916 100%);
+ border:1px solid rgba(61,174,246,.38);padding:10px 16px 12px;gap:13px;min-height:77px;
+}
+#hangarModal .modal-header h2,#shopModal .modal-header h2{
+ color:#fff;text-shadow:0 1px #53b9fd,0 0 20px #1287ee;font-size:clamp(20px,2.4vw,35px);
+}
+#hangarModal .v55-modal-logo img,#shopModal .v55-modal-logo img{
+ filter:drop-shadow(0 1px 7px #1ab4ff);max-width:225px;
+}
+#hangarModal #hangarTabs,#shopModal #shopTabs{
+ background:linear-gradient(180deg,#051222,#030d1c);padding:8px 8px 12px;border:1px solid rgba(27,124,198,.38);
+}
+#shopModal #shopTabs .tab-btn.active,#hangarModal #hangarTabs .tab-btn.active,
+#hangarModal .v56-unit-btn.active,#hangarModal .v56-config-btn.active{
+ background:linear-gradient(180deg,#126ba8,#072745);border:1px solid #45d6ff;color:#fff;
+ box-shadow:0 0 0 1px rgba(32,174,245,.44),0 0 18px rgba(20,151,255,.35),inset 0 0 17px rgba(44,178,255,.23);
+}
+#hangarModal .modal-card .section-box,#hangarModal .hangar-equipment-pane,
+#hangarModal .ship-card,#shopModal .product-card{
+ background:linear-gradient(164deg,rgba(8,29,53,.98),rgba(3,12,29,.99));
+ border:1px solid #185686;border-radius:6px;box-shadow:inset 0 0 21px rgba(0,67,114,.10);
+}
+#hangarModal .ship-card.active-ship{border-color:#51deff;box-shadow:0 0 16px rgba(18,154,255,.25)}
+#hangarModal .v55-hero-main,#hangarModal .v56-workstation-hero,#shopModal .v56-shop-ship-panel{
+ background:radial-gradient(ellipse at 50% 76%,rgba(0,115,252,.21),transparent 52%),
+ radial-gradient(circle at 90% 8%,rgba(28,93,155,.18),transparent 35%),
+ linear-gradient(145deg,#07172c,#020b1a);
+ border:1px solid rgba(47,181,255,.57);border-radius:5px;
+ box-shadow:inset 0 0 32px rgba(2,57,111,.27);
+}
+#hangarModal #hangarContent>.v55-hangar-hero{border-color:#1478c7;border-radius:5px;padding:10px;gap:9px}
+#hangarModal .v55-hero-main{min-height:340px}
+#hangarModal .v55-ship-stage{height:245px;background:radial-gradient(ellipse at 50% 63%,rgba(0,90,200,.20),transparent 60%)}
+#hangarModal .v55-stage-ship{height:245px;max-height:94%;object-fit:contain;filter:drop-shadow(0 12px 14px rgba(0,0,0,.65)) drop-shadow(0 0 10px rgba(28,156,255,.45))}
+#hangarModal .v55-orbit-ring{bottom:32px;width:63%;height:56px}
+#hangarModal .v55-ship-heading h3{font-size:clamp(24px,3.3vw,40px)}
+#hangarModal .ship-grid{grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:9px}
+#hangarModal .ship-card .ship-visual{height:155px;min-height:155px;background:radial-gradient(ellipse at center,rgba(15,100,196,.25),transparent 67%),#031224}
+#hangarModal .ship-card .ship-visual img{max-height:148px;max-width:100%}
+#hangarModal .ship-card .equip-btn,#shopModal .buy-btn,#hangarModal .equip-btn{
+ background:linear-gradient(180deg,#126da5,#062c51);color:#ecfaff;border:1px solid #28aef0;
+ border-radius:3px;text-shadow:0 0 8px rgba(0,188,255,.30);
+}
+#hangarModal .v56-equipment-layout{display:flex;flex-direction:column;gap:9px;min-width:0}
+#hangarModal .v56-equipment-head{display:flex;align-items:center;justify-content:space-between;gap:8px;
+ padding:12px 17px;border:1px solid rgba(45,158,232,.4);background:linear-gradient(90deg,#092448,#041225);}
+#hangarModal .v56-equipment-head small{color:#77cffa;font-size:10px;letter-spacing:.09em}
+#hangarModal .v56-equipment-head h3{margin:3px 0 0;font-size:22px;text-shadow:0 0 13px rgba(24,159,245,.43)}
+#hangarModal .v56-config-bar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;
+ border:1px solid #186294;background:linear-gradient(90deg,#072441,#020d20);padding:9px 13px;}
+#hangarModal .v56-config-bar>b{font-size:11px;letter-spacing:.05em;color:#b9ebff}
+#hangarModal .v56-config-bar>small{margin-left:auto;font-size:10px;color:#89b4d2}
+#hangarModal .v56-config-btn,#hangarModal .v56-unit-btn{cursor:pointer;color:#a3d4f1;border:1px solid #235981;
+ border-radius:3px;background:linear-gradient(180deg,#0b2641,#041326);font-size:11px;font-weight:800;min-height:37px;padding:8px 17px;}
+#hangarModal .v56-config-btn:disabled{cursor:default;opacity:1}
+#hangarModal .v56-unit-tabs{display:flex;gap:5px;overflow-x:auto;padding:3px 0}
+#hangarModal .v56-unit-btn{flex:1;min-width:96px;font-size:12px}
+#hangarModal .v56-unit-body{display:grid;grid-template-columns:minmax(230px,.85fr) minmax(0,2.1fr);gap:9px;align-items:start;min-width:0}
+#hangarModal .v56-workstation-hero{padding:13px;position:sticky;top:3px;min-height:300px;overflow:hidden}
+#hangarModal .v56-workstation-top{text-align:center;display:flex;flex-direction:column;gap:4px}
+#hangarModal .v56-workstation-top span{font-size:10px;color:#7ddeff;letter-spacing:.14em}
+#hangarModal .v56-workstation-top strong{font-size:clamp(19px,2.5vw,31px);color:white;text-shadow:0 0 12px #117ccd}
+#hangarModal .v56-workstation-stage{min-height:210px;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden}
+#hangarModal .v56-workstation-stage img{max-width:100%;width:100%;height:265px;max-height:42vh;object-fit:contain;position:relative;z-index:2;
+ filter:drop-shadow(0 0 15px rgba(0,126,255,.25))}
+#hangarModal .v56-stage-orbit,#shopModal .v56-stage-orbit{position:absolute;bottom:19%;left:17%;width:66%;height:43px;border:3px solid #21bbf8;
+ border-radius:50%;box-shadow:0 0 24px rgba(9,132,255,.65);pointer-events:none}
+#hangarModal .v56-workstation-hero>small{display:block;text-align:center;color:#91c8df;font-size:10px}
+#hangarModal .v56-workstation-slots{min-width:0}
+#hangarModal .v56-workstation-slots .hangar-equipment-console,#hangarModal .v56-workstation-slots .hangar-drone-console,#hangarModal .v56-workstation-slots .pet-hangar-panel{margin:0;min-width:0}
+#hangarModal .v56-workstation-slots .hangar-equipment-split{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,.9fr);gap:8px;min-width:0}
+#hangarModal .v56-workstation-slots .hangar-equip-section{border-color:rgba(36,147,227,.4)}
+#hangarModal .v56-workstation-slots .hangar-pane-title{color:#a5efff;font-weight:900;border-bottom:1px solid rgba(28,146,211,.25)}
+#hangarModal .v56-designer-jump{display:flex;justify-content:space-between;align-items:center;gap:9px;flex-wrap:wrap;padding:10px;
+ background:linear-gradient(90deg,#0b2544,#041326);border:1px solid #175684;margin-top:7px}
+#hangarModal .v56-designer-jump small{font-size:11px;color:#9dcfe9}
+/* Shop: persistent selected ship, shop cards and real actions. */
+#shopModal .v56-shop-layout{display:grid;grid-template-columns:minmax(185px,.7fr) minmax(0,3fr);gap:10px;min-width:0}
+#shopModal .v56-shop-ship-panel{padding:12px;min-width:0;height:max-content;position:sticky;top:0}
+#shopModal .v56-shop-side-head{display:flex;flex-direction:column;gap:3px}
+#shopModal .v56-shop-side-head small{font-size:9px;color:#76d6fa;letter-spacing:.16em}
+#shopModal .v56-shop-side-head b{font-size:24px;color:white;text-shadow:0 0 11px #148ef5}
+#shopModal .v56-shop-side-head span{font-size:11px;color:#acc5d9}
+#shopModal .v56-shop-ship-art{height:230px;position:relative;display:flex;align-items:center;justify-content:center}
+#shopModal .v56-shop-ship-art img{width:100%;height:99%;object-fit:contain;z-index:2;position:relative}
+#shopModal .v56-shop-mini-stats{display:grid;grid-template-columns:1fr 1fr;gap:5px}
+#shopModal .v56-shop-mini-stats span{padding:6px;border:1px solid rgba(42,143,219,.4);font-size:9px;color:#a7d9ef;min-width:0}
+#shopModal .v56-shop-mini-stats b{display:block;color:#fff;font-size:14px}
+#shopModal .v56-shop-ship-link{width:100%;padding:9px;margin-top:8px;border:1px solid #37bdfe;
+ background:linear-gradient(#17619c,#062a4b);color:white;font-size:11px;font-weight:800;cursor:pointer}
+#shopModal #shopGrid{grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:8px;align-content:start}
+#shopModal #shopGrid .product-card{border:1px solid rgba(54,160,231,.54);border-radius:4px;
+ background:radial-gradient(ellipse at 50% 30%,rgba(21,106,179,.15),transparent 62%),linear-gradient(#081b33,#030e20);}
+#shopModal #shopGrid .product-icon{background:radial-gradient(ellipse at 50% 78%,rgba(20,114,223,.38),transparent 55%),#041329!important}
+#shopModal #shopGrid .product-card h3{color:white;text-shadow:0 0 8px rgba(26,144,255,.20)}
+/* responsive practical gameplay on low-memory Android: no animation while scrolling */
+@media(max-width:900px){
+ #hangarModal .v56-unit-body{grid-template-columns:minmax(140px,.6fr) minmax(0,1.5fr)}
+ #hangarModal .v56-workstation-hero{position:static;min-height:220px;padding:6px}
+ #hangarModal .v56-workstation-stage{min-height:145px}
+ #hangarModal .v56-workstation-stage img{height:185px}
+ #hangarModal .v56-workstation-slots .hangar-equipment-split{grid-template-columns:1fr}
+ #shopModal .v56-shop-layout{grid-template-columns:minmax(135px,.55fr) minmax(0,1.9fr)}
+ #shopModal .v56-shop-ship-art{height:175px}
+ #hangarModal .v55-stage-ship{height:180px}
+ #hangarModal .v55-ship-stage{height:180px}
+}
+@media(max-width:600px){
+ #hangarModal .v56-equipment-head{padding:7px 10px}
+ #hangarModal .v56-equipment-head h3{font-size:16px}
+ #hangarModal .v56-equipment-head>small{display:none}
+ #hangarModal .v56-config-bar{padding:6px;gap:4px}
+ #hangarModal .v56-config-bar>b{flex-basis:100%;font-size:9px}
+ #hangarModal .v56-config-btn{padding:6px 12px;font-size:10px;min-height:32px}
+ #hangarModal .v56-config-bar>small{flex-basis:100%;margin:0;font-size:9px}
+ #hangarModal .v56-unit-body{grid-template-columns:1fr}
+ #hangarModal .v56-workstation-hero{min-height:0;position:relative}
+ #hangarModal .v56-workstation-stage{min-height:130px}
+ #hangarModal .v56-workstation-stage img{height:158px;max-height:158px}
+ #hangarModal .v56-workstation-top strong{font-size:19px}
+ #hangarModal .v56-workstation-slots .hangar-equipment-split{grid-template-columns:1fr}
+ #hangarModal #hangarContent>.v55-hangar-hero{grid-template-columns:1fr 1.5fr;gap:4px}
+ #hangarModal .v55-hero-main{min-height:200px}
+ #hangarModal .v55-stage-ship{height:130px}
+ #hangarModal .v55-ship-stage{height:130px}
+ #shopModal .v56-shop-layout{grid-template-columns:1fr}
+ #shopModal .v56-shop-ship-panel{display:grid;grid-template-columns:1fr 1fr;gap:6px;padding:7px;position:static}
+ #shopModal .v56-shop-ship-art{height:90px;grid-column:2;grid-row:1/3}
+ #shopModal .v56-shop-mini-stats{grid-column:1/3;grid-template-columns:repeat(4,minmax(0,1fr))}
+ #shopModal .v56-shop-mini-stats b{font-size:11px}
+ #shopModal .v56-shop-ship-link{margin:0;font-size:10px}
+ #shopModal #shopGrid{grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}
+}
+@media (prefers-reduced-motion: reduce){#hangarModal *,#shopModal *{scroll-behavior:auto!important;animation-duration:.001s!important;transition-duration:.001s!important}}
