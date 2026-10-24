@@ -4956,3 +4956,18 @@ body.mobile-landscape-pro .boss-phase-hud.collapsed{left:auto!important;right:ca
 
 /* V53 designer unique model thumbnails */
 .designer-summary-card .designer-orb img{display:block;width:100%;height:100%;object-fit:contain;filter:drop-shadow(0 0 6px var(--designer-glow,#76dcff))}
+
+/* V64 visual cleanup: remove old placeholder wedges/rings and keep real GLB-derived art clean. */
+.ship-card .ship-visual:before,
+#shopModal #shopGrid .product-icon::before,
+.v55-stage-light,
+.v55-orbit-ring,
+.v56-stage-orbit{display:none!important;content:none!important;}
+.ship-card .ship-visual,
+#shopModal #shopGrid .product-icon,
+.v56-workstation-stage,
+.drone-mini-art{background:transparent!important;box-shadow:none!important;}
+#shopModal #shopGrid .product-icon img,
+.ship-card .ship-visual img,
+.v56-workstation-stage img,
+.drone-mini-art img{filter:none!important;box-shadow:none!important;}

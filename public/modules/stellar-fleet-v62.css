@@ -18,3 +18,10 @@
 .v55-stage-ship,.v56-shop-ship-art img{object-fit:contain!important;object-position:center!important;}
 .ship-card .ship-visual{padding:6px!important;}
 .ship-card .ship-visual canvas.stellar-preview-v61{width:100%!important;height:100%!important;max-height:100%!important;}
+
+/* V64 cleanup: approved renders only, no decorative placeholder overlays. */
+.ship-card .ship-visual:before,
+.v56-stage-orbit{display:none!important;content:none!important;}
+.ship-card .ship-visual,
+.v56-workstation-stage,
+.drone-mini-art{background:transparent!important;box-shadow:none!important;}

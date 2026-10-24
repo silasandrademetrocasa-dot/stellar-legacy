@@ -13,7 +13,8 @@ test('V58: art from top-forward camera for all 13 GLB ships and AUX',()=>{
  }
  assert(existsSync(resolve(root,'public/assets/v58/aux/aux9-perspective.webp')));
  assert.match(game,/v56ShipPerspectiveArt\(ship\.id\)/);
- assert.match(game,/v58\/aux\/aux9-perspective\.webp/);
+ assert.match(game,/auxVisualArtV64\('aux9'\)/);
+ assert(existsSync(resolve(root,'public/assets/v64/aux/aux9.webp')));
 });
 test('V58: the map base trade button is viewport-anchored and not world-screen positioned',()=>{
  const fn=game.slice(game.indexOf('function updateBaseTradePrompt(){'),game.indexOf('function updateUI(){'));

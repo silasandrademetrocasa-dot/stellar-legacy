@@ -174,3 +174,10 @@
  #hangarModal .v55-ship-stats b{font-size:11px}
 }
 @media (prefers-reduced-motion:reduce){#shopModal .product-icon img,#hangarModal .ship-visual img{transition:none!important}}
+
+/* V64 cleanup: remove orbit ring/shadow backdrop from real GLB art cards. */
+#shopModal #shopGrid .product-icon::before,
+.v55-stage-light,
+.v55-orbit-ring{display:none!important;content:none!important;}
+#shopModal #shopGrid .product-icon{background:transparent!important;box-shadow:none!important;}
+#shopModal #shopGrid .product-icon img{filter:none!important;box-shadow:none!important;}
