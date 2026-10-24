@@ -1,0 +1,80 @@
+{
+  "phoenix": {
+    "name": "AURORA",
+    "source_glb": "/assets/v62/models/SL_AURORA_FINAL.glb",
+    "perspective": "/assets/v63/ships/aurora.webp",
+    "sprite16": "/assets/v63/ships/aurora_16.webp"
+  },
+  "liberator": {
+    "name": "PIONEER",
+    "source_glb": "/assets/v62/models/SL_PIONEER_FINAL.glb",
+    "perspective": "/assets/v63/ships/pioneer.webp",
+    "sprite16": "/assets/v63/ships/pioneer_16.webp"
+  },
+  "piranha": {
+    "name": "RAPTOR",
+    "source_glb": "/assets/v62/models/SL_RAPTOR_FINAL.glb",
+    "perspective": "/assets/v63/ships/raptor.webp",
+    "sprite16": "/assets/v63/ships/raptor_16.webp"
+  },
+  "nostromo": {
+    "name": "MERIDIAN",
+    "source_glb": "/assets/v62/models/SL_MERIDIAN_FINAL.glb",
+    "perspective": "/assets/v63/ships/meridian.webp",
+    "sprite16": "/assets/v63/ships/meridian_16.webp"
+  },
+  "bigboy": {
+    "name": "BASTION",
+    "source_glb": "/assets/v62/models/SL_BASTION_FINAL.glb",
+    "perspective": "/assets/v63/ships/bastion.webp",
+    "sprite16": "/assets/v63/ships/bastion_16.webp"
+  },
+  "leonov": {
+    "name": "LYNX",
+    "source_glb": "/assets/v62/models/SL_LYNX_FINAL.glb",
+    "perspective": "/assets/v63/ships/lynx.webp",
+    "sprite16": "/assets/v63/ships/lynx_16.webp"
+  },
+  "defcom": {
+    "name": "PHANTOM",
+    "source_glb": "/assets/v62/models/SL_PHANTOM_FINAL.glb",
+    "perspective": "/assets/v63/ships/phantom.webp",
+    "sprite16": "/assets/v63/ships/phantom_16.webp"
+  },
+  "spearhead": {
+    "name": "PATHFINDER",
+    "source_glb": "/assets/v62/models/SL_PATHFINDER_FINAL.glb",
+    "perspective": "/assets/v63/ships/pathfinder.webp",
+    "sprite16": "/assets/v63/ships/pathfinder_16.webp"
+  },
+  "yamato": {
+    "name": "KENSEI",
+    "source_glb": "/assets/v62/models/SL_KENSEI_FINAL.glb",
+    "perspective": "/assets/v63/ships/kensei.webp",
+    "sprite16": "/assets/v63/ships/kensei_16.webp"
+  },
+  "vengeance": {
+    "name": "VALKYRIE",
+    "source_glb": "/assets/v62/models/SL_VALKYRIE_FINAL.glb",
+    "perspective": "/assets/v63/ships/valkyrie.webp",
+    "sprite16": "/assets/v63/ships/valkyrie_16.webp"
+  },
+  "goliath": {
+    "name": "LEVIATHAN",
+    "source_glb": "/assets/v62/models/SL_LEVIATHAN_FINAL.glb",
+    "perspective": "/assets/v63/ships/leviathan.webp",
+    "sprite16": "/assets/v63/ships/leviathan_16.webp"
+  },
+  "aegis": {
+    "name": "SERAPH",
+    "source_glb": "/assets/v62/models/SL_SERAPH_FINAL.glb",
+    "perspective": "/assets/v63/ships/seraph.webp",
+    "sprite16": "/assets/v63/ships/seraph_16.webp"
+  },
+  "citadel": {
+    "name": "BULWARK",
+    "source_glb": "/assets/v62/models/SL_BULWARK_FINAL.glb",
+    "perspective": "/assets/v63/ships/bulwark.webp",
+    "sprite16": "/assets/v63/ships/bulwark_16.webp"
+  }
+}

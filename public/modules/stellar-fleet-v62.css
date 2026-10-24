@@ -4,3 +4,17 @@
 .product-card .product-icon:has(canvas.stellar-preview-v61){height:178px!important;min-height:156px!important}
 .product-card .product-icon canvas.stellar-preview-v61{image-rendering:auto}
 @media(max-width:680px){.product-card .product-icon:has(canvas.stellar-preview-v61){height:144px!important;min-height:144px!important}}
+
+/* V63: 2D sprites and showroom both originate from the actual GLBs.
+   No painted shadow, orbital ellipse or artificial vignette behind ships. */
+.ship-card .ship-visual,
+.product-card:has(.product-icon canvas.stellar-preview-v61) .product-icon,
+.v55-ship-stage,
+.v56-shop-ship-art { background:transparent!important; box-shadow:none!important; }
+.ship-card .ship-visual canvas.stellar-preview-v61,
+.product-card .product-icon canvas.stellar-preview-v61,
+.v55-stage-ship,.v56-shop-ship-art img {filter:none!important;text-shadow:none!important;box-shadow:none!important;}
+.v55-stage-light,.v55-orbit-ring,.v56-stage-orbit{display:none!important;}
+.v55-stage-ship,.v56-shop-ship-art img{object-fit:contain!important;object-position:center!important;}
+.ship-card .ship-visual{padding:6px!important;}
+.ship-card .ship-visual canvas.stellar-preview-v61{width:100%!important;height:100%!important;max-height:100%!important;}

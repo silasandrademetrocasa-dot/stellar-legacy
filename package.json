@@ -1,6 +1,6 @@
 {
   "name": "stellar-legacy",
-  "version": "47.7.18",
+  "version": "47.7.19",
   "type": "module",
   "scripts": {
     "start": "node server/index.js",
@@ -19,5 +19,5 @@
   "engines": {
     "node": ">=18"
   },
-  "release": "V62.1 Galactic Fleet — hotfix for GitHub import cache version"
+  "release": "V63 Galactic Fleet — GLB 2D/3D visual consistency"
 }

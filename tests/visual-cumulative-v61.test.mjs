@@ -7,7 +7,7 @@ test('V61: all thirteen ships use actual approved V62 GLBs in 3D and auto mode',
   for(const [id,ship] of Object.entries(ALLOWED_SHIPS_V50)){
     const hq=requestedModelAssetV59(id,'on'), lod=requestedModelAssetV59(id,'auto');
     assert.equal(hq,`/assets/v62/models/SL_${ship.toUpperCase()}_FINAL.glb`);
-    assert.equal(lod,`/assets/ships3d/v50/SL_${ship.toUpperCase()}_LOD.glb`);
+    assert.equal(lod,`/assets/v62/models/SL_${ship.toUpperCase()}_FINAL.glb`);
     assert.ok(existsSync(new URL('../public'+hq,import.meta.url)),hq);
   }
 });

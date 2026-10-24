@@ -111,10 +111,10 @@ const FLEET_FINAL_V62 = Object.freeze({
 });
 export function requestedModelAssetV59(id, mode=renderMode()){
   const key=ALLOWED_SHIPS_V50[id]?`SL_${ALLOWED_SHIPS_V50[id].toUpperCase()}`:id;
-  return mode==='on' ? (FLEET_FINAL_V62[id]||HQ_MODEL_ASSET_V59[key]||MODEL_ASSET[id]) : MODEL_ASSET[id];
+  return FLEET_FINAL_V62[id]|| (mode==='on' ? (HQ_MODEL_ASSET_V59[key]||MODEL_ASSET[id]) : MODEL_ASSET[id]);
 }
 const ANGULAR_BUCKETS=32,MAX_CACHED_BITMAPS=72;
-const sceneSize=()=>renderMode()==='on'?240:160;
+const sceneSize=()=>renderMode()==='on'?344:224;
 const TAG='stellar-ships3d-v50';
 const vs=`#version 300 es
 precision highp float;
@@ -140,9 +140,9 @@ void main(){
   vec3 n=normalize(cross(dFdx(vPoint),dFdy(vPoint)));
   float d=abs(dot(n,normalize(vec3(.25,1.,.46))));
   float fill=abs(dot(n,normalize(vec3(-.8,.25,.24))));
-  float shine=pow(max(0.,d),13.)*.15;
-  float rim=pow(1.-abs(dot(n,normalize(vec3(.05,.35,1.)))),3.)*.12;
-  vec3 rgb=uColor.rgb*(.46+.42*d+.13*fill+shine+rim)+uEmissive*.50;
+  float shine=pow(max(0.,d),16.)*.22;
+  float rim=pow(1.-abs(dot(n,normalize(vec3(.05,.35,1.)))),3.)*.15;
+  vec3 rgb=uColor.rgb*(.54+.38*d+.17*fill+shine+rim)+uEmissive*.74;
   outColor=vec4(min(rgb,vec3(1.0)),uColor.a);
 }`;
 function makeShader(gl,type,source){
@@ -206,7 +206,7 @@ export function createStellarShipRendererV50(){
     try{
       canvas=document.createElement('canvas');canvas.width=canvas.height=sceneSize();
       canvas.style.cssText='position:fixed;left:-9999px;top:-9999px;pointer-events:none';
-      gl=canvas.getContext('webgl2',{alpha:true,premultipliedAlpha:true,antialias:false,preserveDrawingBuffer:true,depth:true,powerPreference:'low-power'});
+      gl=canvas.getContext('webgl2',{alpha:true,premultipliedAlpha:true,antialias:true,preserveDrawingBuffer:true,depth:true,powerPreference:'low-power'});
       if(!gl)throw Error('WebGL2 não disponível');
       program=createProgram(gl);gl.useProgram(program);gl.disable(gl.CULL_FACE);gl.enable(gl.DEPTH_TEST);gl.depthFunc(gl.LEQUAL);
       gl.viewport(0,0,canvas.width,canvas.height);
