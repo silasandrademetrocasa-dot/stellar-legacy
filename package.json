@@ -1,6 +1,6 @@
 {
   "name": "stellar-legacy",
-  "version": "47.7.9",
+  "version": "47.7.10",
   "type": "module",
   "scripts": {
     "start": "node server/index.js",
@@ -19,5 +19,5 @@
   "engines": {
     "node": ">=18"
   },
-  "release": "V54.0 Relay Elite & Faction Bases — visual only"
+  "release": "V55.0 Premium Hangar & Arsenal — UI visual, no SQL"
 }

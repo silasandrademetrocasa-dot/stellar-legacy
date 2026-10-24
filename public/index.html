@@ -6,13 +6,14 @@
 <meta content="width=device-width,initial-scale=1,user-scalable=no,viewport-fit=cover" name="viewport"/>
 <meta content="#030816" name="theme-color"/>
 <title>Stellar Legacy</title>
-<link rel="manifest" href="/manifest.webmanifest?v=47.7.9"/>
+<link rel="manifest" href="/manifest.webmanifest?v=47.7.10"/>
 <link rel="icon" type="image/png" href="/icons/stellar-192.png"/>
 <link rel="apple-touch-icon" href="/icons/stellar-192.png"/>
-<link href="/style.css?v=47.7.9" rel="stylesheet"/>
+<link href="/style.css?v=47.7.10" rel="stylesheet"/>
   <link rel="stylesheet" href="/modules/topbar-navigation-v481.css?v=48.1.0">
   <link rel="stylesheet" href="/modules/pilot-ship-hud-v482.css?v=48.2.6">
   <link rel="stylesheet" href="/modules/route-map-layout-v4825.css?v=48.2.5">
+  <link rel="stylesheet" href="/modules/stellar-premium-ui-v55.css?v=47.7.10">
 </head>
 <body>
 <div class="stellar-boot-splash" id="stellarBootSplash" role="status" aria-label="Preparando Stellar Legacy">
@@ -1089,7 +1090,7 @@
 
 <div class="modal hidden" id="shopModal">
 <div class="modal-card wide-card">
-<div class="modal-header">
+<div class="modal-header"><div class="v55-modal-logo"><span class="v55-logo-star" aria-hidden="true">✦</span><img src="/assets/v19/branding/stellar-legacy-logo.webp" alt="Stellar Legacy"></div>
 <div>
 <div class="eyebrow">ECONOMIA &amp; PROGRESSÃO</div>
 <h2>Loja Orbital</h2>
@@ -1098,13 +1099,14 @@
 <button class="small-btn" id="closeShop">Fechar</button>
 </div>
 
+<div id="v55ShopBanner" class="v55-shop-banner"><div><small>STELLAR LEGACY · CATÁLOGO OFICIAL</small><h3 data-v55-title>ARSENAL</h3><span data-v55-subtitle>Equipamentos e suprimentos</span></div><span class="v55-shop-badge">LOJA ORBITAL</span></div>
 <div class="tabs" id="shopTabs"></div>
 <div class="product-grid" id="shopGrid"></div>
 </div>
 </div>
 <div class="modal hidden" id="hangarModal">
 <div class="modal-card wide-card">
-<div class="modal-header">
+<div class="modal-header"><div class="v55-modal-logo"><span class="v55-logo-star" aria-hidden="true">✦</span><img src="/assets/v19/branding/stellar-legacy-logo.webp" alt="Stellar Legacy"></div>
 <div>
 <div class="eyebrow">GERENCIAMENTO</div>
 <h2>Hangar</h2>
@@ -1134,9 +1136,9 @@
 </div>
 </div>
 <div class="perf-diag-overlay hidden" id="perfDiagOverlay" aria-live="off" aria-label="Contador de FPS local"><b id="perfDiagHudFps">FPS —</b><small id="perfDiagHudStutter">P95 —</small></div>
-<script src="/game.js?v=47.7.9" type="module"></script>
-<script type="module" src="/modules/astral-rewards-v381.js?v=47.7.9"></script>
-<script type="module" src="/modules/unified-expansion-v42.js?v=47.7.9"></script>
+<script src="/game.js?v=47.7.10" type="module"></script>
+<script type="module" src="/modules/astral-rewards-v381.js?v=47.7.10"></script>
+<script type="module" src="/modules/unified-expansion-v42.js?v=47.7.10"></script>
   <script type="module" src="/modules/topbar-navigation-v481.js?v=48.1.0"></script>
   <script type="module" src="/modules/pilot-ship-hud-v482.js?v=48.2.6"></script>
 </body>

@@ -1,0 +1,176 @@
+/* V55.0 · Hangar & Arsenal · estética premium. Apenas interface, sem regras de jogo. */
+#shopModal,#hangarModal{--v55-neon:#40d7ff;--v55-sky:#107fff;--v55-ink:#030915;--v55-border:rgba(89,210,255,.59)}
+#shopModal>.modal-card,#hangarModal>.modal-card{
+  position:relative;isolation:isolate;width:min(1460px,98vw);max-height:min(96dvh,1050px);
+  border:1px solid var(--v55-border);border-radius:12px;padding:12px 16px 20px;
+  background:radial-gradient(ellipse at 85% 0%,rgba(18,69,117,.55),transparent 46%),
+    radial-gradient(ellipse at 30% 45%,rgba(3,42,87,.24),transparent 60%),
+    linear-gradient(155deg,#040e20 0%,#030916 55%,#071428 100%);
+  box-shadow:0 0 0 1px #0d355c,0 0 36px rgba(0,129,255,.19),inset 0 0 40px rgba(3,33,80,.45);
+  scrollbar-color:#136595 #030d1d;
+}
+#shopModal>.modal-card::before,#hangarModal>.modal-card::before{
+  content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;opacity:.46;
+  background-image:radial-gradient(#73bff7 0.6px,transparent 1px),radial-gradient(#b6e9ff 0.4px,transparent 1px);
+  background-size:93px 97px,169px 157px;background-position:0 12px,48px 82px;
+  mask-image:linear-gradient(180deg,black 0%,transparent 78%);
+}
+#shopModal .modal-header,#hangarModal .modal-header{
+  gap:12px;min-height:81px;position:relative;padding:7px 12px 13px;margin:0 0 10px;
+  border-bottom:1px solid rgba(101,210,255,.38);
+  background:linear-gradient(90deg,rgba(3,12,28,.82),rgba(8,42,77,.24),rgba(3,11,26,.75));
+}
+#shopModal .v55-modal-logo,#hangarModal .v55-modal-logo{display:flex;align-items:center;gap:7px;max-width:255px;flex:0 1 220px}
+#shopModal .v55-modal-logo img,#hangarModal .v55-modal-logo img{width:100%;max-width:203px;max-height:66px;object-fit:contain;filter:drop-shadow(0 0 11px rgba(70,192,255,.28))}
+#shopModal .v55-logo-star,#hangarModal .v55-logo-star{font-size:40px;color:#dbfaff;text-shadow:0 0 8px #0da6ff,0 0 19px #0089ff}
+#shopModal .modal-header h2,#hangarModal .modal-header h2{font-size:clamp(21px,2.4vw,39px);letter-spacing:.065em;line-height:1.1;text-transform:uppercase;color:#f8fdff;text-shadow:0 2px 1px #18568b,0 0 16px rgba(30,163,255,.5)}
+#shopModal .modal-header .eyebrow,#hangarModal .modal-header .eyebrow{letter-spacing:.23em;color:#65ddff}
+#shopModal .modal-header .wallet,#hangarModal .modal-header .wallet{margin-left:auto;border-color:#1e6896;border-radius:5px;background:#061528;white-space:nowrap;font-size:12px;color:#88e7ff}
+#shopModal .modal-header .wallet b,#hangarModal .modal-header .wallet b{color:white}
+#shopModal .modal-header .small-btn,#hangarModal .modal-header .small-btn{border-radius:5px;padding:8px 12px;min-height:35px;flex:0 0 auto}
+#shopModal #shopTabs,#hangarModal #hangarTabs{
+  display:flex;gap:4px;flex-wrap:nowrap;overflow-x:auto;overscroll-behavior-inline:contain;
+  scrollbar-width:thin;scrollbar-color:#2976a0 #061321;padding:5px 2px 12px;margin:0 0 6px
+}
+#shopModal #shopTabs .tab-btn,#hangarModal #hangarTabs .tab-btn{
+  flex:1 0 auto;min-width:87px;min-height:41px;padding:10px 13px;border:1px solid rgba(73,155,207,.35);
+  border-radius:5px;background:linear-gradient(180deg,#081a30,#061022);color:#a8d3ea;
+  letter-spacing:.07em;text-transform:uppercase;font-size:11px;
+}
+#shopModal #shopTabs .tab-btn.active,#hangarModal #hangarTabs .tab-btn.active{
+  color:#fff;background:linear-gradient(180deg,#124879,#082643);border-color:#51deff;
+  box-shadow:0 0 0 1px rgba(60,191,255,.3),inset 0 0 15px rgba(31,145,246,.31),0 0 16px rgba(3,148,255,.23)
+}
+/* LOJA: fileiras de cards premium, ações reais do catálogo preservadas */
+#shopModal .v55-shop-banner{
+ display:flex;align-items:center;justify-content:space-between;gap:12px;padding:6px 16px 11px;
+ margin:3px 0 4px;min-height:76px;border-bottom:1px solid rgba(65,181,251,.2);
+ background:linear-gradient(90deg,rgba(0,114,210,.1),transparent 70%);
+}
+#shopModal .v55-shop-banner small{font-size:9px;letter-spacing:.2em;color:#7ddfff;font-weight:700}
+#shopModal .v55-shop-banner h3{font-size:clamp(22px,3vw,38px);margin:2px 0 0;letter-spacing:.09em;color:#fff;text-transform:uppercase;text-shadow:0 0 15px rgba(38,166,255,.38)}
+#shopModal .v55-shop-banner span{font-size:11px;color:#70cce9;letter-spacing:.16em;text-transform:uppercase}
+#shopModal .v55-shop-banner .v55-shop-badge{border:1px solid #2c7399;padding:9px 13px;border-radius:3px;background:#06192b;color:#bbf1ff;white-space:nowrap}
+#shopModal #shopGrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(196px,1fr));gap:10px;align-items:stretch;padding:4px 2px 12px}
+#shopModal #shopGrid .product-card{
+  position:relative;min-height:330px;padding:10px;overflow:hidden;gap:7px;border-radius:5px;
+  border:1px solid rgba(70,191,252,.6);
+  background:linear-gradient(180deg,rgba(9,35,65,.92),rgba(3,13,31,.98) 51%,#041123);
+  box-shadow:inset 0 0 0 1px rgba(24,75,119,.7),0 0 17px rgba(0,110,222,.08);
+}
+#shopModal #shopGrid .product-card:before{content:"";position:absolute;top:0;left:0;width:46px;height:2px;background:#8cdeff;box-shadow:0 0 13px #22a9ff}
+#shopModal #shopGrid .product-card.v55-elite-item{border-color:rgba(164,122,255,.69);--v55-card-glow:#9a68ff}
+#shopModal #shopGrid .product-card.v55-credit-item{--v55-card-glow:#ffc866}
+#shopModal #shopGrid .product-icon{
+  position:relative;flex:0 0 156px;height:156px!important;min-height:0!important;padding:7px!important;
+  background:radial-gradient(ellipse at 50% 70%,rgba(16,125,231,.3),transparent 65%),linear-gradient(180deg,#071c39,#030d1f)!important;
+  border:1px solid rgba(75,161,239,.25);border-radius:3px;isolation:isolate;overflow:hidden;
+}
+#shopModal #shopGrid .product-icon::before{
+ content:"";position:absolute;left:50%;bottom:15px;width:76%;height:28px;transform:translateX(-50%);
+ border:2px solid var(--v55-card-glow,#23bcff);border-radius:50%;opacity:.55;
+ box-shadow:0 0 14px var(--v55-card-glow,#23bcff);z-index:-1;
+}
+#shopModal #shopGrid .product-icon img{width:100%!important;height:100%!important;object-fit:contain!important;position:relative;z-index:2;filter:drop-shadow(0 0 12px rgba(42,187,255,.35))}
+#shopModal .v55-icon-rim{position:absolute;inset:auto 13px 7px;height:1px;background:linear-gradient(90deg,transparent,#20b8ff,transparent)}
+#shopModal #shopGrid .product-card h3{font-size:16px;font-weight:900;color:#f3fbff;letter-spacing:.045em}
+#shopModal #shopGrid .product-card .badge{border-radius:3px;padding:3px 7px;font-size:10px;letter-spacing:.07em}
+#shopModal #shopGrid .product-desc{font-size:11px;line-height:1.42;color:#a8cce2;opacity:1;max-height:82px;overflow-y:auto}
+#shopModal #shopGrid .price{border-top:1px solid rgba(77,172,237,.21);padding-top:8px;font-size:15px;text-shadow:0 0 9px rgba(29,143,239,.24)}
+#shopModal #shopGrid .buy-btn{
+  width:100%;min-height:36px;padding:7px;border-radius:4px;text-transform:uppercase;letter-spacing:.09em;
+  background:linear-gradient(180deg,#145c93,#0a2e52);box-shadow:inset 0 0 16px rgba(6,134,234,.16)
+}
+/* HANGAR: hero com nave real, equipamentos atuais e atributos vivos */
+#hangarModal #hangarContent>.v55-hangar-hero{
+ display:grid;grid-template-columns:minmax(132px,1fr) minmax(260px,2.3fr) minmax(132px,1fr);
+ grid-template-rows:auto auto;gap:8px;position:relative;padding:12px;margin:0 0 16px;border-radius:8px;
+ border:1px solid rgba(64,190,255,.51);
+ background:radial-gradient(ellipse at 50% 40%,rgba(11,97,187,.22),transparent 50%),linear-gradient(165deg,#06182e,#040d1e 70%);
+ box-shadow:inset 0 0 35px rgba(0,65,121,.22)
+}
+#hangarModal .v55-hero-sidebar{display:flex;flex-direction:column;gap:9px;justify-content:center;min-width:0}
+#hangarModal .v55-equip-preview{border:1px solid rgba(74,183,246,.36);border-radius:5px;padding:8px;background:linear-gradient(155deg,#0b2342,#061327);min-width:0}
+#hangarModal .v55-equip-label{font-size:10px;font-weight:900;letter-spacing:.05em;color:#b5f2ff;border-bottom:1px solid rgba(89,188,235,.2);padding-bottom:6px}
+#hangarModal .v55-equip-flex{display:flex;align-items:center;justify-content:flex-start;gap:7px;margin-top:8px;min-width:0}
+#hangarModal .v55-equip-flex>img{width:70px;height:63px;min-width:45px;max-width:42%;object-fit:contain;filter:drop-shadow(0 0 11px rgba(45,169,251,.32))}
+#hangarModal .v55-equip-flex>span{display:block;min-width:0;overflow-wrap:anywhere;font-size:12px;font-weight:800;color:#f5fbff}
+#hangarModal .v55-equip-flex small{display:block;font-size:9px;color:#86b7ce;font-weight:500;line-height:1.3;max-height:48px;overflow:hidden}
+#hangarModal .v55-equip-empty{font-size:31px;color:#28688d;text-align:center;flex:0 0 44px}
+#hangarModal .v55-hero-main{position:relative;min-height:280px;min-width:0;text-align:center;overflow:hidden;border:1px solid rgba(84,183,252,.28);border-radius:8px;background:radial-gradient(circle at center,rgba(6,61,133,.35),transparent 63%),linear-gradient(180deg,#07162b,#050e1e)}
+#hangarModal .v55-ship-heading{position:relative;z-index:3;margin:10px 3px 0}
+#hangarModal .v55-ship-heading small{display:block;color:#8ddeff;letter-spacing:.12em;font-size:9px;font-weight:800}
+#hangarModal .v55-ship-heading h3{margin:3px 0 2px;color:#fff;font-size:clamp(23px,3vw,34px);line-height:1;letter-spacing:.075em;text-shadow:0 0 15px rgba(56,170,255,.6)}
+#hangarModal .v55-ship-heading>span{font-size:10px;color:#b0dcf4;letter-spacing:.13em;text-transform:uppercase}
+#hangarModal .v55-ship-stage{height:188px;position:relative;display:flex;align-items:center;justify-content:center;overflow:hidden}
+#hangarModal .v55-orbit-ring{position:absolute;width:min(73%,335px);height:60px;bottom:21px;left:50%;transform:translateX(-50%);border:3px solid rgba(64,211,255,.87);border-radius:50%;box-shadow:0 0 20px rgba(0,155,255,.75),inset 0 0 30px rgba(0,155,255,.55);background:radial-gradient(ellipse,rgba(0,156,255,.18),transparent)}
+#hangarModal .v55-stage-ship{position:relative;z-index:2;object-fit:contain;width:92%;height:185px;filter:drop-shadow(0 17px 11px rgba(0,0,0,.62)) drop-shadow(0 0 21px rgba(45,157,255,.36))}
+#hangarModal .v55-stage-light{position:absolute;left:50%;bottom:5px;transform:translateX(-50%);width:52%;height:15px;border-radius:50%;background:rgba(39,160,255,.46);filter:blur(11px)}
+#hangarModal .v55-hero-controls{position:relative;z-index:3;margin:0 0 11px}
+#hangarModal .v55-change-ship{min-height:33px;padding:7px 22px;border:1px solid #3aceff;border-radius:4px;color:#f0fbff;background:linear-gradient(180deg,#125d9a,#052741);font-size:11px;font-weight:900;letter-spacing:.06em;box-shadow:0 0 14px rgba(4,148,244,.17)}
+#hangarModal .v55-ship-stats{grid-column:1/-1;display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:7px}
+#hangarModal .v55-ship-stats>div{border:1px solid rgba(70,155,235,.34);border-radius:5px;padding:7px 9px;background:#06172c;min-width:0}
+#hangarModal .v55-ship-stats span{display:block;font-size:9px;letter-spacing:.07em;font-weight:800;color:#95caed;white-space:nowrap}
+#hangarModal .v55-ship-stats b{display:block;font-size:17px;margin-top:3px;color:#ebfbff;overflow:hidden;text-overflow:ellipsis}
+#hangarModal .v55-ship-stats i{display:block;height:3px;margin-top:5px;background:linear-gradient(90deg,#28bfff 70%,#103650 70%);border-radius:6px}
+#hangarModal .ship-grid{grid-template-columns:repeat(auto-fit,minmax(205px,1fr));gap:10px}
+#hangarModal .ship-card{border-radius:5px;border:1px solid rgba(66,192,255,.42);background:linear-gradient(180deg,#091d37,#041023);padding:9px}
+#hangarModal .ship-card .ship-visual{height:136px;min-height:136px;border-radius:4px}
+#hangarModal .ship-card .ship-visual img{max-height:130px;max-width:96%}
+#hangarModal .ship-card.active-ship{box-shadow:0 0 0 1px rgba(55,222,255,.67),0 0 23px rgba(0,128,255,.23)}
+#hangarModal .hangar-equipment-pane,#hangarModal .hangar-equip-section,#hangarModal .hangar-drone-console .section-box{border-radius:7px;border-color:rgba(75,179,233,.42)}
+#hangarModal .hangar-summary-strip>.stat-card{border-radius:5px;background:linear-gradient(180deg,#092844,#061321);border-color:rgba(81,190,242,.32)}
+/* Mobile: preserve all functional tabs, scrollability and live buttons. */
+@media(max-width:850px){
+ #shopModal .v55-modal-logo,#hangarModal .v55-modal-logo{flex-basis:130px;max-width:154px}
+ #shopModal .v55-logo-star,#hangarModal .v55-logo-star{font-size:26px}
+ #shopModal .modal-header h2,#hangarModal .modal-header h2{font-size:22px}
+ #shopModal #shopGrid{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+ #shopModal #shopGrid .product-card{min-height:285px}
+ #shopModal #shopGrid .product-icon{height:105px!important;flex-basis:105px}
+ #hangarModal #hangarContent>.v55-hangar-hero{grid-template-columns:minmax(0,1fr) minmax(0,2fr);gap:7px}
+ #hangarModal .v55-hero-sidebar{justify-content:flex-start}
+ #hangarModal .v55-hero-sidebar:nth-of-type(3){grid-column:1;grid-row:2}
+ #hangarModal .v55-hero-main{grid-column:2;grid-row:1/3;min-height:230px}
+ #hangarModal .v55-ship-stats{grid-column:1/-1;grid-row:3;grid-template-columns:repeat(3,minmax(0,1fr))}
+ #hangarModal .v55-ship-stats b{font-size:14px}
+}
+@media(max-width:520px){
+ #shopModal>.modal-card,#hangarModal>.modal-card{padding:8px;max-height:96dvh}
+ #shopModal .modal-header,#hangarModal .modal-header{gap:5px;min-height:52px;padding:5px;margin-bottom:5px}
+ #shopModal .v55-modal-logo,#hangarModal .v55-modal-logo{flex-basis:83px;max-width:83px}
+ #shopModal .v55-logo-star,#hangarModal .v55-logo-star{display:none}
+ #shopModal .modal-header h2,#hangarModal .modal-header h2{font-size:17px}
+ #shopModal .modal-header .eyebrow,#hangarModal .modal-header .eyebrow{font-size:7px;letter-spacing:0}
+ #shopModal .modal-header .wallet,#hangarModal .modal-header .wallet{font-size:8px;padding:4px;order:4}
+ #shopModal .modal-header .small-btn,#hangarModal .modal-header .small-btn{font-size:9px;padding:5px;min-height:28px}
+ #shopModal .v55-shop-banner{min-height:48px;padding:4px 6px}
+ #shopModal .v55-shop-banner small{font-size:8px}
+ #shopModal .v55-shop-banner h3{font-size:21px}
+ #shopModal .v55-shop-banner .v55-shop-badge{display:none}
+ #shopModal #shopTabs .tab-btn,#hangarModal #hangarTabs .tab-btn{min-height:32px;padding:7px 9px;min-width:74px;font-size:9px}
+ #shopModal #shopGrid{grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}
+ #shopModal #shopGrid .product-card{padding:6px;gap:5px;min-height:259px}
+ #shopModal #shopGrid .product-icon{height:90px!important;flex-basis:90px}
+ #shopModal #shopGrid .product-card h3{font-size:12px}
+ #shopModal #shopGrid .product-desc{font-size:10px;max-height:55px}
+ #shopModal #shopGrid .price{font-size:12px}
+ #shopModal #shopGrid .buy-btn{font-size:10px;min-height:30px}
+ #hangarModal #hangarContent>.v55-hangar-hero{padding:5px;gap:5px;grid-template-columns:1fr 1.6fr}
+ #hangarModal .v55-equip-preview{padding:4px}
+ #hangarModal .v55-equip-flex>img{width:34px;height:41px;min-width:30px}
+ #hangarModal .v55-equip-label{font-size:8px;padding-bottom:2px}
+ #hangarModal .v55-equip-flex>span{font-size:9px}
+ #hangarModal .v55-equip-flex small{font-size:7px;max-height:20px}
+ #hangarModal .v55-hero-main{min-height:206px}
+ #hangarModal .v55-ship-heading h3{font-size:20px}
+ #hangarModal .v55-ship-heading small{font-size:7px}
+ #hangarModal .v55-ship-stage{height:120px}
+ #hangarModal .v55-stage-ship{height:120px}
+ #hangarModal .v55-change-ship{font-size:9px;min-height:29px;padding:4px 10px}
+ #hangarModal .v55-ship-stats{gap:3px}
+ #hangarModal .v55-ship-stats>div{padding:4px 5px}
+ #hangarModal .v55-ship-stats span{font-size:7px}
+ #hangarModal .v55-ship-stats b{font-size:11px}
+}
+@media (prefers-reduced-motion:reduce){#shopModal .product-icon img,#hangarModal .ship-visual img{transition:none!important}}
