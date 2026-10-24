@@ -1,6 +1,6 @@
 {
   "name": "stellar-legacy",
-  "version": "47.7.8",
+  "version": "47.7.9",
   "type": "module",
   "scripts": {
     "start": "node server/index.js",
@@ -19,5 +19,5 @@
   "engines": {
     "node": ">=18"
   },
-  "release": "V53.0 Astral Expansion — Portais, Bases, Drones e Materializador"
+  "release": "V54.0 Relay Elite & Faction Bases — visual only"
 }

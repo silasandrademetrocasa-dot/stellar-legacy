@@ -74,7 +74,21 @@ const ASTRAL_MODEL_ASSET={
   "base_mars":'/assets/v53/models/base_mars.glb',
   "base_jupiter":'/assets/v53/models/base_jupiter.glb'
 };
-const MODEL_ASSET={...SHIP_ASSET,...EXT_MODEL_ASSET,...ASTRAL_MODEL_ASSET};
+const RELAY54_MODEL_ASSET={
+  'relay_1_neutral':'/assets/v54/models/relay_1_neutral.glb',
+  'relay_2_neutral':'/assets/v54/models/relay_2_neutral.glb',
+  'relay_3_neutral':'/assets/v54/models/relay_3_neutral.glb',
+  'relay_1_earth':'/assets/v54/models/relay_1_earth.glb',
+  'relay_2_earth':'/assets/v54/models/relay_2_earth.glb',
+  'relay_3_earth':'/assets/v54/models/relay_3_earth.glb',
+  'relay_1_mars':'/assets/v54/models/relay_1_mars.glb',
+  'relay_2_mars':'/assets/v54/models/relay_2_mars.glb',
+  'relay_3_mars':'/assets/v54/models/relay_3_mars.glb',
+  'relay_1_jupiter':'/assets/v54/models/relay_1_jupiter.glb',
+  'relay_2_jupiter':'/assets/v54/models/relay_2_jupiter.glb',
+  'relay_3_jupiter':'/assets/v54/models/relay_3_jupiter.glb'
+};
+const MODEL_ASSET={...SHIP_ASSET,...EXT_MODEL_ASSET,...ASTRAL_MODEL_ASSET,...RELAY54_MODEL_ASSET};
 const ANGULAR_BUCKETS=32,CANVAS_SIZE=160,MAX_CACHED_BITMAPS=100;
 const TAG='stellar-ships3d-v50';
 const vs=`#version 300 es
@@ -233,7 +247,7 @@ export function createStellarShipRendererV50(){
     return true;
   }
   function draw(ctx,shipId,angle,size){return isShipAllowedV50(shipId)?drawKey(ctx,shipId,angle,size):false;}
-  function drawAsset(ctx,id,angle,size){return Boolean(EXT_MODEL_ASSET[id]||ASTRAL_MODEL_ASSET[id])&&drawKey(ctx,id,angle,size);}
+  function drawAsset(ctx,id,angle,size){return Boolean(EXT_MODEL_ASSET[id]||ASTRAL_MODEL_ASSET[id]||RELAY54_MODEL_ASSET[id])&&drawKey(ctx,id,angle,size);}
   function drawAssetAt(ctx,id,angle,size,x,y){ctx.save();ctx.translate(x,y);const ok=drawAsset(ctx,id,angle,size);ctx.restore();return ok;}
   function setMode(mode){try{localStorage.setItem('stellar3d.v50',['off','on','auto'].includes(mode)?mode:'auto')}catch{};if(mode!=='off')preload('phoenix');}
   function getMode(){return renderMode()}
