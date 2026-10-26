@@ -1,6 +1,6 @@
 {
   "name": "stellar-legacy",
-  "version": "47.7.26",
+  "version": "47.7.27",
   "type": "module",
   "scripts": {
     "start": "node server/index.js",
@@ -19,5 +19,5 @@
   "engines": {
     "node": ">=18"
   },
-  "release": "V70 — Otimização gráfica V3: resolução adaptativa, prévias centralizadas, fundos compartilhados"
+  "release": "V71 — portais e bases estáveis, relés leves e diagnóstico visual"
 }

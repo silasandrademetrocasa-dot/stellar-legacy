@@ -1,0 +1,147 @@
+{
+  "version": "47.7.27",
+  "portals": {
+    "Portal_Comum": {
+      "static": "/assets/animations/v71/Portais/Portal_Comum/static.webp",
+      "shell": "/assets/animations/v71/Portais/Portal_Comum/shell.webp",
+      "cores": [
+        "/assets/animations/v71/Portais/Portal_Comum/cores/core_00.webp",
+        "/assets/animations/v71/Portais/Portal_Comum/cores/core_01.webp",
+        "/assets/animations/v71/Portais/Portal_Comum/cores/core_02.webp",
+        "/assets/animations/v71/Portais/Portal_Comum/cores/core_03.webp",
+        "/assets/animations/v71/Portais/Portal_Comum/cores/core_04.webp",
+        "/assets/animations/v71/Portais/Portal_Comum/cores/core_05.webp",
+        "/assets/animations/v71/Portais/Portal_Comum/cores/core_06.webp",
+        "/assets/animations/v71/Portais/Portal_Comum/cores/core_07.webp"
+      ]
+    },
+    "Portal_PvP": {
+      "static": "/assets/animations/v71/Portais/Portal_PvP/static.webp",
+      "shell": "/assets/animations/v71/Portais/Portal_PvP/shell.webp",
+      "cores": [
+        "/assets/animations/v71/Portais/Portal_PvP/cores/core_00.webp",
+        "/assets/animations/v71/Portais/Portal_PvP/cores/core_01.webp",
+        "/assets/animations/v71/Portais/Portal_PvP/cores/core_02.webp",
+        "/assets/animations/v71/Portais/Portal_PvP/cores/core_03.webp",
+        "/assets/animations/v71/Portais/Portal_PvP/cores/core_04.webp",
+        "/assets/animations/v71/Portais/Portal_PvP/cores/core_05.webp",
+        "/assets/animations/v71/Portais/Portal_PvP/cores/core_06.webp",
+        "/assets/animations/v71/Portais/Portal_PvP/cores/core_07.webp"
+      ]
+    },
+    "Portal_Universo": {
+      "static": "/assets/animations/v71/Portais/Portal_Universo/static.webp",
+      "shell": "/assets/animations/v71/Portais/Portal_Universo/shell.webp",
+      "cores": [
+        "/assets/animations/v71/Portais/Portal_Universo/cores/core_00.webp",
+        "/assets/animations/v71/Portais/Portal_Universo/cores/core_01.webp",
+        "/assets/animations/v71/Portais/Portal_Universo/cores/core_02.webp",
+        "/assets/animations/v71/Portais/Portal_Universo/cores/core_03.webp",
+        "/assets/animations/v71/Portais/Portal_Universo/cores/core_04.webp",
+        "/assets/animations/v71/Portais/Portal_Universo/cores/core_05.webp",
+        "/assets/animations/v71/Portais/Portal_Universo/cores/core_06.webp",
+        "/assets/animations/v71/Portais/Portal_Universo/cores/core_07.webp"
+      ]
+    },
+    "Portal_Aurora": {
+      "static": "/assets/animations/v71/Portais/Portal_Aurora/static.webp",
+      "shell": "/assets/animations/v71/Portais/Portal_Aurora/shell.webp",
+      "cores": [
+        "/assets/animations/v71/Portais/Portal_Aurora/cores/core_00.webp",
+        "/assets/animations/v71/Portais/Portal_Aurora/cores/core_01.webp",
+        "/assets/animations/v71/Portais/Portal_Aurora/cores/core_02.webp",
+        "/assets/animations/v71/Portais/Portal_Aurora/cores/core_03.webp",
+        "/assets/animations/v71/Portais/Portal_Aurora/cores/core_04.webp",
+        "/assets/animations/v71/Portais/Portal_Aurora/cores/core_05.webp",
+        "/assets/animations/v71/Portais/Portal_Aurora/cores/core_06.webp",
+        "/assets/animations/v71/Portais/Portal_Aurora/cores/core_07.webp"
+      ]
+    },
+    "Portal_Nexus": {
+      "static": "/assets/animations/v71/Portais/Portal_Nexus/static.webp",
+      "shell": "/assets/animations/v71/Portais/Portal_Nexus/shell.webp",
+      "cores": [
+        "/assets/animations/v71/Portais/Portal_Nexus/cores/core_00.webp",
+        "/assets/animations/v71/Portais/Portal_Nexus/cores/core_01.webp",
+        "/assets/animations/v71/Portais/Portal_Nexus/cores/core_02.webp",
+        "/assets/animations/v71/Portais/Portal_Nexus/cores/core_03.webp",
+        "/assets/animations/v71/Portais/Portal_Nexus/cores/core_04.webp",
+        "/assets/animations/v71/Portais/Portal_Nexus/cores/core_05.webp",
+        "/assets/animations/v71/Portais/Portal_Nexus/cores/core_06.webp",
+        "/assets/animations/v71/Portais/Portal_Nexus/cores/core_07.webp"
+      ]
+    },
+    "Portal_Eclipse": {
+      "static": "/assets/animations/v71/Portais/Portal_Eclipse/static.webp",
+      "shell": "/assets/animations/v71/Portais/Portal_Eclipse/shell.webp",
+      "cores": [
+        "/assets/animations/v71/Portais/Portal_Eclipse/cores/core_00.webp",
+        "/assets/animations/v71/Portais/Portal_Eclipse/cores/core_01.webp",
+        "/assets/animations/v71/Portais/Portal_Eclipse/cores/core_02.webp",
+        "/assets/animations/v71/Portais/Portal_Eclipse/cores/core_03.webp",
+        "/assets/animations/v71/Portais/Portal_Eclipse/cores/core_04.webp",
+        "/assets/animations/v71/Portais/Portal_Eclipse/cores/core_05.webp",
+        "/assets/animations/v71/Portais/Portal_Eclipse/cores/core_06.webp",
+        "/assets/animations/v71/Portais/Portal_Eclipse/cores/core_07.webp"
+      ]
+    }
+  },
+  "bases": {
+    "Terra": {
+      "static": "/assets/animations/v71/Bases/Terra/static.webp",
+      "light": [
+        "/assets/animations/v71/Bases/Terra/light/light_00.webp",
+        "/assets/animations/v71/Bases/Terra/light/light_01.webp",
+        "/assets/animations/v71/Bases/Terra/light/light_02.webp",
+        "/assets/animations/v71/Bases/Terra/light/light_03.webp",
+        "/assets/animations/v71/Bases/Terra/light/light_04.webp",
+        "/assets/animations/v71/Bases/Terra/light/light_05.webp",
+        "/assets/animations/v71/Bases/Terra/light/light_06.webp",
+        "/assets/animations/v71/Bases/Terra/light/light_07.webp",
+        "/assets/animations/v71/Bases/Terra/light/light_08.webp",
+        "/assets/animations/v71/Bases/Terra/light/light_09.webp",
+        "/assets/animations/v71/Bases/Terra/light/light_10.webp",
+        "/assets/animations/v71/Bases/Terra/light/light_11.webp"
+      ]
+    },
+    "Marte": {
+      "static": "/assets/animations/v71/Bases/Marte/static.webp",
+      "light": [
+        "/assets/animations/v71/Bases/Marte/light/light_00.webp",
+        "/assets/animations/v71/Bases/Marte/light/light_01.webp",
+        "/assets/animations/v71/Bases/Marte/light/light_02.webp",
+        "/assets/animations/v71/Bases/Marte/light/light_03.webp",
+        "/assets/animations/v71/Bases/Marte/light/light_04.webp",
+        "/assets/animations/v71/Bases/Marte/light/light_05.webp",
+        "/assets/animations/v71/Bases/Marte/light/light_06.webp",
+        "/assets/animations/v71/Bases/Marte/light/light_07.webp",
+        "/assets/animations/v71/Bases/Marte/light/light_08.webp",
+        "/assets/animations/v71/Bases/Marte/light/light_09.webp",
+        "/assets/animations/v71/Bases/Marte/light/light_10.webp",
+        "/assets/animations/v71/Bases/Marte/light/light_11.webp"
+      ]
+    },
+    "Jupiter": {
+      "static": "/assets/animations/v71/Bases/Jupiter/static.webp",
+      "light": [
+        "/assets/animations/v71/Bases/Jupiter/light/light_00.webp",
+        "/assets/animations/v71/Bases/Jupiter/light/light_01.webp",
+        "/assets/animations/v71/Bases/Jupiter/light/light_02.webp",
+        "/assets/animations/v71/Bases/Jupiter/light/light_03.webp",
+        "/assets/animations/v71/Bases/Jupiter/light/light_04.webp",
+        "/assets/animations/v71/Bases/Jupiter/light/light_05.webp",
+        "/assets/animations/v71/Bases/Jupiter/light/light_06.webp",
+        "/assets/animations/v71/Bases/Jupiter/light/light_07.webp",
+        "/assets/animations/v71/Bases/Jupiter/light/light_08.webp",
+        "/assets/animations/v71/Bases/Jupiter/light/light_09.webp",
+        "/assets/animations/v71/Bases/Jupiter/light/light_10.webp",
+        "/assets/animations/v71/Bases/Jupiter/light/light_11.webp"
+      ]
+    }
+  },
+  "relays": {
+    "Nivel_1": "/assets/animations/v71/Reles/Nivel_1/base.webp",
+    "Nivel_2": "/assets/animations/v71/Reles/Nivel_2/base.webp",
+    "Nivel_3": "/assets/animations/v71/Reles/Nivel_3/base.webp"
+  }
+}

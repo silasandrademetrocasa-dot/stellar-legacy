@@ -8,7 +8,7 @@ export function versionedAssetUrl(path) {
   if(!value)return value;
   // Só os diretórios explicitamente imutáveis recebem URL estável.
   // V17–V67 tiveram arquivos substituídos no mesmo caminho: continuam com revisão.
-  if(/^\/assets\/animations\/v69\//.test(value))return value;
+  if(/^\/assets\/animations\/v(?:69|71)\//.test(value))return value;
   const revision=value.includes('/assets/v18/bonus/')?'18.2.8':ASSET_REVISION;
   return value.includes('?')?`${value}&asset=${revision}`:`${value}?asset=${revision}`;
 }
