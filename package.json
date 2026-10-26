@@ -1,6 +1,6 @@
 {
   "name": "stellar-legacy",
-  "version": "47.7.28",
+  "version": "47.7.29",
   "type": "module",
   "scripts": {
     "start": "node server/index.js",
@@ -19,5 +19,5 @@
   "engines": {
     "node": ">=18"
   },
-  "release": "V72 — isolamento do HUD completo e diagnóstico das pausas do navegador"
+  "release": "V73 — HUD periódico leve e profiler visual por fase"
 }

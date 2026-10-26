@@ -53,5 +53,5 @@ test('V72: mudanças limitadas a renderização/diagnóstico, sem mover loop da 
   assert.match(game,/updatePlayer\(dt\);updateSharedUniverseInterpolation\(dt\);updateEnemies\(dt\);updatePet\(dt\)/);
   assert.match(game,/const dt=Math\.min\(Math\.max\(0,frameInterval\/1000\),\.05\)/);
   assert.match(game,/BROWSER_LATENCY_V72\.start\(\)/);
-  assert.match(game,/47\.7\.28/);
+  assert.match(game,/47\.7\.29/);
 });
