@@ -61,7 +61,7 @@ export function createModularMapV2({loadLayout,requestImage,warn=()=>{},maxVisib
     for(const old of [...states.keys()])if(old!==key)states.delete(old);
     if(!mapLayoutPath(key))return;
     if(states.has(key))return;
-    const state={status:'loading',layout:null,error:null,layers:{}};
+    const state={status:'loading',layout:null,error:null,layers:{},requested:new Set()};
     states.set(key,state);
     Promise.resolve().then(()=>loadLayout(mapLayoutPath(key))).then(layout=>{
       if(states.get(key)!==state)return;
@@ -80,6 +80,7 @@ export function createModularMapV2({loadLayout,requestImage,warn=()=>{},maxVisib
     const q=['low','medium','high'].includes(quality)?quality:'high';
     const bgPath=q==='low'?layout.background.low:layout.background.high;
     const background=requestImage(bgPath);
+    state.requested.add(bgPath);
     if(!naturalDimension(background)[0])return false;
     ctx.save();
     try{
@@ -90,7 +91,8 @@ export function createModularMapV2({loadLayout,requestImage,warn=()=>{},maxVisib
       const layers=state.layers[q]||[];
       const limit=q==='medium'?maxVisibleMedium:(mobile?Math.min(38,maxVisibleHigh):maxVisibleHigh);
       const speed=q==='medium'?.38:1;
-      let painted=0;
+      let painted=0,initiated=0;
+      // Espalha a decodificação de novas texturas por vários frames. A composição continua estável.
       for(const e of layers){
         if(painted>=limit)break;
         const p=(Math.min(.95,Math.max(0,Number(e.parallax)||0)))*speed;
@@ -98,6 +100,10 @@ export function createModularMapV2({loadLayout,requestImage,warn=()=>{},maxVisib
         const sy=Number(e.y)*worldHeight-cameraY*p+height*.5;
         const size=60*Math.min(3,Math.max(.06,Number(e.scale)||.4))*(e.kind==='nebulas'?2.2:e.kind==='celestialBodies'?2.2:1);
         if(sx<-size||sy<-size||sx>width+size||sy>height+size)continue;
+        if(!state.requested.has(e.sprite)){
+          if(initiated>=(mobile?2:4))continue;
+          initiated++;state.requested.add(e.sprite);
+        }
         const img=requestImage(e.sprite),[iw,ih]=naturalDimension(img);
         if(!iw||!ih)continue;
         const sc=size/Math.max(iw,ih),dw=iw*sc,dh=ih*sc;

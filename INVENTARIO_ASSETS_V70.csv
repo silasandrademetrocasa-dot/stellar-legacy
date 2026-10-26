@@ -1,0 +1,1006 @@
+caminho,bytes,sha256,classificacao_preliminar,evidencia
+public/assets/animations/v69/Bases/Jupiter/base.png,319958,36c075ff475589bb553e074b7b370f27569ce50d44d84e8040efc811d9277275,ATIVO,referência textual em manifestos ou código de execução
+public/assets/animations/v69/Bases/Jupiter/frames/frame_00.webp,46624,f7aa141a2b81d911b78e8c0a8907e5774b5793b44c62d5370f6cb93851cbb3b9,ATIVO,referência textual em manifestos ou código de execução
+public/assets/animations/v69/Bases/Jupiter/frames/frame_01.webp,46736,e2ff98c5f7978bece308c27c57bc1e97ded0b3279e20d7a886f964bdbec3befc,ATIVO,referência textual em manifestos ou código de execução
+public/assets/animations/v69/Bases/Jupiter/frames/frame_02.webp,46760,d2b3df5b35be7975d40e661dd3c84bcd49f7f013f889d58f7ad683ad132341cf,ATIVO,referência textual em manifestos ou código de execução
+public/assets/animations/v69/Bases/Jupiter/frames/frame_03.webp,46870,b3e45731cd40de3eb5cb853183288df52963e412dc47c7476d23aca7e1733261,ATIVO,referência textual em manifestos ou código de execução
+public/assets/animations/v69/Bases/Jupiter/frames/frame_04.webp,46940,ee458593a065af8301f9c3d0859a12baaca4ecda4368d3a3d40271998d8f5073,ATIVO,referência textual em manifestos ou código de execução
+public/assets/animations/v69/Bases/Jupiter/frames/frame_05.webp,46868,0ea5413f061ae10c7005538585510e257111419eb510960c744fdbd669fc95f2,ATIVO,referência textual em manifestos ou código de execução
+public/assets/animations/v69/Bases/Jupiter/frames/frame_06.webp,46828,215719619c6e7606581787b5d3939da50087addc8b2e35d6e2d8e824e78eb4eb,ATIVO,referência textual em manifestos ou código de execução
+public/assets/animations/v69/Bases/Jupiter/frames/frame_07.webp,46816,2cfdb889e4e7ed151ed49b80dc30b15a34e65b0e59dd83a3fa1ba83dc3e526f0,ATIVO,referência textual em manifestos ou código de execução
+public/assets/animations/v69/Bases/Jupiter/frames/frame_08.webp,46590,26b25325707ea8fe90e92401ec3201377215ff0afe759656ea4af43f07d48335,ATIVO,referência textual em manifestos ou código de execução
+public/assets/animations/v69/Bases/Jupiter/frames/frame_09.webp,46624,24bca129275fc09b62b5d6be5e2fb31af79b072a48b438959f9604701b467e89,ATIVO,referência textual em manifestos ou código de execução
+public/assets/animations/v69/Bases/Jupiter/frames/frame_10.webp,46550,41ad3119003fe0ce97a1b7320537e5ae62ef5a2da6cd5c1170f57e6c8b43d5a9,ATIVO,referência textual em manifestos ou código de execução
+public/assets/animations/v69/Bases/Jupiter/frames/frame_11.webp,46506,614efec644a9a0fa8b70b31865318f63cb0474c691246bdcd0949cb149deb7ca,ATIVO,referência textual em manifestos ou código de execução
+public/assets/animations/v69/Bases/Jupiter/manifest.json,1072,44dee38512873e07e952195d18b376466c7abb0d28a758f39b81591f726b5836,CONDICIONAL,biblioteca dinâmica por entidade ou mapa; conferir runtime
+public/assets/animations/v69/Bases/Marte/base.png,245916,53f7b5641110cc5cc690e8e3daaa1712e10d84ed0c5954e850b5250184705f85,ATIVO,referência textual em manifestos ou código de execução
+public/assets/animations/v69/Bases/Marte/frames/frame_00.webp,35770,892c45602dfe906d5484f488665beddc7e63858e20b5a3a07f8f6deea3c9843d,ATIVO,referência textual em manifestos ou código de execução
+public/assets/animations/v69/Bases/Marte/frames/frame_01.webp,35996,80db89cc32d80e0ee3e6beca39798523d4db935d07dc6f2e1136c0d3ec52cf2e,ATIVO,referência textual em manifestos ou código de execução
+public/assets/animations/v69/Bases/Marte/frames/frame_02.webp,35852,51dc37694cdbdf72d5e5fb646fbf0d393bc283b89050ca973fbf1ef8f43ce0f8,ATIVO,referência textual em manifestos ou código de execução
+public/assets/animations/v69/Bases/Marte/frames/frame_03.webp,36216,344aac1a8d6446154d1091440486bbc5ebe7a92519d2f87548bfcd05fe056964,ATIVO,referência textual em manifestos ou código de execução
+public/assets/animations/v69/Bases/Marte/frames/frame_04.webp,36308,d0367fb6b028a9e3b5f5a3ccc40722ee00e3789a67e09c5a8ccdee1ccd3dbcb4,ATIVO,referência textual em manifestos ou código de execução
+public/assets/animations/v69/Bases/Marte/frames/frame_05.webp,36058,d46e18739a77b1d227fffec1ad336b8491229487bd507e276ba1cab74b1e5bff,ATIVO,referência textual em manifestos ou código de execução
+public/assets/animations/v69/Bases/Marte/frames/frame_06.webp,36204,61fa5a22f787d0e3b6854d0ee0889846d91f1f53d58b8a67929b0539e29b1efa,ATIVO,referência textual em manifestos ou código de execução
+public/assets/animations/v69/Bases/Marte/frames/frame_07.webp,36068,9f5e2540d486fae1b935ca2d51a27c5320279e6eaf262fd811ab77f9cebb7701,ATIVO,referência textual em manifestos ou código de execução
+public/assets/animations/v69/Bases/Marte/frames/frame_08.webp,35672,27d6745e343303592a5c888b7e5f8914d98de875cb7ad914e49ac06f703e45d3,ATIVO,referência textual em manifestos ou código de execução
+public/assets/animations/v69/Bases/Marte/frames/frame_09.webp,35778,3865c9b7568b7921b4589123ac87784ed99ed6aadef5acb57be3862276f4aef4,ATIVO,referência textual em manifestos ou código de execução
+public/assets/animations/v69/Bases/Marte/frames/frame_10.webp,35774,e49a8e6a1b1fe22a01c35a430e276251aafe98b5a6b4dc55e950ef28fafc7a32,ATIVO,referência textual em manifestos ou código de execução
+public/assets/animations/v69/Bases/Marte/frames/frame_11.webp,35724,ef38a83aaa06f8b365ddee6b9fee898b92b914fa1731cb8ecb2d2dca6a030b43,ATIVO,referência textual em manifestos ou código de execução
+public/assets/animations/v69/Bases/Marte/manifest.json,1044,df7b4fa7ab59a089721056fa00153952f8ba3d871feb7e7403c1b21d752b9494,CONDICIONAL,biblioteca dinâmica por entidade ou mapa; conferir runtime
+public/assets/animations/v69/Bases/Terra/base.png,257125,2d72a1fde58a5b1cf7cf01fa580a34dc28f3f60c30ca363881421b2d1d5b6d28,ATIVO,referência textual em manifestos ou código de execução
+public/assets/animations/v69/Bases/Terra/frames/frame_00.webp,38622,9f649f313078d5ce8c54437b6b63f8f847480d90c6717a38ee8af55d7d24cdbb,ATIVO,referência textual em manifestos ou código de execução
+public/assets/animations/v69/Bases/Terra/frames/frame_01.webp,39070,d97269ec1506bc840643b74590af5201a8b26773be1af8a0a211a1aa353900aa,ATIVO,referência textual em manifestos ou código de execução
+public/assets/animations/v69/Bases/Terra/frames/frame_02.webp,38912,f17427e5b1212516f3c71ef141e55283914ff894eff6375831fbe249bd43ea1b,ATIVO,referência textual em manifestos ou código de execução
+public/assets/animations/v69/Bases/Terra/frames/frame_03.webp,39938,75308f5f065f77b0b9bf110736f08d1e4665943da378a9ad11ec890beade8584,ATIVO,referência textual em manifestos ou código de execução
+public/assets/animations/v69/Bases/Terra/frames/frame_04.webp,40286,c6e572ead6fd8313bfa426db9c8060aa471ef75b30dc287831e6b2b31e1c3e13,ATIVO,referência textual em manifestos ou código de execução
+public/assets/animations/v69/Bases/Terra/frames/frame_05.webp,39976,5838118ae69806e5019595fbda36cb66de5c4ac0d349c237bcf0e703a616a8ad,ATIVO,referência textual em manifestos ou código de execução
+public/assets/animations/v69/Bases/Terra/frames/frame_06.webp,39822,9b8f02fa7d8c4945d3a4c2fc9a6f22e8f8ecaebb29928ab9ec09de4c79020e56,ATIVO,referência textual em manifestos ou código de execução
+public/assets/animations/v69/Bases/Terra/frames/frame_07.webp,39122,ad3633c4f779dcd955cf74a0dcb24c4a1df3595fadb5dc590a7a2fc777f28986,ATIVO,referência textual em manifestos ou código de execução
+public/assets/animations/v69/Bases/Terra/frames/frame_08.webp,38724,2071f47e2c3accdf5d3e8f58f3a14480d00054167a6d3e1285427d5960195c22,ATIVO,referência textual em manifestos ou código de execução
+public/assets/animations/v69/Bases/Terra/frames/frame_09.webp,38600,d926886fed7305eb9d8156804f29bbb3b3de6388854bffc31185eaf96e8a8746,ATIVO,referência textual em manifestos ou código de execução
+public/assets/animations/v69/Bases/Terra/frames/frame_10.webp,38714,1a31cdf8cb847766abf9cb89f77054460971f92faf259d4a5feb97a21ace20a8,ATIVO,referência textual em manifestos ou código de execução
+public/assets/animations/v69/Bases/Terra/frames/frame_11.webp,38558,02740755b24c3d067133e2495c1b66adb47fe03b87e5632863cfa48d59b105ff,ATIVO,referência textual em manifestos ou código de execução
+public/assets/animations/v69/Bases/Terra/manifest.json,1044,3513472418608ec8a5b9f612e33838f1f229cf7ed32404b5fc9f786057e043ea,CONDICIONAL,biblioteca dinâmica por entidade ou mapa; conferir runtime
+public/assets/animations/v69/Portais/Portal_Aurora/base.webp,14726,4960e93138e8518fb15e790821571455fecb50f9612e5337b93bd1b0295090f5,CONDICIONAL,biblioteca dinâmica por entidade ou mapa; conferir runtime
+public/assets/animations/v69/Portais/Portal_Aurora/frames/frame_00.webp,14726,4960e93138e8518fb15e790821571455fecb50f9612e5337b93bd1b0295090f5,ATIVO,referência textual em manifestos ou código de execução
+public/assets/animations/v69/Portais/Portal_Aurora/frames/frame_01.webp,15010,cd3b0838161d169423fd33f853416af4797e704cee78e15cea0f01ae9be45ca3,ATIVO,referência textual em manifestos ou código de execução
+public/assets/animations/v69/Portais/Portal_Aurora/frames/frame_02.webp,15342,9aea5ddfde7775d3a5114df6bc31701b33c212b739a5ce420b326b41cb15720d,ATIVO,referência textual em manifestos ou código de execução
+public/assets/animations/v69/Portais/Portal_Aurora/frames/frame_03.webp,15252,0f9102f9ebeb3459d4654052bfd24f8fd407b706bf16eddd28f73cae829c9a8f,ATIVO,referência textual em manifestos ou código de execução
+public/assets/animations/v69/Portais/Portal_Aurora/frames/frame_04.webp,15894,b87137abbea181f8c367775ee9bc1e720aa23fd68907ae3bbc8fc003aed13609,ATIVO,referência textual em manifestos ou código de execução
+public/assets/animations/v69/Portais/Portal_Aurora/frames/frame_05.webp,15706,ca7df35a1ad57e9e32f2028c5731237c448005d678f6959f3304819d9a32e86d,ATIVO,referência textual em manifestos ou código de execução
+public/assets/animations/v69/Portais/Portal_Aurora/frames/frame_06.webp,15182,2c87cec217fe5a141acb965dfdc29a21f81d755e71a2d1890df1ea0b4441bc0a,ATIVO,referência textual em manifestos ou código de execução
+public/assets/animations/v69/Portais/Portal_Aurora/frames/frame_07.webp,14732,1fc784641190f46f1478e53b2d8aa362b66c62c27b73b7d29abfda2ca363faa7,ATIVO,referência textual em manifestos ou código de execução
+public/assets/animations/v69/Portais/Portal_Aurora/manifest.json,971,8ade928c774a189b08f79654b9e6096139c6d6137398386e53589cbc07a23980,CONDICIONAL,biblioteca dinâmica por entidade ou mapa; conferir runtime
+public/assets/animations/v69/Portais/Portal_Comum/base.webp,12004,237326161abe9e80996cd76a098540e4aac2b1346224adc23a2f9d4b7842cc3a,CONDICIONAL,biblioteca dinâmica por entidade ou mapa; conferir runtime
+public/assets/animations/v69/Portais/Portal_Comum/frames/frame_00.webp,12004,237326161abe9e80996cd76a098540e4aac2b1346224adc23a2f9d4b7842cc3a,ATIVO,referência textual em manifestos ou código de execução
+public/assets/animations/v69/Portais/Portal_Comum/frames/frame_01.webp,12122,c378cbdae48919e67cf06104f6829d5acbc00d4b082ab706b4a5add1b552a2b1,ATIVO,referência textual em manifestos ou código de execução
+public/assets/animations/v69/Portais/Portal_Comum/frames/frame_02.webp,12514,a55dcc76897bc00f5736e52a9da2af0a930e674a6021f6f4acc400278374f970,ATIVO,referência textual em manifestos ou código de execução
+public/assets/animations/v69/Portais/Portal_Comum/frames/frame_03.webp,12538,b3558d16ecabd95e766a8ca58dbad29b050e0d3016d19a0787cb3605c0687b69,ATIVO,referência textual em manifestos ou código de execução
+public/assets/animations/v69/Portais/Portal_Comum/frames/frame_04.webp,12870,25663999373432c81c9eea67ac58c5f5135d8313da79551683ab89039c4bf24a,ATIVO,referência textual em manifestos ou código de execução
+public/assets/animations/v69/Portais/Portal_Comum/frames/frame_05.webp,12244,b69db778110167fb59b841e60829c2a2cb48fcaf51db3bbadb32b53b493037e8,ATIVO,referência textual em manifestos ou código de execução
+public/assets/animations/v69/Portais/Portal_Comum/frames/frame_06.webp,12012,fe97e4fd691d0df4787e287f37d6e549a7fbda27107d4769c15c4507587aae8f,ATIVO,referência textual em manifestos ou código de execução
+public/assets/animations/v69/Portais/Portal_Comum/frames/frame_07.webp,12354,b37585f9912b1b7ce97b328981364bca25400e4f459d5f444a54bba1963559ab,ATIVO,referência textual em manifestos ou código de execução
+public/assets/animations/v69/Portais/Portal_Comum/manifest.json,962,66a8d18a5980b7c39c5da368868f27c63fa70e0ec733f8897999079587590d4c,CONDICIONAL,biblioteca dinâmica por entidade ou mapa; conferir runtime
+public/assets/animations/v69/Portais/Portal_Eclipse/base.webp,12512,c6e70d3bbac8358ab0fa29d4236125ff663aa5d90ebf8f951c2665f05654aac8,CONDICIONAL,biblioteca dinâmica por entidade ou mapa; conferir runtime
+public/assets/animations/v69/Portais/Portal_Eclipse/frames/frame_00.webp,12512,c6e70d3bbac8358ab0fa29d4236125ff663aa5d90ebf8f951c2665f05654aac8,ATIVO,referência textual em manifestos ou código de execução
+public/assets/animations/v69/Portais/Portal_Eclipse/frames/frame_01.webp,12798,2e373d448186ef6527572df1030004c5c614a569d3a07e0cba68d86eb906af11,ATIVO,referência textual em manifestos ou código de execução
+public/assets/animations/v69/Portais/Portal_Eclipse/frames/frame_02.webp,12962,6e3aa93c2724432c4974854f1aea6fed16bfe0ef0fb0a9937da8258dd1d7fb3c,ATIVO,referência textual em manifestos ou código de execução
+public/assets/animations/v69/Portais/Portal_Eclipse/frames/frame_03.webp,13046,0ef143d3ec5a0111e5a37b7e81471933a2366ed025dac2fcb981e5c0389f9f6a,ATIVO,referência textual em manifestos ou código de execução
+public/assets/animations/v69/Portais/Portal_Eclipse/frames/frame_04.webp,13106,2bffae7a0557132c5498eb1d4f69d935fc823cf45b1af31065a06a7f64fc40cb,ATIVO,referência textual em manifestos ou código de execução
+public/assets/animations/v69/Portais/Portal_Eclipse/frames/frame_05.webp,13024,0769146d7819e8a1366e560f806654bfcc416def3b61c05c60a04ab21413feda,ATIVO,referência textual em manifestos ou código de execução
+public/assets/animations/v69/Portais/Portal_Eclipse/frames/frame_06.webp,12452,aacf1fe6d2f3a0c6327a4f630bb9e07c7c1f7d364645764c51caa7520991c665,ATIVO,referência textual em manifestos ou código de execução
+public/assets/animations/v69/Portais/Portal_Eclipse/frames/frame_07.webp,12540,62631e29e536d8117ebdbf4ad1511a650d9bb6adfe4981dbe64fcb1413ff9c3a,ATIVO,referência textual em manifestos ou código de execução
+public/assets/animations/v69/Portais/Portal_Eclipse/manifest.json,980,e8cdcf678bd9ddb7f2d898fb1c53f10f94c1cdf23915f2d1a686d13bd78380de,CONDICIONAL,biblioteca dinâmica por entidade ou mapa; conferir runtime
+public/assets/animations/v69/Portais/Portal_Nexus/base.webp,16606,f49b703a2902c7058d68aca8f0f606634e1003e82fea741507b5644de3cae31e,CONDICIONAL,biblioteca dinâmica por entidade ou mapa; conferir runtime
+public/assets/animations/v69/Portais/Portal_Nexus/frames/frame_00.webp,16606,f49b703a2902c7058d68aca8f0f606634e1003e82fea741507b5644de3cae31e,ATIVO,referência textual em manifestos ou código de execução
+public/assets/animations/v69/Portais/Portal_Nexus/frames/frame_01.webp,16714,1cdddfa3d60ccb7ce6ac70a634c2a19cf95e311f6e64071d8a1e758035411c5c,ATIVO,referência textual em manifestos ou código de execução
+public/assets/animations/v69/Portais/Portal_Nexus/frames/frame_02.webp,16848,2cd68947aa4919559dcca2c7192ccdecd50f64412cf57b24764c0b0379b7e22c,ATIVO,referência textual em manifestos ou código de execução
+public/assets/animations/v69/Portais/Portal_Nexus/frames/frame_03.webp,16846,df389a25f2bba389b9e1bcc491cca8faeb24692bda321d0d2918af6901a50fd9,ATIVO,referência textual em manifestos ou código de execução
+public/assets/animations/v69/Portais/Portal_Nexus/frames/frame_04.webp,17496,ab7683096d1500cf8e3ef46b2516d3f2aa27b32fabf9eb0a4ec7e6ce839900d8,ATIVO,referência textual em manifestos ou código de execução
+public/assets/animations/v69/Portais/Portal_Nexus/frames/frame_05.webp,16822,b92edfd1bae0743d84adabddb399387ac6396e3eef0cbeb7509f34d9800371c6,ATIVO,referência textual em manifestos ou código de execução
+public/assets/animations/v69/Portais/Portal_Nexus/frames/frame_06.webp,16632,2ae8fc9dbcce68046fb279effd29a327dc44dca11c6eaeee26e3789957bbe70c,ATIVO,referência textual em manifestos ou código de execução
+public/assets/animations/v69/Portais/Portal_Nexus/frames/frame_07.webp,16304,4c25b2e9dec974ff93118626cefdd99970d8529833e56add2920ac354f3f3b40,ATIVO,referência textual em manifestos ou código de execução
+public/assets/animations/v69/Portais/Portal_Nexus/manifest.json,962,7475f8b33052ba5d557c03fd751378522ae12a4eaca792e3e15028b851282e6e,CONDICIONAL,biblioteca dinâmica por entidade ou mapa; conferir runtime
+public/assets/animations/v69/Portais/Portal_PvP/base.webp,13078,ec7d92aceb1f3b2094579fa14bdc320a3cf252b48bab1b34a8a47fabae3f2aa1,CONDICIONAL,biblioteca dinâmica por entidade ou mapa; conferir runtime
+public/assets/animations/v69/Portais/Portal_PvP/frames/frame_00.webp,13078,ec7d92aceb1f3b2094579fa14bdc320a3cf252b48bab1b34a8a47fabae3f2aa1,ATIVO,referência textual em manifestos ou código de execução
+public/assets/animations/v69/Portais/Portal_PvP/frames/frame_01.webp,13258,0679f7d9276ae16a60e198f1191cc858f91fb1d0aafa3f541dcec56e315591f1,ATIVO,referência textual em manifestos ou código de execução
+public/assets/animations/v69/Portais/Portal_PvP/frames/frame_02.webp,13438,db1421ef3daf2a324e43f9e518bd867810303491040b81c9e835158fbfbb3bba,ATIVO,referência textual em manifestos ou código de execução
+public/assets/animations/v69/Portais/Portal_PvP/frames/frame_03.webp,13512,a5d213eb3a4848dd03aef6ed83f6008a14debd03a5252e1d49380f92a2d6259f,ATIVO,referência textual em manifestos ou código de execução
+public/assets/animations/v69/Portais/Portal_PvP/frames/frame_04.webp,13358,74b359db61f538400fe5de4ef5b08d655189b71683b7fb80adbd96d07bde091f,ATIVO,referência textual em manifestos ou código de execução
+public/assets/animations/v69/Portais/Portal_PvP/frames/frame_05.webp,13490,15101e19ef102e72900477a6bcc7b7bd669c87e8576e3bd042deacca99cca757,ATIVO,referência textual em manifestos ou código de execução
+public/assets/animations/v69/Portais/Portal_PvP/frames/frame_06.webp,13284,de39dda4945774daf0d7a09b9d595ebacccc978edf98a45de21998eb34c50864,ATIVO,referência textual em manifestos ou código de execução
+public/assets/animations/v69/Portais/Portal_PvP/frames/frame_07.webp,13004,1f8800baabf51acfabbf15adbabc24f7c1193af8727077f25d9d39df0ab2ad2f,ATIVO,referência textual em manifestos ou código de execução
+public/assets/animations/v69/Portais/Portal_PvP/manifest.json,944,a95b06f90dcb3f14a0ccb889327e508dde764fa14a9d26e6acf690cdc31e541f,CONDICIONAL,biblioteca dinâmica por entidade ou mapa; conferir runtime
+public/assets/animations/v69/Portais/Portal_Universo/base.webp,14460,8113069848d7b9db717b51f86a8094813daec8aa86fa48ae837370ab7b6b6340,CONDICIONAL,biblioteca dinâmica por entidade ou mapa; conferir runtime
+public/assets/animations/v69/Portais/Portal_Universo/frames/frame_00.webp,14460,8113069848d7b9db717b51f86a8094813daec8aa86fa48ae837370ab7b6b6340,ATIVO,referência textual em manifestos ou código de execução
+public/assets/animations/v69/Portais/Portal_Universo/frames/frame_01.webp,14920,ffdab5c8d0afde347880049c0a58a73593d25af7bd5095fcde5cead6416910cf,ATIVO,referência textual em manifestos ou código de execução
+public/assets/animations/v69/Portais/Portal_Universo/frames/frame_02.webp,15242,e1c01ed5cb548ba377d1bc161f4639006fdfbfe6547f283408643f3f5c1391d4,ATIVO,referência textual em manifestos ou código de execução
+public/assets/animations/v69/Portais/Portal_Universo/frames/frame_03.webp,15434,3fdddba2e0d475d3c2b81e187412e6c87d80893839ef30ab5cba17f870d2a000,ATIVO,referência textual em manifestos ou código de execução
+public/assets/animations/v69/Portais/Portal_Universo/frames/frame_04.webp,15244,abe01db01a1f599fb34256c42621a5b121f5b76f5ed7e76b7be7d6061c1ed8b0,ATIVO,referência textual em manifestos ou código de execução
+public/assets/animations/v69/Portais/Portal_Universo/frames/frame_05.webp,14962,9864d9dda1215a4cdad23745ba15db06faf94ad147f50eaacf04b9de7ccf7034,ATIVO,referência textual em manifestos ou código de execução
+public/assets/animations/v69/Portais/Portal_Universo/frames/frame_06.webp,14568,a4de483dfac5f9391b92a5b24ce7530083ee7cedc6764dab830e0630c8daf729,ATIVO,referência textual em manifestos ou código de execução
+public/assets/animations/v69/Portais/Portal_Universo/frames/frame_07.webp,14502,d00f8d000ec1cf5d8d781e173d93238ef6208e185bbf45839e04ff75f6ce316a,ATIVO,referência textual em manifestos ou código de execução
+public/assets/animations/v69/Portais/Portal_Universo/manifest.json,989,111bf7cc7d2a841feeb1528922c053bc703d9cd97b515061f70532aeac1d58ee,CONDICIONAL,biblioteca dinâmica por entidade ou mapa; conferir runtime
+public/assets/animations/v69/Reles/Nivel_1/base.webp,15890,b63b404bfb3f86ee4b9b4b8786f51b4c81621344e34fb9a7f1e56a2c5b0c28ed,ATIVO,referência textual em manifestos ou código de execução
+public/assets/animations/v69/Reles/Nivel_1/manifest.json,1109,e5b1b6a268787eda38f346888628f5d19e8aa656efad1f5124e80208d53782d4,CONDICIONAL,biblioteca dinâmica por entidade ou mapa; conferir runtime
+public/assets/animations/v69/Reles/Nivel_1/references/estado_01.webp,15890,b63b404bfb3f86ee4b9b4b8786f51b4c81621344e34fb9a7f1e56a2c5b0c28ed,ATIVO,referência textual em manifestos ou código de execução
+public/assets/animations/v69/Reles/Nivel_1/references/estado_02.webp,16646,4e300323ba806ad605b647bf6bbd98b17f6afa9ff899d2625530fc665b438ce6,ATIVO,referência textual em manifestos ou código de execução
+public/assets/animations/v69/Reles/Nivel_1/references/estado_03.webp,23166,30efc22b96a725812bbca1a9fe31b56271878cb68fa7afc549cea9d90921c292,ATIVO,referência textual em manifestos ou código de execução
+public/assets/animations/v69/Reles/Nivel_1/references/estado_04.webp,22198,31c2ab5b9aaa4e9830618aa3655a70c2346d39e9a330c7731e229dcda0f62666,ATIVO,referência textual em manifestos ou código de execução
+public/assets/animations/v69/Reles/Nivel_1/references/estado_05.webp,24142,dd056589dddcb02de06af671789c58a2b8a7457047dd6a48dcc37fe36182eb16,ATIVO,referência textual em manifestos ou código de execução
+public/assets/animations/v69/Reles/Nivel_1/references/estado_06.webp,30234,a252c279dc2e4b4b82c6b15ecab6b949afd5d089dd47fdaf7b65fe1cf3542556,ATIVO,referência textual em manifestos ou código de execução
+public/assets/animations/v69/Reles/Nivel_1/references/estado_07.webp,23488,e524730e89734e9d273c79b2e08ead1ae2405844247ace791d9eb4ceef32199e,ATIVO,referência textual em manifestos ou código de execução
+public/assets/animations/v69/Reles/Nivel_1/references/estado_08.webp,25484,9016174926a772690c169c4a18c4a0ab55bba06e0741817be5c9ca496b28b614,ATIVO,referência textual em manifestos ou código de execução
+public/assets/animations/v69/Reles/Nivel_2/base.webp,21344,f791a8f6102ad6701f874be8732075a8a6ea831f111e27f62436cde0d1714b51,ATIVO,referência textual em manifestos ou código de execução
+public/assets/animations/v69/Reles/Nivel_2/manifest.json,1109,e379f9c0067d137942a6ec0594b2ec0b84799f423c93491c82576045fbad8b01,CONDICIONAL,biblioteca dinâmica por entidade ou mapa; conferir runtime
+public/assets/animations/v69/Reles/Nivel_2/references/estado_01.webp,21344,f791a8f6102ad6701f874be8732075a8a6ea831f111e27f62436cde0d1714b51,ATIVO,referência textual em manifestos ou código de execução
+public/assets/animations/v69/Reles/Nivel_2/references/estado_02.webp,23170,088af03eec0246c7652aee1ee1cfdcd825767362728e8a769cd79dc24c23a33a,ATIVO,referência textual em manifestos ou código de execução
+public/assets/animations/v69/Reles/Nivel_2/references/estado_03.webp,29488,3c9ccfb0b5d5cd2009d542dbb6c3a0a456df8330e03dc87376fe4d5fba33d23a,ATIVO,referência textual em manifestos ou código de execução
+public/assets/animations/v69/Reles/Nivel_2/references/estado_04.webp,28404,877b4f1542b8ad7a005768721f8d402da34cb531c1b1d4103742201eeacfe814,ATIVO,referência textual em manifestos ou código de execução
+public/assets/animations/v69/Reles/Nivel_2/references/estado_05.webp,28294,64606a091847d7d3ec0434cf67203a2c7ad99281dd862ffcc58116830aac73e5,ATIVO,referência textual em manifestos ou código de execução
+public/assets/animations/v69/Reles/Nivel_2/references/estado_06.webp,33888,28303ef6f91689ea2d33a5ebf9287d46c034dd998c3aac29313a401066caea5c,ATIVO,referência textual em manifestos ou código de execução
+public/assets/animations/v69/Reles/Nivel_2/references/estado_07.webp,28504,91899dd8aa5bd77aa2f845a869b9159d4bb91934a47706a6490c998d0ea87fdf,ATIVO,referência textual em manifestos ou código de execução
+public/assets/animations/v69/Reles/Nivel_2/references/estado_08.webp,29388,f3090ab24d1db48ebb3b4dc69b54932d681464202ac80879b3950a608af025a0,ATIVO,referência textual em manifestos ou código de execução
+public/assets/animations/v69/Reles/Nivel_3/base.webp,24736,5454b6fc37b413aeaeddd9add7d180eafcb04d611ae25f361805dada495d093b,ATIVO,referência textual em manifestos ou código de execução
+public/assets/animations/v69/Reles/Nivel_3/manifest.json,1109,39eadf92e0e30241749d5eb3e5a2baad2448b3253324861f095cff3d115db361,CONDICIONAL,biblioteca dinâmica por entidade ou mapa; conferir runtime
+public/assets/animations/v69/Reles/Nivel_3/references/estado_01.webp,24736,5454b6fc37b413aeaeddd9add7d180eafcb04d611ae25f361805dada495d093b,ATIVO,referência textual em manifestos ou código de execução
+public/assets/animations/v69/Reles/Nivel_3/references/estado_02.webp,27564,7530c9890fb7a9668009f1a0b80567c0a7c627a367a33aae3f88657ed053ee40,ATIVO,referência textual em manifestos ou código de execução
+public/assets/animations/v69/Reles/Nivel_3/references/estado_03.webp,30792,606162400a44e6fa70f1acc34a52ae4bd95cf6fbf2c1f8b75c68265463118d7e,ATIVO,referência textual em manifestos ou código de execução
+public/assets/animations/v69/Reles/Nivel_3/references/estado_04.webp,30952,714da8038991a328344d083fe3fe4588668cd41c3bbedc3444652e61b6c572e6,ATIVO,referência textual em manifestos ou código de execução
+public/assets/animations/v69/Reles/Nivel_3/references/estado_05.webp,29702,644970445b796122c699ce62136068896e93d1ac3c32f3da7a15a6aac57b0717,ATIVO,referência textual em manifestos ou código de execução
+public/assets/animations/v69/Reles/Nivel_3/references/estado_06.webp,33154,5dd8ba239005d722d7b4304a443a3ae384015854ee2d3167ea0d259dc4c10d15,ATIVO,referência textual em manifestos ou código de execução
+public/assets/animations/v69/Reles/Nivel_3/references/estado_07.webp,30348,e6026b84660fb52c7374947d62b88d70b9966a97c3950fa8a7abd8f4cfa4fe9d,ATIVO,referência textual em manifestos ou código de execução
+public/assets/animations/v69/Reles/Nivel_3/references/estado_08.webp,30118,69c0056e31ec32a49d4d886bd4ad43d8c120068a6563f4cc8c3dc6f5d021033b,ATIVO,referência textual em manifestos ou código de execução
+public/assets/animations/v69/manifest.json,14133,a7be64fd4183f739d2fed4c36d70059853e504d71d3239cdbfd7a55b768b9173,CONDICIONAL,biblioteca dinâmica por entidade ou mapa; conferir runtime
+public/assets/loading/stellar-battle-loading.webp,330754,e5b906f3d4b46b8d0d8d40a68350441353c6aa7c6b00ae6092a8616be198f012,ATIVO,referência textual em manifestos ou código de execução
+public/assets/mapas/Biblioteca_Geral/Asteroides/asteroide_acinzentado.png,27184,a1c7b1b29088febdaeea7eca78005f971287a427dbf9b333202bb3bc490562db,ATIVO,referência textual em manifestos ou código de execução
+public/assets/mapas/Biblioteca_Geral/Asteroides/asteroide_escuro.png,21799,97fdd6a6480241467607306e9b55e26ee50c2a4e84772ab7d782104a25ed1237,ATIVO,referência textual em manifestos ou código de execução
+public/assets/mapas/Biblioteca_Geral/Asteroides/asteroide_ferrugem.png,41642,bf7d47f12efe4fd2aaf7e3a075548cd8d7fbbdb2b80331d7c4db13e53adc661a,ATIVO,referência textual em manifestos ou código de execução
+public/assets/mapas/Biblioteca_Geral/Asteroides/asteroide_frio_pequeno.png,39038,ea8e3780f3e1c48bd3e87e928d392ef6adfdb8c335a3dda49a1a39bd1747bde2,ATIVO,referência textual em manifestos ou código de execução
+public/assets/mapas/Biblioteca_Geral/Asteroides/asteroide_gelo.png,53555,4510d701b0c250611d67bc81d24b17da9596053b0da2490946aa7d0f7f4e053e,ATIVO,referência textual em manifestos ou código de execução
+public/assets/mapas/Biblioteca_Geral/Asteroides/asteroide_lava_grande.png,101071,9f3bf4b0fd504a7ada91dfd29feb6b458d3d06db53cbe0239a7f66a12844a10a,ATIVO,referência textual em manifestos ou código de execução
+public/assets/mapas/Biblioteca_Geral/Asteroides/asteroide_lava_medio.png,38388,08fb19aafe6123cbc14e7edd47ba075da869cd1a10a35ac39f2fa548a00b2276,ATIVO,referência textual em manifestos ou código de execução
+public/assets/mapas/Biblioteca_Geral/Asteroides/asteroide_lava_rachado.png,40278,105ca8cba8ac89997ddb5212dcfbaef81d7757011169a5096c185b596615404c,ATIVO,referência textual em manifestos ou código de execução
+public/assets/mapas/Biblioteca_Geral/Asteroides/asteroide_metalico.png,16712,c156e5a39bb9fb68f4064f5bf5b2726844c35af58b23cc184986ee891c80fca6,ATIVO,referência textual em manifestos ou código de execução
+public/assets/mapas/Biblioteca_Geral/Asteroides/asteroide_rocha_quente.png,45247,3a152ed1a735ff66236d5e2db4c2390c33a045f7c113f82e167e1506dab37b34,ATIVO,referência textual em manifestos ou código de execução
+public/assets/mapas/Biblioteca_Geral/Asteroides/asteroide_rochoso.png,20026,9a06ebd1a9021e71ec733b5fd4bc42fe9e3c31ab62616760b9b6dee466be2a19,ATIVO,referência textual em manifestos ou código de execução
+public/assets/mapas/Biblioteca_Geral/Asteroides/asteroide_vulcanico.png,39269,efda9c6e9c0ff7392a108fb6f1258e6acb9f9984c9b964f7a584a9e954c7bf4a,ATIVO,referência textual em manifestos ou código de execução
+public/assets/mapas/Biblioteca_Geral/Efeitos/.gitkeep,0,e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855,CONDICIONAL,biblioteca dinâmica por entidade ou mapa; conferir runtime
+public/assets/mapas/Biblioteca_Geral/Estrelas/estrela_azul.png,8091,b7154123a75cd2500b658fb95ea3b966a451dd4b9343460deccb6c9225591640,ATIVO,referência textual em manifestos ou código de execução
+public/assets/mapas/Biblioteca_Geral/Estrelas/estrela_branca.png,8579,5b2a2c705b300c44fb19af961059eb7c42503dcca752f977643594f7ccbf7e0f,ATIVO,referência textual em manifestos ou código de execução
+public/assets/mapas/Biblioteca_Geral/Estrelas/estrela_dourada.png,8216,c42ad2781bb39c91a47f4f104bdd9f4e97410253fbf428ae38b5ac704a9b0834,ATIVO,referência textual em manifestos ou código de execução
+public/assets/mapas/Biblioteca_Geral/Estrelas/estrela_vermelha.png,7619,6a6ec6695092243ffa28cb43bcc72c1c917ce16034cd47a7afa034c244345550,ATIVO,referência textual em manifestos ou código de execução
+public/assets/mapas/Biblioteca_Geral/Estrelas/estrela_violeta.png,8208,9a5a56bc2d433da09446781258172cf903117953208f0d79a47b90998da2e110,ATIVO,referência textual em manifestos ou código de execução
+public/assets/mapas/Biblioteca_Geral/Fragmentos/fragmentos_gelo.png,61630,0aefb38f196559c575cc5400cbd9c5d75ddbd73805079fa48e023652d207d6ae,ATIVO,referência textual em manifestos ou código de execução
+public/assets/mapas/Biblioteca_Geral/Fragmentos/fragmentos_marte.png,76346,53fc3eb919dfa4d4794a18bea3916312ee6d7448284eb0ec980ec6b1f0205b00,ATIVO,referência textual em manifestos ou código de execução
+public/assets/mapas/Biblioteca_Geral/Fragmentos/fragmentos_pedras_neutras.png,70857,eb2ed449cd195c7c352db8d334a18f081c213ca5dabe5525f9913c9ff7429744,ATIVO,referência textual em manifestos ou código de execução
+public/assets/mapas/Biblioteca_Geral/Fragmentos/fragmentos_rochosos.png,56746,9e378058e7ebab1bb6f7155cdc2c8d5fcb486f2d9ac43b45a1c66635726292ef,ATIVO,referência textual em manifestos ou código de execução
+public/assets/mapas/Biblioteca_Geral/Fundos/fundo_jupiter_ambar.png,1518874,887bd727b491a26413150f8f04aee5713b08085a74e25c123e516f95813955af,ATIVO,referência textual em manifestos ou código de execução
+public/assets/mapas/Biblioteca_Geral/Fundos/fundo_jupiter_ambar_variante.png,1435120,3dd935fe06441ca9222cf472a95fee33e7149a780256e5df21da2a217b46810b,ATIVO,referência textual em manifestos ou código de execução
+public/assets/mapas/Biblioteca_Geral/Fundos/fundo_marte_rubro.png,1313340,6e9b1867486eec878d40f2b47a18156f61fa3b2158e3648cfe8c42ddfd182488,ATIVO,referência textual em manifestos ou código de execução
+public/assets/mapas/Biblioteca_Geral/Fundos/fundo_marte_rubro_variante.png,1240335,20f1aa2e62b4c62df0318781f52eed51b97e9785bbc094d4613c940b0a3fd845,ATIVO,referência textual em manifestos ou código de execução
+public/assets/mapas/Biblioteca_Geral/Fundos/fundo_pvp_bicolor.png,1569338,e5c42dd6021c8f9a41bd22687dea0a07dd8144d2b3f48b8a431f406266e17961,ATIVO,referência textual em manifestos ou código de execução
+public/assets/mapas/Biblioteca_Geral/Fundos/fundo_terra_azul.png,1561603,c6449b33cee1450b60a34b2d653b9872a2b98e50b8af41d2e780d44c7f14c4c6,ATIVO,referência textual em manifestos ou código de execução
+public/assets/mapas/Biblioteca_Geral/Fundos/fundo_terra_azul_variante.png,1468879,7f11fcd361a0478dd32855c0ff4270a7edb5809c4fbceaec90bb128f526e0ae7,ATIVO,referência textual em manifestos ou código de execução
+public/assets/mapas/Biblioteca_Geral/Fundos/fundo_universo_violeta.png,1597865,04aeb2d33edd6ab8c3a0754760bc5b288635b00a57e719a09c49d305b135bdfa,ATIVO,referência textual em manifestos ou código de execução
+public/assets/mapas/Biblioteca_Geral/Fundos_Baixo/fundo_compartilhado_01.webp,72918,1ccc94e32adef08f3c858cbdf172e9fec2deceeaa2b1f38dfb8caa3bc1d8fbcd,ATIVO,referência textual em manifestos ou código de execução
+public/assets/mapas/Biblioteca_Geral/Fundos_Baixo/fundo_compartilhado_02.webp,73256,613efa79c077a0405e4c0490e60eec8ba57ec7965bd572064c8424ef364ccc30,ATIVO,referência textual em manifestos ou código de execução
+public/assets/mapas/Biblioteca_Geral/Fundos_Baixo/fundo_compartilhado_03.webp,61418,a9d435928ae3c693901924129104f8758d842698e138cf35fb8ac5ba004122f6,ATIVO,referência textual em manifestos ou código de execução
+public/assets/mapas/Biblioteca_Geral/Fundos_Baixo/fundo_compartilhado_04.webp,47608,5659ae332c12b2ad935cc897b47a5b0d241a6f7831cd5294ace99b86a2ddfcc2,ATIVO,referência textual em manifestos ou código de execução
+public/assets/mapas/Biblioteca_Geral/Fundos_Baixo/fundo_compartilhado_05.webp,71916,9e80dc459ae077fd0acc042292e5bcb001e0b29801b429d730270522bcd9fcce,ATIVO,referência textual em manifestos ou código de execução
+public/assets/mapas/Biblioteca_Geral/Fundos_Baixo/fundo_compartilhado_06.webp,56018,a44c40539440447cb82b19ea051b4526fb04a73ae5f4e9d5e4b85d7fb7d1f690,ATIVO,referência textual em manifestos ou código de execução
+public/assets/mapas/Biblioteca_Geral/Fundos_Baixo/fundo_compartilhado_07.webp,61018,649cadf0b4b3b9f183648ccbf969cd0ab552efa2d542d17be67e9a9971a6e844,ATIVO,referência textual em manifestos ou código de execução
+public/assets/mapas/Biblioteca_Geral/Fundos_Baixo/fundo_compartilhado_08.webp,69790,2931cff53775173d3e9328073f427e579b44bf9ccb118fefb9245bea04960dcf,ATIVO,referência textual em manifestos ou código de execução
+public/assets/mapas/Biblioteca_Geral/Fundos_otimizados/fundo_jupiter_ambar.webp,140094,265217f89b4fa8d65c577c88b4b9cf8541947957f8b10c0529a4040ea3a10cb0,ATIVO,referência textual em manifestos ou código de execução
+public/assets/mapas/Biblioteca_Geral/Fundos_otimizados/fundo_jupiter_ambar_variante.webp,122848,ca07ca820965905da4e24e6f1eecf66433c32dd6f97d710849a66cbb4789e761,ATIVO,referência textual em manifestos ou código de execução
+public/assets/mapas/Biblioteca_Geral/Fundos_otimizados/fundo_marte_rubro.webp,111890,e48e24033eab1c720efe10ff4b14861565a0b13d62c82ef8a8f53616721a6a0e,ATIVO,referência textual em manifestos ou código de execução
+public/assets/mapas/Biblioteca_Geral/Fundos_otimizados/fundo_marte_rubro_variante.webp,94346,e75ae9e1c2ed293ad78018e590a4b0120616c154324cda1d37a20c1689d24f23,ATIVO,referência textual em manifestos ou código de execução
+public/assets/mapas/Biblioteca_Geral/Fundos_otimizados/fundo_pvp_bicolor.webp,143264,a79fb65e017d0c85d4a44af312b87c37491fed7d1c33c6b6db311fc074253bec,ATIVO,referência textual em manifestos ou código de execução
+public/assets/mapas/Biblioteca_Geral/Fundos_otimizados/fundo_terra_azul.webp,141952,a6d648627b249b387fc1fc14c19fe1d3f9be94b1ef89ec2ee74ed61ffd883bc6,ATIVO,referência textual em manifestos ou código de execução
+public/assets/mapas/Biblioteca_Geral/Fundos_otimizados/fundo_terra_azul_variante.webp,119720,00c7b660183fcecd187b41c661172856b601a3ef6966d7acd377d89050bee0f4,ATIVO,referência textual em manifestos ou código de execução
+public/assets/mapas/Biblioteca_Geral/Fundos_otimizados/fundo_universo_violeta.webp,143158,09eae78f5fc8a05f3db1f4089b0640733bb6918ab2574f71c717b1a1de9952da,ATIVO,referência textual em manifestos ou código de execução
+public/assets/mapas/Biblioteca_Geral/Luas/lua_azul.png,29516,79b90d554341c39c5c7b4825cf8ff06fc0def5d265036c7ac8887447734ff7fb,ATIVO,referência textual em manifestos ou código de execução
+public/assets/mapas/Biblioteca_Geral/Luas/lua_cinza.png,19848,cdddc75649e7bd8e82195247a081c40e43b45fdfe73630a54752de8891ce5a31,ATIVO,referência textual em manifestos ou código de execução
+public/assets/mapas/Biblioteca_Geral/Luas/lua_crateras.png,27124,63b0a7bb953c243abaa0e089f8bdf36172220398c8cbef57c01ee7fdbaa205c3,ATIVO,referência textual em manifestos ou código de execução
+public/assets/mapas/Biblioteca_Geral/Luas/lua_cristal.png,24698,f2e9e6ae01cd1b5014bb8c72be909e1f5186378deb8fe824d8ddd5ef13a11a09,ATIVO,referência textual em manifestos ou código de execução
+public/assets/mapas/Biblioteca_Geral/Luas/lua_energia.png,29484,3a6837ac55b414e4ae3296fa9633767efce1d7e3dca33dfd97c5a1ca05e521a8,ATIVO,referência textual em manifestos ou código de execução
+public/assets/mapas/Biblioteca_Geral/Luas/lua_gelo.png,33799,b0437d97c04a07f0b1f2c4c8e91e912534b66ddaffad6760199196066b1eb8c8,ATIVO,referência textual em manifestos ou código de execução
+public/assets/mapas/Biblioteca_Geral/Luas/lua_magma.png,24167,49087ba8f8312e25a65fcdfe90d5716627f92eb69891772015b59a6a4fbffcb9,ATIVO,referência textual em manifestos ou código de execução
+public/assets/mapas/Biblioteca_Geral/Luas/lua_marte.png,24356,36a1aef7a879f9289261fcff6d326bd940cc54e780782323df52e43fcd3f883f,ATIVO,referência textual em manifestos ou código de execução
+public/assets/mapas/Biblioteca_Geral/Luas/lua_metalica.png,27623,e392ad3cc3cade097330f5e60b7c2c055afebe56ff20b9bfc63aeaa1bc51ccc0,ATIVO,referência textual em manifestos ou código de execução
+public/assets/mapas/Biblioteca_Geral/Luas/lua_rochosa.png,26311,e9131dd3c9ff6a8d1b1b139b2ae1220e50828081d0e1ad16356b5f8cc63e83bc,ATIVO,referência textual em manifestos ou código de execução
+public/assets/mapas/Biblioteca_Geral/Meteoros/.gitkeep,0,e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855,CONDICIONAL,biblioteca dinâmica por entidade ou mapa; conferir runtime
+public/assets/mapas/Biblioteca_Geral/Nebulosas/nebulosa_azul_01.png,84361,40886ce5152bf95356164c6470b08d8b2aed36a2b4f477f9164e63198d179756,ATIVO,referência textual em manifestos ou código de execução
+public/assets/mapas/Biblioteca_Geral/Nebulosas/nebulosa_azul_03.png,73875,42b38d1bb8bacb4b6588487ad0c3cc334d87b158226342e9d904f43b80f2374c,ATIVO,referência textual em manifestos ou código de execução
+public/assets/mapas/Biblioteca_Geral/Nebulosas/nebulosa_azul_espiral.png,81543,37fe252efaa2ddaf0595cea131c2f1746dcb1bbb9423fa19745a43941d958023,ATIVO,referência textual em manifestos ou código de execução
+public/assets/mapas/Biblioteca_Geral/Nebulosas/nebulosa_jupiter_01.png,112010,6f86650fb3c3b552edc237bc85890f2bef2209f2ea18720e8ac16d1910842d68,ATIVO,referência textual em manifestos ou código de execução
+public/assets/mapas/Biblioteca_Geral/Nebulosas/nebulosa_jupiter_02.png,103613,9ab64c52f0ce0b9b1557675b49a19d6e2921140c93d5a9ba61ff358df1011ddb,ATIVO,referência textual em manifestos ou código de execução
+public/assets/mapas/Biblioteca_Geral/Nebulosas/nebulosa_jupiter_03.png,101119,5f704770341594eed04cbfc299465639f79c032fcda36879f987fcce48f0c934,ATIVO,referência textual em manifestos ou código de execução
+public/assets/mapas/Biblioteca_Geral/Nebulosas/nebulosa_jupiter_04.png,102773,12b4a96cdcecdfb0e8c58207b155a9691252d95355912179198234a306c27ce6,ATIVO,referência textual em manifestos ou código de execução
+public/assets/mapas/Biblioteca_Geral/Nebulosas/nebulosa_jupiter_05.png,111737,b5da77361ee42e2f871596dc13709bce60565ffa4b54eaede9c9a4b88e892097,ATIVO,referência textual em manifestos ou código de execução
+public/assets/mapas/Biblioteca_Geral/Nebulosas/nebulosa_marte_01.png,85910,29ff0258b7285c8eaac2ca9279d3640cbf7b83ebd4872910af1a2c78f6fba6da,ATIVO,referência textual em manifestos ou código de execução
+public/assets/mapas/Biblioteca_Geral/Nebulosas/nebulosa_marte_02.png,78065,a59661a1b6159bf22eb3c662b0954d42d282a613fb02ce0d3091c74e7c183d75,ATIVO,referência textual em manifestos ou código de execução
+public/assets/mapas/Biblioteca_Geral/Nebulosas/nebulosa_marte_03.png,89631,97f10c5d799449b8c33da1b7b271ff7d1092a482ebb9b5e1710437f1e51d573e,ATIVO,referência textual em manifestos ou código de execução
+public/assets/mapas/Biblioteca_Geral/Nebulosas/nebulosa_marte_04.png,86347,5f02fc730e39924b696017665e044f9258f84887b043e2ddabb9bdf8d1258222,ATIVO,referência textual em manifestos ou código de execução
+public/assets/mapas/Biblioteca_Geral/Nebulosas/nebulosa_marte_05.png,81159,f084381d959ef640f17a5b21e3624db3a1208ceaa074d3731922d3369c1fb5db,ATIVO,referência textual em manifestos ou código de execução
+public/assets/mapas/Biblioteca_Geral/Nebulosas/nebulosa_marte_sombria_01.png,88024,62c14d21d5df9e8e6aa62f76f54b981817dbcbc7fb11640a5375a774754aad99,ATIVO,referência textual em manifestos ou código de execução
+public/assets/mapas/Biblioteca_Geral/Nebulosas/nebulosa_marte_sombria_02.png,92246,479f89859091e4314c358aee545c82b04faac1a2fd1441788ace3d5193a70da4,ATIVO,referência textual em manifestos ou código de execução
+public/assets/mapas/Biblioteca_Geral/Nebulosas/nebulosa_marte_sombria_03.png,83189,03df63fcefd211a67e702c70ed48a20c523c5ce04af3b6c1c0f6472356898575,ATIVO,referência textual em manifestos ou código de execução
+public/assets/mapas/Biblioteca_Geral/Nebulosas/nebulosa_marte_sombria_04.png,97533,babe780cc4c8e4c1371b22036cbd9b9ad9a0469394024970a43eed600f59bae7,ATIVO,referência textual em manifestos ou código de execução
+public/assets/mapas/Biblioteca_Geral/Nebulosas/nebulosa_marte_sombria_05.png,84901,31ea2404013f6e8d09824659cec6d944d160f1d52d0577eb54a90c1e299b3d9a,ATIVO,referência textual em manifestos ou código de execução
+public/assets/mapas/Biblioteca_Geral/Nebulosas/nebulosa_universo_01.png,108269,50d95a5c4dd89e3a4ffef4a7c839f0b21a3b9224153a552aab195270f268f42a,ATIVO,referência textual em manifestos ou código de execução
+public/assets/mapas/Biblioteca_Geral/Nebulosas/nebulosa_universo_02.png,94686,f5977868f10dff00d31444eeb05c6775502869e89be435f7ed479fbe26d3cbef,ATIVO,referência textual em manifestos ou código de execução
+public/assets/mapas/Biblioteca_Geral/Nebulosas/nebulosa_universo_03.png,95858,0e28321140f9cb0ccc2e992e21bf7f5252863e146a6fe886fd8039e9df8862e8,ATIVO,referência textual em manifestos ou código de execução
+public/assets/mapas/Biblioteca_Geral/Nebulosas/nebulosa_universo_04.png,98230,57d595ec7a72fa598fd0baa130f484a3b4fadd4bb58ebeb282d955d2b517d935,ATIVO,referência textual em manifestos ou código de execução
+public/assets/mapas/Biblioteca_Geral/Nebulosas/nebulosa_universo_05.png,100835,69b67b8b2d4e686cc239dadf6911dc5893bbcbab866f6838d2fb8e4c2f059807,ATIVO,referência textual em manifestos ou código de execução
+public/assets/mapas/Biblioteca_Geral/Nuvens/nuvem_azul_02.png,86353,935a172d06072ce454007b28d8f527d76c76cfa1634c8eb79ef88afff5ec88f0,ATIVO,referência textual em manifestos ou código de execução
+public/assets/mapas/Biblioteca_Geral/Nuvens/nuvem_azul_04.png,91487,77d44ef10ce3886b4faf1baba2b8073548010d0bf6f6054c51d939f651622cd5,ATIVO,referência textual em manifestos ou código de execução
+public/assets/mapas/Biblioteca_Geral/Planetas/gigante_aneis_azuis.png,117223,a192a9371664a18f47355ddf1f5af61eba830a8982edba761f7298d09627aca8,ATIVO,referência textual em manifestos ou código de execução
+public/assets/mapas/Biblioteca_Geral/Planetas/gigante_aneis_dourados.png,104788,0370d9386b669369a98254ceb186553888e046a82a7fc193585cd05a88e564f2,ATIVO,referência textual em manifestos ou código de execução
+public/assets/mapas/Biblioteca_Geral/Planetas/gigante_esmeralda.png,96423,72c8dd2dee0e1401cd5f6c71f7594ef2e398649043957f668c53c6572ee857f8,ATIVO,referência textual em manifestos ou código de execução
+public/assets/mapas/Biblioteca_Geral/Planetas/gigante_jupiter.png,98974,bc4905f0635e2fc571c66edcbcba3218236d79bc162248ff804fbad13df17770,ATIVO,referência textual em manifestos ou código de execução
+public/assets/mapas/Biblioteca_Geral/Planetas/gigante_violeta.png,92258,323ed94c1134635a467cd7c31240c837d6f54ed761335a2ab92adc2847512a12,ATIVO,referência textual em manifestos ou código de execução
+public/assets/mapas/Biblioteca_Geral/Planetas/planeta_deserto.png,53037,b65b163056cd7a6b0e8e70bbbf244d898b4469fa23c0d5e21fb43820df58327f,ATIVO,referência textual em manifestos ou código de execução
+public/assets/mapas/Biblioteca_Geral/Planetas/planeta_glacial.png,58519,17a2284c638d12f95fe57c4724d898c6ef99e0deb70d03106f4a9cf2037c145a,ATIVO,referência textual em manifestos ou código de execução
+public/assets/mapas/Biblioteca_Geral/Planetas/planeta_marte.png,45349,9bf1011e9ada72af5e8975cd7a02daa87f6db2ae3558db165775aa71f2107db9,ATIVO,referência textual em manifestos ou código de execução
+public/assets/mapas/Biblioteca_Geral/Planetas/planeta_oceano.png,56232,f040acd3457d7c82a56d7f3e087680572fb1dffa2a640f229d13892fff78ba2c,ATIVO,referência textual em manifestos ou código de execução
+public/assets/mapas/Biblioteca_Geral/Planetas/planeta_rochoso.png,44266,a31d3b477c618258472d3a72df9dbcc992ecd46bef49344693a5ec8174a11462,ATIVO,referência textual em manifestos ou código de execução
+public/assets/mapas/Biblioteca_Geral/Planetas/planeta_terra.png,73940,05d625bcee5580ae519c3ac5831362c58d9d905bcd107b6e2a357f0771505cd6,ATIVO,referência textual em manifestos ou código de execução
+public/assets/mapas/Biblioteca_Geral/Planetas/planeta_violeta.png,53188,9466e57572acd96da20ae47a456256434019f076c08fa50ef305f0e4307674b5,ATIVO,referência textual em manifestos ou código de execução
+public/assets/mapas/Biblioteca_Geral/Planetas/planeta_vulcanico.png,49685,3de702424302521bc7cd0f24903f73f05563d003bc304316e00ddf3f5e224a94,ATIVO,referência textual em manifestos ou código de execução
+public/assets/mapas/Biblioteca_Geral/Sois/eclipse_azul.png,61846,f2933d1b78fef81c099a1893a3d8e873ae94dfcf204897c90221807bcff1c009,ATIVO,referência textual em manifestos ou código de execução
+public/assets/mapas/Biblioteca_Geral/Sois/eclipse_dourado.png,54241,717a54b11da729594e7c52a1f57dde2f2172ca7ef01402c0dd5a446f5d9e3741,ATIVO,referência textual em manifestos ou código de execução
+public/assets/mapas/Biblioteca_Geral/Sois/eclipse_rubro.png,53496,85bc94a207ad5797985e56f0fe449b70aa4c421edb3ce24ac5d7ab7b63c69fb1,ATIVO,referência textual em manifestos ou código de execução
+public/assets/mapas/Biblioteca_Geral/Sois/sol_azul.png,63627,13af9e4e9b653cc521ba30e4b85dfe73194bde6695212d664744e5a89785147c,ATIVO,referência textual em manifestos ou código de execução
+public/assets/mapas/Biblioteca_Geral/Sois/sol_claro.png,54159,20e6815751206005bf29f92756ece7fb0fff8aea09c132ed82d30f42323020f5,ATIVO,referência textual em manifestos ou código de execução
+public/assets/mapas/Biblioteca_Geral/Sois/sol_lava.png,67698,11d6e8ef6796d02039634c9d3ee2d67ae3297b4d07cde88f4c3f201a7fcf6307,ATIVO,referência textual em manifestos ou código de execução
+public/assets/mapas/Biblioteca_Geral/Sois/sol_ouro.png,69207,d45d3a9de8e499d3e4344fcc6a182cc11b93592dc42e14e70eb59b195ce531da,ATIVO,referência textual em manifestos ou código de execução
+public/assets/mapas/Biblioteca_Geral/catalogo_assets.json,16813,b9d50df857deea44f6c839f3be66a6dd647629db8856f98c61090c0188f24ce9,ATIVO,referência textual em manifestos ou código de execução
+public/assets/mapas/Jupiter/Mapa_3-1/Lua_Sol/.gitkeep,0,e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855,CONDICIONAL,biblioteca dinâmica por entidade ou mapa; conferir runtime
+public/assets/mapas/Jupiter/Mapa_3-1/Nebula_Nuvens/.gitkeep,0,e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855,CONDICIONAL,biblioteca dinâmica por entidade ou mapa; conferir runtime
+public/assets/mapas/Jupiter/Mapa_3-1/Objetos_Estrelas/.gitkeep,0,e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855,CONDICIONAL,biblioteca dinâmica por entidade ou mapa; conferir runtime
+public/assets/mapas/Jupiter/Mapa_3-1/layout.json,26844,9a92405c3c2345568d16dc4605d6b2f0fbeccb58ceb0d01ed8d2eabd0cdedb8c,ATIVO,referência textual em manifestos ou código de execução
+public/assets/mapas/Jupiter/Mapa_3-2/Lua_Sol/.gitkeep,0,e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855,CONDICIONAL,biblioteca dinâmica por entidade ou mapa; conferir runtime
+public/assets/mapas/Jupiter/Mapa_3-2/Nebula_Nuvens/.gitkeep,0,e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855,CONDICIONAL,biblioteca dinâmica por entidade ou mapa; conferir runtime
+public/assets/mapas/Jupiter/Mapa_3-2/Objetos_Estrelas/.gitkeep,0,e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855,CONDICIONAL,biblioteca dinâmica por entidade ou mapa; conferir runtime
+public/assets/mapas/Jupiter/Mapa_3-2/layout.json,26826,40ca01d659e02102b6ea1dc7a7de0a0c7acc6e134d1dd98206693831a0388a62,ATIVO,referência textual em manifestos ou código de execução
+public/assets/mapas/Jupiter/Mapa_3-3/Lua_Sol/.gitkeep,0,e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855,CONDICIONAL,biblioteca dinâmica por entidade ou mapa; conferir runtime
+public/assets/mapas/Jupiter/Mapa_3-3/Nebula_Nuvens/.gitkeep,0,e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855,CONDICIONAL,biblioteca dinâmica por entidade ou mapa; conferir runtime
+public/assets/mapas/Jupiter/Mapa_3-3/Objetos_Estrelas/.gitkeep,0,e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855,CONDICIONAL,biblioteca dinâmica por entidade ou mapa; conferir runtime
+public/assets/mapas/Jupiter/Mapa_3-3/layout.json,26847,5747e2c4264e04156b171b77ca8af1ef18e65c58dd58aebcd91d95c3e7bf0444,ATIVO,referência textual em manifestos ou código de execução
+public/assets/mapas/Jupiter/Mapa_3-4/Lua_Sol/.gitkeep,0,e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855,CONDICIONAL,biblioteca dinâmica por entidade ou mapa; conferir runtime
+public/assets/mapas/Jupiter/Mapa_3-4/Nebula_Nuvens/.gitkeep,0,e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855,CONDICIONAL,biblioteca dinâmica por entidade ou mapa; conferir runtime
+public/assets/mapas/Jupiter/Mapa_3-4/Objetos_Estrelas/.gitkeep,0,e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855,CONDICIONAL,biblioteca dinâmica por entidade ou mapa; conferir runtime
+public/assets/mapas/Jupiter/Mapa_3-4/layout.json,26863,cfe70af761a32a6f6d92d26ff04192424c67f838bb81d4b094faf55488066892,ATIVO,referência textual em manifestos ou código de execução
+public/assets/mapas/Jupiter/Mapa_3-5/Lua_Sol/.gitkeep,0,e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855,CONDICIONAL,biblioteca dinâmica por entidade ou mapa; conferir runtime
+public/assets/mapas/Jupiter/Mapa_3-5/Nebula_Nuvens/.gitkeep,0,e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855,CONDICIONAL,biblioteca dinâmica por entidade ou mapa; conferir runtime
+public/assets/mapas/Jupiter/Mapa_3-5/Objetos_Estrelas/.gitkeep,0,e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855,CONDICIONAL,biblioteca dinâmica por entidade ou mapa; conferir runtime
+public/assets/mapas/Jupiter/Mapa_3-5/layout.json,26792,d1a57c3ec7ce5df0299f7026f19ddd5b8c0c892f5cec5504dca2285ecc192be9,ATIVO,referência textual em manifestos ou código de execução
+public/assets/mapas/Jupiter/Mapa_3-6/Lua_Sol/.gitkeep,0,e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855,CONDICIONAL,biblioteca dinâmica por entidade ou mapa; conferir runtime
+public/assets/mapas/Jupiter/Mapa_3-6/Nebula_Nuvens/.gitkeep,0,e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855,CONDICIONAL,biblioteca dinâmica por entidade ou mapa; conferir runtime
+public/assets/mapas/Jupiter/Mapa_3-6/Objetos_Estrelas/.gitkeep,0,e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855,CONDICIONAL,biblioteca dinâmica por entidade ou mapa; conferir runtime
+public/assets/mapas/Jupiter/Mapa_3-6/layout.json,26888,7b2cf1abe11f554a96c01bb5ce0982a63d94e4522b6cc7ccbf6a1ed88469f2e5,ATIVO,referência textual em manifestos ou código de execução
+public/assets/mapas/Jupiter/Mapa_3-7/Lua_Sol/.gitkeep,0,e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855,CONDICIONAL,biblioteca dinâmica por entidade ou mapa; conferir runtime
+public/assets/mapas/Jupiter/Mapa_3-7/Nebula_Nuvens/.gitkeep,0,e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855,CONDICIONAL,biblioteca dinâmica por entidade ou mapa; conferir runtime
+public/assets/mapas/Jupiter/Mapa_3-7/Objetos_Estrelas/.gitkeep,0,e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855,CONDICIONAL,biblioteca dinâmica por entidade ou mapa; conferir runtime
+public/assets/mapas/Jupiter/Mapa_3-7/layout.json,26820,5938809f0f77ced3147d264886957bbe94abc78e01f6d0cda51b629c9635812d,ATIVO,referência textual em manifestos ou código de execução
+public/assets/mapas/Jupiter/Mapa_3-8/Lua_Sol/.gitkeep,0,e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855,CONDICIONAL,biblioteca dinâmica por entidade ou mapa; conferir runtime
+public/assets/mapas/Jupiter/Mapa_3-8/Nebula_Nuvens/.gitkeep,0,e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855,CONDICIONAL,biblioteca dinâmica por entidade ou mapa; conferir runtime
+public/assets/mapas/Jupiter/Mapa_3-8/Objetos_Estrelas/.gitkeep,0,e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855,CONDICIONAL,biblioteca dinâmica por entidade ou mapa; conferir runtime
+public/assets/mapas/Jupiter/Mapa_3-8/layout.json,26845,8f1ebcf09688a0d582fd7f5e29c4cc522388f24ca405fb70b82183b39a13a27d,ATIVO,referência textual em manifestos ou código de execução
+public/assets/mapas/Marte/Mapa_2-1/Lua_Sol/.gitkeep,0,e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855,CONDICIONAL,biblioteca dinâmica por entidade ou mapa; conferir runtime
+public/assets/mapas/Marte/Mapa_2-1/Nebula_Nuvens/.gitkeep,0,e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855,CONDICIONAL,biblioteca dinâmica por entidade ou mapa; conferir runtime
+public/assets/mapas/Marte/Mapa_2-1/Objetos_Estrelas/.gitkeep,0,e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855,CONDICIONAL,biblioteca dinâmica por entidade ou mapa; conferir runtime
+public/assets/mapas/Marte/Mapa_2-1/layout.json,26812,354808bf28a1dace39dd9b87384e6ada70a0db5c6fead27104e730f9d553420a,ATIVO,referência textual em manifestos ou código de execução
+public/assets/mapas/Marte/Mapa_2-2/Lua_Sol/.gitkeep,0,e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855,CONDICIONAL,biblioteca dinâmica por entidade ou mapa; conferir runtime
+public/assets/mapas/Marte/Mapa_2-2/Nebula_Nuvens/.gitkeep,0,e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855,CONDICIONAL,biblioteca dinâmica por entidade ou mapa; conferir runtime
+public/assets/mapas/Marte/Mapa_2-2/Objetos_Estrelas/.gitkeep,0,e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855,CONDICIONAL,biblioteca dinâmica por entidade ou mapa; conferir runtime
+public/assets/mapas/Marte/Mapa_2-2/layout.json,26826,11debc2db98a7cd01cee64776cdc1ec095d23954c33b7f0f83673ab7304ec0c1,ATIVO,referência textual em manifestos ou código de execução
+public/assets/mapas/Marte/Mapa_2-3/Lua_Sol/.gitkeep,0,e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855,CONDICIONAL,biblioteca dinâmica por entidade ou mapa; conferir runtime
+public/assets/mapas/Marte/Mapa_2-3/Nebula_Nuvens/.gitkeep,0,e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855,CONDICIONAL,biblioteca dinâmica por entidade ou mapa; conferir runtime
+public/assets/mapas/Marte/Mapa_2-3/Objetos_Estrelas/.gitkeep,0,e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855,CONDICIONAL,biblioteca dinâmica por entidade ou mapa; conferir runtime
+public/assets/mapas/Marte/Mapa_2-3/layout.json,26790,032ee286fe45d5cba313f47ea027c9e1a6c3f8c918ce8dc8381c83c09197e291,ATIVO,referência textual em manifestos ou código de execução
+public/assets/mapas/Marte/Mapa_2-4/Lua_Sol/.gitkeep,0,e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855,CONDICIONAL,biblioteca dinâmica por entidade ou mapa; conferir runtime
+public/assets/mapas/Marte/Mapa_2-4/Nebula_Nuvens/.gitkeep,0,e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855,CONDICIONAL,biblioteca dinâmica por entidade ou mapa; conferir runtime
+public/assets/mapas/Marte/Mapa_2-4/Objetos_Estrelas/.gitkeep,0,e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855,CONDICIONAL,biblioteca dinâmica por entidade ou mapa; conferir runtime
+public/assets/mapas/Marte/Mapa_2-4/layout.json,26866,0b56fbf76d4395773ce400f5f065f8e9e4eaf92d0e1d0af58e78cc6d9b3d8a0a,ATIVO,referência textual em manifestos ou código de execução
+public/assets/mapas/Marte/Mapa_2-5/Lua_Sol/.gitkeep,0,e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855,CONDICIONAL,biblioteca dinâmica por entidade ou mapa; conferir runtime
+public/assets/mapas/Marte/Mapa_2-5/Nebula_Nuvens/.gitkeep,0,e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855,CONDICIONAL,biblioteca dinâmica por entidade ou mapa; conferir runtime
+public/assets/mapas/Marte/Mapa_2-5/Objetos_Estrelas/.gitkeep,0,e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855,CONDICIONAL,biblioteca dinâmica por entidade ou mapa; conferir runtime
+public/assets/mapas/Marte/Mapa_2-5/layout.json,26870,e73ab8ff67fbb76a9a3ac95320bf8607388b6a45b912cbb0eb23f0ec1a3cc868,ATIVO,referência textual em manifestos ou código de execução
+public/assets/mapas/Marte/Mapa_2-6/Lua_Sol/.gitkeep,0,e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855,CONDICIONAL,biblioteca dinâmica por entidade ou mapa; conferir runtime
+public/assets/mapas/Marte/Mapa_2-6/Nebula_Nuvens/.gitkeep,0,e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855,CONDICIONAL,biblioteca dinâmica por entidade ou mapa; conferir runtime
+public/assets/mapas/Marte/Mapa_2-6/Objetos_Estrelas/.gitkeep,0,e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855,CONDICIONAL,biblioteca dinâmica por entidade ou mapa; conferir runtime
+public/assets/mapas/Marte/Mapa_2-6/layout.json,26859,5e144b6fc545efc26e333ba70f28620914651c45d801e4eb838d16e83d0fb05c,ATIVO,referência textual em manifestos ou código de execução
+public/assets/mapas/Marte/Mapa_2-7/Lua_Sol/.gitkeep,0,e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855,CONDICIONAL,biblioteca dinâmica por entidade ou mapa; conferir runtime
+public/assets/mapas/Marte/Mapa_2-7/Nebula_Nuvens/.gitkeep,0,e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855,CONDICIONAL,biblioteca dinâmica por entidade ou mapa; conferir runtime
+public/assets/mapas/Marte/Mapa_2-7/Objetos_Estrelas/.gitkeep,0,e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855,CONDICIONAL,biblioteca dinâmica por entidade ou mapa; conferir runtime
+public/assets/mapas/Marte/Mapa_2-7/layout.json,26798,04d4fbdfaff6475d42522e54b9bec09a69ec15c4a144f35095465e28f0a8085f,ATIVO,referência textual em manifestos ou código de execução
+public/assets/mapas/Marte/Mapa_2-8/Lua_Sol/.gitkeep,0,e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855,CONDICIONAL,biblioteca dinâmica por entidade ou mapa; conferir runtime
+public/assets/mapas/Marte/Mapa_2-8/Nebula_Nuvens/.gitkeep,0,e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855,CONDICIONAL,biblioteca dinâmica por entidade ou mapa; conferir runtime
+public/assets/mapas/Marte/Mapa_2-8/Objetos_Estrelas/.gitkeep,0,e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855,CONDICIONAL,biblioteca dinâmica por entidade ou mapa; conferir runtime
+public/assets/mapas/Marte/Mapa_2-8/layout.json,26871,fcfbf8917dc4ecd79287abc69231c77822a337ed8fd65033f5853c0ed56f9166,ATIVO,referência textual em manifestos ou código de execução
+public/assets/mapas/PvP/Mapa_4-1/Lua_Sol/.gitkeep,0,e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855,CONDICIONAL,biblioteca dinâmica por entidade ou mapa; conferir runtime
+public/assets/mapas/PvP/Mapa_4-1/Nebula_Nuvens/.gitkeep,0,e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855,CONDICIONAL,biblioteca dinâmica por entidade ou mapa; conferir runtime
+public/assets/mapas/PvP/Mapa_4-1/Objetos_Estrelas/.gitkeep,0,e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855,CONDICIONAL,biblioteca dinâmica por entidade ou mapa; conferir runtime
+public/assets/mapas/PvP/Mapa_4-1/layout.json,26876,71564b0ea5f08d5e93f7ffcd56bf3986c2708adfe764fda37b9d5f1789eb7093,ATIVO,referência textual em manifestos ou código de execução
+public/assets/mapas/PvP/Mapa_4-2/Lua_Sol/.gitkeep,0,e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855,CONDICIONAL,biblioteca dinâmica por entidade ou mapa; conferir runtime
+public/assets/mapas/PvP/Mapa_4-2/Nebula_Nuvens/.gitkeep,0,e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855,CONDICIONAL,biblioteca dinâmica por entidade ou mapa; conferir runtime
+public/assets/mapas/PvP/Mapa_4-2/Objetos_Estrelas/.gitkeep,0,e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855,CONDICIONAL,biblioteca dinâmica por entidade ou mapa; conferir runtime
+public/assets/mapas/PvP/Mapa_4-2/layout.json,26909,734bfe6b452b5e9ed9e2baf1ad2862c658b6fb6f66920d2dec67b6145d67dc6d,ATIVO,referência textual em manifestos ou código de execução
+public/assets/mapas/PvP/Mapa_4-3/Lua_Sol/.gitkeep,0,e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855,CONDICIONAL,biblioteca dinâmica por entidade ou mapa; conferir runtime
+public/assets/mapas/PvP/Mapa_4-3/Nebula_Nuvens/.gitkeep,0,e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855,CONDICIONAL,biblioteca dinâmica por entidade ou mapa; conferir runtime
+public/assets/mapas/PvP/Mapa_4-3/Objetos_Estrelas/.gitkeep,0,e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855,CONDICIONAL,biblioteca dinâmica por entidade ou mapa; conferir runtime
+public/assets/mapas/PvP/Mapa_4-3/layout.json,26869,abaaa7be1f667ec0d3f13179cd6db83a172bb99f685c7533fd4590d261fabfb7,ATIVO,referência textual em manifestos ou código de execução
+public/assets/mapas/Terra/Mapa_1-1/Lua_Sol/.gitkeep,0,e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855,CONDICIONAL,biblioteca dinâmica por entidade ou mapa; conferir runtime
+public/assets/mapas/Terra/Mapa_1-1/Nebula_Nuvens/.gitkeep,0,e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855,CONDICIONAL,biblioteca dinâmica por entidade ou mapa; conferir runtime
+public/assets/mapas/Terra/Mapa_1-1/Objetos_Estrelas/.gitkeep,0,e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855,CONDICIONAL,biblioteca dinâmica por entidade ou mapa; conferir runtime
+public/assets/mapas/Terra/Mapa_1-1/layout.json,26817,a45b8cd6e64ef2da1d56e40b772137ecb9ef5a492ff05bd84470efe259514cf1,ATIVO,referência textual em manifestos ou código de execução
+public/assets/mapas/Terra/Mapa_1-2/Lua_Sol/.gitkeep,0,e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855,CONDICIONAL,biblioteca dinâmica por entidade ou mapa; conferir runtime
+public/assets/mapas/Terra/Mapa_1-2/Nebula_Nuvens/.gitkeep,0,e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855,CONDICIONAL,biblioteca dinâmica por entidade ou mapa; conferir runtime
+public/assets/mapas/Terra/Mapa_1-2/Objetos_Estrelas/.gitkeep,0,e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855,CONDICIONAL,biblioteca dinâmica por entidade ou mapa; conferir runtime
+public/assets/mapas/Terra/Mapa_1-2/layout.json,26833,00e3dbe54ce19987693dddc2c5564c53de49036aa46d55961b94741003b97cc6,ATIVO,referência textual em manifestos ou código de execução
+public/assets/mapas/Terra/Mapa_1-3/Lua_Sol/.gitkeep,0,e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855,CONDICIONAL,biblioteca dinâmica por entidade ou mapa; conferir runtime
+public/assets/mapas/Terra/Mapa_1-3/Nebula_Nuvens/.gitkeep,0,e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855,CONDICIONAL,biblioteca dinâmica por entidade ou mapa; conferir runtime
+public/assets/mapas/Terra/Mapa_1-3/Objetos_Estrelas/.gitkeep,0,e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855,CONDICIONAL,biblioteca dinâmica por entidade ou mapa; conferir runtime
+public/assets/mapas/Terra/Mapa_1-3/layout.json,26772,108e51a12c0db9201f884cd444cd4cf0c8478ad83e632cb849887be40f4db63b,ATIVO,referência textual em manifestos ou código de execução
+public/assets/mapas/Terra/Mapa_1-4/Lua_Sol/.gitkeep,0,e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855,CONDICIONAL,biblioteca dinâmica por entidade ou mapa; conferir runtime
+public/assets/mapas/Terra/Mapa_1-4/Nebula_Nuvens/.gitkeep,0,e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855,CONDICIONAL,biblioteca dinâmica por entidade ou mapa; conferir runtime
+public/assets/mapas/Terra/Mapa_1-4/Objetos_Estrelas/.gitkeep,0,e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855,CONDICIONAL,biblioteca dinâmica por entidade ou mapa; conferir runtime
+public/assets/mapas/Terra/Mapa_1-4/layout.json,26768,c404d8e1e96caea84fa23894c704beb741c04eb551d0e805723a9fec10510ea4,ATIVO,referência textual em manifestos ou código de execução
+public/assets/mapas/Terra/Mapa_1-5/Lua_Sol/.gitkeep,0,e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855,CONDICIONAL,biblioteca dinâmica por entidade ou mapa; conferir runtime
+public/assets/mapas/Terra/Mapa_1-5/Nebula_Nuvens/.gitkeep,0,e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855,CONDICIONAL,biblioteca dinâmica por entidade ou mapa; conferir runtime
+public/assets/mapas/Terra/Mapa_1-5/Objetos_Estrelas/.gitkeep,0,e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855,CONDICIONAL,biblioteca dinâmica por entidade ou mapa; conferir runtime
+public/assets/mapas/Terra/Mapa_1-5/layout.json,26796,e41d37ee5d804d7878698cbc89b0931947c1ffa21ed1519af301827ea758269c,ATIVO,referência textual em manifestos ou código de execução
+public/assets/mapas/Terra/Mapa_1-6/Lua_Sol/.gitkeep,0,e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855,CONDICIONAL,biblioteca dinâmica por entidade ou mapa; conferir runtime
+public/assets/mapas/Terra/Mapa_1-6/Nebula_Nuvens/.gitkeep,0,e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855,CONDICIONAL,biblioteca dinâmica por entidade ou mapa; conferir runtime
+public/assets/mapas/Terra/Mapa_1-6/Objetos_Estrelas/.gitkeep,0,e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855,CONDICIONAL,biblioteca dinâmica por entidade ou mapa; conferir runtime
+public/assets/mapas/Terra/Mapa_1-6/layout.json,26829,0f4024d843cd92d75cf4d57a2c7cc54d274af115da00386ff1f5fc74c53addd4,ATIVO,referência textual em manifestos ou código de execução
+public/assets/mapas/Terra/Mapa_1-7/Lua_Sol/.gitkeep,0,e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855,CONDICIONAL,biblioteca dinâmica por entidade ou mapa; conferir runtime
+public/assets/mapas/Terra/Mapa_1-7/Nebula_Nuvens/.gitkeep,0,e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855,CONDICIONAL,biblioteca dinâmica por entidade ou mapa; conferir runtime
+public/assets/mapas/Terra/Mapa_1-7/Objetos_Estrelas/.gitkeep,0,e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855,CONDICIONAL,biblioteca dinâmica por entidade ou mapa; conferir runtime
+public/assets/mapas/Terra/Mapa_1-7/layout.json,26745,a03670024e3c7a6c4e37e1c3705af924b14712ec8479d9d11d82bbd56cc8984d,ATIVO,referência textual em manifestos ou código de execução
+public/assets/mapas/Terra/Mapa_1-8/Lua_Sol/.gitkeep,0,e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855,CONDICIONAL,biblioteca dinâmica por entidade ou mapa; conferir runtime
+public/assets/mapas/Terra/Mapa_1-8/Nebula_Nuvens/.gitkeep,0,e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855,CONDICIONAL,biblioteca dinâmica por entidade ou mapa; conferir runtime
+public/assets/mapas/Terra/Mapa_1-8/Objetos_Estrelas/.gitkeep,0,e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855,CONDICIONAL,biblioteca dinâmica por entidade ou mapa; conferir runtime
+public/assets/mapas/Terra/Mapa_1-8/layout.json,26876,ab205b1bc8a3e180e4b9ff82c868beb58b0d3de8c05d2e7c07d904ab777a44be,ATIVO,referência textual em manifestos ou código de execução
+public/assets/mapas/Universo/Mapa_U-1/Lua_Sol/.gitkeep,0,e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855,CONDICIONAL,biblioteca dinâmica por entidade ou mapa; conferir runtime
+public/assets/mapas/Universo/Mapa_U-1/Nebula_Nuvens/.gitkeep,0,e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855,CONDICIONAL,biblioteca dinâmica por entidade ou mapa; conferir runtime
+public/assets/mapas/Universo/Mapa_U-1/Objetos_Estrelas/.gitkeep,0,e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855,CONDICIONAL,biblioteca dinâmica por entidade ou mapa; conferir runtime
+public/assets/mapas/Universo/Mapa_U-1/layout.json,26890,e79dee1b506d0ad0454801a15ad82374ccb4bd6a4a7f71609704df5464436259,ATIVO,referência textual em manifestos ou código de execução
+public/assets/mapas/Universo/Mapa_U-2/Lua_Sol/.gitkeep,0,e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855,CONDICIONAL,biblioteca dinâmica por entidade ou mapa; conferir runtime
+public/assets/mapas/Universo/Mapa_U-2/Nebula_Nuvens/.gitkeep,0,e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855,CONDICIONAL,biblioteca dinâmica por entidade ou mapa; conferir runtime
+public/assets/mapas/Universo/Mapa_U-2/Objetos_Estrelas/.gitkeep,0,e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855,CONDICIONAL,biblioteca dinâmica por entidade ou mapa; conferir runtime
+public/assets/mapas/Universo/Mapa_U-2/layout.json,26954,dc90733bc3510a81413fea1521f4f5486648fdc0a5a0ec036cfe981e5861841b,ATIVO,referência textual em manifestos ou código de execução
+public/assets/mapas/Universo/Mapa_U-3/Lua_Sol/.gitkeep,0,e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855,CONDICIONAL,biblioteca dinâmica por entidade ou mapa; conferir runtime
+public/assets/mapas/Universo/Mapa_U-3/Nebula_Nuvens/.gitkeep,0,e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855,CONDICIONAL,biblioteca dinâmica por entidade ou mapa; conferir runtime
+public/assets/mapas/Universo/Mapa_U-3/Objetos_Estrelas/.gitkeep,0,e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855,CONDICIONAL,biblioteca dinâmica por entidade ou mapa; conferir runtime
+public/assets/mapas/Universo/Mapa_U-3/layout.json,26833,072448c58a018502422ba14b8f9c5082321df5c5f4dc4abd63c39ca395b0cf5a,ATIVO,referência textual em manifestos ou código de execução
+public/assets/mapas/index.json,1822,eeb8a57db4923e7c6ea6c14e7146b217f048c38be7eebc76d1dfe37a3bc96930,CONDICIONAL,biblioteca dinâmica por entidade ou mapa; conferir runtime
+public/assets/v17/drones-map/aux9-elite-sheet.webp,111806,23fdcce31bb7061d552b555bb6727cfdcde3b9096f73a0e7cb4af7878980a4e0,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v17/drones-map/aux9-elite.webp,36890,7aab2f0c2f838d01afe62bfe67080d603d9f8f3416de31a2986c3172f3c147e0,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v17/drones-map/aux9-sheet.webp,110566,fbddfc40dd5450b7537c8ba2e06cf8ca9d19e96d60e34198effe16fbd3852ba0,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v17/drones-map/aux9.webp,29502,df5e8b3949a1ac6c9d7beb8929af74b8bfa37d55d81499f8b00689d83ca3ed88,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v17/drones-map/halo.webp,30920,7b91d88a6b7e91e6b6877c851268d2286ce749c7c0663218f936405db72b03a8,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v17/drones-map/nova.webp,29166,4fa524f0a3a2fa3db71423a1c2d78ed46bc880a98cda87fbd73fbfe23f6c02e3,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v17/drones/aux9-elite.webp,31814,8b678e98083773b8f1beff8ff0319bde058aa7b58a09c5602ed13c0da0458e78,EM ANÁLISE,"sem literal estático confirmado; pode haver uso dinâmico, evento ou compatibilidade"
+public/assets/v17/drones/aux9.webp,26250,b3c37677cde6aa010ba6302d52f70a19fe61e7cec0c3822d905885f7a66bbedb,EM ANÁLISE,"sem literal estático confirmado; pode haver uso dinâmico, evento ou compatibilidade"
+public/assets/v17/drones/halo.webp,27874,59a8f86cba04718f61d27a952ffb30f5c8843ac8f4d3fa37247fb99472ee6f76,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v17/drones/nova.webp,27128,3cf49bf5c4eb3e69071ff29a1852e0509cc72f73e41821f46527acae4a1e0688,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v17/environment/b41.webp,159070,0aa5937c06563a57cf788249e9bf4c0e54e64515c229b861b44038a211efe082,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v17/environment/b42.webp,121054,97520df0d858b82cf5271f2e4ef20ea81d5667a9a87e72cea04d3344a3545f8e,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v17/environment/b43.webp,159840,73e27f557806f7364da7c35402cc9877254ba2edf88162ae4138880e1ded98b5,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v17/environment/ggAlpha.webp,117500,f01af72f33ada4e49f3d2c6c0c8ceb293a33305104d1e6dda634d7d3056cb6bc,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v17/environment/ggBeta.webp,142834,36d5b1d4be3a77e8c8358759bb6b420eea81b736728c91e1e0f310abac0478e4,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v17/environment/ggGamma.webp,139322,c049111eb44cc4c1ed84be748b25d51c881066f68a7532e0c4d368f9ec041255,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v17/environment/orbital-station.webp,60740,0cc244613bf5521b3e1cf1164567bc8c880b5b8458a821c8efe891e6863879f7,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v17/environment/portals/portal-shadow.webp,56036,d9f20439c45b147f0888c99acbe6f58225f4e79c5ab212276fbf5deac955e034,EM ANÁLISE,"sem literal estático confirmado; pode haver uso dinâmico, evento ou compatibilidade"
+public/assets/v17/environment/portals/portal-standard.webp,56960,0e7342d9715456bed85b87a9b1bf1428d7ce78ec4dccc27100cf6a4039eb795f,EM ANÁLISE,"sem literal estático confirmado; pode haver uso dinâmico, evento ou compatibilidade"
+public/assets/v17/environment/portals/portal-warzone.webp,55714,d3439f33e5af7c578b8c0a4c2883d2be13bfe432726a054956d5baeec6ed2254,EM ANÁLISE,"sem literal estático confirmado; pode haver uso dinâmico, evento ou compatibilidade"
+public/assets/v17/environment/resources/credits.webp,143242,d5f4212a9d47d9d5ba7f0016463c54c0414f669b48610d3cad36e2368d399c0d,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v17/environment/resources/cryon.webp,133904,5ca6b6712758e7343afd497079f03c37b140df05bb1c987f07d8b5f29c6e89ee,EM ANÁLISE,"sem literal estático confirmado; pode haver uso dinâmico, evento ou compatibilidade"
+public/assets/v17/environment/resources/duracite.webp,131916,cb781a910ffbd800ad85bf6674ba0a016706ecf92c67e283235df7c5e37036b6,EM ANÁLISE,"sem literal estático confirmado; pode haver uso dinâmico, evento ou compatibilidade"
+public/assets/v17/environment/resources/ferrite.webp,121306,5e221d394811db065ee1324fddf2af7b3a7ae879f1c5ebdaa864cabf8d69c1a6,EM ANÁLISE,"sem literal estático confirmado; pode haver uso dinâmico, evento ou compatibilidade"
+public/assets/v17/environment/resources/ferron.webp,127864,acdfa4f84b89d2f443b97bbc56909b118967ae0eb58e6a449635a770e263c239,EM ANÁLISE,"sem literal estático confirmado; pode haver uso dinâmico, evento ou compatibilidade"
+public/assets/v17/environment/resources/solarium.webp,127302,97038fb2bec758d574e9cb2278b533196a20de565a0df0c913d980cad1e5ae2e,EM ANÁLISE,"sem literal estático confirmado; pode haver uso dinâmico, evento ou compatibilidade"
+public/assets/v17/environment/resources/virel.webp,153954,59aba224c392d169d42e1a4c1ed510ea9bbf73466968851f9c666df6608c747a,EM ANÁLISE,"sem literal estático confirmado; pode haver uso dinâmico, evento ou compatibilidade"
+public/assets/v17/environment/resources/voidite.webp,148136,b8a96733f64550cb52e76c3c3cb6e25a43867f535c3e509bf11a48ca418769a1,EM ANÁLISE,"sem literal estático confirmado; pode haver uso dinâmico, evento ou compatibilidade"
+public/assets/v17/environment/x1.webp,174264,16513e502077199835a5aa44c9adc70b2364d19fe5ff0dd36f1ab5d1bf1ae1e2,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v17/environment/x2.webp,161312,d440cae478bfc3c8e9981979f49afbc75f3fa8dcb5ad0d47afb655f2156b4da5,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v17/environment/x3.webp,172504,0bf8d7caa0d4db1805936d2d59dbd3cd7ee88497e32cb9d7654b3f23c12b10ee,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v17/environment/x4.webp,166568,1d86afb75667115a13bded970c91b8c369ca40e91be5be9d952596d8e0b79636,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v17/equipment/arc1.webp,22742,19c00db26940293e7ddca486f460a6c43cb5ee19104e81673218883e12a7f1cb,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v17/equipment/arc2.webp,26472,9be7dae03c9349ea320c71dac1b7a22f42b74f67bd5c2bc0bd8afb3efd8354f7,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v17/equipment/arc3.webp,26448,dfd49fb82e8e23ba0dc84eb4fc6eb9d244069f573076180d692358dbc11a0037,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v17/equipment/arc4.webp,26448,dfd49fb82e8e23ba0dc84eb4fc6eb9d244069f573076180d692358dbc11a0037,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v17/equipment/arcp1.webp,22786,01944e8d05fa1feb327de6613efc1993d23817246a9b0e361ec4dc395d1f4f42,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v17/equipment/auto-aim.webp,22922,e766a151dae2641d2f1ca9c3cc7f8af178e65c07d2ab91cd42905779a34ae66c,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v17/equipment/auto-launcher.webp,31046,80cd14f394fd01ffb871cfedc634c1fd9239e4330838e5cba77fa8f79735ecb2,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v17/equipment/auto-restock.webp,29896,71e4566bb15507c3efa97bd5ee489308eb917e69235dc9250b37bd2b5e48fc6e,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v17/equipment/cargo-cpu.webp,31478,9829b77e6b011db08adb6ed8645102767b1586d2399afd9b96c980d0cf3eeb1e,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v17/equipment/nanobot-repair.webp,30234,7de7dee4b6c75470cadad6fef8592825c6250a2232df907a469967dbae30b803,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v17/equipment/reload-booster.webp,25492,16b5d4eea00941897266463c4285f4857841011f715eae3a198963c1fa049945,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v17/equipment/sol1.webp,26650,65f1f786eefe5f263a39ac2b642cffe2fbbaf5ddd3b667f6461f1a911ec370cb,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v17/equipment/thr1.webp,16890,026a3cf758f0199446ae719b62845d8f3bf50a0356da9b4f43bcde73e1bf27d1,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v17/equipment/thr2.webp,23378,446bf4fd6b5c35e4a8144bf6c154dff250de4a69f7224da7974d96cbca35c7e3,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v17/equipment/thr3.webp,22462,84fc35ac9f0f0bb3c083fe8cde0d5bd31be5ed1a6fbe17006ebcc51afdb162b0,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v17/equipment/thr4.webp,24668,b57acfdff85c67f66d11476f41cc804782fe775ca0d1f36e18cfbf43fc1873c5,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v17/equipment/thr5.webp,27826,d00b21064b9cfd96da222528b780192ad13b113ce334d921d82f18f66dff1d1a,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v17/equipment/thr6.webp,27826,d00b21064b9cfd96da222528b780192ad13b113ce334d921d82f18f66dff1d1a,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v17/equipment/vsh1.webp,22960,89887e353e617d979efb147be35822802b6f29649e13442ddf86ab27ecf44543,EM ANÁLISE,"sem literal estático confirmado; pode haver uso dinâmico, evento ou compatibilidade"
+public/assets/v17/equipment/vsh2.webp,27162,9d648e24737686eff86dbc89350315d3f1bf53cdb99a23f7a7652677372c79f5,EM ANÁLISE,"sem literal estático confirmado; pode haver uso dinâmico, evento ou compatibilidade"
+public/assets/v17/equipment/vsh3.webp,26014,9e33f4a169c5cf8a75671a5c664784ffd93a7b51004decd531b9efc26f5ced1c,EM ANÁLISE,"sem literal estático confirmado; pode haver uso dinâmico, evento ou compatibilidade"
+public/assets/v17/equipment/vsh4.webp,27734,21b56c72941d19ea5c10112dac0e0c65574aba0d42895c2ba807d26294d0d52a,EM ANÁLISE,"sem literal estático confirmado; pode haver uso dinâmico, evento ou compatibilidade"
+public/assets/v17/equipment/vsh5.webp,27448,f048012fe4e7b14371a7080ef919406ecaa81d79a250bc49ab43945bd252a453,EM ANÁLISE,"sem literal estático confirmado; pode haver uso dinâmico, evento ou compatibilidade"
+public/assets/v17/loot/cargo-box.webp,52706,0e1ae828e889fc105fc8cf9ed2954ddc3bb42712ba0e39f7502a68b8b9f1264b,EM ANÁLISE,"sem literal estático confirmado; pode haver uso dinâmico, evento ou compatibilidade"
+public/assets/v17/manifest.js,19576,7a355e907aed1b8aad4739e8d6b57fb430262cd8e9ee9237eb44f98463cd8404,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v17/npcs/colossar-prime.webp,21972,1d95bec3cae7783e3ae79c69b870952205e842de21e4190cdda97737ac6a4067,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v17/npcs/colossar.webp,18168,688f5ecdc41872229cc954b4790fa22c2461266e1f77b642d79d6c0f33ad2fa0,EM ANÁLISE,"sem literal estático confirmado; pode haver uso dinâmico, evento ou compatibilidade"
+public/assets/v17/npcs/dreadnox-prime.webp,23908,cd9f40eb9f922e0f8a2cbf3afd434a808a51a7c2b4087c27e8aa50f750833e65,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v17/npcs/dreadnox.webp,21196,6cbc009e9eae0a903e7530626b1312b79591e3f38c7616acfca1712759b52b43,EM ANÁLISE,"sem literal estático confirmado; pode haver uso dinâmico, evento ou compatibilidade"
+public/assets/v17/npcs/kharon-prime.webp,32310,974b637f21cce54289c979b05c6808964f569e1250c6ee2df9743de5bf72a1d0,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v17/npcs/kharon.webp,26628,6a1c2cca5f5af757dc0636fa60f56931db10086c3708647d42f9fdf1753e6e7f,EM ANÁLISE,"sem literal estático confirmado; pode haver uso dinâmico, evento ou compatibilidade"
+public/assets/v17/npcs/scavenger-prime.webp,26118,23d616ab90e9ae2626bbd1e1ba1640dfdee3b00e2769b197580b091ee2915d62,EM ANÁLISE,"sem literal estático confirmado; pode haver uso dinâmico, evento ou compatibilidade"
+public/assets/v17/npcs/scavenger-scout.webp,11884,4b42a4a39acd03814c6a85e092d4512d88cb4bf3d42c1c392cc7e6f0244820c5,EM ANÁLISE,"sem literal estático confirmado; pode haver uso dinâmico, evento ou compatibilidade"
+public/assets/v17/npcs/scavenger-support.webp,22540,5feee2b34607111d3f57e08f85dd77d86dd98b09fad5deae0adec909deaec482,EM ANÁLISE,"sem literal estático confirmado; pode haver uso dinâmico, evento ou compatibilidade"
+public/assets/v17/npcs/scavenger.webp,20332,992f1e019bab55ee59776b12120e933fdcd7bd90863dc647371ac08f0ee52e77,EM ANÁLISE,"sem literal estático confirmado; pode haver uso dinâmico, evento ou compatibilidade"
+public/assets/v17/npcs/vrax-prime.webp,22568,d0086512eb35e151d5f7eac205e41209973ae255ae83e29c6fea34437f8a099d,EM ANÁLISE,"sem literal estático confirmado; pode haver uso dinâmico, evento ou compatibilidade"
+public/assets/v17/npcs/vrax.webp,19670,947ae4edbfb4a9457e61ab16ecffe40a8232c8f02fcb735d7e45c7cb558fdf4c,EM ANÁLISE,"sem literal estático confirmado; pode haver uso dinâmico, evento ou compatibilidade"
+public/assets/v17/npcs/zyron-prime.webp,23820,1521aaf5b40592ec2e320e4b2a225b72acb6fd9c3e06e06f64930b1b220917d6,EM ANÁLISE,"sem literal estático confirmado; pode haver uso dinâmico, evento ou compatibilidade"
+public/assets/v17/npcs/zyron.webp,24010,9bcccc9b64fc4e3ef91c1b779349bed38c132f8675e279afac6954b74b110276,EM ANÁLISE,"sem literal estático confirmado; pode haver uso dinâmico, evento ou compatibilidade"
+public/assets/v17/ships-map/aurora.webp,31122,49fd00ca15f07311e471162ee4e52bb2507ffedf7d469be6ae000da2dec72a7a,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v17/ships-map/bastion.webp,32396,5a1336a3c45056da3197db45d35bfa5670de6c15f2d1d1a8f17c663b8d0403e1,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v17/ships-map/bulwark.webp,32742,207f44c90ea339bcc6969e30c54f8df2e82f15adfcca2d1c76ca1624d7c1a588,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v17/ships-map/concord.webp,26816,98fc8643784bd772a416a42dc38450e2b8bb11eb99757ae9351bb95492548d96,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v17/ships-map/doppel.webp,30434,bde732b56e955fccfb347e6cac9d76faec7202e4fec5349dedd3047121cef8ef,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v17/ships-map/echo.webp,33638,d833dea71e75bf54bd66ce4d45521386032697235c15f43367096d3279ae8582,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v17/ships-map/gale.webp,36632,fcf2c44b5d2a334923d436d9eddd1a98398c1befd95a2d2bed06fc56842c1cd2,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v17/ships-map/gravastar.webp,34994,e3c366b67f403b7508c67a5dd61ec72da766820ec44bab267e08743ddc7eedd2,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v17/ships-map/guardian.webp,33798,5ffe761048818a6f605ffcd17dada7cbdb149edc86d9e49d907b313e1cd1d41d,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v17/ships-map/helios.webp,35014,44f14f2db6957a40e1e025d67824c6b140f6023d09d57f8928899bfb4eb8d2d7,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v17/ships-map/hellrunner.webp,30878,9f041a324c10632086afe84b91c334133a2f845a3ac320879da30aa4fd625e2d,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v17/ships-map/interdictor.webp,33784,e6617cfe2788d3007609b05c506e298d5b7b6e046aa3af8dac6fd94f4ff05783,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v17/ships-map/ironclaw.webp,31380,ff7b8e919dd09abcb1f549d4c24db115ed6f47b7e5c09093d57a080d385034be,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v17/ships-map/kensei.webp,33336,449a04af947fbaa1b97651b9b6a74834fa55da3083485f5c02cf66364387c9d9,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v17/ships-map/lancer.webp,31556,b49e0063a03283fcb05a4a99d0ffdb0f4b2529420241361b4037adf61bfc32c7,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v17/ships-map/leviathan-x.webp,36542,28b3db0ad41addd7003b707d108f804f917e1d1ddba82c97ba9ea606ca77425a,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v17/ships-map/leviathan.webp,34738,d40e2955063508db1eb81f860e6715404e3c1a3ce295856711802dff1575961b,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v17/ships-map/lumina.webp,39000,6b19e194e7e6ddf9943317bc50c006a08f3474d58f012098cf923b3fa4b7f9d7,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v17/ships-map/lynx.webp,27804,fc676baaee5821d2222a2e84adab8328e29c64aa6b3e31429f1027b64056a05d,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v17/ships-map/meridian.webp,33624,08064efffbe2d377cc078e192bc297519f9d60f6a00de9fa265f3094fedbd91d,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v17/ships-map/mirage.webp,32102,ab5a31f3103edde1c1ed2ab02a2568d1c9e0b9927cbb30c06fffa6d6838cd5b9,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v17/ships-map/nexus-prime.webp,32478,d2ff4a4496ee799b19e93135edb319eaee3c4463e69c6fa1df6c731e49f384b5,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v17/ships-map/nullifier.webp,34136,47d18d39912595e6a80c042516101e397e2a24e2f39c6614aeda08f1680bf4c4,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v17/ships-map/pathfinder.webp,28256,4ccf3d1c09696f0f417b4b2beb5bac0377a7dd2d606d6b164d9bb40c064b03e9,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v17/ships-map/phantom.webp,25464,a4c7c2b88504e67f789a860e03224f6b26db859433a156cd613de4821bd076ba,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v17/ships-map/pioneer.webp,29778,9a7b517a12a74e850ad78f2be49390ec045ba6d80c2417c8fe29eff3f9e5e2a6,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v17/ships-map/plaguewing.webp,31800,f174f1e774ad6ea4fde66b67f75787f43dc7d0ae4639de5db44b19b13a22e89e,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v17/ships-map/praetor.webp,36324,c9a6ee13146d3adb612227262f982de1027b488d0355da70ff4ca930c0fd6894,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v17/ships-map/prism.webp,30526,9c2570e5780535928fb64211bf827542a9b4a8c15cc0e0b0abb3c2e167567c03,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v17/ships-map/raptor.webp,27866,2ec1fb47198f2c52ab411a643e56f94b94629b7c5bd262e2fe91afcf85490084,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v17/ships-map/ravager.webp,31580,c95447de951a98de9e99d9059897047a2668a8e544ec06db5ac8399378304b77,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v17/ships-map/reclaimer.webp,39500,6e8504093a6b44269c7ac3849a4cd40687d0acc57fe44d82af22ac08024455fa,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v17/ships-map/seraph.webp,36868,cc458dfcef3f7b8a7e699be5b03ba2d61785be83d87bab1a5f6da5bc192341f6,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v17/ships-map/shogun.webp,34880,d53474942573f950526be7b192cbdc9b59f34d24646653ebfd7cd69d7cbbdfa8,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v17/ships-map/sovereign.webp,33296,ef14dd7bfccb3c3b598efebc4230133ea23050599112f887f394d297646adaa2,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v17/ships-map/stormrider.webp,38344,3fabd1af418bfd6083e7cbbb28b07bb70b2ec18cd3e26dc415ff43eda41ea94f,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v17/ships-map/striker.webp,28866,21f1a4cd4fd77203b92a287a848b7008e22e6a2fdb75b6d1e5f4373b93335261,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v17/ships-map/valkyrie.webp,37410,20ba6b6bdf0446b45033502a873e9b7c16ef0b111e12c7b045edbb06b7d830a2,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v17/ships-map/vanguard.webp,30862,8d2b40eea891b00f3f79db8b9000546304120aa042dd511e025b94b934217822,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v17/ships-map/venatrix.webp,30550,0486898b7927d23945f64c67490c5b0d162daa798d9bb7fd0b45ba58af9efe8d,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v17/ships-map/viper.webp,30836,fcc1e9954bf7fd167cf802fa2ee2652383a92f69ba0ff24489922644c5de5e8f,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v17/ships-map/warden.webp,28524,59080deb4f5ae335b33d39d3b309066fdf1d88b8243ca83ce06d392bf726d483,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v17/ships-map/wraith.webp,32364,4727f5ca6bfff7f9c6adcf316be8dba05160ac0dfff61f009ece93783abe45f3,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v17/ships/aurora.webp,28130,af3e6f9d3d806d880a3fab28f4abe4522b1b970339ee4bc8d995ee40483cb808,EM ANÁLISE,"sem literal estático confirmado; pode haver uso dinâmico, evento ou compatibilidade"
+public/assets/v17/ships/bastion.webp,28648,f935aa409466074f5073e18a35af5080c6665d708f57d5361040fd7dc289ed89,EM ANÁLISE,"sem literal estático confirmado; pode haver uso dinâmico, evento ou compatibilidade"
+public/assets/v17/ships/bulwark.webp,29860,974d910a9ef49899c86e50bec35b8c29fba2dd98e964c3204b444af16fbdb532,EM ANÁLISE,"sem literal estático confirmado; pode haver uso dinâmico, evento ou compatibilidade"
+public/assets/v17/ships/concord.webp,28302,242fd7681cfd65cfda489e5a9a431c8b01fd690cd10211e34ce255dcff4a1102,EM ANÁLISE,"sem literal estático confirmado; pode haver uso dinâmico, evento ou compatibilidade"
+public/assets/v17/ships/doppel.webp,24480,5baf6b096f9a6d5762dc19ed0b8e45414384e255bbd02d6f1a59944ced25d905,EM ANÁLISE,"sem literal estático confirmado; pode haver uso dinâmico, evento ou compatibilidade"
+public/assets/v17/ships/echo.webp,26150,3da4fbcf888e346fea0566a77da27fdd8334e6e0ddef1fa202a8cd2af1e1012d,EM ANÁLISE,"sem literal estático confirmado; pode haver uso dinâmico, evento ou compatibilidade"
+public/assets/v17/ships/gale.webp,30246,29f37a698f35205f966ca5889a78fe9dfea1da79ff75653126feb7452887a83b,EM ANÁLISE,"sem literal estático confirmado; pode haver uso dinâmico, evento ou compatibilidade"
+public/assets/v17/ships/gravastar.webp,29542,4721631077e70b4d50ac540914c44784a0e711db2b6454163fd71e70b665a7dc,EM ANÁLISE,"sem literal estático confirmado; pode haver uso dinâmico, evento ou compatibilidade"
+public/assets/v17/ships/guardian.webp,30352,cc72dae3f33034ddfd1f327fad779965d0abb4311248e62c9f5e7738beb31362,EM ANÁLISE,"sem literal estático confirmado; pode haver uso dinâmico, evento ou compatibilidade"
+public/assets/v17/ships/helios.webp,32024,0c44590a6143673d02f60445ddb5d085ab86b21043fde96e66e192de5610622f,EM ANÁLISE,"sem literal estático confirmado; pode haver uso dinâmico, evento ou compatibilidade"
+public/assets/v17/ships/hellrunner.webp,24346,86b4bd92dcdf95eafaca40c7b10509fbbbde2867a5da1dba9431a5a9a0c8bc8d,EM ANÁLISE,"sem literal estático confirmado; pode haver uso dinâmico, evento ou compatibilidade"
+public/assets/v17/ships/interdictor.webp,26046,c2bdb76641d69422b1b187568cf2dfe326dd494dafbd468750a88e9c10635fa6,EM ANÁLISE,"sem literal estático confirmado; pode haver uso dinâmico, evento ou compatibilidade"
+public/assets/v17/ships/ironclaw.webp,28784,ad73c54cd935fdc91482a237787517326a8733b81b3ad48f06d93528fa0f3cfc,EM ANÁLISE,"sem literal estático confirmado; pode haver uso dinâmico, evento ou compatibilidade"
+public/assets/v17/ships/kensei.webp,27790,2fc89e5a6230fc253d85138f1f48c78107f046025391c5faa0c721aaa58c4cc6,EM ANÁLISE,"sem literal estático confirmado; pode haver uso dinâmico, evento ou compatibilidade"
+public/assets/v17/ships/lancer.webp,26472,16b407f7b1ecd39b0f6637a245df2e7cd8e1b70b28953d07f6a5431ab88d9166,EM ANÁLISE,"sem literal estático confirmado; pode haver uso dinâmico, evento ou compatibilidade"
+public/assets/v17/ships/leviathan-x.webp,31122,05f983d43ac280401b96b1042d268203398db6afec657c81d1e84cb11910f886,EM ANÁLISE,"sem literal estático confirmado; pode haver uso dinâmico, evento ou compatibilidade"
+public/assets/v17/ships/leviathan.webp,29688,7c689145deae524e38f0179dac3a258ffdc5cb7f1e5d1f7a17dce4666af1daf4,EM ANÁLISE,"sem literal estático confirmado; pode haver uso dinâmico, evento ou compatibilidade"
+public/assets/v17/ships/lumina.webp,26844,d54b5b9f6c2c3f38160194d2e827741c027dbe89436374a5f71883fd539a2656,EM ANÁLISE,"sem literal estático confirmado; pode haver uso dinâmico, evento ou compatibilidade"
+public/assets/v17/ships/lynx.webp,23326,326998dbc935802ac132bcb23920f15dba5c3739466612d207a933a9379b8373,EM ANÁLISE,"sem literal estático confirmado; pode haver uso dinâmico, evento ou compatibilidade"
+public/assets/v17/ships/meridian.webp,35590,30d731ce75ca98940ce0b971d23e0b992ba767b5befa64b95eff5ac80e187b6a,EM ANÁLISE,"sem literal estático confirmado; pode haver uso dinâmico, evento ou compatibilidade"
+public/assets/v17/ships/mirage.webp,25018,99ee7588c4a2655ea2502130a94101de20e4cce822e49c0d1b74f11e6764bf96,EM ANÁLISE,"sem literal estático confirmado; pode haver uso dinâmico, evento ou compatibilidade"
+public/assets/v17/ships/nexus-prime.webp,29220,fee34de7e1c3439d41fa83e30a669dd3daba177a1eb7ab57855789bb5efe97f2,EM ANÁLISE,"sem literal estático confirmado; pode haver uso dinâmico, evento ou compatibilidade"
+public/assets/v17/ships/nullifier.webp,27452,e61ed895d008aab230852d1669a1fee2ea9676ca60326b0d2bc17f28eac34f2a,EM ANÁLISE,"sem literal estático confirmado; pode haver uso dinâmico, evento ou compatibilidade"
+public/assets/v17/ships/pathfinder.webp,31016,538f632fc39eb16ceadb4791293adc3b92cfb9fe5d370d494e1c31dd623fcbc8,EM ANÁLISE,"sem literal estático confirmado; pode haver uso dinâmico, evento ou compatibilidade"
+public/assets/v17/ships/phantom.webp,24154,44c730e09019717cfd1ae6b73532d50563d7a2ffb7db0b66b1485cfec155728a,EM ANÁLISE,"sem literal estático confirmado; pode haver uso dinâmico, evento ou compatibilidade"
+public/assets/v17/ships/pioneer.webp,28208,a5bef2b7dd7f358415f2354481bba89a38790ed240b3cff22282aa6d55c9fe87,EM ANÁLISE,"sem literal estático confirmado; pode haver uso dinâmico, evento ou compatibilidade"
+public/assets/v17/ships/plaguewing.webp,29664,64e7dd72548901eb7d9472244f45ba8ee3d6b04cec24a0edefb839106c932541,EM ANÁLISE,"sem literal estático confirmado; pode haver uso dinâmico, evento ou compatibilidade"
+public/assets/v17/ships/praetor.webp,26922,bb344987a3238517ee8156e470e1ebd7781a4152ee22aa280204f2b1a542965d,EM ANÁLISE,"sem literal estático confirmado; pode haver uso dinâmico, evento ou compatibilidade"
+public/assets/v17/ships/prism.webp,27340,221463b99944b0979cbe5ab9197be316c3165606c020b5f3eccdd09716b4f6a5,EM ANÁLISE,"sem literal estático confirmado; pode haver uso dinâmico, evento ou compatibilidade"
+public/assets/v17/ships/raptor.webp,22558,d945aab8856e7c9ae12ba1dacf559a4f99e2b704cfa730a228f62dbabb71ebc5,EM ANÁLISE,"sem literal estático confirmado; pode haver uso dinâmico, evento ou compatibilidade"
+public/assets/v17/ships/ravager.webp,29654,557524271d21f3587da9a5fc573d5af24b7e3e85c9462f90287fa3e34061f755,EM ANÁLISE,"sem literal estático confirmado; pode haver uso dinâmico, evento ou compatibilidade"
+public/assets/v17/ships/reclaimer.webp,32346,5e708952e87bb01f4f8dd515bd966008bb7ba43e544c5b7a699b33e80bc97ab6,EM ANÁLISE,"sem literal estático confirmado; pode haver uso dinâmico, evento ou compatibilidade"
+public/assets/v17/ships/seraph.webp,31384,fd57b6ed5dd879396ecd960283178a1fe75fa75863b7ab60cfd647c4eb212a58,EM ANÁLISE,"sem literal estático confirmado; pode haver uso dinâmico, evento ou compatibilidade"
+public/assets/v17/ships/shogun.webp,31018,b057f283c6086cf7703e9d24d2c1cc87d6eb06ed930c6bbc82324b7474efa09d,EM ANÁLISE,"sem literal estático confirmado; pode haver uso dinâmico, evento ou compatibilidade"
+public/assets/v17/ships/sovereign.webp,28970,0aab748fcdfad7d5ec991e09f992cd63e62fe595bab2fccb35e67534063bda51,EM ANÁLISE,"sem literal estático confirmado; pode haver uso dinâmico, evento ou compatibilidade"
+public/assets/v17/ships/stormrider.webp,31046,a07da2d83e35eacab944002c9065e9d42013bbb0ca69cd0b2f25f88558622e0a,EM ANÁLISE,"sem literal estático confirmado; pode haver uso dinâmico, evento ou compatibilidade"
+public/assets/v17/ships/striker.webp,21684,839c6800c4d2459a644bcd1b1f0efca94662a90e7d2e4f711bd2a9507a228bd2,EM ANÁLISE,"sem literal estático confirmado; pode haver uso dinâmico, evento ou compatibilidade"
+public/assets/v17/ships/valkyrie.webp,34250,6cef57b4922af0904dec741c4c108b4142e5851c0600d84493ffebc687715d21,EM ANÁLISE,"sem literal estático confirmado; pode haver uso dinâmico, evento ou compatibilidade"
+public/assets/v17/ships/vanguard.webp,25520,618d86aaaa65522d20e22d709c957ce556c69ac4a1e5e46edd222608d78abc99,EM ANÁLISE,"sem literal estático confirmado; pode haver uso dinâmico, evento ou compatibilidade"
+public/assets/v17/ships/venatrix.webp,27442,8ad01ddfc3f304d141e92a6a1fef64a5f1a14d257d26f78c3e691ba66762e2fc,EM ANÁLISE,"sem literal estático confirmado; pode haver uso dinâmico, evento ou compatibilidade"
+public/assets/v17/ships/viper.webp,28338,69a7f2dd64d90e29c54d225a5b231402ae969a35ff4aae34feabd6a436d1b2c9,EM ANÁLISE,"sem literal estático confirmado; pode haver uso dinâmico, evento ou compatibilidade"
+public/assets/v17/ships/warden.webp,25584,11a1f092d186f50653e040f6a6d2b0c30ef40c525eeda607ea5eb04a2fe862ff,EM ANÁLISE,"sem literal estático confirmado; pode haver uso dinâmico, evento ou compatibilidade"
+public/assets/v17/ships/wraith.webp,28854,72755fde1f4f5188a981801dded181db60a06d9e713a595754127905a7b90dcf,EM ANÁLISE,"sem literal estático confirmado; pode haver uso dinâmico, evento ou compatibilidade"
+public/assets/v18/bonus/bonus-box.webp,6840,4b41ab12b8d40f4389b9cd603990e4f3cad1af7e5e18d7581230507a8c62468a,EM ANÁLISE,"sem literal estático confirmado; pode haver uso dinâmico, evento ou compatibilidade"
+public/assets/v18/bonus/stellar-dust.webp,10406,bc797b8fd9092292bc7402b674a6b402780a55bcd1ef90dfdde204c10688b938,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v19/ammo/cmt1.webp,21066,955d1b6c6aaaeef08b1878fe5e13b452e990581ebb971c9c5d8d57a4d33fc8ea,EM ANÁLISE,"sem literal estático confirmado; pode haver uso dinâmico, evento ou compatibilidade"
+public/assets/v19/ammo/cmt2.webp,23792,9ce76e92ebc74ceb3de8df2ca5a06b5308c892578807e7d050775c2ce4468812,EM ANÁLISE,"sem literal estático confirmado; pode haver uso dinâmico, evento ou compatibilidade"
+public/assets/v19/ammo/cmt3.webp,27148,b42a5cfe65ad31582676136f1f11d38af76c52f4bd6d0390ab6b9da282f05976,EM ANÁLISE,"sem literal estático confirmado; pode haver uso dinâmico, evento ou compatibilidade"
+public/assets/v19/ammo/cmt4.webp,28910,c3733800a1d79897a8271470fc8c9b04bc66c71474cd2b754a540f4b93121c2e,EM ANÁLISE,"sem literal estático confirmado; pode haver uso dinâmico, evento ou compatibilidade"
+public/assets/v19/ammo/pls1.webp,26996,24228a33d5403a5f620799ae18fb6292705ad73b85cb109d5a27cbb04b298475,EM ANÁLISE,"sem literal estático confirmado; pode haver uso dinâmico, evento ou compatibilidade"
+public/assets/v19/ammo/pls2.webp,28132,ed51ae3d7f5ea5d675c5f86927634b0a75b779be6ee0a23e65e00bf520e70202,EM ANÁLISE,"sem literal estático confirmado; pode haver uso dinâmico, evento ou compatibilidade"
+public/assets/v19/ammo/pls3.webp,30200,179ac811f61879b232d5c6dc6cd924daf10cbdf2072831d94579048675f49368,EM ANÁLISE,"sem literal estático confirmado; pode haver uso dinâmico, evento ou compatibilidade"
+public/assets/v19/ammo/pls4.webp,32424,e023e8334e3d011fa131de4eedc5aa31ea2ca441ed3c0f90c10aa3db9ad60cbc,EM ANÁLISE,"sem literal estático confirmado; pode haver uso dinâmico, evento ou compatibilidade"
+public/assets/v19/ammo/sip2.webp,30990,4d88c1d5095fe24de4b3a0366f26b40973f9642159e78d368afcc60ac2c180d2,EM ANÁLISE,"sem literal estático confirmado; pode haver uso dinâmico, evento ou compatibilidade"
+public/assets/v19/branding/earth.webp,34882,d2053b7b698165dce1e0017b186adedb5880ca9952068fe91b44d2320c5cd017,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v19/branding/jupiter.webp,32218,f72adb9da595e31bf8dd3009b81eeaec8c974b9d17cd6d58360c64b6ae01625d,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v19/branding/mars.webp,31078,7668ed7c84fe89e84bd2b5feed04f33ae32d24574356b9d6e6c7fe51feb75e19,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v19/branding/stellar-legacy-logo.webp,60336,caf1feada625bb2de6ba3696a1e963a5b8af9c682915b882c526c11ae72fdf3f,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v19/equipment/terminal-mercante-remoto.webp,100350,b0103cfe3fbfd139b6fa2cf39a65dba7ab424721600207e4f544d735b185fe83,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v19/pilot-skills/alienHunter.png,155889,96f09b5ae7c6ce14d720b48280a03ca4f8311ac32cb228c1095533320d9a2893,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v19/pilot-skills/bounty1.png,163814,a0fad1d1ef6039e72019a4e2c996f032a8ad231a7587e5dcf1dab989c3528cb7,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v19/pilot-skills/bounty2.png,167436,8e4b2edb3e902a8299c303623f67d8afb8886d3a8504b4018ada1483b6f54973,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v19/pilot-skills/cruelty1.png,119240,f950da4f0f5e576e09f79d5df831c19ed1eda8b4110fc542cbf3b035c56ab6c2,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v19/pilot-skills/cruelty2.png,110936,25a040fc9bc3782f783f66dae91e89e2db4f6cc1cf61307d8299f0423357a322,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v19/pilot-skills/detonation1.png,147279,33ea7fcfafcb99d318aeb7901a1399039656c4a25a2a3cd9f6f47948c221132a,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v19/pilot-skills/detonation2.png,139616,e4b8fa8a9481cd1c756b4b45eaf69922866b7fa89fa41527497301870f61e6b6,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v19/pilot-skills/electroOptics.png,155573,30f3dc094e596a5471e505d9030d7367ad3be68ea835b4996ee0f9cc0156eab2,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v19/pilot-skills/engineering.png,176942,4c9d27c88ccced209dae6d670957f9f80a0bde5704ac6c37e1147a9a78f8bedc,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v19/pilot-skills/evasive1.png,161391,5eb87d8918c6e108f3f27ac5d5f736f5c4bfb7121b4f4d8de4bd0905cf8c4c4d,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v19/pilot-skills/evasive2.png,145770,e10c30149034a95002ae2e4a30fcb0111c7386bddb57f7ceb46588adafbef7eb,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v19/pilot-skills/explosives.png,155967,29cced212536d9a1ab7f8b7e8b7765869fa0aef6c1fa10cc17bb93281c284846,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v19/pilot-skills/greed.png,139283,fb27ab63cd8599ac60c8f9db1007d8a1d0a3abcf5ff41c164c275ab4383364d0,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v19/pilot-skills/heatSeeking.png,138978,620022ec100010e87df836b34c3f773b9ac358d094dcc718df7632e7bbf1f6b8,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v19/pilot-skills/hull1.png,158889,21295f71ee82dc5631cf880d3a256348fec62760da8bf248ec833f904597eaaf,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v19/pilot-skills/hull2.png,181860,92117bc5ef7c917093354994d8c3cb18dcc53751dfcc373e7714cbde8f6ae049,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v19/pilot-skills/logistics.png,124476,7782b6336b489bd3212ad42a8f57c2f8b534de6b11673ae7ac4390bed99d720e,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v19/pilot-skills/luck1.png,117568,31c5c96f5c21bd977c4fcb83053161dde7ad2fe1da88d235d715d84bb5f69453,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v19/pilot-skills/luck2.png,134643,2d1dffffe008827f15f2409f4526b50c58d09fea5c8744582fc8a95c6c0cc32f,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v19/pilot-skills/rocketFusion.png,182137,9aecdb4090533d3d34dd838a15a5542f6b50edb7d3285a791827d4f58d5442c4,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v19/pilot-skills/shieldEngineering.png,150133,56d2cca048efb1590392fad0656ef428d5a14ea9ca0be8eba6e09eee6263cd92,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v19/pilot-skills/shieldMechanics.png,154365,51e01576be34db9df95835fb15fac7138717539cdb5f7ac501a9a180255c4ff3,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v19/pilot-skills/tactics.png,131717,61ef899f120ec71962236dc1a3fec20e69b5cc7b2e9301df4e3714bc8ab515c0,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v19/pilot-skills/tractor1.png,128084,147509814a31f4b41b23804b7a4d01153e94a4e63b7b116d9b62b65fbf6f10f3,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v19/pilot-skills/tractor2.png,122454,4aa35340a69e44cb587d4d6fc0da88c0ca8443ae2b910a322803818e4eec4b34,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v19/premium-stage/arsenalBundle.png,40144,ef388d8c14ad038245a075bb22127d7ff6b43d4984b652849694b1f588dd3d15,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v19/premium-stage/battlePassCard.png,33991,70ab5e73be04c557c6c18c8533a42f27f8f7fd4a50ffb6d82f5efdcfe5cc9d6e,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v19/premium-stage/battlePassPlus.png,38226,0b5bb61b6a56d9f6d455ed78c52fc0595d6080edc856054cfbae0007b03d652d,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v19/premium-stage/equipmentBundle.png,35317,badb1ae22edf86c625c7c19a3650d325269b86b24b02c11b6dc6ca55eecf81ee,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v19/premium-stage/eventShipBundle.png,42126,1180f32035f70b20734ca94e0f3678a9d8723e78d6bda660642e9d38cda8805b,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v19/premium-stage/premiumElite.png,40322,c17deefd505ce5e349ecf39e7a1e7a1599602ebd5cca7ae8152fc50bc3e5ebae,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v19/premium-stage/premiumMonth.png,37325,a845af662c50cc31006535035530ac747c9da7a6e45a24df10f33133ed031534,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v19/premium-stage/premiumWeek.png,34507,b02e55ff99f2f26f72a9c33f7ee61121365476c150647ad98093920f5ae2fa20,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v19/premium-stage/starterBundle.png,37894,6a14b023bc3eef9e1ffcbc7835929f6e87fd47cd53a155513fd9fda1678ee3a7,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v19/premium-stage/stlPack.png,33428,58ecc1f466f964c788cf1119186eafe0fb8ea3e4b70ceeab493afe885a8f4db5,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v20/equipment/aeg3.png,86808,f84c2c2fa6e4f10681b81fca584d9b2520abd86b4b5173c94191d9586688c904,EM ANÁLISE,"sem literal estático confirmado; pode haver uso dinâmico, evento ou compatibilidade"
+public/assets/v20/equipment/aeg4.png,89977,f242030067016aed851fe7ca8661c96789d990a85b624f21ec2da06406e4dc04,EM ANÁLISE,"sem literal estático confirmado; pode haver uso dinâmico, evento ou compatibilidade"
+public/assets/v20/equipment/arc-omega.png,96181,77e18e219d5749de3dc23fd2da8db62d42a0ac0d620344f5944d1bc3d0ade755,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v20/equipment/arc-x.png,95107,4825d01f39f7ac763318dba3476a3eac7715fd2128775a15a9e70387c1532dbc,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v20/equipment/nanobot-prime.png,78560,46c4cb1c966af565417a82819e3c6e9a442e6f54069281f8eb6243a95f8fe313,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v20/equipment/thr-7.png,106184,406009ea13e248c333ccc7b079910959014b842c9ee16a462e744ab29a4d5ca6,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v20/equipment/vsh0.png,96130,aa96d5c511ce4c6d719cb741305a8a822f0e88b08eee6974725224795dc063e0,EM ANÁLISE,"sem literal estático confirmado; pode haver uso dinâmico, evento ou compatibilidade"
+public/assets/v20/equipment/vsh6.png,98555,7510c8313bd02116714ed52206de5513ce16a43d895b0f99fd16ba944b9480fb,EM ANÁLISE,"sem literal estático confirmado; pode haver uso dinâmico, evento ou compatibilidade"
+public/assets/v2212/bases/earth.webp,62716,5a502f67a60867a0fa9ee0452b3a73659554f59d0129e9d73032ce7b0aa5b1d5,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v2212/bases/jupiter.webp,72716,2213007beab621d06e4bafd742d7233b81c9f1a11a9d6c62adcb1b84afc77f06,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v2212/bases/mars.webp,73610,08926f4e5e71ba12ae085c98a747166219df5fed61890e09a01a1131c8f32ca7,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v2212/boxes/bonus.webp,26092,b16889222dcac4b6d46c05aaca3998476b584a6772d6d79a4480a9d2bde30a39,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v2212/boxes/common.webp,25138,1dc65a4c1c9726cf6f6f99c369891c24f48fe2d7f31be627f26862eb59f619fa,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v2212/boxes/elite.webp,24646,b43fc5575dcf7592b9f5324f7e83ee43ff03d3715ce924313781cb0b9aed8235,EM ANÁLISE,"sem literal estático confirmado; pode haver uso dinâmico, evento ou compatibilidade"
+public/assets/v2212/boxes/reinforced.webp,24514,b7fac45c00bb2432344e6b21fdb23e59b44883c1f69e964cf0137f33d532484f,EM ANÁLISE,"sem literal estático confirmado; pode haver uso dinâmico, evento ou compatibilidade"
+public/assets/v2212/boxes/resources.webp,20582,4ffab6f2c3790297237b5595e4225a871508019f164915e4fd05eef07d390298,EM ANÁLISE,"sem literal estático confirmado; pode haver uso dinâmico, evento ou compatibilidade"
+public/assets/v2212/boxes/technology.webp,18936,288543d5f08fa68ab1c1cb4a839758e873acbff6aefce72cdbc349478708a739,EM ANÁLISE,"sem literal estático confirmado; pode haver uso dinâmico, evento ou compatibilidade"
+public/assets/v2212/npcs/elite.webp,14240,a775494885a7f7ba0ff9b1a5b3fbf0f6d43c8eeb1b777880119d1e8ab8846a12,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v2212/npcs/fighter.webp,20524,c77fe2ceb3caa30ef5c2fb3a99cebef1ffc92abab3bfca7e861eb03417af3688,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v2212/npcs/heavy.webp,15092,086c095d184d96c92cc6a789b13416494729b6cec1a5445f13739dbf5d02cbac,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v2212/npcs/miner.webp,22542,b1bfd0d2e2c36ea50c50fb7ccf9cc8c2da697ef3cde1add87d7dd247ba32c725,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v2212/npcs/scout.webp,18462,9cc0e82d6c5ff09fb4b90a9eafdf33af152fa59c31903a5124d02234302d7222,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v2212/ores/blue.webp,25212,759d4c38f3c0fcb85a60510333c9408df0ca6c62464f0a6e9729ae47a233647d,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v2212/ores/gold.webp,25004,f664fa0b088bae3365c0167697f8da8f0d6202e320b627563cdb7bc8834feb98,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v2212/ores/prismatic.webp,30702,86c44c936182c8db3140fe05a723bb948593ee7d6948afec3dbe6457f6ff27ca,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v2212/ores/red.webp,27046,d54d0a97e522a4ca03237135e3f6d2a0acbf2f309a5d40fe288843c0b875d4aa,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v2212/ores/teal.webp,23834,1bc84f70b64dceb9717828e7ce85ee218e82cc7542b5a3095c6422909fae8ddd,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v2212/ores/violet.webp,26154,de7f14c4c669af5d3f0325512c3fcbdcb50a237e6c1a655414189ee56cd8453f,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v2212/portals/common.webp,32140,e83c270962d98b6daacb094cffe26f54d3029ce3db41f6da53ea40f6bd4accc5,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v2212/portals/pvp.webp,30226,b8fa41e3e9e62d4b3f20d28df0662e02955ffd140373554c8d0b2e9e34cd020a,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v2212/ships/earth-map.webp,11796,4175cdd1bae2d6fc63c89be0231ab17a1d754ca5595355a3337b2729746da19a,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v2212/ships/earth.webp,38072,2ba0515fff2616a11b1d6a1deb16fec0a664187813d58064f972a334095df8dc,EM ANÁLISE,"sem literal estático confirmado; pode haver uso dinâmico, evento ou compatibilidade"
+public/assets/v2212/ships/jupiter-map.webp,10984,6a41005604cb3645417c70e0d4701ab54a70066d9f01bb59fd5d9188e4fec2c0,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v2212/ships/jupiter.webp,34430,f94213a52830239251b0bc11af281717aff529ecb3fd77d162dfe2bb7b7010d7,EM ANÁLISE,"sem literal estático confirmado; pode haver uso dinâmico, evento ou compatibilidade"
+public/assets/v2212/ships/mars-map.webp,10800,8a8e8289cf776ae4550f89443d213d0751674955243a4cf4cab78174b2d0b0ee,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v2212/ships/mars.webp,35544,276d5cdac6240ebb70219b7c1806c5f662932e67f8d9538793f3020a852ce24a,EM ANÁLISE,"sem literal estático confirmado; pode haver uso dinâmico, evento ou compatibilidade"
+public/assets/v30/dronesheets/halo.webp,97656,f6520977c86f847751b89436f510795da3a092e8a4369706f1fb2af640a43144,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v30/dronesheets/nova.webp,101106,3c2aa4d38a6d7e87e4dd5423aff32ce91aef0c1938d8aebc4aab6ca04113c144,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v30/dronesheets32/aux9-elite-sheet.webp,218756,57675d71564391fd5d95559fb8a68bf9043a13abe2cd13039e1756aae7644141,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v30/dronesheets32/aux9-sheet.webp,216202,5b7dc010e88169cbaa1a7ff521bbd9ec452f35a61f74937373011de375d8cc54,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v30/dronesheets32/halo.webp,187510,dd9a6422977cd7cb8cba01aa6ad7e2ef8109f3eb6eeba573708abe642d7866f3,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v30/dronesheets32/nova.webp,194312,bc93d17b473b3500962da8ce9f8a594157522aacc1792081ce74a88a9ef59c62,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v30/npcsheets/elite.webp,98976,8f4e022827623d0ca3f2ec58135d9aa7146a9637d89d5e4677ca5d0e9b34e3f5,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v30/npcsheets/fighter.webp,77426,d8ba1ab94ee3b8f05df0141296dc05081931212d7d2dbdde4358b9cac77dc5dc,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v30/npcsheets/heavy.webp,101116,4cc828dca73a97a001d94ff657af27ea98322db98ecb5783c983d001508973c9,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v30/npcsheets/scout.webp,83842,4ae0e89df44bab5a3691ecd4d42ab230835b429abda55cd43f972b752c8d4f40,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v30/npcsheets32/elite.webp,192700,30fbfd45761771ced8c38ac0c204a29d919486b67ea5465cbc219cac911bba53,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v30/shipsheets/angelic.webp,92232,2cbbf8759893d220220ebd53d8b1a34e856f5a0d218fef5fbee373235790a3bf,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v30/shipsheets/heavy.webp,90542,6f05e3e9ae6ee999a246cf3742b87070b42dec6696ddc914afd821486a7687b5,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v30/shipsheets/interceptor.webp,104858,7e7b1d5dbfab7c3f44837597e0345634fc6109ea1951949529673f7832d546d3,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v30/shipsheets32/angelic.webp,178294,d098f9cd62f9cb7e296dcee5e01c7188e4317484215ec808d22a999ad8ec89b3,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v30/shipsheets32/heavy.webp,175780,08ddd5476d6b4a25d5de15b0a936aad309f7efee08612eb0c657e8eaa865049b,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v30/shipsheets32/interceptor.webp,202998,f56cdeac8669b2d4c6480c84ab0883fc5e2cf4938cdcf9975f682fe569c04640,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v30/shipsheets32/nova.webp,194312,bc93d17b473b3500962da8ce9f8a594157522aacc1792081ce74a88a9ef59c62,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v3021/ships/aurora.webp,52124,a999d9f3b92d3910dd4810099e01a45e7808c8dd79521a2c5c89590126820fae,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v3021/ships/bastion.webp,53988,eb20936915d684b20dd9e9726f263475c49f25813314dea40904726ed4b19f0b,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v3021/ships/bulwark.webp,54688,0e15613ee841a74e735bad163cc6c1d1ad9faf534321c15dbaf9111fcff8cb5b,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v3021/ships/concord.webp,49828,1bad1ba4ba66aba160e5cb512258a9b8d80629a5827c5f2ce7ef99fa396662fd,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v3021/ships/doppel.webp,48648,90fdf8b647ca5ee96b3ed804c33823124f0164827d857f02265c93c6921537fb,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v3021/ships/echo.webp,48896,1ca28ca3cf96e7b8253096997dcf4855c868b0940fdd62f2190477440c7f6e81,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v3021/ships/gale.webp,53208,9fe9e533b217ac4933b1bb0d9b3223aa7312fa3ee49ac61f4ab4aff1ccbbe9b4,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v3021/ships/gravastar.webp,54752,aac1ef9d08d8cf0ad5fe2c06e5082a3087a3ddb12ab23151dc410b8a6a37fd76,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v3021/ships/guardian.webp,54472,34690fb427dccd585531d7b46490c394a7efa4876467dd86fc681c2da4ff5626,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v3021/ships/helios.webp,57402,4e79326be435ec4628ffe3a47cfcea17b6fe7783315d9adf7a8562ae2bb8b8e2,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v3021/ships/hellrunner.webp,46370,1b3a92c6c3fddae26ede67e38cfb4e3bd26c04bcc20e91a3b43f7d70f65c02d5,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v3021/ships/interdictor.webp,48476,abbf62dbc97a8ef20dd65abd38b5efc85f18914c9618c256a016526fdb4a0f9a,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v3021/ships/ironclaw.webp,53294,83cabdf30ef7f6d513ab29064b41b88ace8ba62e0895136c43933e3e7c35d130,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v3021/ships/kensei.webp,54176,7e5f5d7937ca6b65d99820ffc51a0b788a40c6831a6accc7b5b08f700cc8446a,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v3021/ships/lancer.webp,47562,9aa00d12ead58457b8c8517285d1e43fe198b928a052faa39ef097e0c2fb2d34,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v3021/ships/leviathan-x.webp,54900,9fb03a80019a3acd17ba1051929eb8f4150fe0eea26b34bf3cf69d2d02eb15ed,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v3021/ships/leviathan.webp,56054,29f419781835695fc1bf0aadaac665a03d1220e0c16ebee88bb64880a915fdea,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v3021/ships/lumina.webp,50414,a49ae6351111d85cbf0b9f6ff29258c80c3f353cf6452fec3594f6f509a212f5,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v3021/ships/lynx.webp,45794,517f953f96079b01e0eeead647b28ff1f407aa855770803fe218089256957b8e,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v3021/ships/meridian.webp,63190,1748d4e876707e2f9ead2b1c1249a8cee56465dc2c898f1f80e710d4cefb6297,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v3021/ships/mirage.webp,48732,9991f6f3c2a54e545415303f6f190aa552d82573f3913e28b9b31d9203f7527c,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v3021/ships/nexus-prime.webp,53752,ed0eeb266fffe79817f3624bda2c3aeb1e75e0f1cd5a400a03bea79c7ad4c663,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v3021/ships/nullifier.webp,54114,eaa61b78d537321050670eea612eb1f201c3d2e23ebf9210210e7985d134cfff,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v3021/ships/pathfinder.webp,58608,e992dc7f755dfdbefcfee6d49c6109498ae2d6fe938d24f8e22a047f8df50070,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v3021/ships/phantom.webp,48018,e9ed32e9ef00227bc07298f901b36ed9455e14130707321f10c34c6defd2d39a,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v3021/ships/pioneer.webp,54114,52501844c27acb09825e1add0a655ad2a19692dfeda7aa879428000d2b128e41,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v3021/ships/plaguewing.webp,55790,f5fb645f7331c120c01f8983ec04d93d5fc71604f591093cda5d347eae5ad3d4,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v3021/ships/praetor.webp,50080,ba8c49a54181314407ef15131ebb10305e1c08b659cb674e7d8b1e5f8a52cbb9,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v3021/ships/prism.webp,49500,f0e6eddfe518628db120b86737de0bdd1eab81a9bc18fcd6d07760c71db9ba47,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v3021/ships/raptor.webp,46934,72fa82ecdee4d3646eeed5ee4ed17b47730614e331649d35d4fc7366dafb50b0,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v3021/ships/ravager.webp,52644,a4223268f98ab08a27f725ad292fc2a3de575cc59b3b0ed630d31ad1af1530d7,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v3021/ships/reclaimer.webp,58892,c054141640a29ed35ae638cf0f13d74ce22a91e167fe727218d83721fac46c13,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v3021/ships/seraph.webp,58586,8709140527243dd70c0697fbcf710d686a1a66b4056c315f540424661b45bd4c,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v3021/ships/shogun.webp,56018,3506c2d3bfb561f1102cbe3333adeeda58e22731f74661f44be4e004788ce58f,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v3021/ships/sovereign.webp,52706,7497b2b43e4907413663ba7105515008bc33a2df7e292c71f6de1e530bf1f36a,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v3021/ships/stormrider.webp,55118,36a2cd9387ef4c4d71730820b54b064d5430560eec5c67c5781ae16490ffa1cc,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v3021/ships/striker.webp,43062,ba658cb41a41497ae55ce08ec8675ef2ee99b41913269628952ea8a284866694,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v3021/ships/valkyrie.webp,63110,86c9195a1a76fdeee66ea3b5027fc03eefbbe96dc5454ae8503cd90ba9f5ec06,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v3021/ships/vanguard.webp,48136,c7ab77f5df52050214aca1d853c7047c4dd07842ede2a8b35c4a90455425c779,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v3021/ships/venatrix.webp,51120,241f935516812695b8d89f4845c6a12f058dbc4797f15db5e7ab97aece11d163,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v3021/ships/viper.webp,52986,ef69a26cba85cad0554082217a8846fa029c5f41dd6a725b574896b27a272d0f,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v3021/ships/warden.webp,48748,7f55a93cbe93609bab0dfe7cb8e1cd531a0ba944724bf986fb2444be0c8fe8a4,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v3021/ships/wraith.webp,54638,d007b980f7e42183761a09180afd588f4bfc853962fb66684529fa0e3a182c0f,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v3022/drones/aux9-elite.webp,55510,6a0882a6e294d5d9a1cc32082acf2909c8ebb7604b0209158c2007378fde49ea,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v3022/drones/aux9.webp,49784,0b84d11627fcb17bdb055792143619f9f90481bc18c85a5af595e216acba72bb,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v38/gates/alpha.webp,49340,567efa6c87a6c09d9470537b1ba141058bd4385f1967e1ced2bbcd1407d1c7ce,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v38/gates/beta.webp,50470,903a89fee2ba9a7312001cb403d0c87b9c2d7bd66916d834133ffa20360f9ffa,EM ANÁLISE,"sem literal estático confirmado; pode haver uso dinâmico, evento ou compatibilidade"
+public/assets/v38/gates/gamma.webp,51318,e06480129f675fa86ae4e00c4659c0343fd03cdcacbd5ac8cc877662339fd6a3,EM ANÁLISE,"sem literal estático confirmado; pode haver uso dinâmico, evento ou compatibilidade"
+public/assets/v4777/aux9-new.webp,14296,1adc3d86ed58d8e3a611cc980869660420c7fa1d8d0036c4f59caedfcbd6c7bf,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v52_3/cards/box_ammo.png,138662,3faa38f8cacc142eb401fe7bde3f9e8493a24e5d7debbd2bced4ff82960d1bb3,EM ANÁLISE,"sem literal estático confirmado; pode haver uso dinâmico, evento ou compatibilidade"
+public/assets/v52_3/cards/box_bonus.png,29026,474b6df0c6909642717764cd49eb7cc246e29e00ccf9352c5779d017ce16133b,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v52_3/cards/box_elite.png,21071,5af00c3d11ac2d2f86ea999d4eb5c738367ba590993c80492cbf67344f6e4567,EM ANÁLISE,"sem literal estático confirmado; pode haver uso dinâmico, evento ou compatibilidade"
+public/assets/v52_3/cards/box_loot.png,182322,9c078ee7af18ad692c631bcfe4351b130f731a4c2d3976f3c8afc248c6574e2a,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v52_3/cards/box_mystery.png,188455,64c79dfda0a592050473bb0543df76d6c1007a7198f0dced351912f022fbfe77,EM ANÁLISE,"sem literal estático confirmado; pode haver uso dinâmico, evento ou compatibilidade"
+public/assets/v52_3/cards/box_repair.png,158186,8df53550bba01308814a03c06bf3f48504452aa30e7f8b07afcdc4aff9f3fba0,EM ANÁLISE,"sem literal estático confirmado; pode haver uso dinâmico, evento ou compatibilidade"
+public/assets/v52_3/cards/ore_Duranium.png,145836,9e5a43f1c44d3ed33ed108414ad98bbcccd831175b444bf58a4366f5f278b046,EM ANÁLISE,"sem literal estático confirmado; pode haver uso dinâmico, evento ou compatibilidade"
+public/assets/v52_3/cards/ore_Endurium.png,146689,27fcce325f61cddbe0e00ea92d1e1d500e851cdd70facc784fad84f09c207251,EM ANÁLISE,"sem literal estático confirmado; pode haver uso dinâmico, evento ou compatibilidade"
+public/assets/v52_3/cards/ore_Promerium.png,146335,efbfe142aea89a79ef4507148e31b48239558bbf28d2d2398f6630adccf1e415,EM ANÁLISE,"sem literal estático confirmado; pode haver uso dinâmico, evento ou compatibilidade"
+public/assets/v52_3/cards/ore_Prometid.png,143278,6ec80f383fd76f3c06d7941aa1878ad5b0428d4795ff3fa6b7c928dd48b9df43,EM ANÁLISE,"sem literal estático confirmado; pode haver uso dinâmico, evento ou compatibilidade"
+public/assets/v52_3/cards/ore_Prometium.png,137460,2cac8e4b369e266abe1e80c17cbc343a73b8df65bb95dbcd4027fd19c7e8084e,EM ANÁLISE,"sem literal estático confirmado; pode haver uso dinâmico, evento ou compatibilidade"
+public/assets/v52_3/cards/ore_Terbium.png,182177,4a2a6942c37beacebcf5a172bf845684a7cf1e172f312ebec467c3f9b2b31432,EM ANÁLISE,"sem literal estático confirmado; pode haver uso dinâmico, evento ou compatibilidade"
+public/assets/v52_3/cards/ore_Xenomit.png,167900,1ce1e8d27acb918ef237b1abd2d00c537fac2ae93c7a9e17a34d6de0ced2f38e,EM ANÁLISE,"sem literal estático confirmado; pode haver uso dinâmico, evento ou compatibilidade"
+public/assets/v52_4/aux9.png,24736,a2247d4561d32a6a0f145c3a463d42e30472c908114f03770d6b91961c5c320d,EM ANÁLISE,"sem literal estático confirmado; pode haver uso dinâmico, evento ou compatibilidade"
+public/assets/v52_4/manifest.json,449,2f91d41eda7b76b60a39141bfd109bf77a5fa7c28fdb451271266b12f2dac579,EM ANÁLISE,"sem literal estático confirmado; pode haver uso dinâmico, evento ou compatibilidade"
+public/assets/v52_4/npcs/npc_aiderStreuner.png,26257,3300452a12c2f9b3ad6e316f6a907a30cc249cf1d09c7f4f834a74cd83c81f5c,EM ANÁLISE,"sem literal estático confirmado; pode haver uso dinâmico, evento ou compatibilidade"
+public/assets/v52_4/npcs/npc_bossDevolarium.png,38157,e83aa129e2f6d2f532591ecbabc528bb5c7bd4da5258bbb5dc8a2e3d5484e824,EM ANÁLISE,"sem literal estático confirmado; pode haver uso dinâmico, evento ou compatibilidade"
+public/assets/v52_4/npcs/npc_bossLordakia.png,43691,a49a517526d01363980ca8f1c19eeb31c6b9428f5b8bcab80e1f9eebd9b4047b,EM ANÁLISE,"sem literal estático confirmado; pode haver uso dinâmico, evento ou compatibilidade"
+public/assets/v52_4/npcs/npc_bossMordon.png,35366,6156d4afa086a7c9fe6d41122b78b4577ea82c2edfdc50241b53133209beb8b8,EM ANÁLISE,"sem literal estático confirmado; pode haver uso dinâmico, evento ou compatibilidade"
+public/assets/v52_4/npcs/npc_bossSaimon.png,24276,924ee71e93eb566dded6a98027b993088f28b49094efb2af45f28e4f9655bfd1,EM ANÁLISE,"sem literal estático confirmado; pode haver uso dinâmico, evento ou compatibilidade"
+public/assets/v52_4/npcs/npc_bossSibelon.png,34150,b80cc7870c743f1752608b55fe1feece240bb154a8ff12bcf67b0f7ea40a2fca,EM ANÁLISE,"sem literal estático confirmado; pode haver uso dinâmico, evento ou compatibilidade"
+public/assets/v52_4/npcs/npc_bossStreuner.png,26295,6f8ad4aa9790dfcd1296821f7921328bba5715fc6856176d3962a07383ea784e,EM ANÁLISE,"sem literal estático confirmado; pode haver uso dinâmico, evento ou compatibilidade"
+public/assets/v52_4/npcs/npc_devolarium.png,38892,2b5a568e99512ed9313a17d7433c23c3c2e6e3713fd0f4e6e78d9c904300bc9a,EM ANÁLISE,"sem literal estático confirmado; pode haver uso dinâmico, evento ou compatibilidade"
+public/assets/v52_4/npcs/npc_lordakia.png,41264,d59e74e4c7e7dc6a98cdf2903e0a13b12433c848788abb9b2811b701515471d0,EM ANÁLISE,"sem literal estático confirmado; pode haver uso dinâmico, evento ou compatibilidade"
+public/assets/v52_4/npcs/npc_mordon.png,32947,c1461695ef64c1b41cc0e35a87979680c6974872e1c84334cb21467081909ff2,EM ANÁLISE,"sem literal estático confirmado; pode haver uso dinâmico, evento ou compatibilidade"
+public/assets/v52_4/npcs/npc_recruitStreuner.png,26198,d08d24c1004b3d0346178f498f20283cbfda32792709d0d937a6288112122284,EM ANÁLISE,"sem literal estático confirmado; pode haver uso dinâmico, evento ou compatibilidade"
+public/assets/v52_4/npcs/npc_saimon.png,21978,acbb50ef78b50411b8de144429e5e5f3dc3c6731b995baddf7b5b700da99ba3d,EM ANÁLISE,"sem literal estático confirmado; pode haver uso dinâmico, evento ou compatibilidade"
+public/assets/v52_4/npcs/npc_sibelon.png,32413,6d7f61a841c7bac72972e1939b355746a0a8e000880dae4810ce536d2ca7c8af,EM ANÁLISE,"sem literal estático confirmado; pode haver uso dinâmico, evento ou compatibilidade"
+public/assets/v52_4/npcs/npc_streuner.png,24419,88e83068b904344e3699135bba915dadb968635033676926b02225efa749bc73,EM ANÁLISE,"sem literal estático confirmado; pode haver uso dinâmico, evento ou compatibilidade"
+public/assets/v52_4/ships/aegis.png,35855,19feab36aa1d376b437b6234576717e597a5a4c1d83b592fc815d667eb5a329c,EM ANÁLISE,"sem literal estático confirmado; pode haver uso dinâmico, evento ou compatibilidade"
+public/assets/v52_4/ships/bigboy.png,36086,843c34061b47208db3a90e814dee5cebc581a7d2d93f925ea0ee2989c2b3fadf,EM ANÁLISE,"sem literal estático confirmado; pode haver uso dinâmico, evento ou compatibilidade"
+public/assets/v52_4/ships/citadel.png,38722,fde71ecfc5ba1fe6f2fa3f59b41545f300635b92e401a9b7f1c62f9706d4bc59,EM ANÁLISE,"sem literal estático confirmado; pode haver uso dinâmico, evento ou compatibilidade"
+public/assets/v52_4/ships/defcom.png,33610,459ab38c6255f5df60cb9ab7ba58c161bfaebdcd9a3583d0ba6c442532104f81,EM ANÁLISE,"sem literal estático confirmado; pode haver uso dinâmico, evento ou compatibilidade"
+public/assets/v52_4/ships/goliath.png,36600,ad200828e9e496ed9bbbea4cf655fcfcdda2254a3cf9fc79c5db896ec8c5164e,EM ANÁLISE,"sem literal estático confirmado; pode haver uso dinâmico, evento ou compatibilidade"
+public/assets/v52_4/ships/leonov.png,30378,85f9a9f9df9d5b4fe78b4c327afd3dd60f2cef4a0d24c71e88af83241b257e44,EM ANÁLISE,"sem literal estático confirmado; pode haver uso dinâmico, evento ou compatibilidade"
+public/assets/v52_4/ships/liberator.png,35227,21f57b54b01819f3b2b81f2dea75d892452e09963b5a0c7f831a6c3add7d1614,EM ANÁLISE,"sem literal estático confirmado; pode haver uso dinâmico, evento ou compatibilidade"
+public/assets/v52_4/ships/nostromo.png,33573,94800d5da1123e07f72ccec0a27050052605b734f9da635106cc95490d303f32,EM ANÁLISE,"sem literal estático confirmado; pode haver uso dinâmico, evento ou compatibilidade"
+public/assets/v52_4/ships/phoenix.png,34643,8c1b7ec5f26ea65aeaa8b571dc6782a142248d1f6efa0ff9519f4c42ef58e582,EM ANÁLISE,"sem literal estático confirmado; pode haver uso dinâmico, evento ou compatibilidade"
+public/assets/v52_4/ships/piranha.png,29137,092978ce88d8b6cc8204a00e3a5b5d512ffbaefe75a8905e54de7c2158a89db6,EM ANÁLISE,"sem literal estático confirmado; pode haver uso dinâmico, evento ou compatibilidade"
+public/assets/v52_4/ships/spearhead.png,26174,ef3b44533be02eb463fadcf4b3b76bc5494248547bfb8fb5e88fab0cc82b0aae,EM ANÁLISE,"sem literal estático confirmado; pode haver uso dinâmico, evento ou compatibilidade"
+public/assets/v52_4/ships/vengeance.png,31759,d0276c22c975ab1f237595254c89dcf9a8ce11c768f27ac2d89a8c8c4514fae3,EM ANÁLISE,"sem literal estático confirmado; pode haver uso dinâmico, evento ou compatibilidade"
+public/assets/v52_4/ships/yamato.png,30129,af576f11236bb54b671635da3263b0c1aa42f2b71a1c41e97588d0488d8f25d9,EM ANÁLISE,"sem literal estático confirmado; pode haver uso dinâmico, evento ou compatibilidade"
+public/assets/v53/sprites/astral_aurora.webp,82526,bf7aae27be7913b07990f7b0906379135096ca136c30cde835030d8ea5946120,EM ANÁLISE,"sem literal estático confirmado; pode haver uso dinâmico, evento ou compatibilidade"
+public/assets/v53/sprites/astral_eclipse.webp,67814,e87a1f218bf68265471d932b9c275ea81e5f9219292125dee5f17e04aec620b5,EM ANÁLISE,"sem literal estático confirmado; pode haver uso dinâmico, evento ou compatibilidade"
+public/assets/v53/sprites/astral_nexus.webp,85200,bd3dce891521531d0c5ea4ca44599d1f415f2ec0444a2ff5dfdf821e15de5870,EM ANÁLISE,"sem literal estático confirmado; pode haver uso dinâmico, evento ou compatibilidade"
+public/assets/v53/sprites/base_earth.webp,61110,15ff2a20d8f1a3297652767cd65e3866505d14b6e3a44171608632edee289ed0,EM ANÁLISE,"sem literal estático confirmado; pode haver uso dinâmico, evento ou compatibilidade"
+public/assets/v53/sprites/base_jupiter.webp,60784,e428f63fcdc13e38cefe66112b83105755ce59f2f031eb49a00c5de70bf90aa3,EM ANÁLISE,"sem literal estático confirmado; pode haver uso dinâmico, evento ou compatibilidade"
+public/assets/v53/sprites/base_mars.webp,55970,d16391acbbfa0b55d34333505b6ad1edf5a974a61d26ccd575c3564b008c3866,EM ANÁLISE,"sem literal estático confirmado; pode haver uso dinâmico, evento ou compatibilidade"
+public/assets/v53/sprites/drone_a.webp,23634,87e53753a9c8a968ae46e481e8952d8509cf768ffec091f70c6d62555099a69d,EM ANÁLISE,"sem literal estático confirmado; pode haver uso dinâmico, evento ou compatibilidade"
+public/assets/v53/sprites/drone_b.webp,24418,c9623ac3df2f50e2d2909838c3ce05cc45515bc35bc9e84f47bb4af6023308fb,EM ANÁLISE,"sem literal estático confirmado; pode haver uso dinâmico, evento ou compatibilidade"
+public/assets/v53/sprites/drone_c.webp,21430,1feae88f82296b9023c752b33ce65b90b9eeb5b2ab874fcf5517791119b4dd6e,EM ANÁLISE,"sem literal estático confirmado; pode haver uso dinâmico, evento ou compatibilidade"
+public/assets/v53/sprites/drone_common.webp,19642,a1663b47c5b7b3df4dd8c19d44948f6afa5a694bc560ebc111c0c75cdfeeb884,EM ANÁLISE,"sem literal estático confirmado; pode haver uso dinâmico, evento ou compatibilidade"
+public/assets/v53/sprites/drone_d.webp,25916,9241145dff15f421f059d71c590ef40ff45112de6c0a7c5b015d42ccb8f6008b,EM ANÁLISE,"sem literal estático confirmado; pode haver uso dinâmico, evento ou compatibilidade"
+public/assets/v53/sprites/drone_e.webp,22352,42f373ede62cd2145f0155ad83a039ef14d42076cf152e6afeb85ebafc61f072,EM ANÁLISE,"sem literal estático confirmado; pode haver uso dinâmico, evento ou compatibilidade"
+public/assets/v53/sprites/drone_elite.webp,20140,caa5e7de470d1c2d1bbfa7e552600ccea1755b98c1bc724163cedc5ba6ec07c8,EM ANÁLISE,"sem literal estático confirmado; pode haver uso dinâmico, evento ou compatibilidade"
+public/assets/v53/sprites/portal_normal.webp,76170,05b2d4d16d407c26880999633f579b9675ea28046e73b48228ac0abe6055865b,EM ANÁLISE,"sem literal estático confirmado; pode haver uso dinâmico, evento ou compatibilidade"
+public/assets/v53/sprites/portal_pvp.webp,58060,fd08bb098ee26783af95a3fda414226037123959a0ecbd76dd0930341bc4dff3,EM ANÁLISE,"sem literal estático confirmado; pode haver uso dinâmico, evento ou compatibilidade"
+public/assets/v53/sprites/portal_universe.webp,129332,25fa6a69d8481a9309609e3bae789765c170b9571ec298e9b95cedfffd70da04,EM ANÁLISE,"sem literal estático confirmado; pode haver uso dinâmico, evento ou compatibilidade"
+public/assets/v54/sprites/relay_1_earth.webp,13322,38fca625dbb546af9cc54df2ee2aaba85ecdf6cea44258c7939f6083821bb979,EM ANÁLISE,"sem literal estático confirmado; pode haver uso dinâmico, evento ou compatibilidade"
+public/assets/v54/sprites/relay_1_jupiter.webp,14906,a3f8d1752d468358c1536849296edae44790b1576489928cf9878fc6c5e964d3,EM ANÁLISE,"sem literal estático confirmado; pode haver uso dinâmico, evento ou compatibilidade"
+public/assets/v54/sprites/relay_1_mars.webp,11574,a55302561539bf1e7302c7637f79f25b3c749b91380a7a83a8ab719570834df8,EM ANÁLISE,"sem literal estático confirmado; pode haver uso dinâmico, evento ou compatibilidade"
+public/assets/v54/sprites/relay_1_neutral.webp,11742,ab96dd651a69dcc73191924843f422df64c4dba8f39e8b0d3141c8f96ceb4e19,EM ANÁLISE,"sem literal estático confirmado; pode haver uso dinâmico, evento ou compatibilidade"
+public/assets/v54/sprites/relay_2_earth.webp,14884,eb01f8a4e519f301977d6558f34a04375d1d87493d7bb6bf3afca801f980965b,EM ANÁLISE,"sem literal estático confirmado; pode haver uso dinâmico, evento ou compatibilidade"
+public/assets/v54/sprites/relay_2_jupiter.webp,17282,1a798fcfc4598b9119c24317c4b289cf75dbb86a07d0bec6de3e213ecc433c1a,EM ANÁLISE,"sem literal estático confirmado; pode haver uso dinâmico, evento ou compatibilidade"
+public/assets/v54/sprites/relay_2_mars.webp,13086,b94b2d5dab9ab062f67d01f11438b79dac52b9d1ef0fc7bf666e8949a1762cd3,EM ANÁLISE,"sem literal estático confirmado; pode haver uso dinâmico, evento ou compatibilidade"
+public/assets/v54/sprites/relay_2_neutral.webp,13122,cda98b91e79b25f476b9af8e34328d7ba37beffb08a81ffa13eb8d007190883f,EM ANÁLISE,"sem literal estático confirmado; pode haver uso dinâmico, evento ou compatibilidade"
+public/assets/v54/sprites/relay_3_earth.webp,17540,6f08ade2af24b9a0434fbd13d9f38fab09d16d64deb68b3a693712c50f1b60af,EM ANÁLISE,"sem literal estático confirmado; pode haver uso dinâmico, evento ou compatibilidade"
+public/assets/v54/sprites/relay_3_jupiter.webp,19490,b4385335efea518b1e8a7ee121e4a751779ec14333cbcafe315e7c44ba5f55da,EM ANÁLISE,"sem literal estático confirmado; pode haver uso dinâmico, evento ou compatibilidade"
+public/assets/v54/sprites/relay_3_mars.webp,15568,8121a9eb5643d54dc7c3dd41968ad7eb5b79127cbbb369357909e2723dd17db1,EM ANÁLISE,"sem literal estático confirmado; pode haver uso dinâmico, evento ou compatibilidade"
+public/assets/v54/sprites/relay_3_neutral.webp,15672,735523730fc02488d2a4d07282d29a487d52590cc247e19ee88abc76d18cda86,EM ANÁLISE,"sem literal estático confirmado; pode haver uso dinâmico, evento ou compatibilidade"
+public/assets/v55/shop/fs01.webp,40004,a8fbb7c84f2f144e030499f9a3c0cf7c0864e20038ac460c6bd6dbf3a5875d38,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v55/shop/fs02.webp,38742,b295222d96d3a14f80364d987603485d1142b165e840731d2cfb3ed45757e4cc,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v55/shop/fs03.webp,39948,dc5f8f74df234651ddb50c30ec871f357346ac69bf1f3c0c8f22c473758aa96b,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v55/shop/fs04.webp,38728,9439e8cd28462f69b6ec9d745c992f19952b9495bbc1328e36eef3112bcedf41,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v55/shop/lcb10.webp,29834,a5515338a9ef8875a287cdbc0ab984d20bb67ce3369637d6519625c444e69b9c,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v55/shop/mcb25.webp,30732,b221ecee2feb998be601f50ab5a0e43d9367c04b5feb6d1ce966fc397850d177,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v55/shop/mcb50.webp,30902,40b4b7c96090736abbff6c412eea52893d6dd43f53da95a5d8b59cbefdedae30,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v55/shop/plt2021.webp,30322,e571ce2081c2ee705c3f59a386bc1fa98843ca9db106cfdd280be0ec5b3eef2a,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v55/shop/plt2026.webp,29780,8043435590c2ad36c5b280460a5352ceb88ad9a76040805462a94adddf67441d,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v55/shop/plt3030.webp,29424,4018ce9047061eba120e5df6faeaef07e9ccea85200505319f206c03d21ae81e,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v55/shop/r310.webp,29408,f9070a0b470d130e67db7a6a09352b6850f767b94b5279691773d1a717862a8e,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v55/shop/sab50.webp,30914,d17d2e063eec725356cfd5ce06c3020f3ca626ee5a4c6c77613b153b5a37d713,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v55/shop/sg3na01.webp,38484,8e5160fd39e143a07596f2680dc0d480d9ff2dd1814659e0c08e3263f96326e0,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v55/shop/sg3na02.webp,41440,c5d418b81de639fff759adf5c3849bfbad99258f66e18803c1638ac7174cf1d9,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v55/shop/sg3na03.webp,39214,feacc5f8e25a2cf36d7dd3b306f88d7f061f1ab064f5af159e1994c82d76ac5c,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v55/shop/sg3nb00.webp,44230,b89d7b6811354c7e49d56f0cd534295230f4609ae9fd4036d005264f5898ce89,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v55/shop/sg3nb01.webp,40284,a4c618e9ec190c48d3a0369ce72f1bb12b6871244175bb8ef53b6c56043fc93a,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v55/shop/sg3nb02.webp,40354,d0eda681c8a4d3b78d59a71e8b811a4a1bdd20d937105d48ffa9bdfaf59f0a09,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v55/shop/sg3nb03.webp,46988,6b7dbf0ba661551978a192efdea306ba8af9e9c8a274cd2398e05a1538080e8a,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v55/shop/ucb100.webp,29772,b2dbf26cb789fa56ae74adc8143571a9c58044daae2519363d034153e1686459,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v56/ships/aurora.webp,14540,281a0594ee03e91fed786a986689425512f23dcbc69e62ebe72029dbcf6dd768,EM ANÁLISE,"sem literal estático confirmado; pode haver uso dinâmico, evento ou compatibilidade"
+public/assets/v56/ships/bastion.webp,16740,296940154559b2a9f06e1529eb73f20194d429020edcda4574023bf762d334eb,EM ANÁLISE,"sem literal estático confirmado; pode haver uso dinâmico, evento ou compatibilidade"
+public/assets/v56/ships/bulwark.webp,16274,4e9796569337cd588732d3927de696327a3ddabba95124a235cf65d1a0f1f465,EM ANÁLISE,"sem literal estático confirmado; pode haver uso dinâmico, evento ou compatibilidade"
+public/assets/v56/ships/kensei.webp,17176,9d3ddc940254c5a9213c6128380a7ceecdcb2d5d9889a02abcf3386c3218798e,EM ANÁLISE,"sem literal estático confirmado; pode haver uso dinâmico, evento ou compatibilidade"
+public/assets/v56/ships/leviathan.webp,15038,5bca8110dd2f6d1f034cc5746fe90d748e748122ac783853d82e1b9f8e08c1d2,EM ANÁLISE,"sem literal estático confirmado; pode haver uso dinâmico, evento ou compatibilidade"
+public/assets/v56/ships/lynx.webp,13152,8fd1e7c582d7a6804d817b4f399c9f6d4bd806b9bb729102b9f862a5c8a987f2,EM ANÁLISE,"sem literal estático confirmado; pode haver uso dinâmico, evento ou compatibilidade"
+public/assets/v56/ships/meridian.webp,15532,afb35209ae5769708f34494d903d920271a926d6ffae5cc3e096c3e9ce29b85c,EM ANÁLISE,"sem literal estático confirmado; pode haver uso dinâmico, evento ou compatibilidade"
+public/assets/v56/ships/pathfinder.webp,15450,af8c1b9018e318e01de3af9d38894610a35c96a9978d665abbd7219ec4b009fd,EM ANÁLISE,"sem literal estático confirmado; pode haver uso dinâmico, evento ou compatibilidade"
+public/assets/v56/ships/phantom.webp,14196,69e1c291f7569948a4bb4ff85da1998ba02c9c40ce3ec65a09f0dd04db660971,EM ANÁLISE,"sem literal estático confirmado; pode haver uso dinâmico, evento ou compatibilidade"
+public/assets/v56/ships/pioneer.webp,16792,d819d53e8dab9f8a269ca870ef09f5ce3a9d8eb554aa35a96fa708ab91aca6c7,EM ANÁLISE,"sem literal estático confirmado; pode haver uso dinâmico, evento ou compatibilidade"
+public/assets/v56/ships/raptor.webp,12142,7e1388bfaba7f7124561e97f4456460e3ebddc65926c207a86177767b73d43eb,EM ANÁLISE,"sem literal estático confirmado; pode haver uso dinâmico, evento ou compatibilidade"
+public/assets/v56/ships/seraph.webp,17196,a8af1de9c09cc3838a9eb94b50bff5e910fdb6dce569df76f29318c50cfccd18,EM ANÁLISE,"sem literal estático confirmado; pode haver uso dinâmico, evento ou compatibilidade"
+public/assets/v56/ships/valkyrie.webp,17276,e6afbb984007ddcf9e326c09aa0bee58513dc4ff53cd0b53c891057f13b56ca2,EM ANÁLISE,"sem literal estático confirmado; pode haver uso dinâmico, evento ou compatibilidade"
+public/assets/v58/aux/aux9-perspective.webp,29936,316118be01be822368de33391fb96a169d365c3eee55d091a23841ec06ab6084,EM ANÁLISE,"sem literal estático confirmado; pode haver uso dinâmico, evento ou compatibilidade"
+public/assets/v58/ships/aurora.webp,24032,cde1f6fe57b805f2268c4556dfe34816ad43e99eaef540b00380c1918acf62da,EM ANÁLISE,"sem literal estático confirmado; pode haver uso dinâmico, evento ou compatibilidade"
+public/assets/v58/ships/bastion.webp,23730,ff7127943315731c7ab7bc8fe856468c84de83afc58c738aa0615e099603f0e2,EM ANÁLISE,"sem literal estático confirmado; pode haver uso dinâmico, evento ou compatibilidade"
+public/assets/v58/ships/bulwark.webp,24330,2890fdc93e1ed32b12cc81460c01d2810ca3065a4c0d43a19348f971e19de8f4,EM ANÁLISE,"sem literal estático confirmado; pode haver uso dinâmico, evento ou compatibilidade"
+public/assets/v58/ships/kensei.webp,26612,0738836453e2e61fbd84b554eb7da891041425afdd3ae4ad5c0271cc264e84fe,EM ANÁLISE,"sem literal estático confirmado; pode haver uso dinâmico, evento ou compatibilidade"
+public/assets/v58/ships/leviathan.webp,24034,3313d9546e5db7d76f7e724abd9825e5b65dce641949b9a1a35348c6fa1964e8,EM ANÁLISE,"sem literal estático confirmado; pode haver uso dinâmico, evento ou compatibilidade"
+public/assets/v58/ships/lynx.webp,20800,a3ffa363cf9af461402b95bf83257a57b018645142747b60cb8e0223d0d7f0ed,EM ANÁLISE,"sem literal estático confirmado; pode haver uso dinâmico, evento ou compatibilidade"
+public/assets/v58/ships/meridian.webp,23518,a428ff9f2438f963765692ce2a529e3735d8e51e6325758f0eddac87f077ffaa,EM ANÁLISE,"sem literal estático confirmado; pode haver uso dinâmico, evento ou compatibilidade"
+public/assets/v58/ships/pathfinder.webp,21756,52b0a3d3c0f76c165519ee6eac9c24e2a366dfb64c360d846ebe7d24aef72f0c,EM ANÁLISE,"sem literal estático confirmado; pode haver uso dinâmico, evento ou compatibilidade"
+public/assets/v58/ships/phantom.webp,22064,f4230f39e4a08d2c3de227de8915a0c9c0a231d9a389188ac08a92e180ee7d15,EM ANÁLISE,"sem literal estático confirmado; pode haver uso dinâmico, evento ou compatibilidade"
+public/assets/v58/ships/pioneer.webp,26410,74605789379fbbd444951a3f5084b121edc1ef98d6902e7c2ba886dd2c701383,EM ANÁLISE,"sem literal estático confirmado; pode haver uso dinâmico, evento ou compatibilidade"
+public/assets/v58/ships/raptor.webp,18900,1c996c84e683047928fa220b55057091aaed1c84d3c377735d7f698220a2a0e4,EM ANÁLISE,"sem literal estático confirmado; pode haver uso dinâmico, evento ou compatibilidade"
+public/assets/v58/ships/seraph.webp,29656,86037e92a880783db819235db2d66618ab22c0462d3fe49c9ea89b299588ab49,EM ANÁLISE,"sem literal estático confirmado; pode haver uso dinâmico, evento ou compatibilidade"
+public/assets/v58/ships/valkyrie.webp,25862,2bbac0bbcfbcf0c67b012f6bf3decb7933dd3c640244863f0d348515de2a9625,EM ANÁLISE,"sem literal estático confirmado; pode haver uso dinâmico, evento ou compatibilidade"
+public/assets/v62/showroom/aurora.webp,31562,b778c49a901eb6907c79e84c5c3c926555182c1869e679f121f43f26eb1028b3,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v62/showroom/bastion.webp,46600,363a97ad19c3871eb486c288fc8148c1c0f1b0e3d62f07265b0ee89c3e0a7d68,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v62/showroom/bulwark.webp,68442,23acc6d80feecd45a70748480b4064e8add0558464b458ab7609635ae4dafc5c,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v62/showroom/kensei.webp,80778,5d160ea463533bd28eb4ad7f8b589381221c35434fc76d539b48d2670382ad2c,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v62/showroom/leviathan.webp,79474,6a4112a9bc20ef82919de59f6cba27c70dca48526798813a971588cb515db349,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v62/showroom/lynx.webp,35154,901df64d19603386e676b47f4fc2f5bc5a33f1c45a3b1bff75dcf16c4b5f9278,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v62/showroom/meridian.webp,41726,5d42c05abcc8084879c23000fbb30931c088217d3aac9e7d7b6ae1807079b558,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v62/showroom/pathfinder.webp,33664,38109e08e008c739fb6f3d8c3a0f2900b907562779bc9bca898ada8ba6ba793e,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v62/showroom/phantom.webp,35606,6f520b6ebbd310e8562be84020a78d3dc911f0173ccaa0d862176ed1f3c4625f,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v62/showroom/pioneer.webp,32968,aa59f5219387c0727f2cb447443ba1af9c235a00245484076b783a1b54cd34cd,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v62/showroom/raptor.webp,33404,94790296db7069f92c33d2c53bbbb9b1bf5d4f90a0b66df522f355a5107ae5ab,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v62/showroom/seraph.webp,64572,b4646184b37390c36cfa09177bdba54bdc864339b64fb508af9f5aa8f3559a00,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v62/showroom/valkyrie.webp,87800,534c8ad0b3ace8f607572e5c3cd74e921822b44f88ee1e73a0d076f9932bdcc2,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v63/ships/aurora.webp,58544,c5816d875535eefb1b25ec6732b743bd72ca4fba5afa604a1ad28366513a7f6d,EM ANÁLISE,"sem literal estático confirmado; pode haver uso dinâmico, evento ou compatibilidade"
+public/assets/v63/ships/aurora_16.webp,172114,6d0ca824a83bdc7b766724ad4f492dd5035280c0229f38e10dd1f782ead84453,EM ANÁLISE,"sem literal estático confirmado; pode haver uso dinâmico, evento ou compatibilidade"
+public/assets/v63/ships/bastion.webp,44116,42e2aa9477091f597a5928d892b1a5c7d47ca0a4373aae3851e7c827b972e784,EM ANÁLISE,"sem literal estático confirmado; pode haver uso dinâmico, evento ou compatibilidade"
+public/assets/v63/ships/bastion_16.webp,146676,aecb9dc120632735d05b152afa48d326aecb0d69198c6e02b7997e46c334d3fe,EM ANÁLISE,"sem literal estático confirmado; pode haver uso dinâmico, evento ou compatibilidade"
+public/assets/v63/ships/bulwark.webp,43264,8ea80c5116c3eb29713f9c5a9c99bfbb51fb75905532c073601d05c5412e04c9,EM ANÁLISE,"sem literal estático confirmado; pode haver uso dinâmico, evento ou compatibilidade"
+public/assets/v63/ships/bulwark_16.webp,143504,4c428bea4cb1f2e8de1920d3e61461eff54b41b0199c8388c32e7c0e36ba83d7,EM ANÁLISE,"sem literal estático confirmado; pode haver uso dinâmico, evento ou compatibilidade"
+public/assets/v63/ships/kensei.webp,60012,5623cd88402055bd446da97e056a7610a1de54d7110fc1722df93b83e38ff6a4,EM ANÁLISE,"sem literal estático confirmado; pode haver uso dinâmico, evento ou compatibilidade"
+public/assets/v63/ships/kensei_16.webp,173836,e0ecbfce5982f6148f2fa62aab43e716641d3f903e0b113cdab69ad14b4bef4e,EM ANÁLISE,"sem literal estático confirmado; pode haver uso dinâmico, evento ou compatibilidade"
+public/assets/v63/ships/leviathan.webp,54942,681fa2d937cb53a3448f3f16d9a9f572db3b1935e2f7b5a2af908e0c966c0966,EM ANÁLISE,"sem literal estático confirmado; pode haver uso dinâmico, evento ou compatibilidade"
+public/assets/v63/ships/leviathan_16.webp,167716,d73f69ae0944e0e9e29707e7075541be13514c1fdd9c2b8646093192bd867b96,EM ANÁLISE,"sem literal estático confirmado; pode haver uso dinâmico, evento ou compatibilidade"
+public/assets/v63/ships/lynx.webp,39040,cf9f6c463e42c42004d900ccc34eea553150830f517168c9a999c09f5a524fc6,EM ANÁLISE,"sem literal estático confirmado; pode haver uso dinâmico, evento ou compatibilidade"
+public/assets/v63/ships/lynx_16.webp,119260,df33f6d8aef168950734033a36e38c8a13c4bfb574a111257e761cf8e1685f20,EM ANÁLISE,"sem literal estático confirmado; pode haver uso dinâmico, evento ou compatibilidade"
+public/assets/v63/ships/meridian.webp,58186,8cfe066ead6ac4912bcf43e8e38b3629b2200ee845c2808abaec2c156c5a6dbc,EM ANÁLISE,"sem literal estático confirmado; pode haver uso dinâmico, evento ou compatibilidade"
+public/assets/v63/ships/meridian_16.webp,174244,2ae4fdc2f1721178ea0674634f308c764c5a96f5dd092ca4d7dc22426f109a5c,EM ANÁLISE,"sem literal estático confirmado; pode haver uso dinâmico, evento ou compatibilidade"
+public/assets/v63/ships/pathfinder.webp,34484,053d7e59db21f58b2a5d6e71d239189e21a12db1bf1743d544d6c060f3568d44,EM ANÁLISE,"sem literal estático confirmado; pode haver uso dinâmico, evento ou compatibilidade"
+public/assets/v63/ships/pathfinder_16.webp,114530,c265b0d5254894808428a4868ffc9c9adb017d40ad5a482d77e4bd72b7189fe2,EM ANÁLISE,"sem literal estático confirmado; pode haver uso dinâmico, evento ou compatibilidade"
+public/assets/v63/ships/phantom.webp,46828,4ac6dfd47d18c6fdfb1cff3bc728411a701544449de3e35865685a3ec61553bd,EM ANÁLISE,"sem literal estático confirmado; pode haver uso dinâmico, evento ou compatibilidade"
+public/assets/v63/ships/phantom_16.webp,135132,6e554d73c0364daef1faac99bc2355d2caedc84607dff6bb61efd5c0b20b7a2f,EM ANÁLISE,"sem literal estático confirmado; pode haver uso dinâmico, evento ou compatibilidade"
+public/assets/v63/ships/pioneer.webp,38360,550bf19bf332b7a25e77a66d35bff4a159022a1fc66524b1f37983b3dcb3cc43,EM ANÁLISE,"sem literal estático confirmado; pode haver uso dinâmico, evento ou compatibilidade"
+public/assets/v63/ships/pioneer_16.webp,110962,c93651bd4bff4ec5c535cd45f3ebbfb7356ee0c08b38cf8d2383de63cb41e31a,EM ANÁLISE,"sem literal estático confirmado; pode haver uso dinâmico, evento ou compatibilidade"
+public/assets/v63/ships/raptor.webp,39092,79f469a717dbf540f9f2cf0b4a268e205f8a4c13047879eebb522eff6137fd24,EM ANÁLISE,"sem literal estático confirmado; pode haver uso dinâmico, evento ou compatibilidade"
+public/assets/v63/ships/raptor_16.webp,124166,fcffceccd730097b314bb3abee0e0086bc73884c201b19085fad15b445638c5c,EM ANÁLISE,"sem literal estático confirmado; pode haver uso dinâmico, evento ou compatibilidade"
+public/assets/v63/ships/seraph.webp,52928,9b2e6974515cd348f062c5edeaa91c84e07c009a0d2f2e98ed2303eb0250609b,EM ANÁLISE,"sem literal estático confirmado; pode haver uso dinâmico, evento ou compatibilidade"
+public/assets/v63/ships/seraph_16.webp,162206,cfbba08a6e4203fcd9254cfbce662e4e36542d860f5589a47af7ae7f56e32183,EM ANÁLISE,"sem literal estático confirmado; pode haver uso dinâmico, evento ou compatibilidade"
+public/assets/v63/ships/valkyrie.webp,49392,e1fcd4a79d51e5080dfff2eb46bf7849d97c4612d170927b1fed71e6567da378,EM ANÁLISE,"sem literal estático confirmado; pode haver uso dinâmico, evento ou compatibilidade"
+public/assets/v63/ships/valkyrie_16.webp,136026,121246e98be2a9fd6ad0c228c77763fed834d62e48fd85240cee783622f5232e,EM ANÁLISE,"sem literal estático confirmado; pode haver uso dinâmico, evento ou compatibilidade"
+public/assets/v64/aux/aux9.webp,52348,7d095f2c0069c11c9e6d64e87bc4ee8bc9450d86e95c6adf2fe3f13c104161d7,EM ANÁLISE,"sem literal estático confirmado; pode haver uso dinâmico, evento ou compatibilidade"
+public/assets/v64/aux/aux9_16.webp,105590,7fba87a181af4922e5049e449b8731944f1f68594ab2fccc2d61121b7189002a,EM ANÁLISE,"sem literal estático confirmado; pode haver uso dinâmico, evento ou compatibilidade"
+public/assets/v64/drones/drone_a.webp,53300,ee45422dd1893f04190ac48b560d189e0d3e49785a55f4cba3452c3a86251710,EM ANÁLISE,"sem literal estático confirmado; pode haver uso dinâmico, evento ou compatibilidade"
+public/assets/v64/drones/drone_a_16.webp,124610,7c31dc20f05987c5d45d9f59b38dc3e82e8da5822b2e92083dd4410357585c33,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v64/drones/drone_b.webp,57076,1a88b28dba090bdbf058dccc98d31c0bb5f997e9acc796a680d38cf5f999c878,EM ANÁLISE,"sem literal estático confirmado; pode haver uso dinâmico, evento ou compatibilidade"
+public/assets/v64/drones/drone_b_16.webp,114778,a0b780046a71b4cac0ed860d498f29aa6c0fcd1f135f51f0adcb376db480f314,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v64/drones/drone_c.webp,38626,87faab50449a85fb8b2e0ac00162c5cada05f843460a8539aa8efab98846e7b0,EM ANÁLISE,"sem literal estático confirmado; pode haver uso dinâmico, evento ou compatibilidade"
+public/assets/v64/drones/drone_c_16.webp,89462,9d61f094921e7d65fdc3a7aeef56b09d13af5b63b0e549e5ee5f4c3d8f7cee65,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v64/drones/drone_common.webp,46618,42fcae9cca64bfeb58c1f4cd20bec4894be0630d85f6361008b8b0e53a3b8052,EM ANÁLISE,"sem literal estático confirmado; pode haver uso dinâmico, evento ou compatibilidade"
+public/assets/v64/drones/drone_common_16.webp,115390,79a7f3b10ac726bcd3726abe36cabc8a57784856b136f3e3b22b22b04814290f,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v64/drones/drone_d.webp,57682,623692b47d94223135e59e745e61e5ded047ed444b6af0c01fdbc13853ea20ac,EM ANÁLISE,"sem literal estático confirmado; pode haver uso dinâmico, evento ou compatibilidade"
+public/assets/v64/drones/drone_d_16.webp,115446,ca0cd83797ec1e79e52a7bacb531dc78931538ecb7b194cbaf515a18a2eab277,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v64/drones/drone_e.webp,53876,f19a179860fffe1c1ecdc39e7aed19333a17d7e2c32d5f9f7957aeb83215f129,EM ANÁLISE,"sem literal estático confirmado; pode haver uso dinâmico, evento ou compatibilidade"
+public/assets/v64/drones/drone_e_16.webp,111654,62f8f75ee33c5d5bc622a35b856f0b302499fc552c452b644813a19627b7a842,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v64/drones/drone_elite.webp,38666,06f399081ea64c96b85901be5b976b714feb4a61f29493a035258e89fbe4e496,EM ANÁLISE,"sem literal estático confirmado; pode haver uso dinâmico, evento ou compatibilidade"
+public/assets/v64/drones/drone_elite_16.webp,88292,8240bc07af96143d13315d8a88696a9036640e27bc55ac1dcdcaf6f3cbcf834d,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v65/aux/aux9.webp,44790,9910940ce25cdd9daadccc795056b697d53c6d01a84cb538d77ab42c04dd71ef,EM ANÁLISE,"sem literal estático confirmado; pode haver uso dinâmico, evento ou compatibilidade"
+public/assets/v65/aux/aux9_16.webp,739896,f4018c4cdcd4504fb4a801c8a2a47a143b6f13e1062f5ec35c910a966c3ae183,EM ANÁLISE,"sem literal estático confirmado; pode haver uso dinâmico, evento ou compatibilidade"
+public/assets/v65/aux/aux_00.webp,44790,9910940ce25cdd9daadccc795056b697d53c6d01a84cb538d77ab42c04dd71ef,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v65/aux/aux_01.webp,44214,c07294940c2bda99abb8729dde593b1aed9476f99cb9bee9ab9bbfaad715d158,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v65/aux/aux_02.webp,45296,6a26d684121b5e5efe884c257dd435e5ca5b0594c0c4296d0585e376b31a6c13,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v65/aux/aux_03.webp,48434,141a4f7e4ee801dfad5a4c0bbf0c56d3771f79fa334a5986f313cec1ba0941ca,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v65/aux/aux_04.webp,44424,d897397c58db88952932db6422e346839aff9744348ac93560e330b4d382b48f,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v65/aux/aux_05.webp,46508,af26641651e6527e937fc67194fa6701991ea8ac86d08ecc9a7c854214604985,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v65/aux/aux_06.webp,42468,6718d2da8f424d63f1b9d373296bbddac7ced7f4a2d969b98bc613583ec49418,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v65/aux/aux_07.webp,44766,a0777454c8497acba5e7324ea891bdd3a89672bcadf8e8eae72ea7965b45f495,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v65/aux/aux_08.webp,44564,61444343eb7beed50ea2acd1beb5434892357bae2c5c618b7c7bd4a703083917,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v65/aux/aux_09.webp,45036,6d6c65a24b7684ef83475c7ec0c4403498bb6b5274844d60a7a563509508eaab,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v65/aux/aux_10.webp,45830,1d36aef636798c42766d1c708bdb8cd55fd924e1b69e5bf1ddb5b6fe32494182,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v65/aux/aux_11.webp,44158,b77e0e4716e79260e2becd2d6a54cd4d93d382550cc234ba08618369c75038d6,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v65/aux/aux_12.webp,44534,e7d233ba6367f508f6441881c6d69f1b4b5824b1fcccf411c217eadc4c1c4b8e,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v65/aux/aux_13.webp,50388,328eb556ce30a06536e93be2b4d99e8789866b4961d0ffdd157223210dc96251,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v65/aux/aux_14.webp,45106,7c832b97e05c50c92d0489a4787f4729968625203685df3fceb44d12655e7373,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v65/aux/aux_15.webp,41818,22b78ed06be955fcd42ee0bc0744ed1bc0380f26fd3e94d8259562e516931912,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v65/drones/drone_a.webp,156116,8cbfe264c8753742a152990697f17eabf3411439285873d9e8b944980a56e313,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v65/drones/drone_b.webp,144136,b782c35e097fd58ecf23580de27b0782f95eb65ed6972cae1e1167fbaf1ea311,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v65/drones/drone_c.webp,142034,a101997af0e4b3865198792ba8a6f486583cfe5ff4c750fae0b5360021a94cb6,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v65/drones/drone_common.webp,118582,c27f4db26a96cbb25eec525137c0c7b574f563f489add5a5a7be7c9008a0ae1b,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v65/drones/drone_d.webp,145322,483c79d03d20af066d4a4e7627b45954dd2159cda1d8f102c21e20c7e1d1968f,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v65/drones/drone_e.webp,149150,7f383d6ead17e5e0e227438737920bce2956d3d62a02ea4fce22600be9a4353b,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v65/drones/drone_elite.webp,137368,a0e8bd0e80f88517695fdf9cb5b5fa853b27457434ac4b23784ead13fe37232f,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v65/manifest.json,3026,d7add7e6eed026c3a66775ac69cbe71289df7e75efab9605107290b6935d5fb2,EM ANÁLISE,"sem literal estático confirmado; pode haver uso dinâmico, evento ou compatibilidade"
+public/assets/v65/npcs/aiderStreuner.webp,147894,43ed236f6ace4f82eaac7cf1878456ff15c3532cfede12ef468b86d9d9c50ce5,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v65/npcs/bossLordakia.webp,139462,b5cbe34540fa3794d579a83772ec7936e4660ca84a7d62e8611d14286070b5e6,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v65/npcs/bossMordon.webp,91448,a22409dc80e69949eb9bf4096f251dabe19ccd327eee1e5cfab443b8092042d6,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v65/npcs/bossSaimon.webp,120152,ac0e0046a850462f63eae237de80cfa0c5762ba942a648ae459c4f3d6b394e6e,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v65/npcs/bossStreuner.webp,127114,3319690fc99b6f5c8546d86ca35e1c5ca06649b5e5bcd2073f4d0d400bab0060,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v65/npcs/devolarium.webp,84772,f03b11c28e25b3cabdeb764c367cdd35921de8c1db1d14caf20543085acc0da8,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v65/npcs/lordakia.webp,129398,97083387ef6f681f3634ac3eab4645927655b0997abc2b3d5f2229b4647d6d12,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v65/npcs/mordon.webp,136790,eb719b01cd10e95db0f57d2db63d9a02749b93a56a2350f7600860978b6df9c3,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v65/npcs/recruitStreuner.webp,85486,7365a041a8d48f065744b771d4d0268f6e983c653fc672fea3e5728690d9b41d,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v65/npcs/saimon.webp,138406,d104510c7defddf0d5e502bf072c175c885ab5e942eceab3d3d308760c04c57c,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v65/npcs/streuner.webp,131966,7ea52dcea9fd6a961d8e920e9db86236f050720a69568291b03203686f2670e0,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v65/ships/front/aegis.webp,168662,1f503bd94e99415bd92835bdaf217cc020828d4f5704d967b83573f3908cb0c8,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v65/ships/front/bigboy.webp,146162,457149f5a107b4ce58042a10e7a2f9b31f7f21421203f6f2c0adede420a39ada,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v65/ships/front/citadel.webp,187570,8217e220c5f19b26919077015fd2c2c51fb4be9b932198d21911ee9db7a8e0c1,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v65/ships/front/defcom.webp,132758,b10bd077b938c46767d8d60d343333ffc43660bc9129d8accdb330cdc177816e,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v65/ships/front/goliath.webp,175122,22eacfbe3fce01066e3d5adf4f28063a4a7f173d64323042fd25c05d0d3f729d,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v65/ships/front/leonov.webp,122748,1ec378eb6264e400cfceb84f1152fc7747718a3003ecda348082b1e796991866,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v65/ships/front/liberator.webp,151708,b73e5666ed8392c18ccb1fe43eadd7d39f752ab7235704de19d59671f2661b28,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v65/ships/front/nostromo.webp,149702,3483843464eeb1c9b22f87c3e255b581a64a163f724d4f2b20ab1a6c51149293,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v65/ships/front/phoenix.webp,126166,12680c9fc713f6adc4055fe083ea8f2695c0a3f1b6b4ef3727fbef2f5aa1b1d7,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v65/ships/front/piranha.webp,144196,b25b162653d77aeb78ea70b6a5eda540d5da72bbe05ed72d92e931cc55c54412,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v65/ships/front/spearhead.webp,121588,d328cad34335a127e065d8344a82f0523ce637a87c8e87988fed6f241f0c01b6,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v65/ships/front/vengeance.webp,147746,62476f8d6e1116a1d04be671df81d7930b66dda57e743fe6b6a56e9b7df91dc4,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v65/ships/front/yamato.webp,162354,914d7ce67ba94aa253f7008c8b2c5fef1a92d5ccd4d7374831fdf1b699665a11,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v65/ships/top/aegis.webp,148218,ad157b9bf027a1e68e0b1497b96c21531b0e849cb1b3a23f6c5388366aab4d52,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v65/ships/top/bigboy.webp,155770,24eceadc51459db4cd45818b61baffe2a622f5e2fe5c9530860adb6dffd894b6,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v65/ships/top/citadel.webp,196468,58acf002328e5abf1d306ff1fff05f2adc89befc559f6907db272d7607247a64,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v65/ships/top/defcom.webp,136774,4525959a1b0531725c230f68aaaa905891080b018da88dc592728a86422600c8,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v65/ships/top/goliath.webp,163560,66d9cb6edf530ced47ec770a6217d8d8520cd1f1afb3488fdeff27f241805ac5,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v65/ships/top/leonov.webp,129552,74981ed460b1993f461ef768a331de780f8fa2cb503cef6ab8be1cbca60d7001,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v65/ships/top/liberator.webp,148502,7a638b0a9090b54b1b0ba5756635d6628f0aaed63fdb9e4d622f4307cccd89c8,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v65/ships/top/nostromo.webp,174622,00c2176cc6614232eb0dbbe7b045b88ed064b922372b17a9819bb7c1c062a002,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v65/ships/top/phoenix.webp,149660,f7287ec22cb8de44dd668125b45bd40d4a8d1ed8a98897425320c0a5b5b4a92d,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v65/ships/top/piranha.webp,152824,9ca7397d7d359a48aae2b531e010b54063d6db55b5a6bf77b95e5ad2cbed1b96,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v65/ships/top/spearhead.webp,137078,38807254aed5a637d531007b474f0695f89e12302585a73ad514b1b34acf7349,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v65/ships/top/vengeance.webp,147312,4732e554264abdb4ebaf2278a6631229e26bf5f442ad01fbf83efc2f41f8b6c4,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v65/ships/top/yamato.webp,158752,83a27daf7ea5fe6d5a306659e43c1d572638ef8eccb8ffeda0f86d173ca9662b,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v66/aux/aux9.webp,44790,9910940ce25cdd9daadccc795056b697d53c6d01a84cb538d77ab42c04dd71ef,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v66/aux/aux9_16.webp,739896,f4018c4cdcd4504fb4a801c8a2a47a143b6f13e1062f5ec35c910a966c3ae183,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v66/aux/aux_00.webp,44790,9910940ce25cdd9daadccc795056b697d53c6d01a84cb538d77ab42c04dd71ef,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v66/aux/aux_01.webp,44214,c07294940c2bda99abb8729dde593b1aed9476f99cb9bee9ab9bbfaad715d158,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v66/aux/aux_02.webp,45296,6a26d684121b5e5efe884c257dd435e5ca5b0594c0c4296d0585e376b31a6c13,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v66/aux/aux_03.webp,48434,141a4f7e4ee801dfad5a4c0bbf0c56d3771f79fa334a5986f313cec1ba0941ca,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v66/aux/aux_04.webp,44424,d897397c58db88952932db6422e346839aff9744348ac93560e330b4d382b48f,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v66/aux/aux_05.webp,46508,af26641651e6527e937fc67194fa6701991ea8ac86d08ecc9a7c854214604985,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v66/aux/aux_06.webp,42468,6718d2da8f424d63f1b9d373296bbddac7ced7f4a2d969b98bc613583ec49418,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v66/aux/aux_07.webp,44766,a0777454c8497acba5e7324ea891bdd3a89672bcadf8e8eae72ea7965b45f495,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v66/aux/aux_08.webp,44564,61444343eb7beed50ea2acd1beb5434892357bae2c5c618b7c7bd4a703083917,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v66/aux/aux_09.webp,45036,6d6c65a24b7684ef83475c7ec0c4403498bb6b5274844d60a7a563509508eaab,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v66/aux/aux_10.webp,45830,1d36aef636798c42766d1c708bdb8cd55fd924e1b69e5bf1ddb5b6fe32494182,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v66/aux/aux_11.webp,44158,b77e0e4716e79260e2becd2d6a54cd4d93d382550cc234ba08618369c75038d6,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v66/aux/aux_12.webp,44534,e7d233ba6367f508f6441881c6d69f1b4b5824b1fcccf411c217eadc4c1c4b8e,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v66/aux/aux_13.webp,50388,328eb556ce30a06536e93be2b4d99e8789866b4961d0ffdd157223210dc96251,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v66/aux/aux_14.webp,45106,7c832b97e05c50c92d0489a4787f4729968625203685df3fceb44d12655e7373,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v66/aux/aux_15.webp,41818,22b78ed06be955fcd42ee0bc0744ed1bc0380f26fd3e94d8259562e516931912,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v66/drones/drone_a.webp,74780,f9c54be4c45d80a8d5be733dfd42c3997be23cc5f5ccd9bfd6f9341ce5a1f55f,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v66/drones/drone_b.webp,88896,724bee7b2c97ebf0ba674e969f33ea66b034ec4caec29f808481e802fb9b1973,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v66/drones/drone_c.webp,80650,1571b1e8557bbbb15100c96209fb2893b4ef38382f154a88c5d6221cd299fc2a,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v66/drones/drone_common.webp,65446,d833404c524fc647f0760c2f0955628722f3b1b1c0d2c63821f814d3e3556b16,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v66/drones/drone_d.webp,85598,b32f1fe58b2f43b82e3eb8fb1210593409a4b4563c1ab7a597bc3c77aa96f4b5,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v66/drones/drone_e.webp,92396,3b2a12b6e80e9d3b08c1f64cc2c475fb11c8221ef631f92e3a0bd4f11a7927c1,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v66/drones/drone_elite.webp,68282,7b14a692a0eee279805d35ae6d5937a735861d26e690e58aabc8457d4d5bc6bd,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v66/manifest.json,3025,9ac8ce7548519d6de38f0dc2dcf4e80722773a865d9a697f9fdc5e6164807930,EM ANÁLISE,"sem literal estático confirmado; pode haver uso dinâmico, evento ou compatibilidade"
+public/assets/v66/npcs/aiderStreuner.webp,87340,01ffcc917e21da71141bbf8f541fe405c5b119d7ac2e2cb728ae50f7cf90be9e,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v66/npcs/bossLordakia.webp,83986,3cd4e1aadae32f74ffa5961d0aea83e85be66118e88b0ca92ce199a68e20129c,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v66/npcs/bossMordon.webp,79300,d1e220c5c0cd3a5904bec2e3c97c77beb936a7d424794eb1875ab677252e88a0,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v66/npcs/bossSaimon.webp,89906,00bad1b7a4950f4087a5937289d3d04ebdddc600ca86db9db1c1a60a7bcf1b64,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v66/npcs/bossStreuner.webp,80474,e4c59e118d1873efb6356a638e6344e6a19d049cba0a1ddf48542ad97b671ee8,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v66/npcs/devolarium.webp,84772,f03b11c28e25b3cabdeb764c367cdd35921de8c1db1d14caf20543085acc0da8,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v66/npcs/lordakia.webp,85706,55d165adfcf6f030571ab577f4beff00859243c2dc28fd564e1fd13051072462,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v66/npcs/mordon.webp,77556,2d7351b54269b3c68acb490948dc78167c39c428947248ca9e0177cbe15f8a17,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v66/npcs/recruitStreuner.webp,63536,84aa049c75e3ce73c86bea6f74e08523440f6a533a17c725531e0a2107e14eeb,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v66/npcs/saimon.webp,81080,8c40936539c75627fdc96a01e25cf098a8eb1c58ccc9f015504892666580debf,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v66/npcs/streuner.webp,79058,2c269a270ce246415f3a1249d0d168215b3efcb358ef7aee20dbebdc5e18a0c4,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v66/ships/front/aegis.webp,78808,4dd1b2b891d36e4b66ff6c0fbf7ed68db2050e963bdcda7a710001c39f351065,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v66/ships/front/bigboy.webp,68152,fd0e9629239b620261ca57dffc1ec7b68c7a1f017dcd59702be6268d97245922,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v66/ships/front/citadel.webp,37052,f9f8d335ec4e9fdfed953dfbc8df882089d026fe165cbbd468a545655db6dd86,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v66/ships/front/defcom.webp,71664,40443234d26c57d64737288b11935bd36a03cd4e5456dc133160c051913fcf2b,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v66/ships/front/goliath.webp,84814,cbb2c19d335a9ee0c35d05aafa9d113eff20779e7a51ac8f3c1b4180ee0e9e03,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v66/ships/front/leonov.webp,68894,cbd9e17f23e245d8ccb653be62e733431d2f49fa6923f7c5d2bcd26783a1f41c,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v66/ships/front/liberator.webp,69508,4e500bae4514deaf9b138b7e7b9d23b7651672bd38b7752e1a4420797d715d42,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v66/ships/front/nostromo.webp,82620,4e06a15698f1e95c92fc471fbc9091922b3e14c1abfe621bd76f50ce2eb58a4e,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v66/ships/front/phoenix.webp,68686,781135203a05556727633112a5defbdb52285e37f3886f3bc0a0201e9d533c60,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v66/ships/front/piranha.webp,65164,a2d0b2c75b21ec6469d452bace9fb0c8e689477151832b6317cad61e1135a30f,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v66/ships/front/spearhead.webp,71292,c0ac6cabb5feb3ee711b8bfbf1bd36f2f4c4229ccdfcfcf3a383b81c3d1dad7f,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v66/ships/front/vengeance.webp,77018,627747feab0eaccbe46b8dacc4a5a46d1ef02f27f9d496811b9a03b50eba7b3e,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v66/ships/front/yamato.webp,77294,cfb181158f51c33f383d4929c4fe97285aad2f250c81eaeec7b421574600b4ce,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v66/ships/top/aegis.webp,83246,9821abc239bd3429a174bf28a644d005bfcfa5b9b5790365cdfe81f4536a52b8,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v66/ships/top/bigboy.webp,70730,d5f48736be4688e2e3ca58b636bc0fb6d37c463bcde27f2a64c0b1b2075368ec,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v66/ships/top/citadel.webp,78132,0829aa483340178652cca1975361258154a87ce66504d854aefd274373694831,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v66/ships/top/defcom.webp,71004,6a12d41f83603a89c01b65644ab67a0897da2f8c93e2b4d0cf36b3ac297b9fe4,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v66/ships/top/goliath.webp,100652,9f3a5abaa334b1fe73e44b9ba0be3e78c8d5b8172b3a5bd53fc1d78f6f467ebe,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v66/ships/top/leonov.webp,70124,038cc16601a773aab319853d2b7991ee56c1ff2c74bb29c76e3717a1614056e3,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v66/ships/top/liberator.webp,73660,0e7d71425e266b20df399b12aca9e6bbfc65f67b6066e77a91644397a9bae12d,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v66/ships/top/nostromo.webp,95838,9f3a5e4c99e17ccb483dcf60c1ff7c7352bd21f20ccdc27599ae9acec388372b,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v66/ships/top/phoenix.webp,79988,32ed053f9db4fed074fd2e93d1050c320f834409593d002a8de1be4e5682c914,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v66/ships/top/piranha.webp,70156,dea5cf53b4b70a007d367aee4bc698e2e9f2f44a0a014384245a9c0ff6eefaf3,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v66/ships/top/spearhead.webp,72500,e8df0b6b7a8526389cbb37cb683372ac20ad20697f8ca416e5789406fe3dfc79,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v66/ships/top/vengeance.webp,87302,a31623588df321e2508efea5e667b889478a879285aadbd64232a9af7bf198b3,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v66/ships/top/yamato.webp,98958,792839cc24ce92884ac73ff44079e07ec34f9839489ccdfd8aefc8c529c83c6e,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v67/manifest.json,1964,76a22c8adde5e29e90f896850e37be800c318f440c7a6032afb7184318919b62,EM ANÁLISE,"sem literal estático confirmado; pode haver uso dinâmico, evento ou compatibilidade"
+public/assets/v67/npcs/aiderStreuner.webp,62548,6ac5256e4ab66fcb14d42ca43ca522c60edbc48c782ef8f28c6775389f501196,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v67/npcs/apexOverlord.webp,290070,daa9f854d33d394be7f4f0d8a0264728ef2728650d35c11a399253bc2af2b450,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v67/npcs/astralReaper.webp,162324,9ef8efd44e680aa577f02fea72164051b6a1d1e3f225b0a95acbe667fbc6a9ad,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v67/npcs/bossAstralReaper.webp,218114,51d7e043323e26aa13f3ec67b4dc655c79676c31acb63cf185b5dcd3d470c3de,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v67/npcs/bossDevolarium.webp,117532,4a19fa346b51ba8e7ed1604891134a348bc8a1ddbe2b63f7b2e843d0b09f3a57,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v67/npcs/bossEmberFang.webp,285906,c5ef8b70d730595c6dabff4ee50a23326a93b2fa11edd8c4e0b001e689123719,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v67/npcs/bossIronWasp.webp,282518,75192e07396542bc626d043a64d2c0e4c440520d444cc212bed7c5bbb37a5c4b,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v67/npcs/bossLordakia.webp,96722,5cc5687f54c3a75d0a4d4c018ecdcbeabdbf2065fb11eb12fa307b53d46bd082,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v67/npcs/bossMordon.webp,98670,ee7c469a5d75223e2c4e634b84fbec7b382369230d34413ffd25a07aff0fe615,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v67/npcs/bossNexusWarden.webp,187096,7b507d372566952ab719760f10aff72592ef1f9b4611c9021eee9b6dcd9a0103,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v67/npcs/bossObsidianPike.webp,291020,89a9e33309408eb386e19aefc05c218a85dccafcddf7d5a1857bbde04636d05f,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v67/npcs/bossRiftMauler.webp,305426,37ed0e7a6c7f0ffc45db72ec63c14303c7fefe90377ee74a95ce15713317314b,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v67/npcs/bossRiftScout.webp,141640,e745cfad4be76e537be48bfd773966494527be034585467a9c864c08a8042a6d,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v67/npcs/bossSaimon.webp,97998,385b9e37fb06fafe773403b0fb271c3ed61604547c5a4bc967bce6c539ccd857,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v67/npcs/bossSibelon.webp,262594,6f22d072bf7c74e4a6dab0d64f5b336175101a016674c13e2f2ddfeb9a443402,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v67/npcs/bossStreuner.webp,98414,ebae6327050f2468d286e1fdd6ec023d5e14d7f1f9fe8c20db8c8c95f367b30b,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v67/npcs/bossVoidCorsair.webp,164244,a14f17b9d31436e61560436da338091ca21bc0012ff25dfaae85d93c146d4f9b,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v67/npcs/devolarium.webp,69110,50a4f04adfffa0559cdba208dfd6a90fab5d2ed2379a0c85858d78ba10ed6895,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v67/npcs/emberFang.webp,98904,dc296d36cd10353d2a05bf8407b3f5bbd8fdf91a71569ded27870110f1c13e58,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v67/npcs/ironWasp.webp,134134,c7fc248b02bb69a83dc9b23ee9846afbcfc1425ff6ca02c9d85128a7eea8ca9f,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v67/npcs/lordakia.webp,68632,8561b0965da7fc7f9bccf31afdf29e6770469ad56502366c9187e05bc3547003,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v67/npcs/mordon.webp,65072,f76d26b7783a12240650c155b688c024cb59d5e42a482c7f15d2477baf7c1e78,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v67/npcs/nexusWarden.webp,153596,1950db69b3cb90c41d4dd1cda417e4666e8da43a07fc13450619073276ab1802,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v67/npcs/obsidianPike.webp,122194,f4932326895f2fe5b75abc9ce6c408aea079dee2f2c2ff7302999777b2c072b7,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v67/npcs/recruitStreuner.webp,46114,f20ba2607dc99fd752fd1a0f001f1af935d4bbec1d879beccbfa1ba961deb3b1,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v67/npcs/riftMauler.webp,176452,54ef8c345a3e504313d97dc050de6c89ce35c61d1308157c9207f2b7174c3c8c,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v67/npcs/riftScout.webp,84128,4df0d16534d0e5b86d86c17e90c847ac15b64a44eaa58352e1456d9a108a272f,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v67/npcs/saimon.webp,63906,affd70c53c8e3f4864681a9fe8ce5b869cefea9f0541f220cf45cde9c9e4c2c6,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v67/npcs/sentinelScavenger.webp,92482,b13d57845dfaa4dd2be6505a303c27c7af3fe88748e5c076517766a4e2f283a8,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v67/npcs/sentinelScout.webp,78048,60ce48b0d5429d75dddafbd665245612db8dd78e027a0887c08fdc12a724713b,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v67/npcs/sentinelSupport.webp,113906,2271072024c037ee2718a5f0438316a37de8262780f7cc4bd08d5cb48c02e952,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v67/npcs/sibelon.webp,152344,b0d7987c4687ee5afd69262319457def311bc2e81c060ea924d4058fbbfbcdfc,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v67/npcs/streuner.webp,54094,5fcb0c2a9b983ca0615e755a3a4ef5d6fb28c5d1813150205041e44224393156,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v67/npcs/voidCorsair.webp,105916,42f78d662a239baf45220ef247bbcdbd19dbff654d5f34e7183d08cdc38a03f6,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v8/loot/energy.png,141551,d60ed368bb3dd07f07870b20eaa03897fbd2cc914f010cdb621c7e84e66138f6,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v8/loot/mystery-box.png,191221,4bddd208f510e10daf261b55c0bb0bf413f4ba996b7023b9dac86444921edce3,ATIVO,referência textual em manifestos ou código de execução
+public/assets/v8/loot/repair.png,158671,881e58428bf4404267812bd412bc073cbbd42001509dd4ba2db2bb3ae9b6dae3,ATIVO,referência textual em manifestos ou código de execução

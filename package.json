@@ -1,6 +1,6 @@
 {
   "name": "stellar-legacy",
-  "version": "47.7.25",
+  "version": "47.7.26",
   "type": "module",
   "scripts": {
     "start": "node server/index.js",
@@ -19,5 +19,5 @@
   "engines": {
     "node": ">=18"
   },
-  "release": "V69 — Animações 2D/2.5D: seis portais, três bases, três níveis de relés"
+  "release": "V70 — Otimização gráfica V3: resolução adaptativa, prévias centralizadas, fundos compartilhados"
 }

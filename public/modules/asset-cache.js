@@ -2,10 +2,13 @@
 // Não acessa a rede, o DOM, timers nem dados de usuário diretamente: dependências injetadas.
 // Nunca descarte sprites de naves, NPCs, drones ou AUX via limpeza automática.
 
-const ASSET_REVISION = '34.7.0';
+const ASSET_REVISION = '34.7.0'; // Somente caminhos legados sem versão no nome.
 export function versionedAssetUrl(path) {
   const value=String(path||'');
   if(!value)return value;
+  // Só os diretórios explicitamente imutáveis recebem URL estável.
+  // V17–V67 tiveram arquivos substituídos no mesmo caminho: continuam com revisão.
+  if(/^\/assets\/animations\/v69\//.test(value))return value;
   const revision=value.includes('/assets/v18/bonus/')?'18.2.8':ASSET_REVISION;
   return value.includes('?')?`${value}&asset=${revision}`:`${value}?asset=${revision}`;
 }
@@ -124,7 +127,9 @@ export function createAssetCache({
   function stats() {
     return {count:images.size, failed:failedAt.size,
       entities:[...images.keys()].filter(entityAssetPath).length,
-      scenes:[...images.keys()].filter(isSceneAsset).length};
+      scenes:[...images.keys()].filter(isSceneAsset).length,
+      // Estimativa mínima RGBA 4 bytes/pixel; não equivale à memória total da GPU.
+      decodedRgbaBytesEstimate:[...images.values()].reduce((sum,img)=>sum+(img.naturalWidth||0)*(img.naturalHeight||0)*4,0)};
   }
   return {requestAssetImage,trimAssetCache,discardUnusedForQuality,stats};
 }
