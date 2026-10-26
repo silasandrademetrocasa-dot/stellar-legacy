@@ -1,6 +1,6 @@
 {
   "name": "stellar-legacy",
-  "version": "47.7.30",
+  "version": "47.7.31",
   "type": "module",
   "scripts": {
     "start": "node server/index.js",
@@ -19,5 +19,5 @@
   "engines": {
     "node": ">=18"
   },
-  "release": "V74 — renderização móvel estável, relés centralizados e redução de custo da composição"
+  "release": "V75 — diagnóstico local A/B de desenho por camada, restauração automática"
 }

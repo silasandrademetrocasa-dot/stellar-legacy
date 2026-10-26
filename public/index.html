@@ -6,20 +6,20 @@
 <meta content="width=device-width,initial-scale=1,user-scalable=no,viewport-fit=cover" name="viewport"/>
 <meta content="#030816" name="theme-color"/>
 <title>Stellar Legacy</title>
-<link rel="manifest" href="/manifest.webmanifest?v=47.7.30"/>
+<link rel="manifest" href="/manifest.webmanifest?v=47.7.31"/>
 <link rel="icon" type="image/png" href="/icons/stellar-192.png"/>
 <link rel="apple-touch-icon" href="/icons/stellar-192.png"/>
-<link href="/style.css?v=47.7.30" rel="stylesheet"/>
+<link href="/style.css?v=47.7.31" rel="stylesheet"/>
   <link rel="stylesheet" href="/modules/topbar-navigation-v481.css?v=48.1.0">
   <link rel="stylesheet" href="/modules/pilot-ship-hud-v482.css?v=48.2.6">
   <link rel="stylesheet" href="/modules/route-map-layout-v4825.css?v=48.2.5">
   <link rel="stylesheet" href="/modules/stellar-premium-ui-v55.css?v=47.7.13">
   <link rel="stylesheet" href="/modules/stellar-premium-ui-v56.css?v=47.7.13">
-  <link rel="stylesheet" href="/modules/stellar-admin-v57.css?v=47.7.30">
+  <link rel="stylesheet" href="/modules/stellar-admin-v57.css?v=47.7.31">
   <link rel="stylesheet" href="/modules/stellar-refinement-v58.css?v=47.7.13">
-  <link rel="stylesheet" href="/modules/stellar-refinement-v59.css?v=47.7.30">
-  <link rel="stylesheet" href="/modules/stellar-showcase-v61.css?v=47.7.30">
-  <link rel="stylesheet" href="/modules/stellar-fleet-v62.css?v=47.7.30">
+  <link rel="stylesheet" href="/modules/stellar-refinement-v59.css?v=47.7.31">
+  <link rel="stylesheet" href="/modules/stellar-showcase-v61.css?v=47.7.31">
+  <link rel="stylesheet" href="/modules/stellar-fleet-v62.css?v=47.7.31">
 </head>
 <body>
 <div class="stellar-boot-splash" id="stellarBootSplash" role="status" aria-label="Preparando Stellar Legacy">
@@ -855,6 +855,7 @@
   </div>
 </div>
 
+<button id="visualDiagFloatingV75" class="visual-diag-floating-v75 hidden" type="button" aria-label="Restaurar visual padrão">V75: RESTAURAR</button>
 <div class="modal hidden" id="configModal">
   <div class="modal-card settings-modal-card premium-settings-card">
     <div class="modal-header">
@@ -918,6 +919,27 @@
           <button type="button" class="ghost-btn" id="perfDiagReset" disabled>Reiniciar amostras</button>
         </div>
         <small class="perf-diag-notice" id="perfDiagStatus">Desligado. O relatório é local e não inclui dados de login. *Espera é estimada e inclui o limite de FPS e o agendamento do navegador, não mede GPU.</small>
+      </section>
+
+      <section class="settings-section perf-diagnostics-section" id="visualDiagSectionV75">
+        <div class="settings-title"><div><b>V75 — ISOLAMENTO VISUAL A/B</b><small>Testa uma parte do desenho por vez, sem desligar a lógica do jogo. Uso temporário para investigação.</small></div></div>
+        <label for="visualDiagSelectV75">CENÁRIO DE TESTE (35 SEGUNDOS)</label>
+        <select id="visualDiagSelectV75" class="visual-diag-select-v75">
+          <option value="normal">1. Controle: desenho normal</option>
+          <option value="scenery">2. Sem fundo modular (cor escura)</option>
+          <option value="baseportal">3. Sem desenho de bases/portais</option>
+          <option value="relay">4. Sem desenho de relés</option>
+          <option value="effects">5. Sem efeitos visuais opcionais</option>
+          <option value="minimap">6. Sem desenho do minimapa</option>
+          <option value="hud">7. Sem painéis secundários HUD</option>
+        </select>
+        <div class="perf-diag-actions">
+          <button type="button" class="small-btn" id="visualDiagStartV75">INICIAR TESTE E VOLTAR AO MAPA</button>
+          <button type="button" class="ghost-btn" id="visualDiagStopV75">RESTAURAR VISUAL</button>
+          <button type="button" class="ghost-btn" id="visualDiagClearV75">LIMPAR RESULTADOS A/B</button>
+        </div>
+        <small class="perf-diag-notice" id="visualDiagStatusV75">Pronto. Inicie, feche Configurações e permaneça 35 s no mesmo mapa, orientação e qualidade.</small>
+        <small class="perf-diag-notice">Não teste em combate! Os modos de isolamento ocultam apenas desenhos, mas podem esconder alvos ou portais. Lógica, servidores e hitboxes continuam funcionando. A restauração é automática, ou toque em RESTAURAR.</small>
       </section>
       <section class="settings-section">
         <div class="settings-title"><div><b>ÁUDIO</b><small>Laser, mísseis, impactos, explosões, alertas e efeitos do jogo.</small></div><span id="audioVolumeValue">70%</span></div>
@@ -1154,10 +1176,10 @@
 </div>
 </div>
 <div class="perf-diag-overlay hidden" id="perfDiagOverlay" aria-live="off" aria-label="Contador de FPS local"><b id="perfDiagHudFps">FPS —</b><small id="perfDiagHudStutter">P95 —</small></div>
-<script src="/game.js?v=47.7.30" type="module"></script>
-<script src="/modules/stellar-admin-v57.js?v=47.7.30" type="module"></script>
-<script type="module" src="/modules/astral-rewards-v381.js?v=47.7.30"></script>
-<script type="module" src="/modules/unified-expansion-v42.js?v=47.7.30"></script>
+<script src="/game.js?v=47.7.31" type="module"></script>
+<script src="/modules/stellar-admin-v57.js?v=47.7.31" type="module"></script>
+<script type="module" src="/modules/astral-rewards-v381.js?v=47.7.31"></script>
+<script type="module" src="/modules/unified-expansion-v42.js?v=47.7.31"></script>
   <script type="module" src="/modules/topbar-navigation-v481.js?v=48.1.0"></script>
   <script type="module" src="/modules/pilot-ship-hud-v482.js?v=48.2.6"></script>
 </body>

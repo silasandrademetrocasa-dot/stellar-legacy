@@ -4985,3 +4985,9 @@ body[data-device="mobile"][data-quality="high"] .portal-prompt {
 body[data-device="mobile"] .target-lock-hud,
 body[data-device="mobile"] #minimapPanel,
 body[data-device="mobile"] .hud-panel {contain:style;}
+
+/* V75: recursos visuais temporários, sem tocar em controles críticos de combate */
+.visual-diag-select-v75{display:block;width:100%;padding:10px;border-radius:9px;background:#101a2b;color:#e4f8ff;border:1px solid #3d6a83;margin:8px 0 12px;}
+.visual-diag-floating-v75{position:fixed;bottom:74px;left:8px;z-index:10005;background:#0c3045;color:#eaffff;border:1px solid #4dd8e7;border-radius:10px;padding:8px 12px;font:bold 11px Arial;max-width:220px;box-shadow:0 2px 12px #0009;}
+body[data-visual-test-v75="hud"] :is(#activityPanel,#chatDock,#activeMissionPanel,#petFloatPanel,#gateHud){visibility:hidden!important;}
+body[data-visual-test-v75="minimap"] #minimapPanel{visibility:hidden!important;}
