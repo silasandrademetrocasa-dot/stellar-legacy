@@ -1,6 +1,6 @@
 {
   "name": "stellar-legacy",
-  "version": "47.7.20",
+  "version": "47.7.21",
   "type": "module",
   "scripts": {
     "start": "node server/index.js",
@@ -19,5 +19,5 @@
   "engines": {
     "node": ">=18"
   },
-  "release": "V63 Galactic Fleet — GLB 2D/3D visual consistency"
+  "release": "V65 — Nova Frota 2D, NPCs, Drones e AUX animado"
 }
