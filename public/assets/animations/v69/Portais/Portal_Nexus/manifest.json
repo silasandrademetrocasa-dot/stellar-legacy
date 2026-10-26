@@ -1,0 +1,31 @@
+{
+  "name": "Portal_Nexus",
+  "frameCount": 8,
+  "fps": 5.3,
+  "frameSize": [
+    256,
+    256
+  ],
+  "center": [
+    128,
+    128
+  ],
+  "staticShell": "base.webp",
+  "frames": [
+    "/assets/animations/v69/Portais/Portal_Nexus/frames/frame_00.webp",
+    "/assets/animations/v69/Portais/Portal_Nexus/frames/frame_01.webp",
+    "/assets/animations/v69/Portais/Portal_Nexus/frames/frame_02.webp",
+    "/assets/animations/v69/Portais/Portal_Nexus/frames/frame_03.webp",
+    "/assets/animations/v69/Portais/Portal_Nexus/frames/frame_04.webp",
+    "/assets/animations/v69/Portais/Portal_Nexus/frames/frame_05.webp",
+    "/assets/animations/v69/Portais/Portal_Nexus/frames/frame_06.webp",
+    "/assets/animations/v69/Portais/Portal_Nexus/frames/frame_07.webp"
+  ],
+  "coreClipRadiusPx": 55,
+  "quality": {
+    "low": "static",
+    "medium": "core",
+    "high": "core+glow"
+  },
+  "note": "Outer ring remains static; animated frames are clipped to the inner nucleus"
+}

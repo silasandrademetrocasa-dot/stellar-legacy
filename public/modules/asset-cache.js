@@ -2,7 +2,7 @@
 // Não acessa a rede, o DOM, timers nem dados de usuário diretamente: dependências injetadas.
 // Nunca descarte sprites de naves, NPCs, drones ou AUX via limpeza automática.
 
-const ASSET_REVISION = '34.6.0';
+const ASSET_REVISION = '34.7.0';
 export function versionedAssetUrl(path) {
   const value=String(path||'');
   if(!value)return value;
@@ -28,7 +28,7 @@ export function coreAssetPath(path) {
 }
 function isSceneAsset(path) {
   // Fundos, portais e minério. Só se limpa depois de ficar muito tempo sem ser utilizado.
-  return /\/assets\/(?:v17\/environment|mapas)\//.test(String(path||''));
+  return /\/assets\/(?:v17\/environment|mapas|animations)\//.test(String(path||''));
 }
 
 export function createAssetCache({

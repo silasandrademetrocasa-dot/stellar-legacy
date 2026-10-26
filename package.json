@@ -1,6 +1,6 @@
 {
   "name": "stellar-legacy",
-  "version": "47.7.24",
+  "version": "47.7.25",
   "type": "module",
   "scripts": {
     "start": "node server/index.js",
@@ -19,5 +19,5 @@
   "engines": {
     "node": ">=18"
   },
-  "release": "V68 — checkup de enquadramento dos sprites NPC, limpeza de fragmentos e base acumulativa para novos mapas"
+  "release": "V69 — Animações 2D/2.5D: seis portais, três bases, três níveis de relés"
 }

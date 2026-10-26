@@ -1,0 +1,360 @@
+{
+  "version": "47.7.25",
+  "portals": {
+    "Portal_Comum": {
+      "name": "Portal_Comum",
+      "frameCount": 8,
+      "fps": 5.3,
+      "frameSize": [
+        256,
+        256
+      ],
+      "center": [
+        128,
+        128
+      ],
+      "staticShell": "base.webp",
+      "frames": [
+        "/assets/animations/v69/Portais/Portal_Comum/frames/frame_00.webp",
+        "/assets/animations/v69/Portais/Portal_Comum/frames/frame_01.webp",
+        "/assets/animations/v69/Portais/Portal_Comum/frames/frame_02.webp",
+        "/assets/animations/v69/Portais/Portal_Comum/frames/frame_03.webp",
+        "/assets/animations/v69/Portais/Portal_Comum/frames/frame_04.webp",
+        "/assets/animations/v69/Portais/Portal_Comum/frames/frame_05.webp",
+        "/assets/animations/v69/Portais/Portal_Comum/frames/frame_06.webp",
+        "/assets/animations/v69/Portais/Portal_Comum/frames/frame_07.webp"
+      ],
+      "coreClipRadiusPx": 55,
+      "quality": {
+        "low": "static",
+        "medium": "core",
+        "high": "core+glow"
+      },
+      "note": "Outer ring remains static; animated frames are clipped to the inner nucleus"
+    },
+    "Portal_PvP": {
+      "name": "Portal_PvP",
+      "frameCount": 8,
+      "fps": 5.3,
+      "frameSize": [
+        256,
+        256
+      ],
+      "center": [
+        128,
+        128
+      ],
+      "staticShell": "base.webp",
+      "frames": [
+        "/assets/animations/v69/Portais/Portal_PvP/frames/frame_00.webp",
+        "/assets/animations/v69/Portais/Portal_PvP/frames/frame_01.webp",
+        "/assets/animations/v69/Portais/Portal_PvP/frames/frame_02.webp",
+        "/assets/animations/v69/Portais/Portal_PvP/frames/frame_03.webp",
+        "/assets/animations/v69/Portais/Portal_PvP/frames/frame_04.webp",
+        "/assets/animations/v69/Portais/Portal_PvP/frames/frame_05.webp",
+        "/assets/animations/v69/Portais/Portal_PvP/frames/frame_06.webp",
+        "/assets/animations/v69/Portais/Portal_PvP/frames/frame_07.webp"
+      ],
+      "coreClipRadiusPx": 55,
+      "quality": {
+        "low": "static",
+        "medium": "core",
+        "high": "core+glow"
+      },
+      "note": "Outer ring remains static; animated frames are clipped to the inner nucleus"
+    },
+    "Portal_Universo": {
+      "name": "Portal_Universo",
+      "frameCount": 8,
+      "fps": 5.3,
+      "frameSize": [
+        256,
+        256
+      ],
+      "center": [
+        128,
+        128
+      ],
+      "staticShell": "base.webp",
+      "frames": [
+        "/assets/animations/v69/Portais/Portal_Universo/frames/frame_00.webp",
+        "/assets/animations/v69/Portais/Portal_Universo/frames/frame_01.webp",
+        "/assets/animations/v69/Portais/Portal_Universo/frames/frame_02.webp",
+        "/assets/animations/v69/Portais/Portal_Universo/frames/frame_03.webp",
+        "/assets/animations/v69/Portais/Portal_Universo/frames/frame_04.webp",
+        "/assets/animations/v69/Portais/Portal_Universo/frames/frame_05.webp",
+        "/assets/animations/v69/Portais/Portal_Universo/frames/frame_06.webp",
+        "/assets/animations/v69/Portais/Portal_Universo/frames/frame_07.webp"
+      ],
+      "coreClipRadiusPx": 55,
+      "quality": {
+        "low": "static",
+        "medium": "core",
+        "high": "core+glow"
+      },
+      "note": "Outer ring remains static; animated frames are clipped to the inner nucleus"
+    },
+    "Portal_Aurora": {
+      "name": "Portal_Aurora",
+      "frameCount": 8,
+      "fps": 5.3,
+      "frameSize": [
+        256,
+        256
+      ],
+      "center": [
+        128,
+        128
+      ],
+      "staticShell": "base.webp",
+      "frames": [
+        "/assets/animations/v69/Portais/Portal_Aurora/frames/frame_00.webp",
+        "/assets/animations/v69/Portais/Portal_Aurora/frames/frame_01.webp",
+        "/assets/animations/v69/Portais/Portal_Aurora/frames/frame_02.webp",
+        "/assets/animations/v69/Portais/Portal_Aurora/frames/frame_03.webp",
+        "/assets/animations/v69/Portais/Portal_Aurora/frames/frame_04.webp",
+        "/assets/animations/v69/Portais/Portal_Aurora/frames/frame_05.webp",
+        "/assets/animations/v69/Portais/Portal_Aurora/frames/frame_06.webp",
+        "/assets/animations/v69/Portais/Portal_Aurora/frames/frame_07.webp"
+      ],
+      "coreClipRadiusPx": 55,
+      "quality": {
+        "low": "static",
+        "medium": "core",
+        "high": "core+glow"
+      },
+      "note": "Outer ring remains static; animated frames are clipped to the inner nucleus"
+    },
+    "Portal_Nexus": {
+      "name": "Portal_Nexus",
+      "frameCount": 8,
+      "fps": 5.3,
+      "frameSize": [
+        256,
+        256
+      ],
+      "center": [
+        128,
+        128
+      ],
+      "staticShell": "base.webp",
+      "frames": [
+        "/assets/animations/v69/Portais/Portal_Nexus/frames/frame_00.webp",
+        "/assets/animations/v69/Portais/Portal_Nexus/frames/frame_01.webp",
+        "/assets/animations/v69/Portais/Portal_Nexus/frames/frame_02.webp",
+        "/assets/animations/v69/Portais/Portal_Nexus/frames/frame_03.webp",
+        "/assets/animations/v69/Portais/Portal_Nexus/frames/frame_04.webp",
+        "/assets/animations/v69/Portais/Portal_Nexus/frames/frame_05.webp",
+        "/assets/animations/v69/Portais/Portal_Nexus/frames/frame_06.webp",
+        "/assets/animations/v69/Portais/Portal_Nexus/frames/frame_07.webp"
+      ],
+      "coreClipRadiusPx": 55,
+      "quality": {
+        "low": "static",
+        "medium": "core",
+        "high": "core+glow"
+      },
+      "note": "Outer ring remains static; animated frames are clipped to the inner nucleus"
+    },
+    "Portal_Eclipse": {
+      "name": "Portal_Eclipse",
+      "frameCount": 8,
+      "fps": 5.3,
+      "frameSize": [
+        256,
+        256
+      ],
+      "center": [
+        128,
+        128
+      ],
+      "staticShell": "base.webp",
+      "frames": [
+        "/assets/animations/v69/Portais/Portal_Eclipse/frames/frame_00.webp",
+        "/assets/animations/v69/Portais/Portal_Eclipse/frames/frame_01.webp",
+        "/assets/animations/v69/Portais/Portal_Eclipse/frames/frame_02.webp",
+        "/assets/animations/v69/Portais/Portal_Eclipse/frames/frame_03.webp",
+        "/assets/animations/v69/Portais/Portal_Eclipse/frames/frame_04.webp",
+        "/assets/animations/v69/Portais/Portal_Eclipse/frames/frame_05.webp",
+        "/assets/animations/v69/Portais/Portal_Eclipse/frames/frame_06.webp",
+        "/assets/animations/v69/Portais/Portal_Eclipse/frames/frame_07.webp"
+      ],
+      "coreClipRadiusPx": 55,
+      "quality": {
+        "low": "static",
+        "medium": "core",
+        "high": "core+glow"
+      },
+      "note": "Outer ring remains static; animated frames are clipped to the inner nucleus"
+    }
+  },
+  "bases": {
+    "Terra": {
+      "faction": "Terra",
+      "base": "/assets/animations/v69/Bases/Terra/base.png",
+      "frameCount": 12,
+      "frameSize": [
+        840,
+        490
+      ],
+      "fps": 7,
+      "frames": [
+        "/assets/animations/v69/Bases/Terra/frames/frame_00.webp",
+        "/assets/animations/v69/Bases/Terra/frames/frame_01.webp",
+        "/assets/animations/v69/Bases/Terra/frames/frame_02.webp",
+        "/assets/animations/v69/Bases/Terra/frames/frame_03.webp",
+        "/assets/animations/v69/Bases/Terra/frames/frame_04.webp",
+        "/assets/animations/v69/Bases/Terra/frames/frame_05.webp",
+        "/assets/animations/v69/Bases/Terra/frames/frame_06.webp",
+        "/assets/animations/v69/Bases/Terra/frames/frame_07.webp",
+        "/assets/animations/v69/Bases/Terra/frames/frame_08.webp",
+        "/assets/animations/v69/Bases/Terra/frames/frame_09.webp",
+        "/assets/animations/v69/Bases/Terra/frames/frame_10.webp",
+        "/assets/animations/v69/Bases/Terra/frames/frame_11.webp"
+      ],
+      "sameAnchor": true,
+      "note": "Full frames share fixed structure/perspective; no positional or rotation transform"
+    },
+    "Marte": {
+      "faction": "Marte",
+      "base": "/assets/animations/v69/Bases/Marte/base.png",
+      "frameCount": 12,
+      "frameSize": [
+        840,
+        490
+      ],
+      "fps": 7,
+      "frames": [
+        "/assets/animations/v69/Bases/Marte/frames/frame_00.webp",
+        "/assets/animations/v69/Bases/Marte/frames/frame_01.webp",
+        "/assets/animations/v69/Bases/Marte/frames/frame_02.webp",
+        "/assets/animations/v69/Bases/Marte/frames/frame_03.webp",
+        "/assets/animations/v69/Bases/Marte/frames/frame_04.webp",
+        "/assets/animations/v69/Bases/Marte/frames/frame_05.webp",
+        "/assets/animations/v69/Bases/Marte/frames/frame_06.webp",
+        "/assets/animations/v69/Bases/Marte/frames/frame_07.webp",
+        "/assets/animations/v69/Bases/Marte/frames/frame_08.webp",
+        "/assets/animations/v69/Bases/Marte/frames/frame_09.webp",
+        "/assets/animations/v69/Bases/Marte/frames/frame_10.webp",
+        "/assets/animations/v69/Bases/Marte/frames/frame_11.webp"
+      ],
+      "sameAnchor": true,
+      "note": "Full frames share fixed structure/perspective; no positional or rotation transform"
+    },
+    "Jupiter": {
+      "faction": "Jupiter",
+      "base": "/assets/animations/v69/Bases/Jupiter/base.png",
+      "frameCount": 12,
+      "frameSize": [
+        840,
+        490
+      ],
+      "fps": 7,
+      "frames": [
+        "/assets/animations/v69/Bases/Jupiter/frames/frame_00.webp",
+        "/assets/animations/v69/Bases/Jupiter/frames/frame_01.webp",
+        "/assets/animations/v69/Bases/Jupiter/frames/frame_02.webp",
+        "/assets/animations/v69/Bases/Jupiter/frames/frame_03.webp",
+        "/assets/animations/v69/Bases/Jupiter/frames/frame_04.webp",
+        "/assets/animations/v69/Bases/Jupiter/frames/frame_05.webp",
+        "/assets/animations/v69/Bases/Jupiter/frames/frame_06.webp",
+        "/assets/animations/v69/Bases/Jupiter/frames/frame_07.webp",
+        "/assets/animations/v69/Bases/Jupiter/frames/frame_08.webp",
+        "/assets/animations/v69/Bases/Jupiter/frames/frame_09.webp",
+        "/assets/animations/v69/Bases/Jupiter/frames/frame_10.webp",
+        "/assets/animations/v69/Bases/Jupiter/frames/frame_11.webp"
+      ],
+      "sameAnchor": true,
+      "note": "Full frames share fixed structure/perspective; no positional or rotation transform"
+    }
+  },
+  "relays": {
+    "1": {
+      "level": 1,
+      "base": "/assets/animations/v69/Reles/Nivel_1/base.webp",
+      "referenceFrames": [
+        "/assets/animations/v69/Reles/Nivel_1/references/estado_01.webp",
+        "/assets/animations/v69/Reles/Nivel_1/references/estado_02.webp",
+        "/assets/animations/v69/Reles/Nivel_1/references/estado_03.webp",
+        "/assets/animations/v69/Reles/Nivel_1/references/estado_04.webp",
+        "/assets/animations/v69/Reles/Nivel_1/references/estado_05.webp",
+        "/assets/animations/v69/Reles/Nivel_1/references/estado_06.webp",
+        "/assets/animations/v69/Reles/Nivel_1/references/estado_07.webp",
+        "/assets/animations/v69/Reles/Nivel_1/references/estado_08.webp"
+      ],
+      "frameSize": [
+        300,
+        360
+      ],
+      "statesVerified": false,
+      "stateMapping": {
+        "idle": "base",
+        "alert": "procedural",
+        "shield": "procedural",
+        "attack": "confirmed-server-event",
+        "impact": "confirmed-hp-or-shield-change",
+        "disabled": "confirmed-hp-zero"
+      },
+      "note": "Numbered art is not authoritative state mapping. Some edge effects in source are truncated; rendering uses stable base and procedural overlays."
+    },
+    "2": {
+      "level": 2,
+      "base": "/assets/animations/v69/Reles/Nivel_2/base.webp",
+      "referenceFrames": [
+        "/assets/animations/v69/Reles/Nivel_2/references/estado_01.webp",
+        "/assets/animations/v69/Reles/Nivel_2/references/estado_02.webp",
+        "/assets/animations/v69/Reles/Nivel_2/references/estado_03.webp",
+        "/assets/animations/v69/Reles/Nivel_2/references/estado_04.webp",
+        "/assets/animations/v69/Reles/Nivel_2/references/estado_05.webp",
+        "/assets/animations/v69/Reles/Nivel_2/references/estado_06.webp",
+        "/assets/animations/v69/Reles/Nivel_2/references/estado_07.webp",
+        "/assets/animations/v69/Reles/Nivel_2/references/estado_08.webp"
+      ],
+      "frameSize": [
+        300,
+        360
+      ],
+      "statesVerified": false,
+      "stateMapping": {
+        "idle": "base",
+        "alert": "procedural",
+        "shield": "procedural",
+        "attack": "confirmed-server-event",
+        "impact": "confirmed-hp-or-shield-change",
+        "disabled": "confirmed-hp-zero"
+      },
+      "note": "Numbered art is not authoritative state mapping. Some edge effects in source are truncated; rendering uses stable base and procedural overlays."
+    },
+    "3": {
+      "level": 3,
+      "base": "/assets/animations/v69/Reles/Nivel_3/base.webp",
+      "referenceFrames": [
+        "/assets/animations/v69/Reles/Nivel_3/references/estado_01.webp",
+        "/assets/animations/v69/Reles/Nivel_3/references/estado_02.webp",
+        "/assets/animations/v69/Reles/Nivel_3/references/estado_03.webp",
+        "/assets/animations/v69/Reles/Nivel_3/references/estado_04.webp",
+        "/assets/animations/v69/Reles/Nivel_3/references/estado_05.webp",
+        "/assets/animations/v69/Reles/Nivel_3/references/estado_06.webp",
+        "/assets/animations/v69/Reles/Nivel_3/references/estado_07.webp",
+        "/assets/animations/v69/Reles/Nivel_3/references/estado_08.webp"
+      ],
+      "frameSize": [
+        300,
+        360
+      ],
+      "statesVerified": false,
+      "stateMapping": {
+        "idle": "base",
+        "alert": "procedural",
+        "shield": "procedural",
+        "attack": "confirmed-server-event",
+        "impact": "confirmed-hp-or-shield-change",
+        "disabled": "confirmed-hp-zero"
+      },
+      "note": "Numbered art is not authoritative state mapping. Some edge effects in source are truncated; rendering uses stable base and procedural overlays."
+    }
+  },
+  "limitations": [
+    "Relay reference frames contain edge truncation and have no verified state semantics; render uses safe static silhouette + procedural effects tied to real entity state."
+  ]
+}

@@ -1,0 +1,28 @@
+{
+  "level": 3,
+  "base": "/assets/animations/v69/Reles/Nivel_3/base.webp",
+  "referenceFrames": [
+    "/assets/animations/v69/Reles/Nivel_3/references/estado_01.webp",
+    "/assets/animations/v69/Reles/Nivel_3/references/estado_02.webp",
+    "/assets/animations/v69/Reles/Nivel_3/references/estado_03.webp",
+    "/assets/animations/v69/Reles/Nivel_3/references/estado_04.webp",
+    "/assets/animations/v69/Reles/Nivel_3/references/estado_05.webp",
+    "/assets/animations/v69/Reles/Nivel_3/references/estado_06.webp",
+    "/assets/animations/v69/Reles/Nivel_3/references/estado_07.webp",
+    "/assets/animations/v69/Reles/Nivel_3/references/estado_08.webp"
+  ],
+  "frameSize": [
+    300,
+    360
+  ],
+  "statesVerified": false,
+  "stateMapping": {
+    "idle": "base",
+    "alert": "procedural",
+    "shield": "procedural",
+    "attack": "confirmed-server-event",
+    "impact": "confirmed-hp-or-shield-change",
+    "disabled": "confirmed-hp-zero"
+  },
+  "note": "Numbered art is not authoritative state mapping. Some edge effects in source are truncated; rendering uses stable base and procedural overlays."
+}
