@@ -1,6 +1,6 @@
 {
   "name": "stellar-legacy",
-  "version": "47.7.23",
+  "version": "47.7.24",
   "type": "module",
   "scripts": {
     "start": "node server/index.js",
@@ -19,5 +19,5 @@
   "engines": {
     "node": ">=18"
   },
-  "release": "V67 — novo catálogo de NPCs, sprites transparentes e balanceamento inicial por mapa"
+  "release": "V68 — checkup de enquadramento dos sprites NPC, limpeza de fragmentos e base acumulativa para novos mapas"
 }

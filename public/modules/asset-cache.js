@@ -28,7 +28,7 @@ export function coreAssetPath(path) {
 }
 function isSceneAsset(path) {
   // Fundos, portais e minério. Só se limpa depois de ficar muito tempo sem ser utilizado.
-  return /\/assets\/v17\/environment\//.test(String(path||''));
+  return /\/assets\/(?:v17\/environment|mapas)\//.test(String(path||''));
 }
 
 export function createAssetCache({

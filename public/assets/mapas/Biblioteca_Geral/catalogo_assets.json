@@ -1,0 +1,598 @@
+{
+  "fundo_terra_azul": {
+    "path": "/assets/mapas/Biblioteca_Geral/Fundos/fundo_terra_azul.png",
+    "category": "Fundos",
+    "width": 1080,
+    "height": 1080,
+    "format": "png",
+    "optimized": "/assets/mapas/Biblioteca_Geral/Fundos_otimizados/fundo_terra_azul.webp"
+  },
+  "fundo_terra_azul_variante": {
+    "path": "/assets/mapas/Biblioteca_Geral/Fundos/fundo_terra_azul_variante.png",
+    "category": "Fundos",
+    "width": 1080,
+    "height": 1080,
+    "format": "png",
+    "optimized": "/assets/mapas/Biblioteca_Geral/Fundos_otimizados/fundo_terra_azul_variante.webp"
+  },
+  "fundo_marte_rubro": {
+    "path": "/assets/mapas/Biblioteca_Geral/Fundos/fundo_marte_rubro.png",
+    "category": "Fundos",
+    "width": 1080,
+    "height": 1080,
+    "format": "png",
+    "optimized": "/assets/mapas/Biblioteca_Geral/Fundos_otimizados/fundo_marte_rubro.webp"
+  },
+  "fundo_marte_rubro_variante": {
+    "path": "/assets/mapas/Biblioteca_Geral/Fundos/fundo_marte_rubro_variante.png",
+    "category": "Fundos",
+    "width": 1080,
+    "height": 1080,
+    "format": "png",
+    "optimized": "/assets/mapas/Biblioteca_Geral/Fundos_otimizados/fundo_marte_rubro_variante.webp"
+  },
+  "fundo_jupiter_ambar": {
+    "path": "/assets/mapas/Biblioteca_Geral/Fundos/fundo_jupiter_ambar.png",
+    "category": "Fundos",
+    "width": 1080,
+    "height": 1080,
+    "format": "png",
+    "optimized": "/assets/mapas/Biblioteca_Geral/Fundos_otimizados/fundo_jupiter_ambar.webp"
+  },
+  "fundo_jupiter_ambar_variante": {
+    "path": "/assets/mapas/Biblioteca_Geral/Fundos/fundo_jupiter_ambar_variante.png",
+    "category": "Fundos",
+    "width": 1080,
+    "height": 1080,
+    "format": "png",
+    "optimized": "/assets/mapas/Biblioteca_Geral/Fundos_otimizados/fundo_jupiter_ambar_variante.webp"
+  },
+  "fundo_pvp_bicolor": {
+    "path": "/assets/mapas/Biblioteca_Geral/Fundos/fundo_pvp_bicolor.png",
+    "category": "Fundos",
+    "width": 1080,
+    "height": 1080,
+    "format": "png",
+    "optimized": "/assets/mapas/Biblioteca_Geral/Fundos_otimizados/fundo_pvp_bicolor.webp"
+  },
+  "fundo_universo_violeta": {
+    "path": "/assets/mapas/Biblioteca_Geral/Fundos/fundo_universo_violeta.png",
+    "category": "Fundos",
+    "width": 1080,
+    "height": 1080,
+    "format": "png",
+    "optimized": "/assets/mapas/Biblioteca_Geral/Fundos_otimizados/fundo_universo_violeta.webp"
+  },
+  "sol_ouro": {
+    "path": "/assets/mapas/Biblioteca_Geral/Sois/sol_ouro.png",
+    "category": "Sois",
+    "width": 384,
+    "height": 384,
+    "format": "png"
+  },
+  "sol_lava": {
+    "path": "/assets/mapas/Biblioteca_Geral/Sois/sol_lava.png",
+    "category": "Sois",
+    "width": 384,
+    "height": 384,
+    "format": "png"
+  },
+  "sol_azul": {
+    "path": "/assets/mapas/Biblioteca_Geral/Sois/sol_azul.png",
+    "category": "Sois",
+    "width": 384,
+    "height": 384,
+    "format": "png"
+  },
+  "sol_claro": {
+    "path": "/assets/mapas/Biblioteca_Geral/Sois/sol_claro.png",
+    "category": "Sois",
+    "width": 384,
+    "height": 384,
+    "format": "png"
+  },
+  "eclipse_dourado": {
+    "path": "/assets/mapas/Biblioteca_Geral/Sois/eclipse_dourado.png",
+    "category": "Sois",
+    "width": 384,
+    "height": 384,
+    "format": "png"
+  },
+  "eclipse_rubro": {
+    "path": "/assets/mapas/Biblioteca_Geral/Sois/eclipse_rubro.png",
+    "category": "Sois",
+    "width": 384,
+    "height": 384,
+    "format": "png"
+  },
+  "eclipse_azul": {
+    "path": "/assets/mapas/Biblioteca_Geral/Sois/eclipse_azul.png",
+    "category": "Sois",
+    "width": 384,
+    "height": 384,
+    "format": "png"
+  },
+  "planeta_terra": {
+    "path": "/assets/mapas/Biblioteca_Geral/Planetas/planeta_terra.png",
+    "category": "Planetas",
+    "width": 512,
+    "height": 512,
+    "format": "png"
+  },
+  "planeta_marte": {
+    "path": "/assets/mapas/Biblioteca_Geral/Planetas/planeta_marte.png",
+    "category": "Planetas",
+    "width": 512,
+    "height": 512,
+    "format": "png"
+  },
+  "planeta_oceano": {
+    "path": "/assets/mapas/Biblioteca_Geral/Planetas/planeta_oceano.png",
+    "category": "Planetas",
+    "width": 512,
+    "height": 512,
+    "format": "png"
+  },
+  "planeta_rochoso": {
+    "path": "/assets/mapas/Biblioteca_Geral/Planetas/planeta_rochoso.png",
+    "category": "Planetas",
+    "width": 512,
+    "height": 512,
+    "format": "png"
+  },
+  "planeta_vulcanico": {
+    "path": "/assets/mapas/Biblioteca_Geral/Planetas/planeta_vulcanico.png",
+    "category": "Planetas",
+    "width": 512,
+    "height": 512,
+    "format": "png"
+  },
+  "planeta_glacial": {
+    "path": "/assets/mapas/Biblioteca_Geral/Planetas/planeta_glacial.png",
+    "category": "Planetas",
+    "width": 512,
+    "height": 512,
+    "format": "png"
+  },
+  "planeta_violeta": {
+    "path": "/assets/mapas/Biblioteca_Geral/Planetas/planeta_violeta.png",
+    "category": "Planetas",
+    "width": 512,
+    "height": 512,
+    "format": "png"
+  },
+  "planeta_deserto": {
+    "path": "/assets/mapas/Biblioteca_Geral/Planetas/planeta_deserto.png",
+    "category": "Planetas",
+    "width": 512,
+    "height": 512,
+    "format": "png"
+  },
+  "gigante_jupiter": {
+    "path": "/assets/mapas/Biblioteca_Geral/Planetas/gigante_jupiter.png",
+    "category": "Planetas",
+    "width": 512,
+    "height": 512,
+    "format": "png"
+  },
+  "gigante_aneis_dourados": {
+    "path": "/assets/mapas/Biblioteca_Geral/Planetas/gigante_aneis_dourados.png",
+    "category": "Planetas",
+    "width": 512,
+    "height": 512,
+    "format": "png"
+  },
+  "gigante_aneis_azuis": {
+    "path": "/assets/mapas/Biblioteca_Geral/Planetas/gigante_aneis_azuis.png",
+    "category": "Planetas",
+    "width": 512,
+    "height": 512,
+    "format": "png"
+  },
+  "gigante_violeta": {
+    "path": "/assets/mapas/Biblioteca_Geral/Planetas/gigante_violeta.png",
+    "category": "Planetas",
+    "width": 512,
+    "height": 512,
+    "format": "png"
+  },
+  "gigante_esmeralda": {
+    "path": "/assets/mapas/Biblioteca_Geral/Planetas/gigante_esmeralda.png",
+    "category": "Planetas",
+    "width": 512,
+    "height": 512,
+    "format": "png"
+  },
+  "lua_cinza": {
+    "path": "/assets/mapas/Biblioteca_Geral/Luas/lua_cinza.png",
+    "category": "Luas",
+    "width": 384,
+    "height": 384,
+    "format": "png"
+  },
+  "lua_marte": {
+    "path": "/assets/mapas/Biblioteca_Geral/Luas/lua_marte.png",
+    "category": "Luas",
+    "width": 384,
+    "height": 384,
+    "format": "png"
+  },
+  "lua_gelo": {
+    "path": "/assets/mapas/Biblioteca_Geral/Luas/lua_gelo.png",
+    "category": "Luas",
+    "width": 384,
+    "height": 384,
+    "format": "png"
+  },
+  "lua_crateras": {
+    "path": "/assets/mapas/Biblioteca_Geral/Luas/lua_crateras.png",
+    "category": "Luas",
+    "width": 384,
+    "height": 384,
+    "format": "png"
+  },
+  "lua_magma": {
+    "path": "/assets/mapas/Biblioteca_Geral/Luas/lua_magma.png",
+    "category": "Luas",
+    "width": 384,
+    "height": 384,
+    "format": "png"
+  },
+  "lua_rochosa": {
+    "path": "/assets/mapas/Biblioteca_Geral/Luas/lua_rochosa.png",
+    "category": "Luas",
+    "width": 384,
+    "height": 384,
+    "format": "png"
+  },
+  "lua_cristal": {
+    "path": "/assets/mapas/Biblioteca_Geral/Luas/lua_cristal.png",
+    "category": "Luas",
+    "width": 384,
+    "height": 384,
+    "format": "png"
+  },
+  "lua_energia": {
+    "path": "/assets/mapas/Biblioteca_Geral/Luas/lua_energia.png",
+    "category": "Luas",
+    "width": 384,
+    "height": 384,
+    "format": "png"
+  },
+  "lua_metalica": {
+    "path": "/assets/mapas/Biblioteca_Geral/Luas/lua_metalica.png",
+    "category": "Luas",
+    "width": 384,
+    "height": 384,
+    "format": "png"
+  },
+  "lua_azul": {
+    "path": "/assets/mapas/Biblioteca_Geral/Luas/lua_azul.png",
+    "category": "Luas",
+    "width": 384,
+    "height": 384,
+    "format": "png"
+  },
+  "asteroide_lava_grande": {
+    "path": "/assets/mapas/Biblioteca_Geral/Asteroides/asteroide_lava_grande.png",
+    "category": "Asteroides",
+    "width": 384,
+    "height": 384,
+    "format": "png"
+  },
+  "asteroide_lava_medio": {
+    "path": "/assets/mapas/Biblioteca_Geral/Asteroides/asteroide_lava_medio.png",
+    "category": "Asteroides",
+    "width": 384,
+    "height": 384,
+    "format": "png"
+  },
+  "asteroide_metalico": {
+    "path": "/assets/mapas/Biblioteca_Geral/Asteroides/asteroide_metalico.png",
+    "category": "Asteroides",
+    "width": 384,
+    "height": 384,
+    "format": "png"
+  },
+  "asteroide_escuro": {
+    "path": "/assets/mapas/Biblioteca_Geral/Asteroides/asteroide_escuro.png",
+    "category": "Asteroides",
+    "width": 384,
+    "height": 384,
+    "format": "png"
+  },
+  "asteroide_rocha_quente": {
+    "path": "/assets/mapas/Biblioteca_Geral/Asteroides/asteroide_rocha_quente.png",
+    "category": "Asteroides",
+    "width": 384,
+    "height": 384,
+    "format": "png"
+  },
+  "asteroide_acinzentado": {
+    "path": "/assets/mapas/Biblioteca_Geral/Asteroides/asteroide_acinzentado.png",
+    "category": "Asteroides",
+    "width": 384,
+    "height": 384,
+    "format": "png"
+  },
+  "asteroide_rochoso": {
+    "path": "/assets/mapas/Biblioteca_Geral/Asteroides/asteroide_rochoso.png",
+    "category": "Asteroides",
+    "width": 384,
+    "height": 384,
+    "format": "png"
+  },
+  "asteroide_vulcanico": {
+    "path": "/assets/mapas/Biblioteca_Geral/Asteroides/asteroide_vulcanico.png",
+    "category": "Asteroides",
+    "width": 384,
+    "height": 384,
+    "format": "png"
+  },
+  "asteroide_gelo": {
+    "path": "/assets/mapas/Biblioteca_Geral/Asteroides/asteroide_gelo.png",
+    "category": "Asteroides",
+    "width": 384,
+    "height": 384,
+    "format": "png"
+  },
+  "asteroide_ferrugem": {
+    "path": "/assets/mapas/Biblioteca_Geral/Asteroides/asteroide_ferrugem.png",
+    "category": "Asteroides",
+    "width": 384,
+    "height": 384,
+    "format": "png"
+  },
+  "asteroide_lava_rachado": {
+    "path": "/assets/mapas/Biblioteca_Geral/Asteroides/asteroide_lava_rachado.png",
+    "category": "Asteroides",
+    "width": 384,
+    "height": 384,
+    "format": "png"
+  },
+  "asteroide_frio_pequeno": {
+    "path": "/assets/mapas/Biblioteca_Geral/Asteroides/asteroide_frio_pequeno.png",
+    "category": "Asteroides",
+    "width": 384,
+    "height": 384,
+    "format": "png"
+  },
+  "fragmentos_pedras_neutras": {
+    "path": "/assets/mapas/Biblioteca_Geral/Fragmentos/fragmentos_pedras_neutras.png",
+    "category": "Fragmentos",
+    "width": 512,
+    "height": 512,
+    "format": "png"
+  },
+  "fragmentos_marte": {
+    "path": "/assets/mapas/Biblioteca_Geral/Fragmentos/fragmentos_marte.png",
+    "category": "Fragmentos",
+    "width": 512,
+    "height": 512,
+    "format": "png"
+  },
+  "fragmentos_gelo": {
+    "path": "/assets/mapas/Biblioteca_Geral/Fragmentos/fragmentos_gelo.png",
+    "category": "Fragmentos",
+    "width": 512,
+    "height": 512,
+    "format": "png"
+  },
+  "fragmentos_rochosos": {
+    "path": "/assets/mapas/Biblioteca_Geral/Fragmentos/fragmentos_rochosos.png",
+    "category": "Fragmentos",
+    "width": 512,
+    "height": 512,
+    "format": "png"
+  },
+  "nebulosa_azul_01": {
+    "path": "/assets/mapas/Biblioteca_Geral/Nebulosas/nebulosa_azul_01.png",
+    "category": "Nebulosas",
+    "width": 640,
+    "height": 640,
+    "format": "png"
+  },
+  "nuvem_azul_02": {
+    "path": "/assets/mapas/Biblioteca_Geral/Nuvens/nuvem_azul_02.png",
+    "category": "Nuvens",
+    "width": 640,
+    "height": 640,
+    "format": "png"
+  },
+  "nebulosa_azul_espiral": {
+    "path": "/assets/mapas/Biblioteca_Geral/Nebulosas/nebulosa_azul_espiral.png",
+    "category": "Nebulosas",
+    "width": 640,
+    "height": 640,
+    "format": "png"
+  },
+  "nebulosa_azul_03": {
+    "path": "/assets/mapas/Biblioteca_Geral/Nebulosas/nebulosa_azul_03.png",
+    "category": "Nebulosas",
+    "width": 640,
+    "height": 640,
+    "format": "png"
+  },
+  "nuvem_azul_04": {
+    "path": "/assets/mapas/Biblioteca_Geral/Nuvens/nuvem_azul_04.png",
+    "category": "Nuvens",
+    "width": 640,
+    "height": 640,
+    "format": "png"
+  },
+  "nebulosa_marte_01": {
+    "path": "/assets/mapas/Biblioteca_Geral/Nebulosas/nebulosa_marte_01.png",
+    "category": "Nebulosas",
+    "width": 640,
+    "height": 640,
+    "format": "png"
+  },
+  "nebulosa_marte_02": {
+    "path": "/assets/mapas/Biblioteca_Geral/Nebulosas/nebulosa_marte_02.png",
+    "category": "Nebulosas",
+    "width": 640,
+    "height": 640,
+    "format": "png"
+  },
+  "nebulosa_marte_03": {
+    "path": "/assets/mapas/Biblioteca_Geral/Nebulosas/nebulosa_marte_03.png",
+    "category": "Nebulosas",
+    "width": 640,
+    "height": 640,
+    "format": "png"
+  },
+  "nebulosa_marte_04": {
+    "path": "/assets/mapas/Biblioteca_Geral/Nebulosas/nebulosa_marte_04.png",
+    "category": "Nebulosas",
+    "width": 640,
+    "height": 640,
+    "format": "png"
+  },
+  "nebulosa_marte_05": {
+    "path": "/assets/mapas/Biblioteca_Geral/Nebulosas/nebulosa_marte_05.png",
+    "category": "Nebulosas",
+    "width": 640,
+    "height": 640,
+    "format": "png"
+  },
+  "nebulosa_jupiter_01": {
+    "path": "/assets/mapas/Biblioteca_Geral/Nebulosas/nebulosa_jupiter_01.png",
+    "category": "Nebulosas",
+    "width": 640,
+    "height": 640,
+    "format": "png"
+  },
+  "nebulosa_jupiter_02": {
+    "path": "/assets/mapas/Biblioteca_Geral/Nebulosas/nebulosa_jupiter_02.png",
+    "category": "Nebulosas",
+    "width": 640,
+    "height": 640,
+    "format": "png"
+  },
+  "nebulosa_jupiter_03": {
+    "path": "/assets/mapas/Biblioteca_Geral/Nebulosas/nebulosa_jupiter_03.png",
+    "category": "Nebulosas",
+    "width": 640,
+    "height": 640,
+    "format": "png"
+  },
+  "nebulosa_jupiter_04": {
+    "path": "/assets/mapas/Biblioteca_Geral/Nebulosas/nebulosa_jupiter_04.png",
+    "category": "Nebulosas",
+    "width": 640,
+    "height": 640,
+    "format": "png"
+  },
+  "nebulosa_jupiter_05": {
+    "path": "/assets/mapas/Biblioteca_Geral/Nebulosas/nebulosa_jupiter_05.png",
+    "category": "Nebulosas",
+    "width": 640,
+    "height": 640,
+    "format": "png"
+  },
+  "nebulosa_marte_sombria_01": {
+    "path": "/assets/mapas/Biblioteca_Geral/Nebulosas/nebulosa_marte_sombria_01.png",
+    "category": "Nebulosas",
+    "width": 640,
+    "height": 640,
+    "format": "png"
+  },
+  "nebulosa_marte_sombria_02": {
+    "path": "/assets/mapas/Biblioteca_Geral/Nebulosas/nebulosa_marte_sombria_02.png",
+    "category": "Nebulosas",
+    "width": 640,
+    "height": 640,
+    "format": "png"
+  },
+  "nebulosa_marte_sombria_03": {
+    "path": "/assets/mapas/Biblioteca_Geral/Nebulosas/nebulosa_marte_sombria_03.png",
+    "category": "Nebulosas",
+    "width": 640,
+    "height": 640,
+    "format": "png"
+  },
+  "nebulosa_marte_sombria_04": {
+    "path": "/assets/mapas/Biblioteca_Geral/Nebulosas/nebulosa_marte_sombria_04.png",
+    "category": "Nebulosas",
+    "width": 640,
+    "height": 640,
+    "format": "png"
+  },
+  "nebulosa_marte_sombria_05": {
+    "path": "/assets/mapas/Biblioteca_Geral/Nebulosas/nebulosa_marte_sombria_05.png",
+    "category": "Nebulosas",
+    "width": 640,
+    "height": 640,
+    "format": "png"
+  },
+  "nebulosa_universo_01": {
+    "path": "/assets/mapas/Biblioteca_Geral/Nebulosas/nebulosa_universo_01.png",
+    "category": "Nebulosas",
+    "width": 640,
+    "height": 640,
+    "format": "png"
+  },
+  "nebulosa_universo_02": {
+    "path": "/assets/mapas/Biblioteca_Geral/Nebulosas/nebulosa_universo_02.png",
+    "category": "Nebulosas",
+    "width": 640,
+    "height": 640,
+    "format": "png"
+  },
+  "nebulosa_universo_03": {
+    "path": "/assets/mapas/Biblioteca_Geral/Nebulosas/nebulosa_universo_03.png",
+    "category": "Nebulosas",
+    "width": 640,
+    "height": 640,
+    "format": "png"
+  },
+  "nebulosa_universo_04": {
+    "path": "/assets/mapas/Biblioteca_Geral/Nebulosas/nebulosa_universo_04.png",
+    "category": "Nebulosas",
+    "width": 640,
+    "height": 640,
+    "format": "png"
+  },
+  "nebulosa_universo_05": {
+    "path": "/assets/mapas/Biblioteca_Geral/Nebulosas/nebulosa_universo_05.png",
+    "category": "Nebulosas",
+    "width": 640,
+    "height": 640,
+    "format": "png"
+  },
+  "estrela_branca": {
+    "path": "/assets/mapas/Biblioteca_Geral/Estrelas/estrela_branca.png",
+    "category": "Estrelas",
+    "width": 128,
+    "height": 128,
+    "format": "png"
+  },
+  "estrela_azul": {
+    "path": "/assets/mapas/Biblioteca_Geral/Estrelas/estrela_azul.png",
+    "category": "Estrelas",
+    "width": 128,
+    "height": 128,
+    "format": "png"
+  },
+  "estrela_dourada": {
+    "path": "/assets/mapas/Biblioteca_Geral/Estrelas/estrela_dourada.png",
+    "category": "Estrelas",
+    "width": 128,
+    "height": 128,
+    "format": "png"
+  },
+  "estrela_vermelha": {
+    "path": "/assets/mapas/Biblioteca_Geral/Estrelas/estrela_vermelha.png",
+    "category": "Estrelas",
+    "width": 128,
+    "height": 128,
+    "format": "png"
+  },
+  "estrela_violeta": {
+    "path": "/assets/mapas/Biblioteca_Geral/Estrelas/estrela_violeta.png",
+    "category": "Estrelas",
+    "width": 128,
+    "height": 128,
+    "format": "png"
+  }
+}
