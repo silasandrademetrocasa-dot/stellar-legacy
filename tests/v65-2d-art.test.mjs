@@ -39,7 +39,7 @@ test('Sete drones usam os mesmos sprites na loja e no mapa',()=>{
 test('AUX tem exatamente 16 quadros de animação na mesma vista',()=>{
  webp('/assets/v65/aux/aux9_16.webp');
  for(let i=0;i<16;i++)webp(`/assets/v65/aux/aux_${String(i).padStart(2,'0')}.webp`);
- assert.match(game,/Math\.floor\(performance\.now\(\)\/130\)%frames/);
+ assert.match(game,/Math\.floor\(performance\.now\(\)\/210\)%frames/);
 });
 test('Nenhum modelo 3D é servido ou importado pelo cliente',()=>{
  const walk=p=>readdirSync(p,{withFileTypes:true}).flatMap(e=>e.isDirectory()?walk(join(p,e.name)):[join(p,e.name)]);
@@ -58,4 +58,21 @@ test('Cache de sprites reconhece os novos diretórios V65',()=>{
  for(const p of ['/assets/v65/ships/top/phoenix.webp','/assets/v65/ships/front/phoenix.webp','/assets/v65/aux/aux9.webp','/assets/v65/drones/drone_a.webp','/assets/v65/npcs/streuner.webp']){
   assert.equal(entityAssetPath(p),true,p);
  }
+});
+
+// V66 regression checks: source assets and cache revision are consistent.
+test('V66 cache bust consistente e AUX com nova cadência',()=>{
+  const pkg=JSON.parse(readFileSync(join(root,'package.json'),'utf8'));
+  assert.equal(pkg.version,'47.7.22');
+  const server=readFileSync(join(root,'server/index.js'),'utf8');
+  assert.ok(server.includes("const RELEASE_VERSION = '47.7.22'"));
+  for(const match of game.matchAll(/from\s+['"](\.[^'"]+)['"]/g)){
+    assert.ok(match[1].endsWith('?v=47.7.22'), match[1]);
+  }
+  assert.match(game,/performance\.now\(\)\/210/);
+  assert.match(game,/performance\.now\(\)\/180/);
+  assert.match(game,/\/assets\/v66\/ships/);
+  for(const p of ['/assets/v66/ships/top/phoenix.webp','/assets/v66/ships/front/phoenix.webp','/assets/v66/aux/aux9.webp','/assets/v66/drones/drone_a.webp','/assets/v66/npcs/streuner.webp']){
+    webp(p);assert.equal(entityAssetPath(p),true,p);
+  }
 });

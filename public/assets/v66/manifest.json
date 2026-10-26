@@ -1,0 +1,72 @@
+{
+  "drones": {
+    "drone_common": "/assets/v66/drones/drone_common.webp",
+    "drone_elite": "/assets/v66/drones/drone_elite.webp",
+    "drone_a": "/assets/v66/drones/drone_a.webp",
+    "drone_b": "/assets/v66/drones/drone_b.webp",
+    "drone_c": "/assets/v66/drones/drone_c.webp",
+    "drone_d": "/assets/v66/drones/drone_d.webp",
+    "drone_e": "/assets/v66/drones/drone_e.webp"
+  },
+  "npcs": {
+    "streuner": "/assets/v66/npcs/streuner.webp",
+    "recruitStreuner": "/assets/v66/npcs/recruitStreuner.webp",
+    "aiderStreuner": "/assets/v66/npcs/aiderStreuner.webp",
+    "bossStreuner": "/assets/v66/npcs/bossStreuner.webp",
+    "lordakia": "/assets/v66/npcs/lordakia.webp",
+    "bossLordakia": "/assets/v66/npcs/bossLordakia.webp",
+    "saimon": "/assets/v66/npcs/saimon.webp",
+    "bossSaimon": "/assets/v66/npcs/bossSaimon.webp",
+    "mordon": "/assets/v66/npcs/mordon.webp",
+    "bossMordon": "/assets/v66/npcs/bossMordon.webp",
+    "devolarium": "/assets/v66/npcs/devolarium.webp"
+  },
+  "ships_top": {
+    "phoenix": "/assets/v66/ships/top/phoenix.webp",
+    "liberator": "/assets/v66/ships/top/liberator.webp",
+    "piranha": "/assets/v66/ships/top/piranha.webp",
+    "nostromo": "/assets/v66/ships/top/nostromo.webp",
+    "bigboy": "/assets/v66/ships/top/bigboy.webp",
+    "leonov": "/assets/v66/ships/top/leonov.webp",
+    "defcom": "/assets/v66/ships/top/defcom.webp",
+    "spearhead": "/assets/v66/ships/top/spearhead.webp",
+    "yamato": "/assets/v66/ships/top/yamato.webp",
+    "vengeance": "/assets/v66/ships/top/vengeance.webp",
+    "goliath": "/assets/v66/ships/top/goliath.webp",
+    "aegis": "/assets/v66/ships/top/aegis.webp",
+    "citadel": "/assets/v66/ships/top/citadel.webp"
+  },
+  "ships_front": {
+    "phoenix": "/assets/v66/ships/front/phoenix.webp",
+    "liberator": "/assets/v66/ships/front/liberator.webp",
+    "piranha": "/assets/v66/ships/front/piranha.webp",
+    "nostromo": "/assets/v66/ships/front/nostromo.webp",
+    "bigboy": "/assets/v66/ships/front/bigboy.webp",
+    "leonov": "/assets/v66/ships/front/leonov.webp",
+    "defcom": "/assets/v66/ships/front/defcom.webp",
+    "spearhead": "/assets/v66/ships/front/spearhead.webp",
+    "yamato": "/assets/v66/ships/front/yamato.webp",
+    "vengeance": "/assets/v66/ships/front/vengeance.webp",
+    "goliath": "/assets/v66/ships/front/goliath.webp",
+    "aegis": "/assets/v66/ships/front/aegis.webp",
+    "citadel": "/assets/v66/ships/front/citadel.webp"
+  },
+  "aux": [
+    "/assets/v66/aux/aux_00.webp",
+    "/assets/v66/aux/aux_01.webp",
+    "/assets/v66/aux/aux_02.webp",
+    "/assets/v66/aux/aux_03.webp",
+    "/assets/v66/aux/aux_04.webp",
+    "/assets/v66/aux/aux_05.webp",
+    "/assets/v66/aux/aux_06.webp",
+    "/assets/v66/aux/aux_07.webp",
+    "/assets/v66/aux/aux_08.webp",
+    "/assets/v66/aux/aux_09.webp",
+    "/assets/v66/aux/aux_10.webp",
+    "/assets/v66/aux/aux_11.webp",
+    "/assets/v66/aux/aux_12.webp",
+    "/assets/v66/aux/aux_13.webp",
+    "/assets/v66/aux/aux_14.webp",
+    "/assets/v66/aux/aux_15.webp"
+  ]
+}

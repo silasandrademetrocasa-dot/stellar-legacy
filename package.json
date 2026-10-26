@@ -1,6 +1,6 @@
 {
   "name": "stellar-legacy",
-  "version": "47.7.21",
+  "version": "47.7.22",
   "type": "module",
   "scripts": {
     "start": "node server/index.js",
@@ -19,5 +19,5 @@
   "engines": {
     "node": ">=18"
   },
-  "release": "V65 — Nova Frota 2D, NPCs, Drones e AUX animado"
+  "release": "V66 — sprites refinados e AUX-9 com animação mais suave"
 }
