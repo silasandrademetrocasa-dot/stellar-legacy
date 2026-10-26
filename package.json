@@ -1,6 +1,6 @@
 {
   "name": "stellar-legacy",
-  "version": "47.7.31",
+  "version": "47.7.32",
   "type": "module",
   "scripts": {
     "start": "node server/index.js",
@@ -19,5 +19,5 @@
   "engines": {
     "node": ">=18"
   },
-  "release": "V75 — diagnóstico local A/B de desenho por camada, restauração automática"
+  "release": "V76 revisada — relés protegidos em todos os modos de qualidade"
 }
