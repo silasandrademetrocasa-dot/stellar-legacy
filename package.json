@@ -1,6 +1,6 @@
 {
   "name": "stellar-legacy",
-  "version": "47.7.22",
+  "version": "47.7.23",
   "type": "module",
   "scripts": {
     "start": "node server/index.js",
@@ -19,5 +19,5 @@
   "engines": {
     "node": ">=18"
   },
-  "release": "V66 — sprites refinados e AUX-9 com animação mais suave"
+  "release": "V67 — novo catálogo de NPCs, sprites transparentes e balanceamento inicial por mapa"
 }

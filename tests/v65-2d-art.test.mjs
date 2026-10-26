@@ -61,13 +61,13 @@ test('Cache de sprites reconhece os novos diretórios V65',()=>{
 });
 
 // V66 regression checks: source assets and cache revision are consistent.
-test('V66 cache bust consistente e AUX com nova cadência',()=>{
+test('V67 preserva recursos V66 e mantém versões de imports sincronizadas',()=>{
   const pkg=JSON.parse(readFileSync(join(root,'package.json'),'utf8'));
-  assert.equal(pkg.version,'47.7.22');
+  assert.equal(pkg.version,'47.7.23');
   const server=readFileSync(join(root,'server/index.js'),'utf8');
-  assert.ok(server.includes("const RELEASE_VERSION = '47.7.22'"));
+  assert.ok(server.includes("const RELEASE_VERSION = '47.7.23'"));
   for(const match of game.matchAll(/from\s+['"](\.[^'"]+)['"]/g)){
-    assert.ok(match[1].endsWith('?v=47.7.22'), match[1]);
+    assert.ok(match[1].endsWith('?v=47.7.23'), match[1]);
   }
   assert.match(game,/performance\.now\(\)\/210/);
   assert.match(game,/performance\.now\(\)\/180/);
@@ -75,4 +75,18 @@ test('V66 cache bust consistente e AUX com nova cadência',()=>{
   for(const p of ['/assets/v66/ships/top/phoenix.webp','/assets/v66/ships/front/phoenix.webp','/assets/v66/aux/aux9.webp','/assets/v66/drones/drone_a.webp','/assets/v66/npcs/streuner.webp']){
     webp(p);assert.equal(entityAssetPath(p),true,p);
   }
+});
+
+// V67 — valida todos os 34 sprites de NPCs novos sem tocar no progresso.
+test('V67 possui 34 sprites exclusivos e mapeamento por tipo',()=>{
+  const m=game.match(/const NPC_2D_V65 = Object\.freeze\(\{([\s\S]*?)\}\)/);
+  assert.ok(m,'NPC_2D_V65 ausente');
+  const entries=[...m[1].matchAll(/\b([A-Za-z][A-Za-z0-9]*):\s*'([^']+\.webp)'/g)];
+  assert.equal(entries.length,34);
+  const paths=new Set(entries.map(x=>x[2]));
+  assert.equal(paths.size,34,'sprites repetidos no novo catálogo');
+  for(const path of paths){assert.match(path,/^\/assets\/v67\/npcs\//);webp(path);assert.equal(entityAssetPath(path),true,path);}
+  const data=readFileSync(join(root,'public/data.js'),'utf8');
+  for(const [,id] of entries){assert.ok(data.includes(id),id);}
+  for(const mapId of ['x5','x6','x7','x8','b41','b42','b43'])assert.ok(data.includes(mapId+': {')||data.includes(mapId+':{'),mapId);
 });

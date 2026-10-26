@@ -172,14 +172,11 @@ export const RESOURCES = {
 
 // ECONOMIA REBALANCEADA: Créditos preservados, Stellarium reforçado e XP reduzido para progressão mais longa.
 // BOSS principais continuam com aproximadamente 2x a recompensa do alien normal correspondente.
-export const NPC_TYPES = {
-  // Dano normal rebalanceado para o HP moderno das naves do Stellar Legacy.
-  // A base segue a progressão do Stellar Codex, com escala de combate maior.
-  streuner: { name: 'Scavenger', hp: 800, shield: 400, credits: 7500, uridium: 15, xp: 200, speed: 62, damage: 60, color: '#ff8e47', size: 15, resources: { Prometium: 10, Terbium: 10 } },
-  recruitStreuner: { name: 'Scavenger Scout', hp: 600, shield: 800, credits: 9000, uridium: 20, xp: 260, speed: 68, damage: 120, color: '#ffa852', size: 14, resources: { Prometium: 12, Terbium: 12 } },
-  aiderStreuner: { name: 'Scavenger Support', hp: 1500, shield: 1000, credits: 12000, uridium: 25, xp: 340, speed: 72, damage: 210, color: '#ffbb62', size: 16, resources: { Prometium: 15, Terbium: 15 } },
 
-  // Regra Stellar Legacy: BOSS = 2x HP, escudo, dano, créditos, uridium e carga do NPC normal.
+export const NPC_TYPES = {
+  streuner: { name: 'Scavenger', hp: 900, shield: 500, credits: 6000, uridium: 12, xp: 180, speed: 68, damage: 95, color: '#ff8b75', size: 14, resources: { Prometium: 12, Endurium: 12 } },
+  recruitStreuner: { name: 'Scavenger Scout', hp: 1100, shield: 700, credits: 8500, uridium: 16, xp: 240, speed: 90, damage: 130, color: '#ff9b6f', size: 15, resources: { Prometium: 14, Endurium: 14 } },
+  aiderStreuner: { name: 'Scavenger Support', hp: 1500, shield: 1000, credits: 12000, uridium: 25, xp: 340, speed: 72, damage: 210, color: '#ffbb62', size: 16, resources: { Prometium: 15, Terbium: 15 } },
   bossStreuner: { name: 'Scavenger Prime', hp: 1600, shield: 800, credits: 15000, uridium: 30, xp: 400, speed: 62, damage: 120, color: '#ff5e6e', size: 19, resources: { Prometium: 20, Terbium: 20 } },
 
   lordakia: { name: 'Vrax', hp: 2000, shield: 2000, credits: 18000, uridium: 30, xp: 480, speed: 95, damage: 240, color: '#9f73ff', size: 18, resources: { Prometium: 20, Terbium: 20, Endurium: 20 } },
@@ -196,17 +193,29 @@ export const NPC_TYPES = {
 
   sibelon: { name: 'Colossar', hp: 200000, shield: 200000, credits: 650000, uridium: 400, xp: 12000, speed: 30, damage: 7950, color: '#66ffcb', size: 36, resources: { Prometium: 200, Terbium: 200, Endurium: 200, Prometid: 32, Duranium: 32, Promerium: 4 } },
   bossSibelon: { name: 'Colossar Prime', hp: 400000, shield: 400000, credits: 1300000, uridium: 800, xp: 24000, speed: 30, damage: 15900, color: '#19d59d', size: 45, resources: { Prometium: 400, Terbium: 400, Endurium: 400, Prometid: 64, Duranium: 64, Promerium: 8, Xenomit: 16 } },
-  // V19.0.11 — linha de inimigos da segunda região; mesmo universo, dificuldade escalonada.
-  riftScout: { name:'Batedor da Fenda', hp:270000, shield:175000, credits:700000, uridium:550, xp:15500, speed:86, damage:4600, color:'#4bdaff', size:32, resources:{Prometid:26,Duranium:30,Promerium:6} },
-  bossRiftScout: { name:'Batedor da Fenda Prime', hp:510000, shield:360000, credits:1550000, uridium:950, xp:34000, speed:75, damage:8500, color:'#8ceaff', size:44, resources:{Prometid:26,Duranium:30,Promerium:6} },
-  voidCorsair: { name:'Corsário do Vazio', hp:420000, shield:350000, credits:1100000, uridium:800, xp:23500, speed:92, damage:6700, color:'#e58cff', size:35, resources:{Prometid:26,Duranium:30,Promerium:6} },
-  bossVoidCorsair: { name:'Corsário do Vazio Prime', hp:820000, shield:650000, credits:2250000, uridium:1450, xp:48000, speed:70, damage:12800, color:'#ff9fd0', size:48, resources:{Prometid:26,Duranium:30,Promerium:6} },
-  nexusWarden: { name:'Guardião Nexus', hp:660000, shield:550000, credits:1700000, uridium:1200, xp:38000, speed:80, damage:9400, color:'#7fffbb', size:40, resources:{Prometid:26,Duranium:30,Promerium:6} },
-  bossNexusWarden: { name:'Guardião Nexus Prime', hp:1250000, shield:1050000, credits:3650000, uridium:2150, xp:79000, speed:65, damage:17800, color:'#ffe08b', size:53, resources:{Prometid:26,Duranium:30,Promerium:6} },
-  astralReaper: { name:'Ceifador Astral', hp:920000, shield:780000, credits:2400000, uridium:1700, xp:60000, speed:100, damage:13200, color:'#fe877a', size:44, resources:{Prometid:26,Duranium:30,Promerium:6} },
-  bossAstralReaper: { name:'Ceifador Astral Prime', hp:1850000, shield:1550000, credits:4900000, uridium:3100, xp:125000, speed:80, damage:24800, color:'#fb4a8f', size:61, resources:{Prometid:26,Duranium:30,Promerium:6} },
-};
 
+  emberFang: { name:'Ember Fang', hp:230000, shield:150000, credits:620000, uridium:420, xp:14500, speed:88, damage:4200, color:'#ff6d5d', size:32, resources:{Prometid:18,Duranium:18,Promerium:3} },
+  bossEmberFang: { name:'Ember Fang Prime', hp:460000, shield:300000, credits:1250000, uridium:850, xp:30000, speed:78, damage:7800, color:'#ff8c75', size:42, resources:{Prometid:28,Duranium:28,Promerium:6,Xenomit:2} },
+  ironWasp: { name:'Iron Wasp', hp:280000, shield:220000, credits:760000, uridium:500, xp:17500, speed:96, damage:5100, color:'#ff8970', size:34, resources:{Prometid:20,Duranium:20,Promerium:3} },
+  bossIronWasp: { name:'Iron Wasp Prime', hp:560000, shield:430000, credits:1550000, uridium:980, xp:36000, speed:84, damage:9300, color:'#ff9a84', size:44, resources:{Prometid:32,Duranium:32,Promerium:6,Xenomit:2} },
+  riftMauler: { name:'Rift Mauler', hp:360000, shield:320000, credits:980000, uridium:650, xp:23000, speed:82, damage:6400, color:'#ff7854', size:38, resources:{Prometid:22,Duranium:22,Promerium:4,Xenomit:1} },
+  bossRiftMauler: { name:'Rift Mauler Prime', hp:720000, shield:620000, credits:2000000, uridium:1300, xp:47000, speed:72, damage:11800, color:'#ff8a61', size:50, resources:{Prometid:36,Duranium:36,Promerium:8,Xenomit:3} },
+  obsidianPike: { name:'Obsidian Pike', hp:500000, shield:420000, credits:1350000, uridium:850, xp:31000, speed:90, damage:8300, color:'#ff6a44', size:40, resources:{Prometid:24,Duranium:26,Promerium:5,Xenomit:2} },
+  bossObsidianPike: { name:'Obsidian Pike Prime', hp:980000, shield:860000, credits:2800000, uridium:1700, xp:65000, speed:78, damage:15200, color:'#ff7e57', size:54, resources:{Prometid:40,Duranium:42,Promerium:10,Xenomit:4} },
+  apexOverlord: { name:'Apex Overlord', hp:1800000, shield:1400000, credits:4800000, uridium:2900, xp:115000, speed:68, damage:22500, color:'#ff5038', size:64, resources:{Prometid:48,Duranium:48,Promerium:12,Xenomit:8} },
+  sentinelScavenger: { name:'Sentinel Scavenger', hp:650000, shield:500000, credits:1600000, uridium:950, xp:36000, speed:92, damage:9600, color:'#ff705a', size:42, resources:{Prometid:30,Duranium:30,Promerium:6,Xenomit:2} },
+  sentinelScout: { name:'Sentinel Scout', hp:760000, shield:580000, credits:1850000, uridium:1100, xp:42000, speed:100, damage:10800, color:'#ff8064', size:43, resources:{Prometid:32,Duranium:32,Promerium:6,Xenomit:2} },
+  sentinelSupport: { name:'Sentinel Support', hp:900000, shield:700000, credits:2200000, uridium:1300, xp:52000, speed:86, damage:12800, color:'#ff8a70', size:46, resources:{Prometid:34,Duranium:36,Promerium:8,Xenomit:3} },
+
+  riftScout: { name:'Batedor da Fenda', hp:320000, shield:220000, credits:850000, uridium:600, xp:18000, speed:96, damage:5200, color:'#4bdaff', size:33, resources:{Prometid:24,Duranium:24,Promerium:4} },
+  bossRiftScout: { name:'Batedor da Fenda Prime', hp:620000, shield:450000, credits:1800000, uridium:1200, xp:38000, speed:82, damage:9800, color:'#8ceaff', size:45, resources:{Prometid:36,Duranium:36,Promerium:8,Xenomit:2} },
+  voidCorsair: { name:'Corsário do Vazio', hp:480000, shield:380000, credits:1250000, uridium:850, xp:28000, speed:94, damage:7600, color:'#e58cff', size:38, resources:{Prometid:28,Duranium:28,Promerium:5,Xenomit:1} },
+  bossVoidCorsair: { name:'Corsário do Vazio Prime', hp:920000, shield:760000, credits:2700000, uridium:1650, xp:58000, speed:78, damage:14500, color:'#ff9fd0', size:52, resources:{Prometid:40,Duranium:40,Promerium:9,Xenomit:3} },
+  nexusWarden: { name:'Guardião Nexus', hp:700000, shield:620000, credits:1900000, uridium:1200, xp:43000, speed:82, damage:11000, color:'#7fffbb', size:44, resources:{Prometid:34,Duranium:34,Promerium:7,Xenomit:2} },
+  bossNexusWarden: { name:'Guardião Nexus Prime', hp:1350000, shield:1150000, credits:3900000, uridium:2300, xp:86000, speed:68, damage:20600, color:'#9dffcf', size:58, resources:{Prometid:48,Duranium:48,Promerium:12,Xenomit:5} },
+  astralReaper: { name:'Ceifador Astral', hp:1050000, shield:880000, credits:2850000, uridium:1750, xp:64000, speed:108, damage:15600, color:'#c5fbff', size:48, resources:{Prometid:38,Duranium:38,Promerium:8,Xenomit:3} },
+  bossAstralReaper: { name:'Ceifador Astral Prime', hp:2050000, shield:1700000, credits:5800000, uridium:3400, xp:132000, speed:86, damage:28400, color:'#fb4a8f', size:66, resources:{Prometid:56,Duranium:56,Promerium:14,Xenomit:8} },
+};
 
 // Catálogo preparado para mapas futuros. Estes aliens NÃO são usados nos mapas atuais.
 export const FUTURE_ALIENS = {
@@ -273,49 +282,49 @@ export const MAPS = {
     ores:["Prometium", "Endurium", "Terbium"], oreCount:74, landmarkCount:10,
     palette:{nebula:'#133948',accent:'#51e5ff',deep:'#030b13'},
     structures:["Battle Gate 4-X", "Gate X-6"], portals:[],
-    enemyGroups:[{ type: 'sibelon', count: 6 }, { type: 'bossSibelon', count: 2 }, { type: 'riftScout', count: 10 }, { type: 'bossRiftScout', count: 2 }],
+    enemyGroups: [{ type: 'emberFang', count: 10 }, { type: 'bossEmberFang', count: 2 }, { type: 'ironWasp', count: 8 }, { type: 'bossIronWasp', count: 2 }],
   },
   x6: {
     id:'x6', tier:6, oreYield:3, minLevel:22, name:'Desfiladeiro Vazio', risk:'Crítico', world:{w:10700,h:7800}, enemyMultiplier:1,
     ores:["Prometium", "Endurium", "Terbium"], oreCount:81, landmarkCount:11,
     palette:{nebula:'#3a1d50',accent:'#d28fff',deep:'#0b0517'},
     structures:["Gate X-5", "Gate X-7"], portals:[],
-    enemyGroups:[{ type: 'riftScout', count: 7 }, { type: 'bossRiftScout', count: 3 }, { type: 'voidCorsair', count: 9 }, { type: 'bossVoidCorsair', count: 2 }],
+    enemyGroups: [{ type: 'riftMauler', count: 8 }, { type: 'bossRiftMauler', count: 2 }, { type: 'obsidianPike', count: 7 }, { type: 'bossObsidianPike', count: 2 }],
   },
   x7: {
     id:'x7', tier:7, oreYield:4, minLevel:27, name:'Coração do Nexus', risk:'Extremo', world:{w:11300,h:8300}, enemyMultiplier:1,
     ores:["Prometium", "Endurium", "Terbium"], oreCount:88, landmarkCount:12,
     palette:{nebula:'#134637',accent:'#8cffb5',deep:'#030d0b'},
     structures:["Gate X-6", "Gate X-8"], portals:[],
-    enemyGroups:[{ type: 'voidCorsair', count: 8 }, { type: 'bossVoidCorsair', count: 3 }, { type: 'nexusWarden', count: 8 }, { type: 'bossNexusWarden', count: 2 }],
+    enemyGroups: [{ type: 'riftMauler', count: 5 }, { type: 'obsidianPike', count: 7 }, { type: 'bossObsidianPike', count: 3 }, { type: 'apexOverlord', count: 1 }],
   },
   x8: {
     id:'x8', tier:8, oreYield:5, minLevel:32, name:'Bastião Astral', risk:'Extremo', world:{w:12000,h:8900}, enemyMultiplier:1,
     ores:["Prometium", "Endurium", "Terbium"], oreCount:94, landmarkCount:13,
     palette:{nebula:'#4e243d',accent:'#ff947b',deep:'#120611'},
     structures:["Nova Base", "Trader", "Hangar", "Ship Repair", "Mission Control", "Gate X-7"], portals:[],
-    enemyGroups:[{ type: 'nexusWarden', count: 7 }, { type: 'bossNexusWarden', count: 3 }, { type: 'astralReaper', count: 7 }, { type: 'bossAstralReaper', count: 2 }],
+    enemyGroups: [{ type: 'sentinelScavenger', count: 7 }, { type: 'sentinelScout', count: 6 }, { type: 'sentinelSupport', count: 5 }],
   },
   b41: {
     id: 'b41', label: '4-1', tier: 41, battle: true, name: 'Deep Battle Alpha', risk: 'Extremo', world: { w: 11800, h: 8400 }, enemyMultiplier: 1.90, ores: [], oreCount: 0, landmarkCount: 10,
     palette: { nebula: '#29385d', accent: '#7ec8ff', deep: '#050814' },
     structures: ['Battle Gate 4-2', 'Battle Gate 4-3', 'Earth Battle Gate'],
     portals: [{ x: 900, y: 4200, to: 'x4HomeEarth' }, { x: 10800, y: 2280, to: 'b42' }, { x: 10800, y: 6120, to: 'b43' }],
-    enemyGroups: [{ type: 'lordakia', count: 6 }, { type: 'saimon', count: 7 }, { type: 'mordon', count: 6 }, { type: 'bossMordon', count: 3 }, { type: 'devolarium', count: 3 }],
+    enemyGroups: [{ type: 'riftScout', count: 8 }, { type: 'bossRiftScout', count: 2 }, { type: 'voidCorsair', count: 6 }],
   },
   b42: {
     id: 'b42', label: '4-2', tier: 42, battle: true, name: 'Alien Core Beta', risk: 'Extremo', world: { w: 12500, h: 8900 }, enemyMultiplier: 2.00, ores: [], oreCount: 0, landmarkCount: 11,
     palette: { nebula: '#38442a', accent: '#8ee1a1', deep: '#050b12' },
     structures: ['Battle Gate 4-1', 'Battle Gate 4-3', 'Mars Battle Gate'],
     portals: [{ x: 960, y: 4440, to: 'x4HomeMars' }, { x: 11420, y: 2525, to: 'b41' }, { x: 11420, y: 6375, to: 'b43' }],
-    enemyGroups: [{ type: 'saimon', count: 6 }, { type: 'mordon', count: 7 }, { type: 'bossMordon', count: 4 }, { type: 'devolarium', count: 4 }, { type: 'bossDevolarium', count: 1 }],
+    enemyGroups: [{ type: 'voidCorsair', count: 8 }, { type: 'bossVoidCorsair', count: 3 }, { type: 'nexusWarden', count: 5 }],
   },
   b43: {
     id: 'b43', label: '4-3', tier: 43, battle: true, name: 'Abismo Vermelho', risk: 'Extremo', world: { w: 13500, h: 9600 }, enemyMultiplier: 2.20, ores: [], oreCount: 0, landmarkCount: 12,
     palette: { nebula: '#5d4421', accent: '#ffc65a', deep: '#0a0805' },
     structures: ['Battle Gate 4-1', 'Battle Gate 4-2', 'Jupiter Battle Gate'],
     portals: [{ x: 1020, y: 4800, to: 'x4HomeJupiter' }, { x: 12295, y: 2760, to: 'b41' }, { x: 12295, y: 6840, to: 'b42' }],
-    enemyGroups: [{ type: 'mordon', count: 6 }, { type: 'devolarium', count: 6 }, { type: 'bossDevolarium', count: 3 }, { type: 'sibelon', count: 4 }, { type: 'bossSibelon', count: 2 }],
+    enemyGroups: [{ type: 'nexusWarden', count: 8 }, { type: 'bossNexusWarden', count: 2 }, { type: 'astralReaper', count: 4 }, { type: 'apexOverlord', count: 1 }],
   },
   ggAlpha: {
     id: 'ggAlpha', label: 'AURORA', tier: 90, gate: true, battle: true, name: 'Portal Astral Alpha', risk: 'Portal',

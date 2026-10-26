@@ -19,7 +19,7 @@ export function flattenAssetPaths(value,out=[]) {
 }
 
 export function entityAssetPath(path) {
-  return /\/assets\/(?:v17\/(?:ships|ships-map|drones|drones-map|npcs)|v30\/(?:shipsheets|shipsheets32|dronesheets|dronesheets32|npcsheets|npcsheets32)|v63\/ships|v65\/(?:ships|npcs|drones|aux)|v66\/(?:ships|npcs|drones|aux)|v64\/(?:drones|aux))\//.test(String(path||''));
+  return /\/assets\/(?:v17\/(?:ships|ships-map|drones|drones-map|npcs)|v30\/(?:shipsheets|shipsheets32|dronesheets|dronesheets32|npcsheets|npcsheets32)|v63\/ships|v65\/(?:ships|npcs|drones|aux)|v66\/(?:ships|npcs|drones|aux)|v67\/npcs|v64\/(?:drones|aux))\//.test(String(path||''));
 }
 export function coreAssetPath(path) {
   const value=String(path||'');
