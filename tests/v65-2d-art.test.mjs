@@ -63,11 +63,11 @@ test('Cache de sprites reconhece os novos diretórios V65',()=>{
 // V66 regression checks: source assets and cache revision are consistent.
 test('V69 preserva recursos V66 e mantém versões de imports sincronizadas',()=>{
   const pkg=JSON.parse(readFileSync(join(root,'package.json'),'utf8'));
-  assert.equal(pkg.version,'47.7.29');
+  assert.equal(pkg.version,'47.7.30');
   const server=readFileSync(join(root,'server/index.js'),'utf8');
-  assert.ok(server.includes("const RELEASE_VERSION = '47.7.29'"));
+  assert.ok(server.includes("const RELEASE_VERSION = '47.7.30'"));
   for(const match of game.matchAll(/from\s+['"](\.[^'"]+)['"]/g)){
-    assert.ok(match[1].endsWith('?v=47.7.29'), match[1]);
+    assert.ok(match[1].endsWith('?v=47.7.30'), match[1]);
   }
   assert.match(game,/performance\.now\(\)\/210/);
   assert.match(game,/performance\.now\(\)\/180/);

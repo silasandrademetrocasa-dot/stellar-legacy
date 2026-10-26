@@ -27,7 +27,11 @@ export function createAdaptiveResolution({mobile=false,cooldownMs=4500,windowMs=
     if(at-windowStart<windowMs)return false;
     const w75=quantile(work,.75),f75=quantile(intervals,.75),budget=1000/LIMITS[mode].target;
     work.length=0;intervals.length=0;windowStart=at;
-    const pressure=w75>budget*.88||f75>budget*1.20;
+    // V74: rAF can stall because of tab compositing/throttling even when the
+    // measured Canvas work is cheap. Shrinking the buffer on every such stall
+    // causes an unnecessary canvas reset and visible black flashes.
+    // Only measurable frame work is a reason to resize the canvas.
+    const pressure=w75>budget*.90;
     const spare=w75<budget*.43&&f75<budget*.76;
     slowWindows=pressure?slowWindows+1:0;
     fastWindows=spare?fastWindows+1:0;

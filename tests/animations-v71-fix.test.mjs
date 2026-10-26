@@ -59,6 +59,8 @@ test('V71: componentes são apenas visuais e não alteram servidor nem física',
  assert.match(game,/drawBaseV71 as drawBaseV69/);
  assert.match(game,/drawRelayV71 as drawRelayV69/);
  assert.match(game,/VISUAL_PROFILE_V71/);
- const a=game.match(/ctx\.beginPath\(\);ctx\.arc\(0,0,radius,0,TWO_PI\);if\(!node\.relayMode&&node\.contested\)ctx\.fill\(\);ctx\.stroke\(\)/);
- assert.ok(a, 'campos grandes do relé não devem ser preenchidos por quadro');
+ const ring=game.slice(game.indexOf('const economicalRingV74='),game.indexOf('ctx.fillStyle=\'rgba(3,12,23,.88)\''));
+ assert.match(ring,/if\(!economicalRingV74&&!node\.relayMode&&node\.contested\)ctx\.fill\(\)/,
+   'nenhum preenchimento de captura no relé móvel em Médio');
+ assert.match(ring,/ctx\.arc\(0,0,radius,0,TWO_PI\)/,'preserva raio visual');
 });

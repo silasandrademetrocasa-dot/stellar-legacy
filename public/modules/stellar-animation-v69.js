@@ -1,3 +1,4 @@
+import {drawRelaySpriteV74} from './relay-sprite-framing-v74.js';
 /** V69: renderer visual-only, no gameplay writes. All images served from local assets. */
 const TAU=Math.PI*2, ROOT='/assets/animations/v69';
 const PORTALS={normal:'Portal_Comum',pvp:'Portal_PvP',universe:'Portal_Universo',aurora:'Portal_Aurora',nexus:'Portal_Nexus',eclipse:'Portal_Eclipse'};
@@ -69,7 +70,7 @@ export function drawRelayV69(ctx,node,{quality='medium',time=0,getImage,baseColo
  lastObserved.set(key,{hp,shield,impactAt});if(lastObserved.size>80)lastObserved.delete(lastObserved.keys().next().value);
  const st=relayVisualStateV69(node,time,lastServerAttack.get(coordKey(node.x,node.y))??-1,impactAt);
  const w=lvl===3?163:lvl===2?149:135,h=w*1.2,pulse=.65+.35*Math.sin(time*(st.alert?3.9:2.1));
- ctx.save();ctx.globalAlpha=st.disabled?.54:1;ctx.drawImage(img,-w/2,-h/2,w,h);
+ ctx.save();ctx.globalAlpha=st.disabled?.54:1;drawRelaySpriteV74(ctx,img,lvl);
  ctx.globalAlpha=st.disabled?.17:(quality==='low'?.25:.37+.18*pulse);ctx.fillStyle=st.alert?'#ff9d63':baseColor;
  ctx.beginPath();ctx.arc(0,-5,st.level===3?6:4.5,0,TAU);ctx.fill();
  if(st.shield){ctx.strokeStyle='#73dcff';ctx.lineWidth=quality==='low'?1.1:1.9;ctx.globalAlpha=quality==='low'?.18:.16+.18*st.shieldRatio;ctx.beginPath();ctx.ellipse(0,0,w*.51,h*.42,0,0,TAU);ctx.stroke();}

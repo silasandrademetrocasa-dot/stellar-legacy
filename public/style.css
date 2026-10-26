@@ -4971,3 +4971,17 @@ body.mobile-landscape-pro .boss-phase-hud.collapsed{left:auto!important;right:ca
 .ship-card .ship-visual img,
 .v56-workstation-stage img,
 .drone-mini-art img{filter:none!important;box-shadow:none!important;}
+
+/* V74 compositor fix: blurred translucent HUD forces expensive fullscreen
+   canvas readback/recomposite on Android WebView/Chrome each animated frame.
+   Preserve neon borders and legibility with nearly opaque gradients instead. */
+body[data-device="mobile"][data-quality="medium"] .hud-panel,
+body[data-device="mobile"][data-quality="high"] .hud-panel,
+body[data-device="mobile"][data-quality="medium"] .portal-prompt,
+body[data-device="mobile"][data-quality="high"] .portal-prompt {
+  -webkit-backdrop-filter:none!important;backdrop-filter:none!important;
+  background-color:rgba(5,15,30,.97);
+}
+body[data-device="mobile"] .target-lock-hud,
+body[data-device="mobile"] #minimapPanel,
+body[data-device="mobile"] .hud-panel {contain:style;}
