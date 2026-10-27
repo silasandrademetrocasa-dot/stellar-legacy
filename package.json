@@ -1,6 +1,6 @@
 {
   "name": "stellar-legacy",
-  "version": "47.7.34",
+  "version": "47.7.35",
   "type": "module",
   "scripts": {
     "start": "node server/index.js",
@@ -19,5 +19,5 @@
   "engines": {
     "node": ">=18"
   },
-  "release": "V78 — efeitos leves de combate e seleção circular"
+  "release": "V79 — motor leve universal, sprites nítidos e FX secundários reduzidos"
 }

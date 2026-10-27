@@ -4,6 +4,6 @@ export function allowBackdropFilter({mobile=false,landscape=false,quality='mediu
 }
 export function renderFxCount(size,{mobile=false,quality='medium'}={}){
  const n=Math.max(0,Math.floor(Number(size)||0));
- const max=quality==='low'?48:mobile?(quality==='high'?120:86):200;
+ const max=mobile?(quality==='low'?12:quality==='high'?32:24):quality==='low'?32:120; // V79: limite somente para FX cosméticos
  return Math.min(n,max);
 }

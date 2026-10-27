@@ -8,8 +8,8 @@ const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 export function rebornFxBudgetV470({quality='high',mobile=false,enabled=true}={}){
   if(!enabled)return 0;
   if(quality==='low')return mobile?3:5;
-  if(quality==='medium')return mobile?9:12;
-  return mobile?12:22;
+  if(quality==='medium')return mobile?5:12;
+  return mobile?7:22;
 }
 export function npcTacticalDriftV470(npc,{dx=0,dy=0,d=Infinity,dt=0,now=0,safe=false}={}){
   // Only active when the existing game has already authorized a chase.
@@ -83,10 +83,10 @@ export function createCombatRebornV470({clock=()=>typeof performance!=='undefine
       ctx.save();ctx.translate(p.x,p.y);ctx.globalAlpha=fade*(low?.65:.82);ctx.strokeStyle=f.color;ctx.lineWidth=low?1.6:2.1;
       if(!low&&!mobile){ctx.shadowColor=f.color;ctx.shadowBlur=8;}
       if(f.kind==='threat'){
-        ctx.setLineDash([6,5]);ctx.beginPath();ctx.arc(0,0,radius*1.35,0,Math.PI*2);ctx.stroke();ctx.setLineDash([]);
+        if(!mobile)ctx.setLineDash([6,5]);ctx.beginPath();ctx.arc(0,0,radius*1.35,0,Math.PI*2);ctx.stroke();if(!mobile)ctx.setLineDash([]);
       }else if(f.kind==='boss'){
         ctx.beginPath();ctx.arc(0,0,radius*1.20,0,Math.PI*2);ctx.stroke();
-        if(!low){ctx.beginPath();ctx.arc(0,0,radius*.72,0,Math.PI*2);ctx.stroke();}
+        if(!low&&!mobile){ctx.beginPath();ctx.arc(0,0,radius*.72,0,Math.PI*2);ctx.stroke();}
       }else if(f.kind==='shield'){
         ctx.beginPath();ctx.ellipse(0,0,radius,radius*.76,0,0,Math.PI*2);ctx.stroke();
       }else{
