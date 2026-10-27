@@ -56,4 +56,4 @@ test('V81: migração da curva de XP preservada; economia e saves jamais são es
  const curve=read('public/level-curve-v482.js');assert.match(curve,/PILOT_LEVEL_MAX_V482=44/);
 });
 
-test('V81: montagem astral usa apenas lotes de giro permitidos no backend',()=>{const game=read('public/game.js');assert.match(game,/affordable>=10\?10:affordable>=5\?5:affordable>=1\?1:0/);});
+test('V81: montagem astral usa apenas lotes de giro permitidos no backend',()=>{const game=read('public/game.js');assert.match(game,/affordable>=requestedBatch\?requestedBatch:affordable>=10\?10:affordable>=5\?5:affordable>=1\?1:0/);});

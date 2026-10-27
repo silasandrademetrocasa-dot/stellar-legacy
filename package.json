@@ -1,6 +1,6 @@
 {
   "name": "stellar-legacy",
-  "version": "47.7.38",
+  "version": "47.7.39",
   "type": "module",
   "scripts": {
     "start": "node server/index.js",
@@ -19,5 +19,5 @@
   "engines": {
     "node": ">=18"
   },
-  "release": "V82 — ADM drops/mapas/recompensas + Autopilot astral com revalidação"
+  "release": "V83 — Farm Astral contínuo com giros oficiais 10x/50x, orçamento e parada segura"
 }

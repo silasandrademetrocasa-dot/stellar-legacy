@@ -35,5 +35,5 @@ test('V80: 30 layouts de mapas têm seus próprios fundos e não há colisão de
 test('V80: jogo mantém renderizador seguro do relé e quebra cache da configuração de mapas',()=>{
  const game=readFileSync(join(root,'public/game.js'),'utf8');
  assert.match(game,/drawRelayMediumMobileV76\(ctx,node,relayOptions\)/);
- assert.match(game,/fetch\(path\+'\?v=47\.7\.38',\{cache:'no-cache'\}\)/);
+ assert.match(game,/fetch\(path\+'\?v=47\.7\.39',\{cache:'no-cache'\}\)/);
 });
