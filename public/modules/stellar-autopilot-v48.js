@@ -155,6 +155,15 @@ export function createStellarAutopilotV48({credentials,getIdentity=()=>null,getS
     finally{clearTimeout(timer);}
   }
   function accessReady(){return allowed&&authorizedId===String(getIdentity()||'')&&lastAccessAt>0&&now()-lastAccessAt<75000;}
+  // V82: recheck a stale entitlement before concluding that it is denied.
+  // HTTP 403/no grant is still authoritative: never bypass it for Astral rewards.
+  async function ensureAuthorizedV82(){
+    if(accessReady())return true;
+    const accepted=await refreshAccess();
+    if(accepted&&accessReady())return true;
+    notify('Autopilot sem permissão para esta conta • solicite ao ADM em JOGADORES → AUTOPILOT ou reentre com a conta autorizada');
+    return false;
+  }
   function notify(t){reason=t;onNotice(t);renderStatus();}
   function stop(why='Interrompido'){astralBuildCancel=true;running=false;busy=false;pendingJump=null;clearResume();stopFire();reason=why;ended=now();try{const s=getSnapshot();if(s)lastProgress=stats(s);}catch{}renderStatus();}
   function stats(s){return {xp:Number(s?.xp)||0,credits:Number(s?.credits)||0,stl:Number(s?.stl)||0,kills:Number(s?.kills)||0,boxes:Number(s?.boxes)||0,level:Number(s?.level)||1};}
@@ -164,7 +173,7 @@ export function createStellarAutopilotV48({credentials,getIdentity=()=>null,getS
   function renderStatus(){if(!panel)return;const status=panel.querySelector('[data-ap-status]');if(status)status.textContent=(running?'ATIVO • ':'PARADO • ')+reason;
     const start=panel.querySelector('[data-ap-start]'),stopButton=panel.querySelector('[data-ap-stop]');if(start)start.disabled=!allowed||running||loading;if(stopButton)stopButton.disabled=!running;
     const rep=panel.querySelector('[data-ap-report]');if(rep&&started){const r=sessionReport();rep.textContent=`${r.minutes} min • ${r.kills} NPC • ${fmt(r.xp)} XP • CR líq. ${fmt(r.creditsNet)} • STL ${fmt(r.stl)} • BOX ${r.boxes} • Drop ${r.drops} • Compras ${fmt(r.spent)} CR • Falhas ${r.failures}`;}
-    if(fab)fab.textContent=running?'🤖 AUTO • ON':'🤖 AUTOPILOT';
+    if(fab)fab.textContent=running?'🤖 AUTO • ON':'🤖 AUTOPILOT';if(panel){const state=panel.querySelector('[data-ap-access-v82]');if(state)state.textContent=accessReady()?'✓ Acesso autorizado':'⚠ Acesso não confirmado • verifique a permissão da conta';panel.querySelectorAll('[data-ap-astral-build],[data-ap-astral-enter]').forEach(b=>b.disabled=astralBuildBusy);}
   }
   // Compartilha a mesma consulta entre reabertura manual, login e polling; nunca
   // interpreta uma consulta em andamento como acesso negado ao reabrir a aba.
@@ -182,8 +191,8 @@ export function createStellarAutopilotV48({credentials,getIdentity=()=>null,getS
         lastAccessAt=now();nextAccessAt=now()+45000;
         if(allowed&&!running)restoreCheckpoint();
         if(!allowed&&running)stop('Permissão retirada pelo ADM');
-        if(fab)fab.hidden=!allowed;
-        if(panel&&!allowed){panel.hidden=true;panelOpen=false;}
+        if(fab)fab.hidden=false;
+        if(panel&&!allowed){panel.querySelectorAll('[data-ap-astral-build],[data-ap-astral-enter],[data-ap-start]').forEach(b=>b.disabled=true);}
         return allowed;
       }catch(e){
         nextAccessAt=now()+12000;
@@ -222,6 +231,7 @@ export function createStellarAutopilotV48({credentials,getIdentity=()=>null,getS
     <div class="ap-actions"><button type="button" data-ap-astral-build>✦ MONTAR COM ORÇAMENTO</button><button type="button" data-ap-astral-enter>↗ ENTRAR NO PORTAL</button><button type="button" data-ap-astral-cancel>PARAR MONTAGEM</button></div>
     </details>
   <div class="ap-actions"><button type="button" data-ap-start>▶ INICIAR BOT</button><button type="button" data-ap-stop>■ PARAR</button><button type="button" data-ap-copy>📋 RELATÓRIO</button></div>
+  <div class="ap-status"><span data-ap-access-v82>Verificando autorização...</span> <button type="button" data-ap-check-access-v82>VERIFICAR ACESSO</button><small>Se negado, peça ao ADM habilitar sua conta em JOGADORES → AUTOPILOT. A autorização é individual.</small></div>
   <div data-ap-status class="ap-status">PARADO</div><div data-ap-report class="ap-status"></div></div>`;}
   function readConfig(){if(!panel)return config;const next={...config};for(const field of panel.querySelectorAll('[data-ap-field]'))next[field.dataset.apField]=field.value;
     for(const field of panel.querySelectorAll('[data-ap-check]'))next[field.dataset.apCheck]=field.checked;
@@ -255,11 +265,12 @@ export function createStellarAutopilotV48({credentials,getIdentity=()=>null,getS
     panel=document.createElement('div');panel.id='autopilotPanelV48';panel.hidden=true;panel.innerHTML=controls();document.body.appendChild(panel);
     panel.querySelector('[data-ap-close]').onclick=()=>{panel.hidden=true;panelOpen=false;};
     panel.addEventListener('click',e=>{if(e.target===panel){panel.hidden=true;panelOpen=false;}});
-    panel.querySelector('[data-ap-start]').onclick=()=>{config=readConfig();start();};
+    panel.querySelector('[data-ap-check-access-v82]').onclick=async()=>{await refreshAccess();renderStatus();};
+    panel.querySelector('[data-ap-start]').onclick=async()=>{if(!await ensureAuthorizedV82())return;config=readConfig();start();};
     panel.querySelector('[data-ap-stop]').onclick=()=>stop('Parado pelo piloto');
     panel.querySelector('[data-ap-astral-cancel]').onclick=()=>{astralBuildCancel=true;notify('Montagem interrompida após a operação em andamento');};
     panel.querySelector('[data-ap-astral-build]').onclick=async()=>{
-      if(astralBuildBusy||!accessReady())return notify('Verifique a autorização do Autopilot antes de montar');
+      if(astralBuildBusy||!await ensureAuthorizedV82())return;
       config=readConfig();if(!(config.astralBudget>0))return notify('Defina um orçamento maior que zero');
       astralBuildBusy=true;astralBuildCancel=false;
       try{await assembleAstral(config.astralGate,config.astralBudget,()=>astralBuildCancel,msg=>notify(msg));}
@@ -267,9 +278,9 @@ export function createStellarAutopilotV48({credentials,getIdentity=()=>null,getS
       finally{astralBuildBusy=false;renderStatus();}
     };
     panel.querySelector('[data-ap-astral-enter]').onclick=async()=>{
-      if(!accessReady())return notify('Acesso Autopilot não autorizado');
+      if(!await ensureAuthorizedV82())return;
       config=readConfig();if(!config.astralAssist)return notify('Marque a assistência astral antes de entrar');
-      try{const ok=await enterAstral(config.astralGate);if(ok!==false)notify('Portal iniciado • ative o Autopilot para completar por combate');}
+      try{const ok=await enterAstral(config.astralGate);if(ok!==false){notify('Portal iniciado • aguardando transição antes de iniciar a assistência');if(config.astralAssist){const transition=Number(ok?.transitionMs)||1200;setTimeout(()=>{if(accessReady()&&!running&&getSnapshot()?.astralActive)start();else if(!running)notify('Entrada concluída • toque INICIAR BOT para ativar a assistência');},Math.min(5000,Math.max(900,transition)));}}}
       catch(e){notify('Entrada: '+String(e?.message||e).slice(0,110));}
     };
     panel.querySelector('[data-ap-copy]').onclick=()=>{const text=exportReport();navigator.clipboard?.writeText(text).then(()=>notify('Relatório copiado')).catch(()=>notify(text));};
@@ -283,7 +294,7 @@ export function createStellarAutopilotV48({credentials,getIdentity=()=>null,getS
       loading=true;renderStatus();
       const accepted=await refreshAccess();
       loading=false;renderStatus();
-      if(!accepted||!accessReady())return;
+      if(!accepted||!accessReady()){panel.hidden=false;panelOpen=true;renderStatus();return;}
     }
     if(!panel.dataset.phase3MapInitialized&&!running){
       const m=getSnapshot()?.map, select=panel.querySelector('[data-ap-field="map"]');

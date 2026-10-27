@@ -1,101 +1,101 @@
-import {combatVisualPolicyV78,drawLaserLiteV78,drawRocketLiteV78,drawLightFxV78,drawCircularSelectionV78} from './modules/combat-visual-lite-v78.js?v=47.7.37';
-import {drawEngineWakeLiteV79,drawEntitySpriteV79} from './modules/entity-visual-policy-v79.js?v=47.7.37';
-import {drawRelayMediumMobileV76,relayGeometryV76,relayRenderDiagnosticV76,reportRelayRenderErrorV76} from './modules/relay-render-safe-v76.js?v=47.7.37';
-import {drawPortalV71 as drawPortalV69,drawBaseV71 as drawBaseV69,drawRelayV71 as drawRelayV69,noteRelayAttackV69,resetRelayVisualMemoryV69} from './modules/stellar-animation-v71.js?v=47.7.37';
+import {combatVisualPolicyV78,drawLaserLiteV78,drawRocketLiteV78,drawLightFxV78,drawCircularSelectionV78} from './modules/combat-visual-lite-v78.js?v=47.7.38';
+import {drawEngineWakeLiteV79,drawEntitySpriteV79} from './modules/entity-visual-policy-v79.js?v=47.7.38';
+import {drawRelayMediumMobileV76,relayGeometryV76,relayRenderDiagnosticV76,reportRelayRenderErrorV76} from './modules/relay-render-safe-v76.js?v=47.7.38';
+import {drawPortalV71 as drawPortalV69,drawBaseV71 as drawBaseV69,drawRelayV71 as drawRelayV69,noteRelayAttackV69,resetRelayVisualMemoryV69} from './modules/stellar-animation-v71.js?v=47.7.38';
 /* STELLAR_FLEET_2D_V66 */
 /* STELLAR_OFFLINE_FARM_VISUAL_V485 */
 /* STELLAR_OFFLINE_FARM_V484 APPLIED */
-import {saleQuoteV4776} from './modules/sale-policy-v4776.js?v=47.7.37';
-import {stellarConfirmV4776,stellarPromptV4776} from './modules/stellar-dialog-v4776.js?v=47.7.37';
-import {createWarbotAdminV477} from './modules/warbot-admin-v477.js?v=47.7.37';
-import {frontierAdminAccessV4774} from './api.js?v=47.7.37';
-import {drawWarbotShipV477,drawWarbotBeamV477,WARBOT_SHIP_ASSETS} from './modules/warbot-visual-v477.js?v=47.7.37';
-import {createCombatRebornV470,npcTacticalDriftV470,drawPortalSignatureV470} from './modules/combat-reborn-v470.js?v=47.7.37';
-import {createStellarAudio} from './modules/stellar-audio-v462.js?v=47.7.37';
-import {portalPointV461,CANONICAL_LINKS_V461} from './modules/portal-layout-v461.js?v=47.7.37';
-import {galacticLevelV451,applyGalacticProgressionV451} from './modules/galactic-progression-v451.js?v=47.7.37';
-import {progressionMilestonesV460} from './modules/galactic-balance-v460.js?v=47.7.37';
-import {filteredFrontierPortalsV440} from './modules/frontier-routing-v440.js?v=47.7.37';
-import {astralEquipmentBonusesV435} from './modules/astral-systems-v435.js?v=47.7.37';
-import {registerFrontierSectorsV435,sectorDestinationV435,sectorLabelV435,sectorLevelV435,sectorPortalsV435} from './modules/frontier-sectors-v435.js?v=47.7.37';
-import {loadStageAV423 as loadAstralBattleSnapshotV431} from './api.js?v=47.7.37';
-import {verifiedAstralPveBonusV431} from './modules/astral-combat-v431.js?v=47.7.37';
-import {ASTRAL_ARENAS,isAstralArena,astralRadarVisible,astralResumePoint,drawAstralRift,drawAstralBossCrest,astralBossLabel} from './modules/astral-gates-v380.js?v=47.7.37';
-import {frontierPanelHtml} from './modules/frontier-v370.js?v=47.7.37';
-import {loadFrontierStateOnline,claimFrontierContractOnline,craftFrontierTechOnline,claimFrontierClanOnline,saveFrontierAdminContractOnline} from './api.js?v=47.7.37';
-import {dominionPanelHtml} from './modules/galactic-dominion-v360.js?v=47.7.37';
-import {loadDominionStateOnline,claimDominionOnline,declareDominionWarOnline,claimDominionWarPrizeOnline,saveDominionRulesOnline} from './api.js?v=47.7.37';
-import {createAmmoHudBudget,ammoDisplaySignature} from './modules/ammo-hud-budget-v347.js?v=47.7.37';
-import {visualFxBudget,relayVisualLoadout,relayVisualHealth,relayImpactType,drawRelayStation,drawPortalGateAccents,drawOreEventAccents,drawShipWingLights} from './modules/visual-revolution-v347.js?v=47.7.37';
-import {drawRelayEliteV54,relayLevelV54} from './modules/stellar-relay-elite-v54.js?v=47.7.37';
-import {fortificationNextLevel,fortificationStats,fortificationCanAfford} from './modules/galactic-ascension-v350.js?v=47.7.37';
-import {upgradeRelayFortificationOnline,saveRelayFortificationTierOnline} from './api.js?v=47.7.37';
-import {RELAY_SLOT_CATALOG,RELAY_BONUS_CATALOG,relayModuleFitsSlot,relayModuleName,relaySlotModules,relayBonusDuplicate} from './modules/relay-hangar-v3462.js?v=47.7.37';
-import {loadRelayDominationOnline,relayModuleActionOnline,claimRelayMissionOnline,saveRelayAdminOnline,saveRelayModuleBalanceOnline,repairRelayOnline,adminReleaseRelayOnline} from './api.js?v=47.7.37';
-import { weekendCenterHtml,weekendSlotRowHtml } from './modules/event-control-ui-v3411.js?v=47.7.37';
-import { adminUpdateWeekendSettingsOnline,adminUpdateWeekendEventOnline,adminSetManualEventOnline } from './api.js?v=47.7.37';
-import { bossHudCue, npcThreatLabel } from './modules/tactical-hud-v34.js?v=47.7.37';
-import { allowBackdropFilter, renderFxCount } from './modules/render-budget-v34.js?v=47.7.37';
-import { stellarOreName } from './modules/stellar-display-names.js?v=47.7.37';
-import { rankVisibleNpcTargets } from './modules/combat-target-priority.js?v=47.7.37';
-import { upcomingWeekendSlots, weekendRotationEnabled, weekendSchedule, validateWeekendSettings } from './modules/weekend-events-v341.js?v=47.7.37';
-import { eventControlProfile } from './modules/event-control-profile-v3411.js?v=47.7.37';
-import {eventStage} from './modules/event-evolution-v345.js?v=47.7.37';
-import { minimapPaintInterval } from './modules/minimap-cadence-v33.js?v=47.7.37';
-import { npcUpdateDecision, nearestNpcInRange } from './modules/smart-combat-engine.js?v=47.7.37';
-import { npcPatrolPosition } from './modules/npc-patrol.js?v=47.7.37';
-import { setupMobileLandscape } from './modules/mobile-landscape.js?v=47.7.37';
-import {directionalIndex, directionalGridForImage} from './modules/sprite-orientation.js?v=47.7.37';
-import {createHudIntelligence} from './modules/hud-intelligence.js?v=47.7.37';
-import {sentinelAttackerEligible, selectSentinelAttacker} from './modules/sentinel-defense.js?v=47.7.37';
-import {AUX_PROTOCOL_TYPES, AUX_PROTOCOL_IDS, normalizeAuxProtocols, auxProtocolSlotsUsed, changeAuxProtocolRank, auxProtocolStats} from './modules/aux-protocols.js?v=47.7.37';
-import { movementSpeed, nominalMovementSpeed, followShipCamera } from './modules/ship-navigation.js?v=47.7.37';
-import { loadCommandOverviewOnline,claimCompetitiveSeasonOnline,equipEliteTitleOnline,unequipEliteTitleOnline,loadCommandAdminOnline,saveCompetitiveSeasonOnline,saveWorldDirectiveOnline,loadClanOperationsOnline,claimClanOperationOnline,saveAdminClanOperationOnline } from './api.js?v=47.7.37';
-import {renderV21CommandCenter,V21_TABS} from './modules/v21/command-center-view.js?v=47.7.37';
-import {renderEliteEquipTitles,renderCompetitiveSection,renderUniverseDirectives} from './modules/v22/command-upgrades.js?v=47.7.37';
-import {registerStellarPwaV21,offerInstallV21} from './modules/v21/pwa.js?v=47.7.37';
-import { ECONOMY_EFFECTS, CRAFT_OUTPUT_KINDS, normalizeEconomyEffects, normalizeCraftIngredients, normalizeCraftOutput, formatCraftPreview } from './modules/admin-visual-builders.js?v=47.7.37';
-import { ADMIN_MISSION_PRESETS, createAdminMissionPreset, duplicateAdminMission, validateAdminMissionDraft, previewAdminMission } from './modules/admin-mission-builder.js?v=47.7.37';
-import { createHudContentCache } from './modules/hud-content-cache.js?v=47.7.37';
-import { createAuxiliaryWorkScheduler } from './modules/aux-work-scheduler.js?v=47.7.37';
-import { npcVisualDetail } from './modules/npc-render-detail.js?v=47.7.37';
-import { smoothNpcPosition, smoothNpcHeading, npcCombatLockCue, rocketVisualTarget } from './modules/galactic-combat-v344.js?v=47.7.37';
-import {mergeNpcMotionPatch} from './modules/npc-motion-v3441.js?v=47.7.37';
-import {recordRemotePilotPosition,advanceRemotePilotVisual} from './modules/multiplayer-motion-v3442.js?v=47.7.37';
-import {createModularMapV2,modularMapKey} from './modules/modular-map-v2.js?v=47.7.37';
-import { createBackdropRasterCache } from './modules/backdrop-raster-cache.js?v=47.7.37';
-import { createTextWidthCache } from './modules/text-width-cache.js?v=47.7.37';
-import { createHudUpdateScheduler } from './modules/hud-update-scheduler.js?v=47.7.37';
-import { createAssetCache, flattenAssetPaths } from './modules/asset-cache.js?v=47.7.37';
-import { createSceneGradientCache } from './modules/scene-gradient-cache.js?v=47.7.37';
-import { createPerformanceMonitor, formatPerformanceReport } from './modules/performance-monitor.js?v=47.7.37';
-import {createDeferredHudScheduler} from './modules/deferred-hud-v72.js?v=47.7.37';
-import {createPeriodicHudBudgetV73} from './modules/periodic-hud-v73.js?v=47.7.37';
-import {createRenderPhaseProfilerV73} from './modules/render-phase-profiler-v73.js?v=47.7.37';
-import {createBrowserLatencyDiagnostics} from './modules/browser-latency-v72.js?v=47.7.37';
-import { createAdaptiveResolution, effectiveCanvasDpr } from './modules/adaptive-resolution-v70.js?v=47.7.37';
-import { createPreviewScheduler } from './modules/preview-scheduler-v70.js?v=47.7.37';
-import { createFrameGate } from './modules/frame-gate.js?v=47.7.37';
-import {createVisualIsolationV75, VISUAL_TEST_MODES_V75} from './modules/visual-isolation-v75.js?v=47.7.37';
-import {npcDisplaySizeV526,oreDisplaySizeV526,boxDisplaySizeV526,lootDisplaySizeV526} from './modules/visual-scale-v526.js?v=47.7.37';
-import { createStellarAutopilotV48 } from './modules/stellar-autopilot-v48.js?v=47.7.37';
-import {routeMapLayoutV4825} from './modules/route-map-layout-v4825.js?v=47.7.37';
-import { createStagedAssetPreloader } from './modules/staged-preload-v342.js?v=47.7.37';
-import { QUALITY_PROFILES, initialAutoQualityForDevice } from './modules/quality-profiles.js?v=47.7.37';
-import { freshBattleConfigsV2013, captureCombatBuildV2013, exchangeCombatBuildV2013, combatConfigRemainingV2013, clampStoredShieldV2013 } from './combat-config-v2013.js?v=47.7.37';
-import { FACTIONS, SHIPS, ITEMS, LASER_AMMO, ROCKETS, NPC_TYPES, MAPS, RESOURCES } from './data.js?v=47.7.37';
-import { isShipAllowedV50, ensureAllowedShipSaveV50 } from './modules/stellar-ship-allowlist-v65.js?v=47.7.37';
-import {ASTRAL53, SPRITE53, baseIdV53, portalIdV53, visualDroneV53} from './modules/stellar-astral-expansion-v53.js?v=47.7.37';
+import {saleQuoteV4776} from './modules/sale-policy-v4776.js?v=47.7.38';
+import {stellarConfirmV4776,stellarPromptV4776} from './modules/stellar-dialog-v4776.js?v=47.7.38';
+import {createWarbotAdminV477} from './modules/warbot-admin-v477.js?v=47.7.38';
+import {frontierAdminAccessV4774} from './api.js?v=47.7.38';
+import {drawWarbotShipV477,drawWarbotBeamV477,WARBOT_SHIP_ASSETS} from './modules/warbot-visual-v477.js?v=47.7.38';
+import {createCombatRebornV470,npcTacticalDriftV470,drawPortalSignatureV470} from './modules/combat-reborn-v470.js?v=47.7.38';
+import {createStellarAudio} from './modules/stellar-audio-v462.js?v=47.7.38';
+import {portalPointV461,CANONICAL_LINKS_V461} from './modules/portal-layout-v461.js?v=47.7.38';
+import {galacticLevelV451,applyGalacticProgressionV451} from './modules/galactic-progression-v451.js?v=47.7.38';
+import {progressionMilestonesV460} from './modules/galactic-balance-v460.js?v=47.7.38';
+import {filteredFrontierPortalsV440} from './modules/frontier-routing-v440.js?v=47.7.38';
+import {astralEquipmentBonusesV435} from './modules/astral-systems-v435.js?v=47.7.38';
+import {registerFrontierSectorsV435,sectorDestinationV435,sectorLabelV435,sectorLevelV435,sectorPortalsV435} from './modules/frontier-sectors-v435.js?v=47.7.38';
+import {loadStageAV423 as loadAstralBattleSnapshotV431} from './api.js?v=47.7.38';
+import {verifiedAstralPveBonusV431} from './modules/astral-combat-v431.js?v=47.7.38';
+import {ASTRAL_ARENAS,isAstralArena,astralRadarVisible,astralResumePoint,drawAstralRift,drawAstralBossCrest,astralBossLabel} from './modules/astral-gates-v380.js?v=47.7.38';
+import {frontierPanelHtml} from './modules/frontier-v370.js?v=47.7.38';
+import {loadFrontierStateOnline,claimFrontierContractOnline,craftFrontierTechOnline,claimFrontierClanOnline,saveFrontierAdminContractOnline} from './api.js?v=47.7.38';
+import {dominionPanelHtml} from './modules/galactic-dominion-v360.js?v=47.7.38';
+import {loadDominionStateOnline,claimDominionOnline,declareDominionWarOnline,claimDominionWarPrizeOnline,saveDominionRulesOnline} from './api.js?v=47.7.38';
+import {createAmmoHudBudget,ammoDisplaySignature} from './modules/ammo-hud-budget-v347.js?v=47.7.38';
+import {visualFxBudget,relayVisualLoadout,relayVisualHealth,relayImpactType,drawRelayStation,drawPortalGateAccents,drawOreEventAccents,drawShipWingLights} from './modules/visual-revolution-v347.js?v=47.7.38';
+import {drawRelayEliteV54,relayLevelV54} from './modules/stellar-relay-elite-v54.js?v=47.7.38';
+import {fortificationNextLevel,fortificationStats,fortificationCanAfford} from './modules/galactic-ascension-v350.js?v=47.7.38';
+import {upgradeRelayFortificationOnline,saveRelayFortificationTierOnline} from './api.js?v=47.7.38';
+import {RELAY_SLOT_CATALOG,RELAY_BONUS_CATALOG,relayModuleFitsSlot,relayModuleName,relaySlotModules,relayBonusDuplicate} from './modules/relay-hangar-v3462.js?v=47.7.38';
+import {loadRelayDominationOnline,relayModuleActionOnline,claimRelayMissionOnline,saveRelayAdminOnline,saveRelayModuleBalanceOnline,repairRelayOnline,adminReleaseRelayOnline} from './api.js?v=47.7.38';
+import { weekendCenterHtml,weekendSlotRowHtml } from './modules/event-control-ui-v3411.js?v=47.7.38';
+import { adminUpdateWeekendSettingsOnline,adminUpdateWeekendEventOnline,adminSetManualEventOnline } from './api.js?v=47.7.38';
+import { bossHudCue, npcThreatLabel } from './modules/tactical-hud-v34.js?v=47.7.38';
+import { allowBackdropFilter, renderFxCount } from './modules/render-budget-v34.js?v=47.7.38';
+import { stellarOreName } from './modules/stellar-display-names.js?v=47.7.38';
+import { rankVisibleNpcTargets } from './modules/combat-target-priority.js?v=47.7.38';
+import { upcomingWeekendSlots, weekendRotationEnabled, weekendSchedule, validateWeekendSettings } from './modules/weekend-events-v341.js?v=47.7.38';
+import { eventControlProfile } from './modules/event-control-profile-v3411.js?v=47.7.38';
+import {eventStage} from './modules/event-evolution-v345.js?v=47.7.38';
+import { minimapPaintInterval } from './modules/minimap-cadence-v33.js?v=47.7.38';
+import { npcUpdateDecision, nearestNpcInRange } from './modules/smart-combat-engine.js?v=47.7.38';
+import { npcPatrolPosition } from './modules/npc-patrol.js?v=47.7.38';
+import { setupMobileLandscape } from './modules/mobile-landscape.js?v=47.7.38';
+import {directionalIndex, directionalGridForImage} from './modules/sprite-orientation.js?v=47.7.38';
+import {createHudIntelligence} from './modules/hud-intelligence.js?v=47.7.38';
+import {sentinelAttackerEligible, selectSentinelAttacker} from './modules/sentinel-defense.js?v=47.7.38';
+import {AUX_PROTOCOL_TYPES, AUX_PROTOCOL_IDS, normalizeAuxProtocols, auxProtocolSlotsUsed, changeAuxProtocolRank, auxProtocolStats} from './modules/aux-protocols.js?v=47.7.38';
+import { movementSpeed, nominalMovementSpeed, followShipCamera } from './modules/ship-navigation.js?v=47.7.38';
+import { loadCommandOverviewOnline,claimCompetitiveSeasonOnline,equipEliteTitleOnline,unequipEliteTitleOnline,loadCommandAdminOnline,saveCompetitiveSeasonOnline,saveWorldDirectiveOnline,loadClanOperationsOnline,claimClanOperationOnline,saveAdminClanOperationOnline } from './api.js?v=47.7.38';
+import {renderV21CommandCenter,V21_TABS} from './modules/v21/command-center-view.js?v=47.7.38';
+import {renderEliteEquipTitles,renderCompetitiveSection,renderUniverseDirectives} from './modules/v22/command-upgrades.js?v=47.7.38';
+import {registerStellarPwaV21,offerInstallV21} from './modules/v21/pwa.js?v=47.7.38';
+import { ECONOMY_EFFECTS, CRAFT_OUTPUT_KINDS, normalizeEconomyEffects, normalizeCraftIngredients, normalizeCraftOutput, formatCraftPreview } from './modules/admin-visual-builders.js?v=47.7.38';
+import { ADMIN_MISSION_PRESETS, createAdminMissionPreset, duplicateAdminMission, validateAdminMissionDraft, previewAdminMission } from './modules/admin-mission-builder.js?v=47.7.38';
+import { createHudContentCache } from './modules/hud-content-cache.js?v=47.7.38';
+import { createAuxiliaryWorkScheduler } from './modules/aux-work-scheduler.js?v=47.7.38';
+import { npcVisualDetail } from './modules/npc-render-detail.js?v=47.7.38';
+import { smoothNpcPosition, smoothNpcHeading, npcCombatLockCue, rocketVisualTarget } from './modules/galactic-combat-v344.js?v=47.7.38';
+import {mergeNpcMotionPatch} from './modules/npc-motion-v3441.js?v=47.7.38';
+import {recordRemotePilotPosition,advanceRemotePilotVisual} from './modules/multiplayer-motion-v3442.js?v=47.7.38';
+import {createModularMapV2,modularMapKey} from './modules/modular-map-v2.js?v=47.7.38';
+import { createBackdropRasterCache } from './modules/backdrop-raster-cache.js?v=47.7.38';
+import { createTextWidthCache } from './modules/text-width-cache.js?v=47.7.38';
+import { createHudUpdateScheduler } from './modules/hud-update-scheduler.js?v=47.7.38';
+import { createAssetCache, flattenAssetPaths } from './modules/asset-cache.js?v=47.7.38';
+import { createSceneGradientCache } from './modules/scene-gradient-cache.js?v=47.7.38';
+import { createPerformanceMonitor, formatPerformanceReport } from './modules/performance-monitor.js?v=47.7.38';
+import {createDeferredHudScheduler} from './modules/deferred-hud-v72.js?v=47.7.38';
+import {createPeriodicHudBudgetV73} from './modules/periodic-hud-v73.js?v=47.7.38';
+import {createRenderPhaseProfilerV73} from './modules/render-phase-profiler-v73.js?v=47.7.38';
+import {createBrowserLatencyDiagnostics} from './modules/browser-latency-v72.js?v=47.7.38';
+import { createAdaptiveResolution, effectiveCanvasDpr } from './modules/adaptive-resolution-v70.js?v=47.7.38';
+import { createPreviewScheduler } from './modules/preview-scheduler-v70.js?v=47.7.38';
+import { createFrameGate } from './modules/frame-gate.js?v=47.7.38';
+import {createVisualIsolationV75, VISUAL_TEST_MODES_V75} from './modules/visual-isolation-v75.js?v=47.7.38';
+import {npcDisplaySizeV526,oreDisplaySizeV526,boxDisplaySizeV526,lootDisplaySizeV526} from './modules/visual-scale-v526.js?v=47.7.38';
+import { createStellarAutopilotV48 } from './modules/stellar-autopilot-v48.js?v=47.7.38';
+import {routeMapLayoutV4825} from './modules/route-map-layout-v4825.js?v=47.7.38';
+import { createStagedAssetPreloader } from './modules/staged-preload-v342.js?v=47.7.38';
+import { QUALITY_PROFILES, initialAutoQualityForDevice } from './modules/quality-profiles.js?v=47.7.38';
+import { freshBattleConfigsV2013, captureCombatBuildV2013, exchangeCombatBuildV2013, combatConfigRemainingV2013, clampStoredShieldV2013 } from './combat-config-v2013.js?v=47.7.38';
+import { FACTIONS, SHIPS, ITEMS, LASER_AMMO, ROCKETS, NPC_TYPES, MAPS, RESOURCES } from './data.js?v=47.7.38';
+import { isShipAllowedV50, ensureAllowedShipSaveV50 } from './modules/stellar-ship-allowlist-v65.js?v=47.7.38';
+import {ASTRAL53, SPRITE53, baseIdV53, portalIdV53, visualDroneV53} from './modules/stellar-astral-expansion-v53.js?v=47.7.38';
 
-import { repairPulseSettings } from './repair-balance.js?v=47.7.37';
-import { xpThresholdV1770, xpThresholdV1915, migratePilotXpV1915 } from './level-curve-v1915.js?v=47.7.37';
-import { xpThresholdV460, migratePilotXpV460 } from './level-curve-v460.js?v=47.7.37';
-import { xpThresholdV482, migratePilotXpV482 } from './level-curve-v482.js?v=47.7.37';
-import { applyRecruitBonusV2012, eliteRouteSnapshotV2012, freshEliteRouteJournalV2012, ELITE_ROUTE_TARGETS_V2012, novaTierPriceV2012 } from './progression-plan-v2012.js?v=47.7.37';
-import { GAME_ASSETS } from './assets/v17/manifest.js?v=47.7.37';
-import { signUp, signIn, beginGoogleSignIn, restoreGoogleSignInFromUrl, requestPasswordReset, restorePasswordRecoveryFromUrl, restoreSession, signOutLocal, checkGameSession, endGameSession, getUser, getSessionCredentials, loadCloudSave, saveCloudSave, loadEliteOperationsOnline, claimEliteOperationOnline, loadWarCampaignsOnline, claimWarSupplyOnline, claimWarCampaignOnline, loadAdminWarCampaignsOnline, saveAdminWarCampaignOnline, saveAdminWarRulesOnline, loadAdminEliteObjectivesOnline, saveAdminEliteObjectiveOnline, updateCallsign, updatePassword, loadRankings, loadAuctionBids, saveAuctionBidOnline, markAuctionBidStatusOnline, loadAuctionMarket, upsertPlayerPresenceOnline, loadMapPresenceOnline, savePlayerLocationCheckpointOnline, loadPlayerLocationCheckpointOnline, removePlayerPresenceOnline, queuePvpAttackOnline, consumePvpDamageEventsOnline, syncArenaProfileOnline, loadArenaState, loadArenaDailyRewardStatus, claimArenaDailyReward, loadArenaOpponents, loadArenaHistory, arenaAttackOnline, listClansOnline, loadMyClanOnline, createClanOnline, joinClanOnline, getClanRequestsOnline, reviewClanRequestOnline, cancelClanRequestOnline, setClanMemberRoleOnline, leaveClanOnline, transferClanCreditsOnline, claimClanCreditGrantsOnline, recordClanAlienKillOnline, getPremiumShopOnline, testPurchasePremiumOnline, adminPreviewPremiumStageOnline, adminSimulatePremiumStageOnline, getPremiumStageCatalogOnline, loadWarfrontStateOnline, loadSectorOwnershipOnline, hitWorldBossOnline, claimWorldBossRewardOnline, declareClanWarOnline, recordClanWarScoreOnline, loadLiveOpsOnline, adminUpdateLiveEventScheduleOnline, purchaseLiveCatalogOnline, economyActionOnline, getChatHistoryOnline, sendChatMessageOnline, redeemGameCouponOnline, getMyDesignersOnline, setDesignLoadoutOnline, claimGateDroneDesignOnline, claimEventDesignerOnline, getAdminStatus, adminSearchAccounts, adminRecentActions, adminBanAccount, adminUnbanAccount, adminResetAccount, adminDeleteAccount, pushTelemetryBatch, adminTelemetryOverview, adminPlayerTelemetry, getBattleGroupOnline, createBattleGroupOnline, inviteBattleGroupOnline, searchBattleGroupPlayersOnline, inviteBattleGroupUserOnline, respondBattleGroupInviteOnline, leaveBattleGroupOnline, kickBattleGroupMemberOnline, setBattleGroupRallyOnline, loadRuntimeConfigOnline, loadNpcRuntimeConfigOnline, loadWorldRuntimeConfigOnline, loadSystemsRuntimeConfigOnline, loadAdminRuntimeMonitorOnline, adminUpdateRuntimeModuleOnline, adminUpdateNpcRuntimeOnline, adminUpdateNpcSpawnRuntimeOnline, adminUpdateWorldMapOnline, adminUpdateWorldResourceOnline, adminUpdateWorldSectorOnline, adminUpdateWorldPortalOnline, adminUpdateWorldResourcePoolOnline, adminUpdateMissionCategoryOnline, adminUpdateEconomyServiceOnline, adminUpdateCraftingRecipeOnline, loadBattlePassRuntimeConfigOnline, adminUpdateBattlePassSeasonOnline, adminUpdateBattlePassTierOnline, loadShopsRuntimeConfigOnline, adminUpdateCommonShopItemOnline, adminUpdatePremiumShopItemOnline, loadBonusConfigOnline, adminUpdateBonusConfigOnline, adminCouponDashboardOnline, adminCreateCouponOnline, adminSetCouponActiveOnline, loadGalaxyGatesOnline, adminUpdateGalaxyGateOnline, adminUpsertCustomMissionOnline, adminDeleteCustomMissionOnline, adminCreateCraftRecipeOnline, adminCreateEconomyServiceOnline, adminCreatePassSeasonOnline, loadAuctionRulesOnline, adminUpdateAuctionRulesOnline, loadBalanceRuntimeOnline, adminUpdateBalanceOnline,loadAdminSecurityIncidents,reviewAdminSecurityIncident } from './api.js?v=47.7.37';
-import {createOfflineFarmV484} from './modules/stellar-offline-farm-v484.js?v=47.7.37';
-import { SharedUniverseClient } from './world.js?v=47.7.37';
+import { repairPulseSettings } from './repair-balance.js?v=47.7.38';
+import { xpThresholdV1770, xpThresholdV1915, migratePilotXpV1915 } from './level-curve-v1915.js?v=47.7.38';
+import { xpThresholdV460, migratePilotXpV460 } from './level-curve-v460.js?v=47.7.38';
+import { xpThresholdV482, migratePilotXpV482 } from './level-curve-v482.js?v=47.7.38';
+import { applyRecruitBonusV2012, eliteRouteSnapshotV2012, freshEliteRouteJournalV2012, ELITE_ROUTE_TARGETS_V2012, novaTierPriceV2012 } from './progression-plan-v2012.js?v=47.7.38';
+import { GAME_ASSETS } from './assets/v17/manifest.js?v=47.7.38';
+import { signUp, signIn, beginGoogleSignIn, restoreGoogleSignInFromUrl, requestPasswordReset, restorePasswordRecoveryFromUrl, restoreSession, signOutLocal, checkGameSession, endGameSession, getUser, getSessionCredentials, loadCloudSave, saveCloudSave, loadEliteOperationsOnline, claimEliteOperationOnline, loadWarCampaignsOnline, claimWarSupplyOnline, claimWarCampaignOnline, loadAdminWarCampaignsOnline, saveAdminWarCampaignOnline, saveAdminWarRulesOnline, loadAdminEliteObjectivesOnline, saveAdminEliteObjectiveOnline, updateCallsign, updatePassword, loadRankings, loadAuctionBids, saveAuctionBidOnline, markAuctionBidStatusOnline, loadAuctionMarket, upsertPlayerPresenceOnline, loadMapPresenceOnline, savePlayerLocationCheckpointOnline, loadPlayerLocationCheckpointOnline, removePlayerPresenceOnline, queuePvpAttackOnline, consumePvpDamageEventsOnline, syncArenaProfileOnline, loadArenaState, loadArenaDailyRewardStatus, claimArenaDailyReward, loadArenaOpponents, loadArenaHistory, arenaAttackOnline, listClansOnline, loadMyClanOnline, createClanOnline, joinClanOnline, getClanRequestsOnline, reviewClanRequestOnline, cancelClanRequestOnline, setClanMemberRoleOnline, leaveClanOnline, transferClanCreditsOnline, claimClanCreditGrantsOnline, recordClanAlienKillOnline, getPremiumShopOnline, testPurchasePremiumOnline, adminPreviewPremiumStageOnline, adminSimulatePremiumStageOnline, getPremiumStageCatalogOnline, loadWarfrontStateOnline, loadSectorOwnershipOnline, hitWorldBossOnline, claimWorldBossRewardOnline, declareClanWarOnline, recordClanWarScoreOnline, loadLiveOpsOnline, adminUpdateLiveEventScheduleOnline, purchaseLiveCatalogOnline, economyActionOnline, getChatHistoryOnline, sendChatMessageOnline, redeemGameCouponOnline, getMyDesignersOnline, setDesignLoadoutOnline, claimGateDroneDesignOnline, claimEventDesignerOnline, getAdminStatus, adminSearchAccounts, adminRecentActions, adminBanAccount, adminUnbanAccount, adminResetAccount, adminDeleteAccount, pushTelemetryBatch, adminTelemetryOverview, adminPlayerTelemetry, getBattleGroupOnline, createBattleGroupOnline, inviteBattleGroupOnline, searchBattleGroupPlayersOnline, inviteBattleGroupUserOnline, respondBattleGroupInviteOnline, leaveBattleGroupOnline, kickBattleGroupMemberOnline, setBattleGroupRallyOnline, loadRuntimeConfigOnline, loadNpcRuntimeConfigOnline, loadWorldRuntimeConfigOnline, loadSystemsRuntimeConfigOnline, loadAdminRuntimeMonitorOnline, adminUpdateRuntimeModuleOnline, adminUpdateNpcRuntimeOnline, adminUpdateNpcSpawnRuntimeOnline, adminUpdateWorldMapOnline, adminUpdateWorldResourceOnline, adminUpdateWorldSectorOnline, adminUpdateWorldPortalOnline, adminUpdateWorldResourcePoolOnline, adminUpdateMissionCategoryOnline, adminUpdateEconomyServiceOnline, adminUpdateCraftingRecipeOnline, loadBattlePassRuntimeConfigOnline, adminUpdateBattlePassSeasonOnline, adminUpdateBattlePassTierOnline, loadShopsRuntimeConfigOnline, adminUpdateCommonShopItemOnline, adminUpdatePremiumShopItemOnline, loadBonusConfigOnline, adminUpdateBonusConfigOnline, adminCouponDashboardOnline, adminCreateCouponOnline, adminSetCouponActiveOnline, loadGalaxyGatesOnline, adminUpdateGalaxyGateOnline, adminUpsertCustomMissionOnline, adminDeleteCustomMissionOnline, adminCreateCraftRecipeOnline, adminCreateEconomyServiceOnline, adminCreatePassSeasonOnline, loadAuctionRulesOnline, adminUpdateAuctionRulesOnline, loadBalanceRuntimeOnline, adminUpdateBalanceOnline,loadAdminSecurityIncidents,reviewAdminSecurityIncident } from './api.js?v=47.7.38';
+import {createOfflineFarmV484} from './modules/stellar-offline-farm-v484.js?v=47.7.38';
+import { SharedUniverseClient } from './world.js?v=47.7.38';
 
 const NPC_2D_V65 = Object.freeze({
   streuner: '/assets/v67/npcs/streuner.webp',
@@ -413,7 +413,7 @@ function preloadActiveGameplayAssets(){
 function assetImage(path){return path ? requestAssetImage(path) : null;}
 // V68 • somente visual: nenhuma alteração nos mapas lógicos, spawn ou câmera.
 const MODULAR_MAP_V2=createModularMapV2({
-  loadLayout:async path=>{const resp=await fetch(path+'?v=47.7.37',{cache:'no-cache'});if(!resp.ok)throw Error('HTTP '+resp.status);return resp.json();},
+  loadLayout:async path=>{const resp=await fetch(path+'?v=47.7.38',{cache:'no-cache'});if(!resp.ok)throw Error('HTTP '+resp.status);return resp.json();},
   requestImage:path=>assetImage(path),
   warn:(...args)=>console.warn(...args),
   maxVisibleHigh:DEVICE_CAPS.mobile?36:58,maxVisibleMedium:DEVICE_CAPS.mobile?20:28
@@ -9294,7 +9294,7 @@ const AUTOPILOT_V48=createStellarAutopilotV48({
     normalizeGalaxyGateState();
     if(!progress.galaxyGate[key]?.built&&!progress.galaxyGate[key]?.run)throw Error('Monte o portal antes de entrar');
     if(progress.mapId!=='x1'||!isAtTrader())throw Error('Vá até a base X-1 para entrar');
-    progress.galaxyGate.selected=key;saveGame();enterAlphaGate();return true;
+    progress.galaxyGate.selected=key;saveGame();enterAlphaGate();return {entered:true,transitionMs:1200};
   },
   getGraphLabel:()=>currentGraphMapLabel(),
   getGoalLabel:map=>displayMapLabel(map,progress?.profile?.faction||null),
@@ -9606,7 +9606,7 @@ function renderAdminPortalsEditor(){
   const c=adminBonusEditor.snapshot?.config;
   const costs=c?[['alpha','AURORA'],['beta','NEXUS'],['gamma','ECLIPSE']].map(([key,label])=>`<div class="admin-bonus-reward"><b>${label}</b><div class="admin-shop-fields"><label>STL POR GIRO<input type="number" min="1" max="100000" data-portal-cost="stl:${key}" value="${Math.max(1,Math.round(Number(c.gate_prices?.[key]?.stl)||100))}"></label><label>POEIRA POR GIRO<input type="number" min="1" max="100" data-portal-cost="dust:${key}" value="${Math.max(1,Math.round(Number(c.gate_prices?.[key]?.dust)||1))}"></label></div></div>`).join(''):'';
   const priceContent=c?`<p>Servidor calcula preços e confirma saldo; alterações têm efeito após sincronização.</p><div class="admin-shop-fields"><label>DESCONTO PREMIUM (%)<input data-portal-cost="discount" type="number" min="0" max="50" value="${Math.max(0,Math.min(50,Math.round(Number(c.premium_discount_pct)||0)))}"></label></div>${costs}<button type="button" class="small-btn gold" data-portal-price-save>SALVAR CUSTOS DE GIROS</button>`:'<p class="muted">Preços do Materializador indisponíveis no momento. Use RECARREGAR. As ondas podem ser editadas separadamente.</p>';
-  host.innerHTML=`<article class="admin-bonus-block portal-adm-section"><h4>🎯 PREÇOS DO MATERIALIZADOR</h4>${priceContent}</article><article class="admin-bonus-block portal-adm-section"><h4>🛸 ONDAS, NPCs E PRÊMIOS</h4>${renderAdminGateBuilder()}</article>`;
+  host.innerHTML=`<article class="admin-bonus-block portal-adm-section"><h4>🎯 PREÇOS DO MATERIALIZADOR</h4>${priceContent}</article><article class="admin-bonus-block portal-adm-section"><h4>🛸 ONDAS, NPCs E PRÊMIOS PRINCIPAIS</h4><p class="muted">Atenção: este painel publica o pacote tradicional. O editor ASTRAL REWARDS abaixo publica um bônus <b>adicional</b> e independente. Confira os dois antes de aumentar prêmios.</p>${renderAdminGateBuilder()}</article>`;
 }
 async function saveAdminPortalPrices(){
   if(adminBonusEditor.busy||!adminBonusEditor.snapshot?.config)return;
@@ -9891,11 +9891,25 @@ const adminNpcEditor={busy:false,snapshot:null};
 function adminNpcMessage(text,kind='muted'){if(!ui.adminRuntimeNpcMessage)return;ui.adminRuntimeNpcMessage.textContent=text||'';ui.adminRuntimeNpcMessage.className=`admin-runtime-interface-message ${kind}`.trim();}
 function adminNpcMapLabel(id){const k=String(id||'');if(/^x[1-4]$/.test(k))return `X-${k.slice(1)}`;if(/^b4[1-3]$/.test(k))return `4-${k.slice(2)}`;return k.toUpperCase();}
 function adminNpcSpawnRows(key){return (Array.isArray(adminNpcEditor.snapshot?.spawns)?adminNpcEditor.snapshot.spawns:[]).filter(x=>String(x.npc_key)===String(key)).sort((a,b)=>String(a.map_id).localeCompare(String(b.map_id),undefined,{numeric:true}));}
+function adminNpcDropFieldsV82(row){
+ const data=row?.resources&&typeof row.resources==='object'?row.resources:{};
+ const entries=Object.entries(data).sort((a,b)=>a[0].localeCompare(b[0],'pt-BR'));
+ return `<details class="admin-npc-drop-editor-v82"><summary>📦 DROPS DE RECURSOS (${entries.length}) • expandir</summary><div class="admin-npc-fields">${entries.map(([key,qty])=>`<label>${escHtml(key)}<input data-npc-resource="${escHtml(key)}" type="number" min="0" max="100000" step="1" value="${Math.max(0,Math.trunc(Number(qty)||0))}"></label>`).join('')||'<small>Sem recursos configurados.</small>'}</div><small>Somente quantidades de recursos já vinculados ao NPC. Salve o NPC para publicar no servidor.</small></details>`;
+}
+function adminNpcReadDropsV82(card,base){
+ const result={...(base&&typeof base==='object'?base:{})};
+ for(const input of card.querySelectorAll('[data-npc-resource]')){
+  const key=input.dataset.npcResource,n=Number(input.value);
+  if(!Object.prototype.hasOwnProperty.call(result,key)||!Number.isSafeInteger(n)||n<0||n>100000)throw Error('Drop inválido: '+key);
+  result[key]=n;
+ }
+ return result;
+}
 function renderAdminNpcEditor(){
   if(!ui.adminRuntimeNpcGrid)return;const rows=Array.isArray(adminNpcEditor.snapshot?.npcs)?[...adminNpcEditor.snapshot.npcs]:[];
   rows.sort((a,b)=>String(a.name||a.npc_key).localeCompare(String(b.name||b.npc_key),'pt-BR'));
   if(!rows.length){ui.adminRuntimeNpcGrid.innerHTML='<div class="empty-state">Nenhum NPC carregado.</div>';return;}
-  ui.adminRuntimeNpcGrid.innerHTML=rows.map(row=>{const key=String(row.npc_key||''),spawns=adminNpcSpawnRows(key),rmin=Math.max(1,Number(row.respawn_min_ms)||6000)/1000,rmax=Math.max(1,Number(row.respawn_max_ms)||13000)/1000;return `<article class="admin-npc-card" data-admin-npc="${escHtml(key)}"><div class="admin-npc-card-head"><div><b>${escHtml(row.name||key)}</b><small>${escHtml(key)}</small></div><label class="admin-npc-active"><input data-npc-field="enabled" type="checkbox" ${row.enabled!==false?'checked':''}> ATIVO</label></div><div class="admin-npc-fields"><label>NOME<input data-npc-field="name" maxlength="48" value="${escHtml(row.name||key)}"></label><label>HP<input data-npc-field="hp" type="number" min="1" step="1" value="${Math.max(1,Number(row.hp)||1)}"></label><label>ESCUDO<input data-npc-field="shield" type="number" min="0" step="1" value="${Math.max(0,Number(row.shield)||0)}"></label><label>DANO<input data-npc-field="damage" type="number" min="0" step="1" value="${Math.max(0,Number(row.damage)||0)}"></label><label>VELOCIDADE<input data-npc-field="speed" type="number" min="1" max="1000" step="1" value="${Math.max(1,Number(row.speed)||1)}"></label><label>CR<input data-npc-field="credits" type="number" min="0" step="1" value="${Math.max(0,Number(row.credits)||0)}"></label><label>STL<input data-npc-field="stl" type="number" min="0" step="1" value="${Math.max(0,Number(row.stl)||0)}"></label><label>XP<input data-npc-field="xp" type="number" min="0" step="1" value="${Math.max(0,Number(row.xp)||0)}"></label><label>RESPAWN MIN (s)<input data-npc-field="respawn_min_s" type="number" min="1" max="600" step="0.1" value="${rmin}"></label><label>RESPAWN MAX (s)<input data-npc-field="respawn_max_s" type="number" min="1" max="600" step="0.1" value="${rmax}"></label></div><button class="small-btn gold admin-npc-save" type="button" data-npc-save="${escHtml(key)}">SALVAR NPC</button><div class="admin-npc-spawn-block"><div class="admin-npc-spawn-title"><b>POPULAÇÃO POR MAPA</b><small>Altera somente mapas já vinculados a este NPC.</small></div>${spawns.length?`<div class="admin-npc-spawn-grid">${spawns.map(sp=>`<div class="admin-npc-spawn-row" data-npc-spawn-map="${escHtml(sp.map_id)}"><b>${escHtml(adminNpcMapLabel(sp.map_id))}</b><input data-spawn-count type="number" min="0" max="500" step="1" value="${Math.max(0,Number(sp.spawn_count)||0)}"><label><input data-spawn-enabled type="checkbox" ${sp.enabled!==false?'checked':''}> ON</label><button class="small-btn" type="button" data-npc-spawn-save="${escHtml(key)}">SALVAR</button></div>`).join('')}</div>`:'<div class="empty-state compact">Sem população configurada em mapas normais.</div>'}</div></article>`;}).join('');
+  ui.adminRuntimeNpcGrid.innerHTML=rows.map(row=>{const key=String(row.npc_key||''),spawns=adminNpcSpawnRows(key),rmin=Math.max(1,Number(row.respawn_min_ms)||6000)/1000,rmax=Math.max(1,Number(row.respawn_max_ms)||13000)/1000;return `<article class="admin-npc-card" data-admin-npc="${escHtml(key)}"><div class="admin-npc-card-head"><div><b>${escHtml(row.name||key)}</b><small>${escHtml(key)}</small></div><label class="admin-npc-active"><input data-npc-field="enabled" type="checkbox" ${row.enabled!==false?'checked':''}> ATIVO</label></div><div class="admin-npc-fields"><label>NOME<input data-npc-field="name" maxlength="48" value="${escHtml(row.name||key)}"></label><label>HP<input data-npc-field="hp" type="number" min="1" step="1" value="${Math.max(1,Number(row.hp)||1)}"></label><label>ESCUDO<input data-npc-field="shield" type="number" min="0" step="1" value="${Math.max(0,Number(row.shield)||0)}"></label><label>DANO<input data-npc-field="damage" type="number" min="0" step="1" value="${Math.max(0,Number(row.damage)||0)}"></label><label>VELOCIDADE<input data-npc-field="speed" type="number" min="1" max="1000" step="1" value="${Math.max(1,Number(row.speed)||1)}"></label><label>CR<input data-npc-field="credits" type="number" min="0" step="1" value="${Math.max(0,Number(row.credits)||0)}"></label><label>STL<input data-npc-field="stl" type="number" min="0" step="1" value="${Math.max(0,Number(row.stl)||0)}"></label><label>XP<input data-npc-field="xp" type="number" min="0" step="1" value="${Math.max(0,Number(row.xp)||0)}"></label><label>RESPAWN MIN (s)<input data-npc-field="respawn_min_s" type="number" min="1" max="600" step="0.1" value="${rmin}"></label><label>RESPAWN MAX (s)<input data-npc-field="respawn_max_s" type="number" min="1" max="600" step="0.1" value="${rmax}"></label></div>${adminNpcDropFieldsV82(row)}<button class="small-btn gold admin-npc-save" type="button" data-npc-save="${escHtml(key)}">SALVAR NPC</button><div class="admin-npc-spawn-block"><div class="admin-npc-spawn-title"><b>POPULAÇÃO POR MAPA</b><small>Altera somente mapas já vinculados a este NPC.</small></div>${spawns.length?`<div class="admin-npc-spawn-grid">${spawns.map(sp=>`<div class="admin-npc-spawn-row" data-npc-spawn-map="${escHtml(sp.map_id)}"><b>${escHtml(adminNpcMapLabel(sp.map_id))}</b><input data-spawn-count type="number" min="0" max="500" step="1" value="${Math.max(0,Number(sp.spawn_count)||0)}"><label><input data-spawn-enabled type="checkbox" ${sp.enabled!==false?'checked':''}> ON</label><button class="small-btn" type="button" data-npc-spawn-save="${escHtml(key)}">SALVAR</button></div>`).join('')}</div>`:'<div class="empty-state compact">Sem população configurada em mapas normais.</div>'}</div></article>`;}).join('');
 }
 async function loadAdminNpcEditor(force=false){
   if(adminNpcEditor.busy)return;adminNpcEditor.busy=true;if(ui.adminRuntimeNpcReload)ui.adminRuntimeNpcReload.disabled=true;adminNpcMessage('Carregando configuração dos NPCs...');
@@ -9905,7 +9919,7 @@ async function loadAdminNpcEditor(force=false){
 }
 async function saveAdminNpc(key,card,button){
   if(adminNpcEditor.busy||!key||!card)return;const f=n=>card.querySelector(`[data-npc-field="${n}"]`);const minS=Math.max(1,Number(f('respawn_min_s')?.value)||1),maxS=Math.max(1,Number(f('respawn_max_s')?.value)||1);if(maxS<minS){adminNpcMessage('Respawn máximo deve ser maior ou igual ao mínimo.','err');return;}
-  const payload={name:String(f('name')?.value||'').trim(),hp:Math.max(1,Math.trunc(Number(f('hp')?.value)||1)),shield:Math.max(0,Math.trunc(Number(f('shield')?.value)||0)),damage:Math.max(0,Math.trunc(Number(f('damage')?.value)||0)),speed:Math.max(1,Number(f('speed')?.value)||1),credits:Math.max(0,Math.trunc(Number(f('credits')?.value)||0)),stl:Math.max(0,Math.trunc(Number(f('stl')?.value)||0)),xp:Math.max(0,Math.trunc(Number(f('xp')?.value)||0)),respawn_min_ms:Math.round(minS*1000),respawn_max_ms:Math.round(maxS*1000),enabled:!!f('enabled')?.checked};
+  let resources;try{resources=adminNpcReadDropsV82(card,adminNpcEditor.snapshot?.npcs?.find(n=>n.npc_key===key)?.resources);}catch(e){adminNpcMessage(e.message,'err');return;}const payload={resources,name:String(f('name')?.value||'').trim(),hp:Math.max(1,Math.trunc(Number(f('hp')?.value)||1)),shield:Math.max(0,Math.trunc(Number(f('shield')?.value)||0)),damage:Math.max(0,Math.trunc(Number(f('damage')?.value)||0)),speed:Math.max(1,Number(f('speed')?.value)||1),credits:Math.max(0,Math.trunc(Number(f('credits')?.value)||0)),stl:Math.max(0,Math.trunc(Number(f('stl')?.value)||0)),xp:Math.max(0,Math.trunc(Number(f('xp')?.value)||0)),respawn_min_ms:Math.round(minS*1000),respawn_max_ms:Math.round(maxS*1000),enabled:!!f('enabled')?.checked};
   if(!payload.name){adminNpcMessage('O NPC precisa de um nome.','err');return;}adminNpcEditor.busy=true;if(button)button.disabled=true;adminNpcMessage(`Salvando ${payload.name}...`);
   try{const result=await adminUpdateNpcRuntimeOnline(key,payload);const runtime=result?.runtime||await loadNpcRuntimeConfigOnline(true);adminNpcEditor.snapshot=runtime;normalizeNpcRuntimeConfig(runtime,'online');saveNpcRuntimeConfigCache(runtime);renderAdminNpcEditor();await loadAdminRuntimeMonitor(false);adminNpcMessage(`${payload.name} salvo • NPC runtime v${Number(runtime?.version)||0}.`,'ok');showToast(`${payload.name} atualizado no runtime`);}
   catch(e){adminNpcMessage(e.message||'Falha ao salvar NPC.','err');}
@@ -9936,9 +9950,16 @@ function adminWorldSetView(view='maps'){
 function adminWorldResourceLabel(key){const r=adminWorldEditor.snapshot?.resources?.find(x=>String(x.resource_key)===String(key));return r?.name||key;}
 function adminWorldMapLabel(id){const row=adminWorldEditor.snapshot?.maps?.find(x=>String(x.map_id)===String(id));return row?.label||row?.name||adminNpcMapLabel(id);}
 function adminWorldMapPools(mapId){return (Array.isArray(adminWorldEditor.snapshot?.map_resources)?adminWorldEditor.snapshot.map_resources:[]).filter(x=>String(x.map_id)===String(mapId)).sort((a,b)=>String(a.resource_key).localeCompare(String(b.resource_key)));}
+// V82 • Controles avançados de mapa, sem permitir coordenadas ou objetos livres.
+function adminWorldAdvancedFieldsV82(row){
+ const colors=row.palette&&typeof row.palette==='object'?row.palette:{};
+ const picker=(k,label,fallback)=>`<label>${label}<input type="color" data-world-palette="${k}" value="${/^#[0-9a-f]{6}$/i.test(String(colors[k]))?escHtml(colors[k]):fallback}"></label>`;
+ const structures=Array.isArray(row.structures)&&row.structures.every(x=>typeof x==='string')?row.structures:null;
+ return `<details class="admin-world-advanced-v82"><summary>🎨 PALETA E ESTRUTURAS DO MAPA</summary><div class="admin-world-fields">${picker('nebula','NEBULOSA','#123a52')}${picker('accent','ACENTO','#4fd7ff')}${picker('deep','FUNDO','#030916')}</div><label>ESTRUTURAS DESCRITIVAS (UMA POR LINHA)<textarea data-world-structures-v82 rows="3" maxlength="2500" ${structures===null?'disabled':''}>${structures===null?'Estruturas complexas: preservadas pelo sistema.':escHtml(structures.join('\n'))}</textarea></label><small>As cores e a lista descritiva não alteram coordenadas, hitboxes nem teletransporte. Mapas com estruturas complexas permanecem protegidos.</small></details>`;
+}
 function renderAdminWorldMaps(){
   const rows=Array.isArray(adminWorldEditor.snapshot?.maps)?[...adminWorldEditor.snapshot.maps]:[];rows.sort((a,b)=>(Number(a.tier)||0)-(Number(b.tier)||0)||String(a.map_id).localeCompare(String(b.map_id)));
-  return rows.map(row=>{const id=String(row.map_id||''),pools=adminWorldMapPools(id),rmin=Math.max(1,Number(row.ore_respawn_min_ms)||5000)/1000,rmax=Math.max(1,Number(row.ore_respawn_max_ms)||12000)/1000;return `<article class="admin-world-card admin-world-map-card" data-world-map="${escHtml(id)}"><div class="admin-world-card-head"><div><b>${escHtml(row.label||row.name||id)}</b><small>${escHtml(id)} • TIER ${fmt(row.tier||1)}${row.battle?' • BATALHA':''}${row.gate?' • PORTAL':''}</small></div><label class="admin-npc-active"><input data-world-map-field="enabled" type="checkbox" ${row.enabled!==false?'checked':''}> ATIVO</label></div><div class="admin-world-fields"><label>NOME<input data-world-map-field="name" maxlength="64" value="${escHtml(row.name||id)}"></label><label>RISCO<input data-world-map-field="risk" maxlength="32" value="${escHtml(row.risk||'Normal')}"></label><label>LARGURA<input data-world-map-field="world_w" type="number" min="1000" max="50000" step="100" value="${Math.round(Number(row.world_w)||6000)}"></label><label>ALTURA<input data-world-map-field="world_h" type="number" min="1000" max="50000" step="100" value="${Math.round(Number(row.world_h)||4500)}"></label><label>NÍVEL<input data-world-map-field="min_level" type="number" min="1" max="100" value="${Math.max(1,Number(row.min_level)||1)}"></label><label>MINÉRIOS<input data-world-map-field="ore_count" type="number" min="0" max="1000" value="${Math.max(0,Number(row.ore_count)||0)}"></label><label>RESPAWN MIN (s)<input data-world-map-field="ore_respawn_min_s" type="number" min="1" max="600" step="0.1" value="${rmin}"></label><label>RESPAWN MAX (s)<input data-world-map-field="ore_respawn_max_s" type="number" min="1" max="600" step="0.1" value="${rmax}"></label></div><button class="small-btn gold admin-world-save" type="button" data-world-map-save="${escHtml(id)}">SALVAR MAPA</button><div class="admin-world-pool-block"><div class="admin-npc-spawn-title"><b>POOL DE MINÉRIO</b><small>Peso relativo e disponibilidade dos recursos já vinculados.</small></div>${pools.length?`<div class="admin-world-pool-grid">${pools.map(pool=>`<div class="admin-world-pool-row" data-world-pool-resource="${escHtml(pool.resource_key)}"><b>${escHtml(adminWorldResourceLabel(pool.resource_key))}</b><input data-world-pool-weight type="number" min="0.01" max="1000" step="0.01" value="${Number(pool.weight)||1}"><label><input data-world-pool-enabled type="checkbox" ${pool.enabled!==false?'checked':''}> ON</label><button class="small-btn" type="button" data-world-pool-save="${escHtml(id)}">SALVAR</button></div>`).join('')}</div>`:'<div class="empty-state compact">Sem recursos vinculados a este mapa.</div>'}</div></article>`;}).join('')||'<div class="empty-state">Nenhum mapa carregado.</div>';
+  return rows.map(row=>{const id=String(row.map_id||''),pools=adminWorldMapPools(id),rmin=Math.max(1,Number(row.ore_respawn_min_ms)||5000)/1000,rmax=Math.max(1,Number(row.ore_respawn_max_ms)||12000)/1000;return `<article class="admin-world-card admin-world-map-card" data-world-map="${escHtml(id)}"><div class="admin-world-card-head"><div><b>${escHtml(row.label||row.name||id)}</b><small>${escHtml(id)} • TIER ${fmt(row.tier||1)}${row.battle?' • BATALHA':''}${row.gate?' • PORTAL':''}</small></div><label class="admin-npc-active"><input data-world-map-field="enabled" type="checkbox" ${row.enabled!==false?'checked':''}> ATIVO</label></div><div class="admin-world-fields"><label>NOME<input data-world-map-field="name" maxlength="64" value="${escHtml(row.name||id)}"></label><label>RISCO<input data-world-map-field="risk" maxlength="32" value="${escHtml(row.risk||'Normal')}"></label><label>LARGURA<input data-world-map-field="world_w" type="number" min="1000" max="50000" step="100" value="${Math.round(Number(row.world_w)||6000)}"></label><label>ALTURA<input data-world-map-field="world_h" type="number" min="1000" max="50000" step="100" value="${Math.round(Number(row.world_h)||4500)}"></label><label>NÍVEL<input data-world-map-field="min_level" type="number" min="1" max="100" value="${Math.max(1,Number(row.min_level)||1)}"></label><label>MULTIPLICADOR NPC (x)<input data-world-map-field="enemy_multiplier" type="number" min="0.1" max="10" step="0.05" value="${Math.max(.1,Number(row.enemy_multiplier)||1)}"></label><label>ESTRUTURAS DO MAPA<input data-world-map-field="landmark_count" type="number" min="0" max="100" step="1" value="${Math.max(0,Number(row.landmark_count)||0)}"></label><label>MINÉRIOS<input data-world-map-field="ore_count" type="number" min="0" max="1000" value="${Math.max(0,Number(row.ore_count)||0)}"></label><label>RESPAWN MIN (s)<input data-world-map-field="ore_respawn_min_s" type="number" min="1" max="600" step="0.1" value="${rmin}"></label><label>RESPAWN MAX (s)<input data-world-map-field="ore_respawn_max_s" type="number" min="1" max="600" step="0.1" value="${rmax}"></label></div>${adminWorldAdvancedFieldsV82(row)}<button class="small-btn gold admin-world-save" type="button" data-world-map-save="${escHtml(id)}">SALVAR MAPA</button><div class="admin-world-pool-block"><div class="admin-npc-spawn-title"><b>POOL DE MINÉRIO</b><small>Peso relativo e disponibilidade dos recursos já vinculados.</small></div>${pools.length?`<div class="admin-world-pool-grid">${pools.map(pool=>`<div class="admin-world-pool-row" data-world-pool-resource="${escHtml(pool.resource_key)}"><b>${escHtml(adminWorldResourceLabel(pool.resource_key))}</b><input data-world-pool-weight type="number" min="0.01" max="1000" step="0.01" value="${Number(pool.weight)||1}"><label><input data-world-pool-enabled type="checkbox" ${pool.enabled!==false?'checked':''}> ON</label><button class="small-btn" type="button" data-world-pool-save="${escHtml(id)}">SALVAR</button></div>`).join('')}</div>`:'<div class="empty-state compact">Sem recursos vinculados a este mapa.</div>'}</div></article>`;}).join('')||'<div class="empty-state">Nenhum mapa carregado.</div>';
 }
 function renderAdminWorldResources(){
   const rows=Array.isArray(adminWorldEditor.snapshot?.resources)?[...adminWorldEditor.snapshot.resources]:[];rows.sort((a,b)=>String(a.name||a.resource_key).localeCompare(String(b.name||b.resource_key),'pt-BR'));
@@ -9967,7 +9988,17 @@ async function loadAdminWorldEditor(force=false){
 }
 async function adminWorldApplyResult(result,message){const runtime=result?.runtime||await loadWorldRuntimeConfigOnline(true);adminWorldEditor.snapshot=runtime;normalizeWorldRuntimeConfig(runtime,'online');saveWorldRuntimeConfigCache(runtime);renderAdminWorldEditor();await loadAdminRuntimeMonitor(false);adminWorldMessage(`${message} • World v${Number(runtime?.version)||0}.`,'ok');return runtime;}
 async function saveAdminWorldMap(key,card,button){
-  if(adminWorldEditor.busy||!key||!card)return;const f=n=>card.querySelector(`[data-world-map-field="${n}"]`);const minS=Math.max(1,Number(f('ore_respawn_min_s')?.value)||1),maxS=Math.max(1,Number(f('ore_respawn_max_s')?.value)||1);if(maxS<minS){adminWorldMessage('Respawn máximo deve ser maior ou igual ao mínimo.','err');return;}const payload={name:String(f('name')?.value||'').trim(),risk:String(f('risk')?.value||'').trim(),world_w:Math.round(Number(f('world_w')?.value)||1000),world_h:Math.round(Number(f('world_h')?.value)||1000),min_level:Math.round(Number(f('min_level')?.value)||1),ore_count:Math.round(Number(f('ore_count')?.value)||0),ore_respawn_min_ms:Math.round(minS*1000),ore_respawn_max_ms:Math.round(maxS*1000),enabled:!!f('enabled')?.checked};if(!payload.name||!payload.risk){adminWorldMessage('Nome e risco do mapa são obrigatórios.','err');return;}adminWorldEditor.busy=true;if(button)button.disabled=true;adminWorldMessage(`Salvando ${key.toUpperCase()}...`);try{await adminWorldApplyResult(await adminUpdateWorldMapOnline(key,payload),`${key.toUpperCase()} salvo`);showToast(`${key.toUpperCase()} atualizado no World Runtime`);}catch(e){adminWorldMessage(e.message||'Falha ao salvar mapa.','err');}finally{adminWorldEditor.busy=false;if(button)button.disabled=false;}}
+  if(adminWorldEditor.busy||!key||!card)return;const f=n=>card.querySelector(`[data-world-map-field="${n}"]`);const minS=Math.max(1,Number(f('ore_respawn_min_s')?.value)||1),maxS=Math.max(1,Number(f('ore_respawn_max_s')?.value)||1);if(maxS<minS){adminWorldMessage('Respawn máximo deve ser maior ou igual ao mínimo.','err');return;}const payload={name:String(f('name')?.value||'').trim(),risk:String(f('risk')?.value||'').trim(),world_w:Math.round(Number(f('world_w')?.value)||1000),world_h:Math.round(Number(f('world_h')?.value)||1000),enemy_multiplier:Number(f('enemy_multiplier')?.value),landmark_count:Math.max(0,Math.round(Number(f('landmark_count')?.value)||0)),min_level:Math.round(Number(f('min_level')?.value)||1),ore_count:Math.round(Number(f('ore_count')?.value)||0),ore_respawn_min_ms:Math.round(minS*1000),ore_respawn_max_ms:Math.round(maxS*1000),enabled:!!f('enabled')?.checked};try{
+ payload.palette=Object.fromEntries(['nebula','accent','deep'].map(k=>[k,String(card.querySelector(`[data-world-palette="${k}"]`)?.value||'')]));
+ if(!Object.values(payload.palette).every(c=>/^#[0-9a-f]{6}$/i.test(c)))throw Error('Paleta inválida: use cores RGB.');
+ const structureText=card.querySelector('[data-world-structures-v82]');
+ if(structureText&&!structureText.disabled){
+  const entries=structureText.value.split(/\r?\n/).map(x=>x.trim()).filter(Boolean);
+  if(entries.length>40||entries.some(x=>x.length>64))throw Error('Máximo de 40 estruturas, com até 64 caracteres cada.');
+  payload.structures=entries;
+ }
+ }catch(err){adminWorldMessage(err.message||'Configuração visual inválida.','err');return;}
+ if(!payload.name||!payload.risk){adminWorldMessage('Nome e risco do mapa são obrigatórios.','err');return;}if(!Number.isFinite(payload.enemy_multiplier)||payload.enemy_multiplier<.1||payload.enemy_multiplier>10){adminWorldMessage('Multiplicador dos NPCs fora do limite (0,1 a 10).','err');return;}adminWorldEditor.busy=true;if(button)button.disabled=true;adminWorldMessage(`Salvando ${key.toUpperCase()}...`);try{await adminWorldApplyResult(await adminUpdateWorldMapOnline(key,payload),`${key.toUpperCase()} salvo`);showToast(`${key.toUpperCase()} atualizado no World Runtime`);}catch(e){adminWorldMessage(e.message||'Falha ao salvar mapa.','err');}finally{adminWorldEditor.busy=false;if(button)button.disabled=false;}}
 async function saveAdminWorldResource(key,card,button){
   if(adminWorldEditor.busy||!key||!card)return;const f=n=>card.querySelector(`[data-world-resource-field="${n}"]`);const color=String(f('color')?.value||'').trim();if(!/^#[0-9a-f]{6}$/i.test(color)){adminWorldMessage('Use uma cor hexadecimal no formato #RRGGBB.','err');return;}const payload={name:String(f('name')?.value||'').trim(),color,sell_price:Math.max(0,Math.round(Number(f('sell_price')?.value)||0)),enabled:!!f('enabled')?.checked};if(!payload.name){adminWorldMessage('O recurso precisa de um nome.','err');return;}adminWorldEditor.busy=true;if(button)button.disabled=true;adminWorldMessage(`Salvando ${payload.name}...`);try{await adminWorldApplyResult(await adminUpdateWorldResourceOnline(key,payload),`${payload.name} salvo`);showToast(`${payload.name} atualizado no World Runtime`);}catch(e){adminWorldMessage(e.message||'Falha ao salvar recurso.','err');}finally{adminWorldEditor.busy=false;if(button)button.disabled=false;}}
 async function saveAdminWorldSector(key,card,button){

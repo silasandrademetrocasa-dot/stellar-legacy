@@ -1,0 +1,29 @@
+STELLAR LEGACY V82 — ADM DE BALANCEAMENTO + AUTOPILOT ASTRAL
+Versão base: V81 (47.7.37) → V82 (47.7.38).
+
+MODIFICAÇÕES:
+- NPCs: editor dos drops de recursos existentes, limites inteiros 0–100.000 validados no servidor. 34 NPCs do runtime disponíveis.
+- Mapas: multiplicador de inimigos x0,1–10; quantidade de estruturas decorativas 0–100, edição das 3 cores RGB da paleta e lista de nomes de estruturas (se forem texto simples).
+- Portais: o ADM indica que prêmios principais e ASTRAL REWARDS são fontes diferentes e mostra versão e cotação principal perto dos bônus; edição/publicação continuam separadas.
+- Autopilot: Verificar acesso; revalidar autorização ao iniciar/montar/entrar após expiração do cache; mensagem explícita para conta sem concessão; aguardar transição do mapa, iniciar combate assistido automaticamente após entrada explícita somente com checkbox ativo, acesso válido e dentro do gate.
+- Sem alterações de conteúdo econômico, SQL ou permissões de jogadores. Sem liberação gratuita/geral do Autopilot.
+- Corrige interface e rotas, não inventa recompensas. Os Portais continuam dependendo do servidor.
+
+PARA HABILITAR UMA CONTA SEM ACESSO AO AUTOPILOT:
+Entre no ADM com a conta administradora → JOGADORES → encontre o piloto → AUTOPILOT → marcar autorização → salvar.
+Depois entre com a conta do piloto e toque VERIFICAR ACESSO no menu do Autopilot. A permissão é individual para cada uma das 3 contas.
+
+MANTIDO:
+Saves, HP/dano, movimentos, drops econômicos da V81, dois Apex X-7, gráficos, Render e Supabase sem edição adicional neste ZIP.
+
+INSTALAÇÃO:
+1. Repositório em 47.7.37 (V81).
+2. Subir SOMENTE STELLAR_V82.zip na raiz do GitHub.
+3. Executar GitHub Actions → Instalador Universal e publicar.
+4. Testar o ADM na conta autorizada e o Autopilot Astral primeiro com orçamento baixo e sessão ativa, em X-1 junto da base.
+5. Se necessário, usar STELLAR_V82_ROLLBACK.zip para retornar ao código V81 (não modifica o banco).
+
+LIMITAÇÕES:
+- O modo de estruturas complexas permanece protegido (somente nomes simples editáveis).
+- A economia dos dois sistemas de recompensa dos portais não foi alterada neste patch; agora os painéis exibem a distinção para permitir balancear com segurança.
+- Os 111 testes são de código; confirmação de uso real no celular e de gravação na conta ADM ainda é necessária.

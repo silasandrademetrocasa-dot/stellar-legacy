@@ -33,7 +33,7 @@ import { createSecurityService } from './security-service.js';
 
 const app = express();
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const RELEASE_VERSION = '47.7.37'; // único identificador de release nos endpoints HTTP
+const RELEASE_VERSION = '47.7.38'; // único identificador de release nos endpoints HTTP
 
 function normalizeSupabaseUrl(value = '') {
   let url = String(value || '').trim();
@@ -757,6 +757,24 @@ app.post('/api/admin/runtime/interface/:moduleKey', requireUser, asyncRoute(asyn
   res.json({ok:true,module_key:key,runtime:{...runtime,is_admin:true},saved:data||null});
 }));
 
+// V82 • Inventário de drop editável, com chaves existentes e limites conservadores.
+// Ninguém pode inventar novo recurso, negativo, fração ou chave que não exista na economia.
+export function validateNpcDropResourcesV82(proposed,previous){
+  const original=previous&&typeof previous==='object'&&!Array.isArray(previous)?previous:{};
+  if(proposed===undefined)return {...original};
+  if(!proposed||typeof proposed!=='object'||Array.isArray(proposed))throw Error('Drops do NPC devem ser um objeto.');
+  const keys=Object.keys(proposed),known=Object.keys(original);
+  if(keys.length>40||keys.some(k=>!known.includes(k)))throw Error('Recurso não cadastrado para este NPC.');
+  const result={...original};
+  for(const key of known){
+    if(!(key in proposed))throw Error('Envie todos os recursos já vinculados ao NPC.');
+    const n=Number(proposed[key]);
+    if(!Number.isSafeInteger(n)||n<0||n>100000)throw Error('Quantidade inválida para '+key);
+    result[key]=n;
+  }
+  return result;
+}
+
 // V18.1.6C — editor isolado de NPCs. Só atributos e spawns já existentes.
 app.post('/api/admin/runtime/npcs/:npcKey', requireUser, asyncRoute(async(req,res)=>{
   const key=String(req.params?.npcKey||'').trim();
@@ -769,6 +787,7 @@ app.post('/api/admin/runtime/npcs/:npcKey', requireUser, asyncRoute(async(req,re
   const respawnMin=Math.round(clampNum(body.respawn_min_ms,1000,600000,6000));
   const respawnMax=Math.round(clampNum(body.respawn_max_ms,1000,600000,13000));
   if(respawnMax<respawnMin)return res.status(400).json({error:'Respawn máximo deve ser maior ou igual ao mínimo.'});
+  let validatedNpcDrops;try{validatedNpcDrops=validateNpcDropResourcesV82(body.resources,currentRow.resources);}catch(e){return res.status(400).json({error:String(e.message||'Drops inválidos')});}
   const args={
     p_npc_key:key,p_name:name,
     p_hp:Math.round(clampNum(body.hp,1,1000000000,1)),
@@ -778,7 +797,7 @@ app.post('/api/admin/runtime/npcs/:npcKey', requireUser, asyncRoute(async(req,re
     p_xp:Math.round(clampNum(body.xp,0,1000000000000,0)),
     p_speed:clampNum(body.speed,1,1000,30),
     p_damage:Math.round(clampNum(body.damage,0,1000000000,0)),
-    p_color:String(currentRow.color||'#ff755d'),p_size:clampNum(currentRow.size,4,250,18),p_resources:currentRow.resources&&typeof currentRow.resources==='object'?currentRow.resources:{},
+    p_color:String(currentRow.color||'#ff755d'),p_size:clampNum(currentRow.size,4,250,18),p_resources:validatedNpcDrops,
     p_respawn_min_ms:respawnMin,p_respawn_max_ms:respawnMax,
     p_enabled:body.enabled!==false
   };
@@ -806,7 +825,18 @@ app.post('/api/admin/runtime/world/maps/:mapId', requireUser, asyncRoute(async(r
   const mapId=safeWorldId(req.params?.mapId);const current=await loadWorldRuntimeSnapshot(false);const row=current?.maps?.find(x=>String(x.map_id)===mapId);if(!mapId||!row)return res.status(400).json({error:'Mapa inválido.'});
   const body=req.body&&typeof req.body==='object'?req.body:{};const name=String(body.name||'').trim().slice(0,64),risk=String(body.risk||'').trim().slice(0,32);if(!name||!risk)return res.status(400).json({error:'Nome e risco do mapa são obrigatórios.'});
   const respawnMin=Math.round(clampNum(body.ore_respawn_min_ms,1000,600000,row.ore_respawn_min_ms||5000)),respawnMax=Math.round(clampNum(body.ore_respawn_max_ms,1000,600000,row.ore_respawn_max_ms||12000));if(respawnMax<respawnMin)return res.status(400).json({error:'Respawn máximo deve ser maior ou igual ao mínimo.'});
-  const {data,error}=await req.sb.rpc('admin_update_map_v1814',{p_map_id:mapId,p_name:name,p_risk:risk,p_world_w:Math.round(clampNum(body.world_w,1000,50000,row.world_w||6000)),p_world_h:Math.round(clampNum(body.world_h,1000,50000,row.world_h||4500)),p_enemy_multiplier:null,p_ore_count:Math.round(clampNum(body.ore_count,0,1000,row.ore_count||0)),p_ore_respawn_min_ms:respawnMin,p_ore_respawn_max_ms:respawnMax,p_landmark_count:null,p_min_level:Math.round(clampNum(body.min_level,1,100,row.min_level||1)),p_enabled:body.enabled!==false,p_palette:null,p_structures:null});
+  // V82: valida estrutura antes de passar JSON para a função ADM.
+  let palette=null,structures=null;
+  if(body.palette!==undefined){
+    const pal=body.palette;
+    if(!pal||typeof pal!=='object'||Array.isArray(pal)||!['nebula','accent','deep'].every(k=>/^#[0-9a-f]{6}$/i.test(String(pal[k]||''))))return res.status(400).json({error:'Paleta inválida.'});
+    palette={...row.palette,nebula:pal.nebula,accent:pal.accent,deep:pal.deep};
+  }
+  if(body.structures!==undefined){
+    if(!Array.isArray(body.structures)||body.structures.length>40||!body.structures.every(x=>typeof x==='string'&&x.length>0&&x.length<=64))return res.status(400).json({error:'Estruturas inválidas.'});
+    structures=body.structures;
+  }
+  const {data,error}=await req.sb.rpc('admin_update_map_v1814',{p_map_id:mapId,p_name:name,p_risk:risk,p_world_w:Math.round(clampNum(body.world_w,1000,50000,row.world_w||6000)),p_world_h:Math.round(clampNum(body.world_h,1000,50000,row.world_h||4500)),p_enemy_multiplier:clampNum(body.enemy_multiplier,0.1,10,row.enemy_multiplier||1),p_ore_count:Math.round(clampNum(body.ore_count,0,1000,row.ore_count||0)),p_ore_respawn_min_ms:respawnMin,p_ore_respawn_max_ms:respawnMax,p_landmark_count:Math.round(clampNum(body.landmark_count,0,100,row.landmark_count||0)),p_min_level:Math.round(clampNum(body.min_level,1,100,row.min_level||1)),p_enabled:body.enabled!==false,p_palette:palette,p_structures:structures});
   if(error){const msg=String(error.message||'Falha ao salvar mapa.');return res.status(/administrativ|permiss|negado/i.test(msg)?403:400).json({error:msg});}
   const runtime=await refreshWorldRuntimeSnapshot(true);res.set('Cache-Control','no-store');res.json({ok:true,map_id:mapId,runtime,saved:data||null});
 }));

@@ -1,10 +1,10 @@
 import {stellarNoticeV4776} from './stellar-dialog-v4776.js?v=47.7.6';
 // V38.1.0 — painel de recompensas da arena e editor no ADM.
 // Sem loops de render e sem alterações no motor de combate.
-import {loadAstralRewardsV381,lockAstralRewardV381,claimAstralRewardV381,adminSetAstralRewardV381} from '../api.js?v=47.7.6';
+import {loadAstralRewardsV381,lockAstralRewardV381,claimAstralRewardV381,adminSetAstralRewardV381,loadGalaxyGatesOnline} from '../api.js?v=47.7.6';
 const names={alpha:'AURORA',beta:'NEXUS',gamma:'ECLIPSE'};
 const order=['alpha','beta','gamma'];
-let latest=null,loading=false;
+let latest=null,primaryGates=null,primaryVersion=0,loading=false;
 const fmt=n=>Number(n||0).toLocaleString('pt-BR');
 const $=id=>document.getElementById(id);
 const visible=el=>!!el&&!el.classList.contains('hidden');
@@ -27,6 +27,11 @@ async function refresh(lockKey=null){
  try{
   if(lockKey){try{await lockAstralRewardV381(lockKey);}catch(err){console.warn('[Astral Rewards] preview lock:',err?.message||err);}}
   latest=await loadAstralRewardsV381();
+  // V82: bonus and traditional award originate from different tables. Only compare; never merge writes.
+  if(visible($('adminModal'))){
+   try{const main=await loadGalaxyGatesOnline();primaryGates=main?.config||null;primaryVersion=Number(main?.version)||0;}
+   catch{primaryGates=null;primaryVersion=0;}
+  }
   renderPortal();
   const admin=$('adminModal'),editor=$('astralAdminEditorV381');
   if(visible(admin)&&visible(editor))renderAdmin();
@@ -42,8 +47,9 @@ async function refresh(lockKey=null){
 }
 const schema=[['credits','CR'],['stl','STL'],['cores','Núcleos'],['ammoQty','Munições'],['rocketQty','Mísseis'],['voidite','Voidite'],['resourceQty','Material exclusivo'],['weeklyBonusPct','Bônus semanal (%)'],['referenceWaves','Ondas-base']];
 function renderAdmin(){const el=$('astralAdminEditorV381');if(!el||!latest?.gates)return;
- el.innerHTML=`<div class="astral-rewards-title">ASTRAL REWARDS · CONTROLE DE RECOMPENSAS</div><p>Personalize os prêmios dos portais. Os valores abaixo são bônus adicionais.</p>
- <div class="astral-adm-grid">${order.map(key=>{const a=latest.gates[key];return `<fieldset data-gate="${key}"><legend>${names[key]} </legend>
+ el.innerHTML=`<div class="astral-rewards-title">ASTRAL REWARDS · CONTROLE DE RECOMPENSAS</div><p><b>ATENÇÃO: bônus adicionais!</b> Esses valores são somados ao prêmio tradicional editado em ADM → PORTAIS → ONDAS. Confira a economia total antes de publicar.</p>
+ <div class="astral-adm-grid">${order.map(key=>{const a=latest.gates[key];return `<fieldset data-gate="${key}"><legend>${names[key]} • bônus v${Number(a.revision||0)}</legend>
+ <small>Principal • v${primaryVersion||'?'}: ${primaryGates?.[key]?.finalReward?`${fmt(primaryGates[key].finalReward.credits)} CR + ${fmt(primaryGates[key].finalReward.uridium)} STL (antes de multiplicadores)`:'Clique em RECARREGAR para comparar'} | Bônus adicional • v${Number(a.revision||'?')}</small>
  ${schema.map(([k,label])=>`<label>${label}<input data-reward-key="${k}" type="number" min="0" step="1" value="${Number(a.config[k]||0)}"></label>`).join('')}
  <label>Munição<select data-reward-key="ammoId">${['lcb10','mcb25','mcb50','ucb100','sab50'].map(id=>`<option value="${id}" ${id===a.config.ammoId?'selected':''}>${id}</option>`).join('')}</select></label>
  <label>Míssil<select data-reward-key="rocketId">${['r310','plt2026','plt2021','plt3030'].map(id=>`<option value="${id}" ${id===a.config.rocketId?'selected':''}>${id}</option>`).join('')}</select></label>

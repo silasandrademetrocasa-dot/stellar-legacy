@@ -1,6 +1,6 @@
 {
   "name": "stellar-legacy",
-  "version": "47.7.37",
+  "version": "47.7.38",
   "type": "module",
   "scripts": {
     "start": "node server/index.js",
@@ -19,5 +19,5 @@
   "engines": {
     "node": ">=18"
   },
-  "release": "V81 — 34 NPCs e missões balanceados, Apex X-7, Portais novos e Autopilot astral assistido"
+  "release": "V82 — ADM drops/mapas/recompensas + Autopilot astral com revalidação"
 }
