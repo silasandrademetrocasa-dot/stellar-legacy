@@ -1,6 +1,6 @@
 {
   "name": "stellar-legacy",
-  "version": "47.7.39",
+  "version": "47.7.40",
   "type": "module",
   "scripts": {
     "start": "node server/index.js",
@@ -19,5 +19,5 @@
   "engines": {
     "node": ">=18"
   },
-  "release": "V83 — Farm Astral contínuo com giros oficiais 10x/50x, orçamento e parada segura"
+  "release": "V84 — Farm Offline congela o mapa, libera menus e permite lances de leilão sem salvar estado antigo"
 }
