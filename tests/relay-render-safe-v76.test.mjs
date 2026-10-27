@@ -21,12 +21,13 @@ function mock({throwOnImage=false}={}){
 const node=Object.freeze({id:'A',relayMode:true,x:220,y:300,relayLevel:3,radius:360,hp:120000,maxHp:360000,
  shield:100000,maxShield:240000,contested:true,owner:'earth',nearby:{earth:1,mars:0,jupiter:0}});
 const options={x:150,y:200,image:{naturalWidth:200,naturalHeight:240},color:'#54e3ff',label:'TERRA',selected:true,nearby:2};
-test('V76: relé em qualquer modo usa sprite e marcas leves, sem disco/anel animado',()=>{
+test('V78: relé em qualquer modo usa sprite e anel circular completo sem disco caro',()=>{
  const ctx=mock();const original=JSON.stringify(node);
  assert.equal(drawRelayMediumMobileV76(ctx,node,options),true);
  assert.equal(ctx.depth,0);assert.equal(JSON.stringify(node),original);
  assert.equal(ctx.calls.filter(c=>c[0]==='drawImage').length,1);
- assert.equal(ctx.calls.filter(c=>c[0]==='arc').length,4);
+ assert.equal(ctx.calls.filter(c=>c[0]==='arc').length,3);
+ assert.equal(ctx.calls.find(c=>c[0]==='arc')[3],360); // raio de captura real
  assert.equal(ctx.calls.filter(c=>c[0]==='fillRect').length>=4,true);
  assert.ok(!ctx.calls.some(c=>['createRadialGradient','setLineDash','shadowBlur','clip','filter'].includes(c[0])));
 });

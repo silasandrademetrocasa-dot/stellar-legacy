@@ -1,6 +1,6 @@
 {
   "name": "stellar-legacy",
-  "version": "47.7.32",
+  "version": "47.7.34",
   "type": "module",
   "scripts": {
     "start": "node server/index.js",
@@ -19,5 +19,5 @@
   "engines": {
     "node": ">=18"
   },
-  "release": "V76 revisada — relés protegidos em todos os modos de qualidade"
+  "release": "V78 — efeitos leves de combate e seleção circular"
 }
