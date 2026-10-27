@@ -9,7 +9,7 @@ const manifest=JSON.parse(readFileSync(join(root,'public/assets/animations/v71/m
 const makeContext=()=>{const calls=[];const c={calls};for(const m of ['save','restore','drawImage','beginPath','arc','stroke','fill','ellipse','setLineDash','fillRect'])c[m]=(...args)=>calls.push([m,...args]);return c;};
 const image=(path)=>({naturalWidth:path.includes('/cores/')?106:256,naturalHeight:path.includes('/cores/')?106:256});
 const getImage=(path)=>image(path);
-test('V71: seis portais têm anel fixo e oito núcleos recortados',()=>{
+test('V80: seis portais usam só uma imagem estática nos três níveis',()=>{
  assert.equal(Object.keys(manifest.portals).length,6);
  for(const v of Object.values(manifest.portals)){
   assert.equal(v.cores.length,8);
@@ -23,12 +23,12 @@ test('V71: seis portais têm anel fixo e oito núcleos recortados',()=>{
  assert.equal(drawPortalV71(medium,{...opts,quality:'medium'}),true);
  assert.equal(drawPortalV71(high,{...opts,quality:'high'}),true);
  assert.equal(low.calls.filter(c=>c[0]==='drawImage').length,1);
- const draws=medium.calls.filter(c=>c[0]==='drawImage');assert.equal(draws.length,2);
- assert.deepEqual(draws[0].slice(2),[-31,-31,62,62]);
- assert.deepEqual(draws[1].slice(2),[-75,-75,150,150]);
+ const draws=medium.calls.filter(c=>c[0]==='drawImage');assert.equal(draws.length,1);
+ assert.deepEqual(draws[0].slice(2),[-75,-75,150,150]);
+ assert.equal(high.calls.filter(c=>c[0]==='drawImage').length,1);
  assert.equal(medium.calls.some(c=>c[0]==='clip'),false);
 });
-test('V71: bases mantêm estrutura fixa e overlay independente sem quadros gigantes',()=>{
+test('V80: bases mantêm estrutura fixa sem overlays de animação',()=>{
  assert.equal(Object.keys(manifest.bases).length,3);
  for(const v of Object.values(manifest.bases)){
   assert.equal(v.light.length,12);
@@ -39,8 +39,8 @@ test('V71: bases mantêm estrutura fixa e overlay independente sem quadros gigan
  assert.equal(drawBaseV71(low,{...options,quality:'low'}),true);
  assert.equal(drawBaseV71(high,{...options,quality:'high'}),true);
  assert.equal(low.calls.filter(c=>c[0]==='drawImage').length,1);
- assert.equal(high.calls.filter(c=>c[0]==='drawImage').length,2);
- assert.deepEqual(high.calls.filter(c=>c[0]==='drawImage').map(c=>c.slice(2)),low.calls.filter(c=>c[0]==='drawImage').map(c=>c.slice(2)).concat([[-305,-610*490/840/2,610,610*490/840]]));
+ assert.equal(high.calls.filter(c=>c[0]==='drawImage').length,1);
+ assert.deepEqual(high.calls.filter(c=>c[0]==='drawImage').map(c=>c.slice(2)),low.calls.filter(c=>c[0]==='drawImage').map(c=>c.slice(2)));
 });
 test('V71: relé permanece estacionário e preserva eventos reais',()=>{
  const node={relayMode:true,id:'relay',x:10,y:20,relayLevel:3,hp:100,shield:50,maxHp:100,maxShield:100};

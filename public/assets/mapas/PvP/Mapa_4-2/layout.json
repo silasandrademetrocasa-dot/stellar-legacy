@@ -5,11 +5,11 @@
   "seed": 4101,
   "background": {
     "original": "/assets/mapas/Biblioteca_Geral/Fundos/fundo_pvp_bicolor.png",
-    "high": "/assets/mapas/Biblioteca_Geral/Fundos_otimizados/fundo_pvp_bicolor.webp",
-    "medium": "/assets/mapas/Biblioteca_Geral/Fundos_otimizados/fundo_pvp_bicolor.webp",
-    "low": "/assets/mapas/Biblioteca_Geral/Fundos_Baixo/fundo_compartilhado_05.webp",
-    "logicalWidth": 1080,
-    "logicalHeight": 1080
+    "high": "/assets/mapas/V80_Fundos_Distintos/4_2_alto.webp",
+    "medium": "/assets/mapas/V80_Fundos_Distintos/4_2_alto.webp",
+    "low": "/assets/mapas/V80_Fundos_Distintos/4_2_baixo.webp",
+    "logicalWidth": 896,
+    "logicalHeight": 896
   },
   "stars": [
     {

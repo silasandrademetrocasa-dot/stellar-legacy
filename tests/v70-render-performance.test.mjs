@@ -33,17 +33,18 @@ test('Diretórios imutáveis das animações não baixam novamente por revisão 
  const p='/assets/animations/v69/Portais/Portal_Comum/base.webp';assert.equal(versionedAssetUrl(p),p);
  assert.match(versionedAssetUrl('/assets/v67/npcs/streuner.webp'),/asset=/);
 });
-test('Mapas compartilham 8 fundos Baixo com layout próprio e sprites independentes',()=>{
+test('V80: 30 mapas possuem imagens individuais em Baixo e Alto',()=>{
  const keys=[...['1','2','3'].flatMap(f=>Array.from({length:8},(_,i)=>`${f}-${i+1}`)), '4-1','4-2','4-3','U-1','U-2','U-3'];
  const bg=new Set();for(const key of keys){
   const layout=JSON.parse(readFileSync(path('public'+mapLayoutPath(key)),'utf8'));
   assert.equal(layout.mapId,key);
-  assert.match(layout.background.low,/\/Biblioteca_Geral\/Fundos_Baixo\/.*\.webp$/);
+  assert.match(layout.background.low,/\/V80_Fundos_Distintos\/.*\.webp$/);
   assert.ok(existsSync(path('public'+layout.background.low)));
-  assert.ok(layout.background.high);
+  assert.match(layout.background.high,/\/V80_Fundos_Distintos\/.*\.webp$/);
+  assert.ok(existsSync(path('public'+layout.background.high)));
   bg.add(layout.background.low);
  }
- assert.equal(bg.size,8);
+ assert.equal(bg.size,30);
 });
 test('Diagnóstico registra P95 e P99 sem dados pessoais',()=>{
  const m=createPerformanceMonitor();m.setEnabled(true);

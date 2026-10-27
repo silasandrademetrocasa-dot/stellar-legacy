@@ -5,11 +5,11 @@
   "seed": 9102,
   "background": {
     "original": "/assets/mapas/Biblioteca_Geral/Fundos/fundo_universo_violeta.png",
-    "high": "/assets/mapas/Biblioteca_Geral/Fundos_otimizados/fundo_universo_violeta.webp",
-    "medium": "/assets/mapas/Biblioteca_Geral/Fundos_otimizados/fundo_universo_violeta.webp",
-    "low": "/assets/mapas/Biblioteca_Geral/Fundos_Baixo/fundo_compartilhado_01.webp",
-    "logicalWidth": 1080,
-    "logicalHeight": 1080
+    "high": "/assets/mapas/V80_Fundos_Distintos/U_3_alto.webp",
+    "medium": "/assets/mapas/V80_Fundos_Distintos/U_3_alto.webp",
+    "low": "/assets/mapas/V80_Fundos_Distintos/U_3_baixo.webp",
+    "logicalWidth": 896,
+    "logicalHeight": 896
   },
   "stars": [
     {

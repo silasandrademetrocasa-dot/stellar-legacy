@@ -5,11 +5,11 @@
   "seed": 1004,
   "background": {
     "original": "/assets/mapas/Biblioteca_Geral/Fundos/fundo_terra_azul_variante.png",
-    "high": "/assets/mapas/Biblioteca_Geral/Fundos_otimizados/fundo_terra_azul_variante.webp",
-    "medium": "/assets/mapas/Biblioteca_Geral/Fundos_otimizados/fundo_terra_azul_variante.webp",
-    "low": "/assets/mapas/Biblioteca_Geral/Fundos_Baixo/fundo_compartilhado_03.webp",
-    "logicalWidth": 1080,
-    "logicalHeight": 1080
+    "high": "/assets/mapas/V80_Fundos_Distintos/1_4_alto.webp",
+    "medium": "/assets/mapas/V80_Fundos_Distintos/1_4_alto.webp",
+    "low": "/assets/mapas/V80_Fundos_Distintos/1_4_baixo.webp",
+    "logicalWidth": 896,
+    "logicalHeight": 896
   },
   "stars": [
     {
