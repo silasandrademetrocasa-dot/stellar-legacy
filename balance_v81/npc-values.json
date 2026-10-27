@@ -1,0 +1,586 @@
+{
+  "streuner": {
+    "hp": 900,
+    "shield": 500,
+    "damage": 95,
+    "speed": 68.0,
+    "xp": 200,
+    "credits": 6200,
+    "stl": 13,
+    "resources": {
+      "Prometium": 12,
+      "Endurium": 12
+    },
+    "respawn_min_ms": null,
+    "respawn_max_ms": null
+  },
+  "recruitStreuner": {
+    "hp": 1100,
+    "shield": 700,
+    "damage": 130,
+    "speed": 90.0,
+    "xp": 260,
+    "credits": 8800,
+    "stl": 17,
+    "resources": {
+      "Prometium": 14,
+      "Endurium": 14
+    },
+    "respawn_min_ms": null,
+    "respawn_max_ms": null
+  },
+  "aiderStreuner": {
+    "hp": 1500,
+    "shield": 1000,
+    "damage": 210,
+    "speed": 72.0,
+    "xp": 370,
+    "credits": 12400,
+    "stl": 26,
+    "resources": {
+      "Prometium": 15,
+      "Terbium": 15
+    },
+    "respawn_min_ms": null,
+    "respawn_max_ms": null
+  },
+  "bossStreuner": {
+    "hp": 1600,
+    "shield": 800,
+    "damage": 120,
+    "speed": 62.0,
+    "xp": 440,
+    "credits": 15400,
+    "stl": 32,
+    "resources": {
+      "Prometium": 20,
+      "Terbium": 20
+    },
+    "respawn_min_ms": null,
+    "respawn_max_ms": null
+  },
+  "lordakia": {
+    "hp": 2000,
+    "shield": 2000,
+    "damage": 240,
+    "speed": 95.0,
+    "xp": 530,
+    "credits": 18500,
+    "stl": 32,
+    "resources": {
+      "Prometium": 20,
+      "Terbium": 20,
+      "Endurium": 20
+    },
+    "respawn_min_ms": null,
+    "respawn_max_ms": null
+  },
+  "bossLordakia": {
+    "hp": 4000,
+    "shield": 4000,
+    "damage": 480,
+    "speed": 95.0,
+    "xp": 1060,
+    "credits": 37100,
+    "stl": 63,
+    "resources": {
+      "Prometium": 40,
+      "Terbium": 40,
+      "Endurium": 40,
+      "Xenomit": 1
+    },
+    "respawn_min_ms": null,
+    "respawn_max_ms": null
+  },
+  "saimon": {
+    "hp": 6000,
+    "shield": 6000,
+    "damage": 600,
+    "speed": 82.0,
+    "xp": 1060,
+    "credits": 36000,
+    "stl": 47,
+    "resources": {
+      "Prometium": 40,
+      "Terbium": 40,
+      "Endurium": 40,
+      "Prometid": 2,
+      "Duranium": 2
+    },
+    "respawn_min_ms": null,
+    "respawn_max_ms": null
+  },
+  "bossSaimon": {
+    "hp": 12000,
+    "shield": 12000,
+    "damage": 1200,
+    "speed": 82.0,
+    "xp": 2110,
+    "credits": 72100,
+    "stl": 94,
+    "resources": {
+      "Prometium": 80,
+      "Terbium": 80,
+      "Endurium": 80,
+      "Prometid": 4,
+      "Duranium": 4,
+      "Xenomit": 2
+    },
+    "respawn_min_ms": null,
+    "respawn_max_ms": null
+  },
+  "mordon": {
+    "hp": 20000,
+    "shield": 10000,
+    "damage": 1170,
+    "speed": 52.0,
+    "xp": 2640,
+    "credits": 92700,
+    "stl": 105,
+    "resources": {
+      "Prometium": 80,
+      "Terbium": 80,
+      "Endurium": 80,
+      "Prometid": 8,
+      "Duranium": 8,
+      "Promerium": 1
+    },
+    "respawn_min_ms": null,
+    "respawn_max_ms": null
+  },
+  "bossMordon": {
+    "hp": 40000,
+    "shield": 20000,
+    "damage": 2340,
+    "speed": 52.0,
+    "xp": 5280,
+    "credits": 185400,
+    "stl": 210,
+    "resources": {
+      "Prometium": 160,
+      "Terbium": 160,
+      "Endurium": 160,
+      "Prometid": 16,
+      "Duranium": 16,
+      "Promerium": 2,
+      "Xenomit": 4
+    },
+    "respawn_min_ms": null,
+    "respawn_max_ms": null
+  },
+  "devolarium": {
+    "hp": 108000,
+    "shield": 108000,
+    "damage": 3780,
+    "speed": 38.0,
+    "xp": 8780,
+    "credits": 330000,
+    "stl": 280,
+    "resources": {
+      "Prometium": 100,
+      "Terbium": 100,
+      "Endurium": 100,
+      "Prometid": 16,
+      "Duranium": 16,
+      "Promerium": 2
+    },
+    "respawn_min_ms": null,
+    "respawn_max_ms": null
+  },
+  "bossDevolarium": {
+    "hp": 216000,
+    "shield": 216000,
+    "damage": 7560,
+    "speed": 38.0,
+    "xp": 17570,
+    "credits": 660000,
+    "stl": 560,
+    "resources": {
+      "Prometium": 200,
+      "Terbium": 200,
+      "Endurium": 200,
+      "Prometid": 32,
+      "Duranium": 32,
+      "Promerium": 4,
+      "Xenomit": 8
+    },
+    "respawn_min_ms": null,
+    "respawn_max_ms": null
+  },
+  "sibelon": {
+    "hp": 216000,
+    "shield": 216000,
+    "damage": 8350,
+    "speed": 30.0,
+    "xp": 14640,
+    "credits": 715000,
+    "stl": 448,
+    "resources": {
+      "Prometium": 200,
+      "Terbium": 200,
+      "Endurium": 200,
+      "Prometid": 32,
+      "Duranium": 32,
+      "Promerium": 4
+    },
+    "respawn_min_ms": null,
+    "respawn_max_ms": null
+  },
+  "bossSibelon": {
+    "hp": 432000,
+    "shield": 432000,
+    "damage": 16695,
+    "speed": 30.0,
+    "xp": 29280,
+    "credits": 1430000,
+    "stl": 896,
+    "resources": {
+      "Prometium": 400,
+      "Terbium": 400,
+      "Endurium": 400,
+      "Prometid": 64,
+      "Duranium": 64,
+      "Promerium": 8,
+      "Xenomit": 16
+    },
+    "respawn_min_ms": null,
+    "respawn_max_ms": null
+  },
+  "emberFang": {
+    "hp": 266800,
+    "shield": 172500,
+    "damage": 4535,
+    "speed": 88.0,
+    "xp": 19580,
+    "credits": 731600,
+    "stl": 487,
+    "resources": {
+      "Prometid": 20,
+      "Duranium": 20,
+      "Promerium": 3
+    },
+    "respawn_min_ms": null,
+    "respawn_max_ms": null
+  },
+  "bossEmberFang": {
+    "hp": 533600,
+    "shield": 345000,
+    "damage": 8425,
+    "speed": 78.0,
+    "xp": 40500,
+    "credits": 1475000,
+    "stl": 986,
+    "resources": {
+      "Prometid": 31,
+      "Duranium": 31,
+      "Promerium": 7,
+      "Xenomit": 2
+    },
+    "respawn_min_ms": null,
+    "respawn_max_ms": null
+  },
+  "ironWasp": {
+    "hp": 324800,
+    "shield": 253000,
+    "damage": 5510,
+    "speed": 96.0,
+    "xp": 23620,
+    "credits": 896800,
+    "stl": 580,
+    "resources": {
+      "Prometid": 22,
+      "Duranium": 22,
+      "Promerium": 3
+    },
+    "respawn_min_ms": null,
+    "respawn_max_ms": null
+  },
+  "bossIronWasp": {
+    "hp": 649600,
+    "shield": 494500,
+    "damage": 10045,
+    "speed": 84.0,
+    "xp": 48600,
+    "credits": 1829000,
+    "stl": 1137,
+    "resources": {
+      "Prometid": 36,
+      "Duranium": 36,
+      "Promerium": 7,
+      "Xenomit": 2
+    },
+    "respawn_min_ms": null,
+    "respawn_max_ms": null
+  },
+  "riftMauler": {
+    "hp": 417600,
+    "shield": 368000,
+    "damage": 6910,
+    "speed": 82.0,
+    "xp": 31050,
+    "credits": 1156400,
+    "stl": 754,
+    "resources": {
+      "Prometid": 25,
+      "Duranium": 25,
+      "Promerium": 4,
+      "Xenomit": 1
+    },
+    "respawn_min_ms": null,
+    "respawn_max_ms": null
+  },
+  "bossRiftMauler": {
+    "hp": 835200,
+    "shield": 713000,
+    "damage": 12745,
+    "speed": 72.0,
+    "xp": 63450,
+    "credits": 2360000,
+    "stl": 1508,
+    "resources": {
+      "Prometid": 40,
+      "Duranium": 40,
+      "Promerium": 9,
+      "Xenomit": 3
+    },
+    "respawn_min_ms": null,
+    "respawn_max_ms": null
+  },
+  "obsidianPike": {
+    "hp": 580000,
+    "shield": 483000,
+    "damage": 8965,
+    "speed": 90.0,
+    "xp": 41850,
+    "credits": 1593000,
+    "stl": 986,
+    "resources": {
+      "Prometid": 27,
+      "Duranium": 29,
+      "Promerium": 6,
+      "Xenomit": 2
+    },
+    "respawn_min_ms": null,
+    "respawn_max_ms": null
+  },
+  "bossObsidianPike": {
+    "hp": 1136800,
+    "shield": 989000,
+    "damage": 16415,
+    "speed": 78.0,
+    "xp": 87750,
+    "credits": 3304000,
+    "stl": 1972,
+    "resources": {
+      "Prometid": 45,
+      "Duranium": 47,
+      "Promerium": 11,
+      "Xenomit": 4
+    },
+    "respawn_min_ms": null,
+    "respawn_max_ms": null
+  },
+  "apexOverlord": {
+    "hp": 6000000,
+    "shield": 4200000,
+    "damage": 32000,
+    "speed": 64,
+    "xp": 425000,
+    "credits": 14000000,
+    "stl": 8800,
+    "resources": {
+      "Prometid": 110,
+      "Duranium": 110,
+      "Promerium": 36,
+      "Xenomit": 45
+    },
+    "respawn_min_ms": 360000,
+    "respawn_max_ms": 600000
+  },
+  "sentinelScavenger": {
+    "hp": 780000,
+    "shield": 590000,
+    "damage": 10465,
+    "speed": 92.0,
+    "xp": 52200,
+    "credits": 1952000,
+    "stl": 1140,
+    "resources": {
+      "Prometid": 34,
+      "Duranium": 34,
+      "Promerium": 7,
+      "Xenomit": 2
+    },
+    "respawn_min_ms": null,
+    "respawn_max_ms": null
+  },
+  "sentinelScout": {
+    "hp": 912000,
+    "shield": 684400,
+    "damage": 11770,
+    "speed": 100.0,
+    "xp": 60900,
+    "credits": 2257000,
+    "stl": 1320,
+    "resources": {
+      "Prometid": 36,
+      "Duranium": 36,
+      "Promerium": 7,
+      "Xenomit": 2
+    },
+    "respawn_min_ms": null,
+    "respawn_max_ms": null
+  },
+  "sentinelSupport": {
+    "hp": 1080000,
+    "shield": 826000,
+    "damage": 13950,
+    "speed": 86.0,
+    "xp": 75400,
+    "credits": 2684000,
+    "stl": 1560,
+    "resources": {
+      "Prometid": 38,
+      "Duranium": 40,
+      "Promerium": 9,
+      "Xenomit": 3
+    },
+    "respawn_min_ms": null,
+    "respawn_max_ms": null
+  },
+  "riftScout": {
+    "hp": 371200,
+    "shield": 253000,
+    "damage": 5615,
+    "speed": 96.0,
+    "xp": 24300,
+    "credits": 1003000,
+    "stl": 696,
+    "resources": {
+      "Prometid": 27,
+      "Duranium": 27,
+      "Promerium": 4
+    },
+    "respawn_min_ms": null,
+    "respawn_max_ms": null
+  },
+  "bossRiftScout": {
+    "hp": 719200,
+    "shield": 517500,
+    "damage": 10585,
+    "speed": 82.0,
+    "xp": 51300,
+    "credits": 2124000,
+    "stl": 1392,
+    "resources": {
+      "Prometid": 40,
+      "Duranium": 40,
+      "Promerium": 9,
+      "Xenomit": 2
+    },
+    "respawn_min_ms": null,
+    "respawn_max_ms": null
+  },
+  "voidCorsair": {
+    "hp": 556800,
+    "shield": 437000,
+    "damage": 8210,
+    "speed": 94.0,
+    "xp": 37800,
+    "credits": 1475000,
+    "stl": 986,
+    "resources": {
+      "Prometid": 31,
+      "Duranium": 31,
+      "Promerium": 6,
+      "Xenomit": 1
+    },
+    "respawn_min_ms": null,
+    "respawn_max_ms": null
+  },
+  "bossVoidCorsair": {
+    "hp": 1067200,
+    "shield": 874000,
+    "damage": 15660,
+    "speed": 78.0,
+    "xp": 78300,
+    "credits": 3186000,
+    "stl": 1914,
+    "resources": {
+      "Prometid": 45,
+      "Duranium": 45,
+      "Promerium": 10,
+      "Xenomit": 3
+    },
+    "respawn_min_ms": null,
+    "respawn_max_ms": null
+  },
+  "nexusWarden": {
+    "hp": 840000,
+    "shield": 731600,
+    "damage": 11990,
+    "speed": 82.0,
+    "xp": 62350,
+    "credits": 2318000,
+    "stl": 1440,
+    "resources": {
+      "Prometid": 38,
+      "Duranium": 38,
+      "Promerium": 8,
+      "Xenomit": 2
+    },
+    "respawn_min_ms": null,
+    "respawn_max_ms": null
+  },
+  "bossNexusWarden": {
+    "hp": 1620000,
+    "shield": 1357000,
+    "damage": 22455,
+    "speed": 68.0,
+    "xp": 124700,
+    "credits": 4758000,
+    "stl": 2760,
+    "resources": {
+      "Prometid": 54,
+      "Duranium": 54,
+      "Promerium": 13,
+      "Xenomit": 6
+    },
+    "respawn_min_ms": null,
+    "respawn_max_ms": null
+  },
+  "astralReaper": {
+    "hp": 1260000,
+    "shield": 1038400,
+    "damage": 17005,
+    "speed": 108.0,
+    "xp": 92800,
+    "credits": 3477000,
+    "stl": 2100,
+    "resources": {
+      "Prometid": 43,
+      "Duranium": 43,
+      "Promerium": 9,
+      "Xenomit": 3
+    },
+    "respawn_min_ms": null,
+    "respawn_max_ms": null
+  },
+  "bossAstralReaper": {
+    "hp": 2460000,
+    "shield": 2006000,
+    "damage": 30955,
+    "speed": 86.0,
+    "xp": 191400,
+    "credits": 7076000,
+    "stl": 4080,
+    "resources": {
+      "Prometid": 63,
+      "Duranium": 63,
+      "Promerium": 16,
+      "Xenomit": 9
+    },
+    "respawn_min_ms": null,
+    "respawn_max_ms": null
+  }
+}

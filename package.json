@@ -1,6 +1,6 @@
 {
   "name": "stellar-legacy",
-  "version": "47.7.36",
+  "version": "47.7.37",
   "type": "module",
   "scripts": {
     "start": "node server/index.js",
@@ -19,5 +19,5 @@
   "engines": {
     "node": ">=18"
   },
-  "release": "V80 — portais e bases estáticos, loots limpos, 30 mapas distintos"
+  "release": "V81 — 34 NPCs e missões balanceados, Apex X-7, Portais novos e Autopilot astral assistido"
 }

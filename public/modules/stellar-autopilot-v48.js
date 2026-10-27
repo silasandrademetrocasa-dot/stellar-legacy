@@ -5,7 +5,7 @@
  */
 export const AUTOPILOT_ALLOWED_MAPS=Object.freeze(['x1','x2','x3','x4','x5','x6','x7','x8','u1','u2','u3']);
 export const AUTOPILOT_DEFAULTS=Object.freeze({map:'x1',npcTypes:[],boxes:true,drops:true,ores:false,autoSell:true,autoBuy:true,rockets:true,
-  cargoThreshold:85,hpRetreat:30,minutes:120,budget:50000,ammoMin:250,rocketMin:15,combatRange:0.78,mode:'nearest'});
+  cargoThreshold:85,hpRetreat:30,minutes:120,budget:50000,ammoMin:250,rocketMin:15,combatRange:0.78,mode:'nearest',astralAssist:false,astralGate:'alpha',astralBudget:50000});
 const number=(v,min,max,fallback)=>Math.min(max,Math.max(min,Number.isFinite(Number(v))?Number(v):fallback));
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const fmt=n=>Math.round(Math.max(0,Number(n)||0)).toLocaleString('pt-BR');
@@ -19,7 +19,9 @@ export function cleanAutopilotConfig(input={}){
     cargoThreshold:number(input.cargoThreshold,50,100,85),hpRetreat:number(input.hpRetreat,10,80,30),
     minutes:number(input.minutes,5,360,120),budget:number(input.budget,0,10000000,50000),
     ammoMin:number(input.ammoMin,0,1000000,250),rocketMin:number(input.rocketMin,0,1000000,15),
-    combatRange:number(input.combatRange,0.55,0.93,0.78),mode:['nearest','profit'].includes(input.mode)?input.mode:'nearest'};
+    combatRange:number(input.combatRange,0.55,0.93,0.78),mode:['nearest','profit'].includes(input.mode)?input.mode:'nearest',
+    astralAssist:input.astralAssist===true,astralGate:['alpha','beta','gamma'].includes(input.astralGate)?input.astralGate:'alpha',
+    astralBudget:number(input.astralBudget,0,1000000,50000)};
 }
 export function findAutopilotPortalPath(currentLabel,goalLabel,edges,admit=()=>true){
   if(!currentLabel||!goalLabel)return null;
@@ -39,16 +41,18 @@ export function chooseAutopilotAction(raw,cfg){
   const s=raw||{},c=cleanAutopilotConfig(cfg),player=s.player||{},map=String(s.map||'');
   if(!s.online||!s.ready)return {type:'idle',reason:'Aguardando sessão online'};
   if(s.jumping)return {type:'idle',reason:'Viajando pelo portal'};
-  if(!AUTOPILOT_ALLOWED_MAPS.includes(map))return {type:'pause',reason:'Mapa especial/PvP não permitido'};
+  const inAstral=s.astralActive===true&&c.astralAssist===true&&['ggAlpha','ggBeta','ggGamma'].includes(map);
+  if(!AUTOPILOT_ALLOWED_MAPS.includes(map)&&!inAstral)return {type:'pause',reason:'Mapa especial/PvP não permitido'};
   if(s.repairRequired||!(player.hp>0))return {type:'pause',reason:'Nave destruída: reparar manualmente'};
   const hpRatio=player.hp/Math.max(1,player.maxHp);
   if(hpRatio<=c.hpRetreat/100){
+    if(inAstral)return {type:'pause',reason:'HP crítico no Portal • assistência parada para preservar vidas'};
     if(map!=='x1')return {type:'route',map:'x1',reason:'Retornando para reparação'};
     if(!s.atBase)return {type:'move',x:s.base.x,y:s.base.y,reason:'Reparação na base'};
     if(hpRatio<.80)return {type:'idle',reason:'Aguardando recuperação de HP'};
   }
   const cargoRatio=(Number(s.cargoUsed)||0)/Math.max(1,Number(s.cargoCapacity)||1);
-  if(c.autoSell&&cargoRatio>=c.cargoThreshold/100){
+  if(!inAstral&&c.autoSell&&cargoRatio>=c.cargoThreshold/100){
     if(map==='x1'&&s.canSell)return {type:'sell',reason:'Vendendo recursos no comércio oficial'};
     if(map!=='x1')return {type:'route',map:'x1',reason:'Voltando à base para vender'};
     return {type:'move',x:s.base.x,y:s.base.y,reason:'Aproximando do comerciante'};
@@ -59,8 +63,8 @@ export function chooseAutopilotAction(raw,cfg){
   const affordable=q=>!!q?.catalog_key&&q.currency==='credits'
     &&q.shop_visible!==false&&Number.isFinite(Number(q.price))&&Number(q.price)>0
     &&Number(q.price)<=Number(s.credits)&&Number(q.price)<=Number(s.purchaseBudgetRemaining??c.budget);
-  const lowLaser=c.autoBuy&&Number(s.ammoStock)<c.ammoMin&&affordable(s.ammoQuote);
-  const lowRocket=c.autoBuy&&c.rockets&&Number(s.rocketStock)<c.rocketMin&&affordable(s.rocketQuote);
+  const lowLaser=!inAstral&&c.autoBuy&&Number(s.ammoStock)<c.ammoMin&&affordable(s.ammoQuote);
+  const lowRocket=!inAstral&&c.autoBuy&&c.rockets&&Number(s.rocketStock)<c.rocketMin&&affordable(s.rocketQuote);
   if(lowLaser||lowRocket){
     if(!s.buyPermitted){
       if(map!=='x1')return {type:'route',map:'x1',reason:'Repondo munições: retornando à loja'};
@@ -69,11 +73,11 @@ export function chooseAutopilotAction(raw,cfg){
     // Não atravessar o portal de volta enquanto o servidor ainda compra o próximo pacote.
     return {type:'idle',reason:'Reabastecendo '+(lowLaser?'laser':'mísseis')+' na loja oficial'};
   }
-  if(map!==c.map)return {type:'route',map:c.map,reason:`Rota até ${c.map.toUpperCase()}`};
+  if(map!==c.map&&!inAstral)return {type:'route',map:c.map,reason:`Rota até ${c.map.toUpperCase()}`};
   // V48.1.2: drops reais de NPC continuam prioritários para coleta, mas NÃO
   // cancelam o combate de NPC já alcançável. BOX BÔNUS/minério ficam atrás da caça.
   const npcs=(s.enemies||[]).filter(e=>e&&!e.isPlayer&&!e.warBot&&!e.isHidden&&e.hp>0&&Number.isFinite(e.x)&&Number.isFinite(e.y)
-    &&(c.npcTypes.length===0?!String(e.type||'').toLowerCase().startsWith('boss'):c.npcTypes.includes(String(e.type||''))));
+    &&(inAstral?true:(c.npcTypes.length===0?!String(e.type||'').toLowerCase().startsWith('boss'):c.npcTypes.includes(String(e.type||'')))));
   npcs.sort((a,b)=>{
     if(c.mode==='profit'){
       const as=(Math.max(0,Number(a.credits)||0)+Math.max(0,Number(a.uridium)||0)*100)/Math.max(1,(Number(a.hp)||0)+(Number(a.shield)||0));
@@ -102,10 +106,11 @@ export function chooseAutopilotAction(raw,cfg){
   // Não inventar inimigos ou recompensas quando a sala está vazia.
   return {type:'idle',reason:'Aguardando NPCs e drops'};
 }
-export function createStellarAutopilotV48({credentials,getIdentity=()=>null,getSnapshot,npcTypes=[],getPortals,getGraphLabel,getGoalLabel,mayTravel,navigate,jumpPortal,selectNpc,stopFire=()=>{},fireRocket,sellCargo,buyPackage,ensureCombatAmmo=()=>true,onNotice=()=>{}}={}){
+export function createStellarAutopilotV48({credentials,getIdentity=()=>null,getSnapshot,npcTypes=[],getPortals,getGraphLabel,getGoalLabel,mayTravel,navigate,jumpPortal,selectNpc,stopFire=()=>{},fireRocket,sellCargo,buyPackage,ensureCombatAmmo=()=>true,onNotice=()=>{},getAstralState=()=>null,assembleAstral=async()=>false,enterAstral=async()=>false}={}){
   let allowed=false,isAdmin=false,authorizedId=null,running=false,loading=false,busy=false,lastTickAt=0,lastAccessAt=0,nextAccessAt=0,panelOpen=false;
   let config=cleanAutopilotConfig(),started=0,ended=0,spent=0,attempts=0,failures=0,boxes=0,drops=0,ores=0,reason='Desligado',startStats=null,lastProgress=null;
   let panel=null,fab=null,grantCache=new Map(),refreshingAccess=false,lastPurchaseAttempt=0,lastHealthyAt=0,lastMapId=null;
+  let astralBuildBusy=false,astralBuildCancel=false,astralRunSeen=false;
   // STELLAR_AUTOPILOT_PHASE3_V483: checkpoints somente em memoria durante a aba conectada.
   let pendingJump=null,lastPortalAttempt=0,nextRouteSearch=0,routeMisses=0,nextSaleAttempt=0,buyFailuresInRow=0,lastCheckpointAt=0;
   const now=()=>Date.now();
@@ -151,7 +156,7 @@ export function createStellarAutopilotV48({credentials,getIdentity=()=>null,getS
   }
   function accessReady(){return allowed&&authorizedId===String(getIdentity()||'')&&lastAccessAt>0&&now()-lastAccessAt<75000;}
   function notify(t){reason=t;onNotice(t);renderStatus();}
-  function stop(why='Interrompido'){running=false;busy=false;pendingJump=null;clearResume();stopFire();reason=why;ended=now();try{const s=getSnapshot();if(s)lastProgress=stats(s);}catch{}renderStatus();}
+  function stop(why='Interrompido'){astralBuildCancel=true;running=false;busy=false;pendingJump=null;clearResume();stopFire();reason=why;ended=now();try{const s=getSnapshot();if(s)lastProgress=stats(s);}catch{}renderStatus();}
   function stats(s){return {xp:Number(s?.xp)||0,credits:Number(s?.credits)||0,stl:Number(s?.stl)||0,kills:Number(s?.kills)||0,boxes:Number(s?.boxes)||0,level:Number(s?.level)||1};}
   function sessionReport(){const duration=Math.max(1,((running?now():ended||now())-started)/3600000);const last=lastProgress||stats(getSnapshot());const first=startStats||last;
     return {map:config.map,minutes:Math.round(duration*60),hours:duration,boxes,drops,ores,kills:Math.max(0,last.kills-first.kills),xp:Math.max(0,last.xp-first.xp),grossCredits:last.credits-first.credits+spent,creditsNet:last.credits-first.credits,stl:last.stl-first.stl,spent,levelFrom:first.level,levelTo:last.level,attempts,failures,reason,
@@ -210,6 +215,12 @@ export function createStellarAutopilotV48({credentials,getIdentity=()=>null,getS
   <label>Limite compras CR<input data-ap-field="budget" type="number" min="0" value="${config.budget}"/></label>
   <label>Compra quando laser abaixo de<input data-ap-field="ammoMin" type="number" min="0" value="${config.ammoMin}"/></label>
   <label>Compra quando míssil abaixo de<input data-ap-field="rocketMin" type="number" min="0" value="${config.rocketMin}"/></label></div>
+  <details><summary>✦ PORTAIS ASTRAIS • assistência opcional</summary>
+    <small>Montagem cobra STL pelo servidor e precisa de confirmação. A entrada é separada; combate assistido requer bot ativo e permissão online. Nenhuma recompensa é concedida por este painel.</small>
+    <div class="ap-grid"><label>Portal<select data-ap-field="astralGate"><option value="alpha">AURORA</option><option value="beta">NEXUS</option><option value="gamma">ECLIPSE</option></select></label><label>Orçamento máximo STL<input data-ap-field="astralBudget" type="number" min="0" max="1000000" value="50000"/></label></div>
+    <label><input type="checkbox" data-ap-check="astralAssist"/> Ativar combate assistido apenas após entrada explícita no portal</label>
+    <div class="ap-actions"><button type="button" data-ap-astral-build>✦ MONTAR COM ORÇAMENTO</button><button type="button" data-ap-astral-enter>↗ ENTRAR NO PORTAL</button><button type="button" data-ap-astral-cancel>PARAR MONTAGEM</button></div>
+    </details>
   <div class="ap-actions"><button type="button" data-ap-start>▶ INICIAR BOT</button><button type="button" data-ap-stop>■ PARAR</button><button type="button" data-ap-copy>📋 RELATÓRIO</button></div>
   <div data-ap-status class="ap-status">PARADO</div><div data-ap-report class="ap-status"></div></div>`;}
   function readConfig(){if(!panel)return config;const next={...config};for(const field of panel.querySelectorAll('[data-ap-field]'))next[field.dataset.apField]=field.value;
@@ -246,6 +257,21 @@ export function createStellarAutopilotV48({credentials,getIdentity=()=>null,getS
     panel.addEventListener('click',e=>{if(e.target===panel){panel.hidden=true;panelOpen=false;}});
     panel.querySelector('[data-ap-start]').onclick=()=>{config=readConfig();start();};
     panel.querySelector('[data-ap-stop]').onclick=()=>stop('Parado pelo piloto');
+    panel.querySelector('[data-ap-astral-cancel]').onclick=()=>{astralBuildCancel=true;notify('Montagem interrompida após a operação em andamento');};
+    panel.querySelector('[data-ap-astral-build]').onclick=async()=>{
+      if(astralBuildBusy||!accessReady())return notify('Verifique a autorização do Autopilot antes de montar');
+      config=readConfig();if(!(config.astralBudget>0))return notify('Defina um orçamento maior que zero');
+      astralBuildBusy=true;astralBuildCancel=false;
+      try{await assembleAstral(config.astralGate,config.astralBudget,()=>astralBuildCancel,msg=>notify(msg));}
+      catch(e){notify('Montagem: '+String(e?.message||e).slice(0,110));}
+      finally{astralBuildBusy=false;renderStatus();}
+    };
+    panel.querySelector('[data-ap-astral-enter]').onclick=async()=>{
+      if(!accessReady())return notify('Acesso Autopilot não autorizado');
+      config=readConfig();if(!config.astralAssist)return notify('Marque a assistência astral antes de entrar');
+      try{const ok=await enterAstral(config.astralGate);if(ok!==false)notify('Portal iniciado • ative o Autopilot para completar por combate');}
+      catch(e){notify('Entrada: '+String(e?.message||e).slice(0,110));}
+    };
     panel.querySelector('[data-ap-copy]').onclick=()=>{const text=exportReport();navigator.clipboard?.writeText(text).then(()=>notify('Relatório copiado')).catch(()=>notify(text));};
     renderStatus();
   }
@@ -266,9 +292,10 @@ export function createStellarAutopilotV48({credentials,getIdentity=()=>null,getS
     }
     panel.hidden=false;panelOpen=true;renderStatus();
   }
-  function start(){if(!accessReady())return notify('Permissão não confirmada');if(running)return;const s=getSnapshot();if(!s?.online||!s.ready)return notify('Entre no universo online para ativar');
-    config=readConfig();started=now();ended=0;spent=0;attempts=0;failures=0;boxes=0;drops=0;ores=0;startStats=stats(s);lastProgress=startStats;lastTickAt=0;
-    lastHealthyAt=now();lastMapId=s.map;pendingJump=null;lastPortalAttempt=0;nextRouteSearch=0;routeMisses=0;nextSaleAttempt=0;buyFailuresInRow=0;running=true;checkpoint(true);notify('Rota '+config.map.toUpperCase()+' iniciada');}
+  function start(){if(!accessReady())return notify('Permissão não confirmada');if(running)return;const s=getSnapshot();if(!s?.online||!s.ready)return notify('Entre no jogo conectado para ativar');
+    config=readConfig();
+    if(s.astralActive&&!config.astralAssist)return notify('Marque a assistência astral para combater dentro do portal');started=now();ended=0;spent=0;attempts=0;failures=0;boxes=0;drops=0;ores=0;startStats=stats(s);lastProgress=startStats;lastTickAt=0;
+    lastHealthyAt=now();lastMapId=s.map;pendingJump=null;lastPortalAttempt=0;nextRouteSearch=0;routeMisses=0;nextSaleAttempt=0;buyFailuresInRow=0;running=true;astralRunSeen=!!s.astralActive;checkpoint(true);notify(astralRunSeen?'Portal Astral • combate assistido iniciado':'Rota '+config.map.toUpperCase()+' iniciada');}
   async function safeBuy(s){if(busy||!config.autoBuy||!s.buyPermitted||s.jumping||!s.ready)return;const opts=[{kind:'ammo',stock:s.ammoStock,min:config.ammoMin,quote:s.ammoQuote},{kind:'rocket',stock:s.rocketStock,min:config.rocketMin,quote:s.rocketQuote}];
     for(const opt of opts){const q=opt.quote;if(!q||!q.catalog_key||q.shop_visible===false||Number(opt.stock)>=opt.min||q.currency!=='credits'||(opt.kind==='rocket'&&!config.rockets))continue;
       const cost=Number(q.price)||0;if(cost<=0||cost>config.budget-spent||cost>Number(s.credits)||!Number.isFinite(cost))continue;
@@ -331,6 +358,9 @@ export function createStellarAutopilotV48({credentials,getIdentity=()=>null,getS
       if(String(getIdentity()||'')===authorizedId){notify('Sem sincronização do setor • aguardando servidor');return;}
       stop('Sessão de jogo encerrada');return;
     }
+    if(astralRunSeen&&!s.astralActive){stop('Portal encerrado • assistência finalizada');return;}
+    if(s.astralActive&&!config.astralAssist){stop('Portal Astral exige opção explícita');return;}
+    if(s.astralActive)astralRunSeen=true;
     lastHealthyAt=ts;checkpoint();
     if(lastMapId!==s.map){
       lastMapId=s.map;pendingJump=null;routeMisses=0;nextRouteSearch=0;
@@ -347,7 +377,7 @@ export function createStellarAutopilotV48({credentials,getIdentity=()=>null,getS
     s.purchaseBudgetRemaining=Math.max(0,config.budget-spent);
     lastProgress=stats(s);
     if(busy)return;
-    if(config.autoBuy&&ts-lastPurchaseAttempt>7000){lastPurchaseAttempt=ts;void safeBuy(s);}
+    if(!s.astralActive&&config.autoBuy&&ts-lastPurchaseAttempt>7000){lastPurchaseAttempt=ts;void safeBuy(s);}
     // A compra oficial pode começar neste mesmo tick; não iniciar salto antes de confirmar.
     if(busy)return;
     const action=chooseAutopilotAction(s,config);
