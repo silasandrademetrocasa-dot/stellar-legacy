@@ -11,13 +11,16 @@ const server=readFileSync(resolve(root,'server/index.js'),'utf8');
 
 const menus=['pilot','missions','battle','shops'];
 const actions=['hangarBtn','shopBtn','premiumBtn','auctionBtn','arenaBtn','clanBtn','missionBtn','mapBtn','configBtn','adminBtn'];
-test('V84: offline bloqueia canvas, não esconde navegação ou HUD',()=>{
- assert.match(mod,/\.stellar-offline-active-v485 canvas#game\{pointer-events:none!important\}/);
+test('V85: bloquear somente desenho do mundo, nunca interceptar menus',()=>{
+ assert.match(mod,/#v485-world-lock\{display:none;position:absolute;inset:0;z-index:2;pointer-events:none/);
  assert.match(mod,/\.stellar-offline-active-v485 #v485-world-lock\{display:block\}/);
- assert.match(mod,/#v485-world-lock\{display:none;position:fixed;inset:0;z-index:5;/);
- assert.match(mod,/\.stellar-offline-active-v485 #topbar\{z-index:10050!important;pointer-events:auto!important/);
- assert.doesNotMatch(mod,/\.stellar-offline-active-v485 \.hud-panel:not\(#topbar\)/);
- assert.doesNotMatch(mod,/\.stellar-offline-active-v485 #topbar \.top-actions > :not/);
+ assert.match(mod,/\.stellar-offline-active-v485 canvas#game\{visibility:hidden!important;pointer-events:none!important\}/);
+ assert.match(mod,/gameCanvas\.after\(lock\)/);
+ assert.doesNotMatch(mod,/document\.body\.appendChild\(lock\)/);
+ assert.doesNotMatch(mod,/lock\.addEventListener\('pointerdown'/);
+ assert.match(mod,/\.stellar-offline-active-v485 #topbar\{pointer-events:auto!important;z-index:10050!important/);
+ assert.match(mod,/\.stellar-offline-active-v485 \.modal:not\(\.hidden\)\{pointer-events:auto!important/);
+ assert.match(mod,/#minimapPanel/);
  for(const menu of menus)assert.match(html,new RegExp(`data-menu-group="${menu}"`));
  for(const id of actions)assert.match(html,new RegExp(`id="${id}"`));
 });

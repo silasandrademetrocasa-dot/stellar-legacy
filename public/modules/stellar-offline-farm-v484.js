@@ -15,19 +15,31 @@ export function createOfflineFarmV484({credentials,saveBeforeStart,onPauseWorld,
  #v484-panel .v484-actions{display:flex;flex-wrap:wrap;gap:4px}#v484-panel .v484-error{color:#ffc4bc}#v484-panel .v485-kpis{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;margin:9px 0}
  #v484-panel .v485-kpis div{background:#09192b;border:1px solid #234967;border-radius:10px;padding:10px}#v484-panel .v485-kpis b{display:block;font-size:19px;margin-top:3px;color:#a9f0ff}#v484-panel .v485-kpis small{color:#9db7c8}
  #v484-panel .v485-progress{height:7px;overflow:hidden;border-radius:8px;background:#244258;margin:9px 0}#v484-panel .v485-progress span{display:block;height:100%;width:0;background:#49d8bc;transition:width .5s}
- /* V84: bloquear somente o mundo; navegação do topo e modais seguem acessíveis. */
- #v485-world-lock{display:none;position:fixed;inset:0;z-index:5;background:transparent;touch-action:none;cursor:not-allowed}
+ /* V85: the world shield is INSIDE #app (isolation:isolate), behind #topbar.
+    The older full-screen BODY overlay intercepted clicks on Android even though
+    the topbar had an enormous z-index. No full-screen pointer interceptor now. */
+ #v485-world-lock{display:none;position:absolute;inset:0;z-index:2;pointer-events:none;
+  background:radial-gradient(ellipse at 45% 55%,#103047 0%,#07182a 52%,#020815 100%)}
  .stellar-offline-active-v485 #v485-world-lock{display:block}
- .stellar-offline-active-v485 canvas#game{pointer-events:none!important}
- .stellar-offline-active-v485 #topbar{z-index:10050!important;pointer-events:auto!important;overflow:visible!important}
- .stellar-offline-active-v485 #topbar .top-actions,.stellar-offline-active-v485 #topbar .menu-group,.stellar-offline-active-v485 #topbar .menu-dropdown{pointer-events:auto!important}
- .stellar-offline-active-v485 #topbarDockToggle,.stellar-offline-active-v485 #hudIntelligenceQuick{z-index:10051!important;pointer-events:auto!important}
- /* Radar visível, porém incapaz de indicar rotas durante o farm. */
- .stellar-offline-active-v485 #minimap{pointer-events:none!important}
- /* Modais de hangar, loja, leilão, arena etc. ficam acima do bloqueio do mapa. */
- .stellar-offline-active-v485 .modal:not(.hidden){pointer-events:auto}
- #v485-world-indicator{position:fixed;top:108px;left:50%;transform:translateX(-50%);max-width:90vw;pointer-events:auto;cursor:pointer;touch-action:manipulation;text-align:center;background:#082032ef;border:1px solid #318d9b;border-radius:14px;padding:11px 17px;color:#d9faff;box-shadow:0 8px 36px #000a}
- #v485-world-indicator strong{font-size:15px;display:block}#v485-world-indicator small{color:#9dc7d8;display:block;margin-top:6px}
+ .stellar-offline-active-v485 canvas#game{visibility:hidden!important;pointer-events:none!important}
+ /* Hide gameplay HUD and location while keeping the top menu and HTML panels. */
+ .stellar-offline-active-v485 :is(#topHudDock,#rightHudStack,#weaponBar,#minimapPanel,#minimap,
+   #targetLockHud,#combatStateHud,#combatFlash,#gateHud,#bossPhaseHud,#portalPrompt,
+   #hudEditorBar,#hudIntelligenceQuick,#hint,#mobileCombatModeBtn){display:none!important}
+ .stellar-offline-active-v485 :is(#mapLabel,#sectorName,#minimapMapLabelV4771){visibility:hidden!important}
+ .stellar-offline-active-v485 #mapModal{display:none!important}
+ .stellar-offline-active-v485 #topbar{pointer-events:auto!important;z-index:10050!important;overflow:visible!important}
+ .stellar-offline-active-v485 #topbar :is(.top-actions,.menu-group,.menu-dropdown){pointer-events:auto!important}
+ .stellar-offline-active-v485 .modal:not(.hidden){pointer-events:auto!important;z-index:10060!important}
+ .stellar-offline-active-v485 #topbarDockToggle{pointer-events:auto!important;z-index:10051!important}
+ /* Only the small restore badge accepts a click; background never steals menu events. */
+ #v485-world-indicator{position:absolute;top:clamp(145px,26vh,280px);left:50%;
+  transform:translateX(-50%);width:min(90vw,365px);padding:15px 18px;
+  pointer-events:auto;cursor:pointer;touch-action:manipulation;text-align:center;
+  background:#082032f5;border:1px solid #318d9b;border-radius:14px;color:#d9faff;
+  box-shadow:0 8px 36px #000a}
+ #v485-world-indicator strong{font-size:16px;display:block}
+ #v485-world-indicator small{color:#9dc7d8;display:block;margin-top:8px}
  #v485-adm-farm{border:1px solid #357a90;background:#0d1e2d;padding:13px;border-radius:12px;margin:12px 0;color:#e0f5ff;font:13px system-ui}
  #v485-adm-farm summary{cursor:pointer;font-weight:800}#v485-adm-farm label{display:inline-flex;flex-direction:column;gap:4px;margin:7px 12px 7px 0}
  #v485-adm-farm input{width:130px}#v485-adm-farm button{border-radius:8px;background:#22546b;color:#f0ffff;padding:9px;border:1px solid #45889d}
@@ -56,17 +68,22 @@ export function createOfflineFarmV484({credentials,saveBeforeStart,onPauseWorld,
  <div class="v484-actions"><button id="v484-start">INICIAR FARM</button><button id="v484-settle">RESGATAR / TERMINAR</button><button id="v484-cancel">CANCELAR SEM GANHOS</button><button id="v484-refresh">ATUALIZAR</button><button id="v485-notify">🔔 ALERTA NO CELULAR</button><button id="v484-close">FECHAR</button></div>
  </section>`;document.body.appendChild(shell);
  const $=id=>shell.querySelector('#'+id);let status='none',busy=false,authorized=false,latest=null,preview=null,hasNotified=new Set(),loop=null,menu=null,adminReady=false,v49Tools=null;
- const lock=document.createElement('div');lock.id='v485-world-lock';lock.innerHTML='<div id="v485-world-indicator"><strong>🌙 SYSTEM OFF • FARM ATIVO</strong><small>TOQUE PARA ABRIR FARM / RESGATAR</small></div>';document.body.appendChild(lock);
+ const lock=document.createElement('div');lock.id='v485-world-lock';lock.innerHTML='<div id="v485-world-indicator"><strong>🌙 FARM OFFLINE ATIVO</strong><small>MAPA PAUSADO • MENUS LIBERADOS<br>TOQUE AQUI PARA CONSULTAR / RESGATAR</small></div>';
+ const gameCanvas=document.getElementById('game');const gameApp=document.getElementById('app');
+ if(gameCanvas&&gameApp)gameCanvas.after(lock);else (gameApp||document.body).appendChild(lock);
  const farmRescueIndicator=lock.querySelector('#v485-world-indicator');
  farmRescueIndicator.setAttribute('role','button');farmRescueIndicator.setAttribute('tabindex','0');
  farmRescueIndicator.setAttribute('aria-label','Abrir Farm Offline para consultar e resgatar');
- // O bloqueio permanece para o mapa; o aviso é um atalho seguro ao modal de resgate.
- lock.addEventListener('pointerdown',e=>{if(e.target.closest?.('#v485-world-indicator')){e.stopPropagation();return;}e.preventDefault();e.stopPropagation();},{passive:false});
+ // V85: background never captures pointerdown; Canvas and map handlers guard the world.
+ // The badge is the ONLY clickable point on the world shield.
  farmRescueIndicator.addEventListener('click',e=>{e.stopPropagation();open();});
  farmRescueIndicator.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();open();}});
  async function request(path,body,method){const c=credentials?.()||{};if(!c.accessToken||!c.gameSessionId)throw Error('Faça login no jogo novamente.');const res=await fetch('/api/offline-farm/v484/'+path,{method:method||(body?'POST':'GET'),headers:{'Content-Type':'application/json',Authorization:'Bearer '+c.accessToken,'X-Game-Session-Id':c.gameSessionId},body:body?JSON.stringify(body):undefined,cache:'no-store',signal:AbortSignal.timeout(22000)});const data=await res.json().catch(()=>({}));if(!res.ok)throw Error(data.error||'Erro '+res.status);return data;}
  function installMenu(){if(menu)return;const pilot=document.querySelector('[data-menu-group="pilot"] > .menu-dropdown');if(!pilot)return;menu=document.createElement('button');menu.id='v485FarmMenuEntry';menu.className='menu-item';menu.type='button';menu.textContent='🌙 FARM OFFLINE';const auto=document.getElementById('v481AutopilotEntry');if(auto)auto.after(menu);else pilot.append(menu);menu.addEventListener('click',()=>{open();document.querySelectorAll('.menu-group.open').forEach(g=>g.classList.remove('open'));});}
- function active(yes){const was=document.body.classList.contains('stellar-offline-active-v485');document.body.classList.toggle('stellar-offline-active-v485',yes);if(yes&&!was)void onPauseWorld?.();}
+ function active(yes){const was=document.body.classList.contains('stellar-offline-active-v485');document.body.classList.toggle('stellar-offline-active-v485',yes);
+  if(yes&&!was)void onPauseWorld?.();
+  // Once settled, all world visuals and controls return automatically.
+ }
  function showStats(r){const k=$('v485-kpis');k.innerHTML=[['NPCs',r.kills],['XP',r.xp],['Créditos NPC',r.npc_credits],['STL',r.stl],['BOX',r.boxes_collected],['Minérios',r.mined_units],['CR líquido',r.credits_net],['Compras munição',r.ammo_bought]].map(([label,v])=>`<div><small>${label}</small><b>${fmt(v)}</b></div>`).join('');$('v485-details').textContent=`Vendas: ${fmt(r.sales)} • Crédito de venda: ${fmt(r.sale_credits)}${Number.isFinite(Number(r.starting_cargo_sale_credits))?`\nCR de porão anterior: ${fmt(r.starting_cargo_sale_credits)} • CR gerados no farm: ${fmt(r.farm_generated_sale_credits)}`:''}\nMunição restante: ${fmt(r.ammo_remaining)} • Gasto: ${fmt(r.ammo_spent)} CR\n${preview?.damagePerSecond?`DPS efetivo estimado: ${fmt(preview.damagePerSecond)}\n`:''}${r.laser_count?`Lasers: ${fmt(r.laser_count)} • Munições por NPC: ${fmt(r.ammo_per_kill)}\nDeslocamento por NPC: ${fmt(r.travel_per_kill)}s\n`:''}Os números são recalculados quando o app está aberto.\nO saldo só muda ao resgatar.`;}
  function tick(){if(!authorized)return;const isRunning=status==='running';if(isRunning&&latest?.ends_at){const now=Date.now(),start=new Date(latest.started_at||now).getTime(),end=new Date(latest.ends_at).getTime();const left=Math.max(0,Math.ceil((end-now)/1000));const pct=Math.max(0,Math.min(100,100*(now-start)/Math.max(1,end-start)));$('v485-progress-bar').style.width=pct+'%';$('v485-countdown').textContent=left?`Tempo restante: ${Math.floor(left/3600)}h ${String(Math.floor(left%3600/60)).padStart(2,'0')}m ${String(left%60).padStart(2,'0')}s • ${pct.toFixed(1)}%`:'⏰ Tempo previsto concluído • retorne para resgatar';const title=lock.querySelector('strong');title.textContent=left?'🌙 SYSTEM OFF • FARM ATIVO':'🌙 FARM CONCLUÍDO • RESGATAR';if(left===0&&latest.id&&!hasNotified.has(latest.id)){hasNotified.add(latest.id);void alertFinished();}}
   clearTimeout(loop);loop=setTimeout(tick,1000);
