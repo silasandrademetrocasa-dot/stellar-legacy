@@ -1,0 +1,104 @@
+name: '🚀 Stellar Legacy — APK LOCAL (todas as artes no app)'
+run-name: 'Compilar APK local • ${{ github.actor }}'
+
+on:
+  workflow_dispatch:
+    inputs:
+      build_release:
+        description: 'APK release assinado: requer secrets STELLAR_KEYSTORE_*'
+        required: true
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: stellar-apk-local
+  cancel-in-progress: false
+
+jobs:
+  apk:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      STELLAR_SERVER_URL: ${{ vars.STELLAR_SERVER_URL || 'https://darkorbit-legacy.onrender.com' }}
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+      - name: Node 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verificar origem HTTPS
+        shell: bash
+        run: |
+          set -euo pipefail
+          [[ "$STELLAR_SERVER_URL" =~ ^https://[a-zA-Z0-9.-]+$ ]] || { echo 'Origem invalida'; exit 1; }
+      - name: Testar WEB e inventariar TODAS as artes do APK
+        run: |
+          npm run verify
+          node scripts/prepare-apk-assets.js
+          node scripts/verify-apk.js
+      - name: Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - name: SDK Android
+        uses: android-actions/setup-android@v3
+      - name: Android SDK 36 e build-tools 35
+        run: sdkmanager 'platforms;android-36' 'build-tools;35.0.0'
+      - name: Gradle 8.13
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.13'
+      - name: Versao Android crescente
+        run: echo "STELLAR_VERSION_CODE=$((900000 + GITHUB_RUN_NUMBER))" >> "$GITHUB_ENV"
+      - name: Compilar APK debug
+        run: gradle --no-daemon -p android :app:assembleDebug
+      - name: Publicar APK e relatorio de arquivos locais
+        uses: actions/upload-artifact@v4
+        with:
+          name: Stellar-Legacy-V90-APK-Local-Debug
+          path: |
+            android/app/build/outputs/apk/debug/*.apk
+            android/build/reports/stellar-assets-manifest.json
+          if-no-files-found: error
+          retention-days: 21
+      - name: Preparar assinatura de producao
+        if: ${{ inputs.build_release }}
+        env:
+          KEYSTORE_B64: ${{ secrets.STELLAR_KEYSTORE_BASE64 }}
+          STELLAR_KEYSTORE_PASSWORD: ${{ secrets.STELLAR_KEYSTORE_PASSWORD }}
+          STELLAR_KEY_ALIAS: ${{ secrets.STELLAR_KEY_ALIAS }}
+          STELLAR_KEY_PASSWORD: ${{ secrets.STELLAR_KEY_PASSWORD }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          for var in KEYSTORE_B64 STELLAR_KEYSTORE_PASSWORD STELLAR_KEY_ALIAS STELLAR_KEY_PASSWORD; do
+            if [[ -z "${!var}" ]]; then echo "Secret ausente: $var"; exit 1; fi
+          done
+          umask 077
+          printf '%s' "$KEYSTORE_B64" | base64 --decode > "$RUNNER_TEMP/stellar-release.jks"
+          echo "STELLAR_KEYSTORE_FILE=$RUNNER_TEMP/stellar-release.jks" >> "$GITHUB_ENV"
+      - name: Compilar APK release assinado
+        if: ${{ inputs.build_release }}
+        env:
+          STELLAR_KEYSTORE_PASSWORD: ${{ secrets.STELLAR_KEYSTORE_PASSWORD }}
+          STELLAR_KEY_ALIAS: ${{ secrets.STELLAR_KEY_ALIAS }}
+          STELLAR_KEY_PASSWORD: ${{ secrets.STELLAR_KEY_PASSWORD }}
+        run: gradle --no-daemon -p android :app:assembleRelease
+      - name: Publicar APK release
+        if: ${{ inputs.build_release }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: Stellar-Legacy-V90-APK-Local-Release
+          path: android/app/build/outputs/apk/release/*.apk
+          if-no-files-found: error
+          retention-days: 30
+      - name: Apagar chave de assinatura temporaria
+        if: ${{ always() }}
+        shell: bash
+        run: |
+          if [[ -n "${STELLAR_KEYSTORE_FILE:-}" ]]; then rm -f "$STELLAR_KEYSTORE_FILE"; fi
