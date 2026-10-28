@@ -1,6 +1,6 @@
 {
   "name": "stellar-legacy",
-  "version": "47.7.58",
+  "version": "47.7.59",
   "type": "module",
   "scripts": {
     "start": "node server/index.js",
@@ -20,5 +20,5 @@
   "engines": {
     "node": ">=18"
   },
-  "release": "V102 CONSISTENCIA ECONOMICA: piloto com compra de habilidade autoritativa, save concorrente seguro, auditoria arena"
+  "release": "V103 FARM OFFLINE PROTEGIDO: atividades de leitura livres, operações concorrentes bloqueadas e preflight de resgate sem liquidar conflitos"
 }

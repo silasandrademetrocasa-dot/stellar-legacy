@@ -39,9 +39,9 @@ test('V99: nenhuma operação de mudança de LiveOps ocorre pelo endpoint',()=>{
  const code=read('server/liveops-snapshot-v99.js');assert.doesNotMatch(code,/\.from\([^)]*\)\.(?:update|insert|upsert|delete)\(/);
 });
 test('V100: preflight distingue verificação estrutural de teste no aparelho',()=>{
- const good=releaseReadinessV100({version:'47.7.58',databaseReady:true,checks:[{name:'game.js',ok:true}]});
+ const good=releaseReadinessV100({version:'47.7.59',databaseReady:true,checks:[{name:'game.js',ok:true}]});
  assert.equal(good.pass,true);assert.ok(good.manualAcceptanceRequired.some(x=>x.includes('Autopilot Astral')));
- const bad=releaseReadinessV100({version:'47.7.58',databaseReady:false,checks:[{name:'game.js',ok:false}]});
+ const bad=releaseReadinessV100({version:'47.7.59',databaseReady:false,checks:[{name:'game.js',ok:false}]});
  assert.equal(bad.pass,false);assert.equal(bad.failures.length,2);
 });
 test('V100: APK mantém recursos internos e não depende de imagem remota',()=>{
@@ -49,11 +49,11 @@ test('V100: APK mantém recursos internos e não depende de imagem remota',()=>{
  const java=read('android/app/src/main/java/com/stellarlegacy/mobile/MainActivity.java');
  assert.match(java,/WebViewAssetLoader/);
  const ui=read('public/index.html');assert.match(ui,/id="v98CompetitiveAuditBtn"/);assert.match(ui,/id="v99SnapshotBtn"/);assert.match(ui,/id="v100ReadinessBtn"/);
- assert.match(ui,/stellar-admin-c-v100\.js\?v=47\.7\.58/);
+ assert.match(ui,/stellar-admin-c-v100\.js\?v=47\.7\.59/);
 });
 test('V98–V100: rotas administrativas integradas, sem SQL novo',()=>{
  const code=read('server/index.js');
  for(const name of ['installCompetitiveReadinessV98','installLiveopsSnapshotV99','installReleaseReadinessV100'])assert.match(code,new RegExp(name+'\\(app'));
- assert.match(code,/const RELEASE_VERSION = '47\.7\.58'/);
- const pkg=JSON.parse(read('package.json'));assert.equal(pkg.version,'47.7.58');assert.equal(pkg.scripts['preflight:v100'],'node scripts/v100-release-readiness.mjs');
+ assert.match(code,/const RELEASE_VERSION = '47\.7\.59'/);
+ const pkg=JSON.parse(read('package.json'));assert.equal(pkg.version,'47.7.59');assert.equal(pkg.scripts['preflight:v100'],'node scripts/v100-release-readiness.mjs');
 });

@@ -51,8 +51,9 @@ export function createOfflineFarmV484({credentials,saveBeforeStart,onPauseWorld,
  const ammoName=id=>LASER_AMMO[String(id||'')]?.name||String(id||'');
  const shell=document.createElement('div');shell.id='v484-panel';shell.hidden=true;
  shell.innerHTML=`<section role="dialog" aria-label="Farm Offline">
- <h3>🌙 FARM OFFLINE <small>V49.5</small></h3>
+ <h3>🌙 FARM OFFLINE <small>V103 · RESGATE PROTEGIDO</small></h3>
  <p style="color:#afcbd7;font-size:12px">Farm econômico com acerto no retorno. Os ganhos durante a sessão são <b>estimativas</b>, não saldo já creditado.</p>
+ <p style="color:#f5d598;font-size:12px">V103: Você pode consultar Hangar, Leilão, Loja e Arena; compras, habilidades, batalhas, viagens e resgates que alteram seu piloto devem aguardar o fim do farm. Evita perder horas por save concorrente.</p>
  <div id="v484-status" role="status">Consultando...</div><div class="v485-progress"><span id="v485-progress-bar"></span></div><div id="v485-countdown" style="font-size:12px;color:#a9d0df"></div>
  <div id="v484-settings">
   <label>🎯 NPC comum <select id="v484-npc"><option value="">Automático (mais fraco)</option></select></label>
@@ -66,7 +67,7 @@ export function createOfflineFarmV484({credentials,saveBeforeStart,onPauseWorld,
  <div id="v485-live" hidden><p style="font-weight:700">📊 PROJEÇÃO DO FARM • NÃO CREDITADA</p><div class="v485-kpis" id="v485-kpis"></div><pre id="v485-details"></pre></div>
  <div id="v86-economy-box" hidden style="background:#081a29;border:1px solid #32647a;border-radius:10px;padding:10px;margin-top:9px"><b>💰 SALDO NO SERVIDOR • SOMENTE LEITURA</b><p id="v86-economy-info" style="font-size:12px">Confira seu saldo sem encerrar o farm.</p><button type="button" id="v86-economy-refresh">CONSULTAR SALDO REAL</button><small style="display:block;color:#a1becd">Projeções do farm não estão creditadas. Lances do Leilão são registrados separadamente.</small></div>
  <pre id="v484-report" hidden></pre><p class="v484-error" id="v484-error" role="alert"></p><p id="v91-farm-diagnosis" style="white-space:pre-wrap;font-size:12px;color:#b6dce8"></p>
- <div class="v484-actions"><button id="v484-start">INICIAR FARM</button><button id="v484-settle">RESGATAR / TERMINAR</button><button id="v484-cancel">CANCELAR SEM GANHOS</button><button id="v484-refresh">ATUALIZAR</button><button id="v91-farm-diagnose">DIAGNOSTICAR FALHA</button><button id="v485-notify">🔔 ALERTA NO CELULAR</button><button id="v484-close">FECHAR</button></div>
+ <div class="v484-actions"><button id="v484-start">INICIAR FARM</button><button id="v484-settle">RESGATAR / TERMINAR</button><button id="v484-cancel">CANCELAR SEM GANHOS</button><button id="v484-refresh">ATUALIZAR</button><button id="v103-farm-check">VERIFICAR SEGURANÇA DO RESGATE</button><button id="v91-farm-diagnose">DIAGNOSTICAR FALHA</button><button id="v485-notify">🔔 ALERTA NO CELULAR</button><button id="v484-close">FECHAR</button></div>
  </section>`;document.body.appendChild(shell);
  const $=id=>shell.querySelector('#'+id);let status='none',busy=false,authorized=false,latest=null,preview=null,hasNotified=new Set(),loop=null,menu=null,adminReady=false,v49Tools=null;
  const lock=document.createElement('div');lock.id='v485-world-lock';lock.innerHTML='<div id="v485-world-indicator"><strong>🌙 FARM OFFLINE ATIVO</strong><small>MAPA PAUSADO • MENUS LIBERADOS<br>TOQUE AQUI PARA CONSULTAR / RESGATAR</small></div>';
@@ -119,7 +120,19 @@ export function createOfflineFarmV484({credentials,saveBeforeStart,onPauseWorld,
     }
     $('v91-farm-diagnosis').textContent='';render(x);await refresh();
   });
- $('v484-settle').onclick=()=>operation(async()=>{const x=await request('settle',{});render(x);if(['settled','conflict'].includes(x.status))await onFinish?.();});
+ $('v484-settle').onclick=()=>operation(async()=>{
+    const check=await request('v103/preflight');
+    if(check.status==='running'&&!check.safe){
+      $('v91-farm-diagnosis').textContent='⚠️ RESGATE EM REVISÃO • sessão preservada. Problemas: '+(check.issues||[]).join(', ')+'. Não cancele o Farm. Contate o ADM para auditar.';
+      throw Error('Resgate não realizado: detectamos conflito. O histórico da sessão foi preservado.');
+    }
+    const x=await request('settle',{});render(x);if(['settled','conflict'].includes(x.status))await onFinish?.();
+  });
+  $('v103-farm-check').onclick=()=>operation(async()=>{
+    const check=await request('v103/preflight');
+    const text=check.status!=='running'?'Nenhuma sessão de farm ativa.':check.safe?'✅ PRÉ-CHECAGEM APROVADA. O servidor ainda fará a verificação final no pagamento.':'⚠️ RISCO DE CONFLITO • resgate preservado para revisão: '+(check.issues||[]).join(', ');
+    $('v91-farm-diagnosis').textContent=text;
+  });
  $('v484-cancel').onclick=()=>operation(async()=>{if(!confirm('Cancelar sem qualquer ganho desta sessão?'))return;const x=await request('cancel',{});render(x);await onFinish?.();});
  async function readConfirmedEconomyV86(){const out=$('v86-economy-info');out.textContent='Consultando saldo real no servidor...';
    try{const d=await request('v86/economy');const e=d.economy||{};

@@ -19,7 +19,7 @@ import os from 'os';
 import { fileURLToPath } from 'url';
 import { createClient } from '@supabase/supabase-js';
 import { randomUUID } from 'crypto';
-import {installOfflineFarmV484,offlineFarmEnsureInactiveV484,makeOfflineFarmGuardV484} from './offline-farm-v484.js';
+import {installOfflineFarmV484,offlineFarmEnsureInactiveV484,makeOfflineFarmGuardV484,makeOfflineFarmApiSafetyV103} from './offline-farm-v484.js';
 import {installBalanceAuditV90} from './balance-audit-v90.js';
 import {installCompetitiveReadinessV98} from './competitive-readiness-v98.js';
 import {installLiveopsSnapshotV99} from './liveops-snapshot-v99.js';
@@ -37,7 +37,7 @@ import { createSecurityService } from './security-service.js';
 
 const app = express();
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const RELEASE_VERSION = '47.7.58'; // único identificador de release nos endpoints HTTP
+const RELEASE_VERSION = '47.7.59'; // único identificador de release nos endpoints HTTP
 
 function normalizeSupabaseUrl(value = '') {
   let url = String(value || '').trim();
@@ -599,6 +599,9 @@ function bannedResponse(res,access){
 
 async function requireUser(req, res, next) {
   try {
+    // V103: a trava do Farm já autenticou esta requisição. Não consultar
+    // token/sessão duas vezes na mesma operação, reduzindo rede ao Render.
+    if(req.user?.id && req.gameSessionId && req.accessToken === bearer(req))return next();
     const token = bearer(req);
     if (!token) return res.status(401).json({ error: 'Sessão ausente.' });
     const sb = supabaseBase();
@@ -625,6 +628,10 @@ async function requireUser(req, res, next) {
     next(err);
   }
 }
+
+// V103: fail closed on writes from any gameplay module while Offline Farm
+// owns the player's economic snapshot. Consultas/ADM/auth permanecem ativos.
+app.use('/api',makeOfflineFarmApiSafetyV103({requireUser,getAdmin:requireEliteAdmin}));
 
 function normalizeCallsign(value = '') {
   return String(value || '').trim().replace(/\s+/g, ' ').slice(0, 24);

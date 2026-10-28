@@ -25,7 +25,7 @@ android {
         minSdk 26
         targetSdk 35
         versionCode Integer.parseInt(requestedVersion)
-        versionName '47.7.58-apk1'
+        versionName '47.7.59-apk1'
         buildConfigField 'String', 'SERVER_ORIGIN', '"' + serverUrl + '"'
     }
 

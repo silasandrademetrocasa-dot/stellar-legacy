@@ -1,3 +1,4 @@
+import {offlineFarmDirectActivityAllowedV103} from './modules/offline-farm-activity-v103.js?v=47.7.59';
 import {persistSessionV101,loadPersistedSessionV101,clearPersistedSessionV101} from './modules/login-persistence-v101.js';
 const SESSION_KEY = 'stellarLegacyV4Session';
 const GOOGLE_OAUTH_PENDING_KEY = 'stellarLegacyGoogleOAuthPendingV18216';
@@ -90,6 +91,13 @@ async function getConfig() {
 }
 
 async function supabaseFetch(path, options = {}, withAuth = false) {
+  // V103: scripts do jogo fazem chamadas diretas ao PostgREST. A camada HTTP
+  // do Render não consegue protegê-las; impedir a operação ANTES de enviar.
+  const farmActive=typeof document!=='undefined'&&document.body?.classList.contains('stellar-offline-active-v485');
+  if(withAuth&&!offlineFarmDirectActivityAllowedV103(path,options.method||'GET',farmActive)){
+    const error=new Error('Farm Offline ativo: operação que altera seu progresso bloqueada. Consulte os menus e finalize o farm antes de batalhar/comprar/evoluir.');
+    error.code='FARM_OFFLINE_ACTIVE';error.status=409;throw error;
+  }
   const { url, key } = await getConfig();
   const headers = {
     apikey: key,

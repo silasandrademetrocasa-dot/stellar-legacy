@@ -51,19 +51,89 @@ function summarizedFarmHistoryV49(rows){
  return rows.map(f=>{const r=f.report||{},dur=Math.max(1,(new Date(f.ends_at)-new Date(f.started_at))/3600000);return {id:f.id,map:f.map_id,npc:f.npc_key,npcName:r.npc_name||f.snapshot?.npc_name||f.snapshot?.npc?.name||f.npc_key,model:r.combat_model||f.snapshot?.combat_model||'legacy',status:f.status,minutes:f.minutes,startedAt:f.started_at,endsAt:f.ends_at,completedAt:f.completed_at,kills:saneMoney(r.kills),xp:saneMoney(r.xp),creditsNet:Number(r.credits_net)||0,npcCredits:saneMoney(r.npc_credits),saleCredits:saneMoney(r.sale_credits),stl:saneMoney(r.stl),ammoSpent:saneMoney(r.ammo_spent),ammoBought:saneMoney(r.ammo_bought),killsPerHour:ratio(saneMoney(r.kills),dur),creditsPerHour:ratio(Number(r.credits_net)||0,dur),stlPerHour:ratio(saneMoney(r.stl),dur),reason:r.reason||null}});
 }
 
-export async function offlineFarmActiveV484(userId, getAdmin){
+// V103: a barra de menus permanece livre para LEITURAS, nunca para gravar
+// dados concorrentes do mesmo piloto durante o pagamento SQL do Farm Offline.
+export function offlineFarmMutationPolicyV103(method,pathname){
+  const m=String(method||'GET').toUpperCase();
+  if(['GET','HEAD','OPTIONS'].includes(m))return 'read';
+  const path=String(pathname||'').replace(/\/{2,}/g,'/');
+  if(/^\/api\/(?:offline-farm\/|auth\/|admin\/|telemetry(?:\/|$))/.test(path))return 'separate';
+  if(/^\/api\//.test(path))return 'guard';
+  return 'other';
+}
+// O middleware só é acionado em mutações: leitura do painel, Leilão e consulta
+// de equipamentos continuam disponíveis. Consultar o BD sempre sem cache.
+export function makeOfflineFarmApiSafetyV103({requireUser,getAdmin}){
+  return function farmSafety(req,res,next){
+    if(offlineFarmMutationPolicyV103(req.method,'/api'+req.path)!=='guard')return next();
+    return requireUser(req,res,()=>{
+      offlineFarmEnsureInactiveV484(req.user.id,getAdmin)
+        .then(()=>next())
+        .catch(e=>{
+          const active=e?.code==='FARM_OFFLINE_ACTIVE';
+          res.status(active?409:503).set('Cache-Control','no-store').json({
+            ok:false,code:active?'FARM_OFFLINE_ACTIVE':'FARM_SAFETY_UNAVAILABLE',
+            error:active?'Farm Offline ativo: esta alteração do piloto está bloqueada até resgatar. Menus de consulta continuam disponíveis.':'Não foi possível confirmar a segurança do Farm Offline. Nenhuma alteração foi aplicada.'
+          });
+        });
+    });
+  };
+}
+
+// SQL timestamptz guarda microssegundos. Não comparar só por Date.parse,
+// que ignora os três últimos dígitos e pode gerar falso OK no pré-resgate.
+export function sameFarmTimestampV103(a,b){
+  if(a==null||b==null)return a===b;
+  const ta=Date.parse(a),tb=Date.parse(b);
+  if(!Number.isFinite(ta)||!Number.isFinite(tb))return String(a)===String(b);
+  const micro=x=>String(x).match(/\.(\d+)(?:Z|[+-]\d{2}(?::?\d{2})?)$/i)?.[1]?.padEnd(6,'0').slice(0,6)||'000000';
+  return ta===tb&&micro(a)===micro(b);
+}
+export function farmPreclaimIssuesV103({farm,save,profile,npcLedger,oreLedger}){
+  if(!farm||farm.status!=='running')return [];
+  const issues=[];
+  // Comparação literal: SQL compara timestamps com microssegundos. Date.parse
+  // arredondaria e esconderia conflitos que o banco ainda rejeitaria.
+  if(farm.baseline_save_at && !sameFarmTimestampV103(save?.updated_at,farm.baseline_save_at))issues.push('save_changed');
+  const profileBaseline=farm.snapshot?.profile_updated_at;
+  if(profileBaseline && !sameFarmTimestampV103(profile?.updated_at,profileBaseline))issues.push('profile_changed');
+  if((npcLedger||[]).length)issues.push('npc_online_reward');
+  if((oreLedger||[]).length)issues.push('ore_online_reward');
+  return issues;
+}
+async function farmPreclaimV103(sb,userId){
+  const {data:farm,error:farmError}=await sb.from('stellar_offline_farm_v484')
+    .select('id,status,started_at,ends_at,baseline_save_at,snapshot')
+    .eq('user_id',userId).order('created_at',{ascending:false}).limit(1).maybeSingle();
+  if(farmError)throw farmError;
+  if(farm?.status!=='running')return {status:farm?.status||'none',safe:false,issues:[]};
+  const checks=await Promise.all([
+    sb.from('game_saves').select('updated_at').eq('user_id',userId).maybeSingle(),
+    sb.from('profiles').select('updated_at').eq('id',userId).maybeSingle(),
+    sb.from('stellar_npc_reward_ledger').select('issued_at').eq('user_id',userId).gte('issued_at',farm.started_at).limit(1),
+    sb.from('stellar_ore_reward_ledger').select('issued_at').eq('user_id',userId).gte('issued_at',farm.started_at).limit(1)
+  ]);
+  const err=checks.find(x=>x.error)?.error;
+  if(err)throw err;
+  const issues=farmPreclaimIssuesV103({farm,save:checks[0].data,profile:checks[1].data,npcLedger:checks[2].data,oreLedger:checks[3].data});
+  return {status:'running',id:farm.id,safe:issues.length===0,issues,
+    note:issues.length?'Resgate preservado para análise: nenhuma recompensa foi processada e a sessão continua registrada.':'Pré-checagem aprovada. O SQL faz uma nova validação atômica ao liquidar.'};
+}
+
+export async function offlineFarmActiveV484(userId, getAdmin,{fresh=false}={}){
   const key=String(userId||'');const cached=activityCacheV484.get(key);
-  if(cached&&Date.now()-cached.at<1200)return cached.active;
+  if(!fresh&&cached&&Date.now()-cached.at<1200)return cached.active;
   const sb=await getAdmin();
   const {data,error}=await sb.from('stellar_offline_farm_v484').select('id').eq('user_id',userId).eq('status','running').limit(1);
   // Se a migração ainda não foi aplicada, não bloquear o jogo existente.
-  if(error && /PGRST205|42P01|does not exist|schema cache/i.test(error.message||''))return false;
+  // V103: fail closed. Se a tabela estiver indisponível, NÃO liberar mutações.
+  if(error && /PGRST205|42P01|does not exist|schema cache/i.test(error.message||''))throw new Error('FARM_SAFETY_UNAVAILABLE');
   if(error)throw new Error('Não foi possível verificar sessão offline: '+error.message);
   const active=!!data?.length;activityCacheV484.set(key,{at:Date.now(),active});
   return active;
 }
 export async function offlineFarmEnsureInactiveV484(userId,getAdmin){
-  if(await offlineFarmActiveV484(userId,getAdmin))throw Object.assign(new Error('FARM_OFFLINE_ATIVO: finalize ou cancele antes de voltar ao combate.'),{code:'FARM_OFFLINE_ACTIVE',status:409});
+  if(await offlineFarmActiveV484(userId,getAdmin,{fresh:true}))throw Object.assign(new Error('FARM_OFFLINE_ATIVO: finalize ou cancele antes de voltar ao combate.'),{code:'FARM_OFFLINE_ACTIVE',status:409});
 }
 export function installOfflineFarmV484(app,{requireUser,asyncRoute,requireEliteAdmin}){
   const noCache=(res)=>res.set('Cache-Control','no-store');
@@ -125,6 +195,15 @@ export function installOfflineFarmV484(app,{requireUser,asyncRoute,requireEliteA
         if(!(simulated?.kills>0))throw Error('FARM_NO_VIABLE_COMBAT: nenhum NPC previsto com o equipamento e munição atuais. Troque o NPC ou a munição.');
         args={...args,p_ammo_key:requested,p_combat:model,p_baseline_save_at:save.updated_at};
       }
+      // V103: preserve 8h of evidence if another activity would cause SQL
+      // to mark this farm irreversibly as conflict with zero rewards.
+      if(method==='claim'){
+        const preflight=await farmPreclaimV103(sb,req.user.id);
+        if(preflight.status==='running'&&!preflight.safe)
+          return res.status(409).json({ok:false,code:'FARM_REVIEW_REQUIRED',
+            error:'Resgate não executado: atividade concorrente detectada. Sessão preservada para análise do ADM.',
+            preflight});
+      }
       const {data,error}=await sb.rpc(fn,{p_user:req.user.id,...args});
       if(error)throw error;
       if(method==='start'&&data?.status==='running')activityCacheV484.set(String(req.user.id),{at:Date.now(),active:true});
@@ -173,6 +252,13 @@ export function installOfflineFarmV484(app,{requireUser,asyncRoute,requireEliteA
       return res.json({status:f.status,reason:f.report?.reason||null,checks,
         historicalNote:f.status==='running'?null:'Leitura posterior: save/perfil podem ter mudado após o término. Os ledgers foram limitados à janela da sessão.',
         note:'Consulta somente leitura. Recompensas só são concedidas pelo resgate SQL.'});
+    }catch(e){return errorResponse(res,e);}
+  }));
+  app.get('/api/offline-farm/v484/v103/preflight',requireUser,asyncRoute(async(req,res)=>{
+    noCache(res);
+    try{
+      const sb=await requireEliteAdmin();
+      res.json(await farmPreclaimV103(sb,req.user.id));
     }catch(e){return errorResponse(res,e);}
   }));
   app.get('/api/offline-farm/v484/status',requireUser,asyncRoute(async(req,res)=>rpc(req,res,'status')));
