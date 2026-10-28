@@ -30,7 +30,7 @@ test('V84: ações de mapa permanecem desligadas no farm mesmo por teclado ou to
  assert.match(game,/minimap\.addEventListener\('pointerdown',e=>\{if\(offlineFarmWorldLockedV84\(\)/);
  assert.match(game,/ui\.portalPrompt\.onclick=\(\)=>\{if\(offlineFarmWorldLockedV84\(\)\)return/);
  assert.match(game,/if\(offlineFarmWorldLockedV84\(\)\&\&\(e\.key==='Control'/);
- assert.match(game,/player\.laserFiring=false;state\.pointerNavActive=false;state\.pointerNavId=null;/);
+ assert.match(game,/player\.laserFiring=false;state\.target=null;state\.pointerNavActive=false;state\.pointerNavId=null;/);
  assert.match(game,/if\(document\.visibilityState==='hidden'\|\|offlineFarmWorldLockedV84\(\)\)/);
  assert.match(game,/function canChangeEquipment\(\)\{return !offlineFarmWorldLockedV84\(\)/);
  assert.match(game,/function runMapTransition\([\s\S]+?if\(offlineFarmWorldLockedV84\(\)\)/);

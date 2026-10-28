@@ -7,7 +7,8 @@ import {combatProfileV487,npcCombatCycleV487} from './offline-farm-v487-engine.j
  */
 const activityCacheV484=new Map();
 const FARM_V49='STELLAR_FARM_V49';
-const onlyOrdinaryNpc=n=>!/(boss|rift|elite|suprem|legend|lend|uber|ultra|titan)/i.test(String(n.npc_key||'')+' '+String(n.name||''));
+export const isOfflineFarmNpcAllowedV91=n=>!/(boss|apex|overlord|rift|elite|suprem|legend|lend|uber|ultra|titan)/i.test(String(n.npc_key||'')+' '+String(n.name||''));
+const onlyOrdinaryNpc=isOfflineFarmNpcAllowedV91;
 const saneMoney=x=>Math.max(0,Number(x)||0);
 async function farmGrantV49(sb,userId){
  const [grant,adm,global]=await Promise.all([
@@ -68,7 +69,7 @@ export function installOfflineFarmV484(app,{requireUser,asyncRoute,requireEliteA
   const noCache=(res)=>res.set('Cache-Control','no-store');
   const errorResponse=(res,e)=>{
     const msg=String(e?.message||'Operação indisponível');
-    const bad=/INVALID_DURATION|FARM_MAP|FARM_SAVE|FARM_NO_ELIGIBLE|FARM_ALREADY|FARM_ACCESS|FARM_ECONOMY|FARM_CREDITS|FARM_OFFLINE_ACTIVE/.test(msg);
+    const bad=/INVALID_DURATION|FARM_MAP|FARM_SAVE|FARM_NO_ELIGIBLE|FARM_ALREADY|FARM_ACCESS|FARM_ECONOMY|FARM_CREDITS|FARM_NO_VIABLE_COMBAT|FARM_OFFLINE_ACTIVE/.test(msg);
     return res.status(bad?409:503).json({ok:false,error:msg.slice(0,230)});
   };
   async function rpc(req,res,method,args={}){
@@ -100,8 +101,28 @@ export function installOfflineFarmV484(app,{requireUser,asyncRoute,requireEliteA
           if(cfg.error)throw cfg.error;
           const best=rankFarmNpcV49(npcs,model,strategy,pack&&{price:pack.price,currency:pack.currency,qty:pack.meta?.grant?.qty},{minutes:args.p_minutes,maxKills:cfg.data?.max_kills,stock:save.state.ammo?.[requested],credits:save.state.profile?.credits,autoBuy:args.p_auto_buy})[0];
           if(!best)throw Error('FARM_NO_ELIGIBLE_NPCS');
+          if(!(best.kills>0))throw Error('FARM_NO_VIABLE_COMBAT: nenhum NPC previsto com o equipamento e munição atuais. Troque o NPC ou a munição.');
           args.p_npc_key=best.id;
         }
+        // V91: never allow a legendary/elite target through an old SQL naming regex.
+        // The SQL function remains the final authority for both spawn and rewards.
+        const selectedNpc=String(args.p_npc_key||'');
+        if(!selectedNpc||selectedNpc.length>60)throw Error('FARM_NO_ELIGIBLE_NPCS');
+        const options=await farmNpcOptionsV49(sb,String(save.state.mapId||''));
+        const npc=options.find(n=>n.npc_key===selectedNpc);
+        if(!npc)throw Error('FARM_NO_ELIGIBLE_NPCS');
+        // Don't let a player spend an hour farming 0 NPCs, e.g. an overpowered X-7 target.
+        const [quoteResult,cfgResult]=await Promise.all([
+          sb.from('live_shop_prices_v16').select('ref_id,price,currency,meta').eq('kind','ammo').eq('ref_id',requested).eq('enabled',true).limit(1),
+          sb.from('stellar_offline_farm_settings_v485').select('max_kills').eq('id',1).single()
+        ]);
+        if(quoteResult.error||cfgResult.error)throw quoteResult.error||cfgResult.error;
+        const quote=quoteResult.data?.[0]||null;
+        const simulated=rankFarmNpcV49([npc],model,'weakest',quote&&{price:quote.price,currency:quote.currency,qty:quote.meta?.grant?.qty},{
+          minutes:args.p_minutes,maxKills:cfgResult.data?.max_kills,stock:save.state.ammo?.[requested],
+          credits:save.state.profile?.credits,autoBuy:args.p_auto_buy
+        })[0];
+        if(!(simulated?.kills>0))throw Error('FARM_NO_VIABLE_COMBAT: nenhum NPC previsto com o equipamento e munição atuais. Troque o NPC ou a munição.');
         args={...args,p_ammo_key:requested,p_combat:model,p_baseline_save_at:save.updated_at};
       }
       const {data,error}=await sb.rpc(fn,{p_user:req.user.id,...args});
@@ -121,6 +142,38 @@ export function installOfflineFarmV484(app,{requireUser,asyncRoute,requireEliteA
     if(!data?.state)return res.status(404).json({error:'Save não encontrado para sua conta.'});
     res.json({ok:true,economy:safeFarmEconomySnapshot(data.state,data.updated_at),
       note:'Saldo confirmado no save; os ganhos projetados do Farm Offline entram apenas após resgate.'});
+  }));
+  // V91: read-only conflict checks. Never modify saves or reward ledgers to diagnose.
+  app.get('/api/offline-farm/v484/v91/diagnosis',requireUser,asyncRoute(async(req,res)=>{
+    noCache(res);
+    try{
+      const sb=await requireEliteAdmin();
+      const {data:f,error:fErr}=await sb.from('stellar_offline_farm_v484')
+        .select('id,status,started_at,completed_at,baseline_save_at,snapshot,report')
+        .eq('user_id',req.user.id).order('created_at',{ascending:false}).limit(1).maybeSingle();
+      if(fErr)throw fErr;
+      if(!f)return res.json({status:'none',checks:null});
+      const end=f.status==='running'?new Date().toISOString():(f.completed_at||new Date().toISOString());
+      const queries=[
+        sb.from('game_saves').select('updated_at').eq('user_id',req.user.id).maybeSingle(),
+        sb.from('profiles').select('updated_at').eq('id',req.user.id).maybeSingle(),
+        sb.from('stellar_npc_reward_ledger').select('issued_at').eq('user_id',req.user.id).gte('issued_at',f.started_at).lte('issued_at',end).limit(1),
+        sb.from('stellar_ore_reward_ledger').select('issued_at').eq('user_id',req.user.id).gte('issued_at',f.started_at).lte('issued_at',end).limit(1)
+      ];
+      const rows=await Promise.all(queries);
+      const error=rows.find(x=>x.error)?.error;if(error)throw error;
+      const baselineProfile=f.snapshot?.profile_updated_at||null;
+      const eqTime=(a,b)=>a&&b&&Date.parse(a)===Date.parse(b);
+      const checks={
+        saveChanged:Boolean(f.baseline_save_at&&!eqTime(rows[0].data?.updated_at,f.baseline_save_at)),
+        profileChanged:Boolean(baselineProfile&&!eqTime(rows[1].data?.updated_at,baselineProfile)),
+        npcRewardDuringFarm:Boolean(rows[2].data?.length),
+        oreRewardDuringFarm:Boolean(rows[3].data?.length)
+      };
+      return res.json({status:f.status,reason:f.report?.reason||null,checks,
+        historicalNote:f.status==='running'?null:'Leitura posterior: save/perfil podem ter mudado após o término. Os ledgers foram limitados à janela da sessão.',
+        note:'Consulta somente leitura. Recompensas só são concedidas pelo resgate SQL.'});
+    }catch(e){return errorResponse(res,e);}
   }));
   app.get('/api/offline-farm/v484/status',requireUser,asyncRoute(async(req,res)=>rpc(req,res,'status')));
   app.get('/api/offline-farm/v484/options',requireUser,asyncRoute(async(req,res)=>{

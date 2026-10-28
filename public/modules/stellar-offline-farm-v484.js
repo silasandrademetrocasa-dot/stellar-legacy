@@ -1,7 +1,7 @@
 import {mountFarmV49} from './stellar-offline-v49-ui.js';
 import {LASER_AMMO} from '../data.js';
 /* STELLAR_OFFLINE_FARM_V485 • HUD & admin editor. Projeções são APENAS estimativas. */
-export function createOfflineFarmV484({credentials,saveBeforeStart,onPauseWorld,onFinish}={}){
+export function createOfflineFarmV484({credentials,saveBeforeStart,onPauseWorld,onResumeWorld,onFinish}={}){
  const css=`
  #v484-panel{position:fixed;inset:0;z-index:99996;background:#020c14dc;display:grid;place-items:center;padding:12px}
  #v484-panel[hidden]{display:none!important}
@@ -65,8 +65,8 @@ export function createOfflineFarmV484({credentials,saveBeforeStart,onPauseWorld,
  </div>
  <div id="v485-live" hidden><p style="font-weight:700">📊 PROJEÇÃO DO FARM • NÃO CREDITADA</p><div class="v485-kpis" id="v485-kpis"></div><pre id="v485-details"></pre></div>
  <div id="v86-economy-box" hidden style="background:#081a29;border:1px solid #32647a;border-radius:10px;padding:10px;margin-top:9px"><b>💰 SALDO NO SERVIDOR • SOMENTE LEITURA</b><p id="v86-economy-info" style="font-size:12px">Confira seu saldo sem encerrar o farm.</p><button type="button" id="v86-economy-refresh">CONSULTAR SALDO REAL</button><small style="display:block;color:#a1becd">Projeções do farm não estão creditadas. Lances do Leilão são registrados separadamente.</small></div>
- <pre id="v484-report" hidden></pre><p class="v484-error" id="v484-error" role="alert"></p>
- <div class="v484-actions"><button id="v484-start">INICIAR FARM</button><button id="v484-settle">RESGATAR / TERMINAR</button><button id="v484-cancel">CANCELAR SEM GANHOS</button><button id="v484-refresh">ATUALIZAR</button><button id="v485-notify">🔔 ALERTA NO CELULAR</button><button id="v484-close">FECHAR</button></div>
+ <pre id="v484-report" hidden></pre><p class="v484-error" id="v484-error" role="alert"></p><p id="v91-farm-diagnosis" style="white-space:pre-wrap;font-size:12px;color:#b6dce8"></p>
+ <div class="v484-actions"><button id="v484-start">INICIAR FARM</button><button id="v484-settle">RESGATAR / TERMINAR</button><button id="v484-cancel">CANCELAR SEM GANHOS</button><button id="v484-refresh">ATUALIZAR</button><button id="v91-farm-diagnose">DIAGNOSTICAR FALHA</button><button id="v485-notify">🔔 ALERTA NO CELULAR</button><button id="v484-close">FECHAR</button></div>
  </section>`;document.body.appendChild(shell);
  const $=id=>shell.querySelector('#'+id);let status='none',busy=false,authorized=false,latest=null,preview=null,hasNotified=new Set(),loop=null,menu=null,adminReady=false,v49Tools=null;
  const lock=document.createElement('div');lock.id='v485-world-lock';lock.innerHTML='<div id="v485-world-indicator"><strong>🌙 FARM OFFLINE ATIVO</strong><small>MAPA PAUSADO • MENUS LIBERADOS<br>TOQUE AQUI PARA CONSULTAR / RESGATAR</small></div>';
@@ -81,8 +81,8 @@ export function createOfflineFarmV484({credentials,saveBeforeStart,onPauseWorld,
  farmRescueIndicator.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();open();}});
  async function request(path,body,method){const c=credentials?.()||{};if(!c.accessToken||!c.gameSessionId)throw Error('Faça login no jogo novamente.');const res=await fetch('/api/offline-farm/v484/'+path,{method:method||(body?'POST':'GET'),headers:{'Content-Type':'application/json',Authorization:'Bearer '+c.accessToken,'X-Game-Session-Id':c.gameSessionId},body:body?JSON.stringify(body):undefined,cache:'no-store',signal:AbortSignal.timeout(22000)});const data=await res.json().catch(()=>({}));if(!res.ok)throw Error(data.error||'Erro '+res.status);return data;}
  function installMenu(){if(menu)return;const pilot=document.querySelector('[data-menu-group="pilot"] > .menu-dropdown');if(!pilot)return;menu=document.createElement('button');menu.id='v485FarmMenuEntry';menu.className='menu-item';menu.type='button';menu.textContent='🌙 FARM OFFLINE';const auto=document.getElementById('v481AutopilotEntry');if(auto)auto.after(menu);else pilot.append(menu);menu.addEventListener('click',()=>{open();document.querySelectorAll('.menu-group.open').forEach(g=>g.classList.remove('open'));});}
- function active(yes){const was=document.body.classList.contains('stellar-offline-active-v485');document.body.classList.toggle('stellar-offline-active-v485',yes);
-  if(yes&&!was)void onPauseWorld?.();
+ function active(yes,pauseWorld=true){const was=document.body.classList.contains('stellar-offline-active-v485');document.body.classList.toggle('stellar-offline-active-v485',yes);
+  if(yes&&!was&&pauseWorld)void onPauseWorld?.();
   // Once settled, all world visuals and controls return automatically.
  }
  function showStats(r){const k=$('v485-kpis');k.innerHTML=[['NPCs',r.kills],['XP',r.xp],['Créditos NPC',r.npc_credits],['STL',r.stl],['BOX',r.boxes_collected],['Minérios',r.mined_units],['CR líquido',r.credits_net],['Compras munição',r.ammo_bought]].map(([label,v])=>`<div><small>${label}</small><b>${fmt(v)}</b></div>`).join('');$('v485-details').textContent=`Vendas: ${fmt(r.sales)} • Crédito de venda: ${fmt(r.sale_credits)}${Number.isFinite(Number(r.starting_cargo_sale_credits))?`\nCR de porão anterior: ${fmt(r.starting_cargo_sale_credits)} • CR gerados no farm: ${fmt(r.farm_generated_sale_credits)}`:''}\nMunição restante: ${fmt(r.ammo_remaining)} • Gasto: ${fmt(r.ammo_spent)} CR\n${preview?.damagePerSecond?`DPS efetivo estimado: ${fmt(preview.damagePerSecond)}\n`:''}${r.laser_count?`Lasers: ${fmt(r.laser_count)} • Munições por NPC: ${fmt(r.ammo_per_kill)}\nDeslocamento por NPC: ${fmt(r.travel_per_kill)}s\n`:''}Os números são recalculados quando o app está aberto.\nO saldo só muda ao resgatar.`;}
@@ -91,14 +91,34 @@ export function createOfflineFarmV484({credentials,saveBeforeStart,onPauseWorld,
  }
  async function alertFinished(){if(typeof Notification==='undefined'||Notification.permission!=='granted')return;try{const reg=await navigator.serviceWorker?.ready;if(reg?.showNotification)await reg.showNotification('Stellar Legacy • Farm concluído',{body:'O tempo terminou. Entre no jogo para verificar e resgatar seus ganhos.',tag:'stellar-farm-v485',icon:'/icons/stellar-192.png',data:{url:'/'}});else new Notification('Farm concluído',{body:'Entre no Stellar Legacy para resgatar.'});}catch{}}
  function render(x){latest=x||{status:'none'};status=latest.status||'none';const running=status==='running';active(running);$('v484-status').textContent=running?`FARM ATIVO • ${String(x.map||'').toUpperCase()} • ${x.npc_name||x.npc} • ${x.minutes} min • ${ammoName(x.ammo)}`:status==='settled'?'✅ FARM FINALIZADO':status==='conflict'?'⚠️ ATIVIDADE ONLINE DETECTADA — SEM RECOMPENSAS':status==='cancelled'?'FARM CANCELADO':'SEM SESSÃO ATIVA';$('v86-economy-box').hidden=!running;$('v484-settings').hidden=running;$('v484-start').hidden=running;$('v484-settle').hidden=!running;$('v484-cancel').hidden=!running;$('v485-live').hidden=!running;$('v484-report').hidden=!['settled','conflict'].includes(status);$('v485-progress-bar').style.width=running?'0%':'0%';$('v485-countdown').textContent='';if(status==='settled'){const r=x.report||{};$('v484-report').textContent=`RECOMPENSAS CONFIRMADAS\nNPCs ${fmt(r.kills)} • BOX ${fmt(r.boxes_collected)} • XP ${fmt(r.xp)} • STL ${fmt(r.stl)}\nCréditos NPC ${fmt(r.npc_credits)} • Venda ${fmt(r.sale_credits)}${r.starting_cargo_sale_credits!=null?`\nVendas (porão anterior): ${fmt(r.starting_cargo_sale_credits)} • recursos obtidos no farm: ${fmt(r.farm_generated_sale_credits)}`:''}\nCompras ${fmt(r.ammo_bought)} • Custo ${fmt(r.ammo_spent)} • Crédito líquido ${fmt(r.credits_net)}`;}else if(status==='conflict')$('v484-report').textContent=String(x.report?.message||'Sessão invalidada');if(!running)preview=null;tick();}
- async function refresh(){if(!authorized)return;try{const x=await request('status');render(x);$('v484-error').textContent='';if(x.status==='running'){preview=await request('preview');if(preview?.report)showStats(preview.report);return;}
+ async function refresh(){if(!authorized)return false;let statusVerified=false;try{const x=await request('status');statusVerified=true;render(x);$('v484-error').textContent='';if(x.status==='running'){preview=await request('preview');if(preview?.report)showStats(preview.report);return;}
  const options=await request('options');const sel=$('v484-npc'),old=sel.value;sel.innerHTML='<option value="">Automático (mais fraco)</option>'+(options.choices||[]).map(c=>`<option value="${escape(c.id)}">${escape(c.name||c.id)} • ${fmt(c.credits)} CR</option>`).join('');if([...sel.options].some(o=>o.value===old))sel.value=old;
  const ammo=$('v485-ammo'),oldAmmo=ammo.value;ammo.innerHTML=(options.ammunition||[]).map(a=>`<option value="${escape(a.id)}">${escape(ammoName(a.id))} • ${fmt(a.qty)} un / ${fmt(a.price)} ${escape(a.currency==='credits'?'CR':'STL')}</option>`).join('');if([...ammo.options].some(o=>o.value===oldAmmo))ammo.value=oldAmmo;else ammo.value=options.selectedAmmo||'lcb10';
  const mins=$('v484-minutes'),prior=mins.value;const allowed=[30,60,90,120,180,240,360,480,600,720].filter(n=>n<=(options.maxMinutes||240));mins.innerHTML=allowed.map(n=>`<option value="${n}">${n%60===0?n/60+' hora'+(n===60?'':'s'):n+' minutos'}</option>`).join('');if(allowed.includes(Number(prior)))mins.value=prior;
  v49Tools?.syncOptions(options);
- }catch(e){$('v484-error').textContent=e.message;}}
+ }catch(e){$('v484-error').textContent=e.message;return statusVerified;}return true;}
  async function operation(fn){if(busy)return;busy=true;for(const btn of shell.querySelectorAll('button'))btn.disabled=true;$('v484-error').textContent='';try{await fn();}catch(e){$('v484-error').textContent=e.message;}finally{busy=false;for(const btn of shell.querySelectorAll('button'))btn.disabled=(btn.id==='v484-start'&&btn.dataset.v49PermissionBlocked==='true');}}
- $('v484-start').onclick=()=>operation(async()=>{await saveBeforeStart?.();const x=await request('start',{minutes:Number($('v484-minutes').value),autoSell:$('v484-sell').checked,autoBuy:$('v484-buy').checked,mine:$('v484-mine').checked,npc:$('v484-npc').value||null,ammo:$('v485-ammo').value||null});render(x);await refresh();});
+ $('v484-start').onclick=()=>operation(async()=>{
+    // V91: first wait for all saves, then disconnect combat BEFORE creating the SQL farm.
+    // The frozen world never submits a conflicting NPC reward during the start request.
+    await saveBeforeStart?.();
+    await onPauseWorld?.();
+    active(true,false);
+    await new Promise(resolve=>setTimeout(resolve,350)); // drain already-sent world messages
+    let x=null;
+    try{
+      x=await request('start',{minutes:Number($('v484-minutes').value),autoSell:$('v484-sell').checked,autoBuy:$('v484-buy').checked,mine:$('v484-mine').checked,npc:$('v484-npc').value||null,ammo:$('v485-ammo').value||null});
+      if(x?.status!=='running')throw Error('O servidor não confirmou o início do Farm Offline.');
+    }catch(err){
+      // A timeout may mean that the server STARTED the farm. Never resume online combat
+      // until a trusted status read confirms that no running session exists.
+      const confirmed=await request('status').catch(()=>null);
+      if(confirmed?.status==='running'){render(confirmed);await refresh();return;}
+      if(!confirmed){$('v91-farm-diagnosis').textContent='Início não confirmado. Mundo bloqueado por segurança; toque em ATUALIZAR antes de voltar a jogar.';throw err;}
+      active(false);await onResumeWorld?.();throw err;
+    }
+    $('v91-farm-diagnosis').textContent='';render(x);await refresh();
+  });
  $('v484-settle').onclick=()=>operation(async()=>{const x=await request('settle',{});render(x);if(['settled','conflict'].includes(x.status))await onFinish?.();});
  $('v484-cancel').onclick=()=>operation(async()=>{if(!confirm('Cancelar sem qualquer ganho desta sessão?'))return;const x=await request('cancel',{});render(x);await onFinish?.();});
  async function readConfirmedEconomyV86(){const out=$('v86-economy-info');out.textContent='Consultando saldo real no servidor...';
@@ -106,6 +126,15 @@ export function createOfflineFarmV484({credentials,saveBeforeStart,onPauseWorld,
     out.textContent=`SALDO CONFIRMADO • ${fmt(e.credits)} CR • ${fmt(e.stl)} STL • LV ${fmt(e.level)} • ${fmt(e.xp)} XP • save ${e.updatedAt?new Date(e.updatedAt).toLocaleString('pt-BR'):'sem data'}`;
    }catch(err){out.textContent='Saldo não confirmado: '+String(err?.message||'falha de conexão');}}
  $('v86-economy-refresh').onclick=()=>void readConfirmedEconomyV86();
+ async function diagnoseV91(){
+  const el=$('v91-farm-diagnosis');el.textContent='Conferindo save, perfil e eventos online...';
+  try{
+    const d=await request('v91/diagnosis');if(!d.checks){el.textContent='Nenhuma sessão registrada.';return;}
+    const c=d.checks;const label=[['saveChanged','Save modificado'],['profileChanged','Perfil modificado'],['npcRewardDuringFarm','Recompensa de NPC online'],['oreRewardDuringFarm','Coleta de minério online']];
+    el.textContent='DIAGNÓSTICO '+String(d.status||'').toUpperCase()+'\n'+label.map(([k,v])=>(c[k]?'⚠ ':'✓ ')+v+': '+(c[k]?'detectado':'não detectado')).join('\n')+(d.historicalNote?'\n'+d.historicalNote:'')+'\n'+(d.note||'');
+  }catch(e){el.textContent='Falha ao consultar diagnóstico: '+e.message;}
+ }
+ $('v91-farm-diagnose').onclick=()=>operation(diagnoseV91);
  $('v484-refresh').onclick=()=>operation(refresh);$('v484-close').onclick=()=>shell.hidden=true;
  $('v485-notify').onclick=async()=>{if(typeof Notification==='undefined'||!('serviceWorker' in navigator)){$('v484-error').textContent='Notificações não suportadas neste navegador.';return;}const answer=await Notification.requestPermission();$('v484-error').textContent=answer==='granted'?'Alerta autorizado enquanto o aplicativo estiver em execução. Para tela fechada, será necessário Web Push com agendador externo.':'Permissão não concedida.';};
  function open(){installMenu();shell.hidden=false;void operation(refresh);}
@@ -125,5 +154,5 @@ export function createOfflineFarmV484({credentials,saveBeforeStart,onPauseWorld,
  let lastPreviewAt=0;
  async function loopPreview(){if(authorized&&status==='running'&&!shell.hidden&&Date.now()-lastPreviewAt>15000){lastPreviewAt=Date.now();try{preview=await request('preview');if(preview?.report)showStats(preview.report);}catch{}}setTimeout(loopPreview,5000);}
  void loopPreview();
- return {async enable(){authorized=true;installMenu();await refresh();},disable(){authorized=false;if(menu)menu.hidden=true;shell.hidden=true;active(false);},open};
+ return {async enable(){authorized=true;installMenu();const verified=await refresh();if(!verified){await onPauseWorld?.();active(true,false);$('v91-farm-diagnosis').textContent='Não foi possível verificar se existe Farm Offline ativo. Mundo pausado por segurança. Abra FARM OFFLINE e toque ATUALIZAR.';}},disable(){authorized=false;if(menu)menu.hidden=true;shell.hidden=true;active(false);},open};
 }

@@ -1,6 +1,6 @@
 {
   "name": "stellar-legacy",
-  "version": "47.7.46",
+  "version": "47.7.47",
   "type": "module",
   "scripts": {
     "start": "node server/index.js",
@@ -19,5 +19,5 @@
   "engines": {
     "node": ">=18"
   },
-  "release": "V85 — Farm Offline oculta mundo/minimapa e mantém a topbar e modais livres, sem bloqueador global de toques"
+  "release": "V91 — Farm Offline: inicialização protegida, reconexão bloqueada, diagnósticos e chefes excluídos"
 }
