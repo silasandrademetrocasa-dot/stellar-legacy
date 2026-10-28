@@ -26,7 +26,8 @@ export function cleanAutopilotConfig(input={}){
     astralBatch:[10,50].includes(Number(input.astralBatch))?Number(input.astralBatch):10,
     astralLoop:input.astralLoop===true,
     astralTotalBudget:number(input.astralTotalBudget,0,1000000000,50000),
-    astralMaxCycles:number(input.astralMaxCycles,0,100000,0)};
+    astralMaxCycles:number(input.astralMaxCycles,0,100000,0),
+    preferredTargetId:typeof input.preferredTargetId==='string'&&input.preferredTargetId.length<=90?input.preferredTargetId:null};
 }
 export function findAutopilotPortalPath(currentLabel,goalLabel,edges,admit=()=>true){
   if(!currentLabel||!goalLabel)return null;
@@ -41,6 +42,17 @@ export function findAutopilotPortalPath(currentLabel,goalLabel,edges,admit=()=>t
     }
   }
   return null;
+}
+/** V87: avoid thrashing between similar NPC targets every rAF/WS update. */
+export function chooseStableAutopilotTargetV87(sortedEnemies,player,preferredId,leash=1.28){
+ const options=Array.isArray(sortedEnemies)?sortedEnemies:[];
+ if(!options.length)return null;
+ const nearest=options[0];
+ if(!preferredId)return nearest;
+ const current=options.find(e=>String(e.id)===String(preferredId));
+ if(!current)return nearest;
+ const distance=(e)=>Math.hypot((e.x||0)-(player?.x||0),(e.y||0)-(player?.y||0));
+ return distance(current)<=Math.max(240,distance(nearest)*leash)?current:nearest;
 }
 export function chooseAutopilotAction(raw,cfg){
   const s=raw||{},c=cleanAutopilotConfig(cfg),player=s.player||{},map=String(s.map||'');
@@ -102,7 +114,7 @@ export function chooseAutopilotAction(raw,cfg){
     return {type:'move',x:drop.x,y:drop.y,reason:inRange?'Coletando drop • combatendo NPC em alcance':'Coletando drop de NPC',
       targetId:drop.id,combatTargetId:inRange?.id||null};
   }
-  const npc=npcs[0];if(npc)return {type:'hunt',targetId:npc.id,x:npc.x,y:npc.y,reason:'Caçando '+String(npc.name||npc.type)};
+  const npc=chooseStableAutopilotTargetV87(npcs,player,c.preferredTargetId);if(npc)return {type:'hunt',targetId:npc.id,x:npc.x,y:npc.y,reason:'Caçando '+String(npc.name||npc.type)};
   const extras=[];
   if(c.boxes){for(const box of s.bonusBoxes||[])if(box&&Number.isFinite(box.x)&&Number.isFinite(box.y))extras.push({...box,kind:'box',priority:0});}
   if(c.ores&&Number(s.cargoFree)>0){for(const ore of s.ores||[])if(ore&&Number.isFinite(ore.x)&&Number.isFinite(ore.y))extras.push({...ore,kind:'ore',priority:1});}
@@ -115,6 +127,9 @@ export function createStellarAutopilotV48({credentials,getIdentity=()=>null,getS
   let allowed=false,isAdmin=false,authorizedId=null,running=false,loading=false,busy=false,lastTickAt=0,lastAccessAt=0,nextAccessAt=0,panelOpen=false;
   let config=cleanAutopilotConfig(),started=0,ended=0,spent=0,attempts=0,failures=0,boxes=0,drops=0,ores=0,reason='Desligado',startStats=null,lastProgress=null;
   let panel=null,fab=null,grantCache=new Map(),refreshingAccess=false,lastPurchaseAttempt=0,lastHealthyAt=0,lastMapId=null;
+  // V87: target lock and rocket throttling are in-memory, never persisted.
+  let preferredTargetId=null,preferredTargetAt=0,lastRocketAt=0;
+  function fireRocketRateLimitedV87(ts){if(ts-lastRocketAt<1250)return false;lastRocketAt=ts;fireRocket();return true;}
   let astralBuildBusy=false,astralBuildCancel=false,astralRunSeen=false;
   // V83 • Ciclo contínuo somente após confirmação explícita; estado volátil (nunca retomado depois de refresh).
   let astralLoopSpent=0,astralCycles=0,astralLoopBusy=false,astralLoopEpoch=0;
@@ -175,7 +190,7 @@ export function createStellarAutopilotV48({credentials,getIdentity=()=>null,getS
     return false;
   }
   function notify(t){if(reason===t)return;reason=t;onNotice(t);renderStatus();}
-  function stop(why='Interrompido'){astralBuildCancel=true;astralLoopEpoch++;astralLoopPhase='parado';running=false;busy=false;pendingJump=null;clearResume();stopFire();reason=why;ended=now();try{const s=getSnapshot();if(s)lastProgress=stats(s);}catch{}renderStatus();}
+  function stop(why='Interrompido'){preferredTargetId=null;lastRocketAt=0;astralBuildCancel=true;astralLoopEpoch++;astralLoopPhase='parado';running=false;busy=false;pendingJump=null;clearResume();stopFire();reason=why;ended=now();try{const s=getSnapshot();if(s)lastProgress=stats(s);}catch{}renderStatus();}
   function stats(s){return {xp:Number(s?.xp)||0,credits:Number(s?.credits)||0,stl:Number(s?.stl)||0,kills:Number(s?.kills)||0,boxes:Number(s?.boxes)||0,level:Number(s?.level)||1};}
   function sessionReport(){const duration=Math.max(1,((running?now():ended||now())-started)/3600000);const last=lastProgress||stats(getSnapshot());const first=startStats||last;
     return {map:config.map,minutes:Math.round(duration*60),hours:duration,boxes,drops,ores,kills:Math.max(0,last.kills-first.kills),xp:Math.max(0,last.xp-first.xp),grossCredits:last.credits-first.credits+spent,creditsNet:last.credits-first.credits,stl:last.stl-first.stl,spent,levelFrom:first.level,levelTo:last.level,attempts,failures,reason,
@@ -347,7 +362,7 @@ export function createStellarAutopilotV48({credentials,getIdentity=()=>null,getS
     config=readConfig();
     if(config.astralLoop&&!continuousConfirmed)return notify('Ciclo astral exige confirmação no botão INICIAR FARM DO PORTAL');
     if(s.astralActive&&!config.astralAssist)return notify('Marque a assistência astral para combater dentro do portal');started=now();ended=0;spent=0;attempts=0;failures=0;boxes=0;drops=0;ores=0;startStats=stats(s);lastProgress=startStats;lastTickAt=0;
-    lastHealthyAt=now();lastMapId=s.map;pendingJump=null;lastPortalAttempt=0;nextRouteSearch=0;routeMisses=0;nextSaleAttempt=0;buyFailuresInRow=0;running=true;astralRunSeen=!!s.astralActive;
+    lastHealthyAt=now();lastMapId=s.map;preferredTargetId=null;preferredTargetAt=0;lastRocketAt=0;pendingJump=null;lastPortalAttempt=0;nextRouteSearch=0;routeMisses=0;nextSaleAttempt=0;buyFailuresInRow=0;running=true;astralRunSeen=!!s.astralActive;
     astralLoopSpent=0;astralCycles=0;astralLoopBusy=false;astralLoopEpoch++;astralLoopPhase=config.astralLoop?'aguardando':'parado';astralLoopNextAt=0;astralLoopEnteredAt=0;astralLoopMapWaitSince=0;astralLoopHealSince=0;astralLoopAmmoWaitSince=0;
     const gate=getAstralState(config.astralGate);astralLoopLastCompleted=Number(gate?.completed)||0;astralLoopLastFailed=Number(gate?.failed)||0;
     if(config.astralLoop)clearResume();else checkpoint(true);
@@ -508,7 +523,7 @@ export function createStellarAutopilotV48({credentials,getIdentity=()=>null,getS
       }else{astralLoopPhase='combatendo';}
     }
     if(lastMapId!==s.map){
-      lastMapId=s.map;pendingJump=null;routeMisses=0;nextRouteSearch=0;
+      lastMapId=s.map;preferredTargetId=null;preferredTargetAt=0;pendingJump=null;routeMisses=0;nextRouteSearch=0;
       notify('Setor '+String(s.map||'').toUpperCase()+' conectado • retomando rota');
     }
     if(pendingJump){
@@ -525,7 +540,7 @@ export function createStellarAutopilotV48({credentials,getIdentity=()=>null,getS
     if(!s.astralActive&&config.autoBuy&&ts-lastPurchaseAttempt>7000){lastPurchaseAttempt=ts;void safeBuy(s);}
     // A compra oficial pode começar neste mesmo tick; não iniciar salto antes de confirmar.
     if(busy)return;
-    const action=chooseAutopilotAction(s,config);
+    const action=chooseAutopilotAction(s,{...config,preferredTargetId:ts-preferredTargetAt<=14000?preferredTargetId:null});
     if(action.type==='pause'){stop(action.reason);return;}
     const collectingWhileFiring=action.type==='move'&&!!action.combatTargetId;
     if(action.type!=='hunt'&&!collectingWhileFiring)stopFire();
@@ -551,17 +566,18 @@ export function createStellarAutopilotV48({credentials,getIdentity=()=>null,getS
         const enemy=(s.enemies||[]).find(e=>e?.id===action.combatTargetId&&e.hp>0);
         if(enemy&&dist(s.player,enemy)<=Number(s.laserRange)){
           selectNpc(enemy,true);
-          if(config.rockets&&dist(s.player,enemy)<=Number(s.rocketRange)&&s.rocketReady)fireRocket();
+          if(config.rockets&&dist(s.player,enemy)<=Number(s.rocketRange)&&s.rocketReady)fireRocketRateLimitedV87(ts);
         }else stopFire();
       }
       navigate(action.x,action.y);notify(action.reason);return;
     }
     if(action.type==='hunt'){
       const enemy=(s.enemies||[]).find(e=>e?.id===action.targetId&&e.hp>0);if(!enemy)return;
+      if(preferredTargetId!==String(enemy.id)){preferredTargetId=String(enemy.id);preferredTargetAt=ts;}
       const range=Math.max(180,(Number(s.laserRange)||800)*config.combatRange);const d=dist(s.player,enemy);
       selectNpc(enemy,d<=Number(s.laserRange));
       if(d>range){const ratio=(d-range+35)/Math.max(1,d);navigate(s.player.x+(enemy.x-s.player.x)*ratio,s.player.y+(enemy.y-s.player.y)*ratio);}
-      else if(config.rockets&&d<=Number(s.rocketRange)&&s.rocketReady)fireRocket();
+      else if(config.rockets&&d<=Number(s.rocketRange)&&s.rocketReady)fireRocketRateLimitedV87(ts);
       notify(action.reason);
     }else notify(action.reason);
   }

@@ -20,6 +20,7 @@ import { fileURLToPath } from 'url';
 import { createClient } from '@supabase/supabase-js';
 import { randomUUID } from 'crypto';
 import {installOfflineFarmV484,offlineFarmEnsureInactiveV484,makeOfflineFarmGuardV484} from './offline-farm-v484.js';
+import {installBalanceAuditV90} from './balance-audit-v90.js';
 import { attachSharedUniverse } from './world.js';
 import { eliteStatus } from './elite-operations.js';
 import { warCampaignState,warRankings,safeWarCampaignInput,safeWarRulesInput } from './war-campaigns.js';
@@ -33,7 +34,7 @@ import { createSecurityService } from './security-service.js';
 
 const app = express();
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const RELEASE_VERSION = '47.7.41'; // único identificador de release nos endpoints HTTP
+const RELEASE_VERSION = '47.7.46'; // único identificador de release nos endpoints HTTP
 
 function normalizeSupabaseUrl(value = '') {
   let url = String(value || '').trim();
@@ -1365,6 +1366,7 @@ function applyCraftRecipeServer(state,recipeId,runtime){
 
 // Offline routes and live-economy guards installed BEFORE normal economy/save routes.
 installOfflineFarmV484(app,{requireUser,asyncRoute,requireEliteAdmin});
+installBalanceAuditV90(app,{requireUser,asyncRoute,requireEliteAdmin});
 const OFFLINE_FARM_GUARD_V484=makeOfflineFarmGuardV484(requireEliteAdmin);
 app.post('/api/economy/action', requireUser, OFFLINE_FARM_GUARD_V484, asyncRoute(async (req,res)=>{
   const routeStarted=Date.now();

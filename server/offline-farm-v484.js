@@ -1,4 +1,5 @@
 import {forecastV495} from './farm-v495-forecast.js';
+import {safeFarmEconomySnapshot} from './farm-v86-economy.js';
 import {createHash,timingSafeEqual} from 'node:crypto';
 import {combatProfileV487,npcCombatCycleV487} from './offline-farm-v487-engine.js';
 /* STELLAR_OFFLINE_FARM_V484 — servidor: sessão persistida e liquidação SQL atômica.
@@ -110,6 +111,17 @@ export function installOfflineFarmV484(app,{requireUser,asyncRoute,requireEliteA
       return res.json(data||{ok:false});
     }catch(e){return errorResponse(res,e);}
   }
+  // V86: read the account's authoritative balance while offline farm is active.
+  // No economic write, no claim and no mutation of stale client saves.
+  app.get('/api/offline-farm/v484/v86/economy',requireUser,asyncRoute(async(req,res)=>{
+    noCache(res);
+    const sb=await requireEliteAdmin();
+    const {data,error}=await sb.from('game_saves').select('state,updated_at').eq('user_id',req.user.id).maybeSingle();
+    if(error)return res.status(503).json({error:'Saldo online indisponível.'});
+    if(!data?.state)return res.status(404).json({error:'Save não encontrado para sua conta.'});
+    res.json({ok:true,economy:safeFarmEconomySnapshot(data.state,data.updated_at),
+      note:'Saldo confirmado no save; os ganhos projetados do Farm Offline entram apenas após resgate.'});
+  }));
   app.get('/api/offline-farm/v484/status',requireUser,asyncRoute(async(req,res)=>rpc(req,res,'status')));
   app.get('/api/offline-farm/v484/options',requireUser,asyncRoute(async(req,res)=>{
     noCache(res);
