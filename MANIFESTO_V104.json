@@ -1,0 +1,101 @@
+{
+  "version": "V104 / 47.7.60",
+  "base_zip": "stellar-legacy-main.zip",
+  "full_zip": "stellar-legacy-V104-cumulativa-47.7.60.zip",
+  "layout": "Caminhos relativos a raiz do repositorio, sem pasta stellar-legacy-main/",
+  "files_modified": [
+    {
+      "path": "README.md",
+      "base_sha256": "ae45dc37870c4709026ce63c8413c799eefcd5e3329a06194167e0f0784015e3",
+      "v104_sha256": "b4929c21fbac7981eea7e7cf63a89e9843d0d7ca4e1b4de6c113bbd5696745cd"
+    },
+    {
+      "path": "android/app/build.gradle",
+      "base_sha256": "49477096e2e2324b16a0951d7575410e4d79665e0673d6dbd02b53256d45a823",
+      "v104_sha256": "b2a998c99105bf7285c097ed47121b3ef1b0315061175f2ed0650de094815c81"
+    },
+    {
+      "path": "package.json",
+      "base_sha256": "01f7725f1bb09e0f85419b308024380e7b458e45d318a09ff4788d209f6bca6c",
+      "v104_sha256": "bed758e25f8f51f33aaa9926e7ceb684ddff89d3d75ce6b301d2c1c9ead4f802"
+    },
+    {
+      "path": "public/api.js",
+      "base_sha256": "4d3b4c393af4f6878cd57c96f805afa79e96057bbf5711dee65f71bf1db0ce3b",
+      "v104_sha256": "b3efb2b781baa0369120141ebf956bd446f948d43d9f596fb79f2efbd2d4e280"
+    },
+    {
+      "path": "public/game.js",
+      "base_sha256": "15f0ee518c0f22a8717e936e5d65bf09feb775ea62cbff143d237ee23d1750db",
+      "v104_sha256": "146d23c603c330a4d83ddd889a39de443e81a1c8d9a15ac79c0376e6d46aaffb"
+    },
+    {
+      "path": "public/index.html",
+      "base_sha256": "8b60b24ad738cec76fec6b5c8fc5a95420604aa3c065d1832a19fa4827731563",
+      "v104_sha256": "13d321a24a1af0b225b89161bcf0c393984248fb838536ca0e8a28ceedaeeb8e"
+    },
+    {
+      "path": "public/modules/stellar-autopilot-v48.js",
+      "base_sha256": "fa027bfd8467f45f96a64698f2812b5b45e850472b81bcff92ac24679deb7768",
+      "v104_sha256": "5b140edb68bcbf1c43bdb00984668642afc0013868e06be9f383e45a344d287d"
+    },
+    {
+      "path": "server/index.js",
+      "base_sha256": "52b5cd24e090622d1a1609cb2666cef5c863a85e43793cbad765593cac2132e0",
+      "v104_sha256": "44e73fbf98cfa95f64a3f486f8947037186ac5d3dff1041e0025466b012cb068"
+    },
+    {
+      "path": "server/world.js",
+      "base_sha256": "13564b66782830f0f4ca0f32abafdd949ada59b8e7a1934b7680bf28ba390383",
+      "v104_sha256": "b4d138d5d30f142689d9fcb1985c47ec00c9a83383a02d96d9f455d734a079f7"
+    },
+    {
+      "path": "tests/v100-cumulative-c.test.mjs",
+      "base_sha256": "4896558957134b1b62b8611f504c2c006fa32e777b3ee2bbaa83496f6a2991ab",
+      "v104_sha256": "591ab547605478d56d7e34dba19c2efea646375416f879649c74ed2ce66affe7"
+    },
+    {
+      "path": "tests/v65-2d-art.test.mjs",
+      "base_sha256": "2fa7dc5eeaa78ec143dfe140d6f883e0e518e062adc6618f4e8795556b8513b9",
+      "v104_sha256": "9f16187ad30ce3a69ff3dd3fdbe64469340538b8d0bba4d41ddc22424ac82e4b"
+    },
+    {
+      "path": "tests/v80-static-world-loot.test.mjs",
+      "base_sha256": "56d60070982a8eea73c6c6ba4990fe48a21c629d9f2afbbaaa03d5b00865eff6",
+      "v104_sha256": "891e245e55e70fb613a390cc2cb046951c0b01ad601ab896a902d3c5576c00b9"
+    },
+    {
+      "path": "tests/v90-cumulative.test.mjs",
+      "base_sha256": "9af9bd56d2e71de20bad4a24587c290c5b3e29283f71d0690800acd7a1862993",
+      "v104_sha256": "9ff0ca6192686a59421bd7edd7dac31d799115d525a322a138694455d6474c7c"
+    },
+    {
+      "path": "tests/v97-ab-cumulative.test.mjs",
+      "base_sha256": "281678ed3605964e486d1bd58de31675dafea665c5d1fa106718d29a67482783",
+      "v104_sha256": "d45c78ecf96c76d6f7217029a035e5bd9355342eac324cdadf4caa4902db1de5"
+    }
+  ],
+  "files_added": [
+    {
+      "path": "docs/V104_CUMULATIVA_REDE_SQL.md",
+      "v104_sha256": "3aab4253a04517eba4a8c350d0324636c260caef7aa444c737b9d563ce15a465"
+    },
+    {
+      "path": "public/modules/read-coalescer-v104.js",
+      "v104_sha256": "cc2d9fd94473e3a54d232092bfc418227e15f3998624ee57b8cf93c2b49379ec"
+    },
+    {
+      "path": "scripts/v104-network-benchmark.mjs",
+      "v104_sha256": "e931b659d068b6501241a865e4659cae219e60b26760c4024aa1c02a3e3ac604"
+    },
+    {
+      "path": "server/network-delta-v104.js",
+      "v104_sha256": "f3488ab22413c533f539e5e8e12e955f82eeb9e946cccddea94925f82815e332"
+    },
+    {
+      "path": "tests/v104-network-opt.test.mjs",
+      "v104_sha256": "001020f0a7103c6f7ed37c47e23c127c65308c4dbbc27f4b3e00dfd95ec9b8b1"
+    }
+  ],
+  "files_removed": []
+}

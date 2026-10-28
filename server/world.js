@@ -16,6 +16,7 @@ import { randomUUID } from 'crypto';
 import {admitNpcDamage} from './combat-throttle.js';
 import {PORTAL_NEUTRAL_RADIUS,playerInNeutralPortalRange} from './portal-safety.js';
 import {socketMessageAllowed,boundedVital} from './realtime-guard.js';
+import {playerStateDelta,npcStateDelta} from './network-delta-v104.js';
 import { WebSocketServer, WebSocket } from 'ws';
 import {selectLiveDirective,directiveToWorldEvent} from './universe-directives.js';
 import {captureElapsedSeconds, classifyWarfrontCaptureError, withCaptureTimeout, CAPTURE_FAILURE_BACKOFF_MS} from './warfront-capture.js';
@@ -35,7 +36,7 @@ const NPC_CLOSE_RADIUS_SQ = 1250 * 1250;
 const NPC_FAST_RADIUS_SQ = 800 * 800; // Somente entidades dentro de 800u recebem 8 Hz.
 const NPC_SOCKET_BACKPRESSURE_BYTES = 256 * 1024; // Descarta apenas frames de movimento sob rede congestionada.
 const IDLE_ROOM_TTL_MS = 2 * 60 * 1000; // Desmontar salas sem jogadores após 2 minutos.
-const NPC_FAR_REFRESH_MS = 2500;         // NPCs distantes recebem correção lenta para minimapa/consistência.
+const NPC_FAR_REFRESH_MS = 5000; // Corrige o minimapa distante sem transmitir patrulha frame a frame.
 const NPC_NEAR_RADIUS = 2200;
 const NPC_NEAR_RADIUS_SQ = NPC_NEAR_RADIUS * NPC_NEAR_RADIUS;
 const PLAYER_STATE_MIN_MS = 80;
@@ -192,17 +193,8 @@ class Room {
   }
 
   // Envia somente campos que realmente mudaram desde o último pacote daquele jogador.
-  npcNetPatch(e,prev){
-    const cur=this.npcNetFrame(e);
-    if(!prev)return {cur,patch:cur};
-    const patch={id:cur.id};
-    if(cur.x!==prev.x)patch.x=cur.x;
-    if(cur.y!==prev.y)patch.y=cur.y;
-    if(cur.hp!==prev.hp)patch.hp=cur.hp;
-    if(cur.shield!==prev.shield)patch.shield=cur.shield;
-    if(cur.angle!==prev.angle)patch.angle=cur.angle;
-    if(cur.bossPhase!==prev.bossPhase)patch.bossPhase=cur.bossPhase;
-    return {cur,patch:Object.keys(patch).length>1?patch:null};
+  npcNetPatch(e,prev,positionStep=1){
+    return npcStateDelta(prev,this.npcNetFrame(e),positionStep);
   }
 
   // Interest management: <800u = 8 Hz; <1250u = 4 Hz; médio = 2 Hz; longe = 0,4 Hz.
@@ -212,20 +204,20 @@ class Room {
       const p=c.player;if(!p)continue;
       // Backpressure: mensagens críticas seguem intactas, apenas este lote de movimento aguarda a rede.
       // Não alteramos npcNetState quando ignoramos o lote: o próximo envia o delta verdadeiro.
-      if(c.bufferedAmount>NPC_SOCKET_BACKPRESSURE_BYTES)continue;
+      if(c.bufferedAmount>NPC_SOCKET_BACKPRESSURE_BYTES){this.world.networkV104.npcBackpressureSkips++;continue;}
       c.npcNetState ||= new Map();
       const farRefresh=now-(c.lastNpcFarRefreshAt||0)>=NPC_FAR_REFRESH_MS;
       const midRefresh=now-(c.lastNpcMidRefreshAt||0)>=NPC_MID_REFRESH_MS;
       const nearRefresh=now-(c.lastNpcNearRefreshAt||0)>=250;
-      const entities=[];
+      const entities=[],pendingStates=[];
       for(const e of this.npcs.values()){
         const dx=e.x-p.x,dy=e.y-p.y,distSq=dx*dx+dy*dy;
         if(distSq>NPC_NEAR_RADIUS_SQ){if(!farRefresh)continue;}
         else if(distSq>NPC_CLOSE_RADIUS_SQ&&!midRefresh)continue;
         else if(distSq>NPC_FAST_RADIUS_SQ&&!nearRefresh)continue;
-        const {cur,patch}=this.npcNetPatch(e,c.npcNetState.get(e.id));
-        c.npcNetState.set(e.id,cur);
-        if(patch)entities.push(patch);
+        const positionStep=distSq>NPC_NEAR_RADIUS_SQ?22:distSq>NPC_CLOSE_RADIUS_SQ?5:distSq>NPC_FAST_RADIUS_SQ?3:1;
+        const {cur,patch}=this.npcNetPatch(e,c.npcNetState.get(e.id),positionStep);
+        if(patch){entities.push(patch);pendingStates.push([e.id,cur]);}
       }
       if(nearRefresh)c.lastNpcNearRefreshAt=now;
       if(midRefresh)c.lastNpcMidRefreshAt=now;
@@ -233,7 +225,11 @@ class Room {
         c.lastNpcFarRefreshAt=now;
         for(const id of c.npcNetState.keys())if(!this.npcs.has(id))c.npcNetState.delete(id);
       }
-      if(entities.length)safeJsonSend(c,{type:'npc_batch',entities});
+      if(entities.length&&c.readyState===WebSocket.OPEN){
+        // Um unico JSON por lote e apenas campos alterados. Nao alterar a fila de eventos criticos.
+        const wire=JSON.stringify({type:'npc_batch',entities});
+        try{c.send(wire);for(const [id,frame] of pendingStates)c.npcNetState.set(id,frame);this.world.networkV104.npcBatches++;this.world.networkV104.npcBatchBytes+=Buffer.byteLength(wire);}catch{}
+      }
     }
   }
 
@@ -690,7 +686,34 @@ class Room {
   broadcast(payload,exclude=null){
     if(!this.clients.size)return;
     const wire=JSON.stringify(payload); // Serializar apenas uma vez por sala.
-    for(const c of this.clients){if(c===exclude||c.readyState!==WebSocket.OPEN)continue;try{c.send(wire);}catch{}}
+    const wireBytes=Buffer.byteLength(wire);
+    for(const c of this.clients){
+      if(c===exclude||c.readyState!==WebSocket.OPEN)continue;
+      try{
+        c.send(wire);
+        this.world.networkV104.broadcastMessages++;
+        this.world.networkV104.broadcastBytes+=wireBytes;
+        if(payload.type==='world_player_patch'){this.world.networkV104.playerPatchMessages++;this.world.networkV104.playerPatchBytes+=wireBytes;}
+        // Mensagens estruturais ja transmitem o estado: nao duplicar no proximo npc_batch.
+        if(payload.type==='world_snapshot')c.npcNetState=new Map([...this.npcs.values()].map(e=>[e.id,this.npcNetFrame(e)]));
+        else if(payload.type==='npc_spawn'||payload.type==='npc_patch'){
+          const e=this.npcs.get(payload.entity?.id);
+          if(e&&c.npcNetState){
+            const frame=this.npcNetFrame(e);
+            if(payload.type==='npc_spawn')c.npcNetState.set(e.id,frame);
+            else{
+              // Um npc_patch de combate/runtime pode não trazer x/y: avançar apenas
+              // os campos transmitidos. Assim o npc_batch ainda entrega qualquer
+              // movimento que aconteceu entre o frame anterior e este evento.
+              const baseline={...(c.npcNetState.get(e.id)||{id:e.id})};
+              for(const key of Object.keys(frame))if(Object.hasOwn(payload.entity,key))baseline[key]=frame[key];
+              c.npcNetState.set(e.id,baseline);
+            }
+          }
+        }else if(payload.type==='npc_remove'||payload.type==='npc_death')c.npcNetState?.delete(payload.entityId||payload.entity?.id);
+        else if(payload.type==='event_cleanup')for(const id of payload.npcIds||[])c.npcNetState?.delete(id);
+      }catch{}
+    }
   }
   broadcastEvent(force=false){const now=nowMs();if(!force&&now-this.lastEventBroadcastAt<EVENT_BROADCAST_INTERVAL_MS)return;this.lastEventBroadcastAt=now;this.broadcast({type:'event_update',event:this.eventPayload(),globalEvent:this.world.currentEvent(),serverTime:now});}
   // V18.2.6: progresso é individual, por EVENT ID + janela, persistido no Supabase.
@@ -720,7 +743,8 @@ class Room {
     ws.lastNpcFarRefreshAt=nowMs();
     ws.lastNpcMidRefreshAt=nowMs();
     ws.lastNpcNearRefreshAt=nowMs();
-    this.broadcast({type:'world_player_spawn',entity:this.publicPlayer(player)},ws);
+    player._lastNetFrame=this.publicPlayer(player);
+    this.broadcast({type:'world_player_spawn',entity:player._lastNetFrame},ws);
   }
   removeClient(ws){
     if(!this.clients.has(ws))return;this.clients.delete(ws);if(ws.player)this.players.delete(ws.player.userId);if(ws.player)this.broadcast({type:'world_player_leave',userId:ws.player.userId});ws.room=null;ws.player=null;ws.npcNetState=null;ws.lastNpcFarRefreshAt=0;ws.lastNpcMidRefreshAt=0;ws.lastNpcNearRefreshAt=0;
@@ -746,7 +770,13 @@ class Room {
     const pet=msg.pet&&typeof msg.pet==='object'?msg.pet:null;
     if(pet?.owned){p.pet={owned:true,level:Math.max(1,Math.min(15,Number(pet.level)||1)),x:clamp(pet.x,0,this.map.world.w),y:clamp(pet.y,0,this.map.world.h),angle:Number(pet.angle)||0,activeGear:shortText(pet.activeGear||'off',24),laserTargetId:pet.laserTargetId?shortText(pet.laserTargetId,96):null,laserActive:!!pet.laserActive,laserColor:safeColor(pet.laserColor,p.laserColor),designId:pet.designId?shortText(pet.designId,64):null};}else p.pet={owned:false};
     p.updatedAt=now;
-    this.broadcast({type:'world_player_patch',entity:this.publicPlayer(p)},ws);
+    const frame=this.publicPlayer(p),patch=playerStateDelta(p._lastNetFrame,frame);
+    const receivers=Math.max(0,[...this.clients].filter(c=>c!==ws&&c.readyState===WebSocket.OPEN).length);
+    if(patch){
+      this.world.networkV104.playerFullEquivalentBytes+=receivers*Buffer.byteLength(JSON.stringify({type:'world_player_patch',entity:frame}));
+      p._lastNetFrame=frame;
+      this.broadcast({type:'world_player_patch',entity:patch},ws);
+    }else this.world.networkV104.playerUnchangedSkipped+=receivers;
   }
   playerSafe(p){
     if(!['x1','x8'].includes(this.mapId)||this.territoryFaction!==p.faction)return false;const b=basePointForFaction(this.territoryFaction,this.mapId);return Math.hypot(p.x-b.x,p.y-b.y)<=520;
@@ -1083,6 +1113,8 @@ export function attachSharedUniverse(server,{authenticate,authorizeJoin,recordSe
   });const rooms=new Map();
   const world={
     recordSecurityViolation,
+    // Contadores acumulados desde o boot (sem ID ou dado pessoal): comparar com baseline no Render.
+    networkV104:{since:nowMs(),broadcastMessages:0,broadcastBytes:0,playerPatchMessages:0,playerPatchBytes:0,playerFullEquivalentBytes:0,playerUnchangedSkipped:0,npcBatches:0,npcBatchBytes:0,npcBackpressureSkips:0},
     recordWarDefense:recordWarDefense||(()=>Promise.resolve(false)),
     damageRelay:damageRelay||(()=>Promise.reject(new Error("SQL V34.6 pendente"))),
     readRelayLoadout:readRelayLoadout||(()=>Promise.reject(new Error("Leitura de equipamentos não configurada"))),
@@ -1245,7 +1277,7 @@ export function attachSharedUniverse(server,{authenticate,authorizeJoin,recordSe
         room.broadcastEvent(true);
       }
     },
-    stats(){return {rooms:rooms.size,clients:[...rooms.values()].reduce((s,r)=>s+r.clients.size,0),npcs:[...rooms.values()].reduce((s,r)=>s+r.npcs.size,0),ores:[...rooms.values()].reduce((s,r)=>s+r.ores.size,0),event:world.currentEvent(),directivesCached:world.directives.length,directivesUpdatedAt:world.lastDirectivesAt,liveOpsUpdatedAt:world.lastLiveOpsAt,npcConfigVersion:Number(world.npcRuntime?.version)||0,npcConfigUpdatedAt:world.npcRuntime?.updatedAt||null,worldConfigVersion:Number(world.worldRuntime?.version)||0,worldConfigUpdatedAt:world.worldRuntime?.updatedAt||null};}
+    stats(){return {networkV104:{...world.networkV104},rooms:rooms.size,clients:[...rooms.values()].reduce((s,r)=>s+r.clients.size,0),npcs:[...rooms.values()].reduce((s,r)=>s+r.npcs.size,0),ores:[...rooms.values()].reduce((s,r)=>s+r.ores.size,0),event:world.currentEvent(),directivesCached:world.directives.length,directivesUpdatedAt:world.lastDirectivesAt,liveOpsUpdatedAt:world.lastLiveOpsAt,npcConfigVersion:Number(world.npcRuntime?.version)||0,npcConfigUpdatedAt:world.npcRuntime?.updatedAt||null,worldConfigVersion:Number(world.worldRuntime?.version)||0,worldConfigUpdatedAt:world.worldRuntime?.updatedAt||null};}
   };
 
   wss.on('connection',ws=>{

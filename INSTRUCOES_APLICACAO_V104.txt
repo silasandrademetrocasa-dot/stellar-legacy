@@ -1,0 +1,32 @@
+PATCH CUMULATIVO STELLAR LEGACY V104 (47.7.60)
+=============================================
+
+Este ZIP contem SOMENTE os arquivos criados ou modificados na V104.
+Base da comparacao: stellar-legacy-main.zip
+Arquivos existentes alterados: 14
+Arquivos novos: 5
+Arquivos removidos: 0
+
+COMO APLICAR NO GITHUB:
+1. Abra ou extraia este ZIP. Os caminhos ja comecam na raiz do repositorio.
+2. Envie os arquivos para as mesmas pastas do seu repositorio
+   (por exemplo, server/index.js substitui server/index.js;
+   public/modules/read-coalescer-v104.js e um arquivo novo).
+3. Quando o GitHub perguntar se deve substituir, use a versao V104.
+4. Faca o commit e deixe o Render realizar o deploy normal.
+5. Valide com as instrucoes em docs/V104_CUMULATIVA_REDE_SQL.md.
+
+IMPORTANTE: Nao envie o ZIP para o repositorio esperando que seus arquivos
+sejam aplicados automaticamente: o ZIP precisa ser EXTRAIDO antes, ou os
+arquivos devem ser adicionados pelo git.
+
+Se usa git local, na pasta raiz do projeto:
+  unzip -o stellar-legacy-V104-SOMENTE-MODIFICACOES.zip -d .
+  git add -A
+  git commit -m "V104: otimizacoes WebSocket NPCs Autopilot API SQL"
+  git push
+
+Observacoes:
+- Nao ha arquivos a excluir.
+- O MANIFESTO_V104.json informa os SHA-256 antes e depois.
+- Garanta que seu repositorio seja a versao do ZIP base antes de aplicar.

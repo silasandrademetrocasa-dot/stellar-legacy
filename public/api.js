@@ -1,4 +1,5 @@
-import {offlineFarmDirectActivityAllowedV103} from './modules/offline-farm-activity-v103.js?v=47.7.59';
+import {offlineFarmDirectActivityAllowedV103} from './modules/offline-farm-activity-v103.js?v=47.7.60';
+import {createReadCoalescerV104} from './modules/read-coalescer-v104.js?v=47.7.60';
 import {persistSessionV101,loadPersistedSessionV101,clearPersistedSessionV101} from './modules/login-persistence-v101.js';
 const SESSION_KEY = 'stellarLegacyV4Session';
 const GOOGLE_OAUTH_PENDING_KEY = 'stellarLegacyGoogleOAuthPendingV18216';
@@ -6,6 +7,7 @@ let session = null;
 let currentUser = null;
 let configPromise = null;
 let sessionReplacementNotified = false;
+const coalesceReadV104=createReadCoalescerV104();
 
 async function readJson(res) {
   return res.json().catch(async () => {
@@ -61,7 +63,9 @@ async function serverFetch(path, options = {}, withAuth = false) {
     if (session?.game_session_id) headers['X-Game-Session-Id'] = session.game_session_id;
   }
 
-  const {res,body} = await boundedFetchV4831(path,{...options,headers,cache:'no-store'});
+  const fetchBody=()=>boundedFetchV4831(path,{...options,headers,cache:'no-store'});
+  const eligible=(!options.method||options.method.toUpperCase()==='GET')&&!options.body&&!options.signal;
+  const {res,body} = await (eligible?coalesceReadV104('render|'+String(session?.game_session_id||'public')+'|'+String(session?.access_token||'')+'|'+path+'|'+JSON.stringify(headers),fetchBody):fetchBody());
   if (!res.ok) {
     const msg = body?.error || body?.message || `Erro ${res.status}`;
     const err = new Error(String(msg));
@@ -109,7 +113,10 @@ async function supabaseFetch(path, options = {}, withAuth = false) {
     headers.Authorization = `Bearer ${session.access_token}`;
   }
 
-  const {res,body} = await boundedFetchV4831(`${url}${path}`,{...options,headers});
+  const fetchBody=()=>boundedFetchV4831(`${url}${path}`,{...options,headers});
+  const safeRpcRead=(options.method||'GET').toUpperCase()==='POST'&&/^\/rest\/v1\/rpc\/(?:get_game_runtime_public_v1813|get_npc_runtime_config_v1811|get_world_runtime_config_v1814|get_shops_runtime_config_v1817c|get_systems_runtime_config_v1815|get_battle_pass_runtime_config_v1817b|get_balance_runtime_v1909|get_bonus_box_config_v1825|get_galaxy_gate_config_v1906)$/.test(path);
+  const readOnly=((!options.method||options.method.toUpperCase()==='GET')||safeRpcRead)&&!options.signal;
+  const {res,body} = await (readOnly?coalesceReadV104('sql|'+String(session?.game_session_id||'public')+'|'+String(session?.access_token||'')+'|'+(options.method||'GET')+'|'+path+'|'+String(options.body||'')+'|'+JSON.stringify(headers),fetchBody):fetchBody());
   if (!res.ok) {
     const msg = body?.msg || body?.message || body?.error_description || body?.error || `Erro ${res.status}`;
     throw new Error(String(msg));

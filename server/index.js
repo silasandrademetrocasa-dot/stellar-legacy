@@ -18,6 +18,7 @@ import fs from 'fs/promises';
 import os from 'os';
 import { fileURLToPath } from 'url';
 import { createClient } from '@supabase/supabase-js';
+import {createReadCoalescerV104} from '../public/modules/read-coalescer-v104.js';
 import { randomUUID } from 'crypto';
 import {installOfflineFarmV484,offlineFarmEnsureInactiveV484,makeOfflineFarmGuardV484,makeOfflineFarmApiSafetyV103} from './offline-farm-v484.js';
 import {installBalanceAuditV90} from './balance-audit-v90.js';
@@ -37,7 +38,7 @@ import { createSecurityService } from './security-service.js';
 
 const app = express();
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const RELEASE_VERSION = '47.7.59'; // único identificador de release nos endpoints HTTP
+const RELEASE_VERSION = '47.7.60'; // único identificador de release nos endpoints HTTP
 
 function normalizeSupabaseUrl(value = '') {
   let url = String(value || '').trim();
@@ -131,14 +132,16 @@ function configStatus() {
 const LIVE_OPS_CACHE_MS = 12000;
 let liveOpsCache = null;
 let liveOpsCacheAt = 0;
-const NPC_CONFIG_CACHE_MS = 15000;
+const NPC_CONFIG_CACHE_MS = 30000;
+// Apenas leituras de runtime concorrentes sao coalescidas; gravacoes ADM permanecem imediatas.
+const runtimeReadOnceV104=createReadCoalescerV104();
 let npcRuntimeCache = null;
 let npcRuntimeCacheAt = 0;
 
 // V18.1.3 — SERVER RUNTIME TOPBAR CACHE
 // O Render busca a configuração no Supabase e materializa um snapshot temporário.
 // O navegador nunca reorganiza nós por reparenting; apenas lê este snapshot validado.
-const TOPBAR_RUNTIME_CACHE_MS = 15000;
+const TOPBAR_RUNTIME_CACHE_MS = 30000;
 const TOPBAR_RUNTIME_DIR = path.join(os.tmpdir(), 'stellar-legacy-runtime');
 const TOPBAR_RUNTIME_FILE = path.join(TOPBAR_RUNTIME_DIR, 'topbar.runtime.json');
 const NPC_RUNTIME_FILE = path.join(TOPBAR_RUNTIME_DIR, 'npcs.runtime.json');
@@ -156,7 +159,7 @@ let topbarRuntimeCache = null;
 let topbarRuntimeCacheAt = 0;
 
 // V18.1.4 — WORLD RUNTIME CACHE
-const WORLD_RUNTIME_CACHE_MS = 15000;
+const WORLD_RUNTIME_CACHE_MS = 30000;
 const WORLD_RUNTIME_FILE = path.join(TOPBAR_RUNTIME_DIR, 'world.runtime.json');
 let worldRuntimeCache = null;
 let worldRuntimeCacheAt = 0;
@@ -175,7 +178,7 @@ let passRuntimeCache = null;
 let passRuntimeCacheAt = 0;
 
 // V18.1.7C — LOJAS COMUM + PREMIUM RUNTIME CACHE
-const SHOPS_RUNTIME_CACHE_MS = 15000;
+const SHOPS_RUNTIME_CACHE_MS = 30000;
 const SHOPS_RUNTIME_FILE = path.join(TOPBAR_RUNTIME_DIR, 'shops.runtime.json');
 let shopsRuntimeCache = null;
 let shopsRuntimeCacheAt = 0;
@@ -296,8 +299,11 @@ async function writeShopsRuntimeFile(payload){await fs.mkdir(TOPBAR_RUNTIME_DIR,
 async function readShopsRuntimeFile(){try{const text=await fs.readFile(SHOPS_RUNTIME_FILE,'utf8');const parsed=JSON.parse(text);return parsed&&Array.isArray(parsed.common)&&Array.isArray(parsed.premium)?parsed:null;}catch{return null;}}
 async function refreshShopsRuntimeSnapshot(force=false){
   const now=Date.now();if(!force&&shopsRuntimeCache&&now-shopsRuntimeCacheAt<SHOPS_RUNTIME_CACHE_MS)return shopsRuntimeCache;
-  const sb=supabaseBase();if(!sb)throw new Error('Supabase indisponível para configuração das lojas.');const {data,error}=await sb.rpc('get_shops_runtime_config_v1817c');if(error)throw new Error(`Falha ao carregar shops runtime: ${error.message}`);
+  const readRuntimeV104=async()=>{
+    const sb=supabaseBase();if(!sb)throw new Error('Supabase indisponível para configuração das lojas.');const {data,error}=await sb.rpc('get_shops_runtime_config_v1817c');if(error)throw new Error(`Falha ao carregar shops runtime: ${error.message}`);
   const payload=sanitizeShopsRuntime(data||{});if(!payload.common.length||!payload.premium.length)throw new Error('Snapshot das lojas veio incompleto.');await writeShopsRuntimeFile(payload);shopsRuntimeCache=payload;shopsRuntimeCacheAt=now;return payload;
+  };
+  return force?readRuntimeV104():runtimeReadOnceV104('shops',readRuntimeV104);
 }
 async function loadShopsRuntimeSnapshot(force=false){try{return await refreshShopsRuntimeSnapshot(force);}catch(err){const disk=await readShopsRuntimeFile();if(disk){shopsRuntimeCache=disk;shopsRuntimeCacheAt=Date.now();return disk;}throw err;}}
 
@@ -346,12 +352,15 @@ async function readWorldRuntimeFile(){
 async function refreshWorldRuntimeSnapshot(force=false){
   const now=Date.now();
   if(!force&&worldRuntimeCache&&now-worldRuntimeCacheAt<WORLD_RUNTIME_CACHE_MS)return worldRuntimeCache;
-  const sb=supabaseBase();if(!sb)throw new Error('Supabase indisponível para configuração do mundo.');
+  const readRuntimeV104=async()=>{
+    const sb=supabaseBase();if(!sb)throw new Error('Supabase indisponível para configuração do mundo.');
   const {data,error}=await sb.rpc('get_world_runtime_config_v1814');
   if(error)throw new Error(`Falha ao carregar world runtime: ${error.message}`);
   const payload=sanitizeWorldRuntime(data||{});
   if(!payload.maps.length||!payload.sectors.length)throw new Error('Snapshot do mundo veio vazio.');
   await writeWorldRuntimeFile(payload);worldRuntimeCache=payload;worldRuntimeCacheAt=now;return payload;
+  };
+  return force?readRuntimeV104():runtimeReadOnceV104('world',readRuntimeV104);
 }
 async function loadWorldRuntimeSnapshot(force=false){
   try{return await refreshWorldRuntimeSnapshot(force);}catch(err){const disk=await readWorldRuntimeFile();if(disk){worldRuntimeCache=disk;worldRuntimeCacheAt=Date.now();return disk;}throw err;}
@@ -397,7 +406,8 @@ async function readTopbarRuntimeFile(){
 async function refreshTopbarRuntimeSnapshot(force=false){
   const now=Date.now();
   if(!force&&topbarRuntimeCache&&now-topbarRuntimeCacheAt<TOPBAR_RUNTIME_CACHE_MS)return topbarRuntimeCache;
-  const sb=supabaseBase();
+  const readRuntimeV104=async()=>{
+    const sb=supabaseBase();
   if(!sb)throw new Error('Supabase indisponível para configuração da topbar.');
   const {data,error}=await sb.rpc('get_game_runtime_public_v1813');
   if(error)throw new Error(`Falha ao carregar topbar runtime: ${error.message}`);
@@ -407,6 +417,8 @@ async function refreshTopbarRuntimeSnapshot(force=false){
   topbarRuntimeCache=payload;
   topbarRuntimeCacheAt=now;
   return payload;
+  };
+  return force?readRuntimeV104():runtimeReadOnceV104('topbar',readRuntimeV104);
 }
 
 async function loadTopbarRuntimeSnapshot(force=false){
@@ -436,13 +448,16 @@ async function readNpcRuntimeFile(){try{const text=await fs.readFile(NPC_RUNTIME
 async function refreshNpcRuntimeSnapshot(force=false){
   const now=Date.now();
   if(!force&&npcRuntimeCache&&now-npcRuntimeCacheAt<NPC_CONFIG_CACHE_MS)return npcRuntimeCache;
-  const sb=supabaseBase();
+  const readRuntimeV104=async()=>{
+    const sb=supabaseBase();
   if(!sb)throw new Error('Supabase indisponível para configuração de NPCs.');
   const {data,error}=await sb.rpc('get_npc_runtime_config_v1811');
   if(error)throw new Error(`Falha ao carregar configuração de NPCs: ${error.message}`);
   const payload=(data&&typeof data==='object')?data:{version:0,npcs:[],spawns:[]};
   if(!Array.isArray(payload.npcs)||!payload.npcs.length)throw new Error('Snapshot de NPCs veio incompleto.');
   await writeNpcRuntimeFile(payload);npcRuntimeCache=payload;npcRuntimeCacheAt=now;return payload;
+  };
+  return force?readRuntimeV104():runtimeReadOnceV104('npc',readRuntimeV104);
 }
 async function loadNpcRuntimeSnapshot(force=false){try{return await refreshNpcRuntimeSnapshot(force);}catch(err){const disk=await readNpcRuntimeFile();if(disk){npcRuntimeCache=disk;npcRuntimeCacheAt=Date.now();return disk;}throw err;}}
 
@@ -2247,22 +2262,22 @@ const sharedUniverse = attachSharedUniverse(server, {
 
 
 const topbarRefreshTimer=setInterval(()=>{
-  refreshTopbarRuntimeSnapshot(true).catch(err=>console.warn('[topbar-runtime] refresh:',err.message));
+  refreshTopbarRuntimeSnapshot(false).catch(err=>console.warn('[topbar-runtime] refresh:',err.message));
 },TOPBAR_RUNTIME_CACHE_MS);
 topbarRefreshTimer.unref?.();
 refreshTopbarRuntimeSnapshot(true).then(cfg=>console.log(`[topbar-runtime] v${cfg.version} cacheado em ${TOPBAR_RUNTIME_FILE}`)).catch(err=>console.warn('[topbar-runtime] bootstrap:',err.message));
 
 const worldRefreshTimer=setInterval(()=>{
-  refreshWorldRuntimeSnapshot(true).catch(err=>console.warn('[world-runtime] refresh:',err.message));
+  refreshWorldRuntimeSnapshot(false).catch(err=>console.warn('[world-runtime] refresh:',err.message));
 },WORLD_RUNTIME_CACHE_MS);
 worldRefreshTimer.unref?.();
 refreshWorldRuntimeSnapshot(true).then(cfg=>console.log(`[world-runtime] v${cfg.version} cacheado em ${WORLD_RUNTIME_FILE}`)).catch(err=>console.warn('[world-runtime] bootstrap:',err.message));
 
-const npcRefreshTimer=setInterval(()=>{refreshNpcRuntimeSnapshot(true).catch(err=>console.warn('[npc-runtime] refresh:',err.message));},NPC_CONFIG_CACHE_MS);
+const npcRefreshTimer=setInterval(()=>{refreshNpcRuntimeSnapshot(false).catch(err=>console.warn('[npc-runtime] refresh:',err.message));},NPC_CONFIG_CACHE_MS);
 npcRefreshTimer.unref?.();
 refreshNpcRuntimeSnapshot(true).then(cfg=>console.log(`[npc-runtime] v${cfg.version} cacheado em ${NPC_RUNTIME_FILE}`)).catch(err=>console.warn('[npc-runtime] bootstrap:',err.message));
 
-const shopsRefreshTimer=setInterval(()=>{refreshShopsRuntimeSnapshot(true).catch(err=>console.warn('[shops-runtime] refresh:',err.message));},SHOPS_RUNTIME_CACHE_MS);
+const shopsRefreshTimer=setInterval(()=>{refreshShopsRuntimeSnapshot(false).catch(err=>console.warn('[shops-runtime] refresh:',err.message));},SHOPS_RUNTIME_CACHE_MS);
 shopsRefreshTimer.unref?.();
 refreshShopsRuntimeSnapshot(true).then(cfg=>console.log(`[shops-runtime] v${cfg.version} cacheado em ${SHOPS_RUNTIME_FILE}`)).catch(err=>console.warn('[shops-runtime] bootstrap:',err.message));
 

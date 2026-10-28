@@ -189,14 +189,27 @@ export function createStellarAutopilotV48({credentials,getIdentity=()=>null,getS
     notify('Autopilot sem permissão para esta conta • solicite ao ADM em JOGADORES → AUTOPILOT ou reentre com a conta autorizada');
     return false;
   }
-  function notify(t){if(reason===t)return;reason=t;onNotice(t);renderStatus();}
-  function stop(why='Interrompido'){preferredTargetId=null;lastRocketAt=0;astralBuildCancel=true;astralLoopEpoch++;astralLoopPhase='parado';running=false;busy=false;pendingJump=null;clearResume();stopFire();reason=why;ended=now();try{const s=getSnapshot();if(s)lastProgress=stats(s);}catch{}renderStatus();}
+  let lastRoutineNoticeAt=0,pendingRoutineNotice=null,noticeTimer=null;
+  function notify(t){
+    if(reason===t)return;
+    reason=t;
+    const critical=/falha|erro|negad|sem permissão|não foi possível|interrompid|parado|destruíd|HP crítico|revog|sem sincronização|gasto|limite|autorizado|confirmado|concluído/i.test(t);
+    const elapsed=now()-lastRoutineNoticeAt;
+    if(!critical&&elapsed<1000){
+      pendingRoutineNotice=t;
+      if(!noticeTimer)noticeTimer=setTimeout(()=>{noticeTimer=null;const last=pendingRoutineNotice;pendingRoutineNotice=null;if(last){lastRoutineNoticeAt=now();onNotice(last);renderStatus();}},1000-elapsed);
+      return;
+    }
+    if(critical&&noticeTimer){clearTimeout(noticeTimer);noticeTimer=null;pendingRoutineNotice=null;}
+    lastRoutineNoticeAt=now();onNotice(t);renderStatus();
+  }
+  function stop(why='Interrompido'){if(noticeTimer){clearTimeout(noticeTimer);noticeTimer=null;pendingRoutineNotice=null;}preferredTargetId=null;lastRocketAt=0;astralBuildCancel=true;astralLoopEpoch++;astralLoopPhase='parado';running=false;busy=false;pendingJump=null;clearResume();stopFire();reason=why;ended=now();try{const s=getSnapshot();if(s)lastProgress=stats(s);}catch{}renderStatus();}
   function stats(s){return {xp:Number(s?.xp)||0,credits:Number(s?.credits)||0,stl:Number(s?.stl)||0,kills:Number(s?.kills)||0,boxes:Number(s?.boxes)||0,level:Number(s?.level)||1};}
   function sessionReport(){const duration=Math.max(1,((running?now():ended||now())-started)/3600000);const last=lastProgress||stats(getSnapshot());const first=startStats||last;
     return {map:config.map,minutes:Math.round(duration*60),hours:duration,boxes,drops,ores,kills:Math.max(0,last.kills-first.kills),xp:Math.max(0,last.xp-first.xp),grossCredits:last.credits-first.credits+spent,creditsNet:last.credits-first.credits,stl:last.stl-first.stl,spent,levelFrom:first.level,levelTo:last.level,attempts,failures,reason,
     astralCycles,astralLoopSpent,astralLoopPhase,astralStlGrossEstimated:(last.stl-first.stl)+astralLoopSpent,
     xpPerHour:Math.max(0,last.xp-first.xp)/duration,crPerHour:(last.credits-first.credits)/duration,stlPerHour:(last.stl-first.stl)/duration};}
-  function renderStatus(){if(!panel)return;const status=panel.querySelector('[data-ap-status]');if(status)status.textContent=(running?'ATIVO • ':'PARADO • ')+reason;
+  function renderStatus(){if(!panel)return;if(fab)fab.textContent=running?'🤖 AUTO • ON':'🤖 AUTOPILOT';const status=panel.querySelector('[data-ap-status]');if(status)status.textContent=(running?'ATIVO • ':'PARADO • ')+reason;
     const start=panel.querySelector('[data-ap-start]'),stopButton=panel.querySelector('[data-ap-stop]');if(start)start.disabled=!allowed||running||loading;if(stopButton)stopButton.disabled=!running;
     const rep=panel.querySelector('[data-ap-report]');if(rep&&started){const r=sessionReport();rep.textContent=`${r.minutes} min • ${r.kills} NPC • ${fmt(r.xp)} XP • CR líq. ${fmt(r.creditsNet)} • STL ${fmt(r.stl)} • BOX ${r.boxes} • Drop ${r.drops} • Compras ${fmt(r.spent)} CR • Falhas ${r.failures}`;}
     const loopStatus=panel.querySelector('[data-ap-astral-loop-status]');if(loopStatus)loopStatus.textContent=`${config.astralLoop&&running?'♻ CICLO ATIVO':'♻ Ciclo parado'} • ${astralCycles} portal(is) concluído(s) • ${fmt(astralLoopSpent)} STL gastos • ${astralLoopPhase}`;
