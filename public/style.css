@@ -5008,3 +5008,9 @@ body[data-visual-test-v75="minimap"] #minimapPanel{visibility:hidden!important;}
 .v95-progression-content{padding:10px 12px;line-height:1.65;font-size:12px;color:#c4ecfb;}
 
 .v96-mission-guide{border:1px solid #2a8095;border-radius:10px;background:#09283a;color:#bfe7ee;padding:10px 14px;margin:8px 0 14px;font-size:12px;line-height:1.5;}
+
+/* V101 — preferências de login não competem com os campos no Android. */
+.auth-form .auth-remember-row{display:flex;align-items:center;gap:10px;font-size:.86rem;color:#b7d7e7;line-height:1.35;margin:4px 0;padding:5px 0;cursor:pointer}
+.auth-form .auth-remember-row input{width:18px;height:18px;min-width:18px;accent-color:#2dd1e5;margin:0;flex:none}
+.auth-form .auth-remember-row.hidden,.auth-form .auth-link-btn.hidden,.auth-form .auth-remember-note.hidden{display:none}
+.auth-form .auth-remember-note{font-size:.76rem;color:#8bb0c7;line-height:1.35;margin:-2px 0 5px}

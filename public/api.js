@@ -1,3 +1,4 @@
+import {persistSessionV101,loadPersistedSessionV101,clearPersistedSessionV101} from './modules/login-persistence-v101.js';
 const SESSION_KEY = 'stellarLegacyV4Session';
 const GOOGLE_OAUTH_PENDING_KEY = 'stellarLegacyGoogleOAuthPendingV18216';
 let session = null;
@@ -112,9 +113,10 @@ function setSession(nextSession, user = null) {
   session = nextSession;
   currentUser = user;
   if (session?.game_session_id) sessionReplacementNotified = false;
-  // V14.1: tokens ficam somente na sessão da aba. Nunca persistimos login entre entradas no site.
+  // Web: sessão da aba. APK: token de renovação opcional em cofre criptografado.
   try { sessionStorage.setItem(SESSION_KEY, JSON.stringify({ session, user: currentUser })); } catch {}
   try { localStorage.removeItem(SESSION_KEY); } catch {}
+  persistSessionV101(session,currentUser);
 }
 
 function sessionFromAuth(body) {
@@ -289,13 +291,16 @@ export async function signIn({ email, password }) {
 }
 
 export function signOutLocal() {
+  clearPersistedSessionV101();
   session = null;
   currentUser = null;
   try { sessionStorage.removeItem(SESSION_KEY); } catch {}
   try { localStorage.removeItem(SESSION_KEY); } catch {}
 }
 
+let lastRefreshErrorV101=null;
 async function refreshSession() {
+  lastRefreshErrorV101=null;
   if (!session?.refresh_token) return false;
   try {
     const body = await serverFetch('/api/auth/refresh', {
@@ -306,8 +311,9 @@ async function refreshSession() {
     setSession(body.session, body.user);
     return true;
   } catch (err) {
+    lastRefreshErrorV101=err;
     if(verifiedAuthDenialV4831(err))signOutLocal();
-    // A temporary outage keeps credentials so the next attempt can refresh safely.
+    // Rede indisponível NÃO elimina o login criptografado do APK.
     return false;
   }
 }
@@ -334,20 +340,40 @@ async function authedSupabaseFetch(path, options = {}, retry = true) {
   }
 }
 
+let lastRestoreErrorV101=null;
+export function getSessionRestoreErrorV101(){return lastRestoreErrorV101;}
 export async function restoreSession() {
-  const raw = sessionStorage.getItem(SESSION_KEY);
-  if (!raw) return null;
+  lastRestoreErrorV101=null;
+  let stored=null;
   try {
-    const parsed = JSON.parse(raw);
-    session = parsed.session || null;
-    currentUser = parsed.user || null;
-    if (!session?.access_token || !session?.game_session_id){const e=new Error('Sessão antiga; faça login novamente.');e.code='SESSION_REQUIRED';throw e;}
-    const body = await authedServerFetch('/api/auth/me');
-    currentUser = body.user;
-    setSession(session, currentUser);
-    return { session, user: currentUser };
-  } catch (err) {
-    // Do not destroy sessionStorage on a 500, timeout or loss of signal.
+    // Primeiro tenta a sessão da aba, depois o cofre Android (nunca localStorage).
+    const raw=sessionStorage.getItem(SESSION_KEY);
+    if(raw) stored=JSON.parse(raw);
+  }catch{}
+  if(!stored?.session) stored=loadPersistedSessionV101();
+  if(!stored?.session)return null;
+  try {
+    session=stored.session;
+    currentUser=stored.user||null;
+    if(!session?.game_session_id || (!session?.access_token && !session?.refresh_token)){
+      const e=new Error('Sessão antiga; entre novamente.');e.code='SESSION_REQUIRED';throw e;
+    }
+    // O processo Android pode ter sido encerrado: access_token não é salvo no cofre.
+    // Renova usando a RPC oficial que mantém a proteção de sessão única.
+    const expiry=Number(session.expires_at)||0;
+    if(!session.access_token || !expiry || expiry<=Math.floor(Date.now()/1000)+90){
+      if(!await refreshSession()){
+        lastRestoreErrorV101=lastRefreshErrorV101||new Error('Não foi possível renovar a sessão.');
+        return null;
+      }
+    }
+    const body=await authedServerFetch('/api/auth/me');
+    currentUser=body.user;
+    setSession(session,currentUser);
+    return {session,user:currentUser};
+  }catch(err){
+    lastRestoreErrorV101=err;
+    // 401/403 ou sessão substituída: desautorizar. 5xx/timeout: manter cofre.
     if(verifiedAuthDenialV4831(err))signOutLocal();
     return null;
   }

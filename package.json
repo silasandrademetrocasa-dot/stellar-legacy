@@ -1,6 +1,6 @@
 {
   "name": "stellar-legacy",
-  "version": "47.7.56",
+  "version": "47.7.57",
   "type": "module",
   "scripts": {
     "start": "node server/index.js",
@@ -20,5 +20,5 @@
   "engines": {
     "node": ">=18"
   },
-  "release": "V100 CUMULATIVA C (V98–V100): integridade competitiva, snapshot ADM e preflight Web/APK"
+  "release": "V101 LOGIN PERSISTENTE: sessão criptografada Android, e-mail lembrado opcionalmente, recuperação segura"
 }
