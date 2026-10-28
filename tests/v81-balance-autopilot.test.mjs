@@ -5,8 +5,8 @@ import {resolve} from 'node:path';
 import {NPC_TYPES,MAPS} from '../public/data.js';
 import {chooseAutopilotAction,cleanAutopilotConfig,AUTOPILOT_ALLOWED_MAPS} from '../public/modules/stellar-autopilot-v48.js';
 const read=p=>readFileSync(resolve(import.meta.dirname,'..',p),'utf8');
-const balance=JSON.parse(read('balance_v81/npc-values.json'));
-const gates=JSON.parse(read('balance_v81/gate-config.json'));
+const balance=JSON.parse(read('docs/balance/v81/npc-values.json'));
+const gates=JSON.parse(read('docs/balance/v81/gate-config.json'));
 test('V81 NPC: 34 espécies e catálogos numéricos válidos; lendário de 6M HP',()=>{
  assert.equal(Object.keys(balance).length,34);
  assert.equal(NPC_TYPES.apexOverlord.hp,6000000);

@@ -1,0 +1,74 @@
+plugins {
+    id 'com.android.application'
+}
+
+// A V90 nao precisa de um segundo servidor: o hostname HTTPS e o mesmo da Web.
+// O AssetsPathHandler serve /index.html, /assets, CSS, JS e mapas diretamente do APK.
+def serverUrl = (System.getenv('STELLAR_SERVER_URL') ?: 'https://darkorbit-legacy.onrender.com').trim().replaceAll('/+$', '')
+if (!(serverUrl ==~ /https:\/\/[a-zA-Z0-9.-]+/)) {
+    throw new GradleException('STELLAR_SERVER_URL deve ser https://dominio (sem barras nem caminhos).')
+}
+def requestedVersion = (System.getenv('STELLAR_VERSION_CODE') ?: '900001')
+if (!(requestedVersion ==~ /[0-9]+/)) throw new GradleException('STELLAR_VERSION_CODE invalido')
+def keyFile = System.getenv('STELLAR_KEYSTORE_FILE')
+def keyPassword = System.getenv('STELLAR_KEYSTORE_PASSWORD')
+def keyAlias = System.getenv('STELLAR_KEY_ALIAS')
+def aliasPassword = System.getenv('STELLAR_KEY_PASSWORD')
+def hasSigning = keyFile && keyPassword && keyAlias && aliasPassword
+
+android {
+    namespace 'com.stellarlegacy.mobile'
+    compileSdk 36
+
+    defaultConfig {
+        applicationId 'com.stellarlegacy.mobile'
+        minSdk 26
+        targetSdk 35
+        versionCode Integer.parseInt(requestedVersion)
+        versionName '47.7.46-apk1'
+        buildConfigField 'String', 'SERVER_ORIGIN', '"' + serverUrl + '"'
+    }
+
+    signingConfigs {
+        if (hasSigning) {
+            release {
+                storeFile file(keyFile)
+                storePassword keyPassword
+                keyAlias keyAlias
+                keyPassword aliasPassword
+            }
+        }
+    }
+
+    buildTypes {
+        debug {
+            debuggable true
+        }
+        release {
+            minifyEnabled false
+            shrinkResources false
+            if (hasSigning) signingConfig signingConfigs.release
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+
+    buildFeatures { buildConfig true }
+
+    sourceSets {
+        // Nao DUPLICAR as imagens em android/: empacotar a arvore Web original dentro do APK.
+        // Index.html, JS, CSS, mapas JSON e 100% das artes sao recursos locais.
+        main.assets.srcDirs += [file('../../public')]
+    }
+
+    packaging {
+        resources.excludes += ['META-INF/AL2.0', 'META-INF/LGPL2.1']
+    }
+}
+
+dependencies {
+    implementation 'androidx.webkit:webkit:1.12.1'
+}
