@@ -34,11 +34,28 @@ test('APK nao insere servidor, SQL nem keys privadas como recursos locais',()=>{
   assert.doesNotMatch(manifest,/READ_EXTERNAL_STORAGE|MANAGE_EXTERNAL_STORAGE/);
 });
 
-test('Build original do GitHub tem seus scripts preparador/verificador e android/',()=>{
-  const workflow=read('.github/workflows/Instalapk.yml');
-  assert.match(workflow,/scripts\/prepare-apk-assets\.js/);
-  assert.match(workflow,/scripts\/verify-apk\.js/);
-  assert.ok(fs.existsSync(new URL('../scripts/prepare-apk-assets.js',import.meta.url)));
-  assert.ok(fs.existsSync(new URL('../scripts/verify-apk.js',import.meta.url)));
-  assert.ok(fs.existsSync(new URL('../android/app/src/main/AndroidManifest.xml',import.meta.url)));
+test('GitHub possui workflow APK valido, independentemente do nome do arquivo',()=>{
+  // O workflow pode ter sido renomeado ao instalar a revisao manualmente.
+  // Exigir apenas Instalapk.yml era um falso negativo em GitHub Actions.
+  const base=new URL('../.github/workflows/',import.meta.url);
+  const workflowFiles=fs.readdirSync(base).filter(name=>/\.ya?ml$/i.test(name));
+  const candidates=workflowFiles.map(name=>({
+    name,
+    code:fs.readFileSync(new URL(name,base),'utf8')
+  }));
+  const apkWorkflows=candidates.filter(({code})=>
+    /scripts\/prepare-apk-assets\.js/.test(code) &&
+    /scripts\/verify-apk\.js/.test(code) &&
+    /assembleDebug/.test(code)
+  );
+  assert.ok(apkWorkflows.length>=1,
+    'Nenhum workflow completo de APK em .github/workflows. Encontrados: '+workflowFiles.join(', '));
+  for(const {name,code} of apkWorkflows){
+    assert.match(code,/actions\/checkout@/,name+': precisa baixar o codigo');
+    assert.match(code,/gradle/,name+': precisa compilar o APK local');
+  }
+  for(const file of ['scripts/prepare-apk-assets.js','scripts/verify-apk.js','android/app/src/main/AndroidManifest.xml']){
+    assert.ok(fs.existsSync(new URL('../'+file,import.meta.url)),
+      'Dependencia real do APK ausente: '+file);
+  }
 });
