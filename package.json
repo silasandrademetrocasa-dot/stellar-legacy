@@ -1,13 +1,14 @@
 {
   "name": "stellar-legacy",
-  "version": "47.7.53",
+  "version": "47.7.56",
   "type": "module",
   "scripts": {
     "start": "node server/index.js",
     "dev": "node --watch server/index.js",
     "check": "node scripts/verify-release.mjs",
     "test": "node --test tests/*.test.mjs",
-    "verify": "npm run check && npm test"
+    "verify": "npm run check && npm test",
+    "preflight:v100": "node scripts/v100-release-readiness.mjs"
   },
   "dependencies": {
     "express": "^4.21.2",
@@ -19,5 +20,5 @@
   "engines": {
     "node": ">=18"
   },
-  "release": "V97 CUMULATIVA A+B (V92–V97): APK orientação, compras em lote, farm/autopilot e auditoria de progressão"
+  "release": "V100 CUMULATIVA C (V98–V100): integridade competitiva, snapshot ADM e preflight Web/APK"
 }

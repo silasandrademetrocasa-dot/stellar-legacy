@@ -21,6 +21,9 @@ import { createClient } from '@supabase/supabase-js';
 import { randomUUID } from 'crypto';
 import {installOfflineFarmV484,offlineFarmEnsureInactiveV484,makeOfflineFarmGuardV484} from './offline-farm-v484.js';
 import {installBalanceAuditV90} from './balance-audit-v90.js';
+import {installCompetitiveReadinessV98} from './competitive-readiness-v98.js';
+import {installLiveopsSnapshotV99} from './liveops-snapshot-v99.js';
+import {installReleaseReadinessV100} from './release-readiness-v100.js';
 import { attachSharedUniverse } from './world.js';
 import { eliteStatus } from './elite-operations.js';
 import { warCampaignState,warRankings,safeWarCampaignInput,safeWarRulesInput } from './war-campaigns.js';
@@ -34,7 +37,7 @@ import { createSecurityService } from './security-service.js';
 
 const app = express();
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const RELEASE_VERSION = '47.7.53'; // único identificador de release nos endpoints HTTP
+const RELEASE_VERSION = '47.7.56'; // único identificador de release nos endpoints HTTP
 
 function normalizeSupabaseUrl(value = '') {
   let url = String(value || '').trim();
@@ -1367,6 +1370,9 @@ function applyCraftRecipeServer(state,recipeId,runtime){
 // Offline routes and live-economy guards installed BEFORE normal economy/save routes.
 installOfflineFarmV484(app,{requireUser,asyncRoute,requireEliteAdmin});
 installBalanceAuditV90(app,{requireUser,asyncRoute,requireEliteAdmin});
+installCompetitiveReadinessV98(app,{requireUser,asyncRoute,requireEliteAdmin});
+installLiveopsSnapshotV99(app,{requireUser,asyncRoute,requireEliteAdmin});
+installReleaseReadinessV100(app,{requireUser,asyncRoute,requireEliteAdmin,publicRoot:path.join(__dirname,'../public'),releaseVersion:RELEASE_VERSION});
 const OFFLINE_FARM_GUARD_V484=makeOfflineFarmGuardV484(requireEliteAdmin);
 // V92–V97 • Uma requisição, uma compra autoritativa de munição/mísseis.
 // O cliente escolhe unidades; servidor cobra PACOTES completos e entrega todos eles.
