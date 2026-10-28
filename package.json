@@ -1,6 +1,6 @@
 {
   "name": "stellar-legacy",
-  "version": "47.7.47",
+  "version": "47.7.53",
   "type": "module",
   "scripts": {
     "start": "node server/index.js",
@@ -19,5 +19,5 @@
   "engines": {
     "node": ">=18"
   },
-  "release": "V91 — Farm Offline: inicialização protegida, reconexão bloqueada, diagnósticos e chefes excluídos"
+  "release": "V97 CUMULATIVA A+B (V92–V97): APK orientação, compras em lote, farm/autopilot e auditoria de progressão"
 }

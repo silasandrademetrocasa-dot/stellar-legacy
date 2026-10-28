@@ -823,6 +823,12 @@ export async function purchaseLiveCatalogOnline(catalogKey) {
   }, false);
 }
 
+// V92 • uma compra de suprimentos por chamada; requestId evita duplicação em retry.
+export async function purchaseLiveBulkOnline(catalogKey,quantity,requestId,expectedPrice,expectedCurrency,expectedPackSize){
+  return authedServerFetch('/api/live/purchase/bulk',{
+    method:'POST',body:JSON.stringify({catalog_key:catalogKey,quantity,request_id:requestId,expected_price:expectedPrice,expected_currency:expectedCurrency,expected_pack_size:expectedPackSize})
+  },false);
+}
 
 export async function economyActionOnline(action, payload = {}) {
   return authedServerFetch('/api/economy/action', {

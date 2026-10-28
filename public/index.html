@@ -6,20 +6,20 @@
 <meta content="width=device-width,initial-scale=1,user-scalable=no,viewport-fit=cover" name="viewport"/>
 <meta content="#030816" name="theme-color"/>
 <title>Stellar Legacy</title>
-<link rel="manifest" href="/manifest.webmanifest?v=47.7.47"/>
+<link rel="manifest" href="/manifest.webmanifest?v=47.7.53"/>
 <link rel="icon" type="image/png" href="/icons/stellar-192.png"/>
 <link rel="apple-touch-icon" href="/icons/stellar-192.png"/>
-<link href="/style.css?v=47.7.47" rel="stylesheet"/>
+<link href="/style.css?v=47.7.53" rel="stylesheet"/>
   <link rel="stylesheet" href="/modules/topbar-navigation-v481.css?v=48.1.0">
   <link rel="stylesheet" href="/modules/pilot-ship-hud-v482.css?v=48.2.6">
   <link rel="stylesheet" href="/modules/route-map-layout-v4825.css?v=48.2.5">
   <link rel="stylesheet" href="/modules/stellar-premium-ui-v55.css?v=47.7.13">
   <link rel="stylesheet" href="/modules/stellar-premium-ui-v56.css?v=47.7.13">
-  <link rel="stylesheet" href="/modules/stellar-admin-v57.css?v=47.7.47">
+  <link rel="stylesheet" href="/modules/stellar-admin-v57.css?v=47.7.53">
   <link rel="stylesheet" href="/modules/stellar-refinement-v58.css?v=47.7.13">
-  <link rel="stylesheet" href="/modules/stellar-refinement-v59.css?v=47.7.47">
-  <link rel="stylesheet" href="/modules/stellar-showcase-v61.css?v=47.7.47">
-  <link rel="stylesheet" href="/modules/stellar-fleet-v62.css?v=47.7.47">
+  <link rel="stylesheet" href="/modules/stellar-refinement-v59.css?v=47.7.53">
+  <link rel="stylesheet" href="/modules/stellar-showcase-v61.css?v=47.7.53">
+  <link rel="stylesheet" href="/modules/stellar-fleet-v62.css?v=47.7.53">
 </head>
 <body>
 <div class="stellar-boot-splash" id="stellarBootSplash" role="status" aria-label="Preparando Stellar Legacy">
@@ -220,12 +220,6 @@
   <small id="bossPhaseStatus">ESTÁVEL</small>
 </section>
 
-<aside id="mobileLandscapeHint" class="mobile-landscape-tip hidden" aria-hidden="true" aria-label="Jogar em tela horizontal">
-  <div class="mobile-landscape-tip-icon" aria-hidden="true">▣</div>
-  <div class="mobile-landscape-tip-copy"><strong>JOGUE NA HORIZONTAL</strong><small data-landscape-status>Mais visão de combate, munições e minimapa organizados.</small></div>
-  <button id="mobileLandscapeLaunch" class="mobile-landscape-launch" type="button">GIRAR / TELA CHEIA</button>
-  <button id="mobileLandscapeDismiss" class="mobile-landscape-dismiss" type="button" aria-label="Continuar no modo vertical">×</button>
-</aside>
 <button id="mobileCombatModeBtn" class="mobile-combat-mode-btn" type="button" aria-pressed="false" aria-label="Alternar interface compacta de combate" title="Alternar interface compacta">COMPACTO</button>
 <div class="bottom-hud-dock" id="bottomHudDock">
 <section class="hud-panel chat-dock" id="chatDock" aria-label="Chat dos pilotos">
@@ -892,6 +886,10 @@
         </div>
         <div class="performance-hint" id="performanceHint">Analisando dispositivo...</div>
       </section>
+      <section class="settings-section" id="orientationSettingsV92">
+        <div class="settings-title"><div><b>ORIENTAÇÃO DO JOGO</b><small>Escolha horizontal somente quando quiser. No APK, o Android gira sem exigir tela cheia no login.</small></div><span id="landscapeStatusV92">AUTOMÁTICA</span></div>
+        <div class="orientation-action-row"><button type="button" class="small-btn gold" id="landscapeEnableV92">⤢ HORIZONTAL</button><button type="button" class="ghost-btn" id="landscapeDisableV92">VERTICAL / AUTOMÁTICO</button></div>
+      </section>
       <section class="settings-section perf-diagnostics-section" id="perfDiagnosticsSection">
         <div class="settings-title"><div><b>DIAGNÓSTICO DE DESEMPENHO</b><small>FPS, tempo de simulação e tempo de desenho separados. Sem enviar informações ao servidor.</small></div></div>
         <div class="perf-diag-controls">
@@ -1004,6 +1002,7 @@
     <div class="settings-panel hidden" id="settingsRankingPanel">
       <section class="settings-section ranking-settings-section">
         <div class="settings-title"><div><b>PATENTES & RANKING</b><small>Patentes, posição e desempenho dos pilotos.</small></div><button class="ghost-btn" id="rankingRefreshBtn">ATUALIZAR</button></div>
+        <article class="ranking-board" id="v95ProgressGuide" aria-live="polite"><div class="ranking-board-title">EVOLUÇÃO DO COMANDO • SUA PROGRESSÃO</div><div id="v95ProgressGuideText" class="v95-progression-content">Aguardando dados do piloto.</div></article>
         <div class="ranking-hero-grid">
           <article class="ranking-board ranking-hero-card">
             <div class="ranking-board-title">MINHA PATENTE</div>
@@ -1182,11 +1181,24 @@
 </div>
 </div>
 <div class="perf-diag-overlay hidden" id="perfDiagOverlay" aria-live="off" aria-label="Contador de FPS local"><b id="perfDiagHudFps">FPS —</b><small id="perfDiagHudStutter">P95 —</small></div>
-<script src="/game.js?v=47.7.47" type="module"></script>
-<script src="/modules/stellar-admin-v57.js?v=47.7.47" type="module"></script>
-<script type="module" src="/modules/astral-rewards-v381.js?v=47.7.47"></script>
-<script type="module" src="/modules/unified-expansion-v42.js?v=47.7.47"></script>
+<script src="/game.js?v=47.7.53" type="module"></script>
+<script src="/modules/stellar-admin-v57.js?v=47.7.53" type="module"></script>
+<script type="module" src="/modules/astral-rewards-v381.js?v=47.7.53"></script>
+<script type="module" src="/modules/unified-expansion-v42.js?v=47.7.53"></script>
   <script type="module" src="/modules/topbar-navigation-v481.js?v=48.1.0"></script>
   <script type="module" src="/modules/pilot-ship-hud-v482.js?v=48.2.6"></script>
+
+<!-- V92–V97: compra autoritativa de munição por quantidade digitada. -->
+<section class="stellar-bulk-buy hidden" id="bulkPurchaseModalV92" role="dialog" aria-modal="true" aria-label="Compra de suprimentos em lote">
+  <div class="stellar-bulk-box">
+    <div class="stellar-bulk-head"><strong>🛒 COMPRAR SUPRIMENTOS</strong><button type="button" class="ghost-btn" data-bulk-close>FECHAR</button></div>
+    <p>Escolha o tipo e informe as unidades desejadas. A Loja entrega <b>pacotes inteiros</b>, com uma única compra validada no servidor.</p>
+    <label>TIPO DE MUNIÇÃO / MÍSSIL<select data-bulk-product aria-label="Tipo de suprimento"></select></label>
+    <label>QUANTIDADE DE UNIDADES<input data-bulk-quantity type="number" inputmode="numeric" min="1" max="2000000" step="1" value="1000"></label>
+    <div class="stellar-bulk-preview" data-bulk-preview aria-live="polite"></div>
+    <button class="primary-btn" type="button" data-bulk-accept>REVISAR E CONFIRMAR</button>
+    <small>Nunca haverá várias compras automáticas. Limite: 500 pacotes / operação. Compras indisponíveis durante Farm Offline.</small>
+  </div>
+</section>
 </body>
 </html>

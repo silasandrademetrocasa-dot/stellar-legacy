@@ -1,6 +1,8 @@
 package com.stellarlegacy.mobile;
 
 import android.app.Activity;
+import android.content.pm.ActivityInfo;
+import android.webkit.JavascriptInterface;
 import android.app.AlertDialog;
 import android.content.Intent;
 import android.graphics.Color;
@@ -65,6 +67,8 @@ public final class MainActivity extends Activity {
         settings.setSupportMultipleWindows(false);
         settings.setMixedContentMode(WebSettings.MIXED_CONTENT_NEVER_ALLOW);
         WebView.setWebContentsDebuggingEnabled(BuildConfig.DEBUG);
+        // Somente o WebView local recebe esta ponte restrita de orientação.
+        browser.addJavascriptInterface(new OrientationBridge(), "StellarAndroid");
         browser.setWebChromeClient(new WebChromeClient());
         browser.setWebViewClient(new WebViewClient() {
             @Override public WebResourceResponse shouldInterceptRequest(WebView view, WebResourceRequest request) {
@@ -109,6 +113,14 @@ public final class MainActivity extends Activity {
         setContentView(browser);
         // A primeira pagina e o jogo EMPACOTADO, nao o site remoto.
         browser.loadUrl(origin + "/index.html");
+    }
+
+    private final class OrientationBridge {
+        @JavascriptInterface public void setLandscape(boolean landscape) {
+            runOnUiThread(() -> setRequestedOrientation(landscape
+                ? ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE
+                : ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED));
+        }
     }
 
     @Override public void onBackPressed() {

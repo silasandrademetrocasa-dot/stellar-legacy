@@ -34,7 +34,7 @@ import { createSecurityService } from './security-service.js';
 
 const app = express();
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const RELEASE_VERSION = '47.7.47'; // único identificador de release nos endpoints HTTP
+const RELEASE_VERSION = '47.7.53'; // único identificador de release nos endpoints HTTP
 
 function normalizeSupabaseUrl(value = '') {
   let url = String(value || '').trim();
@@ -43,6 +43,8 @@ function normalizeSupabaseUrl(value = '') {
   url = url.replace(/\/rest\/v1$/i, '');
   return url;
 }
+
+import {quoteBulkPurchase} from '../public/modules/bulk-purchase-v92.js';
 
 const SUPABASE_URL = normalizeSupabaseUrl(process.env.SUPABASE_URL || '');
 const SUPABASE_KEY = String(process.env.SUPABASE_PUBLISHABLE_KEY || process.env.SUPABASE_ANON_KEY || '').trim();
@@ -1334,8 +1336,6 @@ app.post('/api/live/purchase', requireUser, asyncRoute(async (req,res)=>{
 
 
 
-
-
 const BASE_SERVICES_V1783={
   weapon:{name:'Calibração de Armamento',description:'+3% dano laser por 60 minutos.',base_cost:1500000,duration_ms:3600000,level_band_size:5,level_cost_scale:.35,max_stack_ms:21600000,effect:{laser_damage_pct:3},enabled:true},
   shield:{name:'Harmonização de Escudo',description:'+5% escudo máximo por 60 minutos.',base_cost:1000000,duration_ms:3600000,level_band_size:5,level_cost_scale:.35,max_stack_ms:21600000,effect:{shield_pct:5},enabled:true},
@@ -1368,6 +1368,78 @@ function applyCraftRecipeServer(state,recipeId,runtime){
 installOfflineFarmV484(app,{requireUser,asyncRoute,requireEliteAdmin});
 installBalanceAuditV90(app,{requireUser,asyncRoute,requireEliteAdmin});
 const OFFLINE_FARM_GUARD_V484=makeOfflineFarmGuardV484(requireEliteAdmin);
+// V92–V97 • Uma requisição, uma compra autoritativa de munição/mísseis.
+// O cliente escolhe unidades; servidor cobra PACOTES completos e entrega todos eles.
+// request_id persiste no SAVE: repetir por timeout não cobra duas vezes.
+app.post('/api/live/purchase/bulk', requireUser, OFFLINE_FARM_GUARD_V484, asyncRoute(async (req,res)=>{
+  const tamper=invalidShopArguments(req.body,['catalog_key','quantity','request_id','expected_price','expected_currency','expected_pack_size']);
+  if(tamper)return res.status(400).json({error:'Parâmetros de lote inválidos.',code:'INVALID_BULK_ARGUMENTS'});
+  const key=String(req.body?.catalog_key||'').trim(),quantity=Number(req.body?.quantity);
+  const requestId=String(req.body?.request_id||'').trim();
+  if(!/^(?:ammo|rocket):[A-Za-z0-9_-]{2,50}$/.test(key)||
+     !/^[a-f0-9-]{20,70}$/i.test(requestId)||!Number.isSafeInteger(quantity))
+    return res.status(400).json({error:'Produto, quantidade ou ID de pedido inválidos.'});
+  const result=await withPurchaseLock(req.user.id,async()=>{
+    const snapshot=await loadLiveOpsSnapshot(true),row=liveCatalogRow(snapshot,key);
+    if(!row||!['ammo','rocket'].includes(row.kind)||row.shop_visible===false||row.enabled===false)
+      throw Object.assign(new Error('Produto indisponível para compra em lote.'),{status:404});
+    const grant=row.meta?.grant||{};
+    if(String(grant.kind)!==row.kind||!String(grant.id||row.ref_id||''))
+      throw Object.assign(new Error('Catálogo de munições inconsistente.'),{status:409});
+    const packSize=Number(grant.qty),packPrice=Number(row.price);
+    let quote;try{quote=quoteBulkPurchase({requested:quantity,packSize,packPrice});}
+    catch(e){throw Object.assign(e,{status:400});}
+    // Client confirms the exact current catalog quote, so ADM changes never charge silently.
+    if(Number(req.body.expected_price)!==quote.price||
+       String(req.body.expected_currency)!==(row.currency==='uridium'?'uridium':'credits')||
+       Number(req.body.expected_pack_size)!==packSize)
+      throw Object.assign(new Error('Preço do catálogo mudou. Abra a compra novamente para confirmar o novo valor.'),{status:409});
+    const {data:saveRow,error:saveError}=await req.sb.from('game_saves').select('state').eq('user_id',req.user.id).maybeSingle();
+    if(saveError)throw Error(saveError.message);
+    if(!saveRow?.state)throw Object.assign(new Error('Save não encontrado.'),{status:409});
+    const state=structuredClone(saveRow.state);
+    if(String(state.accountOwnerId||req.user.id)!==req.user.id)
+      throw Object.assign(new Error('Proprietário de save inválido.'),{status:403});
+    // Idempotência com recibo persistido, inclusive após reiniciar o Render.
+    const receipts=Array.isArray(state.bulkPurchaseReceiptsV92)?state.bulkPurchaseReceiptsV92:[];
+    const previous=receipts.find(r=>r.requestId===requestId);
+    if(previous){
+      if(previous.catalogKey!==key||previous.quantity!==quantity)
+        throw Object.assign(new Error('ID já usado para outro pedido.'),{status:409});
+      return {state,purchase:{...previous,replayed:true}};
+    }
+    const minLevel=Math.max(1,Math.floor(Number(row.min_level)||1));
+    if((Number(state.profile?.level)||1)<minLevel)
+      throw Object.assign(new Error(`Requer nível ${minLevel}.`),{status:409});
+    const currency=String(row.currency)==='uridium'?'uridium':'credits';
+    const balance=Number(state.profile?.[currency]);
+    if(!Number.isFinite(balance)||balance<quote.price)
+      throw Object.assign(new Error('Saldo insuficiente para o lote.'),{status:409});
+    const oldQuantity=Number((row.kind==='ammo'?state.ammo:state.rockets)?.[grant.id]||0);
+    if(!Number.isSafeInteger(oldQuantity)||oldQuantity<0||oldQuantity+quote.delivered>1000000000)
+      throw Object.assign(new Error('Estoque ultrapassaria o limite seguro.'),{status:409});
+    // Usa o concedente oficial, apenas com a quantidade calculada a partir da tabela de preços.
+    applyLiveGrant(state,{...row,meta:{...row.meta,grant:{...grant,qty:quote.delivered}}});
+    state.profile[currency]=balance-quote.price;
+    state.serverPurchaseRevision=Math.max(0,Math.floor(Number(state.serverPurchaseRevision)||0))+1;
+    state.accountOwnerId=req.user.id;state.accountOwnerEmail=req.user.email||null;
+    const receipt={requestId,catalogKey:key,quantity,delivered:quote.delivered,packages:quote.packages,price:quote.price,currency,at:Date.now()};
+    state.bulkPurchaseReceiptsV92=[...receipts.slice(-23),receipt];
+    const updatedAt=new Date().toISOString();
+    const error=await writeVerifiedSave(req,state,updatedAt);
+    if(error)throw Error(error.message);
+    const profile=state.profile||{};
+    const callsign=await ensureProfile(req.sb,req.user);
+    await (await requireEliteAdmin()).from('profiles').upsert({id:req.user.id,callsign,faction:profile.faction||null,level:Number(profile.level||1),xp:Number(profile.xp||0),credits:Number(profile.credits||0),uridium:Number(profile.uridium||0),aliens_killed:Number(profile.aliensKilled||0),gg_completed:Number(state.galaxyGate?.alpha?.completed||profile.ggCompleted||0),updated_at:updatedAt},{onConflict:'id'});
+    return {state,purchase:receipt};
+  });
+  res.set('Cache-Control','no-store');res.json({ok:true,...result});
+}));
+
+
+
+
+
 app.post('/api/economy/action', requireUser, OFFLINE_FARM_GUARD_V484, asyncRoute(async (req,res)=>{
   const routeStarted=Date.now();
   const action=String(req.body?.action||'').trim();
@@ -1828,6 +1900,10 @@ app.put('/api/save', requireUser, OFFLINE_FARM_GUARD_V484, asyncRoute(async (req
   let statePatch = null;
   const { data: serverSave } = await req.sb.from('game_saves').select('state').eq('user_id', req.user.id).maybeSingle();
   // Compras economicas confirmadas pelo Render nao podem ser desfeitas com save antigo.
+  // O histórico idempotente de compras em lote é SEMPRE autoritativo do servidor.
+  // Clientes legados que não possuem esse campo continuam compatíveis.
+  if(serverSave?.state?.bulkPurchaseReceiptsV92)state.bulkPurchaseReceiptsV92=structuredClone(serverSave.state.bulkPurchaseReceiptsV92);
+  else delete state.bulkPurchaseReceiptsV92;
   const authoritativePurchaseRevision=Math.max(0,Number(serverSave?.state?.serverPurchaseRevision)||0);
   const incomingPurchaseRevision=Math.max(0,Number(state?.serverPurchaseRevision)||0);
   if(incomingPurchaseRevision<authoritativePurchaseRevision)return res.status(409).json({
