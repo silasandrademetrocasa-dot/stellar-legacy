@@ -1,6 +1,6 @@
 {
   "name": "stellar-legacy",
-  "version": "47.7.57",
+  "version": "47.7.58",
   "type": "module",
   "scripts": {
     "start": "node server/index.js",
@@ -20,5 +20,5 @@
   "engines": {
     "node": ">=18"
   },
-  "release": "V101 LOGIN PERSISTENTE: sessão criptografada Android, e-mail lembrado opcionalmente, recuperação segura"
+  "release": "V102 CONSISTENCIA ECONOMICA: piloto com compra de habilidade autoritativa, save concorrente seguro, auditoria arena"
 }

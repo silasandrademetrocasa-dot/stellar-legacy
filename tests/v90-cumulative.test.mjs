@@ -58,5 +58,5 @@ test('V90: legendary alert is cosmetic, unique and persistent visuals untouched'
  assert.match(game,/APEX OVERLORD • CHEFE LENDÁRIO X-7/);
  assert.match(text('server/balance-audit-v90.js'),/apex\[0\]\?\.map_id!=='x7'/);
  assert.match(text('public/modules/stellar-offline-farm-v484.js'),/#v485-world-lock/);
- assert.equal(JSON.parse(text('package.json')).version,'47.7.57');
+ assert.equal(JSON.parse(text('package.json')).version,'47.7.58');
 });

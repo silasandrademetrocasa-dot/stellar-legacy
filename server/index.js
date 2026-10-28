@@ -37,7 +37,7 @@ import { createSecurityService } from './security-service.js';
 
 const app = express();
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const RELEASE_VERSION = '47.7.57'; // único identificador de release nos endpoints HTTP
+const RELEASE_VERSION = '47.7.58'; // único identificador de release nos endpoints HTTP
 
 function normalizeSupabaseUrl(value = '') {
   let url = String(value || '').trim();
@@ -48,6 +48,7 @@ function normalizeSupabaseUrl(value = '') {
 }
 
 import {quoteBulkPurchase} from '../public/modules/bulk-purchase-v92.js';
+import {applyPilotSkillUpgradeV102,applyPilotSkillResetV102,withEconomySaveRetryV102} from './pilot-economy-v102.js';
 
 const SUPABASE_URL = normalizeSupabaseUrl(process.env.SUPABASE_URL || '');
 const SUPABASE_KEY = String(process.env.SUPABASE_PUBLISHABLE_KEY || process.env.SUPABASE_ANON_KEY || '').trim();
@@ -531,9 +532,17 @@ async function writeEconomySave(req,state){
   state.accountOwnerId=req.user.id;state.accountOwnerEmail=req.user.email||null;const updated_at=new Date().toISOString();
   const profile=state.profile||{};let securedCallsign=normalizeCallsign(profile.callsign||'');if(!securedCallsign)securedCallsign=await ensureProfile(req.sb,req.user);
   state.profile={...profile,callsign:securedCallsign};
-  const savePromise=writeVerifiedSave(req,state,updated_at).then(error=>({error}));
-  const profilePromise=(await requireEliteAdmin()).from('profiles').upsert({id:req.user.id,callsign:securedCallsign,faction:profile.faction||null,level:Number(profile.level||1),xp:Number(profile.xp||0),credits:Number(profile.credits||0),uridium:Number(profile.uridium||0),aliens_killed:Number(profile.aliensKilled||0),gg_completed:Number(state.galaxyGate?.alpha?.completed||profile.ggCompleted||0),updated_at},{onConflict:'id'});
-  const [{error:saveError},{error:profileError}]=await Promise.all([savePromise,profilePromise]);if(saveError)throw new Error(saveError.message);if(profileError)throw new Error(profileError.message);return updated_at;
+  // V102: only publish the profile after the guarded save succeeds. A failed
+  // SAVE_NPC_STALE must never update the public profile or charge any resources.
+  const saveError=await writeVerifiedSave(req,state,updated_at);
+  if(saveError)throw new Error(saveError.message);
+  const {error:profileError}=await (await requireEliteAdmin()).from('profiles').upsert({id:req.user.id,callsign:securedCallsign,faction:profile.faction||null,level:Number(profile.level||1),xp:Number(profile.xp||0),credits:Number(profile.credits||0),uridium:Number(profile.uridium||0),aliens_killed:Number(profile.aliensKilled||0),gg_completed:Number(state.galaxyGate?.alpha?.completed||profile.ggCompleted||0),updated_at},{onConflict:'id'});
+  if(profileError){
+    // The authoritative game_saves write already succeeded. Do NOT retry or
+    // tell the client to repeat a charged action on a stale profile projection.
+    console.warn('[economy-profile-sync] game_saves committed; profile projection pending:',profileError.message);
+  }
+  return updated_at;
 }
 function debitServer(state,amount,currency){const c=currency==='uridium'?'uridium':'credits',price=Math.max(0,Math.round(Number(amount)||0)),balance=Math.max(0,Number(state.profile?.[c])||0);if(balance<price)throw Object.assign(new Error(`Saldo insuficiente: faltam ${price-balance} ${c==='uridium'?'STL':'CR'}.`),{status:409});state.profile[c]=balance-price;return {currency:c,price,balance:state.profile[c]};}
 function creditServer(state,amount,currency){const c=currency==='uridium'?'uridium':'credits',value=Math.max(0,Math.round(Number(amount)||0));state.profile[c]=Math.max(0,Number(state.profile?.[c])||0)+value;return {currency:c,value,balance:state.profile[c]};}
@@ -1455,7 +1464,7 @@ app.post('/api/economy/action', requireUser, OFFLINE_FARM_GUARD_V484, asyncRoute
     if(outcome?.auto_suspended)return res.status(403).json({error:'Conta temporariamente suspensa.',code:'ACCOUNT_BANNED'});
     return res.status(400).json({error:'Parâmetros econômicos não autorizados.',code:tamper.code});}
   if(!action)return res.status(400).json({error:'Ação econômica ausente.'});
-  const result=await withPurchaseLock(req.user.id,async()=>{
+  const result=await withPurchaseLock(req.user.id,()=>withEconomySaveRetryV102(async()=>{
     const catalogActions=new Set(['auto_buy','unlock_pet_slot','buy_quantum_cores','sell_cargo','sell_inventory','sell_drone','gate_spin']);
     const premiumActions=new Set(['auto_buy','gate_spin']);
     const systemsActions=new Set(['base_service','craft_recipe']);
@@ -1484,6 +1493,12 @@ app.post('/api/economy/action', requireUser, OFFLINE_FARM_GUARD_V484, asyncRoute
     }
     else if(action==='buy_quantum_cores'){
       const qty=Math.max(1,Math.min(500,Math.floor(Number(payload.qty)||1))),row=liveCatalogRow(snapshot,'quantum_core:unit');if(!row)throw Object.assign(new Error('Núcleos Quânticos indisponíveis no LIVE OPS.'),{status:404});const unit=Math.max(0,Math.round(Number(row.price)||0)),cost=unit*qty;debitServer(state,cost,'uridium');state.pilotBio ||= {};state.pilotBio.logDisks=Math.max(0,Number(state.pilotBio.logDisks)||0)+qty;info={action,qty,unit_price:unit,cost,currency:'uridium'};
+    }
+    else if(action==='pilot_skill_upgrade'){
+      info=applyPilotSkillUpgradeV102(state,String(payload.id||''));
+    }
+    else if(action==='pilot_skill_reset'){
+      info=applyPilotSkillResetV102(state);
     }
     else if(action==='convert_pilot_point'){
       state.pilotBio ||= {};const p=state.pilotBio;p.logDisks=Math.max(0,Math.floor(Number(p.logDisks)||0));p.totalPoints=Math.max(0,Math.floor(Number(p.totalPoints)||0));if(p.totalPoints>=50)throw Object.assign(new Error('Limite de 50 Pontos de Pesquisa atingido.'),{status:409});const next=p.totalPoints+1,cost=Math.max(30,Math.round(30*Math.pow(1.1,Math.max(0,next-1))));if(p.logDisks<cost)throw Object.assign(new Error(`Faltam ${cost-p.logDisks} Núcleos Quânticos.`),{status:409});p.logDisks-=cost;p.totalPoints=next;info={action,point:next,cost,remaining_cores:p.logDisks};
@@ -1541,7 +1556,7 @@ app.post('/api/economy/action', requireUser, OFFLINE_FARM_GUARD_V484, asyncRoute
     else throw Object.assign(new Error('Ação econômica não reconhecida pelo servidor.'),{status:400});
 
     const updated_at=await writeEconomySave(req,state);return {state,updated_at,info};
-  });
+  },{maxAttempts:3,delay:attempt=>{console.warn('[economy-v102] save em conflito; relendo saldo e recompensas, tentativa',attempt+1);return new Promise(resolve=>setTimeout(resolve,40*attempt));}}));
   res.json({ok:true,...result,server_ms:Date.now()-routeStarted});
 }));
 

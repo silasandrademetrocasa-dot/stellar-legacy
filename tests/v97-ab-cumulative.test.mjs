@@ -65,6 +65,6 @@ test('V94–V97: Autopilot, Farm e progressão são diagnósticos, não novos sa
  assert.match(game,/X-7 contém somente dois Apex Overlord lendários/);
 });
 test('V97: versão, APK e assets preservados',()=>{
- assert.match(JSON.parse(read('package.json')).version,/^47\.7\.(53|56|57)$/);
+ assert.match(JSON.parse(read('package.json')).version,/^47\.7\.(53|56|57|58)$/);
  for(const file of ['public/assets/v65/ships/top/phoenix.webp','public/assets/v65/aux/aux9.webp','public/modules/stellar-autopilot-v48.js','server/offline-farm-v484.js'])assert.ok(existsSync(join(root,file)),file);
 });
