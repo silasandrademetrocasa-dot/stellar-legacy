@@ -1,0 +1,25 @@
+STELLAR LEGACY — V105.1 INCREMENTAL • REDE SEGURA
+
+BASE NECESSARIA: V104 47.7.60 + HOTFIX 2 + HOTFIX 3, ja publicados no repositorio.
+Este ZIP nao contem o jogo completo. Substitua os arquivos exatamente nos caminhos indicados.
+
+MUDANCAS:
+- server/network-telemetry-v1051.js [NOVO]
+- server/world.js [MODIFICADO]
+- public/game.js [MODIFICADO: leitura visual de grupo quando modal fechado]
+- public/index.html [MODIFICADO: cache-buster game.js]
+- tests/v106-pvp-inbox-policy.test.mjs [MODIFICADO: versoes de cache aceitas]
+- tests/v1051-network-observability.test.mjs [NOVO]
+- docs/V105_1_REDE_SEGURA_TELEMETRIA.md [NOVO]
+
+COMO APLICAR:
+1) Extrair o ZIP na raiz do repositorio GitHub, mantendo pastas public/, server/, tests/ e docs/.
+2) Revisar diff; nao remover SQL nem outros arquivos.
+3) Rodar npm run check && npm test.
+4) Fazer deploy Render da mesma branch e recompilar APK atualizado.
+5) Em Render Logs, procurar STELLAR_NETWORK_V1051 (a cada 5 min, se houver atividade).
+6) Testar save/relogin, missao, leilao, compra, PvP, troca de mapa e farm offline.
+
+IMPORTANTE: Nenhuma edicao de banco, saves ou RPC economica. A telemetria usa bytes SEM compressao, nao a banda faturada no Render.
+
+Status deste ZIP: codigo e testes locais validados, nao foi implantado no GitHub ou Render.

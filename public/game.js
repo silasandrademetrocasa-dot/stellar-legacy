@@ -6919,7 +6919,11 @@ async function queuePvpShot(target,damage,shieldDrain=false,color='#ff657d'){
 function updateOnlineWorld(dt){
   if(!authenticated||!progress)return;const now=Date.now(),presenceInterval=sharedUniverseOnline()?4500:1200;
   if(now-onlineWorld.lastSyncAt>presenceInterval&&!onlineWorld.busy)syncOnlineWorld();
-  syncPvpInbox();syncClanCreditGrants();if(Date.now()-battleGroupRuntime.lastAt>6000)refreshBattleGroup(false);
+  // V105.1: somente leitura visual do grupo pode ser mais espaçada com o modal fechado.
+  // As verificacoes de membros/recompensas no servidor e as acoes do grupo nao mudam.
+  syncPvpInbox();syncClanCreditGrants();
+  const groupMenuVisibleV1051=!!(ui.battleGroupModal&&!ui.battleGroupModal.classList.contains('hidden'));
+  if(now-battleGroupRuntime.lastAt>(groupMenuVisibleV1051?6000:15000))refreshBattleGroup(false);
   for(const rp of onlineWorld.players.values()){
     // V34.6.3: interpolate buffered remote pilot packets instead of jittery 55ms prediction.
     // Never touch local player position or the server-authoritative combat coordinates.

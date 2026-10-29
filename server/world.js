@@ -17,6 +17,7 @@ import {admitNpcDamage} from './combat-throttle.js';
 import {PORTAL_NEUTRAL_RADIUS,playerInNeutralPortalRange} from './portal-safety.js';
 import {socketMessageAllowed,boundedVital} from './realtime-guard.js';
 import {playerStateDelta,npcStateDelta} from './network-delta-v104.js';
+import {createNetworkTelemetryV1051} from './network-telemetry-v1051.js';
 import { WebSocketServer, WebSocket } from 'ws';
 import {selectLiveDirective,directiveToWorldEvent} from './universe-directives.js';
 import {captureElapsedSeconds, classifyWarfrontCaptureError, withCaptureTimeout, CAPTURE_FAILURE_BACKOFF_MS} from './warfront-capture.js';
@@ -99,7 +100,7 @@ const EVENT_VARIANTS={
 function eventVariant(id){return EVENT_VARIANTS[String(id||'')]||EVENT_VARIANTS.invasion;}
 function safeJsonSend(ws,payload){
   if(ws?.readyState!==WebSocket.OPEN) return false;
-  try{ ws.send(JSON.stringify(payload)); return true; }catch{ return false; }
+  try{const wire=JSON.stringify(payload);ws.send(wire);ws.networkTelemetryV1051?.outbound(payload?.type,wire);return true;}catch{return false;}
 }
 
 class Room {
@@ -228,7 +229,7 @@ class Room {
       if(entities.length&&c.readyState===WebSocket.OPEN){
         // Um unico JSON por lote e apenas campos alterados. Nao alterar a fila de eventos criticos.
         const wire=JSON.stringify({type:'npc_batch',entities});
-        try{c.send(wire);for(const [id,frame] of pendingStates)c.npcNetState.set(id,frame);this.world.networkV104.npcBatches++;this.world.networkV104.npcBatchBytes+=Buffer.byteLength(wire);}catch{}
+        try{c.send(wire);c.networkTelemetryV1051?.outbound('npc_batch',wire);for(const [id,frame] of pendingStates)c.npcNetState.set(id,frame);this.world.networkV104.npcBatches++;this.world.networkV104.npcBatchBytes+=Buffer.byteLength(wire);}catch{}
       }
     }
   }
@@ -691,6 +692,7 @@ class Room {
       if(c===exclude||c.readyState!==WebSocket.OPEN)continue;
       try{
         c.send(wire);
+        c.networkTelemetryV1051?.outbound(payload.type,wire);
         this.world.networkV104.broadcastMessages++;
         this.world.networkV104.broadcastBytes+=wireBytes;
         if(payload.type==='world_player_patch'){this.world.networkV104.playerPatchMessages++;this.world.networkV104.playerPatchBytes+=wireBytes;}
@@ -1111,10 +1113,13 @@ export function attachSharedUniverse(server,{authenticate,authorizeJoin,recordSe
       zlibDeflateOptions:{level:3}
     }
   });const rooms=new Map();
+  const networkTelemetryV1051=createNetworkTelemetryV1051();
+  networkTelemetryV1051.start();
   const world={
     recordSecurityViolation,
     // Contadores acumulados desde o boot (sem ID ou dado pessoal): comparar com baseline no Render.
     networkV104:{since:nowMs(),broadcastMessages:0,broadcastBytes:0,playerPatchMessages:0,playerPatchBytes:0,playerFullEquivalentBytes:0,playerUnchangedSkipped:0,npcBatches:0,npcBatchBytes:0,npcBackpressureSkips:0},
+    networkTelemetryV1051,
     recordWarDefense:recordWarDefense||(()=>Promise.resolve(false)),
     damageRelay:damageRelay||(()=>Promise.reject(new Error("SQL V34.6 pendente"))),
     readRelayLoadout:readRelayLoadout||(()=>Promise.reject(new Error("Leitura de equipamentos não configurada"))),
@@ -1277,13 +1282,14 @@ export function attachSharedUniverse(server,{authenticate,authorizeJoin,recordSe
         room.broadcastEvent(true);
       }
     },
-    stats(){return {networkV104:{...world.networkV104},rooms:rooms.size,clients:[...rooms.values()].reduce((s,r)=>s+r.clients.size,0),npcs:[...rooms.values()].reduce((s,r)=>s+r.npcs.size,0),ores:[...rooms.values()].reduce((s,r)=>s+r.ores.size,0),event:world.currentEvent(),directivesCached:world.directives.length,directivesUpdatedAt:world.lastDirectivesAt,liveOpsUpdatedAt:world.lastLiveOpsAt,npcConfigVersion:Number(world.npcRuntime?.version)||0,npcConfigUpdatedAt:world.npcRuntime?.updatedAt||null,worldConfigVersion:Number(world.worldRuntime?.version)||0,worldConfigUpdatedAt:world.worldRuntime?.updatedAt||null};}
+    stats(){return {networkV104:{...world.networkV104},networkV1051:networkTelemetryV1051.snapshot(),rooms:rooms.size,clients:[...rooms.values()].reduce((s,r)=>s+r.clients.size,0),npcs:[...rooms.values()].reduce((s,r)=>s+r.npcs.size,0),ores:[...rooms.values()].reduce((s,r)=>s+r.ores.size,0),event:world.currentEvent(),directivesCached:world.directives.length,directivesUpdatedAt:world.lastDirectivesAt,liveOpsUpdatedAt:world.lastLiveOpsAt,npcConfigVersion:Number(world.npcRuntime?.version)||0,npcConfigUpdatedAt:world.npcRuntime?.updatedAt||null,worldConfigVersion:Number(world.worldRuntime?.version)||0,worldConfigUpdatedAt:world.worldRuntime?.updatedAt||null};}
   };
 
   wss.on('connection',ws=>{
     try{ws._socket?.setNoDelay?.(true);}catch{}
-    ws.isAuthed=false;ws.authTimer=setTimeout(()=>{try{ws.close(4401,'auth timeout');}catch{}},8000);
+    ws.isAuthed=false;ws.networkTelemetryV1051=networkTelemetryV1051;ws.authTimer=setTimeout(()=>{try{ws.close(4401,'auth timeout');}catch{}},8000);
     ws.on('message',async raw=>{
+      ws.networkTelemetryV1051?.inbound(raw);
       if(!socketMessageAllowed(ws))return;
       let msg;try{msg=JSON.parse(String(raw));if(!msg||typeof msg!=='object'||Array.isArray(msg))return;}catch{return;}
       if(msg.type==='ping')return safeJsonSend(ws,{type:'pong',ts:msg.ts,serverTime:nowMs()});

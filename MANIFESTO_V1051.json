@@ -1,0 +1,44 @@
+{
+  "release": "V105.1",
+  "base": "47.7.60 com HOTFIX 2 + HOTFIX 3",
+  "scope": "rede + leitura visual de grupo; sem alteracoes no save/SQL",
+  "deployed": false,
+  "tests": "202/202 npm test; npm run check OK",
+  "files": [
+    {
+      "path": "server/network-telemetry-v1051.js",
+      "bytes": 3122,
+      "sha256": "8b08ba97987daedec9692f2e89cef0b18f6e5b52d6456ccd958550e5d1da52a4"
+    },
+    {
+      "path": "server/world.js",
+      "bytes": 108837,
+      "sha256": "80dc737c71fdf64b6215715264141f8653d17ce79da22929fba90236a723d799"
+    },
+    {
+      "path": "public/game.js",
+      "bytes": 1189686,
+      "sha256": "dc19909a6e32b74a9693ff1e97e8e13f9afe8df2910f7efff117b9d4c0a54124"
+    },
+    {
+      "path": "public/index.html",
+      "bytes": 87613,
+      "sha256": "831b6083301bfee0f9386367d8f61dc21efba239ad32ccaa36a43fe6612fcc9d"
+    },
+    {
+      "path": "tests/v106-pvp-inbox-policy.test.mjs",
+      "bytes": 2376,
+      "sha256": "e4f3b8af07760ae617c76ccbe188fd8db6af18574d1589644d1c93dc6bc4f7eb"
+    },
+    {
+      "path": "tests/v1051-network-observability.test.mjs",
+      "bytes": 2459,
+      "sha256": "776dcab53c67c9f8d3ab6c5edc120bde147aed0e761c099b55bc491c3c3cac46"
+    },
+    {
+      "path": "docs/V105_1_REDE_SEGURA_TELEMETRIA.md",
+      "bytes": 3903,
+      "sha256": "84d50348143c1f872fdd0078e2d4095e44ca8bcba46a5a98b0917b70940a0505"
+    }
+  ]
+}
