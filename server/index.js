@@ -1916,7 +1916,7 @@ function normalizeShipSaveV50(state){
   if(state.repairRequired&&typeof state.repairRequired==='object')state.repairRequired.shipId='phoenix';
 }
 app.use('/api/save',(req,res,next)=>{if(req.method==='PUT'&&req.body?.state)normalizeShipSaveV50(req.body.state);next();});
-app.put('/api/save', requireUser, OFFLINE_FARM_GUARD_V484, asyncRoute(async (req, res) => {
+app.put('/api/save', requireUser, OFFLINE_FARM_GUARD_V484, asyncRoute(async (req, res) => withPurchaseLock(req.user.id, async()=> {
   let state = req.body?.state;
   if (!state || typeof state !== 'object') return res.status(400).json({ error: 'Save inválido.' });
   const {data:resetRecord,error:resetErr}=await req.sb.from('stellar_account_reset_epochs_v478').select('epoch').eq('user_id',req.user.id).maybeSingle();
@@ -2030,7 +2030,7 @@ app.put('/api/save', requireUser, OFFLINE_FARM_GUARD_V484, asyncRoute(async (req
   }, { onConflict: 'id' });
 
   res.json({ ok: true, updated_at, statePatch });
-}));
+})));
 
 
 // ===================== V17.9.1 BOOTSTRAP-SAFE PLAYER LOCATION =====================

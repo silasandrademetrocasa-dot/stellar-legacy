@@ -1,6 +1,8 @@
 package com.stellarlegacy.mobile;
 
 import android.app.Activity;
+import android.Manifest;
+import android.content.pm.PackageManager;
 import android.content.pm.ActivityInfo;
 import android.webkit.JavascriptInterface;
 import android.app.AlertDialog;
@@ -40,6 +42,7 @@ import androidx.webkit.WebViewAssetLoader;
  * fetch POST autenticado SEM CORS, proxy nativo ou duplicacao de regras economicas.
  */
 public final class MainActivity extends Activity {
+    private static final int DAILY_ALERT_PERMISSION_REQ = 108;
     private WebView browser;
     private String origin;
     private String host;
@@ -53,6 +56,8 @@ public final class MainActivity extends Activity {
         if (!"https".equals(endpoint.getScheme()) || host == null || host.isEmpty()) {
             throw new IllegalStateException("Origem HTTPS do Render invalida");
         }
+        DailyResetNotifier.createChannel(this);
+        DailyResetNotifier.scheduleNext(this); // somente se o jogador optou antes
         localFiles = new WebViewAssetLoader.Builder()
             .setDomain(host)
             .addPathHandler("/", new WebViewAssetLoader.AssetsPathHandler(this))
@@ -83,6 +88,8 @@ public final class MainActivity extends Activity {
         browser.addJavascriptInterface(new OrientationBridge(), "StellarAndroid");
         // V101: sessao opt-in, criptografada pelo Android Keystore. Nenhuma senha salva.
         browser.addJavascriptInterface(new SessionVaultBridge(), "StellarSessionVault");
+        // V108: ponte opt-in SOMENTE para um aviso local; sem acesso a saves/recursos.
+        browser.addJavascriptInterface(new DailyAlertsBridge(), "StellarDailyAlerts");
         browser.setWebChromeClient(new WebChromeClient());
         browser.setWebViewClient(new WebViewClient() {
             @Override public WebResourceResponse shouldInterceptRequest(WebView view, WebResourceRequest request) {
@@ -200,6 +207,57 @@ public final class MainActivity extends Activity {
         @JavascriptInterface public void clearSession() {
             synchronized (vaultLock) { prefs().edit().remove(ENTRY).apply(); }
         }
+    }
+
+    private void notifyDailyAlertUI() {
+        if (browser != null) browser.evaluateJavascript(
+            "window.dispatchEvent(new Event('stellar-daily-alerts-status'))", null);
+    }
+    private final class DailyAlertsBridge {
+        @JavascriptInterface public String status() {
+            return DailyResetNotifier.state(MainActivity.this);
+        }
+        @JavascriptInterface public void enable() {
+            runOnUiThread(() -> {
+                DailyResetNotifier.markRequested(MainActivity.this);
+                if (android.os.Build.VERSION.SDK_INT >= 33 &&
+                    checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+                    requestPermissions(new String[]{ Manifest.permission.POST_NOTIFICATIONS }, DAILY_ALERT_PERMISSION_REQ);
+                    return;
+                }
+                if (DailyResetNotifier.notificationsAllowed(MainActivity.this)) {
+                    DailyResetNotifier.setEnabled(MainActivity.this, true);
+                }
+                notifyDailyAlertUI();
+            });
+        }
+        @JavascriptInterface public void disable() {
+            runOnUiThread(() -> {
+                DailyResetNotifier.setEnabled(MainActivity.this, false);
+                notifyDailyAlertUI();
+            });
+        }
+        @JavascriptInterface public void test() {
+            runOnUiThread(() -> {
+                DailyResetNotifier.deliver(MainActivity.this, true);
+                notifyDailyAlertUI();
+            });
+        }
+    }
+
+    @Override public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode != DAILY_ALERT_PERMISSION_REQ) return;
+        if (grantResults.length>0 && grantResults[0]==PackageManager.PERMISSION_GRANTED) {
+            DailyResetNotifier.setEnabled(this,true);
+        }
+        notifyDailyAlertUI();
+    }
+
+    @Override protected void onResume() {
+        super.onResume();
+        DailyResetNotifier.scheduleNext(this);
+        notifyDailyAlertUI();
     }
 
     private final class OrientationBridge {

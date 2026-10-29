@@ -1,0 +1,11 @@
+STELLAR LEGACY — V106 UNIFIED SAVE ENGINE (CUMULATIVA)
+
+1. Este ZIP contem SOMENTE arquivos novos/alterados em relacao ao arquivo stellar-legacy-main.zip enviado em 29/10/2026.
+2. Inclui V105.1B (notificacoes Android) + V105.1C (hangar) + V106 (fila unica, bloqueio de vendas sem ACK, missao/revisoes e mapa astral 2D).
+3. Extraia SOBRE a raiz do repositorio existente, preservando caminhos. NAO aplique B/C depois da V106.
+4. Nenhum SQL novo. Nao desligue triggers/checks de revisao no Supabase.
+5. Rode npm run check && npm test. Suba GitHub, aguarde Render LIVE, gere um APK NOVO.
+6. Teste com 1 jogador e sem compras reais inicialmente; siga docs/V106_UNIFIED_SAVE_E_LIMPEZA.md.
+7. A auditoria de 2 antigos WebP e OPCIONAL: node scripts/v106-auditoria-artes-astral.mjs (dry-run) ; --apply apenas apos confirmar.
+8. Sem limpeza automática de outros assets. Nenhum GLB/GLTF foi encontrado no ZIP de origem.
+9. Durante conflito persistente nao force venda nem apague dados do aplicativo. Se o status ficar NAO SALVO, investigue antes de desinstalar.

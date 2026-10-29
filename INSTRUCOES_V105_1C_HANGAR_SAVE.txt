@@ -1,0 +1,21 @@
+STELLAR LEGACY V105.1C — CORRECAO PRIORITARIA HANGAR/SUPABASE
+
+BASE: V105.1 + V105.1B (release 47.7.60). Somente arquivos modificados.
+
+Arquivos:
+  public/game.js
+  public/modules/hangar-save-recovery-v109.js
+  tests/v109-hangar-cloud-safety.test.mjs
+  docs/V105_1C_HANGAR_SAVE_SEGURO_V109.md
+  INSTRUCOES_V105_1C_HANGAR_SAVE.txt
+  MANIFESTO_V105_1C.json
+
+1. Recomendado encerrar o farm offline antes de atualizar.
+2. Extrair o ZIP na raiz do repositorio atual, preservando caminhos.
+3. npm run check && npm test
+4. Fazer deploy no Render e gerar NOVO APK pelo GitHub Actions.
+5. Na base X-1, trocar um item e aguardar mensagem 'Hangar confirmado no Supabase ✓'.
+6. Relogar; verificar lasers, escudos, drones, CONF1 e CONF2.
+7. Se o jogo mostrar HANGAR NAO SALVO ou ficar PENDENTE, NAO desinstale ou apague dados antes de investigar.
+
+Nao mexe no SQL, farm offline, moedas, recompensas ou antifraude. Nenhum deploy feito aqui.

@@ -914,6 +914,16 @@
         <div class="settings-title"><div><b>ORIENTAÇÃO DO JOGO</b><small>Escolha horizontal somente quando quiser. No APK, o Android gira sem exigir tela cheia no login.</small></div><span id="landscapeStatusV92">AUTOMÁTICA</span></div>
         <div class="orientation-action-row"><button type="button" class="small-btn gold" id="landscapeEnableV92">⤢ HORIZONTAL</button><button type="button" class="ghost-btn" id="landscapeDisableV92">VERTICAL / AUTOMÁTICO</button></div>
       </section>
+      <!-- V108: lembrete nativo Android sem Render/SQL. Nao aparece no navegador. -->
+      <section class="settings-section hidden" id="androidDailyAlertsSectionV108" hidden>
+        <div class="settings-title"><div><b>🔔 AVISOS DIÁRIOS DO APK</b><small>À meia-noite de Brasília, lembrete de missões diárias e 10 batalhas da Arena. O Android pode atrasar o aviso alguns minutos por economia de bateria. Não altera seus saves.</small></div></div>
+        <div class="orientation-action-row">
+          <button type="button" class="small-btn gold" id="androidDailyAlertsEnableV108">ATIVAR LEMBRETES</button>
+          <button type="button" class="ghost-btn" id="androidDailyAlertsDisableV108">DESATIVAR</button>
+          <button type="button" class="ghost-btn" id="androidDailyAlertsTestV108">TESTAR AVISO</button>
+        </div>
+        <small id="androidDailyAlertsStatusV108" role="status">Carregando status das notificações do Android...</small>
+      </section>
       <section class="settings-section perf-diagnostics-section" id="perfDiagnosticsSection">
         <div class="settings-title"><div><b>DIAGNÓSTICO DE DESEMPENHO</b><small>FPS, tempo de simulação e tempo de desenho separados. Sem enviar informações ao servidor.</small></div></div>
         <div class="perf-diag-controls">
@@ -1205,7 +1215,8 @@
 </div>
 </div>
 <div class="perf-diag-overlay hidden" id="perfDiagOverlay" aria-live="off" aria-label="Contador de FPS local"><b id="perfDiagHudFps">FPS —</b><small id="perfDiagHudStutter">P95 —</small></div>
-<script src="/game.js?v=47.7.60-v1051-network" type="module"></script>
+<script type="module" src="/modules/android-daily-alerts-v108.js?v=108.0.0"></script>
+<script src="/game.js?v=47.7.60-v106-unified-save" type="module"></script>
 <script src="/modules/stellar-admin-v57.js?v=47.7.60" type="module"></script>
 <script src="/modules/stellar-admin-c-v100.js?v=47.7.60" type="module"></script>
 <script type="module" src="/modules/astral-rewards-v381.js?v=47.7.60"></script>

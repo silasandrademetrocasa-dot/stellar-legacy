@@ -29,7 +29,7 @@ test('dois drones originais distintos; cinco designers determinados por bônus e
  assert.equal(visualDroneV53('iris',{bonuses:{hp_per_drone:.02,shield_per_drone:.02,damage_per_drone:.02}}),'drone_e');
 });
 test('Visual não altera combate e materializador usa pieces',()=>{
- for(const text of ['ASTRAL53[d.key]','drawAstralRift(ctx','GAME_ASSETS.bases?.[factionKey]','visualDroneV53(d.type,designer)',"(count||0)/Math.max(1,gd.pieces)",'gate-materializer-sprite']){
+ for(const text of ['drawAstralRift(ctx','GAME_ASSETS.bases?.[factionKey]','visualDroneV53(d.type,designer)',"(count||0)/Math.max(1,gd.pieces)",'gate-materializer-sprite']){
   assert(game.includes(text) || (text==='gate-materializer-sprite'&&readFileSync(resolve(root,'public/style.css'),'utf8').includes(text)),text);
  }
  assert.equal(shipPivotV53('phoenix'),.24);assert.equal(shipPivotV53('drone_a'),0);

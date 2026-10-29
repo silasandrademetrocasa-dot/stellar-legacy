@@ -96,7 +96,9 @@ import { xpThresholdV482, migratePilotXpV482 } from './level-curve-v482.js?v=47.
 import { applyRecruitBonusV2012, eliteRouteSnapshotV2012, freshEliteRouteJournalV2012, ELITE_ROUTE_TARGETS_V2012, novaTierPriceV2012 } from './progression-plan-v2012.js?v=47.7.60';
 import { GAME_ASSETS } from './assets/v17/manifest.js?v=47.7.60';
 import { mergeUnsavedMissionProgressV105 } from './modules/mission-save-recovery-v105.js?v=47.7.60';
+import {createLatestSaveCoordinatorV106} from './modules/unified-save-coordinator-v106.js?v=47.7.60';
 import { pendingMissionCategoriesV107, confirmedMissionCategoriesV107 } from './modules/mission-completion-sync-v107.js?v=47.7.60';
+import {equipmentFingerprintV109,reconcilePendingEquipmentV109} from './modules/hangar-save-recovery-v109.js?v=47.7.60';
 import { shouldPollPvpInboxV106 } from './modules/pvp-inbox-policy-v106.js?v=47.7.60';
 import { signUp, signIn, beginGoogleSignIn, restoreGoogleSignInFromUrl, requestPasswordReset, restorePasswordRecoveryFromUrl, restoreSession, signOutLocal, getSessionRestoreErrorV101, checkGameSession, endGameSession, getUser, getSessionCredentials, loadCloudSave, saveCloudSave, loadEliteOperationsOnline, claimEliteOperationOnline, loadWarCampaignsOnline, claimWarSupplyOnline, claimWarCampaignOnline, loadAdminWarCampaignsOnline, saveAdminWarCampaignOnline, saveAdminWarRulesOnline, loadAdminEliteObjectivesOnline, saveAdminEliteObjectiveOnline, updateCallsign, updatePassword, loadRankings, loadAuctionBids, saveAuctionBidOnline, markAuctionBidStatusOnline, loadAuctionMarket, upsertPlayerPresenceOnline, loadMapPresenceOnline, savePlayerLocationCheckpointOnline, loadPlayerLocationCheckpointOnline, removePlayerPresenceOnline, queuePvpAttackOnline, consumePvpDamageEventsOnline, syncArenaProfileOnline, loadArenaState, loadArenaDailyRewardStatus, claimArenaDailyReward, loadArenaOpponents, loadArenaHistory, arenaAttackOnline, listClansOnline, loadMyClanOnline, createClanOnline, joinClanOnline, getClanRequestsOnline, reviewClanRequestOnline, cancelClanRequestOnline, setClanMemberRoleOnline, leaveClanOnline, transferClanCreditsOnline, claimClanCreditGrantsOnline, recordClanAlienKillOnline, getPremiumShopOnline, testPurchasePremiumOnline, adminPreviewPremiumStageOnline, adminSimulatePremiumStageOnline, getPremiumStageCatalogOnline, loadWarfrontStateOnline, loadSectorOwnershipOnline, hitWorldBossOnline, claimWorldBossRewardOnline, declareClanWarOnline, recordClanWarScoreOnline, loadLiveOpsOnline, adminUpdateLiveEventScheduleOnline, purchaseLiveCatalogOnline, purchaseLiveBulkOnline, economyActionOnline, getChatHistoryOnline, sendChatMessageOnline, redeemGameCouponOnline, getMyDesignersOnline, setDesignLoadoutOnline, claimGateDroneDesignOnline, claimEventDesignerOnline, getAdminStatus, adminSearchAccounts, adminRecentActions, adminBanAccount, adminUnbanAccount, adminResetAccount, adminDeleteAccount, pushTelemetryBatch, adminTelemetryOverview, adminPlayerTelemetry, getBattleGroupOnline, createBattleGroupOnline, inviteBattleGroupOnline, searchBattleGroupPlayersOnline, inviteBattleGroupUserOnline, respondBattleGroupInviteOnline, leaveBattleGroupOnline, kickBattleGroupMemberOnline, setBattleGroupRallyOnline, loadRuntimeConfigOnline, loadNpcRuntimeConfigOnline, loadWorldRuntimeConfigOnline, loadSystemsRuntimeConfigOnline, loadAdminRuntimeMonitorOnline, adminUpdateRuntimeModuleOnline, adminUpdateNpcRuntimeOnline, adminUpdateNpcSpawnRuntimeOnline, adminUpdateWorldMapOnline, adminUpdateWorldResourceOnline, adminUpdateWorldSectorOnline, adminUpdateWorldPortalOnline, adminUpdateWorldResourcePoolOnline, adminUpdateMissionCategoryOnline, adminUpdateEconomyServiceOnline, adminUpdateCraftingRecipeOnline, loadBattlePassRuntimeConfigOnline, adminUpdateBattlePassSeasonOnline, adminUpdateBattlePassTierOnline, loadShopsRuntimeConfigOnline, adminUpdateCommonShopItemOnline, adminUpdatePremiumShopItemOnline, loadBonusConfigOnline, adminUpdateBonusConfigOnline, adminCouponDashboardOnline, adminCreateCouponOnline, adminSetCouponActiveOnline, loadGalaxyGatesOnline, adminUpdateGalaxyGateOnline, adminUpsertCustomMissionOnline, adminDeleteCustomMissionOnline, adminCreateCraftRecipeOnline, adminCreateEconomyServiceOnline, adminCreatePassSeasonOnline, loadAuctionRulesOnline, adminUpdateAuctionRulesOnline, loadBalanceRuntimeOnline, adminUpdateBalanceOnline,loadAdminSecurityIncidents,reviewAdminSecurityIncident } from './api.js?v=47.7.60';
 import {createOfflineFarmV484} from './modules/stellar-offline-farm-v484.js?v=47.7.60';
@@ -397,7 +399,7 @@ function preloadActiveGameplayAssets(){
   // Prioridade absoluta: mapa, sprite/sheet da nave, cargo e base visivel.
   for(const path of [currentMapBackground(),shipMapSheetAsset(progress.activeShipId),shipMapAsset(progress.activeShipId),
     GAME_ASSETS.loot?.cargo,GAME_ASSETS.bonus?.box,
-    isAstralArena(progress.mapId)?`/assets/v38/gates/${ASTRAL_ARENAS[progress.mapId].key}.webp`:null,
+    // V106: mapa astral desenhado em 2D; artes v38/gates permanecem no Materializador.
     ['x1','x8'].includes(progress.mapId)?(GAME_ASSETS.bases?.[currentTerritoryFaction()]||GAME_ASSETS.bases?.orbitalStation):null]){
     if(path)requestAssetImage(path);
   }
@@ -794,6 +796,48 @@ let cloudDirty = false;
 // V105: a resposta de um save antigo nunca pode limpar alterações feitas enquanto ele estava em voo.
 let cloudSaveMutationV105=0;
 let missionSavePendingV105=false;
+// V109: equipamentos precisam de ACK do Supabase, sem afetar salvamentos economicos.
+let equipmentSavePendingV109=false;
+let equipmentSaveDesiredV109=null;
+let equipmentSaveBaselineV109=null;
+let equipmentSaveTimerV109=null;
+let equipmentSaveWarningAtV109=0;
+let saveIntegrityBlockedV106=false; // Conflito de equipamento ainda nao resolvido: proibe compra/venda.
+function rememberEquipmentChangeV109(){
+  if(!authenticated||!progress||offlineFarmWorldLockedV84())return;
+  equipmentSavePendingV109=true;equipmentSaveWarningAtV109=0;
+  equipmentSaveDesiredV109=structuredClone(progress);
+  setSync('HANGAR PENDENTE','busy');
+  scheduleEquipmentSaveV109(180);
+}
+function scheduleEquipmentSaveV109(delay=250){
+  if(!equipmentSavePendingV109||!authenticated||offlineFarmWorldLockedV84())return;
+  if(equipmentSaveTimerV109!==null)clearTimeout(equipmentSaveTimerV109);
+  equipmentSaveTimerV109=setTimeout(()=>{
+    equipmentSaveTimerV109=null;
+    if(!cloudBusy){void flushCloudSave(true);}
+    // Quando houver save concorrente, o finally do flush em andamento reenfileira.
+  },delay);
+}
+function equipmentSavedV109(snapshot){
+  if(!equipmentSavePendingV109)return;
+  if(equipmentFingerprintV109(snapshot)!==equipmentFingerprintV109(equipmentSaveDesiredV109))return;
+  equipmentSavePendingV109=false;equipmentSaveDesiredV109=null;equipmentSaveWarningAtV109=0;
+  saveIntegrityBlockedV106=false;
+  if(equipmentSaveTimerV109!==null){clearTimeout(equipmentSaveTimerV109);equipmentSaveTimerV109=null;}
+  setSync('HANGAR SALVO','ok');
+  showToast('Hangar confirmado no Supabase ✓','system');
+}
+function equipmentRecoveryWarningV109(){
+  saveIntegrityBlockedV106=true;
+  const now=Date.now();
+  setSync('HANGAR NAO SALVO','err');
+  if(now-equipmentSaveWarningAtV109>20000){
+    equipmentSaveWarningAtV109=now;
+    showToast('Montagem nao confirmada: verifique o hangar antes de sair do APK.','system');
+  }
+}
+
 let missionSaveTimerV105=null;
 function queueMissionSaveV105(){
   if(!authenticated||!progress||offlineFarmWorldLockedV84())return;
@@ -1688,10 +1732,49 @@ function mergeTelemetryPending(dst,src){for(const [k,v] of Object.entries(src.co
 async function flushTelemetry(force=false){if(!authenticated||!progress||telemetryRuntime.flushing)return null;if(!force&&Date.now()-telemetryRuntime.lastFlushAt<45000)return null;const snapshot=telemetryRuntime.pending;if(!telemetryHasPayload(snapshot)&&!force)return null;telemetryRuntime.pending=freshTelemetryPending();telemetryRuntime.lastFlushAt=Date.now();telemetryRuntime.flushing=true;const batch={batch_id:(crypto?.randomUUID?.()||`t_${Date.now()}_${Math.random().toString(16).slice(2)}`),counters:snapshot.counters,spent:snapshot.spent,sources:snapshot.sources,level_events:snapshot.level_events,snapshot:{level:Number(progress.profile.level)||1,credits:Number(progress.profile.credits)||0,stl:Number(progress.profile.uridium)||0,xp:Number(progress.profile.xp)||0,title:activePilotTitle().label}};try{return await pushTelemetryBatch(batch);}catch(e){mergeTelemetryPending(telemetryRuntime.pending,snapshot);console.warn('telemetry',e);return null;}finally{telemetryRuntime.flushing=false;}}
 function telemetryTick(dt){if(!authenticated||!progress||!telemetryRuntime.sessionOpen)return;if(document.visibilityState==='visible'){telemetryRuntime.activeRemainder+=Math.max(0,Math.min(.25,Number(dt)||0));if(telemetryRuntime.activeRemainder>=1){const sec=Math.floor(telemetryRuntime.activeRemainder);telemetryRuntime.activeRemainder-=sec;telemetryCounter('play_seconds',sec);}}if(Date.now()-telemetryRuntime.lastFlushAt>=45000)flushTelemetry(false).catch(()=>{});}
 function telemetryTrackEconomyTransition(action,before,after,info={}){if(!before||!after)return;const dCr=Math.round((Number(after.credits)||0)-(Number(before.credits)||0)),dStl=Math.round((Number(after.uridium)||0)-(Number(before.uridium)||0));if(action==='sell_cargo')telemetryEconomy('resource',{cr:Math.max(0,dCr),stl:Math.max(0,dStl)});else if(dCr>0||dStl>0)telemetryEconomy('other',{cr:Math.max(0,dCr),stl:Math.max(0,dStl)});if(dCr<0)telemetrySpend('credits',-dCr);if(dStl<0)telemetrySpend('uridium',-dStl);}
+let economyMutationInFlightV106=false;
 function queueEconomy(fn){const run=economyRuntime.queue.then(fn,fn);economyRuntime.queue=run.catch(()=>{});return run;}
-async function waitCloudIdle(maxMs=1800){const start=Date.now();while(cloudBusy&&Date.now()-start<maxMs)await new Promise(r=>setTimeout(r,35));}
-async function syncBeforeEconomy(){await waitCloudIdle();if(cloudDirty)await flushCloudSave(false);await waitCloudIdle();}
-function installEconomyState(state){if(!state||typeof state!=='object')throw new Error('Servidor não retornou o estado econômico atualizado.');const beforeHp=player.hp,beforeShield=player.shield;installServerStatePreservingPosition(state);createBonusBoxes();cloudDirty=false;computeStats(false);player.hp=Math.max(0,Math.min(player.maxHp,beforeHp));player.shield=clampStoredShieldV2013(beforeShield,player.maxShield);progress.hp=player.hp;progress.shield=player.shield;saveActiveBattleConfigV2013();try{localStorage.setItem(saveKey(),JSON.stringify(progress));}catch{}buildAmmoButtons();refreshPetViews();renderShop();renderCargo();renderGalaxyGate();refreshPilotViews();updateUI();}
+async function waitCloudIdle(maxMs=1800){const start=Date.now();while((cloudBusy||SAVE_COORDINATOR_V106?.running)&&Date.now()-start<maxMs)await new Promise(r=>setTimeout(r,35));}
+async function syncBeforeEconomy(){
+  // Compras/vendas jamais usam um save pendente. Erros continuam bloqueando a operacao,
+  // nao 'liberando' a venda apos um timeout artificial de 1,8 segundo.
+  if(!authenticated||!progress||offlineFarmWorldLockedV84())throw new Error('Sincronizacao de conta indisponivel durante o farm offline.');
+  if(saveIntegrityBlockedV106)throw new Error('Montagem do hangar com conflito ainda nao resolvido. Reconfigure e aguarde HANGAR SALVO antes de comprar/vender.');
+  const result=(cloudDirty||cloudBusy||missionSavePendingV105||equipmentSavePendingV109)
+    ?await Promise.race([flushCloudSave(true),new Promise(resolve=>setTimeout(()=>resolve(false),15000))])
+    :true;
+  if(!result||saveIntegrityBlockedV106||cloudBusy||cloudDirty||equipmentSavePendingV109||missionSavePendingV105)
+    throw new Error('Progresso ainda nao confirmado pelo servidor. Operacao cancelada com seguranca; tente novamente apos sincronizar.');
+}
+function installEconomyState(state,{preservePendingEquipment=true,preservePendingMissions=true}={}){
+  if(!state||typeof state!=='object')throw new Error('Servidor não retornou o estado econômico atualizado.');
+  // Um RPC de compra/recebimento pode devolver um save enquanto o hangar ainda
+  // nao teve ACK. A economia pertence ao SQL, mas a redistribuicao de itens
+  // locais pode ser recuperada SE os totais e o baseline coincidirem.
+  const recovery=preservePendingEquipment&&equipmentSavePendingV109&&progress?
+    reconcilePendingEquipmentV109(state,progress,equipmentSaveBaselineV109):null;
+  const pendingMissionRecoveryV106=preservePendingMissions&&progress?
+    mergeUnsavedMissionProgressV105(state.missions,progress.missions,category=>missionPeriodKey(category)):null;
+  const beforeHp=player.hp,beforeShield=player.shield;
+  installServerStatePreservingPosition(recovery?.ok?recovery.state:state);
+  equipmentSaveBaselineV109=structuredClone(state);
+  createBonusBoxes();cloudDirty=false;computeStats(false);
+  player.hp=Math.max(0,Math.min(player.maxHp,beforeHp));
+  player.shield=clampStoredShieldV2013(beforeShield,player.maxShield);
+  progress.hp=player.hp;progress.shield=player.shield;saveActiveBattleConfigV2013();
+  try{localStorage.setItem(saveKey(),JSON.stringify(progress));}catch{}
+  if(pendingMissionRecoveryV106?.changed){
+    progress.missions=pendingMissionRecoveryV106.missions;normalizeMissionState();saveGame();
+    missionSavePendingV105=true;queueMissionSaveV105();updateMissionButton();
+  }
+  if(recovery){
+    if(recovery.ok&&!recovery.alreadySaved){
+      saveGame();equipmentSaveDesiredV109=structuredClone(progress);scheduleEquipmentSaveV109(200);
+    }else if(recovery.ok){equipmentSavePendingV109=false;equipmentSaveDesiredV109=null;equipmentSaveWarningAtV109=0;}
+    else{equipmentSavePendingV109=false;equipmentSaveDesiredV109=null;equipmentRecoveryWarningV109();console.warn('[hangar-v109] estado do servidor alterado, sem merge inseguro',recovery.reason);}
+  }
+  buildAmmoButtons();refreshPetViews();renderShop();renderCargo();renderGalaxyGate();refreshPilotViews();updateUI();
+}
 window.stellarEconomySyncBeforeV4776=async()=>{if(authenticated&&progress)await syncBeforeEconomy()};
 window.stellarEconomySyncAfterV4776=async()=>{
  if(!authenticated||!progress)return;
@@ -1699,7 +1782,7 @@ window.stellarEconomySyncAfterV4776=async()=>{
 };
 async function runEconomyAction(action,payload={},options={}){
   const {applyState=true,flush=true}=options;
-  return queueEconomy(async()=>{if(flush)await syncBeforeEconomy();const before=progress?{credits:Number(progress.profile?.credits)||0,uridium:Number(progress.profile?.uridium)||0}:null;const result=await economyActionOnline(action,payload);if(applyState&&result?.state){installEconomyState(result.state);telemetryTrackEconomyTransition(action,before,progress?.profile,result?.info||{});}return result;});
+  return queueEconomy(async()=>{if(flush)await syncBeforeEconomy();economyMutationInFlightV106=true;try{const before=progress?{credits:Number(progress.profile?.credits)||0,uridium:Number(progress.profile?.uridium)||0}:null;const result=await economyActionOnline(action,payload);if(applyState&&result?.state){installEconomyState(result.state);telemetryTrackEconomyTransition(action,before,progress?.profile,result?.info||{});}return result;}finally{economyMutationInFlightV106=false;}});
 }
 async function runAutoBuy(catalogKey,label){
   const key=String(catalogKey||'');if(!key||economyRuntime.autoPending.has(key))return false;economyRuntime.autoPending.add(key);
@@ -4453,7 +4536,7 @@ function isPortalNeutralZone(x=player.x,y=player.y){
   try{return resolvedPortals().some(p=>portalHasNeutralSafety(p,state.currentMap)&&Math.hypot(x-p.x,y-p.y)<=PORTAL_NEUTRAL_RADIUS);}catch{return false;}
 }
 function isSafeZone(x=player.x,y=player.y){return isBaseSafeZone(x,y)||isPortalNeutralZone(x,y);}
-function canChangeEquipment(){return !offlineFarmWorldLockedV84()&&isBaseSafeZone();} // Consultar hangar durante o farm, sem alterar equipamentos.
+function canChangeEquipment(){return !offlineFarmWorldLockedV84()&&!economyMutationInFlightV106&&isBaseSafeZone();} // Consultar hangar durante o farm, sem alterar equipamentos.
 function safeZoneDistance(x,y){
   const b=currentBasePoint();
   return Math.hypot(x-b.x,y-b.y);
@@ -4839,7 +4922,7 @@ function copyBattleConfigV2013(from,to){
     petLoadout:source.petLoadout?{lasers:[...(source.petLoadout.lasers||[])],shields:[...(source.petLoadout.shields||[])],activeGear:source.petLoadout.activeGear||'off'}:null,
     shield:Math.max(0,Math.floor(Number(configs.profiles[to]?.shield)||0)) // Mantém o escudo já existente na CONF destino.
   };
-  saveGame();flushCloudSave(true).catch(()=>{});renderHangar();updateUI();
+  saveGame();rememberEquipmentChangeV109();flushCloudSave(true).catch(()=>{});renderHangar();updateUI();
   showToast(`CONF ${from} copiada para CONF ${to}`,'system');
 }
 // V34.6.3: presets are equipment blueprints, never copies of owned inventory.
@@ -4867,7 +4950,7 @@ async function applyBattlePresetV3030(kind){
   progress.inventory=result.inventory;progress.shipLoadout=result.shipLoadout;progress.drones=result.drones;if(result.petLoadout&&progress.pet)Object.assign(progress.pet,result.petLoadout);
   computeStats(false);player.hp=Math.max(0,Math.min(player.maxHp,hp));player.shield=clampStoredShieldV2013(shield,player.maxShield);
   progress.hp=player.hp;progress.shield=player.shield;
-  saveGame();flushCloudSave(true).catch(()=>{});renderHangar();buildAmmoButtons();updateUI();syncSharedUniversePlayer(true);
+  saveGame();rememberEquipmentChangeV109();flushCloudSave(true).catch(()=>{});renderHangar();buildAmmoButtons();updateUI();syncSharedUniversePlayer(true);
   showToast(`Preset ${kind} aplicado • itens indisponíveis ficaram vazios`,'system');
 }
 async function deleteBattlePresetV3040(kind){
@@ -4922,7 +5005,7 @@ function switchBattleConfigV2013(target){
   // Delays are global. Swapping configs never rewinds last damage/repair pulses.
   // Keep the existing global shield repair pulse and time-since-last-hit clocks.
   // Retain continuous fire/lock after changing tactical setup; switching does not grant extra shots.
-  saveGame();flushCloudSave(true).catch(()=>{});syncSharedUniversePlayer(true);renderHangar();buildAmmoButtons();updateUI();
+  saveGame();rememberEquipmentChangeV109();flushCloudSave(true).catch(()=>{});syncSharedUniversePlayer(true);renderHangar();buildAmmoButtons();updateUI();
   showToast(`CONF ${target} ativa • escudo ${fmt(player.shield)}/${fmt(player.maxShield)}`,'system');
 }
 function emptyAllEquippedV2013(scope='all'){
@@ -4939,7 +5022,7 @@ function emptyAllEquippedV2013(scope='all'){
   normalizeLoadout();
   computeStats(false);player.hp=Math.min(player.maxHp,oldHp);player.shield=Math.min(player.maxShield,oldShield);progress.hp=player.hp;progress.shield=player.shield;
   if(scope==='all'||scope==='ship'){progress.flags.autoLaser=false;progress.flags.autoRocket=false;progress.flags.turboRocket=false;}
-  saveGame();flushCloudSave(true).catch(()=>{});renderHangar();buildAmmoButtons();updateExtraControls();
+  saveGame();rememberEquipmentChangeV109();flushCloudSave(true).catch(()=>{});renderHangar();buildAmmoButtons();updateExtraControls();
   showToast(`${qty} equipamento(s) devolvido(s) ao inventário`,'system');
 }
 function bulkUnequipButtonV2013(label,scope){
@@ -5075,9 +5158,9 @@ function hydrateProgress(){
   normalizeAdminUnlockState();
   ensureAdminEntitlements();
 }
-async function flushCloudSave(force=false){
-  if(offlineFarmWorldLockedV84())return; // V84: save online suspenso enquanto o SQL do farm detém o estado do piloto.
-  if(!authenticated||!progress||cloudBusy||(!cloudDirty&&!force))return;
+async function sendCloudSaveAttemptV106(){
+  // Somente o coordenador V106 invoca esta tentativa; nunca há dois PUTs em paralelo.
+  if(offlineFarmWorldLockedV84()||!authenticated||!progress)return 'error';
   cloudBusy=true;setSync('SALVANDO','busy');
   const sentMutation=cloudSaveMutationV105;
   let failed=false;
@@ -5088,8 +5171,11 @@ async function flushCloudSave(force=false){
     const result=await saveCloudSave(snapshot);
     if(result?.statePatch){const patch=result.statePatch;if(Number.isFinite(Number(patch.credits)))progress.profile.credits=Number(patch.credits);if(patch.serverEconomy)progress.serverEconomy={...(progress.serverEconomy||{}),...patch.serverEconomy};localStorage.setItem(saveKey(),JSON.stringify(progress));updateUI();if(patch.serverEconomy?.lastClanCollectionDate)showToast('CLÃ • coleta diária de 10% sincronizada','system');}
     cloudDirty=cloudSaveMutationV105!==sentMutation;
+    equipmentSaveBaselineV109=structuredClone(snapshot);
+    equipmentSavedV109(snapshot);
     if(!cloudDirty)missionSavePendingV105=false;
-    setSync(cloudDirty?'PENDENTE':'ONLINE',cloudDirty?'busy':'ok');
+    if(equipmentSavePendingV109)setSync('HANGAR PENDENTE','busy');
+    else if(!equipmentSaveWarningAtV109)setSync(cloudDirty?'PENDENTE':'ONLINE',cloudDirty?'busy':'ok');
     // V107: o servidor confirmou o progresso da missão; agora pode receber o prêmio.
     // A conclusão é enviada em outro save. Se este falhar, a missão confirmada
     // continua no servidor e pode ser retomada, sem pagar duas vezes no banco.
@@ -5098,6 +5184,7 @@ async function flushCloudSave(force=false){
       const mission=activeMissionDefinition(category,active);
       if(mission)finishMissionAutomatically(category,mission,active);
     }
+    return 'saved';
   }
   catch(e){failed=true;console.warn('cloud save',e);
     if(e?.code==='SAVE_COUPON_STALE'||e?.code==='SAVE_EVENT_STALE'||e?.code==='SAVE_ELITE_STALE'||e?.code==='SAVE_ECONOMY_STALE'||e?.code==='SAVE_NPC_STALE'||e?.code==='SAVE_ORE_STALE'){
@@ -5105,10 +5192,38 @@ async function flushCloudSave(force=false){
         // Não ressuscita missões concluídas: só recupera aceites e progresso ainda não recompensados.
         const localMissions=structuredClone(progress?.missions||{});
         const remote=await loadCloudSave();
+        // Captura DEPOIS do await: o piloto pode ter equipado outro item durante a leitura.
+        const desiredGear=equipmentSavePendingV109?structuredClone(progress):null;
         if(remote?.state){
           const merged=mergeUnsavedMissionProgressV105(remote.state.missions,localMissions,category=>missionPeriodKey(category));
+          const gearRecovery=desiredGear?reconcilePendingEquipmentV109(remote.state,desiredGear,equipmentSaveBaselineV109):null;
           if(e?.code==='SAVE_ELITE_STALE')installServerStatePreservingPosition(remote.state);
-          else installEconomyState(remote.state);
+          else installEconomyState(remote.state,{preservePendingEquipment:false,preservePendingMissions:false});
+          equipmentSaveBaselineV109=structuredClone(remote.state);
+          if(gearRecovery?.ok){
+            if(gearRecovery.alreadySaved){
+              equipmentSavePendingV109=false;equipmentSaveDesiredV109=null;equipmentSaveWarningAtV109=0;saveIntegrityBlockedV106=false;
+              setSync('HANGAR SALVO','ok');showToast('Hangar confirmado no Supabase ✓','system');
+            }else{
+              // O estado de moedas/revisoes veio do SQL, e somente a redistribuicao
+              // comprovadamente conservativa dos equipamentos vem do cliente.
+              const replacement=gearRecovery.state;
+              progress.activeShipId=replacement.activeShipId;
+              progress.inventory=replacement.inventory;
+              progress.shipLoadout=replacement.shipLoadout;
+              progress.drones=replacement.drones;
+              if(progress.pet&&replacement.pet){progress.pet.lasers=replacement.pet.lasers;progress.pet.shields=replacement.pet.shields;progress.pet.activeGear=replacement.pet.activeGear;}
+              progress.combatConfigsV2013=replacement.combatConfigsV2013;
+              computeStats(false);
+              saveGame();
+              equipmentSaveDesiredV109=structuredClone(progress);
+              scheduleEquipmentSaveV109(180);
+            }
+          }else if(gearRecovery){
+            equipmentSavePendingV109=false;equipmentSaveDesiredV109=null;
+            equipmentRecoveryWarningV109();
+            console.warn('[hangar-v109] conflito sem merge seguro',gearRecovery.reason);
+          }
           if(merged.changed){
             progress.missions=merged.missions;
             normalizeMissionState();
@@ -5124,24 +5239,42 @@ async function flushCloudSave(force=false){
             saveGame();missionSavePendingV105=true;
           }
           cloudDirty=merged.changed||cloudDirty||cloudSaveMutationV105!==sentMutation;
-          setSync(cloudDirty?'PENDENTE':'ONLINE',cloudDirty?'busy':'ok');
+          if(equipmentSavePendingV109)setSync('HANGAR PENDENTE','busy');
+          else if(!equipmentSaveWarningAtV109)setSync(cloudDirty?'PENDENTE':'ONLINE',cloudDirty?'busy':'ok');
           console.info('[save-reconcile] Economia remota sincronizada; missão ativa preservada quando seguro');
           failed=false;
-          return;
+          return 'retry';
         }
       }catch(syncErr){console.warn('[save-reconcile] Falha ao recuperar sessão',syncErr);}
     }
-    if(e?.code==='SAVE_RESET_STALE'){try{localStorage.removeItem(saveKey());}catch{}forceLogoutBecauseSessionMoved('Conta zerada pelo ADM. Faça login novamente para criar seu piloto.');return;}
-    if(e?.code==='SAVE_OWNER_MISMATCH'){setSync('BLOQUEADO','err');forceLogoutBecauseSessionMoved('Proteção de conta: um save de outro usuário foi bloqueado.',getUser()?.id||null);return;}
+    if(e?.code==='SAVE_RESET_STALE'){try{localStorage.removeItem(saveKey());}catch{}forceLogoutBecauseSessionMoved('Conta zerada pelo ADM. Faça login novamente para criar seu piloto.');return 'error';}
+    if(e?.code==='SAVE_OWNER_MISMATCH'){setSync('BLOQUEADO','err');forceLogoutBecauseSessionMoved('Proteção de conta: um save de outro usuário foi bloqueado.',getUser()?.id||null);return 'error';}
     cloudDirty=true;
-    setSync('OFFLINE','err');
+    if(equipmentSavePendingV109)equipmentRecoveryWarningV109();
+    else setSync('OFFLINE','err');
+    return 'error';
   }
   finally{
     cloudBusy=false;
     // Um click em ACEITAR no meio de outro save deve ser confirmado sem depender
     // do usuário repetir o click. Em erro real de rede, evita loop de requisições.
-    if(!failed&&cloudDirty&&missionSavePendingV105)queueMissionSaveV105();
+    // O coordenador V106 consolida qualquer alteracao nova na proxima gravacao.
+    // Nao agendar um segundo PUT concorrente aqui.
   }
+}
+
+
+// V106 — Single-flight save. Alteracoes surgidas durante um PUT continuam pendentes;
+// o proximo PUT recebe o estado atual, nunca o snapshot antigo da fila.
+const SAVE_COORDINATOR_V106=createLatestSaveCoordinatorV106({
+  hasPending:()=>Boolean(cloudDirty||missionSavePendingV105||equipmentSavePendingV109),
+  blocked:()=>!authenticated||!progress||offlineFarmWorldLockedV84(),
+  send:()=>sendCloudSaveAttemptV106(),
+  onRetry:attempt=>console.info('[save-v106] revisao economica concorrente; reconciliando',attempt),
+  maxAttempts:6
+});
+async function flushCloudSave(force=false){
+  return SAVE_COORDINATOR_V106.flush(force);
 }
 
 function extraSlotBonusFromLoadout(loadout=progress?.shipLoadout){
@@ -5340,13 +5473,13 @@ function equipPetItem(itemId,kind){
   const list=kind==='laser'?progress.pet.lasers:progress.pet.shields;
   const idx=list.findIndex(v=>!v);if(idx<0){showToast('Sem slot liberado vazio no AUX-9');return;}
   if(!removeInventory(itemId)){showToast('Item não disponível');return;}
-  list[idx]=itemId;saveGame();refreshPetViews();refreshAmmoCounters();
+  list[idx]=itemId;saveGame();rememberEquipmentChangeV109();refreshPetViews();refreshAmmoCounters();
 }
 function unequipPetSlot(kind,index){
   if(!canChangeEquipment()){showToast('Configure equipamentos do AUX-9 somente dentro da sua base X-1');return;}
   if(!progress?.pet?.owned)return;
   const list=kind==='laser'?progress.pet.lasers:progress.pet.shields;
-  const id=list[index];if(!id)return;list[index]=null;compactEquipmentSlotsInPlace(list);addInventory(id);saveGame();refreshPetViews();refreshAmmoCounters();
+  const id=list[index];if(!id)return;list[index]=null;compactEquipmentSlotsInPlace(list);addInventory(id);saveGame();rememberEquipmentChangeV109();refreshPetViews();refreshAmmoCounters();
 }
 function buyPetUnit(){
   if(progress?.pet?.owned){showToast('AUX-9 já adquirido');return;}const q=liveQuote('pet:base');if(!q||q.shop_visible===false){showToast('AUX-9 indisponível na Loja');return;}if(!ensureShopLevel(q))return;if(!canAfford(q.price,q.currency)){showToast(`Faltam ${fmt(q.price-(progress.profile[q.currency]||0))} ${q.currency==='uridium'?'STL':'CR'}`);return;}openSpendConfirm({title:'Comprar AUX-9?',itemName:'AUX-9 — Unidade Base',detail:'Preço confirmado. A compra será processada com segurança.',value:q.price,currency:q.currency,onConfirm:()=>applyAuthoritativePurchase(q.catalog_key,'AUX-9')});
@@ -5370,7 +5503,7 @@ function setPetGear(id){
     petRuntime.kamiArmed=true;
     petRuntime.kamiActivationId=(petRuntime.kamiActivationId||0)+1;
   }else cancelPetKamikazeCharge();
-  progress.pet.activeGear=id;petRuntime.taskId=null;petRuntime.taskType='follow';petRuntime.laserTargetId=null;petRuntime.laserUntil=0;saveGame();refreshPetViews();
+  progress.pet.activeGear=id;petRuntime.taskId=null;petRuntime.taskType='follow';petRuntime.laserTargetId=null;petRuntime.laserUntil=0;saveGame();rememberEquipmentChangeV109();refreshPetViews();
   showToast(id==='off'?'AUX-9 em modo companhia':id==='kami'?'Nova Burst armado • 1 explosão':PET_GEARS[id].name+' ativado');
 }
 function collectPetCargoBox(drop){
@@ -7241,8 +7374,9 @@ function drawAstralGateArenaV380(){
   const world=state.currentMap.world,cx=world.w/2,cy=world.h/2;
   if(!onScreenWorld(cx,cy,420))return;
   const d=ASTRAL_ARENAS[progress.mapId];
-  const p=screenPos(cx,cy),id=ASTRAL53[d.key]||'astral_aurora';
- drawAstralRift(ctx,{mapId:progress.mapId,screenX:p.x,screenY:p.y,time:nowSec(),quality:resolvedQualityMode(),mobile:DEVICE_CAPS.mobile,image:assetImage(SPRITE53(id))});
+  const p=screenPos(cx,cy);
+  // V106: sem imagem volumetrica/GLB derivada no mapa. So rift 2D leve.
+  drawAstralRift(ctx,{mapId:progress.mapId,screenX:p.x,screenY:p.y,time:nowSec(),quality:resolvedQualityMode(),mobile:DEVICE_CAPS.mobile});
 }
 function drawPortals(){
   const q=qualityProfile(),light=q.sceneLight??1,t=nowSec();
@@ -7999,7 +8133,7 @@ function switchShip(shipId){
   }
   if(shipId===progress.activeShipId)return;
   returnShipEquipmentToInventory();progress.activeShipId=shipId;progress.shipLoadout=blankLoadout(shipId);player.laserFiring=false;computeStats(false);
-  progress.combatConfigsV2013=null;ensureBattleConfigsV2013();saveGame();renderHangar();buildAmmoButtons();updateUI();syncSharedUniversePlayer(true);showToast(`${SHIPS[shipId].name} ativada. Equipamentos antigos voltaram ao inventário.`);
+  progress.combatConfigsV2013=null;ensureBattleConfigsV2013();saveGame();rememberEquipmentChangeV109();renderHangar();buildAmmoButtons();updateUI();syncSharedUniversePlayer(true);showToast(`${SHIPS[shipId].name} ativada. Equipamentos antigos voltaram ao inventário.`);
 }
 function computeStatsAfterEquipmentEditV2013(){const hp=player.hp,shield=player.shield;computeStats(false);player.hp=Math.min(player.maxHp,Math.max(0,hp));player.shield=Math.min(player.maxShield,Math.max(0,shield));progress.hp=player.hp;progress.shield=player.shield;}
 function equipShipItem(itemId){
@@ -8014,7 +8148,7 @@ function equipShipItem(itemId){
   if(idx<0){addInventory(itemId);showToast('Sem slot livre na nave');return;}
   progress.shipLoadout[key][idx]=itemId;
   if(key==='extras')normalizeLoadout();
-  computeStatsAfterEquipmentEditV2013();saveGame();renderHangar();buildAmmoButtons();updateExtraControls();
+  computeStatsAfterEquipmentEditV2013();saveGame();rememberEquipmentChangeV109();renderHangar();buildAmmoButtons();updateExtraControls();
   if(item.slotBonus)showToast(`${item.name}: +${item.slotBonus} slots EXTRAS liberados`);
 }
 function unequipShipSlot(key,index){
@@ -8027,11 +8161,11 @@ function unequipShipSlot(key,index){
     for(const flag of ['autoLaser','autoRocket','turboRocket'])progress.flags[flag]=false;
     overflow=normalizeLoadout();
   }
-  computeStatsAfterEquipmentEditV2013();saveGame();renderHangar();buildAmmoButtons();
+  computeStatsAfterEquipmentEditV2013();saveGame();rememberEquipmentChangeV109();renderHangar();buildAmmoButtons();
   if(wasExpansion&&overflow>0)showToast(`${overflow} equipamento${overflow>1?'s':''} excedente${overflow>1?'s':''} voltou${overflow>1?'aram':''} ao inventário`);
 }
-function equipDroneItem(itemId){if(!canChangeEquipment()){showToast('Configure drones somente dentro da sua base X-1');return;}const item=ITEMS[itemId];if(!(item.type==='laser'||(item.type==='generator'&&item.subtype==='shield'))){showToast('Drones aceitam lasers ou geradores de escudo');return;}const drone=progress.drones.find(d=>d.slots.some(v=>!v));if(!drone){showToast('Nenhum slot livre nos drones');return;}if(!removeInventory(itemId))return;drone.slots[drone.slots.findIndex(v=>!v)]=itemId;computeStatsAfterEquipmentEditV2013();saveGame();renderHangar();buildAmmoButtons();}
-function unequipDroneSlot(droneId,index){if(!canChangeEquipment()){showToast('Configure drones somente dentro da sua base X-1');return;}const d=progress.drones.find(x=>x.id===droneId);if(!d||!d.slots[index])return;addInventory(d.slots[index]);d.slots[index]=null;compactEquipmentSlotsInPlace(d.slots);computeStatsAfterEquipmentEditV2013();saveGame();renderHangar();buildAmmoButtons();}
+function equipDroneItem(itemId){if(!canChangeEquipment()){showToast('Configure drones somente dentro da sua base X-1');return;}const item=ITEMS[itemId];if(!(item.type==='laser'||(item.type==='generator'&&item.subtype==='shield'))){showToast('Drones aceitam lasers ou geradores de escudo');return;}const drone=progress.drones.find(d=>d.slots.some(v=>!v));if(!drone){showToast('Nenhum slot livre nos drones');return;}if(!removeInventory(itemId))return;drone.slots[drone.slots.findIndex(v=>!v)]=itemId;computeStatsAfterEquipmentEditV2013();saveGame();rememberEquipmentChangeV109();renderHangar();buildAmmoButtons();}
+function unequipDroneSlot(droneId,index){if(!canChangeEquipment()){showToast('Configure drones somente dentro da sua base X-1');return;}const d=progress.drones.find(x=>x.id===droneId);if(!d||!d.slots[index])return;addInventory(d.slots[index]);d.slots[index]=null;compactEquipmentSlotsInPlace(d.slots);computeStatsAfterEquipmentEditV2013();saveGame();rememberEquipmentChangeV109();renderHangar();buildAmmoButtons();}
 async function performSellDrone(droneId){
   const d=progress.drones.find(x=>x.id===droneId);if(!d)return;const model=ITEMS[d.type];
   try{const r=await runEconomyAction('sell_drone',{drone_id:droneId});showToast(`${model.name} vendido por ${fmt(r?.info?.refund||0)} ${saleCurrencyLabel(r?.info?.currency)} • equipamentos retornaram ao inventário`);}catch(e){showToast(e.message||'Venda do drone recusada pelo servidor');}
@@ -11447,6 +11581,9 @@ async function afterAuth(){
       local=null;
     }
     const remote=await loadCloudSave();
+    saveIntegrityBlockedV106=false;
+    equipmentSaveBaselineV109=remote?.state?structuredClone(remote.state):null;
+    equipmentSavePendingV109=false;equipmentSaveDesiredV109=null;
     accountResetEpochV478=Math.max(0,Math.trunc(Number(remote?.reset_epoch)||0));
     // Never re-upload an old device save after an ADM reset. A newer local timestamp is irrelevant.
     if(local && Math.max(0,Math.trunc(Number(local.adminResetEpoch)||0))!==accountResetEpochV478){
@@ -11471,6 +11608,14 @@ async function afterAuth(){
     const localStampSane=localStamp>0&&localStamp<=Date.now()+300000;
     if(local&&localStampSane&&localStamp>remoteStamp+250){
       progress=local;hydrateProgress();cloudDirty=true;setSync('LOCAL MAIS NOVO','busy');
+      // Um save local de equipamento mais novo continua como pendencia local,
+      // nunca como compra confirmada. A reconciliação ocorrerá com a revisão
+      // econômica correta no próximo conflito, sem descartar a montagem.
+      if(remote?.state&&equipmentFingerprintV109(local)!==equipmentFingerprintV109(remote.state)){
+        equipmentSavePendingV109=true;
+        equipmentSaveDesiredV109=structuredClone(progress);
+        setSync('HANGAR PENDENTE','busy');
+      }
       setTimeout(()=>flushCloudSave(true),0);
     }else if(remote.state){
       progress=remote.state;hydrateProgress();setSync('ONLINE','ok');
@@ -11609,7 +11754,7 @@ setInterval(()=>{
   const moved=movementPositionRuntime.lastX===null?Math.hypot(player.tx-player.x,player.ty-player.y)>2:Math.hypot(player.x-movementPositionRuntime.lastX,player.y-movementPositionRuntime.lastY)>=8;
   if(moved)commitRuntimePosition('periodic_movement');
 },2000);
-document.addEventListener('visibilitychange',()=>{if(offlineFarmWorldLockedV84())return;if(document.visibilityState==='hidden'&&progress){if(movementPositionRuntime.loadedFromCheckpoint||movementPositionRuntime.hasMovedSinceLoad){commitRuntimePosition('hidden');saveGame();flushCloudSave(true);}}else if(document.visibilityState==='visible'&&authenticated){sharedUniverse.recover();void safeSessionCheckV4831();preloadActiveGameplayAssets();}});
+document.addEventListener('visibilitychange',()=>{if(offlineFarmWorldLockedV84())return;if(document.visibilityState==='hidden'&&progress){if(cloudDirty||equipmentSavePendingV109||missionSavePendingV105){void flushCloudSave(true);}if(movementPositionRuntime.loadedFromCheckpoint||movementPositionRuntime.hasMovedSinceLoad){commitRuntimePosition('hidden');saveGame();flushCloudSave(true);}}else if(document.visibilityState==='visible'&&authenticated){sharedUniverse.recover();void safeSessionCheckV4831();preloadActiveGameplayAssets();}});
 const AUTO_QUALITY_ORDER=['low','medium','high'];
 let perfWindowStart=performance.now(),perfFrames=0,perfGoodWindows=0,perfLastChange=0;
 function monitorAutoPerformance(t){

@@ -1,0 +1,12 @@
+STELLAR LEGACY V105.1B — LEMBRETE NATIVO 00H
+
+1. BASE: V105.1 REDE SEGURA ja instalada no GitHub.
+2. Aplicar somente os arquivos deste ZIP preservando a estrutura.
+3. Publicar no GitHub; Render pode fazer deploy normal, MAS AVISO SO FUNCIONA NO APK RECOMPILADO.
+4. Executar workflow de geracao de APK local e instalar esse novo APK.
+5. No jogo: CONF -> JOGO -> AVISOS DIARIOS DO APK -> ATIVAR LEMBRETES.
+6. Permitir notificacoes do Android se solicitado (Android 13+).
+7. Clique TESTAR AVISO para testar imediatamente.
+8. O Android agenda lembrete APROXIMADAMENTE a meia-noite do Brasil. Doze pode atrasar.
+9. O servidor/banco continua controlando resets e recompensas. Nao houve SQL nem alteracao no save.
+10. Testes Node 207/207. Build do APK deve rodar no GitHub Actions (Android SDK ausente localmente).

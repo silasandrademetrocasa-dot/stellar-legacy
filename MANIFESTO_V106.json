@@ -1,0 +1,147 @@
+{
+  "version": "V106 UNIFIED SAVE ENGINE",
+  "source": "user-provided stellar-legacy-main.zip, 2026-10-29",
+  "file_count": 27,
+  "files": [
+    {
+      "path": "INSTRUCOES_V105_1B_NOTIFICACOES.txt",
+      "size": 810,
+      "sha256": "2124b67132574d7f0f4e13805c7544ed8b70ff557ec2b09f5bbceb44e0e7e1db"
+    },
+    {
+      "path": "INSTRUCOES_V105_1C_HANGAR_SAVE.txt",
+      "size": 931,
+      "sha256": "2bff12e3755073763d1c43e12a093c0868cf4b633ec58eee084a5ef6fbd7c811"
+    },
+    {
+      "path": "INSTRUCOES_V106.txt",
+      "size": 1054,
+      "sha256": "ac3e154180ba293f4196ab21e4e9f238478445f9f37f074946c1b477c78127c0"
+    },
+    {
+      "path": "MANIFESTO_V105_1B_NOTIFICACOES.json",
+      "size": 2180,
+      "sha256": "919cf7b69d3a785328374739b2132c469299891a91d0f704a1f8a14d29949878"
+    },
+    {
+      "path": "MANIFESTO_V105_1C.json",
+      "size": 1125,
+      "sha256": "ffbaae9ee3ffd28d9d2534de5daed3376a1883acc2ad4f6e173bf3d04eeb72b7"
+    },
+    {
+      "path": "android/app/src/main/AndroidManifest.xml",
+      "size": 1789,
+      "sha256": "6e69409f8fa8b5c12a171def8fb33d792cc5479415180aca45cf136d26c17fea"
+    },
+    {
+      "path": "android/app/src/main/java/com/stellarlegacy/mobile/DailyResetNotifier.java",
+      "size": 6793,
+      "sha256": "e1d4b63ab3aeda90e8cb778e76144938af5f283515852dd4f46c79dd710d7ae0"
+    },
+    {
+      "path": "android/app/src/main/java/com/stellarlegacy/mobile/DailyResetReceiver.java",
+      "size": 872,
+      "sha256": "eb379bb54f44b0ebc5f75883ead7f543b42cefed909d0342f2e57ed709a491a0"
+    },
+    {
+      "path": "android/app/src/main/java/com/stellarlegacy/mobile/MainActivity.java",
+      "size": 13861,
+      "sha256": "6f697d34d7fd038fa7dee9bbd9947e1f921023476f9e89715a15dd846eddc4bc"
+    },
+    {
+      "path": "android/app/src/main/res/drawable/ic_stellar_notification.xml",
+      "size": 384,
+      "sha256": "607bf21ed1c5f8753da95a0b3d8dd3d60f06b837c3c8b0c4bf30dbb366f34ba6"
+    },
+    {
+      "path": "docs/V105_1B_NOTIFICACOES_DIARIAS_ANDROID.md",
+      "size": 3588,
+      "sha256": "31daa96b5e2656ae83dd3e9858aca829b13739a570684f6e6a61a0f05f29e1e6"
+    },
+    {
+      "path": "docs/V105_1C_HANGAR_SAVE_SEGURO_V109.md",
+      "size": 4668,
+      "sha256": "440cc23e30442832f9634b8237ec8ffda086a99d8766a59a5061013910674668"
+    },
+    {
+      "path": "docs/V106_UNIFIED_SAVE_E_LIMPEZA.md",
+      "size": 4850,
+      "sha256": "da78623bd9fb97b418fca9e1e7e4ba9da931e5ce4c682c2e4b17c3a46bf405de"
+    },
+    {
+      "path": "public/game.js",
+      "size": 1198399,
+      "sha256": "c0bb478a85a7bdaf4015b39c85396ade2786f654355badeeacb9c36a5909deaa"
+    },
+    {
+      "path": "public/index.html",
+      "size": 88681,
+      "sha256": "0844da608a1396b67065da3225cff5d94985db59ccd8d4e571d60ac4edc41b5d"
+    },
+    {
+      "path": "public/modules/android-daily-alerts-v108.js",
+      "size": 1886,
+      "sha256": "e3ba30ded838d22b6049571cbbeeefb3e6b3ce95cff7652c491cfc8b446159a6"
+    },
+    {
+      "path": "public/modules/hangar-save-recovery-v109.js",
+      "size": 4546,
+      "sha256": "df99b350d07e23667d9e10bd763054e52f67edeeb8f2d854f4fe0d49965ff81c"
+    },
+    {
+      "path": "public/modules/unified-save-coordinator-v106.js",
+      "size": 1627,
+      "sha256": "b3ab22bd22496230c35386e626ae933af32fdca0f11f18a4cebda9e3c77176b4"
+    },
+    {
+      "path": "scripts/v106-auditoria-artes-astral.mjs",
+      "size": 1664,
+      "sha256": "bae7427b5ebcf580864a18a7668f96fcb4a65d4dc7f06b3032c63398ae7c20a4"
+    },
+    {
+      "path": "server/index.js",
+      "size": 185226,
+      "sha256": "1df67cd39b7811435fd0678490b7cabaf8555ccad83d356e5a60707a3725cfc6"
+    },
+    {
+      "path": "tests/astral-v53.test.mjs",
+      "size": 2640,
+      "sha256": "33000fa2b3d6c1f1c398d6fa68089d059821fd265cbf293218c72d0506369a87"
+    },
+    {
+      "path": "tests/v1051-network-observability.test.mjs",
+      "size": 2481,
+      "sha256": "5bcb5bf979cab3d2427cab1b31164bed6b501ea9fe375ba4c961ef3ceba8919f"
+    },
+    {
+      "path": "tests/v106-pvp-inbox-policy.test.mjs",
+      "size": 2394,
+      "sha256": "d13ebbfd5409820d859366797a53893ab8d20b22560e43ac652c300a971515c3"
+    },
+    {
+      "path": "tests/v106-unified-save-coordinator.test.mjs",
+      "size": 3482,
+      "sha256": "3bccf659e03eb1a651c3a5ce6cb11191980ebc518f4c855e85d2e0e2011208bc"
+    },
+    {
+      "path": "tests/v108-android-daily-notifications.test.mjs",
+      "size": 3260,
+      "sha256": "e2aa94ba4db6761167f878de206779a52768e309be5a50c97b3d2e4592b2eef4"
+    },
+    {
+      "path": "tests/v109-hangar-cloud-safety.test.mjs",
+      "size": 3815,
+      "sha256": "7fda0b107ee2a41d3bab0d51726a6c966bed16e0cae9a6fa871ab0656760acab"
+    },
+    {
+      "path": "tests/v84-offline-farm-navigation.test.mjs",
+      "size": 3737,
+      "sha256": "79c7eb6dec63909dc1500e7983c6a5a9d1f96a3e47135d1a2a320ee27d22f42b"
+    }
+  ],
+  "sql_changes": false,
+  "deploy_performed": false,
+  "tests": "npm test 220/220; npm run check OK",
+  "base_includes_pending": "V105.1B Android daily notifications, V105.1C hangar save ACK",
+  "asset_audit": "No GLB/GLTF; central astral map visuals now 2D. Optional redundant beta/gamma v38 WebP deletion script."
+}

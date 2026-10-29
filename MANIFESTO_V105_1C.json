@@ -1,0 +1,38 @@
+{
+  "version": "V105.1C / Hangar Save V109",
+  "base": "GitHub public/game.js blob cf09062da843a47182aae688a571a0cbc0a8ba74 (confirmed)",
+  "depends_on": [
+    "V105.1",
+    "V105.1B"
+  ],
+  "production_changes": false,
+  "sql_changes": false,
+  "tests_passed": 213,
+  "files": [
+    {
+      "path": "public/game.js",
+      "sha256": "43b9dd36aa77e68c758f1434c3d3d26f90ebec63e461eee4c76de44d441518ea",
+      "size": 1195925
+    },
+    {
+      "path": "public/modules/hangar-save-recovery-v109.js",
+      "sha256": "df99b350d07e23667d9e10bd763054e52f67edeeb8f2d854f4fe0d49965ff81c",
+      "size": 4546
+    },
+    {
+      "path": "tests/v109-hangar-cloud-safety.test.mjs",
+      "sha256": "7fda0b107ee2a41d3bab0d51726a6c966bed16e0cae9a6fa871ab0656760acab",
+      "size": 3815
+    },
+    {
+      "path": "docs/V105_1C_HANGAR_SAVE_SEGURO_V109.md",
+      "sha256": "440cc23e30442832f9634b8237ec8ffda086a99d8766a59a5061013910674668",
+      "size": 4668
+    },
+    {
+      "path": "INSTRUCOES_V105_1C_HANGAR_SAVE.txt",
+      "sha256": "2bff12e3755073763d1c43e12a093c0868cf4b633ec58eee084a5ef6fbd7c811",
+      "size": 931
+    }
+  ]
+}

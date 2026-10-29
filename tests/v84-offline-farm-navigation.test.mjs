@@ -40,7 +40,7 @@ test('V84: leilão registra lance sem salvar snapshot local durante farm; quita�
  assert.match(game,/await saveAuctionBidOnline\(/);
  assert.match(game,/if\(offlineFarmWorldLockedV84\(\)\)return; \/\/ V84: resgatar lotes/);
  assert.match(game,/if\(!offlineFarmWorldLockedV84\(\)\)saveGame\(\); \/\/ Lance já foi confirmado/);
- assert.match(game,/if\(offlineFarmWorldLockedV84\(\)\)return; \/\/ V84: save online suspenso/);
+ assert.match(game,/offlineFarmWorldLockedV84\(\)\|\|!authenticated\|\|!progress/);
  assert.match(server,/app\.post\('\/api\/economy\/action', requireUser, OFFLINE_FARM_GUARD_V484/);
  assert.match(server,/app\.put\('\/api\/save', requireUser, OFFLINE_FARM_GUARD_V484/);
 });

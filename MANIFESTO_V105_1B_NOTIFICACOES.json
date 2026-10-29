@@ -1,0 +1,62 @@
+{
+  "base": "V105.1 rede segura",
+  "update": "V105.1B lembrete diario Android",
+  "policy": "sem alteracoes SQL/saves/recompensas/arena; notificacao local opt-in",
+  "files": [
+    {
+      "path": "android/app/src/main/AndroidManifest.xml",
+      "bytes": 1789,
+      "sha256": "6e69409f8fa8b5c12a171def8fb33d792cc5479415180aca45cf136d26c17fea"
+    },
+    {
+      "path": "android/app/src/main/java/com/stellarlegacy/mobile/MainActivity.java",
+      "bytes": 13861,
+      "sha256": "6f697d34d7fd038fa7dee9bbd9947e1f921023476f9e89715a15dd846eddc4bc"
+    },
+    {
+      "path": "android/app/src/main/java/com/stellarlegacy/mobile/DailyResetNotifier.java",
+      "bytes": 6793,
+      "sha256": "e1d4b63ab3aeda90e8cb778e76144938af5f283515852dd4f46c79dd710d7ae0"
+    },
+    {
+      "path": "android/app/src/main/java/com/stellarlegacy/mobile/DailyResetReceiver.java",
+      "bytes": 872,
+      "sha256": "eb379bb54f44b0ebc5f75883ead7f543b42cefed909d0342f2e57ed709a491a0"
+    },
+    {
+      "path": "android/app/src/main/res/drawable/ic_stellar_notification.xml",
+      "bytes": 384,
+      "sha256": "607bf21ed1c5f8753da95a0b3d8dd3d60f06b837c3c8b0c4bf30dbb366f34ba6"
+    },
+    {
+      "path": "public/index.html",
+      "bytes": 88677,
+      "sha256": "5d4d3ed3b1fbbf0a23be3c465b50131f759d4fd819ca6bbc32585cfef9995809"
+    },
+    {
+      "path": "public/modules/android-daily-alerts-v108.js",
+      "bytes": 1886,
+      "sha256": "e3ba30ded838d22b6049571cbbeeefb3e6b3ce95cff7652c491cfc8b446159a6"
+    },
+    {
+      "path": "tests/v108-android-daily-notifications.test.mjs",
+      "bytes": 3260,
+      "sha256": "e2aa94ba4db6761167f878de206779a52768e309be5a50c97b3d2e4592b2eef4"
+    },
+    {
+      "path": "docs/V105_1B_NOTIFICACOES_DIARIAS_ANDROID.md",
+      "bytes": 3588,
+      "sha256": "31daa96b5e2656ae83dd3e9858aca829b13739a570684f6e6a61a0f05f29e1e6"
+    },
+    {
+      "path": "INSTRUCOES_V105_1B_NOTIFICACOES.txt",
+      "bytes": 810,
+      "sha256": "2124b67132574d7f0f4e13805c7544ed8b70ff557ec2b09f5bbceb44e0e7e1db"
+    }
+  ],
+  "tested": {
+    "npm_verify": "207/207",
+    "apk_assets": "1210 arquivos 1027 imagens",
+    "android_build": "pendente no GitHub Actions"
+  }
+}
