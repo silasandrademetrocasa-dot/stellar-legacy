@@ -1,0 +1,43 @@
+{
+  "base": "Stellar Legacy V104 HOTFIX 2",
+  "hotfix": "HOTFIX 3: missao concluida apenas apos ACK de save",
+  "tests": 199,
+  "checks": "203 JS; 309 assets; imports OK",
+  "files": [
+    {
+      "path": "public/game.js",
+      "bytes": 1189377,
+      "sha256": "4f41c264963d66bb81b228ec89c2b9e263e6335f8441ce32acf0944d7d0abf47"
+    },
+    {
+      "path": "public/index.html",
+      "bytes": 87611,
+      "sha256": "01a88a7d8416b104fbb603b97ac20919beba63612cc6859f3c7e41104a037dc3"
+    },
+    {
+      "path": "public/modules/mission-save-recovery-v105.js",
+      "bytes": 3200,
+      "sha256": "0d6752593335fbb8c34ea3381d78a30e1b63532362383a70c25fb56057af5281"
+    },
+    {
+      "path": "public/modules/mission-completion-sync-v107.js",
+      "bytes": 1170,
+      "sha256": "ac67b07ecef025988e0d2595822db7d900314407e7210ffbb73e2238e53602b3"
+    },
+    {
+      "path": "tests/v106-pvp-inbox-policy.test.mjs",
+      "bytes": 2358,
+      "sha256": "5ba088399d7c126f4ec681a6fdf83a1c59a2ace45c617dfacb21e3b849489b8a"
+    },
+    {
+      "path": "tests/v107-mission-completion-sync.test.mjs",
+      "bytes": 3013,
+      "sha256": "f55e74fd17c4c20a8abc0f244981b7dad5ca45d56d8e60d075f7e4ea918a5b91"
+    },
+    {
+      "path": "docs/V104_HOTFIX3_CONCLUSAO_MISSOES.md",
+      "bytes": 3838,
+      "sha256": "7ecc0411c12202c403729fe715572be95f49d8760f736bd47d7d9625814cdce8"
+    }
+  ]
+}

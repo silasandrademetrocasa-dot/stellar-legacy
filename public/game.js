@@ -96,6 +96,7 @@ import { xpThresholdV482, migratePilotXpV482 } from './level-curve-v482.js?v=47.
 import { applyRecruitBonusV2012, eliteRouteSnapshotV2012, freshEliteRouteJournalV2012, ELITE_ROUTE_TARGETS_V2012, novaTierPriceV2012 } from './progression-plan-v2012.js?v=47.7.60';
 import { GAME_ASSETS } from './assets/v17/manifest.js?v=47.7.60';
 import { mergeUnsavedMissionProgressV105 } from './modules/mission-save-recovery-v105.js?v=47.7.60';
+import { pendingMissionCategoriesV107, confirmedMissionCategoriesV107 } from './modules/mission-completion-sync-v107.js?v=47.7.60';
 import { shouldPollPvpInboxV106 } from './modules/pvp-inbox-policy-v106.js?v=47.7.60';
 import { signUp, signIn, beginGoogleSignIn, restoreGoogleSignInFromUrl, requestPasswordReset, restorePasswordRecoveryFromUrl, restoreSession, signOutLocal, getSessionRestoreErrorV101, checkGameSession, endGameSession, getUser, getSessionCredentials, loadCloudSave, saveCloudSave, loadEliteOperationsOnline, claimEliteOperationOnline, loadWarCampaignsOnline, claimWarSupplyOnline, claimWarCampaignOnline, loadAdminWarCampaignsOnline, saveAdminWarCampaignOnline, saveAdminWarRulesOnline, loadAdminEliteObjectivesOnline, saveAdminEliteObjectiveOnline, updateCallsign, updatePassword, loadRankings, loadAuctionBids, saveAuctionBidOnline, markAuctionBidStatusOnline, loadAuctionMarket, upsertPlayerPresenceOnline, loadMapPresenceOnline, savePlayerLocationCheckpointOnline, loadPlayerLocationCheckpointOnline, removePlayerPresenceOnline, queuePvpAttackOnline, consumePvpDamageEventsOnline, syncArenaProfileOnline, loadArenaState, loadArenaDailyRewardStatus, claimArenaDailyReward, loadArenaOpponents, loadArenaHistory, arenaAttackOnline, listClansOnline, loadMyClanOnline, createClanOnline, joinClanOnline, getClanRequestsOnline, reviewClanRequestOnline, cancelClanRequestOnline, setClanMemberRoleOnline, leaveClanOnline, transferClanCreditsOnline, claimClanCreditGrantsOnline, recordClanAlienKillOnline, getPremiumShopOnline, testPurchasePremiumOnline, adminPreviewPremiumStageOnline, adminSimulatePremiumStageOnline, getPremiumStageCatalogOnline, loadWarfrontStateOnline, loadSectorOwnershipOnline, hitWorldBossOnline, claimWorldBossRewardOnline, declareClanWarOnline, recordClanWarScoreOnline, loadLiveOpsOnline, adminUpdateLiveEventScheduleOnline, purchaseLiveCatalogOnline, purchaseLiveBulkOnline, economyActionOnline, getChatHistoryOnline, sendChatMessageOnline, redeemGameCouponOnline, getMyDesignersOnline, setDesignLoadoutOnline, claimGateDroneDesignOnline, claimEventDesignerOnline, getAdminStatus, adminSearchAccounts, adminRecentActions, adminBanAccount, adminUnbanAccount, adminResetAccount, adminDeleteAccount, pushTelemetryBatch, adminTelemetryOverview, adminPlayerTelemetry, getBattleGroupOnline, createBattleGroupOnline, inviteBattleGroupOnline, searchBattleGroupPlayersOnline, inviteBattleGroupUserOnline, respondBattleGroupInviteOnline, leaveBattleGroupOnline, kickBattleGroupMemberOnline, setBattleGroupRallyOnline, loadRuntimeConfigOnline, loadNpcRuntimeConfigOnline, loadWorldRuntimeConfigOnline, loadSystemsRuntimeConfigOnline, loadAdminRuntimeMonitorOnline, adminUpdateRuntimeModuleOnline, adminUpdateNpcRuntimeOnline, adminUpdateNpcSpawnRuntimeOnline, adminUpdateWorldMapOnline, adminUpdateWorldResourceOnline, adminUpdateWorldSectorOnline, adminUpdateWorldPortalOnline, adminUpdateWorldResourcePoolOnline, adminUpdateMissionCategoryOnline, adminUpdateEconomyServiceOnline, adminUpdateCraftingRecipeOnline, loadBattlePassRuntimeConfigOnline, adminUpdateBattlePassSeasonOnline, adminUpdateBattlePassTierOnline, loadShopsRuntimeConfigOnline, adminUpdateCommonShopItemOnline, adminUpdatePremiumShopItemOnline, loadBonusConfigOnline, adminUpdateBonusConfigOnline, adminCouponDashboardOnline, adminCreateCouponOnline, adminSetCouponActiveOnline, loadGalaxyGatesOnline, adminUpdateGalaxyGateOnline, adminUpsertCustomMissionOnline, adminDeleteCustomMissionOnline, adminCreateCraftRecipeOnline, adminCreateEconomyServiceOnline, adminCreatePassSeasonOnline, loadAuctionRulesOnline, adminUpdateAuctionRulesOnline, loadBalanceRuntimeOnline, adminUpdateBalanceOnline,loadAdminSecurityIncidents,reviewAdminSecurityIncident } from './api.js?v=47.7.60';
 import {createOfflineFarmV484} from './modules/stellar-offline-farm-v484.js?v=47.7.60';
@@ -2938,8 +2939,25 @@ function finishMissionAutomatically(category,mission,active){
   saveGame();queueMissionSaveV105();updateMissionButton();state.missionHudSignature='';renderActiveMissionHud(true);updateUI();
   if(ui.missionModal&&!ui.missionModal.classList.contains('hidden'))renderMissions();
 }
-function claimMission(category){normalizeMissionState();const active=progress.missions.active[category];if(!active||!active.complete)return;finishMissionAutomatically(category,activeMissionDefinition(category,active),active);}
-function missionEvent(type,payload={}){if(!progress||!featureUnlocked('missions'))return;normalizeMissionState();let anyChanged=false;const finished=[];for(const category of Object.keys(MISSION_CATEGORIES)){if(MISSION_CATEGORIES[category]?.enabled===false)continue;const active=progress.missions.active[category];if(!active||active.complete)continue;const mission=activeMissionDefinition(category,active);if(!mission)continue;let categoryChanged=false;let eventAmount=type==='collectOre'?Math.max(0,Number(payload.amount)||0):1;if(eventAmount<=0)continue;for(let i=0;i<mission.tasks.length;i++){const task=mission.tasks[i];if(!taskUnlocked(mission,active,i))continue;const current=taskCurrent(active,task),remaining=Math.max(0,task.target-current);if(!remaining)continue;let matches=false;if(type==='kill'&&task.type==='kill'&&payload.enemy?.type===task.npc)matches=true;if(type==='collectOre'&&task.type==='ore'&&payload.type===task.resource)matches=true;if(!matches)continue;const add=Math.min(remaining,type==='kill'?1:eventAmount);if(add<=0)continue;active.taskProgress[task.id]=current+add;addMissionReward(active,mission,task.type==='kill'?'kill':'ore',payload,add);categoryChanged=true;anyChanged=true;if(mission.sequence)break;if(type==='kill')break;}if(categoryChanged){active.complete=mission.tasks.every(x=>taskDone(active,x));if(active.complete)finished.push({category,mission,active});}}for(const item of finished)finishMissionAutomatically(item.category,item.mission,item.active);if(anyChanged&&!finished.length){saveGame();updateMissionButton();if(ui.missionModal&&!ui.missionModal.classList.contains('hidden'))renderMissions();}}
+function claimMission(category){
+  normalizeMissionState();const active=progress.missions.active[category];
+  if(!active||!active.complete)return;
+  // V107: só o ACK do save permite creditar prêmio. Nunca pague uma conclusão ainda local.
+  if(!active.awaitingCloudAckV107)active.awaitingCloudAckV107=true;
+  saveGame();queueMissionSaveV105();showToast('Objetivo concluído • validando com o servidor','mission');
+}
+function missionEvent(type,payload={}){if(!progress||!featureUnlocked('missions'))return;normalizeMissionState();let anyChanged=false;const finished=[];for(const category of Object.keys(MISSION_CATEGORIES)){if(MISSION_CATEGORIES[category]?.enabled===false)continue;const active=progress.missions.active[category];if(!active||active.complete)continue;const mission=activeMissionDefinition(category,active);if(!mission)continue;let categoryChanged=false;let eventAmount=type==='collectOre'?Math.max(0,Number(payload.amount)||0):1;if(eventAmount<=0)continue;for(let i=0;i<mission.tasks.length;i++){const task=mission.tasks[i];if(!taskUnlocked(mission,active,i))continue;const current=taskCurrent(active,task),remaining=Math.max(0,task.target-current);if(!remaining)continue;let matches=false;if(type==='kill'&&task.type==='kill'&&payload.enemy?.type===task.npc)matches=true;if(type==='collectOre'&&task.type==='ore'&&payload.type===task.resource)matches=true;if(!matches)continue;const add=Math.min(remaining,type==='kill'?1:eventAmount);if(add<=0)continue;active.taskProgress[task.id]=current+add;addMissionReward(active,mission,task.type==='kill'?'kill':'ore',payload,add);categoryChanged=true;anyChanged=true;if(mission.sequence)break;if(type==='kill')break;}if(categoryChanged){active.complete=mission.tasks.every(x=>taskDone(active,x));if(active.complete)finished.push({category,mission,active});}}for(const item of finished)item.active.awaitingCloudAckV107=true;
+  if(anyChanged){
+    saveGame();
+    if(finished.length){
+      queueMissionSaveV105();
+      showToast('Objetivo completo • confirmando recompensa no servidor','mission');
+      state.missionHudSignature='';renderActiveMissionHud(true);
+    }
+    updateMissionButton();
+    if(ui.missionModal&&!ui.missionModal.classList.contains('hidden'))renderMissions();
+  }
+}
 const MISSION_UI_PREFS_KEY='stellar_mission_ui_v1765';
 const missionUiPrefs={loaded:false,collapsed:{},journeyCollapsed:null,journeyCompletedSeen:false};
 function journeyIsCollapsed(j){loadMissionUiPrefs();if(j.completed&&!missionUiPrefs.journeyCompletedSeen){missionUiPrefs.journeyCollapsed=true;missionUiPrefs.journeyCompletedSeen=true;saveMissionUiPrefs();}return missionUiPrefs.journeyCollapsed===null?!!j.completed:!!missionUiPrefs.journeyCollapsed;}
@@ -5072,6 +5090,14 @@ async function flushCloudSave(force=false){
     cloudDirty=cloudSaveMutationV105!==sentMutation;
     if(!cloudDirty)missionSavePendingV105=false;
     setSync(cloudDirty?'PENDENTE':'ONLINE',cloudDirty?'busy':'ok');
+    // V107: o servidor confirmou o progresso da missão; agora pode receber o prêmio.
+    // A conclusão é enviada em outro save. Se este falhar, a missão confirmada
+    // continua no servidor e pode ser retomada, sem pagar duas vezes no banco.
+    for(const category of confirmedMissionCategoriesV107(snapshot.missions,progress?.missions)){
+      const active=progress?.missions?.active?.[category];
+      const mission=activeMissionDefinition(category,active);
+      if(mission)finishMissionAutomatically(category,mission,active);
+    }
   }
   catch(e){failed=true;console.warn('cloud save',e);
     if(e?.code==='SAVE_COUPON_STALE'||e?.code==='SAVE_EVENT_STALE'||e?.code==='SAVE_ELITE_STALE'||e?.code==='SAVE_ECONOMY_STALE'||e?.code==='SAVE_NPC_STALE'||e?.code==='SAVE_ORE_STALE'){
@@ -5092,7 +5118,12 @@ async function flushCloudSave(force=false){
             // O próximo PUT só transporta a missão preservada com a revisão econômica correta.
             missionSavePendingV105=true;
           }
-          cloudDirty=merged.changed||cloudSaveMutationV105!==sentMutation;
+          // Uma missão 100% concluída e AINDA SEM prêmio precisa ser reenviada.
+          // Isso inclui o caso de save antigo rejeitado quando faltava apenas 1 NPC.
+          if(pendingMissionCategoriesV107(progress?.missions).length){
+            saveGame();missionSavePendingV105=true;
+          }
+          cloudDirty=merged.changed||cloudDirty||cloudSaveMutationV105!==sentMutation;
           setSync(cloudDirty?'PENDENTE':'ONLINE',cloudDirty?'busy':'ok');
           console.info('[save-reconcile] Economia remota sincronizada; missão ativa preservada quando seguro');
           failed=false;

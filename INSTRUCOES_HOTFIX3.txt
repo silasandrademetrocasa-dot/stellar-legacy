@@ -1,0 +1,15 @@
+Stellar Legacy V104 — HOTFIX 3 • CONCLUSAO DE MISSOES
+
+BASE OBRIGATORIA: HOTFIX 2 ja aplicado (V104 / 47.7.60).
+
+A) Nao fazer deploy no meio do farm antes de registrar os dados.
+B) Copiar o conteudo do ZIP sobre os caminhos IGUAIS no repositorio GitHub.
+C) Fazer commit no main. Aguardar o deploy do Render concluir.
+D) Gerar APK NOVO no GitHub Actions e instalar.
+E) Repetir teste de missao (ultimo NPC, save, premio, proxima missao).
+
+NAO RODA SQL, NAO EDITA A CONTA, NAO DESLIGA TRIGGERS.
+Leia docs/V104_HOTFIX3_CONCLUSAO_MISSOES.md.
+
+ATENCAO: A mitigacao precisa de validacao no Android; persistencia economica
+com garantias absolutas exige RPC transacional/idempotente do servidor.
