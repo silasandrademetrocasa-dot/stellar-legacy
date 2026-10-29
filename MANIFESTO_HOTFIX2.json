@@ -1,0 +1,28 @@
+{
+  "base": "Stellar Legacy V104 47.7.60",
+  "description": "hotfix cumulativo missao + reduzir polling PvP em PvE",
+  "changed_files": [
+    "public/game.js",
+    "public/index.html"
+  ],
+  "new_files": [
+    "public/modules/mission-save-recovery-v105.js",
+    "public/modules/pvp-inbox-policy-v106.js",
+    "tests/v105-mission-save-recovery.test.mjs",
+    "tests/v106-pvp-inbox-policy.test.mjs",
+    "docs/V104_MISSIONFIX1_AUTOPILOT.md",
+    "docs/V104_HOTFIX2_MISSOES_PVP.md"
+  ],
+  "checksums_sha256": {
+    "public/game.js": "74c22bb824571f27be8524d3bddb4097e4f4cf4557891305ac1ec5e50b3498e4",
+    "public/index.html": "7077d679775fd819a05b0155516aad93ead3a8ad8b0ef94e832f01b6e2a4b46f",
+    "public/modules/mission-save-recovery-v105.js": "f529e0b24127bbe33a49bce26a56182cb40109088b392e0b2826f8e127a72b4a",
+    "public/modules/pvp-inbox-policy-v106.js": "1e5132b673725d3294d5efe98e8eb976deb98ce305921b0c3a69da153b0cbf53",
+    "tests/v105-mission-save-recovery.test.mjs": "0e96cb9bb9f2236dd98e4b0c883f4f0df741aa904333961857d5b9045b10434a",
+    "tests/v106-pvp-inbox-policy.test.mjs": "4cbafda15baf9d8e4fbf83c3292d8c251070dbd259a07d96f36f0e69dbe9fb8b",
+    "docs/V104_MISSIONFIX1_AUTOPILOT.md": "a911ac03edd8231d58ed2fa7efcab47109e5387ada1b9583b0c0b33027876b24",
+    "docs/V104_HOTFIX2_MISSOES_PVP.md": "7ad0d99240fb1301f85e93ad8006bcd8e7602185ac855cf6c4ce7757a29c299f"
+  },
+  "delete_files": [],
+  "tests_passed": 194
+}

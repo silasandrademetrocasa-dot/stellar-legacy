@@ -1,0 +1,16 @@
+STELLAR LEGACY • HOTFIX 2 • V104 (47.7.60)
+
+COMO APLICAR
+1. Base obrigatoria: Stellar Legacy V104/47.7.60 no seu GitHub.
+2. Use ESTE ZIP em vez do HOTFIX1 anterior: ja inclui a correcao das missoes.
+3. Extraia e copie as pastas public/, tests/ e docs/ na raiz do repositorio.
+4. Substitua public/game.js e public/index.html pelos arquivos deste ZIP.
+5. Envie os arquivos novos sem mudar os caminhos. Nenhuma exclusao necessaria.
+6. Aguarde o deploy no Render, compile um APK NOVO e instale.
+7. Em PvE: conferencia de 10-15 minutos deve mostrar aproximadamente zero chamadas de consume_pvp_damage_events por jogador.
+8. Em PvP (4-X): validar recebimento de dano e transicao para mapa seguro.
+9. Missao: aceitar uma unica vez, conferir progresso e recompensa apos relog.
+
+NAO altera SQL, triggers, recompensas ou dados. Nao foi implantado na producao.
+Teste local: npm test (194/194), npm run check (201 JavaScript e 309 assets).
+Documentacao completa: docs/V104_HOTFIX2_MISSOES_PVP.md
