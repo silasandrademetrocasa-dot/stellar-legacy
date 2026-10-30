@@ -69,10 +69,8 @@ export function chooseAutopilotAction(raw,cfg){
     if(hpRatio<.80)return {type:'idle',reason:'Aguardando recuperação de HP'};
   }
   const cargoRatio=(Number(s.cargoUsed)||0)/Math.max(1,Number(s.cargoCapacity)||1);
-  if(!inAstral&&c.autoSell&&cargoRatio>=c.cargoThreshold/100){
-    if(map==='x1'&&s.canSell)return {type:'sell',reason:'Vendendo recursos no comércio oficial'};
-    if(map!=='x1')return {type:'route',map:'x1',reason:'Voltando à base para vender'};
-    return {type:'move',x:s.base.x,y:s.base.y,reason:'Aproximando do comerciante'};
+  if(!inAstral&&c.autoSell&&s.remoteTraderEquipped===true&&cargoRatio>=c.cargoThreshold/100){
+    return s.canSell?{type:'sell',reason:'Venda remota automática • CPU equipado'}:{type:'idle',reason:'Terminal remoto indisponível • aguardando sincronização'};
   }
   // Reabastecimento fora da base exige o CPU padrão. Sem ele, voltar ao comércio.
   // Uma volta à base deve abastecer munições e mísseis antes de retomar o setor escolhido.
@@ -215,7 +213,10 @@ export function createStellarAutopilotV48({credentials,getIdentity=()=>null,getS
     const loopStatus=panel.querySelector('[data-ap-astral-loop-status]');if(loopStatus)loopStatus.textContent=`${config.astralLoop&&running?'♻ CICLO ATIVO':'♻ Ciclo parado'} • ${astralCycles} portal(is) concluído(s) • ${fmt(astralLoopSpent)} STL gastos • ${astralLoopPhase}`;
     const loopStop=panel.querySelector('[data-ap-astral-loop-stop]');if(loopStop)loopStop.disabled=!running||!config.astralLoop;
     const loopStart=panel.querySelector('[data-ap-astral-loop-start]');if(loopStart)loopStart.disabled=running||astralBuildBusy||astralLoopBusy||!accessReady();
-    if(fab)fab.textContent=running?'🤖 AUTO • ON':'🤖 AUTOPILOT';if(panel){const state=panel.querySelector('[data-ap-access-v82]');if(state)state.textContent=accessReady()?'✓ Acesso autorizado':'⚠ Acesso não confirmado • verifique a permissão da conta';panel.querySelectorAll('[data-ap-astral-build],[data-ap-astral-enter]').forEach(b=>b.disabled=astralBuildBusy);}
+    if(fab)fab.textContent=running?'🤖 AUTO • ON':'🤖 AUTOPILOT';if(panel){const state=panel.querySelector('[data-ap-access-v82]');if(state)state.textContent=accessReady()?'✓ Acesso autorizado':'⚠ Acesso não confirmado • verifique a permissão da conta';panel.querySelectorAll('[data-ap-astral-build],[data-ap-astral-enter]').forEach(b=>b.disabled=astralBuildBusy);
+      const sellToggle=panel.querySelector('[data-ap-check="autoSell"]'),cpuReady=getSnapshot()?.remoteTraderEquipped===true;
+      if(sellToggle){sellToggle.disabled=!cpuReady;sellToggle.title=cpuReady?'Terminal Mercante Remoto equipado':'Equipe o Terminal Mercante Remoto Elite para habilitar venda automática';}
+    }
   }
   // Compartilha a mesma consulta entre reabertura manual, login e polling; nunca
   // interpreta uma consulta em andamento como acesso negado ao reabrir a aba.
@@ -259,7 +260,7 @@ export function createStellarAutopilotV48({credentials,getIdentity=()=>null,getS
   <div class="ap-grid"><label>Mapa<select data-ap-field="map">${AUTOPILOT_ALLOWED_MAPS.map(m=>`<option value="${m}" ${m===config.map?'selected':''}>${m.toUpperCase().replace('X','X-').replace('U','U-')}</option>`).join('')}</select></label>
   <label>Seleção NPC<select data-ap-field="mode"><option value="nearest">Mais próximo</option><option value="profit">Melhor lucro estimado</option></select></label></div>
   <details><summary>NPCs permitidos (nenhum marcado = comuns)</summary><div class="ap-npcs">${npcTypes.filter(n=>n?.id&&/^[a-zA-Z0-9_-]+$/.test(n.id)).slice(0,70).map(n=>`<label><input type="checkbox" data-ap-npc="${esc(n.id)}"/>${esc(n.label||n.id)}</label>`).join('')}</div></details>
-  <div class="ap-grid ap-checks">${[['boxes','BOX bônus'],['drops','Drops de NPC'],['ores','Mineração'],['autoSell','Venda automática'],['autoBuy','Compra munição'],['rockets','Disparar mísseis']].map(([k,l])=>`<label><input type="checkbox" data-ap-check="${k}" ${config[k]?'checked':''}/> ${l}</label>`).join('')}</div>
+  <div class="ap-grid ap-checks">${[['boxes','BOX bônus'],['drops','Drops de NPC'],['ores','Mineração'],['autoSell','Venda remota automática (CPU obrigatório)'],['autoBuy','Compra munição'],['rockets','Disparar mísseis']].map(([k,l])=>`<label><input type="checkbox" data-ap-check="${k}" ${config[k]?'checked':''}/> ${l}</label>`).join('')}</div>
   <div class="ap-grid"><label>Venda ao atingir (%)<input data-ap-field="cargoThreshold" type="number" min="50" max="100" value="${config.cargoThreshold}"/></label>
   <label>Recuar HP (%)<input data-ap-field="hpRetreat" type="number" min="10" max="80" value="${config.hpRetreat}"/></label>
   <label>Duração (min • 0 = sem limite no astral)<input data-ap-field="minutes" type="number" min="0" max="360" value="${config.minutes}"/></label>
@@ -544,7 +545,7 @@ export function createStellarAutopilotV48({credentials,getIdentity=()=>null,getS
       else if(ts-pendingJump.at<18000){notify('Confirmando chegada ao próximo mapa');return;}
       else {pendingJump=null;failures++;notify('Portal demorou: nova tentativa controlada');}
     }
-    if(ts<nextSaleAttempt&&s.map==='x1'&&config.autoSell&&Number(s.cargoUsed)/Math.max(1,Number(s.cargoCapacity))>=config.cargoThreshold/100){
+    if(ts<nextSaleAttempt&&s.remoteTraderEquipped===true&&config.autoSell&&Number(s.cargoUsed)/Math.max(1,Number(s.cargoCapacity))>=config.cargoThreshold/100){
       notify('Aguardando confirmação da venda no servidor');return;
     }
     s.purchaseBudgetRemaining=Math.max(0,config.budget-spent);

@@ -8,6 +8,7 @@ import {renderStageAV423} from './stage-a-v423.js';
 // Stellar Legacy — Unificação V39–V42: telas auxiliares, sem loops de quadro/Canvas.
 // Toda alteração de moeda/material depende de RPC transacional do servidor.
 import {loadUnifiedExpansionV42,actUnifiedExpansionV42,squadUnifiedExpansionV42,adminUnifiedExpansionV42} from '../api.js?v=47.7.6';
+import {loadUniverseDashboardWithRetryV1067,universeDashboardFailureV1067} from './unified-expansion-recovery-v1067.js';
 import {loadSquadObjectiveV421,claimSquadObjectiveV421,adminSquadObjectiveV421} from '../api.js?v=47.7.6';
 const el=id=>document.getElementById(id);
 const esc=s=>String(s??'').replace(/[&<>"']/g,k=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[k]));
@@ -78,9 +79,34 @@ root.querySelectorAll('[data-v42-action]').forEach(b=>b.addEventListener('click'
  finally{working=false;const now=el('frontierExpansionContentV42');if(now&&!snapshot)now.textContent='Falha ao sincronizar.';}
  }));
 }
-async function refresh(){const root=el('frontierExpansionContentV42');if(root)root.textContent='Atualizando suas informações…';
- try{snapshot=await loadUnifiedExpansionV42();if(snapshot?.error)throw Error(snapshot.error);render();}
- catch(e){snapshot=null;if(root)root.textContent=`As atividades do universo estão temporariamente indisponíveis. Tente novamente.`;}
+let refreshVersionV1067=0;
+async function refresh(){
+ const token=++refreshVersionV1067;
+ const root=el('frontierExpansionContentV42');
+ const previous=snapshot;
+ if(root)root.textContent='Atualizando suas informações…';
+ try{
+   const next=await loadUniverseDashboardWithRetryV1067(loadUnifiedExpansionV42);
+   if(token!==refreshVersionV1067)return;
+   if(next?.error)throw Object.assign(new Error(String(next.error)),{code:String(next.error)});
+   if(!next||!Array.isArray(next.catalog))throw Object.assign(new Error('Painel do Universo incompleto'),{code:'UNIVERSE_INVALID_RESPONSE'});
+   snapshot=next;render();
+ }catch(error){
+   if(token!==refreshVersionV1067)return;
+   const failure=universeDashboardFailureV1067(error);
+   // Nunca apagar o ultimo dashboard valido por causa de um erro temporario.
+   snapshot=previous;
+   if(previous)render();
+   if(!root)return;
+   const message=document.createElement('section');message.className='frontier-card-v42 frontier-diagnostic-v1067';
+   message.setAttribute('role','alert');
+   const title=document.createElement('h4');title.textContent=failure.title;
+   const detail=document.createElement('p');detail.textContent=failure.detail;
+   const retry=document.createElement('button');retry.type='button';retry.textContent='TENTAR NOVAMENTE';
+   retry.addEventListener('click',()=>void refresh());
+   message.append(title,detail,retry);
+   root.prepend(message);
+ }
 }
 function boot(){const button=el('frontierExpansionBtnV42'),modal=el('frontierExpansionModalV42');if(!button||!modal)return;
  button.addEventListener('click',()=>{modal.classList.remove('hidden');refresh()});

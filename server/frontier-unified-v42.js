@@ -9,9 +9,24 @@ const asError=(res,error)=>{
 };
 export function attachFrontierUnifiedV42(app,{requireUser,asyncRoute}){
  app.get('/api/frontier/v42',requireUser,asyncRoute(async(req,res)=>{
+  const started=Date.now();
+  res.set('Cache-Control','no-store');
   const {data,error}=await req.sb.rpc('stellar_u42_dashboard');
-  if(error)return res.status(503).json({error:'A expansão V39–V42 requer SQL cumulativo.',detail:String(error.message||'').slice(0,130)});
-  res.set('Cache-Control','no-store');return res.json(data);
+  if(error){
+   const detail=String(error.message||'').slice(0,160);
+   const missing=/PGRST202|42883|does not exist|schema cache/i.test(String(error.code||'')+' '+detail);
+   const timed=/57014|timeout|canceling statement/i.test(String(error.code||'')+' '+detail);
+   const code=missing?'UNIVERSE_SQL_MISSING':timed?'UNIVERSE_DB_TIMEOUT':'UNIVERSE_DB_ERROR';
+   // Diagnostico sem token, callsign, ID do jogador ou dados economicos.
+   console.warn('[universe-v42] dashboard read failed',{code,dbCode:String(error.code||'').slice(0,18),durationMs:Date.now()-started});
+   if(!missing)res.set('Retry-After','1');
+   return res.status(missing?503:timed?504:503).json({code,error:missing?'A expansão do Universo não foi instalada no banco.':timed?'Tempo limite ao carregar o Universo Estelar.':'Não foi possível carregar o Universo Estelar.'});
+  }
+  if(!data||typeof data!=='object'||Array.isArray(data)||!Array.isArray(data.catalog)){
+   console.warn('[universe-v42] dashboard invalid response',{durationMs:Date.now()-started});
+   return res.status(503).json({code:'UNIVERSE_INVALID_RESPONSE',error:'O servidor recebeu um painel incompleto.'});
+  }
+  return res.json(data);
  }));
  app.post('/api/frontier/v42/action',requireUser,asyncRoute(async(req,res)=>{
   const {action,code,idempotencyKey}=req.body||{};

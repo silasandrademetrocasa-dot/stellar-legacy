@@ -1,0 +1,14 @@
+STELLAR LEGACY V106.7 — UNIVERSO ESTELAR (EXPANSAO UNIFICADA V42)
+PACOTE CUMULATIVO SOBRE V106.2 — inclui V106.3, V106.4, V106.5, V106.6.
+
+1. Termine o farm e confirme save ANTES de publicar.
+2. Extrair ZIP na raiz do repo. NAO aplicar V106.3/4/5/6 separadamente.
+3. Rodar npm run verify; subir para GitHub; aguardar Render Live.
+4. Fazer o teste especifico no menu EXPANSAO UNIFICADA → UNIVERSO ESTELAR.
+5. Instalar APK recompilado; Web pode ser testada primeiro em navegador.
+6. Se continuar falhando, verificar Render Logs por [universe-v42], anotar code do erro, momento e status; no painel tocar TENTAR NOVAMENTE.
+7. SQL V106.3 mapas e SQL V106.5 CPU: arquivos separados; executar somente apos farm e avaliacao. V106.7 nao requer SQL adicional.
+
+ATENCAO: a V106.6 tratava o indicador de conexão dos mapas U-X;
+essa V106.7 trata o painel correto identificado na captura de tela.
+NENHUM SQL EXECUTADO. NENHUM DEPLOY FEITO. NAO HOUVE MODIFICACAO DE SALDOS.

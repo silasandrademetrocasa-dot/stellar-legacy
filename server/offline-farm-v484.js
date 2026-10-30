@@ -1,3 +1,4 @@
+import {hasRemoteTraderCpuV1065} from '../public/modules/remote-cargo-auto-sale-v1065.js';
 import {forecastV495} from './farm-v495-forecast.js';
 import {safeFarmEconomySnapshot} from './farm-v86-economy.js';
 import {createHash,timingSafeEqual} from 'node:crypto';
@@ -155,6 +156,7 @@ export function installOfflineFarmV484(app,{requireUser,asyncRoute,requireEliteA
       if(method==='start'){
         const {data:save,error:saveError}=await sb.from('game_saves').select('state,updated_at').eq('user_id',req.user.id).maybeSingle();
         if(saveError||!save?.state)throw saveError||Error('FARM_SAVE_MISSING');
+        if(args.p_auto_sell===true&&!hasRemoteTraderCpuV1065(save.state))throw Error('Venda automática offline exige Terminal Mercante Remoto Elite EQUIPADO antes de iniciar o farm.');
         const requested=String(args.p_ammo_key||save.state.selectedLaserAmmo||'lcb10');
         const model=combatProfileV487(save.state,requested);
         const rawNpc=String(args.p_npc_key||'');
@@ -269,13 +271,14 @@ export function installOfflineFarmV484(app,{requireUser,asyncRoute,requireEliteA
       const save=await sb.from('game_saves').select('state').eq('user_id',req.user.id).maybeSingle();
       if(save.error)throw save.error;
       const map=String(save.data?.state?.mapId||'');
-      if(!/^x[1-8]$/.test(map))return res.json({map,choices:[]});
+      const remoteTraderEquipped=hasRemoteTraderCpuV1065(save.data?.state);
+      if(!/^x[1-8]$/.test(map))return res.json({map,choices:[],remoteTraderEquipped});
       const [spawn,npcs,ammo,settings]=await Promise.all([sb.from('game_map_npc_spawns_v1811').select('npc_key').eq('map_id',map).eq('enabled',true),sb.from('game_npc_config_v1811').select('npc_key,name,hp,shield,credits,stl,xp').eq('enabled',true),sb.from('live_shop_prices_v16').select('ref_id,price,currency,meta').eq('kind','ammo').eq('enabled',true).eq('shop_visible',true),sb.from('stellar_offline_farm_settings_v485').select('max_minutes').eq('id',1).single()]);
       if(spawn.error||npcs.error||ammo.error||settings.error)throw spawn.error||npcs.error||ammo.error||settings.error;
       const found=new Set((spawn.data||[]).map(r=>r.npc_key));
       const choices=(npcs.data||[]).filter(r=>found.has(r.npc_key)&&!/(boss|rift|elite|suprem|legend|lend|uber|ultra|titan)/i.test(r.npc_key+' '+r.name)).map(r=>({id:r.npc_key,name:r.name,credits:r.credits,stl:r.stl})).sort((a,b)=>Number(a.credits)-Number(b.credits));
       const grant=await farmGrantV49(sb,req.user.id);
-      return res.json({map,allowed:grant.allowed,isAdmin:grant.isAdmin,choices,ammunition:(ammo.data||[]).filter(r=>['lcb10','mcb25','mcb50','ucb100'].includes(r.ref_id)).map(r=>({id:r.ref_id,price:r.price,currency:r.currency,qty:Number(r.meta?.grant?.qty)||0})),maxMinutes:grant.maxMinutes,selectedAmmo:String(save.data?.state?.selectedLaserAmmo||'lcb10')});
+      return res.json({map,remoteTraderEquipped,allowed:grant.allowed,isAdmin:grant.isAdmin,choices,ammunition:(ammo.data||[]).filter(r=>['lcb10','mcb25','mcb50','ucb100'].includes(r.ref_id)).map(r=>({id:r.ref_id,price:r.price,currency:r.currency,qty:Number(r.meta?.grant?.qty)||0})),maxMinutes:grant.maxMinutes,selectedAmmo:String(save.data?.state?.selectedLaserAmmo||'lcb10')});
     }catch(e){return errorResponse(res,e);}
   }));
   app.post('/api/offline-farm/v484/start',requireUser,asyncRoute(async(req,res)=>{ 

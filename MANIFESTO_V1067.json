@@ -1,0 +1,172 @@
+{
+  "name": "STELLAR LEGACY V106.7 CUMULATIVA — UNIVERSO ESTELAR V42 + V106.3/4/5/6",
+  "base": "V106.2",
+  "included_versions": [
+    "V106.3",
+    "V106.4",
+    "V106.5",
+    "V106.6",
+    "V106.7"
+  ],
+  "files": [
+    {
+      "path": "docs/V106_3_PRESET_FARM_E_MAPAS.md",
+      "size": 1725,
+      "sha256": "f5cc047e16692773ef973a551b4af7d358707832fc59fef7f8f929820889c1e0"
+    },
+    {
+      "path": "docs/V106_4_CONSUMO_MUNICAO_NAVE_DRONES_AUX.md",
+      "size": 3421,
+      "sha256": "db7ebd0c6b9e8876d6844c5fb2671084699b24d0d104a2022858ef6a3c47b435"
+    },
+    {
+      "path": "docs/V106_5_VENDA_AUTOMATICA_CPU.md",
+      "size": 3126,
+      "sha256": "75f247142bdce89dcd654af8ecf554f0f4667ae63ddb2738a1dd61ca5f1dd360"
+    },
+    {
+      "path": "public/game.js",
+      "size": 1211247,
+      "sha256": "99562ab75613053a1c4a702aaeec6abb42b8e9dd4086b8a50f974dfa5106f70a"
+    },
+    {
+      "path": "public/index.html",
+      "size": 88968,
+      "sha256": "49f6a7f67b6f1f39537802724fe4e87a1cf2f4884c28a976ddce8da3dcd01005"
+    },
+    {
+      "path": "public/modules/battle-preset-guard-v1063.js",
+      "size": 2847,
+      "sha256": "df9c3c90218ff99b2f38f997c37b15dfad59e2447ddec300d115a475979dcd9f"
+    },
+    {
+      "path": "public/modules/combat-ammo-accounting-v1064.js",
+      "size": 1741,
+      "sha256": "9ffdbb40fca6f9b2ab3bbc121d5d288818f48d5f13b4e9a1ad3eb79ede2b5082"
+    },
+    {
+      "path": "public/modules/remote-cargo-auto-sale-v1065.js",
+      "size": 1015,
+      "sha256": "98dcc3c58952d732242f754b3efc589d56ed517a262acefbda4ace4822cd3dc3"
+    },
+    {
+      "path": "public/modules/stellar-autopilot-v48.js",
+      "size": 54817,
+      "sha256": "5f8a0849e52e4aabf05fb873b3f38b25c412458ed9f9cd6a37e079ff5bb3819a"
+    },
+    {
+      "path": "public/modules/stellar-offline-farm-v484.js",
+      "size": 25469,
+      "sha256": "77155a7544536ca95695998d842e123e95fd33221bbc464c78e0ab083ce6cd3b"
+    },
+    {
+      "path": "server/offline-farm-v484.js",
+      "size": 35582,
+      "sha256": "87fc80fd777dee49fb4dea74f18d24ed1602a8ee808bac10e0701a6aad403faa"
+    },
+    {
+      "path": "sql/STELLAR_V106_3_PATCH_MAPAS_POSICAO.sql",
+      "size": 1909,
+      "sha256": "6016a40909a0502fecc3941e261143768f708fa11af4ec5366c83a2182ef6894"
+    },
+    {
+      "path": "sql/STELLAR_V106_5_CPU_VENDA_AUTO.sql",
+      "size": 1171,
+      "sha256": "399b441cb63bce26898e2d5d7e5c1bb21846d084b675b8e02f252ea79d0cf016"
+    },
+    {
+      "path": "tests/v1063-preset-risk.test.mjs",
+      "size": 2740,
+      "sha256": "7c6b3381e44ac3f5fb1662bcdb05395f083adf479cbfdaeb0f84417d32a1f2c2"
+    },
+    {
+      "path": "tests/v1064-ammo-accounting.test.mjs",
+      "size": 4091,
+      "sha256": "5feffafe1d6c7f926988b3eb47fdc7d46216a7ca9096158713942e794e403d7f"
+    },
+    {
+      "path": "tests/v1065-remote-cargo-sale.test.mjs",
+      "size": 4653,
+      "sha256": "3b01259449babc83000676b9860b136fffed2e93dc97f1f53bf4efc36df2354c"
+    },
+    {
+      "path": "tests/v1051-network-observability.test.mjs",
+      "size": 2537,
+      "sha256": "f525e3670d7ecc73aaff8814001d91533000d682631d50399586efaac8768aaf"
+    },
+    {
+      "path": "tests/v106-pvp-inbox-policy.test.mjs",
+      "size": 2450,
+      "sha256": "521ea07ff29193ad2a34ac7603c1b31c720b2a3ec130735a33a62b37e78eaa02"
+    },
+    {
+      "path": "tests/v106-unified-save-coordinator.test.mjs",
+      "size": 3538,
+      "sha256": "698748227020eda44911d36583e9c0f7f9ed3809417a0f7ad0160b739861deb8"
+    },
+    {
+      "path": "docs/V106_6_UNIVERSO_STATUS_DIAGNOSTICO.md",
+      "size": 1656,
+      "sha256": "8ce81d4b53189b7a6bb65db1931015b36a25887e29bc46120bae1b4a15ce2615"
+    },
+    {
+      "path": "public/modules/universe-connection-status-v1066.js",
+      "size": 1608,
+      "sha256": "d54907d5518d24ff29f8a5e372c7c5531684af7dd46c6e94ca9eca9d0932f387"
+    },
+    {
+      "path": "tests/v1066-universe-connection-status.test.mjs",
+      "size": 1626,
+      "sha256": "d7d5184b69f744ef8a3facd03c05027041f1514656e4f58adb8455f149e2375b"
+    },
+    {
+      "path": "INSTRUCOES_V1067_CUMULATIVA.txt",
+      "size": 966,
+      "sha256": "87a23b6105956d500194e61b07aad83a4e9e73720c5dec24223a5512d1258751"
+    },
+    {
+      "path": "docs/V106_7_UNIVERSO_ESTELAR_EXPANSAO_UNIFICADA.md",
+      "size": 2637,
+      "sha256": "ab0abbce099c59b8845089dc5562d73333d6f96dcf8e515ca9a9736384929663"
+    },
+    {
+      "path": "public/modules/unified-expansion-recovery-v1067.js",
+      "size": 2609,
+      "sha256": "dcc82a1501ffc0c205904da1d908e663f02830ccd68e375dbda211179878c684"
+    },
+    {
+      "path": "public/modules/unified-expansion-v42.js",
+      "size": 14833,
+      "sha256": "c07a128222063857a5f6bf1418d0fd457cbf0093eaf8f1f6c032a1527ae9ca86"
+    },
+    {
+      "path": "server/frontier-unified-v42.js",
+      "size": 3720,
+      "sha256": "3199f4a3684f9d6ff367317038480b847ba58570affcbd170456e4767fb26d2c"
+    },
+    {
+      "path": "tests/v1067-unified-expansion-recovery.test.mjs",
+      "size": 4351,
+      "sha256": "2213e6049f70dec9e9c06950527b5705b63d4ea4871c284c48e08f03a6e38236"
+    }
+  ],
+  "tests": {
+    "npm_run_verify": "269/269",
+    "apk_assets": "1219 arquivos; 1027 imagens",
+    "android_gradle_build": "nao realizado"
+  },
+  "database": {
+    "changes": [
+      "sql/STELLAR_V106_3_PATCH_MAPAS_POSICAO.sql",
+      "sql/STELLAR_V106_5_CPU_VENDA_AUTO.sql"
+    ],
+    "executed": false,
+    "v1067_new_migrations": false
+  },
+  "notes": [
+    "A V106.6 tratava de mapas U-X. A V106.7 trata do menu Expansao Unificada/Universo Estelar.",
+    "A causa HTTP da tentativa vista no print não foi observada. O pacote melhora recuperacao e diagnostico de falhas da consulta V42; nao altera recompensas.",
+    "Somente GET e automaticamente repetido uma vez, nao as mutacoes economicas."
+  ],
+  "production_deploy_performed": false
+}
