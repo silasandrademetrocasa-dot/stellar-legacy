@@ -1,0 +1,16 @@
+STELLAR LEGACY V106.2 — HANGAR ANTI-ROLLBACK
+ZIP INCREMENTAL — SOMENTE MODIFICACOES
+
+BASE: V106.1 publicada e instalada. Nao aplicar sobre V105 ou V106 sem V106.1.
+
+1. Extraia o ZIP na raiz do repositorio, preservando public/, server/, tests/, docs/.
+2. Rode npm run verify (npm run check + npm test).
+3. Suba para o GitHub; aguarde Render indicar deploy Live.
+4. Gere e instale o NOVO APK V106.2. Sem ambos (servidor + cliente atualizado), edicoes de hangar podem ser recusadas.
+5. Reequipa uma unica vez os extras/lasers deslocados ao inventario. A atualizacao nao modifica a conta automaticamente.
+6. Valide ambas as CONFs, reinicio APK, vendas, compras, farm offline, combate intenso e missoes.
+7. Procure [HANGAR_WRITE_GUARD_V1062] no Render se alguma tentativa de desmontagem automatica for bloqueada.
+
+SEM MIGRACAO SQL. SEM DEPLOY EXECUTADO POR ESTE ZIP.
+O MOTOR ANTIFRAUDE E A ECONOMIA SERVER-SIDE PERMANECEM ATIVOS.
+Veja docs/V106_2_HANGAR_ANTI_ROLLBACK.md

@@ -99,6 +99,7 @@ import { mergeUnsavedMissionProgressV105 } from './modules/mission-save-recovery
 import {createLatestSaveCoordinatorV106} from './modules/unified-save-coordinator-v106.js?v=47.7.60';
 import { pendingMissionCategoriesV107, confirmedMissionCategoriesV107 } from './modules/mission-completion-sync-v107.js?v=47.7.60';
 import {equipmentFingerprintV109,reconcilePendingEquipmentV109} from './modules/hangar-save-recovery-v109.js?v=47.7.60';
+import {equipmentLayoutSignatureV1062} from './modules/hangar-write-guard-v1062.js?v=47.7.60';
 import {createAmmoSelectionTrackerV1061} from './modules/ammo-selection-recovery-v1061.js?v=47.7.60';
 import { shouldPollPvpInboxV106 } from './modules/pvp-inbox-policy-v106.js?v=47.7.60';
 import { signUp, signIn, beginGoogleSignIn, restoreGoogleSignInFromUrl, requestPasswordReset, restorePasswordRecoveryFromUrl, restoreSession, signOutLocal, getSessionRestoreErrorV101, checkGameSession, endGameSession, getUser, getSessionCredentials, loadCloudSave, saveCloudSave, loadEliteOperationsOnline, claimEliteOperationOnline, loadWarCampaignsOnline, claimWarSupplyOnline, claimWarCampaignOnline, loadAdminWarCampaignsOnline, saveAdminWarCampaignOnline, saveAdminWarRulesOnline, loadAdminEliteObjectivesOnline, saveAdminEliteObjectiveOnline, updateCallsign, updatePassword, loadRankings, loadAuctionBids, saveAuctionBidOnline, markAuctionBidStatusOnline, loadAuctionMarket, upsertPlayerPresenceOnline, loadMapPresenceOnline, savePlayerLocationCheckpointOnline, loadPlayerLocationCheckpointOnline, removePlayerPresenceOnline, queuePvpAttackOnline, consumePvpDamageEventsOnline, syncArenaProfileOnline, loadArenaState, loadArenaDailyRewardStatus, claimArenaDailyReward, loadArenaOpponents, loadArenaHistory, arenaAttackOnline, listClansOnline, loadMyClanOnline, createClanOnline, joinClanOnline, getClanRequestsOnline, reviewClanRequestOnline, cancelClanRequestOnline, setClanMemberRoleOnline, leaveClanOnline, transferClanCreditsOnline, claimClanCreditGrantsOnline, recordClanAlienKillOnline, getPremiumShopOnline, testPurchasePremiumOnline, adminPreviewPremiumStageOnline, adminSimulatePremiumStageOnline, getPremiumStageCatalogOnline, loadWarfrontStateOnline, loadSectorOwnershipOnline, hitWorldBossOnline, claimWorldBossRewardOnline, declareClanWarOnline, recordClanWarScoreOnline, loadLiveOpsOnline, adminUpdateLiveEventScheduleOnline, purchaseLiveCatalogOnline, purchaseLiveBulkOnline, economyActionOnline, getChatHistoryOnline, sendChatMessageOnline, redeemGameCouponOnline, getMyDesignersOnline, setDesignLoadoutOnline, claimGateDroneDesignOnline, claimEventDesignerOnline, getAdminStatus, adminSearchAccounts, adminRecentActions, adminBanAccount, adminUnbanAccount, adminResetAccount, adminDeleteAccount, pushTelemetryBatch, adminTelemetryOverview, adminPlayerTelemetry, getBattleGroupOnline, createBattleGroupOnline, inviteBattleGroupOnline, searchBattleGroupPlayersOnline, inviteBattleGroupUserOnline, respondBattleGroupInviteOnline, leaveBattleGroupOnline, kickBattleGroupMemberOnline, setBattleGroupRallyOnline, loadRuntimeConfigOnline, loadNpcRuntimeConfigOnline, loadWorldRuntimeConfigOnline, loadSystemsRuntimeConfigOnline, loadAdminRuntimeMonitorOnline, adminUpdateRuntimeModuleOnline, adminUpdateNpcRuntimeOnline, adminUpdateNpcSpawnRuntimeOnline, adminUpdateWorldMapOnline, adminUpdateWorldResourceOnline, adminUpdateWorldSectorOnline, adminUpdateWorldPortalOnline, adminUpdateWorldResourcePoolOnline, adminUpdateMissionCategoryOnline, adminUpdateEconomyServiceOnline, adminUpdateCraftingRecipeOnline, loadBattlePassRuntimeConfigOnline, adminUpdateBattlePassSeasonOnline, adminUpdateBattlePassTierOnline, loadShopsRuntimeConfigOnline, adminUpdateCommonShopItemOnline, adminUpdatePremiumShopItemOnline, loadBonusConfigOnline, adminUpdateBonusConfigOnline, adminCouponDashboardOnline, adminCreateCouponOnline, adminSetCouponActiveOnline, loadGalaxyGatesOnline, adminUpdateGalaxyGateOnline, adminUpsertCustomMissionOnline, adminDeleteCustomMissionOnline, adminCreateCraftRecipeOnline, adminCreateEconomyServiceOnline, adminCreatePassSeasonOnline, loadAuctionRulesOnline, adminUpdateAuctionRulesOnline, loadBalanceRuntimeOnline, adminUpdateBalanceOnline,loadAdminSecurityIncidents,reviewAdminSecurityIncident } from './api.js?v=47.7.60';
@@ -803,6 +804,18 @@ let equipmentSaveDesiredV109=null;
 let equipmentSaveBaselineV109=null;
 let equipmentSaveTimerV109=null;
 let equipmentSaveWarningAtV109=0;
+// V106.2: intencao explicita de equipamento persiste entre fechar/reabrir APK.
+// Um save local mais recente (por combate) NAO e intencao de retirar itens.
+function equipmentIntentKeyV1062(){return `stellar_hangar_write_intent_v1062_${getUser()?.id||'none'}`;}
+function readEquipmentIntentV1062(){try{return JSON.parse(localStorage.getItem(equipmentIntentKeyV1062())||'null');}catch{return null;}}
+function persistEquipmentIntentV1062(){
+  try{if(progress&&equipmentSaveBaselineV109)localStorage.setItem(equipmentIntentKeyV1062(),JSON.stringify({
+    owner:getUser()?.id,baseline:equipmentLayoutSignatureV1062(equipmentSaveBaselineV109),
+    desired:equipmentLayoutSignatureV1062(progress),createdAt:Date.now()
+  }));}catch(e){console.warn('[hangar-v1062] journal',e);}
+}
+function clearEquipmentIntentV1062(){try{localStorage.removeItem(equipmentIntentKeyV1062());}catch{}}
+
 let saveIntegrityBlockedV106=false; // Conflito de equipamento ainda nao resolvido: proibe compra/venda.
 // V106.1: a preferencia de disparo fica pendente ate ACK do Supabase.
 // Nunca transporta quantidade de municao ou saldos do cliente para a reconciliacao.
@@ -836,6 +849,7 @@ function rememberEquipmentChangeV109(){
   if(!authenticated||!progress||offlineFarmWorldLockedV84())return;
   equipmentSavePendingV109=true;equipmentSaveWarningAtV109=0;
   equipmentSaveDesiredV109=structuredClone(progress);
+  persistEquipmentIntentV1062();
   setSync('HANGAR PENDENTE','busy');
   scheduleEquipmentSaveV109(180);
 }
@@ -852,6 +866,7 @@ function equipmentSavedV109(snapshot){
   if(!equipmentSavePendingV109)return;
   if(equipmentFingerprintV109(snapshot)!==equipmentFingerprintV109(equipmentSaveDesiredV109))return;
   equipmentSavePendingV109=false;equipmentSaveDesiredV109=null;equipmentSaveWarningAtV109=0;
+  clearEquipmentIntentV1062();
   saveIntegrityBlockedV106=false;
   if(equipmentSaveTimerV109!==null){clearTimeout(equipmentSaveTimerV109);equipmentSaveTimerV109=null;}
   setSync('HANGAR SALVO','ok');
@@ -1515,6 +1530,9 @@ const OFFLINE_FARM_V484=createOfflineFarmV484({
     try{
       const currentAccount=String(getUser()?.id||'');
       if(!authenticated||!currentAccount)throw Error('Sessão do piloto ausente');
+      // Um PUT de antes do resgate jamais pode terminar depois e regravar o farm.
+      await waitCloudIdle(12000);
+      if(cloudBusy)throw Error('Farm resgatado, mas existe save em voo: reconecte com seguranca.');
       const serverSave=await loadCloudSave();
       if(!serverSave?.state)throw Error('Save no servidor ainda indisponível');
       /* O snapshot antigo do PWA não pode sobrescrever o resgate SQL. */
@@ -1782,11 +1800,20 @@ function installEconomyState(state,{preservePendingEquipment=true,preservePendin
   // locais pode ser recuperada SE os totais e o baseline coincidirem.
   const recovery=preservePendingEquipment&&equipmentSavePendingV109&&progress?
     reconcilePendingEquipmentV109(state,progress,equipmentSaveBaselineV109):null;
+  // Snapshot RPC atrasado: se o layout divergir da ultima montagem confirmada,
+  // nao permitir que uma venda/recibo velho passe a ser um novo save de hangar.
+  if(!recovery?.ok&&equipmentSaveBaselineV109&&progress&&!equipmentSavePendingV109&&
+      equipmentLayoutSignatureV1062(state)!==equipmentLayoutSignatureV1062(progress)){
+    console.error('[hangar-v1062] economia retornou layout divergente; montagens nao serao regravadas');
+    saveIntegrityBlockedV106=true;
+    equipmentRecoveryWarningV109();
+  }
   const pendingMissionRecoveryV106=preservePendingMissions&&progress?
     mergeUnsavedMissionProgressV105(state.missions,progress.missions,category=>missionPeriodKey(category)):null;
   const beforeHp=player.hp,beforeShield=player.shield;
   installServerStatePreservingPosition(recovery?.ok?recovery.state:state);
   equipmentSaveBaselineV109=structuredClone(state);
+  if(!equipmentSavePendingV109&&equipmentLayoutSignatureV1062(progress)===equipmentLayoutSignatureV1062(state))saveIntegrityBlockedV106=false;
   createBonusBoxes();cloudDirty=AMMO_SELECTION_V1061.pending;computeStats(false);
   player.hp=Math.max(0,Math.min(player.maxHp,beforeHp));
   player.shield=clampStoredShieldV2013(beforeShield,player.maxShield);
@@ -1798,8 +1825,8 @@ function installEconomyState(state,{preservePendingEquipment=true,preservePendin
   }
   if(recovery){
     if(recovery.ok&&!recovery.alreadySaved){
-      saveGame();equipmentSaveDesiredV109=structuredClone(progress);scheduleEquipmentSaveV109(200);
-    }else if(recovery.ok){equipmentSavePendingV109=false;equipmentSaveDesiredV109=null;equipmentSaveWarningAtV109=0;}
+      saveGame();equipmentSaveDesiredV109=structuredClone(progress);persistEquipmentIntentV1062();scheduleEquipmentSaveV109(200);
+    }else if(recovery.ok){equipmentSavePendingV109=false;equipmentSaveDesiredV109=null;equipmentSaveWarningAtV109=0;clearEquipmentIntentV1062();}
     else{equipmentSavePendingV109=false;equipmentSaveDesiredV109=null;equipmentRecoveryWarningV109();console.warn('[hangar-v109] estado do servidor alterado, sem merge inseguro',recovery.reason);}
   }
   if(AMMO_SELECTION_V1061.pending){saveGame();scheduleAmmoSelectionSaveV1061(200);}
@@ -5200,7 +5227,28 @@ async function sendCloudSaveAttemptV106(){
     progress.adminResetEpoch=accountResetEpochV478;
     // Salva uma fotografia: recompensas/abates recebidos durante o PUT ficam pendentes.
     const snapshot=structuredClone(progress);
-    const result=await saveCloudSave(snapshot);
+    // V106.2: apenas alteracoes reconhecidas de Hangar podem mudar equipamento.
+    // A revisao base e do ultimo estado AUTORITATIVO recebido, nao do localStorage.
+    const layoutDiffV1062=equipmentSaveBaselineV109&&equipmentLayoutSignatureV1062(snapshot)!==equipmentLayoutSignatureV1062(equipmentSaveBaselineV109);
+    if(layoutDiffV1062&&!equipmentSavePendingV109){
+      equipmentRecoveryWarningV109();
+      console.error('[hangar-v1062] snapshot de combate tentou remover/equipar sem acao do jogador');
+      // Restaurar a CONFIGURACAO validada pelo Supabase; nunca enviar a desmontagem.
+      // Protege progressos nao recompensados e escolhas de municao pendentes.
+      try{
+        const officialGearV1062=await loadCloudSave();
+        if(officialGearV1062?.state){
+          installEconomyState(officialGearV1062.state,{preservePendingEquipment:false});
+          equipmentSaveBaselineV109=structuredClone(officialGearV1062.state);
+          showToast('Montagem antiga bloqueada • equipamentos do Supabase restaurados','system');
+          return 'retry';
+        }
+      }catch(recoverErr){console.warn('[hangar-v1062] restauracao segura indisponivel',recoverErr);}
+      return 'error';
+    }
+    const gearIntentV1062=layoutDiffV1062&&equipmentSavePendingV109?
+      {intent:'hangar',baseline:equipmentLayoutSignatureV1062(equipmentSaveBaselineV109)}:null;
+    const result=await saveCloudSave(snapshot,gearIntentV1062);
     if(result?.statePatch){const patch=result.statePatch;if(Number.isFinite(Number(patch.credits)))progress.profile.credits=Number(patch.credits);if(patch.serverEconomy)progress.serverEconomy={...(progress.serverEconomy||{}),...patch.serverEconomy};localStorage.setItem(saveKey(),JSON.stringify(progress));updateUI();if(patch.serverEconomy?.lastClanCollectionDate)showToast('CLÃ • coleta diária de 10% sincronizada','system');}
     AMMO_SELECTION_V1061.confirm(snapshot);
     cloudDirty=cloudSaveMutationV105!==sentMutation||AMMO_SELECTION_V1061.pending;
@@ -5221,7 +5269,7 @@ async function sendCloudSaveAttemptV106(){
     return 'saved';
   }
   catch(e){failed=true;console.warn('cloud save',e);
-    if(e?.code==='SAVE_COUPON_STALE'||e?.code==='SAVE_EVENT_STALE'||e?.code==='SAVE_ELITE_STALE'||e?.code==='SAVE_ECONOMY_STALE'||e?.code==='SAVE_NPC_STALE'||e?.code==='SAVE_ORE_STALE'){
+    if(e?.code==='SAVE_EQUIPMENT_INTENT_REQUIRED'||e?.code==='SAVE_EQUIPMENT_STALE'||e?.code==='SAVE_COUPON_STALE'||e?.code==='SAVE_EVENT_STALE'||e?.code==='SAVE_ELITE_STALE'||e?.code==='SAVE_ECONOMY_STALE'||e?.code==='SAVE_NPC_STALE'||e?.code==='SAVE_ORE_STALE'){
       try{
         // Não ressuscita missões concluídas: só recupera aceites e progresso ainda não recompensados.
         const localMissions=structuredClone(progress?.missions||{});
@@ -5231,12 +5279,16 @@ async function sendCloudSaveAttemptV106(){
         if(remote?.state){
           const merged=mergeUnsavedMissionProgressV105(remote.state.missions,localMissions,category=>missionPeriodKey(category));
           const gearRecovery=desiredGear?reconcilePendingEquipmentV109(remote.state,desiredGear,equipmentSaveBaselineV109):null;
+          if(!desiredGear&&(e?.code==='SAVE_EQUIPMENT_INTENT_REQUIRED'||e?.code==='SAVE_EQUIPMENT_STALE')){
+            console.warn('[hangar-v1062] snapshot de combate rejeitado: restabelecendo configuracao salva no servidor');
+            equipmentRecoveryWarningV109();
+          }
           if(e?.code==='SAVE_ELITE_STALE')installServerStatePreservingPosition(remote.state);
           else installEconomyState(remote.state,{preservePendingEquipment:false,preservePendingMissions:false});
           equipmentSaveBaselineV109=structuredClone(remote.state);
           if(gearRecovery?.ok){
             if(gearRecovery.alreadySaved){
-              equipmentSavePendingV109=false;equipmentSaveDesiredV109=null;equipmentSaveWarningAtV109=0;saveIntegrityBlockedV106=false;
+              equipmentSavePendingV109=false;equipmentSaveDesiredV109=null;equipmentSaveWarningAtV109=0;clearEquipmentIntentV1062();saveIntegrityBlockedV106=false;
               setSync('HANGAR SALVO','ok');showToast('Hangar confirmado no Supabase ✓','system');
             }else{
               // O estado de moedas/revisoes veio do SQL, e somente a redistribuicao
@@ -5251,11 +5303,12 @@ async function sendCloudSaveAttemptV106(){
               computeStats(false);
               saveGame();
               equipmentSaveDesiredV109=structuredClone(progress);
+              persistEquipmentIntentV1062();
               scheduleEquipmentSaveV109(180);
             }
           }else if(gearRecovery){
             equipmentSavePendingV109=false;equipmentSaveDesiredV109=null;
-            equipmentRecoveryWarningV109();
+            clearEquipmentIntentV1062();equipmentRecoveryWarningV109();
             console.warn('[hangar-v109] conflito sem merge seguro',gearRecovery.reason);
           }
           if(merged.changed){
@@ -11641,7 +11694,24 @@ async function afterAuth(){
     const localStamp=Number(local?.clientSavedAt)||0;
     const remoteStamp=Number(remote?.state?.clientSavedAt)||Date.parse(remote?.updated_at||'')||0;
     const localStampSane=localStamp>0&&localStamp<=Date.now()+300000;
-    if(local&&localStampSane&&localStamp>remoteStamp+250){
+    const localGearMismatchV1062=!!(local&&remote?.state&&
+      equipmentLayoutSignatureV1062(local)!==equipmentLayoutSignatureV1062(remote.state));
+    const gearJournalV1062=readEquipmentIntentV1062();
+    const justifiedLocalGearV1062=!!(localGearMismatchV1062&&gearJournalV1062&&
+      gearJournalV1062.owner===accountId&&
+      gearJournalV1062.baseline===equipmentLayoutSignatureV1062(remote.state)&&
+      gearJournalV1062.desired===equipmentLayoutSignatureV1062(local));
+    if(localGearMismatchV1062&&!justifiedLocalGearV1062){
+      console.warn('[hangar-v1062] descartada montagem local mais nova sem acao explicita; servidor soberano');
+      clearEquipmentIntentV1062();
+      // Recuperar somente missoes nao recompensadas. Nada de moeda/inventario local.
+      const missionRecoveryV1062=mergeUnsavedMissionProgressV105(remote.state.missions,local.missions,category=>missionPeriodKey(category));
+      if(missionRecoveryV1062.changed){
+        progress=structuredClone(remote.state);progress.missions=missionRecoveryV1062.missions;
+        hydrateProgress();saveGame();missionSavePendingV105=true;
+        setTimeout(()=>flushCloudSave(true),0);
+      }else{progress=structuredClone(remote.state);hydrateProgress();setSync('HANGAR PROTEGIDO','ok');}
+    }else if(local&&localStampSane&&localStamp>remoteStamp+250){
       progress=local;hydrateProgress();cloudDirty=true;setSync('LOCAL MAIS NOVO','busy');
       if(remote?.state){
         for(const key of ['selectedLaserAmmo','selectedRocket']){
@@ -11651,13 +11721,15 @@ async function afterAuth(){
       // Um save local de equipamento mais novo continua como pendencia local,
       // nunca como compra confirmada. A reconciliação ocorrerá com a revisão
       // econômica correta no próximo conflito, sem descartar a montagem.
-      if(remote?.state&&equipmentFingerprintV109(local)!==equipmentFingerprintV109(remote.state)){
+      if(justifiedLocalGearV1062){
         equipmentSavePendingV109=true;
         equipmentSaveDesiredV109=structuredClone(progress);
+        persistEquipmentIntentV1062();
         setSync('HANGAR PENDENTE','busy');
       }
       setTimeout(()=>flushCloudSave(true),0);
     }else if(remote.state){
+      clearEquipmentIntentV1062();
       progress=remote.state;hydrateProgress();setSync('ONLINE','ok');
     }else if(local){
       progress=local;hydrateProgress();setSync('LOCAL','busy');cloudDirty=true;setTimeout(()=>flushCloudSave(true),0);

@@ -1,0 +1,69 @@
+{
+  "release": "V106.2",
+  "name": "HANGAR ANTI-ROLLBACK",
+  "base": "V106.1",
+  "kind": "incremental",
+  "sql_changes": false,
+  "deployed": false,
+  "validation": {
+    "npm_test": "234/234 PASS",
+    "npm_run_check": "PASS; 216 JS; 309 assets"
+  },
+  "files": [
+    {
+      "path": "INSTRUCOES_V1062.txt",
+      "bytes": 970,
+      "sha256": "fa4570fd5c0a642a895b8ea4c023cc92897fb0b518270efdfd9969fbc4653d23"
+    },
+    {
+      "path": "docs/V106_2_HANGAR_ANTI_ROLLBACK.md",
+      "bytes": 4721,
+      "sha256": "d7397f0d83e1237b20a358f78607ffa71295fae55d5c16824110ba70986ea5ea"
+    },
+    {
+      "path": "public/api.js",
+      "bytes": 63318,
+      "sha256": "d6df61d85707d445a35002be07d36acc553141d9ae700d90454a8b748626ffa6"
+    },
+    {
+      "path": "public/game.js",
+      "bytes": 1205960,
+      "sha256": "1f3fa4dafc627212806d4ed67ad0576d77488c863aaf0ffd636269e0bacfbd8a"
+    },
+    {
+      "path": "public/index.html",
+      "bytes": 88682,
+      "sha256": "e5f32168e147b7fd3d2f401f9ec0a8e2db9be46423c25b01ca56f80bdf14cd6f"
+    },
+    {
+      "path": "public/modules/hangar-write-guard-v1062.js",
+      "bytes": 1899,
+      "sha256": "d7b09eb63b87561c622ec0c7a69fc19e15cab64dc8dfdc9015d7bcc3ae63919e"
+    },
+    {
+      "path": "server/index.js",
+      "bytes": 186073,
+      "sha256": "ed9f23433cecfa4686441e11487d94718d745d1cfa9301b436c39842e5d5d302"
+    },
+    {
+      "path": "tests/v1051-network-observability.test.mjs",
+      "bytes": 2515,
+      "sha256": "244859c305114473f9c1daf3bb4baf5c1bc5cf9735c9ce8d1c9e1b1a328f0faa"
+    },
+    {
+      "path": "tests/v106-pvp-inbox-policy.test.mjs",
+      "bytes": 2428,
+      "sha256": "db85e0a3746b032a15ffc564d07170bae116293fcb164e612a1315c249141e5a"
+    },
+    {
+      "path": "tests/v106-unified-save-coordinator.test.mjs",
+      "bytes": 3516,
+      "sha256": "e3a9b2a5affa34d42c4b3e4f9169227e3ba9787dc8358f7c6567981c87c0c961"
+    },
+    {
+      "path": "tests/v1062-hangar-write-guard.test.mjs",
+      "bytes": 4867,
+      "sha256": "a0d1d712b7eb2e35b35733fb785cb234acb033dde3f1dd99d8fe4b80a7c0bc62"
+    }
+  ]
+}

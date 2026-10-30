@@ -418,11 +418,11 @@ export async function loadCloudSave() {
   return { state: body?.state || null, updated_at: body?.updated_at || null, reset_epoch:Number(body?.reset_epoch)||0 };
 }
 
-export async function saveCloudSave(state) {
+export async function saveCloudSave(state, equipmentMutationV1062=null) {
   if (!currentUser?.id) throw new Error('Usuário não identificado.');
   return authedServerFetch('/api/save', {
     method: 'PUT',
-    body: JSON.stringify({ state }),
+    body: JSON.stringify({ state, ...(equipmentMutationV1062?{equipmentMutationV1062}:{}) }),
   });
 }
 

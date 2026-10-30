@@ -1,5 +1,6 @@
 /* STELLAR_OFFLINE_FARM_V484 APPLIED */
 import {saleQuoteV4776} from '../public/modules/sale-policy-v4776.js';
+import {validateEquipmentWriteV1062} from '../public/modules/hangar-write-guard-v1062.js';
 import {attachFrontierAuditV450} from './frontier-audit-v450.js';
 import {attachFrontierAdminV440} from './frontier-admin-v440.js';
 import {attachAstralIntegrationsV435} from './astral-integrations-v435.js';
@@ -1942,6 +1943,19 @@ app.put('/api/save', requireUser, OFFLINE_FARM_GUARD_V484, asyncRoute(async (req
   // aberto durante o reset, ele não pode sobrescrever a cobrança com um save antigo.
   let statePatch = null;
   const { data: serverSave } = await req.sb.from('game_saves').select('state').eq('user_id', req.user.id).maybeSingle();
+  // V106.2: saves de combate/farm nao podem alterar a montagem (CONF1/2,
+  // nave, drones, AUX) sem uma intencao do hangar e baseline do servidor.
+  // Mantem integralmente os validadores economicos, NPC, inventario e anti-fraude.
+  const gearWriteV1062=validateEquipmentWriteV1062(serverSave?.state||null,state,req.body?.equipmentMutationV1062);
+  if(!gearWriteV1062.ok){
+    console.warn('[HANGAR_WRITE_GUARD_V1062]',gearWriteV1062.code);
+    return res.status(409).json({
+      error:gearWriteV1062.code==='SAVE_EQUIPMENT_STALE'?
+        'Hangar alterado desde a ultima sincronizacao. Recarregue o save.':
+        'Save sem acao de hangar tentou alterar equipamentos. Bloqueado para proteger sua montagem.',
+      code:gearWriteV1062.code
+    });
+  }
   // Compras economicas confirmadas pelo Render nao podem ser desfeitas com save antigo.
   // O histórico idempotente de compras em lote é SEMPRE autoritativo do servidor.
   // Clientes legados que não possuem esse campo continuam compatíveis.
