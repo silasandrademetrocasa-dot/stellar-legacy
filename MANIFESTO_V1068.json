@@ -1,0 +1,197 @@
+{
+  "release": "V106.8",
+  "basis": "V106.2",
+  "includes": [
+    "V106.3",
+    "V106.4",
+    "V106.5",
+    "V106.6",
+    "V106.7",
+    "V106.8"
+  ],
+  "sql_changed_in_v1068": false,
+  "deployed": false,
+  "tested": {
+    "automated_tests": "279/279",
+    "apk_local_files": 1220,
+    "apk_local_images": 1027
+  },
+  "changed_in_v1068": [
+    "public/game.js",
+    "public/index.html",
+    "server/index.js",
+    "public/modules/mission-reward-ack-v108.js",
+    "server/mission-save-guard-v108.js",
+    "tests/v108-mission-exactly-once.test.mjs",
+    "tests/v1051-network-observability.test.mjs",
+    "tests/v106-pvp-inbox-policy.test.mjs",
+    "tests/v106-unified-save-coordinator.test.mjs"
+  ],
+  "files": [
+    {
+      "path": "INSTRUCOES_V1068_CUMULATIVA.txt",
+      "bytes": 786,
+      "sha256": "25045cd5cb32b15b88113a3070739bb409e142cd04da0e42b7133829c6db6d4e"
+    },
+    {
+      "path": "docs/V106_3_PRESET_FARM_E_MAPAS.md",
+      "bytes": 1725,
+      "sha256": "f5cc047e16692773ef973a551b4af7d358707832fc59fef7f8f929820889c1e0"
+    },
+    {
+      "path": "docs/V106_4_CONSUMO_MUNICAO_NAVE_DRONES_AUX.md",
+      "bytes": 3421,
+      "sha256": "db7ebd0c6b9e8876d6844c5fb2671084699b24d0d104a2022858ef6a3c47b435"
+    },
+    {
+      "path": "docs/V106_5_VENDA_AUTOMATICA_CPU.md",
+      "bytes": 3126,
+      "sha256": "75f247142bdce89dcd654af8ecf554f0f4667ae63ddb2738a1dd61ca5f1dd360"
+    },
+    {
+      "path": "docs/V106_6_UNIVERSO_STATUS_DIAGNOSTICO.md",
+      "bytes": 1656,
+      "sha256": "8ce81d4b53189b7a6bb65db1931015b36a25887e29bc46120bae1b4a15ce2615"
+    },
+    {
+      "path": "docs/V106_7_UNIVERSO_ESTELAR_EXPANSAO_UNIFICADA.md",
+      "bytes": 2637,
+      "sha256": "ab0abbce099c59b8845089dc5562d73333d6f96dcf8e515ca9a9736384929663"
+    },
+    {
+      "path": "docs/V106_8_MISSOES_ACK_E_ANTI_ROLLBACK.md",
+      "bytes": 3048,
+      "sha256": "fbb0b9870a71abccd8be05398c74425d8b65c35edf47298df51c47927b4c3a58"
+    },
+    {
+      "path": "public/game.js",
+      "bytes": 1213197,
+      "sha256": "88d31e7db80be2ca9cc5abeec8c87c326ac3171214d4548f35f2fd99a0fd49b0"
+    },
+    {
+      "path": "public/index.html",
+      "bytes": 88964,
+      "sha256": "dff2588276688e5c3bee709fa602bfc65017b87a9b99b0e26e881926e698482f"
+    },
+    {
+      "path": "public/modules/battle-preset-guard-v1063.js",
+      "bytes": 2847,
+      "sha256": "df9c3c90218ff99b2f38f997c37b15dfad59e2447ddec300d115a475979dcd9f"
+    },
+    {
+      "path": "public/modules/combat-ammo-accounting-v1064.js",
+      "bytes": 1741,
+      "sha256": "9ffdbb40fca6f9b2ab3bbc121d5d288818f48d5f13b4e9a1ad3eb79ede2b5082"
+    },
+    {
+      "path": "public/modules/mission-reward-ack-v108.js",
+      "bytes": 1063,
+      "sha256": "952298da8d511cba9c21d7a9a886be428bac0ea92849a968b12af9a1fe50022a"
+    },
+    {
+      "path": "public/modules/remote-cargo-auto-sale-v1065.js",
+      "bytes": 1015,
+      "sha256": "98dcc3c58952d732242f754b3efc589d56ed517a262acefbda4ace4822cd3dc3"
+    },
+    {
+      "path": "public/modules/stellar-autopilot-v48.js",
+      "bytes": 54817,
+      "sha256": "5f8a0849e52e4aabf05fb873b3f38b25c412458ed9f9cd6a37e079ff5bb3819a"
+    },
+    {
+      "path": "public/modules/stellar-offline-farm-v484.js",
+      "bytes": 25469,
+      "sha256": "77155a7544536ca95695998d842e123e95fd33221bbc464c78e0ab083ce6cd3b"
+    },
+    {
+      "path": "public/modules/unified-expansion-recovery-v1067.js",
+      "bytes": 2609,
+      "sha256": "dcc82a1501ffc0c205904da1d908e663f02830ccd68e375dbda211179878c684"
+    },
+    {
+      "path": "public/modules/unified-expansion-v42.js",
+      "bytes": 14833,
+      "sha256": "c07a128222063857a5f6bf1418d0fd457cbf0093eaf8f1f6c032a1527ae9ca86"
+    },
+    {
+      "path": "public/modules/universe-connection-status-v1066.js",
+      "bytes": 1608,
+      "sha256": "d54907d5518d24ff29f8a5e372c7c5531684af7dd46c6e94ca9eca9d0932f387"
+    },
+    {
+      "path": "server/frontier-unified-v42.js",
+      "bytes": 3720,
+      "sha256": "3199f4a3684f9d6ff367317038480b847ba58570affcbd170456e4767fb26d2c"
+    },
+    {
+      "path": "server/index.js",
+      "bytes": 186531,
+      "sha256": "b9520097357331323c5502a4a9f434e6495a585ca112b243bb1c7b5dfd82787a"
+    },
+    {
+      "path": "server/mission-save-guard-v108.js",
+      "bytes": 2279,
+      "sha256": "22925ccefd5bb570b4d0f83b30110edefbb8afc9ea2ebadb582d4d744417a518"
+    },
+    {
+      "path": "server/offline-farm-v484.js",
+      "bytes": 35582,
+      "sha256": "87fc80fd777dee49fb4dea74f18d24ed1602a8ee808bac10e0701a6aad403faa"
+    },
+    {
+      "path": "sql/STELLAR_V106_3_PATCH_MAPAS_POSICAO.sql",
+      "bytes": 1909,
+      "sha256": "6016a40909a0502fecc3941e261143768f708fa11af4ec5366c83a2182ef6894"
+    },
+    {
+      "path": "sql/STELLAR_V106_5_CPU_VENDA_AUTO.sql",
+      "bytes": 1171,
+      "sha256": "399b441cb63bce26898e2d5d7e5c1bb21846d084b675b8e02f252ea79d0cf016"
+    },
+    {
+      "path": "tests/v1051-network-observability.test.mjs",
+      "bytes": 2555,
+      "sha256": "7fad1d6261498b229bc1ff751d840a0c31d5a14e83fb03b7da5a364aafeba86d"
+    },
+    {
+      "path": "tests/v106-pvp-inbox-policy.test.mjs",
+      "bytes": 2468,
+      "sha256": "f27efc76f4001987151b974f2cfc29d7a661f89eb03ce49d7c27e1b02046ed12"
+    },
+    {
+      "path": "tests/v106-unified-save-coordinator.test.mjs",
+      "bytes": 3556,
+      "sha256": "4ac084bad5f8b6f3d72f08226a709d8020db9acc696ff4cb808825fc716b6ac2"
+    },
+    {
+      "path": "tests/v1063-preset-risk.test.mjs",
+      "bytes": 2740,
+      "sha256": "7c6b3381e44ac3f5fb1662bcdb05395f083adf479cbfdaeb0f84417d32a1f2c2"
+    },
+    {
+      "path": "tests/v1064-ammo-accounting.test.mjs",
+      "bytes": 4091,
+      "sha256": "5feffafe1d6c7f926988b3eb47fdc7d46216a7ca9096158713942e794e403d7f"
+    },
+    {
+      "path": "tests/v1065-remote-cargo-sale.test.mjs",
+      "bytes": 4653,
+      "sha256": "3b01259449babc83000676b9860b136fffed2e93dc97f1f53bf4efc36df2354c"
+    },
+    {
+      "path": "tests/v1066-universe-connection-status.test.mjs",
+      "bytes": 1626,
+      "sha256": "d7d5184b69f744ef8a3facd03c05027041f1514656e4f58adb8455f149e2375b"
+    },
+    {
+      "path": "tests/v1067-unified-expansion-recovery.test.mjs",
+      "bytes": 4351,
+      "sha256": "2213e6049f70dec9e9c06950527b5705b63d4ea4871c284c48e08f03a6e38236"
+    },
+    {
+      "path": "tests/v108-mission-exactly-once.test.mjs",
+      "bytes": 5137,
+      "sha256": "fa28b8e3aafae182cd1d35649952c0ce876d68c3731fd808a9b42f1a3df048b1"
+    }
+  ]
+}

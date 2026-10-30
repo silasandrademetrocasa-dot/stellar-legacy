@@ -1,0 +1,11 @@
+STELLAR LEGACY V106.8 — CORREÇÃO MISSÕES SEM ROLLBACK
+
+CUMULATIVA V106.3 a V106.8 | BASE V106.2 | NÃO requer V106.7 separado.
+1) Encerrar autopilot/farm e esperar SAVE confirmado.
+2) Extrair este ZIP sobre raiz do repositório com o Instalador Universal.
+3) Executar npm run verify (279/279 testes nesta distribuição).
+4) Fazer commit/deploy no Render e gerar novo APK Android. Use versão nova do APK para testar.
+5) Testar missão no último abate, salvar, abrir próxima e reconectar. Recompensa só é anunciada após segundo save aceito.
+6) Não rodar SQLs dentro do ZIP durante o farm. Dois SQLs herdados são opcionais/necessários para melhorias anteriores, não para missões.
+
+V106.8 NÃO altera saldo, nem grava banco de produção por si só. NÃO foi feito deploy.

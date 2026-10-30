@@ -37,6 +37,6 @@ test('V106: cliente atualizado usa politica nova sem modificar API econômica',(
   const html=readFileSync(new URL('../public/index.html',import.meta.url),'utf8');
   assert.match(game,/from '\.\/modules\/pvp-inbox-policy-v106\.js\?v=47\.7\.60'/);
   assert.match(game,/shouldPollPvpInboxV106\(\{/);
-  assert.match(html,/\/game\.js\?v=47\.7\.60-(?:missionfix3|v1051-network|v106-unified-save|v1061-ammo-ack|v1062-hangar-guard|v1064-ammo-accounting)/);
+  assert.match(html,/\/game\.js\?v=47\.7\.60-(?:missionfix3|v1051-network|v106-unified-save|v1061-ammo-ack|v1062-hangar-guard|v1064-ammo-accounting|v1068-mission-ack)/);
   assert.match(game,/mergeUnsavedMissionProgressV105/);
 });

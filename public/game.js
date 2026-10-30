@@ -100,6 +100,7 @@ import { GAME_ASSETS } from './assets/v17/manifest.js?v=47.7.60';
 import { mergeUnsavedMissionProgressV105 } from './modules/mission-save-recovery-v105.js?v=47.7.60';
 import {createLatestSaveCoordinatorV106} from './modules/unified-save-coordinator-v106.js?v=47.7.60';
 import { pendingMissionCategoriesV107, confirmedMissionCategoriesV107 } from './modules/mission-completion-sync-v107.js?v=47.7.60';
+import { createMissionRewardAckV108 } from './modules/mission-reward-ack-v108.js?v=47.7.60';
 import {equipmentFingerprintV109,reconcilePendingEquipmentV109} from './modules/hangar-save-recovery-v109.js?v=47.7.60';
 import {equipmentLayoutSignatureV1062} from './modules/hangar-write-guard-v1062.js?v=47.7.60';
 import {createAmmoSelectionTrackerV1061} from './modules/ammo-selection-recovery-v1061.js?v=47.7.60';
@@ -886,6 +887,16 @@ function equipmentRecoveryWarningV109(){
   }
 }
 
+const MISSION_REWARD_ACK_V108=createMissionRewardAckV108();
+let missionRewardOwnerV108=null;
+function announceCommittedMissionRewardsV108(savedMissions){
+  for(const draft of MISSION_REWARD_ACK_V108.acknowledge(savedMissions)){
+    telemetryEconomy('mission',{cr:draft.bonus.credits,stl:draft.bonus.uridium,xp:draft.bonus.xp});
+    telemetryCounter('missions_completed',1);
+    showMissionCompleteAnimation(draft.mission,draft.bonus);
+    showToast(`Recompensa confirmada • ${draft.mission.title}${draft.surprise?.label?` • ${draft.surprise.label}`:''}`,'mission');
+  }
+}
 let missionSaveTimerV105=null;
 function queueMissionSaveV105(){
   if(!authenticated||!progress||offlineFarmWorldLockedV84())return;
@@ -3006,6 +3017,7 @@ function acceptMission(category,id){
   if(!featureUnlocked('missions')){showFeatureLock('missions','Missões');return;}
   if(!missionCategoryUnlocked(category)){showToast(`${MISSION_CATEGORIES[category]?.label||'Categoria'} libera no nível ${missionCategoryRequiredLevel(category)}`);return;}
   normalizeMissionState();
+  if(MISSION_REWARD_ACK_V108.isPendingCategory(category)){showToast('Recompensa anterior aguardando confirmação do Supabase');return;}
   if(progress.missions.active[category]){showToast('Você já tem uma missão ativa nessa categoria');return;}
   const mission=missionById(category,id);if(!mission)return;
   if(!smartMissionPlayable(mission,category)){showToast(smartMissionRequirement(mission).reason+' • contrato indisponível');return;}
@@ -3052,38 +3064,55 @@ function missionItemChance(category,mission=null){
   const rule=systemsMissionCategory(category),cfg=rule?.config||{};if(category==='daily'&&mission?.group==='ore')return Number.isFinite(Number(cfg.ore_item_chance))?Math.max(0,Math.min(1,Number(cfg.ore_item_chance))):1;
   return Number.isFinite(Number(rule?.itemChance))?Math.max(0,Math.min(1,Number(rule.itemChance))):(({daily:.55,weekly:.60,monthly:.78,special:.88})[category]??.45);
 }
-function grantMissionSurprise(category,mission=null){
+function chooseMissionSurpriseV108(category,mission=null){
   if(Math.random()>missionItemChance(category,mission))return null;
   const r=Math.random();
-  if(r<.55){
-    const reward=randomChoice(MISSION_ITEM_REWARD_POOLS.ammo);
-    if(reward.kind==='ammo')progress.ammo[reward.id]=(progress.ammo[reward.id]||0)+reward.qty;
-    else progress.rockets[reward.id]=(progress.rockets[reward.id]||0)+reward.qty;
-    return reward.label;
-  }
+  if(r<.55){const gift=randomChoice(MISSION_ITEM_REWARD_POOLS.ammo);return gift?{...gift}:null;}
   let pool=MISSION_ITEM_REWARD_POOLS.commonGear;
   if(category==='monthly'||category==='special'){
     if(r>.96)pool=MISSION_ITEM_REWARD_POOLS.jackpotGear;
     else if(r>.75)pool=MISSION_ITEM_REWARD_POOLS.eliteGear;
   }else if(category==='weekly'&&r>.90)pool=MISSION_ITEM_REWARD_POOLS.eliteGear;
-  const id=randomChoice(pool),item=ITEMS[id];if(!item)return null;
-  addInventory(id);return item.name;
+  const id=randomChoice(pool),item=ITEMS[id];
+  return item?{kind:'inventory',id,qty:1,label:item.name}:null;
+}
+function grantMissionSurpriseV108(choice){
+  if(!choice)return null;
+  if(choice.kind==='ammo')progress.ammo[choice.id]=(progress.ammo[choice.id]||0)+choice.qty;
+  else if(choice.kind==='rocket')progress.rockets[choice.id]=(progress.rockets[choice.id]||0)+choice.qty;
+  else if(choice.kind==='inventory')addInventory(choice.id,choice.qty);
+  return choice.label||null;
 }
 function missionRewardItemHint(category,mission=null){
   const chance=missionItemChance(category,mission);return chance>=1?'BÔNUS GARANTIDO: munição ou equipamento':`Chance bônus: ${Math.round(chance*100)}% de munição/equipamento`;
 }
 function finishMissionAutomatically(category,mission,active){
-  if(!mission||!active)return;
-  const flat=mission.flatReward||null;
-  if(flat&&!active.flatRewardApplied){active.bonus.credits+=(Number(flat.credits)||0);active.bonus.uridium+=(Number(flat.uridium)||0);active.bonus.xp+=(Number(flat.xp)||0);active.flatRewardApplied=true;}
-  const bonus=roundedMissionBonus(active);
-  progress.profile.credits+=bonus.credits;progress.profile.uridium+=bonus.uridium;bonus.xp=Math.round(bonus.xp*designerXpMultiplier());progress.profile.xp+=bonus.xp;telemetryEconomy('mission',{cr:bonus.credits,stl:bonus.uridium,xp:bonus.xp});telemetryCounter('missions_completed',1);titleStatAdd('missions',1);
-  const surprise=grantMissionSurprise(category,mission);
-  if(surprise)bonus.itemText=`BÔNUS: ${surprise}`;
-  progress.missions.completed[missionInstanceKey(category,mission.id)]=Date.now();
+  if(!mission||!active||!progress?.missions)return;
+  const key=missionInstanceKey(category,mission.id);
+  if(progress.missions.completed[key])return;
+  // A primeira gravação confirmou o objetivo, NÃO o prêmio. Guardar o sorteio
+  // enquanto os saves NPC concorrentes são reconciliados evita novos prêmios
+  // aleatórios e repetição de avisos em cada tentativa de salvar.
+  const draft=MISSION_REWARD_ACK_V108.stage(key,()=>{
+    const flat=mission.flatReward||null;
+    const bonus=roundedMissionBonus(active);
+    if(flat&&!active.flatRewardApplied){bonus.credits+=(Number(flat.credits)||0);bonus.uridium+=(Number(flat.uridium)||0);bonus.xp+=(Number(flat.xp)||0);}
+    bonus.xp=Math.round(bonus.xp*designerXpMultiplier());
+    const surprise=chooseMissionSurpriseV108(category,mission);
+    if(surprise?.label)bonus.itemText=`BÔNUS: ${surprise.label}`;
+    return {key,category,mission:structuredClone(mission),bonus,surprise};
+  });
+  if(!draft)return;
+  progress.profile.credits+=draft.bonus.credits;
+  progress.profile.uridium+=draft.bonus.uridium;
+  progress.profile.xp+=draft.bonus.xp;
+  grantMissionSurpriseV108(draft.surprise);
+  titleStatAdd('missions',1);
+  progress.missions.completed[key]=Date.now();
   progress.missions.active[category]=null;
-  showMissionCompleteAnimation(mission,bonus);processPlayerLevelUps();
-  showToast(`Recompensa automática • ${mission.title}${surprise?` • ${surprise}`:''}`,'mission');
+  // V108: não anunciar recompensa, atualizar telemetria nem liberar outro
+  // contrato na mesma categoria antes da segunda gravação ter ACK.
+  processPlayerLevelUps();
   saveGame();queueMissionSaveV105();updateMissionButton();state.missionHudSignature='';renderActiveMissionHud(true);updateUI();
   if(ui.missionModal&&!ui.missionModal.classList.contains('hidden'))renderMissions();
 }
@@ -5301,6 +5330,8 @@ async function sendCloudSaveAttemptV106(){
     if(equipmentSavePendingV109)setSync('HANGAR PENDENTE','busy');
     else if(AMMO_SELECTION_V1061.pending)setSync('MUNICAO PENDENTE','busy');
     else if(!equipmentSaveWarningAtV109)setSync(cloudDirty?'PENDENTE':'ONLINE',cloudDirty?'busy':'ok');
+    // V108: só o ACK do save que contém o recibo de conclusão libera o aviso.
+    announceCommittedMissionRewardsV108(snapshot.missions);
     // V107: o servidor confirmou o progresso da missão; agora pode receber o prêmio.
     // A conclusão é enviada em outro save. Se este falhar, a missão confirmada
     // continua no servidor e pode ser retomada, sem pagar duas vezes no banco.
@@ -5312,7 +5343,7 @@ async function sendCloudSaveAttemptV106(){
     return 'saved';
   }
   catch(e){failed=true;console.warn('cloud save',e);
-    if(e?.code==='SAVE_EQUIPMENT_INTENT_REQUIRED'||e?.code==='SAVE_EQUIPMENT_STALE'||e?.code==='SAVE_COUPON_STALE'||e?.code==='SAVE_EVENT_STALE'||e?.code==='SAVE_ELITE_STALE'||e?.code==='SAVE_ECONOMY_STALE'||e?.code==='SAVE_NPC_STALE'||e?.code==='SAVE_ORE_STALE'){
+    if(e?.code==='SAVE_MISSION_STALE'||e?.code==='SAVE_MISSION_UNVERIFIED'||e?.code==='SAVE_EQUIPMENT_INTENT_REQUIRED'||e?.code==='SAVE_EQUIPMENT_STALE'||e?.code==='SAVE_COUPON_STALE'||e?.code==='SAVE_EVENT_STALE'||e?.code==='SAVE_ELITE_STALE'||e?.code==='SAVE_ECONOMY_STALE'||e?.code==='SAVE_NPC_STALE'||e?.code==='SAVE_ORE_STALE'){
       try{
         // Não ressuscita missões concluídas: só recupera aceites e progresso ainda não recompensados.
         const localMissions=structuredClone(progress?.missions||{});
@@ -5329,6 +5360,9 @@ async function sendCloudSaveAttemptV106(){
           if(e?.code==='SAVE_ELITE_STALE')installServerStatePreservingPosition(remote.state);
           else installEconomyState(remote.state,{preservePendingEquipment:false,preservePendingMissions:false});
           equipmentSaveBaselineV109=structuredClone(remote.state);
+          // Uma resposta perdida pode ter gravado a recompensa; o snapshot
+          // oficial basta para confirmar, sem tentar pagá-la outra vez.
+          announceCommittedMissionRewardsV108(remote.state.missions);
           if(gearRecovery?.ok){
             if(gearRecovery.alreadySaved){
               equipmentSavePendingV109=false;equipmentSaveDesiredV109=null;equipmentSaveWarningAtV109=0;clearEquipmentIntentV1062();saveIntegrityBlockedV106=false;
@@ -11737,6 +11771,7 @@ async function afterAuth(){
   authenticated=true;await OFFLINE_FARM_V484.enable();void AUTOPILOT_V48.refreshAccess();void refreshCommandV22();ui.loginModal.classList.add('hidden');ui.userLabel.textContent=getUser()?.callsign||getUser()?.email?.split('@')[0]||'Pilot';loadActivityLog();await refreshAdminStatus(true);refreshClanState(true).then(()=>refreshRankings(true)).catch(()=>{});setSync('SINCRONIZANDO','busy');
   try{
     const accountId=String(getUser()?.id||'');
+    if(missionRewardOwnerV108!==accountId){MISSION_REWARD_ACK_V108.reset();missionRewardOwnerV108=accountId;}
     if(ammoSelectionOwnerV1061!==accountId){AMMO_SELECTION_V1061.reset();ammoSelectionOwnerV1061=accountId;}
     let local=readLocalGameState();
     if(local?.accountOwnerId&&String(local.accountOwnerId)!==accountId){

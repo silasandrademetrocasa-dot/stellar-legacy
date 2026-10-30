@@ -34,6 +34,7 @@ import { createRelayRouter } from './relay-router-v346.js';
 import {createDominionRouter} from './dominion-router-v360.js';
 import {createFrontierRouter} from './frontier-router-v370.js';
 import { validatePlayerSave, invalidShopArguments } from './security-guard.js';
+import { missionSaveGuardV108 } from './mission-save-guard-v108.js';
 import { validateRewardClaimContinuity } from './reward-claim-guard.js';
 import { createSecurityService } from './security-service.js';
 
@@ -1956,6 +1957,10 @@ app.put('/api/save', requireUser, OFFLINE_FARM_GUARD_V484, asyncRoute(async (req
       code:gearWriteV1062.code
     });
   }
+  // V108: finalizações/abates confirmados não podem retroceder e
+  // prêmios exigem uma missão completa previamente salva no banco.
+  const missionErrorV108=missionSaveGuardV108(serverSave?.state||null,state);
+  if(missionErrorV108)return res.status(409).json({error:'Progresso de missão alterado no servidor. Reconciliando a conclusão antes do prêmio.',code:missionErrorV108});
   // Compras economicas confirmadas pelo Render nao podem ser desfeitas com save antigo.
   // O histórico idempotente de compras em lote é SEMPRE autoritativo do servidor.
   // Clientes legados que não possuem esse campo continuam compatíveis.
