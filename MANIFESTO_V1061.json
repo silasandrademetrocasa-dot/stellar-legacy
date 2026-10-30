@@ -1,0 +1,60 @@
+{
+  "release": "V106.1-AMMO-ACK",
+  "base": "V106 Unified Save Engine",
+  "install": "extrair mantendo os caminhos sobre o repositorio que contem V106",
+  "scope": "Selecao de munição/misseis com ACK; sem SQL, economia e resgate offline inalterados",
+  "tests": "225/225 node --test",
+  "check": "214 JS e 309 assets verificados",
+  "files": [
+    {
+      "path": "docs/V106_1_MUNICAO_ACK_E_SINCRONIZACAO.md",
+      "bytes": 2103,
+      "sha256": "3d45233031a91f6821528a4cf850b6195c3f9b99a604f251d4dd04122c0f4846"
+    },
+    {
+      "path": "public/game.js",
+      "bytes": 1200855,
+      "sha256": "93beb33ccc1e09a0bfa47fbd0745bd62b8a90e1caa36abddc31f93b1972ee184"
+    },
+    {
+      "path": "public/index.html",
+      "bytes": 88678,
+      "sha256": "58b06f576beb3c182147bd9f61b00a10427ee1e3a520fddbc1038c9819366e31"
+    },
+    {
+      "path": "public/modules/ammo-selection-recovery-v1061.js",
+      "bytes": 1241,
+      "sha256": "89fe7da78c4d0ca37e94efd2d1f0cf2ade8df0ee60105e9d06d229b4a6832c3a"
+    },
+    {
+      "path": "tests/v105-mission-save-recovery.test.mjs",
+      "bytes": 2882,
+      "sha256": "4c2f8529ae0b3ca6f0877c4c7c1eefd287199680e11c152fbaeeabc4f675617a"
+    },
+    {
+      "path": "tests/v1051-network-observability.test.mjs",
+      "bytes": 2496,
+      "sha256": "08705d8a0c81086ea2aab35fe8996ff00844510f68786c0c073a921e2992840c"
+    },
+    {
+      "path": "tests/v106-pvp-inbox-policy.test.mjs",
+      "bytes": 2409,
+      "sha256": "53855b660a6bccadb3efe4a953b339ebe788e8bec2bcc67fd763b5c9d2f394dd"
+    },
+    {
+      "path": "tests/v106-unified-save-coordinator.test.mjs",
+      "bytes": 3497,
+      "sha256": "d22ed4e27c4850e789e3b332e44a1b8af457bb88104d6d3e89e1502a6bae29c7"
+    },
+    {
+      "path": "tests/v1061-ammo-selection-recovery.test.mjs",
+      "bytes": 2879,
+      "sha256": "ec8fba6b3e889fb879359ea72276271b8ec89c3e90daef3d1c9193a6eb1edbee"
+    },
+    {
+      "path": "tests/v91-offline-farm-conflict.test.mjs",
+      "bytes": 3089,
+      "sha256": "af364533810e2f5fba029385a393b190926f85256770719c5e790f3d6c7af2a5"
+    }
+  ]
+}

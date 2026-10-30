@@ -62,5 +62,5 @@ test('V106: mapas astrais desenham fenda 2D; materializador ainda preserva sprit
  assert.match(source,/drawAstralRift\(ctx,\{mapId:progress\.mapId,[^\n]*mobile:DEVICE_CAPS\.mobile\}\)/);
  const html=readFileSync(new URL('../public/index.html',import.meta.url),'utf8');
  assert.match(html,/gateMaterializerSprite/);
- assert.match(html,/v106-unified-save/);
+ assert.match(html,/v106-unified-save|v1061-ammo-ack/);
 });

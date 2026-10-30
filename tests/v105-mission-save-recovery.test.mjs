@@ -37,7 +37,7 @@ test('V105: client snapshots and mutation generation protect in-flight acceptanc
  const src=readFileSync(new URL('../public/game.js',import.meta.url),'utf8');
  assert.match(src,/const sentMutation=cloudSaveMutationV105;/);
  assert.match(src,/const snapshot=structuredClone\(progress\);/);
- assert.match(src,/cloudDirty=cloudSaveMutationV105!==sentMutation;/);
+ assert.match(src,/cloudDirty=cloudSaveMutationV105!==sentMutation\|\|AMMO_SELECTION_V1061\.pending;/);
  assert.match(src,/queueMissionSaveV105\(\);renderMissions\(\);updateMissionButton\(\)/);
  assert.match(src,/mergeUnsavedMissionProgressV105\(remote\.state\.missions,localMissions/);
  assert.match(src,/if\(category==='daily'&&\(!Array\.isArray\(active\.definition\?\.tasks\)/);

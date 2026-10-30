@@ -1,0 +1,20 @@
+STELLAR LEGACY — V106.1 • MUNIÇÃO COM SAVE CONFIRMADO
+
+BASE OBRIGATÓRIA: V106 Unified Save Engine já instalada.
+NÃO APLIQUE este pacote diretamente em V104/V105: ele é incremental sobre V106.
+
+APLICAÇÃO
+1. Extrair na raiz do repositório atual, preservando public/, tests/ e docs/.
+2. Rodar npm run check e npm test.
+3. Fazer commit / deploy do Render e gerar NOVO APK no GitHub Actions.
+4. No APK, selecionar UCB-100, trocar para LCB-10 e retornar para UCB-100.
+   Conferir seleção após 10 segundos, depois de vender recurso e ao relogar.
+5. Repetir teste com mísseis PLT-2026 e Autopilot ligado.
+
+CUIDADOS
+- Este pacote NÃO resolve isoladamente o relato de extras após resgate do farm
+  offline; requer análise e teste separados. Não alteramos o SQL nem a quitação.
+- Munição sem estoque ainda pode cair automaticamente para outra (comportamento normal).
+- Se o APK estiver com save pendente, não desinstalar.
+
+225 testes / 225 aprovados • check 214 JS / 309 recursos • zero SQL.

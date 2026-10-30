@@ -99,6 +99,7 @@ import { mergeUnsavedMissionProgressV105 } from './modules/mission-save-recovery
 import {createLatestSaveCoordinatorV106} from './modules/unified-save-coordinator-v106.js?v=47.7.60';
 import { pendingMissionCategoriesV107, confirmedMissionCategoriesV107 } from './modules/mission-completion-sync-v107.js?v=47.7.60';
 import {equipmentFingerprintV109,reconcilePendingEquipmentV109} from './modules/hangar-save-recovery-v109.js?v=47.7.60';
+import {createAmmoSelectionTrackerV1061} from './modules/ammo-selection-recovery-v1061.js?v=47.7.60';
 import { shouldPollPvpInboxV106 } from './modules/pvp-inbox-policy-v106.js?v=47.7.60';
 import { signUp, signIn, beginGoogleSignIn, restoreGoogleSignInFromUrl, requestPasswordReset, restorePasswordRecoveryFromUrl, restoreSession, signOutLocal, getSessionRestoreErrorV101, checkGameSession, endGameSession, getUser, getSessionCredentials, loadCloudSave, saveCloudSave, loadEliteOperationsOnline, claimEliteOperationOnline, loadWarCampaignsOnline, claimWarSupplyOnline, claimWarCampaignOnline, loadAdminWarCampaignsOnline, saveAdminWarCampaignOnline, saveAdminWarRulesOnline, loadAdminEliteObjectivesOnline, saveAdminEliteObjectiveOnline, updateCallsign, updatePassword, loadRankings, loadAuctionBids, saveAuctionBidOnline, markAuctionBidStatusOnline, loadAuctionMarket, upsertPlayerPresenceOnline, loadMapPresenceOnline, savePlayerLocationCheckpointOnline, loadPlayerLocationCheckpointOnline, removePlayerPresenceOnline, queuePvpAttackOnline, consumePvpDamageEventsOnline, syncArenaProfileOnline, loadArenaState, loadArenaDailyRewardStatus, claimArenaDailyReward, loadArenaOpponents, loadArenaHistory, arenaAttackOnline, listClansOnline, loadMyClanOnline, createClanOnline, joinClanOnline, getClanRequestsOnline, reviewClanRequestOnline, cancelClanRequestOnline, setClanMemberRoleOnline, leaveClanOnline, transferClanCreditsOnline, claimClanCreditGrantsOnline, recordClanAlienKillOnline, getPremiumShopOnline, testPurchasePremiumOnline, adminPreviewPremiumStageOnline, adminSimulatePremiumStageOnline, getPremiumStageCatalogOnline, loadWarfrontStateOnline, loadSectorOwnershipOnline, hitWorldBossOnline, claimWorldBossRewardOnline, declareClanWarOnline, recordClanWarScoreOnline, loadLiveOpsOnline, adminUpdateLiveEventScheduleOnline, purchaseLiveCatalogOnline, purchaseLiveBulkOnline, economyActionOnline, getChatHistoryOnline, sendChatMessageOnline, redeemGameCouponOnline, getMyDesignersOnline, setDesignLoadoutOnline, claimGateDroneDesignOnline, claimEventDesignerOnline, getAdminStatus, adminSearchAccounts, adminRecentActions, adminBanAccount, adminUnbanAccount, adminResetAccount, adminDeleteAccount, pushTelemetryBatch, adminTelemetryOverview, adminPlayerTelemetry, getBattleGroupOnline, createBattleGroupOnline, inviteBattleGroupOnline, searchBattleGroupPlayersOnline, inviteBattleGroupUserOnline, respondBattleGroupInviteOnline, leaveBattleGroupOnline, kickBattleGroupMemberOnline, setBattleGroupRallyOnline, loadRuntimeConfigOnline, loadNpcRuntimeConfigOnline, loadWorldRuntimeConfigOnline, loadSystemsRuntimeConfigOnline, loadAdminRuntimeMonitorOnline, adminUpdateRuntimeModuleOnline, adminUpdateNpcRuntimeOnline, adminUpdateNpcSpawnRuntimeOnline, adminUpdateWorldMapOnline, adminUpdateWorldResourceOnline, adminUpdateWorldSectorOnline, adminUpdateWorldPortalOnline, adminUpdateWorldResourcePoolOnline, adminUpdateMissionCategoryOnline, adminUpdateEconomyServiceOnline, adminUpdateCraftingRecipeOnline, loadBattlePassRuntimeConfigOnline, adminUpdateBattlePassSeasonOnline, adminUpdateBattlePassTierOnline, loadShopsRuntimeConfigOnline, adminUpdateCommonShopItemOnline, adminUpdatePremiumShopItemOnline, loadBonusConfigOnline, adminUpdateBonusConfigOnline, adminCouponDashboardOnline, adminCreateCouponOnline, adminSetCouponActiveOnline, loadGalaxyGatesOnline, adminUpdateGalaxyGateOnline, adminUpsertCustomMissionOnline, adminDeleteCustomMissionOnline, adminCreateCraftRecipeOnline, adminCreateEconomyServiceOnline, adminCreatePassSeasonOnline, loadAuctionRulesOnline, adminUpdateAuctionRulesOnline, loadBalanceRuntimeOnline, adminUpdateBalanceOnline,loadAdminSecurityIncidents,reviewAdminSecurityIncident } from './api.js?v=47.7.60';
 import {createOfflineFarmV484} from './modules/stellar-offline-farm-v484.js?v=47.7.60';
@@ -803,6 +804,34 @@ let equipmentSaveBaselineV109=null;
 let equipmentSaveTimerV109=null;
 let equipmentSaveWarningAtV109=0;
 let saveIntegrityBlockedV106=false; // Conflito de equipamento ainda nao resolvido: proibe compra/venda.
+// V106.1: a preferencia de disparo fica pendente ate ACK do Supabase.
+// Nunca transporta quantidade de municao ou saldos do cliente para a reconciliacao.
+const AMMO_SELECTION_V1061=createAmmoSelectionTrackerV1061({
+  laserIds:Object.keys(LASER_AMMO),rocketIds:Object.keys(ROCKETS)
+});
+let ammoSelectionSaveTimerV1061=null;
+let ammoSelectionOwnerV1061=null;
+function scheduleAmmoSelectionSaveV1061(delay=180){
+  if(!authenticated||!progress||offlineFarmWorldLockedV84()||!AMMO_SELECTION_V1061.pending)return;
+  if(ammoSelectionSaveTimerV1061!==null)clearTimeout(ammoSelectionSaveTimerV1061);
+  ammoSelectionSaveTimerV1061=setTimeout(()=>{
+    ammoSelectionSaveTimerV1061=null;
+    if(authenticated&&!offlineFarmWorldLockedV84())void flushCloudSave(true);
+  },delay);
+}
+function changeAmmoSelectionV1061(kind,id){
+  if(!authenticated||!progress||offlineFarmWorldLockedV84())return false;
+  const key=kind==='laser'?'selectedLaserAmmo':kind==='rocket'?'selectedRocket':null;
+  if(!key||!AMMO_SELECTION_V1061.accepts(key,id))return false;
+  if(progress[key]===id)return true;
+  progress[key]=id;
+  AMMO_SELECTION_V1061.mark(key,id);
+  saveGame();refreshAmmoCounters(true);
+  setSync('MUNICAO PENDENTE','busy');
+  scheduleAmmoSelectionSaveV1061();
+  return true;
+}
+
 function rememberEquipmentChangeV109(){
   if(!authenticated||!progress||offlineFarmWorldLockedV84())return;
   equipmentSavePendingV109=true;equipmentSaveWarningAtV109=0;
@@ -1477,7 +1506,7 @@ const OFFLINE_FARM_V484=createOfflineFarmV484({
     if(cloudBusy)throw Error('Um save ainda está em andamento. Tente iniciar o farm novamente.');
     await flushCloudSave(true);
     await waitCloudIdle(12000);
-    if(cloudBusy||cloudDirty)throw Error('O save não foi confirmado pelo servidor. Farm não iniciado.');
+    if(cloudBusy||cloudDirty||AMMO_SELECTION_V1061.pending||equipmentSavePendingV109)throw Error('O save não foi confirmado pelo servidor. Farm não iniciado.');
   },
   onPauseWorld:async()=>{player.laserFiring=false;state.target=null;state.pointerNavActive=false;state.pointerNavId=null;player.tx=player.x;player.ty=player.y;ui.mapModal?.classList.add('hidden');sharedUniverse.close();},
   onResumeWorld:async()=>{if(authenticated&&progress&&!offlineFarmWorldLockedV84()){joinSharedUniverse();void syncOnlineWorld();}},
@@ -1587,7 +1616,7 @@ function shopRowDisplayName(row,fallback='Produto'){return String(row?.display_n
 function shopRowDescription(row,fallback=''){return String(row?.description||fallback||'');}
 function ensureShopLevel(row){const min=shopRowMinLevel(row);if((Number(progress?.profile?.level)||1)<min){showToast(`Requer nível ${min}`);return false;}return true;}
 async function applyAuthoritativePurchase(catalogKey,label='Item'){
-  try{await flushCloudSave(true);const before={credits:Number(progress?.profile?.credits)||0,uridium:Number(progress?.profile?.uridium)||0};const result=await purchaseLiveCatalogOnline(catalogKey);if(!result?.state)throw new Error('Servidor não retornou o save atualizado.');installServerStatePreservingPosition(result.state);telemetryTrackEconomyTransition('catalog_purchase',before,progress?.profile,result?.purchase||{});cloudDirty=false;try{localStorage.setItem(saveKey(),JSON.stringify(progress));}catch{}computeStats(true);buildAmmoButtons();renderShop();refreshPetViews();updateUI();showToast(`${label} adquirido • compra validada no servidor`,'shop');return true;}catch(e){showToast(e.message||'Compra recusada pelo servidor');return false;}
+  try{await flushCloudSave(true);const before={credits:Number(progress?.profile?.credits)||0,uridium:Number(progress?.profile?.uridium)||0};const result=await purchaseLiveCatalogOnline(catalogKey);if(!result?.state)throw new Error('Servidor não retornou o save atualizado.');installServerStatePreservingPosition(result.state);telemetryTrackEconomyTransition('catalog_purchase',before,progress?.profile,result?.purchase||{});cloudDirty=AMMO_SELECTION_V1061.pending;try{localStorage.setItem(saveKey(),JSON.stringify(progress));}catch{}computeStats(true);buildAmmoButtons();renderShop();refreshPetViews();updateUI();showToast(`${label} adquirido • compra validada no servidor`,'shop');return true;}catch(e){showToast(e.message||'Compra recusada pelo servidor');return false;}
 }
 
 
@@ -1740,10 +1769,10 @@ async function syncBeforeEconomy(){
   // nao 'liberando' a venda apos um timeout artificial de 1,8 segundo.
   if(!authenticated||!progress||offlineFarmWorldLockedV84())throw new Error('Sincronizacao de conta indisponivel durante o farm offline.');
   if(saveIntegrityBlockedV106)throw new Error('Montagem do hangar com conflito ainda nao resolvido. Reconfigure e aguarde HANGAR SALVO antes de comprar/vender.');
-  const result=(cloudDirty||cloudBusy||missionSavePendingV105||equipmentSavePendingV109)
+  const result=(cloudDirty||cloudBusy||missionSavePendingV105||equipmentSavePendingV109||AMMO_SELECTION_V1061.pending)
     ?await Promise.race([flushCloudSave(true),new Promise(resolve=>setTimeout(()=>resolve(false),15000))])
     :true;
-  if(!result||saveIntegrityBlockedV106||cloudBusy||cloudDirty||equipmentSavePendingV109||missionSavePendingV105)
+  if(!result||saveIntegrityBlockedV106||cloudBusy||cloudDirty||equipmentSavePendingV109||missionSavePendingV105||AMMO_SELECTION_V1061.pending)
     throw new Error('Progresso ainda nao confirmado pelo servidor. Operacao cancelada com seguranca; tente novamente apos sincronizar.');
 }
 function installEconomyState(state,{preservePendingEquipment=true,preservePendingMissions=true}={}){
@@ -1758,7 +1787,7 @@ function installEconomyState(state,{preservePendingEquipment=true,preservePendin
   const beforeHp=player.hp,beforeShield=player.shield;
   installServerStatePreservingPosition(recovery?.ok?recovery.state:state);
   equipmentSaveBaselineV109=structuredClone(state);
-  createBonusBoxes();cloudDirty=false;computeStats(false);
+  createBonusBoxes();cloudDirty=AMMO_SELECTION_V1061.pending;computeStats(false);
   player.hp=Math.max(0,Math.min(player.maxHp,beforeHp));
   player.shield=clampStoredShieldV2013(beforeShield,player.maxShield);
   progress.hp=player.hp;progress.shield=player.shield;saveActiveBattleConfigV2013();
@@ -1773,6 +1802,7 @@ function installEconomyState(state,{preservePendingEquipment=true,preservePendin
     }else if(recovery.ok){equipmentSavePendingV109=false;equipmentSaveDesiredV109=null;equipmentSaveWarningAtV109=0;}
     else{equipmentSavePendingV109=false;equipmentSaveDesiredV109=null;equipmentRecoveryWarningV109();console.warn('[hangar-v109] estado do servidor alterado, sem merge inseguro',recovery.reason);}
   }
+  if(AMMO_SELECTION_V1061.pending){saveGame();scheduleAmmoSelectionSaveV1061(200);}
   buildAmmoButtons();refreshPetViews();renderShop();renderCargo();renderGalaxyGate();refreshPilotViews();updateUI();
 }
 window.stellarEconomySyncBeforeV4776=async()=>{if(authenticated&&progress)await syncBeforeEconomy()};
@@ -4867,8 +4897,10 @@ function restoreRuntimeLocationAfterServerState(snapshot){
 function installServerStatePreservingPosition(serverState){
   if(!serverState||typeof serverState!=='object')throw new Error('Servidor não retornou um estado válido.');
   const loc=runtimeLocationSnapshot();
-  progress=serverState;hydrateProgress();
+  progress=AMMO_SELECTION_V1061.merge(serverState);hydrateProgress();
   restoreRuntimeLocationAfterServerState(loc);
+  // Apenas selecoes marcadas como pendentes: o servidor continua dono de estoque, inventario e economia.
+  if(AMMO_SELECTION_V1061.pending){cloudDirty=true;cloudSaveMutationV105++;}
 }
 
 function savedLocationForCurrentMap(){
@@ -5170,11 +5202,13 @@ async function sendCloudSaveAttemptV106(){
     const snapshot=structuredClone(progress);
     const result=await saveCloudSave(snapshot);
     if(result?.statePatch){const patch=result.statePatch;if(Number.isFinite(Number(patch.credits)))progress.profile.credits=Number(patch.credits);if(patch.serverEconomy)progress.serverEconomy={...(progress.serverEconomy||{}),...patch.serverEconomy};localStorage.setItem(saveKey(),JSON.stringify(progress));updateUI();if(patch.serverEconomy?.lastClanCollectionDate)showToast('CLÃ • coleta diária de 10% sincronizada','system');}
-    cloudDirty=cloudSaveMutationV105!==sentMutation;
+    AMMO_SELECTION_V1061.confirm(snapshot);
+    cloudDirty=cloudSaveMutationV105!==sentMutation||AMMO_SELECTION_V1061.pending;
     equipmentSaveBaselineV109=structuredClone(snapshot);
     equipmentSavedV109(snapshot);
     if(!cloudDirty)missionSavePendingV105=false;
     if(equipmentSavePendingV109)setSync('HANGAR PENDENTE','busy');
+    else if(AMMO_SELECTION_V1061.pending)setSync('MUNICAO PENDENTE','busy');
     else if(!equipmentSaveWarningAtV109)setSync(cloudDirty?'PENDENTE':'ONLINE',cloudDirty?'busy':'ok');
     // V107: o servidor confirmou o progresso da missão; agora pode receber o prêmio.
     // A conclusão é enviada em outro save. Se este falhar, a missão confirmada
@@ -5238,7 +5272,7 @@ async function sendCloudSaveAttemptV106(){
           if(pendingMissionCategoriesV107(progress?.missions).length){
             saveGame();missionSavePendingV105=true;
           }
-          cloudDirty=merged.changed||cloudDirty||cloudSaveMutationV105!==sentMutation;
+          cloudDirty=merged.changed||cloudDirty||AMMO_SELECTION_V1061.pending||cloudSaveMutationV105!==sentMutation;
           if(equipmentSavePendingV109)setSync('HANGAR PENDENTE','busy');
           else if(!equipmentSaveWarningAtV109)setSync(cloudDirty?'PENDENTE':'ONLINE',cloudDirty?'busy':'ok');
           console.info('[save-reconcile] Economia remota sincronizada; missão ativa preservada quando seguro');
@@ -5267,7 +5301,7 @@ async function sendCloudSaveAttemptV106(){
 // V106 — Single-flight save. Alteracoes surgidas durante um PUT continuam pendentes;
 // o proximo PUT recebe o estado atual, nunca o snapshot antigo da fila.
 const SAVE_COORDINATOR_V106=createLatestSaveCoordinatorV106({
-  hasPending:()=>Boolean(cloudDirty||missionSavePendingV105||equipmentSavePendingV109),
+  hasPending:()=>Boolean(cloudDirty||missionSavePendingV105||equipmentSavePendingV109||AMMO_SELECTION_V1061.pending),
   blocked:()=>!authenticated||!progress||offlineFarmWorldLockedV84(),
   send:()=>sendCloudSaveAttemptV106(),
   onRetry:attempt=>console.info('[save-v106] revisao economica concorrente; reconciliando',attempt),
@@ -5388,16 +5422,14 @@ function autoBuyActiveRocket(id,announce=true){
 function switchToWeakerLaser(expiredId){
   const next=(LASER_AMMO_FALLBACK[expiredId]||[]).find(id=>ammoQty(id)>0);
   if(!next)return null;
-  progress.selectedLaserAmmo=next;
-  refreshAmmoCounters();saveGame();
+  changeAmmoSelectionV1061('laser',next);
   showToast(`${shortLaserLabel(expiredId)} acabou → ${shortLaserLabel(next)}`,'system');
   return LASER_AMMO[next];
 }
 function switchToWeakerRocket(expiredId){
   const next=(ROCKET_FALLBACK[expiredId]||[]).find(id=>rocketQty(id)>0);
   if(!next)return null;
-  progress.selectedRocket=next;
-  refreshAmmoCounters();saveGame();
+  changeAmmoSelectionV1061('rocket',next);
   showToast(`${shortRocketLabel(expiredId)} acabou → ${shortRocketLabel(next)}`,'system');
   return ROCKETS[next];
 }
@@ -7824,7 +7856,7 @@ function buildAmmoButtons(){
     const b=document.createElement('button');b.type='button';b.dataset.ammoId=a.id;
     b.className='ammo-btn circular';b.style.borderColor=a.color;
     b.innerHTML=`<img class="ammo-art" src="${GAME_ASSETS.ammo[a.id]}" alt=""><span class="ammo-code">${shortLaserLabel(a.id)}</span><span class="ammo-qty"></span>`;
-    b.onclick=()=>{progress.selectedLaserAmmo=a.id;refreshAmmoCounters(true);saveGame();};
+    b.onclick=()=>changeAmmoSelectionV1061('laser',a.id);
     AMMO_HUD_BUTTONS.laser.set(a.id,b);ui.laserAmmoButtons.appendChild(b);
   }
   ui.rocketAmmoButtons.replaceChildren();
@@ -7832,7 +7864,7 @@ function buildAmmoButtons(){
     const b=document.createElement('button');b.type='button';b.dataset.rocketId=r.id;
     b.className='ammo-btn circular';b.style.borderColor=r.color;
     b.innerHTML=`<img class="ammo-art" src="${GAME_ASSETS.ammo[r.id]}" alt=""><span class="ammo-code">${shortRocketLabel(r.id)}</span><span class="ammo-qty"></span>`;
-    b.onclick=()=>{progress.selectedRocket=r.id;refreshAmmoCounters(true);saveGame();};
+    b.onclick=()=>changeAmmoSelectionV1061('rocket',r.id);
     AMMO_HUD_BUTTONS.rocket.set(r.id,b);ui.rocketAmmoButtons.appendChild(b);
   }
   refreshAmmoCounters(true);
@@ -7995,7 +8027,7 @@ async function confirmBulkPurchaseV92(){
       const idempotency=globalThis.crypto?.randomUUID?.()||`${Date.now().toString(16)}-${Math.random().toString(16).slice(2)}-${Math.random().toString(16).slice(2)}`;
       const result=await purchaseLiveBulkOnline(product,quantity,idempotency,quote.price,q.currency,quote.packSize);
       if(!result?.state)throw Error('O servidor não retornou o save atualizado. Consulte o estoque antes de repetir.');
-      installServerStatePreservingPosition(result.state);telemetryTrackEconomyTransition('bulk_supply_purchase',before,progress?.profile,result.purchase||{});cloudDirty=false;
+      installServerStatePreservingPosition(result.state);telemetryTrackEconomyTransition('bulk_supply_purchase',before,progress?.profile,result.purchase||{});cloudDirty=AMMO_SELECTION_V1061.pending;
       try{localStorage.setItem(saveKey(),JSON.stringify(progress));}catch{}
       computeStats(true);buildAmmoButtons();renderShop();updateUI();
       showToast(`${fmt(result.purchase?.delivered||quote.delivered)} unidades adquiridas em uma operação • servidor confirmado`,'shop');
@@ -9734,7 +9766,7 @@ const AUTOPILOT_V48=createStellarAutopilotV48({
     if(ammoQty(progress.selectedLaserAmmo)>0)return true;
     const next=['lcb10','mcb25','mcb50'].find(id=>ammoQty(id)>0);
     if(!next)return false;
-    progress.selectedLaserAmmo=next;
+    changeAmmoSelectionV1061('laser',next);
     updateUI();return true;
   },
   fireRocket:()=>fireRocket(false),
@@ -11444,7 +11476,7 @@ document.addEventListener('keydown',e=>{
   if(k==='t'){e.preventDefault();manualCycleTargetV32();}if(k==='e')useShipAbility();if(k==='k')triggerPetKamikaze();
   if(k==='h')toggleHudUi();if(k==='b')openShop();if(k==='c'){if(isAtTrader())openCargo();else showToast('Venda de recursos na base X-1 ou X-8');}
   if(k==='m')openMapModal();if(k==='w')openWarfront();if(k==='y')openPremiumShop();if(k==='q')openMissions();if(k==='x')openProgression();if(k==='g')openGalaxyGate();if(k==='p')openHangar('pet');if(k==='o')openHangar('pilot');if(k==='l')openAuction();if(k==='a')openArena();if(k==='n')openClan();
-  if(['1','2','3','4','5'].includes(e.key)){progress.selectedLaserAmmo=Object.keys(LASER_AMMO)[Number(e.key)-1];refreshAmmoCounters(true);saveGame();}
+  if(['1','2','3','4','5'].includes(e.key)){changeAmmoSelectionV1061('laser',Object.keys(LASER_AMMO)[Number(e.key)-1]);}
 });
 
 
@@ -11453,6 +11485,8 @@ function forceLogoutBecauseSessionMoved(message='Sua conta foi acessada em outro
   const staleUserId=userId||getUser()?.id||null;
   authenticated=false;
   cloudDirty=false;
+  AMMO_SELECTION_V1061.reset();ammoSelectionOwnerV1061=null;
+  if(ammoSelectionSaveTimerV1061!==null){clearTimeout(ammoSelectionSaveTimerV1061);ammoSelectionSaveTimerV1061=null;}
   player.laserFiring=false;
   state.target=null;
   clearOnlinePlayers();
@@ -11574,6 +11608,7 @@ async function afterAuth(){
   authenticated=true;await OFFLINE_FARM_V484.enable();void AUTOPILOT_V48.refreshAccess();void refreshCommandV22();ui.loginModal.classList.add('hidden');ui.userLabel.textContent=getUser()?.callsign||getUser()?.email?.split('@')[0]||'Pilot';loadActivityLog();await refreshAdminStatus(true);refreshClanState(true).then(()=>refreshRankings(true)).catch(()=>{});setSync('SINCRONIZANDO','busy');
   try{
     const accountId=String(getUser()?.id||'');
+    if(ammoSelectionOwnerV1061!==accountId){AMMO_SELECTION_V1061.reset();ammoSelectionOwnerV1061=accountId;}
     let local=readLocalGameState();
     if(local?.accountOwnerId&&String(local.accountOwnerId)!==accountId){
       console.warn('Local save quarantined: owner mismatch');
@@ -11608,6 +11643,11 @@ async function afterAuth(){
     const localStampSane=localStamp>0&&localStamp<=Date.now()+300000;
     if(local&&localStampSane&&localStamp>remoteStamp+250){
       progress=local;hydrateProgress();cloudDirty=true;setSync('LOCAL MAIS NOVO','busy');
+      if(remote?.state){
+        for(const key of ['selectedLaserAmmo','selectedRocket']){
+          if(progress[key]!==remote.state[key]&&AMMO_SELECTION_V1061.accepts(key,progress[key]))AMMO_SELECTION_V1061.mark(key,progress[key]);
+        }
+      }
       // Um save local de equipamento mais novo continua como pendencia local,
       // nunca como compra confirmada. A reconciliação ocorrerá com a revisão
       // econômica correta no próximo conflito, sem descartar a montagem.

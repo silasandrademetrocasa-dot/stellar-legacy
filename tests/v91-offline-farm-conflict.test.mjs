@@ -23,7 +23,7 @@ test('V91: Offline Farm saves to server, disconnects world, then starts SQL sess
  assert.match(farm,/if\(!confirmed\)\{[^}]*Mundo bloqueado por segurança/);
  assert.match(farm,/active\(false\);await onResumeWorld\?\.\(\);throw err/);
  assert.match(game,/await waitCloudIdle\(12000\)/);
- assert.match(game,/if\(cloudBusy\|\|cloudDirty\)throw Error\('O save não foi confirmado pelo servidor/);
+ assert.match(game,/if\(cloudBusy\|\|cloudDirty\|\|AMMO_SELECTION_V1061\.pending\|\|equipmentSavePendingV109\)throw Error\('O save não foi confirmado pelo servidor/);
 });
 test('V91: no reconnection, autosave or online presence while farm locked',()=>{
  assert.match(game,/function joinSharedUniverse\(\)\{\s*if\(offlineFarmWorldLockedV84\(\)\|\|!sharedUniverseMap\(\)\)return/);
