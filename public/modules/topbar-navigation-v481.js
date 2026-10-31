@@ -37,7 +37,7 @@ function initializeNavigationV481(){
       <button class="menu-item" type="button" data-v481-action="auction">LEILÃO</button>
       <div class="v481-menu-label">SOCIAL E EXPLORAÇÃO</div>
       <button class="menu-item" type="button" data-v481-action="clan">CLÃ <span data-v481-gate="clan"></span></button>
-      <!-- V106.8C: painel Universo Estelar oculto para isolamento de login -->
+      <button class="menu-item" type="button" data-v481-action="universe">✦ UNIVERSO <span data-v481-gate="universe"></span></button>
       <details class="v481-interface-menu">
         <summary>INTERFACE / HUD</summary>
         <div class="v481-interface-actions">
@@ -90,7 +90,7 @@ function initializeNavigationV481(){
     clan.textContent=clanReady?'':'LV8';if(universe)universe.textContent=universeReady?'':'LV10';
     for(const [action,ready] of [['clan',clanReady],['universe',universeReady]]){
       const button=more.querySelector(`[data-v481-action="${action}"]`);
-      if(!button)continue; // O painel V42 foi removido no isolamento V106.8C.
+      if(!button)continue; // Painel opcional: evitar falha caso não esteja montado.
       button.classList.toggle('v481-locked',!ready);
       button.setAttribute('aria-disabled',String(!ready));
       button.title=ready?'':`Libera no nível ${action==='clan'?8:10}`;

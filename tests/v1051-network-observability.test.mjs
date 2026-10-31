@@ -32,10 +32,11 @@ test('V105.1: não memoriza conteúdo de jogadores e não altera callbacks de ev
  assert.match(snapshot,/auth/);
  const game=read('public/game.js'),world=read('server/world.js');
  assert.match(game,/groupMenuVisibleV1051\?6000:15000/);
+ assert.match(world,/STELLAR_NETWORK_LOGS==='1'/);
  assert.match(world,/networkTelemetryV1051\.start\(\)/);
  assert.match(world,/c\.networkTelemetryV1051\?\.outbound\('npc_batch',wire\)/);
  assert.match(world,/this\.world\.grantNpcReward/);
- assert.match(read('public/index.html'),/\/game\.js\?v=47\.7\.60-(?:v1051-network|v106-unified-save|v1061-ammo-ack|v1062-hangar-guard|v1064-ammo-accounting|v1068-mission-ack|v1068d-mission-isolation|v1068e-login-repair)/);
+ assert.match(read('public/index.html'),/\/game\.js\?v=47\.7\.60-(?:v1051-network|v106-unified-save|v1061-ammo-ack|v1062-hangar-guard|v1064-ammo-accounting|v1068-mission-ack|v1068d-mission-isolation|v1068e-login-repair|v108-cumulative-boot-safe)/);
 });
 
 test('V105.1: não altera gatilhos econômicos, sessão, missões, nem save',()=>{

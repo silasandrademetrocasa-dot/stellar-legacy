@@ -30,7 +30,7 @@
   <div class="stellar-boot-bottom">
     <div class="stellar-boot-title">UNIVERSO ONLINE</div>
     <div class="stellar-boot-loader"><i></i></div>
-    <div class="stellar-boot-status">V106.8E · LOGIN REPARADO</div>
+    <div class="stellar-boot-status">PREPARANDO SUA JORNADA...</div>
   </div>
 </div>
 <script>
@@ -44,7 +44,7 @@
     event.preventDefault();
     const auth=document.getElementById('authMessage');
     if(auth)auth.textContent='INICIALIZAÇÃO INTERROMPIDA: o botão Entrar ainda não está pronto. Nenhum dado foi apagado.';
-    console.error('[bootstrap-v1068e] prevented unbound login submit; motor did not finish initialisation',window.STELLAR_BOOT_DIAG_V1068D?.error||'error unavailable');
+    // Falha de inicialização só aparece na interface do jogador; sem logs repetitivos.
   },true);
   // V106.8D: diagnostic must run without game.js and independently of its imports.
   window.STELLAR_BOOT_DIAG_V1068D={error:''};
@@ -57,8 +57,8 @@
     if(!window.STELLAR_BOOT_DIAG_V1068D.error)window.STELLAR_BOOT_DIAG_V1068D.error=String(ev.reason?.name||'UNHANDLED_REJECTION').slice(0,80);
   });
   // V106.8B: loading never silently disappears while authentication is still pending.
-  setTimeout(()=>{if(!ended){const status=splash.querySelector('.stellar-boot-status');if(status)status.textContent=window.STELLAR_LOGIN_FORM_READY_V1068E?'LOGIN PRONTO · VERIFICANDO SESSÃO':window.STELLAR_BOOT_PROBE_V1068D?'MOTOR INTERROMPIDO · '+(window.STELLAR_BOOT_DIAG_V1068D?.error||'VERIFICAR ERRO JS'):'MOTOR NÃO INICIOU · '+(window.STELLAR_BOOT_DIAG_V1068D?.error||'VERIFICAR JS');}},9000);
-  setTimeout(()=>{if(!ended){window.stellarSplashFinish();const info=document.getElementById('authMessage');if(info&&!info.textContent.trim())info.textContent=window.STELLAR_LOGIN_FORM_READY_V1068E?'Login pronto. Entre com seu e-mail e senha; nenhum save foi apagado.':window.STELLAR_BOOT_PROBE_V1068D?'ERRO DE INICIALIZAÇÃO: o motor interrompeu antes de vincular o botão Entrar. '+(window.STELLAR_BOOT_DIAG_V1068D?.error||'Sem detalhe'):'O motor JavaScript não iniciou. '+(window.STELLAR_BOOT_DIAG_V1068D?.error||'Sem detalhe');}},20000);
+  setTimeout(()=>{if(!ended){const status=splash.querySelector('.stellar-boot-status');if(status)status.textContent=window.STELLAR_LOGIN_FORM_READY_V1068E?'INICIALIZANDO SESSÃO…':window.STELLAR_BOOT_PROBE_V1068D?'ERRO DE INICIALIZAÇÃO · '+(window.STELLAR_BOOT_DIAG_V1068D?.error||'VERIFICAR ERRO JS'):'ERRO AO CARREGAR O JOGO · '+(window.STELLAR_BOOT_DIAG_V1068D?.error||'VERIFICAR JS');}},9000);
+  setTimeout(()=>{if(!ended){window.stellarSplashFinish();const info=document.getElementById('authMessage');if(info&&!info.textContent.trim())info.textContent=window.STELLAR_LOGIN_FORM_READY_V1068E?'Entre com sua conta para continuar. Seu progresso permanece salvo.':window.STELLAR_BOOT_PROBE_V1068D?'ERRO DE INICIALIZAÇÃO: o motor interrompeu antes de vincular o botão Entrar. '+(window.STELLAR_BOOT_DIAG_V1068D?.error||'Sem detalhe'):'O motor JavaScript não iniciou. '+(window.STELLAR_BOOT_DIAG_V1068D?.error||'Sem detalhe');}},20000);
 })();
 </script>
 <div id="app">
@@ -97,6 +97,7 @@
 
   <button class="small-btn clan-top-btn" id="clanBtn" type="button">CLÃ <span id="clanTopTag">—</span></button>
   <button class="small-btn" id="mapBtn" type="button">MAPA</button>
+  <button class="small-btn universe-top-btn" id="frontierExpansionBtnV42" type="button" title="Expansões do Universo">✦ UNIVERSO</button>
   
   <button class="small-btn auction-top-btn" id="auctionBtn" type="button">LEILÃO <span id="auctionTopClock">60:00</span></button>
 
@@ -365,7 +366,6 @@
       <div class="eyebrow">STELLAR NETWORK</div>
       <h1>Stellar Legacy</h1>
       <p>Três facções. Uma guerra orbital.</p>
-      <small id="stellarIsolationMarkerV1068C" style="display:inline-block;margin-top:7px;color:#a6c6e0;font-size:11px">V106.8E · LOGIN REPARADO · UNIVERSO/MISSÕES EM TESTE</small>
       <div class="login-factions">
         <div><img alt="Terra" src="/assets/v19/branding/earth.webp"/><span>Terra</span></div>
         <div><img alt="Marte" src="/assets/v19/branding/mars.webp"/><span>Marte</span></div>
@@ -645,7 +645,7 @@
 
 
 
-<!-- V106.8C: Universo Estelar (Expansão Unificada V42) TEMPORARIAMENTE DESATIVADO para isolamento de login. Não é o WebSocket de combate. -->
+<div id="frontierExpansionModalV42" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="frontierExpansionTitleV42"><div class="modal-card frontier-panel-v42"><div class="modal-header"><div><div class="eyebrow">EXPANSÃO UNIFICADA</div><h2 id="frontierExpansionTitleV42">UNIVERSO ESTELAR</h2></div><button class="small-btn" id="frontierExpansionCloseV42" type="button">FECHAR</button></div><div id="frontierExpansionContentV42" class="frontier-content-v42"></div></div></div>
 <div class="modal hidden" id="adminModal">
   <div class="modal-card admin-modal-card">
     <div class="modal-header admin-modal-header">
@@ -1238,12 +1238,13 @@
 </div>
 <div class="perf-diag-overlay hidden" id="perfDiagOverlay" aria-live="off" aria-label="Contador de FPS local"><b id="perfDiagHudFps">FPS —</b><small id="perfDiagHudStutter">P95 —</small></div>
 <script type="module" src="/modules/android-daily-alerts-v108.js?v=108.0.0"></script>
-<script src="/game.js?v=47.7.60-v1068e-login-repair" type="module"></script>
+<script src="/game.js?v=47.7.60-v108-cumulative-boot-safe" type="module"></script>
 <script src="/modules/stellar-admin-v57.js?v=47.7.60" type="module"></script>
 <script src="/modules/stellar-admin-c-v100.js?v=47.7.60" type="module"></script>
 <script type="module" src="/modules/astral-rewards-v381.js?v=47.7.60"></script>
 <!-- V106.8C A/B: import do Universo Estelar removido do bootstrap. -->
-  <script type="module" src="/modules/topbar-navigation-v481.js?v=48.1.0-isolamento-v1068c"></script>
+  <script type="module" src="/modules/unified-expansion-lazy-v107.js?v=107.0.0"></script>
+  <script type="module" src="/modules/topbar-navigation-v481.js?v=48.1.0-universe-lazy-v107"></script>
   <script type="module" src="/modules/pilot-ship-hud-v482.js?v=48.2.6"></script>
 
 <!-- V92–V97: compra autoritativa de munição por quantidade digitada. -->

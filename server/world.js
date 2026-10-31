@@ -18,6 +18,8 @@ import {PORTAL_NEUTRAL_RADIUS,playerInNeutralPortalRange} from './portal-safety.
 import {socketMessageAllowed,boundedVital} from './realtime-guard.js';
 import {playerStateDelta,npcStateDelta} from './network-delta-v104.js';
 import {createNetworkTelemetryV1051} from './network-telemetry-v1051.js';
+import {createNpcDeathSequenceV1069} from './npc-reward-delivery-v1069.js';
+import {shouldRefreshWorldRuntimeV108} from './idle-world-refresh-v108.js';
 import { WebSocketServer, WebSocket } from 'ws';
 import {selectLiveDirective,directiveToWorldEvent} from './universe-directives.js';
 import {captureElapsedSeconds, classifyWarfrontCaptureError, withCaptureTimeout, CAPTURE_FAILURE_BACKOFF_MS} from './warfront-capture.js';
@@ -897,6 +899,12 @@ class Room {
   async killNpc(e,killerUserId){
     if(!this.npcs.has(e.id))return;
     this.npcs.delete(e.id);
+    // Reserva a ordem NO MOMENTO DA MORTE, antes de aguardar grupos/RPCs.
+    // Dois abates do mesmo dono jamais recebem revisões fora de ordem.
+    return this.world.npcDeathSequenceV1069.run(e.ownerUserId||killerUserId,()=>this.commitNpcDeathV1069(e,killerUserId));
+  }
+
+  async commitNpcDeathV1069(e,killerUserId){
     try{await e.ownerGroupPromise;}catch{}
     const total=[...e.damageContrib.values()].reduce((a,b)=>a+b,0)||1;
     const contributors=[...e.damageContrib.entries()].map(([userId,damage])=>({userId,damage,share:damage/total}));
@@ -936,13 +944,15 @@ class Room {
     const factor=eligible.length?1/eligible.length:0;
     for(const c of eligible){
       // Apenas o abate validado pelo servidor gera progresso permanente de Elite.
-      this.world.recordEliteEvent?.(c.player.userId,'npc_kill').catch(err=>console.warn('Elite NPC:',err?.message));
+      // Elite só pontua depois da confirmação financeira do abate pelo SQL.
       const isOwner=String(c.player?.userId||'')===ownerId;
       // Somente a sala online define o NPC, a divisão e o ID do abate.
       // O Supabase confirma a concessão em transação idempotente ANTES de informar o cliente.
       const killKey=`${this.key}:${e.id}`.slice(0,180);
       try{
         const serverReward=await this.world.grantNpcReward(c.player.userId,killKey,String(e.type||'npc'),Math.max(0,Math.round((Number(e.credits)||0)*factor)),Math.max(0,Math.round((Number(e.uridium)||0)*factor)));
+        if(serverReward.granted===true)this.world.recordEliteEvent?.(c.player.userId,'npc_kill').catch(err=>console.warn('Elite NPC:',err?.message));
+        if(serverReward.recoveredAfterTimeout)console.info('[npc-reward-v1069] recibo idempotente recuperado apos timeout');
         this.world.recordRelayPve?.(c.player.userId,`npc:${this.key}:${e.id}:${c.player.userId}`,'npc').catch(()=>{});
         safeJsonSend(c,{type:'kill_credit',entity:dead,factor,serverReward,groupShared:!!rewardGroupId,eligibleCount:eligible.length,ownerUserId:ownerId,ownerGroupId:rewardGroupId||null,dropBox:isOwner});
       }catch(err){
@@ -1114,12 +1124,14 @@ export function attachSharedUniverse(server,{authenticate,authorizeJoin,recordSe
     }
   });const rooms=new Map();
   const networkTelemetryV1051=createNetworkTelemetryV1051();
-  networkTelemetryV1051.start();
+  // V108: telemetria continua acessível em /api/admin, mas log periódico só por opção.
+  if(process.env.STELLAR_NETWORK_LOGS==='1')networkTelemetryV1051.start();
   const world={
     recordSecurityViolation,
     // Contadores acumulados desde o boot (sem ID ou dado pessoal): comparar com baseline no Render.
     networkV104:{since:nowMs(),broadcastMessages:0,broadcastBytes:0,playerPatchMessages:0,playerPatchBytes:0,playerFullEquivalentBytes:0,playerUnchangedSkipped:0,npcBatches:0,npcBatchBytes:0,npcBackpressureSkips:0},
     networkTelemetryV1051,
+    npcDeathSequenceV1069:createNpcDeathSequenceV1069(),
     recordWarDefense:recordWarDefense||(()=>Promise.resolve(false)),
     damageRelay:damageRelay||(()=>Promise.reject(new Error("SQL V34.6 pendente"))),
     readRelayLoadout:readRelayLoadout||(()=>Promise.reject(new Error("Leitura de equipamentos não configurada"))),
@@ -1371,7 +1383,7 @@ export function attachSharedUniverse(server,{authenticate,authorizeJoin,recordSe
   world.refreshNpcConfig(true).catch(()=>{});
   world.refreshLiveOps(true).catch(()=>{});
   world.refreshDirectives(true).catch(()=>{});
-  let last=nowMs(),lastActivityCleanup=0,lastGlobalEventCheckAt=0;const timer=setInterval(()=>{const n=nowMs(),dt=Math.min(.12,(n-last)/1000);last=n;if(n-lastGlobalEventCheckAt>1000){lastGlobalEventCheckAt=n;world.broadcastGlobalEventStatus(false);}if(n-world.lastLiveOpsAt>=LIVE_OPS_REFRESH_MS)world.refreshLiveOps(false).catch(()=>{});if(n-world.lastNpcConfigAt>=12000)world.refreshNpcConfig(false).catch(()=>{});if(n-world.lastWorldConfigAt>=15000)world.refreshWorldConfig(false).catch(()=>{});if(n-world.lastDirectivesAt>=20000)world.refreshDirectives(false).catch(()=>{});if(n-world.lastWarbotConfigAt>=10000)world.refreshWarbotSettings(false).catch(()=>{});for(const [key,r] of rooms){if(r.clients.size>0){r.lastUsedAt=n;r.tick(dt);if(r.warfrontControl&&n-r.lastWarfrontSyncAt>15000){r.lastWarfrontSyncAt=n;r.reconcileWarfrontState().catch(err=>console.warn('Falha sincronizando relés:',err?.message));}}else if(n-(r.lastUsedAt||n)>IDLE_ROOM_TTL_MS)rooms.delete(key);}if(n-lastActivityCleanup>60000){lastActivityCleanup=n;for(const [uid,at] of world.npcActivity)if(n-Number(at)>10*60*1000)world.npcActivity.delete(uid);}},50);
+  let last=nowMs(),lastActivityCleanup=0,lastGlobalEventCheckAt=0,lastIdleRuntimeCheckV108=0;const timer=setInterval(()=>{const n=nowMs(),dt=Math.min(.12,(n-last)/1000);last=n;if(n-lastGlobalEventCheckAt>1000){lastGlobalEventCheckAt=n;world.broadcastGlobalEventStatus(false);}const hasWorldPlayersV108=[...rooms.values()].some(room=>room.clients.size>0);if(shouldRefreshWorldRuntimeV108({hasPlayers:hasWorldPlayersV108,now:n,lastIdleCheckAt:lastIdleRuntimeCheckV108,intervalMs:60000})){lastIdleRuntimeCheckV108=n;if(n-world.lastLiveOpsAt>=LIVE_OPS_REFRESH_MS)world.refreshLiveOps(false).catch(()=>{});if(n-world.lastNpcConfigAt>=12000)world.refreshNpcConfig(false).catch(()=>{});if(n-world.lastWorldConfigAt>=15000)world.refreshWorldConfig(false).catch(()=>{});if(n-world.lastDirectivesAt>=20000)world.refreshDirectives(false).catch(()=>{});if(n-world.lastWarbotConfigAt>=10000)world.refreshWarbotSettings(false).catch(()=>{});}for(const [key,r] of rooms){if(r.clients.size>0){r.lastUsedAt=n;r.tick(dt);if(r.warfrontControl&&n-r.lastWarfrontSyncAt>15000){r.lastWarfrontSyncAt=n;r.reconcileWarfrontState().catch(err=>console.warn('Falha sincronizando relés:',err?.message));}}else if(n-(r.lastUsedAt||n)>IDLE_ROOM_TTL_MS)rooms.delete(key);}if(n-lastActivityCleanup>60000){lastActivityCleanup=n;for(const [uid,at] of world.npcActivity)if(n-Number(at)>10*60*1000)world.npcActivity.delete(uid);}},50);
   timer.unref?.();
   return world;
 }

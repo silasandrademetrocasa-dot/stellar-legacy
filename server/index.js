@@ -8,7 +8,7 @@ import {attachAstralCombatV431} from './astral-combat-v431.js';
 import {attachStageBV426} from './stage-b-v426.js';
 import {attachStageAV423} from './stage-a-v423.js';
 import {attachSquadObjectivesV421} from './squad-objectives-v421.js';
-// V106.8C: import da Expansão Unificada V42 desabilitado para teste A/B.
+import {attachFrontierUnifiedV42} from './frontier-unified-v42.js';
 import {attachAstralRewardsV381} from './astral-rewards-v381.js';
 import {cleanWarbotConfig,WARBOT_MAPS} from './warbot-engine-v477.js';
 import express from 'express';
@@ -34,6 +34,8 @@ import { createRelayRouter } from './relay-router-v346.js';
 import {createDominionRouter} from './dominion-router-v360.js';
 import {createFrontierRouter} from './frontier-router-v370.js';
 import { validatePlayerSave, invalidShopArguments } from './security-guard.js';
+import { missionSaveGuardV108 } from './mission-save-guard-v108.js';
+import {grantNpcRewardSafelyV1069} from './npc-reward-delivery-v1069.js';
 import { validateRewardClaimContinuity } from './reward-claim-guard.js';
 import { createSecurityService } from './security-service.js';
 
@@ -1618,11 +1620,7 @@ app.post('/api/admin/runtime/gates',requireUser,asyncRoute(async(req,res)=>{
 attachAstralRewardsV381(app,{requireUser,asyncRoute,requireEliteAdmin});
 
 // V39–42: extensoes incrementais autenticadas.
-// V106.8C isolamento: sem montar endpoints da Expansão Unificada V42.
-app.use('/api/frontier/v42',(_req,res)=>{
-  res.set('Cache-Control','no-store');
-  res.status(503).json({code:'UNIVERSE_V42_DISABLED_V1068C',error:'Universo Estelar temporariamente desativado para diagnostico do login.'});
-});
+attachFrontierUnifiedV42(app,{requireUser,asyncRoute});
 
 // V42.1: objetivo semanal de esquadrão baseado em abates confirmados.
 attachSquadObjectivesV421(app,{requireUser,asyncRoute});
@@ -1960,8 +1958,10 @@ app.put('/api/save', requireUser, OFFLINE_FARM_GUARD_V484, asyncRoute(async (req
       code:gearWriteV1062.code
     });
   }
-  // TESTE V106.8D: guard V108 temporariamente retirado para diagnostico.
-  // Protecoes de NPC, elite, economia, inventario e hangar permanecem ativas.
+  // V108: finalizações/abates confirmados não podem retroceder e
+  // prêmios exigem uma missão completa previamente salva no banco.
+  const missionErrorV108=missionSaveGuardV108(serverSave?.state||null,state);
+  if(missionErrorV108)return res.status(409).json({error:'Progresso de missão alterado no servidor. Reconciliando a conclusão antes do prêmio.',code:missionErrorV108});
   // Compras economicas confirmadas pelo Render nao podem ser desfeitas com save antigo.
   // O histórico idempotente de compras em lote é SEMPRE autoritativo do servidor.
   // Clientes legados que não possuem esse campo continuam compatíveis.
@@ -2184,13 +2184,24 @@ const sharedUniverse = attachSharedUniverse(server, {
   grantNpcReward:async(userId,killKey,npcType,baseCredits,baseStl)=>{
     await offlineFarmEnsureInactiveV484(userId,requireEliteAdmin);
     const sb=await requireEliteAdmin();
-    const {data,error}=await sb.rpc('stellar_grant_npc_reward_v228',{
-      p_user_id:userId,p_kill_key:killKey,p_npc_type:npcType,
-      p_base_credits:baseCredits,p_base_stl:baseStl
-    });
-    if(error)throw new Error(String(error.message||'Recompensa NPC recusada'));
-    if(!data||!Number.isSafeInteger(Number(data.revision))||Number(data.revision)<1)throw new Error('Recompensa NPC sem confirmação verificável.');
-    return data;
+    const grant=async()=>{
+      const {data,error}=await sb.rpc('stellar_grant_npc_reward_v228',{
+        p_user_id:userId,p_kill_key:killKey,p_npc_type:npcType,
+        p_base_credits:baseCredits,p_base_stl:baseStl
+      });
+      if(error)throw new Error(String(error.message||'Recompensa NPC recusada'));
+      if(!data||!Number.isSafeInteger(Number(data.revision))||Number(data.revision)<1)throw new Error('Recompensa NPC sem confirmação verificável.');
+      return data;
+    };
+    // Consulta ledger somente na rara situação de timeout com commit anterior;
+    // não adiciona consultas ao caminho normal de combate.
+    const readReceipt=async()=>{
+      const {data,error}=await sb.from('stellar_npc_reward_ledger').select('credits,stl')
+        .eq('user_id',userId).eq('kill_key',killKey).maybeSingle();
+      if(error)throw new Error('NPC_REWARD_RECOVERY_LEDGER_UNAVAILABLE');
+      return data;
+    };
+    return grantNpcRewardSafelyV1069({grant,readReceipt});
   },
   grantOreReward:async(userId,oreKey,resource,amount,mapId)=>{
     await offlineFarmEnsureInactiveV484(userId,requireEliteAdmin);
