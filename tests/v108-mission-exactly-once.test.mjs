@@ -21,8 +21,8 @@ test('V106.8D diagnosis: mission-related server clients retained as files only, 
   assert.equal(typeof createMissionRewardAckV108,'function');
 });
 test('V106.8D diagnosis: Cache version and visible marker updated',()=>{
-  assert.match(read('public/index.html'),/v1068d-mission-isolation/);
-  assert.match(read('public/index.html'),/TESTE V106\.8D/);
+  assert.match(read('public/index.html'),/v1068e-login-repair/);
+  assert.match(read('public/index.html'),/V106\.8E/);
   assert.match(read('public/game.js'),/STELLAR_BOOT_PROBE_V1068D/);
 });
 test('V106.8D: completed missions are not auto-awarded; auth and saves are not disabled',()=>{

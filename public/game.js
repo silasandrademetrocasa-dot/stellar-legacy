@@ -5481,7 +5481,7 @@ function removeInventory(itemId,count=1){
   if(progress.inventory[itemId]<=0)delete progress.inventory[itemId];
   return true;
 }
-function hasExtra(itemId){return progress.shipLoadout.extras.includes(itemId);}
+function hasExtra(itemId){return !!progress?.shipLoadout?.extras?.includes(itemId);}
 function autoLaserEnabled(){return hasExtra('autoLaserCpu');}
 function autoRocketEnabled(){return hasExtra('autoRocketCpu');}
 function turboRocketEnabled(){return hasExtra('rocketTurboCpu');}
@@ -11680,6 +11680,8 @@ ui.loginForm.onsubmit=async e=>{
     await afterAuth();
   }catch(err){ui.loginPassword.value='';console.error('[bootstrap] login/entrada falhou',err);ui.loginModal.classList.remove('hidden');ui.authMessage.textContent='Não foi possível iniciar o jogo: '+String(err?.message||'falha inesperada')+'. Sua conta e save foram preservados.';}
 };
+// V106.8E: this marker is set only after the login submit handler really exists.
+window.STELLAR_LOGIN_FORM_READY_V1068E = true;
 ui.loginRetrySessionBtn?.addEventListener('click',async()=>{
   ui.authMessage.textContent='Revalidando a sessão...';
   ui.loginRetrySessionBtn.classList.add('hidden');
