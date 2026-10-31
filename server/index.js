@@ -8,7 +8,7 @@ import {attachAstralCombatV431} from './astral-combat-v431.js';
 import {attachStageBV426} from './stage-b-v426.js';
 import {attachStageAV423} from './stage-a-v423.js';
 import {attachSquadObjectivesV421} from './squad-objectives-v421.js';
-import {attachFrontierUnifiedV42} from './frontier-unified-v42.js';
+// V106.8C: import da Expansão Unificada V42 desabilitado para teste A/B.
 import {attachAstralRewardsV381} from './astral-rewards-v381.js';
 import {cleanWarbotConfig,WARBOT_MAPS} from './warbot-engine-v477.js';
 import express from 'express';
@@ -1619,7 +1619,11 @@ app.post('/api/admin/runtime/gates',requireUser,asyncRoute(async(req,res)=>{
 attachAstralRewardsV381(app,{requireUser,asyncRoute,requireEliteAdmin});
 
 // V39–42: extensoes incrementais autenticadas.
-attachFrontierUnifiedV42(app,{requireUser,asyncRoute});
+// V106.8C isolamento: sem montar endpoints da Expansão Unificada V42.
+app.use('/api/frontier/v42',(_req,res)=>{
+  res.set('Cache-Control','no-store');
+  res.status(503).json({code:'UNIVERSE_V42_DISABLED_V1068C',error:'Universo Estelar temporariamente desativado para diagnostico do login.'});
+});
 
 // V42.1: objetivo semanal de esquadrão baseado em abates confirmados.
 attachSquadObjectivesV421(app,{requireUser,asyncRoute});

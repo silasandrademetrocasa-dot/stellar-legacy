@@ -79,7 +79,7 @@
 
   <button class="small-btn clan-top-btn" id="clanBtn" type="button">CLÃ <span id="clanTopTag">—</span></button>
   <button class="small-btn" id="mapBtn" type="button">MAPA</button>
-  <button class="small-btn universe-top-btn" id="frontierExpansionBtnV42" type="button" title="Expansões do Universo">✦ UNIVERSO</button>
+  
   <button class="small-btn auction-top-btn" id="auctionBtn" type="button">LEILÃO <span id="auctionTopClock">60:00</span></button>
 
   <div class="menu-group menu-group-right" data-menu-group="shops">
@@ -347,6 +347,7 @@
       <div class="eyebrow">STELLAR NETWORK</div>
       <h1>Stellar Legacy</h1>
       <p>Três facções. Uma guerra orbital.</p>
+      <small id="stellarIsolationMarkerV1068C" style="display:inline-block;margin-top:7px;color:#a6c6e0;font-size:11px">TESTE V106.8C · UNIVERSO ESTELAR DESATIVADO</small>
       <div class="login-factions">
         <div><img alt="Terra" src="/assets/v19/branding/earth.webp"/><span>Terra</span></div>
         <div><img alt="Marte" src="/assets/v19/branding/mars.webp"/><span>Marte</span></div>
@@ -626,7 +627,7 @@
 
 
 
-<div id="frontierExpansionModalV42" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="frontierExpansionTitleV42"><div class="modal-card frontier-panel-v42"><div class="modal-header"><div><div class="eyebrow">EXPANSÃO UNIFICADA</div><h2 id="frontierExpansionTitleV42">UNIVERSO ESTELAR</h2></div><button class="small-btn" id="frontierExpansionCloseV42" type="button">FECHAR</button></div><div id="frontierExpansionContentV42" class="frontier-content-v42"></div></div></div>
+<!-- V106.8C: Universo Estelar (Expansão Unificada V42) TEMPORARIAMENTE DESATIVADO para isolamento de login. Não é o WebSocket de combate. -->
 <div class="modal hidden" id="adminModal">
   <div class="modal-card admin-modal-card">
     <div class="modal-header admin-modal-header">
@@ -1223,8 +1224,8 @@
 <script src="/modules/stellar-admin-v57.js?v=47.7.60" type="module"></script>
 <script src="/modules/stellar-admin-c-v100.js?v=47.7.60" type="module"></script>
 <script type="module" src="/modules/astral-rewards-v381.js?v=47.7.60"></script>
-<script type="module" src="/modules/unified-expansion-v42.js?v=47.7.60"></script>
-  <script type="module" src="/modules/topbar-navigation-v481.js?v=48.1.0"></script>
+<!-- V106.8C A/B: import do Universo Estelar removido do bootstrap. -->
+  <script type="module" src="/modules/topbar-navigation-v481.js?v=48.1.0-isolamento-v1068c"></script>
   <script type="module" src="/modules/pilot-ship-hud-v482.js?v=48.2.6"></script>
 
 <!-- V92–V97: compra autoritativa de munição por quantidade digitada. -->

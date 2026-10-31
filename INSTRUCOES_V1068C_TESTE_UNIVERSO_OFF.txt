@@ -1,0 +1,4 @@
+V106.8C TESTE DE ISOLAMENTO: aplicar após V106.8B, SEM V106.9.
+Ver docs/V106_8C_UNIVERSO_ESTELAR_OFF_TESTE_AB.md.
+No login deve aparecer TESTE V106.8C · UNIVERSO ESTELAR DESATIVADO.
+Nenhum SQL, recompensas ou saves alterados. Testar Web antes do APK.
