@@ -1,0 +1,73 @@
+/* V109.1 - AUX Hangar lateral + equipamentos por categoria. UI only. */
+#hangarModal .v109-aux-workbench-body{display:block!important;min-width:0;width:100%;}
+#hangarModal .aux-workbench-v1091{display:grid;grid-template-columns:minmax(120px,160px) minmax(0,1fr);gap:12px;width:100%;min-width:0;}
+#hangarModal .aux-workbench-nav-v1091{grid-column:1;grid-row:1;display:flex;flex-direction:column;gap:6px;padding:10px;border:1px solid rgba(77,186,255,.3);border-radius:12px;background:linear-gradient(160deg,#071e37,#030e21);align-self:stretch;}
+#hangarModal .aux-workbench-logo-v1091{display:flex;flex-direction:column;align-items:center;font-size:20px;font-weight:900;letter-spacing:2px;color:#72dbff;padding:10px 4px 14px;text-shadow:0 0 15px #1466a4}
+#hangarModal .aux-workbench-logo-v1091 small{font-size:9px;letter-spacing:4px;color:#c5edff}
+#hangarModal .aux-workbench-tab-v1091{min-height:43px;background:linear-gradient(180deg,#082641,#06172c);border:1px solid rgba(55,152,218,.3);border-radius:8px;color:#c9eaff;display:flex;gap:9px;align-items:center;text-align:left;padding:8px 10px;font-size:11px;letter-spacing:.5px;}
+#hangarModal .aux-workbench-tab-v1091>span{font-size:19px;color:#72e1ff;min-width:20px;text-align:center}
+#hangarModal .aux-workbench-tab-v1091.active{background:linear-gradient(120deg,#114d83,#0c3150);border-color:#59d7ff;box-shadow:inset 3px 0 #4cd5ff,0 0 12px #2aa5f04f;color:white}
+#hangarModal .aux-workbench-preview-v1091{grid-column:2;grid-row:1;min-width:0;padding:10px 15px;border:1px solid rgba(77,186,255,.3);border-radius:12px;background:radial-gradient(ellipse at center,rgba(22,82,133,.30),transparent 66%),linear-gradient(160deg,#061a2f,#030d20);}
+#hangarModal .aux-workbench-preview-heading-v1091{display:flex;align-items:center;justify-content:space-between;gap:8px;color:#a2e5ff;font-size:11px;letter-spacing:1px}
+#hangarModal .aux-workbench-preview-heading-v1091 b{border:1px solid #45cafa;background:#0c3c63;color:#e3faff;padding:5px 9px;border-radius:7px;white-space:nowrap}
+#hangarModal .aux-workbench-avatar-v1091{min-height:155px;height:clamp(160px,26vh,270px);display:flex;justify-content:center;align-items:center;background:radial-gradient(ellipse at 50% 70%,#0c3e6899,transparent 61%);overflow:hidden}
+#hangarModal .aux-workbench-avatar-v1091 img{height:100%;width:100%;max-width:370px;object-fit:contain;filter:drop-shadow(0 0 14px #22a2fa60)}
+#hangarModal .aux-workbench-preview-stats-v1091{display:flex;flex-wrap:wrap;gap:6px;justify-content:center}
+#hangarModal .aux-workbench-preview-stats-v1091 span{font-size:10px;background:#04192a;border:1px solid #2f739c67;border-radius:7px;padding:6px 8px;white-space:nowrap}
+#hangarModal .aux-workbench-preview-stats-v1091 b{color:#e9f8ff}
+#hangarModal .aux-workbench-caption-v1091{font-size:10px;text-align:center;color:#86adc8;margin-top:8px}
+#hangarModal .aux-workbench-bottom-v1091{grid-column:1/-1;grid-row:2;min-width:0;padding:12px;border:1px solid #296b9977;border-radius:12px;background:linear-gradient(180deg,#061d34,#030e20)}
+#hangarModal .aux-workbench-bottom-head-v1091{display:flex;justify-content:space-between;gap:8px;align-items:center;border-bottom:1px solid #2a668a80;padding:0 0 10px;margin-bottom:12px}
+#hangarModal .aux-workbench-bottom-head-v1091 h3{margin:2px 0;font-size:19px;color:#d6f6ff}
+#hangarModal .aux-workbench-bottom-head-v1091 span{color:#69cfff;font-weight:bold;font-size:10px;letter-spacing:1px}
+#hangarModal .aux-workbench-bottom-head-v1091 small{font-size:10px;color:#9dbfd5;text-align:right}
+#hangarModal .aux-workbench-slot-grid-v1091{display:grid!important;grid-template-columns:repeat(auto-fit,minmax(165px,1fr))!important;gap:9px!important}
+#hangarModal .aux-workbench-slot-grid-v1091 .pet-slot{min-width:0}
+#hangarModal .aux-workbench-inventory-v1091{margin-top:15px;border-top:1px solid #295a8080;padding-top:12px}
+#hangarModal .aux-workbench-inventory-v1091 h4{margin:0 0 10px}
+#hangarModal .aux-workbench-info-v1091{display:grid;grid-template-columns:repeat(auto-fit,minmax(125px,1fr));gap:8px;margin-bottom:10px}
+#hangarModal .aux-workbench-stat-v1091{display:flex;flex-direction:column;gap:7px;padding:10px;border:1px solid #2b69907f;background:#051b30;border-radius:9px;min-width:0}
+#hangarModal .aux-workbench-stat-v1091 b{color:#8bdcff;font-size:10px}
+#hangarModal .aux-workbench-stat-v1091 strong{color:#e4fbff;overflow-wrap:anywhere}
+#hangarModal .aux-workbench-caution-v1091{font-size:12px;line-height:1.5;color:#adf2ff;background:#073250;border:1px solid #3c95b8;border-radius:7px;padding:9px}
+#hangarModal .aux-workbench-specializations-v1091{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:8px}
+#hangarModal .aux-workbench-specialization-v1091{display:flex;align-items:center;gap:8px;padding:10px;border-radius:9px;border:1px solid #27698d;background:#051728;min-width:0}
+#hangarModal .aux-workbench-spec-icon-v1091{font-size:24px;flex:none}
+#hangarModal .aux-workbench-specialization-v1091>div:nth-child(2){flex:1;min-width:0}
+#hangarModal .aux-workbench-specialization-v1091 small{display:block;color:#9dbdd2;font-size:10px;line-height:1.35;margin-top:3px}
+#hangarModal .aux-workbench-specialization-controls-v1091{display:flex;align-items:center;gap:4px;flex:none}
+#hangarModal .aux-workbench-specialization-controls-v1091 button{width:27px;height:31px;border:1px solid #4387b4;background:#123d5e;border-radius:6px;color:#eefaff;font-weight:bold}
+#hangarModal .aux-workbench-specialization-controls-v1091 button:disabled{opacity:.35}
+#hangarModal .aux-workbench-specialization-controls-v1091 strong{white-space:nowrap;font-size:11px}
+#hangarModal .aux-workbench-coming-v1091{display:flex;flex-direction:column;gap:4px;margin:16px 0 10px;border-left:3px solid #ab7bff;padding-left:10px}
+#hangarModal .aux-workbench-coming-v1091 b{color:#d1b5ff;font-size:12px}
+#hangarModal .aux-workbench-coming-v1091 small{font-size:11px;color:#9aabc3;line-height:1.4}
+#hangarModal .aux-workbench-protocol-art-v1091{display:grid;grid-template-columns:repeat(auto-fit,minmax(118px,1fr));gap:8px}
+#hangarModal .aux-workbench-protocol-card-v1091{display:flex;flex-direction:column;align-items:center;gap:4px;background:radial-gradient(circle at 50% 30%,#163656,#061524 75%);border:1px solid #275c80;border-radius:10px;padding:8px;text-align:center;min-width:0}
+#hangarModal .aux-workbench-protocol-card-v1091 img{width:90px;height:90px;max-width:100%;object-fit:contain}
+#hangarModal .aux-workbench-protocol-card-v1091 b{font-size:12px}
+#hangarModal .aux-workbench-protocol-card-v1091 span{color:#8fe3ff;font-size:11px}
+#hangarModal .aux-workbench-protocol-card-v1091 small{font-size:10px;color:#9cb3ce}
+#hangarModal .aux-workbench-future-slots-v1091{display:grid;grid-template-columns:repeat(auto-fit,minmax(85px,1fr));gap:7px}
+#hangarModal .aux-workbench-future-slot-v1091{padding:13px 5px;border:1px dashed #386486;color:#84a6c4;font-weight:700;font-size:10px;border-radius:7px;text-align:center;background:#051629}
+#hangarModal .aux-workbench-modes-v1091{display:grid;grid-template-columns:repeat(auto-fit,minmax(165px,1fr));gap:8px}
+#hangarModal .aux-workbench-modes-v1091 .pet-gear{min-width:0;width:100%;height:auto}
+@media(max-width:680px){
+ #hangarModal .aux-workbench-v1091{grid-template-columns:1fr;gap:7px}
+ #hangarModal .aux-workbench-nav-v1091{grid-column:1;grid-row:1;flex-direction:row;overflow-x:auto;padding:7px;gap:5px;scrollbar-width:thin;align-self:auto}
+ #hangarModal .aux-workbench-logo-v1091{display:none}
+ #hangarModal .aux-workbench-tab-v1091{flex-direction:column;gap:3px;min-width:76px;padding:7px 5px;justify-content:center;font-size:8px;text-align:center;min-height:56px}
+ #hangarModal .aux-workbench-tab-v1091>span{font-size:17px}
+ #hangarModal .aux-workbench-preview-v1091{grid-column:1;grid-row:2}
+ #hangarModal .aux-workbench-avatar-v1091{height:180px;min-height:150px}
+ #hangarModal .aux-workbench-bottom-v1091{grid-column:1;grid-row:3;padding:9px}
+ #hangarModal .aux-workbench-bottom-head-v1091 h3{font-size:15px}
+ #hangarModal .aux-workbench-bottom-head-v1091 small{display:none}
+ #hangarModal .aux-workbench-specializations-v1091{grid-template-columns:1fr}
+ #hangarModal .aux-workbench-protocol-art-v1091{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+
+#hangarModal .aux-workbench-protocol-levels-v1091{display:flex;width:100%;justify-content:space-around;align-items:center;gap:3px}
+#hangarModal .aux-workbench-protocol-levels-v1091>div{display:flex;flex-direction:column;gap:3px;align-items:center;flex:1;min-width:0}
+#hangarModal .aux-workbench-protocol-levels-v1091 img{width:48px;height:48px;max-width:100%;object-fit:contain}
+#hangarModal .aux-workbench-protocol-levels-v1091 span{font-size:10px;color:#92daff;white-space:nowrap}

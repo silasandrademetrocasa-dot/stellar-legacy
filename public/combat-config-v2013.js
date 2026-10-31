@@ -1,7 +1,7 @@
 // Stellar Legacy V20.1.3 — two battle loadouts, no materialised duplicate items.
 export const COMBAT_CONFIG_COOLDOWN_MS_V2013=5000;
 export function captureCombatBuildV2013(shipLoadout,drones,shield=0,pet=null){
-  return {shipLoadout:{lasers:[...(shipLoadout?.lasers||[])],generators:[...(shipLoadout?.generators||[])],extras:[...(shipLoadout?.extras||[])]},droneSlots:Object.fromEntries((drones||[]).map(d=>[String(d.id),[...(d.slots||[])]])),petLoadout:pet?{lasers:[...(pet.lasers||[])],shields:[...(pet.shields||[])],activeGear:pet.activeGear||'off'}:null,shield:Math.max(0,Math.floor(Number(shield)||0))};
+  return {shipLoadout:{lasers:[...(shipLoadout?.lasers||[])],generators:[...(shipLoadout?.generators||[])],extras:[...(shipLoadout?.extras||[])]},droneSlots:Object.fromEntries((drones||[]).map(d=>[String(d.id),[...(d.slots||[])]])),petLoadout:pet?{lasers:[...(pet.lasers||[])],shields:[...(pet.shields||[])],activeGear:pet.activeGear||'off',protocols:{...(pet.protocols||{})}}:null,shield:Math.max(0,Math.floor(Number(shield)||0))};
 }
 export function freshBattleConfigsV2013(loadout,drones,shield,pet=null){
   const build=captureCombatBuildV2013(loadout,drones,shield,pet);
@@ -15,6 +15,19 @@ export function clampStoredShieldV2013(stored,maxShield){
 }
 // Only active configuration materialises items. Returning to inventory before applying the
 // target lets both configurations reference the SAME owned item without duplicating it.
+const AUX_TACTICAL_KEYS_V1091=['guard','ore','box','repair','kami'];
+export function normalizeAuxTacticalProtocolsV1091(source,pet){
+  const level=Math.max(1,Math.min(20,Math.floor(Number(pet?.level)||1)));
+  let remaining=Math.min(12,level+2);
+  const out={};
+  for(const id of AUX_TACTICAL_KEYS_V1091){
+    const raw=Number(source?.[id]);
+    const rank=Number.isFinite(raw)?Math.max(0,Math.min(3,Math.floor(raw))):0;
+    out[id]=pet?.gearsOwned?.[id]?Math.min(rank,remaining):0;
+    remaining-=out[id];
+  }
+  return out;
+}
 export function exchangeCombatBuildV2013({inventory,shipLoadout,drones,pet=null,target,ship,items}){
   const stock={...(inventory||{})};
   const add=id=>{if(id)stock[id]=(stock[id]||0)+1;};
@@ -50,7 +63,10 @@ export function exchangeCombatBuildV2013({inventory,shipLoadout,drones,pet=null,
     petLoadout={
       lasers:(pet.lasers||[]).map((_,i)=>take(source.lasers?.[i],it=>it.type==='laser')),
       shields:(pet.shields||[]).map((_,i)=>take(source.shields?.[i],it=>it.type==='generator'&&it.subtype==='shield')),
-      activeGear:pet.gearsOwned?.[source.activeGear]?source.activeGear:'off'
+      activeGear:pet.gearsOwned?.[source.activeGear]?source.activeGear:'off',
+      // V109.1: the active configuration owns its AUX specialization allocation.
+      // Old presets that lack this field retain the current allocation.
+      protocols:normalizeAuxTacticalProtocolsV1091(source.protocols??pet.protocols,pet)
     };
   }
   return {inventory:stock,shipLoadout:result,drones:resultDrones,petLoadout};

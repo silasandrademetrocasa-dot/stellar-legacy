@@ -1,0 +1,5 @@
+STELLAR LEGACY V109.1 — protótipo funcional do Hangar AUX e CONF1/CONF2 global
+Base: versão Web V108.1. Esta é uma atualização incremental, aplique na raiz mantendo demais arquivos.
+Teste obrigatório: login -> hangar AUX -> CONF1 alterar especializações -> CONF2 conferir sua própria alocação -> CONF1 verificar restauração -> equipamento nave/drones intacto.
+O novo catálogo visual de 15 protocolos é PRÉVIA, não possui loja/craft/efeito habilitados nesta fase.
+SEM SQL. SEM DEPLOY AUTOMATICO. Nunca aplicar a um farm ativo sem confirmar o save.

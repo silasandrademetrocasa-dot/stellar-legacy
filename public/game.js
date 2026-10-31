@@ -4996,7 +4996,13 @@ function ensureBattleConfigsV2013(){
   const configs=progress.combatConfigsV2013;
   // Migrate old saved configurations without overwriting equipment already owned.
   for(const index of [1,2])if(!configs.profiles[index].petLoadout&&progress.pet){
-    configs.profiles[index].petLoadout={lasers:[...(progress.pet.lasers||[])],shields:[...(progress.pet.shields||[])],activeGear:progress.pet.activeGear||'off'};
+    configs.profiles[index].petLoadout={lasers:[...(progress.pet.lasers||[])],shields:[...(progress.pet.shields||[])],activeGear:progress.pet.activeGear||'off',protocols:{...(progress.pet.protocols||{})}};
+  }
+  // Migrate legacy configurations without overwriting any currently equipped equipment.
+  // On old saves neither config had AUX protocol allocations; start both with the current ones.
+  for(const index of [1,2]){
+    const aux=configs.profiles[index]?.petLoadout;
+    if(aux&&!aux.protocols)aux.protocols={...(progress.pet?.protocols||{})};
   }
   if(configs.active!==1&&configs.active!==2)configs.active=1;
   return configs;
@@ -5019,7 +5025,7 @@ function copyBattleConfigV2013(from,to){
   configs.profiles[to]={
     shipLoadout:{lasers:[...(source.shipLoadout?.lasers||[])],generators:[...(source.shipLoadout?.generators||[])],extras:[...(source.shipLoadout?.extras||[])]},
     droneSlots:Object.fromEntries(Object.entries(source.droneSlots||{}).map(([id,list])=>[String(id),[...(list||[])]])),
-    petLoadout:source.petLoadout?{lasers:[...(source.petLoadout.lasers||[])],shields:[...(source.petLoadout.shields||[])],activeGear:source.petLoadout.activeGear||'off'}:null,
+    petLoadout:source.petLoadout?{lasers:[...(source.petLoadout.lasers||[])],shields:[...(source.petLoadout.shields||[])],activeGear:source.petLoadout.activeGear||'off',protocols:{...(source.petLoadout.protocols??progress.pet?.protocols??{})}}:null,
     shield:Math.max(0,Math.floor(Number(configs.profiles[to]?.shield)||0)) // Mantém o escudo já existente na CONF destino.
   };
   saveGame();rememberEquipmentChangeV109();flushCloudSave(true).catch(()=>{});renderHangar();updateUI();
@@ -5067,7 +5073,11 @@ async function applyBattlePresetV3030(kind){
   }
   const hp=player.hp,shield=player.shield;
   const result=exchangeCombatBuildV2013({inventory:progress.inventory,shipLoadout:progress.shipLoadout,drones:progress.drones,pet:progress.pet,target,ship:SHIPS[progress.activeShipId],items:ITEMS});
-  progress.inventory=result.inventory;progress.shipLoadout=result.shipLoadout;progress.drones=result.drones;if(result.petLoadout&&progress.pet)Object.assign(progress.pet,result.petLoadout);
+  progress.inventory=result.inventory;progress.shipLoadout=result.shipLoadout;progress.drones=result.drones;if(result.petLoadout&&progress.pet){
+    Object.assign(progress.pet,result.petLoadout);
+    petRuntime.taskId=null;petRuntime.taskType='follow';petRuntime.laserTargetId=null;petRuntime.laserUntil=0;
+    if(progress.pet.activeGear!=='kami')petRuntime.kamiArmed=false;
+  }
   computeStats(false);player.hp=Math.max(0,Math.min(player.maxHp,hp));player.shield=clampStoredShieldV2013(shield,player.maxShield);
   progress.hp=player.hp;progress.shield=player.shield;
   saveGame();rememberEquipmentChangeV109();flushCloudSave(true).catch(()=>{});renderHangar();buildAmmoButtons();updateUI();syncSharedUniversePlayer(true);
@@ -5115,7 +5125,12 @@ function switchBattleConfigV2013(target){
   const previousHp=player.hp;
   saveActiveBattleConfigV2013();
   const newBuild=exchangeCombatBuildV2013({inventory:progress.inventory,shipLoadout:progress.shipLoadout,drones:progress.drones,pet:progress.pet,target:configs.profiles[target],ship:SHIPS[progress.activeShipId],items:ITEMS});
-  progress.inventory=newBuild.inventory;progress.shipLoadout=newBuild.shipLoadout;progress.drones=newBuild.drones;if(newBuild.petLoadout&&progress.pet)Object.assign(progress.pet,newBuild.petLoadout);
+  progress.inventory=newBuild.inventory;progress.shipLoadout=newBuild.shipLoadout;progress.drones=newBuild.drones;if(newBuild.petLoadout&&progress.pet){
+    Object.assign(progress.pet,newBuild.petLoadout);
+    // V109.1: A new AUX mode belongs to its CONF, so old AI tasks must not survive the swap.
+    petRuntime.taskId=null;petRuntime.taskType='follow';petRuntime.laserTargetId=null;petRuntime.laserUntil=0;
+    if(progress.pet.activeGear!=='kami')petRuntime.kamiArmed=false;
+  }
   // Stats may change, but existing HP does not scale up. The inactive shield is frozen.
   configs.active=target;configs.lastSwitchAt=Date.now();
   computeStats(false);
@@ -8498,7 +8513,90 @@ function renderHangarDrones(){
   layout.append(equippedPane,inv);root.appendChild(layout);return root;
 }
 
-function renderHangarPet(){const root=document.createElement('div');root.className='hangar-embedded-panel pet-hangar-panel';renderPet(root);return root;}
+let auxWorkbenchSectionV1091='info';
+const AUX_TACTICAL_TABS_V1091=[['info','INFORMAÇÕES','◈'],['lasers','ARMAS','⌁'],['shields','ESCUDOS','⬡'],['protocols','PROTOCOLOS','✧'],['modules','MÓDULOS','◇']];
+const AUX_FUTURE_PROTOCOLS_V1091=[
+  {id:'dano',title:'DANO',bonuses:['+1%','+2%','+3%'],description:'Dano do AUX'},
+  {id:'hp',title:'HP',bonuses:['+1%','+2,5%','+5%'],description:'HP do AUX'},
+  {id:'escudo',title:'ESCUDO',bonuses:['+2%','+4%','+7%'],description:'Escudo do AUX'},
+  {id:'loot',title:'BOX / LOOT',bonuses:['+1%','+4%','+7%'],description:'Coleta e loot'},
+  {id:'porao',title:'PORÃO',bonuses:['+5%','+10%','+15%'],description:'Capacidade de carga'}
+];
+function auxProtocolArtV1091(id,rank=1){return `/assets/v109/aux-protocols/aux_protocol_${id}_n${rank}.png`;}
+function renderHangarPet(){
+  const root=document.createElement('div');root.className='hangar-embedded-panel pet-hangar-panel aux-workbench-v1091';
+  if(!progress?.pet?.owned){renderPet(root);return root;}
+  const pet=progress.pet,conf=ensureBattleConfigsV2013()?.active||1,level=pet.level||1;
+  const designer=currentPetDesign(),section=auxWorkbenchSectionV1091;
+  const sidebar=document.createElement('nav');sidebar.className='aux-workbench-nav-v1091';sidebar.setAttribute('aria-label','Categorias de equipamentos do AUX');
+  sidebar.innerHTML='<div class="aux-workbench-logo-v1091">AUX <small>HANGAR</small></div>';
+  for(const [id,label,icon] of AUX_TACTICAL_TABS_V1091){
+    const b=document.createElement('button');b.type='button';b.className='aux-workbench-tab-v1091'+(section===id?' active':'');
+    b.setAttribute('aria-pressed',String(section===id));b.innerHTML=`<span aria-hidden="true">${icon}</span><b>${label}</b>`;
+    b.onclick=()=>{auxWorkbenchSectionV1091=id;renderHangar();};sidebar.appendChild(b);
+  }
+  const main=document.createElement('div');main.className='aux-workbench-preview-v1091';
+  const image=auxVisualArtV64('aux9')||droneCardAsset(pet.level>=10?'petElite':'pet');
+  const stats=petLevelBonuses();
+  main.innerHTML=`<div class="aux-workbench-preview-heading-v1091"><span>UNIDADE AUX-9 • NÍVEL ${level}/20</span><b>CONF ${conf} ATIVA</b></div>
+    <div class="aux-workbench-avatar-v1091"><img src="${image}" alt="AUX-9 no hangar" loading="lazy" ${designer?`style="filter:${designerVisualCss(designer)}"`:''}/></div>
+    <div class="aux-workbench-preview-stats-v1091"><span>LASERS <b>${(pet.lasers||[]).filter(Boolean).length}/${petSlotCapacity('laser',level)}</b></span>
+    <span>ESCUDOS <b>${(pet.shields||[]).filter(Boolean).length}/${petSlotCapacity('shield',level)}</b></span>
+    <span>PROTOCOLOS <b>${petSlotCapacity('protocol',level)} slots</b></span></div>
+    <div class="aux-workbench-caption-v1091">A CONF ${conf} também contém equipamentos da nave e dos drones. Troque pelo seletor global acima.</div>`;
+  const bottom=document.createElement('div');bottom.className='aux-workbench-bottom-v1091';
+  const title=document.createElement('header');title.className='aux-workbench-bottom-head-v1091';
+  title.innerHTML=`<div><span>CONFIGURAÇÃO GLOBAL ${conf}</span><h3>${AUX_TACTICAL_TABS_V1091.find(a=>a[0]===section)?.[1]||'AUX'}</h3></div><small>Troca conjunta: NAVE + DRONES + AUX</small>`;
+  bottom.appendChild(title);
+  if(section==='info'){
+    const pane=document.createElement('div');pane.className='aux-workbench-info-v1091';
+    const threshold=pet.level<PET_MAX_LEVEL?petLevelXp(pet.level):pet.xp;
+    pane.innerHTML=`<div class="aux-workbench-stat-v1091"><b>XP</b><strong>${fmt(pet.xp)} / ${fmt(threshold)}</strong></div>
+    <div class="aux-workbench-stat-v1091"><b>LASERS LIBERADOS</b><strong>${pet.laserSlotsUnlocked}/${petSlotCapacity('laser',level)}</strong></div>
+    <div class="aux-workbench-stat-v1091"><b>ESCUDOS LIBERADOS</b><strong>${pet.shieldSlotsUnlocked}/${petSlotCapacity('shield',level)}</strong></div>
+    <div class="aux-workbench-stat-v1091"><b>DANO DO AUX</b><strong>${fmt(Math.round(petDamage()))}</strong></div>
+    <div class="aux-workbench-stat-v1091"><b>SUPORTE ESCUDO</b><strong>${fmt(Math.round(petShieldSupport()))}</strong></div>
+    <div class="aux-workbench-stat-v1091"><b>MODO ATIVO</b><strong>${escHtml(PET_GEARS[pet.activeGear]?.name||'COMPANHIA')}</strong></div>`;
+    bottom.appendChild(pane);
+    const copy=document.createElement('p');copy.className='muted';copy.textContent=`Bônus de nível: DANO +${stats.damage||0}% • ESCUDO +${stats.shield||0}%. As especializações e o modo ativo são separados entre CONF1 e CONF2.`;bottom.appendChild(copy);
+    const designerBtn=document.createElement('button');designerBtn.className='small-btn';designerBtn.type='button';designerBtn.textContent='DESIGNERS E PROGRESSÃO COMPLETA';designerBtn.onclick=()=>openPet();bottom.appendChild(designerBtn);
+  }else if(section==='lasers'||section==='shields'){
+    const kind=section==='lasers'?'laser':'shield',capacity=petSlotCapacity(kind,level),unlocked=kind==='laser'?pet.laserSlotsUnlocked:pet.shieldSlotsUnlocked;
+    const grid=document.createElement('div');grid.className='pet-slot-grid hangar-slot-grid aux-workbench-slot-grid-v1091';
+    for(let i=0;i<capacity;i++)grid.appendChild(i<unlocked?petEquipCard(kind,i):petLockedCard(kind,i));
+    bottom.appendChild(grid);
+    const inv=document.createElement('div');inv.className='aux-workbench-inventory-v1091';inv.innerHTML=`<h4>INVENTÁRIO • ${kind==='laser'?'LASERS':'ESCUDOS'}</h4>`;
+    inv.appendChild(filteredInventoryGrid(kind==='laser'?'lasers':'shields','pet',['lasers','shields']));bottom.appendChild(inv);
+  }else if(section==='protocols'){
+    const cap=petSlotCapacity('protocol',level),ranks=normalizeAuxProtocols(pet.protocols,cap);
+    const note=document.createElement('p');note.className='aux-workbench-caution-v1091';note.textContent=`ESPECIALIZAÇÕES EXISTENTES • CONF ${conf} • ${auxProtocolSlotsUsed(ranks)}/${cap} pontos utilizados. Elas são funcionais e trocam junto com a configuração.`;bottom.appendChild(note);
+    const legacy=document.createElement('div');legacy.className='aux-workbench-specializations-v1091';
+    for(const def of AUX_PROTOCOL_TYPES){
+      const card=document.createElement('div');card.className='aux-workbench-specialization-v1091';card.innerHTML=`<span class="aux-workbench-spec-icon-v1091">${def.icon}</span><div><b>${def.label}</b><small>${def.bonus}</small></div>`;
+      const controls=document.createElement('div');controls.className='aux-workbench-specialization-controls-v1091';
+      for(const delta of [-1,1]){const b=document.createElement('button');b.type='button';b.textContent=delta<0?'−':'+';b.disabled=delta<0?ranks[def.id]<1:!pet.gearsOwned?.[def.id]||ranks[def.id]>=3||auxProtocolSlotsUsed(ranks)>=cap;b.onclick=()=>changePetProtocol(def.id,delta);controls.appendChild(b);}
+      const value=document.createElement('strong');value.textContent=`${ranks[def.id]}/3`;controls.insertBefore(value,controls.lastChild);card.appendChild(controls);legacy.appendChild(card);
+    }
+    bottom.appendChild(legacy);
+    const heading=document.createElement('div');heading.className='aux-workbench-coming-v1091';heading.innerHTML='<b>NOVOS PROTOCOLOS • PREVIEW V109</b><small>5 tipos, 3 níveis e até 12 slots. Itens, loja, craft e bônus entram após a validação econômica do servidor. As imagens abaixo NÃO são equipamentos adquiridos.</small>';bottom.appendChild(heading);
+    const artGrid=document.createElement('div');artGrid.className='aux-workbench-protocol-art-v1091';
+    for(const def of AUX_FUTURE_PROTOCOLS_V1091){const card=document.createElement('div');card.className='aux-workbench-protocol-card-v1091';
+      const art=def.bonuses.map((bonus,i)=>`<div><img src="${auxProtocolArtV1091(def.id,i+1)}" alt="Protocolo ${def.title} nível ${i+1}" loading="lazy"><span>N${i+1} ${bonus}</span></div>`).join('');
+      card.innerHTML=`<b>${def.title}</b><div class="aux-workbench-protocol-levels-v1091">${art}</div><small>FUTURO • ${def.description}</small>`;artGrid.appendChild(card);
+    }bottom.appendChild(artGrid);
+    const slotHeading=document.createElement('p');slotHeading.className='muted';slotHeading.textContent=`Slots de protocolos previstos para o AUX nível ${level}: ${cap}. Bloqueados para compra/equipamento até a V109 econômica.`;bottom.appendChild(slotHeading);
+    const slotGrid=document.createElement('div');slotGrid.className='aux-workbench-future-slots-v1091';
+    for(let i=0;i<cap;i++){const slot=document.createElement('div');slot.textContent=`+  SLOT ${i+1}`;slot.className='aux-workbench-future-slot-v1091';slot.setAttribute('aria-label',`Slot futuro de protocolo ${i+1}`);slotGrid.appendChild(slot);}bottom.appendChild(slotGrid);
+  }else if(section==='modules'){
+    const modes=document.createElement('div');modes.className='aux-workbench-modes-v1091';
+    const off=document.createElement('button');off.type='button';off.className='pet-gear'+(pet.activeGear==='off'?' active':'');off.innerHTML='<b>COMPANHIA</b><small>Sem ação independente.</small>';off.onclick=()=>setPetGear('off');modes.appendChild(off);
+    for(const gear of Object.values(PET_GEARS)){const b=document.createElement('button');b.type='button';b.className='pet-gear'+(pet.activeGear===gear.id?' active':'');const owned=pet.gearsOwned?.[gear.id];
+      b.innerHTML=`<b>${escHtml(gear.name)}</b><small>${escHtml(gear.description)}</small><em>${owned?'DISPONÍVEL':`LOJA • ${fmt(gear.cost)} STL`}</em>`;
+      b.onclick=()=>owned?setPetGear(gear.id):buyPetGear(gear.id);modes.appendChild(b);
+    }bottom.appendChild(modes);
+  }
+  root.append(sidebar,main,bottom);return root;
+}
 function buildPilotBranch(branch,meta,avail){
   loadPilotUiPrefs();
   const skills=Object.values(PILOT_SKILLS).filter(s=>s.branch===branch),invested=skills.reduce((sum,s)=>sum+pilotSkillLevel(s.id),0),started=skills.filter(s=>pilotSkillLevel(s.id)>0).length,collapsed=!!pilotUiPrefs.collapsed[branch];
@@ -8590,6 +8688,7 @@ function v56EquipmentView(){
   }
   root.appendChild(tabs);
   const body=document.createElement('div');body.className='v56-unit-body';
+  if(v56EquipTarget==='aux'){body.classList.add('v109-aux-workbench-body');body.appendChild(renderHangarPet());root.appendChild(body);return root;}
   const ship=SHIPS[progress.activeShipId];
   const isShip=v56EquipTarget==='ship',isDrone=v56EquipTarget==='drones';
   const art=isShip?v56ShipPerspectiveArt(ship.id):isDrone?(droneVisualArtV64(visualDroneV53(progress.drones?.[0]?.type||'iris',droneDesignFor(progress.drones?.[0]?.id)))||SPRITE53(visualDroneV53(progress.drones?.[0]?.type||'iris',droneDesignFor(progress.drones?.[0]?.id)))):auxVisualArtV64('aux9');
@@ -8710,7 +8809,7 @@ function changePetProtocol(id,delta){
   const after=changeAuxProtocolRank(before,id,delta,slots);
   if(before[id]===after[id]){showToast('Limite de espaços ou nível do protocolo atingido');return;}
   progress.pet.protocols=after;
-  saveGame();refreshPetViews();showToast('Protocolos do AUX-9 atualizados');
+  saveGame();rememberEquipmentChangeV109();refreshPetViews();showToast(`Especializações atualizadas na CONF ${progress.combatConfigsV2013?.active||1}`);
 }
 function refreshPetViews(){
   renderPet();updatePetFloat();

@@ -9,7 +9,7 @@ const loadoutV109 = state => ({
   shipLoadout:state?.shipLoadout||null,
   inventory:state?.inventory||{},
   drones:(state?.drones||[]).map(d=>({id:String(d.id),type:d.type,slots:d.slots||[]})),
-  pet:{lasers:state?.pet?.lasers||[],shields:state?.pet?.shields||[],activeGear:state?.pet?.activeGear||'off'},
+  pet:{lasers:state?.pet?.lasers||[],shields:state?.pet?.shields||[],activeGear:state?.pet?.activeGear||'off',protocols:state?.pet?.protocols||{}},
   combatConfigs:state?.combatConfigsV2013?{
     shipId:state.combatConfigsV2013.shipId,
     active:state.combatConfigsV2013.active,
@@ -51,7 +51,7 @@ export function reconcilePendingEquipmentV109(remote,desired,baseline){
   merged.shipLoadout=copyV109(desired.shipLoadout);
   const desiredDrones=new Map((desired.drones||[]).map(d=>[String(d.id),d]));
   merged.drones=(merged.drones||[]).map(d=>({...d,slots:copyV109(desiredDrones.get(String(d.id))?.slots||[])}));
-  if(merged.pet){merged.pet.lasers=copyV109(desired.pet?.lasers||[]);merged.pet.shields=copyV109(desired.pet?.shields||[]);merged.pet.activeGear=desired.pet?.activeGear||'off';}
+  if(merged.pet){merged.pet.lasers=copyV109(desired.pet?.lasers||[]);merged.pet.shields=copyV109(desired.pet?.shields||[]);merged.pet.activeGear=desired.pet?.activeGear||'off';merged.pet.protocols=copyV109(desired.pet?.protocols||{});}
   if(desired.combatConfigsV2013){
     const current=merged.combatConfigsV2013||{};
     merged.combatConfigsV2013=copyV109(desired.combatConfigsV2013);

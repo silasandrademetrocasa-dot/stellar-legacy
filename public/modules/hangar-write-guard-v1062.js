@@ -5,8 +5,14 @@ const build = b => ({
   lasers:list(b?.lasers),generators:list(b?.generators),extras:list(b?.extras)
 });
 const droneSlots = slots => Object.fromEntries(Object.entries(slots||{}).sort(([a],[b])=>a.localeCompare(b)).map(([id,items])=>[id,list(items)]));
-const petBuild = p => ({lasers:list(p?.lasers),shields:list(p?.shields)});
-const battleProfile = p => ({shipLoadout:build(p?.shipLoadout),droneSlots:droneSlots(p?.droneSlots),petLoadout:petBuild(p?.petLoadout)});
+const protocolKeysV1091 = ['guard','ore','box','repair','kami'];
+const protocolRanksV1091 = p => Object.fromEntries(protocolKeysV1091.map(id=>[id,Math.max(0,Math.min(3,Math.trunc(Number(p?.[id])||0)))]));
+const petBuild = (p,fallback=null) => ({
+  lasers:list(p?.lasers),shields:list(p?.shields),
+  // Mode can reset itself automatically (e.g. NOVA BURST); do not require hangar intent for that.
+  protocols:protocolRanksV1091(p?.protocols??fallback?.protocols)
+});
+const battleProfile = (p,pet) => ({shipLoadout:build(p?.shipLoadout),droneSlots:droneSlots(p?.droneSlots),petLoadout:petBuild(p?.petLoadout,pet)});
 export function equipmentLayoutSignatureV1062(state){
   if(!state||typeof state!=='object')return null;
   const c=state.combatConfigsV2013||{};
@@ -17,7 +23,7 @@ export function equipmentLayoutSignatureV1062(state){
     drones:(state.drones||[]).map(d=>({id:String(d.id),type:String(d.type||''),slots:list(d.slots)})).sort((a,b)=>a.id.localeCompare(b.id)),
     petOwned:Boolean(state.pet?.owned),pet:petBuild(state.pet),
     confShip:String(c.shipId||''),active:Number(c.active)||1,
-    configs:[battleProfile(c.profiles?.[1]),battleProfile(c.profiles?.[2])]
+    configs:[battleProfile(c.profiles?.[1],state.pet),battleProfile(c.profiles?.[2],state.pet)]
   });
 }
 export function validateEquipmentWriteV1062(serverState,incoming,mutation){
