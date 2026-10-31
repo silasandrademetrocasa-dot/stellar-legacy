@@ -20,7 +20,7 @@ test('V110.2: WebSocket telemetry only starts by explicit Render opt-in',()=>{
 test('V110.2: NPC reward integrity V1069 and server AUX economy V110 coexist',()=>{
   assert.match(world,/npcDeathSequenceV1069\.run\(/);
   assert.match(index,/grantNpcRewardSafelyV1069\(\{grant,readReceipt\}\)/);
-  assert.match(index,/applyAuxAdvancedActionV110\(state,action,payload\)/);
+  assert.match(index,/applyAuxAdvancedActionV110\(state,action,payload,\{catalog:/);
   assert.match(index,/validateAuxAdvancedSaveV110\(serverSave\?\.state\|\|null,state\)/);
   assert.match(game,/serverConfirmedEquipment:\['aux_protocol_buy','aux_protocol_craft','aux_protocol_equip'\]\.includes\(action\)/);
 });

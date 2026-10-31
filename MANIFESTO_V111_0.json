@@ -1,0 +1,25 @@
+{
+  "release": "V111.0",
+  "type": "patch",
+  "base": "V110.2 cumulative",
+  "sql_project": "stellar-legacy",
+  "sql_status": "already_applied",
+  "destructive_changes": false,
+  "files": [
+    "public/game.js",
+    "public/api.js",
+    "tests/v111-aux-economy-auction.test.mjs",
+    "tests/v1102-protection-regression.test.mjs",
+    "tests/v110-aux-advanced-protocols.test.mjs",
+    "tests/v1101-aux-npc-compatibility.test.mjs",
+    "server/index.js",
+    "sql/STELLAR_V111_PROTOCOLOS_AUX_LEILAO_APLICADO.sql",
+    "docs/V111_AUX_ECONOMIA_LEILAO_ADM.md",
+    "public/modules/aux-advanced-protocols-v110.css",
+    "public/modules/aux-advanced-protocols-v110.js"
+  ],
+  "protected_from_overwrite": [
+    "server/world.js",
+    "server/npc-reward-delivery-v1069.js"
+  ]
+}

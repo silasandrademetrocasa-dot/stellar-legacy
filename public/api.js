@@ -1278,3 +1278,9 @@ export async function claimRaidV435(){return authedServerFetch('/api/frontier/ra
 export async function adminAstralTestKitV440(code,quantity=5){return authedServerFetch('/api/admin/frontier/test-kit',{method:'POST',body:JSON.stringify({code,quantity})});}
 
 export async function loadFrontierAuditV450(){return authedServerFetch('/api/admin/frontier/diagnostics');}
+
+// V111 • Economia AUX: ADM autorizado no Render e leilão liquidado no SQL.
+export async function loadAdminAuxEconomyOnline(){return serverFetch('/api/admin/runtime/aux-economy',{},true);}
+export async function updateAdminAuxEconomyOnline(payload){return serverFetch('/api/admin/runtime/aux-economy',{method:'POST',body:JSON.stringify(payload)},true);}
+
+export async function claimAuxProtocolAuctionV111({hourKey,lotRef}){return authedSupabaseFetch('/rest/v1/rpc/claim_aux_protocol_auction_v111',{method:'POST',body:JSON.stringify({p_hour_key:String(hourKey),p_lot_ref:String(lotRef)})});}

@@ -52,7 +52,8 @@ import {directionalIndex, directionalGridForImage} from './modules/sprite-orient
 import {createHudIntelligence} from './modules/hud-intelligence.js?v=47.7.60';
 import {sentinelAttackerEligible, selectSentinelAttacker} from './modules/sentinel-defense.js?v=47.7.60';
 import {AUX_PROTOCOL_TYPES, AUX_PROTOCOL_IDS, normalizeAuxProtocols, auxProtocolSlotsUsed, changeAuxProtocolRank, auxProtocolStats} from './modules/aux-protocols.js?v=47.7.60';
-import {AUX_ADVANCED_V110,AUX_ADVANCED_TIERS_V110,auxAdvancedEffectsV110,auxAdvancedSlotsV110,auxAdvancedSlotCountV110,normalizeAuxAdvancedEquippedV110,auxAdvancedLootQuantityV110} from './modules/aux-advanced-protocols-v110.js?v=47.7.60';
+import {loadAdminAuxEconomyOnline,updateAdminAuxEconomyOnline,claimAuxProtocolAuctionV111} from './api.js?v=47.7.60';
+import {AUX_ADVANCED_V110,AUX_ADVANCED_TIERS_V110,auxAdvancedEffectsV110,auxAdvancedSlotsV110,auxAdvancedSlotCountV110,normalizeAuxAdvancedEquippedV110,auxAdvancedLootQuantityV110,auxProtocolTierQuoteV111} from './modules/aux-advanced-protocols-v110.js?v=47.7.60';
 import { movementSpeed, nominalMovementSpeed, followShipCamera } from './modules/ship-navigation.js?v=47.7.60';
 import { loadCommandOverviewOnline,claimCompetitiveSeasonOnline,equipEliteTitleOnline,unequipEliteTitleOnline,loadCommandAdminOnline,saveCompetitiveSeasonOnline,saveWorldDirectiveOnline,loadClanOperationsOnline,claimClanOperationOnline,saveAdminClanOperationOnline } from './api.js?v=47.7.60';
 import {renderV21CommandCenter,V21_TABS} from './modules/v21/command-center-view.js?v=47.7.60';
@@ -107,7 +108,7 @@ import {equipmentLayoutSignatureV1062} from './modules/hangar-write-guard-v1062.
 import {createAmmoSelectionTrackerV1061} from './modules/ammo-selection-recovery-v1061.js?v=47.7.60';
 import {laserAmmoShotBudgetV1064,laserAmmoSourcesV1064,ammoReadoutV1064} from './modules/combat-ammo-accounting-v1064.js?v=47.7.60';
 import { shouldPollPvpInboxV106 } from './modules/pvp-inbox-policy-v106.js?v=47.7.60';
-import { signUp, signIn, beginGoogleSignIn, restoreGoogleSignInFromUrl, requestPasswordReset, restorePasswordRecoveryFromUrl, restoreSession, signOutLocal, getSessionRestoreErrorV101, checkGameSession, endGameSession, getUser, getSessionCredentials, loadCloudSave, saveCloudSave, loadEliteOperationsOnline, claimEliteOperationOnline, loadWarCampaignsOnline, claimWarSupplyOnline, claimWarCampaignOnline, loadAdminWarCampaignsOnline, saveAdminWarCampaignOnline, saveAdminWarRulesOnline, loadAdminEliteObjectivesOnline, saveAdminEliteObjectiveOnline, updateCallsign, updatePassword, loadRankings, loadAuctionBids, saveAuctionBidOnline, markAuctionBidStatusOnline, loadAuctionMarket, upsertPlayerPresenceOnline, loadMapPresenceOnline, savePlayerLocationCheckpointOnline, loadPlayerLocationCheckpointOnline, removePlayerPresenceOnline, queuePvpAttackOnline, consumePvpDamageEventsOnline, syncArenaProfileOnline, loadArenaState, loadArenaDailyRewardStatus, claimArenaDailyReward, loadArenaOpponents, loadArenaHistory, arenaAttackOnline, listClansOnline, loadMyClanOnline, createClanOnline, joinClanOnline, getClanRequestsOnline, reviewClanRequestOnline, cancelClanRequestOnline, setClanMemberRoleOnline, leaveClanOnline, transferClanCreditsOnline, claimClanCreditGrantsOnline, recordClanAlienKillOnline, getPremiumShopOnline, testPurchasePremiumOnline, adminPreviewPremiumStageOnline, adminSimulatePremiumStageOnline, getPremiumStageCatalogOnline, loadWarfrontStateOnline, loadSectorOwnershipOnline, hitWorldBossOnline, claimWorldBossRewardOnline, declareClanWarOnline, recordClanWarScoreOnline, loadLiveOpsOnline, adminUpdateLiveEventScheduleOnline, purchaseLiveCatalogOnline, purchaseLiveBulkOnline, economyActionOnline, getChatHistoryOnline, sendChatMessageOnline, redeemGameCouponOnline, getMyDesignersOnline, setDesignLoadoutOnline, claimGateDroneDesignOnline, claimEventDesignerOnline, getAdminStatus, adminSearchAccounts, adminRecentActions, adminBanAccount, adminUnbanAccount, adminResetAccount, adminDeleteAccount, pushTelemetryBatch, adminTelemetryOverview, adminPlayerTelemetry, getBattleGroupOnline, createBattleGroupOnline, inviteBattleGroupOnline, searchBattleGroupPlayersOnline, inviteBattleGroupUserOnline, respondBattleGroupInviteOnline, leaveBattleGroupOnline, kickBattleGroupMemberOnline, setBattleGroupRallyOnline, loadRuntimeConfigOnline, loadNpcRuntimeConfigOnline, loadWorldRuntimeConfigOnline, loadSystemsRuntimeConfigOnline, loadAdminRuntimeMonitorOnline, adminUpdateRuntimeModuleOnline, adminUpdateNpcRuntimeOnline, adminUpdateNpcSpawnRuntimeOnline, adminUpdateWorldMapOnline, adminUpdateWorldResourceOnline, adminUpdateWorldSectorOnline, adminUpdateWorldPortalOnline, adminUpdateWorldResourcePoolOnline, adminUpdateMissionCategoryOnline, adminUpdateEconomyServiceOnline, adminUpdateCraftingRecipeOnline, loadBattlePassRuntimeConfigOnline, adminUpdateBattlePassSeasonOnline, adminUpdateBattlePassTierOnline, loadShopsRuntimeConfigOnline, adminUpdateCommonShopItemOnline, adminUpdatePremiumShopItemOnline, loadBonusConfigOnline, adminUpdateBonusConfigOnline, adminCouponDashboardOnline, adminCreateCouponOnline, adminSetCouponActiveOnline, loadGalaxyGatesOnline, adminUpdateGalaxyGateOnline, adminUpsertCustomMissionOnline, adminDeleteCustomMissionOnline, adminCreateCraftRecipeOnline, adminCreateEconomyServiceOnline, adminCreatePassSeasonOnline, loadAuctionRulesOnline, adminUpdateAuctionRulesOnline, loadBalanceRuntimeOnline, adminUpdateBalanceOnline,loadAdminSecurityIncidents,reviewAdminSecurityIncident } from './api.js?v=47.7.60';
+import { signUp, signIn, beginGoogleSignIn, restoreGoogleSignInFromUrl, requestPasswordReset, restorePasswordRecoveryFromUrl, restoreSession, signOutLocal, getSessionRestoreErrorV101, checkGameSession, endGameSession, getUser, getSessionCredentials, loadCloudSave, saveCloudSave, loadEliteOperationsOnline, claimEliteOperationOnline, loadWarCampaignsOnline, claimWarSupplyOnline, claimWarCampaignOnline, loadAdminWarCampaignsOnline, saveAdminWarCampaignOnline, saveAdminWarRulesOnline, loadAdminEliteObjectivesOnline, saveAdminEliteObjectiveOnline, updateCallsign, updatePassword, loadRankings, loadAuctionBids, saveAuctionBidOnline, placeAuctionBidOnline, markAuctionBidStatusOnline, loadAuctionMarket, upsertPlayerPresenceOnline, loadMapPresenceOnline, savePlayerLocationCheckpointOnline, loadPlayerLocationCheckpointOnline, removePlayerPresenceOnline, queuePvpAttackOnline, consumePvpDamageEventsOnline, syncArenaProfileOnline, loadArenaState, loadArenaDailyRewardStatus, claimArenaDailyReward, loadArenaOpponents, loadArenaHistory, arenaAttackOnline, listClansOnline, loadMyClanOnline, createClanOnline, joinClanOnline, getClanRequestsOnline, reviewClanRequestOnline, cancelClanRequestOnline, setClanMemberRoleOnline, leaveClanOnline, transferClanCreditsOnline, claimClanCreditGrantsOnline, recordClanAlienKillOnline, getPremiumShopOnline, testPurchasePremiumOnline, adminPreviewPremiumStageOnline, adminSimulatePremiumStageOnline, getPremiumStageCatalogOnline, loadWarfrontStateOnline, loadSectorOwnershipOnline, hitWorldBossOnline, claimWorldBossRewardOnline, declareClanWarOnline, recordClanWarScoreOnline, loadLiveOpsOnline, adminUpdateLiveEventScheduleOnline, purchaseLiveCatalogOnline, purchaseLiveBulkOnline, economyActionOnline, getChatHistoryOnline, sendChatMessageOnline, redeemGameCouponOnline, getMyDesignersOnline, setDesignLoadoutOnline, claimGateDroneDesignOnline, claimEventDesignerOnline, getAdminStatus, adminSearchAccounts, adminRecentActions, adminBanAccount, adminUnbanAccount, adminResetAccount, adminDeleteAccount, pushTelemetryBatch, adminTelemetryOverview, adminPlayerTelemetry, getBattleGroupOnline, createBattleGroupOnline, inviteBattleGroupOnline, searchBattleGroupPlayersOnline, inviteBattleGroupUserOnline, respondBattleGroupInviteOnline, leaveBattleGroupOnline, kickBattleGroupMemberOnline, setBattleGroupRallyOnline, loadRuntimeConfigOnline, loadNpcRuntimeConfigOnline, loadWorldRuntimeConfigOnline, loadSystemsRuntimeConfigOnline, loadAdminRuntimeMonitorOnline, adminUpdateRuntimeModuleOnline, adminUpdateNpcRuntimeOnline, adminUpdateNpcSpawnRuntimeOnline, adminUpdateWorldMapOnline, adminUpdateWorldResourceOnline, adminUpdateWorldSectorOnline, adminUpdateWorldPortalOnline, adminUpdateWorldResourcePoolOnline, adminUpdateMissionCategoryOnline, adminUpdateEconomyServiceOnline, adminUpdateCraftingRecipeOnline, loadBattlePassRuntimeConfigOnline, adminUpdateBattlePassSeasonOnline, adminUpdateBattlePassTierOnline, loadShopsRuntimeConfigOnline, adminUpdateCommonShopItemOnline, adminUpdatePremiumShopItemOnline, loadBonusConfigOnline, adminUpdateBonusConfigOnline, adminCouponDashboardOnline, adminCreateCouponOnline, adminSetCouponActiveOnline, loadGalaxyGatesOnline, adminUpdateGalaxyGateOnline, adminUpsertCustomMissionOnline, adminDeleteCustomMissionOnline, adminCreateCraftRecipeOnline, adminCreateEconomyServiceOnline, adminCreatePassSeasonOnline, loadAuctionRulesOnline, adminUpdateAuctionRulesOnline, loadBalanceRuntimeOnline, adminUpdateBalanceOnline,loadAdminSecurityIncidents,reviewAdminSecurityIncident } from './api.js?v=47.7.60';
 import {createOfflineFarmV484} from './modules/stellar-offline-farm-v484.js?v=47.7.60';
 import { SharedUniverseClient } from './world.js?v=47.7.60';
 import {universeConnectionStatusV1066} from './modules/universe-connection-status-v1066.js?v=47.7.60';
@@ -1645,7 +1646,7 @@ async function refreshShopsRuntimeConfig(force=false){
 }
 setInterval(()=>{if(authenticated)refreshShopsRuntimeConfig(false);},45000);
 function commonShopRows(tab){
-  const source=Array.isArray(shopsRuntime.state?.common)&&shopsRuntime.state.common.length?shopsRuntime.state.common:Array.from(liveOpsRuntime.catalog.values());
+  const main=Array.isArray(shopsRuntime.state?.common)&&shopsRuntime.state.common.length?shopsRuntime.state.common:Array.from(liveOpsRuntime.catalog.values());const source=[...main,...Array.from(liveOpsRuntime.catalog.values()).filter(r=>r.kind==='aux_protocol'&&!main.some(x=>x.catalog_key===r.catalog_key))];
   return source.filter(r=>r?.enabled!==false&&r?.shop_visible!==false&&String(r?.shop_tab||'')===String(tab||'')).sort((a,b)=>(Number(a.sort_order)||100)-(Number(b.sort_order)||100)||String(a.catalog_key).localeCompare(String(b.catalog_key)));
 }
 function shopRowQty(row,fallback=1){return Math.max(1,Math.floor(Number(row?.meta?.grant?.qty)||Number(fallback)||1));}
@@ -2000,6 +2001,12 @@ function eliteAuctionCatalog(includeOwned=false){
   Object.values(LASER_AMMO).filter(x=>x.currency==='uridium'&&x.purchasable!==false).forEach(x=>out.push({ref:`ammo:${x.id}`,kind:'ammo',id:x.id,name:`${x.name} • pacote ${fmt(x.pack)}`,uri:x.price,qty:x.pack}));
   Object.values(ROCKETS).filter(x=>x.currency==='uridium').forEach(x=>out.push({ref:`rocket:${x.id}`,kind:'rocket',id:x.id,name:`${x.name} • pacote ${fmt(x.pack)}`,uri:x.price,qty:x.pack}));
   Object.values(PET_GEARS).filter(x=>x.currency==='uridium'&&(includeOwned||!progress?.pet?.gearsOwned?.[x.id])).forEach(x=>out.push({ref:`petGear:${x.id}`,kind:'petGear',id:x.id,name:`AUX-9 • ${x.name}`,uri:x.cost,qty:1,unique:true}));
+  for(const def of AUX_ADVANCED_V110){
+    const row=liveCatalog(`aux_protocol:${def.id}`);
+    if(!row?.meta?.auction_enabled||!auxProtocolTierQuoteV111(def.id,1,row))continue;
+    if(!includeOwned&&(!progress?.pet?.owned||Number(progress.pet.advancedProtocolOwnedV110?.[def.id])>0))continue;
+    out.push({ref:`auxProtocol:${def.id}`,kind:'auxProtocol',id:def.id,name:`AUX-9 • PROTOCOLO ${def.label} I`,uri:Number(row.price),currency:row.currency,qty:1,unique:true});
+  }
   return out;
 }
 // V18.2.12: abertura fixa de 100 milhões de Créditos para NOVA Elite no leilão.
@@ -2010,6 +2017,7 @@ const AUCTION_CATEGORY_DEFAULTS={ammo:2.5,rocket:2,ship:.03,laser:.04,generator:
 const AUCTION_CATEGORY_LABELS={ammo:'MUNIÇÕES ELITE',rocket:'MÍSSEIS ELITE',ship:'NAVES ELITE',laser:'LASERS ELITE',generator:'GERADORES ELITE',drone:'DRONES ELITE',extra:'EXTRAS ELITE',petGear:'MÓDULOS AUX-9'};
 const auctionPriceRules={nova_floor:100000000,common_floor:100000,stl_to_credits:6667,category_multipliers:{...AUCTION_CATEGORY_DEFAULTS},item_multipliers:{},version:0};
 function auctionLotCategory(lot){
+ if(lot?.kind==='auxProtocol')return 'auxProtocol';
  if(lot?.kind!=='item')return lot?.kind==='petGear'?'petGear':String(lot?.kind||'');
  return ITEMS[lot.id]?.type||'extra';
 }
@@ -2017,6 +2025,7 @@ function auctionLotCatalogRef(lot){
  if(!lot)return '';
  if(lot.kind==='item')return `${auctionLotCategory(lot)}:${lot.id}`;
  if(lot.kind==='petGear')return `pet_gear:${lot.id}`;
+ if(lot.kind==='auxProtocol')return `aux_protocol:${lot.id}`;
  return `${lot.kind}:${lot.id}`;
 }
 function auctionLotShopStl(lot){
@@ -2030,6 +2039,17 @@ function auctionCategoryMultiplier(category){
 }
 function auctionOpeningFloor(lot){
  const common=Math.max(100000,Math.round(Number(auctionPriceRules.common_floor)||100000));
+ if(lot?.kind==='auxProtocol'){
+   const row=liveCatalog(`aux_protocol:${lot.id}`);
+   if(!row||!row.meta?.auction_enabled)return Number.MAX_SAFE_INTEGER;
+   const quote=auxProtocolTierQuoteV111(lot.id,1,row);
+   if(!quote)return Number.MAX_SAFE_INTEGER;
+   const factor=Number(row.meta.auction_factor)||1;
+   if(!Number.isFinite(factor)||factor<.1||factor>2)return Number.MAX_SAFE_INTEGER;
+   const value=quote.cost*(quote.currency==='uridium'?Number(auctionPriceRules.stl_to_credits||6667):1)*factor;
+   return Math.max(common,Math.ceil(value/100000)*100000);
+ }
+
  if(lot?.ref==='item:iris')return Math.max(100000000,Math.round(Number(auctionPriceRules.nova_floor)||100000000));
  const ref=String(lot?.ref||''),over=Number(auctionPriceRules.item_multipliers?.[ref]);
  const mult=Number.isFinite(over)&&over>=.01&&over<=15?over:auctionCategoryMultiplier(auctionLotCategory(lot));
@@ -2085,13 +2105,22 @@ async function finalizeOnlineAuctionBid(row){
     const won=winner?.leader_user_id===mine&&Number(winner?.user_bid)===Number(row.user_bid);
     let result='PERDEU',status='lost';
     if(won){
-      if(progress.profile.credits>=Number(row.user_bid)&&grantAuctionLot(lot)){progress.profile.credits-=Number(row.user_bid);result='VENCEU';status='won';}
+      if(lot.kind==='auxProtocol'){
+        const response=await claimAuxProtocolAuctionV111({hourKey:row.hour_key,lotRef:row.lot_ref});
+        if(!response?.ok||!response?.state)throw new Error('Banco não confirmou a entrega do protocolo.');
+        installEconomyState(response.state,{serverConfirmedEquipment:true});
+        result='VENCEU';status='won';
+      }
+      else if(progress.profile.credits>=Number(row.user_bid)&&grantAuctionLot(lot)){progress.profile.credits-=Number(row.user_bid);result='VENCEU';status='won';}
       else{result='CANCELADO';status='cancelled';}
     }
     progress.auction.history.unshift({at:Date.now(),name:lot.name||row.lot_ref,bid:Number(row.user_bid)||0,result});
     progress.auction.history=progress.auction.history.slice(0,12);
-    await markAuctionBidStatusOnline({hourKey:row.hour_key,lotRef:row.lot_ref,status});
-    saveGame();await flushCloudSave(true);
+    if(lot.kind!=='auxProtocol')await markAuctionBidStatusOnline({hourKey:row.hour_key,lotRef:row.lot_ref,status});
+    if(lot.kind!=='auxProtocol'||status==='won')saveGame();
+    if(lot.kind!=='auxProtocol')await flushCloudSave(true);
+    // Em leilão AUX a liquidação já foi gravada atomicamente no Supabase.
+
   }catch(e){console.warn('auction settle online',e);}
 }
 let auctionSyncBusy=false,auctionLastMarketSync=0;
@@ -2127,7 +2156,7 @@ async function syncAuctionBidsOnline(){
       }
     }
     if(staleOwn.length){
-      Promise.allSettled(staleOwn.map(ref=>markAuctionBidStatusOnline({hourKey:current,lotRef:ref,status:'lost'})));
+      Promise.allSettled(staleOwn.filter(ref=>a.lots[ref]?.kind!=='auxProtocol').map(ref=>markAuctionBidStatusOnline({hourKey:current,lotRef:ref,status:'lost'})));
     }
     for(const ref of prevLeading){
       const lot=a.lots[ref];
@@ -2143,6 +2172,11 @@ function ensureAuctionState(){
   if(!a.legacyEscrowMigrated){const legacy=Object.values(a.lots||{}).reduce((sum,l)=>sum+(Number(l.escrow)||0),0);if(legacy>0)progress.profile.credits+=legacy;a.legacyEscrowMigrated=true;}
   const key=auctionHourKey();
   if(a.marketVersion!==3||a.hourKey!==key){a.hourKey=key;a.lots=buildAuctionLots(key);a.marketVersion=3;a.onlineReady=false;saveGame();setTimeout(()=>syncAuctionBidsOnline(),0);}
+  // V111: novos lotes AUX aparecem ao habilitar no ADM sem aguardar a próxima hora.
+  for(const entry of eliteAuctionCatalog().filter(x=>x.kind==='auxProtocol')){
+    if(!a.lots[entry.ref])a.lots[entry.ref]=normalizeAuctionEconomy({...entry,userBid:0,escrow:0,marketBid:0,leaderUserId:null,leaderCallsign:null},key);
+  }
+  for(const [ref,lot] of Object.entries(a.lots))if(lot.kind==='auxProtocol'&&!liveCatalog(`aux_protocol:${lot.id}`)?.meta?.auction_enabled)delete a.lots[ref];
 }
 
 const PLAYER_MAX_LEVEL=44;
@@ -8232,6 +8266,14 @@ function commonShopProductCard(row){
     const d=ROCKETS[id];if(!d)return null;const qty=shopRowQty(row,d.pack);name=shopRowDisplayName(row,d.name);desc=shopRowDescription(row,`Pacote com ${fmt(qty)} mísseis • dano ${fmt(d.damage)}<br>Em estoque: ${fmt(rocketQty(id))}`);type='rocket';onBuy=()=>buyRockets(id);
   }else if(row.kind==='pet'){
     if(progress.pet?.owned)return null;name=shopRowDisplayName(row,'AUX-9 — Unidade Base');desc=shopRowDescription(row,`Companheiro autônomo com progressão até o nível ${PET_MAX_LEVEL}. Armas, escudos e módulos são comprados separadamente.`);type='pet';badge='ELITE';onBuy=()=>buyPetUnit();
+  }else if(row.kind==='aux_protocol'){
+    const def=AUX_ADVANCED_V110.find(x=>x.id===id),owned=Number(progress.pet?.advancedProtocolOwnedV110?.[id])||0;
+    if(!def||!progress.pet?.owned||owned>=1)return null;
+    const quote=auxProtocolTierQuoteV111(id,1,row);if(!quote)return null;
+    name=shopRowDisplayName(row,`AUX • PROTOCOLO ${def.label} I`);
+    desc=shopRowDescription(row,`${def.description} • bônus N1: +${String(def.bonus[1]*100).replace('.',',')}%`);
+    type='petGear';badge=currency==='uridium'?'ELITE':'COMUM';
+    onBuy=()=>mutateAuxProtocolV110('aux_protocol_buy',id);
   }else if(row.kind==='pet_gear'){
     const d=PET_GEARS[id];if(!d||!progress.pet?.owned||progress.pet.gearsOwned?.[id])return null;name=shopRowDisplayName(row,`AUX-9 • ${d.name}`);desc=shopRowDescription(row,d.description);type='petGear';badge='ELITE';onBuy=()=>buyPetGear(id);
   }else return null;
@@ -8687,6 +8729,18 @@ function renderHangarPet(){
     <div class="aux-workbench-stat-v1091"><b>MODO ATIVO</b><strong>${escHtml(PET_GEARS[pet.activeGear]?.name||'COMPANHIA')}</strong></div>`;
     bottom.appendChild(pane);
     const copy=document.createElement('p');copy.className='muted';copy.textContent=`Bônus de nível: DANO +${stats.damage||0}% • ESCUDO +${stats.shield||0}%. As especializações e o modo ativo são separados entre CONF1 e CONF2.`;bottom.appendChild(copy);
+    // V111: as especializações antigas ficam em INFORMAÇÕES; a aba PROTOCOLOS
+    // fica exclusiva dos 15 equipamentos avançados.
+    const cap=petSlotCapacity('protocol',level),ranks=normalizeAuxProtocols(pet.protocols,cap);
+    const specTitle=document.createElement('h4');specTitle.textContent=`ESPECIALIZAÇÕES • CONF ${conf} • ${auxProtocolSlotsUsed(ranks)}/${cap} pontos utilizados`;bottom.appendChild(specTitle);
+    const legacy=document.createElement('div');legacy.className='aux-workbench-specializations-v1091';
+    for(const def of AUX_PROTOCOL_TYPES){
+      const card=document.createElement('div');card.className='aux-workbench-specialization-v1091';
+      card.innerHTML=`<span class="aux-workbench-spec-icon-v1091">${def.icon}</span><div><b>${def.label}</b><small>${def.bonus}</small></div>`;
+      const controls=document.createElement('div');controls.className='aux-workbench-specialization-controls-v1091';
+      for(const delta of [-1,1]){const b=document.createElement('button');b.type='button';b.textContent=delta<0?'−':'+';b.disabled=delta<0?ranks[def.id]<1:!pet.gearsOwned?.[def.id]||ranks[def.id]>=3||auxProtocolSlotsUsed(ranks)>=cap;b.onclick=()=>changePetProtocol(def.id,delta);controls.appendChild(b);}
+      const value=document.createElement('strong');value.textContent=`${ranks[def.id]}/3`;controls.insertBefore(value,controls.lastChild);card.appendChild(controls);legacy.appendChild(card);
+    }bottom.appendChild(legacy);
     const designerBtn=document.createElement('button');designerBtn.className='small-btn';designerBtn.type='button';designerBtn.textContent='VER DESIGNERS DO AUX-9';designerBtn.onclick=()=>{auxWorkbenchSectionV1091='designers';renderHangar();};bottom.appendChild(designerBtn);
   }else if(section==='lasers'||section==='shields'){
     const kind=section==='lasers'?'laser':'shield',capacity=petSlotCapacity(kind,level),unlocked=kind==='laser'?pet.laserSlotsUnlocked:pet.shieldSlotsUnlocked;
@@ -8696,23 +8750,14 @@ function renderHangarPet(){
     const inv=document.createElement('div');inv.className='aux-workbench-inventory-v1091';inv.innerHTML=`<h4>INVENTÁRIO • ${kind==='laser'?'LASERS':'ESCUDOS'}</h4>`;
     inv.appendChild(filteredInventoryGrid(kind==='laser'?'lasers':'shields','pet',['lasers','shields']));bottom.appendChild(inv);
   }else if(section==='protocols'){
-    const cap=petSlotCapacity('protocol',level),ranks=normalizeAuxProtocols(pet.protocols,cap);
-    const note=document.createElement('p');note.className='aux-workbench-caution-v1091';note.textContent=`ESPECIALIZAÇÕES EXISTENTES • CONF ${conf} • ${auxProtocolSlotsUsed(ranks)}/${cap} pontos utilizados. Elas são funcionais e trocam junto com a configuração.`;bottom.appendChild(note);
-    const legacy=document.createElement('div');legacy.className='aux-workbench-specializations-v1091';
-    for(const def of AUX_PROTOCOL_TYPES){
-      const card=document.createElement('div');card.className='aux-workbench-specialization-v1091';card.innerHTML=`<span class="aux-workbench-spec-icon-v1091">${def.icon}</span><div><b>${def.label}</b><small>${def.bonus}</small></div>`;
-      const controls=document.createElement('div');controls.className='aux-workbench-specialization-controls-v1091';
-      for(const delta of [-1,1]){const b=document.createElement('button');b.type='button';b.textContent=delta<0?'−':'+';b.disabled=delta<0?ranks[def.id]<1:!pet.gearsOwned?.[def.id]||ranks[def.id]>=3||auxProtocolSlotsUsed(ranks)>=cap;b.onclick=()=>changePetProtocol(def.id,delta);controls.appendChild(b);}
-      const value=document.createElement('strong');value.textContent=`${ranks[def.id]}/3`;controls.insertBefore(value,controls.lastChild);card.appendChild(controls);legacy.appendChild(card);
-    }
-    bottom.appendChild(legacy);
+    // V111: nesta aba aparecem apenas os protocolos de inventário avançado.
     // V110: catálogo funcional. Os itens permanecem vinculados à conta e cada CONF
     // mantém somente sua seleção; nenhum item é criado ou consumido no navegador.
     const owned=pet.advancedProtocolOwnedV110||{};
     const equipped=normalizeAuxAdvancedEquippedV110(pet.advancedProtocolEquippedV110,owned,level);
     const slots=auxAdvancedSlotsV110(level),used=Object.values(equipped).filter(Boolean).length;
     const heading=document.createElement('div');heading.className='aux-workbench-coming-v1091';
-    heading.innerHTML=`<b>PROTOCOLOS AVANÇADOS • CONF ${conf}</b><small>${used}/${slots} slots • 5 famílias • Nível I Loja, II Craft, III Craft no Universo. As especializações gratuitas acima continuam independentes.</small>`;bottom.appendChild(heading);
+    heading.innerHTML=`<b>PROTOCOLOS AVANÇADOS • CONF ${conf}</b><small>${used}/${slots} slots • 5 famílias • N1 Loja/Leilão, N2 Craft, N3 Craft no Universo. Especializações gratuitas em INFORMAÇÕES.</small>`;bottom.appendChild(heading);
     const selection=document.createElement('div');selection.className='aux-v110-selections';
     for(const def of AUX_ADVANCED_V110){
       const current=Math.max(0,Number(owned[def.id])||0),active=equipped[def.id],next=current+1;
@@ -8724,13 +8769,13 @@ function renderHangarPet(){
         const toggle=document.createElement('button');toggle.className='small-btn';toggle.type='button';toggle.textContent=active?'DESEQUIPAR':'EQUIPAR';toggle.disabled=!canChangeEquipment()||(!active&&used>=slots);toggle.onclick=()=>mutateAuxProtocolV110('aux_protocol_equip',def.id,active?0:current);actions.appendChild(toggle);
       }
       if(next<=3){
-        const tier=AUX_ADVANCED_TIERS_V110[next],button=document.createElement('button');button.className='small-btn gold';button.type='button';
-        button.textContent=`${tier.method==='buy'?'COMPRAR':'FABRICAR'} N${next}`;
-        button.title=`${fmt(tier.cost)} ${tier.currency==='uridium'?'STL':'CR'}${Object.entries(tier.ingredients).length?' • '+Object.entries(tier.ingredients).map(([res,qty])=>qty+' '+res).join(' • '):''}${tier.universe?' • somente no Universo':''}`;
-        button.disabled=!canCraftAuxProtocolV110(!!tier.universe)||level<tier.minLevel||(Number(progress.profile?.[tier.currency])||0)<tier.cost||Object.entries(tier.ingredients).some(([res,qty])=>(Number(progress.cargo?.[res])||0)<qty);
-        button.onclick=()=>mutateAuxProtocolV110(tier.method==='buy'?'aux_protocol_buy':'aux_protocol_craft',def.id);
+        const tier=auxProtocolTierQuoteV111(def.id,next,liveCatalog(`aux_protocol:${def.id}`)),button=document.createElement('button');button.className='small-btn gold';button.type='button';
+        button.textContent=tier?`${tier.method==='buy'?'COMPRAR':'FABRICAR'} N${next}`:'PREÇO INDISPONÍVEL';button.disabled=!tier;
+        button.title=tier?`${fmt(tier.cost)} ${tier.currency==='uridium'?'STL':'CR'}${Object.entries(tier.ingredients).length?' • '+Object.entries(tier.ingredients).map(([res,qty])=>qty+' '+res).join(' • '):''}${tier.universe?' • somente no Universo':''}`:'Catálogo da loja indisponível';
+        button.disabled=!tier||!canCraftAuxProtocolV110(!!tier?.universe)||level<(tier?.minLevel||1)||(Number(progress.profile?.[tier?.currency])||0)<(tier?.cost||0)||Object.entries(tier?.ingredients||{}).some(([res,qty])=>(Number(progress.cargo?.[res])||0)<qty);
+        button.onclick=()=>{if(tier)mutateAuxProtocolV110(tier.method==='buy'?'aux_protocol_buy':'aux_protocol_craft',def.id);};
         actions.appendChild(button);
-        const price=document.createElement('small');price.textContent=`${fmt(tier.cost)} ${tier.currency==='uridium'?'STL':'CR'}${Object.entries(tier.ingredients).length?' + recursos':''} • AUX N${tier.minLevel}${tier.universe?' • Universo':''}`;actions.appendChild(price);
+        const price=document.createElement('small');price.textContent=tier?`${fmt(tier.cost)} ${tier.currency==='uridium'?'STL':'CR'}${Object.entries(tier.ingredients).length?' + recursos':''} • AUX N${tier.minLevel}${tier.universe?' • Universo':''}`:'Atualize o catálogo LIVE OPS';actions.appendChild(price);
       }else{const max=document.createElement('small');max.textContent='NÍVEL MÁXIMO';actions.appendChild(max);}
       item.appendChild(actions);selection.appendChild(item);
     }
@@ -8946,11 +8991,11 @@ let auxAdvancedRequestPendingV110=false;
 async function mutateAuxProtocolV110(action,id,level=0){
   if(auxAdvancedRequestPendingV110)return;
   const ownedBefore=Number(progress?.pet?.advancedProtocolOwnedV110?.[id])||0;
-  const rule=action==='aux_protocol_equip'?null:AUX_ADVANCED_TIERS_V110[ownedBefore+1];
+  const rule=action==='aux_protocol_equip'?null:auxProtocolTierQuoteV111(id,ownedBefore+1,liveCatalog(`aux_protocol:${id}`));
   if(action==='aux_protocol_equip'?!canChangeEquipment():!canCraftAuxProtocolV110(!!rule?.universe)){showToast(rule?.universe?'Fabricação NIII apenas nos mapas do Universo.':'Protocolo só pode ser gerenciado na base.');return;}
   if(['aux_protocol_buy','aux_protocol_craft'].includes(action)){
     const owned=Number(progress?.pet?.advancedProtocolOwnedV110?.[id])||0;
-    const tier=AUX_ADVANCED_TIERS_V110[owned+1];if(!tier)return;
+    const tier=auxProtocolTierQuoteV111(id,owned+1,liveCatalog(`aux_protocol:${id}`));if(!tier){showToast('Preço do protocolo indisponível. Atualize a loja.');return;}
     const resources=Object.entries(tier.ingredients).map(([k,n])=>`${fmt(n)} ${RESOURCES[k]?.name||k}`).join(' • ');
     const ok=await stellarConfirmV4776(`Confirmar ${action==='aux_protocol_buy'?'compra':'fabricação'} do protocolo ${id.toUpperCase()} N${owned+1} por ${fmt(tier.cost)} ${tier.currency==='uridium'?'STL':'CR'}${resources?' + '+resources:''}?`);
     if(!ok)return;
@@ -9505,12 +9550,9 @@ async function placeAuctionBid(ref,amount){
 
     // Grava SOMENTE o lance do próprio jogador.
     // Isso evita o bug do RPC antigo e respeita o RLS do Supabase.
-    const row=await saveAuctionBidOnline({
-      hourKey:progress.auction.hourKey,
-      lotRef:ref,
-      userBid:amount,
-      lot:{...lot,systemFloor,userBid:0,escrow:0,marketBid:0,leaderUserId:null,leaderCallsign:null}
-    });
+    const bidArgs={hourKey:progress.auction.hourKey,lotRef:ref,userBid:amount,
+      lot:{...lot,systemFloor,userBid:0,escrow:0,marketBid:0,leaderUserId:null,leaderCallsign:null}};
+    const row=lot.kind==='auxProtocol'?await placeAuctionBidOnline(bidArgs):await saveAuctionBidOnline(bidArgs);
     if(!row)throw new Error('O banco não confirmou o lance.');
 
     // Confirma quem realmente ficou na liderança (resolve disputa simultânea).
@@ -9553,6 +9595,7 @@ function auctionLotEligible(lot){
   if(lot.kind==='item'&&ITEMS[lot.id]?.type==='drone')return (progress?.drones?.length||0)<8;
   if(lot.kind==='item'&&ITEMS[lot.id]?.type==='extra')return !ownsExtraItem(lot.id);
   if(lot.kind==='petGear')return !progress?.pet?.gearsOwned?.[lot.id];
+  if(lot.kind==='auxProtocol')return !!progress?.pet?.owned&&Number(progress?.pet?.advancedProtocolOwnedV110?.[lot.id]||0)===0;
   return true;
 }
 const AUCTION_SECTIONS=[
@@ -9565,7 +9608,7 @@ const AUCTION_SECTIONS=[
 function auctionSectionId(lot){
   if(lot.kind==='ship')return 'ships';
   if(lot.kind==='ammo'||lot.kind==='rocket')return 'ammo';
-  if(lot.kind==='petGear')return 'pet';
+  if(lot.kind==='petGear'||lot.kind==='auxProtocol')return 'pet';
   if(lot.kind==='item'){
     const type=ITEMS[lot.id]?.type;
     if(type==='extra')return 'extras';
@@ -9625,6 +9668,7 @@ function renderAuction(){
       else if(lot.kind==='item')art=assetForProduct(lot.id,ITEMS[lot.id]?.type,ITEMS[lot.id]?.subtype);
       else if(lot.kind==='ammo'||lot.kind==='rocket')art=GAME_ASSETS.ammo[lot.id];
       else if(lot.kind==='petGear')art={guard:GAME_ASSETS.equipment.autoLaserCpu,box:GAME_ASSETS.equipment.ammoAutoBuyCpu,ore:GAME_ASSETS.equipment.rocketTurboCpu,repair:GAME_ASSETS.equipment.rep2,kami:GAME_ASSETS.equipment.autoRocketCpu}[lot.id];
+      else if(lot.kind==='auxProtocol')art=auxProtocolArtV1091(lot.id,1);
 
       card.innerHTML=`${art?`<img class="auction-art" src="${art}" alt="${lot.name}">`:''}
         <div class="auction-card-top"><span>${type}</span><b>${leader}</b></div>
@@ -11206,7 +11250,7 @@ async function saveAdminPassTier(tierNo,card,button){
   const season=adminPassSelectedSeason();if(adminPassEditor.busy||!season||!card)return;const f=n=>card.querySelector(`[data-pass-tier-field="${n}"]`);let free_reward,premium_reward;try{free_reward=adminPassParseJson(f('free_reward')?.value,'FREE');premium_reward=adminPassParseJson(f('premium_reward')?.value,'PREMIUM');}catch(e){adminPassMessage(e.message,'err');return;}const payload={free_reward,premium_reward,enabled:!!f('enabled')?.checked};adminPassEditor.busy=true;if(button)button.disabled=true;adminPassMessage(`Salvando Tier ${tierNo}...`);try{await adminPassApplyResult(await adminUpdateBattlePassTierOnline(season.season_key,tierNo,payload),`Tier ${tierNo} salvo`);showToast(`Tier ${tierNo} atualizado`);}catch(e){adminPassMessage(e.message||'Falha ao salvar tier.','err');}finally{adminPassEditor.busy=false;if(button)button.disabled=false;}}
 
 // ===================== V18.1.7C • ADMIN SHOPS EDITOR =====================
-const adminShopsEditor={busy:false,snapshot:null,activeView:'common'};
+const adminShopsEditor={busy:false,snapshot:null,auxItems:[],activeView:'common'};
 function adminShopsMessage(text,kind='muted'){if(!ui.adminRuntimeShopsMessage)return;ui.adminRuntimeShopsMessage.textContent=text||'';ui.adminRuntimeShopsMessage.className=`admin-runtime-interface-message ${kind}`.trim();}
 function adminShopsSetView(view='common'){adminShopsEditor.activeView=['common','premium','auction'].includes(view)?view:'common';ui.adminRuntimeShopsTabs?.querySelectorAll('[data-admin-shops-view]').forEach(b=>b.classList.toggle('active',b.dataset.adminShopsView===adminShopsEditor.activeView));renderAdminShopsEditor();if(view==='auction')refreshAuctionRules().then(()=>renderAdminShopsEditor());}
 function localShopDef(row){const id=String(row?.ref_id||'');if(row?.kind==='ship')return SHIPS[id]||null;if(['laser','generator','extra','drone'].includes(String(row?.kind)))return ITEMS[id]||null;if(row?.kind==='ammo')return LASER_AMMO[id]||null;if(row?.kind==='rocket')return ROCKETS[id]||null;if(row?.kind==='pet_gear')return PET_GEARS[id]||null;if(row?.kind==='pet')return {name:'AUX-9 — Unidade Base',description:'Companheiro autônomo AUX-9.'};return null;}
@@ -11215,21 +11259,21 @@ function renderAdminShopsEditor(){
   if(adminShopsEditor.activeView==='auction'){
     if(!ui.adminRuntimeShopsGrid)return;
     const categoryRows=Object.keys(AUCTION_CATEGORY_DEFAULTS).map(key=>`<label>${AUCTION_CATEGORY_LABELS[key]} • x<input data-auction-category="${key}" type="number" min="0.01" max="15" step="0.01" value="${Number(auctionCategoryMultiplier(key))}"></label>`).join('');
-    const catalog=eliteAuctionCatalog(true).filter(x=>x.ref!=='item:iris'),allLots=[...new Map(catalog.map(x=>[x.ref,x])).values()];
+    const catalog=eliteAuctionCatalog(true).filter(x=>x.ref!=='item:iris'&&x.kind!=='auxProtocol'),allLots=[...new Map(catalog.map(x=>[x.ref,x])).values()];
     const previews=allLots.map(lot=>{
       const override=auctionPriceRules.item_multipliers?.[lot.ref];
-      return `<tr data-auction-preview="${escHtml(lot.ref)}"><td><b>${escHtml(lot.name)}</b><small>${escHtml(lot.ref)}</small></td><td>${fmt(auctionLotShopStl(lot))} STL</td><td><input type="number" min="0.01" max="15" step="0.01" placeholder="Padrão" data-auction-item="${escHtml(lot.ref)}" value="${override==null?'':Number(override)}" aria-label="Multiplicador exclusivo ${escHtml(lot.name)}"></td><td data-auction-floor-preview="${escHtml(lot.ref)}">${fmt(auctionOpeningFloor(lot))} CR</td></tr>`;
+      return `<tr data-auction-preview="${escHtml(lot.ref)}"><td><b>${escHtml(lot.name)}</b><small>${escHtml(lot.ref)}</small></td><td>${fmt(lot.kind==='auxProtocol'?(liveCatalog(`aux_protocol:${lot.id}`)?.price||0):auctionLotShopStl(lot))} ${lot.kind==='auxProtocol'&&liveCatalog(`aux_protocol:${lot.id}`)?.currency==='credits'?'CR':'STL'}</td><td><input type="number" min="0.01" max="15" step="0.01" placeholder="Padrão" data-auction-item="${escHtml(lot.ref)}" value="${override==null?'':Number(override)}" aria-label="Multiplicador exclusivo ${escHtml(lot.name)}"></td><td data-auction-floor-preview="${escHtml(lot.ref)}">${fmt(auctionOpeningFloor(lot))} CR</td></tr>`;
     }).join('');
     ui.adminRuntimeShopsGrid.innerHTML=`<article class="admin-content-creator admin-auction-pricing">
       <h3>🏷️ LEILÃO • PRECIFICAÇÃO COMPLETA</h3>
-      <p class="muted">Todos os valores ficam no Supabase. A abertura é calculada a partir do preço STL da loja; o servidor recusa lances abaixo do piso oficial. Editar não cancela lances já ativos.</p>
+      <p class="muted">Todos os valores ficam no Supabase. Lotes tradicionais seguem a conversão STL → CR; protocolos AUX possuem fatores próprios no painel acima, inclusive os de créditos. O servidor recusa lances abaixo do piso oficial.</p>
       <div class="admin-auction-parameters"><label>CONVERSÃO • 1 STL = QUANTOS CR?<input type="number" data-auction-rule="stl_to_credits" min="100" max="100000" step="1" value="${auctionPriceRules.stl_to_credits||6667}"></label><label>NOVA • PISO FIXO (CR)<input type="number" data-auction-rule="nova_floor" min="100000000" max="1000000000" step="100000" value="${auctionPriceRules.nova_floor}"></label><label>PISO MÍNIMO GERAL (CR)<input type="number" data-auction-rule="common_floor" min="100000" max="10000000" step="100000" value="${auctionPriceRules.common_floor}"></label></div>
       <h4>MULTIPLICADORES POR CATEGORIA</h4><div class="admin-auction-parameters">${categoryRows}</div>
       <p class="admin-shop-note">Fórmula: <b>preço STL × conversão × multiplicador</b>, arredondado para cima em 100 mil CR. Ex.: PLS-3 → ${fmt(auctionOpeningFloor({ref:'ammo:mcb50',kind:'ammo',id:'mcb50',uri:3000}))} CR.</p>
       <h4>EXCEÇÕES POR ITEM • OPCIONAL</h4><p class="admin-shop-note">Deixe vazio para usar o multiplicador da categoria. O Nova mantém sempre seu piso fixo.</p>
       <div class="admin-auction-lots"><table><thead><tr><th>ITEM</th><th>VALOR DA LOJA</th><th>MULT. PRÓPRIO</th><th>ABERTURA ATUAL</th></tr></thead><tbody>${previews}</tbody></table></div>
       <div class="adm-content-actions"><button type="button" class="small-btn gold" data-auction-rule-save>SALVAR E PUBLICAR NO SERVIDOR</button><small>REGRA v${auctionPriceRules.version||0} • novo lance validado pelo banco</small></div>
-    </article>`;return;
+    </article>`;ui.adminRuntimeShopsGrid.insertAdjacentHTML('afterbegin',adminAuxPricingPanelV111());return;
   }
 
   if(!ui.adminRuntimeShopsGrid)return;const snap=adminShopsEditor.snapshot||{};
@@ -11239,11 +11283,37 @@ function renderAdminShopsEditor(){
     return;
   }
   const rows=[...(snap.common||[])].sort((a,b)=>String(a.shop_tab||'').localeCompare(String(b.shop_tab||''))||(Number(a.sort_order)||100)-(Number(b.sort_order)||100)||String(a.catalog_key).localeCompare(String(b.catalog_key)));
-  ui.adminRuntimeShopsGrid.innerHTML=rows.map(row=>{const def=localShopDef(row),name=row.display_name||def?.name||row.ref_id,desc=row.description||def?.description||'',qty=adminShopQty(row);return `<article class="admin-shop-card" data-common-shop="${escHtml(row.catalog_key)}"><div class="admin-shop-head"><div><b>${escHtml(name)}</b><small>${escHtml(row.catalog_key)} • ${escHtml(String(row.kind||'').toUpperCase())}</small></div><div class="admin-shop-flags"><label><input data-common-shop-field="enabled" type="checkbox" ${row.enabled!==false?'checked':''}> ATIVO</label><label><input data-common-shop-field="shop_visible" type="checkbox" ${row.shop_visible!==false?'checked':''}> VISÍVEL</label></div></div><div class="admin-shop-fields"><label>NOME<input data-common-shop-field="display_name" maxlength="100" value="${escHtml(row.display_name||'') }" placeholder="${escHtml(def?.name||row.ref_id)}"></label><label>PREÇO<input data-common-shop-field="price" type="number" min="0" step="1" value="${Math.max(0,Number(row.price)||0)}"></label><label>MOEDA<select data-common-shop-field="currency"><option value="credits" ${row.currency==='credits'?'selected':''}>CR</option><option value="uridium" ${row.currency==='uridium'?'selected':''}>STL</option></select></label>${row.kind==='drone'?`<label>MULTIPLICADOR / COMPRA<input data-common-shop-field="drone_price_multiplier" type="number" min="1" max="4" step="0.1" value="${Math.max(1,Math.min(4,Number(row.meta?.drone_price_multiplier)||2))}"></label>`:''}<label>QTD<input data-common-shop-field="quantity" type="number" min="1" max="10000000" value="${qty}"></label><label>NÍVEL<input data-common-shop-field="min_level" type="number" min="1" max="100" value="${Math.max(1,Number(row.min_level)||1)}"></label><label>ORDEM<input data-common-shop-field="sort_order" type="number" min="0" max="9999" value="${Math.max(0,Number(row.sort_order)||0)}"></label><label>ABA<select data-common-shop-field="shop_tab">${Object.entries(categories).map(([k,v])=>`<option value="${k}" ${row.shop_tab===k?'selected':''}>${escHtml(v)}</option>`).join('')}</select></label></div><label class="admin-shop-description">DESCRIÇÃO<textarea data-common-shop-field="description" maxlength="300" placeholder="${escHtml(def?.description||'Usar descrição local')}">${escHtml(row.description||'')}</textarea></label><button class="small-btn gold admin-shop-save" type="button" data-common-shop-save="${escHtml(row.catalog_key)}">SALVAR PRODUTO</button></article>`;}).join('')||'<div class="empty-state">Nenhum produto da Loja Comum cadastrado.</div>';
+  ui.adminRuntimeShopsGrid.innerHTML=rows.map(row=>{const def=localShopDef(row),name=row.display_name||def?.name||row.ref_id,desc=row.description||def?.description||'',qty=adminShopQty(row);return `<article class="admin-shop-card" data-common-shop="${escHtml(row.catalog_key)}"><div class="admin-shop-head"><div><b>${escHtml(name)}</b><small>${escHtml(row.catalog_key)} • ${escHtml(String(row.kind||'').toUpperCase())}</small></div><div class="admin-shop-flags"><label><input data-common-shop-field="enabled" type="checkbox" ${row.enabled!==false?'checked':''}> ATIVO</label><label><input data-common-shop-field="shop_visible" type="checkbox" ${row.shop_visible!==false?'checked':''}> VISÍVEL</label></div></div><div class="admin-shop-fields"><label>NOME<input data-common-shop-field="display_name" maxlength="100" value="${escHtml(row.display_name||'') }" placeholder="${escHtml(def?.name||row.ref_id)}"></label><label>PREÇO<input data-common-shop-field="price" type="number" min="0" step="1" value="${Math.max(0,Number(row.price)||0)}"></label><label>MOEDA<select data-common-shop-field="currency"><option value="credits" ${row.currency==='credits'?'selected':''}>CR</option><option value="uridium" ${row.currency==='uridium'?'selected':''}>STL</option></select></label>${row.kind==='drone'?`<label>MULTIPLICADOR / COMPRA<input data-common-shop-field="drone_price_multiplier" type="number" min="1" max="4" step="0.1" value="${Math.max(1,Math.min(4,Number(row.meta?.drone_price_multiplier)||2))}"></label>`:''}<label>QTD<input data-common-shop-field="quantity" type="number" min="1" max="10000000" value="${qty}"></label><label>NÍVEL<input data-common-shop-field="min_level" type="number" min="1" max="100" value="${Math.max(1,Number(row.min_level)||1)}"></label><label>ORDEM<input data-common-shop-field="sort_order" type="number" min="0" max="9999" value="${Math.max(0,Number(row.sort_order)||0)}"></label><label>ABA<select data-common-shop-field="shop_tab">${Object.entries(categories).map(([k,v])=>`<option value="${k}" ${row.shop_tab===k?'selected':''}>${escHtml(v)}</option>`).join('')}</select></label></div><label class="admin-shop-description">DESCRIÇÃO<textarea data-common-shop-field="description" maxlength="300" placeholder="${escHtml(def?.description||'Usar descrição local')}">${escHtml(row.description||'')}</textarea></label><button class="small-btn gold admin-shop-save" type="button" data-common-shop-save="${escHtml(row.catalog_key)}">SALVAR PRODUTO</button></article>`;
+  }).join('')||'<div class="empty-state">Nenhum produto da Loja Comum cadastrado.</div>';
+  ui.adminRuntimeShopsGrid.insertAdjacentHTML('afterbegin',adminAuxPricingPanelV111());
+}
+function adminAuxPricingPanelV111(){
+  const rows=adminShopsEditor.auxItems||[],p=rows.filter(r=>r.kind==='aux_protocol'),slots=rows.filter(r=>r.kind==='pet_slot').sort((a,b)=>Number(a.ref_id)-Number(b.ref_id));
+  if(!rows.length)return '<p class="muted">Carregando preços AUX no servidor...</p>';
+  const protocol=p.map(r=>{const factor=Number(r.meta?.auction_factor)||(['dano','hp','escudo'].includes(r.ref_id)?.35:.8);
+    return `<article class="admin-shop-card" data-aux-price="${escHtml(r.catalog_key)}"><b>${escHtml(r.ref_id.toUpperCase())} • N1 • ${r.currency==='uridium'?'STL':'CR'}</b><div class="admin-shop-fields"><label>PREÇO N1<input data-aux-field="price" type="number" min="${r.currency==='uridium'?50000:100000000}" step="1" value="${r.price}"></label><label>FATOR LEILÃO<input data-aux-field="auction_factor" type="number" min="${r.currency==='uridium'?0.1:1}" max="2" step="0.05" value="${factor}"></label><label>ATIVO<input data-aux-field="enabled" type="checkbox" ${r.enabled?'checked':''}></label><label>LOJA<input data-aux-field="shop_visible" type="checkbox" ${r.shop_visible?'checked':''}></label><label>LEILÃO<input data-aux-field="auction_enabled" type="checkbox" ${r.meta?.auction_enabled?'checked':''}></label></div><small>PISO ATUAL LEILÃO: ${r.meta?.auction_enabled?fmt(auctionOpeningFloor({kind:'auxProtocol',id:r.ref_id,ref:`auxProtocol:${r.ref_id}`}))+' CR':'DESATIVADO'}</small><button type="button" class="small-btn gold" data-aux-price-save="${escHtml(r.catalog_key)}">SALVAR PROTOCOLO</button></article>`;
+  }).join('');
+  const slotCards=slots.map(r=>`<label>Slot ${r.ref_id} • STL<input data-aux-slot="${r.ref_id}" type="number" min="1000" step="1000" value="${r.price}"><button type="button" class="small-btn" data-aux-slot-save="${r.ref_id}">SALVAR</button></label>`).join('');
+  return `<details class="admin-aux-economy-v111" open><summary>🤖 AUX-9 • PREÇOS / PROTOCOLOS / LEILÃO</summary><p class="muted">N1 Dano, HP e Escudo: mínimo 50.000 STL. Box/Porão: mínimo 100.000.000 CR. Leilão sempre em créditos; preço e concessão validados no servidor.</p>${protocol}<details><summary>SLOTS AUX • ${slots.length} preços editáveis</summary><div class="admin-aux-slot-grid-v111">${slotCards}</div></details></details>`;
+}
+async function saveAdminAuxPriceV111(key){
+  if(adminShopsEditor.busy)return;
+  const node=[...ui.adminRuntimeShopsGrid.querySelectorAll('[data-aux-price]')].find(n=>n.dataset.auxPrice===key);
+  if(!node)return;const field=k=>node.querySelector(`[data-aux-field="${k}"]`);
+  const data={catalog_key:key,price:Number(field('price')?.value),auction_factor:Number(field('auction_factor')?.value),enabled:field('enabled')?.checked,shop_visible:field('shop_visible')?.checked,auction_enabled:field('auction_enabled')?.checked};
+  adminShopsEditor.busy=true;
+  try{await updateAdminAuxEconomyOnline(data);adminShopsMessage(`Protocolo ${key} publicado no Supabase.`,'ok');await refreshLiveOpsState(true);adminShopsEditor.auxItems=(await loadAdminAuxEconomyOnline()).items||[];renderAdminShopsEditor();}
+  catch(e){adminShopsMessage(e.message||'Falha ao salvar protocolo.','err');}finally{adminShopsEditor.busy=false;}
+}
+async function saveAdminAuxSlotV111(slot){
+  if(adminShopsEditor.busy)return;const input=ui.adminRuntimeShopsGrid.querySelector(`[data-aux-slot="${slot}"]`);
+  if(!input)return;adminShopsEditor.busy=true;
+  try{await updateAdminAuxEconomyOnline({catalog_key:`pet_slot:${slot}`,price:Number(input.value)});adminShopsMessage(`Slot ${slot} atualizado no Supabase.`,'ok');await refreshLiveOpsState(true);adminShopsEditor.auxItems=(await loadAdminAuxEconomyOnline()).items||[];renderAdminShopsEditor();}
+  catch(e){adminShopsMessage(e.message||'Falha ao salvar slot.','err');}finally{adminShopsEditor.busy=false;}
 }
 async function loadAdminShopsEditor(force=false){
   if(adminShopsEditor.busy)return;adminShopsEditor.busy=true;if(ui.adminRuntimeShopsReload)ui.adminRuntimeShopsReload.disabled=true;adminShopsMessage('Carregando lojas...');
-  try{const raw=await loadShopsRuntimeConfigOnline(!!force);adminShopsEditor.snapshot=raw;shopsRuntime.state=raw;shopsRuntime.lastAt=Date.now();renderAdminShopsEditor();adminShopsMessage(`Shops runtime v${Number(raw?.version)||0} • ${raw?.common?.length||0} comuns • ${raw?.premium?.length||0} premium.`,'ok');}
+  try{const [raw,aux]=await Promise.all([loadShopsRuntimeConfigOnline(!!force),loadAdminAuxEconomyOnline()]);adminShopsEditor.auxItems=aux.items||[];adminShopsEditor.snapshot=raw;shopsRuntime.state=raw;shopsRuntime.lastAt=Date.now();renderAdminShopsEditor();adminShopsMessage(`Shops runtime v${Number(raw?.version)||0} • ${raw?.common?.length||0} comuns • ${raw?.premium?.length||0} premium.`,'ok');}
   catch(e){adminShopsMessage(e.message||'Falha ao carregar lojas.','err');}
   finally{adminShopsEditor.busy=false;if(ui.adminRuntimeShopsReload)ui.adminRuntimeShopsReload.disabled=false;}
 }
@@ -11807,7 +11877,7 @@ if(ui.adminRuntimeShopsGrid)ui.adminRuntimeShopsGrid.addEventListener('input',e=
  }
  Object.assign(auctionPriceRules,old);
 });
-if(ui.adminRuntimeShopsGrid)ui.adminRuntimeShopsGrid.onclick=e=>{if(e.target.closest('[data-auction-rule-save]')){saveAdminAuctionRules();return;}const common=e.target.closest('[data-common-shop-save]');if(common){saveAdminCommonShop(common.dataset.commonShopSave,common.closest('[data-common-shop]'),common);return;}const premium=e.target.closest('[data-premium-shop-save]');if(premium){saveAdminPremiumShop(premium.dataset.premiumShopSave,premium.closest('[data-premium-shop]'),premium);}};
+if(ui.adminRuntimeShopsGrid)ui.adminRuntimeShopsGrid.onclick=e=>{const aux=e.target.closest('[data-aux-price-save]');if(aux){saveAdminAuxPriceV111(aux.dataset.auxPriceSave);return;}const slot=e.target.closest('[data-aux-slot-save]');if(slot){saveAdminAuxSlotV111(slot.dataset.auxSlotSave);return;}if(e.target.closest('[data-auction-rule-save]')){saveAdminAuctionRules();return;}const common=e.target.closest('[data-common-shop-save]');if(common){saveAdminCommonShop(common.dataset.commonShopSave,common.closest('[data-common-shop]'),common);return;}const premium=e.target.closest('[data-premium-shop-save]');if(premium){saveAdminPremiumShop(premium.dataset.premiumShopSave,premium.closest('[data-premium-shop]'),premium);}};
 if(ui.adminSearchInput)ui.adminSearchInput.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();refreshAdminPanel();}});
 if(ui.adminUserList)ui.adminUserList.onclick=e=>{const btn=e.target.closest('[data-admin-action]'),card=e.target.closest('[data-admin-user]');if(!btn||!card)return;const user=adminRuntime.users.find(u=>String(u.user_id)===String(card.dataset.adminUser));if(user)runAdminAction(btn.dataset.adminAction,user);};
 if(ui.adminHealthToggle)ui.adminHealthToggle.onclick=toggleAdminHealth;

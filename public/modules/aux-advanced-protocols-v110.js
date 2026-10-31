@@ -12,10 +12,20 @@ export const AUX_ADVANCED_V110=Object.freeze([
 ]);
 export const AUX_ADVANCED_IDS_V110=Object.freeze(AUX_ADVANCED_V110.map(x=>x.id));
 export const AUX_ADVANCED_TIERS_V110=Object.freeze({
-  1:{method:'buy',minLevel:1,cost:1800,currency:'uridium',ingredients:{}},
+  1:{method:'buy',minLevel:1,cost:50000,currency:'uridium',ingredients:{}},
   2:{method:'craft',minLevel:8,cost:3500000,currency:'credits',ingredients:{Prometid:65,Duranium:45,Promerium:4}},
   3:{method:'craft',minLevel:15,cost:16000000,currency:'credits',ingredients:{Prometid:160,Duranium:120,Promerium:18,Xenomit:8},universe:true}
 });
+// V111: o preço N1 é POR FAMÍLIA, publicado no LIVE OPS pelo ADM.
+// NUNCA aceitar valor, moeda ou classe enviados no corpo da compra.
+export function auxProtocolTierQuoteV111(id,level,row){
+  if(level!==1)return AUX_ADVANCED_TIERS_V110[level]||null;
+  if(!AUX_ADVANCED_IDS_V110.includes(id)||!row||row.catalog_key!==`aux_protocol:${id}`||row.kind!=='aux_protocol'||row.ref_id!==id||row.enabled===false||row.shop_visible===false)return null;
+  const currency=['dano','hp','escudo'].includes(id)?'uridium':'credits';
+  const price=Number(row.price),floor=currency==='uridium'?50000:100000000;
+  if(row.currency!==currency||!Number.isSafeInteger(price)||price<floor||price>1000000000000)return null;
+  return {method:'buy',minLevel:1,cost:price,currency,ingredients:{}};
+}
 export function auxAdvancedSlotsV110(level){
   const lv=Math.max(1,Math.min(20,Math.trunc(Number(level)||1)));
   return Math.min(5,1+Math.floor((lv-1)/4)); // 1/5/9/13/17: 1/2/3/4/5 slots
@@ -53,7 +63,7 @@ export function auxAdvancedSlotCountV110(pet){
 }
 const fail=(message,status=409)=>{const e=new Error(message);e.status=status;throw e;};
 const mapAllowsUniverse=map=>['u1','u2','u3','u-1','u-2','u-3'].includes(String(map||'').toLowerCase());
-export function applyAuxAdvancedActionV110(state,action,payload={}){
+export function applyAuxAdvancedActionV110(state,action,payload={},options={}){
   const pet=state?.pet;
   if(!pet?.owned)fail('Compre o AUX-9 antes de usar protocolos.');
   const id=String(payload.id||''),def=AUX_ADVANCED_V110.find(x=>x.id===id);
@@ -77,7 +87,8 @@ export function applyAuxAdvancedActionV110(state,action,payload={}){
   }
   if(!['aux_protocol_buy','aux_protocol_craft'].includes(action))fail('Operação inválida.',400);
   if(current>=3)fail('Protocolo já alcançou o nível máximo.');
-  const target=current+1,rule=AUX_ADVANCED_TIERS_V110[target];
+  const target=current+1,rule=target===1?auxProtocolTierQuoteV111(id,1,options.catalog):AUX_ADVANCED_TIERS_V110[target];
+  if(!rule)fail('Preço do protocolo não publicado ou classe/moeda inválida no LIVE OPS.');
   if(action==='aux_protocol_buy'&&rule.method!=='buy'||action==='aux_protocol_craft'&&rule.method!=='craft')fail('Método de aquisição não corresponde ao nível.',400);
   if((Number(pet.level)||1)<rule.minLevel)fail(`AUX-9 precisa estar no nível ${rule.minLevel}.`);
   if(rule.universe&&!mapAllowsUniverse(state.mapId))fail('Nível III exige fabricação no Universo U-1/U-2/U-3.');

@@ -1044,6 +1044,46 @@ app.post('/api/admin/runtime/shops/premium/:productId', requireUser, asyncRoute(
 
 
 // V19.0.8 • Leilão: valores fixados pelo banco e editáveis exclusivamente por ADM.
+// V111 • preços de protocolos e slots AUX: somente ADM; leitura pública usa LIVE OPS cache.
+app.get('/api/admin/runtime/aux-economy',requireUser,asyncRoute(async(req,res)=>{
+  const {data:isAdmin,error:adminError}=await req.sb.rpc('is_game_admin_v1763',{p_uid:req.user.id});
+  if(adminError||isAdmin!==true)return res.status(403).json({error:'Somente ADM.'});
+  const {data,error}=await (await requireEliteAdmin()).from('live_shop_prices_v16')
+    .select('catalog_key,kind,ref_id,price,currency,enabled,shop_visible,meta')
+    .in('kind',['pet_slot','aux_protocol']).order('catalog_key');
+  if(error)throw new Error(error.message);
+  res.set('Cache-Control','no-store');res.json({items:data||[]});
+}));
+app.post('/api/admin/runtime/aux-economy',requireUser,asyncRoute(async(req,res)=>{
+  const {data:isAdmin,error:adminError}=await req.sb.rpc('is_game_admin_v1763',{p_uid:req.user.id});
+  if(adminError||isAdmin!==true)return res.status(403).json({error:'Somente ADM.'});
+  const body=req.body||{},key=String(body.catalog_key||'');
+  const validProtocol=/^aux_protocol:(dano|hp|escudo|loot|porao)$/.test(key);
+  const validSlot=/^pet_slot:(?:[2-9]|1[0-9]|2[0-2])$/.test(key);
+  if(!validProtocol&&!validSlot)return res.status(400).json({error:'Preço de AUX inválido.'});
+  const price=Number(body.price);
+  if(!Number.isSafeInteger(price)||price>1000000000000)return res.status(400).json({error:'Preço inválido.'});
+  const id=key.split(':')[1],elite=['dano','hp','escudo'].includes(id);
+  const floor=validSlot?1000:(elite?50000:100000000);
+  if(price<floor)return res.status(400).json({error:`Preço mínimo: ${floor}.`});
+  const sb=await requireEliteAdmin();
+  const {data:row,error:readError}=await sb.from('live_shop_prices_v16').select('catalog_key,kind,ref_id,currency,meta').eq('catalog_key',key).maybeSingle();
+  if(readError)throw new Error(readError.message);
+  if(!row||row.kind!==(validSlot?'pet_slot':'aux_protocol')||row.ref_id!==id)return res.status(404).json({error:'Catálogo AUX ausente.'});
+  const expectedCurrency=validSlot||elite?'uridium':'credits';
+  if(row.currency!==expectedCurrency)return res.status(409).json({error:'Moeda de catálogo inválida. Não foi alterada.'});
+  const updates={price,updated_at:new Date().toISOString()};
+  if(validProtocol){
+    const factor=Number(body.auction_factor);
+    if(!Number.isFinite(factor)||factor<(elite?0.1:1)||factor>2)return res.status(400).json({error:elite?'Fator do leilão deve ser 0,1 a 2.':'BOX e PORÃO exigem fator de leilão 1 a 2 (piso de 100 milhões CR).'});
+    updates.enabled=body.enabled!==false;updates.shop_visible=body.shop_visible!==false;
+    updates.meta={...(row.meta||{}),auction_enabled:body.auction_enabled===true,auction_factor:Math.round(factor*100)/100};
+  }
+  const {error}=await sb.from('live_shop_prices_v16').update(updates).eq('catalog_key',key);
+  if(error)throw new Error(error.message);
+  await loadLiveOpsSnapshot(true);
+  res.set('Cache-Control','no-store');res.json({ok:true,catalog_key:key,price});
+}));
 app.get('/api/runtime/auction-rules',requireUser,asyncRoute(async(req,res)=>{
  const {data,error}=await req.sb.rpc('get_auction_rules_v1908');
  if(error)return res.status(503).json({error:'Regras do leilão indisponíveis; execute SQL V19.0.8.'});
@@ -1325,6 +1365,7 @@ app.post('/api/live/purchase', requireUser, asyncRoute(async (req,res)=>{
     const snapshot=await loadLiveOpsSnapshot(true);
     const row=liveCatalogRow(snapshot,catalogKey);
     if(!row||row.shop_visible===false)throw Object.assign(new Error('Produto indisponível na Loja.'),{status:404});
+    if(row.kind==='aux_protocol')throw Object.assign(new Error('Protocolos AUX são comprados exclusivamente pela economia de protocolos validada pelo servidor.'),{status:409});
     const {data:saveRow,error:saveError}=await req.sb.from('game_saves').select('state').eq('user_id',req.user.id).maybeSingle();
     if(saveError)throw new Error(saveError.message);
     if(!saveRow?.state)throw Object.assign(new Error('Save online ainda não foi criado.'),{status:409});
@@ -1491,7 +1532,7 @@ app.post('/api/economy/action', requireUser, OFFLINE_FARM_GUARD_V484, asyncRoute
     return res.status(400).json({error:'Parâmetros econômicos não autorizados.',code:tamper.code});}
   if(!action)return res.status(400).json({error:'Ação econômica ausente.'});
   const result=await withPurchaseLock(req.user.id,()=>withEconomySaveRetryV102(async()=>{
-    const catalogActions=new Set(['auto_buy','unlock_pet_slot','buy_quantum_cores','sell_cargo','sell_inventory','sell_drone','gate_spin']);
+    const catalogActions=new Set(['auto_buy','unlock_pet_slot','buy_quantum_cores','sell_cargo','sell_inventory','sell_drone','gate_spin','aux_protocol_buy']);
     const premiumActions=new Set(['auto_buy','gate_spin']);
     const systemsActions=new Set(['base_service','craft_recipe']);
     const [snapshot,state,premiumResult,systemsSnapshot]=await Promise.all([
@@ -1533,7 +1574,7 @@ app.post('/api/economy/action', requireUser, OFFLINE_FARM_GUARD_V484, asyncRoute
       const serviceId=String(payload.service_id||'').slice(0,40),svc=activateBaseServiceServer(state,serviceId,systemsSnapshot);info={action,service_id:serviceId,cost:svc.cost,currency:'credits',expires_at:svc.expires_at,duration_ms:svc.duration_ms};
     }
     else if(['aux_protocol_buy','aux_protocol_craft','aux_protocol_equip'].includes(action)){
-      info=applyAuxAdvancedActionV110(state,action,payload);
+      info=applyAuxAdvancedActionV110(state,action,payload,{catalog:action==='aux_protocol_buy'?liveCatalogRow(snapshot,`aux_protocol:${String(payload.id||'')}`):null});
     }
     else if(action==='craft_recipe'){
       const recipeId=String(payload.recipe_id||'').slice(0,64),recipe=applyCraftRecipeServer(state,recipeId,systemsSnapshot);info={action,recipe_id:recipeId,cost:recipe.cost,currency:recipe.currency,ingredients:recipe.ingredients,output:recipe.output_label};

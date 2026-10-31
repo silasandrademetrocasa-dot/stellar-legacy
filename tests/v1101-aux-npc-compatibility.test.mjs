@@ -7,7 +7,7 @@ const game=readFileSync(new URL('../public/game.js',import.meta.url),'utf8');
 test('V110.1: servidor mantém a proteção de recompensa V106.9 e a economia AUX V110 juntas',()=>{
   assert.match(index,/import \{grantNpcRewardSafelyV1069\} from '\.\/npc-reward-delivery-v1069\.js';/);
   assert.match(index,/return grantNpcRewardSafelyV1069\(\{grant,readReceipt\}\);/);
-  assert.match(index,/applyAuxAdvancedActionV110\(state,action,payload\)/);
+  assert.match(index,/applyAuxAdvancedActionV110\(state,action,payload,\{catalog:/);
   assert.match(index,/validateAuxAdvancedSaveV110/);
   assert.match(index,/aux_protocol_buy/);
   assert.match(game,/auxAdvanced/);

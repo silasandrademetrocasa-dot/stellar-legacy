@@ -12,8 +12,8 @@ import {captureCombatBuildV2013,exchangeCombatBuildV2013} from '../public/combat
 import {validateEquipmentWriteV1062,equipmentLayoutSignatureV1062} from '../public/modules/hangar-write-guard-v1062.js';
 const root=resolve(fileURLToPath(new URL('..',import.meta.url)));
 const clone=x=>structuredClone(x);
-const old=()=>({mapId:'x1',profile:{credits:100000000,uridium:20000,faction:'terra'},territoryFaction:'terra',cargo:{Prometid:500,Duranium:400,Promerium:40,Xenomit:40},pet:{owned:true,level:20,lasers:['lf4'],shields:['sg3'],protocols:{guard:2},gearsOwned:{guard:true},advancedProtocolOwnedV110:{},advancedProtocolEquippedV110:{}},combatConfigsV2013:{active:1,profiles:{1:{petLoadout:{lasers:['lf4'],shields:['sg3'],protocols:{guard:2}}},2:{petLoadout:{lasers:[],shields:[],protocols:{box:1}}}}}});
-const buy=(st,id)=>applyAuxAdvancedActionV110(st,'aux_protocol_buy',{id});
+const old=()=>({mapId:'x1',profile:{credits:500000000,uridium:500000,faction:'terra'},territoryFaction:'terra',cargo:{Prometid:500,Duranium:400,Promerium:40,Xenomit:40},pet:{owned:true,level:20,lasers:['lf4'],shields:['sg3'],protocols:{guard:2},gearsOwned:{guard:true},advancedProtocolOwnedV110:{},advancedProtocolEquippedV110:{}},combatConfigsV2013:{active:1,profiles:{1:{petLoadout:{lasers:['lf4'],shields:['sg3'],protocols:{guard:2}}},2:{petLoadout:{lasers:[],shields:[],protocols:{box:1}}}}}});
+const buy=(st,id)=>applyAuxAdvancedActionV110(st,'aux_protocol_buy',{id},{catalog:{catalog_key:`aux_protocol:${id}`,kind:'aux_protocol',ref_id:id,enabled:true,shop_visible:true,currency:['dano','hp','escudo'].includes(id)?'uridium':'credits',price:['dano','hp','escudo'].includes(id)?50000:100000000}});
 const craft=(st,id)=>applyAuxAdvancedActionV110(st,'aux_protocol_craft',{id});
 const equip=(st,id,level)=>applyAuxAdvancedActionV110(st,'aux_protocol_equip',{id,level});
 test('15 original protocol assets and declared percentages map exactly to five families/tier',()=>{
@@ -92,7 +92,7 @@ test('new AUX slots require equipment intent on client saves; economy does not e
  assert.equal(validateEquipmentWriteV1062(a,b,null).code,'SAVE_EQUIPMENT_INTENT_REQUIRED');
  const server=readFileSync(resolve(root,'server/index.js'),'utf8');
  assert.match(server,/validateAuxAdvancedSaveV110\(serverSave\?\.state\|\|null,state\)/);
- assert.match(server,/applyAuxAdvancedActionV110\(state,action,payload\)/);
+ assert.match(server,/applyAuxAdvancedActionV110\(state,action,payload,\{catalog:/);
  assert.match(server,/withPurchaseLock\(req\.user\.id,\(\)=>withEconomySaveRetryV102/);
 });
 test('UI and styles are available, owned does not equal equipped, and legacy specialization stays',()=>{
