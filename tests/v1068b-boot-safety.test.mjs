@@ -27,7 +27,8 @@ test('Boot: optional admin read does not block the world',()=>{
 });
 test('Boot: loading does not vanish silently after nine seconds',()=>{
  assert.doesNotMatch(html,/setTimeout\(\(\)=>\{if\(!ended\)window\.stellarSplashFinish\(\)\},9000\)/);
- assert.match(html,/CONECTANDO\.\.\. SE DEMORAR/);
+ assert.match(html,/MOTOR CARREGADO · VERIFICANDO SESSÃO/);
+ assert.match(html,/MOTOR NÃO INICIOU/);
  assert.match(html,/\.stellarSplashFinish\(\);const info=document\.getElementById\('authMessage'\)/);
 });
 test('Boot: session replacement aborts pending async bootstrap',()=>{

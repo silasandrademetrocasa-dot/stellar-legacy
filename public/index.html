@@ -30,7 +30,7 @@
   <div class="stellar-boot-bottom">
     <div class="stellar-boot-title">UNIVERSO ONLINE</div>
     <div class="stellar-boot-loader"><i></i></div>
-    <div class="stellar-boot-status">PREPARANDO SUA JORNADA...</div>
+    <div class="stellar-boot-status">TESTE V106.8D · INICIALIZAÇÃO</div>
   </div>
 </div>
 <script>
@@ -38,9 +38,19 @@
   const splash=document.getElementById('stellarBootSplash');
   const began=performance.now();let ended=false;
   window.stellarSplashFinish=function(){if(ended)return;ended=true;const delay=Math.max(0,1100-(performance.now()-began));setTimeout(()=>{splash.classList.add('dismissed');setTimeout(()=>splash.remove(),650)},delay)};
+  // V106.8D: diagnostic must run without game.js and independently of its imports.
+  window.STELLAR_BOOT_DIAG_V1068D={error:''};
+  window.addEventListener('error',ev=>{
+    const isScript=ev.target&&ev.target!==window&&ev.target.tagName==='SCRIPT';
+    const message=isScript?'SCRIPT_LOAD_FAILED':String(ev.error?.name||ev.message||'JS_LOAD_ERROR').slice(0,80);
+    if(!window.STELLAR_BOOT_DIAG_V1068D.error)window.STELLAR_BOOT_DIAG_V1068D.error=message;
+  },true);
+  window.addEventListener('unhandledrejection',ev=>{
+    if(!window.STELLAR_BOOT_DIAG_V1068D.error)window.STELLAR_BOOT_DIAG_V1068D.error=String(ev.reason?.name||'UNHANDLED_REJECTION').slice(0,80);
+  });
   // V106.8B: loading never silently disappears while authentication is still pending.
-  setTimeout(()=>{if(!ended){const status=splash.querySelector('.stellar-boot-status');if(status)status.textContent='CONECTANDO... SE DEMORAR, VERIFIQUE SUA CONEXÃO';}},9000);
-  setTimeout(()=>{if(!ended){window.stellarSplashFinish();const info=document.getElementById('authMessage');if(info&&!info.textContent.trim())info.textContent='O carregamento está demorando. Você pode tentar entrar novamente; nenhum save foi apagado.';}},20000);
+  setTimeout(()=>{if(!ended){const status=splash.querySelector('.stellar-boot-status');if(status)status.textContent=window.STELLAR_BOOT_PROBE_V1068D?'MOTOR CARREGADO · VERIFICANDO SESSÃO':'MOTOR NÃO INICIOU · '+(window.STELLAR_BOOT_DIAG_V1068D?.error||'VERIFICAR JS');}},9000);
+  setTimeout(()=>{if(!ended){window.stellarSplashFinish();const info=document.getElementById('authMessage');if(info&&!info.textContent.trim())info.textContent=window.STELLAR_BOOT_PROBE_V1068D?'O motor carregou, mas a sessão ainda não terminou. Nenhum save foi apagado.':'V106.8D: o motor JavaScript não iniciou ('+(window.STELLAR_BOOT_DIAG_V1068D?.error||'sem erro informado')+'). Nenhum save foi apagado.';}},20000);
 })();
 </script>
 <div id="app">
@@ -347,7 +357,7 @@
       <div class="eyebrow">STELLAR NETWORK</div>
       <h1>Stellar Legacy</h1>
       <p>Três facções. Uma guerra orbital.</p>
-      <small id="stellarIsolationMarkerV1068C" style="display:inline-block;margin-top:7px;color:#a6c6e0;font-size:11px">TESTE V106.8C · UNIVERSO ESTELAR DESATIVADO</small>
+      <small id="stellarIsolationMarkerV1068C" style="display:inline-block;margin-top:7px;color:#a6c6e0;font-size:11px">TESTE V106.8D · UNIVERSO E MISSÕES EM ISOLAMENTO</small>
       <div class="login-factions">
         <div><img alt="Terra" src="/assets/v19/branding/earth.webp"/><span>Terra</span></div>
         <div><img alt="Marte" src="/assets/v19/branding/mars.webp"/><span>Marte</span></div>
@@ -1220,7 +1230,7 @@
 </div>
 <div class="perf-diag-overlay hidden" id="perfDiagOverlay" aria-live="off" aria-label="Contador de FPS local"><b id="perfDiagHudFps">FPS —</b><small id="perfDiagHudStutter">P95 —</small></div>
 <script type="module" src="/modules/android-daily-alerts-v108.js?v=108.0.0"></script>
-<script src="/game.js?v=47.7.60-v1068-mission-ack-boot-safe" type="module"></script>
+<script src="/game.js?v=47.7.60-v1068d-mission-isolation" type="module"></script>
 <script src="/modules/stellar-admin-v57.js?v=47.7.60" type="module"></script>
 <script src="/modules/stellar-admin-c-v100.js?v=47.7.60" type="module"></script>
 <script type="module" src="/modules/astral-rewards-v381.js?v=47.7.60"></script>
