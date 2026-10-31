@@ -1,0 +1,11 @@
+{
+  "version": "V111.1",
+  "name": "Resgate Farm Offline sem conflito falso",
+  "type": "incremental",
+  "files": [
+    "server/offline-farm-v484.js",
+    "public/modules/stellar-offline-farm-v484.js",
+    "tests/v1111-farm-recovery.test.mjs",
+    "sql/STELLAR_V111_1_FARM_RESCUE_CORRECAO.sql"
+  ]
+}

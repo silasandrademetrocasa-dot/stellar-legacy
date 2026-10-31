@@ -147,7 +147,7 @@ export function installOfflineFarmV484(app,{requireUser,asyncRoute,requireEliteA
     noCache(res);
     try{
       const sb=await requireEliteAdmin();
-      let fn='stellar_offline_farm_'+method+(method==='start'||method==='claim'?'_v49':'_v484');
+      let fn=method==='start'?'stellar_offline_farm_start_v1111':method==='claim'?'stellar_offline_farm_claim_v1111':'stellar_offline_farm_'+method+'_v484';
       if(method==='start'){
         const grant=await farmGrantV49(sb,req.user.id);
         if(!grant.allowed)throw Error('FARM_ACCESS_REQUIRED');
@@ -201,10 +201,15 @@ export function installOfflineFarmV484(app,{requireUser,asyncRoute,requireEliteA
       // to mark this farm irreversibly as conflict with zero rewards.
       if(method==='claim'){
         const preflight=await farmPreclaimV103(sb,req.user.id);
-        if(preflight.status==='running'&&!preflight.safe)
-          return res.status(409).json({ok:false,code:'FARM_REVIEW_REQUIRED',
-            error:'Resgate não executado: atividade concorrente detectada. Sessão preservada para análise do ADM.',
-            preflight});
+        if(preflight.status==='running'&&!preflight.safe){
+          const onlyTimestampChanges=preflight.issues.length>0 &&
+            preflight.issues.every(i=>i==='save_changed'||i==='profile_changed');
+          // V111.1: não é o browser que decide ignorar o conflito.
+          // Só a RPC transacional pode validar a economia e liberar a sessão.
+          if(!onlyTimestampChanges)
+            return res.status(409).json({ok:false,code:'FARM_REVIEW_REQUIRED',
+              error:'Resgate preservado: atividade online ou outro conflito exige auditoria.',preflight});
+        }
       }
       const {data,error}=await sb.rpc(fn,{p_user:req.user.id,...args});
       if(error)throw error;

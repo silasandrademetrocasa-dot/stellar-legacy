@@ -126,10 +126,15 @@ export function createOfflineFarmV484({credentials,saveBeforeStart,onPauseWorld,
  $('v484-settle').onclick=()=>operation(async()=>{
     const check=await request('v103/preflight');
     if(check.status==='running'&&!check.safe){
-      $('v91-farm-diagnosis').textContent='⚠️ RESGATE EM REVISÃO • sessão preservada. Problemas: '+(check.issues||[]).join(', ')+'. Não cancele o Farm. Contate o ADM para auditar.';
-      throw Error('Resgate não realizado: detectamos conflito. O histórico da sessão foi preservado.');
+      const issues=check.issues||[];
+      const timestampsOnly=issues.length>0&&issues.every(i=>i==='save_changed'||i==='profile_changed');
+      if(!timestampsOnly){
+        $('v91-farm-diagnosis').textContent='⚠️ RESGATE EM REVISÃO • sessão preservada. Problemas: '+issues.join(', ')+'. Não cancele o Farm. Contate o ADM para auditar.';
+        throw Error('Resgate preservado: atividade econômica online detectada. Nenhuma recompensa foi processada.');
+      }
+      $('v91-farm-diagnosis').textContent='🔐 Validando recuperação protegida no servidor. Se a economia estiver intacta, o SQL libera o resgate uma única vez.';
     }
-    const x=await request('settle',{});render(x);if(['settled','conflict'].includes(x.status))await onFinish?.();
+    const x=await request('settle',{});render(x);if(x.recovered)$('v91-farm-diagnosis').textContent='✅ RESGATE RECUPERADO COM SEGURANÇA • ganhos confirmados pelo banco, sem duplicidade.';if(['settled','conflict'].includes(x.status))await onFinish?.();
   });
   $('v103-farm-check').onclick=()=>operation(async()=>{
     const check=await request('v103/preflight');
