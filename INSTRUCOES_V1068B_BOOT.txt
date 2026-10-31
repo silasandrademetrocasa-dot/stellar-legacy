@@ -1,0 +1,14 @@
+STELLAR LEGACY V106.8B — HOTFIX DE INICIALIZACAO E LIMPEZA
+
+APLICACAO: sobre a V106.8 ja instalada; nao exige SQL nem mudanca de saldo.
+1. Envie somente este ZIP para a raiz do repositorio.
+2. Rode o workflow Instalador Universal. Ele copia os arquivos e arquiva 22 manifests/instrucoes antigos.
+3. Aguarde Render concluir o deploy e abra a versao Web, primeiro.
+4. Teste o botao ENTRAR, carregamento de mapa, saldo, duas CONFs, e menu FARM OFFLINE.
+5. Caso o status de Farm esteja indisponivel, mundo fica bloqueado por seguranca. Abra FARM OFFLINE > ATUALIZAR.
+6. Para o APK, gere novo APK com os assets/code atualizados e teste separadamente.
+7. NAO publique a V106.9 ate confirmar a entrada e o save.
+
+SEGURANCA: nao apaga inventario, artes, mapas, contas, SQL ou saves.
+VALIDACAO ESTATICA: 285/285 testes; 157 imports/scripts sem caminho faltante.
+VALIDACAO DE LOGIN REAL: ainda pendente, pois nao ha credenciais de teste disponiveis.

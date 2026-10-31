@@ -11644,8 +11644,11 @@ document.addEventListener('keydown',e=>{
 
 
 function forceLogoutBecauseSessionMoved(message='Sua conta foi acessada em outro dispositivo.',userId=null,reason='session'){
+  // Invalidate any async bootstrap still awaiting farm/save data.
+  ++gameBootstrapRuntime.generation;gameBootstrapRuntime.loading=false;gameBootstrapRuntime.ready=false;
   sharedUniverse.close();sharedUniverseRuntime.ready=false;sharedUniverseRuntime.event=null;sharedUniverseRuntime.globalEvent=null;
   const staleUserId=userId||getUser()?.id||null;
+  adminRuntime.status=null;adminRuntime.enabled=false;ui.adminBtn?.classList.add('hidden');
   authenticated=false;
   cloudDirty=false;
   AMMO_SELECTION_V1061.reset();ammoSelectionOwnerV1061=null;
@@ -11710,7 +11713,7 @@ ui.loginForm.onsubmit=async e=>{
     await signIn({email:ui.loginEmail.value,password:ui.loginPassword.value});
     ui.loginPassword.value='';
     await afterAuth();
-  }catch(err){ui.loginPassword.value='';ui.authMessage.textContent=err.message;}
+  }catch(err){ui.loginPassword.value='';console.error('[bootstrap] login/entrada falhou',err);ui.loginModal.classList.remove('hidden');ui.authMessage.textContent='Não foi possível iniciar o jogo: '+String(err?.message||'falha inesperada')+'. Sua conta e save foram preservados.';}
 };
 ui.loginRetrySessionBtn?.addEventListener('click',async()=>{
   ui.authMessage.textContent='Revalidando a sessão...';
@@ -11730,7 +11733,7 @@ function startLoadedGame(){
   if(!telemetryRuntime.sessionOpen)telemetryStartSession();
   state.lastPlayerDamageAt=nowSec();
   normalizeGalaxyGateState();normalizeCombatAbilities();
-  if(!isVerifiedAdminNavigator()&&/^x[1-8]$/.test(progress.mapId)&&progress.territoryFaction&&progress.territoryFaction!==progress.profile.faction){progress.mapId='x1';progress.territoryFaction=progress.profile.faction;}
+  if(adminRuntime.status?.is_admin===false&&/^x[1-8]$/.test(progress.mapId)&&progress.territoryFaction&&progress.territoryFaction!==progress.profile.faction){progress.mapId='x1';progress.territoryFaction=progress.profile.faction;}
   const loadedGateKey=gateKeyForMap(progress.mapId);if(loadedGateKey&&!progress.galaxyGate[loadedGateKey]?.run?.active){progress.mapId='x1';progress.territoryFaction=progress.profile.faction;}else if(loadedGateKey)progress.galaxyGate.selected=loadedGateKey;
   const savedLocation=savedLocationForCurrentMap(),savedX=savedLocation?.x??null,savedY=savedLocation?.y??null;
   state.currentMap=MAPS[progress.mapId]||MAPS.x1;state.radarRange=mapRadarRange();
@@ -11768,7 +11771,27 @@ async function afterAuth(){
   astralCombatV431.owner=null;astralCombatV431.snapshot=null;++astralCombatV431.request;
   const generation=++gameBootstrapRuntime.generation;
   gameBootstrapRuntime.loading=true;gameBootstrapRuntime.ready=false;gameBootstrapRuntime.lastError=null;
-  authenticated=true;await OFFLINE_FARM_V484.enable();void AUTOPILOT_V48.refreshAccess();void refreshCommandV22();ui.loginModal.classList.add('hidden');ui.userLabel.textContent=getUser()?.callsign||getUser()?.email?.split('@')[0]||'Pilot';loadActivityLog();await refreshAdminStatus(true);refreshClanState(true).then(()=>refreshRankings(true)).catch(()=>{});setSync('SINCRONIZANDO','busy');
+  // V106.8B STARTUP: never block the login panel on secondary farm options or ADM queries.
+  // The farm status itself IS critical: use the bounded status-only check, and fail closed.
+  authenticated=true;
+  adminRuntime.status=null;adminRuntime.enabled=false;
+  ui.loginModal.classList.add('hidden');
+  setSync('VALIDANDO FARM','busy');
+  try { await OFFLINE_FARM_V484.enable(); }
+  catch (err) {
+    console.error('[bootstrap] farm verification failed closed',err);
+    document.body.classList.add('stellar-offline-active-v485');
+    setSync('FARM: VERIFICAR','err');
+  }
+  if(!authenticated||generation!==gameBootstrapRuntime.generation)return;
+  void AUTOPILOT_V48.refreshAccess();
+  void refreshCommandV22();
+  ui.userLabel.textContent=getUser()?.callsign||getUser()?.email?.split('@')[0]||'Pilot';
+  loadActivityLog();
+  // ADM is secondary. Never hold player loading while a slow admin read runs.
+  void refreshAdminStatus(true);
+  refreshClanState(true).then(()=>refreshRankings(true)).catch(()=>{});
+  setSync(offlineFarmWorldLockedV84()?'FARM: VERIFICAR':'SINCRONIZANDO',offlineFarmWorldLockedV84()?'err':'busy');
   try{
     const accountId=String(getUser()?.id||'');
     if(missionRewardOwnerV108!==accountId){MISSION_REWARD_ACK_V108.reset();missionRewardOwnerV108=accountId;}
@@ -11879,7 +11902,7 @@ async function afterAuth(){
     startLoadedGame();
     gameBootstrapRuntime.ready=true;
     void refreshAstralCombatV431();
-    setSync('ONLINE','ok');
+    setSync(offlineFarmWorldLockedV84()?'FARM: MUNDO PAUSADO':'ONLINE',offlineFarmWorldLockedV84()?'busy':'ok');
   }catch(e){
     gameBootstrapRuntime.lastError=e;console.error('[bootstrap] startLoadedGame fatal',e);
     // Última barreira: mantém a nave e tenta o universo mesmo se um render auxiliar falhar.
@@ -11925,7 +11948,7 @@ async function boot(){
     }else{
       ui.authMessage.textContent=canRememberSessionV101()?'Entre uma vez e marque “Manter conectado” para as próximas aberturas.':'Entre para acessar sua conta. Seu e-mail pode ficar salvo.';
     }
-  }catch(err){console.warn('[login] falha na inicialização',err?.code||err?.message);ui.authMessage.textContent=err.message||'Faça login novamente.';}
+  }catch(err){console.warn('[login] falha na inicialização',err?.code||err?.message);ui.loginModal.classList.remove('hidden');ui.authMessage.textContent='Falha ao preparar o jogo: '+String(err?.message||'Faça login novamente.')+' • O save online não foi alterado.';}
 }
 
 document.body.dataset.quality=resolvedQualityMode();

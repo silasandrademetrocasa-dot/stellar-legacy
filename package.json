@@ -5,7 +5,7 @@
   "scripts": {
     "start": "node server/index.js",
     "dev": "node --watch server/index.js",
-    "check": "node scripts/verify-release.mjs",
+    "check": "node scripts/verify-release.mjs && node scripts/audit-module-graph.mjs",
     "test": "node --test tests/*.test.mjs",
     "verify": "npm run check && npm test",
     "preflight:v100": "node scripts/v100-release-readiness.mjs",

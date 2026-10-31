@@ -38,7 +38,9 @@
   const splash=document.getElementById('stellarBootSplash');
   const began=performance.now();let ended=false;
   window.stellarSplashFinish=function(){if(ended)return;ended=true;const delay=Math.max(0,1100-(performance.now()-began));setTimeout(()=>{splash.classList.add('dismissed');setTimeout(()=>splash.remove(),650)},delay)};
-  setTimeout(()=>{if(!ended)window.stellarSplashFinish()},9000);
+  // V106.8B: loading never silently disappears while authentication is still pending.
+  setTimeout(()=>{if(!ended){const status=splash.querySelector('.stellar-boot-status');if(status)status.textContent='CONECTANDO... SE DEMORAR, VERIFIQUE SUA CONEXÃO';}},9000);
+  setTimeout(()=>{if(!ended){window.stellarSplashFinish();const info=document.getElementById('authMessage');if(info&&!info.textContent.trim())info.textContent='O carregamento está demorando. Você pode tentar entrar novamente; nenhum save foi apagado.';}},20000);
 })();
 </script>
 <div id="app">
@@ -1217,7 +1219,7 @@
 </div>
 <div class="perf-diag-overlay hidden" id="perfDiagOverlay" aria-live="off" aria-label="Contador de FPS local"><b id="perfDiagHudFps">FPS —</b><small id="perfDiagHudStutter">P95 —</small></div>
 <script type="module" src="/modules/android-daily-alerts-v108.js?v=108.0.0"></script>
-<script src="/game.js?v=47.7.60-v1068-mission-ack" type="module"></script>
+<script src="/game.js?v=47.7.60-v1068-mission-ack-boot-safe" type="module"></script>
 <script src="/modules/stellar-admin-v57.js?v=47.7.60" type="module"></script>
 <script src="/modules/stellar-admin-c-v100.js?v=47.7.60" type="module"></script>
 <script type="module" src="/modules/astral-rewards-v381.js?v=47.7.60"></script>
