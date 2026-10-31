@@ -1,5 +1,5 @@
 /** V98–V100: optional, read-only ADM controls. No changes to multiplayer/save/Live Ops. */
-import {getSessionCredentials} from '../api.js?v=47.7.56';
+import {getSessionCredentials} from '../api.js?v=47.7.60';
 let reference=null;
 const $=id=>document.getElementById(id);
 const out=(id,message)=>{const el=$(id);if(el)el.textContent=String(message||'');};

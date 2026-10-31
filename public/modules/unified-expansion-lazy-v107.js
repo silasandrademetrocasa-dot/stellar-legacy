@@ -2,7 +2,7 @@
 // Nenhum import pesado nem chamada à API da expansão ocorre durante o login.
 let loading=null;
 let ready=false;
-export async function openUniverseLazyV107({load=()=>import('./unified-expansion-v42.js?v=107.0.0'), onReady=()=>{}, onError=()=>{}}={}){
+export async function openUniverseLazyV107({load=()=>import('./unified-expansion-v42.js?v=108.1.0'), onReady=()=>{}, onError=()=>{}}={}){
   if(ready){onReady();return true;}
   if(loading)return loading;
   loading=Promise.resolve().then(load).then(()=>{

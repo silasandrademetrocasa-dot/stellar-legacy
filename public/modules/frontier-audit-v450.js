@@ -1,5 +1,5 @@
 // ADM-only visual view of the public world config. No game frame loop, no writes.
-import {loadFrontierAuditV450} from '../api.js?v=47.7.6';
+import {loadFrontierAuditV450} from '../api.js?v=47.7.60';
 let generation=0;
 const el=(tag,label)=>{const x=document.createElement(tag);if(label!=null)x.textContent=String(label);return x;};
 export async function renderFrontierAuditV450(root,tab,isAdmin){

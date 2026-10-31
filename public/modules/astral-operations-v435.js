@@ -1,4 +1,4 @@
-import {loadStageAV423,adminAstralModuleV435,adminRaidV435,loadRaidV435,claimRaidV435,adminAstralTestKitV440} from '../api.js?v=47.7.6';
+import {loadStageAV423,adminAstralModuleV435,adminRaidV435,loadRaidV435,claimRaidV435,adminAstralTestKitV440} from '../api.js?v=47.7.60';
 import {astralEquipmentBonusesV435,astralModuleCodesV435} from './astral-systems-v435.js?v=47.7.6';
 let ticket=0;
 const el=(tag,text)=>{const x=document.createElement(tag);if(text!=null)x.textContent=text;return x;};

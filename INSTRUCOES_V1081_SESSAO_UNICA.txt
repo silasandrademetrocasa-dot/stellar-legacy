@@ -1,0 +1,10 @@
+STELLAR LEGACY V108.1 — UNIFICACAO DE SESSAO DO UNIVERSO ESTELAR
+
+BASE: V108 CUMULATIVA JA INSTALADA. Aplique no Instalador Universal como patch incremental.
+SINTOMA: No Universo Estelar aparecia "SESSAO DO PILOTO" mesmo apos login valido.
+CAUSA REPRODUZIDA: game.js importa api.js?v=47.7.60; os modulos V42 e derivados importavam api.js?v=47.7.6. O navegador cria duas instancias, com `session` independente; a API secundaria nao tinha token.
+CORRECAO: Todos os modulos afetados agora importam a MESMA URL canonica de API. O lazy-loader e o script HTML recebem cache-busting V108.1.0.
+SEGURANCA: Nao muda SQL, saldos, conta, sessao unica no backend, recompensas, hangar, farm, game.js, Autopilot nem o motor de missões. Nenhuma nova rota e criada.
+TESTE: npm run verify; abrir Web > logar > MAIS > UNIVERSO > conferir Forja/Guerra/Exploracao/Civilizacao. Depois conferir APK recompilado.
+SEM SQL NOVO. Nao execute reativacao SQL novamente: as 24 funcoes V42 ja foram reativadas.
+ROLLBACK: restaure somente os arquivos deste patch pela copia anterior da V108.

@@ -1,7 +1,7 @@
 import {stellarNoticeV4776} from './stellar-dialog-v4776.js?v=47.7.6';
 // V38.1.0 — painel de recompensas da arena e editor no ADM.
 // Sem loops de render e sem alterações no motor de combate.
-import {loadAstralRewardsV381,lockAstralRewardV381,claimAstralRewardV381,adminSetAstralRewardV381,loadGalaxyGatesOnline} from '../api.js?v=47.7.6';
+import {loadAstralRewardsV381,lockAstralRewardV381,claimAstralRewardV381,adminSetAstralRewardV381,loadGalaxyGatesOnline} from '../api.js?v=47.7.60';
 const names={alpha:'AURORA',beta:'NEXUS',gamma:'ECLIPSE'};
 const order=['alpha','beta','gamma'];
 let latest=null,primaryGates=null,primaryVersion=0,loading=false;

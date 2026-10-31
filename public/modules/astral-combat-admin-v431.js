@@ -1,5 +1,5 @@
 // Exibido apenas quando o piloto abre a Forja ou a central administrativa.
-import {loadStageAV423,adminAstralPowerV431} from '../api.js?v=47.7.6';
+import {loadStageAV423,adminAstralPowerV431} from '../api.js?v=47.7.60';
 import {verifiedAstralPveBonusV431} from './astral-combat-v431.js?v=47.7.6';
 let current=0;
 const create=(tag,text)=>{const e=document.createElement(tag);if(text!=null)e.textContent=text;return e;};
