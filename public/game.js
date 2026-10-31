@@ -8415,23 +8415,23 @@ function hangarSection(title,meta,key,body){
   const wrap=document.createElement('div');wrap.className='hangar-section-body';wrap.appendChild(body);box.appendChild(wrap);return box;
 }
 function inventoryMatchesFilter(item,filter){return filter==='all'||equipmentCategory(item)===filter;}
-function inventoryCard(itemId,count,context='ship'){
+function inventoryCard(itemId,count,context='ship',targetDroneId=null){
   const item=ITEMS[itemId],art=GAME_ASSETS.equipment[itemId];const el=document.createElement('div');el.className=`inventory-card hangar-inventory-card cat-${equipmentCategory(item)}`;
   el.innerHTML=`${art?`<img class="inventory-item-art" src="${art}" alt="${item.name}">`:''}<b>${item.name}</b><div class="qty">Quantidade: ${count}</div><div class="muted hangar-item-desc">${item.description}</div>`;
   const actions=document.createElement('div');actions.className='inventory-actions';
   const addButton=(label,fn,primary=false)=>{const b=document.createElement('button');b.className=primary?'equip-btn':'ghost-btn';b.textContent=label;b.onclick=fn;actions.appendChild(b);};
   const cat=equipmentCategory(item);
   if(['lasers','shields','engines','extras'].includes(cat))addButton('Nave',()=>equipShipItem(itemId),context==='ship');
-  if((cat==='lasers'||cat==='shields')&&progress.drones.length)addButton('Drone',()=>equipDroneItem(itemId),context==='drone');
+  if((cat==='lasers'||cat==='shields')&&progress.drones.length)addButton(context==='drone'&&targetDroneId?'Neste drone':'Drone',()=>targetDroneId?equipDroneItemForV1092(itemId,targetDroneId):equipDroneItem(itemId),context==='drone');
   if(progress.pet?.owned&&(cat==='lasers'||cat==='shields'))addButton('AUX-9',()=>equipPetItem(itemId,cat==='lasers'?'laser':'shield'),context==='pet');
   const sell=document.createElement('button');sell.className='danger-btn sell-item-btn';sell.textContent=`${itemSellCaptionV4776(item)} • ${fmt(itemSellValue(item))} CR`;sell.disabled=itemSellValue(item)<=0;sell.title=sell.disabled?'Sem preço publicado pelo ADM':'Venda paga somente créditos';sell.onclick=()=>sellInventoryItem(itemId,1);actions.appendChild(sell);el.appendChild(actions);return el;
 }
-function filteredInventoryGrid(filter,context='ship',allowed=['lasers','shields','engines','extras']){
+function filteredInventoryGrid(filter,context='ship',allowed=['lasers','shields','engines','extras'],targetDroneId=null){
   const grid=document.createElement('div');grid.className='inventory-grid hangar-inventory-grid';
   const entries=Object.entries(progress.inventory).filter(([id,q])=>q>0&&ITEMS[id]&&allowed.includes(equipmentCategory(ITEMS[id]))&&inventoryMatchesFilter(ITEMS[id],filter));
   if(!entries.length){grid.innerHTML='<div class="empty-state compact-empty">Nenhum equipamento desse tipo disponível no inventário.</div>';return grid;}
   entries.sort((a,b)=>equipmentCategory(ITEMS[a[0]]).localeCompare(equipmentCategory(ITEMS[b[0]]))||ITEMS[a[0]].name.localeCompare(ITEMS[b[0]].name));
-  for(const [id,q] of entries)grid.appendChild(inventoryCard(id,q,context));return grid;
+  for(const [id,q] of entries)grid.appendChild(inventoryCard(id,q,context,targetDroneId));return grid;
 }
 
 
@@ -8513,8 +8513,128 @@ function renderHangarDrones(){
   layout.append(equippedPane,inv);root.appendChild(layout);return root;
 }
 
+// V109.2 - Um unico padrão de hangar para NAVE, DRONES e AUX, sem alterar o combate.
+let shipWorkbenchSectionV1092='info';
+let droneWorkbenchSectionV1092='info';
+let selectedDroneIdV1092=null;
+const SHIP_WORKBENCH_TABS_V1092=[['info','INFORMAÇÕES','◈'],['lasers','ARMAS','⌁'],['shields','ESCUDOS','⬡'],['engines','MOTORES','➤'],['extras','EXTRAS','◇'],['designers','DESIGNERS','✧']];
+const DRONE_WORKBENCH_TABS_V1092=[['info','INFORMAÇÕES','◈'],['lasers','ARMAS','⌁'],['shields','ESCUDOS','⬡'],['designers','DESIGNERS','✧']];
+function equipDroneItemForV1092(itemId,droneId){
+  if(!canChangeEquipment()){showToast('Configure drones somente dentro da sua base X-1');return;}
+  const item=ITEMS[itemId],drone=progress.drones.find(d=>d.id===droneId);
+  if(!item||!['lasers','shields'].includes(equipmentCategory(item))){showToast('Drones aceitam apenas lasers ou escudos');return;}
+  if(!drone){showToast('Drone selecionado não encontrado');return;}
+  const slot=drone.slots.findIndex(v=>!v);
+  if(slot<0){showToast('Este drone está com todos os slots ocupados');return;}
+  if(!removeInventory(itemId))return;
+  drone.slots[slot]=itemId;
+  computeStatsAfterEquipmentEditV2013();saveGame();rememberEquipmentChangeV109();renderHangar();buildAmmoButtons();updateUI();
+}
+function createWorkbenchShellV1092({kind,name,label,section,tabs,image,designer=null,stats=[],selectTab}){
+  const conf=ensureBattleConfigsV2013()?.active||1;
+  const root=document.createElement('div');root.className=`hangar-embedded-panel aux-workbench-v1091 v1092-workbench v1092-workbench-${kind}`;
+  const nav=document.createElement('nav');nav.className='aux-workbench-nav-v1091';nav.setAttribute('aria-label',`Categorias de ${name}`);
+  const logo=document.createElement('div');logo.className='aux-workbench-logo-v1091';logo.append(document.createTextNode(name+' '));const small=document.createElement('small');small.textContent='HANGAR';logo.appendChild(small);nav.appendChild(logo);
+  for(const [id,tabName,glyph] of tabs){
+    const btn=document.createElement('button');btn.type='button';btn.className='aux-workbench-tab-v1091'+(id===section?' active':'');btn.setAttribute('aria-pressed',String(id===section));
+    const icon=document.createElement('span');icon.textContent=glyph;icon.setAttribute('aria-hidden','true');const b=document.createElement('b');b.textContent=tabName;btn.append(icon,b);btn.onclick=()=>selectTab(id);nav.appendChild(btn);
+  }
+  const preview=document.createElement('div');preview.className='aux-workbench-preview-v1091';
+  const head=document.createElement('div');head.className='aux-workbench-preview-heading-v1091';
+  const title=document.createElement('span');title.textContent=label;const badge=document.createElement('b');badge.textContent=`CONF ${conf} ATIVA`;head.append(title,badge);preview.appendChild(head);
+  const stage=document.createElement('div');stage.className='aux-workbench-avatar-v1091';
+  if(image){const img=document.createElement('img');img.src=image;img.alt=`Prévia ${label}`;img.loading='lazy';if(designer)img.style.filter=designerVisualCss(designer);stage.appendChild(img);}
+  else{const empty=document.createElement('p');empty.className='muted';empty.textContent='Nenhuma unidade selecionada';stage.appendChild(empty);}
+  preview.appendChild(stage);
+  const statsBar=document.createElement('div');statsBar.className='aux-workbench-preview-stats-v1091';for(const [key,value] of stats){const span=document.createElement('span');span.append(document.createTextNode(key+' '));const b=document.createElement('b');b.textContent=String(value);span.appendChild(b);statsBar.appendChild(span);}preview.appendChild(statsBar);
+  const hint=document.createElement('div');hint.className='aux-workbench-caption-v1091';hint.textContent='CONF global: equipamentos da NAVE + DRONES + AUX-9 são trocados em conjunto.';preview.appendChild(hint);
+  const bottom=document.createElement('div');bottom.className='aux-workbench-bottom-v1091';
+  const sectionHead=document.createElement('header');sectionHead.className='aux-workbench-bottom-head-v1091';
+  const lead=document.createElement('div');const meta=document.createElement('span');meta.textContent=`CONFIGURAÇÃO GLOBAL ${conf}`;
+  const h3=document.createElement('h3');h3.textContent=tabs.find(t=>t[0]===section)?.[1]||name;lead.append(meta,h3);
+  const tail=document.createElement('small');tail.textContent='NAVE + DRONES + AUX • CONFIGURAÇÃO COMPARTILHADA';sectionHead.append(lead,tail);bottom.appendChild(sectionHead);
+  root.append(nav,preview,bottom);return {root,nav,preview,bottom};
+}
+function addWorkbenchInfoV1092(bottom,rows,description=''){
+  const grid=document.createElement('div');grid.className='aux-workbench-info-v1091';
+  for(const [key,value] of rows){const card=document.createElement('div');card.className='aux-workbench-stat-v1091';const b=document.createElement('b');b.textContent=key;const strong=document.createElement('strong');strong.textContent=String(value);card.append(b,strong);grid.appendChild(card);}
+  bottom.appendChild(grid);if(description){const p=document.createElement('p');p.className='muted';p.textContent=description;bottom.appendChild(p);}
+}
+function addWorkbenchInventoryV1092(bottom,filter,context,allowed,droneId=null){
+  const inv=document.createElement('div');inv.className='aux-workbench-inventory-v1091';const h4=document.createElement('h4');h4.textContent=`INVENTÁRIO • ${HANGAR_FILTER_LABELS[filter]}`;inv.appendChild(h4);
+  inv.appendChild(filteredInventoryGrid(filter,context,allowed,droneId));bottom.appendChild(inv);
+}
+function renderWorkbenchDesignersV1092(bottom,kind,droneId=null){
+  const defs=designerCatalog().filter(d=>d.kind===kind),activeId=kind==='ship'?currentShipDesignId():kind==='pet'?currentPetDesignId():droneDesignId(droneId);
+  const eligible=kind!=='ship'||shipDesignerEligible();const canEdit=canChangeEquipment()&&eligible&&(kind!=='drone'||!!droneId);
+  const note=document.createElement('p');note.className='aux-workbench-caution-v1091';note.textContent=!eligible?'Designers de nave só estão disponíveis para naves ELITE ou ESPECIAIS DE EVENTO.':'Designers disponíveis no inventário do servidor. A aplicação é validada pelo servidor e não altera os equipamentos salvos nas CONF 1/2.';bottom.appendChild(note);
+  const grid=document.createElement('div');grid.className='v1092-designer-grid';
+  const renderOption=(def)=>{
+    const id=def?.design_id||null,qty=def?ownedDesignQty(id):0,used=kind==='drone'&&def?equippedDesignCount(id):0,selected=(id||null)===(activeId||null);
+    const card=document.createElement('button');card.type='button';card.className=`v1092-designer-choice${selected?' active':''}`;
+    if(def){
+      const dot=document.createElement('span');dot.className='v1092-designer-orb';dot.style.setProperty('--designer-glow',def.visual?.glow||'#7edcff');
+      const drone=kind==='drone'?progress.drones.find(d=>d.id===droneId):null;
+      const art=kind==='ship'?v56ShipPerspectiveArt(progress.activeShipId):kind==='pet'?auxVisualArtV64('aux9'):drone?(droneVisualArtV64(visualDroneV53(drone.type,def))||SPRITE53(visualDroneV53(drone.type,def))):null;
+      if(art){const thumb=document.createElement('img');thumb.src=art;thumb.alt='';thumb.loading='lazy';thumb.style.filter=designerVisualCss(def);dot.appendChild(thumb);}
+      card.appendChild(dot);
+    }
+    const copy=document.createElement('span');copy.className='v1092-designer-copy';const name=document.createElement('b');name.textContent=def?.name||'SEM DESIGNER';const sub=document.createElement('small');sub.textContent=def?`${rarityLabel(def.rarity)} • Inventário ${qty}${kind==='drone'?` • Em uso ${used}`:''}`:'Remover a aparência especial';copy.append(name,sub);
+    if(def){const bonus=document.createElement('em');bonus.textContent=designerBonusSummary(def);copy.appendChild(bonus);}card.appendChild(copy);
+    const state=document.createElement('strong');state.textContent=selected?'EQUIPADO':def&&(qty<=0||kind==='drone'&&used>=qty)?'BLOQUEADO':'EQUIPAR';card.appendChild(state);
+    const available=!def||qty>0&&(kind!=='drone'||selected||used<qty);
+    card.disabled=!canEdit||selected||!available;
+    card.onclick=()=>{if(kind==='ship')void equipShipDesigner(id);else if(kind==='pet')void equipPetDesigner(id);else if(droneId)void equipDroneDesigner(droneId,id);};
+    return card;
+  };
+  grid.appendChild(renderOption(null));for(const def of defs)grid.appendChild(renderOption(def));bottom.appendChild(grid);
+  if(!defs.length){const p=document.createElement('p');p.className='muted';p.textContent='Catálogo de designers ainda não disponível. Sincronize com o servidor.';bottom.appendChild(p);}
+}
+function renderHangarShipWorkbenchV1092(){
+  const ship=SHIPS[progress.activeShipId],section=shipWorkbenchSectionV1092,design=currentShipDesign(),loadout=progress.shipLoadout,extraCap=shipExtraCapacity();
+  const {root,bottom}=createWorkbenchShellV1092({kind:'ship',name:'NAVE',label:ship.name,section,tabs:SHIP_WORKBENCH_TABS_V1092,image:v56ShipPerspectiveArt(ship.id),designer:design,
+    stats:[['LASERS',`${loadout.lasers.filter(Boolean).length}/${ship.lasers}`],['GERADORES',`${loadout.generators.filter(Boolean).length}/${ship.generators}`],['EXTRAS',`${loadout.extras.filter(Boolean).length}/${extraCap}`]],
+    selectTab:id=>{shipWorkbenchSectionV1092=id;renderHangar();}});
+  if(section==='info'){
+    addWorkbenchInfoV1092(bottom,[['MODELO',ship.name],['HP DE FÁBRICA',fmt(ship.hp)],['VELOCIDADE',fmt(ship.speed)],['PORÃO',fmt(ship.cargo)],['ARMAS',ship.lasers],['GERADORES',ship.generators],['EXTRAS',extraCap],['DESIGNER',design?.name||'Nenhum']], 'Os valores finais em batalha incluem equipamentos, pesquisas e bônus do piloto.');
+    const b=document.createElement('button');b.type='button';b.className='small-btn';b.textContent='GERENCIAR NAVES';b.onclick=()=>{state.hangarTab='ships';renderHangar();};bottom.appendChild(b);
+    try{bottom.appendChild(renderPresetToolbarV3030());}catch(err){console.warn('[hangar presets]',err);}
+  }else if(section==='designers')renderWorkbenchDesignersV1092(bottom,'ship');
+  else{const grid=document.createElement('div');grid.className='v1092-slot-display';grid.appendChild(buildShipEquipmentSection(section,ship,extraCap));bottom.appendChild(grid);addWorkbenchInventoryV1092(bottom,section,'ship',['lasers','shields','engines','extras']);}
+  return root;
+}
+function selectedHangarDroneV1092(){
+  const all=progress?.drones||[];
+  return all.find(d=>d.id===selectedDroneIdV1092)||all[0]||null;
+}
+function renderHangarDroneWorkbenchV1092(){
+  const drone=selectedHangarDroneV1092(),section=droneWorkbenchSectionV1092,idx=drone?progress.drones.indexOf(drone):-1,design=drone?droneDesignFor(drone.id):null,model=drone?ITEMS[drone.type]:null;
+  if(drone)selectedDroneIdV1092=drone.id;
+  const art=drone?droneVisualArtV64(visualDroneV53(drone.type,design))||SPRITE53(visualDroneV53(drone.type,design)):null;
+  const {root,bottom}=createWorkbenchShellV1092({kind:'drone',name:'DRONES',label:drone&&model?`${model.name} #${idx+1}`:'SEM DRONES',section,tabs:DRONE_WORKBENCH_TABS_V1092,image:art,designer:design,
+    stats:[['FROTA',`${progress.drones.length}/8`],['SLOTS',drone?`${drone.slots.filter(Boolean).length}/${drone.slots.length}`:'0/0'],['DESIGNER',design?.name||'Nenhum']],
+    selectTab:id=>{droneWorkbenchSectionV1092=id;renderHangar();}});
+  if(progress.drones.length){
+    const picker=document.createElement('div');picker.className='v1092-drone-picker';picker.setAttribute('role','group');picker.setAttribute('aria-label','Selecionar drone para configurar');
+    progress.drones.forEach((d,i)=>{const selected=drone?.id===d.id,des=droneDesignFor(d.id);const b=document.createElement('button');b.type='button';b.className='v1092-drone-select'+(selected?' active':'');b.setAttribute('aria-pressed',String(selected));b.textContent=`${i+1} • ${ITEMS[d.type]?.name||'Drone'}`;b.title=des?`Designer: ${des.name}`:'Sem designer';b.onclick=()=>{selectedDroneIdV1092=d.id;renderHangar();};picker.appendChild(b);});bottom.appendChild(picker);
+  }
+  if(!drone){const p=document.createElement('div');p.className='empty-state';p.textContent='Adquira um drone na Loja para ativar seus equipamentos e designers.';bottom.appendChild(p);return root;}
+  if(section==='info'){
+    addWorkbenchInfoV1092(bottom,[['DRONE',`${model?.name||drone.type} #${idx+1}`],['SLOTS DE EQUIPAMENTO',`${drone.slots.filter(Boolean).length}/${drone.slots.length}`],['LASERS',drone.slots.filter(id=>equipmentCategory(ITEMS[id])==='lasers').length],['ESCUDOS',drone.slots.filter(id=>equipmentCategory(ITEMS[id])==='shields').length],['DESIGNER',design?.name||'Nenhum']], 'Cada drone usa seus próprios slots e seu próprio Designer. A CONF global troca os equipamentos da frota inteira.');
+    const sell=document.createElement('button');sell.type='button';sell.className='danger-btn';sell.textContent='Vender drone selecionado';sell.onclick=()=>sellDrone(drone.id);bottom.appendChild(sell);
+  }else if(section==='designers'){
+    renderWorkbenchDesignersV1092(bottom,'drone',drone.id);
+    const note=document.createElement('p');note.className='muted';note.textContent='Os bônus de SET 8/8 só ativam quando todos os 8 drones cumprem a condição do Designer.';bottom.appendChild(note);
+  }else{
+    const grid=document.createElement('div');grid.className='slot-grid hangar-slot-grid aux-workbench-slot-grid-v1091';
+    drone.slots.forEach((id,i)=>{if(!id||equipmentCategory(ITEMS[id])===section)grid.appendChild(slotCard(`Slot ${i+1}`,id,null,i,drone.id));});
+    bottom.appendChild(grid);addWorkbenchInventoryV1092(bottom,section,'drone',['lasers','shields'],drone.id);
+  }
+  return root;
+}
+
 let auxWorkbenchSectionV1091='info';
-const AUX_TACTICAL_TABS_V1091=[['info','INFORMAÇÕES','◈'],['lasers','ARMAS','⌁'],['shields','ESCUDOS','⬡'],['protocols','PROTOCOLOS','✧'],['modules','MÓDULOS','◇']];
+const AUX_TACTICAL_TABS_V1091=[['info','INFORMAÇÕES','◈'],['lasers','ARMAS','⌁'],['shields','ESCUDOS','⬡'],['protocols','PROTOCOLOS','✧'],['modules','MÓDULOS','◇'],['designers','DESIGNERS','✧']];
 const AUX_FUTURE_PROTOCOLS_V1091=[
   {id:'dano',title:'DANO',bonuses:['+1%','+2%','+3%'],description:'Dano do AUX'},
   {id:'hp',title:'HP',bonuses:['+1%','+2,5%','+5%'],description:'HP do AUX'},
@@ -8559,7 +8679,7 @@ function renderHangarPet(){
     <div class="aux-workbench-stat-v1091"><b>MODO ATIVO</b><strong>${escHtml(PET_GEARS[pet.activeGear]?.name||'COMPANHIA')}</strong></div>`;
     bottom.appendChild(pane);
     const copy=document.createElement('p');copy.className='muted';copy.textContent=`Bônus de nível: DANO +${stats.damage||0}% • ESCUDO +${stats.shield||0}%. As especializações e o modo ativo são separados entre CONF1 e CONF2.`;bottom.appendChild(copy);
-    const designerBtn=document.createElement('button');designerBtn.className='small-btn';designerBtn.type='button';designerBtn.textContent='DESIGNERS E PROGRESSÃO COMPLETA';designerBtn.onclick=()=>openPet();bottom.appendChild(designerBtn);
+    const designerBtn=document.createElement('button');designerBtn.className='small-btn';designerBtn.type='button';designerBtn.textContent='VER DESIGNERS DO AUX-9';designerBtn.onclick=()=>{auxWorkbenchSectionV1091='designers';renderHangar();};bottom.appendChild(designerBtn);
   }else if(section==='lasers'||section==='shields'){
     const kind=section==='lasers'?'laser':'shield',capacity=petSlotCapacity(kind,level),unlocked=kind==='laser'?pet.laserSlotsUnlocked:pet.shieldSlotsUnlocked;
     const grid=document.createElement('div');grid.className='pet-slot-grid hangar-slot-grid aux-workbench-slot-grid-v1091';
@@ -8587,6 +8707,8 @@ function renderHangarPet(){
     const slotHeading=document.createElement('p');slotHeading.className='muted';slotHeading.textContent=`Slots de protocolos previstos para o AUX nível ${level}: ${cap}. Bloqueados para compra/equipamento até a V109 econômica.`;bottom.appendChild(slotHeading);
     const slotGrid=document.createElement('div');slotGrid.className='aux-workbench-future-slots-v1091';
     for(let i=0;i<cap;i++){const slot=document.createElement('div');slot.textContent=`+  SLOT ${i+1}`;slot.className='aux-workbench-future-slot-v1091';slot.setAttribute('aria-label',`Slot futuro de protocolo ${i+1}`);slotGrid.appendChild(slot);}bottom.appendChild(slotGrid);
+  }else if(section==='designers'){
+    renderWorkbenchDesignersV1092(bottom,'pet');
   }else if(section==='modules'){
     const modes=document.createElement('div');modes.className='aux-workbench-modes-v1091';
     const off=document.createElement('button');off.type='button';off.className='pet-gear'+(pet.activeGear==='off'?' active':'');off.innerHTML='<b>COMPANHIA</b><small>Sem ação independente.</small>';off.onclick=()=>setPetGear('off');modes.appendChild(off);
@@ -8688,21 +8810,9 @@ function v56EquipmentView(){
   }
   root.appendChild(tabs);
   const body=document.createElement('div');body.className='v56-unit-body';
-  if(v56EquipTarget==='aux'){body.classList.add('v109-aux-workbench-body');body.appendChild(renderHangarPet());root.appendChild(body);return root;}
-  const ship=SHIPS[progress.activeShipId];
-  const isShip=v56EquipTarget==='ship',isDrone=v56EquipTarget==='drones';
-  const art=isShip?v56ShipPerspectiveArt(ship.id):isDrone?(droneVisualArtV64(visualDroneV53(progress.drones?.[0]?.type||'iris',droneDesignFor(progress.drones?.[0]?.id)))||SPRITE53(visualDroneV53(progress.drones?.[0]?.type||'iris',droneDesignFor(progress.drones?.[0]?.id)))):auxVisualArtV64('aux9');
-  const label=isShip?ship.name:isDrone?'DRONES • FROTA':'AUX-9 • SUPORTE';
-  const picture=document.createElement('div');picture.className='v56-workstation-hero'+(isShip?' v58-ship-view':isDrone?' v58-drone-view':' v58-aux-view');
-  picture.innerHTML=`<div class="v56-workstation-top"><span>UNIDADE ATIVA</span><strong>${escHtml(label)}</strong></div><div class="v56-workstation-stage"><span class="v56-stage-orbit"></span>${art?`<img src="${art}" alt="${escHtml(label)}" loading="lazy">`:''}</div><small>${isShip?'Visual de seleção da nave':isDrone?'Drones e designers equipados':'Suporte tático e módulos originais'}</small>`;
-  body.appendChild(picture);
-  const slotPane=document.createElement('div');slotPane.className='v56-workstation-slots';
-  if(isShip){
-    slotPane.appendChild(renderHangarEquipment());
-    // V58: designers appear only in HANGAR > NAVES; not duplicated in equipment slots.
-  }else if(isDrone){slotPane.appendChild(renderHangarDrones());}
-  else {slotPane.appendChild(renderHangarPet());}
-  body.appendChild(slotPane);root.appendChild(body);
+  body.classList.add('v109-aux-workbench-body','v1092-unit-workbench-body');
+  body.appendChild(v56EquipTarget==='ship'?renderHangarShipWorkbenchV1092():v56EquipTarget==='drones'?renderHangarDroneWorkbenchV1092():renderHangarPet());
+  root.appendChild(body);
   return root;
 }
 function renderHangar(){

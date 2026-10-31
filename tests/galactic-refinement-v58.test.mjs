@@ -23,10 +23,12 @@ test('V58: the map base trade button is viewport-anchored and not world-screen p
  assert.match(css,/#baseTradePrompt\{position:fixed!important/);
  assert.match(css,/animation:none!important/);
 });
-test('V58: designers only in ship selection; no second image of AUX in equipment',()=>{
+test('V109.2: designers in each workstation without duplicate AUX hero image',()=>{
  const equip=game.slice(game.indexOf('function v56EquipmentView(){'),game.indexOf('function renderHangar(){'));
  assert(!equip.includes('v56-designer-jump'));
- assert.match(equip,/v58-aux-view/);
+ assert.match(equip,/renderHangarShipWorkbenchV1092/);
+ assert.match(equip,/renderHangarDroneWorkbenchV1092/);
+ assert.match(equip,/renderHangarPet\(\)/);
  assert.match(css,/#hangarModal \.pet-hangar-panel \.pet-hero \.pet-avatar\{display:none!important/);
  assert.match(game,/PERSONALIZAR NAVE ELITE/);
 });

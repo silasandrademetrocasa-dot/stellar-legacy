@@ -1,0 +1,16 @@
+STELLAR LEGACY V109.2 — HANGAR DE NAVE, DRONES E AUX COM DESIGNERS
+
+ZIP INCREMENTAL, para aplicar SOBRE A V109.1 já instalada.
+Aplicar via Instalador Universal na raiz do repositório, mantendo todos os demais arquivos.
+
+Novos menus:
+NAVE: Informações | Armas | Escudos | Motores | Extras | Designers
+DRONES: Informações | Armas | Escudos | Designers (por drone selecionado)
+AUX-9: Informações | Armas | Escudos | Protocolos | Módulos | Designers
+
+IMPORTANTE: CONF 1/2 continuam globais para os equipamentos da nave/drones/AUX e protocolos AUX.
+Designers possuem loadout no servidor e NÃO mudam automaticamente na troca de CONF nesta versão.
+Não inclui compras nem efeitos novos de protocolos. NÃO EXIGE SQL.
+
+TESTE: login -> base X-1 -> Hangar > Equipamentos -> nave/drone/AUX -> Designers.
+Teste em uma conta de testes antes de colocar em produção.

@@ -1,0 +1,39 @@
+/* V109.2 — shared, responsive workstation for NAVE / DRONES / AUX and Designer catalog. */
+#hangarModal .v1092-unit-workbench-body{min-width:0;width:100%;display:block!important}
+#hangarModal .v1092-workbench{min-width:0;width:100%}
+#hangarModal .v1092-workbench .aux-workbench-avatar-v1091{min-height:155px;max-height:290px}
+#hangarModal .v1092-workbench-ship .aux-workbench-avatar-v1091 img{max-width:480px;object-fit:contain}
+#hangarModal .v1092-workbench-drone .aux-workbench-avatar-v1091 img{max-width:320px;object-fit:contain}
+#hangarModal .v1092-slot-display{min-width:0}
+#hangarModal .v1092-slot-display .hangar-equip-section{margin:0}
+#hangarModal .v1092-slot-display .hangar-slot-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px}
+#hangarModal .v1092-workbench .aux-workbench-bottom-v1091{min-height:170px}
+#hangarModal .v1092-workbench .aux-workbench-bottom-v1091 .inventory-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(164px,1fr));gap:9px}
+#hangarModal .v1092-drone-picker{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:14px;padding:7px;background:#06172b;border-radius:9px}
+#hangarModal .v1092-drone-select{min-height:35px;background:#0b2742;border:1px solid #225573;color:#badff5;font-size:11px;font-weight:bold;padding:7px 10px;border-radius:7px}
+#hangarModal .v1092-drone-select.active{background:#16578a;border-color:#5cdbff;color:#fff;box-shadow:0 0 12px #49aaff40}
+#hangarModal .v1092-designer-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:10px;margin-top:12px}
+#hangarModal .v1092-designer-choice{width:100%;display:flex;align-items:center;gap:10px;min-width:0;min-height:88px;text-align:left;padding:11px;background:linear-gradient(135deg,#081c34,#061124);border:1px solid #295777;border-radius:10px;color:#e2f5ff;transition:border-color .15s,background .15s}
+#hangarModal .v1092-designer-choice:disabled{opacity:.55;cursor:default}
+#hangarModal .v1092-designer-choice.active{border-color:#52d4ff;box-shadow:inset 3px 0 #52d4ff;background:linear-gradient(135deg,#0d3c63,#061a31);opacity:1}
+#hangarModal .v1092-designer-orb{flex:none;width:36px;height:36px;border-radius:50%;border:1px solid var(--designer-glow,#64d4ff);background:radial-gradient(circle at 40% 35%,#ffffff55,var(--designer-glow,#64d4ff) 35%,#071329 72%);box-shadow:0 0 12px var(--designer-glow,#64d4ff)}
+#hangarModal .v1092-designer-copy{min-width:0;flex:1;display:flex;flex-direction:column;gap:4px}
+#hangarModal .v1092-designer-copy b{font-size:12px;overflow-wrap:anywhere}
+#hangarModal .v1092-designer-copy small{font-size:10px;color:#93bdd6}
+#hangarModal .v1092-designer-copy em{font-size:10px;font-style:normal;line-height:1.45;color:#c3d9ff}
+#hangarModal .v1092-designer-choice>strong{font-size:9px;max-width:68px;text-align:center;color:#89e3ff;overflow-wrap:anywhere}
+#hangarModal .v1092-workbench .aux-workbench-tab-v1091{cursor:pointer}
+#hangarModal .v1092-workbench .aux-workbench-tab-v1091:focus-visible,
+#hangarModal .v1092-designer-choice:focus-visible,
+#hangarModal .v1092-drone-select:focus-visible{outline:2px solid #a9eaff;outline-offset:2px}
+@media(max-width:680px){
+ #hangarModal .v1092-designer-grid{grid-template-columns:1fr}
+ #hangarModal .v1092-workbench .aux-workbench-bottom-v1091 .inventory-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+ #hangarModal .v1092-slot-display .hangar-slot-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+ #hangarModal .v1092-drone-picker{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:thin}
+ #hangarModal .v1092-drone-select{flex:0 0 auto;white-space:nowrap}
+ #hangarModal .v1092-workbench .aux-workbench-avatar-v1091{height:185px}
+ #hangarModal .v1092-designer-choice{padding:9px;min-height:75px}
+}
+
+#hangarModal .v1092-designer-orb img{width:100%;height:100%;object-fit:contain;display:block;filter:drop-shadow(0 0 8px #35baff)}
