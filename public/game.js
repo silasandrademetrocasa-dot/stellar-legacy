@@ -52,6 +52,7 @@ import {directionalIndex, directionalGridForImage} from './modules/sprite-orient
 import {createHudIntelligence} from './modules/hud-intelligence.js?v=47.7.60';
 import {sentinelAttackerEligible, selectSentinelAttacker} from './modules/sentinel-defense.js?v=47.7.60';
 import {AUX_PROTOCOL_TYPES, AUX_PROTOCOL_IDS, normalizeAuxProtocols, auxProtocolSlotsUsed, changeAuxProtocolRank, auxProtocolStats} from './modules/aux-protocols.js?v=47.7.60';
+import {AUX_ADVANCED_V110,AUX_ADVANCED_TIERS_V110,auxAdvancedEffectsV110,auxAdvancedSlotsV110,auxAdvancedSlotCountV110,normalizeAuxAdvancedEquippedV110,auxAdvancedLootQuantityV110} from './modules/aux-advanced-protocols-v110.js?v=47.7.60';
 import { movementSpeed, nominalMovementSpeed, followShipCamera } from './modules/ship-navigation.js?v=47.7.60';
 import { loadCommandOverviewOnline,claimCompetitiveSeasonOnline,equipEliteTitleOnline,unequipEliteTitleOnline,loadCommandAdminOnline,saveCompetitiveSeasonOnline,saveWorldDirectiveOnline,loadClanOperationsOnline,claimClanOperationOnline,saveAdminClanOperationOnline } from './api.js?v=47.7.60';
 import {renderV21CommandCenter,V21_TABS} from './modules/v21/command-center-view.js?v=47.7.60';
@@ -1813,7 +1814,7 @@ async function syncBeforeEconomy(){
   if(!result||saveIntegrityBlockedV106||cloudBusy||cloudDirty||equipmentSavePendingV109||missionSavePendingV105||AMMO_SELECTION_V1061.pending)
     throw new Error('Progresso ainda nao confirmado pelo servidor. Operacao cancelada com seguranca; tente novamente apos sincronizar.');
 }
-function installEconomyState(state,{preservePendingEquipment=true,preservePendingMissions=true}={}){
+function installEconomyState(state,{preservePendingEquipment=true,preservePendingMissions=true,serverConfirmedEquipment=false}={}){
   if(!state||typeof state!=='object')throw new Error('Servidor não retornou o estado econômico atualizado.');
   // Um RPC de compra/recebimento pode devolver um save enquanto o hangar ainda
   // nao teve ACK. A economia pertence ao SQL, mas a redistribuicao de itens
@@ -1822,7 +1823,7 @@ function installEconomyState(state,{preservePendingEquipment=true,preservePendin
     reconcilePendingEquipmentV109(state,progress,equipmentSaveBaselineV109):null;
   // Snapshot RPC atrasado: se o layout divergir da ultima montagem confirmada,
   // nao permitir que uma venda/recibo velho passe a ser um novo save de hangar.
-  if(!recovery?.ok&&equipmentSaveBaselineV109&&progress&&!equipmentSavePendingV109&&
+  if(!serverConfirmedEquipment&&!recovery?.ok&&equipmentSaveBaselineV109&&progress&&!equipmentSavePendingV109&&
       equipmentLayoutSignatureV1062(state)!==equipmentLayoutSignatureV1062(progress)){
     console.error('[hangar-v1062] economia retornou layout divergente; montagens nao serao regravadas');
     saveIntegrityBlockedV106=true;
@@ -1859,7 +1860,7 @@ window.stellarEconomySyncAfterV4776=async()=>{
 };
 async function runEconomyAction(action,payload={},options={}){
   const {applyState=true,flush=true}=options;
-  return queueEconomy(async()=>{if(flush)await syncBeforeEconomy();economyMutationInFlightV106=true;try{const before=progress?{credits:Number(progress.profile?.credits)||0,uridium:Number(progress.profile?.uridium)||0}:null;const result=await economyActionOnline(action,payload);if(applyState&&result?.state){installEconomyState(result.state);telemetryTrackEconomyTransition(action,before,progress?.profile,result?.info||{});}return result;}finally{economyMutationInFlightV106=false;}});
+  return queueEconomy(async()=>{if(flush)await syncBeforeEconomy();economyMutationInFlightV106=true;try{const before=progress?{credits:Number(progress.profile?.credits)||0,uridium:Number(progress.profile?.uridium)||0}:null;const result=await economyActionOnline(action,payload);if(applyState&&result?.state){installEconomyState(result.state,{serverConfirmedEquipment:['aux_protocol_buy','aux_protocol_craft','aux_protocol_equip'].includes(action)});telemetryTrackEconomyTransition(action,before,progress?.profile,result?.info||{});}return result;}finally{economyMutationInFlightV106=false;}});
 }
 async function runAutoBuy(catalogKey,label){
   const key=String(catalogKey||'');if(!key||economyRuntime.autoPending.has(key))return false;economyRuntime.autoPending.add(key);
@@ -4648,8 +4649,11 @@ function cargoCapacity(){
   if(ship.bonusLowMaps&&progress&&['x1','x2','x3','x4'].includes(progress.mapId))cap+=ship.bonusLowMaps.cargo||0;
   cap+=cargoExtraBonus();if(economyBoostActive('cargo'))cap+=economyServiceEffect('cargo','cargo_flat',750);
   cap*=1+pilotSkillValue('logistics')/100;
+  cap*=1+auxAdvancedBonusV110('porao');
   return Math.round(cap);
 }
+function auxAdvancedBonusV110(kind){return Number(auxAdvancedEffectsV110(progress?.pet)?.[kind])||0;}
+function canCraftAuxProtocolV110(universe=false){return !offlineFarmWorldLockedV84()&&!economyMutationInFlightV106&&(universe?['u1','u2','u3','u-1','u-2','u-3'].includes(String(progress?.mapId||'').toLowerCase()):isBaseSafeZone());}
 function cargoUsed(){return Object.entries(progress?.cargo||{}).reduce((a,[id,b])=>id==='Xenomit'?a:a+(Number(b)||0),0);}
 function cargoFree(){return Math.max(0,cargoCapacity()-cargoUsed());}
 function addCargoResource(id,qty){if(!progress||qty<=0)return 0;const amount=Math.floor(qty);if(id==='Xenomit'){progress.cargo[id]=(progress.cargo[id]||0)+amount;return amount;}const take=Math.min(amount,cargoFree());if(take<=0)return 0;progress.cargo[id]=(progress.cargo[id]||0)+take;return take;}
@@ -4996,13 +5000,14 @@ function ensureBattleConfigsV2013(){
   const configs=progress.combatConfigsV2013;
   // Migrate old saved configurations without overwriting equipment already owned.
   for(const index of [1,2])if(!configs.profiles[index].petLoadout&&progress.pet){
-    configs.profiles[index].petLoadout={lasers:[...(progress.pet.lasers||[])],shields:[...(progress.pet.shields||[])],activeGear:progress.pet.activeGear||'off',protocols:{...(progress.pet.protocols||{})}};
+    configs.profiles[index].petLoadout={lasers:[...(progress.pet.lasers||[])],shields:[...(progress.pet.shields||[])],activeGear:progress.pet.activeGear||'off',protocols:{...(progress.pet.protocols||{})},advancedProtocolsV110:{...(progress.pet.advancedProtocolEquippedV110||{})}};
   }
   // Migrate legacy configurations without overwriting any currently equipped equipment.
   // On old saves neither config had AUX protocol allocations; start both with the current ones.
   for(const index of [1,2]){
     const aux=configs.profiles[index]?.petLoadout;
     if(aux&&!aux.protocols)aux.protocols={...(progress.pet?.protocols||{})};
+    if(aux&&!aux.advancedProtocolsV110)aux.advancedProtocolsV110={...(progress.pet?.advancedProtocolEquippedV110||{})};
   }
   if(configs.active!==1&&configs.active!==2)configs.active=1;
   return configs;
@@ -5025,7 +5030,7 @@ function copyBattleConfigV2013(from,to){
   configs.profiles[to]={
     shipLoadout:{lasers:[...(source.shipLoadout?.lasers||[])],generators:[...(source.shipLoadout?.generators||[])],extras:[...(source.shipLoadout?.extras||[])]},
     droneSlots:Object.fromEntries(Object.entries(source.droneSlots||{}).map(([id,list])=>[String(id),[...(list||[])]])),
-    petLoadout:source.petLoadout?{lasers:[...(source.petLoadout.lasers||[])],shields:[...(source.petLoadout.shields||[])],activeGear:source.petLoadout.activeGear||'off',protocols:{...(source.petLoadout.protocols??progress.pet?.protocols??{})}}:null,
+    petLoadout:source.petLoadout?{lasers:[...(source.petLoadout.lasers||[])],shields:[...(source.petLoadout.shields||[])],activeGear:source.petLoadout.activeGear||'off',protocols:{...(source.petLoadout.protocols??progress.pet?.protocols??{})},advancedProtocolsV110:{...(source.petLoadout.advancedProtocolsV110??progress.pet?.advancedProtocolEquippedV110??{})}}:null,
     shield:Math.max(0,Math.floor(Number(configs.profiles[to]?.shield)||0)) // Mantém o escudo já existente na CONF destino.
   };
   saveGame();rememberEquipmentChangeV109();flushCloudSave(true).catch(()=>{});renderHangar();updateUI();
@@ -5613,8 +5618,8 @@ function petRange(){return 300+(progress?.pet?.owned?(progress.pet.level||1):1)*
 function petSlotCost(slotNumber){const v=livePetSlotPrices.get(Number(slotNumber));return Number.isFinite(Number(v))?Number(v):null;}
 function petLaserIds(){return progress?.pet?.owned?(progress.pet.lasers||[]).filter(id=>ITEMS[id]?.type==='laser'):[];}
 function petShieldIds(){return progress?.pet?.owned?(progress.pet.shields||[]).filter(id=>ITEMS[id]?.type==='generator'&&ITEMS[id]?.subtype==='shield'):[];}
-function petDamage(){const levelBonus=petLevelBonuses().damage/100;return petLaserIds().reduce((sum,id)=>{const it=ITEMS[id];const base=it?.alienDamage??it?.damage??0;return sum+base*(1+(Number(it?.alienBonus)||0));},0)*petDesignerDamageMultiplier()*(1+levelBonus);}
-function petShieldSupport(){const levelBonus=petLevelBonuses().shield/100;return petShieldIds().reduce((sum,id)=>sum+(ITEMS[id]?.shield||0),0)*(1+levelBonus);}
+function petDamage(){const levelBonus=petLevelBonuses().damage/100;return petLaserIds().reduce((sum,id)=>{const it=ITEMS[id];const base=it?.alienDamage??it?.damage??0;return sum+base*(1+(Number(it?.alienBonus)||0));},0)*petDesignerDamageMultiplier()*(1+levelBonus)*(1+auxAdvancedBonusV110('dano'));}
+function petShieldSupport(){const levelBonus=petLevelBonuses().shield/100;return petShieldIds().reduce((sum,id)=>sum+(ITEMS[id]?.shield||0),0)*(1+levelBonus)*(1+auxAdvancedBonusV110('escudo'));}
 function petMaxShield(){return petShieldSupport()*(1+Number(petDesignerBonuses().shield||0));}
 function petXpForNpc(enemy){
   if(!enemy)return 0;
@@ -5800,7 +5805,7 @@ function petFireAt(task){
     });
     return;
   }
-  const rawBase=Math.round(laserPveBase(ids)*petDesignerDamageMultiplier()*petProtocolEffects().guardDamage*rand(.95,1.08));
+  const rawBase=Math.round(laserPveBase(ids)*petDesignerDamageMultiplier()*petProtocolEffects().guardDamage*(1+auxAdvancedBonusV110('dano'))*rand(.95,1.08));
   progress.ammo[ammo.id]=Math.max(0,stock-firing);
   battlePassEvent('ammoUse',firing);noteAmmoConsumedV1064();
   if(rawBase>0)applyLaserAmmoHit(task,rawBase,ammo,ammo.color);
@@ -5956,6 +5961,7 @@ function computeStats(keepRatio=true){
   rocketMult*=1+pilotSkillValue('rocketFusion')/100;
   const shipDesignBonus=shipDesignerBonuses(),petDesignBonus=petDesignerBonuses();
   hp*=1+Number(shipDesignBonus.hp||0)+Number(petDesignBonus.hp||0);
+  hp*=1+auxAdvancedBonusV110('hp');
   shield*=1+Number(shipDesignBonus.shield||0)+Number(petDesignBonus.shield||0);
   laserDamage*=1+Number(shipDesignBonus.damage||0);
   const designerMult=droneDesignerMultipliers();hp*=designerMult.hp;shield*=designerMult.shield;laserDamage*=designerMult.damage;
@@ -6171,7 +6177,9 @@ function collectBonusBox(box,fromPet=false){
   const total=pool.reduce((n,r)=>n+Number(r.weight),0);if(total<=0)return false;
   let roll=Math.random()*total,def=pool[pool.length-1];
   for(const row of pool){roll-=Number(row.weight);if(roll<0){def=row;break;}}
-  const qty=Math.floor(def.min+Math.random()*(def.max-def.min+1));
+  // V110: bônus LOOT limitado a caixas bônus; jamais reprocessa drops NPC no navegador.
+  const baseQty=Math.floor(def.min+Math.random()*(def.max-def.min+1));
+  const qty=auxAdvancedLootQuantityV110(baseQty,auxAdvancedBonusV110('loot'),Math.random());
   if(def.kind==='ammo'){
     progress.ammo ||= {};progress.ammo[def.id]=(Number(progress.ammo[def.id])||0)+qty;
     refreshAmmoCounters();
@@ -8662,7 +8670,7 @@ function renderHangarPet(){
     <div class="aux-workbench-avatar-v1091"><img src="${image}" alt="AUX-9 no hangar" loading="lazy" ${designer?`style="filter:${designerVisualCss(designer)}"`:''}/></div>
     <div class="aux-workbench-preview-stats-v1091"><span>LASERS <b>${(pet.lasers||[]).filter(Boolean).length}/${petSlotCapacity('laser',level)}</b></span>
     <span>ESCUDOS <b>${(pet.shields||[]).filter(Boolean).length}/${petSlotCapacity('shield',level)}</b></span>
-    <span>PROTOCOLOS <b>${petSlotCapacity('protocol',level)} slots</b></span></div>
+    <span>PROTOCOLOS <b>${auxAdvancedSlotCountV110(pet)}/${auxAdvancedSlotsV110(level)} slots</b></span></div>
     <div class="aux-workbench-caption-v1091">A CONF ${conf} também contém equipamentos da nave e dos drones. Troque pelo seletor global acima.</div>`;
   const bottom=document.createElement('div');bottom.className='aux-workbench-bottom-v1091';
   const title=document.createElement('header');title.className='aux-workbench-bottom-head-v1091';
@@ -8698,15 +8706,38 @@ function renderHangarPet(){
       const value=document.createElement('strong');value.textContent=`${ranks[def.id]}/3`;controls.insertBefore(value,controls.lastChild);card.appendChild(controls);legacy.appendChild(card);
     }
     bottom.appendChild(legacy);
-    const heading=document.createElement('div');heading.className='aux-workbench-coming-v1091';heading.innerHTML='<b>NOVOS PROTOCOLOS • PREVIEW V109</b><small>5 tipos, 3 níveis e até 12 slots. Itens, loja, craft e bônus entram após a validação econômica do servidor. As imagens abaixo NÃO são equipamentos adquiridos.</small>';bottom.appendChild(heading);
-    const artGrid=document.createElement('div');artGrid.className='aux-workbench-protocol-art-v1091';
-    for(const def of AUX_FUTURE_PROTOCOLS_V1091){const card=document.createElement('div');card.className='aux-workbench-protocol-card-v1091';
-      const art=def.bonuses.map((bonus,i)=>`<div><img src="${auxProtocolArtV1091(def.id,i+1)}" alt="Protocolo ${def.title} nível ${i+1}" loading="lazy"><span>N${i+1} ${bonus}</span></div>`).join('');
-      card.innerHTML=`<b>${def.title}</b><div class="aux-workbench-protocol-levels-v1091">${art}</div><small>FUTURO • ${def.description}</small>`;artGrid.appendChild(card);
-    }bottom.appendChild(artGrid);
-    const slotHeading=document.createElement('p');slotHeading.className='muted';slotHeading.textContent=`Slots de protocolos previstos para o AUX nível ${level}: ${cap}. Bloqueados para compra/equipamento até a V109 econômica.`;bottom.appendChild(slotHeading);
-    const slotGrid=document.createElement('div');slotGrid.className='aux-workbench-future-slots-v1091';
-    for(let i=0;i<cap;i++){const slot=document.createElement('div');slot.textContent=`+  SLOT ${i+1}`;slot.className='aux-workbench-future-slot-v1091';slot.setAttribute('aria-label',`Slot futuro de protocolo ${i+1}`);slotGrid.appendChild(slot);}bottom.appendChild(slotGrid);
+    // V110: catálogo funcional. Os itens permanecem vinculados à conta e cada CONF
+    // mantém somente sua seleção; nenhum item é criado ou consumido no navegador.
+    const owned=pet.advancedProtocolOwnedV110||{};
+    const equipped=normalizeAuxAdvancedEquippedV110(pet.advancedProtocolEquippedV110,owned,level);
+    const slots=auxAdvancedSlotsV110(level),used=Object.values(equipped).filter(Boolean).length;
+    const heading=document.createElement('div');heading.className='aux-workbench-coming-v1091';
+    heading.innerHTML=`<b>PROTOCOLOS AVANÇADOS • CONF ${conf}</b><small>${used}/${slots} slots • 5 famílias • Nível I Loja, II Craft, III Craft no Universo. As especializações gratuitas acima continuam independentes.</small>`;bottom.appendChild(heading);
+    const selection=document.createElement('div');selection.className='aux-v110-selections';
+    for(const def of AUX_ADVANCED_V110){
+      const current=Math.max(0,Number(owned[def.id])||0),active=equipped[def.id],next=current+1;
+      const item=document.createElement('article');item.className='aux-v110-protocol'+(active?' equipped':'');
+      const rank=current||1,percent=val=>`${String(val*100).replace('.',',')}%`;
+      item.innerHTML=`<div class="aux-v110-protocol-art"><img src="${auxProtocolArtV1091(def.id,rank)}" alt="Protocolo ${def.label} nível ${rank}" loading="lazy"></div><div class="aux-v110-protocol-copy"><b>${def.label} ${current?`• N${current}`:'• BLOQUEADO'}</b><small>${def.description}</small><strong>${active?`ATIVO +${percent(def.bonus[active])}`:`POTENCIAL +${percent(def.bonus[current||1])}`}</strong><div class="aux-v110-tiers">${def.bonus.slice(1).map((v,n)=>`<span class="${n+1<=current?'owned':''}">N${n+1} +${percent(v)}</span>`).join('')}</div></div>`;
+      const actions=document.createElement('div');actions.className='aux-v110-actions';
+      if(current){
+        const toggle=document.createElement('button');toggle.className='small-btn';toggle.type='button';toggle.textContent=active?'DESEQUIPAR':'EQUIPAR';toggle.disabled=!canChangeEquipment()||(!active&&used>=slots);toggle.onclick=()=>mutateAuxProtocolV110('aux_protocol_equip',def.id,active?0:current);actions.appendChild(toggle);
+      }
+      if(next<=3){
+        const tier=AUX_ADVANCED_TIERS_V110[next],button=document.createElement('button');button.className='small-btn gold';button.type='button';
+        button.textContent=`${tier.method==='buy'?'COMPRAR':'FABRICAR'} N${next}`;
+        button.title=`${fmt(tier.cost)} ${tier.currency==='uridium'?'STL':'CR'}${Object.entries(tier.ingredients).length?' • '+Object.entries(tier.ingredients).map(([res,qty])=>qty+' '+res).join(' • '):''}${tier.universe?' • somente no Universo':''}`;
+        button.disabled=!canCraftAuxProtocolV110(!!tier.universe)||level<tier.minLevel||(Number(progress.profile?.[tier.currency])||0)<tier.cost||Object.entries(tier.ingredients).some(([res,qty])=>(Number(progress.cargo?.[res])||0)<qty);
+        button.onclick=()=>mutateAuxProtocolV110(tier.method==='buy'?'aux_protocol_buy':'aux_protocol_craft',def.id);
+        actions.appendChild(button);
+        const price=document.createElement('small');price.textContent=`${fmt(tier.cost)} ${tier.currency==='uridium'?'STL':'CR'}${Object.entries(tier.ingredients).length?' + recursos':''} • AUX N${tier.minLevel}${tier.universe?' • Universo':''}`;actions.appendChild(price);
+      }else{const max=document.createElement('small');max.textContent='NÍVEL MÁXIMO';actions.appendChild(max);}
+      item.appendChild(actions);selection.appendChild(item);
+    }
+    bottom.appendChild(selection);
+    const bar=document.createElement('div');bar.className='aux-v110-slotbar';
+    for(let i=0;i<slots;i++){const x=document.createElement('div');x.className='aux-v110-slot';x.textContent=Object.keys(equipped).filter(id=>equipped[id])[i]?.toUpperCase()||`+ SLOT ${i+1}`;bar.appendChild(x);}bottom.appendChild(bar);
+    const warning=document.createElement('p');warning.className='muted';warning.textContent='Compra, craft e equipamento são confirmados pelo servidor. Comprar não equipa automaticamente. Para fabricar NIII, esteja no Universo. O bônus LOOT aplica-se às caixas bônus locais; não multiplica pagamentos NPC validados no SQL.';bottom.appendChild(warning);
   }else if(section==='designers'){
     renderWorkbenchDesignersV1092(bottom,'pet');
   }else if(section==='modules'){
@@ -8910,6 +8941,27 @@ function renderPet(root=ui.petContent){
   }
   const inv=document.createElement('div');inv.className='hangar-equipment-pane inventory-pane';inv.innerHTML='<div class="hangar-pane-title"><span>INVENTÁRIO • AUX-9</span><b>Lasers / Escudos</b></div>';inv.appendChild(hangarSection('EQUIPAMENTOS',HANGAR_FILTER_LABELS[state.hangarPetFilter],`pet:inventory:${state.hangarPetFilter}`,filteredInventoryGrid(state.hangarPetFilter,'pet',['lasers','shields'])));
   equipmentLayout.append(equippedPane,inv);root.appendChild(equipmentLayout);
+}
+let auxAdvancedRequestPendingV110=false;
+async function mutateAuxProtocolV110(action,id,level=0){
+  if(auxAdvancedRequestPendingV110)return;
+  const ownedBefore=Number(progress?.pet?.advancedProtocolOwnedV110?.[id])||0;
+  const rule=action==='aux_protocol_equip'?null:AUX_ADVANCED_TIERS_V110[ownedBefore+1];
+  if(action==='aux_protocol_equip'?!canChangeEquipment():!canCraftAuxProtocolV110(!!rule?.universe)){showToast(rule?.universe?'Fabricação NIII apenas nos mapas do Universo.':'Protocolo só pode ser gerenciado na base.');return;}
+  if(['aux_protocol_buy','aux_protocol_craft'].includes(action)){
+    const owned=Number(progress?.pet?.advancedProtocolOwnedV110?.[id])||0;
+    const tier=AUX_ADVANCED_TIERS_V110[owned+1];if(!tier)return;
+    const resources=Object.entries(tier.ingredients).map(([k,n])=>`${fmt(n)} ${RESOURCES[k]?.name||k}`).join(' • ');
+    const ok=await stellarConfirmV4776(`Confirmar ${action==='aux_protocol_buy'?'compra':'fabricação'} do protocolo ${id.toUpperCase()} N${owned+1} por ${fmt(tier.cost)} ${tier.currency==='uridium'?'STL':'CR'}${resources?' + '+resources:''}?`);
+    if(!ok)return;
+  }
+  auxAdvancedRequestPendingV110=true;
+  try{
+    const result=await runEconomyAction(action,{id,...(action==='aux_protocol_equip'?{level}:{})});
+    computeStats(true);renderHangar();updateUI();
+    showToast(`AUX • ${id.toUpperCase()} nível ${result?.info?.level??0} • confirmado pelo servidor`,'reward');
+  }catch(e){showToast(e.message||'Operação AUX não confirmada. Nenhum item concedido.');}
+  finally{auxAdvancedRequestPendingV110=false;}
 }
 function changePetProtocol(id,delta){
   if(!progress?.pet?.owned||!AUX_PROTOCOL_IDS.includes(id))return;

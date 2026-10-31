@@ -1,7 +1,7 @@
 // Stellar Legacy V20.1.3 — two battle loadouts, no materialised duplicate items.
 export const COMBAT_CONFIG_COOLDOWN_MS_V2013=5000;
 export function captureCombatBuildV2013(shipLoadout,drones,shield=0,pet=null){
-  return {shipLoadout:{lasers:[...(shipLoadout?.lasers||[])],generators:[...(shipLoadout?.generators||[])],extras:[...(shipLoadout?.extras||[])]},droneSlots:Object.fromEntries((drones||[]).map(d=>[String(d.id),[...(d.slots||[])]])),petLoadout:pet?{lasers:[...(pet.lasers||[])],shields:[...(pet.shields||[])],activeGear:pet.activeGear||'off',protocols:{...(pet.protocols||{})}}:null,shield:Math.max(0,Math.floor(Number(shield)||0))};
+  return {shipLoadout:{lasers:[...(shipLoadout?.lasers||[])],generators:[...(shipLoadout?.generators||[])],extras:[...(shipLoadout?.extras||[])]},droneSlots:Object.fromEntries((drones||[]).map(d=>[String(d.id),[...(d.slots||[])]])),petLoadout:pet?{lasers:[...(pet.lasers||[])],shields:[...(pet.shields||[])],activeGear:pet.activeGear||'off',protocols:{...(pet.protocols||{})},advancedProtocolsV110:{...(pet.advancedProtocolEquippedV110||{})}}:null,shield:Math.max(0,Math.floor(Number(shield)||0))};
 }
 export function freshBattleConfigsV2013(loadout,drones,shield,pet=null){
   const build=captureCombatBuildV2013(loadout,drones,shield,pet);
@@ -66,7 +66,8 @@ export function exchangeCombatBuildV2013({inventory,shipLoadout,drones,pet=null,
       activeGear:pet.gearsOwned?.[source.activeGear]?source.activeGear:'off',
       // V109.1: the active configuration owns its AUX specialization allocation.
       // Old presets that lack this field retain the current allocation.
-      protocols:normalizeAuxTacticalProtocolsV1091(source.protocols??pet.protocols,pet)
+      protocols:normalizeAuxTacticalProtocolsV1091(source.protocols??pet.protocols,pet),
+      advancedProtocolEquippedV110:{...(source.advancedProtocolsV110??pet.advancedProtocolEquippedV110??{})}
     };
   }
   return {inventory:stock,shipLoadout:result,drones:resultDrones,petLoadout};

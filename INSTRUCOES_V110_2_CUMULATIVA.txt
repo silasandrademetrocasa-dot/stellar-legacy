@@ -1,0 +1,26 @@
+STELLAR LEGACY — V110.2 CUMULATIVA (PROTOCOLOS AUX + REBASE SEM REGRESSÃO)
+
+ORIGEM: projeto completo stellar-legacy-main.zip recebido em 31/10/2026.
+
+CAUSA DOS ERROS ANTERIORES
+V110.0 sobrescreveu a integração V106.9 de recompensas NPC em server/index.js.
+V110.1 sobrescreveu server/world.js e removeu duas proteções da V108:
+- atualização com intervalo das salas ociosas (shouldRefreshWorldRuntimeV108)
+- logs de rede somente com STELLAR_NETWORK_LOGS=1
+
+O QUE A V110.2 FAZ
+- Inclui todos os recursos de Protocolos AUX da V110 e suas CONF 1/2.
+- Rebaseia server/index.js sobre a versão MAIS RECENTE enviada, preservando V106.9.
+- NÃO altera server/world.js nem o helper V106.9 ou testes antigos.
+- Acrescenta 3 testes de regressão para V108/V106.9/V110.
+- Preserva o hangar V109.2 e todas as demais correções do projeto base.
+
+COMO INSTALAR
+1. Na raiz do GitHub, deixe APENAS este ZIP, excluindo os V110.0 e V110.1.
+2. Execute Actions -> Instalador Universal -> Run workflow.
+3. Confira 'Validar projeto', depois 'Publicar somente se testes passarem'.
+4. Se houver outro erro, compartilhe o bloco completo 'not ok' e a data da branch.
+
+IMPORTANTE: atualização cumulativa em relação ao V109.2. NÃO rodar V110.0 nem V110.1 antes.
+Sem SQL. Não inclua o ZIP completo antigo na raiz do GitHub.
+Só testes locais foram executados; ainda é necessário verificar GitHub Actions e Render.

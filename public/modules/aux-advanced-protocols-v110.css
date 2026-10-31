@@ -1,0 +1,20 @@
+/* V110: cinco familias de protocolos AUX, com render de imagens existentes. */
+#hangarModal .aux-v110-selections{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:10px;align-items:stretch}
+#hangarModal .aux-v110-protocol{display:grid;grid-template-columns:90px minmax(0,1fr);grid-template-rows:1fr auto;column-gap:10px;row-gap:8px;padding:11px;border-radius:12px;border:1px solid #285c82;background:linear-gradient(135deg,#081b30 0%,#07111f 100%);min-width:0;box-shadow:0 3px 16px #0004}
+#hangarModal .aux-v110-protocol.equipped{border-color:#53c5b5;background:linear-gradient(135deg,#0c3241,#071727)}
+#hangarModal .aux-v110-protocol-art{display:flex;align-items:center;justify-content:center;aspect-ratio:1;border-radius:9px;background:radial-gradient(circle,#173456,#071422 75%);border:1px solid #2d6983;min-width:0}
+#hangarModal .aux-v110-protocol-art img{display:block;max-width:100%;width:88px;height:88px;object-fit:contain}
+#hangarModal .aux-v110-protocol-copy{display:flex;flex-direction:column;gap:5px;min-width:0}
+#hangarModal .aux-v110-protocol-copy>b{font-size:13px;letter-spacing:.04em;color:#f3f8ff}
+#hangarModal .aux-v110-protocol-copy small{font-size:11px;color:#b4ccdd;line-height:1.35}
+#hangarModal .aux-v110-protocol-copy strong{font-size:12px;color:#83e5d5}
+#hangarModal .aux-v110-tiers{display:flex;gap:3px;flex-wrap:wrap}
+#hangarModal .aux-v110-tiers span{font-size:9px;line-height:1.35;padding:4px 5px;border:1px solid #345370;background:#0c1c30;color:#879ab4;border-radius:5px}
+#hangarModal .aux-v110-tiers span.owned{color:#c5edff;background:#143654;border-color:#3f7da3}
+#hangarModal .aux-v110-actions{grid-column:1/-1;display:flex;flex-wrap:wrap;align-items:center;gap:6px;padding-top:8px;border-top:1px solid #29496378}
+#hangarModal .aux-v110-actions button{min-width:110px;min-height:34px;flex:1}
+#hangarModal .aux-v110-actions button:disabled{opacity:.42;cursor:not-allowed}
+#hangarModal .aux-v110-actions>small{width:100%;text-align:center;font-size:10px;color:#abbed0}
+#hangarModal .aux-v110-slotbar{display:flex;flex-wrap:wrap;gap:7px;margin:12px 0}
+#hangarModal .aux-v110-slot{flex:1;min-width:76px;border:1px dashed #377ca0;border-radius:7px;text-align:center;padding:10px 7px;color:#abd4f1;background:#092038;font-size:10px;font-weight:750}
+@media(max-width:680px){#hangarModal .aux-v110-selections{grid-template-columns:1fr}#hangarModal .aux-v110-protocol{grid-template-columns:76px minmax(0,1fr);padding:9px}#hangarModal .aux-v110-protocol-art img{width:72px;height:72px}}

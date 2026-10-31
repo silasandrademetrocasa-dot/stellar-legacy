@@ -1,0 +1,33 @@
+{
+  "release": "V110.2",
+  "type": "incremental-cumulative",
+  "basePackageVersion": "47.7.60",
+  "baseSnapshot": "stellar-legacy-main.zip (31/10/2026)",
+  "fixed": [
+    "V1069 reward persistence regression",
+    "V108 idle world refresh regression",
+    "V108 telemetry opt-in regression"
+  ],
+  "notOverwritten": [
+    "server/world.js",
+    "server/npc-reward-delivery-v1069.js",
+    "tests/v108-idle-world-refresh.test.mjs",
+    "tests/v1069-npc-reward-delivery.test.mjs"
+  ],
+  "contents": [
+    "INSTRUCOES_V110_2_CUMULATIVA.txt",
+    "docs/V110_AUX_PROTOCOLOS_AVANCADOS.md",
+    "public/combat-config-v2013.js",
+    "public/game.js",
+    "public/index.html",
+    "public/modules/aux-advanced-protocols-v110.css",
+    "public/modules/aux-advanced-protocols-v110.js",
+    "public/modules/hangar-save-recovery-v109.js",
+    "public/modules/hangar-write-guard-v1062.js",
+    "server/index.js",
+    "stellar-install.json",
+    "tests/v110-aux-advanced-protocols.test.mjs",
+    "tests/v1101-aux-npc-compatibility.test.mjs",
+    "tests/v1102-protection-regression.test.mjs"
+  ]
+}

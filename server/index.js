@@ -1,6 +1,7 @@
 /* STELLAR_OFFLINE_FARM_V484 APPLIED */
 import {saleQuoteV4776} from '../public/modules/sale-policy-v4776.js';
 import {validateEquipmentWriteV1062} from '../public/modules/hangar-write-guard-v1062.js';
+import {applyAuxAdvancedActionV110,validateAuxAdvancedSaveV110} from '../public/modules/aux-advanced-protocols-v110.js';
 import {attachFrontierAuditV450} from './frontier-audit-v450.js';
 import {attachFrontierAdminV440} from './frontier-admin-v440.js';
 import {attachAstralIntegrationsV435} from './astral-integrations-v435.js';
@@ -1484,7 +1485,7 @@ app.post('/api/economy/action', requireUser, OFFLINE_FARM_GUARD_V484, asyncRoute
   const routeStarted=Date.now();
   const action=String(req.body?.action||'').trim();
   const payload=(req.body?.payload&&typeof req.body.payload==='object')?req.body.payload:{};
-  const tamper=invalidShopArguments(req.body,['action','payload'])||invalidShopArguments(payload,['catalog_key','kind','qty','drone_id','item_id','resource_id','id','recipe_id','service_id','protocol','amount']);
+  const tamper=invalidShopArguments(req.body,['action','payload'])||invalidShopArguments(payload,['catalog_key','kind','qty','drone_id','item_id','resource_id','id','recipe_id','service_id','protocol','amount','level']);
   if(tamper){const outcome=await securityService.report(req.user.id,tamper,'economy_action');
     if(outcome?.auto_suspended)return res.status(403).json({error:'Conta temporariamente suspensa.',code:'ACCOUNT_BANNED'});
     return res.status(400).json({error:'Parâmetros econômicos não autorizados.',code:tamper.code});}
@@ -1530,6 +1531,9 @@ app.post('/api/economy/action', requireUser, OFFLINE_FARM_GUARD_V484, asyncRoute
     }
     else if(action==='base_service'){
       const serviceId=String(payload.service_id||'').slice(0,40),svc=activateBaseServiceServer(state,serviceId,systemsSnapshot);info={action,service_id:serviceId,cost:svc.cost,currency:'credits',expires_at:svc.expires_at,duration_ms:svc.duration_ms};
+    }
+    else if(['aux_protocol_buy','aux_protocol_craft','aux_protocol_equip'].includes(action)){
+      info=applyAuxAdvancedActionV110(state,action,payload);
     }
     else if(action==='craft_recipe'){
       const recipeId=String(payload.recipe_id||'').slice(0,64),recipe=applyCraftRecipeServer(state,recipeId,systemsSnapshot);info={action,recipe_id:recipeId,cost:recipe.cost,currency:recipe.currency,ingredients:recipe.ingredients,output:recipe.output_label};
@@ -1958,6 +1962,9 @@ app.put('/api/save', requireUser, OFFLINE_FARM_GUARD_V484, asyncRoute(async (req
       code:gearWriteV1062.code
     });
   }
+  // V110: só salva os níveis de protocolos possuídos no servidor e configurações válidas.
+  const auxValidationV110=validateAuxAdvancedSaveV110(serverSave?.state||null,state);
+  if(!auxValidationV110.ok)return res.status(409).json({error:'Protocolos do AUX divergiram do servidor. Sincronize novamente.',code:auxValidationV110.code});
   // V108: finalizações/abates confirmados não podem retroceder e
   // prêmios exigem uma missão completa previamente salva no banco.
   const missionErrorV108=missionSaveGuardV108(serverSave?.state||null,state);

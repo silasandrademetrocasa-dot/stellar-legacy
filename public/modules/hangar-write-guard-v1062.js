@@ -7,10 +7,12 @@ const build = b => ({
 const droneSlots = slots => Object.fromEntries(Object.entries(slots||{}).sort(([a],[b])=>a.localeCompare(b)).map(([id,items])=>[id,list(items)]));
 const protocolKeysV1091 = ['guard','ore','box','repair','kami'];
 const protocolRanksV1091 = p => Object.fromEntries(protocolKeysV1091.map(id=>[id,Math.max(0,Math.min(3,Math.trunc(Number(p?.[id])||0)))]));
+const advancedBuildV110 = p => Object.fromEntries(['dano','hp','escudo','loot','porao'].map(id=>[id,Math.max(0,Math.min(3,Math.trunc(Number(p?.[id])||0)))]));
 const petBuild = (p,fallback=null) => ({
   lasers:list(p?.lasers),shields:list(p?.shields),
   // Mode can reset itself automatically (e.g. NOVA BURST); do not require hangar intent for that.
-  protocols:protocolRanksV1091(p?.protocols??fallback?.protocols)
+  protocols:protocolRanksV1091(p?.protocols??fallback?.protocols),
+  advancedProtocolsV110:advancedBuildV110(p?.advancedProtocolsV110??p?.advancedProtocolEquippedV110??fallback?.advancedProtocolEquippedV110)
 });
 const battleProfile = (p,pet) => ({shipLoadout:build(p?.shipLoadout),droneSlots:droneSlots(p?.droneSlots),petLoadout:petBuild(p?.petLoadout,pet)});
 export function equipmentLayoutSignatureV1062(state){
