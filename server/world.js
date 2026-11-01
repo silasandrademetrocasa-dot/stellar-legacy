@@ -963,17 +963,20 @@ class Room {
     });
     const factor=eligible.length?1/eligible.length:0;
     for(const c of eligible){
+      // V116.1: a conexao pode cair enquanto a RPC aguarda; congelar ID antes de cada await.
+      const recipientUserId=String(c.player?.userId||'');
+      if(!recipientUserId)continue;
       // Apenas o abate validado pelo servidor gera progresso permanente de Elite.
       // Elite só pontua depois da confirmação financeira do abate pelo SQL.
-      const isOwner=String(c.player?.userId||'')===ownerId;
+      const isOwner=recipientUserId===ownerId;
       // Somente a sala online define o NPC, a divisão e o ID do abate.
       // O Supabase confirma a concessão em transação idempotente ANTES de informar o cliente.
       const killKey=`${this.key}:${e.id}`.slice(0,180);
       try{
-        const serverReward=await this.world.grantNpcReward(c.player.userId,killKey,String(e.type||'npc'),Math.max(0,Math.round((Number(e.credits)||0)*factor)),Math.max(0,Math.round((Number(e.uridium)||0)*factor)),isOwner);
-        if(serverReward.granted===true)this.world.recordEliteEvent?.(c.player.userId,'npc_kill').catch(err=>console.warn('Elite NPC:',err?.message));
+        const serverReward=await this.world.grantNpcReward(recipientUserId,killKey,String(e.type||'npc'),Math.max(0,Math.round((Number(e.credits)||0)*factor)),Math.max(0,Math.round((Number(e.uridium)||0)*factor)),isOwner);
+        if(serverReward.granted===true)this.world.recordEliteEvent?.(recipientUserId,'npc_kill').catch(err=>console.warn('Elite NPC:',err?.message));
         if(serverReward.recoveredAfterTimeout)console.info('[npc-reward-v1069] recibo idempotente recuperado apos timeout');
-        this.world.recordRelayPve?.(c.player.userId,`npc:${this.key}:${e.id}:${c.player.userId}`,'npc').catch(()=>{});
+        this.world.recordRelayPve?.(recipientUserId,`npc:${this.key}:${e.id}:${recipientUserId}`,'npc').catch(()=>{});
         safeJsonSend(c,{type:'kill_credit',entity:dead,factor,serverReward,groupShared:!!rewardGroupId,eligibleCount:eligible.length,ownerUserId:ownerId,ownerGroupId:rewardGroupId||null,dropBox:isOwner});
       }catch(err){
         console.error('[npc-reward] falha no ledger',{npc:e.id,error:String(err?.message||err).slice(0,180)});

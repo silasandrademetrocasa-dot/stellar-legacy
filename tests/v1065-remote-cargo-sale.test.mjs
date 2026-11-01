@@ -61,8 +61,9 @@ test('V106.5: manual fica bloqueado no farm offline e no Autopilot sem PUT por f
   assert.match(game,/runEconomyAction\('sell_cargo',\{resource_id:'all'\}\)/);
   assert.match(game,/sellCargo:\(\)=>sellAllCargo\(\{automatic:true\}\)/);
 });
-test('V106.5: interface Autopilot bloqueia checkbox de venda sem CPU',()=>{
+test('V116.1: interface permite venda presencial sem CPU, mantendo CPU obrigatorio para venda remota',()=>{
   const src=readFileSync(new URL('../public/modules/stellar-autopilot-v48.js',import.meta.url),'utf8');
-  assert.match(src,/sellToggle\.disabled=!cpuReady/);
+  assert.match(src,/sellToggle\.disabled=false/);
   assert.match(src,/s\.remoteTraderEquipped===true&&cargoRatio/);
+  assert.match(src,/Sem terminal remoto: Autopilot retorna à base/);
 });

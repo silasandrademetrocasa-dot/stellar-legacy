@@ -121,7 +121,7 @@ test('V115 painel ADM mede bytes sem UUID, inventários ou dados de usuário',()
  assert.match(server,/is_game_admin_v1763/);
 });
 test('V115 pacote conserva itinerário do Autopilot e forja V113.1',()=>{
- const game=src('public/game.js');assert.match(game,/stellar-autopilot-v112\.js/);
+ const game=src('public/game.js');assert.match(game,/stellar-autopilot-v116\.js/); // V116 usa ponte nova para invalidar cache mobile
  const server=src('server/index.js');assert.match(server,/aux_protocol_craft/);
  assert.match(server,/stellar_grant_npc_reward_v1131/);
  assert.match(server,/installOfflineFarmV484/);

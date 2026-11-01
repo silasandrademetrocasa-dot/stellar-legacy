@@ -1756,6 +1756,21 @@ app.get('/api/autopilot/v48/access',requireUser,asyncRoute(async(req,res)=>{
   const active=data?.enabled===true&&(!data.expires_at||new Date(data.expires_at).getTime()>Date.now());
   return res.json({allowed:active,is_admin:false,source:active?data.source:null});
 }));
+// V116.1: telemetria minima de parada/rota/comercio, autenticada e limitada por piloto.
+const autopilotDiagThrottleV116=new Map();
+app.post('/api/autopilot/v116/diagnostics',requireUser,(req,res)=>{
+  const event=String(req.body?.event||'');
+  if(!['stopped','route_unavailable','route_watchdog','trade_timeout','trade_uncertain'].includes(event))
+    return res.status(400).json({error:'Evento invalido'});
+  const stamp=Date.now(),uid=String(req.user.id),last=autopilotDiagThrottleV116.get(uid)||0;
+  if(stamp-last<20000)return res.status(202).json({ok:true,rateLimited:true});
+  if(autopilotDiagThrottleV116.size>5000)autopilotDiagThrottleV116.clear();
+  autopilotDiagThrottleV116.set(uid,stamp);
+  const map=String(req.body?.map||'').slice(0,10),goal=String(req.body?.goal||'').slice(0,10);
+  const reason=String(req.body?.reason||'').replace(/[^a-zA-Z0-9À-ÿ _•:.,→-]/g,'').slice(0,100);
+  console.info('[autopilot-v116]',JSON.stringify({pilot:uid.slice(0,8),event,map,goal,base:req.body?.atBase===true,routeMisses:Math.min(1000,Math.max(0,Number(req.body?.routeMisses)||0)),tradeBusy:req.body?.tradeBusy===true,holdBuy:req.body?.tradeHoldBuy===true,holdSell:req.body?.tradeHoldSell===true,reason}));
+  return res.json({ok:true});
+});
 app.get('/api/admin/autopilot/v48/grants',requireUser,asyncRoute(async(req,res)=>{
   if(!await autopilotAdminV48(req,res))return;
   const service=await requireEliteAdmin();

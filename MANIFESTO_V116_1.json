@@ -1,0 +1,26 @@
+{
+  "release": "V116.1",
+  "base": "V115.0 cumulativa",
+  "requiresPackageVersion": "47.7.60",
+  "migration": "nenhuma",
+  "files": [
+    "public/game.js",
+    "public/index.html",
+    "public/style.css",
+    "public/modules/stellar-autopilot-v48.js",
+    "public/modules/stellar-autopilot-v116.js",
+    "public/modules/stellar-autopilot-recovery-v116.js",
+    "server/world.js",
+    "server/index.js",
+    "tests/v1065-remote-cargo-sale.test.mjs",
+    "tests/v1069-npc-reward-delivery.test.mjs",
+    "tests/v1101-aux-npc-compatibility.test.mjs",
+    "tests/v112-smart-autopilot.test.mjs",
+    "tests/v115-cumulative-competitive.test.mjs",
+    "tests/v116-autopilot-recovery.test.mjs",
+    "docs/v116/LEIA_PRIMEIRO_V116_1.md",
+    "docs/v116/README.md"
+  ],
+  "tests": 414,
+  "notes": "autopilot base trade, retry backoff, watchdog, reward userId, base button sync"
+}

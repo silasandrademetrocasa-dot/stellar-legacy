@@ -84,7 +84,8 @@ import { createPreviewScheduler } from './modules/preview-scheduler-v70.js?v=47.
 import { createFrameGate } from './modules/frame-gate.js?v=47.7.60';
 import {createVisualIsolationV75, VISUAL_TEST_MODES_V75} from './modules/visual-isolation-v75.js?v=47.7.60';
 import {npcDisplaySizeV526,oreDisplaySizeV526,boxDisplaySizeV526,lootDisplaySizeV526} from './modules/visual-scale-v526.js?v=47.7.60';
-import { createStellarAutopilotV48 } from './modules/stellar-autopilot-v112.js?v=47.7.60';
+import {baseTradeVisibleV116} from './modules/stellar-autopilot-recovery-v116.js?v=47.7.60';
+import { createStellarAutopilotV48 } from './modules/stellar-autopilot-v116.js?v=47.7.60';
 import {routeMapLayoutV4825} from './modules/route-map-layout-v4825.js?v=47.7.60';
 import { createStagedAssetPreloader } from './modules/staged-preload-v342.js?v=47.7.60';
 import { QUALITY_PROFILES, initialAutoQualityForDevice } from './modules/quality-profiles.js?v=47.7.60';
@@ -5410,6 +5411,7 @@ async function sendCloudSaveAttemptV106(){
     return 'saved';
   }
   catch(e){failed=true;console.warn('cloud save',e);
+    if(e?.code==='SAVE_NPC_STALE')console.info('[save-v116] revision NPC alterada em paralelo: lendo estado oficial, sem sobrescrever economia');
     if(e?.code==='SAVE_MISSION_STALE'||e?.code==='SAVE_MISSION_UNVERIFIED'||e?.code==='SAVE_EQUIPMENT_INTENT_REQUIRED'||e?.code==='SAVE_EQUIPMENT_STALE'||e?.code==='SAVE_COUPON_STALE'||e?.code==='SAVE_EVENT_STALE'||e?.code==='SAVE_ELITE_STALE'||e?.code==='SAVE_ECONOMY_STALE'||e?.code==='SAVE_NPC_STALE'||e?.code==='SAVE_ORE_STALE'){
       try{
         // Não ressuscita missões concluídas: só recupera aceites e progresso ainda não recompensados.
@@ -7423,6 +7425,7 @@ function updateFrameHudV2024(profile=null){
   if(work.fast){
     const began=profile?performance.now():0;
     updateCriticalHudV2024();
+    updateBaseTradePrompt(); // Resposta imediata ao entrar/sair da base mesmo com HUD reduzido.
     if(AUX_WORK_V2027.due('portalPromptV73',250))updatePortalPromptV73();
     if(profile)profile.hudCriticalMs=performance.now()-began;
   }
@@ -8098,16 +8101,28 @@ function updatePetFloat(){
     ui.petGearQuickSelect.value=owned.includes(pet.activeGear)?pet.activeGear:'off';
   }
 }
+// V116.1: independente do HUD pesado (deferred). Atualiza só DOM quando elegibilidade muda.
+let basePromptLastVisibleV116=null,basePromptLastInfoAtV116=0;
 function updateBaseTradePrompt(){
   if(!ui.baseTradePrompt)return;
-  const active=!!progress&&isAtTrader()&&!isGalaxyGateMap()&&!state.jumping;
-  ui.baseTradePrompt.classList.toggle('hidden',!active);
-  if(!active)return;
-  // V58: at the trader the button is anchored to the viewport, not the moving base sprite.
-  // Remove stale inline coords left by earlier releases before applying fixed CSS.
-  if(ui.baseTradePrompt.style.left)ui.baseTradePrompt.style.removeProperty('left');
-  if(ui.baseTradePrompt.style.top)ui.baseTradePrompt.style.removeProperty('top');
-  if(ui.baseTradePromptInfo)ui.baseTradePromptInfo.textContent=`Porão ${fmt(cargoUsed())}/${fmt(cargoCapacity())} • ${fmt(cargoSaleValue())} CR`;
+  const active=baseTradeVisibleV116({connected:!!progress&&authenticated,map:progress?.mapId,ownTerritory:!!progress&&isOwnTerritory(),safeZone:!!progress&&isBaseSafeZone(),jumping:!!state.jumping,astral:!!progress&&isGalaxyGateMap()});
+  if(basePromptLastVisibleV116!==active||ui.baseTradePrompt.classList.contains('hidden')===active){
+    ui.baseTradePrompt.classList.toggle('hidden',!active);
+    basePromptLastVisibleV116=active;
+    if(active){
+      ui.baseTradePrompt.style.removeProperty('left');ui.baseTradePrompt.style.removeProperty('top');
+      basePromptLastInfoAtV116=0;
+    }
+  }
+  const ts=performance.now();
+  if(active&&ui.baseTradePromptInfo&&ts-basePromptLastInfoAtV116>=1200){
+    basePromptLastInfoAtV116=ts;
+    HUD_CONTENT_CACHE.text(ui.baseTradePromptInfo,`Porão ${fmt(cargoUsed())}/${fmt(cargoCapacity())} • ${fmt(cargoSaleValue())} CR`);
+  }
+  // Não deixar o modal de venda presencial aberto após deixar a base.
+  if(!active&&ui.cargoModal&&!ui.cargoModal.classList.contains('hidden')&&!hasRemoteTraderCpuV1065(progress)){
+    ui.cargoModal.classList.add('hidden');
+  }
 }
 function updateUI(){
   if(!periodicHudCall)HUD_DEFERRED_V72.cancel();
@@ -9135,8 +9150,8 @@ function cargoSaleValue(){let total=0;for(const [id,qty] of Object.entries(progr
 function canSellCargoNow(){return isAtTrader()||hasRemoteTraderCpuV1065(progress);}
 async function sellCargoResource(id){if(!canSellCargoNow()){showToast('Venda fora da base exige o Terminal Mercante Remoto Elite equipado');return;}const qty=progress.cargo[id]||0,price=liveResourcePrice(id);if(qty<=0||price<=0){showToast('Recurso indisponível para venda neste momento');return;}try{const r=await runEconomyAction('sell_cargo',{resource_id:id});journeyEvent('sell',1);battlePassEvent('sell',qty);showToast(`${qty} ${id} vendidos por ${fmt(r?.info?.total||0)} CR • servidor`);if(state.hangarTab==='refinery')renderHangar();}catch(e){showToast(e.message||'Venda recusada pelo servidor');}}
 async function sellAllCargo({automatic=false}={}){
-  // Venda direta na base permanece manual sem extra. Qualquer automação exige o CPU.
-  if(automatic&&!hasRemoteTraderCpuV1065(progress))return false;
+  // V116.1: venda automatizada permitida na base oficial, enquanto venda remota exige CPU equipado.
+  if(automatic&&!hasRemoteTraderCpuV1065(progress)&&!isAtTrader())return false;
   if(!canSellCargoNow()){if(!automatic)showToast('Para vender fora da base, equipe o Terminal Mercante Remoto Elite');return false;}
   const amount=Object.entries(progress.cargo||{}).reduce((sum,[id,qty])=>sum+(liveResourcePrice(id)>0?Math.max(0,Number(qty)||0):0),0);
   if(amount<=0)return false;
@@ -10169,7 +10184,7 @@ const AUTOPILOT_V48=createStellarAutopilotV48({
     online:authenticated&&(sharedUniverseOnline()||isGalaxyGateMap()),ready:!!progress&&!gameBootstrapRuntime.loading,
     astralActive:isGalaxyGateMap()&&!!alphaGate().run?.active,
     jumping:!!state.jumping,map:progress?.mapId||'',repairRequired:!!(progress?.repairRequired||state.repairRequired),
-    atBase:!!progress&&isAtTrader(),canSell:!!progress&&canSellCargoNow(),remoteTraderEquipped:hasRemoteTraderCpuV1065(progress),remoteBuyEquipped:!!progress&&autoBuyEnabled(),buyPermitted:!!progress&&(isAtTrader()||autoBuyEnabled()),
+    atBase:!!progress&&isAtTrader(),canSell:!!progress&&canSellCargoNow(),sellableCargoValue:progress?cargoSaleValue():0,remoteTraderEquipped:hasRemoteTraderCpuV1065(progress),remoteBuyEquipped:!!progress&&autoBuyEnabled(),buyPermitted:!!progress&&(isAtTrader()||autoBuyEnabled()),
     base:progress?basePointForFaction(progress.profile.faction,'x1'):{x:0,y:0},
     player:{x:player.x,y:player.y,hp:player.hp,maxHp:player.maxHp},
     enemies:state.enemies,loot:state.loot,bonusBoxes:state.bonusBoxes,ores:state.ores,timeSec:nowSec(),
@@ -10267,6 +10282,10 @@ const AUTOPILOT_V48=createStellarAutopilotV48({
   },
   fireRocket:()=>fireRocket(false),
   sellCargo:()=>sellAllCargo({automatic:true}),
+  onDiagnostics:entry=>{
+    const c=getSessionCredentials();if(!authenticated||!c?.accessToken||!c?.gameSessionId)return;
+    fetch('/api/autopilot/v116/diagnostics',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+c.accessToken,'X-Game-Session-Id':c.gameSessionId},body:JSON.stringify(entry),cache:'no-store',signal:AbortSignal.timeout(7000)}).catch(()=>{});
+  },
   buyPackage:(key,kind)=>isAtTrader()?applyAuthoritativePurchase(key,kind==='ammo'?'Munição Autopilot':'Mísseis Autopilot'):(autoBuyEnabled()?runAutoBuy(key,kind==='ammo'?'Munição Autopilot':'Mísseis Autopilot'):Promise.resolve(false)),
   onNotice:()=>{}
 });

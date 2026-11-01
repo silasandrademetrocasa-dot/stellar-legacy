@@ -5014,3 +5014,6 @@ body[data-visual-test-v75="minimap"] #minimapPanel{visibility:hidden!important;}
 .auth-form .auth-remember-row input{width:18px;height:18px;min-width:18px;accent-color:#2dd1e5;margin:0;flex:none}
 .auth-form .auth-remember-row.hidden,.auth-form .auth-link-btn.hidden,.auth-form .auth-remember-note.hidden{display:none}
 .auth-form .auth-remember-note{font-size:.76rem;color:#8bb0c7;line-height:1.35;margin:-2px 0 5px}
+
+/* V116.1: o seletor da base nao deve vencer a classe hidden mesmo em HUD mobile. */
+.base-trade-prompt.hidden{display:none!important;visibility:hidden!important;pointer-events:none!important}

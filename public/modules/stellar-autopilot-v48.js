@@ -1,3 +1,4 @@
+import {baseCommerceWaitV116,nextRouteCooldownV116,routeWatchdogExpiredV116} from './stellar-autopilot-recovery-v116.js?v=116.1';
 /* STELLAR_AUTOPILOT_PHASE3_V483 • Fase 3: rotas, comércio e munição controlados. */
 /* Stellar Legacy V48 — Autopilot assistido (sessão aberta).
  * Não credita recompensas, não escreve saves externos e não concede acesso.
@@ -18,7 +19,7 @@ export function cleanAutopilotConfig(input={}){
   return {map,npcTypes,boxes:input.boxes!==false,drops:input.drops!==false,ores:input.ores===true,orbit:input.orbit!==false,combatCollect:input.combatCollect!==false,avoidCrowd:input.avoidCrowd!==false,
     autoSell:input.autoSell!==false,autoBuy:input.autoBuy!==false,rockets:input.rockets!==false,
     cargoThreshold:number(input.cargoThreshold,50,100,85),hpRetreat:number(input.hpRetreat,10,80,30),
-    minutes:number(input.minutes,input.astralLoop===true?0:5,360,120),budget:number(input.budget,0,250000000,25000000),
+    minutes:number(input.minutes,input.astralLoop===true?0:5,720,120),budget:number(input.budget,0,250000000,25000000),
     ammoMin:number(input.ammoMin,0,1000000,2500),rocketMin:number(input.rocketMin,0,1000000,100),
     combatRange:number(input.combatRange,0.55,0.93,0.78),mode:['nearest','profit'].includes(input.mode)?input.mode:'nearest',
     astralAssist:input.astralAssist===true,astralGate:['alpha','beta','gamma'].includes(input.astralGate)?input.astralGate:'alpha',
@@ -130,8 +131,21 @@ export function chooseAutopilotAction(raw,cfg){
     if(hpRatio<.80)return {type:'idle',reason:'Aguardando recuperação de HP'};
   }
   const cargoRatio=(Number(s.cargoUsed)||0)/Math.max(1,Number(s.cargoCapacity)||1);
-  if(!inAstral&&c.autoSell&&s.remoteTraderEquipped===true&&cargoRatio>=c.cargoThreshold/100){
-    return s.canSell?{type:'sell',reason:'Venda remota automática • CPU equipado'}:{type:'idle',reason:'Terminal remoto indisponível • aguardando sincronização'};
+  const sellable=s.sellableCargoValue===undefined?cargoRatio>0:Number(s.sellableCargoValue)>0;
+  const remoteSaleReady=s.remoteTraderEquipped===true&&cargoRatio>=c.cargoThreshold/100&&sellable;
+  const baseSaleDue=s.remoteTraderEquipped!==true&&cargoRatio>=c.cargoThreshold/100&&sellable;
+  if(!inAstral&&c.autoSell&&(remoteSaleReady||baseSaleDue)){
+    // Nunca vender fora da base sem CPU, mesmo se o snapshot da UI ainda disser canSell.
+    if(baseSaleDue&&!s.atBase){
+      if(map!=='x1')return {type:'route',map:'x1',reason:'Porão cheio • retornando para venda na base'};
+      return {type:'move',x:s.base.x,y:s.base.y,reason:'Porão cheio • aproximando do comerciante'};
+    }
+    if(!s.canSell){
+      if(s.remoteTraderEquipped===true)return {type:'idle',reason:'Terminal remoto indisponível • aguardando sincronização'};
+      if(map!=='x1')return {type:'route',map:'x1',reason:'Porão cheio • retornando para venda na base'};
+      return {type:'move',x:s.base.x,y:s.base.y,reason:'Porão cheio • aproximando do comerciante'};
+    }
+    return {type:'sell',reason:s.remoteTraderEquipped?'Venda remota • CPU equipado':'Venda presencial na base'};
   }
   // Reabastecimento fora da base exige o CPU padrão. Sem ele, voltar ao comércio.
   // Uma volta à base deve abastecer munições e mísseis antes de retomar o setor escolhido.
@@ -180,13 +194,15 @@ export function chooseAutopilotAction(raw,cfg){
   // Não inventar inimigos ou recompensas quando a sala está vazia.
   return {type:'idle',reason:'Aguardando NPCs e drops'};
 }
-export function createStellarAutopilotV48({credentials,getIdentity=()=>null,getSnapshot,npcTypes=[],getPortals,getGraphLabel,getGoalLabel,mayTravel,navigate,jumpPortal,selectNpc,stopFire=()=>{},fireRocket,sellCargo,buyPackage,ensureCombatAmmo=()=>true,onNotice=()=>{},getAstralState=()=>null,assembleAstral=async()=>false,enterAstral=async()=>false,confirmAstralLoop=async message=>window.confirm(message)}={}){
+export function createStellarAutopilotV48({credentials,getIdentity=()=>null,getSnapshot,npcTypes=[],getPortals,getGraphLabel,getGoalLabel,mayTravel,navigate,jumpPortal,selectNpc,stopFire=()=>{},fireRocket,sellCargo,buyPackage,ensureCombatAmmo=()=>true,onNotice=()=>{},getAstralState=()=>null,assembleAstral=async()=>false,enterAstral=async()=>false,confirmAstralLoop=async message=>window.confirm(message),onDiagnostics=()=>{}}={}){
   let allowed=false,isAdmin=false,authorizedId=null,running=false,loading=false,busy=false,lastTickAt=0,lastAccessAt=0,nextAccessAt=0,panelOpen=false;
   let config=cleanAutopilotConfig(),started=0,ended=0,spent=0,attempts=0,failures=0,boxes=0,drops=0,ores=0,reason='Desligado',startStats=null,lastProgress=null;
   let panel=null,fab=null,grantCache=new Map(),refreshingAccess=false,lastPurchaseAttempt=0,lastHealthyAt=0,lastMapId=null;
   // V87: target lock and rocket throttling are in-memory, never persisted.
   let preferredTargetId=null,preferredTargetAt=0,lastRocketAt=0,orbitDirection=1,nextBonusOpportunityAt=0;
-  let tradeBusy=false,tradeHoldBuy=false,tradeHoldSell=false;
+  let tradeBusy=false,tradeHoldBuy=false,tradeHoldSell=false,tradeStartedAt=0;
+  let lastTravelPoint=null,lastTravelProgressAt=0,lastWatchdogLogAt=0,lastDiagnosticAt=0;
+  const logDiagnostic=(event,s,details='')=>{const ts=now();if(ts-lastDiagnosticAt<60000&&event!=='stopped')return;lastDiagnosticAt=ts;try{onDiagnostics({event,map:String(s?.map||''),goal:config.map,atBase:!!s?.atBase,routeMisses,tradeBusy,tradeHoldBuy,tradeHoldSell,reason:String(details||reason).slice(0,110)});}catch{}};
   function fireRocketRateLimitedV87(ts){if(ts-lastRocketAt<1250)return false;lastRocketAt=ts;fireRocket();return true;}
   let astralBuildBusy=false,astralBuildCancel=false,astralRunSeen=false;
   // V83 • Ciclo contínuo somente após confirmação explícita; estado volátil (nunca retomado depois de refresh).
@@ -211,7 +227,7 @@ export function createStellarAutopilotV48({credentials,getIdentity=()=>null,getS
     if(!saved)return false;
     const ts=now(),user=String(getIdentity()||'');
     if(!user||saved.user!==user||!Number.isFinite(saved.storedAt)||ts-saved.storedAt>600000||
-        !Number.isFinite(saved.started)||ts-saved.started>360*60000){clearResume();return false;}
+        !Number.isFinite(saved.started)||ts-saved.started>720*60000){clearResume();return false;}
     const s=getSnapshot();
     if(!s?.online||!s.ready||!AUTOPILOT_ALLOWED_MAPS.includes(s.map))return false;
     const recovered=cleanAutopilotConfig(saved.config);
@@ -221,7 +237,7 @@ export function createStellarAutopilotV48({credentials,getIdentity=()=>null,getS
     attempts=number(saved.attempts,0,1000000,0);failures=number(saved.failures,0,1000000,0);
     boxes=number(saved.boxes,0,1000000,0);drops=number(saved.drops,0,1000000,0);ores=number(saved.ores,0,1000000,0);
     ended=0;lastProgress=stats(s);startStats=lastProgress;lastHealthyAt=ts;lastMapId=s.map;
-    pendingJump=null;lastPortalAttempt=0;nextRouteSearch=0;routeMisses=0;nextSaleAttempt=0;buyFailuresInRow=0;tradeBusy=false;tradeHoldBuy=false;tradeHoldSell=false;nextBonusOpportunityAt=0;orbitDirection=1;
+    pendingJump=null;lastPortalAttempt=0;nextRouteSearch=0;routeMisses=0;nextSaleAttempt=0;buyFailuresInRow=0;tradeBusy=false;tradeHoldBuy=false;tradeHoldSell=false;tradeStartedAt=0;lastTravelPoint=null;lastTravelProgressAt=now();nextBonusOpportunityAt=0;orbitDirection=1;
     running=true;lastTickAt=0;checkpoint(true);
     notify('Sessão restaurada e acesso validado • retomando '+config.map.toUpperCase());return true;
   }
@@ -261,7 +277,7 @@ export function createStellarAutopilotV48({credentials,getIdentity=()=>null,getS
     if(critical&&noticeTimer){clearTimeout(noticeTimer);noticeTimer=null;pendingRoutineNotice=null;}
     lastRoutineNoticeAt=now();onNotice(t);renderStatus();
   }
-  function stop(why='Interrompido'){tradeHoldBuy=false;tradeHoldSell=false;nextBonusOpportunityAt=0;if(noticeTimer){clearTimeout(noticeTimer);noticeTimer=null;pendingRoutineNotice=null;}preferredTargetId=null;lastRocketAt=0;astralBuildCancel=true;astralLoopEpoch++;astralLoopPhase='parado';running=false;busy=false;pendingJump=null;clearResume();stopFire();reason=why;ended=now();try{const s=getSnapshot();if(s)lastProgress=stats(s);}catch{}renderStatus();}
+  function stop(why='Interrompido'){if(running)logDiagnostic('stopped',getSnapshot(),why);tradeHoldBuy=false;tradeHoldSell=false;nextBonusOpportunityAt=0;if(noticeTimer){clearTimeout(noticeTimer);noticeTimer=null;pendingRoutineNotice=null;}preferredTargetId=null;lastRocketAt=0;astralBuildCancel=true;astralLoopEpoch++;astralLoopPhase='parado';running=false;busy=false;pendingJump=null;clearResume();stopFire();reason=why;ended=now();try{const s=getSnapshot();if(s)lastProgress=stats(s);}catch{}renderStatus();}
   function stats(s){return {xp:Number(s?.xp)||0,credits:Number(s?.credits)||0,stl:Number(s?.stl)||0,kills:Number(s?.kills)||0,boxes:Number(s?.boxes)||0,level:Number(s?.level)||1};}
   function sessionReport(){const duration=Math.max(1,((running?now():ended||now())-started)/3600000);const last=lastProgress||stats(getSnapshot());const first=startStats||last;
     return {map:config.map,minutes:Math.round(duration*60),hours:duration,boxes,drops,ores,kills:Math.max(0,last.kills-first.kills),xp:Math.max(0,last.xp-first.xp),grossCredits:last.credits-first.credits+spent,creditsNet:last.credits-first.credits,stl:last.stl-first.stl,spent,levelFrom:first.level,levelTo:last.level,attempts,failures,reason,
@@ -275,7 +291,7 @@ export function createStellarAutopilotV48({credentials,getIdentity=()=>null,getS
     const loopStart=panel.querySelector('[data-ap-astral-loop-start]');if(loopStart)loopStart.disabled=running||astralBuildBusy||astralLoopBusy||!accessReady();
     if(fab)fab.textContent=running?'🤖 AUTO • ON':'🤖 AUTOPILOT';if(panel){const state=panel.querySelector('[data-ap-access-v82]');if(state)state.textContent=accessReady()?'✓ Acesso autorizado':'⚠ Acesso não confirmado • verifique a permissão da conta';panel.querySelectorAll('[data-ap-astral-build],[data-ap-astral-enter]').forEach(b=>b.disabled=astralBuildBusy);
       const sellToggle=panel.querySelector('[data-ap-check="autoSell"]'),cpuReady=getSnapshot()?.remoteTraderEquipped===true;
-      if(sellToggle){sellToggle.disabled=!cpuReady;sellToggle.title=cpuReady?'Terminal Mercante Remoto equipado':'Equipe o Terminal Mercante Remoto Elite para habilitar venda automática';}
+      if(sellToggle){sellToggle.disabled=false;sellToggle.title=cpuReady?'Venda remota com terminal equipado':'Sem terminal remoto: Autopilot retorna à base para venda presencial';}
     }
   }
   // Compartilha a mesma consulta entre reabertura manual, login e polling; nunca
@@ -320,10 +336,10 @@ export function createStellarAutopilotV48({credentials,getIdentity=()=>null,getS
   <div class="ap-grid"><label>Mapa<select data-ap-field="map">${AUTOPILOT_ALLOWED_MAPS.map(m=>`<option value="${m}" ${m===config.map?'selected':''}>${m.toUpperCase().replace('X','X-').replace('U','U-')}</option>`).join('')}</select></label>
   <label>Seleção NPC<select data-ap-field="mode"><option value="nearest">Mais próximo</option><option value="profit">Melhor lucro estimado</option></select></label></div>
   <details><summary>NPCs permitidos (nenhum marcado = comuns)</summary><div class="ap-npcs">${npcTypes.filter(n=>n?.id&&/^[a-zA-Z0-9_-]+$/.test(n.id)).slice(0,70).map(n=>`<label><input type="checkbox" data-ap-npc="${esc(n.id)}"/>${esc(n.label||n.id)}</label>`).join('')}</div></details>
-  <div class="ap-grid ap-checks">${[['boxes','BOX bônus'],['drops','Drops de NPC'],['ores','Mineração'],['orbit','Órbita evasiva durante combate'],['combatCollect','Coletar BOX e Loot atacando'],['avoidCrowd','Evitar aglomerações de NPC'],['autoSell','Venda remota automática (CPU obrigatório)'],['autoBuy','Compra munição'],['rockets','Disparar mísseis']].map(([k,l])=>`<label><input type="checkbox" data-ap-check="${k}" ${config[k]?'checked':''}/> ${l}</label>`).join('')}</div>
+  <div class="ap-grid ap-checks">${[['boxes','BOX bônus'],['drops','Drops de NPC'],['ores','Mineração'],['orbit','Órbita evasiva durante combate'],['combatCollect','Coletar BOX e Loot atacando'],['avoidCrowd','Evitar aglomerações de NPC'],['autoSell','Venda automática (remota com CPU ou na base)'],['autoBuy','Compra munição'],['rockets','Disparar mísseis']].map(([k,l])=>`<label><input type="checkbox" data-ap-check="${k}" ${config[k]?'checked':''}/> ${l}</label>`).join('')}</div>
   <div class="ap-grid"><label>Venda ao atingir (%)<input data-ap-field="cargoThreshold" type="number" min="50" max="100" value="${config.cargoThreshold}"/></label>
   <label>Recuar HP (%)<input data-ap-field="hpRetreat" type="number" min="10" max="80" value="${config.hpRetreat}"/></label>
-  <label>Duração (min • 0 = sem limite no astral)<input data-ap-field="minutes" type="number" min="0" max="360" value="${config.minutes}"/></label>
+  <label>Duração (min • máximo 720)<input data-ap-field="minutes" type="number" min="0" max="720" value="${config.minutes}"/></label>
   <label>Limite compras CR<input data-ap-field="budget" type="number" min="0" max="250000000" value="${config.budget}"/></label>
   <label>Compra quando laser abaixo de<input data-ap-field="ammoMin" type="number" min="0" value="${config.ammoMin}"/></label>
   <label>Compra quando míssil abaixo de<input data-ap-field="rocketMin" type="number" min="0" value="${config.rocketMin}"/></label></div>
@@ -347,7 +363,7 @@ export function createStellarAutopilotV48({credentials,getIdentity=()=>null,getS
     for(const field of panel.querySelectorAll('[data-ap-check]'))next[field.dataset.apCheck]=field.checked;
     next.npcTypes=[...panel.querySelectorAll('[data-ap-npc]:checked')].map(x=>x.dataset.apNpc);return cleanAutopilotConfig(next);
   }
-  function renderUI(){if(!document.body||panel)return;
+  function renderUI(){if(typeof document==='undefined'||!document.body||panel)return;
     const style=document.createElement('style');style.textContent=`
     #autopilotFabV48{position:fixed;bottom:74px;right:12px;z-index:7900;border:1px solid #48c9ef;border-radius:18px;padding:8px 11px;background:#09243c;color:#c4f5ff;font-weight:800;font-size:11px;box-shadow:0 0 14px #1abfe044}
     #autopilotPanelV48{position:fixed;inset:0;z-index:12000;background:#000b;display:flex;align-items:center;justify-content:center;padding:12px}
@@ -436,7 +452,7 @@ export function createStellarAutopilotV48({credentials,getIdentity=()=>null,getS
     config=readConfig();
     if(config.astralLoop&&!continuousConfirmed)return notify('Ciclo astral exige confirmação no botão INICIAR FARM DO PORTAL');
     if(s.astralActive&&!config.astralAssist)return notify('Marque a assistência astral para combater dentro do portal');started=now();ended=0;spent=0;attempts=0;failures=0;boxes=0;drops=0;ores=0;startStats=stats(s);lastProgress=startStats;lastTickAt=0;
-    lastHealthyAt=now();lastMapId=s.map;preferredTargetId=null;preferredTargetAt=0;lastRocketAt=0;tradeBusy=false;tradeHoldBuy=false;tradeHoldSell=false;nextBonusOpportunityAt=0;orbitDirection=1;pendingJump=null;lastPortalAttempt=0;nextRouteSearch=0;routeMisses=0;nextSaleAttempt=0;buyFailuresInRow=0;tradeBusy=false;tradeHoldBuy=false;tradeHoldSell=false;nextBonusOpportunityAt=0;orbitDirection=1;running=true;astralRunSeen=!!s.astralActive;
+    lastHealthyAt=now();lastMapId=s.map;preferredTargetId=null;preferredTargetAt=0;lastRocketAt=0;pendingJump=null;lastPortalAttempt=0;nextRouteSearch=0;routeMisses=0;nextSaleAttempt=0;buyFailuresInRow=0;tradeBusy=false;tradeHoldBuy=false;tradeHoldSell=false;tradeStartedAt=0;lastTravelPoint=null;lastTravelProgressAt=now();nextBonusOpportunityAt=0;orbitDirection=1;running=true;astralRunSeen=!!s.astralActive;
     astralLoopSpent=0;astralCycles=0;astralLoopBusy=false;astralLoopEpoch++;astralLoopPhase=config.astralLoop?'aguardando':'parado';astralLoopNextAt=0;astralLoopEnteredAt=0;astralLoopMapWaitSince=0;astralLoopHealSince=0;astralLoopAmmoWaitSince=0;
     const gate=getAstralState(config.astralGate);astralLoopLastCompleted=Number(gate?.completed)||0;astralLoopLastFailed=Number(gate?.failed)||0;
     if(config.astralLoop)clearResume();else checkpoint(true);
@@ -450,13 +466,13 @@ export function createStellarAutopilotV48({credentials,getIdentity=()=>null,getS
       if(!q||!q.catalog_key||q.shop_visible===false||Number(opt.stock)>=opt.min||q.currency!=='credits'||(opt.kind==='rocket'&&!config.rockets))continue;
       const cost=Number(q.price)||0;
       if(cost<=0||cost>config.budget-spent||cost>Number(s.credits)||!Number.isFinite(cost))continue;
-      attempts++;tradeBusy=true;
+      attempts++;tradeBusy=true;tradeStartedAt=now();
       try{
         const ok=await buyPackage(q.catalog_key,opt.kind,{atBase:!!s.atBase,credits:s.credits,budgetRemaining:config.budget-spent});
-        if(ok===true){spent+=cost;buyFailuresInRow=0;notify('Reabastecimento autorizado • combate mantido');}
-        else {failures++;buyFailuresInRow++;tradeHoldBuy=true;notify('Compra sem confirmação • compras pausadas para evitar duplicidade');}
-      }catch(e){failures++;buyFailuresInRow++;tradeHoldBuy=true;notify('Compra com resposta incerta • compras pausadas (verifique saldo)');}
-      finally{tradeBusy=false;}
+        if(ok===true){spent+=cost;buyFailuresInRow=0;tradeHoldBuy=false;notify('Reabastecimento autorizado • combate mantido');}
+        else {failures++;buyFailuresInRow++;tradeHoldBuy=true;logDiagnostic('trade_uncertain',s,'Compra recusada/sem confirmação');notify('Compra sem confirmação • compras pausadas para evitar duplicidade');}
+      }catch(e){failures++;buyFailuresInRow++;tradeHoldBuy=true;logDiagnostic('trade_uncertain',s,'Compra com erro de rede');notify('Compra com resposta incerta • compras pausadas (verifique saldo)');}
+      finally{tradeBusy=false;tradeStartedAt=0;}
       break; // Exactly one package at a time; always wait for updated server inventory.
     }
   }
@@ -467,9 +483,9 @@ export function createStellarAutopilotV48({credentials,getIdentity=()=>null,getS
     if(!from||!want){nextRouteSearch=ts+1800;notify('Aguardando grafo de portais');return;}
     const path=findAutopilotPortalPath(from,want,getPortals,mayTravel);
     if(!path){
-      nextRouteSearch=ts+2400;routeMisses++;
-      if(routeMisses>=8){stop('Sem rota liberada para '+want+' (8 verificações)');return;}
-      notify('Recalculando rota para '+want);return;
+      routeMisses++;nextRouteSearch=ts+nextRouteCooldownV116(routeMisses);
+      if(routeMisses===8||routeMisses%5===0)logDiagnostic('route_unavailable',s,'Portal indisponível '+want+' • tentativa '+routeMisses);
+      notify('Rota indisponível → '+want+' • nova tentativa em '+Math.ceil((nextRouteSearch-ts)/1000)+'s');return;
     }
     routeMisses=0;
     if(!path.length){pendingJump=null;return;}
@@ -597,6 +613,14 @@ export function createStellarAutopilotV48({credentials,getIdentity=()=>null,getS
     if(s.astralActive&&!config.astralAssist){stop('Portal Astral exige opção explícita');return;}
     if(s.astralActive)astralRunSeen=true;
     lastHealthyAt=ts;checkpoint();
+    // V116.1: watchdog de navegação, sem moedas geradas ou teleporte.
+    if(!lastTravelPoint||lastTravelPoint.map!==s.map||Math.hypot((s.player?.x||0)-lastTravelPoint.x,(s.player?.y||0)-lastTravelPoint.y)>85){
+      lastTravelPoint={map:s.map,x:Number(s.player?.x)||0,y:Number(s.player?.y)||0};lastTravelProgressAt=ts;
+    }else if(routeWatchdogExpiredV116({map:s.map,goal:config.map,lastMovementAt:lastTravelProgressAt,now:ts,enabled:!s.astralActive})){
+      pendingJump=null;nextRouteSearch=0;lastTravelProgressAt=ts;
+      if(ts-lastWatchdogLogAt>60000){lastWatchdogLogAt=ts;logDiagnostic('route_watchdog',s,'Sem deslocamento por 2 min • rota recalculada');}
+      notify('Rota sem progresso • verificando portal e comércio');
+    }
     if(config.astralLoop){
       if(!s.astralActive){
         stopFire();
@@ -622,24 +646,41 @@ export function createStellarAutopilotV48({credentials,getIdentity=()=>null,getS
     let action=chooseAutopilotAction(s,{...config,preferredTargetId:ts-preferredTargetAt<=14000?preferredTargetId:null});
     if(action.type==='sell'){
       if(!tradeBusy&&!tradeHoldSell&&ts>=nextSaleAttempt&&s.canSell){
-        nextSaleAttempt=ts+9000;tradeBusy=true;
+        nextSaleAttempt=ts+9000;tradeBusy=true;tradeStartedAt=ts;
         Promise.resolve().then(()=>sellCargo()).then(ok=>{
-          if(ok!==true){failures++;tradeHoldSell=true;notify('Venda sem confirmação • vendas pausadas, combate mantido');}
+          if(ok!==true){failures++;tradeHoldSell=true;logDiagnostic('trade_uncertain',s,'Venda não confirmada');notify('Venda sem confirmação • vendas pausadas, combate mantido');}
           else notify('Venda remota confirmada • combate mantido');
-        }).catch(()=>{failures++;tradeHoldSell=true;notify('Venda incerta • vendas pausadas para evitar duplicidade');})
-          .finally(()=>{tradeBusy=false;});
+        }).catch(()=>{failures++;tradeHoldSell=true;logDiagnostic('trade_uncertain',s,'Venda sem resposta');notify('Venda incerta • vendas pausadas para evitar duplicidade');})
+          .finally(()=>{tradeBusy=false;tradeStartedAt=0;});
       }
+      if(baseCommerceWaitV116({atBase:s.atBase,remote:s.remoteTraderEquipped,busy:tradeBusy,startedAt:tradeStartedAt,now:ts,hold:tradeHoldSell})){
+        stopFire();notify('Venda presencial • aguardando ACK do servidor');return;
+      }
+      if(s.atBase&&!s.remoteTraderEquipped&&tradeBusy&&ts-tradeStartedAt>=30000){tradeHoldSell=true;logDiagnostic('trade_timeout',s,'Venda presencial sem ACK em 30s');}
       action=chooseAutopilotAction(s,{...config,autoSell:false,preferredTargetId:ts-preferredTargetAt<=14000?preferredTargetId:null});
     }
     if(action.type==='trade'){
       // Without the remote ammo CPU, the ship must remain in the base until the
       // authorized purchase finishes; otherwise it departs before getting ammo.
-      if(s.atBase&&!s.remoteBuyEquipped){stopFire();notify('Compra presencial • aguardando confirmação na base');return;}
+      if(baseCommerceWaitV116({atBase:s.atBase,remote:s.remoteBuyEquipped,busy:tradeBusy,startedAt:tradeStartedAt,now:ts,hold:tradeHoldBuy})){
+        stopFire();notify('Compra presencial • aguardando ACK do servidor');return;
+      }
+      if(s.atBase&&!s.remoteBuyEquipped&&!tradeHoldBuy&&!tradeBusy&&ts-lastPurchaseAttempt<4000){
+        stopFire();notify('Compra presencial • verificando estoque');return;
+      }
+      if(s.atBase&&!s.remoteBuyEquipped&&tradeBusy&&ts-tradeStartedAt>=30000){
+        tradeHoldBuy=true;logDiagnostic('trade_timeout',s,'Compra presencial sem ACK em 30s');
+      }
+      // Com compra incerta, nunca repetir automaticamente: segue para o mapa se há munição válida.
+      if(s.atBase&&tradeHoldBuy&&!ensureCombatAmmo()){stopFire();notify('Compra pendente • sem munição segura, aguarde confirmação');return;}
       action=chooseAutopilotAction(s,{...config,autoBuy:false,autoSell:false,preferredTargetId:ts-preferredTargetAt<=14000?preferredTargetId:null});
     }
     if(action.type==='idle'&&action.reason?.startsWith('Terminal remoto indisponível')){
       // Do not stand still under fire while the sale endpoint is unavailable.
       action=chooseAutopilotAction(s,{...config,autoSell:false,preferredTargetId:ts-preferredTargetAt<=14000?preferredTargetId:null});
+    }
+    if(tradeHoldSell||tradeHoldBuy){
+      action=chooseAutopilotAction(s,{...config,autoSell:false,autoBuy:false,preferredTargetId:ts-preferredTargetAt<=14000?preferredTargetId:null});
     }
     if(action.type==='pause'){stop(action.reason);return;}
     const collectingWhileFiring=action.type==='move'&&!!action.combatTargetId;

@@ -87,7 +87,8 @@ test('V112: integração mantém CPU e venda oficiais sem bloquear o tick de com
 });
 test('V112: compra presencial espera na base e compra remota continua combate',()=>{
  const src=read('public/modules/stellar-autopilot-v48.js'),game=read('public/game.js');
- assert.match(src,/if\(s\.atBase&&!s\.remoteBuyEquipped\)\{stopFire\(\);notify\('Compra presencial/);
+ assert.match(src,/baseCommerceWaitV116\(\{atBase:s\.atBase,remote:s\.remoteBuyEquipped/);
+ assert.match(src,/tradeHoldBuy/);
  assert.match(src,/if\(action\.type==='idle'&&action\.reason\?\.startsWith\('Terminal remoto indisponível'\)\)/);
  assert.match(game,/remoteBuyEquipped:!!progress&&autoBuyEnabled\(\)/);
 });

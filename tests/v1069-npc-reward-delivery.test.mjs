@@ -68,7 +68,7 @@ test('V106.9 — source: queue reserved before awaits; Elite only after SQL; led
   const processing=world.indexOf('async commitNpcDeathV1069(');
   assert.ok(before>0&&processing>before);
   const grant=world.indexOf('const serverReward=await this.world.grantNpcReward(',processing);
-  const elite=world.indexOf("this.world.recordEliteEvent?.(c.player.userId,'npc_kill')",processing);
+  const elite=world.indexOf("this.world.recordEliteEvent?.(recipientUserId,'npc_kill')",processing);
   assert.ok(grant>0&&elite>grant);
   assert.match(index,/return grantNpcRewardSafelyV1069\(\{grant,readReceipt\}\);/);
   assert.match(index,/\.eq\('kill_key',killKey\)\.maybeSingle\(\)/);

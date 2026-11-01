@@ -18,6 +18,6 @@ test('V110.1: a fila de abates é reservada antes do primeiro await e Elite depe
   const reserved=world.indexOf('return this.world.npcDeathSequenceV1069.run(',kill);
   const commit=world.indexOf('async commitNpcDeathV1069(',kill);
   const rewarded=world.indexOf('const serverReward=await this.world.grantNpcReward(',commit);
-  const elite=world.indexOf("this.world.recordEliteEvent?.(c.player.userId,'npc_kill')",commit);
+  const elite=world.indexOf("this.world.recordEliteEvent?.(recipientUserId,'npc_kill')",commit);
   assert.ok(kill>=0&&reserved>kill&&commit>reserved&&rewarded>commit&&elite>rewarded);
 });
