@@ -5,7 +5,7 @@
  */
 export const AUTOPILOT_ALLOWED_MAPS=Object.freeze(['x1','x2','x3','x4','x5','x6','x7','x8','u1','u2','u3']);
 export const AUTOPILOT_DEFAULTS=Object.freeze({map:'x1',npcTypes:[],boxes:true,drops:true,ores:false,autoSell:true,autoBuy:true,rockets:true,
-  cargoThreshold:85,hpRetreat:30,minutes:120,budget:50000,ammoMin:250,rocketMin:15,combatRange:0.78,mode:'nearest',astralAssist:false,astralGate:'alpha',astralBudget:50000,
+  cargoThreshold:85,hpRetreat:30,minutes:120,budget:25000000,ammoMin:2500,rocketMin:100,combatRange:0.78,mode:'nearest',orbit:true,combatCollect:true,avoidCrowd:true,astralAssist:false,astralGate:'alpha',astralBudget:50000,
   astralBatch:10,astralLoop:false,astralTotalBudget:50000,astralMaxCycles:0});
 const number=(v,min,max,fallback)=>Math.min(max,Math.max(min,Number.isFinite(Number(v))?Number(v):fallback));
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
@@ -15,11 +15,11 @@ export function cleanAutopilotConfig(input={}){
   const map=AUTOPILOT_ALLOWED_MAPS.includes(input.map)?input.map:'x1';
   const raw=Array.isArray(input.npcTypes)?input.npcTypes:[];
   const npcTypes=[...new Set(raw.filter(s=>typeof s==='string'&&/^[a-zA-Z0-9_-]{1,50}$/.test(s)))].slice(0,60);
-  return {map,npcTypes,boxes:input.boxes!==false,drops:input.drops!==false,ores:input.ores===true,
+  return {map,npcTypes,boxes:input.boxes!==false,drops:input.drops!==false,ores:input.ores===true,orbit:input.orbit!==false,combatCollect:input.combatCollect!==false,avoidCrowd:input.avoidCrowd!==false,
     autoSell:input.autoSell!==false,autoBuy:input.autoBuy!==false,rockets:input.rockets!==false,
     cargoThreshold:number(input.cargoThreshold,50,100,85),hpRetreat:number(input.hpRetreat,10,80,30),
-    minutes:number(input.minutes,input.astralLoop===true?0:5,360,120),budget:number(input.budget,0,10000000,50000),
-    ammoMin:number(input.ammoMin,0,1000000,250),rocketMin:number(input.rocketMin,0,1000000,15),
+    minutes:number(input.minutes,input.astralLoop===true?0:5,360,120),budget:number(input.budget,0,250000000,25000000),
+    ammoMin:number(input.ammoMin,0,1000000,2500),rocketMin:number(input.rocketMin,0,1000000,100),
     combatRange:number(input.combatRange,0.55,0.93,0.78),mode:['nearest','profit'].includes(input.mode)?input.mode:'nearest',
     astralAssist:input.astralAssist===true,astralGate:['alpha','beta','gamma'].includes(input.astralGate)?input.astralGate:'alpha',
     astralBudget:number(input.astralBudget,0,1000000,50000),
@@ -54,6 +54,67 @@ export function chooseStableAutopilotTargetV87(sortedEnemies,player,preferredId,
  const distance=(e)=>Math.hypot((e.x||0)-(player?.x||0),(e.y||0)-(player?.y||0));
  return distance(current)<=Math.max(240,distance(nearest)*leash)?current:nearest;
 }
+/** V112: box bonuses and real drops are valid combat detours, not idle-only work. */
+export function chooseAutopilotCollectV112(snapshot,config,enemy){
+ const s=snapshot||{}, c=config||{}, player=s.player||{}, range=Math.max(0,Number(s.laserRange)||0);
+ const usable=entry=>entry&&Number.isFinite(entry.x)&&Number.isFinite(entry.y);
+ const canDetour=(item,kind)=>{
+   const d=dist(item,player);
+   if(d>(enemy?780:(kind==='box'?Infinity:1300)))return false;
+   if(!enemy)return true;
+   if(c.combatCollect===false)return false;
+   // Keep the locked NPC reachable from the collection point; no cross-map chases.
+   return d<=Math.max(370,range*0.91)&&dist(item,enemy)<=Math.max(260,range*0.88);
+ };
+ const loot=c.drops!==false&&Number(s.cargoFree)>0?(s.loot||[]).filter(x=>usable(x)&&(!Number.isFinite(x.expiresAt)||x.expiresAt>s.timeSec)&&canDetour(x,'loot')).sort((a,b)=>dist(a,player)-dist(b,player)):[];
+ const boxes=c.boxes!==false?(s.bonusBoxes||[]).filter(x=>usable(x)&&canDetour(x,'box')).sort((a,b)=>dist(a,player)-dist(b,player)):[];
+ const nearestBox=boxes[0],nearestLoot=loot[0];
+ if(!nearestBox&&!nearestLoot)return null;
+ const boxReady=s.bonusDue!==false;
+ // Preserve expiring drop when it is nearby, otherwise regularly visit bonus boxes.
+ const urgentLoot=nearestLoot&&Number.isFinite(nearestLoot.expiresAt)&&nearestLoot.expiresAt-s.timeSec<14&&dist(nearestLoot,player)<410;
+ const boxNear=nearestBox&&dist(nearestBox,player)<(enemy?640:Infinity);
+ const lootMuchCloser=nearestLoot&&(!nearestBox||dist(nearestLoot,player)+240<dist(nearestBox,player));
+ const kind=urgentLoot||lootMuchCloser?'drop':boxNear&&boxReady?'box':nearestLoot?'drop':(!enemy&&nearestBox?'box':null);
+ const entry=kind==='box'?nearestBox:kind==='drop'?nearestLoot:null;
+ return entry?{kind,entry}:null;
+}
+/** V112: continuous orbit steering with enemy repulsion and world limits. Pure math. */
+export function orbitAutopilotWaypointV112({player,target,enemies=[],laserRange=800,mapWidth=0,mapHeight=0,direction=1,avoidCrowd=true}={}){
+ if(!target||!player)return null;
+ const r=Math.max(165,Math.min(575,Number(laserRange)*0.64||360));
+ const dx=player.x-target.x,dy=player.y-target.y,d=Math.hypot(dx,dy),radial=Math.atan2(dy,dx);
+ const crowd=(enemies||[]).filter(e=>e&&e.id!==target.id&&e.hp>0&&Number.isFinite(e.x)&&Number.isFinite(e.y));
+ const cap=(v,max)=>max>80?Math.max(40,Math.min(max-40,v)):v;
+ const clampPoint=(pt)=>({x:cap(pt.x,Number(mapWidth)),y:cap(pt.y,Number(mapHeight))});
+ const danger=(pt)=>crowd.reduce((sum,e)=>{const near=Math.hypot(pt.x-e.x,pt.y-e.y);return sum+(near<490?Math.pow((490-near)/490,2):0)},0);
+ let best=null;
+ for(const dir of [direction>=0?1:-1,direction>=0?-1:1]){
+   const theta=radial+dir*0.43;
+   let pt={x:target.x+Math.cos(theta)*r,y:target.y+Math.sin(theta)*r};
+   pt=clampPoint(pt);
+   // When out of combat range, approach on a radial-to-orbit path before circling.
+   if(d>Math.max(r+220,Number(laserRange)*0.95)){
+     const pull=Math.min(0.66,Math.max(0.22,(d-r)/Math.max(1,d)));
+     pt=clampPoint({x:player.x+(target.x-player.x)*pull,y:player.y+(target.y-player.y)*pull});
+   }
+   let risk=avoidCrowd?danger(pt)*2500:0;
+   const edgeMargin=130;
+   if(mapWidth>0)risk+=Math.max(0,edgeMargin-pt.x)*6+Math.max(0,pt.x-(mapWidth-edgeMargin))*6;
+   if(mapHeight>0)risk+=Math.max(0,edgeMargin-pt.y)*6+Math.max(0,pt.y-(mapHeight-edgeMargin))*6;
+   if(dir!==(direction>=0?1:-1))risk+=95; // hysteresis: do not flip without a safer path
+   if(!best||risk<best.risk)best={...pt,direction:dir,risk};
+ }
+ if(!best)return null;
+ if(avoidCrowd&&crowd.length){
+   let vx=0,vy=0;
+   for(const e of crowd){const dx=best.x-e.x,dy=best.y-e.y,d=Math.max(1,Math.hypot(dx,dy));
+     if(d<490){const amount=(490-d)/490*270;vx+=dx/d*amount;vy+=dy/d*amount;}}
+   best={...best,...clampPoint({x:best.x+vx,y:best.y+vy})};
+ }
+ // Ensure movement; the NPC itself remains the laser target while ship maneuvers.
+ return {x:best.x,y:best.y,direction:best.direction,nearbyThreats:crowd.filter(e=>dist(e,player)<500).length};
+}
 export function chooseAutopilotAction(raw,cfg){
   const s=raw||{},c=cleanAutopilotConfig(cfg),player=s.player||{},map=String(s.map||'');
   if(!s.online||!s.ready)return {type:'idle',reason:'Aguardando sessão online'};
@@ -86,11 +147,10 @@ export function chooseAutopilotAction(raw,cfg){
       return {type:'move',x:s.base.x,y:s.base.y,reason:'Aproximando do comerciante'};
     }
     // Não atravessar o portal de volta enquanto o servidor ainda compra o próximo pacote.
-    return {type:'idle',reason:'Reabastecendo '+(lowLaser?'laser':'mísseis')+' na loja oficial'};
+    return {type:'trade',kind:'buy',reason:'Reabastecendo '+(lowLaser?'laser':'mísseis')+' em segundo plano'};
   }
   if(map!==c.map&&!inAstral)return {type:'route',map:c.map,reason:`Rota até ${c.map.toUpperCase()}`};
-  // V48.1.2: drops reais de NPC continuam prioritários para coleta, mas NÃO
-  // cancelam o combate de NPC já alcançável. BOX BÔNUS/minério ficam atrás da caça.
+  // V112: stable target acquisition; collect bonus boxes and NPC drops *during* a fight.
   const npcs=(s.enemies||[]).filter(e=>e&&!e.isPlayer&&!e.warBot&&!e.isHidden&&e.hp>0&&Number.isFinite(e.x)&&Number.isFinite(e.y)
     &&(inAstral?true:(c.npcTypes.length===0?!String(e.type||'').toLowerCase().startsWith('boss'):c.npcTypes.includes(String(e.type||'')))));
   npcs.sort((a,b)=>{
@@ -101,23 +161,22 @@ export function chooseAutopilotAction(raw,cfg){
     }
     return dist(a,player)-dist(b,player);
   });
-  const realDrops=c.drops&&Number(s.cargoFree)>0?(s.loot||[]).filter(drop=>drop&&Number.isFinite(drop.x)&&Number.isFinite(drop.y)
-    &&(!Number.isFinite(drop.expiresAt)||drop.expiresAt>s.timeSec)&&dist(drop,player)<=1300):[];
-  realDrops.sort((a,b)=>dist(a,player)-dist(b,player));
-  const drop=realDrops[0];
-  if(drop){
+  const npc=chooseStableAutopilotTargetV87(npcs,player,c.preferredTargetId);
+  const candidate=chooseAutopilotCollectV112(s,c,npc);
+  if(candidate){
     const laserRange=Math.max(0,Number(s.laserRange)||0);
-    // Só atacar um NPC válido que JÁ está no alcance real da arma; nunca dispara fora da distância.
-    const inRange=npcs.filter(e=>dist(e,player)<=laserRange).sort((a,b)=>dist(a,player)-dist(b,player))[0];
-    return {type:'move',x:drop.x,y:drop.y,reason:inRange?'Coletando drop • combatendo NPC em alcance':'Coletando drop de NPC',
-      targetId:drop.id,combatTargetId:inRange?.id||null};
+    const inRange=npc&&dist(npc,player)<=laserRange&&dist(npc,candidate.entry)<=laserRange*0.95?npc:
+      npcs.find(e=>dist(e,player)<=laserRange&&dist(e,candidate.entry)<=laserRange*0.95);
+    return {type:'move',x:candidate.entry.x,y:candidate.entry.y,
+      reason:candidate.kind==='box'?'Box bônus • coleta durante combate':'Loot NPC • coleta durante combate',
+      collectKind:candidate.kind,targetId:candidate.entry.id,combatTargetId:inRange?.id||null};
   }
-  const npc=chooseStableAutopilotTargetV87(npcs,player,c.preferredTargetId);if(npc)return {type:'hunt',targetId:npc.id,x:npc.x,y:npc.y,reason:'Caçando '+String(npc.name||npc.type)};
-  const extras=[];
-  if(c.boxes){for(const box of s.bonusBoxes||[])if(box&&Number.isFinite(box.x)&&Number.isFinite(box.y))extras.push({...box,kind:'box',priority:0});}
-  if(c.ores&&Number(s.cargoFree)>0){for(const ore of s.ores||[])if(ore&&Number.isFinite(ore.x)&&Number.isFinite(ore.y))extras.push({...ore,kind:'ore',priority:1});}
-  const close=extras.filter(e=>dist(e,player)<=1300).sort((a,b)=>a.priority-b.priority||dist(a,player)-dist(b,player))[0];
-  if(close)return {type:'move',x:close.x,y:close.y,reason:`Coletando ${close.kind}`,targetId:close.id};
+  if(npc)return {type:'hunt',targetId:npc.id,x:npc.x,y:npc.y,reason:'Caçando '+String(npc.name||npc.type)};
+  if(c.ores&&Number(s.cargoFree)>0){
+    const ore=(s.ores||[]).filter(o=>o&&Number.isFinite(o.x)&&Number.isFinite(o.y)&&dist(o,player)<1300)
+      .sort((a,b)=>dist(a,player)-dist(b,player))[0];
+    if(ore)return {type:'move',x:ore.x,y:ore.y,reason:'Coletando minério',targetId:ore.id};
+  }
   // Não inventar inimigos ou recompensas quando a sala está vazia.
   return {type:'idle',reason:'Aguardando NPCs e drops'};
 }
@@ -126,7 +185,8 @@ export function createStellarAutopilotV48({credentials,getIdentity=()=>null,getS
   let config=cleanAutopilotConfig(),started=0,ended=0,spent=0,attempts=0,failures=0,boxes=0,drops=0,ores=0,reason='Desligado',startStats=null,lastProgress=null;
   let panel=null,fab=null,grantCache=new Map(),refreshingAccess=false,lastPurchaseAttempt=0,lastHealthyAt=0,lastMapId=null;
   // V87: target lock and rocket throttling are in-memory, never persisted.
-  let preferredTargetId=null,preferredTargetAt=0,lastRocketAt=0;
+  let preferredTargetId=null,preferredTargetAt=0,lastRocketAt=0,orbitDirection=1,nextBonusOpportunityAt=0;
+  let tradeBusy=false,tradeHoldBuy=false,tradeHoldSell=false;
   function fireRocketRateLimitedV87(ts){if(ts-lastRocketAt<1250)return false;lastRocketAt=ts;fireRocket();return true;}
   let astralBuildBusy=false,astralBuildCancel=false,astralRunSeen=false;
   // V83 • Ciclo contínuo somente após confirmação explícita; estado volátil (nunca retomado depois de refresh).
@@ -161,7 +221,7 @@ export function createStellarAutopilotV48({credentials,getIdentity=()=>null,getS
     attempts=number(saved.attempts,0,1000000,0);failures=number(saved.failures,0,1000000,0);
     boxes=number(saved.boxes,0,1000000,0);drops=number(saved.drops,0,1000000,0);ores=number(saved.ores,0,1000000,0);
     ended=0;lastProgress=stats(s);startStats=lastProgress;lastHealthyAt=ts;lastMapId=s.map;
-    pendingJump=null;lastPortalAttempt=0;nextRouteSearch=0;routeMisses=0;nextSaleAttempt=0;buyFailuresInRow=0;
+    pendingJump=null;lastPortalAttempt=0;nextRouteSearch=0;routeMisses=0;nextSaleAttempt=0;buyFailuresInRow=0;tradeBusy=false;tradeHoldBuy=false;tradeHoldSell=false;nextBonusOpportunityAt=0;orbitDirection=1;
     running=true;lastTickAt=0;checkpoint(true);
     notify('Sessão restaurada e acesso validado • retomando '+config.map.toUpperCase());return true;
   }
@@ -201,7 +261,7 @@ export function createStellarAutopilotV48({credentials,getIdentity=()=>null,getS
     if(critical&&noticeTimer){clearTimeout(noticeTimer);noticeTimer=null;pendingRoutineNotice=null;}
     lastRoutineNoticeAt=now();onNotice(t);renderStatus();
   }
-  function stop(why='Interrompido'){if(noticeTimer){clearTimeout(noticeTimer);noticeTimer=null;pendingRoutineNotice=null;}preferredTargetId=null;lastRocketAt=0;astralBuildCancel=true;astralLoopEpoch++;astralLoopPhase='parado';running=false;busy=false;pendingJump=null;clearResume();stopFire();reason=why;ended=now();try{const s=getSnapshot();if(s)lastProgress=stats(s);}catch{}renderStatus();}
+  function stop(why='Interrompido'){tradeHoldBuy=false;tradeHoldSell=false;nextBonusOpportunityAt=0;if(noticeTimer){clearTimeout(noticeTimer);noticeTimer=null;pendingRoutineNotice=null;}preferredTargetId=null;lastRocketAt=0;astralBuildCancel=true;astralLoopEpoch++;astralLoopPhase='parado';running=false;busy=false;pendingJump=null;clearResume();stopFire();reason=why;ended=now();try{const s=getSnapshot();if(s)lastProgress=stats(s);}catch{}renderStatus();}
   function stats(s){return {xp:Number(s?.xp)||0,credits:Number(s?.credits)||0,stl:Number(s?.stl)||0,kills:Number(s?.kills)||0,boxes:Number(s?.boxes)||0,level:Number(s?.level)||1};}
   function sessionReport(){const duration=Math.max(1,((running?now():ended||now())-started)/3600000);const last=lastProgress||stats(getSnapshot());const first=startStats||last;
     return {map:config.map,minutes:Math.round(duration*60),hours:duration,boxes,drops,ores,kills:Math.max(0,last.kills-first.kills),xp:Math.max(0,last.xp-first.xp),grossCredits:last.credits-first.credits+spent,creditsNet:last.credits-first.credits,stl:last.stl-first.stl,spent,levelFrom:first.level,levelTo:last.level,attempts,failures,reason,
@@ -256,15 +316,15 @@ export function createStellarAutopilotV48({credentials,getIdentity=()=>null,getS
   }
   function exportReport(){const r=sessionReport();return `STELLAR AUTOPILOT • RELATÓRIO V48\nMapa ${r.map.toUpperCase()} • ${r.minutes} min\nNPC ${r.kills} • XP ${r.xp} • Nível ${r.levelFrom} → ${r.levelTo}\nCR líquidos ${r.creditsNet} • STL líquidos ${r.stl} • BOX ${r.boxes} • Drops ${r.drops} • Minérios ${r.ores} • Gastos munição CR ${r.spent}\nXP/h ${Math.round(r.xpPerHour)} • CR líquidos/h ${Math.round(r.crPerHour)} • STL/h ${Math.round(r.stlPerHour)}\nTentativas de compra ${r.attempts} • Falhas ${r.failures}\nPortais concluídos ${r.astralCycles} • STL gastos no materializador ${r.astralLoopSpent} • STL líquidos da sessão ${r.stl} • STL recebidos estimados ${r.astralStlGrossEstimated} • Etapa ${r.astralLoopPhase}\nSituação ${r.reason}`;}
   function controls(){return `<div class="ap-wrap"><header><b>🤖 STELLAR AUTOPILOT</b><button type="button" data-ap-close>FECHAR</button></header>
-  <small>Farm assistido pelo piloto conectado • ações e prêmios seguem regras normais • somente enquanto esta aba do jogo estiver ativa.</small>
+  <small>Farm assistido online • órbita evasiva, coleta simultânea, compras/vendas remotas sem pausar combate. CPUs equipados e confirmações do servidor continuam obrigatórios.</small>
   <div class="ap-grid"><label>Mapa<select data-ap-field="map">${AUTOPILOT_ALLOWED_MAPS.map(m=>`<option value="${m}" ${m===config.map?'selected':''}>${m.toUpperCase().replace('X','X-').replace('U','U-')}</option>`).join('')}</select></label>
   <label>Seleção NPC<select data-ap-field="mode"><option value="nearest">Mais próximo</option><option value="profit">Melhor lucro estimado</option></select></label></div>
   <details><summary>NPCs permitidos (nenhum marcado = comuns)</summary><div class="ap-npcs">${npcTypes.filter(n=>n?.id&&/^[a-zA-Z0-9_-]+$/.test(n.id)).slice(0,70).map(n=>`<label><input type="checkbox" data-ap-npc="${esc(n.id)}"/>${esc(n.label||n.id)}</label>`).join('')}</div></details>
-  <div class="ap-grid ap-checks">${[['boxes','BOX bônus'],['drops','Drops de NPC'],['ores','Mineração'],['autoSell','Venda remota automática (CPU obrigatório)'],['autoBuy','Compra munição'],['rockets','Disparar mísseis']].map(([k,l])=>`<label><input type="checkbox" data-ap-check="${k}" ${config[k]?'checked':''}/> ${l}</label>`).join('')}</div>
+  <div class="ap-grid ap-checks">${[['boxes','BOX bônus'],['drops','Drops de NPC'],['ores','Mineração'],['orbit','Órbita evasiva durante combate'],['combatCollect','Coletar BOX e Loot atacando'],['avoidCrowd','Evitar aglomerações de NPC'],['autoSell','Venda remota automática (CPU obrigatório)'],['autoBuy','Compra munição'],['rockets','Disparar mísseis']].map(([k,l])=>`<label><input type="checkbox" data-ap-check="${k}" ${config[k]?'checked':''}/> ${l}</label>`).join('')}</div>
   <div class="ap-grid"><label>Venda ao atingir (%)<input data-ap-field="cargoThreshold" type="number" min="50" max="100" value="${config.cargoThreshold}"/></label>
   <label>Recuar HP (%)<input data-ap-field="hpRetreat" type="number" min="10" max="80" value="${config.hpRetreat}"/></label>
   <label>Duração (min • 0 = sem limite no astral)<input data-ap-field="minutes" type="number" min="0" max="360" value="${config.minutes}"/></label>
-  <label>Limite compras CR<input data-ap-field="budget" type="number" min="0" value="${config.budget}"/></label>
+  <label>Limite compras CR<input data-ap-field="budget" type="number" min="0" max="250000000" value="${config.budget}"/></label>
   <label>Compra quando laser abaixo de<input data-ap-field="ammoMin" type="number" min="0" value="${config.ammoMin}"/></label>
   <label>Compra quando míssil abaixo de<input data-ap-field="rocketMin" type="number" min="0" value="${config.rocketMin}"/></label></div>
   <details><summary>✦ PORTAIS ASTRAIS • assistência opcional</summary>
@@ -376,20 +436,28 @@ export function createStellarAutopilotV48({credentials,getIdentity=()=>null,getS
     config=readConfig();
     if(config.astralLoop&&!continuousConfirmed)return notify('Ciclo astral exige confirmação no botão INICIAR FARM DO PORTAL');
     if(s.astralActive&&!config.astralAssist)return notify('Marque a assistência astral para combater dentro do portal');started=now();ended=0;spent=0;attempts=0;failures=0;boxes=0;drops=0;ores=0;startStats=stats(s);lastProgress=startStats;lastTickAt=0;
-    lastHealthyAt=now();lastMapId=s.map;preferredTargetId=null;preferredTargetAt=0;lastRocketAt=0;pendingJump=null;lastPortalAttempt=0;nextRouteSearch=0;routeMisses=0;nextSaleAttempt=0;buyFailuresInRow=0;running=true;astralRunSeen=!!s.astralActive;
+    lastHealthyAt=now();lastMapId=s.map;preferredTargetId=null;preferredTargetAt=0;lastRocketAt=0;tradeBusy=false;tradeHoldBuy=false;tradeHoldSell=false;nextBonusOpportunityAt=0;orbitDirection=1;pendingJump=null;lastPortalAttempt=0;nextRouteSearch=0;routeMisses=0;nextSaleAttempt=0;buyFailuresInRow=0;tradeBusy=false;tradeHoldBuy=false;tradeHoldSell=false;nextBonusOpportunityAt=0;orbitDirection=1;running=true;astralRunSeen=!!s.astralActive;
     astralLoopSpent=0;astralCycles=0;astralLoopBusy=false;astralLoopEpoch++;astralLoopPhase=config.astralLoop?'aguardando':'parado';astralLoopNextAt=0;astralLoopEnteredAt=0;astralLoopMapWaitSince=0;astralLoopHealSince=0;astralLoopAmmoWaitSince=0;
     const gate=getAstralState(config.astralGate);astralLoopLastCompleted=Number(gate?.completed)||0;astralLoopLastFailed=Number(gate?.failed)||0;
     if(config.astralLoop)clearResume();else checkpoint(true);
     notify(config.astralLoop?'♻ Farm astral autorizado • iniciando sequência':astralRunSeen?'Portal Astral • combate assistido iniciado':'Rota '+config.map.toUpperCase()+' iniciada');}
-  async function safeBuy(s){if(busy||!config.autoBuy||!s.buyPermitted||s.jumping||!s.ready)return;const opts=[{kind:'ammo',stock:s.ammoStock,min:config.ammoMin,quote:s.ammoQuote},{kind:'rocket',stock:s.rocketStock,min:config.rocketMin,quote:s.rocketQuote}];
-    for(const opt of opts){const q=opt.quote;if(!q||!q.catalog_key||q.shop_visible===false||Number(opt.stock)>=opt.min||q.currency!=='credits'||(opt.kind==='rocket'&&!config.rockets))continue;
-      const cost=Number(q.price)||0;if(cost<=0||cost>config.budget-spent||cost>Number(s.credits)||!Number.isFinite(cost))continue;
-      attempts++;busy=true;try{const ok=await buyPackage(q.catalog_key,opt.kind,{atBase:!!s.atBase,credits:s.credits,budgetRemaining:config.budget-spent});if(ok){spent+=cost;buyFailuresInRow=0;notify('Reabastecimento validado pelo servidor');}
-        else{failures++;buyFailuresInRow++;stop('Compra sem confirmação • confira estoque e saldo antes de reiniciar');}}
-      catch(e){failures++;buyFailuresInRow++;stop('Compra com resposta perdida • confira estoque e saldo antes de reiniciar');}
-      finally{busy=false;}
-      if(buyFailuresInRow>=3)stop('Compra não autorizada após 3 tentativas; verifique loja, saldo e CPU');
-      break;
+  // Purchases use the existing authoritative queue, but never lock combat/movement.
+  async function safeBuy(s){
+    if(tradeBusy||tradeHoldBuy||busy||!running||!accessReady()||!config.autoBuy||!s.buyPermitted||s.jumping||!s.ready)return;
+    const opts=[{kind:'ammo',stock:s.ammoStock,min:config.ammoMin,quote:s.ammoQuote},
+      {kind:'rocket',stock:s.rocketStock,min:config.rocketMin,quote:s.rocketQuote}];
+    for(const opt of opts){const q=opt.quote;
+      if(!q||!q.catalog_key||q.shop_visible===false||Number(opt.stock)>=opt.min||q.currency!=='credits'||(opt.kind==='rocket'&&!config.rockets))continue;
+      const cost=Number(q.price)||0;
+      if(cost<=0||cost>config.budget-spent||cost>Number(s.credits)||!Number.isFinite(cost))continue;
+      attempts++;tradeBusy=true;
+      try{
+        const ok=await buyPackage(q.catalog_key,opt.kind,{atBase:!!s.atBase,credits:s.credits,budgetRemaining:config.budget-spent});
+        if(ok===true){spent+=cost;buyFailuresInRow=0;notify('Reabastecimento autorizado • combate mantido');}
+        else {failures++;buyFailuresInRow++;tradeHoldBuy=true;notify('Compra sem confirmação • compras pausadas para evitar duplicidade');}
+      }catch(e){failures++;buyFailuresInRow++;tradeHoldBuy=true;notify('Compra com resposta incerta • compras pausadas (verifique saldo)');}
+      finally{tradeBusy=false;}
+      break; // Exactly one package at a time; always wait for updated server inventory.
     }
   }
   async function routeTo(s,map){
@@ -545,16 +613,34 @@ export function createStellarAutopilotV48({credentials,getIdentity=()=>null,getS
       else if(ts-pendingJump.at<18000){notify('Confirmando chegada ao próximo mapa');return;}
       else {pendingJump=null;failures++;notify('Portal demorou: nova tentativa controlada');}
     }
-    if(ts<nextSaleAttempt&&s.remoteTraderEquipped===true&&config.autoSell&&Number(s.cargoUsed)/Math.max(1,Number(s.cargoCapacity))>=config.cargoThreshold/100){
-      notify('Aguardando confirmação da venda no servidor');return;
-    }
     s.purchaseBudgetRemaining=Math.max(0,config.budget-spent);
     lastProgress=stats(s);
     if(busy)return;
-    if(!s.astralActive&&config.autoBuy&&ts-lastPurchaseAttempt>7000){lastPurchaseAttempt=ts;void safeBuy(s);}
-    // A compra oficial pode começar neste mesmo tick; não iniciar salto antes de confirmar.
-    if(busy)return;
-    const action=chooseAutopilotAction(s,{...config,preferredTargetId:ts-preferredTargetAt<=14000?preferredTargetId:null});
+    if(!s.astralActive&&config.autoBuy&&ts-lastPurchaseAttempt>3500&&!tradeHoldBuy){lastPurchaseAttempt=ts;void safeBuy(s);}
+    // Economy operations are asynchronous and must not block fighting/steering.
+    s.bonusDue=ts>=nextBonusOpportunityAt;
+    let action=chooseAutopilotAction(s,{...config,preferredTargetId:ts-preferredTargetAt<=14000?preferredTargetId:null});
+    if(action.type==='sell'){
+      if(!tradeBusy&&!tradeHoldSell&&ts>=nextSaleAttempt&&s.canSell){
+        nextSaleAttempt=ts+9000;tradeBusy=true;
+        Promise.resolve().then(()=>sellCargo()).then(ok=>{
+          if(ok!==true){failures++;tradeHoldSell=true;notify('Venda sem confirmação • vendas pausadas, combate mantido');}
+          else notify('Venda remota confirmada • combate mantido');
+        }).catch(()=>{failures++;tradeHoldSell=true;notify('Venda incerta • vendas pausadas para evitar duplicidade');})
+          .finally(()=>{tradeBusy=false;});
+      }
+      action=chooseAutopilotAction(s,{...config,autoSell:false,preferredTargetId:ts-preferredTargetAt<=14000?preferredTargetId:null});
+    }
+    if(action.type==='trade'){
+      // Without the remote ammo CPU, the ship must remain in the base until the
+      // authorized purchase finishes; otherwise it departs before getting ammo.
+      if(s.atBase&&!s.remoteBuyEquipped){stopFire();notify('Compra presencial • aguardando confirmação na base');return;}
+      action=chooseAutopilotAction(s,{...config,autoBuy:false,autoSell:false,preferredTargetId:ts-preferredTargetAt<=14000?preferredTargetId:null});
+    }
+    if(action.type==='idle'&&action.reason?.startsWith('Terminal remoto indisponível')){
+      // Do not stand still under fire while the sale endpoint is unavailable.
+      action=chooseAutopilotAction(s,{...config,autoSell:false,preferredTargetId:ts-preferredTargetAt<=14000?preferredTargetId:null});
+    }
     if(action.type==='pause'){stop(action.reason);return;}
     const collectingWhileFiring=action.type==='move'&&!!action.combatTargetId;
     if(action.type!=='hunt'&&!collectingWhileFiring)stopFire();
@@ -590,8 +676,13 @@ export function createStellarAutopilotV48({credentials,getIdentity=()=>null,getS
       if(preferredTargetId!==String(enemy.id)){preferredTargetId=String(enemy.id);preferredTargetAt=ts;}
       const range=Math.max(180,(Number(s.laserRange)||800)*config.combatRange);const d=dist(s.player,enemy);
       selectNpc(enemy,d<=Number(s.laserRange));
-      if(d>range){const ratio=(d-range+35)/Math.max(1,d);navigate(s.player.x+(enemy.x-s.player.x)*ratio,s.player.y+(enemy.y-s.player.y)*ratio);}
-      else if(config.rockets&&d<=Number(s.rocketRange)&&s.rocketReady)fireRocketRateLimitedV87(ts);
+      if(config.orbit){
+        const waypoint=orbitAutopilotWaypointV112({player:s.player,target:enemy,enemies:s.enemies,
+          laserRange:Number(s.laserRange)||800,mapWidth:s.mapWidth,mapHeight:s.mapHeight,
+          direction:orbitDirection,avoidCrowd:config.avoidCrowd});
+        if(waypoint){orbitDirection=waypoint.direction;navigate(waypoint.x,waypoint.y);}
+      }else if(d>range){const ratio=(d-range+35)/Math.max(1,d);navigate(s.player.x+(enemy.x-s.player.x)*ratio,s.player.y+(enemy.y-s.player.y)*ratio);}
+      if(config.rockets&&d<=Number(s.rocketRange)&&s.rocketReady)fireRocketRateLimitedV87(ts);
       notify(action.reason);
     }else notify(action.reason);
   }
@@ -665,7 +756,7 @@ export function createStellarAutopilotV48({credentials,getIdentity=()=>null,getS
       }
     }
   }
-  function recordCollect(kind){if(!running)return;if(kind==='box')boxes++;else if(kind==='drop')drops++;else if(kind==='ore')ores++;}
+  function recordCollect(kind){if(!running)return;if(kind==='box'){boxes++;nextBonusOpportunityAt=now()+9000;}else if(kind==='drop')drops++;else if(kind==='ore')ores++;}
   renderUI();
   return {open,tick,stop,start,recordCollect,refreshAccess,decorateAdminUsers,get active(){return running;},get allowed(){return allowed;},get isAdmin(){return isAdmin;},get config(){return {...config}}};
 }

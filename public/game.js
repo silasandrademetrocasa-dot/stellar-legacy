@@ -83,7 +83,7 @@ import { createPreviewScheduler } from './modules/preview-scheduler-v70.js?v=47.
 import { createFrameGate } from './modules/frame-gate.js?v=47.7.60';
 import {createVisualIsolationV75, VISUAL_TEST_MODES_V75} from './modules/visual-isolation-v75.js?v=47.7.60';
 import {npcDisplaySizeV526,oreDisplaySizeV526,boxDisplaySizeV526,lootDisplaySizeV526} from './modules/visual-scale-v526.js?v=47.7.60';
-import { createStellarAutopilotV48 } from './modules/stellar-autopilot-v48.js?v=47.7.60';
+import { createStellarAutopilotV48 } from './modules/stellar-autopilot-v112.js?v=47.7.60';
 import {routeMapLayoutV4825} from './modules/route-map-layout-v4825.js?v=47.7.60';
 import { createStagedAssetPreloader } from './modules/staged-preload-v342.js?v=47.7.60';
 import { QUALITY_PROFILES, initialAutoQualityForDevice } from './modules/quality-profiles.js?v=47.7.60';
@@ -10138,10 +10138,11 @@ const AUTOPILOT_V48=createStellarAutopilotV48({
     online:authenticated&&(sharedUniverseOnline()||isGalaxyGateMap()),ready:!!progress&&!gameBootstrapRuntime.loading,
     astralActive:isGalaxyGateMap()&&!!alphaGate().run?.active,
     jumping:!!state.jumping,map:progress?.mapId||'',repairRequired:!!(progress?.repairRequired||state.repairRequired),
-    atBase:!!progress&&isAtTrader(),canSell:!!progress&&canSellCargoNow(),remoteTraderEquipped:hasRemoteTraderCpuV1065(progress),buyPermitted:!!progress&&(isAtTrader()||autoBuyEnabled()),
+    atBase:!!progress&&isAtTrader(),canSell:!!progress&&canSellCargoNow(),remoteTraderEquipped:hasRemoteTraderCpuV1065(progress),remoteBuyEquipped:!!progress&&autoBuyEnabled(),buyPermitted:!!progress&&(isAtTrader()||autoBuyEnabled()),
     base:progress?basePointForFaction(progress.profile.faction,'x1'):{x:0,y:0},
     player:{x:player.x,y:player.y,hp:player.hp,maxHp:player.maxHp},
     enemies:state.enemies,loot:state.loot,bonusBoxes:state.bonusBoxes,ores:state.ores,timeSec:nowSec(),
+    mapWidth:Number(state.currentMap?.world?.w)||0,mapHeight:Number(state.currentMap?.world?.h)||0,
     laserRange:playerLaserRange(),rocketRange:playerRocketRange(),rocketReady:rocketReady(),
     credits:Number(progress?.profile?.credits)||0,stl:Number(progress?.profile?.uridium)||0,
     xp:Number(progress?.profile?.xp)||0,kills:Number(progress?.profile?.aliensKilled)||0,

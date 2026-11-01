@@ -1,0 +1,20 @@
+{
+  "version": "V112.0",
+  "type": "patch",
+  "requires": "V111.1",
+  "modifiedFiles": [
+    "public/modules/stellar-autopilot-v48.js",
+    "public/modules/stellar-autopilot-v112.js",
+    "public/game.js",
+    "public/index.html",
+    "tests/v112-smart-autopilot.test.mjs"
+  ],
+  "sql": "Nenhum",
+  "liveDatabaseChanged": false,
+  "criticalFilesUntouched": [
+    "server/world.js",
+    "server/index.js",
+    "server/offline-farm-v484.js",
+    "public/modules/stellar-offline-farm-v484.js"
+  ]
+}
