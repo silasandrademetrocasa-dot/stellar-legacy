@@ -24,6 +24,7 @@ import {createReadCoalescerV104} from '../public/modules/read-coalescer-v104.js'
 import { randomUUID } from 'crypto';
 import {installOfflineFarmV484,offlineFarmEnsureInactiveV484,makeOfflineFarmGuardV484,makeOfflineFarmApiSafetyV103} from './offline-farm-v484.js';
 import {installBalanceAuditV90} from './balance-audit-v90.js';
+import {installCombatProgressionAuditV113} from './progression-balance-v113.js';
 import {installCompetitiveReadinessV98} from './competitive-readiness-v98.js';
 import {installLiveopsSnapshotV99} from './liveops-snapshot-v99.js';
 import {installReleaseReadinessV100} from './release-readiness-v100.js';
@@ -1446,6 +1447,7 @@ function applyCraftRecipeServer(state,recipeId,runtime){
 // Offline routes and live-economy guards installed BEFORE normal economy/save routes.
 installOfflineFarmV484(app,{requireUser,asyncRoute,requireEliteAdmin});
 installBalanceAuditV90(app,{requireUser,asyncRoute,requireEliteAdmin});
+installCombatProgressionAuditV113(app,{requireUser,asyncRoute,requireEliteAdmin});
 installCompetitiveReadinessV98(app,{requireUser,asyncRoute,requireEliteAdmin});
 installLiveopsSnapshotV99(app,{requireUser,asyncRoute,requireEliteAdmin});
 installReleaseReadinessV100(app,{requireUser,asyncRoute,requireEliteAdmin,publicRoot:path.join(__dirname,'../public'),releaseVersion:RELEASE_VERSION});

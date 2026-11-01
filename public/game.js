@@ -17,6 +17,7 @@ import {createStellarAudio} from './modules/stellar-audio-v462.js?v=47.7.60';
 import {portalPointV461,CANONICAL_LINKS_V461} from './modules/portal-layout-v461.js?v=47.7.60';
 import {galacticLevelV451,applyGalacticProgressionV451} from './modules/galactic-progression-v451.js?v=47.7.60';
 import {progressionMilestonesV460} from './modules/galactic-balance-v460.js?v=47.7.60';
+import {dailyPassTargetV113} from './modules/pass-targets-v113.js?v=47.7.60';
 import {filteredFrontierPortalsV440} from './modules/frontier-routing-v440.js?v=47.7.60';
 import {astralEquipmentBonusesV435} from './modules/astral-systems-v435.js?v=47.7.60';
 import {registerFrontierSectorsV435,sectorDestinationV435,sectorLabelV435,sectorLevelV435,sectorPortalsV435} from './modules/frontier-sectors-v435.js?v=47.7.60';
@@ -3335,8 +3336,7 @@ function battlePassDailyMissions(){
   normalizeBattlePass();
   // Metas progressivas: nenhum objetivo FREE exige AUX-9, Premium ou mapa avançado.
   const level=Math.max(1,Number(progress?.profile?.level)||1);
-  const scale=Math.min(1,Math.max(0,(level-1)/14));
-  const missionTarget=(min,max)=>Math.round(min+(max-min)*scale);
+  const missionTarget=(min,max)=>dailyPassTargetV113(min,max,level);
   return [
     {id:'kills',kind:'kill',icon:'☠',title:'Caçada diária',desc:'Destrua NPCs em qualquer setor disponível.',target:missionTarget(15,50),points:battlePassDailyPoints()},
     {id:'boxes',kind:'box',icon:'▣',title:'Recuperação de carga',desc:'Colete caixas de NPCs. Não precisa de AUX.',target:missionTarget(8,40),points:battlePassDailyPoints()},
@@ -11823,6 +11823,25 @@ async function loadBalanceAuditV90(){const out=document.getElementById('v90Balan
     (d.topCreditPressure||[]).map(x=>`${x.npc}: ${fmt(x.creditsPerMillionHull)} CR / 1 milhão`).join('\n');
  }catch(e){out.textContent='Auditoria não confirmada: '+String(e.message||e);}finally{btn.disabled=false;}}
 document.getElementById('v90BalanceAuditBtn')?.addEventListener('click',()=>void loadBalanceAuditV90());
+async function loadCombatProgressionAuditV113(){
+ const btn=document.getElementById('adminCombatAuditBtnV113'),box=document.getElementById('adminCombatAuditGridV113');
+ if(!btn||!box)return;
+ const c=getSessionCredentials();if(!c?.accessToken||!c?.gameSessionId){box.textContent='Sessão necessária.';return;}
+ btn.disabled=true;box.textContent='Conferindo progressão no servidor...';
+ try{
+  const r=await fetch('/api/admin/v113/progression-audit',{headers:{Authorization:'Bearer '+c.accessToken,'X-Game-Session-Id':c.gameSessionId},cache:'no-store',signal:AbortSignal.timeout(18000)});
+  const d=await r.json();if(!r.ok||!d.ok)throw Error(d.error||'Auditoria indisponível');
+  const pass=d.pass||{};
+  box.textContent=`V113 • ${d.counts?.ships||0} NAVES • ${d.gear?.drone||0} DRONES • ${d.counts?.npcs||0} NPCs • ${d.counts?.bosses||0} BOSSES\n`+
+   `PASSE ${pass.season||'—'}: ${pass.tiers||0} TIER(S) • ${pass.pointsPerTier||0} PTS/TIER • ~${pass.nominalDaysToFinish||0} dias com as 7 missões FREE\n`+
+   `RENDIMENTO MEDIANO CR/1M CASCO+ESCUDO • NPC: ${fmt(d.normalYield?.medianCreditsPerMillionHull||0)} • BOSS: ${fmt(d.bossesYield?.medianCreditsPerMillionHull||0)}\n`+
+   `AUX: ${d.gear?.auxAdvancedFamilies||0} FAMÍLIAS • ${d.gear?.laser||0} LASERS • ${d.gear?.shield||0} ESCUDOS • ${d.gear?.engine||0} MOTORES\n`+
+   `ALERTAS: ${(d.warnings||[]).join(' | ')||'Nenhum alerta estrutural'}\n`+
+   `Última auditoria: ${new Date(d.generatedAt).toLocaleString('pt-BR')}`;
+ }catch(e){box.textContent='Não foi possível confirmar a auditoria: '+String(e.message||e);}
+ finally{btn.disabled=false;}
+}
+document.getElementById('adminCombatAuditBtnV113')?.addEventListener('click',()=>void loadCombatProgressionAuditV113());
 if(ui.adminBalanceReload)ui.adminBalanceReload.onclick=()=>loadAdminBalanceEditor(true);
 if(ui.adminBalanceTabs)ui.adminBalanceTabs.onclick=e=>{const b=e.target.closest('[data-balance-tab]');if(b){balanceAdminCaptureDraft();balanceAdminRuntime.tab=b.dataset.balanceTab;renderAdminBalance();}};
 if(ui.adminBalanceSearch)ui.adminBalanceSearch.oninput=()=>{balanceAdminCaptureDraft();renderAdminBalance();};

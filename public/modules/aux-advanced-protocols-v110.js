@@ -13,8 +13,8 @@ export const AUX_ADVANCED_V110=Object.freeze([
 export const AUX_ADVANCED_IDS_V110=Object.freeze(AUX_ADVANCED_V110.map(x=>x.id));
 export const AUX_ADVANCED_TIERS_V110=Object.freeze({
   1:{method:'buy',minLevel:1,cost:50000,currency:'uridium',ingredients:{}},
-  2:{method:'craft',minLevel:8,cost:3500000,currency:'credits',ingredients:{Prometid:65,Duranium:45,Promerium:4}},
-  3:{method:'craft',minLevel:15,cost:16000000,currency:'credits',ingredients:{Prometid:160,Duranium:120,Promerium:18,Xenomit:8},universe:true}
+  2:{method:'craft',minLevel:8,cost:50000000,currency:'credits',ingredients:{Prometid:100,Duranium:75,Promerium:8}},
+  3:{method:'craft',minLevel:15,cost:180000000,currency:'credits',ingredients:{Prometid:250,Duranium:180,Promerium:32,Xenomit:12},universe:true}
 });
 // V111: o preço N1 é POR FAMÍLIA, publicado no LIVE OPS pelo ADM.
 // NUNCA aceitar valor, moeda ou classe enviados no corpo da compra.

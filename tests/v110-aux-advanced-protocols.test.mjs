@@ -54,7 +54,7 @@ test('N3 requires Universe and tier II, consuming resources without changing unr
  st.mapId='u2';const info=craft(st,'escudo');assert.equal(info.level,3);
  assert.equal(st.pet.advancedProtocolOwnedV110.escudo,3);
  assert.equal(st.profile.credits,before.profile.credits-AUX_ADVANCED_TIERS_V110[3].cost);
- assert.equal(st.cargo.Xenomit,before.cargo.Xenomit-8);
+ assert.equal(st.cargo.Xenomit,before.cargo.Xenomit-AUX_ADVANCED_TIERS_V110[3].ingredients.Xenomit);
 });
 test('buy+equip N1 never creates a duplicate item or changes existing specialization',()=>{
  const st=old();buy(st,'dano');assert.deepEqual(st.pet.protocols,{guard:2});
