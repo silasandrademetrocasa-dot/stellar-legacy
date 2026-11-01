@@ -1,0 +1,92 @@
+{
+  "version": "V115.0",
+  "basedOn": "V113.1",
+  "stages": [
+    "V114.0 PvP",
+    "V114.1 Clãs/Relés",
+    "V114.2 Eventos",
+    "V114.3 Arena",
+    "V115.0 Performance"
+  ],
+  "files": [
+    {
+      "path": "public/game.js",
+      "sha256": "5029c9807a26adcd408fb1f81f275691af4a4f4bc00ef1a255d67d287a27ded5"
+    },
+    {
+      "path": "public/index.html",
+      "sha256": "154704337af283260e33e1831b726ef82254bdf3e38ffa02ae86acc23a0745eb"
+    },
+    {
+      "path": "public/modules/pvp-target-integrity-v114.js",
+      "sha256": "95ad186f83c511a02537ec8018931518da5b8591d39b1e4022716fddd021fcd3"
+    },
+    {
+      "path": "public/modules/arena-visual-scheduler-v1143.js",
+      "sha256": "e294a959d58909b588e80afc5d089bd066393cf9d1f25e94ba47c2486acb5563"
+    },
+    {
+      "path": "server/world.js",
+      "sha256": "d292b6e853b812f6e9e487ee8383b8c47e798ed356934f0bc64727aae8282282"
+    },
+    {
+      "path": "server/index.js",
+      "sha256": "30f0cf83c2522de34fad3a127ea651fc88bd36d27e1cdb9b11330f0b224d35fe"
+    },
+    {
+      "path": "server/relay-control-integrity-v1141.js",
+      "sha256": "e0696e6cdae69ad319918b3d8eee146c0430db864c31a62c4ad580e4af761032"
+    },
+    {
+      "path": "server/event-lifecycle-integrity-v1142.js",
+      "sha256": "d085d5dfb4538f7c0d1b1578d2b50e58334083cde0aa7f80631d4f4bb09f62e3"
+    },
+    {
+      "path": "server/network-backpressure-v115.js",
+      "sha256": "5c574d07980fab1f442191f9cdf6cd5d8c7ce8c6717e3270d04f34fe8b262015"
+    },
+    {
+      "path": "server/competitive-release-monitor-v115.js",
+      "sha256": "c670eaf122d5c7b518d46a3e9e7105cb857b0d5b8bd4072e8e68b43d222cf750"
+    },
+    {
+      "path": "tests/v115-cumulative-competitive.test.mjs",
+      "sha256": "521a83af32ff358d148740355e9f2990a6d6a60942a51526887039941c19abb7"
+    },
+    {
+      "path": "docs/v115/LEIA_PRIMEIRO_V115.md",
+      "sha256": "d029002644fde7ba8782714af4af3776f45bd8f0f3140cebfa8bd1ca882938df"
+    },
+    {
+      "path": "docs/v115/V114_0_PVP.md",
+      "sha256": "684a9871e407f6f9d79fbc187f30e76864e9c223f68a5f74f5b5873904dc9084"
+    },
+    {
+      "path": "docs/v115/V114_1_CLAS_RELES.md",
+      "sha256": "45fabbdcd7001302fec48ecdc44c61f212a30ddaf9664ddfaa9ed63bec97c5d9"
+    },
+    {
+      "path": "docs/v115/V114_2_EVENTOS.md",
+      "sha256": "556fff65531f728a72fc5b61f46910eb64b7f809a0cd2e4d38e0fc6de5832a67"
+    },
+    {
+      "path": "docs/v115/V114_3_ARENA.md",
+      "sha256": "49911201fd9b60184c7f3a218c96ce93062c19f3ddef16fb3e39a88956fd4573"
+    },
+    {
+      "path": "docs/v115/V115_0_PERFORMANCE.md",
+      "sha256": "dd1e01e724092247ed09d179bdccf89941529538fe50b1605769b9608c3299ed"
+    }
+  ],
+  "sqlApplied": false,
+  "databaseChanges": [],
+  "preserved": [
+    "Autopilot V112",
+    "Farm Offline V111.1",
+    "Forja AUX V113.1",
+    "RPCs NPC Rewards V1069",
+    "RPCs PvP/Arena",
+    "CONF1/CONF2"
+  ],
+  "tests": 401
+}

@@ -16,6 +16,9 @@ import { randomUUID } from 'crypto';
 import {admitNpcDamage} from './combat-throttle.js';
 import {PORTAL_NEUTRAL_RADIUS,playerInNeutralPortalRange} from './portal-safety.js';
 import {socketMessageAllowed,boundedVital} from './realtime-guard.js';
+import {relayCaptureActorEligibleV1141,relayTurretTargetEligibleV1141,relayContestedClansV1141} from './relay-control-integrity-v1141.js';
+import {staleEventEntityIdsV1142,eventRuntimeAdmittedV1142} from './event-lifecycle-integrity-v1142.js';
+import {shouldDeferPlayerMotionV115,mayFlushMovementV115,resyncPlayerIdsV115} from './network-backpressure-v115.js';
 import {playerStateDelta,npcStateDelta} from './network-delta-v104.js';
 import {createNetworkTelemetryV1051} from './network-telemetry-v1051.js';
 import {createNpcDeathSequenceV1069} from './npc-reward-delivery-v1069.js';
@@ -205,6 +208,14 @@ class Room {
     if(!this.clients.size)return;
     for(const c of this.clients){
       const p=c.player;if(!p)continue;
+      if(c.pendingPlayerResyncV115?.size&&mayFlushMovementV115(c.bufferedAmount)){
+        for(const id of resyncPlayerIdsV115(c.pendingPlayerResyncV115,this.players,p.userId)){
+          const remote=this.players.get(id);if(!remote)continue;
+          if(safeJsonSend(c,{type:'world_player_patch',entity:this.publicPlayer(remote)})){
+            c.pendingPlayerResyncV115.delete(id);this.world.networkV104.playerMotionResyncedV115=(this.world.networkV104.playerMotionResyncedV115||0)+1;
+          }
+        }
+      }
       // Backpressure: mensagens críticas seguem intactas, apenas este lote de movimento aguarda a rede.
       // Não alteramos npcNetState quando ignoramos o lote: o próximo envia o delta verdadeiro.
       if(c.bufferedAmount>NPC_SOCKET_BACKPRESSURE_BYTES){this.world.networkV104.npcBackpressureSkips++;continue;}
@@ -374,10 +385,10 @@ class Room {
     }
     if(!force&&this.event?.eventId===ev.eventId)return;
     this.clearEventEntities(this.event?'event_rotate':'event_start');
+    if(!eventRuntimeAdmittedV1142(ev,e=>this.eventEligible(e))){this.event=null;this.broadcastEvent(true);return;}
     this.event={...ev,progress:0,complete:false,stage:0,stageName:'RECONHECIMENTO'};
     this.nextEventBossAt=0;
     this.lastEventStageIndex=-1;
-    if(!this.eventEligible(ev))return;
     const profile=this.eventProfile(ev),mode=profile.mode;
     if(mode==='wave'||mode==='battle_wave') this.spawnEventWave(profile.waveCount||6);
     if(mode==='boss') this.spawnPrime();
@@ -503,8 +514,8 @@ class Room {
       if(node.persisting)continue;
       const active=WARFRONT_FACTIONS.filter(id=>counts[id]>0);
       // In relay combat, two unrelated clans from the same faction also contest.
-      const clanCompetitors=node.relayMode?new Set([...this.players.values()].filter(p=>p.clanId&&this.playerFresh(p)&&Math.hypot(p.x-node.x,p.y-node.y)<=node.radius).map(p=>p.clanId)):null;
-      node.contested=active.length>1||(node.relayMode&&clanCompetitors.size>1);
+      const clanContested=relayContestedClansV1141(this.players.values(),node,p=>this.playerFresh(p)&&Math.hypot(p.x-node.x,p.y-node.y)<=node.radius);
+      node.contested=active.length>1||clanContested;
       if(node.contested)continue;
       if(active.length===1){
         const faction=active[0],weight=Math.max(1,Math.min(3,counts[faction]));
@@ -527,7 +538,7 @@ class Room {
         if(node.progress>=100&&!node.persisting){
           // Só aplicar a mudança depois do COMMIT. Na falha, o dono antigo permanece.
           const actor=node.relayMode?candidates[faction].find(x=>x.player.clanId===node.challengerClanId)?.player:candidates[faction][0]?.player||null;
-          if(!actor?.userId)continue;
+          if(!relayCaptureActorEligibleV1141({actor,node,now}))continue;
           const formerOwner=node.owner,expectedRevision=node.revision||0;
           node.persisting=true;
           // Rede lenta não pode deixar uma captura eternamente pendente.
@@ -590,7 +601,7 @@ class Room {
       if(!node.relayMode||!node.relayHp)continue;
       const weapons=(node.ownerClanId?node.relayModules:RELAY_NEUTRAL_MODULES).filter(m=>m.category==='weapon'&&[1,2].includes(Number(m.slot)));
       if(!weapons.length)continue;
-      const hostile=[...this.clients].filter(c=>c.player&&this.playerFresh(c.player)&&(!node.ownerClanId||c.player.clanId!==node.ownerClanId)&&!this.playerPortalNeutral(c.player)&&Math.hypot(c.player.x-node.x,c.player.y-node.y)<=Math.min(RELAY_BASE.weaponRange,node.radius+150)).sort((a,b)=>Math.hypot(a.player.x-node.x,a.player.y-node.y)-Math.hypot(b.player.x-node.x,b.player.y-node.y))[0];
+      const hostile=[...this.clients].filter(c=>relayTurretTargetEligibleV1141({node,player:c.player,fresh:this.playerFresh(c.player),portalNeutral:c.player?this.playerPortalNeutral(c.player):false,range:RELAY_BASE.weaponRange})).sort((a,b)=>Math.hypot(a.player.x-node.x,a.player.y-node.y)-Math.hypot(b.player.x-node.x,b.player.y-node.y))[0];
       if(!hostile)continue;
       node.relayTurretAt||={};
       for(const module of weapons){
@@ -692,7 +703,16 @@ class Room {
     const wireBytes=Buffer.byteLength(wire);
     for(const c of this.clients){
       if(c===exclude||c.readyState!==WebSocket.OPEN)continue;
+      if(shouldDeferPlayerMotionV115(payload,c.bufferedAmount)){
+        c.pendingPlayerResyncV115 ||= new Set();c.pendingPlayerResyncV115.add(String(payload.entity.userId));
+        this.world.networkV104.playerMotionDeferredV115=(this.world.networkV104.playerMotionDeferredV115||0)+1;
+        continue;
+      }
       try{
+        if(payload.type==='world_player_patch'&&c.pendingPlayerResyncV115?.has(String(payload.entity?.userId||''))){
+          const source=this.players.get(String(payload.entity.userId));
+          if(source){const fullWire=JSON.stringify({type:'world_player_patch',entity:this.publicPlayer(source)});c.send(fullWire);c.networkTelemetryV1051?.outbound(payload.type,fullWire);c.pendingPlayerResyncV115.delete(String(payload.entity.userId));this.world.networkV104.playerMotionResyncedV115=(this.world.networkV104.playerMotionResyncedV115||0)+1;continue;}
+        }
         c.send(wire);
         c.networkTelemetryV1051?.outbound(payload.type,wire);
         this.world.networkV104.broadcastMessages++;
@@ -739,7 +759,7 @@ class Room {
   addClient(ws,player){
     // Sala pode ter ficado em repouso: atualizar evento antes do snapshot de quem retornou.
     this.ensureEvent(false);
-    this.clients.add(ws);this.players.set(player.userId,player);ws.room=this;ws.player=player;
+    this.clients.add(ws);this.players.set(player.userId,player);ws.room=this;ws.player=player;ws.pendingPlayerResyncV115=new Set();
     safeJsonSend(ws,this.snapshot(player.userId));
     this.sendPersonalEventStatus(ws);
     // Snapshot inicial já contém todos os NPCs: ele vira a base do delta para não reenviar tudo em seguida.
@@ -775,7 +795,7 @@ class Room {
     if(pet?.owned){p.pet={owned:true,level:Math.max(1,Math.min(15,Number(pet.level)||1)),x:clamp(pet.x,0,this.map.world.w),y:clamp(pet.y,0,this.map.world.h),angle:Number(pet.angle)||0,activeGear:shortText(pet.activeGear||'off',24),laserTargetId:pet.laserTargetId?shortText(pet.laserTargetId,96):null,laserActive:!!pet.laserActive,laserColor:safeColor(pet.laserColor,p.laserColor),designId:pet.designId?shortText(pet.designId,64):null};}else p.pet={owned:false};
     p.updatedAt=now;
     const frame=this.publicPlayer(p),patch=playerStateDelta(p._lastNetFrame,frame);
-    const receivers=Math.max(0,[...this.clients].filter(c=>c!==ws&&c.readyState===WebSocket.OPEN).length);
+    let receivers=0;for(const c of this.clients)if(c!==ws&&c.readyState===WebSocket.OPEN)receivers++;
     if(patch){
       this.world.networkV104.playerFullEquivalentBytes+=receivers*Buffer.byteLength(JSON.stringify({type:'world_player_patch',entity:frame}));
       p._lastNetFrame=frame;
@@ -1047,10 +1067,14 @@ class Room {
     this.updateWarfrontControl(dt,now);
     this.warbotEngine.tick(dt,now);
     const activeEventId=this.event?.eventId||null;
-    let staleNpc=false,staleOre=false;
-    for(const [id,e] of this.npcs)if(e.eventNpc&&(!activeEventId||e.eventId!==activeEventId)){this.npcs.delete(id);staleNpc=true;}
-    for(const [id,o] of this.ores)if(o.eventOre&&(!activeEventId||o.eventId!==activeEventId)){this.ores.delete(id);staleOre=true;}
-    if(staleNpc||staleOre){this.respawns=this.respawns.filter(r=>r.kind!=='eventNpc');this.oreRespawns=this.oreRespawns.filter(r=>!r.eventOre);if(this.clients.size)this.broadcast(this.snapshot());}
+    const staleNpcIds=staleEventEntityIdsV1142(this.npcs,activeEventId,'eventNpc');
+    const staleOreIds=staleEventEntityIdsV1142(this.ores,activeEventId,'eventOre');
+    for(const id of staleNpcIds)this.npcs.delete(id);
+    for(const id of staleOreIds)this.ores.delete(id);
+    if(staleNpcIds.length||staleOreIds.length){
+      this.respawns=this.respawns.filter(r=>r.kind!=='eventNpc');this.oreRespawns=this.oreRespawns.filter(r=>!r.eventOre);
+      if(this.clients.size)this.broadcast({type:'event_cleanup',reason:'stale_sweep',npcIds:staleNpcIds,oreIds:staleOreIds,eventId:activeEventId,serverTime:now});
+    }
     for(const e of this.npcs.values()){
       const locked=this.lockedAggroPlayer(e);const near=locked?{player:locked,dist:Math.hypot(locked.x-e.x,locked.y-e.y)}:this.nearestPlayer(e);
       e.angle+=(Number(e.drift)||0)*dt;

@@ -109,6 +109,8 @@ import {equipmentLayoutSignatureV1062} from './modules/hangar-write-guard-v1062.
 import {createAmmoSelectionTrackerV1061} from './modules/ammo-selection-recovery-v1061.js?v=47.7.60';
 import {laserAmmoShotBudgetV1064,laserAmmoSourcesV1064,ammoReadoutV1064} from './modules/combat-ammo-accounting-v1064.js?v=47.7.60';
 import { shouldPollPvpInboxV106 } from './modules/pvp-inbox-policy-v106.js?v=47.7.60';
+import {arenaVisibleCombatLogV1143,arenaBattleTimeoutMessageV1143} from './modules/arena-visual-scheduler-v1143.js?v=47.7.60';
+import {pvpShotEligibilityV114} from './modules/pvp-target-integrity-v114.js?v=47.7.60';
 import { signUp, signIn, beginGoogleSignIn, restoreGoogleSignInFromUrl, requestPasswordReset, restorePasswordRecoveryFromUrl, restoreSession, signOutLocal, getSessionRestoreErrorV101, checkGameSession, endGameSession, getUser, getSessionCredentials, loadCloudSave, saveCloudSave, loadEliteOperationsOnline, claimEliteOperationOnline, loadWarCampaignsOnline, claimWarSupplyOnline, claimWarCampaignOnline, loadAdminWarCampaignsOnline, saveAdminWarCampaignOnline, saveAdminWarRulesOnline, loadAdminEliteObjectivesOnline, saveAdminEliteObjectiveOnline, updateCallsign, updatePassword, loadRankings, loadAuctionBids, saveAuctionBidOnline, placeAuctionBidOnline, markAuctionBidStatusOnline, loadAuctionMarket, upsertPlayerPresenceOnline, loadMapPresenceOnline, savePlayerLocationCheckpointOnline, loadPlayerLocationCheckpointOnline, removePlayerPresenceOnline, queuePvpAttackOnline, consumePvpDamageEventsOnline, syncArenaProfileOnline, loadArenaState, loadArenaDailyRewardStatus, claimArenaDailyReward, loadArenaOpponents, loadArenaHistory, arenaAttackOnline, listClansOnline, loadMyClanOnline, createClanOnline, joinClanOnline, getClanRequestsOnline, reviewClanRequestOnline, cancelClanRequestOnline, setClanMemberRoleOnline, leaveClanOnline, transferClanCreditsOnline, claimClanCreditGrantsOnline, recordClanAlienKillOnline, getPremiumShopOnline, testPurchasePremiumOnline, adminPreviewPremiumStageOnline, adminSimulatePremiumStageOnline, getPremiumStageCatalogOnline, loadWarfrontStateOnline, loadSectorOwnershipOnline, hitWorldBossOnline, claimWorldBossRewardOnline, declareClanWarOnline, recordClanWarScoreOnline, loadLiveOpsOnline, adminUpdateLiveEventScheduleOnline, purchaseLiveCatalogOnline, purchaseLiveBulkOnline, economyActionOnline, getChatHistoryOnline, sendChatMessageOnline, redeemGameCouponOnline, getMyDesignersOnline, setDesignLoadoutOnline, claimGateDroneDesignOnline, claimEventDesignerOnline, getAdminStatus, adminSearchAccounts, adminRecentActions, adminBanAccount, adminUnbanAccount, adminResetAccount, adminDeleteAccount, pushTelemetryBatch, adminTelemetryOverview, adminPlayerTelemetry, getBattleGroupOnline, createBattleGroupOnline, inviteBattleGroupOnline, searchBattleGroupPlayersOnline, inviteBattleGroupUserOnline, respondBattleGroupInviteOnline, leaveBattleGroupOnline, kickBattleGroupMemberOnline, setBattleGroupRallyOnline, loadRuntimeConfigOnline, loadNpcRuntimeConfigOnline, loadWorldRuntimeConfigOnline, loadSystemsRuntimeConfigOnline, loadAdminRuntimeMonitorOnline, adminUpdateRuntimeModuleOnline, adminUpdateNpcRuntimeOnline, adminUpdateNpcSpawnRuntimeOnline, adminUpdateWorldMapOnline, adminUpdateWorldResourceOnline, adminUpdateWorldSectorOnline, adminUpdateWorldPortalOnline, adminUpdateWorldResourcePoolOnline, adminUpdateMissionCategoryOnline, adminUpdateEconomyServiceOnline, adminUpdateCraftingRecipeOnline, loadBattlePassRuntimeConfigOnline, adminUpdateBattlePassSeasonOnline, adminUpdateBattlePassTierOnline, loadShopsRuntimeConfigOnline, adminUpdateCommonShopItemOnline, adminUpdatePremiumShopItemOnline, loadBonusConfigOnline, adminUpdateBonusConfigOnline, adminCouponDashboardOnline, adminCreateCouponOnline, adminSetCouponActiveOnline, loadGalaxyGatesOnline, adminUpdateGalaxyGateOnline, adminUpsertCustomMissionOnline, adminDeleteCustomMissionOnline, adminCreateCraftRecipeOnline, adminCreateEconomyServiceOnline, adminCreatePassSeasonOnline, loadAuctionRulesOnline, adminUpdateAuctionRulesOnline, loadBalanceRuntimeOnline, adminUpdateBalanceOnline,loadAdminSecurityIncidents,reviewAdminSecurityIncident } from './api.js?v=47.7.60';
 import {createOfflineFarmV484} from './modules/stellar-offline-farm-v484.js?v=47.7.60';
 import { SharedUniverseClient } from './world.js?v=47.7.60';
@@ -1503,7 +1505,8 @@ function handleSharedUniverseMessage(msg){
   if(msg.type==='npc_attack'){const e=findSharedNpc(msg.entityId);const retaliation=!!msg.retaliation;if(retaliation&&isPortalNeutralZone())state.portalCombatUntil=Math.max(state.portalCombatUntil,nowSec()+6);const hit=takePlayerDamage(Math.max(0,Number(msg.damage)||0),{forceNpcRetaliation:retaliation});if(e&&hit>0)e.lastAttackPlayerAt=nowSec();return;}
   if(msg.type==='event_cleanup'){
     const npcIds=new Set(msg.npcIds||[]),oreIds=new Set(msg.oreIds||[]);
-    if(npcIds.size)state.enemies=state.enemies.filter(e=>!npcIds.has(e.id));else purgeSharedEventEntities(null);
+    if(npcIds.size)state.enemies=state.enemies.filter(e=>!npcIds.has(e.id));
+    else if(['event_end','event_rotate'].includes(String(msg.reason||'')))purgeSharedEventEntities(null);
     if(oreIds.size)state.ores=state.ores.filter(o=>!oreIds.has(o.id));
     if(state.target?.eventNpc&&(!state.enemies.some(e=>e.id===state.target.id))){state.target=null;player.laserFiring=false;}
     galaxyEventRuntime.convoy=null;return;
@@ -6865,6 +6868,8 @@ function fireRocket(manual=false){
 
   if(state.target.isPlayer){
     if(!pvpTargetAllowed(state.target)){if(manual)showToast('PvP permitido apenas nos mapas 4-X');return;}
+    const rocketPolicy=pvpShotEligibilityV114({mapId:progress?.mapId,attackerId:getUser()?.id,target:state.target,groupMember:isBattleGroupMember(state.target.id),attackerX:player.x,attackerY:player.y,maxRange:playerRocketRange()});
+    if(!rocketPolicy.allowed)return;
     if(state.pvpRocketPending)return;
 
     const shotRocket=r;
@@ -7249,7 +7254,9 @@ function pvpLaserBase(ids){
   return dmg;
 }
 async function queuePvpShot(target,damage,shieldDrain=false,color='#ff657d'){
-  if(!target?.isPlayer||Number(state.pvpShotPending||0)>=3)return null;
+  if(Number(state.pvpShotPending||0)>=3)return null;
+  const shotPolicy=pvpShotEligibilityV114({mapId:progress?.mapId,attackerId:getUser()?.id,target,groupMember:isBattleGroupMember(target?.id),attackerX:player.x,attackerY:player.y});
+  if(!shotPolicy.allowed)return null;
   state.pvpShotPending=Number(state.pvpShotPending||0)+1;
   try{
     const row=await queuePvpAttackOnline({
@@ -9850,7 +9857,9 @@ function arenaDamageFloat(target,ev){
 }
 async function playArenaBattle(result){
   if(!ui.arenaBattleStage)return;
-  const log=Array.isArray(result.combat_log)?result.combat_log:[];
+  const fullLog=Array.isArray(result.combat_log)?result.combat_log:[];
+  const log=arenaVisibleCombatLogV1143(fullLog);
+  const truncatedNotice=arenaBattleTimeoutMessageV1143(fullLog);
   arenaRuntime.battleAnimating=true;
   arenaRuntime.skipAnimation=false;
   ui.arenaFighterAttacker?.classList.remove('destroyed','firing','hit');
@@ -9872,7 +9881,7 @@ async function playArenaBattle(result){
   arenaSetBar(ui.arenaAttackerShieldBar,ui.arenaAttackerShieldText,aSh,aShMax);
   arenaSetBar(ui.arenaDefenderHpBar,ui.arenaDefenderHpText,dHp,dHpMax);
   arenaSetBar(ui.arenaDefenderShieldBar,ui.arenaDefenderShieldText,dSh,dShMax);
-  if(ui.arenaBattleStatus)ui.arenaBattleStatus.textContent=`${result.attacker_callsign||'Você'} vs ${result.defender_callsign||result.opponent_callsign||'Piloto'}`;
+  if(ui.arenaBattleStatus)ui.arenaBattleStatus.textContent=`${result.attacker_callsign||'Você'} vs ${result.defender_callsign||result.opponent_callsign||'Piloto'}${truncatedNotice?' • REPLAY COMPACTO':''}`;
   if(ui.arenaBattleRound)ui.arenaBattleRound.textContent='ROUND 1';
   if(ui.arenaBattleTimer)ui.arenaBattleTimer.textContent='0.0s';
   ui.arenaBattleStage.scrollIntoView({behavior:'smooth',block:'nearest'});
@@ -9904,7 +9913,7 @@ async function playArenaBattle(result){
     source?.classList.remove('firing');target?.classList.remove('hit');
   }
 
-  if(arenaRuntime.skipAnimation){
+  if(arenaRuntime.skipAnimation||truncatedNotice){
     const end=arenaBattleSnapshot(result);aHp=end.attackerHp;aSh=end.attackerShield;dHp=end.defenderHp;dSh=end.defenderShield;
     arenaSetBar(ui.arenaAttackerHpBar,ui.arenaAttackerHpText,aHp,aHpMax);
     arenaSetBar(ui.arenaAttackerShieldBar,ui.arenaAttackerShieldText,aSh,aShMax);

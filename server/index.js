@@ -26,6 +26,7 @@ import {installOfflineFarmV484,offlineFarmEnsureInactiveV484,makeOfflineFarmGuar
 import {installBalanceAuditV90} from './balance-audit-v90.js';
 import {installCombatProgressionAuditV113} from './progression-balance-v113.js';
 import {installCompetitiveReadinessV98} from './competitive-readiness-v98.js';
+import {competitiveQualitySummaryV115} from './competitive-release-monitor-v115.js';
 import {installLiveopsSnapshotV99} from './liveops-snapshot-v99.js';
 import {installReleaseReadinessV100} from './release-readiness-v100.js';
 import { attachSharedUniverse } from './world.js';
@@ -2157,6 +2158,12 @@ app.get('/api/world/sector-state',requireUser,asyncRoute(async(req,res)=>{
   res.setHeader('Cache-Control','no-store');res.json({ok:true,mapId,nodes:data});
 }));
 app.get('/api/world/status', (req, res) => res.json({ ok: true, version: RELEASE_VERSION, ...sharedUniverse.stats() }));
+// V115: monitor de guerra disponível SOMENTE ao ADM, sem inventário ou dados pessoais.
+app.get('/api/admin/v115/quality',requireUser,asyncRoute(async(req,res)=>{
+  const {data:allowed,error}=await req.sb.rpc('is_game_admin_v1763',{p_uid:req.user.id});
+  if(error||allowed!==true)return res.status(403).json({error:'Somente ADM.'});
+  res.set('Cache-Control','no-store');res.json({ok:true,...competitiveQualitySummaryV115(sharedUniverse.stats())});
+}));
 
 app.get('*', (req, res) => res.sendFile(path.join(__dirname, '../public/index.html')));
 
