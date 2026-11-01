@@ -1053,12 +1053,27 @@ app.get('/api/admin/runtime/aux-economy',requireUser,asyncRoute(async(req,res)=>
     .select('catalog_key,kind,ref_id,price,currency,enabled,shop_visible,meta')
     .in('kind',['pet_slot','aux_protocol']).order('catalog_key');
   if(error)throw new Error(error.message);
-  res.set('Cache-Control','no-store');res.json({items:data||[]});
+  // Taxas de fragmento para APEX e UNIVERSO, restritas ao painel ADM.
+  const {data:dropRules,error:dropError}=await (await requireEliteAdmin()).from('stellar_aux_protocol_drop_rules_v1131')
+    .select('source,chance,enabled').order('source');
+  if(dropError)throw new Error(dropError.message);
+  res.set('Cache-Control','no-store');res.json({items:data||[],drop_rules:dropRules||[]});
 }));
 app.post('/api/admin/runtime/aux-economy',requireUser,asyncRoute(async(req,res)=>{
   const {data:isAdmin,error:adminError}=await req.sb.rpc('is_game_admin_v1763',{p_uid:req.user.id});
   if(adminError||isAdmin!==true)return res.status(403).json({error:'Somente ADM.'});
   const body=req.body||{},key=String(body.catalog_key||'');
+  // Fragmentos (chance 0–25%) editáveis sem permitir conceder itens manualmente.
+  if(!key&&['apex','universo'].includes(String(body.drop_source||''))){
+    const chance=Number(body.chance);
+    if(!Number.isFinite(chance)||chance<0||chance>0.25)return res.status(400).json({error:'Chance deve estar entre 0% e 25%.'});
+    const source=String(body.drop_source);
+    const {error}=await (await requireEliteAdmin()).from('stellar_aux_protocol_drop_rules_v1131')
+      .update({chance:Math.round(chance*10000)/10000,enabled:body.enabled===true,updated_at:new Date().toISOString()})
+      .eq('source',source);
+    if(error)throw new Error(error.message);
+    res.set('Cache-Control','no-store');return res.json({ok:true,drop_source:source,chance});
+  }
   const validProtocol=/^aux_protocol:(dano|hp|escudo|loot|porao)$/.test(key);
   const validSlot=/^pet_slot:(?:[2-9]|1[0-9]|2[0-2])$/.test(key);
   if(!validProtocol&&!validSlot)return res.status(400).json({error:'Preço de AUX inválido.'});
@@ -1078,7 +1093,15 @@ app.post('/api/admin/runtime/aux-economy',requireUser,asyncRoute(async(req,res)=
     const factor=Number(body.auction_factor);
     if(!Number.isFinite(factor)||factor<(elite?0.1:1)||factor>2)return res.status(400).json({error:elite?'Fator do leilão deve ser 0,1 a 2.':'BOX e PORÃO exigem fator de leilão 1 a 2 (piso de 100 milhões CR).'});
     updates.enabled=body.enabled!==false;updates.shop_visible=body.shop_visible!==false;
-    updates.meta={...(row.meta||{}),auction_enabled:body.auction_enabled===true,auction_factor:Math.round(factor*100)/100};
+    const recipeValues=[['craft_n2_stl',250000],['craft_n3_stl',500000],['craft_n3_credits',180000000]];
+    const recipes={};
+    for(const [field,min] of recipeValues){
+      const value=Number(body[field]??row.meta?.[field]??min);
+      if(!Number.isSafeInteger(value)||value<min||value>1000000000000)
+        return res.status(400).json({error:`Custo ${field} inválido (mínimo ${min}).`});
+      recipes[field]=value;
+    }
+    updates.meta={...(row.meta||{}),...recipes,auction_enabled:body.auction_enabled===true,auction_factor:Math.round(factor*100)/100};
   }
   const {error}=await sb.from('live_shop_prices_v16').update(updates).eq('catalog_key',key);
   if(error)throw new Error(error.message);
@@ -1534,7 +1557,7 @@ app.post('/api/economy/action', requireUser, OFFLINE_FARM_GUARD_V484, asyncRoute
     return res.status(400).json({error:'Parâmetros econômicos não autorizados.',code:tamper.code});}
   if(!action)return res.status(400).json({error:'Ação econômica ausente.'});
   const result=await withPurchaseLock(req.user.id,()=>withEconomySaveRetryV102(async()=>{
-    const catalogActions=new Set(['auto_buy','unlock_pet_slot','buy_quantum_cores','sell_cargo','sell_inventory','sell_drone','gate_spin','aux_protocol_buy']);
+    const catalogActions=new Set(['auto_buy','unlock_pet_slot','buy_quantum_cores','sell_cargo','sell_inventory','sell_drone','gate_spin','aux_protocol_buy','aux_protocol_craft']);
     const premiumActions=new Set(['auto_buy','gate_spin']);
     const systemsActions=new Set(['base_service','craft_recipe']);
     const [snapshot,state,premiumResult,systemsSnapshot]=await Promise.all([
@@ -1576,7 +1599,7 @@ app.post('/api/economy/action', requireUser, OFFLINE_FARM_GUARD_V484, asyncRoute
       const serviceId=String(payload.service_id||'').slice(0,40),svc=activateBaseServiceServer(state,serviceId,systemsSnapshot);info={action,service_id:serviceId,cost:svc.cost,currency:'credits',expires_at:svc.expires_at,duration_ms:svc.duration_ms};
     }
     else if(['aux_protocol_buy','aux_protocol_craft','aux_protocol_equip'].includes(action)){
-      info=applyAuxAdvancedActionV110(state,action,payload,{catalog:action==='aux_protocol_buy'?liveCatalogRow(snapshot,`aux_protocol:${String(payload.id||'')}`):null});
+      info=applyAuxAdvancedActionV110(state,action,payload,{catalog:liveCatalogRow(snapshot,`aux_protocol:${String(payload.id||'')}`)});
     }
     else if(action==='craft_recipe'){
       const recipeId=String(payload.recipe_id||'').slice(0,64),recipe=applyCraftRecipeServer(state,recipeId,systemsSnapshot);info={action,recipe_id:recipeId,cost:recipe.cost,currency:recipe.currency,ingredients:recipe.ingredients,output:recipe.output_label};
@@ -2231,13 +2254,13 @@ const sharedUniverse = attachSharedUniverse(server, {
     const {data,error}=await sb.rpc('stellar_record_war_defense',{p_map_id:mapId,p_node_id:nodeId,p_faction:faction,p_actor:actorUserId});
     if(error)throw new Error(error.message);return data===true;
   },
-  grantNpcReward:async(userId,killKey,npcType,baseCredits,baseStl)=>{
+  grantNpcReward:async(userId,killKey,npcType,baseCredits,baseStl,ownerEligible=false)=>{
     await offlineFarmEnsureInactiveV484(userId,requireEliteAdmin);
     const sb=await requireEliteAdmin();
     const grant=async()=>{
-      const {data,error}=await sb.rpc('stellar_grant_npc_reward_v228',{
+      const {data,error}=await sb.rpc('stellar_grant_npc_reward_v1131',{
         p_user_id:userId,p_kill_key:killKey,p_npc_type:npcType,
-        p_base_credits:baseCredits,p_base_stl:baseStl
+        p_base_credits:baseCredits,p_base_stl:baseStl,p_owner_eligible:ownerEligible===true
       });
       if(error)throw new Error(String(error.message||'Recompensa NPC recusada'));
       if(!data||!Number.isSafeInteger(Number(data.revision))||Number(data.revision)<1)throw new Error('Recompensa NPC sem confirmação verificável.');

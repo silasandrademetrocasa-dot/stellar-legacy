@@ -48,8 +48,9 @@ test('V113: sem redução de slots de nave/drone, proteção Farm e Autopilot pr
 });
 
 test('V113: evolução AUX é conquista sem alterar os protocolos já adquiridos',()=>{
- assert.equal(AUX_ADVANCED_TIERS_V110[2].cost,50000000);
- assert.equal(AUX_ADVANCED_TIERS_V110[3].cost,180000000);
+ assert.equal(AUX_ADVANCED_TIERS_V110[2].cost,250000);
+ assert.equal(AUX_ADVANCED_TIERS_V110[3].cost,500000);
+ assert.equal(AUX_ADVANCED_TIERS_V110[3].creditsCost,180000000);
  assert.equal(AUX_ADVANCED_TIERS_V110[2].minLevel,8);
  assert.equal(AUX_ADVANCED_TIERS_V110[3].universe,true);
  assert.equal(normalizeAuxAdvancedEquippedV110({dano:2,hp:1},{dano:2,hp:1},9).dano,2);

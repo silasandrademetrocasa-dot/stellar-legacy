@@ -14,7 +14,7 @@ const root=resolve(fileURLToPath(new URL('..',import.meta.url)));
 const clone=x=>structuredClone(x);
 const old=()=>({mapId:'x1',profile:{credits:500000000,uridium:500000,faction:'terra'},territoryFaction:'terra',cargo:{Prometid:500,Duranium:400,Promerium:40,Xenomit:40},pet:{owned:true,level:20,lasers:['lf4'],shields:['sg3'],protocols:{guard:2},gearsOwned:{guard:true},advancedProtocolOwnedV110:{},advancedProtocolEquippedV110:{}},combatConfigsV2013:{active:1,profiles:{1:{petLoadout:{lasers:['lf4'],shields:['sg3'],protocols:{guard:2}}},2:{petLoadout:{lasers:[],shields:[],protocols:{box:1}}}}}});
 const buy=(st,id)=>applyAuxAdvancedActionV110(st,'aux_protocol_buy',{id},{catalog:{catalog_key:`aux_protocol:${id}`,kind:'aux_protocol',ref_id:id,enabled:true,shop_visible:true,currency:['dano','hp','escudo'].includes(id)?'uridium':'credits',price:['dano','hp','escudo'].includes(id)?50000:100000000}});
-const craft=(st,id)=>applyAuxAdvancedActionV110(st,'aux_protocol_craft',{id});
+const craft=(st,id,level=2)=>applyAuxAdvancedActionV110(st,'aux_protocol_craft',{id,level});
 const equip=(st,id,level)=>applyAuxAdvancedActionV110(st,'aux_protocol_equip',{id,level});
 test('15 original protocol assets and declared percentages map exactly to five families/tier',()=>{
  assert.equal(AUX_ADVANCED_V110.length,5);assert.deepEqual(AUX_ADVANCED_V110.map(x=>x.id),['dano','hp','escudo','loot','porao']);
@@ -29,32 +29,44 @@ test('slots start 1, grow to 5; cannot equip unowned ranks, over capacity or unk
  assert.throws(()=>equip(st,'hacker',1),/inválida/);
  assert.equal(st.pet.advancedProtocolEquippedV110.hp,0);
 });
-test('N1: purchase server credits once, no duplicate purchase and correct rank',()=>{
+test('N1: compras unitarias realmente geram copias e debitam cada uma',()=>{
  const st=old(),before=st.profile.uridium,price=AUX_ADVANCED_TIERS_V110[1].cost;
- const info=buy(st,'dano');assert.equal(info.level,1);
- assert.equal(st.profile.uridium,before-price);
- assert.throws(()=>buy(st,'dano'),/Método/);
- assert.equal(st.profile.uridium,before-price);
+ buy(st,'dano');buy(st,'dano');
+ assert.equal(st.pet.advancedProtocolStockV1131.dano[1],2);
+ assert.equal(st.profile.uridium,before-2*price);
+ assert.equal(st.pet.advancedProtocolOwnedV110.dano,1);
 });
-test('N2 crafting consumes only known ingredients, validates ALL before debit',()=>{
- const st=old();buy(st,'hp');
- const before=clone(st);st.cargo.Promerium=0;
- assert.throws(()=>craft(st,'hp'),/Recursos insuficientes/);
- assert.equal(st.profile.credits,before.profile.credits);
- st.cargo.Promerium=before.cargo.Promerium;
- const info=craft(st,'hp');assert.equal(info.level,2);
- assert.equal(st.profile.credits,before.profile.credits-AUX_ADVANCED_TIERS_V110[2].cost);
- assert.equal(st.cargo.Promerium,before.cargo.Promerium-AUX_ADVANCED_TIERS_V110[2].ingredients.Promerium);
-});
-test('N3 requires Universe and tier II, consuming resources without changing unrelated resources',()=>{
- const st=old();buy(st,'escudo');craft(st,'escudo');
+test('N2 exige 4 protocolos N1 + 10 fragmentos APEX + 250k STL, sem minérios',()=>{
+ const st=old();st.profile.uridium=1000000;
+ for(let i=0;i<4;i++)buy(st,'hp');
  const before=clone(st);
- assert.throws(()=>craft(st,'escudo'),/Universo/);
- assert.deepEqual(st.cargo,before.cargo);
- st.mapId='u2';const info=craft(st,'escudo');assert.equal(info.level,3);
+ assert.throws(()=>craft(st,'hp',2),/10 fragmentos/);
+ assert.equal(st.profile.uridium,before.profile.uridium);
+ st.pet.advancedProtocolFragmentsV1131={apex:10,universo:0};
+ const info=craft(st,'hp',2);
+ assert.equal(info.level,2);
+ assert.equal(st.pet.advancedProtocolStockV1131.hp[1],0);
+ assert.equal(st.pet.advancedProtocolStockV1131.hp[2],1);
+ assert.equal(st.pet.advancedProtocolFragmentsV1131.apex,0);
+ assert.equal(st.profile.uridium,before.profile.uridium-AUX_ADVANCED_TIERS_V110[2].cost);
+ assert.deepEqual(st.cargo,before.cargo,'nao consome minérios');
+});
+test('N3 exige quatro protocolos N2, dez fragmentos UNIVERSO, STL e CR',()=>{
+ const st=old();st.profile.uridium=6500000;st.profile.credits=2000000000;
+ for(let i=0;i<16;i++)buy(st,'escudo');
+ st.pet.advancedProtocolFragmentsV1131={apex:40,universo:10};
+ for(let i=0;i<4;i++)craft(st,'escudo',2);
+ assert.equal(st.pet.advancedProtocolStockV1131.escudo[2],4);
+ const before=clone(st);
+ assert.throws(()=>craft(st,'escudo',3),/Universo/);
+ st.mapId='u2';const info=craft(st,'escudo',3);
+ assert.equal(info.level,3);
  assert.equal(st.pet.advancedProtocolOwnedV110.escudo,3);
- assert.equal(st.profile.credits,before.profile.credits-AUX_ADVANCED_TIERS_V110[3].cost);
- assert.equal(st.cargo.Xenomit,before.cargo.Xenomit-AUX_ADVANCED_TIERS_V110[3].ingredients.Xenomit);
+ assert.equal(st.pet.advancedProtocolStockV1131.escudo[2],0);
+ assert.equal(st.pet.advancedProtocolStockV1131.escudo[3],1);
+ assert.equal(st.pet.advancedProtocolFragmentsV1131.universo,0);
+ assert.equal(st.profile.uridium,before.profile.uridium-AUX_ADVANCED_TIERS_V110[3].cost);
+ assert.equal(st.profile.credits,before.profile.credits-AUX_ADVANCED_TIERS_V110[3].creditsCost);
 });
 test('buy+equip N1 never creates a duplicate item or changes existing specialization',()=>{
  const st=old();buy(st,'dano');assert.deepEqual(st.pet.protocols,{guard:2});
