@@ -49,6 +49,36 @@ export function createOfflineFarmV484({credentials,saveBeforeStart,onPauseWorld,
  const escape=x=>String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','\'':'&#39;'}[c]));
  const fmt=n=>Math.round(Number(n)||0).toLocaleString('pt-BR');
  const ammoName=id=>LASER_AMMO[String(id||'')]?.name||String(id||'');
+ // V116.5 — Mensagens para jogadores. Códigos técnicos continuam disponíveis
+ // no servidor para suporte; nunca devem ser exibidos no Farm Offline.
+ const farmIssuesV1165=Object.freeze({
+  save_changed:'o progresso salvo foi atualizado',
+  profile_changed:'os dados do piloto foram atualizados',
+  npc_online_reward:'o servidor encontrou recompensa de NPC durante o Farm',
+  ore_online_reward:'o servidor encontrou coleta de minério durante o Farm'
+ });
+ const farmErrorsV1165=Object.freeze({
+  FARM_REVIEW_REQUIRED_UNVERIFIED_CHANGE:'O progresso da conta mudou durante o Farm e o resgate precisa de uma verificação adicional. A sessão continua guardada. Não cancele; toque em Atualizar e tente resgatar novamente.',
+  FARM_REVIEW_REQUIRED_ONLINE_REWARDS:'Foram detectadas recompensas de combate ou coleta enquanto o Farm estava ativo. O resgate foi preservado para análise. Não cancele esta sessão.',
+  FARM_REVIEW_REQUIRED_ECONOMY_DESYNC:'O saldo salvo e o saldo oficial ainda não estão sincronizados. O resgate foi preservado. Atualize o painel e tente novamente depois da sincronização.',
+  FARM_REVIEW_REQUIRED_WAIT_END:'O tempo do Farm ainda não terminou. Você poderá resgatar quando a sessão for concluída.',
+  FARM_RECOVERY_NOT_SETTLED:'O servidor não conseguiu finalizar o resgate com segurança. Seus ganhos continuam em análise. Não cancele o Farm.',
+  FARM_SAVE_MISSING:'Não encontramos o progresso salvo necessário para confirmar o resgate. A sessão não foi cancelada; procure o suporte.',
+  FARM_REVIEW_REQUIRED:'O resgate precisa de uma verificação adicional antes de liberar as recompensas. A sessão está preservada; não cancele.',
+  FARM_OFFLINE_ACTIVE:'O Farm Offline está ativo. Termine ou resgate antes de alterar equipamentos e economia.',
+  FARM_SAFETY_UNAVAILABLE:'Não foi possível verificar o Farm com o servidor. Tente novamente quando a conexão estabilizar.',
+  FARM_CLAIM_FUNCTION_NOT_FOUND:'O resgate está temporariamente indisponível. Tente novamente após a atualização do servidor.'
+ });
+ function farmFriendlyErrorV1165(error){
+  const raw=String(error?.message||error||'').trim();
+  const code=(raw.match(/\b(?:FARM|SAVE|NPC|ORE)_[A-Z0-9_]+\b/)||[])[0];
+  if(code&&farmErrorsV1165[code])return farmErrorsV1165[code];
+  if(/\b(?:SAVE_NPC_STALE|SAVE_ORE_STALE)\b/.test(raw))return 'Recebemos uma atualização antiga do progresso. O servidor está protegendo os ganhos mais recentes. Atualize e tente novamente.';
+  if(/AbortError|TimeoutError|failed to fetch|network|fetch failed|load failed|timed out/i.test(raw))return 'O servidor demorou a responder. O resgate pode estar em processamento. Toque em Atualizar para conferir antes de tentar novamente.';
+  if(!raw||/^[A-Z][A-Z0-9_]+$/.test(raw))return 'Não foi possível concluir esta ação agora. Seus dados foram preservados; atualize o painel e tente novamente.';
+  return raw;
+ }
+ const farmIssueTextV1165=issues=>(Array.isArray(issues)?issues:[]).map(x=>farmIssuesV1165[x]||'uma verificação adicional está pendente').join('; ');
  const shell=document.createElement('div');shell.id='v484-panel';shell.hidden=true;
  shell.innerHTML=`<section role="dialog" aria-label="Farm Offline">
  <h3>🌙 FARM OFFLINE</h3>
@@ -78,7 +108,7 @@ export function createOfflineFarmV484({credentials,saveBeforeStart,onPauseWorld,
  // The badge is the ONLY clickable point on the world shield.
  farmRescueIndicator.addEventListener('click',e=>{e.stopPropagation();open();});
  farmRescueIndicator.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();open();}});
- async function request(path,body,method,timeoutMs=22000){const c=credentials?.()||{};if(!c.accessToken||!c.gameSessionId)throw Error('Faça login no jogo novamente.');const res=await fetch('/api/offline-farm/v484/'+path,{method:method||(body?'POST':'GET'),headers:{'Content-Type':'application/json',Authorization:'Bearer '+c.accessToken,'X-Game-Session-Id':c.gameSessionId},body:body?JSON.stringify(body):undefined,cache:'no-store',signal:AbortSignal.timeout(timeoutMs)});const data=await res.json().catch(()=>({}));if(!res.ok)throw Error(data.error||'Erro '+res.status);return data;}
+ async function request(path,body,method,timeoutMs=22000){const c=credentials?.()||{};if(!c.accessToken||!c.gameSessionId)throw Error('Faça login no jogo novamente.');const res=await fetch('/api/offline-farm/v484/'+path,{method:method||(body?'POST':'GET'),headers:{'Content-Type':'application/json',Authorization:'Bearer '+c.accessToken,'X-Game-Session-Id':c.gameSessionId},body:body?JSON.stringify(body):undefined,cache:'no-store',signal:AbortSignal.timeout(timeoutMs)});const data=await res.json().catch(()=>({}));if(!res.ok)throw Error(farmFriendlyErrorV1165(data.error||data.code||'Erro '+res.status));return data;}
  function installMenu(){if(menu)return;const pilot=document.querySelector('[data-menu-group="pilot"] > .menu-dropdown');if(!pilot)return;menu=document.createElement('button');menu.id='v485FarmMenuEntry';menu.className='menu-item';menu.type='button';menu.textContent='🌙 FARM OFFLINE';const auto=document.getElementById('v481AutopilotEntry');if(auto)auto.after(menu);else pilot.append(menu);menu.addEventListener('click',()=>{open();document.querySelectorAll('.menu-group.open').forEach(g=>g.classList.remove('open'));});}
  function active(yes,pauseWorld=true){const was=document.body.classList.contains('stellar-offline-active-v485');document.body.classList.toggle('stellar-offline-active-v485',yes);
   if(yes&&!was&&pauseWorld)void onPauseWorld?.();
@@ -98,8 +128,8 @@ export function createOfflineFarmV484({credentials,saveBeforeStart,onPauseWorld,
  const ammo=$('v485-ammo'),oldAmmo=ammo.value;ammo.innerHTML=(options.ammunition||[]).map(a=>`<option value="${escape(a.id)}">${escape(ammoName(a.id))} • ${fmt(a.qty)} un / ${fmt(a.price)} ${escape(a.currency==='credits'?'CR':'STL')}</option>`).join('');if([...ammo.options].some(o=>o.value===oldAmmo))ammo.value=oldAmmo;else ammo.value=options.selectedAmmo||'lcb10';
  const mins=$('v484-minutes'),prior=mins.value;const allowed=[30,60,90,120,180,240,360,480,600,720].filter(n=>n<=(options.maxMinutes||240));mins.innerHTML=allowed.map(n=>`<option value="${n}">${n%60===0?n/60+' hora'+(n===60?'':'s'):n+' minutos'}</option>`).join('');if(allowed.includes(Number(prior)))mins.value=prior;
  v49Tools?.syncOptions(options);
- }catch(e){$('v484-error').textContent=e.message;return statusVerified;}return true;}
- async function operation(fn){if(busy)return;busy=true;for(const btn of shell.querySelectorAll('button'))btn.disabled=true;$('v484-error').textContent='';try{await fn();}catch(e){$('v484-error').textContent=e.message;}finally{busy=false;for(const btn of shell.querySelectorAll('button'))btn.disabled=(btn.id==='v484-start'&&btn.dataset.v49PermissionBlocked==='true');}}
+ }catch(e){$('v484-error').textContent=farmFriendlyErrorV1165(e);return statusVerified;}return true;}
+ async function operation(fn){if(busy)return;busy=true;for(const btn of shell.querySelectorAll('button'))btn.disabled=true;$('v484-error').textContent='';try{await fn();}catch(e){$('v484-error').textContent=farmFriendlyErrorV1165(e);}finally{busy=false;for(const btn of shell.querySelectorAll('button'))btn.disabled=(btn.id==='v484-start'&&btn.dataset.v49PermissionBlocked==='true');}}
  $('v484-start').onclick=()=>operation(async()=>{
     // V91: first wait for all saves, then disconnect combat BEFORE creating the SQL farm.
     // The frozen world never submits a conflicting NPC reward during the start request.
@@ -127,16 +157,16 @@ export function createOfflineFarmV484({credentials,saveBeforeStart,onPauseWorld,
       const issues=check.issues||[];
       const timestampsOnly=issues.length>0&&issues.every(i=>i==='save_changed'||i==='profile_changed');
       if(!timestampsOnly){
-        $('v91-farm-diagnosis').textContent='⚠️ RESGATE EM REVISÃO • sessão preservada. Problemas: '+issues.join(', ')+'. Não cancele o Farm. Contate o ADM para auditar.';
+        $('v91-farm-diagnosis').textContent='⚠️ RESGATE EM ANÁLISE • sua sessão está preservada. Encontramos: '+farmIssueTextV1165(issues)+'. Não cancele o Farm.';
         throw Error('Resgate preservado: atividade econômica online detectada. Nenhuma recompensa foi processada.');
       }
-      $('v91-farm-diagnosis').textContent='🔐 Validando recuperação protegida no servidor. Se a economia estiver intacta, o SQL libera o resgate uma única vez.';
+      $('v91-farm-diagnosis').textContent='🔐 Conferindo o progresso e os saldos antes de liberar suas recompensas. O resgate só será realizado uma vez.';
     }
     const x=await request('settle',{});render(x);if(x.recovered)$('v91-farm-diagnosis').textContent='✅ RESGATE RECUPERADO COM SEGURANÇA • ganhos confirmados pelo banco, sem duplicidade.';if(['settled','conflict'].includes(x.status))await onFinish?.();
   });
   $('v103-farm-check').onclick=()=>operation(async()=>{
     const check=await request('v103/preflight');
-    const text=check.status!=='running'?'Nenhuma sessão de farm ativa.':check.safe?'✅ PRÉ-CHECAGEM APROVADA. O servidor ainda fará a verificação final no pagamento.':'⚠️ RISCO DE CONFLITO • resgate preservado para revisão: '+(check.issues||[]).join(', ');
+    const text=check.status!=='running'?'Nenhuma sessão de farm ativa.':check.safe?'✅ PRÉ-CHECAGEM APROVADA. O servidor ainda fará a verificação final no pagamento.':'⚠️ RESGATE EM ANÁLISE • sessão preservada: '+farmIssueTextV1165(check.issues);
     $('v91-farm-diagnosis').textContent=text;
   });
  $('v484-cancel').onclick=()=>operation(async()=>{if(!confirm('Cancelar sem qualquer ganho desta sessão?'))return;const x=await request('cancel',{});render(x);await onFinish?.();});
@@ -149,9 +179,9 @@ export function createOfflineFarmV484({credentials,saveBeforeStart,onPauseWorld,
   const el=$('v91-farm-diagnosis');el.textContent='Conferindo save, perfil e eventos online...';
   try{
     const d=await request('v91/diagnosis');if(!d.checks){el.textContent='Nenhuma sessão registrada.';return;}
-    const c=d.checks;const label=[['saveChanged','Save modificado'],['profileChanged','Perfil modificado'],['npcRewardDuringFarm','Recompensa de NPC online'],['oreRewardDuringFarm','Coleta de minério online']];
-    el.textContent='DIAGNÓSTICO '+String(d.status||'').toUpperCase()+'\n'+label.map(([k,v])=>(c[k]?'⚠ ':'✓ ')+v+': '+(c[k]?'detectado':'não detectado')).join('\n')+(d.historicalNote?'\n'+d.historicalNote:'')+'\n'+(d.note||'');
-  }catch(e){el.textContent='Falha ao consultar diagnóstico: '+e.message;}
+    const c=d.checks;const label=[['saveChanged','Progresso atualizado'],['profileChanged','Dados do piloto atualizados'],['npcRewardDuringFarm','Recompensa de NPC durante o Farm'],['oreRewardDuringFarm','Minério coletado durante o Farm']];
+    el.textContent='VERIFICAÇÃO DO FARM\n'+label.map(([k,v])=>(c[k]?'⚠ ':'✓ ')+v+': '+(c[k]?'detectado':'não detectado')).join('\n')+(d.historicalNote?'\n'+d.historicalNote:'')+'\n'+(d.note||'');
+  }catch(e){el.textContent='Não foi possível consultar os detalhes: '+farmFriendlyErrorV1165(e);}
  }
  $('v91-farm-diagnose').onclick=()=>operation(diagnoseV91);
  $('v484-refresh').onclick=()=>operation(refresh);$('v484-close').onclick=()=>shell.hidden=true;
