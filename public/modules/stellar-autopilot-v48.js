@@ -1,4 +1,5 @@
 import {baseCommerceWaitV116,nextRouteCooldownV116,routeWatchdogExpiredV116} from './stellar-autopilot-recovery-v116.js?v=116.1';
+import {autoLaserReserveV1164,autoTradeRecoveryDelayV1164} from './stellar-autotrade-v1164.js?v=116.4';
 /* STELLAR_AUTOPILOT_PHASE3_V483 • Fase 3: rotas, comércio e munição controlados. */
 /* Stellar Legacy V48 — Autopilot assistido (sessão aberta).
  * Não credita recompensas, não escreve saves externos e não concede acesso.
@@ -153,7 +154,7 @@ export function chooseAutopilotAction(raw,cfg){
   const affordable=q=>!!q?.catalog_key&&q.currency==='credits'
     &&q.shop_visible!==false&&Number.isFinite(Number(q.price))&&Number(q.price)>0
     &&Number(q.price)<=Number(s.credits)&&Number(q.price)<=Number(s.purchaseBudgetRemaining??c.budget);
-  const lowLaser=!inAstral&&c.autoBuy&&Number(s.ammoStock)<c.ammoMin&&affordable(s.ammoQuote);
+  const lowLaser=!inAstral&&c.autoBuy&&Number(s.ammoStock)<autoLaserReserveV1164(c.ammoMin,s.laserCount)&&affordable(s.ammoQuote);
   const lowRocket=!inAstral&&c.autoBuy&&c.rockets&&Number(s.rocketStock)<c.rocketMin&&affordable(s.rocketQuote);
   if(lowLaser||lowRocket){
     if(!s.buyPermitted){
@@ -200,9 +201,9 @@ export function createStellarAutopilotV48({credentials,getIdentity=()=>null,getS
   let panel=null,fab=null,grantCache=new Map(),refreshingAccess=false,lastPurchaseAttempt=0,lastHealthyAt=0,lastMapId=null;
   // V87: target lock and rocket throttling are in-memory, never persisted.
   let preferredTargetId=null,preferredTargetAt=0,lastRocketAt=0,orbitDirection=1,nextBonusOpportunityAt=0;
-  let tradeBusy=false,tradeHoldBuy=false,tradeHoldSell=false,tradeStartedAt=0;
+  let tradeBusy=false,tradeHoldBuy=false,tradeHoldSell=false,tradeStartedAt=0,tradeBuyRetryAt=0,tradeSellRetryAt=0,buyRetryCount=0,sellRetryCount=0,lastBuyConfirmedAt=0,lastSellConfirmedAt=0,lastBuyDetails='',lastSellDetails='';
   let lastTravelPoint=null,lastTravelProgressAt=0,lastWatchdogLogAt=0,lastDiagnosticAt=0;
-  const logDiagnostic=(event,s,details='')=>{const ts=now();if(ts-lastDiagnosticAt<60000&&event!=='stopped')return;lastDiagnosticAt=ts;try{onDiagnostics({event,map:String(s?.map||''),goal:config.map,atBase:!!s?.atBase,routeMisses,tradeBusy,tradeHoldBuy,tradeHoldSell,reason:String(details||reason).slice(0,110)});}catch{}};
+  const logDiagnostic=(event,s,details='')=>{const ts=now();if(ts-lastDiagnosticAt<60000&&event!=='stopped')return;lastDiagnosticAt=ts;try{onDiagnostics({event,map:String(s?.map||''),goal:config.map,atBase:!!s?.atBase,routeMisses,tradeBusy,tradeHoldBuy,tradeHoldSell,reason:String(details||reason).slice(0,110),lastBuyConfirmedAt,lastSellConfirmedAt,buyRetryAt:tradeBuyRetryAt,sellRetryAt:tradeSellRetryAt});}catch{}};
   function fireRocketRateLimitedV87(ts){if(ts-lastRocketAt<1250)return false;lastRocketAt=ts;fireRocket();return true;}
   let astralBuildBusy=false,astralBuildCancel=false,astralRunSeen=false;
   // V83 • Ciclo contínuo somente após confirmação explícita; estado volátil (nunca retomado depois de refresh).
@@ -237,7 +238,7 @@ export function createStellarAutopilotV48({credentials,getIdentity=()=>null,getS
     attempts=number(saved.attempts,0,1000000,0);failures=number(saved.failures,0,1000000,0);
     boxes=number(saved.boxes,0,1000000,0);drops=number(saved.drops,0,1000000,0);ores=number(saved.ores,0,1000000,0);
     ended=0;lastProgress=stats(s);startStats=lastProgress;lastHealthyAt=ts;lastMapId=s.map;
-    pendingJump=null;lastPortalAttempt=0;nextRouteSearch=0;routeMisses=0;nextSaleAttempt=0;buyFailuresInRow=0;tradeBusy=false;tradeHoldBuy=false;tradeHoldSell=false;tradeStartedAt=0;lastTravelPoint=null;lastTravelProgressAt=now();nextBonusOpportunityAt=0;orbitDirection=1;
+    pendingJump=null;lastPortalAttempt=0;nextRouteSearch=0;routeMisses=0;nextSaleAttempt=0;buyFailuresInRow=0;tradeBusy=false;tradeHoldBuy=false;tradeHoldSell=false;tradeStartedAt=0;tradeBuyRetryAt=0;tradeSellRetryAt=0;buyRetryCount=0;sellRetryCount=0;lastTravelPoint=null;lastTravelProgressAt=now();nextBonusOpportunityAt=0;orbitDirection=1;
     running=true;lastTickAt=0;checkpoint(true);
     notify('Sessão restaurada e acesso validado • retomando '+config.map.toUpperCase());return true;
   }
@@ -330,7 +331,7 @@ export function createStellarAutopilotV48({credentials,getIdentity=()=>null,getS
     try{return await accessPromise;}
     finally{accessPromise=null;refreshingAccess=false;renderStatus();}
   }
-  function exportReport(){const r=sessionReport();return `STELLAR AUTOPILOT • RELATÓRIO V48\nMapa ${r.map.toUpperCase()} • ${r.minutes} min\nNPC ${r.kills} • XP ${r.xp} • Nível ${r.levelFrom} → ${r.levelTo}\nCR líquidos ${r.creditsNet} • STL líquidos ${r.stl} • BOX ${r.boxes} • Drops ${r.drops} • Minérios ${r.ores} • Gastos munição CR ${r.spent}\nXP/h ${Math.round(r.xpPerHour)} • CR líquidos/h ${Math.round(r.crPerHour)} • STL/h ${Math.round(r.stlPerHour)}\nTentativas de compra ${r.attempts} • Falhas ${r.failures}\nPortais concluídos ${r.astralCycles} • STL gastos no materializador ${r.astralLoopSpent} • STL líquidos da sessão ${r.stl} • STL recebidos estimados ${r.astralStlGrossEstimated} • Etapa ${r.astralLoopPhase}\nSituação ${r.reason}`;}
+  function exportReport(){const r=sessionReport();return `STELLAR AUTOPILOT • RELATÓRIO V48\nMapa ${r.map.toUpperCase()} • ${r.minutes} min\nNPC ${r.kills} • XP ${r.xp} • Nível ${r.levelFrom} → ${r.levelTo}\nCR líquidos ${r.creditsNet} • STL líquidos ${r.stl} • BOX ${r.boxes} • Drops ${r.drops} • Minérios ${r.ores} • Gastos munição CR ${r.spent}\nXP/h ${Math.round(r.xpPerHour)} • CR líquidos/h ${Math.round(r.crPerHour)} • STL/h ${Math.round(r.stlPerHour)}\nTentativas de compra ${r.attempts} • Falhas ${r.failures}\nÚltima compra confirmada ${lastBuyConfirmedAt?new Date(lastBuyConfirmedAt).toLocaleString('pt-BR')+' ('+lastBuyDetails+')':'nenhuma'} • Última venda ${lastSellConfirmedAt?new Date(lastSellConfirmedAt).toLocaleString('pt-BR')+' ('+lastSellDetails+')':'nenhuma'}\nPortais concluídos ${r.astralCycles} • STL gastos no materializador ${r.astralLoopSpent} • STL líquidos da sessão ${r.stl} • STL recebidos estimados ${r.astralStlGrossEstimated} • Etapa ${r.astralLoopPhase}\nSituação ${r.reason}`;}
   function controls(){return `<div class="ap-wrap"><header><b>🤖 STELLAR AUTOPILOT</b><button type="button" data-ap-close>FECHAR</button></header>
   <small>Farm assistido online • órbita evasiva, coleta simultânea, compras/vendas remotas sem pausar combate. CPUs equipados e confirmações do servidor continuam obrigatórios.</small>
   <div class="ap-grid"><label>Mapa<select data-ap-field="map">${AUTOPILOT_ALLOWED_MAPS.map(m=>`<option value="${m}" ${m===config.map?'selected':''}>${m.toUpperCase().replace('X','X-').replace('U','U-')}</option>`).join('')}</select></label>
@@ -341,7 +342,7 @@ export function createStellarAutopilotV48({credentials,getIdentity=()=>null,getS
   <label>Recuar HP (%)<input data-ap-field="hpRetreat" type="number" min="10" max="80" value="${config.hpRetreat}"/></label>
   <label>Duração (min • máximo 720)<input data-ap-field="minutes" type="number" min="0" max="720" value="${config.minutes}"/></label>
   <label>Limite compras CR<input data-ap-field="budget" type="number" min="0" max="250000000" value="${config.budget}"/></label>
-  <label>Compra quando laser abaixo de<input data-ap-field="ammoMin" type="number" min="0" value="${config.ammoMin}"/></label>
+  <label>Reserva mínima por laser equipado<input data-ap-field="ammoMin" type="number" min="0" value="${config.ammoMin}"/></label>
   <label>Compra quando míssil abaixo de<input data-ap-field="rocketMin" type="number" min="0" value="${config.rocketMin}"/></label></div>
   <details><summary>✦ PORTAIS ASTRAIS • assistência opcional</summary>
     <small>Montagem usa os giros oficiais do servidor. O ciclo V83 só é iniciado com confirmação explícita do piloto, e nunca continua com a aba oculta. Nenhuma recompensa é concedida por este painel.</small>
@@ -452,7 +453,7 @@ export function createStellarAutopilotV48({credentials,getIdentity=()=>null,getS
     config=readConfig();
     if(config.astralLoop&&!continuousConfirmed)return notify('Ciclo astral exige confirmação no botão INICIAR FARM DO PORTAL');
     if(s.astralActive&&!config.astralAssist)return notify('Marque a assistência astral para combater dentro do portal');started=now();ended=0;spent=0;attempts=0;failures=0;boxes=0;drops=0;ores=0;startStats=stats(s);lastProgress=startStats;lastTickAt=0;
-    lastHealthyAt=now();lastMapId=s.map;preferredTargetId=null;preferredTargetAt=0;lastRocketAt=0;pendingJump=null;lastPortalAttempt=0;nextRouteSearch=0;routeMisses=0;nextSaleAttempt=0;buyFailuresInRow=0;tradeBusy=false;tradeHoldBuy=false;tradeHoldSell=false;tradeStartedAt=0;lastTravelPoint=null;lastTravelProgressAt=now();nextBonusOpportunityAt=0;orbitDirection=1;running=true;astralRunSeen=!!s.astralActive;
+    lastHealthyAt=now();lastMapId=s.map;preferredTargetId=null;preferredTargetAt=0;lastRocketAt=0;pendingJump=null;lastPortalAttempt=0;nextRouteSearch=0;routeMisses=0;nextSaleAttempt=0;buyFailuresInRow=0;tradeBusy=false;tradeHoldBuy=false;tradeHoldSell=false;tradeStartedAt=0;tradeBuyRetryAt=0;tradeSellRetryAt=0;buyRetryCount=0;sellRetryCount=0;lastTravelPoint=null;lastTravelProgressAt=now();nextBonusOpportunityAt=0;orbitDirection=1;running=true;astralRunSeen=!!s.astralActive;
     astralLoopSpent=0;astralCycles=0;astralLoopBusy=false;astralLoopEpoch++;astralLoopPhase=config.astralLoop?'aguardando':'parado';astralLoopNextAt=0;astralLoopEnteredAt=0;astralLoopMapWaitSince=0;astralLoopHealSince=0;astralLoopAmmoWaitSince=0;
     const gate=getAstralState(config.astralGate);astralLoopLastCompleted=Number(gate?.completed)||0;astralLoopLastFailed=Number(gate?.failed)||0;
     if(config.astralLoop)clearResume();else checkpoint(true);
@@ -460,7 +461,7 @@ export function createStellarAutopilotV48({credentials,getIdentity=()=>null,getS
   // Purchases use the existing authoritative queue, but never lock combat/movement.
   async function safeBuy(s){
     if(tradeBusy||tradeHoldBuy||busy||!running||!accessReady()||!config.autoBuy||!s.buyPermitted||s.jumping||!s.ready)return;
-    const opts=[{kind:'ammo',stock:s.ammoStock,min:config.ammoMin,quote:s.ammoQuote},
+    const opts=[{kind:'ammo',stock:s.ammoStock,min:autoLaserReserveV1164(config.ammoMin,s.laserCount),quote:s.ammoQuote},
       {kind:'rocket',stock:s.rocketStock,min:config.rocketMin,quote:s.rocketQuote}];
     for(const opt of opts){const q=opt.quote;
       if(!q||!q.catalog_key||q.shop_visible===false||Number(opt.stock)>=opt.min||q.currency!=='credits'||(opt.kind==='rocket'&&!config.rockets))continue;
@@ -469,9 +470,9 @@ export function createStellarAutopilotV48({credentials,getIdentity=()=>null,getS
       attempts++;tradeBusy=true;tradeStartedAt=now();
       try{
         const ok=await buyPackage(q.catalog_key,opt.kind,{atBase:!!s.atBase,credits:s.credits,budgetRemaining:config.budget-spent});
-        if(ok===true){spent+=cost;buyFailuresInRow=0;tradeHoldBuy=false;notify('Reabastecimento autorizado • combate mantido');}
-        else {failures++;buyFailuresInRow++;tradeHoldBuy=true;logDiagnostic('trade_uncertain',s,'Compra recusada/sem confirmação');notify('Compra sem confirmação • compras pausadas para evitar duplicidade');}
-      }catch(e){failures++;buyFailuresInRow++;tradeHoldBuy=true;logDiagnostic('trade_uncertain',s,'Compra com erro de rede');notify('Compra com resposta incerta • compras pausadas (verifique saldo)');}
+        if(ok===true){spent+=cost;buyFailuresInRow=0;buyRetryCount=0;tradeBuyRetryAt=0;tradeHoldBuy=false;lastBuyConfirmedAt=now();lastBuyDetails=String(q.catalog_key);logDiagnostic('trade_purchase_confirmed',s,lastBuyDetails);notify('Reabastecimento confirmado pelo servidor • combate mantido');}
+        else {failures++;buyFailuresInRow++;tradeHoldBuy=true;tradeBuyRetryAt=now()+autoTradeRecoveryDelayV1164(++buyRetryCount);logDiagnostic('trade_uncertain',s,'Compra sem confirmação • ID preservado para repetição segura');notify('Compra em verificação • combate mantido, tentativa segura agendada');}
+      }catch(e){failures++;buyFailuresInRow++;tradeHoldBuy=true;tradeBuyRetryAt=now()+autoTradeRecoveryDelayV1164(++buyRetryCount);logDiagnostic('trade_uncertain',s,'Compra com erro de rede • ID preservado');notify('Compra com resposta incerta • repetição segura agendada');}
       finally{tradeBusy=false;tradeStartedAt=0;}
       break; // Exactly one package at a time; always wait for updated server inventory.
     }
@@ -640,6 +641,8 @@ export function createStellarAutopilotV48({credentials,getIdentity=()=>null,getS
     s.purchaseBudgetRemaining=Math.max(0,config.budget-spent);
     lastProgress=stats(s);
     if(busy)return;
+    if(tradeHoldBuy&&tradeBuyRetryAt>0&&ts>=tradeBuyRetryAt&&!tradeBusy){tradeHoldBuy=false;logDiagnostic('trade_buy_retry',s,'Repetindo a mesma operação com recibo idempotente');}
+    if(tradeHoldSell&&tradeSellRetryAt>0&&ts>=tradeSellRetryAt&&!tradeBusy){tradeHoldSell=false;logDiagnostic('trade_sell_retry',s,'Repetindo a mesma operação com recibo idempotente');}
     if(!s.astralActive&&config.autoBuy&&ts-lastPurchaseAttempt>3500&&!tradeHoldBuy){lastPurchaseAttempt=ts;void safeBuy(s);}
     // Economy operations are asynchronous and must not block fighting/steering.
     s.bonusDue=ts>=nextBonusOpportunityAt;
@@ -648,9 +651,9 @@ export function createStellarAutopilotV48({credentials,getIdentity=()=>null,getS
       if(!tradeBusy&&!tradeHoldSell&&ts>=nextSaleAttempt&&s.canSell){
         nextSaleAttempt=ts+9000;tradeBusy=true;tradeStartedAt=ts;
         Promise.resolve().then(()=>sellCargo()).then(ok=>{
-          if(ok!==true){failures++;tradeHoldSell=true;logDiagnostic('trade_uncertain',s,'Venda não confirmada');notify('Venda sem confirmação • vendas pausadas, combate mantido');}
-          else notify('Venda remota confirmada • combate mantido');
-        }).catch(()=>{failures++;tradeHoldSell=true;logDiagnostic('trade_uncertain',s,'Venda sem resposta');notify('Venda incerta • vendas pausadas para evitar duplicidade');})
+          if(ok!==true){failures++;tradeHoldSell=true;tradeSellRetryAt=now()+autoTradeRecoveryDelayV1164(++sellRetryCount);logDiagnostic('trade_uncertain',s,'Venda incerta • ID preservado para repetir com segurança');notify('Venda pendente • nova confirmação agendada, combate mantido');}
+          else {tradeHoldSell=false;sellRetryCount=0;tradeSellRetryAt=0;lastSellConfirmedAt=now();lastSellDetails=String(s.sellableCargoValue||0)+' CR estimados';logDiagnostic('trade_sale_confirmed',s,lastSellDetails);notify('Venda remota confirmada • combate mantido');}
+        }).catch(()=>{failures++;tradeHoldSell=true;tradeSellRetryAt=now()+autoTradeRecoveryDelayV1164(++sellRetryCount);logDiagnostic('trade_uncertain',s,'Venda sem resposta • ID preservado');notify('Venda incerta • repetição segura agendada');})
           .finally(()=>{tradeBusy=false;tradeStartedAt=0;});
       }
       if(baseCommerceWaitV116({atBase:s.atBase,remote:s.remoteTraderEquipped,busy:tradeBusy,startedAt:tradeStartedAt,now:ts,hold:tradeHoldSell})){

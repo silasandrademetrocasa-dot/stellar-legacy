@@ -58,7 +58,7 @@ test('V106.5: manual fica bloqueado no farm offline e no Autopilot sem PUT por f
   assert.match(game,/autoCargoSale:false/);
   assert.match(game,/AUTOPILOT_V48\.active\|\|offlineFarmWorldLockedV84\(\)/);
   assert.match(game,/AUX_WORK_V2027\.due\('manualAutoSellV1065',4500\)/);
-  assert.match(game,/runEconomyAction\('sell_cargo',\{resource_id:'all'\}\)/);
+  assert.match(game,/runEconomyAction\('sell_cargo',payload,\{flush:true,applyState:true\}\)/);
   assert.match(game,/sellCargo:\(\)=>sellAllCargo\(\{automatic:true\}\)/);
 });
 test('V116.1: interface permite venda presencial sem CPU, mantendo CPU obrigatorio para venda remota',()=>{

@@ -1,4 +1,6 @@
 import {hasRemoteTraderCpuV1065,eligibleAutoCargoSaleV1065} from './modules/remote-cargo-auto-sale-v1065.js?v=47.7.60';
+import {materializerProductNameV1164} from './modules/materializer-product-names-v1164.js?v=47.7.60';
+import {makeAutoTradeRequestV1164,clearAutoTradeRequestV1164} from './modules/stellar-autotrade-v1164.js?v=47.7.60';
 import {canRememberSessionV101,rememberSessionEnabledV101,setRememberSessionV101,rememberEmailEnabledV101,getRememberedEmailV101,setRememberEmailV101} from './modules/login-persistence-v101.js?v=47.7.60';
 import {combatVisualPolicyV78,drawLaserLiteV78,drawRocketLiteV78,drawLightFxV78,drawCircularSelectionV78} from './modules/combat-visual-lite-v78.js?v=47.7.60';
 import {drawEngineWakeLiteV79,drawEntitySpriteV79} from './modules/entity-visual-policy-v79.js?v=47.7.60';
@@ -1878,14 +1880,24 @@ async function runEconomyAction(action,payload={},options={}){
   const {applyState=true,flush=true}=options;
   return queueEconomy(async()=>{if(flush)await syncBeforeEconomy();economyMutationInFlightV106=true;try{const before=progress?{credits:Number(progress.profile?.credits)||0,uridium:Number(progress.profile?.uridium)||0}:null;const result=await economyActionOnline(action,payload);if(applyState&&result?.state){installEconomyState(result.state,{serverConfirmedEquipment:['aux_protocol_buy','aux_protocol_craft','aux_protocol_equip'].includes(action)});telemetryTrackEconomyTransition(action,before,progress?.profile,result?.info||{});}return result;}finally{economyMutationInFlightV106=false;}});
 }
+function autoTradeRequestV1164(kind,key){
+ const owner=String(getUser()?.id||'');
+ return makeAutoTradeRequestV1164({storage:sessionStorage,identity:owner,kind,key,randomId:()=>crypto.randomUUID?.()||('at_'+Array.from(crypto.getRandomValues(new Uint8Array(16)),b=>b.toString(16).padStart(2,'0')).join(''))});
+}
 async function runAutoBuy(catalogKey,label){
-  const key=String(catalogKey||'');if(!key||economyRuntime.autoPending.has(key))return false;economyRuntime.autoPending.add(key);
+  const key=String(catalogKey||'');if(!key||economyRuntime.autoPending.has(key))return false;
+  if(saveIntegrityBlockedV106||equipmentSavePendingV109||offlineFarmWorldLockedV84())return false;
+  const request=autoTradeRequestV1164('buy',key);if(!request)return false;
+  economyRuntime.autoPending.add(key);
   try{
-    const result=await runEconomyAction('auto_buy',{catalog_key:key},{applyState:false,flush:true}),info=result?.info||{};
-    if(info.kind==='ammo'&&info.id){progress.ammo[info.id]=(Number(progress.ammo[info.id])||0)+Math.max(1,Number(info.qty)||1);}
-    else if(info.kind==='rocket'&&info.id){progress.rockets[info.id]=(Number(progress.rockets[info.id])||0)+Math.max(1,Number(info.qty)||1);}
-    const cur=info.currency==='uridium'?'uridium':'credits',spent=Math.max(0,Number(info.price)||0);progress.profile[cur]=Math.max(0,(Number(progress.profile[cur])||0)-spent);telemetrySpend(cur,spent);cloudDirty=true;saveGame();refreshAmmoCounters();renderShop();updateUI();showToast(`AUTO BUY • ${label}`,'shop');return true;
-  }catch(e){console.warn('auto buy server',e);return false;}finally{economyRuntime.autoPending.delete(key);}
+    // V116.4: synchronize pending client changes first (no lost cargo/mission),
+    // then server validates price/CPU and persists official stock/balance.
+    const result=await runEconomyAction('auto_buy',{catalog_key:key,request_id:request.id},{flush:true,applyState:true});
+    if(!result?.ok||!result?.state||!result?.info?.id)return false;
+    clearAutoTradeRequestV1164(sessionStorage,request);
+    showToast(`AUTO BUY • ${label} confirmado`,'shop');return true;
+  }catch(e){console.warn('[auto-buy-v1164] sem confirmação: mantendo ID para retry',String(e?.message||e));return false;}
+  finally{economyRuntime.autoPending.delete(key);}
 }
 
 // ===================== V10 PILOT BIO =====================
@@ -9162,9 +9174,13 @@ async function sellAllCargo({automatic=false}={}){
   if(!canSellCargoNow()){if(!automatic)showToast('Para vender fora da base, equipe o Terminal Mercante Remoto Elite');return false;}
   const amount=Object.entries(progress.cargo||{}).reduce((sum,[id,qty])=>sum+(liveResourcePrice(id)>0?Math.max(0,Number(qty)||0):0),0);
   if(amount<=0)return false;
+  const request=automatic?autoTradeRequestV1164('sale','all'):null;
+  if(automatic&&!request)return false;
   try{
-    const r=await runEconomyAction('sell_cargo',{resource_id:'all'});
+    const payload=automatic?{resource_id:'all',request_id:request.id}:{resource_id:'all'};
+    const r=await runEconomyAction('sell_cargo',payload,{flush:true,applyState:true});
     if(!(Number(r?.info?.total)>0))return false;
+    if(automatic)clearAutoTradeRequestV1164(sessionStorage,request);
     journeyEvent('sell',1);battlePassEvent('sell',amount);
     if(!automatic)showToast(`Porão vendido: +${fmt(r.info.total)} CR • servidor`);
     if(state.hangarTab==='refinery')renderHangar();return true;
@@ -9430,7 +9446,7 @@ function spinAlpha(amount,payment='uridium'){
     value:cost,currency:dust?'dust':'uridium',confirmLabel:'CONFIRMAR GIRO',
     onConfirm:()=>runEconomyAction('gate_spin',{protocol:key,amount,payment}).then(r=>{
       const info=r?.info||{},results=Array.isArray(info.results)?info.results:[],summary={};
-      results.forEach(x=>summary[x.label]=(summary[x.label]||0)+1);
+      results.forEach(x=>{const label=materializerProductNameV1164(x,(kind,id)=>{const row=liveCatalog(`${kind}:${id}`)||liveCatalog(`${kind==='item'?'laser':kind}:${id}`);return row?.display_name?{display_name:row.display_name}:null;});summary[label]=(summary[label]||0)+1;});
       const pieces=results.filter(x=>x.kind==='piece').length;
       const lines=Object.entries(summary).slice(0,12).map(([label,count])=>`${count>1?`${count}× `:''}${label}`);
       ui.gateResultBox.innerHTML=`<b>${info.amount||amount} giro(s) • ${fmt(info.cost??cost)} ${dust?'POEIRA':'STL'} • SERVIDOR</b>${pieces?`<div class="gate-piece-win">✦ ${pieces} peça(s) encontrada(s)</div>`:''}<div>${lines.join(' • ')}</div>`;
@@ -10201,9 +10217,10 @@ const AUTOPILOT_V48=createStellarAutopilotV48({
     xp:Number(progress?.profile?.xp)||0,kills:Number(progress?.profile?.aliensKilled)||0,
     level:Number(progress?.profile?.level)||1,
     cargoUsed:progress?cargoUsed():0,cargoCapacity:progress?cargoCapacity():1,cargoFree:progress?cargoFree():0,
-    ammoStock:progress?ammoQty((([liveQuote('ammo:'+progress.selectedLaserAmmo),liveQuote('ammo:lcb10')].find(q=>q&&q.currency==='credits'&&q.shop_visible!==false)||{}).catalog_key||'').split(':')[1]||progress.selectedLaserAmmo):0,rocketStock:progress?rocketQty((([liveQuote('rocket:'+progress.selectedRocket),liveQuote('rocket:r310')].find(q=>q&&q.currency==='credits'&&q.shop_visible!==false)||{}).catalog_key||'').split(':')[1]||progress.selectedRocket):0,
-    ammoQuote:progress?([liveQuote('ammo:'+progress.selectedLaserAmmo),liveQuote('ammo:lcb10')].find(q=>q&&q.currency==='credits'&&q.shop_visible!==false)||null):null,
-    rocketQuote:progress?([liveQuote('rocket:'+progress.selectedRocket),liveQuote('rocket:r310')].find(q=>q&&q.currency==='credits'&&q.shop_visible!==false)||null):null
+    ammoStock:progress?ammoQty(progress.selectedLaserAmmo):0,rocketStock:progress?rocketQty(progress.selectedRocket):0,
+    laserCount:progress?progress.shipLoadout?.lasers?.filter(Boolean).length||1:1,
+    ammoQuote:progress&&liveQuote('ammo:'+progress.selectedLaserAmmo)?.currency==='credits'?liveQuote('ammo:'+progress.selectedLaserAmmo):null,
+    rocketQuote:progress&&liveQuote('rocket:'+progress.selectedRocket)?.currency==='credits'?liveQuote('rocket:'+progress.selectedRocket):null
   }),
   // V83 • Confirmação no diálogo padrão do jogo antes do ciclo econômico recorrente.
   confirmAstralLoop:message=>stellarConfirmV4776(message),
@@ -10293,7 +10310,7 @@ const AUTOPILOT_V48=createStellarAutopilotV48({
     const c=getSessionCredentials();if(!authenticated||!c?.accessToken||!c?.gameSessionId)return;
     fetch('/api/autopilot/v116/diagnostics',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+c.accessToken,'X-Game-Session-Id':c.gameSessionId},body:JSON.stringify(entry),cache:'no-store',signal:AbortSignal.timeout(7000)}).catch(()=>{});
   },
-  buyPackage:(key,kind)=>isAtTrader()?applyAuthoritativePurchase(key,kind==='ammo'?'Munição Autopilot':'Mísseis Autopilot'):(autoBuyEnabled()?runAutoBuy(key,kind==='ammo'?'Munição Autopilot':'Mísseis Autopilot'):Promise.resolve(false)),
+  buyPackage:(key,kind)=>isAtTrader()||autoBuyEnabled()?runAutoBuy(key,kind==='ammo'?'Munição Autopilot':'Mísseis Autopilot'):Promise.resolve(false),
   onNotice:()=>{}
 });
 

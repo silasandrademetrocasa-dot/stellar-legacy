@@ -1,5 +1,6 @@
 /* STELLAR_OFFLINE_FARM_V484 APPLIED */
 import {saleQuoteV4776} from '../public/modules/sale-policy-v4776.js';
+import {tradeRequestIdV1164,findTradeReceiptV1164,rememberTradeReceiptV1164} from './autotrade-idempotency-v1164.js';
 import {validateEquipmentWriteV1062} from '../public/modules/hangar-write-guard-v1062.js';
 import {applyAuxAdvancedActionV110,validateAuxAdvancedSaveV110} from '../public/modules/aux-advanced-protocols-v110.js';
 import {attachFrontierAuditV450} from './frontier-audit-v450.js';
@@ -511,7 +512,7 @@ const GATE_SERVER_DEFS={
   gamma:{key:'gamma',label:'ECLIPSE',pieces:64,unlock:null,baseLives:3,maxLives:5},
 };
 const GATE_AMMO={lcb10:{name:'PLS-1',base:300},mcb25:{name:'PLS-2',base:200},mcb50:{name:'PLS-3',base:120},ucb100:{name:'PLS-4',base:70}};
-const GATE_ROCKETS={r310:{name:'R-310',base:15},plt2026:{name:'PLT-2026',base:10},plt2021:{name:'PLT-2021',base:7},plt3030:{name:'PLT-3030',base:5}};
+const GATE_ROCKETS={r310:{name:'CMT-1',base:15},plt2026:{name:'CMT-2',base:10},plt2021:{name:'CMT-3',base:7},plt3030:{name:'CMT-4',base:5}};
 function randomChoiceServer(list){return list[Math.floor(Math.random()*list.length)];}
 function randomIntServer(min,max){return Math.floor(min+Math.random()*(max-min+1));}
 function ensureGalaxyGateServer(state){
@@ -1552,7 +1553,7 @@ app.post('/api/economy/action', requireUser, OFFLINE_FARM_GUARD_V484, asyncRoute
   const routeStarted=Date.now();
   const action=String(req.body?.action||'').trim();
   const payload=(req.body?.payload&&typeof req.body.payload==='object')?req.body.payload:{};
-  const tamper=invalidShopArguments(req.body,['action','payload'])||invalidShopArguments(payload,['catalog_key','kind','qty','drone_id','item_id','resource_id','id','recipe_id','service_id','protocol','amount','level']);
+  const tamper=invalidShopArguments(req.body,['action','payload'])||invalidShopArguments(payload,['catalog_key','kind','qty','drone_id','item_id','resource_id','id','recipe_id','service_id','protocol','amount','level','request_id']);
   if(tamper){const outcome=await securityService.report(req.user.id,tamper,'economy_action');
     if(outcome?.auto_suspended)return res.status(403).json({error:'Conta temporariamente suspensa.',code:'ACCOUNT_BANNED'});
     return res.status(400).json({error:'Parâmetros econômicos não autorizados.',code:tamper.code});}
@@ -1569,10 +1570,19 @@ app.post('/api/economy/action', requireUser, OFFLINE_FARM_GUARD_V484, asyncRoute
     ]);
     if(premiumResult?.error)throw new Error(premiumResult.error.message);
     const premium=!!premiumResult?.data?.premium_active;
+    const tradeAction=action==='auto_buy'||action==='sell_cargo';
+    if(!tradeAction&&payload.request_id)throw Object.assign(new Error('Identificador exclusivo do comércio automático.'),{status:400});
+    const requestId=tradeAction?tradeRequestIdV1164(payload.request_id):null;
+    const previous=requestId?findTradeReceiptV1164(state,requestId,action,payload):null;
+    // Replay is read-only. It never writes a new purchase, shipment or save.
+    if(previous)return {state,updated_at:null,info:previous,deduplicated:true};
     let info={action};
 
     if(action==='auto_buy'){
-      const extras=Array.isArray(state?.shipLoadout?.extras)?state.shipLoadout.extras:[];if(!extras.includes('ammoAutoBuyCpu'))throw Object.assign(new Error('CPU AUTO BUY não está equipado no save online.'),{status:403});
+      const extras=Array.isArray(state?.shipLoadout?.extras)?state.shipLoadout.extras:[];
+      const buyAtBase=['x1','x8'].includes(String(state.mapId||''))&&
+        String(state.territoryFaction||state.profile?.faction||'')===String(state.profile?.faction||'');
+      if(!extras.includes('ammoAutoBuyCpu')&&!buyAtBase)throw Object.assign(new Error('Compra remota exige CPU AUTO BUY equipado; sem CPU, visite sua base.'),{status:403});
       const key=String(payload.catalog_key||'').slice(0,120),row=liveCatalogRow(snapshot,key);
       if(!row||!['ammo','rocket'].includes(String(row.kind||'')))throw Object.assign(new Error('AUTO BUY indisponível para esse produto.'),{status:404});
       const base=Math.max(0,Math.round(Number(row.price)||0)),price=premium&&premiumDiscountEligible(row)?Math.max(1,Math.floor(base*.95)):base,currency=String(row.currency||'credits')==='uridium'?'uridium':'credits';
@@ -1651,6 +1661,7 @@ app.post('/api/economy/action', requireUser, OFFLINE_FARM_GUARD_V484, asyncRoute
     }
     else throw Object.assign(new Error('Ação econômica não reconhecida pelo servidor.'),{status:400});
 
+    if(requestId)rememberTradeReceiptV1164(state,requestId,action,payload,info);
     const updated_at=await writeEconomySave(req,state);return {state,updated_at,info};
   },{maxAttempts:3,delay:attempt=>{console.warn('[economy-v102] save em conflito; relendo saldo e recompensas, tentativa',attempt+1);return new Promise(resolve=>setTimeout(resolve,40*attempt));}}));
   res.json({ok:true,...result,server_ms:Date.now()-routeStarted});
@@ -2056,6 +2067,9 @@ app.put('/api/save', requireUser, OFFLINE_FARM_GUARD_V484, asyncRoute(async (req
   // Clientes legados que não possuem esse campo continuam compatíveis.
   if(serverSave?.state?.bulkPurchaseReceiptsV92)state.bulkPurchaseReceiptsV92=structuredClone(serverSave.state.bulkPurchaseReceiptsV92);
   else delete state.bulkPurchaseReceiptsV92;
+  // V116.4: authoritative auto-trade receipts cannot be forged/erased by client PUT.
+  if(serverSave?.state?.autoTradeReceiptsV1164)state.autoTradeReceiptsV1164=structuredClone(serverSave.state.autoTradeReceiptsV1164);
+  else delete state.autoTradeReceiptsV1164;
   const authoritativePurchaseRevision=Math.max(0,Number(serverSave?.state?.serverPurchaseRevision)||0);
   const incomingPurchaseRevision=Math.max(0,Number(state?.serverPurchaseRevision)||0);
   if(incomingPurchaseRevision<authoritativePurchaseRevision)return res.status(409).json({

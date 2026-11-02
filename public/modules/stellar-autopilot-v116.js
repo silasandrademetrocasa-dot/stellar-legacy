@@ -1,2 +1,2 @@
-// V116.1 new URL prevents stale mobile JS cache without changing the build version.
-export {createStellarAutopilotV48} from './stellar-autopilot-v48.js?v=116.1';
+// V116.4: recovery safe and idempotent trade retries.
+export {createStellarAutopilotV48} from './stellar-autopilot-v48.js?v=116.4';
