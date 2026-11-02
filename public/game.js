@@ -3,7 +3,7 @@ import {canRememberSessionV101,rememberSessionEnabledV101,setRememberSessionV101
 import {combatVisualPolicyV78,drawLaserLiteV78,drawRocketLiteV78,drawLightFxV78,drawCircularSelectionV78} from './modules/combat-visual-lite-v78.js?v=47.7.60';
 import {drawEngineWakeLiteV79,drawEntitySpriteV79} from './modules/entity-visual-policy-v79.js?v=47.7.60';
 import {drawRelayMediumMobileV76,relayGeometryV76,relayRenderDiagnosticV76,reportRelayRenderErrorV76} from './modules/relay-render-safe-v76.js?v=47.7.60';
-import {drawPortalV71 as drawPortalV69,drawBaseV71 as drawBaseV69,drawRelayV71 as drawRelayV69,noteRelayAttackV69,resetRelayVisualMemoryV69} from './modules/stellar-animation-v71.js?v=47.7.60';
+import {drawPortalV71 as drawPortalV69,drawBaseV71 as drawBaseV69,drawRelayV71 as drawRelayV69,noteRelayAttackV69,resetRelayVisualMemoryV69} from './modules/stellar-animation-v1163.js?v=47.7.60';
 /* STELLAR_FLEET_2D_V66 */
 /* STELLAR_OFFLINE_FARM_VISUAL_V485 */
 /* STELLAR_OFFLINE_FARM_V484 APPLIED */
@@ -113,7 +113,7 @@ import { shouldPollPvpInboxV106 } from './modules/pvp-inbox-policy-v106.js?v=47.
 import {arenaVisibleCombatLogV1143,arenaBattleTimeoutMessageV1143} from './modules/arena-visual-scheduler-v1143.js?v=47.7.60';
 import {pvpShotEligibilityV114} from './modules/pvp-target-integrity-v114.js?v=47.7.60';
 import { signUp, signIn, beginGoogleSignIn, restoreGoogleSignInFromUrl, requestPasswordReset, restorePasswordRecoveryFromUrl, restoreSession, signOutLocal, getSessionRestoreErrorV101, checkGameSession, endGameSession, getUser, getSessionCredentials, loadCloudSave, saveCloudSave, loadEliteOperationsOnline, claimEliteOperationOnline, loadWarCampaignsOnline, claimWarSupplyOnline, claimWarCampaignOnline, loadAdminWarCampaignsOnline, saveAdminWarCampaignOnline, saveAdminWarRulesOnline, loadAdminEliteObjectivesOnline, saveAdminEliteObjectiveOnline, updateCallsign, updatePassword, loadRankings, loadAuctionBids, saveAuctionBidOnline, placeAuctionBidOnline, markAuctionBidStatusOnline, loadAuctionMarket, upsertPlayerPresenceOnline, loadMapPresenceOnline, savePlayerLocationCheckpointOnline, loadPlayerLocationCheckpointOnline, removePlayerPresenceOnline, queuePvpAttackOnline, consumePvpDamageEventsOnline, syncArenaProfileOnline, loadArenaState, loadArenaDailyRewardStatus, claimArenaDailyReward, loadArenaOpponents, loadArenaHistory, arenaAttackOnline, listClansOnline, loadMyClanOnline, createClanOnline, joinClanOnline, getClanRequestsOnline, reviewClanRequestOnline, cancelClanRequestOnline, setClanMemberRoleOnline, leaveClanOnline, transferClanCreditsOnline, claimClanCreditGrantsOnline, recordClanAlienKillOnline, getPremiumShopOnline, testPurchasePremiumOnline, adminPreviewPremiumStageOnline, adminSimulatePremiumStageOnline, getPremiumStageCatalogOnline, loadWarfrontStateOnline, loadSectorOwnershipOnline, hitWorldBossOnline, claimWorldBossRewardOnline, declareClanWarOnline, recordClanWarScoreOnline, loadLiveOpsOnline, adminUpdateLiveEventScheduleOnline, purchaseLiveCatalogOnline, purchaseLiveBulkOnline, economyActionOnline, getChatHistoryOnline, sendChatMessageOnline, redeemGameCouponOnline, getMyDesignersOnline, setDesignLoadoutOnline, claimGateDroneDesignOnline, claimEventDesignerOnline, getAdminStatus, adminSearchAccounts, adminRecentActions, adminBanAccount, adminUnbanAccount, adminResetAccount, adminDeleteAccount, pushTelemetryBatch, adminTelemetryOverview, adminPlayerTelemetry, getBattleGroupOnline, createBattleGroupOnline, inviteBattleGroupOnline, searchBattleGroupPlayersOnline, inviteBattleGroupUserOnline, respondBattleGroupInviteOnline, leaveBattleGroupOnline, kickBattleGroupMemberOnline, setBattleGroupRallyOnline, loadRuntimeConfigOnline, loadNpcRuntimeConfigOnline, loadWorldRuntimeConfigOnline, loadSystemsRuntimeConfigOnline, loadAdminRuntimeMonitorOnline, adminUpdateRuntimeModuleOnline, adminUpdateNpcRuntimeOnline, adminUpdateNpcSpawnRuntimeOnline, adminUpdateWorldMapOnline, adminUpdateWorldResourceOnline, adminUpdateWorldSectorOnline, adminUpdateWorldPortalOnline, adminUpdateWorldResourcePoolOnline, adminUpdateMissionCategoryOnline, adminUpdateEconomyServiceOnline, adminUpdateCraftingRecipeOnline, loadBattlePassRuntimeConfigOnline, adminUpdateBattlePassSeasonOnline, adminUpdateBattlePassTierOnline, loadShopsRuntimeConfigOnline, adminUpdateCommonShopItemOnline, adminUpdatePremiumShopItemOnline, loadBonusConfigOnline, adminUpdateBonusConfigOnline, adminCouponDashboardOnline, adminCreateCouponOnline, adminSetCouponActiveOnline, loadGalaxyGatesOnline, adminUpdateGalaxyGateOnline, adminUpsertCustomMissionOnline, adminDeleteCustomMissionOnline, adminCreateCraftRecipeOnline, adminCreateEconomyServiceOnline, adminCreatePassSeasonOnline, loadAuctionRulesOnline, adminUpdateAuctionRulesOnline, loadBalanceRuntimeOnline, adminUpdateBalanceOnline,loadAdminSecurityIncidents,reviewAdminSecurityIncident } from './api.js?v=47.7.60';
-import {createOfflineFarmV484} from './modules/stellar-offline-farm-v484.js?v=47.7.60';
+import {createOfflineFarmV484} from './modules/stellar-offline-farm-v1163.js?v=47.7.60';
 import { SharedUniverseClient } from './world.js?v=47.7.60';
 import {universeConnectionStatusV1066} from './modules/universe-connection-status-v1066.js?v=47.7.60';
 
@@ -655,6 +655,7 @@ function assetForProduct(id,type,subtype){
   if(type==='ship')return shipCardAsset(id);
   if(type==='drone')return droneCardAsset(id);
   if(type==='pet')return droneCardAsset('pet');
+  if(type==='auxProtocol'&&AUX_ADVANCED_V110.some(def=>def.id===id))return auxProtocolArtV1091(id,1);
   if(type==='petGear')return ({guard:GAME_ASSETS.equipment.autoLaserCpu,box:GAME_ASSETS.equipment.ammoAutoBuyCpu,ore:GAME_ASSETS.equipment.rocketTurboCpu,repair:GAME_ASSETS.equipment.rep2,kami:GAME_ASSETS.equipment.autoRocketCpu})[id]||droneCardAsset('pet');
   if(type==='ammo'||type==='rocket')return GAME_ASSETS.ammo[id];
   if(GAME_ASSETS.equipment[id])return GAME_ASSETS.equipment[id];
@@ -3520,7 +3521,7 @@ function renderProgression(){
   const missionHeadline=(Number(progress.profile?.level)||1)<2?'Acompanhe suas recompensas desde já: objetivos e pontos do Passe começam no nível 2.':(/\b\d+\s+missões diárias\b/i.test(seasonDescription)?'Missões diárias adaptadas ao seu nível.':seasonDescription||'Complete missões diárias para evoluir seu Passe.');
   loadPassUiPrefs();
   ui.passContent.innerHTML=`${eliteRoutePanelV2012()}<section class="pass-hero"><div><div class="eyebrow">${escHtml(seasonCfg.name||`TEMPORADA ${progress.battlePass.season}`)}</div><h3>TIER ${unlocked} / ${battlePassTierCount()}</h3><p>${escHtml(missionHeadline)} • ${missions.filter(m=>!m.premium).length} missões para todos + 1 extra Premium.</p></div><div class="pass-points"><span>PONTOS</span><b>${fmt(points)}</b><small>${unlocked>=battlePassTierCount()?'PASSE COMPLETO':`faltam ${fmt(nextPoints)} para o próximo tier`}</small></div></section><div class="pass-main-progress"><i style="width:${battlePassTierProgress()}%"></i></div>${premiumCta}
-  <section class="${passSectionClass('missions')}"><button class="pass-section-head pass-section-toggle" type="button" data-pass-toggle="missions"><span class="pass-head-copy"><b>MISSÕES DIÁRIAS</b><small>${missions.filter(m=>daily.completed[m.id]).length}/5 concluídas hoje</small></span><em>${passSectionIcon('missions')}</em></button><div class="pass-section-body"><div class="pass-missions">${dailyHtml}</div></div></section>
+  <section class="${passSectionClass('missions')}"><button class="pass-section-head pass-section-toggle" type="button" data-pass-toggle="missions"><span class="pass-head-copy"><b>MISSÕES DIÁRIAS</b><small>${missions.filter(m=>daily.completed[m.id]).length}/${missions.length} concluídas hoje${paid?'':' • 1 extra Premium'}</small></span><em>${passSectionIcon('missions')}</em></button><div class="pass-section-body"><div class="pass-missions">${dailyHtml}</div></div></section>
   <section class="${passSectionClass('rewards')}"><div class="pass-section-head"><button class="pass-section-title-button" type="button" data-pass-toggle="rewards"><span class="pass-head-copy"><b>RECOMPENSAS DO PASSE</b><small>${battlePassTierCount()} níveis</small></span><em>${passSectionIcon('rewards')}</em></button><div class="pass-claim-stack"><button class="ghost-btn" id="passClaimAll">RESGATAR FREE</button><button class="ghost-btn" id="passPremiumClaimAll" ${paid?'':'disabled'}>RESGATAR PREMIUM</button></div></div><div class="pass-section-body"><div class="pass-tier-grid">${tiers}</div></div></section>
   <section class="${passSectionClass('levels','level-section')}"><div class="pass-section-head"><button class="pass-section-title-button" type="button" data-pass-toggle="levels"><span class="pass-head-copy"><b>RECOMPENSAS DE NÍVEL</b><small>LV 2 → LV ${PLAYER_MAX_LEVEL}</small></span><em>${passSectionIcon('levels')}</em></button><button class="ghost-btn" id="levelClaimAll">RESGATAR DISPONÍVEIS</button></div><div class="pass-section-body"><div class="level-reward-grid">${levels}</div></div></section>`;
   ui.passContent.querySelectorAll('[data-pass-toggle]').forEach(b=>b.onclick=e=>{e.stopPropagation();togglePassSection(b.dataset.passToggle);});
@@ -8089,6 +8090,14 @@ function updatePetFloat(){
   if(!shouldShow)return;
   ui.petFloatPanel.classList.remove('hud-user-disabled');
   if(ui.petFloatLevel)ui.petFloatLevel.textContent=`LV${pet.level}`;
+  const xpBar=document.getElementById('petFloatXpBar'),xpText=document.getElementById('petFloatXpText');
+  if(xpBar||xpText){
+    const start=petLevelThreshold(pet.level),end=pet.level>=PET_MAX_LEVEL?start:petLevelXp(pet.level);
+    const total=Math.max(0,Math.floor(Number(pet.xp)||0)),maxed=pet.level>=PET_MAX_LEVEL;
+    const pct=maxed?100:Math.max(0,Math.min(100,100*(total-start)/Math.max(1,end-start)));
+    if(xpBar)xpBar.style.width=pct.toFixed(1)+'%';
+    if(xpText)xpText.textContent=maxed?`LV ${pet.level} • XP MÁXIMO`:`LV ${pet.level} • ${fmt(total)} / ${fmt(end)} XP`;
+  }
   if(ui.petFloatStatus){const gear=pet.activeGear==='off'?'COMPANHIA':(PET_GEARS[pet.activeGear]?.name||'COMPANHIA');const behavior=({guard:'DEFENDENDO',box:'BUSCANDO BOX',ore:'BUSCANDO PEDRA',repair:'REPARANDO',kami:petRuntime.kamiArmed?'NOVA BURST ARMADO':'NOVA BURST',roam:'PATRULHANDO',escort:'ESCOLTANDO'})[petRuntime.taskType]||'LIVRE';const rangeLabel=pet.activeGear==='guard'?`REVIDA ${fmt(petCombatSearchRange())}`:(pet.activeGear==='box'||pet.activeGear==='ore')?`COLETA ${fmt(petCollectionRange())}`:pet.activeGear==='repair'?'SUPORTE':pet.activeGear==='kami'?'ASSALTO':'ESCOLTA';const pd=currentPetDesign();ui.petFloatStatus.textContent=`${behavior} • ${gear} • ${rangeLabel}${pd?` • ${pd.name}`:''}`;}
   if(ui.petGearQuickSelect){
     const owned=['off',...Object.keys(PET_GEARS).filter(id=>id!=='kami'&&pet.gearsOwned?.[id])];
@@ -8302,8 +8311,8 @@ function commonShopProductCard(row){
     if(!def||!progress.pet?.owned||owned>=1)return null;
     const quote=auxProtocolTierQuoteV111(id,1,row);if(!quote)return null;
     name=shopRowDisplayName(row,`AUX • PROTOCOLO ${def.label} I`);
-    desc=shopRowDescription(row,`${def.description} • bônus N1: +${String(def.bonus[1]*100).replace('.',',')}%`);
-    type='petGear';badge=currency==='uridium'?'ELITE':'COMUM';
+    desc=shopRowDescription(row,`${def.description} • bônus N1: +${new Intl.NumberFormat('pt-BR',{maximumFractionDigits:2}).format(def.bonus[1]*100)}%`);
+    type='auxProtocol';badge=currency==='uridium'?'ELITE':'COMUM';
     onBuy=()=>mutateAuxProtocolV110('aux_protocol_buy',id);
   }else if(row.kind==='pet_gear'){
     const d=PET_GEARS[id];if(!d||!progress.pet?.owned||progress.pet.gearsOwned?.[id])return null;name=shopRowDisplayName(row,`AUX-9 • ${d.name}`);desc=shopRowDescription(row,d.description);type='petGear';badge='ELITE';onBuy=()=>buyPetGear(id);
@@ -8628,12 +8637,11 @@ function createWorkbenchShellV1092({kind,name,label,section,tabs,image,designer=
   else{const empty=document.createElement('p');empty.className='muted';empty.textContent='Nenhuma unidade selecionada';stage.appendChild(empty);}
   preview.appendChild(stage);
   const statsBar=document.createElement('div');statsBar.className='aux-workbench-preview-stats-v1091';for(const [key,value] of stats){const span=document.createElement('span');span.append(document.createTextNode(key+' '));const b=document.createElement('b');b.textContent=String(value);span.appendChild(b);statsBar.appendChild(span);}preview.appendChild(statsBar);
-  const hint=document.createElement('div');hint.className='aux-workbench-caption-v1091';hint.textContent='CONF global: equipamentos da NAVE + DRONES + AUX-9 são trocados em conjunto.';preview.appendChild(hint);
   const bottom=document.createElement('div');bottom.className='aux-workbench-bottom-v1091';
   const sectionHead=document.createElement('header');sectionHead.className='aux-workbench-bottom-head-v1091';
-  const lead=document.createElement('div');const meta=document.createElement('span');meta.textContent=`CONFIGURAÇÃO GLOBAL ${conf}`;
+  const lead=document.createElement('div');const meta=document.createElement('span');meta.textContent=`CONFIGURAÇÃO ${conf}`;
   const h3=document.createElement('h3');h3.textContent=tabs.find(t=>t[0]===section)?.[1]||name;lead.append(meta,h3);
-  const tail=document.createElement('small');tail.textContent='NAVE + DRONES + AUX • CONFIGURAÇÃO COMPARTILHADA';sectionHead.append(lead,tail);bottom.appendChild(sectionHead);
+  const tail=document.createElement('small');tail.textContent='';sectionHead.append(lead,tail);bottom.appendChild(sectionHead);
   root.append(nav,preview,bottom);return {root,nav,preview,bottom};
 }
 function addWorkbenchInfoV1092(bottom,rows,description=''){
@@ -8701,7 +8709,7 @@ function renderHangarDroneWorkbenchV1092(){
   }
   if(!drone){const p=document.createElement('div');p.className='empty-state';p.textContent='Adquira um drone na Loja para ativar seus equipamentos e designers.';bottom.appendChild(p);return root;}
   if(section==='info'){
-    addWorkbenchInfoV1092(bottom,[['DRONE',`${model?.name||drone.type} #${idx+1}`],['SLOTS DE EQUIPAMENTO',`${drone.slots.filter(Boolean).length}/${drone.slots.length}`],['LASERS',drone.slots.filter(id=>equipmentCategory(ITEMS[id])==='lasers').length],['ESCUDOS',drone.slots.filter(id=>equipmentCategory(ITEMS[id])==='shields').length],['DESIGNER',design?.name||'Nenhum']], 'Cada drone usa seus próprios slots e seu próprio Designer. A CONF global troca os equipamentos da frota inteira.');
+    addWorkbenchInfoV1092(bottom,[['DRONE',`${model?.name||drone.type} #${idx+1}`],['SLOTS DE EQUIPAMENTO',`${drone.slots.filter(Boolean).length}/${drone.slots.length}`],['LASERS',drone.slots.filter(id=>equipmentCategory(ITEMS[id])==='lasers').length],['ESCUDOS',drone.slots.filter(id=>equipmentCategory(ITEMS[id])==='shields').length],['DESIGNER',design?.name||'Nenhum']], '');
     const sell=document.createElement('button');sell.type='button';sell.className='danger-btn';sell.textContent='Vender drone selecionado';sell.onclick=()=>sellDrone(drone.id);bottom.appendChild(sell);
   }else if(section==='designers'){
     renderWorkbenchDesignersV1092(bottom,'drone',drone.id);
@@ -8744,10 +8752,10 @@ function renderHangarPet(){
     <div class="aux-workbench-preview-stats-v1091"><span>LASERS <b>${(pet.lasers||[]).filter(Boolean).length}/${petSlotCapacity('laser',level)}</b></span>
     <span>ESCUDOS <b>${(pet.shields||[]).filter(Boolean).length}/${petSlotCapacity('shield',level)}</b></span>
     <span>PROTOCOLOS <b>${auxAdvancedSlotCountV110(pet)}/${auxAdvancedSlotsV110(level)} slots</b></span></div>
-    <div class="aux-workbench-caption-v1091">A CONF ${conf} também contém equipamentos da nave e dos drones. Troque pelo seletor global acima.</div>`;
+`;
   const bottom=document.createElement('div');bottom.className='aux-workbench-bottom-v1091';
   const title=document.createElement('header');title.className='aux-workbench-bottom-head-v1091';
-  title.innerHTML=`<div><span>CONFIGURAÇÃO GLOBAL ${conf}</span><h3>${AUX_TACTICAL_TABS_V1091.find(a=>a[0]===section)?.[1]||'AUX'}</h3></div><small>Troca conjunta: NAVE + DRONES + AUX</small>`;
+  title.innerHTML=`<div><span>CONFIGURAÇÃO ${conf}</span><h3>${AUX_TACTICAL_TABS_V1091.find(a=>a[0]===section)?.[1]||'AUX'}</h3></div>`;
   bottom.appendChild(title);
   if(section==='info'){
     const pane=document.createElement('div');pane.className='aux-workbench-info-v1091';
@@ -8759,7 +8767,6 @@ function renderHangarPet(){
     <div class="aux-workbench-stat-v1091"><b>SUPORTE ESCUDO</b><strong>${fmt(Math.round(petShieldSupport()))}</strong></div>
     <div class="aux-workbench-stat-v1091"><b>MODO ATIVO</b><strong>${escHtml(PET_GEARS[pet.activeGear]?.name||'COMPANHIA')}</strong></div>`;
     bottom.appendChild(pane);
-    const copy=document.createElement('p');copy.className='muted';copy.textContent=`Bônus de nível: DANO +${stats.damage||0}% • ESCUDO +${stats.shield||0}%. As especializações e o modo ativo são separados entre CONF1 e CONF2.`;bottom.appendChild(copy);
     // V111: as especializações antigas ficam em INFORMAÇÕES; a aba PROTOCOLOS
     // fica exclusiva dos 15 equipamentos avançados.
     const cap=petSlotCapacity('protocol',level),ranks=normalizeAuxProtocols(pet.protocols,cap);
@@ -8789,15 +8796,16 @@ function renderHangarPet(){
     const equipped=normalizeAuxAdvancedEquippedV110(pet.advancedProtocolEquippedV110,owned,level);
     const slots=auxAdvancedSlotsV110(level),used=Object.values(equipped).filter(Boolean).length;
     const heading=document.createElement('div');heading.className='aux-workbench-coming-v1091';
-    heading.innerHTML=`<b>PROTOCOLOS AVANÇADOS • CONF ${conf}</b><small>${used}/${slots} slots • 5 famílias • N2 = 4× N1 + 10 APEX • N3 = 4× N2 + 10 UNIVERSO. Especializações gratuitas em INFORMAÇÕES.</small>`;bottom.appendChild(heading);
+    heading.innerHTML=`<b>PROTOCOLOS AVANÇADOS</b><small>${used}/${slots} slots equipados</small>`;
+    heading.title='N2: 4× N1 + 10 APEX • N3: 4× N2 + 10 UNIVERSO';bottom.appendChild(heading);
     const fragmentBox=document.createElement('div');fragmentBox.className='aux-v110-slotbar';
-    fragmentBox.innerHTML=`<b>FRAGMENTOS</b><span>🔴 APEX: <strong>${fmt(fragments.apex)}</strong> / 10</span><span>🟣 UNIVERSO: <strong>${fmt(fragments.universo)}</strong> / 10</span><small>APEX: 10% por abate do chefe lendário. UNIVERSO: 10% por NPC nos mapas U-1/U-2/U-3. Drops registrados pelo servidor.</small>`;
+    fragmentBox.innerHTML=`<b>FRAGMENTOS</b><span>🔴 APEX: <strong>${fmt(fragments.apex)}</strong> / 10</span><span>🟣 UNIVERSO: <strong>${fmt(fragments.universo)}</strong> / 10</span>`;
     bottom.appendChild(fragmentBox);
     const selection=document.createElement('div');selection.className='aux-v110-selections';
     for(const def of AUX_ADVANCED_V110){
       const current=Math.max(0,Number(owned[def.id])||0),active=equipped[def.id],copies=stock[def.id]||{};
       const item=document.createElement('article');item.className='aux-v110-protocol'+(active?' equipped':'');
-      const rank=current||1,percent=val=>`${String(val*100).replace('.',',')}%`;
+      const rank=current||1,percent=val=>`${new Intl.NumberFormat('pt-BR',{maximumFractionDigits:2}).format(Number(val||0)*100)}%`;
       item.innerHTML=`<div class="aux-v110-protocol-art"><img src="${auxProtocolArtV1091(def.id,rank)}" alt="Protocolo ${def.label} nível ${rank}" loading="lazy"></div><div class="aux-v110-protocol-copy"><b>${def.label} ${current?`• N${current}`:'• BLOQUEADO'}</b><small>${def.description}</small><strong>${active?`ATIVO +${percent(def.bonus[active])}`:`POTENCIAL +${percent(def.bonus[current||1])}`}</strong><div class="aux-v110-tiers">${def.bonus.slice(1).map((v,n)=>`<span class="${copies[n+1]?'owned':''}">N${n+1} ×${copies[n+1]||0} • +${percent(v)}</span>`).join('')}</div></div>`;
       const actions=document.createElement('div');actions.className='aux-v110-actions';
       if(current){
@@ -8823,8 +8831,7 @@ function renderHangarPet(){
     }
     bottom.appendChild(selection);
     const bar=document.createElement('div');bar.className='aux-v110-slotbar';
-    for(let i=0;i<slots;i++){const x=document.createElement('div');x.className='aux-v110-slot';x.textContent=Object.keys(equipped).filter(id=>equipped[id])[i]?.toUpperCase()||`+ SLOT ${i+1}`;bar.appendChild(x);}bottom.appendChild(bar);
-    const warning=document.createElement('p');warning.className='muted';warning.textContent='Compra, craft e equipamento são confirmados pelo servidor. Cada fabricação consome 4 cópias reais do protocolo anterior e 10 fragmentos. NIII também cobra créditos e exige Universo. O bônus LOOT aplica-se às caixas bônus locais; não multiplica pagamentos NPC validados no SQL.';bottom.appendChild(warning);
+    for(let i=0;i<slots;i++){const x=document.createElement('div');x.className='aux-v110-slot';x.textContent=Object.keys(equipped).filter(id=>equipped[id])[i]?.toUpperCase()||`SLOT ${i+1} • LIVRE`;bar.appendChild(x);}bottom.appendChild(bar);
   }else if(section==='designers'){
     renderWorkbenchDesignersV1092(bottom,'pet');
   }else if(section==='modules'){

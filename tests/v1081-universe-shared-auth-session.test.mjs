@@ -18,8 +18,8 @@ test('O Universo e todos os modulos compartilham a mesma instancia autenticada d
  assert.deepEqual(offenders,[],'Imports de api.js diferentes criam segundas sessoes em memoria');
  const lazy=read('public/modules/unified-expansion-lazy-v107.js');
  const html=read('public/index.html');
- assert.match(lazy,/unified-expansion-v42\.js\?v=108\.1\.0/);
- assert.match(html,/unified-expansion-lazy-v107\.js\?v=108\.1\.0/);
+ assert.match(lazy,/unified-expansion-v42\.js\?v=116\.3/);
+ assert.match(html,/unified-expansion-lazy-v107\.js\?v=116\.3/);
 });
 
 test('Login na API principal compartilha o token e a sessao com a chamada do Universo',async()=>{

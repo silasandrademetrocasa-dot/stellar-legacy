@@ -4,7 +4,7 @@ import {renderFrontierAuditV450} from './frontier-audit-v450.js';
 import {renderAstralOperationsV435} from './astral-operations-v435.js';
 import {renderAstralCombatAdminV431} from './astral-combat-admin-v431.js';
 import {renderStageBV426} from './stage-b-v426.js';
-import {renderStageAV423} from './stage-a-v423.js';
+import {renderStageAV423} from './stage-a-v423.js?v=116.3';
 // Stellar Legacy — Unificação V39–V42: telas auxiliares, sem loops de quadro/Canvas.
 // Toda alteração de moeda/material depende de RPC transacional do servidor.
 import {loadUnifiedExpansionV42,actUnifiedExpansionV42,squadUnifiedExpansionV42,adminUnifiedExpansionV42} from '../api.js?v=47.7.60';

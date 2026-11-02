@@ -11,7 +11,7 @@ test('V80: todas as qualidades renderizam somente imagem estática do portal',()
  for(const q of ['low','medium','high'])for(const t of [0,4,60]){
   const o=track();assert.ok(drawPortalV71(o.ctx,{portal:{to:'b41'},quality:q,time:t,getImage:o.load}));
   assert.equal(o.draws.length,1);assert.equal(o.paths.length,1);
-  assert.match(o.paths[0],/\/static\.webp$/);assert.deepEqual(o.draws[0].slice(1),[-75,-75,150,150]);
+  assert.match(o.paths[0],/\/static\.webp$/);assert.deepEqual(o.draws[0].slice(1),[40,30,176,195,-68,-70,136,140]); // V116.3: único drawImage, agora recortado
  }
 });
 test('V80: todas as qualidades usam base única e não solicitam quadros',()=>{

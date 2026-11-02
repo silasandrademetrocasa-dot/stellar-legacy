@@ -51,9 +51,7 @@ export function createOfflineFarmV484({credentials,saveBeforeStart,onPauseWorld,
  const ammoName=id=>LASER_AMMO[String(id||'')]?.name||String(id||'');
  const shell=document.createElement('div');shell.id='v484-panel';shell.hidden=true;
  shell.innerHTML=`<section role="dialog" aria-label="Farm Offline">
- <h3>🌙 FARM OFFLINE <small>V103 · RESGATE PROTEGIDO</small></h3>
- <p style="color:#afcbd7;font-size:12px">Farm econômico com acerto no retorno. Os ganhos durante a sessão são <b>estimativas</b>, não saldo já creditado.</p>
- <p style="color:#f5d598;font-size:12px">V103: Você pode consultar Hangar, Leilão, Loja e Arena; compras, habilidades, batalhas, viagens e resgates que alteram seu piloto devem aguardar o fim do farm. Evita perder horas por save concorrente.</p>
+ <h3>🌙 FARM OFFLINE</h3>
  <div id="v484-status" role="status">Consultando...</div><div class="v485-progress"><span id="v485-progress-bar"></span></div><div id="v485-countdown" style="font-size:12px;color:#a9d0df"></div>
  <div id="v484-settings">
   <label>🎯 NPC comum <select id="v484-npc"><option value="">Automático (mais fraco)</option></select></label>

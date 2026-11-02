@@ -24,7 +24,7 @@ test('V80: seis portais usam só uma imagem estática nos três níveis',()=>{
  assert.equal(drawPortalV71(high,{...opts,quality:'high'}),true);
  assert.equal(low.calls.filter(c=>c[0]==='drawImage').length,1);
  const draws=medium.calls.filter(c=>c[0]==='drawImage');assert.equal(draws.length,1);
- assert.deepEqual(draws[0].slice(2),[-75,-75,150,150]);
+ assert.deepEqual(draws[0].slice(2),[40,30,176,195,-68,-70,136,140]); // V116.3: aparar margens transparentes, mesma textura estática
  assert.equal(high.calls.filter(c=>c[0]==='drawImage').length,1);
  assert.equal(medium.calls.some(c=>c[0]==='clip'),false);
 });

@@ -4,6 +4,9 @@ import {loadStageAV423,saveLoadoutV423,loadOpsV423,claimOpsV423,adminOpsV423} fr
 const cfgs=[1,2];
 const slots=[['defense','Defesa'],['engine','Motor'],['weapon','Armamento'],['utility','Suporte']];
 const fmt=n=>Number(n||0).toLocaleString('pt-BR');
+const ASTRAL_NAMES_V1163=Object.freeze({astral_guard:'Guarda Astral',nexus_drive:'Propulsor Nexus',eclipse_lance:'Lança Eclipse',trinity_matrix:'Matriz Trina'});
+export function astralDisplayNameV1163(code){const id=String(code||'');return ASTRAL_NAMES_V1163[id]||id.split('_').filter(Boolean).map(part=>part.charAt(0).toUpperCase()+part.slice(1)).join(' ');}
+
 function node(tag,text,cls){const e=document.createElement(tag);if(text!=null)e.textContent=text;if(cls)e.className=cls;return e;}
 function alertError(e){console.warn('[equipamentos]',e);void stellarNoticeV4776(e?.message||'Não foi possível concluir esta ação. Tente novamente.');}
 let activeRequest=0;
@@ -19,7 +22,6 @@ const alive=(card,root,index)=>card.isConnected&&index===activeRequest&&root.con
 async function forge(card,root,index){
  const data=await loadStageAV423();if(!alive(card,root,index))return;
  card.replaceChildren(node('h4','CONFIGURAÇÕES ASTRAIS'));
- card.append(node('p','Equipe os módulos fabricados nas duas configurações. Seus efeitos de combate ainda não estão disponíveis.'));
  const inventory=new Map((data.items||[]).map(x=>[x.code,Number(x.qty)]));
  const items=Array.isArray(data.definitions)?data.definitions:[];
  const equipped=Array.isArray(data.equipped)?data.equipped:[];
@@ -28,7 +30,7 @@ async function forge(card,root,index){
   for(const [slot,label] of slots){
    const current=equipped.find(x=>Number(x.config)===conf&&x.slot===slot)?.code||'';
    const row=node('div',null,'frontier-v423-row');const name=node('label',`${label}: `);const select=node('select',null,'frontier-input-v42');select.setAttribute('aria-label',`${label}, configuração ${conf}`);
-   for(const opt of [{code:'',name:'Nenhum'},...items.filter(m=>m.slot===slot).map(m=>({code:m.code,name:`${m.code} · ${fmt(inventory.get(m.code)||0)} fabricado(s)`}))]){
+   for(const opt of [{code:'',name:'Nenhum'},...items.filter(m=>m.slot===slot).map(m=>({code:m.code,name:`${astralDisplayNameV1163(m.code)} · ${fmt(inventory.get(m.code)||0)} fabricado(s)`}))]){
     const option=node('option',opt.name);option.value=opt.code;option.selected=opt.code===current;select.append(option);
    }
    const save=node('button','EQUIPAR');save.type='button';save.onclick=async()=>{save.disabled=true;try{await saveLoadoutV423(conf,slot,select.value||null);window.dispatchEvent(new Event('stellar-astral-loadout-updated'));const fresh=await loadStageAV423();if(!card.isConnected)return;data.items=fresh.items;data.equipped=fresh.equipped;await forgeReload(card,root);}catch(e){alertError(e);}finally{save.disabled=false;}};
@@ -36,7 +38,6 @@ async function forge(card,root,index){
   }
   card.append(section);
  }
- card.append(node('small','Cada módulo ocupa uma posição de equipamento. As trocas preservam o estado atual da nave.'));
 }
 async function forgeReload(card,root){const i=++activeRequest;await forge(card,root,i);}
 async function war(card,root,index,admin){

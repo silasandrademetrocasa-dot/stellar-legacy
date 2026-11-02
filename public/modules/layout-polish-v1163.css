@@ -1,0 +1,113 @@
+/* V116.3 • layout polish. Presentation only: no networking, gameplay or saves. */
+/* 1. Login: checkbox + text always on one baseline on narrow Android screens. */
+#loginForm label.auth-remember-row{
+  display:flex!important;flex-flow:row nowrap!important;align-items:center!important;
+  justify-content:flex-start!important;gap:12px!important;width:100%;
+  margin:2px 0!important;padding:9px 12px!important;
+  background:rgba(10,30,47,.58);border:1px solid rgba(88,174,218,.2);border-radius:10px;
+  color:#c5e7f5;line-height:1.3;font-size:13px;min-height:42px;white-space:nowrap;
+}
+#loginForm label.auth-remember-row input[type=checkbox]{
+  flex:0 0 20px!important;display:block!important;width:20px!important;height:20px!important;
+  min-width:20px!important;max-width:20px!important;min-height:20px!important;
+  margin:0!important;padding:0!important;accent-color:#40d8ec;
+}
+#loginForm label.auth-remember-row.hidden{display:none!important}
+#loginForm .auth-remember-note{padding:0 8px;font-size:10px;line-height:1.35;margin:0 0 3px}
+/* 2. Card system: consistent gutters, typography, compact headings. */
+#hangarModal .aux-workbench-v1091{gap:10px}
+#hangarModal .aux-workbench-nav-v1091,
+#hangarModal .aux-workbench-preview-v1091,
+#hangarModal .aux-workbench-bottom-v1091{border-radius:14px}
+#hangarModal .aux-workbench-bottom-v1091{padding:13px}
+#hangarModal .aux-workbench-bottom-head-v1091{margin-bottom:12px}
+#hangarModal .aux-workbench-bottom-head-v1091 h3{font-size:clamp(14px,2vw,18px);letter-spacing:.02em;line-height:1.25}
+#hangarModal .aux-workbench-bottom-head-v1091 small:empty{display:none}
+#hangarModal .aux-workbench-preview-heading-v1091{flex-wrap:wrap;line-height:1.45;letter-spacing:.05em}
+#hangarModal .aux-workbench-preview-heading-v1091 span{min-width:0}
+#hangarModal .aux-workbench-preview-heading-v1091 b{font-size:10px;letter-spacing:.06em}
+#hangarModal .aux-workbench-preview-stats-v1091{gap:5px}
+#hangarModal .aux-workbench-preview-stats-v1091 span{white-space:normal;text-align:center;line-height:1.4}
+#hangarModal .aux-workbench-stat-v1091{gap:6px;padding:10px;min-height:72px}
+#hangarModal .aux-workbench-stat-v1091 strong{font-size:clamp(13px,1.8vw,17px);line-height:1.3}
+#hangarModal .aux-v110-protocol{overflow:hidden;row-gap:8px}
+#hangarModal .aux-v110-protocol-copy{overflow-wrap:anywhere}
+#hangarModal .aux-v110-protocol-copy>b{line-height:1.35}
+#hangarModal .aux-v110-protocol-art img{object-fit:contain}
+#hangarModal .aux-v110-actions button{font-size:11px;letter-spacing:.01em}
+#hangarModal .aux-v110-actions>small{line-height:1.45}
+#hangarModal .aux-v110-slot{min-height:34px;display:grid;place-items:center}
+#hangarModal .v1092-drone-picker{margin-bottom:12px}
+#hangarModal .v1092-drone-select{white-space:nowrap}
+#hangarModal .aux-workbench-tab-v1091{transition:background .15s ease,border-color .15s ease}
+#hangarModal .aux-workbench-tab-v1091:focus-visible{outline:2px solid #86edff;outline-offset:2px}
+/* 3. Portrait modal: readable panels and no clipped nav/tabs. */
+@media(max-width:680px){
+  #hangarModal .aux-workbench-v1091{gap:8px;min-width:0}
+  #hangarModal .aux-workbench-nav-v1091{display:flex;max-width:100%;min-width:0;overscroll-behavior-x:contain;scroll-snap-type:x proximity}
+  #hangarModal .aux-workbench-tab-v1091{flex:0 0 auto;scroll-snap-align:start;min-width:80px;min-height:55px}
+  #hangarModal .aux-workbench-preview-v1091{padding:12px}
+  #hangarModal .aux-workbench-avatar-v1091{min-height:145px;height:170px}
+  #hangarModal .aux-workbench-bottom-v1091{padding:12px}
+  #hangarModal .aux-workbench-info-v1091{grid-template-columns:repeat(2,minmax(0,1fr))}
+  #hangarModal .aux-workbench-stat-v1091{min-height:70px;padding:10px 9px}
+  #hangarModal .aux-workbench-modes-v1091{grid-template-columns:repeat(2,minmax(0,1fr))}
+  #hangarModal .aux-workbench-modes-v1091 .pet-gear{padding:12px 10px;min-height:122px;text-align:left}
+  #hangarModal .aux-v110-selections{grid-template-columns:1fr}
+  #hangarModal .aux-v110-actions{gap:7px}
+  #hangarModal .aux-v110-actions button{min-width:0;flex:1 1 calc(50% - 8px);min-height:40px}
+  #hangarModal .aux-v110-actions>small{flex-basis:100%}
+}
+@media(max-width:400px){
+  #hangarModal .aux-workbench-modes-v1091{grid-template-columns:1fr}
+  #hangarModal .aux-workbench-preview-heading-v1091{font-size:10px}
+  #hangarModal .aux-workbench-tab-v1091{min-width:74px}
+  #hangarModal .aux-v110-protocol{grid-template-columns:68px minmax(0,1fr)}
+  #hangarModal .aux-v110-protocol-art img{width:62px;height:62px}
+}
+/* 4. AUX HUD: integrated XP progress like the pilot/ship, module remains usable. */
+#topHudDock #petFloatPanel{border-radius:12px!important}
+#topHudDock #petFloatPanel .pet-float-head{margin-bottom:5px!important;padding-bottom:5px!important}
+#topHudDock #petFloatPanel .pet-float-body{max-height:104px!important;overflow:hidden!important}
+#topHudDock #petFloatPanel .aux-hud-xp-v1163{display:block;margin:2px 0 8px;min-width:0}
+#topHudDock #petFloatPanel .aux-hud-xp-track-v1163{
+  position:relative;height:18px;min-width:0;border-radius:999px;overflow:hidden;
+  background:linear-gradient(90deg,#091e39,#081527);border:1px solid rgba(109,218,252,.38);
+}
+#topHudDock #petFloatPanel .aux-hud-xp-track-v1163 i{
+  position:absolute;inset:0 auto 0 0;width:0%;border-radius:999px;
+  background:linear-gradient(90deg,#6aa9ff,#35dafa 72%,#acf5ff);
+  transition:width .15s linear;
+}
+#topHudDock #petFloatPanel #petFloatXpText{
+  position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+  color:#edfaff;font-size:8.4px;letter-spacing:-.12px;font-weight:900;
+  white-space:nowrap;text-shadow:0 1px 3px #071426,0 -1px 2px #071426;
+}
+#topHudDock #petFloatPanel .pet-quick-select{height:27px!important;font-size:10px!important}
+#topHudDock #petFloatPanel .pet-quick-label{display:none!important}
+#topHudDock #petFloatPanel.collapsed .pet-float-body{display:none!important}
+/* 5. Shop protocol art and readable two-column cards */
+#shopModal .product-card .product-icon{min-height:116px;height:clamp(116px,14vw,165px)}
+#shopModal .product-card .product-icon img{height:100%;width:100%;max-height:160px;object-fit:contain;padding:5px}
+#shopModal .product-card h3{font-size:14px;line-height:1.3;overflow-wrap:anywhere}
+#shopModal .product-card .product-desc{line-height:1.45;overflow-wrap:anywhere}
+@media(max-width:680px){
+  #shopModal .product-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+  #shopModal .product-card{min-width:0;padding:10px;gap:7px}
+  #shopModal .product-card .product-icon{height:108px;min-height:108px}
+  #shopModal .product-card .product-icon img{max-height:102px}
+  #shopModal .product-card h3{font-size:12px}
+  #shopModal .product-card .product-desc{font-size:10px}
+  #shopModal .product-card .buy-btn{min-height:37px;padding:8px;font-size:10px}
+  #shopModal .product-card .price{font-size:11px}
+}
+@media(max-width:340px){#shopModal .product-grid{grid-template-columns:1fr}}
+/* 6. Pass: remove artificial height and normalize text wraps on narrow screens */
+#passModal .pass-mission{min-width:0;gap:10px}
+#passModal .pass-mission-main{min-width:0;overflow-wrap:anywhere}
+#passModal .pass-mission-main>small{line-height:1.4}
+#passModal .pass-mission-main>b{line-height:1.3}
+#passModal .pass-missions{align-items:stretch}
+/* 7. Legacy isolation A/B controls hidden; FPS diagnostics stay available. */
+#visualDiagSectionV75,#visualDiagFloatingV75{display:none!important}
