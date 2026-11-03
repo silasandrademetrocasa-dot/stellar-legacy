@@ -30,7 +30,8 @@ test('V91: no reconnection, autosave or online presence while farm locked',()=>{
  assert.match(game,/async function syncOnlineWorld\(\)\{\s*if\(offlineFarmWorldLockedV84\(\)/);
  assert.match(game,/function syncSharedUniversePlayer\(force=false\)\{\s*if\(offlineFarmWorldLockedV84\(\)/);
  assert.match(game,/function saveGame\(\)\{\s*if\(!progress\|\|offlineFarmWorldLockedV84\(\)\)return/);
- assert.match(game,/setInterval\(\(\)=>\{if\(progress&&!offlineFarmWorldLockedV84\(\)\)/);
+ assert.match(game,/setInterval\(\(\)=>\{\s*if\(!progress\|\|offlineFarmWorldLockedV84\(\)\)return/);
+ assert.match(game,/shouldSendPeriodicCloudSaveV1172\(/);
  assert.match(game,/else if\(document\.visibilityState==='visible'&&authenticated\)\{sharedUniverse\.recover/);
  const vis=game.match(/document\.addEventListener\('visibilitychange',\(\)=>\{if\(offlineFarmWorldLockedV84\(\)\)return;/);
  assert.ok(vis);

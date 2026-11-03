@@ -19,6 +19,7 @@ import {socketMessageAllowed,boundedVital} from './realtime-guard.js';
 import {relayCaptureActorEligibleV1141,relayTurretTargetEligibleV1141,relayContestedClansV1141} from './relay-control-integrity-v1141.js';
 import {staleEventEntityIdsV1142,eventRuntimeAdmittedV1142} from './event-lifecycle-integrity-v1142.js';
 import {shouldDeferPlayerMotionV115,mayFlushMovementV115,resyncPlayerIdsV115} from './network-backpressure-v115.js';
+import {currentRoomActorV1173,replacedRoomSocketsV1173,eligibleGroupRecipientsV1173} from './multiplayer-session-integrity-v1173.js';
 import {playerStateDelta,npcStateDelta} from './network-delta-v104.js';
 import {createNetworkTelemetryV1051} from './network-telemetry-v1051.js';
 import {createNpcDeathSequenceV1069} from './npc-reward-delivery-v1069.js';
@@ -450,7 +451,7 @@ class Room {
   }
   async handleRelayAttack(ws,msg){
     const p=ws?.player,node=this.warfrontControl?.nodes?.find(n=>n.id===String(msg?.nodeId||''));
-    if(!p||!node?.relayMode||!this.warfrontSynced||!this.playerFresh(p)||ws.identity?.user?.id!==p.userId)return;
+    if(!p||!node?.relayMode||!this.warfrontSynced||!this.playerFresh(p)||!currentRoomActorV1173(ws,this.players)||ws.identity?.user?.id!==p.userId)return;
     if(!p.clanId)return safeJsonSend(ws,{type:'relay_hit_result',ok:false,reason:'Entre em um clã antes de atacar relés.'});
     if(p.clanId&&node.ownerClanId===p.clanId)return safeJsonSend(ws,{type:'relay_hit_result',ok:false,reason:'Seu clã já domina este relé.'});
     const now=nowMs(),rules=node.relayRules||{};
@@ -467,6 +468,7 @@ class Room {
         const authoritative=await this.world.readRelayLoadout(p.userId);
         ws._relayEquipmentCache={at:now,state:authoritative};
       }
+      if(!currentRoomActorV1173(ws,this.players)||!this.playerFresh(p))return;
       const save=ws._relayEquipmentCache.state;
       const gear=relayShipLoadoutDamage(save,p.laserAmmoId,kind==='rocket'?String(msg.rocketId||''):null);
       let damage=kind==='rocket'?gear.rocketDamage:gear.laserDamage;
@@ -762,6 +764,12 @@ class Room {
   addClient(ws,player){
     // Sala pode ter ficado em repouso: atualizar evento antes do snapshot de quem retornou.
     this.ensureEvent(false);
+    // V117.3: reconnect replaces the old socket for THIS pilot, not a second
+    // player with the same identifier. Old close events must not remove the new actor.
+    for(const old of replacedRoomSocketsV1173(this.clients,player.userId,ws)){
+      this.removeClient(old);
+      try{old.close(4409,'new session in room');}catch{}
+    }
     this.clients.add(ws);this.players.set(player.userId,player);ws.room=this;ws.player=player;ws.pendingPlayerResyncV115=new Set();
     safeJsonSend(ws,this.snapshot(player.userId));
     this.sendPersonalEventStatus(ws);
@@ -774,10 +782,18 @@ class Room {
     this.broadcast({type:'world_player_spawn',entity:player._lastNetFrame},ws);
   }
   removeClient(ws){
-    if(!this.clients.has(ws))return;this.clients.delete(ws);if(ws.player)this.players.delete(ws.player.userId);if(ws.player)this.broadcast({type:'world_player_leave',userId:ws.player.userId});ws.room=null;ws.player=null;ws.npcNetState=null;ws.lastNpcFarRefreshAt=0;ws.lastNpcMidRefreshAt=0;ws.lastNpcNearRefreshAt=0;
+    if(!this.clients.has(ws))return;
+    this.clients.delete(ws);
+    const id=String(ws.player?.userId||'');
+    // An old asynchronous close must never delete a newer actor's map entry.
+    if(id&&currentRoomActorV1173(ws,this.players)){
+      this.players.delete(id);
+      this.broadcast({type:'world_player_leave',userId:id});
+    }
+    ws.room=null;ws.player=null;ws.npcNetState=null;ws.lastNpcFarRefreshAt=0;ws.lastNpcMidRefreshAt=0;ws.lastNpcNearRefreshAt=0;
   }
   updatePlayer(ws,msg){
-    const p=ws.player;if(!p)return;
+    const p=ws.player;if(!p||!currentRoomActorV1173(ws,this.players))return;
     const now=nowMs();if(now-(ws.lastPlayerStateAt||0)<PLAYER_STATE_MIN_MS)return;ws.lastPlayerStateAt=now;
     const nextX=clamp(msg.x,0,this.map.world.w),nextY=clamp(msg.y,0,this.map.world.h);
     const dt=Math.min(4,Math.max(.08,(now-Number(p.updatedAt||now))/1000));
@@ -868,7 +884,7 @@ class Room {
 
   async handleDamage(ws,msg){
     if(this.warbotEngine.bots.has(String(msg.entityId||'')))return this.warbotEngine.handleHit(ws,msg,admitNpcDamage);
-    const p=ws.player,e=this.npcs.get(String(msg.entityId||''));if(!p||!e||e.hp<=0)return;
+    const p=ws.player,e=this.npcs.get(String(msg.entityId||''));if(!p||!currentRoomActorV1173(ws,this.players)||!e||e.hp<=0)return;
     const now=nowMs();
     if(!this.playerFresh(p)||String(ws.identity?.user?.id||'')!==String(p.userId))return;
     const hitPolicy=admitNpcDamage(ws,msg,now);
@@ -905,7 +921,7 @@ class Room {
       }
     }
     // Um alvo pode morrer enquanto a consulta de perfil aguarda resposta.
-    if(!this.npcs.has(e.id)||e.hp<=0||ws.player!==p||!this.playerFresh(p))return;
+    if(!this.npcs.has(e.id)||e.hp<=0||ws.player!==p||!currentRoomActorV1173(ws,this.players)||!this.playerFresh(p))return;
 
     const mode=String(msg.mode||'damage');const beforeShield=e.shield,beforeHp=e.hp;let actual=0;
     if(mode==='shield_drain'){
@@ -935,7 +951,7 @@ class Room {
     this.broadcast({type:'npc_death',entity:dead,killerUserId,contributors,ownerUserId:e.ownerUserId,ownerGroupId:e.ownerGroupId});
 
     const ownerId=String(e.ownerUserId||'');
-    const ownerClient=this.world.findClient(ownerId);
+    const ownerClient=[...this.clients].find(c=>c.player?.userId===ownerId&&c.readyState===WebSocket.OPEN)||null;
     const ownerRoomClient=[...this.clients].find(c=>String(c.player?.userId||'')===ownerId)||null;
 
     // V17.9.5: resolve o grupo ATUAL do primeiro atacante na hora da morte.
@@ -959,10 +975,11 @@ class Room {
     }else{
       candidateClients=[...this.clients].filter(c=>String(c.player?.userId||'')===ownerId);
     }
-    const cutoff=nowMs()-120000;
-    const eligible=candidateClients.filter(c=>{
-      const uid=String(c.player?.userId||'');
-      return Number(c.player?.hp||0)>0&&this.world.lastNpcActivity(uid)>=cutoff;
+    const eligible=eligibleGroupRecipientsV1173(candidateClients,{
+      now:nowMs(),cutoffMs:120000,openState:WebSocket.OPEN,
+      lastActivity:id=>this.world.lastNpcActivity(id),
+      isFresh:p=>this.playerFresh(p),
+      isCurrent:c=>c.room===this&&currentRoomActorV1173(c,this.players)
     });
     const factor=eligible.length?1/eligible.length:0;
     for(const c of eligible){
@@ -1001,7 +1018,7 @@ class Room {
 
   async handleOreCollect(ws,msg){
     const p=ws.player,entityId=String(msg.entityId||''),o=this.ores.get(entityId);
-    if(!p)return;
+    if(!p||!currentRoomActorV1173(ws,this.players))return;
     if(!o)return safeJsonSend(ws,{type:'ore_collect_result',entityId,ok:false,reason:'missing'});
     const collector=msg.collector==='pet'?'pet':'ship';
     if(collector==='pet'){
@@ -1376,6 +1393,15 @@ export function attachSharedUniverse(server,{authenticate,authorizeJoin,recordSe
           try{identity.clanId=await world.loadActorClan(identity.user.id);}catch{identity.clanId=null;}
         }
         const r=world.room(mapId,territory);
+        // V117.3: two tabs or reconnects for the same account must not create
+        // phantom players in DIFFERENT rooms while the previous socket closes.
+        // Different accounts remain fully independent and can join the same squad.
+        for(const previousRoom of rooms.values()){
+          for(const old of replacedRoomSocketsV1173(previousRoom.clients,identity.user.id,ws)){
+            previousRoom.removeClient(old);
+            try{old.close(4409,'pilot reconnected');}catch{}
+          }
+        }
         // Não aguardar a consulta de relés para abrir o PvP. O controlador permanece
         // travado até a primeira leitura válida e publica os donos oficiais depois.
         ws.room?.removeClient(ws);const p={clanId:identity.clanId||null,userId:identity.user.id,callsign:identity.callsign||msg.callsign||'Pilot',pilotTitle:shortText(msg.pilotTitle||'Piloto Estelar',64),faction:faction,shipId:String(msg.shipId||'phoenix'),shipDesignId:msg.shipDesignId?shortText(msg.shipDesignId,64):null,level:level,x:Number(msg.x)||400,y:Number(msg.y)||400,hp:Number(msg.hp)||1,maxHp:Number(msg.maxHp)||1,shield:Number(msg.shield)||0,maxShield:Number(msg.maxShield)||0,angle:Number(msg.angle)||0,laserFiring:false,laserColor:'#76d9ff',laserAmmoId:'lcb10',laserAmmoName:'PLS-1',targetId:null,targetIsPlayer:false,pet:{owned:false},updatedAt:nowMs()};// U-X maps: reconcile NPC population once before the initial authoritative snapshot.

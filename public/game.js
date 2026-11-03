@@ -106,6 +106,7 @@ import { applyRecruitBonusV2012, eliteRouteSnapshotV2012, freshEliteRouteJournal
 import { GAME_ASSETS } from './assets/v17/manifest.js?v=47.7.60';
 import { mergeUnsavedMissionProgressV105 } from './modules/mission-save-recovery-v105.js?v=47.7.60';
 import {createLatestSaveCoordinatorV106} from './modules/unified-save-coordinator-v106.js?v=47.7.60';
+import {shouldSendPeriodicCloudSaveV1172} from './modules/cloud-save-cadence-v1172.js?v=47.7.60';
 import { pendingMissionCategoriesV107, confirmedMissionCategoriesV107 } from './modules/mission-completion-sync-v107.js?v=47.7.60';
 import { createMissionRewardAckV108 } from './modules/mission-reward-ack-v108.js?v=47.7.60';
 import {equipmentFingerprintV109,reconcilePendingEquipmentV109} from './modules/hangar-save-recovery-v109.js?v=47.7.60';
@@ -1354,6 +1355,8 @@ function applySharedNpcPatch(raw){
   // Sem objeto temporario por patch; X/Y seguem exclusivamente a interpolacao.
   copyNpcNetworkPatchV1167(e,raw);
 }
+let lastConfirmedNpcRewardAtV1172=0;
+let lastPeriodicCloudSaveAtV1172=0;
 function sharedKillReward(entity,factor=1,opts={}){
   if(!progress)return;
   const share=Math.max(0,Math.min(1,Number(factor)||0));
@@ -1378,6 +1381,7 @@ function sharedKillReward(entity,factor=1,opts={}){
         earnedXp=Math.round((Number(clone.xp)||clone.credits/10+clone.uridium*12)*xpMult*designerXpMultiplier());
   // CR/STL chegam do Supabase; XP e os objetivos legados continuam na progressão local.
   progress.serverNpcRewardRevision=Number(reward.revision);
+  lastConfirmedNpcRewardAtV1172=Date.now();
   progress.profile.credits+=earnedCredits;
   progress.profile.uridium+=earnedUri;
   progress.profile.xp+=earnedXp;
@@ -12195,7 +12199,7 @@ ui.registerForm.onsubmit=async e=>{e.preventDefault();ui.authMessage.textContent
 if(ui.forgotPasswordBtn)ui.forgotPasswordBtn.onclick=async()=>{const email=String(ui.loginEmail?.value||'').trim();ui.authMessage.textContent='Enviando recuperação...';try{await requestPasswordReset(email);ui.authMessage.textContent='E-mail de recuperação enviado. Abra o link recebido para criar uma nova senha.';}catch(err){ui.authMessage.textContent=err.message;}};
 if(ui.recoveryForm)ui.recoveryForm.onsubmit=async e=>{e.preventDefault();const a=ui.recoveryPassword?.value||'',b=ui.recoveryPasswordConfirm?.value||'';if(a!==b){ui.authMessage.textContent='As senhas não conferem.';return;}ui.authMessage.textContent='Atualizando senha...';try{await updatePassword(a);signOutLocal();showAuthMode('login');ui.loginPassword.value='';ui.authMessage.textContent='Senha atualizada. Entre com a nova senha.';}catch(err){ui.authMessage.textContent=err.message;}};
 for(const id of [1,2])document.getElementById(`battleConf${id}`)?.addEventListener('click',()=>switchBattleConfigV2013(id));
-ui.logoutBtn.onclick=async()=>{resetRelayVisualMemoryV69();stopRelayAttack();closeRelayHangar();relayWorkshopRuntime.state=null;relayWorkshopRuntime.active=null;relayWorkshopRuntime.mapId=null;relayWorkshopRuntime.lastAt=0;await flushTelemetry(true).catch(()=>{});telemetryRuntime.sessionOpen=false;sharedUniverse.close();sharedUniverseRuntime.ready=false;sharedUniverseRuntime.event=null;sharedUniverseRuntime.globalEvent=null;if(movementPositionRuntime.loadedFromCheckpoint||movementPositionRuntime.hasMovedSinceLoad)commitRuntimePosition('logout');await flushCloudSave(true);await removePlayerPresenceOnline().catch(()=>{});clearOnlinePlayers();await endGameSession().catch(()=>signOutLocal());authenticated=false;serverEliteEquippedTitleV22=null;serverEliteTitleOwnerV22=null;commandRuntimeV22.overview=null;adminRuntime.enabled=false;adminRuntime.status=null;progress=null;npcRuntimeConfig.version=0;npcRuntimeConfig.updatedAt=null;npcRuntimeConfig.source='fallback';npcRuntimeConfig.spawns=[];worldRuntimeConfig.version=0;worldRuntimeConfig.updatedAt=null;worldRuntimeConfig.source='fallback';passRuntimeConfig.version=0;passRuntimeConfig.updatedAt=null;passRuntimeConfig.activeSeason=null;passRuntimeConfig.seasons=[];passRuntimeConfig.tiers=new Map();passRuntimeConfig.source='fallback';runtimeConfigRuntime.version=0;runtimeConfigRuntime.isAdmin=false;runtimeConfigRuntime.source='fallback';runtimeConfigRuntime.modules=new Map(RUNTIME_FALLBACK_MODULES.map(x=>[x.module_key,x]));runtimeConfigRuntime.flags=new Map(Object.entries(RUNTIME_FALLBACK_FLAGS).map(([flag_key,enabled])=>[flag_key,{flag_key,enabled,config:{}}]));applyRuntimeMenuConfig();clanRuntime.state=null;clanRuntime.clans=[];clanRuntime.lastAt=0;warfrontRuntime.state=null;warfrontRuntime.clans=[];warfrontRuntime.lastAt=0;warfrontRuntime.pendingBossDamage=0;premiumRuntime.state=null;premiumRuntime.lastAt=0;updateClanBadge();updatePremiumBadge();chatRuntime.messages=[];chatRuntime.lastSignature='';renderChatTabs();renderChatMessages();state.target=null;player.laserFiring=false;for(const modal of dismissibleModals())modal.classList.add('hidden');ui.factionModal.classList.add('hidden');ui.portalPrompt?.classList.add('hidden');ui.baseTradePrompt?.classList.add('hidden');ui.petFloatPanel?.classList.add('hidden');ui.loginModal.classList.remove('hidden');if(ui.userLabel)ui.userLabel.textContent='—';if(ui.rankChip)ui.rankChip.textContent='Piloto Básico';if(ui.loginPassword)ui.loginPassword.value='';setSync('LOCAL','');showAuthMode('login');};
+ui.logoutBtn.onclick=async()=>{lastConfirmedNpcRewardAtV1172=0;lastPeriodicCloudSaveAtV1172=0;resetRelayVisualMemoryV69();stopRelayAttack();closeRelayHangar();relayWorkshopRuntime.state=null;relayWorkshopRuntime.active=null;relayWorkshopRuntime.mapId=null;relayWorkshopRuntime.lastAt=0;await flushTelemetry(true).catch(()=>{});telemetryRuntime.sessionOpen=false;sharedUniverse.close();sharedUniverseRuntime.ready=false;sharedUniverseRuntime.event=null;sharedUniverseRuntime.globalEvent=null;if(movementPositionRuntime.loadedFromCheckpoint||movementPositionRuntime.hasMovedSinceLoad)commitRuntimePosition('logout');await flushCloudSave(true);await removePlayerPresenceOnline().catch(()=>{});clearOnlinePlayers();await endGameSession().catch(()=>signOutLocal());authenticated=false;serverEliteEquippedTitleV22=null;serverEliteTitleOwnerV22=null;commandRuntimeV22.overview=null;adminRuntime.enabled=false;adminRuntime.status=null;progress=null;npcRuntimeConfig.version=0;npcRuntimeConfig.updatedAt=null;npcRuntimeConfig.source='fallback';npcRuntimeConfig.spawns=[];worldRuntimeConfig.version=0;worldRuntimeConfig.updatedAt=null;worldRuntimeConfig.source='fallback';passRuntimeConfig.version=0;passRuntimeConfig.updatedAt=null;passRuntimeConfig.activeSeason=null;passRuntimeConfig.seasons=[];passRuntimeConfig.tiers=new Map();passRuntimeConfig.source='fallback';runtimeConfigRuntime.version=0;runtimeConfigRuntime.isAdmin=false;runtimeConfigRuntime.source='fallback';runtimeConfigRuntime.modules=new Map(RUNTIME_FALLBACK_MODULES.map(x=>[x.module_key,x]));runtimeConfigRuntime.flags=new Map(Object.entries(RUNTIME_FALLBACK_FLAGS).map(([flag_key,enabled])=>[flag_key,{flag_key,enabled,config:{}}]));applyRuntimeMenuConfig();clanRuntime.state=null;clanRuntime.clans=[];clanRuntime.lastAt=0;warfrontRuntime.state=null;warfrontRuntime.clans=[];warfrontRuntime.lastAt=0;warfrontRuntime.pendingBossDamage=0;premiumRuntime.state=null;premiumRuntime.lastAt=0;updateClanBadge();updatePremiumBadge();chatRuntime.messages=[];chatRuntime.lastSignature='';renderChatTabs();renderChatMessages();state.target=null;player.laserFiring=false;for(const modal of dismissibleModals())modal.classList.add('hidden');ui.factionModal.classList.add('hidden');ui.portalPrompt?.classList.add('hidden');ui.baseTradePrompt?.classList.add('hidden');ui.petFloatPanel?.classList.add('hidden');ui.loginModal.classList.remove('hidden');if(ui.userLabel)ui.userLabel.textContent='—';if(ui.rankChip)ui.rankChip.textContent='Piloto Básico';if(ui.loginPassword)ui.loginPassword.value='';setSync('LOCAL','');showAuthMode('login');};
 
 function startLoadedGame(){
   if(!telemetryRuntime.sessionOpen)telemetryStartSession();
@@ -12462,7 +12466,17 @@ async function safeSessionCheckV4831(){
 }
 setInterval(()=>{void safeSessionCheckV4831();},20000);
 setInterval(()=>{if(authenticated)refreshChatHistory(false);},CHAT_POLL_MS);
-setInterval(()=>{if(progress&&!offlineFarmWorldLockedV84()){saveGame();flushCloudSave();}},7000);
+setInterval(()=>{
+  if(!progress||offlineFarmWorldLockedV84())return;
+  // Keep the local checkpoint, even when deferring expensive cloud writes.
+  saveGame();
+  const now=Date.now();
+  const criticalPending=!!(missionSavePendingV105||equipmentSavePendingV109||AMMO_SELECTION_V1061.pending||economyMutationInFlightV106);
+  if(!shouldSendPeriodicCloudSaveV1172({now,lastNpcRewardAt:lastConfirmedNpcRewardAtV1172,
+     lastAttemptAt:lastPeriodicCloudSaveAtV1172,criticalPending}))return;
+  lastPeriodicCloudSaveAtV1172=now;
+  void flushCloudSave();
+},7000);
 setInterval(()=>{
   if(!authenticated||!progress||!state?.currentMap||isGalaxyGateMap())return;
   const moved=movementPositionRuntime.lastX===null?Math.hypot(player.tx-player.x,player.ty-player.y)>2:Math.hypot(player.x-movementPositionRuntime.lastX,player.y-movementPositionRuntime.lastY)>=8;
