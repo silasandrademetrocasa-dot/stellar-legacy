@@ -314,7 +314,7 @@ function qualityShouldPreload(path){
 // V20.2.3 — medição local voluntária. Nenhum dado viaja para o servidor.
 const PERF_MONITOR=createPerformanceMonitor();
 const VISUAL_ISOLATION_V75=createVisualIsolationV75();
-function syncVisualIsolationV75(){const state=VISUAL_ISOLATION_V75.snapshot(performance.now());document.body.dataset.visualTestV75=state.mode;const pill=document.getElementById('visualDiagFloatingV75');if(pill){pill.classList.toggle('hidden',!state.active);if(state.active)pill.textContent=state.pending?'V75: abra o mapa para iniciar':`V75 ${VISUAL_TEST_MODES_V75[state.mode]} • ${state.remainingSeconds??35}s • RESTAURAR`; } const status=document.getElementById('visualDiagStatusV75');if(status){const last=state.results.at(-1);status.textContent=state.reason+(last?` • último: ${last.label}, ${last.samples} quadros, ${Number.isFinite(last.fps)?last.fps.toFixed(1):'n/d'} FPS`:'');}}
+function syncVisualIsolationV75(){const state=VISUAL_ISOLATION_V75.snapshot(performance.now());document.body.dataset.visualTestV75=state.mode;const pill=document.getElementById('visualDiagFloatingV75');if(pill){pill.classList.toggle('hidden',!state.active);if(state.active)pill.textContent=state.pending?'Abra o mapa para iniciar':`Teste visual ${VISUAL_TEST_MODES_V75[state.mode]} • ${state.remainingSeconds??35}s • RESTAURAR`; } const status=document.getElementById('visualDiagStatusV75');if(status){const last=state.results.at(-1);status.textContent=state.reason+(last?` • último: ${last.label}, ${last.samples} quadros, ${Number.isFinite(last.fps)?last.fps.toFixed(1):'n/d'} FPS`:'');}}
 
 const BROWSER_LATENCY_V72=createBrowserLatencyDiagnostics();
 let perfHudVisible=false;
@@ -1124,7 +1124,7 @@ function relayWorkshopHtml(){
  </div><div class="relay-admin-footer-v3461"><small>Valores do servidor. Altere e clique em salvar; o novo limite-base se aplica às próximas reconstruções. Os relés existentes não são curados durante combate.</small><button type="button" class="primary-btn" data-relay-admin-save>SALVAR CONTROLES DA GUERRA</button></div>
  <details class="relay-admin-balance-v3463 relay-admin-fortification-v350"><summary>ADM • NÍVEIS DA ESTRUTURA DO RELÉ (${st.fortificationTiers?.length||0} NÍVEIS)</summary>
  <small>Níveis estruturais não são níveis de equipamentos. O valor-base é editado acima. LV2 e LV3 adicionam resistência e exigem recursos reais do cofre e do clã.</small>
- ${(st.fortificationTiers||[]).map(t=>`<div class="relay-admin-balance-row-v3463" data-relay-fort-tier-row="${t.level}"><b>FORTALEZA LV${t.level}</b><div class="relay-admin-balance-fields-v3463">${[['hp_bonus','HP EXTRA'],['shield_bonus','ESCUDO EXTRA'],['parts_each','PEÇAS DE CADA TIPO'],['credits','CRÉDITOS'],['min_clan_level','NÍVEL MÍNIMO DO CLÃ']].map(([key,label])=>`<label>${label}<input type="number" min="${key==='min_clan_level'?1:0}" max="${key==='credits'?10000000:key==='parts_each'?250:key==='min_clan_level'?50:3000000}" step="1" data-relay-fort-tier-field="${key}" value="${Number(t[key])||0}" ${t.level===1?'readonly':''}></label>`).join('')}${t.level>1?`<button class="primary-btn" data-relay-fort-tier-save="${t.level}">SALVAR LV${t.level}</button>`:'<small>LV1 fixo • custo 0 • resistência base</small>'}</div></div>`).join('')||'<small>SQL V35 pendente. Níveis permanecem no padrão LV1.</small>'}
+ ${(st.fortificationTiers||[]).map(t=>`<div class="relay-admin-balance-row-v3463" data-relay-fort-tier-row="${t.level}"><b>FORTALEZA LV${t.level}</b><div class="relay-admin-balance-fields-v3463">${[['hp_bonus','HP EXTRA'],['shield_bonus','ESCUDO EXTRA'],['parts_each','PEÇAS DE CADA TIPO'],['credits','CRÉDITOS'],['min_clan_level','NÍVEL MÍNIMO DO CLÃ']].map(([key,label])=>`<label>${label}<input type="number" min="${key==='min_clan_level'?1:0}" max="${key==='credits'?10000000:key==='parts_each'?250:key==='min_clan_level'?50:3000000}" step="1" data-relay-fort-tier-field="${key}" value="${Number(t[key])||0}" ${t.level===1?'readonly':''}></label>`).join('')}${t.level>1?`<button class="primary-btn" data-relay-fort-tier-save="${t.level}">SALVAR LV${t.level}</button>`:'<small>LV1 fixo • custo 0 • resistência base</small>'}</div></div>`).join('')||'<small>Configuração de relé indisponível. Níveis permanecem no padrão LV1.</small>'}
  </details>
  <details class="relay-admin-balance-v3463"><summary>ADM • CONFIGURAR CADA MÓDULO E NÍVEL (${st.balance?.length||0} CONFIGURAÇÕES)</summary>
  <small>Valores reais do servidor. Alterações em armas aparecem na próxima sincronização; custos são cobrados pelo banco; bônus globais usam o melhor módulo.</small>
@@ -1196,7 +1196,7 @@ async function upgradeRelayFortificationNow(confirmed=false){
  const node=st?.nodes?.find(n=>n.map_id===mapId&&n.node_id===nodeId);
  if(!clan?.isOwner||node?.owner_clan_id!==clan.id){showToast('Somente o líder do clã dominante pode evoluir o relé.');return;}
  const next=fortificationNextLevel(node.fortificationLevel,st.fortificationTiers||[]);
- if(!next)return showToast('Relé no nível máximo ou SQL V35 pendente.');
+ if(!next)return showToast('Relé no nível máximo ou Configuração de relé indisponível.');
  if(!fortificationCanAfford(next,clan,st.pieces||[]))return showToast('Cofre, peças ou nível do clã insuficiente.');
  if(!confirmed){openConfirmModal({eyebrow:'FORTALEZA • ASCENSÃO',title:`Evoluir o relé ${nodeId} para LV${next.level}?`,
    itemName:`${displayMapLabel(mapId)} • RELÉ ${nodeId}`,detail:`Serão consumidos ${fmt(next.parts_each)} ligas de casco e ${fmt(next.parts_each)} núcleos de escudo. Nível mínimo do clã: ${next.min_clan_level}. A evolução NÃO repara durante combate.`,
@@ -10445,7 +10445,7 @@ function balanceApplySnapshot(data,source='online'){
      laserMult:Number(val.laserMult) ||1,rocketMult:Number(val.rocketMult)||1,shieldMult:Number(val.shieldMult)||1
     }:null;continue;
    }
-   if(Object.prototype.hasOwnProperty.call(row.params,k))target[k]=row.params[k];
+   if(Object.prototype.hasOwnProperty.call(row.params,k))target[k]=k==='description'?String(row.params[k]||'').replace(/\s*\(V\d+(?:\.\d+)*\)/gi,''):row.params[k];
   }
  }
  balanceRuntime.version=Number(data.version)||0;balanceRuntime.lastAt=Date.now();balanceRuntime.source=source;
@@ -12004,7 +12004,7 @@ async function loadCombatProgressionAuditV113(){
   const r=await fetch('/api/admin/v113/progression-audit',{headers:{Authorization:'Bearer '+c.accessToken,'X-Game-Session-Id':c.gameSessionId},cache:'no-store',signal:AbortSignal.timeout(18000)});
   const d=await r.json();if(!r.ok||!d.ok)throw Error(d.error||'Auditoria indisponível');
   const pass=d.pass||{};
-  box.textContent=`V113 • ${d.counts?.ships||0} NAVES • ${d.gear?.drone||0} DRONES • ${d.counts?.npcs||0} NPCs • ${d.counts?.bosses||0} BOSSES\n`+
+  box.textContent=`BALANCEAMENTO • ${d.counts?.ships||0} NAVES • ${d.gear?.drone||0} DRONES • ${d.counts?.npcs||0} NPCs • ${d.counts?.bosses||0} BOSSES\n`+
    `PASSE ${pass.season||'—'}: ${pass.tiers||0} TIER(S) • ${pass.pointsPerTier||0} PTS/TIER • ~${pass.nominalDaysToFinish||0} dias com as 7 missões FREE\n`+
    `RENDIMENTO MEDIANO CR/1M CASCO+ESCUDO • NPC: ${fmt(d.normalYield?.medianCreditsPerMillionHull||0)} • BOSS: ${fmt(d.bossesYield?.medianCreditsPerMillionHull||0)}\n`+
    `AUX: ${d.gear?.auxAdvancedFamilies||0} FAMÍLIAS • ${d.gear?.laser||0} LASERS • ${d.gear?.shield||0} ESCUDOS • ${d.gear?.engine||0} MOTORES\n`+

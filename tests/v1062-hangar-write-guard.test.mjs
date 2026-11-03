@@ -49,7 +49,7 @@ test('V106.2: cliente envia intencao somente com montagem alterada explicitament
  assert.match(game,/gearIntentV1062=layoutDiffV1062&&equipmentSavePendingV109/);
  assert.match(game,/saveCloudSave\(snapshot,gearIntentV1062\)/);
  assert.match(api,/equipmentMutationV1062/);
- assert.match(server,/validateEquipmentWriteV1062\(serverSave\?\.state\|\|null,state,req\.body\?\.equipmentMutationV1062\)/);
+ assert.match(server,/validateEquipmentWriteV1062\(officialForGearV118,state,req\.body\?\.equipmentMutationV1062\)/);
  assert.match(server,/gearWriteV1062\.code/);
 });
 test('V106.2: reabertura nao toma timestamp de combate por intencao de desmontar; resgate espera save pendente',()=>{

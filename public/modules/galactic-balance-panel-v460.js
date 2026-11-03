@@ -5,7 +5,7 @@ const format=n=>Number(n).toLocaleString('pt-BR');
 export function renderGalacticBalanceV460(root,tab,isAdmin){
  if(tab!=='admin'||isAdmin!==true||!root)return;
  const section=document.createElement('section');section.className='frontier-card-v42';
- const h=document.createElement('h4');h.textContent='V46 • BALANCEAMENTO GALÁCTICO';section.append(h);
+ const h=document.createElement('h4');h.textContent='BALANCEAMENTO GALÁCTICO';section.append(h);
  const summary=document.createElement('p');summary.textContent='Curva de XP acumulada e desbloqueios (somente leitura). Dados de jogadores não são alterados por este painel.';section.append(summary);
  for(const [id,level] of Object.entries(GALACTIC_PVE_LEVELS_V451)){
   const p=document.createElement('p');p.textContent=`${id.toUpperCase()} • nível ${level} • ${format(xpThresholdV460(level))} XP acumulado`;section.append(p);

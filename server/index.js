@@ -1,4 +1,5 @@
 /* STELLAR_OFFLINE_FARM_V484 APPLIED */
+import {syncFleetConfigsAfterDroneSaleV118,pruneOrphanedDroneLayoutsV118} from './unified-fleet-snapshot-v118.js';
 import {saleQuoteV4776} from '../public/modules/sale-policy-v4776.js';
 import {tradeRequestIdV1164,findTradeReceiptV1164,rememberTradeReceiptV1164} from './autotrade-idempotency-v1164.js';
 import {validateEquipmentWriteV1062} from '../public/modules/hangar-write-guard-v1062.js';
@@ -68,9 +69,18 @@ async function requireEliteAdmin(){if(!eliteAdminClient)throw new Error('Configu
 // O navegador e o token JWT nunca recebem permissao de escrita direta nos saves.
 // Todas as gravacoes passam pelo Render depois da validacao de usuario, sessao e regras.
 async function writeVerifiedSave(req,state,updated_at){
+  // V118: um UNICO commit transacional guarda game_saves, profiles e A/B/C.
+  // O navegador nao pode chamar este RPC: apenas o Render usa service_role.
   const service=await requireEliteAdmin();
-  const {error}=await service.from('game_saves').upsert({user_id:req.user.id,state,updated_at},{onConflict:'user_id'});
-  return error;
+  pruneOrphanedDroneLayoutsV118(state); // descarta apenas IDs órfãos de CONF (sem tocar inventário)
+  const callsign=String(state?.profile?.callsign||'').trim();
+  const {data,error}=await service.rpc('stellar_commit_player_save_v118',{
+    p_user_id:req.user.id,p_state:state,p_updated_at:updated_at,p_callsign:callsign
+  });
+  if(error&&['PGRST202','42883'].includes(String(error.code||'')))
+    return {code:'SAVE_MIGRATION_REQUIRED',message:'Migração de save único ainda não instalada. Nenhum progresso foi gravado.'};
+  if(!error&&data?.ok!==true)return {code:'SAVE_NOT_CONFIRMED',message:'Servidor não confirmou o save único.'};
+  return error||null;
 }
 
 
@@ -558,12 +568,7 @@ async function writeEconomySave(req,state){
   // SAVE_NPC_STALE must never update the public profile or charge any resources.
   const saveError=await writeVerifiedSave(req,state,updated_at);
   if(saveError)throw new Error(saveError.message);
-  const {error:profileError}=await (await requireEliteAdmin()).from('profiles').upsert({id:req.user.id,callsign:securedCallsign,faction:profile.faction||null,level:Number(profile.level||1),xp:Number(profile.xp||0),credits:Number(profile.credits||0),uridium:Number(profile.uridium||0),aliens_killed:Number(profile.aliensKilled||0),gg_completed:Number(state.galaxyGate?.alpha?.completed||profile.ggCompleted||0),updated_at},{onConflict:'id'});
-  if(profileError){
-    // The authoritative game_saves write already succeeded. Do NOT retry or
-    // tell the client to repeat a charged action on a stale profile projection.
-    console.warn('[economy-profile-sync] game_saves committed; profile projection pending:',profileError.message);
-  }
+  // Perfil atualizado na MESMA transacao do save oficial (V118).
   return updated_at;
 }
 function debitServer(state,amount,currency){const c=currency==='uridium'?'uridium':'credits',price=Math.max(0,Math.round(Number(amount)||0)),balance=Math.max(0,Number(state.profile?.[c])||0);if(balance<price)throw Object.assign(new Error(`Saldo insuficiente: faltam ${price-balance} ${c==='uridium'?'STL':'CR'}.`),{status:409});state.profile[c]=balance-price;return {currency:c,price,balance:state.profile[c]};}
@@ -1431,9 +1436,7 @@ app.post('/api/live/purchase', requireUser, asyncRoute(async (req,res)=>{
     const updated_at=new Date().toISOString();
     const writeError=await writeVerifiedSave(req,state,updated_at);
     if(writeError)throw new Error(writeError.message);
-    const profile=state.profile||{};
-    const securedCallsign=await ensureProfile(req.sb,req.user);
-    await (await requireEliteAdmin()).from('profiles').upsert({id:req.user.id,callsign:securedCallsign,faction:profile.faction||null,level:Number(profile.level||1),xp:Number(profile.xp||0),credits:Number(profile.credits||0),uridium:Number(profile.uridium||0),aliens_killed:Number(profile.aliensKilled||0),gg_completed:Number(state.galaxyGate?.alpha?.completed||profile.ggCompleted||0),updated_at},{onConflict:'id'});
+    // V118: perfil validado e confirmado pelo mesmo RPC, sem segundo upsert.
     return {state,updated_at,purchase:{catalog_key:catalogKey,base_price:basePrice,price,currency,drone_tier:row.kind==='drone'?droneTier+1:null,premium_discount:price<basePrice}};
   });
   res.json({ok:true,...result});
@@ -1537,9 +1540,7 @@ app.post('/api/live/purchase/bulk', requireUser, OFFLINE_FARM_GUARD_V484, asyncR
     const updatedAt=new Date().toISOString();
     const error=await writeVerifiedSave(req,state,updatedAt);
     if(error)throw Error(error.message);
-    const profile=state.profile||{};
-    const callsign=await ensureProfile(req.sb,req.user);
-    await (await requireEliteAdmin()).from('profiles').upsert({id:req.user.id,callsign,faction:profile.faction||null,level:Number(profile.level||1),xp:Number(profile.xp||0),credits:Number(profile.credits||0),uridium:Number(profile.uridium||0),aliens_killed:Number(profile.aliensKilled||0),gg_completed:Number(state.galaxyGate?.alpha?.completed||profile.ggCompleted||0),updated_at:updatedAt},{onConflict:'id'});
+    // V118: recibo economico e perfil incluidos no commit transacional.
     return {state,purchase:receipt};
   });
   res.set('Cache-Control','no-store');res.json({ok:true,...result});
@@ -1628,7 +1629,7 @@ app.post('/api/economy/action', requireUser, OFFLINE_FARM_GUARD_V484, asyncRoute
       const itemId=String(payload.item_id||''),qty=Math.max(1,Math.min(999,Math.floor(Number(payload.qty)||1)));state.inventory ||= {};const have=Math.max(0,Math.floor(Number(state.inventory[itemId])||0));if(!itemId||have<qty)throw Object.assign(new Error('Item não disponível no inventário online.'),{status:409});const row=catalogSellRow(snapshot,itemId);if(!row)throw Object.assign(new Error('Esse item não possui preço online para venda.'),{status:404});const quote=saleQuoteV4776(row);if(!quote.available)throw Object.assign(new Error('Item sem cotação de revenda no catálogo.'),{status:409});const unit=quote.unit,total=unit*qty,currency=quote.currency;state.inventory[itemId]=have-qty;if(state.inventory[itemId]<=0)delete state.inventory[itemId];creditServer(state,total,currency);info={action,item_id:itemId,qty,unit,total,currency};
     }
     else if(action==='sell_drone'){
-      const droneId=String(payload.drone_id||''),drones=Array.isArray(state.drones)?state.drones:[],idx=drones.findIndex(d=>String(d?.id||'')===droneId);if(idx<0)throw Object.assign(new Error('Drone não encontrado no save online.'),{status:404});const drone=drones[idx],row=liveCatalogRow(snapshot,`drone:${String(drone.type||'')}`);if(!row)throw Object.assign(new Error('Drone sem preço online para venda.'),{status:404});state.inventory ||= {};for(const itemId of (Array.isArray(drone.slots)?drone.slots:[]).filter(Boolean))state.inventory[itemId]=(Number(state.inventory[itemId])||0)+1;drones.splice(idx,1);state.drones=drones;const quote=saleQuoteV4776(row);if(!quote.available)throw Object.assign(new Error('Drone sem cotação de revenda.'),{status:409});const refund=quote.unit,currency=quote.currency;creditServer(state,refund,currency);info={action,drone_id:droneId,drone_type:String(drone.type||''),refund,currency};
+      const droneId=String(payload.drone_id||''),drones=Array.isArray(state.drones)?state.drones:[],idx=drones.findIndex(d=>String(d?.id||'')===droneId);if(idx<0)throw Object.assign(new Error('Drone não encontrado no save online.'),{status:404});const drone=drones[idx],row=liveCatalogRow(snapshot,`drone:${String(drone.type||'')}`);if(!row)throw Object.assign(new Error('Drone sem preço online para venda.'),{status:404});state.inventory ||= {};for(const itemId of (Array.isArray(drone.slots)?drone.slots:[]).filter(Boolean))state.inventory[itemId]=(Number(state.inventory[itemId])||0)+1;drones.splice(idx,1);state.drones=drones;syncFleetConfigsAfterDroneSaleV118(state,droneId);const quote=saleQuoteV4776(row);if(!quote.available)throw Object.assign(new Error('Drone sem cotação de revenda.'),{status:409});const refund=quote.unit,currency=quote.currency;creditServer(state,refund,currency);info={action,drone_id:droneId,drone_type:String(drone.type||''),refund,currency};
     }
     else if(action==='gate_life'){
       const key=String(payload.protocol||'alpha'),def=GATE_SERVER_DEFS[key];
@@ -2002,7 +2003,9 @@ app.get('/api/save', requireUser, asyncRoute(async (req, res) => {
   const {data: resetRecord,error: resetErr}=await req.sb.from('stellar_account_reset_epochs_v478').select('epoch').eq('user_id',req.user.id).maybeSingle();
   if(resetErr)return res.status(503).json({error:'Integridade do reset indisponível. Execute o SQL de pré-lançamento.'});
   res.set('Cache-Control','no-store');
-  res.json({ state: data?.state || null, updated_at: data?.updated_at || null,reset_epoch:Number(resetRecord?.epoch)||0 });
+  const playerState=data?.state?structuredClone(data.state):null;
+  if(playerState)pruneOrphanedDroneLayoutsV118(playerState);
+  res.json({ state: playerState, updated_at: data?.updated_at || null,reset_epoch:Number(resetRecord?.epoch)||0 });
 }));
 
 /* STELLAR_SHIPS3D_FLEET_V50: server-authoritative 13 ships, without deleting ownership/inventory */
@@ -2045,7 +2048,12 @@ app.put('/api/save', requireUser, OFFLINE_FARM_GUARD_V484, asyncRoute(async (req
   // V106.2: saves de combate/farm nao podem alterar a montagem (CONF1/2,
   // nave, drones, AUX) sem uma intencao do hangar e baseline do servidor.
   // Mantem integralmente os validadores economicos, NPC, inventario e anti-fraude.
-  const gearWriteV1062=validateEquipmentWriteV1062(serverSave?.state||null,state,req.body?.equipmentMutationV1062);
+  // V118: layouts de drones vendidos nao sao equipamento valido. Normalizar
+  // OS DOIS lados evita bloqueios falsos, sem liberar equipamento do cliente.
+  const officialForGearV118=serverSave?.state?structuredClone(serverSave.state):null;
+  if(officialForGearV118)pruneOrphanedDroneLayoutsV118(officialForGearV118);
+  pruneOrphanedDroneLayoutsV118(state);
+  const gearWriteV1062=validateEquipmentWriteV1062(officialForGearV118,state,req.body?.equipmentMutationV1062);
   if(!gearWriteV1062.ok){
     console.warn('[HANGAR_WRITE_GUARD_V1062]',gearWriteV1062.code);
     return res.status(409).json({
@@ -2138,19 +2146,7 @@ app.put('/api/save', requireUser, OFFLINE_FARM_GUARD_V484, asyncRoute(async (req
     return res.status(code?409:400).json({error:error.message,code});
   }
 
-  const profile = state.profile || {};
-  await (await requireEliteAdmin()).from('profiles').upsert({
-    id: req.user.id,
-    callsign: securedCallsign,
-    faction: profile.faction || null,
-    level: Number(profile.level || 1),
-    xp: Number(profile.xp || 0),
-    credits: Number(profile.credits || 0),
-    uridium: Number(profile.uridium || 0),
-    aliens_killed: Number(profile.aliensKilled || 0),
-    gg_completed: Number(state.galaxyGate?.alpha?.completed || profile.ggCompleted || 0),
-    updated_at,
-  }, { onConflict: 'id' });
+  // V118: profiles ja confirmado com game_saves na transacao unica.
 
   res.json({ ok: true, updated_at, statePatch });
 })));
