@@ -2142,31 +2142,61 @@ function grantAuctionLot(lot){
   if(lot.kind==='petGear'){if(progress.pet.gearsOwned[lot.id])return false;progress.pet.gearsOwned[lot.id]=true;return true;}
   return false;
 }
-async function finalizeOnlineAuctionBid(row){
-  if(offlineFarmWorldLockedV84())return; // V84: resgatar lotes somente após reconciliar o save do farm.
-  const lot=row.lot||{};if(!lot?.ref||row.status!=='active')return;
+const AUCTION_SETTLEMENT_RETRY_V1182=new Map();
+async function settleAuctionServerV1182(row){
+  const cred=getSessionCredentials();
+  if(!cred?.accessToken||!cred?.gameSessionId)throw new Error('Faça login novamente para confirmar o leilão.');
+  const abort=new AbortController();
+  const timeout=setTimeout(()=>abort.abort(),14000);
   try{
-    const market=await loadAuctionMarket(row.hour_key),winner=market.find(x=>x.lot_ref===row.lot_ref),mine=getUser()?.id;
-    const won=winner?.leader_user_id===mine&&Number(winner?.user_bid)===Number(row.user_bid);
-    let result='PERDEU',status='lost';
-    if(won){
-      if(lot.kind==='auxProtocol'){
-        const response=await claimAuxProtocolAuctionV111({hourKey:row.hour_key,lotRef:row.lot_ref});
-        if(!response?.ok||!response?.state)throw new Error('Banco não confirmou a entrega do protocolo.');
-        installEconomyState(response.state,{serverConfirmedEquipment:true});
-        result='VENCEU';status='won';
-      }
-      else if(progress.profile.credits>=Number(row.user_bid)&&grantAuctionLot(lot)){progress.profile.credits-=Number(row.user_bid);result='VENCEU';status='won';}
-      else{result='CANCELADO';status='cancelled';}
+    const res=await fetch('/api/auction/settle',{
+      method:'POST',cache:'no-store',signal:abort.signal,
+      headers:{'Content-Type':'application/json','Authorization':`Bearer ${cred.accessToken}`,
+         'X-Game-Session-ID':cred.gameSessionId},
+      body:JSON.stringify({hour_key:row.hour_key,lot_ref:row.lot_ref})
+    });
+    let data={};try{data=await res.json();}catch{}
+    if(!res.ok||!data||typeof data!=='object')throw new Error(
+      data?.message||'O leilão não pôde ser confirmado agora. Seu lance continua registrado.');
+    return data;
+  }catch(err){
+    if(err.name==='AbortError')throw new Error('A confirmação do leilão demorou. Nenhuma nova tentativa de cobrança será feita sem consultar o servidor.');
+    throw err;
+  }finally{clearTimeout(timeout);}
+}
+async function finalizeOnlineAuctionBid(row){
+  if(offlineFarmWorldLockedV84()||!row||row.status!=='active')return;
+  const lot=row.lot||{};if(!row.lot_ref||!lot.ref)return;
+  const key=`${row.hour_key}|${row.lot_ref}`;
+  if(Date.now()<(AUCTION_SETTLEMENT_RETRY_V1182.get(key)||0))return;
+  try{
+    if(lot.kind==='auxProtocol'){
+      const market=await loadAuctionMarket(row.hour_key),winner=market.find(x=>x.lot_ref===row.lot_ref);
+      if(winner?.leader_user_id!==getUser()?.id||Number(winner?.user_bid)!==Number(row.user_bid))return;
+      const response=await claimAuxProtocolAuctionV111({hourKey:row.hour_key,lotRef:row.lot_ref});
+      if(!response?.ok||!response?.state)throw new Error('Entrega do protocolo ainda não confirmada no servidor.');
+      installEconomyState(response.state,{serverConfirmedEquipment:true});
+      return;
     }
-    progress.auction.history.unshift({at:Date.now(),name:lot.name||row.lot_ref,bid:Number(row.user_bid)||0,result});
-    progress.auction.history=progress.auction.history.slice(0,12);
-    if(lot.kind!=='auxProtocol')await markAuctionBidStatusOnline({hourKey:row.hour_key,lotRef:row.lot_ref,status});
-    if(lot.kind!=='auxProtocol'||status==='won')saveGame();
-    if(lot.kind!=='auxProtocol')await flushCloudSave(true);
-    // Em leilão AUX a liquidação já foi gravada atomicamente no Supabase.
-
-  }catch(e){console.warn('auction settle online',e);}
+    // Never mark a winning bid, deduct credits or create an item in the browser.
+    const response=await settleAuctionServerV1182(row);
+    if(response?.ok&&response.state){
+      installEconomyState(response.state,{serverConfirmedEquipment:true,preservePendingEquipment:false});
+      cloudDirty=AMMO_SELECTION_V1061.pending;
+      renderAuction();renderHangar();updateUI();
+      showToast(response.replayed?'Prêmio já confirmado no servidor.':
+        `Leilão confirmado • ${response.receipt?.product||lot.name||'prêmio'} entregue e registrado.`,'reward');
+      AUCTION_SETTLEMENT_RETRY_V1182.delete(key);
+    }else{
+      AUCTION_SETTLEMENT_RETRY_V1182.set(key,Date.now()+120000);
+      if(response?.code!=='AUCTION_STILL_ACTIVE'&&response?.code!=='AUCTION_OUTBID')
+        showToast(response?.message||'O prêmio não foi confirmado. O lance continua registrado.','system');
+    }
+  }catch(err){
+    AUCTION_SETTLEMENT_RETRY_V1182.set(key,Date.now()+120000);
+    console.warn('[auction] confirmation pending',String(err?.message||err).slice(0,150));
+    showToast('Não foi possível confirmar o prêmio agora. Seu lance permanece registrado; confira o leilão antes de tentar novamente.','system');
+  }
 }
 let auctionSyncBusy=false,auctionLastMarketSync=0;
 async function syncAuctionBidsOnline(){
@@ -4781,8 +4811,16 @@ function clearActivityFeed(){
 }
 function safePilotMessage(raw){
   const message=String(raw??'').slice(0,340);
+  // Erros internos não são exibidos ao jogador, mas a mensagem deve explicar a ação necessária.
+  // Estas traduções não afirmam que a operação foi concluída.
+  if(/SAVE_EQUIPMENT_(?:INTENT_REQUIRED|STALE)|HANGAR_WRITE_GUARD|equipment.*(?:stale|intent)/i.test(message))
+    return 'O servidor ainda não confirmou a montagem. Abra o Hangar, confira a configuração e aguarde a confirmação antes de sair.';
+  if(/SAVE_(?:NPC|ORE)_STALE|recompensas? (?:mais )?recentes/i.test(message))
+    return 'O servidor recebeu recompensas mais recentes. Sincronize o progresso antes de alterar equipamentos ou comprar.';
+  if(/AUCTION_(?:LEGACY_REVIEW|SAVE_NOT_CONFIRMED|STATUS_RACE)|leil[aã]o.*(?:falha|erro)/i.test(message))
+    return 'O leilão não foi confirmado. Seu lance permanece registrado; confira o resultado antes de tentar novamente.';
   if(/(?:supabase|postgres(?:ql)?|postgrest|service[_ -]?role|anon[_ -]?key|jwt|\bRPC\b|\bRLS\b|\bSQL\b|\bHTTP\s*[45]\d\d|\bPGRST\d+|relation .* does not exist|permission denied for table|violates row-level security)/i.test(message)){
-    return 'Operação temporariamente indisponível. Tente novamente em instantes.';
+    return 'O servidor recusou esta alteração. Nenhuma confirmação foi recebida; abra o menu novamente e verifique o estado salvo.';
   }
   return message;
 }

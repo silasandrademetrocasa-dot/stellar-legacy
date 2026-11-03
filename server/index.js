@@ -1483,6 +1483,30 @@ const OFFLINE_FARM_GUARD_V484=makeOfflineFarmGuardV484(requireEliteAdmin);
 // V92–V97 • Uma requisição, uma compra autoritativa de munição/mísseis.
 // O cliente escolhe unidades; servidor cobra PACOTES completos e entrega todos eles.
 // request_id persiste no SAVE: repetir por timeout não cobra duas vezes.
+// V118.2: server-only settlement. Auction rows, wallet, prize and A/B/C commit atomically.
+app.post('/api/auction/settle',requireUser,OFFLINE_FARM_GUARD_V484,asyncRoute(async(req,res)=>{
+  const body=req.body||{};
+  if(Object.keys(body).some(key=>!['hour_key','lot_ref'].includes(key))||
+     !/^20[0-9]{2}-[0-9]{2}-[0-9]{2}-[0-9]{2}$/.test(String(body.hour_key||''))||
+     !/^(item|ship|ammo|rocket|petGear):[A-Za-z0-9_]+$/.test(String(body.lot_ref||'')))
+    return res.status(400).json({ok:false,code:'AUCTION_REQUEST_INVALID',message:'Dados do leilão inválidos. Nenhuma cobrança feita.'});
+  const result=await withPurchaseLock(req.user.id,async()=>{
+    const db=await requireEliteAdmin();
+    const {data,error}=await db.rpc('stellar_settle_auction_bid_v1182',{
+      p_user_id:req.user.id,p_hour_key:body.hour_key,p_lot_ref:body.lot_ref
+    });
+    if(error){
+      console.error('[auction-v1182] settlement rejected',String(error.code||''),String(error.message||'').slice(0,180));
+      const missing=['PGRST202','42883'].includes(String(error.code||''));
+      return {ok:false,code:missing?'AUCTION_MIGRATION_REQUIRED':'AUCTION_SERVER_REVIEW',
+        message:missing?'Atualização de segurança do leilão ainda não instalada.':
+          'O servidor não confirmou a entrega do prêmio. Lance preservado; nenhuma nova cobrança foi concluída.'};
+    }
+    return data||{ok:false,code:'AUCTION_NO_RESPONSE',message:'O servidor não confirmou o leilão. Verifique novamente.'};
+  });
+  res.set('Cache-Control','no-store');res.json(result);
+}));
+
 app.post('/api/live/purchase/bulk', requireUser, OFFLINE_FARM_GUARD_V484, asyncRoute(async (req,res)=>{
   const tamper=invalidShopArguments(req.body,['catalog_key','quantity','request_id','expected_price','expected_currency','expected_pack_size']);
   if(tamper)return res.status(400).json({error:'Parâmetros de lote inválidos.',code:'INVALID_BULK_ARGUMENTS'});
