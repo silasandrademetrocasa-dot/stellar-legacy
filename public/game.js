@@ -111,6 +111,7 @@ import { pendingMissionCategoriesV107, confirmedMissionCategoriesV107 } from './
 import { createMissionRewardAckV108 } from './modules/mission-reward-ack-v108.js?v=47.7.60';
 import {equipmentFingerprintV109,reconcilePendingEquipmentV109} from './modules/hangar-save-recovery-v109.js?v=47.7.60';
 import {equipmentLayoutSignatureV1062} from './modules/hangar-write-guard-v1062.js?v=47.7.60';
+import {validateDroneSalePreflightV11731} from './modules/drone-sale-preflight-v11731.js?v=47.7.60';
 import {createAmmoSelectionTrackerV1061} from './modules/ammo-selection-recovery-v1061.js?v=47.7.60';
 import {laserAmmoShotBudgetV1064,laserAmmoSourcesV1064,ammoReadoutV1064} from './modules/combat-ammo-accounting-v1064.js?v=47.7.60';
 import { shouldPollPvpInboxV106 } from './modules/pvp-inbox-policy-v106.js?v=47.7.60';
@@ -1895,7 +1896,7 @@ window.stellarEconomySyncAfterV4776=async()=>{
 };
 async function runEconomyAction(action,payload={},options={}){
   const {applyState=true,flush=true}=options;
-  return queueEconomy(async()=>{if(flush)await syncBeforeEconomy();economyMutationInFlightV106=true;try{const before=progress?{credits:Number(progress.profile?.credits)||0,uridium:Number(progress.profile?.uridium)||0}:null;const result=await economyActionOnline(action,payload);if(applyState&&result?.state){installEconomyState(result.state,{serverConfirmedEquipment:['aux_protocol_buy','aux_protocol_craft','aux_protocol_equip'].includes(action)});telemetryTrackEconomyTransition(action,before,progress?.profile,result?.info||{});}return result;}finally{economyMutationInFlightV106=false;}});
+  return queueEconomy(async()=>{if(flush)await syncBeforeEconomy();economyMutationInFlightV106=true;try{const before=progress?{credits:Number(progress.profile?.credits)||0,uridium:Number(progress.profile?.uridium)||0}:null;const result=await economyActionOnline(action,payload);if(applyState&&result?.state){installEconomyState(result.state,{serverConfirmedEquipment:['aux_protocol_buy','aux_protocol_craft','aux_protocol_equip'].includes(action)||action==='sell_drone'});telemetryTrackEconomyTransition(action,before,progress?.profile,result?.info||{});}return result;}finally{economyMutationInFlightV106=false;}});
 }
 function autoTradeRequestV1164(kind,key){
  const owner=String(getUser()?.id||'');
@@ -8479,9 +8480,62 @@ function unequipShipSlot(key,index){
 }
 function equipDroneItem(itemId){if(!canChangeEquipment()){showToast('Configure drones somente dentro da sua base X-1');return;}const item=ITEMS[itemId];if(!(item.type==='laser'||(item.type==='generator'&&item.subtype==='shield'))){showToast('Drones aceitam lasers ou geradores de escudo');return;}const drone=progress.drones.find(d=>d.slots.some(v=>!v));if(!drone){showToast('Nenhum slot livre nos drones');return;}if(!removeInventory(itemId))return;drone.slots[drone.slots.findIndex(v=>!v)]=itemId;computeStatsAfterEquipmentEditV2013();saveGame();rememberEquipmentChangeV109();renderHangar();buildAmmoButtons();}
 function unequipDroneSlot(droneId,index){if(!canChangeEquipment()){showToast('Configure drones somente dentro da sua base X-1');return;}const d=progress.drones.find(x=>x.id===droneId);if(!d||!d.slots[index])return;addInventory(d.slots[index]);d.slots[index]=null;compactEquipmentSlotsInPlace(d.slots);computeStatsAfterEquipmentEditV2013();saveGame();rememberEquipmentChangeV109();renderHangar();buildAmmoButtons();}
+// V117.3.1: a revenda do drone usa o inventário OFICIAL. Saves comuns
+// pendentes não podem impedir uma operação cuja montagem já está no servidor.
+// Nunca enviar estado/valor local no pedido nem descartar alterações sem confirmação.
+const droneSalesPendingV11731=new Set();
 async function performSellDrone(droneId){
-  const d=progress.drones.find(x=>x.id===droneId);if(!d)return;const model=ITEMS[d.type];
-  try{const r=await runEconomyAction('sell_drone',{drone_id:droneId});showToast(`${model.name} vendido por ${fmt(r?.info?.refund||0)} ${saleCurrencyLabel(r?.info?.currency)} • equipamentos retornaram ao inventário`);}catch(e){showToast(e.message||'Venda do drone recusada pelo servidor');}
+  if(droneSalesPendingV11731.has(droneId))return;
+  if(!isBaseSafeZone()||offlineFarmWorldLockedV84()){
+    showToast('Venda de drone somente na área protegida da sua base X-1 ou X-8.');return;
+  }
+  const d=progress?.drones?.find(x=>x.id===droneId);
+  if(!d){showToast('Drone não encontrado na montagem atual.');return;}
+  droneSalesPendingV11731.add(droneId);
+  try{
+    const remote=await loadCloudSave();
+    const check=validateDroneSalePreflightV11731({
+      localState:progress,officialState:remote?.state,droneId,
+      layoutSignature:equipmentLayoutSignatureV1062
+    });
+    if(!check.ok){
+      if(check.reason==='LAYOUT_DIFFERENT'){
+        openConfirmModal({
+          title:'Sincronizar Hangar antes da venda?',itemName:'Montagem diferente do servidor',
+          detail:'Existe equipamento ou configuração ainda não confirmada. Para evitar perda de itens, confira antes de prosseguir. Carregar a montagem oficial descarta apenas alterações locais não salvas. Depois, revise o Halo e confirme a venda novamente.',
+          value:0,currency:'credits',valueLabel:'NENHUMA COBRANÇA',confirmLabel:'CARREGAR MONTAGEM OFICIAL',confirmClass:'primary-btn',
+          onConfirm:()=>{
+            equipmentSavePendingV109=false;equipmentSaveDesiredV109=null;equipmentSaveWarningAtV109=0;
+            clearEquipmentIntentV1062();
+            if(equipmentSaveTimerV109!==null){clearTimeout(equipmentSaveTimerV109);equipmentSaveTimerV109=null;}
+            installEconomyState(remote.state,{preservePendingEquipment:false,serverConfirmedEquipment:true});
+            renderHangar();showToast('Hangar oficial carregado. Confira os itens e confirme a venda novamente.','system');
+          }
+        });
+        return;
+      }
+      if(check.reason==='NOT_IN_SERVER'){
+        showToast('Esse drone não aparece mais no inventário oficial. Atualize o Hangar.');return;
+      }
+      showToast('Não foi possível confirmar a montagem oficial do drone. Tente atualizar o Hangar.');return;
+    }
+    // Assinaturas idênticas: a montagem já está confirmada no servidor.
+    // Esvazia somente pendências redundantes de equipamento (não as de missão).
+    equipmentSaveBaselineV109=structuredClone(remote.state);
+    equipmentSavePendingV109=false;equipmentSaveDesiredV109=null;equipmentSaveWarningAtV109=0;
+    clearEquipmentIntentV1062();
+    if(equipmentSaveTimerV109!==null){clearTimeout(equipmentSaveTimerV109);equipmentSaveTimerV109=null;}
+    saveIntegrityBlockedV106=false;
+    // O Render tem lock por piloto, verifica o ID do drone e credita somente
+    // depois de removê-lo no save. Não usa preço ou itens fornecidos pelo cliente.
+    const result=await runEconomyAction('sell_drone',{drone_id:droneId},{flush:false,applyState:true});
+    if(!result?.ok||!result?.state||String(result?.info?.drone_id||'')!==String(droneId))
+      throw new Error('O servidor não confirmou a venda do drone. Consulte o Hangar antes de tentar novamente.');
+    renderHangar();buildAmmoButtons();
+    showToast(`${ITEMS[d.type]?.name||'Drone'} vendido por ${fmt(result.info.refund||0)} ${saleCurrencyLabel(result.info.currency)} • equipamentos devolvidos ao inventário`);
+  }catch(e){
+    showToast(e?.message||'Não foi possível confirmar a venda. Nenhum item foi removido pelo cliente.');
+  }finally{droneSalesPendingV11731.delete(droneId);}
 }
 function sellDrone(droneId){
   if(!canChangeEquipment()){showToast('Venda/configuração de drones somente na sua base X-1');return;}
