@@ -35,5 +35,36 @@ export function pruneOrphanedDroneLayoutsV118(state){
       if(!owned.has(String(id))){delete slots[id];removed++;}
     }
   }
+  // A CONF ativa deve representar os equipamentos fisicamente montados.
+  // Depois de vender um drone, backups antigos podem manter uma distribuição
+  // obsoleta em um drone ainda existente. saveGame() recaptura a montagem ativa,
+  // então normalizar somente os IDs órfãos não basta e causa SAVE_EQUIPMENT_INTENT_REQUIRED.
+  removed+=alignActiveDroneBlueprintV1181(state);
   return removed;
+}
+
+/**
+ * Alinha APENAS a planta da configuração ativa com os drones reais do save.
+ * Não muda nenhum slot físico, item, inventário, propriedade, moeda ou CONF
+ * inativa. É idempotente e permite que o primeiro save após hidratação não
+ * seja confundido com uma mutação clandestina de equipamento.
+ */
+export function alignActiveDroneBlueprintV1181(state){
+  const configs=state?.combatConfigsV2013;
+  const active=Number(configs?.active);
+  const profile=(active===1||active===2)?configs?.profiles?.[active]:null;
+  if(!profile||!Array.isArray(state?.drones))return 0;
+  const ids=state.drones.map(d=>String(d?.id||''));
+  // Um estado com IDs repetidos ou ausentes precisa de investigação, não de reparo.
+  if(ids.some(id=>!id)||new Set(ids).size!==ids.length)return 0;
+  const canonical=Object.fromEntries(state.drones.map(d=>[
+    String(d.id),Array.isArray(d.slots)?d.slots.slice():[]
+  ]));
+  const current=profile.droneSlots;
+  if(current&&typeof current==='object'&&!Array.isArray(current)&&
+     Object.keys(canonical).length===Object.keys(current).length&&
+     Object.entries(canonical).every(([id,slots])=>
+       Array.isArray(current[id])&&JSON.stringify(current[id])===JSON.stringify(slots)))return 0;
+  profile.droneSlots=canonical;
+  return 1;
 }
