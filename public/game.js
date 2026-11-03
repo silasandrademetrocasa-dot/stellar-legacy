@@ -82,6 +82,7 @@ import {createPeriodicHudBudgetV73} from './modules/periodic-hud-v73.js?v=47.7.6
 import {createRenderPhaseProfilerV73} from './modules/render-phase-profiler-v73.js?v=47.7.60';
 import {createBrowserLatencyDiagnostics} from './modules/browser-latency-v72.js?v=47.7.60';
 import { createAdaptiveResolution, effectiveCanvasDpr } from './modules/adaptive-resolution-v70.js?v=47.7.60';
+import {mobileQualityProfileV1167,npcVisualIntervalV1167,shouldRefreshNpcVisualV1167,npcLabelQualityV1167,createSharedNpcIndexV1167,copyNpcNetworkPatchV1167} from './modules/mobile-performance-v1167.js?v=47.7.60';
 import { createPreviewScheduler } from './modules/preview-scheduler-v70.js?v=47.7.60';
 import { createFrameGate } from './modules/frame-gate.js?v=47.7.60';
 import {createVisualIsolationV75, VISUAL_TEST_MODES_V75} from './modules/visual-isolation-v75.js?v=47.7.60';
@@ -252,7 +253,9 @@ const AUTO_QUALITY_CEILING=initialAutoQuality();
 let autoQualityResolved=AUTO_QUALITY_CEILING;
 let qualityMode=(()=>{try{const v=localStorage.getItem(QUALITY_STORAGE_KEY);return v==='auto'||QUALITY_PROFILES[v]?v:'auto';}catch{return 'auto';}})();
 function resolvedQualityMode(){return qualityMode==='auto'?autoQualityResolved:qualityMode;}
-function qualityProfile(){return QUALITY_PROFILES[resolvedQualityMode()]||QUALITY_PROFILES.high;}
+// Criados uma vez; nenhuma alocacao extra no caminho quente de cada quadro.
+const MOBILE_QUALITY_V1167=Object.fromEntries(Object.entries(QUALITY_PROFILES).map(([mode,profile])=>[mode,mobileQualityProfileV1167(profile,DEVICE_CAPS,mode)]));
+function qualityProfile(){const mode=resolvedQualityMode();return (DEVICE_CAPS.mobile?MOBILE_QUALITY_V1167:QUALITY_PROFILES)[mode]||QUALITY_PROFILES.high;}
 function qualityBadgeLabel(){return qualityMode==='auto'?`AUTO • ${qualityProfile().label}`:qualityProfile().label;}
 // Ajuste apenas da densidade de pixels do Canvas; todas as coordenadas permanecem intactas.
 const ADAPTIVE_CANVAS_V70=createAdaptiveResolution({mobile:DEVICE_CAPS.mobile});
@@ -376,7 +379,9 @@ function perfReport(){
     +`\nV73 • render P95 fundo ${num(phases.backgroundP95Ms)} • estruturas ${num(phases.structuresP95Ms)} • entidades ${num(phases.actorsP95Ms)} • efeitos ${num(phases.effectsP95Ms)} • minimapa ${num(phases.minimapP95Ms)} (${phases.samples} quadros)`
     +'\nV73 • Compare em cena e orientação iguais à V72. Sem benchmark real, ganho de FPS não confirmado.'
     +`\nV76 • relés renderizados ${relayRenderDiagnosticV76().draws} • erros isolados ${relayRenderDiagnosticV76().failed} • último: ${relayRenderDiagnosticV76().lastError||'nenhum'}`
-    +'\n'+VISUAL_ISOLATION_V75.report();
+    +'\n'+VISUAL_ISOLATION_V75.report()
+    +`\nV116.7 MOBILE • ${DEVICE_CAPS.mobile?'celular':'desktop'} • perfil ${resolvedQualityMode()} • limite ${qualityProfile().fps} FPS • DPR ${DPR.toFixed(2)} • bitmap ${canvas.width}x${canvas.height}`
+    +` • P95 do intervalo de quadro ${window.stellarMobilePerfV1167?.().frameP95Ms||0} ms (amostra local)`;
 }
 function togglePerfDiagnostics(active){
   PERF_MONITOR.setEnabled(active);if(active)BROWSER_LATENCY_V72.start();else BROWSER_LATENCY_V72.stop();if(!active){perfHudVisible=false;VISUAL_ISOLATION_V75.stop('Medições desativadas');syncVisualIsolationV75();}
@@ -1330,7 +1335,10 @@ function syncSharedUniversePlayer(force=false){
     sharedUniverseRuntime.lastPlayerSentShield=shield;
   }
 }
-function findSharedNpc(id){return state.enemies.find(e=>e.id===id&&e.sharedWorld)||null;}
+// V116.7: busca O(1) por ID em lotes WebSocket, em vez de varrer
+// todos os NPCs para CADA patch (quadratico em mapas cheios).
+const SHARED_NPC_INDEX_V1167=createSharedNpcIndexV1167();
+function findSharedNpc(id){return SHARED_NPC_INDEX_V1167.find(state.enemies,id);}
 function purgeSharedEventEntities(activeEventId=null){
   const targetWasEvent=!!state.target?.eventNpc;
   state.enemies=state.enemies.filter(e=>!e.eventNpc||(activeEventId&&e.eventId===activeEventId));
@@ -1340,7 +1348,12 @@ function purgeSharedEventEntities(activeEventId=null){
   if(targetWasEvent&&!state.enemies.some(e=>e.id===state.target?.id)){state.target=null;player.laserFiring=false;}
   galaxyEventRuntime.convoy=null;
 }
-function applySharedNpcPatch(raw){const e=findSharedNpc(raw.id);if(!e)return;mergeNpcMotionPatch(e,raw,Date.now());const rest={...raw};delete rest.x;delete rest.y;Object.assign(e,rest);}
+function applySharedNpcPatch(raw){
+  const e=findSharedNpc(raw.id);if(!e)return;
+  mergeNpcMotionPatch(e,raw,Date.now());
+  // Sem objeto temporario por patch; X/Y seguem exclusivamente a interpolacao.
+  copyNpcNetworkPatchV1167(e,raw);
+}
 function sharedKillReward(entity,factor=1,opts={}){
   if(!progress)return;
   const share=Math.max(0,Math.min(1,Number(factor)||0));
@@ -7111,11 +7124,23 @@ function updateEnemies(dt){
 }
 function updateSharedUniverseInterpolation(dt){
   if(!sharedUniverseMap())return;const now=Date.now();
+  const camera=state.camera,margin=260,hw=W*.5+margin,hh=H*.5+margin;
   for(const e of state.enemies){
     if(!e.sharedWorld||e.hp<=0)continue;
-    const next=smoothNpcPosition(e,{now,dt});
+    const dx=e.x-player.x,dy=e.y-player.y;
+    const interval=npcVisualIntervalV1167({
+      mobile:DEVICE_CAPS.mobile,
+      visible:e.x>=camera.x-hw&&e.x<=camera.x+hw&&e.y>=camera.y-hh&&e.y<=camera.y+hh,
+      selected:state.target?.id===e.id,
+      boss:String(e.type||'').startsWith('boss'),eventNpc:!!e.eventNpc,
+      near:dx*dx+dy*dy<850*850
+    });
+    if(!shouldRefreshNpcVisualV1167({now,lastAt:e._visualRefreshAtV1167,interval}))continue;
+    const elapsed=e._visualRefreshAtV1167?Math.min(.08,(now-e._visualRefreshAtV1167)/1000):dt;
+    const next=smoothNpcPosition(e,{now,dt:Math.max(dt,elapsed)});
     e.x=next.x;e.y=next.y;
-    e.visualAngle=smoothNpcHeading(e.visualAngle,e.angle,dt);
+    e.visualAngle=smoothNpcHeading(e.visualAngle,e.angle,Math.max(dt,elapsed));
+    e._visualRefreshAtV1167=now;
   }
 }
 function updateParticles(dt){for(let i=state.particles.length-1;i>=0;i--){const p=state.particles[i];p.y-=p.vy*dt;if(p.vx)p.x+=p.vx*dt;p.life-=dt;if(p.life<=0)state.particles.splice(i,1);}}
@@ -7722,7 +7747,8 @@ function drawEnemy(e){
   // V20.2.6: nenhum NPC sai da simulação; só detalhes visuais de NPCs
   // comuns distantes no perfil BAIXA ficam mais baratos.
   const dx=e.x-player.x,dy=e.y-player.y;
-  const npcDetail=npcVisualDetail({quality:resolvedQualityMode(),distanceSq:dx*dx+dy*dy,boss,eventNpc:!!e.eventNpc,selected:state.target?.id===e.id});
+  const isSelected=state.target?.id===e.id;
+  const npcDetail=npcVisualDetail({quality:npcLabelQualityV1167({mobile:DEVICE_CAPS.mobile,quality:resolvedQualityMode(),distanceSq:dx*dx+dy*dy,boss,eventNpc:!!e.eventNpc,selected:isSelected}),distanceSq:dx*dx+dy*dy,boss,eventNpc:!!e.eventNpc,selected:isSelected});
   ctx.save();ctx.translate(p.x,p.y);
   if(e.astralProtocol&&boss)drawAstralBossCrest(ctx,{enemy:e,time:nowSec(),quality:resolvedQualityMode()});
   const claim=sharedNpcClaimState(e),claimColor=claim.claimed?(claim.friendly?(e.eventNpc?'rgba(255,190,72,.96)':(e.color||'rgba(255,74,95,.96)')):'rgba(245,250,255,.94)'):null;
@@ -12457,6 +12483,24 @@ function monitorAutoPerformance(t){
 }
 const FRAME_GATE_V20210=createFrameGate();
 let last=performance.now();FRAME_GATE_V20210.reset(last);
+const MOBILE_FRAME_SAMPLES_V1167=[];
+let mobileFrameSampleAtV1167=0;
+function recordMobileFrameV1167(t,interval){
+  if(!DEVICE_CAPS.mobile||t-mobileFrameSampleAtV1167<150)return;
+  mobileFrameSampleAtV1167=t;
+  MOBILE_FRAME_SAMPLES_V1167.push(Math.max(0,Number(interval)||0));
+  if(MOBILE_FRAME_SAMPLES_V1167.length>200)MOBILE_FRAME_SAMPLES_V1167.shift();
+}
+// Diagnostico somente leitura. Nenhum dado de conta e enviado ao servidor.
+window.stellarMobilePerfV1167=()=>{
+  const sorted=[...MOBILE_FRAME_SAMPLES_V1167].sort((a,b)=>a-b);
+  const p95=sorted.length?sorted[Math.min(sorted.length-1,Math.ceil(sorted.length*.95)-1)]:0;
+  return {samples:sorted.length,frameP95Ms:Math.round(p95*10)/10,
+    frameBudgetMs:Math.round(1000/qualityProfile().fps*10)/10,
+    canvasPixels:canvas.width*canvas.height,
+    mode:resolvedQualityMode(),deviceMobile:DEVICE_CAPS.mobile,
+    telemetry:'local'};
+};
 // V34.6.3: o próximo quadro é sempre agendado, mesmo se UI/efeitos falharem.
 // O erro aparece nos logs e num aviso leve, sem provocar loop infinito de notificações.
 const frameRecoveryV3031={errors:0,lastLog:0,lastToast:0};
@@ -12470,6 +12514,7 @@ function loop(t){
     if(PERF_MONITOR.isEnabled())PERF_MONITOR.recordTick(t,allowed);
     if(!allowed)return;
     const frameInterval=t-last;
+    recordMobileFrameV1167(t,frameInterval);
     // V74: never reset the bitmap AFTER the final draw. Buffer clear at the end
     // of a frame was visible as screen flicker until the next rAF.
     if(pendingCanvasResolutionV74){pendingCanvasResolutionV74=false;resize();}

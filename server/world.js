@@ -130,6 +130,9 @@ class Room {
     this.nextEventBossAt=0;
     this.lastBroadcastAt=0;
     this.lastEventBroadcastAt=0;
+    this.lastEventEligibilityCheckV1167=0;
+    this.lastEventCleanupSweepV1167=0;
+    this.lastEventCleanupIdV1167=null;
     this.lastWarfrontBroadcastAt=0;
     this.warfrontFullController=null;
     this.warfrontControl=this.map.battle&&WARFRONT_NODE_LAYOUT[this.mapId]?{mapId:this.mapId,nodes:warfrontNodesForMap(this.mapId,this.map),startedAt:nowMs()}:null;
@@ -1060,7 +1063,14 @@ class Room {
   }
 
   tick(dt){
-    this.ensureEvent(false);const now=nowMs();
+    const now=nowMs();
+    // V116.7: agenda de eventos nao precisa ser recomputada 20x por segundo.
+    // Fases, combate, reliquias e respawns continuam em 20 Hz.
+    if(now-this.lastEventEligibilityCheckV1167>=500){
+      this.lastEventEligibilityCheckV1167=now;
+      this.world.networkV104.eventEligibilityChecksV1167=(this.world.networkV104.eventEligibilityChecksV1167||0)+1;
+      this.ensureEvent(false);
+    }
     // Only build this lookup once per server tick; no change to combat/authority.
     const clientByUserId=new Map([...this.clients].filter(c=>c.player?.userId).map(c=>[String(c.player.userId),c]));
     // Jogadores elegiveis: snapshot reaproveitado por todos os NPCs neste tick.
@@ -1070,8 +1080,13 @@ class Room {
     this.updateWarfrontControl(dt,now);
     this.warbotEngine.tick(dt,now);
     const activeEventId=this.event?.eventId||null;
-    const staleNpcIds=staleEventEntityIdsV1142(this.npcs,activeEventId,'eventNpc');
-    const staleOreIds=staleEventEntityIdsV1142(this.ores,activeEventId,'eventOre');
+    const sweepStaleV1167=now-this.lastEventCleanupSweepV1167>=500||this.lastEventCleanupIdV1167!==activeEventId;
+    if(sweepStaleV1167){
+      this.lastEventCleanupSweepV1167=now;this.lastEventCleanupIdV1167=activeEventId;
+      this.world.networkV104.eventCleanupSweepsV1167=(this.world.networkV104.eventCleanupSweepsV1167||0)+1;
+    }
+    const staleNpcIds=sweepStaleV1167?staleEventEntityIdsV1142(this.npcs,activeEventId,'eventNpc'):[];
+    const staleOreIds=sweepStaleV1167?staleEventEntityIdsV1142(this.ores,activeEventId,'eventOre'):[];
     for(const id of staleNpcIds)this.npcs.delete(id);
     for(const id of staleOreIds)this.ores.delete(id);
     if(staleNpcIds.length||staleOreIds.length){
