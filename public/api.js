@@ -412,18 +412,25 @@ export async function endGameSession() {
   }
 }
 
+let serverSaveRevisionV119=null;
+export function knownSaveRevisionV119(){return serverSaveRevisionV119;}
 export async function loadCloudSave() {
   if (!currentUser?.id) throw new Error('Usuário não identificado.');
   const body = await authedServerFetch('/api/save');
-  return { state: body?.state || null, updated_at: body?.updated_at || null, reset_epoch:Number(body?.reset_epoch)||0 };
+  if(Number.isSafeInteger(Number(body?.revision)))serverSaveRevisionV119=Number(body.revision);
+  return { state: body?.state || null, updated_at: body?.updated_at || null, reset_epoch:Number(body?.reset_epoch)||0,revision:serverSaveRevisionV119 };
 }
 
-export async function saveCloudSave(state, equipmentMutationV1062=null) {
+export async function saveCloudSave(state, equipmentMutationV1062=null, saveMetaV119=null) {
   if (!currentUser?.id) throw new Error('Usuário não identificado.');
-  return authedServerFetch('/api/save', {
+  const result=await authedServerFetch('/api/save', {
     method: 'PUT',
-    body: JSON.stringify({ state, ...(equipmentMutationV1062?{equipmentMutationV1062}:{}) }),
+    body: JSON.stringify({ state, ...(equipmentMutationV1062?{equipmentMutationV1062}:{}),
+      ...(saveMetaV119?.operation_id?{operation_id:saveMetaV119.operation_id}:{}) ,
+      ...(serverSaveRevisionV119!=null?{expected_revision:serverSaveRevisionV119}:{}) }),
   });
+  if(Number.isSafeInteger(Number(result?.revision)))serverSaveRevisionV119=Number(result.revision);
+  return result;
 }
 
 

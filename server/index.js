@@ -1,5 +1,6 @@
 /* STELLAR_OFFLINE_FARM_V484 APPLIED */
 import {syncFleetConfigsAfterDroneSaleV118,pruneOrphanedDroneLayoutsV118} from './unified-fleet-snapshot-v118.js';
+import {saveCoreModeV119,commitSaveCoreV119,saveModuleForRequestV119,SAVE_LOG_MODULES_V119} from './save-core-v119.js';
 import {saleQuoteV4776} from '../public/modules/sale-policy-v4776.js';
 import {tradeRequestIdV1164,findTradeReceiptV1164,rememberTradeReceiptV1164} from './autotrade-idempotency-v1164.js';
 import {validateEquipmentWriteV1062} from '../public/modules/hangar-write-guard-v1062.js';
@@ -74,6 +75,14 @@ async function writeVerifiedSave(req,state,updated_at){
   const service=await requireEliteAdmin();
   pruneOrphanedDroneLayoutsV118(state); // descarta apenas IDs órfãos de CONF (sem tocar inventário)
   const callsign=String(state?.profile?.callsign||'').trim();
+  // V119 em modo OBSERVE (padrao) mantem a V118 ate homologarmos cada RPC legada.
+  // ENFORCE somente depois do SQL PREPARAR + ATIVAR + testes em duas contas.
+  if(saveCoreModeV119()==='enforce'){
+    const response=await commitSaveCoreV119({service,req,userId:req.user.id,state,callsign});
+    if(!response.ok)return response.error;
+    req.v119Revision=response.revision;
+    return null;
+  }
   const {data,error}=await service.rpc('stellar_commit_player_save_v118',{
     p_user_id:req.user.id,p_state:state,p_updated_at:updated_at,p_callsign:callsign
   });
@@ -2022,14 +2031,52 @@ app.use('/api/relay/dominion',requireUser,createDominionRouter({serviceClient:el
 app.use('/api/frontier',requireUser,createFrontierRouter({serviceClient:eliteAdminClient}));
 
 app.get('/api/save', requireUser, asyncRoute(async (req, res) => {
-  const { data, error } = await req.sb.from('game_saves').select('state,updated_at').eq('user_id', req.user.id).maybeSingle();
-  if (error) return res.status(400).json({ error: error.message });
+  let data=null,error=null,revisionV119=null;
+  if(saveCoreModeV119()==='enforce'){
+    // Um unico SELECT SQL devolve estado e revisao do MESMO snapshot.
+    const service=await requireEliteAdmin();
+    const reply=await service.rpc('stellar_read_player_save_v119',{p_user_id:req.user.id});
+    error=reply.error;
+    if(reply.data?.verified===false)return res.status(503).json({error:'Integridade de save em verificacao.',code:'SAVE_CORE_HASH_MISMATCH'});
+    data=reply.data?{state:reply.data.state,updated_at:reply.data.updated_at}:null;
+    revisionV119=reply.data?.revision??null;
+  }else{
+    ({data,error}=await req.sb.from('game_saves').select('state,updated_at').eq('user_id',req.user.id).maybeSingle());
+  }
+  if (error) return res.status(503).json({ error:'Leitura do save indisponivel.',code:'SAVE_READ_UNAVAILABLE' });
   const {data: resetRecord,error: resetErr}=await req.sb.from('stellar_account_reset_epochs_v478').select('epoch').eq('user_id',req.user.id).maybeSingle();
   if(resetErr)return res.status(503).json({error:'Integridade do reset indisponível. Execute o SQL de pré-lançamento.'});
   res.set('Cache-Control','no-store');
   const playerState=data?.state?structuredClone(data.state):null;
   if(playerState)pruneOrphanedDroneLayoutsV118(playerState);
-  res.json({ state: playerState, updated_at: data?.updated_at || null,reset_epoch:Number(resetRecord?.epoch)||0 });
+  res.json({ state: playerState, updated_at: data?.updated_at || null,
+    reset_epoch:Number(resetRecord?.epoch)||0,...(revisionV119==null?{}:{revision:revisionV119}) });
+}));
+
+// V119: consulta de diagnosticos somente leitura. Nao revela estado de outros pilotos.
+app.get('/api/save/core/status',requireUser,asyncRoute(async(req,res)=>{
+  const service=await requireEliteAdmin();
+  const {data:head,error}=await service.from('stellar_player_save_head_v119')
+    .select('revision,state_hash,changed_at').eq('user_id',req.user.id).maybeSingle();
+  if(error)return res.json({ok:true,mode:'legacy',revision:null,checkpoints:[],message:'Nucleo unificado ainda nao inicializado.'});
+  const {data:slots}=await service.from('stellar_player_save_checkpoint_v119')
+    .select('slot,revision,state_hash,captured_at').eq('user_id',req.user.id).order('slot');
+  res.set('Cache-Control','no-store');
+  return res.json({ok:true,mode:saveCoreModeV119(),revision:head?.revision??null,
+    checkpoints:(slots||[]).map(x=>({slot:x.slot,revision:x.revision,captured_at:x.captured_at}))});
+}));
+app.get('/api/save/core/logs',requireUser,asyncRoute(async(req,res)=>{
+  const moduleName=String(req.query.module||'').trim();
+  if(moduleName&&!SAVE_LOG_MODULES_V119.includes(moduleName))return res.status(400).json({error:'Modulo desconhecido.'});
+  const limit=Math.min(50,Math.max(1,Math.round(Number(req.query.limit)||20)));
+  const service=await requireEliteAdmin();
+  let query=service.from('stellar_player_save_journal_v119')
+    .select('revision,modules,created_at').eq('user_id',req.user.id)
+    .order('revision',{ascending:false}).limit(limit);
+  if(moduleName)query=query.contains('modules',[moduleName]);
+  const {data,error}=await query;
+  if(error)return res.status(503).json({error:'Historico do save indisponivel.'});
+  res.set('Cache-Control','no-store');res.json({ok:true,entries:data||[]});
 }));
 
 /* STELLAR_SHIPS3D_FLEET_V50: server-authoritative 13 ships, without deleting ownership/inventory */
@@ -2172,7 +2219,7 @@ app.put('/api/save', requireUser, OFFLINE_FARM_GUARD_V484, asyncRoute(async (req
 
   // V118: profiles ja confirmado com game_saves na transacao unica.
 
-  res.json({ ok: true, updated_at, statePatch });
+  res.json({ ok: true, updated_at, statePatch, ...(req.v119Revision!=null?{revision:req.v119Revision}:{}) });
 })));
 
 

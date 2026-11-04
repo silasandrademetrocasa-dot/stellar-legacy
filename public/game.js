@@ -5426,6 +5426,14 @@ function hydrateProgress(){
   normalizeAdminUnlockState();
   ensureAdminEntitlements();
 }
+let saveOperationPendingV119=null;
+function saveOperationIdV119(){
+  const bytes=new Uint8Array(16);
+  if(globalThis.crypto?.randomUUID)return crypto.randomUUID();
+  crypto.getRandomValues(bytes);bytes[6]=(bytes[6]&15)|64;bytes[8]=(bytes[8]&63)|128;
+  const hex=[...bytes].map(n=>n.toString(16).padStart(2,'0')).join('');
+  return `${hex.slice(0,8)}-${hex.slice(8,12)}-${hex.slice(12,16)}-${hex.slice(16,20)}-${hex.slice(20)}`;
+}
 async function sendCloudSaveAttemptV106(){
   // Somente o coordenador V106 invoca esta tentativa; nunca há dois PUTs em paralelo.
   if(offlineFarmWorldLockedV84()||!authenticated||!progress)return 'error';
@@ -5457,7 +5465,12 @@ async function sendCloudSaveAttemptV106(){
     }
     const gearIntentV1062=layoutDiffV1062&&equipmentSavePendingV109?
       {intent:'hangar',baseline:equipmentLayoutSignatureV1062(equipmentSaveBaselineV109)}:null;
-    const result=await saveCloudSave(snapshot,gearIntentV1062);
+    const mutationKey=`${sentMutation}:${layoutDiffV1062?'gear':'normal'}`;
+    if(saveOperationPendingV119?.key!==mutationKey)
+      saveOperationPendingV119={key:mutationKey,id:saveOperationIdV119()};
+    const result=await saveCloudSave(snapshot,gearIntentV1062,
+      {operation_id:saveOperationPendingV119.id});
+    saveOperationPendingV119=null;
     if(result?.statePatch){const patch=result.statePatch;if(Number.isFinite(Number(patch.credits)))progress.profile.credits=Number(patch.credits);if(patch.serverEconomy)progress.serverEconomy={...(progress.serverEconomy||{}),...patch.serverEconomy};localStorage.setItem(saveKey(),JSON.stringify(progress));updateUI();if(patch.serverEconomy?.lastClanCollectionDate)showToast('CLÃ • coleta diária de 10% sincronizada','system');}
     AMMO_SELECTION_V1061.confirm(snapshot);
     cloudDirty=cloudSaveMutationV105!==sentMutation||AMMO_SELECTION_V1061.pending;
@@ -5480,8 +5493,10 @@ async function sendCloudSaveAttemptV106(){
     return 'saved';
   }
   catch(e){failed=true;console.warn('cloud save',e);
+    if(e?.code==='SAVE_REVISION_CONFLICT'||e?.code==='SAVE_IDEMPOTENCY_ID_REUSED')
+      saveOperationPendingV119=null;
     if(e?.code==='SAVE_NPC_STALE')console.info('[save-v116] revision NPC alterada em paralelo: lendo estado oficial, sem sobrescrever economia');
-    if(e?.code==='SAVE_MISSION_STALE'||e?.code==='SAVE_MISSION_UNVERIFIED'||e?.code==='SAVE_EQUIPMENT_INTENT_REQUIRED'||e?.code==='SAVE_EQUIPMENT_STALE'||e?.code==='SAVE_COUPON_STALE'||e?.code==='SAVE_EVENT_STALE'||e?.code==='SAVE_ELITE_STALE'||e?.code==='SAVE_ECONOMY_STALE'||e?.code==='SAVE_NPC_STALE'||e?.code==='SAVE_ORE_STALE'){
+    if(e?.code==='SAVE_REVISION_CONFLICT'||e?.code==='SAVE_MISSION_STALE'||e?.code==='SAVE_MISSION_UNVERIFIED'||e?.code==='SAVE_EQUIPMENT_INTENT_REQUIRED'||e?.code==='SAVE_EQUIPMENT_STALE'||e?.code==='SAVE_COUPON_STALE'||e?.code==='SAVE_EVENT_STALE'||e?.code==='SAVE_ELITE_STALE'||e?.code==='SAVE_ECONOMY_STALE'||e?.code==='SAVE_NPC_STALE'||e?.code==='SAVE_ORE_STALE'){
       try{
         // Não ressuscita missões concluídas: só recupera aceites e progresso ainda não recompensados.
         const localMissions=structuredClone(progress?.missions||{});

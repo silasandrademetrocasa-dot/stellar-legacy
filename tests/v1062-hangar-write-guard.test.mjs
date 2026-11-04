@@ -47,7 +47,8 @@ test('V106.2: primeiro save de jogador novo nao e bloqueado',()=>{
 test('V106.2: cliente envia intencao somente com montagem alterada explicitamente',()=>{
  assert.match(game,/if\(layoutDiffV1062&&!equipmentSavePendingV109\)/);
  assert.match(game,/gearIntentV1062=layoutDiffV1062&&equipmentSavePendingV109/);
- assert.match(game,/saveCloudSave\(snapshot,gearIntentV1062\)/);
+ assert.match(game,/saveCloudSave\(snapshot,gearIntentV1062,\s*\{operation_id:saveOperationPendingV119\.id\}\)/);
+  assert.match(game,/saveOperationPendingV119/);
  assert.match(api,/equipmentMutationV1062/);
  assert.match(server,/validateEquipmentWriteV1062\(officialForGearV118,state,req\.body\?\.equipmentMutationV1062\)/);
  assert.match(server,/gearWriteV1062\.code/);
