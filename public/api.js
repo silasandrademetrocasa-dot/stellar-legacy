@@ -417,7 +417,9 @@ export function knownSaveRevisionV119(){return serverSaveRevisionV119;}
 export async function loadCloudSave() {
   if (!currentUser?.id) throw new Error('Usuário não identificado.');
   const body = await authedServerFetch('/api/save');
-  if(Number.isSafeInteger(Number(body?.revision)))serverSaveRevisionV119=Number(body.revision);
+  // Revisao antiga de outra sessao/conta nao pode contaminar um novo login.
+  serverSaveRevisionV119=(body?.revision!==null&&body?.revision!==undefined&&
+    Number.isSafeInteger(Number(body.revision)))?Number(body.revision):null;
   return { state: body?.state || null, updated_at: body?.updated_at || null, reset_epoch:Number(body?.reset_epoch)||0,revision:serverSaveRevisionV119 };
 }
 

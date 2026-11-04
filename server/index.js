@@ -1,6 +1,7 @@
 /* STELLAR_OFFLINE_FARM_V484 APPLIED */
 import {syncFleetConfigsAfterDroneSaleV118,pruneOrphanedDroneLayoutsV118} from './unified-fleet-snapshot-v118.js';
 import {saveCoreModeV119,commitSaveCoreV119,saveModuleForRequestV119,SAVE_LOG_MODULES_V119} from './save-core-v119.js';
+import {createSaveLatencyMonitorV1191} from './save-latency-v1191.js';
 import {saleQuoteV4776} from '../public/modules/sale-policy-v4776.js';
 import {tradeRequestIdV1164,findTradeReceiptV1164,rememberTradeReceiptV1164} from './autotrade-idempotency-v1164.js';
 import {validateEquipmentWriteV1062} from '../public/modules/hangar-write-guard-v1062.js';
@@ -104,6 +105,15 @@ app.use(compression({ threshold: 1024 }));
 app.disable('x-powered-by');
 app.use((req,res,next)=>{res.setHeader('X-Content-Type-Options','nosniff');res.setHeader('Referrer-Policy','strict-origin-when-cross-origin');next();});
 app.use(express.json({ limit: '1mb' }));
+
+// V119.1: P95/P99 da leitura e gravação do save, sem registrar dados de jogador.
+const SAVE_LATENCY_V1191=createSaveLatencyMonitorV1191();
+app.use((req,res,next)=>{
+  if(req.path!=='/api/save'||!['GET','PUT'].includes(req.method))return next();
+  const start=performance.now();
+  res.once('finish',()=>SAVE_LATENCY_V1191.record(req.method,performance.now()-start));
+  next();
+});
 
 // Assets recebem cache longo. As URLs dos assets já carregam ?asset=<versão>, portanto um novo
 // release invalida o cache sem obrigar o jogador a baixar os mesmos arquivos a cada F5.
@@ -2031,6 +2041,10 @@ app.use('/api/relay/dominion',requireUser,createDominionRouter({serviceClient:el
 app.use('/api/frontier',requireUser,createFrontierRouter({serviceClient:eliteAdminClient}));
 
 app.get('/api/save', requireUser, asyncRoute(async (req, res) => {
+  // V119.1: leitura de progresso e epoca de reset iniciadas em paralelo.
+  // Isso reduz uma ida-e-volta na inicializacao do Android, sem cachear saldo.
+  const resetReadV1191=req.sb.from('stellar_account_reset_epochs_v478')
+    .select('epoch').eq('user_id',req.user.id).maybeSingle();
   let data=null,error=null,revisionV119=null;
   if(saveCoreModeV119()==='enforce'){
     // Um unico SELECT SQL devolve estado e revisao do MESMO snapshot.
@@ -2044,7 +2058,7 @@ app.get('/api/save', requireUser, asyncRoute(async (req, res) => {
     ({data,error}=await req.sb.from('game_saves').select('state,updated_at').eq('user_id',req.user.id).maybeSingle());
   }
   if (error) return res.status(503).json({ error:'Leitura do save indisponivel.',code:'SAVE_READ_UNAVAILABLE' });
-  const {data: resetRecord,error: resetErr}=await req.sb.from('stellar_account_reset_epochs_v478').select('epoch').eq('user_id',req.user.id).maybeSingle();
+  const {data: resetRecord,error: resetErr}=await resetReadV1191;
   if(resetErr)return res.status(503).json({error:'Integridade do reset indisponível. Execute o SQL de pré-lançamento.'});
   res.set('Cache-Control','no-store');
   const playerState=data?.state?structuredClone(data.state):null;
@@ -2057,14 +2071,35 @@ app.get('/api/save', requireUser, asyncRoute(async (req, res) => {
 app.get('/api/save/core/status',requireUser,asyncRoute(async(req,res)=>{
   const service=await requireEliteAdmin();
   const {data:head,error}=await service.from('stellar_player_save_head_v119')
-    .select('revision,state_hash,changed_at').eq('user_id',req.user.id).maybeSingle();
+    .select('revision,state_hash,changed_at,checkpointed_at,journaled_at').eq('user_id',req.user.id).maybeSingle();
   if(error)return res.json({ok:true,mode:'legacy',revision:null,checkpoints:[],message:'Nucleo unificado ainda nao inicializado.'});
   const {data:slots}=await service.from('stellar_player_save_checkpoint_v119')
     .select('slot,revision,state_hash,captured_at').eq('user_id',req.user.id).order('slot');
   res.set('Cache-Control','no-store');
   return res.json({ok:true,mode:saveCoreModeV119(),revision:head?.revision??null,
+    lastChangedAt:head?.changed_at||null,lastCheckpointAt:head?.checkpointed_at||null,
+    lastLogAt:head?.journaled_at||null,
+    latencyMs:SAVE_LATENCY_V1191.snapshot(),
     checkpoints:(slots||[]).map(x=>({slot:x.slot,revision:x.revision,captured_at:x.captured_at}))});
 }));
+// V119.1: read-only consolidated audit view. Nao participa de compras,
+// recompensas, save ou calculo de saldo. JWT fica no Render.
+app.get('/api/save/core/events',requireUser,asyncRoute(async(req,res)=>{
+  const limit=Math.min(50,Math.max(1,Math.round(Number(req.query.limit)||20)));
+  const moduleName=String(req.query.module||'').trim();
+  if(moduleName&&!['combate','leilao','farm','save'].includes(moduleName))
+    return res.status(400).json({error:'Categoria de registro desconhecida.'});
+  const service=await requireEliteAdmin();
+  let query=service.from('stellar_player_save_audit_v1191')
+    .select('happened_at,module,event,summary').eq('user_id',req.user.id)
+    .order('happened_at',{ascending:false}).limit(limit);
+  if(moduleName)query=query.eq('module',moduleName);
+  const {data,error}=await query;
+  if(error)return res.status(503).json({error:'Historico temporariamente indisponivel.',code:'SAVE_AUDIT_READ_UNAVAILABLE'});
+  res.set('Cache-Control','no-store');
+  res.json({ok:true,entries:data||[]});
+}));
+
 app.get('/api/save/core/logs',requireUser,asyncRoute(async(req,res)=>{
   const moduleName=String(req.query.module||'').trim();
   if(moduleName&&!SAVE_LOG_MODULES_V119.includes(moduleName))return res.status(400).json({error:'Modulo desconhecido.'});
