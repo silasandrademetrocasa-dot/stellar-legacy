@@ -4,12 +4,13 @@
  * A verdadeira autoridade continua sendo game_saves; backups/logs sao derivados.
  */
 import { randomUUID } from 'node:crypto';
+import {savePromotionReadinessV1195} from './save-promotion-gate-v1195.js';
 
 export const SAVE_MODULES_V119=Object.freeze(['checkpoint','hangar','missoes','economia','leilao','farm','combate','server']);
 export const SAVE_LOG_MODULES_V119=Object.freeze(['hangar','missoes','economia','leilao','combate','progresso','criacao']);
 
 export function saveCoreModeV119(value=process.env.STELLAR_SAVE_V119_MODE){
-  return String(value||'observe').toLowerCase()==='enforce'?'enforce':'observe';
+  return savePromotionReadinessV1195({requestedMode:value}).effectiveMode;
 }
 export function saveModuleForRequestV119(req){
   const path=String(req?.originalUrl||req?.path||'').toLowerCase();

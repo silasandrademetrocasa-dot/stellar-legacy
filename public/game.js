@@ -4826,7 +4826,7 @@ function safePilotMessage(raw){
 }
 function showToast(msg,activityType='system'){
   const display=safePilotMessage(msg);
-  ui.toast.textContent=display;ui.toast.classList.add('show');clearTimeout(state.toastTimer);state.toastTimer=setTimeout(()=>ui.toast.classList.remove('show'),1900);
+  ui.toast.textContent=display;ui.toast.setAttribute('role','status');ui.toast.setAttribute('aria-live','polite');ui.toast.classList.add('show');clearTimeout(state.toastTimer);state.toastTimer=setTimeout(()=>ui.toast.classList.remove('show'),display.length>90?6500:display.length>48?4000:2400);
   pushActivity(display,activityType);
 }
 const celebrationQueue=[];let celebrationRunning=false;

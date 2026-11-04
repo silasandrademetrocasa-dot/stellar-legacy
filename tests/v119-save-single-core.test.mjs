@@ -19,7 +19,7 @@ const req={originalUrl:'/api/save',body:{operation_id:id,expected_revision:14}};
 test('V119: modo observe por padrao, enforce so por flag',()=>{
  assert.equal(saveCoreModeV119(), 'observe');
  assert.equal(saveCoreModeV119('nope'),'observe');
- assert.equal(saveCoreModeV119('ENFORCE'),'enforce');
+ assert.equal(saveCoreModeV119('ENFORCE'),'observe'); // V119.5 source gate blocks incomplete cutover
 });
 test('V119: apenas rotas do servidor decidem modulo de gravacao',()=>{
  assert.equal(saveModuleForRequestV119({originalUrl:'/api/save',body:{equipmentMutationV1062:{intent:'hangar'}}}),'hangar');

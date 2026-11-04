@@ -1,6 +1,10 @@
 /* STELLAR_OFFLINE_FARM_V484 APPLIED */
+import {savePromotionReadinessV1195} from './save-promotion-gate-v1195.js';
+import {createAuctionSingleFlightV1194,auctionSettlementKeyV1194} from './save-auction-coalesce-v1194.js';
 import {syncFleetConfigsAfterDroneSaleV118,pruneOrphanedDroneLayoutsV118} from './unified-fleet-snapshot-v118.js';
 import {saveCoreModeV119,commitSaveCoreV119,saveModuleForRequestV119,SAVE_LOG_MODULES_V119} from './save-core-v119.js';
+import {createSaveOperationMonitorV1192} from './save-operation-monitor-v1192.js';
+import {inspectSaveHealthV1192} from './save-health-v1192.js';
 import {createSaveLatencyMonitorV1191} from './save-latency-v1191.js';
 import {saleQuoteV4776} from '../public/modules/sale-policy-v4776.js';
 import {tradeRequestIdV1164,findTradeReceiptV1164,rememberTradeReceiptV1164} from './autotrade-idempotency-v1164.js';
@@ -79,14 +83,14 @@ async function writeVerifiedSave(req,state,updated_at){
   // V119 em modo OBSERVE (padrao) mantem a V118 ate homologarmos cada RPC legada.
   // ENFORCE somente depois do SQL PREPARAR + ATIVAR + testes em duas contas.
   if(saveCoreModeV119()==='enforce'){
-    const response=await commitSaveCoreV119({service,req,userId:req.user.id,state,callsign});
+    const response=await SAVE_OPERATIONS_V1192.measure(saveModuleForRequestV119(req),()=>commitSaveCoreV119({service,req,userId:req.user.id,state,callsign}));
     if(!response.ok)return response.error;
     req.v119Revision=response.revision;
     return null;
   }
-  const {data,error}=await service.rpc('stellar_commit_player_save_v118',{
+  const {data,error}=await SAVE_OPERATIONS_V1192.measure(saveModuleForRequestV119(req),()=>service.rpc('stellar_commit_player_save_v118',{
     p_user_id:req.user.id,p_state:state,p_updated_at:updated_at,p_callsign:callsign
-  });
+  }));
   if(error&&['PGRST202','42883'].includes(String(error.code||'')))
     return {code:'SAVE_MIGRATION_REQUIRED',message:'Migração de save único ainda não instalada. Nenhum progresso foi gravado.'};
   if(!error&&data?.ok!==true)return {code:'SAVE_NOT_CONFIRMED',message:'Servidor não confirmou o save único.'};
@@ -108,6 +112,7 @@ app.use(express.json({ limit: '1mb' }));
 
 // V119.1: P95/P99 da leitura e gravação do save, sem registrar dados de jogador.
 const SAVE_LATENCY_V1191=createSaveLatencyMonitorV1191();
+const SAVE_OPERATIONS_V1192=createSaveOperationMonitorV1192();
 app.use((req,res,next)=>{
   if(req.path!=='/api/save'||!['GET','PUT'].includes(req.method))return next();
   const start=performance.now();
@@ -1492,13 +1497,14 @@ function applyCraftRecipeServer(state,recipeId,runtime){
 }
 
 // Offline routes and live-economy guards installed BEFORE normal economy/save routes.
-installOfflineFarmV484(app,{requireUser,asyncRoute,requireEliteAdmin});
+installOfflineFarmV484(app,{requireUser,asyncRoute,requireEliteAdmin,operationMonitor:SAVE_OPERATIONS_V1192});
 installBalanceAuditV90(app,{requireUser,asyncRoute,requireEliteAdmin});
 installCombatProgressionAuditV113(app,{requireUser,asyncRoute,requireEliteAdmin});
 installCompetitiveReadinessV98(app,{requireUser,asyncRoute,requireEliteAdmin});
 installLiveopsSnapshotV99(app,{requireUser,asyncRoute,requireEliteAdmin});
 installReleaseReadinessV100(app,{requireUser,asyncRoute,requireEliteAdmin,publicRoot:path.join(__dirname,'../public'),releaseVersion:RELEASE_VERSION});
 const OFFLINE_FARM_GUARD_V484=makeOfflineFarmGuardV484(requireEliteAdmin);
+const AUCTION_SINGLE_FLIGHT_V1194=createAuctionSingleFlightV1194();
 // V92–V97 • Uma requisição, uma compra autoritativa de munição/mísseis.
 // O cliente escolhe unidades; servidor cobra PACOTES completos e entrega todos eles.
 // request_id persiste no SAVE: repetir por timeout não cobra duas vezes.
@@ -1509,11 +1515,12 @@ app.post('/api/auction/settle',requireUser,OFFLINE_FARM_GUARD_V484,asyncRoute(as
      !/^20[0-9]{2}-[0-9]{2}-[0-9]{2}-[0-9]{2}$/.test(String(body.hour_key||''))||
      !/^(item|ship|ammo|rocket|petGear):[A-Za-z0-9_]+$/.test(String(body.lot_ref||'')))
     return res.status(400).json({ok:false,code:'AUCTION_REQUEST_INVALID',message:'Dados do leilão inválidos. Nenhuma cobrança feita.'});
-  const result=await withPurchaseLock(req.user.id,async()=>{
+  const result=await AUCTION_SINGLE_FLIGHT_V1194.run(
+    auctionSettlementKeyV1194(req.user.id,body.hour_key,body.lot_ref),()=>withPurchaseLock(req.user.id,async()=>{
     const db=await requireEliteAdmin();
-    const {data,error}=await db.rpc('stellar_settle_auction_bid_v1182',{
+    const {data,error}=await SAVE_OPERATIONS_V1192.measure('leilao',()=>db.rpc('stellar_settle_auction_bid_v1182',{
       p_user_id:req.user.id,p_hour_key:body.hour_key,p_lot_ref:body.lot_ref
-    });
+    }));
     if(error){
       console.error('[auction-v1182] settlement rejected',String(error.code||''),String(error.message||'').slice(0,180));
       const missing=['PGRST202','42883'].includes(String(error.code||''));
@@ -1522,7 +1529,7 @@ app.post('/api/auction/settle',requireUser,OFFLINE_FARM_GUARD_V484,asyncRoute(as
           'O servidor não confirmou a entrega do prêmio. Lance preservado; nenhuma nova cobrança foi concluída.'};
     }
     return data||{ok:false,code:'AUCTION_NO_RESPONSE',message:'O servidor não confirmou o leilão. Verifique novamente.'};
-  });
+  }));
   res.set('Cache-Control','no-store');res.json(result);
 }));
 
@@ -2082,6 +2089,45 @@ app.get('/api/save/core/status',requireUser,asyncRoute(async(req,res)=>{
     latencyMs:SAVE_LATENCY_V1191.snapshot(),
     checkpoints:(slots||[]).map(x=>({slot:x.slot,revision:x.revision,captured_at:x.captured_at}))});
 }));
+// V119.2: diagnostico pontual, somente do piloto autenticado.
+// Não consulta todos os jogadores, não altera game_saves e não recupera backups sozinho.
+app.get('/api/save/core/health',requireUser,asyncRoute(async(req,res)=>{
+  const service=await requireEliteAdmin();
+  const uid=req.user.id;
+  const [canonical,profile,head,checkpoints,farm]=await Promise.all([
+    service.rpc('stellar_read_player_save_v119',{p_user_id:uid}),
+    service.from('profiles').select('credits,uridium,xp,aliens_killed').eq('id',uid).maybeSingle(),
+    service.from('stellar_player_save_head_v119').select('revision,changed_at').eq('user_id',uid).maybeSingle(),
+    service.from('stellar_player_save_checkpoint_v119').select('slot,revision,captured_at').eq('user_id',uid).order('slot'),
+    service.from('stellar_offline_farm_v484').select('status,started_at,ends_at')
+      .eq('user_id',uid).order('created_at',{ascending:false}).limit(1).maybeSingle()
+  ]);
+  if(canonical.error||profile.error||head.error||checkpoints.error||farm.error)
+    return res.status(503).json({ok:false,code:'SAVE_HEALTH_READ_UNAVAILABLE',
+      message:'Não foi possível verificar todos os componentes do save.'});
+  const health=inspectSaveHealthV1192({state:canonical.data?.state,profile:profile.data,
+    ownerId:uid,head:head.data,checkpoints:checkpoints.data||[],farm:farm.data,
+    verified:canonical.data?.verified,mode:saveCoreModeV119()});
+  res.set('Cache-Control','no-store');
+  return res.json({...health,latencyMs:SAVE_LATENCY_V1191.snapshot(),
+    operations:SAVE_OPERATIONS_V1192.snapshot()});
+}));
+
+// V120.0 RC: admin-only cutover diagnostics. This endpoint cannot promote a release.
+app.get('/api/admin/save/v120/readiness',requireUser,asyncRoute(async(req,res)=>{
+  const {data:isAdmin,error:adminError}=await req.sb.rpc('is_game_admin_v1763',{p_uid:req.user.id});
+  if(adminError||isAdmin!==true)return res.status(403).json({ok:false,code:'ADMIN_REQUIRED'});
+  const service=await requireEliteAdmin();
+  const {data,error}=await service.rpc('stellar_save_release_readiness_v120');
+  if(error)return res.status(503).json({ok:false,code:'V120_READINESS_SQL_NOT_INSTALLED',
+    note:'Execute a SQL de readiness V120 em homologacao antes da avaliacao.'});
+  res.set('Cache-Control','no-store');
+  const promotion=savePromotionReadinessV1195({requestedMode:process.env.STELLAR_SAVE_V119_MODE});
+  return res.json({ok:true,version:'V120.0-RC',promotion,database:data,
+    safeToPromote:promotion.ready===true&&data?.db_preflight_passed===true&&data?.cutover_certified===true,
+    operationLatency:SAVE_OPERATIONS_V1192.snapshot()});
+}));
+
 // V119.1: read-only consolidated audit view. Nao participa de compras,
 // recompensas, save ou calculo de saldo. JWT fica no Render.
 app.get('/api/save/core/events',requireUser,asyncRoute(async(req,res)=>{

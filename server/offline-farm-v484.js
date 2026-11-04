@@ -1,3 +1,4 @@
+import {createFarmClaimGateV1193,isFarmConfirmedV1193} from './save-farm-safety-v1193.js';
 import {hasRemoteTraderCpuV1065} from '../public/modules/remote-cargo-auto-sale-v1065.js';
 import {forecastV495} from './farm-v495-forecast.js';
 import {safeFarmEconomySnapshot} from './farm-v86-economy.js';
@@ -7,6 +8,7 @@ import {combatProfileV487,npcCombatCycleV487} from './offline-farm-v487-engine.j
  * Não roda timers em segundo plano, não faz ping artificial para manter o Render acordado.
  */
 const activityCacheV484=new Map();
+const FARM_CLAIM_GATE_V1193=createFarmClaimGateV1193();
 const FARM_V49='STELLAR_FARM_V49';
 export const isOfflineFarmNpcAllowedV91=n=>!/(boss|apex|overlord|rift|elite|suprem|legend|lend|uber|ultra|titan)/i.test(String(n.npc_key||'')+' '+String(n.name||''));
 const onlyOrdinaryNpc=isOfflineFarmNpcAllowedV91;
@@ -136,7 +138,7 @@ export async function offlineFarmActiveV484(userId, getAdmin,{fresh=false}={}){
 export async function offlineFarmEnsureInactiveV484(userId,getAdmin){
   if(await offlineFarmActiveV484(userId,getAdmin,{fresh:true}))throw Object.assign(new Error('FARM_OFFLINE_ATIVO: finalize ou cancele antes de voltar ao combate.'),{code:'FARM_OFFLINE_ACTIVE',status:409});
 }
-export function installOfflineFarmV484(app,{requireUser,asyncRoute,requireEliteAdmin}){
+export function installOfflineFarmV484(app,{requireUser,asyncRoute,requireEliteAdmin,operationMonitor=null}){
   const noCache=(res)=>res.set('Cache-Control','no-store');
   const errorResponse=(res,e)=>{
     const msg=String(e?.message||'Operação indisponível');
@@ -145,6 +147,11 @@ export function installOfflineFarmV484(app,{requireUser,asyncRoute,requireEliteA
   };
   async function rpc(req,res,method,args={}){
     noCache(res);
+    // Prevent same-process duplicate claims. The SQL RPC remains the final authority.
+    const claimGateEntered=method==='claim'?FARM_CLAIM_GATE_V1193.enter(req.user.id):false;
+    if(method==='claim'&&!claimGateEntered)
+      return res.status(409).json({ok:false,code:'FARM_CLAIM_IN_PROGRESS',
+        error:'Resgate em validacao. Consulte o status antes de tentar novamente.'});
     try{
       const sb=await requireEliteAdmin();
       let fn=method==='start'?'stellar_offline_farm_start_v1111':method==='claim'?'stellar_offline_farm_claim_v1111':'stellar_offline_farm_'+method+'_v484';
@@ -211,12 +218,16 @@ export function installOfflineFarmV484(app,{requireUser,asyncRoute,requireEliteA
               error:'Resgate preservado: atividade online ou outro conflito exige auditoria.',preflight});
         }
       }
+      const rpcStartedV1192=performance.now();
       const {data,error}=await sb.rpc(fn,{p_user:req.user.id,...args});
+      operationMonitor?.record('farm',performance.now()-rpcStartedV1192,!error&&data?.ok!==false);
       if(error)throw error;
-      if(method==='start'&&data?.status==='running')activityCacheV484.set(String(req.user.id),{at:Date.now(),active:true});
-      if(method==='cancel'||method==='claim')activityCacheV484.delete(String(req.user.id));
+      if(method==='start'&&isFarmConfirmedV1193(method,data))activityCacheV484.set(String(req.user.id),{at:Date.now(),active:true});
+      // On failed/unknown claims, preserve activity evidence for subsequent diagnosis.
+      if((method==='cancel'||method==='claim')&&isFarmConfirmedV1193(method,data))activityCacheV484.delete(String(req.user.id));
       return res.json(data||{ok:false});
     }catch(e){return errorResponse(res,e);}
+    finally{if(claimGateEntered)FARM_CLAIM_GATE_V1193.leave(req.user.id);}
   }
   // V86: read the account's authoritative balance while offline farm is active.
   // No economic write, no claim and no mutation of stale client saves.
