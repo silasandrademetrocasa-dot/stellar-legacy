@@ -57,7 +57,7 @@ test('V116.3: Farm Offline protegido e legibilidade sem textos de versão',()=>{
   assert.match(index,/id="visualDiagSectionV75"/);assert.match(css,/#visualDiagSectionV75,#visualDiagFloatingV75/);
 });
 test('V116.3: preserva correções V116.1 de autopilot e compra/venda em batalha',()=>{
-  assert.match(game,/stellar-autopilot-v116/);
+  assert.match(game,/stellar-autopilot-v126/); // V126 mantém o mecanismo V116 por nova ponte de cache
   assert.ok(existsSync(join(base,'public/modules/stellar-autopilot-recovery-v116.js')));
   assert.match(game,/baseTradeVisibleV116/);
 });

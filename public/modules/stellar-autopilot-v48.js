@@ -195,8 +195,11 @@ export function chooseAutopilotAction(raw,cfg){
   // Não inventar inimigos ou recompensas quando a sala está vazia.
   return {type:'idle',reason:'Aguardando NPCs e drops'};
 }
-export function createStellarAutopilotV48({credentials,getIdentity=()=>null,getSnapshot,npcTypes=[],getPortals,getGraphLabel,getGoalLabel,mayTravel,navigate,jumpPortal,selectNpc,stopFire=()=>{},fireRocket,sellCargo,buyPackage,ensureCombatAmmo=()=>true,onNotice=()=>{},getAstralState=()=>null,assembleAstral=async()=>false,enterAstral=async()=>false,confirmAstralLoop=async message=>window.confirm(message),onDiagnostics=()=>{}}={}){
+export function createStellarAutopilotV48({credentials,getIdentity=()=>null,getSnapshot,npcTypes=[],getPortals,getGraphLabel,getGoalLabel,mayTravel,navigate,jumpPortal,selectNpc,stopFire=()=>{},fireRocket,sellCargo,buyPackage,ensureCombatAmmo=()=>true,onNotice=()=>{},getAstralState=()=>null,assembleAstral=async()=>false,enterAstral=async()=>false,confirmAstralLoop=async message=>window.confirm(message),onDiagnostics=()=>{},tickIntervalMs=380,statusIntervalMs=1000}={}){
   let allowed=false,isAdmin=false,authorizedId=null,running=false,loading=false,busy=false,lastTickAt=0,lastAccessAt=0,nextAccessAt=0,panelOpen=false;
+  // V126: avoids per-frame restoration checks and tuneable mobile workload.
+  const tickCadenceMs=Math.max(300,Math.min(1000,Number(tickIntervalMs)||380));
+  const statusCadenceMs=Math.max(500,Math.min(3000,Number(statusIntervalMs)||1000));
   let config=cleanAutopilotConfig(),started=0,ended=0,spent=0,attempts=0,failures=0,boxes=0,drops=0,ores=0,reason='Desligado',startStats=null,lastProgress=null;
   let panel=null,fab=null,grantCache=new Map(),refreshingAccess=false,lastPurchaseAttempt=0,lastHealthyAt=0,lastMapId=null;
   // V87: target lock and rocket throttling are in-memory, never persisted.
@@ -270,9 +273,9 @@ export function createStellarAutopilotV48({credentials,getIdentity=()=>null,getS
     reason=t;
     const critical=/falha|erro|negad|sem permissão|não foi possível|interrompid|parado|destruíd|HP crítico|revog|sem sincronização|gasto|limite|autorizado|confirmado|concluído/i.test(t);
     const elapsed=now()-lastRoutineNoticeAt;
-    if(!critical&&elapsed<1000){
+    if(!critical&&elapsed<statusCadenceMs){
       pendingRoutineNotice=t;
-      if(!noticeTimer)noticeTimer=setTimeout(()=>{noticeTimer=null;const last=pendingRoutineNotice;pendingRoutineNotice=null;if(last){lastRoutineNoticeAt=now();onNotice(last);renderStatus();}},1000-elapsed);
+      if(!noticeTimer)noticeTimer=setTimeout(()=>{noticeTimer=null;const last=pendingRoutineNotice;pendingRoutineNotice=null;if(last){lastRoutineNoticeAt=now();onNotice(last);renderStatus();}},statusCadenceMs-elapsed);
       return;
     }
     if(critical&&noticeTimer){clearTimeout(noticeTimer);noticeTimer=null;pendingRoutineNotice=null;}
@@ -589,7 +592,8 @@ export function createStellarAutopilotV48({credentials,getIdentity=()=>null,getS
       .finally(()=>{if(epoch===astralLoopEpoch)astralLoopBusy=false;});
     return false;
   }
-  function tick(){if(!running){if(allowed&&accessReady())restoreCheckpoint();return;}const ts=now();if(ts-lastTickAt<380)return;lastTickAt=ts;
+  function tick(){const ts=now();if(ts-lastTickAt<tickCadenceMs)return;lastTickAt=ts;
+    if(!running){if(allowed&&accessReady())restoreCheckpoint();return;}
     if(ts>=nextAccessAt&&!refreshingAccess)void refreshAccess();
     if(!accessReady()){
       // Sem permissão atual válida, NENHUMA ação; tenta reconectar sem zerar a sessão.

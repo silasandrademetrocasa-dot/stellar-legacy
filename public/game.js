@@ -93,7 +93,7 @@ import { createFrameGate } from './modules/frame-gate.js?v=47.7.63';
 import {createVisualIsolationV75, VISUAL_TEST_MODES_V75} from './modules/visual-isolation-v75.js?v=47.7.63';
 import {npcDisplaySizeV526,oreDisplaySizeV526,boxDisplaySizeV526,lootDisplaySizeV526} from './modules/visual-scale-v526.js?v=47.7.63';
 import {baseTradeVisibleV116} from './modules/stellar-autopilot-recovery-v116.js?v=47.7.63';
-import { createStellarAutopilotV48 } from './modules/stellar-autopilot-v116.js?v=47.7.63';
+import { createStellarAutopilotV48 } from './modules/stellar-autopilot-v126.js?v=47.7.63';
 import {routeMapLayoutV4825} from './modules/route-map-layout-v4825.js?v=47.7.63';
 import { createStagedAssetPreloader } from './modules/staged-preload-v342.js?v=47.7.63';
 import { QUALITY_PROFILES, initialAutoQualityForDevice } from './modules/quality-profiles.js?v=47.7.63';
@@ -4873,7 +4873,7 @@ function safePilotMessage(raw){
   if(/AUCTION_(?:LEGACY_REVIEW|SAVE_NOT_CONFIRMED|STATUS_RACE)|leil[aã]o.*(?:falha|erro)/i.test(message))
     return 'O leilão não foi confirmado. Seu lance permanece registrado; confira o resultado antes de tentar novamente.';
   if(/(?:supabase|postgres(?:ql)?|postgrest|service[_ -]?role|anon[_ -]?key|jwt|\bRPC\b|\bRLS\b|\bSQL\b|\bHTTP\s*[45]\d\d|\bPGRST\d+|relation .* does not exist|permission denied for table|violates row-level security)/i.test(message)){
-    return 'O servidor recusou esta alteração. Nenhuma confirmação foi recebida; abra o menu novamente e verifique o estado salvo.';
+    return 'Confirmação online indisponível. Confira o estado salvo antes de repetir; uma operação pode ter sido aplicada.';
   }
   return message;
 }
@@ -5501,6 +5501,7 @@ async function sendCloudSaveAttemptV106(){
   if(offlineFarmWorldLockedV84()||!authenticated||!progress)return 'error';
   cloudBusy=true;setSync('SALVANDO','busy');
   const sentMutation=cloudSaveMutationV105;
+  let submittedHangarLayoutV126=null;
   let failed=false;
   try{
     progress.adminResetEpoch=accountResetEpochV478;
@@ -5527,6 +5528,7 @@ async function sendCloudSaveAttemptV106(){
     }
     const gearIntentV1062=layoutDiffV1062&&equipmentSavePendingV109?
       {intent:'hangar',baseline:equipmentLayoutSignatureV1062(equipmentSaveBaselineV109)}:null;
+    if(gearIntentV1062)submittedHangarLayoutV126=equipmentLayoutSignatureV1062(snapshot);
     const mutationKey=`${sentMutation}:${layoutDiffV1062?'gear':'normal'}`;
     if(saveOperationPendingV119?.key!==mutationKey)
       saveOperationPendingV119={key:mutationKey,id:saveOperationIdV119()};
@@ -5560,6 +5562,24 @@ async function sendCloudSaveAttemptV106(){
     return 'saved';
   }
   catch(e){failed=true;console.warn('cloud save',e);
+    // V126: a resposta HTTP pode falhar DEPOIS de o servidor persistir a CONF.
+    // A leitura oficial decide se houve sucesso. Nunca ACK pelo cache local.
+    if(submittedHangarLayoutV126 && equipmentSavePendingV109 &&
+        !['SAVE_OWNER_MISMATCH','SAVE_RESET_STALE'].includes(e?.code)){
+      try{
+        const persisted=await loadCloudSave();
+        if(persisted?.state && equipmentLayoutSignatureV1062(persisted.state)===submittedHangarLayoutV126){
+          equipmentSaveBaselineV109=structuredClone(persisted.state);
+          saveOperationPendingV119=null;
+          equipmentSavedV109(snapshot); // só limpa a intenção ainda atual
+          cloudDirty=cloudSaveMutationV105!==sentMutation||equipmentSavePendingV109||missionSavePendingV105||AMMO_SELECTION_V1061.pending;
+          if(equipmentSavePendingV109)setSync('HANGAR PENDENTE','busy');
+          else setSync(cloudDirty?'PENDENTE':'HANGAR SALVO',cloudDirty?'busy':'ok');
+          // A nova montagem já está no servidor. Não há necessidade de repetir o PUT.
+          failed=false;return 'saved';
+        }
+      }catch(readbackError){console.warn('[hangar-v126] confirmação não consultável',readbackError);}
+    }
     if(e?.code==='SAVE_REVISION_CONFLICT'||e?.code==='SAVE_IDEMPOTENCY_ID_REUSED')
       saveOperationPendingV119=null;
     if(e?.code==='SAVE_NPC_STALE')console.info('[save-v116] revision NPC alterada em paralelo: lendo estado oficial, sem sobrescrever economia');
@@ -7617,7 +7637,12 @@ const AUX_WORK_V2027=createAuxiliaryWorkScheduler();
 function update(dt,profile=null){
   if(!progress||gameBootstrapRuntime.loading)return;
   const stageStart=profile?performance.now():0;
-  telemetryTick(dt);eliteRouteTrackV2012(dt);processRespawns();AUTOPILOT_V48.tick();
+  telemetryTick(dt);eliteRouteTrackV2012(dt);processRespawns();
+  // V126: Autopilot não deve acionar verificações de storage a cada quadro.
+  if(AUX_WORK_V2027.due('autopilotV126',250)){
+    const apStart=profile?performance.now():0;AUTOPILOT_V48.tick();
+    if(profile)profile.autopilotMs=(profile.autopilotMs||0)+(performance.now()-apStart);
+  }
   if(AUX_WORK_V2027.due('manualAutoSellV1065',4500))void tickManualAutoCargoSaleV1065();
   if(AUX_WORK_V2027.due('bonusBoxes',240))updateBonusBoxes();
   updateCombatAbilities();
@@ -10417,10 +10442,19 @@ const adminRuntime={enabled:false,status:null,users:[],actions:[],telemetry:null
 const adminRuntimeMonitor={data:null,busy:false};
 // V48 • Piloto conectado: não credita prêmios e não contorna a autorização do Render.
 const AUTOPILOT_V48=createStellarAutopilotV48({
+  tickIntervalMs:DEVICE_CAPS.mobile?650:380,
+  statusIntervalMs:DEVICE_CAPS.mobile?1700:1000,
   credentials:()=>getSessionCredentials(),
   getIdentity:()=>getUser()?.id||null,
   npcTypes:Object.entries(NPC_TYPES||{}).map(([id,n])=>({id,label:n?.name||id})),
-  getSnapshot:()=>({
+  getSnapshot:()=>{
+    // V126: uma só leitura da capacidade e das cotações por decisão do piloto.
+    // Isto não antecipa créditos nem altera a autoridade de venda do servidor.
+    const capacity=progress?cargoCapacity():1;
+    const used=progress?cargoUsed():0;
+    const ammoOffer=progress?liveQuote('ammo:'+progress.selectedLaserAmmo):null;
+    const rocketOffer=progress?liveQuote('rocket:'+progress.selectedRocket):null;
+    return {
     online:authenticated&&(sharedUniverseOnline()||isGalaxyGateMap()),ready:!!progress&&!gameBootstrapRuntime.loading,
     astralActive:isGalaxyGateMap()&&!!alphaGate().run?.active,
     jumping:!!state.jumping,map:progress?.mapId||'',repairRequired:!!(progress?.repairRequired||state.repairRequired),
@@ -10433,12 +10467,12 @@ const AUTOPILOT_V48=createStellarAutopilotV48({
     credits:Number(progress?.profile?.credits)||0,stl:Number(progress?.profile?.uridium)||0,
     xp:Number(progress?.profile?.xp)||0,kills:Number(progress?.profile?.aliensKilled)||0,
     level:Number(progress?.profile?.level)||1,
-    cargoUsed:progress?cargoUsed():0,cargoCapacity:progress?cargoCapacity():1,cargoFree:progress?cargoFree():0,
+    cargoUsed:used,cargoCapacity:capacity,cargoFree:Math.max(0,capacity-used),
     ammoStock:progress?ammoQty(progress.selectedLaserAmmo):0,rocketStock:progress?rocketQty(progress.selectedRocket):0,
     laserCount:progress?progress.shipLoadout?.lasers?.filter(Boolean).length||1:1,
-    ammoQuote:progress&&liveQuote('ammo:'+progress.selectedLaserAmmo)?.currency==='credits'?liveQuote('ammo:'+progress.selectedLaserAmmo):null,
-    rocketQuote:progress&&liveQuote('rocket:'+progress.selectedRocket)?.currency==='credits'?liveQuote('rocket:'+progress.selectedRocket):null
-  }),
+    ammoQuote:ammoOffer?.currency==='credits'?ammoOffer:null,
+    rocketQuote:rocketOffer?.currency==='credits'?rocketOffer:null
+  };},
   // V83 • Confirmação no diálogo padrão do jogo antes do ciclo econômico recorrente.
   confirmAstralLoop:message=>stellarConfirmV4776(message),
   // V81 • Portal Astral exige permissão do Autopilot, confirmação explícita e gastos oficiais.
