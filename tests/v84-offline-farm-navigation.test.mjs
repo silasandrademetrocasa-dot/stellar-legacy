@@ -47,6 +47,6 @@ test('V84: leilão registra lance sem salvar snapshot local durante farm; quita�
 test('V84: farm não é encerrado quando modal é aberto e continua com encerramento oficial',()=>{
  assert.match(mod,/\$\('v484-close'\)\.onclick=\(\)=>shell\.hidden=true/);
  assert.match(mod,/const running=status==='running';active\(running\)/);
- assert.match(mod,/const x=await request\('settle',\{\}\)/);
+ assert.match(mod,/x=await request\('settle',\{\}\)/);
  assert.match(mod,/const x=await request\('cancel',\{\}\)/);
 });

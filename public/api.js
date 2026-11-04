@@ -1,5 +1,5 @@
-import {offlineFarmDirectActivityAllowedV103} from './modules/offline-farm-activity-v103.js?v=47.7.61';
-import {createReadCoalescerV104} from './modules/read-coalescer-v104.js?v=47.7.61';
+import {offlineFarmDirectActivityAllowedV103} from './modules/offline-farm-activity-v103.js?v=47.7.62';
+import {createReadCoalescerV104} from './modules/read-coalescer-v104.js?v=47.7.62';
 import {persistSessionV101,loadPersistedSessionV101,clearPersistedSessionV101} from './modules/login-persistence-v101.js';
 const SESSION_KEY = 'stellarLegacyV4Session';
 const GOOGLE_OAUTH_PENDING_KEY = 'stellarLegacyGoogleOAuthPendingV18216';
@@ -866,10 +866,10 @@ export async function reviewAdminSecurityIncident(id,note){
   });
 }
 
-export async function purchaseLiveCatalogOnline(catalogKey) {
+export async function purchaseLiveCatalogOnline(catalogKey,requestId=null) {
   return authedServerFetch('/api/live/purchase', {
     method: 'POST',
-    body: JSON.stringify({ catalog_key: String(catalogKey || '') }),
+    body: JSON.stringify({ catalog_key: String(catalogKey || ''),...(requestId?{request_id:requestId}:{}) }),
   }, false);
 }
 

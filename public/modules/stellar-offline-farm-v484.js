@@ -162,7 +162,27 @@ export function createOfflineFarmV484({credentials,saveBeforeStart,onPauseWorld,
       }
       $('v91-farm-diagnosis').textContent='🔐 Conferindo o progresso e os saldos antes de liberar suas recompensas. O resgate só será realizado uma vez.';
     }
-    const x=await request('settle',{});render(x);if(x.recovered)$('v91-farm-diagnosis').textContent='✅ RESGATE RECUPERADO COM SEGURANÇA • ganhos confirmados pelo banco, sem duplicidade.';if(['settled','conflict'].includes(x.status))await onFinish?.();
+    let x;
+    try{x=await request('settle',{});}
+    catch(e){
+      // Timeout may happen AFTER the SQL commits. Read the authoritative status
+      // before allowing another claim or resuming gameplay. Never guess a payout.
+      const verified=await request('status',null,'GET').catch(()=>null);
+      if(verified?.status==='settled'){
+        render(verified);
+        $('v91-farm-diagnosis').textContent='✅ RESGATE CONFIRMADO APÓS RECONECTAR • sem pagamento duplicado.';
+        await onFinish?.();return;
+      }
+      if(verified?.status==='running'){
+        render(verified);
+        $('v91-farm-diagnosis').textContent='⚠️ Resgate não confirmado: a sessão continua preservada no banco. Consulte o status antes de repetir.';
+      }else if(!verified){
+        active(true,false);
+        $('v91-farm-diagnosis').textContent='⚠️ Sem confirmação do servidor: mundo permanece pausado para não perder recompensas.';
+      }
+      throw e;
+    }
+    render(x);if(x.recovered)$('v91-farm-diagnosis').textContent='✅ RESGATE RECUPERADO COM SEGURANÇA • ganhos confirmados pelo banco, sem duplicidade.';if(['settled','conflict'].includes(x.status))await onFinish?.();
   });
   $('v103-farm-check').onclick=()=>operation(async()=>{
     const check=await request('v103/preflight');

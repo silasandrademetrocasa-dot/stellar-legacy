@@ -34,7 +34,7 @@ test('V85: menus and modal surfaces are interactive during farm while world cont
 });
 
 test('V85: offline settlement stays authoritative; auction does not overwrite its save',()=>{
- assert.match(farm,/const x=await request\('settle',\{\}\)/);
+ assert.match(farm,/x=await request\('settle',\{\}\)/);
  assert.match(farm,/const x=await request\('cancel',\{\}\)/);
  assert.match(game,/if\(!offlineFarmWorldLockedV84\(\)\)await flushCloudSave\(true\)/);
  assert.match(game,/await saveAuctionBidOnline\(/);

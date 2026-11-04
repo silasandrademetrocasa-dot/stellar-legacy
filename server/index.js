@@ -1,3 +1,4 @@
+import {validPurchaseIdV123,interpretPurchaseCommitV123} from './live-purchase-v123.js';
 /* STELLAR_OFFLINE_FARM_V484 APPLIED */
 import {savePromotionReadinessV1195} from './save-promotion-gate-v1195.js';
 import {createAuctionSingleFlightV1194,auctionSettlementKeyV1194} from './save-auction-coalesce-v1194.js';
@@ -52,7 +53,7 @@ import { createSecurityService } from './security-service.js';
 
 const app = express();
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const RELEASE_VERSION = '47.7.61'; // único identificador de release nos endpoints HTTP
+const RELEASE_VERSION = '47.7.62'; // único identificador de release nos endpoints HTTP
 
 function normalizeSupabaseUrl(value = '') {
   let url = String(value || '').trim();
@@ -1412,18 +1413,32 @@ app.post('/api/coupons/redeem', requireUser, asyncRoute(async (req,res)=>{
 }));
 
 app.post('/api/live/purchase', requireUser, asyncRoute(async (req,res)=>{
-  const tamper=invalidShopArguments(req.body,['catalog_key']);
+  const tamper=invalidShopArguments(req.body,['catalog_key','request_id']);
   if(tamper){const result=await securityService.report(req.user.id,tamper,'live_purchase');if(result?.auto_suspended)return res.status(403).json({error:'Conta temporariamente suspensa por violação de integridade.',code:'ACCOUNT_BANNED'});return res.status(400).json({error:'Parâmetros de compra inválidos.',code:tamper.code});}
   const catalogKey=String(req.body?.catalog_key||'').trim().slice(0,120);
   if(!catalogKey)return res.status(400).json({error:'Produto inválido.'});
+  const requestId=req.body?.request_id==null?null:String(req.body.request_id);
+  if(requestId!==null&&!validPurchaseIdV123(requestId))
+    return res.status(400).json({error:'Identificador de compra inválido.',code:'PURCHASE_ID_INVALID'});
   const result=await withPurchaseLock(req.user.id,async()=>{
     const snapshot=await loadLiveOpsSnapshot(true);
     const row=liveCatalogRow(snapshot,catalogKey);
     if(!row||row.shop_visible===false)throw Object.assign(new Error('Produto indisponível na Loja.'),{status:404});
     if(row.kind==='aux_protocol')throw Object.assign(new Error('Protocolos AUX são comprados exclusivamente pela economia de protocolos validada pelo servidor.'),{status:409});
-    const {data:saveRow,error:saveError}=await req.sb.from('game_saves').select('state').eq('user_id',req.user.id).maybeSingle();
+    const service=requestId?await requireEliteAdmin():null;
+    // Fetch both concurrently: no extra sequential SQL round trip for purchases.
+    const [saveRead,receiptRead]=await Promise.all([
+      req.sb.from('game_saves').select('state,updated_at').eq('user_id',req.user.id).maybeSingle(),
+      requestId?service.from('stellar_live_purchase_receipts_v123').select('catalog_key,receipt').eq('user_id',req.user.id).eq('request_id',requestId).maybeSingle():Promise.resolve({data:null,error:null})
+    ]);
+    const {data:saveRow,error:saveError}=saveRead;
     if(saveError)throw new Error(saveError.message);
+    if(receiptRead.error)throw Object.assign(new Error('Recibos de compras indisponíveis. Aplique a migração V123.'),{status:503});
     if(!saveRow?.state)throw Object.assign(new Error('Save online ainda não foi criado.'),{status:409});
+    if(receiptRead.data){
+      if(receiptRead.data.catalog_key!==catalogKey)throw Object.assign(new Error('Identificador reutilizado para outro item.'),{status:409,code:'PURCHASE_ID_REUSED'});
+      return {state:saveRow.state,updated_at:saveRow.updated_at,purchase:receiptRead.data.receipt,replayed:true};
+    }
     const playerLevel=Math.max(1,Math.floor(Number(saveRow.state?.profile?.level)||1));
     const minLevel=Math.max(1,Math.floor(Number(row.min_level)||1));
     if(playerLevel<minLevel)throw Object.assign(new Error(`Requer nível ${minLevel}.`),{status:409});
@@ -1458,10 +1473,22 @@ app.post('/api/live/purchase', requireUser, asyncRoute(async (req,res)=>{
     // Não avance clientSavedAt em mutações econômicas: esse timestamp pertence ao snapshot do cliente.
     state.accountOwnerId=req.user.id;state.accountOwnerEmail=req.user.email||null;
     const updated_at=new Date().toISOString();
+    const purchase={catalog_key:catalogKey,base_price:basePrice,price,currency,drone_tier:row.kind==='drone'?droneTier+1:null,premium_discount:price<basePrice};
+    if(requestId){
+      // Atomic DB commit: compare current save timestamp, debit, grant and receipt
+      // under the same SQL transaction. Old clients keep the V118 compatibility path.
+      const response=await service.rpc('stellar_commit_live_purchase_v123',{
+        p_user_id:req.user.id,p_request_id:requestId,p_catalog_key:catalogKey,
+        p_expected_updated_at:saveRow.updated_at,p_state:state,
+        p_callsign:String(state.profile.callsign||''),p_receipt:purchase
+      });
+      const confirmed=interpretPurchaseCommitV123(response.data,response.error);
+      if(!confirmed.ok)throw Object.assign(new Error(confirmed.message),{status:confirmed.code==='ECONOMY_STALE'?409:503,code:confirmed.code});
+      return {state:confirmed.state,updated_at:confirmed.updatedAt,purchase:confirmed.receipt,replayed:confirmed.replayed};
+    }
     const writeError=await writeVerifiedSave(req,state,updated_at);
     if(writeError)throw new Error(writeError.message);
-    // V118: perfil validado e confirmado pelo mesmo RPC, sem segundo upsert.
-    return {state,updated_at,purchase:{catalog_key:catalogKey,base_price:basePrice,price,currency,drone_tier:row.kind==='drone'?droneTier+1:null,premium_discount:price<basePrice}};
+    return {state,updated_at,purchase};
   });
   res.json({ok:true,...result});
 }));
