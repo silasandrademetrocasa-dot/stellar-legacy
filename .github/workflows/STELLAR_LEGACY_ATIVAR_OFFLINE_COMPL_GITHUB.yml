@@ -1,0 +1,67 @@
+name: 'Stellar Legacy - ATIVAR OFFLINE COMPLETO'
+on:
+  workflow_dispatch:
+    inputs:
+      confirmacao:
+        description: 'Digite ATIVAR_STELLAR_OFFLINE_COMPLETO para substituir a V130 por offline'
+        type: string
+        required: true
+permissions:
+  contents: write
+concurrency:
+  group: stellar-offline-activation
+  cancel-in-progress: false
+jobs:
+  ativar_e_compilar:
+    if: ${{ inputs.confirmacao == 'ATIVAR_STELLAR_OFFLINE_COMPLETO' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 55
+    steps:
+      - name: Checkout da main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+          persist-credentials: true
+      - name: Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Ativar jogo offline na copia do runner
+        env:
+          STELLAR_CONFIRM: ${{ inputs.confirmacao }}
+        run: node stellar-offline-stage/activate.mjs
+      - name: Validar codigo offline
+        run: npm run check && npm test
+      - name: Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - name: Android SDK
+        uses: android-actions/setup-android@v4
+      - name: Instalar plataforma Android
+        run: sdkmanager 'platforms;android-35' 'build-tools;35.0.0'
+      - name: Gradle 8.9
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.9'
+      - name: Compilar APK com arquivos locais
+        run: gradle --no-daemon -p android :app:assembleDebug
+      - name: Entregar APK antes de publicar o repositorio
+        uses: actions/upload-artifact@v4
+        with:
+          name: Stellar-Legacy-Offline-APK
+          path: android/app/build/outputs/apk/debug/*.apk
+          if-no-files-found: error
+          retention-days: 30
+      - name: Publicar substituicao somente apos validacao e APK
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'Stellar Offline Activation'
+          git config user.email 'actions@users.noreply.github.com'
+          git add -A
+          git diff --cached --quiet && { echo 'Sem alteracoes'; exit 0; }
+          git commit -m 'release: substituir Stellar V130 por Universo Solo offline APK'
+          git push origin HEAD:main
