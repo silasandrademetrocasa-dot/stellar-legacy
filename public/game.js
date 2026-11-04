@@ -1,4 +1,4 @@
-import {stageLocalFirstSnapshotV121,readLocalFirstSnapshotV121,installLocalFirstPageFlushV121} from './modules/local-first-bridge-v121.js?v=47.7.60';
+import {stageLocalFirstSnapshotV121,readBestLocalSnapshotV1211,readLocalFirstSnapshotV121,stageLocalFirstHangarIntentV1211,acknowledgeConfirmedHangarV1211,installLocalFirstPageFlushV121} from './modules/local-first-bridge-v1211.js?v=47.7.60';
 import {hasRemoteTraderCpuV1065,eligibleAutoCargoSaleV1065} from './modules/remote-cargo-auto-sale-v1065.js?v=47.7.60';
 import {materializerProductNameV1164} from './modules/materializer-product-names-v1164.js?v=47.7.60';
 import {makeAutoTradeRequestV1164,clearAutoTradeRequestV1164} from './modules/stellar-autotrade-v1164.js?v=47.7.60';
@@ -873,6 +873,9 @@ function rememberEquipmentChangeV109(){
   equipmentSavePendingV109=true;equipmentSaveWarningAtV109=0;
   equipmentSaveDesiredV109=structuredClone(progress);
   persistEquipmentIntentV1062();
+  // A intencao de Hangar fica na MESMA transacao IndexedDB do snapshot local.
+  // Isto NAO equivale a uma compra/ACK financeiro do servidor.
+  stageLocalFirstHangarIntentV1211(getUser()?.id,progress,equipmentLayoutSignatureV1062(progress));
   setSync('HANGAR PENDENTE','busy');
   scheduleEquipmentSaveV109(180);
 }
@@ -5325,9 +5328,11 @@ function saveGame(){
   syncRuntimeLocationToProgress();
   progress.clientSavedAt=Date.now();
   progress.adminResetEpoch=accountResetEpochV478;
-  localStorage.setItem(saveKey(),JSON.stringify(progress));
-  // Opt-in V121: IndexedDB shadow, sem substituir a autoridade econômica do Render.
+  // V121.1: IndexedDB e a persistencia principal do cliente. O espelho sincrono
+  // permanece somente para rotas legadas que ainda chamam readLocalGameState().
   stageLocalFirstSnapshotV121(getUser()?.id,progress);
+  try{localStorage.setItem(saveKey(),JSON.stringify(progress));}
+  catch(e){console.warn('[localfirst-v121.1] fallback localStorage cheio',e?.message||e);}
   cloudSaveMutationV105++;
   cloudDirty=true;
 }
@@ -5479,6 +5484,11 @@ async function sendCloudSaveAttemptV106(){
     cloudDirty=cloudSaveMutationV105!==sentMutation||AMMO_SELECTION_V1061.pending;
     equipmentSaveBaselineV109=structuredClone(snapshot);
     equipmentSavedV109(snapshot);
+    // A confirmacao do save remoto autoriza a baixa SOMENTE da montagem
+    // que acabou de ser recebida e confirmada pelo mesmo servidor.
+    if(!equipmentSavePendingV109&&equipmentLayoutSignatureV1062(snapshot)===equipmentLayoutSignatureV1062(equipmentSaveBaselineV109)){
+      void acknowledgeConfirmedHangarV1211(getUser()?.id,Number(snapshot.clientSavedAt)||0,equipmentLayoutSignatureV1062(snapshot));
+    }
     if(!cloudDirty)missionSavePendingV105=false;
     if(equipmentSavePendingV109)setSync('HANGAR PENDENTE','busy');
     else if(AMMO_SELECTION_V1061.pending)setSync('MUNICAO PENDENTE','busy');
@@ -12378,9 +12388,10 @@ async function afterAuth(){
     const accountId=String(getUser()?.id||'');
     if(missionRewardOwnerV108!==accountId){MISSION_REWARD_ACK_V108.reset();missionRewardOwnerV108=accountId;}
     if(ammoSelectionOwnerV1061!==accountId){AMMO_SELECTION_V1061.reset();ammoSelectionOwnerV1061=accountId;}
-    let local=readLocalGameState();
-    // A ponte local-first só recupera o cache se o legado estiver ausente.
-    if(!local)local=await readLocalFirstSnapshotV121(accountId);
+    // V121.1: leitura principal do cliente pelo IndexedDB (hash validado),
+    // com fallback localStorage para navegadores antigos ou sem IDB.
+    // O estado remoto continua decidindo moedas, compras, premios e reset ADM.
+    let local=await readBestLocalSnapshotV1211(accountId,readLocalGameState());
     if(local?.accountOwnerId&&String(local.accountOwnerId)!==accountId){
       console.warn('Local save quarantined: owner mismatch');
       try{localStorage.removeItem(saveKey());}catch{}
@@ -12430,20 +12441,43 @@ async function afterAuth(){
         setTimeout(()=>flushCloudSave(true),0);
       }else{progress=structuredClone(remote.state);hydrateProgress();setSync('HANGAR PROTEGIDO','ok');}
     }else if(local&&localStampSane&&localStamp>remoteStamp+250){
-      progress=local;hydrateProgress();cloudDirty=true;setSync('LOCAL MAIS NOVO','busy');
+      // V121.1: nunca restaurar creditos, STL, inventario ou recompensas a
+      // partir de snapshot cliente mais novo. Comecar pelo estado remoto.
+      const gearCandidateV1211=remote?.state&&justifiedLocalGearV1062?
+        reconcilePendingEquipmentV109(remote.state,local,equipmentSaveBaselineV109):null;
+      const missionCandidateV1211=remote?.state?
+        mergeUnsavedMissionProgressV105(remote.state.missions,local.missions,category=>missionPeriodKey(category)):null;
+      const freshLocalV1211=remote?.state?
+        (gearCandidateV1211?.ok?gearCandidateV1211.state:structuredClone(remote.state)):local;
       if(remote?.state){
+        // Posicao e apenas uma preferencia de dispositivo. Nunca altera a economia.
+        if(String(local.mapId)===String(remote.state.mapId)&&
+           Number(local.locationSavedAt||0)>Number(remote.state.locationSavedAt||0)){
+          for(const key of ['x','y','savedMapId','savedTerritoryFaction','locationSavedAt','positionByMap']){
+            if(local[key]!==undefined)freshLocalV1211[key]=structuredClone(local[key]);
+          }
+        }
+        if(missionCandidateV1211?.changed){
+          freshLocalV1211.missions=missionCandidateV1211.missions;
+          missionSavePendingV105=true;
+        }
         for(const key of ['selectedLaserAmmo','selectedRocket']){
-          if(progress[key]!==remote.state[key]&&AMMO_SELECTION_V1061.accepts(key,progress[key]))AMMO_SELECTION_V1061.mark(key,progress[key]);
+          if(local[key]!==remote.state[key]&&AMMO_SELECTION_V1061.accepts(key,local[key])){
+            AMMO_SELECTION_V1061.mark(key,local[key]);freshLocalV1211[key]=local[key];
+          }
         }
       }
-      // Um save local de equipamento mais novo continua como pendencia local,
-      // nunca como compra confirmada. A reconciliação ocorrerá com a revisão
-      // econômica correta no próximo conflito, sem descartar a montagem.
-      if(justifiedLocalGearV1062){
+      progress=freshLocalV1211;hydrateProgress();cloudDirty=true;setSync('LOCAL MAIS NOVO','busy');
+      if(gearCandidateV1211?.ok&&!gearCandidateV1211.alreadySaved){
         equipmentSavePendingV109=true;
         equipmentSaveDesiredV109=structuredClone(progress);
         persistEquipmentIntentV1062();
         setSync('HANGAR PENDENTE','busy');
+      }else if(justifiedLocalGearV1062&&!gearCandidateV1211?.ok){
+        // Sem demonstrar conservacao de equipamentos, a montagem local nao
+        // ultrapassa a autoridade do Supabase.
+        clearEquipmentIntentV1062();
+        console.warn('[localfirst-v121.1] montagem local divergente mantida apenas no checkpoint');
       }
       setTimeout(()=>flushCloudSave(true),0);
     }else if(remote.state){

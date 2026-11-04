@@ -24,9 +24,9 @@ test('v121 não grava remotamente quando offline',async()=>{
  let calls=0;const loop=createLocalSyncLoopV121({store:{pending:async()=>{calls++;return[];}},owner:'test',sendBatch:async()=>{},online:()=>false});
  assert.equal((await loop.tick()).status,'skipped');assert.equal(calls,0);loop.stop();
 });
-test('v121 só habilita ponte opt-in; mantém save legado e gateway de segurança',()=>{
- const bridge=read('public/modules/local-first-bridge-v121.js');const game=read('public/game.js');
- assert.match(bridge,/localfirst.*===.1./);assert.match(game,/localStorage\.setItem\(saveKey\(\),JSON\.stringify\(progress\)\)/);
+test('v121.1 mantém desligamento de emergencia e fallback legado sem desativar gateway seguro',()=>{
+ const bridge=read('public/modules/local-first-bridge-v1211.js');const game=read('public/game.js');
+ assert.match(bridge,/param==='0'/);assert.match(bridge,/stellar_localfirst_v121/);assert.match(game,/localStorage\.setItem\(saveKey\(\),JSON\.stringify\(progress\)\)/);
  assert.match(game,/stageLocalFirstSnapshotV121/);
 });
 test('v121 laboratório acessa catálogo oficial e checkpoint local',()=>{
