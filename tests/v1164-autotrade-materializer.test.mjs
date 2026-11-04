@@ -82,7 +82,7 @@ test('V116.4: cliente não aplica moedas/munição por cálculo local após comp
  const fn=game.slice(begin,end);
  assert.match(fn,/request_id:request\.id/);assert.match(fn,/flush:true,applyState:true/);
  assert.doesNotMatch(fn,/progress\.ammo\[info\.id\]|progress\.profile\[cur\]/);
- assert.match(game,/runEconomyAction\('sell_cargo',payload,\{flush:true,applyState:true\}\)/);
+ assert.match(game,/runEconomyAction\('sell_cargo',payload,\{flush:false,applyState:true\}\)/);
 });
 
 test('V116.4: compra presencial funciona sem CPU, venda remota segue protegida',()=>{

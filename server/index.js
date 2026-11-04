@@ -1,4 +1,5 @@
 import {operationDigestV125,requestIdValidV125,decodeEconomyReceiptV125,replayValidV125} from './economy-receipts-v125.js';
+import {quoteCargoSaleV130} from './cargo-sale-v130.js';
 import {validPurchaseIdV123,interpretPurchaseCommitV123} from './live-purchase-v123.js';
 /* STELLAR_OFFLINE_FARM_V484 APPLIED */
 import {savePromotionReadinessV1195} from './save-promotion-gate-v1195.js';
@@ -1660,7 +1661,7 @@ app.post('/api/economy/action', requireUser, OFFLINE_FARM_GUARD_V484, asyncRoute
   const intentHash=requestId?operationDigestV125(op,payload):null;
   const service=requestId?await requireEliteAdmin():null;
   const result=await withPurchaseLock(req.user.id,()=>withEconomySaveRetryV102(async()=>{
-    const catalogActions=new Set(['auto_buy','unlock_pet_slot','buy_quantum_cores','sell_cargo','sell_inventory','sell_drone','gate_spin','aux_protocol_buy','aux_protocol_craft']);
+    const catalogActions=new Set(['auto_buy','unlock_pet_slot','buy_quantum_cores','sell_inventory','sell_drone','gate_spin','aux_protocol_buy','aux_protocol_craft']);
     const premiumActions=new Set(['auto_buy','gate_spin']);
     const systemsActions=new Set(['base_service','craft_recipe']);
     const [snapshot,state,premiumResult,systemsSnapshot,receiptResult]=await Promise.all([
@@ -1726,10 +1727,17 @@ app.post('/api/economy/action', requireUser, OFFLINE_FARM_GUARD_V484, asyncRoute
       const id=String(payload.resource_id||'all'),atBase=['x1','x8'].includes(String(state.mapId||''))&&String(state.territoryFaction||state.profile?.faction||'')===String(state.profile?.faction||'');
       const remoteEnabled=Array.isArray(state.shipLoadout?.extras)&&state.shipLoadout.extras.includes('remoteTraderCpuElite');
       if(!atBase&&!remoteEnabled)throw Object.assign(new Error('Venda remota requer Terminal Mercante Remoto Elite EQUIPADO na nave.'),{status:403});
-      state.cargo ||= {};let total=0;const sold={};const ids=id==='all'?Object.keys(state.cargo):[id];
-      const worldCfg=await loadWorldRuntimeSnapshot(false).catch(()=>null);const resourceRows=new Map((worldCfg?.resources||[]).map(r=>[String(r.resource_key||''),r]));
-      for(const rid of ids){const qty=Math.max(0,Math.floor(Number(state.cargo[rid])||0));if(!qty||rid==='Xenomit')continue;const runtimeRow=resourceRows.get(rid);let unit=runtimeRow&&runtimeRow.enabled!==false?Math.max(0,Math.round(Number(runtimeRow.sell_price)||0)):0;if(!worldCfg){const row=liveCatalogRow(snapshot,`resource:${rid}`);if(row&&String(row?.meta?.mode||'sell')==='sell')unit=Math.max(0,Math.round(Number(row.price)||0));}if(!unit)continue;total+=qty*unit;sold[rid]={qty,unit,total:qty*unit};delete state.cargo[rid];}
-      if(total<=0)throw Object.assign(new Error('Nada vendável no porão.'),{status:409});creditServer(state,total,'credits');info={action,sold,total,currency:'credits',remote:!atBase,price_source:worldCfg?'world_runtime':'live_ops_fallback'};
+      state.cargo ||= {};const ids=id==='all'?Object.keys(state.cargo):[id];
+      const worldCfg=await loadWorldRuntimeSnapshot(false).catch(()=>null);
+      const resourceRows=new Map((worldCfg?.resources||[]).map(r=>[String(r.resource_key||''),r]));
+      // Only fetch the shop snapshot if the world resource configuration is absent
+      // or does not cover a non-empty cargo item. Avoid blocking every sale on LiveOps.
+      const needFallback=!worldCfg||ids.some(rid=>Number(state.cargo[rid])>0&&rid!=='Xenomit'&&!resourceRows.has(rid));
+      const catalogForSale=needFallback?(await loadLiveOpsSnapshot(false).catch(()=>null)):null;
+      const quote=quoteCargoSaleV130(state.cargo,{resourceId:id,worldResources:worldCfg?.resources||[],catalog:catalogForSale?.catalog||[]});
+      if(quote.total<=0)throw Object.assign(new Error('Sem recursos vendáveis confirmados no servidor. Aguarde o crédito da mineração/coleta e tente novamente.'),{status:409,code:'CARGO_NOT_CONFIRMED'});
+      for(const rid of Object.keys(quote.sold))delete state.cargo[rid];
+      creditServer(state,quote.total,'credits');info={action,sold:quote.sold,total:quote.total,currency:'credits',remote:!atBase,price_source:worldCfg?'world_runtime':'live_ops_fallback'};
     }
     else if(action==='sell_inventory'){
       const itemId=String(payload.item_id||''),qty=Math.max(1,Math.min(999,Math.floor(Number(payload.qty)||1)));state.inventory ||= {};const have=Math.max(0,Math.floor(Number(state.inventory[itemId])||0));if(!itemId||have<qty)throw Object.assign(new Error('Item não disponível no inventário online.'),{status:409});const row=catalogSellRow(snapshot,itemId);if(!row)throw Object.assign(new Error('Esse item não possui preço online para venda.'),{status:404});const quote=saleQuoteV4776(row);if(!quote.available)throw Object.assign(new Error('Item sem cotação de revenda no catálogo.'),{status:409});const unit=quote.unit,total=unit*qty,currency=quote.currency;state.inventory[itemId]=have-qty;if(state.inventory[itemId]<=0)delete state.inventory[itemId];creditServer(state,total,currency);info={action,item_id:itemId,qty,unit,total,currency};

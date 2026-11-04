@@ -2,6 +2,7 @@ import {stageLocalFirstSnapshotV121,readBestLocalSnapshotV1211,readLocalFirstSna
 import {createForegroundSyncV122} from './modules/local-first-sync-v122.js?v=47.7.63';
 import {createPurchaseRequestV123,purchaseFailureIsDefinitiveV123} from './modules/economy-request-v123.js?v=47.7.63';
 import {createEconomyIntentV125} from './modules/economy-intent-v125.js?v=47.7.63';
+import {economyServerFirstV130,shouldRetrySaleV130,createEconomyTimingsV130} from './modules/economy-sale-v130.js?v=47.7.63';
 import {createLegacyMirrorV122} from './modules/local-first-legacy-mirror-v122.js?v=47.7.63';
 import {hasRemoteTraderCpuV1065,eligibleAutoCargoSaleV1065} from './modules/remote-cargo-auto-sale-v1065.js?v=47.7.63';
 import {materializerProductNameV1164} from './modules/materializer-product-names-v1164.js?v=47.7.63';
@@ -1927,26 +1928,47 @@ window.stellarEconomySyncAfterV4776=async()=>{
  await waitCloudIdle();const remote=await loadCloudSave();if(remote?.state)installEconomyState(remote.state);
 };
 const ECONOMY_INTENT_V125=createEconomyIntentV125();
+const ECONOMY_TIMING_V130=createEconomyTimingsV130();
+// Can be inspected in remote WebView debugging without leaking balances or player identities.
+window.stellarEconomyMetricsV130=Object.freeze({snapshot:()=>ECONOMY_TIMING_V130.snapshot(),clear:()=>ECONOMY_TIMING_V130.clear()});
 async function runEconomyAction(action,payload={},options={}){
   const {applyState=true,flush=true}=options;
   return queueEconomy(async()=>{
     const owner=getUser()?.id;
     if(!owner)throw new Error('Entre na sua conta para comprar ou vender.');
     const requestId=ECONOMY_INTENT_V125.id(owner,action,payload);
-    if(flush)await syncBeforeEconomy();
+    // V130: the server already owns canonical cargo and inventory. Do not block a sale
+    // on unrelated unsaved mission/UI/hangar changes: the server validates the stock.
+    // Equipment/gear sales still require the stricter preflight.
+    const serverFirst=economyServerFirstV130(action);
+    if(serverFirst){
+      if(!authenticated||!progress||offlineFarmWorldLockedV84())throw new Error('Venda indisponível durante o Farm Offline.');
+    }else if(flush)await syncBeforeEconomy();
     economyMutationInFlightV106=true;
+    const saleStarted=ECONOMY_TIMING_V130.start();
+    let saleRetried=false;
     try{
       const before=progress?{credits:Number(progress.profile?.credits)||0,uridium:Number(progress.profile?.uridium)||0}:null;
-      const result=await economyActionOnline(action,payload,requestId);
+      let result;
+      try{result=await economyActionOnline(action,payload,requestId);}
+      catch(error){
+        if(!serverFirst||!shouldRetrySaleV130(error))throw error;
+        // The first request may have committed but lost the ACK. Reuse SAME id.
+        saleRetried=true;
+        await new Promise(resolve=>setTimeout(resolve,240));
+        result=await economyActionOnline(action,payload,requestId);
+      }
       if(!result?.ok||!result?.state)throw Object.assign(new Error('Servidor não confirmou a operação econômica.'),{code:'ECONOMY_ACK_UNKNOWN'});
       if(applyState){
         installEconomyState(result.state,{serverConfirmedEquipment:['aux_protocol_buy','aux_protocol_craft','aux_protocol_equip'].includes(action)||action==='sell_drone'});
         telemetryTrackEconomyTransition(action,before,progress?.profile,result?.info||{});
       }
       ECONOMY_INTENT_V125.done(owner,action,payload,requestId);
+      if(serverFirst)ECONOMY_TIMING_V130.finish(saleStarted,{action,ok:true,serverMs:result?.server_ms,retried:saleRetried});
       return result;
     }catch(error){
       if(purchaseFailureIsDefinitiveV123(error))ECONOMY_INTENT_V125.done(owner,action,payload,requestId);
+      if(serverFirst)ECONOMY_TIMING_V130.finish(saleStarted,{action,ok:false,code:error?.code||'REQUEST_FAILED',retried:saleRetried});
       throw error;
     }finally{economyMutationInFlightV106=false;}
   });
@@ -3287,6 +3309,16 @@ function claimMission(category){
   if(!active.awaitingCloudAckV107)active.awaitingCloudAckV107=true;
   saveGame();queueMissionSaveV105();showToast('Objetivo concluído • validando com o servidor','mission');
 }
+let missionUiRenderTimerV130=null;
+function scheduleMissionPanelRenderV130(){
+ if(!ui.missionModal||ui.missionModal.classList.contains('hidden'))return;
+ if(missionUiRenderTimerV130!==null)return;
+ const delay=AUTOPILOT_V48?.active?900:260;
+ missionUiRenderTimerV130=setTimeout(()=>{
+   missionUiRenderTimerV130=null;
+   if(ui.missionModal&&!ui.missionModal.classList.contains('hidden'))renderMissions();
+ },delay);
+}
 function missionEvent(type,payload={}){if(!progress||!featureUnlocked('missions'))return;normalizeMissionState();let anyChanged=false;const finished=[];for(const category of Object.keys(MISSION_CATEGORIES)){if(MISSION_CATEGORIES[category]?.enabled===false)continue;const active=progress.missions.active[category];if(!active||active.complete)continue;const mission=activeMissionDefinition(category,active);if(!mission)continue;let categoryChanged=false;let eventAmount=type==='collectOre'?Math.max(0,Number(payload.amount)||0):1;if(eventAmount<=0)continue;for(let i=0;i<mission.tasks.length;i++){const task=mission.tasks[i];if(!taskUnlocked(mission,active,i))continue;const current=taskCurrent(active,task),remaining=Math.max(0,task.target-current);if(!remaining)continue;let matches=false;if(type==='kill'&&task.type==='kill'&&payload.enemy?.type===task.npc)matches=true;if(type==='collectOre'&&task.type==='ore'&&payload.type===task.resource)matches=true;if(!matches)continue;const add=Math.min(remaining,type==='kill'?1:eventAmount);if(add<=0)continue;active.taskProgress[task.id]=current+add;addMissionReward(active,mission,task.type==='kill'?'kill':'ore',payload,add);categoryChanged=true;anyChanged=true;if(mission.sequence)break;if(type==='kill')break;}if(categoryChanged){active.complete=mission.tasks.every(x=>taskDone(active,x));if(active.complete)finished.push({category,mission,active});}}for(const item of finished)item.active.awaitingCloudAckV107=true;
   if(anyChanged){
     saveGame();
@@ -3296,7 +3328,7 @@ function missionEvent(type,payload={}){if(!progress||!featureUnlocked('missions'
       state.missionHudSignature='';renderActiveMissionHud(true);
     }
     updateMissionButton();
-    if(ui.missionModal&&!ui.missionModal.classList.contains('hidden'))renderMissions();
+    scheduleMissionPanelRenderV130();
   }
 }
 const MISSION_UI_PREFS_KEY='stellar_mission_ui_v1765';
@@ -9406,10 +9438,21 @@ async function refreshSystemsRuntimeConfig(force=false){
 }
 setInterval(()=>{if(authenticated)refreshSystemsRuntimeConfig(false);},45000);
 
-function liveResourcePrice(id){const runtime=RESOURCES[id];if(worldRuntimeConfig.version>0)return runtime&&runtime.enabled!==false?Math.max(0,Number(runtime.sell)||0):0;const row=liveCatalog(`resource:${id}`);return row&&row.enabled!==false&&String(row?.meta?.mode||'sell')==='sell'?Math.max(0,Number(row.price)||0):Math.max(0,Number(runtime?.sell)||0);}
+function liveResourcePrice(id){
+ const runtime=RESOURCES[id];
+ const row=liveCatalog(`resource:${id}`);
+ const fallback=row&&row.enabled!==false&&String(row?.meta?.mode||'sell')==='sell'?Math.max(0,Number(row.price)||0):Math.max(0,Number(runtime?.sell)||0);
+ if(worldRuntimeConfig.version>0){
+   if(runtime?.enabled===false)return 0;
+   const price=Math.max(0,Number(runtime?.sell)||0);
+   // Incomplete runtime cache must not disable the sale button; server checks price.
+   return price>0?price:fallback;
+ }
+ return fallback;
+}
 function cargoSaleValue(){let total=0;for(const [id,qty] of Object.entries(progress.cargo||{}))total+=liveResourcePrice(id)*qty;return total;}
 function canSellCargoNow(){return isAtTrader()||hasRemoteTraderCpuV1065(progress);}
-async function sellCargoResource(id){if(!canSellCargoNow()){showToast('Venda fora da base exige o Terminal Mercante Remoto Elite equipado');return;}const qty=progress.cargo[id]||0,price=liveResourcePrice(id);if(qty<=0||price<=0){showToast('Recurso indisponível para venda neste momento');return;}try{const r=await runEconomyAction('sell_cargo',{resource_id:id});journeyEvent('sell',1);battlePassEvent('sell',qty);showToast(`${qty} ${id} vendidos por ${fmt(r?.info?.total||0)} CR • servidor`);if(state.hangarTab==='refinery')renderHangar();}catch(e){showToast(e.message||'Venda recusada pelo servidor');}}
+async function sellCargoResource(id){if(!canSellCargoNow()){showToast('Venda fora da base exige o Terminal Mercante Remoto Elite equipado');return;}const qty=progress.cargo[id]||0,price=liveResourcePrice(id);if(qty<=0||price<=0){showToast('Recurso indisponível para venda neste momento');return;}try{const r=await runEconomyAction('sell_cargo',{resource_id:id},{flush:false,applyState:true});journeyEvent('sell',1);battlePassEvent('sell',qty);showToast(`${qty} ${id} vendidos por ${fmt(r?.info?.total||0)} CR • servidor`);if(state.hangarTab==='refinery')renderHangar();}catch(e){showToast(e.message||'Venda recusada pelo servidor');}}
 async function sellAllCargo({automatic=false}={}){
   // V116.1: venda automatizada permitida na base oficial, enquanto venda remota exige CPU equipado.
   if(automatic&&!hasRemoteTraderCpuV1065(progress)&&!isAtTrader())return false;
@@ -9420,7 +9463,7 @@ async function sellAllCargo({automatic=false}={}){
   if(automatic&&!request)return false;
   try{
     const payload=automatic?{resource_id:'all',request_id:request.id}:{resource_id:'all'};
-    const r=await runEconomyAction('sell_cargo',payload,{flush:true,applyState:true});
+    const r=await runEconomyAction('sell_cargo',payload,{flush:false,applyState:true});
     if(!(Number(r?.info?.total)>0))return false;
     if(automatic)clearAutoTradeRequestV1164(sessionStorage,request);
     journeyEvent('sell',1);battlePassEvent('sell',amount);
@@ -9440,8 +9483,8 @@ async function tickManualAutoCargoSaleV1065(){
   try{const ok=await sellAllCargo({automatic:true});if(!ok)manualAutoCargoSaleV1065.nextAttempt=Date.now()+30000;}
   finally{manualAutoCargoSaleV1065.busy=false;}
 }
-function renderCargo(){if(!progress)return;const atBase=isAtTrader();const xeno=progress.cargo?.Xenomit||0;const cargoBonus=cargoExtraBonus();ui.cargoSummary.innerHTML=`<b>${fmt(cargoUsed())}/${fmt(cargoCapacity())}</b> unidades ocupadas${cargoBonus?` • Expansão equipada: <b>+${fmt(cargoBonus)}</b>`:''} • Valor vendável: <b>${fmt(cargoSaleValue())} CR</b><br><span class="muted">${atBase?'Trader disponível: você está na base.':'Para vender recursos, retorne à sua base X-1 ou X-8.'} ${xeno?`• Voidite: <b>${fmt(xeno)}</b> (não ocupa porão)`:''}</span>`;ui.cargoGrid.innerHTML='';const entries=Object.entries(progress.cargo||{}).filter(([,q])=>q>0);if(!entries.length){ui.cargoGrid.innerHTML='<div class="empty-state">Seu porão está vazio. Colete minérios no mapa ou caixas deixadas pelos NPCs.</div>';}for(const [id,qty] of entries){const r=RESOURCES[id]||{name:id,color:'#fff'},price=liveResourcePrice(id),special=id==='Xenomit';const c=document.createElement('div');c.className='cargo-card';c.innerHTML=`<div class="cargo-ore" style="--ore:${r.color}"><img src="${GAME_ASSETS.resources[id]||GAME_ASSETS.loot.cargo}" alt="${stellarOreName(id,r.name)}"></div><div><b>${stellarOreName(id,r.name)}</b><div class="muted">${fmt(qty)} un. • ${special?'especial • não ocupa porão':(price?fmt(price)+' CR/un.':'não vendável')}</div></div>`;const b=document.createElement('button');b.className='ghost-btn';b.textContent=price?'Vender':'Guardar';b.disabled=!atBase||!price;b.onclick=()=>sellCargoResource(id);c.appendChild(b);ui.cargoGrid.appendChild(c);}ui.sellAllCargo.disabled=!atBase||cargoSaleValue()<=0;renderRefinery();renderBaseServices();}
-function openCargo(){if(!isAtTrader()){showToast('Venda de recursos na base X-1 ou X-8');return;}closeNavigationModals(ui.cargoModal);renderCargo();ui.cargoModal.classList.remove('hidden');}
+function renderCargo(){if(!progress)return;const atBase=isAtTrader();const xeno=progress.cargo?.Xenomit||0;const cargoBonus=cargoExtraBonus();ui.cargoSummary.innerHTML=`<b>${fmt(cargoUsed())}/${fmt(cargoCapacity())}</b> unidades ocupadas${cargoBonus?` • Expansão equipada: <b>+${fmt(cargoBonus)}</b>`:''} • Valor vendável: <b>${fmt(cargoSaleValue())} CR</b><br><span class="muted">${atBase?'Trader disponível: você está na base.':'Para vender recursos, retorne à sua base X-1 ou X-8.'} ${xeno?`• Voidite: <b>${fmt(xeno)}</b> (não ocupa porão)`:''}</span>`;ui.cargoGrid.innerHTML='';const entries=Object.entries(progress.cargo||{}).filter(([,q])=>q>0);if(!entries.length){ui.cargoGrid.innerHTML='<div class="empty-state">Seu porão está vazio. Colete minérios no mapa ou caixas deixadas pelos NPCs.</div>';}for(const [id,qty] of entries){const r=RESOURCES[id]||{name:id,color:'#fff'},price=liveResourcePrice(id),special=id==='Xenomit';const c=document.createElement('div');c.className='cargo-card';c.innerHTML=`<div class="cargo-ore" style="--ore:${r.color}"><img src="${GAME_ASSETS.resources[id]||GAME_ASSETS.loot.cargo}" alt="${stellarOreName(id,r.name)}"></div><div><b>${stellarOreName(id,r.name)}</b><div class="muted">${fmt(qty)} un. • ${special?'especial • não ocupa porão':(price?fmt(price)+' CR/un.':'não vendável')}</div></div>`;const b=document.createElement('button');b.className='ghost-btn';b.textContent=price?'Vender':'Guardar';b.disabled=!canSellCargoNow()||!price;b.onclick=()=>sellCargoResource(id);c.appendChild(b);ui.cargoGrid.appendChild(c);}ui.sellAllCargo.disabled=!canSellCargoNow()||cargoSaleValue()<=0;renderRefinery();renderBaseServices();}
+function openCargo(){if(!canSellCargoNow()){showToast('Venda na base X-1/X-8 ou com Terminal Mercante Remoto Elite equipado');return;}closeNavigationModals(ui.cargoModal);renderCargo();ui.cargoModal.classList.remove('hidden');}
 
 // ===================== V12 LOJA PREMIUM =====================
 function premiumProductIcon(product){
