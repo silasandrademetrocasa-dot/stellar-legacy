@@ -15,7 +15,7 @@
 - O save completo local ainda contém cópia de economia recebida do servidor, **nunca um comando econômico validado**.
 
 ## Instalação
-- Instalar somente o ZIP cumulativo `STELLAR_LEGACY_V121_1_CUMULATIVA_MIGRACAO_LOCAL_FIRST.zip` pelo Instalador Universal.
+- Instalar somente o ZIP cumulativo `STELLAR_LEGACY_V121_1_CUMULATIVA_LOCAL_FIRST_HANGAR.zip` pelo Instalador Universal.
 - O pacote contém tudo da V121.0 mais os módulos atualizados da V121.1. Não é necessário novo SQL.
 - Abrir o jogo normalmente; testar CONF1/CONF2 no hangar e reentrada. Consultar console apenas em caso de falha, sem expor credenciais.
 - Reverter se necessário: usar `/?localfirst=0` até restaurar a release anterior.
@@ -24,7 +24,7 @@
 - `node --check public/game.js`
 - `npm run check`
 - `npm test`
-- `node --test --test-concurrency=4 tests/*.test.mjs` — 552 testes aprovados
+- `node --test tests/v1211-migration.test.mjs`
 
 ## Proxima cumulativa V121.2
 Integrar fila local a endpoint autenticado, com recibos idempotentes reais no Render/Supabase para **comandos não econômicos primeiro**. Para compras e recompensas, manter debitagem e concessão atômicas do servidor. Não substituir dados de 6 jogadores pela cópia local em um batch sem preflight.

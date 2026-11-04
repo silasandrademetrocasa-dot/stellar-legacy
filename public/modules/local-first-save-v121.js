@@ -91,7 +91,17 @@ export async function openLocalSaveV121({indexedDBFactory=globalThis.indexedDB,n
          };
        };
      }
-     if(preparedIntent)outbox.add({...preparedIntent,revision,createdAt:now});
+     if(preparedIntent){
+       // Only one pending hangar build per owner is meaningful. Preserve older
+       // history as superseded (never ACK it as a server-confirmed operation).
+       outbox.index('owner').getAll(owner).onsuccess=e=>{
+         for(const priorIntent of (e.target.result||[])){
+           if(priorIntent.module==='hangar'&&priorIntent.status==='pending')
+             outbox.put({...priorIntent,status:'superseded',supersededAt:now});
+         }
+         outbox.add({...preparedIntent,revision,createdAt:now});
+       };
+     }
    };
    await done;
    return {owner,revision,hash};
