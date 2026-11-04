@@ -1,3 +1,4 @@
+import {stageLocalFirstSnapshotV121,readLocalFirstSnapshotV121,installLocalFirstPageFlushV121} from './modules/local-first-bridge-v121.js?v=47.7.60';
 import {hasRemoteTraderCpuV1065,eligibleAutoCargoSaleV1065} from './modules/remote-cargo-auto-sale-v1065.js?v=47.7.60';
 import {materializerProductNameV1164} from './modules/materializer-product-names-v1164.js?v=47.7.60';
 import {makeAutoTradeRequestV1164,clearAutoTradeRequestV1164} from './modules/stellar-autotrade-v1164.js?v=47.7.60';
@@ -5325,6 +5326,8 @@ function saveGame(){
   progress.clientSavedAt=Date.now();
   progress.adminResetEpoch=accountResetEpochV478;
   localStorage.setItem(saveKey(),JSON.stringify(progress));
+  // Opt-in V121: IndexedDB shadow, sem substituir a autoridade econômica do Render.
+  stageLocalFirstSnapshotV121(getUser()?.id,progress);
   cloudSaveMutationV105++;
   cloudDirty=true;
 }
@@ -12376,6 +12379,8 @@ async function afterAuth(){
     if(missionRewardOwnerV108!==accountId){MISSION_REWARD_ACK_V108.reset();missionRewardOwnerV108=accountId;}
     if(ammoSelectionOwnerV1061!==accountId){AMMO_SELECTION_V1061.reset();ammoSelectionOwnerV1061=accountId;}
     let local=readLocalGameState();
+    // A ponte local-first só recupera o cache se o legado estiver ausente.
+    if(!local)local=await readLocalFirstSnapshotV121(accountId);
     if(local?.accountOwnerId&&String(local.accountOwnerId)!==accountId){
       console.warn('Local save quarantined: owner mismatch');
       try{localStorage.removeItem(saveKey());}catch{}
@@ -12452,7 +12457,9 @@ async function afterAuth(){
   }catch(err){
     console.warn(err);gameBootstrapRuntime.lastError=err;
     if(err?.code==='SAVE_OWNER_MISMATCH'){authenticated=false;progress=null;signOutLocal();ui.loginModal.classList.remove('hidden');showAuthMode('login');ui.authMessage.textContent=err.message;setSync('BLOQUEADO','err');gameBootstrapRuntime.loading=false;return;}
-    loadLocalGame();setSync('OFFLINE','err');
+    loadLocalGame();
+    if(!progress){const rescue=await readLocalFirstSnapshotV121(getUser()?.id);if(rescue){try{progress=rescue;hydrateProgress();}catch{progress=null;}}}
+    setSync('OFFLINE','err');
   }
   if(generation!==gameBootstrapRuntime.generation)return;
   if(!progress){gameBootstrapRuntime.loading=false;renderFactionChoice();return;}
@@ -12673,3 +12680,6 @@ setInterval(()=>{if(PERF_MONITOR.isEnabled()&&document.visibilityState==='visibl
 setInterval(()=>{if(VISUAL_ISOLATION_V75.snapshot().active)syncVisualIsolationV75();},1000);
 
 // Legacy ADM field relayAdmDamageV346 removed: combat damage is now determined by equipment.
+
+// V121: gravacao de emergencia quando Android/Web muda para segundo plano.
+installLocalFirstPageFlushV121();

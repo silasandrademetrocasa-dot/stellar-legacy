@@ -1,0 +1,147 @@
+# Auditoria de limpeza — Stellar Legacy V121
+
+## Resultado do pacote incremental
+
+Foram selecionados **133 arquivos históricos**, arquivados **sem perda de conteúdo** em `docs/archive/v121/HISTORICO_ANTIGO_PRESERVADO.zip`, e marcados para remoção de seus caminhos originais quando o Instalador Universal executar a atualização. A limpeza **não foi aplicada diretamente à conta GitHub** nesta sessão: o repositório exato não estava disponível para escrita na conexão existente.
+
+- Arquivos por diretório: `raiz`: 28, `docs`: 99, `sql`: 6
+- **Preservados:** `public/assets`, `public/game.js`, `server/`, `tests/`, `.github/workflows`, scripts de CI, SQLs antigos referenciados pelos testes, SQLs V118-V120 e catalogação V121.
+- **Não recomendados para exclusão:** testes automatizados e scripts de migração ainda usados pelo pipeline.
+- **Limpeza via patch:** somente os caminhos explicitamente listados no `stellar-install.json`; nunca usar opção `full` num ZIP incremental.
+- **Rollback:** arquivos originais compactados no ZIP de histórico; backup externo do código completo enviado pelo usuário.
+
+## Arquivos retirados do diretório ativo
+
+- `INSTRUCOES_V1068B_BOOT.txt`
+- `INSTRUCOES_V1068C_TESTE_UNIVERSO_OFF.txt`
+- `INSTRUCOES_V1068D_AB_MISSOES_OFF.txt`
+- `INSTRUCOES_V1068E_LOGIN_REPARADO.txt`
+- `INSTRUCOES_V1081_SESSAO_UNICA.txt`
+- `INSTRUCOES_V108_CUMULATIVA_RESTAURACAO.txt`
+- `INSTRUCOES_V1091_HANGAR_AUX.txt`
+- `INSTRUCOES_V1092_HANGAR_FROTA.txt`
+- `INSTRUCOES_V110_2_CUMULATIVA.txt`
+- `LEIA_ME_CORRECAO_CI_APK.md`
+- `MANIFESTO_V1068B_BOOT.json`
+- `MANIFESTO_V110_2.json`
+- `MANIFESTO_V111_0.json`
+- `MANIFESTO_V111_1.json`
+- `MANIFESTO_V112_0.json`
+- `MANIFESTO_V113_0.json`
+- `MANIFESTO_V113_1.json`
+- `MANIFESTO_V115_0.json`
+- `MANIFESTO_V116_1.json`
+- `MANIFESTO_V116_3.json`
+- `MANIFESTO_V116_4.json`
+- `MANIFESTO_V117_3.json`
+- `README_V119_1_MIGRACOES.txt`
+- `README_V119_2_CUMULATIVA.txt`
+- `README_V119_3.txt`
+- `README_V119_4.txt`
+- `README_V119_5.txt`
+- `README_V120_0_CUMULATIVA.txt`
+- `docs/V100_CUMULATIVA_C.md`
+- `docs/V101_LOGIN_PERSISTENTE_APK.md`
+- `docs/V102_SAVE_ARENA_PESQUISA.md`
+- `docs/V103_FARM_OFFLINE_PROTEGIDO.md`
+- `docs/V103_LOADING_MOBILE_CUMULATIVA.md`
+- `docs/V104_CUMULATIVA_REDE_SQL.md`
+- `docs/V104_HOTFIX2_MISSOES_PVP.md`
+- `docs/V104_HOTFIX3_CONCLUSAO_MISSOES.md`
+- `docs/V104_MISSIONFIX1_AUTOPILOT.md`
+- `docs/V105_1B_NOTIFICACOES_DIARIAS_ANDROID.md`
+- `docs/V105_1C_HANGAR_SAVE_SEGURO_V109.md`
+- `docs/V105_1_REDE_SEGURA_TELEMETRIA.md`
+- `docs/V106_1_MUNICAO_ACK_E_SINCRONIZACAO.md`
+- `docs/V106_2_HANGAR_ANTI_ROLLBACK.md`
+- `docs/V106_3_PRESET_FARM_E_MAPAS.md`
+- `docs/V106_4_CONSUMO_MUNICAO_NAVE_DRONES_AUX.md`
+- `docs/V106_5_VENDA_AUTOMATICA_CPU.md`
+- `docs/V106_6_UNIVERSO_STATUS_DIAGNOSTICO.md`
+- `docs/V106_7_UNIVERSO_ESTELAR_EXPANSAO_UNIFICADA.md`
+- `docs/V106_8B_BOOT_SAFETY_AND_CLEANUP.md`
+- `docs/V106_8C_UNIVERSO_ESTELAR_OFF_TESTE_AB.md`
+- `docs/V106_8D_TESTE_AB_MISSOES_SEM_ROLLBACK_OFF.md`
+- `docs/V106_8E_LOGIN_BOOTSTRAP_ROOT_CAUSE.md`
+- `docs/V106_8_MISSOES_ACK_E_ANTI_ROLLBACK.md`
+- `docs/V106_9_RESTAURACAO_MISSOES_NPCS.md`
+- `docs/V106_UNIFIED_SAVE_E_LIMPEZA.md`
+- `docs/V107_BOOTSTRAP_UNIVERSO_LAZY.md`
+- `docs/V108_PERFORMANCE_E_LIMPEZA_DE_LOGS.md`
+- `docs/V109_1_AUX_HANGAR_CONF_GLOBAIS.md`
+- `docs/V109_2_FROTA_DESIGNERS_HANGAR.md`
+- `docs/V110_AUX_PROTOCOLOS_AVANCADOS.md`
+- `docs/V111_AUX_ECONOMIA_LEILAO_ADM.md`
+- `docs/V112_AUTOPILOT_INTELIGENTE.md`
+- `docs/V83_FARM_ASTRAL.md`
+- `docs/V85_FARM_OFFLINE_MUNDO_OCULTO.md`
+- `docs/V90_CUMULATIVA_V86_V90.md`
+- `docs/V91_FARM_OFFLINE_DIAGNOSTICO.md`
+- `docs/V97_CUMULATIVA_AB.md`
+- `docs/archive/AUDITORIA_ANIMACOES_V69.md`
+- `docs/archive/AUDITORIA_GRAFICA_V68.md`
+- `docs/archive/BALANCEAMENTO_V67.md`
+- `docs/archive/INVENTARIO_ASSETS_V70.csv`
+- `docs/archive/LEIA_ME_V70.md`
+- `docs/archive/LEIA_ME_V71.md`
+- `docs/archive/LEIA_ME_V75.md`
+- `docs/archive/LEIA_ME_V76.md`
+- `docs/archive/LEIA_ME_V77.md`
+- `docs/archive/LEIA_ME_V78.md`
+- `docs/archive/LEIA_ME_V79.md`
+- `docs/archive/LEIA_ME_V80.md`
+- `docs/archive/LEIA_ME_V81.md`
+- `docs/archive/LEIA_ME_V82.txt`
+- `docs/archive/MAPAS_V2_GUIA_TECNICO.md`
+- `docs/archive/PREVIA_ANIMACOES_V69.jpg`
+- `docs/archive/README_V52_5.md`
+- `docs/archive/README_V52_6.md`
+- `docs/archive/README_V53.md`
+- `docs/archive/README_V54.md`
+- `docs/archive/README_V55.md`
+- `docs/archive/README_V56.md`
+- `docs/archive/README_V57.md`
+- `docs/archive/README_V58.md`
+- `docs/archive/README_V59.md`
+- `docs/archive/README_V61.md`
+- `docs/archive/README_V62.md`
+- `docs/archive/README_V63.md`
+- `docs/archive/README_V64.md`
+- `docs/archive/README_V65.md`
+- `docs/archive/README_V66.md`
+- `docs/archive/README_V67.md`
+- `docs/archive/README_V68.md`
+- `docs/archive/README_V69.md`
+- `docs/archive/README_V73.md`
+- `docs/archive/RELATORIO_TECNICO_V70.md`
+- `docs/archive/RELATORIO_V72_DESEMPENHO.md`
+- `docs/archive/RELATORIO_V74_AUDITORIA.md`
+- `docs/archive/SPRITE_CHECKUP_V68.md`
+- `docs/archive/legacy-release-notes-ate-v1068/INSTRUCOES_APLICACAO_V104.txt`
+- `docs/archive/legacy-release-notes-ate-v1068/INSTRUCOES_HOTFIX2.txt`
+- `docs/archive/legacy-release-notes-ate-v1068/INSTRUCOES_HOTFIX3.txt`
+- `docs/archive/legacy-release-notes-ate-v1068/INSTRUCOES_V1051.txt`
+- `docs/archive/legacy-release-notes-ate-v1068/INSTRUCOES_V105_1B_NOTIFICACOES.txt`
+- `docs/archive/legacy-release-notes-ate-v1068/INSTRUCOES_V105_1C_HANGAR_SAVE.txt`
+- `docs/archive/legacy-release-notes-ate-v1068/INSTRUCOES_V106.txt`
+- `docs/archive/legacy-release-notes-ate-v1068/INSTRUCOES_V1061.txt`
+- `docs/archive/legacy-release-notes-ate-v1068/INSTRUCOES_V1062.txt`
+- `docs/archive/legacy-release-notes-ate-v1068/INSTRUCOES_V1067_CUMULATIVA.txt`
+- `docs/archive/legacy-release-notes-ate-v1068/INSTRUCOES_V1068_CUMULATIVA.txt`
+- `docs/archive/legacy-release-notes-ate-v1068/MANIFESTO_HOTFIX2.json`
+- `docs/archive/legacy-release-notes-ate-v1068/MANIFESTO_HOTFIX3.json`
+- `docs/archive/legacy-release-notes-ate-v1068/MANIFESTO_V104.json`
+- `docs/archive/legacy-release-notes-ate-v1068/MANIFESTO_V1051.json`
+- `docs/archive/legacy-release-notes-ate-v1068/MANIFESTO_V105_1B_NOTIFICACOES.json`
+- `docs/archive/legacy-release-notes-ate-v1068/MANIFESTO_V105_1C.json`
+- `docs/archive/legacy-release-notes-ate-v1068/MANIFESTO_V106.json`
+- `docs/archive/legacy-release-notes-ate-v1068/MANIFESTO_V1061.json`
+- `docs/archive/legacy-release-notes-ate-v1068/MANIFESTO_V1062.json`
+- `docs/archive/legacy-release-notes-ate-v1068/MANIFESTO_V1067.json`
+- `docs/archive/legacy-release-notes-ate-v1068/MANIFESTO_V1068.json`
+- `sql/STELLAR_LEGACY_SQL_HISTORICO_UNICO.sql`
+- `sql/STELLAR_V106_3_PATCH_MAPAS_POSICAO.sql`
+- `sql/STELLAR_V107_REATIVAR_UNIVERSO_POS_DEPLOY.sql`
+- `sql/STELLAR_V113_ROLLBACK_MANUAL.sql`
+- `sql/STELLAR_V81_ROLLBACK_SUPABASE_MANUAL.sql`
+- `sql/V67_NPCS_SUPABASE_PATCH.sql`
