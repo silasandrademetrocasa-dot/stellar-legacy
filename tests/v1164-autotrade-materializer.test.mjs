@@ -73,8 +73,8 @@ test('V116.4: apenas nomes visuais mudam, sem alterar ID, quantidade ou chance',
 test('V116.4: o PUT cliente nunca apaga ou forja recibos econômicos',()=>{
  const server=read('server/index.js');
  assert.match(server,/state\.autoTradeReceiptsV1164=structuredClone\(serverSave\.state\.autoTradeReceiptsV1164\)/);
- assert.match(server,/findTradeReceiptV1164\(state,requestId,action,payload\)/);
- assert.match(server,/rememberTradeReceiptV1164\(state,requestId,action,payload,info\)/);
+ assert.match(server,/findTradeReceiptV1164\(state,legacyTradeId,action,payload\)/);
+ assert.match(server,/rememberTradeReceiptV1164\(state,legacyTradeId,action,payload,info\)/);
  assert.match(server,/if\(previous\)return \{state,updated_at:null,info:previous,deduplicated:true\}/);
 });
 test('V116.4: cliente não aplica moedas/munição por cálculo local após compra',()=>{

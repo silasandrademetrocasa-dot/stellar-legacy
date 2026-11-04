@@ -22,7 +22,7 @@ test('V92: compra em lote tem autenticação, guarda offline, débito e grant au
  assert.match(server,/withPurchaseLock\(req\.user\.id/);
  assert.match(server,/state\.bulkPurchaseReceiptsV92=/);
  assert.match(server,/applyLiveGrant\(state,\{\.\.\.row/);
- assert.match(server,/writeVerifiedSave\(req,state,updatedAt\)/);
+ assert.match(server,/stellar_commit_economy_operation_v125/);
  assert.ok(server.indexOf('const OFFLINE_FARM_GUARD_V484=')<server.indexOf("app.post('/api/live/purchase/bulk'"),'guard must be initialized first');
  assert.match(server,/expected_price\)!==quote.price/);
  assert.match(server,/bulkPurchaseReceiptsV92=structuredClone/);
@@ -65,6 +65,6 @@ test('V94–V97: Autopilot, Farm e progressão são diagnósticos, não novos sa
  assert.match(game,/X-7 contém somente dois Apex Overlord lendários/);
 });
 test('V97: versão, APK e assets preservados',()=>{
- assert.match(JSON.parse(read('package.json')).version,/^47\.7\.(53|56|57|58|59|60|61|62)$/);
+ assert.match(JSON.parse(read('package.json')).version,/^47\.7\.(53|56|57|58|59|60|61|62|63)$/);
  for(const file of ['public/assets/v65/ships/top/phoenix.webp','public/assets/v65/aux/aux9.webp','public/modules/stellar-autopilot-v48.js','server/offline-farm-v484.js'])assert.ok(existsSync(join(root,file)),file);
 });
