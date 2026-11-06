@@ -50,8 +50,9 @@ test('V119.1: o login inicia save/reset em paralelo, sem cachear economia',()=>{
  assert.match(server,/lastCheckpointAt:head\?\.checkpointed_at/);
 });
 test('V119.1: o token de revisao nao sobrevive a outra sessao de piloto',()=>{
- assert.match(api,/serverSaveRevisionV119=\(body\?\.revision!==null/);
- assert.match(api,/Number\.isSafeInteger\(Number\(body\.revision\)\)/);
+ assert.match(api,/checkSaveSession\(meta.sessionKey\)/);
+ assert.match(api,/serverSaveRevisionV119=null;[\s\S]{0,40}saveToken=null/);
+ assert.match(api,/Number\.isSafeInteger\(Number\(value\)\)/);
 });
 test('V119.1: eventos consultaveis pelo piloto, mas sem endpoint para editar recibos',()=>{
  assert.match(server,/app\.get\('\/api\/save\/core\/events',requireUser/);

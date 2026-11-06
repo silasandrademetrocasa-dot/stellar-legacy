@@ -63,6 +63,7 @@ async function serverFetch(path, options = {}, withAuth = false) {
     if (session?.game_session_id) headers['X-Game-Session-Id'] = session.game_session_id;
   }
 
+  const requestSession=saveSessionKey();
   const fetchBody=()=>boundedFetchV4831(path,{...options,headers,cache:'no-store'});
   const eligible=(!options.method||options.method.toUpperCase()==='GET')&&!options.body&&!options.signal;
   const {res,body} = await (eligible?coalesceReadV104('render|'+String(session?.game_session_id||'public')+'|'+String(session?.access_token||'')+'|'+path+'|'+JSON.stringify(headers),fetchBody):fetchBody());
@@ -71,7 +72,7 @@ async function serverFetch(path, options = {}, withAuth = false) {
     const err = new Error(String(msg));
     err.status = res.status;
     err.code = body?.code || null;
-    if (withAuth && ['SESSION_REPLACED','SESSION_REQUIRED','ACCOUNT_BANNED'].includes(err.code)) {
+    if (withAuth && requestSession===saveSessionKey() && ['SESSION_REPLACED','SESSION_REQUIRED','ACCOUNT_BANNED'].includes(err.code)) {
       notifySessionReplaced(String(msg), err.code);
     }
     throw err;
@@ -113,6 +114,7 @@ async function supabaseFetch(path, options = {}, withAuth = false) {
     headers.Authorization = `Bearer ${session.access_token}`;
   }
 
+  const requestSession=saveSessionKey();
   const fetchBody=()=>boundedFetchV4831(`${url}${path}`,{...options,headers});
   const safeRpcRead=(options.method||'GET').toUpperCase()==='POST'&&/^\/rest\/v1\/rpc\/(?:get_game_runtime_public_v1813|get_npc_runtime_config_v1811|get_world_runtime_config_v1814|get_shops_runtime_config_v1817c|get_systems_runtime_config_v1815|get_battle_pass_runtime_config_v1817b|get_balance_runtime_v1909|get_bonus_box_config_v1825|get_galaxy_gate_config_v1906)$/.test(path);
   const readOnly=((!options.method||options.method.toUpperCase()==='GET')||safeRpcRead)&&!options.signal;
@@ -125,6 +127,7 @@ async function supabaseFetch(path, options = {}, withAuth = false) {
 }
 
 function setSession(nextSession, user = null) {
+  if(currentUser?.id!==user?.id || session?.game_session_id!==nextSession?.game_session_id)clearSaveBaseline();
   session = nextSession;
   currentUser = user;
   if (session?.game_session_id) sessionReplacementNotified = false;
@@ -306,6 +309,7 @@ export async function signIn({ email, password }) {
 }
 
 export function signOutLocal() {
+  clearSaveBaseline();
   clearPersistedSessionV101();
   session = null;
   currentUser = null;
@@ -317,15 +321,18 @@ let lastRefreshErrorV101=null;
 async function refreshSession() {
   lastRefreshErrorV101=null;
   if (!session?.refresh_token) return false;
+  const key=saveSessionKey();
   try {
     const body = await serverFetch('/api/auth/refresh', {
       method: 'POST',
       body: JSON.stringify({ refresh_token: session.refresh_token, game_session_id: session.game_session_id }),
     });
+    checkSaveSession(key);
     if (!body?.session?.access_token || !body?.user) throw new Error('Sessão não renovada');
     setSession(body.session, body.user);
     return true;
   } catch (err) {
+    if(key!==saveSessionKey())return false;
     lastRefreshErrorV101=err;
     if(verifiedAuthDenialV4831(err))signOutLocal();
     // Rede indisponível NÃO elimina o login criptografado do APK.
@@ -334,12 +341,14 @@ async function refreshSession() {
 }
 
 async function authedServerFetch(path, options = {}, retry = true) {
+  const key=saveSessionKey();
   try {
     return await serverFetch(path, options, true);
   } catch (err) {
     if (['SESSION_REPLACED','SESSION_REQUIRED'].includes(err?.code)) throw err;
+    checkSaveSession(key);
     const authish = err?.status === 401 || /jwt|token|expired|unauthorized|sessão|401/i.test(String(err?.message || err));
-    if (retry && authish && await refreshSession()) return authedServerFetch(path, options, false);
+    if (retry && authish && await refreshSession()){checkSaveSession(key);return authedServerFetch(path, options, false);}
     throw err;
   }
 }
@@ -413,28 +422,63 @@ export async function endGameSession() {
 }
 
 let serverSaveRevisionV119=null;
+let saveToken=null;
+let activeBaseline=0;
+const readBaselines=new WeakMap();
+function clearSaveBaseline(){
+  serverSaveRevisionV119=null;
+  saveToken=null;
+  activeBaseline++;
+}
+function saveSessionKey(){return JSON.stringify([currentUser?.id,session?.game_session_id]);}
+function checkSaveSession(key){
+  if(key!==saveSessionKey())throw Object.assign(new Error('Sessão de salvamento alterada.'),{code:'SAVE_SESSION_CHANGED'});
+}
+export function adoptSaveRead(read){
+  const meta=readBaselines.get(read);
+  if(!meta)return;
+  checkSaveSession(meta.sessionKey);
+  serverSaveRevisionV119=meta.revision;
+  saveToken=meta.token;
+  activeBaseline++;
+}
+function saveRevision(value){
+  if(value==null)return null;
+  if(!Number.isSafeInteger(Number(value))||Number(value)<0)throw new Error('Revisão de save inválida.');
+  return Number(value);
+}
 export function knownSaveRevisionV119(){return serverSaveRevisionV119;}
 export async function loadCloudSave() {
   if (!currentUser?.id) throw new Error('Usuário não identificado.');
-  const body = await authedServerFetch('/api/save');
-  // Revisao antiga de outra sessao/conta nao pode contaminar um novo login.
-  serverSaveRevisionV119=(body?.revision!==null&&body?.revision!==undefined&&
-    Number.isSafeInteger(Number(body.revision)))?Number(body.revision):null;
-  return { state: body?.state || null, updated_at: body?.updated_at || null, reset_epoch:Number(body?.reset_epoch)||0,revision:serverSaveRevisionV119 };
+  const sessionKey=saveSessionKey();
+  const body=await authedServerFetch('/api/save');
+  checkSaveSession(sessionKey);
+  if(!body||!Object.hasOwn(body,'state'))throw new Error('Leitura do progresso incompleta.');
+  const read={state:body.state,updated_at:body.updated_at||null,reset_epoch:Number(body.reset_epoch)||0,
+    revision:saveRevision(body.revision)};
+  const meta={sessionKey,revision:read.revision,token:body.save_token??null};
+  readBaselines.set(read,meta);
+  if(read.state)readBaselines.set(read.state,meta);
+  return read;
 }
 
 export async function saveCloudSave(state, equipmentMutationV1062=null, saveMetaV119=null) {
   if (!currentUser?.id) throw new Error('Usuário não identificado.');
+  const key=saveSessionKey(), baseline=activeBaseline;
   const result=await authedServerFetch('/api/save', {
     method: 'PUT',
     body: JSON.stringify({ state, ...(equipmentMutationV1062?{equipmentMutationV1062}:{}),
-      ...(saveMetaV119?.operation_id?{operation_id:saveMetaV119.operation_id}:{}) ,
-      ...(serverSaveRevisionV119!=null?{expected_revision:serverSaveRevisionV119}:{}) }),
+      ...(saveMetaV119?.operation_id?{operation_id:saveMetaV119.operation_id}:{}),
+      ...(serverSaveRevisionV119!=null?{expected_revision:serverSaveRevisionV119}:{expected_token:saveToken}) }),
   });
-  if(Number.isSafeInteger(Number(result?.revision)))serverSaveRevisionV119=Number(result.revision);
+  checkSaveSession(key);
+  if(result?.ok!==true)throw new Error('Save sem confirmação.');
+  if(baseline!==activeBaseline)throw Object.assign(new Error('O progresso mudou durante a gravação.'),{code:'SAVE_REVISION_CONFLICT'});
+  serverSaveRevisionV119=saveRevision(result.revision);
+  saveToken=result.save_token??null;
+  activeBaseline++;
   return result;
 }
-
 
 export async function updateCallsign(callsign) {
   const preferred = String(callsign || '').trim().replace(/\s+/g, ' ').slice(0, 24);

@@ -20,6 +20,8 @@ export function createLatestSaveCoordinatorV106({hasPending,blocked,send,onRetry
         try{status=await send();}catch(error){console.warn('[save-v106] unexpected error',error);return false;}
         if(status==='error'||status===false)return false;
         if(status==='retry'){
+          if(i===maxAttempts)return false;
+          urgent=true;
           onRetry(i);
           // Backoff curto evita flood no Supabase quando o NPC avanca a revisao.
           await wait(Math.min(900,i*120));

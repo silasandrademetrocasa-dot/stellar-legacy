@@ -36,7 +36,7 @@ test('V105: preserve remote status and do not touch currencies/reward markers',(
 test('V105: client snapshots and mutation generation protect in-flight acceptances',()=>{
  const src=readFileSync(new URL('../public/game.js',import.meta.url),'utf8');
  assert.match(src,/const sentMutation=cloudSaveMutationV105;/);
- assert.match(src,/const snapshot=structuredClone\(progress\);/);
+ assert.match(src,/snapshot=structuredClone\(progress\);/);
  assert.match(src,/cloudDirty=cloudSaveMutationV105!==sentMutation\|\|AMMO_SELECTION_V1061\.pending;/);
  assert.match(src,/queueMissionSaveV105\(\);renderMissions\(\);updateMissionButton\(\)/);
  assert.match(src,/mergeUnsavedMissionProgressV105\(remote\.state\.missions,localMissions/);

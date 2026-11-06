@@ -85,10 +85,19 @@ async function writeVerifiedSave(req,state,updated_at){
   const callsign=String(state?.profile?.callsign||'').trim();
   // V119 em modo OBSERVE (padrao) mantem a V118 ate homologarmos cada RPC legada.
   // ENFORCE somente depois do SQL PREPARAR + ATIVAR + testes em duas contas.
-  if(saveCoreModeV119()==='enforce'){
+  if(saveCoreModeV119()==='enforce' && req.saveTokenV131!=='new'){
     const response=await SAVE_OPERATIONS_V1192.measure(saveModuleForRequestV119(req),()=>commitSaveCoreV119({service,req,userId:req.user.id,state,callsign}));
     if(!response.ok)return response.error;
     req.v119Revision=response.revision;
+    return null;
+  }
+  if(req.saveTokenV131!==undefined){
+    const {data,error}=await SAVE_OPERATIONS_V1192.measure(saveModuleForRequestV119(req),()=>service.rpc('stellar_commit_save_v131',{
+      p_user_id:req.user.id,p_state:state,p_updated_at:updated_at,p_callsign:callsign,p_expected_token:req.saveTokenV131
+    }));
+    if(error)return error;
+    if(!data?.ok)return {code:data?.code||'SAVE_NOT_CONFIRMED',message:data?.code||'SAVE_NOT_CONFIRMED'};
+    req.confirmedTokenV131=data.save_token;
     return null;
   }
   const {data,error}=await SAVE_OPERATIONS_V1192.measure(saveModuleForRequestV119(req),()=>service.rpc('stellar_commit_player_save_v118',{
@@ -583,8 +592,20 @@ function rollGateOnceServer(state,key){
   if(r<95){g.jumpBonus++;return {kind:'jump',label:'Bônus de Salto +1'};}
   g.jumpBonus++;return {kind:'jump',label:'Bônus de Salto +1'}; // Vida removida dos giros V19.0.6
 }
+async function readSaveForWrite(req){
+  const service=await requireEliteAdmin();
+  return service.rpc('stellar_read_save_v131',{p_user_id:req.user.id});
+}
 async function readEconomySave(req){
-  const {data,error}=await req.sb.from('game_saves').select('state,updated_at').eq('user_id',req.user.id).maybeSingle();if(error)throw new Error(error.message);if(!data?.state)throw Object.assign(new Error('Save online ainda não foi criado.'),{status:409});req.economyBaselineV125=data.updated_at;const state=structuredClone(data.state);if(String(state.accountOwnerId||req.user.id)!==req.user.id)throw Object.assign(new Error('SAVE BLOQUEADO: proprietário inválido.'),{status:409});state.profile ||= {};return state;
+  const {data,error}=await readSaveForWrite(req);
+  if(error)throw new Error(error.message);
+  if(!data?.state)throw Object.assign(new Error('Save online ainda não foi criado.'),{status:409});
+  req.economyBaselineV125=data.updated_at;
+  req.saveTokenV131=data.save_token;
+  const state=structuredClone(data.state);
+  if(String(state.accountOwnerId||req.user.id)!==req.user.id)throw Object.assign(new Error('SAVE BLOQUEADO: proprietário inválido.'),{status:409});
+  state.profile ||= {};
+  return state;
 }
 async function writeEconomySave(req,state){
   state.serverPurchaseRevision=Math.max(0,Math.floor(Number(state.serverPurchaseRevision)||0))+1;
@@ -729,6 +750,9 @@ async function ensureProfile(sb, user, callsign = '') {
   if (error) {
     // Em caso de corrida na reserva de nome, cria identidade técnica única para não bloquear o login.
     if (String(error.code) === '23505' || /callsign|duplicate|unique/i.test(String(error.message || ''))) {
+      const {data:concurrent,error:lookupError}=await sb.from('profiles').select('callsign').eq('id',user.id).maybeSingle();
+      if(lookupError)throw new Error('Falha ao confirmar o perfil.');
+      if(concurrent?.callsign)return normalizeCallsign(concurrent.callsign);
       preferred = fallbackCallsign(user);
       const retry = await sb.from('profiles').insert({ id: user.id, callsign: preferred, updated_at: new Date().toISOString() }).select('callsign').single();
       if (retry.error) throw new Error(`Falha ao criar perfil seguro: ${retry.error.message}`);
@@ -1430,7 +1454,7 @@ app.post('/api/live/purchase', requireUser, asyncRoute(async (req,res)=>{
     const service=requestId?await requireEliteAdmin():null;
     // Fetch both concurrently: no extra sequential SQL round trip for purchases.
     const [saveRead,receiptRead]=await Promise.all([
-      req.sb.from('game_saves').select('state,updated_at').eq('user_id',req.user.id).maybeSingle(),
+      readSaveForWrite(req),
       requestId?service.from('stellar_live_purchase_receipts_v123').select('catalog_key,receipt').eq('user_id',req.user.id).eq('request_id',requestId).maybeSingle():Promise.resolve({data:null,error:null})
     ]);
     const {data:saveRow,error:saveError}=saveRead;
@@ -1488,6 +1512,7 @@ app.post('/api/live/purchase', requireUser, asyncRoute(async (req,res)=>{
       if(!confirmed.ok)throw Object.assign(new Error(confirmed.message),{status:confirmed.code==='ECONOMY_STALE'?409:503,code:confirmed.code});
       return {state:confirmed.state,updated_at:confirmed.updatedAt,purchase:confirmed.receipt,replayed:confirmed.replayed};
     }
+    req.saveTokenV131=saveRow.save_token;
     const writeError=await writeVerifiedSave(req,state,updated_at);
     if(writeError)throw new Error(writeError.message);
     return {state,updated_at,purchase};
@@ -2138,8 +2163,14 @@ app.get('/api/save', requireUser, asyncRoute(async (req, res) => {
     if(reply.data?.verified===false)return res.status(503).json({error:'Integridade de save em verificacao.',code:'SAVE_CORE_HASH_MISMATCH'});
     data=reply.data?{state:reply.data.state,updated_at:reply.data.updated_at}:null;
     revisionV119=reply.data?.revision??null;
+    if(!error&&!reply.data){
+      const canonical=await readSaveForWrite(req);
+      if(canonical.error||canonical.data?.save_token!=='new')
+        return res.status(503).json({error:'Revisão do piloto indisponível.',code:'SAVE_READ_UNAVAILABLE'});
+      data=canonical.data;
+    }
   }else{
-    ({data,error}=await req.sb.from('game_saves').select('state,updated_at').eq('user_id',req.user.id).maybeSingle());
+    ({data,error}=await readSaveForWrite(req));
   }
   if (error) return res.status(503).json({ error:'Leitura do save indisponivel.',code:'SAVE_READ_UNAVAILABLE' });
   const {data: resetRecord,error: resetErr}=await resetReadV1191;
@@ -2147,7 +2178,7 @@ app.get('/api/save', requireUser, asyncRoute(async (req, res) => {
   res.set('Cache-Control','no-store');
   const playerState=data?.state?structuredClone(data.state):null;
   if(playerState)pruneOrphanedDroneLayoutsV118(playerState);
-  res.json({ state: playerState, updated_at: data?.updated_at || null,
+  res.json({ save_token:data?.save_token, state: playerState, updated_at: data?.updated_at || null,
     reset_epoch:Number(resetRecord?.epoch)||0,...(revisionV119==null?{}:{revision:revisionV119}) });
 }));
 
@@ -2273,7 +2304,11 @@ app.put('/api/save', requireUser, OFFLINE_FARM_GUARD_V484, asyncRoute(async (req
   // V12: a coleta diária do clã é autoridade do servidor. Se um navegador ficou
   // aberto durante o reset, ele não pode sobrescrever a cobrança com um save antigo.
   let statePatch = null;
-  const { data: serverSave } = await req.sb.from('game_saves').select('state').eq('user_id', req.user.id).maybeSingle();
+  const {data:serverSave,error:readError}=await readSaveForWrite(req);
+  if(readError||!serverSave?.save_token)return res.status(503).json({error:'Leitura do save indisponível.',code:'SAVE_READ_UNAVAILABLE'});
+  req.saveTokenV131=serverSave.save_token;
+  if(Object.hasOwn(req.body,'expected_token') && req.body.expected_token!==req.saveTokenV131)
+    return res.status(409).json({error:'Progresso atualizado em outra operação.',code:'SAVE_REVISION_CONFLICT'});
   // V106.2: saves de combate/farm nao podem alterar a montagem (CONF1/2,
   // nave, drones, AUX) sem uma intencao do hangar e baseline do servidor.
   // Mantem integralmente os validadores economicos, NPC, inventario e anti-fraude.
@@ -2371,13 +2406,15 @@ app.put('/api/save', requireUser, OFFLINE_FARM_GUARD_V484, asyncRoute(async (req
       await securityService.report(req.user.id,{code:'SAVE_DB_GUARD',severity:'warn',evidence:{rule:(message.match(/SECURITY_[A-Z_]+/)||[])[0]||'DB_REJECT'}},'database_save');
       return res.status(409).json({error:'O servidor recusou dados inconsistentes do save. Sincronize seu jogo.',code:'SAVE_DB_GUARD'});
     }
-    const code=message.includes('SAVE_NPC_STALE')?'SAVE_NPC_STALE':message.includes('SAVE_COUPON_STALE')?'SAVE_COUPON_STALE':message.includes('SAVE_EVENT_STALE')?'SAVE_EVENT_STALE':null;
-    return res.status(code?409:400).json({error:error.message,code});
+    const codes=['SAVE_REVISION_CONFLICT','SAVE_REVISION_REQUIRED','SAVE_IDEMPOTENCY_ID_REUSED',
+      'SAVE_NPC_STALE','SAVE_ORE_STALE','SAVE_COUPON_STALE','SAVE_EVENT_STALE','SAVE_ELITE_STALE','SAVE_RESET_STALE'];
+    const conflict=codes.find(code=>code===error.code||message.includes(code));
+    return res.status(conflict?409:503).json({error:conflict?'Sincronize o progresso do piloto.':'Gravação não confirmada. Tente novamente.',code:conflict||'SAVE_WRITE_UNAVAILABLE'});
   }
 
   // V118: profiles ja confirmado com game_saves na transacao unica.
 
-  res.json({ ok: true, updated_at, statePatch, ...(req.v119Revision!=null?{revision:req.v119Revision}:{}) });
+  res.json({ ok: true, save_token:req.confirmedTokenV131, updated_at, statePatch, ...(req.v119Revision!=null?{revision:req.v119Revision}:{}) });
 })));
 
 
