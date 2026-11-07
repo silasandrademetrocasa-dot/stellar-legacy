@@ -20,7 +20,7 @@ export function createChristmasUI(bridge){
  }
  if(seenGoals&&reached.some(k=>!seenGoals.includes(k))){autoCelebration=true;bridge.toast('Meta coletiva conquistada! Confira a Central Natal.');}seenGoals=reached;
  button.textContent=reached.length?'❄ NATAL ★':'❄ NATAL';if(panel?.open)render();
- }catch(e){if(panel?.open)bridge.toast(e.message);}finally{statusBusy=false;}}
+ }catch(e){if(panel?.open){panel.innerHTML='<p>Não foi possível consultar o Natal. Feche e abra novamente após reconectar.</p><button data-close>FECHAR</button>';panel.querySelector('[data-close]').onclick=()=>panel.close();bridge.toast(e.message);}}finally{statusBusy=false;}}
  async function claim(key){if(busy)return;busy=true;try{await bridge.claim(key);await refresh();bridge.toast('Recompensa confirmada no servidor');}catch(e){bridge.toast(e.message);}finally{busy=false;}}
  function render(){
   const p=status?.player||{},claims=status?.claims||[],counts=status?.counts||[],cfg=status?.config||{},f=p.faction||bridge.faction();

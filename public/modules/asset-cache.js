@@ -6,6 +6,7 @@ const ASSET_REVISION = '34.7.0'; // Somente caminhos legados sem versão no nome
 export function versionedAssetUrl(path) {
   const value=String(path||'');
   if(!value)return value;
+  if(/^(?:data:|blob:)/i.test(value))return value;
   // Só os diretórios explicitamente imutáveis recebem URL estável.
   // V17–V67 tiveram arquivos substituídos no mesmo caminho: continuam com revisão.
   if(/^\/assets\/animations\/v(?:69|71)\//.test(value))return value;
