@@ -1337,3 +1337,6 @@ export async function loadAdminAuxEconomyOnline(){return serverFetch('/api/admin
 export async function updateAdminAuxEconomyOnline(payload){return serverFetch('/api/admin/runtime/aux-economy',{method:'POST',body:JSON.stringify(payload)},true);}
 
 export async function claimAuxProtocolAuctionV111({hourKey,lotRef}){return authedSupabaseFetch('/rest/v1/rpc/claim_aux_protocol_auction_v111',{method:'POST',body:JSON.stringify({p_hour_key:String(hourKey),p_lot_ref:String(lotRef)})});}
+
+export const natalStatusOnline=()=>authedServerFetch('/api/natal',{},false);
+export const natalClaimOnline=key=>authedServerFetch('/api/natal/claim',{method:'POST',body:JSON.stringify({key})},false);

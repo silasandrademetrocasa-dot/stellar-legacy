@@ -39,8 +39,9 @@ BEGIN
     OR p_state->>'accountOwnerId' IS DISTINCT FROM p_user_id::text
  THEN RETURN jsonb_build_object('ok',false,'code','ECONOMY_ARGUMENTS_INVALID');END IF;
  PERFORM pg_advisory_xact_lock(hashtextextended(p_user_id::text,125));
+ -- Receipts are immutable. The per-player advisory lock already serializes retries.
  SELECT * INTO previous FROM public.stellar_economy_receipts_v125
-  WHERE user_id=p_user_id AND request_id=p_request_id FOR UPDATE;
+  WHERE user_id=p_user_id AND request_id=p_request_id;
  IF FOUND THEN
    IF previous.operation IS DISTINCT FROM p_operation OR previous.request_hash IS DISTINCT FROM p_request_hash THEN
      RETURN jsonb_build_object('ok',false,'code','ECONOMY_ID_REUSED');

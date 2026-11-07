@@ -1,3 +1,5 @@
+import {natalRoomTick,natalSocket} from './christmas-v132.js';
+import {NPCS as NATAL_NPCS,christmasWindow} from '../public/modules/christmas-v132.js';
 import {frontierRoomTerritoryV4775,frontierWrongFactionV4775,frontierEntryDenialV4775} from './frontier-ux-admission-v4775.js';
 import {createWarbotEngine} from './warbot-engine-v477.js';
 import {portalPointV461} from '../public/modules/portal-layout-v461.js';
@@ -353,11 +355,12 @@ class Room {
 
   currentEventDef(){ const live=this.world.currentEvent();if(live&&this.eventEligible(live))return live;return directiveToWorldEvent(selectLiveDirective(this.world.directives,this.mapId),this.mapId); }
   eventProfile(ev=this.event){return eventControlProfile(eventVariant(ev?.id),ev?.rules?.event_control);}
-  eventMode(ev=this.event){return this.eventProfile(ev).mode;}
+  eventMode(ev=this.event){return ev?.rules?.christmas?'christmas':this.eventProfile(ev).mode;}
   eventStageNow(now=nowMs()){return eventStage(this.event,now,this.eventProfile().phaseCount??4);}
   eventTuningNow(now=nowMs()){return eventStageTuning(this.eventProfile(),this.eventStageNow(now));}
   eventEligible(ev){
     if(!ev)return false;
+    if(ev.rules?.christmas)return this.mapId===ev.rules.map;
     const rules=ev.rules||{},mode=this.eventMode(ev);
     if(rules.battle_only)return !!this.map.battle;
     if(rules.normal_only&&this.map.battle)return false;
@@ -375,6 +378,7 @@ class Room {
     // Never allow delayed event respawns from a finished/rotated event to come back later.
     this.respawns=this.respawns.filter(r=>r.kind!=='eventNpc');
     this.oreRespawns=this.oreRespawns.filter(r=>!r.eventOre);
+    this.natalBoxes?.clear();this.natalEventId=null;this.broadcast({type:'natal_boxes',boxes:[]});
     this.convoy=null;this.convoyRetryAt=0;this.nextEventWaveAt=0;this.lastEventStageIndex=-1;
     if(clearParticipants)this.eventParticipants.clear();
     if(npcIds.length||oreIds.length)this.broadcast({type:'event_cleanup',reason,npcIds,oreIds,eventId:this.event?.eventId||null,serverTime:nowMs()});
@@ -393,7 +397,7 @@ class Room {
     this.event={...ev,progress:0,complete:false,stage:0,stageName:'RECONHECIMENTO'};
     this.nextEventBossAt=0;
     this.lastEventStageIndex=-1;
-    const profile=this.eventProfile(ev),mode=profile.mode;
+    const profile=this.eventProfile(ev),mode=this.eventMode(ev);
     if(mode==='wave'||mode==='battle_wave') this.spawnEventWave(profile.waveCount||6);
     if(mode==='boss') this.spawnPrime();
     if(mode==='ore') this.spawnEventOres(profile.oreCount||12);
@@ -701,7 +705,7 @@ class Room {
       laserFiring:!!p.laserFiring,laserColor:p.laserColor||'#76d9ff',laserAmmoId:p.laserAmmoId||'lcb10',laserAmmoName:p.laserAmmoName||'PLS-1',targetId:p.targetId||null,targetIsPlayer:!!p.targetIsPlayer,
       pet:p.pet?{...p.pet}:null};
   }
-  snapshot(viewerUserId=null){return {type:'world_snapshot',roomKey:this.key,mapId:this.mapId,territoryFaction:this.territoryFaction,npcs:[...this.npcs.values()].map(e=>this.publicNpc(e)).concat([...this.warbotEngine.bots.values()].filter(e=>e.hp>0).map(e=>this.warbotEngine.publicBot(e))),ores:[...this.ores.values()],players:[...this.players.values()].filter(p=>p.userId!==viewerUserId).map(p=>this.publicPlayer(p)),event:this.eventPayload(),globalEvent:this.world.currentEvent(),warfront:this.warfrontPayload(),serverTime:nowMs()};}
+  snapshot(viewerUserId=null){return {type:'world_snapshot',natalBoxes:[...(this.natalBoxes?.values()||[])],roomKey:this.key,mapId:this.mapId,territoryFaction:this.territoryFaction,npcs:[...this.npcs.values()].map(e=>this.publicNpc(e)).concat([...this.warbotEngine.bots.values()].filter(e=>e.hp>0).map(e=>this.warbotEngine.publicBot(e))),ores:[...this.ores.values()],players:[...this.players.values()].filter(p=>p.userId!==viewerUserId).map(p=>this.publicPlayer(p)),event:this.eventPayload(),globalEvent:this.world.currentEvent(),warfront:this.warfrontPayload(),serverTime:nowMs()};}
   broadcast(payload,exclude=null){
     if(!this.clients.size)return;
     const wire=JSON.stringify(payload); // Serializar apenas uma vez por sala.
@@ -975,6 +979,7 @@ class Room {
     }else{
       candidateClients=[...this.clients].filter(c=>String(c.player?.userId||'')===ownerId);
     }
+    if(e.type==='natalRei')candidateClients=[...this.clients].filter(c=>Number(e.damageContrib.get(c.player?.userId)||0)>=total*.01);
     const eligible=eligibleGroupRecipientsV1173(candidateClients,{
       now:nowMs(),cutoffMs:120000,openState:WebSocket.OPEN,
       lastActivity:id=>this.world.lastNpcActivity(id),
@@ -982,22 +987,26 @@ class Room {
       isCurrent:c=>c.room===this&&currentRoomActorV1173(c,this.players)
     });
     const factor=eligible.length?1/eligible.length:0;
+    if(e.eventNpc&&e.eventId===this.event?.eventId&&this.event.rules?.christmas)this.natalKills=(this.natalKills||0)+1;
+    const natalLeader=e.type==='natalRei'?[...eligible].sort((a,b)=>(e.damageContrib.get(b.player.userId)||0)-(e.damageContrib.get(a.player.userId)||0))[0]?.player?.userId:null;
+    const natalDamageTotal=eligible.reduce((n,c)=>n+Number(e.damageContrib.get(c.player?.userId)||0),0);
     for(const c of eligible){
       // V116.1: a conexao pode cair enquanto a RPC aguarda; congelar ID antes de cada await.
       const recipientUserId=String(c.player?.userId||'');
       if(!recipientUserId)continue;
       // Apenas o abate validado pelo servidor gera progresso permanente de Elite.
       // Elite só pontua depois da confirmação financeira do abate pelo SQL.
-      const isOwner=recipientUserId===ownerId;
+      const isOwner=e.type==='natalRei'?recipientUserId===natalLeader:recipientUserId===ownerId;
       // Somente a sala online define o NPC, a divisão e o ID do abate.
       // O Supabase confirma a concessão em transação idempotente ANTES de informar o cliente.
-      const killKey=`${this.key}:${e.id}`.slice(0,180);
+      const killKey=e.type==='natalRei'?e.id:`${this.key}:${e.id}`.slice(0,180);
+      const rewardFactor=e.type==='natalRei'?Number(e.damageContrib.get(recipientUserId)||0)/Math.max(1,natalDamageTotal):factor;
       try{
-        const serverReward=await this.world.grantNpcReward(recipientUserId,killKey,String(e.type||'npc'),Math.max(0,Math.round((Number(e.credits)||0)*factor)),Math.max(0,Math.round((Number(e.uridium)||0)*factor)),isOwner);
+        const serverReward=await this.world.grantNpcReward(recipientUserId,killKey,String(e.type||'npc'),Math.max(0,Math.round((Number(e.credits)||0)*rewardFactor)),Math.max(0,Math.round((Number(e.uridium)||0)*rewardFactor)),isOwner);
         if(serverReward.granted===true)this.world.recordEliteEvent?.(recipientUserId,'npc_kill').catch(err=>console.warn('Elite NPC:',err?.message));
         if(serverReward.recoveredAfterTimeout)console.info('[npc-reward-v1069] recibo idempotente recuperado apos timeout');
         this.world.recordRelayPve?.(recipientUserId,`npc:${this.key}:${e.id}:${recipientUserId}`,'npc').catch(()=>{});
-        safeJsonSend(c,{type:'kill_credit',entity:dead,factor,serverReward,groupShared:!!rewardGroupId,eligibleCount:eligible.length,ownerUserId:ownerId,ownerGroupId:rewardGroupId||null,dropBox:isOwner});
+        safeJsonSend(c,{type:'kill_credit',entity:dead,factor:rewardFactor,serverReward,groupShared:!!rewardGroupId,eligibleCount:eligible.length,ownerUserId:ownerId,ownerGroupId:rewardGroupId||null,dropBox:isOwner});
       }catch(err){
         console.error('[npc-reward] falha no ledger',{npc:e.id,error:String(err?.message||err).slice(0,180)});
         safeJsonSend(c,{type:'npc_reward_error',entityId:e.id,message:'Recompensa econômica indisponível. Nenhum saldo foi adicionado pelo navegador.'});
@@ -1133,8 +1142,9 @@ class Room {
     }
     for(let i=this.respawns.length-1;i>=0;i--){const r=this.respawns[i];if(now<r.at)continue;this.respawns.splice(i,1);if(r.kind==='eventNpc'&&this.event?.eventId!==r.eventId)continue;if(r.kind==='npc'&&this.nonEventNpcCount(r.type)>=this.desiredNpcCount(r.type))continue;const profile=r.kind==='eventNpc'?this.eventProfile():null,baseName=(this.world.npcDefinition(r.type)?.name||String(r.type||'NPC')).toUpperCase();const e=this.makeNpc(r.type,r.kind==='eventNpc'?{eventNpc:true,eventId:r.eventId,forceChase:true,rewardMult:profile?.rewardMult||1.22,scale:profile?.scale||1,color:profile?.color,size:profile?.size,speedMult:profile?.speedMult||1,name:profile?.namePrefix?(profile.namePrefix+' '+baseName):undefined}:(frontierEliteRespawnV450(this.mapId,r.type,this.npcs.values())||(r.rarePatrol?{rarePatrol:true,name:'PATRULHA RARA • '+baseName,color:'#ffd069',scale:1.15}:{})));if(e){this.npcs.set(e.id,e);this.broadcast({type:'npc_spawn',entity:this.publicNpc(e)});}}
     for(let i=this.oreRespawns.length-1;i>=0;i--){const r=this.oreRespawns[i];if(now<r.at)continue;this.oreRespawns.splice(i,1);if(r.eventOre&&this.event?.eventId!==r.eventId)continue;const o=this.makeOre(r.type,r.eventOre?{eventOre:true,eventId:r.eventId,amount:r.amount}:{});this.ores.set(o.id,o);this.broadcast({type:'ore_spawn',ore:o});}
+    if(this.event?.rules?.christmas)natalRoomTick(this,now,safeJsonSend);
     if(this.event&&!this.event.complete){
-      const profile=this.eventProfile(),mode=profile.mode,stage=this.eventStageNow(now),tuning=eventStageTuning(profile,stage);
+      const profile=this.eventProfile(),mode=this.eventMode(),stage=this.eventStageNow(now),tuning=eventStageTuning(profile,stage);
       if(stage.index!==this.lastEventStageIndex){
         this.lastEventStageIndex=stage.index;this.event.stage=stage.number;this.event.stageName=stage.label;
         // Transitions are server-driven; only one broadcast per boundary.
@@ -1171,7 +1181,7 @@ class Room {
   }
 }
 
-export function attachSharedUniverse(server,{authenticate,authorizeJoin,recordSecurityViolation,loadLiveOps,loadBattleGroup,loadNpcConfig,loadWorldConfig,loadPlayerEventProgress,recordPlayerEventProgress,loadWarfront,persistCapture,persistRelayCapture,damageRelay,readRelayLoadout,readAstralCombatProfile,loadActorClan,recordRelayPve,recordEliteEvent,recordWarDefense,loadWorldDirectives,grantNpcReward,grantOreReward,loadWarbotConfig}){
+export function attachSharedUniverse(server,{authenticate,authorizeJoin,recordSecurityViolation,loadLiveOps,loadBattleGroup,loadNpcConfig,loadWorldConfig,loadPlayerEventProgress,recordPlayerEventProgress,loadWarfront,persistCapture,persistRelayCapture,damageRelay,readRelayLoadout,readAstralCombatProfile,loadActorClan,recordRelayPve,recordEliteEvent,recordWarDefense,loadWorldDirectives,grantNpcReward,grantOreReward,loadWarbotConfig,natal}){
   const wss=new WebSocketServer({
     server,
     path:'/ws',
@@ -1201,6 +1211,7 @@ export function attachSharedUniverse(server,{authenticate,authorizeJoin,recordSe
     loadWarfront:loadWarfront||(()=>Promise.reject(new Error('Sem conexão com o banco de relés'))),
     persistCapture:persistCapture||(()=>Promise.reject(new Error('Sem gravação de relés'))),
     recordEliteEvent:recordEliteEvent||(()=>Promise.resolve()),
+    natal,
     grantNpcReward:grantNpcReward||(()=>Promise.reject(new Error('Recompensa NPC não configurada no servidor'))),
     grantOreReward:grantOreReward||(()=>Promise.reject(new Error('Pagamento de minério não configurado no servidor'))),
     warbotSettings:new Map(),lastWarbotConfigAt:0,warbotConfigBusy:false,
@@ -1242,7 +1253,7 @@ export function attachSharedUniverse(server,{authenticate,authorizeJoin,recordSe
     announcementCooldowns:new Map(),
     npcDefinition(type){
       const key=String(type||''),live=this.npcRuntime?.npcs?.get?.(key),fallback=NPC_TYPES[key]||null;
-      return live||fallback;
+      return NATAL_NPCS[key]?{...NATAL_NPCS[key],color:'#ffeaee',resources:{}}:live||fallback;
     },
     npcSpawnGroups(mapId){
       const key=String(mapId||''),rows=this.npcRuntime?.spawns?.get?.(key);
@@ -1318,7 +1329,8 @@ export function attachSharedUniverse(server,{authenticate,authorizeJoin,recordSe
       finally{this.directivesBusy=false;}
       return this.directives;
     },
-    currentEvent(){return resolveLiveEvent(world.liveOps?.events||[],nowMs(),world.liveOps?.weekend_settings,world.liveOps?.manual_override);},
+    mainEventV132(now){return resolveLiveEvent(world.liveOps?.events||[],now,world.liveOps?.weekend_settings,world.liveOps?.manual_override);},
+    currentEvent(){void natal?.refresh();const now=nowMs();return world.mainEventV132(now)||(natal?.active()?christmasWindow(now,t=>world.mainEventV132(t)):null);},
     async refreshLiveOps(force=false){
       const now=nowMs();
       if(!loadLiveOps)return world.liveOps;
@@ -1433,6 +1445,7 @@ export function attachSharedUniverse(server,{authenticate,authorizeJoin,recordSe
         }
         return ws.room?.updatePlayer(ws,msg);
       }
+      if(msg.type==='natal_collect'||msg.type==='natal_fire')return await ws.room&&natalSocket(ws.room,ws,msg,safeJsonSend);
       if(msg.type==='npc_damage')return await ws.room?.handleDamage(ws,msg);
       if(msg.type==='relay_attack')return await ws.room?.handleRelayAttack(ws,msg);
       if(msg.type==='collect_ore')return await ws.room?.handleOreCollect(ws,msg);

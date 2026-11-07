@@ -1,3 +1,9 @@
+import {DESIGNS as NATAL_DESIGNS,NPCS as NATAL_NPCS,compatibleDesign} from './modules/christmas-v132.js?v=47.7.63';
+import {prepareChristmasArt,shipChristmasArt,npcChristmasArt} from './modules/christmas-art-v132.js?v=47.7.63';
+import {createChristmasUI} from './modules/christmas-ui-v132.js?v=47.7.63';
+import {natalStatusOnline,natalClaimOnline} from './api.js?v=47.7.63';
+let natalClientV132=null;
+void prepareChristmasArt();
 import {stageLocalFirstSnapshotV121,readBestLocalSnapshotV1211,stageLocalFirstHangarIntentV1211,acknowledgeConfirmedHangarV1211,installLocalFirstPageFlushV121,flushLocalFirstSnapshotV121,localFirstPilotEnabledV121} from './modules/local-first-bridge-v1211.js?v=47.7.63';
 import {createForegroundSyncV122} from './modules/local-first-sync-v122.js?v=47.7.63';
 import {createPurchaseRequestV123,purchaseFailureIsDefinitiveV123} from './modules/economy-request-v123.js?v=47.7.63';
@@ -511,7 +517,7 @@ const NPC_WORLD_SPRITES = Object.freeze({
   astralReaper: '/assets/v67/npcs/astralReaper.webp',
   bossAstralReaper: '/assets/v67/npcs/bossAstralReaper.webp',
 });
-function npcWorldSpriteAsset(type){return NPC_2D_V65[type]||GAME_ASSETS.npcs?.[type]||NPC_WORLD_SPRITES[type]||null;}
+function npcWorldSpriteAsset(type){return NPC_2D_V65[type]||npcChristmasArt(type)||GAME_ASSETS.npcs?.[type]||NPC_WORLD_SPRITES[type]||null;}
 // V65: arquivos individualizados das duas vistas; recortes com margem transparente.
 const V65_SHIPS = Object.freeze({
   phoenix:1, liberator:1, piranha:1, nostromo:1, bigboy:1, leonov:1,
@@ -530,6 +536,7 @@ const FLEET_MODEL_2D_V63 = Object.freeze(Object.fromEntries(
 const FLEET_MODEL_ATLAS_V63 = Object.freeze(Object.fromEntries(
   Object.entries(SHIP_APPROVED_CARD_V62).map(([id,name])=>[id,`/assets/v63/ships/${name}_16.webp`])));
 function shipCardAsset(id,faction=progress?.profile?.faction){
+  const natalArt=shipChristmasArt(id,id===progress?.activeShipId?currentShipDesignId():null);if(natalArt)return natalArt;
   if(shipArtV65(id,'front'))return shipArtV65(id,'front');
   if(FLEET_MODEL_2D_V63[id])return FLEET_MODEL_2D_V63[id];
   if(FLEET_SHOWROOM_V62[id])return FLEET_SHOWROOM_V62[id];
@@ -538,14 +545,15 @@ function shipCardAsset(id,faction=progress?.profile?.faction){
   if(id==='phoenix' && GAME_ASSETS.starterDesigners?.[faction])return GAME_ASSETS.starterDesigners[faction].card;
   return (GAME_ASSETS.ships&&GAME_ASSETS.ships[id])||null;
 }
-function shipMapAsset(id,faction=progress?.profile?.faction){
+function shipMapAsset(id,faction=progress?.profile?.faction,designId=undefined){
+  const natalArt=shipChristmasArt(id,designId===undefined?(id===progress?.activeShipId?currentShipDesignId():null):designId);if(natalArt)return natalArt;
   if(shipArtV65(id,'top'))return shipArtV65(id,'top');
   if(FLEET_MODEL_2D_V63[id])return FLEET_MODEL_2D_V63[id];
   if(id==='phoenix' && GAME_ASSETS.starterDesigners?.[faction])return GAME_ASSETS.starterDesigners[faction].map;
   return (GAME_ASSETS.shipMap&&GAME_ASSETS.shipMap[id])||shipCardAsset(id,faction);
 }
 const STATIC_SHIP_RENDER_IDS=new Set(Object.keys(GAME_ASSETS.shipMap||{}));
-function shipMapSheetAsset(id,faction=progress?.profile?.faction){
+function shipMapSheetAsset(id,faction=progress?.profile?.faction){if(shipChristmasArt(id))return null;
   if(shipArtV65(id,'top'))return null; // Sem atlas direcional: girar sprite TOP 360°.
   if(FLEET_MODEL_ATLAS_V63[id])return FLEET_MODEL_ATLAS_V63[id];
   // V34.6.3: todas as naves usam o casco visual único no mapa para evitar reaproveitar atlas genéricos.
@@ -556,7 +564,7 @@ function shipMapSheetAsset(id,faction=progress?.profile?.faction){
 function droneCardAsset(id){return auxVisualArtV64(id)||droneVisualArtV64(id)||((GAME_ASSETS.drones&&GAME_ASSETS.drones[id])||null);}
 function droneMapAsset(id){return auxVisualArtV64(id)||droneVisualArtV64(id)||((GAME_ASSETS.droneMap&&GAME_ASSETS.droneMap[id])||droneCardAsset(id));}
 function droneMapSheetAsset(id){if(droneVisualArtV64(id))return null; return auxVisualAtlasV64(id)||droneVisualAtlasV64(id)||((GAME_ASSETS.droneMapSheets32&&GAME_ASSETS.droneMapSheets32[id])||(GAME_ASSETS.droneMapSheets&&GAME_ASSETS.droneMapSheets[id])||null);}
-function npcMapSheetAsset(type){if(NPC_2D_V65[type])return null; return (GAME_ASSETS.npcMapSheets32&&GAME_ASSETS.npcMapSheets32[type])||(GAME_ASSETS.npcMapSheets&&GAME_ASSETS.npcMapSheets[type])||null;}
+function npcMapSheetAsset(type){if(NPC_2D_V65[type])return null;if(NATAL_NPCS[type])return null; return (GAME_ASSETS.npcMapSheets32&&GAME_ASSETS.npcMapSheets32[type])||(GAME_ASSETS.npcMapSheets&&GAME_ASSETS.npcMapSheets[type])||null;}
 function auxSpriteFrameIndex(angle=0,frames=16){return directionalIndex(angle,frames);}
 function auxSpriteSheetGrid(img){return directionalGridForImage(img?.naturalWidth||1,img?.naturalHeight||1);}
 function drawAuxSpriteSheet(img,angle,size,{x=0,y=0,color='#7edcff',designer=null,alpha=.94}={}){
@@ -586,7 +594,7 @@ function stellarPreviewV61(canvas,{kind='ship',id,designer=null}={}){
   if(!canvas)return;
   const c=canvas.getContext('2d');if(!c)return;
   const ship=kind==='ship',isPet=kind==='pet';
-  const fallback=ship?(shipCardAsset(id)||v56ShipPerspectiveArt(id)):
+  const fallback=ship?(shipChristmasArt(id,designer?.design_id)||shipCardAsset(id)||v56ShipPerspectiveArt(id)):
     isPet?auxVisualArtV64('aux9'):(droneVisualArtV64(id)||SPRITE53(id));
   const img=assetImage(fallback); // Reutiliza a textura já decodificada no cache global.
   let last=-1000;
@@ -1462,6 +1470,9 @@ function queueWarfrontGlobalAnnouncement(msg){
 }
 
 function handleSharedUniverseMessage(msg){
+  natalClientV132?.message(msg);
+  if(msg.type==='natal_reward'){natalCollectResolveV132?.resolve(msg);natalCollectResolveV132=null;return;}
+  if(msg.type==='natal_error'){natalCollectResolveV132?.reject(new Error(msg.message));natalCollectResolveV132=null;return;}
   if(handleWarbotMessageV477(msg))return;
   if(!msg||!progress)return;
   if(msg.type==='join_error'){
@@ -1730,14 +1741,14 @@ async function applyAuthoritativePurchase(catalogKey,label='Item'){
 
 // ===================== V16.5 DESIGNER SYSTEM • DRONE + SHIP + AUX =====================
 const designerRuntime={state:{inventory:{},drones:{},loadout:{ship:null,pet:null},catalog:[]},busy:false,lastAt:0};
-function designerCatalog(){return Array.isArray(designerRuntime.state?.catalog)?designerRuntime.state.catalog:[];}
+function designerCatalog(){const rows=Array.isArray(designerRuntime.state?.catalog)?designerRuntime.state.catalog:[];return [...rows.filter(d=>!NATAL_DESIGNS.some(n=>n.design_id===d.design_id)),...NATAL_DESIGNS];}
 function designById(id){return designerCatalog().find(d=>d.design_id===id)||null;}
 function droneDesignId(droneId){return designerRuntime.state?.drones?.[String(droneId||'')]||null;}
 function droneDesignFor(droneId){return designById(droneDesignId(droneId));}
 function currentShipDesignId(){return designerRuntime.state?.loadout?.ship||null;}
 function currentPetDesignId(){return designerRuntime.state?.loadout?.pet||null;}
 function shipDesignerEligible(shipId=progress?.activeShipId){const ship=SHIPS[shipId];return !!ship&&(!!ship.eventOnly||ship.currency==='uridium');}
-function currentShipDesign(){const d=designById(currentShipDesignId());return d?.kind==='ship'&&shipDesignerEligible()?d:null;}
+function currentShipDesign(){const d=designById(currentShipDesignId());return d?.kind==='ship'&&shipDesignerEligible()&&compatibleDesign(d,progress.activeShipId)?d:null;}
 function currentPetDesign(){const d=designById(currentPetDesignId());return d?.kind==='pet'&&progress?.pet?.owned?d:null;}
 function ownedDesignQty(id){return Math.max(0,Number(designerRuntime.state?.inventory?.[id])||0);}
 function freshAdminUnlockState(){return {kitGranted:false,designer:{loadout:{ship:null,pet:null},drones:{}}};}
@@ -1794,6 +1805,7 @@ function designerBonusSummary(d){
   if(b.full_set_shield)parts.push(`SET 8/8: +${pctText(b.full_set_shield)} ESCUDO`);
   if(b.full_set_hp)parts.push(`SET 8/8: +${pctText(b.full_set_hp)} HP`);
   if(b.hp)parts.push(`+${pctText(b.hp)} HP`);if(b.shield)parts.push(`+${pctText(b.shield)} ESCUDO`);if(b.damage)parts.push(`+${pctText(b.damage)} DANO`);
+  if(b.speed)parts.push(`+${pctText(b.speed)} VELOCIDADE`);
   if(b.xp)parts.push(`+${pctText(b.xp)} XP`);if(b.crit)parts.push(`+${pctText(b.crit)} CRÍTICO`);if(b.repair)parts.push(`+${pctText(b.repair)} REPARAÇÃO`);
   if(d?.ability?.name)parts.push(`HAB: ${d.ability.name}`);
   return parts.join(' • ')||'Visual raro';
@@ -1828,6 +1840,7 @@ async function equipDroneDesigner(droneId,designId){
   try{await flushCloudSave(true);designerRuntime.state=await setDesignLoadoutOnline({kind:'drone',designId:designId||null,droneId});designerRuntime.state=applyAdminDesignerOverrides(designerRuntime.state);designerRuntime.lastAt=Date.now();computeStats(true);saveGame();renderHangar();updateUI();syncSharedUniversePlayer(true);showToast(designId?`${designById(designId)?.name||'Designer'} equipado`:'Designer removido');}catch(e){showToast(e.message||'Não foi possível equipar o designer');}
 }
 async function equipShipDesigner(designId){
+  if(designId&&!compatibleDesign(designById(designId),progress.activeShipId)){showToast('Este designer pertence a outra nave');return;}
   if(!canChangeEquipment()){showToast('Designer de nave só pode ser alterado na sua base X-1');return;}
   if(designId&&!shipDesignerEligible()){showToast('Designers de nave são exclusivos de naves ELITE ou ESPECIAIS DE EVENTO');return;}
   if(isAdminPilot()){designerRuntime.state.loadout.ship=designId||null;persistAdminDesignerSelection('ship',designId||null);designerRuntime.lastAt=Date.now();abilityRuntime.activeId=null;abilityRuntime.activeUntil=0;computeStats(true);saveGame();renderHangar();updateAbilityHud();updateUI();syncSharedUniversePlayer(true);showToast(designId?`${designById(designId)?.name||'Designer'} ativado na nave`:'Designer de nave removido');return;}
@@ -2082,6 +2095,7 @@ let serverEliteEquippedTitleV22=null;
 let serverEliteTitleOwnerV22=null;
 const PILOT_TITLES=[
   {id:'pioneer',group:'PROGRESSÃO',label:'Pioneiro Estelar',desc:'Título inicial de todo piloto.',target:1,metric:()=>1,format:(n)=>`${fmt(n)}/1`,req:'Disponível desde o início.'},
+  {id:'natal2026',group:'NATAL',label:'Guardião do Natal 2026',desc:'Conquista coletiva da temporada natalina.',target:1,metric:()=>progress?.natalTitleV132?1:0,format:n=>n?'Conquistado':'Complete a meta global',req:'Resgate a terceira etapa global.'},
   {id:'cadet',group:'PROGRESSÃO',label:'Cadete Estelar',desc:'Primeiros sistemas dominados.',target:5,metric:()=>Number(progress?.profile?.level||1),format:(n)=>`Nível ${fmt(n)}/5`,req:'Alcance o nível 5.'},
   {id:'veteran',group:'PROGRESSÃO',label:'Veterano do Vazio',desc:'Experiência comprovada em setores avançados.',target:15,metric:()=>Number(progress?.profile?.level||1),format:(n)=>`Nível ${fmt(n)}/15`,req:'Alcance o nível 15.'},
   {id:'ace',group:'PROGRESSÃO',label:'Ás Estelar',desc:'Piloto de progressão avançada.',target:25,metric:()=>Number(progress?.profile?.level||1),format:(n)=>`Nível ${fmt(n)}/25`,req:'Alcance o nível 25.'},
@@ -4551,7 +4565,8 @@ function galaxyEventOrePickup(ore,amount){if(sharedUniverseMap())return;const ev
 function renderGalaxyEventHud(ev=currentGalaxyEvent(),rec=galaxyEventRecord(ev)){
   if(!ui.galaxyEventHud)return;if(!ev||ev.id==='none'){ui.galaxyEventHud.classList.add('hidden');if(ui.galaxyEventTopStatus)ui.galaxyEventTopStatus.textContent='—';return;}ui.galaxyEventHud.classList.remove('hidden');ui.galaxyEventHud.classList.toggle('complete',!!rec.complete);if(ui.galaxyEventIcon)ui.galaxyEventIcon.textContent=ev.icon;if(ui.galaxyEventName)ui.galaxyEventName.textContent=ev.name;if(ui.galaxyEventObjective){const st=eventStage(ev,Date.now(),eventControlProfile({},ev?.rules?.event_control).phaseCount??4);ui.galaxyEventObjective.textContent='ETAPA '+st.number+'/'+st.total+' • '+st.label+' • '+galaxyEventObjectiveText(ev,rec);}if(ui.galaxyEventTimer)ui.galaxyEventTimer.textContent=galaxyEventTimeText(galaxyEventSecondsLeft(ev));if(ui.galaxyEventProgress)ui.galaxyEventProgress.style.width=`${Math.min(100,(Number(rec.value)||0)/Math.max(1,ev.target)*100)}%`;if(ui.galaxyEventTopStatus)ui.galaxyEventTopStatus.textContent=ev?.informationalOnly?(galaxyEventEligible({...ev,informationalOnly:false})?'SINCRONIZANDO':'OUTRO SETOR'):rec.complete?'OK':galaxyEventTimeText(galaxyEventSecondsLeft(ev));
 }
-function renderGalaxyEvent(){if(!ui.galaxyEventContent||!progress)return;const ev=currentGalaxyEvent();if(ev.id==='none'){ui.galaxyEventContent.innerHTML=weekendEventCalendarHtml()+'<section class="galaxy-event-hero"><div class="galaxy-event-hero-icon">◇</div><div><div class="eyebrow">UNIVERSO EM EXPLORAÇÃO</div><h3>SEM EVENTO GLOBAL ATIVO</h3><p>Os eventos automáticos acontecem apenas aos sábados e domingos, nos horários definidos. NPCs comuns, missões, PvP e mineração continuam disponíveis.</p></div></section>';return;}const rec=galaxyEventRecord(ev),reward=galaxyEventRewardScaled(ev),eligible=galaxyEventEligible(ev),wb=worldBossState(),worldBossHtml=wb?`<section class="galaxy-event-card world"><div><small>COLETIVO ONLINE • WARFRONT</small><b>${escHtml(wb.name||'NEMESIS PRIME')}</b><span>${Number(wb.hp)>0?`${fmt(wb.hp)} / ${fmt(wb.max_hp)} HP`:'DERROTADO • LOOT DISPONÍVEL'}</span></div><button class="ghost-btn" data-event-warfront>ABRIR WARFRONT</button></section>`:'';const admin=isAdminPilot()?`<section class="galaxy-event-admin"><small>LIVE OPS</small><div class="muted">O calendário, as ondas, os objetivos e as recompensas podem ser ajustados no painel ADM → EVENTOS.</div></section>`:'';
+function renderGalaxyEvent(){
+ if(currentGalaxyEvent()?.rules?.christmas){ui.galaxyEventContent.innerHTML='<h2>❄ Natal Estelar</h2><p>Missões, metas coletivas, mapas e recompensas estão na Central Natal.</p><button id="natalOpenFromEvents">ABRIR CENTRAL NATAL</button>';document.getElementById('natalOpenFromEvents').onclick=()=>document.querySelector('.natal-launch')?.click();return;}if(!ui.galaxyEventContent||!progress)return;const ev=currentGalaxyEvent();if(ev.id==='none'){ui.galaxyEventContent.innerHTML=weekendEventCalendarHtml()+'<section class="galaxy-event-hero"><div class="galaxy-event-hero-icon">◇</div><div><div class="eyebrow">UNIVERSO EM EXPLORAÇÃO</div><h3>SEM EVENTO GLOBAL ATIVO</h3><p>Os eventos automáticos acontecem apenas aos sábados e domingos, nos horários definidos. NPCs comuns, missões, PvP e mineração continuam disponíveis.</p></div></section>';return;}const rec=galaxyEventRecord(ev),reward=galaxyEventRewardScaled(ev),eligible=galaxyEventEligible(ev),wb=worldBossState(),worldBossHtml=wb?`<section class="galaxy-event-card world"><div><small>COLETIVO ONLINE • WARFRONT</small><b>${escHtml(wb.name||'NEMESIS PRIME')}</b><span>${Number(wb.hp)>0?`${fmt(wb.hp)} / ${fmt(wb.max_hp)} HP`:'DERROTADO • LOOT DISPONÍVEL'}</span></div><button class="ghost-btn" data-event-warfront>ABRIR WARFRONT</button></section>`:'';const admin=isAdminPilot()?`<section class="galaxy-event-admin"><small>LIVE OPS</small><div class="muted">O calendário, as ondas, os objetivos e as recompensas podem ser ajustados no painel ADM → EVENTOS.</div></section>`:'';
   ui.galaxyEventContent.innerHTML=weekendEventCalendarHtml()+`<section class="galaxy-event-hero ${rec.complete?'complete':''}"><div class="galaxy-event-hero-icon">${ev.icon}</div><div><div class="eyebrow">EVENTO ATUAL • ETAPA ${eventStage(ev,Date.now(),eventControlProfile({},ev?.rules?.event_control).phaseCount??4).number}/${eventStage(ev,Date.now(),eventControlProfile({},ev?.rules?.event_control).phaseCount??4).total} • ${eventStage(ev,Date.now(),eventControlProfile({},ev?.rules?.event_control).phaseCount??4).label} • ${galaxyEventTimeText(galaxyEventSecondsLeft(ev))}</div><h3>${ev.name}</h3><p>${ev.desc}</p><div class="galaxy-event-big-progress"><i style="width:${Math.min(100,(Number(rec.value)||0)/Math.max(1,ev.target)*100)}%"></i></div><b>${galaxyEventObjectiveText(ev,rec)}</b></div></section><div class="galaxy-event-grid"><section class="galaxy-event-card"><small>RECOMPENSA PESSOAL</small><b>${fmt(reward.credits)} CR</b><span>${fmt(reward.uridium)} STL • ${fmt(reward.xp)} XP${reward.cores?` • ${reward.cores} CORE`:''}</span></section><section class="galaxy-event-card"><small>SETOR</small><b>${eligible?displayMapLabel(progress.mapId):ev.id==='battle'?'4-1 / 4-2 / 4-3':'X-2 / X-3 / X-4'}</b><span>${eligible?'Você está no setor do evento.':'Abra o mapa e siga para um setor compatível.'}</span></section><section class="galaxy-event-card"><small>PILOTOS ONLINE NO SETOR</small><b>${onlineWorld.players.size+1}</b><span>${[...onlineWorld.players.values()].filter(onlinePlayerEnemy).length} hostil(is) detectado(s)</span></section></div><div class="galaxy-event-actions"><button class="primary-btn" data-event-map>ABRIR MAPA</button>${ev.id==='battle'||worldBossOpen()?'<button class="danger-btn" data-event-warfront>WARFRONT / WORLD BOSS</button>':''}</div>${worldBossHtml}${admin}`;
 }
 function openGalaxyEvent(){closeNavigationModals(ui.galaxyEventModal);renderGalaxyEvent();ui.galaxyEventModal?.classList.remove('hidden');refreshLiveOpsState(true).then(()=>{if(!ui.galaxyEventModal?.classList.contains('hidden'))renderGalaxyEvent();}).catch(()=>{});}
@@ -4896,6 +4911,17 @@ function clearActivityFeed(){
 }
 function safePilotMessage(raw){
   const message=String(raw??'').slice(0,340);
+  // These messages originate from confirmed saves or explicit pending states.
+  // Translate their exact meaning before the generic technical-error filter.
+  const knownMessages={
+    'Hangar confirmado no Supabase ✓':'Hangar salvo ✓',
+    'Recompensa anterior aguardando confirmação do Supabase':'Recompensa anterior aguardando confirmação do servidor.',
+    'Montagem antiga bloqueada • equipamentos do Supabase restaurados':'Equipamentos restaurados para a montagem confirmada no servidor.',
+    'DOMÍNIO • REGRAS SALVAS NO SQL':'DOMÍNIO • REGRAS SALVAS',
+    'FRONTEIRA • REGISTRO CONFIRMADO NO SQL':'FRONTEIRA • REGISTRO CONFIRMADO'
+  };
+  if(Object.hasOwn(knownMessages,message))return knownMessages[message];
+
   // Erros internos não são exibidos ao jogador, mas a mensagem deve explicar a ação necessária.
   // Estas traduções não afirmam que a operação foi concluída.
   if(/SAVE_EQUIPMENT_(?:INTENT_REQUIRED|STALE)|HANGAR_WRITE_GUARD|equipment.*(?:stale|intent)/i.test(message))
@@ -6236,7 +6262,7 @@ function computeStats(keepRatio=true){
   const designerMult=droneDesignerMultipliers();hp*=designerMult.hp;shield*=designerMult.shield;laserDamage*=designerMult.damage;
   if(economyBoostActive('weapon'))laserDamage*=1+economyServiceEffect('weapon','laser_damage_pct',3)/100;if(economyBoostActive('shield'))shield*=1+economyServiceEffect('shield','shield_pct',5)/100;if(economyBoostActive('thruster'))speed+=economyServiceEffect('thruster','speed_flat',5);
   hp*=1+relayGlobalBonusPct('hp')/100;shield*=1+relayGlobalBonusPct('shield')/100;speed*=1+relayGlobalBonusPct('speed')/100;laserDamage*=1+relayGlobalBonusPct('damage')/100;const astralV435=astralEquipmentBonusesV435(astralCombatV431.owner===getUser()?.id?astralCombatV431.snapshot:null,progress?.combatConfigsV2013?.active||1);shield*=1+astralV435.shieldPercent/100;speed*=1+astralV435.speedPercent/100;laserDamage*=1+astralV435.npcDamagePercent/100;
-  player.maxHp=Math.round(hp);player.maxShield=Math.round(shield);player.speed=Math.round(speed);player.laserDamage=Math.round(laserDamage);player.shieldAbsorption=absorption;player.rocketMult=rocketMult;player.shieldRegenBoost=shieldRegenBoost;
+  player.maxHp=Math.round(hp);player.maxShield=Math.round(shield);player.speed=Math.round(speed*(1+Number(shipDesignBonus.speed||0)));player.laserDamage=Math.round(laserDamage);player.shieldAbsorption=absorption;player.rocketMult=rocketMult;player.shieldRegenBoost=shieldRegenBoost;
   player.hp=keepRatio?Math.min(player.maxHp,Math.max(1,Math.round(player.maxHp*oldHpRatio))):player.maxHp;
   player.shield=keepRatio?Math.min(player.maxShield,Math.max(0,Math.round(player.maxShield*oldShieldRatio))):player.maxShield;
   if(keepRatio&&astralV435.shieldPercent>0)player.shield=Math.min(player.shield,preAstralShieldV435);
@@ -7576,7 +7602,7 @@ function drawRemoteLaser(rp,p){
 }
 function drawOnlinePlayers(){
   for(const rp of onlineWorld.players.values()){
-    if(!onScreenWorld(rp.x,rp.y,180))continue;const p=screenPos(rp.x,rp.y),f=FACTIONS[rp.faction],enemy=onlinePlayerEnemy(rp),sameGroup=isBattleGroupMember(rp.id),sameClan=!!currentClanTag()&&!!rp.clanTag&&rp.clanTag===currentClanTag(),color=sameGroup?'#63e8ff':enemy?'#ff4d69':sameClan?'#ffe16b':(f?.color||'#69ffbd'),path=shipMapAsset(rp.shipId,rp.faction),img=assetImage(path),sheet=assetImage(shipMapSheetAsset(rp.shipId,rp.faction)),size=onlineShipSize(rp.shipId),designer=designById(rp.shipDesignId),visual=designer?.visual||{},moving=Math.hypot((rp.tx??rp.x)-rp.x,(rp.ty??rp.y)-rp.y)>2;
+    if(!onScreenWorld(rp.x,rp.y,180))continue;const p=screenPos(rp.x,rp.y),f=FACTIONS[rp.faction],enemy=onlinePlayerEnemy(rp),sameGroup=isBattleGroupMember(rp.id),sameClan=!!currentClanTag()&&!!rp.clanTag&&rp.clanTag===currentClanTag(),color=sameGroup?'#63e8ff':enemy?'#ff4d69':sameClan?'#ffe16b':(f?.color||'#69ffbd'),path=shipMapAsset(rp.shipId,rp.faction,rp.shipDesignId),img=assetImage(path),sheet=assetImage(shipMapSheetAsset(rp.shipId,rp.faction)),size=onlineShipSize(rp.shipId),designer=designById(rp.shipDesignId),visual=designer?.visual||{},moving=Math.hypot((rp.tx??rp.x)-rp.x,(rp.ty??rp.y)-rp.y)>2;
     ctx.save();ctx.translate(p.x,p.y);ctx.globalAlpha=.92;if(state.target?.isPlayer&&state.target.id===rp.id)drawCircularSelectionV78(ctx,{radius:size*.55+18,color:'#ffed6f',quality:resolvedQualityMode(),mobile:DEVICE_CAPS.mobile,time:nowSec()});
     if(sheet&&sheet.naturalWidth){ctx.save();ctx.rotate((rp.angle||0)+Math.PI/2);drawEngineWakeLocal(size,visual.glow||color,moving?1:0,Number(rp.level)||0);ctx.restore();drawAuxSpriteSheet(sheet,rp.angle||0,size,{x:0,y:0,color:visual.glow||color,designer,alpha:1});drawDesignerAuraLocal(size,designer,visual,Number(rp.level)||0);}else if(img&&img.naturalWidth){const sc=size/Math.max(img.naturalWidth,img.naturalHeight);ctx.save();ctx.rotate((rp.angle||0)+Math.PI/2);drawEngineWakeLocal(size,visual.glow||color,moving?1:0,Number(rp.level)||0);drawEntitySpriteV79(ctx,img,[-img.naturalWidth*sc/2,-img.naturalHeight*sc/2,img.naturalWidth*sc,img.naturalHeight*sc],{mobile:DEVICE_CAPS.mobile});ctx.restore();drawDesignerAuraLocal(size,designer,visual,Number(rp.level)||0);}else{ctx.rotate(rp.angle||0);drawShipModel(rp.shipId,color);}
     if(moving){ctx.save();ctx.rotate((rp.angle||0)+Math.PI/2);drawShipWingLights(ctx,{quality:resolvedQualityMode(),mobile:DEVICE_CAPS.mobile,size,color});ctx.restore();}
@@ -8221,6 +8247,7 @@ function draw(){
   if(visualTestV75!=='relay')drawWarfrontControlWorld();
   const relayEnd=diag?performance.now():0;
   if(diag)VISUAL_PROFILE_V71.set({baseMs:baseEnd-baseStart,portalMs:portalEnd-portalStart,relayMs:relayEnd-portalEnd,quality:resolvedQualityMode(),time:portalEnd});
+  natalClientV132?.draw(ctx,screenPos,assetImage,Date.now(),resolvedQualityMode()==='low');
   drawRelayTurretBolts();drawOres();drawBonusBoxes();drawLoot();drawGalaxyEventWorld();
   state.enemies.forEach(e=>e.hp>0&&onScreenWorld(e.x,e.y,180)&&drawEnemy(e));
   drawOnlinePlayers();drawWarbotBeamsV477();
@@ -8817,7 +8844,7 @@ function filteredInventoryGrid(filter,context='ship',allowed=['lasers','shields'
 
 
 function renderHangarShips(){
-  const root=document.createElement('div'),defs=designerCatalog().filter(d=>d.kind==='ship'),activeDesign=currentShipDesign(),eligible=shipDesignerEligible();
+  const root=document.createElement('div'),defs=designerCatalog().filter(d=>compatibleDesign(d,progress.activeShipId)),activeDesign=currentShipDesign(),eligible=shipDesignerEligible();
   const designerBox=document.createElement('div');designerBox.className='section-box ship-designer-console';
   const cards=defs.filter(d=>activeDesign?.design_id===d.design_id).map(d=>`<div class="designer-summary-card is-equipped"><div class="designer-orb" style="--designer-glow:${d.visual?.glow||'#7edcff'};--designer-accent:${d.visual?.accent||'#fff'}"></div><div><b>${d.name}</b><small>${designerBonusSummary(d)}</small><span>ATIVO • Bônus definido pelo servidor</span></div></div>`).join('');
   designerBox.innerHTML=`<h3>PERSONALIZAR NAVE ELITE</h3><div class="muted" style="font-size:11px;margin-bottom:7px">Os modelos exclusivos estão em preparação. Alterações apenas na base; efeitos e inventário permanecem validados pelo servidor.</div><div class="designer-summary-grid">${cards||'<div class="muted">Nave sem designer ativo.</div>'}</div>`;
@@ -8945,7 +8972,7 @@ function addWorkbenchInventoryV1092(bottom,filter,context,allowed,droneId=null){
   inv.appendChild(filteredInventoryGrid(filter,context,allowed,droneId));bottom.appendChild(inv);
 }
 function renderWorkbenchDesignersV1092(bottom,kind,droneId=null){
-  const defs=designerCatalog().filter(d=>d.kind===kind),activeId=kind==='ship'?currentShipDesignId():kind==='pet'?currentPetDesignId():droneDesignId(droneId);
+  const defs=designerCatalog().filter(d=>d.kind===kind&&(kind!=='ship'||compatibleDesign(d,progress.activeShipId))),activeId=kind==='ship'?currentShipDesignId():kind==='pet'?currentPetDesignId():droneDesignId(droneId);
   const eligible=kind!=='ship'||shipDesignerEligible();const canEdit=canChangeEquipment()&&eligible&&(kind!=='drone'||!!droneId);
   const note=document.createElement('p');note.className='aux-workbench-caution-v1091';note.textContent=!eligible?'Designers de nave só estão disponíveis para naves ELITE ou ESPECIAIS DE EVENTO.':'Designers disponíveis no inventário do servidor. A aplicação é validada pelo servidor e não altera os equipamentos salvos nas CONF 1/2.';bottom.appendChild(note);
   const grid=document.createElement('div');grid.className='v1092-designer-grid';
@@ -8955,7 +8982,7 @@ function renderWorkbenchDesignersV1092(bottom,kind,droneId=null){
     if(def){
       const dot=document.createElement('span');dot.className='v1092-designer-orb';dot.style.setProperty('--designer-glow',def.visual?.glow||'#7edcff');
       const drone=kind==='drone'?progress.drones.find(d=>d.id===droneId):null;
-      const art=kind==='ship'?v56ShipPerspectiveArt(progress.activeShipId):kind==='pet'?auxVisualArtV64('aux9'):drone?(droneVisualArtV64(visualDroneV53(drone.type,def))||SPRITE53(visualDroneV53(drone.type,def))):null;
+      const art=kind==='ship'?(shipChristmasArt(progress.activeShipId,def.design_id)||v56ShipPerspectiveArt(progress.activeShipId)):kind==='pet'?auxVisualArtV64('aux9'):drone?(droneVisualArtV64(visualDroneV53(drone.type,def))||SPRITE53(visualDroneV53(drone.type,def))):null;
       if(art){const thumb=document.createElement('img');thumb.src=art;thumb.alt='';thumb.loading='lazy';thumb.style.filter=designerVisualCss(def);dot.appendChild(thumb);}
       card.appendChild(dot);
     }
@@ -10870,7 +10897,7 @@ async function saveAdminGateEditor(){
  try{gateAdmValidate(d);}catch(e){showToast(e.message);return;}
  if(!await stellarConfirmV4776(`Publicar ${d.rounds.length} rounds e novas recompensas de ${GALAXY_GATE_DEFS[key].label}?`))return;
  gateAdminRuntime.busy=true;renderAdminPortalsEditor();
- try{const data=await adminUpdateGalaxyGateOnline(key,d);applyGateLiveConfig(data);gateAdminRuntime.snapshot=data;gateAdminRuntime.draft[key]=gateConfigDraft(key);gateAdminRuntime.dirty=false;showToast(`Portal ${GALAXY_GATE_DEFS[key].label} atualizado no Supabase!`,'reward');}
+ try{const data=await adminUpdateGalaxyGateOnline(key,d);applyGateLiveConfig(data);gateAdminRuntime.snapshot=data;gateAdminRuntime.draft[key]=gateConfigDraft(key);gateAdminRuntime.dirty=false;showToast(`Portal ${GALAXY_GATE_DEFS[key].label} atualizado no servidor!`,'reward');}
  catch(e){showToast(e.message||'Servidor recusou a configuração.');}
  finally{gateAdminRuntime.busy=false;renderAdminPortalsEditor();}
 }
@@ -12142,7 +12169,7 @@ if(ui.warfrontContent)ui.warfrontContent.onclick=async e=>{const attack=e.target
   for(const x of panel?.querySelectorAll('[data-dominion-rule]')||[])payload[x.dataset.dominionRule]=Number(x.value);
   btn.disabled=true;saveDominionRulesOnline(payload).then(()=>{showToast('DOMÍNIO • REGRAS SALVAS NO SQL','reward');return refreshRelayWorkshop(true);}).catch(e=>showToast(e.message)).finally(()=>btn.disabled=false);return;
  }
- if(e.target.closest('[data-relay-refresh]')){refreshRelayWorkshop(true);return;}const act=e.target.closest('[data-relay-action]');if(act){performRelayAction(act.dataset.relayAction);return;}const mission=e.target.closest('[data-relay-mission]');if(mission){const id=mission.dataset.relayMission;if(relayMissionBusy.has(id))return;const progressRow=relayWorkshopRuntime.state?.missionProgress?.[id];if(!progressRow||progressRow.claimed||Number(progressRow.count)<Number(progressRow.target))return showToast('Esta missão ainda não está disponível para resgate.');relayMissionBusy.add(id);mission.disabled=true;claimRelayMissionOnline(id).then(()=>{showToast('MISSÃO DE CLÃ • PEÇAS RECEBIDAS!','reward');return refreshRelayWorkshop(true);}).catch(err=>showToast(err.message)).finally(()=>{relayMissionBusy.delete(id);mission.disabled=false;});return;}if(e.target.closest('[data-relay-repair]')){repairRelayOnline({mapId:$('#relayRepairMapV346')?.value,nodeId:$('#relayRepairNodeV346')?.value}).then(()=>{showToast('RELÉ REPARADO • +100.000 ESCUDO/HP','reward');refreshRelayWorkshop(true);}).catch(err=>showToast(err.message));return;}if(e.target.closest('[data-relay-admin-release]')){const kind=e.target.closest('[data-relay-admin-release]').dataset.relayAdminRelease,mapId=$('#relayAdmReleaseMapV346')?.value,nodeId=$('#relayAdmReleaseNodeV346')?.value;const label=kind==='all'?'clã E facção':'clã';if(!await stellarConfirmV4776(`ADMINISTRADOR: expulsar ${label} do relé ${nodeId} em ${mapId}?\n\nOs módulos voltam ao inventário e o histórico será preservado.`))return;adminReleaseRelayOnline({mapId,nodeId,clearFaction:kind==='all'}).then(()=>{showToast('DOMÍNIO LIBERADO PELO ADM','reward');refreshRelayWorkshop(true);refreshSectorReadOnly(true).catch(()=>{});}).catch(err=>showToast(err.message));return;}const fortTierSave=e.target.closest('[data-relay-fort-tier-save]');if(fortTierSave){const row=fortTierSave.closest('[data-relay-fort-tier-row]');if(!row)return;const body={level:Number(fortTierSave.dataset.relayFortTierSave)};for(const input of row.querySelectorAll('[data-relay-fort-tier-field]'))body[input.dataset.relayFortTierField]=Number(input.value);fortTierSave.disabled=true;saveRelayFortificationTierOnline(body).then(()=>{showToast('FORTALEZA LV'+body.level+' • SALVA NO SQL','reward');return refreshRelayWorkshop(true);}).catch(err=>showToast(String(err?.message||err))).finally(()=>fortTierSave.disabled=false);return;}
+ if(e.target.closest('[data-relay-refresh]')){refreshRelayWorkshop(true);return;}const act=e.target.closest('[data-relay-action]');if(act){performRelayAction(act.dataset.relayAction);return;}const mission=e.target.closest('[data-relay-mission]');if(mission){const id=mission.dataset.relayMission;if(relayMissionBusy.has(id))return;const progressRow=relayWorkshopRuntime.state?.missionProgress?.[id];if(!progressRow||progressRow.claimed||Number(progressRow.count)<Number(progressRow.target))return showToast('Esta missão ainda não está disponível para resgate.');relayMissionBusy.add(id);mission.disabled=true;claimRelayMissionOnline(id).then(()=>{showToast('MISSÃO DE CLÃ • PEÇAS RECEBIDAS!','reward');return refreshRelayWorkshop(true);}).catch(err=>showToast(err.message)).finally(()=>{relayMissionBusy.delete(id);mission.disabled=false;});return;}if(e.target.closest('[data-relay-repair]')){repairRelayOnline({mapId:$('#relayRepairMapV346')?.value,nodeId:$('#relayRepairNodeV346')?.value}).then(()=>{showToast('RELÉ REPARADO • +100.000 ESCUDO/HP','reward');refreshRelayWorkshop(true);}).catch(err=>showToast(err.message));return;}if(e.target.closest('[data-relay-admin-release]')){const kind=e.target.closest('[data-relay-admin-release]').dataset.relayAdminRelease,mapId=$('#relayAdmReleaseMapV346')?.value,nodeId=$('#relayAdmReleaseNodeV346')?.value;const label=kind==='all'?'clã E facção':'clã';if(!await stellarConfirmV4776(`ADMINISTRADOR: expulsar ${label} do relé ${nodeId} em ${mapId}?\n\nOs módulos voltam ao inventário e o histórico será preservado.`))return;adminReleaseRelayOnline({mapId,nodeId,clearFaction:kind==='all'}).then(()=>{showToast('DOMÍNIO LIBERADO PELO ADM','reward');refreshRelayWorkshop(true);refreshSectorReadOnly(true).catch(()=>{});}).catch(err=>showToast(err.message));return;}const fortTierSave=e.target.closest('[data-relay-fort-tier-save]');if(fortTierSave){const row=fortTierSave.closest('[data-relay-fort-tier-row]');if(!row)return;const body={level:Number(fortTierSave.dataset.relayFortTierSave)};for(const input of row.querySelectorAll('[data-relay-fort-tier-field]'))body[input.dataset.relayFortTierField]=Number(input.value);fortTierSave.disabled=true;saveRelayFortificationTierOnline(body).then(()=>{showToast('FORTALEZA LV'+body.level+' • SALVA NO SERVIDOR','reward');return refreshRelayWorkshop(true);}).catch(err=>showToast(String(err?.message||err))).finally(()=>fortTierSave.disabled=false);return;}
  const saveBalance=e.target.closest('[data-relay-balance-save]');if(saveBalance){const key=String(saveBalance.dataset.relayBalanceSave||'').split(':'),row=saveBalance.closest('[data-relay-balance-row]');if(key.length!==3||!row)return;const body={category:key[0],attribute:key[1],level:Number(key[2])};for(const input of row.querySelectorAll('[data-relay-balance-field]'))body[input.dataset.relayBalanceField]=Number(input.value);saveBalance.disabled=true;saveRelayModuleBalanceOnline(body).then(()=>{row.closest('.relay-admin-balance-v3463').open=false;showToast('MÓDULO • LV'+body.level+' SALVO NO SERVIDOR','reward');return refreshRelayWorkshop(true);}).catch(err=>showToast(String(err.message||err))).finally(()=>{saveBalance.disabled=false;});return;}
  const frontierButton=e.target.closest('[data-frontier-claim],[data-frontier-craft],[data-frontier-clan-claim],[data-frontier-admin-save],[data-frontier-refresh]');
  if(frontierButton){
@@ -12881,3 +12908,25 @@ setInterval(()=>{if(VISUAL_ISOLATION_V75.snapshot().active)syncVisualIsolationV7
 
 // V121: gravacao de emergencia quando Android/Web muda para segundo plano.
 installLocalFirstPageFlushV121();
+
+// V132: same serialized economy lane and authoritative state installer as purchases.
+let natalCollectResolveV132=null;
+async function natalMutationV132(fn){return queueEconomy(async()=>{
+ if(offlineFarmWorldLockedV84())throw Error('Encerre o Farm Offline antes desta operação');
+ await syncBeforeEconomy();economyMutationInFlightV106=true;
+ try{const r=await fn();if(r?.state)installEconomyState(r.state);await refreshDesignerState(true);updateUI();return r;}
+ finally{economyMutationInFlightV106=false;}
+});}
+natalClientV132=createChristmasUI({
+ combat:()=>!!player.laserFiring||!!state.target,account:()=>getUser()?.id,
+ ready:()=>!!authenticated&&!!progress&&!gameBootstrapRuntime.loading,
+ status:natalStatusOnline,claim:key=>natalMutationV132(()=>natalClaimOnline(key)),
+ toast:message=>showToast(message),ship:()=>progress?.activeShipId,faction:()=>progress?.profile?.faction,
+ owned:id=>ownedDesignQty(id)>0,position:()=>({x:player.x,y:player.y}),send:msg=>sharedUniverse.send(msg),
+ collect:id=>natalMutationV132(()=>new Promise((resolve,reject)=>{
+  const timer=setTimeout(()=>{natalCollectResolveV132=null;reject(Error('Coleta sem confirmação. Consulte o saldo antes de repetir.'));},15000);
+  natalCollectResolveV132={resolve:r=>{clearTimeout(timer);resolve(r);},reject:e=>{clearTimeout(timer);reject(e);}};
+  if(!sharedUniverse.send({type:'natal_collect',id})){clearTimeout(timer);natalCollectResolveV132=null;reject(Error('Reconecte para coletar'));}
+ }))
+});
+setInterval(()=>natalClientV132?.tick(),500);

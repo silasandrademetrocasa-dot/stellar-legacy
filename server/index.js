@@ -1,3 +1,4 @@
+import {createChristmasService,mountChristmasRoutes} from './christmas-v132.js';
 import {operationDigestV125,requestIdValidV125,decodeEconomyReceiptV125,replayValidV125} from './economy-receipts-v125.js';
 import {quoteCargoSaleV130} from './cargo-sale-v130.js';
 import {validPurchaseIdV123,interpretPurchaseCommitV123} from './live-purchase-v123.js';
@@ -1424,6 +1425,7 @@ app.post('/api/admin/runtime/events/central/manual',requireUser,asyncRoute(async
 // A autenticação do jogo é obrigatória e os prêmios são transacionados pelo PostgreSQL.
 app.post('/api/coupons/redeem', requireUser, asyncRoute(async (req,res)=>{
   const code=String(req.body?.code||'').trim().toUpperCase();
+  if(code==='NATALESTELAR'){const result=await natalServiceV132.action(req.user.id,'coupon:NATALESTELAR','coupon');return res.json({...result,handled:true,message:'Natal Estelar resgatado'});}
   if(!/^[A-Z0-9][A-Z0-9_-]{3,63}$/.test(code))return res.status(400).json({error:'Formato de cupom inválido.'});
   const result=await withPurchaseLock(req.user.id,async()=>{
     // Nova central ADM V19.0.3: tenta primeiro cupom novo; código antigo mantém fluxo V18.2.1.
@@ -2342,6 +2344,7 @@ app.put('/api/save', requireUser, OFFLINE_FARM_GUARD_V484, asyncRoute(async (req
   // V116.4: authoritative auto-trade receipts cannot be forged/erased by client PUT.
   if(serverSave?.state?.autoTradeReceiptsV1164)state.autoTradeReceiptsV1164=structuredClone(serverSave.state.autoTradeReceiptsV1164);
   else delete state.autoTradeReceiptsV1164;
+  for(const key of ['natalTitleV132','natalBadgeV132']){if(serverSave?.state?.[key])state[key]=serverSave.state[key];else delete state[key];}
   const authoritativePurchaseRevision=Math.max(0,Number(serverSave?.state?.serverPurchaseRevision)||0);
   const incomingPurchaseRevision=Math.max(0,Number(state?.serverPurchaseRevision)||0);
   if(incomingPurchaseRevision<authoritativePurchaseRevision)return res.status(409).json({
@@ -2456,6 +2459,8 @@ app.get('/api/admin/v115/quality',requireUser,asyncRoute(async(req,res)=>{
   res.set('Cache-Control','no-store');res.json({ok:true,...competitiveQualitySummaryV115(sharedUniverse.stats())});
 }));
 
+const natalServiceV132=createChristmasService({service:requireEliteAdmin,ensureInactive:uid=>offlineFarmEnsureInactiveV484(uid,requireEliteAdmin)});
+mountChristmasRoutes(app,{requireUser,asyncRoute,api:natalServiceV132,getWorld:()=>sharedUniverse});
 app.get('*', (req, res) => res.sendFile(path.join(__dirname, '../public/index.html')));
 
 app.use((err, req, res, next) => {
@@ -2477,7 +2482,7 @@ app.use((err, req, res, next) => {
 
 const port = process.env.PORT || 3000;
 const server = http.createServer(app);
-const sharedUniverse = attachSharedUniverse(server, {
+const sharedUniverse = attachSharedUniverse(server, {natal:natalServiceV132,
   loadWarbotConfig:async()=>{
     const sb=await requireEliteAdmin();
     const {data,error}=await sb.from('stellar_warbot_events_v477').select('map_id,enabled,mode,bots_per_faction,tier,attack_players,ends_at');
@@ -2556,7 +2561,7 @@ const sharedUniverse = attachSharedUniverse(server, {
     await offlineFarmEnsureInactiveV484(userId,requireEliteAdmin);
     const sb=await requireEliteAdmin();
     const grant=async()=>{
-      const {data,error}=await sb.rpc('stellar_grant_npc_reward_v1131',{
+      const {data,error}=await sb.rpc(npcType.startsWith('natal')?'stellar_natal_npc_v132':'stellar_grant_npc_reward_v1131',{
         p_user_id:userId,p_kill_key:killKey,p_npc_type:npcType,
         p_base_credits:baseCredits,p_base_stl:baseStl,p_owner_eligible:ownerEligible===true
       });
@@ -2700,3 +2705,5 @@ server.listen(port, () => {
   console.log('Supabase config:', configStatus());
   console.log('Shared Universe: ONLINE');
 });
+
+
