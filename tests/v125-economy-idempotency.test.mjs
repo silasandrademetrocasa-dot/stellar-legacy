@@ -33,7 +33,7 @@ test('V125 SQL and routes use durable receipt under atomic save transaction',()=
  const sql=read('sql/STELLAR_V125_0_ECONOMY_OPERATION_RECEIPTS.sql');const server=read('server/index.js');const game=read('public/game.js');
  assert.match(sql,/pg_advisory_xact_lock/);assert.match(sql,/FOR UPDATE/);assert.match(sql,/stellar_commit_player_save_v118/);
  assert.match(sql,/PRIMARY KEY \(user_id,request_id\)/);assert.match(sql,/ECONOMY_STALE/);
- assert.match(server,/stellar_commit_economy_operation_v125/);
+ assert.match(server,/commitEconomyUnifiedV1332/);
  assert.match(server,/stellar_economy_receipts_v125/);
  assert.match(server,/p_expected_updated_at:req.economyBaselineV125/);
  assert.match(server,/p_expected_updated_at:saveRow.updated_at/);

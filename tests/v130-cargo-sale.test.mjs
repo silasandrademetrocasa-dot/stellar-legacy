@@ -38,6 +38,6 @@ test('V130 diagnostic buffer bounded and does not collect identity, currency or 
 test('V130 wiring: authoritative server settlement and UI safe preflight',()=>{
  const game=text('../public/game.js');const server=text('../server/index.js');
  assert.match(game,/economyServerFirstV130\(action\)/);assert.match(game,/runEconomyAction\('sell_cargo',payload,\{flush:false,applyState:true\}\)/);
- assert.match(server,/quoteCargoSaleV130\(state\.cargo/);assert.match(server,/stellar_commit_economy_operation_v125/);
+ assert.match(server,/quoteCargoSaleV130\(state\.cargo/);assert.match(server,/commitEconomyUnifiedV1332/);
  assert.match(game,/scheduleMissionPanelRenderV130\(\)/);
 });

@@ -22,7 +22,7 @@ test('V92: compra em lote tem autenticação, guarda offline, débito e grant au
  assert.match(server,/withPurchaseLock\(req\.user\.id/);
  assert.match(server,/state\.bulkPurchaseReceiptsV92=/);
  assert.match(server,/applyLiveGrant\(state,\{\.\.\.row/);
- assert.match(server,/stellar_commit_economy_operation_v125/);
+ assert.match(server,/commitEconomyUnifiedV1332/);
  assert.ok(server.indexOf('const OFFLINE_FARM_GUARD_V484=')<server.indexOf("app.post('/api/live/purchase/bulk'"),'guard must be initialized first');
  assert.match(server,/expected_price\)!==quote.price/);
  assert.match(server,/bulkPurchaseReceiptsV92=structuredClone/);

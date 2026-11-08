@@ -26,6 +26,6 @@ test('V119.4: failures clear pending key and allow SQL to review retry',async()=
 test('V119.4: auction route uses singleflight plus existing SQL settlement v1182',()=>{
  const source=readFileSync(new URL('../server/index.js',import.meta.url),'utf8');
  assert.match(source,/AUCTION_SINGLE_FLIGHT_V1194\.run/);
- assert.match(source,/stellar_settle_auction_bid_v1182/);
+ assert.match(source,/settleAuctionUnifiedV1332/);
  assert.match(source,/withPurchaseLock\(req\.user\.id/);
 });

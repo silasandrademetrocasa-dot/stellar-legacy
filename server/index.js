@@ -1,3 +1,4 @@
+import {commitEconomyUnifiedV1332,settleAuctionUnifiedV1332} from './unified-command-v1332.js';
 import {claimMissionCommandV1331} from './mission-command-v1331.js';
 import {createChristmasService,mountChristmasRoutes} from './christmas-v132.js';
 import {operationDigestV125,requestIdValidV125,decodeEconomyReceiptV125,replayValidV125} from './economy-receipts-v125.js';
@@ -1455,7 +1456,7 @@ app.post('/api/live/purchase', requireUser, asyncRoute(async (req,res)=>{
   if(tamper){const result=await securityService.report(req.user.id,tamper,'live_purchase');if(result?.auto_suspended)return res.status(403).json({error:'Conta temporariamente suspensa por violação de integridade.',code:'ACCOUNT_BANNED'});return res.status(400).json({error:'Parâmetros de compra inválidos.',code:tamper.code});}
   const catalogKey=String(req.body?.catalog_key||'').trim().slice(0,120);
   if(!catalogKey)return res.status(400).json({error:'Produto inválido.'});
-  const requestId=req.body?.request_id==null?null:String(req.body.request_id);
+  const requestId=req.body?.request_id==null?randomUUID():String(req.body.request_id);
   if(requestId!==null&&!validPurchaseIdV123(requestId))
     return res.status(400).json({error:'Identificador de compra inválido.',code:'PURCHASE_ID_INVALID'});
   const result=await withPurchaseLock(req.user.id,async()=>{
@@ -1584,7 +1585,7 @@ app.post('/api/auction/settle',requireUser,OFFLINE_FARM_GUARD_V484,asyncRoute(as
   const result=await AUCTION_SINGLE_FLIGHT_V1194.run(
     auctionSettlementKeyV1194(req.user.id,body.hour_key,body.lot_ref),()=>withPurchaseLock(req.user.id,async()=>{
     const db=await requireEliteAdmin();
-    const {data,error}=await SAVE_OPERATIONS_V1192.measure('leilao',()=>db.rpc('stellar_settle_auction_bid_v1182',{
+    const {data,error}=await SAVE_OPERATIONS_V1192.measure('leilao',()=>settleAuctionUnifiedV1332(db,{
       p_user_id:req.user.id,p_hour_key:body.hour_key,p_lot_ref:body.lot_ref
     }));
     if(error){
@@ -1674,7 +1675,7 @@ app.post('/api/live/purchase/bulk', requireUser, OFFLINE_FARM_GUARD_V484, asyncR
     state.accountOwnerId=req.user.id;state.accountOwnerEmail=req.user.email||null;
     const receipt={requestId,catalogKey:key,quantity,delivered:quote.delivered,packages:quote.packages,price:quote.price,currency,at:Date.now()};
     state.bulkPurchaseReceiptsV92=[...receipts.slice(-23),receipt];
-    const response=await service.rpc('stellar_commit_economy_operation_v125',{
+    const response=await commitEconomyUnifiedV1332(service,{
       p_user_id:req.user.id,p_request_id:requestId,p_operation:operation,p_request_hash:intentHash,
       p_expected_updated_at:saveRow.updated_at,p_state:state,
       p_callsign:String(state.profile?.callsign||''),p_receipt:{purchase:receipt}
@@ -1699,7 +1700,7 @@ app.post('/api/economy/action', requireUser, OFFLINE_FARM_GUARD_V484, asyncRoute
     if(outcome?.auto_suspended)return res.status(403).json({error:'Conta temporariamente suspensa.',code:'ACCOUNT_BANNED'});
     return res.status(400).json({error:'Parâmetros econômicos não autorizados.',code:tamper.code});}
   if(!action)return res.status(400).json({error:'Ação econômica ausente.'});
-  const requestId=req.body?.request_id==null?null:String(req.body.request_id);
+  const requestId=req.body?.request_id==null?randomUUID():String(req.body.request_id);
   if(requestId!==null&&!requestIdValidV125(requestId))return res.status(400).json({error:'ID de transação inválido.',code:'ECONOMY_REQUEST_INVALID'});
   const op=`economy:${action}`;
   const intentHash=requestId?operationDigestV125(op,payload):null;
@@ -1718,7 +1719,10 @@ app.post('/api/economy/action', requireUser, OFFLINE_FARM_GUARD_V484, asyncRoute
     if(receiptResult.error)throw Object.assign(new Error('Recibos V125 indisponíveis: falta aplicar SQL.'),{status:503,code:'ECONOMY_RECEIPTS_UNAVAILABLE'});
     if(receiptResult.data){
       if(!replayValidV125(receiptResult.data,op,intentHash))throw Object.assign(new Error('Identificador reutilizado com parâmetros diferentes.'),{status:409,code:'ECONOMY_ID_REUSED'});
-      return {state,updated_at:req.economyBaselineV125,info:receiptResult.data.receipt?.info||{},deduplicated:true};
+      const replay=await commitEconomyUnifiedV1332(service,{p_user_id:req.user.id,p_request_id:requestId,p_operation:op,p_request_hash:intentHash,p_expected_updated_at:req.economyBaselineV125,p_state:state,p_callsign:state.profile?.callsign,p_receipt:receiptResult.data.receipt});
+      const recovered=decodeEconomyReceiptV125(replay.data,replay.error);
+      if(!recovered.ok)throw Object.assign(new Error('Recuperação não confirmada: '+recovered.code),{status:503,code:recovered.code});
+      return {state:recovered.state,updated_at:recovered.updatedAt,info:recovered.receipt?.info||{},deduplicated:true};
     }
     if(premiumResult?.error)throw new Error(premiumResult.error.message);
     const premium=!!premiumResult?.data?.premium_active;
@@ -1827,7 +1831,7 @@ app.post('/api/economy/action', requireUser, OFFLINE_FARM_GUARD_V484, asyncRoute
     state.accountOwnerId=req.user.id;state.accountOwnerEmail=req.user.email||null;
     const callsign=normalizeCallsign(state.profile?.callsign||'')||await ensureProfile(req.sb,req.user);
     state.profile={...state.profile,callsign};
-    const commit=await service.rpc('stellar_commit_economy_operation_v125',{
+    const commit=await commitEconomyUnifiedV1332(service,{
       p_user_id:req.user.id,p_request_id:requestId,p_operation:op,p_request_hash:intentHash,
       p_expected_updated_at:req.economyBaselineV125,p_state:state,p_callsign:callsign,
       p_receipt:{info}

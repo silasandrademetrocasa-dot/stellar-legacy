@@ -22,7 +22,7 @@ test('V118.2: only service role can settle; no public payment endpoint',()=>{
  assert.match(sql,/grant execute on function public\.stellar_settle_auction_bid_v1182\(uuid,text,text\) to service_role/);
  assert.match(server,/app\.post\('\/api\/auction\/settle',requireUser,OFFLINE_FARM_GUARD_V484/);
  assert.match(server,/withPurchaseLock\(req\.user\.id/);
- assert.match(server,/db\.rpc\('stellar_settle_auction_bid_v1182'/);
+ assert.match(server,/settleAuctionUnifiedV1332\(db,/);
 });
 test('V118.2: browser cannot grant item nor mark own auction victory',()=>{
  const section=game.slice(game.indexOf('async function finalizeOnlineAuctionBid(row){'),game.indexOf('let auctionSyncBusy=false'));
