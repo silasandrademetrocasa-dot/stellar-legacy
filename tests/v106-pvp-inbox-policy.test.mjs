@@ -35,8 +35,8 @@ test('V106: nao consulta enquanto ocupado, desconectado ou em mapa privativo',()
 test('V106: cliente atualizado usa politica nova sem modificar API econômica',()=>{
   const game=readFileSync(new URL('../public/game.js',import.meta.url),'utf8');
   const html=readFileSync(new URL('../public/index.html',import.meta.url),'utf8');
-  assert.match(game,/from '\.\/modules\/pvp-inbox-policy-v106\.js\?v=47\.7\.65'/);
+  assert.match(game,/from '\.\/modules\/pvp-inbox-policy-v106\.js\?v=47\.7\.66'/);
   assert.match(game,/shouldPollPvpInboxV106\(\{/);
-  assert.match(html,/\/game\.js\?v=47\.7\.65-[a-zA-Z0-9-]+/);
+  assert.match(html,/\/game\.js\?v=47\.7\.66-[a-zA-Z0-9-]+/);
   assert.match(game,/mergeUnsavedMissionProgressV105/);
 });

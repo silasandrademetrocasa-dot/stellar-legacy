@@ -54,6 +54,7 @@ test('Lost hangar response verifies only the submitted layout and leaves the ful
   const submitted={gear:'new'},official={gear:'new'};
   const context={structuredClone,console:{warn(){},info(){}},progress:submitted,authenticated:true,
     gameBootstrapRuntime:{generation:1},cloudSaveMutationV105:1,cloudDirty:true,cloudBusy:false,
+    equipmentSubmittedV1342:null,persistEquipmentIntentV1062(){},pendingCargoV1333:()=>({submit(){}}),combatJournalV134:()=>({submit(){}}),installEconomyState(state){assert.equal(state.gear,'new');},
     setSync(){},offlineFarmWorldLockedV84:()=>false,accountResetEpochV478:0,
     equipmentSaveBaselineV109:{gear:'old'},equipmentSavePendingV109:true,equipmentLayoutSignatureV1062:s=>s.gear,
     saveOperationPendingV119:null,saveOperationIdV119:()=> 'op',

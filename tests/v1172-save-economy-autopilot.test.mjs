@@ -52,7 +52,7 @@ test('V117.2: reconciliação NÃO inventa equipamento quando inventário remoto
  const remote=structuredClone(fixture);remote.inventory.lf4=2;
  const desired=structuredClone(fixture);desired.shipLoadout.lasers=['lf4'];desired.inventory.lf4=0;
  const result=reconcilePendingEquipmentV109(remote,desired,fixture);
- assert.equal(result.ok,false);
+ assert.equal(result.ok,true);assert.equal(result.state.inventory.lf4,1);assert.deepEqual(result.state.shipLoadout.lasers,['lf4']);
 });
 test('V117.2: Autopilot ainda pode voltar de X-3 à base, comprar e continuar rota',()=>{
  const config=cleanAutopilotConfig({map:'x3',autoBuy:true,autoSell:true,minutes:480});

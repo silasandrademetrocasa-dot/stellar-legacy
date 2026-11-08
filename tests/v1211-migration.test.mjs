@@ -29,7 +29,7 @@ test('v121.1 nao muda economia por cache local no bootstrap',()=>{
  const game=text('public/game.js');
  assert.match(game,/const freshLocalV1211=remote\?\.state/);
  assert.match(game,/structuredClone\(remote.state\)/);
- assert.match(game,/reconcilePendingEquipmentV109\(remote.state,local,equipmentSaveBaselineV109\)/);
+ assert.match(game,/reconcilePendingEquipmentV109\(remote.state,local,equipmentSaveBaselineV109,equipmentSubmittedV1342\)/);
  assert.match(game,/stageLocalFirstHangarIntentV1211/);
  assert.match(game,/acknowledgeConfirmedHangarV1211/);
  assert.match(game,/readBestLocalSnapshotV1211\(accountId,readLocalGameState\(\)\)/);

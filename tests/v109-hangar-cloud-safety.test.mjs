@@ -41,5 +41,5 @@ test('V109: alterações de nave, drones, AUX e presets pedem save prioritário'
   assert.match(piece,/saveGame\(\);rememberEquipmentChangeV109\(\);/,`sem prioridade ${name}`);
  }
  assert.match(code,/equipmentSaveBaselineV109=structuredClone\(remote.state\)/);
- assert.match(code,/reconcilePendingEquipmentV109\(remote.state,desiredGear,equipmentSaveBaselineV109\)/);
+ assert.match(code,/reconcilePendingEquipmentV109\(remote.state,desiredGear,equipmentSaveBaselineV109,equipmentSubmittedV1342\)/);
 });
