@@ -5554,7 +5554,7 @@ async function sendCloudSaveAttemptV106(){
   // Somente o coordenador V106 invoca esta tentativa; nunca há dois PUTs em paralelo.
   if(offlineFarmWorldLockedV84()||!authenticated||!progress)return 'error';
   cloudBusy=true;setSync('SALVANDO','busy');
-  const sentMutation=cloudSaveMutationV105;
+  let sentMutation=cloudSaveMutationV105;
   let submittedHangarLayoutV126=null;
   const generation=gameBootstrapRuntime.generation;
   let snapshot;
@@ -5562,6 +5562,7 @@ async function sendCloudSaveAttemptV106(){
     progress.adminResetEpoch=accountResetEpochV478;
     // Salva uma fotografia: recompensas/abates recebidos durante o PUT ficam pendentes.
     snapshot=structuredClone(progress);
+    if(saveOperationPendingV119?.snapshot){snapshot=structuredClone(saveOperationPendingV119.snapshot);sentMutation=saveOperationPendingV119.mutation;}
     // V106.2: apenas alteracoes reconhecidas de Hangar podem mudar equipamento.
     // A revisao base e do ultimo estado AUTORITATIVO recebido, nao do localStorage.
     const layoutDiffV1062=equipmentSaveBaselineV109&&equipmentLayoutSignatureV1062(snapshot)!==equipmentLayoutSignatureV1062(equipmentSaveBaselineV109);
@@ -5586,11 +5587,14 @@ async function sendCloudSaveAttemptV106(){
     if(gearIntentV1062)submittedHangarLayoutV126=equipmentLayoutSignatureV1062(snapshot);
     const mutationKey=`${generation}:${sentMutation}:${layoutDiffV1062?'gear':'normal'}`;
     if(saveOperationPendingV119?.key!==mutationKey)
-      saveOperationPendingV119={key:mutationKey,id:saveOperationIdV119()};
+      saveOperationPendingV119={key:mutationKey,id:saveOperationIdV119(),snapshot:structuredClone(snapshot),mutation:sentMutation};
     const result=await saveCloudSave(snapshot,gearIntentV1062,
       {operation_id:saveOperationPendingV119.id});
     if(generation!==gameBootstrapRuntime.generation)return 'error';
     saveOperationPendingV119=null;
+    if(result?.replayed&&result.state){
+      installEconomyState(result.state);cloudDirty=true;return 'retry';
+    }
     if(result?.statePatch){const patch=result.statePatch;if(Number.isFinite(Number(patch.credits)))progress.profile.credits=Number(patch.credits);if(patch.serverEconomy)progress.serverEconomy={...(progress.serverEconomy||{}),...patch.serverEconomy};try{localStorage.setItem(saveKey(),JSON.stringify(progress));}catch{}updateUI();if(patch.serverEconomy?.lastClanCollectionDate)showToast('CLÃ • coleta diária de 10% sincronizada','system');}
     AMMO_SELECTION_V1061.confirm(snapshot);
     cloudDirty=cloudSaveMutationV105!==sentMutation||AMMO_SELECTION_V1061.pending;

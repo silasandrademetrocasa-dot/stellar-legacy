@@ -84,6 +84,15 @@ async function writeVerifiedSave(req,state,updated_at){
   const service=await requireEliteAdmin();
   pruneOrphanedDroneLayoutsV118(state); // descarta apenas IDs órfãos de CONF (sem tocar inventário)
   const callsign=String(state?.profile?.callsign||'').trim();
+  if(req.saveOperationV133){
+    const {data,error}=await service.rpc('stellar_commit_save_v133',{
+      p_user_id:req.user.id,p_state:state,p_updated_at:updated_at,p_callsign:callsign,
+      p_expected_token:req.saveTokenV131,p_operation_id:req.saveOperationV133.id,p_request_hash:req.saveOperationV133.hash
+    });
+    if(error)return error;
+    if(!data?.ok)return {code:data?.code||'SAVE_NOT_CONFIRMED',message:data?.code||'SAVE_NOT_CONFIRMED'};
+    req.confirmedTokenV131=data.save_token;return null;
+  }
   // V119 em modo OBSERVE (padrao) mantem a V118 ate homologarmos cada RPC legada.
   // ENFORCE somente depois do SQL PREPARAR + ATIVAR + testes em duas contas.
   if(saveCoreModeV119()==='enforce' && req.saveTokenV131!=='new'){
@@ -595,7 +604,7 @@ function rollGateOnceServer(state,key){
 }
 async function readSaveForWrite(req){
   const service=await requireEliteAdmin();
-  return service.rpc('stellar_read_save_v131',{p_user_id:req.user.id});
+  return req.saveOperationV133?service.rpc('stellar_read_save_v133',{p_user_id:req.user.id,p_operation_id:req.saveOperationV133.id,p_request_hash:req.saveOperationV133.hash}):service.rpc('stellar_read_save_v131',{p_user_id:req.user.id});
 }
 async function readEconomySave(req){
   const {data,error}=await readSaveForWrite(req);
@@ -2295,6 +2304,10 @@ app.put('/api/save', requireUser, OFFLINE_FARM_GUARD_V484, asyncRoute(async (req
     if(outcome?.auto_suspended)return res.status(403).json({error:'Conta temporariamente suspensa.',code:'ACCOUNT_BANNED'});
     return res.status(409).json({ error: 'SAVE BLOQUEADO: os dados pertencem a outra conta.', code: 'SAVE_OWNER_MISMATCH' });
   }
+  if(req.body?.operation_id){
+    if(!/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(req.body.operation_id))return res.status(400).json({error:'ID inválido',code:'SAVE_OPERATION_ID_INVALID'});
+    req.saveOperationV133={id:req.body.operation_id,hash:operationDigestV125('checkpoint',{state:req.body.state,equipment:req.body.equipmentMutationV1062||null})};
+  }
   const securedCallsign = await ensureProfile(req.sb, req.user);
   state = {
     ...state,
@@ -2308,6 +2321,8 @@ app.put('/api/save', requireUser, OFFLINE_FARM_GUARD_V484, asyncRoute(async (req
   let statePatch = null;
   const {data:serverSave,error:readError}=await readSaveForWrite(req);
   if(readError||!serverSave?.save_token)return res.status(503).json({error:'Leitura do save indisponível.',code:'SAVE_READ_UNAVAILABLE'});
+  if(serverSave.receipt_error)return res.status(409).json({error:'Identidade de salvamento reutilizada.',code:serverSave.receipt_error});
+  if(serverSave.replayed)return res.json({ok:true,replayed:true,state:serverSave.state,save_token:serverSave.save_token,updated_at:serverSave.updated_at});
   req.saveTokenV131=serverSave.save_token;
   if(Object.hasOwn(req.body,'expected_token') && req.body.expected_token!==req.saveTokenV131)
     return res.status(409).json({error:'Progresso atualizado em outra operação.',code:'SAVE_REVISION_CONFLICT'});

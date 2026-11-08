@@ -462,17 +462,25 @@ export async function loadCloudSave() {
   return read;
 }
 
+const pendingTransportV133=new Map();
 export async function saveCloudSave(state, equipmentMutationV1062=null, saveMetaV119=null) {
   if (!currentUser?.id) throw new Error('Usuário não identificado.');
   const key=saveSessionKey(), baseline=activeBaseline;
+  const operation=saveMetaV119?.operation_id;
+  const intentKey=JSON.stringify([key,operation]);
+  let intent=pendingTransportV133.get(intentKey);
+  if(!intent){intent={state:structuredClone(state),equipment:equipmentMutationV1062,token:saveToken,revision:serverSaveRevisionV119};pendingTransportV133.set(intentKey,intent);}
+  // Keep memory bounded; server receipts remain durable across client restarts.
+  if(pendingTransportV133.size>16)pendingTransportV133.delete(pendingTransportV133.keys().next().value);
   const result=await authedServerFetch('/api/save', {
     method: 'PUT',
-    body: JSON.stringify({ state, ...(equipmentMutationV1062?{equipmentMutationV1062}:{}),
+    body: JSON.stringify({ state:intent.state, ...(intent.equipment?{equipmentMutationV1062:intent.equipment}:{}),
       ...(saveMetaV119?.operation_id?{operation_id:saveMetaV119.operation_id}:{}),
-      ...(serverSaveRevisionV119!=null?{expected_revision:serverSaveRevisionV119}:{expected_token:saveToken}) }),
+      ...(intent.revision!=null?{expected_revision:intent.revision}:{expected_token:intent.token}) }),
   });
   checkSaveSession(key);
   if(result?.ok!==true)throw new Error('Save sem confirmação.');
+  pendingTransportV133.delete(intentKey);
   if(baseline!==activeBaseline)throw Object.assign(new Error('O progresso mudou durante a gravação.'),{code:'SAVE_REVISION_CONFLICT'});
   serverSaveRevisionV119=saveRevision(result.revision);
   saveToken=result.save_token??null;
