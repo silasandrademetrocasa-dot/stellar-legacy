@@ -1,5 +1,5 @@
-import {offlineFarmDirectActivityAllowedV103} from './modules/offline-farm-activity-v103.js?v=47.7.64';
-import {createReadCoalescerV104} from './modules/read-coalescer-v104.js?v=47.7.64';
+import {offlineFarmDirectActivityAllowedV103} from './modules/offline-farm-activity-v103.js?v=47.7.65';
+import {createReadCoalescerV104} from './modules/read-coalescer-v104.js?v=47.7.65';
 import {persistSessionV101,loadPersistedSessionV101,clearPersistedSessionV101} from './modules/login-persistence-v101.js';
 const SESSION_KEY = 'stellarLegacyV4Session';
 const GOOGLE_OAUTH_PENDING_KEY = 'stellarLegacyGoogleOAuthPendingV18216';
@@ -1323,4 +1323,4 @@ export const claimMissionCommandOnlineV1331=(category,key)=>authedServerFetch('/
 
 export async function claimPlayerRewardV134(payload){return authedServerFetch('/api/player/rewards/claim',{method:'POST',body:JSON.stringify(payload)});}
 export async function ensurePlayerBoxesV134(){return authedServerFetch('/api/player/collections/ensure',{method:'POST',body:'{}'});}
-export async function collectPlayerDropV134(dropId,requestId){return authedServerFetch('/api/player/collections/claim',{method:'POST',body:JSON.stringify({drop_id:dropId,request_id:requestId})});}
+export async function collectPlayerDropV134(dropId,requestId,collector='ship'){return authedServerFetch('/api/player/collections/claim',{method:'POST',body:JSON.stringify({drop_id:dropId,request_id:requestId,collector})});}

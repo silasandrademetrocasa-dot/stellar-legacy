@@ -1,0 +1,14 @@
+{
+  "delete": [
+    "public/modules/stellar-autopilot-v116.js",
+    "public/modules/local-first-bridge-v121.js",
+    "LEIA_PRIMEIRO_V133_2.md",
+    "LEIA_PRIMEIRO_V133_3.md",
+    "LEIA_PRIMEIRO_V133.md",
+    "LEIA_PRIMEIRO_V132.md",
+    "LEIA_PRIMEIRO_V134.md",
+    "LEIA_PRIMEIRO_V133_1.md",
+    "LEIA_V132_1.txt"
+  ],
+  "reason": "Two superseded modules have no runtime/test/Android references; prior root installation notes archived to avoid applying obsolete instructions. Assets and SQL dependencies retained."
+}

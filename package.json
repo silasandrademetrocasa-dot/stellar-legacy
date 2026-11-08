@@ -1,6 +1,6 @@
 {
   "name": "stellar-legacy",
-  "version": "47.7.64",
+  "version": "47.7.65",
   "type": "module",
   "scripts": {
     "start": "node server/index.js",
@@ -22,7 +22,7 @@
   "engines": {
     "node": ">=18"
   },
-  "release": "V134: transações por conta, rotas atuais, leilão autoritativo, loot/box e resgates com recibos",
+  "release": "V134.1: coleta AUX pelo alcance correto, menos consultas em boxes/leilão e limpeza de módulos substituídos",
   "devDependencies": {
     "@electric-sql/pglite": "0.3.14"
   }

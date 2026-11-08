@@ -1,3 +1,5 @@
+import {collectionAccessV1341} from '../public/modules/collection-access-v1341.js';
+import {createConfigCacheV1341} from './config-cache-v1341.js';
 import {createHash} from 'node:crypto';
 import {ITEMS,SHIPS,MAPS} from '../public/data.js';
 import {applyRecruitBonusV2012} from '../public/progression-plan-v2012.js';
@@ -45,16 +47,17 @@ export function rollBonusV134(config,pet,rng=Math.random){
  return {...def,qty};
 }
 export function createPlayerRewardsV134({db,readPass,readPremium,readBonus,readSystems,world,secret}){
+ readBonus=createConfigCacheV1341(readBonus);readSystems=createConfigCacheV1341(readSystems);
  const saved=async uid=>{const {data,error}=await db.from('game_saves').select('state,updated_at').eq('user_id',uid).single();if(error||!data?.state)fail('Progresso indisponível','PLAYER_STORAGE_UNAVAILABLE');return data;};
- async function replay(uid,id,hash,module){
-  const {data,error}=await db.from('stellar_player_commands_v134').select('request_hash,module').eq('user_id',uid).eq('command_id',id).maybeSingle();if(error)fail('Recibos indisponíveis','PLAYER_STORAGE_UNAVAILABLE');
+ async function replay(uid,id,hash,module,cached){
+  const {data,error}=cached||await db.from('stellar_player_commands_v134').select('request_hash,module').eq('user_id',uid).eq('command_id',id).maybeSingle();if(error)fail('Recibos indisponíveis','PLAYER_STORAGE_UNAVAILABLE');
   if(!data)return null;if(data.request_hash!==hash||data.module!==module)fail('Identificador reutilizado','COMMAND_ID_REUSED');
   const r=await db.rpc('stellar_player_commit',{p_user_id:uid,p_command_id:id,p_module:module,p_request_hash:hash,p_payload:{}});if(r.error||!r.data?.ok)fail('Recuperação indisponível');return r.data;
  }
- async function commit(uid,id,module,hash,make){
-  const previous=await replay(uid,id,hash,module);if(previous)return previous;
+ async function commit(uid,id,module,hash,make,prepared={}){
+  const previous=await replay(uid,id,hash,module,prepared.receipt);if(previous)return previous;
   for(let attempt=0;attempt<5;attempt++){
-   const before=await saved(uid),draft=structuredClone(before.state),payload=await make(draft);
+   const before=attempt===0&&prepared.save?prepared.save:await saved(uid),draft=structuredClone(before.state),payload=await make(draft,attempt);
    draft.serverPurchaseRevision=count(before.state.serverPurchaseRevision)+1;
    const r=await db.rpc('stellar_player_commit',{p_user_id:uid,p_command_id:id,p_module:module,p_request_hash:hash,p_payload:{...payload,base:before.state,state:draft}});
    if(r.error)throw Object.assign(Error(r.error.message),{code:r.error.code,status:503});if(r.data?.ok)return r.data;
@@ -87,35 +90,39 @@ export function createPlayerRewardsV134({db,readPass,readPremium,readBonus,readS
    const client=world()?.findClient(uid);if(!client?.player||!client.room)fail('Conecte-se ao mapa');
    const mapId=client.room.mapId,key=client.room.key,config=(await readBonus()).config||{},map=MAPS[mapId];
    const target=map?.gate?0:Math.max(0,Math.min(100,Number(config.map_counts?.[mapId])||0));
-   const r=await db.rpc('stellar_player_bonus_ensure',{p_user_id:uid,p_map_key:key,p_count:target,p_width:Number(map?.world?.w)||4000,p_height:Number(map?.world?.h)||3000});
-   if(r.error)throw Error(r.error.message);const loot=await db.from('stellar_collection_drops_v134').select('drop_id,x,y,payload,expires_at').eq('user_id',uid).eq('map_key',key).eq('kind','loot').gt('expires_at',new Date().toISOString());if(loot.error)throw Error(loot.error.message);return {ok:true,map_key:key,boxes:r.data||[],loot:(loot.data||[]).map(d=>({id:d.drop_id,x:d.x,y:d.y,resources:d.payload.resources,expires_at:d.expires_at}))};
+   const r=await db.rpc('stellar_player_collections_snapshot',{p_user_id:uid,p_map_key:key,p_count:target,p_width:Number(map?.world?.w)||4000,p_height:Number(map?.world?.h)||3000});
+   if(r.error)throw Error(r.error.message);return {ok:true,map_key:key,boxes:r.data?.boxes||[],loot:r.data?.loot||[]};
   },
   async collect(uid,body){
    const dropId=String(body.drop_id||''),id=String(body.request_id||'');if(!/^[A-Za-z0-9_:-]{8,180}$/.test(dropId)||!/^[A-Za-z0-9_-]{10,90}$/.test(id))fail('Coleta inválida');
+   const collector=body.collector||'ship';if(!['ship','pet'].includes(collector))fail('Coletor inválido','COLLECTOR_INVALID');
    const hash=operationDigestV125('collection',{dropId});
-   return commit(uid,id,'collection',hash,async s=>{
-    const {data:drop,error}=await db.from('stellar_collection_drops_v134').select('*').eq('user_id',uid).eq('drop_id',dropId).maybeSingle();
+   const [save,dropRead,receipt]=await Promise.all([saved(uid),db.from('stellar_collection_drops_v134').select('*').eq('user_id',uid).eq('drop_id',dropId).maybeSingle(),db.from('stellar_player_commands_v134').select('request_hash,module').eq('user_id',uid).eq('command_id',id).maybeSingle()]);
+   if(receipt.error)fail('Recibos indisponíveis','PLAYER_STORAGE_UNAVAILABLE');
+   return commit(uid,id,'collection',hash,async(s,attempt)=>{
+    const {data:drop,error}=attempt===0?dropRead:await db.from('stellar_collection_drops_v134').select('*').eq('user_id',uid).eq('drop_id',dropId).maybeSingle();
     if(error||!drop)fail('Caixa não disponível','COLLECTION_UNAVAILABLE');
     const client=world()?.findClient(uid);
-    if(!client?.player||client.room?.key!==drop.map_key||Math.hypot(client.player.x-drop.x,client.player.y-drop.y)>150)fail('Aproxime-se da caixa');
+    const access=collectionAccessV1341(s,client,drop,collector);
+    if(!access.ok)fail(access.code==='COLLECTION_PET_INACTIVE'?'Ative o Salvager no AUX.':access.code==='COLLECTION_POSITION_STALE'?'Sincronizando posição do AUX.':access.code==='COLLECTION_MAP_MISMATCH'?'Caixa fora do mapa atual.':collector==='pet'?'AUX fora do alcance da caixa.':'Aproxime a nave da caixa.',access.code);
     const payload={drop_id:dropId,drop_before:drop.payload,drop_after:null};
     if(drop.kind==='loot'){
-     s.cargo||={};let free=Math.max(0,cargoCapacityV134(s,await readSystems())-Object.entries(s.cargo).reduce((n,[k,v])=>n+(k==='Xenomit'?0:count(v)),0));const remaining={...drop.payload.resources},picked={};
+     s.cargo||={};const capacity=cargoCapacityV134(s,await readSystems());payload.cargo_limit=capacity;let free=Math.max(0,capacity-Object.entries(s.cargo).reduce((n,[k,v])=>n+(k==='Xenomit'?0:count(v)),0));const remaining={...drop.payload.resources},picked={};
      for(const [k,v] of Object.entries(remaining)){
       const n=Math.min(count(v),k==='Xenomit'?count(v):free);if(!n)continue;s.cargo[k]=count(s.cargo[k])+n;remaining[k]-=n;if(!remaining[k])delete remaining[k];picked[k]=n;if(k!=='Xenomit')free-=n;
      }
      if(!Object.keys(picked).length)fail('Porão cheio','CARGO_FULL');
-     payload.drop_after=Object.keys(remaining).length?{...drop.payload,resources:remaining}:null;payload.receipt={kind:'loot',picked,remaining};
+     payload.drop_after=Object.keys(remaining).length?{...drop.payload,resources:remaining}:null;payload.receipt={kind:'loot',picked,remaining,collector};
     }else{
      const config=(await readBonus()).config||{};if(Number(config.map_counts?.[client.room.mapId]||0)<=0)fail('Box desativada neste mapa','COLLECTION_DISABLED');const reward=rollBonusV134(config,s.pet,seededRandomV134(secret+':'+uid+':'+dropId));
      if(reward.kind==='ammo'){s.ammo||={};s.ammo[reward.id]=count(s.ammo[reward.id])+reward.qty;}
      else if(reward.kind==='stellarDust')s.stellarDust=count(s.stellarDust)+reward.qty;
      else s.profile[reward.kind]=count(s.profile[reward.kind])+reward.qty;
      const rng=seededRandomV134(secret+':respawn:'+dropId),delay=Number(config.respawn_min_ms||10000)+rng()*Math.max(0,Number(config.respawn_max_ms||30000)-Number(config.respawn_min_ms||10000));
-     payload.respawn_ms=Math.round(delay);const area=client.room.map?.world||MAPS[client.room.mapId]?.world||{w:4000,h:3000};payload.respawn_x=220+rng()*(Number(area.w)-440);payload.respawn_y=220+rng()*(Number(area.h)-440);payload.receipt={kind:'bonus',reward};
+     payload.respawn_ms=Math.round(delay);const area=client.room.map?.world||MAPS[client.room.mapId]?.world||{w:4000,h:3000};payload.respawn_x=220+rng()*(Number(area.w)-440);payload.respawn_y=220+rng()*(Number(area.h)-440);payload.receipt={kind:'bonus',reward,collector};
     }
     return payload;
-   });
+   },{save,receipt});
   }
  };
 }

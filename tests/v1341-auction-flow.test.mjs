@@ -1,0 +1,7 @@
+import test from 'node:test';import assert from 'node:assert/strict';import fs from 'node:fs';import vm from 'node:vm';
+test('bidding sends one authoritative registration without waiting for market reads or combat checkpoints',async()=>{
+ const source=fs.readFileSync(new URL('../public/game.js',import.meta.url),'utf8'),start=source.indexOf('async function placeAuctionBidCurrentV134('),end=source.indexOf('function auctionLotEligible(',start);
+ const lot={ref:'item:lf4',kind:'item',id:'lf4',name:'ARC',marketBid:0};let calls=0;
+ const context={progress:{auction:{hourKey:'2026-11-08-00',lots:{'item:lf4':lot}},profile:{callsign:'QA'}},ensureAuctionState(){},getUser:()=>({id:'QA'}),auctionSystemBid:()=>100000,auctionOpeningFloor:()=>100000,auctionMinBid:()=>100000,auctionSpendableCredits:()=>10000000,ECONOMY_INTENT_V125:{id:()=> 'bid_test_1341',done(){}},placeAuctionBidOnline:async args=>{calls++;assert.equal(args.userBid,200000);return {leader_callsign:'QA'};},loadAuctionMarket:()=>{throw Error('market read not allowed');},flushCloudSave:()=>{throw Error('checkpoint not allowed');},offlineFarmWorldLockedV84:()=>false,saveGame(){},renderAuction(){},updateUI(){},showToast(){},fmt:String,setTimeout(){},console};
+ const bid=vm.runInNewContext(source.slice(start,end)+'\nplaceAuctionBidCurrentV134',context);await bid('item:lf4',200000);assert.equal(calls,1);assert.equal(lot.userBid,200000);
+});

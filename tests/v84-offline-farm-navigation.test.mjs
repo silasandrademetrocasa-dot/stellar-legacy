@@ -36,7 +36,7 @@ test('V84: ações de mapa permanecem desligadas no farm mesmo por teclado ou to
  assert.match(game,/function runMapTransition\([\s\S]+?if\(offlineFarmWorldLockedV84\(\)\)/);
 });
 test('V84: leilão registra lance sem salvar snapshot local durante farm; quitação postergada',()=>{
- assert.match(game,/if\(!offlineFarmWorldLockedV84\(\)&&!await flushCloudSave\(true\)\)/);
+ assert.doesNotMatch(game.slice(game.indexOf('async function placeAuctionBidCurrentV134('),game.indexOf('function auctionLotEligible(')),/await flushCloudSave\(/);
  assert.match(game,/await placeAuctionBidOnline\(/);
  assert.match(game,/if\(offlineFarmWorldLockedV84\(\)\|\|!row\|\|row.status!=='active'\)return/);
  assert.match(game,/if\(!offlineFarmWorldLockedV84\(\)\)saveGame\(\); \/\/ Lance já foi confirmado/);

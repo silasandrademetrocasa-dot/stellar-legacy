@@ -60,7 +60,7 @@ import { createSecurityService } from './security-service.js';
 
 const app = express();
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const RELEASE_VERSION = '47.7.64'; // único identificador de release nos endpoints HTTP
+const RELEASE_VERSION = '47.7.65'; // único identificador de release nos endpoints HTTP
 
 function normalizeSupabaseUrl(value = '') {
   let url = String(value || '').trim();
@@ -1557,13 +1557,13 @@ const OFFLINE_FARM_GUARD_V484=makeOfflineFarmGuardV484(requireEliteAdmin);
 const AUCTION_SINGLE_FLIGHT_V1194=createAuctionSingleFlightV1194();
 const playerRewardsV134=createPlayerRewardsV134({db:eliteAdminClient,readPass:()=>loadPassRuntimeSnapshot(false),readPremium:async req=>{const r=await req.sb.rpc('get_premium_shop_v12');if(r.error)throw Error(r.error.message);return r.data;},readBonus:async()=>{const r=await eliteAdminClient.rpc('get_bonus_box_config_v1825');if(r.error)throw Error(r.error.message);return r.data;},readSystems:()=>loadSystemsRuntimeSnapshot(false),world:()=>sharedUniverse,secret:SUPABASE_SERVICE_KEY});
 app.post('/api/player/rewards/claim',requireUser,OFFLINE_FARM_GUARD_V484,asyncRoute(async(req,res)=>res.json(await withPurchaseLock(req.user.id,()=>playerRewardsV134.claim(req.user.id,req.body,req)))));
-app.post('/api/player/collections/ensure',requireUser,OFFLINE_FARM_GUARD_V484,asyncRoute(async(req,res)=>res.json(await playerRewardsV134.ensure(req.user.id))));
-app.post('/api/player/collections/claim',requireUser,OFFLINE_FARM_GUARD_V484,asyncRoute(async(req,res)=>res.json(await withPurchaseLock(req.user.id,()=>playerRewardsV134.collect(req.user.id,req.body)))));
+app.post('/api/player/collections/ensure',requireUser,asyncRoute(async(req,res)=>res.json(await playerRewardsV134.ensure(req.user.id))));
+app.post('/api/player/collections/claim',requireUser,asyncRoute(async(req,res)=>res.json(await playerRewardsV134.collect(req.user.id,req.body))));
 app.post('/api/player/auction/bid',requireUser,asyncRoute(async(req,res)=>{
  const b=req.body||{};
  if(Object.keys(b).some(k=>!['request_id','hour_key','lot_ref','user_bid','lot'].includes(k)))return res.status(400).json({ok:false,code:'BID_ARGUMENTS_INVALID'});
  const {data,error}=await req.sb.rpc('stellar_player_bid',{p_request_id:b.request_id,p_hour_key:b.hour_key,p_lot_ref:b.lot_ref,p_user_bid:b.user_bid,p_lot:b.lot});
- if(error)return res.status(409).json({ok:false,code:'AUCTION_BID_REJECTED',error:String(error.message||'Lance recusado').slice(0,180)});
+ if(error){const raw=String(error.message||''),minimum=raw.match(/AUCTION_MINIMUM_CHANGED:(\d+)/);const message=minimum?'Lance mínimo atualizado: '+Number(minimum[1]).toLocaleString('pt-BR')+' CR.':raw.includes('AUCTION_ROUND_CLOSED')?'A rodada virou. Atualize o leilão.':raw.includes('Créditos insuficientes')?'Créditos insuficientes considerando os lances em garantia.':raw.includes('liderando')?'Você já está liderando este lote.':raw.includes('AUCTION_BID_STEP')?'Use lances em passos de 100.000 CR.':'O lance não foi aceito. Atualize o lote e tente novamente.';return res.status(409).json({ok:false,code:'AUCTION_BID_REJECTED',error:message});}
  res.set('Cache-Control','no-store').json(data);
 }));
 

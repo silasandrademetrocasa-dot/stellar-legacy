@@ -10,6 +10,8 @@ test('V134 real PostgreSQL functions: cross-sector transactions and durable rece
  await db.exec(read('tests/fixtures/v134-schema.sql'));
  await db.exec(read('sql/STELLAR_V134_SAVE_UNICO.sql'));
  await db.exec(read('sql/STELLAR_V134_SAVE_UNICO.sql'));
+ await db.exec(read('sql/STELLAR_V134_1_COLETA_LATENCIA.sql'));
+ await db.exec(read('sql/STELLAR_V134_1_COLETA_LATENCIA.sql'));
  const uid='11111111-1111-4111-8111-111111111111',h='a'.repeat(64);
  let serial=0;
  const initial={accountOwnerId:uid,adminResetEpoch:0,profile:{callsign:'QA134',faction:'earth',level:10,credits:10000,uridium:100,xp:100000},cargo:{Prometium:4},ammo:{lcb10:100},inventory:{},serverPurchaseRevision:0};
@@ -65,6 +67,31 @@ test('V134 real PostgreSQL functions: cross-sector transactions and durable rece
  await t.test('bonus slots are issued by the server and bounded',async()=>{
   const run=async()=> (await db.query('SELECT stellar_player_bonus_ensure($1,$2,$3,$4,$5) r',[uid,'earth:x1',3,4000,3000])).rows[0].r;
   const a=await run(),b=await run();assert.equal(a.length,3);assert.deepEqual(a,b);assert.ok(a.every(x=>x.id.startsWith('bonus_')&&x.x>=220&&x.y>=220));
+ });
+ await t.test('AUX collects owned loot far from the ship, and a lost ACK replay does not need the old position',async()=>{
+  const current=await row();current.activeShipId='goliath';current.pet={owned:true,level:15,activeGear:'box',gearsOwned:{box:true},protocols:{box:3}};
+  await db.query('UPDATE game_saves SET state=$2 WHERE user_id=$1',[uid,current]);
+  await db.query("INSERT INTO stellar_collection_drops_v134(user_id,drop_id,kind,map_key,x,y,payload,expires_at) VALUES($1,'loot_aux_1341','loot','earth:x1',850,0,'{\"resources\":{\"Prometium\":5}}',clock_timestamp()+interval '1 minute')",[uid]);
+  let client={room:{key:'earth:x1',map:{battle:false}},player:{x:0,y:0,updatedAt:Date.now(),pet:{owned:true,activeGear:'box',x:850,y:0}}};
+  const service=createPlayerRewardsV134({db:supabasePgliteV134(db),readSystems:async()=>({}),readBonus:async()=>({config:{}}),world:()=>({findClient:()=>client})});
+  await assert.rejects(()=>service.collect(uid,{drop_id:'loot_aux_1341',request_id:'collect_ship_1341',collector:'ship'}),e=>e.code==='COLLECTION_SHIP_RANGE');
+  const first=await service.collect(uid,{drop_id:'loot_aux_1341',request_id:'collect_pet_1341',collector:'pet'});assert.equal(first.ok,true);assert.equal(first.receipt.collector,'pet');assert.equal(first.state.cargo.Prometium,current.cargo.Prometium+5);
+  client=null;const replay=await service.collect(uid,{drop_id:'loot_aux_1341',request_id:'collect_pet_1341',collector:'pet'});assert.equal(replay.replayed,true);assert.equal(replay.state.cargo.Prometium,first.state.cargo.Prometium);
+ });
+ await t.test('two loot transactions cannot overfill cargo when both prepared against the same snapshot',async()=>{
+  const base=await row();const used=Object.entries(base.cargo).reduce((n,[k,v])=>n+(k==='Xenomit'?0:Number(v)),0),draft=structuredClone(base);draft.cargo.Prometium+=5;draft.serverPurchaseRevision++;
+  for(const suffix of ['a','b'])await db.query("INSERT INTO stellar_collection_drops_v134(user_id,drop_id,kind,map_key,x,y,payload) VALUES($1,$2,'loot','earth:x1',400,400,'{\"resources\":{\"Prometium\":5}}')",[uid,'loot_capacity_'+suffix]);
+  const extra={drop_before:{resources:{Prometium:5}},drop_after:null,cargo_limit:used+6};
+  const first=await command('collection',base,draft,{...extra,drop_id:'loot_capacity_a'});assert.equal(first.ok,true);
+  const second=await command('collection',base,draft,{...extra,drop_id:'loot_capacity_b'});assert.equal(second.ok,false);assert.equal(second.code,'PLAYER_RETRY');assert.equal((await row()).cargo.Prometium,first.state.cargo.Prometium);
+  assert.equal((await db.query("SELECT count(*) n FROM stellar_collection_drops_v134 WHERE drop_id='loot_capacity_b'")).rows[0].n,1);
+ });
+ await t.test('collection snapshot prunes only expired drops and retains issue and command receipts',async()=>{
+  await db.query("INSERT INTO stellar_collection_drops_v134(user_id,drop_id,kind,map_key,x,y,payload,expires_at) VALUES($1,'loot_expired_1341','loot','earth:x1',400,400,'{}',clock_timestamp()-interval '1 minute'),($1,'loot_live_1341','loot','earth:x1',400,400,'{\"resources\":{\"Prometium\":1}}',clock_timestamp()+interval '1 minute')",[uid]);
+  const before=(await db.query('SELECT count(*) n FROM stellar_player_commands_v134')).rows[0].n;
+  const snapshot=(await db.query('SELECT stellar_player_collections_snapshot($1,$2,$3,$4,$5) r',[uid,'earth:x1',3,4000,3000])).rows[0].r;
+  assert.equal(snapshot.boxes.length,3);assert.ok(snapshot.loot.some(x=>x.id==='loot_live_1341'));assert.ok(!snapshot.loot.some(x=>x.id==='loot_expired_1341'));
+  assert.equal((await db.query('SELECT count(*) n FROM stellar_player_commands_v134')).rows[0].n,before);
  });
  await t.test('coupon redemption and NPC award use one balance and a replay never grants twice',async()=>{
   await db.query("SELECT set_config('request.jwt.claim.sub',$1,false)",[uid]);
