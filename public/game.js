@@ -1,9 +1,12 @@
+import {createPendingCargoV1333,auctionMinuteBidV1333} from './modules/cargo-pending-v1333.js?v=47.7.63';
 import {staleSaveAuthoritiesV1331} from './modules/save-freshness-v1331.js?v=47.7.63';
 import {DESIGNS as NATAL_DESIGNS,NPCS as NATAL_NPCS,compatibleDesign} from './modules/christmas-v132.js?v=47.7.63';
 import {prepareChristmasArt,shipChristmasArt,npcChristmasArt} from './modules/christmas-art-v132.js?v=47.7.63';
 import {createChristmasUI} from './modules/christmas-ui-v132.js?v=47.7.63';
 import {natalStatusOnline,natalClaimOnline,claimMissionCommandOnlineV1331} from './api.js?v=47.7.63';
 let natalClientV132=null;
+let cargoOwnerV1333=null;const cargoJournalV1333=createPendingCargoV1333();
+function pendingCargoV1333(){const owner=getUser()?.id;if(owner!==cargoOwnerV1333){cargoJournalV1333.reset();cargoOwnerV1333=owner;}return cargoJournalV1333;}
 void prepareChristmasArt();
 import {stageLocalFirstSnapshotV121,readBestLocalSnapshotV1211,stageLocalFirstHangarIntentV1211,acknowledgeConfirmedHangarV1211,installLocalFirstPageFlushV121,flushLocalFirstSnapshotV121,localFirstPilotEnabledV121} from './modules/local-first-bridge-v1211.js?v=47.7.63';
 import {createForegroundSyncV122} from './modules/local-first-sync-v122.js?v=47.7.63';
@@ -1721,14 +1724,14 @@ async function applyAuthoritativePurchase(catalogKey,label='Item'){
     requestId=LIVE_PURCHASE_KEYS_V123.id(owner,catalogKey);
     // Do not block every shop click with a forced cloud save of mere movement.
     // Important hangar/mission/ammo edits still flush before the purchase.
-    if(cloudDirty&&(equipmentSavePendingV109||missionSavePendingV105||AMMO_SELECTION_V1061.pending))await flushCloudSave(true);
+    if(cloudDirty&&(pendingCargoV1333().pending||equipmentSavePendingV109||missionSavePendingV105||AMMO_SELECTION_V1061.pending))await flushCloudSave(true);
     const before={credits:Number(progress?.profile?.credits)||0,uridium:Number(progress?.profile?.uridium)||0};
     const result=await purchaseLiveCatalogOnline(catalogKey,requestId);
     if(!result?.state||!result?.purchase)throw Object.assign(new Error('Servidor não confirmou a compra.'),{code:'PURCHASE_CONFIRMATION_UNKNOWN'});
     installServerStatePreservingPosition(result.state);
     LIVE_PURCHASE_KEYS_V123.confirmed(owner,catalogKey,requestId);
     telemetryTrackEconomyTransition('catalog_purchase',before,progress?.profile,result.purchase);
-    cloudDirty=AMMO_SELECTION_V1061.pending;
+    cloudDirty=AMMO_SELECTION_V1061.pending||pendingCargoV1333().pending;
     stageLocalFirstSnapshotV121(owner,progress);
     LEGACY_MIRROR_V122.stage(saveKey(),progress,{urgent:true});
     computeStats(true);buildAmmoButtons();renderShop();refreshPetViews();updateUI();
@@ -1918,7 +1921,7 @@ function installEconomyState(state,{preservePendingEquipment=true,preservePendin
   installServerStatePreservingPosition(recovery?.ok?recovery.state:state);
   equipmentSaveBaselineV109=structuredClone(state);
   if(!equipmentSavePendingV109&&equipmentLayoutSignatureV1062(progress)===equipmentLayoutSignatureV1062(state))saveIntegrityBlockedV106=false;
-  createBonusBoxes();cloudDirty=AMMO_SELECTION_V1061.pending;computeStats(false);
+  createBonusBoxes();cloudDirty=AMMO_SELECTION_V1061.pending||pendingCargoV1333().pending;computeStats(false);
   player.hp=Math.max(0,Math.min(player.maxHp,beforeHp));
   player.shield=clampStoredShieldV2013(beforeShield,player.maxShield);
   progress.hp=player.hp;progress.shield=player.shield;saveActiveBattleConfigV2013();
@@ -1954,6 +1957,7 @@ async function runEconomyAction(action,payload={},options={}){
     // V130: the server already owns canonical cargo and inventory. Do not block a sale
     // on unrelated unsaved mission/UI/hangar changes: the server validates the stock.
     // Equipment/gear sales still require the stricter preflight.
+    if(pendingCargoV1333().pending)await syncBeforeEconomy();
     const serverFirst=economyServerFirstV130(action);
     if(serverFirst){
       if(!authenticated||!progress||offlineFarmWorldLockedV84())throw new Error('Venda indisponível durante o Farm Offline.');
@@ -2218,8 +2222,7 @@ function buildAuctionLots(key){
 }
 function auctionSystemBid(lot){
   normalizeAuctionEconomy(lot);
-  const d=new Date(),fraction=(d.getMinutes()*60+d.getSeconds())/3600;
-  return Math.max(100000,Math.round((lot.reserve+(lot.finalSystemBid-lot.reserve)*fraction)/100000)*100000);
+  return auctionMinuteBidV1333(lot.reserve,lot.finalSystemBid);
 }
 function auctionCurrentBid(lot){return Number(lot?.marketBid)>0?Number(lot.marketBid):auctionSystemBid(lot);}
 function auctionEscrow(){return Object.values(progress?.auction?.lots||{}).reduce((sum,l)=>sum+(auctionLotEligible(l)?(Number(l.userBid)||0):0),0);}
@@ -2272,7 +2275,7 @@ async function finalizeOnlineAuctionBid(row){
     const response=await settleAuctionServerV1182(row);
     if(response?.ok&&response.state){
       installEconomyState(response.state,{serverConfirmedEquipment:true,preservePendingEquipment:false});
-      cloudDirty=AMMO_SELECTION_V1061.pending;
+      cloudDirty=AMMO_SELECTION_V1061.pending||pendingCargoV1333().pending;
       renderAuction();renderHangar();updateUI();
       showToast(response.replayed?'Prêmio já confirmado no servidor.':
         `Leilão confirmado • ${response.receipt?.product||lot.name||'prêmio'} entregue e registrado.`,'reward');
@@ -4866,7 +4869,7 @@ function auxAdvancedBonusV110(kind){return Number(auxAdvancedEffectsV110(progres
 function canCraftAuxProtocolV110(universe=false){return !offlineFarmWorldLockedV84()&&!economyMutationInFlightV106&&(universe?['u1','u2','u3','u-1','u-2','u-3'].includes(String(progress?.mapId||'').toLowerCase()):isBaseSafeZone());}
 function cargoUsed(){return Object.entries(progress?.cargo||{}).reduce((a,[id,b])=>id==='Xenomit'?a:a+(Number(b)||0),0);}
 function cargoFree(){return Math.max(0,cargoCapacity()-cargoUsed());}
-function addCargoResource(id,qty){if(!progress||qty<=0)return 0;const amount=Math.floor(qty);if(id==='Xenomit'){progress.cargo[id]=(progress.cargo[id]||0)+amount;return amount;}const take=Math.min(amount,cargoFree());if(take<=0)return 0;progress.cargo[id]=(progress.cargo[id]||0)+take;return take;}
+function addCargoResource(id,qty){if(!progress||qty<=0)return 0;const amount=Math.floor(qty);if(id==='Xenomit'){progress.cargo[id]=(progress.cargo[id]||0)+amount;pendingCargoV1333().add(id,amount);return amount;}const take=Math.min(amount,cargoFree());if(take<=0)return 0;progress.cargo[id]=(progress.cargo[id]||0)+take;pendingCargoV1333().add(id,take);return take;}
 function playerLaserRange(){return state.currentMap?.battle ? 1250 : 900;}
 function playerRocketRange(){return state.currentMap?.battle ? 1100 : 820;}
 function mapRadarRange(){return state.currentMap?.battle ? 2200 : 1650;}
@@ -5206,7 +5209,9 @@ function installServerStatePreservingPosition(serverState){
   if(!serverState||typeof serverState!=='object')throw new Error('Servidor não retornou um estado válido.');
   adoptSaveRead(serverState);
   const loc=runtimeLocationSnapshot();
-  progress=AMMO_SELECTION_V1061.merge(serverState);hydrateProgress();
+  if(Number(serverState.adminResetEpoch||0)>Number(progress?.adminResetEpoch||0))pendingCargoV1333().reset();
+  progress=AMMO_SELECTION_V1061.merge(pendingCargoV1333().reconcile(serverState));hydrateProgress();
+  if(pendingCargoV1333().pending){cloudDirty=true;cloudSaveMutationV105++;}
   restoreRuntimeLocationAfterServerState(loc);
   // Apenas selecoes marcadas como pendentes: o servidor continua dono de estoque, inventario e economia.
   if(AMMO_SELECTION_V1061.pending){cloudDirty=true;cloudSaveMutationV105++;}
@@ -5597,10 +5602,12 @@ async function sendCloudSaveAttemptV106(){
     const mutationKey=`${generation}:${sentMutation}:${layoutDiffV1062?'gear':'normal'}`;
     if(saveOperationPendingV119?.key!==mutationKey)
       saveOperationPendingV119={key:mutationKey,id:saveOperationIdV119(),snapshot:structuredClone(snapshot),mutation:sentMutation};
+    pendingCargoV1333().submit(snapshot.clientSavedAt);
     const result=await saveCloudSave(snapshot,gearIntentV1062,
       {operation_id:saveOperationPendingV119.id});
     if(generation!==gameBootstrapRuntime.generation)return 'error';
     saveOperationPendingV119=null;
+    pendingCargoV1333().acknowledge(snapshot.clientSavedAt);
     if(result?.replayed&&result.state){
       installEconomyState(result.state);cloudDirty=true;return 'retry';
     }
@@ -5763,7 +5770,7 @@ const LOCAL_FIRST_FOREGROUND_V122=createForegroundSyncV122({
   eligible:()=>Boolean(authenticated&&progress&&!offlineFarmWorldLockedV84()),
   online:()=>typeof navigator==='undefined'||navigator.onLine!==false,
   visible:()=>typeof document==='undefined'||document.visibilityState==='visible',
-  hasPending:()=>Boolean(missionSavePendingV105||equipmentSavePendingV109||AMMO_SELECTION_V1061.pending),
+  hasPending:()=>Boolean(pendingCargoV1333().pending||missionSavePendingV105||equipmentSavePendingV109||AMMO_SELECTION_V1061.pending),
   flushLocal:()=>flushLocalFirstSnapshotV121(),
   flushRemote:()=>flushCloudSave(false),
   events:typeof window==='undefined'?null:window,
@@ -8536,7 +8543,7 @@ async function confirmBulkPurchaseV92(){
       const idempotency=globalThis.crypto?.randomUUID?.()||`${Date.now().toString(16)}-${Math.random().toString(16).slice(2)}-${Math.random().toString(16).slice(2)}`;
       const result=await purchaseLiveBulkOnline(product,quantity,idempotency,quote.price,q.currency,quote.packSize);
       if(!result?.state)throw Error('O servidor não retornou o save atualizado. Consulte o estoque antes de repetir.');
-      installServerStatePreservingPosition(result.state);telemetryTrackEconomyTransition('bulk_supply_purchase',before,progress?.profile,result.purchase||{});cloudDirty=AMMO_SELECTION_V1061.pending;
+      installServerStatePreservingPosition(result.state);telemetryTrackEconomyTransition('bulk_supply_purchase',before,progress?.profile,result.purchase||{});cloudDirty=AMMO_SELECTION_V1061.pending||pendingCargoV1333().pending;
       try{localStorage.setItem(saveKey(),JSON.stringify(progress));}catch{}
       computeStats(true);buildAmmoButtons();renderShop();updateUI();
       showToast(`${fmt(result.purchase?.delivered||quote.delivered)} unidades adquiridas em uma operação • servidor confirmado`,'shop');
@@ -9904,13 +9911,14 @@ async function placeAuctionBid(ref,amount){
   ensureAuctionState();
   const lot=progress.auction.lots[ref];
   if(!lot)return;
+  const bidHourV1333=progress.auction.hourKey;
 
   const myId=getUser()?.id;
   if(!myId){showToast('Sessão online não encontrada');return;}
 
   // Busca o mercado real ANTES de aceitar o lance.
   let market=[];
-  try{market=await loadAuctionMarket(progress.auction.hourKey);}
+  try{market=await loadAuctionMarket(bidHourV1333);}
   catch(e){showToast(`Leilão online indisponível: ${e.message}`);return;}
 
   const live=market.find(x=>x.lot_ref===ref)||null;
@@ -9947,17 +9955,18 @@ async function placeAuctionBid(ref,amount){
 
     // Grava SOMENTE o lance do próprio jogador.
     // Isso evita o bug do RPC antigo e respeita o RLS do Supabase.
-    const bidArgs={hourKey:progress.auction.hourKey,lotRef:ref,userBid:amount,
+    if(progress.auction.hourKey!==bidHourV1333){showToast('A rodada virou. Confira o lote e tente novamente.');renderAuction();return;}
+    const bidArgs={hourKey:bidHourV1333,lotRef:ref,userBid:amount,
       lot:{...lot,systemFloor,userBid:0,escrow:0,marketBid:0,leaderUserId:null,leaderCallsign:null}};
     const row=lot.kind==='auxProtocol'?await placeAuctionBidOnline(bidArgs):await saveAuctionBidOnline(bidArgs);
     if(!row)throw new Error('O banco não confirmou o lance.');
 
     // Confirma quem realmente ficou na liderança (resolve disputa simultânea).
-    const after=await loadAuctionMarket(progress.auction.hourKey);
+    const after=await loadAuctionMarket(bidHourV1333);
     const winner=after.find(x=>x.lot_ref===ref)||null;
 
     if(!winner||winner.leader_user_id!==myId||Number(winner.user_bid)!==amount){
-      await markAuctionBidStatusOnline({hourKey:progress.auction.hourKey,lotRef:ref,status:'lost'}).catch(()=>{});
+      await markAuctionBidStatusOnline({hourKey:bidHourV1333,lotRef:ref,status:'lost'}).catch(()=>{});
       lot.userBid=0;lot.escrow=0;
       if(winner){
         lot.marketBid=Number(winner.user_bid)||0;
