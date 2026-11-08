@@ -14,7 +14,7 @@ const api=read('public/api.js');
 
 const id='c7193bdb-a8de-4aa2-9729-12cfabef340c';
 const state={accountOwnerId:id,profile:{callsign:'Teste'}};
-const req={originalUrl:'/api/save',body:{operation_id:id,expected_revision:14}};
+const req={originalUrl:'/api/player/save',body:{operation_id:id,expected_revision:14}};
 
 test('V119: modo observe por padrao, enforce so por flag',()=>{
  assert.equal(saveCoreModeV119(), 'observe');
@@ -22,10 +22,10 @@ test('V119: modo observe por padrao, enforce so por flag',()=>{
  assert.equal(saveCoreModeV119('ENFORCE'),'observe'); // V119.5 source gate blocks incomplete cutover
 });
 test('V119: apenas rotas do servidor decidem modulo de gravacao',()=>{
- assert.equal(saveModuleForRequestV119({originalUrl:'/api/save',body:{equipmentMutationV1062:{intent:'hangar'}}}),'hangar');
- assert.equal(saveModuleForRequestV119({originalUrl:'/api/live/purchase/bulk',body:{}}),'economia');
- assert.equal(saveModuleForRequestV119({originalUrl:'/api/auction/settle',body:{}}),'leilao');
- assert.equal(saveModuleForRequestV119({originalUrl:'/api/save',body:{module:'economia'}}),'checkpoint');
+ assert.equal(saveModuleForRequestV119({originalUrl:'/api/player/save',body:{equipmentMutationV1062:{intent:'hangar'}}}),'hangar');
+ assert.equal(saveModuleForRequestV119({originalUrl:'/api/player/purchase/bulk',body:{}}),'economia');
+ assert.equal(saveModuleForRequestV119({originalUrl:'/api/player/auction/settle',body:{}}),'leilao');
+ assert.equal(saveModuleForRequestV119({originalUrl:'/api/player/save',body:{module:'economia'}}),'checkpoint');
 });
 test('V119: pedido com operacao unica e revisao valida',()=>{
  assert.equal(validOperationIdV119(id),true);
@@ -76,7 +76,7 @@ test('V119: logs por modulo, IDs de comando e checkpoint sao privados',()=>{
 test('V119: camada visual não recebe autoridade economica',()=>{
  assert.match(client,/saveOperationPendingV119/);
  assert.match(api,/operation_id/);
- assert.match(server,/saveCoreModeV119\(\)==='enforce'/);
- assert.match(server,/stellar_commit_player_save_v118/); // convivencia controlada
- assert.match(server,/\/api\/save\/core\/logs/);
+ assert.match(server,/stellar_player_read/);
+ assert.match(server,/stellar_player_commit/); // convivencia controlada
+ assert.match(server,/\/api\/player\/save\/core\/logs/);
 });

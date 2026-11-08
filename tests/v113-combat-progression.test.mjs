@@ -44,7 +44,7 @@ test('V113: sem redução de slots de nave/drone, proteção Farm e Autopilot pr
  const game=src('public/game.js');assert.match(game,/dailyPassTargetV113\(min,max,level\)/);
  const server=src('server/index.js');assert.match(server,/installCombatProgressionAuditV113\(/);
  assert.match(src('public/modules/stellar-autopilot-v48.js'),/chooseAutopilotAction/);
- assert.match(src('server/offline-farm-v484.js'),/stellar_offline_farm_claim_v1111/);
+ assert.match(src('server/offline-farm-v484.js'),/stellar_(?:offline_farm_claim_v1111|player_offline_farm_claim)/);
 });
 
 test('V113: evolução AUX é conquista sem alterar os protocolos já adquiridos',()=>{

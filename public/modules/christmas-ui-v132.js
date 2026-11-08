@@ -1,5 +1,5 @@
 import {DESIGNS,MISSIONS,isChristmas,compatibleDesign} from './christmas-v132.js';
-import {shipChristmasArt,boxChristmasArt,fireworkChristmasArt} from './christmas-art-v132.js?v=47.7.63';
+import {shipChristmasArt,boxChristmasArt,fireworkChristmasArt} from './christmas-art-v132.js?v=47.7.64';
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const fmt=n=>Number(n||0).toLocaleString('pt-BR');
 export function createChristmasUI(bridge){

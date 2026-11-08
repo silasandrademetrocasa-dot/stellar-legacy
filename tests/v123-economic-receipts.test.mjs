@@ -28,7 +28,7 @@ test('V123 uncertain network result keeps id but hard invalid input releases it'
 });
 test('V123 shop route calls durable receipt RPC, never trusts client state',()=>{
  const server=read('server/index.js');
- assert.match(server,/service\.rpc\('stellar_commit_live_purchase_v123'/);
+ assert.match(server,/service\.rpc\('stellar_player_commit'/);
  assert.match(server,/p_expected_updated_at:saveRow.updated_at/);
  assert.match(server,/invalidShopArguments\(req.body,\['catalog_key','request_id'\]\)/);
  assert.match(server,/if\(receiptRead.data\)/);

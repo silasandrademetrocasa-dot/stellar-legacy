@@ -53,7 +53,7 @@ test('V106: acoes economicas esperam ACK, falham fechadas e nao burlam validacao
  assert.match(source,/Progresso ainda nao confirmado pelo servidor/);
  assert.match(source,/economyMutationInFlightV106=true/);
  assert.match(source,/createLatestSaveCoordinatorV106\(/);
- assert.match(server,/app\.put\('\/api\/save'[\s\S]*?withPurchaseLock\(req\.user\.id/);
+ assert.match(server,/app\.put\('\/api\/player\/save'[\s\S]*?withPurchaseLock\(req\.user\.id/);
  assert.match(server,/validatePlayerSave\(state,serverSave/);
  assert.match(server,/SAVE_NPC_STALE/);
 });

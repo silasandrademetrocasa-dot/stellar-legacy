@@ -29,7 +29,7 @@ export function attachAstralRewardsV381(app,{requireUser,asyncRoute,requireElite
     // A função SQL trava o save, compara o contador de conclusões e usa UNIQUE
     // (user_id, gate, completion_number). Nunca calcula o prêmio no cliente.
     const service=await requireEliteAdmin();
-    const {data,error}=await service.rpc('stellar_claim_astral_v381',{p_user_id:req.user.id,p_gate:gate});
+    const {data,error}=await service.rpc('stellar_player_claim_astral',{p_user_id:req.user.id,p_gate:gate});
     if(error){const message=String(error.message||'Resgate negado.');
       return res.status(/SEQUENCE|INVALID|MISSING/.test(message)?409:503).json({error:message});}
     res.set('Cache-Control','no-store');res.json(data);

@@ -1,0 +1,217 @@
+[
+  {
+    "function": "admin_reset_account_v1763",
+    "lock_user": "p_target_user_id",
+    "scope": "account"
+  },
+  {
+    "function": "admin_reset_account_v1763_legacy_v478",
+    "lock_user": "p_target_user_id",
+    "scope": "account"
+  },
+  {
+    "function": "claim_arena_daily_reward",
+    "lock_user": "auth.uid()",
+    "scope": "account"
+  },
+  {
+    "function": "claim_aux_protocol_auction_v111",
+    "lock_user": "auth.uid()",
+    "scope": "account"
+  },
+  {
+    "function": "claim_clan_credit_grants_v12",
+    "lock_user": "auth.uid()",
+    "scope": "account"
+  },
+  {
+    "function": "process_all_clan_collection_v12",
+    "lock_user": null,
+    "scope": "all clan members in UUID order"
+  },
+  {
+    "function": "record_my_galaxy_event_progress_v1826",
+    "lock_user": "auth.uid()",
+    "scope": "account"
+  },
+  {
+    "function": "redeem_aux_sentinel_coupon_v1",
+    "lock_user": "auth.uid()",
+    "scope": "account"
+  },
+  {
+    "function": "redeem_game_coupon_v1821",
+    "lock_user": "auth.uid()",
+    "scope": "account"
+  },
+  {
+    "function": "redeem_game_coupon_v193",
+    "lock_user": "auth.uid()",
+    "scope": "account"
+  },
+  {
+    "function": "stellar_claim_astral_v381",
+    "lock_user": "p_user_id",
+    "scope": "account"
+  },
+  {
+    "function": "stellar_claim_competitive_season",
+    "lock_user": "auth.uid()",
+    "scope": "account"
+  },
+  {
+    "function": "stellar_claim_elite_objective",
+    "lock_user": "auth.uid()",
+    "scope": "account"
+  },
+  {
+    "function": "stellar_claim_war_campaign",
+    "lock_user": "auth.uid()",
+    "scope": "account"
+  },
+  {
+    "function": "stellar_claim_war_supply",
+    "lock_user": "auth.uid()",
+    "scope": "account"
+  },
+  {
+    "function": "stellar_commit_command_v1332",
+    "lock_user": "p_user_id",
+    "scope": "account"
+  },
+  {
+    "function": "stellar_commit_economy_operation_v125",
+    "lock_user": "p_user_id",
+    "scope": "account"
+  },
+  {
+    "function": "stellar_commit_live_purchase_v123",
+    "lock_user": "p_user_id",
+    "scope": "account"
+  },
+  {
+    "function": "stellar_commit_player_command_v119",
+    "lock_user": "p_user_id",
+    "scope": "account"
+  },
+  {
+    "function": "stellar_commit_player_save_v118",
+    "lock_user": "p_user_id",
+    "scope": "account"
+  },
+  {
+    "function": "stellar_commit_save_v131",
+    "lock_user": "p_user_id",
+    "scope": "account"
+  },
+  {
+    "function": "stellar_commit_save_v133",
+    "lock_user": "p_user_id",
+    "scope": "account"
+  },
+  {
+    "function": "stellar_frontier_claim_v370",
+    "lock_user": "auth.uid()",
+    "scope": "account"
+  },
+  {
+    "function": "stellar_grant_npc_reward_v1131",
+    "lock_user": "p_user_id",
+    "scope": "account"
+  },
+  {
+    "function": "stellar_grant_npc_reward_v228",
+    "lock_user": "p_user_id",
+    "scope": "account"
+  },
+  {
+    "function": "stellar_grant_ore_reward_v229",
+    "lock_user": "p_user_id",
+    "scope": "account"
+  },
+  {
+    "function": "stellar_natal_action_v132",
+    "lock_user": "p_user_id",
+    "scope": "account"
+  },
+  {
+    "function": "stellar_natal_npc_v132",
+    "lock_user": "p_user_id",
+    "scope": "account"
+  },
+  {
+    "function": "stellar_offline_farm_claim_v1111",
+    "lock_user": "p_user",
+    "scope": "account"
+  },
+  {
+    "function": "stellar_offline_farm_claim_v484",
+    "lock_user": "p_user",
+    "scope": "account"
+  },
+  {
+    "function": "stellar_offline_farm_claim_v487",
+    "lock_user": "p_user",
+    "scope": "account"
+  },
+  {
+    "function": "stellar_offline_farm_claim_v49",
+    "lock_user": "p_user",
+    "scope": "account"
+  },
+  {
+    "function": "stellar_settle_auction_bid_v1182",
+    "lock_user": "p_user_id",
+    "scope": "account"
+  },
+  {
+    "function": "stellar_u426_market_buy",
+    "lock_user": null,
+    "scope": "buyer and seller in UUID order"
+  },
+  {
+    "function": "stellar_u42_action",
+    "lock_user": "auth.uid()",
+    "scope": "account"
+  },
+  {
+    "function": "test_purchase_premium_v12",
+    "lock_user": "auth.uid()",
+    "scope": "account"
+  },
+  {
+    "function": "place_auction_bid_online",
+    "lock_user": "auth.uid()",
+    "scope": "account then auction lot"
+  },
+  {
+    "function": "place_auction_bid_online_base_v111",
+    "lock_user": "auth.uid()",
+    "scope": "account then auction lot"
+  },
+  {
+    "function": "stellar_offline_farm_start_v1111",
+    "lock_user": "p_user",
+    "scope": "farm start baseline and online writes"
+  },
+  {
+    "function": "stellar_offline_farm_start_v484",
+    "lock_user": "p_user",
+    "scope": "farm start baseline and online writes"
+  },
+  {
+    "function": "stellar_offline_farm_start_v485",
+    "lock_user": "p_user",
+    "scope": "farm start baseline and online writes"
+  },
+  {
+    "function": "stellar_offline_farm_start_v487",
+    "lock_user": "p_user",
+    "scope": "farm start baseline and online writes"
+  },
+  {
+    "function": "stellar_offline_farm_start_v49",
+    "lock_user": "p_user",
+    "scope": "farm start baseline and online writes"
+  }
+]

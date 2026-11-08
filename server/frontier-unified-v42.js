@@ -34,7 +34,7 @@ export function attachFrontierUnifiedV42(app,{requireUser,asyncRoute}){
   if(!['forge','expedition_start','expedition_claim','donate'].includes(action)||typeof code!=='string'||!CODES.test(code)||
      !Number.isInteger(amount)||amount<1||amount>100||!UUID.test(String(idempotencyKey||'')))
     return res.status(400).json({error:'Comando inválido.'});
-  const {data,error}=await req.sb.rpc('stellar_u42_action',{
+  const {data,error}=await req.sb.rpc('stellar_player_u42_action',{
    p_action:action,p_code:code,p_quantity:amount,p_request_id:idempotencyKey
   });
   if(error)return asError(res,error);

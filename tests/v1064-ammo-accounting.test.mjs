@@ -46,8 +46,8 @@ test('V106.4: UI separa consumo do AUX da rajada principal e não infla previsã
 test('V106.4: PVE da nave e do AUX chama mesma fórmula de débito e usa contador',()=>{
  assert.match(source,/const firingCount=laserAmmoShotBudgetV1064\(totalLasers,stock\)\.spent/);
  assert.match(source,/const firing=laserAmmoShotBudgetV1064\(lasers.length,stock\)\.spent/);
- assert.match(source,/progress\.ammo\[ammo\.id\]=Math\.max\(0,stock-firing\);\s*battlePassEvent\('ammoUse',firing\);noteAmmoConsumedV1064\(\);/);
- assert.match(source,/progress\.ammo\[ammo\.id\]=Math\.max\(0,stock-firingCount\);noteAmmoConsumedV1064\(\)/);
+ assert.match(source,/progress\.ammo\[ammo\.id\]=Math\.max\(0,stock-firing\);combatJournalV134\(\)\.spend\('ammo',ammo\.id,firing\);\s*battlePassEvent\('ammoUse',firing\);noteAmmoConsumedV1064\(\);/);
+ assert.match(source,/progress\.ammo\[ammo\.id\]=Math\.max\(0,stock-firingCount\);combatJournalV134\(\)\.spend\('ammo',ammo\.id,firingCount\);noteAmmoConsumedV1064\(\)/);
  assert.match(source,/if\(ammoPersistencePendingV1064\)saveGame\(\)/);
  assert.match(source,/\},2000\);/);
 });

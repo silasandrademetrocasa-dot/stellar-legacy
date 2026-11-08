@@ -69,7 +69,7 @@ export function applyPilotSkillResetV102(state){
 
 const STALE_CODES=/\bSAVE_(?:NPC|ORE|ELITE|COUPON|EVENT|ECONOMY)_STALE\b/;
 export function retryableEconomySaveConflictV102(error){
-  return String(error?.message||'').includes('SAVE_REVISION_CONFLICT')||STALE_CODES.test(String(error?.message||''));
+  return ['PLAYER_RETRY','ECONOMY_STALE','40001','40P01'].includes(error?.code)||String(error?.message||'').includes('SAVE_REVISION_CONFLICT')||STALE_CODES.test(String(error?.message||''));
 }
 export async function withEconomySaveRetryV102(operation,{maxAttempts=3,delay=async()=>{}}={}){
   for(let attempt=1;attempt<=maxAttempts;attempt++){

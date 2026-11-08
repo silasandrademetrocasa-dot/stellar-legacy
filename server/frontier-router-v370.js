@@ -12,7 +12,7 @@ export function createFrontierRouter({serviceClient}){
  r.post('/claim',wrap(async(req,res)=>{
   const id=req.body?.contractId;
   if(typeof id!=='string'||!contractId.test(id))return res.status(400).json({ok:false,error:'Contrato inválido.'});
-  const {data,error}=await req.sb.rpc('stellar_frontier_claim_v370',{p_id:id});
+  const {data,error}=await req.sb.rpc('stellar_player_frontier_claim',{p_id:id});
   if(error)return res.status(409).json({ok:false,error:safeError(error)});
   res.set('Cache-Control','no-store');res.json(data);
  }));

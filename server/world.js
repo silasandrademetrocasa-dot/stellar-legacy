@@ -986,6 +986,8 @@ class Room {
       isFresh:p=>this.playerFresh(p),
       isCurrent:c=>c.room===this&&currentRoomActorV1173(c,this.players)
     });
+    let lootV134=null;
+    if(ownerId&&this.world.issueLoot){try{lootV134=await this.world.issueLoot(ownerId,`loot_${e.id}`,this.key,e.x,e.y,e.resources||{});}catch(error){console.warn('[loot-issue]',String(error.message).slice(0,100));}}
     const factor=eligible.length?1/eligible.length:0;
     if(e.eventNpc&&e.eventId===this.event?.eventId&&this.event.rules?.christmas)this.natalKills=(this.natalKills||0)+1;
     const natalLeader=e.type==='natalRei'?[...eligible].sort((a,b)=>(e.damageContrib.get(b.player.userId)||0)-(e.damageContrib.get(a.player.userId)||0))[0]?.player?.userId:null;
@@ -1006,7 +1008,7 @@ class Room {
         if(serverReward.granted===true)this.world.recordEliteEvent?.(recipientUserId,'npc_kill').catch(err=>console.warn('Elite NPC:',err?.message));
         if(serverReward.recoveredAfterTimeout)console.info('[npc-reward-v1069] recibo idempotente recuperado apos timeout');
         this.world.recordRelayPve?.(recipientUserId,`npc:${this.key}:${e.id}:${recipientUserId}`,'npc').catch(()=>{});
-        safeJsonSend(c,{type:'kill_credit',entity:dead,factor:rewardFactor,serverReward,groupShared:!!rewardGroupId,eligibleCount:eligible.length,ownerUserId:ownerId,ownerGroupId:rewardGroupId||null,dropBox:isOwner});
+        safeJsonSend(c,{type:'kill_credit',entity:dead,factor:rewardFactor,serverReward:{...serverReward,loot:lootV134},groupShared:!!rewardGroupId,eligibleCount:eligible.length,ownerUserId:ownerId,ownerGroupId:rewardGroupId||null,dropBox:isOwner});
       }catch(err){
         console.error('[npc-reward] falha no ledger',{npc:e.id,error:String(err?.message||err).slice(0,180)});
         safeJsonSend(c,{type:'npc_reward_error',entityId:e.id,message:'Recompensa econômica indisponível. Nenhum saldo foi adicionado pelo navegador.'});
@@ -1014,7 +1016,7 @@ class Room {
     }
 
     // A BOX nunca é compartilhada. Mesmo se o dono ficou inativo (>120s), ela continua sendo dele.
-    if(ownerRoomClient&&!eligible.includes(ownerRoomClient))safeJsonSend(ownerRoomClient,{type:'npc_loot_credit',entity:dead,ownerUserId:ownerId});
+    if(ownerRoomClient&&!eligible.includes(ownerRoomClient))safeJsonSend(ownerRoomClient,{type:'npc_loot_credit',entity:dead,loot:lootV134,ownerUserId:ownerId});
 
     const mode=this.eventMode(),ev=this.event;
     if(ev && ((mode==='battle_wave'&&this.map.battle)||(e.eventNpc&&ev.eventId===e.eventId&&(mode==='wave'||mode==='boss')))){
@@ -1181,7 +1183,7 @@ class Room {
   }
 }
 
-export function attachSharedUniverse(server,{authenticate,authorizeJoin,recordSecurityViolation,loadLiveOps,loadBattleGroup,loadNpcConfig,loadWorldConfig,loadPlayerEventProgress,recordPlayerEventProgress,loadWarfront,persistCapture,persistRelayCapture,damageRelay,readRelayLoadout,readAstralCombatProfile,loadActorClan,recordRelayPve,recordEliteEvent,recordWarDefense,loadWorldDirectives,grantNpcReward,grantOreReward,loadWarbotConfig,natal}){
+export function attachSharedUniverse(server,{authenticate,authorizeJoin,recordSecurityViolation,loadLiveOps,loadBattleGroup,loadNpcConfig,loadWorldConfig,loadPlayerEventProgress,recordPlayerEventProgress,loadWarfront,persistCapture,persistRelayCapture,damageRelay,readRelayLoadout,readAstralCombatProfile,loadActorClan,recordRelayPve,recordEliteEvent,recordWarDefense,loadWorldDirectives,grantNpcReward,grantOreReward,loadWarbotConfig,natal,issueLoot}){
   const wss=new WebSocketServer({
     server,
     path:'/ws',
@@ -1196,7 +1198,7 @@ export function attachSharedUniverse(server,{authenticate,authorizeJoin,recordSe
   // V108: telemetria continua acessível em /api/admin, mas log periódico só por opção.
   if(process.env.STELLAR_NETWORK_LOGS==='1')networkTelemetryV1051.start();
   const world={
-    recordSecurityViolation,
+    recordSecurityViolation,issueLoot,
     // Contadores acumulados desde o boot (sem ID ou dado pessoal): comparar com baseline no Render.
     networkV104:{since:nowMs(),broadcastMessages:0,broadcastBytes:0,playerPatchMessages:0,playerPatchBytes:0,playerFullEquivalentBytes:0,playerUnchangedSkipped:0,npcBatches:0,npcBatchBytes:0,npcBackpressureSkips:0},
     networkTelemetryV1051,

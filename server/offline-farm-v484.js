@@ -60,6 +60,7 @@ export function offlineFarmMutationPolicyV103(method,pathname){
   const m=String(method||'GET').toUpperCase();
   if(['GET','HEAD','OPTIONS'].includes(m))return 'read';
   const path=String(pathname||'').replace(/\/{2,}/g,'/');
+  if(path==='/api/player/auction/bid')return 'separate';
   if(/^\/api\/(?:offline-farm\/|auth\/|admin\/|telemetry(?:\/|$))/.test(path))return 'separate';
   if(/^\/api\//.test(path))return 'guard';
   return 'other';
@@ -154,7 +155,7 @@ export function installOfflineFarmV484(app,{requireUser,asyncRoute,requireEliteA
         error:'Resgate em validacao. Consulte o status antes de tentar novamente.'});
     try{
       const sb=await requireEliteAdmin();
-      let fn=method==='start'?'stellar_offline_farm_start_v1111':method==='claim'?'stellar_offline_farm_claim_v1111':'stellar_offline_farm_'+method+'_v484';
+      let fn=method==='start'?'stellar_player_offline_farm_start':method==='claim'?'stellar_player_offline_farm_claim':'stellar_offline_farm_'+method+'_v484';
       if(method==='start'){
         const grant=await farmGrantV49(sb,req.user.id);
         if(!grant.allowed)throw Error('FARM_ACCESS_REQUIRED');

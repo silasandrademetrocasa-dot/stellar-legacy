@@ -34,7 +34,7 @@ export function attachStageBV426(app,{requireUser,asyncRoute}){
  }));
  app.post('/api/frontier/v426/market/buy',...api((req,res)=>{
   if(!UID.test(String(req.body?.offerId||'')))return res.status(400).json({ok:false,error:'Oferta inválida'});
-  return call(req,res,'stellar_u426_market_buy',{p_offer:req.body.offerId});
+  return call(req,res,'stellar_player_u426_market_buy',{p_offer:req.body.offerId});
  }));
  app.post('/api/frontier/v426/market/cancel',...api((req,res)=>{
   if(!UID.test(String(req.body?.offerId||'')))return res.status(400).json({ok:false,error:'Oferta inválida'});

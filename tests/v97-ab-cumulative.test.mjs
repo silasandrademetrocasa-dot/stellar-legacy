@@ -18,12 +18,12 @@ test('V92: limites, subunidades e estouros são rejeitados antes da cobrança',(
 });
 test('V92: compra em lote tem autenticação, guarda offline, débito e grant autoritativos',()=>{
  const server=read('server/index.js');
- assert.match(server,/app.post\('\/api\/live\/purchase\/bulk', requireUser, OFFLINE_FARM_GUARD_V484/);
+ assert.match(server,/app.post\('\/api\/player\/purchase\/bulk', requireUser, OFFLINE_FARM_GUARD_V484/);
  assert.match(server,/withPurchaseLock\(req\.user\.id/);
  assert.match(server,/state\.bulkPurchaseReceiptsV92=/);
  assert.match(server,/applyLiveGrant\(state,\{\.\.\.row/);
  assert.match(server,/commitEconomyUnifiedV1332/);
- assert.ok(server.indexOf('const OFFLINE_FARM_GUARD_V484=')<server.indexOf("app.post('/api/live/purchase/bulk'"),'guard must be initialized first');
+ assert.ok(server.indexOf('const OFFLINE_FARM_GUARD_V484=')<server.indexOf("app.post('/api/player/purchase/bulk'"),'guard must be initialized first');
  assert.match(server,/expected_price\)!==quote.price/);
  assert.match(server,/bulkPurchaseReceiptsV92=structuredClone/);
  assert.match(server,/previous\.catalogKey!==key\|\|previous\.quantity!==quantity/);
@@ -33,7 +33,7 @@ test('V92: UI seleciona produto, quantidade digitável, confirmação e chamada 
  assert.match(html,/data-bulk-product/);assert.match(html,/data-bulk-quantity/);
  assert.match(game,/purchaseLiveBulkOnline\(product,quantity,idempotency,quote.price,q.currency,quote.packSize\)/);
  assert.match(game,/openSpendConfirm\(\{title:'Confirmar compra em lote\?'/);
- assert.match(api,/\/api\/live\/purchase\/bulk/);
+ assert.match(api,/\/api\/player\/purchase\/bulk/);
 });
 test('V93: nenhum popup de landscape no login e controles em Configurações',()=>{
  const html=read('public/index.html');
@@ -65,6 +65,6 @@ test('V94–V97: Autopilot, Farm e progressão são diagnósticos, não novos sa
  assert.match(game,/X-7 contém somente dois Apex Overlord lendários/);
 });
 test('V97: versão, APK e assets preservados',()=>{
- assert.match(JSON.parse(read('package.json')).version,/^47\.7\.(53|56|57|58|59|60|61|62|63)$/);
+ assert.match(JSON.parse(read('package.json')).version,/^47\.7\.(53|56|57|58|59|60|61|62|63|64)$/);
  for(const file of ['public/assets/v65/ships/top/phoenix.webp','public/assets/v65/aux/aux9.webp','public/modules/stellar-autopilot-v48.js','server/offline-farm-v484.js'])assert.ok(existsSync(join(root,file)),file);
 });

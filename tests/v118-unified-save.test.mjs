@@ -15,7 +15,7 @@ test('V118: save transacional escreve estado, perfil e ABC numa única função 
  assert.match(sql,/security invoker/i);assert.match(sql,/revoke all on function.*from public,anon,authenticated/i);
  assert.match(sql,/on conflict\(id\) do update/);
  assert.match(sql,/insert into public\.stellar_player_save_abc_v118/);
- assert.match(server,/service\.rpc\('stellar_commit_player_save_v118'/);
+ assert.match(server,/service\.rpc\('stellar_player_commit'/);
  assert.doesNotMatch(server,/from\('game_saves'\)\.upsert\(\{user_id:req\.user\.id,state,updated_at/);
 });
 test('V118: não apagar CONF ao equipar drones e preservar guarda SQL NPC',()=>{

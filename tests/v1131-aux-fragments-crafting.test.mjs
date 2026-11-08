@@ -74,7 +74,7 @@ test('o drop depende de NPC oficial, ledger, sorteio SQL e de um recibo por abat
  assert.match(sql,/REVOKE ALL ON FUNCTION public\.stellar_grant_npc_reward_v1131/);
  assert.match(sql,/IF NOT p_owner_eligible THEN RETURN v_reward/);
  assert.match(src('server/world.js'),/\),isOwner\);/);
- assert.match(src('server/index.js'),/stellar_grant_npc_reward_v1131/);
+ assert.match(src('server/index.js'),/stellar_(?:grant_npc_reward_v1131|player_grant_npc_reward)/);
 });
 test('o cliente apresenta os fragmentos e envia apenas o ID e nivel ao servidor',()=>{
  const game=src('public/game.js');

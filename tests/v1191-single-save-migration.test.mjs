@@ -55,10 +55,10 @@ test('V119.1: o token de revisao nao sobrevive a outra sessao de piloto',()=>{
  assert.match(api,/Number\.isSafeInteger\(Number\(value\)\)/);
 });
 test('V119.1: eventos consultaveis pelo piloto, mas sem endpoint para editar recibos',()=>{
- assert.match(server,/app\.get\('\/api\/save\/core\/events',requireUser/);
+ assert.match(server,/app\.get\('\/api\/player\/save\/core\/events',requireUser/);
  assert.match(server,/\.eq\('user_id',req\.user\.id\)/);
  assert.match(server,/select\('happened_at,module,event,summary'\)/);
- assert.doesNotMatch(server,/app\.post\('\/api\/save\/core\/events'/);
+ assert.doesNotMatch(server,/app\.post\('\/api\/player\/save\/core\/events'/);
 });
 test('V119.1: captura permanece desligada ate que SQL de ativacao seja executado',()=>{
  assert.doesNotMatch(prepare,/CREATE TRIGGER stellar_capture_save_update_v119/);

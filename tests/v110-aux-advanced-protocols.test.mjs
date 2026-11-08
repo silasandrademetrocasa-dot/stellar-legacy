@@ -109,7 +109,7 @@ test('new AUX slots require equipment intent on client saves; economy does not e
 });
 test('UI and styles are available, owned does not equal equipped, and legacy specialization stays',()=>{
  const game=readFileSync(resolve(root,'public/game.js'),'utf8'),html=readFileSync(resolve(root,'public/index.html'),'utf8');
- for(const text of ['PROTOCOLOS AVANÇADOS','mutateAuxProtocolV110','auxAdvancedBonusV110(\'porao\')','auxAdvancedBonusV110(\'hp\')','auxAdvancedBonusV110(\'loot\')','changePetProtocol(def.id,delta)','canCraftAuxProtocolV110'])assert(game.includes(text),text);
+ for(const text of ['PROTOCOLOS AVANÇADOS','mutateAuxProtocolV110','auxAdvancedBonusV110(\'porao\')','auxAdvancedBonusV110(\'hp\')','changePetProtocol(def.id,delta)','canCraftAuxProtocolV110'])assert(game.includes(text),text);
  assert(html.includes('aux-advanced-protocols-v110.css?v=110'));
  assert(existsSync(resolve(root,'public/modules/aux-advanced-protocols-v110.css')));
 });

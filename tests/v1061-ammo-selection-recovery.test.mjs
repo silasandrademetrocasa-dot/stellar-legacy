@@ -35,6 +35,6 @@ test('V106.1: HUD, hotkeys, fallback e Autopilot usam o mesmo save prioritario',
   assert.match(s,/changeAmmoSelectionV1061\('laser',next\)/);
   assert.match(s,/changeAmmoSelectionV1061\('rocket',next\)/);
   assert.match(s,/AMMO_SELECTION_V1061\.confirm\(snapshot\)/);
-  assert.match(s,/progress=AMMO_SELECTION_V1061\.merge\(pendingCargoV1333\(\)\.reconcile\(serverState\)\)/);
+  assert.match(s,/progress=AMMO_SELECTION_V1061\.merge\(combatJournalV134\(\)\.reconcile\(pendingCargoV1333\(\)\.reconcile\(serverState\)\)\)/);
   assert.match(s,/AMMO_SELECTION_V1061\.pending\|\|cloudSaveMutationV105!==sentMutation/);
 });

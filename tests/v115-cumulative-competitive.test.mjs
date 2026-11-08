@@ -123,6 +123,6 @@ test('V115 painel ADM mede bytes sem UUID, inventários ou dados de usuário',()
 test('V115 pacote conserva itinerário do Autopilot e forja V113.1',()=>{
  const game=src('public/game.js');assert.match(game,/stellar-autopilot-v126\.js/); // V126 sucede V116 com novo URL para invalidar cache mobile
  const server=src('server/index.js');assert.match(server,/aux_protocol_craft/);
- assert.match(server,/stellar_grant_npc_reward_v1131/);
+ assert.match(server,/stellar_(?:grant_npc_reward_v1131|player_grant_npc_reward)/);
  assert.match(server,/installOfflineFarmV484/);
 });

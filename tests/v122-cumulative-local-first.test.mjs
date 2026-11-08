@@ -42,6 +42,6 @@ test('V122 — game uses V106 single-flight, 5s sync and retains economic gate',
  assert.match(game,/intervalMs:5000/);
  assert.match(game,/LEGACY_MIRROR_V122\.stage\(saveKey\(\),progress/);
  assert.match(server,/writeVerifiedSave\(req,state,updated_at\)/);
- assert.match(server,/stellar_commit_player_save_v118/);
+ assert.match(server,/stellar_player_commit/);
  assert.match(game,/rememberEquipmentChangeV109\(\)/);
 });

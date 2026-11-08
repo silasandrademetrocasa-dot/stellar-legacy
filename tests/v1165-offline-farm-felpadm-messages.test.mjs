@@ -17,5 +17,5 @@ test('V116.5: atualiza apenas o cache visual, sem alterar lógica financeira',()
  const html=read('public/index.html');
  assert.match(html,/v1165-farm-error-humanized/);
  const server=read('server/offline-farm-v484.js');
- assert.match(server,/stellar_offline_farm_claim_v1111/);
+ assert.match(server,/stellar_(?:offline_farm_claim_v1111|player_offline_farm_claim)/);
 });

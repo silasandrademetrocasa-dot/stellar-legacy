@@ -4,8 +4,8 @@ import {readFileSync} from 'node:fs';
 const read=x=>readFileSync(new URL('../'+x,import.meta.url),'utf8');
 test('V111.1: claim sempre passa pela recuperação transacional SQL',()=>{
  const s=read('server/offline-farm-v484.js');
- assert.match(s,/stellar_offline_farm_claim_v1111/);
- assert.match(s,/stellar_offline_farm_start_v1111/);
+ assert.match(s,/stellar_(?:offline_farm_claim_v1111|player_offline_farm_claim)/);
+ assert.match(s,/stellar_(?:offline_farm_start_v1111|player_offline_farm_start)/);
  assert.match(s,/onlyTimestampChanges/);
  assert.match(s,/if\(!onlyTimestampChanges\)/);
  assert.match(s,/FARM_REVIEW_REQUIRED/);

@@ -5,11 +5,11 @@ import {offlineFarmMutationPolicyV103,farmPreclaimIssuesV103,sameFarmTimestampV1
 
 const file=x=>readFileSync(new URL('../'+x,import.meta.url),'utf8');
 test('V103: todos os acessos GET aos menus continuam livres',()=>{
-  for(const endpoint of ['/api/auction','/api/runtime/npcs','/api/astral-rewards','/api/arena','/api/live/shops','/api/save','/api/war/rankings'])
+  for(const endpoint of ['/api/auction','/api/runtime/npcs','/api/astral-rewards','/api/arena','/api/live/shops','/api/player/save','/api/war/rankings'])
     assert.equal(offlineFarmMutationPolicyV103('GET',endpoint),'read',endpoint);
 });
 test('V103: operações que alteram o piloto ficam protegidas durante Farm Offline',()=>{
-  for(const endpoint of ['/api/save','/api/live/purchase','/api/live/purchase/bulk','/api/economy/action','/api/player/location','/api/account/callsign','/api/coupons/redeem','/api/astral-rewards/claim','/api/astral-rewards/lock','/api/war/supply/claim','/api/elite/claim','/api/frontier/v42/action','/api/command/claim','/api/relay/fortify','/api/arena/attack'])
+  for(const endpoint of ['/api/player/save','/api/player/purchase','/api/player/purchase/bulk','/api/player/economy','/api/player/location','/api/account/callsign','/api/player/coupons/redeem','/api/astral-rewards/claim','/api/astral-rewards/lock','/api/war/supply/claim','/api/elite/claim','/api/frontier/v42/action','/api/command/claim','/api/relay/fortify','/api/arena/attack'])
     assert.equal(offlineFarmMutationPolicyV103('POST',endpoint),'guard',endpoint);
 });
 test('V103: iniciar/resgatar farm, autenticação, ADM e telemetria não são capturados pelo bloqueio',()=>{

@@ -1,5 +1,5 @@
 // Revisions are authorities, balances are not monotonic (spending is legitimate).
-export const SAVE_AUTHORITIES_V1331=['serverPurchaseRevision','serverNpcRewardRevision','serverOreRevision','serverEliteRevision'];
+export const SAVE_AUTHORITIES_V1331=['serverStateClockV134','serverPurchaseRevision','serverNpcRewardRevision','serverOreRevision','serverEliteRevision'];
 export function staleSaveAuthoritiesV1331(current,incoming){
  if(!current||!incoming||!current.accountOwnerId||current.accountOwnerId!==incoming.accountOwnerId)return [];
  if(Number(incoming.adminResetEpoch||0)>Number(current.adminResetEpoch||0))return [];

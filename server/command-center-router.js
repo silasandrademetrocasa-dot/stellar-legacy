@@ -43,7 +43,7 @@ export function createCommandCenterRouter({serviceClient,requireService}){
  }));
  r.post('/season/:id/claim',wrap(async(req,res)=>{
   if(!uuid.test(req.params.id))return res.status(400).json({error:'Temporada inválida.'});
-  const {data,error}=await req.sb.rpc('stellar_claim_competitive_season',{p_season_id:req.params.id});
+  const {data,error}=await req.sb.rpc('stellar_player_claim_competitive_season',{p_season_id:req.params.id});
   if(error)return res.status(409).json({error:error.message});res.json(data);
  }));
  r.post('/elite/equip-title',wrap(async(req,res)=>{

@@ -1,3 +1,5 @@
+import {createPlayerRewardsV134} from './player-rewards-v134.js';
+import {mergePlayerStateV134} from '../public/modules/player-state-merge-v134.js';
 import {commitEconomyUnifiedV1332,settleAuctionUnifiedV1332} from './unified-command-v1332.js';
 import {claimMissionCommandV1331} from './mission-command-v1331.js';
 import {createChristmasService,mountChristmasRoutes} from './christmas-v132.js';
@@ -58,7 +60,7 @@ import { createSecurityService } from './security-service.js';
 
 const app = express();
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const RELEASE_VERSION = '47.7.63'; // único identificador de release nos endpoints HTTP
+const RELEASE_VERSION = '47.7.64'; // único identificador de release nos endpoints HTTP
 
 function normalizeSupabaseUrl(value = '') {
   let url = String(value || '').trim();
@@ -81,44 +83,18 @@ async function requireEliteAdmin(){if(!eliteAdminClient)throw new Error('Configu
 // O navegador e o token JWT nunca recebem permissao de escrita direta nos saves.
 // Todas as gravacoes passam pelo Render depois da validacao de usuario, sessao e regras.
 async function writeVerifiedSave(req,state,updated_at){
-  // V118: um UNICO commit transacional guarda game_saves, profiles e A/B/C.
-  // O navegador nao pode chamar este RPC: apenas o Render usa service_role.
-  const service=await requireEliteAdmin();
-  pruneOrphanedDroneLayoutsV118(state); // descarta apenas IDs órfãos de CONF (sem tocar inventário)
-  const callsign=String(state?.profile?.callsign||'').trim();
-  if(req.saveOperationV133){
-    const {data,error}=await service.rpc('stellar_commit_save_v133',{
-      p_user_id:req.user.id,p_state:state,p_updated_at:updated_at,p_callsign:callsign,
-      p_expected_token:req.saveTokenV131,p_operation_id:req.saveOperationV133.id,p_request_hash:req.saveOperationV133.hash
-    });
-    if(error)return error;
-    if(!data?.ok)return {code:data?.code||'SAVE_NOT_CONFIRMED',message:data?.code||'SAVE_NOT_CONFIRMED'};
-    req.confirmedTokenV131=data.save_token;return null;
-  }
-  // V119 em modo OBSERVE (padrao) mantem a V118 ate homologarmos cada RPC legada.
-  // ENFORCE somente depois do SQL PREPARAR + ATIVAR + testes em duas contas.
-  if(saveCoreModeV119()==='enforce' && req.saveTokenV131!=='new'){
-    const response=await SAVE_OPERATIONS_V1192.measure(saveModuleForRequestV119(req),()=>commitSaveCoreV119({service,req,userId:req.user.id,state,callsign}));
-    if(!response.ok)return response.error;
-    req.v119Revision=response.revision;
-    return null;
-  }
-  if(req.saveTokenV131!==undefined){
-    const {data,error}=await SAVE_OPERATIONS_V1192.measure(saveModuleForRequestV119(req),()=>service.rpc('stellar_commit_save_v131',{
-      p_user_id:req.user.id,p_state:state,p_updated_at:updated_at,p_callsign:callsign,p_expected_token:req.saveTokenV131
-    }));
-    if(error)return error;
-    if(!data?.ok)return {code:data?.code||'SAVE_NOT_CONFIRMED',message:data?.code||'SAVE_NOT_CONFIRMED'};
-    req.confirmedTokenV131=data.save_token;
-    return null;
-  }
-  const {data,error}=await SAVE_OPERATIONS_V1192.measure(saveModuleForRequestV119(req),()=>service.rpc('stellar_commit_player_save_v118',{
-    p_user_id:req.user.id,p_state:state,p_updated_at:updated_at,p_callsign:callsign
-  }));
-  if(error&&['PGRST202','42883'].includes(String(error.code||'')))
-    return {code:'SAVE_MIGRATION_REQUIRED',message:'Migração de save único ainda não instalada. Nenhum progresso foi gravado.'};
-  if(!error&&data?.ok!==true)return {code:'SAVE_NOT_CONFIRMED',message:'Servidor não confirmou o save único.'};
-  return error||null;
+ const service=await requireEliteAdmin();pruneOrphanedDroneLayoutsV118(state);
+ const original=req.saveOperationV133;
+ const id=original?.id||randomUUID();
+ const hash=original?.hash||operationDigestV125('checkpoint',{state});
+ const {data,error}=await SAVE_OPERATIONS_V1192.measure(saveModuleForRequestV119(req),()=>service.rpc('stellar_player_commit',{
+  p_user_id:req.user.id,p_command_id:id,p_module:'checkpoint',p_request_hash:hash,
+  p_payload:{base:req.playerBaseV134||null,state,receipt:{checkpoint:true}}
+ }));
+ if(error)return error;
+ if(!data?.ok)return {code:data?.code||'SAVE_NOT_CONFIRMED',message:data?.code||'SAVE_NOT_CONFIRMED'};
+ req.confirmedTokenV131=data.save_token;req.confirmedStateV134=data.state;req.confirmedAtV134=data.updated_at;
+ return null;
 }
 
 
@@ -138,7 +114,7 @@ app.use(express.json({ limit: '1mb' }));
 const SAVE_LATENCY_V1191=createSaveLatencyMonitorV1191();
 const SAVE_OPERATIONS_V1192=createSaveOperationMonitorV1192();
 app.use((req,res,next)=>{
-  if(req.path!=='/api/save'||!['GET','PUT'].includes(req.method))return next();
+  if(req.path!=='/api/player/save'||!['GET','PUT'].includes(req.method))return next();
   const start=performance.now();
   res.once('finish',()=>SAVE_LATENCY_V1191.record(req.method,performance.now()-start));
   next();
@@ -605,14 +581,21 @@ function rollGateOnceServer(state,key){
   g.jumpBonus++;return {kind:'jump',label:'Bônus de Salto +1'}; // Vida removida dos giros V19.0.6
 }
 async function readSaveForWrite(req){
-  const service=await requireEliteAdmin();
-  return req.saveOperationV133?service.rpc('stellar_read_save_v133',{p_user_id:req.user.id,p_operation_id:req.saveOperationV133.id,p_request_hash:req.saveOperationV133.hash}):service.rpc('stellar_read_save_v131',{p_user_id:req.user.id});
+ const service=await requireEliteAdmin();
+ const result=await service.rpc('stellar_player_read',{p_user_id:req.user.id,p_token:req.body?.expected_token||null,p_checkpoint_ids:typeof req.query?.checkpoint_receipts==='string'?req.query.checkpoint_receipts.split(',').filter(x=>/^[a-f0-9-]{36}$/i.test(x)).slice(0,16):null});
+ if(!result.error)req.playerBaseV134=structuredClone(result.data?.state||null);
+ if(req.saveOperationV133&&!result.error){
+  const {data:receipt,error}=await service.from('stellar_player_commands_v134').select('request_hash').eq('user_id',req.user.id).eq('command_id',req.saveOperationV133.id).maybeSingle();
+  if(error)return {error};
+  if(receipt)result.data={...result.data,...(receipt.request_hash===req.saveOperationV133.hash?{replayed:true}:{receipt_error:'SAVE_IDEMPOTENCY_ID_REUSED'})};
+ }
+ return result;
 }
 async function readEconomySave(req){
   const {data,error}=await readSaveForWrite(req);
   if(error)throw new Error(error.message);
   if(!data?.state)throw Object.assign(new Error('Save online ainda não foi criado.'),{status:409});
-  req.economyBaselineV125=data.updated_at;
+  req.economyBaselineV125=data.updated_at;req.economyBaseV134=structuredClone(data.state);
   req.saveTokenV131=data.save_token;
   const state=structuredClone(data.state);
   if(String(state.accountOwnerId||req.user.id)!==req.user.id)throw Object.assign(new Error('SAVE BLOQUEADO: proprietário inválido.'),{status:409});
@@ -1434,24 +1417,20 @@ app.post('/api/admin/runtime/events/central/manual',requireUser,asyncRoute(async
 
 // V18.2.1 — cupons cadastrados exclusivamente no Supabase.
 // A autenticação do jogo é obrigatória e os prêmios são transacionados pelo PostgreSQL.
-app.post('/api/coupons/redeem', requireUser, asyncRoute(async (req,res)=>{
+app.post('/api/player/coupons/redeem', requireUser, asyncRoute(async (req,res)=>{
   const code=String(req.body?.code||'').trim().toUpperCase();
   if(code==='NATALESTELAR'){const result=await natalServiceV132.action(req.user.id,'coupon:NATALESTELAR','coupon');return res.json({...result,handled:true,message:'Natal Estelar resgatado'});}
   if(!/^[A-Z0-9][A-Z0-9_-]{3,63}$/.test(code))return res.status(400).json({error:'Formato de cupom inválido.'});
   const result=await withPurchaseLock(req.user.id,async()=>{
-    // Nova central ADM V19.0.3: tenta primeiro cupom novo; código antigo mantém fluxo V18.2.1.
-    const modern=await req.sb.rpc('redeem_game_coupon_v193',{p_code:code});
-    if(modern.error){console.warn('[coupon-v193] rejected',modern.error.code||'');throw Object.assign(new Error(String(modern.error.message||'Cupom recusado pelo servidor.')),{status:400});}
-    if(modern.data?.handled===true)return modern.data;
-    const {data,error}=await req.sb.rpc('redeem_game_coupon_v1821',{p_code:code});
-    if(error){console.warn('[coupon] rejected',error.code||'');throw Object.assign(new Error(String(error.message||'Cupom recusado pelo servidor.')),{status:400});}
+    const {data,error}=await req.sb.rpc('stellar_player_redeem_game_coupon',{p_code:code});
+    if(error)throw Object.assign(new Error(String(error.message||'Cupom recusado pelo servidor.')),{status:409,code:error.code});
     return data;
   });
   res.set('Cache-Control','no-store');
   return res.json(result);
 }));
 
-app.post('/api/live/purchase', requireUser, asyncRoute(async (req,res)=>{
+app.post('/api/player/purchase', requireUser, asyncRoute(async (req,res)=>{
   const tamper=invalidShopArguments(req.body,['catalog_key','request_id']);
   if(tamper){const result=await securityService.report(req.user.id,tamper,'live_purchase');if(result?.auto_suspended)return res.status(403).json({error:'Conta temporariamente suspensa por violação de integridade.',code:'ACCOUNT_BANNED'});return res.status(400).json({error:'Parâmetros de compra inválidos.',code:tamper.code});}
   const catalogKey=String(req.body?.catalog_key||'').trim().slice(0,120);
@@ -1460,6 +1439,14 @@ app.post('/api/live/purchase', requireUser, asyncRoute(async (req,res)=>{
   if(requestId!==null&&!validPurchaseIdV123(requestId))
     return res.status(400).json({error:'Identificador de compra inválido.',code:'PURCHASE_ID_INVALID'});
   const result=await withPurchaseLock(req.user.id,async()=>{
+    const earlyDb=await requireEliteAdmin();
+    const oldReceipt=await earlyDb.from('stellar_live_purchase_receipts_v123').select('catalog_key,receipt').eq('user_id',req.user.id).eq('request_id',requestId).maybeSingle();
+    if(oldReceipt.error)throw Object.assign(Error('Recibo indisponível'),{status:503});
+    if(oldReceipt.data){
+      if(oldReceipt.data.catalog_key!==catalogKey)throw Object.assign(Error('Identificador reutilizado'),{status:409,code:'COMMAND_ID_REUSED'});
+      const readback=await readSaveForWrite(req);if(readback.error)throw Object.assign(Error('Recuperação indisponível'),{status:503});
+      return {state:readback.data.state,save_token:readback.data.save_token,updated_at:readback.data.updated_at,purchase:oldReceipt.data.receipt,replayed:true};
+    }
     const snapshot=await loadLiveOpsSnapshot(true);
     const row=liveCatalogRow(snapshot,catalogKey);
     if(!row||row.shop_visible===false)throw Object.assign(new Error('Produto indisponível na Loja.'),{status:404});
@@ -1516,14 +1503,10 @@ app.post('/api/live/purchase', requireUser, asyncRoute(async (req,res)=>{
     if(requestId){
       // Atomic DB commit: compare current save timestamp, debit, grant and receipt
       // under the same SQL transaction. Old clients keep the V118 compatibility path.
-      const response=await service.rpc('stellar_commit_live_purchase_v123',{
-        p_user_id:req.user.id,p_request_id:requestId,p_catalog_key:catalogKey,
-        p_expected_updated_at:saveRow.updated_at,p_state:state,
-        p_callsign:String(state.profile.callsign||''),p_receipt:purchase
-      });
+      const response=await service.rpc('stellar_player_commit',{p_user_id:req.user.id,p_command_id:requestId,p_module:'purchase',p_request_hash:operationDigestV125('purchase',{catalogKey}),p_payload:{base:saveRow.state,state,receipt:purchase,catalog_key:catalogKey}});
       const confirmed=interpretPurchaseCommitV123(response.data,response.error);
       if(!confirmed.ok)throw Object.assign(new Error(confirmed.message),{status:confirmed.code==='ECONOMY_STALE'?409:503,code:confirmed.code});
-      return {state:confirmed.state,updated_at:confirmed.updatedAt,purchase:confirmed.receipt,replayed:confirmed.replayed};
+      return {state:confirmed.state,save_token:response.data?.save_token,updated_at:confirmed.updatedAt,purchase:confirmed.receipt,replayed:confirmed.replayed};
     }
     req.saveTokenV131=saveRow.save_token;
     const writeError=await writeVerifiedSave(req,state,updated_at);
@@ -1572,11 +1555,23 @@ installLiveopsSnapshotV99(app,{requireUser,asyncRoute,requireEliteAdmin});
 installReleaseReadinessV100(app,{requireUser,asyncRoute,requireEliteAdmin,publicRoot:path.join(__dirname,'../public'),releaseVersion:RELEASE_VERSION});
 const OFFLINE_FARM_GUARD_V484=makeOfflineFarmGuardV484(requireEliteAdmin);
 const AUCTION_SINGLE_FLIGHT_V1194=createAuctionSingleFlightV1194();
+const playerRewardsV134=createPlayerRewardsV134({db:eliteAdminClient,readPass:()=>loadPassRuntimeSnapshot(false),readPremium:async req=>{const r=await req.sb.rpc('get_premium_shop_v12');if(r.error)throw Error(r.error.message);return r.data;},readBonus:async()=>{const r=await eliteAdminClient.rpc('get_bonus_box_config_v1825');if(r.error)throw Error(r.error.message);return r.data;},readSystems:()=>loadSystemsRuntimeSnapshot(false),world:()=>sharedUniverse,secret:SUPABASE_SERVICE_KEY});
+app.post('/api/player/rewards/claim',requireUser,OFFLINE_FARM_GUARD_V484,asyncRoute(async(req,res)=>res.json(await withPurchaseLock(req.user.id,()=>playerRewardsV134.claim(req.user.id,req.body,req)))));
+app.post('/api/player/collections/ensure',requireUser,OFFLINE_FARM_GUARD_V484,asyncRoute(async(req,res)=>res.json(await playerRewardsV134.ensure(req.user.id))));
+app.post('/api/player/collections/claim',requireUser,OFFLINE_FARM_GUARD_V484,asyncRoute(async(req,res)=>res.json(await withPurchaseLock(req.user.id,()=>playerRewardsV134.collect(req.user.id,req.body)))));
+app.post('/api/player/auction/bid',requireUser,asyncRoute(async(req,res)=>{
+ const b=req.body||{};
+ if(Object.keys(b).some(k=>!['request_id','hour_key','lot_ref','user_bid','lot'].includes(k)))return res.status(400).json({ok:false,code:'BID_ARGUMENTS_INVALID'});
+ const {data,error}=await req.sb.rpc('stellar_player_bid',{p_request_id:b.request_id,p_hour_key:b.hour_key,p_lot_ref:b.lot_ref,p_user_bid:b.user_bid,p_lot:b.lot});
+ if(error)return res.status(409).json({ok:false,code:'AUCTION_BID_REJECTED',error:String(error.message||'Lance recusado').slice(0,180)});
+ res.set('Cache-Control','no-store').json(data);
+}));
+
 // V92–V97 • Uma requisição, uma compra autoritativa de munição/mísseis.
 // O cliente escolhe unidades; servidor cobra PACOTES completos e entrega todos eles.
 // request_id persiste no SAVE: repetir por timeout não cobra duas vezes.
 // V118.2: server-only settlement. Auction rows, wallet, prize and A/B/C commit atomically.
-app.post('/api/auction/settle',requireUser,OFFLINE_FARM_GUARD_V484,asyncRoute(async(req,res)=>{
+app.post('/api/player/auction/settle',requireUser,OFFLINE_FARM_GUARD_V484,asyncRoute(async(req,res)=>{
   const body=req.body||{};
   if(Object.keys(body).some(key=>!['hour_key','lot_ref'].includes(key))||
      !/^20[0-9]{2}-[0-9]{2}-[0-9]{2}-[0-9]{2}$/.test(String(body.hour_key||''))||
@@ -1600,14 +1595,14 @@ app.post('/api/auction/settle',requireUser,OFFLINE_FARM_GUARD_V484,asyncRoute(as
   res.set('Cache-Control','no-store');res.json(result);
 }));
 
-app.post('/api/missions/claim',requireUser,OFFLINE_FARM_GUARD_V484,asyncRoute(async(req,res)=>{
+app.post('/api/player/missions/claim',requireUser,OFFLINE_FARM_GUARD_V484,asyncRoute(async(req,res)=>{
  const category=String(req.body?.category||''),key=String(req.body?.key||'');
  if(!['daily','weekly','monthly','special'].includes(category)||key.length>240||!key.startsWith(category+':'))return res.status(400).json({error:'Missão inválida'});
  const result=await withPurchaseLock(req.user.id,async()=>claimMissionCommandV1331({db:await requireEliteAdmin(),userId:req.user.id,category,key,loadRules:()=>loadSystemsRuntimeSnapshot(false),readDesigns:async()=>{const {data,error}=await req.sb.rpc('get_my_designers_v16');if(error)throw Error(error.message);return data;}}));
  res.set('Cache-Control','no-store').json(result);
 }));
 
-app.post('/api/live/purchase/bulk', requireUser, OFFLINE_FARM_GUARD_V484, asyncRoute(async (req,res)=>{
+app.post('/api/player/purchase/bulk', requireUser, OFFLINE_FARM_GUARD_V484, asyncRoute(async (req,res)=>{
   const tamper=invalidShopArguments(req.body,['catalog_key','quantity','request_id','expected_price','expected_currency','expected_pack_size']);
   if(tamper)return res.status(400).json({error:'Parâmetros de lote inválidos.',code:'INVALID_BULK_ARGUMENTS'});
   const key=String(req.body?.catalog_key||'').trim(),quantity=Number(req.body?.quantity);
@@ -1677,12 +1672,12 @@ app.post('/api/live/purchase/bulk', requireUser, OFFLINE_FARM_GUARD_V484, asyncR
     state.bulkPurchaseReceiptsV92=[...receipts.slice(-23),receipt];
     const response=await commitEconomyUnifiedV1332(service,{
       p_user_id:req.user.id,p_request_id:requestId,p_operation:operation,p_request_hash:intentHash,
-      p_expected_updated_at:saveRow.updated_at,p_state:state,
+      p_base_state:saveRow.state,p_expected_updated_at:saveRow.updated_at,p_state:state,
       p_callsign:String(state.profile?.callsign||''),p_receipt:{purchase:receipt}
     });
     const result=decodeEconomyReceiptV125(response.data,response.error);
     if(!result.ok)throw Object.assign(new Error('Compra em lote sem confirmação: '+result.code),{status:result.code==='ECONOMY_STALE'?409:503,code:result.code});
-    return {state:result.state,purchase:{...(result.receipt?.purchase||receipt),...(result.replayed?{replayed:true}:{})}};
+    return {state:result.state,save_token:response.data?.save_token,purchase:{...(result.receipt?.purchase||receipt),...(result.replayed?{replayed:true}:{})}};
   });
   res.set('Cache-Control','no-store');res.json({ok:true,...result});
 }));
@@ -1691,7 +1686,7 @@ app.post('/api/live/purchase/bulk', requireUser, OFFLINE_FARM_GUARD_V484, asyncR
 
 
 
-app.post('/api/economy/action', requireUser, OFFLINE_FARM_GUARD_V484, asyncRoute(async (req,res)=>{
+app.post('/api/player/economy', requireUser, OFFLINE_FARM_GUARD_V484, asyncRoute(async (req,res)=>{
   const routeStarted=Date.now();
   const action=String(req.body?.action||'').trim();
   const payload=(req.body?.payload&&typeof req.body.payload==='object')?req.body.payload:{};
@@ -1719,7 +1714,7 @@ app.post('/api/economy/action', requireUser, OFFLINE_FARM_GUARD_V484, asyncRoute
     if(receiptResult.error)throw Object.assign(new Error('Recibos V125 indisponíveis: falta aplicar SQL.'),{status:503,code:'ECONOMY_RECEIPTS_UNAVAILABLE'});
     if(receiptResult.data){
       if(!replayValidV125(receiptResult.data,op,intentHash))throw Object.assign(new Error('Identificador reutilizado com parâmetros diferentes.'),{status:409,code:'ECONOMY_ID_REUSED'});
-      const replay=await commitEconomyUnifiedV1332(service,{p_user_id:req.user.id,p_request_id:requestId,p_operation:op,p_request_hash:intentHash,p_expected_updated_at:req.economyBaselineV125,p_state:state,p_callsign:state.profile?.callsign,p_receipt:receiptResult.data.receipt});
+      const replay=await commitEconomyUnifiedV1332(service,{p_user_id:req.user.id,p_request_id:requestId,p_operation:op,p_request_hash:intentHash,p_base_state:req.economyBaseV134,p_expected_updated_at:req.economyBaselineV125,p_state:state,p_callsign:state.profile?.callsign,p_receipt:receiptResult.data.receipt});
       const recovered=decodeEconomyReceiptV125(replay.data,replay.error);
       if(!recovered.ok)throw Object.assign(new Error('Recuperação não confirmada: '+recovered.code),{status:503,code:recovered.code});
       return {state:recovered.state,updated_at:recovered.updatedAt,info:recovered.receipt?.info||{},deduplicated:true};
@@ -1833,16 +1828,24 @@ app.post('/api/economy/action', requireUser, OFFLINE_FARM_GUARD_V484, asyncRoute
     state.profile={...state.profile,callsign};
     const commit=await commitEconomyUnifiedV1332(service,{
       p_user_id:req.user.id,p_request_id:requestId,p_operation:op,p_request_hash:intentHash,
-      p_expected_updated_at:req.economyBaselineV125,p_state:state,p_callsign:callsign,
+      p_base_state:req.economyBaseV134,p_expected_updated_at:req.economyBaselineV125,p_state:state,p_callsign:callsign,
       p_receipt:{info}
     });
     const result=decodeEconomyReceiptV125(commit.data,commit.error);
     if(!result.ok)throw Object.assign(new Error('Operação sem confirmação econômica: '+result.code),{code:result.code,status:result.code==='ECONOMY_STALE'?409:503});
-    return {state:result.state,updated_at:result.updatedAt,info:result.receipt?.info||info,deduplicated:result.replayed};
+    return {state:result.state,save_token:commit.data?.save_token,updated_at:result.updatedAt,info:result.receipt?.info||info,deduplicated:result.replayed};
   },{maxAttempts:3,delay:attempt=>{console.warn('[economy-v102] save em conflito; relendo saldo e recompensas, tentativa',attempt+1);return new Promise(resolve=>setTimeout(resolve,40*attempt));}}));
   res.json({ok:true,...result,server_ms:Date.now()-routeStarted});
 }));
 
+app.all('/api/save',(req,res)=>res.status(410).json({ok:false,code:'CLIENT_UPDATE_REQUIRED',current_route:'/api/player/save',error:'Atualize o jogo para usar a rota atual.'}));
+app.all('/api/economy/action',(req,res)=>res.status(410).json({ok:false,code:'CLIENT_UPDATE_REQUIRED',current_route:'/api/player/economy',error:'Atualize o jogo para usar a rota atual.'}));
+app.all('/api/auction/settle',(req,res)=>res.status(410).json({ok:false,code:'CLIENT_UPDATE_REQUIRED',current_route:'/api/player/auction/settle',error:'Atualize o jogo para usar a rota atual.'}));
+app.all('/api/missions/claim',(req,res)=>res.status(410).json({ok:false,code:'CLIENT_UPDATE_REQUIRED',current_route:'/api/player/missions/claim',error:'Atualize o jogo para usar a rota atual.'}));
+app.all('/api/live/purchase/bulk',(req,res)=>res.status(410).json({ok:false,code:'CLIENT_UPDATE_REQUIRED',current_route:'/api/player/purchase/bulk',error:'Atualize o jogo para usar a rota atual.'}));
+app.all('/api/live/purchase',(req,res)=>res.status(410).json({ok:false,code:'CLIENT_UPDATE_REQUIRED',current_route:'/api/player/purchase',error:'Atualize o jogo para usar a rota atual.'}));
+
+app.all(['/api/coupons/redeem','/api/natal','/api/natal/claim'],(req,res)=>res.status(410).json({ok:false,code:'CLIENT_UPDATE_REQUIRED',error:'Atualize o jogo para a rota atual.'}));
 // V18.2.5: fonte única dos preços de giros. Busca autenticada; falha bloqueia cobrança desatualizada.
 async function loadBonusRuntimeForUser(req){
   const {data,error}=await req.sb.rpc('get_bonus_box_config_v1825');
@@ -2065,7 +2068,7 @@ app.post('/api/admin/users/:userId/ban', requireUser, asyncRoute(async(req,res)=
   return adminRpc(req,res,'admin_set_ban_v1763',{p_target_user_id:req.params.userId,p_minutes:minutes,p_reason:String(req.body?.reason||'').slice(0,240)});
 }));
 app.post('/api/admin/users/:userId/unban', requireUser, asyncRoute(async(req,res)=>adminRpc(req,res,'admin_unban_user_v1763',{p_target_user_id:req.params.userId})));
-app.post('/api/admin/users/:userId/reset', requireUser, asyncRoute(async(req,res)=>adminRpc(req,res,'admin_reset_account_v1763',{p_target_user_id:req.params.userId})));
+app.post('/api/admin/users/:userId/reset', requireUser, asyncRoute(async(req,res)=>adminRpc(req,res,'stellar_player_admin_reset_account',{p_target_user_id:req.params.userId})));
 app.delete('/api/admin/users/:userId', requireUser, asyncRoute(async(req,res)=>adminRpc(req,res,'admin_delete_account_v1763',{p_target_user_id:req.params.userId})));
 
 // Dados de progresso e resgates lidos da base autenticada, nunca do navegador.
@@ -2083,7 +2086,7 @@ app.get('/api/elite',requireUser,asyncRoute(async(req,res)=>{
 app.post('/api/elite/claim',requireUser,asyncRoute(async(req,res)=>{
  const objectiveId=String(req.body?.objectiveId||'');
  if(!/^[a-z][a-z0-9_]{2,39}$/.test(objectiveId))return res.status(400).json({error:'Objetivo inválido.'});
- const {data,error}=await req.sb.rpc('stellar_claim_elite_objective',{p_objective_id:objectiveId});
+ const {data,error}=await req.sb.rpc('stellar_player_claim_elite_objective',{p_objective_id:objectiveId});
  if(error)return res.status(409).json({error:error.message||'Resgate não autorizado.'});
  res.json(data);
 }));
@@ -2145,11 +2148,11 @@ app.get('/api/war/campaigns',requireUser,asyncRoute(async(req,res)=>{
  res.json({ok:true,nodes:nodes||[],rules:rules||{},actions:actions||[],campaigns:campaignRows,active_id:active?.id||null,supply_claimed_today:supply?.[0]?.claim_day===today,isAdmin:adm===true});
 }));
 app.post('/api/war/supply/claim',requireUser,asyncRoute(async(req,res)=>{
- const {data,error}=await req.sb.rpc('stellar_claim_war_supply');if(error)return res.status(409).json({error:error.message});res.json(data);
+ const {data,error}=await req.sb.rpc('stellar_player_claim_war_supply');if(error)return res.status(409).json({error:error.message});res.json(data);
 }));
 app.post('/api/war/campaigns/:id/claim',requireUser,asyncRoute(async(req,res)=>{
  const id=String(req.params.id);if(!/^[0-9a-f-]{36}$/i.test(id))return res.status(400).json({error:'Campanha inválida.'});
- const {data,error}=await req.sb.rpc('stellar_claim_war_campaign',{p_campaign_id:id});if(error)return res.status(409).json({error:error.message});res.json(data);
+ const {data,error}=await req.sb.rpc('stellar_player_claim_war_campaign',{p_campaign_id:id});if(error)return res.status(409).json({error:error.message});res.json(data);
 }));
 async function requireWarAdmin(req,res){const {data,error}=await req.sb.rpc('is_game_admin_v1763',{p_uid:req.user.id});if(error||data!==true){res.status(403).json({error:'Somente ADM.'});return null;}return requireEliteAdmin();}
 app.get('/api/admin/war/campaigns',requireUser,asyncRoute(async(req,res)=>{
@@ -2172,41 +2175,25 @@ app.use('/api/relay',requireUser,createRelayRouter({serviceClient:eliteAdminClie
 app.use('/api/relay/dominion',requireUser,createDominionRouter({serviceClient:eliteAdminClient}));
 app.use('/api/frontier',requireUser,createFrontierRouter({serviceClient:eliteAdminClient}));
 
-app.get('/api/save', requireUser, asyncRoute(async (req, res) => {
+app.get('/api/player/save', requireUser, asyncRoute(async (req, res) => {
   // V119.1: leitura de progresso e epoca de reset iniciadas em paralelo.
   // Isso reduz uma ida-e-volta na inicializacao do Android, sem cachear saldo.
   const resetReadV1191=req.sb.from('stellar_account_reset_epochs_v478')
     .select('epoch').eq('user_id',req.user.id).maybeSingle();
   let data=null,error=null,revisionV119=null;
-  if(saveCoreModeV119()==='enforce'){
-    // Um unico SELECT SQL devolve estado e revisao do MESMO snapshot.
-    const service=await requireEliteAdmin();
-    const reply=await service.rpc('stellar_read_player_save_v119',{p_user_id:req.user.id});
-    error=reply.error;
-    if(reply.data?.verified===false)return res.status(503).json({error:'Integridade de save em verificacao.',code:'SAVE_CORE_HASH_MISMATCH'});
-    data=reply.data?{state:reply.data.state,updated_at:reply.data.updated_at}:null;
-    revisionV119=reply.data?.revision??null;
-    if(!error&&!reply.data){
-      const canonical=await readSaveForWrite(req);
-      if(canonical.error||canonical.data?.save_token!=='new')
-        return res.status(503).json({error:'Revisão do piloto indisponível.',code:'SAVE_READ_UNAVAILABLE'});
-      data=canonical.data;
-    }
-  }else{
-    ({data,error}=await readSaveForWrite(req));
-  }
+  ({data,error}=await readSaveForWrite(req));
   if (error) return res.status(503).json({ error:'Leitura do save indisponivel.',code:'SAVE_READ_UNAVAILABLE' });
   const {data: resetRecord,error: resetErr}=await resetReadV1191;
   if(resetErr)return res.status(503).json({error:'Integridade do reset indisponível. Execute o SQL de pré-lançamento.'});
   res.set('Cache-Control','no-store');
   const playerState=data?.state?structuredClone(data.state):null;
   if(playerState)pruneOrphanedDroneLayoutsV118(playerState);
-  res.json({ save_token:data?.save_token, state: playerState, updated_at: data?.updated_at || null,
+  res.json({ checkpoint_receipts:data?.checkpoint_receipts||[],save_token:data?.save_token, state: playerState, updated_at: data?.updated_at || null,
     reset_epoch:Number(resetRecord?.epoch)||0,...(revisionV119==null?{}:{revision:revisionV119}) });
 }));
 
 // V119: consulta de diagnosticos somente leitura. Nao revela estado de outros pilotos.
-app.get('/api/save/core/status',requireUser,asyncRoute(async(req,res)=>{
+app.get('/api/player/save/core/status',requireUser,asyncRoute(async(req,res)=>{
   const service=await requireEliteAdmin();
   const {data:head,error}=await service.from('stellar_player_save_head_v119')
     .select('revision,state_hash,changed_at,checkpointed_at,journaled_at').eq('user_id',req.user.id).maybeSingle();
@@ -2222,7 +2209,7 @@ app.get('/api/save/core/status',requireUser,asyncRoute(async(req,res)=>{
 }));
 // V119.2: diagnostico pontual, somente do piloto autenticado.
 // Não consulta todos os jogadores, não altera game_saves e não recupera backups sozinho.
-app.get('/api/save/core/health',requireUser,asyncRoute(async(req,res)=>{
+app.get('/api/player/save/core/health',requireUser,asyncRoute(async(req,res)=>{
   const service=await requireEliteAdmin();
   const uid=req.user.id;
   const [canonical,profile,head,checkpoints,farm]=await Promise.all([
@@ -2261,7 +2248,7 @@ app.get('/api/admin/save/v120/readiness',requireUser,asyncRoute(async(req,res)=>
 
 // V119.1: read-only consolidated audit view. Nao participa de compras,
 // recompensas, save ou calculo de saldo. JWT fica no Render.
-app.get('/api/save/core/events',requireUser,asyncRoute(async(req,res)=>{
+app.get('/api/player/save/core/events',requireUser,asyncRoute(async(req,res)=>{
   const limit=Math.min(50,Math.max(1,Math.round(Number(req.query.limit)||20)));
   const moduleName=String(req.query.module||'').trim();
   if(moduleName&&!['combate','leilao','farm','save'].includes(moduleName))
@@ -2277,7 +2264,7 @@ app.get('/api/save/core/events',requireUser,asyncRoute(async(req,res)=>{
   res.json({ok:true,entries:data||[]});
 }));
 
-app.get('/api/save/core/logs',requireUser,asyncRoute(async(req,res)=>{
+app.get('/api/player/save/core/logs',requireUser,asyncRoute(async(req,res)=>{
   const moduleName=String(req.query.module||'').trim();
   if(moduleName&&!SAVE_LOG_MODULES_V119.includes(moduleName))return res.status(400).json({error:'Modulo desconhecido.'});
   const limit=Math.min(50,Math.max(1,Math.round(Number(req.query.limit)||20)));
@@ -2301,8 +2288,8 @@ function normalizeShipSaveV50(state){
   if(!state.ownedShips.includes('phoenix'))state.ownedShips.push('phoenix');
   if(state.repairRequired&&typeof state.repairRequired==='object')state.repairRequired.shipId='phoenix';
 }
-app.use('/api/save',(req,res,next)=>{if(req.method==='PUT'&&req.body?.state)normalizeShipSaveV50(req.body.state);next();});
-app.put('/api/save', requireUser, OFFLINE_FARM_GUARD_V484, asyncRoute(async (req, res) => withPurchaseLock(req.user.id, async()=> {
+app.use('/api/player/save',(req,res,next)=>{if(req.method==='PUT'&&req.body?.state)normalizeShipSaveV50(req.body.state);next();});
+app.put('/api/player/save', requireUser, OFFLINE_FARM_GUARD_V484, asyncRoute(async (req, res) => withPurchaseLock(req.user.id, async()=> {
   let state = req.body?.state;
   if (!state || typeof state !== 'object') return res.status(400).json({ error: 'Save inválido.' });
   const {data:resetRecord,error:resetErr}=await req.sb.from('stellar_account_reset_epochs_v478').select('epoch').eq('user_id',req.user.id).maybeSingle();
@@ -2336,8 +2323,20 @@ app.put('/api/save', requireUser, OFFLINE_FARM_GUARD_V484, asyncRoute(async (req
   if(serverSave.receipt_error)return res.status(409).json({error:'Identidade de salvamento reutilizada.',code:serverSave.receipt_error});
   if(serverSave.replayed)return res.json({ok:true,replayed:true,state:serverSave.state,save_token:serverSave.save_token,updated_at:serverSave.updated_at});
   req.saveTokenV131=serverSave.save_token;
-  if(Object.hasOwn(req.body,'expected_token') && req.body.expected_token!==req.saveTokenV131)
-    return res.status(409).json({error:'Progresso atualizado em outra operação.',code:'SAVE_REVISION_CONFLICT'});
+  if(Object.hasOwn(req.body,'expected_token') && req.body.expected_token!==req.saveTokenV131){
+    if(!serverSave.baseline_state)return res.status(409).json({error:'Referência de save antiga. Sincronize o progresso.',code:'SAVE_REVISION_CONFLICT'});
+    try{
+      const draft=structuredClone(state),base=serverSave.baseline_state;
+      // NPC/ore/collection/coupon commits already applied these gains. Never count
+      // the same authoritative money/cargo a second time as a client delta.
+      if(['serverPurchaseRevision','serverNpcRewardRevision','serverEliteRevision'].some(k=>Number(state[k]||0)>Number(base[k]||0)))for(const key of ['credits','uridium'])draft.profile[key]=base.profile?.[key]||0;
+      if(['serverPurchaseRevision','serverOreRevision'].some(k=>Number(state[k]||0)>Number(base[k]||0)))draft.cargo=structuredClone(base.cargo||{});
+      for(const key of ['serverPurchaseRevision','serverNpcRewardRevision','serverOreRevision','serverEliteRevision','serverStateClockV134','serverCheckpointReceiptV134'])draft[key]=base[key];
+      state=mergePlayerStateV134(base,draft,serverSave.state);
+    }
+    catch{return res.status(409).json({error:'Outra operação alterou este setor. Reconciliando.',code:'SAVE_REVISION_CONFLICT'});}
+  }
+  if(serverSave.state){state.serverStateClockV134=serverSave.state.serverStateClockV134;state.serverCheckpointReceiptV134=serverSave.state.serverCheckpointReceiptV134;}
   // V106.2: saves de combate/farm nao podem alterar a montagem (CONF1/2,
   // nave, drones, AUX) sem uma intencao do hangar e baseline do servidor.
   // Mantem integralmente os validadores economicos, NPC, inventario e anti-fraude.
@@ -2408,6 +2407,10 @@ app.put('/api/save', requireUser, OFFLINE_FARM_GUARD_V484, asyncRoute(async (req
   if(incomingEliteRevision<authoritativeEliteRevision)return res.status(409).json({
     error:'SAVE_ELITE_STALE: sincronize as recompensas com o servidor.',code:'SAVE_ELITE_STALE'
   });
+  for(const path of [['levelRewards','claimed'],['battlePass','claimedTiers'],['battlePass','premiumClaimedTiers']]){
+    const old=serverSave?.state?.[path[0]]?.[path[1]]||{},next=state?.[path[0]]?.[path[1]]||{};
+    if(Object.keys(next).some(k=>!Object.hasOwn(old,k)))return res.status(409).json({error:'Use o resgate confirmado pelo servidor.',code:'SAVE_SERVER_CLAIM_REQUIRED'});
+  }
   const claimRollback=validateRewardClaimContinuity(state,serverSave?.state||null);
   if(claimRollback)return res.status(409).json({error:claimRollback.reason,code:claimRollback.code});
   const securityFinding=validatePlayerSave(state,serverSave?.state||null,{userId:req.user.id,isAdmin:false});
@@ -2444,7 +2447,7 @@ app.put('/api/save', requireUser, OFFLINE_FARM_GUARD_V484, asyncRoute(async (req
 
   // V118: profiles ja confirmado com game_saves na transacao unica.
 
-  res.json({ ok: true, save_token:req.confirmedTokenV131, updated_at, statePatch, ...(req.v119Revision!=null?{revision:req.v119Revision}:{}) });
+  res.json({ ok: true, state:req.confirmedStateV134,save_token:req.confirmedTokenV131, updated_at:req.confirmedAtV134||updated_at, statePatch, ...(req.v119Revision!=null?{revision:req.v119Revision}:{}) });
 })));
 
 
@@ -2510,6 +2513,10 @@ app.use((err, req, res, next) => {
 const port = process.env.PORT || 3000;
 const server = http.createServer(app);
 const sharedUniverse = attachSharedUniverse(server, {natal:natalServiceV132,
+  issueLoot:async(userId,dropId,mapKey,x,y,resources)=>{
+    const db=await requireEliteAdmin();const {data,error}=await db.rpc('stellar_player_loot_issue',{p_user_id:userId,p_drop_id:dropId,p_map_key:mapKey,p_x:x,p_y:y,p_resources:resources});
+    if(error)throw Error(error.message);return data;
+  },
   loadWarbotConfig:async()=>{
     const sb=await requireEliteAdmin();
     const {data,error}=await sb.from('stellar_warbot_events_v477').select('map_id,enabled,mode,bots_per_faction,tier,attack_players,ends_at');
@@ -2588,7 +2595,7 @@ const sharedUniverse = attachSharedUniverse(server, {natal:natalServiceV132,
     await offlineFarmEnsureInactiveV484(userId,requireEliteAdmin);
     const sb=await requireEliteAdmin();
     const grant=async()=>{
-      const {data,error}=await sb.rpc(npcType.startsWith('natal')?'stellar_natal_npc_v132':'stellar_grant_npc_reward_v1131',{
+      const {data,error}=await sb.rpc(npcType.startsWith('natal')?'stellar_player_natal_npc':'stellar_player_grant_npc_reward',{
         p_user_id:userId,p_kill_key:killKey,p_npc_type:npcType,
         p_base_credits:baseCredits,p_base_stl:baseStl,p_owner_eligible:ownerEligible===true
       });
@@ -2614,7 +2621,7 @@ const sharedUniverse = attachSharedUniverse(server, {natal:natalServiceV132,
     try{const {data:bonus,error:bonusErr}=await sb.rpc('stellar_relay_active_bonus_v346',{p_user_id:userId,p_map_id:mapId});
       if(!bonusErr&&bonus?.attribute==='resources')confirmedAmount=Math.min(1000,Math.max(1,Math.round(amount*(1+Number(bonus.value||0)/100))));
     }catch{}
-    const {data,error}=await sb.rpc('stellar_grant_ore_reward_v229',{
+    const {data,error}=await sb.rpc('stellar_player_grant_ore_reward',{
       p_user_id:userId,p_ore_key:oreKey,p_resource:resource,p_amount:confirmedAmount
     });
     if(error)throw new Error(String(error.message||'Coleta online recusada'));
@@ -2647,7 +2654,7 @@ const sharedUniverse = attachSharedUniverse(server, {natal:natalServiceV132,
   },
   recordPlayerEventProgress: async (token,eventId,amount) => {
     const sb=supabaseForToken(token);if(!sb)return null;
-    const {data,error}=await sb.rpc('record_my_galaxy_event_progress_v1826',{
+    const {data,error}=await sb.rpc('stellar_player_record_my_galaxy_event_progress',{
       p_event_id:String(eventId||''),p_delta:Math.max(1,Math.min(10000,Math.trunc(Number(amount)||1)))
     });
     if(error)throw new Error(error.message);return data;

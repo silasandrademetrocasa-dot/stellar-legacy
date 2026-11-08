@@ -47,9 +47,9 @@ test('V111: especializações antigas dentro de INFORMAÇÕES e N1 exclusivament
  assert.match(game,/auxWorkbenchSectionV1091/);
 });
 test('V111: leilão de protocolos usa RPC, autenticação e liquidação SQL atômica',()=>{
- assert.match(game,/lot\.kind==='auxProtocol'\?await placeAuctionBidOnline\(bidArgs\):await saveAuctionBidOnline\(bidArgs\)/);
+ assert.match(game,/const row=await placeAuctionBidOnline\(bidArgs\)/);
  assert.match(game,/claimAuxProtocolAuctionV111\(\{hourKey:row\.hour_key,lotRef:row\.lot_ref\}\)/);
- assert.match(api,/claim_aux_protocol_auction_v111/);
+ assert.match(api,/stellar_player_claim_aux_protocol_auction/);
  assert.match(sql,/FOR UPDATE/);assert.match(sql,/serverPurchaseRevision/);
  assert.match(sql,/status='won'/);
  assert.match(sql,/auction_aux_rpc_only_insert_v111/);

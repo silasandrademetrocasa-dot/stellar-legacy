@@ -77,5 +77,5 @@ test('V117.3: servidor protege entradas, recompensas, PvP e relés sem mudar SQL
  assert.match(world,/relayCaptureActorEligibleV1141/);
  assert.match(world,/relayTurretTargetEligibleV1141/);
  assert.match(client,/pvpShotEligibilityV114\(/);
- assert.match(server,/stellar_grant_npc_reward_v1131/);
+ assert.match(server,/stellar_(?:grant_npc_reward_v1131|player_grant_npc_reward)/);
 });

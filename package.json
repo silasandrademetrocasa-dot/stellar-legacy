@@ -1,6 +1,6 @@
 {
   "name": "stellar-legacy",
-  "version": "47.7.63",
+  "version": "47.7.64",
   "type": "module",
   "scripts": {
     "start": "node server/index.js",
@@ -9,17 +9,21 @@
     "test": "node --test tests/*.test.mjs",
     "verify": "npm run check && npm test",
     "preflight:v100": "node scripts/v100-release-readiness.mjs",
-    "benchmark:v104": "node scripts/v104-network-benchmark.mjs"
+    "benchmark:v104": "node scripts/v104-network-benchmark.mjs",
+    "pretest": "node scripts/ensure-test-deps.mjs"
   },
   "dependencies": {
-    "express": "^4.21.2",
     "@supabase/supabase-js": "^2.57.4",
-    "ws": "^8.18.0",
     "compression": "^1.7.5",
-    "web-push": "^3.6.7"
+    "express": "^4.21.2",
+    "web-push": "^3.6.7",
+    "ws": "^8.18.0"
   },
   "engines": {
     "node": ">=18"
   },
-  "release": "V104 CUMULATIVA: deltas WebSocket, NPCs por distancia, Autopilot leve e menos leituras SQL/Render; preserva V103"
+  "release": "V134: transações por conta, rotas atuais, leilão autoritativo, loot/box e resgates com recibos",
+  "devDependencies": {
+    "@electric-sql/pglite": "0.3.14"
+  }
 }

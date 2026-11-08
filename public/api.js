@@ -1,5 +1,5 @@
-import {offlineFarmDirectActivityAllowedV103} from './modules/offline-farm-activity-v103.js?v=47.7.63';
-import {createReadCoalescerV104} from './modules/read-coalescer-v104.js?v=47.7.63';
+import {offlineFarmDirectActivityAllowedV103} from './modules/offline-farm-activity-v103.js?v=47.7.64';
+import {createReadCoalescerV104} from './modules/read-coalescer-v104.js?v=47.7.64';
 import {persistSessionV101,loadPersistedSessionV101,clearPersistedSessionV101} from './modules/login-persistence-v101.js';
 const SESSION_KEY = 'stellarLegacyV4Session';
 const GOOGLE_OAUTH_PENDING_KEY = 'stellarLegacyGoogleOAuthPendingV18216';
@@ -77,6 +77,7 @@ async function serverFetch(path, options = {}, withAuth = false) {
     }
     throw err;
   }
+  if(body?.state&&body?.save_token&&withAuth){const meta={sessionKey:requestSession,revision:body.revision??null,token:body.save_token};readBaselines.set(body.state,meta);}
   return body;
 }
 
@@ -121,8 +122,10 @@ async function supabaseFetch(path, options = {}, withAuth = false) {
   const {res,body} = await (readOnly?coalesceReadV104('sql|'+String(session?.game_session_id||'public')+'|'+String(session?.access_token||'')+'|'+(options.method||'GET')+'|'+path+'|'+String(options.body||'')+'|'+JSON.stringify(headers),fetchBody):fetchBody());
   if (!res.ok) {
     const msg = body?.msg || body?.message || body?.error_description || body?.error || `Erro ${res.status}`;
-    throw new Error(String(msg));
+    throw Object.assign(new Error(String(msg)),{status:res.status,code:String(body?.code||'SUPABASE_REQUEST_FAILED')});
   }
+  if(withAuth)checkSaveSession(requestSession);
+  if(body?.state&&body?.save_token&&withAuth)readBaselines.set(body.state,{sessionKey:requestSession,revision:body.revision??null,token:body.save_token});
   return body;
 }
 
@@ -451,8 +454,11 @@ export function knownSaveRevisionV119(){return serverSaveRevisionV119;}
 export async function loadCloudSave() {
   if (!currentUser?.id) throw new Error('Usuário não identificado.');
   const sessionKey=saveSessionKey();
-  const body=await authedServerFetch('/api/save');
+  let pendingIds=[];
+  try{pendingIds=Object.keys(JSON.parse(localStorage.getItem('stellar-v134-combat:'+currentUser.id)||'{}').markers||{}).filter(x=>/^[a-f0-9-]{36}$/i.test(x)).slice(0,16);}catch{}
+  const body=await authedServerFetch('/api/player/save'+(pendingIds.length?'?checkpoint_receipts='+pendingIds.join(','):''));
   checkSaveSession(sessionKey);
+  if(body?.checkpoint_receipts?.length&&typeof window!=='undefined')window.dispatchEvent(new CustomEvent('stellar-checkpoints-confirmed-v134',{detail:{owner:currentUser.id,ids:body.checkpoint_receipts}}));
   if(!body||!Object.hasOwn(body,'state'))throw new Error('Leitura do progresso incompleta.');
   const read={state:body.state,updated_at:body.updated_at||null,reset_epoch:Number(body.reset_epoch)||0,
     revision:saveRevision(body.revision)};
@@ -472,7 +478,7 @@ export async function saveCloudSave(state, equipmentMutationV1062=null, saveMeta
   if(!intent){intent={state:structuredClone(state),equipment:equipmentMutationV1062,token:saveToken,revision:serverSaveRevisionV119};pendingTransportV133.set(intentKey,intent);}
   // Keep memory bounded; server receipts remain durable across client restarts.
   if(pendingTransportV133.size>16)pendingTransportV133.delete(pendingTransportV133.keys().next().value);
-  const result=await authedServerFetch('/api/save', {
+  const result=await authedServerFetch('/api/player/save', {
     method: 'PUT',
     body: JSON.stringify({ state:intent.state, ...(intent.equipment?{equipmentMutationV1062:intent.equipment}:{}),
       ...(saveMetaV119?.operation_id?{operation_id:saveMetaV119.operation_id}:{}),
@@ -525,34 +531,6 @@ export async function loadAuctionBids() {
   return Array.isArray(rows) ? rows : [];
 }
 
-export async function saveAuctionBidOnline({ hourKey, lotRef, userBid, lot }) {
-  if (!currentUser?.id) throw new Error('Usuário não identificado.');
-  const rows = await authedSupabaseFetch('/rest/v1/auction_bids?on_conflict=user_id,hour_key,lot_ref', {
-    method: 'POST',
-    headers: { Prefer: 'resolution=merge-duplicates,return=representation' },
-    body: JSON.stringify({
-      user_id: currentUser.id,
-      hour_key: hourKey,
-      lot_ref: lotRef,
-      user_bid: Math.max(0, Math.round(Number(userBid) || 0)),
-      lot: lot || {},
-      status: 'active',
-      updated_at: new Date().toISOString(),
-    }),
-  });
-  return Array.isArray(rows) ? rows[0] || null : null;
-}
-
-export async function markAuctionBidStatusOnline({ hourKey, lotRef, status }) {
-  if (!currentUser?.id) throw new Error('Usuário não identificado.');
-  await authedSupabaseFetch(`/rest/v1/auction_bids?user_id=eq.${encodeURIComponent(currentUser.id)}&hour_key=eq.${encodeURIComponent(hourKey)}&lot_ref=eq.${encodeURIComponent(lotRef)}`, {
-    method: 'PATCH',
-    headers: { Prefer: 'return=minimal' },
-    body: JSON.stringify({ status, updated_at: new Date().toISOString() }),
-  });
-  return { ok: true };
-}
-
 export async function loadAuctionMarket(hourKey) {
   const rows = await authedSupabaseFetch('/rest/v1/rpc/get_auction_market', {
     method: 'POST',
@@ -561,17 +539,9 @@ export async function loadAuctionMarket(hourKey) {
   return Array.isArray(rows) ? rows : [];
 }
 
-export async function placeAuctionBidOnline({ hourKey, lotRef, userBid, lot }) {
-  const rows = await authedSupabaseFetch('/rest/v1/rpc/place_auction_bid_online', {
-    method: 'POST',
-    body: JSON.stringify({
-      p_hour_key: String(hourKey || ''),
-      p_lot_ref: String(lotRef || ''),
-      p_user_bid: Math.max(0, Math.round(Number(userBid) || 0)),
-      p_lot: lot || {},
-    }),
-  });
-  return Array.isArray(rows) ? rows[0] || null : null;
+export async function placeAuctionBidOnline({hourKey,lotRef,userBid,lot,requestId}){
+ const r=await authedServerFetch('/api/player/auction/bid',{method:'POST',body:JSON.stringify({request_id:requestId,hour_key:hourKey,lot_ref:lotRef,user_bid:userBid,lot})});
+ if(!r?.ok||!r.bid)throw Error('Lance sem confirmação');return r.bid;
 }
 
 export async function upsertPlayerPresenceOnline(payload) {
@@ -705,7 +675,7 @@ export async function transferClanCreditsOnline({callsign, amount}) {
 }
 
 export async function claimClanCreditGrantsOnline() {
-  return authedSupabaseFetch('/rest/v1/rpc/claim_clan_credit_grants_v12', {
+  return authedSupabaseFetch('/rest/v1/rpc/stellar_player_claim_clan_credit_grants', {
     method: 'POST', body: JSON.stringify({}),
   });
 }
@@ -744,7 +714,7 @@ export async function adminSimulatePremiumStageOnline(productId, idempotencyKey)
 }
 
 export async function testPurchasePremiumOnline(productId) {
-  return authedSupabaseFetch('/rest/v1/rpc/test_purchase_premium_v12', {
+  return authedSupabaseFetch('/rest/v1/rpc/stellar_player_test_purchase_premium', {
     method: 'POST', body: JSON.stringify({p_product_id:String(productId||'')}),
   });
 }
@@ -807,7 +777,7 @@ export async function loadArenaDailyRewardStatus() {
 }
 
 export async function claimArenaDailyReward() {
-  const body = await authedSupabaseFetch('/rest/v1/rpc/claim_arena_daily_reward', {
+  const body = await authedSupabaseFetch('/rest/v1/rpc/stellar_player_claim_arena_daily_reward', {
     method: 'POST',
     body: JSON.stringify({}),
   });
@@ -919,7 +889,7 @@ export async function reviewAdminSecurityIncident(id,note){
 }
 
 export async function purchaseLiveCatalogOnline(catalogKey,requestId=null) {
-  return authedServerFetch('/api/live/purchase', {
+  return authedServerFetch('/api/player/purchase', {
     method: 'POST',
     body: JSON.stringify({ catalog_key: String(catalogKey || ''),...(requestId?{request_id:requestId}:{}) }),
   }, false);
@@ -927,13 +897,13 @@ export async function purchaseLiveCatalogOnline(catalogKey,requestId=null) {
 
 // V92 • uma compra de suprimentos por chamada; requestId evita duplicação em retry.
 export async function purchaseLiveBulkOnline(catalogKey,quantity,requestId,expectedPrice,expectedCurrency,expectedPackSize){
-  return authedServerFetch('/api/live/purchase/bulk',{
+  return authedServerFetch('/api/player/purchase/bulk',{
     method:'POST',body:JSON.stringify({catalog_key:catalogKey,quantity,request_id:requestId,expected_price:expectedPrice,expected_currency:expectedCurrency,expected_pack_size:expectedPackSize})
   },false);
 }
 
 export async function economyActionOnline(action, payload = {},requestId=null) {
-  return authedServerFetch('/api/economy/action', {
+  return authedServerFetch('/api/player/economy', {
     method: 'POST',
     body: JSON.stringify({ action: String(action || ''), payload: payload && typeof payload === 'object' ? payload : {},...(requestId?{request_id:requestId}:{}) }),
   }, false);
@@ -944,7 +914,7 @@ export async function economyActionOnline(action, payload = {},requestId=null) {
 // ===================== V18.2.1 CUPONS SQL-FIRST =====================
 // Resgate autoritativo: o servidor valida o login e a função SQL entrega o prêmio.
 export async function redeemGameCouponOnline(code) {
-  return authedServerFetch('/api/coupons/redeem', {
+  return authedServerFetch('/api/player/coupons/redeem', {
     method: 'POST',
     body: JSON.stringify({ code: String(code||'').trim().toUpperCase().slice(0,64) }),
   });
@@ -1344,9 +1314,13 @@ export async function loadFrontierAuditV450(){return authedServerFetch('/api/adm
 export async function loadAdminAuxEconomyOnline(){return serverFetch('/api/admin/runtime/aux-economy',{},true);}
 export async function updateAdminAuxEconomyOnline(payload){return serverFetch('/api/admin/runtime/aux-economy',{method:'POST',body:JSON.stringify(payload)},true);}
 
-export async function claimAuxProtocolAuctionV111({hourKey,lotRef}){return authedSupabaseFetch('/rest/v1/rpc/claim_aux_protocol_auction_v111',{method:'POST',body:JSON.stringify({p_hour_key:String(hourKey),p_lot_ref:String(lotRef)})});}
+export async function claimAuxProtocolAuctionV111({hourKey,lotRef}){return authedSupabaseFetch('/rest/v1/rpc/stellar_player_claim_aux_protocol_auction',{method:'POST',body:JSON.stringify({p_hour_key:String(hourKey),p_lot_ref:String(lotRef)})});}
 
-export const natalStatusOnline=()=>authedServerFetch('/api/natal',{},false);
-export const natalClaimOnline=key=>authedServerFetch('/api/natal/claim',{method:'POST',body:JSON.stringify({key})},false);
+export const natalStatusOnline=()=>authedServerFetch('/api/player/natal',{},false);
+export const natalClaimOnline=key=>authedServerFetch('/api/player/natal/claim',{method:'POST',body:JSON.stringify({key})},false);
 
-export const claimMissionCommandOnlineV1331=(category,key)=>authedServerFetch('/api/missions/claim',{method:'POST',body:JSON.stringify({category,key})},false);
+export const claimMissionCommandOnlineV1331=(category,key)=>authedServerFetch('/api/player/missions/claim',{method:'POST',body:JSON.stringify({category,key})},false);
+
+export async function claimPlayerRewardV134(payload){return authedServerFetch('/api/player/rewards/claim',{method:'POST',body:JSON.stringify(payload)});}
+export async function ensurePlayerBoxesV134(){return authedServerFetch('/api/player/collections/ensure',{method:'POST',body:'{}'});}
+export async function collectPlayerDropV134(dropId,requestId){return authedServerFetch('/api/player/collections/claim',{method:'POST',body:JSON.stringify({drop_id:dropId,request_id:requestId})});}

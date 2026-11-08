@@ -33,7 +33,7 @@ export async function claimMissionCommandV1331({db,userId,category,key,loadRules
  for(let attempt=0;attempt<3;attempt++){
   const [saved,receipt]=await Promise.all([db.from('game_saves').select('state,updated_at').eq('user_id',userId).single(),db.from('stellar_economy_receipts_v125').select('receipt').eq('user_id',userId).eq('request_id',id).maybeSingle()]);
   if(saved.error||receipt.error)throw Error('MISSION_STORAGE_UNAVAILABLE');
-  if(receipt.data){const replay=await commitEconomyUnifiedV1332(db,{p_user_id:userId,p_request_id:id,p_operation:'economy:mission_claim',p_request_hash:hash,p_expected_updated_at:saved.data.updated_at,p_state:saved.data.state,p_callsign:saved.data.state.profile?.callsign,p_receipt:receipt.data.receipt});if(replay.error||!replay.data?.ok)throw Error(replay.error?.message||replay.data?.code||'MISSION_REPLAY_UNAVAILABLE');return replay.data;}
+  if(receipt.data){const replay=await commitEconomyUnifiedV1332(db,{p_user_id:userId,p_request_id:id,p_operation:'economy:mission_claim',p_request_hash:hash,p_base_state:saved.data.state,p_expected_updated_at:saved.data.updated_at,p_state:saved.data.state,p_callsign:saved.data.state.profile?.callsign,p_receipt:receipt.data.receipt});if(replay.error||!replay.data?.ok)throw Error(replay.error?.message||replay.data?.code||'MISSION_REPLAY_UNAVAILABLE');return replay.data;}
   const active=saved.data.state.missions?.active?.[category];
   const rules=await loadRules(),rule=rules.mission_categories?.find(r=>r.category===category),cfg=rule?.config||{};
   const chance=category==='daily'&&active?.definition?.group==='ore'?Number(cfg.ore_item_chance??1):Number(rule?.item_chance??({daily:.55,weekly:.60,monthly:.78,special:.88}[category]||0));
@@ -42,9 +42,9 @@ export async function claimMissionCommandV1331({db,userId,category,key,loadRules
   const command=completeMissionStateV1331(saved.data.state,{category,key,surprise,xpMultiplier:1+Number(ship?.bonuses?.xp||0)+Number(pet?.bonuses?.xp||0)});
   if(command.alreadyClaimed)return {ok:true,replayed:true,state:command.state};
   const info={key,category,reward:command.reward,surprise:command.surprise};
-  const {data,error}=await commitEconomyUnifiedV1332(db,{p_user_id:userId,p_request_id:id,p_operation:'economy:mission_claim',p_request_hash:hash,p_expected_updated_at:saved.data.updated_at,p_state:command.state,p_callsign:command.state.profile.callsign,p_receipt:info});
+  const {data,error}=await commitEconomyUnifiedV1332(db,{p_user_id:userId,p_request_id:id,p_operation:'economy:mission_claim',p_request_hash:hash,p_base_state:saved.data.state,p_expected_updated_at:saved.data.updated_at,p_state:command.state,p_callsign:command.state.profile.callsign,p_receipt:info});
   if(error)throw Error(error.message);if(data?.ok)return data;
-  if(data?.code!=='ECONOMY_STALE')throw Error(data?.code||'MISSION_NOT_CONFIRMED');
+  if(!['ECONOMY_STALE','PLAYER_RETRY'].includes(data?.code))throw Error(data?.code||'MISSION_NOT_CONFIRMED');
  }
  throw Error('MISSION_BUSY_RETRY');
 }

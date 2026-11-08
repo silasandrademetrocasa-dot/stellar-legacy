@@ -18,7 +18,7 @@ test('Only an installed read advances the write token. Late acknowledgements can
   const sent=[];
   t.mock.method(globalThis,'fetch',async(path,options)=>{
     if(path==='/api/auth/login')return Response.json({session:{access_token:owner,game_session_id:owner},user:{id:owner}});
-    assert.equal(path,'/api/save');
+    assert.equal(path,'/api/player/save');
     if(options.method!=='PUT')return Response.json({state:{accountOwnerId:owner},save_token:token});
     sent.push(JSON.parse(options.body));
     if(delayReply){replyReady();await delayReply;}

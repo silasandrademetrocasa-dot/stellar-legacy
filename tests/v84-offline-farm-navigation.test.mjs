@@ -36,13 +36,13 @@ test('V84: ações de mapa permanecem desligadas no farm mesmo por teclado ou to
  assert.match(game,/function runMapTransition\([\s\S]+?if\(offlineFarmWorldLockedV84\(\)\)/);
 });
 test('V84: leilão registra lance sem salvar snapshot local durante farm; quitação postergada',()=>{
- assert.match(game,/if\(!offlineFarmWorldLockedV84\(\)\)await flushCloudSave\(true\);/);
- assert.match(game,/await saveAuctionBidOnline\(/);
+ assert.match(game,/if\(!offlineFarmWorldLockedV84\(\)&&!await flushCloudSave\(true\)\)/);
+ assert.match(game,/await placeAuctionBidOnline\(/);
  assert.match(game,/if\(offlineFarmWorldLockedV84\(\)\|\|!row\|\|row.status!=='active'\)return/);
  assert.match(game,/if\(!offlineFarmWorldLockedV84\(\)\)saveGame\(\); \/\/ Lance já foi confirmado/);
  assert.match(game,/offlineFarmWorldLockedV84\(\)\|\|!authenticated\|\|!progress/);
- assert.match(server,/app\.post\('\/api\/economy\/action', requireUser, OFFLINE_FARM_GUARD_V484/);
- assert.match(server,/app\.put\('\/api\/save', requireUser, OFFLINE_FARM_GUARD_V484/);
+ assert.match(server,/app\.post\('\/api\/player\/economy', requireUser, OFFLINE_FARM_GUARD_V484/);
+ assert.match(server,/app\.put\('\/api\/player\/save', requireUser, OFFLINE_FARM_GUARD_V484/);
 });
 test('V84: farm não é encerrado quando modal é aberto e continua com encerramento oficial',()=>{
  assert.match(mod,/\$\('v484-close'\)\.onclick=\(\)=>shell\.hidden=true/);

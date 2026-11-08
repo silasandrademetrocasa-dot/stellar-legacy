@@ -69,8 +69,8 @@ test('V119.2: monitor nao registra nomes nem payloads do jogador',()=>{
 });
 test('V119.2: endpoint do diagnostico tem JWT, id somente do usuario, read-only',()=>{
  const server=read('server/index.js');
- assert.match(server,/app\.get\('\/api\/save\/core\/health',requireUser/);
- const part=server.split("app.get('/api/save/core/health'")[1].split("app.get('/api/save/core/events'")[0];
+ assert.match(server,/app\.get\('\/api\/player\/save\/core\/health',requireUser/);
+ const part=server.split("app.get('/api/player/save/core/health'")[1].split("app.get('/api/player/save/core/events'")[0];
  assert.match(part,/const uid=req\.user\.id/);
  assert.match(part,/Promise\.all\(/);
  assert.doesNotMatch(part,/\.upsert\(|\.update\(|\.insert\(|\.delete\(/);
