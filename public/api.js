@@ -1348,3 +1348,5 @@ export async function claimAuxProtocolAuctionV111({hourKey,lotRef}){return authe
 
 export const natalStatusOnline=()=>authedServerFetch('/api/natal',{},false);
 export const natalClaimOnline=key=>authedServerFetch('/api/natal/claim',{method:'POST',body:JSON.stringify({key})},false);
+
+export const claimMissionCommandOnlineV1331=(category,key)=>authedServerFetch('/api/missions/claim',{method:'POST',body:JSON.stringify({category,key})},false);

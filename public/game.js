@@ -1,7 +1,8 @@
+import {staleSaveAuthoritiesV1331} from './modules/save-freshness-v1331.js?v=47.7.63';
 import {DESIGNS as NATAL_DESIGNS,NPCS as NATAL_NPCS,compatibleDesign} from './modules/christmas-v132.js?v=47.7.63';
 import {prepareChristmasArt,shipChristmasArt,npcChristmasArt} from './modules/christmas-art-v132.js?v=47.7.63';
 import {createChristmasUI} from './modules/christmas-ui-v132.js?v=47.7.63';
-import {natalStatusOnline,natalClaimOnline} from './api.js?v=47.7.63';
+import {natalStatusOnline,natalClaimOnline,claimMissionCommandOnlineV1331} from './api.js?v=47.7.63';
 let natalClientV132=null;
 void prepareChristmasArt();
 import {stageLocalFirstSnapshotV121,readBestLocalSnapshotV1211,stageLocalFirstHangarIntentV1211,acknowledgeConfirmedHangarV1211,installLocalFirstPageFlushV121,flushLocalFirstSnapshotV121,localFirstPilotEnabledV121} from './modules/local-first-bridge-v1211.js?v=47.7.63';
@@ -3287,6 +3288,7 @@ function missionRewardItemHint(category,mission=null){
   const chance=missionItemChance(category,mission);return chance>=1?'BÔNUS GARANTIDO: munição ou equipamento':`Chance bônus: ${Math.round(chance*100)}% de munição/equipamento`;
 }
 function finishMissionAutomatically(category,mission,active){
+  if(authenticated){void finishMissionOnlineV1331(category,mission,active);return;}
   if(!mission||!active||!progress?.missions)return;
   const key=missionInstanceKey(category,mission.id);
   if(progress.missions.completed[key])return;
@@ -5194,6 +5196,13 @@ function restoreRuntimeLocationAfterServerState(snapshot){
   progress.positionByMap[snapshot.key]={x:snapshot.x,y:snapshot.y,mapId:snapshot.mapId,territoryFaction:snapshot.territoryFaction,savedAt:snapshot.savedAt};
 }
 function installServerStatePreservingPosition(serverState){
+  const stale=staleSaveAuthoritiesV1331(progress,serverState);
+  if(stale.length){
+    cloudDirty=true;
+    queueMicrotask(()=>{if(authenticated&&!economyMutationInFlightV106)void flushCloudSave(false);});
+    throw Object.assign(new Error('Resposta antiga recebida. O progresso atual foi preservado; sincronizando novamente.'),{code:'SAVE_RESPONSE_STALE',authorities:stale});
+  }
+
   if(!serverState||typeof serverState!=='object')throw new Error('Servidor não retornou um estado válido.');
   adoptSaveRead(serverState);
   const loc=runtimeLocationSnapshot();
@@ -12934,3 +12943,27 @@ natalClientV132=createChristmasUI({
  }))
 });
 setInterval(()=>natalClientV132?.tick(),500);
+
+const missionClaimsV1331=new Map();
+async function finishMissionOnlineV1331(category,mission,active){
+ if(!mission||!active||!progress)return;
+ const owner=getUser()?.id,generation=gameBootstrapRuntime.generation,key=`${category}:${active.period}:${active.id}`,pendingKey=owner+':'+key;
+ if(progress.missions.completed[key]||missionClaimsV1331.has(pendingKey))return;
+ const task=queueEconomy(async()=>{
+  economyMutationInFlightV106=true;
+  try{
+   const r=await claimMissionCommandOnlineV1331(category,key);
+   if(owner!==getUser()?.id||generation!==gameBootstrapRuntime.generation)return;
+   if(!r?.ok||!r.state)throw Error('Recompensa não confirmada');
+   installEconomyState(r.state);processPlayerLevelUps();saveGame();updateMissionButton();updateUI();
+   state.missionHudSignature='';renderActiveMissionHud(true);
+   if(!r.replayed){showToast(`Missão confirmada • ${mission.title}`,'mission');showMissionCompleteAnimation(mission,r.receipt?.reward||{});}
+   if(ui.missionModal&&!ui.missionModal.classList.contains('hidden'))renderMissions();
+  }catch(e){if(owner===getUser()?.id)showToast('Missão preservada. A entrega será consultada novamente.','mission');console.warn('[mission-v1331]',e.message);}
+  finally{economyMutationInFlightV106=false;}
+ });missionClaimsV1331.set(pendingKey,task);try{await task;}finally{missionClaimsV1331.delete(pendingKey);}
+}
+setInterval(()=>{
+ if(!authenticated||!progress||cloudBusy||cloudDirty||offlineFarmWorldLockedV84())return;
+ for(const [category,active] of Object.entries(progress.missions?.active||{}))if(active?.complete&&active.awaitingCloudAckV107){const mission=activeMissionDefinition(category,active);if(mission)void finishMissionOnlineV1331(category,mission,active);}
+},10000);

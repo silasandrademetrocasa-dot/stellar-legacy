@@ -1,3 +1,4 @@
+import {claimMissionCommandV1331} from './mission-command-v1331.js';
 import {createChristmasService,mountChristmasRoutes} from './christmas-v132.js';
 import {operationDigestV125,requestIdValidV125,decodeEconomyReceiptV125,replayValidV125} from './economy-receipts-v125.js';
 import {quoteCargoSaleV130} from './cargo-sale-v130.js';
@@ -1596,6 +1597,13 @@ app.post('/api/auction/settle',requireUser,OFFLINE_FARM_GUARD_V484,asyncRoute(as
     return data||{ok:false,code:'AUCTION_NO_RESPONSE',message:'O servidor não confirmou o leilão. Verifique novamente.'};
   }));
   res.set('Cache-Control','no-store');res.json(result);
+}));
+
+app.post('/api/missions/claim',requireUser,OFFLINE_FARM_GUARD_V484,asyncRoute(async(req,res)=>{
+ const category=String(req.body?.category||''),key=String(req.body?.key||'');
+ if(!['daily','weekly','monthly','special'].includes(category)||key.length>240||!key.startsWith(category+':'))return res.status(400).json({error:'Missão inválida'});
+ const result=await withPurchaseLock(req.user.id,async()=>claimMissionCommandV1331({db:await requireEliteAdmin(),userId:req.user.id,category,key,loadRules:()=>loadSystemsRuntimeSnapshot(false),readDesigns:async()=>{const {data,error}=await req.sb.rpc('get_my_designers_v16');if(error)throw Error(error.message);return data;}}));
+ res.set('Cache-Control','no-store').json(result);
 }));
 
 app.post('/api/live/purchase/bulk', requireUser, OFFLINE_FARM_GUARD_V484, asyncRoute(async (req,res)=>{
