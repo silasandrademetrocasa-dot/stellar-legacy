@@ -5029,3 +5029,16 @@ body[data-visual-test-v75="minimap"] #minimapPanel{visibility:hidden!important;}
 @media(max-width:680px){#toast{top:64px!important;font-size:12px!important;max-height:35vh!important;}}
 
 @media (orientation:landscape){.stellar-boot-splash,.stellar-boot-nebula{background-image:url('/assets/loading/natal-horizontal.png')}}
+
+/* V135.0 — Arena quinzenal, sem alterar o HUD anterior */
+.arena-season-v135{padding:16px;margin:12px 0 14px;background:linear-gradient(125deg,#07132b,#102546);border:1px solid #38729a;border-radius:13px;color:#e5f7ff}
+.arena-season-v135-head{display:flex;flex-wrap:wrap;gap:8px;justify-content:space-between;align-items:start}
+.arena-season-v135-head small{font-size:10px;letter-spacing:1.5px;color:#85dfff}
+.arena-season-v135-head h3{margin:5px 0;color:#fff;font-size:17px}
+.arena-season-v135-head p{color:#9ab5c6;font-size:12px;margin:5px 0}
+.arena-season-v135-my{padding:7px 11px;background:#18365b;border-radius:8px;font-weight:700;color:#b7eaff}
+.arena-season-v135-title{background:#18304b;border-left:3px solid #fad373;padding:10px;margin:10px 0;color:#ffdda1;font-size:12px;border-radius:5px}
+.arena-season-v135-ranking{max-height:264px;overflow:auto;display:grid;gap:4px}
+.arena-season-v135-ranking>div{display:grid;grid-template-columns:35px 1fr auto auto;gap:9px;align-items:center;padding:7px 8px;background:#081d32;border-radius:6px;font-size:12px}
+.arena-season-v135-ranking strong{color:#f5ca6d}.arena-season-v135-ranking b{overflow-wrap:anywhere}.arena-season-v135-ranking em{font-style:normal;color:#74d9f8}
+@media(max-width:500px){.arena-season-v135-ranking>div{grid-template-columns:30px 1fr auto}.arena-season-v135-ranking>div span{display:none}}

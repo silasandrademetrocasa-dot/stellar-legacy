@@ -10,11 +10,7 @@ export const NPCS={
  natalRei:{name:'Rei do Inverno',hp:5000000,shield:3500000,damage:26000,speed:35,credits:12000000,uridium:8000,xp:400000,size:85}
 };
 export const DESIGNS=[];
-const hulls=[['leonov','Lynx'],['vengeance','Valkyrie'],['goliath','Leviathan'],['pusat','Striker']];
-const attrs=[['hp','Vitalis',.15,'#59e697'],['damage','Reaper',.08,'#ef4565'],['shield','Barrier',.15,'#54bfff'],['xp','Scholar',.15,'#bb74ff'],['speed','Velocity',.05,'#ffd45e']];
 function add(ship,name,key,bonuses,atlas,cell,source='shop',price=100000){DESIGNS.push({design_id:`n132_${ship}_${key}`,kind:'ship',name,rarity:'epic',enabled:true,eligibility:{elite_or_event:true,ship_id:ship,source},bonuses,ability:{},visual:{atlas,cell,glow:'#c9eaff'},price});}
-hulls.forEach(([s,n],r)=>attrs.forEach(([k,label,v,color],c)=>{add(s,`${n} • ${label}`,k,{[k]:v},'designs',r*5+c);DESIGNS.at(-1).visual.glow=color;}));
-['Brasil','Estados Unidos','Japão','Espanha','Portugal'].forEach((n,i)=>add('goliath',`Leviathan • ${n}`,['br','us','jp','es','pt'][i],{hp:.08,shield:.08,damage:.04},'designs',20+i,'shop',150000));
 add('aegis','Seraph • Solstice','solstice',{damage:.14,shield:.12,hp:.05},'elite',1,'shop',200000);
 add('citadel','Bulwark • Arctic','arctic',{damage:.10,shield:.18,hp:.06},'elite',3,'shop',200000);
 add('defcom','Phantom • Midnight','midnight',{damage:.15,shield:.11,speed:.05},'elite',5,'shop',200000);

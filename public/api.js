@@ -1,5 +1,5 @@
-import {offlineFarmDirectActivityAllowedV103} from './modules/offline-farm-activity-v103.js?v=47.7.66';
-import {createReadCoalescerV104} from './modules/read-coalescer-v104.js?v=47.7.66';
+import {offlineFarmDirectActivityAllowedV103} from './modules/offline-farm-activity-v103.js?v=47.7.67';
+import {createReadCoalescerV104} from './modules/read-coalescer-v104.js?v=47.7.67';
 import {persistSessionV101,loadPersistedSessionV101,clearPersistedSessionV101} from './modules/login-persistence-v101.js';
 const SESSION_KEY = 'stellarLegacyV4Session';
 const GOOGLE_OAUTH_PENDING_KEY = 'stellarLegacyGoogleOAuthPendingV18216';
@@ -759,6 +759,13 @@ export async function syncArenaProfileOnline(payload) {
   return Array.isArray(rows) ? rows[0] || null : null;
 }
 
+export async function loadArenaSeasonV135() {
+  const result = await authedSupabaseFetch('/rest/v1/rpc/stellar_arena_status_v135', {
+    method: 'POST', body: JSON.stringify({}),
+  });
+  return Array.isArray(result) ? result[0] || null : result || null;
+}
+
 export async function loadArenaState() {
   const rows = await authedSupabaseFetch('/rest/v1/rpc/get_arena_state', {
     method: 'POST',
@@ -840,7 +847,7 @@ export async function hitWorldBossOnline(damage) {
 }
 
 export async function claimWorldBossRewardOnline() {
-  return authedSupabaseFetch('/rest/v1/rpc/claim_world_boss_reward_v131', {
+  return authedSupabaseFetch('/rest/v1/rpc/stellar_player_claim_world_boss_v135', {
     method: 'POST', body: JSON.stringify({}),
   });
 }
@@ -1321,6 +1328,7 @@ export const natalClaimOnline=key=>authedServerFetch('/api/player/natal/claim',{
 
 export const claimMissionCommandOnlineV1331=(category,key)=>authedServerFetch('/api/player/missions/claim',{method:'POST',body:JSON.stringify({category,key})},false);
 
+export async function warfrontActionV135(payload){return authedServerFetch('/api/player/warfront/action',{method:'POST',body:JSON.stringify(payload)});}
 export async function claimPlayerRewardV134(payload){return authedServerFetch('/api/player/rewards/claim',{method:'POST',body:JSON.stringify(payload)});}
 export async function ensurePlayerBoxesV134(){return authedServerFetch('/api/player/collections/ensure',{method:'POST',body:'{}'});}
 export async function collectPlayerDropV134(dropId,requestId,collector='ship'){return authedServerFetch('/api/player/collections/claim',{method:'POST',body:JSON.stringify({drop_id:dropId,request_id:requestId,collector})});}

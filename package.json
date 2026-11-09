@@ -1,6 +1,6 @@
 {
   "name": "stellar-legacy",
-  "version": "47.7.66",
+  "version": "47.7.67",
   "type": "module",
   "scripts": {
     "start": "node server/index.js",
@@ -22,7 +22,7 @@
   "engines": {
     "node": ">=18"
   },
-  "release": "V134.2: confirmação do hangar preserva alterações em voo, configurações, drones e AUX",
+  "release": "V135.0: temporada Arena 14 dias, evento 24/7, PvP exclusivo, sprites U-X e designers legados",
   "devDependencies": {
     "@electric-sql/pglite": "0.3.14"
   }

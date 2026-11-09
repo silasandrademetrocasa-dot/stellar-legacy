@@ -5,6 +5,7 @@ import {ITEMS,SHIPS,MAPS} from '../public/data.js';
 import {applyRecruitBonusV2012} from '../public/progression-plan-v2012.js';
 import {auxAdvancedEffectsV110,auxAdvancedLootQuantityV110} from '../public/modules/aux-advanced-protocols-v110.js';
 import {operationDigestV125} from './economy-receipts-v125.js';
+import {applyWarfrontActionV135} from './warfront-economy-v135.js';
 const fail=(message,code='PLAYER_REWARD_INVALID')=>{throw Object.assign(Error(message),{code,status:409});};
 const count=v=>Math.max(0,Math.floor(Number(v)||0));
 export function cargoCapacityV134(s,systems={}){
@@ -65,6 +66,12 @@ export function createPlayerRewardsV134({db,readPass,readPremium,readBonus,readS
   }fail('Outra operação está sendo confirmada. Tente novamente com o mesmo pedido.','PLAYER_RETRY');
  }
  return {
+  async warfront(uid,body){
+   const action=String(body?.action||''),itemId=String(body?.item_id||''),requestId=String(body?.request_id||'');
+   if(!['craft','mastery'].includes(action)||!/[A-Za-z0-9_-]{10,90}/.test(requestId)||requestId.length>90)fail('Pedido da forja inválido');
+   const payload={action,itemId},hash=operationDigestV125('warfront-v135',payload);
+   return commit(uid,`warfront_${requestId}`,'reward',hash,async s=>({receipt:applyWarfrontActionV135(s,action,itemId)}));
+  },
   async claim(uid,body,req){
    const kind=String(body.kind||''),n=Number(body.tier||body.level),season=String(body.season||'');
    if(!['level','pass_free','pass_premium'].includes(kind)||!Number.isSafeInteger(n)||n<1||n>100)fail('Resgate inválido');

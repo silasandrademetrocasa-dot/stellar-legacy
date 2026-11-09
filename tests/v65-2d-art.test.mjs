@@ -63,11 +63,11 @@ test('Cache de sprites reconhece os novos diretórios V65',()=>{
 // V66 regression checks: source assets and cache revision are consistent.
 test('V69 preserva recursos V66 e mantém versões de imports sincronizadas',()=>{
   const pkg=JSON.parse(readFileSync(join(root,'package.json'),'utf8'));
-  assert.equal(pkg.version,'47.7.66');
+  assert.equal(pkg.version,'47.7.67');
   const server=readFileSync(join(root,'server/index.js'),'utf8');
-  assert.ok(server.includes("const RELEASE_VERSION = '47.7.66'"));
+  assert.ok(server.includes("const RELEASE_VERSION = '47.7.67'"));
   for(const match of game.matchAll(/from\s+['"](\.[^'"]+)['"]/g)){
-    assert.ok(match[1].endsWith('?v=47.7.66'), match[1]);
+    assert.ok(match[1].endsWith('?v=47.7.67'), match[1]);
   }
   assert.match(game,/performance\.now\(\)\/210/);
   assert.match(game,/performance\.now\(\)\/180/);
@@ -85,7 +85,7 @@ test('V67 possui 34 sprites exclusivos e mapeamento por tipo',()=>{
   assert.equal(entries.length,34);
   const paths=new Set(entries.map(x=>x[2]));
   assert.equal(paths.size,34,'sprites repetidos no novo catálogo');
-  for(const path of paths){assert.match(path,/^\/assets\/v67\/npcs\//);webp(path);assert.equal(entityAssetPath(path),true,path);}
+  for(const path of paths){assert.match(path,/^\/assets\/v(?:67|135)\/npcs\//);webp(path);assert.equal(entityAssetPath(path),true,path);}
   const data=readFileSync(join(root,'public/data.js'),'utf8');
   for(const [,id] of entries){assert.ok(data.includes(id),id);}
   for(const mapId of ['x5','x6','x7','x8','b41','b42','b43'])assert.ok(data.includes(mapId+': {')||data.includes(mapId+':{'),mapId);

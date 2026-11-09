@@ -12,6 +12,7 @@ import {safeAstralProfileV431,astralNpcHitCapV431} from './astral-combat-v431.js
 import { idleNpcStep, shouldLeashNpc, NpcAggroWindow } from './npc-intelligence-v34.js';
 import { perceptionPlayers, nearestPerceivedPlayer, turnNpcToward, selectAggroSuccessor } from './npc-intelligence-v343.js';
 import { resolveLiveEvent } from './live-event-scheduler-v341.js';
+import { continuousEventV135, manualOverrideActiveV135 } from './event-rotation-v135.js';
 import { eventControlProfile } from '../public/modules/event-control-profile-v3411.js';
 import { eventStage, eventStageTuning, bossCombatTuning } from '../public/modules/event-evolution-v345.js';
 import { randomUUID } from 'crypto';
@@ -293,6 +294,10 @@ class Room {
   }
 
   applyNpcRuntimeConfig(){
+    if(this.map.battle){
+      for(const [id,e] of this.npcs)if(!e.eventNpc){this.npcs.delete(id);this.broadcast({type:'npc_remove',entityId:id,reason:'pvp_event_only_v135'});}
+      this.respawns=this.respawns.filter(r=>r.kind!=='npc');
+    }
     // Atualiza NPCs vivos preservando a porcentagem atual de HP/escudo.
     for(const [id,e] of this.npcs){
       const base=this.world.npcDefinition(e.type);
@@ -1258,7 +1263,9 @@ export function attachSharedUniverse(server,{authenticate,authorizeJoin,recordSe
       return NATAL_NPCS[key]?{...NATAL_NPCS[key],color:'#ffeaee',resources:{}}:live||fallback;
     },
     npcSpawnGroups(mapId){
-      const key=String(mapId||''),rows=this.npcRuntime?.spawns?.get?.(key);
+      const key=String(mapId||'');
+      if(['b41','b42','b43'].includes(key))return []; // V135: proibição autoritativa de NPCs normais no PvP.
+      const rows=this.npcRuntime?.spawns?.get?.(key);
       if(this.npcRuntime?.version>0&&Array.isArray(rows)&&(rows.length>0||!/^u[1-3]$/.test(key)))return rows.filter(r=>r.enabled!==false&&Number(r.count)>0&&this.npcDefinition(r.type)?.enabled!==false).map(r=>({type:r.type,count:Math.max(0,Math.round(Number(r.count)||0))}));
       const map=MAPS[key]||MAPS.x1,mult=Math.max(1,Number(map.enemyMultiplier)||1);
       return (map.enemyGroups||[]).map(g=>({type:g.type,count:Math.max(1,Math.round((Number(g.count)||0)*mult))}));
@@ -1332,7 +1339,13 @@ export function attachSharedUniverse(server,{authenticate,authorizeJoin,recordSe
       return this.directives;
     },
     mainEventV132(now){return resolveLiveEvent(world.liveOps?.events||[],now,world.liveOps?.weekend_settings,world.liveOps?.manual_override);},
-    currentEvent(){void natal?.refresh();const now=nowMs();return world.mainEventV132(now)||(natal?.active()?christmasWindow(now,t=>world.mainEventV132(t)):null);},
+    currentEvent(){
+      void natal?.refresh();const now=nowMs(),live=world.mainEventV132(now);
+      if(manualOverrideActiveV135(world.liveOps?.manual_override,now))return live;
+      const activeOnce=world.liveOps?.events?.some(r=>r?.enabled!==false&&r?.schedule_mode==='once'&&r?.event_key===live?.id);
+      if(activeOnce)return live;
+      return continuousEventV135(world.liveOps?.events||[],now,{christmasEnabled:!!natal?.active()})||live||(natal?.active()?christmasWindow(now,t=>world.mainEventV132(t)):null);
+    },
     async refreshLiveOps(force=false){
       const now=nowMs();
       if(!loadLiveOps)return world.liveOps;
