@@ -13,6 +13,8 @@ export function portalIdV53(portal){
 }
 export function visualDroneV53(type,designer){
  if(!designer)return type==='iris'?'drone_elite':'drone_common';
+ const own=({drone_fury:'drone_c',drone_aegis:'drone_b',drone_titan:'drone_e'})[designer.design_id];
+ if(own)return own;
  const b=designer.bonuses||{};
  const damage=Number(b.damage_per_drone||b.damage||b.full_set_damage||0);
  const hp=Number(b.hp_per_drone||b.hp||b.full_set_hp||0);

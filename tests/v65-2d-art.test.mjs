@@ -11,14 +11,14 @@ const assets=join(root,'public/assets/v136');
 const SHIP_SLUGS=Object.freeze({phoenix:'aurora',liberator:'pioneer',piranha:'raptor',leonov:'lynx',nostromo:'meridian',bigboy:'bastion',vengeance:'valkyrie',goliath:'leviathan',spearhead:'pathfinder',aegis:'seraph',citadel:'bulwark',defcom:'phantom',yamato:'kensei'});
 const img=p=>readFileSync(join(root,'public',p.replace(/^\//,'')));
 const webp=p=>{const data=img(p);assert.equal(data.toString('ascii',0,4),'RIFF',p);assert.equal(data.toString('ascii',8,12),'WEBP',p);assert.ok(data.length>1500,p);};
-test('V65 usa 13 naves TOP no mapa e FRONT no showroom, hangar, leilão',()=>{
+test('V138 usa vista TOP no mapa, showroom, hangar e leilão',()=>{
   assert.equal(Object.keys(ALLOWED_SHIPS_V50).length,13);
   for(const id of Object.keys(ALLOWED_SHIPS_V50)){
     assert.ok(isShipAllowedV50(id));
     webp(`/assets/v136/ships/top/${SHIP_SLUGS[id]}.webp`);webp(`/assets/v136/ships/front/${SHIP_SLUGS[id]}.webp`);
     assert.notDeepEqual(img(`/assets/v136/ships/top/${SHIP_SLUGS[id]}.webp`),img(`/assets/v136/ships/front/${SHIP_SLUGS[id]}.webp`));
   }
-  assert.match(game,/shipArtV65\(id,'front'\)/);
+  assert.match(game,/shipArtV65\(id,'map'\)/);
   assert.match(game,/shipArtV65\(id,'top'\)/);
   assert.match(game,/function shipMapSheetAsset\(/);
   assert.match(game,/if\(shipArtV65\(id,'top'\)\)return null/);
@@ -64,11 +64,11 @@ test('Cache de sprites reconhece os novos diretórios V65',()=>{
 // V66 regression checks: source assets and cache revision are consistent.
 test('V69 preserva recursos V66 e mantém versões de imports sincronizadas',()=>{
   const pkg=JSON.parse(readFileSync(join(root,'package.json'),'utf8'));
-  assert.equal(pkg.version,'47.7.69');
+  assert.equal(pkg.version,'47.7.70');
   const server=readFileSync(join(root,'server/index.js'),'utf8');
-  assert.ok(server.includes("const RELEASE_VERSION = '47.7.69'"));
+  assert.ok(server.includes("const RELEASE_VERSION = '47.7.70'"));
   for(const match of game.matchAll(/from\s+['"](\.[^'"]+)['"]/g)){
-    assert.ok(match[1].endsWith('?v=47.7.69'), match[1]);
+    assert.ok(match[1].endsWith('?v=47.7.70'), match[1]);
   }
   assert.match(game,/performance\.now\(\)\/210/);
   assert.match(game,/performance\.now\(\)\/180/);

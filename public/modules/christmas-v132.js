@@ -18,6 +18,13 @@ add('spearhead','Pathfinder • Orion','orion',{damage:.12,shield:.10,hp:.05},'e
 add('yamato','Kensei • Crimson','crimson',{damage:.16,shield:.13,speed:.06},'elite',9,'shop',200000);
 add('spearhead','Pathfinder • Cristal','cristal',{damage:.18,shield:.16,hp:.08},'elite',10,'december_pass',0);
 add('yamato','Kensei • Vulcão Natalino','vulcao',{damage:.20,shield:.15,speed:.08},'elite',11,'december_pass',0);
+// Attribute skins belong to their own hull; retired universal ship_* skins stay retired.
+for(const [ship,label] of [['leonov','Lynx'],['vengeance','Valkyrie'],['goliath','Leviathan'],['pusat','Striker']]){
+ for(const [key,name,value] of [['hp','Vitalis',.15],['damage','Reaper',.08],['shield','Barrier',.15],['xp','Scholar',.15],['speed','Velocity',.05]])
+  add(ship,`${label} • ${name}`,key,{[key]:value},'v138',0);
+}
+for(const [key,name] of [['br','Brasil'],['us','Estados Unidos'],['jp','Japão'],['es','Espanha'],['pt','Portugal']])
+ add('goliath',`Leviathan • ${name}`,key,{hp:.08,shield:.08,damage:.04},'v138',0,'shop',150000);
 export const BASE_ART={aegis:0,citadel:2,defcom:4,spearhead:6,yamato:8};
 export function compatibleDesign(d,ship){return d?.kind==='ship'&&d.eligibility?.ship_id===ship;}
 export const MISSIONS=[

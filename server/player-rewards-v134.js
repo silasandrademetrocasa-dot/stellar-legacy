@@ -8,6 +8,11 @@ import {operationDigestV125} from './economy-receipts-v125.js';
 import {applyWarfrontActionV135} from './warfront-economy-v135.js';
 const fail=(message,code='PLAYER_REWARD_INVALID')=>{throw Object.assign(Error(message),{code,status:409});};
 const count=v=>Math.max(0,Math.floor(Number(v)||0));
+function collectionStorageErrorV138(error){
+ const code=/ACCOUNT_BANNED|SESSION_REPLACED/.exec(String(error?.message||''))?.[0]||'COLLECTION_CONTEXT_UNAVAILABLE';
+ const message=code==='SESSION_REPLACED'?'Sua sessão mudou. Entre novamente para continuar.':code==='ACCOUNT_BANNED'?'Esta conta não pode coletar recompensas.':'Não foi possível confirmar a coleta. Tente novamente.';
+ return Object.assign(Error(message),{status:code==='SESSION_REPLACED'?401:409,code});
+}
 export function cargoCapacityV134(s,systems={}){
  const ship=SHIPS[s.activeShipId]||{},extras=(s.shipLoadout?.extras||[]).reduce((n,id)=>n+Number(ITEMS[id]?.cargoBonus||0),0);
  let cap=Number(ship.cargo||0)+extras;
@@ -50,18 +55,18 @@ export function rollBonusV134(config,pet,rng=Math.random){
 export function createPlayerRewardsV134({db,readPass,readPremium,readBonus,readSystems,world,secret}){
  readBonus=createConfigCacheV1341(readBonus);readSystems=createConfigCacheV1341(readSystems);
  const saved=async uid=>{const {data,error}=await db.from('game_saves').select('state,updated_at').eq('user_id',uid).single();if(error||!data?.state)fail('Progresso indisponível','PLAYER_STORAGE_UNAVAILABLE');return data;};
- async function replay(uid,id,hash,module,cached){
+ async function replay(uid,id,hash,module,cached,sessionId=null){
   const {data,error}=cached||await db.from('stellar_player_commands_v134').select('request_hash,module').eq('user_id',uid).eq('command_id',id).maybeSingle();if(error)fail('Recibos indisponíveis','PLAYER_STORAGE_UNAVAILABLE');
   if(!data)return null;if(data.request_hash!==hash||data.module!==module)fail('Identificador reutilizado','COMMAND_ID_REUSED');
-  const r=await db.rpc('stellar_player_commit',{p_user_id:uid,p_command_id:id,p_module:module,p_request_hash:hash,p_payload:{}});if(r.error||!r.data?.ok)fail('Recuperação indisponível');return r.data;
+  const r=await db.rpc('stellar_player_commit',{p_user_id:uid,p_command_id:id,p_module:module,p_request_hash:hash,p_payload:sessionId?{collection_session:sessionId}:{}});if(r.error||!r.data?.ok)fail('Recuperação indisponível');return r.data;
  }
  async function commit(uid,id,module,hash,make,prepared={}){
-  const previous=await replay(uid,id,hash,module,prepared.receipt);if(previous)return previous;
+  const previous=await replay(uid,id,hash,module,prepared.receipt,prepared.sessionId);if(previous)return previous;
   for(let attempt=0;attempt<5;attempt++){
    const before=attempt===0&&prepared.save?prepared.save:await saved(uid),draft=structuredClone(before.state),payload=await make(draft,attempt);
    draft.serverPurchaseRevision=count(before.state.serverPurchaseRevision)+1;
    const r=await db.rpc('stellar_player_commit',{p_user_id:uid,p_command_id:id,p_module:module,p_request_hash:hash,p_payload:{...payload,base:before.state,state:draft}});
-   if(r.error)throw Object.assign(Error(r.error.message),{code:r.error.code,status:503});if(r.data?.ok)return r.data;
+   if(r.error)throw module==='collection'?collectionStorageErrorV138(r.error):Object.assign(Error(r.error.message),{code:r.error.code,status:503});if(r.data?.ok)return r.data;
    if(!['PLAYER_RETRY','COLLECTION_STALE'].includes(r.data?.code))fail('Operação não confirmada',r.data?.code);
   }fail('Outra operação está sendo confirmada. Tente novamente com o mesmo pedido.','PLAYER_RETRY');
  }
@@ -100,19 +105,22 @@ export function createPlayerRewardsV134({db,readPass,readPremium,readBonus,readS
    const r=await db.rpc('stellar_player_collections_snapshot',{p_user_id:uid,p_map_key:key,p_count:target,p_width:Number(map?.world?.w)||4000,p_height:Number(map?.world?.h)||3000});
    if(r.error)throw Error(r.error.message);return {ok:true,map_key:key,boxes:r.data?.boxes||[],loot:r.data?.loot||[]};
   },
-  async collect(uid,body){
+  async collect(uid,body,sessionId=null,arrival=null){
    const dropId=String(body.drop_id||''),id=String(body.request_id||'');if(!/^[A-Za-z0-9_:-]{8,180}$/.test(dropId)||!/^[A-Za-z0-9_-]{10,90}$/.test(id))fail('Coleta inválida');
    const collector=body.collector||'ship';if(!['ship','pet'].includes(collector))fail('Coletor inválido','COLLECTOR_INVALID');
    const hash=operationDigestV125('collection',{dropId});
-   const [save,dropRead,receipt]=await Promise.all([saved(uid),db.from('stellar_collection_drops_v134').select('*').eq('user_id',uid).eq('drop_id',dropId).maybeSingle(),db.from('stellar_player_commands_v134').select('request_hash,module').eq('user_id',uid).eq('command_id',id).maybeSingle()]);
+   const arrived=arrival||(()=>{const c=world()?.findClient(uid);return c?.player?{room:c.room,player:structuredClone(c.player)}:null;})();
+   let save,dropRead,receipt;
+   if(sessionId){const ctx=await db.rpc('stellar_collection_context_v138',{p_user_id:uid,p_session_id:sessionId,p_drop_id:dropId,p_command_id:id});if(ctx.error)throw collectionStorageErrorV138(ctx.error);if(!ctx.data?.save?.state)fail('Progresso indisponível','PLAYER_STORAGE_UNAVAILABLE');save=ctx.data.save;dropRead={data:ctx.data.drop,error:null};receipt={data:ctx.data.receipt,error:null};}
+   else [save,dropRead,receipt]=await Promise.all([saved(uid),db.from('stellar_collection_drops_v134').select('*').eq('user_id',uid).eq('drop_id',dropId).maybeSingle(),db.from('stellar_player_commands_v134').select('request_hash,module').eq('user_id',uid).eq('command_id',id).maybeSingle()]);
    if(receipt.error)fail('Recibos indisponíveis','PLAYER_STORAGE_UNAVAILABLE');
    return commit(uid,id,'collection',hash,async(s,attempt)=>{
     const {data:drop,error}=attempt===0?dropRead:await db.from('stellar_collection_drops_v134').select('*').eq('user_id',uid).eq('drop_id',dropId).maybeSingle();
     if(error||!drop)fail('Caixa não disponível','COLLECTION_UNAVAILABLE');
-    const client=world()?.findClient(uid);
+    const client=arrived;
     const access=collectionAccessV1341(s,client,drop,collector);
     if(!access.ok)fail(access.code==='COLLECTION_PET_INACTIVE'?'Ative o Salvager no AUX.':access.code==='COLLECTION_POSITION_STALE'?'Sincronizando posição do AUX.':access.code==='COLLECTION_MAP_MISMATCH'?'Caixa fora do mapa atual.':collector==='pet'?'AUX fora do alcance da caixa.':'Aproxime a nave da caixa.',access.code);
-    const payload={drop_id:dropId,drop_before:drop.payload,drop_after:null};
+    const payload={drop_id:dropId,drop_before:drop.payload,drop_after:null,...(sessionId?{collection_session:sessionId}:{})};
     if(drop.kind==='loot'){
      s.cargo||={};const capacity=cargoCapacityV134(s,await readSystems());payload.cargo_limit=capacity;let free=Math.max(0,capacity-Object.entries(s.cargo).reduce((n,[k,v])=>n+(k==='Xenomit'?0:count(v)),0));const remaining={...drop.payload.resources},picked={};
      for(const [k,v] of Object.entries(remaining)){
@@ -129,7 +137,7 @@ export function createPlayerRewardsV134({db,readPass,readPremium,readBonus,readS
      payload.respawn_ms=Math.round(delay);const area=client.room.map?.world||MAPS[client.room.mapId]?.world||{w:4000,h:3000};payload.respawn_x=220+rng()*(Number(area.w)-440);payload.respawn_y=220+rng()*(Number(area.h)-440);payload.receipt={kind:'bonus',reward,collector};
     }
     return payload;
-   },{save,receipt});
+   },{save,receipt,sessionId});
   }
  };
 }

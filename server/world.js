@@ -1188,7 +1188,7 @@ class Room {
   }
 }
 
-export function attachSharedUniverse(server,{authenticate,authorizeJoin,recordSecurityViolation,loadLiveOps,loadBattleGroup,loadNpcConfig,loadWorldConfig,loadPlayerEventProgress,recordPlayerEventProgress,loadWarfront,persistCapture,persistRelayCapture,damageRelay,readRelayLoadout,readAstralCombatProfile,loadActorClan,recordRelayPve,recordEliteEvent,recordWarDefense,loadWorldDirectives,grantNpcReward,grantOreReward,loadWarbotConfig,natal,issueLoot}){
+export function attachSharedUniverse(server,{authenticate,authorizeJoin,recordSecurityViolation,loadLiveOps,loadBattleGroup,loadNpcConfig,loadWorldConfig,loadPlayerEventProgress,recordPlayerEventProgress,loadWarfront,persistCapture,persistRelayCapture,damageRelay,readRelayLoadout,readAstralCombatProfile,loadActorClan,recordRelayPve,recordEliteEvent,recordWarDefense,loadWorldDirectives,grantNpcReward,grantOreReward,collectDrop,loadWarbotConfig,natal,issueLoot}){
   const wss=new WebSocketServer({
     server,
     path:'/ws',
@@ -1393,7 +1393,7 @@ export function attachSharedUniverse(server,{authenticate,authorizeJoin,recordSe
       if(msg.type==='ping')return safeJsonSend(ws,{type:'pong',ts:msg.ts,serverTime:nowMs()});
       if(!ws.isAuthed){
         if(msg.type!=='auth')return;
-        try{const identity=await authenticate(String(msg.accessToken||''),String(msg.gameSessionId||''));if(!identity?.user?.id)throw new Error('auth');ws.isAuthed=true;ws.identity=identity;clearTimeout(ws.authTimer);safeJsonSend(ws,{type:'auth_ok',user:{id:identity.user.id,callsign:identity.callsign},serverTime:nowMs()});}catch{safeJsonSend(ws,{type:'auth_error'});try{ws.close(4401,'auth failed');}catch{}}return;
+        try{const identity=await authenticate(String(msg.accessToken||''),String(msg.gameSessionId||''));if(!identity?.user?.id)throw new Error('auth');ws.isAuthed=true;ws.identity=identity;clearTimeout(ws.authTimer);safeJsonSend(ws,{type:'auth_ok',features:{collectionV138:typeof collectDrop==='function'},user:{id:identity.user.id,callsign:identity.callsign},serverTime:nowMs()});}catch{safeJsonSend(ws,{type:'auth_error'});try{ws.close(4401,'auth failed');}catch{}}return;
       }
       if(msg.type==='join_map'){
         const identity=ws.identity;const mapId=String(msg.mapId||'x1');
@@ -1463,6 +1463,16 @@ export function attachSharedUniverse(server,{authenticate,authorizeJoin,recordSe
       if(msg.type==='natal_collect'||msg.type==='natal_fire')return await ws.room&&natalSocket(ws.room,ws,msg,safeJsonSend);
       if(msg.type==='npc_damage')return await ws.room?.handleDamage(ws,msg);
       if(msg.type==='relay_attack')return await ws.room?.handleRelayAttack(ws,msg);
+      if(msg.type==='collect_drop'){
+        const request_id=String(msg.request_id||'');
+        if(!collectDrop||!ws.room||!ws.player||!currentRoomActorV1173(ws,ws.room.players))return safeJsonSend(ws,{type:'collect_drop_result',request_id,ok:false,code:'COLLECTION_MAP_MISMATCH'});
+        ws.collectingDropsV138||=new Set();if(ws.collectingDropsV138.has(request_id))return;
+        if(ws.collectingDropsV138.size>=4)return safeJsonSend(ws,{type:'collect_drop_result',request_id,ok:false,code:'COLLECTION_BUSY'});
+        ws.collectingDropsV138.add(request_id);const room=ws.room,arrival={room,player:structuredClone(ws.player)},started=nowMs();
+        try{const result=await collectDrop(ws.identity.user.id,{drop_id:msg.drop_id,request_id,collector:msg.collector},ws.identity.gameSessionId,arrival);safeJsonSend(ws,{type:'collect_drop_result',request_id,ok:true,result,server_ms:nowMs()-started});}
+        catch(e){safeJsonSend(ws,{type:'collect_drop_result',request_id,ok:false,code:e.code||'COLLECTION_FAILED',error:e.message});}
+        finally{ws.collectingDropsV138.delete(request_id);}return;
+      }
       if(msg.type==='collect_ore')return await ws.room?.handleOreCollect(ws,msg);
       if(msg.type==='force_event'&&ws.identity?.isAdmin===true&&String(ws.identity.callsign||'').trim().toUpperCase()==='FELP22'){
         await world.refreshLiveOps(true);

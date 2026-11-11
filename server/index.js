@@ -60,7 +60,7 @@ import { createSecurityService } from './security-service.js';
 
 const app = express();
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const RELEASE_VERSION = '47.7.69'; // único identificador de release nos endpoints HTTP
+const RELEASE_VERSION = '47.7.70'; // único identificador de release nos endpoints HTTP
 
 function normalizeSupabaseUrl(value = '') {
   let url = String(value || '').trim();
@@ -1559,7 +1559,7 @@ const playerRewardsV134=createPlayerRewardsV134({db:eliteAdminClient,readPass:()
 app.post('/api/player/warfront/action',requireUser,OFFLINE_FARM_GUARD_V484,asyncRoute(async(req,res)=>res.json(await withPurchaseLock(req.user.id,()=>playerRewardsV134.warfront(req.user.id,req.body)))));
 app.post('/api/player/rewards/claim',requireUser,OFFLINE_FARM_GUARD_V484,asyncRoute(async(req,res)=>res.json(await withPurchaseLock(req.user.id,()=>playerRewardsV134.claim(req.user.id,req.body,req)))));
 app.post('/api/player/collections/ensure',requireUser,asyncRoute(async(req,res)=>res.json(await playerRewardsV134.ensure(req.user.id))));
-app.post('/api/player/collections/claim',requireUser,asyncRoute(async(req,res)=>res.json(await playerRewardsV134.collect(req.user.id,req.body))));
+app.post('/api/player/collections/claim',requireUser,asyncRoute(async(req,res)=>res.json(await playerRewardsV134.collect(req.user.id,req.body,req.gameSessionId))));
 app.post('/api/player/auction/bid',requireUser,asyncRoute(async(req,res)=>{
  const b=req.body||{};
  if(Object.keys(b).some(k=>!['request_id','hour_key','lot_ref','user_bid','lot'].includes(k)))return res.status(400).json({ok:false,code:'BID_ARGUMENTS_INVALID'});
@@ -2592,6 +2592,7 @@ const sharedUniverse = attachSharedUniverse(server, {natal:natalServiceV132,
     const {data,error}=await sb.rpc('stellar_record_war_defense',{p_map_id:mapId,p_node_id:nodeId,p_faction:faction,p_actor:actorUserId});
     if(error)throw new Error(error.message);return data===true;
   },
+  collectDrop:async(uid,body,sessionId,arrival)=>playerRewardsV134.collect(uid,body,sessionId,arrival),
   grantNpcReward:async(userId,killKey,npcType,baseCredits,baseStl,ownerEligible=false)=>{
     await offlineFarmEnsureInactiveV484(userId,requireEliteAdmin);
     const sb=await requireEliteAdmin();
@@ -2698,7 +2699,7 @@ const sharedUniverse = attachSharedUniverse(server, {natal:natalServiceV132,
     // Autorização do ADM vem do cadastro de roles no Supabase, nunca do callsign ou do cliente.
     const {data:isAdmin,error:adminErr}=await sb.rpc('is_game_admin_v1763',{p_uid:data.user.id});
     if(adminErr)throw new Error('Falha ao validar privilégios da conta.');
-    return {user:data.user,callsign,accessToken:token,faction:String(profile.faction||''),level:Math.max(1,Number(profile.level)||1),isAdmin:isAdmin===true};
+    return {user:data.user,callsign,accessToken:token,gameSessionId,faction:String(profile.faction||''),level:Math.max(1,Number(profile.level)||1),isAdmin:isAdmin===true};
   },
 });
 

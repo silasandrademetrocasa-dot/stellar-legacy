@@ -1,5 +1,5 @@
 import {DESIGNS,MISSIONS,isChristmas,compatibleDesign} from './christmas-v132.js';
-import {shipChristmasArt,boxChristmasArt,fireworkChristmasArt} from './christmas-art-v132.js?v=47.7.67';
+import {shipChristmasArt,boxChristmasArt,fireworkChristmasArt} from './christmas-art-v132.js?v=47.7.70';
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const fmt=n=>Number(n||0).toLocaleString('pt-BR');
 export function createChristmasUI(bridge){
@@ -78,7 +78,7 @@ export function createChristmasUI(bridge){
    if(lastAccount!==bridge.account()){lastAccount=bridge.account();status=null;seenGoals=null;lastStatus=0;fireRequest=null;}
    if(Date.now()-lastStatus>60000)void refresh();
    if(autoCelebration&&!bridge.combat()){autoCelebration=false;effects.push({userId:'celebration',...bridge.position(),start:Date.now()-2000,style:'gold'});}
-   if(!bridge.ready()||busy||Date.now()-lastCollect<1500)return;
+   if(!bridge.ready()||busy||Date.now()-lastCollect<250)return;
    const p=bridge.position(),b=boxes.find(b=>Math.hypot(p.x-b.x,p.y-b.y)<65);
    if(b){busy=true;lastCollect=Date.now();bridge.collect(b.id).catch(e=>bridge.toast(e.message)).finally(()=>{busy=false;});}
    if(panel?.open&&Date.now()-lastStatus>15000)void refresh();

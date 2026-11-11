@@ -1,6 +1,7 @@
 export class SharedUniverseClient {
   constructor({getCredentials,onMessage,onStatus}){
     this.getCredentials=getCredentials;this.onMessage=onMessage||(()=>{});this.onStatus=onStatus||(()=>{});
+    this.collectionV138=false;this.collectionRequestsV138=new Map();
     this.ws=null;this.authed=false;this.manual=false;this.pendingJoin=null;this.reconnectTimer=null;this.pingTimer=null;this.latency=0;this.lastPing=0;this.lastRxAt=0;this.mapJoinError=null;
     // STELLAR_NETWORK_RECOVERY_V4831: stale sockets can remain OPEN during network handoffs on Android.
     this.watchdogTimer=null;this.reconnectAttempts=0;this.failedAuthToken=null;this.lastConnectAt=0;
@@ -30,7 +31,7 @@ export class SharedUniverseClient {
     const current=this.ws;
     if(current&&(current.readyState===WebSocket.OPEN||current.readyState===WebSocket.CONNECTING)){
       if(!this.stale())return;
-      this.clearPulse();this.authed=false;this.ws=null;
+      this.rejectCollectionsV138();this.collectionV138=false;this.clearPulse();this.authed=false;this.ws=null;
       try{current.close(4000,'stale connection');}catch{}
       this.status('reconnecting');this.scheduleReconnect(0);return;
     }
@@ -55,7 +56,8 @@ export class SharedUniverseClient {
     };
     ws.onmessage=e=>{if(this.ws!==ws)return;
       this.lastRxAt=Date.now();let msg;try{msg=JSON.parse(e.data);}catch{return;}
-      if(msg.type==='auth_ok'){
+      if(msg.type==='collect_drop_result'){const p=this.collectionRequestsV138.get(msg.request_id);if(p){this.collectionRequestsV138.delete(msg.request_id);clearTimeout(p.timer);if(msg.ok&&msg.result?.ok)p.resolve(msg.result);else p.reject(Object.assign(Error(msg.error||'Coleta não confirmada'),{code:msg.code||'COLLECTION_FAILED'}));}return;}
+      if(msg.type==='auth_ok'){this.collectionV138=msg.features?.collectionV138===true;
         this.authed=true;this.failedAuthToken=null;this.reconnectAttempts=0;this.status('online');
         if(this.pendingJoin)this.join(this.pendingJoin,true);
         clearInterval(this.pingTimer);this.pingTimer=setInterval(()=>this.ping(),3000);this.ping();return;
@@ -71,7 +73,7 @@ export class SharedUniverseClient {
       this.onMessage(msg);
     };
     ws.onclose=()=>{if(this.ws!==ws)return;
-      this.clearPulse();this.ws=null;this.authed=false;this.mapJoinError=null;
+      this.rejectCollectionsV138();this.collectionV138=false;this.clearPulse();this.ws=null;this.authed=false;this.mapJoinError=null;
       if(this.manual){this.status('offline');return;}
       if(this.failedAuthToken===(this.getCredentials?.()||{}).accessToken){this.status('auth_error');return;}
       this.status('reconnecting');this.scheduleReconnect();
@@ -84,8 +86,16 @@ export class SharedUniverseClient {
   updatePlayer(payload){return this.send({type:'player_state',...payload});}
   damageNpc(payload){return this.send({type:'npc_damage',...payload});}
   attackRelay(nodeId){return this.send({type:'relay_attack',nodeId});}
+  rejectCollectionsV138(){for(const p of this.collectionRequestsV138.values()){clearTimeout(p.timer);p.reject(Object.assign(Error('Conexão de coleta interrompida'),{code:'SOCKET_COLLECTION_DISCONNECTED'}));}this.collectionRequestsV138.clear();}
+  collectDropV138(payload){
+    if(!this.collectionV138||!this.isOnline())return Promise.reject(Object.assign(Error('Canal de coleta indisponível'),{code:'SOCKET_COLLECTION_UNAVAILABLE'}));
+    const prior=this.collectionRequestsV138.get(payload.request_id);if(prior)return prior.promise;
+    const entry={};entry.promise=new Promise((resolve,reject)=>{Object.assign(entry,{resolve,reject});entry.timer=setTimeout(()=>{if(this.collectionRequestsV138.get(payload.request_id)!==entry)return;this.collectionRequestsV138.delete(payload.request_id);reject(Object.assign(Error('Confirmação de coleta pendente'),{code:'SOCKET_COLLECTION_TIMEOUT'}));},Math.min(8000,Math.max(3500,this.latency*3+1500)));});
+    this.collectionRequestsV138.set(payload.request_id,entry);
+    if(!this.send({type:'collect_drop',...payload})){this.collectionRequestsV138.delete(payload.request_id);clearTimeout(entry.timer);entry.reject(Object.assign(Error('Canal de coleta indisponível'),{code:'SOCKET_COLLECTION_UNAVAILABLE'}));}return entry.promise;
+  }
   collectOre(entityId,collector='ship'){return this.send({type:'collect_ore',entityId,collector:collector==='pet'?'pet':'ship'});}
   forceEvent(index){return this.send({type:'force_event',index});}
-  close(){this.mapJoinError=null;this.manual=true;clearTimeout(this.reconnectTimer);this.clearPulse();this.reconnectTimer=null;try{this.ws?.close(1000,'logout');}catch{}this.ws=null;this.authed=false;this.status('offline');}
+  close(){this.rejectCollectionsV138();this.collectionV138=false;this.mapJoinError=null;this.manual=true;clearTimeout(this.reconnectTimer);this.clearPulse();this.reconnectTimer=null;try{this.ws?.close(1000,'logout');}catch{}this.ws=null;this.authed=false;this.status('offline');}
   isOnline(){return !!this.authed&&this.ws?.readyState===WebSocket.OPEN;}
 }

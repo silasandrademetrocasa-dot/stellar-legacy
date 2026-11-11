@@ -13,7 +13,7 @@ test('Natal: box doubles a single existing prize and quantum drop is optional',(
  for(const [r,cores] of [[0,2],[.009,2],[.01,1],[.049,1],[.05,0],[.99,0]]){let a=[0,0,r];const reward=rollChristmasBox(pool,()=>a.shift());assert.equal(reward.qty,1000);assert.equal(reward.cores,cores);}
 });
 test('Designs preserve approved attributes and require matching hull',()=>{
- assert.equal(DESIGNS.length,7);assert.equal(new Set(DESIGNS.map(x=>x.design_id)).size,7);
+ assert.equal(DESIGNS.length,32);assert.equal(new Set(DESIGNS.map(x=>x.design_id)).size,32);
  for(const d of DESIGNS){assert.ok(compatibleDesign(d,d.eligibility.ship_id));assert.equal(compatibleDesign(d,'phoenix'),false);}
  assert.deepEqual(DESIGNS.find(d=>d.design_id==='n132_yamato_vulcao').bonuses,{damage:.20,shield:.15,speed:.08});
  assert.deepEqual(DESIGNS.find(d=>d.design_id==='n132_spearhead_cristal').bonuses,{damage:.18,shield:.16,hp:.08});

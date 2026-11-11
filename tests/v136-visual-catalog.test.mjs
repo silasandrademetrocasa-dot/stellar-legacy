@@ -36,7 +36,7 @@ test('V136: IDs de gameplay mapeiam naves e NPCs para a única pasta atual',()=>
  }
  assert.match(game,/const shipArtV65=\(id,view\)=>SHIP_ART_ID_V136/);
  assert.match(game,/\/assets\/v136\/npcs\/streuner.webp/);
- assert.match(manifest,/\/assets\/v136\/ships\/front\/aurora.webp/);
+ assert.match(manifest,/\/assets\/v136\/ships\/map\/aurora.webp/);
  assert.ok(Object.keys(catalog.npcs).length>=40);
 });
 
