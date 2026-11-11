@@ -1,0 +1,1509 @@
+{
+  "release": "V138",
+  "view": "orthographic-top-down",
+  "exportPixels": 2048,
+  "mapPixels": 512,
+  "notice": "2048px export. Generated originals retain their actual dimensions below; exports are resampled, not native 2K generations.",
+  "assets": [
+    {
+      "id": "lynx_hp",
+      "group": "ships",
+      "source": "generated_images/exec-9244d348-fe0d-4cba-92fe-ce0f021960b4.png",
+      "nativeWidth": 1254,
+      "nativeHeight": 1254,
+      "hd": {
+        "path": "/assets/v138/hd/ships/lynx_hp.webp",
+        "bytes": 569966,
+        "sha256": "7e1bfc0bfdd90a10c09734bcbe7b3fd610f0c75a44860a2989954cbe4cd4a3fc"
+      },
+      "bounds": [
+        86,
+        154,
+        1961,
+        1893
+      ],
+      "alphaCoverage": 0.3005106449127197,
+      "cornerAlpha": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "map": {
+        "path": "/assets/v138/map/ships/lynx_hp.webp",
+        "bytes": 58534,
+        "sha256": "5800e476ed075f4e1ef297ff0a420dff5a9ab91936116775311b2e7272840fa7"
+      }
+    },
+    {
+      "id": "lynx_damage",
+      "group": "ships",
+      "source": "generated_images/exec-c27617f5-9aed-4802-8000-0cd9e0357353.png",
+      "nativeWidth": 1254,
+      "nativeHeight": 1254,
+      "hd": {
+        "path": "/assets/v138/hd/ships/lynx_damage.webp",
+        "bytes": 520998,
+        "sha256": "17a5b0bb2121c140d86fa9e50a29dfdea93eb84fe3df662fc46c11c6e5c59199"
+      },
+      "bounds": [
+        75,
+        149,
+        1971,
+        1913
+      ],
+      "alphaCoverage": 0.2980930805206299,
+      "cornerAlpha": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "map": {
+        "path": "/assets/v138/map/ships/lynx_damage.webp",
+        "bytes": 52270,
+        "sha256": "d48888137b741f50eecf7e8f15332710715656d7e73f3be2451abee7688e111e"
+      }
+    },
+    {
+      "id": "lynx_shield",
+      "group": "ships",
+      "source": "generated_images/exec-50404da1-7810-453f-a0d3-2b8b4ad30322.png",
+      "nativeWidth": 1254,
+      "nativeHeight": 1254,
+      "hd": {
+        "path": "/assets/v138/hd/ships/lynx_shield.webp",
+        "bytes": 545426,
+        "sha256": "a833d8ce684c810f8589361ca967b29e11dea71633b678b04e1f00c907b658b1"
+      },
+      "bounds": [
+        66,
+        142,
+        1981,
+        1902
+      ],
+      "alphaCoverage": 0.3106377124786377,
+      "cornerAlpha": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "map": {
+        "path": "/assets/v138/map/ships/lynx_shield.webp",
+        "bytes": 56094,
+        "sha256": "0b7542dc044b727e8b45fdef6179322e98fd23095584394266a76f256919bc52"
+      }
+    },
+    {
+      "id": "lynx_xp",
+      "group": "ships",
+      "source": "generated_images/exec-1acb7997-d378-44ac-8d73-0948dddf0d1e.png",
+      "nativeWidth": 1254,
+      "nativeHeight": 1254,
+      "hd": {
+        "path": "/assets/v138/hd/ships/lynx_xp.webp",
+        "bytes": 660290,
+        "sha256": "1531a99b22694117cc28b76abdbcd931f55f9e7f5943d94908acab6dbec516a1"
+      },
+      "bounds": [
+        29,
+        72,
+        2015,
+        1961
+      ],
+      "alphaCoverage": 0.3526878356933594,
+      "cornerAlpha": [
+        1,
+        0,
+        1,
+        0
+      ],
+      "map": {
+        "path": "/assets/v138/map/ships/lynx_xp.webp",
+        "bytes": 67504,
+        "sha256": "315b100dcb0f5d5579b8292d0f80eaf9e43d580b6bf1baad582b33a5651db6eb"
+      }
+    },
+    {
+      "id": "lynx_speed",
+      "group": "ships",
+      "source": "generated_images/exec-df67629c-ada0-45b5-910a-85e2701e469e.png",
+      "nativeWidth": 1254,
+      "nativeHeight": 1254,
+      "hd": {
+        "path": "/assets/v138/hd/ships/lynx_speed.webp",
+        "bytes": 703666,
+        "sha256": "4b51196e9a57afd824757fd121744f1c61825034945343f75ae31d5bfff6e1de"
+      },
+      "bounds": [
+        111,
+        135,
+        1936,
+        1913
+      ],
+      "alphaCoverage": 0.29099440574645996,
+      "cornerAlpha": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "map": {
+        "path": "/assets/v138/map/ships/lynx_speed.webp",
+        "bytes": 68984,
+        "sha256": "e5d6ff7cf85290f6b01edd9b4ff0c84d16b4f9736099dcde172a2e1370c6bbd0"
+      }
+    },
+    {
+      "id": "valkyrie_hp",
+      "group": "ships",
+      "source": "generated_images/exec-4434ad07-79a7-4d11-a90b-11484f19f9f8.png",
+      "nativeWidth": 1254,
+      "nativeHeight": 1254,
+      "hd": {
+        "path": "/assets/v138/hd/ships/valkyrie_hp.webp",
+        "bytes": 760072,
+        "sha256": "0b18745d7a7e4a5b9869f17bcae55f66951a3da209aa12085a720645885a673b"
+      },
+      "bounds": [
+        111,
+        80,
+        1937,
+        1969
+      ],
+      "alphaCoverage": 0.3514552116394043,
+      "cornerAlpha": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "map": {
+        "path": "/assets/v138/map/ships/valkyrie_hp.webp",
+        "bytes": 73166,
+        "sha256": "4f5630b67dc1572c50dd58323dc6493d7fcd2b1cd5f90f2a660f39ac5dd10838"
+      }
+    },
+    {
+      "id": "valkyrie_damage",
+      "group": "ships",
+      "source": "generated_images/exec-254a7de7-a59b-4600-b080-96cd516093b8.png",
+      "nativeWidth": 1254,
+      "nativeHeight": 1254,
+      "hd": {
+        "path": "/assets/v138/hd/ships/valkyrie_damage.webp",
+        "bytes": 743256,
+        "sha256": "69a23d88ba38e8c396375f953823ea9f7bb9cc047c33f5117cfad844146eb682"
+      },
+      "bounds": [
+        142,
+        93,
+        1905,
+        1962
+      ],
+      "alphaCoverage": 0.3392496109008789,
+      "cornerAlpha": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "map": {
+        "path": "/assets/v138/map/ships/valkyrie_damage.webp",
+        "bytes": 70070,
+        "sha256": "842aaf40c823597c6a7f669e89a73cc0a5b2693b22a27a3cde990be51a884cb5"
+      }
+    },
+    {
+      "id": "valkyrie_shield",
+      "group": "ships",
+      "source": "generated_images/exec-b2687928-35a0-4300-b55d-84da6ae106a1.png",
+      "nativeWidth": 1254,
+      "nativeHeight": 1254,
+      "hd": {
+        "path": "/assets/v138/hd/ships/valkyrie_shield.webp",
+        "bytes": 735274,
+        "sha256": "8ec1fd8d101eb5b47d9777180bf1fa1f330a3b7fbef51979d0a41009a7d4aa60"
+      },
+      "bounds": [
+        163,
+        84,
+        1886,
+        1951
+      ],
+      "alphaCoverage": 0.3280470371246338,
+      "cornerAlpha": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "map": {
+        "path": "/assets/v138/map/ships/valkyrie_shield.webp",
+        "bytes": 71748,
+        "sha256": "54e7b919c7f5804c185dff67c0d8b90e73d41af51ad28660ed8eff7f35fb5733"
+      }
+    },
+    {
+      "id": "valkyrie_xp",
+      "group": "ships",
+      "source": "generated_images/exec-32778928-b5a1-4307-823a-f7590d44d816.png",
+      "nativeWidth": 1254,
+      "nativeHeight": 1254,
+      "hd": {
+        "path": "/assets/v138/hd/ships/valkyrie_xp.webp",
+        "bytes": 704534,
+        "sha256": "447e59826406621db9814a2b86351bfa75abfdd469bf9a41c5e16adecc5d139b"
+      },
+      "bounds": [
+        183,
+        142,
+        1865,
+        1901
+      ],
+      "alphaCoverage": 0.30180811882019043,
+      "cornerAlpha": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "map": {
+        "path": "/assets/v138/map/ships/valkyrie_xp.webp",
+        "bytes": 69090,
+        "sha256": "7473ad3e2c1481031853f17afd9e298bfdd92c0108f8c6e8e605ae0ac2ec85bd"
+      }
+    },
+    {
+      "id": "valkyrie_speed",
+      "group": "ships",
+      "source": "generated_images/exec-6f09d2c3-b2f4-4ed6-bdfe-53f94c613f5f.png",
+      "nativeWidth": 1254,
+      "nativeHeight": 1254,
+      "hd": {
+        "path": "/assets/v138/hd/ships/valkyrie_speed.webp",
+        "bytes": 698546,
+        "sha256": "0fbc9c41ee4c9ecc0b86fd876abd566e341aa4f379b078850ce485b84b04878d"
+      },
+      "bounds": [
+        170,
+        122,
+        1878,
+        1938
+      ],
+      "alphaCoverage": 0.32146739959716797,
+      "cornerAlpha": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "map": {
+        "path": "/assets/v138/map/ships/valkyrie_speed.webp",
+        "bytes": 67220,
+        "sha256": "a640bea452a2ede060a7371d48b30ddd6bc7390d4c7b91fbfc140a9c571b77d1"
+      }
+    },
+    {
+      "id": "leviathan_hp",
+      "group": "ships",
+      "source": "generated_images/exec-06517f99-9a07-41c4-aaab-76b3b3c634f7.png",
+      "nativeWidth": 1254,
+      "nativeHeight": 1254,
+      "hd": {
+        "path": "/assets/v138/hd/ships/leviathan_hp.webp",
+        "bytes": 786218,
+        "sha256": "c0498e53f02d103f02d4612301f1909e94fb3f431cdb2e6321aee2004fec4f43"
+      },
+      "bounds": [
+        154,
+        171,
+        1894,
+        1797
+      ],
+      "alphaCoverage": 0.32454609870910645,
+      "cornerAlpha": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "map": {
+        "path": "/assets/v138/map/ships/leviathan_hp.webp",
+        "bytes": 77694,
+        "sha256": "1605e21fb8ab25e3ea9490a094c10626746442aee4bcaa94938a1cf99746d9e2"
+      }
+    },
+    {
+      "id": "leviathan_damage",
+      "group": "ships",
+      "source": "generated_images/exec-ad1e8cc5-a8b9-42ce-b28b-6514f6545c4b.png",
+      "nativeWidth": 1254,
+      "nativeHeight": 1254,
+      "hd": {
+        "path": "/assets/v138/hd/ships/leviathan_damage.webp",
+        "bytes": 860582,
+        "sha256": "6ae45f9505b7ff1479b9e1c5d542eb265df70de4889f9730967b1b54855a3132"
+      },
+      "bounds": [
+        115,
+        129,
+        1935,
+        1911
+      ],
+      "alphaCoverage": 0.3462545871734619,
+      "cornerAlpha": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "map": {
+        "path": "/assets/v138/map/ships/leviathan_damage.webp",
+        "bytes": 81150,
+        "sha256": "b0d6007ed91ac03f61a4a79b8c3295515cf49cae4e653cee10ae53dca6d0d34d"
+      }
+    },
+    {
+      "id": "leviathan_shield",
+      "group": "ships",
+      "source": "generated_images/exec-eae4a3f1-cbef-4738-9dd4-ebfd61f69ebc.png",
+      "nativeWidth": 1254,
+      "nativeHeight": 1254,
+      "hd": {
+        "path": "/assets/v138/hd/ships/leviathan_shield.webp",
+        "bytes": 985896,
+        "sha256": "2faa417085e9fc9d88c8ce7242c8ebdd96c380031369b9868b539b78cdcfb65a"
+      },
+      "bounds": [
+        100,
+        156,
+        1947,
+        1836
+      ],
+      "alphaCoverage": 0.3582193851470947,
+      "cornerAlpha": [
+        0,
+        0,
+        1,
+        0
+      ],
+      "map": {
+        "path": "/assets/v138/map/ships/leviathan_shield.webp",
+        "bytes": 95838,
+        "sha256": "07ff77854b09b201c779f8ff14cc76051759111b43eddabc1730a7c62de32dff"
+      }
+    },
+    {
+      "id": "leviathan_xp",
+      "group": "ships",
+      "source": "generated_images/exec-23807207-566f-406c-b03e-a215165263c0.png",
+      "nativeWidth": 1254,
+      "nativeHeight": 1254,
+      "hd": {
+        "path": "/assets/v138/hd/ships/leviathan_xp.webp",
+        "bytes": 942526,
+        "sha256": "06f65f9c2ae84b09a158ebfa9826a8400e896703206b0601340044f91804ae8e"
+      },
+      "bounds": [
+        99,
+        168,
+        1948,
+        1877
+      ],
+      "alphaCoverage": 0.3618276119232178,
+      "cornerAlpha": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "map": {
+        "path": "/assets/v138/map/ships/leviathan_xp.webp",
+        "bytes": 91852,
+        "sha256": "38f810dd6dec028c8b18cb9ff54fe99bb35a98f2b9a0038807f7179b5ca0f230"
+      }
+    },
+    {
+      "id": "leviathan_speed",
+      "group": "ships",
+      "source": "generated_images/exec-d66c1f9d-41e5-4578-b1f7-ab5246212b55.png",
+      "nativeWidth": 1254,
+      "nativeHeight": 1254,
+      "hd": {
+        "path": "/assets/v138/hd/ships/leviathan_speed.webp",
+        "bytes": 937402,
+        "sha256": "8acda47945892c125ff9226795346cb91f44ce0fcefe5e2292fa5a5a218189b2"
+      },
+      "bounds": [
+        89,
+        159,
+        1959,
+        1887
+      ],
+      "alphaCoverage": 0.36655259132385254,
+      "cornerAlpha": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "map": {
+        "path": "/assets/v138/map/ships/leviathan_speed.webp",
+        "bytes": 91764,
+        "sha256": "3dc4cadc37c8c4800b5df526911dfce0be9c81c3055b0c182571441fb66d9b51"
+      }
+    },
+    {
+      "id": "striker_hp",
+      "group": "ships",
+      "source": "generated_images/exec-5c6ea4b1-87c9-47fd-9e56-9c71cedfe0cf.png",
+      "nativeWidth": 1254,
+      "nativeHeight": 1254,
+      "hd": {
+        "path": "/assets/v138/hd/ships/striker_hp.webp",
+        "bytes": 565356,
+        "sha256": "9ba75fe2a3d4b69243161ef266aff4bb6070c870dc0b195cbca28b9f1c980166"
+      },
+      "bounds": [
+        159,
+        115,
+        1888,
+        1910
+      ],
+      "alphaCoverage": 0.30107808113098145,
+      "cornerAlpha": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "map": {
+        "path": "/assets/v138/map/ships/striker_hp.webp",
+        "bytes": 58456,
+        "sha256": "4a4099e546aa0d539f33fccaf50a326fea2135cfecf7a837c2f3a493b4044842"
+      }
+    },
+    {
+      "id": "striker_damage",
+      "group": "ships",
+      "source": "generated_images/exec-0fedf9c6-5005-43a5-9596-993b728ec1db.png",
+      "nativeWidth": 1254,
+      "nativeHeight": 1254,
+      "hd": {
+        "path": "/assets/v138/hd/ships/striker_damage.webp",
+        "bytes": 581180,
+        "sha256": "a397b2a2b4d4be4715cb53eb2ff07e9fc11803ac6c6e1b8114a2afab5469d26f"
+      },
+      "bounds": [
+        178,
+        80,
+        1870,
+        1939
+      ],
+      "alphaCoverage": 0.2956974506378174,
+      "cornerAlpha": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "map": {
+        "path": "/assets/v138/map/ships/striker_damage.webp",
+        "bytes": 56444,
+        "sha256": "8b4531f88b6afaf3f0d5a640ef8a968be309f51ef764d24b65f76c0b989e747a"
+      }
+    },
+    {
+      "id": "striker_shield",
+      "group": "ships",
+      "source": "generated_images/exec-d1c8ab47-6eb1-461b-b9b1-f700b592ac6f.png",
+      "nativeWidth": 1254,
+      "nativeHeight": 1254,
+      "hd": {
+        "path": "/assets/v138/hd/ships/striker_shield.webp",
+        "bytes": 543190,
+        "sha256": "8ce3f49330383fc9783e408f4476549f5b2c7890a77bc107eb3e7d8edfeb4b90"
+      },
+      "bounds": [
+        197,
+        149,
+        1849,
+        1846
+      ],
+      "alphaCoverage": 0.2541382312774658,
+      "cornerAlpha": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "map": {
+        "path": "/assets/v138/map/ships/striker_shield.webp",
+        "bytes": 59160,
+        "sha256": "302948ffa9a1bcaef8fb994ee37e5392200598e71eb71f380fb6ee9ca00941c1"
+      }
+    },
+    {
+      "id": "striker_xp",
+      "group": "ships",
+      "source": "generated_images/exec-d3a799a6-d288-4238-86f5-b65b5586adee.png",
+      "nativeWidth": 1254,
+      "nativeHeight": 1254,
+      "hd": {
+        "path": "/assets/v138/hd/ships/striker_xp.webp",
+        "bytes": 536314,
+        "sha256": "77a96fe027bb664126205e5c23a1828c7b26f1ef654edef7d944e59e4359c93d"
+      },
+      "bounds": [
+        219,
+        78,
+        1828,
+        1860
+      ],
+      "alphaCoverage": 0.2749931812286377,
+      "cornerAlpha": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "map": {
+        "path": "/assets/v138/map/ships/striker_xp.webp",
+        "bytes": 54330,
+        "sha256": "e5076f3d51973129f94670fd19ad97134096889fe810c38934bfeb88b2ca1bcb"
+      }
+    },
+    {
+      "id": "striker_speed",
+      "group": "ships",
+      "source": "generated_images/exec-782e64bd-e76a-48ef-a4e9-e783b0c84f8f.png",
+      "nativeWidth": 1254,
+      "nativeHeight": 1254,
+      "hd": {
+        "path": "/assets/v138/hd/ships/striker_speed.webp",
+        "bytes": 600244,
+        "sha256": "7da04e8b93ab6fc86cc676abcf5267e00e087a0478054f3d4d60a7f4b731667f"
+      },
+      "bounds": [
+        145,
+        93,
+        1902,
+        1928
+      ],
+      "alphaCoverage": 0.29285359382629395,
+      "cornerAlpha": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "map": {
+        "path": "/assets/v138/map/ships/striker_speed.webp",
+        "bytes": 58374,
+        "sha256": "19c61679e8dbad009d2f04873ead0b57cfafc235f040fedb61067a411fa616cc"
+      }
+    },
+    {
+      "id": "leviathan_br",
+      "group": "ships",
+      "source": "generated_images/exec-71fa0f66-e72f-4fc6-99f4-1aaf7c2621f1.png",
+      "nativeWidth": 1254,
+      "nativeHeight": 1254,
+      "hd": {
+        "path": "/assets/v138/hd/ships/leviathan_br.webp",
+        "bytes": 909424,
+        "sha256": "f6cc5420bea961f77219a4a32a1f7803c3ced1a5c8c9122910e33d1e509f1df8"
+      },
+      "bounds": [
+        40,
+        93,
+        2009,
+        1934
+      ],
+      "alphaCoverage": 0.4156794548034668,
+      "cornerAlpha": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "map": {
+        "path": "/assets/v138/map/ships/leviathan_br.webp",
+        "bytes": 89774,
+        "sha256": "b8ce18db2e5329d4aca5bc659361a2c507da0d964f6f6b3bc1646ad8b2daca26"
+      }
+    },
+    {
+      "id": "leviathan_us",
+      "group": "ships",
+      "source": "generated_images/exec-6fa902d6-ceb4-4533-80f1-f32247f90511.png",
+      "nativeWidth": 1254,
+      "nativeHeight": 1254,
+      "hd": {
+        "path": "/assets/v138/hd/ships/leviathan_us.webp",
+        "bytes": 886590,
+        "sha256": "b373fe21404cc55ad4927e34e3126e0f2ae7fa6959c625921e75a37b38deb807"
+      },
+      "bounds": [
+        62,
+        83,
+        1986,
+        1950
+      ],
+      "alphaCoverage": 0.4128293991088867,
+      "cornerAlpha": [
+        0,
+        0,
+        1,
+        0
+      ],
+      "map": {
+        "path": "/assets/v138/map/ships/leviathan_us.webp",
+        "bytes": 88666,
+        "sha256": "44bee831601d1d0c4a764ec742342e0c4fbf8d758d2299df546a06164dde37d0"
+      }
+    },
+    {
+      "id": "leviathan_jp",
+      "group": "ships",
+      "source": "generated_images/exec-b204e2d0-9016-470d-8d46-1a836d5aec99.png",
+      "nativeWidth": 1254,
+      "nativeHeight": 1254,
+      "hd": {
+        "path": "/assets/v138/hd/ships/leviathan_jp.webp",
+        "bytes": 793520,
+        "sha256": "c32d5029a620c7e46bebe3a603e67b57df38df569d61295ec19921219445014f"
+      },
+      "bounds": [
+        61,
+        75,
+        1988,
+        1938
+      ],
+      "alphaCoverage": 0.3986804485321045,
+      "cornerAlpha": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "map": {
+        "path": "/assets/v138/map/ships/leviathan_jp.webp",
+        "bytes": 79288,
+        "sha256": "166f686489b60b107364fe61a4029f27acdd008b8b425ad12dc683a540d15277"
+      }
+    },
+    {
+      "id": "leviathan_es",
+      "group": "ships",
+      "source": "generated_images/exec-0b47c3c1-8794-48e0-bbbd-fa5666918ce0.png",
+      "nativeWidth": 1254,
+      "nativeHeight": 1254,
+      "hd": {
+        "path": "/assets/v138/hd/ships/leviathan_es.webp",
+        "bytes": 949126,
+        "sha256": "707bd0692ce25e57b869e9d1ac96f40a81b76da7e0a656b1955ca669d63ecf1a"
+      },
+      "bounds": [
+        39,
+        74,
+        2010,
+        1973
+      ],
+      "alphaCoverage": 0.4211244583129883,
+      "cornerAlpha": [
+        0,
+        0,
+        1,
+        0
+      ],
+      "map": {
+        "path": "/assets/v138/map/ships/leviathan_es.webp",
+        "bytes": 92332,
+        "sha256": "78b466be93743df492e42a100ed6c2fe8de4ed460c91b9743294a0c3b3a743b4"
+      }
+    },
+    {
+      "id": "leviathan_pt",
+      "group": "ships",
+      "source": "generated_images/exec-0ff9c0cf-6a17-4f0a-ae27-90fcf24a8ac4.png",
+      "nativeWidth": 1254,
+      "nativeHeight": 1254,
+      "hd": {
+        "path": "/assets/v138/hd/ships/leviathan_pt.webp",
+        "bytes": 851316,
+        "sha256": "843fe01d5c679e4c4639f2549849202cc33634dddcd8ddca90b921c800e1b10d"
+      },
+      "bounds": [
+        103,
+        112,
+        1942,
+        1854
+      ],
+      "alphaCoverage": 0.3753323554992676,
+      "cornerAlpha": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "map": {
+        "path": "/assets/v138/map/ships/leviathan_pt.webp",
+        "bytes": 83764,
+        "sha256": "590f5ed1e4a4a59fdbb112e39ce0e8dd835d1225f26cd7f1f671a5d1ff9f960b"
+      }
+    },
+    {
+      "id": "natalFloco",
+      "group": "natal",
+      "source": "generated_images/exec-9c9c0827-b451-4f6b-a8a0-9c269e73cbb2.png",
+      "nativeWidth": 1254,
+      "nativeHeight": 1254,
+      "hd": {
+        "path": "/assets/v138/hd/natal/natalFloco.webp",
+        "bytes": 534252,
+        "sha256": "c61f4f40f9c8d9290c96279cefb71da58b305251cc69ce6a4c3f367c2f4038ce"
+      },
+      "bounds": [
+        77,
+        125,
+        1970,
+        1887
+      ],
+      "alphaCoverage": 0.3389251232147217,
+      "cornerAlpha": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "map": {
+        "path": "/assets/v138/map/natal/natalFloco.webp",
+        "bytes": 56414,
+        "sha256": "4c8a434f50820bcf0d9f42620cf40c6bb88add0bc6e0494612235d1f6ab607c2"
+      }
+    },
+    {
+      "id": "natalNevasca",
+      "group": "natal",
+      "source": "generated_images/exec-054c1a7d-7c04-4f05-ba8e-a6101c5e893d.png",
+      "nativeWidth": 1254,
+      "nativeHeight": 1254,
+      "hd": {
+        "path": "/assets/v138/hd/natal/natalNevasca.webp",
+        "bytes": 609800,
+        "sha256": "35f9013bb2ad1ad70735cf429ddd11bfa844fb4cb6315719d140841d295f69b6"
+      },
+      "bounds": [
+        111,
+        71,
+        1936,
+        1941
+      ],
+      "alphaCoverage": 0.3069138526916504,
+      "cornerAlpha": [
+        0,
+        0,
+        1,
+        1
+      ],
+      "map": {
+        "path": "/assets/v138/map/natal/natalNevasca.webp",
+        "bytes": 65336,
+        "sha256": "5a41f68eb3443b934b7e11ffe2785b8087001259020312034826829dab5c4bdf"
+      }
+    },
+    {
+      "id": "natalGlacial",
+      "group": "natal",
+      "source": "generated_images/exec-4f501bcc-a793-47a0-9db8-984d8652f453.png",
+      "nativeWidth": 1254,
+      "nativeHeight": 1254,
+      "hd": {
+        "path": "/assets/v138/hd/natal/natalGlacial.webp",
+        "bytes": 764700,
+        "sha256": "76bf9b59b080ee5075899550e41a36a474486ae24e5437ffb8004c272543d637"
+      },
+      "bounds": [
+        134,
+        124,
+        1913,
+        1932
+      ],
+      "alphaCoverage": 0.5171921253204346,
+      "cornerAlpha": [
+        1,
+        0,
+        0,
+        0
+      ],
+      "map": {
+        "path": "/assets/v138/map/natal/natalGlacial.webp",
+        "bytes": 82990,
+        "sha256": "ba29b765190504272c9361f61a7a8f1292b48cb4006418f89db8f465f70c1092"
+      }
+    },
+    {
+      "id": "natalRei",
+      "group": "natal",
+      "source": "generated_images/exec-f946f851-e0b7-4b36-a69f-e2412afcc411.png",
+      "nativeWidth": 1254,
+      "nativeHeight": 1254,
+      "hd": {
+        "path": "/assets/v138/hd/natal/natalRei.webp",
+        "bytes": 975184,
+        "sha256": "2e079258a27515dd5940042f9d938d7ee0d8c4f661251af1142d942a0a73c5ec"
+      },
+      "bounds": [
+        21,
+        32,
+        2027,
+        1985
+      ],
+      "alphaCoverage": 0.44705986976623535,
+      "cornerAlpha": [
+        0,
+        0,
+        1,
+        0
+      ],
+      "map": {
+        "path": "/assets/v138/map/natal/natalRei.webp",
+        "bytes": 102010,
+        "sha256": "e7462afadda72b80fa27f2c298e585710b19d21ea8e8529513df5f312b39caed"
+      }
+    },
+    {
+      "id": "box",
+      "group": "natal",
+      "source": "generated_images/exec-ed0ec861-d3c0-465c-915a-56e203b10184.png",
+      "nativeWidth": 1254,
+      "nativeHeight": 1254,
+      "hd": {
+        "path": "/assets/v138/hd/natal/box.webp",
+        "bytes": 782736,
+        "sha256": "e7b55bf715565564073463ba6b38a1274d81f963c7120abcb67081aa69dfad03"
+      },
+      "bounds": [
+        153,
+        136,
+        1894,
+        1908
+      ],
+      "alphaCoverage": 0.5978753566741943,
+      "cornerAlpha": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "map": {
+        "path": "/assets/v138/map/natal/box.webp",
+        "bytes": 84252,
+        "sha256": "b7c34369cae0434776a3786fa52be1d092814c2aa374898ab91980d887896ba9"
+      }
+    },
+    {
+      "id": "firework",
+      "group": "natal",
+      "source": "generated_images/exec-b3d4a693-cc05-4518-aa84-c270449dc411.png",
+      "nativeWidth": 1254,
+      "nativeHeight": 1254,
+      "hd": {
+        "path": "/assets/v138/hd/natal/firework.webp",
+        "bytes": 754406,
+        "sha256": "96d128472e61968da4e39ef1b4776949e88b549af4ce569e991e0132f169c0f4"
+      },
+      "bounds": [
+        125,
+        100,
+        1922,
+        1949
+      ],
+      "alphaCoverage": 0.5812773704528809,
+      "cornerAlpha": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "map": {
+        "path": "/assets/v138/map/natal/firework.webp",
+        "bytes": 76160,
+        "sha256": "ece1a4d2484f4d70a89ffff4d789a1a0ff9c3b9ad5d5f1298d7ba2b5f5be5616"
+      }
+    },
+    {
+      "id": "seraph",
+      "group": "ships",
+      "source": "generated_images/exec-dfd23b4b-697e-4f94-8561-6e551431102d.png",
+      "nativeWidth": 1254,
+      "nativeHeight": 1254,
+      "hd": {
+        "path": "/assets/v138/hd/ships/seraph.webp",
+        "bytes": 718708,
+        "sha256": "66bf791eb64f6c7e265d28c20de70f3a9da6b72bb84c8fc945ac6824fbec8a10"
+      },
+      "bounds": [
+        89,
+        113,
+        1957,
+        1943
+      ],
+      "alphaCoverage": 0.3556034564971924,
+      "cornerAlpha": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "map": {
+        "path": "/assets/v138/map/ships/seraph.webp",
+        "bytes": 75628,
+        "sha256": "a2bcb6a643892705b4a880013769f42680a6f394f2a1ae8043f17ad492a4b3f5"
+      }
+    },
+    {
+      "id": "seraph_solstice",
+      "group": "ships",
+      "source": "generated_images/exec-284bfd55-5f23-47d6-ac88-9bacf0ea1bd0.png",
+      "nativeWidth": 1254,
+      "nativeHeight": 1254,
+      "hd": {
+        "path": "/assets/v138/hd/ships/seraph_solstice.webp",
+        "bytes": 765648,
+        "sha256": "c8b16dc1c96a8541d553e7d2f424088039542a25bb48b0ef757e0bb386b2f103"
+      },
+      "bounds": [
+        62,
+        82,
+        1986,
+        1951
+      ],
+      "alphaCoverage": 0.3693540096282959,
+      "cornerAlpha": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "map": {
+        "path": "/assets/v138/map/ships/seraph_solstice.webp",
+        "bytes": 77810,
+        "sha256": "8f07d2aebb74f164b06dd8ed8c017162917b0c0ec0229f7ac30b5f2abad18c3e"
+      }
+    },
+    {
+      "id": "bulwark",
+      "group": "ships",
+      "source": "generated_images/exec-8c39c653-7f0c-463d-aa51-775d23f068b2.png",
+      "nativeWidth": 1254,
+      "nativeHeight": 1254,
+      "hd": {
+        "path": "/assets/v138/hd/ships/bulwark.webp",
+        "bytes": 621024,
+        "sha256": "b7a32a23580e6095275f1b902e2a053e5436d9afb4fd9138734841d122986704"
+      },
+      "bounds": [
+        123,
+        67,
+        1924,
+        1963
+      ],
+      "alphaCoverage": 0.4671614170074463,
+      "cornerAlpha": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "map": {
+        "path": "/assets/v138/map/ships/bulwark.webp",
+        "bytes": 62760,
+        "sha256": "be819a91106ea443a88368dc70f4f7bcf8d5aaf1fc37273833c9d3063304261c"
+      }
+    },
+    {
+      "id": "bulwark_arctic",
+      "group": "ships",
+      "source": "generated_images/exec-e8a25510-e5b9-400d-998b-274d8752e2a2.png",
+      "nativeWidth": 1254,
+      "nativeHeight": 1254,
+      "hd": {
+        "path": "/assets/v138/hd/ships/bulwark_arctic.webp",
+        "bytes": 621896,
+        "sha256": "da793bc26485d58206dc303e7d7f7fff43f91ed80547bd7eca16aa7b1c928e86"
+      },
+      "bounds": [
+        107,
+        63,
+        1941,
+        1974
+      ],
+      "alphaCoverage": 0.48578405380249023,
+      "cornerAlpha": [
+        0,
+        0,
+        1,
+        0
+      ],
+      "map": {
+        "path": "/assets/v138/map/ships/bulwark_arctic.webp",
+        "bytes": 66770,
+        "sha256": "8bece03da878fcf6b3ba5246f67678167a27681a53de43916601a5861b3a971e"
+      }
+    },
+    {
+      "id": "phantom",
+      "group": "ships",
+      "source": "generated_images/exec-303a54ea-de53-4917-a32b-aeeed8fd162a.png",
+      "nativeWidth": 1254,
+      "nativeHeight": 1254,
+      "hd": {
+        "path": "/assets/v138/hd/ships/phantom.webp",
+        "bytes": 746184,
+        "sha256": "cc9c7b84b5de02fb4cce41c513743fa8c64806e2aa98c8cbdff45b27d51df5e6"
+      },
+      "bounds": [
+        24,
+        61,
+        2022,
+        2011
+      ],
+      "alphaCoverage": 0.4095766544342041,
+      "cornerAlpha": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "map": {
+        "path": "/assets/v138/map/ships/phantom.webp",
+        "bytes": 76158,
+        "sha256": "403a3980a81a5f05281e53ada4d9c9ca022b0d584c63378daa67e3c7b3db9ccb"
+      }
+    },
+    {
+      "id": "phantom_midnight",
+      "group": "ships",
+      "source": "generated_images/exec-ba400298-0632-4da3-8117-0afa3e6bb358.png",
+      "nativeWidth": 1254,
+      "nativeHeight": 1254,
+      "hd": {
+        "path": "/assets/v138/hd/ships/phantom_midnight.webp",
+        "bytes": 657544,
+        "sha256": "047f61be8965e3d0d6f9b9cb8e363a1f78698ba79e65ea3cd9215abf2c05e438"
+      },
+      "bounds": [
+        63,
+        105,
+        1984,
+        1973
+      ],
+      "alphaCoverage": 0.3734567165374756,
+      "cornerAlpha": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "map": {
+        "path": "/assets/v138/map/ships/phantom_midnight.webp",
+        "bytes": 65184,
+        "sha256": "bbbcb0af47f9a83a3d17d3d866e0cfe53de3a98586dc27f30f60858006fbf874"
+      }
+    },
+    {
+      "id": "pathfinder",
+      "group": "ships",
+      "source": "generated_images/exec-82caee9e-7d81-4c2a-b799-5c1d9a1039a1.png",
+      "nativeWidth": 1254,
+      "nativeHeight": 1254,
+      "hd": {
+        "path": "/assets/v138/hd/ships/pathfinder.webp",
+        "bytes": 641126,
+        "sha256": "c3cafaa0f168a79ac992d12a331e23d08aaf263754db7e259eea0d38e2d2ce01"
+      },
+      "bounds": [
+        175,
+        53,
+        1873,
+        1966
+      ],
+      "alphaCoverage": 0.3295445442199707,
+      "cornerAlpha": [
+        0,
+        0,
+        1,
+        0
+      ],
+      "map": {
+        "path": "/assets/v138/map/ships/pathfinder.webp",
+        "bytes": 66720,
+        "sha256": "b68657668af65e4aaf05934dfb0e0ddec3081260044471dc1a4c88654e6ef71b"
+      }
+    },
+    {
+      "id": "pathfinder_orion",
+      "group": "ships",
+      "source": "generated_images/exec-6af1c00d-f531-4da1-8931-8e43a8a78a9e.png",
+      "nativeWidth": 1254,
+      "nativeHeight": 1254,
+      "hd": {
+        "path": "/assets/v138/hd/ships/pathfinder_orion.webp",
+        "bytes": 687448,
+        "sha256": "62336c74e8bbea50b079bd6e5116c01b419c83cd48ac170e04ccc37d1a09882d"
+      },
+      "bounds": [
+        163,
+        53,
+        1884,
+        1958
+      ],
+      "alphaCoverage": 0.3392364978790283,
+      "cornerAlpha": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "map": {
+        "path": "/assets/v138/map/ships/pathfinder_orion.webp",
+        "bytes": 70000,
+        "sha256": "528686746c88d415200459ff0aaec7024057ac8848f8f5360c80322671733748"
+      }
+    },
+    {
+      "id": "pathfinder_cristal",
+      "group": "ships",
+      "source": "generated_images/exec-5b744624-7d93-4aaa-9031-ea1245633dd0.png",
+      "nativeWidth": 1254,
+      "nativeHeight": 1254,
+      "hd": {
+        "path": "/assets/v138/hd/ships/pathfinder_cristal.webp",
+        "bytes": 805362,
+        "sha256": "592eed8898351369aa403f86181164e026156b1a3d79d7211820dc46705ccda4"
+      },
+      "bounds": [
+        223,
+        88,
+        1824,
+        1933
+      ],
+      "alphaCoverage": 0.31237077713012695,
+      "cornerAlpha": [
+        0,
+        0,
+        1,
+        0
+      ],
+      "map": {
+        "path": "/assets/v138/map/ships/pathfinder_cristal.webp",
+        "bytes": 82186,
+        "sha256": "b982d007852da999c54d29562091efbffc351389eb5450902b60c576b93a40f0"
+      }
+    },
+    {
+      "id": "kensei",
+      "group": "ships",
+      "source": "generated_images/exec-51d3158b-b9fd-476f-9b4b-b06e15125322.png",
+      "nativeWidth": 1254,
+      "nativeHeight": 1254,
+      "hd": {
+        "path": "/assets/v138/hd/ships/kensei.webp",
+        "bytes": 635480,
+        "sha256": "c3eaf7a4192db6152f49e18adaf86ecb5a068be9a563949dd3a4fb0824f76646"
+      },
+      "bounds": [
+        152,
+        53,
+        1895,
+        1955
+      ],
+      "alphaCoverage": 0.34917736053466797,
+      "cornerAlpha": [
+        0,
+        0,
+        1,
+        0
+      ],
+      "map": {
+        "path": "/assets/v138/map/ships/kensei.webp",
+        "bytes": 69146,
+        "sha256": "876c437f8c7747ad14738aef9a8079f3cad1918b4b29013ff61c2780a2127437"
+      }
+    },
+    {
+      "id": "kensei_crimson",
+      "group": "ships",
+      "source": "generated_images/exec-15b75f0d-a42b-41ee-b653-afbe3c2d5958.png",
+      "nativeWidth": 1254,
+      "nativeHeight": 1254,
+      "hd": {
+        "path": "/assets/v138/hd/ships/kensei_crimson.webp",
+        "bytes": 632494,
+        "sha256": "791c7a08e84199171b2a3d19c46c3be91376000da66fca4dc09428e288560e9d"
+      },
+      "bounds": [
+        124,
+        4,
+        1922,
+        2002
+      ],
+      "alphaCoverage": 0.38016772270202637,
+      "cornerAlpha": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "map": {
+        "path": "/assets/v138/map/ships/kensei_crimson.webp",
+        "bytes": 68968,
+        "sha256": "81c5e567677078a036e7951664a5690cc2c07a19ddc7ce7896386ac0a94a29af"
+      }
+    },
+    {
+      "id": "kensei_vulcao",
+      "group": "ships",
+      "source": "generated_images/exec-838d0252-506a-44aa-95ec-af6b9508f5ed.png",
+      "nativeWidth": 1254,
+      "nativeHeight": 1254,
+      "hd": {
+        "path": "/assets/v138/hd/ships/kensei_vulcao.webp",
+        "bytes": 660888,
+        "sha256": "7b80e0dd5cbbffb378b4c5187b507ce4ee1ab468981a087aa661bae0ebe14880"
+      },
+      "bounds": [
+        170,
+        67,
+        1876,
+        1935
+      ],
+      "alphaCoverage": 0.3392066955566406,
+      "cornerAlpha": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "map": {
+        "path": "/assets/v138/map/ships/kensei_vulcao.webp",
+        "bytes": 68814,
+        "sha256": "478a5f757320bb954d2d37ced9a44ad8bde75341997acb1b6df2c8b42a53392d"
+      }
+    },
+    {
+      "id": "drone_common",
+      "group": "drones",
+      "source": "generated_images/exec-b640154a-9d0b-4b6c-b032-fe666276de3e.png",
+      "nativeWidth": 1254,
+      "nativeHeight": 1254,
+      "hd": {
+        "path": "/assets/v138/hd/drones/drone_common.webp",
+        "bytes": 413868,
+        "sha256": "09bf3c6595bafed90c1c3406be8aae1969598556dab88891734f4987b3f80663"
+      },
+      "bounds": [
+        99,
+        40,
+        1949,
+        1997
+      ],
+      "alphaCoverage": 0.32287025451660156,
+      "cornerAlpha": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "map": {
+        "path": "/assets/v138/map/drones/drone_common.webp",
+        "bytes": 44492,
+        "sha256": "d671ac66aa2a7773fbf502bf1b646931fa7d20d6dd15a42efc4a2bead582ae38"
+      }
+    },
+    {
+      "id": "drone_elite",
+      "group": "drones",
+      "source": "generated_images/exec-f4a090b3-fb7a-4d8f-8ef0-43cafd10b6c7.png",
+      "nativeWidth": 1254,
+      "nativeHeight": 1254,
+      "hd": {
+        "path": "/assets/v138/hd/drones/drone_elite.webp",
+        "bytes": 410626,
+        "sha256": "863dcd5f520da5f7e16ff8f034d94beeaf1d216399bf167c80c593346ea16c37"
+      },
+      "bounds": [
+        132,
+        98,
+        1914,
+        1942
+      ],
+      "alphaCoverage": 0.30739736557006836,
+      "cornerAlpha": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "map": {
+        "path": "/assets/v138/map/drones/drone_elite.webp",
+        "bytes": 46518,
+        "sha256": "171dbb77a4a7dfc3bdf6374adcd5ee21546ab2fdbe45f48f7927d885bd6e3768"
+      }
+    },
+    {
+      "id": "drone_a",
+      "group": "drones",
+      "source": "generated_images/exec-8b6f8bc3-b7bc-4cc5-8e37-6e21de9842b3.png",
+      "nativeWidth": 1254,
+      "nativeHeight": 1254,
+      "hd": {
+        "path": "/assets/v138/hd/drones/drone_a.webp",
+        "bytes": 673670,
+        "sha256": "6d64410bda4c2120d1cff224925c1fa4319b57dee3f9814d1598e4cce1354cdd"
+      },
+      "bounds": [
+        57,
+        124,
+        1991,
+        1907
+      ],
+      "alphaCoverage": 0.4308018684387207,
+      "cornerAlpha": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "map": {
+        "path": "/assets/v138/map/drones/drone_a.webp",
+        "bytes": 70368,
+        "sha256": "7b52e0cbf4a8f55f6ed7f36b7774604cf3c74b9417d85b47c3d0c151366d8e76"
+      }
+    },
+    {
+      "id": "drone_b",
+      "group": "drones",
+      "source": "generated_images/exec-c4b3c983-b474-4a47-88d5-01e1fc469976.png",
+      "nativeWidth": 1254,
+      "nativeHeight": 1254,
+      "hd": {
+        "path": "/assets/v138/hd/drones/drone_b.webp",
+        "bytes": 736410,
+        "sha256": "c8695f6cc851ea2a7c1e2da219ca1cc77b462ab8eaa964333d5646833749e57d"
+      },
+      "bounds": [
+        45,
+        120,
+        2001,
+        1875
+      ],
+      "alphaCoverage": 0.4865908622741699,
+      "cornerAlpha": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "map": {
+        "path": "/assets/v138/map/drones/drone_b.webp",
+        "bytes": 79802,
+        "sha256": "44be7d784043dac15dca76a5ccac3a53de83fbb233dd160929391b880b7797b5"
+      }
+    },
+    {
+      "id": "drone_c",
+      "group": "drones",
+      "source": "generated_images/exec-d971b27c-3216-41c7-b185-850ae1041498.png",
+      "nativeWidth": 1254,
+      "nativeHeight": 1254,
+      "hd": {
+        "path": "/assets/v138/hd/drones/drone_c.webp",
+        "bytes": 625992,
+        "sha256": "0467759cd24f067ce27f2294b6b460c43d26a6e1a60fcbe3997352ccbef8c4be"
+      },
+      "bounds": [
+        137,
+        146,
+        1910,
+        1801
+      ],
+      "alphaCoverage": 0.3752474784851074,
+      "cornerAlpha": [
+        0,
+        0,
+        1,
+        0
+      ],
+      "map": {
+        "path": "/assets/v138/map/drones/drone_c.webp",
+        "bytes": 67672,
+        "sha256": "4e00b760591bbd713fa2f32a28e1646220bc5c70b92b2a6966957d1517e51c91"
+      }
+    },
+    {
+      "id": "drone_d",
+      "group": "drones",
+      "source": "generated_images/exec-beeef702-331e-4902-8357-4ea486c30b67.png",
+      "nativeWidth": 1254,
+      "nativeHeight": 1254,
+      "hd": {
+        "path": "/assets/v138/hd/drones/drone_d.webp",
+        "bytes": 757508,
+        "sha256": "44194f887f6d844d19e0d40481efbd400c8d3b07d259edc79e132875f8bea964"
+      },
+      "bounds": [
+        65,
+        149,
+        1982,
+        1886
+      ],
+      "alphaCoverage": 0.46835923194885254,
+      "cornerAlpha": [
+        0,
+        0,
+        1,
+        0
+      ],
+      "map": {
+        "path": "/assets/v138/map/drones/drone_d.webp",
+        "bytes": 79654,
+        "sha256": "cf14cd588b39144781fcbb8495b6ce7012b53d50088a505268fbe5dec3e18858"
+      }
+    },
+    {
+      "id": "drone_e",
+      "group": "drones",
+      "source": "generated_images/exec-f8995978-27f8-432c-8405-b48c1abd7a2b.png",
+      "nativeWidth": 1254,
+      "nativeHeight": 1254,
+      "hd": {
+        "path": "/assets/v138/hd/drones/drone_e.webp",
+        "bytes": 729158,
+        "sha256": "d08a4820bfaf133f314e4b53a14a99ed89d1132baaca349d91ec9f6f2f185eb9"
+      },
+      "bounds": [
+        122,
+        135,
+        1925,
+        1908
+      ],
+      "alphaCoverage": 0.4905812740325928,
+      "cornerAlpha": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "map": {
+        "path": "/assets/v138/map/drones/drone_e.webp",
+        "bytes": 79730,
+        "sha256": "09149591a294048f2fad13ba106fc91fe60576f4cc3cfb802392f56a868558c7"
+      }
+    }
+  ]
+}
