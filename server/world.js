@@ -383,7 +383,7 @@ class Room {
     // Never allow delayed event respawns from a finished/rotated event to come back later.
     this.respawns=this.respawns.filter(r=>r.kind!=='eventNpc');
     this.oreRespawns=this.oreRespawns.filter(r=>!r.eventOre);
-    this.natalBoxes?.clear();this.natalEventId=null;this.broadcast({type:'natal_boxes',boxes:[]});
+    this.natalEventId=null;
     this.convoy=null;this.convoyRetryAt=0;this.nextEventWaveAt=0;this.lastEventStageIndex=-1;
     if(clearParticipants)this.eventParticipants.clear();
     if(npcIds.length||oreIds.length)this.broadcast({type:'event_cleanup',reason,npcIds,oreIds,eventId:this.event?.eventId||null,serverTime:nowMs()});
@@ -710,7 +710,7 @@ class Room {
       laserFiring:!!p.laserFiring,laserColor:p.laserColor||'#76d9ff',laserAmmoId:p.laserAmmoId||'lcb10',laserAmmoName:p.laserAmmoName||'PLS-1',targetId:p.targetId||null,targetIsPlayer:!!p.targetIsPlayer,
       pet:p.pet?{...p.pet}:null};
   }
-  snapshot(viewerUserId=null){return {type:'world_snapshot',natalBoxes:[...(this.natalBoxes?.values()||[])],roomKey:this.key,mapId:this.mapId,territoryFaction:this.territoryFaction,npcs:[...this.npcs.values()].map(e=>this.publicNpc(e)).concat([...this.warbotEngine.bots.values()].filter(e=>e.hp>0).map(e=>this.warbotEngine.publicBot(e))),ores:[...this.ores.values()],players:[...this.players.values()].filter(p=>p.userId!==viewerUserId).map(p=>this.publicPlayer(p)),event:this.eventPayload(),globalEvent:this.world.currentEvent(),warfront:this.warfrontPayload(),serverTime:nowMs()};}
+  snapshot(viewerUserId=null){return {type:'world_snapshot',roomKey:this.key,mapId:this.mapId,territoryFaction:this.territoryFaction,npcs:[...this.npcs.values()].map(e=>this.publicNpc(e)).concat([...this.warbotEngine.bots.values()].filter(e=>e.hp>0).map(e=>this.warbotEngine.publicBot(e))),ores:[...this.ores.values()],players:[...this.players.values()].filter(p=>p.userId!==viewerUserId).map(p=>this.publicPlayer(p)),event:this.eventPayload(),globalEvent:this.world.currentEvent(),warfront:this.warfrontPayload(),serverTime:nowMs()};}
   broadcast(payload,exclude=null){
     if(!this.clients.size)return;
     const wire=JSON.stringify(payload); // Serializar apenas uma vez por sala.
@@ -1460,7 +1460,7 @@ export function attachSharedUniverse(server,{authenticate,authorizeJoin,recordSe
         }
         return ws.room?.updatePlayer(ws,msg);
       }
-      if(msg.type==='natal_collect'||msg.type==='natal_fire')return await ws.room&&natalSocket(ws.room,ws,msg,safeJsonSend);
+      if(msg.type==='natal_fire')return await ws.room&&natalSocket(ws.room,ws,msg,safeJsonSend);
       if(msg.type==='npc_damage')return await ws.room?.handleDamage(ws,msg);
       if(msg.type==='relay_attack')return await ws.room?.handleRelayAttack(ws,msg);
       if(msg.type==='collect_drop'){

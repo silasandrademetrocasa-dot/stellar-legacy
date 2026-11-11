@@ -1,3 +1,4 @@
+import {boxTargetV142,christmasCoresV142} from '../public/modules/seasonal-boxes-v142.js';
 import {collectionAccessV1341} from '../public/modules/collection-access-v1341.js';
 import {createConfigCacheV1341} from './config-cache-v1341.js';
 import {createHash} from 'node:crypto';
@@ -101,7 +102,7 @@ export function createPlayerRewardsV134({db,readPass,readPremium,readBonus,readS
   async ensure(uid){
    const client=world()?.findClient(uid);if(!client?.player||!client.room)fail('Conecte-se ao mapa');
    const mapId=client.room.mapId,key=client.room.key,config=(await readBonus()).config||{},map=MAPS[mapId];
-   const target=map?.gate?0:Math.max(0,Math.min(100,Number(config.map_counts?.[mapId])||0));
+   const target=boxTargetV142(config,mapId,{gate:!!map?.gate,seasonActive:world()?.natal?.active()===true});
    const r=await db.rpc('stellar_player_collections_snapshot',{p_user_id:uid,p_map_key:key,p_count:target,p_width:Number(map?.world?.w)||4000,p_height:Number(map?.world?.h)||3000});
    if(r.error)throw Error(r.error.message);return {ok:true,map_key:key,boxes:r.data?.boxes||[],loot:r.data?.loot||[]};
   },
@@ -129,12 +130,16 @@ export function createPlayerRewardsV134({db,readPass,readPremium,readBonus,readS
      if(!Object.keys(picked).length)fail('Porão cheio','CARGO_FULL');
      payload.drop_after=Object.keys(remaining).length?{...drop.payload,resources:remaining}:null;payload.receipt={kind:'loot',picked,remaining,collector};
     }else{
-     const config=(await readBonus()).config||{};if(Number(config.map_counts?.[client.room.mapId]||0)<=0)fail('Box desativada neste mapa','COLLECTION_DISABLED');const reward=rollBonusV134(config,s.pet,seededRandomV134(secret+':'+uid+':'+dropId));
+     const config=(await readBonus()).config||{},natal=drop.payload?.variant==='natal';
+     if(!boxTargetV142(config,client.room.mapId,{gate:!!client.room.map?.gate,seasonActive:world()?.natal?.active()===true}))fail('Box desativada neste mapa','COLLECTION_DISABLED');
+     if(natal&&world()?.natal?.active()!==true)fail('Atualizando caixas da temporada.','COLLECTION_STALE');
+     const rngReward=seededRandomV134(secret+':'+uid+':'+dropId),reward=rollBonusV134(config,s.pet,rngReward);
+     const cores=natal?christmasCoresV142(rngReward):0;if(natal){reward.qty*=2;s.pilotBio||={};s.pilotBio.logDisks=count(s.pilotBio.logDisks)+cores;}
      if(reward.kind==='ammo'){s.ammo||={};s.ammo[reward.id]=count(s.ammo[reward.id])+reward.qty;}
      else if(reward.kind==='stellarDust')s.stellarDust=count(s.stellarDust)+reward.qty;
      else s.profile[reward.kind]=count(s.profile[reward.kind])+reward.qty;
      const rng=seededRandomV134(secret+':respawn:'+dropId),delay=Number(config.respawn_min_ms||10000)+rng()*Math.max(0,Number(config.respawn_max_ms||30000)-Number(config.respawn_min_ms||10000));
-     payload.respawn_ms=Math.round(delay);const area=client.room.map?.world||MAPS[client.room.mapId]?.world||{w:4000,h:3000};payload.respawn_x=220+rng()*(Number(area.w)-440);payload.respawn_y=220+rng()*(Number(area.h)-440);payload.receipt={kind:'bonus',reward,collector};
+     payload.respawn_ms=Math.round(delay);const area=client.room.map?.world||MAPS[client.room.mapId]?.world||{w:4000,h:3000};payload.respawn_x=220+rng()*(Number(area.w)-440);payload.respawn_y=220+rng()*(Number(area.h)-440);payload.receipt={kind:'bonus',variant:natal?'natal':'bonus',reward,cores,collector};
     }
     return payload;
    },{save,receipt,sessionId});

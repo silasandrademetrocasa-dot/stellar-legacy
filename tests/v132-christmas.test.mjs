@@ -23,12 +23,12 @@ function room(map='x4'){
  let n=0;return {key:'earth:'+map,mapId:map,map:{portals:[]},event:{eventId:'test',start:0,rules:{christmas:true}},npcs:new Map(),world:{natal:{bossKilled:async()=>false}},randomPosition:()=>({x:1000,y:1000}),makeNpc(type,opts){return {id:opts.id||String(n++),type,hp:1,...opts};},publicNpc:e=>e,broadcast(){}};
 }
 test('Natal: respawn caps and one boss across room lifetime',async()=>{
- const r=room();natalRoomTick(r,1000);assert.equal(r.npcs.size,10);assert.equal(r.natalBoxes.size,10);natalRoomTick(r,2000);assert.equal(r.npcs.size,10);
+ const r=room();natalRoomTick(r,1000);assert.equal(r.npcs.size,10);assert.equal(r.natalBoxes,undefined);natalRoomTick(r,2000);assert.equal(r.npcs.size,10);
  r.npcs.delete('0');natalRoomTick(r,3000);assert.equal(r.npcs.size,9);natalRoomTick(r,62000);assert.equal(r.npcs.size,10);
  const p=room('b41');natalRoomTick(p,1200000);await new Promise(resolve=>setImmediate(resolve));assert.equal([...p.npcs.values()].filter(x=>x.type==='natalRei').length,1);p.npcs.delete('test:king');natalRoomTick(p,1300000);await new Promise(resolve=>setImmediate(resolve));assert.equal([...p.npcs.values()].filter(x=>x.type==='natalRei').length,0);
  const restart=room('b41');restart.world.natal.bossKilled=async()=>true;natalRoomTick(restart,1200000);await new Promise(resolve=>setImmediate(resolve));assert.equal([...restart.npcs.values()].filter(x=>x.type==='natalRei').length,0);
 });
-test('Natal: distant collection is rejected and failed delivery leaves box retryable',async()=>{
- const r=room();r.playerFresh=()=>true;r.world.natal.active=()=>true;r.world.natal.action=async()=>{throw Error('network');};r.natalBoxes=new Map([['box',{id:'box',x:1000,y:1000}]]);const ws={player:{userId:'p',x:0,y:0}};let calls=0;
- await natalSocket(r,ws,{type:'natal_collect',id:'box'},()=>calls++);assert.equal(calls,0);ws.player.x=1000;ws.player.y=1000;await natalSocket(r,ws,{type:'natal_collect',id:'box'},()=>calls++);assert.equal(r.natalBoxes.get('box').pending,false);assert.equal(calls,1);
+test('Natal: legacy box socket no longer grants rewards',async()=>{
+ const r=room();r.playerFresh=()=>true;r.world.natal.active=()=>true;let actions=0;r.world.natal.action=async()=>{actions++;};
+ await natalSocket(r,{player:{userId:'p',x:1000,y:1000}},{type:'natal_collect',id:'box'},()=>{});assert.equal(actions,0);
 });

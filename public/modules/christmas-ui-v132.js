@@ -1,10 +1,10 @@
 import {DESIGNS,MISSIONS,isChristmas,compatibleDesign} from './christmas-v132.js';
-import {shipChristmasArt,boxChristmasArt,fireworkChristmasArt} from './christmas-art-v132.js?v=47.7.73';
+import {shipChristmasArt,fireworkChristmasArt} from './christmas-art-v132.js?v=47.7.74';
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const fmt=n=>Number(n||0).toLocaleString('pt-BR');
 export function createChristmasUI(bridge){
  let lastAccount=null,seenGoals=null,autoCelebration=false,lastAnnouncement='',statusBusy=false;
- let status=null,boxes=[],effects=[],lastCollect=0,busy=false,panel=null,lastStatus=0,fireRequest=null,lastFire=0;
+ let status=null,effects=[],busy=false,panel=null,lastStatus=0,fireRequest=null,lastFire=0;
  const button=document.createElement('button');button.className='natal-launch';button.textContent='❄ NATAL';button.type='button';button.hidden=true;document.querySelector('#topbar .top-actions')?.append(button);
  const fire=document.createElement('button');fire.className='natal-fire';fire.textContent='🎆';fire.title='Soltar fogo festivo';fire.type='button';fire.hidden=true;fire.setAttribute('aria-label','Soltar fogo festivo');document.querySelector('#topbar .top-actions')?.append(fire);
  let hiddenFx=false;try{hiddenFx=localStorage.getItem('natalHideFx')==='1';}catch{}
@@ -53,9 +53,9 @@ export function createChristmasUI(bridge){
  }
  button.onclick=async()=>{if(!panel){panel=document.createElement('dialog');panel.className='natal-panel';document.body.append(panel);}panel.innerHTML='<p>Consultando progresso…</p><button>FECHAR</button>';panel.querySelector('button').onclick=()=>panel.close();panel.showModal();await refresh();};fire.onclick=()=>launch();
  return {
+  active(){return status?.config?.enabled===true&&isChristmas(Date.now());},
   message(msg){
-   if(msg.type==='world_snapshot'){boxes=msg.natalBoxes||[];effects=[];}
-   if(msg.type==='natal_boxes')boxes=msg.boxes||[];
+   if(msg.type==='world_snapshot'){effects=[];}
    if(msg.type==='natal_error'){bridge.toast(msg.message);busy=false;}
    if(msg.type==='natal_fire_ack'){if(msg.id===fireRequest)fireRequest=null;if(status?.player)status.player.fireworks=msg.fireworks;}
    if(msg.type==='natal_firework'&&Date.now()-msg.start<5000){effects=effects.filter(e=>e.userId!==msg.userId);effects.push(msg);effects=effects.slice(-8);}
@@ -64,7 +64,7 @@ export function createChristmasUI(bridge){
    if(!bridge.ready())return;
    const ready=isChristmas(now)&&status?.config?.enabled!==false;button.hidden=!ready;fire.hidden=!ready;
    document.body.classList.toggle('natal-theme',ready);
-   for(const b of boxes){const p=screen(b.x,b.y);const art=img(boxChristmasArt());if(art?.complete&&art.naturalWidth)ctx.drawImage(art,p.x-20,p.y-20,40,40);else{ctx.fillStyle='#e94f65';ctx.fillRect(p.x-9,p.y-9,18,18);}}
+
    effects=effects.filter(e=>now-e.start<5000);
    if(hiddenFx)return;
    for(const e of effects.slice(-(low?2:4))){const p=screen(e.x,e.y),t=now-e.start;ctx.save();
@@ -74,13 +74,10 @@ export function createChristmasUI(bridge){
    }
   },
   tick(){
-   if(!bridge.ready()){button.hidden=true;fire.hidden=true;boxes=[];effects=[];return;}
+   if(!bridge.ready()){button.hidden=true;fire.hidden=true;effects=[];return;}
    if(lastAccount!==bridge.account()){lastAccount=bridge.account();status=null;seenGoals=null;lastStatus=0;fireRequest=null;}
    if(Date.now()-lastStatus>60000)void refresh();
    if(autoCelebration&&!bridge.combat()){autoCelebration=false;effects.push({userId:'celebration',...bridge.position(),start:Date.now()-2000,style:'gold'});}
-   if(!bridge.ready()||busy||Date.now()-lastCollect<250)return;
-   const p=bridge.position(),b=boxes.find(b=>Math.hypot(p.x-b.x,p.y-b.y)<65);
-   if(b){busy=true;lastCollect=Date.now();bridge.collect(b.id).catch(e=>bridge.toast(e.message)).finally(()=>{busy=false;});}
    if(panel?.open&&Date.now()-lastStatus>15000)void refresh();
   }
  };

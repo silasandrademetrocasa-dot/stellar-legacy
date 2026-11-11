@@ -22,8 +22,7 @@ export function mountChristmasRoutes(app,{requireUser,asyncRoute,api,getWorld}){
 }
 export function natalRoomTick(room,now,send){
  const ev=room.event;if(!ev?.rules?.christmas)return;
- room.natalBoxes ||= new Map();room.natalUsed ||= new Set();
- if(room.natalEventId!==ev.eventId){room.natalEventId=ev.eventId;room.natalBoxes.clear();room.natalUsed.clear();room.natalRefill=0;room.natalBossChecked=false;room.natalKills=0;}
+ if(room.natalEventId!==ev.eventId){room.natalEventId=ev.eventId;room.natalRefill=0;room.natalBossChecked=false;room.natalKills=0;}
  if(now>=(room.natalRefill||0)){
   room.natalRefill=now+60000;
   const caps=room.mapId==='x4'?[6,3,1]:[8,4,2];
@@ -31,9 +30,7 @@ export function natalRoomTick(room,now,send){
    const alive=[...room.npcs.values()].filter(e=>e.type===type&&e.eventId===ev.eventId).length;
    for(let k=alive;k<caps[i];k++){const e=room.makeNpc(type,{eventNpc:true,eventId:ev.eventId,forceChase:true});if(e){const p=natalPosition(room);Object.assign(e,p,{patrolHomeX:p.x,patrolHomeY:p.y});room.npcs.set(e.id,e);room.broadcast({type:'npc_spawn',entity:room.publicNpc(e)});}}
   });
-  // Ten per map, at most ten new boxes per minute; server owns IDs and positions.
-  for(let i=room.natalBoxes.size;i<10;i++){const b={id:`${ev.eventId}:${room.key}:${randomUUID()}`,...natalPosition(room)};room.natalBoxes.set(b.id,b);}
-  room.broadcast({type:'natal_boxes',boxes:[...room.natalBoxes.values()]});
+
  }
  if(room.mapId!=='x4'&&!room.natalBossChecked&&(now>=ev.start+1200000||(room.natalKills>=60&&now>=ev.start+300000))){
   room.natalBossChecked=true;const key=`${ev.eventId}:king`;
@@ -49,14 +46,7 @@ function natalPosition(room){
 }
 export async function natalSocket(room,ws,msg,send){
  const uid=ws.player?.userId;if(!uid||!room.world.natal?.active()||!room.playerFresh(ws.player))return;
- if(msg.type==='natal_collect'){
-  const id=String(msg.id||''),box=room.natalBoxes?.get(id);
-  if(!box){if(Date.now()-(ws.natalRecoverAt||0)<1500)return;ws.natalRecoverAt=Date.now();const r=await room.world.natal.recover(uid,'box:'+id);if(r)send(ws,{type:'natal_reward',...r});return;}
-  if(!room.event?.rules?.christmas||box.pending||Math.hypot(ws.player.x-box.x,ws.player.y-box.y)>100)return;
-  box.pending=true;
-  try{const r=await room.world.natal.action(uid,'box:'+id,'box');room.natalBoxes.delete(id);send(ws,{type:'natal_reward',...r});room.broadcast({type:'natal_boxes',boxes:[...room.natalBoxes.values()]});}
-  catch(e){box.pending=false;send(ws,{type:'natal_error',message:e.message});}
- }else if(msg.type==='natal_fire'){
+ if(msg.type==='natal_fire'){
   if(ws.natalPending)return;ws.natalPending=true;
   try{
    const id=String(msg.id||'');if(!/^[0-9a-f-]{36}$/i.test(id))return;

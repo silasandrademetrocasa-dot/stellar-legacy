@@ -60,7 +60,7 @@ import { createSecurityService } from './security-service.js';
 
 const app = express();
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const RELEASE_VERSION = '47.7.73'; // único identificador de release nos endpoints HTTP
+const RELEASE_VERSION = '47.7.74'; // único identificador de release nos endpoints HTTP
 
 function normalizeSupabaseUrl(value = '') {
   let url = String(value || '').trim();
@@ -77,7 +77,7 @@ const SUPABASE_URL = normalizeSupabaseUrl(process.env.SUPABASE_URL || '');
 const SUPABASE_KEY = String(process.env.SUPABASE_PUBLISHABLE_KEY || process.env.SUPABASE_ANON_KEY || '').trim();
 // Chave privilegiada SOMENTE no Render. Nunca retorna no /api/config nem no bundle público.
 const SUPABASE_SERVICE_KEY=String(process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SECRET_KEY || '').trim();
-const eliteAdminClient=SUPABASE_URL&&SUPABASE_SERVICE_KEY?createClient(SUPABASE_URL,SUPABASE_SERVICE_KEY,{auth:{persistSession:false,autoRefreshToken:false}}):null;
+const eliteAdminClient=SUPABASE_URL&&SUPABASE_SERVICE_KEY?createClient(SUPABASE_URL,SUPABASE_SERVICE_KEY,{auth:{persistSession:false,autoRefreshToken:false},global:{headers:{'x-stellar-collections':'mixed-v142'}}}):null;
 const securityService=createSecurityService(eliteAdminClient);
 async function requireEliteAdmin(){if(!eliteAdminClient)throw new Error('Configure SUPABASE_SERVICE_ROLE_KEY no Render para persistir conquistas.');return eliteAdminClient;}
 // O navegador e o token JWT nunca recebem permissao de escrita direta nos saves.
