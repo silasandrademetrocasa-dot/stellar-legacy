@@ -1,0 +1,227 @@
+{
+  "version": "V141",
+  "method": "Generated individually from approved silhouettes. Native resolution is recorded; 2048 exports are resampled when source is smaller. Static map derivatives avoid loading HD textures during combat.",
+  "files": {
+    "assets/v141/hd/ships/aurora.webp": {
+      "sourceSize": [
+        1254,
+        1254
+      ],
+      "size": [
+        2048,
+        2048
+      ],
+      "resampled": true,
+      "bytes": 542268,
+      "sha256": "f23ad509827c31f8be0cfd0a7918859f77cf3c6e290bcc1172b5f396f41aeca4"
+    },
+    "assets/v141/map/ships/aurora.webp": {
+      "sourceSize": [
+        1254,
+        1254
+      ],
+      "size": [
+        384,
+        384
+      ],
+      "resampled": false,
+      "bytes": 37506,
+      "sha256": "b6ae24e6cc97afb65cba67669f7de2b085d8f626afa88966b63c5da41df7ed14"
+    },
+    "assets/v141/hd/ships/pioneer.webp": {
+      "sourceSize": [
+        1254,
+        1254
+      ],
+      "size": [
+        2048,
+        2048
+      ],
+      "resampled": true,
+      "bytes": 650826,
+      "sha256": "91c95445f0e74de4fb82cc67004b83b319387011fd8d65481132d083a287ecd5"
+    },
+    "assets/v141/map/ships/pioneer.webp": {
+      "sourceSize": [
+        1254,
+        1254
+      ],
+      "size": [
+        384,
+        384
+      ],
+      "resampled": false,
+      "bytes": 45722,
+      "sha256": "334ffdfd035e1320a2952617387122b3a14071ba307fd5cd676fc613188ff690"
+    },
+    "assets/v141/hd/ships/raptor.webp": {
+      "sourceSize": [
+        1254,
+        1254
+      ],
+      "size": [
+        2048,
+        2048
+      ],
+      "resampled": true,
+      "bytes": 550804,
+      "sha256": "c83f5a708338477e6e67d4b2cb46b4adc5fc32f43064c970522862da588a45ab"
+    },
+    "assets/v141/map/ships/raptor.webp": {
+      "sourceSize": [
+        1254,
+        1254
+      ],
+      "size": [
+        384,
+        384
+      ],
+      "resampled": false,
+      "bytes": 37050,
+      "sha256": "5b712e5d4dd56e03b3509c25c9798052d6e19310329a85436fb7b0b73f083a31"
+    },
+    "assets/v141/hd/ships/lynx.webp": {
+      "sourceSize": [
+        1254,
+        1254
+      ],
+      "size": [
+        2048,
+        2048
+      ],
+      "resampled": true,
+      "bytes": 596008,
+      "sha256": "d5c214550f5815bf6ff1b40167005ee501f625cf8270371a785a1754c032c1a3"
+    },
+    "assets/v141/map/ships/lynx.webp": {
+      "sourceSize": [
+        1254,
+        1254
+      ],
+      "size": [
+        384,
+        384
+      ],
+      "resampled": false,
+      "bytes": 39080,
+      "sha256": "e6c3dc02a543a8cf27c8e214b8c6bed08d93fd621f0ca0b4acaf974a67e35eeb"
+    },
+    "assets/v141/hd/ships/meridian.webp": {
+      "sourceSize": [
+        1254,
+        1254
+      ],
+      "size": [
+        2048,
+        2048
+      ],
+      "resampled": true,
+      "bytes": 766170,
+      "sha256": "d1e4eb296c1943b85a26176a938c050c113bec9a4c647ab4347c0c93b1d48054"
+    },
+    "assets/v141/map/ships/meridian.webp": {
+      "sourceSize": [
+        1254,
+        1254
+      ],
+      "size": [
+        384,
+        384
+      ],
+      "resampled": false,
+      "bytes": 49724,
+      "sha256": "7093838f7366bcb61cad992ddfb7b221ef2a96a5bf86b5f8e9e5f6aa59c096d3"
+    },
+    "assets/v141/hd/ships/bastion.webp": {
+      "sourceSize": [
+        1254,
+        1254
+      ],
+      "size": [
+        2048,
+        2048
+      ],
+      "resampled": true,
+      "bytes": 598356,
+      "sha256": "24e0427aaa686537dad4f7f33758c0cb5ffdd016adc5c634f50a1c7bef3a820b"
+    },
+    "assets/v141/map/ships/bastion.webp": {
+      "sourceSize": [
+        1254,
+        1254
+      ],
+      "size": [
+        384,
+        384
+      ],
+      "resampled": false,
+      "bytes": 43276,
+      "sha256": "0b8af6974588508db1f67942d8a48a5d78d3a40cf827c803dc26b3037904cfc3"
+    },
+    "assets/v141/hd/ships/leviathan.webp": {
+      "sourceSize": [
+        1254,
+        1254
+      ],
+      "size": [
+        2048,
+        2048
+      ],
+      "resampled": true,
+      "bytes": 816488,
+      "sha256": "05573aec1d42c86a8c00bf7dc45eda18260f5af632f8edc689945457f481ada6"
+    },
+    "assets/v141/map/ships/leviathan.webp": {
+      "sourceSize": [
+        1254,
+        1254
+      ],
+      "size": [
+        384,
+        384
+      ],
+      "resampled": false,
+      "bytes": 51284,
+      "sha256": "85765f2223c30e5546315937a4254afdfcd924c1789c771c8f369b5e65fd7aee"
+    },
+    "assets/v137/aux/aux9.webp": {
+      "sourceSize": [
+        1254,
+        1254
+      ],
+      "size": [
+        512,
+        512
+      ],
+      "resampled": false,
+      "bytes": 50964,
+      "sha256": "de303436ee1c1d06ed394c24ddd0fc04df99efd57eb46f79c4a26d1883190fba"
+    },
+    "assets/v141/loading/natal-vertical.webp": {
+      "sourceSize": [
+        941,
+        1672
+      ],
+      "size": [
+        941,
+        1672
+      ],
+      "resampled": false,
+      "bytes": 611860,
+      "sha256": "9f8f67bc98aea0ec0f0ddbf59f7e44426bb721e179a5f411911d62a1a861f9cb"
+    },
+    "assets/v141/loading/natal-horizontal.webp": {
+      "sourceSize": [
+        1672,
+        941
+      ],
+      "size": [
+        1672,
+        941
+      ],
+      "resampled": false,
+      "bytes": 549610,
+      "sha256": "160f92585cb24cf00556cd5d0393f7a67f0d1efd0c8b88c255feb6de8cb8390c"
+    }
+  }
+}

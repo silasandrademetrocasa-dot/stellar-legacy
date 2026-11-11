@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
-import {auxProtocolTierQuoteV111,applyAuxAdvancedActionV110,validateAuxAdvancedSaveV110} from '../public/modules/aux-advanced-protocols-v110.js';
+import {auxProtocolTierQuoteV111,applyAuxAdvancedActionV110,validateAuxAdvancedSaveV110} from '../public/modules/aux-advanced-protocols-v1131.js';
 const source=file=>readFileSync(new URL('../'+file,import.meta.url),'utf8');
 const index=source('server/index.js'),game=source('public/game.js'),api=source('public/api.js'),sql=source('sql/STELLAR_V111_PROTOCOLOS_AUX_LEILAO_APLICADO.sql');
 function row(id,price,currency,extra={}){return {catalog_key:`aux_protocol:${id}`,kind:'aux_protocol',ref_id:id,price,currency,enabled:true,shop_visible:true,...extra};}

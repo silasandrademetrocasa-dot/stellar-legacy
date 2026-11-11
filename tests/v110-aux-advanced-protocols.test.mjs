@@ -7,7 +7,7 @@ import {
  AUX_ADVANCED_V110,AUX_ADVANCED_TIERS_V110,auxAdvancedSlotsV110,
  auxAdvancedEffectsV110,auxAdvancedLootQuantityV110,normalizeAuxAdvancedEquippedV110,applyAuxAdvancedActionV110,
  validateAuxAdvancedSaveV110
-} from '../public/modules/aux-advanced-protocols-v110.js';
+} from '../public/modules/aux-advanced-protocols-v1131.js';
 import {captureCombatBuildV2013,exchangeCombatBuildV2013} from '../public/combat-config-v2013.js';
 import {validateEquipmentWriteV1062,equipmentLayoutSignatureV1062} from '../public/modules/hangar-write-guard-v1062.js';
 const root=resolve(fileURLToPath(new URL('..',import.meta.url)));

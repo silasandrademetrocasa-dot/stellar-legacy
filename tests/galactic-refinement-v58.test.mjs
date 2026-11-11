@@ -11,17 +11,17 @@ test('V58: art from top-forward camera for all 13 GLB ships and AUX',()=>{
   const p=resolve(root,`public/assets/v58/ships/${n}.webp`);assert(existsSync(p),n);
   assert.equal(readFileSync(p).subarray(0,4).toString(),'RIFF',n);
  }
- assert(existsSync(resolve(root,'public/assets/v58/aux/aux9-perspective.webp')));
+ assert(existsSync(resolve(root,'public/assets/v137/aux/aux9.webp')));
  assert.match(game,/v56ShipPerspectiveArt\(ship\.id\)/);
  assert.match(game,/auxVisualArtV64\('aux9'\)/);
- assert(existsSync(resolve(root,'public/assets/v64/aux/aux9.webp')));
+ assert(existsSync(resolve(root,'public/assets/v137/aux/aux9.webp')));
 });
 test('V58: the map base trade button is viewport-anchored and not world-screen positioned',()=>{
  const fn=game.slice(game.indexOf('function updateBaseTradePrompt(){'),game.indexOf('function updateUI(){'));
  assert(!fn.includes('screenPos('));
- assert(fn.includes("removeProperty('left')"));
- assert.match(css,/#baseTradePrompt\{position:fixed!important/);
- assert.match(css,/animation:none!important/);
+ assert(fn.includes('baseTradeVisibleV116'));
+ assert.doesNotMatch(css,/#baseTradePrompt\{position:fixed!important/);
+ assert.doesNotMatch(html,/id="baseTradePrompt"/);
 });
 test('V109.2: designers in each workstation without duplicate AUX hero image',()=>{
  const equip=game.slice(game.indexOf('function v56EquipmentView(){'),game.indexOf('function renderHangar(){'));
@@ -34,7 +34,7 @@ test('V109.2: designers in each workstation without duplicate AUX hero image',()
 });
 test('V58: accessibility-preserving compact CSS in landscape, portrait and premium/cargo/ADM',()=>{
  for(const s of ['#topbar.compact-command-bar','#premiumModal .premium-product','#cargoModal .base-service-card','#adminModal .v57-adm-nav','#hangarModal .v56-unit-body','orientation:landscape','orientation:portrait'])assert(css.includes(s),s);
- assert(html.includes('stellar-refinement-v58.css?v=47.7.72'));
+ assert(html.includes('stellar-refinement-v58.css?v=47.7.73'));
 });
 test('V58: game economy remains server-driven and shared configurations preserved',()=>{
  assert(game.includes('switchBattleConfigV2013(n)'));

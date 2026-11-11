@@ -47,8 +47,8 @@
     "drone_e"
   ],
   "aux": {
-    "spriteAtlas": "aux/aux9_16.webp",
-    "frames": 16,
-    "grid": "4x4"
+    "sprite": "aux/aux9.webp",
+    "frames": 1,
+    "grid": "1x1"
   }
 }

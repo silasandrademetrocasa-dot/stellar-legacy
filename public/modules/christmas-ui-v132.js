@@ -1,12 +1,12 @@
 import {DESIGNS,MISSIONS,isChristmas,compatibleDesign} from './christmas-v132.js';
-import {shipChristmasArt,boxChristmasArt,fireworkChristmasArt} from './christmas-art-v132.js?v=47.7.72';
+import {shipChristmasArt,boxChristmasArt,fireworkChristmasArt} from './christmas-art-v132.js?v=47.7.73';
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const fmt=n=>Number(n||0).toLocaleString('pt-BR');
 export function createChristmasUI(bridge){
  let lastAccount=null,seenGoals=null,autoCelebration=false,lastAnnouncement='',statusBusy=false;
  let status=null,boxes=[],effects=[],lastCollect=0,busy=false,panel=null,lastStatus=0,fireRequest=null,lastFire=0;
- const button=document.createElement('button');button.className='natal-launch';button.textContent='❄ NATAL';button.hidden=true;document.body.append(button);
- const fire=document.createElement('button');fire.className='natal-fire';fire.textContent='🎆';fire.title='Soltar fogo festivo';fire.hidden=true;document.body.append(fire);
+ const button=document.createElement('button');button.className='natal-launch';button.textContent='❄ NATAL';button.type='button';button.hidden=true;document.querySelector('#topbar .top-actions')?.append(button);
+ const fire=document.createElement('button');fire.className='natal-fire';fire.textContent='🎆';fire.title='Soltar fogo festivo';fire.type='button';fire.hidden=true;fire.setAttribute('aria-label','Soltar fogo festivo');document.querySelector('#topbar .top-actions')?.append(fire);
  let hiddenFx=false;try{hiddenFx=localStorage.getItem('natalHideFx')==='1';}catch{}
  const badge=()=>status?.claims?.includes('global:3')?'Guardião do Natal 2026':null;
  async function refresh(){if(!bridge.ready()||statusBusy)return;statusBusy=true;lastStatus=Date.now();try{status=await bridge.status();

@@ -83,7 +83,7 @@ test('V112: integração mantém CPU e venda oficiais sem bloquear o tick de com
  assert.match(game,/sellCargo:\(\)=>sellAllCargo\(\{automatic:true\}\)/);
  assert.match(game,/autoBuyEnabled\(\)/);
  assert.match(src,/recordCollect\(kind\)/);
- assert.match(read('public/modules/stellar-autopilot-v112.js'),/stellar-autopilot-v48\.js\?v=112\.0/);
+ assert.match(read('public/modules/stellar-autopilot-v126.js'),/stellar-autopilot-v48\.js\?v=126\.0/);
 });
 test('V112: compra presencial espera na base e compra remota continua combate',()=>{
  const src=read('public/modules/stellar-autopilot-v48.js'),game=read('public/game.js');

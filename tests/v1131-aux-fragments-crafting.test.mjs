@@ -5,7 +5,7 @@ import {resolve} from 'node:path';
 import {
  AUX_ADVANCED_TIERS_V110,auxProtocolTierQuoteV111,auxProtocolFragmentsV1131,auxProtocolStockV1131,
  applyAuxAdvancedActionV110,validateAuxAdvancedSaveV110
-} from '../public/modules/aux-advanced-protocols-v110.js';
+} from '../public/modules/aux-advanced-protocols-v1131.js';
 const src=f=>readFileSync(resolve(import.meta.dirname,'..',f),'utf8');
 const row=id=>({catalog_key:`aux_protocol:${id}`,kind:'aux_protocol',ref_id:id,enabled:true,shop_visible:true,currency:id==='loot'||id==='porao'?'credits':'uridium',price:id==='loot'||id==='porao'?100000000:50000});
 const state=()=>({mapId:'x1',territoryFaction:'earth',profile:{faction:'earth',credits:5000000000,uridium:5000000},pet:{owned:true,level:20,advancedProtocolOwnedV110:{},advancedProtocolEquippedV110:{}},combatConfigsV2013:{active:1,profiles:{1:{petLoadout:{}},2:{petLoadout:{}}}}});

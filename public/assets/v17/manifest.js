@@ -230,14 +230,14 @@ export const GAME_ASSETS = {
   droneMapSheets: {
     flax: '/assets/v30/dronesheets/halo.webp',
     iris: '/assets/v30/dronesheets/nova.webp',
-    pet: '/assets/v137/aux/aux9_16.webp',
-    petElite: '/assets/v137/aux/aux9_16.webp'
+    pet: null,
+    petElite: null
   },
   droneMapSheets32: {
     flax: '/assets/v30/dronesheets32/halo.webp',
     iris: '/assets/v30/dronesheets32/nova.webp',
-    pet: '/assets/v137/aux/aux9_16.webp',
-    petElite: '/assets/v137/aux/aux9_16.webp'
+    pet: null,
+    petElite: null
   },
   npcMapSheets: {
     riftScout: '/assets/v30/npcsheets/scout.webp',

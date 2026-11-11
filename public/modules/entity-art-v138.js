@@ -10,6 +10,8 @@ export function shipArtV138(ship,designId=null,{detail=false}={}){
  const key=String(designId||''),match=key.startsWith(`n132_${ship}_`)&&SHIP_SKIN_ART_V138[key];
  // Original Valkyrie now has the same framing as its own skins.
  if(!match&&ship==='vengeance')return `/assets/v139/${detail?'hd':'map'}/ships/valkyrie.webp`;
+ const normal={phoenix:'aurora',liberator:'pioneer',piranha:'raptor',leonov:'lynx',nostromo:'meridian',bigboy:'bastion',goliath:'leviathan'}[ship];
+ if(!match&&normal)return `/assets/v141/${detail?'hd':'map'}/ships/${normal}.webp`;
  const name=match||SHIP_HULL_ART_V138[ship];
  return name?`/assets/v138/${detail?'hd':'map'}/ships/${name}.webp`:null;
 }

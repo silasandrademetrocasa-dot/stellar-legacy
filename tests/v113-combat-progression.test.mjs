@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {resolve} from 'node:path';
-import {AUX_ADVANCED_TIERS_V110,normalizeAuxAdvancedEquippedV110} from '../public/modules/aux-advanced-protocols-v110.js';
+import {AUX_ADVANCED_TIERS_V110,normalizeAuxAdvancedEquippedV110} from '../public/modules/aux-advanced-protocols-v1131.js';
 import {dailyPassTargetV113} from '../public/modules/pass-targets-v113.js';
 import {summarizeCombatProgressionV113,npcPressureV113,classifyNpcV113} from '../server/progression-balance-v113.js';
 const root=resolve(import.meta.dirname,'..');

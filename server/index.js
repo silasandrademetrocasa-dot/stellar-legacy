@@ -17,7 +17,7 @@ import {createSaveLatencyMonitorV1191} from './save-latency-v1191.js';
 import {saleQuoteV4776} from '../public/modules/sale-policy-v4776.js';
 import {tradeRequestIdV1164,findTradeReceiptV1164,rememberTradeReceiptV1164} from './autotrade-idempotency-v1164.js';
 import {validateEquipmentWriteV1062} from '../public/modules/hangar-write-guard-v1062.js';
-import {applyAuxAdvancedActionV110,validateAuxAdvancedSaveV110} from '../public/modules/aux-advanced-protocols-v110.js';
+import {applyAuxAdvancedActionV110,validateAuxAdvancedSaveV110} from '../public/modules/aux-advanced-protocols-v1131.js';
 import {attachFrontierAuditV450} from './frontier-audit-v450.js';
 import {attachFrontierAdminV440} from './frontier-admin-v440.js';
 import {attachAstralIntegrationsV435} from './astral-integrations-v435.js';
@@ -60,7 +60,7 @@ import { createSecurityService } from './security-service.js';
 
 const app = express();
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const RELEASE_VERSION = '47.7.72'; // único identificador de release nos endpoints HTTP
+const RELEASE_VERSION = '47.7.73'; // único identificador de release nos endpoints HTTP
 
 function normalizeSupabaseUrl(value = '') {
   let url = String(value || '').trim();

@@ -60,7 +60,7 @@ test('V116: botão do posto mostra/esconde no mesmo ritmo da nave, sem liberar o
     assert.equal(baseTradeVisibleV116({...b,...x}),false);
   const g=src('public/game.js'),css=src('public/style.css');
   assert.match(g,/updateCriticalHudV2024\(\);\s*updateBaseTradePrompt\(\)/);
-  assert.match(css,/\.base-trade-prompt\.hidden\{display:none!important/);
+  assert.doesNotMatch(g,/const visible=active&&!baseNavigationV140/);
 });
 test('V116: suporta até doze horas sem transformar tempo esgotado em falha de rede',()=>{
   assert.equal(cleanAutopilotConfig({minutes:480}).minutes,480);

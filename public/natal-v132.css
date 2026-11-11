@@ -1,8 +1,9 @@
 body.natal-theme{--natal-red:#b62a43;--natal-gold:#eacb87}
 .natal-theme .modal-card,.natal-theme .modal-content{border-color:#e9c9d4;background-image:linear-gradient(135deg,#39142166,transparent 45%)}
 .natal-theme .topbar{border-bottom:1px solid #eacb87}
-.natal-launch,.natal-fire{position:fixed;z-index:60;bottom:135px;left:12px;padding:9px;border:1px solid #eacb87;border-radius:10px;background:#771d34;color:white;font-weight:bold}
-.natal-fire{bottom:90px;width:44px}
+.natal-launch,.natal-fire{position:static;flex:0 0 auto;order:56;padding:7px 8px;min-height:38px;border:1px solid #eacb87;border-radius:8px;background:#771d34;color:white;font-size:10px;font-weight:bold;white-space:nowrap}
+.natal-fire{order:57;min-width:38px}.natal-launch[hidden],.natal-fire[hidden]{display:none!important}
+@media(max-width:680px){body.stellar-nav-v481 #topbar .top-actions{overflow-x:auto;scrollbar-width:none}body.stellar-nav-v481 #topbar:has(.menu-group.open) .top-actions{overflow:visible}.natal-launch{padding:6px;font-size:9px}.natal-fire{padding:6px;min-width:34px}}
 .natal-panel{width:min(92vw,780px);max-height:84vh;overflow:auto;padding:20px;background:#091a2b;color:#e9f5ff;border:1px solid #f0d5b4;border-radius:18px}
 .natal-panel::backdrop{background:#000a}.natal-panel header{display:flex;align-items:center;justify-content:space-between}.natal-panel h3{color:#f3d6a0;margin-top:24px}
 .natal-panel article{padding:12px;margin:8px 0;border:1px solid #52687b;border-radius:10px;background:#12283b}.natal-panel button,.natal-panel select{padding:10px;margin:6px;background:#84243b;color:white;border:1px solid #d7c4ac;border-radius:8px}.natal-panel button:disabled{opacity:.45}.natal-panel small{display:block}.natal-panel label{display:block;padding:12px}.natal-designs{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px}.natal-designs img{display:block;width:140px;height:140px;object-fit:contain;margin:auto}

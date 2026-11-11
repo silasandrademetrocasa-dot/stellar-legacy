@@ -390,48 +390,16 @@
     }
   },
   "npcs": {
-    "zyron": {
-      "path": "/assets/v136/npcs/zyron.webp",
-      "mode": "original-enhanced"
-    },
-    "vrax": {
-      "path": "/assets/v136/npcs/vrax.webp",
-      "mode": "new individual board top"
-    },
-    "vrax-prime": {
-      "path": "/assets/v136/npcs/vrax-prime.webp",
-      "mode": "new individual board top"
-    },
-    "scavenger": {
-      "path": "/assets/v136/npcs/scavenger.webp",
-      "mode": "new individual board top"
-    },
     "colossar-prime": {
       "path": "/assets/v136/npcs/colossar-prime.webp",
       "mode": "original-enhanced"
-    },
-    "scavenger-prime": {
-      "path": "/assets/v136/npcs/scavenger-prime.webp",
-      "mode": "new individual board top"
     },
     "dreadnox-prime": {
       "path": "/assets/v136/npcs/dreadnox-prime.webp",
       "mode": "original-enhanced"
     },
-    "scavenger-support": {
-      "path": "/assets/v136/npcs/scavenger-support.webp",
-      "mode": "original-enhanced"
-    },
     "kharon": {
       "path": "/assets/v136/npcs/kharon.webp",
-      "mode": "original-enhanced"
-    },
-    "scavenger-scout": {
-      "path": "/assets/v136/npcs/scavenger-scout.webp",
-      "mode": "original-enhanced"
-    },
-    "zyron-prime": {
-      "path": "/assets/v136/npcs/zyron-prime.webp",
       "mode": "original-enhanced"
     },
     "kharon-prime": {

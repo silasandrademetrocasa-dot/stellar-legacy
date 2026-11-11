@@ -40,7 +40,7 @@ assert(art.version==='V136.0','versão do catálogo visual inesperada');
 const ships=Object.entries(art.ships||{});
 const npcs=Object.entries(art.npcs||{});
 assert(ships.length===43,'catálogo de naves V136 incompleto');
-assert(npcs.length===48,'catálogo de NPCs V136 incompleto');
+assert(npcs.length===40,'catálogo de NPCs V136 incompleto');
 let checked=0;
 function verifyAsset(url,description){
  assert(typeof url==='string'&&url.startsWith('/assets/v136/'),'caminho inválido de '+description);
@@ -63,12 +63,12 @@ assert(v137.version==='V137.0','versão das novas artes V137 incorreta');
 assert(has('assets/v137/manifest.json'),'catálogo visual V137 fora do APK');
 const v137Visuals=[...v137.equipment.map(n=>`equipment/${n}.webp`),
   ...v137.portals.map(n=>`portals/${n}.webp`),...v137.drones.map(n=>`drones/${n}.webp`),
-  'aux/aux9.webp','aux/aux9_16.webp'];
+  'aux/aux9.webp'];
 for(const item of v137Visuals){const path='assets/v137/'+item;
  assert(has(path),'sprite HD V137 não incluído no APK: '+path);
  assert(report.entries.find(e=>e.path===path)?.size>2000,'sprite HD V137 truncado: '+path);
 }
-assert(v137.aux.frames===16&&v137.aux.grid==='4x4','animação AUX não contém 16 quadros');
+assert(v137.aux.frames===1&&v137.aux.grid==='1x1','AUX não usa quadro superior estático');
 // Proíbe que a remoção de artes antigas seja confundida com perda de novas.
 const oldDirs=/^assets\/(?:v17\/(?:ships|ships-map|npcs)|v52_4\/(?:ships|npcs)|v62\/showroom|v63\/ships|v65\/(?:ships|npcs)|v66\/(?:ships|npcs)|v67\/npcs|v3021\/ships)\//;
 assert(!report.entries.some(e=>oldDirs.test(e.path)),'sprites legados ainda presentes no APK');
@@ -84,3 +84,6 @@ const linked=[...html.matchAll(/\b(?:src|href)=["'](\/[^"']+)["']/g)]
  .map(m=>m[1].split('?')[0]).filter(x=>!x.startsWith('/api/')&&!x.startsWith('/ws'));
 for(const url of linked)assert(has(url.slice(1)),'HTML refere-se a arquivo inexistente no APK: '+url);
 console.log(`✅ APK auditado: ${report.files} arquivos, ${report.images} imagens, ${ships.length} naves, ${npcs.length} NPCs, ${checked} referências V136 e ${v137Visuals.length} visuais V137 verificados. API e WSS continuam remotas.`);
+
+const art141=JSON.parse(fs.readFileSync(path.join(ROOT,'public/assets/v141/manifest.json'),'utf8'));
+for(const rel of Object.keys(art141.files))assert(has(rel),'arte V141 fora do APK: '+rel);

@@ -5,8 +5,8 @@
 export const modelYawFromHeadingV526 = angle => Math.PI / 2 + (Number.isFinite(Number(angle)) ? Number(angle) : 0);
 export const npcDisplaySizeV526 = (radius, isBoss=false) => {
   const r=Math.max(1, Number(radius)||16);
-  // Bosses já estão grandes; preservar exatamente o tamanho de antes.
-  return isBoss?r*3.45:Math.max(76, Math.min(126, r*3.65));
+  // V141: casco legível; chefes têm escala própria. Não muda o raio físico.
+  return isBoss?Math.max(118,Math.min(280,r*3.65)):Math.max(96,Math.min(152,r*3.8));
 };
 export const oreDisplaySizeV526 = (radius, mode='3d') => {
   const r=Math.max(1,Number(radius)||7);

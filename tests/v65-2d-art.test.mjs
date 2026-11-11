@@ -35,12 +35,12 @@ test('NPCs têm arte compartilhada para mapa e card, sem atlas obsoleto',()=>{
 test('Sete drones usam os mesmos sprites na loja e no mapa',()=>{
  for(const id of ['drone_common','drone_elite','drone_a','drone_b','drone_c','drone_d','drone_e'])webp(`/assets/v65/drones/${id}.webp`);
  assert.equal(visualDroneV53('flax',null),'drone_common');
- assert.match(game,/function droneMapSheetAsset\(id\)\{if\(droneVisualArtV64\(id\)\)return null/);
+ assert.match(game,/function droneMapSheetAsset\(id\)\{if\(auxVisualArtV64\(id\)\|\|droneVisualArtV64\(id\)\)return null/);
 });
-test('AUX tem exatamente 16 quadros de animação na mesma vista',()=>{
- webp('/assets/v65/aux/aux9_16.webp');
- for(let i=0;i<16;i++)webp(`/assets/v65/aux/aux_${String(i).padStart(2,'0')}.webp`);
- assert.match(game,/Math\.floor\(performance\.now\(\)\/210\)%frames/);
+test('AUX usa imagem superior fixa, sem atlas no mapa e no hangar',()=>{
+ webp('/assets/v137/aux/aux9.webp');
+ assert.match(game,/const AUX_ATLAS_V64=Object.freeze\(\{\}\)/);
+ assert.ok(!existsSync(join(root,'public/assets/v137/aux/aux9_16.webp')));
 });
 test('Nenhum modelo 3D é servido ou importado pelo cliente',()=>{
  const walk=p=>readdirSync(p,{withFileTypes:true}).flatMap(e=>e.isDirectory()?walk(join(p,e.name)):[join(p,e.name)]);
@@ -56,7 +56,7 @@ test('As migrações não alteram ownership, progresso e IDs de naves',()=>{
  assert.deepEqual(save.inventory,{item:'x'});assert.ok(save.ownedShips.includes('citadel'));
 });
 test('Cache de sprites reconhece os novos diretórios V65',()=>{
- for(const p of ['/assets/v136/ships/top/aurora.webp','/assets/v136/ships/front/aurora.webp','/assets/v65/aux/aux9.webp','/assets/v65/drones/drone_a.webp','/assets/v136/npcs/streuner.webp']){
+ for(const p of ['/assets/v136/ships/top/aurora.webp','/assets/v136/ships/front/aurora.webp','/assets/v137/aux/aux9.webp','/assets/v65/drones/drone_a.webp','/assets/v136/npcs/streuner.webp']){
   assert.equal(entityAssetPath(p),true,p);
  }
 });
@@ -64,16 +64,16 @@ test('Cache de sprites reconhece os novos diretórios V65',()=>{
 // V66 regression checks: source assets and cache revision are consistent.
 test('V69 preserva recursos V66 e mantém versões de imports sincronizadas',()=>{
   const pkg=JSON.parse(readFileSync(join(root,'package.json'),'utf8'));
-  assert.equal(pkg.version,'47.7.72');
+  assert.equal(pkg.version,'47.7.73');
   const server=readFileSync(join(root,'server/index.js'),'utf8');
-  assert.ok(server.includes("const RELEASE_VERSION = '47.7.72'"));
+  assert.ok(server.includes("const RELEASE_VERSION = '47.7.73'"));
   for(const match of game.matchAll(/from\s+['"](\.[^'"]+)['"]/g)){
-    assert.ok(match[1].endsWith('?v=47.7.72'), match[1]);
+    assert.ok(match[1].endsWith('?v=47.7.73'), match[1]);
   }
   assert.match(game,/performance\.now\(\)\/210/);
-  assert.match(game,/performance\.now\(\)\/180/);
+  assert.match(game,/function startAuxSpritePreviewCanvas/);
   assert.match(game,/\/assets\/v136\/ships/);
-  for(const p of ['/assets/v136/ships/top/aurora.webp','/assets/v136/ships/front/aurora.webp','/assets/v66/aux/aux9.webp','/assets/v66/drones/drone_a.webp','/assets/v136/npcs/streuner.webp']){
+  for(const p of ['/assets/v136/ships/top/aurora.webp','/assets/v136/ships/front/aurora.webp','/assets/v137/aux/aux9.webp','/assets/v66/drones/drone_a.webp','/assets/v136/npcs/streuner.webp']){
     webp(p);assert.equal(entityAssetPath(p),true,p);
   }
 });

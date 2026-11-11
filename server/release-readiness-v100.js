@@ -3,7 +3,7 @@ import path from 'node:path';
 /** Preflight V100, deliberately NOT a claim of real-device or multiplayer load testing. */
 export const CORE_APK_ASSETS_V100=Object.freeze([
  'public/index.html','public/game.js','public/api.js','public/style.css',
- 'public/assets/v136/ships/top/aurora.webp','public/assets/v65/aux/aux9.webp',
+ 'public/assets/v136/ships/top/aurora.webp','public/assets/v137/aux/aux9.webp',
  'public/assets/v136/npcs/streuner.webp','public/modules/stellar-autopilot-v48.js'
 ]);
 export function releaseReadinessV100({version,checks=[],databaseReady=false}={}){

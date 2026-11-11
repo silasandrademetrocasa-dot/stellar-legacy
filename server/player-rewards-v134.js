@@ -3,7 +3,7 @@ import {createConfigCacheV1341} from './config-cache-v1341.js';
 import {createHash} from 'node:crypto';
 import {ITEMS,SHIPS,MAPS} from '../public/data.js';
 import {applyRecruitBonusV2012} from '../public/progression-plan-v2012.js';
-import {auxAdvancedEffectsV110,auxAdvancedLootQuantityV110} from '../public/modules/aux-advanced-protocols-v110.js';
+import {auxAdvancedEffectsV110,auxAdvancedLootQuantityV110} from '../public/modules/aux-advanced-protocols-v1131.js';
 import {operationDigestV125} from './economy-receipts-v125.js';
 import {applyWarfrontActionV135} from './warfront-economy-v135.js';
 const fail=(message,code='PLAYER_REWARD_INVALID')=>{throw Object.assign(Error(message),{code,status:409});};

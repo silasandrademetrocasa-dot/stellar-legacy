@@ -35,10 +35,10 @@ test('precificacao raridade e renda original protegida em todos os itens ativos'
   if(rare.length===2){assert.equal(S(rare[0]).currency,'credits');assert.equal(S(rare[1]).currency,'uridium');}
  }
 });
-test('AUX 16 quadros, 7 drones/designers e seis portais transparentes existem',()=>{
+test('AUX estático, 7 drones/designers e seis portais transparentes existem',()=>{
  for(const id of portals)assert.ok(files(`/assets/v137/portals/${id}.webp`)>10000);
  for(const id of ['drone_common','drone_elite','drone_a','drone_b','drone_c','drone_d','drone_e'])assert.ok(files(`/assets/v137/drones/${id}.webp`)>2500);
- assert.ok(files('/assets/v137/aux/aux9_16.webp')>100000);
+ assert.ok(files('/assets/v137/aux/aux9.webp')>2000);
  const manifest=JSON.parse(readFileSync(join(ROOT,'public/assets/v137/manifest.json'),'utf8'));
- assert.equal(manifest.aux.frames,16);assert.equal(manifest.equipment.length,26);
+ assert.equal(manifest.aux.frames,1);assert.equal(manifest.equipment.length,26);
 });

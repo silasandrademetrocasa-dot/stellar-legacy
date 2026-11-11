@@ -14,15 +14,6 @@
 #topbar .menu-dropdown .menu-item{border-bottom:1px solid rgba(68,142,194,.13);color:#c9f0ff}
 #topbar .menu-dropdown .menu-item:hover{background:#0d3453;color:#fff}
 #topbarDockToggle{width:31px!important;height:30px!important;min-width:31px!important;min-height:30px!important;border-radius:8px!important;font-size:11px!important}
-/* Fixed base trader: no jitter as camera/ship move or player crosses the base radius. */
-#baseTradePrompt{position:fixed!important;left:clamp(10px,2.5vw,30px)!important;right:auto!important;top:auto!important;
- bottom:clamp(86px,11dvh,145px)!important;transform:none!important;animation:none!important;
- max-width:min(340px,calc(100vw - 20px))!important;width:max-content!important;
- min-width:0!important;min-height:48px!important;box-sizing:border-box!important;z-index:29!important;
- padding:9px 12px!important;font-size:clamp(11px,2.8vw,15px)!important;border-radius:10px!important;
- background:linear-gradient(105deg,rgba(6,69,55,.99),rgba(3,30,34,.99))!important;
- box-shadow:inset 0 1px rgba(149,255,200,.28),0 0 13px rgba(24,217,155,.23)!important;}
-#baseTradePrompt small{font-size:clamp(9px,2.2vw,11px)!important;max-width:260px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 /* Modal cards share Hangar branding: no opaque, oversized headers or controls. */
 #cargoModal>.modal-card,#premiumModal>.modal-card,#adminModal>.modal-card,#configModal>.modal-card{
  background:radial-gradient(ellipse at 85% 0%,rgba(22,94,169,.17),transparent 48%),linear-gradient(160deg,#06172c,#020a17 82%)!important;
@@ -96,7 +87,6 @@
  #hangarModal .v56-equipment-head h3{font-size:14px!important}
  #hangarModal .v56-config-bar{padding:5px 8px!important;gap:5px!important}
  #hangarModal .v56-unit-btn{min-height:30px!important;padding:5px 12px!important;font-size:10px!important}
- #baseTradePrompt{bottom:60px!important;left:10px!important;max-width:250px!important}
  #topbar.compact-command-bar{max-width:calc(100vw - 44px)!important}
 }
 @media(max-width:600px) and (orientation:portrait){
@@ -128,8 +118,7 @@
  #cargoModal .base-service-card{padding:10px!important}
  #cargoModal .base-service-card .base-service-foot{display:flex;justify-content:space-between!important}
  #adminModal .v57-adm-nav{grid-template-columns:repeat(2,minmax(0,1fr))!important}
- #baseTradePrompt{bottom:105px!important;left:10px!important}
  #topbar .menu-group-toggle,#topbar .top-actions>.small-btn{padding:5px 8px!important;min-height:34px!important;font-size:10px!important}
 }
 @media(max-width:340px){#premiumModal .premium-product-grid{grid-template-columns:1fr!important}}
-@media(prefers-reduced-motion:reduce){#baseTradePrompt{animation:none!important}}
+@media(prefers-reduced-motion:reduce){}

@@ -1,0 +1,497 @@
+{
+  "files": [
+    {
+      "path": "public/assets/v4777/aux9-new.webp",
+      "bytes": 14296,
+      "reason": "Sem referência literal, prefixo dinâmico ou identificador no cliente atual"
+    },
+    {
+      "path": "public/assets/loading/stellar-battle-loading.webp",
+      "bytes": 477764,
+      "reason": "Sem referência literal, prefixo dinâmico ou identificador no cliente atual"
+    },
+    {
+      "path": "public/assets/v64/drones/drone_b_16.webp",
+      "bytes": 114778,
+      "reason": "Sem referência literal, prefixo dinâmico ou identificador no cliente atual"
+    },
+    {
+      "path": "public/assets/v64/drones/drone_elite_16.webp",
+      "bytes": 88292,
+      "reason": "Sem referência literal, prefixo dinâmico ou identificador no cliente atual"
+    },
+    {
+      "path": "public/assets/v64/drones/drone_e_16.webp",
+      "bytes": 111654,
+      "reason": "Sem referência literal, prefixo dinâmico ou identificador no cliente atual"
+    },
+    {
+      "path": "public/assets/v64/drones/drone_common_16.webp",
+      "bytes": 115390,
+      "reason": "Sem referência literal, prefixo dinâmico ou identificador no cliente atual"
+    },
+    {
+      "path": "public/assets/v64/drones/drone_d_16.webp",
+      "bytes": 115446,
+      "reason": "Sem referência literal, prefixo dinâmico ou identificador no cliente atual"
+    },
+    {
+      "path": "public/assets/v64/drones/drone_a_16.webp",
+      "bytes": 124610,
+      "reason": "Sem referência literal, prefixo dinâmico ou identificador no cliente atual"
+    },
+    {
+      "path": "public/assets/v64/drones/drone_c_16.webp",
+      "bytes": 89462,
+      "reason": "Sem referência literal, prefixo dinâmico ou identificador no cliente atual"
+    },
+    {
+      "path": "public/assets/v64/aux/aux9_16.webp",
+      "bytes": 105590,
+      "reason": "Sem referência literal, prefixo dinâmico ou identificador no cliente atual"
+    },
+    {
+      "path": "public/assets/v17/drones/aux9-elite.webp",
+      "bytes": 31814,
+      "reason": "Sem referência literal, prefixo dinâmico ou identificador no cliente atual"
+    },
+    {
+      "path": "public/assets/v17/drones-map/aux9-sheet.webp",
+      "bytes": 110566,
+      "reason": "Sem referência literal, prefixo dinâmico ou identificador no cliente atual"
+    },
+    {
+      "path": "public/assets/v17/drones-map/aux9-elite-sheet.webp",
+      "bytes": 111806,
+      "reason": "Sem referência literal, prefixo dinâmico ou identificador no cliente atual"
+    },
+    {
+      "path": "public/assets/v17/drones-map/aux9-elite.webp",
+      "bytes": 36890,
+      "reason": "Sem referência literal, prefixo dinâmico ou identificador no cliente atual"
+    },
+    {
+      "path": "public/assets/v17/equipment/sol1.webp",
+      "bytes": 26650,
+      "reason": "Sem referência literal, prefixo dinâmico ou identificador no cliente atual"
+    },
+    {
+      "path": "public/assets/v17/equipment/arcp1.webp",
+      "bytes": 22786,
+      "reason": "Sem referência literal, prefixo dinâmico ou identificador no cliente atual"
+    },
+    {
+      "path": "public/assets/v17/environment/portals/portal-standard.webp",
+      "bytes": 56960,
+      "reason": "Sem referência literal, prefixo dinâmico ou identificador no cliente atual"
+    },
+    {
+      "path": "public/assets/v17/environment/portals/portal-warzone.webp",
+      "bytes": 55714,
+      "reason": "Sem referência literal, prefixo dinâmico ou identificador no cliente atual"
+    },
+    {
+      "path": "public/assets/v17/environment/portals/portal-shadow.webp",
+      "bytes": 56036,
+      "reason": "Sem referência literal, prefixo dinâmico ou identificador no cliente atual"
+    },
+    {
+      "path": "public/assets/v17/environment/resources/ferrite.webp",
+      "bytes": 121306,
+      "reason": "Sem referência literal, prefixo dinâmico ou identificador no cliente atual"
+    },
+    {
+      "path": "public/assets/v17/environment/resources/ferron.webp",
+      "bytes": 127864,
+      "reason": "Sem referência literal, prefixo dinâmico ou identificador no cliente atual"
+    },
+    {
+      "path": "public/assets/v17/environment/resources/virel.webp",
+      "bytes": 153954,
+      "reason": "Sem referência literal, prefixo dinâmico ou identificador no cliente atual"
+    },
+    {
+      "path": "public/assets/v17/environment/resources/duracite.webp",
+      "bytes": 131916,
+      "reason": "Sem referência literal, prefixo dinâmico ou identificador no cliente atual"
+    },
+    {
+      "path": "public/assets/v17/environment/resources/solarium.webp",
+      "bytes": 127302,
+      "reason": "Sem referência literal, prefixo dinâmico ou identificador no cliente atual"
+    },
+    {
+      "path": "public/assets/v17/environment/resources/cryon.webp",
+      "bytes": 133904,
+      "reason": "Sem referência literal, prefixo dinâmico ou identificador no cliente atual"
+    },
+    {
+      "path": "public/assets/v30/dronesheets32/aux9-sheet.webp",
+      "bytes": 216202,
+      "reason": "Sem referência literal, prefixo dinâmico ou identificador no cliente atual"
+    },
+    {
+      "path": "public/assets/v30/dronesheets32/aux9-elite-sheet.webp",
+      "bytes": 218756,
+      "reason": "Sem referência literal, prefixo dinâmico ou identificador no cliente atual"
+    },
+    {
+      "path": "public/assets/v58/aux/aux9-perspective.webp",
+      "bytes": 29936,
+      "reason": "Sem referência literal, prefixo dinâmico ou identificador no cliente atual"
+    },
+    {
+      "path": "public/assets/v3022/drones/aux9-elite.webp",
+      "bytes": 55510,
+      "reason": "Sem referência literal, prefixo dinâmico ou identificador no cliente atual"
+    },
+    {
+      "path": "public/assets/v137/aux/aux9_16.webp",
+      "bytes": 465656,
+      "reason": "Sem referência literal, prefixo dinâmico ou identificador no cliente atual"
+    },
+    {
+      "path": "public/assets/v65/aux/aux_00.webp",
+      "bytes": 44790,
+      "reason": "Sem referência literal, prefixo dinâmico ou identificador no cliente atual"
+    },
+    {
+      "path": "public/assets/v65/aux/aux_06.webp",
+      "bytes": 42468,
+      "reason": "Sem referência literal, prefixo dinâmico ou identificador no cliente atual"
+    },
+    {
+      "path": "public/assets/v65/aux/aux_01.webp",
+      "bytes": 44214,
+      "reason": "Sem referência literal, prefixo dinâmico ou identificador no cliente atual"
+    },
+    {
+      "path": "public/assets/v65/aux/aux_10.webp",
+      "bytes": 45830,
+      "reason": "Sem referência literal, prefixo dinâmico ou identificador no cliente atual"
+    },
+    {
+      "path": "public/assets/v65/aux/aux_14.webp",
+      "bytes": 45106,
+      "reason": "Sem referência literal, prefixo dinâmico ou identificador no cliente atual"
+    },
+    {
+      "path": "public/assets/v65/aux/aux_05.webp",
+      "bytes": 46508,
+      "reason": "Sem referência literal, prefixo dinâmico ou identificador no cliente atual"
+    },
+    {
+      "path": "public/assets/v65/aux/aux_07.webp",
+      "bytes": 44766,
+      "reason": "Sem referência literal, prefixo dinâmico ou identificador no cliente atual"
+    },
+    {
+      "path": "public/assets/v65/aux/aux_08.webp",
+      "bytes": 44564,
+      "reason": "Sem referência literal, prefixo dinâmico ou identificador no cliente atual"
+    },
+    {
+      "path": "public/assets/v65/aux/aux_11.webp",
+      "bytes": 44158,
+      "reason": "Sem referência literal, prefixo dinâmico ou identificador no cliente atual"
+    },
+    {
+      "path": "public/assets/v65/aux/aux_15.webp",
+      "bytes": 41818,
+      "reason": "Sem referência literal, prefixo dinâmico ou identificador no cliente atual"
+    },
+    {
+      "path": "public/assets/v65/aux/aux_12.webp",
+      "bytes": 44534,
+      "reason": "Sem referência literal, prefixo dinâmico ou identificador no cliente atual"
+    },
+    {
+      "path": "public/assets/v65/aux/aux_13.webp",
+      "bytes": 50388,
+      "reason": "Sem referência literal, prefixo dinâmico ou identificador no cliente atual"
+    },
+    {
+      "path": "public/assets/v65/aux/aux_02.webp",
+      "bytes": 45296,
+      "reason": "Sem referência literal, prefixo dinâmico ou identificador no cliente atual"
+    },
+    {
+      "path": "public/assets/v65/aux/aux9_16.webp",
+      "bytes": 739896,
+      "reason": "Sem referência literal, prefixo dinâmico ou identificador no cliente atual"
+    },
+    {
+      "path": "public/assets/v65/aux/aux_03.webp",
+      "bytes": 48434,
+      "reason": "Sem referência literal, prefixo dinâmico ou identificador no cliente atual"
+    },
+    {
+      "path": "public/assets/v65/aux/aux_09.webp",
+      "bytes": 45036,
+      "reason": "Sem referência literal, prefixo dinâmico ou identificador no cliente atual"
+    },
+    {
+      "path": "public/assets/v65/aux/aux_04.webp",
+      "bytes": 44424,
+      "reason": "Sem referência literal, prefixo dinâmico ou identificador no cliente atual"
+    },
+    {
+      "path": "public/assets/v136/npcs/zyron-prime.webp",
+      "bytes": 74900,
+      "reason": "Sem referência literal, prefixo dinâmico ou identificador no cliente atual"
+    },
+    {
+      "path": "public/assets/v136/npcs/scavenger-support.webp",
+      "bytes": 55800,
+      "reason": "Sem referência literal, prefixo dinâmico ou identificador no cliente atual"
+    },
+    {
+      "path": "public/assets/v136/npcs/scavenger-prime.webp",
+      "bytes": 121380,
+      "reason": "Sem referência literal, prefixo dinâmico ou identificador no cliente atual"
+    },
+    {
+      "path": "public/assets/v136/npcs/scavenger.webp",
+      "bytes": 120532,
+      "reason": "Sem referência literal, prefixo dinâmico ou identificador no cliente atual"
+    },
+    {
+      "path": "public/assets/v136/npcs/vrax.webp",
+      "bytes": 79454,
+      "reason": "Sem referência literal, prefixo dinâmico ou identificador no cliente atual"
+    },
+    {
+      "path": "public/assets/v136/npcs/vrax-prime.webp",
+      "bytes": 111666,
+      "reason": "Sem referência literal, prefixo dinâmico ou identificador no cliente atual"
+    },
+    {
+      "path": "public/assets/v136/npcs/zyron.webp",
+      "bytes": 50434,
+      "reason": "Sem referência literal, prefixo dinâmico ou identificador no cliente atual"
+    },
+    {
+      "path": "public/assets/v136/npcs/scavenger-scout.webp",
+      "bytes": 25960,
+      "reason": "Sem referência literal, prefixo dinâmico ou identificador no cliente atual"
+    },
+    {
+      "path": "public/assets/v19/ammo/pls3.webp",
+      "bytes": 30200,
+      "reason": "Sem referência literal, prefixo dinâmico ou identificador no cliente atual"
+    },
+    {
+      "path": "public/assets/v19/ammo/cmt4.webp",
+      "bytes": 28910,
+      "reason": "Sem referência literal, prefixo dinâmico ou identificador no cliente atual"
+    },
+    {
+      "path": "public/assets/v19/ammo/pls4.webp",
+      "bytes": 32424,
+      "reason": "Sem referência literal, prefixo dinâmico ou identificador no cliente atual"
+    },
+    {
+      "path": "public/assets/v19/ammo/sip2.webp",
+      "bytes": 30990,
+      "reason": "Sem referência literal, prefixo dinâmico ou identificador no cliente atual"
+    },
+    {
+      "path": "public/assets/v19/ammo/cmt2.webp",
+      "bytes": 23792,
+      "reason": "Sem referência literal, prefixo dinâmico ou identificador no cliente atual"
+    },
+    {
+      "path": "public/assets/v19/ammo/pls1.webp",
+      "bytes": 26996,
+      "reason": "Sem referência literal, prefixo dinâmico ou identificador no cliente atual"
+    },
+    {
+      "path": "public/assets/v19/ammo/cmt3.webp",
+      "bytes": 27148,
+      "reason": "Sem referência literal, prefixo dinâmico ou identificador no cliente atual"
+    },
+    {
+      "path": "public/assets/v19/ammo/cmt1.webp",
+      "bytes": 21066,
+      "reason": "Sem referência literal, prefixo dinâmico ou identificador no cliente atual"
+    },
+    {
+      "path": "public/assets/v20/equipment/thr-7.png",
+      "bytes": 106184,
+      "reason": "Sem referência literal, prefixo dinâmico ou identificador no cliente atual"
+    },
+    {
+      "path": "public/assets/v20/equipment/vsh0.png",
+      "bytes": 96130,
+      "reason": "Sem referência literal, prefixo dinâmico ou identificador no cliente atual"
+    },
+    {
+      "path": "public/assets/mapas/Biblioteca_Geral/Fundos_Baixo/fundo_compartilhado_06.webp",
+      "bytes": 56018,
+      "reason": "Sem referência literal, prefixo dinâmico ou identificador no cliente atual"
+    },
+    {
+      "path": "public/assets/mapas/Biblioteca_Geral/Fundos_Baixo/fundo_compartilhado_04.webp",
+      "bytes": 47608,
+      "reason": "Sem referência literal, prefixo dinâmico ou identificador no cliente atual"
+    },
+    {
+      "path": "public/assets/mapas/Biblioteca_Geral/Fundos_Baixo/fundo_compartilhado_02.webp",
+      "bytes": 73256,
+      "reason": "Sem referência literal, prefixo dinâmico ou identificador no cliente atual"
+    },
+    {
+      "path": "public/assets/mapas/Biblioteca_Geral/Fundos_Baixo/fundo_compartilhado_05.webp",
+      "bytes": 71916,
+      "reason": "Sem referência literal, prefixo dinâmico ou identificador no cliente atual"
+    },
+    {
+      "path": "public/assets/mapas/Biblioteca_Geral/Fundos_Baixo/fundo_compartilhado_08.webp",
+      "bytes": 69790,
+      "reason": "Sem referência literal, prefixo dinâmico ou identificador no cliente atual"
+    },
+    {
+      "path": "public/assets/mapas/Biblioteca_Geral/Fundos_Baixo/fundo_compartilhado_07.webp",
+      "bytes": 61018,
+      "reason": "Sem referência literal, prefixo dinâmico ou identificador no cliente atual"
+    },
+    {
+      "path": "public/assets/mapas/Biblioteca_Geral/Fundos_Baixo/fundo_compartilhado_01.webp",
+      "bytes": 72918,
+      "reason": "Sem referência literal, prefixo dinâmico ou identificador no cliente atual"
+    },
+    {
+      "path": "public/assets/mapas/Biblioteca_Geral/Fundos_Baixo/fundo_compartilhado_03.webp",
+      "bytes": 61418,
+      "reason": "Sem referência literal, prefixo dinâmico ou identificador no cliente atual"
+    },
+    {
+      "path": "public/assets/v66/aux/aux_00.webp",
+      "bytes": 44790,
+      "reason": "Sem referência literal, prefixo dinâmico ou identificador no cliente atual"
+    },
+    {
+      "path": "public/assets/v66/aux/aux_06.webp",
+      "bytes": 42468,
+      "reason": "Sem referência literal, prefixo dinâmico ou identificador no cliente atual"
+    },
+    {
+      "path": "public/assets/v66/aux/aux_01.webp",
+      "bytes": 44214,
+      "reason": "Sem referência literal, prefixo dinâmico ou identificador no cliente atual"
+    },
+    {
+      "path": "public/assets/v66/aux/aux_10.webp",
+      "bytes": 45830,
+      "reason": "Sem referência literal, prefixo dinâmico ou identificador no cliente atual"
+    },
+    {
+      "path": "public/assets/v66/aux/aux_14.webp",
+      "bytes": 45106,
+      "reason": "Sem referência literal, prefixo dinâmico ou identificador no cliente atual"
+    },
+    {
+      "path": "public/assets/v66/aux/aux_05.webp",
+      "bytes": 46508,
+      "reason": "Sem referência literal, prefixo dinâmico ou identificador no cliente atual"
+    },
+    {
+      "path": "public/assets/v66/aux/aux_07.webp",
+      "bytes": 44766,
+      "reason": "Sem referência literal, prefixo dinâmico ou identificador no cliente atual"
+    },
+    {
+      "path": "public/assets/v66/aux/aux_08.webp",
+      "bytes": 44564,
+      "reason": "Sem referência literal, prefixo dinâmico ou identificador no cliente atual"
+    },
+    {
+      "path": "public/assets/v66/aux/aux_11.webp",
+      "bytes": 44158,
+      "reason": "Sem referência literal, prefixo dinâmico ou identificador no cliente atual"
+    },
+    {
+      "path": "public/assets/v66/aux/aux_15.webp",
+      "bytes": 41818,
+      "reason": "Sem referência literal, prefixo dinâmico ou identificador no cliente atual"
+    },
+    {
+      "path": "public/assets/v66/aux/aux_12.webp",
+      "bytes": 44534,
+      "reason": "Sem referência literal, prefixo dinâmico ou identificador no cliente atual"
+    },
+    {
+      "path": "public/assets/v66/aux/aux_13.webp",
+      "bytes": 50388,
+      "reason": "Sem referência literal, prefixo dinâmico ou identificador no cliente atual"
+    },
+    {
+      "path": "public/assets/v66/aux/aux_02.webp",
+      "bytes": 45296,
+      "reason": "Sem referência literal, prefixo dinâmico ou identificador no cliente atual"
+    },
+    {
+      "path": "public/assets/v66/aux/aux9_16.webp",
+      "bytes": 739896,
+      "reason": "Sem referência literal, prefixo dinâmico ou identificador no cliente atual"
+    },
+    {
+      "path": "public/assets/v66/aux/aux_03.webp",
+      "bytes": 48434,
+      "reason": "Sem referência literal, prefixo dinâmico ou identificador no cliente atual"
+    },
+    {
+      "path": "public/assets/v66/aux/aux_09.webp",
+      "bytes": 45036,
+      "reason": "Sem referência literal, prefixo dinâmico ou identificador no cliente atual"
+    },
+    {
+      "path": "public/assets/v66/aux/aux_04.webp",
+      "bytes": 44424,
+      "reason": "Sem referência literal, prefixo dinâmico ou identificador no cliente atual"
+    },
+    {
+      "path": "public/assets/v18/bonus/bonus-box.webp",
+      "bytes": 6840,
+      "reason": "Sem referência literal, prefixo dinâmico ou identificador no cliente atual"
+    },
+    {
+      "path": "public/modules/aux-advanced-protocols-v110.js",
+      "bytes": 14287,
+      "reason": "Substituído por caminho visual atual ou implementação compartilhada idêntica"
+    },
+    {
+      "path": "public/modules/stellar-autopilot-v112.js",
+      "bytes": 182,
+      "reason": "Substituído por caminho visual atual ou implementação compartilhada idêntica"
+    },
+    {
+      "path": "public/assets/loading/natal-vertical.png",
+      "bytes": 483698,
+      "reason": "Substituído por caminho visual atual ou implementação compartilhada idêntica"
+    },
+    {
+      "path": "public/assets/loading/natal-horizontal.png",
+      "bytes": 420209,
+      "reason": "Substituído por caminho visual atual ou implementação compartilhada idêntica"
+    },
+    {
+      "path": "public/assets/v64/aux/aux9.webp",
+      "bytes": 52348,
+      "reason": "Substituído por caminho visual atual ou implementação compartilhada idêntica"
+    },
+    {
+      "path": "public/assets/v65/aux/aux9.webp",
+      "bytes": 44790,
+      "reason": "Substituído por caminho visual atual ou implementação compartilhada idêntica"
+    },
+    {
+      "path": "public/assets/v66/aux/aux9.webp",
+      "bytes": 44790,
+      "reason": "Substituído por caminho visual atual ou implementação compartilhada idêntica"
+    }
+  ],
+  "count": 98,
+  "bytes": 9218322,
+  "method": "Referências literais, prefixos dinâmicos e identificadores revisados no cliente, servidor e scripts; não usa idade da pasta como critério."
+}

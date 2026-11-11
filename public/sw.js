@@ -1,6 +1,6 @@
 // V21/V48.5 • Worker restrito: apenas offline.html e ícones cacheados.
 // Nunca cacheia API, autenticação, WebSocket ou saves.
-const CACHE='stellar-shell-v136-visuals';
+const CACHE='stellar-shell-v141-static-aux';
 const LAB=['/lab-v121.html','/modules/local-first-lab-v121.js','/modules/local-first-save-v121.js','/data.js'];
 const OFFLINE='/offline.html';
 self.addEventListener('install',event=>{
