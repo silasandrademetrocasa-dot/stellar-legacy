@@ -5042,3 +5042,9 @@ body[data-visual-test-v75="minimap"] #minimapPanel{visibility:hidden!important;}
 .arena-season-v135-ranking>div{display:grid;grid-template-columns:35px 1fr auto auto;gap:9px;align-items:center;padding:7px 8px;background:#081d32;border-radius:6px;font-size:12px}
 .arena-season-v135-ranking strong{color:#f5ca6d}.arena-season-v135-ranking b{overflow-wrap:anywhere}.arena-season-v135-ranking em{font-style:normal;color:#74d9f8}
 @media(max-width:500px){.arena-season-v135-ranking>div{grid-template-columns:30px 1fr auto}.arena-season-v135-ranking>div span{display:none}}
+
+/* V140: one touch action at a time, without animation or permanent extra panels. */
+.base-module-prompt-v140{position:fixed;z-index:17;left:50%;bottom:calc(env(safe-area-inset-bottom,0px) + 86px);transform:translateX(-50%);max-width:calc(100vw - 30px);min-height:46px;padding:10px 18px;background:#0b263a;color:#e7f9ff;border:1px solid #66d7f2;border-radius:12px;font:700 13px Arial;cursor:pointer}
+.base-module-prompt-v140:disabled{color:#b1c8d8;border-color:#416378;cursor:default}
+.base-module-prompt-v140.hidden{display:none!important}
+@media(max-height:500px){.base-module-prompt-v140{bottom:18px;max-width:45vw}}

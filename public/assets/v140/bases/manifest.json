@@ -1,0 +1,30 @@
+{
+  "static": true,
+  "perspective": "three-quarter",
+  "rows": [
+    {
+      "faction": "earth",
+      "source": "exec-038b9a76-3c0f-4015-a727-92fd488b9f4f.png",
+      "width": 1024,
+      "height": 576,
+      "bytes": 121642,
+      "sha256": "662d5262eec69cf82c322683b24a39f424eaf7829cb5f544cd34fb11c1101904"
+    },
+    {
+      "faction": "mars",
+      "source": "exec-783fb542-bc12-4742-9fd5-41f16789dbbf.png",
+      "width": 1024,
+      "height": 576,
+      "bytes": 108266,
+      "sha256": "f242404866bce25393c4786ef3053895e0d1d5bc536734771e697bfdbf00964b"
+    },
+    {
+      "faction": "jupiter",
+      "source": "exec-f7404815-51cd-46b6-99fc-bc9096911750.png",
+      "width": 1024,
+      "height": 576,
+      "bytes": 114366,
+      "sha256": "99dd4edd3324ce06d58fd61adbfeb2d63b2a4fb691389ecffe90aeb9533ab62f"
+    }
+  ]
+}
