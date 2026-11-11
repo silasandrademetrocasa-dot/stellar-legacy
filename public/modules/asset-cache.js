@@ -2,7 +2,7 @@
 // Não acessa a rede, o DOM, timers nem dados de usuário diretamente: dependências injetadas.
 // Nunca descarte sprites de naves, NPCs, drones ou AUX via limpeza automática.
 
-const ASSET_REVISION = '138.0.0'; // Somente caminhos legados sem versão no nome.
+const ASSET_REVISION = '139.0.0'; // Somente caminhos legados sem versão no nome.
 export function versionedAssetUrl(path) {
   const value=String(path||'');
   if(!value)return value;
@@ -23,7 +23,7 @@ export function flattenAssetPaths(value,out=[]) {
 }
 
 export function entityAssetPath(path) {
-  return /\/assets\/(?:v138\/(?:hd|map)\/(?:ships|drones|natal)|v137\/(?:equipment|drones|aux|portals)|v136\/(?:ships\/(?:top|front|map)|npcs)|v17\/(?:ships|ships-map|drones|drones-map|npcs)|v30\/(?:shipsheets|shipsheets32|dronesheets|dronesheets32|npcsheets|npcsheets32)|v63\/ships|v65\/(?:ships|npcs|drones|aux)|v66\/(?:ships|npcs|drones|aux)|v67\/npcs|v135\/npcs|v64\/(?:drones|aux))\//.test(String(path||''));
+  return /\/assets\/(?:v139\/(?:hd|map)\/ships|v138\/(?:hd|map)\/(?:ships|drones|natal)|v137\/(?:equipment|drones|aux|portals)|v136\/(?:ships\/(?:top|front|map)|npcs)|v17\/(?:ships|ships-map|drones|drones-map|npcs)|v30\/(?:shipsheets|shipsheets32|dronesheets|dronesheets32|npcsheets|npcsheets32)|v63\/ships|v65\/(?:ships|npcs|drones|aux)|v66\/(?:ships|npcs|drones|aux)|v67\/npcs|v135\/npcs|v64\/(?:drones|aux))\//.test(String(path||''));
 }
 export function coreAssetPath(path) {
   const value=String(path||'');

@@ -1,6 +1,6 @@
 {
   "name": "stellar-legacy",
-  "version": "47.7.70",
+  "version": "47.7.71",
   "type": "module",
   "scripts": {
     "start": "node server/index.js",
@@ -23,7 +23,7 @@
   "engines": {
     "node": ">=18"
   },
-  "release": "V138.0: artes individuais topo, 32 designs por nave, drones completos e coleta por WebSocket com confirmação única",
+  "release": "V139.0: permissões de coleta e salvamento, Valkyrie original e conceito da base natalina",
   "devDependencies": {
     "@electric-sql/pglite": "0.3.14"
   }

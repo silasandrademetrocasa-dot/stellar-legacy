@@ -26,6 +26,9 @@ test('V138 live WebSocket authenticates collection and coalesces duplicate in-fl
  const body={type:'collect_drop',request_id:'qa138_socket_request',drop_id:'loot_qa138_test',collector:'ship',user_id:'spoofed'};
  send(body);send(body);send(body);
  await new Promise(resolve=>{const poll=()=>calls?resolve():setTimeout(poll,5);poll();});
+ // A pong after the three requests proves the duplicate frames were processed
+ // while the collector is still blocked, independent of runner scheduling.
+ send({type:'ping',ts:138});await packet('pong');
  world.findClient('qa138_user').player.x=3000;
  assert.equal(received.uid,'qa138_user');assert.equal(received.session,'qa138_session');assert.equal(received.arrival.player.x,400);assert.equal(received.body.user_id,undefined);
  release();const result=await packet('collect_drop_result');assert.equal(result.ok,true);assert.equal(calls,1);assert.equal(result.request_id,body.request_id);

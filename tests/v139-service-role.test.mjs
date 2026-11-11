@@ -1,0 +1,36 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {readFileSync} from 'node:fs';
+import {PGlite} from '@electric-sql/pglite';
+const read=p=>readFileSync(new URL('../'+p,import.meta.url),'utf8');
+test('V139 actual service role can collect and switch hulls while player roles remain denied',async t=>{
+ const db=new PGlite();t.after(()=>db.close());
+ for(const file of ['tests/fixtures/v134-schema.sql','sql/STELLAR_V134_SAVE_UNICO.sql','sql/STELLAR_V134_1_COLETA_LATENCIA.sql','tests/fixtures/v137-live-commit.sql','sql/STELLAR_V138_COLETA.sql'])await db.exec(read(file));
+ // Existing production permissions, intentionally omitting the five missing SELECTs.
+ await db.exec('GRANT SELECT,INSERT,UPDATE ON game_saves,profiles,stellar_player_save_abc_v118,stellar_offline_farm_v484 TO service_role;GRANT SELECT,INSERT,UPDATE,DELETE ON stellar_ship_design_selection_v132 TO service_role;');
+ const uid='11111111-1111-4111-8111-111111111111',sid='22222222-2222-4222-8222-222222222222';
+ const state={accountOwnerId:uid,adminResetEpoch:0,activeShipId:'goliath',ownedShips:['goliath','vengeance'],profile:{callsign:'QA139',faction:'earth',level:10,credits:1000,uridium:100,xp:100000},cargo:{},serverPurchaseRevision:0};
+ await db.query('INSERT INTO game_saves(user_id,state) VALUES($1,$2)',[uid,state]);
+ await db.query('INSERT INTO game_login_sessions_v1214(user_id,session_id) VALUES($1,$2)',[uid,sid]);
+ await db.exec("INSERT INTO live_designs_v16(design_id,kind,name,eligibility) VALUES('n132_vengeance_hp','ship','Valkyrie • Vitalis','{\"ship_id\":\"vengeance\"}');");
+ await db.query("INSERT INTO player_design_inventory_v16(user_id,design_id,quantity) VALUES($1,'n132_vengeance_hp',1);",[uid]);
+ await db.query("INSERT INTO stellar_ship_design_selection_v132 VALUES($1,'vengeance','n132_vengeance_hp')",[uid]);
+ await db.query('INSERT INTO player_design_loadout_v16(user_id) VALUES($1)',[uid]);
+ await db.query("INSERT INTO stellar_collection_drops_v134(user_id,drop_id,kind,map_key,x,y,payload) VALUES($1,'loot_qa139_role','loot','earth:x1',400,400,'{\"resources\":{\"Prometium\":5}}')",[uid]);
+ const role=async(fn,r='service_role')=>{await db.exec('SET ROLE '+r);try{return await fn();}finally{await db.exec('RESET ROLE');}};
+ const context=()=>db.query('SELECT public.stellar_collection_context_v138($1,$2,$3,$4) r',[uid,sid,'loot_qa139_role','request_qa139_role']);
+ await assert.rejects(role(context),{code:'42501'});
+ await db.exec(read('sql/STELLAR_V139_PERMISSOES_COLETA.sql'));await db.exec(read('sql/STELLAR_V139_PERMISSOES_COLETA.sql'));
+ const ctx=(await role(context)).rows[0].r;assert.equal(ctx.save.state.profile.credits,1000);
+ const draft=structuredClone(ctx.save.state);draft.cargo.Prometium=5;draft.serverPurchaseRevision++;
+ const command=(id,module,hash,payload)=>db.query('SELECT public.stellar_player_commit($1,$2,$3,$4,$5) r',[uid,id,module,hash,payload]);
+ const payload={collection_session:sid,base:ctx.save.state,state:draft,drop_id:'loot_qa139_role',drop_before:{resources:{Prometium:5}},drop_after:null,receipt:{picked:{Prometium:5}}};
+ const result=(await role(()=>command('request_qa139_role','collection','a'.repeat(64),payload))).rows[0].r;assert.equal(result.ok,true);assert.equal(result.state.cargo.Prometium,5);
+ const again=(await role(()=>command('request_qa139_role','collection','a'.repeat(64),{collection_session:sid}))).rows[0].r;assert.equal(again.replayed,true);assert.equal(again.state.cargo.Prometium,5);
+ const next=structuredClone(result.state);next.activeShipId='vengeance';
+ const switched=(await role(()=>command('request_qa139_hull','checkpoint','b'.repeat(64),{base:result.state,state:next}))).rows[0].r;assert.equal(switched.ok,true);
+ assert.equal((await db.query('SELECT ship_design_id FROM player_design_loadout_v16 WHERE user_id=$1',[uid])).rows[0].ship_design_id,'n132_vengeance_hp');
+ for(const r of ['anon','authenticated'])await assert.rejects(role(context,r),{code:'42501'});
+ assert.equal((await db.query("SELECT has_table_privilege('service_role','player_design_inventory_v16','UPDATE') allowed")).rows[0].allowed,false);
+ assert.equal((await db.query("SELECT has_column_privilege('service_role','player_design_loadout_v16','ship_design_id','UPDATE') allowed")).rows[0].allowed,true);
+});

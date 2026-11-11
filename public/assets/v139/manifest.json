@@ -1,0 +1,19 @@
+{
+  "view": "top",
+  "nativePixels": 1254,
+  "exports": [
+    {
+      "path": "assets/v139/hd/ships/valkyrie.webp",
+      "pixels": 2048,
+      "bytes": 690882,
+      "sha256": "e57895232434825715e3b1cae58d57ec0f55d9891765467b3eb3334b4439cf0b"
+    },
+    {
+      "path": "assets/v139/map/ships/valkyrie.webp",
+      "pixels": 512,
+      "bytes": 69554,
+      "sha256": "9b6e28bdb1bd3144f81915cc2bdb118bee70f5aaf659c3152106d1a27f3b5e6c"
+    }
+  ],
+  "note": "Novas artes exportadas; 2048 não é nativo."
+}
