@@ -10,10 +10,10 @@ const ap=file('public/modules/stellar-autopilot-v48.js');
 const html=file('public/index.html');
 
 test('V126: APK usa URL nova da ponte do Autopilot, sem assets de render alterados',()=>{
-  assert.match(game,/stellar-autopilot-v126\.js\?v=47\.7\.67/);
+  assert.match(game,/stellar-autopilot-v126\.js\?v=47\.7\.68/);
   assert.match(file('public/modules/stellar-autopilot-v126.js'),/stellar-autopilot-v48\.js\?v=126\.0/);
   assert.match(html,/v126-ap-hangar/);
-  assert.match(file('public/sw.js'),/stellar-shell-v126-0-0/);
+  assert.match(file('public/sw.js'),/stellar-shell-v136-visuals/);
 });
 test('V126: Autopilot limita restauração sem rodar trabalho a cada frame',()=>{
   assert.match(ap,/if\(ts-lastTickAt<tickCadenceMs\)return;lastTickAt=ts;/);

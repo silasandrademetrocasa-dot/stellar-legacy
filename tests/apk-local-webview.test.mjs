@@ -17,7 +17,7 @@ test('APK Android conserva assets e o jogo no mesmo dominio HTTPS da API',()=>{
 
 test('APK contem sprites naves, drones, AUX, NPCs, mapas, portais e caixas',()=>{
   const base=new URL('../public/assets/',import.meta.url);
-  for(const pathPart of ['v65/ships','v66/aux','v67/npcs','mapas/V80_Fundos_Distintos','animations/v71/Portais','v52_3/cards']){
+  for(const pathPart of ['v136/ships','v66/aux','v136/npcs','mapas/V80_Fundos_Distintos','animations/v71/Portais','v52_3/cards']){
     const target=new URL(pathPart+'/',base);
     assert.ok(fs.existsSync(target),`asset local ausente: ${pathPart}`);
     assert.ok(fs.readdirSync(target).length>0,`asset sem arquivos: ${pathPart}`);

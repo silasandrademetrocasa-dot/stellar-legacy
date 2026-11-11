@@ -7,15 +7,16 @@ import {visualDroneV53} from '../public/modules/stellar-astral-expansion-v53.js'
 import {entityAssetPath} from '../public/modules/asset-cache.js';
 const root=resolve(import.meta.dirname,'..');
 const game=readFileSync(join(root,'public/game.js'),'utf8');
-const assets=join(root,'public/assets/v65');
+const assets=join(root,'public/assets/v136');
+const SHIP_SLUGS=Object.freeze({phoenix:'aurora',liberator:'pioneer',piranha:'raptor',leonov:'lynx',nostromo:'meridian',bigboy:'bastion',vengeance:'valkyrie',goliath:'leviathan',spearhead:'pathfinder',aegis:'seraph',citadel:'bulwark',defcom:'phantom',yamato:'kensei'});
 const img=p=>readFileSync(join(root,'public',p.replace(/^\//,'')));
 const webp=p=>{const data=img(p);assert.equal(data.toString('ascii',0,4),'RIFF',p);assert.equal(data.toString('ascii',8,12),'WEBP',p);assert.ok(data.length>1500,p);};
 test('V65 usa 13 naves TOP no mapa e FRONT no showroom, hangar, leilão',()=>{
   assert.equal(Object.keys(ALLOWED_SHIPS_V50).length,13);
   for(const id of Object.keys(ALLOWED_SHIPS_V50)){
     assert.ok(isShipAllowedV50(id));
-    webp(`/assets/v65/ships/top/${id}.webp`);webp(`/assets/v65/ships/front/${id}.webp`);
-    assert.notDeepEqual(img(`/assets/v65/ships/top/${id}.webp`),img(`/assets/v65/ships/front/${id}.webp`));
+    webp(`/assets/v136/ships/top/${SHIP_SLUGS[id]}.webp`);webp(`/assets/v136/ships/front/${SHIP_SLUGS[id]}.webp`);
+    assert.notDeepEqual(img(`/assets/v136/ships/top/${SHIP_SLUGS[id]}.webp`),img(`/assets/v136/ships/front/${SHIP_SLUGS[id]}.webp`));
   }
   assert.match(game,/shipArtV65\(id,'front'\)/);
   assert.match(game,/shipArtV65\(id,'top'\)/);
@@ -55,7 +56,7 @@ test('As migrações não alteram ownership, progresso e IDs de naves',()=>{
  assert.deepEqual(save.inventory,{item:'x'});assert.ok(save.ownedShips.includes('citadel'));
 });
 test('Cache de sprites reconhece os novos diretórios V65',()=>{
- for(const p of ['/assets/v65/ships/top/phoenix.webp','/assets/v65/ships/front/phoenix.webp','/assets/v65/aux/aux9.webp','/assets/v65/drones/drone_a.webp','/assets/v65/npcs/streuner.webp']){
+ for(const p of ['/assets/v136/ships/top/aurora.webp','/assets/v136/ships/front/aurora.webp','/assets/v65/aux/aux9.webp','/assets/v65/drones/drone_a.webp','/assets/v136/npcs/streuner.webp']){
   assert.equal(entityAssetPath(p),true,p);
  }
 });
@@ -63,16 +64,16 @@ test('Cache de sprites reconhece os novos diretórios V65',()=>{
 // V66 regression checks: source assets and cache revision are consistent.
 test('V69 preserva recursos V66 e mantém versões de imports sincronizadas',()=>{
   const pkg=JSON.parse(readFileSync(join(root,'package.json'),'utf8'));
-  assert.equal(pkg.version,'47.7.67');
+  assert.equal(pkg.version,'47.7.68');
   const server=readFileSync(join(root,'server/index.js'),'utf8');
-  assert.ok(server.includes("const RELEASE_VERSION = '47.7.67'"));
+  assert.ok(server.includes("const RELEASE_VERSION = '47.7.68'"));
   for(const match of game.matchAll(/from\s+['"](\.[^'"]+)['"]/g)){
-    assert.ok(match[1].endsWith('?v=47.7.67'), match[1]);
+    assert.ok(match[1].endsWith('?v=47.7.68'), match[1]);
   }
   assert.match(game,/performance\.now\(\)\/210/);
   assert.match(game,/performance\.now\(\)\/180/);
-  assert.match(game,/\/assets\/v66\/ships/);
-  for(const p of ['/assets/v66/ships/top/phoenix.webp','/assets/v66/ships/front/phoenix.webp','/assets/v66/aux/aux9.webp','/assets/v66/drones/drone_a.webp','/assets/v66/npcs/streuner.webp']){
+  assert.match(game,/\/assets\/v136\/ships/);
+  for(const p of ['/assets/v136/ships/top/aurora.webp','/assets/v136/ships/front/aurora.webp','/assets/v66/aux/aux9.webp','/assets/v66/drones/drone_a.webp','/assets/v136/npcs/streuner.webp']){
     webp(p);assert.equal(entityAssetPath(p),true,p);
   }
 });
@@ -85,7 +86,7 @@ test('V67 possui 34 sprites exclusivos e mapeamento por tipo',()=>{
   assert.equal(entries.length,34);
   const paths=new Set(entries.map(x=>x[2]));
   assert.equal(paths.size,34,'sprites repetidos no novo catálogo');
-  for(const path of paths){assert.match(path,/^\/assets\/v(?:67|135)\/npcs\//);webp(path);assert.equal(entityAssetPath(path),true,path);}
+  for(const path of paths){assert.match(path,/^\/assets\/v136\/npcs\//);webp(path);assert.equal(entityAssetPath(path),true,path);}
   const data=readFileSync(join(root,'public/data.js'),'utf8');
   for(const [,id] of entries){assert.ok(data.includes(id),id);}
   for(const mapId of ['x5','x6','x7','x8','b41','b42','b43'])assert.ok(data.includes(mapId+': {')||data.includes(mapId+':{'),mapId);

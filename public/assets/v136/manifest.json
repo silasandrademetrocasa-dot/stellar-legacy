@@ -1,0 +1,601 @@
+{
+  "version": "V136.0",
+  "ships": {
+    "aurora": {
+      "mode": "new board top+front",
+      "views": {
+        "card": "/assets/v136/ships/front/aurora.webp",
+        "map": "/assets/v136/ships/map/aurora.webp",
+        "top": "/assets/v136/ships/top/aurora.webp",
+        "front": "/assets/v136/ships/front/aurora.webp"
+      }
+    },
+    "bastion": {
+      "mode": "new board top+front",
+      "views": {
+        "card": "/assets/v136/ships/front/bastion.webp",
+        "map": "/assets/v136/ships/map/bastion.webp",
+        "top": "/assets/v136/ships/top/bastion.webp",
+        "front": "/assets/v136/ships/front/bastion.webp"
+      }
+    },
+    "bulwark": {
+      "mode": "new board top+front",
+      "views": {
+        "card": "/assets/v136/ships/front/bulwark.webp",
+        "map": "/assets/v136/ships/map/bulwark.webp",
+        "top": "/assets/v136/ships/top/bulwark.webp",
+        "front": "/assets/v136/ships/front/bulwark.webp"
+      }
+    },
+    "concord": {
+      "mode": "original-enhanced (no approved replacement)",
+      "views": {
+        "card": "/assets/v136/ships/front/concord.webp",
+        "map": "/assets/v136/ships/map/concord.webp",
+        "top": "/assets/v136/ships/top/concord.webp",
+        "front": "/assets/v136/ships/front/concord.webp"
+      }
+    },
+    "doppel": {
+      "mode": "original-enhanced (no approved replacement)",
+      "views": {
+        "card": "/assets/v136/ships/front/doppel.webp",
+        "map": "/assets/v136/ships/map/doppel.webp",
+        "top": "/assets/v136/ships/top/doppel.webp",
+        "front": "/assets/v136/ships/front/doppel.webp"
+      }
+    },
+    "echo": {
+      "mode": "original-enhanced (no approved replacement)",
+      "views": {
+        "card": "/assets/v136/ships/front/echo.webp",
+        "map": "/assets/v136/ships/map/echo.webp",
+        "top": "/assets/v136/ships/top/echo.webp",
+        "front": "/assets/v136/ships/front/echo.webp"
+      }
+    },
+    "gale": {
+      "mode": "original-enhanced (no approved replacement)",
+      "views": {
+        "card": "/assets/v136/ships/front/gale.webp",
+        "map": "/assets/v136/ships/map/gale.webp",
+        "top": "/assets/v136/ships/top/gale.webp",
+        "front": "/assets/v136/ships/front/gale.webp"
+      }
+    },
+    "gravastar": {
+      "mode": "original-enhanced (no approved replacement)",
+      "views": {
+        "card": "/assets/v136/ships/front/gravastar.webp",
+        "map": "/assets/v136/ships/map/gravastar.webp",
+        "top": "/assets/v136/ships/top/gravastar.webp",
+        "front": "/assets/v136/ships/front/gravastar.webp"
+      }
+    },
+    "guardian": {
+      "mode": "original-enhanced (no approved replacement)",
+      "views": {
+        "card": "/assets/v136/ships/front/guardian.webp",
+        "map": "/assets/v136/ships/map/guardian.webp",
+        "top": "/assets/v136/ships/top/guardian.webp",
+        "front": "/assets/v136/ships/front/guardian.webp"
+      }
+    },
+    "helios": {
+      "mode": "original-enhanced (no approved replacement)",
+      "views": {
+        "card": "/assets/v136/ships/front/helios.webp",
+        "map": "/assets/v136/ships/map/helios.webp",
+        "top": "/assets/v136/ships/top/helios.webp",
+        "front": "/assets/v136/ships/front/helios.webp"
+      }
+    },
+    "hellrunner": {
+      "mode": "original-enhanced (no approved replacement)",
+      "views": {
+        "card": "/assets/v136/ships/front/hellrunner.webp",
+        "map": "/assets/v136/ships/map/hellrunner.webp",
+        "top": "/assets/v136/ships/top/hellrunner.webp",
+        "front": "/assets/v136/ships/front/hellrunner.webp"
+      }
+    },
+    "interdictor": {
+      "mode": "original-enhanced (no approved replacement)",
+      "views": {
+        "card": "/assets/v136/ships/front/interdictor.webp",
+        "map": "/assets/v136/ships/map/interdictor.webp",
+        "top": "/assets/v136/ships/top/interdictor.webp",
+        "front": "/assets/v136/ships/front/interdictor.webp"
+      }
+    },
+    "ironclaw": {
+      "mode": "original-enhanced (no approved replacement)",
+      "views": {
+        "card": "/assets/v136/ships/front/ironclaw.webp",
+        "map": "/assets/v136/ships/map/ironclaw.webp",
+        "top": "/assets/v136/ships/top/ironclaw.webp",
+        "front": "/assets/v136/ships/front/ironclaw.webp"
+      }
+    },
+    "kensei": {
+      "mode": "new board top+front",
+      "views": {
+        "card": "/assets/v136/ships/front/kensei.webp",
+        "map": "/assets/v136/ships/map/kensei.webp",
+        "top": "/assets/v136/ships/top/kensei.webp",
+        "front": "/assets/v136/ships/front/kensei.webp"
+      }
+    },
+    "lancer": {
+      "mode": "original-enhanced (no approved replacement)",
+      "views": {
+        "card": "/assets/v136/ships/front/lancer.webp",
+        "map": "/assets/v136/ships/map/lancer.webp",
+        "top": "/assets/v136/ships/top/lancer.webp",
+        "front": "/assets/v136/ships/front/lancer.webp"
+      }
+    },
+    "leviathan": {
+      "mode": "new board top+front",
+      "views": {
+        "card": "/assets/v136/ships/front/leviathan.webp",
+        "map": "/assets/v136/ships/map/leviathan.webp",
+        "top": "/assets/v136/ships/top/leviathan.webp",
+        "front": "/assets/v136/ships/front/leviathan.webp"
+      }
+    },
+    "leviathan-x": {
+      "mode": "original-enhanced (no approved replacement)",
+      "views": {
+        "card": "/assets/v136/ships/front/leviathan-x.webp",
+        "map": "/assets/v136/ships/map/leviathan-x.webp",
+        "top": "/assets/v136/ships/top/leviathan-x.webp",
+        "front": "/assets/v136/ships/front/leviathan-x.webp"
+      }
+    },
+    "lumina": {
+      "mode": "original-enhanced (no approved replacement)",
+      "views": {
+        "card": "/assets/v136/ships/front/lumina.webp",
+        "map": "/assets/v136/ships/map/lumina.webp",
+        "top": "/assets/v136/ships/top/lumina.webp",
+        "front": "/assets/v136/ships/front/lumina.webp"
+      }
+    },
+    "lynx": {
+      "mode": "new board top+front",
+      "views": {
+        "card": "/assets/v136/ships/front/lynx.webp",
+        "map": "/assets/v136/ships/map/lynx.webp",
+        "top": "/assets/v136/ships/top/lynx.webp",
+        "front": "/assets/v136/ships/front/lynx.webp"
+      }
+    },
+    "meridian": {
+      "mode": "new board top+front",
+      "views": {
+        "card": "/assets/v136/ships/front/meridian.webp",
+        "map": "/assets/v136/ships/map/meridian.webp",
+        "top": "/assets/v136/ships/top/meridian.webp",
+        "front": "/assets/v136/ships/front/meridian.webp"
+      }
+    },
+    "mirage": {
+      "mode": "original-enhanced (no approved replacement)",
+      "views": {
+        "card": "/assets/v136/ships/front/mirage.webp",
+        "map": "/assets/v136/ships/map/mirage.webp",
+        "top": "/assets/v136/ships/top/mirage.webp",
+        "front": "/assets/v136/ships/front/mirage.webp"
+      }
+    },
+    "nexus-prime": {
+      "mode": "original-enhanced (no approved replacement)",
+      "views": {
+        "card": "/assets/v136/ships/front/nexus-prime.webp",
+        "map": "/assets/v136/ships/map/nexus-prime.webp",
+        "top": "/assets/v136/ships/top/nexus-prime.webp",
+        "front": "/assets/v136/ships/front/nexus-prime.webp"
+      }
+    },
+    "nullifier": {
+      "mode": "original-enhanced (no approved replacement)",
+      "views": {
+        "card": "/assets/v136/ships/front/nullifier.webp",
+        "map": "/assets/v136/ships/map/nullifier.webp",
+        "top": "/assets/v136/ships/top/nullifier.webp",
+        "front": "/assets/v136/ships/front/nullifier.webp"
+      }
+    },
+    "pathfinder": {
+      "mode": "new board top+front",
+      "views": {
+        "card": "/assets/v136/ships/front/pathfinder.webp",
+        "map": "/assets/v136/ships/map/pathfinder.webp",
+        "top": "/assets/v136/ships/top/pathfinder.webp",
+        "front": "/assets/v136/ships/front/pathfinder.webp"
+      }
+    },
+    "phantom": {
+      "mode": "new board top+front",
+      "views": {
+        "card": "/assets/v136/ships/front/phantom.webp",
+        "map": "/assets/v136/ships/map/phantom.webp",
+        "top": "/assets/v136/ships/top/phantom.webp",
+        "front": "/assets/v136/ships/front/phantom.webp"
+      }
+    },
+    "pioneer": {
+      "mode": "new board top+front",
+      "views": {
+        "card": "/assets/v136/ships/front/pioneer.webp",
+        "map": "/assets/v136/ships/map/pioneer.webp",
+        "top": "/assets/v136/ships/top/pioneer.webp",
+        "front": "/assets/v136/ships/front/pioneer.webp"
+      }
+    },
+    "plaguewing": {
+      "mode": "original-enhanced (no approved replacement)",
+      "views": {
+        "card": "/assets/v136/ships/front/plaguewing.webp",
+        "map": "/assets/v136/ships/map/plaguewing.webp",
+        "top": "/assets/v136/ships/top/plaguewing.webp",
+        "front": "/assets/v136/ships/front/plaguewing.webp"
+      }
+    },
+    "praetor": {
+      "mode": "original-enhanced (no approved replacement)",
+      "views": {
+        "card": "/assets/v136/ships/front/praetor.webp",
+        "map": "/assets/v136/ships/map/praetor.webp",
+        "top": "/assets/v136/ships/top/praetor.webp",
+        "front": "/assets/v136/ships/front/praetor.webp"
+      }
+    },
+    "prism": {
+      "mode": "original-enhanced (no approved replacement)",
+      "views": {
+        "card": "/assets/v136/ships/front/prism.webp",
+        "map": "/assets/v136/ships/map/prism.webp",
+        "top": "/assets/v136/ships/top/prism.webp",
+        "front": "/assets/v136/ships/front/prism.webp"
+      }
+    },
+    "raptor": {
+      "mode": "new board top+front",
+      "views": {
+        "card": "/assets/v136/ships/front/raptor.webp",
+        "map": "/assets/v136/ships/map/raptor.webp",
+        "top": "/assets/v136/ships/top/raptor.webp",
+        "front": "/assets/v136/ships/front/raptor.webp"
+      }
+    },
+    "ravager": {
+      "mode": "original-enhanced (no approved replacement)",
+      "views": {
+        "card": "/assets/v136/ships/front/ravager.webp",
+        "map": "/assets/v136/ships/map/ravager.webp",
+        "top": "/assets/v136/ships/top/ravager.webp",
+        "front": "/assets/v136/ships/front/ravager.webp"
+      }
+    },
+    "reclaimer": {
+      "mode": "original-enhanced (no approved replacement)",
+      "views": {
+        "card": "/assets/v136/ships/front/reclaimer.webp",
+        "map": "/assets/v136/ships/map/reclaimer.webp",
+        "top": "/assets/v136/ships/top/reclaimer.webp",
+        "front": "/assets/v136/ships/front/reclaimer.webp"
+      }
+    },
+    "seraph": {
+      "mode": "new board top+front",
+      "views": {
+        "card": "/assets/v136/ships/front/seraph.webp",
+        "map": "/assets/v136/ships/map/seraph.webp",
+        "top": "/assets/v136/ships/top/seraph.webp",
+        "front": "/assets/v136/ships/front/seraph.webp"
+      }
+    },
+    "shogun": {
+      "mode": "original-enhanced (no approved replacement)",
+      "views": {
+        "card": "/assets/v136/ships/front/shogun.webp",
+        "map": "/assets/v136/ships/map/shogun.webp",
+        "top": "/assets/v136/ships/top/shogun.webp",
+        "front": "/assets/v136/ships/front/shogun.webp"
+      }
+    },
+    "sovereign": {
+      "mode": "original-enhanced (no approved replacement)",
+      "views": {
+        "card": "/assets/v136/ships/front/sovereign.webp",
+        "map": "/assets/v136/ships/map/sovereign.webp",
+        "top": "/assets/v136/ships/top/sovereign.webp",
+        "front": "/assets/v136/ships/front/sovereign.webp"
+      }
+    },
+    "stormrider": {
+      "mode": "original-enhanced (no approved replacement)",
+      "views": {
+        "card": "/assets/v136/ships/front/stormrider.webp",
+        "map": "/assets/v136/ships/map/stormrider.webp",
+        "top": "/assets/v136/ships/top/stormrider.webp",
+        "front": "/assets/v136/ships/front/stormrider.webp"
+      }
+    },
+    "striker": {
+      "mode": "original-enhanced (no approved replacement)",
+      "views": {
+        "card": "/assets/v136/ships/front/striker.webp",
+        "map": "/assets/v136/ships/map/striker.webp",
+        "top": "/assets/v136/ships/top/striker.webp",
+        "front": "/assets/v136/ships/front/striker.webp"
+      }
+    },
+    "valkyrie": {
+      "mode": "original-enhanced (no approved replacement)",
+      "views": {
+        "card": "/assets/v136/ships/front/valkyrie.webp",
+        "map": "/assets/v136/ships/map/valkyrie.webp",
+        "top": "/assets/v136/ships/top/valkyrie.webp",
+        "front": "/assets/v136/ships/front/valkyrie.webp"
+      }
+    },
+    "vanguard": {
+      "mode": "original-enhanced (no approved replacement)",
+      "views": {
+        "card": "/assets/v136/ships/front/vanguard.webp",
+        "map": "/assets/v136/ships/map/vanguard.webp",
+        "top": "/assets/v136/ships/top/vanguard.webp",
+        "front": "/assets/v136/ships/front/vanguard.webp"
+      }
+    },
+    "venatrix": {
+      "mode": "original-enhanced (no approved replacement)",
+      "views": {
+        "card": "/assets/v136/ships/front/venatrix.webp",
+        "map": "/assets/v136/ships/map/venatrix.webp",
+        "top": "/assets/v136/ships/top/venatrix.webp",
+        "front": "/assets/v136/ships/front/venatrix.webp"
+      }
+    },
+    "viper": {
+      "mode": "original-enhanced (no approved replacement)",
+      "views": {
+        "card": "/assets/v136/ships/front/viper.webp",
+        "map": "/assets/v136/ships/map/viper.webp",
+        "top": "/assets/v136/ships/top/viper.webp",
+        "front": "/assets/v136/ships/front/viper.webp"
+      }
+    },
+    "warden": {
+      "mode": "original-enhanced (no approved replacement)",
+      "views": {
+        "card": "/assets/v136/ships/front/warden.webp",
+        "map": "/assets/v136/ships/map/warden.webp",
+        "top": "/assets/v136/ships/top/warden.webp",
+        "front": "/assets/v136/ships/front/warden.webp"
+      }
+    },
+    "wraith": {
+      "mode": "original-enhanced (no approved replacement)",
+      "views": {
+        "card": "/assets/v136/ships/front/wraith.webp",
+        "map": "/assets/v136/ships/map/wraith.webp",
+        "top": "/assets/v136/ships/top/wraith.webp",
+        "front": "/assets/v136/ships/front/wraith.webp"
+      }
+    }
+  },
+  "npcs": {
+    "zyron": {
+      "path": "/assets/v136/npcs/zyron.webp",
+      "mode": "original-enhanced"
+    },
+    "vrax": {
+      "path": "/assets/v136/npcs/vrax.webp",
+      "mode": "new individual board top"
+    },
+    "vrax-prime": {
+      "path": "/assets/v136/npcs/vrax-prime.webp",
+      "mode": "new individual board top"
+    },
+    "scavenger": {
+      "path": "/assets/v136/npcs/scavenger.webp",
+      "mode": "new individual board top"
+    },
+    "colossar-prime": {
+      "path": "/assets/v136/npcs/colossar-prime.webp",
+      "mode": "original-enhanced"
+    },
+    "scavenger-prime": {
+      "path": "/assets/v136/npcs/scavenger-prime.webp",
+      "mode": "new individual board top"
+    },
+    "dreadnox-prime": {
+      "path": "/assets/v136/npcs/dreadnox-prime.webp",
+      "mode": "original-enhanced"
+    },
+    "scavenger-support": {
+      "path": "/assets/v136/npcs/scavenger-support.webp",
+      "mode": "original-enhanced"
+    },
+    "kharon": {
+      "path": "/assets/v136/npcs/kharon.webp",
+      "mode": "original-enhanced"
+    },
+    "scavenger-scout": {
+      "path": "/assets/v136/npcs/scavenger-scout.webp",
+      "mode": "original-enhanced"
+    },
+    "zyron-prime": {
+      "path": "/assets/v136/npcs/zyron-prime.webp",
+      "mode": "original-enhanced"
+    },
+    "kharon-prime": {
+      "path": "/assets/v136/npcs/kharon-prime.webp",
+      "mode": "original-enhanced"
+    },
+    "colossar": {
+      "path": "/assets/v136/npcs/colossar.webp",
+      "mode": "original-enhanced"
+    },
+    "dreadnox": {
+      "path": "/assets/v136/npcs/dreadnox.webp",
+      "mode": "original-enhanced"
+    },
+    "streuner": {
+      "path": "/assets/v136/npcs/streuner.webp",
+      "mode": "new individual board top mapped to verified NPC class",
+      "source": "scavenger"
+    },
+    "bossObsidianPike": {
+      "path": "/assets/v136/npcs/bossObsidianPike.webp",
+      "mode": "original-enhanced"
+    },
+    "bossStreuner": {
+      "path": "/assets/v136/npcs/bossStreuner.webp",
+      "mode": "new individual board top mapped to verified NPC class",
+      "source": "scavenger-prime"
+    },
+    "bossRiftScout": {
+      "path": "/assets/v136/npcs/bossRiftScout.webp",
+      "mode": "original-enhanced"
+    },
+    "voidCorsair": {
+      "path": "/assets/v136/npcs/voidCorsair.webp",
+      "mode": "original-enhanced"
+    },
+    "bossRiftMauler": {
+      "path": "/assets/v136/npcs/bossRiftMauler.webp",
+      "mode": "original-enhanced"
+    },
+    "bossSaimon": {
+      "path": "/assets/v136/npcs/bossSaimon.webp",
+      "mode": "original-enhanced verified low-map mapping",
+      "source": "zyron-prime"
+    },
+    "bossLordakia": {
+      "path": "/assets/v136/npcs/bossLordakia.webp",
+      "mode": "new individual board top mapped to verified NPC class",
+      "source": "vrax-prime"
+    },
+    "sentinelScout": {
+      "path": "/assets/v136/npcs/sentinelScout.webp",
+      "mode": "original-enhanced"
+    },
+    "riftScout": {
+      "path": "/assets/v136/npcs/riftScout.webp",
+      "mode": "original-enhanced"
+    },
+    "riftMauler": {
+      "path": "/assets/v136/npcs/riftMauler.webp",
+      "mode": "original-enhanced"
+    },
+    "saimon": {
+      "path": "/assets/v136/npcs/saimon.webp",
+      "mode": "original-enhanced verified low-map mapping",
+      "source": "zyron"
+    },
+    "bossAstralReaper": {
+      "path": "/assets/v136/npcs/bossAstralReaper.webp",
+      "mode": "original-enhanced"
+    },
+    "sibelon": {
+      "path": "/assets/v136/npcs/sibelon.webp",
+      "mode": "original-enhanced verified low-map mapping",
+      "source": "colossar"
+    },
+    "devolarium": {
+      "path": "/assets/v136/npcs/devolarium.webp",
+      "mode": "original-enhanced verified low-map mapping",
+      "source": "dreadnox"
+    },
+    "lordakia": {
+      "path": "/assets/v136/npcs/lordakia.webp",
+      "mode": "new individual board top mapped to verified NPC class",
+      "source": "vrax"
+    },
+    "aiderStreuner": {
+      "path": "/assets/v136/npcs/aiderStreuner.webp",
+      "mode": "original-enhanced verified low-map mapping",
+      "source": "scavenger-support"
+    },
+    "sentinelScavenger": {
+      "path": "/assets/v136/npcs/sentinelScavenger.webp",
+      "mode": "original-enhanced"
+    },
+    "obsidianPike": {
+      "path": "/assets/v136/npcs/obsidianPike.webp",
+      "mode": "original-enhanced"
+    },
+    "mordon": {
+      "path": "/assets/v136/npcs/mordon.webp",
+      "mode": "original-enhanced verified low-map mapping",
+      "source": "kharon"
+    },
+    "emberFang": {
+      "path": "/assets/v136/npcs/emberFang.webp",
+      "mode": "original-enhanced"
+    },
+    "recruitStreuner": {
+      "path": "/assets/v136/npcs/recruitStreuner.webp",
+      "mode": "original-enhanced verified low-map mapping",
+      "source": "scavenger-scout"
+    },
+    "nexusWarden": {
+      "path": "/assets/v136/npcs/nexusWarden.webp",
+      "mode": "original-enhanced"
+    },
+    "apexOverlord": {
+      "path": "/assets/v136/npcs/apexOverlord.webp",
+      "mode": "original-enhanced"
+    },
+    "bossSibelon": {
+      "path": "/assets/v136/npcs/bossSibelon.webp",
+      "mode": "original-enhanced verified low-map mapping",
+      "source": "colossar-prime"
+    },
+    "bossNexusWarden": {
+      "path": "/assets/v136/npcs/bossNexusWarden.webp",
+      "mode": "original-enhanced"
+    },
+    "bossEmberFang": {
+      "path": "/assets/v136/npcs/bossEmberFang.webp",
+      "mode": "original-enhanced"
+    },
+    "bossDevolarium": {
+      "path": "/assets/v136/npcs/bossDevolarium.webp",
+      "mode": "original-enhanced verified low-map mapping",
+      "source": "dreadnox-prime"
+    },
+    "bossMordon": {
+      "path": "/assets/v136/npcs/bossMordon.webp",
+      "mode": "original-enhanced verified low-map mapping",
+      "source": "kharon-prime"
+    },
+    "bossVoidCorsair": {
+      "path": "/assets/v136/npcs/bossVoidCorsair.webp",
+      "mode": "original-enhanced"
+    },
+    "sentinelSupport": {
+      "path": "/assets/v136/npcs/sentinelSupport.webp",
+      "mode": "original-enhanced"
+    },
+    "bossIronWasp": {
+      "path": "/assets/v136/npcs/bossIronWasp.webp",
+      "mode": "original-enhanced"
+    },
+    "astralReaper": {
+      "path": "/assets/v136/npcs/astralReaper.webp",
+      "mode": "original-enhanced"
+    },
+    "ironWasp": {
+      "path": "/assets/v136/npcs/ironWasp.webp",
+      "mode": "original-enhanced"
+    }
+  },
+  "source": "Approved artwork extracted from individual boards; legacy retained only where new board does not match the in-game identity."
+}

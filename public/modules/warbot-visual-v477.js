@@ -1,8 +1,8 @@
 // V47.7.4: production-vetted Prime/Elite ship sprites from the existing NPC art pipeline.
 export const WARBOT_SHIP_ASSETS=Object.freeze({
-  earth:'/assets/v17/npcs/colossar-prime.webp',
-  mars:'/assets/v17/npcs/dreadnox-prime.webp',
-  jupiter:'/assets/v17/npcs/kharon-prime.webp'
+  earth:'/assets/v136/npcs/colossar-prime.webp',
+  mars:'/assets/v136/npcs/dreadnox-prime.webp',
+  jupiter:'/assets/v136/npcs/kharon-prime.webp'
 });
 const COLORS={earth:'#58d8ff',mars:'#ff8969',jupiter:'#e7c36f'};
 export function drawWarbotShipV477(ctx,e,selected=false,quality='low',time=0){

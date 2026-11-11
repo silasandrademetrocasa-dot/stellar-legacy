@@ -1,6 +1,6 @@
 {
   "name": "stellar-legacy",
-  "version": "47.7.67",
+  "version": "47.7.68",
   "type": "module",
   "scripts": {
     "start": "node server/index.js",
@@ -10,7 +10,8 @@
     "verify": "npm run check && npm test",
     "preflight:v100": "node scripts/v100-release-readiness.mjs",
     "benchmark:v104": "node scripts/v104-network-benchmark.mjs",
-    "pretest": "node scripts/ensure-test-deps.mjs"
+    "pretest": "node scripts/ensure-test-deps.mjs",
+    "prune-art:v136": "node scripts/prune-v136-legacy-art.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.57.4",
@@ -22,7 +23,7 @@
   "engines": {
     "node": ">=18"
   },
-  "release": "V135.0: temporada Arena 14 dias, evento 24/7, PvP exclusivo, sprites U-X e designers legados",
+  "release": "V136.0: catálogo de artes unificado; naves e NPCs com assets transparentes versionados",
   "devDependencies": {
     "@electric-sql/pglite": "0.3.14"
   }
