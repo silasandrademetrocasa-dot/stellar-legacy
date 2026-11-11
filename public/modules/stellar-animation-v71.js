@@ -12,16 +12,11 @@ const bPath=(fac,file)=>`${ROOT}/Bases/${fac}/${file}`;
 export function drawPortalV71(ctx,{portal={},visualId='',mapId='',getImage}={}){
  if(typeof getImage!=='function')return false;
  const kind=portalKindV69(portal,visualId,mapId);
- const still=getImage(pPath(kind,'static.webp'));
+ const still=getImage(`/assets/v137/portals/${kind}.webp`);
  if(!loaded(still))return false;
- // V116.3: os quadros originais têm 40–80px de margem transparente.
- // Recortamos apenas o vazio do próprio sprite; posição, hitbox e rota não mudam.
- const w=Math.max(1,Number(still.naturalWidth||still.width)||256);
- const h=Math.max(1,Number(still.naturalHeight||still.height)||256);
- const common=kind==='normal';
- const sx=w*(common?46:40)/256,sy=h*(common?66:30)/256;
- const sw=w*(common?168:176)/256,sh=h*(common?156:195)/256;
- ctx.drawImage(still,sx,sy,sw,sh,-68,-70,136,140);
+ // V137: o recorte do portal já está transparente e centralizado; não repetir
+ // offsets do atlas V71, que cortavam pontas e núcleos dos portais novos.
+ ctx.drawImage(still,-68,-70,136,140);
  return true;
 }
 /** V80: permanent station silhouette, one drawImage, no lighting-frame sequence. */

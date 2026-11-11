@@ -1,0 +1,54 @@
+{
+  "version": "V137.0",
+  "source": "approved user sheets",
+  "equipment": [
+    "arc1",
+    "arc2",
+    "arc3",
+    "arc4",
+    "arc5",
+    "arc6",
+    "arc-x",
+    "arc-omega",
+    "thr1",
+    "thr2",
+    "thr3",
+    "thr4",
+    "thr5",
+    "thr6",
+    "thr7",
+    "vsh1",
+    "vsh2",
+    "vsh3",
+    "vsh4",
+    "vsh5",
+    "vsh6",
+    "aeg1",
+    "aeg2",
+    "aeg3",
+    "aeg4",
+    "aeg5"
+  ],
+  "portals": [
+    "normal",
+    "aurora",
+    "nexus",
+    "eclipse",
+    "pvp",
+    "universe"
+  ],
+  "drones": [
+    "drone_common",
+    "drone_elite",
+    "drone_a",
+    "drone_b",
+    "drone_c",
+    "drone_d",
+    "drone_e"
+  ],
+  "aux": {
+    "spriteAtlas": "aux/aux9_16.webp",
+    "frames": 16,
+    "grid": "4x4"
+  }
+}

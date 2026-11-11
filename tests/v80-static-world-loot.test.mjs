@@ -11,7 +11,7 @@ test('V80: todas as qualidades renderizam somente imagem estática do portal',()
  for(const q of ['low','medium','high'])for(const t of [0,4,60]){
   const o=track();assert.ok(drawPortalV71(o.ctx,{portal:{to:'b41'},quality:q,time:t,getImage:o.load}));
   assert.equal(o.draws.length,1);assert.equal(o.paths.length,1);
-  assert.match(o.paths[0],/\/static\.webp$/);assert.deepEqual(o.draws[0].slice(1),[40,30,176,195,-68,-70,136,140]); // V116.3: único drawImage, agora recortado
+  assert.match(o.paths[0],/\/assets\/v137\/portals\/pvp\.webp$/);assert.deepEqual(o.draws[0].slice(1),[-68,-70,136,140]); // V116.3: único drawImage, agora recortado
  }
 });
 test('V80: todas as qualidades usam base única e não solicitam quadros',()=>{
@@ -35,5 +35,5 @@ test('V80: 30 layouts de mapas têm seus próprios fundos e não há colisão de
 test('V80: jogo mantém renderizador seguro do relé e quebra cache da configuração de mapas',()=>{
  const game=readFileSync(join(root,'public/game.js'),'utf8');
  assert.match(game,/drawRelayMediumMobileV76\(ctx,node,relayOptions\)/);
- assert.match(game,/fetch\(path\+'\?v=47\.7\.68',\{cache:'no-cache'\}\)/);
+ assert.match(game,/fetch\(path\+'\?v=47\.7\.69',\{cache:'no-cache'\}\)/);
 });

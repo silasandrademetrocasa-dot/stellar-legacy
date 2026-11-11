@@ -91,7 +91,7 @@ body.mobile-landscape-pro #rightHudStack > #targetLockHud:not(.collapsed):not(.h
    animados de combate, designers equipados e seus bônus continuam intactos. */
 .pet-hero .pet-avatar img,
 .pet-hangar-panel .pet-avatar img{
-  content:url('/assets/v4777/aux9-new.webp?v=20261022')!important;
+  content:url('/assets/v137/aux/aux9.webp?v=137')!important;
   width:100%!important;height:100%!important;object-fit:contain!important;
   filter:drop-shadow(0 0 8px rgba(64,203,255,.34))!important;
 }

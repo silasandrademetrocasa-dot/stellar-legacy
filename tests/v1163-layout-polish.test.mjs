@@ -45,8 +45,8 @@ test('V116.3: o portal usa um sprite estático, centralizado e sem alterar hitbo
   const ctx={drawImage:(...args)=>calls.push(args)};
   const portal={to:'x2',targetLabel:'1-2'};
   assert.equal(drawPortalV71(ctx,{portal,getImage:src=>{urls.push(src);return {naturalWidth:256,naturalHeight:256};}}),true);
-  assert.equal(calls.length,1);assert.equal(urls.length,1);assert.match(urls[0],/\/Portal_Comum\/static\.webp$/);
-  assert.deepEqual(calls[0].slice(1),[46,66,168,156,-68,-70,136,140]);
+  assert.equal(calls.length,1);assert.equal(urls.length,1);assert.match(urls[0],/\/assets\/v137\/portals\/normal\.webp$/);
+  assert.deepEqual(calls[0].slice(1),[-68,-70,136,140]);
   assert.equal(portal.to,'x2');
 });
 test('V116.3: Farm Offline protegido e legibilidade sem textos de versão',()=>{

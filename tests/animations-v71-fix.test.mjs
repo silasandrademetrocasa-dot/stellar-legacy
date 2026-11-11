@@ -17,14 +17,16 @@ test('V80: seis portais usam só uma imagem estática nos três níveis',()=>{
    const abs=join(root,'public',f);assert.ok(existsSync(abs),f);const buf=readFileSync(abs);assert.equal(buf.toString('ascii',0,4),'RIFF');
   }
  }
- const opts={portal:{to:'b41'},visualId:'portal_pvp',time:.8,getImage};
+ const requested=[];
+ const opts={portal:{to:'b41'},visualId:'portal_pvp',time:.8,getImage:p=>{requested.push(p);return image(p);}};
  const low=makeContext(),medium=makeContext(),high=makeContext();
  assert.equal(drawPortalV71(low,{...opts,quality:'low'}),true);
  assert.equal(drawPortalV71(medium,{...opts,quality:'medium'}),true);
  assert.equal(drawPortalV71(high,{...opts,quality:'high'}),true);
  assert.equal(low.calls.filter(c=>c[0]==='drawImage').length,1);
  const draws=medium.calls.filter(c=>c[0]==='drawImage');assert.equal(draws.length,1);
- assert.deepEqual(draws[0].slice(2),[40,30,176,195,-68,-70,136,140]); // V116.3: aparar margens transparentes, mesma textura estática
+ assert.deepEqual(draws[0].slice(2),[-68,-70,136,140]); // V137: sprite transparente já está recortado
+ assert.ok(requested.every(p=>p.startsWith('/assets/v137/portals/')), 'Todos os portais utilizam a arte V137'); 
  assert.equal(high.calls.filter(c=>c[0]==='drawImage').length,1);
  assert.equal(medium.calls.some(c=>c[0]==='clip'),false);
 });

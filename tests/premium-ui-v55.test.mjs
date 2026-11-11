@@ -27,15 +27,16 @@ test('V55: CSS carrega depois da navegação existente, tabs e responsividade',(
   assert.ok(html.indexOf('stellar-premium-ui-v55.css')>html.indexOf('route-map-layout-v4825.css'));
   for(const x of ['#shopModal #shopGrid','#hangarModal #hangarContent>.v55-hangar-hero','@media(max-width:520px)','prefers-reduced-motion']) assert.ok(css.includes(x));
 });
-test('V55: PNGs aprovados são WebP reais com IDS corretos (20)',()=>{
+test('V137: os ícones novos substituem os V55 e os remanescentes antigos continuam válidos',()=>{
   const matches=[...manifest.matchAll(/\/assets\/v55\/shop\/([\w-]+)\.webp/g)].map(m=>m[1]);
-  assert.equal(new Set(matches).size,20);
+  assert.ok(new Set(matches).size>=8);
   for(const id of matches){
     const p=resolve(root,'public/assets/v55/shop',id+'.webp');
     assert.ok(existsSync(p),id);
     assert.equal(readFileSync(p).subarray(0,4).toString(),'RIFF',id);
   }
-  for(const id of ['fs01','fs02','fs03','fs04','sg3nb00','sg3na02','sg3nb03','lcb10','plt3030'])assert.ok(matches.includes(id));
+  for(const id of ['lcb10','plt3030'])assert.ok(matches.includes(id));
+  for(const id of ['fs01','fs02','fs03','fs04','fs05','sg3na02','sg3nb03'])assert.ok(manifest.includes(id+": '/assets/v137/equipment/"));
 });
 test('V55: AUX não foi repintado, SQL permanece sem alteração',()=>{
   assert.match(game,/if\(type==='petGear'\)return/);

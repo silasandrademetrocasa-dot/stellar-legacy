@@ -1,6 +1,6 @@
 {
   "name": "stellar-legacy",
-  "version": "47.7.68",
+  "version": "47.7.69",
   "type": "module",
   "scripts": {
     "start": "node server/index.js",
@@ -23,7 +23,7 @@
   "engines": {
     "node": ">=18"
   },
-  "release": "V136.0: catálogo de artes unificado; naves e NPCs com assets transparentes versionados",
+  "release": "V137.0: escudos ponderados, artes HD, 16 quadros AUX, balanceamento e códigos estáveis",
   "devDependencies": {
     "@electric-sql/pglite": "0.3.14"
   }

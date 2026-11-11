@@ -18,6 +18,7 @@ const native=read('android/app/src/main/java/com/stellarlegacy/mobile/MainActivi
 const build=read('android/app/build.gradle');
 const androidManifest=read('android/app/src/main/AndroidManifest.xml');
 const art=JSON.parse(read('public/assets/v136/manifest.json'));
+const v137=JSON.parse(read('public/assets/v137/manifest.json'));
 
 // Inventário gerado a partir de public/ (sourceSet local, sem baixar as artes).
 assert(report.release===pkg.version,'versão de assets não confere');
@@ -56,6 +57,18 @@ for(const [id,ship] of ships){
 }
 for(const [id,npc] of npcs)verifyAsset(npc.path,'NPC '+id);
 
+// V137: AUDITORIA VISUAL COMPLETA. Não basta contar arquivos; todos os 40 sprites aprovados
+// (26 equipamentos, seis portais, sete drones, AUX estático e atlas animado) precisam existir.
+assert(v137.version==='V137.0','versão das novas artes V137 incorreta');
+assert(has('assets/v137/manifest.json'),'catálogo visual V137 fora do APK');
+const v137Visuals=[...v137.equipment.map(n=>`equipment/${n}.webp`),
+  ...v137.portals.map(n=>`portals/${n}.webp`),...v137.drones.map(n=>`drones/${n}.webp`),
+  'aux/aux9.webp','aux/aux9_16.webp'];
+for(const item of v137Visuals){const path='assets/v137/'+item;
+ assert(has(path),'sprite HD V137 não incluído no APK: '+path);
+ assert(report.entries.find(e=>e.path===path)?.size>2000,'sprite HD V137 truncado: '+path);
+}
+assert(v137.aux.frames===16&&v137.aux.grid==='4x4','animação AUX não contém 16 quadros');
 // Proíbe que a remoção de artes antigas seja confundida com perda de novas.
 const oldDirs=/^assets\/(?:v17\/(?:ships|ships-map|npcs)|v52_4\/(?:ships|npcs)|v62\/showroom|v63\/ships|v65\/(?:ships|npcs)|v66\/(?:ships|npcs)|v67\/npcs|v3021\/ships)\//;
 assert(!report.entries.some(e=>oldDirs.test(e.path)),'sprites legados ainda presentes no APK');
@@ -70,4 +83,4 @@ for(const f of ['index.html','style.css','game.js','api.js','world.js'])assert(h
 const linked=[...html.matchAll(/\b(?:src|href)=["'](\/[^"']+)["']/g)]
  .map(m=>m[1].split('?')[0]).filter(x=>!x.startsWith('/api/')&&!x.startsWith('/ws'));
 for(const url of linked)assert(has(url.slice(1)),'HTML refere-se a arquivo inexistente no APK: '+url);
-console.log(`✅ APK auditado: ${report.files} arquivos, ${report.images} imagens, ${ships.length} naves, ${npcs.length} NPCs, ${checked} referências visuais V136 verificadas. API e WSS continuam remotas.`);
+console.log(`✅ APK auditado: ${report.files} arquivos, ${report.images} imagens, ${ships.length} naves, ${npcs.length} NPCs, ${checked} referências V136 e ${v137Visuals.length} visuais V137 verificados. API e WSS continuam remotas.`);

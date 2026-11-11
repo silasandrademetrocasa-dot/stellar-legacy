@@ -103,5 +103,5 @@ test('V116.7: cliente usa indice nos pacotes WebSocket e evita alocacoes por pat
 });
 test('V116.7: nome e versao do jogo sao preservados e cache HTML atualizado',()=>{
   assert.match(html,/v1167-mobile-ws/);
-  assert.match(source,/mobile-performance-v1167\.js\?v=47\.7\.68/);
+  assert.match(source,/mobile-performance-v1167\.js\?v=47\.7\.69/);
 });
