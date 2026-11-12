@@ -30,7 +30,7 @@ export async function readBestLocalSnapshotV1211(owner,legacy=null,{resetEpoch=n
  const fallback=usable(owner,legacy,resetEpoch)?legacy:null;
  if(!localFirstPilotEnabledV121())return fallback;
  let indexed=null;
- try{indexed=readIndexed?await readIndexed(owner):(await (await store()).read(owner))?.state||null;}
+ try{indexed=readIndexed?await readIndexed(owner):(await (await store()).readRecovering(owner))?.state||null;}
  catch(e){console.warn('[localfirst-v121.1] leitura IndexedDB',e?.message||e);}
  if(!usable(owner,indexed,resetEpoch))return fallback;
  if(!fallback)return indexed;
@@ -61,12 +61,19 @@ export async function flushLocalFirstSnapshotV121(){
  if(timeout!==null){clearTimeout(timeout);timeout=null;}
  if(staged.size===0)return writing;
  const tasks=[...staged.values()];staged.clear();
+ let failed=false;
  writing=writing.catch(()=>{}).then(async()=>{
    const db=await store();
    for(const item of tasks){await db.commit(item.owner,item.state,{intent:item.intent});}
- }).catch(e=>{console.warn('[localfirst-v121.1] escrita local indisponivel',e?.message||e);});
+ }).catch(e=>{
+   failed=true;
+   // Never discard a staged intent on quota/storage failure. Keep newer state if present.
+   for(const item of tasks){const newer=staged.get(item.owner);staged.set(item.owner,newer?{...newer,intent:newer.intent||item.intent}:item);}
+   console.warn('[localfirst-v121.1] escrita local pendente',e?.message||e);
+ });
  await writing;
- if(staged.size)return flushLocalFirstSnapshotV121();
+ // Do not recursively spin when storage is unavailable; next mutation/lifecycle event retries.
+ if(!failed&&staged.size)return flushLocalFirstSnapshotV121();
 }
 /** Recebemos ACK somente DEPOIS do PUT legado ser confirmado no servidor. */
 export function localHangarAckEligibleV1211(e,confirmedAt,signature){

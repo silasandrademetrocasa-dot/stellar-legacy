@@ -1,6 +1,6 @@
 {
   "name": "stellar-legacy",
-  "version": "47.7.80",
+  "version": "47.7.81",
   "type": "module",
   "scripts": {
     "start": "node server/index.js",
@@ -9,7 +9,8 @@
     "test": "node --test tests/*.test.mjs",
     "verify": "npm run check && npm test",
     "pretest": "node scripts/ensure-test-deps.mjs",
-    "apk:check": "node scripts/prepare-apk-assets.js && node scripts/verify-apk.js"
+    "apk:check": "node scripts/prepare-apk-assets.js && node scripts/verify-apk.js",
+    "test:browser": "node scripts/test-local-first-browser-v145.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.57.4",
@@ -21,9 +22,10 @@
   "engines": {
     "node": ">=18"
   },
-  "release": "V144.1: loja de formações e HUD 18 atalhos com reabertura",
+  "release": "V145.0: delta de transporte, journal recuperável e sincronização por alterações (migração parcial)",
   "devDependencies": {
     "@electric-sql/pglite": "0.3.14",
+    "fake-indexeddb": "6.2.4",
     "linkedom": "0.18.12"
   }
 }

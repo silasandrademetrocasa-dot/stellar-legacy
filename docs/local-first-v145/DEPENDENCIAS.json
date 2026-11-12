@@ -1,0 +1,1430 @@
+[
+  {
+    "origin": "public/api.js",
+    "dependency": "./modules/state-delta-v145.js"
+  },
+  {
+    "origin": "public/api.js",
+    "dependency": "./modules/runtime-read-cache-v145.js"
+  },
+  {
+    "origin": "public/api.js",
+    "dependency": "./modules/native-data-origin.js?v=47.7.81"
+  },
+  {
+    "origin": "public/api.js",
+    "dependency": "./modules/offline-farm-activity-v103.js?v=47.7.81"
+  },
+  {
+    "origin": "public/api.js",
+    "dependency": "./modules/read-coalescer-v104.js?v=47.7.81"
+  },
+  {
+    "origin": "public/api.js",
+    "dependency": "./modules/login-persistence-v101.js"
+  },
+  {
+    "origin": "public/game.js",
+    "dependency": "./modules/aux-heading.js?v=47.7.81"
+  },
+  {
+    "origin": "public/game.js",
+    "dependency": "./modules/mutation-checkpoint-v145.js?v=47.7.81"
+  },
+  {
+    "origin": "public/game.js",
+    "dependency": "./modules/combat-tactics-v144.js?v=47.7.81"
+  },
+  {
+    "origin": "public/game.js",
+    "dependency": "./modules/drone-formation-motion-v144.js?v=47.7.81"
+  },
+  {
+    "origin": "public/game.js",
+    "dependency": "./modules/combat-hud-v144.js?v=47.7.81"
+  },
+  {
+    "origin": "public/game.js",
+    "dependency": "./modules/seasonal-boxes-v142.js?v=47.7.81"
+  },
+  {
+    "origin": "public/game.js",
+    "dependency": "./modules/npc-framing-v141.js?v=47.7.81"
+  },
+  {
+    "origin": "public/game.js",
+    "dependency": "./modules/base-modules-v140.js?v=47.7.81"
+  },
+  {
+    "origin": "public/game.js",
+    "dependency": "./modules/entity-art-v138.js?v=47.7.81"
+  },
+  {
+    "origin": "public/game.js",
+    "dependency": "./modules/collection-transport-v138.js?v=47.7.81"
+  },
+  {
+    "origin": "public/game.js",
+    "dependency": "./modules/shield-combat-v137.js?v=47.7.81"
+  },
+  {
+    "origin": "public/game.js",
+    "dependency": "./modules/collection-access-v1341.js?v=47.7.81"
+  },
+  {
+    "origin": "public/game.js",
+    "dependency": "./modules/combat-journal-v134.js?v=47.7.81"
+  },
+  {
+    "origin": "public/game.js",
+    "dependency": "./modules/player-state-merge-v134.js?v=47.7.81"
+  },
+  {
+    "origin": "public/game.js",
+    "dependency": "./api.js?v=47.7.81"
+  },
+  {
+    "origin": "public/game.js",
+    "dependency": "./modules/cargo-pending-v1333.js?v=47.7.81"
+  },
+  {
+    "origin": "public/game.js",
+    "dependency": "./modules/save-freshness-v1331.js?v=47.7.81"
+  },
+  {
+    "origin": "public/game.js",
+    "dependency": "./modules/christmas-v132.js?v=47.7.81"
+  },
+  {
+    "origin": "public/game.js",
+    "dependency": "./modules/christmas-art-v132.js?v=47.7.81"
+  },
+  {
+    "origin": "public/game.js",
+    "dependency": "./modules/christmas-ui-v132.js?v=47.7.81"
+  },
+  {
+    "origin": "public/game.js",
+    "dependency": "./api.js?v=47.7.81"
+  },
+  {
+    "origin": "public/game.js",
+    "dependency": "./modules/local-first-bridge-v1211.js?v=47.7.81"
+  },
+  {
+    "origin": "public/game.js",
+    "dependency": "./modules/local-first-sync-v122.js?v=47.7.81"
+  },
+  {
+    "origin": "public/game.js",
+    "dependency": "./modules/economy-request-v123.js?v=47.7.81"
+  },
+  {
+    "origin": "public/game.js",
+    "dependency": "./modules/economy-intent-v125.js?v=47.7.81"
+  },
+  {
+    "origin": "public/game.js",
+    "dependency": "./modules/economy-sale-v130.js?v=47.7.81"
+  },
+  {
+    "origin": "public/game.js",
+    "dependency": "./modules/local-first-legacy-mirror-v122.js?v=47.7.81"
+  },
+  {
+    "origin": "public/game.js",
+    "dependency": "./modules/remote-cargo-auto-sale-v1065.js?v=47.7.81"
+  },
+  {
+    "origin": "public/game.js",
+    "dependency": "./modules/materializer-product-names-v1164.js?v=47.7.81"
+  },
+  {
+    "origin": "public/game.js",
+    "dependency": "./modules/stellar-autotrade-v1164.js?v=47.7.81"
+  },
+  {
+    "origin": "public/game.js",
+    "dependency": "./modules/login-persistence-v101.js?v=47.7.81"
+  },
+  {
+    "origin": "public/game.js",
+    "dependency": "./modules/combat-visual-lite-v78.js?v=47.7.81"
+  },
+  {
+    "origin": "public/game.js",
+    "dependency": "./modules/entity-visual-policy-v79.js?v=47.7.81"
+  },
+  {
+    "origin": "public/game.js",
+    "dependency": "./modules/relay-render-safe-v76.js?v=47.7.81"
+  },
+  {
+    "origin": "public/game.js",
+    "dependency": "./modules/stellar-animation-v1163.js?v=47.7.81"
+  },
+  {
+    "origin": "public/game.js",
+    "dependency": "./modules/sale-policy-v4776.js?v=47.7.81"
+  },
+  {
+    "origin": "public/game.js",
+    "dependency": "./modules/stellar-dialog-v4776.js?v=47.7.81"
+  },
+  {
+    "origin": "public/game.js",
+    "dependency": "./modules/warbot-admin-v477.js?v=47.7.81"
+  },
+  {
+    "origin": "public/game.js",
+    "dependency": "./api.js?v=47.7.81"
+  },
+  {
+    "origin": "public/game.js",
+    "dependency": "./modules/warbot-visual-v477.js?v=47.7.81"
+  },
+  {
+    "origin": "public/game.js",
+    "dependency": "./modules/combat-reborn-v470.js?v=47.7.81"
+  },
+  {
+    "origin": "public/game.js",
+    "dependency": "./modules/stellar-audio-v462.js?v=47.7.81"
+  },
+  {
+    "origin": "public/game.js",
+    "dependency": "./modules/portal-layout-v461.js?v=47.7.81"
+  },
+  {
+    "origin": "public/game.js",
+    "dependency": "./modules/galactic-progression-v451.js?v=47.7.81"
+  },
+  {
+    "origin": "public/game.js",
+    "dependency": "./modules/galactic-balance-v460.js?v=47.7.81"
+  },
+  {
+    "origin": "public/game.js",
+    "dependency": "./modules/pass-targets-v113.js?v=47.7.81"
+  },
+  {
+    "origin": "public/game.js",
+    "dependency": "./modules/frontier-routing-v440.js?v=47.7.81"
+  },
+  {
+    "origin": "public/game.js",
+    "dependency": "./modules/astral-systems-v435.js?v=47.7.81"
+  },
+  {
+    "origin": "public/game.js",
+    "dependency": "./modules/frontier-sectors-v435.js?v=47.7.81"
+  },
+  {
+    "origin": "public/game.js",
+    "dependency": "./api.js?v=47.7.81"
+  },
+  {
+    "origin": "public/game.js",
+    "dependency": "./modules/astral-combat-v431.js?v=47.7.81"
+  },
+  {
+    "origin": "public/game.js",
+    "dependency": "./modules/astral-gates-v380.js?v=47.7.81"
+  },
+  {
+    "origin": "public/game.js",
+    "dependency": "./modules/frontier-v370.js?v=47.7.81"
+  },
+  {
+    "origin": "public/game.js",
+    "dependency": "./api.js?v=47.7.81"
+  },
+  {
+    "origin": "public/game.js",
+    "dependency": "./modules/galactic-dominion-v360.js?v=47.7.81"
+  },
+  {
+    "origin": "public/game.js",
+    "dependency": "./api.js?v=47.7.81"
+  },
+  {
+    "origin": "public/game.js",
+    "dependency": "./modules/ammo-hud-budget-v347.js?v=47.7.81"
+  },
+  {
+    "origin": "public/game.js",
+    "dependency": "./modules/visual-revolution-v347.js?v=47.7.81"
+  },
+  {
+    "origin": "public/game.js",
+    "dependency": "./modules/stellar-relay-elite-v54.js?v=47.7.81"
+  },
+  {
+    "origin": "public/game.js",
+    "dependency": "./modules/galactic-ascension-v350.js?v=47.7.81"
+  },
+  {
+    "origin": "public/game.js",
+    "dependency": "./api.js?v=47.7.81"
+  },
+  {
+    "origin": "public/game.js",
+    "dependency": "./modules/relay-hangar-v3462.js?v=47.7.81"
+  },
+  {
+    "origin": "public/game.js",
+    "dependency": "./api.js?v=47.7.81"
+  },
+  {
+    "origin": "public/game.js",
+    "dependency": "./modules/event-control-ui-v3411.js?v=47.7.81"
+  },
+  {
+    "origin": "public/game.js",
+    "dependency": "./api.js?v=47.7.81"
+  },
+  {
+    "origin": "public/game.js",
+    "dependency": "./modules/tactical-hud-v34.js?v=47.7.81"
+  },
+  {
+    "origin": "public/game.js",
+    "dependency": "./modules/render-budget-v34.js?v=47.7.81"
+  },
+  {
+    "origin": "public/game.js",
+    "dependency": "./modules/stellar-display-names.js?v=47.7.81"
+  },
+  {
+    "origin": "public/game.js",
+    "dependency": "./modules/combat-target-priority.js?v=47.7.81"
+  },
+  {
+    "origin": "public/game.js",
+    "dependency": "./modules/weekend-events-v341.js?v=47.7.81"
+  },
+  {
+    "origin": "public/game.js",
+    "dependency": "./modules/event-control-profile-v3411.js?v=47.7.81"
+  },
+  {
+    "origin": "public/game.js",
+    "dependency": "./modules/event-evolution-v345.js?v=47.7.81"
+  },
+  {
+    "origin": "public/game.js",
+    "dependency": "./modules/minimap-cadence-v33.js?v=47.7.81"
+  },
+  {
+    "origin": "public/game.js",
+    "dependency": "./modules/smart-combat-engine.js?v=47.7.81"
+  },
+  {
+    "origin": "public/game.js",
+    "dependency": "./modules/npc-patrol.js?v=47.7.81"
+  },
+  {
+    "origin": "public/game.js",
+    "dependency": "./modules/mobile-landscape.js?v=47.7.81"
+  },
+  {
+    "origin": "public/game.js",
+    "dependency": "./modules/bulk-purchase-v92.js?v=47.7.81"
+  },
+  {
+    "origin": "public/game.js",
+    "dependency": "./modules/sprite-orientation.js?v=47.7.81"
+  },
+  {
+    "origin": "public/game.js",
+    "dependency": "./modules/hud-intelligence.js?v=47.7.81"
+  },
+  {
+    "origin": "public/game.js",
+    "dependency": "./modules/sentinel-defense.js?v=47.7.81"
+  },
+  {
+    "origin": "public/game.js",
+    "dependency": "./modules/aux-protocols.js?v=47.7.81"
+  },
+  {
+    "origin": "public/game.js",
+    "dependency": "./api.js?v=47.7.81"
+  },
+  {
+    "origin": "public/game.js",
+    "dependency": "./modules/aux-advanced-protocols-v1131.js?v=47.7.81"
+  },
+  {
+    "origin": "public/game.js",
+    "dependency": "./modules/ship-navigation.js?v=47.7.81"
+  },
+  {
+    "origin": "public/game.js",
+    "dependency": "./api.js?v=47.7.81"
+  },
+  {
+    "origin": "public/game.js",
+    "dependency": "./modules/v21/command-center-view.js?v=47.7.81"
+  },
+  {
+    "origin": "public/game.js",
+    "dependency": "./modules/v22/command-upgrades.js?v=47.7.81"
+  },
+  {
+    "origin": "public/game.js",
+    "dependency": "./modules/v21/pwa.js?v=47.7.81"
+  },
+  {
+    "origin": "public/game.js",
+    "dependency": "./modules/admin-visual-builders.js?v=47.7.81"
+  },
+  {
+    "origin": "public/game.js",
+    "dependency": "./modules/admin-mission-builder.js?v=47.7.81"
+  },
+  {
+    "origin": "public/game.js",
+    "dependency": "./modules/hud-content-cache.js?v=47.7.81"
+  },
+  {
+    "origin": "public/game.js",
+    "dependency": "./modules/aux-work-scheduler.js?v=47.7.81"
+  },
+  {
+    "origin": "public/game.js",
+    "dependency": "./modules/npc-render-detail.js?v=47.7.81"
+  },
+  {
+    "origin": "public/game.js",
+    "dependency": "./modules/galactic-combat-v344.js?v=47.7.81"
+  },
+  {
+    "origin": "public/game.js",
+    "dependency": "./modules/npc-motion-v3441.js?v=47.7.81"
+  },
+  {
+    "origin": "public/game.js",
+    "dependency": "./modules/multiplayer-motion-v3442.js?v=47.7.81"
+  },
+  {
+    "origin": "public/game.js",
+    "dependency": "./modules/modular-map-v2.js?v=47.7.81"
+  },
+  {
+    "origin": "public/game.js",
+    "dependency": "./modules/backdrop-raster-cache.js?v=47.7.81"
+  },
+  {
+    "origin": "public/game.js",
+    "dependency": "./modules/text-width-cache.js?v=47.7.81"
+  },
+  {
+    "origin": "public/game.js",
+    "dependency": "./modules/hud-update-scheduler.js?v=47.7.81"
+  },
+  {
+    "origin": "public/game.js",
+    "dependency": "./modules/asset-cache.js?v=47.7.81"
+  },
+  {
+    "origin": "public/game.js",
+    "dependency": "./modules/scene-gradient-cache.js?v=47.7.81"
+  },
+  {
+    "origin": "public/game.js",
+    "dependency": "./modules/performance-monitor.js?v=47.7.81"
+  },
+  {
+    "origin": "public/game.js",
+    "dependency": "./modules/deferred-hud-v72.js?v=47.7.81"
+  },
+  {
+    "origin": "public/game.js",
+    "dependency": "./modules/periodic-hud-v73.js?v=47.7.81"
+  },
+  {
+    "origin": "public/game.js",
+    "dependency": "./modules/render-phase-profiler-v73.js?v=47.7.81"
+  },
+  {
+    "origin": "public/game.js",
+    "dependency": "./modules/browser-latency-v72.js?v=47.7.81"
+  },
+  {
+    "origin": "public/game.js",
+    "dependency": "./modules/adaptive-resolution-v70.js?v=47.7.81"
+  },
+  {
+    "origin": "public/game.js",
+    "dependency": "./modules/mobile-performance-v1167.js?v=47.7.81"
+  },
+  {
+    "origin": "public/game.js",
+    "dependency": "./modules/preview-scheduler-v70.js?v=47.7.81"
+  },
+  {
+    "origin": "public/game.js",
+    "dependency": "./modules/frame-gate.js?v=47.7.81"
+  },
+  {
+    "origin": "public/game.js",
+    "dependency": "./modules/visual-isolation-v75.js?v=47.7.81"
+  },
+  {
+    "origin": "public/game.js",
+    "dependency": "./modules/visual-scale-v526.js?v=47.7.81"
+  },
+  {
+    "origin": "public/game.js",
+    "dependency": "./modules/stellar-autopilot-recovery-v116.js?v=47.7.81"
+  },
+  {
+    "origin": "public/game.js",
+    "dependency": "./modules/stellar-autopilot-v126.js?v=47.7.81"
+  },
+  {
+    "origin": "public/game.js",
+    "dependency": "./modules/route-map-layout-v4825.js?v=47.7.81"
+  },
+  {
+    "origin": "public/game.js",
+    "dependency": "./modules/staged-preload-v342.js?v=47.7.81"
+  },
+  {
+    "origin": "public/game.js",
+    "dependency": "./modules/quality-profiles.js?v=47.7.81"
+  },
+  {
+    "origin": "public/game.js",
+    "dependency": "./combat-config-v2013.js?v=47.7.81"
+  },
+  {
+    "origin": "public/game.js",
+    "dependency": "./modules/battle-preset-guard-v1063.js?v=47.7.81"
+  },
+  {
+    "origin": "public/game.js",
+    "dependency": "./data.js?v=47.7.81"
+  },
+  {
+    "origin": "public/game.js",
+    "dependency": "./modules/stellar-ship-allowlist-v65.js?v=47.7.81"
+  },
+  {
+    "origin": "public/game.js",
+    "dependency": "./modules/stellar-astral-expansion-v53.js?v=47.7.81"
+  },
+  {
+    "origin": "public/game.js",
+    "dependency": "./repair-balance.js?v=47.7.81"
+  },
+  {
+    "origin": "public/game.js",
+    "dependency": "./level-curve-v1915.js?v=47.7.81"
+  },
+  {
+    "origin": "public/game.js",
+    "dependency": "./level-curve-v460.js?v=47.7.81"
+  },
+  {
+    "origin": "public/game.js",
+    "dependency": "./level-curve-v482.js?v=47.7.81"
+  },
+  {
+    "origin": "public/game.js",
+    "dependency": "./progression-plan-v2012.js?v=47.7.81"
+  },
+  {
+    "origin": "public/game.js",
+    "dependency": "./assets/v17/manifest.js?v=47.7.81"
+  },
+  {
+    "origin": "public/game.js",
+    "dependency": "./modules/mission-save-recovery-v105.js?v=47.7.81"
+  },
+  {
+    "origin": "public/game.js",
+    "dependency": "./modules/unified-save-coordinator-v106.js?v=47.7.81"
+  },
+  {
+    "origin": "public/game.js",
+    "dependency": "./modules/cloud-save-cadence-v1172.js?v=47.7.81"
+  },
+  {
+    "origin": "public/game.js",
+    "dependency": "./modules/mission-completion-sync-v107.js?v=47.7.81"
+  },
+  {
+    "origin": "public/game.js",
+    "dependency": "./modules/mission-reward-ack-v108.js?v=47.7.81"
+  },
+  {
+    "origin": "public/game.js",
+    "dependency": "./modules/hangar-save-recovery-v109.js?v=47.7.81"
+  },
+  {
+    "origin": "public/game.js",
+    "dependency": "./modules/hangar-write-guard-v1062.js?v=47.7.81"
+  },
+  {
+    "origin": "public/game.js",
+    "dependency": "./modules/drone-sale-preflight-v11731.js?v=47.7.81"
+  },
+  {
+    "origin": "public/game.js",
+    "dependency": "./modules/ammo-selection-recovery-v1061.js?v=47.7.81"
+  },
+  {
+    "origin": "public/game.js",
+    "dependency": "./modules/combat-ammo-accounting-v1064.js?v=47.7.81"
+  },
+  {
+    "origin": "public/game.js",
+    "dependency": "./modules/pvp-inbox-policy-v106.js?v=47.7.81"
+  },
+  {
+    "origin": "public/game.js",
+    "dependency": "./modules/arena-visual-scheduler-v1143.js?v=47.7.81"
+  },
+  {
+    "origin": "public/game.js",
+    "dependency": "./modules/pvp-target-integrity-v114.js?v=47.7.81"
+  },
+  {
+    "origin": "public/game.js",
+    "dependency": "./api.js?v=47.7.81"
+  },
+  {
+    "origin": "public/game.js",
+    "dependency": "./modules/stellar-offline-farm-v1163.js?v=47.7.81"
+  },
+  {
+    "origin": "public/game.js",
+    "dependency": "./world.js?v=47.7.81"
+  },
+  {
+    "origin": "public/game.js",
+    "dependency": "./modules/universe-connection-status-v1066.js?v=47.7.81"
+  },
+  {
+    "origin": "public/level-curve-v460.js",
+    "dependency": "./level-curve-v1915.js"
+  },
+  {
+    "origin": "public/level-curve-v482.js",
+    "dependency": "./level-curve-v460.js"
+  },
+  {
+    "origin": "public/modules/astral-combat-admin-v431.js",
+    "dependency": "../api.js?v=47.7.81"
+  },
+  {
+    "origin": "public/modules/astral-combat-admin-v431.js",
+    "dependency": "./astral-combat-v431.js?v=47.7.81"
+  },
+  {
+    "origin": "public/modules/astral-operations-v435.js",
+    "dependency": "../api.js?v=47.7.81"
+  },
+  {
+    "origin": "public/modules/astral-operations-v435.js",
+    "dependency": "./astral-systems-v435.js?v=47.7.81"
+  },
+  {
+    "origin": "public/modules/astral-rewards-v381.js",
+    "dependency": "./stellar-dialog-v4776.js?v=47.7.81"
+  },
+  {
+    "origin": "public/modules/astral-rewards-v381.js",
+    "dependency": "../api.js?v=47.7.81"
+  },
+  {
+    "origin": "public/modules/christmas-art-v132.js",
+    "dependency": "./entity-art-v138.js"
+  },
+  {
+    "origin": "public/modules/christmas-ui-v132.js",
+    "dependency": "./natal-prices-v1421.js"
+  },
+  {
+    "origin": "public/modules/christmas-ui-v132.js",
+    "dependency": "./christmas-v132.js"
+  },
+  {
+    "origin": "public/modules/christmas-ui-v132.js",
+    "dependency": "./christmas-art-v132.js?v=47.7.81"
+  },
+  {
+    "origin": "public/modules/collection-access-v1341.js",
+    "dependency": "./aux-protocols.js"
+  },
+  {
+    "origin": "public/modules/combat-hud-v144.js",
+    "dependency": "./drone-formation-motion-v144.js"
+  },
+  {
+    "origin": "public/modules/combat-hud-v144.js",
+    "dependency": "../data.js"
+  },
+  {
+    "origin": "public/modules/combat-hud-v144.js",
+    "dependency": "./combat-tactics-v144.js"
+  },
+  {
+    "origin": "public/modules/combat-tactics-v144.js",
+    "dependency": "../data.js"
+  },
+  {
+    "origin": "public/modules/drone-formation-motion-v144.js",
+    "dependency": "./combat-tactics-v144.js"
+  },
+  {
+    "origin": "public/modules/event-control-ui-v3411.js",
+    "dependency": "./weekend-events-v341.js"
+  },
+  {
+    "origin": "public/modules/frontier-audit-v450.js",
+    "dependency": "../api.js?v=47.7.81"
+  },
+  {
+    "origin": "public/modules/frontier-routing-v440.js",
+    "dependency": "./portal-layout-v461.js"
+  },
+  {
+    "origin": "public/modules/frontier-routing-v440.js",
+    "dependency": "./frontier-sectors-v435.js"
+  },
+  {
+    "origin": "public/modules/galactic-balance-panel-v460.js",
+    "dependency": "../level-curve-v460.js?v=47.7.81"
+  },
+  {
+    "origin": "public/modules/galactic-balance-panel-v460.js",
+    "dependency": "./galactic-progression-v451.js?v=47.7.81"
+  },
+  {
+    "origin": "public/modules/hangar-save-recovery-v109.js",
+    "dependency": "./hangar-write-guard-v1062.js"
+  },
+  {
+    "origin": "public/modules/local-first-bridge-v1211.js",
+    "dependency": "./local-first-save-v121.js"
+  },
+  {
+    "origin": "public/modules/materializer-product-names-v1164.js",
+    "dependency": "../data.js"
+  },
+  {
+    "origin": "public/modules/modular-map-v2.js",
+    "dependency": "./map-projection-v144.js"
+  },
+  {
+    "origin": "public/modules/pilot-ship-hud-v482.js",
+    "dependency": "../level-curve-v482.js"
+  },
+  {
+    "origin": "public/modules/relay-render-safe-v76.js",
+    "dependency": "./relay-sprite-framing-v74.js"
+  },
+  {
+    "origin": "public/modules/relay-render-safe-v76.js",
+    "dependency": "./combat-visual-lite-v78.js"
+  },
+  {
+    "origin": "public/modules/stage-a-v423.js",
+    "dependency": "./stellar-dialog-v4776.js?v=47.7.81"
+  },
+  {
+    "origin": "public/modules/stage-a-v423.js",
+    "dependency": "../api.js?v=47.7.81"
+  },
+  {
+    "origin": "public/modules/stage-b-v426.js",
+    "dependency": "./stellar-dialog-v4776.js?v=47.7.81"
+  },
+  {
+    "origin": "public/modules/stage-b-v426.js",
+    "dependency": "../api.js?v=47.7.81"
+  },
+  {
+    "origin": "public/modules/stellar-admin-c-v100.js",
+    "dependency": "../api.js?v=47.7.81"
+  },
+  {
+    "origin": "public/modules/stellar-animation-v1163.js",
+    "dependency": "./stellar-animation-v71.js?v=116.3"
+  },
+  {
+    "origin": "public/modules/stellar-animation-v69.js",
+    "dependency": "./relay-sprite-framing-v74.js"
+  },
+  {
+    "origin": "public/modules/stellar-animation-v71.js",
+    "dependency": "./stellar-animation-v69.js"
+  },
+  {
+    "origin": "public/modules/stellar-autopilot-v126.js",
+    "dependency": "./stellar-autopilot-v48.js?v=126.0"
+  },
+  {
+    "origin": "public/modules/stellar-autopilot-v48.js",
+    "dependency": "./stellar-autopilot-recovery-v116.js?v=116.1"
+  },
+  {
+    "origin": "public/modules/stellar-autopilot-v48.js",
+    "dependency": "./stellar-autotrade-v1164.js?v=116.4"
+  },
+  {
+    "origin": "public/modules/stellar-offline-farm-v1163.js",
+    "dependency": "./stellar-offline-farm-v484.js?v=116.5"
+  },
+  {
+    "origin": "public/modules/stellar-offline-farm-v484.js",
+    "dependency": "./stellar-offline-v49-ui.js"
+  },
+  {
+    "origin": "public/modules/stellar-offline-farm-v484.js",
+    "dependency": "../data.js"
+  },
+  {
+    "origin": "public/modules/unified-expansion-v42.js",
+    "dependency": "./stellar-dialog-v4776.js?v=47.7.81"
+  },
+  {
+    "origin": "public/modules/unified-expansion-v42.js",
+    "dependency": "./galactic-balance-panel-v460.js"
+  },
+  {
+    "origin": "public/modules/unified-expansion-v42.js",
+    "dependency": "./frontier-audit-v450.js"
+  },
+  {
+    "origin": "public/modules/unified-expansion-v42.js",
+    "dependency": "./astral-operations-v435.js"
+  },
+  {
+    "origin": "public/modules/unified-expansion-v42.js",
+    "dependency": "./astral-combat-admin-v431.js"
+  },
+  {
+    "origin": "public/modules/unified-expansion-v42.js",
+    "dependency": "./stage-b-v426.js"
+  },
+  {
+    "origin": "public/modules/unified-expansion-v42.js",
+    "dependency": "./stage-a-v423.js?v=116.3"
+  },
+  {
+    "origin": "public/modules/unified-expansion-v42.js",
+    "dependency": "../api.js?v=47.7.81"
+  },
+  {
+    "origin": "public/modules/unified-expansion-v42.js",
+    "dependency": "./unified-expansion-recovery-v1067.js"
+  },
+  {
+    "origin": "public/modules/unified-expansion-v42.js",
+    "dependency": "../api.js?v=47.7.81"
+  },
+  {
+    "origin": "public/modules/v21/command-center-view.js",
+    "dependency": "./operations.js"
+  },
+  {
+    "origin": "public/modules/v21/command-center-view.js",
+    "dependency": "./war-briefing.js"
+  },
+  {
+    "origin": "public/modules/v21/command-center-view.js",
+    "dependency": "./season-briefing.js"
+  },
+  {
+    "origin": "public/modules/v21/command-center-view.js",
+    "dependency": "./war-campaigns-view.js"
+  },
+  {
+    "origin": "server/christmas-v132.js",
+    "dependency": "node:crypto"
+  },
+  {
+    "origin": "server/christmas-v132.js",
+    "dependency": "../public/modules/christmas-v132.js"
+  },
+  {
+    "origin": "server/combat-tactics-v144.js",
+    "dependency": "../public/modules/combat-tactics-v144.js"
+  },
+  {
+    "origin": "server/command-center-router.js",
+    "dependency": "express"
+  },
+  {
+    "origin": "server/command-center-router.js",
+    "dependency": "./competitive-seasons.js"
+  },
+  {
+    "origin": "server/command-center-router.js",
+    "dependency": "./clan-operations.js"
+  },
+  {
+    "origin": "server/dominion-router-v360.js",
+    "dependency": "express"
+  },
+  {
+    "origin": "server/dominion-router-v360.js",
+    "dependency": "./galactic-dominion-v360.js"
+  },
+  {
+    "origin": "server/drone-presentation-v144.js",
+    "dependency": "../public/modules/combat-tactics-v144.js"
+  },
+  {
+    "origin": "server/economy-receipts-v125.js",
+    "dependency": "node:crypto"
+  },
+  {
+    "origin": "server/event-rotation-v135.js",
+    "dependency": "../public/modules/christmas-v132.js"
+  },
+  {
+    "origin": "server/formation-shop-v1441.js",
+    "dependency": "../public/modules/combat-tactics-v144.js"
+  },
+  {
+    "origin": "server/frontier-router-v370.js",
+    "dependency": "express"
+  },
+  {
+    "origin": "server/frontier-stability-v450.js",
+    "dependency": "../public/modules/frontier-boss-v440.js"
+  },
+  {
+    "origin": "server/index.js",
+    "dependency": "./save-delta-v145.js"
+  },
+  {
+    "origin": "server/index.js",
+    "dependency": "./formation-shop-v1441.js"
+  },
+  {
+    "origin": "server/index.js",
+    "dependency": "./combat-tactics-v144.js"
+  },
+  {
+    "origin": "server/index.js",
+    "dependency": "./player-rewards-v134.js"
+  },
+  {
+    "origin": "server/index.js",
+    "dependency": "../public/modules/player-state-merge-v134.js"
+  },
+  {
+    "origin": "server/index.js",
+    "dependency": "./unified-command-v1332.js"
+  },
+  {
+    "origin": "server/index.js",
+    "dependency": "./mission-command-v1331.js"
+  },
+  {
+    "origin": "server/index.js",
+    "dependency": "./christmas-v132.js"
+  },
+  {
+    "origin": "server/index.js",
+    "dependency": "./economy-receipts-v125.js"
+  },
+  {
+    "origin": "server/index.js",
+    "dependency": "./cargo-sale-v130.js"
+  },
+  {
+    "origin": "server/index.js",
+    "dependency": "./live-purchase-v123.js"
+  },
+  {
+    "origin": "server/index.js",
+    "dependency": "./save-promotion-gate-v1195.js"
+  },
+  {
+    "origin": "server/index.js",
+    "dependency": "./save-auction-coalesce-v1194.js"
+  },
+  {
+    "origin": "server/index.js",
+    "dependency": "./unified-fleet-snapshot-v118.js"
+  },
+  {
+    "origin": "server/index.js",
+    "dependency": "./save-core-v119.js"
+  },
+  {
+    "origin": "server/index.js",
+    "dependency": "./save-operation-monitor-v1192.js"
+  },
+  {
+    "origin": "server/index.js",
+    "dependency": "./save-health-v1192.js"
+  },
+  {
+    "origin": "server/index.js",
+    "dependency": "./save-latency-v1191.js"
+  },
+  {
+    "origin": "server/index.js",
+    "dependency": "../public/modules/sale-policy-v4776.js"
+  },
+  {
+    "origin": "server/index.js",
+    "dependency": "./autotrade-idempotency-v1164.js"
+  },
+  {
+    "origin": "server/index.js",
+    "dependency": "../public/modules/hangar-write-guard-v1062.js"
+  },
+  {
+    "origin": "server/index.js",
+    "dependency": "../public/modules/aux-advanced-protocols-v1131.js"
+  },
+  {
+    "origin": "server/index.js",
+    "dependency": "./frontier-audit-v450.js"
+  },
+  {
+    "origin": "server/index.js",
+    "dependency": "./frontier-admin-v440.js"
+  },
+  {
+    "origin": "server/index.js",
+    "dependency": "./astral-integrations-v435.js"
+  },
+  {
+    "origin": "server/index.js",
+    "dependency": "./astral-combat-v431.js"
+  },
+  {
+    "origin": "server/index.js",
+    "dependency": "./stage-b-v426.js"
+  },
+  {
+    "origin": "server/index.js",
+    "dependency": "./stage-a-v423.js"
+  },
+  {
+    "origin": "server/index.js",
+    "dependency": "./squad-objectives-v421.js"
+  },
+  {
+    "origin": "server/index.js",
+    "dependency": "./frontier-unified-v42.js"
+  },
+  {
+    "origin": "server/index.js",
+    "dependency": "./astral-rewards-v381.js"
+  },
+  {
+    "origin": "server/index.js",
+    "dependency": "./warbot-engine-v477.js"
+  },
+  {
+    "origin": "server/index.js",
+    "dependency": "express"
+  },
+  {
+    "origin": "server/index.js",
+    "dependency": "compression"
+  },
+  {
+    "origin": "server/index.js",
+    "dependency": "http"
+  },
+  {
+    "origin": "server/index.js",
+    "dependency": "path"
+  },
+  {
+    "origin": "server/index.js",
+    "dependency": "fs/promises"
+  },
+  {
+    "origin": "server/index.js",
+    "dependency": "os"
+  },
+  {
+    "origin": "server/index.js",
+    "dependency": "url"
+  },
+  {
+    "origin": "server/index.js",
+    "dependency": "@supabase/supabase-js"
+  },
+  {
+    "origin": "server/index.js",
+    "dependency": "../public/modules/read-coalescer-v104.js"
+  },
+  {
+    "origin": "server/index.js",
+    "dependency": "crypto"
+  },
+  {
+    "origin": "server/index.js",
+    "dependency": "./offline-farm-v484.js"
+  },
+  {
+    "origin": "server/index.js",
+    "dependency": "./balance-audit-v90.js"
+  },
+  {
+    "origin": "server/index.js",
+    "dependency": "./progression-balance-v113.js"
+  },
+  {
+    "origin": "server/index.js",
+    "dependency": "./competitive-readiness-v98.js"
+  },
+  {
+    "origin": "server/index.js",
+    "dependency": "./competitive-release-monitor-v115.js"
+  },
+  {
+    "origin": "server/index.js",
+    "dependency": "./liveops-snapshot-v99.js"
+  },
+  {
+    "origin": "server/index.js",
+    "dependency": "./release-readiness-v100.js"
+  },
+  {
+    "origin": "server/index.js",
+    "dependency": "./world.js"
+  },
+  {
+    "origin": "server/index.js",
+    "dependency": "./elite-operations.js"
+  },
+  {
+    "origin": "server/index.js",
+    "dependency": "./war-campaigns.js"
+  },
+  {
+    "origin": "server/index.js",
+    "dependency": "./command-center-router.js"
+  },
+  {
+    "origin": "server/index.js",
+    "dependency": "./relay-router-v346.js"
+  },
+  {
+    "origin": "server/index.js",
+    "dependency": "./dominion-router-v360.js"
+  },
+  {
+    "origin": "server/index.js",
+    "dependency": "./frontier-router-v370.js"
+  },
+  {
+    "origin": "server/index.js",
+    "dependency": "./security-guard.js"
+  },
+  {
+    "origin": "server/index.js",
+    "dependency": "./mission-save-guard-v108.js"
+  },
+  {
+    "origin": "server/index.js",
+    "dependency": "./npc-reward-delivery-v1069.js"
+  },
+  {
+    "origin": "server/index.js",
+    "dependency": "./reward-claim-guard.js"
+  },
+  {
+    "origin": "server/index.js",
+    "dependency": "./security-service.js"
+  },
+  {
+    "origin": "server/index.js",
+    "dependency": "../public/modules/bulk-purchase-v92.js"
+  },
+  {
+    "origin": "server/index.js",
+    "dependency": "./pilot-economy-v102.js"
+  },
+  {
+    "origin": "server/live-event-scheduler-v341.js",
+    "dependency": "../public/modules/weekend-events-v341.js"
+  },
+  {
+    "origin": "server/liveops-snapshot-v99.js",
+    "dependency": "node:crypto"
+  },
+  {
+    "origin": "server/mission-command-v1331.js",
+    "dependency": "./unified-command-v1332.js"
+  },
+  {
+    "origin": "server/mission-command-v1331.js",
+    "dependency": "./economy-receipts-v125.js"
+  },
+  {
+    "origin": "server/mission-command-v1331.js",
+    "dependency": "../public/data.js"
+  },
+  {
+    "origin": "server/offline-farm-v484.js",
+    "dependency": "./save-farm-safety-v1193.js"
+  },
+  {
+    "origin": "server/offline-farm-v484.js",
+    "dependency": "../public/modules/remote-cargo-auto-sale-v1065.js"
+  },
+  {
+    "origin": "server/offline-farm-v484.js",
+    "dependency": "./farm-v495-forecast.js"
+  },
+  {
+    "origin": "server/offline-farm-v484.js",
+    "dependency": "./farm-v86-economy.js"
+  },
+  {
+    "origin": "server/offline-farm-v484.js",
+    "dependency": "node:crypto"
+  },
+  {
+    "origin": "server/offline-farm-v484.js",
+    "dependency": "./offline-farm-v487-engine.js"
+  },
+  {
+    "origin": "server/offline-farm-v487-engine.js",
+    "dependency": "../public/data.js"
+  },
+  {
+    "origin": "server/offline-farm-v49-push.js",
+    "dependency": "node:crypto"
+  },
+  {
+    "origin": "server/player-rewards-v134.js",
+    "dependency": "../public/modules/seasonal-boxes-v142.js"
+  },
+  {
+    "origin": "server/player-rewards-v134.js",
+    "dependency": "../public/modules/collection-access-v1341.js"
+  },
+  {
+    "origin": "server/player-rewards-v134.js",
+    "dependency": "./config-cache-v1341.js"
+  },
+  {
+    "origin": "server/player-rewards-v134.js",
+    "dependency": "node:crypto"
+  },
+  {
+    "origin": "server/player-rewards-v134.js",
+    "dependency": "../public/data.js"
+  },
+  {
+    "origin": "server/player-rewards-v134.js",
+    "dependency": "../public/progression-plan-v2012.js"
+  },
+  {
+    "origin": "server/player-rewards-v134.js",
+    "dependency": "../public/modules/aux-advanced-protocols-v1131.js"
+  },
+  {
+    "origin": "server/player-rewards-v134.js",
+    "dependency": "./economy-receipts-v125.js"
+  },
+  {
+    "origin": "server/player-rewards-v134.js",
+    "dependency": "./warfront-economy-v135.js"
+  },
+  {
+    "origin": "server/relay-combat-v3463.js",
+    "dependency": "../public/modules/combat-tactics-v144.js"
+  },
+  {
+    "origin": "server/relay-combat-v3463.js",
+    "dependency": "../public/data.js"
+  },
+  {
+    "origin": "server/relay-router-v346.js",
+    "dependency": "express"
+  },
+  {
+    "origin": "server/relay-router-v346.js",
+    "dependency": "./relay-domination-v346.js"
+  },
+  {
+    "origin": "server/release-readiness-v100.js",
+    "dependency": "node:fs/promises"
+  },
+  {
+    "origin": "server/release-readiness-v100.js",
+    "dependency": "node:path"
+  },
+  {
+    "origin": "server/save-core-v119.js",
+    "dependency": "node:crypto"
+  },
+  {
+    "origin": "server/save-core-v119.js",
+    "dependency": "./save-promotion-gate-v1195.js"
+  },
+  {
+    "origin": "server/save-delta-v145.js",
+    "dependency": "node:crypto"
+  },
+  {
+    "origin": "server/save-delta-v145.js",
+    "dependency": "../public/modules/state-delta-v145.js"
+  },
+  {
+    "origin": "server/unified-command-v1332.js",
+    "dependency": "./economy-receipts-v125.js"
+  },
+  {
+    "origin": "server/world.js",
+    "dependency": "./drone-presentation-v144.js"
+  },
+  {
+    "origin": "server/world.js",
+    "dependency": "./christmas-v132.js"
+  },
+  {
+    "origin": "server/world.js",
+    "dependency": "../public/modules/christmas-v132.js"
+  },
+  {
+    "origin": "server/world.js",
+    "dependency": "./frontier-ux-admission-v4775.js"
+  },
+  {
+    "origin": "server/world.js",
+    "dependency": "./warbot-engine-v477.js"
+  },
+  {
+    "origin": "server/world.js",
+    "dependency": "../public/modules/portal-layout-v461.js"
+  },
+  {
+    "origin": "server/world.js",
+    "dependency": "../public/modules/galactic-progression-v451.js"
+  },
+  {
+    "origin": "server/world.js",
+    "dependency": "./frontier-stability-v450.js"
+  },
+  {
+    "origin": "server/world.js",
+    "dependency": "../public/modules/frontier-boss-v440.js"
+  },
+  {
+    "origin": "server/world.js",
+    "dependency": "../public/modules/frontier-routing-v440.js"
+  },
+  {
+    "origin": "server/world.js",
+    "dependency": "../public/modules/frontier-sectors-v435.js"
+  },
+  {
+    "origin": "server/world.js",
+    "dependency": "./astral-combat-v431.js"
+  },
+  {
+    "origin": "server/world.js",
+    "dependency": "./npc-intelligence-v34.js"
+  },
+  {
+    "origin": "server/world.js",
+    "dependency": "./npc-intelligence-v343.js"
+  },
+  {
+    "origin": "server/world.js",
+    "dependency": "./live-event-scheduler-v341.js"
+  },
+  {
+    "origin": "server/world.js",
+    "dependency": "./event-rotation-v135.js"
+  },
+  {
+    "origin": "server/world.js",
+    "dependency": "../public/modules/event-control-profile-v3411.js"
+  },
+  {
+    "origin": "server/world.js",
+    "dependency": "../public/modules/event-evolution-v345.js"
+  },
+  {
+    "origin": "server/world.js",
+    "dependency": "crypto"
+  },
+  {
+    "origin": "server/world.js",
+    "dependency": "./combat-throttle.js"
+  },
+  {
+    "origin": "server/world.js",
+    "dependency": "./portal-safety.js"
+  },
+  {
+    "origin": "server/world.js",
+    "dependency": "./realtime-guard.js"
+  },
+  {
+    "origin": "server/world.js",
+    "dependency": "./relay-control-integrity-v1141.js"
+  },
+  {
+    "origin": "server/world.js",
+    "dependency": "./event-lifecycle-integrity-v1142.js"
+  },
+  {
+    "origin": "server/world.js",
+    "dependency": "./network-backpressure-v115.js"
+  },
+  {
+    "origin": "server/world.js",
+    "dependency": "./multiplayer-session-integrity-v1173.js"
+  },
+  {
+    "origin": "server/world.js",
+    "dependency": "./network-delta-v104.js"
+  },
+  {
+    "origin": "server/world.js",
+    "dependency": "./network-telemetry-v1051.js"
+  },
+  {
+    "origin": "server/world.js",
+    "dependency": "./npc-reward-delivery-v1069.js"
+  },
+  {
+    "origin": "server/world.js",
+    "dependency": "./idle-world-refresh-v108.js"
+  },
+  {
+    "origin": "server/world.js",
+    "dependency": "ws"
+  },
+  {
+    "origin": "server/world.js",
+    "dependency": "./universe-directives.js"
+  },
+  {
+    "origin": "server/world.js",
+    "dependency": "./warfront-capture.js"
+  },
+  {
+    "origin": "server/world.js",
+    "dependency": "../public/data.js"
+  },
+  {
+    "origin": "server/world.js",
+    "dependency": "./relay-domination-v346.js"
+  },
+  {
+    "origin": "server/world.js",
+    "dependency": "./relay-combat-v3463.js"
+  }
+]

@@ -1,3 +1,4 @@
+import {createSaveDeltaTransportV145} from './save-delta-v145.js';
 import {applyFormationGrantV1441} from './formation-shop-v1441.js';
 import {prepareCombatTactics} from './combat-tactics-v144.js';
 import {createPlayerRewardsV134} from './player-rewards-v134.js';
@@ -62,7 +63,7 @@ import { createSecurityService } from './security-service.js';
 
 const app = express();
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const RELEASE_VERSION = '47.7.80'; // único identificador de release nos endpoints HTTP
+const RELEASE_VERSION = '47.7.81'; // único identificador de release nos endpoints HTTP
 
 function normalizeSupabaseUrl(value = '') {
   let url = String(value || '').trim();
@@ -2178,6 +2179,12 @@ app.use('/api/command',requireUser,createCommandCenterRouter({serviceClient:elit
 app.use('/api/relay',requireUser,createRelayRouter({serviceClient:eliteAdminClient}));
 app.use('/api/relay/dominion',requireUser,createDominionRouter({serviceClient:eliteAdminClient}));
 app.use('/api/frontier',requireUser,createFrontierRouter({serviceClient:eliteAdminClient}));
+
+const SAVE_DELTA_V145=createSaveDeltaTransportV145();
+app.use('/api/player/save', (req,res,next)=>{
+ if(!['GET','PUT'].includes(req.method)||req.path!=='/')return next();
+ return requireUser(req,res,()=>{return SAVE_DELTA_V145.middleware(req,res,next);});
+});
 
 app.get('/api/player/save', requireUser, asyncRoute(async (req, res) => {
   // V119.1: leitura de progresso e epoca de reset iniciadas em paralelo.

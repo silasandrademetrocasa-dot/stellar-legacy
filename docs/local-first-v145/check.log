@@ -1,0 +1,7 @@
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+
+> stellar-legacy@47.7.81 check
+> node scripts/verify-release.mjs && node scripts/audit-module-graph.mjs
+
+✅ V47.7.81: 316 JS verificados; 240 caminhos de assets; HTML/versões/imports e Render OK.
+BOOTAUDIT: 172 client JS modules, 218 static import/script paths, 0 missing.

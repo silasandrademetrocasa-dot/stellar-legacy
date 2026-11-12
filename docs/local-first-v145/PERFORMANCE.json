@@ -1,0 +1,28 @@
+{
+  "environment": {
+    "node": "v24.22.1",
+    "type": "synthetic transport microbenchmark; no Render, device or production database"
+  },
+  "save": {
+    "samples": 1000,
+    "baselineBytes": 8216500,
+    "deltaBytes": 258424,
+    "reductionPct": 96.85481652771861,
+    "baselineGzipBytes": 2499762,
+    "deltaGzipBytes": 146632,
+    "gzipReductionPct": 94.13416157218167,
+    "meanEncodingMs": 0.07056596399999922
+  },
+  "configuration": {
+    "attemptedReads": 100,
+    "networkBefore": 100,
+    "networkAfter": 15,
+    "reductionPct": 85
+  },
+  "limitations": [
+    "Synthetic 500-item inventory; real player save sizes differ.",
+    "Gzip sizes estimate compressibility; request bodies are normally uncompressed.",
+    "Does not measure gameplay FPS, economic UI latency, total mobile traffic or SQL load.",
+    "Active writes remain server-authorized and database save format remains a full JSON snapshot."
+  ]
+}

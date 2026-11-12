@@ -1,4 +1,4 @@
-# Stellar Legacy — V144.1 (47.7.80)
+# Stellar Legacy — V144.1 (47.7.81)
 
 ## Instalação
 

@@ -1,0 +1,1311 @@
+[
+  {
+    "origin": "server/astral-combat-v431.js",
+    "line": 15,
+    "method": "POST",
+    "path": "/api/admin/frontier/astral-power",
+    "frequency": "Sob demanda do consumidor; routers montados podem adicionar prefixo"
+  },
+  {
+    "origin": "server/astral-integrations-v435.js",
+    "line": 4,
+    "method": "POST",
+    "path": "/api/admin/frontier/astral-module",
+    "frequency": "Sob demanda do consumidor; routers montados podem adicionar prefixo"
+  },
+  {
+    "origin": "server/astral-integrations-v435.js",
+    "line": 10,
+    "method": "POST",
+    "path": "/api/admin/frontier/raid",
+    "frequency": "Sob demanda do consumidor; routers montados podem adicionar prefixo"
+  },
+  {
+    "origin": "server/astral-integrations-v435.js",
+    "line": 18,
+    "method": "GET",
+    "path": "/api/frontier/raid",
+    "frequency": "Sob demanda do consumidor; routers montados podem adicionar prefixo"
+  },
+  {
+    "origin": "server/astral-integrations-v435.js",
+    "line": 22,
+    "method": "POST",
+    "path": "/api/frontier/raid/claim",
+    "frequency": "Sob demanda do consumidor; routers montados podem adicionar prefixo"
+  },
+  {
+    "origin": "server/astral-rewards-v381.js",
+    "line": 5,
+    "method": "GET",
+    "path": "/api/astral-rewards",
+    "frequency": "Sob demanda do consumidor; routers montados podem adicionar prefixo"
+  },
+  {
+    "origin": "server/astral-rewards-v381.js",
+    "line": 10,
+    "method": "POST",
+    "path": "/api/astral-rewards/lock",
+    "frequency": "Sob demanda do consumidor; routers montados podem adicionar prefixo"
+  },
+  {
+    "origin": "server/astral-rewards-v381.js",
+    "line": 17,
+    "method": "POST",
+    "path": "/api/admin/astral-rewards",
+    "frequency": "Sob demanda do consumidor; routers montados podem adicionar prefixo"
+  },
+  {
+    "origin": "server/astral-rewards-v381.js",
+    "line": 26,
+    "method": "POST",
+    "path": "/api/astral-rewards/claim",
+    "frequency": "Sob demanda do consumidor; routers montados podem adicionar prefixo"
+  },
+  {
+    "origin": "server/balance-audit-v90.js",
+    "line": 28,
+    "method": "GET",
+    "path": "/api/admin/v90/balance-audit",
+    "frequency": "Sob demanda do consumidor; routers montados podem adicionar prefixo"
+  },
+  {
+    "origin": "server/christmas-v132.js",
+    "line": 14,
+    "method": "GET",
+    "path": "/api/player/natal",
+    "frequency": "Sob demanda do consumidor; routers montados podem adicionar prefixo"
+  },
+  {
+    "origin": "server/christmas-v132.js",
+    "line": 17,
+    "method": "POST",
+    "path": "/api/player/natal/claim",
+    "frequency": "Sob demanda do consumidor; routers montados podem adicionar prefixo"
+  },
+  {
+    "origin": "server/competitive-readiness-v98.js",
+    "line": 30,
+    "method": "GET",
+    "path": "/api/admin/v98/competitive-audit",
+    "frequency": "Sob demanda do consumidor; routers montados podem adicionar prefixo"
+  },
+  {
+    "origin": "server/frontier-admin-v440.js",
+    "line": 7,
+    "method": "POST",
+    "path": "/api/admin/frontier/test-kit",
+    "frequency": "Sob demanda do consumidor; routers montados podem adicionar prefixo"
+  },
+  {
+    "origin": "server/frontier-audit-v450.js",
+    "line": 3,
+    "method": "GET",
+    "path": "/api/admin/frontier/diagnostics",
+    "frequency": "Sob demanda do consumidor; routers montados podem adicionar prefixo"
+  },
+  {
+    "origin": "server/frontier-unified-v42.js",
+    "line": 11,
+    "method": "GET",
+    "path": "/api/frontier/v42",
+    "frequency": "Sob demanda do consumidor; routers montados podem adicionar prefixo"
+  },
+  {
+    "origin": "server/frontier-unified-v42.js",
+    "line": 31,
+    "method": "POST",
+    "path": "/api/frontier/v42/action",
+    "frequency": "Sob demanda do consumidor; routers montados podem adicionar prefixo"
+  },
+  {
+    "origin": "server/frontier-unified-v42.js",
+    "line": 43,
+    "method": "POST",
+    "path": "/api/frontier/v42/squad",
+    "frequency": "Sob demanda do consumidor; routers montados podem adicionar prefixo"
+  },
+  {
+    "origin": "server/frontier-unified-v42.js",
+    "line": 50,
+    "method": "POST",
+    "path": "/api/admin/frontier/v42/catalog",
+    "frequency": "Sob demanda do consumidor; routers montados podem adicionar prefixo"
+  },
+  {
+    "origin": "server/index.js",
+    "line": 128,
+    "method": "USE",
+    "path": "/assets",
+    "frequency": "Sob demanda do consumidor; routers montados podem adicionar prefixo"
+  },
+  {
+    "origin": "server/index.js",
+    "line": 708,
+    "method": "USE",
+    "path": "/api",
+    "frequency": "Sob demanda do consumidor; routers montados podem adicionar prefixo"
+  },
+  {
+    "origin": "server/index.js",
+    "line": 770,
+    "method": "GET",
+    "path": "/health",
+    "frequency": "Sob demanda do consumidor; routers montados podem adicionar prefixo"
+  },
+  {
+    "origin": "server/index.js",
+    "line": 773,
+    "method": "GET",
+    "path": "/api/config",
+    "frequency": "Sob demanda do consumidor; routers montados podem adicionar prefixo"
+  },
+  {
+    "origin": "server/index.js",
+    "line": 784,
+    "method": "GET",
+    "path": "/api/meta",
+    "frequency": "Sob demanda do consumidor; routers montados podem adicionar prefixo"
+  },
+  {
+    "origin": "server/index.js",
+    "line": 793,
+    "method": "GET",
+    "path": "/api/runtime/topbar",
+    "frequency": "Sob demanda do consumidor; routers montados podem adicionar prefixo"
+  },
+  {
+    "origin": "server/index.js",
+    "line": 804,
+    "method": "GET",
+    "path": "/api/runtime/npcs",
+    "frequency": "Sob demanda do consumidor; routers montados podem adicionar prefixo"
+  },
+  {
+    "origin": "server/index.js",
+    "line": 814,
+    "method": "GET",
+    "path": "/api/admin/runtime-monitor",
+    "frequency": "Sob demanda do consumidor; routers montados podem adicionar prefixo"
+  },
+  {
+    "origin": "server/index.js",
+    "line": 836,
+    "method": "POST",
+    "path": "/api/admin/runtime/interface/:moduleKey",
+    "frequency": "Sob demanda do consumidor; routers montados podem adicionar prefixo"
+  },
+  {
+    "origin": "server/index.js",
+    "line": 878,
+    "method": "POST",
+    "path": "/api/admin/runtime/npcs/:npcKey",
+    "frequency": "Sob demanda do consumidor; routers montados podem adicionar prefixo"
+  },
+  {
+    "origin": "server/index.js",
+    "line": 909,
+    "method": "POST",
+    "path": "/api/admin/runtime/npcs/:npcKey/spawns/:mapId",
+    "frequency": "Sob demanda do consumidor; routers montados podem adicionar prefixo"
+  },
+  {
+    "origin": "server/index.js",
+    "line": 923,
+    "method": "POST",
+    "path": "/api/admin/runtime/world/maps/:mapId",
+    "frequency": "Sob demanda do consumidor; routers montados podem adicionar prefixo"
+  },
+  {
+    "origin": "server/index.js",
+    "line": 942,
+    "method": "POST",
+    "path": "/api/admin/runtime/world/resources/:resourceKey",
+    "frequency": "Sob demanda do consumidor; routers montados podem adicionar prefixo"
+  },
+  {
+    "origin": "server/index.js",
+    "line": 948,
+    "method": "POST",
+    "path": "/api/admin/runtime/world/sectors/:sectorLabel",
+    "frequency": "Sob demanda do consumidor; routers montados podem adicionar prefixo"
+  },
+  {
+    "origin": "server/index.js",
+    "line": 953,
+    "method": "POST",
+    "path": "/api/admin/runtime/world/portals/:portalKey",
+    "frequency": "Sob demanda do consumidor; routers montados podem adicionar prefixo"
+  },
+  {
+    "origin": "server/index.js",
+    "line": 958,
+    "method": "POST",
+    "path": "/api/admin/runtime/world/maps/:mapId/resources/:resourceKey",
+    "frequency": "Sob demanda do consumidor; routers montados podem adicionar prefixo"
+  },
+  {
+    "origin": "server/index.js",
+    "line": 964,
+    "method": "GET",
+    "path": "/api/runtime/world",
+    "frequency": "Sob demanda do consumidor; routers montados podem adicionar prefixo"
+  },
+  {
+    "origin": "server/index.js",
+    "line": 972,
+    "method": "POST",
+    "path": "/api/admin/runtime/systems/missions/:category",
+    "frequency": "Sob demanda do consumidor; routers montados podem adicionar prefixo"
+  },
+  {
+    "origin": "server/index.js",
+    "line": 978,
+    "method": "POST",
+    "path": "/api/admin/runtime/systems/economy/:serviceId",
+    "frequency": "Sob demanda do consumidor; routers montados podem adicionar prefixo"
+  },
+  {
+    "origin": "server/index.js",
+    "line": 985,
+    "method": "POST",
+    "path": "/api/admin/runtime/systems/crafting/:recipeId",
+    "frequency": "Sob demanda do consumidor; routers montados podem adicionar prefixo"
+  },
+  {
+    "origin": "server/index.js",
+    "line": 994,
+    "method": "POST",
+    "path": "/api/admin/runtime/systems/custom-missions",
+    "frequency": "Sob demanda do consumidor; routers montados podem adicionar prefixo"
+  },
+  {
+    "origin": "server/index.js",
+    "line": 1012,
+    "method": "DELETE",
+    "path": "/api/admin/runtime/systems/custom-missions/:missionId",
+    "frequency": "Sob demanda do consumidor; routers montados podem adicionar prefixo"
+  },
+  {
+    "origin": "server/index.js",
+    "line": 1019,
+    "method": "POST",
+    "path": "/api/admin/runtime/systems/new/economy",
+    "frequency": "Sob demanda do consumidor; routers montados podem adicionar prefixo"
+  },
+  {
+    "origin": "server/index.js",
+    "line": 1029,
+    "method": "POST",
+    "path": "/api/admin/runtime/systems/new/crafting",
+    "frequency": "Sob demanda do consumidor; routers montados podem adicionar prefixo"
+  },
+  {
+    "origin": "server/index.js",
+    "line": 1037,
+    "method": "GET",
+    "path": "/api/runtime/systems",
+    "frequency": "Sob demanda do consumidor; routers montados podem adicionar prefixo"
+  },
+  {
+    "origin": "server/index.js",
+    "line": 1043,
+    "method": "GET",
+    "path": "/api/runtime/pass",
+    "frequency": "Sob demanda do consumidor; routers montados podem adicionar prefixo"
+  },
+  {
+    "origin": "server/index.js",
+    "line": 1047,
+    "method": "POST",
+    "path": "/api/admin/runtime/pass/seasons/new",
+    "frequency": "Sob demanda do consumidor; routers montados podem adicionar prefixo"
+  },
+  {
+    "origin": "server/index.js",
+    "line": 1056,
+    "method": "POST",
+    "path": "/api/admin/runtime/pass/seasons/:seasonKey",
+    "frequency": "Sob demanda do consumidor; routers montados podem adicionar prefixo"
+  },
+  {
+    "origin": "server/index.js",
+    "line": 1062,
+    "method": "POST",
+    "path": "/api/admin/runtime/pass/seasons/:seasonKey/tiers/:tierNo",
+    "frequency": "Sob demanda do consumidor; routers montados podem adicionar prefixo"
+  },
+  {
+    "origin": "server/index.js",
+    "line": 1070,
+    "method": "GET",
+    "path": "/api/runtime/shops",
+    "frequency": "Sob demanda do consumidor; routers montados podem adicionar prefixo"
+  },
+  {
+    "origin": "server/index.js",
+    "line": 1074,
+    "method": "POST",
+    "path": "/api/admin/runtime/shops/common/:catalogKey",
+    "frequency": "Sob demanda do consumidor; routers montados podem adicionar prefixo"
+  },
+  {
+    "origin": "server/index.js",
+    "line": 1090,
+    "method": "POST",
+    "path": "/api/admin/runtime/shops/premium/:productId",
+    "frequency": "Sob demanda do consumidor; routers montados podem adicionar prefixo"
+  },
+  {
+    "origin": "server/index.js",
+    "line": 1106,
+    "method": "GET",
+    "path": "/api/admin/runtime/aux-economy",
+    "frequency": "Sob demanda do consumidor; routers montados podem adicionar prefixo"
+  },
+  {
+    "origin": "server/index.js",
+    "line": 1119,
+    "method": "POST",
+    "path": "/api/admin/runtime/aux-economy",
+    "frequency": "Sob demanda do consumidor; routers montados podem adicionar prefixo"
+  },
+  {
+    "origin": "server/index.js",
+    "line": 1168,
+    "method": "GET",
+    "path": "/api/runtime/auction-rules",
+    "frequency": "Sob demanda do consumidor; routers montados podem adicionar prefixo"
+  },
+  {
+    "origin": "server/index.js",
+    "line": 1173,
+    "method": "POST",
+    "path": "/api/admin/runtime/auction-rules",
+    "frequency": "Sob demanda do consumidor; routers montados podem adicionar prefixo"
+  },
+  {
+    "origin": "server/index.js",
+    "line": 1183,
+    "method": "GET",
+    "path": "/api/diagnostics",
+    "frequency": "Sob demanda do consumidor; routers montados podem adicionar prefixo"
+  },
+  {
+    "origin": "server/index.js",
+    "line": 1212,
+    "method": "POST",
+    "path": "/api/auth/signup",
+    "frequency": "Sob demanda do consumidor; routers montados podem adicionar prefixo"
+  },
+  {
+    "origin": "server/index.js",
+    "line": 1250,
+    "method": "POST",
+    "path": "/api/auth/login",
+    "frequency": "Sob demanda do consumidor; routers montados podem adicionar prefixo"
+  },
+  {
+    "origin": "server/index.js",
+    "line": 1276,
+    "method": "POST",
+    "path": "/api/auth/google/session",
+    "frequency": "Sob demanda do consumidor; routers montados podem adicionar prefixo"
+  },
+  {
+    "origin": "server/index.js",
+    "line": 1296,
+    "method": "POST",
+    "path": "/api/auth/refresh",
+    "frequency": "Sob demanda do consumidor; routers montados podem adicionar prefixo"
+  },
+  {
+    "origin": "server/index.js",
+    "line": 1325,
+    "method": "GET",
+    "path": "/api/auth/session-status",
+    "frequency": "Sob demanda do consumidor; routers montados podem adicionar prefixo"
+  },
+  {
+    "origin": "server/index.js",
+    "line": 1329,
+    "method": "POST",
+    "path": "/api/auth/logout",
+    "frequency": "Sob demanda do consumidor; routers montados podem adicionar prefixo"
+  },
+  {
+    "origin": "server/index.js",
+    "line": 1335,
+    "method": "GET",
+    "path": "/api/auth/me",
+    "frequency": "Sob demanda do consumidor; routers montados podem adicionar prefixo"
+  },
+  {
+    "origin": "server/index.js",
+    "line": 1340,
+    "method": "PUT",
+    "path": "/api/account/callsign",
+    "frequency": "Sob demanda do consumidor; routers montados podem adicionar prefixo"
+  },
+  {
+    "origin": "server/index.js",
+    "line": 1363,
+    "method": "GET",
+    "path": "/api/live-ops",
+    "frequency": "Sob demanda do consumidor; routers montados podem adicionar prefixo"
+  },
+  {
+    "origin": "server/index.js",
+    "line": 1370,
+    "method": "POST",
+    "path": "/api/admin/runtime/events/:eventKey",
+    "frequency": "Sob demanda do consumidor; routers montados podem adicionar prefixo"
+  },
+  {
+    "origin": "server/index.js",
+    "line": 1401,
+    "method": "POST",
+    "path": "/api/admin/runtime/events/central/settings",
+    "frequency": "Sob demanda do consumidor; routers montados podem adicionar prefixo"
+  },
+  {
+    "origin": "server/index.js",
+    "line": 1406,
+    "method": "POST",
+    "path": "/api/admin/runtime/events/central/event/:eventKey",
+    "frequency": "Sob demanda do consumidor; routers montados podem adicionar prefixo"
+  },
+  {
+    "origin": "server/index.js",
+    "line": 1414,
+    "method": "POST",
+    "path": "/api/admin/runtime/events/central/manual",
+    "frequency": "Sob demanda do consumidor; routers montados podem adicionar prefixo"
+  },
+  {
+    "origin": "server/index.js",
+    "line": 1424,
+    "method": "POST",
+    "path": "/api/player/coupons/redeem",
+    "frequency": "Sob demanda do consumidor; routers montados podem adicionar prefixo"
+  },
+  {
+    "origin": "server/index.js",
+    "line": 1437,
+    "method": "POST",
+    "path": "/api/player/purchase",
+    "frequency": "Sob demanda do consumidor; routers montados podem adicionar prefixo"
+  },
+  {
+    "origin": "server/index.js",
+    "line": 1563,
+    "method": "POST",
+    "path": "/api/player/warfront/action",
+    "frequency": "Sob demanda do consumidor; routers montados podem adicionar prefixo"
+  },
+  {
+    "origin": "server/index.js",
+    "line": 1564,
+    "method": "POST",
+    "path": "/api/player/rewards/claim",
+    "frequency": "Sob demanda do consumidor; routers montados podem adicionar prefixo"
+  },
+  {
+    "origin": "server/index.js",
+    "line": 1565,
+    "method": "POST",
+    "path": "/api/player/collections/ensure",
+    "frequency": "Sob demanda do consumidor; routers montados podem adicionar prefixo"
+  },
+  {
+    "origin": "server/index.js",
+    "line": 1566,
+    "method": "POST",
+    "path": "/api/player/collections/claim",
+    "frequency": "Sob demanda do consumidor; routers montados podem adicionar prefixo"
+  },
+  {
+    "origin": "server/index.js",
+    "line": 1567,
+    "method": "POST",
+    "path": "/api/player/auction/bid",
+    "frequency": "Sob demanda do consumidor; routers montados podem adicionar prefixo"
+  },
+  {
+    "origin": "server/index.js",
+    "line": 1579,
+    "method": "POST",
+    "path": "/api/player/auction/settle",
+    "frequency": "Sob demanda do consumidor; routers montados podem adicionar prefixo"
+  },
+  {
+    "origin": "server/index.js",
+    "line": 1603,
+    "method": "POST",
+    "path": "/api/player/missions/claim",
+    "frequency": "Sob demanda do consumidor; routers montados podem adicionar prefixo"
+  },
+  {
+    "origin": "server/index.js",
+    "line": 1610,
+    "method": "POST",
+    "path": "/api/player/purchase/bulk",
+    "frequency": "Sob demanda do consumidor; routers montados podem adicionar prefixo"
+  },
+  {
+    "origin": "server/index.js",
+    "line": 1694,
+    "method": "POST",
+    "path": "/api/player/economy",
+    "frequency": "Sob demanda do consumidor; routers montados podem adicionar prefixo"
+  },
+  {
+    "origin": "server/index.js",
+    "line": 1846,
+    "method": "ALL",
+    "path": "/api/save",
+    "frequency": "Sob demanda do consumidor; routers montados podem adicionar prefixo"
+  },
+  {
+    "origin": "server/index.js",
+    "line": 1847,
+    "method": "ALL",
+    "path": "/api/economy/action",
+    "frequency": "Sob demanda do consumidor; routers montados podem adicionar prefixo"
+  },
+  {
+    "origin": "server/index.js",
+    "line": 1848,
+    "method": "ALL",
+    "path": "/api/auction/settle",
+    "frequency": "Sob demanda do consumidor; routers montados podem adicionar prefixo"
+  },
+  {
+    "origin": "server/index.js",
+    "line": 1849,
+    "method": "ALL",
+    "path": "/api/missions/claim",
+    "frequency": "Sob demanda do consumidor; routers montados podem adicionar prefixo"
+  },
+  {
+    "origin": "server/index.js",
+    "line": 1850,
+    "method": "ALL",
+    "path": "/api/live/purchase/bulk",
+    "frequency": "Sob demanda do consumidor; routers montados podem adicionar prefixo"
+  },
+  {
+    "origin": "server/index.js",
+    "line": 1851,
+    "method": "ALL",
+    "path": "/api/live/purchase",
+    "frequency": "Sob demanda do consumidor; routers montados podem adicionar prefixo"
+  },
+  {
+    "origin": "server/index.js",
+    "line": 1860,
+    "method": "GET",
+    "path": "/api/runtime/bonus",
+    "frequency": "Sob demanda do consumidor; routers montados podem adicionar prefixo"
+  },
+  {
+    "origin": "server/index.js",
+    "line": 1861,
+    "method": "POST",
+    "path": "/api/admin/runtime/bonus",
+    "frequency": "Sob demanda do consumidor; routers montados podem adicionar prefixo"
+  },
+  {
+    "origin": "server/index.js",
+    "line": 1871,
+    "method": "GET",
+    "path": "/api/runtime/gates",
+    "frequency": "Sob demanda do consumidor; routers montados podem adicionar prefixo"
+  },
+  {
+    "origin": "server/index.js",
+    "line": 1876,
+    "method": "POST",
+    "path": "/api/admin/runtime/gates",
+    "frequency": "Sob demanda do consumidor; routers montados podem adicionar prefixo"
+  },
+  {
+    "origin": "server/index.js",
+    "line": 1907,
+    "method": "GET",
+    "path": "/api/runtime/balance",
+    "frequency": "Sob demanda do consumidor; routers montados podem adicionar prefixo"
+  },
+  {
+    "origin": "server/index.js",
+    "line": 1912,
+    "method": "POST",
+    "path": "/api/admin/runtime/balance",
+    "frequency": "Sob demanda do consumidor; routers montados podem adicionar prefixo"
+  },
+  {
+    "origin": "server/index.js",
+    "line": 1928,
+    "method": "POST",
+    "path": "/api/telemetry",
+    "frequency": "Sob demanda do consumidor; routers montados podem adicionar prefixo"
+  },
+  {
+    "origin": "server/index.js",
+    "line": 1942,
+    "method": "GET",
+    "path": "/api/autopilot/v48/access",
+    "frequency": "Sob demanda do consumidor; routers montados podem adicionar prefixo"
+  },
+  {
+    "origin": "server/index.js",
+    "line": 1956,
+    "method": "POST",
+    "path": "/api/autopilot/v116/diagnostics",
+    "frequency": "Sob demanda do consumidor; routers montados podem adicionar prefixo"
+  },
+  {
+    "origin": "server/index.js",
+    "line": 1969,
+    "method": "GET",
+    "path": "/api/admin/autopilot/v48/grants",
+    "frequency": "Sob demanda do consumidor; routers montados podem adicionar prefixo"
+  },
+  {
+    "origin": "server/index.js",
+    "line": 1976,
+    "method": "PUT",
+    "path": "/api/admin/autopilot/v48/grants/:userId",
+    "frequency": "Sob demanda do consumidor; routers montados podem adicionar prefixo"
+  },
+  {
+    "origin": "server/index.js",
+    "line": 2000,
+    "method": "GET",
+    "path": "/api/admin/coupons",
+    "frequency": "Sob demanda do consumidor; routers montados podem adicionar prefixo"
+  },
+  {
+    "origin": "server/index.js",
+    "line": 2001,
+    "method": "POST",
+    "path": "/api/admin/coupons",
+    "frequency": "Sob demanda do consumidor; routers montados podem adicionar prefixo"
+  },
+  {
+    "origin": "server/index.js",
+    "line": 2012,
+    "method": "POST",
+    "path": "/api/admin/coupons/:code/active",
+    "frequency": "Sob demanda do consumidor; routers montados podem adicionar prefixo"
+  },
+  {
+    "origin": "server/index.js",
+    "line": 2022,
+    "method": "GET",
+    "path": "/api/admin/warbots",
+    "frequency": "Sob demanda do consumidor; routers montados podem adicionar prefixo"
+  },
+  {
+    "origin": "server/index.js",
+    "line": 2029,
+    "method": "POST",
+    "path": "/api/admin/warbots",
+    "frequency": "Sob demanda do consumidor; routers montados podem adicionar prefixo"
+  },
+  {
+    "origin": "server/index.js",
+    "line": 2046,
+    "method": "GET",
+    "path": "/api/frontier/admin-entry",
+    "frequency": "Sob demanda do consumidor; routers montados podem adicionar prefixo"
+  },
+  {
+    "origin": "server/index.js",
+    "line": 2053,
+    "method": "GET",
+    "path": "/api/admin/status",
+    "frequency": "Sob demanda do consumidor; routers montados podem adicionar prefixo"
+  },
+  {
+    "origin": "server/index.js",
+    "line": 2054,
+    "method": "GET",
+    "path": "/api/admin/users",
+    "frequency": "Sob demanda do consumidor; routers montados podem adicionar prefixo"
+  },
+  {
+    "origin": "server/index.js",
+    "line": 2055,
+    "method": "GET",
+    "path": "/api/admin/actions",
+    "frequency": "Sob demanda do consumidor; routers montados podem adicionar prefixo"
+  },
+  {
+    "origin": "server/index.js",
+    "line": 2056,
+    "method": "GET",
+    "path": "/api/admin/telemetry",
+    "frequency": "Sob demanda do consumidor; routers montados podem adicionar prefixo"
+  },
+  {
+    "origin": "server/index.js",
+    "line": 2058,
+    "method": "GET",
+    "path": "/api/admin/security/incidents",
+    "frequency": "Sob demanda do consumidor; routers montados podem adicionar prefixo"
+  },
+  {
+    "origin": "server/index.js",
+    "line": 2064,
+    "method": "POST",
+    "path": "/api/admin/security/incidents/:id/review",
+    "frequency": "Sob demanda do consumidor; routers montados podem adicionar prefixo"
+  },
+  {
+    "origin": "server/index.js",
+    "line": 2070,
+    "method": "GET",
+    "path": "/api/admin/telemetry/:userId",
+    "frequency": "Sob demanda do consumidor; routers montados podem adicionar prefixo"
+  },
+  {
+    "origin": "server/index.js",
+    "line": 2071,
+    "method": "POST",
+    "path": "/api/admin/users/:userId/ban",
+    "frequency": "Sob demanda do consumidor; routers montados podem adicionar prefixo"
+  },
+  {
+    "origin": "server/index.js",
+    "line": 2075,
+    "method": "POST",
+    "path": "/api/admin/users/:userId/unban",
+    "frequency": "Sob demanda do consumidor; routers montados podem adicionar prefixo"
+  },
+  {
+    "origin": "server/index.js",
+    "line": 2076,
+    "method": "POST",
+    "path": "/api/admin/users/:userId/reset",
+    "frequency": "Sob demanda do consumidor; routers montados podem adicionar prefixo"
+  },
+  {
+    "origin": "server/index.js",
+    "line": 2077,
+    "method": "DELETE",
+    "path": "/api/admin/users/:userId",
+    "frequency": "Sob demanda do consumidor; routers montados podem adicionar prefixo"
+  },
+  {
+    "origin": "server/index.js",
+    "line": 2081,
+    "method": "GET",
+    "path": "/api/elite",
+    "frequency": "Sob demanda do consumidor; routers montados podem adicionar prefixo"
+  },
+  {
+    "origin": "server/index.js",
+    "line": 2091,
+    "method": "POST",
+    "path": "/api/elite/claim",
+    "frequency": "Sob demanda do consumidor; routers montados podem adicionar prefixo"
+  },
+  {
+    "origin": "server/index.js",
+    "line": 2098,
+    "method": "GET",
+    "path": "/api/admin/elite/objectives",
+    "frequency": "Sob demanda do consumidor; routers montados podem adicionar prefixo"
+  },
+  {
+    "origin": "server/index.js",
+    "line": 2104,
+    "method": "POST",
+    "path": "/api/admin/elite/objectives",
+    "frequency": "Sob demanda do consumidor; routers montados podem adicionar prefixo"
+  },
+  {
+    "origin": "server/index.js",
+    "line": 2123,
+    "method": "GET",
+    "path": "/api/war/campaigns",
+    "frequency": "Sob demanda do consumidor; routers montados podem adicionar prefixo"
+  },
+  {
+    "origin": "server/index.js",
+    "line": 2155,
+    "method": "POST",
+    "path": "/api/war/supply/claim",
+    "frequency": "Sob demanda do consumidor; routers montados podem adicionar prefixo"
+  },
+  {
+    "origin": "server/index.js",
+    "line": 2158,
+    "method": "POST",
+    "path": "/api/war/campaigns/:id/claim",
+    "frequency": "Sob demanda do consumidor; routers montados podem adicionar prefixo"
+  },
+  {
+    "origin": "server/index.js",
+    "line": 2163,
+    "method": "GET",
+    "path": "/api/admin/war/campaigns",
+    "frequency": "Sob demanda do consumidor; routers montados podem adicionar prefixo"
+  },
+  {
+    "origin": "server/index.js",
+    "line": 2167,
+    "method": "POST",
+    "path": "/api/admin/war/rules",
+    "frequency": "Sob demanda do consumidor; routers montados podem adicionar prefixo"
+  },
+  {
+    "origin": "server/index.js",
+    "line": 2171,
+    "method": "POST",
+    "path": "/api/admin/war/campaigns",
+    "frequency": "Sob demanda do consumidor; routers montados podem adicionar prefixo"
+  },
+  {
+    "origin": "server/index.js",
+    "line": 2178,
+    "method": "USE",
+    "path": "/api/command",
+    "frequency": "Sob demanda do consumidor; routers montados podem adicionar prefixo"
+  },
+  {
+    "origin": "server/index.js",
+    "line": 2179,
+    "method": "USE",
+    "path": "/api/relay",
+    "frequency": "Sob demanda do consumidor; routers montados podem adicionar prefixo"
+  },
+  {
+    "origin": "server/index.js",
+    "line": 2180,
+    "method": "USE",
+    "path": "/api/relay/dominion",
+    "frequency": "Sob demanda do consumidor; routers montados podem adicionar prefixo"
+  },
+  {
+    "origin": "server/index.js",
+    "line": 2181,
+    "method": "USE",
+    "path": "/api/frontier",
+    "frequency": "Sob demanda do consumidor; routers montados podem adicionar prefixo"
+  },
+  {
+    "origin": "server/index.js",
+    "line": 2184,
+    "method": "USE",
+    "path": "/api/player/save",
+    "frequency": "Sob demanda do consumidor; routers montados podem adicionar prefixo"
+  },
+  {
+    "origin": "server/index.js",
+    "line": 2189,
+    "method": "GET",
+    "path": "/api/player/save",
+    "frequency": "Sob demanda do consumidor; routers montados podem adicionar prefixo"
+  },
+  {
+    "origin": "server/index.js",
+    "line": 2207,
+    "method": "GET",
+    "path": "/api/player/save/core/status",
+    "frequency": "Sob demanda do consumidor; routers montados podem adicionar prefixo"
+  },
+  {
+    "origin": "server/index.js",
+    "line": 2223,
+    "method": "GET",
+    "path": "/api/player/save/core/health",
+    "frequency": "Sob demanda do consumidor; routers montados podem adicionar prefixo"
+  },
+  {
+    "origin": "server/index.js",
+    "line": 2246,
+    "method": "GET",
+    "path": "/api/admin/save/v120/readiness",
+    "frequency": "Sob demanda do consumidor; routers montados podem adicionar prefixo"
+  },
+  {
+    "origin": "server/index.js",
+    "line": 2262,
+    "method": "GET",
+    "path": "/api/player/save/core/events",
+    "frequency": "Sob demanda do consumidor; routers montados podem adicionar prefixo"
+  },
+  {
+    "origin": "server/index.js",
+    "line": 2278,
+    "method": "GET",
+    "path": "/api/player/save/core/logs",
+    "frequency": "Sob demanda do consumidor; routers montados podem adicionar prefixo"
+  },
+  {
+    "origin": "server/index.js",
+    "line": 2302,
+    "method": "USE",
+    "path": "/api/player/save",
+    "frequency": "Sob demanda do consumidor; routers montados podem adicionar prefixo"
+  },
+  {
+    "origin": "server/index.js",
+    "line": 2303,
+    "method": "PUT",
+    "path": "/api/player/save",
+    "frequency": "Sob demanda do consumidor; routers montados podem adicionar prefixo"
+  },
+  {
+    "origin": "server/index.js",
+    "line": 2469,
+    "method": "GET",
+    "path": "/api/player/location",
+    "frequency": "Sob demanda do consumidor; routers montados podem adicionar prefixo"
+  },
+  {
+    "origin": "server/index.js",
+    "line": 2474,
+    "method": "POST",
+    "path": "/api/player/location",
+    "frequency": "Sob demanda do consumidor; routers montados podem adicionar prefixo"
+  },
+  {
+    "origin": "server/index.js",
+    "line": 2488,
+    "method": "GET",
+    "path": "/api/world/sector-state",
+    "frequency": "Sob demanda do consumidor; routers montados podem adicionar prefixo"
+  },
+  {
+    "origin": "server/index.js",
+    "line": 2496,
+    "method": "GET",
+    "path": "/api/world/status",
+    "frequency": "Sob demanda do consumidor; routers montados podem adicionar prefixo"
+  },
+  {
+    "origin": "server/index.js",
+    "line": 2498,
+    "method": "GET",
+    "path": "/api/admin/v115/quality",
+    "frequency": "Sob demanda do consumidor; routers montados podem adicionar prefixo"
+  },
+  {
+    "origin": "server/index.js",
+    "line": 2506,
+    "method": "GET",
+    "path": "*",
+    "frequency": "Sob demanda do consumidor; routers montados podem adicionar prefixo"
+  },
+  {
+    "origin": "server/liveops-snapshot-v99.js",
+    "line": 31,
+    "method": "GET",
+    "path": "/api/admin/v99/liveops-snapshot",
+    "frequency": "Sob demanda do consumidor; routers montados podem adicionar prefixo"
+  },
+  {
+    "origin": "server/offline-farm-v484.js",
+    "line": 235,
+    "method": "GET",
+    "path": "/api/offline-farm/v484/v86/economy",
+    "frequency": "Sob demanda do consumidor; routers montados podem adicionar prefixo"
+  },
+  {
+    "origin": "server/offline-farm-v484.js",
+    "line": 245,
+    "method": "GET",
+    "path": "/api/offline-farm/v484/v91/diagnosis",
+    "frequency": "Sob demanda do consumidor; routers montados podem adicionar prefixo"
+  },
+  {
+    "origin": "server/offline-farm-v484.js",
+    "line": 276,
+    "method": "GET",
+    "path": "/api/offline-farm/v484/v103/preflight",
+    "frequency": "Sob demanda do consumidor; routers montados podem adicionar prefixo"
+  },
+  {
+    "origin": "server/offline-farm-v484.js",
+    "line": 283,
+    "method": "GET",
+    "path": "/api/offline-farm/v484/status",
+    "frequency": "Sob demanda do consumidor; routers montados podem adicionar prefixo"
+  },
+  {
+    "origin": "server/offline-farm-v484.js",
+    "line": 284,
+    "method": "GET",
+    "path": "/api/offline-farm/v484/options",
+    "frequency": "Sob demanda do consumidor; routers montados podem adicionar prefixo"
+  },
+  {
+    "origin": "server/offline-farm-v484.js",
+    "line": 301,
+    "method": "POST",
+    "path": "/api/offline-farm/v484/start",
+    "frequency": "Sob demanda do consumidor; routers montados podem adicionar prefixo"
+  },
+  {
+    "origin": "server/offline-farm-v484.js",
+    "line": 310,
+    "method": "GET",
+    "path": "/api/offline-farm/v484/preview",
+    "frequency": "Sob demanda do consumidor; routers montados podem adicionar prefixo"
+  },
+  {
+    "origin": "server/offline-farm-v484.js",
+    "line": 330,
+    "method": "GET",
+    "path": "/api/offline-farm/v484/admin/settings",
+    "frequency": "Sob demanda do consumidor; routers montados podem adicionar prefixo"
+  },
+  {
+    "origin": "server/offline-farm-v484.js",
+    "line": 339,
+    "method": "PUT",
+    "path": "/api/offline-farm/v484/admin/settings",
+    "frequency": "Sob demanda do consumidor; routers montados podem adicionar prefixo"
+  },
+  {
+    "origin": "server/offline-farm-v484.js",
+    "line": 348,
+    "method": "POST",
+    "path": "/api/offline-farm/v484/admin/cancel",
+    "frequency": "Sob demanda do consumidor; routers montados podem adicionar prefixo"
+  },
+  {
+    "origin": "server/offline-farm-v484.js",
+    "line": 355,
+    "method": "GET",
+    "path": "/api/offline-farm/v484/v49/history",
+    "frequency": "Sob demanda do consumidor; routers montados podem adicionar prefixo"
+  },
+  {
+    "origin": "server/offline-farm-v484.js",
+    "line": 363,
+    "method": "GET",
+    "path": "/api/offline-farm/v484/v49/strategies",
+    "frequency": "Sob demanda do consumidor; routers montados podem adicionar prefixo"
+  },
+  {
+    "origin": "server/offline-farm-v484.js",
+    "line": 388,
+    "method": "GET",
+    "path": "/api/offline-farm/v484/v49/access",
+    "frequency": "Sob demanda do consumidor; routers montados podem adicionar prefixo"
+  },
+  {
+    "origin": "server/offline-farm-v484.js",
+    "line": 391,
+    "method": "GET",
+    "path": "/api/offline-farm/v484/v49/admin/audit",
+    "frequency": "Sob demanda do consumidor; routers montados podem adicionar prefixo"
+  },
+  {
+    "origin": "server/offline-farm-v484.js",
+    "line": 405,
+    "method": "PUT",
+    "path": "/api/offline-farm/v484/v49/admin/access",
+    "frequency": "Sob demanda do consumidor; routers montados podem adicionar prefixo"
+  },
+  {
+    "origin": "server/offline-farm-v484.js",
+    "line": 415,
+    "method": "POST",
+    "path": "/api/offline-farm/v484/settle",
+    "frequency": "Sob demanda do consumidor; routers montados podem adicionar prefixo"
+  },
+  {
+    "origin": "server/offline-farm-v484.js",
+    "line": 416,
+    "method": "POST",
+    "path": "/api/offline-farm/v484/cancel",
+    "frequency": "Sob demanda do consumidor; routers montados podem adicionar prefixo"
+  },
+  {
+    "origin": "server/offline-farm-v49-push.js",
+    "line": 24,
+    "method": "GET",
+    "path": "/api/offline-farm/v484/v49/push-config",
+    "frequency": "Sob demanda do consumidor; routers montados podem adicionar prefixo"
+  },
+  {
+    "origin": "server/offline-farm-v49-push.js",
+    "line": 27,
+    "method": "POST",
+    "path": "/api/offline-farm/v484/v49/push-subscribe",
+    "frequency": "Sob demanda do consumidor; routers montados podem adicionar prefixo"
+  },
+  {
+    "origin": "server/offline-farm-v49-push.js",
+    "line": 40,
+    "method": "POST",
+    "path": "/api/offline-farm/v484/v49/push-unsubscribe",
+    "frequency": "Sob demanda do consumidor; routers montados podem adicionar prefixo"
+  },
+  {
+    "origin": "server/offline-farm-v49-push.js",
+    "line": 46,
+    "method": "POST",
+    "path": "/api/offline-farm/v49/dispatch",
+    "frequency": "Sob demanda do consumidor; routers montados podem adicionar prefixo"
+  },
+  {
+    "origin": "server/progression-balance-v113.js",
+    "line": 56,
+    "method": "GET",
+    "path": "/api/admin/v113/progression-audit",
+    "frequency": "Sob demanda do consumidor; routers montados podem adicionar prefixo"
+  },
+  {
+    "origin": "server/release-readiness-v100.js",
+    "line": 21,
+    "method": "GET",
+    "path": "/api/admin/v100/readiness",
+    "frequency": "Sob demanda do consumidor; routers montados podem adicionar prefixo"
+  },
+  {
+    "origin": "server/squad-objectives-v421.js",
+    "line": 5,
+    "method": "GET",
+    "path": "/api/frontier/v421/squad-objective",
+    "frequency": "Sob demanda do consumidor; routers montados podem adicionar prefixo"
+  },
+  {
+    "origin": "server/squad-objectives-v421.js",
+    "line": 9,
+    "method": "POST",
+    "path": "/api/frontier/v421/squad-objective/claim",
+    "frequency": "Sob demanda do consumidor; routers montados podem adicionar prefixo"
+  },
+  {
+    "origin": "server/squad-objectives-v421.js",
+    "line": 13,
+    "method": "POST",
+    "path": "/api/admin/frontier/v421/squad-objective",
+    "frequency": "Sob demanda do consumidor; routers montados podem adicionar prefixo"
+  },
+  {
+    "origin": "server/stage-a-v423.js",
+    "line": 6,
+    "method": "GET",
+    "path": "/api/frontier/v423/loadouts",
+    "frequency": "Sob demanda do consumidor; routers montados podem adicionar prefixo"
+  },
+  {
+    "origin": "server/stage-a-v423.js",
+    "line": 7,
+    "method": "POST",
+    "path": "/api/frontier/v423/loadouts",
+    "frequency": "Sob demanda do consumidor; routers montados podem adicionar prefixo"
+  },
+  {
+    "origin": "server/stage-a-v423.js",
+    "line": 13,
+    "method": "GET",
+    "path": "/api/frontier/v423/operations",
+    "frequency": "Sob demanda do consumidor; routers montados podem adicionar prefixo"
+  },
+  {
+    "origin": "server/stage-a-v423.js",
+    "line": 14,
+    "method": "POST",
+    "path": "/api/frontier/v423/operations/claim",
+    "frequency": "Sob demanda do consumidor; routers montados podem adicionar prefixo"
+  },
+  {
+    "origin": "server/stage-a-v423.js",
+    "line": 18,
+    "method": "POST",
+    "path": "/api/admin/frontier/v423/operations",
+    "frequency": "Sob demanda do consumidor; routers montados podem adicionar prefixo"
+  },
+  {
+    "origin": "server/stage-b-v426.js",
+    "line": 21,
+    "method": "GET",
+    "path": "/api/frontier/v426/exploration",
+    "frequency": "Sob demanda do consumidor; routers montados podem adicionar prefixo"
+  },
+  {
+    "origin": "server/stage-b-v426.js",
+    "line": 22,
+    "method": "POST",
+    "path": "/api/frontier/v426/exploration/start",
+    "frequency": "Sob demanda do consumidor; routers montados podem adicionar prefixo"
+  },
+  {
+    "origin": "server/stage-b-v426.js",
+    "line": 26,
+    "method": "POST",
+    "path": "/api/frontier/v426/exploration/claim",
+    "frequency": "Sob demanda do consumidor; routers montados podem adicionar prefixo"
+  },
+  {
+    "origin": "server/stage-b-v426.js",
+    "line": 30,
+    "method": "GET",
+    "path": "/api/frontier/v426/market",
+    "frequency": "Sob demanda do consumidor; routers montados podem adicionar prefixo"
+  },
+  {
+    "origin": "server/stage-b-v426.js",
+    "line": 31,
+    "method": "POST",
+    "path": "/api/frontier/v426/market/sell",
+    "frequency": "Sob demanda do consumidor; routers montados podem adicionar prefixo"
+  },
+  {
+    "origin": "server/stage-b-v426.js",
+    "line": 35,
+    "method": "POST",
+    "path": "/api/frontier/v426/market/buy",
+    "frequency": "Sob demanda do consumidor; routers montados podem adicionar prefixo"
+  },
+  {
+    "origin": "server/stage-b-v426.js",
+    "line": 39,
+    "method": "POST",
+    "path": "/api/frontier/v426/market/cancel",
+    "frequency": "Sob demanda do consumidor; routers montados podem adicionar prefixo"
+  },
+  {
+    "origin": "server/stage-b-v426.js",
+    "line": 43,
+    "method": "GET",
+    "path": "/api/frontier/v426/clan",
+    "frequency": "Sob demanda do consumidor; routers montados podem adicionar prefixo"
+  },
+  {
+    "origin": "server/stage-b-v426.js",
+    "line": 44,
+    "method": "POST",
+    "path": "/api/frontier/v426/clan/fund",
+    "frequency": "Sob demanda do consumidor; routers montados podem adicionar prefixo"
+  },
+  {
+    "origin": "server/stage-b-v426.js",
+    "line": 48,
+    "method": "POST",
+    "path": "/api/admin/frontier/v426/sector",
+    "frequency": "Sob demanda do consumidor; routers montados podem adicionar prefixo"
+  },
+  {
+    "origin": "server/stage-b-v426.js",
+    "line": 53,
+    "method": "POST",
+    "path": "/api/admin/frontier/v426/market",
+    "frequency": "Sob demanda do consumidor; routers montados podem adicionar prefixo"
+  },
+  {
+    "origin": "server/stage-b-v426.js",
+    "line": 57,
+    "method": "POST",
+    "path": "/api/admin/frontier/v426/clan",
+    "frequency": "Sob demanda do consumidor; routers montados podem adicionar prefixo"
+  }
+]

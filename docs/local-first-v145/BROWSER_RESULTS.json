@@ -1,0 +1,8 @@
+{
+  "status": "blocked",
+  "command": "npm run test:browser",
+  "browser": "Chromium /usr/bin/chromium",
+  "error": "FATAL process_singleton_posix.cc:297 socket() failed: Operation not permitted (1)",
+  "passed": false,
+  "fallback": "Journal tested with fake-indexeddb; not a browser or physical-device approval"
+}

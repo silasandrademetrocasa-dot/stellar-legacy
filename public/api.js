@@ -1,6 +1,10 @@
-import {configureNativeDataOrigin} from './modules/native-data-origin.js?v=47.7.80';
-import {offlineFarmDirectActivityAllowedV103} from './modules/offline-farm-activity-v103.js?v=47.7.80';
-import {createReadCoalescerV104} from './modules/read-coalescer-v104.js?v=47.7.80';
+import {compactSaveV145,applyStateDeltaV145} from './modules/state-delta-v145.js';
+import {createRuntimeReadCacheV145} from './modules/runtime-read-cache-v145.js';
+const runtimeReadCacheV145=createRuntimeReadCacheV145();
+let deltaBaselineV145=null;
+import {configureNativeDataOrigin} from './modules/native-data-origin.js?v=47.7.81';
+import {offlineFarmDirectActivityAllowedV103} from './modules/offline-farm-activity-v103.js?v=47.7.81';
+import {createReadCoalescerV104} from './modules/read-coalescer-v104.js?v=47.7.81';
 import {persistSessionV101,loadPersistedSessionV101,clearPersistedSessionV101} from './modules/login-persistence-v101.js';
 const SESSION_KEY = 'stellarLegacyV4Session';
 const GOOGLE_OAUTH_PENDING_KEY = 'stellarLegacyGoogleOAuthPendingV18216';
@@ -71,6 +75,11 @@ async function serverFetch(path, options = {}, withAuth = false) {
   const requestSession=saveSessionKey();
   const fetchBody=()=>boundedFetchV4831(path,{...options,headers,cache:'no-store'});
   const eligible=(!options.method||options.method.toUpperCase()==='GET')&&!options.body&&!options.signal;
+  const runtimePath=String(path).split('?')[0];
+  const runtimeCacheable=eligible&&withAuth&&/^\/api\/runtime\/(?:topbar|npcs|world|systems|pass|shops|bonus|gates|balance)$/.test(runtimePath);
+  if(runtimeCacheable&&!options.runtimeCacheHandledV145){
+    return runtimeReadCacheV145.read(saveSessionKey()+'|'+runtimePath,()=>serverFetch(path,{...options,runtimeCacheHandledV145:true},withAuth),{refresh:/(?:[?&])refresh=1(?:&|$)/.test(path)});
+  }
   const {res,body} = await (eligible?coalesceReadV104('render|'+String(session?.game_session_id||'public')+'|'+String(session?.access_token||'')+'|'+path+'|'+JSON.stringify(headers),fetchBody):fetchBody());
   if (!res.ok) {
     const msg = body?.error || body?.message || `Erro ${res.status}`;
@@ -437,6 +446,7 @@ let saveToken=null;
 let activeBaseline=0;
 const readBaselines=new WeakMap();
 function clearSaveBaseline(){
+  deltaBaselineV145=null;runtimeReadCacheV145.clear();
   serverSaveRevisionV119=null;
   saveToken=null;
   activeBaseline++;
@@ -473,6 +483,7 @@ export async function loadCloudSave() {
   const meta={sessionKey,revision:read.revision,token:body.save_token??null};
   readBaselines.set(read,meta);
   if(read.state)readBaselines.set(read.state,meta);
+  if(read.state&&body.delta_base_v145)deltaBaselineV145={id:body.delta_base_v145,state:structuredClone(read.state)};
   return read;
 }
 
@@ -486,16 +497,25 @@ export async function saveCloudSave(state, equipmentMutationV1062=null, saveMeta
   if(!intent){intent={state:structuredClone(state),equipment:equipmentMutationV1062,token:saveToken,revision:serverSaveRevisionV119};pendingTransportV133.set(intentKey,intent);}
   // Keep memory bounded; server receipts remain durable across client restarts.
   if(pendingTransportV133.size>16)pendingTransportV133.delete(pendingTransportV133.keys().next().value);
-  const result=await authedServerFetch('/api/player/save', {
-    method: 'PUT',
-    body: JSON.stringify({ state:intent.state, ...(intent.equipment?{equipmentMutationV1062:intent.equipment}:{}),
-      ...(saveMetaV119?.operation_id?{operation_id:saveMetaV119.operation_id}:{}),
-      ...(intent.revision!=null?{expected_revision:intent.revision}:{expected_token:intent.token}) }),
-  });
+  const metadata={...(intent.equipment?{equipmentMutationV1062:intent.equipment}:{}),
+    ...(saveMetaV119?.operation_id?{operation_id:saveMetaV119.operation_id}:{}),
+    ...(intent.revision!=null?{expected_revision:intent.revision}:{expected_token:intent.token})};
+  const request=compactSaveV145(deltaBaselineV145,intent.state,metadata);
+  let result;
+  const send=body=>authedServerFetch('/api/player/save',{method:'PUT',headers:{'X-Stellar-Delta':'1'},body:JSON.stringify(body)});
+  try{result=await send(request);}
+  catch(error){
+    if(error.code!=='DELTA_BASE_MISSING'||!request.delta_v145)throw error;
+    // Missing base is rejected BEFORE processing; retry retains the exact command ID and state.
+    checkSaveSession(key);result=await send({state:intent.state,...metadata});
+  }
+  if(result?.state_delta_v145){result.state=applyStateDeltaV145(intent.state,result.state_delta_v145);delete result.state_delta_v145;}
   checkSaveSession(key);
   if(result?.ok!==true)throw new Error('Save sem confirmação.');
   pendingTransportV133.delete(intentKey);
   if(baseline!==activeBaseline)throw Object.assign(new Error('O progresso mudou durante a gravação.'),{code:'SAVE_REVISION_CONFLICT'});
+  if(result.state&&result.delta_base_v145)deltaBaselineV145={id:result.delta_base_v145,state:structuredClone(result.state)};
+  if(result.state){readBaselines.set(result.state,{sessionKey:key,revision:result.revision??null,token:result.save_token??null});emitCombatConfirmationV144(result.state);}
   serverSaveRevisionV119=saveRevision(result.revision);
   saveToken=result.save_token??null;
   activeBaseline++;

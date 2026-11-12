@@ -1,6 +1,6 @@
 import {natalDesignQuoteV1421} from './natal-prices-v1421.js';
 import {DESIGNS,MISSIONS,isChristmas,compatibleDesign} from './christmas-v132.js';
-import {shipChristmasArt,fireworkChristmasArt} from './christmas-art-v132.js?v=47.7.80';
+import {shipChristmasArt,fireworkChristmasArt} from './christmas-art-v132.js?v=47.7.81';
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const fmt=n=>Number(n||0).toLocaleString('pt-BR');
 export function createChristmasUI(bridge){

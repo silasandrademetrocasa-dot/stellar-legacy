@@ -54,6 +54,15 @@ export async function openLocalSaveV121({indexedDBFactory=globalThis.indexedDB,n
    if(verify&&value.hash!==await hashLocalStateV121(value.state))throw Error('LOCAL_SAVE_HASH_MISMATCH');
    return value;
   },
+  async readRecovering(owner){
+    try{const current=await this.read(owner);if(current)return current;}
+    catch(error){if(error.message!=='LOCAL_SAVE_HASH_MISMATCH')throw error;}
+    for(const slot of ['A','B','C']){
+      try{const backup=await this.checkpoint(owner,slot);if(backup)return {...backup,recoveredFrom:slot};}
+      catch(error){if(error.message!=='LOCAL_CHECKPOINT_HASH_MISMATCH')throw error;}
+    }
+    return null;
+  },
   async checkpoint(owner,slot='A'){
     owner=ensureOwner(owner);if(!['A','B','C'].includes(slot))throw Error('CHECKPOINT_SLOT_INVALID');
     const value=await onRequest(db.transaction(CHECKS,'readonly').objectStore(CHECKS).get(owner+':'+slot));
@@ -96,10 +105,15 @@ export async function openLocalSaveV121({indexedDBFactory=globalThis.indexedDB,n
        // history as superseded (never ACK it as a server-confirmed operation).
        outbox.index('owner').getAll(owner).onsuccess=e=>{
          for(const priorIntent of (e.target.result||[])){
-           if(priorIntent.module==='hangar'&&priorIntent.status==='pending')
+           if(preparedIntent.module==='hangar'&&priorIntent.module==='hangar'&&priorIntent.status==='pending'&&priorIntent.id!==preparedIntent.id)
              outbox.put({...priorIntent,status:'superseded',supersededAt:now});
          }
-         outbox.add({...preparedIntent,revision,createdAt:now});
+         outbox.get(preparedIntent.id).onsuccess=event=>{
+           const existing=event.target.result;
+           if(existing){
+             if(existing.owner!==owner||existing.module!==preparedIntent.module||existing.action!==preparedIntent.action||JSON.stringify(existing.payload)!==JSON.stringify(preparedIntent.payload)){tx.abort();}
+           }else outbox.add({...preparedIntent,revision,sequence:revision,createdAt:now});
+         };
        };
      }
    };
@@ -109,7 +123,7 @@ export async function openLocalSaveV121({indexedDBFactory=globalThis.indexedDB,n
   async pending(owner,limit=50){
     owner=ensureOwner(owner);
     const all=await onRequest(db.transaction(OUTBOX,'readonly').objectStore(OUTBOX).index('owner').getAll(owner));
-    return all.filter(r=>r.status==='pending').sort((a,b)=>a.createdAt-b.createdAt).slice(0,Math.max(1,Math.min(100,limit)));
+    return all.filter(r=>r.status==='pending').sort((a,b)=>a.revision-b.revision).slice(0,Math.max(1,Math.min(100,limit)));
   },
   async acknowledge(ids=[]){
     if(!Array.isArray(ids)||ids.length===0)return 0;
