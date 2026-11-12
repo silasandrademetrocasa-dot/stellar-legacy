@@ -15,10 +15,25 @@ test('native Android and worker share a tested route policy (assets never use th
  writeFileSync(join(dir,'AssetRoutePolicy.java'),read('android/app/src/main/java/com/stellarlegacy/mobile/AssetRoutePolicy.java'));
  writeFileSync(join(dir,'RouteTest.java'),`package com.stellarlegacy.mobile;
  public class RouteTest {
+  static final AssetRoutePolicy policy = new AssetRoutePolicy();
   static void check(String scheme,String host,int port,String path,AssetRoutePolicy.Route expected) {
-   if(AssetRoutePolicy.classify("game.example",scheme,host,port,path)!=expected) throw new AssertionError(path);
+   if(policy.classify("game.example",scheme,host,port,path)!=expected) throw new AssertionError(path);
   }
   public static void main(String[] args) {
+   check("https","project.supabase.co",443,"/rest/v1/rpc/get_public_rankings",AssetRoutePolicy.Route.BLOCKED);
+   if(policy.allowDataOrigin("http://project.supabase.co")) throw new AssertionError("HTTP config");
+   if(policy.allowDataOrigin("https://user:password@project.supabase.co")) throw new AssertionError("credentials");
+   if(policy.allowDataOrigin("https://project.supabase.co/wrong")) throw new AssertionError("path");
+   if(!policy.allowDataOrigin("https://project.supabase.co/")) throw new AssertionError("origin");
+   if(!policy.allowDataOrigin("https://PROJECT.supabase.co")) throw new AssertionError("same origin");
+   if(policy.allowDataOrigin("https://other.supabase.co")) throw new AssertionError("repin");
+   for(String rpc:new String[]{"get_public_rankings","get_chat_history_v16","send_chat_message_v16","stellar_arena_status_v135","get_arena_state","get_arena_opponents","get_arena_history","get_arena_daily_reward_status","stellar_player_claim_arena_daily_reward","stellar_player_claim_clan_credit_grants","claim_event_designer_v165"}) check("https","project.supabase.co",443,"/rest/v1/rpc/"+rpc,AssetRoutePolicy.Route.DATA);
+   check("https","project.supabase.co",443,"/rest/v1/auction_bids",AssetRoutePolicy.Route.DATA);
+   check("https","project.supabase.co",443,"/auth/v1/user",AssetRoutePolicy.Route.DATA);
+   check("https","project.supabase.co",443,"/assets/ship.webp",AssetRoutePolicy.Route.BLOCKED);
+   check("https","project.supabase.co",443,"/storage/v1/object/public/ship.webp",AssetRoutePolicy.Route.BLOCKED);
+   check("https","other.supabase.co",443,"/rest/v1/rpc/get_public_rankings",AssetRoutePolicy.Route.BLOCKED);
+   check("https","project.supabase.co.evil.example",443,"/rest/v1/profiles",AssetRoutePolicy.Route.BLOCKED);
    for(String path:new String[]{"/api","/api/player","/api/auth/login","/ws","/health"}) check("https","game.example",-1,path,AssetRoutePolicy.Route.DATA);
    for(String path:new String[]{"/","/index.html","/assets/v141/loading/natal-vertical.webp","/modules/a.js","/sw.js","/api-other","/api.json","/health/image.png","/missing.webp"}) check("https","GAME.EXAMPLE",443,path,AssetRoutePolicy.Route.LOCAL);
    check("https","cdn.example",443,"/assets/ship.webp",AssetRoutePolicy.Route.BLOCKED);

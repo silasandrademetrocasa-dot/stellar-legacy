@@ -1,5 +1,6 @@
-import {offlineFarmDirectActivityAllowedV103} from './modules/offline-farm-activity-v103.js?v=47.7.76';
-import {createReadCoalescerV104} from './modules/read-coalescer-v104.js?v=47.7.76';
+import {configureNativeDataOrigin} from './modules/native-data-origin.js?v=47.7.77';
+import {offlineFarmDirectActivityAllowedV103} from './modules/offline-farm-activity-v103.js?v=47.7.77';
+import {createReadCoalescerV104} from './modules/read-coalescer-v104.js?v=47.7.77';
 import {persistSessionV101,loadPersistedSessionV101,clearPersistedSessionV101} from './modules/login-persistence-v101.js';
 const SESSION_KEY = 'stellarLegacyV4Session';
 const GOOGLE_OAUTH_PENDING_KEY = 'stellarLegacyGoogleOAuthPendingV18216';
@@ -87,6 +88,7 @@ async function getConfig() {
       .then(({res,body}) => {
         if (!res.ok) throw new Error(body.error || 'Supabase não configurado.');
         if (!body.supabaseUrl || !body.supabasePublishableKey) throw new Error('Configuração pública do Supabase incompleta.');
+        configureNativeDataOrigin(body.supabaseUrl);
         return {
           url: String(body.supabaseUrl).replace(/\/+$/, ''),
           key: String(body.supabasePublishableKey),

@@ -1,15 +1,20 @@
-# Stellar Legacy — V143 (47.7.76)
+# Stellar Legacy — V143.1 (47.7.77)
 
 ## Instalar a atualização
 
-Este pacote é cumulativo sobre o ZIP completo 47.7.75 fornecido nesta conversa. Não é uma instalação vazia: as artes aprovadas já existentes em public/ são preservadas.
+Esta correção deve ser aplicada sobre a V143 (47.7.76), usando o Instalador Universal existente. Deixe somente o ZIP V143.1 na raiz e execute o instalador. Não é uma instalação vazia; as artes existentes são preservadas.
 
-1. Deixe somente o ZIP V143 na raiz do repositório e execute o Instalador Universal atual. Ele substitui os arquivos alterados e remove os 203 caminhos antigos listados em stellar-install.json. Só publica após as verificações e os testes.
-2. Para atualizar também o nome e a configuração do workflow APK, substitua `.github/workflows/Instalapk.yml` pelo arquivo `Instalapk.yml` entregue junto ao ZIP. O instalador universal protege `.github/`, portanto essa substituição é manual. Os ajustes essenciais de empacotamento e auditoria também estão no Gradle e funcionam com o workflow APK atual.
-3. Remova manualmente `.github/workflows/ativar-offline.yml`: é um fluxo antigo de substituição do projeto online por outro protótipo. Não o execute para gerar este jogo.
-4. No GitHub Actions, execute **APK LOCAL**. Baixe o APK no artefato Debug; para produção use `build_release` com os secrets de assinatura já existentes. Mantenha a mesma chave de assinatura para atualizar um APK já instalado. Um debug assinado com outra chave não atualiza uma instalação release.
+Depois execute **APK LOCAL** e instale o APK recém-gerado no aparelho. A correção inclui código Java nativo: atualizar somente o site não atualiza o APK já instalado. O workflow entregue com a V143 pode ser mantido. A mesma chave de assinatura é necessária para atualizar a instalação existente sem desinstalar.
 
-Nenhum SQL novo precisa ser executado para a V143. Nenhum dado de jogador nem objeto do banco é removido nesta limpeza.
+Nenhum SQL novo precisa ser executado. Não foram alteradas funções, permissões, saldos nem resgates no banco.
+
+## Correção da conexão no APK
+
+A V143 havia liberado somente dados do Render, bloqueando as consultas diretas do cliente ao Supabase. As chamadas de ranking, histórico/envio de chat, Arena, presença, clãs, leilão e vários resgates usam REST/RPC do Supabase e eram tratadas como conteúdo externo proibido. O navegador web não tinha essa restrição.
+
+Agora o cliente lê `/api/config` e informa somente a URL pública à ponte nativa antes de qualquer chamada ao Supabase. O Android fixa um único host HTTPS exato para a Activity e permite nesse host somente `/rest/v1` (incluindo RPCs) e `/auth/v1`. A regra vale para WebView e Service Workers. Imagens, scripts, CSS, Storage e outros hosts continuam bloqueados como fontes remotas de apresentação. Tokens, chaves e corpos de operações não passam pela nova ponte; seguem nos pedidos HTTP autenticados já existentes. Nenhuma operação econômica é repetida pela ponte.
+
+Se um cliente novo encontrar um APK antigo sem essa capacidade, a mensagem orienta a atualizar o APK. Uma configuração recusada pode ser consultada novamente, sem disparar a operação ao Supabase.
 
 ## O que fica no aparelho
 
@@ -17,7 +22,7 @@ O Android empacota diretamente toda a árvore public/: telas, JavaScript, CSS, J
 
 O mesmo roteamento atende a página e os Service Workers. Cache HTTP é desativado para o conteúdo do APK; caches PWA antigos com prefixo `stellar-shell-` são retirados antes de iniciar o jogo. Sessões, IndexedDB e saves não são apagados.
 
-Login, validação de saldos, compras, vendas, recompensas, salvamentos e multiplayer continuam online em `/api`, `/ws` e `/health`. Não se trata de um modo de jogo offline. Recursos de outros hosts não são carregados dentro do WebView; links externos continuam no navegador do Android. O fluxo Google OAuth com retorno ao APK ainda exige App Links dedicado, como antes.
+Login, validação de saldos, compras, vendas, recompensas, salvamentos e multiplayer continuam online em `/api`, `/ws` e `/health` no Render e em `/rest/v1` e `/auth/v1` no host exato do Supabase. Não se trata de um modo de jogo offline. Outros recursos remotos não são carregados dentro do WebView; links externos continuam no navegador do Android. O fluxo Google OAuth com retorno ao APK ainda exige App Links dedicado, como antes.
 
 Recursos visuais novos exigem uma nova versão do APK. Alterar apenas os arquivos do Render não troca as artes de um APK já instalado. O conjunto atual ocupa aproximadamente 110 MiB descompactado; não é uma estimativa do tamanho final do APK nem da memória gráfica em uso.
 
@@ -40,4 +45,6 @@ As migrações antigas removidas do repositório continuam recuperáveis no ZIP 
 
 A política nativa também tem testes executáveis em Java. Sem JDK eles aparecem explicitamente como não executados; no workflow APK novo, Java 17 é instalado antes dos testes e a execução é obrigatória.
 
-Validação desta entrega: regressões e inventário executados localmente. O ambiente desta revisão não possui SDK Android/Gradle; a compilação do APK e o teste no aparelho devem ser feitos pelo workflow. No primeiro teste, confira loading de Natal, hangar, designs, mapas, áudio disponível, login e sincronização. Uma perda de internet deve impedir ações online, mantendo a apresentação local disponível.
+Validação desta entrega: 221 testes aprovados, sem falhas ou testes omitidos; inclui compilação Java da política de roteamento com ECJ e execução real na JVM, além de simulações do transporte usando as funções reais de configuração e requisição. Inventário do APK conferido. A configuração pública do servidor e o endpoint público de autenticação responderam HTTP 200. Nenhum resgate de jogador foi executado nesta validação.
+
+O ambiente ainda não possui SDK Android/Gradle: a compilação do aplicativo completo e o teste em WebView no aparelho ficam para o workflow. Após instalar, valide ranking, chat, atualização da Arena e um resgate disponível. Esses testes em aparelho não foram realizados nesta revisão.

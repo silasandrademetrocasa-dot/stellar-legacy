@@ -39,7 +39,7 @@ import androidx.webkit.WebViewAssetLoader;
 
 /**
  * Stellar Legacy Android: TODOS os recursos de apresentacao vem do APK.
- * Apenas /api, /ws e endpoints explicitos de dados passam pelo HTTPS real do Render.
+ * Dados: API/WSS do Render e REST/Auth do host exato do Supabase informado por /api/config.
  * Usar o hostname de producao preserva a mesma origem da Web e permite WebSocket +
  * fetch POST autenticado SEM CORS, proxy nativo ou duplicacao de regras economicas.
  */
@@ -49,6 +49,7 @@ public final class MainActivity extends Activity {
     private String origin;
     private String host;
     private WebViewAssetLoader localFiles;
+    private final AssetRoutePolicy dataRoutes = new AssetRoutePolicy();
 
     @Override public void onCreate(Bundle state) {
         super.onCreate(state);
@@ -76,8 +77,8 @@ public final class MainActivity extends Activity {
 
     private WebResourceResponse routeResource(Uri url) {
         String path = url.getPath();
-        AssetRoutePolicy.Route route = AssetRoutePolicy.classify(host, url.getScheme(), url.getHost(), url.getPort(), path);
-        if (route == AssetRoutePolicy.Route.DATA) return null; // authenticated API / WSS remain online
+        AssetRoutePolicy.Route route = dataRoutes.classify(host, url.getScheme(), url.getHost(), url.getPort(), path);
+        if (route == AssetRoutePolicy.Route.DATA) return null; // Render API + pinned Supabase REST/Auth remain online
         if (route == AssetRoutePolicy.Route.BLOCKED) {
             return new WebResourceResponse("text/plain", "UTF-8", 403, "Forbidden",
                 Collections.emptyMap(), new ByteArrayInputStream(new byte[0]));
@@ -276,6 +277,9 @@ public final class MainActivity extends Activity {
     }
 
     private final class OrientationBridge {
+        @JavascriptInterface public boolean allowDataOrigin(String url) {
+            return dataRoutes.allowDataOrigin(url);
+        }
         @JavascriptInterface public void setLandscape(boolean landscape) {
             runOnUiThread(() -> setRequestedOrientation(landscape
                 ? ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE

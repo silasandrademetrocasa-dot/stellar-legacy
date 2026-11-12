@@ -77,6 +77,12 @@ assert(build.includes("file('../../public')"),'sourceSet local não configurada'
 assert(native.includes('.setDomain(host)')&&native.includes('new WebViewAssetLoader.AssetsPathHandler(this)'),'WebView não serve arquivos locais');
 assert(read('android/app/src/main/java/com/stellarlegacy/mobile/AssetRoutePolicy.java').includes('path.startsWith("/api/")')&&native.includes('Route.DATA) return null;'),'API do Render não está liberada');
 assert(native.includes('localFiles.shouldInterceptRequest(url)'),'arquivos estáticos não são interceptados');
+const routePolicy=read('android/app/src/main/java/com/stellarlegacy/mobile/AssetRoutePolicy.java');
+assert(native.includes('dataRoutes.classify(host,')&&native.includes('dataRoutes.allowDataOrigin(url)'), 'origem de dados não chega ao roteador nativo');
+assert(routePolicy.includes('path.startsWith("/rest/v1/")')&&routePolicy.includes('path.startsWith("/auth/v1/")'), 'Supabase REST/Auth bloqueados no APK');
+assert(read('public/api.js').includes('configureNativeDataOrigin(body.supabaseUrl)'), 'configuração pública não autoriza os dados antes das RPCs');
+assert(has('modules/native-data-origin.js'),'ponte de conexão fora do APK');
+
 assert(androidManifest.includes('android:usesCleartextTraffic="false"'),'HTTP não protegido');
 assert(!androidManifest.includes('READ_EXTERNAL_STORAGE'),'não pedir armazenamento dos jogadores');
 for(const f of ['index.html','style.css','game.js','api.js','world.js'])assert(has(f),'arquivo básico não incluído: '+f);
