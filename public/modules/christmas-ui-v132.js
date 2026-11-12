@@ -1,5 +1,6 @@
+import {natalDesignQuoteV1421} from './natal-prices-v1421.js';
 import {DESIGNS,MISSIONS,isChristmas,compatibleDesign} from './christmas-v132.js';
-import {shipChristmasArt,fireworkChristmasArt} from './christmas-art-v132.js?v=47.7.74';
+import {shipChristmasArt,fireworkChristmasArt} from './christmas-art-v132.js?v=47.7.75';
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const fmt=n=>Number(n||0).toLocaleString('pt-BR');
 export function createChristmasUI(bridge){
@@ -21,7 +22,7 @@ export function createChristmasUI(bridge){
  if(seenGoals&&reached.some(k=>!seenGoals.includes(k))){autoCelebration=true;bridge.toast('Meta coletiva conquistada! Confira a Central Natal.');}seenGoals=reached;
  button.textContent=reached.length?'❄ NATAL ★':'❄ NATAL';if(panel?.open)render();
  }catch(e){if(panel?.open){panel.innerHTML='<p>Não foi possível consultar o Natal. Feche e abra novamente após reconectar.</p><button data-close>FECHAR</button>';panel.querySelector('[data-close]').onclick=()=>panel.close();bridge.toast(e.message);}}finally{statusBusy=false;}}
- async function claim(key){if(busy)return;busy=true;try{await bridge.claim(key);await refresh();bridge.toast('Recompensa confirmada no servidor');}catch(e){bridge.toast(e.message);}finally{busy=false;}}
+ async function claim(key,payload={}){if(busy)return;busy=true;try{await bridge.claim(key,payload);await refresh();bridge.toast('Recompensa confirmada no servidor');}catch(e){bridge.toast(e.message);}finally{busy=false;}}
  function render(){
   const p=status?.player||{},claims=status?.claims||[],counts=status?.counts||[],cfg=status?.config||{},f=p.faction||bridge.faction();
   const sum=(kind,faction)=>counts.filter(c=>c.kind===kind&&(!faction||c.faction===faction)).reduce((n,c)=>n+Number(c.qty),0);
@@ -37,12 +38,12 @@ export function createChristmasUI(bridge){
   }
   html+=`<h3>Presente de abertura</h3><p>NATALESTELAR • 10 milhões CR, 10.000 STL, 5 núcleos e 10 fogos</p>${claimButton('coupon:NATALESTELAR')}`;
   html+=`<h3>Passe de dezembro • trilha gratuita</h3><p>Os designs exclusivos desbloqueiam nos tiers 15 e 30 do passe de dezembro.</p><p>Pathfinder Cristal • tier 15 ${claimButton('pass:cristal')}</p><p>Kensei Vulcão Natalino • tier 30 ${claimButton('pass:vulcao')}</p>`;
-  html+=`<h3>Designs da sua nave</h3><div class="natal-designs">${DESIGNS.filter(d=>compatibleDesign(d,bridge.ship())).map(d=>`<article><img src="${esc(shipChristmasArt(bridge.ship(),d.design_id)||'')}" alt="${esc(d.name)}"><b>${esc(d.name)}</b><p>${Object.entries(d.bonuses).map(([k,v])=>`${esc(k)} +${Math.round(v*100)}%`).join(' • ')}</p>${d.eligibility.source==='shop'?`<p>${fmt(d.price)} STL</p><button data-buy="design:${esc(d.design_id)}">${bridge.owned(d.design_id)?'ADQUIRIDO':'COMPRAR'}</button>`:'Exclusivo do passe de dezembro'}</article>`).join('')}</div>`;
+  html+=`<h3>Designs da sua nave</h3><div class="natal-designs">${DESIGNS.filter(d=>compatibleDesign(d,bridge.ship())).map(d=>`<article><img src="${esc(shipChristmasArt(bridge.ship(),d.design_id)||'')}" alt="${esc(d.name)}"><b>${esc(d.name)}</b><p>${Object.entries(d.bonuses).map(([k,v])=>`${esc(k)} +${Math.round(v*100)}%`).join(' • ')}</p>${d.eligibility.source==='shop'?`<p>${natalDesignQuoteV1421(status,d.design_id)===null?'Consultando preço…':fmt(natalDesignQuoteV1421(status,d.design_id))+' STL'}</p><button data-buy="design:${esc(d.design_id)}">${bridge.owned(d.design_id)?'ADQUIRIDO':'COMPRAR'}</button>`:'Exclusivo do passe de dezembro'}</article>`).join('')}</div>`;
   html+=`<h3>Fogos manuais</h3><p>Um por vez • arma em 2s • intervalo de 5s • sem dano</p><select data-style><option value="gold">Estrela dourada</option><option value="snow">Floco branco</option><option value="red">Explosão vermelha</option></select><button data-fire>🎆 SOLTAR (${fmt(p.fireworks)})</button><label><input type="checkbox" data-hide ${hiddenFx?'checked':''}> Ocultar explosões de fogos</label><p>${badge()||''}</p><button data-refresh>ATUALIZAR</button>`;
   panel.innerHTML=html;
   panel.querySelector('[data-close]').onclick=()=>panel.close();panel.querySelector('[data-refresh]').onclick=refresh;
   panel.querySelectorAll('[data-claim]').forEach(b=>b.onclick=()=>claim(b.dataset.claim));
-  panel.querySelectorAll('[data-buy]').forEach(b=>{b.disabled=bridge.owned(b.dataset.buy.slice(7));b.onclick=()=>{if(confirm('Confirmar compra deste design com STL?'))claim(b.dataset.buy);};});
+  panel.querySelectorAll('[data-buy]').forEach(b=>{const id=b.dataset.buy.slice(7),price=natalDesignQuoteV1421(status,id);b.disabled=bridge.owned(id)||price===null;b.onclick=()=>{if(price!==null&&confirm(`Confirmar compra deste design por ${fmt(price)} STL?`))claim(b.dataset.buy,{price_quote:price});};});
   panel.querySelector('[data-fire]').onclick=()=>launch(panel.querySelector('[data-style]').value);
   panel.querySelector('[data-hide]').onchange=e=>{hiddenFx=e.target.checked;try{localStorage.setItem('natalHideFx',hiddenFx?'1':'0');}catch{}};
  }

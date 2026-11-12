@@ -17,7 +17,7 @@ export function mountChristmasRoutes(app,{requireUser,asyncRoute,api,getWorld}){
  app.post('/api/player/natal/claim',requireUser,asyncRoute(async(req,res)=>{
  const key=String(req.body?.key||'');const action=key.split(':')[0];
  if(!['coupon','mission','faction','global','design','pass'].includes(action)||key.length>160)return res.status(400).json({error:'Prêmio inválido'});
- res.json(await api.action(req.user.id,key,action));
+ res.json(await api.action(req.user.id,key,action,action==='design'?{price_quote:req.body?.price_quote}:{}));
  }));
 }
 export function natalRoomTick(room,now,send){

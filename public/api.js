@@ -1,5 +1,5 @@
-import {offlineFarmDirectActivityAllowedV103} from './modules/offline-farm-activity-v103.js?v=47.7.74';
-import {createReadCoalescerV104} from './modules/read-coalescer-v104.js?v=47.7.74';
+import {offlineFarmDirectActivityAllowedV103} from './modules/offline-farm-activity-v103.js?v=47.7.75';
+import {createReadCoalescerV104} from './modules/read-coalescer-v104.js?v=47.7.75';
 import {persistSessionV101,loadPersistedSessionV101,clearPersistedSessionV101} from './modules/login-persistence-v101.js';
 const SESSION_KEY = 'stellarLegacyV4Session';
 const GOOGLE_OAUTH_PENDING_KEY = 'stellarLegacyGoogleOAuthPendingV18216';
@@ -1324,7 +1324,7 @@ export async function updateAdminAuxEconomyOnline(payload){return serverFetch('/
 export async function claimAuxProtocolAuctionV111({hourKey,lotRef}){return authedSupabaseFetch('/rest/v1/rpc/stellar_player_claim_aux_protocol_auction',{method:'POST',body:JSON.stringify({p_hour_key:String(hourKey),p_lot_ref:String(lotRef)})});}
 
 export const natalStatusOnline=()=>authedServerFetch('/api/player/natal',{},false);
-export const natalClaimOnline=key=>authedServerFetch('/api/player/natal/claim',{method:'POST',body:JSON.stringify({key})},false);
+export const natalClaimOnline=(key,payload={})=>authedServerFetch('/api/player/natal/claim',{method:'POST',body:JSON.stringify({key,...payload})},false);
 
 export const claimMissionCommandOnlineV1331=(category,key)=>authedServerFetch('/api/player/missions/claim',{method:'POST',body:JSON.stringify({category,key})},false);
 

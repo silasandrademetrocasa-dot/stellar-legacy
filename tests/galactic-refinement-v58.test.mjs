@@ -34,7 +34,7 @@ test('V109.2: designers in each workstation without duplicate AUX hero image',()
 });
 test('V58: accessibility-preserving compact CSS in landscape, portrait and premium/cargo/ADM',()=>{
  for(const s of ['#topbar.compact-command-bar','#premiumModal .premium-product','#cargoModal .base-service-card','#adminModal .v57-adm-nav','#hangarModal .v56-unit-body','orientation:landscape','orientation:portrait'])assert(css.includes(s),s);
- assert(html.includes('stellar-refinement-v58.css?v=47.7.74'));
+ assert(html.includes('stellar-refinement-v58.css?v=47.7.75'));
 });
 test('V58: game economy remains server-driven and shared configurations preserved',()=>{
  assert(game.includes('switchBattleConfigV2013(n)'));
