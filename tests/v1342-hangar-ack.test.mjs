@@ -60,6 +60,7 @@ function context(){
   equipmentSaveBaselineV109:clone(s),equipmentSaveDesiredV109:null,equipmentSavePendingV109:true,equipmentSubmittedV1342:null,equipmentSaveWarningAtV109:0,saveIntegrityBlockedV106:false,
   saveOperationPendingV119:null,saveOperationIdV119:()=> '00000000-0000-4000-8000-'+String(++operation).padStart(12,'0'),
   equipmentLayoutSignatureV1062,equipmentFingerprintV109,reconcilePendingEquipmentV109,checkpointWithoutEquipmentDeltaV1342,mergePlayerStateV134,
+  confirmCombatStateV144(){},formationVitalsPendingV144:false,
   offlineFarmWorldLockedV84:()=>false,setSync(){},pendingCargoV1333:()=>({submit(){},acknowledge(){},pending:false}),combatJournalV134:()=>({submit(){},acknowledge(){}}),
   AMMO_SELECTION_V1061:{pending:false,confirm(){}},missionSavePendingV105:false,player:{hp:5,shield:3,maxHp:5,maxShield:3},
   mergeUnsavedMissionProgressV105:()=>({changed:false}),staleSaveAuthoritiesV1331:()=>[],adoptSaveRead(){},

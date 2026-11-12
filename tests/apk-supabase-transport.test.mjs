@@ -13,7 +13,7 @@ test('public config pins data origin before all direct Supabase requests, preser
  const start=api.indexOf('async function getConfig()');
  const end=api.indexOf('\nfunction setSession(',start);
  const session={access_token:'test-access-token',game_session_id:'test-game-session'};
- const context={configPromise:null,configureNativeDataOrigin:url=>configureNativeDataOrigin(url,native),session,
+ const context={emitCombatConfirmationV144(){},configPromise:null,configureNativeDataOrigin:url=>configureNativeDataOrigin(url,native),session,
   document:{body:{classList:{contains:()=>false}}},offlineFarmDirectActivityAllowedV103:()=>true,
   saveSessionKey:()=>session.game_session_id,checkSaveSession:()=>{},readBaselines:new WeakMap(),
   coalesceReadV104:(_key,fetcher)=>fetcher(),
@@ -42,7 +42,7 @@ test('web does not depend on native bridge; older APK gets an actionable update 
 
 test('configuration rejected by native routing is retriable and sends no Supabase mutation',async()=>{
  let reject=true,dispatches=0;
- const context={configPromise:null,configureNativeDataOrigin:url=>configureNativeDataOrigin(url,{allowDataOrigin:()=>!reject}),
+ const context={emitCombatConfirmationV144(){},configPromise:null,configureNativeDataOrigin:url=>configureNativeDataOrigin(url,{allowDataOrigin:()=>!reject}),
   boundedFetchV4831:async url=>{assert.equal(url,'/api/config');dispatches++;return {res:{ok:true},body:{supabaseUrl:'https://project.supabase.co',supabasePublishableKey:'public-test-key'}};}};
  vm.createContext(context);vm.runInContext(api.slice(api.indexOf('async function getConfig()'),api.indexOf('\nasync function supabaseFetch(')),context);
  await assert.rejects(context.getConfig(),{code:'APK_DATA_ORIGIN_REJECTED'});

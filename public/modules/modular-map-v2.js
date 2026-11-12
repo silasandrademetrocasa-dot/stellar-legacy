@@ -1,3 +1,4 @@
+import {drawWorldBackdrop} from './map-projection-v144.js';
 // STELLAR LEGACY V68 • Camadas decorativas modulares (somente renderização).
 // Não acessa saves, combate, física, spawns, portais nem coordenadas de entidades.
 const MAP_ROOT='/assets/mapas';
@@ -39,7 +40,8 @@ export function mapVisualLayers(layout,quality){
   return [...stars,...objects,...bodies,...nebulae].sort((a,b)=>(a.depth||0)-(b.depth||0));
 }
 function naturalDimension(img){return [Number(img?.naturalWidth||img?.width)||0,Number(img?.naturalHeight||img?.height)||0];}
-export function drawModularBackground(ctx,img,{width,height,cameraX,cameraY,worldWidth,worldHeight}){
+export function drawModularBackground(ctx,img,{width,height,cameraX,cameraY,worldWidth,worldHeight,worldAligned=false}){
+  if(worldAligned)return drawWorldBackdrop(ctx,img,{width,height,cameraX,cameraY,worldWidth,worldHeight});
   const [iw,ih]=naturalDimension(img);
   if(!iw||!ih||width<=0||height<=0)return false;
   // Aspect ratio conservado: cover com cropping limitado; nenhuma deformação.
@@ -69,6 +71,7 @@ export function createModularMapV2({loadLayout,requestImage,warn=()=>{},maxVisib
       state.layout=layout;state.status='ready';
       state.layers.high=mapVisualLayers(layout,'high');
       state.layers.medium=mapVisualLayers(layout,'medium');
+      state.radarFeatures=[...(layout.celestialBodies||[]),...(layout.objects||[])];
     }).catch(error=>{if(states.get(key)!==state)return;state.status='error';state.error=error;warn('Mapa modular indisponível; fallback anterior ativado',key,error);});
   }
   function draw(ctx,{key,quality='high',width,height,cameraX=0,cameraY=0,worldWidth=7200,worldHeight=5400,mobile=false}={}){
@@ -78,14 +81,14 @@ export function createModularMapV2({loadLayout,requestImage,warn=()=>{},maxVisib
     if(state?.status!=='ready')return false;
     const layout=state.layout;
     const q=['low','medium','high'].includes(quality)?quality:'high';
-    const bgPath=q==='low'?layout.background.low:layout.background.high;
+    const bgPath=layout.background[q]||layout.background.high;
     const background=requestImage(bgPath);
     state.requested.add(bgPath);
     if(!naturalDimension(background)[0])return false;
     ctx.save();
     try{
       ctx.fillStyle='#061222';ctx.fillRect(0,0,width,height);
-      if(!drawModularBackground(ctx,background,{width,height,cameraX,cameraY,worldWidth,worldHeight}))return false;
+      if(!drawModularBackground(ctx,background,{width,height,cameraX,cameraY,worldWidth,worldHeight,worldAligned:!!layout.background.worldAligned}))return false;
       if(q==='low')return true;
       // Nunca reamostrar posições com aleatoriedade durante renderização.
       const layers=state.layers[q]||[];
@@ -96,8 +99,8 @@ export function createModularMapV2({loadLayout,requestImage,warn=()=>{},maxVisib
       for(const e of layers){
         if(painted>=limit)break;
         const p=(Math.min(.95,Math.max(0,Number(e.parallax)||0)))*speed;
-        const sx=Number(e.x)*worldWidth-cameraX*p+width*.5;
-        const sy=Number(e.y)*worldHeight-cameraY*p+height*.5;
+        const sx=Number(e.x)*worldWidth-cameraX*(layout.background.worldAligned?1:p)+width*.5;
+        const sy=Number(e.y)*worldHeight-cameraY*(layout.background.worldAligned?1:p)+height*.5;
         const size=60*Math.min(3,Math.max(.06,Number(e.scale)||.4))*(e.kind==='nebulas'?2.2:e.kind==='celestialBodies'?2.2:1);
         if(sx<-size||sy<-size||sx>width+size||sy>height+size)continue;
         if(!state.requested.has(e.sprite)){
@@ -115,5 +118,15 @@ export function createModularMapV2({loadLayout,requestImage,warn=()=>{},maxVisib
       return true;
     }finally{ctx.restore();}
   }
-  return {activate,draw,active:()=>activeKey,state:key=>states.get(key)?.status||'unloaded',layout:key=>states.get(key)?.layout||null};
+  function drawMinimap(ctx,{key,width,height,worldWidth,worldHeight,quality='high'}={}){
+   activate(key);const state=states.get(key),layout=state?.layout;if(!layout?.background?.worldAligned)return false;
+   const path=layout.background.radar||layout.background.low,img=requestImage(path);if(!naturalDimension(img)[0])return false;
+   ctx.save();ctx.globalAlpha=.68;const ok=drawWorldBackdrop(ctx,img,{width,height,worldWidth,worldHeight,overview:true});ctx.restore();
+   // The same world-normalized features are shown, without screen-space parallax drift.
+   if(quality!=='low')for(const e of state.radarFeatures){
+    const x=Number(e.x)*width,y=Number(e.y)*height;ctx.fillStyle=e.kind==='celestialBodies'?'#8c8bac88':'#7894a766';ctx.beginPath();ctx.arc(x,y,e.kind==='celestialBodies'?2.5:1,0,Math.PI*2);ctx.fill();
+   }
+   return ok;
+  }
+  return {activate,draw,drawMinimap,active:()=>activeKey,state:key=>states.get(key)?.status||'unloaded',layout:key=>states.get(key)?.layout||null};
 }

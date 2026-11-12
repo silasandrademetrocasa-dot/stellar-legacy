@@ -1,6 +1,6 @@
-import {configureNativeDataOrigin} from './modules/native-data-origin.js?v=47.7.78';
-import {offlineFarmDirectActivityAllowedV103} from './modules/offline-farm-activity-v103.js?v=47.7.78';
-import {createReadCoalescerV104} from './modules/read-coalescer-v104.js?v=47.7.78';
+import {configureNativeDataOrigin} from './modules/native-data-origin.js?v=47.7.79';
+import {offlineFarmDirectActivityAllowedV103} from './modules/offline-farm-activity-v103.js?v=47.7.79';
+import {createReadCoalescerV104} from './modules/read-coalescer-v104.js?v=47.7.79';
 import {persistSessionV101,loadPersistedSessionV101,clearPersistedSessionV101} from './modules/login-persistence-v101.js';
 const SESSION_KEY = 'stellarLegacyV4Session';
 const GOOGLE_OAUTH_PENDING_KEY = 'stellarLegacyGoogleOAuthPendingV18216';
@@ -10,6 +10,10 @@ let configPromise = null;
 let sessionReplacementNotified = false;
 const coalesceReadV104=createReadCoalescerV104();
 
+function emitCombatConfirmationV144(state){
+ if(!state||state.accountOwnerId!==currentUser?.id||typeof window==='undefined')return;
+ window.dispatchEvent(new CustomEvent('stellar-combat-confirmed-v144',{detail:{accountOwnerId:state.accountOwnerId,combatConfigsV2013:{active:state.combatConfigsV2013?.active},combatHudV144:state.combatHudV144,ownedDroneFormationsV144:state.ownedDroneFormationsV144,selectedLaserAmmo:state.selectedLaserAmmo,selectedRocket:state.selectedRocket,serverStateClockV134:state.serverStateClockV134}}));
+}
 async function readJson(res) {
   return res.json().catch(async () => {
     const text = await res.text().catch(() => '');
@@ -79,6 +83,7 @@ async function serverFetch(path, options = {}, withAuth = false) {
     throw err;
   }
   if(body?.state&&body?.save_token&&withAuth){const meta={sessionKey:requestSession,revision:body.revision??null,token:body.save_token};readBaselines.set(body.state,meta);}
+  if(withAuth&&body?.state)emitCombatConfirmationV144(body.state);
   return body;
 }
 
@@ -128,6 +133,7 @@ async function supabaseFetch(path, options = {}, withAuth = false) {
   }
   if(withAuth)checkSaveSession(requestSession);
   if(body?.state&&body?.save_token&&withAuth)readBaselines.set(body.state,{sessionKey:requestSession,revision:body.revision??null,token:body.save_token});
+  if(withAuth&&body?.state)emitCombatConfirmationV144(body.state);
   return body;
 }
 

@@ -1,4 +1,57 @@
-# Stellar Legacy — V143.2 (47.7.78)
+# Stellar Legacy — V144 (47.7.79)
+
+## Entrega cumulativa: mapas, formações e HUD compacto
+
+Instale sobre **V143.2 / 47.7.78** com o Instalador Universal já existente. Coloque somente `Stellar_Legacy_V144_MAPAS_FORMACOES_HUD_CUMULATIVA.zip` na raiz do repositório. O manifesto verifica a versão base. Este pacote contém todas as mudanças V144; os recursos da V143.2 permanecem no repositório. Não é uma instalação vazia. Não apague artes ou módulos antigos manualmente: os fallbacks ainda referenciados são necessários.
+
+**SQL: aplicação online não confirmada.** A chamada de migração foi interrompida sem devolver confirmação. O arquivo `supabase/migrations/20261112030426_combat_tactics_v144.sql` está incluído, é reaplicável e deve estar aplicado antes de publicar o cliente/servidor V144. Não execute os SQLs de `tests/fixtures` em produção. Nenhum saldo ou formação especial foi concedido a contas reais nesta entrega.
+
+Após o deploy, gere e instale um novo APK pelo workflow existente. A versão web recebe as mudanças no deploy; um APK instalado só recebe os novos arquivos locais quando for atualizado. Os gráficos continuam incorporados no APK, e a validação de dados permanece online.
+
+## Alterações realizadas
+
+- HUD inferior com 12 atalhos em duas fileiras de seis, independentes em CONF1/CONF2. Barra recolhível e habilidades em gaveta separada. Toque longo de 500 ms, botão direito ou engrenagem abre a edição; não foi criado um inventário permanente ampliado.
+- Atalhos para munições, mísseis e formações reutilizam seleção, consumo e configuração existentes. Quantidades, seleção e indisponibilidade continuam visíveis.
+- Nove formações com os percentuais aprovados. Original é padrão. As oito especiais ficam visíveis para prévia, mas bloqueadas até haver propriedade válida no save do servidor: o brief não definiu aquisição, preços ou concessão, portanto nada foi inventado.
+- Movimentos próprios por formação e transformação de 0,75 segundo usando os IDs reais dos drones. Comuns e raras em 2D; épicas e lendárias com profundidade simulada, escala e ordem de desenho. Nenhuma troca duplica, remove ou redistribui equipamentos.
+- Bônus e visual da formação só passam a valer após confirmação canônica. Mudança preserva proporcionalmente HP/escudo e não recarrega recursos; o dano recebido durante a gravação é conservado.
+- Trinta mapas existentes com novas composições de cinco famílias: Terra, Marte, Júpiter, PvP e Universo. Fundos alto 2048, médio 1024, baixo 512 e textura de minimapa 256. Os cinco originais foram gerados em 1254×1254 e reamostrados para exportação 2048: não são arte nativa 2K. As trinta composições usam recortes/variações desses cinco originais. Mapas Astrais não foram substituídos.
+- Minimap e cenário usam o mesmo recorte e coordenadas do mundo, com indicação do enquadramento atual. Portais, bases, AUX, marcadores e dimensões lógicas existentes são mantidos.
+
+## Caminhos e validação reutilizados
+
+`combat-hud-v144.js` → seleção atual ou `saveCombatHudV144` → coordenador de gravação existente → **PUT /api/player/save** → `prepareCombatTactics` → `writeVerifiedSave` → **stellar_player_commit**, módulo `checkpoint` → **game_saves.state** → trigger V144 → retorno canônico/ACK.
+
+O novo campo `combatHudV144` contém apenas os dois perfis e atalhos. `ownedDroneFormationsV144` é propriedade reservada do servidor. Não há uma segunda tabela de save, um endpoint paralelo de formações ou novos preços. Clientes antigos não podem apagar esses campos ao omiti-los. O multiplayer transmite apenas metadados obtidos do save canônico e anima localmente; não envia posições individuais por frame.
+
+## Percentuais aprovados
+
+| Formação | Dano | HP | Escudo | Velocidade |
+|---|---:|---:|---:|---:|
+| Original | 0% | 0% | 0% | 0% |
+| Fúria | +18% | -10% | -8% | 0% |
+| Interceptor | -10% | 0% | -8% | +18% |
+| Bastião | -6% | 0% | +22% | -12% |
+| Colosso | -12% | +22% | 0% | -6% |
+| Vanguarda | +14% | -10% | -8% | +14% |
+| Prisma | +14% | -6% | +14% | -10% |
+| Caçador Supremo | +16% | -6% | -12% | +18% |
+| Leviatã | -6% | +18% | +18% | -12% |
+
+## Regressões e limites da conferência
+
+A suíte completa passou com **236 testes, zero falhas e zero omitidos**, incluindo PostgreSQL isolado/PGlite, reenvio de operação, ACK perdido, recompensa de NPC concorrente, backup canônico, propriedade de formações, independência de CONF, conservação de itens e munições, interface DOM real e roteamento nativo Java compilado com ECJ e executado em JVM. Sintaxe/imports e inventário do APK também foram verificados: 1.352 arquivos locais, 1.103 imagens, aproximadamente 119,09 MiB descompactados; isso não é o tamanho do APK final nem a RAM usada.
+
+A prévia HTML separada contém dados fictícios e libera as nove formações somente para demonstração visual, sem conectar ao banco ou alterar contas. Ela não é uma captura de tela do jogo. O navegador deste ambiente bloqueou a prévia local; por isso **a aparência em WebView/aparelho, o APK completo e FPS mobile ainda precisam de validação real**. O benchmark do solver mede somente CPU em Node, não desempenho gráfico do celular.
+
+Execute `npm ci --include=dev --ignore-scripts`, `npm run verify` e `npm run apk:check`. Para exigir os testes Java, use JDK 17 e `STELLAR_REQUIRE_JAVA_TEST=1`. O workflow APK continua responsável pela compilação Android e auditoria do pacote real.
+
+No aparelho, conferir: 12 slots em retrato/paisagem; recolher/abrir habilidades; alternar CONF e reabrir; atirar/comprar/coletar durante saves; trocar formação já possuída sem cura; radar alinhado nos cinco cenários; chat/ranking/Arena/resgates. Não confundir o acesso liberado na prévia com propriedade de itens na conta real.
+
+---
+
+## Base preservada da V143.2
+
 
 ## Instalar a atualização
 

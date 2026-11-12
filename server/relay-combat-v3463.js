@@ -1,3 +1,4 @@
+import {formationMultipliers} from '../public/modules/combat-tactics-v144.js';
 // Relay damage is calculated on the SERVER from persisted equipment, never from a client damage field.
 import {ITEMS,SHIPS,LASER_AMMO,ROCKETS} from '../public/data.js';
 export function relayShipLoadoutDamage(state={},ammoId='lcb10',rocketId=null){
@@ -20,10 +21,11 @@ export function relayShipLoadoutDamage(state={},ammoId='lcb10',rocketId=null){
  const ammoAvailable=Number(state.ammo?.[selected.id])>0;
  const laserCount=Math.min(ownedLaserIds.length,Math.max(0,Math.floor(Number(state.ammo?.[selected.id])||0)));
  const fraction=ownedLaserIds.length?laserCount/ownedLaserIds.length:0;
- const laserDamage=ammoAvailable?Math.max(0,Math.round((laserBase*fraction*shipPilotMult+auxBase*(1+auxDamageBonus))*Number(selected.mult))):0;
+ const fm=formationMultipliers(state);
+ const laserDamage=ammoAvailable?Math.max(0,Math.round((laserBase*fraction*shipPilotMult*fm.damage+auxBase*(1+auxDamageBonus))*Number(selected.mult))):0;
  const rocket=ROCKETS[rocketId];
  const rocketDamage=rocket&&Number(state.rockets?.[rocketId])>0?Math.round(rocket.damage*rocketPilotMult):0;
- return {laserDamage,rocketDamage,ammoId:selected.id,laserCount,auxCount:pet.length};
+ return {laserDamage,rocketDamage:Math.round(rocketDamage*fm.damage),ammoId:selected.id,laserCount,auxCount:pet.length};
 }
 export function relayTurretStats(module,rows){
  const level=Math.max(1,Math.min(3,Math.floor(Number(module?.level)||1)));

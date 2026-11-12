@@ -1,6 +1,6 @@
 {
   "name": "stellar-legacy",
-  "version": "47.7.78",
+  "version": "47.7.79",
   "type": "module",
   "scripts": {
     "start": "node server/index.js",
@@ -21,8 +21,9 @@
   "engines": {
     "node": ">=18"
   },
-  "release": "V143.2: AUX com direção suave, ícone natalino e correção de conexão Supabase no APK",
+  "release": "V144: cenários e minimapa alinhados, formações autoritativas e HUD compacto CONF1/CONF2",
   "devDependencies": {
-    "@electric-sql/pglite": "0.3.14"
+    "@electric-sql/pglite": "0.3.14",
+    "linkedom": "0.18.12"
   }
 }

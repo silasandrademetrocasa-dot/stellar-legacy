@@ -1,3 +1,4 @@
+import {dronePresentation} from './drone-presentation-v144.js';
 import {natalRoomTick,natalSocket} from './christmas-v132.js';
 import {NPCS as NATAL_NPCS,christmasWindow} from '../public/modules/christmas-v132.js';
 import {frontierRoomTerritoryV4775,frontierWrongFactionV4775,frontierEntryDenialV4775} from './frontier-ux-admission-v4775.js';
@@ -708,7 +709,7 @@ class Room {
     if(!p)return null;
     return {userId:p.userId,callsign:p.callsign,pilotTitle:p.pilotTitle||'Piloto Estelar',faction:p.faction,shipId:p.shipId,shipDesignId:p.shipDesignId||null,level:p.level,x:p.x,y:p.y,angle:p.angle,hp:p.hp,maxHp:p.maxHp,shield:p.shield,maxShield:p.maxShield,updatedAt:p.updatedAt,
       laserFiring:!!p.laserFiring,laserColor:p.laserColor||'#76d9ff',laserAmmoId:p.laserAmmoId||'lcb10',laserAmmoName:p.laserAmmoName||'PLS-1',targetId:p.targetId||null,targetIsPlayer:!!p.targetIsPlayer,
-      pet:p.pet?{...p.pet}:null};
+      pet:p.pet?{...p.pet}:null,dronePresentation:p.dronePresentation||{formationId:"original",drones:[]}};
   }
   snapshot(viewerUserId=null){return {type:'world_snapshot',roomKey:this.key,mapId:this.mapId,territoryFaction:this.territoryFaction,npcs:[...this.npcs.values()].map(e=>this.publicNpc(e)).concat([...this.warbotEngine.bots.values()].filter(e=>e.hp>0).map(e=>this.warbotEngine.publicBot(e))),ores:[...this.ores.values()],players:[...this.players.values()].filter(p=>p.userId!==viewerUserId).map(p=>this.publicPlayer(p)),event:this.eventPayload(),globalEvent:this.world.currentEvent(),warfront:this.warfrontPayload(),serverTime:nowMs()};}
   broadcast(payload,exclude=null){
@@ -822,6 +823,15 @@ class Room {
     const pet=msg.pet&&typeof msg.pet==='object'?msg.pet:null;
     if(pet?.owned){p.pet={owned:true,level:Math.max(1,Math.min(15,Number(pet.level)||1)),x:clamp(pet.x,0,this.map.world.w),y:clamp(pet.y,0,this.map.world.h),angle:Number(pet.angle)||0,activeGear:shortText(pet.activeGear||'off',24),laserTargetId:pet.laserTargetId?shortText(pet.laserTargetId,96):null,laserActive:!!pet.laserActive,laserColor:safeColor(pet.laserColor,p.laserColor),designId:pet.designId?shortText(pet.designId,64):null};}else p.pet={owned:false};
     p.updatedAt=now;
+    const hint=String(msg.droneLayoutHint||'').slice(0,1600);
+    if((!p.dronePresentation||hint!==ws._droneHintV144)&&!ws._droneReadingV144&&nowMs()-(ws._droneReadAtV144||0)>2000&&this.world.readRelayLoadout){
+      ws._droneReadingV144=true;ws._droneReadAtV144=nowMs();
+      Promise.resolve(this.world.readRelayLoadout(p.userId)).then(save=>{
+        if(ws.player!==p||!currentRoomActorV1173(ws,this.players))return;
+        p.dronePresentation=dronePresentation(save);ws._droneHintV144=hint;
+        this.broadcast({type:'world_player_patch',entity:{userId:p.userId,dronePresentation:p.dronePresentation}},ws);
+      }).catch(()=>{}).finally(()=>{ws._droneReadingV144=false;});
+    }
     const frame=this.publicPlayer(p),patch=playerStateDelta(p._lastNetFrame,frame);
     let receivers=0;for(const c of this.clients)if(c!==ws&&c.readyState===WebSocket.OPEN)receivers++;
     if(patch){

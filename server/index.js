@@ -1,3 +1,4 @@
+import {prepareCombatTactics} from './combat-tactics-v144.js';
 import {createPlayerRewardsV134} from './player-rewards-v134.js';
 import {mergePlayerStateV134} from '../public/modules/player-state-merge-v134.js';
 import {commitEconomyUnifiedV1332,settleAuctionUnifiedV1332} from './unified-command-v1332.js';
@@ -60,7 +61,7 @@ import { createSecurityService } from './security-service.js';
 
 const app = express();
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const RELEASE_VERSION = '47.7.78'; // único identificador de release nos endpoints HTTP
+const RELEASE_VERSION = '47.7.79'; // único identificador de release nos endpoints HTTP
 
 function normalizeSupabaseUrl(value = '') {
   let url = String(value || '').trim();
@@ -2346,6 +2347,7 @@ app.put('/api/player/save', requireUser, OFFLINE_FARM_GUARD_V484, asyncRoute(asy
   const officialForGearV118=serverSave?.state?structuredClone(serverSave.state):null;
   if(officialForGearV118)pruneOrphanedDroneLayoutsV118(officialForGearV118);
   pruneOrphanedDroneLayoutsV118(state);
+  const tacticsV144=prepareCombatTactics(officialForGearV118,state);if(!tacticsV144.ok)return res.status(409).json({error:'Atalhos ou formação inválidos.',code:tacticsV144.code});
   const gearWriteV1062=validateEquipmentWriteV1062(officialForGearV118,state,req.body?.equipmentMutationV1062);
   if(!gearWriteV1062.ok){
     console.warn('[HANGAR_WRITE_GUARD_V1062]',gearWriteV1062.code);

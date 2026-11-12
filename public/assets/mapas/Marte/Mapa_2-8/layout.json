@@ -5,11 +5,14 @@
   "seed": 2008,
   "background": {
     "original": "/assets/mapas/Biblioteca_Geral/Fundos/fundo_marte_rubro_variante.png",
-    "high": "/assets/mapas/V80_Fundos_Distintos/2_8_alto.webp",
-    "medium": "/assets/mapas/V80_Fundos_Distintos/2_8_alto.webp",
-    "low": "/assets/mapas/V80_Fundos_Distintos/2_8_baixo.webp",
-    "logicalWidth": 896,
-    "logicalHeight": 896
+    "high": "/assets/v144/maps/2_8_high.webp",
+    "medium": "/assets/v144/maps/2_8_medium.webp",
+    "low": "/assets/v144/maps/2_8_low.webp",
+    "logicalWidth": 2048,
+    "logicalHeight": 2048,
+    "radar": "/assets/v144/maps/2_8_radar.webp",
+    "worldAligned": true,
+    "sourceFamily": "mars"
   },
   "stars": [
     {
