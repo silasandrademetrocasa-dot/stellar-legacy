@@ -1,6 +1,6 @@
 {
   "name": "stellar-legacy",
-  "version": "47.7.77",
+  "version": "47.7.78",
   "type": "module",
   "scripts": {
     "start": "node server/index.js",
@@ -21,7 +21,7 @@
   "engines": {
     "node": ">=18"
   },
-  "release": "V143.1: conexão Supabase no APK para ranking, chat, Arena e resgates",
+  "release": "V143.2: AUX com direção suave, ícone natalino e correção de conexão Supabase no APK",
   "devDependencies": {
     "@electric-sql/pglite": "0.3.14"
   }

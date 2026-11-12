@@ -1,8 +1,8 @@
-# Stellar Legacy — V143.1 (47.7.77)
+# Stellar Legacy — V143.2 (47.7.78)
 
 ## Instalar a atualização
 
-Esta correção deve ser aplicada sobre a V143 (47.7.76), usando o Instalador Universal existente. Deixe somente o ZIP V143.1 na raiz e execute o instalador. Não é uma instalação vazia; as artes existentes são preservadas.
+Este ZIP é cumulativo sobre a V143 (47.7.76) ou V143.1 (47.7.77), usando o Instalador Universal existente. Já inclui a correção de conexão Supabase da V143.1. Deixe somente o ZIP V143.2 na raiz e execute o instalador. Não é uma instalação vazia; as artes existentes são preservadas.
 
 Depois execute **APK LOCAL** e instale o APK recém-gerado no aparelho. A correção inclui código Java nativo: atualizar somente o site não atualiza o APK já instalado. O workflow entregue com a V143 pode ser mantido. A mesma chave de assinatura é necessária para atualizar a instalação existente sem desinstalar.
 
@@ -15,6 +15,14 @@ A V143 havia liberado somente dados do Render, bloqueando as consultas diretas d
 Agora o cliente lê `/api/config` e informa somente a URL pública à ponte nativa antes de qualquer chamada ao Supabase. O Android fixa um único host HTTPS exato para a Activity e permite nesse host somente `/rest/v1` (incluindo RPCs) e `/auth/v1`. A regra vale para WebView e Service Workers. Imagens, scripts, CSS, Storage e outros hosts continuam bloqueados como fontes remotas de apresentação. Tokens, chaves e corpos de operações não passam pela nova ponte; seguem nos pedidos HTTP autenticados já existentes. Nenhuma operação econômica é repetida pela ponte.
 
 Se um cliente novo encontrar um APK antigo sem essa capacidade, a mensagem orienta a atualizar o APK. Uma configuração recusada pode ser consultada novamente, sem disparar a operação ao Supabase.
+
+## AUX e ícone de Natal
+
+O AUX mantém o sprite único aprovado em vista superior. Agora gira no plano do mapa para apontar na direção do movimento, com virada limitada e suavizada pelo menor arco; parado, conserva a última direção. O mesmo comportamento é usado no próprio AUX e nos AUX de outros jogadores. A correção não usa atlas com inclinação em 3D e não muda velocidade de voo, alcance de coleta ou recompensa. O texto do AUX continua reto fora da transformação da imagem.
+
+O ícone natalino do APK substitui a arte antiga e tem recurso adaptativo para launchers redondos ou quadrados. Arte gerada com a logo metálica STELLAR LEGACY, estrela orbital ciano, gorro vermelho, neve e espaço azul escuro. Direção final da arte: preservar o logotipo central na zona segura e prolongar o fundo espacial até as bordas, sem moldura. Arquivo de produção: `android/app/src/main/res/drawable-nodpi/stellar_icon.png`, preparado em 512×512 para o aplicativo. A imagem de alta resolução foi criada no gerador integrado; o build usa somente o recurso local.
+
+Gere e instale o APK novo para atualizar o ícone e a ponte de conexão; o ajuste do AUX também funciona na web após o deploy. A validação completa em WebView e no launcher do aparelho permanece necessária.
 
 ## O que fica no aparelho
 
@@ -45,6 +53,6 @@ As migrações antigas removidas do repositório continuam recuperáveis no ZIP 
 
 A política nativa também tem testes executáveis em Java. Sem JDK eles aparecem explicitamente como não executados; no workflow APK novo, Java 17 é instalado antes dos testes e a execução é obrigatória.
 
-Validação desta entrega: 221 testes aprovados, sem falhas ou testes omitidos; inclui compilação Java da política de roteamento com ECJ e execução real na JVM, além de simulações do transporte usando as funções reais de configuração e requisição. Inventário do APK conferido. A configuração pública do servidor e o endpoint público de autenticação responderam HTTP 200. Nenhum resgate de jogador foi executado nesta validação.
+Validação desta entrega: 226 testes aprovados, sem falhas ou testes omitidos; inclui compilação Java da política de roteamento com ECJ e execução real na JVM, além de simulações do transporte usando as funções reais de configuração e requisição. Inventário do APK conferido. A configuração pública do servidor e o endpoint público de autenticação responderam HTTP 200. Nenhum resgate de jogador foi executado nesta validação.
 
 O ambiente ainda não possui SDK Android/Gradle: a compilação do aplicativo completo e o teste em WebView no aparelho ficam para o workflow. Após instalar, valide ranking, chat, atualização da Arena e um resgate disponível. Esses testes em aparelho não foram realizados nesta revisão.

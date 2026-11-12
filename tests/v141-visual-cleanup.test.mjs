@@ -23,12 +23,13 @@ test('V141: new normal hulls resolve independently of owned country and attribut
  assert.match(shipArtV138('goliath','n132_goliath_br'),/v138.*leviathan_br/);
  assert.match(shipArtV138('leonov','n132_leonov_hp'),/v138.*lynx_hp/);
 });
-test('V141: local and remote AUX renders have no yaw rotation or animated atlas source',()=>{
+test('AUX local e remoto usam sprite único e rotação no plano, sem atlas animado',()=>{
  const game=read('public/game.js');
  assert.match(game.slice(game.indexOf('function shipCardAsset('),game.indexOf('function shipMapAsset(')),/detail:false/);
  for(const [start,end] of [['function drawPet(){','function drawShipModel'],['function drawRemotePet(','function drawRemoteLaser']]){
   const block=game.slice(game.indexOf(start),game.indexOf(end,game.indexOf(start)));
-  assert.doesNotMatch(block,/ctx\.rotate/);
+  assert.match(block,/ctx\.rotate\(auxSpriteRotation\(/);
+  assert.doesNotMatch(block,/ctx\.transform|ctx\.scale/);
  }
  assert.match(game,/function droneMapSheetAsset\(id\)\{if\(auxVisualArtV64\(id\)/);
  const html=read('public/index.html');assert.doesNotMatch(html,/id="baseTradePrompt"/);
