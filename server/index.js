@@ -1,3 +1,4 @@
+import {applyFormationGrantV1441} from './formation-shop-v1441.js';
 import {prepareCombatTactics} from './combat-tactics-v144.js';
 import {createPlayerRewardsV134} from './player-rewards-v134.js';
 import {mergePlayerStateV134} from '../public/modules/player-state-merge-v134.js';
@@ -61,7 +62,7 @@ import { createSecurityService } from './security-service.js';
 
 const app = express();
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const RELEASE_VERSION = '47.7.79'; // único identificador de release nos endpoints HTTP
+const RELEASE_VERSION = '47.7.80'; // único identificador de release nos endpoints HTTP
 
 function normalizeSupabaseUrl(value = '') {
   let url = String(value || '').trim();
@@ -224,7 +225,7 @@ const SHOPS_RUNTIME_CACHE_MS = 30000;
 const SHOPS_RUNTIME_FILE = path.join(TOPBAR_RUNTIME_DIR, 'shops.runtime.json');
 let shopsRuntimeCache = null;
 let shopsRuntimeCacheAt = 0;
-const COMMON_SHOP_KINDS = new Set(['ship','laser','generator','drone','pet','pet_gear','extra','ammo','rocket']);
+const COMMON_SHOP_KINDS = new Set(['ship','laser','generator','drone','drone_formation','pet','pet_gear','extra','ammo','rocket']);
 const COMMON_SHOP_TABS = new Set(['ships','lasers','generators','drones','pet','extras','ammo','rockets']);
 const SYSTEM_MISSION_CATEGORIES = new Set(['daily','weekly','monthly','special']);
 const SYSTEM_SERVICE_IDS = new Set(['weapon','shield','cargo','thruster']);
@@ -518,7 +519,8 @@ function ensurePetState(state){
   state.pet.lasers ||= [];state.pet.shields ||= [];
   return state.pet;
 }
-function applyLiveGrant(state,row){
+function applyLiveGrant(state,row,context={}){
+  if(row?.kind==='drone_formation'){applyFormationGrantV1441(state,row,context);return;}
   const grant=row?.meta?.grant||{};
   const kind=String(grant.kind||'');
   const id=String(grant.id||row?.ref_id||'');
@@ -1492,7 +1494,7 @@ app.post('/api/player/purchase', requireUser, asyncRoute(async (req,res)=>{
     const currency=String(row.currency||'credits')==='uridium'?'uridium':'credits';
     const balance=Math.max(0,Number(state.profile[currency])||0);
     if(balance<price)throw Object.assign(new Error(`Saldo insuficiente para ${catalogKey}.`),{status:409});
-    applyLiveGrant(state,row);
+    applyLiveGrant(state,row,{requestId});
     if(row.kind==='drone')state.dronePurchasesV1829[String(row.ref_id||'')]=droneTier+1;
     state.profile[currency]=balance-price;
     // Uma compra confirmada so pode ser sobreposta por um save com a mesma revisao.

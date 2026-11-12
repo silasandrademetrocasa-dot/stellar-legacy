@@ -1,111 +1,59 @@
-# Stellar Legacy — V144 (47.7.79)
+# Stellar Legacy — V144.1 (47.7.80)
 
-## Entrega cumulativa: mapas, formações e HUD compacto
+## Instalação
 
-Instale sobre **V143.2 / 47.7.78** com o Instalador Universal já existente. Coloque somente `Stellar_Legacy_V144_MAPAS_FORMACOES_HUD_CUMULATIVA.zip` na raiz do repositório. O manifesto verifica a versão base. Este pacote contém todas as mudanças V144; os recursos da V143.2 permanecem no repositório. Não é uma instalação vazia. Não apague artes ou módulos antigos manualmente: os fallbacks ainda referenciados são necessários.
+ZIP cumulativo sobre **V144 / 47.7.79**, usando o Instalador Universal existente. Coloque somente `Stellar_Legacy_V144_1_LOJA_FORMACOES_HUD18_CUMULATIVA.zip` na raiz e execute o workflow atual. O manifesto exige a V144. O pacote inclui os recursos e mudanças da V144, além das correções V144.1. Não é uma instalação vazia e não remove arquivos ainda referenciados.
 
-**SQL: aplicação online não confirmada.** A chamada de migração foi interrompida sem devolver confirmação. O arquivo `supabase/migrations/20261112030426_combat_tactics_v144.sql` está incluído, é reaplicável e deve estar aplicado antes de publicar o cliente/servidor V144. Não execute os SQLs de `tests/fixtures` em produção. Nenhum saldo ou formação especial foi concedido a contas reais nesta entrega.
+**SQL V144 e V144.1 já aplicados e verificados no Supabase. Não precisa executar novamente.** As migrações em `supabase/migrations` registram a evolução; nunca aplique os fixtures de testes ao banco real. Nenhuma formação foi concedida gratuitamente e nenhuma compra foi feita em conta de jogador durante a validação.
 
-Após o deploy, gere e instale um novo APK pelo workflow existente. A versão web recebe as mudanças no deploy; um APK instalado só recebe os novos arquivos locais quando for atualizado. Os gráficos continuam incorporados no APK, e a validação de dados permanece online.
+Depois do deploy, gere e instale um novo APK pelo workflow existente para receber a interface e os recursos novos. A mesma assinatura deve ser mantida para atualizar o aplicativo instalado. O pacote de atualização não é um APK compilado.
 
-## Alterações realizadas
+## Loja → Drones → Formações
 
-- HUD inferior com 12 atalhos em duas fileiras de seis, independentes em CONF1/CONF2. Barra recolhível e habilidades em gaveta separada. Toque longo de 500 ms, botão direito ou engrenagem abre a edição; não foi criado um inventário permanente ampliado.
-- Atalhos para munições, mísseis e formações reutilizam seleção, consumo e configuração existentes. Quantidades, seleção e indisponibilidade continuam visíveis.
-- Nove formações com os percentuais aprovados. Original é padrão. As oito especiais ficam visíveis para prévia, mas bloqueadas até haver propriedade válida no save do servidor: o brief não definiu aquisição, preços ou concessão, portanto nada foi inventado.
-- Movimentos próprios por formação e transformação de 0,75 segundo usando os IDs reais dos drones. Comuns e raras em 2D; épicas e lendárias com profundidade simulada, escala e ordem de desenho. Nenhuma troca duplica, remove ou redistribui equipamentos.
-- Bônus e visual da formação só passam a valer após confirmação canônica. Mudança preserva proporcionalmente HP/escudo e não recarrega recursos; o dano recebido durante a gravação é conservado.
-- Trinta mapas existentes com novas composições de cinco famílias: Terra, Marte, Júpiter, PvP e Universo. Fundos alto 2048, médio 1024, baixo 512 e textura de minimapa 256. Os cinco originais foram gerados em 1254×1254 e reamostrados para exportação 2048: não são arte nativa 2K. As trinta composições usam recortes/variações desses cinco originais. Mapas Astrais não foram substituídos.
-- Minimap e cenário usam o mesmo recorte e coordenadas do mundo, com indicação do enquadramento atual. Portais, bases, AUX, marcadores e dimensões lógicas existentes são mantidos.
+| Formação | Raridade | Valor | Moeda |
+|---|---|---:|---|
+| Original | Base | Grátis | — |
+| Fúria | Comum | 500.000.000 | CR |
+| Interceptor | Comum | 650.000.000 | CR |
+| Bastião | Rara | 1.200.000.000 | CR |
+| Colosso | Rara | 1.500.000.000 | CR |
+| Vanguarda | Épica | 1.500.000 | STL |
+| Prisma | Épica | 2.000.000 | STL |
+| Caçador Supremo | Lendária | 4.000.000 | STL |
+| Leviatã | Lendária | 5.000.000 | STL |
 
-## Caminhos e validação reutilizados
+O desbloqueio é permanente e pode ser usado nas duas configurações. Comprar não equipa automaticamente nem troca equipamentos. A formação obtida aparece como Obtido; não é possível comprá-la repetidamente. Esses produtos não recebem desconto Premium. Os preços ficam no catálogo SQL existente `live_shop_prices_v16`, chaves `formation:<id>`.
 
-`combat-hud-v144.js` → seleção atual ou `saveCombatHudV144` → coordenador de gravação existente → **PUT /api/player/save** → `prepareCombatTactics` → `writeVerifiedSave` → **stellar_player_commit**, módulo `checkpoint` → **game_saves.state** → trigger V144 → retorno canônico/ACK.
+## HUD inferior
 
-O novo campo `combatHudV144` contém apenas os dois perfis e atalhos. `ownedDroneFormationsV144` é propriedade reservada do servidor. Não há uma segunda tabela de save, um endpoint paralelo de formações ou novos preços. Clientes antigos não podem apagar esses campos ao omiti-los. O multiplayer transmite apenas metadados obtidos do save canônico e anima localmente; não envia posições individuais por frame.
+- Duas fileiras de nove: **18 atalhos**, independentes em CONF1/CONF2, ocupando a largura inferior.
+- Os 12 atalhos anteriores são conservados; os seis novos começam vazios. Clientes antigos com 12 slots não apagam os slots 13–18 já salvos pela versão nova.
+- O botão de reabrir fica na barra superior do próprio HUD, fora do conteúdo oculto. Ao recolher, permanece uma pequena aba visível. O estado usa a preferência existente, incluindo os controles gerais de interface.
+- Habilidades ficam em uma gaveta retrátil; munições e mísseis mantêm quantidades, seleção, consumo e cooldown existentes. Toque longo, botão direito ou engrenagem abre o editor.
+- Minimap e chat são posicionados acima da barra para evitar disputa pelo rodapé.
 
-## Percentuais aprovados
+## Save e compra validados no servidor
 
-| Formação | Dano | HP | Escudo | Velocidade |
-|---|---:|---:|---:|---:|
-| Original | 0% | 0% | 0% | 0% |
-| Fúria | +18% | -10% | -8% | 0% |
-| Interceptor | -10% | 0% | -8% | +18% |
-| Bastião | -6% | 0% | +22% | -12% |
-| Colosso | -12% | +22% | 0% | -6% |
-| Vanguarda | +14% | -10% | -8% | +14% |
-| Prisma | +14% | -6% | +14% | -10% |
-| Caçador Supremo | +16% | -6% | -12% | +18% |
-| Leviatã | -6% | +18% | +18% | -12% |
+Loja e formação usam **POST /api/player/purchase**, a rota de compra existente → bloqueio por jogador → catálogo do servidor → concessão validada → **stellar_player_commit**, módulo `purchase` → `game_saves.state` + recibos existentes na mesma transação. Não há nova rota de compra, nova carteira ou novo save.
 
-## Regressões e limites da conferência
+`ownedDroneFormationsV144` só pode aumentar por uma compra válida ou administração SQL autorizada. O banco confere uma única formação nova, a moeda e o débito exato do catálogo. `serverFormationPurchaseV1441` guarda apenas a referência da última compra para impedir que duas intenções concorrentes da mesma formação sejam mescladas com duas cobranças. Checkpoints não podem forjar essa referência. O mesmo identificador de operação recupera o recibo, sem cobrar novamente.
 
-A suíte completa passou com **236 testes, zero falhas e zero omitidos**, incluindo PostgreSQL isolado/PGlite, reenvio de operação, ACK perdido, recompensa de NPC concorrente, backup canônico, propriedade de formações, independência de CONF, conservação de itens e munições, interface DOM real e roteamento nativo Java compilado com ECJ e executado em JVM. Sintaxe/imports e inventário do APK também foram verificados: 1.352 arquivos locais, 1.103 imagens, aproximadamente 119,09 MiB descompactados; isso não é o tamanho do APK final nem a RAM usada.
+Atalhos continuam em `combatHudV144` dentro do save único, via **PUT /api/player/save** e módulo `checkpoint`. Os bônus percentuais aprovados, transição de 0,75 s, movimentos e IDs/equipamentos reais dos drones são mantidos. Visual e bônus da formação dependem do estado confirmado.
 
-A prévia HTML separada contém dados fictícios e libera as nove formações somente para demonstração visual, sem conectar ao banco ou alterar contas. Ela não é uma captura de tela do jogo. O navegador deste ambiente bloqueou a prévia local; por isso **a aparência em WebView/aparelho, o APK completo e FPS mobile ainda precisam de validação real**. O benchmark do solver mede somente CPU em Node, não desempenho gráfico do celular.
+## Mapas e recursos da V144 preservados
 
-Execute `npm ci --include=dev --ignore-scripts`, `npm run verify` e `npm run apk:check`. Para exigir os testes Java, use JDK 17 e `STELLAR_REQUIRE_JAVA_TEST=1`. O workflow APK continua responsável pela compilação Android e auditoria do pacote real.
+Trinta composições existentes usam cinco famílias de cenários: Terra, Marte, Júpiter, PvP e Universo. Fundo alto 2048, médio 1024, baixo 512 e radar 256. As cinco artes originais foram geradas em 1254×1254 e reamostradas para a exportação 2048; não são originais nativos 2K. As trinta composições usam variações/recortes dessas cinco artes. Astrais permanecem como antes.
 
-No aparelho, conferir: 12 slots em retrato/paisagem; recolher/abrir habilidades; alternar CONF e reabrir; atirar/comprar/coletar durante saves; trocar formação já possuída sem cura; radar alinhado nos cinco cenários; chat/ranking/Arena/resgates. Não confundir o acesso liberado na prévia com propriedade de itens na conta real.
+Cenário e minimapa compartilham recorte e coordenadas do mundo. Portais, bases, AUX, marcadores e dimensões lógicas foram preservados.
 
----
+## APK e verificações
 
-## Base preservada da V143.2
+Todo `public/` permanece incorporado localmente no APK. O aplicativo não baixa imagens, JavaScript ou CSS do Render. Dados e multiplayer continuam online no Render e no host Supabase autorizado; não é um modo offline. Alterar o site não altera os recursos de um APK já instalado.
 
+Validação: **239 testes aprovados, zero falhas e zero omitidos**; sintaxe/imports e auditoria dos recursos locais do APK aprovadas. Inclui PostgreSQL isolado/PGlite, débito + propriedade + recibo, replay, tentativa concorrente de duplicar compra, rejeição de débito incorreto, propriedade forjada, migração 12→18, proteção da cauda contra cliente antigo, CONF independentes e controle de reabertura fora da área recolhível. Os testes Java da política nativa foram compilados com ECJ e executados na JVM.
 
-## Instalar a atualização
+O SQL online foi conferido: oito produtos ativos na aba Drones, todos retornados pelo catálogo atual; proteção do save habilitada; função auxiliar sem execução pública e sem SECURITY DEFINER. Não foram feitas compras reais nem alterações em saldo de jogador.
 
-Este ZIP é cumulativo sobre a V143 (47.7.76) ou V143.1 (47.7.77), usando o Instalador Universal existente. Já inclui a correção de conexão Supabase da V143.1. Deixe somente o ZIP V143.2 na raiz e execute o instalador. Não é uma instalação vazia; as artes existentes são preservadas.
+Ainda é necessária a conferência visual em aparelho/WebView, incluindo retrato e paisagem, além da compilação Android pelo workflow. Não foi medida taxa de FPS mobile nesta revisão. Os testes DOM não substituem essa validação visual.
 
-Depois execute **APK LOCAL** e instale o APK recém-gerado no aparelho. A correção inclui código Java nativo: atualizar somente o site não atualiza o APK já instalado. O workflow entregue com a V143 pode ser mantido. A mesma chave de assinatura é necessária para atualizar a instalação existente sem desinstalar.
-
-Nenhum SQL novo precisa ser executado. Não foram alteradas funções, permissões, saldos nem resgates no banco.
-
-## Correção da conexão no APK
-
-A V143 havia liberado somente dados do Render, bloqueando as consultas diretas do cliente ao Supabase. As chamadas de ranking, histórico/envio de chat, Arena, presença, clãs, leilão e vários resgates usam REST/RPC do Supabase e eram tratadas como conteúdo externo proibido. O navegador web não tinha essa restrição.
-
-Agora o cliente lê `/api/config` e informa somente a URL pública à ponte nativa antes de qualquer chamada ao Supabase. O Android fixa um único host HTTPS exato para a Activity e permite nesse host somente `/rest/v1` (incluindo RPCs) e `/auth/v1`. A regra vale para WebView e Service Workers. Imagens, scripts, CSS, Storage e outros hosts continuam bloqueados como fontes remotas de apresentação. Tokens, chaves e corpos de operações não passam pela nova ponte; seguem nos pedidos HTTP autenticados já existentes. Nenhuma operação econômica é repetida pela ponte.
-
-Se um cliente novo encontrar um APK antigo sem essa capacidade, a mensagem orienta a atualizar o APK. Uma configuração recusada pode ser consultada novamente, sem disparar a operação ao Supabase.
-
-## AUX e ícone de Natal
-
-O AUX mantém o sprite único aprovado em vista superior. Agora gira no plano do mapa para apontar na direção do movimento, com virada limitada e suavizada pelo menor arco; parado, conserva a última direção. O mesmo comportamento é usado no próprio AUX e nos AUX de outros jogadores. A correção não usa atlas com inclinação em 3D e não muda velocidade de voo, alcance de coleta ou recompensa. O texto do AUX continua reto fora da transformação da imagem.
-
-O ícone natalino do APK substitui a arte antiga e tem recurso adaptativo para launchers redondos ou quadrados. Arte gerada com a logo metálica STELLAR LEGACY, estrela orbital ciano, gorro vermelho, neve e espaço azul escuro. Direção final da arte: preservar o logotipo central na zona segura e prolongar o fundo espacial até as bordas, sem moldura. Arquivo de produção: `android/app/src/main/res/drawable-nodpi/stellar_icon.png`, preparado em 512×512 para o aplicativo. A imagem de alta resolução foi criada no gerador integrado; o build usa somente o recurso local.
-
-Gere e instale o APK novo para atualizar o ícone e a ponte de conexão; o ajuste do AUX também funciona na web após o deploy. A validação completa em WebView e no launcher do aparelho permanece necessária.
-
-## O que fica no aparelho
-
-O Android empacota diretamente toda a árvore public/: telas, JavaScript, CSS, JSON, ícones, naves, designs, NPCs, drones, AUX, bases, mapas e demais recursos estáticos. Não há download inicial ou fallback de artes pelo Render. Um recurso ausente resulta em erro local e reprovação da auditoria; não é buscado no servidor.
-
-O mesmo roteamento atende a página e os Service Workers. Cache HTTP é desativado para o conteúdo do APK; caches PWA antigos com prefixo `stellar-shell-` são retirados antes de iniciar o jogo. Sessões, IndexedDB e saves não são apagados.
-
-Login, validação de saldos, compras, vendas, recompensas, salvamentos e multiplayer continuam online em `/api`, `/ws` e `/health` no Render e em `/rest/v1` e `/auth/v1` no host exato do Supabase. Não se trata de um modo de jogo offline. Outros recursos remotos não são carregados dentro do WebView; links externos continuam no navegador do Android. O fluxo Google OAuth com retorno ao APK ainda exige App Links dedicado, como antes.
-
-Recursos visuais novos exigem uma nova versão do APK. Alterar apenas os arquivos do Render não troca as artes de um APK já instalado. O conjunto atual ocupa aproximadamente 110 MiB descompactado; não é uma estimativa do tamanho final do APK nem da memória gráfica em uso.
-
-## Organização mantida
-
-- `public/` e `server/`: código e recursos usados pelo jogo.
-- `docs/GUIA.md`: este guia único, substituindo relatórios e roteiros de versões antigas.
-- `sql/`: somente as duas últimas atualizações de Natal já aplicadas; não são um bootstrap de banco vazio.
-- `tests/`: regressões de saves, transações, combate, equipamentos, coleta, economia, artes e APK. Não são arquivos embarcados no aplicativo.
-- `tests/fixtures/`: banco isolado e SQL histórico estritamente necessário às regressões. Nunca aplicar esses fixtures em produção.
-- `scripts/`: instalador e verificações atuais. Benchmarks e scripts destrutivos antigos de poda foram retirados.
-
-As migrações antigas removidas do repositório continuam recuperáveis no ZIP completo original fornecido. Esta limpeza não recria nem desativa RPCs em produção.
-
-## Conferências
-
-`npm ci --include=dev --ignore-scripts` instala as dependências travadas. `npm run verify` verifica a sintaxe, imports, referências visuais e executa as regressões, com PostgreSQL isolado via PGlite; não conecta ao Supabase de produção.
-
-`npm run apk:check` inventaria e confere todos os recursos locais. O Gradle repete essa etapa antes do build e, após `assembleDebug`/`assembleRelease`, confere tamanho e SHA-256 de cada recurso dentro do APK real. Arquivos faltantes, alterados, duplicados ou extras reprovam a compilação. Os relatórios ficam em `android/build/reports/` e são anexados pelo novo workflow.
-
-A política nativa também tem testes executáveis em Java. Sem JDK eles aparecem explicitamente como não executados; no workflow APK novo, Java 17 é instalado antes dos testes e a execução é obrigatória.
-
-Validação desta entrega: 226 testes aprovados, sem falhas ou testes omitidos; inclui compilação Java da política de roteamento com ECJ e execução real na JVM, além de simulações do transporte usando as funções reais de configuração e requisição. Inventário do APK conferido. A configuração pública do servidor e o endpoint público de autenticação responderam HTTP 200. Nenhum resgate de jogador foi executado nesta validação.
-
-O ambiente ainda não possui SDK Android/Gradle: a compilação do aplicativo completo e o teste em WebView no aparelho ficam para o workflow. Após instalar, valide ranking, chat, atualização da Arena e um resgate disponível. Esses testes em aparelho não foram realizados nesta revisão.
+Comandos: `npm ci --include=dev --ignore-scripts`, `npm run verify`, `npm run apk:check`. Com JDK 17, use `STELLAR_REQUIRE_JAVA_TEST=1` para exigir os testes nativos.

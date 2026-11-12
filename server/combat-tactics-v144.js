@@ -1,5 +1,7 @@
 import {TACTICS_KEY,validateTacticsWrite,activeConfig} from '../public/modules/combat-tactics-v144.js';
 export function prepareCombatTactics(stored,next){
+ if(next.serverFormationPurchaseV1441===undefined&&stored?.serverFormationPurchaseV1441!==undefined)next.serverFormationPurchaseV1441=structuredClone(stored.serverFormationPurchaseV1441);
+ if(JSON.stringify(next.serverFormationPurchaseV1441??null)!==JSON.stringify(stored?.serverFormationPurchaseV1441??null))return {ok:false,code:'FORMATION_PURCHASE_RESERVED'};
  if(next.ownedDroneFormationsV144===undefined&&stored?.ownedDroneFormationsV144!==undefined)next.ownedDroneFormationsV144=structuredClone(stored.ownedDroneFormationsV144);
  if(next[TACTICS_KEY]==null&&stored?.[TACTICS_KEY])next[TACTICS_KEY]=structuredClone(stored[TACTICS_KEY]);
  const check=validateTacticsWrite(stored,next);if(!check.ok)return check;

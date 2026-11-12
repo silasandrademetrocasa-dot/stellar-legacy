@@ -1,0 +1,40 @@
+import test from 'node:test';import assert from 'node:assert/strict';import {readFileSync,readdirSync} from 'node:fs';import {PGlite} from '@electric-sql/pglite';
+import {applyFormationGrantV1441} from '../server/formation-shop-v1441.js';
+import {tacticsFor,validateTacticsWrite} from '../public/modules/combat-tactics-v144.js';
+import {prepareCombatTactics} from '../server/combat-tactics-v144.js';
+const read=p=>readFileSync(new URL('../'+p,import.meta.url),'utf8');
+const uid='14410000-0000-4000-8000-000000000001',request='14410000-0000-4000-8000-000000000002';
+const migration='supabase/migrations/'+readdirSync(new URL('../supabase/migrations/',import.meta.url)).find(x=>x.endsWith('_formations_shop_hud18_v1441.sql'));
+const base=()=>{const s={accountOwnerId:uid,adminResetEpoch:0,profile:{callsign:'QA1441',level:25,credits:10000000000,uridium:20000000},drones:[{id:'real-drone',type:'iris',slots:['lf4',null]}],inventory:{lf4:3},hp:333,shield:222,ammo:{lcb10:555},rockets:{r310:99},selectedLaserAmmo:'lcb10',selectedRocket:'r310',combatConfigsV2013:{active:1}};s.combatHudV144=tacticsFor(s);return s;};
+test('12-slot saves migrate to eighteen without changing first twelve or CONF independence',()=>{
+ const s=base();s.combatHudV144.profiles[1].slots=s.combatHudV144.profiles[1].slots.slice(0,12);s.combatHudV144.profiles[2].slots=s.combatHudV144.profiles[2].slots.slice(0,12);
+ const old=structuredClone(s.combatHudV144),migrated=tacticsFor(s);assert.equal(migrated.profiles[1].slots.length,18);assert.deepEqual(migrated.profiles[1].slots.slice(0,12),old.profiles[1].slots);assert.deepEqual(migrated.profiles[2].slots.slice(12),Array(6).fill(null));
+ migrated.profiles[2].slots[17]={kind:'rocket',id:'plt3030'};assert.equal(migrated.profiles[1].slots[17],null);assert.equal(validateTacticsWrite(s,{...s,combatHudV144:migrated}).ok,true);
+});
+test('shop grant rejects duplicates and wrong currency, preserves combat and requires request identity',()=>{
+ const s=base(),row={kind:'drone_formation',ref_id:'furia',currency:'credits',meta:{grant:{kind:'drone_formation',id:'furia'}}};const before=structuredClone(s);
+ assert.throws(()=>applyFormationGrantV1441(s,row),/Identificador/);assert.throws(()=>applyFormationGrantV1441(s,{...row,currency:'uridium'},{requestId:request}),/Moeda/);
+ applyFormationGrantV1441(s,row,{requestId:request});assert.deepEqual(s.ownedDroneFormationsV144,['furia']);for(const k of ['drones','inventory','ammo','rockets','hp','shield','combatHudV144'])assert.deepEqual(s[k],before[k]);
+ assert.throws(()=>applyFormationGrantV1441(s,row,{requestId:request}),/já obtida/);
+ assert.equal(prepareCombatTactics(s,{...s,serverFormationPurchaseV1441:{id:'prisma',requestId:request}}).code,'FORMATION_PURCHASE_RESERVED');
+});
+test('PostgreSQL: catalog price/currency, atomic debit+ownership+receipt, replay, concurrent duplicate and legacy HUD tail',async t=>{
+ const db=new PGlite();t.after(()=>db.close());
+ for(const f of ['tests/fixtures/v134-schema.sql','tests/fixtures/sql/STELLAR_V134_SAVE_UNICO.sql','tests/fixtures/sql/STELLAR_V134_1_COLETA_LATENCIA.sql','tests/fixtures/v137-live-commit.sql','supabase/migrations/20261112030426_combat_tactics_v144.sql',migration,migration])await db.exec(read(f));
+ const catalog=(await db.query("select * from live_shop_prices_v16 where kind='drone_formation' order by sort_order")).rows;
+ assert.equal(catalog.length,8);assert.deepEqual(catalog.map(r=>[r.ref_id,Number(r.price),r.currency]),[['furia',500000000,'credits'],['interceptor',650000000,'credits'],['bastiao',1200000000,'credits'],['colosso',1500000000,'credits'],['vanguarda',1500000,'uridium'],['prisma',2000000,'uridium'],['cacador_supremo',4000000,'uridium'],['leviata',5000000,'uridium']]);
+ const initial=base();await db.query('insert into game_saves(user_id,state) values($1,$2)',[uid,initial]);
+ const row=async()=>(await db.query('select state from game_saves where user_id=$1',[uid])).rows[0].state;
+ const payload=(before,product,id)=>{const next=structuredClone(before);applyFormationGrantV1441(next,product,{requestId:id});next.profile[product.currency]-=Number(product.price);next.serverPurchaseRevision=(next.serverPurchaseRevision||0)+1;return {base:before,state:next,receipt:{catalog_key:product.catalog_key,price:Number(product.price),currency:product.currency},catalog_key:product.catalog_key};};
+ const command=async(id,p,module='purchase')=>(await db.query('select stellar_player_commit($1,$2,$3,$4,$5) result',[uid,id,module,'b'.repeat(64),p])).rows[0].result;
+ const p=payload(initial,catalog[0],request),bought=await command(request,p);assert.equal(bought.ok,true);assert.equal(bought.state.profile.credits,9500000000);assert.deepEqual(bought.state.ownedDroneFormationsV144,['furia']);assert.equal(bought.state.hp,333);assert.equal(bought.state.shield,222);assert.deepEqual(bought.state.drones,initial.drones);
+ const replay=await command(request,p);assert.equal(replay.replayed,true);assert.equal(replay.state.profile.credits,9500000000);
+ const staleId='14410000-0000-4000-8000-000000000003',stale=await command(staleId,payload(initial,catalog[0],staleId));assert.equal(stale.ok,false);assert.equal((await row()).profile.credits,9500000000);
+ let before=await row(),next=structuredClone(before);next.ownedDroneFormationsV144.push('prisma');await assert.rejects(command('14410000-0000-4000-8000-000000000004',{base:before,state:next},'checkpoint'),/FORMATION_OWNERSHIP_RESERVED/);
+ const wrong=payload(before,catalog[5],'14410000-0000-4000-8000-000000000005');wrong.state.profile.uridium=before.profile.uridium-1;await assert.rejects(command('14410000-0000-4000-8000-000000000005',wrong),/FORMATION_PURCHASE_INVALID/);assert.deepEqual((await row()).ownedDroneFormationsV144,['furia']);
+ const valid=payload(before,catalog[5],'14410000-0000-4000-8000-000000000006');const epic=await command('14410000-0000-4000-8000-000000000006',valid);assert.equal(epic.ok,true);assert.equal(epic.state.profile.uridium,18000000);
+ before=await row();next=structuredClone(before);next.combatHudV144.profiles[2].slots[17]={kind:'formation',id:'prisma'};await command('14410000-0000-4000-8000-000000000007',{base:before,state:next},'checkpoint');
+ const legacy=await row();for(const n of [1,2])legacy.combatHudV144.profiles[n].slots=legacy.combatHudV144.profiles[n].slots.slice(0,12);delete legacy.serverFormationPurchaseV1441;
+ await db.query('update game_saves set state=$2 where user_id=$1',[uid,legacy]);const final=await row();assert.equal(final.combatHudV144.profiles[2].slots.length,18);assert.deepEqual(final.combatHudV144.profiles[2].slots[17],{kind:'formation',id:'prisma'});assert.equal(final.serverFormationPurchaseV1441.id,'prisma');
+ const receipt=(await db.query('select count(*)::integer as n from stellar_live_purchase_receipts_v123 where user_id=$1',[uid])).rows[0].n;assert.equal(receipt,2);
+});

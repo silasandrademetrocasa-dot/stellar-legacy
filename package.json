@@ -1,6 +1,6 @@
 {
   "name": "stellar-legacy",
-  "version": "47.7.79",
+  "version": "47.7.80",
   "type": "module",
   "scripts": {
     "start": "node server/index.js",
@@ -21,7 +21,7 @@
   "engines": {
     "node": ">=18"
   },
-  "release": "V144: cenários e minimapa alinhados, formações autoritativas e HUD compacto CONF1/CONF2",
+  "release": "V144.1: loja de formações e HUD 18 atalhos com reabertura",
   "devDependencies": {
     "@electric-sql/pglite": "0.3.14",
     "linkedom": "0.18.12"

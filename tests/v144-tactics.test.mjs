@@ -13,7 +13,7 @@ test('all nine formations match the exact approved percentages, without stacking
  assert.equal(rescaleResource(0,100,150),0);assert.equal(rescaleResource(50,100,90),45);assert.equal(rescaleResource(45,90,100),50);
 });
 test('CONF slots are independent and state normalization cannot fabricate ownership',()=>{
- const s=base(),t=tacticsFor(s);assert.equal(t.profiles[1].slots.length,12);assert.equal(t.profiles[2].slots.length,12);t.profiles[1].slots[0]={kind:'formation',id:'furia'};assert.notDeepEqual(t.profiles[1].slots,t.profiles[2].slots);
+ const s=base(),t=tacticsFor(s);assert.equal(t.profiles[1].slots.length,18);assert.equal(t.profiles[2].slots.length,18);t.profiles[1].slots[0]={kind:'formation',id:'furia'};assert.notDeepEqual(t.profiles[1].slots,t.profiles[2].slots);
  s.combatHudV144=t;assert.equal(validateTacticsWrite(base(),s).ok,true);
  const forgery=structuredClone(s);forgery.ownedDroneFormationsV144.push('anything');assert.equal(validateTacticsWrite(s,forgery).code,'FORMATION_OWNERSHIP_RESERVED');
  const unowned=base();delete unowned.ownedDroneFormationsV144;assert.equal(validateTacticsWrite(unowned,s).ok,false);
@@ -33,7 +33,7 @@ test('motion preserves unique equipped identities at 0, 1, 4, 8, 12, 20 drones; 
 });
 test('single checkpoint SQL: ownership, ratios, replay, CONF independence and concurrent NPC rewards',async t=>{
  const db=new PGlite();t.after(()=>db.close());
- for(const p of ['tests/fixtures/v134-schema.sql','tests/fixtures/sql/STELLAR_V134_SAVE_UNICO.sql','tests/fixtures/sql/STELLAR_V134_1_COLETA_LATENCIA.sql','tests/fixtures/v137-live-commit.sql',migration,migration])await db.exec(read(p));
+ for(const p of ['tests/fixtures/v134-schema.sql','tests/fixtures/sql/STELLAR_V134_SAVE_UNICO.sql','tests/fixtures/sql/STELLAR_V134_1_COLETA_LATENCIA.sql','tests/fixtures/v137-live-commit.sql',migration,migration,'supabase/migrations/'+readdirSync(new URL('../supabase/migrations/',import.meta.url)).find(x=>x.endsWith('_formations_shop_hud18_v1441.sql'))])await db.exec(read(p));
  const s=base(),uid=s.accountOwnerId;s.adminResetEpoch=0;delete s.ownedDroneFormationsV144;s.combatHudV144=tacticsFor(s);
  await db.query('INSERT INTO game_saves(user_id,state) VALUES($1,$2)',[uid,s]);
  const row=async()=>(await db.query('select state from game_saves where user_id=$1',[uid])).rows[0].state;

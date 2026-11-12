@@ -1,9 +1,9 @@
 import {createFormationMotion} from './drone-formation-motion-v144.js';
 import {LASER_AMMO,ROCKETS} from '../data.js';
-import {DRONE_FORMATIONS,TACTICS_KEY,tacticsFor,activeConfig,ownedFormations,formationDescription} from './combat-tactics-v144.js';
-const glyphs={original:'○',furia:'△',interceptor:'⋈',bastiao:'▣',colosso:'▰',vanguarda:'⋀',prisma:'◇',cacador_supremo:'⌖',leviata:'♜'};
+import {DRONE_FORMATIONS,COMBAT_SLOT_COUNT,FORMATION_GLYPHS,TACTICS_KEY,tacticsFor,activeConfig,ownedFormations,formationDescription} from './combat-tactics-v144.js';
+const glyphs=FORMATION_GLYPHS;
 const shortQty=n=>n>=1e6?(n/1e6).toFixed(1)+'m':n>=1e3?(n/1e3).toFixed(1)+'k':String(Math.max(0,n||0));
-export function mountCombatHud({root,getState,getConfirmedFormation,onSelect,onAssign,onConfig,getAsset,getCooldown=()=>0,notify=()=>{}}){
+export function mountCombatHud({root,getState,getConfirmedFormation,onSelect,onAssign,onConfig,getAsset,getCooldown=()=>0,getExpanded=null,onToggle=null,notify=()=>{}}){
  if(!root)return null;
  root.classList.add('combat-hud-v144');
  const toolbar=root.querySelector('.weapon-toolbar');toolbar.innerHTML='<span class="combat-hud-title">ATALHOS</span><button type="button" data-conf="1">CONF 1</button><button type="button" data-conf="2">CONF 2</button><button type="button" class="combat-edit" aria-label="Editar atalhos">⚙</button>';
@@ -12,11 +12,13 @@ export function mountCombatHud({root,getState,getConfirmedFormation,onSelect,onA
  const hide=document.createElement('button');hide.id='weaponBarToggle';hide.className='combat-side';hide.type='button';hide.textContent='▾';hide.title='Recolher atalhos';
  const skill=document.createElement('button');skill.className='combat-side combat-skill';skill.type='button';skill.textContent='SKILL ▴';skill.title='Habilidades da nave';
  const ability=root.querySelector('#abilityBar');ability.classList.add('skill-drawer-v144');ability.hidden=true;
- let collapsed=false;hide.onclick=()=>{collapsed=!collapsed;root.classList.toggle('collapsed',collapsed);root.classList.toggle('combat-collapsed',collapsed);hide.textContent=collapsed?'▸':'▾';hide.setAttribute('aria-expanded',String(!collapsed));};
+ let expanded=getExpanded?!!getExpanded():!root.classList.contains('collapsed');
+ function setExpanded(value){expanded=!!value;root.classList.toggle('collapsed',!expanded);root.classList.toggle('combat-collapsed',!expanded);hide.textContent=expanded?'▾':'▸';hide.title=expanded?'Recolher atalhos':'Expandir atalhos';hide.setAttribute('aria-label',hide.title);hide.setAttribute('aria-expanded',String(expanded));}
+ hide.onclick=()=>{if(onToggle){onToggle();setExpanded(getExpanded?getExpanded():!expanded);}else setExpanded(!expanded);};
  skill.onclick=()=>{ability.hidden=!ability.hidden;skill.setAttribute('aria-expanded',String(!ability.hidden));};
  const buttons=[];let preview='original',previewMotion=createFormationMotion(),previewIds=[],previewFrame=0;
  let editIndex=0,category='laser',dialog=null,lastSignature='',pending=false,holdTimer=null,suppressClick=false;
- for(let i=0;i<12;i++){
+ for(let i=0;i<COMBAT_SLOT_COUNT;i++){
   const b=document.createElement('button');b.type='button';b.className='combat-slot';b.dataset.slot=String(i);b.innerHTML='<span class="slot-number"></span><span class="slot-icon"></span><span class="slot-label"></span><span class="slot-qty"></span>';
   b.querySelector('.slot-number').textContent=String(i+1).padStart(2,'0');
   b.oncontextmenu=e=>{e.preventDefault();openEditor(i);};
@@ -25,10 +27,11 @@ export function mountCombatHud({root,getState,getConfirmedFormation,onSelect,onA
   b.onclick=async()=>{if(suppressClick){suppressClick=false;return;}const ref=tacticsFor(getState()).profiles[activeConfig(getState())].slots[i];if(!ref)return openEditor(i);if(b.classList.contains('unavailable')||pending)return;pending=true;refresh(true);try{await onSelect(ref);}catch(e){notify(e.message||'Seleção não confirmada.');}finally{pending=false;refresh(true);}};
   buttons.push(b);
  }
- grid.append(hide,...buttons.slice(0,6),skill,...buttons.slice(6));content.prepend(grid);
+ grid.append(...buttons);content.prepend(grid);toolbar.append(skill,hide);
  toolbar.querySelector('.combat-edit').onclick=()=>openEditor(0);
  for(const b of toolbar.querySelectorAll('[data-conf]'))b.onclick=async()=>{if(pending)return;pending=true;refresh(true);try{await onConfig(Number(b.dataset.conf));}catch(e){notify(e.message);}finally{pending=false;refresh(true);}};
  function refresh(force=false){
+  setExpanded(getExpanded?getExpanded():expanded);
   const state=getState();if(!state)return;const config=activeConfig(state),profile=tacticsFor(state).profiles[config],formation=getConfirmedFormation();
   const cooldown=Math.ceil(getCooldown()*5)/5;const signature=JSON.stringify([config,profile,formation,pending,state.selectedLaserAmmo,state.selectedRocket,state.ammo,state.rockets,cooldown]);if(!force&&signature===lastSignature)return;lastSignature=signature;
   root.setAttribute('aria-busy',String(pending));
@@ -53,7 +56,7 @@ export function mountCombatHud({root,getState,getConfirmedFormation,onSelect,onA
  function drawEditor(){
   dialog.replaceChildren();const header=document.createElement('header');const title=document.createElement('h3');title.textContent=`Atalho ${String(editIndex+1).padStart(2,'0')} · CONF ${activeConfig(getState())}`;
   const close=document.createElement('button');close.type='button';close.textContent='Fechar';close.onclick=()=>dialog.close();header.append(title,close);dialog.append(header);
-  const slots=document.createElement('div');slots.className='editor-slot-index';for(let i=0;i<12;i++){const b=document.createElement('button');b.type='button';b.textContent=String(i+1);b.classList.toggle('active',i===editIndex);b.onclick=()=>{editIndex=i;drawEditor();};slots.append(b);}dialog.append(slots);
+  const slots=document.createElement('div');slots.className='editor-slot-index';for(let i=0;i<COMBAT_SLOT_COUNT;i++){const b=document.createElement('button');b.type='button';b.textContent=String(i+1);b.classList.toggle('active',i===editIndex);b.onclick=()=>{editIndex=i;drawEditor();};slots.append(b);}dialog.append(slots);
   const tabs=document.createElement('nav');for(const [id,label] of [['laser','Munições'],['rocket','Mísseis'],['formation','Formações']]){const b=document.createElement('button');b.type='button';b.textContent=label;b.classList.toggle('active',category===id);b.onclick=()=>{category=id;drawEditor();};tabs.append(b);}dialog.append(tabs);
   if(category==='formation'){
    const canvas=document.createElement('canvas');canvas.className='formation-preview-v144';canvas.width=330;canvas.height=170;dialog.append(canvas);
@@ -73,5 +76,5 @@ export function mountCombatHud({root,getState,getConfirmedFormation,onSelect,onA
   dialog.append(list);const remove=document.createElement('button');remove.type='button';remove.textContent='Limpar atalho';remove.onclick=()=>assign(null);dialog.append(remove);
  }
  async function assign(ref){if(pending)return;pending=true;try{await onAssign(activeConfig(getState()),editIndex,ref);dialog.close();}catch(e){notify(e.message||'Atalho não confirmado.');}finally{pending=false;refresh(true);}}
- refresh(true);return {refresh,openEditor};
+ refresh(true);return {refresh,openEditor,setExpanded};
 }
