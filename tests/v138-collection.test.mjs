@@ -17,7 +17,7 @@ test('V138 socket fallback keeps the durable id, and business rejection never re
 });
 test('V138 PostgreSQL: arrival position, lost ACK, concurrent gains, session and Farm protections',async t=>{
  const db=new PGlite();t.after(()=>db.close());
- for(const file of ['tests/fixtures/v134-schema.sql','sql/STELLAR_V134_SAVE_UNICO.sql','sql/STELLAR_V134_1_COLETA_LATENCIA.sql','tests/fixtures/v137-live-commit.sql','sql/STELLAR_V138_COLETA.sql','sql/STELLAR_V138_COLETA.sql'])await db.exec(read(file));
+ for(const file of ['tests/fixtures/v134-schema.sql','tests/fixtures/sql/STELLAR_V134_SAVE_UNICO.sql','tests/fixtures/sql/STELLAR_V134_1_COLETA_LATENCIA.sql','tests/fixtures/v137-live-commit.sql','tests/fixtures/sql/STELLAR_V138_COLETA.sql','tests/fixtures/sql/STELLAR_V138_COLETA.sql'])await db.exec(read(file));
  const uid='11111111-1111-4111-8111-111111111111',sid='22222222-2222-4222-8222-222222222222';
  const state={accountOwnerId:uid,adminResetEpoch:0,activeShipId:'goliath',mapId:'x1',profile:{callsign:'QA138',faction:'earth',level:10,credits:1000,uridium:100,xp:100000},cargo:{},ammo:{lcb10:100},serverPurchaseRevision:0,pet:{owned:true,level:15,activeGear:'box',gearsOwned:{box:true}}};
  await db.query('INSERT INTO game_saves(user_id,state) VALUES($1,$2)',[uid,state]);

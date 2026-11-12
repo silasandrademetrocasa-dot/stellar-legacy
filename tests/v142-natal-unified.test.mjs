@@ -16,7 +16,7 @@ test('V142: density applies all day to ordinary, PvP and Universe maps; Astrals 
 });
 test('V142 PostgreSQL: mixed personal drops share normal commit, protection and reward counters',async t=>{
  const db=new PGlite();t.after(()=>db.close());
- for(const f of ['tests/fixtures/v134-schema.sql','sql/STELLAR_V134_SAVE_UNICO.sql','sql/STELLAR_V134_1_COLETA_LATENCIA.sql','tests/fixtures/v137-live-commit.sql','sql/STELLAR_V138_COLETA.sql','sql/STELLAR_V142_BOX_NATAL_UNIFICADA.sql','sql/STELLAR_V142_BOX_NATAL_UNIFICADA.sql'])await db.exec(read(f));
+ for(const f of ['tests/fixtures/v134-schema.sql','tests/fixtures/sql/STELLAR_V134_SAVE_UNICO.sql','tests/fixtures/sql/STELLAR_V134_1_COLETA_LATENCIA.sql','tests/fixtures/v137-live-commit.sql','tests/fixtures/sql/STELLAR_V138_COLETA.sql','sql/STELLAR_V142_BOX_NATAL_UNIFICADA.sql','sql/STELLAR_V142_BOX_NATAL_UNIFICADA.sql'])await db.exec(read(f));
  const uid='11111111-1111-4111-8111-111111111111',sid='22222222-2222-4222-8222-222222222222';
  const state={accountOwnerId:uid,adminResetEpoch:0,activeShipId:'goliath',mapId:'x1',profile:{callsign:'QA142',faction:'earth',level:10,credits:1000,uridium:100,xp:100000},cargo:{},ammo:{lcb10:100},serverPurchaseRevision:0,pet:{owned:true,level:15,activeGear:'box',gearsOwned:{box:true}}};
  await db.query('INSERT INTO game_saves(user_id,state) VALUES($1,$2)',[uid,state]);await db.query('INSERT INTO game_login_sessions_v1214(user_id,session_id) VALUES($1,$2)',[uid,sid]);

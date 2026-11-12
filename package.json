@@ -1,6 +1,6 @@
 {
   "name": "stellar-legacy",
-  "version": "47.7.75",
+  "version": "47.7.76",
   "type": "module",
   "scripts": {
     "start": "node server/index.js",
@@ -8,10 +8,8 @@
     "check": "node scripts/verify-release.mjs && node scripts/audit-module-graph.mjs",
     "test": "node --test tests/*.test.mjs",
     "verify": "npm run check && npm test",
-    "preflight:v100": "node scripts/v100-release-readiness.mjs",
-    "benchmark:v104": "node scripts/v104-network-benchmark.mjs",
     "pretest": "node scripts/ensure-test-deps.mjs",
-    "prune-art:v136": "node scripts/prune-v136-legacy-art.mjs"
+    "apk:check": "node scripts/prepare-apk-assets.js && node scripts/verify-apk.js"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.57.4",
@@ -23,7 +21,7 @@
   "engines": {
     "node": ">=18"
   },
-  "release": "V140.0: bases natalinas das três facções em X-1/X-8 e totens de serviços",
+  "release": "V143: limpeza de documentos e regressões; APK com recursos locais e auditoria do pacote final",
   "devDependencies": {
     "@electric-sql/pglite": "0.3.14"
   }

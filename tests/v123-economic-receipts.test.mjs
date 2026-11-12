@@ -32,7 +32,7 @@ test('V123 shop route calls durable receipt RPC, never trusts client state',()=>
  assert.match(server,/p_expected_updated_at:saveRow.updated_at/);
  assert.match(server,/invalidShopArguments\(req.body,\['catalog_key','request_id'\]\)/);
  assert.match(server,/if\(receiptRead.data\)/);
- const sql=read('sql/STELLAR_V123_0_ECONOMIA_COMPRA_IDEMPOTENTE.sql');
+ const sql=read('tests/fixtures/sql/STELLAR_V123_0_ECONOMIA_COMPRA_IDEMPOTENTE.sql');
  assert.match(sql,/pg_advisory_xact_lock/);
  assert.match(sql,/FOR UPDATE/);
  assert.match(sql,/v_new IS DISTINCT FROM v_old-v_cost/);

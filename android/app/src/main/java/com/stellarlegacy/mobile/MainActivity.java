@@ -31,6 +31,8 @@ import android.webkit.WebResourceResponse;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import android.webkit.ServiceWorkerClient;
+import android.webkit.ServiceWorkerController;
 import java.io.ByteArrayInputStream;
 import java.util.Collections;
 import androidx.webkit.WebViewAssetLoader;
@@ -62,7 +64,33 @@ public final class MainActivity extends Activity {
             .setDomain(host)
             .addPathHandler("/", new WebViewAssetLoader.AssetsPathHandler(this))
             .build();
+        // minSdk 26: the platform Service Worker API (24+) is always available.
+        // Install before creating a WebView: workers must use the same local-only router.
+        ServiceWorkerController.getInstance().setServiceWorkerClient(new ServiceWorkerClient() {
+            @Override public WebResourceResponse shouldInterceptRequest(WebResourceRequest request) {
+                return routeResource(request.getUrl());
+            }
+        });
         showGame();
+    }
+
+    private WebResourceResponse routeResource(Uri url) {
+        String path = url.getPath();
+        AssetRoutePolicy.Route route = AssetRoutePolicy.classify(host, url.getScheme(), url.getHost(), url.getPort(), path);
+        if (route == AssetRoutePolicy.Route.DATA) return null; // authenticated API / WSS remain online
+        if (route == AssetRoutePolicy.Route.BLOCKED) {
+            return new WebResourceResponse("text/plain", "UTF-8", 403, "Forbidden",
+                Collections.emptyMap(), new ByteArrayInputStream(new byte[0]));
+        }
+        if ("/".equals(path)) url = url.buildUpon().path("/index.html").build();
+        WebResourceResponse local = localFiles.shouldInterceptRequest(url);
+        if (local != null) {
+            // No cached remote CSS/JS can replace a newer bundled resource after an update.
+            local.setResponseHeaders(Collections.singletonMap("Cache-Control", "no-store"));
+            return local;
+        }
+        return new WebResourceResponse("text/plain", "UTF-8", 404, "Not Found",
+            Collections.emptyMap(), new ByteArrayInputStream(new byte[0]));
     }
 
     private void showGame() {
@@ -78,7 +106,7 @@ public final class MainActivity extends Activity {
         settings.setDatabaseEnabled(true);
         settings.setAllowFileAccess(false);
         settings.setAllowContentAccess(false);
-        settings.setCacheMode(WebSettings.LOAD_DEFAULT);
+        settings.setCacheMode(WebSettings.LOAD_NO_CACHE); // local bytes always come from this APK version
         settings.setMediaPlaybackRequiresUserGesture(true);
         settings.setJavaScriptCanOpenWindowsAutomatically(false);
         settings.setSupportMultipleWindows(false);
@@ -93,20 +121,7 @@ public final class MainActivity extends Activity {
         browser.setWebChromeClient(new WebChromeClient());
         browser.setWebViewClient(new WebViewClient() {
             @Override public WebResourceResponse shouldInterceptRequest(WebView view, WebResourceRequest request) {
-                Uri url = request.getUrl();
-                if (!"https".equals(url.getScheme()) || !host.equalsIgnoreCase(url.getHost())) return null;
-                String path = url.getPath();
-                if (path == null) return null;
-                // SOMENTE DADOS: servidor autentica, valida economia e sincroniza multiplayer.
-                // WebSocket WSS /ws e aberto pelo Chromium (nao passa por WebResourceRequest).
-                if (path.equals("/api") || path.startsWith("/api/") || path.equals("/ws") || path.equals("/health")) return null;
-                // Todo resto, incluindo imagens, mapas, CSS, JS e JSON, SEMPRE local.
-                // Arquivo ausente gera erro local; nunca cai para a rede e gasta Render.
-                WebResourceResponse local = localFiles.shouldInterceptRequest(url);
-                if (local != null) return local;
-                // A origem remota jamais pode servir arte faltante para o APK.
-                return new WebResourceResponse("text/plain", "UTF-8", 404, "Not Found",
-                    Collections.emptyMap(), new ByteArrayInputStream(new byte[0]));
+                return routeResource(request.getUrl());
             }
             @Override public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
                 Uri url = request.getUrl();

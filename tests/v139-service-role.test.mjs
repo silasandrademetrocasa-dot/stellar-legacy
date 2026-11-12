@@ -5,7 +5,7 @@ import {PGlite} from '@electric-sql/pglite';
 const read=p=>readFileSync(new URL('../'+p,import.meta.url),'utf8');
 test('V139 actual service role can collect and switch hulls while player roles remain denied',async t=>{
  const db=new PGlite();t.after(()=>db.close());
- for(const file of ['tests/fixtures/v134-schema.sql','sql/STELLAR_V134_SAVE_UNICO.sql','sql/STELLAR_V134_1_COLETA_LATENCIA.sql','tests/fixtures/v137-live-commit.sql','sql/STELLAR_V138_COLETA.sql'])await db.exec(read(file));
+ for(const file of ['tests/fixtures/v134-schema.sql','tests/fixtures/sql/STELLAR_V134_SAVE_UNICO.sql','tests/fixtures/sql/STELLAR_V134_1_COLETA_LATENCIA.sql','tests/fixtures/v137-live-commit.sql','tests/fixtures/sql/STELLAR_V138_COLETA.sql'])await db.exec(read(file));
  // Existing production permissions, intentionally omitting the five missing SELECTs.
  await db.exec('GRANT SELECT,INSERT,UPDATE ON game_saves,profiles,stellar_player_save_abc_v118,stellar_offline_farm_v484 TO service_role;GRANT SELECT,INSERT,UPDATE,DELETE ON stellar_ship_design_selection_v132 TO service_role;');
  const uid='11111111-1111-4111-8111-111111111111',sid='22222222-2222-4222-8222-222222222222';
@@ -20,7 +20,7 @@ test('V139 actual service role can collect and switch hulls while player roles r
  const role=async(fn,r='service_role')=>{await db.exec('SET ROLE '+r);try{return await fn();}finally{await db.exec('RESET ROLE');}};
  const context=()=>db.query('SELECT public.stellar_collection_context_v138($1,$2,$3,$4) r',[uid,sid,'loot_qa139_role','request_qa139_role']);
  await assert.rejects(role(context),{code:'42501'});
- await db.exec(read('sql/STELLAR_V139_PERMISSOES_COLETA.sql'));await db.exec(read('sql/STELLAR_V139_PERMISSOES_COLETA.sql'));
+ await db.exec(read('tests/fixtures/sql/STELLAR_V139_PERMISSOES_COLETA.sql'));await db.exec(read('tests/fixtures/sql/STELLAR_V139_PERMISSOES_COLETA.sql'));
  const ctx=(await role(context)).rows[0].r;assert.equal(ctx.save.state.profile.credits,1000);
  const draft=structuredClone(ctx.save.state);draft.cargo.Prometium=5;draft.serverPurchaseRevision++;
  const command=(id,module,hash,payload)=>db.query('SELECT public.stellar_player_commit($1,$2,$3,$4,$5) r',[uid,id,module,hash,payload]);

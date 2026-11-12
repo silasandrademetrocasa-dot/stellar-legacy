@@ -11,7 +11,7 @@ test('V118: venda de um drone remove apenas o ID de suas CONF1/2',()=>{
  assert.equal(syncFleetConfigsAfterDroneSaleV118(state,'sold'),0);
 });
 test('V118: save transacional escreve estado, perfil e ABC numa única função SQL',()=>{
- const sql=get('sql/STELLAR_V118_0_SAVE_UNICO_ABC.sql');const server=get('server/index.js');
+ const sql=get('tests/fixtures/sql/STELLAR_V118_0_SAVE_UNICO_ABC.sql');const server=get('server/index.js');
  assert.match(sql,/security invoker/i);assert.match(sql,/revoke all on function.*from public,anon,authenticated/i);
  assert.match(sql,/on conflict\(id\) do update/);
  assert.match(sql,/insert into public\.stellar_player_save_abc_v118/);

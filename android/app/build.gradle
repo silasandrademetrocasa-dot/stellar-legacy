@@ -8,6 +8,7 @@ def serverUrl = (System.getenv('STELLAR_SERVER_URL') ?: 'https://darkorbit-legac
 if (!(serverUrl ==~ /https:\/\/[a-zA-Z0-9.-]+/)) {
     throw new GradleException('STELLAR_SERVER_URL deve ser https://dominio (sem barras nem caminhos).')
 }
+def gamePackage = new groovy.json.JsonSlurper().parse(file('../../package.json'))
 def requestedVersion = (System.getenv('STELLAR_VERSION_CODE') ?: '900001')
 if (!(requestedVersion ==~ /[0-9]+/)) throw new GradleException('STELLAR_VERSION_CODE invalido')
 def keyFile = System.getenv('STELLAR_KEYSTORE_FILE')
@@ -25,7 +26,7 @@ android {
         minSdk 26
         targetSdk 35
         versionCode Integer.parseInt(requestedVersion)
-        versionName '47.7.60-apk1'
+        versionName gamePackage.version + '-local'
         buildConfigField 'String', 'SERVER_ORIGIN', '"' + serverUrl + '"'
     }
 
@@ -71,4 +72,32 @@ android {
 
 dependencies {
     implementation 'androidx.webkit:webkit:1.12.1'
+}
+
+// Also enforced when an older GitHub workflow or Android Studio invokes Gradle.
+def projectRoot = rootProject.projectDir.parentFile
+tasks.register('inventoryLocalAssets', Exec) {
+    workingDir projectRoot
+    commandLine 'node', 'scripts/prepare-apk-assets.js'
+}
+tasks.register('verifyLocalAssets', Exec) {
+    dependsOn 'inventoryLocalAssets'
+    workingDir projectRoot
+    commandLine 'node', 'scripts/verify-apk.js'
+}
+tasks.configureEach { task ->
+    if (task.name == 'preBuild') task.dependsOn 'verifyLocalAssets'
+    if (task.name == 'assembleDebug' || task.name == 'assembleRelease') {
+        task.doLast {
+            def variant = task.name == 'assembleDebug' ? 'debug' : 'release'
+            def apks = fileTree(layout.buildDirectory.dir("outputs/apk/${variant}").get().asFile) { include '*.apk' }.files
+            if (apks.empty) throw new GradleException('APK final ausente para auditoria')
+            apks.each { apk ->
+                project.exec {
+                    workingDir projectRoot
+                    commandLine 'python3', 'scripts/verify-built-apk.py', apk.absolutePath
+                }
+            }
+        }
+    }
 }

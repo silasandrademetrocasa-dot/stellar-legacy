@@ -2,10 +2,10 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 const read=(p)=>readFileSync(new URL('../'+p,import.meta.url),'utf8');
-const prepare=read('sql/STELLAR_V119_1_CAPTURA_ADAPTATIVA_PREPARAR.sql');
-const activate=read('sql/STELLAR_V119_1_CAPTURA_ATIVAR.sql');
-const rollback=read('sql/STELLAR_V119_1_CAPTURA_DESATIVAR.sql');
-const logs=read('sql/STELLAR_V119_1_LOGS_SOMENTE_LEITURA.sql');
+const prepare=read('tests/fixtures/sql/STELLAR_V119_1_CAPTURA_ADAPTATIVA_PREPARAR.sql');
+const activate=read('tests/fixtures/sql/STELLAR_V119_1_CAPTURA_ATIVAR.sql');
+const rollback=read('tests/fixtures/sql/STELLAR_V119_1_CAPTURA_DESATIVAR.sql');
+const logs=read('tests/fixtures/sql/STELLAR_V119_1_LOGS_SOMENTE_LEITURA.sql');
 const server=read('server/index.js');
 const api=read('public/api.js');
 

@@ -13,7 +13,7 @@ test('V142.1: display and purchase quote must come from a valid server price',()
 });
 test('V142.1 PostgreSQL: real prices, dynamic catalogue, stale quotes, debit and replay',async t=>{
  const db=new PGlite();t.after(()=>db.close());
- for(const f of ['tests/fixtures/v134-schema.sql','sql/STELLAR_V134_SAVE_UNICO.sql'])await db.exec(read(f));
+ for(const f of ['tests/fixtures/v134-schema.sql','tests/fixtures/sql/STELLAR_V134_SAVE_UNICO.sql'])await db.exec(read(f));
  for(const [ship,price] of [['leonov',900000],['vengeance',1400000],['goliath',2500000],['pusat',3000000]])await db.query("INSERT INTO live_shop_prices_v16(catalog_key,kind,ref_id,price,currency) VALUES($1,'ship',$2,$3,'uridium')",['ship:'+ship,ship,price]);
  for(const d of DESIGNS)await db.query('INSERT INTO stellar_natal_rewards_v132(id,definition) VALUES($1,$2)',['design:'+d.design_id,d]);
  await db.exec(read('sql/STELLAR_V142_1_PRECOS_DESIGNS.sql'));await db.exec(read('sql/STELLAR_V142_1_PRECOS_DESIGNS.sql'));

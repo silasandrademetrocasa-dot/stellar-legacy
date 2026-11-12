@@ -8,10 +8,10 @@ const read=p=>fs.readFileSync(new URL('../'+p,import.meta.url),'utf8');
 test('V134 real PostgreSQL functions: cross-sector transactions and durable receipts',async t=>{
  const db=new PGlite();t.after(()=>db.close());
  await db.exec(read('tests/fixtures/v134-schema.sql'));
- await db.exec(read('sql/STELLAR_V134_SAVE_UNICO.sql'));
- await db.exec(read('sql/STELLAR_V134_SAVE_UNICO.sql'));
- await db.exec(read('sql/STELLAR_V134_1_COLETA_LATENCIA.sql'));
- await db.exec(read('sql/STELLAR_V134_1_COLETA_LATENCIA.sql'));
+ await db.exec(read('tests/fixtures/sql/STELLAR_V134_SAVE_UNICO.sql'));
+ await db.exec(read('tests/fixtures/sql/STELLAR_V134_SAVE_UNICO.sql'));
+ await db.exec(read('tests/fixtures/sql/STELLAR_V134_1_COLETA_LATENCIA.sql'));
+ await db.exec(read('tests/fixtures/sql/STELLAR_V134_1_COLETA_LATENCIA.sql'));
  const uid='11111111-1111-4111-8111-111111111111',h='a'.repeat(64);
  let serial=0;
  const initial={accountOwnerId:uid,adminResetEpoch:0,profile:{callsign:'QA134',faction:'earth',level:10,credits:10000,uridium:100,xp:100000},cargo:{Prometium:4},ammo:{lcb10:100},inventory:{},serverPurchaseRevision:0};
@@ -20,7 +20,7 @@ test('V134 real PostgreSQL functions: cross-sector transactions and durable rece
  const command=async(module,base,state,extra={},id='qa134_command_'+(++serial),hash=h)=>(await db.query('SELECT stellar_player_commit($1,$2,$3,$4,$5) r',[uid,id,module,hash,{base,state,receipt:{total:400},operation:'economy:sell_cargo',...extra}])).rows[0].r;
  await reset();
  await t.test('all inventoried writers lock the account before their rules',async()=>{
-  const coverage=JSON.parse(read('docs/v134/SQL_WRITER_COVERAGE.json'));
+  const coverage=JSON.parse(read('tests/fixtures/sql-writer-coverage.json'));
   for(const m of coverage){const f=await db.query('SELECT pg_get_functiondef(p.oid) d FROM pg_proc p WHERE proname=$1',[m.function]);assert.equal(f.rows.length,1,m.function);assert.match(f.rows[0].d,/PLAYER_SHARED_LOCK_V134/,m.function);}
  });
  await t.test('NPC reward arriving after a sale quote is preserved with sale credits',async()=>{
@@ -123,7 +123,7 @@ test('V134 real PostgreSQL functions: cross-sector transactions and durable rece
   assert.equal((await db.query('SELECT count(*) n FROM auction_bids WHERE user_id=$1',[uid])).rows[0].n,1);
  });
  await t.test('cutover removes table DML and public historical entry points; current aliases retain grants',async()=>{
-  await db.exec(read('sql/STELLAR_V134_CUTOVER_ROTAS.sql'));
+  await db.exec(read('tests/fixtures/sql/STELLAR_V134_CUTOVER_ROTAS.sql'));
   await db.exec('SET ROLE authenticated');
   await assert.rejects(()=>db.query('SELECT stellar_player_commit($1,$2,$3,$4,$5)',[uid,'forged_command_1','reward',h,{}]),/permission denied/);
   await assert.rejects(()=>db.exec("UPDATE auction_bids SET status='lost'"),/permission denied/);

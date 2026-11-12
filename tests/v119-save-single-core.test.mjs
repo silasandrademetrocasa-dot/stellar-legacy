@@ -6,8 +6,8 @@ import {
  saveCoreEnvelopeV119,commitSaveCoreV119,SAVE_LOG_MODULES_V119
 } from '../server/save-core-v119.js';
 const read=(p)=>readFileSync(new URL('../'+p,import.meta.url),'utf8');
-const sql=read('sql/STELLAR_V119_0_SAVE_UNICO_PREPARAR.sql');
-const activate=read('sql/STELLAR_V119_0_ATIVAR_AUDITORIA.sql');
+const sql=read('tests/fixtures/sql/STELLAR_V119_0_SAVE_UNICO_PREPARAR.sql');
+const activate=read('tests/fixtures/sql/STELLAR_V119_0_ATIVAR_AUDITORIA.sql');
 const server=read('server/index.js');
 const client=read('public/game.js');
 const api=read('public/api.js');

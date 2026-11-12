@@ -1,4 +1,0 @@
-SQL V132 aplicado e conferido no Supabase nesta sessão. Não precisa executar novamente.
-Instale somente este ZIP pelo workflow universal e recarregue o jogo.
-Corrige imagens de atlas invalidadas pelo cache. 587 testes aprovados.
-O guia original descreve a preparação da V132; a informação de SQL pendente foi substituída por este aviso.

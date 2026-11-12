@@ -75,7 +75,7 @@ assert(!report.entries.some(e=>oldDirs.test(e.path)),'sprites legados ainda pres
 
 assert(build.includes("file('../../public')"),'sourceSet local não configurada');
 assert(native.includes('.setDomain(host)')&&native.includes('new WebViewAssetLoader.AssetsPathHandler(this)'),'WebView não serve arquivos locais');
-assert(native.includes('path.startsWith("/api/")')&&native.includes('return null;'),'API do Render não está liberada');
+assert(read('android/app/src/main/java/com/stellarlegacy/mobile/AssetRoutePolicy.java').includes('path.startsWith("/api/")')&&native.includes('Route.DATA) return null;'),'API do Render não está liberada');
 assert(native.includes('localFiles.shouldInterceptRequest(url)'),'arquivos estáticos não são interceptados');
 assert(androidManifest.includes('android:usesCleartextTraffic="false"'),'HTTP não protegido');
 assert(!androidManifest.includes('READ_EXTERNAL_STORAGE'),'não pedir armazenamento dos jogadores');

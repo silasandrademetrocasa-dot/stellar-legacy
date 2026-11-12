@@ -10,7 +10,7 @@ test('APK Android conserva assets e o jogo no mesmo dominio HTTPS da API',()=>{
   assert.match(native,/\.setDomain\(host\)/);
   assert.match(native,/AssetsPathHandler\(this\)/);
   assert.match(native,/browser\.loadUrl\(origin \+ "\/index\.html"\)/);
-  assert.match(native,/path\.startsWith\("\/api\/"\)/);
+  assert.match(read('android/app/src/main/java/com/stellarlegacy/mobile/AssetRoutePolicy.java'),/path\.startsWith\("\/api\/"\)/);
   assert.match(native,/localFiles\.shouldInterceptRequest\(url\)/);
   assert.match(native,/new WebResourceResponse\("text\/plain", "UTF-8", 404/);
 });

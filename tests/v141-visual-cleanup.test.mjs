@@ -34,10 +34,3 @@ test('V141: local and remote AUX renders have no yaw rotation or animated atlas 
  const html=read('public/index.html');assert.doesNotMatch(html,/id="baseTradePrompt"/);
  const ui=read('public/modules/christmas-ui-v132.js');assert.equal((ui.match(/querySelector\('#topbar \.top-actions'\)\?\.append/g)||[]).length,2);
 });
-test('V141: deletion inventory contains no active imports or literal asset paths',()=>{
- const report=JSON.parse(read('docs/v141/ARQUIVOS_REMOVIDOS.json'));
- assert.ok(report.count>=98);assert.equal(report.files.length,report.count);
- const runtime=['public/game.js','public/index.html','public/style.css','public/assets/v17/manifest.js','server/index.js','server/world.js'].map(read).join('\n');
- for(const row of report.files){assert.ok(!existsSync(new URL('../'+row.path,import.meta.url)),row.path);assert.ok(!runtime.includes('/'+row.path.replace(/^public\//,'')),row.path);}
- assert.equal(report.bytes,report.files.reduce((sum,row)=>sum+row.bytes,0));
-});
