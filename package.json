@@ -1,6 +1,6 @@
 {
   "name": "stellar-legacy",
-  "version": "47.7.81",
+  "version": "47.7.82",
   "type": "module",
   "scripts": {
     "start": "node server/index.js",
@@ -22,7 +22,7 @@
   "engines": {
     "node": ">=18"
   },
-  "release": "V145.0: delta de transporte, journal recuperável e sincronização por alterações (migração parcial)",
+  "release": "V145.1: compras sem pre-save desnecessário, contexto consolidado e proteção de tentativas",
   "devDependencies": {
     "@electric-sql/pglite": "0.3.14",
     "fake-indexeddb": "6.2.4",

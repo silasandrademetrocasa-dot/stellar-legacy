@@ -1,3 +1,4 @@
+import {createShopContextV1451} from './shop-context-v1451.js';
 import {createSaveDeltaTransportV145} from './save-delta-v145.js';
 import {applyFormationGrantV1441} from './formation-shop-v1441.js';
 import {prepareCombatTactics} from './combat-tactics-v144.js';
@@ -63,7 +64,7 @@ import { createSecurityService } from './security-service.js';
 
 const app = express();
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const RELEASE_VERSION = '47.7.81'; // único identificador de release nos endpoints HTTP
+const RELEASE_VERSION = '47.7.82'; // único identificador de release nos endpoints HTTP
 
 function normalizeSupabaseUrl(value = '') {
   let url = String(value || '').trim();
@@ -1434,7 +1435,10 @@ app.post('/api/player/coupons/redeem', requireUser, asyncRoute(async (req,res)=>
   return res.json(result);
 }));
 
+const SHOP_CONTEXT_V1451=createShopContextV1451({getDb:requireEliteAdmin,readSave:readSaveForWrite,readCatalog:()=>loadLiveOpsSnapshot(true),premiumEligible:premiumDiscountEligible});
+
 app.post('/api/player/purchase', requireUser, asyncRoute(async (req,res)=>{
+  const routeStarted=Date.now();let purchaseContext='legacy';
   const tamper=invalidShopArguments(req.body,['catalog_key','request_id']);
   if(tamper){const result=await securityService.report(req.user.id,tamper,'live_purchase');if(result?.auto_suspended)return res.status(403).json({error:'Conta temporariamente suspensa por violação de integridade.',code:'ACCOUNT_BANNED'});return res.status(400).json({error:'Parâmetros de compra inválidos.',code:tamper.code});}
   const catalogKey=String(req.body?.catalog_key||'').trim().slice(0,120);
@@ -1443,40 +1447,23 @@ app.post('/api/player/purchase', requireUser, asyncRoute(async (req,res)=>{
   if(requestId!==null&&!validPurchaseIdV123(requestId))
     return res.status(400).json({error:'Identificador de compra inválido.',code:'PURCHASE_ID_INVALID'});
   const result=await withPurchaseLock(req.user.id,async()=>{
-    const earlyDb=await requireEliteAdmin();
-    const oldReceipt=await earlyDb.from('stellar_live_purchase_receipts_v123').select('catalog_key,receipt').eq('user_id',req.user.id).eq('request_id',requestId).maybeSingle();
-    if(oldReceipt.error)throw Object.assign(Error('Recibo indisponível'),{status:503});
-    if(oldReceipt.data){
-      if(oldReceipt.data.catalog_key!==catalogKey)throw Object.assign(Error('Identificador reutilizado'),{status:409,code:'COMMAND_ID_REUSED'});
-      const readback=await readSaveForWrite(req);if(readback.error)throw Object.assign(Error('Recuperação indisponível'),{status:503});
-      return {state:readback.data.state,save_token:readback.data.save_token,updated_at:readback.data.updated_at,purchase:oldReceipt.data.receipt,replayed:true};
-    }
-    const snapshot=await loadLiveOpsSnapshot(true);
-    const row=liveCatalogRow(snapshot,catalogKey);
-    if(!row||row.shop_visible===false)throw Object.assign(new Error('Produto indisponível na Loja.'),{status:404});
-    if(row.kind==='aux_protocol')throw Object.assign(new Error('Protocolos AUX são comprados exclusivamente pela economia de protocolos validada pelo servidor.'),{status:409});
-    const service=requestId?await requireEliteAdmin():null;
-    // Fetch both concurrently: no extra sequential SQL round trip for purchases.
-    const [saveRead,receiptRead]=await Promise.all([
-      readSaveForWrite(req),
-      requestId?service.from('stellar_live_purchase_receipts_v123').select('catalog_key,receipt').eq('user_id',req.user.id).eq('request_id',requestId).maybeSingle():Promise.resolve({data:null,error:null})
-    ]);
-    const {data:saveRow,error:saveError}=saveRead;
-    if(saveError)throw new Error(saveError.message);
-    if(receiptRead.error)throw Object.assign(new Error('Recibos de compras indisponíveis. Aplique a migração V123.'),{status:503});
-    if(!saveRow?.state)throw Object.assign(new Error('Save online ainda não foi criado.'),{status:409});
+    const context=await SHOP_CONTEXT_V1451(req,{catalogKey,requestId});purchaseContext=context.source;
+    const service=await requireEliteAdmin();
+    const saveRow=context.save,receiptRead={data:context.receipt};
     if(receiptRead.data){
-      if(receiptRead.data.catalog_key!==catalogKey)throw Object.assign(new Error('Identificador reutilizado para outro item.'),{status:409,code:'PURCHASE_ID_REUSED'});
-      return {state:saveRow.state,updated_at:saveRow.updated_at,purchase:receiptRead.data.receipt,replayed:true};
+      if(receiptRead.data.catalog_key!==catalogKey)throw Object.assign(Error('Identificador reutilizado'),{status:409,code:'COMMAND_ID_REUSED'});
+      return {state:saveRow.state,save_token:saveRow.save_token,updated_at:saveRow.updated_at,purchase:receiptRead.data.receipt,replayed:true};
     }
+    const row=context.catalog;
+    if(!row||row.enabled!==true||row.shop_visible===false)throw Object.assign(new Error('Produto indisponível na Loja.'),{status:404});
+    if(row.kind==='aux_protocol')throw Object.assign(new Error('Protocolos AUX são comprados exclusivamente pela economia de protocolos validada pelo servidor.'),{status:409});
     const playerLevel=Math.max(1,Math.floor(Number(saveRow.state?.profile?.level)||1));
     const minLevel=Math.max(1,Math.floor(Number(row.min_level)||1));
     if(playerLevel<minLevel)throw Object.assign(new Error(`Requer nível ${minLevel}.`),{status:409});
     const state=structuredClone(saveRow.state);
     if(String(state.accountOwnerId||req.user.id)!==req.user.id)throw Object.assign(new Error('SAVE BLOQUEADO: proprietário inválido.'),{status:409});
     state.profile ||= {};
-    const {data:premiumState}=await req.sb.rpc('get_premium_shop_v12');
-    const premium=!!premiumState?.premium_active;
+    const premium=context.premium_active===true;
     // V18.2.9: cada tipo de drone dobra de preço a cada aquisição efetiva.
     // O histórico não recua ao vender um drone; evita recomprar 1ª unidade indefinidamente.
     const listedBase=Math.max(0,Math.round(Number(row.price)||0));
@@ -1517,7 +1504,7 @@ app.post('/api/player/purchase', requireUser, asyncRoute(async (req,res)=>{
     if(writeError)throw new Error(writeError.message);
     return {state,updated_at,purchase};
   });
-  res.json({ok:true,...result});
+  res.json({ok:true,...result,server_ms:Date.now()-routeStarted,purchase_context:purchaseContext});
 }));
 
 
@@ -1608,6 +1595,7 @@ app.post('/api/player/missions/claim',requireUser,OFFLINE_FARM_GUARD_V484,asyncR
 }));
 
 app.post('/api/player/purchase/bulk', requireUser, OFFLINE_FARM_GUARD_V484, asyncRoute(async (req,res)=>{
+  const routeStarted=Date.now();let purchaseContext='legacy';
   const tamper=invalidShopArguments(req.body,['catalog_key','quantity','request_id','expected_price','expected_currency','expected_pack_size']);
   if(tamper)return res.status(400).json({error:'Parâmetros de lote inválidos.',code:'INVALID_BULK_ARGUMENTS'});
   const key=String(req.body?.catalog_key||'').trim(),quantity=Number(req.body?.quantity);
@@ -1620,17 +1608,15 @@ app.post('/api/player/purchase/bulk', requireUser, OFFLINE_FARM_GUARD_V484, asyn
     // remain replayable even if the ADM changes the price or disables the item.
     const operation=`bulk:${key}`,intentHash=operationDigestV125(operation,{quantity});
     const service=await requireEliteAdmin();
-    const receiptRead=await service.from('stellar_economy_receipts_v125')
-      .select('operation,request_hash,receipt').eq('user_id',req.user.id).eq('request_id',requestId).maybeSingle();
-    if(receiptRead.error)throw Object.assign(new Error('Recibos V125 indisponíveis: falta SQL.'),{status:503});
+    const context=await SHOP_CONTEXT_V1451(req,{catalogKey:key,requestId,bulk:true});purchaseContext=context.source;
+    const receiptRead={data:context.receipt};
+    const saveRow=context.save;
     if(receiptRead.data){
       if(!replayValidV125(receiptRead.data,operation,intentHash))throw Object.assign(new Error('ID reutilizado para pedido diferente.'),{status:409});
-      const {data:confirmed,error:readError}=await req.sb.from('game_saves').select('state').eq('user_id',req.user.id).maybeSingle();
-      if(readError||!confirmed?.state)throw Object.assign(new Error('Save de compra confirmada indisponível.'),{status:503});
-      return {state:confirmed.state,purchase:{...receiptRead.data.receipt?.purchase,replayed:true}};
+      return {state:saveRow.state,save_token:saveRow.save_token,purchase:{...receiptRead.data.receipt?.purchase,replayed:true}};
     }
-    const snapshot=await loadLiveOpsSnapshot(true),row=liveCatalogRow(snapshot,key);
-    if(!row||!['ammo','rocket'].includes(row.kind)||row.shop_visible===false||row.enabled===false)
+    const row=context.catalog;
+    if(!row||!['ammo','rocket'].includes(row.kind)||row.shop_visible===false||row.enabled!==true)
       throw Object.assign(new Error('Produto indisponível para compra em lote.'),{status:404});
     const grant=row.meta?.grant||{};
     if(String(grant.kind)!==row.kind||!String(grant.id||row.ref_id||''))
@@ -1643,10 +1629,6 @@ app.post('/api/player/purchase/bulk', requireUser, OFFLINE_FARM_GUARD_V484, asyn
        String(req.body.expected_currency)!==(row.currency==='uridium'?'uridium':'credits')||
        Number(req.body.expected_pack_size)!==packSize)
       throw Object.assign(new Error('Preço do catálogo mudou. Abra a compra novamente para confirmar o novo valor.'),{status:409});
-    const {data:saveRow,error:saveError}=await req.sb.from('game_saves')
-      .select('state,updated_at').eq('user_id',req.user.id).maybeSingle();
-    if(saveError)throw Error(saveError.message);
-    if(!saveRow?.state)throw Object.assign(new Error('Save não encontrado.'),{status:409});
     const state=structuredClone(saveRow.state);
     if(String(state.accountOwnerId||req.user.id)!==req.user.id)
       throw Object.assign(new Error('Proprietário de save inválido.'),{status:403});
@@ -1684,7 +1666,7 @@ app.post('/api/player/purchase/bulk', requireUser, OFFLINE_FARM_GUARD_V484, asyn
     if(!result.ok)throw Object.assign(new Error('Compra em lote sem confirmação: '+result.code),{status:result.code==='ECONOMY_STALE'?409:503,code:result.code});
     return {state:result.state,save_token:response.data?.save_token,purchase:{...(result.receipt?.purchase||receipt),...(result.replayed?{replayed:true}:{})}};
   });
-  res.set('Cache-Control','no-store');res.json({ok:true,...result});
+  res.set('Cache-Control','no-store');res.json({ok:true,...result,server_ms:Date.now()-routeStarted,purchase_context:purchaseContext});
 }));
 
 
@@ -1692,7 +1674,7 @@ app.post('/api/player/purchase/bulk', requireUser, OFFLINE_FARM_GUARD_V484, asyn
 
 
 app.post('/api/player/economy', requireUser, OFFLINE_FARM_GUARD_V484, asyncRoute(async (req,res)=>{
-  const routeStarted=Date.now();
+  const routeStarted=Date.now();let purchaseContext;
   const action=String(req.body?.action||'').trim();
   const payload=(req.body?.payload&&typeof req.body.payload==='object')?req.body.payload:{};
   const tamper=invalidShopArguments(req.body,['action','payload','request_id'])||invalidShopArguments(payload,['catalog_key','kind','qty','drone_id','item_id','resource_id','id','recipe_id','service_id','protocol','amount','level','request_id']);
@@ -1707,15 +1689,23 @@ app.post('/api/player/economy', requireUser, OFFLINE_FARM_GUARD_V484, asyncRoute
   const service=requestId?await requireEliteAdmin():null;
   const result=await withPurchaseLock(req.user.id,()=>withEconomySaveRetryV102(async()=>{
     const catalogActions=new Set(['auto_buy','unlock_pet_slot','buy_quantum_cores','sell_inventory','sell_drone','gate_spin','aux_protocol_buy','aux_protocol_craft']);
-    const premiumActions=new Set(['auto_buy','gate_spin']);
+    const premiumActions=new Set(['gate_spin']);
     const systemsActions=new Set(['base_service','craft_recipe']);
-    const [snapshot,state,premiumResult,systemsSnapshot,receiptResult]=await Promise.all([
-      catalogActions.has(action)?loadLiveOpsSnapshot(false):Promise.resolve(null),
-      readEconomySave(req),
-      premiumActions.has(action)?req.sb.rpc('get_premium_shop_v12'):Promise.resolve({data:null,error:null}),
-      systemsActions.has(action)?loadSystemsRuntimeSnapshot(false).catch(()=>null):Promise.resolve(null),
-      requestId?service.from('stellar_economy_receipts_v125').select('operation,request_hash,receipt').eq('user_id',req.user.id).eq('request_id',requestId).maybeSingle():Promise.resolve({data:null,error:null})
-    ]);
+    let context=null;
+    if(action==='auto_buy'){
+      context=await SHOP_CONTEXT_V1451(req,{catalogKey:String(payload.catalog_key||''),requestId,bulk:true});
+      purchaseContext=context.source;
+      req.economyBaselineV125=context.save.updated_at;req.economyBaseV134=structuredClone(context.save.state);req.saveTokenV131=context.save.save_token;
+    }
+    const [snapshot,state,premiumResult,systemsSnapshot,receiptResult]=context?
+      [{catalog:context.catalog?[context.catalog]:[]},structuredClone(context.save.state),{data:null,error:null},null,{data:context.receipt,error:null}]:
+      await Promise.all([
+        catalogActions.has(action)?loadLiveOpsSnapshot(false):Promise.resolve(null),
+        readEconomySave(req),
+        premiumActions.has(action)?req.sb.rpc('get_premium_shop_v12'):Promise.resolve({data:null,error:null}),
+        systemsActions.has(action)?loadSystemsRuntimeSnapshot(false).catch(()=>null):Promise.resolve(null),
+        requestId?service.from('stellar_economy_receipts_v125').select('operation,request_hash,receipt').eq('user_id',req.user.id).eq('request_id',requestId).maybeSingle():Promise.resolve({data:null,error:null})
+      ]);
     if(receiptResult.error)throw Object.assign(new Error('Recibos V125 indisponíveis: falta aplicar SQL.'),{status:503,code:'ECONOMY_RECEIPTS_UNAVAILABLE'});
     if(receiptResult.data){
       if(!replayValidV125(receiptResult.data,op,intentHash))throw Object.assign(new Error('Identificador reutilizado com parâmetros diferentes.'),{status:409,code:'ECONOMY_ID_REUSED'});
@@ -1840,7 +1830,7 @@ app.post('/api/player/economy', requireUser, OFFLINE_FARM_GUARD_V484, asyncRoute
     if(!result.ok)throw Object.assign(new Error('Operação sem confirmação econômica: '+result.code),{code:result.code,status:result.code==='ECONOMY_STALE'?409:503});
     return {state:result.state,save_token:commit.data?.save_token,updated_at:result.updatedAt,info:result.receipt?.info||info,deduplicated:result.replayed};
   },{maxAttempts:3,delay:attempt=>{console.warn('[economy-v102] save em conflito; relendo saldo e recompensas, tentativa',attempt+1);return new Promise(resolve=>setTimeout(resolve,40*attempt));}}));
-  res.json({ok:true,...result,server_ms:Date.now()-routeStarted});
+  res.json({ok:true,...result,server_ms:Date.now()-routeStarted,...(purchaseContext?{purchase_context:purchaseContext}:{})});
 }));
 
 app.all('/api/save',(req,res)=>res.status(410).json({ok:false,code:'CLIENT_UPDATE_REQUIRED',current_route:'/api/player/save',error:'Atualize o jogo para usar a rota atual.'}));

@@ -2,9 +2,9 @@ import {compactSaveV145,applyStateDeltaV145} from './modules/state-delta-v145.js
 import {createRuntimeReadCacheV145} from './modules/runtime-read-cache-v145.js';
 const runtimeReadCacheV145=createRuntimeReadCacheV145();
 let deltaBaselineV145=null;
-import {configureNativeDataOrigin} from './modules/native-data-origin.js?v=47.7.81';
-import {offlineFarmDirectActivityAllowedV103} from './modules/offline-farm-activity-v103.js?v=47.7.81';
-import {createReadCoalescerV104} from './modules/read-coalescer-v104.js?v=47.7.81';
+import {configureNativeDataOrigin} from './modules/native-data-origin.js?v=47.7.82';
+import {offlineFarmDirectActivityAllowedV103} from './modules/offline-farm-activity-v103.js?v=47.7.82';
+import {createReadCoalescerV104} from './modules/read-coalescer-v104.js?v=47.7.82';
 import {persistSessionV101,loadPersistedSessionV101,clearPersistedSessionV101} from './modules/login-persistence-v101.js';
 const SESSION_KEY = 'stellarLegacyV4Session';
 const GOOGLE_OAUTH_PENDING_KEY = 'stellarLegacyGoogleOAuthPendingV18216';

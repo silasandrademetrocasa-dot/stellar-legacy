@@ -1,5 +1,5 @@
 /** V130: sales are authoritative on the server; UI-only pending saves must not block trading. */
-const SERVER_FIRST = new Set(['sell_cargo','sell_inventory']);
+const SERVER_FIRST = new Set(['sell_cargo','sell_inventory','auto_buy']);
 export function economyServerFirstV130(action){return SERVER_FIRST.has(String(action||''));}
 export function shouldRetrySaleV130(error){
  const status=Number(error?.status)||0;
