@@ -1,3 +1,7 @@
+# Stellar Legacy — V146.0 (47.8.0)
+
+Leia primeiro [a entrega V146](local-first-v146/LEIA_PRIMEIRO.md). O texto abaixo é histórico da V144.1 e não substitui as instruções atuais.
+
 # Stellar Legacy — V144.1 (47.7.82)
 
 ## Instalação

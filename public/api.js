@@ -2,9 +2,9 @@ import {compactSaveV145,applyStateDeltaV145} from './modules/state-delta-v145.js
 import {createRuntimeReadCacheV145} from './modules/runtime-read-cache-v145.js';
 const runtimeReadCacheV145=createRuntimeReadCacheV145();
 let deltaBaselineV145=null;
-import {configureNativeDataOrigin} from './modules/native-data-origin.js?v=47.7.82';
-import {offlineFarmDirectActivityAllowedV103} from './modules/offline-farm-activity-v103.js?v=47.7.82';
-import {createReadCoalescerV104} from './modules/read-coalescer-v104.js?v=47.7.82';
+import {configureNativeDataOrigin} from './modules/native-data-origin.js?v=47.8.0';
+import {offlineFarmDirectActivityAllowedV103} from './modules/offline-farm-activity-v103.js?v=47.8.0';
+import {createReadCoalescerV104} from './modules/read-coalescer-v104.js?v=47.8.0';
 import {persistSessionV101,loadPersistedSessionV101,clearPersistedSessionV101} from './modules/login-persistence-v101.js';
 const SESSION_KEY = 'stellarLegacyV4Session';
 const GOOGLE_OAUTH_PENDING_KEY = 'stellarLegacyGoogleOAuthPendingV18216';
@@ -474,11 +474,11 @@ export async function loadCloudSave() {
   const sessionKey=saveSessionKey();
   let pendingIds=[];
   try{pendingIds=Object.keys(JSON.parse(localStorage.getItem('stellar-v134-combat:'+currentUser.id)||'{}').markers||{}).filter(x=>/^[a-f0-9-]{36}$/i.test(x)).slice(0,16);}catch{}
-  const body=await authedServerFetch('/api/player/save'+(pendingIds.length?'?checkpoint_receipts='+pendingIds.join(','):''));
+  const body=await authedServerFetch('/api/player/save'+(pendingIds.length?'?checkpoint_receipts='+pendingIds.join(','):''),{headers:{'X-Stellar-LocalFirst':'146'}});
   checkSaveSession(sessionKey);
   if(body?.checkpoint_receipts?.length&&typeof window!=='undefined')window.dispatchEvent(new CustomEvent('stellar-checkpoints-confirmed-v134',{detail:{owner:currentUser.id,ids:body.checkpoint_receipts}}));
   if(!body||!Object.hasOwn(body,'state'))throw new Error('Leitura do progresso incompleta.');
-  const read={state:body.state,updated_at:body.updated_at||null,reset_epoch:Number(body.reset_epoch)||0,
+  const read={local_first_v146:body.local_first_v146,state:body.state,updated_at:body.updated_at||null,reset_epoch:Number(body.reset_epoch)||0,
     revision:saveRevision(body.revision)};
   const meta={sessionKey,revision:read.revision,token:body.save_token??null};
   readBaselines.set(read,meta);
@@ -1360,3 +1360,9 @@ export async function warfrontActionV135(payload){return authedServerFetch('/api
 export async function claimPlayerRewardV134(payload){return authedServerFetch('/api/player/rewards/claim',{method:'POST',body:JSON.stringify(payload)});}
 export async function ensurePlayerBoxesV134(){return authedServerFetch('/api/player/collections/ensure',{method:'POST',body:'{}'});}
 export async function collectPlayerDropV134(dropId,requestId,collector='ship'){return authedServerFetch('/api/player/collections/claim',{method:'POST',body:JSON.stringify({drop_id:dropId,request_id:requestId,collector})});}
+
+export async function sendEconomicBatchV146(events){
+ const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),30000);
+ try{return await authedServerFetch('/api/player/economy/batch',{method:'POST',body:JSON.stringify({events}),signal:controller.signal});}
+ finally{clearTimeout(timer);}
+}

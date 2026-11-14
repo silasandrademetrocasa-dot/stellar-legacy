@@ -1,0 +1,36 @@
+{
+  "scenario": "100 laser purchases; synthetic 200ms HTTP latency; Node + fake-indexeddb + PGlite; uncompressed JSON bodies only",
+  "v1451": {
+    "http": 100,
+    "render_supabase_rpc": 200,
+    "json_bytes": 89471,
+    "visible_action": {
+      "mean_ms": 205.8216962100001,
+      "p50_ms": 205.11815300000035,
+      "p95_ms": 216.360983999999
+    }
+  },
+  "v146": {
+    "http": 3,
+    "render_supabase_rpc": 200,
+    "json_bytes": 50480,
+    "visible_action": {
+      "mean_ms": 1.7261843800000134,
+      "p50_ms": 1.2538039999999455,
+      "p95_ms": 4.863382000003185
+    },
+    "background_sync_ms": 1050.6340640000017
+  },
+  "integrity": {
+    "items": 200,
+    "credits": 980000,
+    "expected_items": 200,
+    "expected_credits": 980000
+  },
+  "limits": [
+    "Not Android, FPS, Render or mobile-data measurements",
+    "Excludes TLS, headers, compression, auth/session, farm guard and retries",
+    "Normal purchases still validate in PostgreSQL per event; this benchmark does not establish lower SQL load",
+    "BOX observation messages and shared combat remain additional traffic"
+  ]
+}

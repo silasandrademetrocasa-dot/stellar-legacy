@@ -1,6 +1,6 @@
 {
   "name": "stellar-legacy",
-  "version": "47.7.82",
+  "version": "47.8.0",
   "type": "module",
   "scripts": {
     "start": "node server/index.js",
@@ -10,7 +10,8 @@
     "verify": "npm run check && npm test",
     "pretest": "node scripts/ensure-test-deps.mjs",
     "apk:check": "node scripts/prepare-apk-assets.js && node scripts/verify-apk.js",
-    "test:browser": "node scripts/test-local-first-browser-v145.mjs"
+    "test:browser": "node scripts/test-local-first-browser-v145.mjs",
+    "benchmark:economy": "node scripts/benchmark-economy-v146.mjs docs/local-first-v146/PERFORMANCE.json"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.57.4",
@@ -22,7 +23,7 @@
   "engines": {
     "node": ">=18"
   },
-  "release": "V145.1: compras sem pre-save desnecessário, contexto consolidado e proteção de tentativas",
+  "release": "V146.0: fila econômica persistente, compras e vendas otimistas, coleta visual imediata e reconciliação por lote",
   "devDependencies": {
     "@electric-sql/pglite": "0.3.14",
     "fake-indexeddb": "6.2.4",

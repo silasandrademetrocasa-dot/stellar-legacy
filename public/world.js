@@ -56,6 +56,7 @@ export class SharedUniverseClient {
     };
     ws.onmessage=e=>{if(this.ws!==ws)return;
       this.lastRxAt=Date.now();let msg;try{msg=JSON.parse(e.data);}catch{return;}
+      if(msg.type==='drop_proof_v146'){const p=this.collectionRequestsV138.get(msg.request_id);if(p){this.collectionRequestsV138.delete(msg.request_id);clearTimeout(p.timer);if(msg.ok&&msg.proof)p.resolve(msg.proof);else p.reject(Object.assign(Error('Posição da coleta não observada.'),{code:'COLLECTION_PROOF_PENDING'}));}return;}
       if(msg.type==='collect_drop_result'){const p=this.collectionRequestsV138.get(msg.request_id);if(p){this.collectionRequestsV138.delete(msg.request_id);clearTimeout(p.timer);if(msg.ok&&msg.result?.ok)p.resolve(msg.result);else p.reject(Object.assign(Error(msg.error||'Coleta não confirmada'),{code:msg.code||'COLLECTION_FAILED'}));}return;}
       if(msg.type==='auth_ok'){this.collectionV138=msg.features?.collectionV138===true;
         this.authed=true;this.failedAuthToken=null;this.reconnectAttempts=0;this.status('online');
@@ -93,6 +94,12 @@ export class SharedUniverseClient {
     const entry={};entry.promise=new Promise((resolve,reject)=>{Object.assign(entry,{resolve,reject});entry.timer=setTimeout(()=>{if(this.collectionRequestsV138.get(payload.request_id)!==entry)return;this.collectionRequestsV138.delete(payload.request_id);reject(Object.assign(Error('Confirmação de coleta pendente'),{code:'SOCKET_COLLECTION_TIMEOUT'}));},Math.min(8000,Math.max(3500,this.latency*3+1500)));});
     this.collectionRequestsV138.set(payload.request_id,entry);
     if(!this.send({type:'collect_drop',...payload})){this.collectionRequestsV138.delete(payload.request_id);clearTimeout(entry.timer);entry.reject(Object.assign(Error('Canal de coleta indisponível'),{code:'SOCKET_COLLECTION_UNAVAILABLE'}));}return entry.promise;
+  }
+  observeDropV146(payload){
+    if(!this.isOnline())return Promise.reject(Object.assign(Error('Coleta aguardando conexão.'),{code:'SOCKET_COLLECTION_UNAVAILABLE'}));
+    const prior=this.collectionRequestsV138.get(payload.request_id);if(prior)return prior.promise;
+    const entry={};entry.promise=new Promise((resolve,reject)=>{Object.assign(entry,{resolve,reject});entry.timer=setTimeout(()=>{this.collectionRequestsV138.delete(payload.request_id);reject(Error('COLLECTION_PROOF_PENDING'));},5000);});
+    this.collectionRequestsV138.set(payload.request_id,entry);this.send({type:'observe_drop_v146',...payload});return entry.promise;
   }
   collectOre(entityId,collector='ship'){return this.send({type:'collect_ore',entityId,collector:collector==='pet'?'pet':'ship'});}
   forceEvent(index){return this.send({type:'force_event',index});}

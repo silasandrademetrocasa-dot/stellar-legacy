@@ -55,7 +55,7 @@ const sendSource=extract('async function sendCloudSaveAttemptV106()','// V106 â€
 const installSource=extract('function installEconomyState(','window.stellarEconomySyncBeforeV4776');
 function context(){
  const s=base();let operation=0;
- const c={structuredClone,console,Date,Math,Number,Boolean,JSON,Set,Map,Promise,queueMicrotask,
+ const c={ECONOMY_V146:null,structuredClone,console,Date,Math,Number,Boolean,JSON,Set,Map,Promise,queueMicrotask,
   progress:s,authenticated:true,gameBootstrapRuntime:{generation:1},cloudSaveMutationV105:1,cloudDirty:true,cloudBusy:false,accountResetEpochV478:0,
   equipmentSaveBaselineV109:clone(s),equipmentSaveDesiredV109:null,equipmentSavePendingV109:true,equipmentSubmittedV1342:null,equipmentSaveWarningAtV109:0,saveIntegrityBlockedV106:false,
   saveOperationPendingV119:null,saveOperationIdV119:()=> '00000000-0000-4000-8000-'+String(++operation).padStart(12,'0'),

@@ -19,7 +19,7 @@ const state=()=>({accountOwnerId:uid,adminResetEpoch:0,profile:{callsign:'QA1451
 function captureRoutes(db){
  const source=read('server/index.js'),handlers=new Map();
  const context=createShopContextV1451({getDb:async()=>db,readSave:()=>assert.fail('consolidated route must not use legacy save'),readCatalog:()=>assert.fail('consolidated route must not fetch full live ops'),premiumEligible:eligible});
- const env={Date,JSON,Number,Math,String,Array,Object,Set,structuredClone,randomUUID,console,
+ const env={ECONOMIC_HANDLERS_V146:{},createEconomicBatchV146:()=>()=>{},ECONOMIC_SCOPE_V146:{},COLLECTION_PROOF_V146:{},Date,JSON,Number,Math,String,Array,Object,Set,structuredClone,randomUUID,console,
  app:{post(path,...args){handlers.set(path,args.at(-1));}},asyncRoute:f=>f,requireUser(){},OFFLINE_FARM_GUARD_V484(){},
  SHOP_CONTEXT_V1451:context,requireEliteAdmin:async()=>db,invalidShopArguments,validPurchaseIdV123,interpretPurchaseCommitV123,operationDigestV125,commitEconomyUnifiedV1332,decodeEconomyReceiptV125,replayValidV125,quoteBulkPurchase,applyFormationGrantV1441,
  withEconomySaveRetryV102,tradeRequestIdV1164,findTradeReceiptV1164,rememberTradeReceiptV1164,requestIdValidV125,
@@ -112,7 +112,7 @@ test('actual client purchase callback does not wait for a mission/ammo/cargo sav
  const source=read('public/game.js'),a=source.indexOf('async function applyAuthoritativePurchase('),b=source.indexOf('// ===================== V16.5 DESIGNER',a);
  let requests=0,installs=0,release;
  const env={getUser:()=>({id:uid}),getSessionCredentials:()=>({gameSessionId:'one'}),authenticated:true,offlineFarmWorldLockedV84:()=>false,saveIntegrityBlockedV106:false,
- PURCHASE_FLIGHT_V1451:createPurchaseSingleFlightV1451(),PURCHASE_METRICS_V1451:{start:()=>0,finish(){}},LIVE_PURCHASE_KEYS_V123:{id:()=>randomUUID(),confirmed(){},rejected(){}},
+ ECONOMY_V146:null,PURCHASE_FLIGHT_V1451:createPurchaseSingleFlightV1451(),PURCHASE_METRICS_V1451:{start:()=>0,finish(){}},LIVE_PURCHASE_KEYS_V123:{id:()=>randomUUID(),confirmed(){},rejected(){}},
  liveQuote:()=>({kind:'laser'}),purchaseNeedsPreflightV1451,equipmentSavePendingV109:false,flushCloudSave:()=>assert.fail('purchase must not pre-save missions or ammo'),
  progress:state(),purchaseLiveCatalogOnline:async()=>{requests++;return await new Promise(r=>release=r);},
  installEconomyState:()=>{installs++;},telemetryTrackEconomyTransition(){},cloudDirty:true,combatJournalV134:()=>({pending:true}),AMMO_SELECTION_V1061:{pending:true},pendingCargoV1333:()=>({pending:true}),missionSavePendingV105:true,

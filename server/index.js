@@ -1,3 +1,8 @@
+import {createEconomicScopeV146} from './localfirst-scope-v146.js';
+import {createEconomicBatchV146} from './localfirst-batch-v146.js';
+import {createCollectionProofV146} from './collection-proof-v146.js';
+const ECONOMIC_SCOPE_V146=createEconomicScopeV146();
+const ECONOMIC_HANDLERS_V146={};
 import {createShopContextV1451} from './shop-context-v1451.js';
 import {createSaveDeltaTransportV145} from './save-delta-v145.js';
 import {applyFormationGrantV1441} from './formation-shop-v1441.js';
@@ -64,7 +69,7 @@ import { createSecurityService } from './security-service.js';
 
 const app = express();
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const RELEASE_VERSION = '47.7.82'; // único identificador de release nos endpoints HTTP
+const RELEASE_VERSION = '47.8.0'; // único identificador de release nos endpoints HTTP
 
 function normalizeSupabaseUrl(value = '') {
   let url = String(value || '').trim();
@@ -81,7 +86,9 @@ const SUPABASE_URL = normalizeSupabaseUrl(process.env.SUPABASE_URL || '');
 const SUPABASE_KEY = String(process.env.SUPABASE_PUBLISHABLE_KEY || process.env.SUPABASE_ANON_KEY || '').trim();
 // Chave privilegiada SOMENTE no Render. Nunca retorna no /api/config nem no bundle público.
 const SUPABASE_SERVICE_KEY=String(process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SECRET_KEY || '').trim();
-const eliteAdminClient=SUPABASE_URL&&SUPABASE_SERVICE_KEY?createClient(SUPABASE_URL,SUPABASE_SERVICE_KEY,{auth:{persistSession:false,autoRefreshToken:false},global:{headers:{'x-stellar-collections':'mixed-v142'}}}):null;
+const eliteAdminClientRaw=SUPABASE_URL&&SUPABASE_SERVICE_KEY?createClient(SUPABASE_URL,SUPABASE_SERVICE_KEY,{auth:{persistSession:false,autoRefreshToken:false},global:{headers:{'x-stellar-collections':'mixed-v142'}}}):null;
+const eliteAdminClient=ECONOMIC_SCOPE_V146.wrap(eliteAdminClientRaw);
+const COLLECTION_PROOF_V146=createCollectionProofV146(SUPABASE_SERVICE_KEY);
 const securityService=createSecurityService(eliteAdminClient);
 async function requireEliteAdmin(){if(!eliteAdminClient)throw new Error('Configure SUPABASE_SERVICE_ROLE_KEY no Render para persistir conquistas.');return eliteAdminClient;}
 // O navegador e o token JWT nunca recebem permissao de escrita direta nos saves.
@@ -529,7 +536,7 @@ function applyLiveGrant(state,row,context={}){
   const qty=Math.max(1,Math.floor(Number(grant.qty)||1));
   if(kind==='ship'){state.ownedShips ||= [];if(state.ownedShips.includes(id))throw Object.assign(new Error('Nave já obtida.'),{status:409});state.ownedShips.push(id);return;}
   if(kind==='inventory'){state.inventory ||= {};const equippedExtra=(state.shipLoadout?.extras||[]).includes(id);if(row.kind==='extra'&&((state.inventory[id]||0)>0||equippedExtra))throw Object.assign(new Error('Esse EXTRA já pertence à sua conta.'),{status:409});state.inventory[id]=(Number(state.inventory[id])||0)+qty;return;}
-  if(kind==='drone'){state.drones ||= [];if(state.drones.length>=8)throw Object.assign(new Error('Limite de 8 drones atingido.'),{status:409});state.drones.push({id:`d_${Date.now()}_${randomUUID().slice(0,6)}`,type:id,slots:Array(Math.max(1,Number(grant.slots)||1)).fill(null)});return;}
+  if(kind==='drone'){state.drones ||= [];if(state.drones.length>=8)throw Object.assign(new Error('Limite de 8 drones atingido.'),{status:409});state.drones.push({id:context.requestId?'d_lf_'+context.requestId.replaceAll('-',''):`d_${Date.now()}_${randomUUID().slice(0,6)}`,type:id,slots:Array(Math.max(1,Number(grant.slots)||1)).fill(null)});return;}
   if(kind==='ammo'){state.ammo ||= {};state.ammo[id]=(Number(state.ammo[id])||0)+qty;return;}
   if(kind==='rocket'){state.rockets ||= {};state.rockets[id]=(Number(state.rockets[id])||0)+qty;return;}
   if(kind==='pet_base'){const pet=ensurePetState(state);if(pet.owned)throw Object.assign(new Error('AUX-9 já adquirido.'),{status:409});pet.owned=true;pet.level=Math.max(1,Number(pet.level)||1);pet.laserSlotsUnlocked=Math.max(1,Number(pet.laserSlotsUnlocked)||1);pet.shieldSlotsUnlocked=Math.max(2,Number(pet.shieldSlotsUnlocked)||2);pet.lasers=pet.lasers.length?pet.lasers:[null];pet.shields=pet.shields.length?pet.shields:[null,null];return;}
@@ -587,7 +594,8 @@ function rollGateOnceServer(state,key){
 }
 async function readSaveForWrite(req){
  const service=await requireEliteAdmin();
- const result=await service.rpc('stellar_player_read',{p_user_id:req.user.id,p_token:req.body?.expected_token||null,p_checkpoint_ids:typeof req.query?.checkpoint_receipts==='string'?req.query.checkpoint_receipts.split(',').filter(x=>/^[a-f0-9-]{36}$/i.test(x)).slice(0,16):null});
+ let result=await service.rpc(req.headers?.['x-stellar-localfirst']==='146'?'stellar_localfirst_read_v146':'stellar_player_read',{p_user_id:req.user.id,p_token:req.body?.expected_token||null,p_checkpoint_ids:typeof req.query?.checkpoint_receipts==='string'?req.query.checkpoint_receipts.split(',').filter(x=>/^[a-f0-9-]{36}$/i.test(x)).slice(0,16):null});
+ if(result.error&&['PGRST202','42883'].includes(result.error.code)&&req.headers?.['x-stellar-localfirst']==='146')result=await service.rpc('stellar_player_read',{p_user_id:req.user.id,p_token:req.body?.expected_token||null,p_checkpoint_ids:null});
  if(!result.error)req.playerBaseV134=structuredClone(result.data?.state||null);
  if(req.saveOperationV133&&!result.error){
   const {data:receipt,error}=await service.from('stellar_player_commands_v134').select('request_hash').eq('user_id',req.user.id).eq('command_id',req.saveOperationV133.id).maybeSingle();
@@ -1437,7 +1445,7 @@ app.post('/api/player/coupons/redeem', requireUser, asyncRoute(async (req,res)=>
 
 const SHOP_CONTEXT_V1451=createShopContextV1451({getDb:requireEliteAdmin,readSave:readSaveForWrite,readCatalog:()=>loadLiveOpsSnapshot(true),premiumEligible:premiumDiscountEligible});
 
-app.post('/api/player/purchase', requireUser, asyncRoute(async (req,res)=>{
+app.post('/api/player/purchase', requireUser, asyncRoute(ECONOMIC_HANDLERS_V146.catalog=async (req,res)=>{
   const routeStarted=Date.now();let purchaseContext='legacy';
   const tamper=invalidShopArguments(req.body,['catalog_key','request_id']);
   if(tamper){const result=await securityService.report(req.user.id,tamper,'live_purchase');if(result?.auto_suspended)return res.status(403).json({error:'Conta temporariamente suspensa por violação de integridade.',code:'ACCOUNT_BANNED'});return res.status(400).json({error:'Parâmetros de compra inválidos.',code:tamper.code});}
@@ -1550,7 +1558,7 @@ const playerRewardsV134=createPlayerRewardsV134({db:eliteAdminClient,readPass:()
 app.post('/api/player/warfront/action',requireUser,OFFLINE_FARM_GUARD_V484,asyncRoute(async(req,res)=>res.json(await withPurchaseLock(req.user.id,()=>playerRewardsV134.warfront(req.user.id,req.body)))));
 app.post('/api/player/rewards/claim',requireUser,OFFLINE_FARM_GUARD_V484,asyncRoute(async(req,res)=>res.json(await withPurchaseLock(req.user.id,()=>playerRewardsV134.claim(req.user.id,req.body,req)))));
 app.post('/api/player/collections/ensure',requireUser,asyncRoute(async(req,res)=>res.json(await playerRewardsV134.ensure(req.user.id))));
-app.post('/api/player/collections/claim',requireUser,asyncRoute(async(req,res)=>res.json(await playerRewardsV134.collect(req.user.id,req.body,req.gameSessionId))));
+app.post('/api/player/collections/claim',requireUser,asyncRoute(ECONOMIC_HANDLERS_V146.collection=async(req,res)=>res.json(await playerRewardsV134.collect(req.user.id,req.body,req.gameSessionId,req.collectionArrivalV146))));
 app.post('/api/player/auction/bid',requireUser,asyncRoute(async(req,res)=>{
  const b=req.body||{};
  if(Object.keys(b).some(k=>!['request_id','hour_key','lot_ref','user_bid','lot'].includes(k)))return res.status(400).json({ok:false,code:'BID_ARGUMENTS_INVALID'});
@@ -1594,7 +1602,7 @@ app.post('/api/player/missions/claim',requireUser,OFFLINE_FARM_GUARD_V484,asyncR
  res.set('Cache-Control','no-store').json(result);
 }));
 
-app.post('/api/player/purchase/bulk', requireUser, OFFLINE_FARM_GUARD_V484, asyncRoute(async (req,res)=>{
+app.post('/api/player/purchase/bulk', requireUser, OFFLINE_FARM_GUARD_V484, asyncRoute(ECONOMIC_HANDLERS_V146.bulk=async (req,res)=>{
   const routeStarted=Date.now();let purchaseContext='legacy';
   const tamper=invalidShopArguments(req.body,['catalog_key','quantity','request_id','expected_price','expected_currency','expected_pack_size']);
   if(tamper)return res.status(400).json({error:'Parâmetros de lote inválidos.',code:'INVALID_BULK_ARGUMENTS'});
@@ -1673,11 +1681,11 @@ app.post('/api/player/purchase/bulk', requireUser, OFFLINE_FARM_GUARD_V484, asyn
 
 
 
-app.post('/api/player/economy', requireUser, OFFLINE_FARM_GUARD_V484, asyncRoute(async (req,res)=>{
+app.post('/api/player/economy', requireUser, OFFLINE_FARM_GUARD_V484, asyncRoute(ECONOMIC_HANDLERS_V146.economy=async (req,res)=>{
   const routeStarted=Date.now();let purchaseContext;
   const action=String(req.body?.action||'').trim();
   const payload=(req.body?.payload&&typeof req.body.payload==='object')?req.body.payload:{};
-  const tamper=invalidShopArguments(req.body,['action','payload','request_id'])||invalidShopArguments(payload,['catalog_key','kind','qty','drone_id','item_id','resource_id','id','recipe_id','service_id','protocol','amount','level','request_id']);
+  const tamper=invalidShopArguments(req.body,['action','payload','request_id'])||invalidShopArguments(payload,['catalog_key','kind','qty','drone_id','item_id','resource_id','id','recipe_id','service_id','protocol','amount','level','request_id','expected_sold']);
   if(tamper){const outcome=await securityService.report(req.user.id,tamper,'economy_action');
     if(outcome?.auto_suspended)return res.status(403).json({error:'Conta temporariamente suspensa.',code:'ACCOUNT_BANNED'});
     return res.status(400).json({error:'Parâmetros econômicos não autorizados.',code:tamper.code});}
@@ -1773,6 +1781,7 @@ app.post('/api/player/economy', requireUser, OFFLINE_FARM_GUARD_V484, asyncRoute
       const needFallback=!worldCfg||ids.some(rid=>Number(state.cargo[rid])>0&&rid!=='Xenomit'&&!resourceRows.has(rid));
       const catalogForSale=needFallback?(await loadLiveOpsSnapshot(false).catch(()=>null)):null;
       const quote=quoteCargoSaleV130(state.cargo,{resourceId:id,worldResources:worldCfg?.resources||[],catalog:catalogForSale?.catalog||[]});
+      if(payload.expected_sold&&operationDigestV125('stock',payload.expected_sold)!==operationDigestV125('stock',Object.fromEntries(Object.entries(quote.sold).map(([k,v])=>[k,v.qty]))))throw Object.assign(Error('Estoque mudou; venda não efetuada.'),{status:409,code:'SALE_STOCK_CHANGED'});
       if(quote.total<=0)throw Object.assign(new Error('Sem recursos vendáveis confirmados no servidor. Aguarde o crédito da mineração/coleta e tente novamente.'),{status:409,code:'CARGO_NOT_CONFIRMED'});
       for(const rid of Object.keys(quote.sold))delete state.cargo[rid];
       creditServer(state,quote.total,'credits');info={action,sold:quote.sold,total:quote.total,currency:'credits',remote:!atBase,price_source:worldCfg?'world_runtime':'live_ops_fallback'};
@@ -1832,6 +1841,12 @@ app.post('/api/player/economy', requireUser, OFFLINE_FARM_GUARD_V484, asyncRoute
   },{maxAttempts:3,delay:attempt=>{console.warn('[economy-v102] save em conflito; relendo saldo e recompensas, tentativa',attempt+1);return new Promise(resolve=>setTimeout(resolve,40*attempt));}}));
   res.json({ok:true,...result,server_ms:Date.now()-routeStarted,...(purchaseContext?{purchase_context:purchaseContext}:{})});
 }));
+
+app.post('/api/player/economy/batch',requireUser,asyncRoute(createEconomicBatchV146({
+ getDb:requireEliteAdmin,scope:ECONOMIC_SCOPE_V146,handlers:ECONOMIC_HANDLERS_V146,
+ guard:async req=>offlineFarmEnsureInactiveV484(req.user.id,requireEliteAdmin),
+ collectionArrival:(req,body)=>COLLECTION_PROOF_V146.verify(req.user.id,body)
+})));
 
 app.all('/api/save',(req,res)=>res.status(410).json({ok:false,code:'CLIENT_UPDATE_REQUIRED',current_route:'/api/player/save',error:'Atualize o jogo para usar a rota atual.'}));
 app.all('/api/economy/action',(req,res)=>res.status(410).json({ok:false,code:'CLIENT_UPDATE_REQUIRED',current_route:'/api/player/economy',error:'Atualize o jogo para usar a rota atual.'}));
@@ -2189,7 +2204,7 @@ app.get('/api/player/save', requireUser, asyncRoute(async (req, res) => {
   res.set('Cache-Control','no-store');
   const playerState=data?.state?structuredClone(data.state):null;
   if(playerState)pruneOrphanedDroneLayoutsV118(playerState);
-  res.json({ checkpoint_receipts:data?.checkpoint_receipts||[],save_token:data?.save_token, state: playerState, updated_at: data?.updated_at || null,
+  res.json({local_first_v146:data?.local_first_v146, checkpoint_receipts:data?.checkpoint_receipts||[],save_token:data?.save_token, state: playerState, updated_at: data?.updated_at || null,
     reset_epoch:Number(resetRecord?.epoch)||0,...(revisionV119==null?{}:{revision:revisionV119}) });
 }));
 
@@ -2593,6 +2608,7 @@ const sharedUniverse = attachSharedUniverse(server, {natal:natalServiceV132,
     const {data,error}=await sb.rpc('stellar_record_war_defense',{p_map_id:mapId,p_node_id:nodeId,p_faction:faction,p_actor:actorUserId});
     if(error)throw new Error(error.message);return data===true;
   },
+  collectionProof:(uid,session,body,arrival)=>COLLECTION_PROOF_V146.issue(uid,session,body,arrival),
   collectDrop:async(uid,body,sessionId,arrival)=>playerRewardsV134.collect(uid,body,sessionId,arrival),
   grantNpcReward:async(userId,killKey,npcType,baseCredits,baseStl,ownerEligible=false)=>{
     await offlineFarmEnsureInactiveV484(userId,requireEliteAdmin);

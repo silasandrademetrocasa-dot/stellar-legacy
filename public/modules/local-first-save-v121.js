@@ -4,8 +4,8 @@
  * IndexedDB persists one canonical client state, 3 recovery snapshots and outbox.
  */
 export const STELLAR_LOCAL_DB_V121='stellar-legacy-local-v121';
-export const STELLAR_LOCAL_SCHEMA_V121=1;
-const STORE='saves', CHECKS='checkpoints', OUTBOX='outbox';
+export const STELLAR_LOCAL_SCHEMA_V121=2;
+const STORE='saves', CHECKS='checkpoints', OUTBOX='outbox', META='economic-meta-v146';
 const OWNER_RE=/^[0-9a-f-]{8,64}$/i;
 const PRIVATE_FIELDS=new Set(['access_token','refresh_token','password','service_role','secret_key','api_key']);
 
@@ -36,12 +36,15 @@ export async function openLocalSaveV121({indexedDBFactory=globalThis.indexedDB,n
  const req=indexedDBFactory.open(name,STELLAR_LOCAL_SCHEMA_V121);
  req.onupgradeneeded=()=>{
   const db=req.result;
+  if(!db.objectStoreNames.contains(META))db.createObjectStore(META,{keyPath:'owner'});
   if(!db.objectStoreNames.contains(STORE))db.createObjectStore(STORE,{keyPath:'owner'});
   if(!db.objectStoreNames.contains(CHECKS))db.createObjectStore(CHECKS,{keyPath:'key'});
   if(!db.objectStoreNames.contains(OUTBOX)){
     const store=db.createObjectStore(OUTBOX,{keyPath:'id'});
     store.createIndex('owner','owner',{unique:false});
   }
+  const outbox=req.transaction.objectStore(OUTBOX);
+  if(!outbox.indexNames.contains('ownerStatus'))outbox.createIndex('ownerStatus',['owner','status'],{unique:false});
  };
  const db=await onRequest(req);
  db.onversionchange=()=>db.close();
@@ -77,7 +80,7 @@ export async function openLocalSaveV121({indexedDBFactory=globalThis.indexedDB,n
    // Validate a command BEFORE opening the transaction: an invalid intent must never persist a save.
    const preparedIntent=intent?normalizeLocalIntentV121(owner,intent,0,Date.now()):null;
    const now=Date.now();
-   const tx=db.transaction([STORE,CHECKS,OUTBOX],'readwrite');
+   const tx=db.transaction([STORE,CHECKS,OUTBOX,META],'readwrite');
    const done=onTransaction(tx);
    const saves=tx.objectStore(STORE), checks=tx.objectStore(CHECKS), outbox=tx.objectStore(OUTBOX);
    let revision=0;
@@ -103,22 +106,56 @@ export async function openLocalSaveV121({indexedDBFactory=globalThis.indexedDB,n
      if(preparedIntent){
        // Only one pending hangar build per owner is meaningful. Preserve older
        // history as superseded (never ACK it as a server-confirmed operation).
-       outbox.index('owner').getAll(owner).onsuccess=e=>{
-         for(const priorIntent of (e.target.result||[])){
+       const append=e=>{
+         for(const priorIntent of (e?.target?.result||[])){
            if(preparedIntent.module==='hangar'&&priorIntent.module==='hangar'&&priorIntent.status==='pending'&&priorIntent.id!==preparedIntent.id)
              outbox.put({...priorIntent,status:'superseded',supersededAt:now});
          }
          outbox.get(preparedIntent.id).onsuccess=event=>{
            const existing=event.target.result;
            if(existing){
-             if(existing.owner!==owner||existing.module!==preparedIntent.module||existing.action!==preparedIntent.action||JSON.stringify(existing.payload)!==JSON.stringify(preparedIntent.payload)){tx.abort();}
+             const original=structuredClone(existing.payload);if(existing.module==='economy-v146'){delete original.event.device;delete original.event.sequence;}
+             const requested=structuredClone(preparedIntent.payload);if(preparedIntent.module==='economy-v146'){delete requested.event.device;delete requested.event.sequence;}
+             if(existing.owner!==owner||existing.module!==preparedIntent.module||existing.action!==preparedIntent.action||JSON.stringify(original)!==JSON.stringify(requested)){tx.abort();}
+             else if(existing.module==='economy-v146')preparedIntent.payload.event=existing.payload.event;
+           }else if(preparedIntent.module==='economy-v146'){
+             const meta=tx.objectStore(META);meta.get(owner).onsuccess=e=>{
+               const prior=e.target.result||{owner,device:crypto.randomUUID(),sequence:0};
+               const next={...prior,sequence:prior.sequence+1};
+               preparedIntent.payload.event={...preparedIntent.payload.event,device:prior.device,sequence:next.sequence};
+               meta.put(next);outbox.add({...preparedIntent,revision,sequence:next.sequence,createdAt:now});
+             };
            }else outbox.add({...preparedIntent,revision,sequence:revision,createdAt:now});
          };
        };
+       if(preparedIntent.module==='hangar')outbox.index('ownerStatus').getAll([owner,'pending']).onsuccess=append;else append();
      }
    };
    await done;
-   return {owner,revision,hash};
+   return {owner,revision,hash,event:preparedIntent?.payload?.event};
+  },
+  async economicPending(owner){
+   owner=ensureOwner(owner);
+   const rows=await onRequest(db.transaction(OUTBOX,'readonly').objectStore(OUTBOX).index('ownerStatus').getAll([owner,'pending']));
+   return rows.filter(r=>r.module==='economy-v146'&&r.status==='pending').map(r=>r.payload.event).sort((a,b)=>a.sequence-b.sequence);
+  },
+  async attachEconomicProof(owner,id,proof){
+   owner=ensureOwner(owner);const tx=db.transaction(OUTBOX,'readwrite'),done=onTransaction(tx),store=tx.objectStore(OUTBOX);
+   store.get(id).onsuccess=e=>{const row=e.target.result;if(!row||row.owner!==owner||row.status!=='pending'||row.payload?.event?.kind!=='collection'||row.payload.event.body.proof)return;row.payload.event.body.proof=String(proof);store.put(row);};await done;
+  },
+  async settleEconomic(owner,results,state){
+   owner=ensureOwner(owner);const safe=stablePublicSnapshotV121(state),hash=await hashLocalStateV121(safe);
+   if(safe.accountOwnerId!==owner)throw Error('LOCAL_SAVE_OWNER_MISMATCH');
+   const tx=db.transaction([STORE,OUTBOX],'readwrite'),done=onTransaction(tx),saves=tx.objectStore(STORE),box=tx.objectStore(OUTBOX);
+   saves.get(owner).onsuccess=e=>saves.put({owner,state:safe,hash,revision:Number(e.target.result?.revision||0)+1,createdAt:Date.now(),resetEpoch:Number(safe.adminResetEpoch)||0});
+   for(const result of results){
+    box.get(result.id).onsuccess=e=>{
+     const row=e.target.result,ev=row?.payload?.event;
+     if(!row||row.owner!==owner||ev?.device!==result.device||ev.sequence!==result.sequence||!['confirmed','rejected'].includes(result.status)){tx.abort();return;}
+     box.put({...row,status:result.status,receipt:result.receipt,code:result.code,ackedAt:Date.now()});
+    };
+   }
+   await done;
   },
   async pending(owner,limit=50){
     owner=ensureOwner(owner);

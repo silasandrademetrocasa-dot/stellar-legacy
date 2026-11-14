@@ -1,0 +1,52 @@
+cloud save Error: lost
+    at c.saveCloudSave (file:///workspace/scratch/b367560527f0/work/stellar-legacy-main/tests/v1342-hangar-ack.test.mjs:89:246)
+    at Object.sendCloudSaveAttemptV106 (evalmachine.<anonymous>:88:24)
+    at TestContext.<anonymous> (file:///workspace/scratch/b367560527f0/work/stellar-legacy-main/tests/v1342-hangar-ack.test.mjs:91:23)
+    at Test.runInAsyncScope (node:async_hooks:227:14)
+    at Test.run (node:internal/test_runner/test:1402:25)
+    at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+    at Test.postRun (node:internal/test_runner/test:1542:19)
+    at Test.run (node:internal/test_runner/test:1467:12)
+    at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+  status: 504
+}
+✔ V134.2: delayed ACK of first equip keeps the second edit, balances and shields (11.984848ms)
+✔ V134.2: confirmed layouts compare semantically after server normalization (0.35592ms)
+✔ V134.2: server inventory grant is retained, missing free stock and invented items rejected (2.669147ms)
+✔ V134.2: CONF, drones and AUX newer than ACK survive with an exact submitted receipt (1.77477ms)
+✔ V134.2: equipment arrays bypass generic ACK merge while combat changes are retained (1.324055ms)
+✔ V134.2: actual checkpoint sender preserves rapid edits across the first ACK and confirms the next (7.549118ms)
+✔ V134.2: lost HTTP ACK plus readback keeps newer edits for the next save (4.403118ms)
+✔ V134.2: reopen recovers pending equipment from durable submitted receipt, without local money (1.642537ms)
+✔ V134.2: stale economy snapshots cannot clear pending hangar or advance its base (3.029149ms)
+✔ V145.1 actual purchase handlers: 100 catalog purchases and 100 bulk purchases need two RPCs each and never charge a replay twice (3309.78445ms)
+✔ context current price/Premium; roles denied; invoker helper and rollback preserve save and receipts (1067.189042ms)
+✔ parallel fallback has one receipt read, does not cache finances, and recovers receipts with catalog/Premium unavailable (1.390629ms)
+✔ non-missing helper errors fail closed and never start legacy requests (0.453021ms)
+✔ preflight only on ownership-changing purchases with unsaved gear; single flight consolidates rapid taps and releases after failure (0.428255ms)
+✔ buying with pending ammo consumption does not need a pre-save or refund spent ammo (0.651168ms)
+✔ actual client purchase callback does not wait for a mission/ammo/cargo save; rapid taps send one request and apply a receipt once (4.205699ms)
+✔ pending hangar layout survives purchased inventory without a pre-save (2.828359ms)
+✔ actual auto-buy handler uses consolidated context plus commit, checks base/CPU and remains idempotent (1017.902283ms)
+✔ V146 actual handlers + PostgreSQL: 100 purchases in three HTTP batches, lost ACK, replay and competing device (2665.716949ms)
+✔ V146 changed quote, ADM reset and unauthorized SQL: rejection advances sequence without debit; next valid event survives (960.664627ms)
+✔ V146 IndexedDB manager: offline 100 purchases, reopen, lost server ACK, current cursor avoids double projection (1461.743293ms)
+✔ V146 isolated economic scope never captures concurrent NPC or another account commits (0.476629ms)
+✔ V146 signed BOX observation preserves collection reach after movement; forged/cross-account/repeated identity rejected (1.302472ms)
+✔ V146 recovery projector skips terminal cursor and preserves unrelated progress after one rejection (0.432152ms)
+✔ V146 500 actual collection handlers in 13 batches: signed observation, lost replies, no duplicate reward; NPC rewards keep their authority (5905.479191ms)
+✔ V146 local ACK failure retains event and replay restores one purchase; no background polling with empty queue (1261.555371ms)
+✔ V146 rejected provisional laser preserves legitimate pending hangar edits and mission completion (2.004872ms)
+✔ V146 pending ownership rejection removes only its drone and returns legitimate slots (0.645496ms)
+✔ V146 bulk, AUTO BUY and sales use actual handlers; quote mismatch never creates sale money (1474.780488ms)
+✔ V146 rollback preserves receipts and enables drain; forged cursor on insert is discarded (1338.328093ms)
+✔ V146 actual game purchase callback updates durable local stock without HTTP, including 100 consecutive taps (127.959363ms)
+✔ V146 two device connections share dense local sequence; tab lock contention retries; drained tab reads canonical once (1056.595714ms)
+ℹ tests 32
+ℹ suites 0
+ℹ pass 32
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 16627.002231

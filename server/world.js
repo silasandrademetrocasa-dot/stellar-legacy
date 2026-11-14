@@ -1198,7 +1198,7 @@ class Room {
   }
 }
 
-export function attachSharedUniverse(server,{authenticate,authorizeJoin,recordSecurityViolation,loadLiveOps,loadBattleGroup,loadNpcConfig,loadWorldConfig,loadPlayerEventProgress,recordPlayerEventProgress,loadWarfront,persistCapture,persistRelayCapture,damageRelay,readRelayLoadout,readAstralCombatProfile,loadActorClan,recordRelayPve,recordEliteEvent,recordWarDefense,loadWorldDirectives,grantNpcReward,grantOreReward,collectDrop,loadWarbotConfig,natal,issueLoot}){
+export function attachSharedUniverse(server,{authenticate,authorizeJoin,recordSecurityViolation,loadLiveOps,loadBattleGroup,loadNpcConfig,loadWorldConfig,loadPlayerEventProgress,recordPlayerEventProgress,loadWarfront,persistCapture,persistRelayCapture,damageRelay,readRelayLoadout,readAstralCombatProfile,loadActorClan,recordRelayPve,recordEliteEvent,recordWarDefense,loadWorldDirectives,grantNpcReward,grantOreReward,collectDrop,collectionProof,loadWarbotConfig,natal,issueLoot}){
   const wss=new WebSocketServer({
     server,
     path:'/ws',
@@ -1473,6 +1473,15 @@ export function attachSharedUniverse(server,{authenticate,authorizeJoin,recordSe
       if(msg.type==='natal_fire')return await ws.room&&natalSocket(ws.room,ws,msg,safeJsonSend);
       if(msg.type==='npc_damage')return await ws.room?.handleDamage(ws,msg);
       if(msg.type==='relay_attack')return await ws.room?.handleRelayAttack(ws,msg);
+      if(msg.type==='observe_drop_v146'){
+        const request_id=String(msg.request_id||'');
+        if(!/^[a-f0-9-]{36}$/i.test(request_id)||!/^[A-Za-z0-9_:-]{8,180}$/.test(String(msg.drop_id||''))||!['ship','pet'].includes(msg.collector||'ship'))return safeJsonSend(ws,{type:'drop_proof_v146',request_id,ok:false});
+        const window=Math.floor(nowMs()/1000);if(ws.proofWindowV146!==window){ws.proofWindowV146=window;ws.proofCountV146=0;}
+        if(++ws.proofCountV146>30)return safeJsonSend(ws,{type:'drop_proof_v146',request_id,ok:false});
+        if(!collectionProof||!ws.room||!ws.player||!currentRoomActorV1173(ws,ws.room.players))return safeJsonSend(ws,{type:'drop_proof_v146',request_id,ok:false});
+        try{const proof=collectionProof(ws.identity.user.id,ws.identity.gameSessionId,{drop_id:msg.drop_id,collector:msg.collector},{room:ws.room,player:structuredClone(ws.player)});safeJsonSend(ws,{type:'drop_proof_v146',request_id,ok:true,proof});}
+        catch{safeJsonSend(ws,{type:'drop_proof_v146',request_id,ok:false});}return;
+      }
       if(msg.type==='collect_drop'){
         const request_id=String(msg.request_id||'');
         if(!collectDrop||!ws.room||!ws.player||!currentRoomActorV1173(ws,ws.room.players))return safeJsonSend(ws,{type:'collect_drop_result',request_id,ok:false,code:'COLLECTION_MAP_MISMATCH'});
