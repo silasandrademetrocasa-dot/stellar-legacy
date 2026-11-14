@@ -6,13 +6,13 @@
 <meta content="width=device-width,initial-scale=1,user-scalable=no,viewport-fit=cover" name="viewport"/>
 <meta content="#030816" name="theme-color"/>
 <title>Stellar Legacy</title>
-<script src="/modules/native-assets-bootstrap.js?v=47.8.0"></script>
-<link rel="manifest" href="/manifest.webmanifest?v=47.8.0"/>
+<script src="/modules/native-assets-bootstrap.js?v=47.8.1"></script>
+<link rel="manifest" href="/manifest.webmanifest?v=47.8.1"/>
 <link rel="icon" type="image/png" href="/icons/stellar-192.png"/>
 <link rel="preload" as="image" href="/assets/v141/loading/natal-vertical.webp" media="(orientation:portrait)" fetchpriority="high"/>
 <link rel="preload" as="image" href="/assets/v141/loading/natal-horizontal.webp" media="(orientation:landscape)" fetchpriority="high"/>
 <link rel="apple-touch-icon" href="/icons/stellar-192.png"/>
-<link href="/style.css?v=47.8.0" rel="stylesheet"/>
+<link href="/style.css?v=47.8.1" rel="stylesheet"/>
 <link href="/modules/aux-workbench-v1091.css?v=109.1" rel="stylesheet"/>
 <link href="/modules/hangar-workbench-v1092.css?v=109.2" rel="stylesheet"/>
 <link href="/modules/aux-advanced-protocols-v110.css?v=110" rel="stylesheet"/>
@@ -20,15 +20,15 @@
   <link rel="stylesheet" href="/modules/topbar-navigation-v481.css?v=48.1.0">
   <link rel="stylesheet" href="/modules/pilot-ship-hud-v482.css?v=48.2.6">
   <link rel="stylesheet" href="/modules/route-map-layout-v4825.css?v=48.2.5">
-  <link rel="stylesheet" href="/modules/stellar-premium-ui-v55.css?v=47.8.0">
-  <link rel="stylesheet" href="/modules/stellar-premium-ui-v56.css?v=47.8.0">
-  <link rel="stylesheet" href="/modules/stellar-admin-v57.css?v=47.8.0">
-  <link rel="stylesheet" href="/modules/stellar-refinement-v58.css?v=47.8.0">
-  <link rel="stylesheet" href="/modules/stellar-refinement-v59.css?v=47.8.0">
-  <link rel="stylesheet" href="/modules/stellar-showcase-v61.css?v=47.8.0">
-  <link rel="stylesheet" href="/modules/stellar-fleet-v62.css?v=47.8.0">
-<link rel="stylesheet" href="/natal-v132.css?v=47.8.0">
-<link rel="stylesheet" href="/modules/combat-hud-v144.css?v=47.8.0">
+  <link rel="stylesheet" href="/modules/stellar-premium-ui-v55.css?v=47.8.1">
+  <link rel="stylesheet" href="/modules/stellar-premium-ui-v56.css?v=47.8.1">
+  <link rel="stylesheet" href="/modules/stellar-admin-v57.css?v=47.8.1">
+  <link rel="stylesheet" href="/modules/stellar-refinement-v58.css?v=47.8.1">
+  <link rel="stylesheet" href="/modules/stellar-refinement-v59.css?v=47.8.1">
+  <link rel="stylesheet" href="/modules/stellar-showcase-v61.css?v=47.8.1">
+  <link rel="stylesheet" href="/modules/stellar-fleet-v62.css?v=47.8.1">
+<link rel="stylesheet" href="/natal-v132.css?v=47.8.1">
+<link rel="stylesheet" href="/modules/combat-hud-v144.css?v=47.8.1">
 </head>
 <body>
 <div class="stellar-boot-splash" id="stellarBootSplash" role="status" aria-label="Preparando Stellar Legacy">
@@ -342,7 +342,15 @@
 </div>
 
 <button class="portal-prompt hidden" id="portalPrompt" type="button"><span class="portal-icon">↯</span><span><b>JUMP / SALTAR</b><small id="portalPromptMap">—</small></span></button>
-<button id="baseModulePromptV140" class="base-module-prompt-v140 hidden" type="button" aria-live="polite"></button>
+<div id="baseModulePromptV140" class="base-module-prompt-v140 hidden" role="group" aria-label="Módulos da base">
+ <div class="base-actions-v1461">
+  <button type="button" data-base-module="missions">MISSÕES</button>
+  <button type="button" data-base-module="commerce">COMÉRCIO</button>
+  <button type="button" data-base-module="hangar">HANGAR</button>
+  <button type="button" data-base-module="portals">PORTAIS ASTRAIS</button>
+ </div>
+ <button type="button" data-base-open class="hidden" aria-live="polite"></button>
+</div>
 
 <div class="jump-transition hidden" id="jumpTransition">
 <div class="warp-stars"></div>
@@ -1256,10 +1264,10 @@
 </div>
 <div class="perf-diag-overlay hidden" id="perfDiagOverlay" aria-live="off" aria-label="Contador de FPS local"><b id="perfDiagHudFps">FPS —</b><small id="perfDiagHudStutter">P95 —</small></div>
 <script type="module" src="/modules/android-daily-alerts-v108.js?v=108.0.0"></script>
-<script src="/game.js?v=47.8.0-v108-cumulative-boot-safe-v1092-fleet-workbench-v112-autopilot-smart-v113-combat-progression-v1131-fragment-forge-v115-competitive-performance-v1161-autopilot-base-watchdog-v1163-polish-v1164-commerce-v1165-farm-error-humanized-v1167-mobile-ws-v11731-halo-resale-v118-single-save-v1182-auction-atomic-v119-save-core-v1192-cumulative-v1211-localfirst-v122-batched-v126-ap-hangar-v131-save-sync-v1312-messages-v132-natal-v1321-atlas-v133-save-v1331-mission-v1332-gateway-v1333-cargo" type="module"></script>
-<script src="/modules/stellar-admin-v57.js?v=47.8.0" type="module"></script>
-<script src="/modules/stellar-admin-c-v100.js?v=47.8.0" type="module"></script>
-<script type="module" src="/modules/astral-rewards-v381.js?v=47.8.0"></script>
+<script src="/game.js?v=47.8.1-v108-cumulative-boot-safe-v1092-fleet-workbench-v112-autopilot-smart-v113-combat-progression-v1131-fragment-forge-v115-competitive-performance-v1161-autopilot-base-watchdog-v1163-polish-v1164-commerce-v1165-farm-error-humanized-v1167-mobile-ws-v11731-halo-resale-v118-single-save-v1182-auction-atomic-v119-save-core-v1192-cumulative-v1211-localfirst-v122-batched-v126-ap-hangar-v131-save-sync-v1312-messages-v132-natal-v1321-atlas-v133-save-v1331-mission-v1332-gateway-v1333-cargo" type="module"></script>
+<script src="/modules/stellar-admin-v57.js?v=47.8.1" type="module"></script>
+<script src="/modules/stellar-admin-c-v100.js?v=47.8.1" type="module"></script>
+<script type="module" src="/modules/astral-rewards-v381.js?v=47.8.1"></script>
 <!-- V106.8C A/B: import do Universo Estelar removido do bootstrap. -->
   <script type="module" src="/modules/unified-expansion-lazy-v107.js?v=116.3"></script>
   <script type="module" src="/modules/topbar-navigation-v481.js?v=48.1.0-universe-lazy-v107"></script>

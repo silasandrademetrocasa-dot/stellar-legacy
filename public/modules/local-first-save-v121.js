@@ -141,7 +141,8 @@ export async function openLocalSaveV121({indexedDBFactory=globalThis.indexedDB,n
   },
   async attachEconomicProof(owner,id,proof){
    owner=ensureOwner(owner);const tx=db.transaction(OUTBOX,'readwrite'),done=onTransaction(tx),store=tx.objectStore(OUTBOX);
-   store.get(id).onsuccess=e=>{const row=e.target.result;if(!row||row.owner!==owner||row.status!=='pending'||row.payload?.event?.kind!=='collection'||row.payload.event.body.proof)return;row.payload.event.body.proof=String(proof);store.put(row);};await done;
+   let persisted=null;
+   store.get(id).onsuccess=e=>{const row=e.target.result;if(!row||row.owner!==owner||row.payload?.event?.kind!=='collection')return;if(row.payload.event.body.proof){persisted=row.payload.event.body.proof;return;}if(row.status!=='pending')return;row.payload.event.body.proof=String(proof);persisted=row.payload.event.body.proof;store.put(row);};await done;return persisted;
   },
   async settleEconomic(owner,results,state){
    owner=ensureOwner(owner);const safe=stablePublicSnapshotV121(state),hash=await hashLocalStateV121(safe);

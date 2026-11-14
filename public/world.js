@@ -99,7 +99,7 @@ export class SharedUniverseClient {
     if(!this.isOnline())return Promise.reject(Object.assign(Error('Coleta aguardando conexão.'),{code:'SOCKET_COLLECTION_UNAVAILABLE'}));
     const prior=this.collectionRequestsV138.get(payload.request_id);if(prior)return prior.promise;
     const entry={};entry.promise=new Promise((resolve,reject)=>{Object.assign(entry,{resolve,reject});entry.timer=setTimeout(()=>{this.collectionRequestsV138.delete(payload.request_id);reject(Error('COLLECTION_PROOF_PENDING'));},5000);});
-    this.collectionRequestsV138.set(payload.request_id,entry);this.send({type:'observe_drop_v146',...payload});return entry.promise;
+    this.collectionRequestsV138.set(payload.request_id,entry);if(!this.send({type:'observe_drop_v146',...payload})){this.collectionRequestsV138.delete(payload.request_id);clearTimeout(entry.timer);entry.reject(Error('SOCKET_COLLECTION_UNAVAILABLE'));}return entry.promise;
   }
   collectOre(entityId,collector='ship'){return this.send({type:'collect_ore',entityId,collector:collector==='pet'?'pet':'ship'});}
   forceEvent(index){return this.send({type:'force_event',index});}

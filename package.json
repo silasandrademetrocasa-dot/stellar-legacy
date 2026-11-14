@@ -1,6 +1,6 @@
 {
   "name": "stellar-legacy",
-  "version": "47.8.0",
+  "version": "47.8.1",
   "type": "module",
   "scripts": {
     "start": "node server/index.js",
@@ -23,7 +23,7 @@
   "engines": {
     "node": ">=18"
   },
-  "release": "V146.0: fila econômica persistente, compras e vendas otimistas, coleta visual imediata e reconciliação por lote",
+  "release": "V146.1: contato de BOX antes do disco, recuperação de posição/HP e atalhos da base acima da nave",
   "devDependencies": {
     "@electric-sql/pglite": "0.3.14",
     "fake-indexeddb": "6.2.4",

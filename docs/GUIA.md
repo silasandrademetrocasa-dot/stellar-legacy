@@ -1,3 +1,7 @@
+# Stellar Legacy — V146.1 (47.8.1)
+
+Instruções atuais: [correções de coleta, login e base](correcoes-v1461/LEIA_PRIMEIRO.md). O material abaixo é histórico de versões anteriores.
+
 # Stellar Legacy — V146.0 (47.8.0)
 
 Leia primeiro [a entrega V146](local-first-v146/LEIA_PRIMEIRO.md). O texto abaixo é histórico da V144.1 e não substitui as instruções atuais.

@@ -1,0 +1,7 @@
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+
+> stellar-legacy@47.8.1 apk:check
+> node scripts/prepare-apk-assets.js && node scripts/verify-apk.js
+
+✅ APK local: 1361 arquivos (119.13 MiB), 1103 imagens; inventario: /workspace/scratch/b367560527f0/work/stellar-legacy-main/android/build/reports/stellar-assets-manifest.json
+✅ APK auditado: 1361 arquivos, 1103 imagens, 43 naves, 40 NPCs, 212 referências V136 e 40 visuais V137 verificados. API e WSS continuam remotas.

@@ -1,0 +1,164 @@
+{
+  "release": "V146.1 / 47.8.1",
+  "compared_to": "V146.0 / 47.8.0",
+  "changes": [
+    {
+      "file": "docs/GUIA.md",
+      "bytes": 6218,
+      "sha256": "43c257e7634dce8bcfd4a495beca2a1c0f3dd33a6b5997537e3cf31acd68735d"
+    },
+    {
+      "file": "docs/correcoes-v1461/LEIA_PRIMEIRO.md",
+      "bytes": 7721,
+      "sha256": "4363f9a398c8b477e4384553b0711b6177c595cb40e01b8775696dfeffd024bf"
+    },
+    {
+      "file": "docs/correcoes-v1461/apk-check.log",
+      "bytes": 527,
+      "sha256": "a8b3df56ea0e9a8f92aec31dd09aca650efd33e1139529db3db40e644883d925"
+    },
+    {
+      "file": "docs/correcoes-v1461/targeted.log",
+      "bytes": 3115,
+      "sha256": "538ef99fcd96dff45dff36e85c692761b5d4e6a6585a7cc5582f6a93194eed7c"
+    },
+    {
+      "file": "docs/correcoes-v1461/verify.log",
+      "bytes": 30340,
+      "sha256": "873dd394a1f759771a9ad2c5bac69017ac6b4d337c68d9f48f0932487b6d005d"
+    },
+    {
+      "file": "package-lock.json",
+      "bytes": 49969,
+      "sha256": "f0e6486f5407dd03e5e40b77ada9060f2b8ca77941b1ce6b35095f0ee3529907"
+    },
+    {
+      "file": "package.json",
+      "bytes": 1106,
+      "sha256": "e129b9b3fe465cad657f0e8a23583082f9b0d8d26ba884c6eb01b4dfc56a1499"
+    },
+    {
+      "file": "public/api.js",
+      "bytes": 70939,
+      "sha256": "19346c590fe50659f615fa4242b4bf7d83da720397893002637fc646bb401fbf"
+    },
+    {
+      "file": "public/game.js",
+      "bytes": 1312751,
+      "sha256": "d71843eeb81bededf792c3bd3c914428f66417e0fca8d9348523bc542f837983"
+    },
+    {
+      "file": "public/index.html",
+      "bytes": 93945,
+      "sha256": "0abdb2924a53d51a4c98e38642bea7187018eb40e26b1594d31e828b0e929961"
+    },
+    {
+      "file": "public/modules/astral-combat-admin-v431.js",
+      "bytes": 2259,
+      "sha256": "2f4a36d7976e3bafef97dd1405cb545bbdd854aaa0f18d1d89a449560576accc"
+    },
+    {
+      "file": "public/modules/astral-operations-v435.js",
+      "bytes": 4785,
+      "sha256": "710559ba55d4597bf2e761bfa52d1fa0b6ccbd79c727ee251491c5554d729a82"
+    },
+    {
+      "file": "public/modules/astral-rewards-v381.js",
+      "bytes": 9149,
+      "sha256": "c848087b2fb2cd71fa4992027511a59db41d8a51820aad833f1b17ccb14b1eb5"
+    },
+    {
+      "file": "public/modules/base-actions-v1461.js",
+      "bytes": 493,
+      "sha256": "a953b393bdc658f67de524621d6c46116012e47bfbddcf246c6bd47c2c6e9918"
+    },
+    {
+      "file": "public/modules/christmas-ui-v132.js",
+      "bytes": 10318,
+      "sha256": "fb951ec7af0587b99c6da00051b763cb7197ec64fc6b4c4833509b7419dcf2e0"
+    },
+    {
+      "file": "public/modules/collection-contact-v1461.js",
+      "bytes": 927,
+      "sha256": "ea421d0e6ca248ec81339f05758bc0662b35fdc3e7710ff810b42cda9a8ae846"
+    },
+    {
+      "file": "public/modules/economic-manager-v146.js",
+      "bytes": 7651,
+      "sha256": "cf6b12dddd9e8732335014eff902591040bb3d4d0c81cb3ac0f7a1a2b382c58b"
+    },
+    {
+      "file": "public/modules/frontier-audit-v450.js",
+      "bytes": 2226,
+      "sha256": "43ee6c5f82c11a80c1da5e36bed4c0ed019eab7fef415b6fc560e9eca66e5d67"
+    },
+    {
+      "file": "public/modules/galactic-balance-panel-v460.js",
+      "bytes": 1305,
+      "sha256": "68c7bf50ff182cca2a3ec4be4f735ce716de28d3280a2c0b2264396e6571ee4a"
+    },
+    {
+      "file": "public/modules/local-first-save-v121.js",
+      "bytes": 12474,
+      "sha256": "637628a33512cda4305ff7ff5afda5fc3e2ff266deb6bade3c89fa5e7f8adc8a"
+    },
+    {
+      "file": "public/modules/stage-a-v423.js",
+      "bytes": 5785,
+      "sha256": "57c72f852dd8d14d9c54299b26f059870b58e24432d7947e8e4e78ee50a1fef1"
+    },
+    {
+      "file": "public/modules/stage-b-v426.js",
+      "bytes": 9698,
+      "sha256": "4d3f83009911e855829f799dfe8a142c0f118e5280406ccfa88b0ae6ee319b4b"
+    },
+    {
+      "file": "public/modules/stellar-admin-c-v100.js",
+      "bytes": 4876,
+      "sha256": "3f27003f0f35980480fd79994d4b67cd00bbeea4cf13cd726452c422fb0d05ba"
+    },
+    {
+      "file": "public/modules/unified-expansion-v42.js",
+      "bytes": 14841,
+      "sha256": "6f88ac37432767e470e5e95ac03073f20bd116def7d58c916af720d2f3259d4e"
+    },
+    {
+      "file": "public/style.css",
+      "bytes": 478368,
+      "sha256": "1b42e754043f30b1474ff44d6be73a64c4f4295b7e3f73f0be3855648974a65a"
+    },
+    {
+      "file": "public/world.js",
+      "bytes": 9204,
+      "sha256": "d494fdaa4a00754245555191e8c84a877dc010e53a7c121f0dce7a96c594d14d"
+    },
+    {
+      "file": "server/collection-contact-v1461.js",
+      "bytes": 934,
+      "sha256": "374f5fd70c33c55f4958da3001144e8e74d9ae95ff73e9ce3509ebd3a5057f16"
+    },
+    {
+      "file": "server/collection-proof-v146.js",
+      "bytes": 2518,
+      "sha256": "47fa979985e632e730f2ad23cbb05d8706653d08b0dd0cb5edae4d692fa28e53"
+    },
+    {
+      "file": "server/index.js",
+      "bytes": 222734,
+      "sha256": "ce9f27eb8ecf3553bb4fd3cdd9e295950dae962c64d0bbde3a79d7abe38df035"
+    },
+    {
+      "file": "server/world.js",
+      "bytes": 120324,
+      "sha256": "e53fe9ad0a7abc7c2f8613c26ba38132f563bd0ec809dfddec423f3fbd5311c5"
+    },
+    {
+      "file": "tests/v1461-contact-bootstrap-base.test.mjs",
+      "bytes": 16042,
+      "sha256": "830ac1df3f2c54028bf94815dce42b85161658bfe9d949256ccba663b82aa720"
+    }
+  ],
+  "images_verified_unchanged": 1104,
+  "new_sql_required": false,
+  "delete": []
+}

@@ -1,3 +1,4 @@
+import {collectionContactV1461} from './collection-contact-v1461.js';
 import {dronePresentation} from './drone-presentation-v144.js';
 import {natalRoomTick,natalSocket} from './christmas-v132.js';
 import {NPCS as NATAL_NPCS,christmasWindow} from '../public/modules/christmas-v132.js';
@@ -1479,7 +1480,7 @@ export function attachSharedUniverse(server,{authenticate,authorizeJoin,recordSe
         const window=Math.floor(nowMs()/1000);if(ws.proofWindowV146!==window){ws.proofWindowV146=window;ws.proofCountV146=0;}
         if(++ws.proofCountV146>30)return safeJsonSend(ws,{type:'drop_proof_v146',request_id,ok:false});
         if(!collectionProof||!ws.room||!ws.player||!currentRoomActorV1173(ws,ws.room.players))return safeJsonSend(ws,{type:'drop_proof_v146',request_id,ok:false});
-        try{const proof=collectionProof(ws.identity.user.id,ws.identity.gameSessionId,{drop_id:msg.drop_id,collector:msg.collector},{room:ws.room,player:structuredClone(ws.player)});safeJsonSend(ws,{type:'drop_proof_v146',request_id,ok:true,proof});}
+        try{const proof=collectionProof(ws.identity.user.id,ws.identity.gameSessionId,{drop_id:msg.drop_id,collector:msg.collector,request_id},{room:ws.room,player:collectionContactV1461(ws.player,msg.contact,ws.room,msg.collector)});safeJsonSend(ws,{type:'drop_proof_v146',request_id,ok:true,proof});}
         catch{safeJsonSend(ws,{type:'drop_proof_v146',request_id,ok:false});}return;
       }
       if(msg.type==='collect_drop'){

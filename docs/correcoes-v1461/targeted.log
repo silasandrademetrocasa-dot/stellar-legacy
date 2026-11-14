@@ -1,0 +1,40 @@
+cloud save Error: lost
+    at c.saveCloudSave (file:///workspace/scratch/b367560527f0/work/stellar-legacy-main/tests/v1342-hangar-ack.test.mjs:89:246)
+    at Object.sendCloudSaveAttemptV106 (evalmachine.<anonymous>:88:24)
+    at TestContext.<anonymous> (file:///workspace/scratch/b367560527f0/work/stellar-legacy-main/tests/v1342-hangar-ack.test.mjs:91:23)
+    at Test.runInAsyncScope (node:async_hooks:227:14)
+    at Test.run (node:internal/test_runner/test:1402:25)
+    at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+    at Test.postRun (node:internal/test_runner/test:1542:19)
+    at Test.run (node:internal/test_runner/test:1467:12)
+    at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+  status: 504
+}
+✔ V134.2: delayed ACK of first equip keeps the second edit, balances and shields (9.894925ms)
+✔ V134.2: confirmed layouts compare semantically after server normalization (0.444782ms)
+✔ V134.2: server inventory grant is retained, missing free stock and invented items rejected (2.280032ms)
+✔ V134.2: CONF, drones and AUX newer than ACK survive with an exact submitted receipt (1.449531ms)
+✔ V134.2: equipment arrays bypass generic ACK merge while combat changes are retained (0.94218ms)
+✔ V134.2: actual checkpoint sender preserves rapid edits across the first ACK and confirms the next (6.777785ms)
+✔ V134.2: lost HTTP ACK plus readback keeps newer edits for the next save (4.793711ms)
+✔ V134.2: reopen recovers pending equipment from durable submitted receipt, without local money (1.691942ms)
+✔ V134.2: stale economy snapshots cannot clear pending hangar or advance its base (2.252407ms)
+✔ V146.1 contact observation precedes slow IndexedDB; visual queue callback never waits for proof (5.617498ms)
+✔ V146.1 contact snapshot fixes throttled AUX position but keeps canonical map, gear, radar and tether checks (1.432336ms)
+✔ V146.1 lost proof response reuses original server observation after movement, without SQL or a new reward (1.383279ms)
+✔ V146.1 manager bootstrap leaves saved vitals and location intact and schedules nothing before world restoration (7.69598ms)
+✔ V146.1 actual save and position snapshot do not promote the old runtime during bootstrap (3.120873ms)
+✔ V146.1 actual loaded-game restoration retains absolute saved hull and last map coordinates (2.493731ms)
+✔ V146.1 actual optimistic purchase callback recalculates stats without healing hull or shield (1.700504ms)
+✔ V146.1 ready prefix bypasses later missing BOX proof; collections do not rebuild shop/stats on enqueue (10.581362ms)
+✔ V146.1 racing contact replies send the first durably stored proof, so lost ACK replay retains the same hash (2.83481ms)
+✔ V146.1 100 AUX pickups remain valid after movement: production session context, signed contact and real SQL commits (3376.947792ms)
+✔ V146.1 base toolbar is above the ship and weapon bar in portrait/tablet/landscape; existing menu dispatch is retained (51.181981ms)
+ℹ tests 20
+ℹ suites 0
+ℹ pass 20
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 3849.124328
