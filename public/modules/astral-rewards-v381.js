@@ -1,7 +1,7 @@
-import {stellarNoticeV4776} from './stellar-dialog-v4776.js?v=47.8.1';
+import {stellarNoticeV4776} from './stellar-dialog-v4776.js?v=47.8.2';
 // V38.1.0 — painel de recompensas da arena e editor no ADM.
 // Sem loops de render e sem alterações no motor de combate.
-import {loadAstralRewardsV381,lockAstralRewardV381,claimAstralRewardV381,adminSetAstralRewardV381,loadGalaxyGatesOnline} from '../api.js?v=47.8.1';
+import {loadAstralRewardsV381,lockAstralRewardV381,claimAstralRewardV381,adminSetAstralRewardV381,loadGalaxyGatesOnline} from '../api.js?v=47.8.2';
 const names={alpha:'AURORA',beta:'NEXUS',gamma:'ECLIPSE'};
 const order=['alpha','beta','gamma'];
 let latest=null,primaryGates=null,primaryVersion=0,loading=false;
@@ -17,7 +17,7 @@ function renderPortal(){const box=$('astralRewardV381');if(!box)return;const key
  <p>${formatQuote(q)}</p><small>${fmt(q.waves)} ondas · fator real de dificuldade ${fmt(q.difficultyMult)}× · primeira conclusão semanal: ${q.firstWeekly?'ATIVA':'já resgatada'} (${fmt(q.weeklyBonusPct)}% extra em CR, STL, Núcleos e material).</small>
  <div class="astral-rewards-actions"><small>${fmt(entry.pending)} conclusão(ões) aguardando resgate · ${fmt(entry.materialBalance)} ${escape(q.resource)} no inventário</small><button type="button" id="astralClaimV381" class="primary-btn" ${entry.pending<1?'disabled':''}>RESGATAR BÔNUS</button></div>
  <small>Prêmio adicional ao pacote tradicional do portal. Confirme sua vitória e salve o progresso antes de resgatar.</small>`;
- $('astralClaimV381')?.addEventListener('click',async()=>{const b=$('astralClaimV381');b.disabled=true;b.textContent='VALIDANDO...';try{await window.stellarEconomySyncBeforeV4776?.();const r=await claimAstralRewardV381(key);if(!r?.claimed)throw Error('Nenhuma nova conclusão disponível.');await stellarNoticeV4776(`BÔNUS ${names[key]} RESGATADO!\n${formatQuote(r.quote)}\nOs itens estão sendo sincronizados no jogo.`);await window.stellarEconomySyncAfterV4776?.();await refresh();}catch(e){await stellarNoticeV4776('Não foi possível concluir esta ação. Tente novamente.');b.disabled=false;b.textContent='RESGATAR BÔNUS';}});
+ $('astralClaimV381')?.addEventListener('click',async()=>{const b=$('astralClaimV381');b.disabled=true;b.textContent='VALIDANDO...';try{await (window.stellarTaskCheckpointV1462?.()??window.stellarEconomySyncBeforeV4776?.());const r=await claimAstralRewardV381(key);if(!r?.claimed)throw Error('Nenhuma nova conclusão disponível.');await stellarNoticeV4776(`BÔNUS ${names[key]} RESGATADO!\n${formatQuote(r.quote)}\nOs itens estão sendo sincronizados no jogo.`);await window.stellarEconomySyncAfterV4776?.();await refresh();}catch(e){await stellarNoticeV4776('Não foi possível concluir esta ação. Tente novamente.');b.disabled=false;b.textContent='RESGATAR BÔNUS';}});
 }
 // A portal change during a request is queued instead of being silently ignored.
 let queuedGate=null;

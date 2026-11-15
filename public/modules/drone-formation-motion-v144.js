@@ -1,22 +1,36 @@
 import {DRONE_FORMATIONS} from './combat-tactics-v144.js';
 const TAU=Math.PI*2,TRANSITION=.75;
-const anchors={furia:[[115,0],[66,-65],[66,65],[-90,0]],interceptor:[[70,-108],[70,108],[-66,-108],[-66,108]],bastiao:[[74,-74],[74,74],[-74,-74],[-74,74]],colosso:[[12,-106],[12,106],[-85,-70],[-85,70]],vanguarda:[[106,-59],[106,59],[-48,-90],[-48,90]],prisma:[[120,0],[0,-112],[-112,0],[0,112]],cacador_supremo:[[128,-55],[128,55],[-65,-105],[-65,105]],leviata:[[64,-89],[64,89],[-73,-100],[-73,100]]};
+// D1..D8 in the pilot's drawings (14 November). X is forward, Y is starboard.
+// Numbering is independent of depth sorting. Fewer drones keep their numbered slots.
+export const FORMATION_ANCHORS=Object.freeze(Object.fromEntries(Object.entries({
+ original:[[-96,0],[-112,40],[-112,-40],[-128,0],[8,-80],[8,80],[-8,-120],[-8,120]],
+ furia:[[130,0],[85,80],[85,-80],[25,120],[25,-120],[-85,120],[-85,-120],[-100,0]],
+ interceptor:[[112,-40],[112,40],[82,-80],[8,80],[8,-80],[-66,120],[-66,-120],[-96,0]],
+ bastiao:[[97,-40],[97,40],[38,-80],[38,80],[-38,-80],[-38,80],[-97,-40],[-97,40]],
+ colosso:[[98,-40],[98,40],[68,-80],[68,80],[8,-120],[8,120],[-68,-80],[-68,80]],
+ vanguarda:[[97,-40],[97,40],[38,-80],[38,80],[-8,-120],[-8,120],[-66,-120],[-66,120]],
+ prisma:[[110,0],[-94,0],[8,-120],[8,120],[66,-80],[66,80],[-50,-80],[-50,80]],
+ cacador_supremo:[[108,0],[79,80],[79,-80],[50,120],[50,-120],[-94,40],[-94,-40],[-108,0]],
+ leviata:[[94,-40],[94,40],[79,-120],[79,120],[7,-120],[7,120],[-66,-120],[-66,120]]
+}).map(([id,slots])=>[id,Object.freeze(slots.map(p=>Object.freeze(p)))])));
 export function createFormationMotion(){
- const points=new Map();let order=[],formation=null,heading=0,lastTime=null,lastIds=null;
+ const points=new Map();let order=[],formation=null,heading=0,lastTime=null,lastIds=null,orbitStart=0,orbitHeading=0;
  function sample(ids,id,angle,time,{attacking=false,quality='high'}={}){
   const def=DRONE_FORMATIONS[id]||DRONE_FORMATIONS.original;
   if(lastTime!==null&&time===lastTime&&formation===def.id&&ids===lastIds)return order;
-  const dt=lastTime===null?0:Math.max(0,Math.min(.1,time-lastTime));lastTime=time;
+  const first=lastTime===null,dt=first?0:Math.max(0,Math.min(.1,time-lastTime));lastTime=time;
+  if(first)heading=angle;
   const delta=Math.atan2(Math.sin(angle-heading),Math.cos(angle-heading));heading+=delta*(1-Math.exp(-dt/.18));
   const switched=formation!==def.id;formation=def.id;
+  if(switched&&def.id==='original'){orbitStart=time;orbitHeading=heading;}
   if(ids!==lastIds){const live=new Set(ids.map(String));for(const key of points.keys())if(!live.has(key))points.delete(key);lastIds=ids;}
   const cos=Math.cos(heading),sin=Math.sin(heading);
   for(let i=0;i<ids.length;i++){
-   const key=String(ids[i]),phase=time*.8+i*TAU/Math.max(1,ids.length),tier=Math.floor(i/4),side=i%2?-1:1;
-   let x,y,z=0;
-   if(def.id==='original'){const a=time*(25*Math.PI/180)+i*TAU/Math.max(1,ids.length);const radius=Math.max(83,ids.length*32/TAU)+(ids.length>10?Math.floor(i/10)*40:0);x=Math.cos(a)*radius;y=Math.sin(a)*radius;}
+   const key=String(ids[i]),phase=time*.8+i*TAU/Math.max(1,ids.length),tier=Math.floor(i/8),side=i%2?-1:1;
+   const anchor=FORMATION_ANCHORS[def.id][i%8];
+   let x=anchor[0]+tier*44*Math.sign(anchor[0]||side),y=anchor[1]+tier*44*Math.sign(anchor[1]||side),z=0;
+   if(def.id==='original'){const a=orbitHeading+(time-orbitStart)*(25*Math.PI/180),rx=x*Math.cos(a)-y*Math.sin(a);y=x*Math.sin(a)+y*Math.cos(a);x=rx;}
    else{
-    const a=anchors[def.id][Math.floor(i*4/Math.min(4,ids.length))%4];x=a[0]+tier*44*Math.sign(a[0]||side);y=a[1]+tier*44*Math.sign(a[1]||side);
     switch(def.id){
      case 'furia':x+=Math.sin(phase)*5+(attacking?12:0);y+=Math.cos(phase)*4;break;
      case 'interceptor':x+=Math.cos(phase)*10;y+=Math.sin(phase)*7;break;

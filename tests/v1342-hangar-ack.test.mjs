@@ -1,3 +1,4 @@
+import {mergePendingPassV1462} from '../public/modules/task-claims-v1462.js';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import vm from 'node:vm';
@@ -55,7 +56,7 @@ const sendSource=extract('async function sendCloudSaveAttemptV106()','// V106 â€
 const installSource=extract('function installEconomyState(','window.stellarEconomySyncBeforeV4776');
 function context(){
  const s=base();let operation=0;
- const c={ECONOMY_V146:null,structuredClone,console,Date,Math,Number,Boolean,JSON,Set,Map,Promise,queueMicrotask,
+ const c={mergePendingPassV1462,ECONOMY_V146:null,structuredClone,console,Date,Math,Number,Boolean,JSON,Set,Map,Promise,queueMicrotask,
   progress:s,authenticated:true,gameBootstrapRuntime:{generation:1},cloudSaveMutationV105:1,cloudDirty:true,cloudBusy:false,accountResetEpochV478:0,
   equipmentSaveBaselineV109:clone(s),equipmentSaveDesiredV109:null,equipmentSavePendingV109:true,equipmentSubmittedV1342:null,equipmentSaveWarningAtV109:0,saveIntegrityBlockedV106:false,
   saveOperationPendingV119:null,saveOperationIdV119:()=> '00000000-0000-4000-8000-'+String(++operation).padStart(12,'0'),
@@ -81,14 +82,31 @@ test('V134.2: actual checkpoint sender preserves rapid edits across the first AC
   if(calls===1){c.progress=equip(c.progress,2);c.equipmentSaveDesiredV109=clone(c.progress);c.cloudSaveMutationV105++;}
   return {ok:true,state:remote};
  };
- assert.equal(await c.sendCloudSaveAttemptV106(),'saved');assert.equal(c.progress.shipLoadout.lasers.length,2);assert.equal(c.equipmentSavePendingV109,true);
- assert.equal(await c.sendCloudSaveAttemptV106(),'saved');assert.equal(c.progress.shipLoadout.lasers.length,2);assert.equal(c.equipmentSavePendingV109,false);
+ assert.equal((await c.sendCloudSaveAttemptV106()).status,'saved');assert.equal(c.progress.shipLoadout.lasers.length,2);assert.equal(c.equipmentSavePendingV109,true);
+ assert.equal((await c.sendCloudSaveAttemptV106()).status,'saved');assert.equal(c.progress.shipLoadout.lasers.length,2);assert.equal(c.equipmentSavePendingV109,false);
 });
 test('V134.2: lost HTTP ACK plus readback keeps newer edits for the next save',async()=>{
  const c=context();c.progress=equip(c.progress);c.equipmentSaveDesiredV109=clone(c.progress);let remote;
  c.saveCloudSave=async submitted=>{remote=clone(submitted);remote.serverCheckpointReceiptV134=c.equipmentSubmittedV1342.id;c.progress=equip(c.progress,2);c.equipmentSaveDesiredV109=clone(c.progress);c.cloudSaveMutationV105++;throw Object.assign(Error('lost'),{status:504});};
  c.loadCloudSave=async()=>({state:remote});
  assert.equal(await c.sendCloudSaveAttemptV106(),'retry');assert.equal(c.progress.shipLoadout.lasers.length,2);assert.equal(c.equipmentSavePendingV109,true);assert.equal(c.cloudDirty,true);
+});
+test('V146.2: actual economic installer preserves locally completed pass objectives and installs only authoritative claim markers',()=>{
+ const c=context();c.equipmentSavePendingV109=false;
+ c.progress.battlePass={season:'qa',points:500,claimedTiers:{},premiumClaimedTiers:{},daily:{key:'2026-11-14',progress:{kills:15},completed:{kills:123}}};
+ const remote=clone(c.progress);remote.battlePass.points=400;remote.battlePass.daily.progress.kills=8;remote.battlePass.daily.completed={};remote.battlePass.claimedTiers={1:456};remote.profile.credits=999;
+ c.cloudDirty=false;c.installEconomyState(remote,{localFirstReceipt:true});
+ assert.equal(c.progress.battlePass.points,500);assert.equal(c.progress.battlePass.daily.completed.kills,123);assert.equal(c.progress.battlePass.claimedTiers[1],456);assert.equal(c.progress.profile.credits,999);assert.equal(c.cloudDirty,true);
+ assert.equal(c.player.hp,5);assert.equal(c.player.shield,3);
+});
+test('V146.2: a server reward adding a ship preserves legitimate pending equipment, without accepting client ownership or another-device edits',()=>{
+ const c=context(),b=clone(c.progress);c.progress=equip(c.progress,2);c.equipmentSaveDesiredV109=clone(c.progress);
+ const remote=clone(b);remote.ownedShips.push('leonov');remote.inventory.lf4++;
+ c.installEconomyState(remote,{localFirstReceipt:true});
+ assert.equal(c.progress.shipLoadout.lasers.length,2);assert.equal(c.progress.inventory.lf4,2);assert.deepEqual(c.progress.ownedShips,['goliath','leonov']);assert.equal(c.equipmentSavePendingV109,true);
+ const forged=equip(clone(b));forged.ownedShips.push('invented');assert.equal(reconcilePendingEquipmentV109(remote,forged,b,null,{allowShipGrants:true}).ok,false);
+ const other=equip(clone(remote));assert.equal(reconcilePendingEquipmentV109(other,equip(clone(b),2),b,null,{allowShipGrants:true}).ok,false);
+ const removed=clone(b);removed.ownedShips=[];assert.equal(reconcilePendingEquipmentV109(removed,equip(clone(b)),b,null,{allowShipGrants:true}).ok,false);
 });
 
 test('V134.2: reopen recovers pending equipment from durable submitted receipt, without local money',()=>{

@@ -1,0 +1,227 @@
+[
+  {
+    "export": "claimClanCreditGrantsOnline",
+    "file": "public/api.js",
+    "line": 705,
+    "destinations": [
+      "/rest/v1/rpc/stellar_player_claim_clan_credit_grants"
+    ],
+    "frequency": "acionado por resgate; funções periódicas e consumidores devem ser consultados separadamente"
+  },
+  {
+    "export": "claimArenaDailyReward",
+    "file": "public/api.js",
+    "line": 814,
+    "destinations": [
+      "/rest/v1/rpc/stellar_player_claim_arena_daily_reward"
+    ],
+    "frequency": "acionado por resgate; funções periódicas e consumidores devem ser consultados separadamente"
+  },
+  {
+    "export": "claimWorldBossRewardOnline",
+    "file": "public/api.js",
+    "line": 877,
+    "destinations": [
+      "/rest/v1/rpc/stellar_player_claim_world_boss_v135"
+    ],
+    "frequency": "acionado por resgate; funções periódicas e consumidores devem ser consultados separadamente"
+  },
+  {
+    "export": "redeemGameCouponOnline",
+    "file": "public/api.js",
+    "line": 951,
+    "destinations": [
+      "/api/player/coupons/redeem"
+    ],
+    "frequency": "acionado por resgate; funções periódicas e consumidores devem ser consultados separadamente"
+  },
+  {
+    "export": "claimGateDroneDesignOnline",
+    "file": "public/api.js",
+    "line": 1009,
+    "destinations": [
+      "/rest/v1/rpc/claim_gate_drone_design_v163"
+    ],
+    "frequency": "acionado por resgate; funções periódicas e consumidores devem ser consultados separadamente"
+  },
+  {
+    "export": "claimEventDesignerOnline",
+    "file": "public/api.js",
+    "line": 1021,
+    "destinations": [
+      "/rest/v1/rpc/claim_event_designer_v165"
+    ],
+    "frequency": "acionado por resgate; funções periódicas e consumidores devem ser consultados separadamente"
+  },
+  {
+    "export": "claimEliteOperationOnline",
+    "file": "public/api.js",
+    "line": 1242,
+    "destinations": [
+      "/api/elite/claim"
+    ],
+    "frequency": "acionado por resgate; funções periódicas e consumidores devem ser consultados separadamente"
+  },
+  {
+    "export": "claimWarSupplyOnline",
+    "file": "public/api.js",
+    "line": 1249,
+    "destinations": [
+      "/api/war/supply/claim"
+    ],
+    "frequency": "acionado por resgate; funções periódicas e consumidores devem ser consultados separadamente"
+  },
+  {
+    "export": "claimWarCampaignOnline",
+    "file": "public/api.js",
+    "line": 1250,
+    "destinations": [
+      "/api/war/campaigns/${encodeURIComponent(String(id))}/claim"
+    ],
+    "frequency": "acionado por resgate; funções periódicas e consumidores devem ser consultados separadamente"
+  },
+  {
+    "export": "claimCompetitiveSeasonOnline",
+    "file": "public/api.js",
+    "line": 1257,
+    "destinations": [
+      "/api/command/season/${encodeURIComponent(id)}/claim"
+    ],
+    "frequency": "acionado por resgate; funções periódicas e consumidores devem ser consultados separadamente"
+  },
+  {
+    "export": "claimClanOperationOnline",
+    "file": "public/api.js",
+    "line": 1267,
+    "destinations": [
+      "/api/command/clan/operations/${encodeURIComponent(id)}/claim"
+    ],
+    "frequency": "acionado por resgate; funções periódicas e consumidores devem ser consultados separadamente"
+  },
+  {
+    "export": "claimRelayMissionOnline",
+    "file": "public/api.js",
+    "line": 1273,
+    "destinations": [
+      "/api/relay/mission/${encodeURIComponent(id)}/claim"
+    ],
+    "frequency": "acionado por resgate; funções periódicas e consumidores devem ser consultados separadamente"
+  },
+  {
+    "export": "claimDominionOnline",
+    "file": "public/api.js",
+    "line": 1286,
+    "destinations": [
+      "/api/relay/dominion/claim"
+    ],
+    "frequency": "acionado por resgate; funções periódicas e consumidores devem ser consultados separadamente"
+  },
+  {
+    "export": "claimDominionWarPrizeOnline",
+    "file": "public/api.js",
+    "line": 1289,
+    "destinations": [
+      "/api/relay/dominion/war/prize"
+    ],
+    "frequency": "acionado por resgate; funções periódicas e consumidores devem ser consultados separadamente"
+  },
+  {
+    "export": "claimFrontierContractOnline",
+    "file": "public/api.js",
+    "line": 1293,
+    "destinations": [
+      "/api/frontier/claim"
+    ],
+    "frequency": "acionado por resgate; funções periódicas e consumidores devem ser consultados separadamente"
+  },
+  {
+    "export": "claimFrontierClanOnline",
+    "file": "public/api.js",
+    "line": 1295,
+    "destinations": [
+      "/api/frontier/clan-claim"
+    ],
+    "frequency": "acionado por resgate; funções periódicas e consumidores devem ser consultados separadamente"
+  },
+  {
+    "export": "claimAstralRewardV381",
+    "file": "public/api.js",
+    "line": 1301,
+    "destinations": [
+      "/api/astral-rewards/claim"
+    ],
+    "frequency": "acionado por resgate; funções periódicas e consumidores devem ser consultados separadamente"
+  },
+  {
+    "export": "claimSquadObjectiveV421",
+    "file": "public/api.js",
+    "line": 1312,
+    "destinations": [
+      "/api/frontier/v421/squad-objective/claim"
+    ],
+    "frequency": "acionado por resgate; funções periódicas e consumidores devem ser consultados separadamente"
+  },
+  {
+    "export": "claimOpsV423",
+    "file": "public/api.js",
+    "line": 1319,
+    "destinations": [
+      "/api/frontier/v423/operations/claim"
+    ],
+    "frequency": "acionado por resgate; funções periódicas e consumidores devem ser consultados separadamente"
+  },
+  {
+    "export": "claimSectorV426",
+    "file": "public/api.js",
+    "line": 1325,
+    "destinations": [
+      "/api/frontier/v426/exploration/claim"
+    ],
+    "frequency": "acionado por resgate; funções periódicas e consumidores devem ser consultados separadamente"
+  },
+  {
+    "export": "claimRaidV435",
+    "file": "public/api.js",
+    "line": 1342,
+    "destinations": [
+      "/api/frontier/raid/claim"
+    ],
+    "frequency": "acionado por resgate; funções periódicas e consumidores devem ser consultados separadamente"
+  },
+  {
+    "export": "claimAuxProtocolAuctionV111",
+    "file": "public/api.js",
+    "line": 1352,
+    "destinations": [
+      "/rest/v1/rpc/stellar_player_claim_aux_protocol_auction"
+    ],
+    "frequency": "acionado por resgate; funções periódicas e consumidores devem ser consultados separadamente"
+  },
+  {
+    "export": "claimMissionCommandOnlineV1331",
+    "file": "public/api.js",
+    "line": 1357,
+    "destinations": [
+      "/api/player/missions/claim"
+    ],
+    "frequency": "acionado por resgate; funções periódicas e consumidores devem ser consultados separadamente"
+  },
+  {
+    "export": "claimPlayerRewardV134",
+    "file": "public/api.js",
+    "line": 1360,
+    "destinations": [
+      "/api/player/rewards/claim"
+    ],
+    "frequency": "acionado por resgate; funções periódicas e consumidores devem ser consultados separadamente"
+  },
+  {
+    "export": "collectPlayerDropV134",
+    "file": "public/api.js",
+    "line": 1362,
+    "destinations": [
+      "/api/player/collections/claim"
+    ],
+    "frequency": "acionado por resgate; funções periódicas e consumidores devem ser consultados separadamente"
+  }
+]

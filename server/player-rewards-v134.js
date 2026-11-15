@@ -84,13 +84,13 @@ export function createPlayerRewardsV134({db,readPass,readPremium,readBonus,readS
    const intent={kind,n,season},id='reward_'+operationDigestV125('reward',intent),hash=operationDigestV125('reward',intent);
    return commit(uid,id,'reward',hash,async s=>{
     let reward;if(kind==='level'){
-     if(n<2||n>44||count(s.profile?.level)<n)fail('Nível não liberado');s.levelRewards||={};s.levelRewards.claimed||={};
+     if(n<2||n>44||count(s.profile?.level)<n)fail('Nível não liberado','PLAYER_REWARD_NOT_READY');s.levelRewards||={};s.levelRewards.claimed||={};
      if(s.levelRewards.claimed[n])return {receipt:{alreadyClaimed:true}};
      reward=levelRewardV134(n);s.levelRewards.claimed[n]=Date.now();
     }else{
      const pass=await readPass(),def=(pass.seasons||[]).find(x=>x.season_key===season),tier=(pass.tiers||[]).find(x=>x.season_key===season&&Number(x.tier_no)===n);
      if(!def||!def.enabled||Date.now()<Date.parse(def.starts_at)||Date.now()>=Date.parse(def.ends_at)||!tier||tier.enabled===false)fail('Temporada ou tier indisponível');
-     if(s.battlePass?.season!==season||Math.floor(count(s.battlePass?.points)/Number(def.points_per_tier))<n)fail('Tier não liberado');
+     if(s.battlePass?.season!==season||Math.floor(count(s.battlePass?.points)/Number(def.points_per_tier))<n)fail('Tier não liberado','PLAYER_REWARD_NOT_READY');
      if(kind==='pass_premium'&&!(await readPremium(req))?.battle_pass_active)fail('Passe Premium necessário');
      const field=kind==='pass_free'?'claimedTiers':'premiumClaimedTiers';s.battlePass[field]||={};
      if(s.battlePass[field][n])return {receipt:{alreadyClaimed:true}};

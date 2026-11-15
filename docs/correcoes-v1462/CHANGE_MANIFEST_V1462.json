@@ -1,0 +1,604 @@
+{
+  "release": "V146.2 / 47.8.2",
+  "base": "V144.1 / 47.7.80",
+  "cumulative": true,
+  "new_sql_required": false,
+  "delete": [],
+  "files": [
+    {
+      "file": "docs/GUIA.md",
+      "sha256": "43c257e7634dce8bcfd4a495beca2a1c0f3dd33a6b5997537e3cf31acd68735d",
+      "bytes": 6218
+    },
+    {
+      "file": "docs/compras-v1451/LEIA_PRIMEIRO.md",
+      "sha256": "14fe07f0b845fca97d2e365435af0a176ae54127f674479eecc35238b3f5eb1c",
+      "bytes": 6993
+    },
+    {
+      "file": "docs/compras-v1451/apk-check.log",
+      "sha256": "828181b15c94ab56efedc60daa7c5f5fafed1645bd2fe6b24d9eafa2fbac10c1",
+      "bytes": 528
+    },
+    {
+      "file": "docs/compras-v1451/testes.log",
+      "sha256": "44c9b12f74d76a8a1619b1ac9bd17ff91d199fcdfc4fa86071f33db9cf18a7f0",
+      "bytes": 26346
+    },
+    {
+      "file": "docs/compras-v1451/verify.log",
+      "sha256": "e1c5e00b73ba0a413be4accb10cbdabcf6aba8baa899d434d91a359a40a2f2a3",
+      "bytes": 26760
+    },
+    {
+      "file": "docs/correcoes-v1461/ALTERACOES.json",
+      "sha256": "da2bf23c24e659027e8a8e06047c7733db065ee15a96e5ee43650e8055cbdffe",
+      "bytes": 5288
+    },
+    {
+      "file": "docs/correcoes-v1461/LEIA_PRIMEIRO.md",
+      "sha256": "4363f9a398c8b477e4384553b0711b6177c595cb40e01b8775696dfeffd024bf",
+      "bytes": 7721
+    },
+    {
+      "file": "docs/correcoes-v1461/apk-check.log",
+      "sha256": "a8b3df56ea0e9a8f92aec31dd09aca650efd33e1139529db3db40e644883d925",
+      "bytes": 527
+    },
+    {
+      "file": "docs/correcoes-v1461/targeted.log",
+      "sha256": "538ef99fcd96dff45dff36e85c692761b5d4e6a6585a7cc5582f6a93194eed7c",
+      "bytes": 3115
+    },
+    {
+      "file": "docs/correcoes-v1461/verify.log",
+      "sha256": "873dd394a1f759771a9ad2c5bac69017ac6b4d337c68d9f48f0932487b6d005d",
+      "bytes": 30340
+    },
+    {
+      "file": "docs/correcoes-v1462/ARQUIVOS_ALTERADOS_DESDE_V1461.json",
+      "sha256": "02dd849ae7db9fbcf3996ba25bee2b1c2329f103b380363348a93679fd58a58d",
+      "bytes": 1378
+    },
+    {
+      "file": "docs/correcoes-v1462/COLETAVEIS_E_ROTAS.md",
+      "sha256": "7b725572f0b1093cd2f448d5c66a5158ee6facb3dcb60ca415ce628478b51c13",
+      "bytes": 5722
+    },
+    {
+      "file": "docs/correcoes-v1462/FORMACOES_D1_D8.png",
+      "sha256": "fd09e36988a9d668dd02d48047367569b86a3783271b599472df7fd2e35cdd2d",
+      "bytes": 67072
+    },
+    {
+      "file": "docs/correcoes-v1462/INVENTARIO_APIS_COLETAVEIS.json",
+      "sha256": "ccb86687ccb7e24e44985db0a691a89370fa5e25feb2ba75d1233a7ffe9d5919",
+      "bytes": 7121
+    },
+    {
+      "file": "docs/correcoes-v1462/LEIA_PRIMEIRO.md",
+      "sha256": "9a75783cbeaa0b170b6224327c42e78cb8b9c3412485d4a2f62e49cb341b5855",
+      "bytes": 6281
+    },
+    {
+      "file": "docs/correcoes-v1462/POSICOES_D1_D8.json",
+      "sha256": "d771fce0ac0ff13b3005e340f7c462cfb9cb22ebddb6cb777bab0a9e3f2e8dba",
+      "bytes": 770
+    },
+    {
+      "file": "docs/correcoes-v1462/TESTES_PERFORMANCE_LIMITES.md",
+      "sha256": "f7f763cc7abfcefee09497ef933b33b9170c571f06d58f73758db4cb42aa082b",
+      "bytes": 5392
+    },
+    {
+      "file": "docs/correcoes-v1462/v1462-apk-final.log",
+      "sha256": "bacb6c9753e17dca111e64fe70cde0d235afe954a695daa2756ae4a0ed76e59d",
+      "bytes": 527
+    },
+    {
+      "file": "docs/correcoes-v1462/v1462-verify-final.log",
+      "sha256": "773d19e0fcc6ee3e0f402fec2d3635e51996ad4ec1f1cbfb89fe72bddecc20ad",
+      "bytes": 32158
+    },
+    {
+      "file": "docs/local-first-v145/ARQUITETURA.md",
+      "sha256": "aa4da02397a16f51dcc207193253edc8f9e2f0ffe67cd3c0850993811c75a2ea",
+      "bytes": 5192
+    },
+    {
+      "file": "docs/local-first-v145/BROWSER_RESULTS.json",
+      "sha256": "77540bf89529f151d828bff5082355806f2f1da6059587291b0c733d3751b4b3",
+      "bytes": 316
+    },
+    {
+      "file": "docs/local-first-v145/CHANGE_MANIFEST.json",
+      "sha256": "16220bfe5e213311becbac1506d478b295ee5c37853f6e714f35717593d53b1e",
+      "bytes": 2165
+    },
+    {
+      "file": "docs/local-first-v145/DEPENDENCIAS.json",
+      "sha256": "3e51e06a7d6ecf4a3f64bc2387258c3c9b74d63e1a3ae8a453e25e326187633f",
+      "bytes": 35672
+    },
+    {
+      "file": "docs/local-first-v145/ENDPOINTS_RENDER.json",
+      "sha256": "6f1737cd883edaf082f282a8e4cc89db49982d8909139a5b6026a4dbc3e38005",
+      "bytes": 40198
+    },
+    {
+      "file": "docs/local-first-v145/IMPLANTACAO_ROLLBACK.md",
+      "sha256": "5ecc833357c0effe68148aaf5a2d83ac284d51771ff98d71e6895eb076791065",
+      "bytes": 3799
+    },
+    {
+      "file": "docs/local-first-v145/LEIA_PRIMEIRO.md",
+      "sha256": "49029051a43804ccd425e2a7495e3c3eecc9ed66a65f343afe65786aed2f343e",
+      "bytes": 4989
+    },
+    {
+      "file": "docs/local-first-v145/MAPA_ROTAS.csv",
+      "sha256": "e597e9645fe947e5f18c5cf1218d5cb1ad49d2c81e4f5435de36e65644b7f6c7",
+      "bytes": 488582
+    },
+    {
+      "file": "docs/local-first-v145/PERFORMANCE.json",
+      "sha256": "533b92d75994f5bf049795ae4401c334c617dc3f15f0a1dca91e29a4529356be",
+      "bytes": 920
+    },
+    {
+      "file": "docs/local-first-v145/PERFORMANCE.md",
+      "sha256": "90570f1c80ae6d148aed38ec400cb949ab2d21392f976434707971cd79332dfa",
+      "bytes": 2470
+    },
+    {
+      "file": "docs/local-first-v145/RISCOS_PENDENCIAS.md",
+      "sha256": "6df94da1d47f4c99c965c7d94df56ccfaf80d45b3960c8907097bf2bd752abe1",
+      "bytes": 4241
+    },
+    {
+      "file": "docs/local-first-v145/ROTAS.md",
+      "sha256": "277ce401cb54a82ebc30cb8b76746734ab3b478956f21d58ab49c428a7850ddd",
+      "bytes": 3623
+    },
+    {
+      "file": "docs/local-first-v145/ROUTES_BEFORE.json",
+      "sha256": "8ee1fd4caea82f431e51853352522d2ee1be4066b400be5bc3be13e0e6eb9bcb",
+      "bytes": 902501
+    },
+    {
+      "file": "docs/local-first-v145/TESTES.md",
+      "sha256": "4e5de0268b8ca588636e02e442485721956f5f0def59a2e74f47ce22712321c7",
+      "bytes": 4576
+    },
+    {
+      "file": "docs/local-first-v145/apk-check.log",
+      "sha256": "206bb678bccb9ba49c70e09db2523919f6e6bf5455c4393ff4b81edb81264992",
+      "bytes": 528
+    },
+    {
+      "file": "docs/local-first-v145/check.log",
+      "sha256": "887698b746a22715123153f165621cd8a7355bbcb5450fad82e071ccd4af4dd5",
+      "bytes": 375
+    },
+    {
+      "file": "docs/local-first-v145/testes.log",
+      "sha256": "ca496e5054d642810ea67aabf97bf313d8636f672ee6c23cae8f2ffdb734fbd8",
+      "bytes": 25253
+    },
+    {
+      "file": "docs/local-first-v146/ARQUITETURA.md",
+      "sha256": "770e353f470a86b2db960ae590d3ed1364ecf39438f82c5b615790f2b254ab06",
+      "bytes": 5297
+    },
+    {
+      "file": "docs/local-first-v146/CHANGE_MANIFEST_V146.json",
+      "sha256": "21c274ff7854a86ea9cda7b8aaebfefb625ea494037cd8436409b17cc261500b",
+      "bytes": 15688
+    },
+    {
+      "file": "docs/local-first-v146/LEIA_PRIMEIRO.md",
+      "sha256": "36c94c1dec65f322bc0d75ec41bc5c05bbf7419e72d3ab3e8f792b8bdc2e0614",
+      "bytes": 7682
+    },
+    {
+      "file": "docs/local-first-v146/PERFORMANCE.json",
+      "sha256": "61f7787aab777bc3eee24f1cb01a893e55170351baf66705e967f32457114171",
+      "bytes": 1100
+    },
+    {
+      "file": "docs/local-first-v146/PRESERVACAO.json",
+      "sha256": "1a1b5478cc8c37487aab90e0326004bb16ccabb3b2c0c6bbb541547d09e71444",
+      "bytes": 175
+    },
+    {
+      "file": "docs/local-first-v146/ROTAS.md",
+      "sha256": "149b3d1b42925499eb27ae0bae8e6aaafaf159aff3228c280266362c7305ef00",
+      "bytes": 3522
+    },
+    {
+      "file": "docs/local-first-v146/TESTES.md",
+      "sha256": "9c44cf56109712c891c2d69ab3ffeac3fb75dc9a1aeef5b61f23679c66e5602c",
+      "bytes": 6229
+    },
+    {
+      "file": "docs/local-first-v146/apk-check.log",
+      "sha256": "fb2f5f7b51216dc41c65a6ce70b0d83a1c5e8e9e893b08a58f839420dae9307c",
+      "bytes": 527
+    },
+    {
+      "file": "docs/local-first-v146/targeted.log",
+      "sha256": "54b486287a7706585b0bc82e3f7b1c00817fee221effccf27696e2339ed23886",
+      "bytes": 4629
+    },
+    {
+      "file": "docs/local-first-v146/verify.log",
+      "sha256": "119cec6c06ffb094c8c930f3f41545421ddece873d34c5cc8ef554a6083f72bb",
+      "bytes": 29019
+    },
+    {
+      "file": "package-lock.json",
+      "sha256": "20c5a582596bee380d6649ed164352ce32a2733b62f9a6551648c7b45bbf22b1",
+      "bytes": 49969
+    },
+    {
+      "file": "package.json",
+      "sha256": "190c0fd566baadb26674a7476c14c164ac5b541222fa5191fc564dc68c71bcfb",
+      "bytes": 1106
+    },
+    {
+      "file": "public/api.js",
+      "sha256": "f8dc818d38c9e8d258d49e2b8b2ae278732d6369aaa8da2bad3a80fe833697f3",
+      "bytes": 70939
+    },
+    {
+      "file": "public/game.js",
+      "sha256": "fe1d5087a664b675584bc6f1f7a60a24a2620da8e3c9fb775033ec29947b3e2a",
+      "bytes": 1313856
+    },
+    {
+      "file": "public/index.html",
+      "sha256": "00e2d945c54b456b34f926dc01416264d1e6825d8e292aecbaebca8f1bcdc6b6",
+      "bytes": 93945
+    },
+    {
+      "file": "public/modules/astral-combat-admin-v431.js",
+      "sha256": "7257b8ee217958b214d18a39be161d86de8a8c24dc55b9077e114936426c2d9b",
+      "bytes": 2259
+    },
+    {
+      "file": "public/modules/astral-operations-v435.js",
+      "sha256": "e4f00ec1ee98520a1ff26acdaae5a3740cfc99e32f8aa74bc4009e19dc44951c",
+      "bytes": 4785
+    },
+    {
+      "file": "public/modules/astral-rewards-v381.js",
+      "sha256": "6f9c5629c39ce2d00200ebb817e3336428040340367b8905ff16b2e96ec09b13",
+      "bytes": 9190
+    },
+    {
+      "file": "public/modules/base-actions-v1461.js",
+      "sha256": "a953b393bdc658f67de524621d6c46116012e47bfbddcf246c6bd47c2c6e9918",
+      "bytes": 493
+    },
+    {
+      "file": "public/modules/christmas-ui-v132.js",
+      "sha256": "cb9227c247990aab7703e2b5db37dec0ee53edebf3e56f632adda0d77313d2af",
+      "bytes": 11603
+    },
+    {
+      "file": "public/modules/collection-contact-v1461.js",
+      "sha256": "ea421d0e6ca248ec81339f05758bc0662b35fdc3e7710ff810b42cda9a8ae846",
+      "bytes": 927
+    },
+    {
+      "file": "public/modules/drone-formation-motion-v144.js",
+      "sha256": "46acb80fc1abc2d0069e34accdf3447b3b7f691bd8559841f3eadf472b43ddb9",
+      "bytes": 4940
+    },
+    {
+      "file": "public/modules/economic-hangar-v146.js",
+      "sha256": "e7f8f9f0de8f8cdd329b9503d38b3b810d4d9ac222ba7ae5e7a3dd05a3c87f95",
+      "bytes": 2170
+    },
+    {
+      "file": "public/modules/economic-manager-v146.js",
+      "sha256": "cf6b12dddd9e8732335014eff902591040bb3d4d0c81cb3ac0f7a1a2b382c58b",
+      "bytes": 7651
+    },
+    {
+      "file": "public/modules/economy-projector-v146.js",
+      "sha256": "d9bd9085f812e9a4d81302b4a2a3a1e054dd76d75da90fb7774c3ccf9fe270d4",
+      "bytes": 3871
+    },
+    {
+      "file": "public/modules/economy-request-v123.js",
+      "sha256": "01b416c72e11a504f2a1252ce6bc4e5eb51695f040636f13a5ce0129f7ef4875",
+      "bytes": 1873
+    },
+    {
+      "file": "public/modules/economy-sale-v130.js",
+      "sha256": "708e8dc0c48c1c1846bdb4a0d2aeab8c1f6a02bb18402f0843711d534791ed00",
+      "bytes": 1417
+    },
+    {
+      "file": "public/modules/frontier-audit-v450.js",
+      "sha256": "ebaa2585876aa8d6562317dc1840faff3598a02373655a7a8bee23089ba0a278",
+      "bytes": 2226
+    },
+    {
+      "file": "public/modules/galactic-balance-panel-v460.js",
+      "sha256": "99530fcf79386c9a1ef8a4aa186ae6e5eceea3e65c38fbd521e1b417317d14ff",
+      "bytes": 1305
+    },
+    {
+      "file": "public/modules/hangar-save-recovery-v109.js",
+      "sha256": "18eee0cfccd7eded35e3dde7e8b67c34fd2168a0e0d39644615b091af1b55e3a",
+      "bytes": 7027
+    },
+    {
+      "file": "public/modules/local-first-bridge-v1211.js",
+      "sha256": "b0e3285a38b34c1db594d4ea5d4d288832fbaed597e92681b69a71bb5df12244",
+      "bytes": 5342
+    },
+    {
+      "file": "public/modules/local-first-save-v121.js",
+      "sha256": "637628a33512cda4305ff7ff5afda5fc3e2ff266deb6bade3c89fa5e7f8adc8a",
+      "bytes": 12474
+    },
+    {
+      "file": "public/modules/local-first-sync-v122.js",
+      "sha256": "accc0e03a9c34f2e19e121ebc1283d6f8096f73c1f2fa4475f35f9c2c16b0d1d",
+      "bytes": 2152
+    },
+    {
+      "file": "public/modules/mutation-checkpoint-v145.js",
+      "sha256": "1ffc4a1c8716be8620c0d8ac3e84cafdb15390063386af1e1b68e14343ce6114",
+      "bytes": 490
+    },
+    {
+      "file": "public/modules/purchase-flow-v1451.js",
+      "sha256": "76a3b4cc4de30c2bb3c3f9b2d0aac955adf5431d1cb8743f4f4a632d43f3b032",
+      "bytes": 1244
+    },
+    {
+      "file": "public/modules/runtime-read-cache-v145.js",
+      "sha256": "d5e33c0a089eb09caebd850f96c5791ca022dd1744f02f40573a0ebf2d53879c",
+      "bytes": 874
+    },
+    {
+      "file": "public/modules/stage-a-v423.js",
+      "sha256": "0620deb7cbbbe83640f4fb13d553fed715bdd3c0d9cb37e09cc7cb1deb0746e3",
+      "bytes": 5785
+    },
+    {
+      "file": "public/modules/stage-b-v426.js",
+      "sha256": "841a9398b223cb04dcd2f3c261d4cfcfd8fc7510da8260e48b9a8e78008b1b83",
+      "bytes": 9698
+    },
+    {
+      "file": "public/modules/state-delta-v145.js",
+      "sha256": "9c1d897ecf81601ee774357d82bdba609bbe358c81f1e924dd0c5e1641168c36",
+      "bytes": 2115
+    },
+    {
+      "file": "public/modules/stellar-admin-c-v100.js",
+      "sha256": "be08e988d80c203683dbcd924c4533ac28cb53d1d94bb9368d8f4bade2982cc8",
+      "bytes": 4876
+    },
+    {
+      "file": "public/modules/task-claims-v1462.js",
+      "sha256": "bb2045a2721278b7ca64e3fe6b116fe74a07cb9e0809e310026608417053c5a3",
+      "bytes": 2998
+    },
+    {
+      "file": "public/modules/unified-expansion-v42.js",
+      "sha256": "554552db57b576028a81bd9a5646585c62dd83cc903b09cb75919dccae3e2545",
+      "bytes": 14841
+    },
+    {
+      "file": "public/modules/unified-save-coordinator-v106.js",
+      "sha256": "b147c8829d5f16d3257a82c79462713b67b109a1ca65ec369b66bd0dd388b005",
+      "bytes": 2471
+    },
+    {
+      "file": "public/style.css",
+      "sha256": "1b42e754043f30b1474ff44d6be73a64c4f4295b7e3f73f0be3855648974a65a",
+      "bytes": 478368
+    },
+    {
+      "file": "public/world.js",
+      "sha256": "d494fdaa4a00754245555191e8c84a877dc010e53a7c121f0dce7a96c594d14d",
+      "bytes": 9204
+    },
+    {
+      "file": "scripts/benchmark-economy-v146.mjs",
+      "sha256": "e6951675dfd2a8f1345d1b411003de017631c6c86eefc5640831640c528f089d",
+      "bytes": 4105
+    },
+    {
+      "file": "scripts/benchmark-local-first-v145.mjs",
+      "sha256": "3470825355940f44ce61c5c8370b156b3a7e47c3aa2c7e1c220e5bee55b43e77",
+      "bytes": 2463
+    },
+    {
+      "file": "scripts/ensure-test-deps.mjs",
+      "sha256": "b61c9578c84faf2f4c9b75fc89ed4841514457dede645612a33399051f3818fd",
+      "bytes": 708
+    },
+    {
+      "file": "scripts/migrate-v145.sh",
+      "sha256": "dd16a428fa7d9f8eee3d4f125bb787c7a9c4c118806ba9b14765dda1abd90f50",
+      "bytes": 499
+    },
+    {
+      "file": "scripts/migrate-v1451.sh",
+      "sha256": "521773445aa0087496a46173dc27ba3357936d4d623e28573b67cde3f35f512c",
+      "bytes": 598
+    },
+    {
+      "file": "scripts/migrate-v146.sh",
+      "sha256": "471b49bb883cf30588d6b63774a6fa0bbd50e012f9154f8c59b0f527cef60a59",
+      "bytes": 678
+    },
+    {
+      "file": "scripts/test-local-first-browser-v145.mjs",
+      "sha256": "e6ff26650c4f4255e4ad3f00219706b619710f8804433c20526a3f1a4569eff5",
+      "bytes": 6802
+    },
+    {
+      "file": "server/collection-contact-v1461.js",
+      "sha256": "374f5fd70c33c55f4958da3001144e8e74d9ae95ff73e9ce3509ebd3a5057f16",
+      "bytes": 934
+    },
+    {
+      "file": "server/collection-proof-v146.js",
+      "sha256": "47fa979985e632e730f2ad23cbb05d8706653d08b0dd0cb5edae4d692fa28e53",
+      "bytes": 2518
+    },
+    {
+      "file": "server/index.js",
+      "sha256": "d87827e842c68dd15a2635512ffb2a1144118370e9391c3d5781d75a61c2ddaf",
+      "bytes": 222734
+    },
+    {
+      "file": "server/localfirst-batch-v146.js",
+      "sha256": "998e6668ea1555c48a611b77a1b47a8e7c7d38a3b1ea3a2df88173226d6653e7",
+      "bytes": 5189
+    },
+    {
+      "file": "server/localfirst-scope-v146.js",
+      "sha256": "600f75731ef7b4d731b0e86537bfcd83546bf73850bdbfea2f70450b29b74930",
+      "bytes": 1322
+    },
+    {
+      "file": "server/player-rewards-v134.js",
+      "sha256": "6dbe4ec5bc1fa1cc9f97c9dd397443666436eb09983cd52b2b636087967321bf",
+      "bytes": 13628
+    },
+    {
+      "file": "server/save-delta-v145.js",
+      "sha256": "fd6e93c5bb1aa7ad26fcd9ffb369da3d04ac6966d54fafefc41ef52a7235718a",
+      "bytes": 2608
+    },
+    {
+      "file": "server/shop-context-v1451.js",
+      "sha256": "6fec6a9f884a01e6278afd79369fcc5a0a31f571b4573f214618e7c94a377d33",
+      "bytes": 2854
+    },
+    {
+      "file": "server/world.js",
+      "sha256": "e53fe9ad0a7abc7c2f8613c26ba38132f563bd0ec809dfddec423f3fbd5311c5",
+      "bytes": 120324
+    },
+    {
+      "file": "sql/STELLAR_V145_1_COMPRA_CONTEXTO.sql",
+      "sha256": "5f75960690392048f9233bd010fb5a1f89911c758c31eb5548b3c84a31638253",
+      "bytes": 2890
+    },
+    {
+      "file": "sql/STELLAR_V145_1_COMPRA_ROLLBACK.sql",
+      "sha256": "46352dae28908eaeff89da1ddf2056113f25fcbc6f006d5126b2a09bf0520e4c",
+      "bytes": 366
+    },
+    {
+      "file": "sql/STELLAR_V145_2_EVENTO_PVP.sql",
+      "sha256": "72de28df44d5224f1afc3d382a69ac9f73fcfd93c2f141f2a2fcff6084e4fd2e",
+      "bytes": 10858
+    },
+    {
+      "file": "sql/STELLAR_V145_2_EVENTO_PVP_ROLLBACK.sql",
+      "sha256": "df5b908004d51fcbe6e19748c4297772b6ed26c2c9ce70ee12204306b5694380",
+      "bytes": 8215
+    },
+    {
+      "file": "sql/STELLAR_V145_2_EVENT_WINDOW.sql",
+      "sha256": "c572132d1aead02d1541491fa0d1ee9258bb8dbdc16fb6f251ef308457ce8087",
+      "bytes": 2455
+    },
+    {
+      "file": "sql/STELLAR_V145_PREFLIGHT.sql",
+      "sha256": "e2ca9aae3f499905e9c6caac1fa1cef9dcf2d79cea95f54d80905e099780e947",
+      "bytes": 870
+    },
+    {
+      "file": "sql/STELLAR_V145_ROLLBACK.sql",
+      "sha256": "2a5af5e336af54261edca98fbf4dc876f9a18b50e455cbea9dc1fff79cd59758",
+      "bytes": 259
+    },
+    {
+      "file": "sql/STELLAR_V146_OUTBOX.sql",
+      "sha256": "e2da76997580f0ca49aa047f0303346300413c13bb8192aeac99f924e76bd3bc",
+      "bytes": 9152
+    },
+    {
+      "file": "sql/STELLAR_V146_PREFLIGHT.sql",
+      "sha256": "6741a8357ca0ae0a0743a4f0f8198590994eadc0aa53de24c87e2309dc90cb27",
+      "bytes": 838
+    },
+    {
+      "file": "sql/STELLAR_V146_ROLLBACK.sql",
+      "sha256": "4016ae433e94500782f675fa5e6c6096fb25de14da74125711774df3170504c7",
+      "bytes": 766
+    },
+    {
+      "file": "tests/fixtures/localfirst-v146.mjs",
+      "sha256": "cce468fef6afff213c636a06493136dbfabbcd54425c9161aef2e74fa390c1c9",
+      "bytes": 6134
+    },
+    {
+      "file": "tests/fixtures/supabase-pglite-v134.mjs",
+      "sha256": "f563c70dcdc2a8d9556a801d4e60eec857c7dd54803cc0d227be85ad0dcca2e1",
+      "bytes": 1184
+    },
+    {
+      "file": "tests/v1342-hangar-ack.test.mjs",
+      "sha256": "372be6b64702f6f4f8e3f9b6188d8216a4f3fb20bc5e39add16780180785df84",
+      "bytes": 12975
+    },
+    {
+      "file": "tests/v145-api-delta.test.mjs",
+      "sha256": "d929cec9fe88f2c7b88386675d195962e829710618f44afadda1c74535e4eac0",
+      "bytes": 2328
+    },
+    {
+      "file": "tests/v145-journal.test.mjs",
+      "sha256": "f4bc169fdfdd0df2602b6f9889cafa62d3c049802e782e3b8d684c737d8c9b4a",
+      "bytes": 3432
+    },
+    {
+      "file": "tests/v145-local-first.test.mjs",
+      "sha256": "7e545b2bf9448b647ca69a2869d462ac8847af67e4ea7f786e0af159046e151b",
+      "bytes": 7863
+    },
+    {
+      "file": "tests/v145-stress.test.mjs",
+      "sha256": "fc556a78d587961e449e4bf68d06ddab30d43bf77474a8e73e0d7d7974deacb2",
+      "bytes": 3762
+    },
+    {
+      "file": "tests/v1451-purchase.test.mjs",
+      "sha256": "380e4421f0ec9006c4612feb55ff3b395dc419d142da73c3dea51b0182771852",
+      "bytes": 16244
+    },
+    {
+      "file": "tests/v1452-event-window.test.mjs",
+      "sha256": "10efb9207d58fb581899e3bbe833ee3da9a8de8645aad2e31654fe401d7cb448",
+      "bytes": 5017
+    },
+    {
+      "file": "tests/v146-outbox.test.mjs",
+      "sha256": "b51b1cd8d406a50d2e5e40b7e96f04022c05ca86374d8eb9222585fbceaa94f1",
+      "bytes": 21781
+    },
+    {
+      "file": "tests/v1461-contact-bootstrap-base.test.mjs",
+      "sha256": "830ac1df3f2c54028bf94815dce42b85161658bfe9d949256ccba663b82aa720",
+      "bytes": 16042
+    },
+    {
+      "file": "tests/v1462-layout-task-claims.test.mjs",
+      "sha256": "72b042728b04a46765a3e3bcf73a150c9551441fb8d731ac11530d82fb6b1fae",
+      "bytes": 13886
+    }
+  ]
+}

@@ -1,16 +1,23 @@
 import {natalDesignQuoteV1421} from './natal-prices-v1421.js';
 import {DESIGNS,MISSIONS,isChristmas,compatibleDesign} from './christmas-v132.js';
-import {shipChristmasArt,fireworkChristmasArt} from './christmas-art-v132.js?v=47.8.1';
+import {shipChristmasArt,fireworkChristmasArt} from './christmas-art-v132.js?v=47.8.2';
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const fmt=n=>Number(n||0).toLocaleString('pt-BR');
 export function createChristmasUI(bridge){
- let lastAccount=null,seenGoals=null,autoCelebration=false,lastAnnouncement='',statusBusy=false;
+ let lastAccount=null,seenGoals=null,autoCelebration=false,lastAnnouncement='',statusRequest=null,accountEpoch=0;
+ const confirmedClaims=new Set();
  let status=null,effects=[],busy=false,panel=null,lastStatus=0,fireRequest=null,lastFire=0;
  const button=document.createElement('button');button.className='natal-launch';button.textContent='❄ NATAL';button.type='button';button.hidden=true;document.querySelector('#topbar .top-actions')?.append(button);
  const fire=document.createElement('button');fire.className='natal-fire';fire.textContent='🎆';fire.title='Soltar fogo festivo';fire.type='button';fire.hidden=true;fire.setAttribute('aria-label','Soltar fogo festivo');document.querySelector('#topbar .top-actions')?.append(fire);
  let hiddenFx=false;try{hiddenFx=localStorage.getItem('natalHideFx')==='1';}catch{}
+ function syncAccount(){const owner=bridge.account();if(lastAccount!==owner){lastAccount=owner;accountEpoch++;status=null;seenGoals=null;lastStatus=0;fireRequest=null;confirmedClaims.clear();statusRequest=null;busy=false;}return accountEpoch;}
  const badge=()=>status?.claims?.includes('global:3')?'Guardião do Natal 2026':null;
- async function refresh(){if(!bridge.ready()||statusBusy)return;statusBusy=true;lastStatus=Date.now();try{status=await bridge.status();
+ async function refresh(force=false){if(!bridge.ready())return;const epoch=syncAccount();
+ if(statusRequest){const prior=statusRequest.promise;await prior;if(force&&epoch===accountEpoch)return refresh();return;}
+ const token={epoch,promise:null};statusRequest=token;lastStatus=Date.now();
+ token.promise=Promise.resolve().then(async()=>{try{const nextStatus=await bridge.status();if(epoch!==accountEpoch||epoch!==syncAccount())return;
+ if(!nextStatus||nextStatus.error)throw Error(nextStatus?.error||'Resposta de Natal indisponível');
+ status={...nextStatus,claims:[...new Set([...(nextStatus.claims||[]),...confirmedClaims])]};
  const now=Date.now(),next=status.upcoming?.find(e=>e.start>now&&e.start-now<=300000);
  if(next&&lastAnnouncement!==next.eventId){lastAnnouncement=next.eventId;bridge.toast(`${next.name} começa em ${Math.ceil((next.start-now)/60000)} min`);}
  const counts=status.counts||[],goals=status.config?.goals||{},f=status.player?.faction||bridge.faction(),reached=[];
@@ -21,13 +28,26 @@ export function createChristmasUI(bridge){
  }
  if(seenGoals&&reached.some(k=>!seenGoals.includes(k))){autoCelebration=true;bridge.toast('Meta coletiva conquistada! Confira a Central Natal.');}seenGoals=reached;
  button.textContent=reached.length?'❄ NATAL ★':'❄ NATAL';if(panel?.open)render();
- }catch(e){if(panel?.open){panel.innerHTML='<p>Não foi possível consultar o Natal. Feche e abra novamente após reconectar.</p><button data-close>FECHAR</button>';panel.querySelector('[data-close]').onclick=()=>panel.close();bridge.toast(e.message);}}finally{statusBusy=false;}}
- async function claim(key,payload={}){if(busy)return;busy=true;try{await bridge.claim(key,payload);await refresh();bridge.toast('Recompensa confirmada no servidor');}catch(e){bridge.toast(e.message);}finally{busy=false;}}
+ }catch(e){if(epoch===accountEpoch&&panel?.open){panel.innerHTML='<p>Não foi possível consultar o Natal. Feche e abra novamente após reconectar.</p><button data-close>FECHAR</button>';panel.querySelector('[data-close]').onclick=()=>panel.close();bridge.toast(e.message);}}finally{if(statusRequest===token)statusRequest=null;}});return token.promise;}
+ async function claim(key,payload={}){
+  const epoch=syncAccount();if(busy)return;busy=key;if(panel?.open)render();
+  try{
+   const result=await bridge.claim(key,payload);
+   if(epoch!==syncAccount())return;
+   if(!result||result.ok!==true||!result.state)throw Error('Resgate sem confirmação. Tente novamente após reconectar.');
+   confirmedClaims.add(key);status||={};status.claims=[...new Set([...(status.claims||[]),key])];
+   if(panel?.open)render();
+   bridge.toast(result.replayed?'Recompensa já confirmada':'Recompensa confirmada no servidor');
+   await refresh(true);
+  }catch(e){if(epoch===syncAccount())bridge.toast(e.message);}
+  finally{if(epoch===accountEpoch){busy=false;if(panel?.open)render();}}
+ }
+
  function render(){
   const p=status?.player||{},claims=status?.claims||[],counts=status?.counts||[],cfg=status?.config||{},f=p.faction||bridge.faction();
   const sum=(kind,faction)=>counts.filter(c=>c.kind===kind&&(!faction||c.faction===faction)).reduce((n,c)=>n+Number(c.qty),0);
   const reward=r=>`${fmt(r.credits)} CR • ${fmt(r.uridium)} STL • ${r.cores} núcleos • ${r.fireworks} fogos`;
-  const claimButton=(key,disabled=false)=>`<button data-claim="${esc(key)}" ${claims.includes(key)||disabled?'disabled':''}>${claims.includes(key)?'RESGATADO':'RESGATAR'}</button>`;
+  const claimButton=(key,disabled=false)=>`<button data-claim="${esc(key)}" ${claims.includes(key)||disabled||busy?'disabled':''}>${claims.includes(key)?'RESGATADO':busy===key?'CONFIRMANDO…':'RESGATAR'}</button>`;
   const date=t=>new Date(t).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit',timeZone:'America/Sao_Paulo'});
   let html=`<header><h2>❄ NATAL ESTELAR</h2><button data-close>✕</button></header><p>NPCs: ${fmt(p.npc)} • Boxes: ${fmt(p.box)} • Chefes: ${fmt(p.boss)} • Fogos: ${fmt(p.fireworks)}</p>`;
   html+=`<p>${status?.current?esc(status.current.name)+' • até '+date(status.current.end):'Preparando a próxima rodada'}</p><details><summary>Próximos eventos • Brasília</summary>${(status?.upcoming||[]).map(e=>`<p>${date(e.start)}–${date(e.end)} • ${esc(e.name)} ${e.rules?.map?esc(e.rules.map==='x4'?'X-4':e.rules.map.replace('b4','4-')):''}</p>`).join('')}</details>`;
@@ -41,7 +61,7 @@ export function createChristmasUI(bridge){
   html+=`<h3>Designs da sua nave</h3><div class="natal-designs">${DESIGNS.filter(d=>compatibleDesign(d,bridge.ship())).map(d=>`<article><img src="${esc(shipChristmasArt(bridge.ship(),d.design_id)||'')}" alt="${esc(d.name)}"><b>${esc(d.name)}</b><p>${Object.entries(d.bonuses).map(([k,v])=>`${esc(k)} +${Math.round(v*100)}%`).join(' • ')}</p>${d.eligibility.source==='shop'?`<p>${natalDesignQuoteV1421(status,d.design_id)===null?'Consultando preço…':fmt(natalDesignQuoteV1421(status,d.design_id))+' STL'}</p><button data-buy="design:${esc(d.design_id)}">${bridge.owned(d.design_id)?'ADQUIRIDO':'COMPRAR'}</button>`:'Exclusivo do passe de dezembro'}</article>`).join('')}</div>`;
   html+=`<h3>Fogos manuais</h3><p>Um por vez • arma em 2s • intervalo de 5s • sem dano</p><select data-style><option value="gold">Estrela dourada</option><option value="snow">Floco branco</option><option value="red">Explosão vermelha</option></select><button data-fire>🎆 SOLTAR (${fmt(p.fireworks)})</button><label><input type="checkbox" data-hide ${hiddenFx?'checked':''}> Ocultar explosões de fogos</label><p>${badge()||''}</p><button data-refresh>ATUALIZAR</button>`;
   panel.innerHTML=html;
-  panel.querySelector('[data-close]').onclick=()=>panel.close();panel.querySelector('[data-refresh]').onclick=refresh;
+  panel.querySelector('[data-close]').onclick=()=>panel.close();panel.querySelector('[data-refresh]').onclick=()=>refresh(true);
   panel.querySelectorAll('[data-claim]').forEach(b=>b.onclick=()=>claim(b.dataset.claim));
   panel.querySelectorAll('[data-buy]').forEach(b=>{const id=b.dataset.buy.slice(7),price=natalDesignQuoteV1421(status,id);b.disabled=bridge.owned(id)||price===null;b.onclick=()=>{if(price!==null&&confirm(`Confirmar compra deste design por ${fmt(price)} STL?`))claim(b.dataset.buy,{price_quote:price});};});
   panel.querySelector('[data-fire]').onclick=()=>launch(panel.querySelector('[data-style]').value);
@@ -57,7 +77,7 @@ export function createChristmasUI(bridge){
   active(){return status?.config?.enabled===true&&isChristmas(Date.now());},
   message(msg){
    if(msg.type==='world_snapshot'){effects=[];}
-   if(msg.type==='natal_error'){bridge.toast(msg.message);busy=false;}
+   if(msg.type==='natal_error'){bridge.toast(msg.message);}
    if(msg.type==='natal_fire_ack'){if(msg.id===fireRequest)fireRequest=null;if(status?.player)status.player.fireworks=msg.fireworks;}
    if(msg.type==='natal_firework'&&Date.now()-msg.start<5000){effects=effects.filter(e=>e.userId!==msg.userId);effects.push(msg);effects=effects.slice(-8);}
   },
@@ -76,7 +96,7 @@ export function createChristmasUI(bridge){
   },
   tick(){
    if(!bridge.ready()){button.hidden=true;fire.hidden=true;effects=[];return;}
-   if(lastAccount!==bridge.account()){lastAccount=bridge.account();status=null;seenGoals=null;lastStatus=0;fireRequest=null;}
+   syncAccount();
    if(Date.now()-lastStatus>60000)void refresh();
    if(autoCelebration&&!bridge.combat()){autoCelebration=false;effects.push({userId:'celebration',...bridge.position(),start:Date.now()-2000,style:'gold'});}
    if(panel?.open&&Date.now()-lastStatus>15000)void refresh();

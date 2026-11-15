@@ -44,17 +44,23 @@ function countsV109(state){
 }
 function dronesV109(state){return JSON.stringify((state?.drones||[]).map(d=>[String(d.id),String(d.type||'')]).sort((a,b)=>a[0].localeCompare(b[0])));}
 function shipsV109(state){return JSON.stringify([...(state?.ownedShips||[])].sort());}
-export function reconcilePendingEquipmentV109(remote,desired,baseline,submitted=null){
+export function reconcilePendingEquipmentV109(remote,desired,baseline,submitted=null,{allowShipGrants=false}={}){
   // Only a server receipt plus the exact submitted layout can advance the base.
   // An HTTP success alone, or a matching client snapshot, is insufficient.
   if(submittedEquipmentConfirmedV1342(remote,submitted))baseline=submitted.snapshot;
   if(!remote||!desired||!baseline)return {ok:false,reason:'BASELINE_UNAVAILABLE'};
   if(equipmentFingerprintV109(remote)===equipmentFingerprintV109(desired))return {ok:true,alreadySaved:true,state:copyV109(remote)};
-  if(shipsV109(remote)!==shipsV109(baseline)||shipsV109(desired)!==shipsV109(baseline))return {ok:false,reason:'OWNERSHIP_CHANGED'};
+  // A validated reward can add an unequipped ship while the pilot edits the hangar.
+  // Compare the unchanged layout against the old ownership, but retain server ownership below.
+  // Client additions/removals and other-device layout changes still fail closed.
+  let comparable=remote;
+  if(allowShipGrants&&shipsV109(desired)===shipsV109(baseline)&&
+      (baseline.ownedShips||[]).every(id=>remote.ownedShips?.includes(id)))comparable={...remote,ownedShips:baseline.ownedShips};
+  if(shipsV109(comparable)!==shipsV109(baseline)||shipsV109(desired)!==shipsV109(baseline))return {ok:false,reason:'OWNERSHIP_CHANGED'};
   if(dronesV109(remote)!==dronesV109(baseline)||dronesV109(desired)!==dronesV109(baseline))return {ok:false,reason:'DRONES_CHANGED'};
   if(Boolean(remote.pet?.owned)!==Boolean(desired.pet?.owned)||Boolean(remote.pet?.owned)!==Boolean(baseline.pet?.owned))return {ok:false,reason:'PET_CHANGED'};
   // Se outro dispositivo modificou o hangar, nao sobrescrevemos o trabalho dele.
-  if(equipmentLayoutSignatureV1062(remote)!==equipmentLayoutSignatureV1062(baseline))return {ok:false,reason:'SERVER_EQUIPMENT_CHANGED'};
+  if(equipmentLayoutSignatureV1062(comparable)!==equipmentLayoutSignatureV1062(baseline))return {ok:false,reason:'SERVER_EQUIPMENT_CHANGED'};
   if(!desired.ownedShips?.includes(desired.activeShipId))return {ok:false,reason:'SHIP_NOT_OWNED'};
   try{
     if(countsV109(desired)!==countsV109(baseline))return {ok:false,reason:'ITEM_COUNTS_CHANGED'};
