@@ -1,6 +1,6 @@
 {
   "name": "stellar-legacy",
-  "version": "47.8.2",
+  "version": "47.8.3",
   "type": "module",
   "scripts": {
     "start": "node server/index.js",
@@ -23,7 +23,7 @@
   "engines": {
     "node": ">=18"
   },
-  "release": "V146.2: layouts D1–D8, resgates de tarefas sem espera global e preservação do progresso do passe",
+  "release": "V146.3: seleção local imediata de formações, persistência e reconciliação em segundo plano",
   "devDependencies": {
     "@electric-sql/pglite": "0.3.14",
     "fake-indexeddb": "6.2.4",

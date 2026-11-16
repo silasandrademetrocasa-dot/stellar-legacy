@@ -1,3 +1,4 @@
+import {LOCAL_TACTICS_INTENT_V1463,recordTacticsSubmissionV1463,editLocalTacticsV1463} from '../public/modules/local-formation-v1463.js';
 import {mergePendingPassV1462} from '../public/modules/task-claims-v1462.js';
 import test from 'node:test';
 import assert from 'node:assert/strict';
@@ -56,7 +57,7 @@ const sendSource=extract('async function sendCloudSaveAttemptV106()','// V106 â€
 const installSource=extract('function installEconomyState(','window.stellarEconomySyncBeforeV4776');
 function context(){
  const s=base();let operation=0;
- const c={mergePendingPassV1462,ECONOMY_V146:null,structuredClone,console,Date,Math,Number,Boolean,JSON,Set,Map,Promise,queueMicrotask,
+ const c={LOCAL_TACTICS_INTENT_V1463,recordTacticsSubmissionV1463,pendingCombatHudV144:null,mergePendingPassV1462,ECONOMY_V146:null,structuredClone,console,Date,Math,Number,Boolean,JSON,Set,Map,Promise,queueMicrotask,
   progress:s,authenticated:true,gameBootstrapRuntime:{generation:1},cloudSaveMutationV105:1,cloudDirty:true,cloudBusy:false,accountResetEpochV478:0,
   equipmentSaveBaselineV109:clone(s),equipmentSaveDesiredV109:null,equipmentSavePendingV109:true,equipmentSubmittedV1342:null,equipmentSaveWarningAtV109:0,saveIntegrityBlockedV106:false,
   saveOperationPendingV119:null,saveOperationIdV119:()=> '00000000-0000-4000-8000-'+String(++operation).padStart(12,'0'),
@@ -84,6 +85,14 @@ test('V134.2: actual checkpoint sender preserves rapid edits across the first AC
  };
  assert.equal((await c.sendCloudSaveAttemptV106()).status,'saved');assert.equal(c.progress.shipLoadout.lasers.length,2);assert.equal(c.equipmentSavePendingV109,true);
  assert.equal((await c.sendCloudSaveAttemptV106()).status,'saved');assert.equal(c.progress.shipLoadout.lasers.length,2);assert.equal(c.equipmentSavePendingV109,false);
+});
+test('V146.3: actual checkpoint persists formation submission before the one existing HTTP save and strips device metadata',async()=>{
+ const c=context(),trace=[];c.equipmentSavePendingV109=false;c.progress.ownedDroneFormationsV144=['furia'];
+ c.pendingCombatHudV144=editLocalTacticsV1463(c.progress,c.progress,null,t=>t.profiles[1].formation='furia');c.progress.combatHudV144=clone(c.pendingCombatHudV144.desired);
+ c.stageLocalFirstSnapshotV121=(owner,state)=>{trace.push('stage');assert.equal(state.clientCombatIntentV1463.submitted.id,c.saveOperationPendingV119.id);};
+ c.flushLocalFirstSnapshotV121=async()=>trace.push('local');
+ c.saveCloudSave=async submitted=>{trace.push('http');assert.equal(submitted.clientCombatIntentV1463,undefined);assert.equal(submitted.combatHudV144.profiles[1].formation,'furia');return {ok:true,state:clone(submitted)};};
+ const result=await c.sendCloudSaveAttemptV106();assert.equal(result.status,'saved');assert.deepEqual(trace,['stage','local','http']);
 });
 test('V134.2: lost HTTP ACK plus readback keeps newer edits for the next save',async()=>{
  const c=context();c.progress=equip(c.progress);c.equipmentSaveDesiredV109=clone(c.progress);let remote;
