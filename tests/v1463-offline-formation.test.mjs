@@ -68,6 +68,6 @@ test('autopilot ammo change after a formation click does not leave its confirmed
 });
 test('background checkpoint strips device-only intent and uses only the existing save writer',()=>{
  const a=source.indexOf('async function sendCloudSaveAttemptV106('),b=source.indexOf('// V106 — Single-flight save.',a),sender=source.slice(a,b);
- assert.match(sender,/delete snapshot\[LOCAL_TACTICS_INTENT_V1463\]/);assert.match(sender,/await flushLocalFirstSnapshotV121\(\)/);assert.match(sender,/saveCloudSave\(snapshot,gearIntentV1062/);
+ assert.match(sender,/delete snapshot\[LOCAL_TACTICS_INTENT_V1463\]/);assert.match(sender,/beforeSend:pendingCombatHudV144\?flushLocalFirstSnapshotV121/);assert.match(sender,/saveCloudSave\(snapshot,gearIntentV1062/);
  assert.match(source,/const localTacticsIntentV1463=local\?\.\[LOCAL_TACTICS_INTENT_V1463\]/);assert.match(source,/reconcileLocalTacticsV1463\(remote.state,localTacticsIntentV1463\)/);
 });

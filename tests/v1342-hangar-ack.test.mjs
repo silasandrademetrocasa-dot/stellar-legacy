@@ -1,3 +1,4 @@
+import {passiveCheckpointV1465} from '../public/modules/passive-checkpoint-v1465.js';
 import {LOCAL_TACTICS_INTENT_V1463,recordTacticsSubmissionV1463,editLocalTacticsV1463} from '../public/modules/local-formation-v1463.js';
 import {mergePendingPassV1462} from '../public/modules/task-claims-v1462.js';
 import test from 'node:test';
@@ -57,7 +58,7 @@ const sendSource=extract('async function sendCloudSaveAttemptV106()','// V106 â€
 const installSource=extract('function installEconomyState(','window.stellarEconomySyncBeforeV4776');
 function context(){
  const s=base();let operation=0;
- const c={LOCAL_TACTICS_INTENT_V1463,recordTacticsSubmissionV1463,pendingCombatHudV144:null,mergePendingPassV1462,ECONOMY_V146:null,structuredClone,console,Date,Math,Number,Boolean,JSON,Set,Map,Promise,queueMicrotask,
+ const c={passiveCheckpointV1465,LOCAL_TACTICS_INTENT_V1463,recordTacticsSubmissionV1463,pendingCombatHudV144:null,mergePendingPassV1462,ECONOMY_V146:null,structuredClone,console,Date,Math,Number,Boolean,JSON,Set,Map,Promise,queueMicrotask,
   progress:s,authenticated:true,gameBootstrapRuntime:{generation:1},cloudSaveMutationV105:1,cloudDirty:true,cloudBusy:false,accountResetEpochV478:0,
   equipmentSaveBaselineV109:clone(s),equipmentSaveDesiredV109:null,equipmentSavePendingV109:true,equipmentSubmittedV1342:null,equipmentSaveWarningAtV109:0,saveIntegrityBlockedV106:false,
   saveOperationPendingV119:null,saveOperationIdV119:()=> '00000000-0000-4000-8000-'+String(++operation).padStart(12,'0'),
@@ -91,7 +92,7 @@ test('V146.3: actual checkpoint persists formation submission before the one exi
  c.pendingCombatHudV144=editLocalTacticsV1463(c.progress,c.progress,null,t=>t.profiles[1].formation='furia');c.progress.combatHudV144=clone(c.pendingCombatHudV144.desired);
  c.stageLocalFirstSnapshotV121=(owner,state)=>{trace.push('stage');assert.equal(state.clientCombatIntentV1463.submitted.id,c.saveOperationPendingV119.id);};
  c.flushLocalFirstSnapshotV121=async()=>trace.push('local');
- c.saveCloudSave=async submitted=>{trace.push('http');assert.equal(submitted.clientCombatIntentV1463,undefined);assert.equal(submitted.combatHudV144.profiles[1].formation,'furia');return {ok:true,state:clone(submitted)};};
+ c.saveCloudSave=async (submitted,gear,meta)=>{await meta.beforeSend?.();trace.push('http');assert.equal(submitted.clientCombatIntentV1463,undefined);assert.equal(submitted.combatHudV144.profiles[1].formation,'furia');return {ok:true,state:clone(submitted)};};
  const result=await c.sendCloudSaveAttemptV106();assert.equal(result.status,'saved');assert.deepEqual(trace,['stage','local','http']);
 });
 test('V134.2: lost HTTP ACK plus readback keeps newer edits for the next save',async()=>{
@@ -132,4 +133,26 @@ test('V134.2: stale economy snapshots cannot clear pending hangar or advance its
  c.staleSaveAuthoritiesV1331=()=>['serverStateClockV134'];c.installServerStatePreservingPosition=()=>{throw Object.assign(Error('old snapshot'),{code:'SAVE_RESPONSE_STALE'});};
  assert.throws(()=>c.installEconomyState({...base(),serverStateClockV134:0}),{code:'SAVE_RESPONSE_STALE'});
  assert.deepEqual(c.progress,before);assert.equal(c.equipmentSavePendingV109,true);assert.deepEqual(c.equipmentSaveBaselineV109,before);
+});
+test('V146.5: passive gameplay checkpoint repairs layout drift without a GET or hangar warning',async()=>{
+ const c=context();c.equipmentSavePendingV109=false;const confirmed=clone(c.progress);
+ c.progress=equip(c.progress);c.progress.x=703;c.progress.hp=19;c.progress.shield=4;c.progress.missions={kills:12};
+ c.progress.combatConfigsV2013.profiles[2].shield=2;
+ let calls=0;c.loadCloudSave=()=>{throw Error('unexpected GET');};
+ c.saveCloudSave=async (submitted,intent)=>{calls++;assert.equal(intent,null);assert.equal(equipmentLayoutSignatureV1062(submitted),equipmentLayoutSignatureV1062(confirmed));assert.equal(submitted.inventory.lf4,3);assert.equal(submitted.x,703);assert.equal(submitted.hp,19);assert.equal(submitted.shield,4);assert.equal(submitted.missions.kills,12);assert.equal(submitted.combatConfigsV2013.profiles[2].shield,2);return {ok:true,state:clone(submitted)};};
+ assert.equal((await c.sendCloudSaveAttemptV106()).status,'saved');assert.equal(calls,1);assert.equal(c.progress.shipLoadout.lasers.length,0);assert.equal(c.progress.missions.kills,12);
+});
+test('V146.5: immutable failed checkpoint retries the original ID, equipment intent and snapshot',async()=>{
+ const c=context();c.equipmentSavePendingV109=false;c.console={...console,warn(){}};let first;
+ c.saveCloudSave=async (state,intent,meta)=>{first={state:clone(state),intent:clone(intent),id:meta.operation_id};throw Error('offline');};
+ await c.sendCloudSaveAttemptV106();assert.ok(c.saveOperationPendingV119);
+ c.progress=equip(c.progress);c.equipmentSavePendingV109=true;c.equipmentSaveDesiredV109=clone(c.progress);c.cloudSaveMutationV105++;
+ c.saveCloudSave=async (state,intent,meta)=>{assert.deepEqual(state,first.state);assert.equal(intent,first.intent);assert.equal(meta.operation_id,first.id);return {ok:true,state:clone(state)};};
+ assert.equal((await c.sendCloudSaveAttemptV106()).status,'saved');assert.equal(c.equipmentSavePendingV109,true);assert.equal(c.progress.shipLoadout.lasers.length,1);
+});
+test('V146.5: passive projection isolates owners/reset and keeps combat data without modifying input',()=>{
+ const b=base(),local=equip(clone(b));local.pet.activeGear='off';local.profile.credits=999;local.cargo={ore:3};local.ammo={x:7};
+ const before=clone(local),out=passiveCheckpointV1465(local,b);assert.equal(out.changed,true);assert.deepEqual(local,before);assert.equal(out.state.profile.credits,999);assert.deepEqual(out.state.cargo,{ore:3});assert.deepEqual(out.state.ammo,{x:7});assert.equal(out.state.pet.activeGear,'off');
+ assert.throws(()=>passiveCheckpointV1465({...local,accountOwnerId:'another'},b),{code:'SAVE_SESSION_CHANGED'});
+ assert.throws(()=>passiveCheckpointV1465({...local,adminResetEpoch:1},b),{code:'SAVE_SESSION_CHANGED'});
 });
