@@ -1,0 +1,18 @@
+{
+  "source_version": "47.8.4",
+  "source_code_changed": false,
+  "installer_parts_sequential": 7,
+  "payload_files_hash_verified": 4509,
+  "node_modules_files_included": 2866,
+  "cleanup_files": 2728,
+  "npm_verify": {
+    "tests": 323,
+    "pass": 322,
+    "fail": 0,
+    "skipped": 1
+  },
+  "production_deployed": false,
+  "sql_executed": false,
+  "apk_built": false,
+  "authenticated_gameplay_tested": false
+}
