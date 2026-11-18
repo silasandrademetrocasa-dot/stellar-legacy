@@ -1396,7 +1396,7 @@ export function attachSharedUniverse(server,{authenticate,authorizeJoin,recordSe
 
   wss.on('connection',ws=>{
     try{ws._socket?.setNoDelay?.(true);}catch{}
-    ws.isAuthed=false;ws.networkTelemetryV1051=networkTelemetryV1051;ws.authTimer=setTimeout(()=>{try{ws.close(4401,'auth timeout');}catch{}},8000);
+    ws.isAuthed=false;ws.networkTelemetryV1051=networkTelemetryV1051;ws.authTimer=setTimeout(()=>{try{ws.close(4401,'auth timeout');}catch{}},30000);
     ws.on('message',async raw=>{
       ws.networkTelemetryV1051?.inbound(raw);
       if(!socketMessageAllowed(ws))return;

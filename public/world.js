@@ -3,7 +3,6 @@ export class SharedUniverseClient {
     this.getCredentials=getCredentials;this.onMessage=onMessage||(()=>{});this.onStatus=onStatus||(()=>{});
     this.collectionV138=false;this.collectionRequestsV138=new Map();
     this.ws=null;this.authed=false;this.manual=false;this.pendingJoin=null;this.reconnectTimer=null;this.pingTimer=null;this.latency=0;this.lastPing=0;this.lastRxAt=0;this.mapJoinError=null;
-    // STELLAR_NETWORK_RECOVERY_V4831: stale sockets can remain OPEN during network handoffs on Android.
     this.watchdogTimer=null;this.reconnectAttempts=0;this.failedAuthToken=null;this.lastConnectAt=0;
     this.resumeListener=()=>this.recover();
     if(typeof window!=='undefined')window.addEventListener('online',this.resumeListener);
@@ -13,12 +12,11 @@ export class SharedUniverseClient {
   }
   status(state,extra={}){this.onStatus({state,latency:this.latency,...extra});}
   url(){const proto=location.protocol==='https:'?'wss:':'ws:';return `${proto}//${location.host}/ws`;}
-  // STELLAR_NETWORK_RECOVERY_V4831: reconnect only after detecting a stale session, not on every missed frame.
   clearPulse(){clearInterval(this.pingTimer);clearInterval(this.watchdogTimer);this.pingTimer=null;this.watchdogTimer=null;}
   scheduleReconnect(delay=null){
     if(this.manual||this.failedAuthToken===this.getCredentials?.()?.accessToken)return;
     clearTimeout(this.reconnectTimer);
-    const wait=delay===null?Math.min(12000,700*(2**Math.min(5,this.reconnectAttempts++))):delay;
+    const wait=delay===null?Math.min(60000,2000*(2**Math.min(6,this.reconnectAttempts++))):delay;
     this.reconnectTimer=setTimeout(()=>{this.reconnectTimer=null;this.connect();},wait);
   }
   stale(){
@@ -43,8 +41,41 @@ export class SharedUniverseClient {
     const c=this.getCredentials?.()||{};
     if(!c.accessToken||!c.gameSessionId){this.status('auth_error');return;}
     if(this.failedAuthToken===c.accessToken){this.status('auth_error');return;}
-    this.status('connecting');this.lastConnectAt=Date.now();this.lastRxAt=this.lastConnectAt;this.authed=false;
-    let ws;try{ws=new WebSocket(this.url());}catch{this.status('reconnecting');this.scheduleReconnect();return;}
+
+    this.status('checking_server');
+    this.checkServerHealth().then(healthy=>{
+      if(!healthy){
+        this.status('server_waking');
+        this.scheduleReconnect(5000);
+        return;
+      }
+      this.doConnect(c);
+    }).catch(()=>{
+      this.status('reconnecting');
+      this.scheduleReconnect(5000);
+    });
+  }
+
+  async checkServerHealth(){
+    try{
+      const res=await fetch(`${location.protocol}//${location.host}/health`,{
+        cache:'no-store',
+        signal:AbortSignal.timeout(10000)
+      });
+      const data=await res.json();
+      return data.ok===true;
+    }catch{
+      return false;
+    }
+  }
+
+  doConnect(c){
+    this.status('connecting');
+    this.lastConnectAt=Date.now();
+    this.lastRxAt=this.lastConnectAt;
+    this.authed=false;
+    let ws;
+    try{ws=new WebSocket(this.url());}catch{this.status('reconnecting');this.scheduleReconnect();return;}
     this.ws=ws;
     this.clearPulse();
     this.watchdogTimer=setInterval(()=>{
@@ -61,13 +92,10 @@ export class SharedUniverseClient {
       if(msg.type==='auth_ok'){this.collectionV138=msg.features?.collectionV138===true;
         this.authed=true;this.failedAuthToken=null;this.reconnectAttempts=0;this.status('online');
         if(this.pendingJoin)this.join(this.pendingJoin,true);
-        clearInterval(this.pingTimer);this.pingTimer=setInterval(()=>this.ping(),3000);this.ping();return;
-      }
+        clearInterval(this.pingTimer);this.pingTimer=setInterval(()=>this.ping(),3000);this.ping();return;}
       if(msg.type==='auth_error'){
-        // Real auth denial is terminal until credentials change; no login-flood loop.
         this.failedAuthToken=(this.getCredentials?.()||{}).accessToken||null;
-        this.authed=false;this.status('auth_error');try{ws.close(4401,'auth failed');}catch{}return;
-      }
+        this.authed=false;this.status('auth_error');try{ws.close(4401,'auth failed');}catch{}return;}
       if(msg.type==='pong'){this.latency=Math.max(0,Date.now()-Number(msg.ts||Date.now()));if(!this.mapJoinError)this.status('online');return;}
       if(msg.type==='join_error'){this.mapJoinError={code:String(msg.code||'MAP_JOIN_ERROR'),reason:String(msg.reason||'Falha ao entrar no mapa')};this.status('map_error',this.mapJoinError);this.onMessage(msg);return;}
       if(msg.type==='world_snapshot'){this.mapJoinError=null;this.status('online');}
