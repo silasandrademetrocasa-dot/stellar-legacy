@@ -24,18 +24,3 @@ test('delta transport cannot convert a forged purchase revision into a permitted
  const base=initial(),forged={...base,serverPurchaseRevision:1000};const decoded=applyStateDeltaV145(base,stateDeltaV145(base,forged));
  assert.equal(validatePlayerSave(decoded,base,{userId:owner}).code,'SAVE_PURCHASE_REVISION_FORGED');
 });
-test('V146.5: API captures revision before durable local flush and never serializes the callback',async t=>{
- let token='old',sent,order=[];const base=initial();
- t.mock.method(globalThis,'fetch',async(path,options)=>{
-  if(path==='/api/auth/login')return Response.json({session:{access_token:'qa',game_session_id:'race'},user:{id:owner}});
-  if(options.method!=='PUT')return Response.json({state:base,save_token:token});
-  sent=JSON.parse(options.body);order.push('http');return Response.json({ok:true,state:base,save_token:'ack'});
- });
- try{
-  await signIn({email:'qa@test.invalid',password:'test'});adoptSaveRead(await loadCloudSave());
-  await assert.rejects(saveCloudSave(base,null,{operation_id:'14650000-0000-4000-8000-000000000001',beforeSend:async()=>{order.push('disk');token='new';adoptSaveRead(await loadCloudSave());}}),{code:'SAVE_REVISION_CONFLICT'});
-  assert.deepEqual(order,['disk','http']);assert.equal(sent.expected_token,'old');assert.equal(sent.beforeSend,undefined);
-  let sends=0;const original=globalThis.fetch;globalThis.fetch=async(...args)=>{sends++;return original(...args);};
-  await assert.rejects(saveCloudSave(base,null,{operation_id:'14650000-0000-4000-8000-000000000002',beforeSend:async()=>{throw Error('disk failed');}}),/disk failed/);assert.equal(sends,0);
- }finally{signOutLocal();}
-});

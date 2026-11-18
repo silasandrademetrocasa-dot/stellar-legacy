@@ -2,9 +2,9 @@ import {compactSaveV145,applyStateDeltaV145} from './modules/state-delta-v145.js
 import {createRuntimeReadCacheV145} from './modules/runtime-read-cache-v145.js';
 const runtimeReadCacheV145=createRuntimeReadCacheV145();
 let deltaBaselineV145=null;
-import {configureNativeDataOrigin} from './modules/native-data-origin.js?v=47.8.5';
-import {offlineFarmDirectActivityAllowedV103} from './modules/offline-farm-activity-v103.js?v=47.8.5';
-import {createReadCoalescerV104} from './modules/read-coalescer-v104.js?v=47.8.5';
+import {configureNativeDataOrigin} from './modules/native-data-origin.js?v=47.8.4';
+import {offlineFarmDirectActivityAllowedV103} from './modules/offline-farm-activity-v103.js?v=47.8.4';
+import {createReadCoalescerV104} from './modules/read-coalescer-v104.js?v=47.8.4';
 import {persistSessionV101,loadPersistedSessionV101,clearPersistedSessionV101} from './modules/login-persistence-v101.js';
 const SESSION_KEY = 'stellarLegacyV4Session';
 const GOOGLE_OAUTH_PENDING_KEY = 'stellarLegacyGoogleOAuthPendingV18216';
@@ -503,7 +503,6 @@ export async function saveCloudSave(state, equipmentMutationV1062=null, saveMeta
   const request=compactSaveV145(deltaBaselineV145,intent.state,metadata);
   let result;
   const send=body=>authedServerFetch('/api/player/save',{method:'PUT',headers:{'X-Stellar-Delta':'1'},body:JSON.stringify(body)});
-  if(saveMetaV119?.beforeSend){await saveMetaV119.beforeSend();checkSaveSession(key);}
   try{result=await send(request);}
   catch(error){
     if(error.code!=='DELTA_BASE_MISSING'||!request.delta_v145)throw error;
