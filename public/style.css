@@ -5044,5 +5044,15 @@ body[data-visual-test-v75="minimap"] #minimapPanel{visibility:hidden!important;}
 .base-module-prompt-v140 [data-base-open]{width:100%;margin-top:4px;min-height:32px}
 .base-module-prompt-v140 button:disabled{color:#b1c8d8;border-color:#416378;cursor:default}
 .base-module-prompt-v140.hidden{display:none!important}
+
+/* V146.4: preserve the game's established palette under native forced colors.
+ * The explicit System option restores the browser/OS accessibility palette.
+ * No new palette, assets, HUD dimensions or player-state changes. */
+:root[data-interface-appearance="game"]{color-scheme:only dark;forced-color-adjust:none}
+:root[data-interface-appearance="system"]{color-scheme:dark;forced-color-adjust:auto}
+:root[data-interface-appearance="game"] dialog::backdrop{forced-color-adjust:none}
+.interface-appearance-choice-v1464{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;color:#c8e8f6;font-size:12px}
+.interface-appearance-choice-v1464 select{max-width:100%;min-height:40px;padding:7px 10px;border:1px solid #39758c;border-radius:8px;background:#0b2337;color:#d9f5ff;font:inherit}
+#interfaceAppearanceStatusV1464{display:block;margin-top:8px;color:#9fc4d6;font-size:11px;line-height:1.5}
 @media(orientation:landscape) and (min-width:550px){.base-module-prompt-v140{width:min(560px,calc(100vw - 24px))}.base-actions-v1461{grid-template-columns:repeat(4,minmax(0,1fr))}}
 
